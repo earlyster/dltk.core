@@ -1,4 +1,4 @@
-package org.eclipse.dltk.typeinference;
+package org.eclipse.dltk.ast;
 
 public class ASTCaching {
 
