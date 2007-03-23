@@ -11,6 +11,7 @@
 package org.eclipse.dltk.core.search.indexing;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.search.index.Index;
 
@@ -23,6 +24,7 @@ public class InternalSearchDocument {
 	protected String containerRelativePath;
 	protected ISourceElementParser parser;
 	public SourceIndexerRequestor requestor;
+	public IDLTKLanguageToolkit toolkit;
 	/*
 	 * Hidden by API SearchDocument subclass
 	 */
@@ -59,5 +61,14 @@ public class InternalSearchDocument {
 	 */
 	public String getPath() {
 		return null; // implemented by subclass
+	}
+	public IDLTKLanguageToolkit getToolkit() {
+		return this.toolkit;
+	}
+	public void setIndex(Index index) {
+		this.index = index;
+	}
+	public void setContainerRelativePath(String path ) {
+		this.containerRelativePath = path;
 	}
 }

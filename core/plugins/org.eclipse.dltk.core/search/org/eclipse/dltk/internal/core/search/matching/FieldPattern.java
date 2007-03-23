@@ -13,7 +13,6 @@ package org.eclipse.dltk.internal.core.search.matching;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
-import org.eclipse.dltk.internal.core.util.Util;
 
 public class FieldPattern extends VariablePattern implements IIndexConstants {
 	// declaring type
@@ -52,11 +51,7 @@ public class FieldPattern extends VariablePattern implements IIndexConstants {
 	public FieldPattern(boolean findDeclarations, boolean readAccess, boolean writeAccess, char[] name, char[] declaringQualification,
 			char[] declaringSimpleName, char[] typeQualification, char[] typeSimpleName, String typeSignature, int matchRule) {
 		this(findDeclarations, readAccess, writeAccess, name, declaringQualification, declaringSimpleName, typeQualification,
-				typeSimpleName, matchRule);
-		// store type signatures and arguments
-		if (typeSignature != null) {
-			this.typeSignatures = Util.splitTypeLevelsSignature(typeSignature);
-		}
+				typeSimpleName, matchRule);				
 	}
 
 	public void decodeIndexKey(char[] key) {

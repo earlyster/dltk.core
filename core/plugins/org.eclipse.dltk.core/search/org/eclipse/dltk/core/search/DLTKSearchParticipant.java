@@ -58,19 +58,13 @@ public class DLTKSearchParticipant extends SearchParticipant {
 	public SearchDocument getExternalDocument(String documentPath) {
 		return new DLTKSearchDocument(documentPath, this, true);
 	}
-	
 	public void indexDocument(SearchDocument document, IPath indexPath) {
 		// TODO must verify that the document + indexPath match, when this is
 		// not called from scheduleDocumentIndexing
 		document.removeAllIndexEntries(); // in case the document was already
 											// indexed
-//		String documentPath = document.getPath();
-//		//if (org.eclipse.dltk.internal.core.util.Util.isJavaLikeFileName(documentPath)) {
 		new SourceIndexer(document).indexDocument();
-		//} 
-//		else if (org.eclipse.dltk.internal.compiler.util.Util.isClassFileName(documentPath)) {
-//			new BinaryIndexer(document).indexDocument();
-//		}
+
 	}
 
 	/*

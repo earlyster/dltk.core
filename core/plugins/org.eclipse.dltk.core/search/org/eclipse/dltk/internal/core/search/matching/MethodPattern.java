@@ -19,7 +19,6 @@ import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.index.EntryResult;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
-import org.eclipse.dltk.internal.core.util.Util;
 
 
 public class MethodPattern extends DLTKSearchPattern implements IIndexConstants {
@@ -94,12 +93,13 @@ public class MethodPattern extends DLTKSearchPattern implements IIndexConstants 
 		// String key;
 		methodParameters = true;
 		// Store type signature and arguments for declaring type
-		if (genericDeclaringTypeSignature != null) {
-			this.typeSignatures = Util.splitTypeLevelsSignature(genericDeclaringTypeSignature);
-			// setTypeArguments(Util.getAllTypeArguments(this.typeSignatures));
-		} else {
-			storeTypeSignaturesAndArguments(declaringType);
-		}				
+//		if (genericDeclaringTypeSignature != null) {
+//			this.typeSignatures = Util.splitTypeLevelsSignature(genericDeclaringTypeSignature);
+//			// setTypeArguments(Util.getAllTypeArguments(this.typeSignatures));
+//		} else {
+//			storeTypeSignaturesAndArguments(declaringType);
+//		}
+		
 		// Store type signatures and arguments for method
 		methodArguments = extractMethodArguments(method);
 	}

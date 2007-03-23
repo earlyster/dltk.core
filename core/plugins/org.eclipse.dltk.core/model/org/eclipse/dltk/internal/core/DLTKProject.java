@@ -20,10 +20,13 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -1644,7 +1647,7 @@ public class DLTKProject extends Openable implements IDLTKProject {
 			// problem with pref store - quietly ignore
 		}
 	}
-
+	
 	/**
 	 * @see IScriptProject#setRawBuildpath(IBuildpathEntry[],IPath,boolean,IProgressMonitor)
 	 */
@@ -1855,7 +1858,7 @@ public class DLTKProject extends Openable implements IDLTKProject {
 	public String getElementName() {
 		return project.getName();
 	}
-
+	
 	/*
 	 * Returns whether the given resource is accessible through the children or
 	 * the non-script resources of this project. Returns true if the resource is
@@ -1885,7 +1888,7 @@ public class DLTKProject extends Openable implements IDLTKProject {
 
 	public boolean isValid() {
 		try {
-			IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLangaugeToolkit(this);
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLanguageToolkit(this);
 			return toolkit != null;
 		} catch (CoreException ex) {
 			return false;

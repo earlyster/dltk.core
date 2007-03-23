@@ -12,7 +12,6 @@ package org.eclipse.dltk.core.search.indexing;
 
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.IScriptFolder;
-import org.eclipse.dltk.core.Signature;
 import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.internal.core.search.matching.FieldPattern;
 import org.eclipse.dltk.internal.core.search.matching.MethodPattern;
@@ -21,7 +20,7 @@ import org.eclipse.dltk.internal.core.search.matching.TypeDeclarationPattern;
 
 public abstract class AbstractIndexer implements IIndexConstants {
 
-	SearchDocument document;
+	protected SearchDocument document;
 
 	public AbstractIndexer(SearchDocument document) {
 		this.document = document;
@@ -50,11 +49,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		}
 	}
 
-	private char[] erasure(char[] typeName) {
-		int genericStart = CharOperation.indexOf(Signature.C_GENERIC_START,
-				typeName);
-		if (genericStart > -1)
-			typeName = CharOperation.subarray(typeName, 0, genericStart);
+	private char[] erasure(char[] typeName) {		
 		return typeName;
 	}
 
@@ -135,4 +130,8 @@ public abstract class AbstractIndexer implements IIndexConstants {
 	}
 
 	public abstract void indexDocument();
+	
+	public void addMixin(char[] name) {
+		addIndexEntry(MIXIN, name);
+	}
 }

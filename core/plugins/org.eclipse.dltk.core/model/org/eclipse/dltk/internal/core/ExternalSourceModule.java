@@ -224,7 +224,8 @@ public class ExternalSourceModule extends Openable implements IExternalSourceMod
 			return null;
 
 		// set the buffer source
-		if (buffer.getCharacters() == null) {
+		char[] chars = buffer.getCharacters();
+		if (chars == null ) {
 			if (isWorkingCopy) {
 				ISourceModule original;
 				if (!isPrimary() && (original = new ExternalSourceModule((ScriptFolder) getParent(), getElementName(), DefaultWorkingCopyOwner.PRIMARY, this.fStorage)).isOpen()) {
@@ -293,6 +294,13 @@ public class ExternalSourceModule extends Openable implements IExternalSourceMod
 			return ""; //$NON-NLS-1$
 		return buffer.getContents();
 	}
+	public char[] getSourceAsCharArray() throws ModelException {
+
+		IBuffer buffer = getBuffer();
+		if (buffer == null)
+			return new char[0]; //$NON-NLS-1$
+		return buffer.getCharacters();
+	}
 
 	public String getElementName() {
 
@@ -331,7 +339,7 @@ public class ExternalSourceModule extends Openable implements IExternalSourceMod
 		IPath path = this.getFullPath();
 		if(!root.isArchive()) { 
 			try {
-				IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLangaugeToolkit(this);			
+				IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLanguageToolkit(this);			
 				if (toolkit != null) {
 					return toolkit.validateSourceModule(path);
 				} else {

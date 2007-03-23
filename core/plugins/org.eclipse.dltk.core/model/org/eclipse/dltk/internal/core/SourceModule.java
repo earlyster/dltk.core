@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.compiler.IProblemReporter;
+import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -149,10 +149,16 @@ public class SourceModule extends Openable implements ISourceModule, org.eclipse
 				return false;
 			}
 			//System.out.println("==> Parsing: " + resource.getName());
-
-			IProblemReporter problemReporter = toolkit
-					.createProblemReporter(resource, toolkit
-							.createProblemFactory());
+			ModelManager.PerWorkingCopyInfo wcInfo = getPerWorkingCopyInfo();
+			IProblemReporter problemReporter;
+			if (wcInfo != null && wcInfo.problemReporter != null) {
+				problemReporter = wcInfo.problemReporter;
+			}
+			else {
+				problemReporter = toolkit
+						.createProblemReporter(resource, toolkit
+								.createProblemFactory());
+			}
 
 			//problemReporter.reportTestProblem();
 
@@ -323,6 +329,14 @@ public class SourceModule extends Openable implements ISourceModule, org.eclipse
 			return ""; //$NON-NLS-1$
 		return buffer.getContents();
 	}
+	
+	public char[] getSourceAsCharArray() throws ModelException {
+
+		IBuffer buffer = getBuffer();
+		if (buffer == null)
+			return new char[0]; //$NON-NLS-1$
+		return buffer.getCharacters();
+	}
 
 	public String getElementName() {
 
@@ -339,6 +353,10 @@ public class SourceModule extends Openable implements ISourceModule, org.eclipse
 	}
 
 	public ISourceModule getWorkingCopy(WorkingCopyOwner workingCopyOwner, IProblemRequestor problemRequestor, IProgressMonitor monitor) throws ModelException {
+		return getWorkingCopy(workingCopyOwner, problemRequestor, null, monitor);
+	}
+
+	public ISourceModule getWorkingCopy(WorkingCopyOwner workingCopyOwner, IProblemRequestor problemRequestor, IProblemReporter problemReporter, IProgressMonitor monitor) throws ModelException {
 		if (!isPrimary()) return this;
 		
 		ModelManager manager = ModelManager.getModelManager();
@@ -349,7 +367,7 @@ public class SourceModule extends Openable implements ISourceModule, org.eclipse
 		if (perWorkingCopyInfo != null) {
 			return perWorkingCopyInfo.getWorkingCopy(); // return existing handle instead of the one created above
 		}
-		BecomeWorkingCopyOperation op = new BecomeWorkingCopyOperation(workingCopy, problemRequestor);
+		BecomeWorkingCopyOperation op = new BecomeWorkingCopyOperation(workingCopy, problemRequestor, problemReporter);
 		op.runOperation(monitor);
 		return workingCopy;
 	}
@@ -385,7 +403,7 @@ public class SourceModule extends Openable implements ISourceModule, org.eclipse
 		}
 		if(!root.isArchive()) { 
 			try {
-				IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLangaugeToolkit(this);
+				IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLanguageToolkit(this);
 				if (toolkit != null) {
 					return toolkit.validateSourceModule(resource);
 				} else {

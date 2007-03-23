@@ -53,7 +53,8 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.dltk.compiler.IProblem;
+import org.eclipse.dltk.compiler.problem.IProblem;
+import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.compiler.util.HashtableOfObjectToInt;
 import org.eclipse.dltk.core.BuildpathContainerInitializer;
 import org.eclipse.dltk.core.DLTKCore;
@@ -192,12 +193,19 @@ public class ModelManager implements ISaveParticipant {
 	public static class PerWorkingCopyInfo implements IProblemRequestor {
 		int useCount = 0;
 		IProblemRequestor problemRequestor;
+		IProblemReporter problemReporter;
 		ISourceModule workingCopy;
 
 		public PerWorkingCopyInfo(ISourceModule workingCopy,
 				IProblemRequestor problemRequestor) {
 			this.workingCopy = workingCopy;
 			this.problemRequestor = problemRequestor;
+		}
+
+		public PerWorkingCopyInfo(ISourceModule workingCopy,
+				IProblemRequestor problemRequestor, IProblemReporter problemReporter) {
+			this(workingCopy, problemRequestor);
+			this.problemReporter = problemReporter;
 		}
 
 		public void acceptProblem(IProblem problem) {
@@ -691,6 +699,12 @@ public class ModelManager implements ISaveParticipant {
 	public PerWorkingCopyInfo getPerWorkingCopyInfo(SourceModule workingCopy,
 			boolean create, boolean recordUsage,
 			IProblemRequestor problemRequestor) {
+		return getPerWorkingCopyInfo(workingCopy, create, recordUsage, problemRequestor, null);
+	}
+
+	public PerWorkingCopyInfo getPerWorkingCopyInfo(SourceModule workingCopy,
+			boolean create, boolean recordUsage,
+			IProblemRequestor problemRequestor, IProblemReporter problemReporter) {
 		synchronized (this.perWorkingCopyInfos) { // use the
 			// perWorkingCopyInfo
 			// collection as its own
@@ -704,7 +718,7 @@ public class ModelManager implements ISaveParticipant {
 			PerWorkingCopyInfo info = workingCopyToInfos == null ? null
 					: (PerWorkingCopyInfo) workingCopyToInfos.get(workingCopy);
 			if (info == null && create) {
-				info = new PerWorkingCopyInfo(workingCopy, problemRequestor);
+				info = new PerWorkingCopyInfo(workingCopy, problemRequestor, problemReporter);
 				workingCopyToInfos.put(workingCopy, info);
 			}
 			if (info != null && recordUsage)
@@ -778,6 +792,26 @@ public class ModelManager implements ISaveParticipant {
 
 	public IndexManager getIndexManager() {
 		return this.indexManager;
+	}
+	
+	public Object getLastBuiltState(IProject project, IProgressMonitor monitor) {
+		if (!DLTKLanguageManager.hasScriptNature(project)) {
+			if (ScriptBuilder.DEBUG)
+				System.out.println(project + " is not a Java project"); //$NON-NLS-1$
+			return null; // should never be requested on non-Java projects
+		}
+		PerProjectInfo info = getPerProjectInfo(project, true/*create if missing*/);
+		if (!info.triedRead) {
+			info.triedRead = true;
+			try {
+				if (monitor != null)
+					monitor.subTask(Messages.bind(Messages.build_readStateProgress, project.getName())); 
+				info.savedState = readState(project);
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+		}
+		return info.savedState;
 	}
 
 	public String getOption(String optionName) {
@@ -1067,6 +1101,41 @@ public class ModelManager implements ISaveParticipant {
 		}
 	}
 
+	/**
+	 * Reads the build state for the relevant project.
+	 */
+	protected Object readState(IProject project) throws CoreException {
+		File file = getSerializationFile(project);
+		if (file != null && file.exists()) {
+			try {
+				DataInputStream in= new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
+				try {
+					String pluginID= in.readUTF();
+					if (!pluginID.equals(DLTKCore.PLUGIN_ID))
+						throw new IOException(Messages.build_wrongFileFormat); 
+					String kind= in.readUTF();
+					if (!kind.equals("STATE")) //$NON-NLS-1$
+						throw new IOException(Messages.build_wrongFileFormat); 
+					if (in.readBoolean())
+						return ScriptBuilder.readState(project, in);
+					if (ScriptBuilder.DEBUG)
+						System.out.println("Saved state thinks last build failed for " + project.getName()); //$NON-NLS-1$
+				} finally {
+					in.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new CoreException(new Status(IStatus.ERROR, DLTKCore.PLUGIN_ID, Platform.PLUGIN_ERROR, "Error reading last build state for project "+ project.getName(), e)); //$NON-NLS-1$
+			}
+		} else if (ScriptBuilder.DEBUG) {
+			if (file == null)
+				System.out.println("Project does not exist: " + project); //$NON-NLS-1$
+			else
+				System.out.println("Build state file " + file.getPath() + " does not exist"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return null;
+	}
+	
 	public static void recreatePersistedContainer(String propertyName,
 			String containerString, boolean addToContainerValues) {
 		int containerPrefixLength = BP_CONTAINER_PREFERENCES_PREFIX.length();

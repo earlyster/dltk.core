@@ -14,8 +14,6 @@ package org.eclipse.dltk.internal.codeassist;
  * Internal completion context
  */
 public class InternalCompletionContext {
-	protected char[][] expectedTypesSignatures;
-	protected char[][] expectedTypesKeys;
 	protected int doc;
 
 	protected int offset = -1;
@@ -23,14 +21,6 @@ public class InternalCompletionContext {
 	protected int tokenEnd = -1;
 	protected char[] token = null;
 	protected int tokenKind;
-
-	protected void setExpectedTypesSignatures(char[][] expectedTypesSignatures) {
-		this.expectedTypesSignatures = expectedTypesSignatures;
-	}
-
-	protected void setExpectedTypesKeys(char[][] expectedTypesKeys) {
-		this.expectedTypesKeys = expectedTypesKeys;
-	}
 
 	protected void setDoc(int doc) {
 		this.doc = doc;

@@ -101,6 +101,16 @@ public interface ISourceModule extends IModule, ISourceReference,ISourceManipula
 	 *                    if an exception occurs while accessing its corresponding resource
 	 */
 	String getSource( ) throws ModelException;
+	
+	/**
+	 * Returns the source code associated with this element. This extracts the substring from the source buffer containing this source element.
+	 * This corresponds to the source range that would be returned by <code>getSourceRange</code>.
+	 * 
+	 * @return the source code, or <code>null</code> if this element has no associated source code
+	 * @exception ModelException
+	 *                    if an exception occurs while accessing its corresponding resource
+	 */
+	char[] getSourceAsCharArray() throws ModelException;
 
 	/**
 	 * Returns a new working copy of this compilation unit if it is a primary compilation unit, or this compilation unit if it is already a
@@ -250,7 +260,7 @@ public interface ISourceModule extends IModule, ISourceReference,ISourceManipula
 	 */
 	IType[] getTypes() throws ModelException;
 	
-	public IType[] getAllTypes() throws ModelException;
+	IType[] getAllTypes() throws ModelException;
 	
 	/**
 	 * Read only source module. From external resources.
@@ -289,15 +299,15 @@ public interface ISourceModule extends IModule, ISourceReference,ISourceManipula
 	 * <p>
 	 * The type signatures may be either unresolved (for source types)
 	 * or resolved (for binary types), and either basic (for basic types)
-	 * or rich (for parameterized types). See {@link Signature} for details.
+	 * or rich (for parameterized types).
 	 * </p>
 	 * 
 	 * @param name the given name
-	 * @param parameterTypeSignatures the given parameter types
 	 * @return the method with the specified name and parameter types in this type
 	 */
 	IMethod getMethod(String name);
 	
 	IField getField(String string);
+	
 	IField[] getFields() throws ModelException;
 }

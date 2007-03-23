@@ -14,7 +14,6 @@ import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
-import org.eclipse.dltk.internal.core.util.Util;
 
 	public class TypeReferencePattern extends AndPattern implements IIndexConstants {
 	
@@ -49,27 +48,14 @@ import org.eclipse.dltk.internal.core.util.Util;
 		else
 			this.segmentsSize = this.segments.length;
 	}
-	/*
-	 * Instanciate a type reference pattern with additional information for generics search
-	 */
-	public TypeReferencePattern(char[] qualification, char[] simpleName, String typeSignature, int matchRule) {
-		this(qualification, simpleName,matchRule);
-		if (typeSignature != null) {
-			// store type signatures and arguments
-			this.typeSignatures = Util.splitTypeLevelsSignature(typeSignature);
-			//setTypeArguments(Util.getAllTypeArguments(this.typeSignatures));
-			if (hasTypeArguments()) {
-				this.segmentsSize = getTypeArguments().length + CharOperation.occurencesOf('/', this.typeSignatures[0]) - 1;
-			}
-		}
-	}
+	
 	/*
 	 * Instanciate a type reference pattern with additional information for generics search
 	 */
 	public TypeReferencePattern(char[] qualification, char[] simpleName, IType type, int matchRule) {
 		this(qualification, simpleName,matchRule);
-		storeTypeSignaturesAndArguments(type);
 	}
+	
 	TypeReferencePattern(int matchRule) {
 		super(TYPE_REF_PATTERN, matchRule);
 	}
