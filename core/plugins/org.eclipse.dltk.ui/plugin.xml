@@ -137,13 +137,6 @@
 
 <extension
        point="org.eclipse.ui.views">
-    <view
-          allowMultiple="false"
-          category="org.eclipse.dltk.ui.main"
-          class="org.eclipse.ui.navigator.CommonNavigator"
-          icon="/icons/full/eview16/projects.gif"
-          id="org.eclipse.dltk.ui.views.navigator"
-          name="Script Navigator"/>
     
     <view
           name="%ScriptExplorerViewName"
@@ -174,8 +167,8 @@
    
  <extension
        point="org.eclipse.ui.navigator.viewer">
-    <viewer viewerId="org.eclipse.dltk.ui.views.navigator"/>
-    <viewerContentBinding viewerId="org.eclipse.dltk.ui.views.navigator">
+    <viewer viewerId="org.eclipse.ui.navigator.ProjectExplorer"/>
+    <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
        <includes>
           <contentExtension pattern="org.eclipse.dltk.ui.scriptContent"/>
           <!--contentExtension pattern="org.eclipse.dltk.ui.filters.*" />
@@ -186,14 +179,11 @@
        </includes>
     </viewerContentBinding>
     
-    <viewerActionBinding viewerId="org.eclipse.dltk.ui.views.navigator">
+    <viewerActionBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
              <actionExtension pattern="org.eclipse.ui.navigator.resources.*" />
          </includes>
     </viewerActionBinding>
-    <dragAssistant
-         class="org.eclipse.ui.navigator.resources.ResourceDragAdapterAssistant"
-         viewerId="org.eclipse.ui.navigator.ProjectExplorer"/>
  </extension>
  
  <extension
@@ -201,10 +191,10 @@
     <navigatorContent
           activeByDefault="true"
           contentProvider="org.eclipse.dltk.internal.ui.navigator.ScriptNavigatorContentProvider"
-          icon="icons/tcl.gif"
+          icon="icons/full/tcl.gif"
           id="org.eclipse.dltk.ui.scriptContent"
           labelProvider="org.eclipse.dltk.internal.ui.navigator.ScriptNavigatorLabelProvider"
-          name="DLTK TCL Script content"
+          name="DLTK Script content"
           priority="high">			
           
           <triggerPoints>
@@ -895,8 +885,7 @@
 	</extension>         
 	
 	
-	<!-- Note: Do not change the sequence of those hover contributions 
-	(this funny string was spizded from JDT) -->
+	<!-- Note: Do not change the sequence of those hover contributions -->
    <extension
          point="org.eclipse.dltk.ui.editorTextHovers">
       <hover
@@ -905,11 +894,25 @@
             class="org.eclipse.dltk.internal.ui.text.hover.BestMatchHover"
             id="org.eclipse.dltk.ui.BestMatchHover">
       </hover>
+      
+      <hover
+            label="%problemHover"
+            description="%problemHoverDescription"
+            class="org.eclipse.dltk.internal.ui.text.hover.ProblemHover"
+            id="org.eclipse.dltk.ui.ProblemHover">
+      </hover>
+      
       <hover
             label="%documentationHover"
             description="%documentationHoverDescription"
             class="org.eclipse.dltk.internal.ui.text.hover.DocumentationHover"
             id="org.eclipse.dltk.ui.DocumentationHover">
+      </hover>
+      <hover
+            label="%annotationHover"
+            description="%annotationHoverDescription"
+            class="org.eclipse.dltk.internal.ui.text.hover.AnnotationHover"
+            id="org.eclipse.dltk.ui.AnnotationHover">
       </hover>
    </extension>
 <!-- =========================================================================== -->
@@ -923,5 +926,8 @@
 			searchResultClass="org.eclipse.dltk.internal.ui.search.DLTKSearchResult"
 			class="org.eclipse.dltk.internal.ui.search.DLTKSearchResultPage">
 		</viewPage>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.templates">
    </extension>         
 </plugin>

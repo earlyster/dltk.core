@@ -12,7 +12,7 @@
 package org.eclipse.dltk.internal.ui.preferences;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.dltk.ui.text.DLTKSourceViewerConfiguration;
+import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.source.SourceViewer;
@@ -24,7 +24,7 @@ import org.eclipse.swt.events.DisposeListener;
 /**
  * Handles dltk editor font changes for script source preview viewers.
  */
-public class DLTKSourcePreviewerUpdater {
+public class ScriptSourcePreviewerUpdater {
 
 	/**
 	 * Creates a script source preview updater for the given viewer,
@@ -37,8 +37,8 @@ public class DLTKSourcePreviewerUpdater {
 	 * @param preferenceStore
 	 *            the preference store
 	 */
-	public DLTKSourcePreviewerUpdater(final SourceViewer viewer,
-			final DLTKSourceViewerConfiguration configuration,
+	public ScriptSourcePreviewerUpdater(final SourceViewer viewer,
+			final ScriptSourceViewerConfiguration configuration,
 			final IPreferenceStore preferenceStore) {
 		Assert.isNotNull(viewer);
 		Assert.isNotNull(configuration);
@@ -72,6 +72,7 @@ public class DLTKSourcePreviewerUpdater {
 						fontChangeListener);
 			}
 		});
+		
 		JFaceResources.getFontRegistry().addListener(fontChangeListener);
 		preferenceStore.addPropertyChangeListener(propertyChangeListener);
 	}

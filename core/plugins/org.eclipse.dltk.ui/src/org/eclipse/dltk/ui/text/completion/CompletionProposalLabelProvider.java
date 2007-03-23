@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.CompletionContext;
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.core.Flags;
-import org.eclipse.dltk.core.Signature;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.ScriptElementImageDescriptor;
 import org.eclipse.dltk.ui.ScriptElementImageProvider;
@@ -25,8 +24,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
  * Provides labels forscriptcontent assist proposals. The functionality is
  * similar to the one provided by {@link org.eclipse.dltk.ui.ModelElementLabels},
  * but based on signatures and {@link CompletionProposal}s.
- * 
- * @see Signature
  * 
  */
 public abstract class CompletionProposalLabelProvider {
@@ -115,7 +112,7 @@ public abstract class CompletionProposalLabelProvider {
 		}
 		return buffer;
 	}
-
+	
 	/**
 	 * Creates a display label for the given method proposal. The display label
 	 * consists of:
@@ -149,21 +146,6 @@ public abstract class CompletionProposalLabelProvider {
 		appendUnboundedParameterList(nameBuffer, methodProposal);
 		nameBuffer.append(')');
 
-		// return type
-		if (!methodProposal.isConstructor()) {
-			// TODO remove SignatureUtil.fix83600 call when bugs are fixed
-			// char[] returnType=
-			// createTypeDisplayName(methodProposal.getSignature());
-			// nameBuffer.append(" "); //$NON-NLS-1$
-			// nameBuffer.append(returnType);
-		}
-
-		// declaring type
-		// nameBuffer.append(" - "); //$NON-NLS-1$
-		// String declaringType= extractDeclaringTypeFQN(methodProposal);
-		// declaringType= Signature.getSimpleName(declaringType);
-		// nameBuffer.append(declaringType);
-
 		return nameBuffer.toString();
 	}
 
@@ -178,16 +160,7 @@ public abstract class CompletionProposalLabelProvider {
 		nameBuffer.append('(');
 		appendUnboundedParameterList(nameBuffer, methodProposal);
 		nameBuffer.append(")  "); //$NON-NLS-1$
-
-		// return type
-		// TODO remove SignatureUtil.fix83600 call when bugs are fixed
-		// char[] returnType=
-		// createTypeDisplayName(methodProposal.getSignature());
-		// nameBuffer.append(returnType);
-
-		// declaring type
-		// nameBuffer.append(" - "); //$NON-NLS-1$
-
+		
 		return nameBuffer.toString();
 	}
 
@@ -209,9 +182,7 @@ public abstract class CompletionProposalLabelProvider {
 	 * @return the display label for the given type proposal
 	 */
 	protected String createTypeProposalLabel(CompletionProposal typeProposal) {
-		char[] signature;
-		signature = typeProposal.getSignature();
-		char[] fullName = Signature.toCharArray(signature);
+		char[] fullName = typeProposal.getName();
 		return createTypeProposalLabel(fullName);
 	}
 
@@ -221,8 +192,6 @@ public abstract class CompletionProposalLabelProvider {
 	}
 
 	String createTypeProposalLabel(char[] fullName) {
-		// only display innermost type name as type name, using any
-		// enclosing types as qualification
 		int qIndex = findSimpleNameStart(fullName);
 
 		StringBuffer buf = new StringBuffer();
@@ -247,29 +216,12 @@ public abstract class CompletionProposalLabelProvider {
 		return lastDot;
 	}
 
-	String createSimpleLabelWithType(CompletionProposal proposal) {
-		StringBuffer buf = new StringBuffer();
-		buf.append(proposal.getCompletion());
-		char[] typeName = Signature.getSignatureSimpleName(proposal
-				.getSignature());
-		if (typeName.length > 0) {
-			buf.append("    "); //$NON-NLS-1$
-			buf.append(typeName);
-		}
-		return buf.toString();
+	String createSimpleLabelWithType(CompletionProposal proposal) {		
+		return new String(proposal.getCompletion());
 	}
 
 	String createLabelWithTypeAndDeclaration(CompletionProposal proposal) {
-		StringBuffer buf = new StringBuffer();
-		buf.append(proposal.getCompletion());
-		char[] typeName = Signature.getSignatureSimpleName(proposal
-				.getSignature());
-		if (typeName.length > 0) {
-			buf.append("    "); //$NON-NLS-1$
-			buf.append(typeName);
-		}
-		
-		return buf.toString();
+		return new String(proposal.getCompletion());
 	}
 
 	public String createSimpleLabel(CompletionProposal proposal) {
@@ -291,8 +243,8 @@ public abstract class CompletionProposalLabelProvider {
 			return createMethodProposalLabel(proposal);
 		case CompletionProposal.METHOD_DECLARATION:
 			return createOverrideMethodProposalLabel(proposal);
-		case CompletionProposal.TYPE_REF:
-			return createTypeProposalLabel(proposal);
+		case CompletionProposal.TYPE_REF:			
+			return createTypeProposalLabel(proposal);			
 			// case CompletionProposal.JAVADOC_TYPE_REF:
 			// return createJavadocTypeProposalLabel(proposal);
 			// case CompletionProposal.JAVADOC_FIELD_REF:
@@ -329,8 +281,6 @@ public abstract class CompletionProposalLabelProvider {
 	 *         is available
 	 */
 	public ImageDescriptor createImageDescriptor(CompletionProposal proposal) {
-		final int flags = proposal.getFlags();
-
 		ImageDescriptor descriptor;
 		switch (proposal.getKind()) {
 		case CompletionProposal.METHOD_DECLARATION:
@@ -421,31 +371,7 @@ public abstract class CompletionProposalLabelProvider {
 	private ImageDescriptor decorateImageDescriptor(ImageDescriptor descriptor,
 			CompletionProposal proposal) {
 		int adornments = 0;
-		int flags = proposal.getFlags();
-		int kind = proposal.getKind();
-
-		// if (Flags.isDeprecated(flags))
-		// adornments |= ModelElementImageDescriptor.DEPRECATED;
-
-		// if (kind == CompletionProposal.FIELD_REF || kind ==
-		// CompletionProposal.METHOD_DECLARATION || kind ==
-		// CompletionProposal.METHOD_DECLARATION || kind ==
-		// CompletionProposal.METHOD_NAME_REFERENCE || kind ==
-		// CompletionProposal.METHOD_REF)
-		// if (Flags.isStatic(flags))
-		// adornments |= ModelElementImageDescriptor.STATIC;
-
-		// if (kind == CompletionProposal.METHOD_DECLARATION || kind ==
-		// CompletionProposal.METHOD_DECLARATION || kind ==
-		// CompletionProposal.METHOD_NAME_REFERENCE || kind ==
-		// CompletionProposal.METHOD_REF)
-		// if (Flags.isSynchronized(flags))
-		// adornments |= ModelElementImageDescriptor.SYNCHRONIZED;
-
-		// if (kind == CompletionProposal.TYPE_REF && Flags.isAbstract(flags) &&
-		// !Flags.isInterface(flags))
-		// adornments |= ModelElementImageDescriptor.ABSTRACT;
-
+	
 		return new ScriptElementImageDescriptor(descriptor, adornments,
 				ScriptElementImageProvider.SMALL_SIZE);
 	}
@@ -460,5 +386,4 @@ public abstract class CompletionProposalLabelProvider {
 	void setContext(CompletionContext context) {
 		fContext = context;
 	}
-
 }

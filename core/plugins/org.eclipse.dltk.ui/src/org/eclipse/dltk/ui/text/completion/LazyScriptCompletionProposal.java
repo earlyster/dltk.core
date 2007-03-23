@@ -19,7 +19,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 
 public abstract class LazyScriptCompletionProposal extends
-		AbstractDLTKCompletionProposal {
+		AbstractScriptCompletionProposal {
 
 	protected static final String LPAREN = "("; //$NON-NLS-1$
 	protected static final String RPAREN = ")"; //$NON-NLS-1$
@@ -42,6 +42,7 @@ public abstract class LazyScriptCompletionProposal extends
 	 * The core proposal wrapped by this completion proposal.
 	 */
 	protected final CompletionProposal fProposal;
+
 	/**
 	 * The invocation context of this completion proposal.
 	 */
@@ -52,16 +53,16 @@ public abstract class LazyScriptCompletionProposal extends
 		Assert.isNotNull(proposal);
 		Assert.isNotNull(context);
 		Assert.isNotNull(context.getCoreContext());
+
 		fInvocationContext = context;
 		fProposal = proposal;
 	}
 
-	/*
-	 * @see ICompletionProposalExtension#getTriggerCharacters()
-	 */
 	public final char[] getTriggerCharacters() {
-		if (!fTriggerCharactersComputed)
+		if (!fTriggerCharactersComputed) {
 			setTriggerCharacters(computeTriggerCharacters());
+		}
+
 		return super.getTriggerCharacters();
 	}
 
@@ -101,8 +102,10 @@ public abstract class LazyScriptCompletionProposal extends
 	 *         exists
 	 */
 	protected final ProposalInfo getProposalInfo() {
-		if (!fProposalInfoComputed)
+		if (!fProposalInfoComputed) {
 			setProposalInfo(computeProposalInfo());
+		}
+
 		return super.getProposalInfo();
 	}
 
@@ -124,8 +127,9 @@ public abstract class LazyScriptCompletionProposal extends
 	}
 
 	protected final int getCursorPosition() {
-		if (!fCursorPositionComputed)
+		if (!fCursorPositionComputed) {
 			setCursorPosition(computeCursorPosition());
+		}
 		return super.getCursorPosition();
 	}
 
@@ -137,12 +141,10 @@ public abstract class LazyScriptCompletionProposal extends
 		return fInvocationContext.getCoreContext().isInDoc();
 	}
 
-	/*
-	 * @see ICompletionProposal#getContextInformation()
-	 */
 	public final IContextInformation getContextInformation() {
-		if (!fContextInformationComputed)
+		if (!fContextInformationComputed) {
 			setContextInformation(computeContextInformation());
+		}
 		return super.getContextInformation();
 	}
 
@@ -166,8 +168,9 @@ public abstract class LazyScriptCompletionProposal extends
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public final String getDisplayString() {
-		if (!fDisplayStringComputed)
+		if (!fDisplayStringComputed) {
 			setDisplayString(computeDisplayString());
+		}
 		return super.getDisplayString();
 	}
 
@@ -180,19 +183,14 @@ public abstract class LazyScriptCompletionProposal extends
 		return fInvocationContext.getLabelProvider().createLabel(fProposal);
 	}
 
-	/*
-	 * @see ICompletionProposal#getAdditionalProposalInfo()
-	 */
 	public final String getAdditionalProposalInfo() {
 		return super.getAdditionalProposalInfo();
 	}
 
-	/*
-	 * @see ICompletionProposalExtension#getContextInformationPosition()
-	 */
 	public final int getContextInformationPosition() {
-		if (getContextInformation() == null)
+		if (getContextInformation() == null) {
 			return getReplacementOffset() - 1;
+		}
 		return getReplacementOffset() + getCursorPosition();
 	}
 
@@ -202,8 +200,9 @@ public abstract class LazyScriptCompletionProposal extends
 	 * @return Returns a int
 	 */
 	public final int getReplacementOffset() {
-		if (!fReplacementOffsetComputed)
+		if (!fReplacementOffsetComputed) {
 			setReplacementOffset(fProposal.getReplaceStart());
+		}
 		return super.getReplacementOffset();
 	}
 
@@ -218,9 +217,6 @@ public abstract class LazyScriptCompletionProposal extends
 		super.setReplacementOffset(replacementOffset);
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getCompletionOffset()
-	 */
 	public final int getPrefixCompletionStart(IDocument document,
 			int completionOffset) {
 		return getReplacementOffset();
@@ -275,9 +271,6 @@ public abstract class LazyScriptCompletionProposal extends
 		super.setReplacementString(replacementString);
 	}
 
-	/*
-	 * @see ICompletionProposal#getImage()
-	 */
 	public final Image getImage() {
 		if (!fImageComputed)
 			setImage(computeImage());

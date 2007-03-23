@@ -1,3 +1,5 @@
+package org.eclipse.dltk.internal.ui.text.hover;
+
 /*******************************************************************************
  * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
@@ -9,21 +11,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.dltk.internal.ui.text.hover;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.dltk.internal.ui.text.HTML2TextReader;
-import org.eclipse.dltk.internal.ui.text.HTMLPrinter;
-import org.eclipse.dltk.internal.ui.text.IInformationControlExtension4;
-import org.eclipse.dltk.ui.DLTKUIPlugin;
-import org.eclipse.jface.text.IInformationControl;
-import org.eclipse.jface.text.IInformationControlExtension;
-import org.eclipse.jface.text.IInformationControlExtension3;
-import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
@@ -53,24 +44,32 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.ListenerList;
 
+import org.eclipse.jface.internal.text.link.contentassist.HTML2TextReader;
+
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlExtension;
+import org.eclipse.jface.text.IInformationControlExtension3;
+import org.eclipse.jface.text.TextPresentation;
 
 /**
- * Displays textual information in a {@link org.eclipse.swt.browser.Browser}
- * widget.
- *
+ * Displays textual information in a {@link org.eclipse.swt.browser.Browser} widget.
+ * </p>
+ * <p>
+ * XXX copy of org.eclipse.jdt.internal.ui.text.java.hover.BrowserInformationControl.
+ * </p>
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  * <p>
- * Current problems:
- * - the size computation is too small
- * - focusLost event is not sent (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532)
+ * Current problems: - the size computation is too small - focusLost event is not sent (see
+ * https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532)
  * </p>
- *
-	 *
+ * 
+ * @since 3.2
  */
-public class BrowserInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension3, IInformationControlExtension4,  DisposeListener {
+public class BrowserInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension3, DisposeListener {
 
 
 	/**
@@ -83,11 +82,6 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	public static boolean isAvailable(Composite parent) {
 		if (!fgAvailabilityChecked) {
 			try {
-				if (parent == null)
-					parent= DLTKUIPlugin.getActiveWorkbenchShell();
-				if (parent == null)
-					return false; // don't store this value - try again later
-				
 				Browser browser= new Browser(parent, SWT.NONE);
 				browser.dispose();
 				fgIsAvailable= true;
@@ -107,7 +101,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	
 	/**
 	 * Minimal size constraints.
-	 *
+	 * @since 3.2
 	 */
 	private static final int MIN_WIDTH= 80;
 	private static final int MIN_HEIGHT= 80;
@@ -126,9 +120,9 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/** Tells whether the browser has content */
 	private boolean fBrowserHasContent;
 	/** The control width constraint */
-	private int fMaxWidth= -1;
+	private int fMaxWidth= SWT.DEFAULT;
 	/** The control height constraint */
-	private int fMaxHeight= -1;
+	private int fMaxHeight= SWT.DEFAULT;
 	private Font fStatusTextFont;
 	private Label fStatusTextField;
 	private String fStatusFieldText;
@@ -313,16 +307,22 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		else if (fHideScrollBars && true)
 			styles= new String[] { "overflow:hidden;", "word-wrap: break-word;" }; //$NON-NLS-1$ //$NON-NLS-2$
 		
+		content= content.replaceAll("overflow: auto;", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		
 		if (styles != null) {
 			StringBuffer buffer= new StringBuffer(content);
-			HTMLPrinter.insertStyles(buffer, styles);
+			//HTMLPrinter.insertStyles(buffer, styles);
 			content= buffer.toString();
 		}
 		
 		fBrowser.setText(content);
 	
 	}
-	
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.IInformationControlExtension4#setStatusText(java.lang.String)
+	 * @since 3.2
+	 */
 	public void setStatusText(String statusFieldText) {
 		fStatusFieldText= statusFieldText;
 	}
@@ -353,7 +353,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 * Creates and initializes the text layout used
 	 * to compute the size hint.
 	 * 
-	 *
+	 * @since 3.2
 	 */
 	private void createTextLayout() {
 		fTextLayout= new TextLayout(fBrowser.getDisplay());

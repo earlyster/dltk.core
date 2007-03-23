@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dltk.compiler.IProblem;
+import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.core.CompletionContext;
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.core.CompletionRequestor;
@@ -65,7 +65,7 @@ import org.eclipse.swt.graphics.Image;
  * 
  * 
  */
-public abstract class CompletionProposalCollector extends CompletionRequestor {
+public abstract class ScriptCompletionProposalCollector extends CompletionRequestor {
 	/** Tells whether this class is in debug mode. */
 	private static final boolean DEBUG = "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.dltk.ui/debug/ResultCollector")); //$NON-NLS-1$//$NON-NLS-2$
 
@@ -114,7 +114,7 @@ public abstract class CompletionProposalCollector extends CompletionRequestor {
 	 * @param cu
 	 *            the compilation unit that the result collector will operate on
 	 */
-	public CompletionProposalCollector(ISourceModule cu) {
+	public ScriptCompletionProposalCollector(ISourceModule cu) {
 		this(cu.getScriptProject(), cu);
 	}
 
@@ -123,7 +123,7 @@ public abstract class CompletionProposalCollector extends CompletionRequestor {
 	 * for anonymous types and method declarations are not created when using
 	 * this constructor, as those need to know the compilation unit that they
 	 * are created on. Use
-	 * {@link CompletionProposalCollector#CompletionProposalCollector(ISourceModule)}
+	 * {@link ScriptCompletionProposalCollector#CompletionProposalCollector(ISourceModule)}
 	 * instead to get all proposals.
 	 * <p>
 	 * If the passed Script project is <code>null</code>, no javadoc will be
@@ -136,11 +136,11 @@ public abstract class CompletionProposalCollector extends CompletionRequestor {
 	 *            the project that the result collector will operate on, or
 	 *            <code>null</code>
 	 */
-	public CompletionProposalCollector(IDLTKProject project) {
+	public ScriptCompletionProposalCollector(IDLTKProject project) {
 		this(project, null);
 	}
 
-	protected CompletionProposalCollector(IDLTKProject project, ISourceModule cu) {
+	protected ScriptCompletionProposalCollector(IDLTKProject project, ISourceModule cu) {
 		fScriptProject = project;
 		fSourceModule = cu;
 		fUserReplacementLength = -1;
@@ -172,8 +172,10 @@ public abstract class CompletionProposalCollector extends CompletionRequestor {
 	 * 
 	 */
 	protected final ScriptContentAssistInvocationContext getInvocationContext() {
-		if (fInvocationContext == null)
+		if (fInvocationContext == null) {
 			setInvocationContext(createScriptContentAssistInvocationContext(getSourceModule()));
+		}
+		
 		return fInvocationContext;
 	}
 
@@ -522,67 +524,13 @@ public abstract class CompletionProposalCollector extends CompletionRequestor {
 	 *         <code>false</code> to let it pass
 	 */
 	protected boolean isFiltered(CompletionProposal proposal) {
-		if (isIgnored(proposal.getKind()))
+		if (isIgnored(proposal.getKind())) {
 			return true;
-		char[] declaringType = null;// getDeclaringType(proposal);
-		if (DLTKCore.DEBUG) {
-			System.out.println("TODO:Add type filtering here");
 		}
-		return declaringType != null;// &&
-		// TypeFilter.isFiltered(declaringType);
-	}
 
-	/**
-	 * Returns the type signature of the declaring type of a
-	 * <code>CompletionProposal</code>, or <code>null</code> for proposals
-	 * that do not have a declaring type. The return value is <em>not</em>
-	 * <code>null</code>
-	 * for proposals of the following kinds:
-	 * <ul>
-	 * <li>METHOD_DECLARATION</li>
-	 * <li>METHOD_NAME_REFERENCE</li>
-	 * <li>METHOD_REF</li>
-	 * <li>ANNOTATION_ATTRIBUTE_REF</li>
-	 * <li>POTENTIAL_METHOD_DECLARATION</li>
-	 * <li>ANONYMOUS_CLASS_DECLARATION</li>
-	 * <li>FIELD_REF</li>
-	 * <li>PACKAGE_REF (returns the package, but no type)</li>
-	 * <li>TYPE_REF</li>
-	 * </ul>
-	 * 
-	 * @param proposal
-	 *            the completion proposal to get the declaring type for
-	 * @return the type signature of the declaring type, or <code>null</code>
-	 *         if there is none
-	 */
-	protected final char[] getDeclaringType(CompletionProposal proposal) {
-		switch (proposal.getKind()) {
-		case CompletionProposal.METHOD_DECLARATION:
-		case CompletionProposal.METHOD_NAME_REFERENCE:
-		case CompletionProposal.METHOD_REF:
-		case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
-		case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
-		case CompletionProposal.FIELD_REF:
-			if (DLTKCore.DEBUG) {
-				System.err
-						.println("TODO: Add support for DEclaration signature...");
-			}
-			return null;// Not yet support
-			// case CompletionProposal.JAVADOC_TYPE_REF:
-		case CompletionProposal.TYPE_REF:			
-		case CompletionProposal.LOCAL_VARIABLE_REF:
-		case CompletionProposal.VARIABLE_DECLARATION:
-		case CompletionProposal.KEYWORD:
-		case CompletionProposal.PACKAGE_REF:
-		case CompletionProposal.LABEL_REF:
-			// case CompletionProposal.JAVADOC_BLOCK_TAG:
-			// case CompletionProposal.JAVADOC_INLINE_TAG:
-			// case CompletionProposal.JAVADOC_PARAM_REF:
-			return null;
-		default:
-			Assert.isTrue(false);
-			return null;
-		}
+		// TODO: possible add code to check completion preferences for filtering
+
+		return false;
 	}
 
 	private void acceptPotentialMethodDeclaration(CompletionProposal proposal) {
@@ -657,48 +605,10 @@ public abstract class CompletionProposalCollector extends CompletionRequestor {
 																	 * .isInDoc()
 																	 */false);
 		if (fScriptProject != null)
-			scriptProposal.setProposalInfo(new FieldProposalInfo(fScriptProject,
-					proposal));
+			scriptProposal.setProposalInfo(new FieldProposalInfo(
+					fScriptProject, proposal));
 		scriptProposal.setTriggerCharacters(getVarTrigger());
 		return scriptProposal;
-	}
-
-	private IScriptCompletionProposal createScriptdocSimpleProposal(
-			CompletionProposal javadocProposal) {
-		// TODO do better with javadoc proposals
-		// String completion= String.valueOf(proposal.getCompletion());
-		// int start= proposal.getReplaceStart();
-		// int length= getLength(proposal);
-		// String label= getLabelProvider()..createSimpleLabel(proposal);
-		// Image image=
-		// getImage(getLabelProvider()..createImageDescriptor(proposal));
-		// int relevance= computeRelevance(proposal);
-		//
-		// JavaCompletionProposal javaProposal= new
-		// JavaCompletionProposal(completion, start, length, image, label,
-		// relevance);
-		// if (fScriptProject != null)
-		// javaProposal.setProposalInfo(new FieldProposalInfo(fScriptProject,
-		// proposal));
-		//
-		// javaProposal.setTriggerCharacters(VAR_TRIGGER);
-		//
-		// return javaProposal;
-		// LazyJavaCompletionProposal proposal = new
-		// LazyJavaCompletionProposal(javadocProposal, getInvocationContext());
-		// adaptLength(proposal, javadocProposal);
-		// return proposal;
-		return null;
-	}
-
-	private IScriptCompletionProposal createScriptdocInlineTagProposal(
-			CompletionProposal javadocProposal) {
-		// LazyJavaCompletionProposal proposal= new
-		// JavadocInlineTagCompletionProposal(javadocProposal,
-		// getInvocationContext());
-		// adaptLength(proposal, javadocProposal);
-		// return proposal;
-		return null;
 	}
 
 	protected IScriptCompletionProposal createKeywordProposal(
@@ -711,6 +621,7 @@ public abstract class CompletionProposalCollector extends CompletionRequestor {
 		return createScriptCompletionProposal(completion, start, length, null,
 				label, relevance);
 	}
+
 	protected IScriptCompletionProposal createPackageProposal(
 			CompletionProposal proposal) {
 		String completion = String.valueOf(proposal.getCompletion());
@@ -718,7 +629,8 @@ public abstract class CompletionProposalCollector extends CompletionRequestor {
 		int length = getLength(proposal);
 		String label = getLabelProvider().createSimpleLabel(proposal);
 		int relevance = computeRelevance(proposal);
-		return createScriptCompletionProposal(completion, start, length, getImage(getLabelProvider().createImageDescriptor(proposal)),
+		return createScriptCompletionProposal(completion, start, length,
+				getImage(getLabelProvider().createImageDescriptor(proposal)),
 				label, relevance);
 	}
 
@@ -756,15 +668,13 @@ public abstract class CompletionProposalCollector extends CompletionRequestor {
 		if (fSourceModule == null || fScriptProject == null) {
 			return null;
 		}
-				
+
 		String name = String.valueOf(proposal.getName());
-		
-		
+
 		String[] paramTypes;
-		
+
 		paramTypes = new String[0];
 
-		
 		int start = proposal.getReplaceStart();
 		int length = getLength(proposal);
 		String label = getLabelProvider().createOverrideMethodProposalLabel(
@@ -776,8 +686,8 @@ public abstract class CompletionProposalCollector extends CompletionRequestor {
 				.createMethodImageDescriptor(proposal)));
 
 		ProposalInfo info = new MethodProposalInfo(fScriptProject, proposal);
-//		info.setHackMessage("<h1></h1>");
-		scriptProposal.setProposalInfo(info);		
+		// info.setHackMessage("<h1></h1>");
+		scriptProposal.setProposalInfo(info);
 
 		scriptProposal.setRelevance(computeRelevance(proposal));
 		fSuggestedMethodNames.add(new String(name));
@@ -799,34 +709,23 @@ public abstract class CompletionProposalCollector extends CompletionRequestor {
 		}
 	}
 
-	
-
 	private IScriptCompletionProposal createTypeProposal(
 			CompletionProposal typeProposal) {
-		// LazyJavaCompletionProposal proposal= new
-		// LazyJavaTypeCompletionProposal(typeProposal, getInvocationContext());
-		// adaptLength(proposal, typeProposal);
-		// return proposal;
+
 		String completion = new String(typeProposal.getCompletion());
 		int replaceStart = typeProposal.getReplaceStart();
 		int length = typeProposal.getReplaceEnd()
 				- typeProposal.getReplaceStart() + 1;
 		Image image = getImage(getLabelProvider().createTypeImageDescriptor(
 				typeProposal));
-		String displayString = getLabelProvider().createTypeProposalLabel(typeProposal);
+
+		 String displayString =
+		 getLabelProvider().createTypeProposalLabel(typeProposal);
+
+
 
 		return createScriptCompletionProposal(completion, replaceStart, length,
 				image, displayString, 0);
 
-	}
-
-	private IScriptCompletionProposal createScriptdocLinkTypeProposal(
-			CompletionProposal typeProposal) {
-		// LazyJavaCompletionProposal proposal= new
-		// JavadocLinkTypeCompletionProposal(typeProposal,
-		// getInvocationContext());
-		// adaptLength(proposal, typeProposal);
-		// return proposal;
-		return null;
 	}
 }
