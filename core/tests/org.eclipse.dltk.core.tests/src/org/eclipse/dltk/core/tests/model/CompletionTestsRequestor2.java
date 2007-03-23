@@ -13,11 +13,10 @@ package org.eclipse.dltk.core.tests.model;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import org.eclipse.dltk.compiler.IProblem;
+import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.core.CompletionContext;
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.core.CompletionRequestor;
-
 
 public class CompletionTestsRequestor2 extends CompletionRequestor {
 	private final char[] NULL_LITERAL = "null".toCharArray();//$NON-NLS-1$
@@ -106,34 +105,35 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 			}
 			buffer.append('\n');
 		}
-		char[][] expectedTypesSignatures = this.context.getExpectedTypesSignatures();
-		buffer.append("expectedTypesSignatures=");
-		if(expectedTypesSignatures == null) {
-			buffer.append(NULL_LITERAL);
-		} else {
-			buffer.append('{');
-			for (int i = 0; i < expectedTypesSignatures.length; i++) {
-				if(i > 0) buffer.append(',');
-				buffer.append(expectedTypesSignatures[i]);
-				
-			}
-			buffer.append('}');
-		}
-		buffer.append('\n');
 		
-		char[][] expectedTypesKeys = this.context.getExpectedTypesKeys();
-		buffer.append("expectedTypesKeys=");
-		if(expectedTypesSignatures == null) {
-			buffer.append(NULL_LITERAL);
-		} else {
-			buffer.append('{');
-			for (int i = 0; i < expectedTypesKeys.length; i++) {
-				if(i > 0) buffer.append(',');
-				buffer.append(expectedTypesKeys[i]);
-				
-			}
-			buffer.append('}');
-		}
+//		char[][] expectedTypesSignatures = this.context.getExpectedTypesSignatures();
+//		buffer.append("expectedTypesSignatures=");
+//		if(expectedTypesSignatures == null) {
+//			buffer.append(NULL_LITERAL);
+//		} else {
+//			buffer.append('{');
+//			for (int i = 0; i < expectedTypesSignatures.length; i++) {
+//				if(i > 0) buffer.append(',');
+//				buffer.append(expectedTypesSignatures[i]);
+//				
+//			}
+//			buffer.append('}');
+//		}
+//		buffer.append('\n');
+//		
+//		char[][] expectedTypesKeys = this.context.getExpectedTypesKeys();
+//		buffer.append("expectedTypesKeys=");
+//		if(expectedTypesSignatures == null) {
+//			buffer.append(NULL_LITERAL);
+//		} else {
+//			buffer.append('{');
+//			for (int i = 0; i < expectedTypesKeys.length; i++) {
+//				if(i > 0) buffer.append(',');
+//				buffer.append(expectedTypesKeys[i]);
+//				
+//			}
+//			buffer.append('}');
+//		}
 		//buffer.append('\n');
 		
 		

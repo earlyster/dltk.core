@@ -14,7 +14,6 @@ import java.util.Vector;
 
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.core.CompletionRequestor;
-import org.eclipse.dltk.core.Signature;
 
 
 public class CompletionTestsRequestor extends CompletionRequestor {
@@ -37,7 +36,8 @@ public class CompletionTestsRequestor extends CompletionRequestor {
 		switch(proposal.getKind()) {			
 				
 			case CompletionProposal.TYPE_REF :			
-					typeName = Signature.getSignatureSimpleName(proposal.getSignature());
+					//typeName = Signature.getSignatureSimpleName(proposal.getSignature());
+					typeName = proposal.getName();
 					fElements.addElement(new String(typeName));
 					this.acceptCommon(proposal);
 				break;
