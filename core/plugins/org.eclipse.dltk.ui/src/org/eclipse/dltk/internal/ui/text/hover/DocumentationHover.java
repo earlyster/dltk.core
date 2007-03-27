@@ -16,6 +16,7 @@ import java.io.StringReader;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.ui.BrowserInformationControl;
 import org.eclipse.dltk.internal.ui.text.HTMLPrinter;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.dltk.internal.ui.text.IInformationControlExtension4;
@@ -28,6 +29,7 @@ import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
+
 
 /**
  * Provides documentation as hover info for Script elements and keywords.

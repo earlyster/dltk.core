@@ -1,4 +1,4 @@
-package org.eclipse.dltk.internal.ui.text.hover;
+package org.eclipse.dltk.internal.ui;
 
 /*******************************************************************************
  * Copyright (c) 2000, 2006 IBM Corporation and others.
@@ -45,26 +45,27 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.ListenerList;
-
-import org.eclipse.jface.internal.text.link.contentassist.HTML2TextReader;
+import org.eclipse.dltk.internal.ui.text.HTML2TextReader;
+import org.eclipse.dltk.ui.text.completion.HTMLPrinter;
 
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension3;
 import org.eclipse.jface.text.TextPresentation;
 
+
 /**
  * Displays textual information in a {@link org.eclipse.swt.browser.Browser} widget.
- * </p>
  * <p>
- * XXX copy of org.eclipse.jdt.internal.ui.text.java.hover.BrowserInformationControl.
- * </p>
+ * Moved into this package from <code>org.eclipse.jface.internal.text.revisions</code>.</p>
  * <p>
- * This class may be instantiated; it is not intended to be subclassed.
- * </p>
+ * This class may be instantiated; it is not intended to be subclassed.</p>
  * <p>
- * Current problems: - the size computation is too small - focusLost event is not sent (see
- * https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532)
+ * Current problems:
+ * <ul>
+ * 	<li>the size computation is too small</li>
+ * 	<li>focusLost event is not sent - see https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532</li>
+ * </ul>
  * </p>
  * 
  * @since 3.2
@@ -307,11 +308,9 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		else if (fHideScrollBars && true)
 			styles= new String[] { "overflow:hidden;", "word-wrap: break-word;" }; //$NON-NLS-1$ //$NON-NLS-2$
 		
-		content= content.replaceAll("overflow: auto;", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		
 		if (styles != null) {
 			StringBuffer buffer= new StringBuffer(content);
-			//HTMLPrinter.insertStyles(buffer, styles);
+			HTMLPrinter.insertStyles(buffer, styles);
 			content= buffer.toString();
 		}
 		
