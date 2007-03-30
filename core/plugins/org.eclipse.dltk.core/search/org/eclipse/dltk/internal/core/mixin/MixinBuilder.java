@@ -17,6 +17,8 @@ import org.eclipse.dltk.core.IDLTKProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ISourceModuleInfoCache;
+import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.mixin.IMixinParser;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
@@ -28,9 +30,12 @@ import org.eclipse.dltk.core.search.TypeNameRequestor;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.InternalSearchDocument;
+import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
+import org.eclipse.dltk.internal.core.BuiltinSourceModule;
 import org.eclipse.dltk.internal.core.ExternalProjectFragment;
 import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.ModelManager;
+import org.eclipse.dltk.internal.core.SourceModule;
 import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 
 public class MixinBuilder implements IScriptBuilder {
@@ -59,7 +64,7 @@ public class MixinBuilder implements IScriptBuilder {
 			return null;
 		}
 		try {
-			waitUntilIndexReady(toolkit);
+//			waitUntilIndexReady(toolkit);
 			IPath fullPath = project.getProject().getFullPath();
 			
 			Map indexes = new HashMap();
@@ -68,6 +73,9 @@ public class MixinBuilder implements IScriptBuilder {
 			for (int i = 0; i < elements.size(); ++i) {
 				Index currentIndex = mixinIndex;
 				monitor.worked(1);
+				if( monitor.isCanceled()) {
+					return null;
+				}
 				ISourceModule element = (ISourceModule) elements.get(i);
 				
 				IProjectFragment projectFragment = (IProjectFragment)element.getAncestor(IModelElement.PROJECT_FRAGMENT);
@@ -87,6 +95,21 @@ public class MixinBuilder implements IScriptBuilder {
 						}
 					}
 				}
+				else if( projectFragment instanceof BuiltinProjectFragment ) {
+					IPath path = projectFragment.getPath();
+//					if( indexes.containsKey(path)) {
+//						currentIndex = (Index)indexes.get(path);
+					containerPath = path;
+//					}
+//					else {
+//						Index index = manager.getSpecialIndex("mixin", path.toString(), path.toOSString() );
+//						if( index != null ) {
+////							currentIndex = index;
+//							indexes.put(path, index);
+//							containerPath = path.removeLastSegments(1);
+//						}
+//					}
+				}
 				
 				char[] source = element.getSourceAsCharArray();
 				SearchParticipant participant = SearchEngine
@@ -102,15 +125,28 @@ public class MixinBuilder implements IScriptBuilder {
 				if (element instanceof ExternalSourceModule) {
 					containerRelativePath= (element.getPath().removeFirstSegments(containerPath.segmentCount()).setDevice(null)
 									.toString());
-				} else {
+				} else if( element instanceof SourceModule ) {
 					containerRelativePath = (element.getPath()
 									.removeFirstSegments(1).toOSString());
+				} 
+				else if( element instanceof BuiltinSourceModule ) {
+					containerRelativePath = document.getPath();
+//					(element.getPath()
+//							.removeFirstSegments().toOSString());
 				}
 				((InternalSearchDocument) document)
 				.setContainerRelativePath(containerRelativePath);
 				currentIndex.remove(containerRelativePath);
 				((InternalSearchDocument) document).setIndex(currentIndex);
-				new MixinIndexer(document, source).indexDocument();
+				
+				ISourceModuleInfoCache sourceModuleInfoCache = ModelManager.getModelManager().getSourceModuleInfoCache();
+//				sourceModuleInfoCache.remove(element);
+				ISourceModuleInfo mifo = sourceModuleInfoCache.get(element);
+				
+				new MixinIndexer(document, source, mifo ).indexDocument();
+				if( mifo.isEmpty() ) {
+					sourceModuleInfoCache.remove(element);
+				}
 			}
 			if (mixinIndex != null)
 				manager.saveIndex(mixinIndex);
@@ -130,7 +166,7 @@ public class MixinBuilder implements IScriptBuilder {
 		return null;
 	}
 
-	private void waitUntilIndexReady(IDLTKLanguageToolkit toolkit) {
+	private void waitUntilIndexReady(IDLTKLanguageToolkit toolkit, IProgressMonitor monitor) {
 		// dummy query for waiting until the indexes are ready
 		SearchEngine engine = new SearchEngine();
 		IDLTKSearchScope scope = SearchEngine.createWorkspaceScope(toolkit);
@@ -143,7 +179,7 @@ public class MixinBuilder implements IScriptBuilder {
 								char[] packageName, char[] simpleTypeName,
 								char[][] enclosingTypeNames, String path) {
 						}
-					}, IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
+					}, IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 		} catch (CoreException e) {
 		}
 

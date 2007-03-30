@@ -15,6 +15,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IBuiltinModuleProvider;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
@@ -50,7 +52,7 @@ import org.eclipse.dltk.internal.core.util.HandleFactory;
  */
 public class SearchEngine {
 		
-	private static final String SPECIAL_MIXIN = "#special#mixin:";
+	private static final String SPECIAL_MIXIN = "#special#mixin#";
 	// Search engine now uses basic engine functionalities
 	private BasicSearchEngine basicEngine;
 
@@ -715,6 +717,10 @@ public class SearchEngine {
 				if( documentPath.startsWith(SPECIAL_MIXIN)) {
 					documentPath = documentPath.substring(SPECIAL_MIXIN.length());
 				}
+				String s = IBuildpathEntry.BUILDIN_EXTERNAL_ENTRY.toString();
+				if( documentPath.indexOf(s) != -1) {
+					documentPath = documentPath.substring(documentPath.indexOf(s));
+				}
 				Openable createOpenable = factory.createOpenable(documentPath, scope);
 				if( createOpenable instanceof ISourceModule ) {
 					modules.add(createOpenable);
@@ -726,11 +732,16 @@ public class SearchEngine {
 		IndexManager indexManager = ModelManager.getModelManager().getIndexManager();
 		
 		MixinPattern pattern = new MixinPattern(key.toCharArray(), SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE |  SearchPattern.R_PATTERN_MATCH);
+		
+		SearchParticipant participant = SearchEngine.getDefaultSearchParticipant();
+		
+		participant.selectMixinIndexes(pattern, scope);
+		
 		// add type names from indexes
 		indexManager.performConcurrentJob(
 			new PatternSearchJob(
 				pattern, 
-				SearchEngine.getDefaultSearchParticipant(), // Script search only
+				participant, // Script search only
 				scope, 
 				searchRequestor),
 				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
@@ -761,11 +772,16 @@ public class SearchEngine {
 			flags |= SearchPattern.R_PATTERN_MATCH;
 		
 		MixinPattern pattern = new MixinPattern(key.toCharArray(), flags);
+		
+		SearchParticipant participant = SearchEngine.getDefaultSearchParticipant();
+		
+		participant.selectMixinIndexes(pattern, scope);
+
 		// add type names from indexes
 		indexManager.performConcurrentJob(
 			new PatternSearchJob(
 				pattern, 
-				SearchEngine.getDefaultSearchParticipant(), // Script search only
+				participant, // Script search only
 				scope, 
 				searchRequestor),
 				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,

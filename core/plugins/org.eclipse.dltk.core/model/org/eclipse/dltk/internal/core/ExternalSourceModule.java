@@ -225,7 +225,7 @@ public class ExternalSourceModule extends Openable implements IExternalSourceMod
 
 		// set the buffer source
 		char[] chars = buffer.getCharacters();
-		if (chars == null ) {
+		if ( chars == null || ( chars != null && chars.length == 0 ) ) {
 			if (isWorkingCopy) {
 				ISourceModule original;
 				if (!isPrimary() && (original = new ExternalSourceModule((ScriptFolder) getParent(), getElementName(), DefaultWorkingCopyOwner.PRIMARY, this.fStorage)).isOpen()) {
@@ -666,5 +666,10 @@ public class ExternalSourceModule extends Openable implements IExternalSourceMod
 		IType[] arrayOfAllTypes = new IType[allTypes.size()];
 		allTypes.toArray(arrayOfAllTypes);
 		return arrayOfAllTypes;
+	}
+
+	public boolean isBuiltin() {
+		// TODO Auto-generated method stub
+		return false;
 	}	
 }
