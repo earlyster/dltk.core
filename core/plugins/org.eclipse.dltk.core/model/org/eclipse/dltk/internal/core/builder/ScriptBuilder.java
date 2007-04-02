@@ -241,7 +241,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 			// Call builders for resources.
 			int count = resources.size() + elements.size();
-			monitor.beginTask("Building", count);
+			monitor.beginTask("Indexing", count);
 			buildResources(resources, monitor);
 			buildElements(elements, monitor);
 			monitor.done();
@@ -269,7 +269,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			List elements = new ArrayList();
 			scriptProject.accept(new ExternalModuleVisitor(elements));
 
-			monitor.beginTask("Building", actualResourcesToBuild.size()
+			monitor.beginTask("Indexing", actualResourcesToBuild.size()
 					+ elements.size());
 			buildResources(actualResourcesToBuild, monitor);
 			buildElements(elements, monitor);
@@ -324,10 +324,13 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 						.getScriptBuilders(natureIds[j]);
 				if (builders != null) {
 					for (int k = 0; k < builders.length; k++) {
-						IStatus s = builders[k].buildResources(
+						IStatus[] st = builders[k].buildResources(
 								this.scriptProject, realResources, monitor);
-						if (s != null && s.getSeverity() != IStatus.OK) {
-							status.add(s);
+						for (int i = 0; i < st.length; i++) {
+							IStatus s = st[i];
+							if (s != null && s.getSeverity() != IStatus.OK) {
+								status.add(s);
+							}	
 						}
 					}
 				}
@@ -350,10 +353,13 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 			if (builders != null) {
 				for (int k = 0; k < builders.length; k++) {
-					IStatus s = builders[k].buildModelElements(scriptProject,
+					IStatus[] st = builders[k].buildModelElements(scriptProject,
 							elements, monitor);
-					if (s != null && s.getSeverity() != IStatus.OK) {
-						status.add(s);
+					for (int i = 0; i < st.length; i++) {
+						IStatus s = st[i];
+						if (s != null && s.getSeverity() != IStatus.OK) {
+							status.add(s);
+						}	
 					}
 				}
 

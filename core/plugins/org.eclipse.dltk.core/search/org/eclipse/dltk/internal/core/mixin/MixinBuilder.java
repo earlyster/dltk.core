@@ -30,6 +30,7 @@ import org.eclipse.dltk.core.search.TypeNameRequestor;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.InternalSearchDocument;
+import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
 import org.eclipse.dltk.internal.core.BuiltinSourceModule;
 import org.eclipse.dltk.internal.core.ExternalProjectFragment;
@@ -39,7 +40,7 @@ import org.eclipse.dltk.internal.core.SourceModule;
 import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 
 public class MixinBuilder implements IScriptBuilder {
-	public IStatus buildResources(IDLTKProject project, List resources, IProgressMonitor monitor) {
+	public IStatus[] buildResources(IDLTKProject project, List resources, IProgressMonitor monitor) {
 		return null;
 	}
 
@@ -47,7 +48,7 @@ public class MixinBuilder implements IScriptBuilder {
 		return null;
 	}
 
-	public IStatus buildModelElements(IDLTKProject project, List elements,
+	public IStatus[] buildModelElements(IDLTKProject project, List elements,
 			IProgressMonitor monitor) {
 		IndexManager manager = ModelManager.getModelManager().getIndexManager();
 		
@@ -68,8 +69,11 @@ public class MixinBuilder implements IScriptBuilder {
 			IPath fullPath = project.getProject().getFullPath();
 			
 			Map indexes = new HashMap();
+			Map imons = new HashMap();
 			
 			Index mixinIndex = manager.getSpecialIndex("mixin",  /*project.getProject()*/ fullPath.toString(), fullPath.toOSString() );
+			ReadWriteMonitor imon = mixinIndex.monitor;
+			imon.enterWrite();
 			for (int i = 0; i < elements.size(); ++i) {
 				Index currentIndex = mixinIndex;
 				monitor.worked(1);
@@ -90,7 +94,10 @@ public class MixinBuilder implements IScriptBuilder {
 						Index index = manager.getSpecialIndex("mixin", path.toString(), path.toOSString() );
 						if( index != null ) {
 							currentIndex = index;
-							indexes.put(path, index);
+							if( !indexes.values().contains(index)) {
+								index.monitor.enterWrite();
+								indexes.put(path, index);
+							}
 							containerPath = path;
 						}
 					}
@@ -148,11 +155,14 @@ public class MixinBuilder implements IScriptBuilder {
 					sourceModuleInfoCache.remove(element);
 				}
 			}
-			if (mixinIndex != null)
+			if (mixinIndex != null) {
+				imon.exitWrite();
 				manager.saveIndex(mixinIndex);
+			}
 			Iterator iterator = indexes.values().iterator();
 			while(iterator.hasNext()) {
 				Index index = (Index)iterator.next();
+				index.monitor.exitWrite();
 				manager.saveIndex(index);
 			}
 		} catch (CoreException e) {
