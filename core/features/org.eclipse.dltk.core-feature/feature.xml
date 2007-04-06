@@ -23,8 +23,8 @@ http://www.eclipse.org/legal/epl-v10.html
    </license>
 
    <url>
-      <update label="%updateSiteName" url="http://download.eclipse.org/technology/dltk/updates/"/>
-      <discovery label="%updateSiteName" url="http://download.eclipse.org/technology/dltk/updates/"/>
+      <update label="%updateSiteName" url="http://download.eclipse.org/technology/dltk/updates/1.0/"/>
+      <discovery label="%updateSiteName" url="http://download.eclipse.org/technology/dltk/updates/1.0/"/>
    </url>
 
    <requires>
@@ -75,6 +75,20 @@ http://www.eclipse.org/legal/epl-v10.html
 
    <plugin
          id="org.eclipse.dltk.console.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.dltk.validators.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.dltk.validators.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
