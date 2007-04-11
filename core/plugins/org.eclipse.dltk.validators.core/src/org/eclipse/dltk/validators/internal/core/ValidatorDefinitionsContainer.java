@@ -275,7 +275,7 @@ public class ValidatorDefinitionsContainer {
 			} catch (IOException e) {
 				DLTKCore.getDefault().getLog().log(
 						new Status(0, ValidatorsCore.PLUGIN_ID, 0,
-								"Failed to load validator from XML...", e));
+								"Failed to load validator from XML...", null));
 			}
 		} else {
 			if (DLTKCore.DEBUG) {
