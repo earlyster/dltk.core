@@ -11,12 +11,12 @@ import org.eclipse.dltk.utils.CorePrinter;
  * Base binary class for binary Expressions.
  */
 public class BinaryExpression extends Expression {
-	private Expression left;
+	private Statement left;
 	private Statement right;
 	
 	protected int kind;
 
-	public BinaryExpression(Expression left, int kind, Statement right) {
+	public BinaryExpression(Statement left, int kind, Statement right) {
 		if (left != null) {
 			this.setStart(left.sourceStart());
 		}
@@ -30,7 +30,7 @@ public class BinaryExpression extends Expression {
 		this.right = right;
 	}
 
-	public Expression getLeft() {
+	public Statement getLeft() {
 		return left;
 	}
 
