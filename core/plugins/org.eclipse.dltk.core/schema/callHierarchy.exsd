@@ -3,18 +3,17 @@
 <schema targetNamespace="org.eclipse.dltk.core">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.dltk.core" id="language" name="language"/>
+         <meta.schema plugin="org.eclipse.dltk.core" id="sourceElementParsers" name="Source Element Parsers"/>
       </appInfo>
       <documentation>
-         Main DLTK based IDE entry point.
-Used to specify parsers, locators, validators, etc.
+         [Enter description of this extension point.]
       </documentation>
    </annotation>
 
    <element name="extension">
       <complexType>
-         <sequence>
-            <element ref="language"/>
+         <sequence minOccurs="0" maxOccurs="unbounded">
+            <element ref="callHerarchiesFactory"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -43,18 +42,8 @@ Used to specify parsers, locators, validators, etc.
       </complexType>
    </element>
 
-   <element name="language">
+   <element name="callHerarchiesFactory">
       <complexType>
-         <attribute name="class" type="string" use="required">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-               <appInfo>
-                  <meta.attribute kind="java" basedOn="org.eclipse.dltk.core.IDLTKLanguageToolkit"/>
-               </appInfo>
-            </annotation>
-         </attribute>
          <attribute name="nature" type="string" use="required">
             <annotation>
                <documentation>
@@ -69,6 +58,16 @@ Used to specify parsers, locators, validators, etc.
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.eclipse.dltk.core.ICallHierarchyFactory"/>
+               </appInfo>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 
@@ -77,7 +76,7 @@ Used to specify parsers, locators, validators, etc.
          <meta.section type="since"/>
       </appInfo>
       <documentation>
-         
+         [Enter the first release in which this extension point appears.]
       </documentation>
    </annotation>
 
@@ -86,7 +85,7 @@ Used to specify parsers, locators, validators, etc.
          <meta.section type="examples"/>
       </appInfo>
       <documentation>
-         
+         [Enter extension point usage example here.]
       </documentation>
    </annotation>
 
@@ -95,7 +94,7 @@ Used to specify parsers, locators, validators, etc.
          <meta.section type="apiInfo"/>
       </appInfo>
       <documentation>
-         
+         [Enter API information here.]
       </documentation>
    </annotation>
 
@@ -104,7 +103,7 @@ Used to specify parsers, locators, validators, etc.
          <meta.section type="implementation"/>
       </appInfo>
       <documentation>
-         
+         [Enter information about supplied implementation of this extension point.]
       </documentation>
    </annotation>
 
