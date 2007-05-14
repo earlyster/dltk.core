@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 /*
  * (c) 2002, 2005 xored software and others all rights reserved. http://www.xored.com
  */
@@ -22,6 +31,8 @@ public interface ExpressionConstants {
 	static public final int E_DIV = 1003;
 
 	static public final int E_LOR = 1004;
+	
+	static public final int E_LOR_ASSIGN = 1104;
 
 	static public final int E_XOR = 1005;
 
@@ -32,10 +43,16 @@ public interface ExpressionConstants {
 	static public final int E_BAND = 1007;
 
 	static public final int E_LAND = 1008;
+	
+	static public final int E_LAND_ASSIGN = 1108;
 
 	static public final int E_LSHIFT = 1009;
 
 	static public final int E_RSHIFT = 1010;
+	
+	static public final int E_LSHIFT_ASSIGN = 1109;
+
+	static public final int E_RSHIFT_ASSIGN = 1110;
 
 	static public final int E_BXOR = 1011;
 
@@ -170,6 +187,8 @@ public interface ExpressionConstants {
 	static public final int E_DOUBLEDIV_ASSIGN = 1077;
 
 	static public final int E_POWER = 1078;
+	
+	static public final int E_POWER_ASSIGN = 1079;
 
 	static public final int USER_EXPRESSION_START = 10000;
 }

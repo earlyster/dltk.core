@@ -1,12 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
+ 
  *******************************************************************************/
 package org.eclipse.dltk.core.search.matching;
 
@@ -28,7 +27,6 @@ import org.eclipse.dltk.ast.declarations.FieldDeclaration;
 import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.ast.declarations.TypeDeclaration;
-import org.eclipse.dltk.ast.references.ExtendedVariableReference;
 import org.eclipse.dltk.compiler.env.INameEnvironment;
 import org.eclipse.dltk.compiler.env.ISourceType;
 import org.eclipse.dltk.compiler.env.lookup.Scope;
@@ -574,7 +572,7 @@ public class MatchLocator implements ITypeRequestor {
 					IModelStatusConstants.INVALID_PROJECT, project,
 					"Language Toolkit not found on project"));
 		}
-		this.parser = tk.createMatchParser(this);
+		this.parser = DLTKLanguageManager.createMatchParser(tk.getNatureID(), this);
 
 		// remember project's name lookup
 		this.nameLookup = searchableEnvironment.getNameLookup();
@@ -1032,7 +1030,7 @@ public class MatchLocator implements ITypeRequestor {
 		IResource resource = this.currentPossibleMatch.resource;
 		return new MethodReferenceMatch(enclosingElement, accuracy, offset,
 				length, isConstructor, isSynthetic, false, participant,
-				resource);
+				resource, reference);
 	}
 
 	public SearchMatch newPackageReferenceMatch(IModelElement enclosingElement,
@@ -1218,85 +1216,85 @@ public class MatchLocator implements ITypeRequestor {
 		// report(match);
 	}
 
-	/**
-	 * Finds the accurate positions of each valid token in the source and
-	 * reports a reference to this token to the search requestor. A token is
-	 * valid if it has an accuracy which is not -1.
-	 */
-	protected void reportAccurateFieldReference(SearchMatch[] matches,
-			ExtendedVariableReference qNameRef) throws CoreException {
-		if (matches == null)
-			return; // there's nothing to accurate in this case
-		// int matchesLength = matches.length;
-		// int sourceStart = qNameRef.sourceStart;
-		// int sourceEnd = qNameRef.sourceEnd;
-		// char[][] tokens = qNameRef.tokens;
-		// // compute source positions of the qualified reference
-		// Scanner scanner = this.parser.scanner;
-		// scanner.setSource(this.currentPossibleMatch.getContents());
-		// scanner.resetTo(sourceStart, sourceEnd);
-		// int sourceLength = sourceEnd - sourceStart + 1;
-		// int refSourceStart = -1, refSourceEnd = -1;
-		// int length = tokens.length;
-		// int token = -1;
-		// int previousValid = -1;
-		// int i = 0;
-		// int index = 0;
-		// do {
-		// int currentPosition = scanner.currentPosition;
-		// // read token
-		// try {
-		// token = scanner.getNextToken();
-		// } catch (InvalidInputException e) {
-		// // ignore
-		// }
-		// if (token != TerminalTokens.TokenNameEOF) {
-		// char[] currentTokenSource = scanner.getCurrentTokenSource();
-		// boolean equals = false;
-		// while (i < length && !(equals =
-		// this.pattern.matchesName(tokens[i++],
-		// currentTokenSource))) {/* empty */
-		// }
-		// if (equals && (previousValid == -1 || previousValid == i - 2)) {
-		// previousValid = i - 1;
-		// if (refSourceStart == -1)
-		// refSourceStart = currentPosition;
-		// refSourceEnd = scanner.currentPosition - 1;
-		// } else {
-		// i = 0;
-		// refSourceStart = -1;
-		// previousValid = -1;
-		// }
-		// // read '.'
-		// try {
-		// token = scanner.getNextToken();
-		// } catch (InvalidInputException e) {
-		// // ignore
-		// }
-		// }
-		// SearchMatch match = matches[index];
-		// if (match != null && match.getRule() != 0) {
-		// if (!encloses((IModelElement) match.getElement()))
-		// return;
-		// // accept reference
-		// if (refSourceStart != -1) {
-		// match.setOffset(refSourceStart);
-		// match.setLength(refSourceEnd - refSourceStart + 1);
-		// report(match);
-		// } else {
-		// match.setOffset(sourceStart);
-		// match.setLength(sourceLength);
-		// report(match);
-		// }
-		// i = 0;
-		// }
-		// refSourceStart = -1;
-		// previousValid = -1;
-		// if (index < matchesLength - 1) {
-		// index++;
-		// }
-		// } while (token != TerminalTokens.TokenNameEOF);
-	}
+//	/**
+//	 * Finds the accurate positions of each valid token in the source and
+//	 * reports a reference to this token to the search requestor. A token is
+//	 * valid if it has an accuracy which is not -1.
+//	 */
+//	protected void reportAccurateFieldReference(SearchMatch[] matches,
+//			ExtendedVariableReference qNameRef) throws CoreException {
+//		if (matches == null)
+//			return; // there's nothing to accurate in this case
+//		// int matchesLength = matches.length;
+//		// int sourceStart = qNameRef.sourceStart;
+//		// int sourceEnd = qNameRef.sourceEnd;
+//		// char[][] tokens = qNameRef.tokens;
+//		// // compute source positions of the qualified reference
+//		// Scanner scanner = this.parser.scanner;
+//		// scanner.setSource(this.currentPossibleMatch.getContents());
+//		// scanner.resetTo(sourceStart, sourceEnd);
+//		// int sourceLength = sourceEnd - sourceStart + 1;
+//		// int refSourceStart = -1, refSourceEnd = -1;
+//		// int length = tokens.length;
+//		// int token = -1;
+//		// int previousValid = -1;
+//		// int i = 0;
+//		// int index = 0;
+//		// do {
+//		// int currentPosition = scanner.currentPosition;
+//		// // read token
+//		// try {
+//		// token = scanner.getNextToken();
+//		// } catch (InvalidInputException e) {
+//		// // ignore
+//		// }
+//		// if (token != TerminalTokens.TokenNameEOF) {
+//		// char[] currentTokenSource = scanner.getCurrentTokenSource();
+//		// boolean equals = false;
+//		// while (i < length && !(equals =
+//		// this.pattern.matchesName(tokens[i++],
+//		// currentTokenSource))) {/* empty */
+//		// }
+//		// if (equals && (previousValid == -1 || previousValid == i - 2)) {
+//		// previousValid = i - 1;
+//		// if (refSourceStart == -1)
+//		// refSourceStart = currentPosition;
+//		// refSourceEnd = scanner.currentPosition - 1;
+//		// } else {
+//		// i = 0;
+//		// refSourceStart = -1;
+//		// previousValid = -1;
+//		// }
+//		// // read '.'
+//		// try {
+//		// token = scanner.getNextToken();
+//		// } catch (InvalidInputException e) {
+//		// // ignore
+//		// }
+//		// }
+//		// SearchMatch match = matches[index];
+//		// if (match != null && match.getRule() != 0) {
+//		// if (!encloses((IModelElement) match.getElement()))
+//		// return;
+//		// // accept reference
+//		// if (refSourceStart != -1) {
+//		// match.setOffset(refSourceStart);
+//		// match.setLength(refSourceEnd - refSourceStart + 1);
+//		// report(match);
+//		// } else {
+//		// match.setOffset(sourceStart);
+//		// match.setLength(sourceLength);
+//		// report(match);
+//		// }
+//		// i = 0;
+//		// }
+//		// refSourceStart = -1;
+//		// previousValid = -1;
+//		// if (index < matchesLength - 1) {
+//		// index++;
+//		// }
+//		// } while (token != TerminalTokens.TokenNameEOF);
+//	}
 
 	protected void reportBinaryMemberDeclaration(IResource resource,
 			IMember binaryMember, int accuracy) throws CoreException {
@@ -1400,50 +1398,7 @@ public class MatchLocator implements ITypeRequestor {
 		this.fieldHandles = new HashSet();
 		boolean matchedUnitContainer = (this.matchContainer & PatternLocator.COMPILATION_UNIT_CONTAINER) != 0;
 		// report references in javadoc
-		// if (unit.javadoc != null) {
-		// ASTNode[] nodes = nodeSet.matchingNodes(unit.javadoc.sourceStart,
-		// unit.javadoc.sourceEnd);
-		// if (nodes != null) {
-		// if (!matchedUnitContainer) {
-		// for (int i = 0, l = nodes.length; i < l; i++)
-		// nodeSet.matchingNodes.removeKey(nodes[i]);
-		// } else {
-		// IModelElement element = createPackageDeclarationHandle(unit);
-		// for (int i = 0, l = nodes.length; i < l; i++) {
-		// ASTNode node = nodes[i];
-		// Integer level = (Integer) nodeSet.matchingNodes.removeKey(node);
-		// if (encloses(element))
-		// this.patternLocator.matchReportReference(node, element, null/*
-		// * no
-		// * binding
-		// */, level.intValue(), this);
-		// }
-		// }
-		// }
-		// }
-		// if (matchedUnitContainer) {
-		// ImportReference pkg = unit.currentPackage;
-		// if (pkg != null && pkg.annotations != null) {
-		// IModelElement element = createPackageDeclarationHandle(unit);
-		// if (element != null) {
-		// reportMatching(pkg.annotations, element, null, nodeSet, true,
-		// encloses(element));
-		// }
-		// }
-		// ImportReference[] imports = unit.imports;
-		// if (imports != null) {
-		// for (int i = 0, l = imports.length; i < l; i++) {
-		// ImportReference importRef = imports[i];
-		// Integer level = (Integer) nodeSet.matchingNodes.removeKey(importRef);
-		// if (level != null)
-		// this.patternLocator.matchReportImportRef(importRef, null/*
-		// * no
-		// * binding
-		// */, createImportHandle(importRef),
-		// level.intValue(), this);
-		// }
-		// }
-		// }
+
 		TypeDeclaration[] types = unit.getTypes();
 		if (types != null) {
 			for (int i = 0, l = types.length; i < l; i++) {
@@ -1543,31 +1498,7 @@ public class MatchLocator implements ITypeRequestor {
 			report(match);
 		}
 		boolean matchedClassContainer = (this.matchContainer & PatternLocator.CLASS_CONTAINER) != 0;
-		// super types
-		// if ((type.bits & ASTNode.IsAnonymousType) != 0) {
-		// TypeReference superType = type.allocation.type;
-		// if (superType != null) {
-		// Integer level = (Integer) nodeSet.matchingNodes.removeKey(superType);
-		// if (level != null && matchedClassContainer)
-		// this.patternLocator.matchReportReference(superType, enclosingElement,
-		// type.binding, level.intValue(), this);
-		// }
-		// } else {
-		// TypeReference superClass = type.superclass;
-		// if (superClass != null) {
-		// reportMatchingSuper(superClass, enclosingElement, type.binding,
-		// nodeSet,
-		// matchedClassContainer);
-		// }
-		// TypeReference[] superInterfaces = type.superInterfaces;
-		// if (superInterfaces != null) {
-		// for (int i = 0, l = superInterfaces.length; i < l; i++) {
-		// reportMatchingSuper(superInterfaces[i], enclosingElement,
-		// type.binding,
-		// nodeSet, matchedClassContainer);
-		// }
-		// }
-		// }
+
 		// filter out element not in hierarchy scope
 		if (DLTKCore.DEBUG) {
 			System.out
@@ -1575,58 +1506,7 @@ public class MatchLocator implements ITypeRequestor {
 		}
 
 		boolean typeInHierarchy = true;// type.binding == null ||
-		// typeInHierarchy(type.binding);
-		// matchedClassContainer = matchedClassContainer && typeInHierarchy;
-		// // Visit fields
-		// FieldDeclaration[] fields = type.fields;
-		// if (fields != null) {
-		// if (nodeSet.matchingNodes.elementSize == 0)
-		// return; // end as all matching nodes were reported
-		// FieldDeclaration[] otherFields = null;
-		// int first = -1;
-		// int length = fields.length;
-		// for (int i = 0; i < length; i++) {
-		// FieldDeclaration field = fields[i];
-		// boolean last = field.endPart2Position == 0 || field.declarationEnd ==
-		// field.endPart2Position;
-		// // Store first index of multiple field declaration
-		// if (!last) {
-		// if (first == -1) {
-		// first = i;
-		// }
-		// }
-		// if (first >= 0) {
-		// // Store all multiple fields but first one for other
-		// // elements
-		// if (i > first) {
-		// if (otherFields == null) {
-		// otherFields = new FieldDeclaration[length - i];
-		// }
-		// otherFields[i - 1 - first] = field;
-		// }
-		// // On last field, report match with all other elements
-		// if (last) {
-		// for (int j = first; j <= i; j++) {
-		// Integer level = (Integer) nodeSet.matchingNodes.removeKey(fields[j]);
-		// int value = (level != null && matchedClassContainer) ?
-		// level.intValue() : -1;
-		// reportMatching(fields[j], otherFields, type, enclosingElement, value,
-		// typeInHierarchy, nodeSet);
-		// }
-		// first = -1;
-		// otherFields = null;
-		// }
-		// } else {
-		// // Single field, report normally
-		// Integer level = (Integer) nodeSet.matchingNodes.removeKey(field);
-		// int value = (level != null && matchedClassContainer) ?
-		// level.intValue() : -1;
-		// reportMatching(field, null, type, enclosingElement, value,
-		// typeInHierarchy,
-		// nodeSet);
-		// }
-		// }
-		// }
+		
 		// Visit methods
 		MethodDeclaration[] methods = type.getMethods();
 		if (methods != null) {

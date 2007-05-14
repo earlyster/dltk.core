@@ -1,7 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.DLTKCore;
@@ -155,23 +164,26 @@ public class SourceModule extends Openable implements ISourceModule, org.eclipse
 				problemReporter = wcInfo.problemReporter;
 			}
 			else {
-				problemReporter = toolkit
-						.createProblemReporter(resource, toolkit
-								.createProblemFactory());
+//				problemReporter = toolkit
+//						.createProblemReporter(resource, toolkit
+//								.createProblemFactory());
+				IProblemFactory factory = DLTKLanguageManager.getProblemFactory(toolkit.getNatureID());
+				problemReporter = factory.createReporter(resource);
 			}
 
 			//problemReporter.reportTestProblem();
 
-			ISourceElementParser parser = toolkit.createSourceElementParser(
-					requestor, problemReporter, Collections.EMPTY_MAP);
+			ISourceElementParser parser = DLTKLanguageManager.getSourceElementParser(toolkit.getNatureID());
+			parser.setRequestor(requestor);
+			parser.setReporter(problemReporter);
 
 			ISourceModuleInfoCache sourceModuleInfoCache = ModelManager.getModelManager().getSourceModuleInfoCache();
-			sourceModuleInfoCache.remove(this);
+//			sourceModuleInfoCache.remove(this);
 			ISourceModuleInfo mifo = sourceModuleInfoCache.get(this);
 			parser.parseSourceModule(contents, mifo);
-			if( mifo.isEmpty()) {
-				sourceModuleInfoCache.remove(this);
-			}
+//			if( mifo.isEmpty()) {
+//				sourceModuleInfoCache.remove(this);
+//			}
 
 			if (SourceModule.DEBUG_PRINT_MODEL) {
 				System.out.println("Source Module Debug print:");
@@ -479,6 +491,11 @@ public class SourceModule extends Openable implements ISourceModule, org.eclipse
 	public void makeConsistent(IProgressMonitor monitor) throws ModelException {
 
 		// makeConsistent(false/*don't create AST*/, 0, monitor);
+		
+		//Remove AST Cache element
+		ISourceModuleInfoCache sourceModuleInfoCache = ModelManager.getModelManager().getSourceModuleInfoCache();
+//		sourceModuleInfoCache.remove(this);
+		sourceModuleInfoCache.remove(this);
 		openWhenClosed(createElementInfo(), monitor);
 	}
 
@@ -772,7 +789,7 @@ public class SourceModule extends Openable implements ISourceModule, org.eclipse
 		IType[] arrayOfAllTypes = new IType[allTypes.size()];
 		allTypes.toArray(arrayOfAllTypes);
 		return arrayOfAllTypes;
-	}
+	}		
 
 	public boolean isBuiltin() {
 		// TODO Auto-generated method stub

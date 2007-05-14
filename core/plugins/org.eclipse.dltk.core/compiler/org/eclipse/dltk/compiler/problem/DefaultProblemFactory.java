@@ -1,6 +1,20 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
 import java.util.Locale;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.core.DLTKCore;
 
 
 public class DefaultProblemFactory implements IProblemFactory {
@@ -47,5 +61,15 @@ public class DefaultProblemFactory implements IProblemFactory {
 		}
 		return b.toString();
 	}
-
+	public IProblemReporter createReporter(IResource resource ) {
+		try {
+			resource.deleteMarkers(IMarker.PROBLEM, true,
+					IResource.DEPTH_INFINITE);
+		} catch (CoreException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		return new DLTKProblemReporter(resource, this);
+	}
 }

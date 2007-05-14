@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 /*
  * (c) 2002, 2005 xored software and others all rights reserved. http://www.xored.com
  */
@@ -28,15 +37,15 @@ public class ModuleDeclaration extends ASTNode {
 	// TODO: make private
 	public SourceModuleScope scope;
 
-	protected List getTypeList() {
+	public List getTypeList() {
 		return types;
 	}
 
-	protected List getFunctionList() {
+	public List getFunctionList() {
 		return functions;
 	}
 
-	protected List getVariablesList() {
+	public List getVariablesList() {
 		return variables;
 	}
 
@@ -48,6 +57,7 @@ public class ModuleDeclaration extends ASTNode {
 		super(0, sourceLength);
 
 		this.body = new Block();
+		this.body.setEnd(sourceLength);
 		this.types = new ArrayList();
 		this.functions = new ArrayList();
 		this.variables = new ArrayList();
@@ -137,4 +147,16 @@ public class ModuleDeclaration extends ASTNode {
 		}
 		return (ASTNode[]) results.toArray(new ASTNode[results.size()]);
 	}
+
+	public void setEnd(int end) {		
+		super.setEnd(end);
+		body.setEnd(end);
+	}
+
+	public void setStart(int start) {
+		super.setStart(start);
+		body.setStart(start);
+	}
+	
+	
 }

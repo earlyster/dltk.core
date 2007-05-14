@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.codeassist;
 
 import java.util.List;
@@ -7,7 +16,6 @@ import org.eclipse.dltk.ast.declarations.Argument;
 import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.problem.CategorizedProblem;
-import org.eclipse.dltk.compiler.util.HashtableOfObject;
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.DLTKCore;
@@ -43,15 +51,15 @@ public abstract class ScriptCompletionEngine extends Engine implements
 
 	protected char[] source;
 
-	public ScriptCompletionEngine(ISearchableEnvironment nameEnvironment,
+	public ScriptCompletionEngine(/*ISearchableEnvironment nameEnvironment,
 			CompletionRequestor requestor, Map settings,
-			IDLTKProject dltkProject) {
-		super(settings);
+			IDLTKProject dltkProject*/) {
+		super(null);
 		
-		this.dltkProject = dltkProject;
-		this.requestor = requestor;
-		this.nameEnvironment = nameEnvironment;
-		this.lookupEnvironment = new LookupEnvironment(this, nameEnvironment);
+//		this.dltkProject = dltkProject;
+//		this.requestor = requestor;
+//		this.nameEnvironment = nameEnvironment;
+//		this.lookupEnvironment = new LookupEnvironment(this, nameEnvironment);
 	}
 
 	protected CompletionProposal createProposal(int kind, int completionOffset) {
@@ -543,5 +551,20 @@ public abstract class ScriptCompletionEngine extends Engine implements
 			return RelevanceConstants.R_NON_RESTRICTED;
 		}
 		return 0;
+	}
+	public void setEnvironment(ISearchableEnvironment environment) {
+		this.nameEnvironment = environment;
+		this.lookupEnvironment = new LookupEnvironment(this, nameEnvironment);
+	}
+
+	public void setOptions(Map options) {
+	}
+
+	public void setProject(IDLTKProject project) {
+		this.dltkProject = project;
+	}
+
+	public void setRequestor(CompletionRequestor requestor) {
+		this.requestor = requestor;
 	}
 }

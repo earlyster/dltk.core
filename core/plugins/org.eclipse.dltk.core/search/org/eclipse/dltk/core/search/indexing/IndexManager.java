@@ -1,12 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
+ 
  *******************************************************************************/
 package org.eclipse.dltk.core.search.indexing;
 
@@ -244,7 +243,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			e.printStackTrace();
 		}
 		if (toolkit != null) {
-			return toolkit.createSourceRequestor();
+			return DLTKLanguageManager.createSourceRequestor(toolkit.getNatureID());
 		}
 		return null;
 	}
@@ -252,7 +251,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	public ISourceElementParser getSourceElementParser(IDLTKProject project,
 			ISourceElementRequestor requestor) {
 		// disable task tags to speed up parsing
-		Map options = project.getOptions(true);
+//		Map options = project.getOptions(true);
 		// options.put(DLTKCore.COMPILER_TASK_TAGS, ""); //$NON-NLS-1$
 		IDLTKLanguageToolkit toolkit = null;
 		try {
@@ -264,8 +263,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		if (toolkit != null) {
 			ISourceElementParser parser = null;
 			try {
-				parser = toolkit.createSourceElementParser(requestor, null,
-						options);
+				parser = DLTKLanguageManager.getSourceElementParser(toolkit.getNatureID());
+				parser.setRequestor(requestor);
 			} catch (CoreException e) {
 			}
 			return parser;

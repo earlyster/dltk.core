@@ -1,12 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
+ 
  *******************************************************************************/
 package org.eclipse.dltk.core.search;
 
@@ -15,6 +14,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.search.indexing.SourceIndexer;
@@ -100,7 +100,7 @@ public class DLTKSearchParticipant extends SearchParticipant {
 	protected MatchLocator createMatchLocator(SearchPattern pattern, SearchRequestor requestor, IDLTKSearchScope scope, SubProgressMonitor monitor) {
 		IDLTKLanguageToolkit toolkit = scope.getLanguageToolkit();
 		if( toolkit != null ) {
-			MatchLocator locator = toolkit.createMatchLocator(pattern, requestor, scope, monitor == null ? null: new SubProgressMonitor(monitor, 95));
+			MatchLocator locator = DLTKLanguageManager.createMatchLocator(toolkit.getNatureID(), pattern, requestor, scope, monitor == null ? null: new SubProgressMonitor(monitor, 95));
 			if( locator != null ) {
 				return locator;
 			}

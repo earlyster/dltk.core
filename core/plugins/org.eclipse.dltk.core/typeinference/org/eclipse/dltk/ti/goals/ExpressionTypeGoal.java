@@ -1,18 +1,27 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.ti.goals;
 
-import org.eclipse.dltk.ast.statements.Statement;
+import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ti.IContext;
 
 public class ExpressionTypeGoal extends AbstractTypeGoal {
 
-	private final Statement expression;
+	private final ASTNode expression;
 
-	public ExpressionTypeGoal(IContext context, Statement expression) {
+	public ExpressionTypeGoal(IContext context, ASTNode expression) {
 		super(context);
 		this.expression = expression;
 	}
 
-	public Statement getExpression() {
+	public ASTNode getExpression() {
 		return expression;
 	}
 
@@ -27,7 +36,15 @@ public class ExpressionTypeGoal extends AbstractTypeGoal {
 	}
 
 	public int hashCode() {
-		return expression.hashCode();		
+		if (expression != null)
+			return expression.hashCode();
+		return super.hashCode();
 	}
 
+	public String toString() {
+		return "ExpressionTypeGoal: " + ((expression != null)?expression.toString():"null") + " context: " + ((context != null)?context.toString():"null");
+	}
+
+	
+	
 }

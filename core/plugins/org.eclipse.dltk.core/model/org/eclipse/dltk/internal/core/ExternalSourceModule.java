@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
 import java.io.BufferedInputStream;
@@ -7,7 +16,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -127,16 +135,17 @@ public class ExternalSourceModule extends Openable implements IExternalSourceMod
 			if(toolkit == null) {
 				throw new ModelException(new ModelStatus(ModelStatus.INVALID_NAME));
 			}
-			ISourceElementParser parser = toolkit.createSourceElementParser(requestor, null, Collections.EMPTY_MAP);
+			ISourceElementParser parser = DLTKLanguageManager.getSourceElementParser(toolkit.getNatureID());
+			parser.setRequestor(requestor);
 			
 			ISourceModuleInfoCache sourceModuleInfoCache = ModelManager.getModelManager().getSourceModuleInfoCache();
 //			sourceModuleInfoCache.remove(this);
 //			parser.parseSourceModule(contents, sourceModuleInfoCache.get(this));
 			ISourceModuleInfo mifo = sourceModuleInfoCache.get(this);
 			parser.parseSourceModule(contents, mifo);
-			if( mifo.isEmpty()) {
-				sourceModuleInfoCache.remove(this);
-			}
+//			if( mifo.isEmpty()) {
+//				sourceModuleInfoCache.remove(this);
+//			}
 			
 //			parser.parseSourceModule(contents, null);
 			if (ExternalSourceModule.DEBUG_PRINT_MODEL) {

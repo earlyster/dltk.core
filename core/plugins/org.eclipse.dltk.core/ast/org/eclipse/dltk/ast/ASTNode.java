@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 /*
  * (c) 2002, 2005 xored software and others all rights reserved. http://www.xored.com
  */
@@ -5,6 +14,8 @@
 package org.eclipse.dltk.ast;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.internal.core.SourceRange;
@@ -127,9 +138,11 @@ public abstract class ASTNode {
 		this.sourceEnd = end;
 	}
 
-	public abstract void traverse(ASTVisitor pVisitor) throws Exception;
+	public abstract void traverse(ASTVisitor visitor) throws Exception;
 
-	public abstract void printNode(CorePrinter output);
+	public void printNode(CorePrinter output) {
+		output.println (this.getClass() + "(node doesn't support debug printing)\n" );
+	}
 	
 	protected ISourceRange getSourceRange () {
 		return new SourceRange(this.sourceStart(), this.sourceEnd() - this.sourceStart() + 1);
@@ -152,4 +165,29 @@ public abstract class ASTNode {
 		printer.close();
 		return writer.getBuffer().toString();
 	}
+	
+	/**
+	 * Uses simplest visitor to get childs and returns collection of ASTNode objects
+	 * @return
+	 */
+	public List getChilds () {
+		final List result = new ArrayList();
+		ASTVisitor visitor = new ASTVisitor() {
+
+			public boolean visitGeneral(ASTNode node) throws Exception {
+				if (node == ASTNode.this)
+					return true;
+				result.add(node);
+				return false; //we needn't subchilds and more
+			}
+			
+		};
+		try {
+			this.traverse(visitor);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 }

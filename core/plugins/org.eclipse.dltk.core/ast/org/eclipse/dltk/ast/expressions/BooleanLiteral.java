@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 /*
  * (c) 2002, 2005 xored software and others all rights reserved. http://www.xored.com
  */
@@ -26,6 +35,7 @@ public class BooleanLiteral extends Literal {
 	public BooleanLiteral(int start, int end, boolean value) {
 		super(start, end);
 		this.value = value;
+		this.fLiteralValue = Boolean.toString(value);
 	}
 
 	public boolean boolValue() {
@@ -34,6 +44,7 @@ public class BooleanLiteral extends Literal {
 
 	public void setValue(boolean value) {
 		this.value = value;
+		this.fLiteralValue = Boolean.toString(value);
 	}
 
 	/**

@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
 import java.util.Iterator;
@@ -371,7 +380,8 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	}
 	
 	protected void exitMember(int declarationEnd) {
-		SourceRefElementInfo info = (SourceRefElementInfo) this.infoStack.pop();
+		Object object = this.infoStack.pop();
+		SourceRefElementInfo info = (SourceRefElementInfo) object;
 		info.setSourceRangeEnd(declarationEnd);
 		this.handleStack.pop();
 	}

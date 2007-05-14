@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 /*
  * (c) 2002, 2005 xored software and others all rights reserved. http://www.xored.com
  */
@@ -8,10 +17,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.dltk.ast.ASTListNode;
 import org.eclipse.dltk.ast.ASTVisitor;
 import org.eclipse.dltk.ast.DLTKToken;
 import org.eclipse.dltk.ast.statements.Block;
-import org.eclipse.dltk.ast.statements.CompoundStatement;
 import org.eclipse.dltk.internal.compiler.lookup.MethodScope;
 import org.eclipse.dltk.utils.CorePrinter;
 
@@ -106,9 +115,9 @@ public class MethodDeclaration extends Declaration {
 		acceptBody(block, true);
 	}
 	
-	public void setBody (CompoundStatement statement) {
+	public void setBody (ASTListNode statement) {
 		Block b = new Block (statement.sourceStart(), statement.sourceEnd());
-		b.acceptStatements(statement.getStatements());
+		b.acceptStatements(statement.getChilds());
 		acceptBody(b, true);
 	}
 

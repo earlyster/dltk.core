@@ -1,8 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +34,7 @@ import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Util;
 
+
 /**
  * Project fragment for buildpath script folders and modules.
  * 
@@ -34,6 +43,8 @@ import org.eclipse.dltk.internal.core.util.Util;
  */
 public class BuiltinProjectFragment extends ProjectFragment {
 	public final static ArrayList EMPTY_LIST = new ArrayList();
+
+	private static final Object INTERPRETER_CONTAINER = "org.eclipse.dltk.launching.INTERPRETER_CONTAINER";
 
 	protected final IPath fPath;
 	
@@ -54,7 +65,11 @@ public class BuiltinProjectFragment extends ProjectFragment {
 			IPath containerPath = null;
 			for (int i = 0; i < entries.length; i++) {
 				if (entries[i].getEntryKind() == IBuildpathEntry.BPE_CONTAINER) {
-					containerPath = entries[i].getPath();
+					IPath path = entries[i].getPath();
+					if(path.segment(0).equals(INTERPRETER_CONTAINER)) {
+						containerPath = entries[i].getPath();
+						break;
+					}
 				}
 			}
 			if (containerPath == null) {
@@ -62,6 +77,9 @@ public class BuiltinProjectFragment extends ProjectFragment {
 			}
 			IBuildpathContainer buildpathContainer = ModelManager.getModelManager().getBuildpathContainer(containerPath,
 					project);
+			if( buildpathContainer == null ) {
+				return null;
+			}
 			IBuiltinModuleProvider builtinProvider = buildpathContainer.getBuiltinProvider();
 			return builtinProvider;
 		} catch (CoreException ex) {
