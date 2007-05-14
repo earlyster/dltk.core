@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.dbgp.commands;
 
 import java.net.URI;
@@ -14,7 +23,7 @@ public interface IDbgpBreakpointCommands {
 	String setCallBreakpoint(String function, DbgpBreakpointConfig config)
 			throws DbgpException;
 
-	String setReturnBreakpoint(String function, DbgpBreakpointConfig config)
+	String setReturnBreakpoint(URI uri, String function, DbgpBreakpointConfig config)
 			throws DbgpException;
 
 	String setExceptionBreakpoint(String exception, DbgpBreakpointConfig config)

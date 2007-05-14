@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.commands;
 
 import java.net.URI;
@@ -89,6 +98,10 @@ public class DbgpBreakpointCommands extends DbgpBaseCommands implements
 				request.addOption("-h", info.getHitValue());
 				request.addOption("-o", info.getHitConditionString());
 			}
+			String conditionExpression = info.getConditionExpression();
+			if (conditionExpression!=null){
+				request.setData(conditionExpression);
+			}
 		}
 
 		if (expression != null) {
@@ -114,9 +127,9 @@ public class DbgpBreakpointCommands extends DbgpBaseCommands implements
 				info);
 	}
 
-	public String setReturnBreakpoint(String function, DbgpBreakpointConfig info)
+	public String setReturnBreakpoint(URI uri, String function, DbgpBreakpointConfig info)
 			throws DbgpException {
-		return setBreakpoint(RETURN_BREAKPOINT, null, null, function, null,
+		return setBreakpoint(RETURN_BREAKPOINT, uri, new Integer(-1), function, null,
 				null, info);
 	}
 
@@ -170,7 +183,12 @@ public class DbgpBreakpointCommands extends DbgpBaseCommands implements
 		if (config.getHitCondition() != -1) {
 			request.addOption("-o", config.getHitConditionString());
 		}
-
+		// not sure that this is correct but it looks that this is possible
+		// TODO review it
+		String conditionExpression = config.getConditionExpression();
+		if (conditionExpression!=null){
+			request.setData(conditionExpression);
+		}
 		communicate(request);
 	}
 

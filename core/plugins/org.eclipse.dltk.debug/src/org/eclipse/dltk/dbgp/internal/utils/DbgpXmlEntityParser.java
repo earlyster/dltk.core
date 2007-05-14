@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.utils;
 
 import java.net.URI;
@@ -30,8 +39,7 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 
 	}
 
-	public static DbgpStackLevel parseStackLevel(Element element)
-			throws DbgpException {
+	public static DbgpStackLevel parseStackLevel(Element element) throws DbgpException {
 		final String ATTR_LEVEL = "level";
 		final String ATTR_CMDBEGIN = "cmdbegin";
 		final String ATTR_CMDEND = "cmdend";
@@ -68,12 +76,10 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 		// }
 
 		String where = element.getAttribute(ATTR_WHERE);
-		return new DbgpStackLevel(fileUri, where, level, lineNumber, lineBegin,
-				lineEnd);
+		return new DbgpStackLevel(fileUri, where, level, lineNumber, lineBegin, lineEnd);
 	}
 
-	public static DbgpFeature parseFeature(Element element)
-			throws DbgpProtocolException {
+	public static DbgpFeature parseFeature(Element element) throws DbgpProtocolException {
 		final String ATTR_FEATURE_NAME = "feature_name";
 		final String ATTR_SUPPORTED = "supported";
 
@@ -91,6 +97,7 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 		final String ATTR_NUMCHILDREN = "numchildren";
 		final String ATTR_CONSTANT = "constant";
 		final String ATTR_ENCODING = "encoding";
+		final String ATTR_KEY = "key";
 
 		String name = property.getAttribute(ATTR_NAME);
 		String fullName = property.getAttribute(ATTR_FULLNAME);
@@ -109,8 +116,9 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 		int childrenCount = 0;
 		List availableChildren = new ArrayList();
 		if (hasChildren) {
-			childrenCount = Integer.parseInt(property
-					.getAttribute(ATTR_NUMCHILDREN));
+			if (property.hasAttribute(ATTR_NUMCHILDREN)) {
+				childrenCount = Integer.parseInt(property.getAttribute(ATTR_NUMCHILDREN));
+			}
 
 			NodeList properties = property.getChildNodes();
 			for (int i = 0; i < properties.getLength(); ++i) {
@@ -133,6 +141,11 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 			encoding = property.getAttribute(ATTR_ENCODING);
 		}
 
+		String key = null;
+		if (property.hasAttribute(ATTR_KEY)) {
+			key = property.getAttribute(ATTR_KEY);
+		}
+
 		String value = null;
 		if (encoding.equals("none")) {
 			value = parseContent(property);
@@ -142,12 +155,10 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 			throw new AssertionError();
 		}
 
-		return new DbgpProperty(name, fullName, type, value, size,
-				childrenCount, availableChildren, constant);
+		return new DbgpProperty(name, fullName, type, value, size, childrenCount, hasChildren, availableChildren, constant, key);
 	}
 
-	public static IDbgpStatus parseStatus(Element element)
-			throws DbgpProtocolException {
+	public static IDbgpStatus parseStatus(Element element) throws DbgpProtocolException {
 		final String ATTR_REASON = "reason";
 		final String ATTR_STATUS = "status";
 
@@ -200,30 +211,23 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 
 		if (type.equals(LINE_BREAKPOINT)) {
 			String fileName = element.getAttribute(ATTR_FILENAME);
-			int lineNumber = Integer
-					.parseInt(element.getAttribute(ATTR_LINENO));
-			return new DbgpLineBreakpoint(id, enabled, hitValue, hitCount,
-					hitCondition, fileName, lineNumber);
+			int lineNumber = Integer.parseInt(element.getAttribute(ATTR_LINENO));
+			return new DbgpLineBreakpoint(id, enabled, hitValue, hitCount, hitCondition, fileName, lineNumber);
 		} else if (type.equals(CALL_BREAKPOINT)) {
 			String function = element.getAttribute(ATTR_FUNCTION);
-			return new DbgpCallBreakpoint(id, enabled, hitValue, hitCount,
-					hitCondition, function);
+			return new DbgpCallBreakpoint(id, enabled, hitValue, hitCount, hitCondition, function);
 		} else if (type.equals(RETURN_BREAKPOINT)) {
 			String function = element.getAttribute(ATTR_FUNCTION);
-			return new DbgpReturnBreakpoint(id, enabled, hitValue, hitCount,
-					hitCondition, function);
+			return new DbgpReturnBreakpoint(id, enabled, hitValue, hitCount, hitCondition, function);
 		} else if (type.equals(EXCEPTION_BREAKPOINT)) {
 			String exception = element.getAttribute(ATTR_EXCEPTION);
-			return new DbgpExceptionBreakpoint(id, enabled, hitValue, hitCount,
-					hitCondition, exception);
+			return new DbgpExceptionBreakpoint(id, enabled, hitValue, hitCount, hitCondition, exception);
 		} else if (type.equals(CONDITIONAL_BREAKPOINT)) {
 			String expression = element.getAttribute(ATTR_EXPRESSION);
-			return new DbgpConditionalBreakpoint(id, enabled, hitValue,
-					hitCount, hitCondition, expression);
+			return new DbgpConditionalBreakpoint(id, enabled, hitValue, hitCount, hitCondition, expression);
 		} else if (type.equals(WATCH_BREAKPOINT)) {
 			String expression = element.getAttribute(ATTR_EXPRESSION);
-			return new DbgpWatchBreakpoint(id, enabled, hitValue, hitCount,
-					hitCondition, expression);
+			return new DbgpWatchBreakpoint(id, enabled, hitValue, hitCount, hitCondition, expression);
 		}
 
 		return null;
@@ -252,7 +256,6 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 		// throw new DbgpException(e);
 		// }
 
-		return new DbgpSessionInfo(appId, ideKey, session, threadId, parentId,
-				language, null);
+		return new DbgpSessionInfo(appId, ideKey, session, threadId, parentId, language, null);
 	}
 }

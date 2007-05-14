@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.commands;
 
 import java.util.ArrayList;
@@ -10,6 +19,7 @@ import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlEntityParser;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class DbgpContextCommands extends DbgpBaseCommands implements
@@ -47,12 +57,20 @@ public class DbgpContextCommands extends DbgpBaseCommands implements
 
 	protected List parseContextPropertiesResponse(Element response)
 			throws DbgpException {
-		NodeList properties = response.getElementsByTagName(TAG_PROPERTY);
+		NodeList properties = response.getChildNodes();
 
 		List list = new ArrayList();
 		for (int i = 0; i < properties.getLength(); ++i) {
-			list.add(DbgpXmlEntityParser.parseProperty((Element) properties
-					.item(i)));
+			
+			Node item = properties
+					.item(i);
+			if (item instanceof Element)
+			{
+			if (item.getNodeName().equals(TAG_PROPERTY))
+			{
+			list.add(DbgpXmlEntityParser.parseProperty((Element) item));
+			}
+			}
 		}
 
 		return list;

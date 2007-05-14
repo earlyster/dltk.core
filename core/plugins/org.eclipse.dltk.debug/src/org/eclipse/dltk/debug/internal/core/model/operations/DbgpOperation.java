@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.debug.internal.core.model.operations;
 
 import java.io.IOException;
@@ -14,7 +23,7 @@ import org.eclipse.dltk.dbgp.commands.IDbgpCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpCoreCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpExtendedCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
-import org.eclipse.dltk.debug.internal.core.model.IThreadManagement;
+import org.eclipse.dltk.debug.core.model.IScriptThread;
 
 public abstract class DbgpOperation {
 	private static final boolean DEBUG = DLTKCore.DEBUG;
@@ -27,13 +36,9 @@ public abstract class DbgpOperation {
 
 	private IDbgpContinuationHandler continuationHandler;
 
-	private IThreadManagement management;
-
 	private IDbgpCommands commands;
 
-	protected IThreadManagement getManagement() {
-		return management;
-	}
+	private final IScriptThread th;
 
 	protected IDbgpCoreCommands getCore() {
 		return commands.getCoreCommands();
@@ -57,16 +62,13 @@ public abstract class DbgpOperation {
 		resultHandler.finish(status, null);
 	}
 
-	protected DbgpOperation(IThreadManagement management,
-			IDbgpCommands commands, String name, IResultHandler handler) {
-		if (management == null || commands == null) {
-			throw new IllegalArgumentException();
-		}
+	protected DbgpOperation(IScriptThread thread, String name,
+			IResultHandler handler) {
+		this.th = thread;
 
 		this.resultHandler = handler;
 
-		this.management = management;
-		this.commands = commands;
+		this.commands = thread.getDbgpSession();
 
 		job = new Job(name) {
 			protected IStatus run(IProgressMonitor monitor) {
@@ -89,23 +91,30 @@ public abstract class DbgpOperation {
 		this.continuationHandler = new IDbgpContinuationHandler() {
 			public void stderrReceived(String data) {
 				try {
-					OutputStream err = getManagement().getStreamProxy()
-							.getStderr();
+					OutputStream err = th.getStreamProxy().getStderr();
 					err.write(data.getBytes());
 					err.flush();
+
 				} catch (IOException e) {
 					e.printStackTrace();
+				}
+
+				if (DEBUG) {
+					System.out.println("Received (stderr): " + data);
 				}
 			}
 
 			public void stdoutReceived(String data) {
 				try {
-					OutputStream out = getManagement().getStreamProxy()
-							.getStdout();
+					OutputStream out = th.getStreamProxy().getStdout();
 					out.write(data.getBytes());
 					out.flush();
 				} catch (IOException e) {
 					e.printStackTrace();
+				}
+
+				if (DEBUG) {
+					System.out.println("Received (stdout): " + data);
 				}
 			}
 		};

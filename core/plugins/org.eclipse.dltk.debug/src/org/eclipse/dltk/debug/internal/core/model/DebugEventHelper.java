@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.debug.internal.core.model;
 
 import org.eclipse.debug.core.DebugEvent;
@@ -18,13 +27,18 @@ public final class DebugEventHelper {
 
 	public static void fireResumeEvent(IDebugElement element, int detail) {
 		fireEvent(new DebugEvent(element, DebugEvent.RESUME, detail));
+		
 	}
 
 	public static void fireSuspendEvent(IDebugElement element, int detail) {
-		fireEvent(new DebugEvent(element, DebugEvent.SUSPEND, detail));
+		fireEvent(new DebugEvent(element, DebugEvent.SUSPEND, detail));		
 	}
 
 	public static void fireTerminateEvent(IDebugElement element) {
-		fireEvent(new DebugEvent(element, DebugEvent.TERMINATE));
+		fireEvent(new DebugEvent(element, DebugEvent.TERMINATE));		
+	}
+
+	public static void fireChangeEvent(IDebugElement scriptVariable) {
+		fireEvent(new DebugEvent(scriptVariable, DebugEvent.CHANGE));
 	}
 }

@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 /**
  * 
  */
@@ -46,9 +55,13 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 
 	private IDbgpService dbgpService;
 	private String dbgpId;
+	
+	private String mondelId;
 
-	public ScriptDebugTarget(IDbgpService dbgpService, String id,
+	public ScriptDebugTarget(String modelId, IDbgpService dbgpService, String id,
 			ILaunch launch, IProcess process) throws CoreException {
+		
+		this.mondelId = modelId;
 
 		this.listeners = new ListenerList();
 
@@ -76,6 +89,10 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		return this;
 	}
 
+	public String getModelIdentifier() {
+		return mondelId;	
+	}
+	
 	public ILaunch getLaunch() {
 		return launch;
 	}
@@ -89,7 +106,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		return threadManager.hasThreads();
 	}
 
-	public IThread[] getThreads() throws DebugException {
+	public IThread[] getThreads() throws DebugException {		
 		return threadManager.getThreads();
 	}
 
@@ -111,38 +128,36 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	}
 
 	protected boolean waitTermianted() {
-		final int WAIT_CHUNK = 200; // 200 ms
+		final int WAIT_CHUNK = 400; // 200 ms
 
 		int all = 0;
 		while (all < THREAD_TERMINATION_TIMEOUT) {
-			if (threadManager.isTerminated()) {
-				return true;
-			}
-
 			try {
 				Thread.sleep(WAIT_CHUNK);
 				all += WAIT_CHUNK;
 			} catch (InterruptedException e) {
 
 			}
+			if (threadManager.isTerminated()) {
+				return true;
+			}			
 		}
 		return false;
 	}
 
 	public void terminate() throws DebugException {
 		dbgpService.unregisterAcceptor(dbgpId);		
-		dbgpService.shutdown();
-		
+		dbgpService.shutdown();				
 		threadManager.terminate();
-
 		if (waitTermianted()) {
+			
 			threadManager.removeListener(this);
-
 			DebugPlugin.getDefault().getBreakpointManager()
-					.removeBreakpointListener(this);
-
-			DebugEventHelper.fireTerminateEvent(this);
+					.removeBreakpointListener(this);			
+			DebugEventHelper.fireTerminateEvent(this);			
 		}
+		
+		
 	}
 
 	// ISuspendResume
@@ -286,4 +301,6 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	public void removeListener(IScriptDebugTargetListener listener) {
 		listeners.remove(listener);
 	}
+
+	
 }

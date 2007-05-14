@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.debug.internal.core.model;
 
 import java.io.BufferedReader;
@@ -10,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.dbgp.IDbgpNotification;
@@ -25,7 +35,7 @@ import org.eclipse.dltk.debug.internal.core.model.operations.DbgpDebugger;
 import org.eclipse.dltk.debug.internal.core.model.operations.IDbgpDebuggerFeedback;
 
 public class ScriptThread extends ScriptDebugElement implements IScriptThread,
-		IThreadManagement, IDbgpDebuggerFeedback {
+	IThreadManagement, IDbgpDebuggerFeedback {
 
 	private boolean canSuspend;
 
@@ -49,6 +59,8 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 	private volatile boolean suspended;
 
 	private volatile boolean terminated;
+	
+	private IScriptDebugTarget target;
 
 	// Stop
 	private IDbgpStatus stopDebugger() throws DbgpException {
@@ -83,7 +95,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 				if (stopDebugger().isStopped()) {
 					setTerminated();
 				}
-			} else if (status.isStopped()) {
+			} else if (status.isStopped()) {				
 				setTerminated();
 			}
 		} catch (DbgpException e) {
@@ -112,15 +124,10 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 		processOperationEnd(execption, status, DebugEvent.STEP_END);
 	}
 	
-	
 	public ScriptThread(IScriptDebugTarget target, IDbgpSession session,
 			ScriptThreadManager manager) throws DbgpException, CoreException {
-		super(target);
-
-		if (target == null || session == null) {
-			throw new IllegalArgumentException();
-		}
 		
+		this.target = target;
 		
 
 		this.manager = manager;
@@ -137,7 +144,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 		// Stepping
 		this.stepping = this.suspended;
 
-		engine = new DbgpDebugger(this, session, this);
+		engine = new DbgpDebugger(this, this);
 
 		if (DLTKCore.DEBUG) {
 			DbgpDebugger.printEngineInfo(engine);
@@ -145,7 +152,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 
 		final IDbgpExtendedCommands extended = session.getExtendedCommands();
 
-		canSuspend = engine.isSupportsAsync();
+		canSuspend = true; //  engine.isSupportsAsync();
 
 		engine.setMaxChildren(256);
 		engine.setMaxDepth(2);
@@ -183,7 +190,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 	}
 
 	// IThread
-	public IStackFrame[] getStackFrames() throws DebugException {
+	public IStackFrame[] getStackFrames() throws DebugException {	
 		synchronized (frames) {
 			return (IStackFrame[]) frames
 					.toArray(new IStackFrame[frames.size()]);
@@ -211,18 +218,25 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 	}
 
 	protected void setStackFrames() throws DbgpException {
+		List retrieveStackFrames = retrieveStackFrames();
 		synchronized (frames) {
 			frames.clear();
-			frames.addAll(retrieveStackFrames());
+			frames.addAll(retrieveStackFrames);
 		}
 	}
 
 	protected void setSuspended(boolean value, int detail) {
 		suspended = value;
 		if (value) {
+			
 			DebugEventHelper.fireSuspendEvent(this, detail);
+			
 		} else {
+			synchronized( this.frames ) {
+				this.frames.clear();
+			}
 			DebugEventHelper.fireResumeEvent(this, detail);
+			DebugEventHelper.fireChangeEvent(this);
 		}
 	}
 
@@ -263,6 +277,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 
 	public void resume() throws DebugException {
 		setSuspended(false, DebugEvent.CLIENT_REQUEST);
+		
 		engine.resume();
 	}
 
@@ -345,5 +360,9 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 
 	public String toString() {
 		return "Thread (" + session.getInfo().getThreadId() + ")";
+	}
+
+	public IDebugTarget getDebugTarget() {
+		return target.getDebugTarget();
 	}
 }

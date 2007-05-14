@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.commands;
 
 import java.net.URI;
@@ -104,9 +113,9 @@ public class DbgpCoreCommands implements IDbgpCoreCommands {
 		return breakpointCommands.setLineBreakpoint(uri, lineNumber, info);
 	}
 
-	public String setReturnBreakpoint(String function, DbgpBreakpointConfig info)
+	public String setReturnBreakpoint(URI uri,String function, DbgpBreakpointConfig info)
 			throws DbgpException {
-		return breakpointCommands.setReturnBreakpoint(function, info);
+		return breakpointCommands.setReturnBreakpoint(uri,function, info);
 	}
 
 	public String setWatchBreakpoint(String expression,
@@ -201,32 +210,37 @@ public class DbgpCoreCommands implements IDbgpCoreCommands {
 		return streamCommands.configureStdout(value);
 	}
 
-	public IDbgpProperty getPropery(String name) throws DbgpException {
-		return propertyCommands.getPropery(name);
+	public IDbgpProperty getProperty(String name) throws DbgpException {
+		return propertyCommands.getProperty(name);
 	}
 
-	public IDbgpProperty getPropery(String name, int stackDepth)
+	public IDbgpProperty getProperty(String name, int stackDepth)
 			throws DbgpException {
-		return propertyCommands.getPropery(name, stackDepth);
+		return propertyCommands.getProperty(name, stackDepth);
 	}
 
-	public IDbgpProperty getPropery(String name, int stackDepth, int contextId)
+	public IDbgpProperty getProperty(String name, int stackDepth, int contextId)
 			throws DbgpException {
-		return propertyCommands.getPropery(name, stackDepth, contextId);
+		return propertyCommands.getProperty(name, stackDepth, contextId);
 	}
 
-	public IDbgpProperty getPropery(String name, int stackDepth, int contextId,
+	public IDbgpProperty getProperty(String name, int stackDepth, int contextId,
 			String dataType, String dataPage) throws DbgpException {
-		return propertyCommands.getPropery(name, stackDepth, contextId,
+		return propertyCommands.getProperty(name, stackDepth, contextId,
 				dataType, dataPage);
 	}
 
-	public boolean setPropery(IDbgpProperty property) throws DbgpException {
-		return propertyCommands.setPropery(property);
+	public boolean setProperty(IDbgpProperty property) throws DbgpException {
+		return propertyCommands.setProperty(property);
 	}
 
-	public boolean setPropery(String name, int stackDepth, String value)
+	public boolean setProperty(String name, int stackDepth, String value)
 			throws DbgpException {
-		return propertyCommands.setPropery(name, stackDepth, value);
+		return propertyCommands.setProperty(name, stackDepth, value);
+	}
+
+	public IDbgpProperty getPropertyByKey(String name, String key)
+			throws DbgpException {
+		return propertyCommands.getPropertyByKey(name, key);
 	}
 }

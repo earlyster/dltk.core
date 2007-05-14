@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.dbgp.breakpoints;
 
 public class DbgpBreakpointConfig {
@@ -18,21 +27,28 @@ public class DbgpBreakpointConfig {
 	private int hitValue;
 
 	private int hitCondition;
+	
+	private String conditionExpression;
 
-	public DbgpBreakpointConfig(boolean enabled) {
-		this(enabled, -1, -1);
+	public String getConditionExpression() {
+		return conditionExpression;
 	}
 
-	public DbgpBreakpointConfig(boolean enabled, int hitValue, int hitCondition) {
-		this(enabled, -1, -1, false);
+	public DbgpBreakpointConfig(boolean enabled) {
+		this(enabled, -1, -1,null);
+	}
+
+	public DbgpBreakpointConfig(boolean enabled, int hitValue, int hitCondition,String conString) {
+		this(enabled, hitValue, hitCondition, false,conString);
 	}
 
 	public DbgpBreakpointConfig(boolean enabled, int hitValue,
-			int hitCondition, boolean temporary) {
+			int hitCondition, boolean temporary,String conString) {
 		this.enabled = enabled;
 		this.hitValue = hitValue;
 		this.hitCondition = hitCondition;
 		this.temporary = temporary;
+		this.conditionExpression=conString;
 	}
 
 	public boolean isEnabled() {

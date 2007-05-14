@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.debug.internal.core.model;
 
 import org.eclipse.core.runtime.CoreException;
@@ -7,9 +16,14 @@ import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
 
 public abstract class ScriptBreakpoint extends Breakpoint implements
 		IScriptBreakpoint {
-	private static final String BREAKPOINT = "org.eclipse.dltk.script_breakpoint";
+	public static final String BREAKPOINT = "org.eclipse.dltk.script_breakpoint";
 
 	private static final String BREAKPOINT_ID = BREAKPOINT + ".id";
+
+	private static final String EXPRESSION_ID = BREAKPOINT + ".expression";
+
+	private static final String COND_EXPRESSION_ENABLED_ID = BREAKPOINT
+			+ ".expression.enabled";
 
 	private static final String BREAKPOINT_HIT_VALUE = BREAKPOINT
 			+ ".hit_value";
@@ -24,6 +38,24 @@ public abstract class ScriptBreakpoint extends Breakpoint implements
 
 	public void setIdentifier(String id) throws CoreException {
 		getMarker().setAttribute(BREAKPOINT_ID, id);
+	}
+
+	public String getConditionalExpression() {
+		return getMarker().getAttribute(EXPRESSION_ID, null);
+	}
+
+	public boolean isConditionalExpressionEnabled() {
+		return getMarker().getAttribute(COND_EXPRESSION_ENABLED_ID, "false")
+				.equals("true");
+	}
+
+	public void setConditionalExpression(String id) throws CoreException {
+		getMarker().setAttribute(EXPRESSION_ID, id);
+	}
+
+	public void setConditionalExpressionEnabled(boolean enabled)
+			throws CoreException {
+		getMarker().setAttribute(COND_EXPRESSION_ENABLED_ID, enabled + "");
 	}
 
 	// Hit count

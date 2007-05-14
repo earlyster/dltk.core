@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.debug.internal.core.model;
 
 import java.net.URI;
@@ -15,6 +24,7 @@ import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptLineBreakpoint;
+import org.eclipse.dltk.debug.core.model.IScriptMethodEntryBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 
 public class DbgpBreakpointManager implements IBreakpointListener {
@@ -33,7 +43,6 @@ public class DbgpBreakpointManager implements IBreakpointListener {
 		if (breakpoint instanceof IScriptBreakpoint) {
 			return true;
 		}
-
 		return false;
 	}
 
@@ -45,14 +54,30 @@ public class DbgpBreakpointManager implements IBreakpointListener {
 
 			boolean enabled = b.isEnabled()
 					&& getBreakpointManager().isEnabled();
-
+			String cExpr = null;
+			if (breakpoint.isConditionalExpressionEnabled()) {
+				cExpr = breakpoint.getConditionalExpression();
+			}
 			DbgpBreakpointConfig config = new DbgpBreakpointConfig(enabled, b
-					.getHitValue(), b.getHitCondition());
+					.getHitValue(), b.getHitCondition(), cExpr);
 
-			String id = commands.setLineBreakpoint(b.getResourceURI(), b
-					.getLineNumber(), config);
-
-			b.setIdentifier(id);
+			if (b instanceof IScriptMethodEntryBreakpoint) {
+				IScriptMethodEntryBreakpoint me = (IScriptMethodEntryBreakpoint) b;
+				if (me.shouldBreakOnEntry()) {
+					String id = commands.setLineBreakpoint(b.getResourceURI(),
+							b.getLineNumber(), config);
+					b.setIdentifier(id);
+				}
+				if (me.shouldBreakOnExit()) {
+					String id = commands.setReturnBreakpoint(
+							b.getResourceURI(), me.getMethodName(), config);
+					me.setSecondaryId(id);
+				}
+			} else {
+				String id = commands.setLineBreakpoint(b.getResourceURI(), b
+						.getLineNumber(), config);
+				b.setIdentifier(id);
+			}
 
 			// TODO: why?
 			b.setHitValue(config.getHitValue());
@@ -86,9 +111,46 @@ public class DbgpBreakpointManager implements IBreakpointListener {
 
 		int hitValue = b.getHitValue();
 		int hitCondition = b.getHitCondition();
+		String cExpr = null;
+		if (breakpoint.isConditionalExpressionEnabled()) {
+			cExpr = breakpoint.getConditionalExpression();
+		}
 		DbgpBreakpointConfig config = new DbgpBreakpointConfig(enabled,
-				hitValue, hitCondition);
-		commands.updateBreakpoint(b.getIdentifier(), config);
+				hitValue, hitCondition, cExpr);
+		
+		if (b.getIdentifier()!=null) commands.updateBreakpoint(b.getIdentifier(), config);
+		if (b instanceof IScriptMethodEntryBreakpoint){
+			IScriptMethodEntryBreakpoint ba=(IScriptMethodEntryBreakpoint) b;
+			String secondaryId = ba.getSecondaryId();
+			if (secondaryId!=null){
+				if (!ba.shouldBreakOnExit()){
+					commands.removeBreakpoint(secondaryId);
+					ba.setSecondaryId(null);					
+				}
+				else
+				commands.updateBreakpoint(secondaryId, config);
+			}
+			else if (ba.shouldBreakOnExit()){
+				String id = commands.setReturnBreakpoint(
+						ba.getResourceURI(), ba.getMethodName(), config);
+				ba.setSecondaryId(id);
+			}
+			if (!ba.shouldBreakOnEntry()){
+				String identifier = ba.getIdentifier();
+				if  (identifier!=null){
+					commands.removeBreakpoint(identifier);
+					ba.setIdentifier(null);
+				}
+			}
+			else {
+				String identifier = ba.getIdentifier();
+				if  (identifier==null){
+					String id = commands.setLineBreakpoint(ba.getResourceURI(), ba
+							.getLineNumber(), config);
+					ba.setIdentifier(id);					
+				}
+			}
+		}
 	}
 
 	protected void changeBreakpoint(IBreakpoint breakpoint)
@@ -112,7 +174,17 @@ public class DbgpBreakpointManager implements IBreakpointListener {
 	protected static void removeBreakpoint(IDbgpBreakpointCommands commands,
 			IScriptBreakpoint breakpoint) throws DbgpException {
 		IScriptBreakpoint b = (IScriptBreakpoint) breakpoint;
+		
+		System.out.println("DbgpBreakpointManager.removeBreakpoint()");
+
 		commands.removeBreakpoint(b.getIdentifier());
+		if (b instanceof IScriptMethodEntryBreakpoint) {
+			IScriptMethodEntryBreakpoint mr = (IScriptMethodEntryBreakpoint) b;
+			String secondaryId = mr.getSecondaryId();
+			if (secondaryId != null) {
+				commands.removeBreakpoint(secondaryId);
+			}
+		}
 	}
 
 	protected void removeBreakpoint(IBreakpoint breakpoint)
@@ -159,7 +231,7 @@ public class DbgpBreakpointManager implements IBreakpointListener {
 			throws DbgpException, CoreException {
 
 		DbgpBreakpointConfig config = new DbgpBreakpointConfig(true, -1, -1,
-				true);
+				true, null);
 
 		IThread[] threads = threadManager.getThreads();
 		for (int i = 0; i < threads.length; ++i) {

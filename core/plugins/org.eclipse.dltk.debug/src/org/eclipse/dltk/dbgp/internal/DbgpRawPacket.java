@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal;
 
 import java.io.IOException;
@@ -16,7 +25,7 @@ public class DbgpRawPacket {
 		int b = -1;
 		while (true) {
 			b = input.read();
-
+			
 			if (b == -1) {
 				throw new IOException();
 			}
@@ -24,7 +33,7 @@ public class DbgpRawPacket {
 			if (b == 0) {
 				break;
 			}
-
+			
 			sb.append((char) b);
 		}
 
@@ -50,7 +59,7 @@ public class DbgpRawPacket {
 			throw new IOException("No termination '0' byte");
 		}
 
-		return new String(bytes);
+		return new String(bytes, "ASCII");
 	}
 
 	public static DbgpRawPacket readPacket(InputStream input)

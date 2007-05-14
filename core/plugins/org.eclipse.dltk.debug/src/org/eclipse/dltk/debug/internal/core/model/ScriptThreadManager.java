@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.debug.internal.core.model;
 
 import java.util.ArrayList;
@@ -80,7 +89,7 @@ public class ScriptThreadManager implements IDbgpThreadAcceptor, ITerminate,
 		}
 	}
 
-	public IThread[] getThreads() {
+	public IThread[] getThreads() {		
 		synchronized (threads) {
 			return (IThread[]) threads.toArray(new IThread[threads.size()]);
 		}
@@ -122,9 +131,8 @@ public class ScriptThreadManager implements IDbgpThreadAcceptor, ITerminate,
 
 	public void terminateThread(IScriptThread thread) {
 		synchronized (threads) {
-			threads.remove(thread);
-			DebugEventHelper.fireTerminateEvent(thread);
-
+			threads.remove(thread);				
+			DebugEventHelper.fireTerminateEvent(thread);			
 			if (!hasThreads()) {
 				fireAllThreadsTerminated();
 			}
@@ -173,9 +181,9 @@ public class ScriptThreadManager implements IDbgpThreadAcceptor, ITerminate,
 			for (int i = 0; i < threads.length; ++i) {
 				threads[i].terminate();
 			}
-
 			waitingForThreads = false;
-		}
+
+		}		
 	}
 
 	public boolean canResume() {

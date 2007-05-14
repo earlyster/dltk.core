@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.debug.internal.core.model;
 
 import java.net.URI;
@@ -54,7 +63,7 @@ public class ScriptLineBreakpoint extends ScriptBreakpoint implements
 						getModelIdentifier(), true, lineNumber, charStart,
 						charEnd);
 
-				setMarker(ScriptMarkerFactory.makeMarker(resource, attributes));
+				setMarker(ScriptMarkerFactory.makeMarker(resource, attributes,getMarkerID()));
 				ensureMarker().setAttributes(attributes);
 
 				register(add);
@@ -62,6 +71,9 @@ public class ScriptLineBreakpoint extends ScriptBreakpoint implements
 		};
 
 		run(getMarkerRule(resource), wr);
+	}
+	protected String getMarkerID(){
+		return ScriptMarkerFactory.MARKER_ID;
 	}
 
 	// ILineBreakpoint
@@ -87,4 +99,6 @@ public class ScriptLineBreakpoint extends ScriptBreakpoint implements
 			return null;
 		}
 	}
+
+	
 }

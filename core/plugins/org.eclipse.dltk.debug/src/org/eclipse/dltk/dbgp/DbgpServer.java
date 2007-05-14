@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.dbgp;
 
 import java.io.IOException;
@@ -34,16 +43,19 @@ public class DbgpServer extends DbgpWorkingThread implements IDbgpServer {
 	}
 
 	protected void workingCycle() throws Exception, IOException {
+		
 		try {
+			
 			while (true) {
 				Socket client = server.accept();
 				
-				System.out.println("Client connected!");				
+				//System.out.println("Client connected!");				
 
 				client.setSoTimeout(clientTimeout);
 
-				DbgpSession session = new DbgpSession(new DbgpDebugingEngine(
-						client));
+				DbgpDebugingEngine dbgpDebugingEngine = new DbgpDebugingEngine(
+						client);
+				DbgpSession session = new DbgpSession(dbgpDebugingEngine);
 
 				String id = session.getInfo().getIdeKey();
 
@@ -58,7 +70,7 @@ public class DbgpServer extends DbgpWorkingThread implements IDbgpServer {
 			}
 		} finally {
 			server.close();
-
+			
 			acceptNotAvailable();
 		}
 	}

@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.dbgp.commands;
 
 import org.eclipse.dltk.dbgp.IDbgpProperty;
@@ -17,18 +26,20 @@ public interface IDbgpPropertyCommands {
 	 * provided by the debugger engine.
 	 */
 
-	IDbgpProperty getPropery(String name) throws DbgpException;
+	IDbgpProperty getPropertyByKey(String name, String key) throws DbgpException;
+	
+	IDbgpProperty getProperty(String name) throws DbgpException;
 
-	IDbgpProperty getPropery(String name, int stackDepth) throws DbgpException;
+	IDbgpProperty getProperty(String name, int stackDepth) throws DbgpException;
 
-	IDbgpProperty getPropery(String name, int stackDepth, int contextId)
+	IDbgpProperty getProperty(String name, int stackDepth, int contextId)
 			throws DbgpException;
 
-	IDbgpProperty getPropery(String name, int stackDepth, int contextId,
+	IDbgpProperty getProperty(String name, int stackDepth, int contextId,
 			String dataType, String dataPage) throws DbgpException;
 
-	boolean setPropery(IDbgpProperty property) throws DbgpException;
+	boolean setProperty(IDbgpProperty property) throws DbgpException;
 
-	boolean setPropery(String name, int stackDepth, String value)
+	boolean setProperty(String name, int stackDepth, String value)
 			throws DbgpException;
 }

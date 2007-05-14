@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.debug.internal.core.model;
 
 import java.util.ArrayList;
@@ -23,8 +32,7 @@ import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptValue;
 import org.eclipse.dltk.debug.core.model.IScriptVariable;
 
-public class ScriptWatchExpressionDelegate implements IWatchExpressionDelegate,
-		IWatchExpressionResult {
+public class ScriptWatchExpressionDelegate implements IWatchExpressionDelegate, IWatchExpressionResult {
 
 	private IDebugElement context;
 
@@ -47,14 +55,14 @@ public class ScriptWatchExpressionDelegate implements IWatchExpressionDelegate,
 		Job job = new Job("Evaluate expression") {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
+					if (context.getDebugTarget().isTerminated())
+						return Status.OK_STATUS;
 					IDbgpProperty property = extended.evaluate(expression);
 
-					IScriptVariable variable = new ScriptVariable(0, property,
-							context.getDebugTarget(), core);
+					ScriptVariable variable = new ScriptVariable(context.getDebugTarget(), 0, property, core);
 					value = new ScriptValue(variable);
 
-					listener
-							.watchEvaluationFinished(ScriptWatchExpressionDelegate.this);
+					listener.watchEvaluationFinished(ScriptWatchExpressionDelegate.this);
 				} catch (DbgpException e) {
 					addError(e.getMessage());
 				}
@@ -80,8 +88,7 @@ public class ScriptWatchExpressionDelegate implements IWatchExpressionDelegate,
 	}
 
 	// IWatchExpressionDelegate
-	public void evaluateExpression(String expression, IDebugElement context,
-			IWatchExpressionListener listener) {
+	public void evaluateExpression(String expression, IDebugElement context, IWatchExpressionListener listener) {
 		this.expression = expression;
 		this.context = context;
 		this.listener = listener;

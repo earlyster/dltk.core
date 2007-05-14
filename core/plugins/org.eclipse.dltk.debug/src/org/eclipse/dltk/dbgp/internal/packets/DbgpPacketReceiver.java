@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.packets;
 
 import java.io.InputStream;
@@ -27,8 +36,12 @@ public class DbgpPacketReceiver extends DbgpWorkingThread {
 			while (!map.containsKey(key)) {
 				wait();
 			}
-
-			return map.get(key);
+			
+			return map.remove(key);			
+		}
+		
+		public synchronized int size() {
+			return map.size();
 		}
 	}
 
@@ -72,6 +85,7 @@ public class DbgpPacketReceiver extends DbgpWorkingThread {
 	private IDbgpLogger logger;
 
 	protected void workingCycle() throws Exception {
+		
 		while (!Thread.interrupted()) {
 			DbgpRawPacket packet = DbgpRawPacket.readPacket(input);
 
@@ -81,7 +95,7 @@ public class DbgpPacketReceiver extends DbgpWorkingThread {
 
 			addDocument(packet.getParsedXml());
 		}
-
+		
 	}
 
 	protected void addDocument(Document doc) {
@@ -113,6 +127,7 @@ public class DbgpPacketReceiver extends DbgpWorkingThread {
 
 	public DbgpResponsePacket getResponsePacket(int transactionId)
 			throws InterruptedException {
+					
 		return (DbgpResponsePacket) responseQueue
 				.get(new Integer(transactionId));
 	}

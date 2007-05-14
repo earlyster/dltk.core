@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal;
 
 import java.util.List;
@@ -22,9 +31,13 @@ public class DbgpProperty implements IDbgpProperty {
 
 	private boolean constant;
 
+	private boolean hasChildren;
+
+	private String key;
+
 	public DbgpProperty(String name, String fullName, String type,
-			String value, int size, int childrenCount, List availableChildren,
-			boolean constant) {
+			String value, int size, int childrenCount, boolean hasChildren,
+			List availableChildren, boolean constant, String key) {
 		this.name = name;
 		this.fullName = fullName;
 		this.type = type;
@@ -32,7 +45,9 @@ public class DbgpProperty implements IDbgpProperty {
 		this.size = size;
 		this.childrenCount = childrenCount;
 		this.availableChildren = availableChildren;
+		this.hasChildren = hasChildren;
 		this.constant = constant;
+		this.key = key;
 	}
 
 	public String getFullName() {
@@ -60,15 +75,16 @@ public class DbgpProperty implements IDbgpProperty {
 	}
 
 	public boolean hasChildren() {
-		return getChildrenCount() > 0;
+		return hasChildren;
 	}
 
 	public int getChildrenCount() {
 		return childrenCount;
 	}
 
-	public List getAvailableChildren() {
-		return availableChildren;
+	public IDbgpProperty[] getAvailableChildren() {
+		return (IDbgpProperty[]) availableChildren
+				.toArray(new IDbgpProperty[availableChildren.size()]);
 	}
 
 	public boolean isConstant() {
@@ -88,5 +104,9 @@ public class DbgpProperty implements IDbgpProperty {
 		// }
 
 		return sb.toString();
+	}
+
+	public String getKey() {
+		return key;
 	}
 }
