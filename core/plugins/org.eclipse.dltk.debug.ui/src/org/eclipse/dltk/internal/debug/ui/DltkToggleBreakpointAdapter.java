@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui;
 
 import org.eclipse.core.resources.IResource;
@@ -6,8 +15,12 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.ILineBreakpoint;
 import org.eclipse.debug.ui.actions.IToggleBreakpointsTarget;
+import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.internal.core.model.ScriptModelConstants;
 import org.eclipse.dltk.debug.ui.BreakpointUtils;
+import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchPart;
@@ -62,8 +75,28 @@ public class DltkToggleBreakpointAdapter implements IToggleBreakpointsTarget {
 						}
 					}
 				}
-				
-				BreakpointUtils.addLineBreakpoint(getPartEditor(part), lineNumber);
+				ITextEditor partEditor = getPartEditor(part);
+				if (partEditor instanceof ScriptEditor){
+					ScriptEditor ed=(ScriptEditor) partEditor;
+					IRegion lineInformation;
+					try {
+						lineInformation = ed.getScriptSourceViewer().getDocument().getLineInformation(lineNumber-1);
+						String string = ed.getScriptSourceViewer().getDocument().get(lineInformation.getOffset(), lineInformation.getLength());
+						int contains = string.indexOf("function");
+						if (contains!=-1){
+							string=string.substring(contains+"function".length()).trim();
+							int apos=string.indexOf('(');
+							if (apos>=0)string=string.substring(0,apos).trim();
+							BreakpointUtils.addMethodEntryBreakpoint(partEditor, lineNumber,string,string);
+							return;
+						}
+						else BreakpointUtils.addLineBreakpoint(partEditor, lineNumber);
+					} catch (BadLocationException e) {
+						DLTKDebugPlugin.log(e);
+						return;
+					}																	
+				}				
+				else BreakpointUtils.addLineBreakpoint(partEditor, lineNumber);
 			}
 		} 
 	}

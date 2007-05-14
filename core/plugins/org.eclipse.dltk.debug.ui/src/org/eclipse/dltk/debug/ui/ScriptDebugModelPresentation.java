@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.debug.ui;
 
 import java.io.File;
@@ -10,6 +19,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.ILineBreakpoint;
 import org.eclipse.debug.core.model.IValue;
+import org.eclipse.debug.core.model.IWatchExpression;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IValueDetailListener;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
@@ -112,7 +122,7 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 		}
 	}
 
-	protected String getVariableText(IScriptVariable variable) {
+	public String getVariableText(IScriptVariable variable) {
 		return variable.toString();
 	}
 
@@ -145,6 +155,10 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 			return getVariableText((IScriptVariable) element);
 		} else if (element instanceof IScriptValue) {
 			return getValueText((IScriptValue) element);
+		}
+		else if (element instanceof IWatchExpression){
+			IWatchExpression exp=(IWatchExpression) element;
+			return exp.getExpressionText();
 		}
 
 		return element.toString();

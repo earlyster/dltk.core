@@ -1,12 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
+ 
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
@@ -221,8 +220,10 @@ public abstract class AbstractInterpreterComboBlock {
 		fCombo = new Combo(group, SWT.DROP_DOWN | SWT.READ_ONLY);
 		fCombo.setFont(font);
 		data= new GridData(GridData.FILL_HORIZONTAL);
+//		data.minimumWidth = 100;
+//		data.widthHint = 100;
 		data.horizontalSpan = 1;
-		fCombo.setLayoutData(data);
+		fCombo.setLayoutData(data);		
 		ControlAccessibleListener.addListener(fCombo, fSpecificButton.getText());
 		
 		fCombo.addSelectionListener(new SelectionAdapter() {
@@ -320,6 +321,10 @@ public abstract class AbstractInterpreterComboBlock {
 		}
 		fCombo.setItems(names);
 		fCombo.setVisibleItemCount(Math.min(names.length, 20));
+//		if (names.length == 0) {			
+//			fCombo.setEnabled(names.length > 0);
+//			fSpecificButton.setEnabled(names.length > 0);
+//		}
 	}
 	
 	protected Shell getShell() {

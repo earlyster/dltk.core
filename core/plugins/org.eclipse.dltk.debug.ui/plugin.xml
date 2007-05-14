@@ -31,6 +31,44 @@
        </adapter>
     </factory>         
     </extension>
+     <extension
+         point="org.eclipse.ui.popupMenus">
+    <objectContribution
+            objectClass="org.eclipse.dltk.debug.core.model.IScriptMethodEntryBreakpoint"
+            id="org.eclipse.dltk.debug.MethodBreakpointToggleActions">
+         <action
+               label="%entryAction.label"
+               helpContextId="entry_toggle_action_context"
+               state="false"
+               class="org.eclipse.dltk.debug.ui.actions.EntryToggleAction"
+               menubarPath="emptyBreakpointGroup"
+               enablesFor="+"
+               id="org.eclipse.jdt.debug.ui.actions.EntryToggle">
+         </action>
+         <action
+               label="%exitAction.label"
+               helpContextId="exit_toggle_action_context"
+               state="false"
+               class="org.eclipse.dltk.debug.ui.actions.ExitToggleAction"
+               menubarPath="emptyBreakpointGroup"
+               enablesFor="+"
+               id="org.eclipse.jdt.debug.ui.actions.ExitToggle">
+         </action>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.dltk.debug.core.model.IScriptBreakpoint"
+            id="org.eclipse.dltk.debug.ScriptBreakpointActions">                
+         <action
+               class="org.eclipse.dltk.debug.ui.actions.ScriptBreakpointPropertiesAction"
+               definitionId="org.eclipse.jdt.debug.ui.breakpoint.properties"
+               enablesFor="1"
+               helpContextId="breakpoint_properties_action_context"
+               id="org.eclipse.jdt.debug.ui.actions.JavaBreakpointProperties"
+               label="%ScriptBreakpointProperties.label"
+               menubarPath="additions">
+         </action>
+      </objectContribution>
+      </extension>
 
  <extension
          point="org.eclipse.ui.actionSetPartAssociations">
@@ -93,10 +131,7 @@
 		</view> 
 	</perspectiveExtension>
  </extension>
- 
- <extension point="org.eclipse.debug.ui.debugModelContextBindings">
-	<modelContextBinding contextId="org.eclipse.dltk.debug.ui.debugging" debugModelId="org.eclipse.dltk.debug.core.model"></modelContextBinding>
- </extension>   
+    
    
  <extension
        point="org.eclipse.debug.core.statusHandlers">
@@ -124,6 +159,15 @@
             id="org.eclipse.dltk.internal.debug.ui.NoDefaultInterpreterStatusHandler"
             plugin="org.eclipse.dltk.launching">
     </statusHandler>
+ </extension>
+ <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          category="org.eclipse.dltk.preferences"
+          class="org.eclipse.dltk.debug.ui.preferences.DebuggingPreferences"
+          id="org.eclipse.dltk.preferences.debug"
+          name="Debugging">
+    </page>
  </extension>
  
 </plugin>
