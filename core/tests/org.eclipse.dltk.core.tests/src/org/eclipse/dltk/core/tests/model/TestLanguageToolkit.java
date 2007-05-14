@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.core.tests.model;
 
 import java.text.MessageFormat;
@@ -51,7 +60,9 @@ public class TestLanguageToolkit implements IDLTKLanguageToolkit {
 	public ISourceElementParser createSourceElementParser(
 			ISourceElementRequestor requestor,
 			IProblemReporter problemReporter, Map options) throws CoreException {
-		return new TestSourceElementParser(requestor);
+		TestSourceElementParser t = new TestSourceElementParser();
+		t.setRequestor(requestor);
+		return t;
 	}
 
 	public IStatus validateSourceModule(String name) {

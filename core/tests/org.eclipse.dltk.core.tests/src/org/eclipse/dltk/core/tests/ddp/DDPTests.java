@@ -1,26 +1,44 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.core.tests.ddp;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import junit.framework.TestCase;
+import junit.framework.Test;
 
+import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.DLTKToken;
 import org.eclipse.dltk.ast.expressions.Expression;
 import org.eclipse.dltk.ast.expressions.NumericLiteral;
 import org.eclipse.dltk.ast.references.SimpleReference;
-import org.eclipse.dltk.ast.statements.Statement;
+import org.eclipse.dltk.core.tests.model.SuiteOfTestCases;
+import org.eclipse.dltk.ti.DefaultTypeInferencer;
 import org.eclipse.dltk.ti.GoalState;
 import org.eclipse.dltk.ti.IGoalEvaluatorFactory;
 import org.eclipse.dltk.ti.ITypeInferencer;
-import org.eclipse.dltk.ti.DefaultTypeInferencer;
 import org.eclipse.dltk.ti.goals.ExpressionTypeGoal;
 import org.eclipse.dltk.ti.goals.GoalEvaluator;
 import org.eclipse.dltk.ti.goals.IGoal;
 import org.eclipse.dltk.ti.types.IEvaluatedType;
 
-public class DDPTests extends TestCase {
+public class DDPTests extends SuiteOfTestCases {	
+
+	public DDPTests(String name) {
+		super(name);
+	}
+	
+	public static Test suite() {
+		return new Suite(DDPTests.class);
+	}
 
 	private static final class FixedAnswerGoalEvaluator extends GoalEvaluator {
 		private final IEvaluatedType answer;
@@ -123,7 +141,7 @@ public class DDPTests extends TestCase {
 			public GoalEvaluator createEvaluator(IGoal goal) {
 				if (goal instanceof ExpressionTypeGoal) {
 					ExpressionTypeGoal egoal = (ExpressionTypeGoal) goal;
-					Statement expr = egoal.getExpression();
+					ASTNode expr = egoal.getExpression();
 					if (expr == x)
 						return new SingleDependentGoalEvaluator(goal, new ExpressionTypeGoal(null, y),
 								new MyNum());
@@ -158,7 +176,7 @@ public class DDPTests extends TestCase {
 			public GoalEvaluator createEvaluator2(IGoal goal) {
 				if (goal instanceof ExpressionTypeGoal) {
 					ExpressionTypeGoal egoal = (ExpressionTypeGoal) goal;
-					Statement expr = egoal.getExpression();
+					ASTNode expr = egoal.getExpression();
 					if (expr == x)
 						return new SingleDependentGoalEvaluator(goal, new IGoal[] {
 								new ExpressionTypeGoal(null, y), new ExpressionTypeGoal(null, z) }, new MyNum());
