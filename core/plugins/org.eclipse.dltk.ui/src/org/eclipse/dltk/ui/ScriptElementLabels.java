@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.ui;
 
 import org.eclipse.core.resources.IProject;
@@ -8,6 +17,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.BuildpathContainerInitializer;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKProject;
@@ -312,7 +322,57 @@ public class ScriptElementLabels {
 
 	private final static long QUALIFIER_FLAGS = P_COMPRESSED | USE_RESOLVED;
 	
-	private static ScriptElementLabels sInstance = new ScriptElementLabels();
+	private static ScriptElementLabels sInstanceO = new ScriptElementLabels() { };
+	private static ScriptElementLabels sInstance = new ScriptElementLabels() {
+		private ScriptElementLabels getLabels(IModelElement element) {
+			IDLTKUILanguageToolkit languageToolkit = null;
+			try {
+				languageToolkit = DLTKUILanguageManager.getLanguageToolkit(element);
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+			if( languageToolkit != null ) {
+				ScriptElementLabels scriptElementLabels = languageToolkit.getScriptElementLabels();
+				if( scriptElementLabels != null ) {
+					return scriptElementLabels;
+				}
+			}
+			return sInstanceO;
+		}
+		public String getContainerEntryLabel(IPath containerPath,
+				IDLTKProject project) throws ModelException {
+			
+			return getLabels(project).getContainerEntryLabel(containerPath, project);
+		}
+
+		public void getDeclarationLabel(IModelElement declaration, long flags,
+				StringBuffer buf) {
+			getLabels(declaration).getDeclarationLabel(declaration, flags, buf);
+		}
+
+		public void getElementLabel(IModelElement element, long flags,
+				StringBuffer buf) {
+			getLabels(element).getElementLabel(element, flags, buf);
+		}
+
+		public String getElementLabel(IModelElement element, long flags) {
+			return getLabels(element).getElementLabel(element, flags);
+		}
+
+		public void getProjectFragmentLabel(IProjectFragment root, long flags,
+				StringBuffer buf) {
+			getLabels(root).getProjectFragmentLabel(root, flags, buf);
+		}
+
+		public void getScriptFolderLabel(IProjectFragment pack, long flags,
+				StringBuffer buf) {
+			getLabels(pack).getScriptFolderLabel(pack, flags, buf);
+		}
+
+		protected void getTypeLabel(IType type, long flags, StringBuffer buf) {
+			getLabels(type).getTypeLabel(type, flags, buf);
+		}
+	};
 	
 	public static ScriptElementLabels getDefault() {
 		return sInstance;
@@ -360,7 +420,7 @@ public class ScriptElementLabels {
 			IModelElement element = (IModelElement)obj;
 			if( this.equals( sInstance )) {
 				try {
-					IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager.getLangaugeToolkit(element);
+					IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager.getLanguageToolkit(element);
 					if( uiToolkit != null ) {
 						ScriptElementLabels labels = uiToolkit.getScriptElementLabels();
 						if( labels != null ) {

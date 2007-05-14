@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.internal.ui.editor;
 
 import java.text.CharacterIterator;
@@ -66,7 +75,6 @@ import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.ITextViewerExtension5;
@@ -158,7 +166,6 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor {
 	protected final static String MATCHING_BRACKETS_COLOR=  PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR;
 	
 	private ScriptEditorErrorTickUpdater fScriptEditorErrorTickUpdater;	
-	
 	
 	public ISourceViewer getScriptSourceViewer(){
 		return super.getSourceViewer();
@@ -1355,20 +1362,6 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor {
 			fScriptEditorErrorTickUpdater.updateEditorImage(getInputModelElement());
 	}
 
-	// protected IEditorInput transformEditorInput(IEditorInput input) {
-	// if (input instanceof IFileEditorInput) {
-	// IFile file = ((IFileEditorInput) input).getFile();
-	// IScriptFileEditorInput scriptFileInput = new ScriptFileEditorInput(file);
-	// ISourceModule module = scriptFileInput.getSourceModule();
-	// IDLTKProject project = EditorUtility.getDLTKProject(input);
-	// if (module != null && project.isValid()) {
-	// input = scriptFileInput;
-	// }
-	// }
-	// return input;
-	// }
-	
-	
 	
 	private ScriptOutlinePage createOutlinePage() {
 		final ScriptOutlinePage page = doCreateOutlinePage();
@@ -1414,17 +1407,6 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor {
 		} else {
 			page.setInput(null);
 		}
-		// IDLTKProject project = EditorUtility.getDLTKProject(input);
-		// if (page != null && project != null && input instanceof
-		// IScriptFileEditorInput) {
-		// IScriptFileEditorInput sfi = (IScriptFileEditorInput) input;
-		// ISourceModule module = sfi.getSourceModule();
-		// if (module != null && module.exists() && project.isValid()) {
-		// page.setInput(module);
-		// } else {
-		// page.setInput(null);
-		// }
-		// }
 	}
 
 	public Object getAdapter(Class required) {

@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.ui;
 
 import org.eclipse.dltk.ui.text.completion.ProposalSorterRegistry;
@@ -128,7 +137,9 @@ public class PreferenceConstants {
 	 * </p>
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants#EDITOR_TAB_WIDTH
 	 */
-	public final static String EDITOR_TAB_WIDTH= AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH; 
+	public final static String EDITOR_TAB_WIDTH= AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH;
+	
+	public final static String EDITOR_TAB_ALWAYS_INDENT= "tab_always_indent";
 	
 	/**
 	 * A named preference that controls whether the outline view selection
@@ -307,6 +318,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE, true);
 		
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
+		store.setDefault(PreferenceConstants.EDITOR_TAB_ALWAYS_INDENT, false);
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, new RGB(192, 192,192));
 		
 	}

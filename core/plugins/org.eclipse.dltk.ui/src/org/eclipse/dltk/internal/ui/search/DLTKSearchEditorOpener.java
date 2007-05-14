@@ -1,19 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
+ 
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.search;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.dltk.core.DLTKLanguageManager;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
@@ -21,7 +18,9 @@ import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.SourceModule;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.editor.ExternalStorageEditorInput;
+import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.text.Match;
@@ -157,7 +156,7 @@ public class DLTKSearchEditorOpener {
 		String editorID = null;
 		IEditorDescriptor desc= null;
 		try {
-			IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLanguageToolkit(module);
+			IDLTKUILanguageToolkit toolkit = DLTKUILanguageManager.getLanguageToolkit(module); 
 			editorID = toolkit.getEditorID(module);
 		} catch (CoreException e) {				
 		}

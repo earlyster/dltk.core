@@ -1,12 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
+ 
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.wizards.buildpath.newsourcepage;
 
@@ -129,8 +128,8 @@ public class AddLibraryToBuildpathAction extends Action implements ISelectionCha
 						pm.beginTask(NewWizardMessages.BuildpathModifier_Monitor_AddToBuildpath, 4); 
 
 						List addedEntries= new ArrayList();
-						for (int i= 0; i < selected.length; i++) {							
-							addedEntries.add(new BPListElement(project, IBuildpathEntry.BPE_CONTAINER, selected[i].getPath(), null, false ));
+						for (int i= 0; i < selected.length; i++) {		
+							addedEntries.add(new BPListElement(project, selected[i].getEntryKind(), selected[i].getPath(), null, selected[i].isExported() ));
 						}
 
 						pm.worked(1);

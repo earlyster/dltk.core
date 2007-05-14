@@ -1,22 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
+ 
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.typehierarchy;
 
 import org.eclipse.dltk.core.DLTKModelUtil;
-import org.eclipse.dltk.core.Flags;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.internal.core.util.MethodOverrideTester;
 import org.eclipse.dltk.ui.ModelElementSorter;
 import org.eclipse.dltk.ui.viewsupport.SourcePositionSorter;
 import org.eclipse.jface.viewers.Viewer;

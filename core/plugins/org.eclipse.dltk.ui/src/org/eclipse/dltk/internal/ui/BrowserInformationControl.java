@@ -1,20 +1,26 @@
 package org.eclipse.dltk.internal.ui;
 
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
+ 
  *******************************************************************************/
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Iterator;
 
+import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.dltk.internal.ui.text.HTML2TextReader;
+import org.eclipse.dltk.ui.text.completion.HTMLPrinter;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlExtension;
+import org.eclipse.jface.text.IInformationControlExtension3;
+import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
@@ -43,15 +49,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.dltk.internal.ui.text.HTML2TextReader;
-import org.eclipse.dltk.ui.text.completion.HTMLPrinter;
-
-import org.eclipse.jface.text.IInformationControl;
-import org.eclipse.jface.text.IInformationControlExtension;
-import org.eclipse.jface.text.IInformationControlExtension3;
-import org.eclipse.jface.text.TextPresentation;
 
 
 /**

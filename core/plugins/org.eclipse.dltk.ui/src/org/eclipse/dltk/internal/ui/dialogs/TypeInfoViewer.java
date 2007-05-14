@@ -1,12 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
+ 
  *******************************************************************************/
  package org.eclipse.dltk.internal.ui.dialogs;
 
@@ -362,7 +361,7 @@ public class TypeInfoViewer {
 //			String result= info.getTypeContainerName();
 			String result = "";
 			try {
-				IDLTKUILanguageToolkit toolkit = DLTKUILanguageManager.getLangaugeToolkit(info.getType());
+				IDLTKUILanguageToolkit toolkit = DLTKUILanguageManager.getLanguageToolkit(info.getType());
 				if( toolkit != null ) {
 					ScriptElementLabels labels = toolkit.getScriptElementLabels();
 					result = labels.getElementLabel(info.getType(), ScriptElementLabels.T_CONTAINER_QUALIFIED 
@@ -393,6 +392,7 @@ public class TypeInfoViewer {
 			StringBuffer buf= new StringBuffer();
 			ScriptElementLabels labels = fToolkit.getScriptElementLabels();
 			labels.getProjectFragmentLabel(root, ScriptElementLabels.ROOT_QUALIFIED | ScriptElementLabels.ROOT_VARIABLE, buf);
+			
 			return buf.toString();
 		}
 	}

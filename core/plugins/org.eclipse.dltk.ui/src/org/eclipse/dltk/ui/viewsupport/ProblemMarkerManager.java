@@ -1,20 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
+ 
  *******************************************************************************/
 package org.eclipse.dltk.ui.viewsupport;
 
 
 import java.util.HashSet;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
@@ -24,17 +20,16 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
-
-import org.eclipse.swt.widgets.Display;
-
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.dltk.internal.ui.util.SWTUtil;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.editor.SourceModuleAnnotationModelEvent;
 import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
-
-import org.eclipse.dltk.internal.ui.util.SWTUtil;
-import org.eclipse.dltk.ui.DLTKUIPlugin;
-import org.eclipse.dltk.ui.editor.SourceModuleAnnotationModelEvent;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * Listens to resource deltas and filters for marker changes of type IMarker.PROBLEM

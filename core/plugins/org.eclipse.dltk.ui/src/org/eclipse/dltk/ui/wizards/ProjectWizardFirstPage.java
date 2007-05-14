@@ -1,12 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
+ 
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
@@ -315,12 +314,14 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			fUseProjectInterpreterEnvironment.doFillIntoGrid(fGroup, 1);
 			fUseProjectInterpreterEnvironment.setDialogFieldListener(this);
 						
-			fInterpreterEnvironmentCombo= new ComboDialogField(SWT.READ_ONLY);
+			fInterpreterEnvironmentCombo= new ComboDialogField(SWT.READ_ONLY);			
 			fillInstalledInterpreterEnvironments(fInterpreterEnvironmentCombo);
 			fInterpreterEnvironmentCombo.setDialogFieldListener(this);
 
 			Combo comboControl= fInterpreterEnvironmentCombo.getComboControl(fGroup);
-			comboControl.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, true, false)); // make sure column 2 is grabing (but no fill)
+			GridData gridData = new GridData(GridData.BEGINNING, GridData.CENTER, true, false);
+			gridData.minimumWidth = 100;
+			comboControl.setLayoutData(gridData); // make sure column 2 is grabing (but no fill)
 			comboControl.setVisibleItemCount(20);
 			
 			DialogField.createEmptySpace(fGroup);

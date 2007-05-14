@@ -1,12 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
+ 
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.navigator;
 
@@ -76,10 +75,11 @@ public abstract class ScriptExplorerContentProvider extends
 	 */
 	public ScriptExplorerContentProvider(boolean provideMembers) {
 		super(provideMembers);
-		fScriptFolderProvider = new ProjectFragmentProvider(getPreferenceStore());
+		fScriptFolderProvider = new ProjectFragmentProvider(
+				getPreferenceStore());
 	}
 
-	/* package */ProjectFragmentProvider getScriptFolderProvider() {
+	public ProjectFragmentProvider getScriptFolderProvider() {
 		return fScriptFolderProvider;
 	}
 
@@ -151,7 +151,8 @@ public abstract class ScriptExplorerContentProvider extends
 			if (parentElement instanceof IProject)
 				return ((IProject) parentElement).members();
 			if (needsToDelegateGetChildren(parentElement)) {
-				Object[] ScriptFolders = fScriptFolderProvider.getChildren(parentElement);
+				Object[] ScriptFolders = fScriptFolderProvider
+						.getChildren(parentElement);
 				children = getWithParentsResources(ScriptFolders, parentElement);
 			} else {
 				children = super.getChildren(parentElement);
@@ -255,15 +256,18 @@ public abstract class ScriptExplorerContentProvider extends
 			Object parent) {
 		Object[] objects = super.getChildren(parent);
 		List list = new ArrayList();
+		if (existingObject != null) {
+			list.addAll(Arrays.asList(existingObject));
+		}
 		// Add everything that is not a ScriptFolder
 		for (int i = 0; i < objects.length; i++) {
 			Object object = objects[i];
 			if (!(object instanceof ScriptFolder)) {
-				list.add(object);
+				if( !list.contains(object)) {
+					list.add(object);
+				}
 			}
 		}
-		if (existingObject != null)
-			list.addAll(Arrays.asList(existingObject));
 		return list.toArray();
 	}
 
@@ -297,11 +301,9 @@ public abstract class ScriptExplorerContentProvider extends
 				&& elementType != IModelElement.SCRIPT_PROJECT) {
 			IDLTKProject proj = element.getScriptProject();
 			if (proj == null || !proj.getProject().isOpen()) // TODO: Not
-																// needed if
-																// parent
-																// already did
-																// the 'open'
-																// check!
+				/*
+				 * needed if parent already did the 'open' check!
+				 */
 				return;
 		}
 		if (!fIsFlatLayout && elementType == IModelElement.SCRIPT_FOLDER) {
@@ -406,7 +408,7 @@ public abstract class ScriptExplorerContentProvider extends
 			// IModelElementDelta.F_SOURCEDETACHED)) != 0)
 			// postUpdateIcon(element);
 			if (isBuildPathChange(delta)) {
-				// throw the towel and do a full refresh of the affected script 
+				// throw the towel and do a full refresh of the affected script
 				// project.
 				postRefresh(element.getScriptProject(), PROJECT, element);
 				return;

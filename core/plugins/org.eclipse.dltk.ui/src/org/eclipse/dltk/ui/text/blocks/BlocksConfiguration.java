@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 /**
  * 
  */
@@ -122,8 +131,8 @@ public class BlocksConfiguration {
 		Map narrowings = new HashMap();
 		for (Iterator iter = wordsToKeywords.values().iterator(); iter.hasNext();) {
 			Keyword incomingKeyword = (Keyword) iter.next();
-			if (incomingKeyword.getText().equals("end"))
-				System.out.println();
+//			if (incomingKeyword.getText().equals("end"))
+//				System.out.println();
 			Set narrowBlocks = new HashSet();
 			for (Iterator iterator = blocks.iterator(); iterator.hasNext();) {
 				Block block = (Block) iterator.next();
