@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.launching;
 
 import java.io.ByteArrayInputStream;
@@ -321,7 +330,7 @@ public final class ScriptRuntime {
 	public static IInterpreterInstallType getInterpreterInstallType(String id) {
 		IInterpreterInstallType[] interpreterTypes= getInterpreterInstallTypes();
 		for (int i= 0; i < interpreterTypes.length; i++) {
-			if (interpreterTypes[i].getId().equals(id)) {
+			if (interpreterTypes[i] != null && interpreterTypes[i].getId().equals(id)) {
 				return interpreterTypes[i];
 			}
 		}
