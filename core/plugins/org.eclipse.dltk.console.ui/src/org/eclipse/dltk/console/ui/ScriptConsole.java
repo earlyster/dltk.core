@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
 package org.eclipse.dltk.console.ui;
 
 import java.io.IOException;
@@ -39,6 +48,8 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 
 	private ScriptConsoleHistory history;
 
+	private IConsoleStyleProvider styleProvider;
+
 	protected IConsoleDocumentPartitioner getPartitioner() {
 		return partitioner;
 	}
@@ -55,7 +66,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 
 		partitioner = new ScriptConsolePartitioner();
 		getDocument().setDocumentPartitioner(partitioner);
-		partitioner.connect(getDocument());
+		partitioner.connect(getDocument());	
 	}
 
 	public IScriptConsoleSession getSession() {
@@ -76,6 +87,10 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 
 	protected void setInterpreter(IScriptInterpreter interpreter) {
 		this.interpreter = interpreter;
+	}
+	
+	protected void setStyleProvider (IConsoleStyleProvider provider) {
+		this.styleProvider = provider;		
 	}
 
 	public void setPrompt(ScriptConsolePrompt prompt) {
@@ -98,6 +113,8 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		SourceViewerConfiguration cfg = new ScriptConsoleSourceViewerConfiguration(
 				processor, hover);
 		page = new ScriptConsolePage(this, view, cfg);
+		if (styleProvider != null)
+			page.setStyleProviser(styleProvider);
 		return page;
 	}
 
