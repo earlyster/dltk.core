@@ -119,6 +119,7 @@ public class ScriptThreadManager implements IDbgpThreadAcceptor, ITerminate,
 
 				// Auto start
 				thread.resume();
+				//thread.stepInto();
 			} catch (Exception e) {
 				DLTKDebugPlugin.log(e);
 			}

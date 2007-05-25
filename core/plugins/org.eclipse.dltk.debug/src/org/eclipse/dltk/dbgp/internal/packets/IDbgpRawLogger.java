@@ -7,10 +7,9 @@
  *
  
  *******************************************************************************/
-package org.eclipse.dltk.dbgp;
+package org.eclipse.dltk.dbgp.internal.packets;
 
-public interface IDbgpThreadAcceptor {
-	void acceptDbgpThread(IDbgpSession session);
 
-	void acceptDbgpThreadNotUnavailable();
+public interface IDbgpRawLogger {
+	void log(String output);
 }

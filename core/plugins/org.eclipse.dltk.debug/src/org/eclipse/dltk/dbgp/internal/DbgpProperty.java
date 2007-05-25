@@ -9,8 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal;
 
-import java.util.List;
-
 import org.eclipse.dltk.dbgp.IDbgpProperty;
 
 public class DbgpProperty implements IDbgpProperty {
@@ -23,13 +21,13 @@ public class DbgpProperty implements IDbgpProperty {
 
 	private String value;
 
+	private boolean constant;
+
 	private int size;
 
 	private int childrenCount;
 
-	private List availableChildren;
-
-	private boolean constant;
+	private IDbgpProperty[] availableChildren;
 
 	private boolean hasChildren;
 
@@ -37,7 +35,7 @@ public class DbgpProperty implements IDbgpProperty {
 
 	public DbgpProperty(String name, String fullName, String type,
 			String value, int size, int childrenCount, boolean hasChildren,
-			List availableChildren, boolean constant, String key) {
+			boolean constant, String key, IDbgpProperty[] availableChildren) {
 		this.name = name;
 		this.fullName = fullName;
 		this.type = type;
@@ -66,10 +64,6 @@ public class DbgpProperty implements IDbgpProperty {
 		return value;
 	}
 
-	public void setValue(String value) {
-		this.value = value;
-	}
-
 	public int getSize() {
 		return size;
 	}
@@ -83,8 +77,7 @@ public class DbgpProperty implements IDbgpProperty {
 	}
 
 	public IDbgpProperty[] getAvailableChildren() {
-		return (IDbgpProperty[]) availableChildren
-				.toArray(new IDbgpProperty[availableChildren.size()]);
+		return (IDbgpProperty[]) availableChildren.clone();
 	}
 
 	public boolean isConstant() {
@@ -92,18 +85,8 @@ public class DbgpProperty implements IDbgpProperty {
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer("DbgpProperty (Name: " + name
-				+ "; Full name: " + fullName + "; Type: " + type + "; Value: "
-				+ value + ")");
-		// Iterator iter = availableChildren.iterator();
-		//		
-		// while(iter.hasNext()){
-		// sb.append('\n');
-		// sb.append('\t');
-		// sb.append(iter.next().toString());
-		// }
-
-		return sb.toString();
+		return "DbgpProperty (Name: " + name + "; Full name: " + fullName
+				+ "; Type: " + type + "; Value: " + value + ")";
 	}
 
 	public String getKey() {

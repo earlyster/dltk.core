@@ -9,42 +9,71 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.internal.core.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.dltk.dbgp.IDbgpProperty;
+import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.dbgp.commands.IDbgpCoreCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
+import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
+import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptVariable;
 
-public class ScriptVariable extends ScriptDebugElement implements IScriptVariable {
+public class ScriptVariable extends AbstractScriptVariable {
 
-	private int stackLevel;
+	private IDbgpSession session;
+
+	private IScriptStackFrame frame;
 
 	private IDbgpProperty property;
 
-	private String newValue;
+	private String assignedValue;
 
-	private IDbgpCoreCommands core;
+	protected ScriptVariable[] readChildrenVariables(IDbgpCoreCommands core)
+			throws DbgpException {
+		String key = property.getKey();
 
-	private IDebugTarget target;
-	
-	protected ScriptVariable(IDebugTarget target, int stackLevel, IDbgpProperty property, IDbgpCoreCommands core) {
-		this.target = target;
+		IDbgpProperty p = null;
 
-		this.stackLevel = stackLevel;
-		this.property = property;
+		if (key != null) {
+			p = core
+					.getPropertyByKey(property.getFullName(), property.getKey());
+		} else if (frame != null) {
+			p = core.getProperty(property.getFullName(), frame.getLevel());
+		} else {
+			p = core.getProperty(property.getFullName());
+		}
 
-		this.newValue = null;
+		IDbgpProperty[] properties = p.getAvailableChildren();
 
-		this.core = core;
+		ScriptVariable[] variables = new ScriptVariable[properties.length];
+		for (int i = 0; i < properties.length; ++i) {
+			variables[i] = createChildVariable(properties[i]);
+		}
+
+		return variables;
 	}
 
-	public IDebugTarget getDebugTarget() {
-		 return target;
+	protected ScriptVariable createChildVariable(IDbgpProperty property) {
+		if (frame != null)
+			return new ScriptVariable(frame, property);
+		else
+			return new ScriptVariable(getDebugTarget(), session, property);
+	}
+
+	public ScriptVariable(IScriptStackFrame frame, IDbgpProperty property) {
+		super(frame.getDebugTarget());
+		this.frame = frame;
+		this.session = ((IScriptThread) frame.getThread()).getDbgpSession();
+		this.property = property;
+	}
+
+	public ScriptVariable(IDebugTarget target, IDbgpSession session,
+			IDbgpProperty property) {
+		super(target);
+		this.session = session;
+		this.property = property;
 	}
 
 	public String getName() throws DebugException {
@@ -55,24 +84,23 @@ public class ScriptVariable extends ScriptDebugElement implements IScriptVariabl
 		return property.getType();
 	}
 
-	public IValue getValue() throws DebugException {
-		return new ScriptValue(this);
-	}
-
 	public boolean hasValueChanged() throws DebugException {
 		return false;
 	}
 
 	public void setValue(String expression) throws DebugException {
-		newValue = expression;
 		try {
-			// TODO: Set current value of IValue !!!
-			core.setProperty(property.getFullName(), stackLevel, expression);
-			property.setValue(expression);
-			DebugEventHelper.fireChangeEvent(this);
-		} catch (DbgpException e) {
+			if (frame != null) {
+				if (session.getCoreCommands().setProperty(
+						property.getFullName(), frame.getLevel(), expression)) {
+					DebugEventHelper.fireChangeEvent(this);
+				}
 
-			e.printStackTrace();
+				assignedValue = expression;
+			}
+
+		} catch (DbgpException e) {
+			throw wrapDbgpException("Can't assign variable", e);
 		}
 	}
 
@@ -81,66 +109,35 @@ public class ScriptVariable extends ScriptDebugElement implements IScriptVariabl
 	}
 
 	public boolean supportsValueModification() {
-		return !hasChildren() && !property.isConstant();
+		return frame != null && !hasChildren() && !property.isConstant();
 	}
 
 	public boolean verifyValue(String expression) throws DebugException {
 		return expression != null;
-
 	}
 
 	public boolean verifyValue(IValue value) throws DebugException {
 		return verifyValue(value.getValueString());
 	}
 
-	public boolean isConstant() throws DebugException {
+	public boolean hasChildren() {
+		boolean shouldHas = property.hasChildren();
+		int count = property.getChildrenCount();
+
+		return count == -1 ? shouldHas : shouldHas && count > 0;
+	}
+
+	public boolean isConstant() {
 		return property.isConstant();
 	}
 
-	public boolean hasChildren() {
-		return property.hasChildren();
-	}
-	
-	protected ScriptVariable[] readVariablesByKey(IDbgpCoreCommands core) throws DbgpException {
-		IDbgpProperty p = core.getPropertyByKey(property.getName(), property.getKey());
-		IDbgpProperty[] props = p.getAvailableChildren();
-		
-		List variables  = new ArrayList();
-					
-		for (int i = 0; i < props.length; ++i) {
-			variables.add(new ScriptVariable(getDebugTarget(), stackLevel, props[i], core));
+	public synchronized IScriptVariable[] getChildren() throws DebugException {
+		try {
+			return readChildrenVariables(session.getCoreCommands());
+		} catch (DbgpException e) {
+			throw wrapDbgpException(
+					"Exception during getting variable children", e);
 		}
-
-		return (ScriptVariable[]) variables.toArray(new ScriptVariable[variables.size()]);
-	}
-
-	public synchronized IScriptVariable[] getChildren() {
-		if (property.getKey() != null) {
-			try {
-				return readVariablesByKey(core);
-			} catch (DbgpException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return new IScriptVariable[0];
-			} 
-		}
-		
-		IDbgpProperty[] properties = property.getAvailableChildren();
-
-		if (properties.length != property.getChildrenCount()) {
-			try {
-				property = core.getProperty(property.getFullName(), stackLevel);
-				return getChildren();
-			} catch (DbgpException e) {
-				// // TODO Auto-generated catch block
-				// e.printStackTrace();
-			}
-		}
-		IScriptVariable[] variables = new IScriptVariable[properties.length];
-		for (int i = 0; i < properties.length; ++i) {
-			variables[i] = new ScriptVariable(getDebugTarget(), stackLevel, (IDbgpProperty) properties[i], core);
-		}
-		return variables;
 	}
 
 	public String getTypeString() {
@@ -148,18 +145,18 @@ public class ScriptVariable extends ScriptDebugElement implements IScriptVariabl
 	}
 
 	public String getValueString() {
-		if (newValue != null) {
-			return newValue;
-		} else {
-			return property.getValue();
-		}
+		return assignedValue != null ? assignedValue : property.getValue();
 	}
 
 	public String toString() {
-		return property.getName();
+		return getFullName();
 	}
 
 	public String getFullName() {
 		return property.getFullName();
+	}
+
+	public String getId() {
+		return property.getKey();
 	}
 }

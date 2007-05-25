@@ -250,7 +250,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 			breakpointManager.setupDeferredBreakpoints(thread);
 		} catch (CoreException e) {
 			// TODO: log exception
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 		if (first) {

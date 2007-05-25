@@ -43,8 +43,6 @@
             type="org.eclipse.dltk.debug.scriptBreakpointMarker">
       </super>
    </extension>
-    
-      
    <extension
          id="scriptMethodEntryBreakpointMarker"
          point="org.eclipse.core.resources.markers">
@@ -67,12 +65,12 @@
             name="org.eclipse.debug.core.id.methodExit">
       </attribute>
    </extension>
-    
-      
    <extension
-         point="org.eclipse.debug.core.watchExpressionDelegates">
-      <watchExpressionDelegate
-            debugModel="org.eclipse.dltk.debug.core.model"
-            delegateClass="org.eclipse.dltk.debug.internal.core.model.ScriptWatchExpressionDelegate"/>
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.eclipse.dltk.debug.core.DLTKDebugPluginPreferenceInitializer">
+      </initializer>
    </extension>
+   
+      
 </plugin>

@@ -13,15 +13,17 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IVariable;
 
 public interface IScriptVariable extends IVariable {
-	boolean isConstant() throws DebugException;
+	boolean isConstant();
+
+	String getFullName();
 
 	String getTypeString();
 
 	String getValueString();
 
+	String getId();
+
 	boolean hasChildren();
 
-	String getFullName();
-
-	IScriptVariable[] getChildren();
+	IScriptVariable[] getChildren() throws DebugException;
 }
