@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.compiler.env.IGenericType;
-import org.eclipse.dltk.compiler.problem.DefaultProblemFactory;
 import org.eclipse.dltk.core.ISearchableEnvironment;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
@@ -100,14 +99,14 @@ public abstract class HierarchyBuilder {
 		if (focusType == null)
 			return;
 		// get generic type from focus type
-		IGenericType type;
-		try {
-			type = (IGenericType) ((ModelElement) focusType).getElementInfo();
-		} catch (ModelException e) {
-			// if the focus type is not present, or if cannot get workbench path
-			// we cannot create the hierarchy
-			return;
-		}
+//		IGenericType type;
+//		try {
+//			type = (IGenericType) ((ModelElement) focusType).getElementInfo();
+//		} catch (ModelException e) {
+//			// if the focus type is not present, or if cannot get workbench path
+//			// we cannot create the hierarchy
+//			return;
+//		}
 		// NB: no need to set focus type on hierarchy resolver since no other
 		// type is injected
 		// in the hierarchy resolver, thus there is no need to check that a type

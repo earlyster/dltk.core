@@ -27,9 +27,17 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.dltk.core.search.IDLTKSearchConstants;
+import org.eclipse.dltk.core.search.IDLTKSearchScope;
+import org.eclipse.dltk.core.search.SearchEngine;
+import org.eclipse.dltk.core.search.SearchPattern;
+import org.eclipse.dltk.core.search.TypeNameRequestor;
 import org.eclipse.dltk.internal.core.BatchOperation;
 import org.eclipse.dltk.internal.core.BuildpathAccessRule;
 import org.eclipse.dltk.internal.core.BuildpathAttribute;
@@ -40,7 +48,9 @@ import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.dltk.internal.core.Model;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.Region;
+import org.eclipse.dltk.internal.core.builder.State;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
+import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
 import org.osgi.framework.BundleContext;
 
@@ -1147,7 +1157,7 @@ public class DLTKCore extends Plugin {
 	
 		if (ModelManager.BP_RESOLVE_VERBOSE){
 			Util.verbose(
-				"CPContainer SET  - setting container\n" + //$NON-NLS-1$
+				"BPContainer SET  - setting container\n" + //$NON-NLS-1$
 				"	container path: " + containerPath + '\n' + //$NON-NLS-1$
 				"	projects: {" +//$NON-NLS-1$
 				org.eclipse.dltk.internal.core.util.Util.toString(
@@ -1220,6 +1230,7 @@ public class DLTKCore extends Plugin {
 			}
 			IBuildpathContainer oldContainer = manager.containerGet(affectedProject, containerPath);
 			if (oldContainer == ModelManager.CONTAINER_INITIALIZATION_IN_PROGRESS) {
+				oldContainer = null;
 			}
 			if (oldContainer != null && oldContainer.equals(respectiveContainers[i])){
 				modifiedProjects[i] = null; // filter out this project - container did not change
@@ -1529,4 +1540,5 @@ public class DLTKCore extends Plugin {
 	public static IRegion newRegion() {
 		return new Region();
 	}
+	
 }

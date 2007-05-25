@@ -24,7 +24,6 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.internal.core.ModelManager;
-import org.eclipse.dltk.internal.core.mixin.MixinIndexer;
 
 /**
  * A SourceIndexer indexes script files using a script parser. The following
@@ -69,11 +68,11 @@ public class SourceIndexer extends AbstractIndexer {
 			}
 			String pkgName = "";
 			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-			ISourceModule sourceModule = null;
+//			ISourceModule sourceModule = null;
 			if (file.exists()) {
 				ISourceModule module = (ISourceModule) DLTKCore.create(file);
 				if (module != null) {
-					sourceModule = module;
+//					sourceModule = module;
 					IScriptFolder folder = (IScriptFolder) module.getParent();
 					pkgName = folder.getElementName();
 				}

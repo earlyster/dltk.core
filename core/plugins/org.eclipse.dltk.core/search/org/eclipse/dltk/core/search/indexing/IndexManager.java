@@ -57,6 +57,7 @@ import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
 
 public class IndexManager extends JobManager implements IIndexConstants {
+	private static final String SPECIAL_MIXIN = "#special#mixin#";
 	public SimpleLookupTable indexLocations = new SimpleLookupTable();
 	/*
 	 * key = an IPath, value = an Index
@@ -604,7 +605,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			// requestingProject);
 			return;
 		}
-		else if( target == null && path.equals(IBuildpathEntry.BUILDIN_EXTERNAL_ENTRY)) {
+		else if( target == null && path.equals(IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY)) {
 			request = new AddBuiltinFolderToIndex(path, requestingProject, this );
 		}
 		// check if the same request is not already in the queue
@@ -673,6 +674,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		if (workspace == null)
 			return;
+
 		Object target = Model.getTarget(workspace.getRoot(), containerPath,
 				true);
 		if (target == null) {
@@ -685,8 +687,9 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		IndexRequest request = null;
 		if (target instanceof IProject) {
 			IProject p = (IProject) target;
-			if (DLTKProject.hasScriptNature(p))
+			if (DLTKProject.hasScriptNature(p)) {
 				request = new IndexAllProject(p, this);
+			}
 		} else if (target instanceof IFolder) {
 			// request = new IndexBinaryFolder((IFolder) target, this);
 			return;
