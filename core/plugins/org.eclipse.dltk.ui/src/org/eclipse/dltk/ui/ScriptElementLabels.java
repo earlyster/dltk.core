@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.BuildpathContainerInitializer;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKProject;
@@ -759,7 +758,7 @@ public class ScriptElementLabels {
 		if (root.isArchive())
 			getArchiveLabel(root, flags, buf);
 		else {
-			if( root.getPath().toString().startsWith(IBuildpathEntry.BUILDIN_EXTERNAL_ENTRY.toString())) {
+			if( root.getPath().toString().startsWith(IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY.toString())) {
 				buf.append(BUILTINS_FRAGMENT);
 			}
 			else if (root.isExternal()) {

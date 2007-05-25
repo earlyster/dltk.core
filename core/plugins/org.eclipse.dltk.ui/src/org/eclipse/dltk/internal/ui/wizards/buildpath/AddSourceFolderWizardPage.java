@@ -38,6 +38,7 @@ import org.eclipse.dltk.core.IDLTKProject;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.corext.util.Messages;
+import org.eclipse.dltk.internal.ui.ResourceComparator;
 import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.internal.ui.wizards.TypedElementSelectionValidator;
@@ -67,9 +68,6 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.ide.dialogs.PathVariableSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.eclipse.ui.views.navigator.ResourceSorter;
-
-
 
 public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	
@@ -699,7 +697,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		dialog.setMessage(message);
 		dialog.addFilter(filter);
 		dialog.setInput(currProject);
-		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		dialog.setSorter(new ResourceComparator(ResourceComparator.NAME));
 		IResource res= currProject.findMember(initialPath);
 		if (res != null) {
 			dialog.setInitialSelection(res);

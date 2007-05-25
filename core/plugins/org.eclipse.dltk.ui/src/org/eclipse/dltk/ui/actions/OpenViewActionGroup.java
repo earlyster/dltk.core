@@ -34,7 +34,7 @@ import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 public class OpenViewActionGroup extends ActionGroup {
 
     private boolean fEditorIsOwner;
-	private boolean fIsTypeHiararchyViewerOwner;
+//	private boolean fIsTypeHiararchyViewerOwner;
     private boolean fIsCallHiararchyViewerOwner;
     
 	private ISelectionProvider fSelectionProvider;
@@ -99,7 +99,7 @@ public class OpenViewActionGroup extends ActionGroup {
 		createSiteActions(part.getSite(), selectionProvider);
 		// we do a name check here to avoid class loading. 
 		String partName= part.getClass().getName();
-		fIsTypeHiararchyViewerOwner= "org.eclipse.dltk.internal.ui.typehierarchy.TypeHierarchyViewPart".equals(partName); //$NON-NLS-1$
+//		fIsTypeHiararchyViewerOwner= "org.eclipse.dltk.internal.ui.typehierarchy.TypeHierarchyViewPart".equals(partName); //$NON-NLS-1$
 		fIsCallHiararchyViewerOwner= "org.eclipse.dltk.internal.ui.callhierarchy.CallHierarchyViewPart".equals(partName); //$NON-NLS-1$
 	}
 	
@@ -142,7 +142,7 @@ public class OpenViewActionGroup extends ActionGroup {
 //		part.setAction("OpenTypeHierarchy", fOpenTypeHierarchy); //$NON-NLS-1$
 		if( !disableCallHierarcy ) {
 			fOpenCallHierarchy= new OpenCallHierarchyAction(part);
-			fOpenCallHierarchy.setActionDefinitionId(IDLTKEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
+			fOpenCallHierarchy.setActionDefinitionId(IScriptEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
 			part.setAction("OpenCallHierarchy", fOpenCallHierarchy); //$NON-NLS-1$
 		}
 
@@ -164,7 +164,7 @@ public class OpenViewActionGroup extends ActionGroup {
 
 		if( !disableCallHierarcy ) {
 			fOpenCallHierarchy= new OpenCallHierarchyAction(site);
-			fOpenCallHierarchy.setActionDefinitionId(IDLTKEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
+			fOpenCallHierarchy.setActionDefinitionId(IScriptEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
 			fOpenCallHierarchy.setSpecialSelectionProvider(specialProvider);
 		}
 

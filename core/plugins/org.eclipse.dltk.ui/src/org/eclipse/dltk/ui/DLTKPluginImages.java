@@ -40,7 +40,7 @@ public class DLTKPluginImages {
 	private static final String T_ELCL = "elcl16"; //$NON-NLS-1$
 	private static final String T_DLCL = "dlcl16"; //$NON-NLS-1$
 	private static final String T_ETOOL = "etool16"; //$NON-NLS-1$
-	private static final String T_EVIEW = "eview16"; //$NON-NLS-1$
+//	private static final String T_EVIEW = "eview16"; //$NON-NLS-1$
 	
 	public static final String TERMINATE_CONSOLE = NAME_PREFIX + "term_sbook.gif"; //$NON-NLS-1$
 	
@@ -145,6 +145,7 @@ public class DLTKPluginImages {
 	public static final ImageDescriptor DESC_OBJS_OUTPUT_FOLDER_ATTRIB = createUnManaged(T_OBJ, "output_folder_attrib.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_SOURCE_ATTACH_ATTRIB = createUnManaged(T_OBJ, "source_attach_attrib.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_JAVADOC_LOCATION_ATTRIB = createUnManaged(T_OBJ, "javadoc_location_attrib.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_INFO_OBJ = createUnManaged(T_OBJ, "info_obj.gif"); //$NON-NLS-1$
 	
 	public static final ImageDescriptor DESC_OBJS_ACCESSRULES_ATTRIB = createManagedFromKey(T_OBJ, IMG_OBJS_ACCESSRULES_ATTRIB);
 	public static final ImageDescriptor DESC_OBJS_NATIVE_LIB_PATH_ATTRIB = createUnManaged(T_OBJ, "native_lib_path_attrib.gif"); //$NON-NLS-1$
@@ -155,6 +156,7 @@ public class DLTKPluginImages {
 	public static final ImageDescriptor DESC_OBJS_TEMPLATE= createManagedFromKey(T_OBJ, IMG_OBJS_TEMPLATE);
 	public static final ImageDescriptor DESC_OVR_ABSTRACT = createUnManaged(T_OVR, "abstract_co.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_RECURSIVE = createUnManaged(T_OVR, "recursive_co.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_CALLER = createUnManaged(T_OVR, "read.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_MAX_LEVEL = createUnManaged(T_OVR, "maxlevel_co.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWCLASS = createUnManaged(T_WIZBAN, "newclass_wiz.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWINT = createUnManaged(T_WIZBAN, "newint_wiz.png"); //$NON-NLS-1$

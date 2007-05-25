@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
@@ -172,8 +173,10 @@ public abstract class ScriptCompletionProposalComputer implements
 		try {
 			IModelElement element = sourceModule.getElementAt(offset);
 			if (element != null) {
-				System.out.println("========= Model element: "
-						+ element.getClass());
+				if (DLTKCore.DEBUG_COMPLETION) {
+					System.out.println("========= Model element: "
+							+ element.getClass());
+				}
 			}
 
 			sourceModule.codeComplete(offset, collector);
@@ -239,37 +242,39 @@ public abstract class ScriptCompletionProposalComputer implements
 
 		return Collections.EMPTY_LIST;
 	}
-
-	// TODO: fix this...
+	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
+		return context.getInvocationOffset();
+	}
 	public List computeContextInformation(
 			ContentAssistInvocationContext context, IProgressMonitor monitor) {//
-		System.out
-				.println("TclTypeCompletionProposalComputer.computeContextInformation()");
-		// if (context instanceof ScriptContentAssistInvocationContext) {
-		// ScriptContentAssistInvocationContext scriptContext=
-		// (ScriptContentAssistInvocationContext) context;
-		//			
-		// int contextInformationPosition=
-		// guessContextInformationPosition(scriptContext);
-		// List result= addContextInformations(scriptContext,
-		// contextInformationPosition, monitor);
-		// return result;
-		// }
-		// return Collections.EMPTY_LIST;
 
-		List types = computeCompletionProposals(context, monitor);
-		Iterator iter = types.iterator();
+		if (context instanceof ScriptContentAssistInvocationContext) {
+			ScriptContentAssistInvocationContext scriptContext = (ScriptContentAssistInvocationContext) context;
 
-		List list = new ArrayList();
-		while (iter.hasNext()) {
-			IScriptCompletionProposal proposal = (IScriptCompletionProposal) iter
-					.next();
-			System.out.println("Proposal: " + proposal + ", info: "
-					+ proposal.getContextInformation());
-			System.out.println(proposal.getClass());
-			list.add(proposal.getContextInformation());
+			int contextInformationPosition = guessContextInformationPosition(scriptContext);
+			List result = addContextInformations(scriptContext,
+					contextInformationPosition, monitor);
+			return result;
 		}
-		return list;
+		return Collections.EMPTY_LIST;
+
+		// List types = computeCompletionProposals(context, monitor);
+		// Iterator iter = types.iterator();
+
+		// List list = new ArrayList();
+		// while (iter.hasNext()) {
+		// Object o = iter
+		// .next();
+		// if( !( o instanceof IScriptCompletionProposal ) ) {
+		// continue;
+		// }
+		// IScriptCompletionProposal proposal = (IScriptCompletionProposal) o;
+		// // System.out.println("Proposal: " + proposal + ", info: "
+		// // + proposal.getContextInformation());
+		// // System.out.println(proposal.getClass());
+		// list.add(proposal.getContextInformation());
+		// }
+		// return list;
 	}
 
 	public String getErrorMessage() {
@@ -284,7 +289,8 @@ public abstract class ScriptCompletionProposalComputer implements
 	}
 
 	// Possible override in subclasses
-	protected TemplateCompletionProcessor createTemplateProposalComputer(ScriptContentAssistInvocationContext context) {
+	protected TemplateCompletionProcessor createTemplateProposalComputer(
+			ScriptContentAssistInvocationContext context) {
 		return null;
 	}
 

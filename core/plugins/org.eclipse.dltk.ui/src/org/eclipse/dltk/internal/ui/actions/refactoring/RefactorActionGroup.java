@@ -25,7 +25,7 @@ import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IContextMenuConstants;
 import org.eclipse.dltk.ui.actions.DLTKActionConstants;
-import org.eclipse.dltk.ui.actions.IDLTKEditorActionDefinitionIds;
+import org.eclipse.dltk.ui.actions.IScriptEditorActionDefinitionIds;
 import org.eclipse.dltk.ui.actions.SelectionDispatchAction;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -42,7 +42,6 @@ import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionFactory;
@@ -153,7 +152,7 @@ public class RefactorActionGroup extends ActionGroup {
 	
 	private final List fActions= new ArrayList();
 	
-	private static final String QUICK_MENU_ID= "org.eclipse.dltk.ui.edit.text.script.refactor.quickMenu"; //$NON-NLS-1$
+//	private static final String QUICK_MENU_ID= "org.eclipse.dltk.ui.edit.text.script.refactor.quickMenu"; //$NON-NLS-1$
 	
 //	private class RefactorQuickAccessAction extends DLTKQuickMenuAction {
 //		public RefactorQuickAccessAction(SourceModuleEditor editor) {
@@ -165,7 +164,7 @@ public class RefactorActionGroup extends ActionGroup {
 //	}
 	
 	//private RefactorQuickAccessAction fQuickAccessAction;
-	private IKeyBindingService fKeyBindingService;
+//	private IKeyBindingService fKeyBindingService;
 
 	private static class NoActionAvailable extends Action {
 		public NoActionAvailable() {
@@ -183,7 +182,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public RefactorActionGroup(IViewPart part) {
-		this(part.getSite(), part.getSite().getKeyBindingService());
+		this(part.getSite());
 		
 		IUndoContext workspaceContext= (IUndoContext)ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class);
 		fUndoRedoActionGroup= new UndoRedoActionGroup(part.getViewSite(), workspaceContext, true);
@@ -197,7 +196,7 @@ public class RefactorActionGroup extends ActionGroup {
 	 * @param page the page that owns this action group
 	 */
 	public RefactorActionGroup(Page page) {
-		this(page.getSite(), null);
+		this(page.getSite());
 	}
 	
 	/**
@@ -217,11 +216,11 @@ public class RefactorActionGroup extends ActionGroup {
 		ISelection selection= provider.getSelection();
 		
 		fRenameAction= new RenameAction(editor);
-		initAction(fRenameAction, selection, IDLTKEditorActionDefinitionIds.RENAME_ELEMENT);
+		initAction(fRenameAction, selection, IScriptEditorActionDefinitionIds.RENAME_ELEMENT);
 		editor.setAction("RenameElement", fRenameAction); //$NON-NLS-1$
 //		
 		fMoveAction= new MoveAction(editor);
-		initAction(fMoveAction, selection, IDLTKEditorActionDefinitionIds.MOVE_ELEMENT);
+		initAction(fMoveAction, selection, IScriptEditorActionDefinitionIds.MOVE_ELEMENT);
 		editor.setAction("MoveElement", fMoveAction); //$NON-NLS-1$
 //				
 //		fModifyParametersAction= new ModifyParametersAction(editor);
@@ -311,7 +310,7 @@ public class RefactorActionGroup extends ActionGroup {
 		stats.endRun();
 	}
 
-	private RefactorActionGroup(IWorkbenchSite site, IKeyBindingService keyBindingService) {
+	private RefactorActionGroup(IWorkbenchSite site/*, IKeyBindingService keyBinding*/) {
 
 		final PerformanceStats stats= PerformanceStats.getStats(PERF_REFACTOR_ACTION_GROUP, this);
 		stats.startRun();
@@ -321,10 +320,10 @@ public class RefactorActionGroup extends ActionGroup {
 		ISelection selection= provider.getSelection();
 		
 		fMoveAction= new MoveAction(site);
-		initUpdatingAction(fMoveAction, provider, selection, IDLTKEditorActionDefinitionIds.MOVE_ELEMENT);
+		initUpdatingAction(fMoveAction, provider, selection, IScriptEditorActionDefinitionIds.MOVE_ELEMENT);
 //		
 		fRenameAction= new RenameAction(site);
-		initUpdatingAction(fRenameAction, provider, selection, IDLTKEditorActionDefinitionIds.RENAME_ELEMENT);
+		initUpdatingAction(fRenameAction, provider, selection, IScriptEditorActionDefinitionIds.RENAME_ELEMENT);
 //		
 //		fModifyParametersAction= new ModifyParametersAction(fSite);
 //		initUpdatingAction(fModifyParametersAction, provider, selection, IScriptEditorActionDefinitionIds.MODIFY_METHOD_PARAMETERS);
@@ -600,31 +599,31 @@ public class RefactorActionGroup extends ActionGroup {
 			getDocument(fEditor.getEditorInput());
 	}
 	
-	private void fillQuickMenu(IMenuManager menu) {
-		if (fEditor != null) {
-			IModelElement element= SelectionConverter.getInput(fEditor);
-			if (element == null || !ActionUtil.isOnBuildPath(element)) {
-				menu.add(fNoActionAvailable);
-				return;
-			}
-			ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
-			ModelTextSelection javaSelection= new ModelTextSelection(
-				getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
-			
-			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
-				((SelectionDispatchAction)iter.next()).update(javaSelection);
-			}
-			fillRefactorMenu(menu);
-			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
-				((SelectionDispatchAction)iter.next()).update(textSelection);
-			}
-			
-		} else {
-			ISelection selection= fSite.getSelectionProvider().getSelection();
-			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
-				((SelectionDispatchAction)iter.next()).update(selection);
-			}
-			fillRefactorMenu(menu);
-		}
-	}
+//	private void fillQuickMenu(IMenuManager menu) {
+//		if (fEditor != null) {
+//			IModelElement element= SelectionConverter.getInput(fEditor);
+//			if (element == null || !ActionUtil.isOnBuildPath(element)) {
+//				menu.add(fNoActionAvailable);
+//				return;
+//			}
+//			ITextSelection textSelection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
+//			ModelTextSelection javaSelection= new ModelTextSelection(
+//				getEditorInput(), getDocument(), textSelection.getOffset(), textSelection.getLength());
+//			
+//			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
+//				((SelectionDispatchAction)iter.next()).update(javaSelection);
+//			}
+//			fillRefactorMenu(menu);
+//			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
+//				((SelectionDispatchAction)iter.next()).update(textSelection);
+//			}
+//			
+//		} else {
+//			ISelection selection= fSite.getSelectionProvider().getSelection();
+//			for (Iterator iter= fActions.iterator(); iter.hasNext(); ) {
+//				((SelectionDispatchAction)iter.next()).update(selection);
+//			}
+//			fillRefactorMenu(menu);
+//		}
+//	}
 }

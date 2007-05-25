@@ -40,6 +40,7 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.corext.util.Messages;
+import org.eclipse.dltk.internal.ui.ResourceComparator;
 import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.util.CoreUtility;
@@ -68,9 +69,6 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.eclipse.ui.views.navigator.ResourceSorter;
-
-
 
 public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		
@@ -456,7 +454,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		}
 		monitor.beginTask(NewWizardMessages.NewSourceFolderWizardPage_operation, 3); 
 		try {
-			IPath projPath= fCurrJProject.getProject().getFullPath();			
+//			IPath projPath= fCurrJProject.getProject().getFullPath();			
 			
 			String relPath= fRootDialogField.getText();
 				
@@ -494,7 +492,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		dialog.setMessage(message);
 		dialog.addFilter(filter);
 		dialog.setInput(currProject);
-		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		dialog.setSorter(new ResourceComparator(ResourceComparator.NAME));
 		IResource res= currProject.findMember(initialPath);
 		if (res != null) {
 			dialog.setInitialSelection(res);

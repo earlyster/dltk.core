@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.dltk.internal.ui.ResourceComparator;
 import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -42,7 +43,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.dialogs.NewFolderDialog;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
-import org.eclipse.ui.views.navigator.ResourceSorter;
 
 
 /**
@@ -183,7 +183,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 			}
 		});
 
-		fViewer.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		fViewer.setComparator(new ResourceComparator(ResourceComparator.NAME));
 		if (fFilters != null) {
 			for (int i = 0; i != fFilters.size(); i++)
 				fViewer.addFilter((ViewerFilter) fFilters.get(i));

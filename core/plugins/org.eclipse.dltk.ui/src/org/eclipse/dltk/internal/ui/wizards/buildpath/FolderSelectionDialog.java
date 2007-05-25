@@ -11,6 +11,7 @@ package org.eclipse.dltk.internal.ui.wizards.buildpath;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.internal.ui.ResourceComparator;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -29,7 +30,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.NewFolderDialog;
-import org.eclipse.ui.views.navigator.ResourceSorter;
 
 
 /**
@@ -41,7 +41,7 @@ public class FolderSelectionDialog extends ElementTreeSelectionDialog implements
 
 	public FolderSelectionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider) {
 		super(parent, labelProvider, contentProvider);
-		setSorter(new ResourceSorter(ResourceSorter.NAME));
+		setSorter(new ResourceComparator(ResourceComparator.NAME));
 	}
 
 	/* (non-Javadoc)

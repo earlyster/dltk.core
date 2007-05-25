@@ -36,6 +36,7 @@ import org.eclipse.dltk.core.IDLTKProject;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.corext.util.Messages;
+import org.eclipse.dltk.internal.ui.ResourceComparator;
 import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.internal.ui.util.CoreUtility;
@@ -89,7 +90,6 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
-import org.eclipse.ui.views.navigator.ResourceSorter;
 
 
 public abstract class BuildpathsBlock {
@@ -581,7 +581,7 @@ public abstract class BuildpathsBlock {
 			IProject project = javaProject.getProject();
 			IPath projPath = project.getFullPath();
 			monitor.worked(1);
-			IWorkspaceRoot fWorkspaceRoot = DLTKUIPlugin.getWorkspace().getRoot();
+//			IWorkspaceRoot fWorkspaceRoot = DLTKUIPlugin.getWorkspace().getRoot();
 			// create and set the output path first
 			monitor.worked(1);
 			if (monitor.isCanceled()) {
@@ -747,7 +747,7 @@ public abstract class BuildpathsBlock {
 		dialog.addFilter(filter);
 		dialog.setInput(fWorkspaceRoot);
 		dialog.setInitialSelection(initSelection);
-		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		dialog.setSorter(new ResourceComparator(ResourceComparator.NAME));
 		if (dialog.open() == Window.OK) {
 			return (IContainer) dialog.getFirstResult();
 		}

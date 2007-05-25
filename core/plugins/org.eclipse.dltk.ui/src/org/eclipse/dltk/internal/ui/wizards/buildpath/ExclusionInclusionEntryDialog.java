@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.internal.corext.util.Messages;
+import org.eclipse.dltk.internal.ui.ResourceComparator;
 import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.internal.ui.wizards.TypedElementSelectionValidator;
@@ -45,7 +46,6 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.eclipse.ui.views.navigator.ResourceSorter;
 
 
 public class ExclusionInclusionEntryDialog extends StatusDialog {
@@ -261,7 +261,7 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 		dialog.addFilter(filter);
 		dialog.setInput(currentSourceFolder);
 		dialog.setInitialSelection(initialElement);
-		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		dialog.setSorter(new ResourceComparator(ResourceComparator.NAME));
 		dialog.setHelpAvailable(false);
 		
 		if (dialog.open() == Window.OK) {

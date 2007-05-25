@@ -31,7 +31,6 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenWithMenu;
 
-
 /**
  * Action group that adds the actions opening a new editor to the context menu
  * and the action bar's navigate menu.
@@ -53,7 +52,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 	public OpenEditorActionGroup(IViewPart part) {
 		fSite = part.getSite();
 		fOpen = new OpenAction(fSite);
-		fOpen.setActionDefinitionId(IDLTKEditorActionDefinitionIds.OPEN_EDITOR);
+		fOpen.setActionDefinitionId(IScriptEditorActionDefinitionIds.OPEN_EDITOR);
 		initialize(fSite.getSelectionProvider());
 	}
 
@@ -67,7 +66,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 	public OpenEditorActionGroup(ScriptEditor editor) {
 		fIsEditorOwner = true;
 		fOpen = new OpenAction(editor);
-		fOpen.setActionDefinitionId(IDLTKEditorActionDefinitionIds.OPEN_EDITOR);
+		fOpen.setActionDefinitionId(IScriptEditorActionDefinitionIds.OPEN_EDITOR);
 		editor.setAction("OpenEditor", fOpen); //$NON-NLS-1$
 		fSite = editor.getEditorSite();
 		initialize(fSite.getSelectionProvider());

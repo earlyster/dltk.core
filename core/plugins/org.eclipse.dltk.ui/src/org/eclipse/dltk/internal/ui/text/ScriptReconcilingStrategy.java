@@ -53,6 +53,9 @@ public class ScriptReconcilingStrategy implements IReconcilingStrategy,
 				.getSourceModuleDocumentProvider();
 		
 		fIsScriptReconcilingListener= fEditor instanceof IScriptReconcilingListener;
+		if (fIsScriptReconcilingListener){
+			fJavaReconcilingListener=(IScriptReconcilingListener) fEditor;	
+		}
 	}
 	
 	private IProblemRequestorExtension getProblemRequestorExtension() {
@@ -125,7 +128,9 @@ public class ScriptReconcilingStrategy implements IReconcilingStrategy,
 	}
 
 	public void aboutToBeReconciled() {
-
+		if (fIsScriptReconcilingListener) {
+			fJavaReconcilingListener.aboutToBeReconciled();
+		}
 	}
 
 	public void setDocument(IDocument document) {
@@ -146,5 +151,8 @@ public class ScriptReconcilingStrategy implements IReconcilingStrategy,
 
 	public void initialReconcile() {
 		reconcile(true);
+	}
+	public void notifyListeners(boolean notify) {
+		fNotify= notify;
 	}
 }
