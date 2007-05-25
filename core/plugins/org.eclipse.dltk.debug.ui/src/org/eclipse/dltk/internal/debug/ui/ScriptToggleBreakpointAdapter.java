@@ -17,7 +17,7 @@ import org.eclipse.debug.core.model.ILineBreakpoint;
 import org.eclipse.debug.ui.actions.IToggleBreakpointsTarget;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.internal.core.model.ScriptModelConstants;
-import org.eclipse.dltk.debug.ui.BreakpointUtils;
+import org.eclipse.dltk.debug.ui.breakpoints.BreakpointUtils;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IRegion;
@@ -26,7 +26,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-public class DltkToggleBreakpointAdapter implements IToggleBreakpointsTarget {
+public class ScriptToggleBreakpointAdapter implements IToggleBreakpointsTarget {
 	
 	protected ITextEditor getPartEditor(IWorkbenchPart part) {
 		if (part instanceof ITextEditor) {
@@ -47,7 +47,7 @@ public class DltkToggleBreakpointAdapter implements IToggleBreakpointsTarget {
 		return null;
 	}
 
-	public DltkToggleBreakpointAdapter() {
+	public ScriptToggleBreakpointAdapter() {
 
 	}
 

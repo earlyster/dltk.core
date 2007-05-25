@@ -39,6 +39,10 @@ import org.eclipse.ui.part.FileEditorInput;
 
 public abstract class ScriptDebugModelPresentation extends LabelProvider
 		implements IDebugModelPresentation {
+
+	private static final String SUSPENDED_LABEL = "suspended";
+	private static final String RUNNING_LABEL = "running";
+
 	public static class ExternalFileEditorInput implements IPathEditorInput,
 			ILocationProvider {
 		private File file;
@@ -110,6 +114,15 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 	}
 
 	protected String getThreadText(IScriptThread thread) {
+		try {
+			return thread.getName() + " ("
+					+ (thread.isSuspended() ? SUSPENDED_LABEL : RUNNING_LABEL)
+					+ ")";
+
+		} catch (DebugException e) {
+			DLTKDebugUIPlugin.log(e);
+		}
+
 		return thread.toString();
 	}
 
@@ -118,15 +131,37 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 			return stackFrame.getName();
 		} catch (DebugException e) {
 			DLTKDebugUIPlugin.log(e);
-			return stackFrame.toString();
 		}
+
+		return stackFrame.toString();
 	}
 
 	public String getVariableText(IScriptVariable variable) {
+		try {
+			String name = variable.getName();
+
+			if (!variable.hasChildren()) {
+				String value = variable.getValueString();
+				if (value != null && value.length() > 0) {
+					return name + " = " + value;
+				}
+			}
+
+			return name;
+		} catch (DebugException e) {
+			DLTKDebugUIPlugin.log(e);
+		}
+
 		return variable.toString();
 	}
 
 	protected String getValueText(IScriptValue value) {
+		try {
+			return value.getValueString();
+		} catch (DebugException e) {
+			DLTKDebugUIPlugin.log(e);
+		}
+
 		return value.toString();
 	}
 
@@ -138,10 +173,35 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 						+ "]";
 			}
 		} catch (CoreException e) {
-			// Nothing to do
+			DLTKDebugUIPlugin.log(e);
 		}
 
 		return breakpoint.toString();
+	}
+
+	protected String getWatchExpressionText(IWatchExpression expression) {
+		String text = expression.getExpressionText() + " = Error!";
+		try {
+			if (!expression.hasErrors()) {
+				text = expression.getExpressionText();
+				IScriptValue value = (IScriptValue) expression.getValue();
+				if (value != null) {
+					if (value.hasVariables()) {
+						text += " = " + value.getReferenceTypeName();
+						String id = value.getReferenceId();
+						if (id != null) {
+							text += " (id = " + id + ")";
+						}
+					} else {
+						text += " = " + value.getValueString();
+					}
+				}
+			}
+		} catch (DebugException e) {
+			DLTKDebugUIPlugin.log(e);
+		}
+
+		return text;
 	}
 
 	public final String getText(Object element) {
@@ -155,21 +215,23 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 			return getVariableText((IScriptVariable) element);
 		} else if (element instanceof IScriptValue) {
 			return getValueText((IScriptValue) element);
-		}
-		else if (element instanceof IWatchExpression){
-			IWatchExpression exp=(IWatchExpression) element;
-			return exp.getExpressionText();
+		} else if (element instanceof IWatchExpression) {
+			return getWatchExpressionText((IWatchExpression) element);
 		}
 
 		return element.toString();
 	}
 
 	public void computeDetail(IValue value, IValueDetailListener listener) {
-		String detail = "";
+		String detail = "Can't compute detail";
 		try {
-			detail = value.getValueString();
+			if (value.hasVariables()) {
+				detail = value.getReferenceTypeName();
+			} else {
+				detail = value.getValueString();
+			}			
 		} catch (DebugException e) {
-			// Nothing to do
+			DLTKDebugUIPlugin.log(e);
 		}
 		listener.detailComputed(value, detail);
 	}

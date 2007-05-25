@@ -43,7 +43,7 @@
                class="org.eclipse.dltk.debug.ui.actions.EntryToggleAction"
                menubarPath="emptyBreakpointGroup"
                enablesFor="+"
-               id="org.eclipse.jdt.debug.ui.actions.EntryToggle">
+               id="org.eclipse.dltk.debug.ui.actions.EntryToggle">
          </action>
          <action
                label="%exitAction.label"
@@ -52,7 +52,7 @@
                class="org.eclipse.dltk.debug.ui.actions.ExitToggleAction"
                menubarPath="emptyBreakpointGroup"
                enablesFor="+"
-               id="org.eclipse.jdt.debug.ui.actions.ExitToggle">
+               id="org.eclipse.dltk.debug.ui.actions.ExitToggle">
          </action>
       </objectContribution>
       <objectContribution
@@ -60,10 +60,9 @@
             id="org.eclipse.dltk.debug.ScriptBreakpointActions">                
          <action
                class="org.eclipse.dltk.debug.ui.actions.ScriptBreakpointPropertiesAction"
-               definitionId="org.eclipse.jdt.debug.ui.breakpoint.properties"
                enablesFor="1"
                helpContextId="breakpoint_properties_action_context"
-               id="org.eclipse.jdt.debug.ui.actions.JavaBreakpointProperties"
+               id="org.eclipse.dltk.debug.ui.actions.ScriptBreakpointProperties"
                label="%ScriptBreakpointProperties.label"
                menubarPath="additions">
          </action>
@@ -96,30 +95,50 @@
                label="%RunMenu.label"
                path="additions"
                id="org.eclipse.ui.run">
-            <separator
-                  name="dltkGroup">
+            <separator 
+            	name="dltkGroup">
             </separator>
-         </menu>  
+         </menu>
+                 
+         <action
+               class="org.eclipse.dltk.internal.debug.ui.actions.WatchAction"
+               enablesFor="+"
+               id="org.eclipse.dltk.debug.ui.Watch"
+               label="Watch!!!!"
+               menubarPath="org.eclipse.ui.run/dltkGroup">           
+         </action>
        </actionSet>
  </extension>
  <extension
        point="org.eclipse.ui.propertyPages">
+    <!-- Eclipse 3.3 fix -->
     <page
-          class="org.eclipse.dltk.debug.ui.ScriptBreakpointPropertyPage"
+          class="org.eclipse.dltk.debug.ui.breakpoints.ScriptBreakpointPropertyPage"
           id="org.eclipse.dltk.debug.ui.ScriptBreakpointPropertyPage"
-          name="Breakpoint properties"
-          objectClass="org.eclipse.dltk.debug.core.model.IScriptBreakpoint"/>
+          name="Breakpoint properties">
+          <enabledWhen>
+            <or>
+               <instanceof
+                     value="org.eclipse.dltk.debug.core.model.IScriptBreakpoint">
+               </instanceof>
+               <adapt
+                     type="org.eclipse.dltk.debug.core.model.IScriptBreakpoint">
+               </adapt>
+            </or>
+         </enabledWhen>
+    </page>
  </extension>
  
     <extension
          point="org.eclipse.ui.contexts">
       <context
-            name="DLTK Debugging"
-            description="DLTK Debugging description"
+            name="%DebuggingScriptContext.label"
+            description="%DebuggingScriptContext.description"
             id="org.eclipse.dltk.debug.ui.debugging"
             parentId="org.eclipse.debug.ui.debugging">
       </context>
    </extension>
+   
  <extension
        point="org.eclipse.ui.perspectiveExtensions">
     <perspectiveExtension targetID="org.eclipse.debug.ui.DebugPerspective">
@@ -136,25 +155,25 @@
  <extension
        point="org.eclipse.debug.core.statusHandlers">
     <statusHandler
-          class="org.eclipse.dltk.internal.debug.ui.DbgpServiceNotAvailableStatusHandler"
+          class="org.eclipse.dltk.internal.debug.ui.handlers.DbgpServiceNotAvailableStatusHandler"
           code="200"
           id="org.eclipse.dltk.internal.debug.ui.DbgpServiceNotAvailableStatusHandler"
           plugin="org.eclipse.dltk.launching">
     </statusHandler>
     <statusHandler
-          class="org.eclipse.dltk.internal.debug.ui.DebuggingEngineNotStartedStatusHandler"
+          class="org.eclipse.dltk.internal.debug.ui.handlers.DebuggingEngineNotStartedStatusHandler"
           code="201"
           id="org.eclipse.dltk.internal.debug.ui.DebuggingEngineNotStartedStatusHandler"
           plugin="org.eclipse.dltk.launching">
     </statusHandler>
     <statusHandler
-          class="org.eclipse.dltk.internal.debug.ui.DebuggingEngineNotConnectedStatusHandler"
+          class="org.eclipse.dltk.internal.debug.ui.handlers.DebuggingEngineNotConnectedStatusHandler"
           code="202"
           id="org.eclipse.dltk.internal.debug.ui.DebuggingEngineNotConnectedStatusHandler"
           plugin="org.eclipse.dltk.launching">
     </statusHandler>    
     <statusHandler
-            class="org.eclipse.dltk.internal.debug.ui.NoDefaultInterpreterStatusHandler"
+            class="org.eclipse.dltk.internal.debug.ui.handlers.NoDefaultInterpreterStatusHandler"
             code="167"
             id="org.eclipse.dltk.internal.debug.ui.NoDefaultInterpreterStatusHandler"
             plugin="org.eclipse.dltk.launching">
@@ -164,10 +183,48 @@
        point="org.eclipse.ui.preferencePages">
     <page
           category="org.eclipse.dltk.preferences"
-          class="org.eclipse.dltk.debug.ui.preferences.DebuggingPreferences"
+          class="org.eclipse.dltk.debug.ui.preferences.ScriptDebugPreferencePage"
           id="org.eclipse.dltk.preferences.debug"
           name="Debugging">
     </page>
  </extension>
- 
-</plugin>
+ <extension
+       point="org.eclipse.ui.views">
+    <view
+          class="org.eclipse.dltk.internal.debug.ui.ScriptDebugLogView"
+          id="org.eclipse.dltk.debug.ui.dbgpLogView"
+          name="Script Debug Log">
+    </view>
+ </extension>
+   
+   <extension
+         point="org.eclipse.ui.viewActions">
+         
+         <viewContribution
+            targetID="org.eclipse.debug.ui.VariableView"
+            id="org.eclipse.dltk.debug.ui.VariableViewActions">
+         <action
+               class="org.eclipse.dltk.debug.ui.ToggleShowGlobalVariablesActionDelegate"
+               id="org.eclipse.dltk.debug.ui.variableViewActions.ShowStatic"
+               label="%ShowGlobalVarsAction.label"
+               menubarPath="org.eclipse.dltk.debug.ui.VariableView.scriptSubmenu/scriptPart"
+               style="toggle"
+               tooltip="%ShowGlobalVarsAction.tooltip">
+         </action>
+         <action
+               class="org.eclipse.dltk.debug.ui.ToggleShowClassVariablesActionDelegate"
+               id="org.eclipse.dltk.debug.ui.variableViewActions.ShowStatic"
+               label="%ShowClassVarsAction.label"
+               menubarPath="org.eclipse.dltk.debug.ui.VariableView.scriptSubmenu/scriptPart"
+               style="toggle"
+               tooltip="%ShowClasssVarsAction.tooltip">
+         </action>
+         <menu
+               id="org.eclipse.dltk.debug.ui.VariableView.scriptSubmenu"
+               label="%VariablesViewScriptSubmenu.label"
+               path="scriptActions">
+            <groupMarker name="org.eclipse.dltk.debug.ui.scriptPart"/>
+         </menu>
+      </viewContribution>
+   </extension>
+  </plugin>

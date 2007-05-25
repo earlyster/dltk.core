@@ -26,9 +26,10 @@ import org.eclipse.dltk.debug.ui.messages.DLTKLaunchConfigurationsMessages;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.ui.DLTKUIStatus;
+import org.eclipse.dltk.internal.ui.ResourceComparator;
 import org.eclipse.dltk.launching.IDLTKLaunchConfigurationConstants;
+import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
-import org.eclipse.dltk.ui.viewsupport.ScriptUILabelProvider;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -52,7 +53,6 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.eclipse.ui.views.navigator.ResourceSorter;
 
 
 public abstract class MainLaunchConfigurationTab extends AbstractLaunchConfigurationTab {
@@ -98,7 +98,7 @@ public abstract class MainLaunchConfigurationTab extends AbstractLaunchConfigura
 	 * @return
 	 */
 	private IDLTKProject chooseProject() {
-		ILabelProvider labelProvider = new ScriptUILabelProvider();
+		ILabelProvider labelProvider = DLTKUILanguageManager.createLabelProvider(getNatureID());
 		ElementListSelectionDialog dialog = new ElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setTitle(DLTKLaunchConfigurationsMessages.mainTab_chooseProject_title);
 		dialog.setMessage(DLTKLaunchConfigurationsMessages.mainTab_chooseProject_message);
@@ -174,6 +174,7 @@ public abstract class MainLaunchConfigurationTab extends AbstractLaunchConfigura
 	protected abstract boolean validateProject(IDLTKProject project);
 
 	protected abstract String getLanguageName();
+	protected abstract String getNatureID();
 
 	/**
 	 * Show a dialog that lets the user select a project. This in turn provides
@@ -237,7 +238,7 @@ public abstract class MainLaunchConfigurationTab extends AbstractLaunchConfigura
 	 * @param config
 	 *            the configuration we are editing
 	 */
-	private void updateProjectFromConfig(ILaunchConfiguration config) {
+	protected void updateProjectFromConfig(ILaunchConfiguration config) {
 		String projectName = EMPTY_STRING;
 		try {
 			projectName = config.getAttribute(IDLTKLaunchConfigurationConstants.ATTR_PROJECT_NAME, EMPTY_STRING);
@@ -297,7 +298,7 @@ public abstract class MainLaunchConfigurationTab extends AbstractLaunchConfigura
 		if (proj == null)
 			return;
 		dialog.setInput(proj.getProject());
-		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		dialog.setSorter(new ResourceComparator(ResourceComparator.NAME));
 		if (dialog.open() == IDialogConstants.OK_ID) {
 			IResource resource = (IResource) dialog.getFirstResult();
 			String arg = resource.getProjectRelativePath().toPortableString();

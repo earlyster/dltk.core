@@ -430,8 +430,7 @@ public abstract class ScriptDebugHover implements IScriptEditorTextHover,
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				return new DefaultInformationControl(parent, SWT.NONE,
-						new HTMLTextPresenter(true), /*EditorsUI
-								.getTooltipAffordanceString()*/null);
+						new HTMLTextPresenter(true), null);
 			}
 		};
 	}
