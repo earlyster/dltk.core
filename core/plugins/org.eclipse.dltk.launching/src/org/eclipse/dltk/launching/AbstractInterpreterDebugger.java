@@ -13,7 +13,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.IDbgpService;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
@@ -22,7 +21,7 @@ import org.eclipse.dltk.debug.internal.core.model.ScriptDebugTarget;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 
 public abstract class AbstractInterpreterDebugger extends AbstractInterpreterRunner {
-	private static final boolean DEBUG = DLTKCore.DEBUG;
+//	private static final boolean DEBUG = DLTKCore.DEBUG;
 
 	protected static final int DEFAULT_WAITING_TIMEOUT = 1000 * 1000;
 
@@ -82,11 +81,7 @@ public abstract class AbstractInterpreterDebugger extends AbstractInterpreterRun
 			sessionId = generateSessionId();
 		}
 
-		// RubyDebugTarget target = new RubyDebugTarget(launch, null, sessionId,
-		// dbgpService);
-		// launch.addDebugTarget(target);
-
-		IScriptDebugTarget target = new ScriptDebugTarget(getDebugModelIdentidier(), dbgpService, sessionId, launch, null);
+		IScriptDebugTarget target =  new ScriptDebugTarget(getDebugModelIdentidier(), dbgpService, sessionId, launch, null);
 		launch.addDebugTarget(target);
 
 		return sessionId;
@@ -113,9 +108,6 @@ public abstract class AbstractInterpreterDebugger extends AbstractInterpreterRun
 		final String sessionId = addDebugTarget(launch, config, dbgpService);
 		final int port = dbgpService.getPort();
 
-		//System.out.println("Session id: " + sessionId);
-		//System.out.println("Port: " + port);
-
 		try {
 			boolean remoteDebugging = config.getAttribute(IDLTKLaunchConfigurationConstants.ATTR_DLTK_DBGP_REMOTE, false);
 
@@ -123,10 +115,6 @@ public abstract class AbstractInterpreterDebugger extends AbstractInterpreterRun
 			final String host = "127.0.0.1";
 
 			final String[] commandLine = getCommandLine(sessionId, host, port, configuration);
-
-			// if (DEBUG) {
-			System.out.println(renderCommandLine(commandLine));
-			// }
 
 			if (!remoteDebugging) {
 				// Start local debugging engine

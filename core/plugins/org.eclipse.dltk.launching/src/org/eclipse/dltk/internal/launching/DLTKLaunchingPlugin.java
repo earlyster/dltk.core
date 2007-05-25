@@ -11,6 +11,7 @@ package org.eclipse.dltk.internal.launching;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -50,6 +51,7 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKProject;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallChangedListener;
+import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.IRuntimeBuildpathEntry2;
 import org.eclipse.dltk.launching.InterpreterStandin;
 import org.eclipse.dltk.launching.LaunchingMessages;
@@ -280,6 +282,25 @@ public class DLTKLaunchingPlugin extends Plugin implements
 		// IResourceChangeEvent.PRE_BUILD);
 		// DebugPlugin.getDefault().getLaunchManager().addLaunchListener(this);
 		// DebugPlugin.getDefault().addDebugEventListener(this);
+		
+		// prefetch library locations
+		Job libPrefetch = new Job("Inializing DLTK launching") {
+
+			protected IStatus run(IProgressMonitor monitor) {
+				IInterpreterInstallType[] installTypes = ScriptRuntime.getInterpreterInstallTypes();				
+				for (int i = 0; i < installTypes.length; i++) {
+					IInterpreterInstall[] installs = installTypes[i].getInterpreterInstalls();
+					for (int j = 0; j < installs.length; j++) {
+						File path = installs[j].getInstallLocation();
+						installTypes[i].getDefaultLibraryLocations(path);			
+					}					
+				}
+				return Status.OK_STATUS;
+			}
+			
+		};
+		libPrefetch.setSystem(true);
+		libPrefetch.schedule();
 	}
 
 	/**
