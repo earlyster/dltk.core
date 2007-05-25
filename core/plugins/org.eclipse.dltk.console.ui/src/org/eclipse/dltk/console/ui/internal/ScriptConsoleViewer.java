@@ -113,7 +113,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 			processResult(handler.handleCommand(command));
 
 		}
-		
+
 		protected void processResult(final String result)
 				throws BadLocationException {
 			if (result != null) {
