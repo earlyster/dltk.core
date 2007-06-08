@@ -8,12 +8,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.dltk.debug.core.eval.IScriptEvaluationEngine;
+import org.eclipse.dltk.debug.core.eval.IScriptEvaluationListener;
+import org.eclipse.dltk.debug.core.eval.IScriptEvaluationResult;
 import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
-import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptValue;
 import org.eclipse.dltk.debug.core.model.IScriptVariable;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
@@ -49,16 +50,17 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-public class CommonEvaluationAction implements IWorkbenchWindowActionDelegate,
+public class ScriptEvaluationAction implements IWorkbenchWindowActionDelegate,
 		IObjectActionDelegate, IPartListener, IScriptEvaluationListener {
-	
+
 	private static class ObjectResolver {
 		private IWorkbenchPart part;
 		private IRegion region;
-		
+
 		protected static ISelection getSelection(IWorkbenchPart part) {
 			if (part != null) {
-				ISelectionProvider provider = part.getSite().getSelectionProvider();
+				ISelectionProvider provider = part.getSite()
+						.getSelectionProvider();
 				if (provider != null) {
 					return provider.getSelection();
 				}
@@ -66,36 +68,40 @@ public class CommonEvaluationAction implements IWorkbenchWindowActionDelegate,
 
 			return null;
 		}
-				
+
 		protected static boolean textHasContent(String text) {
 			if (text != null) {
-				int length= text.length();
+				int length = text.length();
 				if (length > 0) {
-					for (int i= 0; i < length; i++) {
+					for (int i = 0; i < length; i++) {
 						if (Character.isLetterOrDigit(text.charAt(i))) {
 							return true;
 						}
 					}
 				}
 			}
-			
+
 			return false;
 		}
-		
+
 		protected Object resolveTextSelection(ITextSelection selection) {
 			String text = selection.getText();
 			if (textHasContent(text)) {
-				region = new Region(selection.getOffset(), selection.getLength());
+				region = new Region(selection.getOffset(), selection
+						.getLength());
 				return text;
 			} else if (part instanceof IEditorPart) {
 				IEditorPart editor = (IEditorPart) part;
 				if (editor instanceof ITextEditor) {
 					ITextEditor textEditor = (ITextEditor) editor;
-					IDocument doc = textEditor.getDocumentProvider().getDocument(editor.getEditorInput());
-					region = ScriptWordFinder.findWord(doc, selection.getOffset());
+					IDocument doc = textEditor.getDocumentProvider()
+							.getDocument(editor.getEditorInput());
+					region = ScriptWordFinder.findWord(doc, selection
+							.getOffset());
 					if (region != null) {
 						try {
-							return doc.get(region.getOffset(), region.getLength());
+							return doc.get(region.getOffset(), region
+									.getLength());
 						} catch (BadLocationException e) {
 						}
 					}
@@ -104,17 +110,18 @@ public class CommonEvaluationAction implements IWorkbenchWindowActionDelegate,
 
 			return null;
 		}
-		
-		protected Object resolveStructuredSelection(IStructuredSelection selection) {
+
+		protected Object resolveStructuredSelection(
+				IStructuredSelection selection) {
 			if (!selection.isEmpty()) {
 				if (part.getSite().getId().equals(
 						IDebugUIConstants.ID_DEBUG_VIEW)) {
 					IEditorPart editor = part.getSite().getPage()
 							.getActiveEditor();
-					
-					ISelection newSelection = getSelection(editor);					
+
+					ISelection newSelection = getSelection(editor);
 					if (newSelection instanceof ITextSelection) {
-						return resolveTextSelection((ITextSelection)newSelection);
+						return resolveTextSelection((ITextSelection) newSelection);
 					}
 				} else {
 					Iterator elements = selection.iterator();
@@ -128,53 +135,46 @@ public class CommonEvaluationAction implements IWorkbenchWindowActionDelegate,
 					return selection;
 				}
 			}
-			
+
 			return null;
 		}
-		
+
 		public ObjectResolver(IWorkbenchPart part) {
 			this.part = part;
 		}
 
 		public Object resolveSelectedObject() {
 			ISelection selection = getSelection(part);
-			
+
 			if (selection instanceof ITextSelection) {
 				return resolveTextSelection((ITextSelection) selection);
 			} else if (selection instanceof IStructuredSelection) {
 				return resolveStructuredSelection((IStructuredSelection) selection);
 			}
-			
+
 			return null;
 		}
-		
+
 		public IRegion getRegion() {
 			return region;
 		}
 	}
-
 
 	private IWorkbenchWindow window;
 	private IWorkbenchPart part;
 	private IAction action;
 	private Object selectedObject;
 	private boolean evaluation;
-	
-	private IDebugModelPresentation presentation;
-	
-	protected IDebugModelPresentation getDebugModelPresentation() {
-		if (presentation == null) {
-			presentation = DebugUITools.newDebugModelPresentation("TODO"); // TODO:
-		}
-		
-		return presentation;
+
+	protected static IDebugModelPresentation getDebugModelPresentation(String identifier) {
+			return DebugUITools.newDebugModelPresentation(identifier);
 	}
-	
-	private void disposeDebugModelPresentation() {
+
+	/*private void disposeDebugModelPresentation() {
 		if (presentation != null) {
 			presentation.dispose();
 		}
-	}
+	}*/
 
 	private void setWindow(IWorkbenchWindow window) {
 		this.window = window;
@@ -208,21 +208,18 @@ public class CommonEvaluationAction implements IWorkbenchWindowActionDelegate,
 		return this.selectedObject;
 	}
 
-	private void  setEvaluating(boolean evaluation) {
+	private void setEvaluating(boolean evaluation) {
 		this.evaluation = evaluation;
 	}
-	
-	private boolean isEvaluating() {
+
+	protected boolean isEvaluating() {
 		return this.evaluation;
 	}
-	
+
 	protected void evaluationCleanup() {
 		setEvaluating(false);
-		//setTargetPart(fNewTargetPart);
+		// setTargetPart(fNewTargetPart);
 	}
-	
-	
-	
 
 	// IWorkbenchWindowActionDelegate
 	public void init(IWorkbenchWindow window) {
@@ -238,7 +235,7 @@ public class CommonEvaluationAction implements IWorkbenchWindowActionDelegate,
 	}
 
 	public void dispose() {
-		disposeDebugModelPresentation();
+		//disposeDebugModelPresentation();
 
 		IWorkbenchWindow window = getWindow();
 		if (window != null) {
@@ -295,29 +292,31 @@ public class CommonEvaluationAction implements IWorkbenchWindowActionDelegate,
 			setSelectedObject(or.resolveSelectedObject());
 		}
 	}
-	
+
 	protected void showExpressionView() {
-		if (getPart().getSite().getId().equals(IDebugUIConstants.ID_EXPRESSION_VIEW)) {
+		if (getPart().getSite().getId().equals(
+				IDebugUIConstants.ID_EXPRESSION_VIEW)) {
 			return;
 		}
-		
+
 		IWorkbenchPage page = DLTKDebugUIPlugin.getActivePage();
 		if (page != null) {
-			IViewPart part = page.findView(IDebugUIConstants.ID_EXPRESSION_VIEW);
+			IViewPart part = page
+					.findView(IDebugUIConstants.ID_EXPRESSION_VIEW);
 			if (part == null) {
 				try {
 					page.showView(IDebugUIConstants.ID_EXPRESSION_VIEW);
 				} catch (PartInitException e) {
-					//reportError(e.getStatus().getMessage());
+					// reportError(e.getStatus().getMessage());
 				}
 			} else {
 				page.bringToTop(part);
 			}
 		}
 	}
-	
+
 	public static StyledText getStyledText(IWorkbenchPart part) {
-		ITextViewer viewer = (ITextViewer)part.getAdapter(ITextViewer.class);
+		ITextViewer viewer = (ITextViewer) part.getAdapter(ITextViewer.class);
 		StyledText textWidget = null;
 		if (viewer == null) {
 			Control control = (Control) part.getAdapter(Control.class);
@@ -329,143 +328,150 @@ public class CommonEvaluationAction implements IWorkbenchWindowActionDelegate,
 		}
 		return textWidget;
 	}
-	
+
 	public static Point getPopupAnchor(StyledText textWidget) {
 		if (textWidget != null) {
-	        Point docRange = textWidget.getSelectionRange();
-	        int midOffset = docRange.x + (docRange.y / 2);
-	        Point point = textWidget.getLocationAtOffset(midOffset);
-	        point = textWidget.toDisplay(point);
-	
-	        GC gc = new GC(textWidget);
-	        gc.setFont(textWidget.getFont());
-	        int height = gc.getFontMetrics().getHeight();
-	        gc.dispose();
-	        point.y += height;
-	        return point;
+			Point docRange = textWidget.getSelectionRange();
+			int midOffset = docRange.x + (docRange.y / 2);
+			Point point = textWidget.getLocationAtOffset(midOffset);
+			point = textWidget.toDisplay(point);
+
+			GC gc = new GC(textWidget);
+			gc.setFont(textWidget.getFont());
+			int height = gc.getFontMetrics().getHeight();
+			gc.dispose();
+			point.y += height;
+			return point;
 		}
-		
+
 		return null;
 	}
-	
+
 	protected Shell getShell() {
 		if (getPart() != null) {
 			return getPart().getSite().getShell();
 		}
-		
+
 		return DLTKDebugUIPlugin.getActiveWorkbenchShell();
 	}
-	
+
 	protected IScriptStackFrame getStackFrameContext() {
 		IWorkbenchPart part = getPart();
 		IScriptStackFrame frame = null;
 		if (part == null) {
-			frame = ScriptEvaluationContextManager.getEvaluationContext(getWindow());
+			frame = ScriptEvaluationContextManager
+					.getEvaluationContext(getWindow());
 		} else {
 			frame = ScriptEvaluationContextManager.getEvaluationContext(part);
-		}		
+		}
 		return frame;
 	}
 
-	protected void run() {		
-		final IScriptStackFrame stackFrame= getStackFrameContext();
+	protected void run() {
+		final IScriptStackFrame stackFrame = getStackFrameContext();
 		if (stackFrame == null) {
-			reportError("Cannot get StackFrame"); 
+			reportError("Cannot get StackFrame");
 			return;
 		}
-		
-	//	setNewTargetPart(getTargetPart());
-        
-        IRunnableWithProgress runnable = new IRunnableWithProgress() {
-            public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-                if (stackFrame.isSuspended()) {
-                        IScriptEvaluationEngine engine = null;
-                        try {
-                            Object selection= getSelectedObject();
-                            if (!(selection instanceof String)) {
-                                return;
-                            }
-                            String expression= (String)selection;
-                            
-                           // engine = stackFrame.getThread();
-                            setEvaluating(true);
-                            engine.evaluate(expression, stackFrame, CommonEvaluationAction.this);
-                        } catch (CoreException e) {
-                            throw new InvocationTargetException(e, getExceptionMessage(e));
-                        }
-                }
-                // thread not suspended
-                throw new InvocationTargetException(null, "Thread is not suspended"); 
-            }
-        };
-        
-        IWorkbench workbench = DLTKDebugUIPlugin.getDefault().getWorkbench();
-        try {
-            workbench.getProgressService().busyCursorWhile(runnable);
-        } catch (InvocationTargetException e) {
-        	evaluationCleanup();
-        	String message = e.getMessage();
-        	if (message == null) {
-        		message = e.getClass().getName();
-        		if (e.getCause() != null) {
-        			message = e.getCause().getClass().getName();
-        			if (e.getCause().getMessage() != null) {
-        				message = e.getCause().getMessage();
-        			}
-        		}
-        	}
-            reportError(message);
-        } catch (InterruptedException e) {
-        }
+
+		// setNewTargetPart(getTargetPart());
+
+		// Preparing runnable
+		IRunnableWithProgress runnable = new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor)
+					throws InvocationTargetException, InterruptedException {
+				if (stackFrame.isSuspended()) {
+					Object selection = getSelectedObject();
+					if (!(selection instanceof String)) {
+						return;
+					}
+					String expression = (String) selection;
+
+					IScriptEvaluationEngine engine = stackFrame
+							.getScriptThread().getEvaluationEngine();
+					setEvaluating(true);
+					engine.asyncEvaluate(expression, stackFrame,
+							ScriptEvaluationAction.this);
+				} else {
+					throw new InvocationTargetException(null,
+							"Thread is not suspended");
+				}
+			}
+		};
+
+		// Run
+		try {
+			IWorkbench workbench = DLTKDebugUIPlugin.getDefault()
+					.getWorkbench();
+			workbench.getProgressService().busyCursorWhile(runnable);
+		} catch (InvocationTargetException e) {
+			evaluationCleanup();
+			String message = e.getMessage();
+			if (message == null) {
+				message = e.getClass().getName();
+				if (e.getCause() != null) {
+					message = e.getCause().getClass().getName();
+					if (e.getCause().getMessage() != null) {
+						message = e.getCause().getMessage();
+					}
+				}
+			}
+			reportError(message);
+		} catch (InterruptedException e) {
+		}
 	}
-	
+
 	// Error reporting
 	public static String getExceptionMessage(Throwable exception) {
 		if (exception instanceof CoreException) {
-			CoreException ce = (CoreException)exception;
-			Throwable throwable= ce.getStatus().getException();
+			CoreException ce = (CoreException) exception;
+			Throwable throwable = ce.getStatus().getException();
 			if (throwable instanceof CoreException) {
 				// Traverse nested CoreExceptions
 				return getExceptionMessage(throwable);
 			}
 			return ce.getStatus().getMessage();
 		}
-		String message= MessageFormat.format("An exception occured: {0}", new Object[] { exception.getClass() }); 
+		String message = MessageFormat.format("An exception occured: {0}",
+				new Object[] { exception.getClass() });
 		if (exception.getMessage() != null) {
-			message= MessageFormat.format("{0} - {1}", new Object[] { message, exception.getMessage() }); 
+			message = MessageFormat.format("{0} - {1}", new Object[] { message,
+					exception.getMessage() });
 		}
 		return message;
 	}
-	
-	protected String getErrorMessage(IScriptEvaluationResult result) {
-		String[] errors= result.getErrorMessages();
+
+	protected static String getErrorMessage(IScriptEvaluationResult result) {
+		String[] errors = result.getErrorMessages();
 		if (errors.length == 0) {
 			return getExceptionMessage(result.getException());
 		}
 		return getErrorMessage(errors);
 	}
-	
-	protected String getErrorMessage(String[] errors) {
-		String message= ""; //$NON-NLS-1$
-		for (int i= 0; i < errors.length; i++) {
-			String msg= errors[i];
+
+	protected static String getErrorMessage(String[] errors) {
+		String message = ""; //$NON-NLS-1$
+		for (int i = 0; i < errors.length; i++) {
+			String msg = errors[i];
 			if (i == 0) {
-				message= msg;
+				message = msg;
 			} else {
-				message= MessageFormat.format("{0}{1}", new Object[] { message, msg }); 
+				message = MessageFormat.format("{0}{1}", new Object[] {
+						message, msg });
 			}
 		}
 		return message;
 	}
-	
+
 	protected void reportErrors(IScriptEvaluationResult result) {
-		String message= getErrorMessage(result);
+		String message = getErrorMessage(result);
 		reportError(message);
 	}
-	
+
 	protected void reportError(String message) {
-		Status status= new Status(IStatus.ERROR, DLTKDebugUIPlugin.getUniqueIdentifier(), IStatus.ERROR, message, null);
-		ErrorDialog.openError(getShell(), "Error evaluating", null, status); 
+		Status status = new Status(IStatus.ERROR, DLTKDebugUIPlugin
+				.getUniqueIdentifier(), IStatus.ERROR, message, null);
+		ErrorDialog.openError(getShell(), "Error evaluating", null, status);
 	}
 
 	// IScriptEvaluationListener
@@ -474,18 +480,20 @@ public class CommonEvaluationAction implements IWorkbenchWindowActionDelegate,
 		if (DLTKDebugUIPlugin.getDefault() == null) {
 			return;
 		}
-		
-		final IScriptValue value= result.getValue();
+
+		final IScriptValue value = result.getValue();
 		if (result.hasErrors() || value != null) {
-			final Display display= DLTKDebugUIPlugin.getStandardDisplay();
+			final Display display = DLTKDebugUIPlugin.getStandardDisplay();
 			if (display.isDisposed()) {
 				return;
 			}
+
+			// Each action should implement this method for own purposes
 			displayResult(result);
 		}
-		
+
 	}
-	
+
 	protected void displayResult(IScriptEvaluationResult result) {
 		// Nothing by default
 	}
