@@ -23,10 +23,8 @@ final class ScriptHoverMessages extends NLS {
 	}
 
 	public static String ScriptdocHover_noAttachedInformation;
-	public static String ScriptTextHover_createTextHover;
 	public static String ScriptTextHover_makeStickyHint;
 	public static String NoBreakpointAnnotation_addBreakpoint;
-	public static String NLSStringHover_NLSStringHover_missingKeyWarning;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, ScriptHoverMessages.class);
