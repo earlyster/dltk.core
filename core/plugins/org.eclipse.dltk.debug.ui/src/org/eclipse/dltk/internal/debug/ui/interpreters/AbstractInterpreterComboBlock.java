@@ -261,6 +261,13 @@ public abstract class AbstractInterpreterComboBlock {
 	 * @param id pref page id
 	 * @param page pref page
 	 */
+	protected void showPrefPage(String pageId, IPreferencePage page) {
+		PreferencesUtil.createPreferenceDialogOn(getShell(),
+				pageId, new String[] { pageId }, null).open();
+		
+		
+		refreshInterpreters();	
+	}
 	protected void showPrefPage(String pageId) {
 		PreferencesUtil.createPreferenceDialogOn(getShell(),
 				pageId, new String[] { pageId }, null).open();

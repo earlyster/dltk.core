@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -38,6 +39,22 @@ public abstract class AbstractScriptDebuggingEngineConfigurationBlock extends
 
 	private Map engineToDescriptionMap;
 
+	protected Composite createComposite(Composite parent, Font font,
+			int columns, int hspan, int fill, int marginwidth, int marginheight) {
+		return SWTFactory.createComposite(parent, font, columns, hspan, fill,
+				marginwidth, marginheight);
+	}
+
+	protected Group createGroup(Composite parent, String text, int columns,
+			int hspan, int fill) {
+		return SWTFactory.createGroup(parent, text, columns, hspan, fill);
+	}
+
+	protected Label createLabel(Composite parent, String text, int hspan) {
+		return SWTFactory.createLabel(parent, text, hspan);
+	}
+
+	
 	public AbstractScriptDebuggingEngineConfigurationBlock(
 			OverlayPreferenceStore store, PreferencePage preferencePage) {
 		super(store, preferencePage);
