@@ -149,9 +149,9 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 		engine.setMaxDepth(2);
 		engine.setMaxData(8192);
 
-		if (engine.isFeatureSupported(IDbgpExtendedCommands.STDIN_COMMAND)) {
+		//if (engine.isFeatureSupported(IDbgpExtendedCommands.STDIN_COMMAND)) {
 			engine.redirectStdin();
-		}
+		//}
 
 		engine.setNotifyOk(true);
 
