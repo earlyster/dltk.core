@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
-
+ 
  *******************************************************************************/
 package org.eclipse.dltk.compiler;
 
@@ -40,7 +40,7 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 	}
 
 	protected MethodDeclaration getCurrentMethod() {
-		return this.fCurrentMethod;
+		return fCurrentMethod;
 	}
 
 	protected String makeLanguageDependentValue(ASTNode expr) {
@@ -75,9 +75,9 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 	/**
 	 * Creates correct string value from expression. For example for
 	 * StringLiteral returns "value". And so on.
-	 *
+	 * 
 	 * Return "" if it is imposible to make value from expression.
-	 *
+	 * 
 	 * @param expr
 	 * @return
 	 */
@@ -85,7 +85,7 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 //		if (!(stmt instanceof Expression))
 //			return null;
 
-
+		
 
 		String value = "";
 		if (stmt instanceof StringLiteral) {
@@ -95,33 +95,33 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 		} else /*if (stmt instanceof ExtendedVariableReference) */{
 			// If it is Dot.
 			// Lets make recursive value parsing in this case.
-			value += this.makeLanguageDependentValue(stmt);
+			value += makeLanguageDependentValue(stmt);
 		}
 
 		return value;
 	}
 
 	public boolean endvisit(MethodDeclaration method) throws Exception {
-		this.fRequestor.exitMethod(method.sourceEnd());
-		this.fInMethod = false;
-		this.fCurrentMethod = null;
+		fRequestor.exitMethod(method.sourceEnd());
+		fInMethod = false;
+		fCurrentMethod = null;
 
-		this.onEndVisitMethod(method);
+		onEndVisitMethod(method);
 
-		this.fNodes.pop();
+		fNodes.pop();
 		return true;
 	}
 
-	public boolean endvisit(TypeDeclaration type) throws Exception {
-		this.fRequestor.exitType(type.sourceEnd());
-		this.fInClass = false;
-		this.onEndVisitClass(type);
-		this.fNodes.pop();
+	public boolean endvisit(TypeDeclaration typeDeclaration) throws Exception {
+		fRequestor.exitType(typeDeclaration.sourceEnd());
+		fInClass = false;
+		onEndVisitClass(typeDeclaration);
+		fNodes.pop();
 		return true;
 	}
 
 	public boolean visit(MethodDeclaration method) throws Exception {
-		this.fNodes.push(method);
+		fNodes.push(method);
 		List args = method.getArguments();
 
 		String[] parameter = new String[args.size()];
@@ -138,59 +138,59 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 		mi.nameSourceEnd = method.getNameEnd() - 1;
 		mi.declarationStart = method.sourceStart();
 
-		this.fRequestor.enterMethod(mi);
+		fRequestor.enterMethod(mi);
 
-		this.fInMethod = true;
-		this.fCurrentMethod = method;
+		fInMethod = true;
+		fCurrentMethod = method;
 		return true;
 	}
 
-	public boolean visit(TypeDeclaration type) throws Exception {
-		this.fNodes.push(type);
+	public boolean visit(TypeDeclaration s) throws Exception {
+		fNodes.push(s);
 
 		ISourceElementRequestor.TypeInfo info = new ISourceElementRequestor.TypeInfo();
-		info.modifiers = type.getModifiers();
-		info.name = type.getName();
-		info.nameSourceStart = type.getNameStart();
-		info.nameSourceEnd = type.getNameEnd() - 1;
-		info.declarationStart = type.sourceStart();
-		info.superclasses = this.processSuperClasses(type);
+		info.modifiers = s.getModifiers();
+		info.name = s.getName();
+		info.nameSourceStart = s.getNameStart();
+		info.nameSourceEnd = s.getNameEnd() - 1;
+		info.declarationStart = s.sourceStart();
+		info.superclasses = processSuperClasses(s);
 
-		this.fRequestor.enterType(info);
-		this.fInClass = true;
+		fRequestor.enterType(info);
+		fInClass = true;
 
 		return true;
 	}
 
-	public boolean endvisit(ModuleDeclaration declaration) throws Exception {
-		this.fRequestor.exitModule(declaration.sourceEnd());
-		this.fNodes.pop();
+	public boolean endvisit(ModuleDeclaration s) throws Exception {
+		fRequestor.exitModule(s.sourceEnd());
+		fNodes.pop();
 		return true;
 	}
 
 	public boolean visit(ModuleDeclaration declaration) throws Exception {
-		this.fNodes.push(declaration);
-		this.fRequestor.enterModule();
+		fNodes.push(declaration);
+		fRequestor.enterModule();
 		return true;
 	}
 
-	public boolean endvisit(Expression expression) throws Exception {
-		this.fNodes.pop();
+	public boolean endvisit(Expression s) throws Exception {
+		fNodes.pop();
 		return true;
 	}
 
-	public boolean endvisit(Statement statement) throws Exception {
-		this.fNodes.pop();
+	public boolean endvisit(Statement s) throws Exception {
+		fNodes.pop();
 		return true;
 	}
 
 	public boolean visit(Expression expression) throws Exception {
-		this.fNodes.push(expression);
+		fNodes.push(expression);
 		return true;
 	}
 
 	public boolean visit(Statement statement) throws Exception {
-		this.fNodes.push(statement);
+		fNodes.push(statement);
 		return true;
 	}
 }

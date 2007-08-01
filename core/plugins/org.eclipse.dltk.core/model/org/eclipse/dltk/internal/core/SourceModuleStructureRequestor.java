@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
-
+ 
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
@@ -14,16 +14,15 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
-import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 
 
 public class SourceModuleStructureRequestor implements ISourceElementRequestor {
-
+	
 	private final static String[] EMPTY = new String[0];
-
+		
 	/**
 	 * The handle to the source module being parsed
 	 */
@@ -56,9 +55,9 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	 * handles.
 	 */
 	private Stack handleStack;
-
-	protected boolean hasSyntaxErrors = false;
-
+	
+	protected boolean hasSyntaxErrors = false;	
+	
 	SourceModuleStructureRequestor(ISourceModule module, SourceModuleElementInfo moduleInfo, Map newElements) {
 		this.module = module;
 		this.moduleInfo = moduleInfo;
@@ -74,32 +73,32 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 			handle.occurrenceCount++;
 		}
 	}
-
+	
 	public void enterModule() {
 		this.infoStack = new Stack();
 		this.handleStack= new Stack();
-		this.enterModuleRoot();
+		enterModuleRoot();
 	}
-
+	
 	public void enterModuleRoot() {
 		this.infoStack.push(this.moduleInfo);
 		this.handleStack.push(this.module);
 	}
 
-	public void enterField(FieldInfo fieldInfo) {
-
+	public void enterField(FieldInfo fieldInfo) {				
+		
 		ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack.peek();
 		ModelElement parentHandle= (ModelElement) this.handleStack.peek();
-
-		this.createField(fieldInfo, parentInfo, parentHandle);
+		
+		createField(fieldInfo, parentInfo, parentHandle);
 	}
-
+	
 	private void createField(FieldInfo fieldInfo, ModelElementInfo parentInfo, ModelElement parentHandle) {
 		ModelManager manager = ModelManager.getModelManager();
 
 		SourceField handle = new SourceField(parentHandle, manager.intern(fieldInfo.name));
-		this.resolveDuplicates(handle);
-
+		resolveDuplicates(handle);
+		
 		SourceFieldElementInfo info = new SourceFieldElementInfo();
 		info.setNameSourceStart(fieldInfo.nameSourceStart);
 		info.setNameSourceEnd(fieldInfo.nameSourceEnd);
@@ -112,15 +111,15 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 		this.infoStack.push(info);
 		this.handleStack.push(handle);
 	}
-
+	
 	public boolean enterFieldCheckDuplicates(FieldInfo fieldInfo, ModelElementInfo parentInfo, ModelElement parentHandle) {
 		IModelElement[] childrens = parentInfo.getChildren( );
 		for(int i = 0; i < childrens.length; ++i ) {
-			if(childrens[i] instanceof SourceField
+			if(childrens[i] instanceof SourceField 
 					&& childrens[i].getElementName( ).equals( fieldInfo.name )) {
 				//we should go inside existent element
 				SourceField handle = (SourceField)childrens[i];
-				SourceFieldElementInfo info = (SourceFieldElementInfo)this.newElements.get(handle);
+				SourceFieldElementInfo info = (SourceFieldElementInfo)newElements.get(handle);
 				this.infoStack.push(info);
 				this.handleStack.push(handle);
 				return true;
@@ -135,16 +134,16 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 				}
 			}
 		}
-		this.createField(fieldInfo, parentInfo, parentHandle);
+		createField(fieldInfo, parentInfo, parentHandle);
 		return true;
 	}
-
-	public boolean enterFieldCheckDuplicates(FieldInfo fieldInfo) {
+	
+	public boolean enterFieldCheckDuplicates(FieldInfo fieldInfo) {						
 		ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack.peek();
 		ModelElement parentHandle= (ModelElement) this.handleStack.peek();
-		return  this.enterFieldCheckDuplicates(fieldInfo, parentInfo, parentHandle);
+		return  enterFieldCheckDuplicates(fieldInfo, parentInfo, parentHandle);
 	}
-
+	
 	public void enterMethodRemoveSame(MethodInfo methodInfo) {
 		ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack.peek();
 		IModelElement[] childrens = parentInfo.getChildren( );
@@ -153,38 +152,38 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 				parentInfo.removeChild( childrens[i] );
 			}
 		}
-		this.enterMethod( methodInfo );
+		enterMethod( methodInfo );
 	}
 
 	public void enterMethod(MethodInfo methodInfo) {
 		ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack.peek();
 		ModelElement parentHandle= (ModelElement) this.handleStack.peek();
-
-		this.processMethod(methodInfo, parentInfo, parentHandle);
+		
+		processMethod(methodInfo, parentInfo, parentHandle);
 	}
 
 	private void processMethod(MethodInfo methodInfo, ModelElementInfo parentInfo, ModelElement parentHandle) {
 		String nameString= new String(methodInfo.name);
 		ModelManager manager = ModelManager.getModelManager();
 		SourceMethod handle = new SourceMethod(parentHandle, manager.intern(nameString));
-		this.resolveDuplicates(handle);
-
+		resolveDuplicates(handle);
+		
 		SourceMethodElementInfo info = new SourceMethodElementInfo();
 		info.setSourceRangeStart(methodInfo.declarationStart);
 		info.setFlags(methodInfo.modifiers);
 		info.setNameSourceStart(methodInfo.nameSourceStart);
 		info.setNameSourceEnd(methodInfo.nameSourceEnd);
-
-		String[] parameterNames = methodInfo.parameterNames == null ?
+		
+		String[] parameterNames = methodInfo.parameterNames == null ? 
 				EMPTY : methodInfo.parameterNames;
-
-		String[] parameterInitializers = methodInfo.parameterInitializers == null ?
+		
+		String[] parameterInitializers = methodInfo.parameterInitializers == null ? 
 				EMPTY : methodInfo.parameterInitializers;
-
+		
 		if(parameterNames.length != parameterInitializers.length ) {
 			parameterInitializers = new String[parameterNames.length];
 		}
-
+			
 		for (int i = 0, length = parameterNames.length; i < length; i++) {
 			parameterNames[i] = manager.intern(parameterNames[i]);
 			if( parameterInitializers[i] != null ) {
@@ -193,13 +192,13 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 		}
 		info.setArgumentNames(parameterNames);
 		info.setArgumentInializers(parameterInitializers);
-
+		
 		parentInfo.addChild(handle);
 		this.newElements.put(handle, info);
 		this.infoStack.push(info);
 		this.handleStack.push(handle);
 	}
-
+	
 	/**
 	 * Returns type in which we currently are. If we are not in type, returns null.
 	 * @return
@@ -208,16 +207,15 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 		SourceType t = null;
 		for (Iterator iter = this.handleStack.iterator(); iter.hasNext();) {
 			Object o = iter.next();
-			if (o instanceof SourceType) {
+			if (o instanceof SourceType)
 				t = (SourceType)o;
-			}
 		}
 		return t;
 	}
-
+	
 	/**
 	 * Searches for a type already in the model. If founds, returns it.
-	 * If <code>parentName</code> starts with a delimeter, searches starting
+	 * If <code>parentName</code> starts with a delimeter, searches starting 
 	 * from current source module (i.e. in global), else from the current
 	 * level.
 	 * @param parentName
@@ -227,28 +225,28 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	private SourceType getExistentType (String parentName, String delimiter) {
 		try {
 			SourceType element = null;
-			if (parentName.startsWith(delimiter)) {
-				element = this.findTypeFrom( this.module.getChildren(), "", parentName, delimiter );
-				return element;
+			if (parentName.startsWith(delimiter)) {				
+				element = findTypeFrom( this.module.getChildren(), "", parentName, delimiter );
+				return element;	
 			} else {
 				parentName = delimiter + parentName;
-				SourceType enc = this.getCurrentType();
+				SourceType enc = getCurrentType();
 				if (enc == null) {
-					element = this.findTypeFrom( this.module.getChildren(), "", parentName, delimiter );
+					element = findTypeFrom( this.module.getChildren(), "", parentName, delimiter );
 				} else {
-					element = this.findTypeFrom( enc.getChildren(), "", parentName, delimiter );
+					element = findTypeFrom( enc.getChildren(), "", parentName, delimiter );
 				}
 				return element;
 			}
-
+			
 		} catch (ModelException e) {
-			e.printStackTrace();
-		}
+			e.printStackTrace();			
+		}		
 		return null;
 	}
-
+	
 	private SourceType findTypeFrom(IModelElement[] childs, String name, String parentName, String delimiter) {
-		try {
+		try {			
 			for( int i = 0; i < childs.length; ++i ) {
 				if( childs[i] instanceof SourceType ) {
 					SourceType type = (SourceType)childs[i];
@@ -256,7 +254,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 					if( qname.equals(parentName)) {
 						return type;
 					}
-					SourceType val = this.findTypeFrom(type.getChildren(), qname,  parentName, delimiter);
+					SourceType val = findTypeFrom(type.getChildren(), qname,  parentName, delimiter);
 					if( val != null ) {
 						return val;
 					}
@@ -264,26 +262,26 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 			}
 		} catch (ModelException e) {
 			e.printStackTrace();
-		}
+		}		
 		return null;
 	}
-
+	
 	public boolean enterMethodWithParentType(MethodInfo info, String parentName, String delimiter) {
 		try {
-			ModelElement element = this.getExistentType(parentName, delimiter );
+			ModelElement element = getExistentType(parentName, delimiter );
 			if( element == null) {
 				return false;
 			}
 			ModelElementInfo typeInfo = (ModelElementInfo)element.getElementInfo();
-
+			
 			IModelElement[] childrens = typeInfo.getChildren( );
 			for(int i = 0; i < childrens.length; ++i ) {
 				if( childrens[i].getElementName( ).equals( info.name )) {
 					typeInfo.removeChild( childrens[i] );
 				}
 			}
-
-			this.processMethod(info, typeInfo, element);
+			
+			processMethod(info, typeInfo, element);
 			return true;
 		} catch (ModelException e) {
 			// TODO Auto-generated catch block
@@ -291,56 +289,55 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 		}
 		return false;
 	}
-
+	
 	public boolean enterFieldWithParentType(FieldInfo info, String parentName, String delimiter) {
 		try {
-			ModelElement element = this.getExistentType(parentName, delimiter );
+			ModelElement element = getExistentType(parentName, delimiter );			
 			if( element == null) {
 				return false;
 			}
 			ModelElementInfo typeInfo = (ModelElementInfo)element.getElementInfo();
-			this.enterFieldCheckDuplicates(info, typeInfo, element);
+			enterFieldCheckDuplicates(info, typeInfo, element);
 			return true;
 		} catch (ModelException e) {
-			if( DLTKCore.DEBUG ) {
-				e.printStackTrace();
-			}
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return false;
 	}
-
-
+	
+	
 
 	public void enterType(TypeInfo typeInfo) {
 		ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack.peek();
 		ModelElement parentHandle= (ModelElement) this.handleStack.peek();
-		this.processType(typeInfo, parentInfo, parentHandle);
+		processType(typeInfo, parentInfo, parentHandle);		
 	}
-
-
-
+	
+	
+	
 	public boolean enterTypeAppend(String fullName, String delimiter ) {
 		try {
-			ModelElement element = this.getExistentType(fullName, delimiter );
-			if( element == null) {
+			ModelElement element = getExistentType(fullName, delimiter );			
+			if( element == null) {				
 				return false;
 			} else {
-				ModelElementInfo info = (ModelElementInfo)element.getElementInfo();
+				ModelElementInfo info = (ModelElementInfo)element.getElementInfo();			
 				this.infoStack.push(info);
 				this.handleStack.push(element);
 				return true;
 			}
 		} catch (ModelException e) {
 			e.printStackTrace();
-		}
+		}		
 		return false;
 	}
 
 	private void processType(TypeInfo typeInfo, ModelElementInfo parentInfo, ModelElement parentHandle) {
 		String nameString= new String(typeInfo.name);
 		SourceType handle = new SourceType(parentHandle, nameString); //NB: occurenceCount is computed in resolveDuplicates
-		this.resolveDuplicates(handle);
-
+		resolveDuplicates(handle);
+		
 		SourceTypeElementInfo info = new SourceTypeElementInfo();
 		info.setHandle(handle);
 		info.setSourceRangeStart(typeInfo.declarationStart);
@@ -349,9 +346,8 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 		info.setNameSourceEnd(typeInfo.nameSourceEnd);
 		ModelManager manager = ModelManager.getModelManager();
 		String[] superclasses = typeInfo.superclasses;
-		for (int i = 0, length = superclasses == null ? 0 : superclasses.length; i < length; i++) {
+		for (int i = 0, length = superclasses == null ? 0 : superclasses.length; i < length; i++)
 			superclasses[i] = manager.intern(superclasses[i]);
-		}
 		info.setSuperclassNames(superclasses);
 		parentInfo.addChild(handle);
 		this.newElements.put(handle, info);
@@ -360,29 +356,29 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	}
 
 	public void exitModule(int declarationEnd) {
-		this.moduleInfo.setSourceLength(declarationEnd + 1);
+		moduleInfo.setSourceLength(declarationEnd + 1);
 
 		// determine if there were any parsing errors
-		this.moduleInfo.setIsStructureKnown(!this.hasSyntaxErrors);
+		moduleInfo.setIsStructureKnown(!hasSyntaxErrors);
 	}
-
+	
 	public void exitModuleRoot() {
 		this.infoStack.pop();
 		this.handleStack.pop();
 	}
 
 	public void exitField(int declarationEnd) {
-		this.exitMember(declarationEnd);
+		exitMember(declarationEnd);
 	}
 
 	public void exitMethod(int declarationEnd) {
-		this.exitMember(declarationEnd);
+		exitMember(declarationEnd);
 	}
 
 	public void exitType(int declarationEnd) {
-		this.exitMember(declarationEnd);
+		exitMember(declarationEnd);
 	}
-
+	
 	protected void exitMember(int declarationEnd) {
 		Object object = this.infoStack.pop();
 		SourceRefElementInfo info = (SourceRefElementInfo) object;
@@ -390,33 +386,37 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 		this.handleStack.pop();
 	}
 
-	public void acceptPackage(int declarationStart, int declarationEnd, char[] name) {
+	public void acceptPackage(int declarationStart, int declarationEnd, char[] name) {	
 		ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack.peek();
 		ModelElement parentHandle= (ModelElement) this.handleStack.peek();
 		PackageDeclaration handle = null;
-
+		
 		//if (parentHandle.getElementType() == IModelElement.SOURCE_MODULE) {
 		handle = new PackageDeclaration(parentHandle, new String(name));
-
-		this.resolveDuplicates(handle);
-
+		
+		resolveDuplicates(handle);
+		
 		SourceRefElementInfo info = new SourceRefElementInfo();
 		info.setSourceRangeStart(declarationStart);
-		info.setSourceRangeEnd(declarationEnd);
-
+		info.setSourceRangeEnd(declarationEnd);		
+		
 		parentInfo.addChild(handle);
 		this.newElements.put(handle, info);
 	}
 
 	public void acceptFieldReference(char[] fieldName, int sourcePosition) {
+		// TODO Auto-generated method stub
 	}
 
 	public void acceptMethodReference(char[] methodName, int argCount, int sourcePosition, int sourceEndPosition) {
+		// TODO Auto-generated method stub
 	}
 
 	public void acceptTypeReference(char[][] typeName, int sourceStart, int sourceEnd) {
+		// TODO Auto-generated method stub
 	}
 
 	public void acceptTypeReference(char[] typeName, int sourcePosition) {
+		// TODO Auto-generated method stub		
 	}
 }

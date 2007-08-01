@@ -12,7 +12,6 @@ package org.eclipse.dltk.internal.core;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 
 public class ClassBasedDLTKExtensionManager extends BasicDLTKExtensionManager {
@@ -40,9 +39,8 @@ public class ClassBasedDLTKExtensionManager extends BasicDLTKExtensionManager {
 				return object;
 			}
 		} catch (CoreException e) {
-			if( DLTKCore.DEBUG ) {
-				e.printStackTrace();
-			}
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return null;
 	}

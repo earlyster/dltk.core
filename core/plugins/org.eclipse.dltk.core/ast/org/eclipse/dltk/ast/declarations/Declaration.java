@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
-
+ 
  *******************************************************************************/
 /*
  * (c) 2002, 2005 xored software and others all rights reserved. http://www.xored.com
@@ -17,7 +17,6 @@ import org.eclipse.dltk.ast.ASTVisitor;
 import org.eclipse.dltk.ast.DLTKToken;
 import org.eclipse.dltk.ast.Modifiers;
 import org.eclipse.dltk.ast.PositionInformation;
-import org.eclipse.dltk.ast.references.SimpleReference;
 import org.eclipse.dltk.ast.statements.Statement;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.internal.core.SourceRange;
@@ -32,13 +31,18 @@ public abstract class Declaration extends Statement implements Modifiers {
 
 	public final static int D_DECLARATOR = 3004;
 
-	SimpleReference ref;
+	protected int nameStart;
+
+	protected int nameEnd;
+
+	protected String name;
 
 	protected int modifiers;
 
 	protected Declaration() {
 		this.modifiers = 0;
-		this.ref = new SimpleReference(0, 0, null);
+		this.nameStart = 0;
+		this.nameEnd = -1;
 	}
 
 	protected Declaration(int start, int end) {
@@ -49,90 +53,84 @@ public abstract class Declaration extends Statement implements Modifiers {
 	protected Declaration(DLTKToken name, int start, int end) {
 		super(start, end);
 		if (name != null) {
-			this.ref = new SimpleReference(name);
-		}
-		else {
-			this.ref = new SimpleReference(start, end, null);
+			this.name = name.getText();
+			this.nameStart = name.getColumn();
+			this.nameEnd = nameStart + this.name.length();
 		}
 	}
 
 	public final int getNameStart() {
-		return this.ref.sourceStart();
+		return nameStart;
 	}
 
 	public final int getNameEnd() {
-		return this.ref.sourceEnd();
+		return nameEnd;
 	}
-
+	
 	protected ISourceRange getNameSourceRange () {
-		return new SourceRange(this.getNameStart(), this.getNameEnd() - this.getNameStart() + 1);
+		return new SourceRange(getNameStart(), getNameEnd() - getNameStart() + 1);
 	}
 
 	public final String getName() {
-		return this.ref.getName();
+		return name;
 	}
 
 	public final int getModifiers() {
-		return this.modifiers;
+		return modifiers;
 	}
 
 	public final PositionInformation getPositionInformation() {
-		return new PositionInformation(this.getNameStart(), this.getNameEnd(), this.sourceStart(),
-				this.sourceEnd());
+		return new PositionInformation(nameStart, nameEnd, sourceStart(),
+				sourceEnd());
 	}
 
 	public final void setModifier(int mods) {
-		this.modifiers |= mods;
+		modifiers |= mods;
 	}
 
 	public final void setModifiers(int mods) {
-		this.modifiers = mods;
+		modifiers = mods;
 	}
 
 	public final void setName(String name) {
-		if( this.ref == null ) {
-			this.ref = new SimpleReference(0, 0, name);
-		}
-		else {
-			this.ref.setName(name);
-		}
+		this.name = name;
 	}
 
 	public void setNameEnd(int end) {
-		this.ref.setEnd(end);
+		nameEnd = end;
 	}
 
 	public void setNameStart(int start) {
-		this.ref.setStart(start);
+		nameStart = start;
 	}
 
 	public boolean isStatic() {
-		return (this.modifiers & AccStatic) != 0;
+		return (modifiers & AccStatic) != 0;
 	}
 
 	public boolean isPublic() {
-		return (this.modifiers & AccPublic) != 0;
+		return (modifiers & AccPublic) != 0;
 	}
 
 	public boolean isPrivate() {
-		return (this.modifiers & AccPrivate) != 0;
+		return (modifiers & AccPrivate) != 0;
 	}
 
 	public boolean isProtected() {
 
-		return (this.modifiers & AccProtected) != 0;
+		return (modifiers & AccProtected) != 0;
 	}
 
 	public boolean isFinal() {
-		return (this.modifiers & AccFinal) != 0;
+		return (modifiers & AccFinal) != 0;
 	}
 
 	public boolean isAbstract() {
-		return (this.modifiers & AccAbstract) != 0;
+		return (modifiers & AccAbstract) != 0;
 	}
 
 	public boolean isInterface() {
-		return (this.modifiers & AccInterface) != 0;
+		return (modifiers & AccInterface) != 0;
 	}
 
 	public String toString() {
@@ -141,8 +139,8 @@ public abstract class Declaration extends Statement implements Modifiers {
 		if (this.isStatic()) {
 			buf += "static ";
 		}
-		if (this.ref.getName() != null) {
-			buf += " " + this.ref.getName();
+		if (this.name != null) {
+			buf += " " + this.name;
 		}
 		return buf;
 	}
@@ -158,10 +156,8 @@ public abstract class Declaration extends Statement implements Modifiers {
 	}
 
 	public void traverse(ASTVisitor pVisitor) throws Exception {
-		if (pVisitor.visit(this)) {
-			this.ref.traverse(pVisitor);
+		if (pVisitor.visit(this))
 			pVisitor.endvisit(this);
-		}
 	}
 
 	public boolean equals(Object obj) {
@@ -170,18 +166,16 @@ public abstract class Declaration extends Statement implements Modifiers {
 		}
 		Declaration d = (Declaration) obj;
 		// Only name.
-		return d.ref.getName().equals(this.ref.getName()) && d.ref.sourceStart() == this.ref.sourceStart()
-				&& d.ref.sourceEnd() == this.ref.sourceEnd() && super.equals(obj);
+		return d.name.equals(this.name) && d.nameStart == this.nameStart
+				&& d.nameEnd == this.nameEnd && super.equals(obj);
 	}
 
 	public int hashCode() {
-		return this.ref.getName().hashCode();
+		return this.name.hashCode();
 	}
-
+	
 	public String debugString () {
 		return super.debugString() + this.getNameSourceRange().toString();
 	}
-	protected SimpleReference getRef() {
-		return this.ref;
-	}
+	
 }
