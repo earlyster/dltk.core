@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.dltk.debug; singleton:=true
-Bundle-Version: 0.9.1.qualifier
+Bundle-Version: 0.9.0.qualifier
 Bundle-Activator: org.eclipse.dltk.debug.core.DLTKDebugPlugin
 Bundle-Vendor: %pluginProvider
 Bundle-Localization: plugin
@@ -28,4 +28,4 @@ Export-Package: org.eclipse.dltk.dbgp,
  org.eclipse.dltk.debug.core.model,
  org.eclipse.dltk.internal.debug.core.model,
  org.eclipse.dltk.internal.debug.core.model.operations
-Bundle-RequiredExecutionEnvironment: J2SE-1.4
+

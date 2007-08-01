@@ -149,10 +149,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 		engine.setMaxDepth(2);
 		engine.setMaxData(8192);
 
-		//if (engine.isFeatureSupported(IDbgpExtendedCommands.STDIN_COMMAND)) {
-			engine.redirectStdin();
-		//}
-
+		engine.redirectStdin();
 		engine.setNotifyOk(true);
 
 		engine.redirectStdout();
@@ -334,7 +331,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 	public IDbgpSession getDbgpSession() {
 		return session;
 	}
-
+	
 	public IDbgpBreakpoint getDbgpBreakpoint(String id) {
 		try {
 			return session.getCoreCommands().getBreakpoint(id);
@@ -342,7 +339,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
 		return null;
 	}
 
