@@ -53,7 +53,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.ui.dialogs.PreferencesUtil;
 
 
 /**
@@ -409,16 +408,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		 * Shows window with appropriate language preference page.
 		 *
 		 */
-		void showInterpreterPreferencePage () {
-			final String pageId = getIntereprtersPreferencePageId();
-			
-			PreferencesUtil.createPreferenceDialogOn(getShell(),
-					pageId, new String[] { pageId }, null).open();
-		}
-		
-		
-		protected abstract String getIntereprtersPreferencePageId();
-		
+		protected abstract void showInterpreterPreferencePage ();
 		
 		protected abstract String getCurrentLanguageNature ();
 
