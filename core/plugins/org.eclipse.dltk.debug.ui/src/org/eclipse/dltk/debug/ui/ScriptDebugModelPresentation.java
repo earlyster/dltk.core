@@ -10,7 +10,6 @@
 package org.eclipse.dltk.debug.ui;
 
 import java.io.File;
-import java.text.MessageFormat;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -33,7 +32,6 @@ import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptValue;
 import org.eclipse.dltk.debug.core.model.IScriptVariable;
 import org.eclipse.dltk.debug.core.model.IScriptWatchpoint;
-import org.eclipse.dltk.debug.ui.breakpoints.BreakpointUtils;
 import org.eclipse.dltk.internal.debug.ui.ScriptEvaluationContextManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -204,33 +202,21 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 		try {
 			StringBuffer sb = new StringBuffer();
 
-			final String language = BreakpointUtils.getLanguageToolkit(
-					breakpoint).getLanguageName();
-
-			final int hitCount = breakpoint.getHitCount();
-
-			if (breakpoint instanceof IScriptWatchpoint) { // IScriptWatchPoint
-				IScriptWatchpoint w = (IScriptWatchpoint) breakpoint;
-
-				final String file = w.getResourceName();
-				final int lineNumber = w.getLineNumber();
-				final String fieldName = w.getFieldName();
-
-				sb.append(MessageFormat.format("{0}: {1} [line: {2}], watch: {3}",
-						new Object[] { language, file, new Integer(lineNumber),
-								fieldName }));
-			} else if (breakpoint instanceof IScriptLineBreakpoint) { // IScriptLineBreakpoint
+			// IScriptLineBreakpoint
+			if (breakpoint instanceof IScriptLineBreakpoint) {
 				IScriptLineBreakpoint b = (IScriptLineBreakpoint) breakpoint;
+				sb.append(b.getResourceName());
+				sb.append("[line: " + b.getLineNumber() + "]");
 
-				final String file = b.getResourceName();
-				final int lineNumber = b.getLineNumber();
-
-				sb.append(MessageFormat.format("{0}: {1}: [line: {2}]", new Object[] {
-						language, file, new Integer(lineNumber) }));
+				int hitCount = b.getHitCount();
+				if (hitCount != -1) {
+					sb.append(", " + hitCount + " hits");
+				}
 			}
 
-			if (hitCount != -1) {
-				sb.append(", " + hitCount + " hits");
+			// IScriptWatchPoint
+			if (breakpoint instanceof IScriptWatchpoint) {
+
 			}
 
 			return sb.toString();

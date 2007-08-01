@@ -17,8 +17,6 @@ import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore;
 
 public class ScriptDebugPreferencePage extends
 		AbstractConfigurationBlockPreferencePage {
-	
-	public static final String PAGE_ID = "org.eclipse.dltk.preferences.debug";
 
 	protected IPreferenceConfigurationBlock createConfigurationBlock(
 			OverlayPreferenceStore overlayPreferenceStore) {
@@ -30,7 +28,7 @@ public class ScriptDebugPreferencePage extends
 	}
 
 	protected void setDescription() {
-		setDescription(ScriptDebugPreferencesMessages.GeneralPreferencesDescription);
+		setDescription("General debugging parameters for all script languages");
 	}
 
 	protected void setPreferenceStore() {

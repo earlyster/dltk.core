@@ -37,6 +37,7 @@ public class EntryToggleAction extends BreakpointToggleAction {
 			if (!(element instanceof IScriptMethodEntryBreakpoint)) {
 				return false;
 			}
+
 		}
 		return true;
 	}

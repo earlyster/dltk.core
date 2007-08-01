@@ -49,7 +49,15 @@
             class="" 
             adaptableType="org.eclipse.dltk.internal.ui.editor.ExternalStorageEditorInput">
             <adapter type="org.eclipse.debug.ui.actions.ILaunchable"/>
-         </factory>               
+         </factory>
+         <factory
+          adaptableType="org.eclipse.dltk.internal.ui.editor.ScriptEditor"
+          class="org.eclipse.dltk.internal.debug.ui.DltkRetargettableActionAdapterFactory">
+       <adapter type="org.eclipse.debug.ui.actions.IToggleBreakpointsTarget"/>
+       <adapter
+             type="org.eclipse.debug.ui.actions.IRunToLineTarget">
+       </adapter>
+    </factory>         
     </extension>
      <extension
          point="org.eclipse.ui.popupMenus">
@@ -319,7 +327,6 @@
           id="org.eclipse.dltk.debug.ui.breakpoints.ScriptLineBreakpointPropertyPage"
           name="Script Line Breakpoint">
           <enabledWhen>
-            <and>
             <or>
                <instanceof
                      value="org.eclipse.dltk.debug.core.model.IScriptLineBreakpoint">
@@ -328,15 +335,6 @@
                      type="org.eclipse.dltk.debug.core.model.IScriptLineBreakpoint">
                </adapt>              
             </or>
-            <not>
-            <instanceof
-                     value="org.eclipse.dltk.debug.core.model.IScriptWatchpoint"/>
-            </not>
-            <not>
-            <instanceof
-                     value="org.eclipse.dltk.debug.core.model.IScriptMethodEntryBreakpoint"/>
-            </not>
-            </and>
          </enabledWhen>
     </page>
     <page
@@ -403,7 +401,7 @@
           category="org.eclipse.dltk.preferences"
           class="org.eclipse.dltk.debug.ui.preferences.ScriptDebugPreferencePage"
           id="org.eclipse.dltk.preferences.debug"
-          name="%ScriptDebugPreferencePage.name">
+          name="Debugging">
     </page>
  </extension>
  <extension
