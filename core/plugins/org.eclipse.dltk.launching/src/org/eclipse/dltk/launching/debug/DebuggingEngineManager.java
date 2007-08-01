@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.debug.DebuggingEngine;
+import org.eclipse.dltk.internal.launching.debug.PriorityBasedDebuggingEngineSelector;
 import org.eclipse.dltk.launching.IInterpreterRunnerFactory;
 
 public class DebuggingEngineManager {
@@ -34,18 +35,13 @@ public class DebuggingEngineManager {
 
 	private static final String ID = "id";
 	private static final String NATURE_ID = "natureId";
-	private static final String PREFERENCE_PAGE_ID = "preferencePageId";
 	private static final String NAME = "name";
 	private static final String DESCRIPTION = "description";
 	private static final String PRIORITY = "priority";
 	private static final String CLASS = "class";
 
-	private static final String ENGINE_TAG = "engine";
-	private static final String SELECTOR_TAG = "selector";
-
 	private void addEngine(String natureId, IConfigurationElement element) {
 		final String id = element.getAttribute(ID);
-		final String preferencePageId = element.getAttribute(PREFERENCE_PAGE_ID);
 		final String name = element.getAttribute(NAME);
 		final String description = element.getAttribute(DESCRIPTION);
 		final int priority = Integer.parseInt(element.getAttribute(PRIORITY));
@@ -55,8 +51,7 @@ public class DebuggingEngineManager {
 			if (object instanceof IInterpreterRunnerFactory) {
 				IInterpreterRunnerFactory factory = (IInterpreterRunnerFactory) object;
 
-				IDebuggingEngine engine = new DebuggingEngine(id, natureId, preferencePageId,
-						name, description, priority, factory);
+				IDebuggingEngine engine = new DebuggingEngine(id, natureId, name, description, priority, factory);
 
 				List engines = (List) natureToEnginesMap.get(natureId);
 				if (engines == null) {
@@ -101,9 +96,9 @@ public class DebuggingEngineManager {
 				IConfigurationElement innerElement = innerElements[j];
 				String name = innerElement.getName();
 
-				if (name.equals(ENGINE_TAG)) {
+				if (name.equals("engine")) {
 					addEngine(natureId, innerElement);
-				} else if (name.equals(SELECTOR_TAG)) {
+				} else if (name.equals("selector")) {
 					addSelector(natureId, innerElement);
 				}
 			}

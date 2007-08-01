@@ -1,5 +1,7 @@
-package org.eclipse.dltk.launching.debug;
+package org.eclipse.dltk.internal.launching.debug;
 
+import org.eclipse.dltk.launching.debug.IDebuggingEngine;
+import org.eclipse.dltk.launching.debug.IDebuggingEngineSelector;
 
 public class PriorityBasedDebuggingEngineSelector implements
 		IDebuggingEngineSelector {

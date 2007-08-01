@@ -9,8 +9,6 @@ public interface IDebuggingEngine {
 	String getModelId();
 
 	String getNatureId();
-	
-	String getPreferencePageId();
 
 	String getName();
 
