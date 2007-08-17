@@ -290,8 +290,8 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		int elementType = getElementType();
 		if (elementType == SCRIPT_FOLDER || elementType == PROJECT_FRAGMENT
 				|| elementType == SCRIPT_PROJECT || elementType == SCRIPT_MODEL) { // fix
-																					// for
-																					// 1FWNMHH
+			// for
+			// 1FWNMHH
 			Enumeration openBuffers = getBufferManager().getOpenBuffers();
 			while (openBuffers.hasMoreElements()) {
 				IBuffer buffer = (IBuffer) openBuffers.nextElement();
@@ -395,10 +395,10 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		if (workspace == null)
 			return false; // workaround for
-							// http://bugs.eclipse.org/bugs/show_bug.cgi?id=34069
+		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=34069
 		return Model.getTarget(workspace.getRoot(), this.getPath()
 				.makeRelative(), // ensure path is relative (see
-									// http://dev.eclipse.org/bugs/show_bug.cgi?id=22517)
+				// http://dev.eclipse.org/bugs/show_bug.cgi?id=22517)
 				true) != null;
 	}
 
@@ -411,11 +411,12 @@ public abstract class Openable extends ModelElement implements IOpenable,
 					IModelStatusConstants.READ_ONLY, this));
 		}
 		IBuffer buf = getBuffer();
-		if (buf != null) { // some Openables (like a ScriptProject) don't have a
-							// buffer
+		if (buf != null) { // some Openables (like a ScriptProject) don't have
+			// a
+			// buffer
 			buf.save(pm, force);
 			this.makeConsistent(pm); // update the element info of this
-										// element
+			// element
 		}
 	}
 
@@ -431,7 +432,8 @@ public abstract class Openable extends ModelElement implements IOpenable,
 			int position, CompletionRequestor requestor, WorkingCopyOwner owner)
 			throws ModelException {
 		if (requestor == null) {
-			throw new IllegalArgumentException("Completion requestor cannot be null");
+			throw new IllegalArgumentException(
+					"Completion requestor cannot be null");
 		}
 
 		IBuffer buffer = getBuffer();
@@ -439,13 +441,16 @@ public abstract class Openable extends ModelElement implements IOpenable,
 			return;
 		}
 		if (position < -1 || position > buffer.getLength()) {
-			throw new ModelException(new ModelStatus(
-					IModelStatusConstants.INDEX_OUT_OF_BOUNDS));
+			if (DLTKCore.DEBUG) {
+				throw new ModelException(new ModelStatus(
+						IModelStatusConstants.INDEX_OUT_OF_BOUNDS));
+			}
+			return;
 		}
-		
+
 		ScriptProject project = (ScriptProject) getScriptProject();
 
-		//TODO: Add searchable environment support.
+		// TODO: Add searchable environment support.
 		SearchableEnvironment environment = project
 				.newSearchableNameEnvironment(owner);
 
@@ -453,8 +458,8 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		environment.unitToSkip = cu;
 
 		IDLTKLanguageToolkit toolkit = null;
-		
-		//TODO: rewrite this ugly code
+
+		// TODO: rewrite this ugly code
 		try {
 			toolkit = DLTKLanguageManager.getLanguageToolkit(this);
 		} catch (CoreException e) {
@@ -462,32 +467,35 @@ public abstract class Openable extends ModelElement implements IOpenable,
 				e.printStackTrace();
 			}
 		}
-		
+
 		if (toolkit == null) {
 			toolkit = DLTKLanguageManager.findToolkit(this.getResource());
 			if (toolkit == null) {
 				return;
 			}
 		}
-		
+
 		// code complete
 		ICompletionEngine engine = null;
 		try {
-			engine = DLTKLanguageManager.getCompletionEngine(toolkit.getNatureId());
+			engine = DLTKLanguageManager.getCompletionEngine(toolkit
+					.getNatureId());
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if( engine == null ) {
+		if (engine == null) {
 			return;
 		}
 		engine.setEnvironment(environment);
 		engine.setRequestor(requestor);
 		engine.setOptions(project.getOptions(true));
 		engine.setProject(project);
-		
-		/*toolkit.createCompletionEngine(environment,
-				requestor, project.getOptions(true), project);*/
+
+		/*
+		 * toolkit.createCompletionEngine(environment, requestor,
+		 * project.getOptions(true), project);
+		 */
 
 		engine.complete(cu, position, 0);
 
@@ -546,7 +554,8 @@ public abstract class Openable extends ModelElement implements IOpenable,
 
 		ISelectionEngine engine = null;
 		try {
-			engine = DLTKLanguageManager.getSelectionEngine(toolkit.getNatureId());
+			engine = DLTKLanguageManager.getSelectionEngine(toolkit
+					.getNatureId());
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -556,9 +565,9 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		}
 		engine.setEnvironment(environment);
 		engine.setOptions(project.getOptions(true));
-//		createSelectionEngine(environment,
-//				project.getOptions(true));
-		
+		// createSelectionEngine(environment,
+		// project.getOptions(true));
+
 		IModelElement[] elements = engine.select(cu, offset, offset + length
 				- 1);
 
