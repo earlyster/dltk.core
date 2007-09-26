@@ -24,14 +24,15 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.ElementChangedEvent;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IElementChangedListener;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceModuleInfoCache;
 import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
@@ -80,25 +81,9 @@ public class MixinModel {
 				changedListener);
 	}
 
-// private static void waitForAutoBuild() {
-// boolean wasInterrupted = false;
-// do {
-// try {
-// Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD,
-// null);
-// wasInterrupted = false;
-// } catch (OperationCanceledException e) {
-// e.printStackTrace();
-// } catch (InterruptedException e) {
-// wasInterrupted = true;
-// }
-// } while (wasInterrupted);
-// }
-
 	public IMixinElement get(String key) {
-		// waitForAutoBuild();
+
 		if (DLTKCore.VERBOSE) {
-// System.out.println("$$$ MixinModel.get() key=" + key);
 		}
 		if (notExistKeysCache.contains(key)) {
 			return null;
@@ -132,11 +117,11 @@ public class MixinModel {
 
 		ISourceModule[] containedModules = SearchEngine.searchMixinSources(
 				pattern, toolkit, set);
-		
+
 		if (containedModules.length == 0) {
 			return new IMixinElement[0];
 		}
-		
+
 		for (int i = 0; i < containedModules.length; ++i) {
 			reportModule(containedModules[i]);
 		}
@@ -156,7 +141,6 @@ public class MixinModel {
 	}
 
 	public String[] findKeys(String pattern) {
-// System.out.println("$$$ MixinModel.findKeys() pattern=" + pattern);
 		return SearchEngine.searchMixinPatterns(pattern, toolkit);
 	}
 
@@ -216,7 +200,7 @@ public class MixinModel {
 		markElementAsFinal(element);
 	}
 
-	private void markElementAsFinal(MixinElement element) {
+	private synchronized void markElementAsFinal(MixinElement element) {
 		element.bFinal = true;
 		for (Iterator i = element.children.iterator(); i.hasNext();) {
 			markElementAsFinal((MixinElement) i.next());
@@ -261,7 +245,8 @@ public class MixinModel {
 				this.currentModule = null;
 			}
 		} catch (CoreException e) {
-			e.printStackTrace();
+			if (DLTKCore.DEBUG)
+				e.printStackTrace();
 			return;
 		}
 	}
@@ -274,14 +259,18 @@ public class MixinModel {
 	 * @return
 	 */
 	private ISourceModule[] findModules(String key) {
-// long start = System.currentTimeMillis();
 		ISourceModule[] searchMixinSources = SearchEngine.searchMixinSources(
 				key, toolkit);
-// long end = System.currentTimeMillis();
-// System.out.println("findModules:" + Long.toString(end - start));
 		return searchMixinSources;
 	}
 
+	/**
+	 * Returns a mixin element from this.cache by it's key, or creates new one
+	 * if cache doesn't contain required element
+	 * 
+	 * @param key
+	 * @return
+	 */
 	private synchronized MixinElement getCreateEmpty(String key) {
 		MixinElement element = (MixinElement) MixinModel.this.cache.get(key);
 		if (element == null) {
@@ -321,13 +310,24 @@ public class MixinModel {
 					MixinModel.this.remove((ISourceModule) element);
 				}
 			}
+
+			if (delta.getKind() == IModelElementDelta.CHANGED
+					&& ((delta.getFlags() & IModelElementDelta.F_REMOVED_FROM_BUILDPATH) != 0)) {
+				MixinModel.this.cache.flush();
+			}
+
+			if (delta.getKind() == IModelElementDelta.CHANGED
+					&& ((delta.getFlags() & IModelElementDelta.F_ADDED_TO_BUILDPATH) != 0)) {
+				MixinModel.this.notExistKeysCache.clear();
+			}
 			if (delta.getKind() == IModelElementDelta.ADDED) {
 				if (element.getElementType() == IModelElement.SOURCE_MODULE) {
-					// clearAllElementsState();
 					if (!modulesToReparse.contains(element)) {
 						modulesToReparse.add(element);
+						reportModule((ISourceModule) element);
 					}
 				}
+				MixinModel.this.notExistKeysCache.clear();
 			}
 
 			if ((delta.getFlags() & IModelElementDelta.F_CHILDREN) != 0) {
@@ -420,7 +420,15 @@ public class MixinModel {
 			this.elementToMixinCache.remove(element);
 		}
 	}
-
+	/***
+	 * Then getObjects are called, special initialize listener are called. 
+	 *
+	 */
+	public interface IMixinObjectInitializeListener {
+		void initialize(IMixinElement element, Object object, ISourceModule module);
+	}
+	private final ListenerList mixinObjectInitializeListeners = new ListenerList();
+	
 	private class MixinElement implements IMixinElement, IInternalMixinElement {
 		private String key;
 		private boolean bFinal = false;
@@ -546,21 +554,26 @@ public class MixinModel {
 			this.validate();
 			Object o = this.sourceModuleToObject.get(module);
 			if (o instanceof List) {
-				return ((List) o).toArray();
+			
+				Object[] objs = ((List) o).toArray();
+				for (int i = 0; i < objs.length; i++) {
+					notifyInitializeListener(this, module, objs[i]);
+				}
+				return objs;
 			}
+			notifyInitializeListener(this, module, o);
 			return new Object[] { o };
 		}
 
 		public Object[] getAllObjects() {
 			this.validate();
-			List objects = new ArrayList();
-			for (int i = 0; i < this.sourceModules.size(); ++i) {
-				Object[] objs = this
-						.getObjects((ISourceModule) this.sourceModules.get(i));
+			HashSet objects = new HashSet();
+			for (Iterator iterator = this.sourceModules.iterator(); iterator
+					.hasNext();) {
+				ISourceModule module = (ISourceModule) iterator.next();
+				Object[] objs = this.getObjects(module);
 				for (int j = 0; j < objs.length; ++j) {
-					if (!objects.contains(objs[j])) {
-						objects.add(objs[j]);
-					}
+					objects.add(objs[j]);
 				}
 			}
 			return objects.toArray();
@@ -658,7 +671,7 @@ public class MixinModel {
 			// }
 		}
 	}
-	
+
 	public void makeAllModuleElementsFinal(ISourceModule module) {
 		if (this.elementToMixinCache.containsKey(module)) {
 			List elements = (List) this.elementToMixinCache.get(module);
@@ -690,5 +703,21 @@ public class MixinModel {
 		existKeysCache.remove(key);
 		notExistKeysCache.remove(key);
 		// MixinElement e = (MixinElement)this.cache.get(key);
-	};
+	}
+	
+	//// Mixin object initialize listeners code
+	public void addObjectInitializeListener(
+			IMixinObjectInitializeListener mixinObjectInitializeListener) {
+		this.mixinObjectInitializeListeners.add(mixinObjectInitializeListener);
+	}
+	public void removeObjectInitializeListener(
+			IMixinObjectInitializeListener mixinObjectInitializeListener) {
+		this.mixinObjectInitializeListeners.remove(mixinObjectInitializeListener);
+	}
+	private void notifyInitializeListener(IMixinElement element, ISourceModule module, Object o ) {
+		Object[] listeners = mixinObjectInitializeListeners.getListeners();
+		for (int i = 0; i < listeners.length; i++) {
+			((IMixinObjectInitializeListener)(listeners[i])).initialize(element, o, module);
+		}
+	}
 }

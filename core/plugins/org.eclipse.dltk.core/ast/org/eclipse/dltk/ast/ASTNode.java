@@ -17,6 +17,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.internal.core.SourceRange;
 import org.eclipse.dltk.utils.CorePrinter;
@@ -185,7 +186,9 @@ public abstract class ASTNode {
 		try {
 			this.traverse(visitor);
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 		return result;
 	}
