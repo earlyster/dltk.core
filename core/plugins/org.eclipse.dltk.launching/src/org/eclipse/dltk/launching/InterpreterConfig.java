@@ -34,6 +34,7 @@ public class InterpreterConfig {
 		}
 
 		this.scriptFile = scriptFile;
+		this.workingDirectory = scriptFile.getParentFile();
 	}
 
 	public InterpreterConfig(File scriptFile, File workingDirectory) {
@@ -58,8 +59,13 @@ public class InterpreterConfig {
 	public File getScriptFile() {
 		return scriptFile;
 	}
-
+	protected void checkScriptFile(File file) {
+		if (file == null) {
+			throw new IllegalArgumentException("Script file cannot be null");
+		}
+	}
 	public void setScriptFile(File file) {
+		checkScriptFile(file);
 		this.scriptFile = file;
 	}
 
@@ -67,13 +73,23 @@ public class InterpreterConfig {
 	public File getWorkingDirectory() {
 		return workingDirectory;
 	}
-
+	protected void checkWorkingDirectory(File directory) {
+		if (directory == null) {
+			throw new IllegalArgumentException(
+					"Working directory cannot be null");
+		}
+	}
 	public void setWorkingDirectory(File directory) {
+		checkWorkingDirectory(directory);
 		this.workingDirectory = directory;
 	}
 
 	// Interpreter section
 	public boolean addInterpreterArg(String arg) {
+		if (arg == null) {
+			throw new IllegalArgumentException(
+					"Interpreter argument cannot be null");
+		}
 		return interpreterArgs.add(arg);
 	}
 
@@ -112,10 +128,16 @@ public class InterpreterConfig {
 
 	// Script section
 	public boolean addScriptArg(String arg) {
+		if (arg == null) {
+			throw new IllegalArgumentException("Script argument cannot be null");
+		}
 		return scriptArgs.add(arg);
 	}
 
 	public void addScriptArgs(String[] args) {
+		if (args == null) {
+			throw new IllegalArgumentException("Script argument cannot be null");
+		}
 		for (int i = 0; i < args.length; ++i) {
 			addScriptArg(args[i]);
 		}
