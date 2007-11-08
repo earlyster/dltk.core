@@ -105,7 +105,11 @@ public class DLTKLanguageManager {
 
 	public static IDLTKLanguageToolkit getLanguageToolkit(IModelElement element)
 			throws CoreException {
-		return (IDLTKLanguageToolkit) instance.getObject(element);
+		IDLTKLanguageToolkit toolkit = (IDLTKLanguageToolkit) instance.getObject(element);
+		if( toolkit == null && element.getElementType() == IModelElement.SOURCE_MODULE ) {
+			return findAppropriateToolkitByObject(element.getPath());
+		}
+		return toolkit;
 	}
 
 	public static IDLTKLanguageToolkit findToolkit(IResource resource) {
