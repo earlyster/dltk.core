@@ -271,7 +271,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			// on full build we need to manage this.
 			// Call builders for resources.
 			buildResources(resources, monitor, 60);
-			
+
 			Set elements = getExternalElementsFrom(scriptProject, monitor, 5);
 			List els = new ArrayList();
 			els.addAll(elements);
@@ -329,13 +329,15 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		this.lastState = newState;
 		try {
 			monitor.beginTask("Incremental building", 100);
+
 			Set resources = getResourcesFrom(delta, monitor, 5);
+			
 			// Call builders for resources.
 			Set actualResourcesToBuild = findDependencies(resources);
 			monitor.done();
 
 			buildResources(actualResourcesToBuild, monitor, 60);
-			
+			//
 			Set elements = getExternalElementsFrom(scriptProject, monitor, 5);
 			List els = new ArrayList();
 			els.addAll(elements);
@@ -390,37 +392,43 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			}
 			return;
 		}
-		Set alreadyPassed = new HashSet();
-		for (int j = 0; j < natureIds.length; j++) {
-			try {
-				IScriptBuilder[] builders = ScriptBuilderManager
-						.getScriptBuilders(natureIds[j]);
-				if (builders != null) {
-					for (int k = 0; k < builders.length; k++) {
-						IProgressMonitor ssub = new SubProgressMonitor(monitor,
-								(tiks / 3)
-										/ (builders.length * natureIds.length));
-						ssub.beginTask("Building", 1);
-						if (!alreadyPassed.contains(builders[k])) {
-							alreadyPassed.add(builders[k]);
-							IStatus[] st = builders[k].buildResources(
-									this.scriptProject, realResources, ssub);
-							if (st != null) {
-								for (int i = 0; i < st.length; i++) {
-									IStatus s = st[i];
-									if (s != null
-											&& s.getSeverity() != IStatus.OK) {
-										status.add(s);
+		if (realResources.size() == 0) {
+			monitor.worked(tiks / 3);
+		} else {
+			Set alreadyPassed = new HashSet();
+			for (int j = 0; j < natureIds.length; j++) {
+				try {
+					IScriptBuilder[] builders = ScriptBuilderManager
+							.getScriptBuilders(natureIds[j]);
+					if (builders != null) {
+						for (int k = 0; k < builders.length; k++) {
+							IProgressMonitor ssub = new SubProgressMonitor(
+									monitor,
+									(tiks / 3)
+											/ (builders.length * natureIds.length));
+							ssub.beginTask("Building", 1);
+							if (!alreadyPassed.contains(builders[k])) {
+								alreadyPassed.add(builders[k]);
+								IStatus[] st = builders[k]
+										.buildResources(this.scriptProject,
+												realResources, ssub);
+								if (st != null) {
+									for (int i = 0; i < st.length; i++) {
+										IStatus s = st[i];
+										if (s != null
+												&& s.getSeverity() != IStatus.OK) {
+											status.add(s);
+										}
 									}
 								}
 							}
+							ssub.done();
 						}
-						ssub.done();
 					}
-				}
-			} catch (CoreException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
+				} catch (CoreException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
