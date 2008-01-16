@@ -19,6 +19,7 @@ import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuffer;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProblemRequestor;
@@ -56,7 +57,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 			IProgressMonitor monitor) throws ModelException {
 		ModelManager manager = ModelManager.getModelManager();
 		ModelManager.PerWorkingCopyInfo perWorkingCopyInfo = manager
-		.getPerWorkingCopyInfo(this, false /* don't create */,
+				.getPerWorkingCopyInfo(this, false /* don't create */,
 						true /* record usage */, null /*
 														 * no problem requestor
 														 * needed
@@ -404,7 +405,11 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		IResource resource = this.getResource();
 		Object lookup = (resource == null) ? (Object) getPath() : resource;
 
-		return lookupLanguageToolkit(lookup).getNatureId();
+		IDLTKLanguageToolkit lookupLanguageToolkit = lookupLanguageToolkit(lookup);
+		if( lookupLanguageToolkit == null ) {
+			return null;
+		}
+		return lookupLanguageToolkit.getNatureId();
 	}
 
 	/*
@@ -424,7 +429,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	protected char[] getBufferContent() throws ModelException {
 		IFile file = (IFile) this.getResource();
 		if (file == null || !file.exists()) {
-			//throw newNotPresentException();
+			// throw newNotPresentException();
 			// initialize buffer with empty contents
 			return CharOperation.NO_CHAR;
 		}
@@ -447,24 +452,6 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 				DefaultWorkingCopyOwner.PRIMARY);
 	}
 
-	protected void toStringInfo(int tab, StringBuffer buffer, Object info, boolean showResolvedInfo) {
-		if (!isPrimary()) {
-			buffer.append(this.tabString(tab));
-			buffer.append("[Working copy] "); //$NON-NLS-1$
-			toStringName(buffer);
-		} else {
-			if (isWorkingCopy()) {
-				buffer.append(this.tabString(tab));
-				buffer.append("[Working copy] "); //$NON-NLS-1$
-				toStringName(buffer);
-				if (info == null) {
-					buffer.append(" (not open)"); //$NON-NLS-1$
-				}
-			} else {
-				super.toStringInfo(tab, buffer, info, showResolvedInfo);
-			}
-		}
-	}
 	/*
 	 * Assume that this is a working copy
 	 */
