@@ -33,7 +33,10 @@ public final class LibraryStandin {
 	 */	
 	public LibraryStandin(LibraryLocation libraryLocation) {
 		fSystemLibrary= libraryLocation.getLibraryPath();
-	}		
+	}	
+	public LibraryStandin(IPath path) {
+		fSystemLibrary= path;
+	}	
 		
 	/**
 	 * Returns the InterpreterEnvironment library archive location.
