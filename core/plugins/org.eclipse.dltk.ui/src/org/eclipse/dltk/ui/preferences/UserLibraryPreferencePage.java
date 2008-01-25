@@ -910,8 +910,8 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 				null,
 
 				PreferencesMessages.UserLibraryPreferencePage_libraries_load_button,
-				PreferencesMessages.UserLibraryPreferencePage_libraries_save_button,
-				null, "Detect" };
+				PreferencesMessages.UserLibraryPreferencePage_libraries_save_button/*,
+				null, "Detect" */};
 
 		fLibraryList = new TreeListDialogField(adapter, buttonLabels,
 				new BPListLabelProvider());
@@ -1174,7 +1174,7 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 		field.enableButton(IDX_UP, canMoveUp(list));
 		field.enableButton(IDX_DOWN, canMoveDown(list));
 		field.enableButton(IDX_SAVE, field.getSize() > 0);
-		field.enableButton(IDX_DETECT, isDetectionSupported());
+//		field.enableButton(IDX_DETECT, isDetectionSupported());
 	}
 
 	protected void doCustomButtonPressed(TreeListDialogField field, int index) {
