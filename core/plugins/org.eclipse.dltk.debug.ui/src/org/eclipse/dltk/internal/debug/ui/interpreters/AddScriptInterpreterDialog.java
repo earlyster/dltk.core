@@ -209,8 +209,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 			gd = new GridData(GridData.FILL_BOTH);
 			gd.horizontalSpan = 3;
 			block.setLayoutData(gd);
-		}
-		else {
+		} else {
 			l.dispose();
 		}
 
@@ -552,7 +551,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	 */
 	public void updateLibraries(EnvironmentVariable[] newVars,
 			EnvironmentVariable[] oldVars) {
-		// fLibraryBlock.reDiscover(newVars, oldVars);
+		fLibraryBlock.reDiscover(newVars, oldVars);
 	}
 
 	protected boolean isRediscoverSupported() {
