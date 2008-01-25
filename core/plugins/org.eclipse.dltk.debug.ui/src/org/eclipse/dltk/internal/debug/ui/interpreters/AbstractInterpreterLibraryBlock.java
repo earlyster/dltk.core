@@ -203,7 +203,8 @@ public abstract class AbstractInterpreterLibraryBlock implements
 				.getEnvironmentVariables());
 		if (libs != null) {
 			fLibraryContentProvider.setLibraries(libs);
-			fLibraryContentProvider.initialize(getHomeDirectory(), fDialog.getEnvironmentVariables());
+			fLibraryContentProvider.initialize(getHomeDirectory(), fDialog
+					.getEnvironmentVariables());
 		}
 		update();
 	}
@@ -410,7 +411,8 @@ public abstract class AbstractInterpreterLibraryBlock implements
 			return;
 		fLibraryContentProvider.add(new LibraryLocation[] { libs }, selection);
 		// We need to reinitialize.
-		fLibraryContentProvider.initialize(this.getHomeDirectory(), fDialog.getEnvironmentVariables());
+		fLibraryContentProvider.initialize(this.getHomeDirectory(), fDialog
+				.getEnvironmentVariables());
 		update();
 	}
 
@@ -462,8 +464,10 @@ public abstract class AbstractInterpreterLibraryBlock implements
 				}
 			}
 		}
-		fUpButton.setEnabled(enableUp);
-		fDownButton.setEnabled(enableDown);
+		fUpButton.setEnabled(enableUp
+				&& fLibraryContentProvider.canUp(selection));
+		fDownButton.setEnabled(enableDown
+				&& fLibraryContentProvider.canUp(selection));
 	}
 
 	/**
@@ -505,7 +509,8 @@ public abstract class AbstractInterpreterLibraryBlock implements
 			fLibraryContentProvider.setLibraries(libs[0]);
 
 			// Set All possibly libraries here
-			fLibraryContentProvider.initialize(getHomeDirectory(), fDialog.getEnvironmentVariables());
+			fLibraryContentProvider.initialize(getHomeDirectory(), fDialog
+					.getEnvironmentVariables());
 		}
 		update();
 	}

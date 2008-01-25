@@ -199,4 +199,11 @@ public class LibraryContentProvider implements ITreeContentProvider {
 	public boolean canEnable(IStructuredSelection selection) {
 		return false;
 	}
+
+	public boolean canUp(IStructuredSelection selection) {
+		return true;
+	}
+	public boolean canDown(IStructuredSelection selection) {
+		return true;
+	}
 }
