@@ -557,4 +557,5 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	protected boolean isRediscoverSupported() {
 		return false;
 	}
+
 }
