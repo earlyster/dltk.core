@@ -15,7 +15,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.dltk.validators.ValidatorConfigurationPage;
+import org.eclipse.dltk.validators.ui.ValidatorConfigurationPage;
 
 public class ValidatorConfigurationPageManager {
 

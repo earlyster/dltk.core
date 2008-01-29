@@ -15,13 +15,12 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.ui.AbstractValidateSelectionWithConsole;
-import org.eclipse.ui.IObjectActionDelegate;
 
-public class RemoveValidatorAllMarkersAction extends AbstractValidateSelectionWithConsole implements IObjectActionDelegate {
+public class ValidateSelectionWithConsoleAction extends AbstractValidateSelectionWithConsole {
 	protected void invoceValidationFor(final OutputStream out,
 			final List elements, final List resources,
 			IProgressMonitor monitor) {
-		ValidatorRuntime.executeCleanAllValidatorsWithConsole(
+		ValidatorRuntime.executeAllValidatorsWithConsole(out,
 				elements, resources, monitor);
 	}
 }
