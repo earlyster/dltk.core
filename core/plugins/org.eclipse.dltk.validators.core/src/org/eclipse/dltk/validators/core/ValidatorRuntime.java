@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
@@ -368,6 +369,41 @@ public final class ValidatorRuntime {
 				monitor);
 	}
 
+	public static void executeValidatorWithConsole(String id,
+			OutputStream stream, List elements, List resources,
+			IProgressMonitor monitor) {
+		IValidator[] validValidators = getValidValidators();
+		List required = new ArrayList();
+		for (int i = 0; i < validValidators.length; i++) {
+			if (id.equals(validValidators[i].getValidatorType().getID())) {
+				required.add(validValidators[i]);
+			}
+		}
+		IValidator[] activeValidators = (IValidator[]) required
+				.toArray(new IValidator[required.size()]);
+		if (activeValidators.length == 0) {
+			if (stream != null) {
+				try {
+					IValidatorType type = getValidatorType(id);
+					String sub = "...";
+					if (type != null) {
+						sub = "for " + type.getName() + "...";
+					}
+					stream
+							.write(("Validation could not be performed...\nPlease check validator preferences " + sub)
+									.getBytes());
+				} catch (IOException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
+			}
+			return;
+		}
+		process(stream, elements, resources, activeValidators, processValidate,
+				monitor);
+	}
+
 	public static void executeAllValidatorsWithConsole(OutputStream stream,
 			List elements, List resources) {
 		executeAllValidatorsWithConsole(stream, elements, resources, null);
@@ -440,9 +476,13 @@ public final class ValidatorRuntime {
 												.getPath()).getBytes());
 							}
 						} catch (IOException e1) {
-							e1.printStackTrace();
+							if (DLTKCore.DEBUG) {
+								e1.printStackTrace();
+							}
 						}
-						e.printStackTrace();
+						if (DLTKCore.DEBUG) {
+							e.printStackTrace();
+						}
 						continue;
 					}
 					for (int i = 0; i < activeValidators.length; i++) {
@@ -465,7 +505,9 @@ public final class ValidatorRuntime {
 										try {
 											stream.write(message.getBytes());
 										} catch (IOException e1) {
-											e1.printStackTrace();
+											if (DLTKCore.DEBUG) {
+												e1.printStackTrace();
+											}
 										}
 									}
 								}

@@ -12,6 +12,7 @@ package org.eclipse.dltk.validators.core;
 import java.io.OutputStream;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.core.ISourceModule;
 import org.w3c.dom.Document;
@@ -23,6 +24,7 @@ public abstract class AbstractValidator implements IValidator {
 	private String name;
 	private IValidatorType type;
 	private boolean active = true;
+	private IProgressMonitor progressMonitor;
 	
 	protected AbstractValidator(String id, String name, IValidatorType type ) {
 		this.id = id;
@@ -76,5 +78,11 @@ public abstract class AbstractValidator implements IValidator {
 	}
 	public void setActive(boolean active) {
 		this.active = active;
-	}	
+	}
+	public void setProgressMonitor(IProgressMonitor monitor) {
+		this.progressMonitor = monitor;
+	}
+	public IProgressMonitor getProgressMonitor() {
+		return this.progressMonitor;
+	}
 }
