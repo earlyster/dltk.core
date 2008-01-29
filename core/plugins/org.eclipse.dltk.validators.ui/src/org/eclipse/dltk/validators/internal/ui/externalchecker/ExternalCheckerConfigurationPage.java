@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.dltk.validators.ValidatorConfigurationPage;
 import org.eclipse.dltk.validators.internal.core.externalchecker.ExternalChecker;
 import org.eclipse.dltk.validators.internal.core.externalchecker.Rule;
+import org.eclipse.dltk.validators.ui.ValidatorConfigurationPage;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
 import org.eclipse.jface.viewers.IStructuredContentProvider;

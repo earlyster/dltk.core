@@ -1,13 +1,4 @@
-/*******************************************************************************
- * Copyright (c) 2005, 2007 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- 
- *******************************************************************************/
-package org.eclipse.dltk.validators.internal.ui.popup.actions;
+package org.eclipse.dltk.validators.ui;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -18,9 +9,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.internal.core.ValidatorUtils;
-import org.eclipse.dltk.validators.internal.ui.ValidatorConsoleTrackerManager;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -37,15 +26,16 @@ import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.console.IPatternMatchListener;
 
-public class ValidatorSelectionWithConsoleAction implements
-		IObjectActionDelegate {
+public abstract class AbstractValidateSelectionWithConsole implements IObjectActionDelegate {
+
 	public static final String DLTK_VALIDATORS_CONSOLE = "DLTK Validators output";
+
+	protected abstract void invoceValidationFor(final OutputStream out, final List elements,
+			final List resources, IProgressMonitor monitor);
+
 	ISelection selection;
 
-	/**
-	 * Constructor for Action1.
-	 */
-	public ValidatorSelectionWithConsoleAction() {
+	public AbstractValidateSelectionWithConsole() {
 		super();
 	}
 
@@ -81,8 +71,7 @@ public class ValidatorSelectionWithConsoleAction implements
 		}
 	}
 
-	private void processSelectionToElements(final OutputStream out,
-			ISelection selection) {
+	protected void processSelectionToElements(final OutputStream out, ISelection selection) {
 		final List elements = new ArrayList();
 		final List resources = new ArrayList();
 		if (this.selection != null
@@ -95,21 +84,19 @@ public class ValidatorSelectionWithConsoleAction implements
 						resources);
 			}
 		}
-
+	
 		// ValidatorRuntime.executeAllValidatorsWithConsole(out, elements,
 		// resources);
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(PlatformUI
 				.getWorkbench().getDisplay().getActiveShell());
 		try {
 			dialog.run(true, true, new IRunnableWithProgress() {
-
+	
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-//					monitor.beginTask("DLTK Validation with console", 1);
-					ValidatorRuntime.executeAllValidatorsWithConsole(out,
-							elements, resources, monitor);
-//					monitor.done();
+					invoceValidationFor(out, elements, resources, monitor);
 				}
+	
 			});
 		} catch (InvocationTargetException e) {
 			if (DLTKCore.DEBUG) {

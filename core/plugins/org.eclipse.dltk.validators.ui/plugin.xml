@@ -30,19 +30,23 @@
                label="DLTK Validators"
                path="additions">
             <separator
-                  name="top">
+                  name="sep">
             </separator>
+            <groupMarker
+                  name="bottom">
+            </groupMarker>
          </menu>
          <action
-               class="org.eclipse.dltk.validators.internal.ui.popup.actions.ValidatorSelectionWithConsoleAction"
-               id="org.eclipse.dltk.validators.ui.newAction"
-               label="Validate selection with console"
-               menubarPath="org.eclipse.dltk.validators.ui.menu/top"
-               >
+               class="org.eclipse.dltk.validators.internal.ui.popup.actions.ValidateSelectionWithConsoleAction"
+               icon="icons/goto_input.gif"
+               id="org.eclipse.dltk.validators.ui.execActive"
+               label="Execute all active validators with console"
+               menubarPath="org.eclipse.dltk.validators.ui.menu/top">
          </action>
          <action
                class="org.eclipse.dltk.validators.internal.ui.popup.actions.RemoveValidatorAllMarkersAction"
-               id="org.eclipse.dltk.validators.ui.action2"
+               icon="icons/clear_co.gif"
+               id="org.eclipse.dltk.validators.ui.clean"
                label="Remove all validator markers"
                menubarPath="org.eclipse.dltk.validators.ui.menu/top">
          </action>

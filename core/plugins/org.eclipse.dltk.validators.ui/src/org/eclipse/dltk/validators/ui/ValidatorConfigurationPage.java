@@ -7,7 +7,7 @@
  *
  
  *******************************************************************************/
-package org.eclipse.dltk.validators;
+package org.eclipse.dltk.validators.ui;
 
 import org.eclipse.dltk.validators.core.IValidator;
 import org.eclipse.swt.widgets.Composite;

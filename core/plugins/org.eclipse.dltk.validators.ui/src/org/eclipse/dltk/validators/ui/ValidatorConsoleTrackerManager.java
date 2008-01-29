@@ -7,7 +7,7 @@
  *
  
  *******************************************************************************/
-package org.eclipse.dltk.validators.internal.ui;
+package org.eclipse.dltk.validators.ui;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dltk.validators.internal.ui.ValidatorsUI;
 import org.eclipse.ui.console.IPatternMatchListener;
 
 public class ValidatorConsoleTrackerManager {
