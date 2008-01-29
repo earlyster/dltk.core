@@ -20,7 +20,7 @@ public class ValidateSelectionWithConsoleAction extends AbstractValidateSelectio
 	protected void invoceValidationFor(final OutputStream out,
 			final List elements, final List resources,
 			IProgressMonitor monitor) {
-		ValidatorRuntime.executeAllValidatorsWithConsole(out,
+		ValidatorRuntime.executeAllValidators(out,
 				elements, resources, monitor);
 	}
 }
