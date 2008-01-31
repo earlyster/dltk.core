@@ -24,4 +24,12 @@ public class RemoveValidatorAllMarkersAction extends AbstractValidateSelectionWi
 		ValidatorRuntime.executeCleanAllValidatorsWithConsole(
 				elements, resources, monitor);
 	}
+
+	protected String getJobName() {
+		return "Validator cleanup";
+	}
+
+	protected boolean isConsoleRequired() {
+		return false;
+	}
 }
