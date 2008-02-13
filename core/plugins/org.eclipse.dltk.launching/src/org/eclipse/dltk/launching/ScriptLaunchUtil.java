@@ -54,6 +54,22 @@ public class ScriptLaunchUtil {
 		return config;
 	}
 
+	public static InterpreterConfig createInterpreterConfig(File scriptFile,
+			File workingDirectory, EnvironmentVariable[] env) {
+		InterpreterConfig config = new InterpreterConfig(scriptFile,
+				workingDirectory);
+
+		config.addEnvVars(DebugPlugin.getDefault().getLaunchManager()
+				.getNativeEnvironmentCasePreserved());
+		if (env != null) {
+			for (int i = 0; i < env.length; i++) {
+				config.addEnvVar(env[i].getName(), env[i].getValue());
+			}
+		}
+
+		return config;
+	}
+
 	// Useful run methods
 	public static Process runScriptWithInterpreter(String interpreter,
 			InterpreterConfig config) throws CoreException {
@@ -93,7 +109,8 @@ public class ScriptLaunchUtil {
 
 	public static Process runScriptWithInterpreter(String interpreter,
 			File scriptFile, File workingDirectory, String[] interpreterArgs,
-			String[] scriptArgs) throws CoreException {
+			String[] scriptArgs, EnvironmentVariable[] environment)
+			throws CoreException {
 		InterpreterConfig config = createInterpreterConfig(scriptFile,
 				workingDirectory);
 
@@ -105,16 +122,24 @@ public class ScriptLaunchUtil {
 			config.addInterpreterArgs(interpreterArgs);
 		}
 
+		if (environment != null) {
+			for (int i = 0; i < environment.length; i++) {
+				config.addEnvVar(environment[i].getName(), environment[i]
+						.getValue());
+			}
+		}
+
 		return runScriptWithInterpreter(interpreter, config);
 	}
 
 	public static Process runScriptWithInterpreter(String interpreter,
 			String scriptContent, File workingDirectory,
-			String[] interpreterArgs, String[] scriptArgs)
-			throws CoreException, IOException {
+			String[] interpreterArgs, String[] scriptArgs,
+			EnvironmentVariable[] environment) throws CoreException,
+			IOException {
 		return runScriptWithInterpreter(interpreter,
 				createScriptFileWithContent(scriptContent), workingDirectory,
-				interpreterArgs, scriptArgs);
+				interpreterArgs, scriptArgs, environment);
 	}
 
 	// 
@@ -158,8 +183,15 @@ public class ScriptLaunchUtil {
 	// Run by default interpreter
 	public static ILaunch runScript(String natureId, InterpreterConfig config,
 			IProgressMonitor monitor) throws CoreException {
-		return runScript(getDefaultInterpreterInstall(natureId), config,
-				monitor);
+		IInterpreterInstall install = getDefaultInterpreterInstall(natureId);
+		EnvironmentVariable[] variables = install.getEnvironmentVariables();
+		if (variables != null) {
+			for (int i = 0; i < variables.length; i++) {
+				config.addEnvVar(variables[i].getName(), variables[i]
+						.getValue());
+			}
+		}
+		return runScript(install, config, monitor);
 	}
 
 	// Script file
