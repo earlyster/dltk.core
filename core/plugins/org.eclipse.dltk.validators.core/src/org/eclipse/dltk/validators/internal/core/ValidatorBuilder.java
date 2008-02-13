@@ -11,17 +11,12 @@ package org.eclipse.dltk.validators.internal.core;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.ISourceManipulation;
-import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
-import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
-import org.eclipse.dltk.internal.core.ExternalProjectFragment;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 
 public class ValidatorBuilder implements IScriptBuilder {
