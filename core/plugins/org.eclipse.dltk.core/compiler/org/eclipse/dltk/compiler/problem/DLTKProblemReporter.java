@@ -36,6 +36,7 @@ public class DLTKProblemReporter implements IProblemReporter {
 
 	private IResource resource;
 	private IProblemFactory factory;
+	private boolean cleaned = false;
 
 	public IMarker reportProblem(IProblem problem) throws CoreException {
 		int severity = IMarker.SEVERITY_INFO;
@@ -89,6 +90,11 @@ public class DLTKProblemReporter implements IProblemReporter {
 					e.printStackTrace();
 				}
 			}
+			this.cleaned  = true;
 		}
+	}
+
+	public boolean isMarkersCleaned() {
+		return this.cleaned;
 	}
 }
