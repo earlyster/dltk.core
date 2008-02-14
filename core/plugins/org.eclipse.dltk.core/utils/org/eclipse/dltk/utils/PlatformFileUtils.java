@@ -17,6 +17,19 @@ public class PlatformFileUtils {
 		if (!file.exists() && !file.isAbsolute()) {
 			String loc;
 			Location location = Platform.getInstanceLocation();
+			if( location != null ) {
+				try {
+					loc = FileLocator.resolve(location.getURL()).getPath();
+					File nfile = new File(loc + File.separator + locationName);
+					if( nfile.exists() ) {
+						return nfile;
+					}
+				} catch (IOException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
+			}
 			if (location == null) {
 				location = Platform.getInstallLocation();
 			}
