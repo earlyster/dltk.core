@@ -16,12 +16,14 @@ public class PlatformFileUtils {
 		String locationName = file.getPath();
 		if (!file.exists() && !file.isAbsolute()) {
 			String loc;
-			Location location = Platform.getInstanceLocation();
-			if( location != null ) {
+			Location location = Platform.getInstallLocation();
+			if (location != null) {
 				try {
 					loc = FileLocator.resolve(location.getURL()).getPath();
+					System.out.println("relavie to:" + loc);
 					File nfile = new File(loc + File.separator + locationName);
-					if( nfile.exists() ) {
+					System.out.println("relavie to:" + nfile.toString());
+					if (nfile.exists()) {
 						return nfile;
 					}
 				} catch (IOException e) {
@@ -30,14 +32,15 @@ public class PlatformFileUtils {
 					}
 				}
 			}
-			if (location == null) {
-				location = Platform.getInstallLocation();
-			}
+
+			location = Platform.getInstanceLocation();
+
 			if (location != null) {
 				try {
 					loc = FileLocator.resolve(location.getURL()).getPath();
 					File nfile = new File(loc + File.separator + locationName);
-					if( nfile.exists() ) {
+					System.out.println("relavie to:" + nfile.toString());
+					if (nfile.exists()) {
 						return nfile;
 					}
 				} catch (IOException e) {
