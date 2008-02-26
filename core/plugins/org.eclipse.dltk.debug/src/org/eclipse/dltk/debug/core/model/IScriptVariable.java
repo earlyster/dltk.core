@@ -11,7 +11,6 @@ package org.eclipse.dltk.debug.core.model;
 
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IVariable;
-import org.eclipse.dltk.debug.core.eval.IScriptEvaluationListener;
 
 public interface IScriptVariable extends IVariable {
 	String getId();
