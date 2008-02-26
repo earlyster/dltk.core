@@ -546,6 +546,13 @@ public class ScriptElementLabels {
 		return (IProjectFragment) element;
 	}
 
+	protected void getScriptFolderLabel(IScriptFolder folder, StringBuffer buf) {
+		buf.append(folder.getElementName()/*
+											 * .replace(IScriptFolder.PACKAGE_DELIMITER,
+											 * '.')
+											 */);
+	}
+
 	private void getScriptFolderLabel(IScriptFolder folder, long flags,
 			StringBuffer buf) {
 		if (getFlag(flags, P_QUALIFIED)) {
@@ -574,10 +581,7 @@ public class ScriptElementLabels {
 			}
 			buf.append(name.substring(start));
 		} else {
-			buf.append(folder.getElementName()/*
-												 * .replace(IScriptFolder.PACKAGE_DELIMITER,
-												 * '.')
-												 */);
+			getScriptFolderLabel(folder, buf);
 		}
 		if (getFlag(flags, P_POST_QUALIFIED)) {
 			buf.append(CONCAT_STRING);
@@ -934,23 +938,24 @@ public class ScriptElementLabels {
 		}
 		// refreshPackageNamePattern();
 
-// if (getFlag(flags, P_COMPRESSED) && fgPkgNameLength >= 0) {
-// String name = pack.getElementName();
-// int start = 0;
-// int dot = name.indexOf(getTypeDelimiter(), start);
-// while (dot > 0) {
-// if (dot - start > fgPkgNameLength - 1) {
-// buf.append(fgPkgNamePrefix);
-// if (fgPkgNameChars > 0)
-// buf.append(name.substring(start, Math.min(start + fgPkgNameChars, dot)));
-// buf.append(fgPkgNamePostfix);
-// } else
-// buf.append(name.substring(start, dot + 1));
-// start = dot + 1;
-// dot = name.indexOf(getTypeDelimiter(), start);
-// }
-// buf.append(name.substring(start));
-// } else {
+		// if (getFlag(flags, P_COMPRESSED) && fgPkgNameLength >= 0) {
+		// String name = pack.getElementName();
+		// int start = 0;
+		// int dot = name.indexOf(getTypeDelimiter(), start);
+		// while (dot > 0) {
+		// if (dot - start > fgPkgNameLength - 1) {
+		// buf.append(fgPkgNamePrefix);
+		// if (fgPkgNameChars > 0)
+		// buf.append(name.substring(start, Math.min(start + fgPkgNameChars,
+		// dot)));
+		// buf.append(fgPkgNamePostfix);
+		// } else
+		// buf.append(name.substring(start, dot + 1));
+		// start = dot + 1;
+		// dot = name.indexOf(getTypeDelimiter(), start);
+		// }
+		// buf.append(name.substring(start));
+		// } else {
 		if (pack instanceof ExternalProjectFragment) {
 			buf.append(pack.getElementName().replace(
 					ExternalProjectFragment.JEM_SKIP_DELIMETER, Path.SEPARATOR)
@@ -962,7 +967,7 @@ public class ScriptElementLabels {
 				buf.append(pack.getElementName() + " ");
 			}
 		}
-// }
+		// }
 		if (getFlag(flags, P_POST_QUALIFIED)) {
 			buf.append(CONCAT_STRING);
 			getProjectFragmentLabel((IProjectFragment) pack.getParent(),
