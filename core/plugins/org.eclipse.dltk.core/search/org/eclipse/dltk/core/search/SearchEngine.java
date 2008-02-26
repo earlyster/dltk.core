@@ -10,7 +10,9 @@
 package org.eclipse.dltk.core.search;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -704,98 +706,119 @@ public class SearchEngine {
 		this.basicEngine.searchDeclarationsOfSentMessages(enclosingElement, requestor, monitor);
 	}
 	
-	public static ISourceModule[] searchMixinSources(String key, IDLTKLanguageToolkit toolkit, final Set keys ) {
-		final IDLTKSearchScope scope = SearchEngine.createWorkspaceScope(toolkit); 
+	/**
+	 * 
+	 * @param key
+	 *            contains map of ISourceModule to Set
+	 * @param toolkit
+	 * @param keys
+	 * @return
+	 */
+	public static ISourceModule[] searchMixinSources(String key,
+			IDLTKLanguageToolkit toolkit, final Map keys) {
+		final IDLTKSearchScope scope = SearchEngine
+				.createWorkspaceScope(toolkit);
 		// Index requestor
 		final HandleFactory factory = new HandleFactory();
 		final List modules = new ArrayList();
-		IndexQueryRequestor searchRequestor = new IndexQueryRequestor(){
+		IndexQueryRequestor searchRequestor = new IndexQueryRequestor() {
 			public boolean acceptIndexMatch(String documentPath,
 					SearchPattern indexRecord, SearchParticipant participant,
 					AccessRuleSet access) {
-				if( documentPath.startsWith(SPECIAL_MIXIN)) {
-					documentPath = documentPath.substring(SPECIAL_MIXIN.length());
+				if (documentPath.startsWith(SPECIAL_MIXIN)) {
+					documentPath = documentPath.substring(SPECIAL_MIXIN
+							.length());
 				}
-				String s = IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY.toString();
-				if( documentPath.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR) != -1) {
-					documentPath = documentPath.substring(documentPath.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR) + 1);
+				// String s = IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY.toString();
+				if (documentPath.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR) != -1) {
+					documentPath = documentPath
+							.substring(documentPath
+									.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR) + 1);
 				}
-				Openable createOpenable = factory.createOpenable(documentPath, scope);
-				if( createOpenable instanceof ISourceModule ) {
-					modules.add(createOpenable);
+				Openable module = factory.createOpenable(documentPath, scope);
+				if (module instanceof ISourceModule) {
+					modules.add(module);
 				}
-				
+
 				if (keys != null) {
-					String val = new String( indexRecord.getIndexKey() );
-					if (!keys.contains(val)) {
-						keys.add(val);
+					String val = new String(indexRecord.getIndexKey());
+					if (keys.containsKey(module)) {
+						Set keysList = (Set) keys.get(module);
+						keysList.add(val);
+					} else {
+						Set keysList = new HashSet();
+						keysList.add(val);
+						keys.put(module, keysList);
 					}
 				}
-				
+
 				return true;
 			}
 		};
-		IndexManager indexManager = ModelManager.getModelManager().getIndexManager();
-		
-		MixinPattern pattern = new MixinPattern(key.toCharArray(), SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE |  SearchPattern.R_PATTERN_MATCH);
-		
-		SearchParticipant participant = SearchEngine.getDefaultSearchParticipant();
-		
-		participant.selectMixinIndexes(pattern, scope);
-		
-		// add type names from indexes
-		indexManager.performConcurrentJob(
-			new PatternSearchJob(
-				pattern, 
-				participant, // Script search only
-				scope, 
-				searchRequestor),
-				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-			null);	
-		return (ISourceModule[])modules.toArray(new ISourceModule[modules.size()]);
-	}
-	
-	public static ISourceModule[] searchMixinSources(String key, IDLTKLanguageToolkit toolkit ) {
-		return searchMixinSources(key, toolkit, null);
-	}
-	
-	public static String[] searchMixinPatterns(String key, IDLTKLanguageToolkit toolkit) {
-		final IDLTKSearchScope scope = SearchEngine.createWorkspaceScope(toolkit); 
-		// Index requestor
-		final List result = new ArrayList();
-		IndexQueryRequestor searchRequestor = new IndexQueryRequestor(){
-			public boolean acceptIndexMatch(String documentPath,
-					SearchPattern indexRecord, SearchParticipant participant,
-					AccessRuleSet access) {
-				String val = new String( indexRecord.getIndexKey() );
-				if( !result.contains(val)) {
-					result.add(val);
-				}
-				
-				return true;
-			}
-		};
-		IndexManager indexManager = ModelManager.getModelManager().getIndexManager();
-		
-		int flags = SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
-		if (key.indexOf('*') != -1 || key.indexOf('?') != -1) 
-			flags |= SearchPattern.R_PATTERN_MATCH;
-		
-		MixinPattern pattern = new MixinPattern(key.toCharArray(), flags);
-		
-		SearchParticipant participant = SearchEngine.getDefaultSearchParticipant();
-		
+		IndexManager indexManager = ModelManager.getModelManager()
+				.getIndexManager();
+
+		MixinPattern pattern = new MixinPattern(key.toCharArray(),
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE
+						| SearchPattern.R_PATTERN_MATCH);
+
+		SearchParticipant participant = SearchEngine
+				.getDefaultSearchParticipant();
+
 		participant.selectMixinIndexes(pattern, scope);
 
 		// add type names from indexes
-		indexManager.performConcurrentJob(
-			new PatternSearchJob(
-				pattern, 
+		indexManager.performConcurrentJob(new PatternSearchJob(pattern,
 				participant, // Script search only
-				scope, 
-				searchRequestor),
-				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-			null);	
-		return (String[])result.toArray(new String[result.size()]);
+				scope, searchRequestor),
+				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
+		return (ISourceModule[]) modules.toArray(new ISourceModule[modules
+				.size()]);
+	}
+
+	public static ISourceModule[] searchMixinSources(String key,
+			IDLTKLanguageToolkit toolkit) {
+		return searchMixinSources(key, toolkit, null);
+	}
+
+	public static String[] searchMixinPatterns(String key,
+			IDLTKLanguageToolkit toolkit) {
+		final IDLTKSearchScope scope = SearchEngine
+				.createWorkspaceScope(toolkit);
+		// Index requestor
+		final List result = new ArrayList();
+		IndexQueryRequestor searchRequestor = new IndexQueryRequestor() {
+			public boolean acceptIndexMatch(String documentPath,
+					SearchPattern indexRecord, SearchParticipant participant,
+					AccessRuleSet access) {
+				String val = new String(indexRecord.getIndexKey());
+				if (!result.contains(val)) {
+					result.add(val);
+				}
+
+				return true;
+			}
+		};
+		IndexManager indexManager = ModelManager.getModelManager()
+				.getIndexManager();
+
+		int flags = SearchPattern.R_EXACT_MATCH
+				| SearchPattern.R_CASE_SENSITIVE;
+		if (key.indexOf('*') != -1 || key.indexOf('?') != -1)
+			flags |= SearchPattern.R_PATTERN_MATCH;
+
+		MixinPattern pattern = new MixinPattern(key.toCharArray(), flags);
+
+		SearchParticipant participant = SearchEngine
+				.getDefaultSearchParticipant();
+
+		participant.selectMixinIndexes(pattern, scope);
+
+		// add type names from indexes
+		indexManager.performConcurrentJob(new PatternSearchJob(pattern,
+				participant, // Script search only
+				scope, searchRequestor),
+				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
+		return (String[]) result.toArray(new String[result.size()]);
 	}
 }

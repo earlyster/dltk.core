@@ -335,19 +335,29 @@ public class SourceModule extends Openable implements ISourceModule, org.eclipse
 	}
 
 	public String getSource() throws ModelException {
-
-		IBuffer buffer = getBuffer();
+		IBuffer buffer = getBufferNotOpen();
 		if (buffer == null)
-			return ""; //$NON-NLS-1$
+			return new String(getBufferContent()); //$NON-NLS-1$
 		return buffer.getContents();
 	}
 	
 	public char[] getSourceAsCharArray() throws ModelException {
-
-		IBuffer buffer = getBuffer();
+		IBuffer buffer = getBufferNotOpen();
 		if (buffer == null)
-			return new char[0]; //$NON-NLS-1$
-		return buffer.getCharacters();
+			return getBufferContent(); //$NON-NLS-1$
+		return buffer.getContents().toCharArray();
+		// return getSource().toCharArray();
+	}
+	
+	protected char[] getBufferContent() throws ModelException {
+		IFile file = (IFile) this.getResource();
+		if (file == null || !file.exists()) {
+			// throw newNotPresentException();
+			// initialize buffer with empty contents
+			return CharOperation.NO_CHAR;
+		}
+
+		return Util.getResourceContentsAsCharArray(file);
 	}
 
 	public String getElementName() {
