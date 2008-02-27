@@ -18,14 +18,14 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.ScriptModelUtil;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.internal.ui.scriptview.BuildPathContainer;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
@@ -338,7 +338,7 @@ public class ModelElementSorter extends ViewerSorter {
 		if (element instanceof IModelElement) {
 			return ((IModelElement) element).getElementName();
 		} else if (element instanceof BuildPathContainer) {
-			return ((BuildPathContainer) element).getLabel(element);
+			return ((BuildPathContainer) element).getLabel();
 		} else {
 			return element.toString();
 		}
