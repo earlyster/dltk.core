@@ -23,10 +23,6 @@ public abstract class AbstractLanguageToolkit implements IDLTKLanguageToolkit {
 		return true;
 	}
 
-	public String getDelimeterReplacerString() {
-		return ".";
-	}
-
 	public IType[] getParentTypes(IType type) {
 		return null;
 	}

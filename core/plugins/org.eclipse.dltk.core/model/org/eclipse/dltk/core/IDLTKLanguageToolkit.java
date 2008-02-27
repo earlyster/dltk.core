@@ -32,8 +32,6 @@ public interface IDLTKLanguageToolkit {
 
 	String getNatureId();
 
-	String getDelimeterReplacerString();
-
 	String[] getLanguageFileExtensions();
 
 	String getLanguageName();
