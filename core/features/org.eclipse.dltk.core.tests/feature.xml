@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.dltk.core.tests"
       label="%featureName"
-      version="1.0.0.qualifier"
+      version="0.9.2.qualifier"
       provider-name="%featureProvider">
 
    <description>
@@ -21,28 +21,4 @@
       <update label="%updateSiteName" url="http://download.eclipse.org/technology/dltk/updates/"/>
    </url>
 
-   <plugin
-         id="org.eclipse.dltk.core.tests"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.dltk.debug.tests"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.dltk.ui.tests"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.dltk.validators.core.tests"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-         
 </feature>
