@@ -74,6 +74,17 @@ public class EnvironmentResolverTests extends TestCase {
 		EnvironmentVariable[] resolve = EnvironmentResolver.resolve(env, vars);
 		assertEquals(resolve.length, 0);
 	}
+	public void testEnvironmentResolve007() {
+		Map env = new HashMap();
+		env.put("PATH", "/bin:/usr/bin");
+		EnvironmentVariable[] vars = new EnvironmentVariable[] {
+				new EnvironmentVariable("a1", "$a2"),
+				new EnvironmentVariable("a2", "a2") };
+		EnvironmentVariable[] resolve = EnvironmentResolver.resolve(env, vars);
+		assertEquals(resolve.length, 2);
+		test(resolve, "a1", "a2");
+		test(resolve, "a2", "a2");
+	}
 
 	private void test(EnvironmentVariable[] resolve, String b, String v) {
 		assertContains(resolve, mk(b, v));
