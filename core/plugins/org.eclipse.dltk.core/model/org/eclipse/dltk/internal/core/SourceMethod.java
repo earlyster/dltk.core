@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
@@ -24,6 +24,13 @@ public class SourceMethod extends NamedMember implements IMethod {
 
 	public int getElementType() {
 		return METHOD;
+	}
+
+	public boolean equals(Object o) {
+		if (!(o instanceof SourceMethod)) {
+			return false;
+		}
+		return super.equals(o);
 	}
 
 	public String[] getParameters() throws ModelException {
