@@ -23,10 +23,25 @@ public final class EnvironmentResolver {
 	/*
 	 * Resolves specified set of environment variables with system environment
 	 */
-	public static EnvironmentVariable[] resolve(Map env,
+	public static EnvironmentVariable[] resolve(Map penv,
 			EnvironmentVariable[] variables) {
 		if (variables == null) {
 			return null;
+		}
+		Map env = new HashMap();
+		Map selfDep = new HashMap();
+		for (Iterator iterator = penv.keySet().iterator(); iterator.hasNext();) {
+			String name = (String) iterator.next();
+			String value = (String) penv.get(name);
+			env.put(name, value);
+		}
+
+		for (int i = 0; i < variables.length; i++) {
+			String name = variables[i].getName();
+			if (env.containsKey(name)) {
+				selfDep.put(name, env.get(name));
+				env.remove(name);
+			}
 		}
 		Map resolved = new HashMap();
 		List result = new ArrayList();
@@ -40,30 +55,33 @@ public final class EnvironmentResolver {
 		}
 
 		while (unresolved.size() > 0) {
-			REnvironmentVariable var = (REnvironmentVariable) unresolved.get(0);
-			if (isResolved(var.var)) {
-				result.add(var.var);
-				resolved.put(var.var.getName(), var.var.getValue());
-				unresolved.remove(0);
-			} else {
-				if (isCyclick(var, unresolved)) {
-					// Resolve self cycles to environment
-					if (isSelfCyclick(var)) {
-						resolveVariable(var, env);
-						if (isResolved(var.var)) {
-							continue;
-						}
-					}
-					unresolved.remove(0);
-					continue;
-				}
-				resolveVariable(var, resolved);
-				resolveVariable(var, env);
+			for (Iterator iterator = unresolved.iterator(); iterator.hasNext();) {
+				REnvironmentVariable var = (REnvironmentVariable) iterator.next();;
 				if (isResolved(var.var)) {
-					continue;
-				}
-				if (isUnresolvable(var, unresolved)) {
-					unresolved.remove(0);
+					result.add(var.var);
+					resolved.put(var.var.getName(), var.var.getValue());
+					iterator.remove();
+				} else {
+					if (isCyclick(var, unresolved)) {
+						// Resolve self cycles to environment
+						if (isSelfCyclick(var)) {
+							resolveVariable(var, env);
+							resolveVariable(var, selfDep);
+							if (isResolved(var.var)) {
+								continue;
+							}
+						}
+						iterator.remove();
+						continue;
+					}
+					resolveVariable(var, resolved);
+					resolveVariable(var, env);
+					if (isResolved(var.var)) {
+						continue;
+					}
+					if (isUnresolvable(var, unresolved)) {
+						iterator.remove();
+					}
 				}
 			}
 		}
