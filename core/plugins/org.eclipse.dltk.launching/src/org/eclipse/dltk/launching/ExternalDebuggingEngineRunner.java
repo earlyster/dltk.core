@@ -33,7 +33,7 @@ public abstract class ExternalDebuggingEngineRunner extends
 					ScriptLaunchConfigurationConstants.ERR_DEBUGGING_ENGINE_NOT_CONFIGURED);
 		}
 
-		return alterConfig(config, file.toString());
+		return alterConfig(config, delegate);
 	}
 
 	/**
@@ -54,12 +54,18 @@ public abstract class ExternalDebuggingEngineRunner extends
 
 		String path = delegate.getString(qualifier, key);
 		if (path != null) {
-			return new File(path);
+			return PlatformFileUtils
+					.findAbsoluteOrEclipseRelativeFile(new File(path));
 		}
 
 		return null;
 	}
+	protected String getDebuggingPreference(PreferencesLookupDelegate delegate, String key) {
+		String qualifier = getDebuggingEnginePreferenceQualifier();
+
+		return delegate.getString(qualifier, key);
+	}
 
 	protected abstract InterpreterConfig alterConfig(InterpreterConfig config,
-			String debuggingEnginePath) throws CoreException;
+			PreferencesLookupDelegate delegate) throws CoreException;
 }

@@ -208,33 +208,26 @@ public abstract class AbstractInterpreterInstallType implements
 	}
 
 	protected String[] extractEnvironment(EnvironmentVariable[] variables) {
-		Map systemEnv = DebugPlugin.getDefault().getLaunchManager()
+		Map env = DebugPlugin.getDefault().getLaunchManager()
 				.getNativeEnvironmentCasePreserved();
 
-		filterEnvironment(systemEnv);
+		filterEnvironment(env);
 
 		List list = new ArrayList();
-		Iterator it = systemEnv.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
-			// Skip all in variables.
-			if (variables != null) {
-				for (int i = 0; i < variables.length; i++) {
-					if (variables[i].getName().equals(entry.getKey())) {
-						continue;
-					}
-				}
-			}
-			list.add(entry.getKey() + "=" + entry.getValue());
-		}
+		
+		EnvironmentVariable[] vars = EnvironmentResolver.resolve(env, variables);
 
 		// Overwrite from variables with updates values.
 		if (variables != null) {
-			for (int i = 0; i < variables.length; i++) {
-				list
-						.add(variables[i].getName() + "="
-								+ variables[i].getValue());
+			for (int i = 0; i < vars.length; i++) {
+				env.put(vars[i].getName(), vars[i].getValue());
 			}
+		}
+
+		Iterator it = env.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry entry = (Map.Entry) it.next();
+			list.add(entry.getKey() + "=" + entry.getValue());
 		}
 
 		return (String[]) list.toArray(new String[list.size()]);

@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.internal.launching.EnvironmentResolver;
 
 public class InterpreterConfig implements Cloneable {
 	/**
@@ -300,7 +301,9 @@ public class InterpreterConfig implements Cloneable {
 	}
 
 	public String[] getEnvironmentAsStringsIncluding(
-			EnvironmentVariable[] variables) {
+			EnvironmentVariable[] vars) {
+		
+		EnvironmentVariable[] variables = EnvironmentResolver.resolve(getEnvVars(), vars );
 		Set pressentVars = new HashSet();
 		ArrayList list = new ArrayList();
 		if (variables != null) {
