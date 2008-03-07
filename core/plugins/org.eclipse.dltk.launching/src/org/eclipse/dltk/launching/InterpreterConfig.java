@@ -300,10 +300,10 @@ public class InterpreterConfig implements Cloneable {
 		return (String[]) list.toArray(new String[list.size()]);
 	}
 
-	public String[] getEnvironmentAsStringsIncluding(
-			EnvironmentVariable[] vars) {
-		
-		EnvironmentVariable[] variables = EnvironmentResolver.resolve(getEnvVars(), vars );
+	public String[] getEnvironmentAsStringsIncluding(EnvironmentVariable[] vars) {
+
+		EnvironmentVariable[] variables = EnvironmentResolver.resolve(
+				getEnvVars(), vars);
 		Set pressentVars = new HashSet();
 		ArrayList list = new ArrayList();
 		if (variables != null) {
