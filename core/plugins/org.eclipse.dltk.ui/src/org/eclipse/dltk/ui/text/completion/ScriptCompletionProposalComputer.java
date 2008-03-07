@@ -287,12 +287,15 @@ public abstract class ScriptCompletionProposalComputer implements
 	public void sessionEnded() {
 		fErrorMessage = null;
 	}
-
-	// Possible override in subclasses
-	protected TemplateCompletionProcessor createTemplateProposalComputer(
-			ScriptContentAssistInvocationContext context) {
-		return null;
-	}
+	
+	/**
+	 * Creates the template completion processor
+	 * 
+	 * <p>Subclasses may return <code>null</code> if they do not wish to 
+	 * provide template support.</p>
+	 */
+	protected abstract TemplateCompletionProcessor createTemplateProposalComputer(
+			ScriptContentAssistInvocationContext context);
 
 	protected ScriptCompletionProposalCollector createCollector(
 			ScriptContentAssistInvocationContext context) {

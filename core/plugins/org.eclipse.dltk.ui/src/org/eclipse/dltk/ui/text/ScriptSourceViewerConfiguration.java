@@ -21,6 +21,7 @@ import org.eclipse.dltk.internal.ui.text.hover.EditorTextHoverProxy;
 import org.eclipse.dltk.internal.ui.text.hover.ScriptInformationProvider;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.actions.IScriptEditorActionDefinitionIds;
+import org.eclipse.dltk.ui.text.completion.ContentAssistPreference;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.AbstractInformationControlManager;
@@ -30,6 +31,8 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewerExtension2;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
@@ -296,5 +299,34 @@ public abstract class ScriptSourceViewerConfiguration extends
 
 		presenter.setSizeConstraints(60, 10, true, true);
 		return presenter;
+	}
+	
+	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+		if (getEditor() != null) {
+			ContentAssistant assistant = new ContentAssistant();
+
+			assistant
+					.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
+			assistant
+					.setRestoreCompletionProposalSize(getSettings("completion_proposal_size")); //$NON-NLS-1$
+			assistant
+					.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
+			assistant
+					.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+			
+			getContentAssistPreference().configure(assistant, fPreferenceStore);
+			
+			alterContentAssistant(assistant);
+			
+			return assistant;
+		}
+
+		return null;
+	}
+	
+	protected abstract ContentAssistPreference getContentAssistPreference();
+	
+	protected void alterContentAssistant(ContentAssistant assistant) {
+		// empty implementation
 	}
 }
