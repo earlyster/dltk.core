@@ -65,7 +65,9 @@ public abstract class ScriptSourceViewerConfiguration extends
 		initializeScanners();
 	}
 
-	abstract protected void initializeScanners();
+	protected void initializeScanners() {
+		
+	}
 
 	public String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer) {
 		if (fDocumentPartitioning != null)
@@ -98,9 +100,13 @@ public abstract class ScriptSourceViewerConfiguration extends
 		// return null;
 	}
 
-	public abstract boolean affectsTextPresentation(PropertyChangeEvent event);
+	public  boolean affectsTextPresentation(PropertyChangeEvent event) {
+		return false;
+	}
 
-	public abstract void handlePropertyChangeEvent(PropertyChangeEvent event);
+	public void handlePropertyChangeEvent(PropertyChangeEvent event) {
+		
+	}
 
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getDefaultPrefixes(org.eclipse.jface.text.source.ISourceViewer,
@@ -136,8 +142,10 @@ public abstract class ScriptSourceViewerConfiguration extends
 	 * @return an information control creator
 	 * 
 	 */
-	protected abstract IInformationControlCreator getOutlinePresenterControlCreator(
-			ISourceViewer sourceViewer, final String commandId);
+	protected IInformationControlCreator getOutlinePresenterControlCreator(
+			ISourceViewer sourceViewer, final String commandId) {
+		return null;
+	}
 
 	public IInformationPresenter getOutlinePresenter(
 			ScriptSourceViewer sourceViewer, boolean doCodeResolve) {
