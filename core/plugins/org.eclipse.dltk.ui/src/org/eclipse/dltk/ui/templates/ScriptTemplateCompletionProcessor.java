@@ -166,7 +166,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		return new Template[0];
 	}
 
-	protected abstract String[] getIgnore();
+	protected abstract char[] getIgnore();
 
 	protected TemplateContextType getContextType(ITextViewer viewer,
 			IRegion region) {
@@ -177,7 +177,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		try {
 			String trigger = getTrigger(viewer, region);
 
-			String[] ignore = getIgnore();
+			char[] ignore = getIgnore();
 			for (int i = 0; i < ignore.length; i++) {
 				if (trigger.indexOf(ignore[i]) != -1) {
 					contains = true;
