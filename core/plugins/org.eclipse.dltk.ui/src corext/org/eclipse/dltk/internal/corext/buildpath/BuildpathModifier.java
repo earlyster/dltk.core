@@ -778,8 +778,11 @@ public class BuildpathModifier {
 			if (container == null)
 				return null;
 		} while (scriptElem == null || !(scriptElem instanceof IProjectFragment));
-		if (scriptElem instanceof IScriptProject)
+		if (scriptElem instanceof IScriptProject) {
+			if (!isSourceFolder((IScriptProject)scriptElem))
+				return null;
 			scriptElem= project.getProjectFragment(project.getResource());
+		}
 		return (IProjectFragment) scriptElem;
 	}
 

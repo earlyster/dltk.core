@@ -14,9 +14,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
+import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.text.completion.ScriptContentAssistInvocationContext;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
@@ -30,11 +33,11 @@ import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateProposal;
-import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.IWorkbenchPartOrientation;
 
-public abstract class ScriptTempalteCompletionProcessor extends
+public abstract class ScriptTemplateCompletionProcessor extends
 		TemplateCompletionProcessor {
 
 	private static final class ProposalComparator implements Comparator {
@@ -48,7 +51,7 @@ public abstract class ScriptTempalteCompletionProcessor extends
 
 	private ScriptContentAssistInvocationContext context;
 
-	public ScriptTempalteCompletionProcessor(
+	public ScriptTemplateCompletionProcessor(
 			ScriptContentAssistInvocationContext context) {
 		if (context == null) {
 			throw new IllegalArgumentException();
@@ -105,7 +108,7 @@ public abstract class ScriptTempalteCompletionProcessor extends
 		return (ICompletionProposal[]) matches
 				.toArray(new ICompletionProposal[matches.size()]);
 	}
-	
+
 	protected TemplateContext createContext(ITextViewer viewer, IRegion region) {
 		TemplateContextType contextType = getContextType(viewer, region);
 		if (contextType instanceof ScriptTemplateContextType) {
@@ -114,39 +117,105 @@ public abstract class ScriptTempalteCompletionProcessor extends
 			return ((ScriptTemplateContextType) contextType).createContext(
 					document, region.getOffset(), region.getLength(),
 					getContext().getSourceModule());
-		} else {
-			return super.createContext(viewer, region);
-		}
+		} 
+		
+		return super.createContext(viewer, region);
 	}
 
 	protected ICompletionProposal createProposal(Template template,
-			TemplateContext context, IRegion region, int relevance) {	
-		TemplateProposal proposal = new ScriptTemplateProposal(template, context, region, getImage(template), relevance);
+			TemplateContext context, IRegion region, int relevance) {
+		TemplateProposal proposal = new ScriptTemplateProposal(template,
+				context, region, getImage(template), relevance);
 		proposal.setInformationControlCreator(getInformationControlCreator());
 		return proposal;
 	}
-		
+
 	private IInformationControlCreator getInformationControlCreator() {
 		int orientation;
-		ScriptEditor editor= getScriptEditor();
-		if (editor instanceof IWorkbenchPartOrientation)
-			orientation= ((IWorkbenchPartOrientation)editor).getOrientation();
-		else
-			orientation= SWT.LEFT_TO_RIGHT;
-		return new TemplateInformationControlCreator(orientation, editor.getLanguageToolkit());
+		ScriptEditor editor = getScriptEditor();
+		// compiler says editor already instanceof IWorkbenchPartOrientation
+		orientation = ((IWorkbenchPartOrientation) editor).getOrientation();
+		return new TemplateInformationControlCreator(orientation, editor
+				.getLanguageToolkit());
 	}
-	
+
 	/**
 	 * Returns the currently active java editor, or <code>null</code> if it
 	 * cannot be determined.
-	 *
-	 * @return  the currently active java editor, or <code>null</code>
+	 * 
+	 * @return the currently active java editor, or <code>null</code>
 	 */
 	private ScriptEditor getScriptEditor() {
-		IEditorPart part= DLTKUIPlugin.getActivePage().getActiveEditor();
-		if (part instanceof ScriptEditor)
+		IEditorPart part = DLTKUIPlugin.getActivePage().getActiveEditor();
+		if (part instanceof ScriptEditor) {
 			return (ScriptEditor) part;
-		else
-			return null;
+		}
+		
+		return null;
+	}
+
+	protected abstract String getContextTypeId();
+
+	protected abstract ScriptTemplateAccess getTemplateAccess();
+
+	protected Template[] getTemplates(String contextTypeId) {
+		if (contextTypeId.equals(getContextTypeId())) {
+			return getTemplateAccess().getTemplateStore().getTemplates();
+		}
+
+		return new Template[0];
+	}
+
+	protected abstract char[] getIgnore();
+
+	protected TemplateContextType getContextType(ITextViewer viewer,
+			IRegion region) {
+
+		boolean contains = false;
+
+		// TODO: make smarter
+		try {
+			String trigger = getTrigger(viewer, region);
+
+			char[] ignore = getIgnore();
+			for (int i = 0; i < ignore.length; i++) {
+				if (trigger.indexOf(ignore[i]) != -1) {
+					contains = true;
+					// don't bother checking the rest of the array
+					break;
+				}
+			}
+		} catch (BadLocationException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+
+		if (!contains) {
+			return getTemplateAccess().getContextTypeRegistry().getContextType(
+					getContextTypeId());
+		}
+
+		return null;
+	}
+
+	protected Image getImage(Template template) {
+		return DLTKPluginImages.get(DLTKPluginImages.IMG_OBJS_TEMPLATE);
+	}
+
+	protected String getTrigger(ITextViewer viewer, IRegion region)
+			throws BadLocationException {
+		IDocument doc = viewer.getDocument();
+		IRegion line = doc.getLineInformationOfOffset(region.getOffset()
+				+ region.getLength());
+		int len = region.getOffset() + region.getLength() - line.getOffset();
+		String s = doc.get(line.getOffset(), len);
+
+		int spaceIndex = s.lastIndexOf(' ');
+		if (spaceIndex != -1) {
+			s = s.substring(spaceIndex);
+		}
+
+		return s;
 	}
 }

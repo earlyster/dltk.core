@@ -87,7 +87,7 @@ public class ScriptExplorerContentProvider extends
 	 */
 	public ScriptExplorerContentProvider(final boolean provideMembers) {
 		super(provideMembers);
-		fShowLibrariesNode = true;
+		fShowLibrariesNode = false;
 		fIsFlatLayout = false;
 		fFoldPackages = arePackagesFoldedInHierarchicalLayout();
 		fPendingUpdates = null;
