@@ -386,7 +386,7 @@ public class CallHierarchyViewPart extends ViewPart implements
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(fPagebook,
 		// IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
 		if (DLTKCore.DEBUG) {
-			System.err.println("Add help support here...");
+			System.err.println("Add help support here..."); //$NON-NLS-1$
 		}
 
 		fSelectionProviderMediator = new CallHierarchySelectionProvider(
@@ -736,7 +736,7 @@ public class CallHierarchyViewPart extends ViewPart implements
 		// IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
 		// }
 		if (DLTKCore.DEBUG) {
-			System.err.println("Add help support here...");
+			System.err.println("Add help support here..."); //$NON-NLS-1$
 		}
 		return super.getAdapter(adapter);
 	}

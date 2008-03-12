@@ -52,7 +52,7 @@ public class SourceMethod extends NamedMember implements IMethod {
 	}
 
 	public void printNode(CorePrinter output) {
-		output.formatPrint("DLTK Source Method:" + getElementName());
+		output.formatPrint("DLTK Source Method:" + getElementName()); //$NON-NLS-1$
 		output.indent();
 		try {
 			IModelElement modelElements[] = this.getChildren();
@@ -61,7 +61,7 @@ public class SourceMethod extends NamedMember implements IMethod {
 				if (element instanceof ModelElement) {
 					((ModelElement) element).printNode(output);
 				} else {
-					output.print("Unknown element:" + element);
+					output.print("Unknown element:" + element); //$NON-NLS-1$
 				}
 			}
 		} catch (ModelException ex) {
@@ -96,7 +96,7 @@ public class SourceMethod extends NamedMember implements IMethod {
 	}
 
 	public String getFullyQualifiedName() {
-		return getFullyQualifiedName("$");
+		return getFullyQualifiedName("$"); //$NON-NLS-1$
 	}
 
 	public IScriptFolder getScriptFolder() {

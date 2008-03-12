@@ -152,7 +152,7 @@ public class ScriptExplorerPart extends ViewPart implements
 	public static final int PROJECTS_AS_ROOTS = 1;
 	public static final int WORKING_SETS_AS_ROOTS = 2;
 
-	public final static String VIEW_ID = "org.eclipse.dltk.ui.view.scriptExplorer";
+	public final static String VIEW_ID = "org.eclipse.dltk.ui.view.scriptExplorer"; //$NON-NLS-1$
 
 	// Persistence tags.
 	private static final String TAG_LAYOUT = "layout"; //$NON-NLS-1$
@@ -846,7 +846,7 @@ public class ScriptExplorerPart extends ViewPart implements
 		// IScriptHelpContextIds.PACKAGES_VIEW);
 		// }
 		if (DLTKCore.DEBUG) {
-			System.err.println("Add help support here...");
+			System.err.println("Add help support here..."); //$NON-NLS-1$
 		}
 
 		return super.getAdapter(key);
@@ -1393,7 +1393,7 @@ public class ScriptExplorerPart extends ViewPart implements
 		Object input = fViewer.getInput();
 		if (input == null || (input instanceof IScriptModel)) {
 			setContentDescription(""); //$NON-NLS-1$
-			setTitleToolTip("");
+			setTitleToolTip(""); //$NON-NLS-1$
 		} else {
 			String inputText = ScriptElementLabels.getDefault().getTextLabel(
 					input, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS);
@@ -1436,7 +1436,7 @@ public class ScriptExplorerPart extends ViewPart implements
 		}
 		if (DLTKCore.DEBUG) {
 			System.err
-					.println("Add members order preference cach support here...");
+					.println("Add members order preference cach support here..."); //$NON-NLS-1$
 		}
 		// } else if
 		// (MembersOrderPreferenceCache.isMemberOrderProperty(event.getProperty()))
@@ -1543,7 +1543,7 @@ public class ScriptExplorerPart extends ViewPart implements
 		if (element instanceof IModelElement) {
 			return ((IModelElement) element).getElementName();
 		} else if (element instanceof WorkingSetModel) {
-			return "";
+			return ""; //$NON-NLS-1$
 		} else {
 			return fLabelProvider.getText(element);
 		}

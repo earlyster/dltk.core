@@ -31,7 +31,7 @@ public class SourceField extends NamedMember implements IField {
 	}
 
 	public void printNode(CorePrinter output) {
-		output.formatPrint("DLTK Source field:" + getElementName());
+		output.formatPrint("DLTK Source field:" + getElementName()); //$NON-NLS-1$
 	}
 
 	protected char getHandleMementoDelimiter() {
@@ -52,6 +52,6 @@ public class SourceField extends NamedMember implements IField {
 	}
 
 	public String getFullyQualifiedName() {
-		return getFullyQualifiedName("$");
+		return getFullyQualifiedName("$"); //$NON-NLS-1$
 	}
 }

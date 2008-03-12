@@ -58,11 +58,11 @@ public class DLTKProblemReporter implements IProblemReporter {
 
 	public DLTKProblemReporter(IResource resource, IProblemFactory factory) {
 		if (resource == null) {
-			throw new NullPointerException("resource cannot be null");
+			throw new NullPointerException(Messages.DLTKProblemReporter_resourceCannotBeNull);
 		}
 
 		if (factory == null) {
-			throw new NullPointerException("factory cannot be null");
+			throw new NullPointerException(Messages.DLTKProblemReporter_factoryCannotBeNull);
 		}
 
 		this.resource = resource;
@@ -71,7 +71,7 @@ public class DLTKProblemReporter implements IProblemReporter {
 
 	// dummy method
 	public void reportTestProblem() {
-		IProblem problem = new DefaultProblem("originatingFileName", "message",
+		IProblem problem = new DefaultProblem("originatingFileName", "message", //$NON-NLS-1$ //$NON-NLS-2$
 				0, null, IMarker.SEVERITY_INFO, 0, 1, 0, 0);
 		try {
 			reportProblem(problem);

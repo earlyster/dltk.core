@@ -67,9 +67,9 @@ import org.osgi.framework.BundleContext;
  */
 public class DLTKUIPlugin extends AbstractUIPlugin {
 
-	public static final String PLUGIN_ID = "org.eclipse.dltk.ui";
-	public static final String ID_SCRIPTEXPLORER = "org.eclipse.dltk.ui.ScriptExplorer";
-	public static final String ID_TYPE_HIERARCHY = "org.eclipse.dltk.ui.TypeHierarchy";
+	public static final String PLUGIN_ID = "org.eclipse.dltk.ui"; //$NON-NLS-1$
+	public static final String ID_SCRIPTEXPLORER = "org.eclipse.dltk.ui.ScriptExplorer"; //$NON-NLS-1$
+	public static final String ID_TYPE_HIERARCHY = "org.eclipse.dltk.ui.TypeHierarchy"; //$NON-NLS-1$
 	// The shared instance.
 	private static DLTKUIPlugin plugin;
 
@@ -199,7 +199,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return AbstractUIPlugin.imageDescriptorFromPlugin(
-				"org.eclipse.dltk.ui", path);
+				"org.eclipse.dltk.ui", path); //$NON-NLS-1$
 	}
 
 	private IWorkingCopyManager fWorkingCopyManager;

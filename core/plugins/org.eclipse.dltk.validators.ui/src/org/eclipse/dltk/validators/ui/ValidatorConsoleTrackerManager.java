@@ -21,7 +21,7 @@ import org.eclipse.ui.console.IPatternMatchListener;
 public class ValidatorConsoleTrackerManager {
 
 	private final static String EXTPOINT = ValidatorsUI.PLUGIN_ID
-			+ ".validatorConsoleTracker";
+			+ ".validatorConsoleTracker"; //$NON-NLS-1$
 
 	private static List listeners;
 
@@ -36,7 +36,7 @@ public class ValidatorConsoleTrackerManager {
 
 		for (int i = 0; i < cfg.length; i++) {
 			IPatternMatchListener listener = (IPatternMatchListener) cfg[i]
-					.createExecutableExtension("class");
+					.createExecutableExtension("class"); //$NON-NLS-1$
 			listeners.add(listener);
 		}
 	}

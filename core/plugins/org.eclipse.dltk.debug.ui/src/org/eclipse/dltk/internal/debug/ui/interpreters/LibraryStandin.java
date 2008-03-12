@@ -112,7 +112,7 @@ public final class LibraryStandin {
 		File f = getSystemLibraryPath().toFile();
 		if (!f.exists()) {
 			IPath path = getSystemLibraryPath();
-			String message = "Path is empty";
+			String message = InterpretersMessages.LibraryStandin_pathIsEmpty;
 			if( path != null ) {
 				message = path.toOSString();
 			}

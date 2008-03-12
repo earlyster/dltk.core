@@ -1,6 +1,7 @@
 package org.eclipse.dltk.ui.templates;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -43,7 +44,7 @@ public abstract class ScriptTemplateAccess {
 		try {
 			fStore.load();
 		} catch (IOException e) {
-			DLTKUIPlugin.logErrorMessage("unable to load template store: " + e);
+			DLTKUIPlugin.logErrorMessage(MessageFormat.format(Messages.ScriptTemplateAccess_unableToLoadTemplateStore, new Object[] { e }));
 		}
 	}
 }

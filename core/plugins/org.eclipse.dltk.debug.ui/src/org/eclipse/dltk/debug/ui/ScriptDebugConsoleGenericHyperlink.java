@@ -54,7 +54,7 @@ public abstract class ScriptDebugConsoleGenericHyperlink implements IHyperlink {
 
 			return line;
 		} catch (BadLocationException e) {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 
