@@ -55,7 +55,7 @@ public abstract class ExternalCheckerGenericHyperlink implements IHyperlink {
 
 			return line;
 		} catch (BadLocationException e) {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 
