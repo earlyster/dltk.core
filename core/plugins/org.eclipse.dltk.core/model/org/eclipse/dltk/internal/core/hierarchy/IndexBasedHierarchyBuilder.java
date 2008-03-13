@@ -338,11 +338,7 @@ public class IndexBasedHierarchyBuilder extends HierarchyBuilder {
 			HandleFactory factory = new HandleFactory();
 			IScriptProject currentProject = null;
 			if (monitor != null) {
-				monitor
-						.beginTask("", length * 2 /*
-													 * 1 for build binding, 1
-													 * for connect hierarchy
-													 */);
+				monitor.beginTask("", length * 2); //$NON-NLS-1$ // 1 for build binding, 1 for connect hierarchy
 			}
 			for (int i = 0; i < length; i++) {
 				try {

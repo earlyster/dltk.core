@@ -72,7 +72,7 @@ public class HierarchyResolver {
 				}
 			}
 		};
-		SearchPattern pattern = SearchPattern.createPattern("*",
+		SearchPattern pattern = SearchPattern.createPattern("*", //$NON-NLS-1$
 				IDLTKSearchConstants.TYPE, IDLTKSearchConstants.DECLARATIONS,
 				SearchPattern.R_REGEXP_MATCH);
 		engine.search(pattern, new SearchParticipant[] { SearchEngine

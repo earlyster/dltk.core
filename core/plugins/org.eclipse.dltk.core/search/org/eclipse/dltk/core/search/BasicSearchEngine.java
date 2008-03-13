@@ -307,7 +307,7 @@ public class BasicSearchEngine {
 						// libraris, should be handled not here...
 						if (DLTKCore.DEBUG) {
 							System.err
-									.println("This is Quick fix... Dublicates of Interpreter libraris, should be handled not here...");
+									.println("This is Quick fix... Dublicates of Interpreter libraris, should be handled not here..."); //$NON-NLS-1$
 						}
 						List paths = new ArrayList();
 						List filteredMatches = new ArrayList();

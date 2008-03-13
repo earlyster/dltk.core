@@ -184,7 +184,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 		// (see
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=92357)
 		if (DLTKCore.DEBUG) {
-			System.err.println("Bu possible. type should be unresolved...");
+			System.err.println("Bu possible. type should be unresolved..."); //$NON-NLS-1$
 		}
 		this.workingCopies = workingCopies;
 		this.computeSubtypes = computeSubtypes;
@@ -1399,7 +1399,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("Focus: "); //$NON-NLS-1$
-		buffer.append(this.focusType == null ? "<NONE>"
+		buffer.append(this.focusType == null ? "<NONE>" //$NON-NLS-1$
 				: ((ModelElement) this.focusType).toStringWithAncestors(false/*
 																				 * don't
 																				 * show

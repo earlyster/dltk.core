@@ -287,7 +287,7 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 	}
 
 	public void printNode(CorePrinter output) {
-		output.formatPrint("ScriptProject fragment:" + getPath().toOSString());
+		output.formatPrint("ScriptProject fragment:" + getPath().toOSString()); //$NON-NLS-1$
 		output.indent();
 		try {
 			IModelElement modelElements[] = this.getChildren();
@@ -296,7 +296,7 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 				if (element instanceof ModelElement) {
 					((ModelElement) element).printNode(output);
 				} else {
-					output.print("Unknown element:" + element);
+					output.print("Unknown element:" + element); //$NON-NLS-1$
 				}
 			}
 		} catch (ModelException ex) {

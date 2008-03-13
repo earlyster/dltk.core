@@ -58,7 +58,7 @@ public class SourceType extends NamedMember implements IType {
 	}
 
 	public void printNode(CorePrinter output) {
-		output.formatPrint("DLTK Source Type:" + getElementName());
+		output.formatPrint("DLTK Source Type:" + getElementName()); //$NON-NLS-1$
 		output.indent();
 		try {
 			IModelElement modelElements[] = this.getChildren();
@@ -67,7 +67,7 @@ public class SourceType extends NamedMember implements IType {
 				if (element instanceof ModelElement) {
 					((ModelElement) element).printNode(output);
 				} else {
-					output.print("Unknown element:" + element);
+					output.print("Unknown element:" + element); //$NON-NLS-1$
 				}
 			}
 		} catch (ModelException ex) {
@@ -221,7 +221,7 @@ public class SourceType extends NamedMember implements IType {
 	}
 
 	public String getFullyQualifiedName() {
-		return getFullyQualifiedName("$");
+		return getFullyQualifiedName("$"); //$NON-NLS-1$
 	}
 
 	public void codeComplete(char[] snippet, int insertion, int position,
@@ -257,7 +257,7 @@ public class SourceType extends NamedMember implements IType {
 	 * @see IType#getTypeQualifiedName()
 	 */
 	public String getTypeQualifiedName() {
-		return this.getTypeQualifiedName("$");
+		return this.getTypeQualifiedName("$"); //$NON-NLS-1$
 	}
 	/**
 	 * @see IType#getTypeQualifiedName(char)

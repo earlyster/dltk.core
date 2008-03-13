@@ -198,7 +198,7 @@ public abstract class AbstractSourceModule extends Openable implements
 		case JEM_IMPORTDECLARATION: {
 			if (DLTKCore.DEBUG) {
 				System.err
-						.println("Add import support in SourceModule getHandleFromMemento");
+						.println("Add import support in SourceModule getHandleFromMemento"); //$NON-NLS-1$
 			}
 			// ModelElement container = (ModelElement)getImportContainer();
 			// return container.getHandleFromMemento(token, memento,
@@ -328,7 +328,7 @@ public abstract class AbstractSourceModule extends Openable implements
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}
 
@@ -406,7 +406,7 @@ public abstract class AbstractSourceModule extends Openable implements
 					((ModelElement) element).printNode(output);
 				} else {
 
-					output.print("Unknown element:" + element);
+					output.print("Unknown element:" + element); //$NON-NLS-1$
 				}
 			}
 		} catch (ModelException ex) {
@@ -491,7 +491,7 @@ public abstract class AbstractSourceModule extends Openable implements
 					.toCharArray());
 
 			if (DEBUG_PRINT_MODEL) {
-				System.out.println("Source Module Debug print:");
+				System.out.println("Source Module Debug print:"); //$NON-NLS-1$
 
 				CorePrinter printer = new CorePrinter(System.out);
 				printNode(printer);
@@ -526,6 +526,11 @@ public abstract class AbstractSourceModule extends Openable implements
 	protected IProblemReporter getProblemReporter(String natureId)
 			throws CoreException {
 		IScriptProject project = getScriptProject();
+		if (project != null
+				&& ExternalScriptProject.EXTERNAL_PROJECT_NAME.equals(project
+						.getElementName())) {
+			return null;
+		}
 		if (project == null || !project.getProject().hasNature(natureId))
 			return null;
 
