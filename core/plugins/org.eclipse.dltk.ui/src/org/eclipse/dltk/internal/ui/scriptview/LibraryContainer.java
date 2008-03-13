@@ -49,7 +49,7 @@ public class LibraryContainer extends ProjectFragmentContainer {
 	}
 
 	public String getLabel() {
-		return "Libraries";// ScriptMessages.LibraryContainer_name;
+		return Messages.LibraryContainer_libraries;
 	}
 
 	/*

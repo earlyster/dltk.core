@@ -189,7 +189,7 @@ public class DLTKPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_ADD_LIBRARY = createUnManaged(T_WIZBAN, "addlibrary_wiz.png");//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_CLEAN_UP = createUnManaged(T_WIZBAN, "cleanup_wiz.png"); //$NON-NLS-1$
 	
-	public static final ImageDescriptor DESC_TOOL_BUILDPATH_ORDER= createUnManaged(T_OBJ, "cp_order_obj.gif"); 		//$N
+	public static final ImageDescriptor DESC_TOOL_BUILDPATH_ORDER= createUnManaged(T_OBJ, "cp_order_obj.gif"); //$NON-NLS-1$
 	/*
 	 * Set of predefined Image Descriptors.
 	 */
@@ -414,7 +414,7 @@ public class DLTKPluginImages {
 		if (fgImageRegistry != null) {
 			// Plugin.logErrorMessage("Image registry already defined");
 			// //$NON-NLS-1$
-			System.err.println("Image registry already defined");
+			System.err.println("Image registry already defined"); //$NON-NLS-1$
 		}		
 		return result;
 		}

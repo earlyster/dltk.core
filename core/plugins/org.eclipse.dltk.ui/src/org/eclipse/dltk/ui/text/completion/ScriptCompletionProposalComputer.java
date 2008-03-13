@@ -174,7 +174,7 @@ public abstract class ScriptCompletionProposalComputer implements
 			IModelElement element = sourceModule.getElementAt(offset);
 			if (element != null) {
 				if (DLTKCore.DEBUG_COMPLETION) {
-					System.out.println("========= Model element: "
+					System.out.println("========= Model element: " //$NON-NLS-1$
 							+ element.getClass());
 				}
 			}
