@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.breakpoints;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -258,11 +260,11 @@ public abstract class ScriptToggleBreakpointAdapter implements
 									BreakpointUtils.addLineBreakpoint(editor,
 											lineNumber);
 								} else {
-									report("Breakpoint already set at line "
-											+ lineNumber, part);
+									report(MessageFormat.format(Messages.ScriptToggleBreakpointAdapter_breakpointAlreadySetAtLine,
+											new Object[] { new Integer( lineNumber ) }), part);
 								}
 							} else {
-								report("Invalid breakpoint position.", part);
+								report(Messages.ScriptToggleBreakpointAdapter_invalidBreakpointPosition, part);
 							}
 						}
 					} catch (CoreException e) {
