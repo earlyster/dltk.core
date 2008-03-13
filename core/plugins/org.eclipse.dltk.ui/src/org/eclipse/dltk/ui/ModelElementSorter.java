@@ -71,6 +71,7 @@ public class ModelElementSorter extends ViewerSorter {
 	private MembersOrderPreferenceCache fMemberOrderCache;
 	private Collator fNewCollator; // collator from ICU
 
+	private boolean innerElements = true;
 	/**
 	 * Constructor.
 	 */
@@ -80,6 +81,17 @@ public class ModelElementSorter extends ViewerSorter {
 				.getMemberOrderPreferenceCache();
 		fNewCollator = null;
 	}
+	
+
+	public boolean isInnerElements() {
+		return innerElements;
+	}
+
+
+	public void setInnerElements(boolean innerElements) {
+		this.innerElements = innerElements;
+	}
+
 
 	/*
 	 * @see ViewerSorter#category
@@ -197,7 +209,14 @@ public class ModelElementSorter extends ViewerSorter {
 
 		String name1 = getElementName(e1);
 		String name2 = getElementName(e2);
-
+		
+		//If 
+		if( !this.isInnerElements() && e1 instanceof IModelElement ) {
+			IModelElement me = (IModelElement) e1;
+			if( me.getElementType() > IModelElement.BINARY_MODULE ) {
+				return 0;
+			}
+		}
 		if (e1 instanceof IType) { // handle anonymous types
 			if (name1.length() == 0) {
 				if (name2.length() == 0) {
