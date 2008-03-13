@@ -71,11 +71,11 @@ public abstract class AbstractInterpreterInstallType implements
 
 	private static final int NOT_WORK_COUNT = -2;
 
-	private static final String DLTK_TOTAL_WORK_START = "%DLTK_TOTAL_WORK_START%:";
-	private static final String DLTK_TOTAL_WORK_END = "%DLTK_TOTAL_WORK_END%";
-	private static final String DLTK_TOTAL_WORK_INC = "%DLTK_TOTAL_WORK_INCREMENT%";
+	private static final String DLTK_TOTAL_WORK_START = "%DLTK_TOTAL_WORK_START%:"; //$NON-NLS-1$
+	private static final String DLTK_TOTAL_WORK_END = "%DLTK_TOTAL_WORK_END%"; //$NON-NLS-1$
+	private static final String DLTK_TOTAL_WORK_INC = "%DLTK_TOTAL_WORK_INCREMENT%"; //$NON-NLS-1$
 
-	public static final String DLTK_PATH_PREFIX = "DLTK:";
+	public static final String DLTK_PATH_PREFIX = "DLTK:"; //$NON-NLS-1$
 
 	private List fInterpreters;
 
@@ -227,7 +227,7 @@ public abstract class AbstractInterpreterInstallType implements
 		Iterator it = env.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry entry = (Map.Entry) it.next();
-			list.add(entry.getKey() + "=" + entry.getValue());
+			list.add(entry.getKey() + "=" + entry.getValue()); //$NON-NLS-1$
 		}
 
 		return (String[]) list.toArray(new String[list.size()]);
@@ -288,7 +288,7 @@ public abstract class AbstractInterpreterInstallType implements
 					int work = extractWorkFromLine(line);
 					if (work != NOT_WORK_COUNT) {
 						monitor.beginTask(
-								"Featching interpeter library locations", work);
+								LaunchingMessages.AbstractInterpreterInstallType_fetchingInterpreterLibraryLocations, work);
 						// monitor.subTask("Featching interpeter library
 						// locations");
 						workReceived = true;
@@ -307,12 +307,12 @@ public abstract class AbstractInterpreterInstallType implements
 		} catch (IOException e) {
 			DLTKLaunchingPlugin.log(new Status(IStatus.INFO,
 					DLTKLaunchingPlugin.PLUGIN_ID, IStatus.INFO,
-					"Failed to read from discovert script output stream:"
-							+ e.getMessage(), e));
+					MessageFormat.format(LaunchingMessages.AbstractInterpreterInstallType_failedToReadFromDiscoverScriptOutputStream,
+							new Object[] { e.getMessage() }), e));
 		} finally {
 			if (monitor != null) {
 				if (!workReceived) {
-					monitor.beginTask("Featching interpeter library locations",
+					monitor.beginTask(LaunchingMessages.AbstractInterpreterInstallType_fetchingInterpreterLibraryLocations,
 							1);
 				}
 				monitor.done();
@@ -354,7 +354,7 @@ public abstract class AbstractInterpreterInstallType implements
 	private String combine(List result) {
 		StringBuffer buffer = new StringBuffer();
 		for (int i = 0; i < result.size(); i++) {
-			buffer.append(" " + result.get(i));
+			buffer.append(" " + result.get(i)); //$NON-NLS-1$
 		}
 		return buffer.toString();
 	}
@@ -367,7 +367,7 @@ public abstract class AbstractInterpreterInstallType implements
 			IProgressMonitor monitor) {
 		List resolvedLocs = new ArrayList();
 		if (monitor != null) {
-			monitor.beginTask("Correct locations...", locs.size());
+			monitor.beginTask(LaunchingMessages.AbstractInterpreterInstallType_correctingLocations, locs.size());
 		}
 		for (Iterator iter = locs.iterator(); iter.hasNext();) {
 			LibraryLocation l = (LibraryLocation) iter.next();
@@ -445,7 +445,7 @@ public abstract class AbstractInterpreterInstallType implements
 	}
 
 	protected String getBuildPathDelimeter() {
-		return " ";
+		return " "; //$NON-NLS-1$
 	}
 
 	protected String[] parsePaths(String result) {
@@ -456,7 +456,7 @@ public abstract class AbstractInterpreterInstallType implements
 		String[] paths = res.split(getBuildPathDelimeter());
 		List filtered = new ArrayList();
 		for (int i = 0; i < paths.length; ++i) {
-			if (!paths[i].equals(".")) {
+			if (!paths[i].equals(".")) { //$NON-NLS-1$
 				filtered.add(paths[i].trim());
 			}
 		}
@@ -481,7 +481,7 @@ public abstract class AbstractInterpreterInstallType implements
 
 				String[] paths = parsePaths(res);
 				for (int i = 0; i < paths.length; ++i) {
-					if (!paths[i].equals(".")) {
+					if (!paths[i].equals(".")) { //$NON-NLS-1$
 						filtered.add(paths[i].trim());
 					}
 				}
@@ -508,11 +508,11 @@ public abstract class AbstractInterpreterInstallType implements
 		if (Platform.getOS().equals(Platform.OS_WIN32)) {
 			for (int i = 0; i < possibleNames.length; ++i) {
 				final String possibleName = possibleNames[i].toLowerCase();
-				String fName = nPath.removeFileExtension().lastSegment()
+				String fName = nPath.removeFileExtension().toString()
 						.toLowerCase();
 				String ext = nPath.getFileExtension();
-				if ((ext.equalsIgnoreCase("exe") || ext.equalsIgnoreCase("bat"))
-						&& fName.startsWith(possibleName)) {
+				if (possibleName.equals(fName)
+						&& ("exe".equalsIgnoreCase(ext) || "bat".equalsIgnoreCase(ext))) { //$NON-NLS-1$ //$NON-NLS-2$
 					matchFound = true;
 					break;
 				}
@@ -521,7 +521,7 @@ public abstract class AbstractInterpreterInstallType implements
 			for (int i = 0; i < possibleNames.length; i++) {
 				final String possibleName = possibleNames[i];
 				String fName = nPath.lastSegment();
-				if (fName.startsWith(possibleName)) {
+				if (fName.equals(possibleName)) {
 					matchFound = true;
 					break;
 				}
@@ -529,7 +529,7 @@ public abstract class AbstractInterpreterInstallType implements
 		}
 
 		if (matchFound) {
-			return createStatus(IStatus.OK, "", null);
+			return createStatus(IStatus.OK, "", null); //$NON-NLS-1$
 		} else {
 			return createStatus(IStatus.ERROR,
 					InterpreterMessages.errNoInterpreterExecutablesFound, null);
@@ -553,13 +553,13 @@ public abstract class AbstractInterpreterInstallType implements
 			cmdLine = buildCommandLine(installLocation, pathFile);
 			try {
 				if (DLTKLaunchingPlugin.TRACE_EXECUTION) {
-					traceExecution("Tcl library discovery script", cmdLine, env);
+					traceExecution(LaunchingMessages.AbstractInterpreterInstallType_libraryDiscoveryScript, cmdLine, env);
 				}
 				process = DebugPlugin.exec(cmdLine, null, env);
 				if (process != null) {
 					String result[] = readPathsFromProcess(monitor, process);
 					if (result == null) {
-						throw new IOException("null result from process");
+						throw new IOException(LaunchingMessages.AbstractInterpreterInstallType_nullResultFromProcess);
 					}
 					if (DLTKLaunchingPlugin.TRACE_EXECUTION) {
 						traceDiscoveryOutput(result);
@@ -578,7 +578,7 @@ public abstract class AbstractInterpreterInstallType implements
 					if (result != null) {
 						StringBuffer resultBuffer = new StringBuffer();
 						for (int i = 0; i < result.length; i++) {
-							resultBuffer.append(result[i]).append("\n");
+							resultBuffer.append(result[i]).append("\n"); //$NON-NLS-1$
 						}
 						return resultBuffer.toString();
 					}
@@ -594,7 +594,7 @@ public abstract class AbstractInterpreterInstallType implements
 			if (DLTKCore.VERBOSE) {
 				getLog().log(
 						createStatus(IStatus.ERROR,
-								"Unable to lookup library paths", e));
+								LaunchingMessages.AbstractInterpreterInstallType_unableToLookupLibraryPaths, e));
 			}
 		} finally {
 			if (process != null) {
@@ -609,36 +609,36 @@ public abstract class AbstractInterpreterInstallType implements
 
 	private void traceDiscoveryOutput(String[] result) {
 		StringBuffer sb = new StringBuffer();
-		sb.append("-----------------------------------------------\n");
-		sb.append("Discovery script output:").append('\n');
-		sb.append("Output Result:");
+		sb.append("-----------------------------------------------\n"); //$NON-NLS-1$
+		sb.append("Discovery script output:").append('\n'); //$NON-NLS-1$
+		sb.append("Output Result:"); //$NON-NLS-1$
 		if (result != null) {
 			for (int i = 0; i < result.length; i++) {
-				sb.append(" " + result[i]);
+				sb.append(" " + result[i]); //$NON-NLS-1$
 			}
 		} else {
-			sb.append("Null");
+			sb.append("Null"); //$NON-NLS-1$
 		}
-		sb.append("\n-----------------------------------------------\n");
+		sb.append("\n-----------------------------------------------\n"); //$NON-NLS-1$
 		System.out.println(sb);
 	}
 
 	private void traceExecution(String processLabel, String[] cmdLineLabel,
 			String[] environment) {
 		StringBuffer sb = new StringBuffer();
-		sb.append("-----------------------------------------------\n");
-		sb.append("Running ").append(processLabel).append('\n');
+		sb.append("-----------------------------------------------\n"); //$NON-NLS-1$
+		sb.append("Running ").append(processLabel).append('\n'); //$NON-NLS-1$
 		// sb.append("Command line: ").append(cmdLineLabel).append('\n');
-		sb.append("Command line: ");
+		sb.append("Command line: "); //$NON-NLS-1$
 		for (int i = 0; i < cmdLineLabel.length; i++) {
-			sb.append(" " + cmdLineLabel[i]);
+			sb.append(" " + cmdLineLabel[i]); //$NON-NLS-1$
 		}
-		sb.append("\n");
-		sb.append("Environment:\n");
+		sb.append("\n"); //$NON-NLS-1$
+		sb.append("Environment:\n"); //$NON-NLS-1$
 		for (int i = 0; i < environment.length; i++) {
 			sb.append('\t').append(environment[i]).append('\n');
 		}
-		sb.append("-----------------------------------------------\n");
+		sb.append("-----------------------------------------------\n"); //$NON-NLS-1$
 		System.out.println(sb);
 	}
 
@@ -650,20 +650,19 @@ public abstract class AbstractInterpreterInstallType implements
 					File locator = createPathFile();
 					String result = retrivePaths(installLocation, locations,
 							monitor, locator, variables);
-					String message = "Failed to obtain library locations for "
-							+ installLocation.getName() + " with "
-							+ locator.toString();
+					String message = MessageFormat.format(LaunchingMessages.AbstractInterpreterInstallType_failedToResolveLibraryLocationsForWith,
+							new Object[] { installLocation.getName(), locator.toString() });
 					if (locations.size() == 0) {
 						if (result == null) {
 							DLTKLaunchingPlugin.log(message);
 						} else {
 							DLTKLaunchingPlugin.logWarning(message,
-									new Exception("Output:\n" + result));
+									new Exception(MessageFormat.format(LaunchingMessages.AbstractInterpreterInstallType_output, new Object[] { result })));
 						}
 					}
 				} catch (IOException e) {
 					DLTKLaunchingPlugin.log(
-							"Problem while obtaining interpreter libraries", e);
+							LaunchingMessages.AbstractInterpreterInstallType_problemWhileResolvingInterpreterLibraries, e);
 					if (DLTKCore.DEBUG) {
 						e.printStackTrace();
 					}
@@ -686,7 +685,7 @@ public abstract class AbstractInterpreterInstallType implements
 			final File installLocation, EnvironmentVariable[] variables,
 			IProgressMonitor monitor) {
 		if (monitor != null) {
-			monitor.beginTask(this.getName() + " getting library paths", 100);
+			monitor.beginTask(MessageFormat.format(LaunchingMessages.AbstractInterpreterInstallType_resolvingLibraryPaths, new Object[] { this.getName() }), 100);
 		}
 		Object cacheKey = makeKey(installLocation, variables);
 		if (fCachedLocations.containsKey(cacheKey)) {
@@ -705,11 +704,11 @@ public abstract class AbstractInterpreterInstallType implements
 		} catch (InvocationTargetException e) {
 			getLog().log(
 					createStatus(IStatus.ERROR,
-							"Error to get default libraries:", e));
+							LaunchingMessages.AbstractInterpreterInstallType_errorResolvingDefaultLibraries, e));
 		} catch (InterruptedException e) {
 			getLog().log(
 					createStatus(IStatus.ERROR,
-							"Error to get default libraries:", e));
+							LaunchingMessages.AbstractInterpreterInstallType_errorResolvingDefaultLibraries, e));
 		}
 
 		LibraryLocation[] libs = correctLocations(locations,
@@ -728,7 +727,7 @@ public abstract class AbstractInterpreterInstallType implements
 		String key = installLocation.getAbsolutePath();
 		if (variables != null) {
 			for (int i = 0; i < variables.length; i++) {
-				key += "|" + variables[i].getName() + ":"
+				key += "|" + variables[i].getName() + ":" //$NON-NLS-1$ //$NON-NLS-2$
 						+ variables[i].getValue();
 			}
 		}
