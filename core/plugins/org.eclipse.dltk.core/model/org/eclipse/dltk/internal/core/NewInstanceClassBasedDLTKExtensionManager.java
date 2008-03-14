@@ -21,6 +21,14 @@ public class NewInstanceClassBasedDLTKExtensionManager extends
 		super(extensionPoint);
 	}
 
+	public NewInstanceClassBasedDLTKExtensionManager(String extensionPoint,
+			boolean initializeAtStartup) {
+		super(extensionPoint);
+		if( initializeAtStartup ) {
+			initialize();
+		}
+	}
+
 	public Object getInitObject(ElementInfo ext) {
 		try {
 			if (ext != null) {
