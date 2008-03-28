@@ -17,6 +17,7 @@ import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IBuiltinModuleProvider;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.core.util.Util;
 
 /**
@@ -34,7 +35,17 @@ public class UserLibraryBuildpathContainer implements IBuildpathContainer {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.IClasspathContainer#getClasspathEntries()
 	 */
+	/**
+	 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
+	 */
 	public IBuildpathEntry[] getBuildpathEntries() {
+		return getBuildpathEntries(null);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.IClasspathContainer#getClasspathEntries()
+	 */
+	public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 		UserLibrary library= getUserLibrary();
 		if (library != null) {
 			return library.getEntries();
