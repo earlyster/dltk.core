@@ -68,13 +68,8 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 	}
 
 	private String getNatureFromProject(IScriptProject project) {
-		try {
-			return DLTKLanguageManager.getLanguageToolkit(project)
-					.getNatureId();
-		} catch (CoreException e) {
-			DLTKLaunchingPlugin.log(e);
-		}
-		return null;
+		return DLTKLanguageManager.getLanguageToolkit(project)
+				.getNatureId();
 	}
 
 	/**
