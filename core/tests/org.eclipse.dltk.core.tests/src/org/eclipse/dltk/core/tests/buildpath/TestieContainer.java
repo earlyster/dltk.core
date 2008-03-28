@@ -14,6 +14,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IBuiltinModuleProvider;
+import org.eclipse.dltk.core.IScriptProject;
 
 public class TestieContainer implements IBuildpathContainer {
 	private IPath fPath;
@@ -22,7 +23,14 @@ public class TestieContainer implements IBuildpathContainer {
 		this.fPath = srcPath;
 	}
 
+	/**
+	 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
+	 */
 	public IBuildpathEntry[] getBuildpathEntries() {
+		return getBuildpathEntries(null);
+	}
+
+	public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 		return new IBuildpathEntry[] { DLTKCore.newExtLibraryEntry(this.fPath) };
 	}
 
