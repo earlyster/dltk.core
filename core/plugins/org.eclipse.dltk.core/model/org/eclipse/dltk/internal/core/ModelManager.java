@@ -115,7 +115,14 @@ public class ModelManager implements ISaveParticipant {
 	public boolean batchContainerInitializations = false;
 	public HashMap containerInitializersCache = new HashMap(5);
 	public final static IBuildpathContainer CONTAINER_INITIALIZATION_IN_PROGRESS = new IBuildpathContainer() {
+		/**
+		 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
+		 */
 		public IBuildpathEntry[] getBuildpathEntries() {
+			return getBuildpathEntries(null);
+		}
+
+		public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 			return null;
 		}
 
@@ -1228,7 +1235,14 @@ public class ModelManager implements ISaveParticipant {
 			if (entries != ScriptProject.INVALID_BUILDPATH) {
 				final IBuildpathEntry[] containerEntries = entries;
 				IBuildpathContainer container = new IBuildpathContainer() {
+					/**
+					 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
+					 */
 					public IBuildpathEntry[] getBuildpathEntries() {
+						return getBuildpathEntries(null);
+					}
+
+					public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 						return containerEntries;
 					}
 
@@ -1670,7 +1684,7 @@ public class ModelManager implements ISaveParticipant {
 				if (container != null) {
 					buffer
 							.append("	container: " + container.getDescription() + " {\n"); //$NON-NLS-2$//$NON-NLS-1$
-					IBuildpathEntry[] entries = container.getBuildpathEntries();
+					IBuildpathEntry[] entries = container.getBuildpathEntries(project);
 					if (entries != null) {
 						for (int i = 0; i < entries.length; i++) {
 							buffer.append("		" + entries[i] + '\n'); //$NON-NLS-1$
@@ -1718,7 +1732,7 @@ public class ModelManager implements ISaveParticipant {
 					buffer.append(previousContainer.getDescription());
 					buffer.append(" {\n"); //$NON-NLS-1$
 					IBuildpathEntry[] entries = previousContainer
-							.getBuildpathEntries();
+							.getBuildpathEntries(project);
 					if (entries != null) {
 						for (int j = 0; j < entries.length; j++) {
 							buffer.append(" 		"); //$NON-NLS-1$
@@ -1809,7 +1823,7 @@ public class ModelManager implements ISaveParticipant {
 			return false;
 		IBuildpathContainer previousSessionContainer = getPreviousSessionContainer(
 				containerPath, project);
-		final IBuildpathEntry[] newEntries = container.getBuildpathEntries();
+		final IBuildpathEntry[] newEntries = container.getBuildpathEntries(project);
 		if (previousSessionContainer == null)
 			if (newEntries.length == 0) {
 				containerPut(project, containerPath, container);
@@ -1818,7 +1832,7 @@ public class ModelManager implements ISaveParticipant {
 				return false;
 			}
 		final IBuildpathEntry[] oldEntries = previousSessionContainer
-				.getBuildpathEntries();
+				.getBuildpathEntries(project);
 		if (oldEntries.length != newEntries.length)
 			return false;
 		for (int i = 0, length = newEntries.length; i < length; i++) {
@@ -2169,7 +2183,7 @@ public class ModelManager implements ISaveParticipant {
 						}
 						if (container != null) {
 							IBuildpathEntry[] entries = container
-									.getBuildpathEntries();
+									.getBuildpathEntries(project);
 							containerString = ((ScriptProject) project)
 									.encodeBuildpath(entries, false, null/*
 																			 * not
@@ -2318,7 +2332,7 @@ public class ModelManager implements ISaveParticipant {
 							path, project);
 				}
 				if (container != null)
-					cpEntries = container.getBuildpathEntries();
+					cpEntries = container.getBuildpathEntries(project);
 				savePath(path);
 				saveBuildpathEntries(cpEntries);
 			}
@@ -2469,7 +2483,14 @@ public class ModelManager implements ISaveParticipant {
 			this.project = project;
 		}
 
+		/**
+		 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
+		 */
 		public IBuildpathEntry[] getBuildpathEntries() {
+			return getBuildpathEntries(null);
+		}
+
+		public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 			return entries;
 		}
 
