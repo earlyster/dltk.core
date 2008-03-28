@@ -1086,14 +1086,14 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 			((UserLibraryBuildpathContainerInitializer) initializer)
 					.setToolkit(getLanguageToolkit());
 		}
-		IScriptProject jproject = fDummyProject;
+		IScriptProject project = fDummyProject;
 
 		for (int i = 0; i < nExisting; i++) {
 			BPUserLibraryElement element = (BPUserLibraryElement) list.get(i);
 			IPath path = element.getPath();
 			if (newEntries.contains(element)
 					|| element.hasChanges(DLTKCore.getBuildpathContainer(path,
-							jproject))) {
+							project), project)) {
 				IBuildpathContainer updatedContainer = element
 						.getUpdatedContainer();
 				try {
@@ -1101,7 +1101,7 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 						((UserLibraryBuildpathContainerInitializer) initializer)
 								.setToolkit(getLanguageToolkit());
 					}
-					initializer.requestBuildpathContainerUpdate(path, jproject,
+					initializer.requestBuildpathContainerUpdate(path, project,
 							updatedContainer);
 				} catch (CoreException e) {
 					multiStatus.add(e.getStatus());
@@ -1117,7 +1117,7 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 			IPath path = new Path(DLTKCore.USER_LIBRARY_CONTAINER_ID)
 					.append(name);
 			try {
-				initializer.requestBuildpathContainerUpdate(path, jproject,
+				initializer.requestBuildpathContainerUpdate(path, project,
 						null);
 			} catch (CoreException e) {
 				multiStatus.add(e.getStatus());

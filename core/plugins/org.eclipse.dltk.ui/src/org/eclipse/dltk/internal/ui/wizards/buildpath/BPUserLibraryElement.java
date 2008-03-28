@@ -27,7 +27,14 @@ public class BPUserLibraryElement {
 	private  class UpdatedBuildpathContainer implements IBuildpathContainer {
 			
 		
+		/**
+		 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
+		 */
 		public IBuildpathEntry[] getBuildpathEntries() {
+			return getBuildpathEntries(null);
+		}
+
+		public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 			BPListElement[] children= getChildren();
 			IBuildpathEntry[] entries= new IBuildpathEntry[children.length];
 			for (int i= 0; i < entries.length; i++) {
@@ -62,7 +69,7 @@ public class BPUserLibraryElement {
 		fName= name;
 		fChildren= new ArrayList();
 		if (container != null) {
-			IBuildpathEntry[] entries= container.getBuildpathEntries();
+			IBuildpathEntry[] entries= container.getBuildpathEntries(project);
 			BPListElement[] res= new BPListElement[entries.length];
 			for (int i= 0; i < res.length; i++) {
 				IBuildpathEntry curr= entries[i];
@@ -175,11 +182,11 @@ public class BPUserLibraryElement {
 		return new UpdatedBuildpathContainer();
 	}
 		
-	public boolean hasChanges(IBuildpathContainer oldContainer) {
+	public boolean hasChanges(IBuildpathContainer oldContainer, IScriptProject project) {
 		if (oldContainer == null || (oldContainer.getKind() == IBuildpathContainer.K_SYSTEM) != fIsSystemLibrary) {
 			return true;
 		}
-		IBuildpathEntry[] oldEntries= oldContainer.getBuildpathEntries();
+		IBuildpathEntry[] oldEntries= oldContainer.getBuildpathEntries(project);
 		if (fChildren.size() != oldEntries.length) {
 			return true;
 		}

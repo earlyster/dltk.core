@@ -121,7 +121,7 @@ public class BuildPathContainer extends ProjectFragmentContainer {
 			list.add(roots[i]);
 		}
 		if (fContainer != null) {
-			IBuildpathEntry[] classpathEntries= fContainer.getBuildpathEntries();
+			IBuildpathEntry[] classpathEntries= fContainer.getBuildpathEntries(getScriptProject());
 			if (classpathEntries == null) {
 				// invalid implementation of a classpath container
 				DLTKUIPlugin.log(new IllegalArgumentException("Invalid classpath container implementation: getClasspathEntries() returns null. " + fContainer.getPath())); //$NON-NLS-1$
