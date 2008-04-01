@@ -184,14 +184,6 @@ public class InterpreterContainer implements IBuildpathContainer {
 	}
 
 	/**
-	 * @see IBuildpathContainer#getBuildpathEntries()
-	 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
-	 */
-	public IBuildpathEntry[] getBuildpathEntries() {
-		return getBuildpathEntries((IScriptProject)null);
-	}
-
-	/**
 	 * @see IBuildpathContainer#getBuildpathEntries(IScriptProject)
 	 */
 	public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
