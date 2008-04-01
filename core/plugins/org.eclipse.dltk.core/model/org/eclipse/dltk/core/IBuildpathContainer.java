@@ -88,49 +88,6 @@ public interface IBuildpathContainer {
 	 * </ul>
 	 * The effects of using other script model APIs are unspecified.
 	 * </p>
-	 * 
-	 * @return IBuildpathEntry[] - the buildpath entries this container represents
-	 * @see IBuildpathEntry
-	 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
-	 */	
-	IBuildpathEntry[] getBuildpathEntries();
-
-	/**
-	 * Answers the set of buildpath entries this container is mapping to.
-	 * <p>
-	 * The set of entries associated with a buildpath container may contain any of the following:
-	 * <ul>
-	 * <li> library entries (<code>CPE_LIBRARY</code>) </li>
-	 * <li> project entries (<code>CPE_PROJECT</code>) </li>
-	 * </ul>
-	 * A buildpath container can neither reference further buildpath containers
-	 * or buildpath variables.
-	 * </p>
-	 * <p>
-	 * This method is called by the script model when it needs to resolve this
-	 * buildpath container entry into a list of library and project entries.
-	 * The method is typically called exactly once for a given script project,
-	 * and the resulting list of entries cached internally by the script model.
-	 * This method must not be called by other clients.
-	 * <p>
-	 * There are a wide variety of conditions under which this method may be
-	 * invoked. To ensure that the implementation does not interfere with
-	 * correct functioning of the script model, the implementation should use
-	 * only the following script model APIs:
-	 * <ul>
-	 * <li>{@link DLTKCore#newLibraryEntry(IPath, IPath, IPath, boolean, boolean)} and variants</li>
-	 * <li>{@link DLTKCore#newProjectEntry(IPath, boolean)} and variants</li>
-	 * <li>{@link DLTKCore#create(org.eclipse.core.resources.IWorkspaceRoot)}</li>
-	 * <li>{@link DLTKCore#create(org.eclipse.core.resources.IProject)}</li>
-	 * <li>{@link IScriptModel#getScriptProjects()}</li>
-	 * <li>{@link IScriptProject#getRawbuildpath()}</li>
-	 * <li>{@link IScriptProject#readRawbuildpath()}</li>
-	 * <li>{@link IScriptProject#getOutputLocation()}</li>
-	 * <li>{@link IScriptProject#readOutputLocation()}</li>
-	 * <li>script element operations marked as "handle-only"</li>
-	 * </ul>
-	 * The effects of using other script model APIs are unspecified.
-	 * </p>
 	 * @param project TODO
 	 * 
 	 * @return IBuildpathEntry[] - the buildpath entries this container represents
