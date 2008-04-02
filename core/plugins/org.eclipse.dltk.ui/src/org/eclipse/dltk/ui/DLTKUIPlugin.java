@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui;
 
+import java.io.IOException;
+
 import org.eclipse.core.filesystem.URIUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -70,8 +72,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.ConfigurationElementSorter;
 import org.osgi.framework.BundleContext;
 
-import java.io.IOException;
-
 /**
  * The main plugin class to be used in the desktop.
  */
@@ -85,13 +85,12 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 
 	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
 
-	private static ISharedImages fgSharedImages= null;
-
+	private static ISharedImages fgSharedImages = null;
 
 	/**
 	 * Content assist history.
-	 *
-	 *
+	 * 
+	 * 
 	 */
 	private ContentAssistHistory fContentAssistHistory;
 
@@ -123,8 +122,10 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 					IProjectFragment fragment = (IProjectFragment) original
 							.getAncestor(IModelElement.PROJECT_FRAGMENT);
 					if (!fragment.isArchive()) {
-						IPath path = original.getPath();
-						return new DocumentAdapter(workingCopy, path);
+//						IPath path = original.getPath();
+						// return new DocumentAdapter(workingCopy, path);
+						return BufferManager.getDefaultBufferManager()
+								.createBuffer(original);
 					}
 					return BufferManager.getDefaultBufferManager()
 							.createBuffer(original);
@@ -183,10 +184,10 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	}
 
 	public IDialogSettings getDialogSettingsSection(String name) {
-		IDialogSettings dialogSettings= getDialogSettings();
-		IDialogSettings section= dialogSettings.getSection(name);
+		IDialogSettings dialogSettings = getDialogSettings();
+		IDialogSettings section = dialogSettings.getSection(name);
 		if (section == null) {
-			section= dialogSettings.addNewSection(name);
+			section = dialogSettings.addNewSection(name);
 		}
 		return section;
 	}
@@ -196,13 +197,14 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	}
 
 	public static IWorkbenchWindow getActiveWorkbenchWindow() {
-		return DLTKUIPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow();
+		return DLTKUIPlugin.getDefault().getWorkbench()
+				.getActiveWorkbenchWindow();
 	}
 
 	/**
 	 * Returns an image descriptor for the image file at the given plug-in
 	 * relative path.
-	 *
+	 * 
 	 * @param path
 	 *            the path
 	 * @return the image descriptor
@@ -250,7 +252,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns the model element wrapped by the given editor input.
-	 *
+	 * 
 	 * @param editorInput
 	 *            the editor input
 	 * @return the model element wrapped by <code>editorInput</code> or
@@ -259,8 +261,8 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	public static IModelElement getEditorInputModelElement(
 			IEditorInput editorInput) {
 		// Performance: check working copy manager first: this is faster
-		IModelElement je = DLTKUIPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(
-				editorInput);
+		IModelElement je = DLTKUIPlugin.getDefault().getWorkingCopyManager()
+				.getWorkingCopy(editorInput);
 		if (je != null) {
 			return je;
 		}
@@ -315,7 +317,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Creates the DLTK plug-in's standard groups for view context menus.
-	 *
+	 * 
 	 * @param menu
 	 *            the menu manager to be populated
 	 */
@@ -349,9 +351,9 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns the Script content assist history.
-	 *
+	 * 
 	 * @return the Script content assist history
-	 *
+	 * 
 	 */
 	public ContentAssistHistory getContentAssistHistory() {
 		if (fContentAssistHistory == null) {
@@ -378,8 +380,8 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * This will force a rebuild of the descriptors the next time a client asks
 	 * for them.
 	 * </p>
-	 *
-	 *
+	 * 
+	 * 
 	 */
 	public void resetEditorTextHoverDescriptors() {
 		fEditorTextHoverDescriptors = null;
@@ -387,7 +389,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns all editor text hovers contributed to the workbench.
-	 *
+	 * 
 	 * @param store
 	 *            preference store to initialize settings from
 	 * @return an array of EditorTextHoverDescriptor *
@@ -420,7 +422,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * elements inside a compilation unit or class file, the parent is opened in
 	 * the editor is opened and the element revealed. If there already is an
 	 * open Java editor for the given element, it is returned.
-	 *
+	 * 
 	 * @param element
 	 *            the input element; either a compilation unit (<code>ICompilationUnit</code>)
 	 *            or a class file (<code>IClassFile</code>) or source
@@ -446,7 +448,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * elements inside a compilation unit or class file, the parent is opened in
 	 * the editor is opened. If there already is an open Java editor for the
 	 * given element, it is returned.
-	 *
+	 * 
 	 * @param element
 	 *            the input element; either a compilation unit (<code>ICompilationUnit</code>)
 	 *            or a class file (<code>IClassFile</code>) or source
