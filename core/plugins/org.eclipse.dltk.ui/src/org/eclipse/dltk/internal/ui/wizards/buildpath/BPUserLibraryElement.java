@@ -25,15 +25,6 @@ import org.eclipse.dltk.core.IScriptProject;
 public class BPUserLibraryElement {
 	
 	private  class UpdatedBuildpathContainer implements IBuildpathContainer {
-			
-		
-		/**
-		 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
-		 */
-		public IBuildpathEntry[] getBuildpathEntries() {
-			return getBuildpathEntries(null);
-		}
-
 		public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 			BPListElement[] children= getChildren();
 			IBuildpathEntry[] entries= new IBuildpathEntry[children.length];
@@ -43,7 +34,7 @@ public class BPUserLibraryElement {
 			return entries;
 		}
 		
-		public String getDescription() {
+		public String getDescription(IScriptProject project) {
 			return getName();
 		}
 
@@ -55,7 +46,7 @@ public class BPUserLibraryElement {
 			return BPUserLibraryElement.this.getPath();
 		}
 
-		public IBuiltinModuleProvider getBuiltinProvider() {
+		public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
 			return null;
 		}
 	}
