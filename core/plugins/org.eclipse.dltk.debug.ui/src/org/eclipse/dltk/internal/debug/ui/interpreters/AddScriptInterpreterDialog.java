@@ -13,7 +13,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
@@ -85,7 +85,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 			fStati[i] = new StatusInfo();
 		}
 
-		fEnvironments = EnvironmentsManager.getEnvironments();
+		fEnvironments = EnvironmentManager.getEnvironments();
 		fInterpreterTypes = interpreterInstallTypes;
 		fSelectedInterpreterType = editedInterpreter != null ? editedInterpreter
 				.getInterpreterInstallType()
@@ -390,7 +390,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	private IEnvironment getSelectedEnvironment() {
 		int idx = fInterpreterEnvCombo.getSelectionIndex();
 		if (idx < 0)
-			return EnvironmentsManager.getLocalEnvironment();
+			return EnvironmentManager.getLocalEnvironment();
 		return fEnvironments[idx];
 	}
 

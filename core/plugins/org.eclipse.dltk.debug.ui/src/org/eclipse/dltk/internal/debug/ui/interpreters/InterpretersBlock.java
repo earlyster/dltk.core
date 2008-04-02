@@ -18,7 +18,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.internal.ui.util.SWTUtil;
@@ -639,7 +639,7 @@ public abstract class InterpretersBlock implements
 							IProgressMonitor.UNKNOWN);
 
 					// TODO: Add environment support
-					searcher.search(EnvironmentsManager.getLocalEnvironment(),
+					searcher.search(EnvironmentManager.getLocalEnvironment(),
 							getCurrentNature(), exstingLocations, 1, monitor);
 				} finally {
 					monitor.done();
