@@ -1,6 +1,5 @@
 package org.eclipse.dltk.core.tests.launching;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +29,8 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.debug.core.model.IStreamsProxy;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.tests.model.AbstractModelTests;
 import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
 import org.eclipse.dltk.debug.core.model.IScriptLineBreakpoint;
@@ -279,14 +280,15 @@ public abstract class ScriptLaunchingTests extends AbstractModelTests {
 		final List installs = new ArrayList();
 		final InterpreterSearcher searcher = new InterpreterSearcher();
 
-		searcher.search(natureId, null, 1, null);
+		searcher.search(EnvironmentsManager.getLocalEnvironment(), natureId,
+				null, 1, null);
 
 		if (searcher.hasResults()) {
-			File[] files = searcher.getFoundFiles();
+			IFileHandle[] files = searcher.getFoundFiles();
 			IInterpreterInstallType[] types = searcher.getFoundInstallTypes();
 
 			for (int i = 0; i < files.length; ++i) {
-				final File file = files[i];
+				final IFileHandle file = files[i];
 				final IInterpreterInstallType type = types[i];
 
 				// // Skip useless interpreters
@@ -319,7 +321,8 @@ public abstract class ScriptLaunchingTests extends AbstractModelTests {
 
 	private boolean isInterpreterAvailable(String interpreterName) {
 		for (int i = 0; i < interpreterInstalls.length; i++) {
-			File installLocation = interpreterInstalls[i].getInstallLocation();
+			IFileHandle installLocation = interpreterInstalls[i]
+					.getInstallLocation();
 			if (isRequiredInstall(interpreterName, installLocation)) {
 				return true;
 			}
@@ -328,9 +331,8 @@ public abstract class ScriptLaunchingTests extends AbstractModelTests {
 	}
 
 	private boolean isRequiredInstall(String interpreterName,
-			File installLocation) {
-		IPath path = new Path(installLocation.getAbsolutePath());
-		String executableName = path.lastSegment();
+			IFileHandle installLocation) {
+		String executableName = installLocation.getName();
 		if (executableName.startsWith(interpreterName)) {
 			return true;
 		}
@@ -543,9 +545,9 @@ public abstract class ScriptLaunchingTests extends AbstractModelTests {
 			// System.out.println("Interperter install location (debug): "
 			// + install.getInstallLocation());
 
-//			final InterpretersUpdater updater = new InterpretersUpdater();
-//			updater.updateInterpreterSettings(getNatureId(),
-//					interpreterInstalls, install);
+			// final InterpretersUpdater updater = new InterpretersUpdater();
+			// updater.updateInterpreterSettings(getNatureId(),
+			// interpreterInstalls, install);
 
 			stats.reset();
 
@@ -590,7 +592,8 @@ public abstract class ScriptLaunchingTests extends AbstractModelTests {
 
 	protected abstract String getDebugModelId();
 
-	protected abstract void startLaunch(ILaunch launch, final IInterpreterInstall install) throws CoreException;
+	protected abstract void startLaunch(ILaunch launch,
+			final IInterpreterInstall install) throws CoreException;
 
 	protected abstract ILaunchConfiguration createLaunchConfiguration(
 			String arguments);
@@ -601,7 +604,8 @@ public abstract class ScriptLaunchingTests extends AbstractModelTests {
 
 	protected IInterpreterInstall createInstall(String path, String id,
 			IInterpreterInstallType type) {
-		File file = new File(path);
+		IFileHandle file = EnvironmentsManager.getLocalEnvironment().getFile(
+				new Path(path));
 		if (!file.exists()) {
 			return null;
 		}
