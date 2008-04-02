@@ -1174,7 +1174,7 @@ public class DLTKCore extends Plugin {
 								return buffer.toString();
 							}
 							IBuildpathContainer container = (IBuildpathContainer) o;
-							buffer.append(container.getDescription());
+							buffer.append(container.getDescription(null));
 							buffer.append(" {\n"); //$NON-NLS-1$
 							IBuildpathEntry[] entries = container.getBuildpathEntries(null);
 							if (entries != null){

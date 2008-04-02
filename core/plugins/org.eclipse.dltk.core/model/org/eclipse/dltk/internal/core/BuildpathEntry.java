@@ -1262,10 +1262,10 @@ public class BuildpathEntry implements IBuildpathEntry {
 							if (containerEntry == null
 									|| kind == IBuildpathEntry.BPE_SOURCE
 									|| kind == IBuildpathEntry.BPE_CONTAINER) {
-								String description = container.getDescription();
-								if (description == null)
-									description = path.makeRelative()
-											.toString();
+//								String description = container.getDescription(project);
+//								if (description == null)
+//									description = path.makeRelative()
+//											.toString();
 								return new ModelStatus(
 										IModelStatusConstants.INVALID_BP_CONTAINER_ENTRY,
 										project, path);
