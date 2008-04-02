@@ -23,18 +23,11 @@ public class TestieContainer implements IBuildpathContainer {
 		this.fPath = srcPath;
 	}
 
-	/**
-	 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
-	 */
-	public IBuildpathEntry[] getBuildpathEntries() {
-		return getBuildpathEntries(null);
-	}
-
 	public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 		return new IBuildpathEntry[] { DLTKCore.newExtLibraryEntry(this.fPath) };
 	}
 
-	public String getDescription() {
+	public String getDescription(IScriptProject project) {
 		return "Testie Buildpath Container";
 	}
 
@@ -46,7 +39,7 @@ public class TestieContainer implements IBuildpathContainer {
 		return fPath;
 	}
 
-	public IBuiltinModuleProvider getBuiltinProvider() {
+	public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
 		// TODO Auto-generated method stub
 		return null;
 	}
