@@ -52,7 +52,7 @@ import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.launching.CompositeId;
@@ -1637,7 +1637,7 @@ public final class ScriptRuntime {
 
 						// Only local installs can be contributed, so
 						// use local environment
-						IEnvironment localEnv = EnvironmentsManager
+						IEnvironment localEnv = EnvironmentManager
 								.getLocalEnvironment();
 
 						IFileHandle homeDir = localEnv.getFile(new Path(home));

@@ -14,10 +14,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.environment.EFSFileHandle;
 import org.eclipse.dltk.core.environment.IDeployment;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.internal.environment.EFSFileHandle;
 import org.osgi.framework.Bundle;
 
 public class EFSDeployment implements IDeployment {
@@ -26,7 +26,8 @@ public class EFSDeployment implements IDeployment {
 
 	public EFSDeployment(IEnvironment env, URI rootURI) throws CoreException {
 		this.environment = env;
-		this.root = EFS.getStore(rootURI);		
+		this.root = EFS.getStore(rootURI);
+		this.root.mkdir(0, null);
 	}
 
 	public IPath add(Bundle bundle, String bundlePath) throws IOException {

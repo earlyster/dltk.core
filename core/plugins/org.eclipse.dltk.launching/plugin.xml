@@ -34,7 +34,7 @@
   <extension
         point="org.eclipse.core.runtime.adapters">
      <factory
-           adaptableType="org.eclipse.dltk.core.environment.LocalEnvironment"
+           adaptableType="org.eclipse.dltk.core.internal.environment.LocalEnvironment"
            class="org.eclipse.dltk.internal.launching.execution.LocalExecEnvironmentAdapter">
         <adapter
               type="org.eclipse.dltk.core.environment.IExecutionEnvironment">

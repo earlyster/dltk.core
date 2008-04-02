@@ -16,7 +16,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IDeployment;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
-import org.eclipse.dltk.core.environment.LocalEnvironment;
+import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 
 import sun.security.action.GetPropertyAction;
 

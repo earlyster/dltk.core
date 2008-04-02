@@ -44,10 +44,10 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptModelMarker;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
-import org.eclipse.dltk.core.environment.LocalEnvironment;
+import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.InterpreterRuntimeBuildpathEntryResolver;
 import org.eclipse.dltk.launching.debug.DebuggingEngineManager;
@@ -753,7 +753,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		String envId = configuration.getAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_ENVIRONMENT_ID,
 				LocalEnvironment.ENVIRONMENT_ID);
-		return EnvironmentsManager.getEnvironmentById(envId);
+		return EnvironmentManager.getEnvironmentById(envId);
 	}
 
 	protected void validateLaunchConfiguration(

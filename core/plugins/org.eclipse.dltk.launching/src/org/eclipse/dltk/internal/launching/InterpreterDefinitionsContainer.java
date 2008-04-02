@@ -26,7 +26,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.EnvironmentVariable;
@@ -644,7 +644,7 @@ public class InterpreterDefinitionsContainer {
 			}
 
 			String envId = element.getAttribute(ENVIRONMENT_ID); //$NON-NLS-1$
-			IEnvironment env = EnvironmentsManager.getEnvironmentById(envId);
+			IEnvironment env = EnvironmentManager.getEnvironmentById(envId);
 			if (env == null) {
 				return;
 			}
