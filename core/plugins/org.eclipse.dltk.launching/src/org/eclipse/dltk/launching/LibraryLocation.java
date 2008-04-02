@@ -16,6 +16,7 @@ public class LibraryLocation {
 
 	/**
 	 * Creates a new library location.
+	 * @param environment 
 	 * 
 	 * @param libraryPath
 	 *            The location of the archive containing java.lang.Object Must
@@ -28,7 +29,6 @@ public class LibraryLocation {
 		if (libraryPath == null) {
 			throw new IllegalArgumentException();
 		}
-
 		this.libraryPath = libraryPath;
 	}
 

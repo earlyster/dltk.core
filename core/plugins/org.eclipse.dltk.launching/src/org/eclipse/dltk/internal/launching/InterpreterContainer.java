@@ -9,8 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.launching;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,6 +28,8 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IBuiltinModuleProvider;
 import org.eclipse.dltk.core.IInterpreterContainerExtension;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallChangedListener;
@@ -117,14 +117,13 @@ public class InterpreterContainer implements IBuildpathContainer {
 			if (!entryPath.isEmpty()) {
 				
 				//	resolve symlink
-				try {
-					File f = entryPath.toFile();
-					if (f == null)
-						continue;
-					entryPath = new Path(f.getCanonicalPath());
-				} catch (IOException e) {
+				IEnvironment environment = interpreter.getEnvironment();
+
+				IFileHandle f = environment.getFile(entryPath);
+				if (!f.exists())
 					continue;
-				}
+				entryPath = new Path(f.getCanonicalPath());
+
 				
 				if (rawEntries.contains(entryPath))
 					continue;
@@ -138,14 +137,12 @@ public class InterpreterContainer implements IBuildpathContainer {
 					if (otherPath.isEmpty())
 						continue;
 					//resolve symlink
-					try {
-						File f = entryPath.toFile();
-						if (f == null)
-							continue;
-						entryPath = new Path(f.getCanonicalPath());
-					} catch (IOException e) {
+
+					f = environment.getFile(entryPath);
+					if (f == null)
 						continue;
-					}
+					entryPath = new Path(f.getCanonicalPath());
+
 										
 					// compare, if it contains some another					
 					if (entryPath.isPrefixOf(otherPath) && !otherPath.equals(entryPath) ) {						

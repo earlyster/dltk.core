@@ -1,7 +1,5 @@
 package org.eclipse.dltk.launching;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +15,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IExecutionEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 public class InterpreterSearcher {
 	private Set searchedFiles;
@@ -27,14 +27,18 @@ public class InterpreterSearcher {
 	private String natureId;
 	private Set ignore;
 
-	protected void searchFast(IProgressMonitor monitor, int deep) {
+	protected void searchFast(IProgressMonitor monitor, IEnvironment environment, int deep) {
 		if (monitor.isCanceled()) {
 			return;
 		}
 
 		// Path variable
-		Map env = DebugPlugin.getDefault().getLaunchManager()
-				.getNativeEnvironmentCasePreserved();
+		IExecutionEnvironment exeEnv = (IExecutionEnvironment) environment
+				.getAdapter(IExecutionEnvironment.class);
+		if (exeEnv == null)
+			return;
+		
+		Map env = exeEnv.getEnvironmentVariables();
 
 		String path = null;
 		final Iterator it = env.keySet().iterator();
@@ -44,7 +48,6 @@ public class InterpreterSearcher {
 				path = (String) env.get(name);
 			}
 		}
-
 		if (path == null) {
 			return;
 		}
@@ -63,7 +66,7 @@ public class InterpreterSearcher {
 			final IPath folder = (IPath) iter.next();
 
 			if (folder != null) {
-				File f = folder.toFile();
+				IFileHandle f = environment.getFile(folder);
 				if (f.isDirectory()) {
 					search(f, monitor, deep);
 				}
@@ -83,7 +86,7 @@ public class InterpreterSearcher {
 	 * @param deep
 	 *            deepness of search. -1 if infinite.
 	 */
-	protected void search(File directory, IProgressMonitor monitor, int deep) {
+	protected void search(IFileHandle directory, IProgressMonitor monitor, int deep) {
 		if (deep == 0) {
 			return;
 		}
@@ -96,33 +99,30 @@ public class InterpreterSearcher {
 			return;
 		}
 
-		String[] names = directory.list();
-		if (names == null) {
+		IFileHandle[] files = directory.getChildren();
+		if (files == null) {
 			return;
 		}
 
 		List subDirs = new ArrayList();
-		for (int i = 0; i < names.length; i++) {
+		for (int i = 0; i < files.length; i++) {
 			if (monitor.isCanceled()) {
 				return;
 			}
 
-			final File file = new File(directory, names[i]);
+			final IFileHandle file = files[i];
 
-			try {
-				monitor.subTask(MessageFormat.format(
-						Messages.InterpreterSearcher_foundSearching, new String[] {
-								Integer.toString(found.size()),
-								file.getCanonicalPath() }));
+			monitor.subTask(MessageFormat.format(
+					Messages.InterpreterSearcher_foundSearching, new String[] {
+							Integer.toString(found.size()),
+							file.getCanonicalPath() }));
 
-				// Check if file is a symlink
-				if (file.isDirectory()
-						&& (!file.getCanonicalPath().equals(
-								file.getAbsolutePath()))) {
-					continue;
-				}
-			} catch (IOException e) {
+			// Check if file is a symlink
+			if (file.isDirectory()
+					&& file.isSymlink()) {
+				continue;
 			}
+
 
 			IInterpreterInstallType[] installTypes = ScriptRuntime
 					.getInterpreterInstallTypes(natureId);
@@ -157,7 +157,7 @@ public class InterpreterSearcher {
 		}
 
 		while (!subDirs.isEmpty()) {
-			File subDir = (File) subDirs.remove(0);
+			IFileHandle subDir = (IFileHandle) subDirs.remove(0);
 			search(subDir, monitor, deep - 1);
 		}
 
@@ -170,7 +170,7 @@ public class InterpreterSearcher {
 		this.types = new ArrayList();
 	}
 
-	public void search(String natureId, Set ignore, int deep,
+	public void search(IEnvironment environment, String natureId, Set ignore, int deep,
 			IProgressMonitor monitor) {
 		if (natureId == null) {
 			throw new IllegalArgumentException();
@@ -183,15 +183,15 @@ public class InterpreterSearcher {
 		this.natureId = natureId;
 		this.ignore = ignore == null ? Collections.EMPTY_SET : ignore;
 
-		searchFast(monitor == null ? new NullProgressMonitor() : monitor, deep);
+		searchFast(monitor == null ? new NullProgressMonitor() : monitor, environment, deep);
 	}
 
 	public boolean hasResults() {
 		return !found.isEmpty();
 	}
 
-	public File[] getFoundFiles() {
-		return (File[]) found.toArray(new File[found.size()]);
+	public IFileHandle[] getFoundFiles() {
+		return (IFileHandle[]) found.toArray(new IFileHandle[found.size()]);
 	}
 
 	public IInterpreterInstallType[] getFoundInstallTypes() {

@@ -52,6 +52,9 @@ import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.launching.CompositeId;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.DefaultEntryResolver;
@@ -857,6 +860,7 @@ public final class ScriptRuntime {
 			IInterpreterInstall interperterInstall) {
 		return getLibraryLocations(interperterInstall, null);
 	}
+
 	public static LibraryLocation[] getLibraryLocations(
 			IInterpreterInstall interperterInstall, IProgressMonitor monitor) {
 
@@ -916,9 +920,13 @@ public final class ScriptRuntime {
 	 * 
 	 */
 	public static IPath newInterpreterContainerPath(
-			IInterpreterInstall Interpreter) {
-		return newInterpreterContainerPath(Interpreter
-				.getInterpreterInstallType().getId(), Interpreter.getName());
+			IInterpreterInstall interpreter) {
+		if (interpreter != null) {
+			String name = interpreter.getName();
+			String typeId = interpreter.getInterpreterInstallType().getId();
+			return newInterpreterContainerPath(typeId, name);
+		}
+		return null;
 	}
 
 	/**
@@ -933,6 +941,10 @@ public final class ScriptRuntime {
 	 * 
 	 */
 	public static IPath newInterpreterContainerPath(String typeId, String name) {
+		if (typeId == null || name == null) {
+			return null;
+		}
+		
 		IPath path = newDefaultInterpreterContainerPath();
 		path = path.append(typeId);
 		path = path.append(name);
@@ -1622,14 +1634,17 @@ public final class ScriptRuntime {
 								installType, id);
 						standin.setName(name);
 						home = substitute(home);
-						File homeDir = new File(home);
+
+						// Only local installs can be contributed, so
+						// use local environment
+						IEnvironment localEnv = EnvironmentsManager
+								.getLocalEnvironment();
+
+						IFileHandle homeDir = localEnv.getFile(new Path(home));
 						if (homeDir.exists()) {
-							try {
-								// adjust for relative path names
-								home = homeDir.getCanonicalPath();
-								homeDir = new File(home);
-							} catch (IOException e) {
-							}
+							// adjust for relative path names
+							home = homeDir.getCanonicalPath();
+							homeDir = localEnv.getFile(new Path(home));
 						}
 						IStatus status = installType
 								.validateInstallLocation(homeDir);

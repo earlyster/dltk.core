@@ -9,54 +9,56 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.Launch;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.IExecutionEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.EnvironmentResolver;
 
 public class ScriptLaunchUtil {
 	// Create file with script content
-	public static File createScriptFileWithContent(String scriptContent)
-			throws IOException {
-		File file = File.createTempFile("script", null); //$NON-NLS-1$
-
-		FileWriter writer = null;
-		try {
-			writer = new FileWriter(file);
-			writer.write(scriptContent);
-		} finally {
-			if (writer != null) {
-				writer.close();
-			}
-		}
-
-		return file;
-	}
+	// public static File createScriptFileWithContent(String scriptContent)
+	// throws IOException {
+	// File file = File.createTempFile("script", null); //$NON-NLS-1$
+	//
+	// FileWriter writer = null;
+	// try {
+	// writer = new FileWriter(file);
+	// writer.write(scriptContent);
+	// } finally {
+	// if (writer != null) {
+	// writer.close();
+	// }
+	// }
+	//
+	// return file;
+	// }
 
 	// Creating of InterpreterConfig
-	public static InterpreterConfig createInterpreterConfig(File scriptFile,
-			File workingDirectory) {
-		return createInterpreterConfig(scriptFile, workingDirectory, null);
+	public static InterpreterConfig createInterpreterConfig(
+			IExecutionEnvironment exeEnv, IFileHandle scriptFile,
+			IFileHandle workingDirectory) {
+		return createInterpreterConfig(exeEnv, scriptFile, workingDirectory,
+				null);
 	}
 
-	public static InterpreterConfig createInterpreterConfig(File scriptFile,
-			File workingDirectory, EnvironmentVariable[] env) {
-		InterpreterConfig config = new InterpreterConfig(scriptFile,
-				workingDirectory);
+	public static InterpreterConfig createInterpreterConfig(
+			IExecutionEnvironment exeEnv, IFileHandle scriptFile,
+			IFileHandle workingDirectory, EnvironmentVariable[] env) {
+		InterpreterConfig config = new InterpreterConfig(scriptFile
+				.getEnvironment(), new Path(scriptFile.getAbsolutePath()),
+				new Path(workingDirectory.getAbsolutePath()));
 
-		Map envVars = DebugPlugin.getDefault().getLaunchManager()
-				.getNativeEnvironmentCasePreserved();
+		Map envVars = exeEnv.getEnvironmentVariables();
 		config.addEnvVars(envVars);
 		EnvironmentVariable[] resVars = EnvironmentResolver.resolve(envVars,
 				env);
@@ -70,21 +72,18 @@ public class ScriptLaunchUtil {
 	}
 
 	// Useful run methods
-	public static Process runScriptWithInterpreter(String interpreter,
+	public static Process runScriptWithInterpreter(
+			IExecutionEnvironment exeEnv, String interpreter,
 			InterpreterConfig config) throws CoreException {
 		String[] cmdLine = config.renderCommandLine(interpreter);
 
 		String[] environmentAsStrings = config.getEnvironmentAsStrings();
 		IPath workingDirectoryPath = config.getWorkingDirectoryPath();
-		File file = null;
-		if (workingDirectoryPath != null) {
-			file = workingDirectoryPath.toFile();
-		}
 		if (DLTKLaunchingPlugin.TRACE_EXECUTION) {
 			traceExecution("runScript with interpreter", cmdLine, //$NON-NLS-1$
 					environmentAsStrings);
 		}
-		return DebugPlugin.exec(cmdLine, file, environmentAsStrings);
+		return exeEnv.exec(cmdLine, workingDirectoryPath, environmentAsStrings);
 	}
 
 	private static void traceExecution(String processLabel,
@@ -106,11 +105,12 @@ public class ScriptLaunchUtil {
 		System.out.println(sb);
 	}
 
-	public static Process runScriptWithInterpreter(String interpreter,
-			File scriptFile, File workingDirectory, String[] interpreterArgs,
-			String[] scriptArgs, EnvironmentVariable[] environment)
-			throws CoreException {
-		InterpreterConfig config = createInterpreterConfig(scriptFile,
+	public static Process runScriptWithInterpreter(
+			IExecutionEnvironment exeEnv, String interpreter,
+			IFileHandle scriptFile, IFileHandle workingDirectory,
+			String[] interpreterArgs, String[] scriptArgs,
+			EnvironmentVariable[] environment) throws CoreException {
+		InterpreterConfig config = createInterpreterConfig(exeEnv, scriptFile,
 				workingDirectory, environment);
 
 		if (scriptArgs != null) {
@@ -121,18 +121,18 @@ public class ScriptLaunchUtil {
 			config.addInterpreterArgs(interpreterArgs);
 		}
 
-		return runScriptWithInterpreter(interpreter, config);
+		return runScriptWithInterpreter(exeEnv, interpreter, config);
 	}
 
-	public static Process runScriptWithInterpreter(String interpreter,
-			String scriptContent, File workingDirectory,
-			String[] interpreterArgs, String[] scriptArgs,
-			EnvironmentVariable[] environment) throws CoreException,
-			IOException {
-		return runScriptWithInterpreter(interpreter,
-				createScriptFileWithContent(scriptContent), workingDirectory,
-				interpreterArgs, scriptArgs, environment);
-	}
+	// public static Process runScriptWithInterpreter(String interpreter,
+	// String scriptContent, IFileHandle workingDirectory,
+	// String[] interpreterArgs, String[] scriptArgs,
+	// EnvironmentVariable[] environment) throws CoreException,
+	// IOException {
+	// return runScriptWithInterpreter(interpreter,
+	// createScriptFileWithContent(scriptContent), workingDirectory,
+	// interpreterArgs, scriptArgs, environment);
+	// }
 
 	// 
 	public static IInterpreterInstall getDefaultInterpreterInstall(
@@ -188,11 +188,11 @@ public class ScriptLaunchUtil {
 	}
 
 	// Script file
-	public static ILaunch runScript(String natureId, File scriptFile,
-			File workingDirectory, String[] interpreterArgs,
+	public static ILaunch runScript(String natureId, IFileHandle scriptFile,
+			IFileHandle workingDirectory, String[] interpreterArgs,
 			String[] scriptArgs, IProgressMonitor monitor) throws CoreException {
-		InterpreterConfig config = createInterpreterConfig(scriptFile,
-				workingDirectory, null);
+		InterpreterConfig config = createInterpreterConfig(null, scriptFile,
+				workingDirectory);
 
 		if (interpreterArgs != null) {
 			config.addInterpreterArgs(interpreterArgs);
@@ -205,22 +205,22 @@ public class ScriptLaunchUtil {
 		return runScript(natureId, config, monitor);
 	}
 
-	public static ILaunch runScript(String natureId, File scriptFile)
-			throws CoreException {
-		return runScript(natureId, scriptFile, null, null, null, null);
-	}
+	// public static ILaunch runScript(String natureId, IFileHandle scriptFile)
+	// throws CoreException {
+	// return runScript(natureId, scriptFile, null, null, null, null);
+	// }
+	//
+	// // Script content
+	// public static ILaunch runScript(String natureId, String scriptContent,
+	// IFileHandle workingDirectory, String[] interpreterArgs,
+	// String[] scriptArgs, IProgressMonitor monitor)
+	// throws CoreException, IOException {
+	// return runScript(natureId, createScriptFileWithContent(scriptContent),
+	// workingDirectory, interpreterArgs, scriptArgs, monitor);
+	// }
 
-	// Script content
-	public static ILaunch runScript(String natureId, String scriptContent,
-			File workingDirectory, String[] interpreterArgs,
-			String[] scriptArgs, IProgressMonitor monitor)
-			throws CoreException, IOException {
-		return runScript(natureId, createScriptFileWithContent(scriptContent),
-				workingDirectory, interpreterArgs, scriptArgs, monitor);
-	}
-
-	public static ILaunch runScript(String natureId, String scriptContent)
-			throws CoreException, IOException {
-		return runScript(natureId, createScriptFileWithContent(scriptContent));
-	}
+	// public static ILaunch runScript(String natureId, String scriptContent)
+	// throws CoreException, IOException {
+	// return runScript(natureId, createScriptFileWithContent(scriptContent));
+	// }
 }

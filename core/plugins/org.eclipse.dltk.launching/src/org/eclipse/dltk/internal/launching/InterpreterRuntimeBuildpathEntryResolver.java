@@ -111,8 +111,7 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		if (libs == null) {
 			// default system libs
 			libs = defaultLibs;
-		}
-		else if (!isSamePaths(libs, defaultLibs)) {
+		} else if (!isSamePaths(libs, defaultLibs)) {
 			// determine if bootpath should be explicit
 			kind = IRuntimeBuildpathEntry.BOOTSTRAP_ENTRY;
 		}
@@ -127,7 +126,9 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		return (IRuntimeBuildpathEntry[]) resolvedEntries
 				.toArray(new IRuntimeBuildpathEntry[resolvedEntries.size()]);
 	}
-	public static boolean isSamePaths(LibraryLocation[] libs, LibraryLocation[] defaultLibs) {
+
+	public static boolean isSamePaths(LibraryLocation[] libs,
+			LibraryLocation[] defaultLibs) {
 		if (libs.length != defaultLibs.length) {
 			return false;
 		}
@@ -135,9 +136,12 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		for (int i = 0; i < defaultLibs.length; i++) {
 			dpath = defaultLibs[i].getLibraryPath();
 			lpath = libs[i].getLibraryPath();
-			if(Platform.getOS().equals(Platform.OS_WIN32)) {
-				//the .equals method of IPath ignores trailing seperators so we must as well
-				if (!dpath.removeTrailingSeparator().toOSString().equalsIgnoreCase(lpath.removeTrailingSeparator().toOSString())) {
+			if (Platform.getOS().equals(Platform.OS_WIN32)) {
+				// the .equals method of IPath ignores trailing seperators so we
+				// must as well
+				if (!dpath.removeTrailingSeparator().toOSString()
+						.equalsIgnoreCase(
+								lpath.removeTrailingSeparator().toOSString())) {
 					return false;
 				}
 			} else if (!dpath.equals(lpath)) {
@@ -146,6 +150,7 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		}
 		return true;
 	}
+
 	/**
 	 * Return whether the given list of libraries refer to the same archives in
 	 * the same order. Only considers the binary archive (not source or javadoc
