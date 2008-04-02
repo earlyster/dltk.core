@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,6 +47,9 @@ import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
 import org.eclipse.dltk.internal.core.builder.ScriptBuilder;
@@ -84,15 +86,10 @@ public class DeltaProcessor {
 				if (resource != null) {
 					this.root = this.project.getProjectFragment(resource);
 				} else {
-					Object target = Model.getTarget(ResourcesPlugin
-							.getWorkspace().getRoot(), this.rootPath, false/*
-																			 * don't
-																			 * check
-																			 * existence
-																			 */);
-					if (target instanceof IResource) {
-						this.root = this.project
-								.getProjectFragment((IResource) target);
+					resource = Model.getInternalTarget(ResourcesPlugin
+							.getWorkspace().getRoot(), this.rootPath, false);
+					if (resource != null) {
+						this.root = this.project.getProjectFragment(resource);
 					} else {
 						this.root = this.project
 								.getProjectFragment(this.rootPath.toOSString());
@@ -174,7 +171,7 @@ public class DeltaProcessor {
 	 * Answer a combination of the lastModified stamp and the size. Used for
 	 * detecting external JAR changes
 	 */
-	public static long getTimeStamp(File file) {
+	public static long getTimeStamp(IFileHandle file) {
 		return file.lastModified() + file.length();
 	}
 
@@ -894,9 +891,11 @@ public class DeltaProcessor {
 							.get(entryPath);
 					if (status == null) {
 						// compute shared status
-						Object targetLibrary = Model.getTarget(wksRoot,
+						IEnvironment env = EnvironmentsManager
+								.getEnvironment(scriptProject);
+						IFileHandle externalFile = Model.getExternalTarget(env,
 								entryPath, true);
-						if (targetLibrary == null) { // missing JAR
+						if (externalFile == null) { // missing JAR
 							if (this.state.getExternalLibTimeStamps().remove(
 									entryPath) != null) {
 								externalArchivesStatus.put(entryPath,
@@ -906,9 +905,8 @@ public class DeltaProcessor {
 								this.manager.indexManager
 										.removeIndex(entryPath);
 							}
-						} else if (targetLibrary instanceof File) { // external
+						} else { // external
 							// JAR
-							File externalFile = (File) targetLibrary;
 							// check timestamp to figure if JAR has changed in
 							// some way
 							Long oldTimestamp = (Long) this.state
@@ -967,9 +965,6 @@ public class DeltaProcessor {
 															.fullExclusionPatternChars());
 								}
 							}
-						} else { // internal ZIP
-							externalArchivesStatus.put(entryPath,
-									INTERNAL_ZIP_IGNORE);
 						}
 					}
 					// according to computed status, generate a delta

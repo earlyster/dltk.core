@@ -65,6 +65,9 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -744,8 +747,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 		case IBuildpathEntry.BPE_SOURCE:
 			if (projectPath.isPrefixOf(entryPath)) {
 				if (checkExistency) {
-					Object target = Model.getTarget(workspaceRoot, entryPath,
-							checkExistency);
+					Object target = Model.getInternalTarget(workspaceRoot,
+							entryPath, checkExistency);
 					if (target == null)
 						return;
 					if (target instanceof IFolder || target instanceof IProject) {
@@ -767,18 +770,17 @@ public class ScriptProject extends Openable implements IScriptProject {
 					root = new BuiltinProjectFragment(entryPath, this);
 					break;
 				}
-				Object target = Model.getTarget(workspaceRoot, entryPath,
-						checkExistency);
-				if (target == null)
-					return;
 				if (!resolvedEntry.isExternal()) {
-					if (target instanceof IResource) {
-						// internal target
-						root = getProjectFragment((IResource) target);
-					}
+					IResource resource = Model.getInternalTarget(workspaceRoot,
+							entryPath, checkExistency);
+					if (resource == null)
+						return;
+					root = getProjectFragment(resource);
 				} else {// external target
+					IEnvironment env = EnvironmentsManager.getEnvironment(this);
+					IFileHandle file = Model.getExternalTarget(env , entryPath, checkExistency);
 					// This is external folder or zip.
-					if (Model.isFile(target)
+					if (Model.isFile(file)
 							&& (org.eclipse.dltk.compiler.util.Util
 									.isArchiveFileName(entryPath.lastSegment()))) {
 						// root = new ArchiveProjectFragment(entryPath, this);
@@ -3029,7 +3031,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 	public static boolean hasScriptNature(IProject p) {
 		return DLTKLanguageManager.hasScriptNature(p);
 	}
-	
+
 	public IScriptFolder[] getScriptFolders() throws ModelException {
 
 		IProjectFragment[] roots = getProjectFragments();
@@ -3053,5 +3055,5 @@ public class ScriptProject extends Openable implements IScriptProject {
 		IScriptFolder[] fragments = new IScriptFolder[frags.size()];
 		frags.toArray(fragments);
 		return fragments;
-	}	
+	}
 }

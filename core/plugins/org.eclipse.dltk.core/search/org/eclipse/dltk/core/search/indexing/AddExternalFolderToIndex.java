@@ -23,6 +23,9 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.index.Index;
@@ -34,6 +37,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 	IProject project;
 	char[][] inclusionPatterns;
 	char[][] exclusionPatterns;
+	private IEnvironment environment;
 
 	public AddExternalFolderToIndex(IPath folderPath, IProject project,
 			char[][] inclusionPatterns, char[][] exclusionPatterns,
@@ -282,7 +286,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 			SourceIndexerRequestor requestor, SearchParticipant participant,
 			Index index, String path, IDLTKLanguageToolkit toolkit) {
 		char[] contents = null;
-		File ffile = new File(path);
+		IFileHandle ffile = getEnvironment().getFile(new Path(path));
 		if (ffile != null && ffile.exists()) {
 			try {
 				contents = Util.getResourceContentsAsCharArray(ffile);
@@ -297,12 +301,20 @@ class AddExternalFolderToIndex extends IndexRequest {
 				.segmentCount());
 		dpath = dpath.setDevice(null);
 		DLTKSearchDocument entryDocument = new DLTKSearchDocument(dpath
-				.toOSString(), this.containerPath, contents, participant, true);
+				.toOSString(), contents, participant);
 		entryDocument.parser = parser;
 		entryDocument.requestor = requestor;
 		entryDocument.toolkit = toolkit;
 		this.manager.indexDocument(entryDocument, participant, index,
 				this.containerPath);
+	}
+
+	private IEnvironment getEnvironment() {
+		if (environment == null) {
+			IScriptProject scriptProject = DLTKCore.create(project);
+			environment = EnvironmentsManager.getEnvironment(scriptProject);
+		}
+		return environment;
 	}
 
 	public String toString() {

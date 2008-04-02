@@ -9,21 +9,29 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.index.MixinIndex;
 import org.eclipse.dltk.core.search.indexing.SourceIndexer;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 import org.eclipse.dltk.internal.core.search.IndexSelector;
-
+import org.eclipse.dltk.internal.core.util.Util;
 
 /**
  * A search participant describes a particular extension to a generic search
@@ -40,31 +48,65 @@ import org.eclipse.dltk.internal.core.search.IndexSelector;
 public class DLTKSearchParticipant extends SearchParticipant {
 	private IndexSelector indexSelector;
 	private boolean bSkipMixinIndexes = false;
+
 	public void beginSearching() {
 		super.beginSearching();
 		this.indexSelector = null;
 	}
-	
+
 	public void doneSearching() {
 		this.indexSelector = null;
 		super.doneSearching();
 	}
-	
+
 	public String getDescription() {
 		return "DLTK"; //$NON-NLS-1$
 	}
-	
+
 	public SearchDocument getDocument(String documentPath) {
-		return new DLTKSearchDocument(documentPath, this, false);
+		return new DLTKSearchDocument(documentPath,
+				getInternalDocumentContents(documentPath), this);
 	}
-	public SearchDocument getExternalDocument(String documentPath) {
-		return new DLTKSearchDocument(documentPath, this, true);
+
+	private char[] getInternalDocumentContents(String documentPath) {
+		IResource resource = ResourcesPlugin.getWorkspace().getRoot()
+				.findMember(new Path(documentPath));
+		try {
+			if (resource instanceof IFile) {
+				return Util.getResourceContentsAsCharArray((IFile) resource);
+			}
+		} catch (ModelException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		return new char[0];
 	}
+
+	public SearchDocument getExternalDocument(IEnvironment environment,
+			String documentPath) {
+		return new DLTKSearchDocument(documentPath,
+				getExternalDocumentContents(environment, documentPath), this);
+	}
+
+	private char[] getExternalDocumentContents(IEnvironment environment,
+			String documentPath) {
+		IFileHandle file = environment.getFile(new Path(documentPath));
+		try {
+			return Util.getResourceContentsAsCharArray(file);
+		} catch (ModelException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+			return new char[0];
+		}
+	}
+
 	public void indexDocument(SearchDocument document, IPath indexPath) {
 		// TODO must verify that the document + indexPath match, when this is
 		// not called from scheduleDocumentIndexing
 		document.removeAllIndexEntries(); // in case the document was already
-											// indexed
+		// indexed
 		new SourceIndexer(document).indexDocument();
 
 	}
@@ -75,39 +117,51 @@ public class DLTKSearchParticipant extends SearchParticipant {
 	 * @see SearchParticipant#locateMatches(SearchDocument[], SearchPattern,
 	 *      IDLTKSearchScope, SearchRequestor, IProgressMonitor)
 	 */
-	public void locateMatches(SearchDocument[] indexMatches, SearchPattern pattern, IDLTKSearchScope scope, SearchRequestor requestor,
-			IProgressMonitor monitor) throws CoreException {
-		MatchLocator matchLocator = createMatchLocator(pattern, requestor, scope, monitor);
+	public void locateMatches(SearchDocument[] indexMatches,
+			SearchPattern pattern, IDLTKSearchScope scope,
+			SearchRequestor requestor, IProgressMonitor monitor)
+			throws CoreException {
+		MatchLocator matchLocator = createMatchLocator(pattern, requestor,
+				scope, monitor);
 		/* eliminating false matches and locating them */
 		if (monitor != null && monitor.isCanceled())
 			throw new OperationCanceledException();
 		matchLocator.locateMatches(indexMatches);
 		if (monitor != null && monitor.isCanceled())
 			throw new OperationCanceledException();
-		//matchLocator.locatePackageDeclarations(this);
+		// matchLocator.locatePackageDeclarations(this);
 	}
-	
-	public ISourceModule[] locateModules(SearchDocument[] indexMatches, SearchPattern pattern, IDLTKSearchScope scope, IProgressMonitor monitor) throws CoreException {
-		MatchLocator matchLocator = createMatchLocator(pattern, null, scope, monitor == null ? null: new SubProgressMonitor(monitor, 95));
+
+	public ISourceModule[] locateModules(SearchDocument[] indexMatches,
+			SearchPattern pattern, IDLTKSearchScope scope,
+			IProgressMonitor monitor) throws CoreException {
+		MatchLocator matchLocator = createMatchLocator(pattern, null, scope,
+				monitor == null ? null : new SubProgressMonitor(monitor, 95));
 		/* eliminating false matches and locating them */
 		if (monitor != null && monitor.isCanceled())
 			throw new OperationCanceledException();
 		ISourceModule[] modules = matchLocator.locateModules(indexMatches);
 		if (monitor != null && monitor.isCanceled())
 			throw new OperationCanceledException();
-		//matchLocator.locatePackageDeclarations(this);
+		// matchLocator.locatePackageDeclarations(this);
 		return modules;
 	}
 
-	protected MatchLocator createMatchLocator(SearchPattern pattern, SearchRequestor requestor, IDLTKSearchScope scope, IProgressMonitor monitor) {
+	protected MatchLocator createMatchLocator(SearchPattern pattern,
+			SearchRequestor requestor, IDLTKSearchScope scope,
+			IProgressMonitor monitor) {
 		IDLTKLanguageToolkit toolkit = scope.getLanguageToolkit();
-		if( toolkit != null ) {
-			MatchLocator locator = DLTKLanguageManager.createMatchLocator(toolkit.getNatureId(), pattern, requestor, scope, monitor == null ? null: new SubProgressMonitor(monitor, 95));
-			if( locator != null ) {
+		if (toolkit != null) {
+			MatchLocator locator = DLTKLanguageManager.createMatchLocator(
+					toolkit.getNatureId(), pattern, requestor, scope,
+					monitor == null ? null
+							: new SubProgressMonitor(monitor, 95));
+			if (locator != null) {
 				return locator;
 			}
 		}
-		return new MatchLocator(pattern, requestor, scope, monitor == null ? null: new SubProgressMonitor(monitor, 95));		
+		return new MatchLocator(pattern, requestor, scope,
+				monitor == null ? null : new SubProgressMonitor(monitor, 95));
 	}
 
 	public IPath[] selectIndexes(SearchPattern pattern, IDLTKSearchScope scope) {
@@ -128,12 +182,12 @@ public class DLTKSearchParticipant extends SearchParticipant {
 	}
 
 	public boolean isSkipped(Index index) {
-		if( this.bSkipMixinIndexes ) {
-			if( index instanceof MixinIndex ) {
+		if (this.bSkipMixinIndexes) {
+			if (index instanceof MixinIndex) {
 				return false;
 			}
 			String containerPath = index.containerPath;
-			if( containerPath.startsWith("#special#mixin")) { //$NON-NLS-1$
+			if (containerPath.startsWith("#special#mixin")) { //$NON-NLS-1$
 				return false;
 			}
 			return true;

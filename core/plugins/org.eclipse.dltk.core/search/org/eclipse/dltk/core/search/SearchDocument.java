@@ -91,8 +91,15 @@ public abstract class SearchDocument extends InternalSearchDocument {
 	 */
 	public abstract char[] getCharContents();
 
-	public abstract String getContents();
-
+	public String getContents() {
+		char[] contents = getCharContents();
+		if (contents == null) {
+			return ""; //$NON-NLS-1$
+		}
+		String ret = new String(contents);
+		return ret;
+	}
+	
 	/**
 	 * Returns the encoding for this document.
 	 * <p>
@@ -132,6 +139,4 @@ public abstract class SearchDocument extends InternalSearchDocument {
 	public void removeAllIndexEntries() {
 		super.removeAllIndexEntries();
 	}
-
-	public abstract boolean isExternal();
 }

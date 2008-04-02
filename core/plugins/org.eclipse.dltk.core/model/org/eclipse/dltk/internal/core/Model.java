@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +33,8 @@ import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.utils.CorePrinter;
 
@@ -82,12 +83,8 @@ public class Model extends Openable implements IScriptModel {
 		return true;
 	}
 
-	/**
-	 * Helper method - returns the targeted item (IResource if internal or
-	 * java.io.File if external), or null if unbound Internal items must be
-	 * referred to using container relative paths.
-	 */
-	public static Object getTarget(IContainer container, IPath path,
+
+	public static IResource getInternalTarget(IContainer container, IPath path,
 			boolean checkResourceExistence) {
 		if (path == null)
 			return null;
@@ -100,15 +97,19 @@ public class Model extends Openable implements IScriptModel {
 			if (resource != null) {
 				if (!checkResourceExistence || resource.exists())
 					return resource;
-				return null;
 			}
 		}
+		return null;
+	}
+
+	public static IFileHandle getExternalTarget(IEnvironment env, IPath path,
+			boolean checkResourceExistence) {
 		// if path is relative, it cannot be an external path
 		// (see http://dev.eclipse.org/bugs/show_bug.cgi?id=22517)
 		if (!path.isAbsolute())
 			return null;
 		// lookup - outside the container
-		File externalFile = new File(path.toOSString());
+		IFileHandle externalFile = env.getFile(path);
 		if (!checkResourceExistence) {
 			return externalFile;
 		} else if (existingExternalFiles.contains(externalFile)) {
@@ -291,11 +292,11 @@ public class Model extends Openable implements IScriptModel {
 	 * Helper method - returns the file item (ie. which returns true to
 	 * {@link java.io.File#isFile()}, or null if unbound
 	 */
-	public static synchronized File getFile(Object target) {
+	public static synchronized IFileHandle getFile(Object target) {
 		if (existingExternalConfirmedFiles.contains(target))
-			return (File) target;
-		if (target instanceof File) {
-			File f = (File) target;
+			return (IFileHandle) target;
+		if (target instanceof IFileHandle) {
+			IFileHandle f = (IFileHandle) target;
 			if (f.isFile()) {
 				existingExternalConfirmedFiles.add(f);
 				return f;

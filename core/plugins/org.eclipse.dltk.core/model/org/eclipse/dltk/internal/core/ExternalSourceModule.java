@@ -8,7 +8,6 @@
 package org.eclipse.dltk.internal.core;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -20,6 +19,9 @@ import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 /**
  * Represents an external source module.
@@ -89,7 +91,8 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getBufferContent()
 	 */
 	protected char[] getBufferContent() throws ModelException {
-		File file = new File(getPath().toOSString());
+		IEnvironment env = EnvironmentsManager.getEnvironment(this);
+		IFileHandle file = env.getFile(getPath());
 		// (IFile) this.getResource();
 		// if ((file == null) || ! file.exists())
 		boolean inProjectArchive = false;
@@ -106,12 +109,15 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 		InputStream stream = null;
 		char[] content;
 		try {
-//			if( this.storage == null ) {
-//				stream = new BufferedInputStream(new FileInputStream(file));
-//			}
-//			else {
-			stream = new BufferedInputStream(storage.getContents());
-//			}
+			if( this.storage == null ) {
+				stream = new BufferedInputStream(file.openInputStream());
+			}
+			else {
+				stream = new BufferedInputStream(storage.getContents());
+			}
+		} catch (IOException e) {
+			throw new ModelException(e,
+					IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);			
 		} catch (CoreException e) {
 			throw new ModelException(e,
 					IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);

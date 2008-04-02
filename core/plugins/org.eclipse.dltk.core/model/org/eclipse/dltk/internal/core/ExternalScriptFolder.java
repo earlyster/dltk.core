@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,9 +22,11 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Util;
-
 
 public class ExternalScriptFolder extends ScriptFolder {
 	public ExternalScriptFolder(ProjectFragment parent, IPath path) {
@@ -44,10 +45,10 @@ public class ExternalScriptFolder extends ScriptFolder {
 			Object[] res = new Object[max];
 			int index = 0;
 			for (int i = 0; i < max; i++) {
-				IPath resPath = ((IPath)resNames.get(i));
-				//String resName = resPath.lastSegment();
-				if (!Util.isValidSourceModule(getScriptProject(), resPath)) {					
-					res[index++] = new ExternalEntryFile((IPath)resNames.get(i));
+				IPath resPath = ((IPath) resNames.get(i));
+				if (!Util.isValidSourceModule(getScriptProject(), resPath)) {
+					IEnvironment env = EnvironmentsManager.getEnvironment(this);
+					res[index++] = new ExternalEntryFile(env.getFile(resPath));
 				}
 			}
 			if (index != max) {
@@ -56,11 +57,15 @@ public class ExternalScriptFolder extends ScriptFolder {
 			info.setForeignResources(res);
 		}
 	}
+
 	public ISourceModule getSourceModule(String name) {
-		return new ExternalSourceModule(this, name, DefaultWorkingCopyOwner.PRIMARY, 
-				new ExternalEntryFile(getPath().append(name)));
+		IEnvironment env = EnvironmentsManager.getEnvironment(this);
+		IPath path = getPath().append(name);
+		ExternalEntryFile storage = new ExternalEntryFile(env.getFile(path));
+		return new ExternalSourceModule(this, name,
+				DefaultWorkingCopyOwner.PRIMARY, storage);
 	}
-	
+
 	protected boolean computeChildren(OpenableElementInfo info, List entryNames) {
 		if (entryNames != null && entryNames.size() > 0) {
 			ArrayList vChildren = new ArrayList();
@@ -90,34 +95,46 @@ public class ExternalScriptFolder extends ScriptFolder {
 	}
 
 	// Open my archive: this creates all the pkg infos
-	protected void generateInfos(Object info, HashMap newElements, IProgressMonitor pm) throws ModelException {
+	protected void generateInfos(Object info, HashMap newElements,
+			IProgressMonitor pm) throws ModelException {
 		// Open my archive: this creates all the pkg infos
 		Openable openableParent = (Openable) this.parent;
 		if (!openableParent.isOpen()) {
-			openableParent.generateInfos(openableParent.createElementInfo(), newElements, pm);
+			openableParent.generateInfos(openableParent.createElementInfo(),
+					newElements, pm);
 		}
 	}
-	public IModelElement getHandleFromMemento(String token, MementoTokenizer memento, WorkingCopyOwner owner) {
+
+	public IModelElement getHandleFromMemento(String token,
+			MementoTokenizer memento, WorkingCopyOwner owner) {
 		switch (token.charAt(0)) {
-			case JEM_SOURCEMODULE:
-				if (!memento.hasMoreTokens()) return this;
-				String classFileName = memento.nextToken();
-				ModelElement classFile = (ModelElement)getSourceModule(classFileName);
-				return classFile.getHandleFromMemento(memento, owner);			
+		case JEM_SOURCEMODULE:
+			if (!memento.hasMoreTokens())
+				return this;
+			String classFileName = memento.nextToken();
+			ModelElement classFile = (ModelElement) getSourceModule(classFileName);
+			return classFile.getHandleFromMemento(memento, owner);
 		}
 		return null;
 	}
-	
+
 	protected Object createElementInfo() {
-		return null; // not used for ExternalScriptFolders: info is created when directory are opened.
+		return null; // not used for ExternalScriptFolders: info is created
+		// when directory are opened.
 	}
+
 	protected boolean resourceExists() {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		if (workspace == null) return false; // workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=34069
-		File file = new File(getPath().toOSString());
+		if (workspace == null)
+			return false; // workaround for
+		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=34069
+		IFileHandle file = EnvironmentsManager.getEnvironment(this).getFile(
+				getPath());
 		return file != null && file.exists() && file.isDirectory();
 	}
-	public Object[] getForeignResources() throws ModelException {		
-		return ((ExternalScriptFolderInfo) getElementInfo()).getForeignResources();		
+
+	public Object[] getForeignResources() throws ModelException {
+		return ((ExternalScriptFolderInfo) getElementInfo())
+				.getForeignResources();
 	}
 }

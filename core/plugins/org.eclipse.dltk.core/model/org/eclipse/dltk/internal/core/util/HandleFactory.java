@@ -14,6 +14,7 @@ import java.util.HashSet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -24,19 +25,19 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.internal.compiler.lookup.TypeScope;
-import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.Model;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.Openable;
 import org.eclipse.dltk.internal.core.ProjectFragment;
+import org.eclipse.dltk.internal.core.ScriptProject;
 
 /**
  * Creates script element handles.
@@ -192,13 +193,14 @@ public class HandleFactory {
 
 		IPath archivePath = new Path(archivePathString);
 
-		Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
+		IResource resource = Model.getInternalTarget(ResourcesPlugin.getWorkspace()
 				.getRoot(), archivePath, false);
-		if (target instanceof IFile) {
+		
+		if (resource instanceof IFile) {
 			// internal jar: is it on the classpath of its project?
 			// e.g. org.eclipse.swt.win32/ws/win32/swt.jar
 			// is NOT on the classpath of org.eclipse.swt.win32
-			IFile archiveFile = (IFile) target;
+			IFile archiveFile = (IFile) resource;
 			ScriptProject scriptProject = (ScriptProject) this.model
 					.getScriptProject(archiveFile);
 			IBuildpathEntry[] classpathEntries;
@@ -235,7 +237,7 @@ public class HandleFactory {
 				System.arraycopy(projects, 0,
 						projects = new IScriptProject[index], 0, index);
 			}
-			IProjectFragment root = getArchiveFolder(archivePath, target,
+			IProjectFragment root = getArchiveFolder(archivePath, resource,
 					projects);
 			if (root != null) {
 				return root;
@@ -253,7 +255,7 @@ public class HandleFactory {
 			// script model is not accessible
 			return null;
 		}
-		return getArchiveFolder(archivePath, target, projects);
+		return getArchiveFolder(archivePath, resource, projects);
 	}
 
 	private IProjectFragment getArchiveFolder(IPath archivePath, Object target,

@@ -40,7 +40,6 @@ import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IParent;
-import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISearchableEnvironment;
 import org.eclipse.dltk.core.ISourceModule;
@@ -172,11 +171,22 @@ public class MatchLocator implements ITypeRequestor {
 		public org.eclipse.dltk.core.ISourceModule workingCopy;
 
 		WorkingCopyDocument(org.eclipse.dltk.core.ISourceModule workingCopy,
-				SearchParticipant participant, boolean external) {
-			super(workingCopy.getPath().toString(), participant, external);
-			this.charContents = ((SourceModule) workingCopy)
-					.getSourceContents();
+				SearchParticipant participant) {
+			super(workingCopy.getPath().toString(), getContents(workingCopy),
+					participant);
 			this.workingCopy = workingCopy;
+		}
+
+		private static char[] getContents(
+				org.eclipse.dltk.core.ISourceModule workingCopy) {
+			try {
+				return workingCopy.getSourceAsCharArray();
+			} catch (ModelException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+				return new char[0];
+			}
 		}
 
 		public String toString() {
@@ -263,16 +273,8 @@ public class MatchLocator implements ITypeRequestor {
 			if (focus == null
 					|| IndexSelector.canSeeFocus(focus, isPolymorphicSearch,
 							projectOrArchive)) {
-				boolean external = false;
-				IProjectFragment frag = (IProjectFragment) workingCopy
-						.getAncestor(IModelElement.PROJECT_FRAGMENT);
-				if (frag != null) {
-					external = frag.isExternal();
-				}
-
 				result.put(workingCopy.getPath().toString(),
-						new WorkingCopyDocument(workingCopy, participant,
-								external));
+						new WorkingCopyDocument(workingCopy, participant));
 			}
 		}
 		return result;

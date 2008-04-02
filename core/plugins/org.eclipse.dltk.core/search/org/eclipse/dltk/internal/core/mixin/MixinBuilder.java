@@ -29,6 +29,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.mixin.IMixinParser;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -151,10 +152,14 @@ public class MixinBuilder implements IScriptBuilder {
 				SearchParticipant participant = SearchEngine
 						.getDefaultSearchParticipant();
 
-				DLTKSearchDocument document;
-				document = new DLTKSearchDocument(element.getPath()
-						.toOSString(), containerPath, null, participant,
-						element instanceof ExternalSourceModule);
+				char[] content;
+				try {
+					content = element.getSourceAsCharArray();
+				} catch (ModelException e) {
+					content = new char[0];
+				}
+				DLTKSearchDocument document = new DLTKSearchDocument(element.getPath()
+						.toOSString(), content , participant);
 				// System.out.println("mixin indexing:" + document.getPath());
 				((InternalSearchDocument) document).toolkit = toolkit;
 				String containerRelativePath = null;

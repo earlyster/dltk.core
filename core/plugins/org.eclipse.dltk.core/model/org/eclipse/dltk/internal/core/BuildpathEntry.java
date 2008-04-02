@@ -10,7 +10,6 @@
 package org.eclipse.dltk.internal.core;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -37,6 +36,9 @@ import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.compiler.env.AccessRule;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
 import org.eclipse.dltk.internal.core.util.Messages;
@@ -223,13 +225,14 @@ public class BuildpathEntry implements IBuildpathEntry {
 											"{0}", "{1}", getPath().segment(0) })); //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
 			IPath libPath = getPath();
-			Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
-					.getRoot(), libPath, false);
+			IResource resource = Model.getInternalTarget(ResourcesPlugin
+					.getWorkspace().getRoot(), libPath, false);
 			String pathString;
-			if (target instanceof java.io.File)
+			if (resource == null)
 				pathString = libPath.toOSString();
 			else
 				pathString = libPath.makeRelative().toString();
+
 			result[0] = manager
 					.intern(Messages
 							.bind(
@@ -324,14 +327,16 @@ public class BuildpathEntry implements IBuildpathEntry {
 				|| referringEntry.getAccessRuleSet() != null) {
 			boolean combine = this.entryKind == BPE_SOURCE
 					|| referringEntry.combineAccessRules();
-			return new BuildpathEntry(getContentKind(), getEntryKind(),
+			return new BuildpathEntry(
+					getContentKind(),
+					getEntryKind(),
 					getPath(),
 					referringEntry.isExported() || this.isExported, // duplicate
-																	// container
-																	// entry for
-																	// tagging
-																	// it as
-																	// exported
+					// container
+					// entry for
+					// tagging
+					// it as
+					// exported
 					this.inclusionPatterns, this.exclusionPatterns, combine(
 							referringEntry.getAccessRules(), getAccessRules(),
 							combine), this.combineAccessRules,
@@ -588,7 +593,8 @@ public class BuildpathEntry implements IBuildpathEntry {
 			}
 			break;
 		case IBuildpathEntry.BPE_CONTAINER:
-			entry = DLTKCore.newContainerEntry(path, accessRules, extraAttributes, isExported);
+			entry = DLTKCore.newContainerEntry(path, accessRules,
+					extraAttributes, isExported);
 			break;
 		default:
 			throw new AssertionFailedException(Messages.bind(
@@ -1031,9 +1037,9 @@ public class BuildpathEntry implements IBuildpathEntry {
 		// retrieve resolved buildpath
 		IBuildpathEntry[] buildpath;
 		try {
-			buildpath = ((ScriptProject) scriptProject)
-					.getResolvedBuildpath(rawBuildpath, true/* ignore pb */,
-							false/* no marker */, null /* no reverse map */);
+			buildpath = ((ScriptProject) scriptProject).getResolvedBuildpath(
+					rawBuildpath, true/* ignore pb */, false/* no marker */,
+					null /* no reverse map */);
 		} catch (ModelException e) {
 			return e.getModelStatus();
 		}
@@ -1296,32 +1302,22 @@ public class BuildpathEntry implements IBuildpathEntry {
 				break;
 			}
 			if (path != null && path.isAbsolute() && !path.isEmpty()) {
-				Object target = Model.getTarget(workspaceRoot, path, true);
 				// TODO: Add here some library version cheking
 				if (!entry.isExternal()) {
-					if (target instanceof IResource) {
-						IResource resolvedResource = (IResource) target;
-						switch (resolvedResource.getType()) {
-						case IResource.FILE:
-							break;
-						case IResource.FOLDER: // internal binary folder
-							break;
-						}
-					} else if (target instanceof File) {
-						File file = (File) target;
-						if (!file.exists()) {
-							return new ModelStatus(
-									IModelStatusConstants.INVALID_BUILDPATH,
-									Messages
-											.bind(
-													Messages.buildpath_illegalLibraryArchive,
-													new String[] {
-															path.toOSString(),
-															projectName }));
-						}
+					IResource target = Model.getInternalTarget(workspaceRoot,
+							path, true);
+					if (target == null || !target.exists()) {
+						return new ModelStatus(
+								IModelStatusConstants.INVALID_BUILDPATH,
+								Messages.bind(
+										Messages.buildpath_illegalLibraryPath,
+										new String[] { entryPathMsg,
+												projectName }));
 					}
 				} else {
-					File file = new File(entry.getPath().toOSString());
+					IEnvironment env = EnvironmentsManager
+							.getEnvironment(project);
+					IFileHandle file = env.getFile(entry.getPath());
 					if (file == null || !file.exists()) {
 						return new ModelStatus(
 								IModelStatusConstants.INVALID_BUILDPATH,
@@ -1329,7 +1325,7 @@ public class BuildpathEntry implements IBuildpathEntry {
 										.bind(
 												Messages.buildpath_illegalExternalFolder,
 												new String[] {
-														path.toOSString(),
+														file.getAbsolutePath(),
 														projectName }));
 					}
 				}
@@ -1381,7 +1377,7 @@ public class BuildpathEntry implements IBuildpathEntry {
 			if (path != null && path.isAbsolute() && !path.isEmpty()) {
 				IPath projectPath = project.getProject().getFullPath();
 				if (!projectPath.isPrefixOf(path)
-						|| Model.getTarget(workspaceRoot, path, true) == null) {
+						|| Model.getInternalTarget(workspaceRoot, path, true) == null) {
 					return new ModelStatus(
 							IModelStatusConstants.INVALID_BUILDPATH,
 							Messages.bind(
