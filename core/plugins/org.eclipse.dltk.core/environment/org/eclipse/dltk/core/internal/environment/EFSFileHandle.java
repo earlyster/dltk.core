@@ -1,6 +1,5 @@
-package org.eclipse.dltk.core.environment;
+package org.eclipse.dltk.core.internal.environment;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -10,6 +9,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 public class EFSFileHandle implements IFileHandle {
 	private IFileStore file;
@@ -18,37 +19,6 @@ public class EFSFileHandle implements IFileHandle {
 	public EFSFileHandle(IEnvironment env, IFileStore file) {
 		this.environment = env;
 		this.file = file;
-	}
-
-	public boolean copy(IFileHandle destination) {
-		return false;
-	}
-
-	public boolean move(IFileHandle destination) {
-		if (destination instanceof EFSFileHandle) {
-			try {
-				file.move(((EFSFileHandle) destination).file, EFS.OVERWRITE, null);
-				return true;
-			} catch (CoreException e) {
-				if (DLTKCore.DEBUG)
-					e.printStackTrace();
-				return false;
-			}
-		} else {
-			// TODO: Add ability to move to non local destination
-			return false;
-		}
-	}
-
-	public boolean delete() {
-		try {
-			file.delete(EFS.NONE, null);
-			return true;
-		} catch (CoreException e) {
-			if (DLTKCore.DEBUG)
-				e.printStackTrace();
-			return false;
-		}
 	}
 
 	public boolean exists() {
@@ -120,34 +90,9 @@ public class EFSFileHandle implements IFileHandle {
 		return file.fetchInfo().getAttribute(EFS.ATTRIBUTE_SYMLINK);
 	}
 
-	public boolean mkdir() {
-		try {
-			file.mkdir(EFS.NONE, null);
-			return true;
-		} catch (CoreException e) {
-			if (DLTKCore.DEBUG)
-				e.printStackTrace();
-			return false;
-		}
-	}
-
 	public InputStream openInputStream() throws IOException {
 		try {
 			return file.openInputStream(EFS.NONE, null);
-		} catch (CoreException e) {
-			if (DLTKCore.DEBUG)
-				e.printStackTrace();
-			throw new IOException(e.getLocalizedMessage());
-		}
-	}
-
-	public void setLastModified(long time) {
-		file.fetchInfo().setLastModified(time);
-	}
-
-	public File toLocalFile() throws IOException {
-		try {
-			return file.toLocalFile(EFS.NONE, null);
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG)
 				e.printStackTrace();

@@ -32,7 +32,7 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.ArchiveProjectFragment;
@@ -106,7 +106,7 @@ public class HierarchyScope extends DLTKSearchScope {
 				// internal jar
 				zipFileName = jarPath.toString();
 			} else {
-				IEnvironment env = EnvironmentsManager.getEnvironment(root);
+				IEnvironment env = EnvironmentManager.getEnvironment(root);
 				IFileHandle file = Model.getExternalTarget(env, jarPath, true);
 				if (file != null) {
 					// external jar
@@ -154,7 +154,7 @@ public class HierarchyScope extends DLTKSearchScope {
 					// internal jar
 					zipFileName = jarPath.toString();
 				} else {
-					IEnvironment env = EnvironmentsManager.getEnvironment(root);
+					IEnvironment env = EnvironmentManager.getEnvironment(root);
 					IFileHandle file = Model.getExternalTarget(env, jarPath, true);
 					if (file != null) {
 						// external jar

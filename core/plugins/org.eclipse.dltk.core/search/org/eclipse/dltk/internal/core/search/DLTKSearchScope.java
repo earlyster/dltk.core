@@ -31,7 +31,7 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
@@ -755,7 +755,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 					return (IProjectFragment) element
 							.getAncestor(IModelElement.PROJECT_FRAGMENT);
 				} else {
-					IEnvironment env = EnvironmentsManager
+					IEnvironment env = EnvironmentManager
 							.getEnvironment(project);
 					IFileHandle file = Model
 							.getExternalTarget(env, path, false);

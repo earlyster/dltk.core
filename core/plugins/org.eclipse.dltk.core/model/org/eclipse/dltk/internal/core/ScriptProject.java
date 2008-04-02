@@ -65,7 +65,7 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
@@ -777,7 +777,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 						return;
 					root = getProjectFragment(resource);
 				} else {// external target
-					IEnvironment env = EnvironmentsManager.getEnvironment(this);
+					IEnvironment env = EnvironmentManager.getEnvironment(this);
 					IFileHandle file = Model.getExternalTarget(env , entryPath, checkExistency);
 					// This is external folder or zip.
 					if (Model.isFile(file)

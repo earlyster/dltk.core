@@ -36,7 +36,7 @@ import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.compiler.env.AccessRule;
@@ -1315,7 +1315,7 @@ public class BuildpathEntry implements IBuildpathEntry {
 												projectName }));
 					}
 				} else {
-					IEnvironment env = EnvironmentsManager
+					IEnvironment env = EnvironmentManager
 							.getEnvironment(project);
 					IFileHandle file = env.getFile(entry.getPath());
 					if (file == null || !file.exists()) {

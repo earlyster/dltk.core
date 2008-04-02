@@ -25,7 +25,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.core.util.HashtableOfArrayToObject;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -236,7 +236,7 @@ public class ArchiveProjectFragment extends ProjectFragment {
 			/*
 			 * don't make the path relative as this is an external archive
 			 */
-			IEnvironment env = EnvironmentsManager.getEnvironment(this);
+			IEnvironment env = EnvironmentManager.getEnvironment(this);
 			return Model.getExternalTarget(env , this.getPath(), true) != null;
 		} else {
 			return super.resourceExists();

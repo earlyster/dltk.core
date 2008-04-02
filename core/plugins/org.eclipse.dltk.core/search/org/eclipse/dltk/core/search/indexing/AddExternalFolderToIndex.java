@@ -23,7 +23,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -312,7 +312,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 	private IEnvironment getEnvironment() {
 		if (environment == null) {
 			IScriptProject scriptProject = DLTKCore.create(project);
-			environment = EnvironmentsManager.getEnvironment(scriptProject);
+			environment = EnvironmentManager.getEnvironment(scriptProject);
 		}
 		return environment;
 	}

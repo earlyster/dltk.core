@@ -1,5 +1,6 @@
 package org.eclipse.dltk.core.environment;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
@@ -9,4 +10,5 @@ public interface IEnvironment extends IAdaptable {
 	String getSeparator();
 	char getSeparatorChar();
 	String getName();
+	boolean hasProject(IProject project);
 }

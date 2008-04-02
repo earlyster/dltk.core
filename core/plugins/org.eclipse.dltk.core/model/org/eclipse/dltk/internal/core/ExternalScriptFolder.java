@@ -22,7 +22,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
@@ -47,7 +47,7 @@ public class ExternalScriptFolder extends ScriptFolder {
 			for (int i = 0; i < max; i++) {
 				IPath resPath = ((IPath) resNames.get(i));
 				if (!Util.isValidSourceModule(getScriptProject(), resPath)) {
-					IEnvironment env = EnvironmentsManager.getEnvironment(this);
+					IEnvironment env = EnvironmentManager.getEnvironment(this);
 					res[index++] = new ExternalEntryFile(env.getFile(resPath));
 				}
 			}
@@ -59,7 +59,7 @@ public class ExternalScriptFolder extends ScriptFolder {
 	}
 
 	public ISourceModule getSourceModule(String name) {
-		IEnvironment env = EnvironmentsManager.getEnvironment(this);
+		IEnvironment env = EnvironmentManager.getEnvironment(this);
 		IPath path = getPath().append(name);
 		ExternalEntryFile storage = new ExternalEntryFile(env.getFile(path));
 		return new ExternalSourceModule(this, name,
@@ -128,7 +128,7 @@ public class ExternalScriptFolder extends ScriptFolder {
 		if (workspace == null)
 			return false; // workaround for
 		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=34069
-		IFileHandle file = EnvironmentsManager.getEnvironment(this).getFile(
+		IFileHandle file = EnvironmentManager.getEnvironment(this).getFile(
 				getPath());
 		return file != null && file.exists() && file.isDirectory();
 	}

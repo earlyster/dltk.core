@@ -31,10 +31,12 @@ import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Util;
 import org.eclipse.dltk.utils.CorePrinter;
-
+import org.omg.CORBA.Environment;
 
 /**
  * Root of model element handle hierarchy.
@@ -44,56 +46,54 @@ import org.eclipse.dltk.utils.CorePrinter;
 
 public abstract class ModelElement extends PlatformObject implements
 		IModelElement {
-	
-	
+
 	public static final char JEM_ESCAPE = '\\';
 	public static final char JEM_SCRIPTPROJECT = '=';
-	public static final char JEM_PROJECTFRAGMENT = '/';	
-	public static final char JEM_SCRIPTFOLDER = '<';	
+	public static final char JEM_PROJECTFRAGMENT = '/';
+	public static final char JEM_SCRIPTFOLDER = '<';
 	public static final char JEM_FIELD = '^';
-	public static final char JEM_METHOD = '~';	
-	public static final char JEM_SOURCEMODULE = '{';		
-	public static final char JEM_TYPE = '[';	
+	public static final char JEM_METHOD = '~';
+	public static final char JEM_SOURCEMODULE = '{';
+	public static final char JEM_TYPE = '[';
 	public static final char JEM_IMPORTDECLARATION = '#';
 	public static final char JEM_COUNT = '!';
 	public static final char JEM_LOCALVARIABLE = '@';
 	public static final char JEM_TYPE_PARAMETER = ']';
 	public static final char JEM_PACKAGEDECLARATION = '%';
-	
-	// Used to replace path / or \\ symbols in external package names and archives.
-	public static final char JEM_SKIP_DELIMETER= '>';
 
+	// Used to replace path / or \\ symbols in external package names and
+	// archives.
+	public static final char JEM_SKIP_DELIMETER = '>';
 
 	/**
 	 * This element's parent, or <code>null</code> if this element does not
 	 * have a parent.
 	 */
 	protected ModelElement parent;
-	
+
 	protected static final ModelElement[] NO_ELEMENTS = new ModelElement[0];
 	protected static final Object NO_INFO = new Object();
-	
 
 	/**
-	 * Constructs a handle for a model element with
-	 * the given parent element.
-	 *
-	 * @param parent The parent of model element
-	 *
-	 * @exception IllegalArgumentException if the type is not one of the valid
-	 *		model element type constants
-	 *
+	 * Constructs a handle for a model element with the given parent element.
+	 * 
+	 * @param parent
+	 *            The parent of model element
+	 * 
+	 * @exception IllegalArgumentException
+	 *                if the type is not one of the valid model element type
+	 *                constants
+	 * 
 	 */
 	protected ModelElement(ModelElement parent) throws IllegalArgumentException {
 		this.parent = parent;
 	}
-	
 
 	/**
 	 * @see IModelElement
 	 */
 	public boolean exists() {
-		
+
 		try {
 			getElementInfo();
 			return true;
@@ -102,63 +102,69 @@ public abstract class ModelElement extends PlatformObject implements
 		}
 		return false;
 	}
-	
+
 	/**
 	 * @see IModelElement
 	 */
 	public IModelElement getAncestor(int ancestorType) {
-		
+
 		IModelElement element = this;
 		while (element != null) {
-			if (element.getElementType() == ancestorType)  return element;
-			element= element.getParent();
+			if (element.getElementType() == ancestorType)
+				return element;
+			element = element.getParent();
 		}
-		return null;				
-	}	
-	
+		return null;
+	}
+
 	/**
 	 * @see IOpenable
 	 */
 	public void close() throws ModelException {
 		ModelManager.getModelManager().removeInfoAndChildren(this);
 	}
-	
+
 	/**
-	 * This element is being closed.  Do any necessary cleanup.
+	 * This element is being closed. Do any necessary cleanup.
 	 */
 	protected abstract void closing(Object info) throws ModelException;
-	
+
 	/**
-	 * Returns the info for this handle.  
-	 * If this element is not already open, it and all of its parents are opened.
-	 * Does not return null.
-	 * NOTE: BinaryType infos are NOT rooted under ModelElementInfo.
-	 * @exception ModelException if the element is not present or not accessible
+	 * Returns the info for this handle. If this element is not already open, it
+	 * and all of its parents are opened. Does not return null. NOTE: BinaryType
+	 * infos are NOT rooted under ModelElementInfo.
+	 * 
+	 * @exception ModelException
+	 *                if the element is not present or not accessible
 	 */
 	public Object getElementInfo() throws ModelException {
 		return getElementInfo(null);
 	}
-	
+
 	/**
-	 * Returns the info for this handle.  
-	 * If this element is not already open, it and all of its parents are opened.
-	 * Does not return null.
-	 * NOTE: BinaryType infos are NOT rooted under ModelElementInfo.
-	 * @exception ModelException if the element is not present or not accessible
+	 * Returns the info for this handle. If this element is not already open, it
+	 * and all of its parents are opened. Does not return null. NOTE: BinaryType
+	 * infos are NOT rooted under ModelElementInfo.
+	 * 
+	 * @exception ModelException
+	 *                if the element is not present or not accessible
 	 */
-	public Object getElementInfo(IProgressMonitor monitor) throws ModelException {
+	public Object getElementInfo(IProgressMonitor monitor)
+			throws ModelException {
 
 		ModelManager manager = ModelManager.getModelManager();
 		Object info = manager.getInfo(this);
-		if (info != null) return info;
+		if (info != null)
+			return info;
 		return openWhenClosed(createElementInfo(), monitor);
 	}
-	
+
 	/*
-	 * Opens an <code>Openable</code> that is known to be closed (no check for <code>isOpen()</code>).
-	 * Returns the created element info.
+	 * Opens an <code>Openable</code> that is known to be closed (no check for
+	 * <code>isOpen()</code>). Returns the created element info.
 	 */
-	protected Object openWhenClosed(Object info, IProgressMonitor monitor) throws ModelException {
+	protected Object openWhenClosed(Object info, IProgressMonitor monitor)
+			throws ModelException {
 		ModelManager manager = ModelManager.getModelManager();
 		boolean hadTemporaryCache = manager.hasTemporaryCache();
 		try {
@@ -169,11 +175,12 @@ public abstract class ModelElement extends PlatformObject implements
 			}
 			if (info == null) { // a source ref element could not be opened
 				// close the buffer that was opened for the openable parent
-			    // close only the openable's buffer (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=62854)
-			    Openable openable = (Openable) getOpenable();
-			    if (newElements.containsKey(openable)) {
-			        openable.closeBuffer();
-			    }
+				// close only the openable's buffer (see
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=62854)
+				Openable openable = (Openable) getOpenable();
+				if (newElements.containsKey(openable)) {
+					openable.closeBuffer();
+				}
 				throw newNotPresentException();
 			}
 			if (!hadTemporaryCache) {
@@ -186,212 +193,235 @@ public abstract class ModelElement extends PlatformObject implements
 		}
 		return info;
 	}
-	
+
 	/*
 	 * @see IModelElement
 	 */
 	public IOpenable getOpenable() {
-		return this.getOpenableParent();	
+		return this.getOpenableParent();
 	}
-	
-	
+
 	/**
-	 * Return the first instance of IOpenable in the parent
-	 * hierarchy of this element.
-	 *
-	 * <p>Subclasses that are not IOpenable's must override this method.
+	 * Return the first instance of IOpenable in the parent hierarchy of this
+	 * element.
+	 * 
+	 * <p>
+	 * Subclasses that are not IOpenable's must override this method.
 	 */
 	public IOpenable getOpenableParent() {
-		return (IOpenable)this.parent;
+		return (IOpenable) this.parent;
 	}
-	
+
 	/**
 	 * @see IModelElement
 	 */
 	public IModelElement getParent() {
 		return this.parent;
 	}
-	
+
 	/*
 	 * Returns a new element info for this element.
 	 */
 	protected abstract Object createElementInfo();
-	
+
 	/**
-	 * Generates the element infos for this element, its ancestors (if they are not opened) and its children (if it is an Openable).
-	 * Puts the newly created element info in the given map.
+	 * Generates the element infos for this element, its ancestors (if they are
+	 * not opened) and its children (if it is an Openable). Puts the newly
+	 * created element info in the given map.
 	 */
-	protected abstract void generateInfos(Object info, HashMap newElements, IProgressMonitor pm) throws ModelException;
-	
+	protected abstract void generateInfos(Object info, HashMap newElements,
+			IProgressMonitor pm) throws ModelException;
+
 	/**
 	 * @see IAdaptable
 	 */
 	public String getElementName() {
 		return ""; //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Creates and returns a new not present exception for this element.
 	 */
 	public ModelException newNotPresentException() {
-		return new ModelException(new ModelStatus(IModelStatusConstants.ELEMENT_DOES_NOT_EXIST, this));
+		return new ModelException(new ModelStatus(
+				IModelStatusConstants.ELEMENT_DOES_NOT_EXIST, this));
 	}
-	
+
 	/**
-	 * Returns true if this handle represents the same model element
-	 * as the given handle. By default, two handles represent the same
-	 * element if they are identical or if they represent the same type
-	 * of element, have equal names, parents, and occurrence counts.
-	 *
-	 * <p>If a subclass has other requirements for equality, this method
-	 * must be overridden.
-	 *
+	 * Returns true if this handle represents the same model element as the
+	 * given handle. By default, two handles represent the same element if they
+	 * are identical or if they represent the same type of element, have equal
+	 * names, parents, and occurrence counts.
+	 * 
+	 * <p>
+	 * If a subclass has other requirements for equality, this method must be
+	 * overridden.
+	 * 
 	 * @see Object#equals
 	 */
 	public boolean equals(Object o) {
-		
-		if (this == o) return true;
-	
+
+		if (this == o)
+			return true;
+
+		IEnvironment environment = EnvironmentManager.getEnvironment(this);
+		if (o instanceof IModelElement) {
+			IEnvironment environmento = EnvironmentManager.getEnvironment((IModelElement)o);
+			if( !environment.equals(environmento)) {
+				return false;
+			}
+		}
+
 		// model parent is null
-		if (this.parent == null) return super.equals(o);
-	
+		if (this.parent == null)
+			return super.equals(o);
+
 		// assume instanceof check is done in subclass
-		ModelElement other = (ModelElement) o;		
-		return getElementName().equals(other.getElementName()) &&
-				this.parent.equals(other.parent);
+		ModelElement other = (ModelElement) o;
+		return getElementName().equals(other.getElementName())
+				&& this.parent.equals(other.parent);
 	}
-	
+
 	/**
-	 * Returns the hash code for this model element. By default,
-	 * the hash code for an element is a combination of its name
-	 * and parent's hash code. Elements with other requirements must
-	 * override this method.
+	 * Returns the hash code for this model element. By default, the hash code
+	 * for an element is a combination of its name and parent's hash code.
+	 * Elements with other requirements must override this method.
 	 */
 	public int hashCode() {
-		if (this.parent == null) return super.hashCode();
-		return Util.combineHashCodes(getElementName().hashCode(), this.parent.hashCode());
+		if (this.parent == null)
+			return super.hashCode();
+		return Util.combineHashCodes(getElementName().hashCode(), this.parent
+				.hashCode());
 	}
-	
+
 	/**
 	 * Returns true if this element is an ancestor of the given element,
 	 * otherwise false.
 	 */
 	public boolean isAncestorOf(IModelElement e) {
-		IModelElement parentElement= e.getParent();
+		IModelElement parentElement = e.getParent();
 		while (parentElement != null && !parentElement.equals(this)) {
-			parentElement= parentElement.getParent();
+			parentElement = parentElement.getParent();
 		}
 		return parentElement != null;
 	}
-	
+
 	/**
 	 * @see IModelElement
 	 */
 	public boolean isReadOnly() {
 		return false;
 	}
-	
+
 	/**
 	 * Returns a collection of (immediate) children of this node of the
 	 * specified type.
-	 *
-	 * @param type - one of the EM_* constants defined by ModelElement
+	 * 
+	 * @param type -
+	 *            one of the EM_* constants defined by ModelElement
 	 */
 	protected ArrayList getChildrenOfType(int type) throws ModelException {
 		IModelElement[] children = getChildren();
 		int size = children.length;
 		ArrayList list = new ArrayList(size);
 		for (int i = 0; i < size; ++i) {
-			ModelElement elt = (ModelElement)children[i];
+			ModelElement elt = (ModelElement) children[i];
 			if (elt.getElementType() == type) {
 				list.add(elt);
 			}
 		}
 		return list;
 	}
-	
+
 	/**
-	 * @see IParent 
+	 * @see IParent
 	 */
 	public IModelElement[] getChildren() throws ModelException {
 		Object elementInfo = getElementInfo();
 		if (elementInfo instanceof ModelElementInfo) {
-			return ((ModelElementInfo)elementInfo).getChildren();
+			return ((ModelElementInfo) elementInfo).getChildren();
 		} else {
 			return NO_ELEMENTS;
 		}
-	}	
-	
+	}
+
 	/**
 	 * @see IModelElement
 	 */
 	public IScriptModel getModel() {
 		IModelElement current = this;
 		do {
-			if (current instanceof IScriptModel) return (IScriptModel) current;
+			if (current instanceof IScriptModel)
+				return (IScriptModel) current;
 		} while ((current = current.getParent()) != null);
 		return null;
 	}
 
 	/**
-	 * Creates and returns a new model exception for this element with the given status.
+	 * Creates and returns a new model exception for this element with the given
+	 * status.
 	 */
 	public ModelException newModelException(IStatus status) {
 		if (status instanceof IModelStatus)
 			return new ModelException((IModelStatus) status);
 		else
-			return new ModelException(new ModelStatus(status.getSeverity(), status.getCode(), status.getMessage()));
+			return new ModelException(new ModelStatus(status.getSeverity(),
+					status.getCode(), status.getMessage()));
 	}
-	
+
 	/**
 	 * @see IModelElement
 	 */
 	public IScriptProject getScriptProject() {
 		IModelElement current = this;
 		do {
-			if (current instanceof IScriptProject) return (IScriptProject) current;
+			if (current instanceof IScriptProject)
+				return (IScriptProject) current;
 		} while ((current = current.getParent()) != null);
 		return null;
 	}
-	
+
 	public boolean hasChildren() throws ModelException {
-		// if I am not open, return true to avoid opening (case of a project, a source module or a binary file).
+		// if I am not open, return true to avoid opening (case of a project, a
+		// source module or a binary file).
 		Object elementInfo = ModelManager.getModelManager().getInfo(this);
 		if (elementInfo instanceof ModelElementInfo) {
-			return ((ModelElementInfo)elementInfo).getChildren().length > 0;
+			return ((ModelElementInfo) elementInfo).getChildren().length > 0;
 		} else {
 			return true;
 		}
 	}
-	
+
 	/**
 	 * Debugging purposes
-	 */	
+	 */
 	protected String tabString(int tab) {
 		StringBuffer buffer = new StringBuffer();
 		for (int i = tab; i > 0; i--)
 			buffer.append("  "); //$NON-NLS-1$
 		return buffer.toString();
 	}
-	
+
 	/**
 	 * Debugging purposes
 	 */
 	public String toDebugString() {
 		StringBuffer buffer = new StringBuffer();
-		this.toStringInfo(0, buffer, NO_INFO, true/*show resolved info*/);
+		this.toStringInfo(0, buffer, NO_INFO, true/* show resolved info */);
 		return buffer.toString();
 	}
+
 	/**
-	 *  Debugging purposes
+	 * Debugging purposes
 	 */
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
 		toString(0, buffer);
 		return buffer.toString();
 	}
+
 	/**
-	 *  Debugging purposes
+	 * Debugging purposes
 	 */
 	protected void toString(int tab, StringBuffer buffer) {
 		Object info = this.toStringInfo(tab, buffer);
@@ -400,14 +430,16 @@ public abstract class ModelElement extends PlatformObject implements
 		}
 		this.toStringChildren(tab, buffer, info);
 	}
+
 	/**
-	 *  Debugging purposes
+	 * Debugging purposes
 	 */
 	public String toStringWithAncestors() {
-		return toStringWithAncestors(true/*show resolved info*/);
+		return toStringWithAncestors(true/* show resolved info */);
 	}
-		/**
-	 *  Debugging purposes
+
+	/**
+	 * Debugging purposes
 	 */
 	public String toStringWithAncestors(boolean showResolvedInfo) {
 		StringBuffer buffer = new StringBuffer();
@@ -415,75 +447,90 @@ public abstract class ModelElement extends PlatformObject implements
 		this.toStringAncestors(buffer);
 		return buffer.toString();
 	}
+
 	/**
-	 *  Debugging purposes
+	 * Debugging purposes
 	 */
 	protected void toStringAncestors(StringBuffer buffer) {
-		ModelElement parentElement = (ModelElement)this.getParent();
+		ModelElement parentElement = (ModelElement) this.getParent();
 		if (parentElement != null && parentElement.getParent() != null) {
 			buffer.append(" [in "); //$NON-NLS-1$
-			parentElement.toStringInfo(0, buffer, NO_INFO, false/*don't show resolved info*/);
+			parentElement
+					.toStringInfo(0, buffer, NO_INFO, false/*
+															 * don't show
+															 * resolved info
+															 */);
 			parentElement.toStringAncestors(buffer);
 			buffer.append("]"); //$NON-NLS-1$
 		}
 	}
+
 	/**
-	 *  Debugging purposes
+	 * Debugging purposes
 	 */
 	protected void toStringChildren(int tab, StringBuffer buffer, Object info) {
-		if (info == null || !(info instanceof ModelElementInfo)) return;
-		IModelElement[] children = ((ModelElementInfo)info).getChildren();
+		if (info == null || !(info instanceof ModelElementInfo))
+			return;
+		IModelElement[] children = ((ModelElementInfo) info).getChildren();
 		for (int i = 0; i < children.length; i++) {
 			buffer.append("\n"); //$NON-NLS-1$
-			((ModelElement)children[i]).toString(tab + 1, buffer);
+			((ModelElement) children[i]).toString(tab + 1, buffer);
 		}
 	}
+
 	/**
-	 *  Debugging purposes
+	 * Debugging purposes
 	 */
 	public Object toStringInfo(int tab, StringBuffer buffer) {
 		Object info = ModelManager.getModelManager().peekAtInfo(this);
-		this.toStringInfo(tab, buffer, info, true/*show resolved info*/);
+		this.toStringInfo(tab, buffer, info, true/* show resolved info */);
 		return info;
 	}
+
 	/**
-	 *  Debugging purposes
-	 * @param showResolvedInfo TODO
+	 * Debugging purposes
+	 * 
+	 * @param showResolvedInfo
+	 *            TODO
 	 */
-	protected void toStringInfo(int tab, StringBuffer buffer, Object info, boolean showResolvedInfo) {
+	protected void toStringInfo(int tab, StringBuffer buffer, Object info,
+			boolean showResolvedInfo) {
 		buffer.append(this.tabString(tab));
 		toStringName(buffer);
 		if (info == null) {
 			buffer.append(" (not open)"); //$NON-NLS-1$
 		}
 	}
+
 	/**
-	 *  Debugging purposes
+	 * Debugging purposes
 	 */
 	protected void toStringName(StringBuffer buffer) {
 		buffer.append(getElementName());
 	}
-	
+
 	/**
-	 * Returns the element that is located at the given source position
-	 * in this element.  This is a helper method for <code>ISourceModule#getElementAt</code>,
-	 * and only works on compilation units and types. The position given is
-	 * known to be within this element's source range already, and if no finer
-	 * grained element is found at the position, this element is returned.
+	 * Returns the element that is located at the given source position in this
+	 * element. This is a helper method for
+	 * <code>ISourceModule#getElementAt</code>, and only works on compilation
+	 * units and types. The position given is known to be within this element's
+	 * source range already, and if no finer grained element is found at the
+	 * position, this element is returned.
 	 */
-	protected IModelElement getSourceElementAt(int position) throws ModelException {
+	protected IModelElement getSourceElementAt(int position)
+			throws ModelException {
 		IModelElement res = getSourceElementAtTop(position);
 		if (res != this)
 			return res;
-		
+
 		if (this instanceof ISourceReference) {
 			IModelElement[] children = getChildren();
-			for (int i = children.length-1; i >= 0; i--) {
+			for (int i = children.length - 1; i >= 0; i--) {
 				IModelElement aChild = children[i];
 				if (aChild instanceof SourceRefElement) {
 					SourceRefElement child = (SourceRefElement) children[i];
 					if (child instanceof IParent) {
-						res =  child.getSourceElementAt(position);
+						res = child.getSourceElementAt(position);
 						if (res != child)
 							return res;
 					}
@@ -495,18 +542,20 @@ public abstract class ModelElement extends PlatformObject implements
 		}
 		return this;
 	}
-	
+
 	/**
-	 * Returns the element that is located at the given source position
-	 * in this element.  This is a helper method for <code>ISourceModule#getElementAt</code>,
-	 * and only works on compilation units and types. The position given is
-	 * known to be within this element's source range already, and if no finer
-	 * grained element is found at the position, this element is returned.
+	 * Returns the element that is located at the given source position in this
+	 * element. This is a helper method for
+	 * <code>ISourceModule#getElementAt</code>, and only works on compilation
+	 * units and types. The position given is known to be within this element's
+	 * source range already, and if no finer grained element is found at the
+	 * position, this element is returned.
 	 */
-	protected IModelElement getSourceElementAtTop(int position) throws ModelException {
+	protected IModelElement getSourceElementAtTop(int position)
+			throws ModelException {
 		if (this instanceof ISourceReference) {
 			IModelElement[] children = getChildren();
-			for (int i = children.length-1; i >= 0; i--) {
+			for (int i = children.length - 1; i >= 0; i--) {
 				IModelElement aChild = children[i];
 				if (aChild instanceof SourceRefElement) {
 					SourceRefElement child = (SourceRefElement) children[i];
@@ -515,19 +564,26 @@ public abstract class ModelElement extends PlatformObject implements
 					int end = start + range.getLength();
 					if (start <= position && position <= end) {
 						if (child instanceof IField) {
-							// check muti-declaration case (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=39943)
+							// check muti-declaration case (see
+							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=39943)
 							int declarationStart = start;
 							SourceRefElement candidate = null;
 							do {
 								// check name range
-								range = ((IField)child).getNameRange();
-								if (position <= range.getOffset() + range.getLength()) {
+								range = ((IField) child).getNameRange();
+								if (position <= range.getOffset()
+										+ range.getLength()) {
 									candidate = child;
 								} else {
-									return candidate == null ? child.getSourceElementAt(position) : candidate.getSourceElementAt(position);
+									return candidate == null ? child
+											.getSourceElementAt(position)
+											: candidate
+													.getSourceElementAt(position);
 								}
-								child = --i>=0 ? (SourceRefElement) children[i] : null;
-							} while (child != null && child.getSourceRange().getOffset() == declarationStart);
+								child = --i >= 0 ? (SourceRefElement) children[i]
+										: null;
+							} while (child != null
+									&& child.getSourceRange().getOffset() == declarationStart);
 							// position in field's type: use first field
 							return candidate.getSourceElementAt(position);
 						} else if (child instanceof IParent) {
@@ -544,21 +600,23 @@ public abstract class ModelElement extends PlatformObject implements
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Only for testing.
 	 * 
 	 * Used to print this node with all sub childs.
+	 * 
 	 * @param output
 	 */
-	public abstract void printNode( CorePrinter output );
-	
+	public abstract void printNode(CorePrinter output);
+
 	/*
 	 * @see IModelElement#getPrimaryElement()
 	 */
 	public IModelElement getPrimaryElement() {
 		return getPrimaryElement(true);
 	}
+
 	/*
 	 * Returns the primary element. If checkOwner, and the cu owner is primary,
 	 * return this element.
@@ -566,56 +624,66 @@ public abstract class ModelElement extends PlatformObject implements
 	public IModelElement getPrimaryElement(boolean checkOwner) {
 		return this;
 	}
-	
-	public IModelElement getHandleFromMemento(MementoTokenizer memento, WorkingCopyOwner owner) {
-		if (!memento.hasMoreTokens()) return this;
+
+	public IModelElement getHandleFromMemento(MementoTokenizer memento,
+			WorkingCopyOwner owner) {
+		if (!memento.hasMoreTokens())
+			return this;
 		String token = memento.nextToken();
 		return getHandleFromMemento(token, memento, owner);
 	}
-	public abstract IModelElement getHandleFromMemento(String token, MementoTokenizer memento, WorkingCopyOwner owner);
-	
+
+	public abstract IModelElement getHandleFromMemento(String token,
+			MementoTokenizer memento, WorkingCopyOwner owner);
+
 	public String getHandleIdentifier() {
 		return getHandleMemento();
 	}
-	public String getHandleMemento(){
+
+	public String getHandleMemento() {
 		StringBuffer buff = new StringBuffer();
 		getHandleMemento(buff);
 		return buff.toString();
 	}
+
 	protected void getHandleMemento(StringBuffer buff) {
-		((ModelElement)getParent()).getHandleMemento(buff);
+		((ModelElement) getParent()).getHandleMemento(buff);
 		buff.append(getHandleMementoDelimiter());
 		escapeMementoName(buff, getElementName());
 	}
+
 	protected abstract char getHandleMementoDelimiter();
+
 	protected void escapeMementoName(StringBuffer buffer, String mementoName) {
 		for (int i = 0, length = mementoName.length(); i < length; i++) {
 			char character = mementoName.charAt(i);
 			switch (character) {
-				case JEM_ESCAPE:
-				case JEM_COUNT:
-				case JEM_SCRIPTPROJECT:
-				case JEM_PROJECTFRAGMENT:
-				case JEM_SCRIPTFOLDER:
-				case JEM_FIELD:
-				case JEM_METHOD:				
-				case JEM_SOURCEMODULE:	
-				case JEM_TYPE:				
-				case JEM_IMPORTDECLARATION:
-				case JEM_LOCALVARIABLE:
-				case JEM_TYPE_PARAMETER:
-					buffer.append(JEM_ESCAPE);
+			case JEM_ESCAPE:
+			case JEM_COUNT:
+			case JEM_SCRIPTPROJECT:
+			case JEM_PROJECTFRAGMENT:
+			case JEM_SCRIPTFOLDER:
+			case JEM_FIELD:
+			case JEM_METHOD:
+			case JEM_SOURCEMODULE:
+			case JEM_TYPE:
+			case JEM_IMPORTDECLARATION:
+			case JEM_LOCALVARIABLE:
+			case JEM_TYPE_PARAMETER:
+				buffer.append(JEM_ESCAPE);
 			}
 			buffer.append(character);
 		}
 	}
+
 	public ISourceModule getSourceModule() {
 		return null;
 	}
-	public void accept( IModelElementVisitor visitor ) throws ModelException {
-		if( visitor.visit(this) ) {
+
+	public void accept(IModelElementVisitor visitor) throws ModelException {
+		if (visitor.visit(this)) {
 			IModelElement[] elements = getChildren();
-			for( int i = 0; i < elements.length; ++i ) {
+			for (int i = 0; i < elements.length; ++i) {
 				elements[i].accept(visitor);
 			}
 		}

@@ -26,7 +26,7 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
@@ -105,7 +105,7 @@ public class ExternalProjectFragment extends ProjectFragment {
 		List scriptElements = new ArrayList();
 		List nonScriptElements = new ArrayList();
 		try {
-			IFileHandle file = EnvironmentsManager.getEnvironment(this)
+			IFileHandle file = EnvironmentManager.getEnvironment(this)
 					.getFile(path);
 			IFileHandle[] members = file.getChildren();
 			if (members != null) {
@@ -205,7 +205,7 @@ public class ExternalProjectFragment extends ProjectFragment {
 				IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)) {
 			return true;
 		}
-		IFileHandle file = EnvironmentsManager.getEnvironment(this).getFile(
+		IFileHandle file = EnvironmentManager.getEnvironment(this).getFile(
 				fPath);
 		return file.exists() && file.isDirectory();
 	}
@@ -223,13 +223,20 @@ public class ExternalProjectFragment extends ProjectFragment {
 		}
 		if (o instanceof ExternalProjectFragment) {
 			ExternalProjectFragment other = (ExternalProjectFragment) o;
+			IEnvironment environment = EnvironmentManager.getEnvironment(this);
+			if (o instanceof IModelElement) {
+				IEnvironment environmento = EnvironmentManager.getEnvironment((IModelElement)other);
+				if( !environment.equals(environmento)) {
+					return false;
+				}
+			}
 			return this.fPath.equals(other.fPath);
 		}
 		return false;
 	}
 
 	public String getElementName() {
-		IEnvironment env = EnvironmentsManager.getEnvironment(this);
+		IEnvironment env = EnvironmentManager.getEnvironment(this);
 		return fPath.toOSString().replace(env.getSeparatorChar(),
 				JEM_SKIP_DELIMETER);
 	}

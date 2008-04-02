@@ -1,12 +1,15 @@
-package org.eclipse.dltk.core.environment;
+package org.eclipse.dltk.core.internal.environment;
 
 import java.io.File;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileSystem;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 public class LocalEnvironment extends PlatformObject implements IEnvironment {
 	public static final String ENVIRONMENT_ID = DLTKCore.PLUGIN_ID
@@ -40,6 +43,14 @@ public class LocalEnvironment extends PlatformObject implements IEnvironment {
 	}
 
 	public String getName() {
-		return "Local";
+		return "Localhost";
+	}
+
+	public boolean hasProject(IProject project) {
+		File file = new File( project.getLocation().makeAbsolute().toOSString() );
+		if( file.exists() ) {
+			return true;
+		}
+		return false;
 	}
 }

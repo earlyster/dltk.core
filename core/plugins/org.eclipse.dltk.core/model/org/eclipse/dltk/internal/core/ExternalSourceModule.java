@@ -19,7 +19,7 @@ import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
@@ -91,7 +91,7 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getBufferContent()
 	 */
 	protected char[] getBufferContent() throws ModelException {
-		IEnvironment env = EnvironmentsManager.getEnvironment(this);
+		IEnvironment env = EnvironmentManager.getEnvironment(this);
 		IFileHandle file = env.getFile(getPath());
 		// (IFile) this.getResource();
 		// if ((file == null) || ! file.exists())

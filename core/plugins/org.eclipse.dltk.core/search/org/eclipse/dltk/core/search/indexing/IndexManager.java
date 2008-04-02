@@ -42,7 +42,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.BasicSearchEngine;
@@ -636,7 +636,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			return;
 		} else if (resource == null) {
 			IScriptProject scriptProject = DLTKCore.create(requestingProject);
-			IEnvironment env = EnvironmentsManager
+			IEnvironment env = EnvironmentManager
 					.getEnvironment(scriptProject);
 			IFileHandle file = Model.getExternalTarget(env, path, true);
 			if (file != null) {
