@@ -29,7 +29,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.debug.core.model.IStreamsProxy;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.tests.model.AbstractModelTests;
 import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
@@ -280,7 +280,7 @@ public abstract class ScriptLaunchingTests extends AbstractModelTests {
 		final List installs = new ArrayList();
 		final InterpreterSearcher searcher = new InterpreterSearcher();
 
-		searcher.search(EnvironmentsManager.getLocalEnvironment(), natureId,
+		searcher.search(EnvironmentManager.getLocalEnvironment(), natureId,
 				null, 1, null);
 
 		if (searcher.hasResults()) {
@@ -604,7 +604,7 @@ public abstract class ScriptLaunchingTests extends AbstractModelTests {
 
 	protected IInterpreterInstall createInstall(String path, String id,
 			IInterpreterInstallType type) {
-		IFileHandle file = EnvironmentsManager.getLocalEnvironment().getFile(
+		IFileHandle file = EnvironmentManager.getLocalEnvironment().getFile(
 				new Path(path));
 		if (!file.exists()) {
 			return null;

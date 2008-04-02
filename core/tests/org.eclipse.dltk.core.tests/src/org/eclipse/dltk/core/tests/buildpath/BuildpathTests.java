@@ -41,7 +41,7 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
-import org.eclipse.dltk.core.environment.LocalEnvironment;
+import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.core.tests.model.ModelTestsPlugin;
 import org.eclipse.dltk.core.tests.model.ModifyingResourceTests;
 import org.eclipse.dltk.core.tests.util.Util;

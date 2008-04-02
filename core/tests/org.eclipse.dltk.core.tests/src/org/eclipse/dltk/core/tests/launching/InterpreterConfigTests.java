@@ -8,7 +8,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.tests.model.AbstractModelTests;
 import org.eclipse.dltk.launching.InterpreterConfig;
@@ -41,7 +41,7 @@ public class InterpreterConfigTests extends AbstractModelTests {
 		IProject project = scriptProject.getProject();
 		IResource member = project.findMember("src/script.xxx");
 		IPath scriptPath = member.getLocation();
-		IEnvironment env = EnvironmentsManager.getEnvironment(scriptProject);
+		IEnvironment env = EnvironmentManager.getEnvironment(scriptProject);
 		return new InterpreterConfig(env, scriptPath);
 	}
 
@@ -49,7 +49,7 @@ public class InterpreterConfigTests extends AbstractModelTests {
 		IProject project = scriptProject.getProject();
 		IResource member = project.findMember("src/script.xxx");
 		IPath scriptPath = member.getLocation();
-		IEnvironment env = EnvironmentsManager.getEnvironment(scriptProject);
+		IEnvironment env = EnvironmentManager.getEnvironment(scriptProject);
 
 		InterpreterConfig config = new InterpreterConfig(env, scriptPath);
 
