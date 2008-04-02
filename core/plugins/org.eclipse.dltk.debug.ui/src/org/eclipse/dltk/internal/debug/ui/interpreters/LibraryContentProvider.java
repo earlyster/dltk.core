@@ -9,13 +9,13 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.LibraryLocation;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -54,7 +54,7 @@ public class LibraryContentProvider implements ITreeContentProvider {
 		fViewer.refresh();
 	}
 
-	public void initialize(File file,
+	public void initialize(IFileHandle file,
 			EnvironmentVariable[] environmentVariables, boolean restoreDefault) {
 
 	}

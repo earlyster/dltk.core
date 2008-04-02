@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,6 +21,7 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.IDLTKDebugUIConstants;
 import org.eclipse.dltk.debug.ui.actions.ControlAccessibleListener;
@@ -482,6 +482,7 @@ public abstract class AbstractInterpreterComboBlock {
 		}
 		return ScriptRuntime.newDefaultInterpreterContainerPath();
 	}
+	
 	public IBuildpathEntry getEntry() {
 		return DLTKCore.newContainerEntry(getInterpreterPath());
 	}
@@ -511,7 +512,7 @@ public abstract class AbstractInterpreterComboBlock {
 				setError(InterpretersMessages.InterpretersComboBlock_8);				
 			} else {
 				selectInterpreter(install);
-				File location = install.getInstallLocation();
+				IFileHandle location = install.getInstallLocation();
 				if (location == null) {
 					setError(InterpretersMessages.InterpretersComboBlock_12); 
 				} else if (!location.exists()) {

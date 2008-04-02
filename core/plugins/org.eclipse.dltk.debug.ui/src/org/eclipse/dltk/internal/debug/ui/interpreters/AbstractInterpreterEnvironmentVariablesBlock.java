@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
-import java.io.File;
 import java.text.MessageFormat;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -23,6 +22,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.internal.ui.DebugPluginImages;
 import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationsMessages;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
@@ -75,7 +75,6 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	protected boolean fInCallback = false;
 	protected IInterpreterInstall fInterpreterInstall;
 	protected IInterpreterInstallType fInterpreterInstallType;
-	protected File fHome;
 
 	// widgets
 	protected EnvironmentVariableContentProvider fEnvironmentVariablesContentProvider;
@@ -240,7 +239,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		if (install == null || EnvironmentVariables == null) {
 			return true;
 		}
-		File installLocation = install.getInstallLocation();
+		IFileHandle installLocation = install.getInstallLocation();
 		if (installLocation != null) {
 			EnvironmentVariable[] def = new EnvironmentVariable[0];
 			if (def.length == EnvironmentVariables.length) {

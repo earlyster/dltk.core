@@ -104,7 +104,7 @@ public abstract class ScriptInterpreterPreferencePage extends PreferencePage imp
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
 		ancestor.setLayout(layout);
-					
+		
 		fInterpretersBlock = createInterpretersBlock();
 		fInterpretersBlock.createControl(ancestor);
 		Control control = fInterpretersBlock.getControl();

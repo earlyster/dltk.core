@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,6 +18,8 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.dltk.core.environment.EnvironmentsManager;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.internal.ui.util.SWTUtil;
 import org.eclipse.dltk.internal.ui.util.TableLayoutComposite;
@@ -151,7 +152,7 @@ public abstract class InterpretersBlock implements
 				case 1:
 					return interp.getInterpreterInstallType().getName();
 				case 2:
-					return interp.getRawInstallLocation().toString();
+					return interp.getRawInstallLocation().getAbsolutePath();
 				}
 			}
 			return element.toString();
@@ -624,7 +625,7 @@ public abstract class InterpretersBlock implements
 		Iterator iter = fInterpreters.iterator();
 		while (iter.hasNext()) {
 			exstingLocations.add(((IInterpreterInstall) iter.next())
-					.getInstallLocation().getAbsoluteFile());
+					.getInstallLocation());
 		}
 
 		// search
@@ -637,8 +638,9 @@ public abstract class InterpretersBlock implements
 							InterpretersMessages.InstalledInterpretersBlock_11,
 							IProgressMonitor.UNKNOWN);
 
-					searcher.search(getCurrentNature(), exstingLocations, 1,
-							monitor);
+					// TODO: Add environment support
+					searcher.search(EnvironmentsManager.getLocalEnvironment(),
+							getCurrentNature(), exstingLocations, 1, monitor);
 				} finally {
 					monitor.done();
 				}
@@ -667,12 +669,12 @@ public abstract class InterpretersBlock implements
 					InterpretersMessages.InstalledInterpretersBlock_12,
 					InterpretersMessages.InstalledInterpretersBlock_113);
 		} else {
-			final File[] locations = searcher.getFoundFiles();
+			final IFileHandle[] locations = searcher.getFoundFiles();
 			final IInterpreterInstallType[] types = searcher
 					.getFoundInstallTypes();
 
 			for (int i = 0; i < locations.length; ++i) {
-				final File file = locations[i];
+				final IFileHandle file = locations[i];
 				final IInterpreterInstallType type = types[i];
 
 				IInterpreterInstall interpreter = new InterpreterStandin(type,
