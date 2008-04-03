@@ -8,7 +8,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.SimplePriorityClassDLTKExtensionManager;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 
@@ -30,6 +29,10 @@ public final class EnvironmentManager {
 		if (project == null)
 			return null;
 		
+		return getEnvironment(project);
+	}
+
+	public static IEnvironment getEnvironment(IProject project) {
 		IEnvironment[] environments = getEnvironments();
 		for (int i = 0; i < environments.length; i++) {
 			if( environments[i].hasProject(project)) {

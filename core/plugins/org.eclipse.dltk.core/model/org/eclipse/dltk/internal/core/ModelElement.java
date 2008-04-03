@@ -265,7 +265,7 @@ public abstract class ModelElement extends PlatformObject implements
 			return true;
 
 		IEnvironment environment = EnvironmentManager.getEnvironment(this);
-		if (o instanceof IModelElement) {
+		if (o instanceof IModelElement && environment != null) {
 			IEnvironment environmento = EnvironmentManager.getEnvironment((IModelElement)o);
 			if( !environment.equals(environmento)) {
 				return false;
