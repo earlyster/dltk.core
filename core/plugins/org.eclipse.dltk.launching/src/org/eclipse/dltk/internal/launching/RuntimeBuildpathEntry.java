@@ -11,6 +11,7 @@
 package org.eclipse.dltk.internal.launching;
 
 import java.io.IOException;
+import java.net.URI;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -428,7 +429,7 @@ public class RuntimeBuildpathEntry implements IRuntimeBuildpathEntry {
 	}
 
 	/**
-	 * Returns the OS path for the given aboslute or workspace relative path
+	 * Returns the OS path for the given absolute or workspace relative path
 	 */
 	protected IPath resolvePath(IPath path) {
 		if (path != null) {
@@ -439,6 +440,10 @@ public class RuntimeBuildpathEntry implements IRuntimeBuildpathEntry {
 			}
 			if (res == null) {
 				return path;
+			}
+			URI locationURI = res.getLocationURI();
+			if( locationURI != null ) {
+				return new Path(locationURI.getPath());
 			}
 			IPath location = res.getLocation();
 			if (location != null) {

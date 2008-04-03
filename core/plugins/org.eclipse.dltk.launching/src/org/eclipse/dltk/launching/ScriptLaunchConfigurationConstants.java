@@ -115,8 +115,6 @@ public class ScriptLaunchConfigurationConstants {
 
 	public static final String ATTR_INTERPRETER_ARGUMENTS = "interpreterArguments"; //$NON-NLS-1$
 
-	public static final String ATTR_ENVIRONMENT_ID = "environmentId";
-
 	/**
 	 * Launch configuration attribute key. This value is an identifier for the
 	 * working directory of a remote debugging session, and is used in an

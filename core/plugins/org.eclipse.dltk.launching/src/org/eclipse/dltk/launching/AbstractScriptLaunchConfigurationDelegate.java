@@ -10,6 +10,7 @@
 package org.eclipse.dltk.launching;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,7 +48,6 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
-import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.InterpreterRuntimeBuildpathEntryResolver;
 import org.eclipse.dltk.launching.debug.DebuggingEngineManager;
@@ -559,9 +559,9 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * @exception CoreException
 	 *                if unable to retrieve the attribute
 	 */
-	public File getWorkingDirectory(ILaunchConfiguration configuration)
-			throws CoreException {
-		return verifyWorkingDirectory(configuration);
+	public String getWorkingDirectory(ILaunchConfiguration configuration,
+			IEnvironment environment) throws CoreException {
+		return verifyWorkingDirectory(configuration, environment);
 	}
 
 	/**
@@ -600,11 +600,12 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * @exception CoreException
 	 *                if unable to retrieve the attribute
 	 */
-	public File verifyWorkingDirectory(ILaunchConfiguration configuration)
-			throws CoreException {
+	public String verifyWorkingDirectory(ILaunchConfiguration configuration,
+			IEnvironment environment) throws CoreException {
 		IPath path = getWorkingDirectoryPath(configuration);
 		if (path == null) {
-			File dir = getDefaultWorkingDirectory(configuration);
+			IPath dirPath = getDefaultWorkingDirectory(configuration);
+			IFileHandle dir = environment.getFile(dirPath);
 			if (dir != null) {
 				if (!dir.isDirectory()) {
 					abort(
@@ -615,13 +616,13 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 							null,
 							ScriptLaunchConfigurationConstants.ERR_WORKING_DIRECTORY_DOES_NOT_EXIST);
 				}
-				return dir;
+				return dir.getAbsolutePath();
 			}
 		} else {
 			if (path.isAbsolute()) {
 				File dir = new File(path.toOSString());
 				if (dir.isDirectory()) {
-					return dir;
+					return dir.getAbsolutePath();
 				}
 				// This may be a workspace relative path returned by a variable.
 				// However variable paths start with a slash and thus are
@@ -630,7 +631,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 				IResource res = ResourcesPlugin.getWorkspace().getRoot()
 						.findMember(path);
 				if (res instanceof IContainer && res.exists()) {
-					return res.getLocation().toFile();
+					return res.getLocation().toOSString();
 				}
 				abort(
 						MessageFormat
@@ -643,7 +644,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 				IResource res = ResourcesPlugin.getWorkspace().getRoot()
 						.findMember(path);
 				if (res instanceof IContainer && res.exists()) {
-					return res.getLocation().toFile();
+					return res.getLocation().toOSString();
 				}
 				abort(
 						MessageFormat
@@ -681,21 +682,25 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	}
 
 	// Project path + script path
-	protected String getScriptLaunchPath(ILaunchConfiguration configuration)
-			throws CoreException {
+	protected String getScriptLaunchPath(ILaunchConfiguration configuration,
+			IEnvironment scriptEnvironment) throws CoreException {
 		String mainScriptName = verifyMainScriptName(configuration);
 		IProject project = getScriptProject(configuration).getProject();
-		IPath location = project.getLocation();
+		String loc = null;
+		URI location = project.getLocationURI();
 		if (location == null) {
+			loc = project.getLocation().toOSString();
 			return null;
+		} else {
+			loc = location.getPath();
 		}
-		IPath workspaceLocation = location.append(mainScriptName);
-		IFile file = ResourcesPlugin.getWorkspace().getRoot()
-				.getFileForLocation(workspaceLocation);
-		if (file.exists() && file.getLocation() != null) {
-			return file.getLocation().toPortableString();
+
+		IPath environmentLocation = new Path(loc).append(mainScriptName);
+		IFileHandle file = scriptEnvironment.getFile(environmentLocation);
+		if (file.exists()) {
+			return file.getAbsolutePath();
 		}
-		return workspaceLocation.toPortableString();
+		return environmentLocation.toOSString();
 	}
 
 	// Should be overriden in for any language
@@ -705,13 +710,14 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 
 		// Validation already included
 		IEnvironment scriptEnvironment = getScriptEnvironment(configuration);
-		String scriptLaunchPath = getScriptLaunchPath(configuration);
+		String scriptLaunchPath = getScriptLaunchPath(configuration,
+				scriptEnvironment);
 		if (scriptLaunchPath == null) {
 			return null;
 		}
 		final IPath mainScript = new Path(scriptLaunchPath);
 		final IPath workingDirectory = new Path(getWorkingDirectory(
-				configuration).getAbsolutePath());
+				configuration, scriptEnvironment));
 
 		InterpreterConfig config = new InterpreterConfig(scriptEnvironment,
 				mainScript, workingDirectory);
@@ -750,10 +756,9 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 
 	private IEnvironment getScriptEnvironment(ILaunchConfiguration configuration)
 			throws CoreException {
-		String envId = configuration.getAttribute(
-				ScriptLaunchConfigurationConstants.ATTR_ENVIRONMENT_ID,
-				LocalEnvironment.ENVIRONMENT_ID);
-		return EnvironmentManager.getEnvironmentById(envId);
+		IScriptProject scriptProject = AbstractScriptLaunchConfigurationDelegate
+				.getScriptProject(configuration);
+		return EnvironmentManager.getEnvironment(scriptProject);
 	}
 
 	protected void validateLaunchConfiguration(
@@ -867,14 +872,9 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		}
 	}
 
-	protected String getWorkingDir(ILaunchConfiguration configuration)
+	protected String getWorkingDir(ILaunchConfiguration configuration, IEnvironment environment)
 			throws CoreException {
-		File workingDir = verifyWorkingDirectory(configuration);
-		String workingDirName = null;
-		if (workingDir != null) {
-			workingDirName = workingDir.getAbsolutePath();
-		}
-		return workingDirName;
+		return verifyWorkingDirectory(configuration, environment);
 	}
 
 	protected IPath[] createBuildPath(ILaunchConfiguration configuration)
@@ -1043,13 +1043,17 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 *             directory
 	 * 
 	 */
-	protected File getDefaultWorkingDirectory(ILaunchConfiguration configuration)
-			throws CoreException {
+	protected IPath getDefaultWorkingDirectory(
+			ILaunchConfiguration configuration) throws CoreException {
 		// default working directory is the project if this config has a project
-		IScriptProject jp = getScriptProject(configuration);
-		if (jp != null) {
-			IProject p = jp.getProject();
-			return p.getLocation().toFile();
+		IScriptProject scriptProject = getScriptProject(configuration);
+		if (scriptProject != null) {
+			IProject project = scriptProject.getProject();
+			URI uri = project.getLocationURI();
+			if (uri != null) {
+				return new Path(uri.getPath());
+			}
+			return project.getLocation();
 		}
 		return null;
 	}

@@ -100,7 +100,7 @@ public class InterpreterContainerHelper {
 				newBuildpath.add(rawBuildpath[i]);
 			} else {
 				found = true;
-				newBuildpath.add(createPackagesContainer(names, containerName));
+				newBuildpath.add(createPackagesContainer(names, rawBuildpath[i].getPath()));
 			}
 		}
 		if (!found) {
