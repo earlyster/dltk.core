@@ -462,13 +462,6 @@ public abstract class Openable extends ModelElement implements IOpenable,
 
 		ScriptProject project = (ScriptProject) getScriptProject();
 
-		// TODO: Add searchable environment support.
-		SearchableEnvironment environment = project
-				.newSearchableNameEnvironment(owner);
-
-		// set unit to skip
-		environment.unitToSkip = cu;
-
 		IDLTKLanguageToolkit toolkit = null;
 
 		toolkit = DLTKLanguageManager.getLanguageToolkit(this);
@@ -496,15 +489,6 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		 */
 
 		engine.complete(cu, position, 0);
-
-		if (NameLookup.VERBOSE) {
-			System.out
-					.println(Thread.currentThread()
-							+ " TIME SPENT in NameLoopkup#seekTypesInSourcePackage: " + environment.nameLookup.timeSpentInSeekTypesInSourcePackage + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
-			System.out
-					.println(Thread.currentThread()
-							+ " TIME SPENT in NameLoopkup#seekTypesInBinaryPackage: " + environment.nameLookup.timeSpentInSeekTypesInBinaryPackage + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
 	}
 
 	protected IModelElement[] codeSelect(
@@ -542,7 +526,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		if (engine == null) {
 			return new IModelElement[0];
 		}
-		// engine.setEnvironment(environment);
+//		engine.setEnvironment(environment);
 		engine.setOptions(project.getOptions(true));
 		// createSelectionEngine(environment,
 		// project.getOptions(true));
