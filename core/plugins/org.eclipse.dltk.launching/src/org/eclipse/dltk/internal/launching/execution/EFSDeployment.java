@@ -32,7 +32,7 @@ public class EFSDeployment implements IDeployment {
 
 	public IPath add(Bundle bundle, String bundlePath) throws IOException {
 		try {
-			final IFileStore dest = root.getFileStore(new Path(bundlePath));
+			final IFileStore dest = root.getChild(new Path(bundlePath));
 			final Enumeration paths = bundle.getEntryPaths(bundlePath);
 			if (paths != null) {
 				// result is a directory
@@ -111,12 +111,12 @@ public class EFSDeployment implements IDeployment {
 	}
 
 	public IFileHandle getFile(IPath deploymentPath) {
-		return new EFSFileHandle(environment, root.getFileStore(deploymentPath));
+		return new EFSFileHandle(environment, root.getChild(deploymentPath));
 	}
 
 	public void mkdirs(IPath path) {
 		try {
-			root.getFileStore(path).mkdir(EFS.NONE, null);
+			root.getChild(path).mkdir(EFS.NONE, null);
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
