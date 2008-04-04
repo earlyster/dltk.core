@@ -61,6 +61,10 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 		}
 		return false;
 	}
+	
+	public String convertPathToString(IPath path) {
+		return path.toOSString();
+	}
 
 	public Object getAdapter(Class adapter) {
 		return Platform.getAdapterManager().loadAdapter(this, adapter.getName());

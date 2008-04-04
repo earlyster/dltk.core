@@ -13,5 +13,6 @@ public interface IEnvironment extends IAdaptable {
 	char getSeparatorChar();
 	String getName();
 	boolean hasProject(IProject project);
+	String convertPathToString(IPath path);
 	URI getURI(IPath location);
 }
