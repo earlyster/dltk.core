@@ -48,10 +48,12 @@ public class LocalEnvironment extends PlatformObject implements IEnvironment {
 
 	public boolean hasProject(IProject project) {
 		if (project.isAccessible()) {
-			File file = new File(project.getLocation().makeAbsolute()
-					.toOSString());
-			if (file.exists()) {
-				return true;
+			IPath location = project.getLocation();
+			if (location != null) {
+				File file = new File(location.makeAbsolute().toOSString());
+				if (file.exists()) {
+					return true;
+				}
 			}
 		}
 		return false;

@@ -11,6 +11,7 @@ package org.eclipse.dltk.core;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.dltk.core.environment.IEnvironment;
 
 public interface IDLTKLanguageToolkit {
 
@@ -20,7 +21,7 @@ public interface IDLTKLanguageToolkit {
 	 */
 	String getLanguageContentType();
 
-	boolean validateSourcePackage(IPath path);
+	boolean validateSourcePackage(IPath path, IEnvironment environment);
 	IStatus validateSourceModule(IResource resource);
 
 	boolean languageSupportZIPBuildpath();
