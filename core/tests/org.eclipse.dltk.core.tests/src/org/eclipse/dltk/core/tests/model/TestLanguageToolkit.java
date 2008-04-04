@@ -37,6 +37,7 @@ import org.eclipse.dltk.core.ISearchableEnvironment;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.search.DLTKSearchParticipant;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.IMatchLocatorParser;
@@ -79,7 +80,7 @@ public class TestLanguageToolkit implements IDLTKLanguageToolkit {
 		return true;
 	}
 
-	public boolean validateSourcePackage(IPath path) {
+	public boolean validateSourcePackage(IPath path, IEnvironment env) {
 		return true;
 	}
 
