@@ -121,6 +121,13 @@ public class BuildpathDetector {
 			}
 			monitor.worked(10);
 			addInterpreterContainer(cpEntries);
+			if (cpEntries.size() == 1) {
+				IBuildpathEntry entry = (IBuildpathEntry) cpEntries.get(0);
+				if (entry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER) {
+					cpEntries.add(DLTKCore.newSourceEntry(fProject.getFullPath()));
+				}
+
+			}
 			if (cpEntries.isEmpty() && fSourceFiles.isEmpty()) {
 				return;
 			}
@@ -137,7 +144,7 @@ public class BuildpathDetector {
 		}
 	}
 
-	protected void processSources(List correctFiles, SubProgressMonitor sub) {		
+	protected void processSources(List correctFiles, SubProgressMonitor sub) {
 	}
 
 	protected void addInterpreterContainer(ArrayList cpEntries) {

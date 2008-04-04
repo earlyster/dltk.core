@@ -274,7 +274,7 @@ public abstract class ProjectWizardSecondPage extends
 		if (fFirstPage.isInWorkspace()) {
 			return null;
 		}
-		return URIUtil.toURI(fFirstPage.getLocationPath());
+		return fFirstPage.getLocationURI();
 	}
 
 	private IBuildpathEntry[] getDefaultBuildpathEntry() {
