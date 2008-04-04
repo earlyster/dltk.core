@@ -620,7 +620,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 			}
 		} else {
 			if (path.isAbsolute()) {
-				File dir = new File(path.toOSString());
+				IFileHandle dir = environment.getFile(path);
 				if (dir.isDirectory()) {
 					return dir.getAbsolutePath();
 				}
@@ -1006,32 +1006,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 				configuration);
 	}
 
-	/**
-	 * Returns an array of paths to be used for the
-	 * <code>java.library.path</code> system property, or <code>null</code>
-	 * if unspecified.
-	 * 
-	 * @param configuration
-	 * @return an array of paths to be used for the
-	 *         <code>java.library.path</code> system property, or
-	 *         <code>null</code>
-	 * @throws CoreException
-	 *             if unable to determine the attribute
-	 * 
-	 */
-	public String[] getScriptLibraryPath(ILaunchConfiguration configuration)
-			throws CoreException {
-		IScriptProject project = getScriptProject(configuration);
-		if (project != null) {
-			String[] paths = ScriptRuntime.computeScriptLibraryPath(project,
-					true);
-			if (paths.length > 0) {
-				return paths;
-			}
-		}
-		return null;
-	}
-
+	
 	/**
 	 * Returns the default working directory for the given launch configuration,
 	 * or <code>null</code> if none. Subclasses may override as necessary.
