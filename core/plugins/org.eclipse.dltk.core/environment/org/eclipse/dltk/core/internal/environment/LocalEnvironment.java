@@ -1,17 +1,20 @@
 package org.eclipse.dltk.core.internal.environment;
 
 import java.io.File;
+import java.net.URI;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileSystem;
+import org.eclipse.core.filesystem.URIUtil;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.PlatformObject;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
-public class LocalEnvironment extends PlatformObject implements IEnvironment {
+public class LocalEnvironment implements IEnvironment, IAdaptable {
 	public static final String ENVIRONMENT_ID = DLTKCore.PLUGIN_ID
 			+ ".environment.localEnvironment";
 
@@ -57,5 +60,13 @@ public class LocalEnvironment extends PlatformObject implements IEnvironment {
 			}
 		}
 		return false;
+	}
+
+	public Object getAdapter(Class adapter) {
+		return Platform.getAdapterManager().loadAdapter(this, adapter.getName());
+	}
+
+	public URI getURI(IPath location) {
+		return URIUtil.toURI(location);
 	}
 }
