@@ -124,7 +124,7 @@ public class BuildpathDetector {
 			if (cpEntries.size() == 1) {
 				IBuildpathEntry entry = (IBuildpathEntry) cpEntries.get(0);
 				if (entry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER) {
-					cpEntries.add(DLTKCore.newSourceEntry(fProject.getFullPath()));
+					cpEntries.add(0, DLTKCore.newSourceEntry(fProject.getFullPath()));
 				}
 
 			}
