@@ -12,7 +12,7 @@ public class LocalEnvironmentUIAdapter implements IAdapterFactory {
 
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (adaptableObject instanceof LocalEnvironment
-				&& adapterType.equals(IEnvironmentUI.class)) {
+				&& adapterType == IEnvironmentUI.class) {
 			return new LocalEnvironmentUI();
 		}
 		return null;
