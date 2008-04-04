@@ -14,8 +14,6 @@ import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 public final class EnvironmentManager {
 	private static final String ENVIRONMENT_EXTENSION = DLTKCore.PLUGIN_ID
 			+ ".environment";
-	private static final String ENVIRONMENT_ID = DLTKCore.PLUGIN_ID
-			+ ".environmentId";
 	private static SimplePriorityClassDLTKExtensionManager manager = new SimplePriorityClassDLTKExtensionManager(
 			ENVIRONMENT_EXTENSION, "id");
 
