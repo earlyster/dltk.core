@@ -12,7 +12,6 @@ package org.eclipse.dltk.internal.debug.ui.interpreters;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -28,6 +27,7 @@ import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterStandin;
+import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.dltk.utils.PlatformFileUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -39,7 +39,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -328,7 +327,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	}
 
 	IStatus validateInterpreterLocation() {
-		IEnvironment selectedEnv = getSelectedEnvironment();
+		IEnvironment selectedEnv = getEnvironment();
 		String locationName = fInterpreterPath.getText();
 		IStatus s = null;
 		IFileHandle file = null;
@@ -387,7 +386,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		return s;
 	}
 
-	private IEnvironment getSelectedEnvironment() {
+	private IEnvironment getEnvironment() {
 		int idx = fInterpreterEnvCombo.getSelectionIndex();
 		if (idx < 0)
 			return EnvironmentManager.getLocalEnvironment();
@@ -426,19 +425,14 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	}
 
 	private void browseForInstallation() {
-
-		FileDialog dialog = new FileDialog(getShell());
-		dialog.setFilterPath(fInterpreterPath.getText());
-		if (Platform.getOS().equals(Platform.OS_WIN32)) {
-			dialog.setFilterExtensions(new String[] { "*.exe;*.bat;*.exe" }); //$NON-NLS-1$
-		} else {
-			dialog.setFilterExtensions(new String[] { "*" }); //$NON-NLS-1$
-		}
-		dialog
-				.setFilterNames(new String[] { InterpretersMessages.AddScriptInterpreterDialog_executables });
-		String newPath = dialog.open();
-		if (newPath != null) {
-			fInterpreterPath.setText(newPath);
+		IEnvironment environment = getEnvironment();
+		IEnvironmentUI environmentUI = (IEnvironmentUI) environment
+				.getAdapter(IEnvironmentUI.class);
+		if (environmentUI != null) {
+			String newPath = environmentUI.selectFile(getShell(), IEnvironmentUI.EXECUTABLE);
+			if (newPath != null) {
+				fInterpreterPath.setText(newPath);
+			}
 		}
 	}
 
@@ -472,7 +466,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	}
 
 	protected void setFieldValuesToInterpreter(IInterpreterInstall install) {
-		IEnvironment selectedEnv = getSelectedEnvironment();
+		IEnvironment selectedEnv = getEnvironment();
 		IFileHandle dir = selectedEnv.getFile(new Path(fInterpreterPath
 				.getText()));
 		// try {
