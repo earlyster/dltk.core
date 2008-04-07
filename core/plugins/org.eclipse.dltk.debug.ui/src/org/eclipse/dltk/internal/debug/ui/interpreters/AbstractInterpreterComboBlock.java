@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.IDLTKDebugUIConstants;
@@ -63,7 +64,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 public abstract class AbstractInterpreterComboBlock {
 	
 	public static final String PROPERTY_INTERPRETER = "PROPERTY_INTERPRETER"; //$NON-NLS-1$
-	
+	private IEnvironment environment;
 	/**
 	 * This block's control
 	 */
@@ -300,9 +301,15 @@ public abstract class AbstractInterpreterComboBlock {
 	 * 
 	 * @param Interpreters InterpreterEnvironments to be displayed
 	 */
-	protected void setInterpreters(List InterpreterEnvironments) {
+	protected void setInterpreters(List interpreterEnvironments) {
 		fInterpreters.clear();
-		fInterpreters.addAll(InterpreterEnvironments);
+		for (Iterator iterator = interpreterEnvironments.iterator(); iterator
+				.hasNext();) {
+			IInterpreterInstall install = (IInterpreterInstall) iterator.next();
+			if( install.getEnvironment().equals(environment)) {
+				fInterpreters.add(install);
+			}
+		}
 		// sort by name
 		Collections.sort(fInterpreters, new Comparator() {
 			public int compare(Object o1, Object o2) {
@@ -507,7 +514,7 @@ public abstract class AbstractInterpreterComboBlock {
 		if (ScriptRuntime.newDefaultInterpreterContainerPath().equals(containerPath)) {
 			setUseDefaultInterpreter();			
 		} else {			
-			IInterpreterInstall install = ScriptRuntime.getInterpreterInstall(getCurrentLanguageNature(), containerPath);
+			IInterpreterInstall install = ScriptRuntime.getInterpreterInstall(getCurrentLanguageNature(), environment.getId(), containerPath);
 			if (install == null) {
 				setError(InterpretersMessages.InterpretersComboBlock_8);				
 			} else {
@@ -522,7 +529,9 @@ public abstract class AbstractInterpreterComboBlock {
 			
 		}
 	}
-	
+	public void setEnvironment(IEnvironment environment) {
+		this.environment = environment;
+	}
 	private void setError(String message) {
 		setStatus(new Status(IStatus.ERROR, DLTKDebugUIPlugin.getUniqueIdentifier(),
 				IDLTKDebugUIConstants.INTERNAL_ERROR, message, null));		

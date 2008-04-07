@@ -11,15 +11,20 @@ package org.eclipse.dltk.internal.debug.ui.interpreters;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.internal.ui.util.SWTUtil;
 import org.eclipse.dltk.internal.ui.util.TableLayoutComposite;
@@ -61,6 +66,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -104,6 +110,13 @@ public abstract class InterpretersBlock implements
 	private Button fCopyButton;
 	private Button fSearchButton;
 
+	private Combo fEnvironments;
+
+	/**
+	 * Environment to checked interpreter.
+	 */
+	private Map checkedInterpreters = new HashMap();
+
 	// index of column used for sorting
 	private int fSortColumn = 0;
 
@@ -124,7 +137,17 @@ public abstract class InterpretersBlock implements
 	 */
 	class InterpretersContentProvider implements IStructuredContentProvider {
 		public Object[] getElements(Object input) {
-			return fInterpreters.toArray();
+			IEnvironment environment = getCurrentEnvironment();
+			List result = new ArrayList();
+			for (Iterator iterator = fInterpreters.iterator(); iterator
+					.hasNext();) {
+				IInterpreterInstall install = (IInterpreterInstall) iterator
+						.next();
+				if (install.getEnvironment().equals(environment)) {
+					result.add(install);
+				}
+			}
+			return result.toArray();
 		}
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -214,6 +237,8 @@ public abstract class InterpretersBlock implements
 				} else {
 					fInterpreterList
 							.setCheckedElements(new Object[] { interp });
+					IInterpreterInstall install = (IInterpreterInstall) interp;
+					checkedInterpreters.put(install.getEnvironment(), install);
 					fInterpreterList.reveal(interp);
 				}
 				fireSelectionChanged();
@@ -248,12 +273,53 @@ public abstract class InterpretersBlock implements
 
 		GridData data;
 
-		Label tableLabel = new Label(parent, SWT.NONE);
-		tableLabel.setText(InterpretersMessages.InstalledInterpretersBlock_15);
-		data = new GridData();
+		Composite env = new Composite(parent, SWT.NONE);
+		GridLayout layout2 = new GridLayout(2, false);
+		layout2.marginLeft = -5;
+		layout2.marginRight = -5;
+		layout2.marginTop = -5;
+		layout2.marginBottom = -5;
+		env.setLayout(layout2);
+		data = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
 		data.horizontalSpan = 2;
-		tableLabel.setLayoutData(data);
-		tableLabel.setFont(font);
+		env.setLayoutData(data);
+		Label environmentLabel = new Label(env, SWT.NONE);
+		environmentLabel.setText("Host:");
+		this.fEnvironments = new Combo(env, SWT.DROP_DOWN | SWT.READ_ONLY);
+		data = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
+		this.fEnvironments.setLayoutData(data);
+		environments = EnvironmentManager.getEnvironments();
+		String[] items = new String[environments.length];
+		int local = 0;
+		for (int i = 0; i < items.length; i++) {
+			items[i] = environments[i].getName();
+			if (environments[i].getId().equals(LocalEnvironment.ENVIRONMENT_ID)) {
+				local = i;
+			}
+		}
+		this.fEnvironments.setItems(items);
+		this.fEnvironments.select(local);
+
+		this.fEnvironments.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				Object install = checkedInterpreters
+						.get(getCurrentEnvironment());
+				fInterpreterList.refresh();
+				if (install != null) {
+					fInterpreterList
+							.setCheckedElements(new Object[] { install });
+				} else {
+					fInterpreterList.setCheckedElements(new Object[0]);
+				}
+			}
+		});
+
+		// Label tableLabel = new Label(parent, SWT.NONE);
+		// tableLabel.setText(InterpretersMessages.InstalledInterpretersBlock_15);
+		// data = new GridData();
+		// data.horizontalSpan = 2;
+		// tableLabel.setLayoutData(data);
+		// tableLabel.setFont(font);
 
 		PixelConverter conv = new PixelConverter(parent);
 		data = new GridData(GridData.FILL_BOTH);
@@ -701,14 +767,17 @@ public abstract class InterpretersBlock implements
 	/**
 	 * Sets the checked InterpreterEnvironment, possible <code>null</code>
 	 * 
-	 * @param Interpreter
+	 * @param interpreter
 	 *            InterpreterEnvironment or <code>null</code>
 	 */
-	public void setCheckedInterpreter(IInterpreterInstall Interpreter) {
-		if (Interpreter == null) {
+	public void setCheckedInterpreter(IInterpreterInstall interpreter) {
+		if (interpreter == null) {
 			setSelection(new StructuredSelection());
 		} else {
-			setSelection(new StructuredSelection(Interpreter));
+			if (interpreter.getEnvironment().equals(getCurrentEnvironment())) {
+				setSelection(new StructuredSelection(interpreter));
+			}
+			checkedInterpreters.put(interpreter.getEnvironment(), interpreter);
 		}
 	}
 
@@ -717,12 +786,15 @@ public abstract class InterpretersBlock implements
 	 * 
 	 * @return the checked Interpreter or <code>null</code> if none
 	 */
-	public IInterpreterInstall getCheckedInterpreter() {
-		Object[] objects = fInterpreterList.getCheckedElements();
-		if (objects.length == 0) {
-			return null;
+	public IInterpreterInstall[] getCheckedInterpreters() {
+		Collection values = checkedInterpreters.values();
+		IInterpreterInstall[] installs = new IInterpreterInstall[values.size()];
+		int i = 0;
+		for (Iterator iterator = values.iterator(); iterator.hasNext();) {
+			installs[i] = (IInterpreterInstall) iterator.next();
+			++i;
 		}
-		return (IInterpreterInstall) objects[0];
+		return installs;
 	}
 
 	/**
@@ -830,6 +902,8 @@ public abstract class InterpretersBlock implements
 	// happen very quickly
 	private static String fgLastUsedID;
 
+	private IEnvironment[] environments;
+
 	/**
 	 * Find a unique Interpreter id. Check existing 'real' Interpreters, as well
 	 * as the last id used for a InterpreterStandin.
@@ -932,5 +1006,17 @@ public abstract class InterpretersBlock implements
 			return;
 		}
 		fInterpreterList.refresh(install);
+	}
+
+	public IEnvironment getCurrentEnvironment() {
+		if (fEnvironments == null) {
+			return EnvironmentManager
+					.getEnvironmentById(LocalEnvironment.ENVIRONMENT_ID);
+		}
+		return environments[fEnvironments.getSelectionIndex()];
+	}
+
+	public int getEnvironmentsCount() {
+		return environments.length;
 	}
 }

@@ -14,6 +14,7 @@ import java.text.MessageFormat;
 import org.eclipse.dltk.debug.ui.messages.ScriptLaunchMessages;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 
 /**
  * Interpreter Descriptor used for the Interpreter container wizard page.
@@ -21,14 +22,16 @@ import org.eclipse.dltk.launching.ScriptRuntime;
 public class BuildInterpreterDescriptor extends InterpreterDescriptor {
 	
 	private String fNature;
+	private String fEnvironment;
 	
-	public BuildInterpreterDescriptor(String nature) {
+	public BuildInterpreterDescriptor(String nature, String environment) {
 		fNature = nature;
+		this.fEnvironment = environment;
 	}
 		
 	public String getDescription() {
 		String name = ScriptLaunchMessages.InterpreterTab_7;
-		IInterpreterInstall Interpreter = ScriptRuntime.getDefaultInterpreterInstall(fNature);
+		IInterpreterInstall Interpreter = ScriptRuntime.getDefaultInterpreterInstall(new DefaultInterpreterEntry( fNature, fEnvironment));
 		if (Interpreter != null) {
 			name = Interpreter.getName();
 		}
