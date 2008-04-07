@@ -42,6 +42,7 @@ import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterStandin;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.jface.dialogs.Dialog;
@@ -359,7 +360,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 
 		private String getDefaultInterpreterName() {
 			IInterpreterInstall inst = ScriptRuntime
-					.getDefaultInterpreterInstall(getCurrentLanguageNature());
+					.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
+							getCurrentLanguageNature(), getEnvironment()
+									.getId()));
 			if (inst != null)
 				return inst.getName();
 			else
@@ -450,7 +453,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			}
 			return null;
 		}
-
 	}
 
 	/**
