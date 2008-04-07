@@ -12,20 +12,16 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.osgi.service.datalocation.Location;
 
 public class PlatformFileUtils {
-	/**
-	 * Returns same file if not exist.
-	 * @deprecated
-	 */
-	public static File findAbsoluteOrEclipseRelativeFile(File file) {
-		throw new RuntimeException("Incorrect usage");
-	}
-	
 	public static IFileHandle findAbsoluteOrEclipseRelativeFile(
 			IEnvironment env, IPath path) {
 		IFileHandle file = env.getFile(path);
+		if( !env.getId().equals(LocalEnvironment.ENVIRONMENT_ID)) {
+			return file;
+		}
 		if (EnvironmentManager.isLocal(env) && !file.exists()
 				&& !path.isAbsolute()) {
 			String loc;
@@ -62,6 +58,10 @@ public class PlatformFileUtils {
 			}
 
 		}
+		return file;
+	}
+
+	public static File findAbsoluteOrEclipseRelativeFile(File file) {
 		return file;
 	}
 }
