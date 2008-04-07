@@ -113,7 +113,7 @@ public class ScriptThreadManager implements IScriptThreadManager {
 				if (proxy != null) {
 					try {
 						final OutputStream err = proxy.getStderr();
-						err.write(data.getBytes());
+						err.write(data.getBytes(ScriptThreadManager.this.target.getConsoleEncoding()));
 						err.flush();
 
 					} catch (IOException e) {
@@ -131,7 +131,7 @@ public class ScriptThreadManager implements IScriptThreadManager {
 				if (proxy != null) {
 					try {
 						final OutputStream out = proxy.getStdout();
-						out.write(data.getBytes());
+						out.write(data.getBytes(ScriptThreadManager.this.target.getConsoleEncoding()));
 						out.flush();
 					} catch (IOException e) {
 						e.printStackTrace();

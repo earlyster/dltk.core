@@ -12,8 +12,8 @@ public class ScriptDebugConsole extends IOConsole {
 	public void setLaunch(ILaunch launch) {
 		this.launch = launch;
 	}
-	public ScriptDebugConsole(String name, ImageDescriptor imageDescriptor) {
-		super(name, imageDescriptor);
+	public ScriptDebugConsole(String name, ImageDescriptor imageDescriptor, String encoding) {
+		super(name, null, imageDescriptor, encoding, true);
 		
 		this.addPatternMatchListener(new ScriptDebugConsoleTraceTracker());
 	}

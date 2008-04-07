@@ -59,7 +59,7 @@ public class ScriptConsoleIO implements IScriptConsoleIO {
 			sxcn.printStackTrace();
 		}
 
-		return new String(buffer, 0, from);
+		return new String(buffer, 0, from, "UTF-8"); //$NON-NLS-1$
 	}
 
 	protected static int readLength(InputStream input) throws IOException {
@@ -132,11 +132,11 @@ public class ScriptConsoleIO implements IScriptConsoleIO {
 	public ShellResponse execShell(String command, String[] args)
 			throws IOException {
 
-		output.write((SHELL + "\n").getBytes()); //$NON-NLS-1$
-		output.write((command + "\n").getBytes()); //$NON-NLS-1$
+		output.write((SHELL + "\n").getBytes("UTF-8")); //$NON-NLS-1$ //$NON-NLS-2$
+		output.write((command + "\n").getBytes("UTF-8")); //$NON-NLS-1$ //$NON-NLS-2$
 
 		for (int i = 0; i < args.length; ++i) {
-			output.write((args[i] + "\n").getBytes()); //$NON-NLS-1$
+			output.write((args[i] + "\n").getBytes("UTF-8")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		output.flush();
@@ -148,8 +148,8 @@ public class ScriptConsoleIO implements IScriptConsoleIO {
 
 	public InterpreterResponse execInterpreter(String command)
 			throws IOException {
-		output.write((INTERPRETER + "\n").getBytes()); //$NON-NLS-1$
-		output.write((command + "\n").getBytes()); //$NON-NLS-1$
+		output.write((INTERPRETER + "\n").getBytes("UTF-8")); //$NON-NLS-1$ //$NON-NLS-2$
+		output.write((command + "\n").getBytes("UTF-8")); //$NON-NLS-1$ //$NON-NLS-2$
 		output.flush();
 
 		final String response = readResponse(input);

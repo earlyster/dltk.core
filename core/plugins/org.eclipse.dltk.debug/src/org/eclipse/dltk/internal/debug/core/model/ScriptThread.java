@@ -125,17 +125,18 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 			if (proxy != null) {
 				OutputStream stdout = proxy.getStderr();
 				try {
+					String encoding = target.getConsoleEncoding();
 					String message = "\n" + e.getMessage() + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
-					stdout.write(message.getBytes());
+					stdout.write(message.getBytes(encoding));
 					stack.update();
 					IStackFrame[] frames = stack.getFrames();
-					stdout.write("\nStack trace:\n".getBytes()); //$NON-NLS-1$
+					stdout.write("\nStack trace:\n".getBytes(encoding)); //$NON-NLS-1$
 					for (int i = 0; i < frames.length; i++) {
 						IScriptStackFrame frame = (IScriptStackFrame) frames[i];
 						String line = "\t#" + frame.getLevel() + " file:" //$NON-NLS-1$ //$NON-NLS-2$
 								+ frame.getSourceURI().getPath() + " [" //$NON-NLS-1$
 								+ frame.getLineNumber() + "]\n"; //$NON-NLS-1$
-						stdout.write(line.getBytes());
+						stdout.write(line.getBytes(encoding));
 					}
 				} catch (IOException e1) {
 					if (DLTKCore.DEBUG) {
