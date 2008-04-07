@@ -5,6 +5,7 @@ import org.eclipse.swt.widgets.Shell;
 public interface IEnvironmentUI {
 	public static final int DEFAULT = 0;
 	public static final int EXECUTABLE = 1;
+	public static final int ARCHIVE = 2;
 
 	/**
 	 * Open directory selection dialog. Dialog allow creation of new
