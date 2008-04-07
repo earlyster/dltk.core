@@ -679,13 +679,6 @@ public abstract class InterpretersBlock implements
 	protected void search() {
 
 		// choose a root directory for the search
-		/*
-		 * DirectoryDialog dialog = new DirectoryDialog(getShell());
-		 * dialog.setMessage(InterpretersMessages.InstalledInterpreterEnvironmentsBlock_9);
-		 * dialog.setText(InterpretersMessages.InstalledInterpreterEnvironmentsBlock_10);
-		 * String path = dialog.open(); if (path == null) { return; }
-		 */
-
 		// ignore installed locations
 		final Set exstingLocations = new HashSet();
 		Iterator iter = fInterpreters.iterator();
@@ -696,6 +689,8 @@ public abstract class InterpretersBlock implements
 
 		// search
 		final InterpreterSearcher searcher = new InterpreterSearcher();
+		
+		final IEnvironment currentEnvironment = getCurrentEnvironment();
 
 		IRunnableWithProgress r = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) {
@@ -704,8 +699,7 @@ public abstract class InterpretersBlock implements
 							InterpretersMessages.InstalledInterpretersBlock_11,
 							IProgressMonitor.UNKNOWN);
 
-					// TODO: Add environment support
-					searcher.search(EnvironmentManager.getLocalEnvironment(),
+					searcher.search(currentEnvironment,
 							getCurrentNature(), exstingLocations, 1, monitor);
 				} finally {
 					monitor.done();
@@ -966,6 +960,7 @@ public abstract class InterpretersBlock implements
 							.getInterpreterInstallType()));
 			standin.setName(generateName(selectedInterpreter.getName()));
 			AddScriptInterpreterDialog dialog = createInterpreterDialog(standin);
+			dialog.setEnvironment(getCurrentEnvironment());
 			dialog.setTitle(InterpretersMessages.InstalledInterpretersBlock_18);
 			if (dialog.open() != Window.OK) {
 				return;
@@ -983,6 +978,7 @@ public abstract class InterpretersBlock implements
 	 */
 	protected void addInterpreter() {
 		AddScriptInterpreterDialog dialog = createInterpreterDialog(null);
+		dialog.setEnvironment(getCurrentEnvironment());
 		dialog.setTitle(InterpretersMessages.InstalledInterpretersBlock_7);
 		if (dialog.open() != Window.OK) {
 			return;
@@ -1001,6 +997,7 @@ public abstract class InterpretersBlock implements
 		}
 
 		AddScriptInterpreterDialog dialog = createInterpreterDialog(install);
+		dialog.setEnvironment(getCurrentEnvironment());
 		dialog.setTitle(InterpretersMessages.InstalledInterpretersBlock_8);
 		if (dialog.open() != Window.OK) {
 			return;

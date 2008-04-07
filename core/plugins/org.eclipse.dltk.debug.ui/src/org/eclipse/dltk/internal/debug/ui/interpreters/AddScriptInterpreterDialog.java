@@ -12,7 +12,6 @@ package org.eclipse.dltk.internal.debug.ui.interpreters;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
@@ -48,12 +47,10 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	private IAddInterpreterDialogRequestor fRequestor;
 
 	private IInterpreterInstallType[] fInterpreterTypes;
-	IEnvironment[] fEnvironments;
-
+	
 	private IInterpreterInstallType fSelectedInterpreterType;
 
 	private ComboDialogField fInterpreterTypeCombo;
-	private ComboDialogField fInterpreterEnvCombo;
 
 	private IInterpreterInstall fEditedInterpreter;
 
@@ -69,6 +66,8 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	private IStatus[] fStati;
 	private int fPrevIndex = -1;
 
+	private IEnvironment environment;
+
 	protected boolean useInterpreterArgs() {
 		return true;
 	}
@@ -83,8 +82,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		for (int i = 0; i < fStati.length; i++) {
 			fStati[i] = new StatusInfo();
 		}
-
-		fEnvironments = EnvironmentManager.getEnvironments();
+		
 		fInterpreterTypes = interpreterInstallTypes;
 		fSelectedInterpreterType = editedInterpreter != null ? editedInterpreter
 				.getInterpreterInstallType()
@@ -107,10 +105,6 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		fInterpreterTypeCombo
 				.setLabelText(InterpretersMessages.addInterpreterDialog_InterpreterEnvironmentType);
 		fInterpreterTypeCombo.setItems(getInterpreterTypeNames());
-
-		fInterpreterEnvCombo = new ComboDialogField(SWT.READ_ONLY);
-		fInterpreterEnvCombo.setLabelText("Environment");
-		fInterpreterEnvCombo.setItems(getEnvironmentNames());
 
 		fInterpreterName = new StringDialogField();
 		fInterpreterName
@@ -185,9 +179,6 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 
 		fInterpreterName.doFillIntoGrid(parent, 3);
 
-		fInterpreterEnvCombo.doFillIntoGrid(parent, 3);
-		((GridData) fInterpreterEnvCombo.getComboControl(null).getLayoutData()).widthHint = convertWidthInCharsToPixels(50);
-
 		fInterpreterPath.doFillIntoGrid(parent, 3);
 
 		if (this.useInterpreterArgs()) {
@@ -260,14 +251,6 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		selectInterpreterType();
 	}
 
-	private String[] getEnvironmentNames() {
-		String[] names = new String[fEnvironments.length];
-		for (int i = 0; i < names.length; i++) {
-			names[i] = fEnvironments[i].getName();
-		}
-		return names;
-	}
-
 	private String[] getInterpreterTypeNames() {
 		String[] names = new String[fInterpreterTypes.length];
 		for (int i = 0; i < fInterpreterTypes.length; i++) {
@@ -286,10 +269,8 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	}
 
 	private void initializeFields() {
-		fInterpreterEnvCombo.setItems(getEnvironmentNames());
 		fInterpreterTypeCombo.setItems(getInterpreterTypeNames());
 		if (fEditedInterpreter == null) {
-			fInterpreterEnvCombo.setText("");
 			fInterpreterName.setText(""); //$NON-NLS-1$
 			fInterpreterPath.setText(""); //$NON-NLS-1$
 			fLibraryBlock.initializeFrom(null, fSelectedInterpreterType);
@@ -301,8 +282,6 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 				fInterpreterArgs.setText(""); //$NON-NLS-1$
 			}
 		} else {
-			fInterpreterEnvCombo.setText(fEditedInterpreter.getEnvironment()
-					.getName());
 			fInterpreterTypeCombo.setEnabled(false);
 			fInterpreterName.setText(fEditedInterpreter.getName());
 			fInterpreterPath.setText(fEditedInterpreter.getRawInstallLocation()
@@ -386,11 +365,11 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		return s;
 	}
 
-	private IEnvironment getEnvironment() {
-		int idx = fInterpreterEnvCombo.getSelectionIndex();
-		if (idx < 0)
-			return EnvironmentManager.getLocalEnvironment();
-		return fEnvironments[idx];
+	public IEnvironment getEnvironment() {
+		return this.environment;
+	}
+	public void setEnvironment(IEnvironment environment) {
+		this.environment = environment;
 	}
 
 	private IStatus validateInterpreterName() {
@@ -469,12 +448,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		IEnvironment selectedEnv = getEnvironment();
 		IFileHandle dir = selectedEnv.getFile(new Path(fInterpreterPath
 				.getText()));
-		// try {
 		install.setInstallLocation(dir);
-		// } catch (IOException e) {
-		// // Interpreter.setInstallLocation(dir.getAbsoluteFile());
-		// Interpreter.setInstallLocation(dir);
-		// }
 		install.setName(fInterpreterName.getText());
 
 		if (this.useInterpreterArgs()) {

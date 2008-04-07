@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.IInterpreterInstall;
@@ -29,6 +30,7 @@ import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.LibraryLocation;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.ui.dialogs.TimeTriggeredProgressMonitorDialog;
+import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -48,7 +50,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 
 /**
@@ -535,23 +536,16 @@ public abstract class AbstractInterpreterLibraryBlock implements
 	protected abstract IDialogSettings getDialogSettions();
 
 	protected LibraryLocation add() {
-		IDialogSettings dialogSettings = getDialogSettions();
-		String lastUsedPath = dialogSettings.get(LAST_PATH_SETTING);
-		if (lastUsedPath == null) {
-			lastUsedPath = ""; //$NON-NLS-1$
-		}
-		DirectoryDialog dialog = new DirectoryDialog(fLibraryViewer
-				.getControl().getShell(), SWT.MULTI);
-		dialog.setMessage(InterpretersMessages.InterpreterLibraryBlock_10);
-		dialog.setFilterPath(lastUsedPath);
-		String res = dialog.open();
+		IEnvironment environment = fDialog.getEnvironment();
+		IEnvironmentUI ui = (IEnvironmentUI) environment
+				.getAdapter(IEnvironmentUI.class);
+		String res = ui.selectFolder(fLibraryViewer.getControl().getShell());
 		if (res == null) {
 			return null;
 		}
 
 		IPath path = new Path(res);
 		LibraryLocation lib = new LibraryLocation(path.makeAbsolute());
-		dialogSettings.put(LAST_PATH_SETTING, path.toOSString());
 		return lib;
 	}
 

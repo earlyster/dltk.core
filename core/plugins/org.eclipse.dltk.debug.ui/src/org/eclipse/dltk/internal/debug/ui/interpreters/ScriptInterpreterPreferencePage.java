@@ -38,9 +38,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * The Installed InterpreterEnvironments preference page.
- * 
- * 
+ * The Installed InterpreterEnvironments preference page. 
  */
 public abstract class ScriptInterpreterPreferencePage extends PreferencePage
 		implements IWorkbenchPreferencePage {
