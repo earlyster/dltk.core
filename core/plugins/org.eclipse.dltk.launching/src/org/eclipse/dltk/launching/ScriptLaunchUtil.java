@@ -23,26 +23,10 @@ import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.EnvironmentResolver;
+import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 
 public class ScriptLaunchUtil {
-	// Create file with script content
-	// public static File createScriptFileWithContent(String scriptContent)
-	// throws IOException {
-	// File file = File.createTempFile("script", null); //$NON-NLS-1$
-	//
-	// FileWriter writer = null;
-	// try {
-	// writer = new FileWriter(file);
-	// writer.write(scriptContent);
-	// } finally {
-	// if (writer != null) {
-	// writer.close();
-	// }
-	// }
-	//
-	// return file;
-	// }
-
+	
 	// Creating of InterpreterConfig
 	public static InterpreterConfig createInterpreterConfig(
 			IExecutionEnvironment exeEnv, IFileHandle scriptFile,
@@ -136,8 +120,8 @@ public class ScriptLaunchUtil {
 
 	// 
 	public static IInterpreterInstall getDefaultInterpreterInstall(
-			String natureId) {
-		return ScriptRuntime.getDefaultInterpreterInstall(natureId);
+			String natureId, String environment) {
+		return ScriptRuntime.getDefaultInterpreterInstall(new DefaultInterpreterEntry(natureId, environment));
 	}
 
 	public static IInterpreterInstall getProjectInterpreterInstall(
@@ -173,9 +157,9 @@ public class ScriptLaunchUtil {
 	}
 
 	// Run by default interpreter
-	public static ILaunch runScript(String natureId, InterpreterConfig config,
+	public static ILaunch runScript(String natureId, String environment, InterpreterConfig config,
 			IProgressMonitor monitor) throws CoreException {
-		IInterpreterInstall install = getDefaultInterpreterInstall(natureId);
+		IInterpreterInstall install = getDefaultInterpreterInstall(natureId, environment);
 		EnvironmentVariable[] variables = EnvironmentResolver.resolve(config
 				.getEnvVars(), install.getEnvironmentVariables());
 		if (variables != null) {
@@ -202,7 +186,7 @@ public class ScriptLaunchUtil {
 			config.addScriptArgs(scriptArgs);
 		}
 
-		return runScript(natureId, config, monitor);
+		return runScript(natureId, scriptFile.getEnvironment().getId(), config, monitor);
 	}
 
 	// public static ILaunch runScript(String natureId, IFileHandle scriptFile)

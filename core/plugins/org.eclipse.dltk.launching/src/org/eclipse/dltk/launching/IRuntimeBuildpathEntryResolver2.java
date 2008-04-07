@@ -27,5 +27,5 @@ public interface IRuntimeBuildpathEntryResolver2 extends IRuntimeBuildpathEntryR
 	 * @param entry buildpath entry
 	 * @return whether the given buildpath entry references a Interpreter install
 	 */
-	public boolean isInterpreterInstallReference(String lang, IBuildpathEntry entry);
+	public boolean isInterpreterInstallReference(String lang, String environment, IBuildpathEntry entry);
 }

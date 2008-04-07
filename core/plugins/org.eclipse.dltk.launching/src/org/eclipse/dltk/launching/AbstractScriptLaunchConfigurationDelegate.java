@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
-import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -296,14 +295,16 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 				.computeUnresolvedRuntimeBuildpath(configuration);
 		List bootEntriesPrepend = new ArrayList();
 		int index = 0;
-		IRuntimeBuildpathEntry InterpreterEnvironmentEntry = null;
-		while (InterpreterEnvironmentEntry == null && index < entries.length) {
+		IRuntimeBuildpathEntry interpreterEnvironmentEntry = null;
+		IScriptProject project = getScriptProject(configuration);
+		IEnvironment environment = EnvironmentManager.getEnvironment(project);
+		while (interpreterEnvironmentEntry == null && index < entries.length) {
 			IRuntimeBuildpathEntry entry = entries[index++];
 			if (entry.getBuildpathProperty() == IRuntimeBuildpathEntry.BOOTSTRAP_ENTRY
 					|| entry.getBuildpathProperty() == IRuntimeBuildpathEntry.STANDARD_ENTRY) {
 				if (ScriptRuntime.isInterpreterInstallReference(
-						getLanguageId(), entry)) {
-					InterpreterEnvironmentEntry = entry;
+						getLanguageId(), environment.getId(), entry)) {
+					interpreterEnvironmentEntry = entry;
 				} else {
 					bootEntriesPrepend.add(entry);
 				}
@@ -321,7 +322,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 				entriesPrep[i] = bootEntriesPrep[i].getLocation();
 			}
 		}
-		if (InterpreterEnvironmentEntry != null) {
+		if (interpreterEnvironmentEntry != null) {
 			List bootEntriesAppend = new ArrayList();
 			for (; index < entries.length; index++) {
 				IRuntimeBuildpathEntry entry = entries[index];
@@ -366,10 +367,10 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 												null))) {
 					// resolve bootpath entries in InterpreterEnvironment entry
 					IRuntimeBuildpathEntry[] bootEntries = null;
-					if (InterpreterEnvironmentEntry.getType() == IRuntimeBuildpathEntry.CONTAINER) {
+					if (interpreterEnvironmentEntry.getType() == IRuntimeBuildpathEntry.CONTAINER) {
 						IRuntimeBuildpathEntry bootEntry = ScriptRuntime
 								.newRuntimeContainerBuildpathEntry(
-										InterpreterEnvironmentEntry.getPath(),
+										interpreterEnvironmentEntry.getPath(),
 										IRuntimeBuildpathEntry.BOOTSTRAP_ENTRY,
 										getScriptProject(configuration));
 						bootEntries = ScriptRuntime
@@ -378,7 +379,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 					} else {
 						bootEntries = ScriptRuntime
 								.resolveRuntimeBuildpathEntry(
-										InterpreterEnvironmentEntry,
+										interpreterEnvironmentEntry,
 										configuration);
 					}
 

@@ -217,8 +217,64 @@ public final class ScriptRuntime {
 
 	private static IInterpreterInstallType[] fgInterpreterTypes = null;
 
+	public static class DefaultInterpreterEntry {
+		private String nature;
+		private String environment;
+
+		public DefaultInterpreterEntry(String nature, String environment) {
+			this.nature = nature;
+			this.environment = environment;
+		}
+
+		public String getNature() {
+			return nature;
+		}
+
+		public String getEnvironment() {
+			return environment;
+		}
+
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((environment == null) ? 0 : environment.hashCode());
+			result = prime * result
+					+ ((nature == null) ? 0 : nature.hashCode());
+			return result;
+		}
+
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			DefaultInterpreterEntry other = (DefaultInterpreterEntry) obj;
+			if (environment == null) {
+				if (other.environment != null)
+					return false;
+			} else if (!environment.equals(other.environment))
+				return false;
+			if (nature == null) {
+				if (other.nature != null)
+					return false;
+			} else if (!nature.equals(other.nature))
+				return false;
+			return true;
+		}
+	}
+
+	/**
+	 * Contain association of default interpreter entries to interprter
+	 * identifiers.
+	 */
 	private static Map fgDefaultInterpreterId = new HashMap();
 
+	/**
+	 * Contain DefaultInterpreterEntry entry assocications
+	 */
 	private static Map fgDefaultInterpreterConnectorId = new HashMap();
 
 	/**
@@ -315,6 +371,10 @@ public final class ScriptRuntime {
 		return null;
 	}
 
+	private static String getEnvironmentFromProject(IScriptProject project) {
+		return EnvironmentManager.getEnvironment(project).getId();
+	}
+
 	/**
 	 * Returns the interpreter assigned to build the given script project. The
 	 * project must exist. The interpreter assigned to a project is determined
@@ -343,7 +403,8 @@ public final class ScriptRuntime {
 						.getPath().segment(0));
 				if (resolver != null) {
 					interpreter = resolver.resolveInterpreterInstall(
-							getNatureFromProject(project), entry);
+							getNatureFromProject(project),
+							getEnvironmentFromProject(project), entry);
 				}
 				break;
 			}
@@ -417,19 +478,22 @@ public final class ScriptRuntime {
 		IInterpreterInstall previous = null;
 		String nature = interpreter.getInterpreterInstallType().getNatureId();
 
-		if (fgDefaultInterpreterId.get(nature) != null) {
+		String environment = interpreter.getEnvironment().getId();
+		DefaultInterpreterEntry defaultInterpreterID = new DefaultInterpreterEntry(
+				nature, environment);
+		if (fgDefaultInterpreterId.get(defaultInterpreterID) != null) {
 			previous = getInterpreterFromCompositeId((String) fgDefaultInterpreterId
-					.get(nature));
+					.get(defaultInterpreterID));
 		}
-		fgDefaultInterpreterId.put(nature,
+		fgDefaultInterpreterId.put(defaultInterpreterID,
 				getCompositeIdFromInterpreter(interpreter));
 		if (savePreference) {
 			saveInterpreterConfiguration();
 		}
 		IInterpreterInstall current = null;
-		if (fgDefaultInterpreterId.get(nature) != null) {
+		if (fgDefaultInterpreterId.get(defaultInterpreterID) != null) {
 			current = getInterpreterFromCompositeId((String) fgDefaultInterpreterId
-					.get(nature));
+					.get(defaultInterpreterID));
 		}
 		if (previous != current) {
 			notifyDefaultInterpreterChanged(previous, current);
@@ -443,8 +507,8 @@ public final class ScriptRuntime {
 	 * @return Returns the default Interpreter.
 	 */
 	public static IInterpreterInstall getDefaultInterpreterInstall(
-			String natureId) {
-		IInterpreterInstall install = getInterpreterFromCompositeId(getDefaultInterpreterId(natureId));
+			DefaultInterpreterEntry entry) {
+		IInterpreterInstall install = getInterpreterFromCompositeId(getDefaultInterpreterId(entry));
 		if (install != null && install.getInstallLocation().exists()) {
 			return install;
 		}
@@ -460,7 +524,7 @@ public final class ScriptRuntime {
 			initializeInterpreters();
 		}
 
-		return getInterpreterFromCompositeId(getDefaultInterpreterId(natureId));
+		return getInterpreterFromCompositeId(getDefaultInterpreterId(entry));
 	}
 
 	/**
@@ -499,19 +563,21 @@ public final class ScriptRuntime {
 				.toArray(new IInterpreterInstallType[res.size()]);
 	}
 
-	public static String[] getInterpreterNatures() {
+	public static DefaultInterpreterEntry[] getDefaultInterpreterIDs() {
 		Set set = fgDefaultInterpreterId.keySet();
-		return (String[]) set.toArray(new String[set.size()]);
+		return (DefaultInterpreterEntry[]) set
+				.toArray(new DefaultInterpreterEntry[set.size()]);
 	}
 
-	private static String getDefaultInterpreterId(String nature) {
+	private static String getDefaultInterpreterId(DefaultInterpreterEntry entry) {
 		initializeInterpreters();
-		return (String) fgDefaultInterpreterId.get(nature);
+		return (String) fgDefaultInterpreterId.get(entry);
 	}
 
-	private static String getDefaultInterpreterConnectorId(String nature) {
+	private static String getDefaultInterpreterConnectorId(
+			DefaultInterpreterEntry entry) {
 		initializeInterpreters();
-		return (String) fgDefaultInterpreterConnectorId.get(nature);
+		return (String) fgDefaultInterpreterConnectorId.get(entry);
 	}
 
 	/**
@@ -635,8 +701,9 @@ public final class ScriptRuntime {
 		String containerPath = configuration.getAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_CONTAINER_PATH,
 				(String) null);
+		IScriptProject proj = getScriptProject(configuration);
+		String environment = getEnvironmentFromProject(proj);
 		if (containerPath == null) {
-			IScriptProject proj = getScriptProject(configuration);
 			if (proj != null) {
 				IInterpreterInstall install = getInterpreterInstall(proj);
 				if (install != null) {
@@ -649,11 +716,13 @@ public final class ScriptRuntime {
 			IRuntimeBuildpathEntryResolver2 resolver = getContainerResolver(interpreterPath
 					.segment(0));
 			if (resolver != null) {
-				return resolver.resolveInterpreterInstall(nature, entry);
+				return resolver.resolveInterpreterInstall(nature, environment,
+						entry);
 			} else {
 				resolver = getContainerResolver(interpreterPath.segment(0));
 				if (resolver != null) {
-					return resolver.resolveInterpreterInstall(nature, entry);
+					return resolver.resolveInterpreterInstall(nature,
+							environment, entry);
 				}
 			}
 		}
@@ -666,7 +735,9 @@ public final class ScriptRuntime {
 		}
 		// OR extract project nature from it's name (what about several
 		// natures?)
-		IInterpreterInstall res = getDefaultInterpreterInstall(nature);
+		DefaultInterpreterEntry entry = new DefaultInterpreterEntry(nature,
+				environment);
+		IInterpreterInstall res = getDefaultInterpreterInstall(entry);
 		if (res == null) {
 			abort(
 					LaunchingMessages.ScriptRuntime_notDefaultInterpreter,
@@ -748,16 +819,16 @@ public final class ScriptRuntime {
 			ParserConfigurationException, TransformerException {
 		InterpreterDefinitionsContainer container = new InterpreterDefinitionsContainer();
 
-		String[] natures = getInterpreterNatures();
-		for (int i = 0; i < natures.length; i++) {
-			String id = getDefaultInterpreterId(natures[i]);
+		DefaultInterpreterEntry[] entries = getDefaultInterpreterIDs();
+		for (int i = 0; i < entries.length; i++) {
+			String id = getDefaultInterpreterId(entries[i]);
 			if (id != null)
-				container.setDefaultInterpreterInstallCompositeID(natures[i],
+				container.setDefaultInterpreterInstallCompositeID(entries[i],
 						id);
-			id = getDefaultInterpreterConnectorId(natures[i]);
+			id = getDefaultInterpreterConnectorId(entries[i]);
 			if (id != null)
 				container.setDefaultInterpreterInstallConnectorTypeID(
-						natures[i], id);
+						entries[i], id);
 		}
 
 		IInterpreterInstallType[] InterpreterTypes = getInterpreterInstallTypes();
@@ -944,7 +1015,7 @@ public final class ScriptRuntime {
 		if (typeId == null || name == null) {
 			return null;
 		}
-		
+
 		IPath path = newDefaultInterpreterContainerPath();
 		path = path.append(typeId);
 		path = path.append(name);
@@ -963,10 +1034,10 @@ public final class ScriptRuntime {
 	 * 
 	 */
 	public static IInterpreterInstall getInterpreterInstall(String nature,
-			IPath InterpreterEnvironmentContainerPath) {
+			String environment, IPath InterpreterEnvironmentContainerPath) {
 		try {
 			return InterpreterContainerInitializer.resolveInterpreter(nature,
-					InterpreterEnvironmentContainerPath);
+					environment, InterpreterEnvironmentContainerPath);
 		} catch (CoreException e) {
 			return null;
 		}
@@ -1077,7 +1148,8 @@ public final class ScriptRuntime {
 				resolver = getContainerResolver(entry.getPath().segment(0));
 				if (resolver != null) {
 					if (resolver.isInterpreterInstallReference(
-							getNatureFromProject(project), entry)) {
+							getNatureFromProject(project),
+							getEnvironmentFromProject(project), entry)) {
 						IBuildpathContainer container = DLTKCore
 								.getBuildpathContainer(entry.getPath(), project);
 						if (container != null) {
@@ -1113,7 +1185,7 @@ public final class ScriptRuntime {
 	 * 
 	 */
 	public static boolean isInterpreterInstallReference(String lang,
-			IRuntimeBuildpathEntry entry) {
+			String environment, IRuntimeBuildpathEntry entry) {
 		IBuildpathEntry buildpathEntry = entry.getBuildpathEntry();
 		if (buildpathEntry != null) {
 			switch (buildpathEntry.getEntryKind()) {
@@ -1122,7 +1194,7 @@ public final class ScriptRuntime {
 						.getPath().segment(0));
 				if (resolver != null) {
 					return resolver.isInterpreterInstallReference(lang,
-							buildpathEntry);
+							environment, buildpathEntry);
 				}
 				break;
 			}
@@ -1741,7 +1813,8 @@ public final class ScriptRuntime {
 						addInterpreterExtensions(defs);
 
 						// 5. verify default interpreters is valid
-						String[] natures = defs.getInterpreterNatures();
+						DefaultInterpreterEntry[] natures = defs
+								.getInterpreterNatures();
 						for (int i = 0; i < natures.length; i++) {
 							String defId = defs
 									.getDefaultInterpreterInstallCompositeID(natures[i]);
@@ -1775,16 +1848,13 @@ public final class ScriptRuntime {
 								}
 							}
 
-							fgDefaultInterpreterId
-									.put(
-											natures[i],
-											defs
-													.getDefaultInterpreterInstallCompositeID(natures[i]));
-							fgDefaultInterpreterConnectorId
-									.put(
-											natures[i],
-											defs
-													.getDefaultInterpreterInstallConnectorTypeID(natures[i]));
+							String defInstCID = defs
+									.getDefaultInterpreterInstallCompositeID(natures[i]);
+							fgDefaultInterpreterId.put(natures[i], defInstCID);
+							String defIntCTypeID = defs
+									.getDefaultInterpreterInstallConnectorTypeID(natures[i]);
+							fgDefaultInterpreterConnectorId.put(natures[i],
+									defIntCTypeID);
 						}
 						// Create the underlying interpreters for each valid
 						// Interpreter

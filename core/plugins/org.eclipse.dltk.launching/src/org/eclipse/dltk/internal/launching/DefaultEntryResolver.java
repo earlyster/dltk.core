@@ -54,7 +54,7 @@ public class DefaultEntryResolver implements IRuntimeBuildpathEntryResolver {
 		return (IRuntimeBuildpathEntry[]) resolved.toArray(new IRuntimeBuildpathEntry[resolved.size()]);
 	}
 		
-	public IInterpreterInstall resolveInterpreterInstall(String lang, IBuildpathEntry entry) throws CoreException {
+	public IInterpreterInstall resolveInterpreterInstall(String lang, String environment, IBuildpathEntry entry) throws CoreException {
 		return null;
 	}
 }
