@@ -46,6 +46,7 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.InterpreterRuntimeBuildpathEntryResolver;
@@ -711,6 +712,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 
 		// Validation already included
 		IEnvironment scriptEnvironment = getScriptEnvironment(configuration);
+		IExecutionEnvironment scriptExecEnvironment = (IExecutionEnvironment) scriptEnvironment.getAdapter(IExecutionEnvironment.class);
 		String scriptLaunchPath = getScriptLaunchPath(configuration,
 				scriptEnvironment);
 		if (scriptLaunchPath == null) {
@@ -737,8 +739,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		Map configEnv = configuration.getAttribute(
 				ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap());
 		// build base environment
-		Map env = DebugPlugin.getDefault().getLaunchManager()
-				.getNativeEnvironmentCasePreserved();
+		Map env = scriptExecEnvironment.getEnvironmentVariables();
 		boolean append = configuration.getAttribute(
 				ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES, true);
 		if (configEnv != null) {

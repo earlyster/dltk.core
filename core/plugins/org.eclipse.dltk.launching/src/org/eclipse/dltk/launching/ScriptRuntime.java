@@ -2339,8 +2339,10 @@ public final class ScriptRuntime {
 										new String[] { entry.getPath()
 												.toString() }), null);
 			}
-			File file = new File(location);
-			if (!file.exists()) {
+			IScriptProject scriptProject = AbstractScriptLaunchConfigurationDelegate.getScriptProject(configuration);
+			IEnvironment environment = EnvironmentManager.getEnvironment(scriptProject);
+			IFileHandle fileHandle = environment.getFile(new Path( location ));
+			if (!fileHandle.exists()) {
 				abort(
 						MessageFormat
 								.format(
