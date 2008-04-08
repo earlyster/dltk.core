@@ -160,6 +160,12 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			fEnvironment = new ComboDialogField(SWT.DROP_DOWN | SWT.READ_ONLY);
 			fEnvironment.setLabelText("Host:");
 			fEnvironment.setDialogFieldListener(this);
+			fEnvironment.setDialogFieldListener(new IDialogFieldListener() {
+				public void dialogFieldChanged(DialogField field) {
+					updateInterpreters();
+				}
+
+			});
 			environments = EnvironmentManager.getEnvironments();
 			String[] items = new String[environments.length];
 			int local = 0;
@@ -176,11 +182,31 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 					.setHorizontalGrabbing(fEnvironment.getComboControl(null));
 			fExternalRadio.attachDialogFields(new DialogField[] { fLocation,
 					fEnvironment });
+			fWorkspaceRadio.setDialogFieldListener(new IDialogFieldListener() {
+				public void dialogFieldChanged(DialogField field) {
+					updateInterpreters();
+				}
+			});
+			fExternalRadio.setDialogFieldListener(new IDialogFieldListener() {
+				public void dialogFieldChanged(DialogField field) {
+					updateInterpreters();
+				}
+			});
 		}
 
 		protected void fireEvent() {
 			setChanged();
 			notifyObservers();
+		}
+
+		private void updateInterpreters() {
+			Observable observable = ProjectWizardFirstPage.this
+					.getInterpreterGroupObservable();
+			if (observable != null
+					&& observable instanceof AbstractInterpreterGroup) {
+				((AbstractInterpreterGroup) observable)
+						.handlePossibleInterpreterChange();
+			}
 		}
 
 		protected String getDefaultPath(String name) {
@@ -346,12 +372,15 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			List standins = new ArrayList();
 			IInterpreterInstallType[] types = ScriptRuntime
 					.getInterpreterInstallTypes(getCurrentLanguageNature());
+			IEnvironment environment = fLocationGroup.getEnvironment();
 			for (int i = 0; i < types.length; i++) {
 				IInterpreterInstallType type = types[i];
 				IInterpreterInstall[] installs = type.getInterpreterInstalls();
 				for (int j = 0; j < installs.length; j++) {
 					IInterpreterInstall install = installs[j];
-					standins.add(new InterpreterStandin(install));
+					if (install.getEnvironment().equals(environment)) {
+						standins.add(new InterpreterStandin(install));
+					}
 				}
 			}
 			return ((IInterpreterInstall[]) standins
