@@ -9,12 +9,13 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
-import java.io.File;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.IDLTKDebugUIConstants;
 import org.eclipse.dltk.launching.LibraryLocation;
@@ -27,12 +28,14 @@ import org.eclipse.dltk.launching.LibraryLocation;
  */
 public final class LibraryStandin {
 	private IPath fSystemLibrary;
+	private IEnvironment fEnvironment;
 		
 	/**
 	 * Creates a new library standin on the given library location.
 	 */	
-	public LibraryStandin(LibraryLocation libraryLocation) {
+	public LibraryStandin(LibraryLocation libraryLocation, IEnvironment environment) {
 		fSystemLibrary= libraryLocation.getLibraryPath();
+		this.fEnvironment = environment;
 	}	
 	public LibraryStandin(IPath path) {
 		fSystemLibrary= path;
@@ -105,11 +108,12 @@ public final class LibraryStandin {
 	
 	/**
 	 * Returns a status for this library describing any error states
+	 * @param environment 
 	 * 
 	 * @return
 	 */
 	public IStatus validate() {
-		File f = getSystemLibraryPath().toFile();
+		IFileHandle f = fEnvironment.getFile(getSystemLibraryPath());
 		if (!f.exists()) {
 			IPath path = getSystemLibraryPath();
 			String message = InterpretersMessages.LibraryStandin_pathIsEmpty;

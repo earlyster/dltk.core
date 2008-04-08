@@ -189,7 +189,7 @@ public abstract class AbstractInterpreterLibraryBlock implements
 	}
 
 	protected LibraryContentProvider createLibraryContentProvider() {
-		return new LibraryContentProvider();
+		return new LibraryContentProvider(fDialog.getEnvironment());
 	}
 
 	protected TreeViewer createViewer(Composite comp) {
