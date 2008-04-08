@@ -946,9 +946,11 @@ public final class ScriptRuntime {
 						interperterInstall.getEnvironmentVariables(), monitor);
 
 		List existingDefaultLocations = new ArrayList();
+		IEnvironment environment = interperterInstall.getEnvironment();
 		for (int i = 0; i < defaultLocations.length; ++i) {
 			LibraryLocation location = defaultLocations[i];
-			File file = location.getLibraryPath().toFile();
+			
+			IFileHandle file = environment.getFile(location.getLibraryPath());
 			if (file.exists()) {
 				existingDefaultLocations.add(location);
 			}

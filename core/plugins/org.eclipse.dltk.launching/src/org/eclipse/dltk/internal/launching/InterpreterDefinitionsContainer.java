@@ -259,9 +259,9 @@ public class InterpreterDefinitionsContainer {
 	 * @return List
 	 */
 	public List getValidInterpreterList(DefaultInterpreterEntry nature) {
-		List Interpreters = getInterpreterList(nature);
-		List resultList = new ArrayList(Interpreters.size());
-		resultList.addAll(Interpreters);
+		List interpreters = getInterpreterList(nature);
+		List resultList = new ArrayList(interpreters.size());
+		resultList.addAll(interpreters);
 		resultList.removeAll(fInvalidInterpreterList);
 		return resultList;
 	}
