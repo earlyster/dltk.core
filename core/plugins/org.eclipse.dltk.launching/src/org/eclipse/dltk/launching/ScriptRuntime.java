@@ -53,6 +53,7 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.launching.CompositeId;
@@ -946,11 +947,10 @@ public final class ScriptRuntime {
 						interperterInstall.getEnvironmentVariables(), monitor);
 
 		List existingDefaultLocations = new ArrayList();
-		IEnvironment environment = interperterInstall.getEnvironment();
 		for (int i = 0; i < defaultLocations.length; ++i) {
 			LibraryLocation location = defaultLocations[i];
 			
-			IFileHandle file = environment.getFile(location.getLibraryPath());
+			IFileHandle file = EnvironmentPathUtils.getFile(location.getLibraryPath());
 			if (file.exists()) {
 				existingDefaultLocations.add(location);
 			}
@@ -2340,10 +2340,8 @@ public final class ScriptRuntime {
 										LaunchingMessages.ScriptRuntime_Buildpath_references_non_existant_archive___0__4,
 										new String[] { entry.getPath()
 												.toString() }), null);
-			}
-			IScriptProject scriptProject = AbstractScriptLaunchConfigurationDelegate.getScriptProject(configuration);
-			IEnvironment environment = EnvironmentManager.getEnvironment(scriptProject);
-			IFileHandle fileHandle = environment.getFile(new Path( location ));
+			}			
+			IFileHandle fileHandle = EnvironmentPathUtils.getFile(new Path( location ));
 			if (!fileHandle.exists()) {
 				abort(
 						MessageFormat

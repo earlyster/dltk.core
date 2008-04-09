@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IDeployment;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
@@ -400,7 +401,7 @@ public abstract class AbstractInterpreterInstallType implements
 			if (!paths[i].equals(sPath)) {
 				IFileHandle f = env.getFile(new Path(paths[i]));
 				if (f.exists()) {
-					LibraryLocation l = new LibraryLocation(new Path(paths[i]));
+					LibraryLocation l = new LibraryLocation(EnvironmentPathUtils.getFullPath(env, f.getPath()));
 					if (!locs.contains(l)) {
 						locs.add(l);
 					}
