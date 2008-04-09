@@ -40,7 +40,8 @@ import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.core.tests.model.ModelTestsPlugin;
 import org.eclipse.dltk.core.tests.model.ModifyingResourceTests;
@@ -265,24 +266,26 @@ public class BuildpathTests extends ModifyingResourceTests {
 	 * @throws Exception
 	 */
 	public void test004() throws Exception {
-		setUpScriptProject(BUILDPATH_PRJ_2);
-		IScriptProject project = (IScriptProject) getScriptProject(BUILDPATH_PRJ_2);
-		assertNotNull(project);
-		IBuildpathEntry entrys[] = project.getRawBuildpath();
-		assertEquals(1, entrys.length);
-		assertEquals(IBuildpathEntry.BPE_LIBRARY, entrys[0].getEntryKind());
-		IProjectFragment[] fragments = project.getProjectFragments();
-		assertEquals(1, fragments.length);
-		assertTrue(fragments[0] instanceof ArchiveProjectFragment);
-		IProjectFragment fragment = fragments[0];
-		IModelElement[] elements = fragment.getChildren();
+		try {
+			setUpScriptProject(BUILDPATH_PRJ_2);
+			IScriptProject project = (IScriptProject) getScriptProject(BUILDPATH_PRJ_2);
+			assertNotNull(project);
+			IBuildpathEntry entrys[] = project.getRawBuildpath();
+			assertEquals(1, entrys.length);
+			assertEquals(IBuildpathEntry.BPE_LIBRARY, entrys[0].getEntryKind());
+			IProjectFragment[] fragments = project.getProjectFragments();
+			assertEquals(1, fragments.length);
+			assertTrue(fragments[0] instanceof ArchiveProjectFragment);
+			IProjectFragment fragment = fragments[0];
+			IModelElement[] elements = fragment.getChildren();
 
-		// System.out.println("Model:");
-		CorePrinter printer = new CorePrinter(System.out);
-		((ScriptProject) project).printNode(printer);
-		printer.flush();
-
-		deleteProject(BUILDPATH_PRJ_2);
+			// System.out.println("Model:");
+			CorePrinter printer = new CorePrinter(System.out);
+			((ScriptProject) project).printNode(printer);
+			printer.flush();
+		} finally {
+			deleteProject(BUILDPATH_PRJ_2);
+		}
 	}
 
 	/**
@@ -295,15 +298,17 @@ public class BuildpathTests extends ModifyingResourceTests {
 			URL url = ModelTestsPlugin.getDefault().getBundle().getEntry(
 					"workspace/Buildpath3");
 			URL res = FileLocator.resolve(url);
-			String filePath = res.getFile();
+			IPath filePath = new Path(res.getFile());
 			IScriptProject proj = this.createScriptProject("P", TEST_NATURE,
 					new String[] { "src" });
 			IBuildpathEntry[] originalCP = proj.getRawBuildpath();
 
 			IBuildpathEntry[] newCP = new IBuildpathEntry[originalCP.length + 1];
 			System.arraycopy(originalCP, 0, newCP, 0, originalCP.length);
-			newCP[originalCP.length] = DLTKCore.newExtLibraryEntry(new Path(
-					filePath));
+			IEnvironment env = LocalEnvironment.getInstance();
+			newCP[originalCP.length] = DLTKCore
+					.newExtLibraryEntry(EnvironmentPathUtils.getFullPath(env,
+							filePath));
 
 			IModelStatus status = BuildpathEntry.validateBuildpath(proj, newCP);
 
@@ -312,11 +317,12 @@ public class BuildpathTests extends ModifyingResourceTests {
 			proj.setRawBuildpath(newCP, null);
 
 			IProjectFragment[] fragments = proj.getProjectFragments();
-
+			assertEquals(2, fragments.length);
 			// System.out.println("Model:");
 			CorePrinter printer = new CorePrinter(System.out, true);
 			((ScriptProject) proj).printNode(printer);
 			printer.flush();
+			
 		} finally {
 			this.deleteProject("P");
 		}
@@ -327,16 +333,17 @@ public class BuildpathTests extends ModifyingResourceTests {
 			URL url = ModelTestsPlugin.getDefault().getBundle().getEntry(
 					"/workspace/Buildpath3");
 			URL res = FileLocator.resolve(url);
-			String filePath = res.getFile();
-			IPath contPath = new Path(filePath.substring(1)).setDevice(null);
+
+			IPath localPath = new Path("Testie").append(res.getFile()
+					.substring(1));
+			IPath contPath = localPath;
 			IScriptProject proj = this.createScriptProject("P", TEST_NATURE,
 					new String[] { "src" });
 			IBuildpathEntry[] originalCP = proj.getRawBuildpath();
 
 			IBuildpathEntry[] newCP = new IBuildpathEntry[originalCP.length + 1];
 			System.arraycopy(originalCP, 0, newCP, 0, originalCP.length);
-			newCP[originalCP.length] = DLTKCore.newContainerEntry(new Path(
-					"Testie").append(contPath));
+			newCP[originalCP.length] = DLTKCore.newContainerEntry(contPath);
 
 			IModelStatus status = BuildpathEntry.validateBuildpath(proj, newCP);
 
@@ -475,17 +482,17 @@ public class BuildpathTests extends ModifyingResourceTests {
 
 			IBuildpathEntry[] newCP = new IBuildpathEntry[originalCP.length + 1];
 			System.arraycopy(originalCP, 0, newCP, 0, originalCP.length);
-			IPath libPath = new Path("/opt2");
+			IEnvironment env = LocalEnvironment.getInstance();
+			IPath libPath = EnvironmentPathUtils.getFullPath(env, new Path(
+					"/opt2"));
 			newCP[originalCP.length] = DLTKCore.newExtLibraryEntry(libPath);
 
 			IModelStatus status = BuildpathEntry.validateBuildpathEntry(proj,
 					newCP[originalCP.length], false);
-			IFileHandle libDir = LocalEnvironment.getInstance()
-					.getFile(libPath);
+
 			assertStatus("should detect not pressent folders",
 					"Required library cannot denote external folder or archive: \'"
-							+ libDir.getAbsolutePath() + "\' for project Pv0",
-					status);
+							+ libPath.toString() + "\' for project Pv0", status);
 		} finally {
 			this.deleteProject("Pv0");
 		}
