@@ -28,6 +28,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
 import org.eclipse.dltk.internal.core.ExternalProjectFragment;
@@ -908,8 +909,7 @@ public class ScriptElementLabels {
 		if (rootQualified) {
 			buf.append(root.getPath().makeRelative().toString());
 		} else {
-			IEnvironment env = EnvironmentManager.getEnvironment(root);
-			buf.append(env.convertPathToString(root.getPath()));
+			buf.append(EnvironmentPathUtils.getLocalPathString(root.getPath()));
 			if (referencedQualified) {
 				buf.append(CONCAT_STRING);
 				buf.append(root.getScriptProject().getElementName());
