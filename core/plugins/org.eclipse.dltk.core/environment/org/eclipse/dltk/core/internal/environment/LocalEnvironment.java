@@ -73,4 +73,8 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 	public URI getURI(IPath location) {
 		return URIUtil.toURI(location);
 	}
+
+	public IFileHandle getFile(URI locationURI) {
+		return new EFSFileHandle(this, fs.getStore(locationURI));
+	}
 }

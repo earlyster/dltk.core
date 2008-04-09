@@ -15,4 +15,5 @@ public interface IEnvironment extends IAdaptable {
 	boolean hasProject(IProject project);
 	String convertPathToString(IPath path);
 	URI getURI(IPath location);
+	IFileHandle getFile(URI locationURI);
 }
