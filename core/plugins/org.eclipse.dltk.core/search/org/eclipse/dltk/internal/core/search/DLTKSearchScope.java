@@ -31,8 +31,6 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
@@ -743,41 +741,36 @@ public class DLTKSearchScope extends AbstractSearchScope {
 					return project
 							.getProjectFragment(this.containerPaths[index]);
 				}
-
-				Path path = new Path(this.containerPaths[index] + '/'
-						+ this.relativePaths[index]);
-				IResource resource = Model.getInternalTarget(ResourcesPlugin
-						.getWorkspace().getRoot(), path, false);
-				if (resource instanceof IProject) {
-					return project.getProjectFragment((IProject) resource);
-				} else if (resource != null) {
-					IModelElement element = DLTKCore.create(resource);
+				Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
+						.getRoot(), Path.fromPortableString(this.containerPaths[index] + '/'
+						+ this.relativePaths[index]), false);
+				if (target instanceof IProject) {
+					return project.getProjectFragment((IProject) target);
+				}
+				if (target instanceof IResource) {
+					IModelElement element = DLTKCore.create((IResource) target);
 					return (IProjectFragment) element
 							.getAncestor(IModelElement.PROJECT_FRAGMENT);
-				} else {
-					IEnvironment env = EnvironmentManager
-							.getEnvironment(project);
-					IFileHandle file = Model
-							.getExternalTarget(env, path, false);
-					if (file != null) {
-						try {
-							IProjectFragment[] fragments = project
-									.getProjectFragments();
-							String absPath = file.getAbsolutePath();
-							for (int i = 0; i < fragments.length; ++i) {
-								IProjectFragment f = fragments[i];
-								if (f instanceof ExternalProjectFragment) {
-									ExternalProjectFragment ep = (ExternalProjectFragment) f;
-									String pPath = ep.getPath().toOSString();
-									if (absPath.equals(pPath)) {
-										return f;
-									}
+				}
+				if (target instanceof IFileHandle) {
+					try {
+						IProjectFragment[] fragments = project
+								.getProjectFragments();
+						IFileHandle t = (IFileHandle) target;
+						String absPath = t.getFullPath().toString();
+						for (int i = 0; i < fragments.length; ++i) {
+							IProjectFragment f = fragments[i];
+							if (f instanceof ExternalProjectFragment) {
+								ExternalProjectFragment ep = (ExternalProjectFragment) f;
+								String pPath = ep.getPath().toString();
+								if (absPath.equals(pPath)) {
+									return f;
 								}
 							}
-						} catch (ModelException e) {
-							e.printStackTrace();
-							return null;
 						}
+					} catch (ModelException e) {
+						e.printStackTrace();
+						return null;
 					}
 				}
 			}
@@ -809,6 +802,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 		this.pathRestrictions = newScope.pathRestrictions;
 		this.threshold = newScope.threshold;
 	}
+
 
 	public String toString() {
 		StringBuffer result = new StringBuffer("JavaSearchScope on "); //$NON-NLS-1$

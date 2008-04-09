@@ -14,7 +14,6 @@ import java.util.HashSet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -31,6 +30,9 @@ import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.internal.compiler.lookup.TypeScope;
 import org.eclipse.dltk.internal.core.Model;
@@ -91,7 +93,7 @@ public class HandleFactory {
 			}
 			// create handle
 			String classFilePath = resourcePath.substring(separatorIndex + 1);
-			String[] simpleNames = new Path(classFilePath).segments();
+			String[] simpleNames = Path.fromPortableString(classFilePath).segments();
 			String[] pkgName;
 			int length = simpleNames.length - 1;
 			if (length > 0) {
@@ -132,7 +134,7 @@ public class HandleFactory {
 			// create handle
 			resourcePath = resourcePath.substring(this.lastPkgFragmentRootPath
 					.length() + 1);
-			String[] simpleNames = new Path(resourcePath).segments();
+			String[] simpleNames = Path.fromPortableString(resourcePath).segments();
 			String[] pkgName;
 			int length = simpleNames.length - 1;
 			if (length > 0) {
@@ -191,16 +193,15 @@ public class HandleFactory {
 	private IProjectFragment getArchiveProjectFragment(
 			String archivePathString, IDLTKSearchScope scope) {
 
-		IPath archivePath = new Path(archivePathString);
+		IPath archivePath = Path.fromPortableString(archivePathString);
 
-		IResource resource = Model.getInternalTarget(ResourcesPlugin.getWorkspace()
+		Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
 				.getRoot(), archivePath, false);
-		
-		if (resource instanceof IFile) {
+		if (target instanceof IFile) {
 			// internal jar: is it on the classpath of its project?
 			// e.g. org.eclipse.swt.win32/ws/win32/swt.jar
 			// is NOT on the classpath of org.eclipse.swt.win32
-			IFile archiveFile = (IFile) resource;
+			IFile archiveFile = (IFile) target;
 			ScriptProject scriptProject = (ScriptProject) this.model
 					.getScriptProject(archiveFile);
 			IBuildpathEntry[] classpathEntries;
@@ -237,7 +238,7 @@ public class HandleFactory {
 				System.arraycopy(projects, 0,
 						projects = new IScriptProject[index], 0, index);
 			}
-			IProjectFragment root = getArchiveFolder(archivePath, resource,
+			IProjectFragment root = getArchiveFolder(archivePath, target,
 					projects);
 			if (root != null) {
 				return root;
@@ -255,7 +256,7 @@ public class HandleFactory {
 			// script model is not accessible
 			return null;
 		}
-		return getArchiveFolder(archivePath, resource, projects);
+		return getArchiveFolder(archivePath, target, projects);
 	}
 
 	private IProjectFragment getArchiveFolder(IPath archivePath, Object target,
@@ -298,7 +299,7 @@ public class HandleFactory {
 	private IProjectFragment getProjectFragment(String pathString,
 			IDLTKSearchScope scope) {
 
-		IPath path = new Path(pathString);
+		IPath path = Path.fromPortableString(pathString);
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
 				.getProjects();
 		IPath[] enclosingProjectsAndZips = scope.enclosingProjectsAndZips();

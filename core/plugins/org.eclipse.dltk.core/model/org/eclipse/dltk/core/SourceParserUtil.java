@@ -62,7 +62,7 @@ public class SourceParserUtil {
 				}
 				try {
 					moduleDeclaration = sourceParser.parse(module.getPath()
-							.toOSString().toCharArray(), module
+							.toString().toCharArray(), module
 							.getSourceAsCharArray(), reporter);
 				} catch (ModelException e) {
 					if (DLTKCore.DEBUG) {

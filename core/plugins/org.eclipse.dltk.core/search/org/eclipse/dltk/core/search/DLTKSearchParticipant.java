@@ -23,12 +23,12 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.index.MixinIndex;
 import org.eclipse.dltk.core.search.indexing.SourceIndexer;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
+import org.eclipse.dltk.internal.core.Model;
 import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 import org.eclipse.dltk.internal.core.search.IndexSelector;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -65,15 +65,29 @@ public class DLTKSearchParticipant extends SearchParticipant {
 
 	public SearchDocument getDocument(String documentPath) {
 		return new DLTKSearchDocument(documentPath,
-				getInternalDocumentContents(documentPath), this);
+				getDocumentContents(documentPath), this,
+				isExternal(documentPath));
 	}
 
-	private char[] getInternalDocumentContents(String documentPath) {
-		IResource resource = ResourcesPlugin.getWorkspace().getRoot()
-				.findMember(new Path(documentPath));
+	private boolean isExternal(String documentPath) {
+		Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
+				.getRoot(), new Path(documentPath), true);
+		if (target instanceof IResource)
+			return false;
+		else
+			return true;
+
+	}
+
+	private char[] getDocumentContents(String documentPath) {
+		Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
+				.getRoot(), new Path(documentPath), true);
 		try {
-			if (resource instanceof IFile) {
-				return Util.getResourceContentsAsCharArray((IFile) resource);
+			if (target instanceof IFile) {
+				return Util.getResourceContentsAsCharArray((IFile) target);
+			} else if (target instanceof IFileHandle) {
+				return Util
+						.getResourceContentsAsCharArray((IFileHandle) target);
 			}
 		} catch (ModelException e) {
 			if (DLTKCore.DEBUG) {
@@ -81,25 +95,6 @@ public class DLTKSearchParticipant extends SearchParticipant {
 			}
 		}
 		return new char[0];
-	}
-
-	public SearchDocument getExternalDocument(IEnvironment environment,
-			String documentPath) {
-		return new DLTKSearchDocument(documentPath,
-				getExternalDocumentContents(environment, documentPath), this);
-	}
-
-	private char[] getExternalDocumentContents(IEnvironment environment,
-			String documentPath) {
-		IFileHandle file = environment.getFile(new Path(documentPath));
-		try {
-			return Util.getResourceContentsAsCharArray(file);
-		} catch (ModelException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
-			return new char[0];
-		}
 	}
 
 	public void indexDocument(SearchDocument document, IPath indexPath) {

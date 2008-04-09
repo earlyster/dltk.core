@@ -17,8 +17,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.environment.IEnvironment;
-import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.Model;
@@ -114,8 +112,6 @@ public abstract class SearchParticipant {
 	 */
 	public abstract SearchDocument getDocument(String documentPath);
 	
-	//public abstract SearchDocument getExternalDocument(String documentPath);
-
 	/**
 	 * Indexes the given document in the given index. A search participant
 	 * asked to index a document should parse it and call 
@@ -217,16 +213,12 @@ public abstract class SearchParticipant {
 	public final void scheduleDocumentIndexing(SearchDocument document, IPath indexLocation) {
 		IPath documentPath = new Path(document.getPath());
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IResource resource = Model.getInternalTarget(root, documentPath, true);
+		Object file = Model.getTarget(root, documentPath, true);
 		IPath containerPath = documentPath;
-		if (resource != null) {
-			containerPath = ((IResource)resource).getProject().getFullPath();
-		} else {
-			IEnvironment env = null;
-			IFileHandle file = Model.getExternalTarget(env, documentPath, true);
-			if (file == null) {
-				containerPath = documentPath.removeLastSegments(documentPath.segmentCount()-1);
-			}
+		if (file instanceof IResource) {
+			containerPath = ((IResource)file).getProject().getFullPath();
+		} else if (file == null) {
+			containerPath = documentPath.removeLastSegments(documentPath.segmentCount()-1);
 		}
 		IndexManager manager = ModelManager.getModelManager().getIndexManager();
 		String osIndexLocation = indexLocation.toOSString();
@@ -234,7 +226,6 @@ public abstract class SearchParticipant {
 		manager.ensureIndexExists(osIndexLocation, containerPath);
 		manager.scheduleDocumentIndexing(document, containerPath, osIndexLocation, this);
 	}
-
 	/**
 	 * Returns the collection of index locations to consider when performing the
 	 * given search query in the given scope. The search engine calls this

@@ -139,4 +139,6 @@ public abstract class SearchDocument extends InternalSearchDocument {
 	public void removeAllIndexEntries() {
 		super.removeAllIndexEntries();
 	}
+
+	public abstract boolean isExternal();
 }

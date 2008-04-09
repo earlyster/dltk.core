@@ -41,4 +41,6 @@ public interface IFileHandle {
 	long lastModified();
 
 	long length();
+
+	IPath getFullPath();
 }

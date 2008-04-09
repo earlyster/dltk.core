@@ -27,6 +27,7 @@ import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
@@ -105,13 +106,12 @@ public class ExternalProjectFragment extends ProjectFragment {
 		List scriptElements = new ArrayList();
 		List nonScriptElements = new ArrayList();
 		try {
-			IFileHandle file = EnvironmentManager.getEnvironment(this)
-					.getFile(path);
+			IFileHandle file = EnvironmentPathUtils.getFile(path);
 			IFileHandle[] members = file.getChildren();
 			if (members != null) {
 				for (int i = 0, max = members.length; i < max; i++) {
 					IFileHandle memberFile = members[i];
-					IPath memberPath = memberFile.getPath();
+					IPath memberPath = memberFile.getFullPath();
 					if (memberFile.isDirectory()) {
 						boolean isMemberIncluded = !Util.isExcluded(memberPath,
 								inclusionPatterns, exclusionPatterns, true);
@@ -205,8 +205,7 @@ public class ExternalProjectFragment extends ProjectFragment {
 				IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)) {
 			return true;
 		}
-		IFileHandle file = EnvironmentManager.getEnvironment(this).getFile(
-				fPath);
+		IFileHandle file = EnvironmentPathUtils.getFile(fPath);
 		return file.exists() && file.isDirectory();
 	}
 
@@ -225,8 +224,9 @@ public class ExternalProjectFragment extends ProjectFragment {
 			ExternalProjectFragment other = (ExternalProjectFragment) o;
 			IEnvironment environment = EnvironmentManager.getEnvironment(this);
 			if (o instanceof IModelElement && environment != null) {
-				IEnvironment environmento = EnvironmentManager.getEnvironment((IModelElement)other);
-				if( !environment.equals(environmento)) {
+				IEnvironment environmento = EnvironmentManager
+						.getEnvironment((IModelElement) other);
+				if (!environment.equals(environmento)) {
 					return false;
 				}
 			}
@@ -237,8 +237,8 @@ public class ExternalProjectFragment extends ProjectFragment {
 
 	public String getElementName() {
 		IEnvironment env = EnvironmentManager.getEnvironment(this);
-		return fPath.toOSString().replace(env.getSeparatorChar(),
-				JEM_SKIP_DELIMETER);
+		String pathString = EnvironmentPathUtils.getLocalPathString(fPath);
+		return pathString.replace(env.getSeparatorChar(), JEM_SKIP_DELIMETER);
 	}
 
 	public IModelElement getHandleFromMemento(String token,
@@ -280,7 +280,8 @@ public class ExternalProjectFragment extends ProjectFragment {
 				&& rawEntry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER) {
 			IBuildpathContainer container = DLTKCore.getBuildpathContainer(
 					rawEntry.getPath(), this.getScriptProject());
-			IBuildpathEntry entrys[] = container.getBuildpathEntries(getScriptProject());
+			IBuildpathEntry entrys[] = container
+					.getBuildpathEntries(getScriptProject());
 			for (int i = 0; i < entrys.length; ++i) {
 				if (entrys[i].getPath().equals(this.getPath())) {
 					return entrys[i];

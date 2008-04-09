@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
@@ -22,7 +23,11 @@ public class EFSFileHandle implements IFileHandle {
 	}
 
 	public boolean exists() {
-		return file.fetchInfo().exists();
+		try {
+			return file.fetchInfo().exists();
+		} catch (RuntimeException e) {
+			return false;
+		}
 	}
 
 	public String getAbsolutePath() {
@@ -34,7 +39,8 @@ public class EFSFileHandle implements IFileHandle {
 	}
 
 	public IFileHandle getChild(final String childname) {
-		return new EFSFileHandle(environment, file.getChild(new Path(childname)));
+		return new EFSFileHandle(environment, file
+				.getChild(new Path(childname)));
 	}
 
 	public IFileHandle[] getChildren() {
@@ -108,8 +114,12 @@ public class EFSFileHandle implements IFileHandle {
 		return false;
 	}
 
+	public int hashCode() {
+		return file.hashCode();
+	}
+
 	public String toString() {
-		return getAbsolutePath();
+		return environment.convertPathToString(getPath());
 	}
 
 	public long lastModified() {
@@ -118,5 +128,9 @@ public class EFSFileHandle implements IFileHandle {
 
 	public long length() {
 		return file.fetchInfo().getLength();
-	}	
+	}
+
+	public IPath getFullPath() {
+		return EnvironmentPathUtils.getFullPath(environment, getPath());
+	}
 }

@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -37,6 +38,7 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.compiler.env.AccessRule;
@@ -159,6 +161,12 @@ public class BuildpathEntry implements IBuildpathEntry {
 			org.eclipse.dltk.core.IAccessRule[] accessRules,
 			boolean combineAccessRules, IBuildpathAttribute[] extraAttributes,
 			boolean externalLib) {
+		// if this is external entry, path should be full
+		Assert.isLegal(!externalLib
+				|| EnvironmentPathUtils.isFull(path)
+				|| path.segment(0).equals(
+						IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR));
+
 		this.contentKind = contentKind;
 		this.entryKind = entryKind;
 		this.path = path;
@@ -225,13 +233,14 @@ public class BuildpathEntry implements IBuildpathEntry {
 											"{0}", "{1}", getPath().segment(0) })); //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
 			IPath libPath = getPath();
-			IResource resource = Model.getInternalTarget(ResourcesPlugin
-					.getWorkspace().getRoot(), libPath, false);
+			Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
+					.getRoot(), libPath, false);
 			String pathString;
-			if (resource == null)
-				pathString = libPath.toOSString();
-			else
+			if (target instanceof IFileHandle) {
+				pathString = target.toString();
+			} else {
 				pathString = libPath.makeRelative().toString();
+			}
 
 			result[0] = manager
 					.intern(Messages
@@ -566,6 +575,13 @@ public class BuildpathEntry implements IBuildpathEntry {
 					false);
 			break;
 		case IBuildpathEntry.BPE_LIBRARY:
+			if (isExternal) {
+				IEnvironment environment = EnvironmentManager
+						.getEnvironment(project);
+				if (environment != null) {
+					path = EnvironmentPathUtils.getFullPath(environment, path);
+				}
+			}
 			entry = DLTKCore.newLibraryEntry(path, accessRules,
 					extraAttributes, inclusionPatterns, exclusionPatterns,
 					isExported, isExternal);
@@ -857,6 +873,9 @@ public class BuildpathEntry implements IBuildpathEntry {
 				&& this.entryKind != IBuildpathEntry.BPE_CONTAINER) {
 			// translate to project relative from absolute (unless a device
 			// path)
+			if (EnvironmentPathUtils.isFull(xmlPath)) {
+				xmlPath = EnvironmentPathUtils.getLocalPath(path);
+			}
 			if (xmlPath.isAbsolute()) {
 				if (projectPath != null && projectPath.isPrefixOf(xmlPath)) {
 					if (xmlPath.segment(0).equals(projectPath.segment(0))) {
@@ -1268,10 +1287,11 @@ public class BuildpathEntry implements IBuildpathEntry {
 							if (containerEntry == null
 									|| kind == IBuildpathEntry.BPE_SOURCE
 									|| kind == IBuildpathEntry.BPE_CONTAINER) {
-//								String description = container.getDescription(project);
-//								if (description == null)
-//									description = path.makeRelative()
-//											.toString();
+								// String description =
+								// container.getDescription(project);
+								// if (description == null)
+								// description = path.makeRelative()
+								// .toString();
 								return new ModelStatus(
 										IModelStatusConstants.INVALID_BP_CONTAINER_ENTRY,
 										project, path);
@@ -1302,30 +1322,40 @@ public class BuildpathEntry implements IBuildpathEntry {
 				break;
 			}
 			if (path != null && path.isAbsolute() && !path.isEmpty()) {
+				Object target = Model.getTarget(workspaceRoot, path, true);
 				// TODO: Add here some library version cheking
 				if (!entry.isExternal()) {
-					IResource target = Model.getInternalTarget(workspaceRoot,
-							path, true);
-					if (target == null || !target.exists()) {
-						return new ModelStatus(
-								IModelStatusConstants.INVALID_BUILDPATH,
-								Messages.bind(
-										Messages.buildpath_illegalLibraryPath,
-										new String[] { entryPathMsg,
-												projectName }));
+					if (target instanceof IResource) {
+						IResource resolvedResource = (IResource) target;
+						switch (resolvedResource.getType()) {
+						case IResource.FILE:
+							break;
+						case IResource.FOLDER: // internal binary folder
+							break;
+						}
+					} else if (target instanceof IFileHandle) {
+						IFileHandle file = (IFileHandle) target;
+						if (!file.exists()) {
+							return new ModelStatus(
+									IModelStatusConstants.INVALID_BUILDPATH,
+									Messages
+											.bind(
+													Messages.buildpath_illegalLibraryArchive,
+													new String[] {
+															path.toString(),
+															projectName }));
+						}
 					}
 				} else {
-					IEnvironment env = EnvironmentManager
-							.getEnvironment(project);
-					IFileHandle file = env.getFile(entry.getPath());
+					IFileHandle file = EnvironmentPathUtils.getFile(entry
+							.getPath());
 					if (file == null || !file.exists()) {
 						return new ModelStatus(
 								IModelStatusConstants.INVALID_BUILDPATH,
 								Messages
 										.bind(
 												Messages.buildpath_illegalExternalFolder,
-												new String[] {
-														file.getAbsolutePath(),
+												new String[] { path.toString(),
 														projectName }));
 					}
 				}
@@ -1377,7 +1407,7 @@ public class BuildpathEntry implements IBuildpathEntry {
 			if (path != null && path.isAbsolute() && !path.isEmpty()) {
 				IPath projectPath = project.getProject().getFullPath();
 				if (!projectPath.isPrefixOf(path)
-						|| Model.getInternalTarget(workspaceRoot, path, true) == null) {
+						|| Model.getTarget(workspaceRoot, path, true) == null) {
 					return new ModelStatus(
 							IModelStatusConstants.INVALID_BUILDPATH,
 							Messages.bind(

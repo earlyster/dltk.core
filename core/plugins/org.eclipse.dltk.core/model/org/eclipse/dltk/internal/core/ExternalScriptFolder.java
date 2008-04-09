@@ -23,7 +23,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -47,8 +47,7 @@ public class ExternalScriptFolder extends ScriptFolder {
 			for (int i = 0; i < max; i++) {
 				IPath resPath = ((IPath) resNames.get(i));
 				if (!Util.isValidSourceModule(getScriptProject(), resPath)) {
-					IEnvironment env = EnvironmentManager.getEnvironment(this);
-					res[index++] = new ExternalEntryFile(env.getFile(resPath));
+					res[index++] = new ExternalEntryFile(EnvironmentPathUtils.getFile(resPath));
 				}
 			}
 			if (index != max) {
@@ -59,9 +58,8 @@ public class ExternalScriptFolder extends ScriptFolder {
 	}
 
 	public ISourceModule getSourceModule(String name) {
-		IEnvironment env = EnvironmentManager.getEnvironment(this);
 		IPath path = getPath().append(name);
-		ExternalEntryFile storage = new ExternalEntryFile(env.getFile(path));
+		ExternalEntryFile storage = new ExternalEntryFile(EnvironmentPathUtils.getFile(path));
 		return new ExternalSourceModule(this, name,
 				DefaultWorkingCopyOwner.PRIMARY, storage);
 	}

@@ -159,7 +159,8 @@ public class MixinBuilder implements IScriptBuilder {
 					content = new char[0];
 				}
 				DLTKSearchDocument document = new DLTKSearchDocument(element.getPath()
-						.toOSString(), content , participant);
+						.toString(), containerPath, content , participant,
+						element instanceof ExternalSourceModule);
 				// System.out.println("mixin indexing:" + document.getPath());
 				((InternalSearchDocument) document).toolkit = toolkit;
 				String containerRelativePath = null;

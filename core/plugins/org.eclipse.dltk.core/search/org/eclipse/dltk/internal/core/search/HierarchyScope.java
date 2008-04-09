@@ -32,8 +32,6 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.ArchiveProjectFragment;
 import org.eclipse.dltk.internal.core.Model;
@@ -61,14 +59,12 @@ public class HierarchyScope extends DLTKSearchScope {
 
 	public boolean needsRefresh;
 
-	/*
-	 * (non-Javadoc) Adds the given resource to this search scope.
+	/* (non-Javadoc)
+	 * Adds the given resource to this search scope.
 	 */
 	public void add(IResource element) {
 		if (this.elementCount == this.elements.length) {
-			System.arraycopy(this.elements, 0,
-					this.elements = new IResource[this.elementCount * 2], 0,
-					this.elementCount);
+			System.arraycopy(this.elements, 0, this.elements = new IResource[this.elementCount * 2], 0, this.elementCount);
 		}
 		elements[elementCount++] = element;
 
@@ -82,11 +78,10 @@ public class HierarchyScope extends DLTKSearchScope {
 		}
 	}
 
-	/*
-	 * (non-Javadoc) Creates a new hiearchy scope for the given type.
+	/* (non-Javadoc)
+	 * Creates a new hiearchy scope for the given type.
 	 */
-	public HierarchyScope(IDLTKLanguageToolkit languageToolkit, IType type,
-			WorkingCopyOwner owner) throws ModelException {
+	public HierarchyScope(IDLTKLanguageToolkit languageToolkit, IType type, WorkingCopyOwner owner) throws ModelException {
 		super(languageToolkit);
 
 		this.focusType = type;
@@ -95,38 +90,31 @@ public class HierarchyScope extends DLTKSearchScope {
 		this.enclosingProjectsAndZips = this.computeProjectsAndZips(type);
 
 		// resource path
-		IProjectFragment root = (IProjectFragment) type.getScriptFolder()
-				.getParent();
+		IProjectFragment root = (IProjectFragment) type.getScriptFolder().getParent();
 		if (root.isArchive()) {
 			IPath jarPath = root.getPath();
-			IResource resource = Model.getInternalTarget(ResourcesPlugin
-					.getWorkspace().getRoot(), jarPath, true);
+			Object target = Model.getTarget(ResourcesPlugin.getWorkspace().getRoot(), jarPath, true);
 			String zipFileName;
-			if (resource instanceof IFile) {
+			if (target instanceof IFile) {
 				// internal jar
 				zipFileName = jarPath.toString();
+			} else if (target instanceof IFileHandle) {
+				// external jar
+				// TODO Check this
+				zipFileName = ((IFileHandle) target).getAbsolutePath();
 			} else {
-				IEnvironment env = EnvironmentManager.getEnvironment(root);
-				IFileHandle file = Model.getExternalTarget(env, jarPath, true);
-				if (file != null) {
-					// external jar
-					zipFileName = file.getAbsolutePath();
-				} else {
-					return; // unknown target
-				}
+				return; // unknown target
 			}
-			this.focusPath = zipFileName
-					+ IDependent.ARCHIVE_FILE_ENTRY_SEPARATOR
-					+ type.getFullyQualifiedName().replace('.', '/')
-			/* + SUFFIX_STRING_class */;
+			this.focusPath = zipFileName + IDependent.ARCHIVE_FILE_ENTRY_SEPARATOR + type.getFullyQualifiedName().replace('.', '/')
+			/*+ SUFFIX_STRING_class*/;
 		} else {
 			this.focusPath = type.getPath().toString();
 		}
 
 		this.needsRefresh = true;
 
-		// disabled for now as this could be expensive
-		// JavaModelManager.getJavaModelManager().rememberScope(this);
+		//disabled for now as this could be expensive
+		//JavaModelManager.getJavaModelManager().rememberScope(this);
 	}
 
 	private void buildResourceVector() {
@@ -141,39 +129,31 @@ public class HierarchyScope extends DLTKSearchScope {
 				resources.put(resource, resource);
 				add(resource);
 			}
-			IProjectFragment root = (IProjectFragment) type.getScriptFolder()
-					.getParent();
+			IProjectFragment root = (IProjectFragment) type.getScriptFolder().getParent();
 			if (root instanceof ArchiveProjectFragment) {
 				// type in a jar
 				ArchiveProjectFragment jar = (ArchiveProjectFragment) root;
 				IPath jarPath = jar.getPath();
-				IResource targetResource = Model.getInternalTarget(workspaceRoot,
-						jarPath, true);
+				Object target = Model.getTarget(workspaceRoot, jarPath, true);
 				String zipFileName;
-				if (targetResource instanceof IFile) {
+				if (target instanceof IFile) {
 					// internal jar
 					zipFileName = jarPath.toString();
+				} else if (target instanceof IFileHandle) {
+					// external jar
+					// TODO Check this
+					zipFileName = ((IFileHandle) target).getAbsolutePath();
 				} else {
-					IEnvironment env = EnvironmentManager.getEnvironment(root);
-					IFileHandle file = Model.getExternalTarget(env, jarPath, true);
-					if (file != null) {
-						// external jar
-						zipFileName = file.getAbsolutePath();
-					} else {
-						continue; // unknown target
-					}
+					continue; // unknown target
 				}
-				String resourcePath = zipFileName
-						+ IDependent.ARCHIVE_FILE_ENTRY_SEPARATOR
-						+ type.getFullyQualifiedName().replace('.', '/')
-				/* + SUFFIX_STRING_class */;
+				String resourcePath = zipFileName + IDependent.ARCHIVE_FILE_ENTRY_SEPARATOR + type.getFullyQualifiedName().replace('.', '/')
+				/*+ SUFFIX_STRING_class*/;
 
 				this.resourcePaths.add(resourcePath);
 				paths.put(jarPath, type);
 			} else {
 				// type is a project
-				paths.put(type.getScriptProject().getProject().getFullPath(),
-						type);
+				paths.put(type.getScriptProject().getProject().getFullPath(), type);
 			}
 		}
 		this.enclosingProjectsAndZips = new IPath[paths.size()];
@@ -184,14 +164,12 @@ public class HierarchyScope extends DLTKSearchScope {
 	}
 
 	/*
-	 * Computes the paths of projects and jars that the hierarchy on the given
-	 * type could contain. This is a super set of the project and jar paths once
-	 * the hierarchy is computed.
+	 * Computes the paths of projects and jars that the hierarchy on the given type could contain.
+	 * This is a super set of the project and jar paths once the hierarchy is computed.
 	 */
 	private IPath[] computeProjectsAndZips(IType type) throws ModelException {
 		HashSet set = new HashSet();
-		IProjectFragment root = (IProjectFragment) type.getScriptFolder()
-				.getParent();
+		IProjectFragment root = (IProjectFragment) type.getScriptFolder().getParent();
 		if (root.isArchive()) {
 			// add the root
 			set.add(root.getPath());
@@ -238,8 +216,7 @@ public class HierarchyScope extends DLTKSearchScope {
 		return result;
 	}
 
-	private void computeDependents(IScriptProject project, HashSet set,
-			HashSet visited) {
+	private void computeDependents(IScriptProject project, HashSet set, HashSet visited) {
 		if (visited.contains(project)) {
 			return;
 		}
@@ -264,9 +241,7 @@ public class HierarchyScope extends DLTKSearchScope {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see IJavaSearchScope#encloses(String)
 	 */
 	public boolean encloses(String resourcePath) {
@@ -281,10 +256,8 @@ public class HierarchyScope extends DLTKSearchScope {
 						return false;
 					}
 				} else {
-					// the scope is used only to find enclosing projects and
-					// jars
-					// clients is responsible for filtering out elements not in
-					// the hierarchy (see SearchEngine)
+					// the scope is used only to find enclosing projects and jars
+					// clients is responsible for filtering out elements not in the hierarchy (see SearchEngine)
 					return true;
 				}
 			}
@@ -296,14 +269,12 @@ public class HierarchyScope extends DLTKSearchScope {
 				return false;
 			}
 		}
-		int separatorIndex = resourcePath
-				.indexOf(IDependent.ARCHIVE_FILE_ENTRY_SEPARATOR);
+		int separatorIndex = resourcePath.indexOf(IDependent.ARCHIVE_FILE_ENTRY_SEPARATOR);
 		if (separatorIndex != -1) {
 			return this.resourcePaths.contains(resourcePath);
 		} else {
 			for (int i = 0; i < this.elementCount; i++) {
-				if (resourcePath.startsWith(this.elements[i].getFullPath()
-						.toString())) {
+				if (resourcePath.startsWith(this.elements[i].getFullPath().toString())) {
 					return true;
 				}
 			}
@@ -311,9 +282,7 @@ public class HierarchyScope extends DLTKSearchScope {
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see IJavaSearchScope#encloses(IModelElement)
 	 */
 	public boolean encloses(IModelElement element) {
@@ -328,10 +297,8 @@ public class HierarchyScope extends DLTKSearchScope {
 						return false;
 					}
 				} else {
-					// the scope is used only to find enclosing projects and
-					// jars
-					// clients is responsible for filtering out elements not in
-					// the hierarchy (see SearchEngine)
+					// the scope is used only to find enclosing projects and jars
+					// clients is responsible for filtering out elements not in the hierarchy (see SearchEngine)
 					return true;
 				}
 			}
@@ -353,13 +320,10 @@ public class HierarchyScope extends DLTKSearchScope {
 			if (this.hierarchy.contains(type)) {
 				return true;
 			} else {
-				// be flexible: look at original element (see bug 14106
-				// Declarations in Hierarchy does not find declarations in
-				// hierarchy)
+				// be flexible: look at original element (see bug 14106 Declarations in Hierarchy does not find declarations in hierarchy)
 				IType original;
-				if (/*
-					 * !type.isBinary() &&
-					 */(original = (IType) type.getPrimaryElement()) != null) {
+				if (/*!type.isBinary()
+										&&*/(original = (IType) type.getPrimaryElement()) != null) {
 					return this.hierarchy.contains(original);
 				}
 			}
@@ -367,9 +331,7 @@ public class HierarchyScope extends DLTKSearchScope {
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
+	/* (non-Javadoc)
 	 * @see IJavaSearchScope#enclosingProjectsAndZips()
 	 * @deprecated
 	 */
@@ -404,15 +366,13 @@ public class HierarchyScope extends DLTKSearchScope {
 		if (this.needsRefresh) {
 			return;
 		}
-		this.needsRefresh = this.hierarchy == null ? false
-				: ((TypeHierarchy) this.hierarchy)
-						.isAffected(delta/* , eventType */);
+		this.needsRefresh = this.hierarchy == null ? false : ((TypeHierarchy) this.hierarchy).isAffected(delta/*, eventType*/);
 	}
 
 	protected void refresh() throws ModelException {
-		// if (this.hierarchy != null) {
+		//		if (this.hierarchy != null) {
 		this.initialize();
-		// }
+		//		}
 	}
 
 	public String toString() {

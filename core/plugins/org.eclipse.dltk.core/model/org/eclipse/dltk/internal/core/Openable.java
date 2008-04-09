@@ -408,7 +408,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		if (workspace == null)
 			return false; // workaround for
 		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=34069
-		return Model.getInternalTarget(workspace.getRoot(), this.getPath()
+		return Model.getTarget(workspace.getRoot(), this.getPath()
 				.makeRelative(), // ensure path is relative (see
 				// http://dev.eclipse.org/bugs/show_bug.cgi?id=22517)
 				true) != null;

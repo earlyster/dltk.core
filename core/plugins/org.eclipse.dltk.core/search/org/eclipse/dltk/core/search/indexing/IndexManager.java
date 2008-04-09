@@ -41,6 +41,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.BasicSearchEngine;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchDocument;
@@ -214,7 +215,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	public String computeIndexLocation(IPath containerPath) {
 		String indexLocation = (String) this.indexLocations.get(containerPath);
 		if (indexLocation == null) {
-			String pathString = containerPath.toOSString();
+			String pathString = containerPath.toString();
 			checksumCalculator.reset();
 			checksumCalculator.update(pathString.getBytes());
 			String fileName = Long.toString(checksumCalculator.getValue())
@@ -419,9 +420,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 				}
 			}
 			// index isn't cached, consider reusing an existing index file
-			String containerPathString = containerPath.getDevice() == null ? containerPath
-					.toString()
-					: containerPath.toOSString();
+			String containerPathString = containerPath.toString();
 			if (reuseExistingFile) {
 				File indexFile = new File(indexLocation);
 				if (indexFile.exists()) { // check before creating index so as
@@ -642,14 +641,14 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		if (DLTKCore.getPlugin() == null) {
 			return;
 		}
-		Object target = Model.getInternalTarget(ResourcesPlugin.getWorkspace()
+		Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
 				.getRoot(), path, true);
 		IndexRequest request = null;
 		if (target instanceof IFile) {
 			// request = new AddArchiveFileToIndex((IFile) target, this);
 			return;
-		} else if (target instanceof java.io.File) {
-			if (((java.io.File) target).isFile()) {
+		} else if (target instanceof IFileHandle) {
+			if (((IFileHandle) target).isFile()) {
 				// request = new AddArchiveFileToIndex(path, this);
 				return;
 			} else {
@@ -736,15 +735,16 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			return;
 		}
 
-		Object target = Model.getInternalTarget(workspace.getRoot(), containerPath,
+		Object target = Model.getTarget(workspace.getRoot(), containerPath,
 				true);
 		if (target == null) {
 			return;
 		}
 		if (VERBOSE) {
 			Util
-					.verbose("-> request to rebuild index: " + indexLocation + " path: " + containerPath.toOSString()); //$NON-NLS-1$ //$NON-NLS-2$
+					.verbose("-> request to rebuild index: " + indexLocation + " path: " + containerPath.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		
 		this.updateIndexState(indexLocation, REBUILDING_STATE);
 		IndexRequest request = null;
 		if (target instanceof IProject) {
@@ -758,7 +758,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		} else if (target instanceof IFile) {
 			// request = new AddArchiveFileToIndex((IFile) target, this);
 			return;
-		} else if (target instanceof java.io.File) {
+		} else if (target instanceof IFileHandle) {
 			// request = new AddArchiveFileToIndex(containerPath, this);
 			return;
 		}
@@ -775,9 +775,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	public synchronized Index recreateIndex(IPath containerPath) {
 		boolean mixin = containerPath.toString().startsWith("#special#mixin#"); //$NON-NLS-1$
 		// only called to over write an existing cached index...
-		String containerPathString = containerPath.getDevice() == null ? containerPath
-				.toString()
-				: containerPath.toOSString();
+		String containerPathString = containerPath.toString();
 		try {
 			// Path is already canonical
 			String indexLocation = this.computeIndexLocation(containerPath);

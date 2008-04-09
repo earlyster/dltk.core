@@ -78,11 +78,9 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 			cfp = cfp.substring(IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR
 					.length());
 		}
-		String pathToString = containerPath.getDevice() == null ? containerPath
-				.toString() : containerPath.toOSString();
+		String pathToString = containerPath.toString();
 
-		Index index = this.manager
-				.getSpecialIndex("builtin", cfp, pathToString); //$NON-NLS-1$
+		Index index = this.manager.getSpecialIndex("builtin", cfp, pathToString); //$NON-NLS-1$
 		if (index == null) {
 			if (JobManager.VERBOSE)
 				org.eclipse.dltk.internal.core.util.Util
@@ -110,7 +108,7 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 					.getSourceRequestor(scriptProject);
 			if (JobManager.VERBOSE)
 				org.eclipse.dltk.internal.core.util.Util
-						.verbose("-> indexing " + containerPath.toOSString()); //$NON-NLS-1$
+						.verbose("-> indexing " + containerPath.toString()); //$NON-NLS-1$
 			long initialTime = System.currentTimeMillis();
 
 			SearchParticipant participant = SearchEngine
@@ -122,7 +120,7 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 			if (JobManager.VERBOSE)
 				org.eclipse.dltk.internal.core.util.Util
 						.verbose("-> done indexing of " //$NON-NLS-1$
-								+ containerPath.toOSString()
+								+ containerPath.toString()
 								+ " (" //$NON-NLS-1$
 								+ (System.currentTimeMillis() - initialTime)
 								+ "ms)"); //$NON-NLS-1$			
@@ -158,7 +156,7 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 				if (this.isCancelled) {
 					if (JobManager.VERBOSE)
 						org.eclipse.dltk.internal.core.util.Util
-								.verbose("-> indexing of " + containerPath.toOSString() + " has been cancelled"); //$NON-NLS-1$ //$NON-NLS-2$
+								.verbose("-> indexing of " + containerPath.toString() + " has been cancelled"); //$NON-NLS-1$ //$NON-NLS-2$
 					return;
 				}
 
@@ -179,7 +177,7 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 		dpath = dpath.setDevice(null);
 
 		DLTKSearchDocument entryDocument = new DLTKSearchDocument(dpath
-				.toOSString(), contents.toCharArray(), participant); //$NON-NLS-1$
+				.toString(), new Path( "" ), contents.toCharArray(), participant, true); //$NON-NLS-1$
 		entryDocument.parser = parser;
 		entryDocument.requestor = requestor;
 		entryDocument.toolkit = toolkit;

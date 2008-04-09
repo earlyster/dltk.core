@@ -33,7 +33,7 @@ import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.utils.CorePrinter;
@@ -84,7 +84,12 @@ public class Model extends Openable implements IScriptModel {
 	}
 
 
-	public static IResource getInternalTarget(IContainer container, IPath path,
+	/**
+	 * Helper method - returns the targeted item (IResource if internal or
+	 * IFileHandle if external), or null if unbound Internal items must be
+	 * referred to using container relative paths.
+	 */
+	public static Object getTarget(IContainer container, IPath path,
 			boolean checkResourceExistence) {
 		if (path == null)
 			return null;
@@ -97,37 +102,35 @@ public class Model extends Openable implements IScriptModel {
 			if (resource != null) {
 				if (!checkResourceExistence || resource.exists())
 					return resource;
+				return null;
 			}
 		}
-		return null;
-	}
-
-	public static IFileHandle getExternalTarget(IEnvironment env, IPath path,
-			boolean checkResourceExistence) {
 		// if path is relative, it cannot be an external path
 		// (see http://dev.eclipse.org/bugs/show_bug.cgi?id=22517)
 		if (!path.isAbsolute())
 			return null;
 		// lookup - outside the container
-		IFileHandle externalFile = env.getFile(path);
-		if (!checkResourceExistence) {
-			return externalFile;
-		} else if (existingExternalFiles.contains(externalFile)) {
-			return externalFile;
-		} else {
-			if (ModelManager.ZIP_ACCESS_VERBOSE) {
-				System.out
-						.println("(" + Thread.currentThread() + ") [Model.getTarget(...)] Checking existence of " + path.toString()); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			if (externalFile.exists()) {
-				// cache external file
-				existingExternalFiles.add(externalFile);
+		IFileHandle externalFile = EnvironmentPathUtils.getFile(path);
+		if (externalFile != null) {
+			if (!checkResourceExistence) {
 				return externalFile;
+			} else if (existingExternalFiles.contains(externalFile)) {
+				return externalFile;
+			} else {
+				if (ModelManager.ZIP_ACCESS_VERBOSE) {
+					System.out
+							.println("(" + Thread.currentThread() + ") [Model.getTarget(...)] Checking existence of " + path.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				if (externalFile.exists()) {
+					// cache external file
+					existingExternalFiles.add(externalFile);
+					return externalFile;
+				}
 			}
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Returns the active script project associated with the specified resource,
 	 * or <code>null</code> if no script project yet exists for the resource.

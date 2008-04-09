@@ -11,19 +11,28 @@ package org.eclipse.dltk.internal.core.search;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.core.search.SearchParticipant;
 
 public class DLTKSearchDocument extends SearchDocument {
 	protected char[] charContents;
+	private boolean external;
 
 	public DLTKSearchDocument(String path,
-			char[] contents, SearchParticipant participant) {
-		super(IDLTKSearchScope.FILE_ENTRY_SEPARATOR + path, participant);
+			char[] contents, SearchParticipant participant, boolean external) {
+		super(path, participant);
 		this.charContents = contents;
+		this.external = external;
 	}
-
+	
+	public DLTKSearchDocument(String path, IPath containerPath, char[] contents, SearchParticipant participant, boolean external) {
+		super(IDLTKSearchScope.FILE_ENTRY_SEPARATOR + path, participant );
+		this.charContents = contents;
+		this.external = external;
+	}
+	
 	public String getContents() {		
 		return new String(charContents);
 	}
@@ -43,5 +52,9 @@ public class DLTKSearchDocument extends SearchDocument {
 
 	public String toString() {
 		return "SearchDocument for " + getPath(); //$NON-NLS-1$
+	}
+	
+	public boolean isExternal() {
+		return external;
 	}
 }

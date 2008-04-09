@@ -1406,13 +1406,19 @@ public class BasicSearchEngine {
 								.verbose("Searching for " + pattern + " in " + resource.getFullPath()); //$NON-NLS-1$//$NON-NLS-2$
 					}
 					SearchParticipant participant = getSearchParticipant(enclosingElement);
+					boolean external = false;
+					IProjectFragment fragment = (IProjectFragment) enclosingElement
+							.getAncestor(IModelElement.PROJECT_FRAGMENT);
+					if (fragment != null) {
+						external = fragment.isExternal();
+					}
 					char[] contents = Util
 							.getResourceContentsAsCharArray((IFile) resource);
 					SearchDocument[] documents = MatchLocator.addWorkingCopies(
 							pattern,
 							new SearchDocument[] { new DLTKSearchDocument(
 									enclosingElement.getPath().toString(),
-									contents, participant) },
+									contents, participant, external) },
 							getWorkingCopies(enclosingElement), participant);
 					participant.locateMatches(documents, pattern, scope,
 							requestor, monitor);

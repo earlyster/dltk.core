@@ -47,8 +47,6 @@ import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
@@ -86,10 +84,15 @@ public class DeltaProcessor {
 				if (resource != null) {
 					this.root = this.project.getProjectFragment(resource);
 				} else {
-					resource = Model.getInternalTarget(ResourcesPlugin
-							.getWorkspace().getRoot(), this.rootPath, false);
-					if (resource != null) {
-						this.root = this.project.getProjectFragment(resource);
+					Object target = Model.getTarget(ResourcesPlugin
+							.getWorkspace().getRoot(), this.rootPath, false/*
+																			 * don't
+																			 * check
+																			 * existence
+																			 */);
+					if (target instanceof IResource) {
+						this.root = this.project
+								.getProjectFragment((IResource) target);
 					} else {
 						this.root = this.project
 								.getProjectFragment(this.rootPath.toOSString());
@@ -891,11 +894,9 @@ public class DeltaProcessor {
 							.get(entryPath);
 					if (status == null) {
 						// compute shared status
-						IEnvironment env = EnvironmentManager
-								.getEnvironment(scriptProject);
-						IFileHandle externalFile = Model.getExternalTarget(env,
+						Object targetLibrary = Model.getTarget(wksRoot,
 								entryPath, true);
-						if (externalFile == null) { // missing JAR
+						if (targetLibrary == null) { // missing JAR
 							if (this.state.getExternalLibTimeStamps().remove(
 									entryPath) != null) {
 								externalArchivesStatus.put(entryPath,
@@ -905,8 +906,9 @@ public class DeltaProcessor {
 								this.manager.indexManager
 										.removeIndex(entryPath);
 							}
-						} else { // external
+						} else if (targetLibrary instanceof IFileHandle) { // external
 							// JAR
+							IFileHandle externalFile = (IFileHandle) targetLibrary;
 							// check timestamp to figure if JAR has changed in
 							// some way
 							Long oldTimestamp = (Long) this.state
@@ -965,6 +967,9 @@ public class DeltaProcessor {
 															.fullExclusionPatternChars());
 								}
 							}
+						} else { // internal ZIP
+							externalArchivesStatus.put(entryPath,
+									INTERNAL_ZIP_IGNORE);
 						}
 					}
 					// according to computed status, generate a delta

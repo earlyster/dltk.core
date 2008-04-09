@@ -65,9 +65,6 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.IEnvironment;
-import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -747,8 +744,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 		case IBuildpathEntry.BPE_SOURCE:
 			if (projectPath.isPrefixOf(entryPath)) {
 				if (checkExistency) {
-					Object target = Model.getInternalTarget(workspaceRoot,
-							entryPath, checkExistency);
+					Object target = Model.getTarget(workspaceRoot, entryPath,
+							checkExistency);
 					if (target == null)
 						return;
 					if (target instanceof IFolder || target instanceof IProject) {
@@ -770,17 +767,18 @@ public class ScriptProject extends Openable implements IScriptProject {
 					root = new BuiltinProjectFragment(entryPath, this);
 					break;
 				}
+				Object target = Model.getTarget(workspaceRoot, entryPath,
+						checkExistency);
+				if (target == null)
+					return;
 				if (!resolvedEntry.isExternal()) {
-					IResource resource = Model.getInternalTarget(workspaceRoot,
-							entryPath, checkExistency);
-					if (resource == null)
-						return;
-					root = getProjectFragment(resource);
+					if (target instanceof IResource) {
+						// internal target
+						root = getProjectFragment((IResource) target);
+					}
 				} else {// external target
-					IEnvironment env = EnvironmentManager.getEnvironment(this);
-					IFileHandle file = Model.getExternalTarget(env , entryPath, checkExistency);
 					// This is external folder or zip.
-					if (Model.isFile(file)
+					if (Model.isFile(target)
 							&& (org.eclipse.dltk.compiler.util.Util
 									.isArchiveFileName(entryPath.lastSegment()))) {
 						// root = new ArchiveProjectFragment(entryPath, this);
@@ -915,41 +913,44 @@ public class ScriptProject extends Openable implements IScriptProject {
 		if (workspace.getRoot().findMember(externalPath) != null) {
 			return externalPath;
 		}
-		IPath canonicalPath = null;
-		try {
-			canonicalPath = new Path(new File(externalPath.toOSString())
-					.getCanonicalPath());
-		} catch (IOException e) {
-			// default to original path
-			return externalPath;
-		}
-		IPath result;
-		int canonicalLength = canonicalPath.segmentCount();
-		if (canonicalLength == 0) {
-			// the java.io.File canonicalization failed
-			return externalPath;
-		} else if (externalPath.isAbsolute()) {
-			result = canonicalPath;
-		} else {
-			// if path is relative, remove the first segments that were added by
-			// the java.io.File canonicalization
-			// e.g. 'lib/classes.zip' was converted to
-			// 'd:/myfolder/lib/classes.zip'
-			int externalLength = externalPath.segmentCount();
-			if (canonicalLength >= externalLength) {
-				result = canonicalPath.removeFirstSegments(canonicalLength
-						- externalLength);
-			} else {
-				return externalPath;
-			}
-		}
-		// keep device only if it was specified (this is because
-		// File.getCanonicalPath() converts '/lib/classed.zip' to
-		// 'd:/lib/classes/zip')
-		if (externalPath.getDevice() == null) {
-			result = result.setDevice(null);
-		}
-		return result;
+		//TODO Check this
+		return externalPath;
+		//		
+		// IPath canonicalPath = null;
+		// try {
+		// canonicalPath = new Path(new File(externalPath.toOSString())
+		// .getCanonicalPath());
+		// } catch (IOException e) {
+		// // default to original path
+		// return externalPath;
+		// }
+		// IPath result;
+		// int canonicalLength = canonicalPath.segmentCount();
+		// if (canonicalLength == 0) {
+		// // the java.io.File canonicalization failed
+		// return externalPath;
+		// } else if (externalPath.isAbsolute()) {
+		// result = canonicalPath;
+		// } else {
+		// // if path is relative, remove the first segments that were added by
+		// // the java.io.File canonicalization
+		// // e.g. 'lib/classes.zip' was converted to
+		// // 'd:/myfolder/lib/classes.zip'
+		// int externalLength = externalPath.segmentCount();
+		// if (canonicalLength >= externalLength) {
+		// result = canonicalPath.removeFirstSegments(canonicalLength
+		// - externalLength);
+		// } else {
+		// return externalPath;
+		// }
+		// }
+		// // keep device only if it was specified (this is because
+		// // File.getCanonicalPath() converts '/lib/classed.zip' to
+		// // 'd:/lib/classes/zip')
+		// if (externalPath.getDevice() == null) {
+		//			result = result.setDevice(null);
+		//		}
+		//		return result;
 	}
 
 	/**
