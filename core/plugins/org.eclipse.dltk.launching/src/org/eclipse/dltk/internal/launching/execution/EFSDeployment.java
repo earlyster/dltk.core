@@ -129,7 +129,7 @@ public class EFSDeployment implements IDeployment {
 		try {
 			copy(input, dest);
 		} catch (CoreException e) {
-			throw new IOException("Failed to deploy stream:", e);
+			throw new IOException("Failed to deploy stream:" + e.getMessage());
 		}
 		return filename;
 	}
