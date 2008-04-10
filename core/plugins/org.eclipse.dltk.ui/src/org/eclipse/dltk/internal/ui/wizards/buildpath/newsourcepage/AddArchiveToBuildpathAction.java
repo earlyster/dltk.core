@@ -25,6 +25,7 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.internal.corext.buildpath.BuildpathModifier;
 import org.eclipse.dltk.internal.ui.wizards.BuildpathDialogAccess;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
@@ -66,7 +67,8 @@ public class AddArchiveToBuildpathAction extends Action implements ISelectionCha
 	public void run() {
 
 		final Shell shell= fSite.getShell() != null ? fSite.getShell() : DLTKUIPlugin.getActiveWorkbenchShell();
-		final IPath[] selected= BuildpathDialogAccess.chooseExternalArchiveEntries(shell);
+		final IPath[] selected = BuildpathDialogAccess
+				.chooseExternalArchiveEntries(shell, EnvironmentManager.getEnvironment(this.fScriptProject));
 
 		try {
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {

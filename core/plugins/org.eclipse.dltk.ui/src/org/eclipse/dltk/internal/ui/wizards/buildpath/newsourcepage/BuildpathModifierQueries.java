@@ -14,6 +14,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.ui.wizards.BuildpathDialogAccess;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.BPListElement;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.ExclusionInclusionDialog;
@@ -289,7 +290,7 @@ public class BuildpathModifierQueries {
      * 
      * @see IAddArchivesQuery
      */
-    public static IAddArchivesQuery getDefaultArchivesQuery(final Shell shell) {
+    public static IAddArchivesQuery getDefaultArchivesQuery(final Shell shell, final IEnvironment environment) {
         return new IAddArchivesQuery() {
 
             public IPath[] doQuery() {
@@ -297,7 +298,8 @@ public class BuildpathModifierQueries {
                 Display.getDefault().syncExec(new Runnable() {
                     public void run() {
                         Shell sh= shell != null ? shell : DLTKUIPlugin.getActiveWorkbenchShell();
-                        selected[0]= BuildpathDialogAccess.chooseExternalArchiveEntries(sh);
+                        selected[0] = BuildpathDialogAccess
+								.chooseExternalArchiveEntries(sh, environment);
                     }
                 });
                 if(selected[0] == null)

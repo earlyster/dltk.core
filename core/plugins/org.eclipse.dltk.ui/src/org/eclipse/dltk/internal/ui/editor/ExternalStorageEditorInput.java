@@ -12,16 +12,14 @@ package org.eclipse.dltk.internal.ui.editor;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.internal.core.BuiltinSourceModule;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.editors.text.ILocationProvider;
 
 public class ExternalStorageEditorInput implements IEditorInput,
-		IStorageEditorInput, ILocationProvider {
+		IStorageEditorInput {
 	private IStorage fStorage;
 
 	public ExternalStorageEditorInput(IStorage storage) {
@@ -55,11 +53,14 @@ public class ExternalStorageEditorInput implements IEditorInput,
 	}
 
 	public Object getAdapter(Class adapter) {
-
-		if (!(fStorage instanceof BuiltinSourceModule)
-				&& (adapter == this.getClass() || adapter == ILocationProvider.class)) {
-			return this;
-		}
+//		if (!(fStorage instanceof BuiltinSourceModule)
+//				&& (adapter == this.getClass() || adapter == ILocationProvider.class)) {
+//			return this;
+//		}
+//		if (!(fStorage instanceof BuiltinSourceModule)
+//				&& (adapter == this.getClass() || adapter == ILocationProvider.class)) {
+//			return this;
+//		}
 		if (adapter == IModelElement.class && fStorage instanceof IModelElement) {
 			return fStorage;
 		}

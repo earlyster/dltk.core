@@ -22,15 +22,16 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.ui.IUIConstants;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.ArchiveFileFilter;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.BuildpathContainerWizard;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.MultipleFolderSelectionDialog;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.dltk.ui.wizards.IBuildpathContainerPageExtension;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
@@ -264,29 +265,30 @@ public final class BuildpathDialogAccess {
 	 * @return Returns the new buildpath container entry paths or <code>null</code> if the dialog has
 	 * been canceled by the user.
 	 */
-	public static IPath[] chooseExternalArchiveEntries(Shell shell) {
-		String lastUsedPath= DLTKUIPlugin.getDefault().getDialogSettings().get(IUIConstants.DIALOGSTORE_LASTEXTZIP);
-		if (lastUsedPath == null) {
-			lastUsedPath= ""; //$NON-NLS-1$
-		}
-		FileDialog dialog= new FileDialog(shell, SWT.MULTI);
-		dialog.setText(NewWizardMessages.BuildPathDialogAccess_ExtZIPArchiveDialog_new_title); 
-		dialog.setFilterExtensions(ArchiveFileFilter.FILTER_EXTENSIONS);
-		dialog.setFilterPath(lastUsedPath);
-		
-		String res= dialog.open();
+	public static IPath[] chooseExternalArchiveEntries(Shell shell, IEnvironment environment) {
+//		String lastUsedPath= DLTKUIPlugin.getDefault().getDialogSettings().get(IUIConstants.DIALOGSTORE_LASTEXTZIP);
+//		if (lastUsedPath == null) {
+//			lastUsedPath= ""; //$NON-NLS-1$
+//		}
+//		FileDialog dialog= new FileDialog(shell, SWT.MULTI);
+//		dialog.setText(NewWizardMessages.BuildPathDialogAccess_ExtZIPArchiveDialog_new_title); 
+//		dialog.setFilterExtensions(ArchiveFileFilter.FILTER_EXTENSIONS);
+//		dialog.setFilterPath(lastUsedPath);
+		IEnvironmentUI ui = (IEnvironmentUI) environment.getAdapter(IEnvironmentUI.class);
+		String res = ui.selectFile(shell, IEnvironmentUI.ARCHIVE);
 		if (res == null) {
 			return null;
 		}
-		String[] fileNames= dialog.getFileNames();
-		int nChosen= fileNames.length;
+//		String[] fileNames= dialog.getFileNames();
+//		int nChosen= fileNames.length;
 			
-		IPath filterPath= Path.fromOSString(dialog.getFilterPath());
-		IPath[] elems= new IPath[nChosen];
-		for (int i= 0; i < nChosen; i++) {
-			elems[i]= filterPath.append(fileNames[i]).makeAbsolute();	
-		}
-		DLTKUIPlugin.getDefault().getDialogSettings().put(IUIConstants.DIALOGSTORE_LASTEXTZIP, dialog.getFilterPath());
+//		IPath filterPath= Path.fromOSString(dialog.getFilterPath());
+		IPath[] elems= new IPath[1];
+		elems[0] = new Path(res);
+//		for (int i= 0; i < nChosen; i++) {
+//			elems[i]= filterPath.append(fileNames[i]).makeAbsolute();	
+//		}
+//		DLTKUIPlugin.getDefault().getDialogSettings().put(IUIConstants.DIALOGSTORE_LASTEXTZIP, dialog.getFilterPath());
 		
 		return elems;
 	}
@@ -312,13 +314,13 @@ public final class BuildpathDialogAccess {
 		return internalChooseFolderEntry(shell, initialSelection, usedEntries, title, message);
 	}
 	
-	public static IPath[] chooseExtSourceFolderEntries(Shell shell, IPath initialSelection, IPath[] usedEntries) {
+	public static IPath[] chooseExtSourceFolderEntries(Shell shell, IPath initialSelection, IPath[] usedEntries, IEnvironment environment) {
 		if (usedEntries == null) {
 			throw new IllegalArgumentException();
 		}
 		String title= NewWizardMessages.BuildPathDialogAccess_ExistingClassFolderDialog_new_title; 
 		String message= NewWizardMessages.BuildPathDialogAccess_ExistingClassFolderDialog_new_description;
-		return internalExtChooseFolderEntry(shell, initialSelection, usedEntries, title, message);
+		return internalExtChooseFolderEntry(shell, initialSelection, usedEntries, title, message, environment);
 	}
 	
 		
@@ -357,24 +359,24 @@ public final class BuildpathDialogAccess {
 		}
 		return null;		
 	}	
-	private static IPath[] internalExtChooseFolderEntry(Shell shell, IPath initialSelection, IPath[] usedEntries, String title, String message) {	
-		String lastUsedPath= DLTKUIPlugin.getDefault().getDialogSettings().get(IUIConstants.DIALOGSTORE_LASTEXTSOURCE);
-		if (lastUsedPath == null) {
-			lastUsedPath= ""; //$NON-NLS-1$
-		}
-		DirectoryDialog dialog= new DirectoryDialog(shell, SWT.SINGLE);
-		dialog.setText(NewWizardMessages.BuildPathDialogAccess_ExistingClassFolderDialog_new_title); 		
-		dialog.setFilterPath(lastUsedPath);
-		
-		String res= dialog.open();
+	private static IPath[] internalExtChooseFolderEntry(Shell shell, IPath initialSelection, IPath[] usedEntries, String title, String message, IEnvironment environment) {	
+//		String lastUsedPath= DLTKUIPlugin.getDefault().getDialogSettings().get(IUIConstants.DIALOGSTORE_LASTEXTSOURCE);
+//		if (lastUsedPath == null) {
+//			lastUsedPath= ""; //$NON-NLS-1$
+//		}
+//		DirectoryDialog dialog= new DirectoryDialog(shell, SWT.SINGLE);
+//		dialog.setText(NewWizardMessages.BuildPathDialogAccess_ExistingClassFolderDialog_new_title); 		
+//		dialog.setFilterPath(lastUsedPath);
+		IEnvironmentUI ui = (IEnvironmentUI) environment.getAdapter(IEnvironmentUI.class);
+		String res = ui.selectFolder(shell);
 		if (res == null) {
 			return null;
 		}		
 					
 		IPath[] elems= new IPath[1];
-		elems[0]= new Path(res).makeAbsolute();	
-		
-		DLTKUIPlugin.getDefault().getDialogSettings().put(IUIConstants.DIALOGSTORE_LASTEXTSOURCE, dialog.getFilterPath());
+		elems[0]= new Path(res)/*.makeAbsolute()*/;	
+//		
+//		DLTKUIPlugin.getDefault().getDialogSettings().put(IUIConstants.DIALOGSTORE_LASTEXTSOURCE, dialog.getFilterPath());
 		
 		return elems;
 	}	

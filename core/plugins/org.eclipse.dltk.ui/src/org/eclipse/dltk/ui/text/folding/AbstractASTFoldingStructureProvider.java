@@ -1097,7 +1097,6 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		FoldingASTVisitor visitor = getFoldingVisitor(offset);
 
 		try {
-			// System.out.println("blah");
 			decl.traverse(visitor);
 		} catch (Exception e) {
 			if (DLTKCore.DEBUG) {

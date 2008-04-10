@@ -22,9 +22,10 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.corext.buildpath.IBuildpathInformationProvider;
 import org.eclipse.dltk.internal.corext.buildpath.IPackageExplorerActionListener;
 import org.eclipse.dltk.internal.corext.buildpath.PackageExplorerActionEvent;
@@ -452,8 +453,8 @@ public final class HintTextGroup implements IBuildpathInformationProvider, IPack
      * @see BuildpathModifierQueries#getDefaultArchivesQuery(Shell)
      * @see IBuildpathInformationProvider#getExternalArchivesQuery()
      */
-    public IAddArchivesQuery getExternalArchivesQuery() throws ModelException {
-        return BuildpathModifierQueries.getDefaultArchivesQuery(getShell());
+    public IAddArchivesQuery getExternalArchivesQuery(IEnvironment environment) throws ModelException {
+        return BuildpathModifierQueries.getDefaultArchivesQuery(getShell(), environment);
     }
     
     /**

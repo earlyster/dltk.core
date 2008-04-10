@@ -25,7 +25,6 @@ import java.util.Observable;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.filesystem.URIUtil;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -53,6 +52,7 @@ import org.eclipse.dltk.internal.ui.wizards.BuildpathDetector;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.util.ExceptionHandler;
@@ -274,7 +274,7 @@ public abstract class ProjectWizardSecondPage extends
 		if (fFirstPage.isInWorkspace()) {
 			return null;
 		}
-		return URIUtil.toURI(fFirstPage.getLocationPath());
+		return fFirstPage.getLocationURI();
 	}
 
 	private IBuildpathEntry[] getDefaultBuildpathEntry() {
@@ -455,8 +455,11 @@ public abstract class ProjectWizardSecondPage extends
 					nature = gr.getCurrentLanguageNature();
 				}
 				if (nature != null) {
+					String environment = fFirstPage.getEnvironment().getId();
+					DefaultInterpreterEntry entry = new DefaultInterpreterEntry(
+							nature, environment);
 					projectInterpreter = ScriptRuntime
-							.getDefaultInterpreterInstall(nature);
+							.getDefaultInterpreterInstall(entry);
 				}
 
 			}
