@@ -14,4 +14,6 @@ public interface IExecutionEnvironment {
 			throws CoreException;
 
 	IEnvironment getEnvironment();
+	
+	boolean isValidExecutableName(String name);
 }

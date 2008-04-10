@@ -109,7 +109,7 @@ public class EFSFileHandle implements IFileHandle {
 	public boolean equals(Object obj) {
 		if (obj instanceof EFSFileHandle) {
 			EFSFileHandle anotherFile = (EFSFileHandle) obj;
-			return this.file.fetchInfo().equals(anotherFile.file.fetchInfo());
+			return this.file.equals(anotherFile.file);
 		}
 		return false;
 	}
