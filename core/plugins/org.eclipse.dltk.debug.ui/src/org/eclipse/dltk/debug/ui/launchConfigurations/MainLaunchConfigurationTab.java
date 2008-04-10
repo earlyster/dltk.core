@@ -9,12 +9,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.launchConfigurations;
 
+import java.net.URI;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.dltk.core.IScriptProject;
@@ -159,23 +158,27 @@ public abstract class MainLaunchConfigurationTab extends
 		String projectName = getProjectName();
 		IScriptProject proj = getScriptModel().getScriptProject(projectName);
 
-		IPath location = proj.getProject().getLocation();
+		URI location = proj.getProject().getLocationURI();
 		if (location == null) {
 			setErrorMessage(DLTKLaunchConfigurationsMessages.error_notAValidProject);
 			return false;
 		}
-		IPath script = location.append(new Path( getScriptName()));
-		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(script);
-		if( file.exists() && file.getLocation() != null ) {
-			script = file.getLocation();
-		}
-
-		IStatus result = validator.validate(script.toPortableString());
-
-		if (!result.isOK()) {
-			setErrorMessage(DLTKLaunchConfigurationsMessages.error_scriptNotFound);
+		URI script = URI.create(location.toString() + "/" + getScriptName());
+		IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(script);
+		if (files.length != 1)
 			return false;
+		
+		IFile file = files[0];
+		if( file.exists() && file.getLocationURI() != null ) {
+			script = file.getLocationURI();
 		}
+
+//		IStatus result = validator.validate(script.toPortableString());
+//
+//		if (!result.isOK()) {
+//			setErrorMessage(DLTKLaunchConfigurationsMessages.error_scriptNotFound);
+//			return false;
+//		}
 
 		return true;
 	}

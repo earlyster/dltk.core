@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
-import java.io.File;
 import java.text.MessageFormat;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,10 +18,12 @@ import java.util.TreeMap;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.internal.ui.DebugPluginImages;
 import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationsMessages;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IExecutionEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
@@ -48,6 +49,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 
 /**
@@ -75,7 +77,6 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	protected boolean fInCallback = false;
 	protected IInterpreterInstall fInterpreterInstall;
 	protected IInterpreterInstallType fInterpreterInstallType;
-	protected File fHome;
 
 	// widgets
 	protected EnvironmentVariableContentProvider fEnvironmentVariablesContentProvider;
@@ -240,7 +241,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		if (install == null || EnvironmentVariables == null) {
 			return true;
 		}
-		File installLocation = install.getInstallLocation();
+		IFileHandle installLocation = install.getInstallLocation();
 		if (installLocation != null) {
 			EnvironmentVariable[] def = new EnvironmentVariable[0];
 			if (def.length == EnvironmentVariables.length) {
@@ -468,9 +469,17 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	protected abstract IDialogSettings getDialogSettions();
 
 	protected EnvironmentVariable[] addExisted() {
-		// get Environment Variables from the OS
+		
+		// get Environment Variables from the Environment
 		Map envVariables = getNativeEnvironment();
-
+		if( envVariables.size() == 0 ) {
+			MessageBox box = new MessageBox(fDialog.getShell(), SWT.ICON_ERROR);
+			box.setMessage("Could not retrive environment variables from:" + fDialog.getEnvironment().getName());
+			box.setText("Failed to get environment");
+			box.open();
+			return null;
+		}
+ 
 		// get Environment Variables from the table
 		EnvironmentVariable[] items = fEnvironmentVariablesContentProvider
 				.getVariables();
@@ -563,8 +572,9 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	}
 
 	private Map getNativeEnvironment() {
-		Map stringVars = DebugPlugin.getDefault().getLaunchManager()
-				.getNativeEnvironmentCasePreserved();
+		IEnvironment environment = fDialog.getEnvironment();
+		IExecutionEnvironment execEnvironment = (IExecutionEnvironment) environment.getAdapter(IExecutionEnvironment.class);
+		Map stringVars = execEnvironment.getEnvironmentVariables();
 		HashMap vars = new HashMap();
 		for (Iterator i = stringVars.keySet().iterator(); i.hasNext();) {
 			String key = (String) i.next();

@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,12 +22,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.LibraryLocation;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.ui.dialogs.TimeTriggeredProgressMonitorDialog;
+import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -48,7 +50,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 
 /**
@@ -71,7 +72,7 @@ public abstract class AbstractInterpreterLibraryBlock implements
 	protected boolean fInCallback = false;
 	protected IInterpreterInstall fInterpreterInstall;
 	protected IInterpreterInstallType fInterpreterInstallType;
-	protected File fHome;
+	protected IFileHandle fHome;
 
 	// widgets
 	protected LibraryContentProvider fLibraryContentProvider;
@@ -128,7 +129,8 @@ public abstract class AbstractInterpreterLibraryBlock implements
 
 		if (isEnableButtonSupported()) {
 			fEnabledButton = new Button(comp2, SWT.CHECK);
-			fEnabledButton.setText(InterpretersMessages.AbstractInterpreterLibraryBlock_setPathVisibleToDltk);
+			fEnabledButton
+					.setText(InterpretersMessages.AbstractInterpreterLibraryBlock_setPathVisibleToDltk);
 			fEnabledButton.addSelectionListener(this);
 			this.fLibraryViewer
 					.addDoubleClickListener(new IDoubleClickListener() {
@@ -173,7 +175,9 @@ public abstract class AbstractInterpreterLibraryBlock implements
 				InterpretersMessages.InterpreterLibraryBlock_9);
 		fDefaultButton.addSelectionListener(this);
 		if (this.fDialog.isRediscoverSupported()) {
-			fRediscoverButton = createPushButton(pathButtonComp, InterpretersMessages.AbstractInterpreterLibraryBlock_rediscover);
+			fRediscoverButton = createPushButton(
+					pathButtonComp,
+					InterpretersMessages.AbstractInterpreterLibraryBlock_rediscover);
 			fRediscoverButton.addSelectionListener(this);
 		}
 
@@ -209,7 +213,7 @@ public abstract class AbstractInterpreterLibraryBlock implements
 	protected LibraryLocation[] getLibrariesWithEnvironment(
 			final EnvironmentVariable[] environmentVariables) {
 		final LibraryLocation[][] libs = new LibraryLocation[][] { null };
-		final File installLocation = getHomeDirectory();
+		final IFileHandle installLocation = getHomeDirectory();
 		if (installLocation == null) {
 			libs[0] = new LibraryLocation[0];
 		} else {
@@ -266,14 +270,14 @@ public abstract class AbstractInterpreterLibraryBlock implements
 	/**
 	 * Sets the home directory of the Interpreter Install the user has chosen
 	 */
-	public void setHomeDirectory(File file) {
+	public void setHomeDirectory(IFileHandle file) {
 		fHome = file;
 	}
 
 	/**
 	 * Returns the home directory
 	 */
-	protected File getHomeDirectory() {
+	protected IFileHandle getHomeDirectory() {
 		return fHome;
 	}
 
@@ -331,7 +335,7 @@ public abstract class AbstractInterpreterLibraryBlock implements
 		if (install == null || libraryLocations == null) {
 			return true;
 		}
-		File installLocation = install.getInstallLocation();
+		IFileHandle installLocation = install.getInstallLocation();
 		if (installLocation != null) {
 			LibraryLocation[] def = getInterpreterInstallType()
 					.getDefaultLibraryLocations(installLocation,
@@ -532,23 +536,16 @@ public abstract class AbstractInterpreterLibraryBlock implements
 	protected abstract IDialogSettings getDialogSettions();
 
 	protected LibraryLocation add() {
-		IDialogSettings dialogSettings = getDialogSettions();
-		String lastUsedPath = dialogSettings.get(LAST_PATH_SETTING);
-		if (lastUsedPath == null) {
-			lastUsedPath = ""; //$NON-NLS-1$
-		}
-		DirectoryDialog dialog = new DirectoryDialog(fLibraryViewer
-				.getControl().getShell(), SWT.MULTI);
-		dialog.setMessage(InterpretersMessages.InterpreterLibraryBlock_10);
-		dialog.setFilterPath(lastUsedPath);
-		String res = dialog.open();
+		IEnvironment environment = fDialog.getEnvironment();
+		IEnvironmentUI ui = (IEnvironmentUI) environment
+				.getAdapter(IEnvironmentUI.class);
+		String res = ui.selectFolder(fLibraryViewer.getControl().getShell());
 		if (res == null) {
 			return null;
 		}
 
 		IPath path = new Path(res);
 		LibraryLocation lib = new LibraryLocation(path.makeAbsolute());
-		dialogSettings.put(LAST_PATH_SETTING, path.toOSString());
 		return lib;
 	}
 

@@ -38,7 +38,7 @@ public class LibraryLabelProvider extends LabelProvider {
 
 	public String getText(Object element) {
 		if (element instanceof LibraryStandin) {
-			return ((LibraryStandin)element).getSystemLibraryPath().toOSString();
+			return ((LibraryStandin)element).getLibraryPathString();
 		} 
 		return null;
 	}

@@ -9,13 +9,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.ComboDialogField;
@@ -28,6 +26,7 @@ import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterStandin;
+import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.dltk.utils.PlatformFileUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -39,7 +38,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -49,7 +47,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	private IAddInterpreterDialogRequestor fRequestor;
 
 	private IInterpreterInstallType[] fInterpreterTypes;
-
+	
 	private IInterpreterInstallType fSelectedInterpreterType;
 
 	private ComboDialogField fInterpreterTypeCombo;
@@ -68,6 +66,8 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	private IStatus[] fStati;
 	private int fPrevIndex = -1;
 
+	private IEnvironment environment;
+
 	protected boolean useInterpreterArgs() {
 		return true;
 	}
@@ -82,7 +82,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		for (int i = 0; i < fStati.length; i++) {
 			fStati[i] = new StatusInfo();
 		}
-
+		
 		fInterpreterTypes = interpreterInstallTypes;
 		fSelectedInterpreterType = editedInterpreter != null ? editedInterpreter
 				.getInterpreterInstallType()
@@ -200,7 +200,8 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		block.setLayoutData(gd);
 
 		l = new Label(parent, SWT.NONE);
-		l.setText(InterpretersMessages.AddScriptInterpreterDialog_interpreterEnvironmentVariables);
+		l
+				.setText(InterpretersMessages.AddScriptInterpreterDialog_interpreterEnvironmentVariables);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
 		l.setLayoutData(gd);
@@ -284,7 +285,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 			fInterpreterTypeCombo.setEnabled(false);
 			fInterpreterName.setText(fEditedInterpreter.getName());
 			fInterpreterPath.setText(fEditedInterpreter.getRawInstallLocation()
-					.toString());
+					.getAbsolutePath());
 			if (fEnvironmentVariablesBlock != null) {
 				fEnvironmentVariablesBlock.initializeFrom(fEditedInterpreter,
 						fSelectedInterpreterType);
@@ -305,22 +306,23 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	}
 
 	IStatus validateInterpreterLocation() {
+		IEnvironment selectedEnv = getEnvironment();
 		String locationName = fInterpreterPath.getText();
 		IStatus s = null;
-		File file = null;
+		IFileHandle file = null;
 		if (locationName.length() == 0) {
 			s = new StatusInfo(IStatus.INFO,
 					InterpretersMessages.addInterpreterDialog_enterLocation);
 		} else {
-			file = PlatformFileUtils
-					.findAbsoluteOrEclipseRelativeFile(new File(locationName));
+			file = PlatformFileUtils.findAbsoluteOrEclipseRelativeFile(
+					selectedEnv, new Path(locationName));
 			if (!file.exists()) {
 				s = new StatusInfo(
 						IStatus.ERROR,
 						InterpretersMessages.addInterpreterDialog_locationNotExists);
 			} else {
 				final IStatus[] temp = new IStatus[1];
-				final File tempFile = file;
+				final IFileHandle tempFile = file;
 				Runnable r = new Runnable() {
 					/**
 					 * @see java.lang.Runnable#run()
@@ -340,20 +342,17 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 			String name = fInterpreterName.getText();
 			if (name == null || name.trim().length() == 0) {
 				// auto-generate interpreter name
-				try {
-					String genName = null;
-					IPath path = new Path(file.getCanonicalPath());
-					int segs = path.segmentCount();
-					if (segs == 1) {
-						genName = path.segment(0);
-					} else if (segs >= 2) {
-						String last = path.lastSegment();
-						genName = last;
-					}
-					if (genName != null) {
-						fInterpreterName.setText(genName);
-					}
-				} catch (IOException e) {
+				String genName = null;
+				IPath path = new Path(file.getCanonicalPath());
+				int segs = path.segmentCount();
+				if (segs == 1) {
+					genName = path.segment(0);
+				} else if (segs >= 2) {
+					String last = path.lastSegment();
+					genName = last;
+				}
+				if (genName != null) {
+					fInterpreterName.setText(genName);
 				}
 			}
 		} else {
@@ -364,6 +363,13 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		// fEnvironmentVariablesBlock.restoreDefaultVariables();
 		// }
 		return s;
+	}
+
+	public IEnvironment getEnvironment() {
+		return this.environment;
+	}
+	public void setEnvironment(IEnvironment environment) {
+		this.environment = environment;
 	}
 
 	private IStatus validateInterpreterName() {
@@ -398,18 +404,14 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	}
 
 	private void browseForInstallation() {
-
-		FileDialog dialog = new FileDialog(getShell());
-		dialog.setFilterPath(fInterpreterPath.getText());
-		if (Platform.getOS().equals(Platform.OS_WIN32)) {
-			dialog.setFilterExtensions(new String[] { "*.exe;*.bat;*.exe" }); //$NON-NLS-1$
-		} else {
-			dialog.setFilterExtensions(new String[] { "*" }); //$NON-NLS-1$
-		}
-		dialog.setFilterNames(new String[] { InterpretersMessages.AddScriptInterpreterDialog_executables });
-		String newPath = dialog.open();
-		if (newPath != null) {
-			fInterpreterPath.setText(newPath);
+		IEnvironment environment = getEnvironment();
+		IEnvironmentUI environmentUI = (IEnvironmentUI) environment
+				.getAdapter(IEnvironmentUI.class);
+		if (environmentUI != null) {
+			String newPath = environmentUI.selectFile(getShell(), IEnvironmentUI.EXECUTABLE);
+			if (newPath != null) {
+				fInterpreterPath.setText(newPath);
+			}
 		}
 	}
 
@@ -443,13 +445,10 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	}
 
 	protected void setFieldValuesToInterpreter(IInterpreterInstall install) {
-		File dir = new File(fInterpreterPath.getText());
-		// try {
+		IEnvironment selectedEnv = getEnvironment();
+		IFileHandle dir = selectedEnv.getFile(new Path(fInterpreterPath
+				.getText()));
 		install.setInstallLocation(dir);
-		// } catch (IOException e) {
-		// // Interpreter.setInstallLocation(dir.getAbsoluteFile());
-		// Interpreter.setInstallLocation(dir);
-		// }
 		install.setName(fInterpreterName.getText());
 
 		if (this.useInterpreterArgs()) {
