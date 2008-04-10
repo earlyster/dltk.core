@@ -35,6 +35,9 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.internal.core.BufferManager;
 import org.eclipse.dltk.internal.core.BuiltinSourceModule;
 import org.eclipse.dltk.internal.core.ExternalProjectFragment;
@@ -45,6 +48,7 @@ import org.eclipse.dltk.internal.ui.IDLTKStatusConstants;
 import org.eclipse.dltk.internal.ui.editor.DocumentAdapter;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.editor.ISourceModuleDocumentProvider;
+import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.editor.SourceModuleDocumentProvider;
 import org.eclipse.dltk.internal.ui.editor.WorkingCopyManager;
 import org.eclipse.dltk.internal.ui.text.hover.EditorTextHoverDescriptor;
@@ -62,10 +66,14 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -122,7 +130,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 					IProjectFragment fragment = (IProjectFragment) original
 							.getAncestor(IModelElement.PROJECT_FRAGMENT);
 					if (!fragment.isArchive()) {
-//						IPath path = original.getPath();
+						// IPath path = original.getPath();
 						// return new DocumentAdapter(workingCopy, path);
 						return BufferManager.getDefaultBufferManager()
 								.createBuffer(original);
@@ -154,12 +162,56 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 
 		// to initialize launching
 		DLTKLaunchingPlugin.getDefault();
+		
+		/**
+		 * Close all open editors which has not local Environment files open
+		 */
+
+		PlatformUI.getWorkbench().addWorkbenchListener(
+				new IWorkbenchListener() {
+					public void postShutdown(IWorkbench workbench) {
+						// TODO Auto-generated method stub
+
+					}
+
+					public boolean preShutdown(IWorkbench workbench,
+							boolean forced) {
+						IWorkbenchWindow window = PlatformUI.getWorkbench()
+								.getActiveWorkbenchWindow();
+						if (window != null) {
+							IEditorReference[] references = window
+									.getActivePage().getEditorReferences();
+							for (int i = 0; i < references.length; i++) {
+								IEditorPart editor = references[i]
+										.getEditor(false);
+								if (editor != null
+										&& editor instanceof ScriptEditor) {
+									ScriptEditor scriptEditor = (ScriptEditor) editor;
+									IModelElement modelElement = scriptEditor
+											.getInputModelElement();
+									IEnvironment environment = EnvironmentManager
+											.getEnvironment(modelElement);
+									if (environment != null) {
+										if (!environment
+												.getId()
+												.equals(
+														LocalEnvironment.ENVIRONMENT_ID)) {
+											scriptEditor.close(false);
+										}
+									}
+								}
+							}
+						}
+						return true;
+					}
+				});
 	}
 
 	/**
 	 * This method is called when the plug-in is stopped
 	 */
 	public void stop(BundleContext context) throws Exception {
+		
 		if (fMembersOrderPreferenceCache != null) {
 			fMembersOrderPreferenceCache.dispose();
 			fMembersOrderPreferenceCache = null;
