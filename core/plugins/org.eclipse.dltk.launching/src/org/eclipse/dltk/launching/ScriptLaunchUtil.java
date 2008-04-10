@@ -26,7 +26,7 @@ import org.eclipse.dltk.internal.launching.EnvironmentResolver;
 import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 
 public class ScriptLaunchUtil {
-	
+
 	// Creating of InterpreterConfig
 	public static InterpreterConfig createInterpreterConfig(
 			IExecutionEnvironment exeEnv, IFileHandle scriptFile,
@@ -38,9 +38,13 @@ public class ScriptLaunchUtil {
 	public static InterpreterConfig createInterpreterConfig(
 			IExecutionEnvironment exeEnv, IFileHandle scriptFile,
 			IFileHandle workingDirectory, EnvironmentVariable[] env) {
+		IPath workingDirectoryPath = null;
+		if (workingDirectory != null) {
+			workingDirectoryPath = new Path(workingDirectory.getAbsolutePath());
+		}
 		InterpreterConfig config = new InterpreterConfig(scriptFile
 				.getEnvironment(), new Path(scriptFile.getAbsolutePath()),
-				new Path(workingDirectory.getAbsolutePath()));
+				workingDirectoryPath);
 
 		Map envVars = exeEnv.getEnvironmentVariables();
 		config.addEnvVars(envVars);
@@ -121,7 +125,9 @@ public class ScriptLaunchUtil {
 	// 
 	public static IInterpreterInstall getDefaultInterpreterInstall(
 			String natureId, String environment) {
-		return ScriptRuntime.getDefaultInterpreterInstall(new DefaultInterpreterEntry(natureId, environment));
+		return ScriptRuntime
+				.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
+						natureId, environment));
 	}
 
 	public static IInterpreterInstall getProjectInterpreterInstall(
@@ -157,9 +163,11 @@ public class ScriptLaunchUtil {
 	}
 
 	// Run by default interpreter
-	public static ILaunch runScript(String natureId, String environment, InterpreterConfig config,
-			IProgressMonitor monitor) throws CoreException {
-		IInterpreterInstall install = getDefaultInterpreterInstall(natureId, environment);
+	public static ILaunch runScript(String natureId, String environment,
+			InterpreterConfig config, IProgressMonitor monitor)
+			throws CoreException {
+		IInterpreterInstall install = getDefaultInterpreterInstall(natureId,
+				environment);
 		EnvironmentVariable[] variables = EnvironmentResolver.resolve(config
 				.getEnvVars(), install.getEnvironmentVariables());
 		if (variables != null) {
@@ -186,7 +194,8 @@ public class ScriptLaunchUtil {
 			config.addScriptArgs(scriptArgs);
 		}
 
-		return runScript(natureId, scriptFile.getEnvironment().getId(), config, monitor);
+		return runScript(natureId, scriptFile.getEnvironment().getId(), config,
+				monitor);
 	}
 
 	// public static ILaunch runScript(String natureId, IFileHandle scriptFile)
