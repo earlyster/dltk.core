@@ -10,7 +10,6 @@
 package org.eclipse.dltk.internal.launching;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -27,6 +26,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
@@ -34,6 +36,7 @@ import org.eclipse.dltk.launching.InterpreterStandin;
 import org.eclipse.dltk.launching.LaunchingMessages;
 import org.eclipse.dltk.launching.LibraryLocation;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -65,6 +68,7 @@ public class InterpreterDefinitionsContainer {
 	private static final String INTERPRETER_TYPE_TAG = "interpreterType"; //$NON-NLS-1$
 	private static final String ID_ATTR = "id"; //$NON-NLS-1$
 	private static final String NATURE_ATTR = "nature"; //$NON-NLS-1$
+	private static final String ENVIRONMENT_ATTR = "environment"; //$NON-NLS-1$
 	private static final String DEFAULT_INTERPRETER_TAG = "defaultInterpreter"; //$NON-NLS-1$
 	private static final String INTERPRETER_SETTINGS_TAG = "interpreterSettings"; //$NON-NLS-1$
 	private static final String VARIABLE_VALUE_ATTR = "variableValue"; //$NON-NLS-1$
@@ -75,7 +79,7 @@ public class InterpreterDefinitionsContainer {
 	private static final String ENVIRONMENT_VARIABLE_TAG = "environmentVariable"; //$NON-NLS-1$
 	private static final String LIBRARY_LOCATIONS_TAG = "libraryLocations"; //$NON-NLS-1$
 	private static final String LIBRARY_LOCATION_TAG = "libraryLocation"; //$NON-NLS-1$
-
+	private static final String ENVIRONMENT_ID = "environmentId"; //$NON-NLS-1$
 	/**
 	 * Map of InterpreterInstallTypes to Lists of corresponding
 	 * InterpreterInstalls.
@@ -87,11 +91,11 @@ public class InterpreterDefinitionsContainer {
 	 */
 	private List fInterpreterList;
 
-	/**
-	 * Interpreters managed by this container whose install locations don't
-	 * actually exist.
-	 */
-	private List fInvalidInterpreterList;
+//	/**
+//	 * Interpreters managed by this container whose install locations don't
+//	 * actually exist.
+//	 */
+//	private List fInvalidInterpreterList;
 
 	/**
 	 * The composite identifier of the default Interpreter. This consists of the
@@ -111,7 +115,7 @@ public class InterpreterDefinitionsContainer {
 	 */
 	public InterpreterDefinitionsContainer() {
 		fInterTypeToInterMap = new HashMap(10);
-		fInvalidInterpreterList = new ArrayList(10);
+//		fInvalidInterpreterList = new ArrayList(10);
 		fInterpreterList = new ArrayList(10);
 		fDefaultInterpreterInstallCompositeID = new HashMap();
 		fDefaultInterpreterInstallConnectorTypeID = new HashMap();
@@ -122,9 +126,10 @@ public class InterpreterDefinitionsContainer {
 	 * 
 	 * @return
 	 */
-	public String[] getInterpreterNatures() {
+	public DefaultInterpreterEntry[] getInterpreterNatures() {
 		Set s = fDefaultInterpreterInstallCompositeID.keySet();
-		return (String[]) s.toArray(new String[s.size()]);
+		return (DefaultInterpreterEntry[]) s
+				.toArray(new DefaultInterpreterEntry[s.size()]);
 	}
 
 	/**
@@ -151,12 +156,12 @@ public class InterpreterDefinitionsContainer {
 						InterpreterList);
 			}
 			InterpreterList.add(Interpreter);
-			File installLocation = Interpreter.getInstallLocation();
-			if (installLocation == null
-					|| !InterpreterInstallType.validateInstallLocation(
-							installLocation).isOK()) {
-				fInvalidInterpreterList.add(Interpreter);
-			}
+			IFileHandle installLocation = Interpreter.getInstallLocation();
+//			if (installLocation == null
+//					|| !InterpreterInstallType.validateInstallLocation(
+//							installLocation).isOK()) {
+//				fInvalidInterpreterList.add(Interpreter);
+//			}
 			fInterpreterList.add(Interpreter);
 		}
 	}
@@ -218,13 +223,15 @@ public class InterpreterDefinitionsContainer {
 	 * @return List the data structure containing all Interpreters managed by
 	 *         this container
 	 */
-	public List getInterpreterList(String nature) {
+	public List getInterpreterList(DefaultInterpreterEntry nature) {
 		List res = new ArrayList(fInterpreterList.size());
 		for (Iterator iter = fInterpreterList.iterator(); iter.hasNext();) {
-			IInterpreterInstall Interpreter = (IInterpreterInstall) iter.next();
-			if (Interpreter.getInterpreterInstallType().getNatureId().equals(
-					nature))
-				res.add(Interpreter);
+			IInterpreterInstall interpreter = (IInterpreterInstall) iter.next();
+			if (interpreter.getInterpreterInstallType().getNatureId().equals(
+					nature.getNature())
+					&& interpreter.getEnvironment().getId().equals(
+							nature.getEnvironment()))
+				res.add(interpreter);
 		}
 		return res;
 	}
@@ -240,7 +247,7 @@ public class InterpreterDefinitionsContainer {
 		List Interpreters = getInterpreterList();
 		List resultList = new ArrayList(Interpreters.size());
 		resultList.addAll(Interpreters);
-		resultList.removeAll(fInvalidInterpreterList);
+//		resultList.removeAll(fInvalidInterpreterList);
 		return resultList;
 	}
 
@@ -251,11 +258,11 @@ public class InterpreterDefinitionsContainer {
 	 * 
 	 * @return List
 	 */
-	public List getValidInterpreterList(String nature) {
-		List Interpreters = getInterpreterList(nature);
-		List resultList = new ArrayList(Interpreters.size());
-		resultList.addAll(Interpreters);
-		resultList.removeAll(fInvalidInterpreterList);
+	public List getValidInterpreterList(DefaultInterpreterEntry nature) {
+		List interpreters = getInterpreterList(nature);
+		List resultList = new ArrayList(interpreters.size());
+		resultList.addAll(interpreters);
+//		resultList.removeAll(fInvalidInterpreterList);
 		return resultList;
 	}
 
@@ -268,7 +275,8 @@ public class InterpreterDefinitionsContainer {
 	 * @return String returns the composite ID of the current default
 	 *         Interpreter
 	 */
-	public String getDefaultInterpreterInstallCompositeID(String nature) {
+	public String getDefaultInterpreterInstallCompositeID(
+			DefaultInterpreterEntry nature) {
 		return (String) fDefaultInterpreterInstallCompositeID.get(nature);
 	}
 
@@ -286,7 +294,8 @@ public class InterpreterDefinitionsContainer {
 	 * @param id
 	 *            identifies the new default Interpreter using a composite ID
 	 */
-	public void setDefaultInterpreterInstallCompositeID(String nature, String id) {
+	public void setDefaultInterpreterInstallCompositeID(
+			DefaultInterpreterEntry nature, String id) {
 		if (id != null)
 			fDefaultInterpreterInstallCompositeID.put(nature, id);
 		else
@@ -299,7 +308,8 @@ public class InterpreterDefinitionsContainer {
 	 * @return String the current value of the default Interpreter's connector
 	 *         type ID
 	 */
-	public String getDefaultInterpreterInstallConnectorTypeID(String nature) {
+	public String getDefaultInterpreterInstallConnectorTypeID(
+			DefaultInterpreterEntry nature) {
 		return (String) fDefaultInterpreterInstallConnectorTypeID.get(nature);
 	}
 
@@ -309,8 +319,8 @@ public class InterpreterDefinitionsContainer {
 	 * @param id
 	 *            the new value of the default Interpreter's connector type ID
 	 */
-	public void setDefaultInterpreterInstallConnectorTypeID(String nature,
-			String id) {
+	public void setDefaultInterpreterInstallConnectorTypeID(
+			DefaultInterpreterEntry nature, String id) {
 		fDefaultInterpreterInstallConnectorTypeID.put(nature, id);
 	}
 
@@ -344,24 +354,28 @@ public class InterpreterDefinitionsContainer {
 		// Set the defaultInterpreter attribute on the top-level node
 		for (Iterator iter = fDefaultInterpreterInstallCompositeID.keySet()
 				.iterator(); iter.hasNext();) {
-			String nature = (String) iter.next();
+			DefaultInterpreterEntry entry = (DefaultInterpreterEntry) iter
+					.next();
 			Element defaulte = doc.createElement(DEFAULT_INTERPRETER_TAG);
 			config.appendChild(defaulte);
-			defaulte.setAttribute(NATURE_ATTR, nature);
+			defaulte.setAttribute(NATURE_ATTR, entry.getNature());
+			defaulte.setAttribute(ENVIRONMENT_ATTR, entry.getEnvironment());
 			defaulte.setAttribute(ID_ATTR,
-					(String) fDefaultInterpreterInstallCompositeID.get(nature));
+					(String) fDefaultInterpreterInstallCompositeID.get(entry));
 		}
 
 		// Set the defaultInterpreterConnector attribute on the top-level node
 		for (Iterator iter = fDefaultInterpreterInstallConnectorTypeID.keySet()
 				.iterator(); iter.hasNext();) {
-			String nature = (String) iter.next();
+			DefaultInterpreterEntry entry = (DefaultInterpreterEntry) iter
+					.next();
 			Element defaulte = doc.createElement("defaultInterpreterConnector"); //$NON-NLS-1$
 			config.appendChild(defaulte);
-			defaulte.setAttribute(NATURE_ATTR, nature);
+			defaulte.setAttribute(NATURE_ATTR, entry.getNature());
+			defaulte.setAttribute(ENVIRONMENT_ATTR, entry.getEnvironment());
 			defaulte.setAttribute(ID_ATTR,
 					(String) fDefaultInterpreterInstallConnectorTypeID
-							.get(nature));
+							.get(entry));
 		}
 
 		// Create a node for each install type represented in this container
@@ -418,12 +432,14 @@ public class InterpreterDefinitionsContainer {
 		Element element = doc.createElement(INTERPRETER_TAG); //$NON-NLS-1$
 		element.setAttribute(ID_ATTR, Interpreter.getId()); //$NON-NLS-1$
 		element.setAttribute(INTERPRETER_NAME_ATTR, Interpreter.getName()); //$NON-NLS-1$
+		element.setAttribute(ENVIRONMENT_ID, Interpreter.getInstallLocation()
+				.getEnvironment().getId()); //$NON-NLS-1$
 
 		// Determine and set the 'path' attribute for the Interpreter
 		String installPath = ""; //$NON-NLS-1$
-		File installLocation = Interpreter.getRawInstallLocation();
+		IFileHandle installLocation = Interpreter.getRawInstallLocation();
 		if (installLocation != null) {
-			installPath = installLocation.toString();
+			installPath = installLocation.getAbsolutePath();
 		}
 		element.setAttribute(PATH_ATTR, installPath); //$NON-NLS-1$
 
@@ -561,26 +577,34 @@ public class InterpreterDefinitionsContainer {
 			Node node = list.item(i);
 			short type = node.getNodeType();
 			if (type == Node.ELEMENT_NODE) {
-				Element InterpreterTypeElement = (Element) node;
-				if (InterpreterTypeElement.getNodeName().equalsIgnoreCase(
+				Element interpreterTypeElement = (Element) node;
+				if (interpreterTypeElement.getNodeName().equalsIgnoreCase(
 						INTERPRETER_TYPE_TAG)) { //$NON-NLS-1$
-					populateInterpreterTypes(InterpreterTypeElement, container);
+					populateInterpreterTypes(interpreterTypeElement, container);
 				}
-				if (InterpreterTypeElement.getNodeName().equalsIgnoreCase(
+				if (interpreterTypeElement.getNodeName().equalsIgnoreCase(
 						DEFAULT_INTERPRETER_TAG)) { //$NON-NLS-1$
-					String nature = InterpreterTypeElement
+					String nature = interpreterTypeElement
 							.getAttribute(NATURE_ATTR);
-					String id = InterpreterTypeElement.getAttribute(ID_ATTR);
-					container.setDefaultInterpreterInstallCompositeID(nature,
-							id);
+					String id = interpreterTypeElement.getAttribute(ID_ATTR);
+					String environment = interpreterTypeElement
+							.getAttribute(ENVIRONMENT_ATTR);
+					DefaultInterpreterEntry entry = new DefaultInterpreterEntry(
+							nature, environment);
+					container
+							.setDefaultInterpreterInstallCompositeID(entry, id);
 				}
-				if (InterpreterTypeElement.getNodeName().equalsIgnoreCase(
+				if (interpreterTypeElement.getNodeName().equalsIgnoreCase(
 						"defaultInterpreterConnector")) { //$NON-NLS-1$
-					String nature = InterpreterTypeElement
+					String nature = interpreterTypeElement
 							.getAttribute(NATURE_ATTR);
-					String id = InterpreterTypeElement.getAttribute(ID_ATTR);
+					String environment = interpreterTypeElement
+							.getAttribute(ENVIRONMENT_ATTR);
+					String id = interpreterTypeElement.getAttribute(ID_ATTR);
+					DefaultInterpreterEntry entry = new DefaultInterpreterEntry(
+							nature, environment);
 					container.setDefaultInterpreterInstallConnectorTypeID(
-							nature, id);
+							entry, id);
 				}
 			}
 		}
@@ -639,11 +663,17 @@ public class InterpreterDefinitionsContainer {
 				return;
 			}
 
+			String envId = element.getAttribute(ENVIRONMENT_ID); //$NON-NLS-1$
+			IEnvironment env = EnvironmentManager.getEnvironmentById(envId);
+			if (env == null) {
+				return;
+			}
+
 			// Create a InterpreterStandin for the node and set its 'name' &
 			// 'installLocation' attributes
 			InterpreterStandin standin = new InterpreterStandin(installType, id);
 			standin.setName(element.getAttribute(INTERPRETER_NAME_ATTR)); //$NON-NLS-1$
-			File installLocation = new File(installPath);
+			IFileHandle installLocation = env.getFile(new Path(installPath));
 			standin.setInstallLocation(installLocation);
 			container.addInterpreter(standin);
 
@@ -745,8 +775,8 @@ public class InterpreterDefinitionsContainer {
 			short type = node.getNodeType();
 			if (type == Node.ELEMENT_NODE) {
 				Element envVarElement = (Element) node;
-				if (envVarElement.getNodeName().equals(
-						ENVIRONMENT_VARIABLE_TAG)) { //$NON-NLS-1$
+				if (envVarElement.getNodeName()
+						.equals(ENVIRONMENT_VARIABLE_TAG)) { //$NON-NLS-1$
 					variables.add(getEnvironmentVariable(envVarElement));
 				}
 			}
@@ -763,7 +793,7 @@ public class InterpreterDefinitionsContainer {
 	 */
 	public void removeInterpreter(IInterpreterInstall Interpreter) {
 		fInterpreterList.remove(Interpreter);
-		fInvalidInterpreterList.remove(Interpreter);
+//		fInvalidInterpreterList.remove(Interpreter);
 		List list = (List) fInterTypeToInterMap.get(Interpreter
 				.getInterpreterInstallType());
 		if (list != null) {

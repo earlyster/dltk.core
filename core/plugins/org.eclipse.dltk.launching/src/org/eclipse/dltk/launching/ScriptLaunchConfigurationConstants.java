@@ -152,5 +152,4 @@ public class ScriptLaunchConfigurationConstants {
 	public static final int ERR_DEBUGGING_ENGINE_NOT_CONFIGURED = 500;
 
 	public static final int ERR_NO_DEFAULT_DEBUGGING_ENGINE = 510;
-
 }

@@ -9,8 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.launching;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IAccessRule;
@@ -65,13 +62,18 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * @param interpreter
 	 * @return buildpath entries
 	 */
-	private static IBuildpathEntry[] getBuildpathEntries(IInterpreterInstall interpreter) {
+	private static IBuildpathEntry[] getBuildpathEntries(
+			IInterpreterInstall interpreter) {
 		if (fgBuildpathEntries == null) {
 			fgBuildpathEntries = new HashMap(10);
-			// add a listener to clear cached value when a Interpreter changes or is
+			// add a listener to clear cached value when a Interpreter changes
+			// or is
 			// removed
 			IInterpreterInstallChangedListener listener = new IInterpreterInstallChangedListener() {
-				public void defaultInterpreterInstallChanged(IInterpreterInstall previous, IInterpreterInstall current) {}
+				public void defaultInterpreterInstallChanged(
+						IInterpreterInstall previous,
+						IInterpreterInstall current) {
+				}
 
 				public void interpreterChanged(PropertyChangeEvent event) {
 					if (event.getSource() != null) {
@@ -80,16 +82,18 @@ public class InterpreterContainer implements IBuildpathContainer {
 				}
 
 				public void interpreterAdded(IInterpreterInstall newInterpreter) {
-					
+
 				}
 
-				public void interpreterRemoved(IInterpreterInstall removedInterpreter) {
+				public void interpreterRemoved(
+						IInterpreterInstall removedInterpreter) {
 					fgBuildpathEntries.remove(removedInterpreter);
 				}
 			};
 			ScriptRuntime.addInterpreterInstallChangedListener(listener);
 		}
-		IBuildpathEntry[] entries = (IBuildpathEntry[]) fgBuildpathEntries.get(interpreter);
+		IBuildpathEntry[] entries = (IBuildpathEntry[]) fgBuildpathEntries
+				.get(interpreter);
 		if (entries == null) {
 			entries = computeBuildpathEntries(interpreter);
 			fgBuildpathEntries.put(interpreter, entries);
@@ -104,69 +108,71 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * @param interpreter
 	 * @return buildpath entries
 	 */
-	private static IBuildpathEntry[] computeBuildpathEntries(IInterpreterInstall interpreter) {
+	private static IBuildpathEntry[] computeBuildpathEntries(
+			IInterpreterInstall interpreter) {
 		LibraryLocation[] libs = interpreter.getLibraryLocations();
 		if (libs == null) {
 			libs = ScriptRuntime.getLibraryLocations(interpreter);
 		}
 		List entries = new ArrayList(libs.length);
-		Set rawEntries = new HashSet (libs.length);
+		Set rawEntries = new HashSet(libs.length);
 		for (int i = 0; i < libs.length; i++) {
 			IPath entryPath = libs[i].getLibraryPath();
-		
+
 			if (!entryPath.isEmpty()) {
-				
-				//	resolve symlink
-				try {
-					File f = entryPath.toFile();
-					if (f == null)
-						continue;
-					entryPath = new Path(f.getCanonicalPath());
-				} catch (IOException e) {
-					continue;
-				}
-				
+				// TODO Check this
+				// // resolve symlink
+				// IEnvironment environment = interpreter.getEnvironment();
+				//
+				// IFileHandle f = environment.getFile(entryPath);
+				// if (!f.exists())
+				// continue;
+				// entryPath = new Path(f.getCanonicalPath());
+				//
+				//				
 				if (rawEntries.contains(entryPath))
 					continue;
-				
-				/*if (!entryPath.isAbsolute())
-					Assert.isTrue(false, "Path for IBuildpathEntry must be absolute"); //$NON-NLS-1$*/
+
+				/*
+				 * if (!entryPath.isAbsolute()) Assert.isTrue(false, "Path for
+				 * IBuildpathEntry must be absolute"); //$NON-NLS-1$
+				 */
 				IBuildpathAttribute[] attributes = new IBuildpathAttribute[0];
 				ArrayList excluded = new ArrayList(); // paths to exclude
 				for (int j = 0; j < libs.length; j++) {
 					IPath otherPath = libs[j].getLibraryPath();
 					if (otherPath.isEmpty())
 						continue;
-					//resolve symlink
-					try {
-						File f = entryPath.toFile();
-						if (f == null)
-							continue;
-						entryPath = new Path(f.getCanonicalPath());
-					} catch (IOException e) {
-						continue;
-					}
-										
-					// compare, if it contains some another					
-					if (entryPath.isPrefixOf(otherPath) && !otherPath.equals(entryPath) ) {						
-						IPath pattern = otherPath.removeFirstSegments(entryPath.segmentCount()).append("*"); //$NON-NLS-1$
-						if( !excluded.contains(pattern ) ) {
+
+					// compare, if it contains some another
+					if (entryPath.isPrefixOf(otherPath)
+							&& !otherPath.equals(entryPath)) {
+						IPath pattern = otherPath.removeFirstSegments(
+								entryPath.segmentCount()).append("*"); //$NON-NLS-1$
+						if (!excluded.contains(pattern)) {
 							excluded.add(pattern);
 						}
 					}
 				}
 
-				entries.add(DLTKCore.newLibraryEntry(entryPath, EMPTY_RULES, attributes,
-						BuildpathEntry.INCLUDE_ALL, (IPath[]) excluded.toArray(new IPath[excluded.size()]), false, true));
-				rawEntries.add (entryPath);
+				entries.add(DLTKCore.newLibraryEntry(entryPath, EMPTY_RULES,
+						attributes, BuildpathEntry.INCLUDE_ALL,
+						(IPath[]) excluded.toArray(new IPath[excluded.size()]),
+						false, true));
+				rawEntries.add(entryPath);
 			}
 		}
 		// Add builtin entry.
 		{
 			IBuildpathAttribute[] attributes = new IBuildpathAttribute[0];
-			entries.add(DLTKCore.newBuiltinEntry(IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY.append(interpreter.getInstallLocation().getAbsolutePath()), EMPTY_RULES, attributes, BuildpathEntry.INCLUDE_ALL, new IPath[0], false, true ));
+			entries.add(DLTKCore.newBuiltinEntry(
+					IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY.append(interpreter
+							.getInstallLocation().getAbsolutePath()),
+					EMPTY_RULES, attributes, BuildpathEntry.INCLUDE_ALL,
+					new IPath[0], false, true));
 		}
-		return (IBuildpathEntry[]) entries.toArray(new IBuildpathEntry[entries.size()]);
+		return (IBuildpathEntry[]) entries.toArray(new IBuildpathEntry[entries
+				.size()]);
 	}
 
 	/**
@@ -191,11 +197,13 @@ public class InterpreterContainer implements IBuildpathContainer {
 		List entries = new ArrayList();
 		entries.addAll(Arrays.asList(buildpathEntries));
 		// Use custom per project interpreter entries.
-		IInterpreterContainerExtension extension = DLTKLanguageManager.getInterpreterContainerExtensions(project);
-		if( extension != null ) {
+		IInterpreterContainerExtension extension = DLTKLanguageManager
+				.getInterpreterContainerExtensions(project);
+		if (extension != null) {
 			extension.processEntres(project, entries);
 		}
-		return (IBuildpathEntry[]) entries.toArray(new IBuildpathEntry[entries.size()]);
+		return (IBuildpathEntry[]) entries.toArray(new IBuildpathEntry[entries
+				.size()]);
 	}
 
 	/**
@@ -203,9 +211,10 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 */
 	public String getDescription(IScriptProject project) {
 		String tag = fInterpreterInstall.getName();
-		return MessageFormat.format(LaunchingMessages.InterpreterEnvironmentContainer_InterpreterEnvironment_System_Library_1, new String[] {
-			tag
-		});
+		return MessageFormat
+				.format(
+						LaunchingMessages.InterpreterEnvironmentContainer_InterpreterEnvironment_System_Library_1,
+						new String[] { tag });
 	}
 
 	/**

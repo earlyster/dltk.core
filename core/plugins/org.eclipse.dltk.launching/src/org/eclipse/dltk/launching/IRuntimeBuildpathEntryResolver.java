@@ -93,5 +93,5 @@ public interface IRuntimeBuildpathEntryResolver {
 	 * @return Interpreter install associated with entry or <code>null</code> if none
 	 * @exception CoreException if unable to resolve a Interpreter
 	 */
-	public IInterpreterInstall resolveInterpreterInstall(String lang, IBuildpathEntry entry) throws CoreException;
+	public IInterpreterInstall resolveInterpreterInstall(String lang, String environment, IBuildpathEntry entry) throws CoreException;
 }

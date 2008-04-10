@@ -22,6 +22,8 @@ import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterStandin;
@@ -29,6 +31,7 @@ import org.eclipse.dltk.launching.LaunchingMessages;
 import org.eclipse.dltk.launching.LibraryLocation;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 
 import com.ibm.icu.text.MessageFormat;
 
@@ -49,7 +52,8 @@ public class InterpreterContainerInitializer extends
 					ScriptRuntime.INTERPRETER_CONTAINER)) {
 
 				IInterpreterInstall interp = resolveInterpreter(
-						getNatureFromProject(project), containerPath);
+						getNatureFromProject(project),
+						getEnvironmentFromProject(project), containerPath);
 				InterpreterContainer container = null;
 				if (interp != null) {
 					container = new InterpreterContainer(interp, containerPath);
@@ -70,7 +74,7 @@ public class InterpreterContainerInitializer extends
 	 *             interpreter is specified
 	 */
 	public static IInterpreterInstall resolveInterpreter(String natureId,
-			IPath containerPath) throws CoreException {
+			String environment, IPath containerPath) throws CoreException {
 		if (containerPath.segmentCount() > 1) {
 			String typeId = getInterpreterTypeId(containerPath);
 			IInterpreterInstallType installType = ScriptRuntime
@@ -80,7 +84,9 @@ public class InterpreterContainerInitializer extends
 				return installType.findInterpreterInstallByName(name);
 			}
 		}
-		return ScriptRuntime.getDefaultInterpreterInstall(natureId);
+		return ScriptRuntime
+				.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
+						natureId, environment));
 	}
 
 	/**
@@ -112,7 +118,7 @@ public class InterpreterContainerInitializer extends
 					.segment(0))) {
 				try {
 					return resolveInterpreter(getNatureFromProject(project),
-							containerPath) != null;
+							getEnvironmentFromProject(project), containerPath) != null;
 				} catch (CoreException e) {
 					return false;
 				}
@@ -130,11 +136,20 @@ public class InterpreterContainerInitializer extends
 		return null;
 	}
 
+	private String getEnvironmentFromProject(IScriptProject project) {
+		IEnvironment environment = EnvironmentManager.getEnvironment(project);
+		if (environment != null) {
+			return environment.getId();
+		}
+		return null;
+	}
+
 	public void requestBuildpathContainerUpdate(IPath containerPath,
 			IScriptProject project, IBuildpathContainer containerSuggestion)
 			throws CoreException {
 		IInterpreterInstall interpreter = resolveInterpreter(
-				getNatureFromProject(project), containerPath);
+				getNatureFromProject(project),
+				getEnvironmentFromProject(project), containerPath);
 		if (interpreter == null) {
 			IStatus status = new Status(
 					IStatus.ERROR,
@@ -148,7 +163,8 @@ public class InterpreterContainerInitializer extends
 			throw new CoreException(status);
 		}
 		// update of the interpreter with new library locations
-		IBuildpathEntry[] entries = containerSuggestion.getBuildpathEntries(project);
+		IBuildpathEntry[] entries = containerSuggestion
+				.getBuildpathEntries(project);
 		LibraryLocation[] libs = new LibraryLocation[entries.length];
 		for (int i = 0; i < entries.length; i++) {
 			IBuildpathEntry entry = entries[i];

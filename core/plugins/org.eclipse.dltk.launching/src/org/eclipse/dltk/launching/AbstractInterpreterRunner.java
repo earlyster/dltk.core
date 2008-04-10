@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -22,6 +23,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IExecutionEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.InterpreterMessages;
 
@@ -107,10 +111,10 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 	}
 
 	// Execution helpers
-	protected Process exec(String[] cmdLine, File workingDirectory)
-			throws CoreException {
-		return DebugPlugin.exec(cmdLine, workingDirectory);
-	}
+//	protected Process exec(String[] cmdLine, File workingDirectory)
+//			throws CoreException {
+//		return DebugPlugin.exec(cmdLine, workingDirectory);
+//	}
 
 	// 
 	protected Map getDefaultProcessMap() {
@@ -128,8 +132,9 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 	}
 
 
-	protected void checkConfig(InterpreterConfig config) throws CoreException {
-		File dir = new File(config.getWorkingDirectoryPath().toOSString());
+	protected void checkConfig(InterpreterConfig config, IEnvironment environment) throws CoreException {
+		IPath workingDirectoryPath = config.getWorkingDirectoryPath();
+		IFileHandle dir = environment.getFile(workingDirectoryPath);
 		if (!dir.exists()) {
 			abort(
 					MessageFormat
@@ -137,7 +142,7 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 									InterpreterMessages.errDebuggingEngineWorkingDirectoryDoesntExist,
 									new Object[] { dir.toString() }), null);
 		}
-		File script = new File(config.getScriptFilePath().toOSString());
+		IFileHandle script = environment.getFile(config.getScriptFilePath());
 		if (!script.exists()) {
 			abort(
 					MessageFormat
@@ -179,10 +184,11 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 
 	protected IProcess rawRun(ILaunch launch, InterpreterConfig config)
 			throws CoreException {
-		checkConfig(config);
+		
+		checkConfig(config, getInstall().getEnvironment());
 		
 		String[] cmdLine = renderCommandLine(config);
-		File workingDirectory = config.getWorkingDirectoryPath().toFile();
+		IPath workingDirectory = config.getWorkingDirectoryPath();
 		String[] environment = config.getEnvironmentAsStringsIncluding(interpreterInstall.getEnvironmentVariables());
 
 		final String cmdLineLabel = renderCommandLineLabel(cmdLine);
@@ -193,7 +199,8 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 					environment);
 		}
 		
-		Process p = DebugPlugin.exec(cmdLine, workingDirectory, environment);
+		IExecutionEnvironment exeEnv = interpreterInstall.getExecEnvironment();
+		Process p = exeEnv.exec(cmdLine, workingDirectory, environment);
 		if (p == null) {
 			abort(LaunchingMessages.AbstractInterpreterRunner_executionWasCancelled, null);
 		}
@@ -208,7 +215,7 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 	}
 
 	private void traceExecution(String processLabel,
-			String cmdLineLabel, File workingDirectory, String[] environment) {
+			String cmdLineLabel, IPath workingDirectory, String[] environment) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("-----------------------------------------------\n"); //$NON-NLS-1$
 		sb.append("Running ").append(processLabel).append('\n'); //$NON-NLS-1$

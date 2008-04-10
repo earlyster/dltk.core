@@ -9,13 +9,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 
 public class LibraryLocation {
 	private IPath libraryPath;
 
 	/**
 	 * Creates a new library location.
+	 * @param environment 
 	 * 
 	 * @param libraryPath
 	 *            The location of the archive containing java.lang.Object Must
@@ -25,10 +28,10 @@ public class LibraryLocation {
 	 * 
 	 */
 	public LibraryLocation(IPath libraryPath) {
+		Assert.isLegal(EnvironmentPathUtils.isFull(libraryPath));
 		if (libraryPath == null) {
 			throw new IllegalArgumentException();
 		}
-
 		this.libraryPath = libraryPath;
 	}
 
