@@ -280,7 +280,6 @@ public abstract class AbstractInterpreterInstallType implements
 							break;
 						}
 						String line = dataIn.readLine();
-						System.out.println(line);
 						if (line != null && monitor != null && !workReceived) {
 							int work = extractWorkFromLine(line);
 							if (work != NOT_WORK_COUNT) {
