@@ -15,5 +15,5 @@ public interface IExecutionEnvironment {
 
 	IEnvironment getEnvironment();
 	
-	boolean isValidExecutableName(String name);
+	boolean isValidExecutableAndEquals(String name, IPath fName);
 }
