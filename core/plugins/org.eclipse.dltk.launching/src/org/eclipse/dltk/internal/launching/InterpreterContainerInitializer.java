@@ -23,6 +23,7 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterStandin;
@@ -136,7 +137,11 @@ public class InterpreterContainerInitializer extends
 	}
 
 	private String getEnvironmentFromProject(IScriptProject project) {
-		return EnvironmentManager.getEnvironment(project).getId();
+		IEnvironment environment = EnvironmentManager.getEnvironment(project);
+		if (environment != null) {
+			return environment.getId();
+		}
+		return null;
 	}
 
 	public void requestBuildpathContainerUpdate(IPath containerPath,
