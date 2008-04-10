@@ -91,11 +91,11 @@ public class InterpreterDefinitionsContainer {
 	 */
 	private List fInterpreterList;
 
-	/**
-	 * Interpreters managed by this container whose install locations don't
-	 * actually exist.
-	 */
-	private List fInvalidInterpreterList;
+//	/**
+//	 * Interpreters managed by this container whose install locations don't
+//	 * actually exist.
+//	 */
+//	private List fInvalidInterpreterList;
 
 	/**
 	 * The composite identifier of the default Interpreter. This consists of the
@@ -115,7 +115,7 @@ public class InterpreterDefinitionsContainer {
 	 */
 	public InterpreterDefinitionsContainer() {
 		fInterTypeToInterMap = new HashMap(10);
-		fInvalidInterpreterList = new ArrayList(10);
+//		fInvalidInterpreterList = new ArrayList(10);
 		fInterpreterList = new ArrayList(10);
 		fDefaultInterpreterInstallCompositeID = new HashMap();
 		fDefaultInterpreterInstallConnectorTypeID = new HashMap();
@@ -157,11 +157,11 @@ public class InterpreterDefinitionsContainer {
 			}
 			InterpreterList.add(Interpreter);
 			IFileHandle installLocation = Interpreter.getInstallLocation();
-			if (installLocation == null
-					|| !InterpreterInstallType.validateInstallLocation(
-							installLocation).isOK()) {
-				fInvalidInterpreterList.add(Interpreter);
-			}
+//			if (installLocation == null
+//					|| !InterpreterInstallType.validateInstallLocation(
+//							installLocation).isOK()) {
+//				fInvalidInterpreterList.add(Interpreter);
+//			}
 			fInterpreterList.add(Interpreter);
 		}
 	}
@@ -247,7 +247,7 @@ public class InterpreterDefinitionsContainer {
 		List Interpreters = getInterpreterList();
 		List resultList = new ArrayList(Interpreters.size());
 		resultList.addAll(Interpreters);
-		resultList.removeAll(fInvalidInterpreterList);
+//		resultList.removeAll(fInvalidInterpreterList);
 		return resultList;
 	}
 
@@ -262,7 +262,7 @@ public class InterpreterDefinitionsContainer {
 		List interpreters = getInterpreterList(nature);
 		List resultList = new ArrayList(interpreters.size());
 		resultList.addAll(interpreters);
-		resultList.removeAll(fInvalidInterpreterList);
+//		resultList.removeAll(fInvalidInterpreterList);
 		return resultList;
 	}
 
@@ -793,7 +793,7 @@ public class InterpreterDefinitionsContainer {
 	 */
 	public void removeInterpreter(IInterpreterInstall Interpreter) {
 		fInterpreterList.remove(Interpreter);
-		fInvalidInterpreterList.remove(Interpreter);
+//		fInvalidInterpreterList.remove(Interpreter);
 		List list = (List) fInterTypeToInterMap.get(Interpreter
 				.getInterpreterInstallType());
 		if (list != null) {

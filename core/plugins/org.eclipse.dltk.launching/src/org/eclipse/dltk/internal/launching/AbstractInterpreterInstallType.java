@@ -258,7 +258,7 @@ public abstract class AbstractInterpreterInstallType implements
 	 * @return
 	 */
 	protected String[] readPathsFromProcess(final IProgressMonitor monitor,
-			Process process) {
+			final Process process) {
 		// DLTKLaunchingPlugin.log(new Status(IStatus.INFO,
 		// DLTKLaunchingPlugin.PLUGIN_ID, IStatus.INFO,
 		// "Start reading discovery script library paths", null));
@@ -269,61 +269,71 @@ public abstract class AbstractInterpreterInstallType implements
 
 		// final Object lock = new Object();
 
-		// Thread tReading = new Thread(new Runnable() {
-		// public void run() {
-		boolean workReceived = false;
-		try {
-			System.out.println("BEGIN PROCESS OUTPUT");
-			while (true) {
-				if (monitor != null && monitor.isCanceled()) {
-					monitor.worked(1);
-					process.destroy();
-					break;
-				}
-				String line = dataIn.readLine();
-				System.out.println(line);
-				if (line != null && monitor != null && !workReceived) {
-					int work = extractWorkFromLine(line);
-					if (work != NOT_WORK_COUNT) {
-						monitor
-								.beginTask(
-										LaunchingMessages.AbstractInterpreterInstallType_fetchingInterpreterLibraryLocations,
-										work);
-						// monitor.subTask("Featching interpeter library
-						// locations");
-						workReceived = true;
+		Thread tReading = new Thread(new Runnable() {
+			public void run() {
+				boolean workReceived = false;
+				try {
+					while (true) {
+						if (monitor != null && monitor.isCanceled()) {
+							monitor.worked(1);
+							process.destroy();
+							break;
+						}
+						String line = dataIn.readLine();
+						System.out.println(line);
+						if (line != null && monitor != null && !workReceived) {
+							int work = extractWorkFromLine(line);
+							if (work != NOT_WORK_COUNT) {
+								monitor
+										.beginTask(
+												LaunchingMessages.AbstractInterpreterInstallType_fetchingInterpreterLibraryLocations,
+												work);
+								// monitor.subTask("Featching interpeter library
+								// locations");
+								workReceived = true;
+							}
+						}
+						if (line != null && monitor != null
+								&& detectWorkInc(line)) {
+							monitor.worked(1);
+						}
+						if (line != null) {
+							result.add(line);
+						} else {
+							break;
+						}
+					}
+
+				} catch (IOException e) {
+					DLTKLaunchingPlugin
+							.log(new Status(
+									IStatus.INFO,
+									DLTKLaunchingPlugin.PLUGIN_ID,
+									IStatus.INFO,
+									MessageFormat
+											.format(
+													LaunchingMessages.AbstractInterpreterInstallType_failedToReadFromDiscoverScriptOutputStream,
+													new Object[] { e
+															.getMessage() }), e));
+				} finally {
+					if (monitor != null) {
+						if (!workReceived) {
+							monitor
+									.beginTask(
+											LaunchingMessages.AbstractInterpreterInstallType_fetchingInterpreterLibraryLocations,
+											1);
+						}
+						monitor.done();
 					}
 				}
-				if (line != null && monitor != null && detectWorkInc(line)) {
-					monitor.worked(1);
-				}
-				if (line != null) {
-					result.add(line);
-				} else {
-					break;
-				}
 			}
-
-		} catch (IOException e) {
-			DLTKLaunchingPlugin
-					.log(new Status(
-							IStatus.INFO,
-							DLTKLaunchingPlugin.PLUGIN_ID,
-							IStatus.INFO,
-							MessageFormat
-									.format(
-											LaunchingMessages.AbstractInterpreterInstallType_failedToReadFromDiscoverScriptOutputStream,
-											new Object[] { e.getMessage() }), e));
-		} finally {
-			System.out.println("END PROCESS OUTPUT");
-			if (monitor != null) {
-				if (!workReceived) {
-					monitor
-							.beginTask(
-									LaunchingMessages.AbstractInterpreterInstallType_fetchingInterpreterLibraryLocations,
-									1);
-				}
-				monitor.done();
+		});
+		tReading.start();
+		try {
+			tReading.join(10000);
+		} catch (InterruptedException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
 			}
 		}
 
@@ -401,7 +411,8 @@ public abstract class AbstractInterpreterInstallType implements
 			if (!paths[i].equals(sPath)) {
 				IFileHandle f = env.getFile(new Path(paths[i]));
 				if (f.exists()) {
-					LibraryLocation l = new LibraryLocation(EnvironmentPathUtils.getFullPath(env, f.getPath()));
+					LibraryLocation l = new LibraryLocation(
+							EnvironmentPathUtils.getFullPath(env, f.getPath()));
 					if (!locs.contains(l)) {
 						locs.add(l);
 					}
@@ -504,31 +515,27 @@ public abstract class AbstractInterpreterInstallType implements
 		final String name = installLocation.getName();
 		IPath nPath = new Path(name);
 
-		// // name.matches(possibleName + ".*\\.exe")
-		// if (Platform.getOS().equals(Platform.OS_WIN32)) {
-		// for (int i = 0; i < possibleNames.length; ++i) {
-		// final String possibleName = possibleNames[i].toLowerCase();
-		// String fName = nPath.removeFileExtension().toString()
-		// .toLowerCase();
-		// String ext = nPath.getFileExtension();
-		// if (possibleName.equals(fName)
-		// && ("exe".equalsIgnoreCase(ext) || "bat".equalsIgnoreCase(ext))) {
-		// //$NON-NLS-1$ //$NON-NLS-2$
-		// matchFound = true;
-		// break;
-		// }
-		// }
-		// } else {
-		for (int i = 0; i < possibleNames.length; i++) {
-			final String possibleName = possibleNames[i];
-			String fName = nPath.lastSegment();
-			if (fName.startsWith(possibleName)) {
-				matchFound = true;
-				break;
+		IExecutionEnvironment execEnv = (IExecutionEnvironment) installLocation
+				.getEnvironment().getAdapter(IExecutionEnvironment.class);
+
+		if (execEnv != null) {
+			// name.matches(possibleName + ".*\\.exe")
+			for (int i = 0; i < possibleNames.length; ++i) {
+				final String possibleName = possibleNames[i].toLowerCase();
+				String fName = nPath.removeFileExtension().toString()
+						.toLowerCase();
+				String ext = nPath.getFileExtension();
+				if (possibleName.equals(fName)) {
+					if (execEnv.isValidExecutableName(fName)
+							|| "exe".equalsIgnoreCase(ext)
+							|| "bat".equalsIgnoreCase(ext)) {
+						//$NON-NLS-1$ //$NON-NLS-2$
+						matchFound = true;
+						break;
+					}
+				}
 			}
 		}
-		// }
-
 		if (matchFound) {
 			return createStatus(IStatus.OK, "", null); //$NON-NLS-1$
 		} else {
@@ -785,5 +792,28 @@ public abstract class AbstractInterpreterInstallType implements
 	protected IStatus createStatus(int severity, String message,
 			Throwable throwable) {
 		return new Status(severity, getPluginId(), 0, message, throwable);
+	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((fId == null) ? 0 : fId.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AbstractInterpreterInstallType other = (AbstractInterpreterInstallType) obj;
+		if (fId == null) {
+			if (other.fId != null)
+				return false;
+		} else if (!fId.equals(other.fId))
+			return false;
+		return true;
 	}
 }

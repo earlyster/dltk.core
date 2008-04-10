@@ -11,6 +11,7 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IDeployment;
@@ -52,12 +53,13 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 	private static IPath getTempDirPath() {
 		if (temp == null) {
 			GetPropertyAction a = new GetPropertyAction("java.io.tmpdir");
-			File tempFile = new File(((String) AccessController.doPrivileged(a)));
+			File tempFile = new File(
+					((String) AccessController.doPrivileged(a)));
 			try {
 				temp = new Path(tempFile.getCanonicalPath());
 			} catch (IOException e) {
 				temp = new Path(tempFile.getAbsolutePath());
-			}			
+			}
 		}
 		return temp;
 	}
@@ -78,5 +80,10 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 
 	public IEnvironment getEnvironment() {
 		return LocalEnvironment.getInstance();
+	}
+
+	public boolean isValidExecutableName(String name) {
+		return !Platform.getOS().equals(Platform.OS_WIN32)
+				|| name.endsWith(".exe") || name.endsWith(".bat");
 	}
 }
