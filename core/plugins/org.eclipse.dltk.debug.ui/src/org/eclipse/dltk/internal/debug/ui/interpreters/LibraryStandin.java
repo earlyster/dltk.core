@@ -14,7 +14,7 @@ import java.text.MessageFormat;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.IDLTKDebugUIConstants;
@@ -27,18 +27,16 @@ import org.eclipse.dltk.launching.LibraryLocation;
  * 
  */
 public final class LibraryStandin {
-	private IPath fSystemLibrary;
-	private IEnvironment fEnvironment;
+	private IPath fLibraryLocation;
 		
 	/**
 	 * Creates a new library standin on the given library location.
 	 */	
-	public LibraryStandin(LibraryLocation libraryLocation, IEnvironment environment) {
-		fSystemLibrary= libraryLocation.getLibraryPath();
-		this.fEnvironment = environment;
+	public LibraryStandin(LibraryLocation libraryLocation) {
+		fLibraryLocation= libraryLocation.getLibraryPath();
 	}	
 	public LibraryStandin(IPath path) {
-		fSystemLibrary= path;
+		fLibraryLocation= path;
 	}	
 		
 	/**
@@ -46,8 +44,8 @@ public final class LibraryStandin {
 	 * 
 	 * @return The InterpreterEnvironment library archive location.
 	 */
-	public IPath getSystemLibraryPath() {
-		return fSystemLibrary;
+	public String getLibraryPathString() {
+		return EnvironmentPathUtils.getLocalPathString(fLibraryLocation);
 	}
 	
 	
@@ -57,7 +55,7 @@ public final class LibraryStandin {
 	public boolean equals(Object obj) {
 		if (obj instanceof LibraryStandin) {
 			LibraryStandin lib = (LibraryStandin)obj;
-			return getSystemLibraryPath().equals(lib.getSystemLibraryPath());
+			return fLibraryLocation.equals(lib.fLibraryLocation);
 		} 
 		return false;
 	}
@@ -66,7 +64,7 @@ public final class LibraryStandin {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return getSystemLibraryPath().hashCode();
+		return fLibraryLocation.hashCode();
 	}
 	
 	/**
@@ -103,7 +101,7 @@ public final class LibraryStandin {
 	 * @return library location
 	 */
 	public LibraryLocation toLibraryLocation() {
-		return new LibraryLocation(getSystemLibraryPath());
+		return new LibraryLocation(fLibraryLocation);
 	}
 	
 	/**
@@ -113,15 +111,10 @@ public final class LibraryStandin {
 	 * @return
 	 */
 	public IStatus validate() {
-		IFileHandle f = fEnvironment.getFile(getSystemLibraryPath());
+		IFileHandle f = EnvironmentPathUtils.getFile(fLibraryLocation);
 		if (!f.exists()) {
-			IPath path = getSystemLibraryPath();
-			String message = InterpretersMessages.LibraryStandin_pathIsEmpty;
-			if( path != null ) {
-				message = path.toOSString();
-			}
 			return new Status(IStatus.ERROR, DLTKDebugUIPlugin.PLUGIN_ID, IDLTKDebugUIConstants.INTERNAL_ERROR, 
-					MessageFormat.format(InterpretersMessages.LibraryStandin_0, new String[]{message}), null);
+					MessageFormat.format(InterpretersMessages.LibraryStandin_0, new String[]{f.toString()}), null);
 		}	
 		return Status.OK_STATUS;
 	}

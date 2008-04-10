@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.LibraryLocation;
@@ -32,10 +31,8 @@ public class LibraryContentProvider implements ITreeContentProvider {
 	protected LibraryStandin[] fLibraries = new LibraryStandin[0];
 	protected LibraryStandin[] fAllLibraries = new LibraryStandin[0];
 
-	private IEnvironment fEnvironment;
 
-	public LibraryContentProvider(IEnvironment environment) {
-		this.fEnvironment = environment;
+	public LibraryContentProvider() {
 	}
 
 	public void dispose() {
@@ -53,7 +50,7 @@ public class LibraryContentProvider implements ITreeContentProvider {
 		if (libs != null) {
 			fLibraries = new LibraryStandin[libs.length];
 			for (int i = 0; i < libs.length; i++) {
-				fLibraries[i] = new LibraryStandin(libs[i], this.fEnvironment);
+				fLibraries[i] = new LibraryStandin(libs[i]);
 			}
 		} else {
 			fLibraries = new LibraryStandin[0];
@@ -152,7 +149,7 @@ public class LibraryContentProvider implements ITreeContentProvider {
 		}
 		List toAdd = new ArrayList(libs.length);
 		for (int i = 0; i < libs.length; i++) {
-			toAdd.add(new LibraryStandin(libs[i], this.fEnvironment));
+			toAdd.add(new LibraryStandin(libs[i]));
 		}
 		if (selection.isEmpty()) {
 			newLibraries.addAll(toAdd);
