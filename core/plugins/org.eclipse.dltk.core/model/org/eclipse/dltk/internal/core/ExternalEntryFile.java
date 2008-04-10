@@ -9,7 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.io.FileInputStream;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 
 /**
@@ -27,15 +28,15 @@ import org.eclipse.dltk.core.ModelException;
  * @see IStorage
  */
 public class ExternalEntryFile extends PlatformObject implements IStorage {
-	private IPath path;
+	private IFileHandle file;
 
-	public ExternalEntryFile(IPath path) {		
-		this.path = path;
+	public ExternalEntryFile(IFileHandle file) {		
+		this.file = file;
 	}
 
 	public InputStream getContents() throws CoreException {
-		try {
-			return new FileInputStream(path.toOSString());
+		try {			
+			return new BufferedInputStream(file.openInputStream());
 		} catch (IOException e) {
 			throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
 		}
@@ -45,14 +46,14 @@ public class ExternalEntryFile extends PlatformObject implements IStorage {
 	 * @see IStorage#getFullPath
 	 */
 	public IPath getFullPath() {
-		return this.path;
+		return this.file.getPath();
 	}
 
 	/**
 	 * @see IStorage#getName
 	 */
 	public String getName() {
-		return this.path.lastSegment();
+		return this.file.getName();
 	}
 
 	/**
@@ -66,6 +67,6 @@ public class ExternalEntryFile extends PlatformObject implements IStorage {
 	 * @see IStorage#isReadOnly()
 	 */
 	public String toString() {
-		return "ExternalEntryFile[" + this.path.toOSString() + "]"; //$NON-NLS-2$ //$NON-NLS-1$
+		return "ExternalEntryFile[" + this.file.getAbsolutePath() + "]"; //$NON-NLS-2$ //$NON-NLS-1$
 	}
 }

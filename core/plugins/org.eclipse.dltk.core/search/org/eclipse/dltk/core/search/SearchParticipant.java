@@ -112,8 +112,6 @@ public abstract class SearchParticipant {
 	 */
 	public abstract SearchDocument getDocument(String documentPath);
 	
-	public abstract SearchDocument getExternalDocument(String documentPath);
-
 	/**
 	 * Indexes the given document in the given index. A search participant
 	 * asked to index a document should parse it and call 
@@ -228,7 +226,6 @@ public abstract class SearchParticipant {
 		manager.ensureIndexExists(osIndexLocation, containerPath);
 		manager.scheduleDocumentIndexing(document, containerPath, osIndexLocation, this);
 	}
-
 	/**
 	 * Returns the collection of index locations to consider when performing the
 	 * given search query in the given scope. The search engine calls this

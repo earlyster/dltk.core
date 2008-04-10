@@ -1,5 +1,6 @@
 package org.eclipse.dltk.core;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,6 +17,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 public class DLTKContentTypeManager {
 	public static boolean isValidFileNameForContentType(
@@ -24,7 +27,7 @@ public class DLTKContentTypeManager {
 			return true;
 		}
 		if (path.isAbsolute()) {
-			File file = new File(path.toOSString());
+			File file = path.toFile();
 			if (file.exists() && file.isFile()
 					&& (file.getName().indexOf('.') == -1)) {
 				IContentType[] derived = getDerivedContentTypes(toolkit
@@ -34,7 +37,8 @@ public class DLTKContentTypeManager {
 					IContentType type = derived[i];
 					InputStream stream = null;
 					try {
-						stream = new FileInputStream(file);
+						stream = new BufferedInputStream(new FileInputStream(
+								file), 2048);
 						IContentDescription description = type
 								.getDescriptionFor(stream,
 										IContentDescription.ALL);
@@ -87,7 +91,7 @@ public class DLTKContentTypeManager {
 		if (resource instanceof IFile) {
 			// Custom filtering via language tookit
 			IStatus status = toolkit.validateSourceModule(resource);
-			if( status.getSeverity() != IStatus.OK) {
+			if (status.getSeverity() != IStatus.OK) {
 				return false;
 			}
 			IFile file = (IFile) resource;

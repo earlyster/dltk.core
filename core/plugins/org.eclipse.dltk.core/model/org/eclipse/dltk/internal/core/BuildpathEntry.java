@@ -10,7 +10,6 @@
 package org.eclipse.dltk.internal.core;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -37,6 +37,10 @@ import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.compiler.env.AccessRule;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
 import org.eclipse.dltk.internal.core.util.Messages;
@@ -157,6 +161,12 @@ public class BuildpathEntry implements IBuildpathEntry {
 			org.eclipse.dltk.core.IAccessRule[] accessRules,
 			boolean combineAccessRules, IBuildpathAttribute[] extraAttributes,
 			boolean externalLib) {
+		// if this is external entry, path should be full
+		Assert.isLegal(!externalLib
+				|| EnvironmentPathUtils.isFull(path)
+				|| path.segment(0).equals(
+						IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR));
+
 		this.contentKind = contentKind;
 		this.entryKind = entryKind;
 		this.path = path;
@@ -226,10 +236,12 @@ public class BuildpathEntry implements IBuildpathEntry {
 			Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
 					.getRoot(), libPath, false);
 			String pathString;
-			if (target instanceof java.io.File)
-				pathString = libPath.toOSString();
-			else
+			if (target instanceof IFileHandle) {
+				pathString = target.toString();
+			} else {
 				pathString = libPath.makeRelative().toString();
+			}
+
 			result[0] = manager
 					.intern(Messages
 							.bind(
@@ -324,14 +336,16 @@ public class BuildpathEntry implements IBuildpathEntry {
 				|| referringEntry.getAccessRuleSet() != null) {
 			boolean combine = this.entryKind == BPE_SOURCE
 					|| referringEntry.combineAccessRules();
-			return new BuildpathEntry(getContentKind(), getEntryKind(),
+			return new BuildpathEntry(
+					getContentKind(),
+					getEntryKind(),
 					getPath(),
 					referringEntry.isExported() || this.isExported, // duplicate
-																	// container
-																	// entry for
-																	// tagging
-																	// it as
-																	// exported
+					// container
+					// entry for
+					// tagging
+					// it as
+					// exported
 					this.inclusionPatterns, this.exclusionPatterns, combine(
 							referringEntry.getAccessRules(), getAccessRules(),
 							combine), this.combineAccessRules,
@@ -561,6 +575,13 @@ public class BuildpathEntry implements IBuildpathEntry {
 					false);
 			break;
 		case IBuildpathEntry.BPE_LIBRARY:
+			if (isExternal) {
+				IEnvironment environment = EnvironmentManager
+						.getEnvironment(project);
+				if (environment != null) {
+					path = EnvironmentPathUtils.getFullPath(environment, path);
+				}
+			}
 			entry = DLTKCore.newLibraryEntry(path, accessRules,
 					extraAttributes, inclusionPatterns, exclusionPatterns,
 					isExported, isExternal);
@@ -588,7 +609,8 @@ public class BuildpathEntry implements IBuildpathEntry {
 			}
 			break;
 		case IBuildpathEntry.BPE_CONTAINER:
-			entry = DLTKCore.newContainerEntry(path, accessRules, extraAttributes, isExported);
+			entry = DLTKCore.newContainerEntry(path, accessRules,
+					extraAttributes, isExported);
 			break;
 		default:
 			throw new AssertionFailedException(Messages.bind(
@@ -851,6 +873,9 @@ public class BuildpathEntry implements IBuildpathEntry {
 				&& this.entryKind != IBuildpathEntry.BPE_CONTAINER) {
 			// translate to project relative from absolute (unless a device
 			// path)
+			if (EnvironmentPathUtils.isFull(xmlPath)) {
+				xmlPath = EnvironmentPathUtils.getLocalPath(path);
+			}
 			if (xmlPath.isAbsolute()) {
 				if (projectPath != null && projectPath.isPrefixOf(xmlPath)) {
 					if (xmlPath.segment(0).equals(projectPath.segment(0))) {
@@ -1031,9 +1056,9 @@ public class BuildpathEntry implements IBuildpathEntry {
 		// retrieve resolved buildpath
 		IBuildpathEntry[] buildpath;
 		try {
-			buildpath = ((ScriptProject) scriptProject)
-					.getResolvedBuildpath(rawBuildpath, true/* ignore pb */,
-							false/* no marker */, null /* no reverse map */);
+			buildpath = ((ScriptProject) scriptProject).getResolvedBuildpath(
+					rawBuildpath, true/* ignore pb */, false/* no marker */,
+					null /* no reverse map */);
 		} catch (ModelException e) {
 			return e.getModelStatus();
 		}
@@ -1262,10 +1287,11 @@ public class BuildpathEntry implements IBuildpathEntry {
 							if (containerEntry == null
 									|| kind == IBuildpathEntry.BPE_SOURCE
 									|| kind == IBuildpathEntry.BPE_CONTAINER) {
-//								String description = container.getDescription(project);
-//								if (description == null)
-//									description = path.makeRelative()
-//											.toString();
+								// String description =
+								// container.getDescription(project);
+								// if (description == null)
+								// description = path.makeRelative()
+								// .toString();
 								return new ModelStatus(
 										IModelStatusConstants.INVALID_BP_CONTAINER_ENTRY,
 										project, path);
@@ -1307,8 +1333,8 @@ public class BuildpathEntry implements IBuildpathEntry {
 						case IResource.FOLDER: // internal binary folder
 							break;
 						}
-					} else if (target instanceof File) {
-						File file = (File) target;
+					} else if (target instanceof IFileHandle) {
+						IFileHandle file = (IFileHandle) target;
 						if (!file.exists()) {
 							return new ModelStatus(
 									IModelStatusConstants.INVALID_BUILDPATH,
@@ -1316,20 +1342,20 @@ public class BuildpathEntry implements IBuildpathEntry {
 											.bind(
 													Messages.buildpath_illegalLibraryArchive,
 													new String[] {
-															path.toOSString(),
+															path.toString(),
 															projectName }));
 						}
 					}
 				} else {
-					File file = new File(entry.getPath().toOSString());
+					IFileHandle file = EnvironmentPathUtils.getFile(entry
+							.getPath());
 					if (file == null || !file.exists()) {
 						return new ModelStatus(
 								IModelStatusConstants.INVALID_BUILDPATH,
 								Messages
 										.bind(
 												Messages.buildpath_illegalExternalFolder,
-												new String[] {
-														path.toOSString(),
+												new String[] { path.toString(),
 														projectName }));
 					}
 				}

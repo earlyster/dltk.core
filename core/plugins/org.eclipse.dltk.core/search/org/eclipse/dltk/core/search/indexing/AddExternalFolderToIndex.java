@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search.indexing;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.core.resources.IProject;
@@ -23,6 +22,10 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.index.Index;
@@ -34,6 +37,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 	IProject project;
 	char[][] inclusionPatterns;
 	char[][] exclusionPatterns;
+	private IEnvironment environment;
 
 	public AddExternalFolderToIndex(IPath folderPath, IProject project,
 			char[][] inclusionPatterns, char[][] exclusionPatterns,
@@ -72,7 +76,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 		if (!this.project.isAccessible()) {
 			return true; // nothing to do
 		}
-		File folder = new File(this.containerPath.toOSString());
+		IFileHandle folder = EnvironmentPathUtils.getFile(this.containerPath);
 		if (folder == null || folder.isFile()) {
 			return true; // nothing to do, source folder was removed
 		}
@@ -127,7 +131,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 					.getSourceRequestor(project);
 			if (JobManager.VERBOSE) {
 				org.eclipse.dltk.internal.core.util.Util
-						.verbose("-> indexing " + this.containerPath.toOSString()); //$NON-NLS-1$
+						.verbose("-> indexing " + this.containerPath.toString()); //$NON-NLS-1$
 			}
 			long initialTime = System.currentTimeMillis();
 			String[] paths = index.queryDocumentNames(""); // all file names //$NON-NLS-1$
@@ -164,7 +168,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 						if (JobManager.VERBOSE) {
 							org.eclipse.dltk.internal.core.util.Util
 									.verbose("-> no indexing required (index is consistent with library) for " //$NON-NLS-1$
-											+ this.containerPath.toOSString()
+											+ this.containerPath.toString()
 											+ " (" //$NON-NLS-1$
 											+ (System.currentTimeMillis() - initialTime)
 											+ "ms)"); //$NON-NLS-1$
@@ -193,7 +197,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 			if (JobManager.VERBOSE) {
 				org.eclipse.dltk.internal.core.util.Util
 						.verbose("-> done indexing of " //$NON-NLS-1$
-								+ this.containerPath.toOSString()
+								+ this.containerPath.toString()
 								+ " (" //$NON-NLS-1$
 								+ (System.currentTimeMillis() - initialTime)
 								+ "ms)"); //$NON-NLS-1$
@@ -213,20 +217,20 @@ class AddExternalFolderToIndex extends IndexRequest {
 	}
 
 	private void visit(SimpleLookupTable table, IScriptProject project,
-			File folder, ISourceElementParser parser,
+			IFileHandle folder, ISourceElementParser parser,
 			SourceIndexerRequestor requestor, IndexManager indexManager,
 			IPath container, boolean operation, SearchParticipant participant,
 			Index index) {
 
 		IDLTKLanguageToolkit toolkit = null;
 		toolkit = DLTKLanguageManager.getLanguageToolkit(project);
-		File[] files = folder.listFiles();
+		IFileHandle[] files = folder.getChildren();
 		if (files != null) {
 			for (int i = 0; i < files.length; ++i) {
 				if (this.isCancelled) {
 					if (JobManager.VERBOSE) {
 						org.eclipse.dltk.internal.core.util.Util
-								.verbose("-> indexing of " + this.containerPath.toOSString() + " has been cancelled"); //$NON-NLS-1$ //$NON-NLS-2$
+								.verbose("-> indexing of " + this.containerPath.toString() + " has been cancelled"); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					return;
 				}
@@ -282,7 +286,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 			SourceIndexerRequestor requestor, SearchParticipant participant,
 			Index index, String path, IDLTKLanguageToolkit toolkit) {
 		char[] contents = null;
-		File ffile = new File(path);
+		IFileHandle ffile = getEnvironment().getFile(new Path(path));
 		if (ffile != null && ffile.exists()) {
 			try {
 				contents = Util.getResourceContentsAsCharArray(ffile);
@@ -297,12 +301,20 @@ class AddExternalFolderToIndex extends IndexRequest {
 				.segmentCount());
 		dpath = dpath.setDevice(null);
 		DLTKSearchDocument entryDocument = new DLTKSearchDocument(dpath
-				.toOSString(), this.containerPath, contents, participant, true);
+				.toString(), this.containerPath, contents, participant, true);
 		entryDocument.parser = parser;
 		entryDocument.requestor = requestor;
 		entryDocument.toolkit = toolkit;
 		this.manager.indexDocument(entryDocument, participant, index,
 				this.containerPath);
+	}
+
+	private IEnvironment getEnvironment() {
+		if (environment == null) {
+			IScriptProject scriptProject = DLTKCore.create(project);
+			environment = EnvironmentManager.getEnvironment(scriptProject);
+		}
+		return environment;
 	}
 
 	public String toString() {

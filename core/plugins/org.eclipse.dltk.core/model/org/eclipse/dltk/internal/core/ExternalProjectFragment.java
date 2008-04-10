@@ -5,17 +5,15 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
-
+ 
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -28,14 +26,18 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Util;
 
 /**
  * Project fragment to external source folder.
- *
+ * 
  * @author haiodo
- *
+ * 
  */
 public class ExternalProjectFragment extends ProjectFragment {
 	public final static ArrayList EMPTY_LIST = new ArrayList();
@@ -76,9 +78,9 @@ public class ExternalProjectFragment extends ProjectFragment {
 	/**
 	 * Starting at this folder, create folders and add them to the collection of
 	 * children.
-	 *
+	 * 
 	 * @param newElements
-	 *
+	 * 
 	 * @exception ModelException
 	 *                The resource associated with this project fragment does
 	 *                not exist
@@ -104,20 +106,18 @@ public class ExternalProjectFragment extends ProjectFragment {
 		List scriptElements = new ArrayList();
 		List nonScriptElements = new ArrayList();
 		try {
-			File file = new File(path.toOSString());
-			String[] members = file.list();
+			IFileHandle file = EnvironmentPathUtils.getFile(path);
+			IFileHandle[] members = file.getChildren();
 			if (members != null) {
 				for (int i = 0, max = members.length; i < max; i++) {
-					String member = members[i];
-					IPath memberPath = path.append(member);
-					File memberFile = new File(memberPath.toOSString());
+					IFileHandle memberFile = members[i];
+					IPath memberPath = memberFile.getFullPath();
 					if (memberFile.isDirectory()) {
 						boolean isMemberIncluded = !Util.isExcluded(memberPath,
 								inclusionPatterns, exclusionPatterns, true);
-						this.computeFolderChildren(memberPath,
-								isMemberIncluded, vChildren, vForeign,
-								newElements, inclusionPatterns,
-								exclusionPatterns);
+						computeFolderChildren(memberPath, isMemberIncluded,
+								vChildren, vForeign, newElements,
+								inclusionPatterns, exclusionPatterns);
 					} else {
 						if (Util.isValidSourceModule(this, memberPath)) {
 							scriptElements.add(memberPath);
@@ -146,7 +146,7 @@ public class ExternalProjectFragment extends ProjectFragment {
 
 	public IScriptFolder getScriptFolder(IPath path) {
 		try {
-			List childs = this.getChildrenOfType(SCRIPT_FOLDER);
+			List childs = getChildrenOfType(SCRIPT_FOLDER);
 			for (int i = 0; i < childs.size(); ++i) {
 				IScriptFolder folder = (IScriptFolder) childs.get(i);
 				if (folder.getElementName().equals(path.toPortableString())) {
@@ -190,43 +190,26 @@ public class ExternalProjectFragment extends ProjectFragment {
 	}
 
 	public IPath getPath() {
-		if (this.isExternal()) {
-			return this.fPath;
-		} else {
-			return super.getPath();
-		}
+		return this.fPath;
 	}
 
 	public IResource getResource() {
-		if (this.resource == null) {
-			this.resource = Model.getTarget(ResourcesPlugin.getWorkspace()
-					.getRoot(), this.fPath, false);
-		}
-		if (this.resource instanceof IResource) {
-			return super.getResource();
-		} else {
-			// external
-			return null;
-		}
+		return null;
 	}
 
 	/**
 	 * Returns whether the corresponding resource or associated file exists
 	 */
 	protected boolean resourceExists() {
-		if (this.isExternal()) {
-			File file = new File(this.fPath.toOSString());
-			return file.exists() && file.isDirectory();
-		} else {
-			return super.resourceExists();
+		if (fPath.toString().startsWith(
+				IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)) {
+			return true;
 		}
+		IFileHandle file = EnvironmentPathUtils.getFile(fPath);
+		return file.exists() && file.isDirectory();
 	}
 
 	protected void toStringAncestors(StringBuffer buffer) {
-		if (this.isExternal()) {
-			return;
-		}
-		super.toStringAncestors(buffer);
 	}
 
 	public int getKind() {
@@ -239,14 +222,23 @@ public class ExternalProjectFragment extends ProjectFragment {
 		}
 		if (o instanceof ExternalProjectFragment) {
 			ExternalProjectFragment other = (ExternalProjectFragment) o;
+			IEnvironment environment = EnvironmentManager.getEnvironment(this);
+			if (o instanceof IModelElement && environment != null) {
+				IEnvironment environmento = EnvironmentManager
+						.getEnvironment((IModelElement) other);
+				if (!environment.equals(environmento)) {
+					return false;
+				}
+			}
 			return this.fPath.equals(other.fPath);
 		}
 		return false;
 	}
 
 	public String getElementName() {
-		return this.fPath.toOSString().replace(File.separatorChar,
-				JEM_SKIP_DELIMETER);
+		IEnvironment env = EnvironmentManager.getEnvironment(this);
+		String pathString = EnvironmentPathUtils.getLocalPathString(fPath);
+		return pathString.replace(env.getSeparatorChar(), JEM_SKIP_DELIMETER);
 	}
 
 	public IModelElement getHandleFromMemento(String token,
@@ -288,7 +280,8 @@ public class ExternalProjectFragment extends ProjectFragment {
 				&& rawEntry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER) {
 			IBuildpathContainer container = DLTKCore.getBuildpathContainer(
 					rawEntry.getPath(), this.getScriptProject());
-			IBuildpathEntry entrys[] = container.getBuildpathEntries(getScriptProject());
+			IBuildpathEntry entrys[] = container
+					.getBuildpathEntries(getScriptProject());
 			for (int i = 0; i < entrys.length; ++i) {
 				if (entrys[i].getPath().equals(this.getPath())) {
 					return entrys[i];

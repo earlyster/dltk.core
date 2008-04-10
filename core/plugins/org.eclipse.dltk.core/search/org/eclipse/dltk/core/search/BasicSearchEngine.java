@@ -210,7 +210,7 @@ public class BasicSearchEngine {
 	 * using helper methods (from a String pattern or a Script element) and
 	 * encapsulate the description of what is being searched (for example,
 	 * search method declarations in a case sensitive way).
-	 *
+	 * 
 	 * @param scope
 	 *            the search result has to be limited to the given scope
 	 * @param requestor
@@ -223,7 +223,6 @@ public class BasicSearchEngine {
 			throw new OperationCanceledException();
 		}
 
-	
 		if (VERBOSE) {
 			Util.verbose("Searching for pattern: " + pattern.toString()); //$NON-NLS-1$
 			Util.verbose(scope.toString());
@@ -236,7 +235,7 @@ public class BasicSearchEngine {
 		}
 		int length = participants.length;
 		if (monitor != null)
-			monitor.beginTask(Messages.engine_searching, 100 * length); 
+			monitor.beginTask(Messages.engine_searching, 100 * length);
 
 		IndexManager indexManager = ModelManager.getModelManager()
 				.getIndexManager();
@@ -249,19 +248,27 @@ public class BasicSearchEngine {
 				}
 
 				try {
-					if (monitor != null) monitor.subTask(Messages.bind(Messages.engine_searching_indexing, new String[] {participant.getDescription()})); 
+					if (monitor != null)
+						monitor.subTask(Messages.bind(
+								Messages.engine_searching_indexing,
+								new String[] { participant.getDescription() }));
 					participant.beginSearching();
 					requestor.enterParticipant(participant);
 					PathCollector pathCollector = new PathCollector();
 					indexManager.performConcurrentJob(new PatternSearchJob(
 							pattern, participant, scope, pathCollector),
 							IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-							monitor==null ? null : new SubProgressMonitor(monitor, 50));
-					if (monitor != null && monitor.isCanceled()) throw new OperationCanceledException();
+							monitor == null ? null : new SubProgressMonitor(
+									monitor, 50));
+					if (monitor != null && monitor.isCanceled())
+						throw new OperationCanceledException();
 
 					// locate index matches if any (note that all search matches
 					// could have been issued during index querying)
-					if (monitor != null) monitor.subTask(Messages.bind(Messages.engine_searching_matching, new String[] {participant.getDescription()})); 
+					if (monitor != null)
+						monitor.subTask(Messages.bind(
+								Messages.engine_searching_matching,
+								new String[] { participant.getDescription() }));
 					String[] indexMatchPaths = pathCollector.getPaths();
 					if (indexMatchPaths != null) {
 						pathCollector = null; // release
@@ -293,7 +300,8 @@ public class BasicSearchEngine {
 								.toArray(new SearchDocument[filteredMatches
 										.size()]);
 						participant.locateMatches(fmatches, pattern, scope,
-								requestor, monitor==null ? null : new SubProgressMonitor(monitor, 50));
+								requestor, monitor == null ? null
+										: new SubProgressMonitor(monitor, 50));
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -414,9 +422,9 @@ public class BasicSearchEngine {
 
 	/**
 	 * Returns a new default Script search participant.
-	 *
+	 * 
 	 * @return a new default Script search participant
-	 *
+	 * 
 	 */
 	public static SearchParticipant getDefaultSearchParticipant() {
 		return new DLTKSearchParticipant();
@@ -467,7 +475,7 @@ public class BasicSearchEngine {
 
 	/**
 	 * Return kind of search corresponding to given value.
-	 *
+	 * 
 	 * @param searchFor
 	 */
 	public static String getSearchForString(final int searchFor) {
@@ -509,7 +517,8 @@ public class BasicSearchEngine {
 		ISourceModule[] copies;
 		if (this.workingCopies != null) {
 			if (this.workingCopyOwner == null) {
-				copies = ModelManager.getModelManager()
+				copies = ModelManager
+						.getModelManager()
 						.getWorkingCopies(DefaultWorkingCopyOwner.PRIMARY,
 								false/* don't add primary WCs a second time */);
 				if (copies == null) {
@@ -519,7 +528,7 @@ public class BasicSearchEngine {
 					for (int i = 0; i < copies.length; i++) {
 						ISourceModule unit = (ISourceModule) copies[i];
 						pathToCUs.put(unit.getPath(), unit);
-						
+
 					}
 					for (int i = 0; i < this.workingCopies.length; i++) {
 						ISourceModule unit = this.workingCopies[i];
@@ -536,17 +545,11 @@ public class BasicSearchEngine {
 			copies = ModelManager.getModelManager().getWorkingCopies(
 					this.workingCopyOwner, true/* add primary WCs */);
 		} else {
-			copies = ModelManager
-					.getModelManager()
-					.getWorkingCopies(DefaultWorkingCopyOwner.PRIMARY, false/*
-																			 * don't
-																			 * add
-																			 * primary
-																			 * WCs
-																			 * a
-																			 * second
-																			 * time
-																			 */);
+			copies = ModelManager.getModelManager().getWorkingCopies(
+					DefaultWorkingCopyOwner.PRIMARY, false/*
+															 * don't add primary
+															 * WCs a second time
+															 */);
 		}
 		if (copies == null) {
 			return null;
@@ -659,7 +662,7 @@ public class BasicSearchEngine {
 	 * created using helper methods (from a String pattern or a Script element)
 	 * and encapsulate the description of what is being searched (for example,
 	 * search method declarations in a case sensitive way).
-	 *
+	 * 
 	 * @see SearchEngine#search(SearchPattern, SearchParticipant[],
 	 *      IJavaSearchScope, SearchRequestor, IProgressMonitor) for detailed
 	 *      comment
@@ -679,7 +682,7 @@ public class BasicSearchEngine {
 	 * created using helper methods (from a String pattern or a Script element)
 	 * and encapsulate the description of what is being searched (for example,
 	 * search method declarations in a case sensitive way).
-	 *
+	 * 
 	 * @see SearchEngine#search(SearchPattern, SearchParticipant[],
 	 *      IJavaSearchScope, SearchRequestor, IProgressMonitor) for detailed
 	 *      comment
@@ -832,7 +835,7 @@ public class BasicSearchEngine {
 	 * Searches for all top-level types and member types in the given scope. The
 	 * search can be selecting specific types (given a package or a type name
 	 * prefix and match modes).
-	 *
+	 * 
 	 * @see SearchEngine#searchAllTypeNames(char[], char[], int, int,
 	 *      IJavaSearchScope, TypeNameRequestor, int, IProgressMonitor) for
 	 *      detailed comment
@@ -1036,7 +1039,7 @@ public class BasicSearchEngine {
 	 * Searches for all top-level types and member types in the given scope
 	 * using a case sensitive exact match with the given qualified names and
 	 * type names.
-	 *
+	 * 
 	 * @see SearchEngine#searchAllTypeNames(char[][], char[][],
 	 *      IJavaSearchScope, TypeNameRequestor, int, IProgressMonitor) for
 	 *      detailed comment
@@ -1409,11 +1412,13 @@ public class BasicSearchEngine {
 					if (fragment != null) {
 						external = fragment.isExternal();
 					}
+					char[] contents = Util
+							.getResourceContentsAsCharArray((IFile) resource);
 					SearchDocument[] documents = MatchLocator.addWorkingCopies(
 							pattern,
 							new SearchDocument[] { new DLTKSearchDocument(
 									enclosingElement.getPath().toString(),
-									participant, external) },
+									contents, participant, external) },
 							getWorkingCopies(enclosingElement), participant);
 					participant.locateMatches(documents, pattern, scope,
 							requestor, monitor);
@@ -1438,7 +1443,7 @@ public class BasicSearchEngine {
 	 * Searches for all declarations of the fields accessed in the given
 	 * element. The element can be a compilation unit, a source type, or a
 	 * source method. Reports the field declarations using the given requestor.
-	 *
+	 * 
 	 * @see SearchEngine#searchDeclarationsOfAccessedFields(IModelElement,
 	 *      SearchRequestor, IProgressMonitor) for detailed comment
 	 */
@@ -1458,7 +1463,7 @@ public class BasicSearchEngine {
 	 * Searches for all declarations of the types referenced in the given
 	 * element. The element can be a compilation unit, a source type, or a
 	 * source method. Reports the type declarations using the given requestor.
-	 *
+	 * 
 	 * @see SearchEngine#searchDeclarationsOfReferencedTypes(IModelElement,
 	 *      SearchRequestor, IProgressMonitor) for detailed comment
 	 */
@@ -1478,7 +1483,7 @@ public class BasicSearchEngine {
 	 * Searches for all declarations of the methods invoked in the given
 	 * element. The element can be a compilation unit, a source type, or a
 	 * source method. Reports the method declarations using the given requestor.
-	 *
+	 * 
 	 * @see SearchEngine#searchDeclarationsOfSentMessages(IModelElement,
 	 *      SearchRequestor, IProgressMonitor) for detailed comment
 	 */

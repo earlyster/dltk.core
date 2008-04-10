@@ -474,7 +474,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 
 		// code complete
 		ICompletionEngine engine = DLTKLanguageManager
-				.getCompletionEngine(toolkit.getNatureId());
+			.getCompletionEngine(toolkit.getNatureId());
 		if (engine == null) {
 			return;
 		}
@@ -522,7 +522,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		}
 
 		ISelectionEngine engine = DLTKLanguageManager
-				.getSelectionEngine(toolkit.getNatureId());
+			.getSelectionEngine(toolkit.getNatureId());
 		if (engine == null) {
 			return new IModelElement[0];
 		}
