@@ -521,17 +521,12 @@ public abstract class AbstractInterpreterInstallType implements
 			// name.matches(possibleName + ".*\\.exe")
 			for (int i = 0; i < possibleNames.length; ++i) {
 				final String possibleName = possibleNames[i].toLowerCase();
-				String fName = nPath.removeFileExtension().toString()
-						.toLowerCase();
-				String ext = nPath.getFileExtension();
-				if (possibleName.equals(fName)) {
-					if (execEnv.isValidExecutableName(fName)
-							|| "exe".equalsIgnoreCase(ext)
-							|| "bat".equalsIgnoreCase(ext)) {
-						//$NON-NLS-1$ //$NON-NLS-2$
-						matchFound = true;
-						break;
-					}
+				// String fName = nPath.removeFileExtension().toString()
+				// .toLowerCase();
+				if (execEnv.isValidExecutableAndEquals(possibleName, nPath)) {
+					//$NON-NLS-1$ 
+					matchFound = true;
+					break;
 				}
 			}
 		}

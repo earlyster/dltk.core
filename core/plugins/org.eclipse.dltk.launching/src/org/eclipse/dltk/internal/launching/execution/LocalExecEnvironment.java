@@ -82,8 +82,21 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 		return LocalEnvironment.getInstance();
 	}
 
-	public boolean isValidExecutableName(String name) {
-		return !Platform.getOS().equals(Platform.OS_WIN32)
-				|| name.endsWith(".exe") || name.endsWith(".bat");
+	public boolean isValidExecutableAndEquals(String possibleName, IPath path) {
+		if (Platform.getOS().equals(Platform.OS_WIN32)) {
+			possibleName = possibleName.toLowerCase();
+			String fName = path.removeFileExtension().toString().toLowerCase();
+			String ext = path.getFileExtension();
+			if (possibleName.equals(fName)
+					&& ("exe".equalsIgnoreCase(ext) || "bat".equalsIgnoreCase(ext))) { //$NON-NLS-1$ //$NON-NLS-2$
+				return true;
+			}
+		} else {
+			String fName = path.lastSegment();
+			if (fName.equals(possibleName)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
