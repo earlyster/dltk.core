@@ -1,9 +1,9 @@
 package org.eclipse.dltk.core.tests.launching;
 
-import java.io.File;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 public interface IFileVisitor {
 
-	boolean visit(File file);
+	boolean visit(IFileHandle file);
 
 }

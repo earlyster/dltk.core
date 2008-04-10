@@ -1,6 +1,5 @@
 package org.eclipse.dltk.core.tests.launching;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -14,11 +13,15 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 public class PathFilesContainer {
 	private static final String PATH = "path";
+	private IEnvironment environment;
 
-	public PathFilesContainer() {
+	public PathFilesContainer(IEnvironment environment) {
+		this.environment = environment;
 	}
 
 	public void accept(IFileVisitor visitor) {
@@ -66,7 +69,7 @@ public class PathFilesContainer {
 			final IPath folder = (IPath) iter.next();
 
 			if (folder != null) {
-				File f = folder.toFile();
+				IFileHandle f = environment.getFile(folder);
 				if (f.isDirectory()) {
 					visitFolder(visitor, f, monitor, deep, searchedFiles);
 				}
@@ -81,7 +84,7 @@ public class PathFilesContainer {
 	 * 
 	 * @param visitor
 	 * 
-	 * @param directory
+	 * @param ry
 	 * @param found
 	 * @param types
 	 * @param ignore
@@ -89,7 +92,7 @@ public class PathFilesContainer {
 	 *            deepness of search. -1 if infinite.
 	 * @param searchedFiles
 	 */
-	protected void visitFolder(IFileVisitor visitor, File directory,
+	protected void visitFolder(IFileVisitor visitor, IFileHandle directory,
 			IProgressMonitor monitor, int deep, ArrayList searchedFiles) {
 		if (deep == 0) {
 			return;
@@ -103,35 +106,32 @@ public class PathFilesContainer {
 			return;
 		}
 
-		String[] names = directory.list();
-		if (names == null) {
+		IFileHandle[] childFiles = directory.getChildren();
+		if (childFiles == null) {
 			return;
 		}
 
 		List subDirs = new ArrayList();
-		for (int i = 0; i < names.length; i++) {
+		for (int i = 0; i < childFiles.length; i++) {
 			if (monitor.isCanceled()) {
 				return;
 			}
 
-			final File file = new File(directory, names[i]);
+			final IFileHandle file = childFiles[i];
 
-			try {
-				monitor.subTask(MessageFormat.format("Searching {0}",
-						new String[] { file.getCanonicalPath() }));
+			monitor.subTask(MessageFormat.format("Searching {0}",
+					new String[] { file.getCanonicalPath() }));
 
-				// Check if file is a symlink
-				if (file.isDirectory()
-						&& (!file.getCanonicalPath().equals(
-								file.getAbsolutePath()))) {
-					continue;
-				}
-			} catch (IOException e) {
+			// Check if file is a symlink
+			if (file.isDirectory()
+					&& (!file.getCanonicalPath().equals(
+							file.getAbsolutePath()))) {
+				continue;
 			}
 
 			if (visitor.visit(file)) {
 				while (!subDirs.isEmpty()) {
-					File subDir = (File) subDirs.remove(0);
+					IFileHandle subDir = (IFileHandle) subDirs.remove(0);
 					visitFolder(visitor, subDir, monitor, deep - 1,
 							searchedFiles);
 				}

@@ -1,6 +1,5 @@
 package org.eclipse.dltk.core.tests.launching;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +7,8 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.ScriptRuntime;
 
@@ -20,7 +21,7 @@ public class InterpreterSearcher {
 	public InterpreterSearcher() {
 	}
 
-	public void search(String natureId, Set ignore, int deep,
+	public void search(IEnvironment environment, String natureId, Set ignore, int deep,
 			IProgressMonitor monsitor) {
 		if (natureId == null) {
 			throw new IllegalArgumentException();
@@ -33,7 +34,7 @@ public class InterpreterSearcher {
 		this.ignore = ignore == null ? Collections.EMPTY_SET : ignore;
 
 		Searcher searcher = new Searcher(); 
-		PathFilesContainer path = new PathFilesContainer();
+		PathFilesContainer path = new PathFilesContainer(environment);
 		path.accept(searcher);
 	}
 
@@ -41,8 +42,8 @@ public class InterpreterSearcher {
 		return !found.isEmpty();
 	}
 
-	public File[] getFoundFiles() {
-		return (File[]) found.toArray(new File[found.size()]);
+	public IFileHandle[] getFoundFiles() {
+		return (IFileHandle[]) found.toArray(new IFileHandle[found.size()]);
 	}
 
 	public IInterpreterInstallType[] getFoundInstallTypes() {
@@ -51,7 +52,7 @@ public class InterpreterSearcher {
 	}
 	
 	class Searcher implements IFileVisitor {
-		public boolean visit(File file) {
+		public boolean visit(IFileHandle file) {
 			IInterpreterInstallType[] installTypes = ScriptRuntime
 					.getInterpreterInstallTypes(natureId);
 

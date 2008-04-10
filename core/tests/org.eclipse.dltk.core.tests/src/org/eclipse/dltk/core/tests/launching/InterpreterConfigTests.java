@@ -1,6 +1,5 @@
 package org.eclipse.dltk.core.tests.launching;
 
-import java.io.File;
 import java.util.List;
 
 import junit.framework.Test;
@@ -9,6 +8,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.tests.model.AbstractModelTests;
 import org.eclipse.dltk.launching.InterpreterConfig;
 
@@ -40,29 +41,29 @@ public class InterpreterConfigTests extends AbstractModelTests {
 		IProject project = scriptProject.getProject();
 		IResource member = project.findMember("src/script.xxx");
 		IPath scriptPath = member.getLocation();
-		File file = new File( scriptPath.toOSString() );
-		return new InterpreterConfig(file);
+		IEnvironment env = EnvironmentManager.getEnvironment(scriptProject);
+		return new InterpreterConfig(env, scriptPath);
 	}
 
 	public void testInterpreterConfig() {
 		IProject project = scriptProject.getProject();
 		IResource member = project.findMember("src/script.xxx");
 		IPath scriptPath = member.getLocation();
+		IEnvironment env = EnvironmentManager.getEnvironment(scriptProject);
 
-		File file = new File( scriptPath.toOSString() );
-		InterpreterConfig config = new InterpreterConfig(file);
+		InterpreterConfig config = new InterpreterConfig(env, scriptPath);
 
 		// Creation
-		assertNotNull(config.getScriptFile());
-		assertNotNull(config.getWorkingDirectory());
+		assertNotNull(config.getScriptFilePath());
+		assertNotNull(config.getWorkingDirectoryPath());
 
-		assertEquals(scriptPath.toOSString(), config.getScriptFile().toString());
+		assertEquals(scriptPath.toOSString(), config.getScriptFilePath().toOSString());
 		assertEquals(scriptPath.removeLastSegments(1).toOSString(), config
-				.getWorkingDirectory().toString());
+				.getWorkingDirectoryPath().toOSString());
 
 		// Null as script file
 		try {
-			config.setScriptFile((File)null);
+			config.setScriptFile(null);
 			fail("Should raise an IllegalArgumentException");
 		} catch (IllegalArgumentException e) {
 
@@ -77,7 +78,7 @@ public class InterpreterConfigTests extends AbstractModelTests {
 
 		// Null as working directory
 		try {
-			config.setWorkingDirectory((File) null);
+			config.setWorkingDirectory(null);
 			fail("Should raise an IllegalArgumentException");
 		} catch (IllegalArgumentException e) {
 
