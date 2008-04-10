@@ -177,9 +177,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 					if ((includeMask & APPLICATION_LIBRARIES) != 0) {
 						IPath path = entry.getPath();
 						if (pathToAdd == null || pathToAdd.equals(path)) {
-							String pathToString = path.getDevice() == null ? path
-									.toString()
-									: path.toOSString();
+							String pathToString = path.toString();
 							add(
 									projectPath.toString(),
 									"", pathToString, false/* not a package */, access); //$NON-NLS-1$
@@ -197,9 +195,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 							|| (includeMask & SYSTEM_LIBRARIES) != 0) {
 						IPath path = entry.getPath();
 						if (pathToAdd == null || pathToAdd.equals(path)) {
-							String pathToString = path.getDevice() == null ? path
-									.toString()
-									: path.toOSString();
+							String pathToString = path.toString();
 							add(
 									projectPath.toString(),
 									"", pathToString, false/* not a package */, access); //$NON-NLS-1$
@@ -267,9 +263,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 				containerPath = root.getKind() == IProjectFragment.K_SOURCE ? root
 						.getParent().getPath()
 						: rootPath;
-				containerPathToString = containerPath.getDevice() == null ? containerPath
-						.toString()
-						: containerPath.toOSString();
+				containerPathToString = containerPath.toString();
 				IResource rootResource = root.getResource();
 				projectPath = root.getScriptProject().getPath().toString();
 				if (rootResource != null && rootResource.isAccessible()) {
@@ -285,9 +279,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 			} else {
 				projectPath = root.getScriptProject().getPath().toString();
 				containerPath = root.getPath();
-				containerPathToString = containerPath.getDevice() == null ? containerPath
-						.toString()
-						: containerPath.toOSString();
+				containerPathToString = containerPath.toString();
 				add(
 						projectPath,
 						"", containerPathToString, false/* not a package */, null); //$NON-NLS-1$
@@ -303,9 +295,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 				String relativePath = ((ScriptFolder) element).getPath()
 						.toString() + '/';
 				containerPath = root.getPath();
-				containerPathToString = containerPath.getDevice() == null ? containerPath
-						.toString()
-						: containerPath.toOSString();
+				containerPathToString = containerPath.toString();
 				add(projectPath, relativePath, containerPathToString,
 						true/* package */, null);
 			} else {
@@ -319,9 +309,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 						// for working copies, get resource container full path
 						containerPath = resource.getParent().getFullPath();
 					}
-					containerPathToString = containerPath.getDevice() == null ? containerPath
-							.toString()
-							: containerPath.toOSString();
+					containerPathToString = containerPath.toString();
 					String relativePath = Util.relativePath(resource
 							.getFullPath(), containerPath.segmentCount());
 					add(projectPath, relativePath, containerPathToString,
@@ -354,9 +342,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 				relativePath = getPath(element, true/* relative path */)
 						.toString();
 			}
-			containerPathToString = containerPath.getDevice() == null ? containerPath
-					.toString()
-					: containerPath.toOSString();
+			containerPathToString = containerPath.toString();
 			add(projectPath, relativePath, containerPathToString,
 					false/* not a package */, null);
 		}
@@ -456,13 +442,24 @@ public class DLTKSearchScope extends AbstractSearchScope {
 			String currentRelativePath = this.relativePaths[i];
 			if (currentRelativePath == null)
 				continue;
-			String currentContainerPath = this.containerPaths[i];
+
+			String currentContainerPath = createPath(containerPaths[i],
+					relativePaths[i]);
 			String currentFullPath = currentRelativePath.length() == 0 ? currentContainerPath
-					: (currentContainerPath + '/' + currentRelativePath);
+					: (currentContainerPath + currentRelativePath);
 			if (encloses(currentFullPath, fullPath, i))
 				return i;
 		}
 		return -1;
+	}
+
+	private String createPath(String containerPath, String relativePath) {
+		StringBuffer b = new StringBuffer();
+		b.append(containerPath);
+		if (relativePath.length() > 0) {
+			b.append('/').append(relativePath);
+		}
+		return b.toString();
 	}
 
 	/**
@@ -566,8 +563,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 		if (root != null && root.isArchive()) {
 			// external or internal archive
 			IPath rootPath = root.getPath();
-			String rootPathToString = rootPath.getDevice() == null ? rootPath
-					.toString() : rootPath.toOSString();
+			String rootPathToString = rootPath.toString();
 			IPath relativePath = getPath(element, true/* relative path */);
 			return indexOf(rootPathToString, relativePath.toString()) >= 0;
 		}
@@ -687,7 +683,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 					}
 					int toRemove = -1;
 					for (int i = 0; i < this.pathsCount; i++) {
-						if (this.relativePaths[i].equals(path.toOSString())) {
+						if (this.relativePaths[i].equals(path.toString())) {
 							toRemove = i;
 							break;
 						}
@@ -742,8 +738,10 @@ public class DLTKSearchScope extends AbstractSearchScope {
 							.getProjectFragment(this.containerPaths[index]);
 				}
 				Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
-						.getRoot(), Path.fromPortableString(this.containerPaths[index] + '/'
-						+ this.relativePaths[index]), false);
+						.getRoot(), Path.fromPortableString(
+						createPath(this.containerPaths[index],
+								this.relativePaths[index])),
+						false);
 				if (target instanceof IProject) {
 					return project.getProjectFragment((IProject) target);
 				}
@@ -802,7 +800,6 @@ public class DLTKSearchScope extends AbstractSearchScope {
 		this.pathRestrictions = newScope.pathRestrictions;
 		this.threshold = newScope.threshold;
 	}
-
 
 	public String toString() {
 		StringBuffer result = new StringBuffer("JavaSearchScope on "); //$NON-NLS-1$
