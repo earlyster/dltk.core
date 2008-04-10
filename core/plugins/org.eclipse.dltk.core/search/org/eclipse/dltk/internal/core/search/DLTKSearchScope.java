@@ -443,23 +443,13 @@ public class DLTKSearchScope extends AbstractSearchScope {
 			if (currentRelativePath == null)
 				continue;
 
-			String currentContainerPath = createPath(containerPaths[i],
-					relativePaths[i]);
+			String currentContainerPath = containerPaths[i];
 			String currentFullPath = currentRelativePath.length() == 0 ? currentContainerPath
-					: (currentContainerPath + currentRelativePath);
+					: (currentContainerPath  +"/"+ currentRelativePath);
 			if (encloses(currentFullPath, fullPath, i))
 				return i;
 		}
 		return -1;
-	}
-
-	private String createPath(String containerPath, String relativePath) {
-		StringBuffer b = new StringBuffer();
-		b.append(containerPath);
-		if (relativePath.length() > 0) {
-			b.append('/').append(relativePath);
-		}
-		return b.toString();
 	}
 
 	/**
@@ -738,10 +728,8 @@ public class DLTKSearchScope extends AbstractSearchScope {
 							.getProjectFragment(this.containerPaths[index]);
 				}
 				Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
-						.getRoot(), Path.fromPortableString(
-						createPath(this.containerPaths[index],
-								this.relativePaths[index])),
-						false);
+						.getRoot(), Path.fromPortableString(this.containerPaths[index] + '/'
+						+ this.relativePaths[index]), false);
 				if (target instanceof IProject) {
 					return project.getProjectFragment((IProject) target);
 				}
