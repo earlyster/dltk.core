@@ -445,7 +445,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 
 			String currentContainerPath = containerPaths[i];
 			String currentFullPath = currentRelativePath.length() == 0 ? currentContainerPath
-					: (currentContainerPath  +"/"+ currentRelativePath);
+					: (currentContainerPath  +"/"+ currentRelativePath); //$NON-NLS-1$
 			if (encloses(currentFullPath, fullPath, i))
 				return i;
 		}

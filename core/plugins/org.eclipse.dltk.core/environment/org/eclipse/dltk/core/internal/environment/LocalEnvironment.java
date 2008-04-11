@@ -16,7 +16,7 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 
 public class LocalEnvironment implements IEnvironment, IAdaptable {
 	public static final String ENVIRONMENT_ID = DLTKCore.PLUGIN_ID
-			+ ".environment.localEnvironment";
+			+ ".environment.localEnvironment"; //$NON-NLS-1$
 
 	private static IEnvironment instance = new LocalEnvironment();
 	private IFileSystem fs;
@@ -46,7 +46,7 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 	}
 
 	public String getName() {
-		return "Localhost";
+		return "Localhost"; //$NON-NLS-1$
 	}
 
 	public boolean hasProject(IProject project) {

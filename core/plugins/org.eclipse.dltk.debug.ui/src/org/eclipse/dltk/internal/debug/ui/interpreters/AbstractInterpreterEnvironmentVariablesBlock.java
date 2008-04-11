@@ -474,8 +474,10 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		Map envVariables = getNativeEnvironment();
 		if( envVariables.size() == 0 ) {
 			MessageBox box = new MessageBox(fDialog.getShell(), SWT.ICON_ERROR);
-			box.setMessage("Could not retrive environment variables from:" + fDialog.getEnvironment().getName());
-			box.setText("Failed to get environment");
+			box.setMessage(MessageFormat.format(
+					InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_couldNotRetrieveEnvironmentVariablesFrom,
+					new Object[] { fDialog.getEnvironment().getName() }));
+			box.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_failedToRetrieveEnvironment);
 			box.open();
 			return null;
 		}

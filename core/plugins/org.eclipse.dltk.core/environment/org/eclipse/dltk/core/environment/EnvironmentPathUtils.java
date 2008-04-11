@@ -1,5 +1,7 @@
 package org.eclipse.dltk.core.environment;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 
@@ -9,7 +11,7 @@ public class EnvironmentPathUtils {
 
 	public static IPath getFullPath(IEnvironment env, IPath path) {
 		if (isFull(path)) {
-			throw new RuntimeException("Invalid path");
+			throw new RuntimeException(MessageFormat.format(Messages.EnvironmentPathUtils_invalidPath, new Object[] { path }));
 		}
 //		if( path.segment(0).startsWith("#special#")) {
 //			return path;

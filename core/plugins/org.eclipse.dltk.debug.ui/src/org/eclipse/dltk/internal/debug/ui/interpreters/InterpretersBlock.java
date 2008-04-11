@@ -284,7 +284,7 @@ public abstract class InterpretersBlock implements
 		data.horizontalSpan = 2;
 		env.setLayoutData(data);
 		Label environmentLabel = new Label(env, SWT.NONE);
-		environmentLabel.setText("Host:");
+		environmentLabel.setText(InterpretersMessages.InterpretersBlock_host);
 		this.fEnvironments = new Combo(env, SWT.DROP_DOWN | SWT.READ_ONLY);
 		data = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
 		this.fEnvironments.setLayoutData(data);

@@ -28,7 +28,7 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 	public IDeployment createDeployment() {
 		try {
 			IPath rootPath = getTempDirPath().append(
-					getTempName("dltk", ".tmp"));
+					getTempName("dltk", ".tmp")); //$NON-NLS-1$ //$NON-NLS-2$
 			URI rootUri = createLocalURI(rootPath);
 			return new EFSDeployment(LocalEnvironment.getInstance(), rootUri);
 		} catch (CoreException e) {
@@ -52,7 +52,7 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 
 	private static IPath getTempDirPath() {
 		if (temp == null) {
-			GetPropertyAction a = new GetPropertyAction("java.io.tmpdir");
+			GetPropertyAction a = new GetPropertyAction("java.io.tmpdir"); //$NON-NLS-1$
 			File tempFile = new File(
 					((String) AccessController.doPrivileged(a)));
 			try {

@@ -163,7 +163,7 @@ public abstract class MainLaunchConfigurationTab extends
 			setErrorMessage(DLTKLaunchConfigurationsMessages.error_notAValidProject);
 			return false;
 		}
-		URI script = URI.create(location.toString() + "/" + getScriptName());
+		URI script = URI.create(location.toString() + "/" + getScriptName()); //$NON-NLS-1$
 		IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(script);
 		if (files.length != 1)
 			return false;

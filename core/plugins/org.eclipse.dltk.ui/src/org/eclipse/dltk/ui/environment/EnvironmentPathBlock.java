@@ -61,7 +61,7 @@ public class EnvironmentPathBlock {
 					if (path != null) {
 						return (String) path;
 					}
-					return "(undefined)";
+					return Messages.EnvironmentPathBlock_undefined;
 				default:
 					break;
 				}
@@ -85,12 +85,12 @@ public class EnvironmentPathBlock {
 
 		TableViewerColumn environmentsColumn = new TableViewerColumn(
 				pathViewer, SWT.NULL);
-		environmentsColumn.getColumn().setText("Environment:");
+		environmentsColumn.getColumn().setText(Messages.EnvironmentPathBlock_environment);
 		environmentsColumn.getColumn().setWidth(
 				conv.convertWidthInCharsToPixels(20));
 		TableViewerColumn pathColumn = new TableViewerColumn(pathViewer,
 				SWT.NULL);
-		pathColumn.getColumn().setText("Path:");
+		pathColumn.getColumn().setText(Messages.EnvironmentPathBlock_path);
 		pathColumn.getColumn().setWidth(conv.convertWidthInCharsToPixels(70));
 		pathColumn.setEditingSupport(new EditingSupport(pathViewer) {
 			protected boolean canEdit(Object element) {
@@ -114,8 +114,8 @@ public class EnvironmentPathBlock {
 						text.setLayoutData(new GridData(SWT.FILL, SWT.DEFAULT,
 								true, false));
 						browse = new Button(composite, SWT.PUSH);
-						browse.setText("...");
-						Font font = new Font(parent.getDisplay(), "arial", 6, 0);
+						browse.setText("..."); //$NON-NLS-1$
+						Font font = new Font(parent.getDisplay(), "arial", 6, 0); //$NON-NLS-1$
 						browse.setFont(font);
 						browse.setLayoutData(new GridData(SWT.DEFAULT,
 								SWT.FILL, false, true));

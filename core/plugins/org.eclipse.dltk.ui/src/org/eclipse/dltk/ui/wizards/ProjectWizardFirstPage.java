@@ -158,7 +158,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			LayoutUtil.setHorizontalGrabbing(fLocation.getTextControl(null));
 
 			fEnvironment = new ComboDialogField(SWT.DROP_DOWN | SWT.READ_ONLY);
-			fEnvironment.setLabelText("Host:");
+			fEnvironment.setLabelText(NewWizardMessages.ProjectWizardFirstPage_host);
 			fEnvironment.setDialogFieldListener(this);
 			fEnvironment.setDialogFieldListener(new IDialogFieldListener() {
 				public void dialogFieldChanged(DialogField field) {

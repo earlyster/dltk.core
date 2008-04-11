@@ -22,7 +22,7 @@ public class LocalEnvironmentUI implements IEnvironmentUI {
 			} else {
 				dialog.setFilterExtensions(new String[] { "*" }); //$NON-NLS-1$
 			}
-			dialog.setFilterNames(new String[] { "Executables" });
+			dialog.setFilterNames(new String[] { Messages.LocalEnvironmentUI_executables });
 		}
 		return dialog.open();
 	}

@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.util;
 
-import java.io.BufferedInputStream;
 import java.io.DataInput;
 import java.io.EOFException;
 import java.io.File;
@@ -259,7 +258,7 @@ public class Util {
 			throws ModelException {
 		InputStream stream = null;
 		try {
-			stream = new BufferedInputStream(file.getContents(true));
+			stream = file.getContents(true);
 		} catch (CoreException e) {
 			throw new ModelException(e);
 		}
@@ -281,7 +280,7 @@ public class Util {
 			throws ModelException {
 		InputStream stream = null;
 		try {
-			stream = new BufferedInputStream(new FileInputStream(file));
+			stream = new FileInputStream(file);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return null;
@@ -400,7 +399,7 @@ public class Util {
 		// Get resource contents
 		InputStream stream = null;
 		try {
-			stream = new BufferedInputStream(file.openInputStream());
+			stream = file.openInputStream();
 		} catch (Exception e) {
 			throw new ModelException(e,
 					IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);

@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Enumeration;
 
 import org.eclipse.core.filesystem.EFS;
@@ -48,7 +49,7 @@ public class EFSDeployment implements IDeployment {
 			} else {
 				final URL url = bundle.getEntry(bundlePath);
 				if (url == null)
-					throw new IOException("Failed to locate the entry");
+					throw new IOException(MessageFormat.format(Messages.EFSDeployment_failedToLocateEntryForPath, new Object[] { bundlePath }));
 				
 				IFileStore parent = dest.getParent();
 				if (parent != null) {
@@ -129,7 +130,7 @@ public class EFSDeployment implements IDeployment {
 		try {
 			copy(input, dest);
 		} catch (CoreException e) {
-			throw new IOException("Failed to deploy stream:" + e.getMessage());
+			throw new IOException(MessageFormat.format(Messages.EFSDeployment_failedToDeployStream, new Object[] { e.getMessage() }));
 		}
 		return filename;
 	}

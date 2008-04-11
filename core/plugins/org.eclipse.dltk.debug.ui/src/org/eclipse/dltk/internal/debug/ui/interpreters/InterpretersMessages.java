@@ -16,8 +16,10 @@ public class InterpretersMessages extends NLS {
 	public static String AbstractInterpreterEnvironmentVariablesBlock_add;
 	public static String AbstractInterpreterEnvironmentVariablesBlock_addFromEnvironment;
 	public static String AbstractInterpreterEnvironmentVariablesBlock_addVariable;
+	public static String AbstractInterpreterEnvironmentVariablesBlock_couldNotRetrieveEnvironmentVariablesFrom;
 	public static String AbstractInterpreterEnvironmentVariablesBlock_edit;
 	public static String AbstractInterpreterEnvironmentVariablesBlock_editVariable;
+	public static String AbstractInterpreterEnvironmentVariablesBlock_failedToRetrieveEnvironment;
 	public static String AbstractInterpreterEnvironmentVariablesBlock_name;
 	public static String AbstractInterpreterEnvironmentVariablesBlock_value;
 	public static String AbstractInterpreterLibraryBlock_rediscover;
@@ -29,6 +31,7 @@ public class InterpretersMessages extends NLS {
 	public static String EnvironmentTab_20;
 	public static String EnvironmentTab_7;
 	public static String InterpretersBlock_0;
+	public static String InterpretersBlock_host;
 	public static String InterpretersPreferencePage_1;
 	public static String InterpretersPreferencePage_2;
 	public static String InstalledInterpretersBlock_15;

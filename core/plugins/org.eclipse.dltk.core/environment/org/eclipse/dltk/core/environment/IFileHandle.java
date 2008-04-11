@@ -6,7 +6,7 @@ import java.io.InputStream;
 import org.eclipse.core.runtime.IPath;
 
 public interface IFileHandle {
-	String ID_SEPARATOR = "#";
+	String ID_SEPARATOR = "#"; //$NON-NLS-1$
 
 	IEnvironment getEnvironment();
 
