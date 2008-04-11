@@ -50,6 +50,7 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathAttribute;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
@@ -710,6 +711,11 @@ public final class ScriptRuntime {
 				if (install != null) {
 					return install;
 				}
+				if (nature == null) {
+					IDLTKLanguageToolkit tk = DLTKLanguageManager
+							.getLanguageToolkit(proj);
+					nature = tk.getNatureId();
+				}
 			}
 		} else {
 			IPath interpreterPath = Path.fromPortableString(containerPath);
@@ -949,8 +955,9 @@ public final class ScriptRuntime {
 		List existingDefaultLocations = new ArrayList();
 		for (int i = 0; i < defaultLocations.length; ++i) {
 			LibraryLocation location = defaultLocations[i];
-			
-			IFileHandle file = EnvironmentPathUtils.getFile(location.getLibraryPath());
+
+			IFileHandle file = EnvironmentPathUtils.getFile(location
+					.getLibraryPath());
 			if (file.exists()) {
 				existingDefaultLocations.add(location);
 			}
@@ -2340,8 +2347,9 @@ public final class ScriptRuntime {
 										LaunchingMessages.ScriptRuntime_Buildpath_references_non_existant_archive___0__4,
 										new String[] { entry.getPath()
 												.toString() }), null);
-			}			
-			IFileHandle fileHandle = EnvironmentPathUtils.getFile(new Path( location ));
+			}
+			IFileHandle fileHandle = EnvironmentPathUtils.getFile(new Path(
+					location));
 			if (!fileHandle.exists()) {
 				abort(
 						MessageFormat

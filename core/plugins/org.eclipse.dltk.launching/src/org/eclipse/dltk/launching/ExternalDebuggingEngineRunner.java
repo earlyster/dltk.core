@@ -58,7 +58,7 @@ public abstract class ExternalDebuggingEngineRunner extends
 		String pathKeyValue = delegate.getString(qualifier, key);
 		String path = (String) EnvironmentPathUtils.decodePaths(pathKeyValue)
 				.get(env);
-		if (!(path == null && "".equals(path))) { //$NON-NLS-1$
+		if (path != null || "".equals(path)) { //$NON-NLS-1$
 			return PlatformFileUtils
 					.findAbsoluteOrEclipseRelativeFile(env, new Path(path));
 		}
