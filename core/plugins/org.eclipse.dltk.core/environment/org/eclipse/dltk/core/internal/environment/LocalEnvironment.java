@@ -77,4 +77,12 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 	public IFileHandle getFile(URI locationURI) {
 		return new EFSFileHandle(this, fs.getStore(locationURI));
 	}
+
+	public String getPathsSeparator() {
+		return Character.toString(getPathsSeparatorChar());
+	}
+
+	public char getPathsSeparatorChar() {
+		return Platform.getOS().equals(Platform.OS_WIN32) ? ';' : ':';
+	}
 }

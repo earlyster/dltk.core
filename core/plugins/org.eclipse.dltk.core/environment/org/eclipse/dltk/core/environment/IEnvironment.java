@@ -11,6 +11,8 @@ public interface IEnvironment extends IAdaptable {
 	String getId();
 	String getSeparator();
 	char getSeparatorChar();
+	String getPathsSeparator();
+	char getPathsSeparatorChar();	
 	String getName();
 	boolean hasProject(IProject project);
 	String convertPathToString(IPath path);

@@ -22,6 +22,10 @@ import org.eclipse.dltk.compiler.CharOperation;
 
 public class Util {
 
+	/**
+	 * Some input streams return available() as zero, so we need this value.
+	 */
+	private static final int DEFAULT_READING_SIZE = 8192;
 	public final static String UTF_8 = "UTF-8";	//$NON-NLS-1$			
 	public static String LINE_SEPARATOR = System.getProperty("line.separator"); //$NON-NLS-1$
 
@@ -40,9 +44,7 @@ public class Util {
 			int contentsLength = 0;
 			int amountRead = -1;
 			do {
-				int amountRequested = stream.available();
-				if (amountRequested < 1)
-					break;
+				int amountRequested = Math.max(stream.available(), DEFAULT_READING_SIZE);  // read at least 8K
 				
 				// resize contents if needed
 				if (contentsLength + amountRequested > contents.length) {
@@ -138,13 +140,18 @@ public class Util {
 				// until known length is met, reuse same array sized eagerly
 				amountRequested = length - totalRead;
 			} else {
-				amountRequested = stream.available();
-				if (amountRequested < 1)
-					break;
+				// reading beyond known length
+				int current = reader.read(); 
+				if (current < 0) break;
+				
+				amountRequested = Math.max(stream.available(), DEFAULT_READING_SIZE);  // read at least 8K
 
 				// resize contents if needed
-				if (totalRead + amountRequested > contents.length)
-					System.arraycopy(contents, 	0, 	contents = new char[totalRead + amountRequested], 0, totalRead);
+				if (totalRead + 1 + amountRequested > contents.length)
+					System.arraycopy(contents, 	0, 	contents = new char[totalRead + 1 + amountRequested], 0, totalRead);
+				
+				// add current character
+				contents[totalRead++] = (char) current; // coming from totalRead==length
 			}
 			// read as many chars as possible
 			int amountRead = reader.read(contents, totalRead, amountRequested);

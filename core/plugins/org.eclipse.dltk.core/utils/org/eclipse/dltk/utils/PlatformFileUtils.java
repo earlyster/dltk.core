@@ -2,8 +2,8 @@ package org.eclipse.dltk.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidParameterException;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -18,6 +18,9 @@ import org.eclipse.osgi.service.datalocation.Location;
 public class PlatformFileUtils {
 	public static IFileHandle findAbsoluteOrEclipseRelativeFile(
 			IEnvironment env, IPath path) {
+		if( path == null || path.isEmpty()) {
+			throw new InvalidParameterException("Path could not be empty");
+		}
 		IFileHandle file = env.getFile(path);
 		if( !env.getId().equals(LocalEnvironment.ENVIRONMENT_ID)) {
 			return file;
