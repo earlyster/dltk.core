@@ -122,4 +122,12 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 		return new EFSFileHandle(this, RSEFileSystem.getInstance().getStore(
 				locationURI));
 	}
+	
+	public String getPathsSeparator() {
+		return Character.toString(getPathsSeparatorChar());
+	}
+
+	public char getPathsSeparatorChar() {
+		return host.getSystemType().isWindows() ? ';' : ':';
+	}
 }

@@ -28,10 +28,12 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 		if (envId.startsWith(RSE_ENVIRONMENT_PREFIX)) {
 			String name = envId.substring(RSE_ENVIRONMENT_PREFIX.length());
 			IHost connection = getRSEConnection(name);
-			IRemoteFileSubSystem fs = RemoteFileUtility
-					.getFileSubSystem(connection);
-			if (fs != null)
-				return new RSEEnvironment(fs);
+			if (connection != null) {
+				IRemoteFileSubSystem fs = RemoteFileUtility
+						.getFileSubSystem(connection);
+				if (fs != null)
+					return new RSEEnvironment(fs);
+			}
 		}
 		return null;
 	}
