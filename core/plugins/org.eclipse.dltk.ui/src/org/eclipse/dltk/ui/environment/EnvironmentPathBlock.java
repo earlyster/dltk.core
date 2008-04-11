@@ -1,6 +1,5 @@
 package org.eclipse.dltk.ui.environment;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,16 +68,21 @@ public class EnvironmentPathBlock {
 			return null;
 		}
 	}
-
 	public void createControl(Composite parent) {
+		createControl(parent, 1);
+	}
+	public void createControl(Composite parent, int columns ) {
 		PixelConverter conv = new PixelConverter(parent);
 
 		pathTable = new Table(parent, SWT.SINGLE | SWT.BORDER
 				| SWT.FULL_SELECTION);
 		pathTable.setHeaderVisible(true);
 		pathTable.setLinesVisible(true);
-		GridData tableData = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
+		//GridData tableData = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
+		//tableData.heightHint = conv.convertHeightInCharsToPixels(4);
+		GridData tableData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		tableData.heightHint = conv.convertHeightInCharsToPixels(8);
+		tableData.horizontalSpan = columns;
 		pathTable.setLayoutData(tableData);
 
 		pathViewer = new TableViewer(pathTable);
@@ -87,7 +91,7 @@ public class EnvironmentPathBlock {
 				pathViewer, SWT.NULL);
 		environmentsColumn.getColumn().setText(Messages.EnvironmentPathBlock_environment);
 		environmentsColumn.getColumn().setWidth(
-				conv.convertWidthInCharsToPixels(20));
+				conv.convertWidthInCharsToPixels(30));
 		TableViewerColumn pathColumn = new TableViewerColumn(pathViewer,
 				SWT.NULL);
 		pathColumn.getColumn().setText(Messages.EnvironmentPathBlock_path);
@@ -202,6 +206,6 @@ public class EnvironmentPathBlock {
 	}
 
 	public Map getPaths() {
-		return Collections.unmodifiableMap(this.paths);
+		return this.paths;
 	}
 }
