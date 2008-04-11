@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui;
 
-import java.io.File;
 import java.net.URI;
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -38,6 +37,7 @@ import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IValueDetailListener;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.debug.core.ScriptDebugManager;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
@@ -172,7 +172,7 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 		final URI uri = stackFrame.getSourceURI();
 		final IProject project = getProject(stackFrame);
 
-		final IPath projectPath = project.getLocation();
+		final IPath projectPath = new Path(project.getLocationURI().getPath());
 		final IPath realPath = new Path(uri.getPath());
 
 		IPath path = realPath;
@@ -480,8 +480,8 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 
 	// Editor
 	public IEditorInput getEditorInput(Object element) {
-		if (element instanceof File) {
-			return new ExternalFileEditorInput((File) element);
+		if (element instanceof IFileHandle) {
+			return new ExternalFileEditorInput((IFileHandle) element);
 		} else if (element instanceof IFile) {
 			return new FileEditorInput((IFile) element);
 		} else if (element instanceof ILineBreakpoint) {
