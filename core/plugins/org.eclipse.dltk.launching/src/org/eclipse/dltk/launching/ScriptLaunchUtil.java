@@ -63,7 +63,7 @@ public class ScriptLaunchUtil {
 	public static Process runScriptWithInterpreter(
 			IExecutionEnvironment exeEnv, String interpreter,
 			InterpreterConfig config) throws CoreException {
-		String[] cmdLine = config.renderCommandLine(interpreter);
+		String[] cmdLine = config.renderCommandLine(exeEnv.getEnvironment(), interpreter);
 
 		String[] environmentAsStrings = config.getEnvironmentAsStrings();
 		IPath workingDirectoryPath = config.getWorkingDirectoryPath();

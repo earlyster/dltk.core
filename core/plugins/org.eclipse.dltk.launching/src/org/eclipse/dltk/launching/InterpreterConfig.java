@@ -334,7 +334,7 @@ public class InterpreterConfig implements Cloneable {
 	public String[] renderCommandLine(IInterpreterInstall interpreter) {
 		final List items = new ArrayList();
 
-		items.add(interpreter.getInstallLocation().getAbsolutePath());
+		items.add(interpreter.getInstallLocation().toString());
 		items.addAll(interpreterArgs);
 
 		String[] interpreterOwnArgs = interpreter.getInterpreterArguments();
@@ -342,25 +342,25 @@ public class InterpreterConfig implements Cloneable {
 			items.addAll(Arrays.asList(interpreterOwnArgs));
 		}
 
-		items.add(scriptFile.toPortableString());
+		items.add(interpreter.getEnvironment().convertPathToString(scriptFile));
 		items.addAll(scriptArgs);
 
 		return (String[]) items.toArray(new String[items.size()]);
 	}
 
-	protected String[] renderCommandLine(IPath interpreter) {
+	protected String[] renderCommandLine(IEnvironment environment, IPath interpreter) {
 		final List items = new ArrayList();
 
-		items.add(interpreter.toPortableString());
+		items.add(environment.convertPathToString(interpreter));
 		items.addAll(interpreterArgs);
-		items.add(scriptFile.toPortableString());
+		items.add(environment.convertPathToString(scriptFile));
 		items.addAll(scriptArgs);
 
 		return (String[]) items.toArray(new String[items.size()]);
 	}
 
-	public String[] renderCommandLine(String interpreter) {
-		return renderCommandLine(new Path(interpreter));
+	public String[] renderCommandLine(IEnvironment environment, String interpreter) {
+		return renderCommandLine(environment, new Path(interpreter));
 	}
 
 	// TODO: make more real implementation

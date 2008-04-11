@@ -1,9 +1,11 @@
 package org.eclipse.dltk.launching;
 
-import java.io.File;
-
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.PreferencesLookupDelegate;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.launching.InterpreterMessages;
 import org.eclipse.dltk.utils.PlatformFileUtils;
 
@@ -17,8 +19,7 @@ public abstract class ExternalDebuggingEngineRunner extends
 	protected final InterpreterConfig addEngineConfig(InterpreterConfig config,
 			PreferencesLookupDelegate delegate) throws CoreException {
 
-		final File file = PlatformFileUtils
-				.findAbsoluteOrEclipseRelativeFile(getDebuggingEnginePath(delegate));
+		final IFileHandle file = getDebuggingEnginePath(delegate);
 
 		// Checking debugging engine path
 		if (file == null || file.toString().length() == 0) {
@@ -42,27 +43,31 @@ public abstract class ExternalDebuggingEngineRunner extends
 	 */
 	protected abstract String getDebuggingEnginePreferenceKey();
 
-//	/**
-//	 * Returns the id of the plugin whose preference store that contains the
-//	 * debugging engine path.
-//	 */
-//	protected abstract String getDebuggingEnginePreferenceQualifier();
+	// /**
+	// * Returns the id of the plugin whose preference store that contains the
+	// * debugging engine path.
+	// */
+	// protected abstract String getDebuggingEnginePreferenceQualifier();
 
-	
-	protected File getDebuggingEnginePath(PreferencesLookupDelegate delegate) {
+	protected IFileHandle getDebuggingEnginePath(
+			PreferencesLookupDelegate delegate) {
+		IEnvironment env = this.getInstall().getEnvironment();
 		String key = getDebuggingEnginePreferenceKey();
 		String qualifier = getDebuggingEnginePreferenceQualifier();
 
-		String path = delegate.getString(qualifier, key);
+		String pathKeyValue = delegate.getString(qualifier, key);
+		String path = (String) EnvironmentPathUtils.decodePaths(pathKeyValue)
+				.get(env);
 		if (!(path == null && "".equals(path))) { //$NON-NLS-1$
 			return PlatformFileUtils
-					.findAbsoluteOrEclipseRelativeFile(new File(path));
+					.findAbsoluteOrEclipseRelativeFile(env, new Path(path));
 		}
 
 		return null;
 	}
-	
-	protected String getDebuggingPreference(PreferencesLookupDelegate delegate, String key) {
+
+	protected String getDebuggingPreference(PreferencesLookupDelegate delegate,
+			String key) {
 		String qualifier = getDebuggingEnginePreferenceQualifier();
 		return delegate.getString(qualifier, key);
 	}

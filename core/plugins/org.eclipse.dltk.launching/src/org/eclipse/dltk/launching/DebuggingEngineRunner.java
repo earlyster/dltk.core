@@ -1,17 +1,19 @@
 package org.eclipse.dltk.launching;
 
-import java.io.File;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.PreferencesLookupDelegate;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.dbgp.DbgpSessionIdGenerator;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
@@ -105,7 +107,8 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 			monitor = new NullProgressMonitor();
 		}
 
-		monitor.beginTask(InterpreterMessages.DebuggingEngineRunner_launching, 5);
+		monitor.beginTask(InterpreterMessages.DebuggingEngineRunner_launching,
+				5);
 		if (monitor.isCanceled()) {
 			return;
 		}
@@ -122,7 +125,8 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 						ExtendedDebugEventDetails.BEFORE_VM_STARTED);
 
 				// Running
-				monitor.subTask(InterpreterMessages.DebuggingEngineRunner_running);
+				monitor
+						.subTask(InterpreterMessages.DebuggingEngineRunner_running);
 				process = rawRun(launch, newConfig);
 			} catch (CoreException e) {
 				abort(InterpreterMessages.errDebuggingEngineNotStarted, e);
@@ -143,7 +147,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	protected String[] renderCommandLine(InterpreterConfig config) {
 		String exe = (String) config.getProperty(OVERRIDE_EXE);
 		if (exe != null) {
-			return config.renderCommandLine(exe);
+			return config.renderCommandLine(getInstall().getEnvironment(), exe);
 		}
 
 		return config.renderCommandLine(getInstall());
@@ -287,7 +291,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	 * with the debugging session id.
 	 * </p>
 	 */
-	protected File getLogFileName(PreferencesLookupDelegate delegate,
+	protected String getLogFileName(PreferencesLookupDelegate delegate,
 			String sessionId) {
 		String qualifier = getDebuggingEnginePreferenceQualifier();
 
@@ -299,8 +303,10 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 		String fileName = MessageFormat.format(logFileName,
 				new Object[] { sessionId });
 
-		File file = new File(logFilePath + File.separator + fileName);
+		IEnvironment env = getInstall().getEnvironment();
+		IPath filePath = new Path(logFilePath + env.getSeparator() + fileName);
 
-		return PlatformFileUtils.findAbsoluteOrEclipseRelativeFile(file);
+		return PlatformFileUtils.findAbsoluteOrEclipseRelativeFile(env,
+				filePath).toString();
 	}
 }
