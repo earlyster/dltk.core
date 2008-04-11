@@ -1,18 +1,23 @@
 package org.eclipse.dltk.launching;
 
-import java.text.MessageFormat;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.PreferencesLookupDelegate;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.dbgp.DbgpSessionIdGenerator;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
@@ -27,15 +32,14 @@ import org.eclipse.dltk.internal.launching.InterpreterMessages;
 import org.eclipse.dltk.launching.debug.DbgpInterpreterConfig;
 import org.eclipse.dltk.launching.debug.DebuggingEngineManager;
 import org.eclipse.dltk.launching.debug.IDebuggingEngine;
-import org.eclipse.dltk.utils.PlatformFileUtils;
 
 public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	// Launch attributes
 	public static final String LAUNCH_ATTR_DEBUGGING_ENGINE_ID = "debugging_engine_id"; //$NON-NLS-1$
 
-	private static final String LOCALHOST = "127.0.0.1"; //$NON-NLS-1$
-
 	public static final String OVERRIDE_EXE = "OVERRIDE_EXE"; //$NON-NLS-1$
+
+	private static String sHostAddress = null;
 
 	protected String getSessionId(ILaunchConfiguration configuration)
 			throws CoreException {
@@ -55,6 +59,49 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 
 	public DebuggingEngineRunner(IInterpreterInstall install) {
 		super(install);
+		synchronized (DebuggingEngineRunner.class) {
+			if (sHostAddress == null) {
+				try {
+					InetAddress ip = null;
+					Enumeration netInterfaces = NetworkInterface
+							.getNetworkInterfaces();
+					while (netInterfaces.hasMoreElements()) {
+						NetworkInterface ni = (NetworkInterface) netInterfaces
+								.nextElement();
+						ip = (InetAddress) ni.getInetAddresses().nextElement();
+						Enumeration inetAddresses = ni.getInetAddresses();
+						while(inetAddresses.hasMoreElements()) {
+							ip = (InetAddress) inetAddresses.nextElement();
+							if (!ip.getHostAddress().equals("127.0.0.1") && !ip.isLoopbackAddress()
+									&& ip.getHostAddress().indexOf(":") == -1) {
+								break;
+							} else {
+								ip = null;
+							}
+						}
+						if( ip != null) {
+							break;
+						}
+					}
+					if( ip != null ) {
+						sHostAddress = ip.getHostAddress();
+					}
+					else {
+						sHostAddress = InetAddress.getLocalHost().getHostAddress();
+					}
+				} catch (SocketException e) {
+					sHostAddress = "127.0.0.1"; //$NON-NLS-1$
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				} catch (UnknownHostException e) {
+					sHostAddress = "127.0.0.1"; //$NON-NLS-1$
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 	}
 
 	protected void initializeLaunch(ILaunch launch, InterpreterConfig config,
@@ -91,7 +138,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 
 		dbgpConfig.setSessionId(target.getSessionId());
 		dbgpConfig.setPort(service.getPort());
-		dbgpConfig.setHost(LOCALHOST);
+		dbgpConfig.setHost(sHostAddress);
 	}
 
 	/**
@@ -256,13 +303,11 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	 * and not the DBGP protocol output.
 	 * </p>
 	 */
-	protected abstract String getLoggingEnabledPreferenceKey();
-
+	// protected abstract String getLoggingEnabledPreferenceKey();
 	/**
 	 * Returns the preference key used to store the log file path
 	 */
-	protected abstract String getLogFilePathPreferenceKey();
-
+	// protected abstract String getLogFilePathPreferenceKey();
 	/**
 	 * Returns the preference key usd to store the log file name
 	 */
@@ -276,13 +321,12 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	 * the given debugging engine.
 	 * </p>
 	 */
-	protected boolean isLoggingEnabled(PreferencesLookupDelegate delegate) {
-		String key = getLoggingEnabledPreferenceKey();
-		String qualifier = getDebuggingEnginePreferenceQualifier();
-
-		return delegate.getBoolean(qualifier, key);
-	}
-
+	// protected boolean isLoggingEnabled(PreferencesLookupDelegate delegate) {
+	// String key = getLoggingEnabledPreferenceKey();
+	// String qualifier = getDebuggingEnginePreferenceQualifier();
+	//
+	// return delegate.getBoolean(qualifier, key);
+	// }
 	/**
 	 * Returns a fully qualifed path to a log file name.
 	 * 
@@ -294,19 +338,19 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	protected String getLogFileName(PreferencesLookupDelegate delegate,
 			String sessionId) {
 		String qualifier = getDebuggingEnginePreferenceQualifier();
-
-		String logFilePath = delegate.getString(qualifier,
-				getLogFilePathPreferenceKey());
-		String logFileName = delegate.getString(qualifier,
+		String keyValue = delegate.getString(qualifier,
 				getLogFileNamePreferenceKey());
 
-		String fileName = MessageFormat.format(logFileName,
-				new Object[] { sessionId });
-
+		Map logFileNames = EnvironmentPathUtils.decodePaths(keyValue);
 		IEnvironment env = getInstall().getEnvironment();
-		IPath filePath = new Path(logFilePath + env.getSeparator() + fileName);
-
-		return PlatformFileUtils.findAbsoluteOrEclipseRelativeFile(env,
-				filePath).toString();
+		String pathString = (String) logFileNames.get(env);
+		if (pathString != null && pathString.length() > 0) {
+			return pathString;
+			// IPath path = new Path(pathString);
+			// return PlatformFileUtils.findAbsoluteOrEclipseRelativeFile(env,
+			// path).toString();
+		} else {
+			return null;
+		}
 	}
 }
