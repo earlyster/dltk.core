@@ -103,7 +103,7 @@ public class ScriptLineBreakpoint extends AbstractScriptBreakpoint implements
 		try {
 			IResource resource = ensureMarker().getResource();
 			if (!resource.equals(ResourcesPlugin.getWorkspace().getRoot()))
-				return makeUri(ensureMarker().getResource().getLocation());
+				return makeUri(new Path(ensureMarker().getResource().getLocationURI().getPath()));
 
 			// else
 			String portablePath = (String) ensureMarker().getAttribute(
