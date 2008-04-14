@@ -8,7 +8,7 @@ import org.osgi.framework.Bundle;
 
 public interface IDeployment {
 	IPath add(Bundle bundle, String bundlePath) throws IOException;
-	IPath add(InputStream stream, IPath filename) throws IOException;
+	IPath add(InputStream stream, String filename) throws IOException;
 	void mkdirs(IPath path);
 	void dispose();
 	IFileHandle getFile(IPath deploymentPath);
