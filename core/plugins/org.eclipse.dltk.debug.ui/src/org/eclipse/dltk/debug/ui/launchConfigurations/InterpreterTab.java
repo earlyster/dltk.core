@@ -23,6 +23,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.messages.ScriptLaunchMessages;
@@ -166,6 +167,11 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 		updateInterpreterFromConfig(configuration);
 		fInterpreterBlock
 				.setDefaultInterpreterDescriptor(getDefaultInterpreterDescriptor());
+		IScriptProject scriptProject = getScriptProject();
+		if(scriptProject != null ) {
+			fInterpreterBlock.setEnvironment(EnvironmentManager.getEnvironment(scriptProject));
+			fInterpreterBlock.refreshInterpreters();
+		}
 		ILaunchConfigurationTab dynamicTab = getDynamicTab();
 		if (dynamicTab != null) {
 			dynamicTab.initializeFrom(configuration);

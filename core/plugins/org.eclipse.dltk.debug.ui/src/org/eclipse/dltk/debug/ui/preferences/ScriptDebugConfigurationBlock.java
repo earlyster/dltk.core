@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.Preferences;
-import org.eclipse.dltk.dbgp.DbgpServer;
+import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.IDLTKDebugUIPreferenceConstants;
@@ -109,7 +109,7 @@ public class ScriptDebugConfigurationBlock extends
 
 		ipCombo.add(Messages.ScriptDebugConfigurationBlock_AutoDetectBindAddress, AUTODETECT_BIND_ADDRESS_INDEX);
 
-		String[] ipAddresses = DbgpServer.getLocalAddresses();
+		String[] ipAddresses = DLTKDebugPlugin.getLocalAddresses();
 		for (int i=0; i<ipAddresses.length; i++) {
 			ipCombo.add(ipAddresses[i]);
 		}

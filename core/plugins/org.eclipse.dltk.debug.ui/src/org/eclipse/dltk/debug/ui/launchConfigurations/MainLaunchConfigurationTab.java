@@ -45,6 +45,10 @@ public abstract class MainLaunchConfigurationTab extends
 
 	private Text fScriptText;
 
+	public MainLaunchConfigurationTab(String mode) {
+		super(mode);
+	}
+
 	protected void doInitializeForm(ILaunchConfiguration config) {
 		updateMainModuleFromConfig(config);
 	}

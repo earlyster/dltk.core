@@ -30,7 +30,6 @@ import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IParent;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.messages.ScriptLaunchMessages;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
@@ -82,12 +81,7 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 			MessageDialog.openError(getShell(),
 					LaunchingMessages.ScriptLaunchShortcut_1, emptyMessage);
 		} else if (scripts.length > 1) {
-			try {
-				script = chooseScript(scripts, selectMessage);
-			} catch (ModelException e) {
-				reportErorr(e);
-				return;
-			}
+			script = chooseScript(scripts, selectMessage);
 		} else {
 			script = scripts[0];
 		}
@@ -106,8 +100,7 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 	 * 
 	 * @return the selected type or <code>null</code> if none.
 	 */
-	protected IResource chooseScript(IResource[] scripts, String title)
-			throws ModelException {
+	protected IResource chooseScript(IResource[] scripts, String title) {
 		ElementListSelectionDialog dialog = new ElementListSelectionDialog(
 				getShell(), new WorkbenchLabelProvider());
 		dialog.setElements(scripts);
