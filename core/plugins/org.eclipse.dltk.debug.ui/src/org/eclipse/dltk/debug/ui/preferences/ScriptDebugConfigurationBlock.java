@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.Preferences;
+import org.eclipse.dltk.dbgp.DbgpServer;
 import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.IDLTKDebugUIPreferenceConstants;
@@ -49,6 +50,10 @@ public class ScriptDebugConfigurationBlock extends
 
 		// Connection
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
+				OverlayPreferenceStore.STRING,
+				DLTKDebugPreferenceConstants.PREF_DBGP_BIND_ADDRESS));
+
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
 				OverlayPreferenceStore.INT,
 				DLTKDebugPreferenceConstants.PREF_DBGP_PORT));
 
@@ -83,15 +88,31 @@ public class ScriptDebugConfigurationBlock extends
 	private static final int AUTO_SELECT_PORT_INDEX = 0;
 	private static final int CUSTOM_PORT_INDEX = 1;
 
+	private static final int AUTODETECT_BIND_ADDRESS_INDEX = 0;
+
 	private Combo portCombo;
 	private Text portText;
 	private Button fAlertHCRFailed;
 	private Button fAlertHCRNotSupported;
+	private Combo ipCombo;
 
 	private Control createDbgpGroup(Composite parent) {
 		final Group group = SWTFactory.createGroup(parent,
 				ScriptDebugPreferencesMessages.CommunicationLabel, 2, 1,
 				GridData.FILL_HORIZONTAL);
+
+		// Port
+		SWTFactory.createLabel(group, Messages.ScriptDebugConfigurationBlock_BindAddress, 1);
+
+		ipCombo = SWTFactory.createCombo(group, SWT.READ_ONLY | SWT.BORDER, 0,
+				new String[] {});
+
+		ipCombo.add(Messages.ScriptDebugConfigurationBlock_AutoDetectBindAddress, AUTODETECT_BIND_ADDRESS_INDEX);
+
+		String[] ipAddresses = DbgpServer.getLocalAddresses();
+		for (int i=0; i<ipAddresses.length; i++) {
+			ipCombo.add(ipAddresses[i]);
+		}
 
 		// Port
 		SWTFactory.createLabel(group, ScriptDebugPreferencesMessages.PortLabel,
@@ -222,6 +243,12 @@ public class ScriptDebugConfigurationBlock extends
 		super.initialize();
 
 		final IPreferenceStore store = getPreferenceStore();
+		String address = store
+				.getString(DLTKDebugPreferenceConstants.PREF_DBGP_BIND_ADDRESS);
+		int index = ipCombo.indexOf(address);
+		if (index < 0)
+			index = AUTODETECT_BIND_ADDRESS_INDEX;
+		ipCombo.select(index);
 
 		int port = store.getInt(DLTKDebugPreferenceConstants.PREF_DBGP_PORT);
 		if (port == DLTKDebugPreferenceConstants.DBGP_AVAILABLE_PORT) {
@@ -253,6 +280,14 @@ public class ScriptDebugConfigurationBlock extends
 				fAlertHCRNotSupported.getSelection());
 
 		final IPreferenceStore store = getPreferenceStore();
+
+		if (ipCombo.getSelectionIndex() == AUTODETECT_BIND_ADDRESS_INDEX) {
+			store.setValue(DLTKDebugPreferenceConstants.PREF_DBGP_BIND_ADDRESS,
+					DLTKDebugPreferenceConstants.DBGP_AUTODETECT_BIND_ADDRESS);
+		} else {
+			store.setValue(DLTKDebugPreferenceConstants.PREF_DBGP_BIND_ADDRESS,
+					ipCombo.getText());
+		}
 
 		if (portCombo.getSelectionIndex() == AUTO_SELECT_PORT_INDEX) {
 			store.setValue(DLTKDebugPreferenceConstants.PREF_DBGP_PORT,
