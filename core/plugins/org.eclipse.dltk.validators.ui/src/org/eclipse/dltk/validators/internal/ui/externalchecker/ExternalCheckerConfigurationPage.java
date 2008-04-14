@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.dltk.ui.environment.EnvironmentPathBlock;
 import org.eclipse.dltk.validators.internal.core.externalchecker.ExternalChecker;
 import org.eclipse.dltk.validators.internal.core.externalchecker.Rule;
 import org.eclipse.dltk.validators.ui.ValidatorConfigurationPage;
@@ -21,7 +22,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
@@ -32,7 +32,7 @@ public class ExternalCheckerConfigurationPage extends
 		ValidatorConfigurationPage {
 
 	private StringDialogField fArguments;
-	private StringDialogField fPath;
+	private EnvironmentPathBlock fPath;
 	private StringDialogField fExtensions;
 
 	private Table fTable;
@@ -55,35 +55,14 @@ public class ExternalCheckerConfigurationPage extends
 	public void applyChanges() {
 		ExternalChecker externalChecker = getExtrenalChecker();
 		externalChecker.setArguments(this.fArguments.getText());
-		externalChecker.setCommand(this.fPath.getText());
+		externalChecker.setCommand(this.fPath.getPaths());
 		externalChecker.setRules(rulesList.getRules());
 		externalChecker.setExtensions(this.fExtensions.getText());
 	}
 
 	private void createPathBrowse(final Composite parent, int columns) {
-		this.fPath.doFillIntoGrid(parent, columns - 1);
-		Text path = this.fPath.getTextControl(parent);
-		GridData gd = new GridData();
-		gd.horizontalAlignment = GridData.FILL;
-		gd.grabExcessHorizontalSpace = true;
-		gd.horizontalSpan = columns - 2;
-		path.setLayoutData(gd);
-		// Browse
-		Button browse = new Button(parent, SWT.PUSH);
-		browse.setText(Messages.ExternalCheckerConfigurationPage_browse);
-		gd = new GridData(GridData.END);
-		gd.horizontalSpan = 1;
-		browse.setLayoutData(gd);
-
-		browse.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				FileDialog dialog = new FileDialog(parent.getShell(), SWT.OPEN);
-				String file = dialog.open();
-				if (file != null) {
-					fPath.setText(file);
-				}
-			}
-		});
+		this.fPath = new EnvironmentPathBlock();
+		this.fPath.createControl(parent, columns);
 	}
 
 	public void createControl(final Composite ancestor, int columns) {
@@ -203,19 +182,17 @@ public class ExternalCheckerConfigurationPage extends
 		ExternalChecker externalChecker = getExtrenalChecker();
 		this.fArguments.setText(externalChecker.getArguments());
 
-		this.fPath.setText(externalChecker.getCommand().toOSString());
+		this.fPath.setPaths(externalChecker.getCommand());
 		this.fExtensions.setText(externalChecker.getExtensions());
 
 		this.rulesList.getRules().clear();
 		for (int i = 0; i < externalChecker.getNRules(); i++) {
-			Rule r = (Rule) externalChecker.getRule(i);
+			Rule r = externalChecker.getRule(i);
 			rulesList.addRule(r);
 		}
 	}
 
 	private void createFields() {
-		this.fPath = new StringDialogField();
-		this.fPath.setLabelText(Messages.ExternalCheckerConfigurationPage_commandToRunChecker);
 		this.fArguments = new StringDialogField();
 		this.fArguments.setLabelText(Messages.ExternalCheckerConfigurationPage_CheckerArguments);
 		this.fExtensions = new StringDialogField();
