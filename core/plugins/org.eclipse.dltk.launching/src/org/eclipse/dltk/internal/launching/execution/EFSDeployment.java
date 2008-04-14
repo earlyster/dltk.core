@@ -125,13 +125,13 @@ public class EFSDeployment implements IDeployment {
 		}
 	}
 
-	public IPath add(InputStream input, IPath filename) throws IOException {
+	public IPath add(InputStream input, String filename) throws IOException {
 		final IFileStore dest = root.getChild(filename);
 		try {
 			copy(input, dest);
 		} catch (CoreException e) {
 			throw new IOException(MessageFormat.format(Messages.EFSDeployment_failedToDeployStream, new Object[] { e.getMessage() }));
 		}
-		return filename;
+		return new Path( filename );
 	}
 }
