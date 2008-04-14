@@ -2,6 +2,7 @@ package org.eclipse.dltk.core.environment;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
 import org.eclipse.core.runtime.IPath;
 
@@ -12,35 +13,33 @@ public interface IFileHandle {
 
 	IPath getPath();
 
+	String toOSString();
+
+	String getCanonicalPath();
+
+	IPath getFullPath();
+
 	String getName();
+
+	URI toURI();
 
 	IFileHandle getParent();
 
 	IFileHandle[] getChildren();
 
-	boolean isDirectory();
+	IFileHandle getChild(String bundlePath);
 
 	boolean exists();
 
 	InputStream openInputStream() throws IOException;
 
-	String getId();
-
-	boolean isHidden();
-
-	IFileHandle getChild(String bundlePath);
-
 	boolean isSymlink();
 
+	boolean isDirectory();
+
 	boolean isFile();
-
-	String getAbsolutePath();
-
-	String getCanonicalPath();
 
 	long lastModified();
 
 	long length();
-
-	IPath getFullPath();
 }

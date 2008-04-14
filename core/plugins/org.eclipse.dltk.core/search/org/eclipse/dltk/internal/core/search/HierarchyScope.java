@@ -101,7 +101,7 @@ public class HierarchyScope extends DLTKSearchScope {
 			} else if (target instanceof IFileHandle) {
 				// external jar
 				// TODO Check this
-				zipFileName = ((IFileHandle) target).getAbsolutePath();
+				zipFileName = ((IFileHandle) target).toOSString();
 			} else {
 				return; // unknown target
 			}
@@ -142,7 +142,7 @@ public class HierarchyScope extends DLTKSearchScope {
 				} else if (target instanceof IFileHandle) {
 					// external jar
 					// TODO Check this
-					zipFileName = ((IFileHandle) target).getAbsolutePath();
+					zipFileName = ((IFileHandle) target).toOSString();
 				} else {
 					continue; // unknown target
 				}

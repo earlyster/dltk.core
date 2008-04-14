@@ -67,6 +67,6 @@ public class ExternalEntryFile extends PlatformObject implements IStorage {
 	 * @see IStorage#isReadOnly()
 	 */
 	public String toString() {
-		return "ExternalEntryFile[" + this.file.getAbsolutePath() + "]"; //$NON-NLS-2$ //$NON-NLS-1$
+		return "ExternalEntryFile[" + this.file.toOSString() + "]"; //$NON-NLS-2$ //$NON-NLS-1$
 	}
 }

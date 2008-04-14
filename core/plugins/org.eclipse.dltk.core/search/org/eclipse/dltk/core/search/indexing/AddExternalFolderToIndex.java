@@ -235,7 +235,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 					return;
 				}
 				if (files[i].isDirectory()) {
-					IPath fPath = new Path(files[i].getAbsolutePath());
+					IPath fPath = new Path(files[i].toOSString());
 					boolean valid = Util.isValidSourcePackageName(project,
 							fPath);
 					if (!((fPath.segmentCount() == 0 || valid))) {
@@ -248,7 +248,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 								participant, index);
 					}
 				} else {
-					String path = files[i].getAbsolutePath();
+					String path = files[i].toOSString();
 					IPath rPath = new Path(path);
 					if (org.eclipse.dltk.internal.core.util.Util
 							.isValidSourceModuleName(project, path)) {

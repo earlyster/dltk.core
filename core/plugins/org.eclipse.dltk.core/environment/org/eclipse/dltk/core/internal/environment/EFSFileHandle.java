@@ -2,6 +2,7 @@ package org.eclipse.dltk.core.internal.environment;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -30,12 +31,12 @@ public class EFSFileHandle implements IFileHandle {
 		}
 	}
 
-	public String getAbsolutePath() {
+	public String toOSString() {
 		return getPath().toString();
 	}
 
 	public String getCanonicalPath() {
-		return getAbsolutePath();
+		return toOSString();
 	}
 
 	public IFileHandle getChild(final String childname) {
@@ -61,8 +62,8 @@ public class EFSFileHandle implements IFileHandle {
 		return environment;
 	}
 
-	public String getId() {
-		return file.toURI().toString();
+	public URI toURI() {
+		return file.toURI();
 	}
 
 	public String getName() {
@@ -86,10 +87,6 @@ public class EFSFileHandle implements IFileHandle {
 
 	public boolean isFile() {
 		return !isDirectory();
-	}
-
-	public boolean isHidden() {
-		return file.fetchInfo().getAttribute(EFS.ATTRIBUTE_HIDDEN);
 	}
 
 	public boolean isSymlink() {
