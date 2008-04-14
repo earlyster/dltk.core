@@ -13,7 +13,6 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.PreferencesLookupDelegate;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
-import org.eclipse.dltk.dbgp.DbgpServer;
 import org.eclipse.dltk.dbgp.DbgpSessionIdGenerator;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
@@ -94,11 +93,10 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	}
 
 	private String getBindAddress() {
-		String address = DLTKDebugPlugin.getDefault().getPluginPreferences()
-				.getString(DLTKDebugPreferenceConstants.PREF_DBGP_BIND_ADDRESS);
+		String address = DLTKDebugPlugin.getDefault().getBindAddress();
 		if (DLTKDebugPreferenceConstants.DBGP_AUTODETECT_BIND_ADDRESS
 				.equals(address)) {
-			String[] ipAddresses = DbgpServer.getLocalAddresses();
+			String[] ipAddresses = DLTKDebugPlugin.getLocalAddresses();
 			if (ipAddresses.length > 0) {
 				address = ipAddresses[0];
 			} else {
