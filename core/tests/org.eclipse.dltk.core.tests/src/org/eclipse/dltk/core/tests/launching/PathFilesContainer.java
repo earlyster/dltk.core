@@ -125,7 +125,7 @@ public class PathFilesContainer {
 			// Check if file is a symlink
 			if (file.isDirectory()
 					&& (!file.getCanonicalPath().equals(
-							file.getAbsolutePath()))) {
+							file.toOSString()))) {
 				continue;
 			}
 
