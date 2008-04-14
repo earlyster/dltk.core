@@ -505,16 +505,22 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 				handlePossibleInterpreterChange();
 			}
 		}
+		
+		private boolean isValidProjectName(String name) {
+			if (name.length() == 0) {
+				return false;
+			}
+			final IWorkspace workspace = DLTKUIPlugin.getWorkspace();
+			return workspace.validateName(name, IResource.PROJECT).isOK()
+					&& workspace.getRoot().findMember(name) == null;
+		}
 
 		public void update(Observable o, Object arg) {
 			if (o instanceof LocationGroup) {
 				boolean oldDetectState = fDetect;
 				IPath location = fLocationGroup.getLocation();
 				if (fLocationGroup.isInWorkspace()) {
-					String name = getProjectName();
-					if (name.length() == 0
-							|| DLTKUIPlugin.getWorkspace().getRoot()
-									.findMember(name) != null) {
+					if (!isValidProjectName(getProjectName())) {
 						fDetect = false;
 					} else {
 						IEnvironment environment = fLocationGroup
@@ -538,6 +544,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 						fHintText.setVisible(true);
 						fHintText
 								.setText(NewWizardMessages.ScriptProjectWizardFirstPage_DetectGroup_message);
+					}
+					else {
+						fHintText.setVisible(false);
 					}
 					if (supportInterpreter()) {
 						handlePossibleInterpreterChange();
