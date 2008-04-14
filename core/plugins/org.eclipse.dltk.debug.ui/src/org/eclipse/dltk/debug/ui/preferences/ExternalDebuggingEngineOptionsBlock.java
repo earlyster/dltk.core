@@ -81,11 +81,15 @@ public abstract class ExternalDebuggingEngineOptionsBlock extends
 	protected void createEngineBlock(final Composite parent) {
 		final Group group = SWTFactory.createGroup(parent,
 				ScriptDebugPreferencesMessages.ExternalEngineGroup, 3, 1,
-				GridData.FILL_BOTH);
+				getExternalEngineBlockFillType());
 
 		enginePaths = new EnvironmentPathBlock();
 		enginePaths.createControl(group);
 		enginePaths.setPaths(getEnvironmentPaths());
+	}
+
+	protected int getExternalEngineBlockFillType() {
+		return GridData.FILL_BOTH;
 	}
 
 	protected boolean processChanges(IWorkbenchPreferenceContainer container) {

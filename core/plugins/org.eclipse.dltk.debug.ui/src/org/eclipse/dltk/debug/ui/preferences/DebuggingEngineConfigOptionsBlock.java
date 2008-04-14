@@ -72,7 +72,7 @@ public abstract class DebuggingEngineConfigOptionsBlock extends
 	protected void createLoggingBlock(final Composite parent) {
 		final Group group = SWTFactory.createGroup(parent,
 				ScriptDebugPreferencesMessages.LoggingGroupLabel, 3, 1,
-				GridData.FILL_HORIZONTAL);
+				GridData.FILL_BOTH);
 		logFilePaths = new EnvironmentPathBlock();
 		logFilePaths.createControl(group);
 		Map paths = EnvironmentPathUtils
