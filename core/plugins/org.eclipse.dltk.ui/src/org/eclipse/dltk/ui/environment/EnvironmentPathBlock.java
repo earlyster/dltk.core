@@ -19,6 +19,8 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -56,11 +58,11 @@ public class EnvironmentPathBlock {
 				case 0:
 					return ((IEnvironment) element).getName();
 				case 1:
-					Object path = paths.get(((IEnvironment) element));
+					Object path = paths.get(element);
 					if (path != null) {
 						return (String) path;
 					}
-					return Messages.EnvironmentPathBlock_undefined;
+					return "";
 				default:
 					break;
 				}
@@ -81,7 +83,7 @@ public class EnvironmentPathBlock {
 		//GridData tableData = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
 		//tableData.heightHint = conv.convertHeightInCharsToPixels(4);
 		GridData tableData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		tableData.heightHint = conv.convertHeightInCharsToPixels(8);
+		tableData.heightHint = conv.convertHeightInCharsToPixels(4);
 		tableData.horizontalSpan = columns;
 		pathTable.setLayoutData(tableData);
 
@@ -95,7 +97,7 @@ public class EnvironmentPathBlock {
 		TableViewerColumn pathColumn = new TableViewerColumn(pathViewer,
 				SWT.NULL);
 		pathColumn.getColumn().setText(Messages.EnvironmentPathBlock_path);
-		pathColumn.getColumn().setWidth(conv.convertWidthInCharsToPixels(70));
+		pathColumn.getColumn().setWidth(conv.convertWidthInCharsToPixels(40));
 		pathColumn.setEditingSupport(new EditingSupport(pathViewer) {
 			protected boolean canEdit(Object element) {
 				return true;
@@ -104,10 +106,11 @@ public class EnvironmentPathBlock {
 			protected CellEditor getCellEditor(Object element) {
 				return new TextCellEditor(pathTable) {
 					private Button browse;
+					private Composite composite;
 
-					protected Control createControl(Composite parent) {
-						Composite composite = new Composite(parent, SWT.NONE);
-						composite.setBackground(parent.getBackground());
+					protected Control createControl(Composite compositeParent) {
+						composite = new Composite(compositeParent, SWT.NONE);
+						composite.setBackground(compositeParent.getBackground());
 						GridLayout layout = new GridLayout(2, false);
 						layout.marginLeft = -4;
 						layout.marginTop = -4;
@@ -119,22 +122,38 @@ public class EnvironmentPathBlock {
 								true, false));
 						browse = new Button(composite, SWT.PUSH);
 						browse.setText("..."); //$NON-NLS-1$
-						Font font = new Font(parent.getDisplay(), "arial", 6, 0); //$NON-NLS-1$
+						Font font = new Font(compositeParent.getDisplay(), "arial", 6, 0); //$NON-NLS-1$
 						browse.setFont(font);
 						browse.setLayoutData(new GridData(SWT.DEFAULT,
 								SWT.FILL, false, true));
 						browse.addSelectionListener(new SelectionAdapter() {
 							public void widgetSelected(SelectionEvent e) {
 								editPath();
+								doFocusLost();
 							}
 						});
+						FocusAdapter listener = new FocusAdapter() {
+				            public void focusLost(FocusEvent e) {
+				            	Control cursorControl = composite.getDisplay().getCursorControl();
+				            	if( cursorControl != null ) {
+				            		if(cursorControl.equals( browse )) {
+				            			return;
+				            		}
+				            	}
+				            	System.out.println(e.getSource());
+				                doFocusLost();
+				            }
+				        };
+				        browse.addFocusListener(listener);
+						text.addFocusListener(listener);
 						return composite;
 					}
-
+					
+					public void doFocusLost() {
+						super.focusLost();
+					}
+					
 					protected void focusLost() {
-						if (!text.isFocusControl() && !browse.isFocusControl()) {
-							super.focusLost();
-						}
 					}
 				};
 			}
