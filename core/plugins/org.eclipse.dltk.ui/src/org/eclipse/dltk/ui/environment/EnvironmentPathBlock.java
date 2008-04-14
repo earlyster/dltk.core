@@ -140,7 +140,6 @@ public class EnvironmentPathBlock {
 				            			return;
 				            		}
 				            	}
-				            	System.out.println(e.getSource());
 				                doFocusLost();
 				            }
 				        };
