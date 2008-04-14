@@ -1,22 +1,14 @@
 package org.eclipse.dltk.dbgp;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.dbgp.internal.DbgpDebugingEngine;
 import org.eclipse.dltk.dbgp.internal.DbgpSession;
 import org.eclipse.dltk.dbgp.internal.DbgpWorkingThread;
@@ -28,48 +20,7 @@ public class DbgpServer extends DbgpWorkingThread {
 
 	private final int serverTimeout;
 	private final int clientTimeout;
-
-	public static String[] getLocalAddresses() {
-		Set addresses = new HashSet();
-		try {
-			InetAddress ip = null;
-			Enumeration netInterfaces = NetworkInterface.getNetworkInterfaces();
-			while (netInterfaces.hasMoreElements()) {
-				NetworkInterface ni = (NetworkInterface) netInterfaces
-						.nextElement();
-				Enumeration inetAddresses = ni.getInetAddresses();
-				while (inetAddresses.hasMoreElements()) {
-					ip = (InetAddress) inetAddresses.nextElement();
-					if (!ip.getHostAddress().equals("127.0.0.1")
-							&& !ip.isLoopbackAddress()
-							&& ip.getHostAddress().indexOf(":") == -1) {
-						break;
-					} else {
-						ip = null;
-					}
-				}
-				if (ip != null) {
-					addresses.add(ip.getHostAddress());
-				}
-			}
-
-			if (addresses.isEmpty()) {
-				addresses.add(InetAddress.getLocalHost().getHostAddress());
-			}
-		} catch (SocketException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
-		} catch (UnknownHostException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
-		}
-		String[] result = new String[addresses.size()];
-		addresses.toArray(result);
-		return result;
-	}
-
+	
 	public static int findAvailablePort(int fromPort, int toPort) {
 		if (fromPort > toPort) {
 			throw new IllegalArgumentException(

@@ -9,6 +9,14 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.core;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
@@ -16,6 +24,7 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.internal.debug.core.model.DbgpService;
 import org.eclipse.dltk.internal.debug.core.model.HotCodeReplaceManager;
 import org.eclipse.dltk.internal.debug.core.model.ScriptDebugTarget;
@@ -45,19 +54,20 @@ public class DLTKDebugPlugin extends Plugin {
 
 	public void stop(BundleContext context) throws Exception {
 		HotCodeReplaceManager.getDefault().shutdown();
-		
+
 		super.stop(context);
 
 		if (dbgpService != null) {
 			dbgpService.shutdown();
 		}
-		
-		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
-		IDebugTarget[] targets= launchManager.getDebugTargets();
-		for (int i= 0 ; i < targets.length; i++) {
-			IDebugTarget target= targets[i];
+
+		ILaunchManager launchManager = DebugPlugin.getDefault()
+				.getLaunchManager();
+		IDebugTarget[] targets = launchManager.getDebugTargets();
+		for (int i = 0; i < targets.length; i++) {
+			IDebugTarget target = targets[i];
 			if (target instanceof ScriptDebugTarget) {
-				((ScriptDebugTarget)target).shutdown();
+				((ScriptDebugTarget) target).shutdown();
 			}
 		}
 	}
@@ -83,11 +93,62 @@ public class DLTKDebugPlugin extends Plugin {
 			}
 		}
 
-		log(new Status(IStatus.ERROR, PLUGIN_ID, INTERNAL_ERROR,
-				Messages.DLTKDebugPlugin_internalErrorLoggedFromDltkDebugPlugin, top));
+		log(new Status(
+				IStatus.ERROR,
+				PLUGIN_ID,
+				INTERNAL_ERROR,
+				Messages.DLTKDebugPlugin_internalErrorLoggedFromDltkDebugPlugin,
+				top));
 	}
 
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
+
+	public String getBindAddress() {
+		return getPluginPreferences().getString(
+				DLTKDebugPreferenceConstants.PREF_DBGP_BIND_ADDRESS);
+	}
+
+	public static String[] getLocalAddresses() {
+		Set addresses = new HashSet();
+		try {
+			InetAddress ip = null;
+			Enumeration netInterfaces = NetworkInterface.getNetworkInterfaces();
+			while (netInterfaces.hasMoreElements()) {
+				NetworkInterface ni = (NetworkInterface) netInterfaces
+						.nextElement();
+				Enumeration inetAddresses = ni.getInetAddresses();
+				while (inetAddresses.hasMoreElements()) {
+					ip = (InetAddress) inetAddresses.nextElement();
+					if (!ip.getHostAddress().equals("127.0.0.1")
+							&& !ip.isLoopbackAddress()
+							&& ip.getHostAddress().indexOf(":") == -1) {
+						break;
+					} else {
+						ip = null;
+					}
+				}
+				if (ip != null) {
+					addresses.add(ip.getHostAddress());
+				}
+			}
+
+			if (addresses.isEmpty()) {
+				addresses.add(InetAddress.getLocalHost().getHostAddress());
+			}
+		} catch (SocketException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		} catch (UnknownHostException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		String[] result = new String[addresses.size()];
+		addresses.toArray(result);
+		return result;
+	}
+
 }
