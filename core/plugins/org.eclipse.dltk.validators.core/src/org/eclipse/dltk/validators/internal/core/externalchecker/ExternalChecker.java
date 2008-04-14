@@ -388,7 +388,7 @@ public class ExternalChecker extends AbstractValidator {
 		else {
 			URI uri = resource.getLocationURI();
 			IFileHandle file = environment.getFile(uri);
-			path = file.getAbsolutePath();
+			path = file.toOSString();
 		}
 		String user = replaceSequence(arguments.replaceAll("\t", "::") //$NON-NLS-1$ //$NON-NLS-2$
 				.replaceAll(" ", "::"), 'f', path); //$NON-NLS-1$ //$NON-NLS-2$
