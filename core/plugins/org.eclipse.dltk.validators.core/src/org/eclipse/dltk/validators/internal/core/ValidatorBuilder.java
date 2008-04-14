@@ -18,26 +18,35 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 
 public class ValidatorBuilder implements IScriptBuilder {
 
 	public IStatus buildModelElements(IScriptProject project, List elements,
 			IProgressMonitor monitor, int buildType) {
-		ValidatorRuntime.executeActiveValidators(null, elements, null, monitor);
+		ValidatorRuntime.executeActiveValidators(null, elements, null, monitor,
+				EnvironmentManager.getEnvironment(project));
 		return null;
 	}
 
 	public IStatus buildResources(IScriptProject project, List resources,
 			IProgressMonitor monitor, int buildType) {
-		ValidatorRuntime
-				.executeActiveValidators(null, null, resources, monitor);
+		ValidatorRuntime.executeActiveValidators(null, null, resources,
+				monitor, EnvironmentManager.getEnvironment(project));
 		return null;
 	}
 
 	public int estimateElementsToBuild(List elements) {
-		if (ValidatorRuntime.getActiveValidators().length == 0)
+		IEnvironment[] environments = EnvironmentManager.getEnvironments();
+		int count = 0;
+		for (int i = 0; i < environments.length; i++) {
+			count += ValidatorRuntime.getActiveValidators(environments[i]).length;
+		}
+		if( count == 0 ) {
 			return 0;
+		}
 		int estimation = 0;
 		for (int i = 0; i < elements.size(); i++) {
 			IModelElement element = (IModelElement) elements.get(i);

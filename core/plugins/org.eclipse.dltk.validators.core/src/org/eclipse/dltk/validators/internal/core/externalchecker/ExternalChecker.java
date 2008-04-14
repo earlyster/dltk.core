@@ -1,59 +1,65 @@
 package org.eclipse.dltk.validators.internal.core.externalchecker;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IExecutionEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.validators.core.AbstractValidator;
 import org.eclipse.dltk.validators.core.IValidatorType;
 import org.eclipse.dltk.validators.internal.core.ValidatorsCore;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class ExternalChecker extends AbstractValidator {
 
 	private static final String EXTENSIONS = "scriptPattrn"; //$NON-NLS-1$
 	private String arguments;
-	private IPath commmand;
+	private Map paths;
 	boolean initialized = false;
 	private static final String ARGUMENTS = "arguments"; //$NON-NLS-1$
-	private static final String COMMAND = "command"; //$NON-NLS-1$
+	private static final String PATH_TAG = "path";
+	private static final String ENVIRONMENT_ATTR = "environment";
+	private static final String PATH_ATTR = "path";
 	private List rules = new ArrayList();
 	private String extensions;
 
-	public void setCommand(String text) {
-		this.commmand = new Path(text);
+	public void setCommand(Map command) {
+		this.paths = command;
 	}
 
 	public void setRules(Vector list) {
 		rules.clear();
 		for (int i = 0; i < list.size(); i++) {
-			rules.add(((Rule) list.get(i)));
+			rules.add(list.get(i));
 		}
 	}
 
-	public IPath getCommand() {
-		return commmand;
+	public Map getCommand() {
+		return paths;
 	}
 
 	private static class ExternalCheckerCodeModel {
@@ -114,18 +120,26 @@ public class ExternalChecker extends AbstractValidator {
 	public ExternalChecker(String id, String name, IValidatorType type) {
 		super(id, name, type);
 		this.arguments = "%f"; //$NON-NLS-1$
-		this.commmand = new Path(""); //$NON-NLS-1$
+		this.paths = newEmptyPath(); //$NON-NLS-1$
 		this.extensions = "*"; //$NON-NLS-1$
+	}
+
+	private Map newEmptyPath() {
+		Map paths = new HashMap();
+		IEnvironment[] environments = EnvironmentManager.getEnvironments();
+		for (int i = 0; i < environments.length; i++) {
+			paths.put(environments[i], "");
+		}
+		return paths;
 	}
 
 	protected ExternalChecker(String id, IValidatorType type) {
 		super(id, null, type);
 		this.arguments = "%f"; //$NON-NLS-1$
-		this.commmand = new Path(""); //$NON-NLS-1$
+		this.paths = newEmptyPath(); //$NON-NLS-1$
 	}
 
-	protected ExternalChecker(String id, Element element, IValidatorType type)
-			throws IOException {
+	protected ExternalChecker(String id, Element element, IValidatorType type) {
 		super(id, null, type);
 		loadInfo(element);
 	}
@@ -136,7 +150,26 @@ public class ExternalChecker extends AbstractValidator {
 		}
 		super.loadFrom(element);
 		initialized = true;
-		this.commmand = new Path((element.getAttribute(COMMAND)));
+		IEnvironment[] environments = EnvironmentManager.getEnvironments();
+		paths = newEmptyPath();
+		// this.path = new Path(element.getAttribute(PATHS_TAG));
+		NodeList childNodes = element.getChildNodes();
+		for (int i = 0; i < childNodes.getLength(); i++) {
+			Node item = childNodes.item(i);
+			if (item.getNodeType() == Node.ELEMENT_NODE) {
+				Element elementNode = (Element) item;
+				if (elementNode.getTagName().equalsIgnoreCase(PATH_TAG)) {
+					String environment = elementNode
+							.getAttribute(ENVIRONMENT_ATTR);
+					String path = elementNode.getAttribute(PATH_ATTR);
+					IEnvironment env = EnvironmentManager
+							.getEnvironmentById(environment);
+					if (env != null) {
+						this.paths.put(env, path);
+					}
+				}
+			}
+		}
 		this.arguments = element.getAttribute(ARGUMENTS);
 		this.extensions = element.getAttribute(EXTENSIONS);
 
@@ -156,7 +189,6 @@ public class ExternalChecker extends AbstractValidator {
 	public void storeTo(Document doc, Element element) {
 		super.storeTo(doc, element);
 		element.setAttribute(ARGUMENTS, this.arguments);
-		element.setAttribute(COMMAND, this.commmand.toOSString());
 		element.setAttribute(EXTENSIONS, this.extensions);
 
 		for (int i = 0; i < rules.size(); i++) {
@@ -166,6 +198,15 @@ public class ExternalChecker extends AbstractValidator {
 			element.appendChild(elem);
 		}
 
+		for (Iterator iterator = paths.keySet().iterator(); iterator.hasNext();) {
+			IEnvironment env = (IEnvironment) iterator.next();
+			if (env != null) {
+				Element elem = doc.createElement(PATH_TAG);
+				elem.setAttribute(ENVIRONMENT_ATTR, env.getId());
+				elem.setAttribute(PATH_ATTR, (String) paths.get(env));
+				element.appendChild(elem);
+			}
+		}
 	}
 
 	protected static IMarker reportErrorProblem(IResource resource,
@@ -205,7 +246,9 @@ public class ExternalChecker extends AbstractValidator {
 		if (monitor == null)
 			monitor = new NullProgressMonitor();
 
-		monitor.beginTask(Messages.ExternalChecker_checkingWithExternalExecutable, modules.length);
+		monitor.beginTask(
+				Messages.ExternalChecker_checkingWithExternalExecutable,
+				modules.length);
 		try {
 			for (int i = 0; i < modules.length; i++) {
 				if (monitor.isCanceled())
@@ -249,11 +292,17 @@ public class ExternalChecker extends AbstractValidator {
 				e2.printStackTrace();
 			}
 		}
+		IEnvironment environment = EnvironmentManager.getEnvironment(module);
+		IExecutionEnvironment execEnvironment = (IExecutionEnvironment) environment
+				.getAdapter(IExecutionEnvironment.class);
 
 		List lines = new ArrayList();
 		// String filepath = resource.getLocation().makeAbsolute().toOSString();
-		String com = this.commmand.toOSString();
-		String args = this.processArguments(resource);
+		String com = (String) this.paths.get(environment);
+		if (com == null || com.trim().length() == 0) {
+			return Status.CANCEL_STATUS;
+		}
+		String args = this.processArguments(resource, environment);
 		String[] sArgs = args.split("::"); //$NON-NLS-1$
 
 		List coms = new ArrayList();
@@ -262,25 +311,18 @@ public class ExternalChecker extends AbstractValidator {
 			coms.add(sArgs[i]);
 		}
 
-		// StringBuilder sb = new StringBuilder();
-		// /sb.append(com);
-		// sb.append(" ");
-		// sb.append(args);
-
-		// String extcom1 = new String(sb);
 		String[] extcom = (String[]) coms.toArray(new String[coms.size()]);
 
 		BufferedReader input = null;
-		// OutputStreamWriter output = null;
 		Process process = null;
 		try {
 			try {
-				// process = Runtime.getRuntime().exec(extcom);
-				process = DebugPlugin.exec(extcom, null);
+				process = execEnvironment.exec(extcom, null, null);
 			} catch (Throwable e) {
 				if (DLTKCore.DEBUG) {
 					System.out.println(e.toString());
 				}
+				return Status.CANCEL_STATUS;
 			}
 			input = new BufferedReader(new InputStreamReader(process
 					.getInputStream()));
@@ -303,10 +345,12 @@ public class ExternalChecker extends AbstractValidator {
 				ExternalCheckerProblem problem = parseProblem(line1);
 				if (problem != null) {
 					int[] bounds = model.getBounds(problem.getLineNumber() - 1);
-					if (problem.getType().indexOf(Messages.ExternalChecker_error) != -1) {
+					if (problem.getType().indexOf(
+							Messages.ExternalChecker_error) != -1) {
 						reportErrorProblem(resource, problem, bounds[0],
 								bounds[1]);
-					} else if (problem.getType().indexOf(Messages.ExternalChecker_warning) != -1) {
+					} else if (problem.getType().indexOf(
+							Messages.ExternalChecker_warning) != -1) {
 						reportWarningProblem(resource, problem, bounds[0],
 								bounds[1]);
 					}
@@ -336,10 +380,16 @@ public class ExternalChecker extends AbstractValidator {
 		return rules.size();
 	}
 
-	private String processArguments(IResource resource) {
-		String path = resource.getLocation().makeAbsolute().toOSString();
-		String arguments = this.arguments;
-
+	private String processArguments(IResource resource, IEnvironment environment) {
+		String path = null;
+		if (resource.getLocation() != null) {
+			path = resource.getLocation().makeAbsolute().toOSString();
+		}
+		else {
+			URI uri = resource.getLocationURI();
+			IFileHandle file = environment.getFile(uri);
+			path = file.getAbsolutePath();
+		}
 		String user = replaceSequence(arguments.replaceAll("\t", "::") //$NON-NLS-1$ //$NON-NLS-2$
 				.replaceAll(" ", "::"), 'f', path); //$NON-NLS-1$ //$NON-NLS-2$
 		return user;
@@ -359,10 +409,13 @@ public class ExternalChecker extends AbstractValidator {
 		}
 		return buffer.toString();
 	}
-
-	public boolean isValidatorValid() {
-		IPath path = this.commmand;
-		File file = new File(path.toOSString());
+	
+	public boolean isValidatorValid(IEnvironment environment) {
+		String path = (String) this.paths.get(environment);
+		if( path == null || path.trim().length() == 0 ) {
+			return false;
+		}
+		IFileHandle file = environment.getFile(new Path(path));
 
 		if (!file.exists()) {
 			return false;

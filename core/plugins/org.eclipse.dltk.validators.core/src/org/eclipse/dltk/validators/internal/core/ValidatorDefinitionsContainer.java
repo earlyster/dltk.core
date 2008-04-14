@@ -42,11 +42,11 @@ public class ValidatorDefinitionsContainer {
 
 	private List fValidatorList;
 
-	private List fInvalidValidatorList;
+//	private List fInvalidValidatorList;
 
 	public ValidatorDefinitionsContainer() {
 		fValidatorTypeToValidatorMap = new HashMap(10);
-		fInvalidValidatorList = new ArrayList(10);
+//		fInvalidValidatorList = new ArrayList(10);
 		fValidatorList = new ArrayList(10);
 	}
 
@@ -62,9 +62,9 @@ public class ValidatorDefinitionsContainer {
 						validatorList);
 			}
 			validatorList.add(validator);
-			if (!validator.isValidatorValid()) {
-				fInvalidValidatorList.add(validator);
-			}
+//			if (!validator.isValidatorValid()) {
+//				fInvalidValidatorList.add(validator);
+//			}
 			fValidatorList.add(validator);
 		}
 	}
@@ -102,7 +102,7 @@ public class ValidatorDefinitionsContainer {
 		List validators = getValidatorList();
 		List resultList = new ArrayList(validators.size());
 		resultList.addAll(validators);
-		resultList.removeAll(fInvalidValidatorList);
+//		resultList.removeAll(fInvalidValidatorList);
 		return resultList;
 	}
 
@@ -110,7 +110,7 @@ public class ValidatorDefinitionsContainer {
 		List Interpreters = getValidatorList(nature);
 		List resultList = new ArrayList(Interpreters.size());
 		resultList.addAll(Interpreters);
-		resultList.removeAll(fInvalidValidatorList);
+//		resultList.removeAll(fInvalidValidatorList);
 		return resultList;
 	}
 
@@ -292,7 +292,7 @@ public class ValidatorDefinitionsContainer {
 	 */
 	public void removeValidator(IValidator Interpreter) {
 		fValidatorList.remove(Interpreter);
-		fInvalidValidatorList.remove(Interpreter);
+//		fInvalidValidatorList.remove(Interpreter);
 		List list = (List) fValidatorTypeToValidatorMap.get(Interpreter
 				.getValidatorType());
 		if (list != null) {
