@@ -285,7 +285,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 			fInterpreterTypeCombo.setEnabled(false);
 			fInterpreterName.setText(fEditedInterpreter.getName());
 			fInterpreterPath.setText(fEditedInterpreter.getRawInstallLocation()
-					.getAbsolutePath());
+					.toOSString());
 			if (fEnvironmentVariablesBlock != null) {
 				fEnvironmentVariablesBlock.initializeFrom(fEditedInterpreter,
 						fSelectedInterpreterType);

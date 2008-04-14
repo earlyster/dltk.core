@@ -50,7 +50,7 @@ public class ExternalFileEditorInput implements IPathEditorInput,
 	}
 
 	public String getToolTipText() {
-		return file.getAbsolutePath();
+		return file.toOSString();
 	}
 
 	public Object getAdapter(Class adapter) {
@@ -79,7 +79,7 @@ public class ExternalFileEditorInput implements IPathEditorInput,
 	}
 
 	public IPath getPath() {
-		return Path.fromOSString(file.getAbsolutePath());
+		return Path.fromPortableString(file.toOSString());
 	}
 
 	public boolean equals(Object o) {
