@@ -1,10 +1,5 @@
 package org.eclipse.dltk.launching;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Enumeration;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -14,11 +9,11 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.PreferencesLookupDelegate;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.dbgp.DbgpServer;
 import org.eclipse.dltk.dbgp.DbgpSessionIdGenerator;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
@@ -39,7 +34,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 
 	public static final String OVERRIDE_EXE = "OVERRIDE_EXE"; //$NON-NLS-1$
 
-	private static String sHostAddress = null;
+	private static final String LOCALHOST = "127.0.0.1"; //$NON-NLS-1$
 
 	protected String getSessionId(ILaunchConfiguration configuration)
 			throws CoreException {
@@ -59,49 +54,6 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 
 	public DebuggingEngineRunner(IInterpreterInstall install) {
 		super(install);
-		synchronized (DebuggingEngineRunner.class) {
-			if (sHostAddress == null) {
-				try {
-					InetAddress ip = null;
-					Enumeration netInterfaces = NetworkInterface
-							.getNetworkInterfaces();
-					while (netInterfaces.hasMoreElements()) {
-						NetworkInterface ni = (NetworkInterface) netInterfaces
-								.nextElement();
-						ip = (InetAddress) ni.getInetAddresses().nextElement();
-						Enumeration inetAddresses = ni.getInetAddresses();
-						while(inetAddresses.hasMoreElements()) {
-							ip = (InetAddress) inetAddresses.nextElement();
-							if (!ip.getHostAddress().equals("127.0.0.1") && !ip.isLoopbackAddress()
-									&& ip.getHostAddress().indexOf(":") == -1) {
-								break;
-							} else {
-								ip = null;
-							}
-						}
-						if( ip != null) {
-							break;
-						}
-					}
-					if( ip != null ) {
-						sHostAddress = ip.getHostAddress();
-					}
-					else {
-						sHostAddress = InetAddress.getLocalHost().getHostAddress();
-					}
-				} catch (SocketException e) {
-					sHostAddress = "127.0.0.1"; //$NON-NLS-1$
-					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
-					}
-				} catch (UnknownHostException e) {
-					sHostAddress = "127.0.0.1"; //$NON-NLS-1$
-					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
 	}
 
 	protected void initializeLaunch(ILaunch launch, InterpreterConfig config,
@@ -138,7 +90,22 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 
 		dbgpConfig.setSessionId(target.getSessionId());
 		dbgpConfig.setPort(service.getPort());
-		dbgpConfig.setHost(sHostAddress);
+		dbgpConfig.setHost(getBindAddress());
+	}
+
+	private String getBindAddress() {
+		String address = DLTKDebugPlugin.getDefault().getPluginPreferences()
+				.getString(DLTKDebugPreferenceConstants.PREF_DBGP_BIND_ADDRESS);
+		if (DLTKDebugPreferenceConstants.DBGP_AUTODETECT_BIND_ADDRESS
+				.equals(address)) {
+			String[] ipAddresses = DbgpServer.getLocalAddresses();
+			if (ipAddresses.length > 0) {
+				address = ipAddresses[0];
+			} else {
+				address = LOCALHOST;
+			}
+		}
+		return address;
 	}
 
 	/**
