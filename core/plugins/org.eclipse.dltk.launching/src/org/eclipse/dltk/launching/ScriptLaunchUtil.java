@@ -26,7 +26,6 @@ import org.eclipse.dltk.internal.launching.EnvironmentResolver;
 import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 
 public class ScriptLaunchUtil {
-
 	// Creating of InterpreterConfig
 	public static InterpreterConfig createInterpreterConfig(
 			IExecutionEnvironment exeEnv, IFileHandle scriptFile,
@@ -112,17 +111,6 @@ public class ScriptLaunchUtil {
 		return runScriptWithInterpreter(exeEnv, interpreter, config);
 	}
 
-	// public static Process runScriptWithInterpreter(String interpreter,
-	// String scriptContent, IFileHandle workingDirectory,
-	// String[] interpreterArgs, String[] scriptArgs,
-	// EnvironmentVariable[] environment) throws CoreException,
-	// IOException {
-	// return runScriptWithInterpreter(interpreter,
-	// createScriptFileWithContent(scriptContent), workingDirectory,
-	// interpreterArgs, scriptArgs, environment);
-	// }
-
-	// 
 	public static IInterpreterInstall getDefaultInterpreterInstall(
 			String natureId, String environment) {
 		return ScriptRuntime
@@ -141,7 +129,7 @@ public class ScriptLaunchUtil {
 			throws CoreException {
 
 		if (install == null) {
-			// TODO: Handle this error!!!
+			return null;
 		}
 
 		ILaunch launch = new Launch(null, ILaunchManager.RUN_MODE, null);
@@ -197,23 +185,4 @@ public class ScriptLaunchUtil {
 		return runScript(natureId, scriptFile.getEnvironment().getId(), config,
 				monitor);
 	}
-
-	// public static ILaunch runScript(String natureId, IFileHandle scriptFile)
-	// throws CoreException {
-	// return runScript(natureId, scriptFile, null, null, null, null);
-	// }
-	//
-	// // Script content
-	// public static ILaunch runScript(String natureId, String scriptContent,
-	// IFileHandle workingDirectory, String[] interpreterArgs,
-	// String[] scriptArgs, IProgressMonitor monitor)
-	// throws CoreException, IOException {
-	// return runScript(natureId, createScriptFileWithContent(scriptContent),
-	// workingDirectory, interpreterArgs, scriptArgs, monitor);
-	// }
-
-	// public static ILaunch runScript(String natureId, String scriptContent)
-	// throws CoreException, IOException {
-	// return runScript(natureId, createScriptFileWithContent(scriptContent));
-	// }
 }
