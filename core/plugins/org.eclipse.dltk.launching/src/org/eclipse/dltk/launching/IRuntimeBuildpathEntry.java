@@ -152,7 +152,7 @@ public interface IRuntimeBuildpathEntry {
 	 * Since 3.0, this method may return <code>null</code>.
 	 * </p>
 	 * @return the path associated with this entry, or <code>null</code>
-	 * @see org.eclipse.dltk.core.IClasspathEntry#getId()
+	 * @see org.eclipse.dltk.core.IClasspathEntry#toURI()
 	 */
 	public IPath getPath();
 	

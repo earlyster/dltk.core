@@ -163,7 +163,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 							.format(
 									LaunchingMessages.AbstractScriptLaunchConfigurationDelegate_InterpreterEnvironment_home_directory_for__0__does_not_exist___1__6,
 									new String[] { interpreter.getName(),
-											location.getId() }),
+											location.toURI().toString() }),
 					null,
 					ScriptLaunchConfigurationConstants.ERR_INTERPRETER_INSTALL_DOES_NOT_EXIST);
 		}
@@ -618,13 +618,13 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 							null,
 							ScriptLaunchConfigurationConstants.ERR_WORKING_DIRECTORY_DOES_NOT_EXIST);
 				}
-				return dir.getAbsolutePath();
+				return dir.toOSString();
 			}
 		} else {
 			if (path.isAbsolute()) {
 				IFileHandle dir = environment.getFile(path);
 				if (dir.isDirectory()) {
-					return dir.getAbsolutePath();
+					return dir.toOSString();
 				}
 				// This may be a workspace relative path returned by a variable.
 				// However variable paths start with a slash and thus are
@@ -700,7 +700,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		IPath environmentLocation = new Path(loc).append(mainScriptName);
 		IFileHandle file = scriptEnvironment.getFile(environmentLocation);
 		if (file.exists()) {
-			return file.getAbsolutePath();
+			return file.toOSString();
 		}
 		return environmentLocation.toOSString();
 	}

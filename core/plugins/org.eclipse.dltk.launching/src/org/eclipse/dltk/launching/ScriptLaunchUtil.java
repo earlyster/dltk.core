@@ -39,10 +39,10 @@ public class ScriptLaunchUtil {
 			IFileHandle workingDirectory, EnvironmentVariable[] env) {
 		IPath workingDirectoryPath = null;
 		if (workingDirectory != null) {
-			workingDirectoryPath = new Path(workingDirectory.getAbsolutePath());
+			workingDirectoryPath = new Path(workingDirectory.toOSString());
 		}
 		InterpreterConfig config = new InterpreterConfig(scriptFile
-				.getEnvironment(), new Path(scriptFile.getAbsolutePath()),
+				.getEnvironment(), new Path(scriptFile.toOSString()),
 				workingDirectoryPath);
 
 		Map envVars = exeEnv.getEnvironmentVariables();

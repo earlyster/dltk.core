@@ -502,7 +502,7 @@ public abstract class AbstractInterpreterInstallType implements
 
 	public IStatus validateInstallLocation(IFileHandle installLocation) {
 		if (!installLocation.exists() || !installLocation.isFile()
-				|| installLocation.isHidden()) {
+				/*|| installLocation.isHidden()*/) {
 			return createStatus(IStatus.ERROR,
 					InterpreterMessages.errNonExistentOrInvalidInstallLocation,
 					null);
@@ -675,7 +675,7 @@ public abstract class AbstractInterpreterInstallType implements
 										LaunchingMessages.AbstractInterpreterInstallType_failedToResolveLibraryLocationsForWith,
 										new Object[] {
 												installLocation.getName(),
-												locator.getAbsolutePath() });
+												locator.toOSString() });
 						if (locations.size() == 0) {
 							if (result == null) {
 								DLTKLaunchingPlugin.log(message);
@@ -773,7 +773,7 @@ public abstract class AbstractInterpreterInstallType implements
 
 	public static Object makeKey(IFileHandle installLocation,
 			EnvironmentVariable[] variables) {
-		String key = installLocation.getId();
+		String key = installLocation.toURI().toString();
 		if (variables != null) {
 			for (int i = 0; i < variables.length; i++) {
 				key += "|" + variables[i].getName() + ":" //$NON-NLS-1$ //$NON-NLS-2$
