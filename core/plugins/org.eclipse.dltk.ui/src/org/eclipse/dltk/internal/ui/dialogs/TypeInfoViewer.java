@@ -276,7 +276,7 @@ public class TypeInfoViewer {
 						processLibraryLocation(libLocations, label);
 					} else {
 						String filePath = installs[i].getInstallLocation()
-								.getAbsolutePath();
+								.toOSString();
 						// on MacOS X install locations end in an additional
 						// "/Home" segment; remove it
 						if (isMac && filePath.endsWith(HOME_SUFFIX))

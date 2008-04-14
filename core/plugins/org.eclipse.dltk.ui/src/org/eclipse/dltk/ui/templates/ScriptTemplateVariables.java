@@ -76,7 +76,7 @@ public final class ScriptTemplateVariables {
 				IInterpreterInstall install = ScriptRuntime
 						.getInterpreterInstall(module.getScriptProject());
 				
-				path = install.getRawInstallLocation().getAbsolutePath();				
+				path = install.getRawInstallLocation().toOSString();				
 			} catch (CoreException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
