@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.validators.core.AbstractValidator;
 import org.eclipse.dltk.validators.core.IValidatorType;
 import org.w3c.dom.Document;
@@ -56,7 +57,7 @@ public class SimpleValidator extends AbstractValidator {
 	public void setValid(boolean b) {
 		this.valid = b;
 	}
-	public boolean isValidatorValid() {
+	public boolean isValidatorValid(IEnvironment environment) {
 		return this.valid;
 	}
 	public void clean(ISourceModule[] module) {
