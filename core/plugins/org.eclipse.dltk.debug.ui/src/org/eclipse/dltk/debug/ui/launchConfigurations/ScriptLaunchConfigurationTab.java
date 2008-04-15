@@ -94,8 +94,16 @@ public abstract class ScriptLaunchConfigurationTab extends
 		createVerticalSpacer(comp, 1);
 
 		createDebugOptionsGroup(comp);
+
+		createCustomSections(comp);
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(),
 		// IScriptDebugHelpContextIds.LAUNCH_CONFIGURATION_DIALOG_MAIN_TAB);
+	}
+
+	/**
+	 * Create some custom user sections.
+	 */
+	protected void createCustomSections(Composite comp) {
 	}
 
 	/**

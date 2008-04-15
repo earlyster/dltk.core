@@ -172,6 +172,10 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 			fInterpreterBlock.setEnvironment(EnvironmentManager.getEnvironment(scriptProject));
 			fInterpreterBlock.refreshInterpreters();
 		}
+		else {
+			fInterpreterBlock.setEnvironment(EnvironmentManager.getLocalEnvironment());
+			fInterpreterBlock.refreshInterpreters();
+		}
 		ILaunchConfigurationTab dynamicTab = getDynamicTab();
 		if (dynamicTab != null) {
 			dynamicTab.initializeFrom(configuration);
