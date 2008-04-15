@@ -32,6 +32,8 @@ import org.osgi.framework.BundleContext;
 
 public class DLTKDebugPlugin extends Plugin {
 
+	private static final String LOCALHOST = "127.0.0.1"; //$NON-NLS-1$
+
 	public static final String PLUGIN_ID = "org.eclipse.dltk.debug"; //$NON-NLS-1$
 
 	public static final int INTERNAL_ERROR = 120;
@@ -106,8 +108,18 @@ public class DLTKDebugPlugin extends Plugin {
 	}
 
 	public String getBindAddress() {
-		return getPluginPreferences().getString(
+		String address = getPluginPreferences().getString(
 				DLTKDebugPreferenceConstants.PREF_DBGP_BIND_ADDRESS);
+		if (DLTKDebugPreferenceConstants.DBGP_AUTODETECT_BIND_ADDRESS
+				.equals(address)) {
+			String[] ipAddresses = DLTKDebugPlugin.getLocalAddresses();
+			if (ipAddresses.length > 0) {
+				address = ipAddresses[0];
+			} else {
+				address = LOCALHOST;
+			}
+		}
+		return address;
 	}
 
 	public static String[] getLocalAddresses() {
