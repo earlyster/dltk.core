@@ -29,6 +29,9 @@ public class DLTKLaunchConfigurationsMessages extends NLS {
 	public static String mainTab_errorDlg_reasonNotALangProject;
 	public static String error_selectScript;
 	public static String error_scriptNotFound;
+	public static String MainLaunchConfigurationTab_0;
+	public static String MainLaunchConfigurationTab_1;
+	public static String MainLaunchConfigurationTab_2;
 
 	public static String remoteTab_title;
 	public static String remoteTab_connectionProperties;
