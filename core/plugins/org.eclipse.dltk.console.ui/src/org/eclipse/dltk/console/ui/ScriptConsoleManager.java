@@ -161,7 +161,7 @@ public class ScriptConsoleManager implements ILaunchListener {
 				return;
 			}
 			
-			boolean useDltk = configuration.getAttribute(ScriptLaunchConfigurationConstants.ATTR_USE_DLTK_OUTPUT, false);
+			boolean useDltk = configuration.getAttribute(ScriptLaunchConfigurationConstants.ATTR_USE_INTERACTIVE_CONSOLE, false);
 
 			if (!useDltk) {
 				return;
