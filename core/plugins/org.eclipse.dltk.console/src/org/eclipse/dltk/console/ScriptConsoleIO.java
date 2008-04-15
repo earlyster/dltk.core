@@ -138,7 +138,6 @@ public class ScriptConsoleIO implements IScriptConsoleIO {
 		for (int i = 0; i < args.length; ++i) {
 			output.write((args[i] + "\n").getBytes("UTF-8")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-
 		output.flush();
 
 		final String response = readResponse(input);
