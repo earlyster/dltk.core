@@ -23,6 +23,7 @@ import org.eclipse.dltk.console.ui.internal.ScriptConsoleInput;
 import org.eclipse.dltk.console.ui.internal.ScriptConsolePage;
 import org.eclipse.dltk.console.ui.internal.ScriptConsoleSession;
 import org.eclipse.dltk.console.ui.internal.ScriptConsoleViewer.ConsoleDocumentListener;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
@@ -251,7 +252,9 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		try {
 			interpreter.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 	}
 
