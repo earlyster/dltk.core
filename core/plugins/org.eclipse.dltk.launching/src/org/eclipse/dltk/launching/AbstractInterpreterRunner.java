@@ -141,6 +141,9 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 									InterpreterMessages.errDebuggingEngineWorkingDirectoryDoesntExist,
 									new Object[] { dir.toString() }), null);
 		}
+		if( config.getScriptFilePath() == null ) {
+			return;
+		}
 		IFileHandle script = environment.getFile(config.getScriptFilePath());
 		if (!script.exists()) {
 			abort(

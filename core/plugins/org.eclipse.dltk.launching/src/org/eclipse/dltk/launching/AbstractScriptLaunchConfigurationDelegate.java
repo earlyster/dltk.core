@@ -687,6 +687,9 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	protected String getScriptLaunchPath(ILaunchConfiguration configuration,
 			IEnvironment scriptEnvironment) throws CoreException {
 		String mainScriptName = verifyMainScriptName(configuration);
+		if( mainScriptName.length() == 0 ) {
+			return null;
+		}
 		IProject project = getScriptProject(configuration).getProject();
 		String loc = null;
 		URI location = project.getLocationURI();
@@ -715,13 +718,16 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		IExecutionEnvironment scriptExecEnvironment = (IExecutionEnvironment) scriptEnvironment.getAdapter(IExecutionEnvironment.class);
 		String scriptLaunchPath = getScriptLaunchPath(configuration,
 				scriptEnvironment);
-		if (scriptLaunchPath == null) {
-			return null;
-		}
-		final IPath mainScript = new Path(scriptLaunchPath);
+//		if (scriptLaunchPath == null) {
+//			return null;
+//		}
 		final IPath workingDirectory = new Path(getWorkingDirectory(
 				configuration, scriptEnvironment));
 
+		IPath mainScript = null;//
+		if( scriptLaunchPath != null ) {
+			mainScript = new Path(scriptLaunchPath);
+		}
 		InterpreterConfig config = new InterpreterConfig(scriptEnvironment,
 				mainScript, workingDirectory);
 

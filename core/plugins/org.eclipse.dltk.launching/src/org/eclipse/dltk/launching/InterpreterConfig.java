@@ -97,7 +97,9 @@ public class InterpreterConfig implements Cloneable {
 
 	public InterpreterConfig(IEnvironment environment, IPath scriptFile,
 			IPath workingDirectory) {
-		checkScriptFile(scriptFile);
+		if (scriptFile != null) {
+			checkScriptFile(scriptFile);
+		}
 		init(environment, scriptFile, workingDirectory);
 	}
 
@@ -113,7 +115,7 @@ public class InterpreterConfig implements Cloneable {
 		}
 		return null;
 	}
-	
+
 	public void setEnvironment(IEnvironment environment) {
 		this.environment = environment;
 	}
@@ -348,7 +350,8 @@ public class InterpreterConfig implements Cloneable {
 		return (String[]) items.toArray(new String[items.size()]);
 	}
 
-	protected String[] renderCommandLine(IEnvironment environment, IPath interpreter) {
+	protected String[] renderCommandLine(IEnvironment environment,
+			IPath interpreter) {
 		final List items = new ArrayList();
 
 		items.add(environment.convertPathToString(interpreter));
@@ -359,7 +362,8 @@ public class InterpreterConfig implements Cloneable {
 		return (String[]) items.toArray(new String[items.size()]);
 	}
 
-	public String[] renderCommandLine(IEnvironment environment, String interpreter) {
+	public String[] renderCommandLine(IEnvironment environment,
+			String interpreter) {
 		return renderCommandLine(environment, new Path(interpreter));
 	}
 

@@ -33,8 +33,6 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 
 	public static final String OVERRIDE_EXE = "OVERRIDE_EXE"; //$NON-NLS-1$
 
-	private static final String LOCALHOST = "127.0.0.1"; //$NON-NLS-1$
-
 	protected String getSessionId(ILaunchConfiguration configuration)
 			throws CoreException {
 		return DbgpSessionIdGenerator.generate();
@@ -93,17 +91,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	}
 
 	private String getBindAddress() {
-		String address = DLTKDebugPlugin.getDefault().getBindAddress();
-		if (DLTKDebugPreferenceConstants.DBGP_AUTODETECT_BIND_ADDRESS
-				.equals(address)) {
-			String[] ipAddresses = DLTKDebugPlugin.getLocalAddresses();
-			if (ipAddresses.length > 0) {
-				address = ipAddresses[0];
-			} else {
-				address = LOCALHOST;
-			}
-		}
-		return address;
+		return DLTKDebugPlugin.getDefault().getBindAddress();
 	}
 
 	/**
