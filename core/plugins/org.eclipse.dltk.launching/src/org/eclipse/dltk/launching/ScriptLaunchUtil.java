@@ -19,6 +19,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.Launch;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
@@ -171,7 +172,9 @@ public class ScriptLaunchUtil {
 	public static ILaunch runScript(String natureId, IFileHandle scriptFile,
 			IFileHandle workingDirectory, String[] interpreterArgs,
 			String[] scriptArgs, IProgressMonitor monitor) throws CoreException {
-		InterpreterConfig config = createInterpreterConfig(null, scriptFile,
+		IEnvironment environment = scriptFile.getEnvironment();
+		IExecutionEnvironment execEnvironment = (IExecutionEnvironment) environment.getAdapter(IExecutionEnvironment.class);
+		InterpreterConfig config = createInterpreterConfig(execEnvironment, scriptFile,
 				workingDirectory);
 
 		if (interpreterArgs != null) {
@@ -182,7 +185,7 @@ public class ScriptLaunchUtil {
 			config.addScriptArgs(scriptArgs);
 		}
 
-		return runScript(natureId, scriptFile.getEnvironment().getId(), config,
+		return runScript(natureId, environment.getId(), config,
 				monitor);
 	}
 }
