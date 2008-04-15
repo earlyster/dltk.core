@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.corext.buildpath.BuildpathModifier;
 import org.eclipse.dltk.internal.corext.buildpath.BuildpathModifier.IBuildpathModifierListener;
@@ -141,7 +141,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
                            ScrolledPageContent parentScrolledComposite= getParentScrolledComposite(excomposite);
                            if (parentScrolledComposite != null) {
                               boolean expanded= excomposite.isExpanded();
-                              parentScrolledComposite.reflow(true);
+//                              parentScrolledComposite.reflow(true);
                               adjustSashForm(sashWeight, sashForm, expanded);
                               preferenceStore.setValue(OPEN_SETTING, expanded);
                            }
