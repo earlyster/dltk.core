@@ -14,8 +14,6 @@ import java.io.OutputStream;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
@@ -58,8 +56,6 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 	private IScriptEvaluationEngine evalEngine;
 
 	private int currentStackLevel;
-
-	private IPropertyChangeListener propertyListener;
 
 	private boolean terminated = false;
 
