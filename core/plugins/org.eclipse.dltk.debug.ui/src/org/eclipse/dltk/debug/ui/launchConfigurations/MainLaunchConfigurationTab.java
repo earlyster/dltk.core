@@ -15,7 +15,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.IDebugUIConstants;
@@ -175,8 +174,14 @@ public abstract class MainLaunchConfigurationTab extends
 			config.setAttribute(
 					ScriptLaunchConfigurationConstants.ATTR_DLTK_CONSOLE_ID,
 					"dltk_" + Long.toString(System.currentTimeMillis()));
-			config.setAttribute(IDebugUIConstants.ATTR_CAPTURE_IN_CONSOLE, "false");
-			config.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, "false");
+			if (this.interactiveConsoleCheck.getSelection()) {
+				config.setAttribute(IDebugUIConstants.ATTR_CAPTURE_IN_CONSOLE,
+						false);
+			} else {
+				config.setAttribute(IDebugUIConstants.ATTR_CAPTURE_IN_CONSOLE,
+						(String)null);
+			}
+			// config.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, "false");
 		}
 	}
 

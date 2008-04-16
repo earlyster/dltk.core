@@ -22,8 +22,9 @@ public abstract class DebuggingEngineConfigOptionsBlock extends
 		AbstractOptionsBlock {
 
 	private EnvironmentPathBlock logFilePaths;
-//	private Text logFileName;
-//	private Text logFilePath;
+
+	// private Text logFileName;
+	// private Text logFilePath;
 
 	public DebuggingEngineConfigOptionsBlock(IStatusChangeListener context,
 			IProject project, PreferenceKey[] allKeys,
@@ -119,8 +120,11 @@ public abstract class DebuggingEngineConfigOptionsBlock extends
 	}
 
 	protected boolean processChanges(IWorkbenchPreferenceContainer container) {
-		String loggingPaths = EnvironmentPathUtils.encodePaths(logFilePaths.getPaths());
-		setString(getLogFileNamePreferenceKey(), loggingPaths);
+		if (logFilePaths != null) {
+			String loggingPaths = EnvironmentPathUtils.encodePaths(logFilePaths
+					.getPaths());
+			setString(getLogFileNamePreferenceKey(), loggingPaths);
+		}
 		return super.processChanges(container);
 	}
 
