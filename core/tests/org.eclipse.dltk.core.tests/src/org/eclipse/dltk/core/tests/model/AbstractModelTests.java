@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.core.DLTKCore;
@@ -223,30 +224,30 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 	 * destination file).
 	 */
 	public static void copy(File src, File dest) throws IOException {
-	  InputStream in = null;
-	  OutputStream out = null;
-	  byte[] buffer = new byte[12 * 1024];
-	  int read;
+		InputStream in = null;
+		OutputStream out = null;
+		byte[] buffer = new byte[12 * 1024];
+		int read;
 
-	  try {
-	    in = new FileInputStream(src);
+		try {
+			in = new FileInputStream(src);
 
-	    try {
-	      out = new FileOutputStream(dest);
+			try {
+				out = new FileOutputStream(dest);
 
-	      while ((read = in.read(buffer)) != -1) {
-	        out.write(buffer, 0, read); 
-	      }
-	    } finally {
-	      if (out != null) {
-	        out.close();
-	      }
-	    }
-	  } finally {
-	    if (in != null) {
-	      in.close();
-	    }
-	  }
+				while ((read = in.read(buffer)) != -1) {
+					out.write(buffer, 0, read);
+				}
+			} finally {
+				if (out != null) {
+					out.close();
+				}
+			}
+		} finally {
+			if (in != null) {
+				in.close();
+			}
+		}
 	}
 
 	protected IProject setUpProject(final String projectName)
@@ -926,8 +927,45 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 		boolean wasInterrupted = false;
 		do {
 			try {
-				Job.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD,
-						null);
+				IJobManager jobManager = Job.getJobManager();
+				jobManager.join(ResourcesPlugin.FAMILY_AUTO_BUILD,
+						new IProgressMonitor() {
+							public void beginTask(String name, int totalWork) {
+								System.out.println("task:" + name + " (" + totalWork + ")");
+							}
+
+							public void done() {
+								System.out.println("done");
+							}
+
+							public void internalWorked(double work) {
+								System.out.println(".");
+							}
+
+							public boolean isCanceled() {
+								// TODO Auto-generated method stub
+								return false;
+							}
+
+							public void setCanceled(boolean value) {
+								// TODO Auto-generated method stub
+
+							}
+
+							public void setTaskName(String name) {
+								System.out.println("taskname:" + name);
+							}
+
+							public void subTask(String name) {
+								System.out.println("subtask:" + name);
+
+							}
+
+							public void worked(int work) {
+								System.out.println(".");
+							}
+
+						});
 				wasInterrupted = false;
 			} catch (OperationCanceledException e) {
 				e.printStackTrace();
