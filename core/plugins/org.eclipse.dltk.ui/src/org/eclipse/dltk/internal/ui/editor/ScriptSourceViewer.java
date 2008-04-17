@@ -5,7 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ *
+ * Contributors:
+ *     		IBM Corporation - initial API and implementation
+ * 			Alex Panchenko <alex@xored.com>
  *******************************************************************************/
 
 package org.eclipse.dltk.internal.ui.editor;
@@ -16,6 +19,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextPresentationListener;
@@ -229,7 +233,7 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 					this, true);
 			if (fHierarchyPresenter != null)
 				fHierarchyPresenter.install(this);
-
+			textWidget.setFont(JFaceResources.getFont(dltkSVCconfiguration.getFontPropertyPreferenceKey()));
 		}
 
 		if (fPreferenceStore != null) {
