@@ -184,7 +184,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 * 
 	 * @return the primary control
 	 */
-	abstract Control getControl();
+	protected abstract Control getControl();
 
 	/**
 	 * Returns the context ID for the Help system
