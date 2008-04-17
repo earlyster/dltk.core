@@ -98,7 +98,7 @@ public class ValidatorDefinitionsContainer {
 		return res;
 	}
 
-	public List getValidValidatorsList() {
+	public List getValidatorsList() {
 		List validators = getValidatorList();
 		List resultList = new ArrayList(validators.size());
 		resultList.addAll(validators);
@@ -106,7 +106,7 @@ public class ValidatorDefinitionsContainer {
 		return resultList;
 	}
 
-	public List getValidValidatorsList(String nature) {
+	public List getValidatorsList(String nature) {
 		List Interpreters = getValidatorList(nature);
 		List resultList = new ArrayList(Interpreters.size());
 		resultList.addAll(Interpreters);
