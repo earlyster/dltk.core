@@ -17,8 +17,19 @@ import org.eclipse.core.runtime.IPath;
 import org.osgi.framework.Bundle;
 
 public interface IDeployment {
+	/**
+	 * Extract and deploy specific folder or file from plugin bundle to environment file system.
+	 */
 	IPath add(Bundle bundle, String bundlePath) throws IOException;
+	/**
+	 * Deploy specific stream as file into environment file system.
+	 */
 	IPath add(InputStream stream, String filename) throws IOException;
+	
+	/**
+	 * Make specific folders
+	 * @param path
+	 */
 	void mkdirs(IPath path);
 	void dispose();
 	IFileHandle getFile(IPath deploymentPath);
