@@ -19,12 +19,14 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.debug.ui.messages.DLTKLaunchConfigurationsMessages;
 import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.preferences.FieldValidators;
-import org.eclipse.dltk.ui.preferences.IFieldValidator;
+import org.eclipse.dltk.ui.preferences.FieldValidators.FilePathValidator;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -197,8 +199,10 @@ public abstract class MainLaunchConfigurationTab extends
 	protected boolean validateScript() {
 		URI script = validatAndGetScriptPath();
 		if (script != null) {
-			IFieldValidator validator = new FieldValidators.FilePathValidator();
-			IStatus result = validator.validate(script.getPath());
+			FilePathValidator validator = new FieldValidators.FilePathValidator();
+			IScriptProject project = getProject();
+			IEnvironment environment = EnvironmentManager.getEnvironment(project);
+			IStatus result = validator.validate(script.getPath(), environment);
 
 			if (!result.isOK()) {
 				setErrorMessage(DLTKLaunchConfigurationsMessages.error_scriptNotFound); //$NON-NLS-1$

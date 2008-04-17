@@ -434,7 +434,7 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 			public String getDescription() {
 				IScriptProject project = getScriptProject();
 				String name = ScriptLaunchMessages.InterpreterTab_7;
-				if (project == null) {
+				if (project == null || project.getProject().isAccessible()) {
 					IInterpreterInstall interpreter = null;
 					interpreter = ScriptRuntime
 							.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
@@ -448,10 +448,10 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 							new String[] { name });
 				}
 				try {
-					IInterpreterInstall Interpreter = ScriptRuntime
+					IInterpreterInstall interpreter = ScriptRuntime
 							.getInterpreterInstall(project);
-					if (Interpreter != null) {
-						name = Interpreter.getName();
+					if (interpreter != null) {
+						name = interpreter.getName();
 					}
 				} catch (CoreException e) {
 				}
