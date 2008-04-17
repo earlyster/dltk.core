@@ -30,7 +30,6 @@ import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.internal.core.IInternalDebugCoreConstants;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.IDebugHelpContextIds;
 import org.eclipse.debug.internal.ui.IInternalDebugUIConstants;
@@ -418,7 +417,7 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 				GridData.FILL_BOTH);
 
 		fDefaultEncodingButton = createRadioButton(group,
-				IInternalDebugCoreConstants.EMPTY_STRING);
+				"");
 		GridData gd = new GridData(SWT.BEGINNING, SWT.NORMAL, true, false);
 		gd.horizontalSpan = 2;
 		fDefaultEncodingButton.setLayoutData(gd);
@@ -504,7 +503,7 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 	}
 
 	private String getDefaultSharedConfigLocation(ILaunchConfiguration config) {
-		String path = IInternalDebugCoreConstants.EMPTY_STRING;
+		String path = "";
 		try {
 			IResource[] res = config.getMappedResources();
 			if (res != null) {
@@ -580,7 +579,7 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 		fSharedLocationText
 				.setText(getDefaultSharedConfigLocation(configuration));
 		if (isShared) {
-			String containerName = IInternalDebugCoreConstants.EMPTY_STRING;
+			String containerName = "";
 			IFile file = configuration.getFile();
 			if (file != null) {
 				IContainer parent = file.getParent();
