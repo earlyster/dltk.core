@@ -133,5 +133,4 @@ public class ScriptConsolePage extends TextConsolePage implements
 
 		super.dispose();
 	}
-
 }

@@ -56,6 +56,16 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		}
 
 		public void run() {
+			// We need to be sure what page is already created
+			while (page == null) {
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
+			}
 			final ScriptConsoleViewer viewer = (ScriptConsoleViewer) page
 					.getViewer();
 			InputStream stream = interpreter.getInitialOutputStream();
@@ -64,7 +74,6 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 			}
 			final BufferedReader reader = new BufferedReader(
 					new InputStreamReader(stream));
-
 			Thread readerThread = new Thread(new Runnable() {
 				public void run() {
 					boolean first = true;
@@ -85,7 +94,9 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 							break;
 						}
 					}
-					appendInvitation(viewer);
+					if (!first) {
+						appendInvitation(viewer);
+					}
 				}
 
 			});
@@ -126,6 +137,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 					try {
 						if (clean) {
 							document.replace(0, document.getLength(), text);
+							getDocumentListener().appendDelimeter();
 						} else {
 							document.replace(document.getLength(), 0, text);
 							getDocumentListener().appendDelimeter();
