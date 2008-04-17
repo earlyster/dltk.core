@@ -25,15 +25,13 @@ public class ScriptConsoleIO implements IScriptConsoleIO {
 	private final OutputStream output;
 
 	private final String id;
-	
-	private String initialResponse = null;
 
 	protected static void logInterpreterResponse(String response) {
-//		System.out.println("interpreter: " + response);
+		// System.out.println("interpreter: " + response);
 	}
 
 	protected static void logShellResponse(String response) {
-//		System.out.println("shell: " + response);
+		// System.out.println("shell: " + response);
 	}
 
 	protected static String readFixed(int len, InputStream input)
@@ -44,18 +42,16 @@ public class ScriptConsoleIO implements IScriptConsoleIO {
 			while (from < buffer.length) {
 				int n;
 				try {
-				  n = input.read(buffer, from, buffer.length - from);
-				}
-				catch (SocketTimeoutException sxcn) {
-				    n = input.read(buffer, from, buffer.length - from);
+					n = input.read(buffer, from, buffer.length - from);
+				} catch (SocketTimeoutException sxcn) {
+					n = input.read(buffer, from, buffer.length - from);
 				}
 				if (n == -1) {
 					return null;
 				}
 				from += n;
 			}
-		}
-		catch (SocketTimeoutException sxcn) {
+		} catch (SocketTimeoutException sxcn) {
 			sxcn.printStackTrace();
 		}
 
@@ -64,9 +60,9 @@ public class ScriptConsoleIO implements IScriptConsoleIO {
 
 	protected static int readLength(InputStream input) throws IOException {
 		try {
-			return Integer.parseInt(readFixed(10, input));
-		}
-		catch (NumberFormatException e) {
+			String readFixed = readFixed(10, input);
+			return Integer.parseInt(readFixed);
+		} catch (NumberFormatException e) {
 			return -1;
 		}
 	}
@@ -96,33 +92,25 @@ public class ScriptConsoleIO implements IScriptConsoleIO {
 		this.output = output;
 
 		this.id = ScriptConsoleXmlHelper.parseInfoXml(readResponse(input));
-		// read all input from console
-//		String readResponse = readResponse(input);
-//		while (readResponse != null) {
-//			try {
-//				InterpreterResponse xml = ScriptConsoleXmlHelper
-//						.parseInterpreterXml(readResponse);
-//				String content = xml.getContent();
-//				if (content.startsWith("%%{{START_OF_SCRIPT}}&&")) {
-//					break;
-//				}
-//				if( initialResponse == null ) {
-//					initialResponse = content;
-//				}
-//				else {
-//					initialResponse += content;
-//				}
-////				this.output.write(content.getBytes());
-////				this.output.flush();
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//			readResponse = readResponse(input);
-//		}
-
 	}
-	public String getInitialResponse() {
-		return this.initialResponse;
+
+	public InputStream getInitialResponseStream() {
+		return new InputStream() {
+			boolean finished = false;
+
+			public int read() throws IOException {
+				if (finished == true) {
+					return -1;
+				}
+				byte b[] = new byte[1];
+				int read = input.read(b, 0, 1);
+				if (read == -1 || b[0] == 0) {
+					finished = true;
+					return -1;
+				}
+				return b[0];
+			}
+		};
 	}
 
 	public String getId() {

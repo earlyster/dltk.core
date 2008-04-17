@@ -10,6 +10,7 @@
 package org.eclipse.dltk.console;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 public interface IScriptConsoleIO {
 	String getId();
@@ -20,5 +21,5 @@ public interface IScriptConsoleIO {
 
 	void close() throws IOException;
 
-	String getInitialResponse();
+	InputStream getInitialResponseStream();
 }

@@ -9,9 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.console;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 
 public class SocketScriptConsoleIO implements IScriptConsoleIO {
@@ -22,13 +22,10 @@ public class SocketScriptConsoleIO implements IScriptConsoleIO {
 	public SocketScriptConsoleIO(Socket socket) throws IOException {
 		this.socket = socket;
 
-		BufferedInputStream input = new BufferedInputStream(socket
-				.getInputStream());
-
 		BufferedOutputStream output = new BufferedOutputStream(socket
 				.getOutputStream());
 
-		io = new ScriptConsoleIO(input, output);
+		io = new ScriptConsoleIO(socket.getInputStream(), output);
 	}
 
 	public String getId() {
@@ -49,7 +46,8 @@ public class SocketScriptConsoleIO implements IScriptConsoleIO {
 		io.close();
 		socket.close();
 	}
-	public String getInitialResponse() {
-		return io.getInitialResponse();
+
+	public InputStream getInitialResponseStream() {
+		return io.getInitialResponseStream();
 	}
 }
