@@ -921,17 +921,17 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-//		boolean isInteractive = false;
-//		try {
-//			isInteractive = configuration
-//					.getAttribute(
-//							ScriptLaunchConfigurationConstants.ATTR_USE_INTERACTIVE_CONSOLE,
-//							false);
-//		} catch (CoreException e) {
-//			if (DLTKCore.DEBUG) {
-//				e.printStackTrace();
-//			}
-//		}
+		boolean isInteractive = false;
+		try {
+			isInteractive = configuration
+					.getAttribute(
+							ScriptLaunchConfigurationConstants.ATTR_USE_INTERACTIVE_CONSOLE,
+							false);
+		} catch (CoreException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
 
 		updateConfigFromLocalShared(configuration);
 		updateConfigFromFavorites(configuration);
@@ -943,7 +943,7 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 		}
 		configuration.setAttribute(DebugPlugin.ATTR_CONSOLE_ENCODING, encoding);
 		boolean captureOutput = false;
-		if (fConsoleOutput.getSelection() /*&& !isInteractive*/) {
+		if (fConsoleOutput.getSelection() && !isInteractive) {
 			captureOutput = true;
 			configuration.setAttribute(
 					IDebugUIConstants.ATTR_CAPTURE_IN_CONSOLE, (String) null);
