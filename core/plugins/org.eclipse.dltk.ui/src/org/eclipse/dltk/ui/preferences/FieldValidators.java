@@ -1,83 +1,36 @@
 package org.eclipse.dltk.ui.preferences;
 
-import java.io.File;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.utils.PlatformFileUtils;
 
 public final class FieldValidators {
 
-	public static class DirValidator implements IFieldValidator {
+	public static class FilePathValidator implements IFieldValidator {
 		public IStatus validate(String text) {
+			return validate(text, EnvironmentManager.getLocalEnvironment());
+		}
+		public IStatus validate(String text, IEnvironment environment) {
 			StatusInfo status = new StatusInfo();
-
-			if (text.trim().length() == 0) {
-				status.setError(ValidatorMessages.DirPathIsEmpty);
+			if( environment == null ) {
+				status.setError(org.eclipse.dltk.ui.preferences.Messages.FieldValidators_0);
 				return status;
 			}
 
-			File dir = Path.fromOSString(text).toFile();
-			if (!dir.exists()) {
-				status.setError(Messages.format(
-						ValidatorMessages.DirPathNotExists, text));
-			} else if (!dir.isDirectory()) {
-				status.setError(Messages.format(
-						ValidatorMessages.DirPathIsInvalid, text));
-			}
-
-			return status;
-		}
-	}
-
-	public static class FileNameValidator implements IFieldValidator {
-		public IStatus validate(String text) {
-			StatusInfo status = new StatusInfo();
-
-			if (text.trim().length() == 0) {
-				status.setError(ValidatorMessages.FileNameIsEmpty);
-			}
-
-			return status;
-		}
-	}
-
-	public static class FilePathValidator implements IFieldValidator {
-		public IStatus validate(String text) {
-			StatusInfo status = new StatusInfo();
-
 			if (!(text.trim().length() == 0)) {
-				File file = PlatformFileUtils
-						.findAbsoluteOrEclipseRelativeFile(Path.fromOSString(
-								text).toFile());
+				IFileHandle file = PlatformFileUtils
+						.findAbsoluteOrEclipseRelativeFile(environment, Path
+								.fromPortableString(text));
 
 				if (!file.exists()) {
 					status.setError(Messages.format(
 							ValidatorMessages.FilePathNotExists, text));
 				} else if (file.isDirectory()) {
-					status.setError(Messages.format(
-							ValidatorMessages.FilePathIsInvalid, text));
-				}
-			}
-
-			return status;
-		}
-	}
-	public static class DirPathValidator implements IFieldValidator {
-		public IStatus validate(String text) {
-			StatusInfo status = new StatusInfo();
-
-			if (!(text.trim().length() == 0)) {
-				File file = PlatformFileUtils
-						.findAbsoluteOrEclipseRelativeFile(Path.fromOSString(
-								text).toFile());
-
-				if (!file.exists()) {
-					status.setError(Messages.format(
-							ValidatorMessages.FilePathNotExists, text));
-				} else if (!file.isDirectory()) {
 					status.setError(Messages.format(
 							ValidatorMessages.FilePathIsInvalid, text));
 				}
@@ -137,14 +90,6 @@ public final class FieldValidators {
 	}
 
 	// Available validators
-	public static IFieldValidator FILE_NAME_VALIDATOR = new FileNameValidator();
-
-	public static IFieldValidator PATH_VALIDATOR = new FilePathValidator();
-	public static IFieldValidator DIR_PATH_VALIDATOR = new DirPathValidator();
-
 	public static IFieldValidator POSITIVE_NUMBER_VALIDATOR = new PositiveNumberValidator();
-
 	public static IFieldValidator PORT_VALIDATOR = new PortValidator();
-
-	public static IFieldValidator DIR_VALIDATOR = new DirValidator();
 }
