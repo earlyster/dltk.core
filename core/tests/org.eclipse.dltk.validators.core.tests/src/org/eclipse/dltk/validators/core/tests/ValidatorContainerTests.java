@@ -37,12 +37,12 @@ public class ValidatorContainerTests extends TestCase {
 		String xml = co.getAsXML();
 		assertNotNull(xml);
 		System.out.println(xml);
-		List validValidatorsList = co.getValidValidatorsList();
+		List validValidatorsList = co.getValidatorsList();
 		List validatorList = co.getValidatorList();
 		assertNotNull(validValidatorsList);
 		assertNotNull(validatorList);
 		assertTrue(validValidatorsList.contains(v1));
-		assertFalse(validValidatorsList.contains(v2));
+		assertTrue(validValidatorsList.contains(v2));
 		assertTrue(validatorList.contains(v1));
 		assertTrue(validatorList.contains(v2));
 		
