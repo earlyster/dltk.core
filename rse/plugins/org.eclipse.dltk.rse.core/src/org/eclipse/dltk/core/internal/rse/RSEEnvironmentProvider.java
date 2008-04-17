@@ -7,6 +7,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IEnvironmentProvider;
+import org.eclipse.rse.core.IRSESystemType;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.model.SystemStartHere;
 import org.eclipse.rse.subsystems.files.core.model.RemoteFileUtility;
@@ -54,17 +55,20 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 		initializeRSE();
 		IHost[] connections = SystemStartHere.getConnections();
 		List environments = new LinkedList();
-		for (int i = 0; i < connections.length; i++) {
-			IHost connection = connections[i];
-			if (connection.getSystemType().isWindows()
-					|| connection.getSystemType().isLocal()) {
-				continue;
-			}
+		if (connections != null) {
+			for (int i = 0; i < connections.length; i++) {
+				IHost connection = connections[i];
+				IRSESystemType systemType = connection.getSystemType();
+				if (systemType == null || systemType.isWindows()
+						|| systemType.isLocal()) {
+					continue;
+				}
 
-			IRemoteFileSubSystem fs = RemoteFileUtility
-					.getFileSubSystem(connection);
-			if (fs != null)
-				environments.add(new RSEEnvironment(fs));
+				IRemoteFileSubSystem fs = RemoteFileUtility
+						.getFileSubSystem(connection);
+				if (fs != null)
+					environments.add(new RSEEnvironment(fs));
+			}
 		}
 		return (IEnvironment[]) environments
 				.toArray(new IEnvironment[environments.size()]);
