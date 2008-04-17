@@ -18,5 +18,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.debug.ui,
  org.eclipse.dltk.core
 Eclipse-LazyStart: true
-Export-Package: org.eclipse.dltk.console.ui
+Export-Package: org.eclipse.dltk.console.ui,
+ org.eclipse.dltk.console.ui.internal
 Bundle-RequiredExecutionEnvironment: J2SE-1.4

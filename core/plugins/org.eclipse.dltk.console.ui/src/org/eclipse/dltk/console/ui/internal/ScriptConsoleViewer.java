@@ -20,6 +20,7 @@ import org.eclipse.dltk.console.ui.IConsoleStyleProvider;
 import org.eclipse.dltk.console.ui.IScriptConsoleViewer;
 import org.eclipse.dltk.console.ui.ScriptConsole;
 import org.eclipse.dltk.console.ui.ScriptConsolePartitioner;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -41,9 +42,9 @@ import org.eclipse.ui.console.TextConsoleViewer;
 
 public class ScriptConsoleViewer extends TextConsoleViewer implements
 		IScriptConsoleViewer {
-
 	public static class ConsoleDocumentListener implements IDocumentListener {
 
+		private boolean bEnabled = true;
 		private ICommandHandler handler;
 
 		private ScriptConsolePrompt prompt;
@@ -156,6 +157,9 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 		}
 
 		protected void proccessAddition(int offset, String text) {
+			if( !bEnabled) {
+				return;
+			}
 			try {
 				String delim = getDelimeter();
 
@@ -192,9 +196,13 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 				appendText(text.substring(start, text.length()));
 				history.update(getCommandLine());
 			} catch (BadLocationException e) {
-				e.printStackTrace();
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
 			}
 		}
 
@@ -210,7 +218,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 			return offset;
 		}
 
-		protected void appendInvitation() throws BadLocationException {
+		public void appendInvitation() throws BadLocationException {
 			int start = doc.getLength();
 			appendText(prompt.toString());
 			ScriptConsoleViewer viewer;
@@ -229,7 +237,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 			}
 		}
 
-		protected void appendDelimeter() throws BadLocationException {
+		public void appendDelimeter() throws BadLocationException {
 			appendText(getDelimeter());
 		}
 
@@ -339,6 +347,15 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 	public int getCaretPosition() {
 		return getTextWidget().getCaretOffset();
+	}
+	
+	public void enableProcessing() {
+		ConsoleDocumentListener listener = console.getDocumentListener();
+		listener.bEnabled = true;
+	}
+	public void disableProcessing() {
+		ConsoleDocumentListener listener = console.getDocumentListener();
+		listener.bEnabled = false;
 	}
 
 	public void setCaretPosition(final int offset) {

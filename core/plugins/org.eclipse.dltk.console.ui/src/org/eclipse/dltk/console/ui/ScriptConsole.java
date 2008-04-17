@@ -9,7 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.console.ui;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -22,9 +25,13 @@ import org.eclipse.dltk.console.ui.internal.ICommandHandler;
 import org.eclipse.dltk.console.ui.internal.ScriptConsoleInput;
 import org.eclipse.dltk.console.ui.internal.ScriptConsolePage;
 import org.eclipse.dltk.console.ui.internal.ScriptConsoleSession;
+import org.eclipse.dltk.console.ui.internal.ScriptConsoleViewer;
 import org.eclipse.dltk.console.ui.internal.ScriptConsoleViewer.ConsoleDocumentListener;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -32,6 +39,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.IConsoleDocumentPartitioner;
 import org.eclipse.ui.console.IConsoleView;
@@ -40,7 +48,107 @@ import org.eclipse.ui.part.IPageBookViewPage;
 
 public class ScriptConsole extends TextConsole implements ICommandHandler {
 
-	private ScriptConsolePage page;
+	private final class InitialStreamReader implements Runnable {
+		private final IScriptInterpreter interpreter;
+
+		private InitialStreamReader(IScriptInterpreter interpreter) {
+			this.interpreter = interpreter;
+		}
+
+		public void run() {
+			final ScriptConsoleViewer viewer = (ScriptConsoleViewer) page
+					.getViewer();
+			InputStream stream = interpreter.getInitialOutputStream();
+			if (stream == null) {
+				return;
+			}
+			final BufferedReader reader = new BufferedReader(
+					new InputStreamReader(stream));
+
+			Thread readerThread = new Thread(new Runnable() {
+				public void run() {
+					boolean first = true;
+					while (!terminated) {
+						String readLine;
+						try {
+							readLine = reader.readLine();
+							if (readLine != null) {
+								updateText(viewer, readLine, first);
+								first = false;
+							} else {
+								break;
+							}
+						} catch (IOException e) {
+							if (DLTKCore.DEBUG) {
+								e.printStackTrace();
+							}
+							break;
+						}
+					}
+					appendInvitation(viewer);
+				}
+
+			});
+			readerThread.start();
+		}
+
+		private void appendInvitation(final ScriptConsoleViewer viewer) {
+			Control control = viewer.getControl();
+			if (control == null) {
+				return;
+			}
+			control.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					try {
+						viewer.disableProcessing();
+						getDocumentListener().appendDelimeter();
+						getDocumentListener().appendInvitation();
+						viewer.enableProcessing();
+					} catch (BadLocationException e) {
+						if (DLTKCore.DEBUG) {
+							e.printStackTrace();
+						}
+					}
+				}
+			});
+		}
+
+		private void updateText(final ScriptConsoleViewer viewer,
+				final String text, final boolean clean) {
+			Control control = viewer.getControl();
+			if (control == null) {
+				return;
+			}
+			control.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					viewer.disableProcessing();
+					IDocument document = getDocument();
+					try {
+						if (clean) {
+							document.replace(0, document.getLength(), text);
+						} else {
+							document.replace(document.getLength(), 0, text);
+							getDocumentListener().appendDelimeter();
+						}
+						IDocumentPartitioner partitioner = viewer.getDocument()
+								.getDocumentPartitioner();
+						if (partitioner instanceof ScriptConsolePartitioner) {
+							ScriptConsolePartitioner scriptConsolePartitioner = (ScriptConsolePartitioner) partitioner;
+							scriptConsolePartitioner.clearRanges();
+							viewer.getTextWidget().redraw();
+						}
+					} catch (BadLocationException e) {
+						if (DLTKCore.DEBUG) {
+							e.printStackTrace();
+						}
+					}
+					viewer.enableProcessing();
+				}
+			});
+		}
+	}
+
+	protected ScriptConsolePage page;
 
 	private ScriptConsolePartitioner partitioner;
 
@@ -59,6 +167,8 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 	private ScriptConsoleHistory history;
 
 	private IConsoleStyleProvider styleProvider;
+
+	private boolean terminated = false;
 
 	private Color colorBlack = new Color(Display.getCurrent(), new RGB(0, 0, 0));
 	private Color colorBlue = new Color(Display.getCurrent(),
@@ -134,7 +244,6 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 					int offset) {
 				return createStyles(offset, content, false, false);
 			}
-
 		};
 	}
 
@@ -158,21 +267,10 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		this.processor = processor;
 	}
 
-	protected void setInterpreter(IScriptInterpreter interpreter) {
+	protected void setInterpreter(final IScriptInterpreter interpreter) {
 		this.interpreter = interpreter;
-		// interpreter.addInitialListenerOperation(new Runnable() {
-		// public void run() {
-		// Object[] listeners = consoleListeners.getListeners();
-		// String output = ScriptConsole.this.interpreter
-		// .getInitialOuput();
-		// if (output != null) {
-		// for (int i = 0; i < listeners.length; i++) {
-		// ((IScriptConsoleListener) listeners[i])
-		// .interpreterResponse(output);
-		// }
-		// }
-		// }
-		// });
+		interpreter.addInitialListenerOperation(new InitialStreamReader(
+				interpreter));
 	}
 
 	protected void setStyleProvider(IConsoleStyleProvider provider) {
@@ -249,6 +347,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 	}
 
 	public void terminate() {
+		terminated = true;
 		try {
 			interpreter.close();
 		} catch (IOException e) {
