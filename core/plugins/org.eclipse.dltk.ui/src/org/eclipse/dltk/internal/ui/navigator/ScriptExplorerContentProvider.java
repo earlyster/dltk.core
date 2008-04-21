@@ -397,17 +397,19 @@ public class ScriptExplorerContentProvider extends
 
 			try {
 				IBuildpathEntry entry = root.getRawBuildpathEntry();
-				int entryKind = entry.getEntryKind();
-				if (entryKind == IBuildpathEntry.BPE_CONTAINER) {
-					return new BuildPathContainer(root.getScriptProject(),
-							entry);
-				} else if (fShowLibrariesNode
-						&& (entryKind == IBuildpathEntry.BPE_LIBRARY /*
-																		 * ||
-																		 * entryKind ==
-																		 * IBuildpathEntry.BPE_VARIABLE
-																		 */)) {
-					return new LibraryContainer(root.getScriptProject());
+				if (entry != null) {
+					int entryKind = entry.getEntryKind();
+					if (entryKind == IBuildpathEntry.BPE_CONTAINER) {
+						return new BuildPathContainer(root.getScriptProject(),
+								entry);
+					} else if (fShowLibrariesNode
+							&& (entryKind == IBuildpathEntry.BPE_LIBRARY /*
+																			 * ||
+																			 * entryKind ==
+																			 * IBuildpathEntry.BPE_VARIABLE
+																			 */)) {
+						return new LibraryContainer(root.getScriptProject());
+					}
 				}
 			} catch (ModelException e) {
 				// fall through
@@ -467,7 +469,7 @@ public class ScriptExplorerContentProvider extends
 				newElements.add(children[i]);
 			}
 			children = (IModelElement[]) newElements
-			.toArray(new IModelElement[newElements.size()]);
+					.toArray(new IModelElement[newElements.size()]);
 		}
 
 		String prefix = fragment != null ? fragment.getElementName()

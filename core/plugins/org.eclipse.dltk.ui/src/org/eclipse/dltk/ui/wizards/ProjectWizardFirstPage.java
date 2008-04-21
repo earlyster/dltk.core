@@ -210,8 +210,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		}
 
 		protected String getDefaultPath(String name) {
-			final IPath path = Platform.getLocation().append(name);
-			return path.toOSString();
+//			final IPath path = Platform.getLocation().append(name);
+//			return path.toOSString();
+			return "";
 		}
 
 		/*
