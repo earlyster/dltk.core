@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -62,6 +64,16 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class InterpreterDefinitionsContainer {
 
+	private final class DefaultInterpreterComparator implements Comparator {
+		public int compare(Object arg0, Object arg1) {
+			DefaultInterpreterEntry entry0 = (DefaultInterpreterEntry) arg0;
+			DefaultInterpreterEntry entry1 = (DefaultInterpreterEntry) arg1;
+			String k0 = entry0.getEnvironment() + ":" + entry0.getNature();
+			String k1 = entry1.getEnvironment() + ":" + entry1.getNature();
+			return k0.compareTo(k1);
+		}
+	}
+
 	private static final String PATH_ATTR = "path"; //$NON-NLS-1$
 	private static final String INTERPRETER_NAME_ATTR = "name"; //$NON-NLS-1$
 	private static final String INTERPRETER_TAG = "interpreter"; //$NON-NLS-1$
@@ -91,11 +103,11 @@ public class InterpreterDefinitionsContainer {
 	 */
 	private List fInterpreterList;
 
-//	/**
-//	 * Interpreters managed by this container whose install locations don't
-//	 * actually exist.
-//	 */
-//	private List fInvalidInterpreterList;
+	// /**
+	// * Interpreters managed by this container whose install locations don't
+	// * actually exist.
+	// */
+	// private List fInvalidInterpreterList;
 
 	/**
 	 * The composite identifier of the default Interpreter. This consists of the
@@ -115,7 +127,7 @@ public class InterpreterDefinitionsContainer {
 	 */
 	public InterpreterDefinitionsContainer() {
 		fInterTypeToInterMap = new HashMap(10);
-//		fInvalidInterpreterList = new ArrayList(10);
+		// fInvalidInterpreterList = new ArrayList(10);
 		fInterpreterList = new ArrayList(10);
 		fDefaultInterpreterInstallCompositeID = new HashMap();
 		fDefaultInterpreterInstallConnectorTypeID = new HashMap();
@@ -157,11 +169,11 @@ public class InterpreterDefinitionsContainer {
 			}
 			InterpreterList.add(Interpreter);
 			IFileHandle installLocation = Interpreter.getInstallLocation();
-//			if (installLocation == null
-//					|| !InterpreterInstallType.validateInstallLocation(
-//							installLocation).isOK()) {
-//				fInvalidInterpreterList.add(Interpreter);
-//			}
+			// if (installLocation == null
+			// || !InterpreterInstallType.validateInstallLocation(
+			// installLocation).isOK()) {
+			// fInvalidInterpreterList.add(Interpreter);
+			// }
 			fInterpreterList.add(Interpreter);
 		}
 	}
@@ -247,7 +259,7 @@ public class InterpreterDefinitionsContainer {
 		List Interpreters = getInterpreterList();
 		List resultList = new ArrayList(Interpreters.size());
 		resultList.addAll(Interpreters);
-//		resultList.removeAll(fInvalidInterpreterList);
+		// resultList.removeAll(fInvalidInterpreterList);
 		return resultList;
 	}
 
@@ -262,7 +274,7 @@ public class InterpreterDefinitionsContainer {
 		List interpreters = getInterpreterList(nature);
 		List resultList = new ArrayList(interpreters.size());
 		resultList.addAll(interpreters);
-//		resultList.removeAll(fInvalidInterpreterList);
+		// resultList.removeAll(fInvalidInterpreterList);
 		return resultList;
 	}
 
@@ -352,8 +364,11 @@ public class InterpreterDefinitionsContainer {
 		doc.appendChild(config);
 
 		// Set the defaultInterpreter attribute on the top-level node
-		for (Iterator iter = fDefaultInterpreterInstallCompositeID.keySet()
-				.iterator(); iter.hasNext();) {
+		List keys = new ArrayList();
+		keys.addAll(fDefaultInterpreterInstallCompositeID.keySet());
+		Collections.sort(keys, new DefaultInterpreterComparator());
+
+		for (Iterator iter = keys.iterator(); iter.hasNext();) {
 			DefaultInterpreterEntry entry = (DefaultInterpreterEntry) iter
 					.next();
 			Element defaulte = doc.createElement(DEFAULT_INTERPRETER_TAG);
@@ -363,9 +378,13 @@ public class InterpreterDefinitionsContainer {
 			defaulte.setAttribute(ID_ATTR,
 					(String) fDefaultInterpreterInstallCompositeID.get(entry));
 		}
+		
+		List keys2 = new ArrayList();
+		keys2.addAll(fDefaultInterpreterInstallConnectorTypeID.keySet());
+		Collections.sort(keys2, new DefaultInterpreterComparator());
 
 		// Set the defaultInterpreterConnector attribute on the top-level node
-		for (Iterator iter = fDefaultInterpreterInstallConnectorTypeID.keySet()
+		for (Iterator iter = keys2
 				.iterator(); iter.hasNext();) {
 			DefaultInterpreterEntry entry = (DefaultInterpreterEntry) iter
 					.next();
@@ -793,7 +812,7 @@ public class InterpreterDefinitionsContainer {
 	 */
 	public void removeInterpreter(IInterpreterInstall Interpreter) {
 		fInterpreterList.remove(Interpreter);
-//		fInvalidInterpreterList.remove(Interpreter);
+		// fInvalidInterpreterList.remove(Interpreter);
 		List list = (List) fInterTypeToInterMap.get(Interpreter
 				.getInterpreterInstallType());
 		if (list != null) {

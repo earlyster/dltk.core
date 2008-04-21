@@ -664,12 +664,16 @@ public class DLTKLaunchingPlugin extends Plugin implements
 		public void interpreterRemoved(IInterpreterInstall Interpreter) {
 		}
 
+		InterpreterUpdateJob job = null;
+
 		/**
 		 * Re-bind buildpath variables and containers affected by the
 		 * InterpreterEnvironment changes.
 		 */
 		public void process() throws CoreException {
-			InterpreterUpdateJob job = new InterpreterUpdateJob(this);
+			if (job == null) {
+				job = new InterpreterUpdateJob(this);
+			}
 			job.schedule();
 		}
 

@@ -375,7 +375,7 @@ public final class ScriptRuntime {
 
 	private static String getEnvironmentFromProject(IScriptProject project) {
 		IEnvironment environment = EnvironmentManager.getEnvironment(project);
-		if( environment == null ) {
+		if (environment == null) {
 			return null;
 		}
 		return environment.getId();
