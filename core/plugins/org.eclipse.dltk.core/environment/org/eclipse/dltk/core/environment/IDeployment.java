@@ -16,6 +16,9 @@ import java.io.InputStream;
 import org.eclipse.core.runtime.IPath;
 import org.osgi.framework.Bundle;
 
+/**
+ * This class should register to deployment manager for correct undeployment actions.
+ */
 public interface IDeployment {
 	/**
 	 * Extract and deploy specific folder or file from plugin bundle to environment file system.
@@ -31,6 +34,10 @@ public interface IDeployment {
 	 * @param path
 	 */
 	void mkdirs(IPath path);
+	
+	/**
+	 * Undeploy deployment and unregister it from deployment manager
+	 */
 	void dispose();
 	IFileHandle getFile(IPath deploymentPath);
 	IPath getAbsolutePath();
