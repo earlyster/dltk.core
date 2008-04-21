@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.dltk.console.IScriptInterpreter;
 import org.eclipse.dltk.console.ScriptConsoleHistory;
 import org.eclipse.dltk.console.ScriptConsolePrompt;
@@ -47,6 +50,38 @@ import org.eclipse.ui.console.TextConsole;
 import org.eclipse.ui.part.IPageBookViewPage;
 
 public class ScriptConsole extends TextConsole implements ICommandHandler {
+	private ILaunch launch = null;
+	private ILaunchesListener2 listener = null;
+
+	private class ScriptConsoleLaunchListener implements ILaunchesListener2 {
+		public void launchesTerminated(ILaunch[] launches) {
+			if( terminated ) {
+				return;
+			}
+			for (int i = 0; i < launches.length; i++) {
+				if (launches[i].equals(launch)) {
+					ScriptConsoleViewer consoleViewer = (ScriptConsoleViewer) page
+							.getViewer();
+					if (consoleViewer != null) {
+						consoleViewer.disableProcessing();
+						appendInvitation(consoleViewer);
+						updateText(consoleViewer, "Process terminated...",
+								false);
+						consoleViewer.setEditable(false);
+					}
+				}
+			}
+		}
+
+		public void launchesAdded(ILaunch[] launches) {
+		}
+
+		public void launchesChanged(ILaunch[] launches) {
+		}
+
+		public void launchesRemoved(ILaunch[] launches) {
+		}
+	};
 
 	private final class InitialStreamReader implements Runnable {
 		private final IScriptInterpreter interpreter;
@@ -103,61 +138,62 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 			readerThread.start();
 		}
 
-		private void appendInvitation(final ScriptConsoleViewer viewer) {
-			Control control = viewer.getControl();
-			if (control == null) {
-				return;
-			}
-			control.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					try {
-						viewer.disableProcessing();
-						getDocumentListener().appendDelimeter();
-						getDocumentListener().appendInvitation();
-						viewer.enableProcessing();
-					} catch (BadLocationException e) {
-						if (DLTKCore.DEBUG) {
-							e.printStackTrace();
-						}
-					}
-				}
-			});
-		}
+	}
 
-		private void updateText(final ScriptConsoleViewer viewer,
-				final String text, final boolean clean) {
-			Control control = viewer.getControl();
-			if (control == null) {
-				return;
-			}
-			control.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					viewer.disableProcessing();
-					IDocument document = getDocument();
-					try {
-						if (clean) {
-							document.replace(0, document.getLength(), text);
-							getDocumentListener().appendDelimeter();
-						} else {
-							document.replace(document.getLength(), 0, text);
-							getDocumentListener().appendDelimeter();
-						}
-						IDocumentPartitioner partitioner = viewer.getDocument()
-								.getDocumentPartitioner();
-						if (partitioner instanceof ScriptConsolePartitioner) {
-							ScriptConsolePartitioner scriptConsolePartitioner = (ScriptConsolePartitioner) partitioner;
-							scriptConsolePartitioner.clearRanges();
-							viewer.getTextWidget().redraw();
-						}
-					} catch (BadLocationException e) {
-						if (DLTKCore.DEBUG) {
-							e.printStackTrace();
-						}
-					}
-					viewer.enableProcessing();
-				}
-			});
+	private void appendInvitation(final ScriptConsoleViewer viewer) {
+		Control control = viewer.getControl();
+		if (control == null) {
+			return;
 		}
+		control.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				try {
+					viewer.disableProcessing();
+					getDocumentListener().appendDelimeter();
+					getDocumentListener().appendInvitation();
+					viewer.enableProcessing();
+				} catch (BadLocationException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+	}
+
+	private void updateText(final ScriptConsoleViewer viewer,
+			final String text, final boolean clean) {
+		Control control = viewer.getControl();
+		if (control == null) {
+			return;
+		}
+		control.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				viewer.disableProcessing();
+				IDocument document = getDocument();
+				try {
+					if (clean) {
+						document.replace(0, document.getLength(), text);
+						getDocumentListener().appendDelimeter();
+					} else {
+						document.replace(document.getLength(), 0, text);
+						getDocumentListener().appendDelimeter();
+					}
+					IDocumentPartitioner partitioner = viewer.getDocument()
+							.getDocumentPartitioner();
+					if (partitioner instanceof ScriptConsolePartitioner) {
+						ScriptConsolePartitioner scriptConsolePartitioner = (ScriptConsolePartitioner) partitioner;
+						scriptConsolePartitioner.clearRanges();
+						viewer.getTextWidget().redraw();
+					}
+				} catch (BadLocationException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
+				viewer.enableProcessing();
+			}
+		});
 	}
 
 	protected ScriptConsolePage page;
@@ -377,8 +413,20 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		colorRed.dispose();
 
 		terminate();
+		if (listener != null) {
+			DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(
+					listener);
+		}
 
 		super.dispose();
 	}
 
+	public void setLaunch(ILaunch launch) {
+		this.launch = launch;
+		if (this.listener == null) {
+			this.listener = new ScriptConsoleLaunchListener();
+			DebugPlugin.getDefault().getLaunchManager().addLaunchListener(
+					listener);
+		}
+	}
 }

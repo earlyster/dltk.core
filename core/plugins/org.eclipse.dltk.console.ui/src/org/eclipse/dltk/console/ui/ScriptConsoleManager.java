@@ -146,7 +146,7 @@ public class ScriptConsoleManager implements ILaunchListener {
 	}
 
 	// ILaunchListener
-	public void launchAdded(ILaunch launch) {
+	public void launchAdded(final ILaunch launch) {
 		try {
 			final ILaunchConfiguration configuration = launch
 					.getLaunchConfiguration();
@@ -189,7 +189,7 @@ public class ScriptConsoleManager implements ILaunchListener {
 
 					server.register(consoleId, interpreter);
 
-					factory.openConsole(interpreter, configuration.getName());
+					factory.openConsole(interpreter, configuration.getName(), launch);
 				}
 			};
 
