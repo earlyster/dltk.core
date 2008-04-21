@@ -47,7 +47,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	private IAddInterpreterDialogRequestor fRequestor;
 
 	private IInterpreterInstallType[] fInterpreterTypes;
-	
+
 	private IInterpreterInstallType fSelectedInterpreterType;
 
 	private ComboDialogField fInterpreterTypeCombo;
@@ -82,7 +82,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		for (int i = 0; i < fStati.length; i++) {
 			fStati[i] = new StatusInfo();
 		}
-		
+
 		fInterpreterTypes = interpreterInstallTypes;
 		fSelectedInterpreterType = editedInterpreter != null ? editedInterpreter
 				.getInterpreterInstallType()
@@ -340,7 +340,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 			fLibraryBlock.setHomeDirectory(file);
 
 			String name = fInterpreterName.getText();
-			if (name == null || name.trim().length() == 0) {
+			if (name == null || name.trim().length() == 0 || file != null) {
 				// auto-generate interpreter name
 				String genName = null;
 				IPath path = new Path(file.getCanonicalPath());
@@ -351,8 +351,25 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 					String last = path.lastSegment();
 					genName = last;
 				}
-				if (genName != null) {
-					fInterpreterName.setText(genName);
+				// Add number if interpreter with such name already exists.
+				String pName = genName;
+				int index = 0;
+				while (true) {
+					boolean found = false;
+					for (int i = 0; i < this.fInterpreterTypes.length; i++) {
+						IInterpreterInstallType type = this.fInterpreterTypes[i];
+						if (type.findInterpreterInstallByName(pName) != null) {
+							pName = genName + "(" + String.valueOf(++index) + ")";
+							found = true;
+							break;
+						}
+					}
+					if( !found ) {
+						break;
+					}
+				}
+				if (pName != null) {
+					fInterpreterName.setText(pName);
 				}
 			}
 		} else {
@@ -368,6 +385,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	public IEnvironment getEnvironment() {
 		return this.environment;
 	}
+
 	public void setEnvironment(IEnvironment environment) {
 		this.environment = environment;
 	}
@@ -408,7 +426,8 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		IEnvironmentUI environmentUI = (IEnvironmentUI) environment
 				.getAdapter(IEnvironmentUI.class);
 		if (environmentUI != null) {
-			String newPath = environmentUI.selectFile(getShell(), IEnvironmentUI.EXECUTABLE);
+			String newPath = environmentUI.selectFile(getShell(),
+					IEnvironmentUI.EXECUTABLE);
 			if (newPath != null) {
 				fInterpreterPath.setText(newPath);
 			}

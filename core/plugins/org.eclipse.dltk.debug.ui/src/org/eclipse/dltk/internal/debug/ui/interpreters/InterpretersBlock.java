@@ -137,17 +137,7 @@ public abstract class InterpretersBlock implements
 	 */
 	class InterpretersContentProvider implements IStructuredContentProvider {
 		public Object[] getElements(Object input) {
-			IEnvironment environment = getCurrentEnvironment();
-			List result = new ArrayList();
-			for (Iterator iterator = fInterpreters.iterator(); iterator
-					.hasNext();) {
-				IInterpreterInstall install = (IInterpreterInstall) iterator
-						.next();
-				if (install.getEnvironment().equals(environment)) {
-					result.add(install);
-				}
-			}
-			return result.toArray();
+			return getCurrentInterprers();
 		}
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -622,6 +612,19 @@ public abstract class InterpretersBlock implements
 				.toArray(new IInterpreterInstall[fInterpreters.size()]);
 	}
 
+	public IInterpreterInstall[] getCurrentInterprers() {
+		IEnvironment environment = getCurrentEnvironment();
+		List result = new ArrayList();
+		for (Iterator iterator = fInterpreters.iterator(); iterator.hasNext();) {
+			IInterpreterInstall install = (IInterpreterInstall) iterator.next();
+			if (install.getEnvironment().equals(environment)) {
+				result.add(install);
+			}
+		}
+		return (IInterpreterInstall[]) result
+				.toArray(new IInterpreterInstall[result.size()]);
+	}
+
 	/**
 	 * @see IAddInterpreterDialogRequestor#isDuplicateName(String)
 	 */
@@ -689,7 +692,7 @@ public abstract class InterpretersBlock implements
 
 		// search
 		final InterpreterSearcher searcher = new InterpreterSearcher();
-		
+
 		final IEnvironment currentEnvironment = getCurrentEnvironment();
 
 		IRunnableWithProgress r = new IRunnableWithProgress() {
@@ -699,8 +702,8 @@ public abstract class InterpretersBlock implements
 							InterpretersMessages.InstalledInterpretersBlock_11,
 							IProgressMonitor.UNKNOWN);
 
-					searcher.search(currentEnvironment,
-							getCurrentNature(), exstingLocations, 1, monitor);
+					searcher.search(currentEnvironment, getCurrentNature(),
+							exstingLocations, 1, monitor);
 				} finally {
 					monitor.done();
 				}
@@ -883,7 +886,7 @@ public abstract class InterpretersBlock implements
 		fInterpreters.add(Interpreter);
 		fInterpreterList.refresh();
 
-		IInterpreterInstall[] installs = getInterpreters();
+		IInterpreterInstall[] installs = getCurrentInterprers();
 		if (installs.length == 1) {
 			// pick a default Interpreter automatically
 			setSelection(new StructuredSelection(installs[0]));

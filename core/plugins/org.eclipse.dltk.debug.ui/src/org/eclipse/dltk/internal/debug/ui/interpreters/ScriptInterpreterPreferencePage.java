@@ -38,7 +38,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * The Installed InterpreterEnvironments preference page. 
+ * The Installed InterpreterEnvironments preference page.
  */
 public abstract class ScriptInterpreterPreferencePage extends PreferencePage
 		implements IWorkbenchPreferencePage {
@@ -137,9 +137,10 @@ public abstract class ScriptInterpreterPreferencePage extends PreferencePage
 						setErrorMessage(null);
 						if (fInterpretersBlock.getInterpreters().length > 0
 								&& install.length < fInterpretersBlock
-										.getEnvironmentsCount())
+										.getEnvironmentsCount()) {
 							setErrorMessage(InterpretersMessages.InterpreterPreferencePage_pleaseSetDefaultInterpreter);
-						else if( fInterpretersBlock.getInterpreters().length == 0) {
+
+						} else if (fInterpretersBlock.getInterpreters().length == 0) {
 							setErrorMessage(InterpretersMessages.InterpreterPreferencePage_addInterpreter);
 						}
 					}
