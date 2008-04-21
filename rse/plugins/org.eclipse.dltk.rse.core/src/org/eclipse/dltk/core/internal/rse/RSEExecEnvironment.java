@@ -1,14 +1,17 @@
 package org.eclipse.dltk.core.internal.rse;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IDeployment;
 import org.eclipse.dltk.core.environment.IEnvironment;
@@ -26,6 +29,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 	private final static String CMD_DELIMITER = " ;"; //$NON-NLS-1$
 	private RSEEnvironment environment;
 	private static int counter = -1;
+	private Map environmentVariables = null;
 
 	public RSEExecEnvironment(RSEEnvironment env) {
 		this.environment = env;
@@ -150,27 +154,51 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 	}
 
 	public Map getEnvironmentVariables() {
-		IShellServiceSubSystem system = getShellServiceSubSystem(environment
-				.getHost());
+		if (this.environmentVariables != null) {
+			return this.environmentVariables;
+		}
+		final Map result = new HashMap();
 		try {
-			system.connect(false, null);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		Iterator it = system.getHostEnvironmentVariables().iterator();
-		Map result = new HashMap();
-		while (it.hasNext()) {
-			String var = (String) it.next();
-			int pos = var.indexOf('=');
-			if (pos < 0) {
-				result.put(var, "");
-			} else {
-				String name = var.substring(0, pos);
-				String value = var.substring(pos + 1);
-				result.put(name, value);
+			Process process = this.exec(new String[] { "set" }, new Path(""),
+					null);
+			if (process != null) {
+				final BufferedReader input = new BufferedReader(
+						new InputStreamReader(process.getInputStream()));
+				Thread t = new Thread(new Runnable() {
+					public void run() {
+						try {
+							while (true) {
+								String line;
+								line = input.readLine();
+								if (line == null) {
+									break;
+								}
+								line = line.trim();
+								int pos = line.indexOf("=");
+								if (pos != -1) {
+									String varName = line.substring(0, pos);
+									String varValue = line.substring(pos + 1);
+									result.put(varName, varValue);
+								}
+							}
+						} catch (IOException e) {
+							DLTKRSEPlugin.log(e);
+						}
+					}
+				});
+				t.start();
+				try {
+					t.join(5000);// No more than 5 seconds
+				} catch (InterruptedException e) {
+					DLTKRSEPlugin.log(e);
+				}
 			}
+		} catch (CoreException e) {
+			DLTKRSEPlugin.log(e);
 		}
-
+		if (result.size() > 0) {
+			environmentVariables = result;
+		}
 		return result;
 	}
 
