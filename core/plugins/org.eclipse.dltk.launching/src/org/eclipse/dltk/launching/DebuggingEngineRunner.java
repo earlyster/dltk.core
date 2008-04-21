@@ -96,9 +96,10 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 
 	/**
 	 * Add the debugging engine configuration.
+	 * @param launch TODO
 	 */
 	protected abstract InterpreterConfig addEngineConfig(
-			InterpreterConfig config, PreferencesLookupDelegate delegate)
+			InterpreterConfig config, PreferencesLookupDelegate delegate, ILaunch launch)
 			throws CoreException;
 
 	public void run(InterpreterConfig config, ILaunch launch,
@@ -116,7 +117,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 			PreferencesLookupDelegate prefDelegate = createPreferencesLookupDelegate(launch);
 
 			initializeLaunch(launch, config, prefDelegate);
-			InterpreterConfig newConfig = addEngineConfig(config, prefDelegate);
+			InterpreterConfig newConfig = addEngineConfig(config, prefDelegate, launch);
 
 			// Starting debugging engine
 			IProcess process = null;

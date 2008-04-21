@@ -26,8 +26,20 @@ public abstract class RemoteDebuggingEngineRunner extends DebuggingEngineRunner 
 	 * @see org.eclipse.dltk.launching.DebuggingEngineRunner#addEngineConfig(org.eclipse.dltk.launching.InterpreterConfig,
 	 *      org.eclipse.dltk.core.IScriptProject)
 	 */
+	/**
+	 * @deprecated Use {@link #addEngineConfig(InterpreterConfig,PreferencesLookupDelegate,ILaunch)} instead
+	 */
 	protected InterpreterConfig addEngineConfig(InterpreterConfig config,
 			PreferencesLookupDelegate delegate) {
+				return addEngineConfig(config, delegate, null);
+			}
+
+	/*
+	 * @see org.eclipse.dltk.launching.DebuggingEngineRunner#addEngineConfig(org.eclipse.dltk.launching.InterpreterConfig,
+	 *      org.eclipse.dltk.core.IScriptProject)
+	 */
+	protected InterpreterConfig addEngineConfig(InterpreterConfig config,
+			PreferencesLookupDelegate delegate, ILaunch launch) {
 		return config;
 	}
 

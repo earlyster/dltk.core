@@ -2,6 +2,7 @@ package org.eclipse.dltk.launching;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.dltk.core.PreferencesLookupDelegate;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
@@ -16,8 +17,16 @@ public abstract class ExternalDebuggingEngineRunner extends
 		super(install);
 	}
 
+	/**
+	 * @deprecated Use {@link #addEngineConfig(InterpreterConfig,PreferencesLookupDelegate,ILaunch)} instead
+	 */
 	protected final InterpreterConfig addEngineConfig(InterpreterConfig config,
 			PreferencesLookupDelegate delegate) throws CoreException {
+				return addEngineConfig(config, delegate, null);
+			}
+
+	protected final InterpreterConfig addEngineConfig(InterpreterConfig config,
+			PreferencesLookupDelegate delegate, ILaunch launch) throws CoreException {
 
 		final IFileHandle file = getDebuggingEnginePath(delegate);
 

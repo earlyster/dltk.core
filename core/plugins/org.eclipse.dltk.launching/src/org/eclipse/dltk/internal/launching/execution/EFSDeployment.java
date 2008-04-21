@@ -29,6 +29,7 @@ public class EFSDeployment implements IDeployment {
 		this.environment = env;
 		this.root = EFS.getStore(rootURI);
 		this.root.mkdir(0, null);
+		DeploymentManager.getInstance().addDeployment(this);
 	}
 
 	public IPath add(Bundle bundle, String bundlePath) throws IOException {
@@ -105,6 +106,7 @@ public class EFSDeployment implements IDeployment {
 				e.printStackTrace();
 			}
 		}
+		DeploymentManager.getInstance().removeDeployment(this);
 	}
 
 	public IPath getAbsolutePath() {
