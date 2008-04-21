@@ -9,13 +9,11 @@ import java.util.Random;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IDeployment;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.internal.launching.execution.EFSDeployment;
-import org.eclipse.rse.core.model.Host;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.subsystems.ISubSystem;
 import org.eclipse.rse.internal.efs.RSEFileSystem;
@@ -97,8 +95,9 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 			return null;
 		}
 		IShellService shellService = shell.getShellService();
-		final IHostShell hostShell = shellService.launchShell(
-				"", environment, new NullProgressMonitor()); //$NON-NLS-1$
+		IHostShell hostShell = null;
+		hostShell = shellService.runCommand(workingDir.toPortableString(),
+				"bash", environment, new NullProgressMonitor());
 
 		// Sometimes environment variables aren't set, so use export.
 		if (environment != null) {

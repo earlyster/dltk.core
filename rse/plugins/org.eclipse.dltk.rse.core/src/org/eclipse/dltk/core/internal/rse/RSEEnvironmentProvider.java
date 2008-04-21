@@ -93,4 +93,14 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 			}
 		}
 	}
+
+	public void waitInitialized() {
+//		try {
+//			RSECorePlugin.waitForInitCompletion();
+//		} catch (InterruptedException e) {
+//			if (DLTKCore.DEBUG) {
+//				e.printStackTrace();
+//			}
+//		}
+	}
 }
