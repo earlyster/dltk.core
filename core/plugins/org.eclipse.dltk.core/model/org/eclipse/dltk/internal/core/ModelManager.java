@@ -86,6 +86,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceModuleInfoCache;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.builder.ScriptBuilder;
 import org.eclipse.dltk.internal.core.search.DLTKWorkspaceScope;
@@ -1104,6 +1105,9 @@ public class ModelManager implements ISaveParticipant {
 			processSavedState.setSystem(true);
 			processSavedState.setPriority(Job.SHORT); // process asap
 			processSavedState.schedule();
+			
+			EnvironmentManager.waitInitialized();
+			
 		} catch (RuntimeException e) {
 			shutdown();
 			throw e;

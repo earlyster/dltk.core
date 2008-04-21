@@ -34,24 +34,24 @@ public final class EnvironmentManager {
 	}
 
 	public static IEnvironment getEnvironment(IModelElement element) {
-		if( element == null ) {
+		if (element == null) {
 			return null;
 		}
 		IScriptProject scriptProject = element.getScriptProject();
-		if( scriptProject == null ) {
+		if (scriptProject == null) {
 			return null;
 		}
 		IProject project = scriptProject.getProject();
 		if (project == null)
 			return null;
-		
+
 		return getEnvironment(project);
 	}
 
 	public static IEnvironment getEnvironment(IProject project) {
 		IEnvironment[] environments = getEnvironments();
 		for (int i = 0; i < environments.length; i++) {
-			if( environments[i].hasProject(project)) {
+			if (environments[i].hasProject(project)) {
 				return environments[i];
 			}
 		}
@@ -103,6 +103,7 @@ public final class EnvironmentManager {
 			listener.environmentAdded(environment);
 		}
 	}
+
 	public static void environmentRemoved(IEnvironment environment) {
 		Object[] environmentListeners = listeners.getListeners();
 		for (int i = 0; i < environmentListeners.length; i++) {
@@ -110,6 +111,7 @@ public final class EnvironmentManager {
 			listener.environmentRemoved(environment);
 		}
 	}
+
 	public static void environmentChanged(IEnvironment environment) {
 		Object[] environmentListeners = listeners.getListeners();
 		for (int i = 0; i < environmentListeners.length; i++) {
@@ -120,5 +122,16 @@ public final class EnvironmentManager {
 
 	public static IEnvironment getLocalEnvironment() {
 		return getEnvironmentById(LocalEnvironment.ENVIRONMENT_ID);
+	}
+
+	/**
+	 * Wait white all structures are initialized.
+	 */
+	public static void waitInitialized() {
+		Object[] objects = manager.getObjects();
+		for (int i = 0; i < objects.length; i++) {
+			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
+			provider.waitInitialized();
+		}
 	}
 }

@@ -28,4 +28,7 @@ public class LocalEnvironmentProvider implements IEnvironmentProvider {
 	public IEnvironment[] getEnvironments() {
 		return new IEnvironment[] { LocalEnvironment.getInstance() };
 	}
+
+	public void waitInitialized() {
+	}
 }
