@@ -27,9 +27,11 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.ILaunchShortcut;
+import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IParent;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.messages.ScriptLaunchMessages;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
@@ -299,6 +301,16 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 					if (elem instanceof ISourceModule) {
 						IResource res = ((ISourceModule) elem)
 								.getCorrespondingResource();
+						if (res != null)
+							list.add(res);
+					} else if (elem instanceof IType) {
+						IResource res = ((IType) elem)
+								.getUnderlyingResource();
+						if (res != null)
+							list.add(res);
+					} else if (elem instanceof IMethod) {
+						IResource res = ((IMethod) elem)
+								.getUnderlyingResource();
 						if (res != null)
 							list.add(res);
 					} else if (elem instanceof IParent) {
