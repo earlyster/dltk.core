@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -274,13 +275,13 @@ public class MatchLocator implements ITypeRequestor {
 			if (focus == null
 					|| IndexSelector.canSeeFocus(focus, isPolymorphicSearch,
 							projectOrArchive)) {
-											boolean external = false;
+				boolean external = false;
 				IProjectFragment frag = (IProjectFragment) workingCopy
 						.getAncestor(IModelElement.PROJECT_FRAGMENT);
 				if (frag != null) {
 					external = frag.isExternal();
 				}
-							
+
 				result.put(workingCopy.getPath().toString(),
 						new WorkingCopyDocument(workingCopy, participant,
 								external));
@@ -291,7 +292,10 @@ public class MatchLocator implements ITypeRequestor {
 
 	public static SearchPattern createAndPattern(
 			final SearchPattern leftPattern, final SearchPattern rightPattern) {
-		return new AndPattern(0/* no kind */, 0/* no rule */) {
+		Assert.isNotNull(leftPattern.getToolkit());
+		Assert.isTrue(leftPattern.getToolkit().equals(rightPattern.getToolkit()));
+		return new AndPattern(0/* no kind */, 0/* no rule */, leftPattern
+				.getToolkit()) {
 			SearchPattern current = leftPattern;
 
 			public SearchPattern currentPattern() {
@@ -344,7 +348,8 @@ public class MatchLocator implements ITypeRequestor {
 	public MatchLocator(SearchPattern pattern, SearchRequestor requestor,
 			IDLTKSearchScope scope, IProgressMonitor progressMonitor) {
 		this.pattern = pattern;
-		this.patternLocator = PatternLocator.patternLocator(this.pattern);
+		this.patternLocator = PatternLocator.patternLocator(this.pattern, scope
+				.getLanguageToolkit());
 		this.matchContainer = this.patternLocator.matchContainer();
 		this.requestor = requestor;
 		this.scope = scope;

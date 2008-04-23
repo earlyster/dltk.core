@@ -10,28 +10,35 @@
 package org.eclipse.dltk.internal.core.search.matching;
 
 import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 
-public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern implements IIndexConstants {
+public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern
+		implements IIndexConstants {
 	public char[] qualification;
-	//PackageDeclarationPattern packagePattern;
+	// PackageDeclarationPattern packagePattern;
 	public int packageIndex = -1;
 
-	public QualifiedTypeDeclarationPattern(char[] qualification, char[] simpleName, char typeSuffix, int matchRule) {
-		this(matchRule);
-		this.qualification = isCaseSensitive() ? qualification : CharOperation.toLowerCase(qualification);
-		this.simpleName = (isCaseSensitive() || isCamelCase()) ? simpleName : CharOperation.toLowerCase(simpleName);
+	public QualifiedTypeDeclarationPattern(char[] qualification,
+			char[] simpleName, char typeSuffix, int matchRule,
+			IDLTKLanguageToolkit toolkit) {
+		this(matchRule, toolkit);
+		this.qualification = isCaseSensitive() ? qualification : CharOperation
+				.toLowerCase(qualification);
+		this.simpleName = (isCaseSensitive() || isCamelCase()) ? simpleName
+				: CharOperation.toLowerCase(simpleName);
 		this.typeSuffix = typeSuffix;
 	}
 
-	public QualifiedTypeDeclarationPattern(char[] qualification, int qualificationMatchRule, char[] simpleName, char typeSuffix,
-			int matchRule) {
-		this(qualification, simpleName, typeSuffix, matchRule);
+	public QualifiedTypeDeclarationPattern(char[] qualification,
+			int qualificationMatchRule, char[] simpleName, char typeSuffix,
+			int matchRule, IDLTKLanguageToolkit toolkit) {
+		this(qualification, simpleName, typeSuffix, matchRule, toolkit);
 	}
 
-	QualifiedTypeDeclarationPattern(int matchRule) {
-		super(matchRule);
+	QualifiedTypeDeclarationPattern(int matchRule, IDLTKLanguageToolkit toolkit) {
+		super(matchRule, toolkit);
 	}
 
 	public void decodeIndexKey(char[] key) {
@@ -42,7 +49,8 @@ public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern impl
 			this.pkg = CharOperation.NO_CHAR;
 		} else {
 			slash = CharOperation.indexOf(SEPARATOR, key, start);
-			this.pkg = internedPackageNames.add(CharOperation.subarray(key, start, slash));
+			this.pkg = internedPackageNames.add(CharOperation.subarray(key,
+					start, slash));
 		}
 		this.qualification = this.pkg;
 		// Continue key read by the end to decode modifiers
@@ -61,53 +69,60 @@ public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern impl
 		} else {
 			int length = this.qualification.length;
 			int size = last - start;
-			System.arraycopy(this.qualification, 0, this.qualification = new char[length + 1 + size], 0, length);
+			System
+					.arraycopy(this.qualification, 0,
+							this.qualification = new char[length + 1 + size],
+							0, length);
 			this.qualification[length] = '$';
 			if (last == (start + 1) && key[start] == ZERO_CHAR) {
 				this.enclosingTypeNames = ONE_ZERO_CHAR;
 				this.qualification[length + 1] = ZERO_CHAR;
 			} else {
-				this.enclosingTypeNames = CharOperation.splitOn('$', key, start, last);
-				System.arraycopy(key, start, this.qualification, length + 1, size);
+				this.enclosingTypeNames = CharOperation.splitOn('$', key,
+						start, last);
+				System.arraycopy(key, start, this.qualification, length + 1,
+						size);
 			}
 		}
 	}
 
 	public SearchPattern getBlankPattern() {
-		return new QualifiedTypeDeclarationPattern(R_EXACT_MATCH | R_CASE_SENSITIVE);
+		return new QualifiedTypeDeclarationPattern(R_EXACT_MATCH
+				| R_CASE_SENSITIVE, getToolkit());
 	}
 
 	public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 		QualifiedTypeDeclarationPattern pattern = (QualifiedTypeDeclarationPattern) decodedPattern;
 		switch (this.typeSuffix) {
+		case TYPE_SUFFIX:
+			switch (pattern.typeSuffix) {
 			case TYPE_SUFFIX:
-				switch (pattern.typeSuffix) {
-					case TYPE_SUFFIX:					
-						break;
-					default:
-						return false;
-				}
 				break;
-			case ANNOTATION_TYPE_SUFFIX:
-				if (this.typeSuffix != pattern.typeSuffix)
-					return false;
-				break;
+			default:
+				return false;
+			}
+			break;
+		case ANNOTATION_TYPE_SUFFIX:
+			if (this.typeSuffix != pattern.typeSuffix)
+				return false;
+			break;
 		}
 		return matchesName(this.simpleName, pattern.simpleName)
-				&& (this.qualification == null);
+				&& (this.qualification == null || pattern.matchesName(
+						this.qualification, pattern.qualification));
 	}
 
 	protected StringBuffer print(StringBuffer output) {
 		switch (this.typeSuffix) {
-			case TYPE_SUFFIX:
-				output.append("ClassDeclarationPattern: qualification<"); //$NON-NLS-1$
-				break;		
-			case ANNOTATION_TYPE_SUFFIX:
-				output.append("AnnotationTypeDeclarationPattern: qualification<"); //$NON-NLS-1$
-				break;
-			default:
-				output.append("TypeDeclarationPattern: qualification<"); //$NON-NLS-1$
-				break;
+		case TYPE_SUFFIX:
+			output.append("ClassDeclarationPattern: qualification<"); //$NON-NLS-1$
+			break;
+		case ANNOTATION_TYPE_SUFFIX:
+			output.append("AnnotationTypeDeclarationPattern: qualification<"); //$NON-NLS-1$
+			break;
+		default:
+			output.append("TypeDeclarationPattern: qualification<"); //$NON-NLS-1$
+			break;
 		}
 		if (this.qualification != null)
 			output.append(this.qualification);

@@ -11,7 +11,7 @@ package org.eclipse.dltk.internal.core;
 
 import org.eclipse.dltk.compiler.env.ISourceModule;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.ISearchableEnvironment;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
@@ -24,15 +24,15 @@ import org.eclipse.dltk.core.search.IDLTKSearchScope;
  */
 public class SearchableEnvironment implements ISearchableEnvironment {
 	public NameLookup nameLookup;
-	
+
 	protected ISourceModule unitToSkip;
-	
+
 	protected org.eclipse.dltk.core.ISourceModule[] workingCopies;
-	
+
 	protected ScriptProject project;
-	
+
 	protected IDLTKSearchScope searchScope;
-	
+
 	protected boolean checkAccessRestrictions;
 
 	/**
@@ -41,24 +41,24 @@ public class SearchableEnvironment implements ISearchableEnvironment {
 	public SearchableEnvironment(ScriptProject project,
 			org.eclipse.dltk.core.ISourceModule[] workingCopies)
 			throws ModelException {
-		
+
 		this.project = project;
 		this.checkAccessRestrictions = !DLTKCore.IGNORE.equals(project
 				.getOption(DLTKCore.COMPILER_PB_FORBIDDEN_REFERENCE, true))
 				|| !DLTKCore.IGNORE.equals(project.getOption(
 						DLTKCore.COMPILER_PB_DISCOURAGED_REFERENCE, true));
-		
+
 		this.workingCopies = workingCopies;
-		
+
 		this.nameLookup = project.newNameLookup(workingCopies);
-		
+
 		// Create search scope with visible entry on the project's buildpath
 		if (this.checkAccessRestrictions) {
-			this.searchScope = BasicSearchEngine
-					.createSearchScope(new IModelElement[] { project });
+			this.searchScope = BasicSearchEngine.createSearchScope(project);
 		} else {
-			this.searchScope = BasicSearchEngine
-					.createSearchScope(this.nameLookup.projectFragments);
+			this.searchScope = BasicSearchEngine.createSearchScope(
+					this.nameLookup.projectFragments, DLTKLanguageManager
+							.getLanguageToolkit(project));
 		}
 	}
 
@@ -70,7 +70,7 @@ public class SearchableEnvironment implements ISearchableEnvironment {
 		this(project, owner == null ? null : ModelManager.getModelManager()
 				.getWorkingCopies(owner, true)); // add primary WCs
 	}
-	
+
 	public void cleanup() {
 		// nothing to do
 	}

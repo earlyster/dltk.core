@@ -70,8 +70,7 @@ public class ScriptModelUtil {
 
 	public static void searchTypeDeclarations(IScriptProject project,
 			String patternString, TypeNameMatchRequestor requestor) {
-		IDLTKSearchScope scope = SearchEngine
-				.createSearchScope(new IModelElement[] { project });
+		IDLTKSearchScope scope = SearchEngine.createSearchScope(project);
 		try {
 			SearchEngine engine = new SearchEngine();
 			engine
@@ -90,15 +89,15 @@ public class ScriptModelUtil {
 	public static void searchMethodDeclarations(IScriptProject project,
 			String patternString, SearchRequestor requestor) {
 
-		IDLTKSearchScope scope = SearchEngine
-				.createSearchScope(new IModelElement[] { project });
+		IDLTKSearchScope scope = SearchEngine.createSearchScope(project);
 
 		try {
 			SearchEngine engine = new SearchEngine();
 			SearchPattern pattern = SearchPattern.createPattern(patternString,
 					IDLTKSearchConstants.METHOD,
 					IDLTKSearchConstants.DECLARATIONS,
-					SearchPattern.R_PATTERN_MATCH);
+					SearchPattern.R_PATTERN_MATCH, DLTKLanguageManager
+							.getLanguageToolkit(project));
 			engine.search(pattern, new SearchParticipant[] { SearchEngine
 					.getDefaultSearchParticipant() }, scope, requestor, null);
 		} catch (CoreException e) {

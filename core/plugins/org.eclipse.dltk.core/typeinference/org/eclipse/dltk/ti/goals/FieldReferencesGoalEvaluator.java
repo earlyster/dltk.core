@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.ti.goals;
 
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.SearchPattern;
 
@@ -18,11 +19,12 @@ public class FieldReferencesGoalEvaluator extends SearchBasedGoalEvaluator {
 		super(goal);
 	}
 
-	protected SearchPattern createSearchPattern() {
+	protected SearchPattern createSearchPattern(IDLTKLanguageToolkit toolkit) {
 		FieldReferencesGoal goal = (FieldReferencesGoal) getGoal();
 		String name = goal.getName();
 		return SearchPattern.createPattern(name, IDLTKSearchConstants.FIELD,
-				IDLTKSearchConstants.REFERENCES, SearchPattern.R_EXACT_MATCH);
+				IDLTKSearchConstants.REFERENCES, SearchPattern.R_EXACT_MATCH,
+				toolkit);
 	}
 
 	protected IGoal createVerificationGoal(PossiblePosition pos) {

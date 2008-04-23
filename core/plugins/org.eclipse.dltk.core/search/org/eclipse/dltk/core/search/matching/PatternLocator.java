@@ -23,6 +23,7 @@ import org.eclipse.dltk.ast.references.TypeReference;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.env.lookup.Scope;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.search.SearchMatch;
 import org.eclipse.dltk.core.search.SearchPattern;
@@ -34,11 +35,12 @@ import org.eclipse.dltk.internal.core.search.matching.InternalSearchPattern;
 import org.eclipse.dltk.internal.core.search.matching.MatchingNodeSet;
 import org.eclipse.dltk.internal.core.search.matching.MethodLocator;
 import org.eclipse.dltk.internal.core.search.matching.MethodPattern;
+import org.eclipse.dltk.internal.core.search.matching.OrLocator;
+import org.eclipse.dltk.internal.core.search.matching.OrPattern;
 import org.eclipse.dltk.internal.core.search.matching.TypeDeclarationLocator;
 import org.eclipse.dltk.internal.core.search.matching.TypeDeclarationPattern;
 import org.eclipse.dltk.internal.core.search.matching.TypeReferenceLocator;
 import org.eclipse.dltk.internal.core.search.matching.TypeReferencePattern;
-
 
 public abstract class PatternLocator implements IIndexConstants {
 	// store pattern info
@@ -57,11 +59,16 @@ public abstract class PatternLocator implements IIndexConstants {
 	public static final int ERASURE_MATCH = 4;
 	// Possible rule match flavors
 	// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=79866
-	protected static final int POSSIBLE_FULL_MATCH = POSSIBLE_MATCH | (SearchPattern.R_FULL_MATCH << 16);
-	protected static final int POSSIBLE_PREFIX_MATCH = POSSIBLE_MATCH | (SearchPattern.R_PREFIX_MATCH << 16);
-	protected static final int POSSIBLE_PATTERN_MATCH = POSSIBLE_MATCH | (SearchPattern.R_PATTERN_MATCH << 16);
-	protected static final int POSSIBLE_REGEXP_MATCH = POSSIBLE_MATCH | (SearchPattern.R_REGEXP_MATCH << 16);
-	protected static final int POSSIBLE_CAMELCASE_MATCH = POSSIBLE_MATCH | (SearchPattern.R_CAMELCASE_MATCH << 16);
+	protected static final int POSSIBLE_FULL_MATCH = POSSIBLE_MATCH
+			| (SearchPattern.R_FULL_MATCH << 16);
+	protected static final int POSSIBLE_PREFIX_MATCH = POSSIBLE_MATCH
+			| (SearchPattern.R_PREFIX_MATCH << 16);
+	protected static final int POSSIBLE_PATTERN_MATCH = POSSIBLE_MATCH
+			| (SearchPattern.R_PATTERN_MATCH << 16);
+	protected static final int POSSIBLE_REGEXP_MATCH = POSSIBLE_MATCH
+			| (SearchPattern.R_REGEXP_MATCH << 16);
+	protected static final int POSSIBLE_CAMELCASE_MATCH = POSSIBLE_MATCH
+			| (SearchPattern.R_CAMELCASE_MATCH << 16);
 	public static final int NODE_SET_MASK = 0xFF;
 	protected static final int POSSIBLE_MATCH_MASK = ~NODE_SET_MASK;
 	/* match container */
@@ -69,50 +76,44 @@ public abstract class PatternLocator implements IIndexConstants {
 	public static final int CLASS_CONTAINER = 2;
 	public static final int METHOD_CONTAINER = 4;
 	public static final int FIELD_CONTAINER = 8;
-	public static final int ALL_CONTAINER = COMPILATION_UNIT_CONTAINER | CLASS_CONTAINER | METHOD_CONTAINER | FIELD_CONTAINER;
+	public static final int ALL_CONTAINER = COMPILATION_UNIT_CONTAINER
+			| CLASS_CONTAINER | METHOD_CONTAINER | FIELD_CONTAINER;
 	/* match rule */
-	public static final int RAW_MASK = SearchPattern.R_EQUIVALENT_MATCH | SearchPattern.R_ERASURE_MATCH;
+	public static final int RAW_MASK = SearchPattern.R_EQUIVALENT_MATCH
+			| SearchPattern.R_ERASURE_MATCH;
 	public static final int RULE_MASK = RAW_MASK; // no other values for the
 
 	// while...
-	public static PatternLocator patternLocator(SearchPattern pattern) {
-		if (DLTKCore.DEBUG) {
-			System.err.println("TODO: Add other patternLocators"); //$NON-NLS-1$
-		}
+	public static PatternLocator patternLocator(SearchPattern pattern, IDLTKLanguageToolkit toolkit) {
 		switch (((InternalSearchPattern) pattern).kind) {
-			// case IIndexConstants.PKG_REF_PATTERN:
-			// return new PackageReferenceLocator((PackageReferencePattern)
+		// case IIndexConstants.PKG_REF_PATTERN:
+		// return new PackageReferenceLocator((PackageReferencePattern)
+		// pattern);
+		// case IIndexConstants.PKG_DECL_PATTERN:
+		// return new PackageDeclarationLocator((PackageDeclarationPattern)
+		// pattern);
+		case IIndexConstants.TYPE_REF_PATTERN:
+			return new TypeReferenceLocator((TypeReferencePattern) pattern);
+		case IIndexConstants.TYPE_DECL_PATTERN:
+			return new TypeDeclarationLocator((TypeDeclarationPattern) pattern);
+			// case IIndexConstants.SUPER_REF_PATTERN:
+			// return new
+			// SuperTypeReferenceLocator((SuperTypeReferencePattern)
 			// pattern);
-			// case IIndexConstants.PKG_DECL_PATTERN:
-			// return new PackageDeclarationLocator((PackageDeclarationPattern)
-			// pattern);
-			case IIndexConstants.TYPE_REF_PATTERN:
-				return new TypeReferenceLocator((TypeReferencePattern) pattern);
-			case IIndexConstants.TYPE_DECL_PATTERN:
-				return new TypeDeclarationLocator((TypeDeclarationPattern) pattern);
-//			case IIndexConstants.SUPER_REF_PATTERN:
-//				return new
-//				SuperTypeReferenceLocator((SuperTypeReferencePattern)
-//				pattern);
-				// case IIndexConstants.CONSTRUCTOR_PATTERN:
-				// return new ConstructorLocator((ConstructorPattern) pattern);
-			case IIndexConstants.FIELD_PATTERN:
-				 return new FieldLocator((FieldPattern) pattern);
-			case IIndexConstants.METHOD_PATTERN:
-				return new MethodLocator((MethodPattern) pattern);
-				// case IIndexConstants.OR_PATTERN:
-				// return new OrLocator((OrPattern) pattern);
-				// case IIndexConstants.LOCAL_VAR_PATTERN:
-				// return new LocalVariableLocator((LocalVariablePattern)
-				// pattern);
-				// case IIndexConstants.TYPE_PARAM_PATTERN:
-				// return new TypeParameterLocator((TypeParameterPattern)
-				// pattern);
+			// case IIndexConstants.CONSTRUCTOR_PATTERN:
+			// return new ConstructorLocator((ConstructorPattern) pattern);
+		case IIndexConstants.FIELD_PATTERN:
+			return new FieldLocator((FieldPattern) pattern);
+		case IIndexConstants.METHOD_PATTERN:
+			return new MethodLocator((MethodPattern) pattern);
+		case IIndexConstants.OR_PATTERN:
+			return new OrLocator((OrPattern) pattern);
 		}
 		return null;
 	}
 
-	public static char[] qualifiedPattern(char[] simpleNamePattern, char[] qualificationPattern) {
+	public static char[] qualifiedPattern(char[] simpleNamePattern,
+			char[] qualificationPattern) {
 		// NOTE: if case insensitive search then simpleNamePattern &
 		// qualificationPattern are assumed to be lowercase
 		if (simpleNamePattern == null) {
@@ -120,7 +121,8 @@ public abstract class PatternLocator implements IIndexConstants {
 				return null;
 			return CharOperation.concat(qualificationPattern, ONE_STAR, '.');
 		} else {
-			return qualificationPattern == null ? CharOperation.concat(ONE_STAR, simpleNamePattern) : CharOperation.concat(
+			return qualificationPattern == null ? CharOperation.concat(
+					ONE_STAR, simpleNamePattern) : CharOperation.concat(
 					qualificationPattern, simpleNamePattern, '.');
 		}
 	}
@@ -138,7 +140,7 @@ public abstract class PatternLocator implements IIndexConstants {
 	 * Clear caches
 	 */
 	protected void clear() {
-	// nothing to clear by default
+		// nothing to clear by default
 	}
 
 	/*
@@ -146,7 +148,8 @@ public abstract class PatternLocator implements IIndexConstants {
 	 * star before simple name pattern when qualification pattern is null. This
 	 * avoid to match p.X when pattern is only X...
 	 */
-	protected char[] getQualifiedPattern(char[] simpleNamePattern, char[] qualificationPattern) {
+	protected char[] getQualifiedPattern(char[] simpleNamePattern,
+			char[] qualificationPattern) {
 		// NOTE: if case insensitive search then simpleNamePattern &
 		// qualificationPattern are assumed to be lowercase
 		if (simpleNamePattern == null) {
@@ -156,7 +159,8 @@ public abstract class PatternLocator implements IIndexConstants {
 		} else if (qualificationPattern == null) {
 			return simpleNamePattern;
 		} else {
-			return CharOperation.concat(qualificationPattern, simpleNamePattern, '.');
+			return CharOperation.concat(qualificationPattern,
+					simpleNamePattern, '.');
 		}
 	}
 
@@ -165,7 +169,7 @@ public abstract class PatternLocator implements IIndexConstants {
 	 * performed.
 	 */
 	public void initializePolymorphicSearch(MatchLocator locator) {
-	// default is to do nothing
+		// default is to do nothing
 	}
 
 	public int match(Annotation node, MatchingNodeSet nodeSet) {
@@ -183,8 +187,9 @@ public abstract class PatternLocator implements IIndexConstants {
 		// each subtype should override if needed
 		return IMPOSSIBLE_MATCH;
 	}
-	
-	public int match(CallExpression node, MatchingNodeSet nodeSet) { // needed for
+
+	public int match(CallExpression node, MatchingNodeSet nodeSet) { // needed
+		// for
 		// each subtype should override if needed
 		return IMPOSSIBLE_MATCH;
 	}
@@ -203,11 +208,12 @@ public abstract class PatternLocator implements IIndexConstants {
 		// each subtype should override if needed
 		return IMPOSSIBLE_MATCH;
 	}
+
 	public int match(TypeReference node, MatchingNodeSet nodeSet) {
 		// each subtype should override if needed
 		return IMPOSSIBLE_MATCH;
 	}
-	
+
 	public int match(FieldDeclaration node, MatchingNodeSet nodeSet) {
 		// each subtype should override if needed
 		return IMPOSSIBLE_MATCH;
@@ -275,35 +281,42 @@ public abstract class PatternLocator implements IIndexConstants {
 		boolean matchFirstChar = !this.isCaseSensitive || pattern[0] == name[0];
 		boolean sameLength = pattern.length == name.length;
 		boolean canBePrefix = name.length >= pattern.length;
-		if (this.isCamelCase && matchFirstChar && CharOperation.camelCaseMatch(pattern, name)) {
+		if (this.isCamelCase && matchFirstChar
+				&& CharOperation.camelCaseMatch(pattern, name)) {
 			return POSSIBLE_CAMELCASE_MATCH;
 		}
 		switch (this.matchMode) {
-			case SearchPattern.R_EXACT_MATCH:
-				if (!this.isCamelCase) {
-					if (sameLength && matchFirstChar && CharOperation.equals(pattern, name, this.isCaseSensitive)) {
-						return POSSIBLE_FULL_MATCH;
-					}
-					break;
-				}
-				// fall through next case to match as prefix if camel case
-				// failed
-			case SearchPattern.R_PREFIX_MATCH:
-				if (canBePrefix && matchFirstChar && CharOperation.prefixEquals(pattern, name, this.isCaseSensitive)) {
-					return POSSIBLE_PREFIX_MATCH;
+		case SearchPattern.R_EXACT_MATCH:
+			if (!this.isCamelCase) {
+				if (sameLength
+						&& matchFirstChar
+						&& CharOperation.equals(pattern, name,
+								this.isCaseSensitive)) {
+					return POSSIBLE_FULL_MATCH;
 				}
 				break;
-			case SearchPattern.R_PATTERN_MATCH:
-				if (!this.isCaseSensitive) {
-					pattern = CharOperation.toLowerCase(pattern);
-				}
-				if (CharOperation.match(pattern, name, this.isCaseSensitive)) {
-					return POSSIBLE_MATCH;
-				}
-				break;
-			case SearchPattern.R_REGEXP_MATCH:
-				// TODO (frederic) implement regular expression match
-				break;
+			}
+			// fall through next case to match as prefix if camel case
+			// failed
+		case SearchPattern.R_PREFIX_MATCH:
+			if (canBePrefix
+					&& matchFirstChar
+					&& CharOperation.prefixEquals(pattern, name,
+							this.isCaseSensitive)) {
+				return POSSIBLE_PREFIX_MATCH;
+			}
+			break;
+		case SearchPattern.R_PATTERN_MATCH:
+			if (!this.isCaseSensitive) {
+				pattern = CharOperation.toLowerCase(pattern);
+			}
+			if (CharOperation.match(pattern, name, this.isCaseSensitive)) {
+				return POSSIBLE_MATCH;
+			}
+			break;
+		case SearchPattern.R_REGEXP_MATCH:
+			// TODO (frederic) implement regular expression match
+			break;
 		}
 		return IMPOSSIBLE_MATCH;
 	}
@@ -311,20 +324,25 @@ public abstract class PatternLocator implements IIndexConstants {
 	/**
 	 * Reports the match of the given reference.
 	 */
-	protected void matchReportReference(ASTNode reference, IModelElement element, int accuracy, MatchLocator locator) throws CoreException {
+	protected void matchReportReference(ASTNode reference,
+			IModelElement element, int accuracy, MatchLocator locator)
+			throws CoreException {
 		match = null;
 		int referenceType = referenceType();
 		int offset = reference.sourceStart();
 		switch (referenceType) {
-			case IModelElement.TYPE:
-				match = locator.newTypeReferenceMatch(element, accuracy, offset, reference.sourceEnd() - offset , reference);
-				break;
-			case IModelElement.FIELD:
-				match = locator.newFieldReferenceMatch(element, accuracy, offset, reference.sourceEnd() - offset, reference);
-				break;
-			case IModelElement.METHOD:
-				match = locator.newMethodReferenceMatch(element, accuracy, offset, reference.sourceEnd() - offset, false, false, reference);
-				break;
+		case IModelElement.TYPE:
+			match = locator.newTypeReferenceMatch(element, accuracy, offset,
+					reference.sourceEnd() - offset, reference);
+			break;
+		case IModelElement.FIELD:
+			match = locator.newFieldReferenceMatch(element, accuracy, offset,
+					reference.sourceEnd() - offset, reference);
+			break;
+		case IModelElement.METHOD:
+			match = locator.newMethodReferenceMatch(element, accuracy, offset,
+					reference.sourceEnd() - offset, false, false, reference);
+			break;
 		}
 		if (match != null) {
 			locator.report(match);
@@ -335,8 +353,10 @@ public abstract class PatternLocator implements IIndexConstants {
 	 * Reports the match of the given reference. Also provide a local element to
 	 * eventually report in match.
 	 */
-	protected void matchReportReference(ASTNode reference, IModelElement element, IModelElement localElement,
-			IModelElement[] otherElements, int accuracy, MatchLocator locator) throws CoreException {
+	protected void matchReportReference(ASTNode reference,
+			IModelElement element, IModelElement localElement,
+			IModelElement[] otherElements, int accuracy, MatchLocator locator)
+			throws CoreException {
 		matchReportReference(reference, element, accuracy, locator);
 	}
 
@@ -344,13 +364,17 @@ public abstract class PatternLocator implements IIndexConstants {
 	 * Reports the match of the given reference. Also provide a scope to look
 	 * for potential other elements.
 	 */
-	public void matchReportReference(ASTNode reference, IModelElement element, Scope scope, int accuracy, MatchLocator locator)
+	public void matchReportReference(ASTNode reference, IModelElement element,
+			Scope scope, int accuracy, MatchLocator locator)
 			throws CoreException {
 		matchReportReference(reference, element, accuracy, locator);
 	}
 
-	public SearchMatch newDeclarationMatch(ASTNode reference, IModelElement element, int accuracy, int length, MatchLocator locator) {
-		return locator.newDeclarationMatch(element, accuracy, reference.sourceStart(), length);
+	public SearchMatch newDeclarationMatch(ASTNode reference,
+			IModelElement element, int accuracy, int length,
+			MatchLocator locator) {
+		return locator.newDeclarationMatch(element, accuracy, reference
+				.sourceStart(), length);
 	}
 
 	protected int referenceType() {
@@ -378,7 +402,8 @@ public abstract class PatternLocator implements IIndexConstants {
 	 * Try to resolve pattern and look for compatibility with type arguments to
 	 * set match rule.
 	 */
-	protected void updateMatch(MatchLocator locator, char[][] patternArguments, boolean hasTypeParameters) {
+	protected void updateMatch(MatchLocator locator, char[][] patternArguments,
+			boolean hasTypeParameters) {
 		if (DLTKCore.DEBUG) {
 			System.err.println("TODO: updateMatch"); //$NON-NLS-1$
 		}
@@ -386,13 +411,14 @@ public abstract class PatternLocator implements IIndexConstants {
 
 	/**
 	 * Returns whether the given type binding matches the given simple name
-	 * pattern and qualification pattern. Note that this method
-	 * resolve to accurate member or local types even if they are not fully
-	 * qualified (ie. X.Member instead of p.X.Member). Returns ACCURATE_MATCH if
-	 * it does. Returns INACCURATE_MATCH if resolve failed. Returns
-	 * IMPOSSIBLE_MATCH if it doesn't.
+	 * pattern and qualification pattern. Note that this method resolve to
+	 * accurate member or local types even if they are not fully qualified (ie.
+	 * X.Member instead of p.X.Member). Returns ACCURATE_MATCH if it does.
+	 * Returns INACCURATE_MATCH if resolve failed. Returns IMPOSSIBLE_MATCH if
+	 * it doesn't.
 	 */
-	protected int resolveLevelForType(char[] simpleNamePattern, char[] qualificationPattern) {
+	protected int resolveLevelForType(char[] simpleNamePattern,
+			char[] qualificationPattern) {
 		return INACCURATE_MATCH;
 	}
 

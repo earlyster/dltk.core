@@ -11,10 +11,13 @@ package org.eclipse.dltk.core.search;
 
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.util.ScannerHelper;
-import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.ISearchFactory;
+import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
@@ -184,6 +187,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			| R_PATTERN_MATCH | R_REGEXP_MATCH;
 	private int matchRule;
 
+	private IDLTKLanguageToolkit toolkit;
+
 	/**
 	 * Creates a search pattern with the rule to apply for matching index keys.
 	 * It can be exact match, prefix match, pattern match or regexp match. Rule
@@ -206,12 +211,17 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 *            Note also that default behavior for generic types/methods
 	 *            search is to find exact matches.
 	 */
-	public SearchPattern(int matchRule) {
+	public SearchPattern(int matchRule, IDLTKLanguageToolkit toolkit) {
 		this.matchRule = matchRule;
+		this.toolkit = toolkit;
 		// Set full match implicit mode
 		if ((matchRule & (R_EQUIVALENT_MATCH | R_ERASURE_MATCH)) == 0) {
 			this.matchRule |= R_FULL_MATCH;
 		}
+	}
+
+	public IDLTKLanguageToolkit getToolkit() {
+		return this.toolkit;
 	}
 
 	/**
@@ -511,7 +521,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * java.lang.String.serialVersionUID long field*
 	 */
 	private static SearchPattern createFieldPattern(String patternString,
-			int limitTo, int matchRule) {
+			int limitTo, int matchRule, IDLTKLanguageToolkit toolkit) {
 		// Signatures
 		char[] declaringTypeSignature = null;
 		// extract declaring type infos
@@ -536,7 +546,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		return new FieldPattern(findDeclarations, findReferences,
 				findReferences, selectorChars, declaringTypeQualification,
 				declaringTypeSimpleName, declaringTypeSignature, null,
-				matchRule);
+				matchRule, toolkit);
 	}
 
 	/**
@@ -560,21 +570,40 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * </ul>
 	 * Type arguments have the same pattern that for type patterns
 	 * 
+	 * @param toolkit
+	 *            TODO
+	 * 
 	 */
 	private static SearchPattern createMethodOrConstructorPattern(
 			String patternString, int limitTo, int matchRule,
-			boolean isConstructor) {
-
-		if (DLTKCore.DEBUG) {
-			System.err
-					.println("TODO: Add correct support of method, fuction patters search..."); //$NON-NLS-1$
-		}
+			boolean isConstructor, IDLTKLanguageToolkit toolkit) {
 
 		// Signatures
 		String declaringTypeSignature = null;
+		char declaringTypeQualification[] = null;
+		char declaringTypeSimpleName[] = null;
+		char[] selectorChars = patternString.toCharArray();
+
 		// extract declaring type infos
 		// extract parameter types infos
 		// Create method/constructor pattern
+
+		if (toolkit != null) {
+			ISearchFactory factory = DLTKLanguageManager
+					.getSearchFactory(toolkit.getNatureId());
+			if (factory != null) {
+				ISearchPatternProcessor processor = factory
+						.createSearchPatternProcessor();
+				if (processor != null) {
+					declaringTypeQualification = processor
+							.extractDeclaringTypeQualification(patternString);
+					declaringTypeSimpleName = processor
+							.extractDeclaringTypeSimpleName(patternString);
+					selectorChars = processor.extractSelector(patternString);
+				}
+			}
+		}
+
 		boolean findDeclarations = true;
 		boolean findReferences = true;
 		switch (limitTo) {
@@ -587,9 +616,6 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		case IDLTKSearchConstants.ALL_OCCURRENCES:
 			break;
 		}
-		char[] selectorChars = patternString.toCharArray();
-		char declaringTypeQualification[] = null;
-		char declaringTypeSimpleName[] = null;
 		if (isConstructor) {
 			// return new ConstructorPattern(findDeclarations, findReferences,
 			// declaringTypeSimpleName, declaringTypeQualification,
@@ -600,7 +626,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			return new MethodPattern(findDeclarations, findReferences,
 					selectorChars, declaringTypeQualification,
 					declaringTypeSimpleName, declaringTypeSignature, null,
-					matchRule);
+					matchRule, toolkit);
 		}
 		return null;
 	}
@@ -619,7 +645,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	public static SearchPattern createOrPattern(SearchPattern leftPattern,
 			SearchPattern rightPattern) {
 		return new OrPattern(leftPattern, rightPattern);
-//		return null;
+		// return null;
 	}
 
 	private static SearchPattern createScriptFolderPattern(
@@ -729,7 +755,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 *         <code>null</code> if the string pattern is ill-formed
 	 */
 	public static SearchPattern createPattern(String stringPattern,
-			int searchFor, int limitTo, int matchRule) {
+			int searchFor, int limitTo, int matchRule,
+			IDLTKLanguageToolkit toolkit) {
 		if (stringPattern == null || stringPattern.length() == 0)
 			return null;
 		if ((matchRule = validateMatchRule(stringPattern, matchRule)) == -1) {
@@ -740,20 +767,21 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		switch (searchFor) {
 		case IDLTKSearchConstants.ANNOTATION_TYPE:
 			return createTypePattern(stringPattern, limitTo, matchRule,
-					IIndexConstants.ANNOTATION_TYPE_SUFFIX);
+					IIndexConstants.ANNOTATION_TYPE_SUFFIX, toolkit);
 		case IDLTKSearchConstants.TYPE:
 			return createTypePattern(stringPattern, limitTo, matchRule,
-					IIndexConstants.TYPE_SUFFIX);
+					IIndexConstants.TYPE_SUFFIX, toolkit);
 		case IDLTKSearchConstants.METHOD:
 			return createMethodOrConstructorPattern(stringPattern, limitTo,
 					matchRule, false/*
 									 * not a constructor
-									 */);
+									 */, toolkit);
 			// case IDLTKSearchConstants.CONSTRUCTOR:
 			// return createMethodOrConstructorPattern(stringPattern, limitTo,
 			// matchRule, true/* constructor */);
 		case IDLTKSearchConstants.FIELD:
-			return createFieldPattern(stringPattern, limitTo, matchRule);
+			return createFieldPattern(stringPattern, limitTo, matchRule,
+					toolkit);
 			// case IDLTKSearchConstants.PACKAGE:
 			// return createScriptFolderPattern(stringPattern, limitTo,
 			// matchRule);
@@ -842,7 +870,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 */
 	public static SearchPattern createPattern(IModelElement element, int limitTo) {
 		return createPattern(element, limitTo, R_EXACT_MATCH | R_CASE_SENSITIVE
-				| R_ERASURE_MATCH);
+				| R_ERASURE_MATCH, DLTKLanguageManager
+				.getLanguageToolkit(element));
 	}
 
 	/**
@@ -924,7 +953,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * 
 	 */
 	public static SearchPattern createPattern(IModelElement element,
-			int limitTo, int matchRule) {
+			int limitTo, int matchRule, IDLTKLanguageToolkit toolkit) {
 		SearchPattern searchPattern = null;
 		boolean ignoreDeclaringType = false;
 		// boolean ignoreReturnType = false;
@@ -956,8 +985,10 @@ public abstract class SearchPattern extends InternalSearchPattern {
 				if (declaringClass != null) {
 					declaringSimpleName = declaringClass.getElementName()
 							.toCharArray();
-					declaringQualification = declaringClass.getScriptFolder()
-							.getElementName().toCharArray();
+					IModelElement parent = declaringClass.getParent();
+//					if (parent.getElementType() == IModelElement.TYPE) {
+//						declaringQualification = ((IType)parent).getTypeQualifiedName().toCharArray(); 
+//					}
 					char[][] enclosingNames = enclosingTypeNames(declaringClass);
 					if (enclosingNames.length > 0) {
 						declaringQualification = CharOperation.concat(
@@ -980,23 +1011,10 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			case IDLTKSearchConstants.ALL_OCCURRENCES:
 				break;
 			}
-			// if (isConstructor) {
-			// // searchPattern =
-			// // new ConstructorPattern(
-			// // findMethodDeclarations,
-			// // findMethodReferences,
-			// // declaringSimpleName,
-			// // declaringQualification,
-			// // parameterQualifications,
-			// // parameterSimpleNames,
-			// // parameterSignatures,
-			// // method,
-			// // matchRule);
-			// } else {
+
 			searchPattern = new MethodPattern(findMethodDeclarations,
 					findMethodReferences, selector, declaringQualification,
-					declaringSimpleName, method, matchRule);
-			// }
+					declaringSimpleName, method, matchRule, toolkit);
 			break;
 		case IModelElement.TYPE:
 			IType type = (IType) element;
@@ -1012,7 +1030,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			break;
 		case IModelElement.FIELD:
 			searchPattern = createFieldPattern(element.getElementName(),
-					maskedLimitTo, matchRule);
+					maskedLimitTo, matchRule, toolkit);
 			break;
 		}
 		if (searchPattern != null)
@@ -1023,19 +1041,21 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	private static SearchPattern createTypePattern(char[] simpleName,
 			char[] packageName, char[][] enclosingTypeNames,
 			String typeSignature, IType type, int limitTo, int matchRule) {
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(type);
 		switch (limitTo) {
 		case IDLTKSearchConstants.DECLARATIONS:
 			return new TypeDeclarationPattern(packageName, enclosingTypeNames,
-					simpleName, IIndexConstants.TYPE_SUFFIX, matchRule);
+					simpleName, IIndexConstants.TYPE_SUFFIX, matchRule, toolkit);
 		case IDLTKSearchConstants.REFERENCES:
 			if (type != null) {
 				return new TypeReferencePattern(CharOperation.concatWith(
 						packageName, enclosingTypeNames, '$'), simpleName,
-						type, matchRule);
+						type, matchRule, toolkit);
 			}
 			return new TypeReferencePattern(CharOperation.concatWith(
 					packageName, enclosingTypeNames, '$'), simpleName,
-					matchRule);
+					matchRule, toolkit);
 			// case IDLTKSearchConstants.IMPLEMENTORS :
 			// return new SuperTypeReferencePattern(
 			// CharOperation.concatWith(packageName, enclosingTypeNames,
@@ -1046,14 +1066,14 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		case IDLTKSearchConstants.ALL_OCCURRENCES:
 			return new OrPattern(new TypeDeclarationPattern(packageName,
 					enclosingTypeNames, simpleName,
-					IIndexConstants.TYPE_SUFFIX, matchRule),
+					IIndexConstants.TYPE_SUFFIX, matchRule, toolkit),
 					(type != null) ? new TypeReferencePattern(CharOperation
 							.concatWith(packageName, enclosingTypeNames, '$'),
-							simpleName, type, matchRule)
+							simpleName, type, matchRule, toolkit)
 							: new TypeReferencePattern(CharOperation
 									.concatWith(packageName,
 											enclosingTypeNames, '$'),
-									simpleName, matchRule));
+									simpleName, matchRule, toolkit));
 		}
 		return null;
 	}
@@ -1070,11 +1090,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * &lt;&gt; (ie. it must be put on first position of the type argument)
 	 */
 	private static SearchPattern createTypePattern(String patternString,
-			int limitTo, int matchRule, char indexSuffix) {
-		if (DLTKCore.DEBUG) {
-			System.err.println("TODO: Search. Add correct code here."); //$NON-NLS-1$
-		}
-
+			int limitTo, int matchRule, char indexSuffix,
+			IDLTKLanguageToolkit toolkit) {
 		String type = patternString;
 		if (type == null)
 			return null;
@@ -1082,22 +1099,50 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		char[] qualificationChars = null, typeChars = null;
 		
 		typeChars = patternString.toCharArray();
+		
+		if (toolkit != null) {
+			ISearchFactory factory = DLTKLanguageManager
+					.getSearchFactory(toolkit.getNatureId());
+			if (factory != null) {
+				ISearchPatternProcessor processor = factory
+						.createSearchPatternProcessor();
+				if (processor != null) {
+					qualificationChars = processor
+							.extractTypeQualification(patternString);
+					typeChars = processor.extractTypeChars(patternString);
+				}
+			}
+		}
+		
 		if (typeChars.length == 1 && typeChars[0] == '*') {
 			typeChars = null;
 		}
-		
+
+
 		switch (limitTo) {
-		case IDLTKSearchConstants.DECLARATIONS : // cannot search for explicit member types
-			return new QualifiedTypeDeclarationPattern(qualificationChars, typeChars, indexSuffix, matchRule);
-		case IDLTKSearchConstants.REFERENCES :
-			return new TypeReferencePattern(qualificationChars, typeChars, matchRule);
-//		case IDLTKSearchConstants.IMPLEMENTORS : 
-//			return new SuperTypeReferencePattern(qualificationChars, typeChars, SuperTypeReferencePattern.ONLY_SUPER_INTERFACES, indexSuffix, matchRule);
-		case IDLTKSearchConstants.ALL_OCCURRENCES :
-			return new OrPattern(
-				new QualifiedTypeDeclarationPattern(qualificationChars, typeChars, indexSuffix, matchRule),// cannot search for explicit member types
-				new TypeReferencePattern(qualificationChars, typeChars, matchRule));
-	}
+		case IDLTKSearchConstants.DECLARATIONS: // cannot search for explicit
+			// member types
+			return new QualifiedTypeDeclarationPattern(qualificationChars,
+					typeChars, indexSuffix, matchRule, toolkit);
+		case IDLTKSearchConstants.REFERENCES:
+			return new TypeReferencePattern(qualificationChars, typeChars,
+					matchRule, toolkit);
+			// case IDLTKSearchConstants.IMPLEMENTORS :
+			// return new SuperTypeReferencePattern(qualificationChars,
+			// typeChars, SuperTypeReferencePattern.ONLY_SUPER_INTERFACES,
+			// indexSuffix, matchRule);
+		case IDLTKSearchConstants.ALL_OCCURRENCES:
+			return new OrPattern(new QualifiedTypeDeclarationPattern(
+					qualificationChars, typeChars, indexSuffix, matchRule,
+					toolkit),// cannot
+					// search
+					// for
+					// explicit
+					// member
+					// types
+					new TypeReferencePattern(qualificationChars, typeChars,
+							matchRule, toolkit));
+		}
 		return null;
 	}
 

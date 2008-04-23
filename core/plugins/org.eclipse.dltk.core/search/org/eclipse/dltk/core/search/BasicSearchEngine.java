@@ -138,8 +138,14 @@ public class BasicSearchEngine {
 	 * @see SearchEngine#createSearchScope(IModelElement[]) for detailed
 	 *      comment.
 	 */
-	public static IDLTKSearchScope createSearchScope(IModelElement[] elements) {
-		return createSearchScope(elements, true);
+	public static IDLTKSearchScope createSearchScope(IModelElement[] elements,
+			IDLTKLanguageToolkit toolkit) {
+		return createSearchScope(elements, true, toolkit);
+	}
+
+	public static IDLTKSearchScope createSearchScope(IModelElement element) {
+		return createSearchScope(new IModelElement[] { element }, true,
+				DLTKLanguageManager.getLanguageToolkit(element));
 	}
 
 	/**
@@ -147,14 +153,14 @@ public class BasicSearchEngine {
 	 *      detailed comment.
 	 */
 	public static IDLTKSearchScope createSearchScope(IModelElement[] elements,
-			boolean includeReferencedProjects) {
+			boolean includeReferencedProjects, IDLTKLanguageToolkit toolkit) {
 		int includeMask = IDLTKSearchScope.SOURCES
 				| IDLTKSearchScope.APPLICATION_LIBRARIES
 				| IDLTKSearchScope.SYSTEM_LIBRARIES;
 		if (includeReferencedProjects) {
 			includeMask |= IDLTKSearchScope.REFERENCED_PROJECTS;
 		}
-		return createSearchScope(elements, includeMask);
+		return createSearchScope(elements, includeMask, toolkit);
 	}
 
 	/**
@@ -162,28 +168,26 @@ public class BasicSearchEngine {
 	 *      comment.
 	 */
 	public static IDLTKSearchScope createSearchScope(IModelElement[] elements,
-			int includeMask) {
-		IDLTKLanguageToolkit toolkit = null;
-		if (elements.length > 0) {
-			toolkit = DLTKLanguageManager.getLanguageToolkit(elements[0]);
-		}
-		if (toolkit == null) {
-			return null;
-		}
+			int includeMask, IDLTKLanguageToolkit toolkit) {
+
 		DLTKSearchScope scope = new DLTKSearchScope(toolkit);
-		HashSet visitedProjects = new HashSet(2);
-		for (int i = 0; i < elements.length; i++) {
-			IModelElement element = elements[i];
-			if (element != null) {
-				try {
-					if (element instanceof ScriptProject) {
-						scope.add((ScriptProject) element, includeMask,
-								visitedProjects);
-					} else {
-						scope.add(element);
+
+		// For EMPTY CASE
+		if (toolkit != null) {
+			HashSet visitedProjects = new HashSet(2);
+			for (int i = 0; i < elements.length; i++) {
+				IModelElement element = elements[i];
+				if (element != null) {
+					try {
+						if (element instanceof ScriptProject) {
+							scope.add((ScriptProject) element, includeMask,
+									visitedProjects);
+						} else {
+							scope.add(element);
+						}
+					} catch (ModelException e) {
+						// ignore
 					}
-				} catch (ModelException e) {
-					// ignore
 				}
 			}
 		}
@@ -889,9 +893,11 @@ public class BasicSearchEngine {
 			break;
 		}
 		final TypeDeclarationPattern pattern = packageMatchRule == SearchPattern.R_EXACT_MATCH ? new TypeDeclarationPattern(
-				packageName, null, typeName, typeSuffix, typeMatchRule)
+				packageName, null, typeName, typeSuffix, typeMatchRule, scope
+						.getLanguageToolkit())
 				: new QualifiedTypeDeclarationPattern(packageName,
-						packageMatchRule, typeName, typeSuffix, typeMatchRule);
+						packageMatchRule, typeName, typeSuffix, typeMatchRule,
+						scope.getLanguageToolkit());
 
 		// Get working copy path(s). Store in a single string in case of only
 		// one to optimize comparison in requestor
@@ -1383,7 +1389,9 @@ public class BasicSearchEngine {
 		if (VERBOSE) {
 			Util.verbose("	- script element: " + enclosingElement); //$NON-NLS-1$
 		}
-		IDLTKSearchScope scope = createSearchScope(new IModelElement[] { enclosingElement });
+		IDLTKSearchScope scope = createSearchScope(
+				new IModelElement[] { enclosingElement }, DLTKLanguageManager
+						.getLanguageToolkit(enclosingElement));
 		IResource resource = enclosingElement.getResource();
 		if (enclosingElement instanceof IMember) {
 			IMember member = (IMember) enclosingElement;

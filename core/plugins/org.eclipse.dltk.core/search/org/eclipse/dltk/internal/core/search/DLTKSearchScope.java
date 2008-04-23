@@ -361,7 +361,6 @@ public class DLTKSearchScope extends AbstractSearchScope {
 			return true;
 		}
 		if (languageToolkit != null
-				&& languageToolkit2 != null
 				&& languageToolkit.getNatureId().equals(
 						languageToolkit2.getNatureId())) {
 			// Filter by nature.
@@ -445,7 +444,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 
 			String currentContainerPath = containerPaths[i];
 			String currentFullPath = currentRelativePath.length() == 0 ? currentContainerPath
-					: (currentContainerPath  +"/"+ currentRelativePath); //$NON-NLS-1$
+					: (currentContainerPath + "/" + currentRelativePath); //$NON-NLS-1$
 			if (encloses(currentFullPath, fullPath, i))
 				return i;
 		}
@@ -728,8 +727,9 @@ public class DLTKSearchScope extends AbstractSearchScope {
 							.getProjectFragment(this.containerPaths[index]);
 				}
 				Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
-						.getRoot(), Path.fromPortableString(this.containerPaths[index] + '/'
-						+ this.relativePaths[index]), false);
+						.getRoot(), Path
+						.fromPortableString(this.containerPaths[index] + '/'
+								+ this.relativePaths[index]), false);
 				if (target instanceof IProject) {
 					return project.getProjectFragment((IProject) target);
 				}

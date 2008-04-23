@@ -80,7 +80,7 @@ public class DLTKTypeInferenceEngine implements ITypeInferencer {
 			includeMask |= (IDLTKSearchScope.APPLICATION_LIBRARIES
 					| IDLTKSearchScope.REFERENCED_PROJECTS | IDLTKSearchScope.SYSTEM_LIBRARIES);
 			IDLTKSearchScope scope = SearchEngine.createSearchScope(
-					new IScriptProject[] { dltkProject }, includeMask);
+					dltkProject, includeMask);
 			SearchEngine engine = new SearchEngine();
 			String typeName = ""; //$NON-NLS-1$
 			if (patternString.indexOf("::") != -1) { //$NON-NLS-1$

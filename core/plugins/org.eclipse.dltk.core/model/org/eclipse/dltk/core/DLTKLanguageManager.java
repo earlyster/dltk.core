@@ -172,7 +172,7 @@ public class DLTKLanguageManager {
 		return new DLTKSearchParticipant();
 	}
 
-	private static ISearchFactory getSearchFactory(String natureId) {
+	public static ISearchFactory getSearchFactory(String natureId) {
 		return (ISearchFactory) InternalDLTKLanguageManager.getSearchManager()
 				.getObject(natureId);
 	}

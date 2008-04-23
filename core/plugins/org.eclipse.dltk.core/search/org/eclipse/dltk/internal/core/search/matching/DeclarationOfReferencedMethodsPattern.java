@@ -11,6 +11,7 @@ package org.eclipse.dltk.internal.core.search.matching;
 
 // import java.util.HashSet;
 import org.eclipse.dltk.compiler.util.SimpleSet;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IModelElement;
 
 public class DeclarationOfReferencedMethodsPattern extends MethodPattern {
@@ -18,7 +19,8 @@ public class DeclarationOfReferencedMethodsPattern extends MethodPattern {
 	protected SimpleSet knownMethods;
 
 	public DeclarationOfReferencedMethodsPattern(IModelElement enclosingElement) {
-		super(false, true, null, null, null, null, null, R_PATTERN_MATCH);
+		super(false, true, null, null, null, null, null, R_PATTERN_MATCH,
+				DLTKLanguageManager.getLanguageToolkit(enclosingElement));
 		this.enclosingElement = enclosingElement;
 		this.knownMethods = new SimpleSet();
 	}

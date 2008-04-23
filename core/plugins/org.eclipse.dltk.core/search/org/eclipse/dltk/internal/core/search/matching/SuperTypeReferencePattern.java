@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.core.search.matching;
 import java.io.IOException;
 
 import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.index.EntryResult;
 import org.eclipse.dltk.core.search.index.Index;
@@ -38,7 +39,7 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 	public static final int ALL_SUPER_TYPES = 0;
 	public static final int ONLY_SUPER_INTERFACES = 1; // used for IMPLEMENTORS
 	public static final int ONLY_SUPER_CLASSES = 2; // used for hierarchy with a
-													// class focus
+	// class focus
 
 	protected static char[][] CATEGORIES = { IIndexConstants.SUPER_REF };
 
@@ -156,30 +157,34 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 	}
 
 	public SuperTypeReferencePattern(char[] superQualification,
-			char[] superSimpleName, int superRefKind, int matchRule) {
+			char[] superSimpleName, int superRefKind, int matchRule,
+			IDLTKLanguageToolkit toolkit) {
 
-		this(matchRule);
+		this(matchRule, toolkit);
 
 		this.superQualification = isCaseSensitive() ? superQualification
 				: CharOperation.toLowerCase(superQualification);
 		this.superSimpleName = (isCaseSensitive() || isCamelCase()) ? superSimpleName
 				: CharOperation.toLowerCase(superSimpleName);
-//		((InternalSearchPattern) this).mustResolve = superQualification != null;
+		// ((InternalSearchPattern) this).mustResolve = superQualification !=
+		// null;
 		this.superRefKind = superRefKind;
 	}
 
 	public SuperTypeReferencePattern(char[] superQualification,
 			char[] superSimpleName, int superRefKind, char typeSuffix,
-			int matchRule) {
+			int matchRule, IDLTKLanguageToolkit toolkit) {
 
-		this(superQualification, superSimpleName, superRefKind, matchRule);
+		this(superQualification, superSimpleName, superRefKind, matchRule,
+				toolkit);
 		this.typeSuffix = typeSuffix;
-//		((InternalSearchPattern) this).mustResolve = superQualification != null
-//				|| typeSuffix != TYPE_SUFFIX;
+		// ((InternalSearchPattern) this).mustResolve = superQualification !=
+		// null
+		// || typeSuffix != TYPE_SUFFIX;
 	}
 
-	SuperTypeReferencePattern(int matchRule) {
-		super(IIndexConstants.SUPER_REF_PATTERN, matchRule);
+	SuperTypeReferencePattern(int matchRule, IDLTKLanguageToolkit toolkit) {
+		super(IIndexConstants.SUPER_REF_PATTERN, matchRule, toolkit);
 	}
 
 	/*
@@ -197,14 +202,16 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 		this.superQualification = slash == start ? null : CharOperation
 				.subarray(key, start, slash);
 
-		slash = CharOperation.indexOf(IIndexConstants.SEPARATOR, key, start = slash + 1);
+		slash = CharOperation.indexOf(IIndexConstants.SEPARATOR, key,
+				start = slash + 1);
 		this.simpleName = CharOperation.subarray(key, start, slash);
 
 		start = ++slash;
 		if (key[start] == IIndexConstants.SEPARATOR) {
 			this.enclosingTypeName = null;
 		} else {
-			slash = CharOperation.indexOf(IIndexConstants.SEPARATOR, key, start);
+			slash = CharOperation
+					.indexOf(IIndexConstants.SEPARATOR, key, start);
 			if (slash == (start + 1) && key[start] == IIndexConstants.ZERO_CHAR) {
 				this.enclosingTypeName = IIndexConstants.ONE_ZERO;
 			} else {
@@ -217,7 +224,8 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 		if (key[start] == IIndexConstants.SEPARATOR) {
 			this.typeParameterSignatures = null;
 		} else {
-			slash = CharOperation.indexOf(IIndexConstants.SEPARATOR, key, start);
+			slash = CharOperation
+					.indexOf(IIndexConstants.SEPARATOR, key, start);
 			this.typeParameterSignatures = CharOperation.splitOn(',', key,
 					start, slash);
 		}
@@ -226,7 +234,8 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 		if (key[start] == IIndexConstants.SEPARATOR) {
 			this.pkgName = null;
 		} else {
-			slash = CharOperation.indexOf(IIndexConstants.SEPARATOR, key, start);
+			slash = CharOperation
+					.indexOf(IIndexConstants.SEPARATOR, key, start);
 			if (slash == (start + 1) && key[start] == IIndexConstants.ZERO_CHAR) {
 				this.pkgName = this.superQualification;
 			} else {
@@ -241,7 +250,7 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 	}
 
 	public SearchPattern getBlankPattern() {
-		return new SuperTypeReferencePattern(R_EXACT_MATCH | R_CASE_SENSITIVE);
+		return new SuperTypeReferencePattern(R_EXACT_MATCH | R_CASE_SENSITIVE, getToolkit());
 	}
 
 	public char[][] getIndexCategories() {
@@ -251,7 +260,11 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 	public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 		SuperTypeReferencePattern pattern = (SuperTypeReferencePattern) decodedPattern;
 		if (this.superRefKind == ONLY_SUPER_CLASSES
-				&& pattern.enclosingTypeName != IIndexConstants.ONE_ZERO/* not an anonymous */)
+				&& pattern.enclosingTypeName != IIndexConstants.ONE_ZERO/*
+																		 * not
+																		 * an
+																		 * anonymous
+																		 */)
 			// consider enumerations as classes, reject interfaces and
 			// annotations
 			if (pattern.superClassOrInterface == IIndexConstants.ANNOTATION_TYPE_SUFFIX)
@@ -279,7 +292,8 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 			matchRule &= ~R_EXACT_MATCH;
 			matchRule |= R_PREFIX_MATCH;
 			if (this.superSimpleName != null)
-				key = CharOperation.append(this.superSimpleName, IIndexConstants.SEPARATOR);
+				key = CharOperation.append(this.superSimpleName,
+						IIndexConstants.SEPARATOR);
 			break;
 		case R_PREFIX_MATCH:
 			// do a prefix query with the superSimpleName
@@ -293,11 +307,11 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 		}
 
 		return index.query(getIndexCategories(), key, matchRule); // match
-																	// rule is
-																	// irrelevant
-																	// when the
-																	// key is
-																	// null
+		// rule is
+		// irrelevant
+		// when the
+		// key is
+		// null
 	}
 
 	protected StringBuffer print(StringBuffer output) {

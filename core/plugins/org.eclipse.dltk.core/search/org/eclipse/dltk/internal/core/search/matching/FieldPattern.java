@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.core.search.matching;
 
 import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 
@@ -20,37 +21,42 @@ public class FieldPattern extends VariablePattern implements IIndexConstants {
 	// type
 	protected char[] typeQualification;
 	protected char[] typeSimpleName;
-	protected static char[][] REF_CATEGORIES = {
-		REF
-	};
-	protected static char[][] REF_AND_DECL_CATEGORIES = {
-			REF, FIELD_DECL
-	};
-	protected static char[][] DECL_CATEGORIES = {
-		FIELD_DECL
-	};
+	protected static char[][] REF_CATEGORIES = { REF };
+	protected static char[][] REF_AND_DECL_CATEGORIES = { REF, FIELD_DECL };
+	protected static char[][] DECL_CATEGORIES = { FIELD_DECL };
 
 	public static char[] createIndexKey(char[] fieldName) {
 		return fieldName;
 	}
 
-	public FieldPattern(boolean findDeclarations, boolean readAccess, boolean writeAccess, char[] name, char[] declaringQualification,
-			char[] declaringSimpleName, char[] typeQualification, char[] typeSimpleName, int matchRule) {
-		super(FIELD_PATTERN, findDeclarations, readAccess, writeAccess, name, matchRule);
-		this.declaringQualification = isCaseSensitive() ? declaringQualification : CharOperation.toLowerCase(declaringQualification);
-		this.declaringSimpleName = isCaseSensitive() ? declaringSimpleName : CharOperation.toLowerCase(declaringSimpleName);
-		this.typeQualification = isCaseSensitive() ? typeQualification : CharOperation.toLowerCase(typeQualification);
-		this.typeSimpleName = (isCaseSensitive() || isCamelCase()) ? typeSimpleName : CharOperation.toLowerCase(typeSimpleName);
+	public FieldPattern(boolean findDeclarations, boolean readAccess,
+			boolean writeAccess, char[] name, char[] declaringQualification,
+			char[] declaringSimpleName, char[] typeQualification,
+			char[] typeSimpleName, int matchRule, IDLTKLanguageToolkit toolkit) {
+		super(FIELD_PATTERN, findDeclarations, readAccess, writeAccess, name,
+				matchRule, toolkit);
+		this.declaringQualification = isCaseSensitive() ? declaringQualification
+				: CharOperation.toLowerCase(declaringQualification);
+		this.declaringSimpleName = isCaseSensitive() ? declaringSimpleName
+				: CharOperation.toLowerCase(declaringSimpleName);
+		this.typeQualification = isCaseSensitive() ? typeQualification
+				: CharOperation.toLowerCase(typeQualification);
+		this.typeSimpleName = (isCaseSensitive() || isCamelCase()) ? typeSimpleName
+				: CharOperation.toLowerCase(typeSimpleName);
 	}
 
 	/*
 	 * Instanciate a field pattern with additional information for generics
 	 * search
 	 */
-	public FieldPattern(boolean findDeclarations, boolean readAccess, boolean writeAccess, char[] name, char[] declaringQualification,
-			char[] declaringSimpleName, char[] typeQualification, char[] typeSimpleName, String typeSignature, int matchRule) {
-		this(findDeclarations, readAccess, writeAccess, name, declaringQualification, declaringSimpleName, typeQualification,
-				typeSimpleName, matchRule);				
+	public FieldPattern(boolean findDeclarations, boolean readAccess,
+			boolean writeAccess, char[] name, char[] declaringQualification,
+			char[] declaringSimpleName, char[] typeQualification,
+			char[] typeSimpleName, String typeSignature, int matchRule,
+			IDLTKLanguageToolkit toolkit) {
+		this(findDeclarations, readAccess, writeAccess, name,
+				declaringQualification, declaringSimpleName, typeQualification,
+				typeSimpleName, matchRule, toolkit);
 	}
 
 	public void decodeIndexKey(char[] key) {
@@ -58,7 +64,8 @@ public class FieldPattern extends VariablePattern implements IIndexConstants {
 	}
 
 	public SearchPattern getBlankPattern() {
-		return new FieldPattern(false, false, false, null, null, null, null, null, R_EXACT_MATCH | R_CASE_SENSITIVE);
+		return new FieldPattern(false, false, false, null, null, null, null,
+				null, R_EXACT_MATCH | R_CASE_SENSITIVE, getToolkit());
 	}
 
 	public char[] getIndexKey() {
@@ -67,7 +74,8 @@ public class FieldPattern extends VariablePattern implements IIndexConstants {
 
 	public char[][] getIndexCategories() {
 		if (this.findReferences)
-			return this.findDeclarations || this.writeAccess ? REF_AND_DECL_CATEGORIES : REF_CATEGORIES;
+			return this.findDeclarations || this.writeAccess ? REF_AND_DECL_CATEGORIES
+					: REF_CATEGORIES;
 		if (this.findDeclarations)
 			return DECL_CATEGORIES;
 		return CharOperation.NO_CHAR_CHAR;
@@ -78,7 +86,8 @@ public class FieldPattern extends VariablePattern implements IIndexConstants {
 	}
 
 	protected boolean mustResolve() {
-		if (this.declaringSimpleName != null || this.declaringQualification != null)
+		if (this.declaringSimpleName != null
+				|| this.declaringQualification != null)
 			return true;
 		if (this.typeSimpleName != null || this.typeQualification != null)
 			return true;

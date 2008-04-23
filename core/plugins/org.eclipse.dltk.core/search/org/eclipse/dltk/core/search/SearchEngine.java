@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
@@ -164,8 +165,15 @@ public class SearchEngine {
 	 * @return a new Script search scope
 	 * 
 	 */
-	public static IDLTKSearchScope createSearchScope(IModelElement[] elements) {
-		return BasicSearchEngine.createSearchScope(elements);
+	public static IDLTKSearchScope createSearchScope(IModelElement[] elements,
+			IDLTKLanguageToolkit toolkit) {
+		return BasicSearchEngine.createSearchScope(elements, toolkit);
+	}
+
+	public static IDLTKSearchScope createSearchScope(IModelElement element) {
+		return BasicSearchEngine.createSearchScope(
+				new IModelElement[] { element }, DLTKLanguageManager
+						.getLanguageToolkit(element));
 	}
 
 	/**
@@ -190,9 +198,9 @@ public class SearchEngine {
 	 * 
 	 */
 	public static IDLTKSearchScope createSearchScope(IModelElement[] elements,
-			boolean includeReferencedProjects) {
+			boolean includeReferencedProjects, IDLTKLanguageToolkit toolkit) {
 		return BasicSearchEngine.createSearchScope(elements,
-				includeReferencedProjects);
+				includeReferencedProjects, toolkit);
 	}
 
 	/**
@@ -228,8 +236,16 @@ public class SearchEngine {
 	 * 
 	 */
 	public static IDLTKSearchScope createSearchScope(IModelElement[] elements,
+			int includeMask, IDLTKLanguageToolkit toolkit) {
+		return BasicSearchEngine.createSearchScope(elements, includeMask,
+				toolkit);
+	}
+
+	public static IDLTKSearchScope createSearchScope(IModelElement element,
 			int includeMask) {
-		return BasicSearchEngine.createSearchScope(elements, includeMask);
+		return BasicSearchEngine.createSearchScope(
+				new IModelElement[] { element }, includeMask,
+				DLTKLanguageManager.getLanguageToolkit(element));
 	}
 
 	/**
@@ -925,7 +941,7 @@ public class SearchEngine {
 
 		MixinPattern pattern = new MixinPattern(key.toCharArray(),
 				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE
-						| SearchPattern.R_PATTERN_MATCH);
+						| SearchPattern.R_PATTERN_MATCH, toolkit);
 
 		SearchParticipant participant = SearchEngine
 				.getDefaultSearchParticipant();
@@ -972,7 +988,7 @@ public class SearchEngine {
 		if (key.indexOf('*') != -1 || key.indexOf('?') != -1)
 			flags |= SearchPattern.R_PATTERN_MATCH;
 
-		MixinPattern pattern = new MixinPattern(key.toCharArray(), flags);
+		MixinPattern pattern = new MixinPattern(key.toCharArray(), flags, toolkit);
 
 		SearchParticipant participant = SearchEngine
 				.getDefaultSearchParticipant();

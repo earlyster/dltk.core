@@ -23,22 +23,14 @@ public class TypeDeclarationLocator extends PatternLocator {
 		this.pattern = pattern;
 	}
 
-	// public int match(ASTNode node, MatchingNodeSet nodeSet) - SKIP IT
-	// public int match(ConstructorDeclaration node, MatchingNodeSet nodeSet) -
-	// SKIP IT
-	// public int match(Expression node, MatchingNodeSet nodeSet) - SKIP IT
-	// public int match(FieldDeclaration node, MatchingNodeSet nodeSet) - SKIP
-	// IT
-	// public int match(MethodDeclaration node, MatchingNodeSet nodeSet) - SKIP
-	// IT
-	// public int match(MessageSend node, MatchingNodeSet nodeSet) - SKIP IT
-	// public int match(Reference node, MatchingNodeSet nodeSet) - SKIP IT
 	public int match(TypeDeclaration node, MatchingNodeSet nodeSet) {
 		if (this.pattern.simpleName == null || matchesName(this.pattern.simpleName, node.getName().toCharArray())) {
-			
 			//	fully qualified name
 			if (this.pattern instanceof QualifiedTypeDeclarationPattern) {
 //				QualifiedTypeDeclarationPattern qualifiedPattern = (QualifiedTypeDeclarationPattern) this.pattern;
+//					if( !matchesName(this.pattern.simpleName, enclosingNodeTypeName)) {
+//					return IMPOSSIBLE_MATCH;
+//				}
 //				return resolveLevelForType(qualifiedPattern.simpleName, qualifiedPattern.qualification, node);
 			} else {
 				char[] enclosingTypeName = this.pattern.enclosingTypeNames == null ? null : CharOperation.concatWith(this.pattern.enclosingTypeNames, '$');

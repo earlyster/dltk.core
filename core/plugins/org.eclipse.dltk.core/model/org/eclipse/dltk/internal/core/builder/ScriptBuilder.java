@@ -219,22 +219,17 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		if (TRACE) {
 			System.out
 					.println("-----SCRIPT-BUILDER-INFORMATION-TRACE----------------------------"); //$NON-NLS-1$
-			System.out
-					.println("Finished build of project:" //$NON-NLS-1$
-							+ currentProject.getName()
-							+ "\n" //$NON-NLS-1$
-							+ "Building time:" //$NON-NLS-1$
-							+ Long.toString(System.currentTimeMillis() - start)
-							+ "\n" //$NON-NLS-1$
-							+ "Resources count:" //$NON-NLS-1$
-							+ this.lastBuildResources
-							+ "\n" //$NON-NLS-1$
-							+ "Sources count:" //$NON-NLS-1$
-							+ this.lastBuildSourceFiles
-							+ "\n" //$NON-NLS-1$
-							+ "Build type:" //$NON-NLS-1$
-							+ (kind == FULL_BUILD ? "Full build" //$NON-NLS-1$
-									: "Incremental build")); //$NON-NLS-1$
+			System.out.println("Finished build of project:" //$NON-NLS-1$
+					+ currentProject.getName() + "\n" //$NON-NLS-1$
+					+ "Building time:" //$NON-NLS-1$
+					+ Long.toString(System.currentTimeMillis() - start) + "\n" //$NON-NLS-1$
+					+ "Resources count:" //$NON-NLS-1$
+					+ this.lastBuildResources + "\n" //$NON-NLS-1$
+					+ "Sources count:" //$NON-NLS-1$
+					+ this.lastBuildSourceFiles + "\n" //$NON-NLS-1$
+					+ "Build type:" //$NON-NLS-1$
+					+ (kind == FULL_BUILD ? "Full build" //$NON-NLS-1$
+							: "Incremental build")); //$NON-NLS-1$
 			System.out
 					.println("-----------------------------------------------------------------"); //$NON-NLS-1$
 		}
@@ -361,7 +356,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	private Set getResourcesFrom(Object el, final IProgressMonitor monitor,
 			int ticks) throws CoreException {
 		Set resources = new HashSet();
-		String name = MessageFormat.format(Messages.ScriptBuilder_scanningResourcesIn,
+		String name = MessageFormat.format(
+				Messages.ScriptBuilder_scanningResourcesIn,
 				new Object[] { currentProject.getName() });
 		monitor.subTask(name);
 		try {
@@ -456,21 +452,20 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-
 	protected void buildResources(Set resources, IProgressMonitor monitor,
 			int tiks, int buildType, Set externalFoldersBefore,
 			Set externalFolders, Set allresources) {
-//		HandleFactory factory = new HandleFactory();
+		// HandleFactory factory = new HandleFactory();
 		List status = new ArrayList();
-		IDLTKSearchScope scope = SearchEngine
-				.createSearchScope(new IModelElement[] { scriptProject });
+		IDLTKSearchScope scope = SearchEngine.createSearchScope(scriptProject);
 
 		List realResources = new ArrayList(); // real resources
 		List elements = new ArrayList(); // Model elements
 
 		Set allElements = new HashSet();
 		Set allResources = new HashSet();
-		String name = MessageFormat.format(Messages.ScriptBuilder_locatingResourcesFor,
+		String name = MessageFormat.format(
+				Messages.ScriptBuilder_locatingResourcesFor,
 				new Object[] { this.scriptProject.getElementName() });
 		IProgressMonitor sub = new SubProgressMonitor(monitor, tiks / 3);
 		// sub.subTask(name);
@@ -482,9 +477,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (sub.isCanceled()) {
 				return;
 			}
-//			IModelElement element2 = DLTKCore.create(res);
+			// IModelElement element2 = DLTKCore.create(res);
 			IModelElement element = DLTKCore.create(res);
-//			factory.createOpenable(res.getFullPath().toString(), scope);
+			// factory.createOpenable(res.getFullPath().toString(), scope);
 			if (element != null
 					&& element.getElementType() == IModelElement.SOURCE_MODULE
 					&& element.exists()) {

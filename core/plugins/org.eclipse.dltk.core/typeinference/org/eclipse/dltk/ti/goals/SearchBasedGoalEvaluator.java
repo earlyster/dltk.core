@@ -14,8 +14,8 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.ast.ASTNode;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.search.FieldReferenceMatch;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.MethodReferenceMatch;
@@ -68,9 +68,8 @@ public abstract class SearchBasedGoalEvaluator extends GoalEvaluator {
 		if (project == null) {
 			return null;
 		}
-		IDLTKSearchScope scope = SearchEngine
-				.createSearchScope(new IModelElement[] { project });
-		SearchPattern pattern = createSearchPattern();
+		IDLTKSearchScope scope = SearchEngine.createSearchScope(project);
+		SearchPattern pattern = createSearchPattern(scope.getLanguageToolkit());
 		SearchEngine engine = new SearchEngine();
 
 		try {
@@ -96,7 +95,7 @@ public abstract class SearchBasedGoalEvaluator extends GoalEvaluator {
 		return references.toArray(new ItemReference[references.size()]);
 	}
 
-	protected abstract SearchPattern createSearchPattern();
+	protected abstract SearchPattern createSearchPattern(IDLTKLanguageToolkit toolkit);
 
 	protected abstract IGoal createVerificationGoal(PossiblePosition pos);
 

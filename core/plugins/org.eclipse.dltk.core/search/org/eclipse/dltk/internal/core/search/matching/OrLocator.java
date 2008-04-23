@@ -33,7 +33,7 @@ public class OrLocator extends PatternLocator {
 		this.patternLocators = new PatternLocator[length];
 		for (int i = 0; i < length; i++)
 			this.patternLocators[i] = PatternLocator
-					.patternLocator(patterns[i]);
+					.patternLocator(patterns[i], null);
 	}
 
 	public void initializePolymorphicSearch(MatchLocator locator) {
