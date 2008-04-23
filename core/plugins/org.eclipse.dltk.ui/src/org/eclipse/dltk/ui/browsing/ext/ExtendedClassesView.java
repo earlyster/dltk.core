@@ -73,13 +73,13 @@ public class ExtendedClassesView extends ViewPart implements
 			IElementChangedListener {
 		public void elementChanged(ElementChangedEvent event) {
 			// We need to update
-//			if (event.getType() == ElementChangedEvent.POST_CHANGE) {
-				IModelElementDelta delta = event.getDelta();
-				if (browsingPane != null && !browsingPane.isDisposed()
-						&& typesChanged(delta)) {
-					browsingPane.refresh();
-				}
-//			}
+			// if (event.getType() == ElementChangedEvent.POST_CHANGE) {
+			IModelElementDelta delta = event.getDelta();
+			if (browsingPane != null && !browsingPane.isDisposed()
+					&& typesChanged(delta)) {
+				browsingPane.refresh();
+			}
+			// }
 		}
 
 		private boolean typesChanged(IModelElementDelta delta) {
@@ -87,9 +87,8 @@ public class ExtendedClassesView extends ViewPart implements
 			for (int i = 0; i < affectedChildren.length; i++) {
 				if (affectedChildren[i].getElement().getElementType() == IModelElement.TYPE) {
 					return true;
-				}
-				else {
-					if( typesChanged(affectedChildren[i])) {
+				} else {
+					if (typesChanged(affectedChildren[i])) {
 						return true;
 					}
 				}
@@ -174,10 +173,11 @@ public class ExtendedClassesView extends ViewPart implements
 
 		};
 		browsingPane.setContentProvider(new ExtendedClasesContentProvider(this,
-				SearchEngine.createWorkspaceScope(this.fToolkit), parent));
+				SearchEngine.createWorkspaceScope(this.fToolkit), parent, this.fToolkit));
 
 		browsingPane.setLabelProvider(new ExtendedClasesLabelProvider(
-				DLTKUILanguageManager.createLabelProvider(this.fToolkit.getNatureId())));
+				DLTKUILanguageManager.createLabelProvider(this.fToolkit
+						.getNatureId())));
 
 		getSite().setSelectionProvider(this);
 		getViewSite().getPage().addPostSelectionListener(this);

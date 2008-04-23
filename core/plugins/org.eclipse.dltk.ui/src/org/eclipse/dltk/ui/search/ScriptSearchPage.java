@@ -62,9 +62,9 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
+public abstract class ScriptSearchPage extends DialogPage implements
+		ISearchPage, IDLTKSearchConstants {
 
-public abstract class ScriptSearchPage extends DialogPage implements ISearchPage, IDLTKSearchConstants {
-	
 	private static class SearchPatternData {
 		private int searchFor;
 		private int limitTo;
@@ -74,25 +74,31 @@ public abstract class ScriptSearchPage extends DialogPage implements ISearchPage
 		private boolean includeInterpreterEnvironment;
 		private int scope;
 		private IWorkingSet[] workingSets;
-		
-		public SearchPatternData(int searchFor, int limitTo, boolean isCaseSensitive, String pattern, IModelElement element, boolean includeInterpreterEnvironment) {
-			this(searchFor, limitTo, pattern, isCaseSensitive, element, ISearchPageContainer.WORKSPACE_SCOPE, null, includeInterpreterEnvironment);
+
+		public SearchPatternData(int searchFor, int limitTo,
+				boolean isCaseSensitive, String pattern, IModelElement element,
+				boolean includeInterpreterEnvironment) {
+			this(searchFor, limitTo, pattern, isCaseSensitive, element,
+					ISearchPageContainer.WORKSPACE_SCOPE, null,
+					includeInterpreterEnvironment);
 		}
-		
-		public SearchPatternData(int searchFor, int limitTo, String pattern, boolean isCaseSensitive, IModelElement element, int scope, IWorkingSet[] workingSets, boolean includeInterpreterEnvironment) {
-			this.searchFor= searchFor;
-			this.limitTo= limitTo;
-			this.pattern= pattern;
-			this.isCaseSensitive= isCaseSensitive;
-			this.scope= scope;
-			this.workingSets= workingSets;
-			this.includeInterpreterEnvironment= includeInterpreterEnvironment;
-			
+
+		public SearchPatternData(int searchFor, int limitTo, String pattern,
+				boolean isCaseSensitive, IModelElement element, int scope,
+				IWorkingSet[] workingSets, boolean includeInterpreterEnvironment) {
+			this.searchFor = searchFor;
+			this.limitTo = limitTo;
+			this.pattern = pattern;
+			this.isCaseSensitive = isCaseSensitive;
+			this.scope = scope;
+			this.workingSets = workingSets;
+			this.includeInterpreterEnvironment = includeInterpreterEnvironment;
+
 			setModelElement(element);
 		}
-		
+
 		public void setModelElement(IModelElement modelElement) {
-			this.modelElement= modelElement;
+			this.modelElement = modelElement;
 		}
 
 		public boolean isCaseSensitive() {
@@ -122,183 +128,207 @@ public abstract class ScriptSearchPage extends DialogPage implements ISearchPage
 		public IWorkingSet[] getWorkingSets() {
 			return workingSets;
 		}
-		
+
 		public boolean includesInterpreterEnvironment() {
 			return includeInterpreterEnvironment;
 		}
-		
+
 		public void store(IDialogSettings settings) {
 			settings.put("searchFor", searchFor); //$NON-NLS-1$
 			settings.put("scope", scope); //$NON-NLS-1$
 			settings.put("pattern", pattern); //$NON-NLS-1$
 			settings.put("limitTo", limitTo); //$NON-NLS-1$
-			settings.put("modelElement", modelElement != null ? modelElement.getHandleIdentifier() : ""); //$NON-NLS-1$ //$NON-NLS-2$
+			settings
+					.put(
+							"modelElement", modelElement != null ? modelElement.getHandleIdentifier() : ""); //$NON-NLS-1$ //$NON-NLS-2$
 			settings.put("isCaseSensitive", isCaseSensitive); //$NON-NLS-1$
 			if (workingSets != null) {
-				String[] wsIds= new String[workingSets.length];
-				for (int i= 0; i < workingSets.length; i++) {
-					wsIds[i]= workingSets[i].getName();
+				String[] wsIds = new String[workingSets.length];
+				for (int i = 0; i < workingSets.length; i++) {
+					wsIds[i] = workingSets[i].getName();
 				}
 				settings.put("workingSets", wsIds); //$NON-NLS-1$
 			} else {
 				settings.put("workingSets", new String[0]); //$NON-NLS-1$
 			}
-			settings.put("includeInterpreterEnvironment", includeInterpreterEnvironment); //$NON-NLS-1$
+			settings
+					.put(
+							"includeInterpreterEnvironment", includeInterpreterEnvironment); //$NON-NLS-1$
 		}
-		
+
 		public static SearchPatternData create(IDialogSettings settings) {
-			String pattern= settings.get("pattern"); //$NON-NLS-1$
+			String pattern = settings.get("pattern"); //$NON-NLS-1$
 			if (pattern.length() == 0) {
 				return null;
 			}
-			IModelElement elem= null;
-			String handleId= settings.get("modelElement"); //$NON-NLS-1$
+			IModelElement elem = null;
+			String handleId = settings.get("modelElement"); //$NON-NLS-1$
 			if (handleId != null && handleId.length() > 0) {
-				IModelElement restored= DLTKCore.create(handleId); 
-				if (restored != null && isSearchableType(restored) && restored.exists()) {
-					elem= restored;
+				IModelElement restored = DLTKCore.create(handleId);
+				if (restored != null && isSearchableType(restored)
+						&& restored.exists()) {
+					elem = restored;
 				}
 			}
-			String[] wsIds= settings.getArray("workingSets"); //$NON-NLS-1$
-			IWorkingSet[] workingSets= null;
+			String[] wsIds = settings.getArray("workingSets"); //$NON-NLS-1$
+			IWorkingSet[] workingSets = null;
 			if (wsIds != null && wsIds.length > 0) {
-				IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
-				workingSets= new IWorkingSet[wsIds.length];
-				for (int i= 0; workingSets != null && i < wsIds.length; i++) {
-					workingSets[i]= workingSetManager.getWorkingSet(wsIds[i]);
+				IWorkingSetManager workingSetManager = PlatformUI
+						.getWorkbench().getWorkingSetManager();
+				workingSets = new IWorkingSet[wsIds.length];
+				for (int i = 0; workingSets != null && i < wsIds.length; i++) {
+					workingSets[i] = workingSetManager.getWorkingSet(wsIds[i]);
 					if (workingSets[i] == null) {
-						workingSets= null;
+						workingSets = null;
 					}
 				}
 			}
 
 			try {
-				int searchFor= settings.getInt("searchFor"); //$NON-NLS-1$
-				int scope= settings.getInt("scope"); //$NON-NLS-1$
-				int limitTo= settings.getInt("limitTo"); //$NON-NLS-1$
-				boolean isCaseSensitive= settings.getBoolean("isCaseSensitive"); //$NON-NLS-1$
-				
+				int searchFor = settings.getInt("searchFor"); //$NON-NLS-1$
+				int scope = settings.getInt("scope"); //$NON-NLS-1$
+				int limitTo = settings.getInt("limitTo"); //$NON-NLS-1$
+				boolean isCaseSensitive = settings
+						.getBoolean("isCaseSensitive"); //$NON-NLS-1$
+
 				boolean includeInterpreterEnvironment;
 				if (settings.get("includeInterpreterEnvironment") != null) { //$NON-NLS-1$
-					includeInterpreterEnvironment= settings.getBoolean("includeInterpreterEnvironment"); //$NON-NLS-1$
+					includeInterpreterEnvironment = settings
+							.getBoolean("includeInterpreterEnvironment"); //$NON-NLS-1$
 				} else {
-					includeInterpreterEnvironment= forceIncludeInterpreterEnvironment(limitTo);
+					includeInterpreterEnvironment = forceIncludeInterpreterEnvironment(limitTo);
 				}
-				return 	new SearchPatternData(searchFor, limitTo, pattern, isCaseSensitive, elem, scope, workingSets, includeInterpreterEnvironment);
+				return new SearchPatternData(searchFor, limitTo, pattern,
+						isCaseSensitive, elem, scope, workingSets,
+						includeInterpreterEnvironment);
 			} catch (NumberFormatException e) {
 				return null;
 			}
 		}
-		
-	}
-	
-	public static final String PARTICIPANT_EXTENSION_POINT= "org.eclipse.dltk.ui.queryParticipants"; //$NON-NLS-1$
 
-	public static final String EXTENSION_POINT_ID= "org.eclipse.dltk.ui.DLTKSearchPage"; //$NON-NLS-1$
-	
-	private static final int HISTORY_SIZE= 12;
-	
+	}
+
+	public static final String PARTICIPANT_EXTENSION_POINT = "org.eclipse.dltk.ui.queryParticipants"; //$NON-NLS-1$
+
+	public static final String EXTENSION_POINT_ID = "org.eclipse.dltk.ui.DLTKSearchPage"; //$NON-NLS-1$
+
+	private static final int HISTORY_SIZE = 12;
+
 	// Dialog store id constants
-	private final static String PAGE_NAME= "DLTKSearchPage"; //$NON-NLS-1$
-	private final static String STORE_CASE_SENSITIVE= "CASE_SENSITIVE"; //$NON-NLS-1$
-	private final static String STORE_HISTORY= "HISTORY"; //$NON-NLS-1$
-	private final static String STORE_HISTORY_SIZE= "HISTORY_SIZE"; //$NON-NLS-1$
-	
+	private final static String PAGE_NAME = "DLTKSearchPage"; //$NON-NLS-1$
+	private final static String STORE_CASE_SENSITIVE = "CASE_SENSITIVE"; //$NON-NLS-1$
+	private final static String STORE_HISTORY = "HISTORY"; //$NON-NLS-1$
+	private final static String STORE_HISTORY_SIZE = "HISTORY_SIZE"; //$NON-NLS-1$
+
 	private final List fPreviousSearchPatterns;
-	
+
 	private SearchPatternData fInitialData;
 	private IModelElement fModelElement;
-	private boolean fFirstTime= true;
+	private boolean fFirstTime = true;
 	private IDialogSettings fDialogSettings;
 	private boolean fIsCaseSensitive;
-	
+
 	private Combo fPattern;
 	private ISearchPageContainer fContainer;
 	private Button fCaseSensitive;
-	
+
 	private Button[] fSearchFor;
-	private String[] fSearchForText= {
-		SearchMessages.SearchPage_searchFor_type, 
-		SearchMessages.SearchPage_searchFor_method, 
-		//SearchMessages.SearchPage_searchFor_package, 
-		//SearchMessages.SearchPage_searchFor_constructor, 
-		SearchMessages.SearchPage_searchFor_field
-		}; 
+	private String[] fSearchForText = {
+			SearchMessages.SearchPage_searchFor_type,
+			SearchMessages.SearchPage_searchFor_method,
+			// SearchMessages.SearchPage_searchFor_package,
+			// SearchMessages.SearchPage_searchFor_constructor,
+			SearchMessages.SearchPage_searchFor_field };
 
 	private Button[] fLimitTo;
-	private String[] fLimitToText= {
-		SearchMessages.SearchPage_limitTo_declarations, 
-		//SearchMessages.SearchPage_limitTo_implementors, 
-		SearchMessages.SearchPage_limitTo_references, 
-		SearchMessages.SearchPage_limitTo_allOccurrences 
-		//SearchMessages.SearchPage_limitTo_readReferences, 
-		//SearchMessages.SearchPage_limitTo_writeReferences
-		};
+	private String[] fLimitToText = {
+			SearchMessages.SearchPage_limitTo_declarations,
+			// SearchMessages.SearchPage_limitTo_implementors,
+			SearchMessages.SearchPage_limitTo_references,
+			SearchMessages.SearchPage_limitTo_allOccurrences
+	// SearchMessages.SearchPage_limitTo_readReferences,
+	// SearchMessages.SearchPage_limitTo_writeReferences
+	};
 
-	private Button fIncludeInterpreterEnvironmentCheckbox; 
+	private Button fIncludeInterpreterEnvironmentCheckbox;
 
 	public ScriptSearchPage() {
-		fPreviousSearchPatterns= new ArrayList();
+		fPreviousSearchPatterns = new ArrayList();
 	}
-	
+
 	public boolean performAction() {
 		return performNewSearch();
 	}
-		
+
 	private boolean performNewSearch() {
-		SearchPatternData data= getPatternData();
+		SearchPatternData data = getPatternData();
 
 		// Setup search scope
-		IDLTKSearchScope scope= null;
-		String scopeDescription= ""; //$NON-NLS-1$
-		
-		boolean includeInterpreterEnvironment= data.includesInterpreterEnvironment();
-		DLTKSearchScopeFactory factory= DLTKSearchScopeFactory.getInstance();
-		
+		IDLTKSearchScope scope = null;
+		String scopeDescription = ""; //$NON-NLS-1$
+
+		boolean includeInterpreterEnvironment = data
+				.includesInterpreterEnvironment();
+		DLTKSearchScopeFactory factory = DLTKSearchScopeFactory.getInstance();
+
 		switch (getContainer().getSelectedScope()) {
-			case ISearchPageContainer.WORKSPACE_SCOPE:
-				scopeDescription= factory.getWorkspaceScopeDescription(includeInterpreterEnvironment);
-				scope= factory.createWorkspaceScope(includeInterpreterEnvironment, getLanguageToolkit());
-				break;
-			case ISearchPageContainer.SELECTION_SCOPE:
-				IModelElement[] modelElements= factory.getModelElements(getContainer().getSelection());
-				scope= factory.createSearchScope(modelElements, includeInterpreterEnvironment);
-				scopeDescription= factory.getSelectionScopeDescription(modelElements, includeInterpreterEnvironment);
-				break;
-			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE: {
-				String[] projectNames= getContainer().getSelectedProjectNames();
-				scope= factory.createProjectSearchScope(projectNames, includeInterpreterEnvironment);
-				scopeDescription= factory.getProjectScopeDescription(projectNames, includeInterpreterEnvironment);
-				break;
-			}
-			case ISearchPageContainer.WORKING_SET_SCOPE: {
-				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
-				// should not happen - just to be sure
-				if (workingSets == null || workingSets.length < 1)
-					return false;
-				scopeDescription= factory.getWorkingSetScopeDescription(workingSets, includeInterpreterEnvironment); 
-				scope= factory.createSearchScope(workingSets, includeInterpreterEnvironment, getLanguageToolkit());
-				SearchUtil.updateLRUWorkingSets(workingSets);
-			}
+		case ISearchPageContainer.WORKSPACE_SCOPE:
+			scopeDescription = factory
+					.getWorkspaceScopeDescription(includeInterpreterEnvironment);
+			scope = factory.createWorkspaceScope(includeInterpreterEnvironment,
+					getLanguageToolkit());
+			break;
+		case ISearchPageContainer.SELECTION_SCOPE:
+			IModelElement[] modelElements = factory
+					.getModelElements(getContainer().getSelection());
+			scope = factory.createSearchScope(modelElements,
+					includeInterpreterEnvironment, getLanguageToolkit());
+			scopeDescription = factory.getSelectionScopeDescription(
+					modelElements, includeInterpreterEnvironment);
+			break;
+		case ISearchPageContainer.SELECTED_PROJECTS_SCOPE: {
+			String[] projectNames = getContainer().getSelectedProjectNames();
+			scope = factory.createProjectSearchScope(projectNames,
+					includeInterpreterEnvironment, getLanguageToolkit());
+			scopeDescription = factory.getProjectScopeDescription(projectNames,
+					includeInterpreterEnvironment);
+			break;
 		}
-		
-		QuerySpecification querySpec= null;
-		if (data.getModelElement() != null && getPattern().equals(fInitialData.getPattern())) {
-//			if (data.getLimitTo() == IDLTKSearchConstants.REFERENCES)
-//				SearchUtil.warnIfBinaryConstant(data.getModelElement(), getShell());
-			querySpec= new ElementQuerySpecification(data.getModelElement(), data.getLimitTo(), scope, scopeDescription);
+		case ISearchPageContainer.WORKING_SET_SCOPE: {
+			IWorkingSet[] workingSets = getContainer().getSelectedWorkingSets();
+			// should not happen - just to be sure
+			if (workingSets == null || workingSets.length < 1)
+				return false;
+			scopeDescription = factory.getWorkingSetScopeDescription(
+					workingSets, includeInterpreterEnvironment);
+			scope = factory.createSearchScope(workingSets,
+					includeInterpreterEnvironment, getLanguageToolkit());
+			SearchUtil.updateLRUWorkingSets(workingSets);
+		}
+		}
+
+		QuerySpecification querySpec = null;
+		if (data.getModelElement() != null
+				&& getPattern().equals(fInitialData.getPattern())) {
+			// if (data.getLimitTo() == IDLTKSearchConstants.REFERENCES)
+			// SearchUtil.warnIfBinaryConstant(data.getModelElement(),
+			// getShell());
+			querySpec = new ElementQuerySpecification(data.getModelElement(),
+					data.getLimitTo(), scope, scopeDescription);
 		} else {
-			querySpec= new PatternQuerySpecification(data.getPattern(), data.getSearchFor(), data.isCaseSensitive(), data.getLimitTo(), scope, scopeDescription);
+			querySpec = new PatternQuerySpecification(data.getPattern(), data
+					.getSearchFor(), data.isCaseSensitive(), data.getLimitTo(),
+					scope, scopeDescription);
 			data.setModelElement(null);
-		} 
-		
-		DLTKSearchQuery textSearchJob= new DLTKSearchQuery(querySpec);
+		}
+
+		DLTKSearchQuery textSearchJob = new DLTKSearchQuery(querySpec);
 		NewSearchUI.runQueryInBackground(textSearchJob);
 		return true;
 	}
-	
+
 	private int getLimitTo() {
-		for (int i= 0; i < fLimitTo.length; i++) {
+		for (int i = 0; i < fLimitTo.length; i++) {
 			if (fLimitTo[i].getSelection())
 				return i;
 		}
@@ -306,81 +336,79 @@ public abstract class ScriptSearchPage extends DialogPage implements ISearchPage
 	}
 
 	private void setLimitTo(int searchFor, int limitTo) {
-		if (!(searchFor == TYPE ) /*&& limitTo == IMPLEMENTORS*/) {
-			limitTo= REFERENCES;
+		if (!(searchFor == TYPE) /* && limitTo == IMPLEMENTORS */) {
+			limitTo = REFERENCES;
 		}
 
-		if (!(searchFor == FIELD) /*&& (limitTo == READ_ACCESSES || limitTo == WRITE_ACCESSES)*/) {
-			limitTo= REFERENCES;
+		if (!(searchFor == FIELD) /*
+									 * && (limitTo == READ_ACCESSES || limitTo ==
+									 * WRITE_ACCESSES)
+									 */) {
+			limitTo = REFERENCES;
 		}
-		
-		for (int i= 0; i < fLimitTo.length; i++) {
+
+		for (int i = 0; i < fLimitTo.length; i++) {
 			fLimitTo[i].setSelection(limitTo == i);
 		}
-		
+
 		fLimitTo[DECLARATIONS].setEnabled(true);
-//		fLimitTo[IMPLEMENTORS].setEnabled( searchFor == TYPE);
-		fLimitTo[REFERENCES].setEnabled(true);			
+		// fLimitTo[IMPLEMENTORS].setEnabled( searchFor == TYPE);
+		fLimitTo[REFERENCES].setEnabled(true);
 		fLimitTo[ALL_OCCURRENCES].setEnabled(true);
-//		fLimitTo[READ_ACCESSES].setEnabled(searchFor == FIELD);
-//		fLimitTo[WRITE_ACCESSES].setEnabled(searchFor == FIELD);
-		
+		// fLimitTo[READ_ACCESSES].setEnabled(searchFor == FIELD);
+		// fLimitTo[WRITE_ACCESSES].setEnabled(searchFor == FIELD);
+
 	}
 
 	private String[] getPreviousSearchPatterns() {
 		// Search results are not persistent
-		int patternCount= fPreviousSearchPatterns.size();
-		String [] patterns= new String[patternCount];
-		for (int i= 0; i < patternCount; i++)
-			patterns[i]= ((SearchPatternData) fPreviousSearchPatterns.get(i)).getPattern();
+		int patternCount = fPreviousSearchPatterns.size();
+		String[] patterns = new String[patternCount];
+		for (int i = 0; i < patternCount; i++)
+			patterns[i] = ((SearchPatternData) fPreviousSearchPatterns.get(i))
+					.getPattern();
 		return patterns;
 	}
-	
+
 	private int getSearchFor() {
-		for (int i= 0; i < fSearchFor.length; i++) {
+		for (int i = 0; i < fSearchFor.length; i++) {
 			if (fSearchFor[i].getSelection())
 				return i;
 		}
-		
+
 		return -1;
 	}
-	
+
 	private String getPattern() {
 		return fPattern.getText();
 	}
 
-	
 	private SearchPatternData findInPrevious(String pattern) {
-		for (Iterator iter= fPreviousSearchPatterns.iterator(); iter.hasNext();) {
-			SearchPatternData element= (SearchPatternData) iter.next();
+		for (Iterator iter = fPreviousSearchPatterns.iterator(); iter.hasNext();) {
+			SearchPatternData element = (SearchPatternData) iter.next();
 			if (pattern.equals(element.getPattern())) {
 				return element;
 			}
 		}
 		return null;
 	}
-	
+
 	/**
-	 * Return search pattern data and update previous searches.
-	 * An existing entry will be updated.
+	 * Return search pattern data and update previous searches. An existing
+	 * entry will be updated.
 	 */
 	private SearchPatternData getPatternData() {
-		String pattern= getPattern();
-		SearchPatternData match= findInPrevious(pattern);
+		String pattern = getPattern();
+		SearchPatternData match = findInPrevious(pattern);
 		if (match != null) {
 			fPreviousSearchPatterns.remove(match);
 		}
-		match= new SearchPatternData(
-				getSearchFor(),
-				getLimitTo(),
-				pattern,
-				fCaseSensitive.getSelection(),
-				fModelElement,
-				getContainer().getSelectedScope(),
-				getContainer().getSelectedWorkingSets(),
-				fIncludeInterpreterEnvironmentCheckbox.getSelection()
-		);
-			
+		match = new SearchPatternData(getSearchFor(), getLimitTo(), pattern,
+				fCaseSensitive.getSelection(), fModelElement, getContainer()
+						.getSelectedScope(), getContainer()
+						.getSelectedWorkingSets(),
+				fIncludeInterpreterEnvironmentCheckbox.getSelection());
+
 		fPreviousSearchPatterns.add(0, match); // insert on top
 		return match;
 	}
@@ -391,7 +419,7 @@ public abstract class ScriptSearchPage extends DialogPage implements ISearchPage
 	public void setVisible(boolean visible) {
 		if (visible && fPattern != null) {
 			if (fFirstTime) {
-				fFirstTime= false;
+				fFirstTime = false;
 				// Set item and text here to prevent page from resizing
 				fPattern.setItems(getPreviousSearchPatterns());
 				initSelections();
@@ -401,12 +429,12 @@ public abstract class ScriptSearchPage extends DialogPage implements ISearchPage
 		updateOKStatus();
 		super.setVisible(visible);
 	}
-	
+
 	public boolean isValid() {
 		return true;
 	}
 
-	//---- Widget creation ------------------------------------------------
+	// ---- Widget creation ------------------------------------------------
 
 	/**
 	 * Creates the page's content.
@@ -414,40 +442,46 @@ public abstract class ScriptSearchPage extends DialogPage implements ISearchPage
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		readConfiguration();
-		
-		Composite result= new Composite(parent, SWT.NONE);
-		
-		GridLayout layout= new GridLayout(2, false);
-		layout.horizontalSpacing= 10;
+
+		Composite result = new Composite(parent, SWT.NONE);
+
+		GridLayout layout = new GridLayout(2, false);
+		layout.horizontalSpacing = 10;
 		result.setLayout(layout);
-		
-		Control expressionComposite= createExpression(result);
-		expressionComposite.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1));
-		
-		Label separator= new Label(result, SWT.NONE);
+
+		Control expressionComposite = createExpression(result);
+		expressionComposite.setLayoutData(new GridData(GridData.FILL,
+				GridData.CENTER, true, false, 2, 1));
+
+		Label separator = new Label(result, SWT.NONE);
 		separator.setVisible(false);
-		GridData data= new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1);
-		data.heightHint= convertHeightInCharsToPixels(1) / 3;
+		GridData data = new GridData(GridData.FILL, GridData.FILL, false,
+				false, 2, 1);
+		data.heightHint = convertHeightInCharsToPixels(1) / 3;
 		separator.setLayoutData(data);
-		
-		Control searchFor= createSearchFor(result);
-		searchFor.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
 
-		Control limitTo= createLimitTo(result);
-		limitTo.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
+		Control searchFor = createSearchFor(result);
+		searchFor.setLayoutData(new GridData(GridData.FILL, GridData.FILL,
+				true, false, 1, 1));
 
-		fIncludeInterpreterEnvironmentCheckbox= new Button(result, SWT.CHECK);
-		fIncludeInterpreterEnvironmentCheckbox.setText(SearchMessages.SearchPage_searchInterpreterEnvironment_label); 
-		fIncludeInterpreterEnvironmentCheckbox.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1));
-		
-		//createParticipants(result);
-		
-		SelectionAdapter modelElementInitializer= new SelectionAdapter() {
+		Control limitTo = createLimitTo(result);
+		limitTo.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true,
+				false, 1, 1));
+
+		fIncludeInterpreterEnvironmentCheckbox = new Button(result, SWT.CHECK);
+		fIncludeInterpreterEnvironmentCheckbox
+				.setText(SearchMessages.SearchPage_searchInterpreterEnvironment_label);
+		fIncludeInterpreterEnvironmentCheckbox.setLayoutData(new GridData(
+				SWT.FILL, SWT.CENTER, false, false, 2, 1));
+
+		// createParticipants(result);
+
+		SelectionAdapter modelElementInitializer = new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				if (getSearchFor() == fInitialData.getSearchFor())
-					fModelElement= fInitialData.getModelElement();
+					fModelElement = fInitialData.getModelElement();
 				else
-					fModelElement= null;
+					fModelElement = null;
 				setLimitTo(getSearchFor(), getLimitTo());
 				doPatternModified();
 			}
@@ -456,32 +490,34 @@ public abstract class ScriptSearchPage extends DialogPage implements ISearchPage
 		fSearchFor[TYPE].addSelectionListener(modelElementInitializer);
 		fSearchFor[METHOD].addSelectionListener(modelElementInitializer);
 		fSearchFor[FIELD].addSelectionListener(modelElementInitializer);
-		//fSearchFor[CONSTRUCTOR].addSelectionListener(modelElementInitializer);
-		//fSearchFor[PACKAGE].addSelectionListener(modelElementInitializer);
+		// fSearchFor[CONSTRUCTOR].addSelectionListener(modelElementInitializer);
+		// fSearchFor[PACKAGE].addSelectionListener(modelElementInitializer);
 
 		setControl(result);
 
 		Dialog.applyDialogFont(result);
-//		PlatformUI.getWorkbench().getHelpSystem().setHelp(result, IJavaHelpContextIds.JAVA_SEARCH_PAGE);
+		// PlatformUI.getWorkbench().getHelpSystem().setHelp(result,
+		// IJavaHelpContextIds.JAVA_SEARCH_PAGE);
 		if (DLTKCore.DEBUG) {
 			System.out.println("TODO: Add help support here..."); //$NON-NLS-1$
 		}
 	}
-	
+
 	private Control createExpression(Composite parent) {
-		Composite result= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout(2, false);
-		layout.marginWidth= 0;
-		layout.marginHeight= 0;
+		Composite result = new Composite(parent, SWT.NONE);
+		GridLayout layout = new GridLayout(2, false);
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
 		result.setLayout(layout);
 
 		// Pattern text + info
-		Label label= new Label(result, SWT.LEFT);
-		label.setText(SearchMessages.SearchPage_expression_label); 
-		label.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1));
+		Label label = new Label(result, SWT.LEFT);
+		label.setText(SearchMessages.SearchPage_expression_label);
+		label.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false,
+				false, 2, 1));
 
 		// Pattern combo
-		fPattern= new Combo(result, SWT.SINGLE | SWT.BORDER);
+		fPattern = new Combo(result, SWT.SINGLE | SWT.BORDER);
 		fPattern.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				handlePatternSelected();
@@ -496,28 +532,31 @@ public abstract class ScriptSearchPage extends DialogPage implements ISearchPage
 			}
 		});
 		TextFieldNavigationHandler.install(fPattern);
-		GridData data= new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1);
-		data.widthHint= convertWidthInCharsToPixels(50);
+		GridData data = new GridData(GridData.FILL, GridData.FILL, true, false,
+				1, 1);
+		data.widthHint = convertWidthInCharsToPixels(50);
 		fPattern.setLayoutData(data);
 
-		// Ignore case checkbox		
-		fCaseSensitive= new Button(result, SWT.CHECK);
-		fCaseSensitive.setText(SearchMessages.SearchPage_expression_caseSensitive); 
+		// Ignore case checkbox
+		fCaseSensitive = new Button(result, SWT.CHECK);
+		fCaseSensitive
+				.setText(SearchMessages.SearchPage_expression_caseSensitive);
 		fCaseSensitive.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				fIsCaseSensitive= fCaseSensitive.getSelection();
+				fIsCaseSensitive = fCaseSensitive.getSelection();
 			}
 		});
-		fCaseSensitive.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false, 1, 1));
-		
+		fCaseSensitive.setLayoutData(new GridData(GridData.FILL, GridData.FILL,
+				false, false, 1, 1));
+
 		return result;
 	}
-	
+
 	final void updateOKStatus() {
-		boolean isValid= isValidSearchPattern();
+		boolean isValid = isValidSearchPattern();
 		getContainer().setPerformActionEnabled(isValid);
 	}
-	
+
 	private boolean isValidSearchPattern() {
 		if (getPattern().length() == 0) {
 			return false;
@@ -525,11 +564,14 @@ public abstract class ScriptSearchPage extends DialogPage implements ISearchPage
 		if (fModelElement != null) {
 			return true;
 		}
-		return SearchPattern.createPattern(getPattern(), getSearchFor(), getLimitTo(), SearchPattern.R_EXACT_MATCH) != null;		
+		return SearchPattern
+				.createPattern(getPattern(), getSearchFor(), getLimitTo(),
+						SearchPattern.R_EXACT_MATCH, getLanguageToolkit()) != null;
 	}
-	
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
 	public void dispose() {
@@ -538,255 +580,289 @@ public abstract class ScriptSearchPage extends DialogPage implements ISearchPage
 	}
 
 	private void doPatternModified() {
-		if (fInitialData != null && getPattern().equals(fInitialData.getPattern()) && fInitialData.getModelElement() != null && fInitialData.getSearchFor() == getSearchFor()) {
+		if (fInitialData != null
+				&& getPattern().equals(fInitialData.getPattern())
+				&& fInitialData.getModelElement() != null
+				&& fInitialData.getSearchFor() == getSearchFor()) {
 			fCaseSensitive.setEnabled(false);
 			fCaseSensitive.setSelection(true);
-			fModelElement= fInitialData.getModelElement();
+			fModelElement = fInitialData.getModelElement();
 		} else {
 			fCaseSensitive.setEnabled(true);
 			fCaseSensitive.setSelection(fIsCaseSensitive);
-			fModelElement= null;
+			fModelElement = null;
 		}
 	}
 
 	private void handlePatternSelected() {
-		int selectionIndex= fPattern.getSelectionIndex();
-		if (selectionIndex < 0 || selectionIndex >= fPreviousSearchPatterns.size())
+		int selectionIndex = fPattern.getSelectionIndex();
+		if (selectionIndex < 0
+				|| selectionIndex >= fPreviousSearchPatterns.size())
 			return;
-		
-		SearchPatternData initialData= (SearchPatternData) fPreviousSearchPatterns.get(selectionIndex);
+
+		SearchPatternData initialData = (SearchPatternData) fPreviousSearchPatterns
+				.get(selectionIndex);
 
 		setSearchFor(initialData.getSearchFor());
 		setLimitTo(initialData.getSearchFor(), initialData.getLimitTo());
 
 		fPattern.setText(initialData.getPattern());
-		fIsCaseSensitive= initialData.isCaseSensitive();
-		fModelElement= initialData.getModelElement();
+		fIsCaseSensitive = initialData.isCaseSensitive();
+		fModelElement = initialData.getModelElement();
 		fCaseSensitive.setEnabled(fModelElement == null);
 		fCaseSensitive.setSelection(initialData.isCaseSensitive());
 
-		
 		if (initialData.getWorkingSets() != null)
 			getContainer().setSelectedWorkingSets(initialData.getWorkingSets());
 		else
 			getContainer().setSelectedScope(initialData.getScope());
-		
-		fInitialData= initialData;
+
+		fInitialData = initialData;
 	}
-	
+
 	private void setSearchFor(int searchFor) {
-		for (int i= 0; i < fSearchFor.length; i++) {
+		for (int i = 0; i < fSearchFor.length; i++) {
 			fSearchFor[i].setSelection(searchFor == i);
 		}
 	}
-	
 
 	private Control createSearchFor(Composite parent) {
-		Group result= new Group(parent, SWT.NONE);
-		result.setText(SearchMessages.SearchPage_searchFor_label); 
+		Group result = new Group(parent, SWT.NONE);
+		result.setText(SearchMessages.SearchPage_searchFor_label);
 		result.setLayout(new GridLayout(2, true));
 
-		fSearchFor= new Button[fSearchForText.length];
-		for (int i= 0; i < fSearchForText.length; i++) {
-			Button button= new Button(result, SWT.RADIO);
+		fSearchFor = new Button[fSearchForText.length];
+		for (int i = 0; i < fSearchForText.length; i++) {
+			Button button = new Button(result, SWT.RADIO);
 			button.setText(fSearchForText[i]);
 			button.setSelection(i == TYPE);
 			button.setLayoutData(new GridData());
-			fSearchFor[i]= button;
+			fSearchFor[i] = button;
 		}
 
 		// Fill with dummy radio buttons
-		Label filler= new Label(result, SWT.NONE);
+		Label filler = new Label(result, SWT.NONE);
 		filler.setVisible(false);
-		filler.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
+		filler.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1,
+				1));
 
-		return result;		
+		return result;
 	}
-	
+
 	private Control createLimitTo(Composite parent) {
-		Group result= new Group(parent, SWT.NONE);
-		result.setText(SearchMessages.SearchPage_limitTo_label); 
+		Group result = new Group(parent, SWT.NONE);
+		result.setText(SearchMessages.SearchPage_limitTo_label);
 		result.setLayout(new GridLayout(2, true));
-		
-		SelectionAdapter listener= new SelectionAdapter() {
+
+		SelectionAdapter listener = new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				updateUseInterpreterEnvironment();
 			}
 		};
 
-		fLimitTo= new Button[fLimitToText.length];
-		for (int i= 0; i < fLimitToText.length; i++) {
-			Button button= new Button(result, SWT.RADIO);
+		fLimitTo = new Button[fLimitToText.length];
+		for (int i = 0; i < fLimitToText.length; i++) {
+			Button button = new Button(result, SWT.RADIO);
 			button.setText(fLimitToText[i]);
-			fLimitTo[i]= button;
+			fLimitTo[i] = button;
 			button.setSelection(i == REFERENCES);
 			button.addSelectionListener(listener);
 			button.setLayoutData(new GridData());
 		}
-		
-		return result;		
-	}	
-	
+
+		return result;
+	}
+
 	private void initSelections() {
-		ISelection sel= getContainer().getSelection();
-		SearchPatternData initData= null;
+		ISelection sel = getContainer().getSelection();
+		SearchPatternData initData = null;
 
 		if (sel instanceof IStructuredSelection) {
-			initData= tryStructuredSelection((IStructuredSelection) sel);
+			initData = tryStructuredSelection((IStructuredSelection) sel);
 		} else if (sel instanceof ITextSelection) {
-			IEditorPart activePart= getActiveEditor();
+			IEditorPart activePart = getActiveEditor();
 			if (activePart instanceof ScriptEditor) {
 				try {
-					IModelElement[] elements= SelectionConverter.codeResolve((ScriptEditor) activePart);
+					IModelElement[] elements = SelectionConverter
+							.codeResolve((ScriptEditor) activePart);
 					if (elements != null && elements.length > 0) {
-						initData= determineInitValuesFrom(elements[0]);
+						initData = determineInitValuesFrom(elements[0]);
 					}
 				} catch (ModelException e) {
 					// ignore
 				}
 			}
 			if (initData == null) {
-				initData= trySimpleTextSelection((ITextSelection) sel);
+				initData = trySimpleTextSelection((ITextSelection) sel);
 			}
 		}
 		if (initData == null) {
-			initData= getDefaultInitValues();
+			initData = getDefaultInitValues();
 		}
-		
-		fInitialData= initData;
-		fModelElement= initData.getModelElement();
+
+		fInitialData = initData;
+		fModelElement = initData.getModelElement();
 		fCaseSensitive.setSelection(initData.isCaseSensitive());
 		fCaseSensitive.setEnabled(fModelElement == null);
-		
+
 		setSearchFor(initData.getSearchFor());
 		setLimitTo(initData.getSearchFor(), initData.getLimitTo());
 
 		fPattern.setText(initData.getPattern());
-		
-		boolean forceIncludeInterpreterEnvironment= forceIncludeInterpreterEnvironment(getLimitTo());
-		fIncludeInterpreterEnvironmentCheckbox.setEnabled(!forceIncludeInterpreterEnvironment);
-		fIncludeInterpreterEnvironmentCheckbox.setSelection(forceIncludeInterpreterEnvironment || initData.includesInterpreterEnvironment());
+
+		boolean forceIncludeInterpreterEnvironment = forceIncludeInterpreterEnvironment(getLimitTo());
+		fIncludeInterpreterEnvironmentCheckbox
+				.setEnabled(!forceIncludeInterpreterEnvironment);
+		fIncludeInterpreterEnvironmentCheckbox
+				.setSelection(forceIncludeInterpreterEnvironment
+						|| initData.includesInterpreterEnvironment());
 	}
 
 	private void updateUseInterpreterEnvironment() {
-		boolean forceIncludeInterpreterEnvironment= forceIncludeInterpreterEnvironment(getLimitTo());
-		fIncludeInterpreterEnvironmentCheckbox.setEnabled(!forceIncludeInterpreterEnvironment);
-		boolean isSelected= true;
+		boolean forceIncludeInterpreterEnvironment = forceIncludeInterpreterEnvironment(getLimitTo());
+		fIncludeInterpreterEnvironmentCheckbox
+				.setEnabled(!forceIncludeInterpreterEnvironment);
+		boolean isSelected = true;
 		if (!forceIncludeInterpreterEnvironment) {
-			isSelected= fIncludeInterpreterEnvironmentCheckbox.getSelection();
+			isSelected = fIncludeInterpreterEnvironmentCheckbox.getSelection();
 		} else {
-			isSelected= true;
+			isSelected = true;
 		}
 		fIncludeInterpreterEnvironmentCheckbox.setSelection(isSelected);
 	}
 
 	private static boolean forceIncludeInterpreterEnvironment(int limitTo) {
-		return limitTo == DECLARATIONS; /*|| limitTo == IMPLEMENTORS;*/
+		return limitTo == DECLARATIONS; /* || limitTo == IMPLEMENTORS; */
 	}
 
-	private SearchPatternData tryStructuredSelection(IStructuredSelection selection) {
+	private SearchPatternData tryStructuredSelection(
+			IStructuredSelection selection) {
 		if (selection == null || selection.size() > 1)
 			return null;
 
-		Object o= selection.getFirstElement();
-		SearchPatternData res= null;
+		Object o = selection.getFirstElement();
+		SearchPatternData res = null;
 		if (o instanceof IModelElement) {
-			res= determineInitValuesFrom((IModelElement) o);
-		} 
-//		else if (o instanceof LogicalPackage) {
-//			LogicalPackage lp= (LogicalPackage)o;
-//			return new SearchPatternData(PACKAGE, REFERENCES, fIsCaseSensitive, lp.getElementName(), null, false);
-//		} 
+			res = determineInitValuesFrom((IModelElement) o);
+		}
+		// else if (o instanceof LogicalPackage) {
+		// LogicalPackage lp= (LogicalPackage)o;
+		// return new SearchPatternData(PACKAGE, REFERENCES, fIsCaseSensitive,
+		// lp.getElementName(), null, false);
+		// }
 		else if (o instanceof IAdaptable) {
-			IModelElement element= (IModelElement) ((IAdaptable) o).getAdapter(IModelElement.class);
+			IModelElement element = (IModelElement) ((IAdaptable) o)
+					.getAdapter(IModelElement.class);
 			if (element != null) {
-				res= determineInitValuesFrom(element);
+				res = determineInitValuesFrom(element);
 			}
 		}
 		if (res == null && o instanceof IAdaptable) {
-			IWorkbenchAdapter adapter= (IWorkbenchAdapter)((IAdaptable)o).getAdapter(IWorkbenchAdapter.class);
+			IWorkbenchAdapter adapter = (IWorkbenchAdapter) ((IAdaptable) o)
+					.getAdapter(IWorkbenchAdapter.class);
 			if (adapter != null) {
-				return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, adapter.getLabel(o), null, false);
+				return new SearchPatternData(TYPE, REFERENCES,
+						fIsCaseSensitive, adapter.getLabel(o), null, false);
 			}
 		}
 		return res;
 	}
-	
+
 	final static boolean isSearchableType(IModelElement element) {
 		switch (element.getElementType()) {
-			case IModelElement.SCRIPT_FOLDER:
-			case IModelElement.PACKAGE_DECLARATION:
-//			case IModelElement.IMPORT_DECLARATION:
-			case IModelElement.TYPE:
-			case IModelElement.FIELD:
-			case IModelElement.METHOD:
-				return true;
+		case IModelElement.SCRIPT_FOLDER:
+		case IModelElement.PACKAGE_DECLARATION:
+			// case IModelElement.IMPORT_DECLARATION:
+		case IModelElement.TYPE:
+		case IModelElement.FIELD:
+		case IModelElement.METHOD:
+			return true;
 		}
 		return false;
 	}
 
 	private SearchPatternData determineInitValuesFrom(IModelElement element) {
-		DLTKSearchScopeFactory factory= DLTKSearchScopeFactory.getInstance();
-		boolean isInsideInterpreterEnvironment= factory.isInsideInterpreter(element);
-		
+		DLTKSearchScopeFactory factory = DLTKSearchScopeFactory.getInstance();
+		boolean isInsideInterpreterEnvironment = factory
+				.isInsideInterpreter(element);
+
 		switch (element.getElementType()) {
-			case IModelElement.SCRIPT_FOLDER:
-//				case IModelElement.PACKAGE_DECLARATION:
-//					return new SearchPatternData(PACKAGE, REFERENCES, true, element.getElementName(), element, isInsideInterpreterEnvironment);
-//				case IModelElement.IMPORT_DECLARATION: {
-//					IImportDeclaration declaration= (IImportDeclaration) element;
-//					if (declaration.isOnDemand()) {
-//						String name= Signature.getQualifier(declaration.getElementName());
-//						return new SearchPatternData(PACKAGE, DECLARATIONS, true, name, element, true);
-//					}
-//					return new SearchPatternData(TYPE, DECLARATIONS, true, element.getElementName(), element, true);
-//				}
-				break;
-			case IModelElement.TYPE:
-				return new SearchPatternData(TYPE, REFERENCES, true, PatternStrings.getTypeSignature((IType) element), element, isInsideInterpreterEnvironment);
-			case IModelElement.SOURCE_MODULE: {
-				if (DLTKCore.DEBUG) {
-					System.out.println("TODO: DLTKSearchPage: Add init values for source module support."); //$NON-NLS-1$
-				}
-//					IType mainType= ((ISourceModule) element).
-//					if (mainType != null) {
-//						return new SearchPatternData(TYPE, REFERENCES, true, PatternStrings.getTypeSignature(mainType), mainType, isInsideInterpreterEnvironment);
-//					}
-				break;
-			}				
-			case IModelElement.FIELD:
-				return new SearchPatternData(FIELD, REFERENCES, true, PatternStrings.getFieldSignature((IField) element), element, isInsideInterpreterEnvironment);
-			case IModelElement.METHOD:
-				IMethod method= (IMethod) element;
-				int searchFor= /*method.isConstructor() ? CONSTRUCTOR :*/ METHOD;
-				return new SearchPatternData(searchFor, REFERENCES, true, PatternStrings.getMethodSignature(method), element, isInsideInterpreterEnvironment);
+		case IModelElement.SCRIPT_FOLDER:
+			// case IModelElement.PACKAGE_DECLARATION:
+			// return new SearchPatternData(PACKAGE, REFERENCES, true,
+			// element.getElementName(), element,
+			// isInsideInterpreterEnvironment);
+			// case IModelElement.IMPORT_DECLARATION: {
+			// IImportDeclaration declaration= (IImportDeclaration) element;
+			// if (declaration.isOnDemand()) {
+			// String name=
+			// Signature.getQualifier(declaration.getElementName());
+			// return new SearchPatternData(PACKAGE, DECLARATIONS, true, name,
+			// element, true);
+			// }
+			// return new SearchPatternData(TYPE, DECLARATIONS, true,
+			// element.getElementName(), element, true);
+			// }
+			break;
+		case IModelElement.TYPE:
+			return new SearchPatternData(TYPE, REFERENCES, true, PatternStrings
+					.getTypeSignature((IType) element), element,
+					isInsideInterpreterEnvironment);
+		case IModelElement.SOURCE_MODULE: {
+			if (DLTKCore.DEBUG) {
+				System.out
+						.println("TODO: DLTKSearchPage: Add init values for source module support."); //$NON-NLS-1$
+			}
+			// IType mainType= ((ISourceModule) element).
+			// if (mainType != null) {
+			// return new SearchPatternData(TYPE, REFERENCES, true,
+			// PatternStrings.getTypeSignature(mainType), mainType,
+			// isInsideInterpreterEnvironment);
+			// }
+			break;
 		}
-		return null;	
+		case IModelElement.FIELD:
+			return new SearchPatternData(FIELD, REFERENCES, true,
+					PatternStrings.getFieldSignature((IField) element),
+					element, isInsideInterpreterEnvironment);
+		case IModelElement.METHOD:
+			IMethod method = (IMethod) element;
+			int searchFor = /* method.isConstructor() ? CONSTRUCTOR : */METHOD;
+			return new SearchPatternData(searchFor, REFERENCES, true,
+					PatternStrings.getMethodSignature(method), element,
+					isInsideInterpreterEnvironment);
+		}
+		return null;
 	}
-	public static boolean isLineDelimiterChar(char ch) { 
+
+	public static boolean isLineDelimiterChar(char ch) {
 		return ch == '\n' || ch == '\r';
 	}
-	
+
 	private SearchPatternData trySimpleTextSelection(ITextSelection selection) {
-		String selectedText= selection.getText();
+		String selectedText = selection.getText();
 		if (selectedText != null && selectedText.length() > 0) {
-			int i= 0;
-			while (i < selectedText.length() && !isLineDelimiterChar(selectedText.charAt(i))) {
+			int i = 0;
+			while (i < selectedText.length()
+					&& !isLineDelimiterChar(selectedText.charAt(i))) {
 				i++;
 			}
 			if (i > 0) {
-				return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, selectedText.substring(0, i), null, true);
+				return new SearchPatternData(TYPE, REFERENCES,
+						fIsCaseSensitive, selectedText.substring(0, i), null,
+						true);
 			}
 		}
 		return null;
 	}
-	
+
 	private SearchPatternData getDefaultInitValues() {
 		if (!fPreviousSearchPatterns.isEmpty()) {
 			return (SearchPatternData) fPreviousSearchPatterns.get(0);
 		}
-		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, "", null, false); //$NON-NLS-1$
-	}	
+		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive,
+				"", null, false); //$NON-NLS-1$
+	}
 
 	/*
 	 * Implements method from ISearchPage
@@ -794,14 +870,14 @@ public abstract class ScriptSearchPage extends DialogPage implements ISearchPage
 	public void setContainer(ISearchPageContainer container) {
 		fContainer = container;
 	}
-	
+
 	/**
 	 * Returns the search page's container.
 	 */
 	private ISearchPageContainer getContainer() {
 		return fContainer;
 	}
-		
+
 	private IEditorPart getActiveEditor() {
 		IWorkbenchPage activePage = DLTKUIPlugin.getActivePage();
 		if (activePage != null) {
@@ -809,35 +885,37 @@ public abstract class ScriptSearchPage extends DialogPage implements ISearchPage
 		}
 		return null;
 	}
-	
-	//--------------- Configuration handling --------------
-	
+
+	// --------------- Configuration handling --------------
+
 	/**
 	 * Returns the page settings for this Script search page.
 	 * 
 	 * @return the page settings to be used
 	 */
 	private IDialogSettings getDialogSettings() {
-		IDialogSettings settings= DLTKUIPlugin.getDefault().getDialogSettings();
-		fDialogSettings= settings.getSection(PAGE_NAME);
+		IDialogSettings settings = DLTKUIPlugin.getDefault()
+				.getDialogSettings();
+		fDialogSettings = settings.getSection(PAGE_NAME);
 		if (fDialogSettings == null)
-			fDialogSettings= settings.addNewSection(PAGE_NAME);
+			fDialogSettings = settings.addNewSection(PAGE_NAME);
 		return fDialogSettings;
 	}
-	
+
 	/**
 	 * Initializes itself from the stored page settings.
 	 */
 	private void readConfiguration() {
-		IDialogSettings s= getDialogSettings();
-		fIsCaseSensitive= s.getBoolean(STORE_CASE_SENSITIVE);
-		
+		IDialogSettings s = getDialogSettings();
+		fIsCaseSensitive = s.getBoolean(STORE_CASE_SENSITIVE);
+
 		try {
-			int historySize= s.getInt(STORE_HISTORY_SIZE);
-			for (int i= 0; i < historySize; i++) {
-				IDialogSettings histSettings= s.getSection(STORE_HISTORY + i);
+			int historySize = s.getInt(STORE_HISTORY_SIZE);
+			for (int i = 0; i < historySize; i++) {
+				IDialogSettings histSettings = s.getSection(STORE_HISTORY + i);
 				if (histSettings != null) {
-					SearchPatternData data= SearchPatternData.create(histSettings);
+					SearchPatternData data = SearchPatternData
+							.create(histSettings);
 					if (data != null) {
 						fPreviousSearchPatterns.add(data);
 					}
@@ -847,22 +925,24 @@ public abstract class ScriptSearchPage extends DialogPage implements ISearchPage
 			// ignore
 		}
 	}
-	
+
 	/**
 	 * Stores it current configuration in the dialog store.
 	 */
 	private void writeConfiguration() {
-		IDialogSettings s= getDialogSettings();
+		IDialogSettings s = getDialogSettings();
 		s.put(STORE_CASE_SENSITIVE, fIsCaseSensitive);
-		
-		int historySize= Math.min(fPreviousSearchPatterns.size(), HISTORY_SIZE);
+
+		int historySize = Math
+				.min(fPreviousSearchPatterns.size(), HISTORY_SIZE);
 		s.put(STORE_HISTORY_SIZE, historySize);
-		for (int i= 0; i < historySize; i++) {
-			IDialogSettings histSettings= s.addNewSection(STORE_HISTORY + i);
-			SearchPatternData data= ((SearchPatternData) fPreviousSearchPatterns.get(i));
+		for (int i = 0; i < historySize; i++) {
+			IDialogSettings histSettings = s.addNewSection(STORE_HISTORY + i);
+			SearchPatternData data = ((SearchPatternData) fPreviousSearchPatterns
+					.get(i));
 			data.store(histSettings);
 		}
 	}
-	
+
 	protected abstract IDLTKLanguageToolkit getLanguageToolkit();
 }
