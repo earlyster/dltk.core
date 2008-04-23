@@ -144,8 +144,7 @@ public class ValidatorUtils {
 			return null; // Lets pass not script projects.
 		}
 		IScriptProject scriptProject = DLTKCore.create(project);
-		IDLTKSearchScope scope = SearchEngine
-				.createSearchScope(new IModelElement[] { scriptProject });
+		IDLTKSearchScope scope = SearchEngine.createSearchScope(scriptProject);
 
 		IModelElement element = factory.createOpenable(res.getFullPath()
 				.toString(), scope);
