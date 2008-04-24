@@ -340,7 +340,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 			fLibraryBlock.setHomeDirectory(file);
 
 			String name = fInterpreterName.getText();
-			if (name == null || name.trim().length() == 0 || file != null) {
+			if ((name == null || name.trim().length() == 0) && file != null) {
 				// auto-generate interpreter name
 				String genName = null;
 				IPath path = new Path(file.getCanonicalPath());
@@ -358,7 +358,8 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 					boolean found = false;
 					for (int i = 0; i < this.fInterpreterTypes.length; i++) {
 						IInterpreterInstallType type = this.fInterpreterTypes[i];
-						if (type.findInterpreterInstallByName(pName) != null) {
+						IInterpreterInstall inst = type.findInterpreterInstallByName(pName);
+						if (inst != null) {
 							pName = genName + "(" + String.valueOf(++index) + ")";
 							found = true;
 							break;
