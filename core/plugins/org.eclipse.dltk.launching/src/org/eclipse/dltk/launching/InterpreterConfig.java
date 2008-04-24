@@ -48,6 +48,8 @@ public class InterpreterConfig implements Cloneable {
 
 	private IEnvironment environment;
 
+	private boolean noFile = false;
+
 	protected void checkScriptFile(IPath file) {
 		if (file == null) {
 			throw new IllegalArgumentException(
@@ -387,5 +389,12 @@ public class InterpreterConfig implements Cloneable {
 
 	public void clearScriptArgs() {
 		this.scriptArgs.clear();
+	}
+
+	public void setNoFile(boolean value) {
+		this.noFile = value;
+	}
+	public boolean isNoFile() {
+		return this.noFile;
 	}
 }

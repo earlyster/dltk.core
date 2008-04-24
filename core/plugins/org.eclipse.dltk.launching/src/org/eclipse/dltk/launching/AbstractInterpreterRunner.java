@@ -145,7 +145,7 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 			return;
 		}
 		IFileHandle script = environment.getFile(config.getScriptFilePath());
-		if (!script.exists()) {
+		if (!config.isNoFile() && !script.exists()) {
 			abort(
 					MessageFormat
 							.format(
