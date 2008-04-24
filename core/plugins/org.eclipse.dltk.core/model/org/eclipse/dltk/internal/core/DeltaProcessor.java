@@ -2708,14 +2708,7 @@ public class DeltaProcessor {
 	private ISourceElementParser getSourceElementParser(Openable element) {
 		if (this.sourceElementParserCache == null) {
 			this.sourceElementParserCache = this.manager.indexManager
-					.getSourceElementParser(element.getScriptProject(), null/*
-																			 * requestor
-																			 * will
-																			 * be
-																			 * set
-																			 * by
-																			 * indexer
-																			 */);
+					.getSourceElementParser(element.getScriptProject());
 		}
 		return this.sourceElementParserCache;
 	}

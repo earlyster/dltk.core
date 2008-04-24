@@ -123,10 +123,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 			final IndexManager indexManager = this.manager;
 			final IScriptProject project = DLTKCore.create(this.project);
 			final ISourceElementParser parser = indexManager
-					.getSourceElementParser(project, null/*
-															 * requestor will be
-															 * set by indexer
-															 */);
+					.getSourceElementParser(project);
 			final SourceIndexerRequestor requestor = indexManager
 					.getSourceRequestor(project);
 			if (JobManager.VERBOSE) {

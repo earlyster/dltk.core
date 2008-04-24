@@ -255,19 +255,30 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		return null;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public ISourceElementParser getSourceElementParser(IScriptProject project,
 			ISourceElementRequestor requestor) {
+		final ISourceElementParser parser = getSourceElementParser(project);
+		if (parser != null) {
+			parser.setRequestor(requestor);
+		}
+		return parser;
+	}
+	
+	/**
+	 * Method to be used when <i>requestor will be set by indexer</i>
+	 */
+	public ISourceElementParser getSourceElementParser(IScriptProject project) {
 		// disable task tags to speed up parsing
 		// Map options = project.getOptions(true);
 		// options.put(DLTKCore.COMPILER_TASK_TAGS, ""); //$NON-NLS-1$
-		IDLTKLanguageToolkit toolkit = null;
-		toolkit = DLTKLanguageManager.getLanguageToolkit(project);
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(project);
 		if (toolkit != null) {
-			ISourceElementParser parser = null;
-			parser = DLTKLanguageManager.getSourceElementParser(toolkit
+			return DLTKLanguageManager.getSourceElementParser(toolkit
 					.getNatureId());
-			parser.setRequestor(requestor);
-			return parser;
 		}
 		return null;
 	}

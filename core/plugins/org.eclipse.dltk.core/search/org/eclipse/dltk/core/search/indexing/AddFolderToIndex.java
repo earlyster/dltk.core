@@ -60,7 +60,7 @@ class AddFolderToIndex extends IndexRequest {
 			final IndexManager indexManager = this.manager;
 			final IScriptProject project = DLTKCore.create(this.project);
 			final IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLanguageToolkit(project);
-			final ISourceElementParser parser = indexManager.getSourceElementParser(project, null/*requestor will be set by indexer*/);
+			final ISourceElementParser parser = indexManager.getSourceElementParser(project);
 			final SourceIndexerRequestor requestor = indexManager.getSourceRequestor(project);
 			if (this.exclusionPatterns == null && this.inclusionPatterns == null) {
 				folder.accept(

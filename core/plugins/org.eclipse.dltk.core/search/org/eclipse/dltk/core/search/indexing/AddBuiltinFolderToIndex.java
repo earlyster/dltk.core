@@ -99,11 +99,7 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 			final IPath container = this.containerPath;
 			final IndexManager indexManager = this.manager;
 			final ISourceElementParser parser = indexManager
-					.getSourceElementParser(scriptProject, null/*
-																 * requestor
-																 * will be set
-																 * by indexer
-																 */);
+					.getSourceElementParser(scriptProject);
 			final SourceIndexerRequestor requestor = indexManager
 					.getSourceRequestor(scriptProject);
 			if (JobManager.VERBOSE)

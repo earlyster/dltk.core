@@ -74,10 +74,9 @@ public class SourceIndexer extends AbstractIndexer {
 
 			if (parser == null) {
 				parser = ModelManager.getModelManager().indexManager
-						.getSourceElementParser(scriptProject, requestor);
-			} else {
-				parser.setRequestor(requestor);
+						.getSourceElementParser(scriptProject);
 			}
+			parser.setRequestor(requestor);
 			String pkgName = ""; //$NON-NLS-1$
 			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 			// ISourceModule sourceModule = null;
