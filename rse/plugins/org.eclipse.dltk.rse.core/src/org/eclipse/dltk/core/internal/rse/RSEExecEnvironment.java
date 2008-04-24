@@ -73,9 +73,11 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		IShellServiceSubSystem system = getShellServiceSubSystem(environment
 				.getHost());
 		try {
-			system.connect(false, null);
+			system.connect(new NullProgressMonitor(), false);
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 		String temp = system.getConnectorService().getTempDirectory();
 		if (temp.length() == 0) {
@@ -89,9 +91,11 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		IShellServiceSubSystem shell = getShellServiceSubSystem(this.environment
 				.getHost());
 		try {
-			shell.connect(false, null);
+			shell.connect(null, false);
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 			return null;
 		}
 
@@ -188,7 +192,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 				});
 				t.start();
 				try {
-					t.join(5000);// No more than 5 seconds
+					t.join(25000);// No more than 5 seconds
 				} catch (InterruptedException e) {
 					DLTKRSEPlugin.log(e);
 				}
