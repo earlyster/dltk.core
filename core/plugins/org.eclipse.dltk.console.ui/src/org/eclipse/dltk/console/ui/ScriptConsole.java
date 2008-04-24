@@ -55,7 +55,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 
 	private class ScriptConsoleLaunchListener implements ILaunchesListener2 {
 		public void launchesTerminated(ILaunch[] launches) {
-			if( terminated ) {
+			if (terminated) {
 				return;
 			}
 			for (int i = 0; i < launches.length; i++) {
@@ -92,7 +92,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 
 		public void run() {
 			// We need to be sure what page is already created
-			while (page == null) {
+			while (page == null && page.getViewer() != null) {
 				try {
 					Thread.sleep(50);
 				} catch (InterruptedException e) {
