@@ -12,6 +12,8 @@ package org.eclipse.dltk.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.PriorityClassDLTKExtensionManager;
 import org.eclipse.dltk.ui.viewsupport.ScriptUILabelProvider;
@@ -47,7 +49,12 @@ public class DLTKUILanguageManager extends PriorityClassDLTKExtensionManager {
 
 	public static IDLTKUILanguageToolkit getLanguageToolkit(
 			IModelElement element) {
-		return (IDLTKUILanguageToolkit) instance.getObject(element);
+		IDLTKLanguageToolkit coreToolkit = DLTKLanguageManager
+				.getLanguageToolkit(element);
+		if (coreToolkit != null) {
+			return (IDLTKUILanguageToolkit) instance.getObject(coreToolkit.getNatureId());
+		}
+		return null;
 	}
 
 	public static ScriptUILabelProvider createLabelProvider(
