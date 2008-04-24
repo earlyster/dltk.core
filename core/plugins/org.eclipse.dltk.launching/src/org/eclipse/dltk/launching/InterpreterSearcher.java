@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -53,7 +52,7 @@ public class InterpreterSearcher {
 		}
 
 		// Folder list
-		final String separator = Platform.getOS().equals(Platform.OS_WIN32) ? ";" : ":"; //$NON-NLS-1$ //$NON-NLS-2$
+		final String separator = environment.getPathsSeparator();
 
 		final List folders = new ArrayList();
 		String[] res = path.split(separator);
