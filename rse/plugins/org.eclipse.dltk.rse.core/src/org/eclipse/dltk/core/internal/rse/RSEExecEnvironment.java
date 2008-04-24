@@ -192,6 +192,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 				} catch (InterruptedException e) {
 					DLTKRSEPlugin.log(e);
 				}
+				process.destroy();
 			}
 		} catch (CoreException e) {
 			DLTKRSEPlugin.log(e);
