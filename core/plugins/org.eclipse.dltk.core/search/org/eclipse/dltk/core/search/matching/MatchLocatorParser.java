@@ -61,11 +61,11 @@ public abstract class MatchLocatorParser implements IMatchLocatorParser {
 		return patternLocator; 
 	}	
 	
-	protected MethodDeclaration processMethod(MethodDeclaration m) {
+	public MethodDeclaration processMethod(MethodDeclaration m) {
 		return m;
 	}
 
-	protected TypeDeclaration processType(TypeDeclaration t) {
+	public TypeDeclaration processType(TypeDeclaration t) {
 		return t;
 	}
 	

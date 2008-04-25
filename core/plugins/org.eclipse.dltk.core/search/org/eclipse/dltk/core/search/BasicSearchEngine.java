@@ -285,12 +285,6 @@ public class BasicSearchEngine {
 						SearchDocument[] matches = MatchLocator
 								.addWorkingCopies(pattern, indexMatches,
 										getWorkingCopies(), participant);
-						// TODO: This is Quick fix... Dublicates of Interpreter
-						// libraris, should be handled not here...
-						if (DLTKCore.DEBUG) {
-							System.err
-									.println("This is Quick fix... Dublicates of Interpreter libraris, should be handled not here..."); //$NON-NLS-1$
-						}
 						List paths = new ArrayList();
 						List filteredMatches = new ArrayList();
 						for (int q = 0; q < matches.length; ++q) {
@@ -308,14 +302,18 @@ public class BasicSearchEngine {
 										: new SubProgressMonitor(monitor, 50));
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
 				} finally {
 					requestor.exitParticipant(participant);
 					participant.doneSearching();
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 		} finally {
 			requestor.endReporting();
 			if (monitor != null) {

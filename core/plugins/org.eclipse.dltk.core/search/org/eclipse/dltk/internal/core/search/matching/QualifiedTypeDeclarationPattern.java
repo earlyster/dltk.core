@@ -52,7 +52,7 @@ public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern
 			this.pkg = internedPackageNames.add(CharOperation.subarray(key,
 					start, slash));
 		}
-		this.qualification = this.pkg;
+		this.qualification = CharOperation.NO_CHAR;
 		// Continue key read by the end to decode modifiers
 		int last = key.length - 1;
 		this.secondary = key[last] == 'S';
@@ -67,21 +67,18 @@ public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern
 		if (start == last) {
 			this.enclosingTypeNames = CharOperation.NO_CHAR_CHAR;
 		} else {
-			int length = this.qualification.length;
+			int length = 0;
 			int size = last - start;
-			System
-					.arraycopy(this.qualification, 0,
-							this.qualification = new char[length + 1 + size],
-							0, length);
-			this.qualification[length] = '$';
+			System.arraycopy(this.qualification, 0,
+					this.qualification = new char[length + size], 0, length);
+			// this.qualification[length] = '$';
 			if (last == (start + 1) && key[start] == ZERO_CHAR) {
 				this.enclosingTypeNames = ONE_ZERO_CHAR;
 				this.qualification[length + 1] = ZERO_CHAR;
 			} else {
 				this.enclosingTypeNames = CharOperation.splitOn('$', key,
 						start, last);
-				System.arraycopy(key, start, this.qualification, length + 1,
-						size);
+				System.arraycopy(key, start, this.qualification, 0, size);
 			}
 		}
 	}

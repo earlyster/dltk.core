@@ -9,7 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search;
 
+import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
+import org.eclipse.dltk.ast.declarations.TypeDeclaration;
 import org.eclipse.dltk.core.search.matching.PossibleMatch;
 import org.eclipse.dltk.internal.core.search.matching.MatchingNodeSet;
 
@@ -20,4 +22,7 @@ public interface IMatchLocatorParser {
 	ModuleDeclaration parse(PossibleMatch possibleMatch);
 
 	void parseBodies(ModuleDeclaration unit);
+	
+	MethodDeclaration processMethod(MethodDeclaration m);
+	TypeDeclaration processType(TypeDeclaration t);
 }
