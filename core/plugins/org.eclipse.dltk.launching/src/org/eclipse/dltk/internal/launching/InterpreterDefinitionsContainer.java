@@ -741,7 +741,7 @@ public class InterpreterDefinitionsContainer {
 		String interpreterEnvironmentArchive = libLocationElement
 				.getAttribute(LIBRARY_PATH_ATTR); //$NON-NLS-1$		
 		if (interpreterEnvironmentArchive != null) {
-			return new LibraryLocation(new Path(interpreterEnvironmentArchive));
+			return new LibraryLocation(Path.fromPortableString(interpreterEnvironmentArchive));
 		}
 		DLTKLaunchingPlugin
 				.log("Library location element is specified incorrectly."); //$NON-NLS-1$
