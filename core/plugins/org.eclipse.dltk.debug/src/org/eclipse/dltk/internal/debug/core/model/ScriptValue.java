@@ -101,7 +101,8 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 			variables[offset + i] = new ScriptVariable(frame, p, p.getName());
 		}
 		Arrays.sort(this.variables, offset, offset + properties.length,
-				new VariableNameComparator());
+				ScriptDebugManager.getInstance()
+        			.getVariableNameComparatorByDebugModel(getDebugTarget().getModelIdentifier()));
 		Assert.isLegal(pageSize > 0 || properties.length == variables.length);
 	}
 

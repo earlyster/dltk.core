@@ -68,6 +68,16 @@
                </appInfo>
             </annotation>
          </attribute>
+         <attribute name="variableComparator" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":java.util.Comparator"/>
+               </appInfo>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

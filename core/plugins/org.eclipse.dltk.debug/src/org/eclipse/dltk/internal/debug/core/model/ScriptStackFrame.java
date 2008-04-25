@@ -32,6 +32,7 @@ import org.eclipse.dltk.dbgp.commands.IDbgpContextCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpDebuggingEngineException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
+import org.eclipse.dltk.debug.core.ScriptDebugManager;
 import org.eclipse.dltk.debug.core.model.IScriptStack;
 import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
@@ -83,7 +84,8 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 				variables[i] = new ScriptVariable(parentFrame, property, name);
 			}
 
-	        Arrays.sort(variables, new VariableNameComparator());
+			Arrays.sort(variables, ScriptDebugManager.getInstance()
+	        		.getVariableNameComparatorByDebugModel(parentFrame.getModelIdentifier()));
 
 			return variables;
 		} catch (DbgpDebuggingEngineException e) {
