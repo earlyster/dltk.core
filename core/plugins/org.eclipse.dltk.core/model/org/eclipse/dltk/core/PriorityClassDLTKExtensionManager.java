@@ -11,17 +11,20 @@ package org.eclipse.dltk.core;
 
 import org.eclipse.core.resources.IProject;
 
-public class PriorityClassDLTKExtensionManager extends SimplePriorityClassDLTKExtensionManager {
+public class PriorityClassDLTKExtensionManager extends
+		SimplePriorityClassDLTKExtensionManager {
 
 	public PriorityClassDLTKExtensionManager(String extensionPoint) {
 		super(extensionPoint, "nature"); //$NON-NLS-1$
 	}
+
 	public PriorityClassDLTKExtensionManager(String extensionPoint, String id) {
 		super(extensionPoint, id);
 	}
 
 	public Object getObject(IModelElement element) {
-		if (element == null || element.getElementType() == IModelElement.SCRIPT_MODEL) {
+		if (element == null
+				|| element.getElementType() == IModelElement.SCRIPT_MODEL) {
 			return null;
 		}
 		IProject project = element.getScriptProject().getProject();

@@ -174,17 +174,30 @@ public class Util {
 
 		return contents;
 	}	
+
+	private final static char[] SUFFIX_zip = new char[] { '.', 'z', 'i', 'p' };
+	private final static char[] SUFFIX_ZIP = new char[] { '.', 'Z', 'I', 'P' };
+
 	/**
-	 * Returns true iff str.toLowerCase().endsWith(".zip") || str.toLowerCase().endsWith(".zip")
+	 * Returns <code>true</code> if str.toLowerCase().endsWith(".zip")
 	 * implementation is not creating extra strings.
 	 */
 	public final static boolean isArchiveFileName(String name) {
-		//System.err.println("TODO: Util.isArchiveFileName always return false for:" + name);
-		//return false;
 		if( name == null ) {
 			return false;
 		}
-		return name.toLowerCase().endsWith(".zip") || name.toLowerCase().endsWith(".zip"); //$NON-NLS-1$ //$NON-NLS-2$
+		final int nameLength = name.length();
+		final int suffixLength = SUFFIX_ZIP.length;
+		if (nameLength < suffixLength)
+			return false;
+		for (int i = 0; i < suffixLength; i++) {
+			final char c = name.charAt(nameLength - i - 1);
+			final int suffixIndex = suffixLength - i - 1;
+			if (c != SUFFIX_zip[suffixIndex] && c != SUFFIX_ZIP[suffixIndex]) {
+				return false;
+			}
+		}
+		return true;
 	}	
 	/* TODO (philippe) should consider promoting it to CharOperation
 	 * Returns whether the given resource path matches one of the inclusion/exclusion
