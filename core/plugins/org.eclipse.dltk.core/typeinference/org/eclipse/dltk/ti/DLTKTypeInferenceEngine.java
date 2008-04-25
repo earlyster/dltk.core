@@ -10,7 +10,6 @@
 package org.eclipse.dltk.ti;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -73,6 +72,17 @@ public class DLTKTypeInferenceEngine implements ITypeInferencer {
 	public DLTKTypeInferenceEngine() {
 	}
 
+	private void flattenTypes(AmbiguousType type, Set typeSet) {
+		IEvaluatedType[] possibleTypes = type.getPossibleTypes();
+		for (int cnt = 0, max = possibleTypes.length; cnt < max; cnt++) {
+			if (possibleTypes[cnt] instanceof AmbiguousType) {
+				flattenTypes((AmbiguousType) possibleTypes[cnt], typeSet);
+			} else {
+				typeSet.add(possibleTypes[cnt]);
+			}
+		}
+	}
+
 	private void searchTypeDeclarations(IScriptProject dltkProject,
 			String patternString, TypeNameMatchRequestor requestor) {
 		try {
@@ -98,13 +108,58 @@ public class DLTKTypeInferenceEngine implements ITypeInferencer {
 		}
 	}
 
-	private void flatten(AmbiguousType type, Set typeSet) {
-		IEvaluatedType[] possibleTypes = type.getPossibleTypes();
-		for (int cnt = 0, max = possibleTypes.length; cnt < max; cnt++) {
-			if (possibleTypes[cnt] instanceof AmbiguousType) {
-				flatten((AmbiguousType) possibleTypes[cnt], typeSet);
-			} else {
-				typeSet.add(possibleTypes[cnt]);
+	private void collectSuperClasses(IScriptProject project, String typeName,
+			Set superClassSet) {
+		final Set iTypeSet = new HashSet();
+		searchTypeDeclarations(project, typeName, new TypeNameMatchRequestor() {
+
+			public void acceptTypeNameMatch(TypeNameMatch match) {
+				iTypeSet.add(match.getType());
+			}
+
+		});
+
+		if (iTypeSet.isEmpty() != true) {
+			IType itype;
+			String[] superClasses;
+			for (Iterator typeIter = iTypeSet.iterator(); typeIter.hasNext();) {
+				itype = (IType) typeIter.next();
+				if (itype.exists()) {
+					try {
+						superClasses = itype.getSuperClasses();
+						if (superClasses != null) {
+							for (int cnt = 0, max = superClasses.length; cnt < max; cnt++) {
+								if (!superClassSet.contains(superClasses[cnt])) {
+									superClassSet.add(superClasses[cnt]);
+
+									collectSuperClasses(project,
+											superClasses[cnt], superClassSet);
+								}
+							}
+						}
+					} catch (ModelException mxcn) {
+						mxcn.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+
+	private void reduceTypes(BasicContext context, Set typeSet) {
+		IEvaluatedType type;
+		Set superClassSet = new HashSet();
+		for (Iterator iter = typeSet.iterator(); iter.hasNext();) {
+			type = (IEvaluatedType) iter.next();
+			collectSuperClasses(context.getSourceModule().getScriptProject(),
+					type.getTypeName(), superClassSet);
+		}
+
+		if (!superClassSet.isEmpty()) {
+			for (Iterator iter = typeSet.iterator(); iter.hasNext();) {
+				type = (IEvaluatedType) iter.next();
+				if (superClassSet.contains(type.getTypeName())) { //$NON-NLS-1$
+					iter.remove();
+				}
 			}
 		}
 	}
@@ -129,64 +184,18 @@ public class DLTKTypeInferenceEngine implements ITypeInferencer {
 				IEvaluatedType type = ti.evaluateType(goal, time);
 				if (type != null && !(type instanceof UnknownType)) {
 					if (type instanceof AmbiguousType) {
-						flatten((AmbiguousType) type, typeSet);
+						flattenTypes((AmbiguousType) type, typeSet);
 					} else {
 						typeSet.add(type);
 					}
 				}
 			}
+
 			if ((typeSet.size() > 1)
 					&& (goal.getContext() instanceof BasicContext)) {
-				boolean foundSub = true;
-				IType itype;
-				Set superTypeSet;
-				while (foundSub == true) {
-					IEvaluatedType type;
-					IEvaluatedType type2;
-					for (Iterator iter = typeSet.iterator(); iter.hasNext();) {
-						type = (IEvaluatedType) iter.next();
-						foundSub = false;
-						itype = null;
-						final Set iTypeSet = new HashSet();
-						String typeName = type.getTypeName();
-						searchTypeDeclarations(((BasicContext) goal
-								.getContext()).getSourceModule()
-								.getScriptProject(), typeName,
-								new TypeNameMatchRequestor() {
-
-									public void acceptTypeNameMatch(
-											TypeNameMatch match) {
-										iTypeSet.add(match.getType());
-									}
-
-								});
-						if (iTypeSet.isEmpty() != true) {
-							itype = (IType) iTypeSet.iterator().next();
-							try {
-								superTypeSet = new HashSet(Arrays.asList(itype
-										.getSuperClasses()));
-
-								for (Iterator iter2 = typeSet.iterator(); iter2
-										.hasNext();) {
-									type2 = (IEvaluatedType) iter2.next();
-									foundSub = (superTypeSet
-											.contains("::" + type2.getTypeName()) == true); //$NON-NLS-1$
-									if (foundSub == true) {
-										typeSet.remove(type2);
-										break;
-									}
-								}
-
-								if (foundSub == true) {
-									break;
-								}
-							} catch (ModelException mxcn) {
-								mxcn.printStackTrace();
-							}
-						}
-					}
-				}
+				reduceTypes((BasicContext) goal.getContext(), typeSet);
 			}
+
 			if (typeSet.size() == 1) {
 				return (IEvaluatedType) typeSet.iterator().next();
 			} else if (typeSet.size() > 1) {
