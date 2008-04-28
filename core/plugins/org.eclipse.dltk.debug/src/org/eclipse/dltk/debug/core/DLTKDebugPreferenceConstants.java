@@ -12,12 +12,14 @@ package org.eclipse.dltk.debug.core;
 public class DLTKDebugPreferenceConstants {
 	public static final int DBGP_DEFAULT_PORT = 9000;
 	public static final int DBGP_AVAILABLE_PORT = -1;
+	public static final String DBGP_AUTODETECT_BIND_ADDRESS = "autodetect";
 
 	public static final String PREF_DBGP_BREAK_ON_FIRST_LINE = "dbgp_break_on_first_line"; //$NON-NLS-1$
 
 	public static final String PREF_DBGP_ENABLE_LOGGING = "dbgp_enable_logging"; //$NON-NLS-1$
 
 	// Communication
+	public static final String PREF_DBGP_BIND_ADDRESS = "dbgp_bind_address";
 	public static final String PREF_DBGP_PORT = "dbgp_port"; //$NON-NLS-1$
 
 	// Time to wait of connection debugging engine to the IDE

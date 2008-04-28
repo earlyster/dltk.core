@@ -10,6 +10,7 @@
 package org.eclipse.dltk.dbgp.internal.utils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.eclipse.dltk.dbgp.exceptions.DbgpIOException;
 
@@ -23,13 +24,18 @@ public class Base64Helper {
 	private static final BASE64Decoder decoder = new BASE64Decoder();
 
 	public static String encodeString(String s) {
-		return encoder.encode(s.getBytes()).replaceAll("\n", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		
+		try {
+			return encoder.encode(s.getBytes("UTF-8")).replaceAll("\n", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+		catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public static String decodeString(String base64) throws DbgpIOException {
 		try {
-			return new String(decoder.decodeBuffer(base64));
+			return new String(decoder.decodeBuffer(base64), "UTF-8"); //$NON-NLS-1$
 		} catch (IOException e) {
 			throw new DbgpIOException(e);
 		}

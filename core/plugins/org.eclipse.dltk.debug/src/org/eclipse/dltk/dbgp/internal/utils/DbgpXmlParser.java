@@ -60,7 +60,9 @@ public class DbgpXmlParser {
 			// }
 			// });
 
-			return builder.parse(new InputSource(reader));
+			InputSource source = new InputSource(reader);
+			source.setEncoding("UTF-8"); //$NON-NLS-1$
+			return builder.parse(source);
 		} catch (ParserConfigurationException e) {
 			throw new DbgpProtocolException(e);
 		} catch (SAXException e) {

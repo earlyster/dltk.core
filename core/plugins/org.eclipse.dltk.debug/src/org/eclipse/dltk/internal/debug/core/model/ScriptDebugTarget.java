@@ -447,4 +447,15 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	public boolean retrieveLocalVariables() {
 		return retrieveLocalVariables;
 	}
+
+	public String getConsoleEncoding() {
+		String encoding = "UTF-8"; //$NON-NLS-1$
+		try {
+			encoding = getLaunch().getLaunchConfiguration().getAttribute(DebugPlugin.ATTR_CONSOLE_ENCODING, encoding);
+		}
+		catch (CoreException e) {
+			e.printStackTrace();
+		}
+		return encoding;
+	}
 }

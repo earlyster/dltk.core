@@ -14,8 +14,6 @@ import java.io.OutputStream;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
@@ -58,8 +56,6 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 	private IScriptEvaluationEngine evalEngine;
 
 	private int currentStackLevel;
-
-	private IPropertyChangeListener propertyListener;
 
 	private boolean terminated = false;
 
@@ -125,17 +121,18 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 			if (proxy != null) {
 				OutputStream stdout = proxy.getStderr();
 				try {
+					String encoding = target.getConsoleEncoding();
 					String message = "\n" + e.getMessage() + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
-					stdout.write(message.getBytes());
+					stdout.write(message.getBytes(encoding));
 					stack.update();
 					IStackFrame[] frames = stack.getFrames();
-					stdout.write("\nStack trace:\n".getBytes()); //$NON-NLS-1$
+					stdout.write("\nStack trace:\n".getBytes(encoding)); //$NON-NLS-1$
 					for (int i = 0; i < frames.length; i++) {
 						IScriptStackFrame frame = (IScriptStackFrame) frames[i];
 						String line = "\t#" + frame.getLevel() + " file:" //$NON-NLS-1$ //$NON-NLS-2$
 								+ frame.getSourceURI().getPath() + " [" //$NON-NLS-1$
 								+ frame.getLineNumber() + "]\n"; //$NON-NLS-1$
-						stdout.write(line.getBytes());
+						stdout.write(line.getBytes(encoding));
 					}
 				} catch (IOException e1) {
 					if (DLTKCore.DEBUG) {

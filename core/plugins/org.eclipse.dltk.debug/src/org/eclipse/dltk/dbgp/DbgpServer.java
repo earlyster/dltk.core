@@ -20,7 +20,7 @@ public class DbgpServer extends DbgpWorkingThread {
 
 	private final int serverTimeout;
 	private final int clientTimeout;
-
+	
 	public static int findAvailablePort(int fromPort, int toPort) {
 		if (fromPort > toPort) {
 			throw new IllegalArgumentException(
@@ -66,36 +66,36 @@ public class DbgpServer extends DbgpWorkingThread {
 	}
 
 	private void createSession(final Socket client) {
-		Job job = new Job(Messages.DbgpServer_acceptingDebuggingEngineConnection) {
+		Job job = new Job(
+				Messages.DbgpServer_acceptingDebuggingEngineConnection) {
 			protected IStatus run(IProgressMonitor monitor) {
 				if (listener != null) {
 					DbgpDebugingEngine dbgpDebugingEngine = null;
 					DbgpSession session = null;
-					
+
 					try {
 						dbgpDebugingEngine = new DbgpDebugingEngine(client);
 						session = new DbgpSession(dbgpDebugingEngine);
 						listener.clientConnected(session);
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						DLTKDebugPlugin.log(e);
 						if (dbgpDebugingEngine != null)
 							dbgpDebugingEngine.requestTermination();
 					}
 				}
-				return Status.OK_STATUS;				
-			} 
+				return Status.OK_STATUS;
+			}
 		};
 		job.schedule();
 	}
 
 	private Socket acceptClient() throws IOException {
-		Socket client = null; 
+		Socket client = null;
 		while (client == null) {
 			try {
 				client = server.accept();
+			} catch (SocketTimeoutException e) {
 			}
-			catch (SocketTimeoutException e) {}
 		}
 		return client;
 	}

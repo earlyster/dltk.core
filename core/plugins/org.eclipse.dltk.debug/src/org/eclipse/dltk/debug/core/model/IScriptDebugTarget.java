@@ -65,4 +65,6 @@ public interface IScriptDebugTarget extends IDebugTarget {
 	boolean retrieveClassVariables();
 	
 	boolean retrieveLocalVariables();
+
+	String getConsoleEncoding();
 }
