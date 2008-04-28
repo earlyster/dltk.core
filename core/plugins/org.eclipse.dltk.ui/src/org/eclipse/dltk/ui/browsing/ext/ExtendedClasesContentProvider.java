@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IType;
@@ -37,13 +38,15 @@ class ExtendedClasesContentProvider implements ITreeContentProvider {
 	private IDLTKSearchScope scope;
 	private Composite parent;
 	private boolean firstTime = true;
+	IDLTKLanguageToolkit toolkit;
 
 	public ExtendedClasesContentProvider(
 			ExtendedClassesView extendedClassesView, IDLTKSearchScope scope,
-			Composite parent) {
+			Composite parent, IDLTKLanguageToolkit toolkit) {
 		contentProvider = extendedClassesView;
 		this.scope = scope;
 		this.parent = parent;
+		this.toolkit = toolkit;
 	}
 
 	public Object[] getChildren(Object parentElement) {
@@ -169,11 +172,10 @@ class ExtendedClasesContentProvider implements ITreeContentProvider {
 	private void updateInput() {
 		if (this.input instanceof IModelElement) {
 			IModelElement element = (IModelElement) this.input;
-			this.scope = SearchEngine
-					.createSearchScope(new IModelElement[] { element });
+			this.scope = SearchEngine.createSearchScope(element);
 		} else if (this.input instanceof IModelElement[]) {
 			this.scope = SearchEngine
-					.createSearchScope((IModelElement[]) this.input);
+					.createSearchScope((IModelElement[]) this.input, toolkit);
 		}
 	}
 }

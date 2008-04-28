@@ -51,19 +51,13 @@ public class BuildPathSupport {
 			fOriginal= original;
 		}
 
-		/**
-		 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
-		 */
-		public IBuildpathEntry[] getBuildpathEntries() {
-			return getBuildpathEntries(null);
-		}
 
 		public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 			return fNewEntries;
 		}
 
-		public String getDescription() {
-			return fOriginal.getDescription();
+		public String getDescription(IScriptProject project) {
+			return fOriginal.getDescription(project);
 		}
 
 		public int getKind() {
@@ -74,8 +68,8 @@ public class BuildPathSupport {
 			return fOriginal.getPath();
 		}
 
-		public IBuiltinModuleProvider getBuiltinProvider() {
-			return fOriginal.getBuiltinProvider();
+		public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
+			return fOriginal.getBuiltinProvider(project);
 		}
 	}
 

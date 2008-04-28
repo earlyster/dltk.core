@@ -527,7 +527,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	private final Filter fCommentFilter = new CommentFilter();
 	private IPreferenceStore fStore;
 	private int fBlockLinesMin;
-	private boolean fCommentsFolding;
+	protected boolean fCommentsFolding;
 	protected boolean fFoldNewLines = true;
 
 	/**
@@ -761,8 +761,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 								.hashCode();
 						IModelElement element = null;
 						ctx.addProjectionRange(new ScriptProjectionAnnotation(
-								initiallyCollapseComments(ctx), true,
-								new SourceRangeStamp(hash, normalized
+								initiallyCollapseComments(normalized, ctx),
+								true, new SourceRangeStamp(hash, normalized
 										.getLength()), element), position);
 					}
 				}
@@ -774,9 +774,6 @@ public abstract class AbstractASTFoldingStructureProvider implements
 			CodeBlock codeBlock = blockRegions[i];
 			if (!mayCollapse(codeBlock.statement, ctx))
 				continue;
-			if (codeBlock.statement instanceof TypeDeclaration) {
-
-			}
 
 			boolean collapseCode = initiallyCollapse(codeBlock.statement, ctx);
 			IRegion reg = codeBlock.region;
@@ -795,23 +792,22 @@ public abstract class AbstractASTFoldingStructureProvider implements
 					try {
 						int len = normalized.getOffset()
 								+ normalized.getLength();
-						if( contents.length() == len + 1 ) {
+						if (contents.length() == len + 1) {
 							len = len - 1;
 						}
 						if (contents.length() >= len) {
 							int hash = contents.substring(
 									normalized.getOffset(), len).hashCode();
 							IModelElement element = null;
-							ctx.addProjectionRange(
-									new ScriptProjectionAnnotation(
-											collapseCode, false,
-											new SourceRangeStamp(hash,
-													normalized.getLength()),
-											element), position);
+							SourceRangeStamp codeStamp = new SourceRangeStamp(
+									hash, normalized.getLength());
+							ScriptProjectionAnnotation annotation = new ScriptProjectionAnnotation(
+									collapseCode, false, codeStamp, element);
+							ctx.addProjectionRange(annotation, position);
 						}
-//						else {
-//							System.out.println("COOL");
-//						}
+						// else {
+						// System.out.println("COOL");
+						// }
 					} catch (StringIndexOutOfBoundsException e) {
 						if (DLTKCore.DEBUG) {
 							e.printStackTrace();
@@ -853,8 +849,11 @@ public abstract class AbstractASTFoldingStructureProvider implements
 
 	protected boolean isEmptyRegion(IDocument d, ITypedRegion r)
 			throws BadLocationException {
-		String s = d.get(r.getOffset(), r.getLength());
-		return (s.trim().length() == 0);
+		return isEmptyRegion(d, r.getOffset(), r.getLength());
+	}
+	
+	protected boolean isEmptyRegion(IDocument d, int offset, int length) throws BadLocationException {
+		return d.get(offset, length).trim().length() == 0;
 	}
 
 	protected boolean isMultilineRegion(IDocument d, IRegion region)
@@ -927,8 +926,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 			int endOffset;
 			if (document.getNumberOfLines() > end + 1) {
 				endOffset = document.getLineOffset(end + 1);
-			}
-			else {
+			} else {
 				endOffset = document.getLineOffset(end)
 						+ document.getLineLength(end);
 			}
@@ -1078,7 +1076,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	protected final ISourceParser getSourceParser() {
 		return DLTKLanguageManager.getSourceParser(getNatureId());
 	}
-	
+
 	/**
 	 * Should locate all statements and return
 	 * 
@@ -1097,7 +1095,6 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		FoldingASTVisitor visitor = getFoldingVisitor(offset);
 
 		try {
-			// System.out.println("blah");
 			decl.traverse(visitor);
 		} catch (Exception e) {
 			if (DLTKCore.DEBUG) {
@@ -1122,9 +1119,45 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	protected abstract boolean initiallyCollapse(ASTNode s,
 			FoldingStructureComputationContext ctx);
 
-	protected abstract boolean initiallyCollapseComments(
-			FoldingStructureComputationContext ctx);
+	/**
+	 * @param ctx
+	 * @return
+	 * @deprecated will be removed
+	 * @see #initiallyCollapseComments(IRegion, org.eclipse.dltk.ui.text.folding.AbstractASTFoldingStructureProvider.FoldingStructureComputationContext)
+	 */
+	protected boolean initiallyCollapseComments(
+			FoldingStructureComputationContext ctx) {
+		return false;
+	}
 
+	protected boolean initiallyCollapseComments(IRegion commentRegion,
+			FoldingStructureComputationContext ctx) {
+		return initiallyCollapseComments(ctx);
+	}
+	
+	/**
+	 * Checks if the specified region is located at the beginning of the
+	 * document
+	 * 
+	 * @param region
+	 * @param ctx
+	 * @return
+	 */
+	protected boolean isHeaderRegion(IRegion region,
+			FoldingStructureComputationContext ctx) {
+		final int offset = region.getOffset();
+		if (offset == 0) {
+			return true;
+		} else if (offset < 100) {
+			try {
+				return isEmptyRegion(ctx.getDocument(), 0, offset);
+			} catch (BadLocationException e) {
+				//
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * Installs a partitioner with <code>document</code>.
 	 * 

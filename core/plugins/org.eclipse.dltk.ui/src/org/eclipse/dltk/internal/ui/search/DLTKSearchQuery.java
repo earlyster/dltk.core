@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.PerformanceStats;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -107,20 +108,22 @@ public class DLTKSearchQuery implements ISearchQuery {
 			SearchPattern pattern;
 			String stringPattern;
 			
+			IDLTKLanguageToolkit toolkit = this.fPatternData.getScope().getLanguageToolkit();
 			if (fPatternData instanceof ElementQuerySpecification) {
 				IModelElement element= ((ElementQuerySpecification) fPatternData).getElement();
 				stringPattern= ScriptElementLabels.getDefault().getElementLabel(element, ScriptElementLabels.ALL_DEFAULT);
 				if (!element.exists()) {
 					return new Status(IStatus.ERROR, DLTKUIPlugin.getPluginId(), 0, Messages.format(SearchMessages.DLTKSearchQuery_error_element_does_not_exist, stringPattern), null);  
 				}
-				pattern= SearchPattern.createPattern(element, fPatternData.getLimitTo(), SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+				pattern= SearchPattern.createPattern(element, fPatternData.getLimitTo(), SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE, toolkit);
 			} else {
 				PatternQuerySpecification patternSpec = (PatternQuerySpecification) fPatternData;
 				stringPattern= patternSpec.getPattern();
 				int matchMode= getMatchMode(stringPattern) | SearchPattern.R_ERASURE_MATCH;
 				if (patternSpec.isCaseSensitive())
 					matchMode |= SearchPattern.R_CASE_SENSITIVE;
-				pattern= SearchPattern.createPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), matchMode);
+				
+				pattern= SearchPattern.createPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), matchMode, toolkit);
 			}
 			
 			if (pattern == null) {

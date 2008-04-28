@@ -24,6 +24,7 @@ import org.eclipse.dltk.ui.actions.IScriptEditorActionDefinitionIds;
 import org.eclipse.dltk.ui.text.completion.ContentAssistPreference;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.AbstractInformationControlManager;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
@@ -340,5 +341,9 @@ public abstract class ScriptSourceViewerConfiguration extends
 	
 	protected void alterContentAssistant(ContentAssistant assistant) {
 		// empty implementation
+	}
+	
+	public String getFontPropertyPreferenceKey() {
+		return JFaceResources.TEXT_FONT;
 	}
 }

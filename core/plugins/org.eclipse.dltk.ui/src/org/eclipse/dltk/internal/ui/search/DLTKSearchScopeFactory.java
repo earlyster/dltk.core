@@ -27,10 +27,10 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
@@ -51,7 +51,7 @@ import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
 public class DLTKSearchScopeFactory {
 
 	private static DLTKSearchScopeFactory fgInstance;
-	private final IDLTKSearchScope EMPTY_SCOPE= SearchEngine.createSearchScope(new IModelElement[] {});
+	private final IDLTKSearchScope EMPTY_SCOPE= SearchEngine.createSearchScope(new IModelElement[] {}, null);
 	
 	private DLTKSearchScopeFactory() {
 	}
@@ -87,7 +87,7 @@ public class DLTKSearchScopeFactory {
 			}
 			addModelElements(modelElements, workingSet);
 		}
-		return createSearchScope(modelElements, includeInterp);
+		return createSearchScope(modelElements, includeInterp, toolkit);
 	}
 	
 	public IDLTKSearchScope createSearchScope(IWorkingSet workingSet, boolean includeInterp, IDLTKLanguageToolkit toolkit) {
@@ -96,7 +96,7 @@ public class DLTKSearchScopeFactory {
 			return createWorkspaceScope(includeInterp, toolkit);
 		}
 		addModelElements(modelElements, workingSet);
-		return createSearchScope(modelElements, includeInterp);
+		return createSearchScope(modelElements, includeInterp, toolkit);
 	}
 
 	public IDLTKSearchScope createSearchScope(IResource[] resources, boolean includeInterp, IDLTKLanguageToolkit toolkit) {
@@ -104,15 +104,15 @@ public class DLTKSearchScopeFactory {
 			return EMPTY_SCOPE;
 		Set modelElements= new HashSet(resources.length);
 		addModelElements(modelElements, resources);
-		return createSearchScope(modelElements, includeInterp);
+		return createSearchScope(modelElements, includeInterp, toolkit);
 	}
 		
 	
-	public IDLTKSearchScope createSearchScope(ISelection selection, boolean includeInterp) {
-		return createSearchScope(getModelElements(selection), includeInterp);
+	public IDLTKSearchScope createSearchScope(ISelection selection, boolean includeInterp, IDLTKLanguageToolkit toolkit) {
+		return createSearchScope(getModelElements(selection), includeInterp, toolkit);
 	}
 		
-	public IDLTKSearchScope createProjectSearchScope(String[] projectNames, boolean includeInterp) {
+	public IDLTKSearchScope createProjectSearchScope(String[] projectNames, boolean includeInterp, IDLTKLanguageToolkit toolkit) {
 		ArrayList res= new ArrayList();
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int i= 0; i < projectNames.length; i++) {
@@ -121,11 +121,11 @@ public class DLTKSearchScopeFactory {
 				res.add(project);
 			}
 		}
-		return createSearchScope(res, includeInterp);
+		return createSearchScope(res, includeInterp, toolkit);
 	}
 
 	public IDLTKSearchScope createProjectSearchScope(IScriptProject project, boolean includeInterp) {
-		return SearchEngine.createSearchScope(new IModelElement[] { project }, getSearchFlags(includeInterp));
+		return SearchEngine.createSearchScope(project, getSearchFlags(includeInterp));
 	}
 	
 	public IDLTKSearchScope createProjectSearchScope(IEditorInput editorInput, boolean includeInterp) {
@@ -265,17 +265,17 @@ public class DLTKSearchScopeFactory {
 		return (IModelElement[]) result.toArray(new IModelElement[result.size()]);
 	}
 	
-	public IDLTKSearchScope createSearchScope(IModelElement[] modelElements, boolean includeInterp) {
+	public IDLTKSearchScope createSearchScope(IModelElement[] modelElements, boolean includeInterp, IDLTKLanguageToolkit toolkit) {
 		if (modelElements.length == 0)
 			return EMPTY_SCOPE;
-		return SearchEngine.createSearchScope(modelElements, getSearchFlags(includeInterp));
+		return SearchEngine.createSearchScope(modelElements, getSearchFlags(includeInterp), toolkit);
 	}
 
-	private IDLTKSearchScope createSearchScope(Collection modelElements, boolean includeInterp) {
+	private IDLTKSearchScope createSearchScope(Collection modelElements, boolean includeInterp, IDLTKLanguageToolkit toolkit) {
 		if (modelElements.isEmpty())
 			return EMPTY_SCOPE;
 		IModelElement[] elementArray= (IModelElement[]) modelElements.toArray(new IModelElement[modelElements.size()]);
-		return SearchEngine.createSearchScope(elementArray, getSearchFlags(includeInterp));
+		return SearchEngine.createSearchScope(elementArray, getSearchFlags(includeInterp), toolkit);
 	}
 	
 	private static int getSearchFlags(boolean includeInterp) {
@@ -352,7 +352,7 @@ public class DLTKSearchScopeFactory {
 		if (!includeInterp) {
 			try {
 				IScriptProject[] projects= DLTKCore.create(ResourcesPlugin.getWorkspace().getRoot()).getScriptProjects();
-				return SearchEngine.createSearchScope(projects, getSearchFlags(includeInterp));
+				return SearchEngine.createSearchScope(projects, getSearchFlags(includeInterp), toolkit);
 			} catch (ModelException e) {
 				// ignore, use workspace scope instead
 			}

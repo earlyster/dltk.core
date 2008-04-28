@@ -32,7 +32,6 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
-import org.eclipse.dltk.ui.documentation.IScriptDocumentationProvider;
 import org.eclipse.dltk.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -137,7 +136,7 @@ public class ScriptElementImageProvider {
 	private static Map labelProviders = null;
 
 	/**
-	 * Creates {@link IScriptDocumentationProvider} objects from configuration
+	 * Creates {@link ILabelProvider} objects from configuration
 	 * elements.
 	 */
 	private static void createProviders(IConfigurationElement[] elements) {

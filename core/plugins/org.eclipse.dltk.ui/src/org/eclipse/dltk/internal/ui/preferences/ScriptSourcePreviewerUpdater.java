@@ -5,7 +5,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     		IBM Corporation - initial API and implementation
+ * 			Alex Panchenko <alex@xored.com>
  *******************************************************************************/
 
 package org.eclipse.dltk.internal.ui.preferences;
@@ -19,6 +21,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Font;
 
 /**
  * Handles dltk editor font changes for script source preview viewers.
@@ -44,15 +47,11 @@ public class ScriptSourcePreviewerUpdater {
 		Assert.isNotNull(preferenceStore);
 		final IPropertyChangeListener fontChangeListener = new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
-				System.err
-						.println("DLTKSourcePreviewerUpdater: TODO: Editor Text Font usage code"); //$NON-NLS-1$
-				// if
-				// (event.getProperty().equals(PreferenceConstants.EDITOR_TEXT_FONT))
-				// {
-				// Font font=
-				// JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
-				// viewer.getTextWidget().setFont(font);
-				// }
+				final String fontKey = configuration.getFontPropertyPreferenceKey();
+				if (fontKey.equals(event.getProperty())) {
+					final Font font = JFaceResources.getFont(fontKey);
+					viewer.getTextWidget().setFont(font);
+				}
 			}
 		};
 		final IPropertyChangeListener propertyChangeListener = new IPropertyChangeListener() {

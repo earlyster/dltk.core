@@ -764,13 +764,13 @@
                menubarPath="navigate/open.ext"
                id="org.eclipse.dltk.ui.actions.OpenCallHierarchy">
          </action>
-         <!--action
+         <action
                definitionId="org.eclipse.dltk.ui.edit.text.script.open.type.hierarchy"
                label="%OpenTypeHierarchyAction.label"
                retarget="true"
                menubarPath="navigate/open.ext"
                id="org.eclipse.dltk.ui.actions.OpenTypeHierarchy">
-         </action-->
+         </action>
          <action
                definitionId="org.eclipse.dltk.ui.edit.text.script.open.editor"
                label="%OpenAction.label"
@@ -1082,18 +1082,6 @@
 			icon="/icons/full/elcl16/templateprop_co.gif"/>
 	</extension>
 
-	<!-- the parameterized content assist action and keybindings for our contributed computers -->
- 
- <!-- with an A_                                                                -->
-<!-- the open action set is contributed before the CodeActionSet we prefix it  -->
-<!-- Action sets are contributed after they have been sorted. To enfore that   -->
-<!-- Begin Java Open action contributions  -->
-   <extension
-         point="org.eclipse.ui.editors.templates">
-   </extension>         
-	
-	
-	<!-- Note: Do not change the sequence of those hover contributions -->
 <!-- =========================================================================== -->
 <!-- Call Hierarchy                                                              -->
 <!-- =========================================================================== -->    
@@ -1352,4 +1340,14 @@
          </action>
       </actionSet>
    </extension>
+ <extension
+       point="org.eclipse.core.runtime.adapters">
+    <factory
+          adaptableType="org.eclipse.dltk.core.internal.environment.LocalEnvironment"
+          class="org.eclipse.dltk.internal.ui.environment.LocalEnvironmentUIAdapter">
+       <adapter
+             type="org.eclipse.dltk.ui.environment.IEnvironmentUI">
+       </adapter>
+    </factory>
+ </extension>
 </plugin>

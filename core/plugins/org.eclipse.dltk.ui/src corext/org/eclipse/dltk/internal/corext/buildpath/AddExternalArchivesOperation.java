@@ -16,6 +16,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.newsourcepage.BuildpathModifierQueries.IAddArchivesQuery;
@@ -55,7 +57,8 @@ public class AddExternalArchivesOperation extends BuildpathModifierOperation {
         fException= null;
         try {
             IScriptProject project= fInformationProvider.getScriptProject();
-            IAddArchivesQuery query= fInformationProvider.getExternalArchivesQuery();
+            IEnvironment environment = EnvironmentManager.getEnvironment(project);
+			IAddArchivesQuery query= fInformationProvider.getExternalArchivesQuery(environment);
             result= addExternalArchives(query, project, monitor);
         } catch (CoreException e) {
             fException= e;

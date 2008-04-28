@@ -9,7 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
-import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -24,6 +24,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.ComboDialogField;
@@ -38,7 +42,9 @@ import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterStandin;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.wizard.WizardPage;
@@ -50,7 +56,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -115,6 +120,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		protected final SelectionButtonDialogField fWorkspaceRadio;
 		protected final SelectionButtonDialogField fExternalRadio;
 		protected final StringButtonDialogField fLocation;
+		protected final ComboDialogField fEnvironment;
+		private IEnvironment[] environments;
+
 		private String fPreviousExternalLocation;
 		private static final String DIALOGSTORE_LAST_EXTERNAL_LOC = DLTKUIPlugin.PLUGIN_ID
 				+ ".last.external.project"; //$NON-NLS-1$
@@ -140,7 +148,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 					.setLabelText(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_locationLabel_desc);
 			fLocation
 					.setButtonLabel(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_browseButton_desc);
-			fExternalRadio.attachDialogField(fLocation);
+			// fExternalRadio.attachDialogField(fLocation);
 			fWorkspaceRadio.setSelection(true);
 			fExternalRadio.setSelection(false);
 			fPreviousExternalLocation = ""; //$NON-NLS-1$
@@ -148,6 +156,42 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			fExternalRadio.doFillIntoGrid(group, numColumns);
 			fLocation.doFillIntoGrid(group, numColumns);
 			LayoutUtil.setHorizontalGrabbing(fLocation.getTextControl(null));
+
+			fEnvironment = new ComboDialogField(SWT.DROP_DOWN | SWT.READ_ONLY);
+			fEnvironment.setLabelText(NewWizardMessages.ProjectWizardFirstPage_host);
+			fEnvironment.setDialogFieldListener(this);
+			fEnvironment.setDialogFieldListener(new IDialogFieldListener() {
+				public void dialogFieldChanged(DialogField field) {
+					updateInterpreters();
+				}
+
+			});
+			environments = EnvironmentManager.getEnvironments();
+			String[] items = new String[environments.length];
+			int local = 0;
+			for (int i = 0; i < items.length; i++) {
+				items[i] = environments[i].getName();
+				if (items[i].equals(LocalEnvironment.ENVIRONMENT_ID)) {
+					local = i;
+				}
+			}
+			fEnvironment.setItems(items);
+			fEnvironment.selectItem(local);
+			fEnvironment.doFillIntoGrid(group, numColumns);
+			LayoutUtil
+					.setHorizontalGrabbing(fEnvironment.getComboControl(null));
+			fExternalRadio.attachDialogFields(new DialogField[] { fLocation,
+					fEnvironment });
+			fWorkspaceRadio.setDialogFieldListener(new IDialogFieldListener() {
+				public void dialogFieldChanged(DialogField field) {
+					updateInterpreters();
+				}
+			});
+			fExternalRadio.setDialogFieldListener(new IDialogFieldListener() {
+				public void dialogFieldChanged(DialogField field) {
+					updateInterpreters();
+				}
+			});
 		}
 
 		protected void fireEvent() {
@@ -155,9 +199,20 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			notifyObservers();
 		}
 
+		private void updateInterpreters() {
+			Observable observable = ProjectWizardFirstPage.this
+					.getInterpreterGroupObservable();
+			if (observable != null
+					&& observable instanceof AbstractInterpreterGroup) {
+				((AbstractInterpreterGroup) observable)
+						.handlePossibleInterpreterChange();
+			}
+		}
+
 		protected String getDefaultPath(String name) {
-			final IPath path = Platform.getLocation().append(name);
-			return path.toOSString();
+//			final IPath path = Platform.getLocation().append(name);
+//			return path.toOSString();
+			return "";
 		}
 
 		/*
@@ -177,35 +232,34 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			if (isInWorkspace()) {
 				return Platform.getLocation();
 			}
-			return Path.fromOSString(fLocation.getText().trim());
+			return new Path(fLocation.getText().trim());
 		}
 
 		public boolean isInWorkspace() {
 			return fWorkspaceRadio.isSelected();
 		}
 
+		public IEnvironment getEnvironment() {
+			if (fWorkspaceRadio.isSelected()) {
+				return EnvironmentManager
+						.getEnvironmentById(LocalEnvironment.ENVIRONMENT_ID);
+			}
+			return environments[fEnvironment.getSelectionIndex()];
+		}
+
 		public void changeControlPressed(DialogField field) {
-			final DirectoryDialog dialog = new DirectoryDialog(getShell());
-			dialog
-					.setMessage(NewWizardMessages.ScriptProjectWizardFirstPage_directory_message);
-			String directoryName = fLocation.getText().trim();
-			if (directoryName.length() == 0) {
-				String prevLocation = DLTKUIPlugin.getDefault()
-						.getDialogSettings().get(DIALOGSTORE_LAST_EXTERNAL_LOC);
-				if (prevLocation != null) {
-					directoryName = prevLocation;
+			IEnvironment environment = getEnvironment();
+			IEnvironmentUI environmentUI = (IEnvironmentUI) environment
+					.getAdapter(IEnvironmentUI.class);
+			if (environmentUI != null) {
+				String selectedDirectory = environmentUI
+						.selectFolder(getShell());
+
+				if (selectedDirectory != null) {
+					fLocation.setText(selectedDirectory);
+					DLTKUIPlugin.getDefault().getDialogSettings().put(
+							DIALOGSTORE_LAST_EXTERNAL_LOC, selectedDirectory);
 				}
-			}
-			if (directoryName.length() > 0) {
-				final File path = new File(directoryName);
-				if (path.exists())
-					dialog.setFilterPath(directoryName);
-			}
-			final String selectedDirectory = dialog.open();
-			if (selectedDirectory != null) {
-				fLocation.setText(selectedDirectory);
-				DLTKUIPlugin.getDefault().getDialogSettings().put(
-						DIALOGSTORE_LAST_EXTERNAL_LOC, selectedDirectory);
 			}
 		}
 
@@ -222,83 +276,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			fireEvent();
 		}
 	}
-
-	/**
-	 * Request a project layout.
-	 */
-
-	// private final class LayoutGroup implements Observer, SelectionListener {
-	// private final SelectionButtonDialogField fStdRadio, fSrcBinRadio;
-	// private final Group fGroup;
-	// private final Link fPreferenceLink;
-	//
-	// public LayoutGroup(Composite composite) {
-	// fGroup = new Group(composite, SWT.NONE);
-	// fGroup.setFont(composite.getFont());
-	// fGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	// fGroup.setLayout(initGridLayout(new GridLayout(3, false), true));
-	// fGroup.setText(NewWizardMessages.ScriptProjectWizardFirstPage_LayoutGroup_title);
-	// fStdRadio = new SelectionButtonDialogField(SWT.RADIO);
-	// fStdRadio.setLabelText(NewWizardMessages.ScriptProjectWizardFirstPage_LayoutGroup_option_oneFolder);
-	// fSrcBinRadio = new SelectionButtonDialogField(SWT.RADIO);
-	// fSrcBinRadio.setLabelText(NewWizardMessages.ScriptProjectWizardFirstPage_LayoutGroup_option_separateFolders);
-	// fStdRadio.doFillIntoGrid(fGroup, 3);
-	// LayoutUtil.setHorizontalGrabbing(fStdRadio.getSelectionButton(null));
-	// fSrcBinRadio.doFillIntoGrid(fGroup, 2);
-	// fPreferenceLink = new Link(fGroup, SWT.NONE);
-	// fPreferenceLink.setText(NewWizardMessages.ScriptProjectWizardFirstPage_LayoutGroup_link_description);
-	// fPreferenceLink.setLayoutData(new GridData(GridData.END, GridData.END,
-	// false, false));
-	// fPreferenceLink.addSelectionListener(this);
-	// if (DLTKCore.DEBUG) {
-	// System.err.println("TOTO: Possible language dependent code here
-	// required...");
-	// }
-	// boolean useSrcBin =
-	// DLTKUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ);
-	// fSrcBinRadio.setSelection(useSrcBin);
-	// fStdRadio.setSelection(!useSrcBin);
-	// }
-	//
-	// public void update(Observable o, Object arg) {
-	// final boolean detect = fDetectGroup.mustDetect();
-	// fStdRadio.setEnabled(!detect);
-	// fSrcBinRadio.setEnabled(!detect);
-	// fPreferenceLink.setEnabled(!detect);
-	// fGroup.setEnabled(!detect);
-	// }
-	//
-	// public boolean isSrcBin() {
-	// return fSrcBinRadio.isSelected();
-	// }
-	//
-	// /*
-	// * (non-Javadoc)
-	// *
-	// * @see
-	// org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-	// */
-	// public void widgetSelected(SelectionEvent e) {
-	// widgetDefaultSelected(e);
-	// }
-	//
-	// /*
-	// * (non-Javadoc)
-	// *
-	// * @see
-	// org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-	// */
-	// public void widgetDefaultSelected(SelectionEvent e) {
-	// String id = NewScriptProjectPreferencePage.ID;
-	// PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] {
-	// id
-	// }, null).open();
-	// // fInterpreterEnvironmentGroup.handlePossibleJInterpreterChange();
-	// if (supportInterpreter()) {
-	// handlePossibleInterpreterChange();
-	// }
-	// }
-	// }
 
 	protected abstract class AbstractInterpreterGroup extends Observable
 			implements Observer, SelectionListener, IDialogFieldListener {
@@ -350,7 +327,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 					GridData.CENTER, true, false);
 			gridData.minimumWidth = 100;
 			comboControl.setLayoutData(gridData); // make sure column 2 is
-													// grabing (but no fill)
+			// grabing (but no fill)
 			comboControl.setVisibleItemCount(20);
 
 			DialogField.createEmptySpace(fGroup);
@@ -396,12 +373,15 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			List standins = new ArrayList();
 			IInterpreterInstallType[] types = ScriptRuntime
 					.getInterpreterInstallTypes(getCurrentLanguageNature());
+			IEnvironment environment = fLocationGroup.getEnvironment();
 			for (int i = 0; i < types.length; i++) {
 				IInterpreterInstallType type = types[i];
 				IInterpreterInstall[] installs = type.getInterpreterInstalls();
 				for (int j = 0; j < installs.length; j++) {
 					IInterpreterInstall install = installs[j];
-					standins.add(new InterpreterStandin(install));
+					if (install.getEnvironment().equals(environment)) {
+						standins.add(new InterpreterStandin(install));
+					}
 				}
 			}
 			return ((IInterpreterInstall[]) standins
@@ -410,7 +390,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 
 		private String getDefaultInterpreterName() {
 			IInterpreterInstall inst = ScriptRuntime
-					.getDefaultInterpreterInstall(getCurrentLanguageNature());
+					.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
+							getCurrentLanguageNature(), getEnvironment()
+									.getId()));
 			if (inst != null)
 				return inst.getName();
 			else
@@ -501,7 +483,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			}
 			return null;
 		}
-
 	}
 
 	/**
@@ -525,25 +506,37 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 				handlePossibleInterpreterChange();
 			}
 		}
+		
+		private boolean isValidProjectName(String name) {
+			if (name.length() == 0) {
+				return false;
+			}
+			final IWorkspace workspace = DLTKUIPlugin.getWorkspace();
+			return workspace.validateName(name, IResource.PROJECT).isOK()
+					&& workspace.getRoot().findMember(name) == null;
+		}
 
 		public void update(Observable o, Object arg) {
 			if (o instanceof LocationGroup) {
 				boolean oldDetectState = fDetect;
+				IPath location = fLocationGroup.getLocation();
 				if (fLocationGroup.isInWorkspace()) {
-					String name = getProjectName();
-					if (name.length() == 0
-							|| DLTKUIPlugin.getWorkspace().getRoot()
-									.findMember(name) != null) {
+					if (!isValidProjectName(getProjectName())) {
 						fDetect = false;
 					} else {
-						final File directory = fLocationGroup.getLocation()
-								.append(getProjectName()).toFile();
+						IEnvironment environment = fLocationGroup
+								.getEnvironment();
+						final IFileHandle directory = environment
+								.getFile(location.append(getProjectName()));
 						fDetect = directory.isDirectory();
 					}
 				} else {
-					final File directory = fLocationGroup.getLocation()
-							.toFile();
-					fDetect = directory.isDirectory();
+					IEnvironment environment = fLocationGroup.getEnvironment();
+					if (location.toPortableString().length() > 0) {
+						final IFileHandle directory = environment
+								.getFile(location);
+						fDetect = directory.isDirectory();
+					}
 				}
 				if (oldDetectState != fDetect) {
 					setChanged();
@@ -552,6 +545,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 						fHintText.setVisible(true);
 						fHintText
 								.setText(NewWizardMessages.ScriptProjectWizardFirstPage_DetectGroup_message);
+					}
+					else {
+						fHintText.setVisible(false);
 					}
 					if (supportInterpreter()) {
 						handlePossibleInterpreterChange();
@@ -584,16 +580,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 				System.err
 						.println("DetectGroup show compilancePreferencePage..."); //$NON-NLS-1$
 			}
-			// String InterpreterEnvironmentID=
-			// BuildPathSupport.InterpreterEnvironment_PREF_PAGE_ID;
-			// String complianceId= CompliancePreferencePage.PREF_ID;
-			// Map data= new HashMap();
-			// data.put(PropertyAndPreferencePage.DATA_NO_LINK, Boolean.TRUE);
-			// PreferencesUtil.createPreferenceDialogOn(getShell(),
-			// complianceId, new String[] { InterpreterEnvironmentID,
-			// complianceId }, data).open();
-			// fInterpreterEnvironmentGroup.handlePossibleJInterpreterChange();
-			// handlePossibleJInterpreterChange();
 			if (supportInterpreter()) {
 				handlePossibleInterpreterChange();
 			}
@@ -655,12 +641,15 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			// If we do not place the contents in the workspace validate the
 			// location.
 			if (!fLocationGroup.isInWorkspace()) {
-				final IStatus locationStatus = workspace
-						.validateProjectLocation(handle, projectPath);
-				if (!locationStatus.isOK()) {
-					setErrorMessage(locationStatus.getMessage());
-					setPageComplete(false);
-					return;
+				IEnvironment environment = getEnvironment();
+				if (EnvironmentManager.isLocal(environment)) {
+					final IStatus locationStatus = workspace
+							.validateProjectLocation(handle, projectPath);
+					if (!locationStatus.isOK()) {
+						setErrorMessage(locationStatus.getMessage());
+						setPageComplete(false);
+						return;
+					}
 				}
 			}
 			if (supportInterpreter() && interpeterRequired()) {
@@ -695,12 +684,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		setTitle(NewWizardMessages.ScriptProjectWizardFirstPage_page_title);
 		setDescription(NewWizardMessages.ScriptProjectWizardFirstPage_page_description);
 		fInitialName = ""; //$NON-NLS-1$
-		// initializeDefaultInterpreter();
 	}
-
-	// private void initializeDefaultInterpreter() {
-	// scriptRuntime.getDefaultInterpreterInstall();
-	// }
 
 	public void setName(String name) {
 		fInitialName = name;
@@ -779,8 +763,13 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 	 * 
 	 * @return the project location path or its anticipated initial value.
 	 */
-	public IPath getLocationPath() {
-		return fLocationGroup.getLocation();
+	public URI getLocationURI() {
+		IEnvironment environment = getEnvironment();
+		return environment.getURI(fLocationGroup.getLocation());
+	}
+
+	public IEnvironment getEnvironment() {
+		return fLocationGroup.getEnvironment();
 	}
 
 	/**

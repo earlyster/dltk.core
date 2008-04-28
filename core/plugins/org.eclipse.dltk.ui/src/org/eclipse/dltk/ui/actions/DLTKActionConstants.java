@@ -530,4 +530,11 @@ public class DLTKActionConstants {
 	public static final String FIND_IMPLEMENT_OCCURRENCES= "org.eclipse.dltk.ui.actions.ImplementOccurrences"; //$NON-NLS-1$		
 
 
+	/**
+	 * Navigate menu: name of standard Open Type Hierarchy global action
+	 * (value <code>"org.eclipse.dltk.ui.actions.OpenTypeHierarchy"</code>).
+	 */
+	public static final String OPEN_TYPE_HIERARCHY= "org.eclipse.dltk.ui.actions.OpenTypeHierarchy"; //$NON-NLS-1$
+
+
 }

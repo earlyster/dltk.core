@@ -71,4 +71,14 @@ public final class ActionMessages extends NLS {
 	public static String OpenNewSourceFolderWizardAction_text2;
 	public static String OpenNewSourceFolderWizardAction_description;
 	public static String OpenNewSourceFolderWizardAction_tooltip;
+
+	public static String OpenTypeHierarchyAction_label;
+	public static String OpenTypeHierarchyAction_tooltip;
+	public static String OpenTypeHierarchyAction_description;
+	public static String OpenTypeHierarchyAction_messages_no_script_element;
+	public static String OpenTypeHierarchyAction_messages_title;
+	public static String OpenTypeHierarchyAction_dialog_title;
+	public static String OpenTypeHierarchyAction_messages_no_script_resources;
+	public static String OpenTypeHierarchyAction_messages_no_types;
+	public static String OpenTypeHierarchyAction_messages_no_valid_script_element;
 }

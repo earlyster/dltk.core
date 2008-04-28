@@ -11,12 +11,9 @@ package org.eclipse.dltk.internal.ui.editor;
 
 import java.text.CharacterIterator;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.Stack;
 
 import org.eclipse.core.resources.ProjectScope;
@@ -3008,18 +3005,21 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	}
 
 	protected String[] collectContextMenuPreferencePages() {
-		String[] inheritedPages = super.collectContextMenuPreferencePages();
-		String natureId = getLanguageToolkit().getNatureId();
+		final List result = new ArrayList();
+		final IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager
+				.getLanguageToolkit(getLanguageToolkit().getNatureId());
+		addPages(result, uiToolkit.getEditorPreferencePages());
+		addPages(result, super.collectContextMenuPreferencePages());
+		return (String[]) result.toArray(new String[result.size()]);
+	}
 
-		IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager
-				.getLanguageToolkit(natureId);
-		final String[] myPages = uiToolkit.getEditorPreferencePages();
-		Set items = new HashSet();
-		items.addAll(Arrays.asList(inheritedPages));
-		if (myPages != null) {
-			items.addAll(Arrays.asList(myPages));
+	private void addPages(final List result, final String[] pages) {
+		if (pages != null) {
+			for (int i = 0; i < pages.length; ++i) {
+				if (!result.contains(pages[i])) {
+					result.add(pages[i]);
+				}
+			}
 		}
-
-		return (String[]) items.toArray(new String[items.size()]);
 	}
 }

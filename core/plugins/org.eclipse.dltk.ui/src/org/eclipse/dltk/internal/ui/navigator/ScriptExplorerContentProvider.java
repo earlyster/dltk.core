@@ -297,7 +297,7 @@ public class ScriptExplorerContentProvider extends
 			}
 
 			if (parentElement instanceof ProjectFragmentContainer) {
-				return getContainerPackageFragmentRoots((ProjectFragmentContainer) parentElement);
+				return getContainerProjectFragments((ProjectFragmentContainer) parentElement);
 			}
 
 			if (parentElement instanceof IProject) {
@@ -323,7 +323,7 @@ public class ScriptExplorerContentProvider extends
 
 		List result = new ArrayList();
 
-		boolean addJARContainer = false;
+		boolean addZIPContainer = false;
 
 		IProjectFragment[] roots = project.getProjectFragments();
 		for (int i = 0; i < roots.length; i++) {
@@ -341,7 +341,7 @@ public class ScriptExplorerContentProvider extends
 																	 * entryKind ==
 																	 * IBuildpathEntry.BPE_VARIABLE
 																	 */)) {
-				addJARContainer = true;
+				addZIPContainer = true;
 			} else {
 				if (isProjectProjectFragment(root)) {
 					// filter out package fragments that correspond to projects
@@ -357,14 +357,14 @@ public class ScriptExplorerContentProvider extends
 			}
 		}
 
-		if (addJARContainer) {
+		if (addZIPContainer) {
 			result.add(new LibraryContainer(project));
 		}
 
 		// separate loop to make sure all containers are on the classpath
-		IBuildpathEntry[] rawClasspath = project.getRawBuildpath();
-		for (int i = 0; i < rawClasspath.length; i++) {
-			IBuildpathEntry classpathEntry = rawClasspath[i];
+		IBuildpathEntry[] rawBuidspath = project.getRawBuildpath();
+		for (int i = 0; i < rawBuidspath.length; i++) {
+			IBuildpathEntry classpathEntry = rawBuidspath[i];
 			if (classpathEntry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER) {
 				result.add(new BuildPathContainer(project, classpathEntry));
 			}
@@ -376,7 +376,7 @@ public class ScriptExplorerContentProvider extends
 		return result.toArray();
 	}
 
-	private Object[] getContainerPackageFragmentRoots(
+	private Object[] getContainerProjectFragments(
 			final ProjectFragmentContainer container) {
 		return container.getChildren();
 	}
@@ -397,17 +397,19 @@ public class ScriptExplorerContentProvider extends
 
 			try {
 				IBuildpathEntry entry = root.getRawBuildpathEntry();
-				int entryKind = entry.getEntryKind();
-				if (entryKind == IBuildpathEntry.BPE_CONTAINER) {
-					return new BuildPathContainer(root.getScriptProject(),
-							entry);
-				} else if (fShowLibrariesNode
-						&& (entryKind == IBuildpathEntry.BPE_LIBRARY /*
-																		 * ||
-																		 * entryKind ==
-																		 * IBuildpathEntry.BPE_VARIABLE
-																		 */)) {
-					return new LibraryContainer(root.getScriptProject());
+				if (entry != null) {
+					int entryKind = entry.getEntryKind();
+					if (entryKind == IBuildpathEntry.BPE_CONTAINER) {
+						return new BuildPathContainer(root.getScriptProject(),
+								entry);
+					} else if (fShowLibrariesNode
+							&& (entryKind == IBuildpathEntry.BPE_LIBRARY /*
+																			 * ||
+																			 * entryKind ==
+																			 * IBuildpathEntry.BPE_VARIABLE
+																			 */)) {
+						return new LibraryContainer(root.getScriptProject());
+					}
 				}
 			} catch (ModelException e) {
 				// fall through
@@ -467,7 +469,7 @@ public class ScriptExplorerContentProvider extends
 				newElements.add(children[i]);
 			}
 			children = (IModelElement[]) newElements
-			.toArray(new IModelElement[newElements.size()]);
+					.toArray(new IModelElement[newElements.size()]);
 		}
 
 		String prefix = fragment != null ? fragment.getElementName()

@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.newsourcepage.BuildpathModifierQueries;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.newsourcepage.BuildpathModifierQueries.IAddArchivesQuery;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.newsourcepage.BuildpathModifierQueries.IAddLibrariesQuery;
@@ -143,7 +144,7 @@ public interface IBuildpathInformationProvider {
      * 
      * @see BuildpathModifierQueries#getDefaultArchivesQuery(Shell)
      */
-    IAddArchivesQuery getExternalArchivesQuery() throws ModelException;
+    IAddArchivesQuery getExternalArchivesQuery(IEnvironment environment) throws ModelException;
     
     /**
      * Method to retrieve an <code>IAddLibrariesQuery</code> from 

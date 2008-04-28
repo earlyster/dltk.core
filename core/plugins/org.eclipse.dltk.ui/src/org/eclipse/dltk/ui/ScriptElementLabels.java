@@ -27,6 +27,9 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
 import org.eclipse.dltk.internal.core.ExternalProjectFragment;
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -813,19 +816,20 @@ public class ScriptElementLabels {
 	private void getExternalArchiveLabel(IProjectFragment root, long flags,
 			StringBuffer buf) {
 		IPath path = root.getPath();
+		IEnvironment env = EnvironmentManager.getEnvironment(root);
 		if (getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED)) {
 			int segements = path.segmentCount();
 			if (segements > 0) {
 				buf.append(path.segment(segements - 1));
 				if (segements > 1 || path.getDevice() != null) {
 					buf.append(CONCAT_STRING);
-					buf.append(path.removeLastSegments(1).toOSString());
+					buf.append(env.convertPathToString(path.removeLastSegments(1)));
 				}
 			} else {
-				buf.append(path.toOSString());
+				buf.append(env.convertPathToString(path));
 			}
 		} else {
-			buf.append(path.toOSString());
+			buf.append(env.convertPathToString(path));
 		}
 	}
 
@@ -905,7 +909,7 @@ public class ScriptElementLabels {
 		if (rootQualified) {
 			buf.append(root.getPath().makeRelative().toString());
 		} else {
-			buf.append(root.getPath().toOSString());
+			buf.append(EnvironmentPathUtils.getLocalPathString(root.getPath()));
 			if (referencedQualified) {
 				buf.append(CONCAT_STRING);
 				buf.append(root.getScriptProject().getElementName());
@@ -993,7 +997,7 @@ public class ScriptElementLabels {
 		IBuildpathContainer container = DLTKCore.getBuildpathContainer(
 				containerPath, project);
 		if (container != null) {
-			return container.getDescription();
+			return container.getDescription(project);
 		}
 		BuildpathContainerInitializer initializer = DLTKCore
 				.getBuildpathContainerInitializer(containerPath.segment(0));

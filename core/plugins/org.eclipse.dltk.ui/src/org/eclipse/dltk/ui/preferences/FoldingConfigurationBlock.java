@@ -20,8 +20,8 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -136,31 +136,15 @@ public abstract class FoldingConfigurationBlock implements IPreferenceConfigurat
 		fFoldingCheckbox.setText(PreferencesMessages.FoldingConfigurationBlock_enable); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		fFoldingCheckbox.setLayoutData(gd);
-		fFoldingCheckbox.addSelectionListener(new SelectionListener() {
+		fFoldingCheckbox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				boolean enabled= fFoldingCheckbox.getSelection(); 
 				fStore.setValue(PreferenceConstants.EDITOR_FOLDING_ENABLED, enabled);
 				updateCheckboxDependencies();
 			}
-
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
 		});
 		
-		fCommentsFoldingCheckbox= new Button(composite, SWT.CHECK);
-		fCommentsFoldingCheckbox.setText(PreferencesMessages.FoldingConfigurationBlock_commentsEnable); 
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
-		fCommentsFoldingCheckbox.setLayoutData(gd);
-		fCommentsFoldingCheckbox.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent e) {
-				boolean enabled= fCommentsFoldingCheckbox.getSelection(); 
-				fStore.setValue(PreferenceConstants.EDITOR_COMMENTS_FOLDING_ENABLED, enabled);
-				updateCheckboxDependencies();
-			}
-
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-		});
+		createCommentsFoldingCheckbox(composite);
 		
 		/*Label label= new Label(composite, SWT.CENTER);
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
@@ -184,10 +168,25 @@ public abstract class FoldingConfigurationBlock implements IPreferenceConfigurat
 		return composite;
 	}
 
-	
+	protected void createCommentsFoldingCheckbox(Composite composite) {
+		fCommentsFoldingCheckbox= new Button(composite, SWT.CHECK);
+		fCommentsFoldingCheckbox.setText(PreferencesMessages.FoldingConfigurationBlock_commentsEnable); 
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		fCommentsFoldingCheckbox.setLayoutData(gd);
+		fCommentsFoldingCheckbox.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean enabled= fCommentsFoldingCheckbox.getSelection(); 
+				fStore.setValue(PreferenceConstants.EDITOR_COMMENTS_FOLDING_ENABLED, enabled);
+				updateCheckboxDependencies();
+			}
+		});
+	}
 
 	private void updateCheckboxDependencies() {
-		fCommentsFoldingCheckbox.setEnabled(fFoldingCheckbox.getSelection());
+		if (fCommentsFoldingCheckbox != null) {
+			fCommentsFoldingCheckbox
+					.setEnabled(fFoldingCheckbox.getSelection());
+		}
 	}
 	
 	IFoldingPreferenceBlock getPreferenceBlock () {
@@ -245,7 +244,9 @@ public abstract class FoldingConfigurationBlock implements IPreferenceConfigurat
 		boolean enabled= fStore.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
 		fFoldingCheckbox.setSelection(enabled);
 		boolean commentsEnabled= fStore.getBoolean(PreferenceConstants.EDITOR_COMMENTS_FOLDING_ENABLED);
-		fCommentsFoldingCheckbox.setSelection(commentsEnabled);
+		if (fCommentsFoldingCheckbox != null) {
+			fCommentsFoldingCheckbox.setSelection(commentsEnabled);
+		}
 		updateCheckboxDependencies();		
 		updateListDependencies();
 	}

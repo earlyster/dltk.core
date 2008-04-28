@@ -846,9 +846,6 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 				fColorManager, store, null, false);
 		fPreviewViewer.configure(configuration);
 
-		// Font font = JFaceResources
-		// .getFont(PreferenceConstants.EDITOR_TEXT_FONT);
-		// fPreviewViewer.getTextWidget().setFont(font);
 		new ScriptSourcePreviewerUpdater(fPreviewViewer, configuration, store);
 		fPreviewViewer.setEditable(false);
 

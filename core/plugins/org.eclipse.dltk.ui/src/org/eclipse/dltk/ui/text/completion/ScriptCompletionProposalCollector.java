@@ -537,7 +537,7 @@ public abstract class ScriptCompletionProposalCollector extends CompletionReques
 		if (isIgnored(proposal.getKind())) {
 			return true;
 		}
-
+		
 		// TODO: possible add code to check completion preferences for filtering
 
 		return false;
