@@ -10,8 +10,6 @@
 
 package org.eclipse.dltk.internal.debug.ui;
 
-import java.io.File;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -20,6 +18,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IPathEditorInput;
 import org.eclipse.ui.IPersistableElement;
@@ -27,9 +26,9 @@ import org.eclipse.ui.editors.text.ILocationProvider;
 
 public class ExternalFileEditorInput implements IPathEditorInput,
 		ILocationProvider {
-	private File file;
+	private IFileHandle file;
 
-	public ExternalFileEditorInput(File file) {
+	public ExternalFileEditorInput(IFileHandle file) {
 		super();
 		this.file = file;
 	}
@@ -51,7 +50,7 @@ public class ExternalFileEditorInput implements IPathEditorInput,
 	}
 
 	public String getToolTipText() {
-		return file.getAbsolutePath();
+		return file.toOSString();
 	}
 
 	public Object getAdapter(Class adapter) {
@@ -80,7 +79,7 @@ public class ExternalFileEditorInput implements IPathEditorInput,
 	}
 
 	public IPath getPath() {
-		return Path.fromOSString(file.getAbsolutePath());
+		return Path.fromPortableString(file.toOSString());
 	}
 
 	public boolean equals(Object o) {

@@ -9,21 +9,24 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.launchConfigurations;
 
+import java.net.URI;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.debug.ui.messages.DLTKLaunchConfigurationsMessages;
 import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.preferences.FieldValidators;
-import org.eclipse.dltk.ui.preferences.IFieldValidator;
+import org.eclipse.dltk.ui.preferences.FieldValidators.FilePathValidator;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -46,8 +49,31 @@ public abstract class MainLaunchConfigurationTab extends
 
 	private Text fScriptText;
 
+	private Button interactiveConsoleCheck;
+
+	private boolean useInteractiveConsoleGroup = false;
+
+	public MainLaunchConfigurationTab(String mode) {
+		super(mode);
+	}
+
+	/**
+	 * Enable this to allow interactive group support.
+	 */
+	protected void enableInteractiveConsoleGroup() {
+		this.useInteractiveConsoleGroup = true;
+	}
+
 	protected void doInitializeForm(ILaunchConfiguration config) {
 		updateMainModuleFromConfig(config);
+		if (useInteractiveConsoleGroup) {
+			boolean console = LaunchConfigurationUtils
+					.getBoolean(
+							config,
+							ScriptLaunchConfigurationConstants.ATTR_USE_INTERACTIVE_CONSOLE,
+							false);
+			this.interactiveConsoleCheck.setSelection(console);
+		}
 	}
 
 	private Button fSearchButton;
@@ -142,6 +168,23 @@ public abstract class MainLaunchConfigurationTab extends
 		config.setAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
 				getScriptName());
+		if (useInteractiveConsoleGroup) {
+			config
+					.setAttribute(
+							ScriptLaunchConfigurationConstants.ATTR_USE_INTERACTIVE_CONSOLE,
+							this.interactiveConsoleCheck.getSelection());
+			config.setAttribute(
+					ScriptLaunchConfigurationConstants.ATTR_DLTK_CONSOLE_ID,
+					"dltk_" + Long.toString(System.currentTimeMillis()));
+			if (this.interactiveConsoleCheck.getSelection()) {
+				config.setAttribute(IDebugUIConstants.ATTR_CAPTURE_IN_CONSOLE,
+						false);
+			} else {
+				config.setAttribute(IDebugUIConstants.ATTR_CAPTURE_IN_CONSOLE,
+						(String)null);
+			}
+			// config.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, "false");
+		}
 	}
 
 	protected String getScriptName() {
@@ -154,30 +197,52 @@ public abstract class MainLaunchConfigurationTab extends
 	 * @return true if the selected script is valid, false otherwise
 	 */
 	protected boolean validateScript() {
-		IFieldValidator validator = new FieldValidators.FilePathValidator();
+		URI script = validatAndGetScriptPath();
+		if (script != null) {
+			FilePathValidator validator = new FieldValidators.FilePathValidator();
+			IScriptProject project = getProject();
+			IEnvironment environment = EnvironmentManager.getEnvironment(project);
+			IStatus result = validator.validate(script.getPath(), environment);
 
-		String projectName = getProjectName();
-		IScriptProject proj = getScriptModel().getScriptProject(projectName);
-
-		IPath location = proj.getProject().getLocation();
-		if (location == null) {
-			setErrorMessage(DLTKLaunchConfigurationsMessages.error_notAValidProject);
-			return false;
-		}
-		IPath script = location.append(new Path( getScriptName()));
-		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(script);
-		if( file.exists() && file.getLocation() != null ) {
-			script = file.getLocation();
-		}
-
-		IStatus result = validator.validate(script.toPortableString());
-
-		if (!result.isOK()) {
-			setErrorMessage(DLTKLaunchConfigurationsMessages.error_scriptNotFound);
-			return false;
+			if (!result.isOK()) {
+				setErrorMessage(DLTKLaunchConfigurationsMessages.error_scriptNotFound); //$NON-NLS-1$
+				return false;
+			}
+		} else {
+			if (useInteractiveConsoleGroup) {
+				if (!interactiveConsoleCheck.getSelection()) {
+					setErrorMessage(DLTKLaunchConfigurationsMessages.MainLaunchConfigurationTab_0);
+					return false;
+				}
+			} else {
+				setErrorMessage(DLTKLaunchConfigurationsMessages.error_scriptNotFound); //$NON-NLS-1$
+				return false;
+			}
 		}
 
 		return true;
+	}
+
+	protected URI validatAndGetScriptPath() {
+		String projectName = getProjectName();
+		IScriptProject proj = getScriptModel().getScriptProject(projectName);
+
+		URI location = proj.getProject().getLocationURI();
+		if (location == null) {
+			setErrorMessage(DLTKLaunchConfigurationsMessages.error_notAValidProject);
+			return null;
+		}
+		URI script = URI.create(location.toString() + "/" + getScriptName()); //$NON-NLS-1$
+		IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+				.findFilesForLocationURI(script);
+		if (files.length != 1)
+			return null;
+
+		IFile file = files[0];
+		if (file.exists() && file.getLocationURI() != null) {
+			script = file.getLocationURI();
+		}
+		return script;
 	}
 
 	/*
@@ -207,5 +272,24 @@ public abstract class MainLaunchConfigurationTab extends
 		}
 
 		return mainModuleName;
+	}
+
+	protected void createCustomSections(Composite parent) {
+		if (useInteractiveConsoleGroup) {
+			Font font = parent.getFont();
+			Group group = new Group(parent, SWT.NONE);
+			group
+					.setText(DLTKLaunchConfigurationsMessages.MainLaunchConfigurationTab_1);
+			GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+			group.setLayoutData(gd);
+			GridLayout layout = new GridLayout();
+			layout.numColumns = 2;
+			group.setLayout(layout);
+			group.setFont(font);
+			interactiveConsoleCheck = createCheckButton(
+					group,
+					DLTKLaunchConfigurationsMessages.MainLaunchConfigurationTab_2);
+			interactiveConsoleCheck.addSelectionListener(getWidgetListener());
+		}
 	}
 }

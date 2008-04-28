@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.launchConfigurations;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -178,8 +180,7 @@ public class ScriptArgumentsTab extends CommonScriptLaunchTab {
 				fInterpreterArgumentsBlock.initializeFrom(configuration);
 			fWorkingDirectoryBlock.initializeFrom(configuration);
 		} catch (CoreException e) {
-			setErrorMessage(ScriptLaunchMessages.ArgumentsTab_Exception_occurred_reading_configuration___15
-					+ e.getStatus().getMessage());
+			setErrorMessage(MessageFormat.format(ScriptLaunchMessages.ArgumentsTab_Exception_occurred_reading_configuration___15, new Object[] { e.getStatus().getMessage() }));
 			DLTKLaunchingPlugin.log(e);
 		}
 	}

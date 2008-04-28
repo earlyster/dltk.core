@@ -4,6 +4,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.debug.ui.preferences.messages"; //$NON-NLS-1$
+	public static String ScriptDebugConfigurationBlock_AutoDetectBindAddress;
+	public static String ScriptDebugConfigurationBlock_BindAddress;
 	public static String ScriptStepFilterPreferencePage_search;
 	static {
 		// initialize resource bundle

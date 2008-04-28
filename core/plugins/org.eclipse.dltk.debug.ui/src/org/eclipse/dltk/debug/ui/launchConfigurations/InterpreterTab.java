@@ -23,6 +23,8 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.messages.ScriptLaunchMessages;
 import org.eclipse.dltk.internal.debug.ui.interpreters.AbstractInterpreterComboBlock;
@@ -30,6 +32,7 @@ import org.eclipse.dltk.internal.debug.ui.interpreters.InterpreterDescriptor;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -164,6 +167,15 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 		updateInterpreterFromConfig(configuration);
 		fInterpreterBlock
 				.setDefaultInterpreterDescriptor(getDefaultInterpreterDescriptor());
+		IScriptProject scriptProject = getScriptProject();
+		if(scriptProject != null ) {
+			fInterpreterBlock.setEnvironment(EnvironmentManager.getEnvironment(scriptProject));
+			fInterpreterBlock.refreshInterpreters();
+		}
+		else {
+			fInterpreterBlock.setEnvironment(EnvironmentManager.getLocalEnvironment());
+			fInterpreterBlock.refreshInterpreters();
+		}
 		ILaunchConfigurationTab dynamicTab = getDynamicTab();
 		if (dynamicTab != null) {
 			dynamicTab.initializeFrom(configuration);
@@ -422,22 +434,24 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 			public String getDescription() {
 				IScriptProject project = getScriptProject();
 				String name = ScriptLaunchMessages.InterpreterTab_7;
-				if (project == null) {
-					IInterpreterInstall Interpreter = null;
-					Interpreter = ScriptRuntime
-							.getDefaultInterpreterInstall(getNature());
-					if (Interpreter != null) {
-						name = Interpreter.getName();
+				if (project == null || project.getProject().isAccessible()) {
+					IInterpreterInstall interpreter = null;
+					interpreter = ScriptRuntime
+							.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
+									getNature(),
+									LocalEnvironment.ENVIRONMENT_ID));
+					if (interpreter != null) {
+						name = interpreter.getName();
 					}
 					return MessageFormat.format(
 							ScriptLaunchMessages.InterpreterTab_8,
 							new String[] { name });
 				}
 				try {
-					IInterpreterInstall Interpreter = ScriptRuntime
+					IInterpreterInstall interpreter = ScriptRuntime
 							.getInterpreterInstall(project);
-					if (Interpreter != null) {
-						name = Interpreter.getName();
+					if (interpreter != null) {
+						name = interpreter.getName();
 					}
 				} catch (CoreException e) {
 				}

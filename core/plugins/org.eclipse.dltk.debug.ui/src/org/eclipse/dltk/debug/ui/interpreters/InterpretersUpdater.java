@@ -11,18 +11,23 @@ package org.eclipse.dltk.debug.ui.interpreters;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.internal.debug.ui.interpreters.InterpretersMessages;
 import org.eclipse.dltk.internal.launching.InterpreterDefinitionsContainer;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 /**
@@ -44,17 +49,19 @@ public class InterpretersUpdater {
 	private void saveCurrentAsOriginal() {
 		fOriginalInterpreters = new InterpreterDefinitionsContainer();
 
-		final String[] natureIds = ScriptRuntime.getInterpreterNatures();
-		for (int i = 0; i < natureIds.length; i++) {
-			final String natureId = natureIds[i];
+		final DefaultInterpreterEntry[] entries = ScriptRuntime
+				.getDefaultInterpreterIDs();
+		for (int i = 0; i < entries.length; i++) {
+			final DefaultInterpreterEntry entry = entries[i];
 
 			IInterpreterInstall def = ScriptRuntime
-					.getDefaultInterpreterInstall(natureId);
+					.getDefaultInterpreterInstall(entry);
 
 			if (def != null) {
-				fOriginalInterpreters.setDefaultInterpreterInstallCompositeID(
-						natureId, ScriptRuntime
-								.getCompositeIdFromInterpreter(def));
+				fOriginalInterpreters
+						.setDefaultInterpreterInstallCompositeID(entry,
+								ScriptRuntime
+										.getCompositeIdFromInterpreter(def));
 			}
 		}
 
@@ -76,26 +83,41 @@ public class InterpretersUpdater {
 	 * 
 	 * @param interpreters
 	 *            new installed InterpreterEnvironments
-	 * @param defaultInterpreter
+	 * @param defaultInterpreters
 	 *            new default Interpreter
 	 * @return whether the update was successful
 	 */
 	public boolean updateInterpreterSettings(String langNatureId,
 			IInterpreterInstall[] interpreters,
-			IInterpreterInstall defaultInterpreter) {
+			IInterpreterInstall[] defaultInterpreters) {
 		// Create a Interpreter definition container
 		InterpreterDefinitionsContainer container = new InterpreterDefinitionsContainer();
 
 		// Default interpreter id for natureId
-		if (defaultInterpreter != null) {
-			final String defaultId = ScriptRuntime
-					.getCompositeIdFromInterpreter(defaultInterpreter);
-			container.setDefaultInterpreterInstallCompositeID(langNatureId,
-					defaultId);
-		} else {
-			container.setDefaultInterpreterInstallCompositeID(langNatureId,
-					null);
+		Set envs = new HashSet();
+		if (defaultInterpreters != null) {
+			for (int i = 0; i < defaultInterpreters.length; i++) {
+				final String defaultId = ScriptRuntime
+						.getCompositeIdFromInterpreter(defaultInterpreters[i]);
+				IEnvironment environment = defaultInterpreters[i]
+						.getEnvironment();
+				DefaultInterpreterEntry entry = new DefaultInterpreterEntry(
+						langNatureId, environment.getId());
+				container.setDefaultInterpreterInstallCompositeID(entry,
+						defaultId);
+				envs.add(environment);
+			}
 		}
+		IEnvironment[] environments = EnvironmentManager.getEnvironments();
+		for (int i = 0; i < environments.length; i++) {
+			if (!envs.contains(environments[i])) {
+				DefaultInterpreterEntry entry = new DefaultInterpreterEntry(
+						langNatureId, environments[i].getId());
+				container.setDefaultInterpreterInstallCompositeID(entry, null);
+			}
+		}
+		// container.setDefaultInterpreterInstallCompositeID(langNatureId,
+		// null);
 
 		// Interpreters for natureId
 		for (int i = 0; i < interpreters.length; i++) {
@@ -103,14 +125,14 @@ public class InterpretersUpdater {
 		}
 
 		// Default interpreters for other languages
-		final String[] natureIds = fOriginalInterpreters
+		final DefaultInterpreterEntry[] entries = fOriginalInterpreters
 				.getInterpreterNatures();
-		for (int i = 0; i < natureIds.length; i++) {
-			final String natureId = natureIds[i];
-			if (!langNatureId.equals(natureId)) {
+		for (int i = 0; i < entries.length; i++) {
+			final DefaultInterpreterEntry entry = entries[i];
+			if (!langNatureId.equals(entry.getNature())) {
 				final String defaultId = fOriginalInterpreters
-						.getDefaultInterpreterInstallCompositeID(natureId);
-				container.setDefaultInterpreterInstallCompositeID(natureId,
+						.getDefaultInterpreterInstallCompositeID(entry);
+				container.setDefaultInterpreterInstallCompositeID(entry,
 						defaultId);
 			}
 		}

@@ -6,6 +6,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -52,12 +53,19 @@ public abstract class ScriptLaunchConfigurationTab extends
 		AbstractLaunchConfigurationTab {
 	protected static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
+	private String fMode;
+	// this options only active then mode is ILaunchManager.DEBUG
 	private Button breakOnFirstLine;
 	private Button enableLogging;
+
 	private Button fProjButton;
 	private Text fProjText;
 
 	private WidgetListener fListener = new WidgetListener();
+
+	public ScriptLaunchConfigurationTab(String mode) {
+		this.fMode = mode;
+	}
 
 	/*
 	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#canSave()
@@ -86,8 +94,16 @@ public abstract class ScriptLaunchConfigurationTab extends
 		createVerticalSpacer(comp, 1);
 
 		createDebugOptionsGroup(comp);
+
+		createCustomSections(comp);
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(),
 		// IScriptDebugHelpContextIds.LAUNCH_CONFIGURATION_DIALOG_MAIN_TAB);
+	}
+
+	/**
+	 * Create some custom user sections.
+	 */
+	protected void createCustomSections(Composite comp) {
 	}
 
 	/**
@@ -97,18 +113,21 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 *            the parent composite
 	 */
 	protected void createDebugOptionsGroup(Composite parent) {
-		String text = DLTKLaunchConfigurationsMessages.ScriptLaunchConfigurationTab_debugOptions;
-		Font font = parent.getFont();
-		Group group = new Group(parent, SWT.NONE);
-		group.setText(text);
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		group.setLayoutData(gd);
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 2;
-		group.setLayout(layout);
-		group.setFont(font);
-		addBreakOnFirstLineButton(group);
-		addDbgpLoggingButton(group);
+		if (ILaunchManager.DEBUG_MODE.equals(fMode)) {
+			String text = DLTKLaunchConfigurationsMessages.ScriptLaunchConfigurationTab_debugOptions;
+			Font font = parent.getFont();
+			Group group = new Group(parent, SWT.NONE);
+			group.setText(text);
+			GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+			group.setLayoutData(gd);
+			GridLayout layout = new GridLayout();
+			layout.numColumns = 2;
+			group.setLayout(layout);
+			group.setFont(font);
+
+			addBreakOnFirstLineButton(group);
+			addDbgpLoggingButton(group);
+		}
 	}
 
 	/*
@@ -142,15 +161,17 @@ public abstract class ScriptLaunchConfigurationTab extends
 		config.setAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, project);
 
-		if (breakOnFirstLine != null)
-			config
-					.setAttribute(
-							ScriptLaunchConfigurationConstants.ENABLE_BREAK_ON_FIRST_LINE,
-							breakOnFirstLine.getSelection());
-		if (enableLogging != null)
-			config.setAttribute(
-					ScriptLaunchConfigurationConstants.ENABLE_DBGP_LOGGING,
-					enableLogging.getSelection());
+		if (ILaunchManager.DEBUG_MODE.equals(fMode)) {
+			if (breakOnFirstLine != null)
+				config
+						.setAttribute(
+								ScriptLaunchConfigurationConstants.ENABLE_BREAK_ON_FIRST_LINE,
+								breakOnFirstLine.getSelection());
+			if (enableLogging != null)
+				config.setAttribute(
+						ScriptLaunchConfigurationConstants.ENABLE_DBGP_LOGGING,
+						enableLogging.getSelection());
+		}
 
 		doPerformApply(config);
 	}
@@ -481,11 +502,13 @@ public abstract class ScriptLaunchConfigurationTab extends
 		PreferencesLookupDelegate delegate = new PreferencesLookupDelegate(
 				getProject());
 
-		if (breakOnFirstLine != null)
-			breakOnFirstLine
-					.setSelection(breakOnFirstLinePrefEnabled(delegate));
-		if (enableLogging != null)
-			enableLogging.setSelection(dbpgLoggingPrefEnabled(delegate));
+		if (ILaunchManager.DEBUG_MODE.equals(fMode)) {
+			if (breakOnFirstLine != null)
+				breakOnFirstLine
+						.setSelection(breakOnFirstLinePrefEnabled(delegate));
+			if (enableLogging != null)
+				enableLogging.setSelection(dbpgLoggingPrefEnabled(delegate));
+		}
 	}
 
 	/**
@@ -502,12 +525,14 @@ public abstract class ScriptLaunchConfigurationTab extends
 
 		setProjectName(projectName);
 
-		if (breakOnFirstLine != null)
-			breakOnFirstLine.setSelection(LaunchConfigurationUtils
-					.isBreakOnFirstLineEnabled(config));
-		if (enableLogging != null)
-			enableLogging.setSelection(LaunchConfigurationUtils
-					.isDbgpLoggingEnabled(config));
+		if (ILaunchManager.DEBUG_MODE.equals(fMode)) {
+			if (breakOnFirstLine != null)
+				breakOnFirstLine.setSelection(LaunchConfigurationUtils
+						.isBreakOnFirstLineEnabled(config));
+			if (enableLogging != null)
+				enableLogging.setSelection(LaunchConfigurationUtils
+						.isDbgpLoggingEnabled(config));
+		}
 	}
 
 	protected boolean validateProject() {

@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Text;
 public abstract class RemoteLaunchConfigurationTab extends
 		ScriptLaunchConfigurationTab {
 
+
 	private static int DEFAULT_PORT = 10000;
 	private static String DEFAULT_IDEKEY = "idekey"; //$NON-NLS-1$
 
@@ -29,6 +30,9 @@ public abstract class RemoteLaunchConfigurationTab extends
 	private Text ideKey;
 	private Text remoteWorkingDir;
 
+	public RemoteLaunchConfigurationTab(String mode) {
+		super(mode);
+	}
 	/*
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getName()
 	 */

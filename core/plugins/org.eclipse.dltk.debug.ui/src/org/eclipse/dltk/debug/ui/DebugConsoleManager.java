@@ -12,10 +12,13 @@ package org.eclipse.dltk.debug.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
+import org.eclipse.ui.WorkbenchEncoding;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -48,7 +51,14 @@ public class DebugConsoleManager implements ILaunchListener {
 	}
 
 	protected ScriptDebugConsole createConsole(String name, ILaunch launch) {
-		ScriptDebugConsole console = new ScriptDebugConsole(name, null);
+		String encoding = WorkbenchEncoding.getWorkbenchDefaultEncoding();
+		try {
+			encoding = launch.getLaunchConfiguration().getAttribute(DebugPlugin.ATTR_CONSOLE_ENCODING, encoding);
+		}
+		catch (CoreException e) {
+			e.printStackTrace();
+		}
+		ScriptDebugConsole console = new ScriptDebugConsole(name, null, encoding);
 		console.setLaunch(launch);
 		IConsoleManager manager = ConsolePlugin.getDefault()
 				.getConsoleManager();
