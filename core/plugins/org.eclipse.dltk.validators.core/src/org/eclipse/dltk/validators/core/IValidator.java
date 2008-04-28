@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -28,7 +29,7 @@ public interface IValidator {
 	String getName();
 	void setName(String name);
 	IValidatorType getValidatorType();
-	boolean isValidatorValid();
+	boolean isValidatorValid(IEnvironment environment);
 	
 	//Per-resouce operations
 	// If console is non null then output to console are possible.
