@@ -79,7 +79,7 @@ public abstract class DbgpOperation {
 				return Status.OK_STATUS;
 			}
 		};
-		job.setSystem(false);
+		job.setSystem(true);
 		job.setUser(false);
 	}
 
