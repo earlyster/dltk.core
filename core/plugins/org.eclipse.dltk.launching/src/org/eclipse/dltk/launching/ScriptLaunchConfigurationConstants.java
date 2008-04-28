@@ -21,7 +21,7 @@ public class ScriptLaunchConfigurationConstants {
 	}
 
 	// Attributes
-	public static final String ATTR_USE_DLTK_OUTPUT = "use_dtltk"; //$NON-NLS-1$
+	public static final String ATTR_USE_INTERACTIVE_CONSOLE = "use_dltk_interactive_console"; //$NON-NLS-1$
 
 	public static final String ATTR_DLTK_CONSOLE_ID = "console_id"; //$NON-NLS-1$
 
@@ -152,5 +152,4 @@ public class ScriptLaunchConfigurationConstants {
 	public static final int ERR_DEBUGGING_ENGINE_NOT_CONFIGURED = 500;
 
 	public static final int ERR_NO_DEFAULT_DEBUGGING_ENGINE = 510;
-
 }

@@ -22,6 +22,9 @@ import org.eclipse.dltk.core.IAccessRule;
 import org.eclipse.dltk.core.IBuildpathAttribute;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.launching.AbstractScriptLaunchConfigurationDelegate;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IRuntimeBuildpathEntry;
 import org.eclipse.dltk.launching.IRuntimeBuildpathEntryResolver;
@@ -48,28 +51,36 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		String nature = configuration.getAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_SCRIPT_NATURE,
 				(String) null);
-		IInterpreterInstall InterpreterEnvironment = null;
+
+		IScriptProject project = AbstractScriptLaunchConfigurationDelegate
+				.getScriptProject(configuration);
+		IEnvironment environment = EnvironmentManager.getEnvironment(project);
+		IInterpreterInstall interpreterEnvironment = null;
 		if (entry.getType() == IRuntimeBuildpathEntry.CONTAINER
 				&& entry.getPath().segmentCount() > 1) {
 			// a specific Interpreter
-			InterpreterEnvironment = InterpreterContainerInitializer
-					.resolveInterpreter(nature, entry.getPath());
+			interpreterEnvironment = InterpreterContainerInitializer
+					.resolveInterpreter(nature, environment.getId(), entry
+							.getPath());
 		} else {
 			// default Interpreter for config
-			InterpreterEnvironment = ScriptRuntime
+			interpreterEnvironment = ScriptRuntime
 					.computeInterpreterInstall(configuration);
 		}
-		if (InterpreterEnvironment == null) {
+		if (interpreterEnvironment == null) {
 			// cannot resolve InterpreterEnvironment
 			return new IRuntimeBuildpathEntry[0];
 		}
-		return resolveLibraryLocations(InterpreterEnvironment, entry
+		return resolveLibraryLocations(interpreterEnvironment, entry
 				.getBuildpathProperty());
 	}
 
 	private String getNatureFromProject(IScriptProject project) {
-		return DLTKLanguageManager.getLanguageToolkit(project)
-				.getNatureId();
+		return DLTKLanguageManager.getLanguageToolkit(project).getNatureId();
+	}
+
+	private String getEnvironmentFromProject(IScriptProject project) {
+		return EnvironmentManager.getEnvironment(project).getId();
 	}
 
 	/**
@@ -79,23 +90,23 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 	public IRuntimeBuildpathEntry[] resolveRuntimeBuildpathEntry(
 			IRuntimeBuildpathEntry entry, IScriptProject project)
 			throws CoreException {
-		IInterpreterInstall InterpreterEnvironment = null;
+		IInterpreterInstall interpreterEnvironment = null;
 		if (entry.getType() == IRuntimeBuildpathEntry.CONTAINER
 				&& entry.getPath().segmentCount() > 1) {
 			// a specific Interpreter
-			InterpreterEnvironment = InterpreterContainerInitializer
-					.resolveInterpreter(getNatureFromProject(project), entry
-							.getPath());
+			interpreterEnvironment = InterpreterContainerInitializer
+					.resolveInterpreter(getNatureFromProject(project),
+							getEnvironmentFromProject(project), entry.getPath());
 		} else {
 			// default Interpreter for project
-			InterpreterEnvironment = ScriptRuntime
+			interpreterEnvironment = ScriptRuntime
 					.getInterpreterInstall(project);
 		}
-		if (InterpreterEnvironment == null) {
+		if (interpreterEnvironment == null) {
 			// cannot resolve InterpreterEnvironment
 			return new IRuntimeBuildpathEntry[0];
 		}
-		return resolveLibraryLocations(InterpreterEnvironment, entry
+		return resolveLibraryLocations(interpreterEnvironment, entry
 				.getBuildpathProperty());
 	}
 
@@ -111,8 +122,7 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		if (libs == null) {
 			// default system libs
 			libs = defaultLibs;
-		}
-		else if (!isSamePaths(libs, defaultLibs)) {
+		} else if (!isSamePaths(libs, defaultLibs)) {
 			// determine if bootpath should be explicit
 			kind = IRuntimeBuildpathEntry.BOOTSTRAP_ENTRY;
 		}
@@ -127,7 +137,9 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		return (IRuntimeBuildpathEntry[]) resolvedEntries
 				.toArray(new IRuntimeBuildpathEntry[resolvedEntries.size()]);
 	}
-	public static boolean isSamePaths(LibraryLocation[] libs, LibraryLocation[] defaultLibs) {
+
+	public static boolean isSamePaths(LibraryLocation[] libs,
+			LibraryLocation[] defaultLibs) {
 		if (libs.length != defaultLibs.length) {
 			return false;
 		}
@@ -135,9 +147,12 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		for (int i = 0; i < defaultLibs.length; i++) {
 			dpath = defaultLibs[i].getLibraryPath();
 			lpath = libs[i].getLibraryPath();
-			if(Platform.getOS().equals(Platform.OS_WIN32)) {
-				//the .equals method of IPath ignores trailing seperators so we must as well
-				if (!dpath.removeTrailingSeparator().toOSString().equalsIgnoreCase(lpath.removeTrailingSeparator().toOSString())) {
+			if (Platform.getOS().equals(Platform.OS_WIN32)) {
+				// the .equals method of IPath ignores trailing seperators so we
+				// must as well
+				if (!dpath.removeTrailingSeparator().toOSString()
+						.equalsIgnoreCase(
+								lpath.removeTrailingSeparator().toOSString())) {
 					return false;
 				}
 			} else if (!dpath.equals(lpath)) {
@@ -146,6 +161,7 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		}
 		return true;
 	}
+
 	/**
 	 * Return whether the given list of libraries refer to the same archives in
 	 * the same order. Only considers the binary archive (not source or javadoc
@@ -175,13 +191,13 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 	 * @see IRuntimeBuildpathEntryResolver#resolveInterpreterInstall(IBuildpathEntry)
 	 */
 	public IInterpreterInstall resolveInterpreterInstall(String lang,
-			IBuildpathEntry entry) {
+			String environment, IBuildpathEntry entry) {
 		if (entry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER)
 			if (entry.getPath().segment(0).equals(
 					ScriptRuntime.INTERPRETER_CONTAINER)) {
 				try {
 					return InterpreterContainerInitializer.resolveInterpreter(
-							lang, entry.getPath());
+							lang, environment, entry.getPath());
 				} catch (CoreException e) {
 					return null;
 				}
@@ -189,7 +205,7 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		return null;
 	}
 
-	public boolean isInterpreterInstallReference(String lang,
+	public boolean isInterpreterInstallReference(String lang, String environment,
 			IBuildpathEntry entry) {
 		if (entry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER)
 			if (entry.getPath().segment(0).equals(

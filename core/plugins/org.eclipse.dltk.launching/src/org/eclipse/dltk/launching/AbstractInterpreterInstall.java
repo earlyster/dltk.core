@@ -9,15 +9,15 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
-import java.io.File;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IExecutionEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.DebugRunnerDelegate;
-import org.eclipse.dltk.utils.PlatformFileUtils;
 
 /**
  * Abstract implementation of a interpreter install.
@@ -29,7 +29,7 @@ public abstract class AbstractInterpreterInstall implements IInterpreterInstall 
 	private IInterpreterInstallType fType;
 	private String fId;
 	private String fName;
-	private File fInstallLocation;
+	private IFileHandle fInstallLocation;
 	private LibraryLocation[] fSystemLibraryDescriptions;
 	private String fInterpreterArgs;
 	private EnvironmentVariable[] fEnvironmentVariables;
@@ -83,15 +83,32 @@ public abstract class AbstractInterpreterInstall implements IInterpreterInstall 
 		}
 	}
 
-	public File getInstallLocation() {
-		return PlatformFileUtils
-				.findAbsoluteOrEclipseRelativeFile(fInstallLocation);
-	}
-	public File getRawInstallLocation() {
+	public IFileHandle getInstallLocation() {
+		// return PlatformFileUtils
+		// .findAbsoluteOrEclipseRelativeFile(fInstallLocation);
 		return fInstallLocation;
 	}
 
-	public void setInstallLocation(File installLocation) {
+	public IFileHandle getRawInstallLocation() {
+		return fInstallLocation;
+	}
+
+	public IEnvironment getEnvironment() {
+		if (fInstallLocation != null)
+			return fInstallLocation.getEnvironment();
+		return null;
+	}
+
+	public IExecutionEnvironment getExecEnvironment() {
+		IEnvironment environment = getEnvironment();
+		if (environment != null) {
+			return (IExecutionEnvironment) environment
+					.getAdapter(IExecutionEnvironment.class);
+		}
+		return null;
+	}
+
+	public void setInstallLocation(IFileHandle installLocation) {
 		if (!installLocation.equals(fInstallLocation)) {
 			PropertyChangeEvent event = new PropertyChangeEvent(
 					this,

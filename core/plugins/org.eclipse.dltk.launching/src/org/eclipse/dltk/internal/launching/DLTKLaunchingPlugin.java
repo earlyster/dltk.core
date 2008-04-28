@@ -37,23 +37,19 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.internal.launching.execution.DeploymentManager;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallChangedListener;
-import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.IRuntimeBuildpathEntry2;
 import org.eclipse.dltk.launching.InterpreterStandin;
 import org.eclipse.dltk.launching.LaunchingMessages;
@@ -307,43 +303,7 @@ public class DLTKLaunchingPlugin extends Plugin implements
 		// DebugPlugin.getDefault().getLaunchManager().addLaunchListener(this);
 		// DebugPlugin.getDefault().addDebugEventListener(this);
 
-		// prefetch library locations for default interpreters
-//		Job libPrefetch = new Job("Initializing DLTK launching") {
-//			protected IStatus run(IProgressMonitor monitor) {
-//				try {
-//					IDLTKLanguageToolkit[] toolkits = DLTKLanguageManager
-//							.getLanguageToolkits();
-//					monitor.beginTask("Initialize interpreters", toolkits.length);
-//					for (int i = 0; i < toolkits.length; i++) {
-//						SubProgressMonitor subMonitor = new SubProgressMonitor(
-//								monitor, 1);
-//						String natureId = toolkits[i].getNatureId();
-//						IInterpreterInstall install = ScriptRuntime
-//								.getDefaultInterpreterInstall(natureId);
-//						if (install != null) {
-//							IInterpreterInstallType type = install
-//									.getInterpreterInstallType();
-//							// cache library locations.
-//							type.getDefaultLibraryLocations(install
-//									.getInstallLocation(), install
-//									.getEnvironmentVariables(), subMonitor);
-//						} else {
-//							subMonitor.worked(1);
-//						}
-//						subMonitor.done();
-//					}
-//					monitor.done();
-//				} catch (CoreException e) {
-//					if (DLTKCore.DEBUG) {
-//						e.printStackTrace();
-//					}
-//				}
-//				return Status.OK_STATUS;
-//			}
-//
-//		};
-////		libPrefetch.setSystem(true);
-//		libPrefetch.schedule();
+		DeploymentManager.getInstance().startup();
 	}
 
 	/**
@@ -353,6 +313,7 @@ public class DLTKLaunchingPlugin extends Plugin implements
 	 */
 	public void stop(BundleContext context) throws Exception {
 		try {
+			DeploymentManager.getInstance().shutdown();
 			// DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(this);
 			// DebugPlugin.getDefault().removeDebugEventListener(this);
 			// ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
@@ -638,27 +599,6 @@ public class DLTKLaunchingPlugin extends Plugin implements
 		// old container ids to new
 		private HashMap fRenamedContainerIds = new HashMap();
 
-		/**
-		 * Returns the InterpreterEnvironment container id that the given
-		 * Interpreter would map to, or <code>null</code> if none.
-		 * 
-		 * @param Interpreter
-		 * @return container id or <code>null</code>
-		 */
-		private IPath getContainerId(IInterpreterInstall Interpreter) {
-			if (Interpreter != null) {
-				String name = Interpreter.getName();
-				if (name != null) {
-					IPath path = new Path(ScriptRuntime.INTERPRETER_CONTAINER);
-					path = path.append(new Path(Interpreter
-							.getInterpreterInstallType().getId()));
-					path = path.append(new Path(name));
-					return path;
-				}
-			}
-			return null;
-		}
-
 		public void defaultInterpreterInstallChanged(
 				IInterpreterInstall previous, IInterpreterInstall current) {
 		}
@@ -673,15 +613,15 @@ public class DLTKLaunchingPlugin extends Plugin implements
 					.getSource();
 			if (property
 					.equals(IInterpreterInstallChangedListener.PROPERTY_NAME)) {
-				IPath newId = getContainerId(Interpreter);
-				IPath oldId = new Path(ScriptRuntime.INTERPRETER_CONTAINER);
-				oldId = oldId.append(Interpreter.getInterpreterInstallType()
-						.getId());
+				IPath newId = ScriptRuntime
+						.newInterpreterContainerPath(Interpreter);
+
 				String oldName = (String) event.getOldValue();
-				// bug 33746 - if there is no old name, then this is not a
-				// re-name.
-				if (oldName != null) {
-					oldId = oldId.append(oldName);
+				String oldTypeId = Interpreter.getInterpreterInstallType()
+						.getId();
+				IPath oldId = ScriptRuntime.newInterpreterContainerPath(
+						oldTypeId, oldName);
+				if (oldId != null) {
 					fRenamedContainerIds.put(oldId, newId);
 				}
 			}
@@ -690,12 +630,16 @@ public class DLTKLaunchingPlugin extends Plugin implements
 		public void interpreterRemoved(IInterpreterInstall Interpreter) {
 		}
 
+		InterpreterUpdateJob job = null;
+
 		/**
 		 * Re-bind buildpath variables and containers affected by the
 		 * InterpreterEnvironment changes.
 		 */
 		public void process() throws CoreException {
-			InterpreterUpdateJob job = new InterpreterUpdateJob(this);
+			if (job == null) {
+				job = new InterpreterUpdateJob(this);
+			}
 			job.schedule();
 		}
 

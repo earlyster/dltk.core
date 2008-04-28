@@ -9,9 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
-import java.io.File;
-
 import org.eclipse.dltk.core.IBuiltinModuleProvider;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IExecutionEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 public interface IInterpreterInstall extends IBuiltinModuleProvider {
 	// Runner
@@ -28,11 +29,14 @@ public interface IInterpreterInstall extends IBuiltinModuleProvider {
 	void setName(String name);
 
 	// Also search for Platform location relative locations.
-	File getInstallLocation();
+	IFileHandle getInstallLocation();
 	//
-	File getRawInstallLocation();
+	IFileHandle getRawInstallLocation();
 
-	void setInstallLocation(File installLocation);
+	void setInstallLocation(IFileHandle installLocation);
+
+	IEnvironment getEnvironment();
+	IExecutionEnvironment getExecEnvironment();
 
 	// Type
 	IInterpreterInstallType getInterpreterInstallType();

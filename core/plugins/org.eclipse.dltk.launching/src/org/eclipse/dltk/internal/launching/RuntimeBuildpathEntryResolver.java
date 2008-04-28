@@ -72,8 +72,8 @@ public class RuntimeBuildpathEntryResolver implements IRuntimeBuildpathEntryReso
 	/**
 	 * @see IRuntimeBuildpathEntryResolver#resolveInterpreterInstall(IBuildpathEntry)
 	 */
-	public IInterpreterInstall resolveInterpreterInstall(String lang, IBuildpathEntry entry) throws CoreException {
-		return getResolver().resolveInterpreterInstall(lang, entry);
+	public IInterpreterInstall resolveInterpreterInstall(String lang, String environment, IBuildpathEntry entry) throws CoreException {
+		return getResolver().resolveInterpreterInstall(lang, environment, entry);
 	}
 
 	/**
@@ -83,14 +83,14 @@ public class RuntimeBuildpathEntryResolver implements IRuntimeBuildpathEntryReso
 		return getResolver().resolveRuntimeBuildpathEntry(entry, project);
 	}
 
-	public boolean isInterpreterInstallReference(String lang, IBuildpathEntry entry) {
+	public boolean isInterpreterInstallReference(String lang, String environment, IBuildpathEntry entry) {
 		try {
 			IRuntimeBuildpathEntryResolver resolver = getResolver();
 			if (resolver instanceof IRuntimeBuildpathEntryResolver2) {
 				IRuntimeBuildpathEntryResolver2 resolver2 = (IRuntimeBuildpathEntryResolver2) resolver;
-				return resolver2.isInterpreterInstallReference(lang, entry);
+				return resolver2.isInterpreterInstallReference(lang, environment, entry);
 			} else {
-				return resolver.resolveInterpreterInstall(lang, entry) != null;
+				return resolver.resolveInterpreterInstall(lang, environment, entry) != null;
 			}
 		} catch (CoreException e) {
 			return false;

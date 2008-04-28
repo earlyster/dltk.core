@@ -1,7 +1,6 @@
 package org.eclipse.dltk.launching;
 
-import java.io.File;
-import java.text.MessageFormat;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -12,6 +11,8 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.PreferencesLookupDelegate;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.dbgp.DbgpSessionIdGenerator;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
@@ -25,13 +26,10 @@ import org.eclipse.dltk.internal.launching.InterpreterMessages;
 import org.eclipse.dltk.launching.debug.DbgpInterpreterConfig;
 import org.eclipse.dltk.launching.debug.DebuggingEngineManager;
 import org.eclipse.dltk.launching.debug.IDebuggingEngine;
-import org.eclipse.dltk.utils.PlatformFileUtils;
 
 public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	// Launch attributes
 	public static final String LAUNCH_ATTR_DEBUGGING_ENGINE_ID = "debugging_engine_id"; //$NON-NLS-1$
-
-	private static final String LOCALHOST = "127.0.0.1"; //$NON-NLS-1$
 
 	public static final String OVERRIDE_EXE = "OVERRIDE_EXE"; //$NON-NLS-1$
 
@@ -89,14 +87,19 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 
 		dbgpConfig.setSessionId(target.getSessionId());
 		dbgpConfig.setPort(service.getPort());
-		dbgpConfig.setHost(LOCALHOST);
+		dbgpConfig.setHost(getBindAddress());
+	}
+
+	private String getBindAddress() {
+		return DLTKDebugPlugin.getDefault().getBindAddress();
 	}
 
 	/**
 	 * Add the debugging engine configuration.
+	 * @param launch TODO
 	 */
 	protected abstract InterpreterConfig addEngineConfig(
-			InterpreterConfig config, PreferencesLookupDelegate delegate)
+			InterpreterConfig config, PreferencesLookupDelegate delegate, ILaunch launch)
 			throws CoreException;
 
 	public void run(InterpreterConfig config, ILaunch launch,
@@ -105,7 +108,8 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 			monitor = new NullProgressMonitor();
 		}
 
-		monitor.beginTask(InterpreterMessages.DebuggingEngineRunner_launching, 5);
+		monitor.beginTask(InterpreterMessages.DebuggingEngineRunner_launching,
+				5);
 		if (monitor.isCanceled()) {
 			return;
 		}
@@ -113,7 +117,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 			PreferencesLookupDelegate prefDelegate = createPreferencesLookupDelegate(launch);
 
 			initializeLaunch(launch, config, prefDelegate);
-			InterpreterConfig newConfig = addEngineConfig(config, prefDelegate);
+			InterpreterConfig newConfig = addEngineConfig(config, prefDelegate, launch);
 
 			// Starting debugging engine
 			IProcess process = null;
@@ -122,7 +126,8 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 						ExtendedDebugEventDetails.BEFORE_VM_STARTED);
 
 				// Running
-				monitor.subTask(InterpreterMessages.DebuggingEngineRunner_running);
+				monitor
+						.subTask(InterpreterMessages.DebuggingEngineRunner_running);
 				process = rawRun(launch, newConfig);
 			} catch (CoreException e) {
 				abort(InterpreterMessages.errDebuggingEngineNotStarted, e);
@@ -143,7 +148,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	protected String[] renderCommandLine(InterpreterConfig config) {
 		String exe = (String) config.getProperty(OVERRIDE_EXE);
 		if (exe != null) {
-			return config.renderCommandLine(exe);
+			return config.renderCommandLine(getInstall().getEnvironment(), exe);
 		}
 
 		return config.renderCommandLine(getInstall());
@@ -252,13 +257,11 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	 * and not the DBGP protocol output.
 	 * </p>
 	 */
-	protected abstract String getLoggingEnabledPreferenceKey();
-
+	// protected abstract String getLoggingEnabledPreferenceKey();
 	/**
 	 * Returns the preference key used to store the log file path
 	 */
-	protected abstract String getLogFilePathPreferenceKey();
-
+	// protected abstract String getLogFilePathPreferenceKey();
 	/**
 	 * Returns the preference key usd to store the log file name
 	 */
@@ -272,13 +275,12 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	 * the given debugging engine.
 	 * </p>
 	 */
-	protected boolean isLoggingEnabled(PreferencesLookupDelegate delegate) {
-		String key = getLoggingEnabledPreferenceKey();
-		String qualifier = getDebuggingEnginePreferenceQualifier();
-
-		return delegate.getBoolean(qualifier, key);
-	}
-
+	// protected boolean isLoggingEnabled(PreferencesLookupDelegate delegate) {
+	// String key = getLoggingEnabledPreferenceKey();
+	// String qualifier = getDebuggingEnginePreferenceQualifier();
+	//
+	// return delegate.getBoolean(qualifier, key);
+	// }
 	/**
 	 * Returns a fully qualifed path to a log file name.
 	 * 
@@ -287,20 +289,22 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	 * with the debugging session id.
 	 * </p>
 	 */
-	protected File getLogFileName(PreferencesLookupDelegate delegate,
+	protected String getLogFileName(PreferencesLookupDelegate delegate,
 			String sessionId) {
 		String qualifier = getDebuggingEnginePreferenceQualifier();
-
-		String logFilePath = delegate.getString(qualifier,
-				getLogFilePathPreferenceKey());
-		String logFileName = delegate.getString(qualifier,
+		String keyValue = delegate.getString(qualifier,
 				getLogFileNamePreferenceKey());
 
-		String fileName = MessageFormat.format(logFileName,
-				new Object[] { sessionId });
-
-		File file = new File(logFilePath + File.separator + fileName);
-
-		return PlatformFileUtils.findAbsoluteOrEclipseRelativeFile(file);
+		Map logFileNames = EnvironmentPathUtils.decodePaths(keyValue);
+		IEnvironment env = getInstall().getEnvironment();
+		String pathString = (String) logFileNames.get(env);
+		if (pathString != null && pathString.length() > 0) {
+			return pathString;
+			// IPath path = new Path(pathString);
+			// return PlatformFileUtils.findAbsoluteOrEclipseRelativeFile(env,
+			// path).toString();
+		} else {
+			return null;
+		}
 	}
 }

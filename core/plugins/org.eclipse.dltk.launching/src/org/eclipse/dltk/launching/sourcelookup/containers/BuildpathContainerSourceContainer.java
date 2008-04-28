@@ -8,7 +8,6 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.sourcelookup.ISourceContainerType;
 import org.eclipse.debug.core.sourcelookup.containers.AbstractSourceContainer;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -19,10 +18,9 @@ import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 public class BuildpathContainerSourceContainer extends AbstractSourceContainer {
 
 	public static final String TYPE_ID = "org.eclipse.dltk.launching.sourceContainer.buildpathContainer"; //$NON-NLS-1$
-	
+
 	private String libraryPath;
-	
-	
+
 	public BuildpathContainerSourceContainer(String location) {
 		libraryPath = location;
 	}
@@ -32,9 +30,10 @@ public class BuildpathContainerSourceContainer extends AbstractSourceContainer {
 			return new Object[0];
 		}
 
-		// Lets try to locate model element.		
+		// Lets try to locate model element.
 		try {
-			final ILaunchConfiguration configuration = getDirector().getLaunchConfiguration();
+			final ILaunchConfiguration configuration = getDirector()
+					.getLaunchConfiguration();
 
 			String projectName;
 
@@ -47,11 +46,10 @@ public class BuildpathContainerSourceContainer extends AbstractSourceContainer {
 				IProject project = ResourcesPlugin.getWorkspace().getRoot()
 						.getProject(projectName);
 				IScriptProject prj = DLTKCore.create(project);
-				IDLTKSearchScope scope = SearchEngine
-						.createSearchScope(new IModelElement[] { prj });
+				IDLTKSearchScope scope = SearchEngine.createSearchScope(prj);
 				HandleFactory fac = new HandleFactory();
 				Openable op = fac.createOpenable(name, scope);
-				
+
 				if (op != null && op.exists() && op instanceof IStorage) {
 					return new Object[] { op };
 				}
@@ -63,7 +61,7 @@ public class BuildpathContainerSourceContainer extends AbstractSourceContainer {
 
 		return new Object[0];
 	}
-	
+
 	public String getName() {
 		return libraryPath;
 	}

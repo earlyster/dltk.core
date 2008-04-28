@@ -13,6 +13,7 @@ import java.io.File;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 /**
  * Represents a particular type of interpreter for which there may be any number
@@ -101,12 +102,12 @@ public interface IInterpreterInstallType {
 	 * executable is present.
 	 * </p>
 	 * 
-	 * @param installLocation
+	 * @param file
 	 *            the root directory of a potential installation for this type
 	 *            of interpreter
 	 * @return a status object describing whether the install location is valid
 	 */
-	IStatus validateInstallLocation(File installLocation);
+	IStatus validateInstallLocation(IFileHandle file);
 
 	/**
 	 * Returns a collection of <code>LibraryLocation</code>s that represent
@@ -125,12 +126,12 @@ public interface IInterpreterInstallType {
 	 * 
 	 */
 
-	LibraryLocation[] getDefaultLibraryLocations(File installLocation);
+	LibraryLocation[] getDefaultLibraryLocations(IFileHandle installLocation);
 
-	LibraryLocation[] getDefaultLibraryLocations(File installLocation,
+	LibraryLocation[] getDefaultLibraryLocations(IFileHandle installLocation,
 			EnvironmentVariable[] variables);
 
-	LibraryLocation[] getDefaultLibraryLocations(File installLocation,
+	LibraryLocation[] getDefaultLibraryLocations(IFileHandle fileHandle,
 			EnvironmentVariable[] variables, IProgressMonitor monitor);
 
 	/**

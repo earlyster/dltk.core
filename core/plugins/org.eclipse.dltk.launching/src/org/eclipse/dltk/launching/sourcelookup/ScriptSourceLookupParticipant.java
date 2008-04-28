@@ -1,21 +1,22 @@
 package org.eclipse.dltk.launching.sourcelookup;
 
-import java.io.File;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.sourcelookup.AbstractSourceLookupParticipant;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.debug.core.model.ScriptStackFrame;
@@ -31,9 +32,9 @@ public class ScriptSourceLookupParticipant extends
 		if (path.length() == 0) {
 			return null;
 		}
-		if (Platform.getOS().equals(Platform.OS_WIN32)) {
-			path = path.substring(1);
-		}
+//		if (Platform.getOS().equals(Platform.OS_WIN32)) {
+//			path = path.substring(1);
+//		}
 
 		String root = getProjectRoot();
 
@@ -58,10 +59,17 @@ public class ScriptSourceLookupParticipant extends
 		return path;
 	}
 
+	private IEnvironment getEnvironment() {
+		IProject project = LaunchConfigurationUtils.getProject(getDirector()
+				.getLaunchConfiguration());
+		IScriptProject scriptProject = DLTKCore.create(project);
+		return EnvironmentManager.getEnvironment(scriptProject);
+	}
+	
 	protected String getProjectRoot() throws CoreException {
 		IProject project = LaunchConfigurationUtils.getProject(getDirector()
 				.getLaunchConfiguration());
-		return project.getLocation().toPortableString();
+		return project.getLocationURI().getPath();
 	}
 
 	public Object[] findSourceElements(Object object) throws CoreException {
@@ -78,7 +86,7 @@ public class ScriptSourceLookupParticipant extends
 
 		ScriptStackFrame frame = (ScriptStackFrame) object;
 		final String path = frame.getFileName().getPath();
-		File file = new File(path);
+		IFileHandle file = getEnvironment().getFile(new Path(path));
 		final ISourceModule[] result = new ISourceModule[] { null };
 		if (file.exists()) {
 			// Try to open external source module.

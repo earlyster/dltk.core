@@ -35,19 +35,20 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IDeployment;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IExecutionEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.LaunchingMessages;
 import org.eclipse.dltk.launching.LibraryLocation;
 import org.eclipse.dltk.launching.ScriptRuntime;
-import org.eclipse.dltk.utils.DeployHelper;
 
 /**
  * Abstract implementation of a interpreter install type. Subclasses should
@@ -207,15 +208,16 @@ public abstract class AbstractInterpreterInstallType implements
 		}
 	}
 
-	protected String[] extractEnvironment(EnvironmentVariable[] variables) {
-		Map env = DebugPlugin.getDefault().getLaunchManager()
-				.getNativeEnvironmentCasePreserved();
+	protected String[] extractEnvironment(IExecutionEnvironment exeEnv,
+			EnvironmentVariable[] variables) {
+		Map env = exeEnv.getEnvironmentVariables();
 
 		filterEnvironment(env);
 
 		List list = new ArrayList();
-		
-		EnvironmentVariable[] vars = EnvironmentResolver.resolve(env, variables);
+
+		EnvironmentVariable[] vars = EnvironmentResolver
+				.resolve(env, variables);
 
 		// Overwrite from variables with updates values.
 		if (variables != null) {
@@ -247,75 +249,90 @@ public abstract class AbstractInterpreterInstallType implements
 		// Nothing to do
 	}
 
-	protected File storeToMetadata(Plugin plugin, String name, String path)
-			throws IOException {
-		return DeployHelper.deploy(plugin, path).toFile();
-		// return ScriptUtils.storeToMetadata(plugin, name, path);
-	}
-
 	/**
 	 * Process should write one line into console with format 'path1 path2
 	 * path3'
 	 * 
 	 * @param monitor
-	 * @param p
+	 * @param process
 	 * @return
 	 */
 	protected String[] readPathsFromProcess(final IProgressMonitor monitor,
-			Process p) {
+			final Process process) {
 		// DLTKLaunchingPlugin.log(new Status(IStatus.INFO,
 		// DLTKLaunchingPlugin.PLUGIN_ID, IStatus.INFO,
 		// "Start reading discovery script library paths", null));
 		final BufferedReader dataIn = new BufferedReader(new InputStreamReader(
-				p.getInputStream()));
+				process.getInputStream()));
 
 		final List result = new ArrayList();
 
 		// final Object lock = new Object();
 
-		// Thread tReading = new Thread(new Runnable() {
-		// public void run() {
-		boolean workReceived = false;
-		try {
-			while (true) {
-				if (monitor != null && monitor.isCanceled()) {
-					monitor.worked(1);
-					p.destroy();
-					break;
-				}
-				String line = dataIn.readLine();
-				if (line != null && monitor != null && !workReceived) {
-					int work = extractWorkFromLine(line);
-					if (work != NOT_WORK_COUNT) {
-						monitor.beginTask(
-								LaunchingMessages.AbstractInterpreterInstallType_fetchingInterpreterLibraryLocations, work);
-						// monitor.subTask("Featching interpeter library
-						// locations");
-						workReceived = true;
+		Thread tReading = new Thread(new Runnable() {
+			public void run() {
+				boolean workReceived = false;
+				try {
+					while (true) {
+						if (monitor != null && monitor.isCanceled()) {
+							monitor.worked(1);
+							process.destroy();
+							break;
+						}
+						String line = dataIn.readLine();
+						if (line != null && monitor != null && !workReceived) {
+							int work = extractWorkFromLine(line);
+							if (work != NOT_WORK_COUNT) {
+								monitor
+										.beginTask(
+												LaunchingMessages.AbstractInterpreterInstallType_fetchingInterpreterLibraryLocations,
+												work);
+								// monitor.subTask("Featching interpeter library
+								// locations");
+								workReceived = true;
+							}
+						}
+						if (line != null && monitor != null
+								&& detectWorkInc(line)) {
+							monitor.worked(1);
+						}
+						if (line != null) {
+							result.add(line);
+						} else {
+							break;
+						}
+					}
+
+				} catch (IOException e) {
+					DLTKLaunchingPlugin
+							.log(new Status(
+									IStatus.INFO,
+									DLTKLaunchingPlugin.PLUGIN_ID,
+									IStatus.INFO,
+									MessageFormat
+											.format(
+													LaunchingMessages.AbstractInterpreterInstallType_failedToReadFromDiscoverScriptOutputStream,
+													new Object[] { e
+															.getMessage() }), e));
+				} finally {
+					if (monitor != null) {
+						if (!workReceived) {
+							monitor
+									.beginTask(
+											LaunchingMessages.AbstractInterpreterInstallType_fetchingInterpreterLibraryLocations,
+											1);
+						}
+						monitor.done();
 					}
 				}
-				if (line != null && monitor != null && detectWorkInc(line)) {
-					monitor.worked(1);
-				}
-				if (line != null) {
-					result.add(line);
-				} else {
-					break;
-				}
 			}
-
-		} catch (IOException e) {
-			DLTKLaunchingPlugin.log(new Status(IStatus.INFO,
-					DLTKLaunchingPlugin.PLUGIN_ID, IStatus.INFO,
-					MessageFormat.format(LaunchingMessages.AbstractInterpreterInstallType_failedToReadFromDiscoverScriptOutputStream,
-							new Object[] { e.getMessage() }), e));
-		} finally {
-			if (monitor != null) {
-				if (!workReceived) {
-					monitor.beginTask(LaunchingMessages.AbstractInterpreterInstallType_fetchingInterpreterLibraryLocations,
-							1);
-				}
-				monitor.done();
+		});
+		tReading.start();
+		try {
+			tReading.join(10000);
+		} catch (InterruptedException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
 			}
 		}
 
@@ -345,20 +362,6 @@ public abstract class AbstractInterpreterInstallType implements
 		return NOT_WORK_COUNT;
 	}
 
-	/**
-	 * Combine list of strings
-	 * 
-	 * @param result
-	 * @return
-	 */
-	private String combine(List result) {
-		StringBuffer buffer = new StringBuffer();
-		for (int i = 0; i < result.size(); i++) {
-			buffer.append(" " + result.get(i)); //$NON-NLS-1$
-		}
-		return buffer.toString();
-	}
-
 	public static LibraryLocation[] correctLocations(final List locs) {
 		return correctLocations(locs, null);
 	}
@@ -367,21 +370,24 @@ public abstract class AbstractInterpreterInstallType implements
 			IProgressMonitor monitor) {
 		List resolvedLocs = new ArrayList();
 		if (monitor != null) {
-			monitor.beginTask(LaunchingMessages.AbstractInterpreterInstallType_correctingLocations, locs.size());
+			monitor
+					.beginTask(
+							LaunchingMessages.AbstractInterpreterInstallType_correctingLocations,
+							locs.size());
 		}
 		for (Iterator iter = locs.iterator(); iter.hasNext();) {
-			LibraryLocation l = (LibraryLocation) iter.next();
-			String res;
-			try {
-				File f = l.getLibraryPath().toFile();
-				if (f != null)
-					res = f.getCanonicalPath();
-				else
-					continue;
-			} catch (IOException e) {
-				continue;
-			}
-			LibraryLocation n = new LibraryLocation(new Path(res));
+			LibraryLocation n = (LibraryLocation) iter.next();
+			// String res;
+			// try {
+			// File f = l.getLibraryPath().toFile();
+			// if (f != null)
+			// res = f.getCanonicalPath();
+			// else
+			// continue;
+			// } catch (IOException e) {
+			// continue;
+			// }
+			// LibraryLocation n = new LibraryLocation(new Path(res));
 			if (!resolvedLocs.contains(n))
 				resolvedLocs.add(n);
 			if (monitor != null) {
@@ -397,14 +403,15 @@ public abstract class AbstractInterpreterInstallType implements
 		return libs;
 	}
 
-	protected void fillLocationsExceptOne(final List locs, String[] paths,
-			IPath path) {
+	protected void fillLocationsExceptOne(IEnvironment env, final List locs,
+			String[] paths, IPath path) {
 		String sPath = path.toOSString();
 		for (int i = 0; i < paths.length; i++) {
 			if (!paths[i].equals(sPath)) {
-				File f = new File(paths[i]);
+				IFileHandle f = env.getFile(new Path(paths[i]));
 				if (f.exists()) {
-					LibraryLocation l = new LibraryLocation(new Path(paths[i]));
+					LibraryLocation l = new LibraryLocation(
+							EnvironmentPathUtils.getFullPath(env, f.getPath()));
 					if (!locs.contains(l)) {
 						locs.add(l);
 					}
@@ -437,11 +444,14 @@ public abstract class AbstractInterpreterInstallType implements
 
 	protected abstract ILog getLog();
 
-	protected abstract File createPathFile() throws IOException;
+	protected abstract IPath createPathFile(IDeployment deployment)
+			throws IOException;
 
-	protected String[] buildCommandLine(File installLocation, File pathFile) {
-		String path = installLocation.getAbsolutePath();
-		return new String[] { path, pathFile.getAbsolutePath() };
+	protected String[] buildCommandLine(IFileHandle installLocation,
+			IFileHandle pathFile) {
+		String interpreterPath = installLocation.getCanonicalPath();
+		String scriptPath = pathFile.getCanonicalPath();
+		return new String[] { interpreterPath, scriptPath };
 	}
 
 	protected String getBuildPathDelimeter() {
@@ -490,9 +500,9 @@ public abstract class AbstractInterpreterInstallType implements
 		return (String[]) filtered.toArray(new String[filtered.size()]);
 	}
 
-	public IStatus validateInstallLocation(File installLocation) {
+	public IStatus validateInstallLocation(IFileHandle installLocation) {
 		if (!installLocation.exists() || !installLocation.isFile()
-				|| installLocation.isHidden()) {
+				/*|| installLocation.isHidden()*/) {
 			return createStatus(IStatus.ERROR,
 					InterpreterMessages.errNonExistentOrInvalidInstallLocation,
 					null);
@@ -504,30 +514,22 @@ public abstract class AbstractInterpreterInstallType implements
 		final String name = installLocation.getName();
 		IPath nPath = new Path(name);
 
-		// name.matches(possibleName + ".*\\.exe")
-		if (Platform.getOS().equals(Platform.OS_WIN32)) {
+		IExecutionEnvironment execEnv = (IExecutionEnvironment) installLocation
+				.getEnvironment().getAdapter(IExecutionEnvironment.class);
+
+		if (execEnv != null) {
+			// name.matches(possibleName + ".*\\.exe")
 			for (int i = 0; i < possibleNames.length; ++i) {
 				final String possibleName = possibleNames[i].toLowerCase();
-				String fName = nPath.removeFileExtension().toString()
-						.toLowerCase();
-				String ext = nPath.getFileExtension();
-				if (possibleName.equals(fName)
-						&& ("exe".equalsIgnoreCase(ext) || "bat".equalsIgnoreCase(ext))) { //$NON-NLS-1$ //$NON-NLS-2$
-					matchFound = true;
-					break;
-				}
-			}
-		} else {
-			for (int i = 0; i < possibleNames.length; i++) {
-				final String possibleName = possibleNames[i];
-				String fName = nPath.lastSegment();
-				if (fName.equals(possibleName)) {
+				// String fName = nPath.removeFileExtension().toString()
+				// .toLowerCase();
+				if (execEnv.isValidExecutableAndEquals(possibleName, nPath)) {
+					//$NON-NLS-1$ 
 					matchFound = true;
 					break;
 				}
 			}
 		}
-
 		if (matchFound) {
 			return createStatus(IStatus.OK, "", null); //$NON-NLS-1$
 		} else {
@@ -536,8 +538,9 @@ public abstract class AbstractInterpreterInstallType implements
 		}
 	}
 
-	protected String retrivePaths(final File installLocation,
-			final List locations, IProgressMonitor monitor, File pathFile,
+	protected String retrivePaths(IExecutionEnvironment exeEnv,
+			final IFileHandle installLocation, final List locations,
+			IProgressMonitor monitor, IFileHandle locator,
 			EnvironmentVariable[] variables) {
 		Process process = null;
 		try {
@@ -548,18 +551,21 @@ public abstract class AbstractInterpreterInstallType implements
 				}
 			}
 			String[] cmdLine;
-			String[] env = extractEnvironment(variables);
+			String[] env = extractEnvironment(exeEnv, variables);
 
-			cmdLine = buildCommandLine(installLocation, pathFile);
+			cmdLine = buildCommandLine(installLocation, locator);
 			try {
 				if (DLTKLaunchingPlugin.TRACE_EXECUTION) {
-					traceExecution(LaunchingMessages.AbstractInterpreterInstallType_libraryDiscoveryScript, cmdLine, env);
+					traceExecution(
+							LaunchingMessages.AbstractInterpreterInstallType_libraryDiscoveryScript,
+							cmdLine, env);
 				}
-				process = DebugPlugin.exec(cmdLine, null, env);
+				process = exeEnv.exec(cmdLine, null, env);
 				if (process != null) {
 					String result[] = readPathsFromProcess(monitor, process);
 					if (result == null) {
-						throw new IOException(LaunchingMessages.AbstractInterpreterInstallType_nullResultFromProcess);
+						throw new IOException(
+								LaunchingMessages.AbstractInterpreterInstallType_nullResultFromProcess);
 					}
 					if (DLTKLaunchingPlugin.TRACE_EXECUTION) {
 						traceDiscoveryOutput(result);
@@ -571,10 +577,11 @@ public abstract class AbstractInterpreterInstallType implements
 						paths = parsePaths(result);
 					}
 
-					IPath path = new Path(pathFile.getCanonicalPath())
+					IPath path = new Path(locator.getCanonicalPath())
 							.removeLastSegments(1);
 
-					fillLocationsExceptOne(locations, paths, path);
+					fillLocationsExceptOne(exeEnv.getEnvironment(), locations,
+							paths, path);
 					if (result != null) {
 						StringBuffer resultBuffer = new StringBuffer();
 						for (int i = 0; i < result.length; i++) {
@@ -592,9 +599,12 @@ public abstract class AbstractInterpreterInstallType implements
 
 		} catch (IOException e) {
 			if (DLTKCore.VERBOSE) {
-				getLog().log(
-						createStatus(IStatus.ERROR,
-								LaunchingMessages.AbstractInterpreterInstallType_unableToLookupLibraryPaths, e));
+				getLog()
+						.log(
+								createStatus(
+										IStatus.ERROR,
+										LaunchingMessages.AbstractInterpreterInstallType_unableToLookupLibraryPaths,
+										e));
 			}
 		} finally {
 			if (process != null) {
@@ -642,27 +652,54 @@ public abstract class AbstractInterpreterInstallType implements
 		System.out.println(sb);
 	}
 
-	protected ILookupRunnable createLookupRunnable(final File installLocation,
-			final List locations, final EnvironmentVariable[] variables) {
+	protected ILookupRunnable createLookupRunnable(
+			final IFileHandle installLocation, final List locations,
+			final EnvironmentVariable[] variables) {
 		return new ILookupRunnable() {
 			public void run(IProgressMonitor monitor) {
 				try {
-					File locator = createPathFile();
-					String result = retrivePaths(installLocation, locations,
-							monitor, locator, variables);
-					String message = MessageFormat.format(LaunchingMessages.AbstractInterpreterInstallType_failedToResolveLibraryLocationsForWith,
-							new Object[] { installLocation.getName(), locator.toString() });
-					if (locations.size() == 0) {
-						if (result == null) {
-							DLTKLaunchingPlugin.log(message);
-						} else {
-							DLTKLaunchingPlugin.logWarning(message,
-									new Exception(MessageFormat.format(LaunchingMessages.AbstractInterpreterInstallType_output, new Object[] { result })));
+					IEnvironment env = installLocation.getEnvironment();
+					IExecutionEnvironment exeEnv = (IExecutionEnvironment) env
+							.getAdapter(IExecutionEnvironment.class);
+					if (exeEnv == null)
+						return;
+					IDeployment deployment = exeEnv.createDeployment();
+					try {
+						IPath deploymentPath = createPathFile(deployment);
+						IFileHandle locator = deployment
+								.getFile(deploymentPath);
+						String result = retrivePaths(exeEnv, installLocation,
+								locations, monitor, locator, variables);
+						String message = MessageFormat
+								.format(
+										LaunchingMessages.AbstractInterpreterInstallType_failedToResolveLibraryLocationsForWith,
+										new Object[] {
+												installLocation.getName(),
+												locator.toOSString() });
+						if (locations.size() == 0) {
+							if (result == null) {
+								DLTKLaunchingPlugin.log(message);
+							} else {
+								DLTKLaunchingPlugin
+										.logWarning(
+												message,
+												new Exception(
+														MessageFormat
+																.format(
+																		LaunchingMessages.AbstractInterpreterInstallType_output,
+																		new Object[] { result })));
+							}
+						}
+					} finally {
+						if (deployment != null) {
+							deployment.dispose();
 						}
 					}
 				} catch (IOException e) {
-					DLTKLaunchingPlugin.log(
-							LaunchingMessages.AbstractInterpreterInstallType_problemWhileResolvingInterpreterLibraries, e);
+					DLTKLaunchingPlugin
+							.log(
+									LaunchingMessages.AbstractInterpreterInstallType_problemWhileResolvingInterpreterLibraries,
+									e);
 					if (DLTKCore.DEBUG) {
 						e.printStackTrace();
 					}
@@ -672,20 +709,26 @@ public abstract class AbstractInterpreterInstallType implements
 	}
 
 	public synchronized LibraryLocation[] getDefaultLibraryLocations(
-			final File installLocation) {
+			final IFileHandle installLocation) {
 		return getDefaultLibraryLocations(installLocation, null);
 	}
 
 	public synchronized LibraryLocation[] getDefaultLibraryLocations(
-			final File installLocation, EnvironmentVariable[] variables) {
+			final IFileHandle installLocation, EnvironmentVariable[] variables) {
 		return getDefaultLibraryLocations(installLocation, variables, null);
 	}
 
 	public synchronized LibraryLocation[] getDefaultLibraryLocations(
-			final File installLocation, EnvironmentVariable[] variables,
+			final IFileHandle installLocation, EnvironmentVariable[] variables,
 			IProgressMonitor monitor) {
 		if (monitor != null) {
-			monitor.beginTask(MessageFormat.format(LaunchingMessages.AbstractInterpreterInstallType_resolvingLibraryPaths, new Object[] { this.getName() }), 100);
+			monitor
+					.beginTask(
+							MessageFormat
+									.format(
+											LaunchingMessages.AbstractInterpreterInstallType_resolvingLibraryPaths,
+											new Object[] { this.getName() }),
+							100);
 		}
 		Object cacheKey = makeKey(installLocation, variables);
 		if (fCachedLocations.containsKey(cacheKey)) {
@@ -702,13 +745,19 @@ public abstract class AbstractInterpreterInstallType implements
 					monitor != null ? new SubProgressMonitor(monitor, 95)
 							: null);
 		} catch (InvocationTargetException e) {
-			getLog().log(
-					createStatus(IStatus.ERROR,
-							LaunchingMessages.AbstractInterpreterInstallType_errorResolvingDefaultLibraries, e));
+			getLog()
+					.log(
+							createStatus(
+									IStatus.ERROR,
+									LaunchingMessages.AbstractInterpreterInstallType_errorResolvingDefaultLibraries,
+									e));
 		} catch (InterruptedException e) {
-			getLog().log(
-					createStatus(IStatus.ERROR,
-							LaunchingMessages.AbstractInterpreterInstallType_errorResolvingDefaultLibraries, e));
+			getLog()
+					.log(
+							createStatus(
+									IStatus.ERROR,
+									LaunchingMessages.AbstractInterpreterInstallType_errorResolvingDefaultLibraries,
+									e));
 		}
 
 		LibraryLocation[] libs = correctLocations(locations,
@@ -722,9 +771,9 @@ public abstract class AbstractInterpreterInstallType implements
 		return libs;
 	}
 
-	public static Object makeKey(File installLocation,
+	public static Object makeKey(IFileHandle installLocation,
 			EnvironmentVariable[] variables) {
-		String key = installLocation.getAbsolutePath();
+		String key = installLocation.toURI().toString();
 		if (variables != null) {
 			for (int i = 0; i < variables.length; i++) {
 				key += "|" + variables[i].getName() + ":" //$NON-NLS-1$ //$NON-NLS-2$
@@ -737,5 +786,28 @@ public abstract class AbstractInterpreterInstallType implements
 	protected IStatus createStatus(int severity, String message,
 			Throwable throwable) {
 		return new Status(severity, getPluginId(), 0, message, throwable);
+	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((fId == null) ? 0 : fId.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AbstractInterpreterInstallType other = (AbstractInterpreterInstallType) obj;
+		if (fId == null) {
+			if (other.fId != null)
+				return false;
+		} else if (!fId.equals(other.fId))
+			return false;
+		return true;
 	}
 }
