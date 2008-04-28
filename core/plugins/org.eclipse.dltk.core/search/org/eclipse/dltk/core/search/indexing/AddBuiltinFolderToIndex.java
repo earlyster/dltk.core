@@ -61,8 +61,8 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 		return false;
 	}
 
-//	private static String EXISTS = "OK"; //$NON-NLS-1$
-//	private static String DELETED = "DELETED"; //$NON-NLS-1$
+	// private static String EXISTS = "OK"; //$NON-NLS-1$
+	// private static String DELETED = "DELETED"; //$NON-NLS-1$
 
 	public boolean execute(IProgressMonitor progressMonitor) {
 		if (this.isCancelled || progressMonitor != null
@@ -72,13 +72,13 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 			return true; // nothing to do
 
 		/* ensure no concurrent write access to index */
-//		IPath fullPath = project.getProject().getFullPath();
+		// IPath fullPath = project.getProject().getFullPath();
 		String cfp = containerPath.toString();
-		if( cfp.startsWith(IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)) {
-			cfp = cfp.substring(IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR.length());
+		if (cfp.startsWith(IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)) {
+			cfp = cfp.substring(IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR
+					.length());
 		}
-		String pathToString = containerPath.getDevice() == null ? containerPath
-				.toString() : containerPath.toOSString();
+		String pathToString = containerPath.toString();
 
 		Index index = this.manager.getSpecialIndex("builtin", cfp, pathToString); //$NON-NLS-1$
 		if (index == null) {
@@ -99,27 +99,24 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 			final IPath container = this.containerPath;
 			final IndexManager indexManager = this.manager;
 			final ISourceElementParser parser = indexManager
-					.getSourceElementParser(scriptProject, null/*
-															 * requestor will be
-															 * set by indexer
-															 */);
+					.getSourceElementParser(scriptProject);
 			final SourceIndexerRequestor requestor = indexManager
 					.getSourceRequestor(scriptProject);
 			if (JobManager.VERBOSE)
 				org.eclipse.dltk.internal.core.util.Util
-						.verbose("-> indexing " + containerPath.toOSString()); //$NON-NLS-1$
+						.verbose("-> indexing " + containerPath.toString()); //$NON-NLS-1$
 			long initialTime = System.currentTimeMillis();
-			
+
 			SearchParticipant participant = SearchEngine
-				 	.getDefaultSearchParticipant();
-			
-			visit(null, scriptProject, parser, requestor, indexManager, container,
-					true, participant, index);
+					.getDefaultSearchParticipant();
+
+			visit(null, scriptProject, parser, requestor, indexManager,
+					container, true, participant, index);
 			this.manager.saveIndex(index);
 			if (JobManager.VERBOSE)
 				org.eclipse.dltk.internal.core.util.Util
 						.verbose("-> done indexing of " //$NON-NLS-1$
-								+ containerPath.toOSString()
+								+ containerPath.toString()
 								+ " (" //$NON-NLS-1$
 								+ (System.currentTimeMillis() - initialTime)
 								+ "ms)"); //$NON-NLS-1$			
@@ -129,7 +126,7 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 						.verbose("-> failed to index " + this.containerPath + " because of the following exception:"); //$NON-NLS-1$ //$NON-NLS-2$
 				ex.printStackTrace();
 			}
-//			manager.removeIndex(this.containerPath);
+			// manager.removeIndex(this.containerPath);
 			return false;
 		} finally {
 			monitor.exitRead(); // free read lock
@@ -137,13 +134,16 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 		return true;
 	}
 
-	private void visit(SimpleLookupTable table, IScriptProject project, ISourceElementParser parser, SourceIndexerRequestor requestor, IndexManager indexManager,
-			IPath container, boolean operation, SearchParticipant participant, Index index) {
-		
+	private void visit(SimpleLookupTable table, IScriptProject project,
+			ISourceElementParser parser, SourceIndexerRequestor requestor,
+			IndexManager indexManager, IPath container, boolean operation,
+			SearchParticipant participant, Index index) {
+
 		IDLTKLanguageToolkit toolkit = null;
 		toolkit = DLTKLanguageManager.getLanguageToolkit(project);
-		IBuiltinModuleProvider provider = BuiltinProjectFragment.getBuiltinProvider(project);
-		if( provider == null ) {
+		IBuiltinModuleProvider provider = BuiltinProjectFragment
+				.getBuiltinProvider(project);
+		if (provider == null) {
 			return;
 		}
 		String[] files = provider.getBuiltinModules();
@@ -151,24 +151,29 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 			for (int i = 0; i < files.length; ++i) {
 				if (this.isCancelled) {
 					if (JobManager.VERBOSE)
-						org.eclipse.dltk.internal.core.util.Util.verbose("-> indexing of " + containerPath.toOSString() + " has been cancelled"); //$NON-NLS-1$ //$NON-NLS-2$
+						org.eclipse.dltk.internal.core.util.Util
+								.verbose("-> indexing of " + containerPath.toString() + " has been cancelled"); //$NON-NLS-1$ //$NON-NLS-2$
 					return;
 				}
-				
-				indexDocument(parser, requestor, participant, index, files[i], toolkit, provider.getBuiltinModuleContent(files[i]) );
+
+				indexDocument(parser, requestor, participant, index, files[i],
+						toolkit, provider.getBuiltinModuleContent(files[i]));
 			}
 		}
 	}
 
 	private void indexDocument(ISourceElementParser parser,
 			SourceIndexerRequestor requestor, SearchParticipant participant,
-			Index index, String path, IDLTKLanguageToolkit toolkit, String contents ) {
-		IPath dpath = (new Path(path));/*.removeFirstSegments(this.containerPath
-				.segmentCount());*/
+			Index index, String path, IDLTKLanguageToolkit toolkit,
+			String contents) {
+		IPath dpath = (new Path(path));/*
+										 * .removeFirstSegments(this.containerPath
+										 * .segmentCount());
+										 */
 		dpath = dpath.setDevice(null);
-		
+
 		DLTKSearchDocument entryDocument = new DLTKSearchDocument(dpath
-				.toOSString(), new Path( "" ), contents.toCharArray(), participant, true); //$NON-NLS-1$
+				.toString(), new Path( "" ), contents.toCharArray(), participant, true); //$NON-NLS-1$
 		entryDocument.parser = parser;
 		entryDocument.requestor = requestor;
 		entryDocument.toolkit = toolkit;

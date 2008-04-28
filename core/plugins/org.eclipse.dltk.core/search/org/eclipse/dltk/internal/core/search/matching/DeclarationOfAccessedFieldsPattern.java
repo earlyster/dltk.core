@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.core.search.matching;
 
 import org.eclipse.dltk.compiler.util.SimpleSet;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IModelElement;
 
 public class DeclarationOfAccessedFieldsPattern extends FieldPattern {
@@ -17,7 +18,8 @@ public class DeclarationOfAccessedFieldsPattern extends FieldPattern {
 	protected SimpleSet knownFields;
 
 	public DeclarationOfAccessedFieldsPattern(IModelElement enclosingElement) {
-		super(false, true, true, null, null, null, null, null, R_PATTERN_MATCH);
+		super(false, true, true, null, null, null, null, null, R_PATTERN_MATCH,
+				DLTKLanguageManager.getLanguageToolkit(enclosingElement));
 		this.enclosingElement = enclosingElement;
 		this.knownFields = new SimpleSet();
 	}

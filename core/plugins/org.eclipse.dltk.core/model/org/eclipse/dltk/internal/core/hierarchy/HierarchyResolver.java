@@ -77,9 +77,11 @@ public class HierarchyResolver {
 				}
 			}
 		};
-		SearchPattern pattern = SearchPattern.createPattern("*", //$NON-NLS-1$
+		SearchPattern pattern = SearchPattern.createPattern(
+				"*", //$NON-NLS-1$
 				IDLTKSearchConstants.TYPE, IDLTKSearchConstants.DECLARATIONS,
-				SearchPattern.R_REGEXP_MATCH);
+				SearchPattern.R_REGEXP_MATCH, hierarchyBuilder.hierarchy.scope
+						.getLanguageToolkit());
 		engine.search(pattern, new SearchParticipant[] { SearchEngine
 				.getDefaultSearchParticipant() },
 				hierarchyBuilder.hierarchy.scope, typesCollector,
@@ -88,16 +90,24 @@ public class HierarchyResolver {
 		IFileHierarchyResolver fileHierarchyResolver = createFileHierarchyResolver(focusType);
 		IFileHierarchyInfo hierarchyInfo = null;
 		if (fileHierarchyResolver != null) {
-			hierarchyInfo = fileHierarchyResolver.resolveDown(focusType.getSourceModule(), hierarchyBuilder.hierarchy.progressMonitor);
+			hierarchyInfo = fileHierarchyResolver.resolveDown(focusType
+					.getSourceModule(),
+					hierarchyBuilder.hierarchy.progressMonitor);
 		}
 
-		computeSubtypesFor(focusType, superTypeToExtender, new HashMap(), hierarchyInfo);
+		computeSubtypesFor(focusType, superTypeToExtender, new HashMap(),
+				hierarchyInfo);
 	}
 
-	protected void computeSubtypesFor(IType focusType, Map superTypeToExtender, Map subTypesCache, IFileHierarchyInfo hierarchyInfo) throws CoreException {
-		List extenders = (List) superTypeToExtender.get(focusType.getElementName());
+	protected void computeSubtypesFor(IType focusType, Map superTypeToExtender,
+			Map subTypesCache, IFileHierarchyInfo hierarchyInfo)
+			throws CoreException {
+		List extenders = (List) superTypeToExtender.get(focusType
+				.getElementName());
 		if (extenders != null) {
-			IType[] subTypes = searchTypes((String[])extenders.toArray(new String[extenders.size()]), subTypesCache, hierarchyInfo);
+			IType[] subTypes = searchTypes((String[]) extenders
+					.toArray(new String[extenders.size()]), subTypesCache,
+					hierarchyInfo);
 			for (int i = 0; i < subTypes.length; i++) {
 				IType subType = subTypes[i];
 				hierarchyBuilder.hierarchy.addSubtype(focusType, subType);
@@ -105,7 +115,8 @@ public class HierarchyResolver {
 
 			for (int i = 0; i < subTypes.length; i++) {
 				IType subType = subTypes[i];
-				computeSubtypesFor(subType, superTypeToExtender, subTypesCache, hierarchyInfo);
+				computeSubtypesFor(subType, superTypeToExtender, subTypesCache,
+						hierarchyInfo);
 			}
 		}
 	}
@@ -114,13 +125,16 @@ public class HierarchyResolver {
 		IFileHierarchyResolver fileHierarchyResolver = createFileHierarchyResolver(focusType);
 		IFileHierarchyInfo hierarchyInfo = null;
 		if (fileHierarchyResolver != null) {
-			hierarchyInfo = fileHierarchyResolver.resolveUp(focusType.getSourceModule(), hierarchyBuilder.hierarchy.progressMonitor);
+			hierarchyInfo = fileHierarchyResolver.resolveUp(focusType
+					.getSourceModule(),
+					hierarchyBuilder.hierarchy.progressMonitor);
 		}
 
 		computeSupertypesFor(focusType, hierarchyInfo);
 	}
 
-	protected void computeSupertypesFor(IType focusType, IFileHierarchyInfo hierarchyInfo) throws CoreException {
+	protected void computeSupertypesFor(IType focusType,
+			IFileHierarchyInfo hierarchyInfo) throws CoreException {
 		// Build superclasses hieararchy:
 		String[] superClasses = focusType.getSuperClasses();
 		if (superClasses != null && superClasses.length > 0) {
@@ -128,7 +142,8 @@ public class HierarchyResolver {
 
 			for (int i = 0; i < searchTypes.length; i++) {
 				IType superclass = searchTypes[i];
-				hierarchyBuilder.hierarchy.cacheSuperclass(focusType, superclass);
+				hierarchyBuilder.hierarchy.cacheSuperclass(focusType,
+						superclass);
 			}
 
 			for (int i = 0; i < searchTypes.length; i++) {
@@ -142,25 +157,29 @@ public class HierarchyResolver {
 		}
 	}
 
-	protected IType[] searchTypes(String[] types, IFileHierarchyInfo hierarchyInfo) throws CoreException {
+	protected IType[] searchTypes(String[] types,
+			IFileHierarchyInfo hierarchyInfo) throws CoreException {
 		return searchTypes(types, null, hierarchyInfo);
 	}
 
-	protected IType[] searchTypes(String[] types, Map cache, IFileHierarchyInfo hierarchyInfo)
-			throws CoreException {
+	protected IType[] searchTypes(String[] types, Map cache,
+			IFileHierarchyInfo hierarchyInfo) throws CoreException {
 		List result = new LinkedList();
 		for (int i = 0; i < types.length; i++) {
 			String type = types[i];
-			result.addAll(Arrays.asList(searchTypes(type, cache, hierarchyInfo)));
+			result.addAll(Arrays
+					.asList(searchTypes(type, cache, hierarchyInfo)));
 		}
 		return (IType[]) result.toArray(new IType[result.size()]);
 	}
 
-	protected IType[] searchTypes(String type, IFileHierarchyInfo hierarchyInfo) throws CoreException {
+	protected IType[] searchTypes(String type, IFileHierarchyInfo hierarchyInfo)
+			throws CoreException {
 		return searchTypes(type, null, hierarchyInfo);
 	}
 
-	protected IType[] searchTypes(String type, Map cache, final IFileHierarchyInfo hierarchyInfo) throws CoreException {
+	protected IType[] searchTypes(String type, Map cache,
+			final IFileHierarchyInfo hierarchyInfo) throws CoreException {
 		if (cache != null && cache.containsKey(type)) {
 			return (IType[]) cache.get(type);
 		}
@@ -172,7 +191,8 @@ public class HierarchyResolver {
 			public void acceptSearchMatch(SearchMatch match)
 					throws CoreException {
 				IType type = (IType) match.getElement();
-				if (hierarchyInfo != null && !hierarchyInfo.exists(type.getSourceModule())) {
+				if (hierarchyInfo != null
+						&& !hierarchyInfo.exists(type.getSourceModule())) {
 					filteredTypes.add(type);
 					return;
 				}
@@ -181,13 +201,14 @@ public class HierarchyResolver {
 		};
 		SearchPattern pattern = SearchPattern.createPattern(type,
 				IDLTKSearchConstants.TYPE, IDLTKSearchConstants.DECLARATIONS,
-				SearchPattern.R_EXACT_MATCH);
+				SearchPattern.R_EXACT_MATCH, hierarchyBuilder.hierarchy.scope.getLanguageToolkit());
 		engine.search(pattern, new SearchParticipant[] { SearchEngine
 				.getDefaultSearchParticipant() },
 				hierarchyBuilder.hierarchy.scope, typesCollector,
 				hierarchyBuilder.hierarchy.progressMonitor);
 
-		// If all results where filtered that means we could find a path to any of elements.
+		// If all results where filtered that means we could find a path to any
+		// of elements.
 		// In this case return all elements.
 		if (result.isEmpty()) {
 			result.addAll(filteredTypes);
@@ -210,11 +231,14 @@ public class HierarchyResolver {
 		}
 	}
 
-	private static IFileHierarchyResolver createFileHierarchyResolver(IType type) throws CoreException {
+	private static IFileHierarchyResolver createFileHierarchyResolver(IType type)
+			throws CoreException {
 		IFileHierarchyResolver fileHierarchyResolver = null;
-		IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLanguageToolkit(type);
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(type);
 		if (toolkit != null) {
-			fileHierarchyResolver = DLTKLanguageManager.getFileHierarchyResolver(toolkit.getNatureId());
+			fileHierarchyResolver = DLTKLanguageManager
+					.getFileHierarchyResolver(toolkit.getNatureId());
 		}
 		return fileHierarchyResolver;
 	}

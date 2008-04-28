@@ -24,19 +24,22 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.internal.compiler.lookup.TypeScope;
-import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.Model;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.Openable;
 import org.eclipse.dltk.internal.core.ProjectFragment;
+import org.eclipse.dltk.internal.core.ScriptProject;
 
 /**
  * Creates script element handles.
@@ -90,7 +93,7 @@ public class HandleFactory {
 			}
 			// create handle
 			String classFilePath = resourcePath.substring(separatorIndex + 1);
-			String[] simpleNames = new Path(classFilePath).segments();
+			String[] simpleNames = Path.fromPortableString(classFilePath).segments();
 			String[] pkgName;
 			int length = simpleNames.length - 1;
 			if (length > 0) {
@@ -131,7 +134,7 @@ public class HandleFactory {
 			// create handle
 			resourcePath = resourcePath.substring(this.lastPkgFragmentRootPath
 					.length() + 1);
-			String[] simpleNames = new Path(resourcePath).segments();
+			String[] simpleNames = Path.fromPortableString(resourcePath).segments();
 			String[] pkgName;
 			int length = simpleNames.length - 1;
 			if (length > 0) {
@@ -190,7 +193,7 @@ public class HandleFactory {
 	private IProjectFragment getArchiveProjectFragment(
 			String archivePathString, IDLTKSearchScope scope) {
 
-		IPath archivePath = new Path(archivePathString);
+		IPath archivePath = Path.fromPortableString(archivePathString);
 
 		Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
 				.getRoot(), archivePath, false);
@@ -296,7 +299,7 @@ public class HandleFactory {
 	private IProjectFragment getProjectFragment(String pathString,
 			IDLTKSearchScope scope) {
 
-		IPath path = new Path(pathString);
+		IPath path = Path.fromPortableString(pathString);
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
 				.getProjects();
 		IPath[] enclosingProjectsAndZips = scope.enclosingProjectsAndZips();

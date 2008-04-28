@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,6 +47,7 @@ import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
 import org.eclipse.dltk.internal.core.builder.ScriptBuilder;
@@ -174,7 +174,7 @@ public class DeltaProcessor {
 	 * Answer a combination of the lastModified stamp and the size. Used for
 	 * detecting external JAR changes
 	 */
-	public static long getTimeStamp(File file) {
+	public static long getTimeStamp(IFileHandle file) {
 		return file.lastModified() + file.length();
 	}
 
@@ -906,9 +906,9 @@ public class DeltaProcessor {
 								this.manager.indexManager
 										.removeIndex(entryPath);
 							}
-						} else if (targetLibrary instanceof File) { // external
+						} else if (targetLibrary instanceof IFileHandle) { // external
 							// JAR
-							File externalFile = (File) targetLibrary;
+							IFileHandle externalFile = (IFileHandle) targetLibrary;
 							// check timestamp to figure if JAR has changed in
 							// some way
 							Long oldTimestamp = (Long) this.state
@@ -2708,14 +2708,7 @@ public class DeltaProcessor {
 	private ISourceElementParser getSourceElementParser(Openable element) {
 		if (this.sourceElementParserCache == null) {
 			this.sourceElementParserCache = this.manager.indexManager
-					.getSourceElementParser(element.getScriptProject(), null/*
-																			 * requestor
-																			 * will
-																			 * be
-																			 * set
-																			 * by
-																			 * indexer
-																			 */);
+					.getSourceElementParser(element.getScriptProject());
 		}
 		return this.sourceElementParserCache;
 	}

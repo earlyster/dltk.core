@@ -394,6 +394,9 @@ public class ChangeCollector {
 		// check super classes
 		IType[] existingSuperClasses = this.hierarchy.getSuperclass(type);
 		String[] newSuperClases = type.getSuperClasses();
+		if (newSuperClases == null && existingSuperClasses.length != 0) {
+			return true;
+		}
 		if (existingSuperClasses.length != newSuperClases.length) {
 			return true;
 		}

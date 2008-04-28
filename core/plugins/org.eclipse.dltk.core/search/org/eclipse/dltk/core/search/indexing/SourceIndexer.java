@@ -26,11 +26,23 @@ import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 /**
- * A SourceIndexer indexes script files using a script parser. The following
- * items are indexed: Declarations of: - Classes<br> - Interfaces; <br> -
- * Methods;<br> - Fields;<br>
- * References to: - Methods (with number of arguments); <br> - Fields;<br> -
- * Types;<br> - Constructors.
+ * A SourceIndexer indexes script files using a script parser. The following items are indexed:
+ * <ul>
+ * <li>Declarations of:
+ * <ul>
+ * <li>Classes;
+ * <li>Interfaces;
+ * <li>Methods;
+ * <li>Fields;
+ * </ul>
+ * <li>References to:
+ * <ul>
+ * <li>Methods (with number of arguments);
+ * <li>Fields;
+ * <li>Types;
+ * <li>Constructors.
+ * </ul>
+ * </ul>
  */
 public class SourceIndexer extends AbstractIndexer {
 
@@ -62,10 +74,9 @@ public class SourceIndexer extends AbstractIndexer {
 
 			if (parser == null) {
 				parser = ModelManager.getModelManager().indexManager
-						.getSourceElementParser(scriptProject, requestor);
-			} else {
-				parser.setRequestor(requestor);
+						.getSourceElementParser(scriptProject);
 			}
+			parser.setRequestor(requestor);
 			String pkgName = ""; //$NON-NLS-1$
 			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 			// ISourceModule sourceModule = null;

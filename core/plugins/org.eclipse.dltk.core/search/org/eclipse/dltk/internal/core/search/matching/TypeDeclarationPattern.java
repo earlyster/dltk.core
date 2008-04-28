@@ -12,13 +12,14 @@ package org.eclipse.dltk.internal.core.search.matching;
 import java.io.IOException;
 
 import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.index.EntryResult;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 
-
-public class TypeDeclarationPattern extends DLTKSearchPattern implements IIndexConstants {
+public class TypeDeclarationPattern extends DLTKSearchPattern implements
+		IIndexConstants {
 	public char[] simpleName;
 	public char[] pkg;
 	public char[][] enclosingTypeNames;
@@ -30,11 +31,10 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements IIndexC
 	public char typeSuffix;
 	public int modifiers;
 	public boolean secondary = false;
-	protected static char[][] CATEGORIES = {
-		TYPE_DECL
-	};
+	protected static char[][] CATEGORIES = { TYPE_DECL };
 	// want to save space by interning the package names for each match
 	static PackageNameSet internedPackageNames = new PackageNameSet(1001);
+
 	static class PackageNameSet {
 		public char[][] names;
 		public int elementSize; // number of elements in the table
@@ -43,7 +43,7 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements IIndexC
 		PackageNameSet(int size) {
 			this.elementSize = 0;
 			this.threshold = size; // size represents the expected number of
-									// elements
+			// elements
 			int extraRoom = (int) (size * 1.5f);
 			if (this.threshold == extraRoom)
 				extraRoom++;
@@ -69,11 +69,11 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements IIndexC
 
 		void rehash() {
 			PackageNameSet newSet = new PackageNameSet(elementSize * 2); // double
-																			// the
-																			// number
-																			// of
-																			// expected
-																			// elements
+			// the
+			// number
+			// of
+			// expected
+			// elements
 			char[] current;
 			for (int i = names.length; --i >= 0;)
 				if ((current = names[i]) != null)
@@ -89,10 +89,11 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements IIndexC
 	 * packageName / enclosingTypeName / modifiers or for secondary types key =
 	 * typeName / packageName / enclosingTypeName / modifiers / 'S'
 	 */
-	public static char[] createIndexKey(int modifiers, char[] typeName, char[] packageName, char[][] enclosingTypeNames) { // ,
-																																				// char
-																																				// typeSuffix)
-																																				// {
+	public static char[] createIndexKey(int modifiers, char[] typeName,
+			char[] packageName, char[][] enclosingTypeNames) { // ,
+		// char
+		// typeSuffix)
+		// {
 		int typeNameLength = typeName == null ? 0 : typeName.length;
 		int packageLength = packageName == null ? 0 : packageName.length;
 		int enclosingNamesLength = 0;
@@ -103,7 +104,8 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements IIndexC
 					enclosingNamesLength++; // for the '.' separator
 			}
 		}
-		int resultLength = typeNameLength + packageLength + enclosingNamesLength + 5;
+		int resultLength = typeNameLength + packageLength
+				+ enclosingNamesLength + 5;
 
 		char[] result = new char[resultLength];
 		int pos = 0;
@@ -129,12 +131,13 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements IIndexC
 		}
 		result[pos++] = SEPARATOR;
 		result[pos++] = (char) modifiers;
-		result[pos] = (char) (modifiers >> 16);		
+		result[pos] = (char) (modifiers >> 16);
 		return result;
 	}
 
-	public TypeDeclarationPattern(char[] pkg, char[][] enclosingTypeNames, char[] simpleName, char typeSuffix, int matchRule) {
-		this(matchRule);
+	public TypeDeclarationPattern(char[] pkg, char[][] enclosingTypeNames,
+			char[] simpleName, char typeSuffix, int matchRule, IDLTKLanguageToolkit toolkit) {
+		this(matchRule, toolkit);
 		this.pkg = isCaseSensitive() ? pkg : CharOperation.toLowerCase(pkg);
 		if (isCaseSensitive() || enclosingTypeNames == null) {
 			this.enclosingTypeNames = enclosingTypeNames;
@@ -142,14 +145,16 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements IIndexC
 			int length = enclosingTypeNames.length;
 			this.enclosingTypeNames = new char[length][];
 			for (int i = 0; i < length; i++)
-				this.enclosingTypeNames[i] = CharOperation.toLowerCase(enclosingTypeNames[i]);
+				this.enclosingTypeNames[i] = CharOperation
+						.toLowerCase(enclosingTypeNames[i]);
 		}
-		this.simpleName = (isCaseSensitive() || isCamelCase()) ? simpleName : CharOperation.toLowerCase(simpleName);
+		this.simpleName = (isCaseSensitive() || isCamelCase()) ? simpleName
+				: CharOperation.toLowerCase(simpleName);
 		this.typeSuffix = typeSuffix;
 	}
 
-	TypeDeclarationPattern(int matchRule) {
-		super(TYPE_DECL_PATTERN, matchRule);
+	TypeDeclarationPattern(int matchRule, IDLTKLanguageToolkit toolkit) {
+		super(TYPE_DECL_PATTERN, matchRule, toolkit);
 	}
 
 	/*
@@ -167,7 +172,8 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements IIndexC
 			this.pkg = CharOperation.NO_CHAR;
 		} else {
 			slash = CharOperation.indexOf(SEPARATOR, key, start);
-			this.pkg = internedPackageNames.add(CharOperation.subarray(key, start, slash));
+			this.pkg = internedPackageNames.add(CharOperation.subarray(key,
+					start, slash));
 		}
 		// Continue key read by the end to decode modifiers
 		int last = key.length - 1;
@@ -189,7 +195,8 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements IIndexC
 			if (last == (start + 1) && key[start] == ZERO_CHAR) {
 				this.enclosingTypeNames = ONE_ZERO_CHAR;
 			} else {
-				this.enclosingTypeNames = CharOperation.splitOn('$', key, start, last);
+				this.enclosingTypeNames = CharOperation.splitOn('$', key,
+						start, last);
 			}
 		}
 	}
@@ -199,7 +206,7 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements IIndexC
 	}
 
 	public SearchPattern getBlankPattern() {
-		return new TypeDeclarationPattern(R_EXACT_MATCH | R_CASE_SENSITIVE);
+		return new TypeDeclarationPattern(R_EXACT_MATCH | R_CASE_SENSITIVE, getToolkit());
 	}
 
 	public char[][] getIndexCategories() {
@@ -208,34 +215,39 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements IIndexC
 
 	public boolean matchesDecodedKey(SearchPattern decodedPattern) {
 		TypeDeclarationPattern pattern = (TypeDeclarationPattern) decodedPattern;
-		switch (this.typeSuffix) {			
-			case ANNOTATION_TYPE_SUFFIX:
-				if (this.typeSuffix != pattern.typeSuffix)
-					return false;
-				break;
+		switch (this.typeSuffix) {
+		case ANNOTATION_TYPE_SUFFIX:
+			if (this.typeSuffix != pattern.typeSuffix)
+				return false;
+			break;
+		case TYPE_SUFFIX:
+			switch (pattern.typeSuffix) {
 			case TYPE_SUFFIX:
-				switch (pattern.typeSuffix) {
-					case TYPE_SUFFIX:					
-						break;
-					default:
-						return false;
-				}
-				break;			
+				break;
+			default:
+				return false;
+			}
+			break;
 		}
 		if (!matchesName(this.simpleName, pattern.simpleName))
 			return false;
 		// check package - exact match only
-		if (this.pkg != null && !CharOperation.equals(this.pkg, pattern.pkg, isCaseSensitive()))
+		if (this.pkg != null
+				&& !CharOperation.equals(this.pkg, pattern.pkg,
+						isCaseSensitive()))
 			return false;
 		// check enclosingTypeNames - exact match only
 		if (this.enclosingTypeNames != null) {
 			if (this.enclosingTypeNames.length == 0)
 				return pattern.enclosingTypeNames.length == 0;
-			if (this.enclosingTypeNames.length == 1 && pattern.enclosingTypeNames.length == 1)
-				return CharOperation.equals(this.enclosingTypeNames[0], pattern.enclosingTypeNames[0], isCaseSensitive());
+			if (this.enclosingTypeNames.length == 1
+					&& pattern.enclosingTypeNames.length == 1)
+				return CharOperation.equals(this.enclosingTypeNames[0],
+						pattern.enclosingTypeNames[0], isCaseSensitive());
 			if (pattern.enclosingTypeNames == ONE_ZERO_CHAR)
 				return true; // is a local or anonymous type
-			return CharOperation.equals(this.enclosingTypeNames, pattern.enclosingTypeNames, isCaseSensitive());
+			return CharOperation.equals(this.enclosingTypeNames,
+					pattern.enclosingTypeNames, isCaseSensitive());
 		}
 		return true;
 	}
@@ -244,62 +256,67 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements IIndexC
 		char[] key = this.simpleName; // can be null
 		int matchRule = getMatchRule();
 		switch (getMatchMode()) {
-			case R_PREFIX_MATCH:
-				// do a prefix query with the simpleName
+		case R_PREFIX_MATCH:
+			// do a prefix query with the simpleName
+			break;
+		case R_EXACT_MATCH:
+			if (this.isCamelCase)
 				break;
-			case R_EXACT_MATCH:
-				if (this.isCamelCase)
-					break;
-				matchRule &= ~R_EXACT_MATCH;
-				if (this.simpleName != null) {
-					matchRule |= R_PREFIX_MATCH;
-					key = this.pkg == null ? CharOperation.append(this.simpleName, SEPARATOR) : CharOperation.concat(this.simpleName,
-							SEPARATOR, this.pkg, SEPARATOR, CharOperation.NO_CHAR);
-					break; // do a prefix query with the simpleName and
-							// possibly the pkg
-				}
-				matchRule |= R_PATTERN_MATCH;
-				// fall thru to encode the key and do a pattern query
-			case R_PATTERN_MATCH:
-				if (this.pkg == null) {
-					if (this.simpleName == null) {
-						switch (this.typeSuffix) {
-							case TYPE_SUFFIX:				
-							case ANNOTATION_TYPE_SUFFIX:							
-								break;
-						}
-					} else if (this.simpleName[this.simpleName.length - 1] != '*') {
-						key = CharOperation.concat(this.simpleName, ONE_STAR, SEPARATOR);
+			matchRule &= ~R_EXACT_MATCH;
+			if (this.simpleName != null) {
+				matchRule |= R_PREFIX_MATCH;
+				key = this.pkg == null ? CharOperation.append(this.simpleName,
+						SEPARATOR) : CharOperation.concat(this.simpleName,
+						SEPARATOR, this.pkg, SEPARATOR, CharOperation.NO_CHAR);
+				break; // do a prefix query with the simpleName and
+				// possibly the pkg
+			}
+			matchRule |= R_PATTERN_MATCH;
+			// fall thru to encode the key and do a pattern query
+		case R_PATTERN_MATCH:
+			if (this.pkg == null) {
+				if (this.simpleName == null) {
+					switch (this.typeSuffix) {
+					case TYPE_SUFFIX:
+					case ANNOTATION_TYPE_SUFFIX:
+						break;
 					}
-					break; // do a pattern query with the current encoded key
+				} else if (this.simpleName[this.simpleName.length - 1] != '*') {
+					key = CharOperation.concat(this.simpleName, ONE_STAR,
+							SEPARATOR);
 				}
-				// must decode to check enclosingTypeNames due to the encoding
-				// of local types
-				key = CharOperation.concat(this.simpleName == null ? ONE_STAR : this.simpleName, SEPARATOR, this.pkg, SEPARATOR, ONE_STAR);
-				break;
-			case R_REGEXP_MATCH:
-				// TODO (frederic) implement regular expression match
-				break;
+				break; // do a pattern query with the current encoded key
+			}
+			// must decode to check enclosingTypeNames due to the encoding
+			// of local types
+			key = CharOperation
+					.concat(this.simpleName == null ? ONE_STAR
+							: this.simpleName, SEPARATOR, this.pkg, SEPARATOR,
+							ONE_STAR);
+			break;
+		case R_REGEXP_MATCH:
+			// TODO (frederic) implement regular expression match
+			break;
 		}
 		return index.query(getIndexCategories(), key, matchRule); // match
-																	// rule is
-																	// irrelevant
-																	// when the
-																	// key is
-																	// null
+		// rule is
+		// irrelevant
+		// when the
+		// key is
+		// null
 	}
 
 	protected StringBuffer print(StringBuffer output) {
 		switch (this.typeSuffix) {
-			case TYPE_SUFFIX:
-				output.append("TypeDeclarationPattern: pkg<"); //$NON-NLS-1$
-				break;			
-			case ANNOTATION_TYPE_SUFFIX:
-				output.append("AnnotationTypeDeclarationPattern: pkg<"); //$NON-NLS-1$
-				break;
-			default:
-				output.append("TypeDeclarationPattern: pkg<"); //$NON-NLS-1$
-				break;
+		case TYPE_SUFFIX:
+			output.append("TypeDeclarationPattern: pkg<"); //$NON-NLS-1$
+			break;
+		case ANNOTATION_TYPE_SUFFIX:
+			output.append("AnnotationTypeDeclarationPattern: pkg<"); //$NON-NLS-1$
+			break;
+		default:
+			output.append("TypeDeclarationPattern: pkg<"); //$NON-NLS-1$
+			break;
 		}
 		if (pkg != null)
 			output.append(pkg);

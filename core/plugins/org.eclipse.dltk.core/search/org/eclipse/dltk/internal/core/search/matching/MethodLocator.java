@@ -14,11 +14,16 @@ import java.util.List;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.ast.expressions.CallExpression;
+import org.eclipse.dltk.ast.expressions.MethodCallExpression;
+import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.ISearchFactory;
+import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.search.SearchMatch;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.core.search.matching.PatternLocator;
-
 
 public class MethodLocator extends PatternLocator {
 	protected MethodPattern pattern;
@@ -39,32 +44,6 @@ public class MethodLocator extends PatternLocator {
 	public void initializePolymorphicSearch(MatchLocator locator) {
 	}
 
-	public int match(ASTNode node, MatchingNodeSet nodeSet) {
-		int declarationsLevel = IMPOSSIBLE_MATCH;
-		if (this.pattern.findReferences) {
-//			if (node instanceof ImportReference) {
-//				// With static import, we can have static method reference in
-//				// import reference
-//				ImportReference importRef = (ImportReference) node;
-//				int length = importRef.tokens.length - 1;
-//				if (importRef.isStatic() && !importRef.onDemand && matchesName(this.pattern.selector, importRef.tokens[length])) {
-//					char[][] compoundName = new char[length][];
-//					System.arraycopy(importRef.tokens, 0, compoundName, 0, length);
-//					char[] declaringType = CharOperation.concat(pattern.declaringQualification, pattern.declaringSimpleName, '.');
-//					if (matchesName(declaringType, CharOperation.concatWith(compoundName, '.'))) {
-//						declarationsLevel = ((InternalSearchPattern) this.pattern).mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH;
-//					}
-//				}
-//			}
-		}
-		return nodeSet.addMatch(node, declarationsLevel);
-	}
-
-	// public int match(ConstructorDeclaration node, MatchingNodeSet nodeSet) -
-	// SKIP IT
-	// public int match(Expression node, MatchingNodeSet nodeSet) - SKIP IT
-	// public int match(FieldDeclaration node, MatchingNodeSet nodeSet) - SKIP
-	// IT
 	public int match(MethodDeclaration node, MatchingNodeSet nodeSet) {
 		if (!this.pattern.findDeclarations)
 			return IMPOSSIBLE_MATCH;
@@ -79,16 +58,23 @@ public class MethodLocator extends PatternLocator {
 			if (length != argsLength)
 				return IMPOSSIBLE_MATCH;
 		}
+		// check type names
+
+		String declaringType = node.getDeclaringTypeName();
+		if (checkTypeName(declaringType)) {
+			return INACCURATE_MATCH;
+		}
 		// Verify type arguments (do not reject if pattern has no argument as it
 		// can be an erasure match)
 		if (this.pattern.hasMethodArguments()) {
-//			if (node.typeParameters == null || node.typeParameters.length != this.pattern.methodArguments.length)
-//				return IMPOSSIBLE_MATCH;
+			// if (node.typeParameters == null || node.typeParameters.length !=
+			// this.pattern.methodArguments.length)
+			// return IMPOSSIBLE_MATCH;
 		}
 		// Method declaration may match pattern
 		return nodeSet.addMatch(node, ACCURATE_MATCH);
-	}	
-	
+	}
+
 	// public int match(TypeDeclaration node, MatchingNodeSet nodeSet) - SKIP IT
 	// public int match(TypeReference node, MatchingNodeSet nodeSet) - SKIP IT
 	public int matchContainer() {
@@ -100,9 +86,11 @@ public class MethodLocator extends PatternLocator {
 		return COMPILATION_UNIT_CONTAINER | CLASS_CONTAINER | METHOD_CONTAINER;
 	}
 
-	public SearchMatch newDeclarationMatch(ASTNode reference, IModelElement element, int accuracy, int length,
-			MatchLocator locator) {		
-		return super.newDeclarationMatch(reference, element, accuracy, length, locator);
+	public SearchMatch newDeclarationMatch(ASTNode reference,
+			IModelElement element, int accuracy, int length,
+			MatchLocator locator) {
+		return super.newDeclarationMatch(reference, element, accuracy, length,
+				locator);
 	}
 
 	protected int referenceType() {
@@ -113,16 +101,54 @@ public class MethodLocator extends PatternLocator {
 		return "Locator for " + this.pattern.toString(); //$NON-NLS-1$
 	}
 
-	public int match(CallExpression node, MatchingNodeSet nodeSet) { // interested in NameReference & its subtypes
-		if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
-		
+	public int match(CallExpression node, MatchingNodeSet nodeSet) {
+		if (!this.pattern.findReferences)
+			return IMPOSSIBLE_MATCH;
+
 		if (this.pattern.selector == null)
 			return nodeSet.addMatch(node, POSSIBLE_MATCH);
-		
-		if (matchesName(this.pattern.selector, ((CallExpression) node).getName().toCharArray()))
+
+		if (this.pattern.declaringSimpleName != null
+				&& node instanceof MethodCallExpression) {
+			MethodCallExpression mce = (MethodCallExpression) node;
+			String declaringType = mce.getDeclaringTypeName();
+			if (checkTypeName(declaringType)) {
+				return INACCURATE_MATCH;
+			}
+		}
+
+		if (matchesName(this.pattern.selector, node.getName().toCharArray()))
 			return nodeSet.addMatch(node, ACCURATE_MATCH);
-		
-		
+
 		return IMPOSSIBLE_MATCH;
+	}
+
+	private boolean checkTypeName(String declaringType) {
+		IDLTKLanguageToolkit toolkit = this.pattern.getToolkit();
+		ISearchFactory factory = DLTKLanguageManager.getSearchFactory(toolkit
+				.getNatureId());
+		ISearchPatternProcessor processor = factory
+				.createSearchPatternProcessor();
+		if (processor != null) {
+			if (this.pattern.declaringSimpleName != null) {
+				char[] delimeter = processor.getDelimeterReplacementString()
+						.toCharArray();
+				char[] typeName = CharOperation.concatWithSeparator(
+						this.pattern.declaringQualificationName,
+						this.pattern.declaringSimpleName, delimeter);
+				typeName = CharOperation.replace(typeName, new char[] { '$' },
+						delimeter);
+				if (declaringType != null) {
+					char[] declaringTypeName = declaringType.toCharArray();
+					if (!matchesName(typeName, declaringTypeName)) {
+						return true;
+					}
+				} else {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }

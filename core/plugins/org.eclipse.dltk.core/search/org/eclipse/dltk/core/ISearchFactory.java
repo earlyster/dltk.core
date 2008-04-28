@@ -22,13 +22,12 @@ public interface ISearchFactory {
 	
 	IMatchLocatorParser createMatchParser(MatchLocator locator); //to ext point
 
-
 	SourceIndexerRequestor createSourceRequestor(); //to ext point
 	
 	// Is this method really need?
 	DLTKSearchParticipant createSearchParticipant(); // to ext point
 
 	MatchLocator createMatchLocator(SearchPattern pattern, SearchRequestor requestor, IDLTKSearchScope scope, SubProgressMonitor monitor); // to ext point
-
-
+	
+	ISearchPatternProcessor createSearchPatternProcessor();
 }

@@ -11,6 +11,7 @@ package org.eclipse.dltk.internal.core.search.matching;
 
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.SearchPattern;
@@ -60,8 +61,8 @@ public class DLTKSearchPattern extends SearchPattern {
 	private int flags = 0;
 	static final int HAS_TYPE_ARGUMENTS = 1;
 
-	protected DLTKSearchPattern(int patternKind, int matchRule) {
-		super(matchRule);
+	protected DLTKSearchPattern(int patternKind, int matchRule, IDLTKLanguageToolkit toolkit) {
+		super(matchRule, toolkit);
 		((InternalSearchPattern)this).kind = patternKind;
 		// Use getMatchRule() instead of matchRule as super constructor may modify its value
 		// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=81377

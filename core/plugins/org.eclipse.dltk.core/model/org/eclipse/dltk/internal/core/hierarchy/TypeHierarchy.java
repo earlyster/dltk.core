@@ -164,8 +164,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 */
 	public TypeHierarchy(IType type, ISourceModule[] workingCopies,
 			IScriptProject project, boolean computeSubtypes) {
-		this(type, workingCopies, SearchEngine
-				.createSearchScope(new IModelElement[] { project }),
+		this(type, workingCopies, SearchEngine.createSearchScope(project),
 				computeSubtypes);
 		this.project = project;
 	}
@@ -1023,7 +1022,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 				typeHierarchy.project = (IScriptProject) DLTKCore
 						.create(new String(bytes));
 				typeHierarchy.scope = SearchEngine
-						.createSearchScope(new IModelElement[] { typeHierarchy.project });
+						.createSearchScope(typeHierarchy.project);
 			} else {
 				typeHierarchy.project = null;
 				typeHierarchy.scope = SearchEngine

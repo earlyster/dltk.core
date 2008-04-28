@@ -41,6 +41,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.BasicSearchEngine;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchDocument;
@@ -214,7 +215,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	public String computeIndexLocation(IPath containerPath) {
 		String indexLocation = (String) this.indexLocations.get(containerPath);
 		if (indexLocation == null) {
-			String pathString = containerPath.toOSString();
+			String pathString = containerPath.toString();
 			checksumCalculator.reset();
 			checksumCalculator.update(pathString.getBytes());
 			String fileName = Long.toString(checksumCalculator.getValue())
@@ -254,19 +255,30 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		return null;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public ISourceElementParser getSourceElementParser(IScriptProject project,
 			ISourceElementRequestor requestor) {
+		final ISourceElementParser parser = getSourceElementParser(project);
+		if (parser != null) {
+			parser.setRequestor(requestor);
+		}
+		return parser;
+	}
+	
+	/**
+	 * Method to be used when <i>requestor will be set by indexer</i>
+	 */
+	public ISourceElementParser getSourceElementParser(IScriptProject project) {
 		// disable task tags to speed up parsing
 		// Map options = project.getOptions(true);
 		// options.put(DLTKCore.COMPILER_TASK_TAGS, ""); //$NON-NLS-1$
-		IDLTKLanguageToolkit toolkit = null;
-		toolkit = DLTKLanguageManager.getLanguageToolkit(project);
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(project);
 		if (toolkit != null) {
-			ISourceElementParser parser = null;
-			parser = DLTKLanguageManager.getSourceElementParser(toolkit
+			return DLTKLanguageManager.getSourceElementParser(toolkit
 					.getNatureId());
-			parser.setRequestor(requestor);
-			return parser;
 		}
 		return null;
 	}
@@ -419,9 +431,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 				}
 			}
 			// index isn't cached, consider reusing an existing index file
-			String containerPathString = containerPath.getDevice() == null ? containerPath
-					.toString()
-					: containerPath.toOSString();
+			String containerPathString = containerPath.toString();
 			if (reuseExistingFile) {
 				File indexFile = new File(indexLocation);
 				if (indexFile.exists()) { // check before creating index so as
@@ -648,8 +658,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		if (target instanceof IFile) {
 			// request = new AddArchiveFileToIndex((IFile) target, this);
 			return;
-		} else if (target instanceof java.io.File) {
-			if (((java.io.File) target).isFile()) {
+		} else if (target instanceof IFileHandle) {
+			if (((IFileHandle) target).isFile()) {
 				// request = new AddArchiveFileToIndex(path, this);
 				return;
 			} else {
@@ -743,8 +753,9 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		}
 		if (VERBOSE) {
 			Util
-					.verbose("-> request to rebuild index: " + indexLocation + " path: " + containerPath.toOSString()); //$NON-NLS-1$ //$NON-NLS-2$
+					.verbose("-> request to rebuild index: " + indexLocation + " path: " + containerPath.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		
 		this.updateIndexState(indexLocation, REBUILDING_STATE);
 		IndexRequest request = null;
 		if (target instanceof IProject) {
@@ -758,7 +769,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		} else if (target instanceof IFile) {
 			// request = new AddArchiveFileToIndex((IFile) target, this);
 			return;
-		} else if (target instanceof java.io.File) {
+		} else if (target instanceof IFileHandle) {
 			// request = new AddArchiveFileToIndex(containerPath, this);
 			return;
 		}
@@ -775,9 +786,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	public synchronized Index recreateIndex(IPath containerPath) {
 		boolean mixin = containerPath.toString().startsWith("#special#mixin#"); //$NON-NLS-1$
 		// only called to over write an existing cached index...
-		String containerPathString = containerPath.getDevice() == null ? containerPath
-				.toString()
-				: containerPath.toOSString();
+		String containerPathString = containerPath.toString();
 		try {
 			// Path is already canonical
 			String indexLocation = this.computeIndexLocation(containerPath);

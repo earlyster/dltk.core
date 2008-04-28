@@ -23,9 +23,9 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.util.HashtableOfObject;
 import org.eclipse.dltk.compiler.util.HashtableOfObjectToInt;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISearchableEnvironment;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
@@ -39,11 +39,11 @@ import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
-import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.IPathRequestor;
 import org.eclipse.dltk.internal.core.Member;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.Openable;
+import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.search.IndexQueryRequestor;
 import org.eclipse.dltk.internal.core.search.SubTypeSearchJob;
 import org.eclipse.dltk.internal.core.search.matching.SuperTypeReferencePattern;
@@ -535,7 +535,7 @@ public class IndexBasedHierarchyBuilder extends HierarchyBuilder {
 		superRefKind = SuperTypeReferencePattern.ALL_SUPER_TYPES;
 		SuperTypeReferencePattern pattern = new SuperTypeReferencePattern(null,
 				null, superRefKind, SearchPattern.R_EXACT_MATCH
-						| SearchPattern.R_CASE_SENSITIVE);
+						| SearchPattern.R_CASE_SENSITIVE, scope.getLanguageToolkit());
 		MatchLocator.setFocus(pattern, type);
 		SubTypeSearchJob job = new SubTypeSearchJob(pattern,
 				new DLTKSearchParticipant(), // java search only

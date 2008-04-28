@@ -287,8 +287,8 @@ public class IndexAllProject extends IndexRequest {
 				}
 			}
 
-			ISourceElementParser parser = this.manager.getSourceElementParser(
-					scriptProject, null/* requestor will be set by indexer */);
+			ISourceElementParser parser = this.manager
+					.getSourceElementParser(scriptProject);
 			SourceIndexerRequestor requestor = this.manager
 					.getSourceRequestor(scriptProject);
 			Object[] names = indexedFileNames.keyTable;

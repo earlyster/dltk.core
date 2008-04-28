@@ -35,16 +35,6 @@ public class UserLibraryBuildpathContainer implements IBuildpathContainer {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.IClasspathContainer#getClasspathEntries()
 	 */
-	/**
-	 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
-	 */
-	public IBuildpathEntry[] getBuildpathEntries() {
-		return getBuildpathEntries(null);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.IClasspathContainer#getClasspathEntries()
-	 */
 	public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 		UserLibrary library= getUserLibrary();
 		if (library != null) {
@@ -56,7 +46,7 @@ public class UserLibraryBuildpathContainer implements IBuildpathContainer {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.IClasspathContainer#getDescription()
 	 */
-	public String getDescription() {
+	public String getDescription(IScriptProject project) {
 		return this.name;
 	}
 
@@ -92,7 +82,7 @@ public class UserLibraryBuildpathContainer implements IBuildpathContainer {
 			"	userLibraryName: " + userLibraryName); //$NON-NLS-1$
 	}
 
-	public IBuiltinModuleProvider getBuiltinProvider() {
+	public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
 		return null;
 	}
 }

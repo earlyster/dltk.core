@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.search.matching;
 
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 
@@ -19,8 +20,8 @@ public class MixinPattern extends DLTKSearchPattern implements IIndexConstants {
 		return fieldName;
 	}
 
-	public MixinPattern(char[] key, int matchRule) {
-		super(FIELD_PATTERN, matchRule);
+	public MixinPattern(char[] key, int matchRule, IDLTKLanguageToolkit toolkit) {
+		super(FIELD_PATTERN, matchRule, toolkit);
 		this.mixinKey = key;
 	}
 
@@ -29,7 +30,7 @@ public class MixinPattern extends DLTKSearchPattern implements IIndexConstants {
 	}
 
 	public SearchPattern getBlankPattern() {
-		return new MixinPattern(null, R_EXACT_MATCH | R_CASE_SENSITIVE);
+		return new MixinPattern(null, R_EXACT_MATCH | R_CASE_SENSITIVE, getToolkit());
 	}
 
 	public char[] getIndexKey() {

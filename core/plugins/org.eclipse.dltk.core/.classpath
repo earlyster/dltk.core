@@ -8,6 +8,7 @@
 	<classpathentry kind="src" path="utils"/>
 	<classpathentry kind="src" path="codeassist"/>
 	<classpathentry kind="src" path="typeinference"/>
+	<classpathentry kind="src" path="environment"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -8,7 +8,6 @@
 package org.eclipse.dltk.internal.core;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -20,6 +19,8 @@ import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 /**
  * Represents an external source module.
@@ -68,10 +69,9 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	 * @see org.eclipse.core.resources.IStorage#getFullPath()
 	 */
 	public IPath getFullPath() {
-		if( this.storage != null ) {
+		if (this.storage != null) {
 			return storage.getFullPath();
-		}
-		else {
+		} else {
 			return getPath();
 		}
 	}
@@ -82,41 +82,46 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	public String getName() {
 		return storage.getName();
 	}
-	public IResource getResource()  {
+
+	public IResource getResource() {
 		return null;
 	}
+
 	/*
 	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getBufferContent()
 	 */
 	protected char[] getBufferContent() throws ModelException {
-		File file = new File(getPath().toOSString());
-		// (IFile) this.getResource();
-		// if ((file == null) || ! file.exists())
-		boolean inProjectArchive = false;
-		ProjectFragment projectFragment = this.getProjectFragment();
-		if( projectFragment.isArchive() ) {
-			if(projectFragment.getResource() != null) {
-				inProjectArchive = projectFragment.getResource().exists();
-			}
-		}
-		if (!file.exists() && !inProjectArchive ) {
-			throw newNotPresentException();
-		}
-
+		IFileHandle file = EnvironmentPathUtils.getFile(getPath());
 		InputStream stream = null;
-		char[] content;
+
 		try {
-//			if( this.storage == null ) {
-//				stream = new BufferedInputStream(new FileInputStream(file));
-//			}
-//			else {
-			stream = new BufferedInputStream(storage.getContents());
-//			}
+			if (file != null && file.exists()) {
+				stream = new BufferedInputStream(file.openInputStream());
+			} else {
+				// This is an archive entry
+				boolean inProjectArchive = false;
+				ProjectFragment projectFragment = this.getProjectFragment();
+				if (projectFragment.isArchive()) {
+					if (projectFragment.getResource() != null) {
+						inProjectArchive = projectFragment.getResource()
+								.exists();
+					}
+				}
+				if (!inProjectArchive) {
+					throw newNotPresentException();
+				}
+				stream = new BufferedInputStream(storage.getContents());
+			}
+
+		} catch (IOException e) {
+			throw new ModelException(e,
+					IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
 		} catch (CoreException e) {
 			throw new ModelException(e,
 					IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
 		}
 
+		char[] content;
 		try {
 			content = org.eclipse.dltk.compiler.util.Util
 					.getInputStreamAsCharArray(stream, -1, "utf-8"); //$NON-NLS-1$

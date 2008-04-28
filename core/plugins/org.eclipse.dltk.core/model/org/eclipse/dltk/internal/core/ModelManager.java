@@ -86,6 +86,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceModuleInfoCache;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.builder.ScriptBuilder;
 import org.eclipse.dltk.internal.core.search.DLTKWorkspaceScope;
@@ -115,18 +116,11 @@ public class ModelManager implements ISaveParticipant {
 	public boolean batchContainerInitializations = false;
 	public HashMap containerInitializersCache = new HashMap(5);
 	public final static IBuildpathContainer CONTAINER_INITIALIZATION_IN_PROGRESS = new IBuildpathContainer() {
-		/**
-		 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
-		 */
-		public IBuildpathEntry[] getBuildpathEntries() {
-			return getBuildpathEntries(null);
-		}
-
 		public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 			return null;
 		}
 
-		public String getDescription() {
+		public String getDescription(IScriptProject project) {
 			return "Container Initialization In Progress";} //$NON-NLS-1$
 
 		public int getKind() {
@@ -138,11 +132,10 @@ public class ModelManager implements ISaveParticipant {
 		}
 
 		public String toString() {
-			return getDescription();
+			return getDescription(null);
 		}
 
-		public IBuiltinModuleProvider getBuiltinProvider() {
-			// TODO Auto-generated method stub
+		public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
 			return null;
 		}
 	};
@@ -1112,6 +1105,9 @@ public class ModelManager implements ISaveParticipant {
 			processSavedState.setSystem(true);
 			processSavedState.setPriority(Job.SHORT); // process asap
 			processSavedState.schedule();
+			
+			EnvironmentManager.waitInitialized();
+			
 		} catch (RuntimeException e) {
 			shutdown();
 			throw e;
@@ -1235,18 +1231,12 @@ public class ModelManager implements ISaveParticipant {
 			if (entries != ScriptProject.INVALID_BUILDPATH) {
 				final IBuildpathEntry[] containerEntries = entries;
 				IBuildpathContainer container = new IBuildpathContainer() {
-					/**
-					 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
-					 */
-					public IBuildpathEntry[] getBuildpathEntries() {
-						return getBuildpathEntries(null);
-					}
-
-					public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
+					public IBuildpathEntry[] getBuildpathEntries(
+							IScriptProject project) {
 						return containerEntries;
 					}
 
-					public String getDescription() {
+					public String getDescription(IScriptProject project) {
 						return "Persisted container [" + containerPath + " for project [" + project.getElementName() + "]"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 					}
 
@@ -1259,10 +1249,11 @@ public class ModelManager implements ISaveParticipant {
 					}
 
 					public String toString() {
-						return getDescription();
+						return getDescription(project);
 					}
 
-					public IBuiltinModuleProvider getBuiltinProvider() {
+					public IBuiltinModuleProvider getBuiltinProvider(
+							IScriptProject project) {
 						return null;
 					}
 				};
@@ -1654,23 +1645,17 @@ public class ModelManager implements ISaveParticipant {
 							Util
 									.verbose("CPContainer INIT - FAILED (initializer did not initialize container)\n" + //$NON-NLS-1$
 											"	project: " //$NON-NLS-1$
-											+ project.getElementName()
-											+ '\n'
-											+ //$NON-NLS-1$
+											+ project.getElementName() + '\n' + //$NON-NLS-1$
 											"	container path: " //$NON-NLS-1$
-											+ containerPath
-											+ '\n' + //$NON-NLS-1$
+											+ containerPath + '\n' + //$NON-NLS-1$
 											"	initializer: " + initializer); //$NON-NLS-1$
 						} else {
 							Util
 									.verbose("CPContainer INIT - FAILED (see exception above)\n" + //$NON-NLS-1$
 											"	project: " //$NON-NLS-1$
-											+ project.getElementName()
-											+ '\n'
-											+ //$NON-NLS-1$
+											+ project.getElementName() + '\n' + //$NON-NLS-1$
 											"	container path: " //$NON-NLS-1$
-											+ containerPath
-											+ '\n' + //$NON-NLS-1$
+											+ containerPath + '\n' + //$NON-NLS-1$
 											"	initializer: " + initializer); //$NON-NLS-1$
 						}
 					}
@@ -1683,8 +1668,9 @@ public class ModelManager implements ISaveParticipant {
 				buffer.append("	container path: " + containerPath + '\n'); //$NON-NLS-1$
 				if (container != null) {
 					buffer
-							.append("	container: " + container.getDescription() + " {\n"); //$NON-NLS-2$//$NON-NLS-1$
-					IBuildpathEntry[] entries = container.getBuildpathEntries(project);
+							.append("	container: " + container.getDescription(project) + " {\n"); //$NON-NLS-2$//$NON-NLS-1$
+					IBuildpathEntry[] entries = container
+							.getBuildpathEntries(project);
 					if (entries != null) {
 						for (int i = 0; i < entries.length; i++) {
 							buffer.append("		" + entries[i] + '\n'); //$NON-NLS-1$
@@ -1729,7 +1715,7 @@ public class ModelManager implements ISaveParticipant {
 							.append("	project: " + project.getElementName() + '\n'); //$NON-NLS-1$
 					buffer.append("	container path: " + containerPath + '\n'); //$NON-NLS-1$
 					buffer.append("	previous value: "); //$NON-NLS-1$
-					buffer.append(previousContainer.getDescription());
+					buffer.append(previousContainer.getDescription(project));
 					buffer.append(" {\n"); //$NON-NLS-1$
 					IBuildpathEntry[] entries = previousContainer
 							.getBuildpathEntries(project);
@@ -1818,12 +1804,13 @@ public class ModelManager implements ISaveParticipant {
 		final IBuildpathContainer container = respectiveContainers[0];
 		if (container == null)
 			return false;
-		IScriptProject project = projects[0];
+		final IScriptProject project = projects[0];
 		if (!containerInitializationInProgress(project).contains(containerPath))
 			return false;
 		IBuildpathContainer previousSessionContainer = getPreviousSessionContainer(
 				containerPath, project);
-		final IBuildpathEntry[] newEntries = container.getBuildpathEntries(project);
+		final IBuildpathEntry[] newEntries = container
+				.getBuildpathEntries(project);
 		if (previousSessionContainer == null)
 			if (newEntries.length == 0) {
 				containerPut(project, containerPath, container);
@@ -1862,7 +1849,7 @@ public class ModelManager implements ISaveParticipant {
 												return buffer.toString();
 											}
 											buffer.append(container
-													.getDescription());
+													.getDescription(project));
 											buffer.append(" {\n"); //$NON-NLS-1$
 											for (int j = 0; j < oldEntries.length; j++) {
 												buffer.append(" 			"); //$NON-NLS-1$
@@ -1884,7 +1871,7 @@ public class ModelManager implements ISaveParticipant {
 												return buffer.toString();
 											}
 											buffer.append(container
-													.getDescription());
+													.getDescription(project));
 											buffer.append(" {\n"); //$NON-NLS-1$
 											for (int j = 0; j < newEntries.length; j++) {
 												buffer.append(" 			"); //$NON-NLS-1$
@@ -1906,6 +1893,9 @@ public class ModelManager implements ISaveParticipant {
 	/**
 	 * Returns the open ZipFile at the given path. If the ZipFile does not yet
 	 * exist, it is created, opened, and added to the cache of open ZipFiles.
+	 * 
+	 * NOTE: closeZipFile() must be called for the resulting ZipFile, when the
+	 * client is done using it.
 	 * 
 	 * The path must be a file system path if representing an external zip, or
 	 * it must be an absolute workspace relative path if representing a zip
@@ -2483,18 +2473,11 @@ public class ModelManager implements ISaveParticipant {
 			this.project = project;
 		}
 
-		/**
-		 * @deprecated Use {@link #getBuildpathEntries(IScriptProject)} instead
-		 */
-		public IBuildpathEntry[] getBuildpathEntries() {
-			return getBuildpathEntries(null);
-		}
-
 		public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 			return entries;
 		}
 
-		public String getDescription() {
+		public String getDescription(IScriptProject prj) {
 			return "Persisted container [" + containerPath //$NON-NLS-1$
 					+ " for project [" + project.getElementName() //$NON-NLS-1$
 					+ "]]"; //$NON-NLS-1$  
@@ -2509,10 +2492,10 @@ public class ModelManager implements ISaveParticipant {
 		}
 
 		public String toString() {
-			return getDescription();
+			return getDescription(project);
 		}
 
-		public IBuiltinModuleProvider getBuiltinProvider() {
+		public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
 			return null;
 		}
 	}
@@ -2793,10 +2776,10 @@ public class ModelManager implements ISaveParticipant {
 			UserLibraryManager libraryManager = new UserLibraryManager();
 			synchronized (MANAGER) {
 				if (MANAGER.userLibraryManager == null) { // ensure another
-															// library manager
-															// was not set while
-															// creating the
-															// instance above
+					// library manager
+					// was not set while
+					// creating the
+					// instance above
 					MANAGER.userLibraryManager = libraryManager;
 				}
 			}

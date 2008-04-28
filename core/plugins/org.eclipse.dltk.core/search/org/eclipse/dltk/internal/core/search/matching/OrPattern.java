@@ -11,6 +11,7 @@ package org.eclipse.dltk.internal.core.search.matching;
 
 import java.io.IOException;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchParticipant;
@@ -34,8 +35,11 @@ public class OrPattern extends SearchPattern implements IIndexConstants {
 	int matchCompatibility;
 
 	public OrPattern(SearchPattern leftPattern, SearchPattern rightPattern) {
-		super(Math.max(leftPattern.getMatchRule(), rightPattern.getMatchRule()));
+		super(Math.max(leftPattern.getMatchRule(), rightPattern.getMatchRule()), leftPattern.getToolkit());
 		((InternalSearchPattern)this).kind = OR_PATTERN;
+		
+		Assert.isNotNull(leftPattern.getToolkit());
+		Assert.isTrue(leftPattern.getToolkit().equals(rightPattern.getToolkit()));
 	
 		SearchPattern[] leftPatterns = leftPattern instanceof OrPattern ? ((OrPattern) leftPattern).patterns : null;
 		SearchPattern[] rightPatterns = rightPattern instanceof OrPattern ? ((OrPattern) rightPattern).patterns : null;

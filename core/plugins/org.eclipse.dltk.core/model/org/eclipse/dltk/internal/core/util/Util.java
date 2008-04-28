@@ -46,6 +46,8 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ProjectFragment;
 
@@ -393,12 +395,12 @@ public class Util {
 		return getResourceContentsAsCharArray(file, encoding);
 	}
 
-	public static char[] getResourceContentsAsCharArray(File file)
+	public static char[] getResourceContentsAsCharArray(IFileHandle file)
 			throws ModelException {
 		// Get resource contents
 		InputStream stream = null;
 		try {
-			stream = new BufferedInputStream(new FileInputStream(file));
+			stream = new BufferedInputStream(file.openInputStream());
 		} catch (Exception e) {
 			throw new ModelException(e,
 					IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
@@ -603,7 +605,7 @@ public class Util {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(parent);
 		if (toolkit != null) {
-			return toolkit.validateSourcePackage(path);
+			return toolkit.validateSourcePackage(path, EnvironmentManager.getEnvironment(parent));
 		}
 		return false;
 	}

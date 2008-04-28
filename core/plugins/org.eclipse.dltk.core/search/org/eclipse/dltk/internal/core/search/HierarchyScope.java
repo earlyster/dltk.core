@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.search;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,6 +32,7 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.ArchiveProjectFragment;
 import org.eclipse.dltk.internal.core.Model;
 import org.eclipse.dltk.internal.core.ModelElement;
@@ -98,9 +98,10 @@ public class HierarchyScope extends DLTKSearchScope {
 			if (target instanceof IFile) {
 				// internal jar
 				zipFileName = jarPath.toString();
-			} else if (target instanceof File) {
+			} else if (target instanceof IFileHandle) {
 				// external jar
-				zipFileName = ((File) target).getPath();
+				// TODO Check this
+				zipFileName = ((IFileHandle) target).toOSString();
 			} else {
 				return; // unknown target
 			}
@@ -138,9 +139,10 @@ public class HierarchyScope extends DLTKSearchScope {
 				if (target instanceof IFile) {
 					// internal jar
 					zipFileName = jarPath.toString();
-				} else if (target instanceof File) {
+				} else if (target instanceof IFileHandle) {
 					// external jar
-					zipFileName = ((File) target).getPath();
+					// TODO Check this
+					zipFileName = ((IFileHandle) target).toOSString();
 				} else {
 					continue; // unknown target
 				}

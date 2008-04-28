@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +33,8 @@ import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.utils.CorePrinter;
 
@@ -82,9 +83,10 @@ public class Model extends Openable implements IScriptModel {
 		return true;
 	}
 
+
 	/**
 	 * Helper method - returns the targeted item (IResource if internal or
-	 * java.io.File if external), or null if unbound Internal items must be
+	 * IFileHandle if external), or null if unbound Internal items must be
 	 * referred to using container relative paths.
 	 */
 	public static Object getTarget(IContainer container, IPath path,
@@ -108,25 +110,27 @@ public class Model extends Openable implements IScriptModel {
 		if (!path.isAbsolute())
 			return null;
 		// lookup - outside the container
-		File externalFile = new File(path.toOSString());
-		if (!checkResourceExistence) {
-			return externalFile;
-		} else if (existingExternalFiles.contains(externalFile)) {
-			return externalFile;
-		} else {
-			if (ModelManager.ZIP_ACCESS_VERBOSE) {
-				System.out
-						.println("(" + Thread.currentThread() + ") [Model.getTarget(...)] Checking existence of " + path.toString()); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			if (externalFile.exists()) {
-				// cache external file
-				existingExternalFiles.add(externalFile);
+		IFileHandle externalFile = EnvironmentPathUtils.getFile(path);
+		if (externalFile != null) {
+			if (!checkResourceExistence) {
 				return externalFile;
+			} else if (existingExternalFiles.contains(externalFile)) {
+				return externalFile;
+			} else {
+				if (ModelManager.ZIP_ACCESS_VERBOSE) {
+					System.out
+							.println("(" + Thread.currentThread() + ") [Model.getTarget(...)] Checking existence of " + path.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				if (externalFile.exists()) {
+					// cache external file
+					existingExternalFiles.add(externalFile);
+					return externalFile;
+				}
 			}
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Returns the active script project associated with the specified resource,
 	 * or <code>null</code> if no script project yet exists for the resource.
@@ -291,11 +295,11 @@ public class Model extends Openable implements IScriptModel {
 	 * Helper method - returns the file item (ie. which returns true to
 	 * {@link java.io.File#isFile()}, or null if unbound
 	 */
-	public static synchronized File getFile(Object target) {
+	public static synchronized IFileHandle getFile(Object target) {
 		if (existingExternalConfirmedFiles.contains(target))
-			return (File) target;
-		if (target instanceof File) {
-			File f = (File) target;
+			return (IFileHandle) target;
+		if (target instanceof IFileHandle) {
+			IFileHandle f = (IFileHandle) target;
 			if (f.isFile()) {
 				existingExternalConfirmedFiles.add(f);
 				return f;

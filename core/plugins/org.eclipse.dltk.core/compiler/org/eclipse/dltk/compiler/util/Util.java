@@ -22,6 +22,9 @@ import org.eclipse.dltk.compiler.CharOperation;
 
 public class Util {
 
+	/**
+	 * Some input streams return available() as zero, so we need this value.
+	 */
 	private static final int DEFAULT_READING_SIZE = 8192;
 	public final static String UTF_8 = "UTF-8";	//$NON-NLS-1$			
 	public static String LINE_SEPARATOR = System.getProperty("line.separator"); //$NON-NLS-1$
@@ -142,7 +145,7 @@ public class Util {
 				if (current < 0) break;
 				
 				amountRequested = Math.max(stream.available(), DEFAULT_READING_SIZE);  // read at least 8K
-				
+
 				// resize contents if needed
 				if (totalRead + 1 + amountRequested > contents.length)
 					System.arraycopy(contents, 	0, 	contents = new char[totalRead + 1 + amountRequested], 0, totalRead);
@@ -171,17 +174,30 @@ public class Util {
 
 		return contents;
 	}	
+
+	private final static char[] SUFFIX_zip = new char[] { '.', 'z', 'i', 'p' };
+	private final static char[] SUFFIX_ZIP = new char[] { '.', 'Z', 'I', 'P' };
+
 	/**
-	 * Returns true iff str.toLowerCase().endsWith(".zip") || str.toLowerCase().endsWith(".zip")
+	 * Returns <code>true</code> if str.toLowerCase().endsWith(".zip")
 	 * implementation is not creating extra strings.
 	 */
 	public final static boolean isArchiveFileName(String name) {
-		//System.err.println("TODO: Util.isArchiveFileName always return false for:" + name);
-		//return false;
 		if( name == null ) {
 			return false;
 		}
-		return name.toLowerCase().endsWith(".zip") || name.toLowerCase().endsWith(".zip"); //$NON-NLS-1$ //$NON-NLS-2$
+		final int nameLength = name.length();
+		final int suffixLength = SUFFIX_ZIP.length;
+		if (nameLength < suffixLength)
+			return false;
+		for (int i = 0; i < suffixLength; i++) {
+			final char c = name.charAt(nameLength - i - 1);
+			final int suffixIndex = suffixLength - i - 1;
+			if (c != SUFFIX_zip[suffixIndex] && c != SUFFIX_ZIP[suffixIndex]) {
+				return false;
+			}
+		}
+		return true;
 	}	
 	/* TODO (philippe) should consider promoting it to CharOperation
 	 * Returns whether the given resource path matches one of the inclusion/exclusion

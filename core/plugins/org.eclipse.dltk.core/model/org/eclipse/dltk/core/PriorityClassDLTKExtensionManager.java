@@ -10,51 +10,21 @@
 package org.eclipse.dltk.core;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
 
-public class PriorityClassDLTKExtensionManager extends PriorityDLTKExtensionManager {
-
-	private static final String CLASS_ATTR = "class"; //$NON-NLS-1$
+public class PriorityClassDLTKExtensionManager extends
+		SimplePriorityClassDLTKExtensionManager {
 
 	public PriorityClassDLTKExtensionManager(String extensionPoint) {
 		super(extensionPoint, "nature"); //$NON-NLS-1$
 	}
+
 	public PriorityClassDLTKExtensionManager(String extensionPoint, String id) {
 		super(extensionPoint, id);
 	}
 
-	public Object getObject(String id) {
-		return getInitObject(getElementInfo(id));
-	}
-
-	public Object getInitObject(ElementInfo ext) {
-		try {
-			if (ext != null) {
-				if (ext.object != null) {
-					return ext.object;
-				}
-
-				IConfigurationElement cfg = (IConfigurationElement) ext.config;
-				Object object = createObject(cfg);
-				ext.object = object;
-				return object;
-			}
-		} catch (CoreException e) {
-			if( DLTKCore.DEBUG ) {
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
-
-	protected Object createObject(IConfigurationElement cfg)
-			throws CoreException {
-		return cfg.createExecutableExtension(CLASS_ATTR);
-	}
-
 	public Object getObject(IModelElement element) {
-		if (element == null || element.getElementType() == IModelElement.SCRIPT_MODEL) {
+		if (element == null
+				|| element.getElementType() == IModelElement.SCRIPT_MODEL) {
 			return null;
 		}
 		IProject project = element.getScriptProject().getProject();

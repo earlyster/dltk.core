@@ -913,41 +913,44 @@ public class ScriptProject extends Openable implements IScriptProject {
 		if (workspace.getRoot().findMember(externalPath) != null) {
 			return externalPath;
 		}
-		IPath canonicalPath = null;
-		try {
-			canonicalPath = new Path(new File(externalPath.toOSString())
-					.getCanonicalPath());
-		} catch (IOException e) {
-			// default to original path
-			return externalPath;
-		}
-		IPath result;
-		int canonicalLength = canonicalPath.segmentCount();
-		if (canonicalLength == 0) {
-			// the java.io.File canonicalization failed
-			return externalPath;
-		} else if (externalPath.isAbsolute()) {
-			result = canonicalPath;
-		} else {
-			// if path is relative, remove the first segments that were added by
-			// the java.io.File canonicalization
-			// e.g. 'lib/classes.zip' was converted to
-			// 'd:/myfolder/lib/classes.zip'
-			int externalLength = externalPath.segmentCount();
-			if (canonicalLength >= externalLength) {
-				result = canonicalPath.removeFirstSegments(canonicalLength
-						- externalLength);
-			} else {
-				return externalPath;
-			}
-		}
-		// keep device only if it was specified (this is because
-		// File.getCanonicalPath() converts '/lib/classed.zip' to
-		// 'd:/lib/classes/zip')
-		if (externalPath.getDevice() == null) {
-			result = result.setDevice(null);
-		}
-		return result;
+		//TODO Check this
+		return externalPath;
+		//		
+		// IPath canonicalPath = null;
+		// try {
+		// canonicalPath = new Path(new File(externalPath.toOSString())
+		// .getCanonicalPath());
+		// } catch (IOException e) {
+		// // default to original path
+		// return externalPath;
+		// }
+		// IPath result;
+		// int canonicalLength = canonicalPath.segmentCount();
+		// if (canonicalLength == 0) {
+		// // the java.io.File canonicalization failed
+		// return externalPath;
+		// } else if (externalPath.isAbsolute()) {
+		// result = canonicalPath;
+		// } else {
+		// // if path is relative, remove the first segments that were added by
+		// // the java.io.File canonicalization
+		// // e.g. 'lib/classes.zip' was converted to
+		// // 'd:/myfolder/lib/classes.zip'
+		// int externalLength = externalPath.segmentCount();
+		// if (canonicalLength >= externalLength) {
+		// result = canonicalPath.removeFirstSegments(canonicalLength
+		// - externalLength);
+		// } else {
+		// return externalPath;
+		// }
+		// }
+		// // keep device only if it was specified (this is because
+		// // File.getCanonicalPath() converts '/lib/classed.zip' to
+		// // 'd:/lib/classes/zip')
+		// if (externalPath.getDevice() == null) {
+		//			result = result.setDevice(null);
+		//		}
+		//		return result;
 	}
 
 	/**
@@ -3029,7 +3032,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 	public static boolean hasScriptNature(IProject p) {
 		return DLTKLanguageManager.hasScriptNature(p);
 	}
-	
+
 	public IScriptFolder[] getScriptFolders() throws ModelException {
 
 		IProjectFragment[] roots = getProjectFragments();
@@ -3053,5 +3056,5 @@ public class ScriptProject extends Openable implements IScriptProject {
 		IScriptFolder[] fragments = new IScriptFolder[frags.size()];
 		frags.toArray(fragments);
 		return fragments;
-	}	
+	}
 }

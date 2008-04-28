@@ -80,7 +80,7 @@ public class BuiltinProjectFragment extends ProjectFragment {
 			if( buildpathContainer == null ) {
 				return null;
 			}
-			IBuiltinModuleProvider builtinProvider = buildpathContainer.getBuiltinProvider();
+			IBuiltinModuleProvider builtinProvider = buildpathContainer.getBuiltinProvider(project);
 			return builtinProvider;
 		} catch (CoreException ex) {
 			if (DLTKCore.DEBUG) {

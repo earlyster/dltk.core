@@ -621,6 +621,27 @@ public final class CharOperation {
 		System.arraycopy(second, 0, result, length1 + 1, length2);
 		return result;
 	}
+	public static final char[] concatWithSeparator(char[] first, char[] second,
+			char[] separator) {
+		if (first == null)
+			return second;
+		if (second == null)
+			return first;
+
+		int length1 = first.length;
+		if (length1 == 0)
+			return second;
+		int length2 = second.length;
+		if (length2 == 0)
+			return first;
+		int length3 = separator.length;
+
+		char[] result = new char[length1 + length2 + length3];
+		System.arraycopy(first, 0, result, 0, length1);
+		System.arraycopy(separator, 0, result, length1, length3);
+		System.arraycopy(second, 0, result, length1 + length3, length2);
+		return result;
+	}
 
 	/**
 	 * Answers the concatenation of the three arrays inserting the sep1

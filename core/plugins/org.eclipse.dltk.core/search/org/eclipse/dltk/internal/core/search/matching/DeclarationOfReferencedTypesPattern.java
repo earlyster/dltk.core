@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.core.search.matching;
 
 import org.eclipse.dltk.compiler.util.SimpleSet;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IModelElement;
 
 public class DeclarationOfReferencedTypesPattern extends TypeReferencePattern {
@@ -17,7 +18,8 @@ public class DeclarationOfReferencedTypesPattern extends TypeReferencePattern {
 	protected IModelElement enclosingElement;
 
 	public DeclarationOfReferencedTypesPattern(IModelElement enclosingElement) {
-		super(null, null, R_PATTERN_MATCH);
+		super(null, null, R_PATTERN_MATCH, DLTKLanguageManager
+				.getLanguageToolkit(enclosingElement));
 		this.enclosingElement = enclosingElement;
 	}
 }

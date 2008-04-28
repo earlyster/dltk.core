@@ -13,9 +13,10 @@
    <extension-point id="completionEngine" name="%extension-point.name.completionEngine" schema="schema/completionEngine.exsd"/>
    <extension-point id="callHierarchy" name="%extension-point.name.callHierarchy" schema="schema/callHierarchy.exsd"/>
    <extension-point id="problemFactory" name="%extension-point.name.problemFactory" schema="schema/problemFactory.exsd"/>
+   <extension-point id="environment" name="%extension-point.name.environment" schema="schema/environment.exsd"/>
    <extension-point id="fileHierarchyResolvers" name="%extension-point.name.fileHierarchyResolvers" schema="schema/fileHierarchyResolvers.exsd"/>
    <extension-point id="interpreterContainerExtension" name="%extension-point.name.interpreterContainerExtension" schema="schema/interpreterContainerExtension.exsd"/>
-
+   
 <!-- =================================================================================== -->
 <!-- Extension: DLTK Problem                                                             -->
 <!-- =================================================================================== -->
@@ -97,5 +98,13 @@
          class="org.eclipse.dltk.internal.core.UserLibraryBuildpathContainerInitializer"
          id="org.eclipse.dltk.USER_LIBRARY">
    </buildpathContainerInitializer>
+</extension>
+<extension
+      point="org.eclipse.dltk.core.environment">
+   <environment
+         class="org.eclipse.dltk.core.internal.environment.LocalEnvironmentProvider"
+         id="org.eclipse.dltk.core.localEnvironmentProvider"
+         priority="0">
+   </environment>
 </extension>
 </plugin>
