@@ -96,7 +96,6 @@ public class ValidatorUpdater {
 				} finally {
 					monitor.done();
 				}
-				
 			}
 		};
 		try {

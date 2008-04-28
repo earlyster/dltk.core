@@ -27,12 +27,14 @@ public class ExternalCheckerConsoleTracker implements IPatternMatchListener {
 	public ExternalCheckerConsoleTracker() {
 		super();
 
-		IValidator[] validators = ValidatorRuntime.getActiveValidators();
+		IValidator[] validators = ValidatorRuntime.getAllValidators();
 		for (int i = 0; i < validators.length; i++) {
 			if (validators[i] instanceof ExternalChecker) {
 				ExternalChecker checker = (ExternalChecker) validators[i];
-				for (int j = 0; j < checker.getNRules(); j++) {
-					rules.add(checker.getRule(j));
+				if (checker.isActive()) {
+					for (int j = 0; j < checker.getNRules(); j++) {
+						rules.add(checker.getRule(j));
+					}
 				}
 			}
 		}
@@ -62,30 +64,28 @@ public class ExternalCheckerConsoleTracker implements IPatternMatchListener {
 	public void matchFound(PatternMatchEvent event) {
 		try {
 			IOConsole cons = (IOConsole) event.getSource();
-			IDocument doc = (IDocument) cons.getDocument();
+			IDocument doc = cons.getDocument();
 			int offset = event.getOffset();
 			int length = event.getLength();
 			String text = doc.get(offset, length);
-			
+
 			List wlist = ExternalCheckerWildcardManager.loadCustomWildcards();
 			WildcardMatcher wmatcher = new WildcardMatcher(wlist);
 
-				for (int i = 0; i < rules.size(); i++) {
-					Rule rule = (Rule) rules.get(i);
-					try {
-						ExternalCheckerProblem problem = wmatcher.match(rule,
-								text);
-						if (problem != null) {
-							IHyperlink link = new ExternalCheckerSyntaxHyperlink(
-									console, problem);
-							console.addHyperlink(link, offset, text
-									.length());
-							break;
-						}
-					} catch (WildcardException x) {
+			for (int i = 0; i < rules.size(); i++) {
+				Rule rule = (Rule) rules.get(i);
+				try {
+					ExternalCheckerProblem problem = wmatcher.match(rule, text);
+					if (problem != null) {
+						IHyperlink link = new ExternalCheckerSyntaxHyperlink(
+								console, problem);
+						console.addHyperlink(link, offset, text.length());
+						break;
 					}
+				} catch (WildcardException x) {
 				}
-//				offset = offset + text.length() + 1;
+			}
+			// offset = offset + text.length() + 1;
 		} catch (BadLocationException e) {
 		}
 	}
