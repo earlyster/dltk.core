@@ -19,6 +19,7 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.debug.core.ScriptDebugManager;
 import org.eclipse.dltk.debug.core.model.IScriptLineBreakpoint;
+import org.eclipse.dltk.debug.core.model.IScriptMethodEntryBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptWatchpoint;
 
 public class ScriptDebugModel {
@@ -50,7 +51,7 @@ public class ScriptDebugModel {
 				charStart, charEnd, register);
 	}
 
-	public static IScriptLineBreakpoint createMethodEntryBreakpoint(
+	public static IScriptMethodEntryBreakpoint createMethodEntryBreakpoint(
 			IResource resource, IPath path, int lineNumber, int charStart, int charEnd,
 			boolean register, Map attributes, String methodName)
 			throws CoreException {
