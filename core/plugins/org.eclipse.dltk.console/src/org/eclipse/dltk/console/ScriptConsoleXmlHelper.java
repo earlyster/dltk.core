@@ -60,7 +60,9 @@ public final class ScriptConsoleXmlHelper {
 					.newInstance();
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			StringReader reader = new StringReader(xml);
-			return builder.parse(new InputSource(reader));
+			InputSource source = new InputSource(reader);
+			source.setEncoding("UTF-8"); //$NON-NLS-1$
+			return builder.parse(source);
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

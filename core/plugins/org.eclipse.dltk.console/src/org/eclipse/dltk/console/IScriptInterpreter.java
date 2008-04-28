@@ -9,8 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.console;
 
+import java.io.InputStream;
+
 public interface IScriptInterpreter extends IScriptConsoleShell,
 		IScriptConsoleInterpreter, ConsoleRequest {
-	String getInitialOuput();
 	void addInitialListenerOperation(Runnable runnable);
+	InputStream getInitialOutputStream();
 }
