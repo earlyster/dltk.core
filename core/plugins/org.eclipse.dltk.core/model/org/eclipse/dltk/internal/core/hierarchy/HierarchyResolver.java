@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.DLTKCore;
@@ -96,12 +97,15 @@ public class HierarchyResolver {
 		}
 
 		computeSubtypesFor(focusType, superTypeToExtender, new HashMap(),
-				hierarchyInfo);
+				hierarchyInfo, new HashSet());
 	}
 
 	protected void computeSubtypesFor(IType focusType, Map superTypeToExtender,
-			Map subTypesCache, IFileHierarchyInfo hierarchyInfo)
+			Map subTypesCache, IFileHierarchyInfo hierarchyInfo, Set processedTypes)
 			throws CoreException {
+		
+		processedTypes.add(focusType);
+		
 		List extenders = (List) superTypeToExtender.get(focusType
 				.getElementName());
 		if (extenders != null) {
@@ -115,8 +119,10 @@ public class HierarchyResolver {
 
 			for (int i = 0; i < subTypes.length; i++) {
 				IType subType = subTypes[i];
-				computeSubtypesFor(subType, superTypeToExtender, subTypesCache,
-						hierarchyInfo);
+				if (!processedTypes.contains(subType)) {
+					computeSubtypesFor(subType, superTypeToExtender, subTypesCache,
+						hierarchyInfo, processedTypes);
+				}
 			}
 		}
 	}
@@ -130,11 +136,14 @@ public class HierarchyResolver {
 					hierarchyBuilder.hierarchy.progressMonitor);
 		}
 
-		computeSupertypesFor(focusType, hierarchyInfo);
+		computeSupertypesFor(focusType, hierarchyInfo, new HashSet());
 	}
 
 	protected void computeSupertypesFor(IType focusType,
-			IFileHierarchyInfo hierarchyInfo) throws CoreException {
+			IFileHierarchyInfo hierarchyInfo, Set processedTypes) throws CoreException {
+		
+		processedTypes.add(focusType);
+		
 		// Build superclasses hieararchy:
 		String[] superClasses = focusType.getSuperClasses();
 		if (superClasses != null && superClasses.length > 0) {
@@ -148,7 +157,9 @@ public class HierarchyResolver {
 
 			for (int i = 0; i < searchTypes.length; i++) {
 				IType superclass = searchTypes[i];
-				computeSupertypesFor(superclass, hierarchyInfo);
+				if (!processedTypes.contains(superclass)) {
+					computeSupertypesFor(superclass, hierarchyInfo, processedTypes);
+				}
 			}
 		} else {
 			if (!hierarchyBuilder.hierarchy.contains(focusType)) {
