@@ -171,7 +171,7 @@ public class MixinBuilder implements IScriptBuilder {
 							.setDevice(null).toString());
 				} else if (element instanceof SourceModule) {
 					containerRelativePath = (element.getPath()
-							.removeFirstSegments(1).toOSString());
+							.removeFirstSegments(1).toPortableString());
 				} else if (element instanceof BuiltinSourceModule) {
 					containerRelativePath = document.getPath();
 					// (element.getPath()
