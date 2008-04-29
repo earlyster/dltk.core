@@ -56,9 +56,11 @@ import org.eclipse.dltk.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.ITextSelection;
@@ -983,7 +985,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 			// menu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
 			menu.add(new Separator(IContextMenuConstants.GROUP_SEARCH));
 			// menu.add(new Separator(IContextMenuConstants.GROUP_BUILD));
-			// menu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
+			menu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
 			// menu.add(new
 			// Separator(IContextMenuConstants.GROUP_VIEWER_SETUP));
 			menu.add(new Separator(IContextMenuConstants.GROUP_PROPERTIES));
@@ -1036,22 +1038,18 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 					.addPostSelectionChangedListener((ISelectionChangedListener) listeners[i]);
 		}
 
-		// MenuManager manager = new MenuManager(fContextMenuID,
-		// fContextMenuID);
-		// manager.setRemoveAllWhenShown(true);
-		// manager.addMenuListener(new IMenuListener() {
-		// public void menuAboutToShow(IMenuManager m) {
-		// contextMenuAboutToShow(m);
-		// }
-		// });
-		// fMenu = manager.createContextMenu(tree);
-		// tree.setMenu(fMenu);
+		 MenuManager manager = new MenuManager(DLTKUIPlugin.getPluginId() + ".outline",DLTKUIPlugin.getPluginId() + ".outline");
+		 manager.setRemoveAllWhenShown(true);
+		 manager.addMenuListener(new IMenuListener() {
+		 public void menuAboutToShow(IMenuManager m) {
+		 contextMenuAboutToShow(m);
+		 }
+		 });
+		 fMenu = manager.createContextMenu(tree);
+		 tree.setMenu(fMenu);
 
 		IPageSite site = getSite();
-		// site
-		// .registerContextMenu(
-		// DLTKUIPlugin.getPluginId() + ".outline", manager, fOutlineViewer);
-		// //$NON-NLS-1$
+		site.registerContextMenu(DLTKUIPlugin.getPluginId() + ".outline", manager, fOutlineViewer); //$NON-NLS-1$
 
 		updateSelectionProvider(site);
 
