@@ -92,7 +92,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 
 		public void run() {
 			// We need to be sure what page is already created
-			while (page == null && page.getViewer() != null) {
+			while (page == null && page.getViewer() == null) {
 				try {
 					Thread.sleep(50);
 				} catch (InterruptedException e) {
