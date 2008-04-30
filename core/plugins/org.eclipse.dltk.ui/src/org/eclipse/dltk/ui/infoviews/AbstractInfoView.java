@@ -5,7 +5,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation (Andrei Sobolev)
+ *     xored software, Inc. - Patch 228846 (Alex Panchenko <alex@xored.com>)
  *******************************************************************************/
 package org.eclipse.dltk.ui.infoviews;
 
@@ -15,6 +17,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.text.ScriptWordFinder;
 import org.eclipse.dltk.internal.ui.util.SelectionUtil;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IContextMenuConstants;
 import org.eclipse.dltk.ui.ScriptElementLabels;
 import org.eclipse.dltk.ui.actions.SelectionDispatchAction;
@@ -27,6 +30,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -57,8 +61,8 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
  * 
  * 
  */
-public abstract class AbstractInfoView extends ViewPart implements ISelectionListener,
-		IMenuListener, IPropertyChangeListener {
+public abstract class AbstractInfoView extends ViewPart implements
+		ISelectionListener, IMenuListener, IPropertyChangeListener {
 	/** ScriptElementLabels flags used for the title */
 	private final long TITLE_FLAGS = ScriptElementLabels.ALL_FULLY_QUALIFIED
 			| ScriptElementLabels.M_PRE_RETURNTYPE
@@ -69,9 +73,9 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 			| ScriptElementLabels.M_PRE_TYPE_PARAMETERS
 			| ScriptElementLabels.T_TYPE_PARAMETERS
 			| ScriptElementLabels.USE_RESOLVED;
-// private final long LOCAL_VARIABLE_TITLE_FLAGS = TITLE_FLAGS &
-// ~ScriptElementLabels.F_FULLY_QUALIFIED |
-// ScriptElementLabels.F_POST_QUALIFIED;
+	// private final long LOCAL_VARIABLE_TITLE_FLAGS = TITLE_FLAGS &
+	// ~ScriptElementLabels.F_FULLY_QUALIFIED |
+	// ScriptElementLabels.F_POST_QUALIFIED;
 	/** ScriptElementLabels flags used for the tool tip text */
 	private static final long TOOLTIP_LABEL_FLAGS = ScriptElementLabels.DEFAULT_QUALIFIED
 			| ScriptElementLabels.ROOT_POST_QUALIFIED
@@ -391,27 +395,37 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 *            the selection
 	 * @return the selected Script element
 	 */
-	protected IModelElement findSelectedModelElement(IWorkbenchPart part,
+	protected Object findSelectedModelElement(IWorkbenchPart part,
 			ISelection selection) {
-		Object element;
 		try {
-			if (part instanceof ScriptEditor
+			if (isValidWorkbenchPart(part)
 					&& selection instanceof ITextSelection) {
+				final ScriptEditor editor = (ScriptEditor) part;
 				IModelElement[] elements = TextSelectionConverter.codeResolve(
-						(ScriptEditor) part, (ITextSelection) selection);
-				if (elements != null && elements.length > 0)
-					return elements[0];
-				else
-					return null;
+						editor, (ITextSelection) selection);
+				if (elements != null && elements.length > 0) {
+					return elements.length == 1 ? elements[0]
+							: (Object) new ModelElementArray(elements);
+				}
 			} else if (selection instanceof IStructuredSelection) {
-				element = SelectionUtil.getSingleElement(selection);
-			} else {
-				return null;
+				Object element = SelectionUtil.getSingleElement(selection);
+				return findModelElement(element);
 			}
 		} catch (ModelException e) {
-			return null;
+			DLTKUIPlugin.log(e);
 		}
-		return findModelElement(element);
+		return null;
+	}
+
+	/**
+	 * Checks that specified {@link IWorkbenchPart} is an {@link ScriptEditor}
+	 * and is suitable to retrieve selected {@link IModelElement}s
+	 * 
+	 * @param part
+	 * @return
+	 */
+	protected boolean isValidWorkbenchPart(IWorkbenchPart part) {
+		return part instanceof ScriptEditor;
 	}
 
 	/**
@@ -423,13 +437,11 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 *         <code>null</code>
 	 */
 	private IModelElement findModelElement(Object element) {
-		if (element == null)
-			return null;
-		IModelElement je = null;
-		if (element instanceof IAdaptable)
-			je = (IModelElement) ((IAdaptable) element)
+		if (element != null && element instanceof IAdaptable) {
+			return (IModelElement) ((IAdaptable) element)
 					.getAdapter(IModelElement.class);
-		return je;
+		}
+		return null;
 	}
 
 	/*
@@ -476,23 +488,20 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 			public void run() {
 				if (currentCount != fComputeCount)
 					return;
-				IModelElement je = findSelectedModelElement(part, selection);
+				Object je = findSelectedModelElement(part, selection);
 				Object tmp = null;
 				if (je != null) {
 					tmp = je;
 				} else {
 					if (part instanceof ScriptEditor
 							&& selection instanceof ITextSelection) {
-						IRegion reg = ScriptWordFinder
-								.findWord(((ScriptEditor) part).getViewer()
-										.getDocument(),
-										((ITextSelection) selection)
-												.getOffset());
+						IDocument doc = ((ScriptEditor) part).getViewer()
+								.getDocument();
+						IRegion reg = ScriptWordFinder.findWord(doc,
+								((ITextSelection) selection).getOffset());
 						if (reg != null) {
 							try {
-								tmp = ((ScriptEditor) part).getViewer()
-										.getDocument().get(reg.getOffset(),
-												reg.getLength());
+								tmp = doc.get(reg.getOffset(), reg.getLength());
 							} catch (BadLocationException e) {
 								tmp = null;
 							}
@@ -539,13 +548,16 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		setInput(input);
 		Object in = getInput();
 		fGotoInputAction.setEnabled(in instanceof IModelElement);
-		long flags = TITLE_FLAGS;
 		if (in instanceof IModelElement) {
 			IModelElement me = (IModelElement) in;
 			setContentDescription(ScriptElementLabels.getDefault()
-					.getElementLabel(me, flags));
+					.getElementLabel(me, TITLE_FLAGS));
 			setTitleToolTip(ScriptElementLabels.getDefault().getElementLabel(
 					me, TOOLTIP_LABEL_FLAGS));
+		} else if (in instanceof ModelElementArray) {
+			final ModelElementArray array = (ModelElementArray) in;
+			setContentDescription(array.getContentDescription());
+			setTitleToolTip(array.getTitleTooltip());
 		} else {
 			setContentDescription(in.toString());
 			setTitleToolTip(in.toString());

@@ -5,7 +5,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation (Andrei Sobolev)
+ *     xored software, Inc. - Patch 228846 (Alex Panchenko <alex@xored.com>)
  *******************************************************************************/
 package org.eclipse.dltk.ui.infoviews;
 
@@ -16,12 +18,13 @@ import org.eclipse.osgi.util.NLS;
  */
 final class InfoViewMessages extends NLS {
 
-	private static final String BUNDLE_NAME= InfoViewMessages.class.getName();
+	private static final String BUNDLE_NAME = InfoViewMessages.class.getName();
 
 	private InfoViewMessages() {
 		// Do not instantiate
 	}
 
+	public static String ContentDescription_multipleMethodsWithSameName;
 	public static String CopyAction_label;
 	public static String CopyAction_tooltip;
 	public static String CopyAction_description;
@@ -37,6 +40,7 @@ final class InfoViewMessages extends NLS {
 	public static String ScriptdocView_error_noBrowser_message;
 	public static String ScriptdocView_error_noBrowser_doNotWarn;
 	public static String ScriptdocView_noAttachedInformation;
+	public static String ScriptdocView_noAttachedInformationHeader;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, InfoViewMessages.class);
