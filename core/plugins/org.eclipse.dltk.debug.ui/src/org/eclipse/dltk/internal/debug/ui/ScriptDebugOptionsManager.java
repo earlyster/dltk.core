@@ -33,6 +33,7 @@ import org.eclipse.dltk.dbgp.breakpoints.IDbgpBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpointListener;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
+import org.eclipse.dltk.debug.core.model.IScriptMethodEntryBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.preferences.StepFilterManager;
@@ -93,8 +94,27 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 		updateBreakpoints(breakpoints, new IBreakpointUpdater() {
 			public void update(IScriptBreakpoint breakpoint)
 					throws CoreException {
-				String id = breakpoint.getIdentifier();
-				IDbgpBreakpoint br = thread.getDbgpBreakpoint(id);
+				
+				IDbgpBreakpoint br = null;
+
+				if (breakpoint instanceof IScriptMethodEntryBreakpoint) {
+					IScriptMethodEntryBreakpoint entryBreakpoint = (IScriptMethodEntryBreakpoint) breakpoint;
+
+					final String entryId = entryBreakpoint.getEntryBreakpointId();
+					if (entryId != null) {
+						br = thread.getDbgpBreakpoint(entryId);
+					}
+
+					final String exitId = entryBreakpoint.getExitBreakpointId();
+					if (exitId != null) {
+						br = thread.getDbgpBreakpoint(exitId);
+					}
+				}
+				else
+				{
+					String id = breakpoint.getIdentifier();
+					br = thread.getDbgpBreakpoint(id);
+				}
 				if (br != null) {
 					breakpoint.setHitCount(br.getHitCount());
 				}

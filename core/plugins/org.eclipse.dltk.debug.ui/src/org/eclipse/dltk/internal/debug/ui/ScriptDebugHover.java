@@ -94,7 +94,7 @@ public abstract class ScriptDebugHover implements IScriptEditorTextHover,
 				IModelElement scriptElement = resolve[i];
 				if (scriptElement instanceof IField) {
 					IField field = (IField) scriptElement;
-					String snippet = field.getElementName();
+					String snippet = getFieldProperty(field);
 					try {
 						IDbgpProperty property = propCmds.getProperty(snippet);
 						return getResultText(snippet, ScriptValue.createValue(
@@ -106,6 +106,11 @@ public abstract class ScriptDebugHover implements IScriptEditorTextHover,
 		} catch (Exception e) {
 		}
 		return null;
+	}
+
+	protected String getFieldProperty(IField field) {
+		String snippet = field.getElementName();
+		return snippet;
 	}
 
 	protected String getResultText(String snippet, IScriptValue value)

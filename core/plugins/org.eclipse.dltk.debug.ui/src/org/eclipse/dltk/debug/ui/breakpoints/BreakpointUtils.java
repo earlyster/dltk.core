@@ -25,7 +25,10 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.ScriptDebugManager;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
+import org.eclipse.dltk.debug.core.model.IScriptLineBreakpoint;
+import org.eclipse.dltk.debug.core.model.IScriptMethodEntryBreakpoint;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
+import org.eclipse.dltk.internal.debug.core.model.AbstractScriptBreakpoint;
 import org.eclipse.dltk.internal.debug.core.model.ScriptDebugModel;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
@@ -167,9 +170,10 @@ public class BreakpointUtils {
 				int end = start + line.getLength() - 1;
 				// TODO
 				IPath path = resource.getLocation();
-				/* ILineBreakpoint b = */ScriptDebugModel
-						.createMethodEntryBreakpoint(resource, path,
-								lineNumber, start, end, true, null, methodName);
+				IScriptMethodEntryBreakpoint methodEntryBreakpoint = ScriptDebugModel.createMethodEntryBreakpoint(resource, path,
+								lineNumber, start, end, false, null, methodName);
+				methodEntryBreakpoint.setBreakOnEntry(true);
+				((AbstractScriptBreakpoint)methodEntryBreakpoint).register(true);
 			} catch (BadLocationException e) {
 				DebugPlugin.log(e);
 			}
