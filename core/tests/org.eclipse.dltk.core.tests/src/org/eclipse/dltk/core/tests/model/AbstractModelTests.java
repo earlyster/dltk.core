@@ -928,44 +928,17 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 		do {
 			try {
 				IJobManager jobManager = Job.getJobManager();
-				jobManager.join(ResourcesPlugin.FAMILY_AUTO_BUILD,
-						new IProgressMonitor() {
-							public void beginTask(String name, int totalWork) {
-								System.out.println("task:" + name + " (" + totalWork + ")");
-							}
-
-							public void done() {
-								System.out.println("done");
-							}
-
-							public void internalWorked(double work) {
-								System.out.println(".");
-							}
-
-							public boolean isCanceled() {
-								// TODO Auto-generated method stub
-								return false;
-							}
-
-							public void setCanceled(boolean value) {
-								// TODO Auto-generated method stub
-
-							}
-
-							public void setTaskName(String name) {
-								System.out.println("taskname:" + name);
-							}
-
-							public void subTask(String name) {
-								System.out.println("subtask:" + name);
-
-							}
-
-							public void worked(int work) {
-								System.out.println(".");
-							}
-
-						});
+				Job[] jobs = Job.getJobManager().find(
+						ResourcesPlugin.FAMILY_AUTO_BUILD);
+				for (int j = 0; j < jobs.length; j++) {
+					System.out.println("#1" + jobs[j]);
+				}
+				jobManager.join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+				jobs = Job.getJobManager().find(
+						ResourcesPlugin.FAMILY_AUTO_BUILD);
+				for (int j = 0; j < jobs.length; j++) {
+					System.out.println("#2" + jobs[j]);
+				}
 				wasInterrupted = false;
 			} catch (OperationCanceledException e) {
 				e.printStackTrace();

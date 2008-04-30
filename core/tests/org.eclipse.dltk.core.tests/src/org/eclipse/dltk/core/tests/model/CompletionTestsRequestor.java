@@ -11,6 +11,9 @@ package org.eclipse.dltk.core.tests.model;
 
 import java.util.Vector;
 
+import junit.framework.Assert;
+
+import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.core.CompletionRequestor;
 
@@ -23,6 +26,12 @@ public class CompletionTestsRequestor extends CompletionRequestor {
 	private Vector fCompletionEnd = new Vector();
 	
 	public boolean fDebug = false;
+
+	public void completionFailure(IProblem problem) {
+		Assert.fail("completionFailure("
+				+ (problem != null ? problem.getMessage() : "Unknown problem")
+				+ ")");
+	}
 
 	private void acceptCommon(CompletionProposal proposal) {
 		fCompletions.addElement(new String(proposal.getCompletion()));
