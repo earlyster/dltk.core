@@ -28,12 +28,11 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ISourceElementParserExtension;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ISourceModuleInfoCache;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -363,9 +362,9 @@ public abstract class AbstractSourceModule extends Openable implements
 			throws ModelException {
 
 		return getWorkingCopy(new WorkingCopyOwner() /*
-														 * non shared working
-														 * copy
-														 */
+		 * non shared working
+		 * copy
+		 */
 		{
 		}, null /* no problem requestor */, monitor);
 	}
@@ -446,20 +445,6 @@ public abstract class AbstractSourceModule extends Openable implements
 
 			SourceModuleElementInfo moduleInfo = (SourceModuleElementInfo) info;
 
-			// get buffer contents
-			char[] contents;
-			IBuffer buffer = getBufferManager().getBuffer(this);
-			if (buffer != null) {
-			  contents = buffer.getCharacters();
-			}
-			else {
-			  //ssanders: PERFORMANCE - Avoid using a Buffer, if there isn't one already
-			  contents = getBufferContent();
-              //buffer = openBuffer(pm, moduleInfo); // open buffer
-              // independently
-              // from the info, since we are building the info
-			}
-
 			// generate structure and compute syntax problems if needed
 			SourceModuleStructureRequestor requestor = new SourceModuleStructureRequestor(
 					this, moduleInfo, newElements);
@@ -483,16 +468,7 @@ public abstract class AbstractSourceModule extends Openable implements
 			parser.setRequestor(requestor);
 			parser.setReporter(problemReporter);
 
-			/*
-			 * XXX: this has performance problem written all over it if the user
-			 * doesn't understand how the caching system works.
-			 */
-			ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
-					.getModelManager().getSourceModuleInfoCache();
-			// sourceModuleInfoCache.remove(this);
-			ISourceModuleInfo mifo = sourceModuleInfoCache.get(this);
-			parser.parseSourceModule(contents, mifo, this.getPath().toString()
-					.toCharArray());
+			SourceParserUtil.parseSourceModule(this, parser);
 
 			if (DEBUG_PRINT_MODEL) {
 				System.out.println("Source Module Debug print:"); //$NON-NLS-1$
