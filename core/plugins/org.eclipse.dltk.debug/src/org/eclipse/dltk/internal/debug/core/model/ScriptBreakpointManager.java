@@ -128,12 +128,12 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 			DbgpBreakpointConfig config = createBreakpointConfig(breakpoint);
 			IScriptMethodEntryBreakpoint entryBreakpoint = (IScriptMethodEntryBreakpoint) breakpoint;
 
-			String entryId = null;
+			String entryId = entryBreakpoint.getEntryBreakpointId();
 			if (entryBreakpoint.breakOnEntry()) {
 				if (entryId == null) {
 					// Create entry breakpoint
-					entryId = commands.setLineBreakpoint(entryBreakpoint
-							.getResourceURI(), entryBreakpoint.getLineNumber(),
+					entryId = commands.setCallBreakpoint(entryBreakpoint
+							.getResourceURI(), entryBreakpoint.getMethodName(),
 							config);
 					entryBreakpoint.setEntryBreakpointId(entryId);
 				} else {

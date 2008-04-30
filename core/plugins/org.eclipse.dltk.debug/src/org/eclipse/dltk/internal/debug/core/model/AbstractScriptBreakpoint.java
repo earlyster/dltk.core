@@ -173,7 +173,7 @@ public abstract class AbstractScriptBreakpoint extends Breakpoint implements
 	 * Add this breakpoint to the breakpoint manager, or sets it as
 	 * unregistered.
 	 */
-	protected void register(boolean register) throws CoreException {
+	public void register(boolean register) throws CoreException {
 		DebugPlugin plugin = DebugPlugin.getDefault();
 		if (plugin != null && register) {
 			plugin.getBreakpointManager().addBreakpoint(this);
