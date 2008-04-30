@@ -70,18 +70,14 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 		}
 
 		public void clear() {
-			try {
-				disconnectListener();
-				doc.set(""); //$NON-NLS-1$
-				appendInvitation();
-				for (Iterator iter = viewerList.iterator(); iter.hasNext();) {
-					((ScriptConsoleViewer) iter.next()).setCaretPosition(doc
-							.getLength());
-				}
-				connectListener();
-			} catch (BadLocationException e) {
-				e.printStackTrace();
+			disconnectListener();
+			doc.set(""); //$NON-NLS-1$
+			// appendInvitation();
+			for (Iterator iter = viewerList.iterator(); iter.hasNext();) {
+				((ScriptConsoleViewer) iter.next()).setCaretPosition(doc
+						.getLength());
 			}
+			connectListener();
 		}
 
 		public ConsoleDocumentListener(ICommandHandler handler,
@@ -157,7 +153,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 		}
 
 		protected void proccessAddition(int offset, String text) {
-			if( !bEnabled) {
+			if (!bEnabled) {
 				return;
 			}
 			try {
@@ -348,11 +344,12 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 	public int getCaretPosition() {
 		return getTextWidget().getCaretOffset();
 	}
-	
+
 	public void enableProcessing() {
 		ConsoleDocumentListener listener = console.getDocumentListener();
 		listener.bEnabled = true;
 	}
+
 	public void disableProcessing() {
 		ConsoleDocumentListener listener = console.getDocumentListener();
 		listener.bEnabled = false;
@@ -402,7 +399,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 		final StyledText styledText = getTextWidget();
 
-		// styledText.setEditable(false);
+		this.setEditable(false);
 
 		// Correct keyboard actions
 		styledText.addFocusListener(new FocusListener() {
