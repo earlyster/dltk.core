@@ -59,21 +59,23 @@ public class SourceModuleInfoCache implements ISourceModuleInfoCache {
 		DLTKCore.removeElementChangedListener(changedListener);
 	}
 
+	private final ISourceModuleInfo cacheGet(ISourceModule module) {
+		allAccess++;
+		final SoftReference ref = (SoftReference) cache.get(module);
+		return ref != null ? (ISourceModuleInfo) ref.get() : null;
+	}
+
 	public ISourceModuleInfo get(ISourceModule module) {
-		Object object = this.cache.get(module);
 		if (DLTKCore.VERBOSE) {
 			System.out.println("Filling ratio:" + this.cache.fillingRatio()); //$NON-NLS-1$
 		}
-		allAccess++;
-		if (object == null) {
-			miss++;
-			return returnAdd(module);
-		}
-		SoftReference ref = (SoftReference) object;
-		ISourceModuleInfo info = (ISourceModuleInfo) ref.get();
+		ISourceModuleInfo info = cacheGet(module);
 		if (info == null) {
 			miss++;
-			return returnAdd(module);
+			info = new SourceModuleInfo();
+			cache.put(module, new SoftReference(info));
+			cache.ensureSpaceLimit(1, module);
+			return info;
 		}
 		// this.cache.printStats();
 		if (DLTKCore.PERFOMANCE) {
@@ -82,14 +84,6 @@ public class SourceModuleInfoCache implements ISourceModuleInfoCache {
 					+ "% closes:" + closes); //$NON-NLS-1$
 			System.out.println("Filling ratio:" + this.cache.fillingRatio()); //$NON-NLS-1$
 		}
-		return (ISourceModuleInfo) info;
-	}
-
-	private ISourceModuleInfo returnAdd(ISourceModule module) {
-		ISourceModuleInfo info = new SourceModuleInfo();
-		SoftReference ref = new SoftReference(info);
-		this.cache.put(module, ref);
-		this.cache.ensureSpaceLimit(1, module);
 		return info;
 	}
 

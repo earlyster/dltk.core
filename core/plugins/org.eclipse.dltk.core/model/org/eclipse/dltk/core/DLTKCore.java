@@ -27,8 +27,10 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.dltk.internal.core.BatchOperation;
 import org.eclipse.dltk.internal.core.BuildpathAccessRule;
@@ -1540,6 +1542,14 @@ public class DLTKCore extends Plugin {
 	}
 	public static String[] getUserLibraryNames(IDLTKLanguageToolkit toolkit) {
 		 return ModelManager.getUserLibraryManager().getUserLibraryNames(toolkit);
+	}
+
+	public static void error(String message) {
+		plugin.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, null));
+	}
+	
+	public static void error(String message, Throwable t) {
+		plugin.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, t));
 	}
 	
 }

@@ -220,17 +220,15 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		}
 	}
 
+	/**
+	 * Returns {@link IBuffer} or <code>null</code> if this element is not
+	 * opened yet.
+	 */
 	public IBuffer getBufferNotOpen() throws ModelException {
 		if (hasBuffer()) {
-			// ensure element is open
-			IBuffer buffer = getBufferManager().getBuffer(this);
-			if (buffer == null) {
-				return null;
-			}
-			return buffer;
-		} else {
-			return null;
+			return getBufferManager().getBuffer(this);
 		}
+		return null;
 	}
 
 	/**

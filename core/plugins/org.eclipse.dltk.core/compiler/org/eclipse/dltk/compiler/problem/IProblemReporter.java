@@ -11,10 +11,14 @@ package org.eclipse.dltk.compiler.problem;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 
-public interface IProblemReporter {
+public interface IProblemReporter extends IAdaptable {
+
 	IMarker reportProblem(IProblem problem) throws CoreException;
-	// Clear all existing markes from file
+
+	// Clear all existing marks from file
 	void clearMarkers();
+
 	boolean isMarkersCleaned();
 }

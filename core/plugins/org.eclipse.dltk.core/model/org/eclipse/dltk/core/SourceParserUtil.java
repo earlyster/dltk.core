@@ -17,8 +17,10 @@ public class SourceParserUtil {
 	 */
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
 			IProblemReporter reporter) {
-		return getModuleDeclaration(module, reporter, ISourceParserConstants.DEFAULT);
+		return getModuleDeclaration(module, reporter,
+				ISourceParserConstants.DEFAULT);
 	}
+
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
 			IProblemReporter reporter, int flags) {
 		ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
@@ -33,8 +35,10 @@ public class SourceParserUtil {
 
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
 			IProblemReporter reporter, ISourceModuleInfo mifo) {
-		return getModuleDeclaration(module, reporter, mifo, ISourceParserConstants.DEFAULT);
+		return getModuleDeclaration(module, reporter, mifo,
+				ISourceParserConstants.DEFAULT);
 	}
+
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
 			IProblemReporter reporter, ISourceModuleInfo mifo, int flags) {
 
@@ -45,7 +49,7 @@ public class SourceParserUtil {
 		if (mifo != null) {
 			moduleDeclaration = (ModuleDeclaration) mifo.get(AST);
 			flag = (Integer) mifo.get(FLAGS);
-			if( flag != null && flag.intValue() != flags ) {
+			if (flag != null && flag.intValue() != flags) {
 				moduleDeclaration = null;
 			}
 		}
@@ -108,10 +112,11 @@ public class SourceParserUtil {
 	/**
 	 * This is for use in parsers.
 	 */
-	public static ModuleDeclaration getModuleFromCache(ISourceModuleInfo mifo, int flags) {
+	public static ModuleDeclaration getModuleFromCache(ISourceModuleInfo mifo,
+			int flags) {
 		if (mifo != null) {
 			Integer flag = (Integer) mifo.get(FLAGS);
-			if( flag != null && flag.intValue() != flags ) {
+			if (flag != null && flag.intValue() != flags) {
 				return null;
 			}
 			return (ModuleDeclaration) mifo.get(AST);
@@ -124,6 +129,23 @@ public class SourceParserUtil {
 		if (info != null) {
 			info.put(AST, module);
 			info.put(FLAGS, new Integer(flags));
+		}
+	}
+
+	public static void parseSourceModule(ISourceModule module,
+			ISourceElementParser parser) {
+		char[] contents;
+		try {
+			contents = module.getSourceAsCharArray();
+			ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
+					.getModelManager().getSourceModuleInfoCache();
+			ISourceModuleInfo mifo = sourceModuleInfoCache.get(module);
+			parser.parseSourceModule(contents, mifo, module.getPath()
+					.toString().toCharArray());
+		} catch (ModelException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

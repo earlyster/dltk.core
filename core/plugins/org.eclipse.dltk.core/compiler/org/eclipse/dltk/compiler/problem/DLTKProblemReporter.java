@@ -12,6 +12,8 @@ package org.eclipse.dltk.compiler.problem;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.compiler.task.DLTKTaskReporter;
+import org.eclipse.dltk.compiler.task.ITaskReporter;
 import org.eclipse.dltk.core.DLTKCore;
 
 public class DLTKProblemReporter implements IProblemReporter {
@@ -96,5 +98,12 @@ public class DLTKProblemReporter implements IProblemReporter {
 
 	public boolean isMarkersCleaned() {
 		return this.cleaned;
+	}
+
+	public Object getAdapter(Class adapter) {
+		if (ITaskReporter.class.equals(adapter)) {
+			return new DLTKTaskReporter(resource);
+		}
+		return null;
 	}
 }
