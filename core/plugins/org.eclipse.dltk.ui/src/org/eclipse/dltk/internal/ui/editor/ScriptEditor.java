@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Stack;
 
+import org.eclipse.core.filebuffers.IPersistableAnnotationModel;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -884,6 +885,27 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		setDocumentProvider(DLTKUIPlugin.getDefault()
 				.getSourceModuleDocumentProvider());
 		fScriptEditorErrorTickUpdater = new ScriptEditorErrorTickUpdater(this);
+	}
+	
+	/**
+	 * @see org.eclipse.ui.texteditor.StatusTextEditor#handleElementContentReplaced()
+	 */
+	protected void handleElementContentReplaced()
+	{
+		super.handleElementContentReplaced();
+		
+		IAnnotationModel annotationModel = getScriptSourceViewer().getAnnotationModel();
+		if (annotationModel instanceof IPersistableAnnotationModel)
+		{
+			try
+			{
+				((IPersistableAnnotationModel)annotationModel).reinitialize(getScriptSourceViewer().getDocument());
+			}
+			catch (CoreException ex)
+			{
+				ex.printStackTrace();
+			}
+		}
 	}
 
 	public void dispose() {

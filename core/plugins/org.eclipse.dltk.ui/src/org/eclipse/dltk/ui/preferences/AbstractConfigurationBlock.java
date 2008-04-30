@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
@@ -327,6 +328,10 @@ public abstract class AbstractConfigurationBlock implements
 	private org.eclipse.dltk.internal.ui.dialogs.StatusInfo fStatus;
 
 	private final PreferencePage fMainPage;
+	
+	protected Shell getShell() {
+		return fMainPage.getShell();
+	}
 
 	public AbstractConfigurationBlock(OverlayPreferenceStore store) {
 		Assert.isNotNull(store);
