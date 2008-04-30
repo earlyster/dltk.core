@@ -51,6 +51,7 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 		if (temp == null) {
 			try {
 				File tempFile = File.createTempFile("dltk", "temp");
+				tempFile.delete();
 				temp = new Path(tempFile.getCanonicalPath());
 			} catch (IOException e) {
 				throw new RuntimeException(
