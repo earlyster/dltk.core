@@ -3,7 +3,6 @@ package org.eclipse.dltk.internal.launching.execution;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.security.AccessController;
 import java.util.Map;
 import java.util.Random;
 
@@ -18,8 +17,6 @@ import org.eclipse.dltk.core.environment.IDeployment;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
-
-import sun.security.action.GetPropertyAction;
 
 public class LocalExecEnvironment implements IExecutionEnvironment {
 	private static IPath temp;
@@ -52,13 +49,13 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 
 	private static IPath getTempDirPath() {
 		if (temp == null) {
-			GetPropertyAction a = new GetPropertyAction("java.io.tmpdir"); //$NON-NLS-1$
-			File tempFile = new File(
-					((String) AccessController.doPrivileged(a)));
 			try {
+				File tempFile = File.createTempFile("dltk", "temp");
+				tempFile.delete();
 				temp = new Path(tempFile.getCanonicalPath());
 			} catch (IOException e) {
-				temp = new Path(tempFile.getAbsolutePath());
+				throw new RuntimeException(
+						"DLTK: Failed to locate temp folder...");
 			}
 		}
 		return temp;
