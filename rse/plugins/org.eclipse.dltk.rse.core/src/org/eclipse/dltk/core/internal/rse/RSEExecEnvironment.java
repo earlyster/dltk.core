@@ -20,6 +20,7 @@ import org.eclipse.dltk.internal.launching.execution.EFSDeployment;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.subsystems.ISubSystem;
 import org.eclipse.rse.internal.efs.RSEFileSystem;
+import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
 import org.eclipse.rse.services.shells.IHostShell;
 import org.eclipse.rse.services.shells.IShellService;
 import org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem.IShellServiceSubSystem;
@@ -29,7 +30,8 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 	private final static String CMD_DELIMITER = " ;"; //$NON-NLS-1$
 	private RSEEnvironment environment;
 	private static int counter = -1;
-	private Map environmentVariables = null;
+	
+	private static Map hostToEnvironment = new HashMap();
 
 	public RSEExecEnvironment(RSEEnvironment env) {
 		this.environment = env;
@@ -158,8 +160,8 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 	}
 
 	public Map getEnvironmentVariables() {
-		if (this.environmentVariables != null) {
-			return this.environmentVariables;
+		if (this.hostToEnvironment.containsKey(this.environment.getHost())) {
+			return (Map) this.hostToEnvironment.get(this.environment.getHost());
 		}
 		final Map result = new HashMap();
 		try {
@@ -202,7 +204,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 			DLTKRSEPlugin.log(e);
 		}
 		if (result.size() > 0) {
-			environmentVariables = result;
+			hostToEnvironment.put(this.environment.getHost(), result);
 		}
 		return result;
 	}

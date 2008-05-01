@@ -1,6 +1,8 @@
 package org.eclipse.dltk.core.internal.rse;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -21,7 +23,7 @@ import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
 public class RSEEnvironment implements IEnvironment, IAdaptable {
 	private IRemoteFileSubSystem fs;
 	private IHost host;
-
+	private static Map projectToEnvironmentMap = new HashMap();
 	public RSEEnvironment(IRemoteFileSubSystem fs) {
 		this.fs = fs;
 		this.host = fs.getConnectorService().getHost();
@@ -74,6 +76,9 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 		if (!project.isAccessible()) {
 			return false;
 		}
+		if( projectToEnvironmentMap.containsKey(project) ) {
+			return ((Boolean)projectToEnvironmentMap.get(project)).booleanValue();
+		}
 		IProjectDescription description;
 		try {
 			description = project.getDescription();
@@ -86,6 +91,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 								uri.getPath(), null);
 						if (remoteFileObject != null) {
 							if (remoteFileObject.exists()) {
+								projectToEnvironmentMap.put(project, new Boolean(true));
 								return true;
 							}
 						}
@@ -97,6 +103,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
+		projectToEnvironmentMap.put(project, new Boolean(false));
 		return false;
 	}
 
