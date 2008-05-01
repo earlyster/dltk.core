@@ -886,23 +886,20 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				.getSourceModuleDocumentProvider());
 		fScriptEditorErrorTickUpdater = new ScriptEditorErrorTickUpdater(this);
 	}
-	
+
 	/**
 	 * @see org.eclipse.ui.texteditor.StatusTextEditor#handleElementContentReplaced()
 	 */
-	protected void handleElementContentReplaced()
-	{
+	protected void handleElementContentReplaced() {
 		super.handleElementContentReplaced();
-		
-		IAnnotationModel annotationModel = getScriptSourceViewer().getAnnotationModel();
-		if (annotationModel instanceof IPersistableAnnotationModel)
-		{
-			try
-			{
-				((IPersistableAnnotationModel)annotationModel).reinitialize(getScriptSourceViewer().getDocument());
-			}
-			catch (CoreException ex)
-			{
+
+		IAnnotationModel annotationModel = getScriptSourceViewer()
+				.getAnnotationModel();
+		if (annotationModel instanceof IPersistableAnnotationModel) {
+			try {
+				((IPersistableAnnotationModel) annotationModel)
+						.reinitialize(getScriptSourceViewer().getDocument());
+			} catch (CoreException ex) {
 				ex.printStackTrace();
 			}
 		}
@@ -1341,10 +1338,11 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		markAsStateDependentAction("ContentAssistContextInformation", true); //$NON-NLS-1$
 
 		// GroupEdit
-		ActionGroup rg = new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
+		ActionGroup rg = new RefactorActionGroup(this,
+				ITextEditorActionConstants.GROUP_EDIT);
 		fActionGroups.addGroup(rg);
 		fContextMenuGroup.addGroup(rg);
-		
+
 		// GoToNextMember
 		action = GoToNextPreviousMemberAction.newGoToNextMemberAction(this);
 		action
@@ -1437,7 +1435,12 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		sourceViewer.configure(getSourceViewerConfiguration());
 		getSourceViewerDecorationSupport(sourceViewer).install(
 				getPreferenceStore());
-		internalDoSetInput(input);
+		try {
+			internalDoSetInput(input);
+		} catch (ModelException e) {
+			DLTKUIPlugin.log(e);
+			this.close(false);
+		}
 
 		if (fScriptEditorErrorTickUpdater != null)
 			fScriptEditorErrorTickUpdater
