@@ -92,7 +92,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 
 		public void run() {
 			// We need to be sure what page is already created
-			while (page == null && page.getViewer() != null) {
+			while (page == null || (page != null && page.getViewer() == null)) {
 				try {
 					Thread.sleep(50);
 				} catch (InterruptedException e) {
@@ -129,9 +129,8 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 							break;
 						}
 					}
-					if (!first) {
-						appendInvitation(viewer);
-					}
+					appendInvitation(viewer);
+					enableEdit(viewer);
 				}
 
 			});
@@ -140,7 +139,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 
 	}
 
-	private void appendInvitation(final ScriptConsoleViewer viewer) {
+	protected void appendInvitation(final ScriptConsoleViewer viewer) {
 		Control control = viewer.getControl();
 		if (control == null) {
 			return;
@@ -157,6 +156,17 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 						e.printStackTrace();
 					}
 				}
+			}
+		});
+	}
+	protected void enableEdit(final ScriptConsoleViewer viewer) {
+		Control control = viewer.getControl();
+		if (control == null) {
+			return;
+		}
+		control.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				viewer.setEditable(true);
 			}
 		});
 	}
@@ -372,6 +382,9 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 	}
 
 	public String handleCommand(String userInput) throws IOException {
+		if( this.interpreter == null && this.interpreter.isValid() ) {
+			return "";
+		}
 		Object[] listeners = consoleListeners.getListeners();
 		for (int i = 0; i < listeners.length; i++) {
 			((IScriptConsoleListener) listeners[i]).userRequest(userInput);
