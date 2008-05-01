@@ -15,4 +15,5 @@ public interface IScriptInterpreter extends IScriptConsoleShell,
 		IScriptConsoleInterpreter, ConsoleRequest {
 	void addInitialListenerOperation(Runnable runnable);
 	InputStream getInitialOutputStream();
+	boolean isValid();
 }
