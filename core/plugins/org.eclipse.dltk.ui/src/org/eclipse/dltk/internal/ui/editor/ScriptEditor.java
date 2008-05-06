@@ -1424,7 +1424,12 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		ISourceViewer sourceViewer = getSourceViewer();
 		if (!(sourceViewer instanceof ISourceViewerExtension2)) {
 			setPreferenceStore(createCombinedPreferenceStore(input));
-			internalDoSetInput(input);
+			try {
+				internalDoSetInput(input);
+			} catch (ModelException e) {
+				DLTKUIPlugin.log(e);
+				this.close(false);
+			}
 			return;
 		}
 		// uninstall & unregister preference store listener
