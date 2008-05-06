@@ -97,6 +97,10 @@ public abstract class ProjectWizardSecondPage extends
 		fIsAutobuild = null;
 	}
 
+	public ProjectWizardFirstPage getFirstPage() {
+		return fFirstPage;
+	}
+
 	protected boolean useNewSourcePage() {
 		return true;
 	}

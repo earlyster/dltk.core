@@ -789,9 +789,9 @@ public class ScriptExplorerPart extends ViewPart implements
 				.getPreferenceStore();
 		return new ScriptExplorerLabelProvider(fContentProvider, store);
 	}
-	
+
 	protected ScriptExplorerContentProvider getContentProvider() {
-	  return fContentProvider;
+		return fContentProvider;
 	}
 
 	private IElementComparer createElementComparer() {
@@ -1371,21 +1371,22 @@ public class ScriptExplorerPart extends ViewPart implements
 
 	protected Object getElementOfInput(IEditorInput input) {
 		if (input instanceof IFileEditorInput)
-			return ((IFileEditorInput)input).getFile();
+			return ((IFileEditorInput) input).getFile();
 		else if (input instanceof ExternalStorageEditorInput)
-			return ((ExternalStorageEditorInput)input).getStorage();
-	    else if (input instanceof FileStoreEditorInput) {
-	      ISourceModule module = DLTKUIPlugin.resolveSourceModule((FileStoreEditorInput)input);
-	      if (module != null) {
-	        return module;
-	      }
-	    }
+			return ((ExternalStorageEditorInput) input).getStorage();
+		else if (input instanceof FileStoreEditorInput) {
+			ISourceModule module = DLTKUIPlugin
+					.resolveSourceModule((FileStoreEditorInput) input);
+			if (module != null) {
+				return module;
+			}
+		}
 		return null;
 	}
-	
+
 	/**
- 	 * Returns the TreeViewer.
- 	 */
+	 * Returns the TreeViewer.
+	 */
 	public TreeViewer getTreeViewer() {
 		return fViewer;
 	}
@@ -1802,15 +1803,15 @@ public class ScriptExplorerPart extends ViewPart implements
 	public int getRootMode() {
 		return fRootMode;
 	}
-	
+
 	protected boolean showProjects() {
 		return fRootMode == ViewActionGroup.SHOW_PROJECTS;
 	}
-	
+
 	protected boolean showWorkingSets() {
 		return fRootMode == ViewActionGroup.SHOW_WORKING_SETS;
 	}
-	
+
 	protected void setComparator() {
 		if (showWorkingSets()) {
 			WorkingSetAwareModelElementSorter comparator = new WorkingSetAwareModelElementSorter();

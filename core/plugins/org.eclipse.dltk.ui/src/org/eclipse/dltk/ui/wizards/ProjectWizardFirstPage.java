@@ -158,7 +158,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			LayoutUtil.setHorizontalGrabbing(fLocation.getTextControl(null));
 
 			fEnvironment = new ComboDialogField(SWT.DROP_DOWN | SWT.READ_ONLY);
-			fEnvironment.setLabelText(NewWizardMessages.ProjectWizardFirstPage_host);
+			fEnvironment
+					.setLabelText(NewWizardMessages.ProjectWizardFirstPage_host);
 			fEnvironment.setDialogFieldListener(this);
 			fEnvironment.setDialogFieldListener(new IDialogFieldListener() {
 				public void dialogFieldChanged(DialogField field) {
@@ -210,8 +211,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		}
 
 		protected String getDefaultPath(String name) {
-//			final IPath path = Platform.getLocation().append(name);
-//			return path.toOSString();
+			// final IPath path = Platform.getLocation().append(name);
+			// return path.toOSString();
 			return "";
 		}
 
@@ -330,7 +331,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			// grabing (but no fill)
 			comboControl.setVisibleItemCount(20);
 
-			DialogField.createEmptySpace(fGroup);
+			// DialogField.createEmptySpace(fGroup);
 
 			fUseDefaultInterpreterEnvironment.setSelection(true);
 			fInterpreterEnvironmentCombo
@@ -498,7 +499,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			InterpreterEnvironment50Text.setFont(composite.getFont());
 			InterpreterEnvironment50Text.addSelectionListener(this);
 			GridData gridData = new GridData(GridData.FILL, SWT.FILL, true,
-					true);
+					false);
 			gridData.widthHint = convertWidthInCharsToPixels(50);
 			InterpreterEnvironment50Text.setLayoutData(gridData);
 			fHintText = InterpreterEnvironment50Text;
@@ -506,7 +507,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 				handlePossibleInterpreterChange();
 			}
 		}
-		
+
 		private boolean isValidProjectName(String name) {
 			if (name.length() == 0) {
 				return false;
@@ -545,8 +546,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 						fHintText.setVisible(true);
 						fHintText
 								.setText(NewWizardMessages.ScriptProjectWizardFirstPage_DetectGroup_message);
-					}
-					else {
+					} else {
 						fHintText.setVisible(false);
 					}
 					if (supportInterpreter()) {
@@ -721,6 +721,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		if (supportInterpreter()) {
 			createInterpreterGroup(composite);
 		}
+		createCustomGroups(composite);
 		// fLayoutGroup= new LayoutGroup(composite);
 		fDetectGroup = new DetectGroup(composite);
 		// establish connections
@@ -749,6 +750,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		}
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(composite,
 		// IDLTKHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
+	}
+
+	protected void createCustomGroups(Composite composite) {
 	}
 
 	/**

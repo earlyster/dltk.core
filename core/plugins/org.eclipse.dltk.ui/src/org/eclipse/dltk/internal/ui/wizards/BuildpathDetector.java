@@ -218,8 +218,8 @@ public class BuildpathDetector {
 	}
 
 	private boolean isValidResource(IResource res) {
-		return DLTKContentTypeManager.isValidResourceForContentType(
-				this.fToolkit, res);
+		return DLTKContentTypeManager.isValidFileNameForContentType(
+				this.fToolkit, res.getFullPath().lastSegment());
 	}
 
 	/*
