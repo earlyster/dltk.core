@@ -29,7 +29,6 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.mixin.IMixinParser;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -87,11 +86,14 @@ public class MixinBuilder implements IScriptBuilder {
 		try {
 			// waitUntilIndexReady(toolkit);
 			IPath fullPath = project.getProject().getFullPath();
-			String fullContainerPath = ((fullPath.getDevice() == null) ?
-					fullPath.toString() : fullPath.toOSString());
+			String fullContainerPath = ((fullPath.getDevice() == null) ? fullPath
+					.toString()
+					: fullPath.toOSString());
 
-			mixinIndex = manager.getSpecialIndex("mixin", //$NON-NLS-1$
-					/* project.getProject() */fullPath.toString(), fullContainerPath);
+			mixinIndex = manager.getSpecialIndex(
+					"mixin", //$NON-NLS-1$
+					/* project.getProject() */fullPath.toString(),
+					fullContainerPath);
 			imon = mixinIndex.monitor;
 			imon.enterWrite();
 			String name = MessageFormat.format(
@@ -133,8 +135,8 @@ public class MixinBuilder implements IScriptBuilder {
 						currentIndex = (Index) indexes.get(path);
 						containerPath = path;
 					} else {
-						String contPath = ((path.getDevice() == null) ?
-								path.toString() : path.toOSString());
+						String contPath = ((path.getDevice() == null) ? path
+								.toString() : path.toOSString());
 
 						Index index = manager.getSpecialIndex("mixin", //$NON-NLS-1$
 								path.toString(), contPath);
@@ -152,15 +154,9 @@ public class MixinBuilder implements IScriptBuilder {
 				SearchParticipant participant = SearchEngine
 						.getDefaultSearchParticipant();
 
-				char[] content;
-				try {
-					content = element.getSourceAsCharArray();
-				} catch (ModelException e) {
-					content = new char[0];
-				}
-				DLTKSearchDocument document = new DLTKSearchDocument(element.getPath()
-						.toString(), containerPath, content , participant,
-						element instanceof ExternalSourceModule);
+				DLTKSearchDocument document = new DLTKSearchDocument(element
+						.getPath().toString(), containerPath, null,
+						participant, element instanceof ExternalSourceModule);
 				// System.out.println("mixin indexing:" + document.getPath());
 				((InternalSearchDocument) document).toolkit = toolkit;
 				String containerRelativePath = null;
