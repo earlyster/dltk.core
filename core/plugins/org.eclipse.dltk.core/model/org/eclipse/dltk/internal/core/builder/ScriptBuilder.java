@@ -373,7 +373,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			return resources;
 		} finally {
 			monitor.worked(ticks);
-			monitor.done();
 		}
 	}
 
@@ -390,12 +389,16 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 			IProjectFragment[] fragments = prj.getAllProjectFragments();
 			List extFragments = new ArrayList();
+			List currentFragments = new ArrayList();
 			for (int i = 0; i < fragments.length; i++) {
-				if (fragments[i] instanceof ExternalProjectFragment) {
-					ExternalProjectFragment fragment = (ExternalProjectFragment) fragments[i];
+				if (fragments[i] instanceof ExternalProjectFragment
+						|| fragments[i] instanceof BuiltinProjectFragment) {
+					IProjectFragment fragment = fragments[i];
 					IPath path = fragment.getPath();
 					if (!this.lastState.externalFolderLocations.contains(path)) {
 						extFragments.add(fragments[i]);
+					} else {
+						currentFragments.add(path);
 					}
 				}
 			}
@@ -408,16 +411,16 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				// from this fragment.
 				fragment.accept(visitor);
 			}
-			sub.done();
-			monitor.done();
 
 			this.lastState.externalFolderLocations.clear();
 			this.lastState.externalFolderLocations.addAll(visitor
 					.getExternalFolders());
+			this.lastState.externalFolderLocations.addAll(currentFragments);
 
 			return elements;
 		} finally {
-			monitor.worked(tiks);
+			sub.done();
+			// monitor.worked(tiks);
 			// monitor.setTaskName("");
 		}
 	}
