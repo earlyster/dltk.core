@@ -423,11 +423,23 @@ public class Util {
 			String encoding) throws ModelException {
 		// Get resource contents
 		InputStream stream = null;
-		try {
-			stream = file.getContents(true);
-		} catch (CoreException e) {
-			throw new ModelException(e,
-					IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
+		int tryCount = 10;
+		while (stream == null) {
+			try {
+				stream = file.getContents(true);
+			} catch (Exception e) {
+				IStatus status = new Status(IStatus.ERROR, DLTKCore.PLUGIN_ID,
+						"Error receiving file content: retrying("
+								+ String.valueOf(tryCount) + ")", e);
+				DLTKCore.getDefault().getLog().log(status);
+				// Some times for RSE we can get here if connection is not
+				// established yet, or if connection are lost.
+				if (tryCount == 0) {
+					throw new ModelException(e,
+							IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
+				}
+				tryCount--;
+			}
 		}
 		try {
 			return org.eclipse.dltk.compiler.util.Util
