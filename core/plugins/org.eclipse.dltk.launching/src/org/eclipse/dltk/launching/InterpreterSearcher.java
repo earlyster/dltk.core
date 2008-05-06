@@ -26,7 +26,8 @@ public class InterpreterSearcher {
 	private String natureId;
 	private Set ignore;
 
-	protected void searchFast(IProgressMonitor monitor, IEnvironment environment, int deep) {
+	protected void searchFast(IProgressMonitor monitor,
+			IEnvironment environment, int deep) {
 		if (monitor.isCanceled()) {
 			return;
 		}
@@ -36,8 +37,8 @@ public class InterpreterSearcher {
 				.getAdapter(IExecutionEnvironment.class);
 		if (exeEnv == null)
 			return;
-		
-		Map env = exeEnv.getEnvironmentVariables();
+
+		Map env = exeEnv.getEnvironmentVariables(true);
 
 		String path = null;
 		final Iterator it = env.keySet().iterator();
@@ -85,7 +86,8 @@ public class InterpreterSearcher {
 	 * @param deep
 	 *            deepness of search. -1 if infinite.
 	 */
-	protected void search(IFileHandle directory, IProgressMonitor monitor, int deep) {
+	protected void search(IFileHandle directory, IProgressMonitor monitor,
+			int deep) {
 		if (deep == 0) {
 			return;
 		}
@@ -117,11 +119,9 @@ public class InterpreterSearcher {
 							file.getCanonicalPath() }));
 
 			// Check if file is a symlink
-			if (file.isDirectory()
-					&& file.isSymlink()) {
+			if (file.isDirectory() && file.isSymlink()) {
 				continue;
 			}
-
 
 			IInterpreterInstallType[] installTypes = ScriptRuntime
 					.getInterpreterInstallTypes(natureId);
@@ -169,8 +169,8 @@ public class InterpreterSearcher {
 		this.types = new ArrayList();
 	}
 
-	public void search(IEnvironment environment, String natureId, Set ignore, int deep,
-			IProgressMonitor monitor) {
+	public void search(IEnvironment environment, String natureId, Set ignore,
+			int deep, IProgressMonitor monitor) {
 		if (natureId == null) {
 			throw new IllegalArgumentException();
 		}
@@ -182,7 +182,8 @@ public class InterpreterSearcher {
 		this.natureId = natureId;
 		this.ignore = ignore == null ? Collections.EMPTY_SET : ignore;
 
-		searchFast(monitor == null ? new NullProgressMonitor() : monitor, environment, deep);
+		searchFast(monitor == null ? new NullProgressMonitor() : monitor,
+				environment, deep);
 	}
 
 	public boolean hasResults() {

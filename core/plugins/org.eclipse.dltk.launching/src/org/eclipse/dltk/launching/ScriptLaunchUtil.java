@@ -46,7 +46,7 @@ public class ScriptLaunchUtil {
 				.getEnvironment(), new Path(scriptFile.toOSString()),
 				workingDirectoryPath);
 
-		Map envVars = exeEnv.getEnvironmentVariables();
+		Map envVars = exeEnv.getEnvironmentVariables(false);
 		config.addEnvVars(envVars);
 		EnvironmentVariable[] resVars = EnvironmentResolver.resolve(envVars,
 				env);
@@ -63,7 +63,8 @@ public class ScriptLaunchUtil {
 	public static Process runScriptWithInterpreter(
 			IExecutionEnvironment exeEnv, String interpreter,
 			InterpreterConfig config) throws CoreException {
-		String[] cmdLine = config.renderCommandLine(exeEnv.getEnvironment(), interpreter);
+		String[] cmdLine = config.renderCommandLine(exeEnv.getEnvironment(),
+				interpreter);
 
 		String[] environmentAsStrings = config.getEnvironmentAsStrings();
 		IPath workingDirectoryPath = config.getWorkingDirectoryPath();
@@ -173,9 +174,10 @@ public class ScriptLaunchUtil {
 			IFileHandle workingDirectory, String[] interpreterArgs,
 			String[] scriptArgs, IProgressMonitor monitor) throws CoreException {
 		IEnvironment environment = scriptFile.getEnvironment();
-		IExecutionEnvironment execEnvironment = (IExecutionEnvironment) environment.getAdapter(IExecutionEnvironment.class);
-		InterpreterConfig config = createInterpreterConfig(execEnvironment, scriptFile,
-				workingDirectory);
+		IExecutionEnvironment execEnvironment = (IExecutionEnvironment) environment
+				.getAdapter(IExecutionEnvironment.class);
+		InterpreterConfig config = createInterpreterConfig(execEnvironment,
+				scriptFile, workingDirectory);
 
 		if (interpreterArgs != null) {
 			config.addInterpreterArgs(interpreterArgs);
@@ -185,7 +187,6 @@ public class ScriptLaunchUtil {
 			config.addScriptArgs(scriptArgs);
 		}
 
-		return runScript(natureId, environment.getId(), config,
-				monitor);
+		return runScript(natureId, environment.getId(), config, monitor);
 	}
 }
