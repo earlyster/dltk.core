@@ -11,9 +11,10 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
-import org.eclipse.dltk.core.internal.environment.EFSFileHandle;
+import org.eclipse.dltk.core.internal.rse.perfomance.RSEPerfomanceStatistics;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.internal.efs.RSEFileSystem;
 import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
@@ -24,6 +25,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	private IRemoteFileSubSystem fs;
 	private IHost host;
 	private static Map projectToEnvironmentMap = new HashMap();
+
 	public RSEEnvironment(IRemoteFileSubSystem fs) {
 		this.fs = fs;
 		this.host = fs.getConnectorService().getHost();
@@ -35,8 +37,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 					"Passing empty filename to RSEEnvironment.getFile() method...");
 		}
 		URI uri = RSEFileSystem.getURIFor(host.getHostName(), path.toString());
-		return new EFSFileHandle(this, RSEFileSystem.getInstance()
-				.getStore(uri));
+		return new RSEFileHandle(this, uri);
 	}
 
 	public String getId() {
@@ -73,38 +74,58 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	}
 
 	public boolean hasProject(IProject project) {
-		if (!project.isAccessible()) {
-			return false;
+		if (RSEPerfomanceStatistics.PERFOMANCE_TRACING) {
+			RSEPerfomanceStatistics
+					.inc(RSEPerfomanceStatistics.HAS_PROJECT_EXECUTIONS);
 		}
-		if( projectToEnvironmentMap.containsKey(project) ) {
-			return ((Boolean)projectToEnvironmentMap.get(project)).booleanValue();
-		}
-		IProjectDescription description;
+		long start = System.currentTimeMillis();
 		try {
-			description = project.getDescription();
-			URI uri = description.getLocationURI();
-			if (uri != null) {
-				String uriHost = uri.getHost();
-				if (host.getHostName().equalsIgnoreCase(uriHost)) {
-					try {
-						IRemoteFile remoteFileObject = fs.getRemoteFileObject(
-								uri.getPath(), null);
-						if (remoteFileObject != null) {
-							if (remoteFileObject.exists()) {
-								projectToEnvironmentMap.put(project, new Boolean(true));
-								return true;
+			if (!project.isAccessible()) {
+				return false;
+			}
+			if (projectToEnvironmentMap.containsKey(project)) {
+				return ((Boolean) projectToEnvironmentMap.get(project))
+						.booleanValue();
+			}
+			IProjectDescription description;
+			try {
+				description = project.getDescription();
+				URI uri = description.getLocationURI();
+				if (uri != null) {
+					String uriHost = uri.getHost();
+					if (host.getHostName().equalsIgnoreCase(uriHost)) {
+						try {
+							IRemoteFile remoteFileObject = fs
+									.getRemoteFileObject(uri.getPath(), null);
+							if (remoteFileObject != null) {
+								if (remoteFileObject.exists()) {
+									projectToEnvironmentMap.put(project,
+											new Boolean(true));
+									return true;
+								}
+							}
+						} catch (SystemMessageException e) {
+							if (DLTKCore.DEBUG) {
+								e.printStackTrace();
 							}
 						}
-					} catch (SystemMessageException e) {
-						e.printStackTrace();
 					}
 				}
+			} catch (CoreException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
 			}
-		} catch (CoreException e) {
-			e.printStackTrace();
+			projectToEnvironmentMap.put(project, new Boolean(false));
+			return false;
+		} finally {
+			long end = System.currentTimeMillis();
+			if (RSEPerfomanceStatistics.PERFOMANCE_TRACING) {
+				RSEPerfomanceStatistics.inc(
+						RSEPerfomanceStatistics.HAS_POJECT_EXECUTIONS_TIME,
+						(end - start));
+			}
 		}
-		projectToEnvironmentMap.put(project, new Boolean(false));
-		return false;
 	}
 
 	public Object getAdapter(Class adapter) {
@@ -126,10 +147,9 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	}
 
 	public IFileHandle getFile(URI locationURI) {
-		return new EFSFileHandle(this, RSEFileSystem.getInstance().getStore(
-				locationURI));
+		return new RSEFileHandle(this, locationURI);
 	}
-	
+
 	public String getPathsSeparator() {
 		return Character.toString(getPathsSeparatorChar());
 	}

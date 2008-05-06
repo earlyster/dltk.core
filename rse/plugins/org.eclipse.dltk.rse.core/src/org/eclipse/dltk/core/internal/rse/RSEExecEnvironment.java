@@ -16,21 +16,21 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IDeployment;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
+import org.eclipse.dltk.core.internal.rse.perfomance.RSEPerfomanceStatistics;
 import org.eclipse.dltk.internal.launching.execution.EFSDeployment;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.subsystems.ISubSystem;
 import org.eclipse.rse.internal.efs.RSEFileSystem;
-import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
 import org.eclipse.rse.services.shells.IHostShell;
 import org.eclipse.rse.services.shells.IShellService;
 import org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem.IShellServiceSubSystem;
 
 public class RSEExecEnvironment implements IExecutionEnvironment {
 	private final static String EXIT_CMD = "exit"; //$NON-NLS-1$
-	private final static String CMD_DELIMITER = " ;"; //$NON-NLS-1$
+	// private final static String CMD_DELIMITER = " ;"; //$NON-NLS-1$
 	private RSEEnvironment environment;
 	private static int counter = -1;
-	
+
 	private static Map hostToEnvironment = new HashMap();
 
 	public RSEExecEnvironment(RSEEnvironment env) {
@@ -38,6 +38,10 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 	}
 
 	public IDeployment createDeployment() {
+		if (RSEPerfomanceStatistics.PERFOMANCE_TRACING) {
+			RSEPerfomanceStatistics
+					.inc(RSEPerfomanceStatistics.DEPLOYMENTS_CREATED);
+		}
 		try {
 			String rootPath = getTempDir() + environment.getSeparator()
 					+ getTempName("dltk", ".tmp");
@@ -90,6 +94,11 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 
 	public Process exec(String[] cmdLine, IPath workingDir, String[] environment)
 			throws CoreException {
+		if (RSEPerfomanceStatistics.PERFOMANCE_TRACING) {
+			RSEPerfomanceStatistics
+					.inc(RSEPerfomanceStatistics.EXECUTION_COUNT);
+		}
+		long start = System.currentTimeMillis();
 		IShellServiceSubSystem shell = getShellServiceSubSystem(this.environment
 				.getHost());
 		try {
@@ -111,6 +120,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 
 		// Sometimes environment variables aren't set, so use export.
 		if (environment != null) {
+			// TODO: Skip environment variables what is alredy in shell.
 			for (int i = 0; i < environment.length; i++) {
 				hostShell.writeToShell("export "
 						+ toShellArguments(environment[i]));
@@ -133,6 +143,11 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 				p.destroy();
 			}
 			throw new RuntimeException("Failed to run remote command");
+		}
+		long end = System.currentTimeMillis();
+		if (RSEPerfomanceStatistics.PERFOMANCE_TRACING) {
+			RSEPerfomanceStatistics.inc(RSEPerfomanceStatistics.EXECUTION_TIME,
+					(end - start));
 		}
 		return p;
 	}
@@ -159,7 +174,11 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		return cmdLine[0] + " " + /* toShellArguments( */cmd.toString()/* ) */;
 	}
 
-	public Map getEnvironmentVariables() {
+	public Map getEnvironmentVariables(boolean realyNeed) {
+		if (!realyNeed) {
+			return new HashMap();
+		}
+		long start = System.currentTimeMillis();
 		if (this.hostToEnvironment.containsKey(this.environment.getHost())) {
 			return (Map) this.hostToEnvironment.get(this.environment.getHost());
 		}
@@ -205,6 +224,14 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		}
 		if (result.size() > 0) {
 			hostToEnvironment.put(this.environment.getHost(), result);
+		}
+		long end = System.currentTimeMillis();
+		if (RSEPerfomanceStatistics.PERFOMANCE_TRACING) {
+			RSEPerfomanceStatistics
+					.inc(RSEPerfomanceStatistics.ENVIRONMENT_RECEIVE_COUNT);
+			RSEPerfomanceStatistics.inc(
+					RSEPerfomanceStatistics.ENVIRONMENT_RECEIVE_TIME,
+					(end - start));
 		}
 		return result;
 	}
