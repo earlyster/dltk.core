@@ -393,6 +393,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			return elements;
 		} finally {
 			monitor.worked(tiks);
+			monitor.setTaskName("");
 		}
 	}
 
