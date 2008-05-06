@@ -132,13 +132,18 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		pathButtonComp.setLayoutData(gd);
 		pathButtonComp.setFont(font);
 
-		fAddButton = createPushButton(pathButtonComp, InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_add);
+		fAddButton = createPushButton(
+				pathButtonComp,
+				InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_add);
 		fAddButton.addSelectionListener(this);
 
-		fAddExistedButton = createPushButton(pathButtonComp,
+		fAddExistedButton = createPushButton(
+				pathButtonComp,
 				InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_addFromEnvironment);
 		fAddExistedButton.addSelectionListener(this);
-		fEditButton = createPushButton(pathButtonComp, InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_edit);
+		fEditButton = createPushButton(
+				pathButtonComp,
+				InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_edit);
 		fEditButton.addSelectionListener(this);
 
 		fRemoveButton = createPushButton(pathButtonComp,
@@ -320,7 +325,8 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		String originalName = var.getName();
 		String value = var.getValue();
 		MultipleInputDialog dialog = new MultipleInputDialog(
-				fDialog.getShell(), InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_editVariable);
+				fDialog.getShell(),
+				InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_editVariable);
 		dialog.addTextField(NAME_LABEL, originalName, false);
 		dialog.addVariablesField(VALUE_LABEL, value, true);
 
@@ -361,7 +367,8 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 
 	private EnvironmentVariable[] add() {
 		MultipleInputDialog dialog = new MultipleInputDialog(
-				fDialog.getShell(), InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_addVariable);
+				fDialog.getShell(),
+				InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_addVariable);
 		dialog.addTextField(NAME_LABEL, null, false);
 		dialog.addVariablesField(VALUE_LABEL, null, true);
 
@@ -469,19 +476,23 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	protected abstract IDialogSettings getDialogSettions();
 
 	protected EnvironmentVariable[] addExisted() {
-		
+
 		// get Environment Variables from the Environment
 		Map envVariables = getNativeEnvironment();
-		if( envVariables.size() == 0 ) {
+		if (envVariables.size() == 0) {
 			MessageBox box = new MessageBox(fDialog.getShell(), SWT.ICON_ERROR);
-			box.setMessage(MessageFormat.format(
-					InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_couldNotRetrieveEnvironmentVariablesFrom,
-					new Object[] { fDialog.getEnvironment().getName() }));
-			box.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_failedToRetrieveEnvironment);
+			box
+					.setMessage(MessageFormat
+							.format(
+									InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_couldNotRetrieveEnvironmentVariablesFrom,
+									new Object[] { fDialog.getEnvironment()
+											.getName() }));
+			box
+					.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_failedToRetrieveEnvironment);
 			box.open();
 			return null;
 		}
- 
+
 		// get Environment Variables from the table
 		EnvironmentVariable[] items = fEnvironmentVariablesContentProvider
 				.getVariables();
@@ -575,8 +586,9 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 
 	private Map getNativeEnvironment() {
 		IEnvironment environment = fDialog.getEnvironment();
-		IExecutionEnvironment execEnvironment = (IExecutionEnvironment) environment.getAdapter(IExecutionEnvironment.class);
-		Map stringVars = execEnvironment.getEnvironmentVariables();
+		IExecutionEnvironment execEnvironment = (IExecutionEnvironment) environment
+				.getAdapter(IExecutionEnvironment.class);
+		Map stringVars = execEnvironment.getEnvironmentVariables(true);
 		HashMap vars = new HashMap();
 		for (Iterator i = stringVars.keySet().iterator(); i.hasNext();) {
 			String key = (String) i.next();
