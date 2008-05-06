@@ -16,5 +16,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rse.services,
  org.eclipse.core.resources
 Bundle-ActivationPolicy: lazy
-Export-Package: org.eclipse.dltk.core.internal.rse
+Export-Package: org.eclipse.dltk.core.internal.rse,
+ org.eclipse.dltk.core.internal.rse.perfomance
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
