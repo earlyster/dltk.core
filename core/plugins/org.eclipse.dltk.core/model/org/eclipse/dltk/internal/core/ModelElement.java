@@ -265,8 +265,9 @@ public abstract class ModelElement extends PlatformObject implements
 
 		IEnvironment environment = EnvironmentManager.getEnvironment(this);
 		if (o instanceof IModelElement && environment != null) {
-			IEnvironment environmento = EnvironmentManager.getEnvironment((IModelElement)o);
-			if( !environment.equals(environmento)) {
+			IEnvironment environmento = EnvironmentManager
+					.getEnvironment((IModelElement) o);
+			if (!environment.equals(environmento)) {
 				return false;
 			}
 		}
@@ -320,7 +321,12 @@ public abstract class ModelElement extends PlatformObject implements
 	 *            one of the EM_* constants defined by ModelElement
 	 */
 	protected ArrayList getChildrenOfType(int type) throws ModelException {
-		IModelElement[] children = getChildren();
+		return getChildrenOfType(type, null);
+	}
+
+	protected ArrayList getChildrenOfType(int type, IProgressMonitor monitor)
+			throws ModelException {
+		IModelElement[] children = getChildren(monitor);
 		int size = children.length;
 		ArrayList list = new ArrayList(size);
 		for (int i = 0; i < size; ++i) {
@@ -336,7 +342,12 @@ public abstract class ModelElement extends PlatformObject implements
 	 * @see IParent
 	 */
 	public IModelElement[] getChildren() throws ModelException {
-		Object elementInfo = getElementInfo();
+		return getChildren(null);
+	}
+
+	public IModelElement[] getChildren(IProgressMonitor monitor)
+			throws ModelException {
+		Object elementInfo = getElementInfo(monitor);
 		if (elementInfo instanceof ModelElementInfo) {
 			return ((ModelElementInfo) elementInfo).getChildren();
 		} else {
@@ -454,11 +465,10 @@ public abstract class ModelElement extends PlatformObject implements
 		ModelElement parentElement = (ModelElement) this.getParent();
 		if (parentElement != null && parentElement.getParent() != null) {
 			buffer.append(" [in "); //$NON-NLS-1$
-			parentElement
-					.toStringInfo(0, buffer, NO_INFO, false/*
-															 * don't show
-															 * resolved info
-															 */);
+			parentElement.toStringInfo(0, buffer, NO_INFO, false/*
+			 * don't show
+			 * resolved info
+			 */);
 			parentElement.toStringAncestors(buffer);
 			buffer.append("]"); //$NON-NLS-1$
 		}

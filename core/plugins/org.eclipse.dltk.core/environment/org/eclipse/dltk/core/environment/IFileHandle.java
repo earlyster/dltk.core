@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.net.URI;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 public interface IFileHandle {
 	String ID_SEPARATOR = "#"; //$NON-NLS-1$
@@ -41,7 +42,7 @@ public interface IFileHandle {
 
 	boolean exists();
 
-	InputStream openInputStream() throws IOException;
+	InputStream openInputStream(IProgressMonitor monitor) throws IOException;
 
 	boolean isSymlink();
 

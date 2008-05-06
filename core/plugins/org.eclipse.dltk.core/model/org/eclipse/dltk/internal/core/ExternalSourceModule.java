@@ -96,7 +96,7 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 
 		try {
 			if (file != null && file.exists()) {
-				stream = new BufferedInputStream(file.openInputStream());
+				stream = new BufferedInputStream(file.openInputStream(null));
 			} else {
 				// This is an archive entry
 				boolean inProjectArchive = false;

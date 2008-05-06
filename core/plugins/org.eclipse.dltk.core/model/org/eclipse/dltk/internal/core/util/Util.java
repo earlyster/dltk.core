@@ -400,7 +400,7 @@ public class Util {
 		// Get resource contents
 		InputStream stream = null;
 		try {
-			stream = new BufferedInputStream(file.openInputStream());
+			stream = new BufferedInputStream(file.openInputStream(null));
 		} catch (Exception e) {
 			throw new ModelException(e,
 					IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
@@ -421,24 +421,6 @@ public class Util {
 
 	public static char[] getResourceContentsAsCharArray(IFile file,
 			String encoding) throws ModelException {
-		// Get file length
-		// workaround https://bugs.eclipse.org/bugs/show_bug.cgi?id=130736 by
-		// using java.io.File if possible
-		IPath location = file.getLocation();
-		long length;
-		if (location == null) {
-			// non local file
-			try {
-				length = EFS.getStore(file.getLocationURI()).fetchInfo()
-						.getLength();
-			} catch (CoreException e) {
-				throw new ModelException(e);
-			}
-		} else {
-			// local file
-			length = location.toFile().length();
-		}
-
 		// Get resource contents
 		InputStream stream = null;
 		try {
@@ -449,7 +431,7 @@ public class Util {
 		}
 		try {
 			return org.eclipse.dltk.compiler.util.Util
-					.getInputStreamAsCharArray(stream, (int) length, encoding);
+					.getInputStreamAsCharArray(stream, -1, encoding);
 		} catch (IOException e) {
 			throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
 		} finally {
@@ -579,8 +561,8 @@ public class Util {
 		} else {
 			toolkit = DLTKLanguageManager.findToolkit(resource);
 			if (toolkit != null) {
-				return DLTKContentTypeManager
-						.isValidResourceForContentType(toolkit, resource);
+				return DLTKContentTypeManager.isValidResourceForContentType(
+						toolkit, resource);
 			}
 			return false;
 		}
@@ -590,11 +572,13 @@ public class Util {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(parent);
 		if (toolkit != null) {
-			return DLTKContentTypeManager.isValidFileNameForContentType(toolkit, path);
+			return DLTKContentTypeManager.isValidFileNameForContentType(
+					toolkit, path);
 		} else {
 			toolkit = DLTKLanguageManager.findToolkit(path);
 			if (toolkit != null) {
-				return DLTKContentTypeManager.isValidFileNameForContentType(toolkit, path);
+				return DLTKContentTypeManager.isValidFileNameForContentType(
+						toolkit, path);
 			}
 			return false;
 		}
@@ -605,7 +589,8 @@ public class Util {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(parent);
 		if (toolkit != null) {
-			return toolkit.validateSourcePackage(path, EnvironmentManager.getEnvironment(parent));
+			return toolkit.validateSourcePackage(path, EnvironmentManager
+					.getEnvironment(parent));
 		}
 		return false;
 	}
@@ -615,7 +600,8 @@ public class Util {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(parent);
 		if (toolkit != null) {
-			return DLTKContentTypeManager.isValidFileNameForContentType(toolkit, name);
+			return DLTKContentTypeManager.isValidFileNameForContentType(
+					toolkit, name);
 		} else {
 			return false;
 		}
@@ -624,7 +610,8 @@ public class Util {
 	public static boolean isValidSourceModule(IResource res) {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager.findToolkit(res);
 		if (toolkit != null) {
-			return DLTKContentTypeManager.isValidResourceForContentType(toolkit, res);
+			return DLTKContentTypeManager.isValidResourceForContentType(
+					toolkit, res);
 		}
 		return false;
 	}
