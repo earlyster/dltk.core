@@ -125,11 +125,13 @@ public abstract class ScriptContentDescriber implements ITextContentDescriber {
 			Pattern[] headerPatterns, Pattern[] footerPatterns) {
 		BufferedReader reader = new BufferedReader(stream);
 		StringBuffer buffer = new StringBuffer();
+		char buff[] = new char[8096];
 		while (true) {
 			try {
-				String line = reader.readLine();
-				buffer.append(line).append("\n"); //$NON-NLS-1$
-				if (line == null) {
+				int len = reader.read(buff);
+				if (len != -1) {
+					buffer.append(buff, 0, len);
+				} else {
 					break;
 				}
 			} catch (IOException e) {
