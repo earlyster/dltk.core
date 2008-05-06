@@ -5,11 +5,11 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
-
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation
+ *     xored software, Inc. - Search All occurences bugfix, 
+ *     						  hilight only class name when class is in search results ( Alex Panchenko <alex@xored.com>)
  *******************************************************************************/
-/*
- * (c) 2002, 2005 xored software and others all rights reserved. http://www.xored.com
- */
 
 package org.eclipse.dltk.ast;
 
@@ -27,82 +27,82 @@ public abstract class ASTNode {
 
 	// storage for internal flags (32 bits) BIT USAGE
 	public final static int Bit1 = 0x1; // return type (operator) | name
-										// reference kind (name ref) | add
-										// assertion (type decl) | useful empty
-										// statement (empty statement)
+	// reference kind (name ref) | add
+	// assertion (type decl) | useful empty
+	// statement (empty statement)
 	public final static int Bit2 = 0x2; // return type (operator) | name
-										// reference kind (name ref) | has local
-										// type (type, method, field decl)
+	// reference kind (name ref) | has local
+	// type (type, method, field decl)
 	public final static int Bit3 = 0x4; // return type (operator) | name
-										// reference kind (name ref) | implicit
-										// this (this ref)
+	// reference kind (name ref) | implicit
+	// this (this ref)
 	public final static int Bit4 = 0x8; // return type (operator) | first
-										// assignment to local (local decl) |
-										// undocumented empty block (block, type
-										// and method decl)
+	// assignment to local (local decl) |
+	// undocumented empty block (block, type
+	// and method decl)
 	public final static int Bit5 = 0x10; // value for return (expression) |
-											// has all method bodies (unit) |
-											// supertype ref (type ref)
+	// has all method bodies (unit) |
+	// supertype ref (type ref)
 	public final static int Bit6 = 0x20; // depth (name ref, msg) | ignore
-											// need cast check (cast expression)
+	// need cast check (cast expression)
 	public final static int Bit7 = 0x40; // depth (name ref, msg) | operator
-											// (operator) | need runtime
-											// checkcast (cast expression) |
-											// label used (labelStatement)
+	// (operator) | need runtime
+	// checkcast (cast expression) |
+	// label used (labelStatement)
 	public final static int Bit8 = 0x80; // depth (name ref, msg) | operator
-											// (operator) | unsafe cast (cast
-											// expression)
+	// (operator) | unsafe cast (cast
+	// expression)
 	public final static int Bit9 = 0x100; // depth (name ref, msg) | operator
-											// (operator) | is local type (type
-											// decl)
+	// (operator) | is local type (type
+	// decl)
 	public final static int Bit10 = 0x200; // depth (name ref, msg) | operator
-											// (operator) | is anonymous type
-											// (type decl)
+	// (operator) | is anonymous type
+	// (type decl)
 	public final static int Bit11 = 0x400; // depth (name ref, msg) | operator
-											// (operator) | is member type (type
-											// decl)
+	// (operator) | is member type (type
+	// decl)
 	public final static int Bit12 = 0x800; // depth (name ref, msg) | operator
-											// (operator) | has abstract methods
-											// (type decl)
+	// (operator) | has abstract methods
+	// (type decl)
 	public final static int Bit13 = 0x1000; // depth (name ref, msg) | is
-											// secondary type (type decl)
+	// secondary type (type decl)
 	public final static int Bit14 = 0x2000; // strictly assigned (reference lhs)
 	public final static int Bit15 = 0x4000; // is unnecessary cast (expression)
-											// | is varargs (type ref) |
-											// isSubRoutineEscaping (try
-											// statement)
+	// | is varargs (type ref) |
+	// isSubRoutineEscaping (try
+	// statement)
 	public final static int Bit16 = 0x8000; // in javadoc comment (name ref,
-											// type ref, msg)
+	// type ref, msg)
 	public final static int Bit17 = 0x10000; // compound assigned (reference
-												// lhs)
+	// lhs)
 	public final static int Bit18 = 0x20000; // non null (expression)
 	public final static int Bit19 = 0x40000;
 	public final static int Bit20 = 0x80000;
 	public final static int Bit21 = 0x100000;
 	public final static int Bit22 = 0x200000; // parenthesis count
-												// (expression)
+	// (expression)
 	public final static int Bit23 = 0x400000; // parenthesis count
-												// (expression)
+	// (expression)
 	public final static int Bit24 = 0x800000; // parenthesis count
-												// (expression)
+	// (expression)
 	public final static int Bit25 = 0x1000000; // parenthesis count
-												// (expression)
+	// (expression)
 	public final static int Bit26 = 0x2000000; // parenthesis count
-												// (expression)
+	// (expression)
 	public final static int Bit27 = 0x4000000; // parenthesis count
-												// (expression)
+	// (expression)
 	public final static int Bit28 = 0x8000000; // parenthesis count
-												// (expression)
+	// (expression)
 	public final static int Bit29 = 0x10000000; // parenthesis count
-												// (expression)
+	// (expression)
 	public final static int Bit30 = 0x20000000; // elseif (if statement) | try
-												// block exit (try statement) |
-												// fall-through (case statement)
+	// block exit (try statement) |
+	// fall-through (case statement)
 	public final static int Bit31 = 0x40000000; // local declaration reachable
-												// (local decl) | ignore raw
-												// type check (type ref) |
-												// discard entire assignment
-												// (assignment)
+	// (local decl) | ignore raw
+	// type check (type ref) |
+	// discard entire assignment
+	// (assignment)
 	public final static int Bit32 = 0x80000000; // reachable (statement)
 
 	public final static long Bit32L = 0x80000000L;
@@ -176,6 +176,24 @@ public abstract class ASTNode {
 		return this.sourceEnd;
 	}
 
+	/**
+	 * Returns the offset of the region which should be highlighted when this
+	 * item is added to search results.
+	 * 
+	 * The goal is to highlight only classname when searching for types.
+	 */
+	public int matchStart() {
+		return sourceStart();
+	}
+
+	/**
+	 * Returns the length of the region which should be highlighted when this
+	 * item is added to search results.
+	 */
+	public int matchLength() {
+		return sourceEnd() - sourceStart();
+	}
+
 	// TODO: Need to find way to change visibility to protected.
 	public void setStart(int start) {
 		this.sourceStart = start;
@@ -189,7 +207,9 @@ public abstract class ASTNode {
 	public abstract void traverse(ASTVisitor visitor) throws Exception;
 
 	public void printNode(CorePrinter output) {
-		output.println(MessageFormat.format(Messages.ASTNode_nodeDoesntSupportDebugPrinting, new Object[] { this.getClass() }));
+		output.println(MessageFormat.format(
+				Messages.ASTNode_nodeDoesntSupportDebugPrinting,
+				new Object[] { this.getClass() }));
 	}
 
 	protected ISourceRange getSourceRange() {
@@ -219,7 +239,7 @@ public abstract class ASTNode {
 	/**
 	 * Uses simplest visitor to get childs and returns collection of ASTNode
 	 * objects
-	 *
+	 * 
 	 * @return
 	 */
 	public List getChilds() {

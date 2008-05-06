@@ -80,9 +80,9 @@ public class FieldLocator extends PatternLocator {
 		return COMPILATION_UNIT_CONTAINER | CLASS_CONTAINER | METHOD_CONTAINER;
 	}
 
-	public SearchMatch newDeclarationMatch(ASTNode reference, IModelElement element, int accuracy, int length,
+	public SearchMatch newDeclarationMatch(ASTNode reference, IModelElement element, int accuracy, 
 			MatchLocator locator) {		
-		return super.newDeclarationMatch(reference, element, accuracy, length, locator);
+		return super.newDeclarationMatch(reference, element, accuracy, locator);
 	}
 
 	protected int referenceType() {

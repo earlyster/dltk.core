@@ -9,12 +9,15 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.search.matching;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.declarations.FieldDeclaration;
 import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.ast.declarations.TypeDeclaration;
 import org.eclipse.dltk.ast.expressions.Expression;
 import org.eclipse.dltk.ast.references.Reference;
+import org.eclipse.dltk.ast.references.TypeReference;
+import org.eclipse.dltk.compiler.env.lookup.Scope;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.search.SearchMatch;
 import org.eclipse.dltk.core.search.SearchPattern;
@@ -119,7 +122,28 @@ public class OrLocator extends PatternLocator {
 		return level;
 	}
 
+	public int match(TypeReference node, MatchingNodeSet nodeSet) {
+		int level = IMPOSSIBLE_MATCH;
+		for (int i = 0, length = this.patternLocators.length; i < length; i++) {
+			int newLevel = this.patternLocators[i].match(node, nodeSet);
+			if (newLevel > level) {
+				if (newLevel == ACCURATE_MATCH)
+					return ACCURATE_MATCH;
+				level = newLevel;
+			}
+		}
+		return level;
+	}
 	
+	public void matchReportReference(ASTNode reference, IModelElement element,
+			Scope scope, int accuracy, MatchLocator locator)
+			throws CoreException {
+		for (int i = 0, length = this.patternLocators.length; i < length; i++) {
+			this.patternLocators[i].matchReportReference(reference, element,
+					scope, accuracy, locator);
+		}
+	}
+
 	public int matchContainer() {
 		int result = 0;
 		for (int i = 0, length = this.patternLocators.length; i < length; i++)
@@ -130,7 +154,7 @@ public class OrLocator extends PatternLocator {
 
 	public SearchMatch newDeclarationMatch(ASTNode reference,
 			IModelElement element, int accuracy,
-			int length, MatchLocator locator) {
+			MatchLocator locator) {
 		PatternLocator closestPattern = null;
 		int level = ACCURATE_MATCH;
 		for (int i = 0, pl = this.patternLocators.length; i < pl; i++) {
@@ -145,11 +169,11 @@ public class OrLocator extends PatternLocator {
 		}
 		if (closestPattern != null) {
 			return closestPattern.newDeclarationMatch(reference, element,
-					accuracy, length, locator);
+					accuracy, locator);
 		}
 		// super implementation...
 		return locator.newDeclarationMatch(element, accuracy,
-				reference.sourceStart(), length);
+				reference.matchStart(), reference.matchLength());
 	}
 
 	public int resolveLevel(ASTNode node) {

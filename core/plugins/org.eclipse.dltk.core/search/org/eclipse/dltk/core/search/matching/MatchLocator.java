@@ -5,7 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation
+ *     xored software, Inc. - Search All occurences bugfix, 
+ *     						  hilight only class name when class is in search results ( Alex Panchenko <alex@xored.com>)
  *******************************************************************************/
 package org.eclipse.dltk.core.search.matching;
 
@@ -1221,10 +1224,8 @@ public class MatchLocator implements ITypeRequestor {
 		boolean enclosesElement = encloses(enclosingElement);
 		// report the type declaration
 		if (accuracy > -1 && enclosesElement) {
-			int offset = type.sourceStart();
 			SearchMatch match = this.patternLocator.newDeclarationMatch(type,
-					enclosingElement, accuracy, type.sourceEnd() - offset + 1,
-					this);
+					enclosingElement, accuracy, this);
 			report(match);
 		}
 		boolean matchedClassContainer = (this.matchContainer & PatternLocator.CLASS_CONTAINER) != 0;
@@ -1324,17 +1325,14 @@ public class MatchLocator implements ITypeRequestor {
 		if (accuracy > -1) {
 			enclosingElement = createHandle(method, parent);
 			if (enclosingElement != null) { // skip if unable to find method
-				int nameSourceStart = method.sourceStart();
-
 				if (encloses(enclosingElement)) {
 					SearchMatch match = null;
 					if (DLTKCore.DEBUG) {
 						System.out
 								.println("TODO: AST Add constructor support."); //$NON-NLS-1$
 					}
-					int length = method.sourceEnd() - nameSourceStart;
 					match = this.patternLocator.newDeclarationMatch(method,
-							enclosingElement, accuracy, length, this);
+							enclosingElement, accuracy, this);
 					// }
 					if (match != null) {
 						report(match);
@@ -1385,17 +1383,14 @@ public class MatchLocator implements ITypeRequestor {
 		if (accuracy > -1) {
 			enclosingElement = createHandle(field, parent);
 			if (enclosingElement != null) { // skip if unable to find method
-				int nameSourceStart = field.sourceStart();
-
 				if (encloses(enclosingElement)) {
 					SearchMatch match = null;
 					if (DLTKCore.DEBUG) {
 						System.out
 								.println("TODO: AST Add constructor support."); //$NON-NLS-1$
 					}
-					int length = field.sourceEnd() - nameSourceStart;
 					match = this.patternLocator.newDeclarationMatch(field,
-							enclosingElement, accuracy, length, this);
+							enclosingElement, accuracy, this);
 					// }
 					if (match != null) {
 						report(match);
@@ -1452,16 +1447,14 @@ public class MatchLocator implements ITypeRequestor {
 				enclosingElement = createFieldHandle(field.getName());
 			}
 			if (enclosingElement != null) { // skip if unable to find method
-				int nameSourceStart = field.sourceStart();
 				if (encloses(enclosingElement)) {
 					SearchMatch match = null;
 					if (DLTKCore.DEBUG) {
 						System.out
 								.println("TODO: AST Add constructor support."); //$NON-NLS-1$
 					}
-					int length = field.sourceEnd() - nameSourceStart;
 					match = this.patternLocator.newDeclarationMatch(field,
-							enclosingElement, accuracy, length, this);
+							enclosingElement, accuracy, this);
 					// }
 					if (match != null) {
 						report(match);
@@ -1514,16 +1507,14 @@ public class MatchLocator implements ITypeRequestor {
 				enclosingElement = createMethodHandle(method.getName());
 			}
 			if (enclosingElement != null) { // skip if unable to find method
-				int nameSourceStart = method.sourceStart();
 				if (encloses(enclosingElement)) {
 					SearchMatch match = null;
 					if (DLTKCore.DEBUG) {
 						System.out
 								.println("TODO: AST Add constructor support."); //$NON-NLS-1$
 					}
-					int length = method.sourceEnd() - nameSourceStart;
 					match = this.patternLocator.newDeclarationMatch(method,
-							enclosingElement, accuracy, length, this);
+							enclosingElement, accuracy, this);
 					// }
 					if (match != null) {
 						report(match);
