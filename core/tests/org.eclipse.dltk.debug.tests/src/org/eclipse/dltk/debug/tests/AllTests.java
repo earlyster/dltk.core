@@ -12,6 +12,7 @@ package org.eclipse.dltk.debug.tests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.dltk.debug.dbgp.tests.DbgpBase64Tests;
 import org.eclipse.dltk.debug.dbgp.tests.DbgpBreakpointCommandsTests;
 import org.eclipse.dltk.debug.dbgp.tests.DbgpContextCommandsTests;
 import org.eclipse.dltk.debug.dbgp.tests.DbgpContinuationCommandsTests;
@@ -21,6 +22,7 @@ import org.eclipse.dltk.debug.dbgp.tests.DbgpRequestTests;
 import org.eclipse.dltk.debug.dbgp.tests.DbgpStackCommandsTests;
 import org.eclipse.dltk.debug.dbgp.tests.DbgpStackLevelTests;
 import org.eclipse.dltk.debug.dbgp.tests.DbgpStatusCommandsTests;
+import org.eclipse.dltk.debug.dbgp.tests.DbgpStatusTests;
 import org.eclipse.dltk.debug.dbgp.tests.DbgpStreamCommandsTests;
 import org.eclipse.dltk.debug.tests.breakpoints.BreakpointTests;
 
@@ -43,6 +45,8 @@ public class AllTests {
 		dbgpSuite.addTestSuite(DbgpStackCommandsTests.class);
 		dbgpSuite.addTestSuite(DbgpStreamCommandsTests.class);
 		dbgpSuite.addTestSuite(DbgpStatusCommandsTests.class);
+		dbgpSuite.addTestSuite(DbgpBase64Tests.class);
+		dbgpSuite.addTestSuite(DbgpStatusTests.class);
 		suite.addTest(dbgpSuite);
 
 		// Breakpoints
