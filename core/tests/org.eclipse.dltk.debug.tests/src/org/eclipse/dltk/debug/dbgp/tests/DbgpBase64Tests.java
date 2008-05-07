@@ -56,6 +56,7 @@ public class DbgpBase64Tests extends TestCase {
 			final int endIndex = Math.min(encoded.length(), beginIndex
 					+ chunkSize);
 			chunked.append(encoded.substring(beginIndex, endIndex));
+			chunked.append("\r\n");
 		}
 		final String output = Base64Helper.decodeString(chunked.toString());
 		assertEquals(input, output);
