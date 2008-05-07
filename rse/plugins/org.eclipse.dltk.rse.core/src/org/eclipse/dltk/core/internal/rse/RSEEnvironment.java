@@ -116,7 +116,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 					e.printStackTrace();
 				}
 			}
-			projectToEnvironmentMap.put(project, new Boolean(false));
+			// projectToEnvironmentMap.put(project, new Boolean(false));
 			return false;
 		} finally {
 			long end = System.currentTimeMillis();
