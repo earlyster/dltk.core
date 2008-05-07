@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
+ *     xored software, Inc. - Fixed bug for end of file less whan 4 symbol comments (Andrei Sobolev)
  *******************************************************************************/
 package org.eclipse.dltk.compiler.task;
 
@@ -100,16 +101,19 @@ public class TodoTaskSimpleParser {
 	private void processLine(char[] content, int begin, final int end) {
 		for (int i = 0; i < tags.length; ++i) {
 			final char[] tag = tags[i];
-			char ch = content[begin + tag.length];
-			if (begin + tag.length < end && isEnd(ch)
-					|| begin + tag.length == end) {
-				if (compareTag(content, begin, tag)) {
-					final String msg = new String(content, begin, end - begin);
-					try {
-						taskReporter.reportTask(msg, lineNumber, priorities[i],
-								begin, contentPos);
-					} catch (CoreException e) {
-						DLTKCore.error("Error in reportTask()", e);
+			if (begin + tag.length < content.length) {
+				char ch = content[begin + tag.length];
+				if (begin + tag.length < end && isEnd(ch)
+						|| begin + tag.length == end) {
+					if (compareTag(content, begin, tag)) {
+						final String msg = new String(content, begin, end
+								- begin);
+						try {
+							taskReporter.reportTask(msg, lineNumber,
+									priorities[i], begin, contentPos);
+						} catch (CoreException e) {
+							DLTKCore.error("Error in reportTask()", e);
+						}
 					}
 				}
 			}

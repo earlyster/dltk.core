@@ -106,6 +106,9 @@ public class DLTKContentTypeManager {
 		// I've disable file content checking for non local environments.
 		IEnvironment environment = EnvironmentManager.getEnvironment(resource
 				.getProject());
+		if (environment == null) {
+			return false;
+		}
 		if (!EnvironmentManager.isLocal(environment)) {
 			return false;
 		}
