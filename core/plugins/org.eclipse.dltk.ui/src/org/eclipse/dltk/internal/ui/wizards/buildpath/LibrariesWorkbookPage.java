@@ -581,7 +581,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (elem instanceof BPListElement) {
 			BPListElement curr = (BPListElement) elem;
 			return !(curr.getResource() instanceof IFolder || curr
-					.isExtenralFolder())
+					.isExternalFolder())
 					&& curr.getParentContainer() == null;
 		}
 		if (elem instanceof BPListElementAttribute) {

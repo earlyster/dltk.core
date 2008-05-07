@@ -1233,7 +1233,7 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 				editUserLibraryElement((BPUserLibraryElement) curr);
 			} else if (curr instanceof BPListElement) {
 				BPListElement elem = (BPListElement) curr;
-				if (((BPListElement) curr).isExtenralFolder()) {
+				if (((BPListElement) curr).isExternalFolder()) {
 					editExternalElement(elem, (BPUserLibraryElement) elem
 							.getParentContainer());
 				} else {

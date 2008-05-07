@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.wizards.buildpath;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -33,6 +32,10 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptModelUtil;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -139,7 +142,8 @@ public class BPListElement {
 				IBuildpathContainer container = DLTKCore.getBuildpathContainer(
 						fPath, fProject);
 				if (container != null) {
-					IBuildpathEntry[] entries = container.getBuildpathEntries(fProject);
+					IBuildpathEntry[] entries = container
+							.getBuildpathEntries(fProject);
 					for (int i = 0; i < entries.length; i++) {
 						IBuildpathEntry entry = entries[i];
 						if (entry != null) {
@@ -561,7 +565,6 @@ public class BPListElement {
 
 		switch (curr.getEntryKind()) {
 		case IBuildpathEntry.BPE_CONTAINER:
-			res = null;
 			try {
 				isMissing = project != null
 						&& (DLTKCore.getBuildpathContainer(path, project) == null);
@@ -580,14 +583,17 @@ public class BPListElement {
 						res = root.getFolder(path);
 					}
 				}
-				if (isExternel) {
-					File file = new File(path.toOSString());
-					if (file == null || !file.exists()) {
+				if (path.toString().startsWith(
+						IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)) {
+					isMissing = false;
+				} else {
+					IEnvironment environment = EnvironmentManager
+							.getEnvironment(project);
+					IFileHandle handle = EnvironmentPathUtils.getFile(
+							environment, path);
+					if (handle == null || !handle.exists()) {
 						isMissing = true;
 					}
-				} else {
-					isMissing = !path.toFile().isFile(); // look for external
-					// archives
 				}
 			} else if (res.isLinked()) {
 				linkTarget = res.getLocation();
@@ -777,8 +783,10 @@ public class BPListElement {
 		}
 	}
 
-	public static IBuildpathEntry[] convertToBuildpathEntries(
-			List/* <CPListElement> */cpList) {
+	public static IBuildpathEntry[] convertToBuildpathEntries(List/*
+																 * <CPListElement
+																 * >
+																 */cpList) {
 
 		IBuildpathEntry[] result = new IBuildpathEntry[cpList.size()];
 		int i = 0;
@@ -827,7 +835,7 @@ public class BPListElement {
 		return fOrginalLinkTarget;
 	}
 
-	public boolean isExtenralFolder() {
+	public boolean isExternalFolder() {
 		return this.fExternal && this.fEntryKind == IBuildpathEntry.BPE_LIBRARY
 				&& !Util.isArchiveFileName(this.fPath.toOSString());
 	}
