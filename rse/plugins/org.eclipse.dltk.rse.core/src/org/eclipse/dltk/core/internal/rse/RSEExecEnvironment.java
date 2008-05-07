@@ -21,6 +21,7 @@ import org.eclipse.dltk.internal.launching.execution.EFSDeployment;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.subsystems.ISubSystem;
 import org.eclipse.rse.internal.efs.RSEFileSystem;
+import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
 import org.eclipse.rse.services.shells.IHostShell;
 import org.eclipse.rse.services.shells.IShellService;
 import org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem.IShellServiceSubSystem;
@@ -115,8 +116,13 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		}
 		IShellService shellService = shell.getShellService();
 		IHostShell hostShell = null;
-		hostShell = shellService.runCommand(workingDir.toPortableString(),
-				"bash", environment, new NullProgressMonitor());
+		try {
+			hostShell = shellService.runCommand(workingDir.toPortableString(),
+					"bash", environment, new NullProgressMonitor());
+		} catch (SystemMessageException e1) {
+			DLTKRSEPlugin.log(e1);
+			return null;
+		}
 
 		// Sometimes environment variables aren't set, so use export.
 		if (environment != null) {
