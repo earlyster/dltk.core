@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     xored software, Inc. - fix decode chunked base64 (Bug# 230825) (Alex Panchenko) 
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.utils;
 
@@ -127,6 +128,99 @@ class Base64 {
 	}
 
 	/**
+	 * This method decodes the byte array in base 64 encoding into a char array
+	 * Base 64 encoding has to be according to the specification given by the
+	 * RFC 1521 (5.2).
+	 * 
+	 * @param data
+	 *            the encoded byte array
+	 * @param length
+	 *            the length of the data
+	 * @return the number of the result bytes
+	 */
+	public static int decodeInlplace(byte[] data, final int length) {
+		if (length == 0) {
+			return 0;
+		}
+		int lastRealDataIndex = length - 1;
+		while (data[lastRealDataIndex] == equalSign) {
+			lastRealDataIndex--;
+		}
+		// original data digit is 8 bits long, but base64 digit is 6 bits long
+		final int padBytes = length - 1 - lastRealDataIndex;
+		final int byteLength = length * 6 / 8 - padBytes;
+		// Each 4 bytes of input (encoded) we end up with 3 bytes of output
+		int dataIndex = 0;
+		int resultIndex = 0;
+		int allBits = 0;
+		// how many result chunks we can process before getting to pad bytes
+		int resultChunks = (lastRealDataIndex + 1) / 4;
+		for (int i = 0; i < resultChunks; i++) {
+			allBits = 0;
+			// Loop 4 times gathering input bits (4 * 6 = 24)
+			for (int j = 0; j < 4; j++) {
+				allBits = (allBits << 6) | decodeDigit(data[dataIndex++]);
+			}
+			// Loop 3 times generating output bits (3 * 8 = 24)
+			for (int j = resultIndex + 2; j >= resultIndex; j--) {
+				data[j] = (byte) (allBits & 0xff); // Bottom 8 bits
+				allBits = allBits >>> 8;
+			}
+			resultIndex += 3; // processed 3 result bytes
+		}
+		// Now we do the extra bytes in case the original (non-encoded) data
+		// was not multiple of 3 bytes
+		switch (padBytes) {
+		case 1:
+			// 1 pad byte means 3 (4-1) extra Base64 bytes of input, 18
+			// bits, of which only 16 are meaningful
+			// Or: 2 bytes of result data
+			allBits = 0;
+			// Loop 3 times gathering input bits
+			for (int j = 0; j < 3; j++) {
+				allBits = (allBits << 6) | decodeDigit(data[dataIndex++]);
+			}
+			// NOTE - The code below ends up being equivalent to allBits =
+			// allBits>>>2
+			// But we code it in a non-optimized way for clarity
+			// The 4th, missing 6 bits are all 0
+			allBits = allBits << 6;
+			// The 3rd, missing 8 bits are all 0
+			allBits = allBits >>> 8;
+			// Loop 2 times generating output bits
+			for (int j = resultIndex + 1; j >= resultIndex; j--) {
+				data[j] = (byte) (allBits & 0xff); // Bottom 8
+				// bits
+				allBits = allBits >>> 8;
+			}
+			break;
+		case 2:
+			// 2 pad bytes mean 2 (4-2) extra Base64 bytes of input, 12 bits
+			// of data, of which only 8 are meaningful
+			// Or: 1 byte of result data
+			allBits = 0;
+			// Loop 2 times gathering input bits
+			for (int j = 0; j < 2; j++) {
+				allBits = (allBits << 6) | decodeDigit(data[dataIndex++]);
+			}
+			// NOTE - The code below ends up being equivalent to allBits =
+			// allBits>>>4
+			// But we code it in a non-optimized way for clarity
+			// The 3rd and 4th, missing 6 bits are all 0
+			allBits = allBits << 6;
+			allBits = allBits << 6;
+			// The 3rd and 4th, missing 8 bits are all 0
+			allBits = allBits >>> 8;
+			allBits = allBits >>> 8;
+			data[resultIndex] = (byte) (allBits & 0xff); // Bottom
+			// 8
+			// bits
+			break;
+		}
+		return byteLength;
+	}
+
+	/**
 	 * This method converts a Base 64 digit to its numeric value.
 	 * 
 	 * @param data
@@ -202,8 +296,8 @@ class Base64 {
 				allBits = allBits >>> 6;
 			}
 			// 2 pad tags
-			result[result.length - 1] = (byte) '=';
-			result[result.length - 2] = (byte) '=';
+			result[result.length - 1] = equalSign;
+			result[result.length - 2] = equalSign;
 			break;
 		case 2:
 			allBits = data[dataIndex++]; // actual byte
@@ -218,7 +312,7 @@ class Base64 {
 				allBits = allBits >>> 6;
 			}
 			// 1 pad tag
-			result[result.length - 1] = (byte) '=';
+			result[result.length - 1] = equalSign;
 			break;
 		}
 		return result;
