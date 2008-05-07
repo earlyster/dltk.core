@@ -25,7 +25,9 @@ public class EnvironmentPathUtils {
 
 	public static IPath getFullPath(IEnvironment env, IPath path) {
 		if (isFull(path)) {
-			throw new RuntimeException(MessageFormat.format(Messages.EnvironmentPathUtils_invalidPath, new Object[] { path }));
+			throw new RuntimeException(MessageFormat.format(
+					Messages.EnvironmentPathUtils_invalidPath,
+					new Object[] { path }));
 		}
 		// if( path.segment(0).startsWith("#special#")) {
 		// return path;
@@ -124,5 +126,12 @@ public class EnvironmentPathUtils {
 			}
 		}
 		return concatenatedPaths.toString();
+	}
+
+	public static IFileHandle getFile(IEnvironment environment, IPath path) {
+		if (isFull(path)) {
+			return getFile(path);
+		}
+		return environment.getFile(path);
 	}
 }
