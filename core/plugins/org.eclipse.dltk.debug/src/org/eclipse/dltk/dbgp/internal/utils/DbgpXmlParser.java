@@ -5,7 +5,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - initial API and implementation
+ *     xored software, Inc. - fix decode chunked base64 (Bug# 230825) (Alex Panchenko) 
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.utils;
 
@@ -17,7 +19,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.dltk.dbgp.exceptions.DbgpDebuggingEngineException;
-import org.eclipse.dltk.dbgp.exceptions.DbgpIOException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpProtocolException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -87,12 +88,7 @@ public class DbgpXmlParser {
 	}
 
 	public static String parseBase64Content(Element element) {
-		try {
-			return Base64Helper.decodeString(parseContent(element));
-		} catch (DbgpIOException e) {
-
-		}
-		return ""; //$NON-NLS-1$
+		return Base64Helper.decodeString(parseContent(element));
 	}
 
 	public static DbgpDebuggingEngineException checkError(Element element) {
