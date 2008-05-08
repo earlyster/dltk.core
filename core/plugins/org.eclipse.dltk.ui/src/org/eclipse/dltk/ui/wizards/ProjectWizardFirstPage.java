@@ -115,7 +115,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 	 * field is changed, regardless of whether the change originates from the
 	 * user or has been invoked programmatically.
 	 */
-	private final class LocationGroup extends Observable implements Observer,
+	protected final class LocationGroup extends Observable implements Observer,
 			IStringButtonAdapter, IDialogFieldListener {
 		protected final SelectionButtonDialogField fWorkspaceRadio;
 		protected final SelectionButtonDialogField fExternalRadio;
@@ -220,7 +220,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		 * (non-Javadoc)
 		 * 
 		 * @see java.util.Observer#update(java.util.Observable,
-		 *      java.lang.Object)
+		 * java.lang.Object)
 		 */
 		public void update(Observable o, Object arg) {
 			if (isInWorkspace()) {
@@ -281,9 +281,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 	protected abstract class AbstractInterpreterGroup extends Observable
 			implements Observer, SelectionListener, IDialogFieldListener {
 
-		private final SelectionButtonDialogField fUseDefaultInterpreterEnvironment,
+		protected final SelectionButtonDialogField fUseDefaultInterpreterEnvironment,
 				fUseProjectInterpreterEnvironment;
-		private final ComboDialogField fInterpreterEnvironmentCombo;
+		protected final ComboDialogField fInterpreterEnvironmentCombo;
 		private final Group fGroup;
 		private String[] fComplianceLabels;
 		private final Link fPreferenceLink;
@@ -426,7 +426,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+		 * @see
+		 * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse
+		 * .swt.events.SelectionEvent)
 		 */
 		public void widgetSelected(SelectionEvent e) {
 			widgetDefaultSelected(e);
@@ -450,7 +452,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+		 * @see
+		 * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org
+		 * .eclipse.swt.events.SelectionEvent)
 		 */
 		public void widgetDefaultSelected(SelectionEvent e) {
 			showInterpreterPreferencePage();
@@ -489,7 +493,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 	/**
 	 * Show a warning when the project location contains files.
 	 */
-	private final class DetectGroup extends Observable implements Observer,
+	protected final class DetectGroup extends Observable implements Observer,
 			SelectionListener {
 		private final Link fHintText;
 		private boolean fDetect;
@@ -564,7 +568,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+		 * @see
+		 * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse
+		 * .swt.events.SelectionEvent)
 		 */
 		public void widgetSelected(SelectionEvent e) {
 			widgetDefaultSelected(e);
@@ -573,7 +579,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+		 * @see
+		 * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org
+		 * .eclipse.swt.events.SelectionEvent)
 		 */
 		public void widgetDefaultSelected(SelectionEvent e) {
 			if (DLTKCore.DEBUG) {
@@ -666,11 +674,11 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 	}
 
 	private NameGroup fNameGroup;
-	private LocationGroup fLocationGroup;
+	protected LocationGroup fLocationGroup;
 	// private LayoutGroup fLayoutGroup;
 	// private InterpreterEnvironmentGroup fInterpreterEnvironmentGroup;
 	private boolean interpretersPresent;
-	private DetectGroup fDetectGroup;
+	protected DetectGroup fDetectGroup;
 	private Validator fValidator;
 	private String fInitialName;
 	private static final String PAGE_NAME = NewWizardMessages.ScriptProjectWizardFirstPage_page_pageName;
