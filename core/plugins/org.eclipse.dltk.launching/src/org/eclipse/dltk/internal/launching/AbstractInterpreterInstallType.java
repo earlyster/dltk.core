@@ -210,7 +210,7 @@ public abstract class AbstractInterpreterInstallType implements
 
 	protected String[] extractEnvironment(IExecutionEnvironment exeEnv,
 			EnvironmentVariable[] variables) {
-		Map env = exeEnv.getEnvironmentVariables();
+		Map env = exeEnv.getEnvironmentVariables(false);
 
 		filterEnvironment(env);
 
@@ -502,7 +502,7 @@ public abstract class AbstractInterpreterInstallType implements
 
 	public IStatus validateInstallLocation(IFileHandle installLocation) {
 		if (!installLocation.exists() || !installLocation.isFile()
-				/*|| installLocation.isHidden()*/) {
+		/* || installLocation.isHidden() */) {
 			return createStatus(IStatus.ERROR,
 					InterpreterMessages.errNonExistentOrInvalidInstallLocation,
 					null);

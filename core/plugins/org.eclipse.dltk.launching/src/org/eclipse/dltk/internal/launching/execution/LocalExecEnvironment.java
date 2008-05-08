@@ -29,8 +29,9 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 			URI rootUri = createLocalURI(rootPath);
 			return new EFSDeployment(LocalEnvironment.getInstance(), rootUri);
 		} catch (CoreException e) {
-			if (DLTKCore.DEBUG)
+			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
+			}
 		}
 		return null;
 	}
@@ -52,7 +53,7 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 			try {
 				File tempFile = File.createTempFile("dltk", "temp");
 				tempFile.delete();
-				temp = new Path(tempFile.getCanonicalPath());
+				temp = new Path(tempFile.getParent());
 			} catch (IOException e) {
 				throw new RuntimeException(
 						"DLTK: Failed to locate temp folder...");
@@ -70,7 +71,7 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 		return DebugPlugin.exec(cmdLine, workingDirFile, environment);
 	}
 
-	public Map getEnvironmentVariables() {
+	public Map getEnvironmentVariables(boolean value) {
 		return DebugPlugin.getDefault().getLaunchManager()
 				.getNativeEnvironmentCasePreserved();
 	}

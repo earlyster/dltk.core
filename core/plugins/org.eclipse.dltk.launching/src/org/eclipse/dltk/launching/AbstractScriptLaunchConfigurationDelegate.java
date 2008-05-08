@@ -687,7 +687,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	protected String getScriptLaunchPath(ILaunchConfiguration configuration,
 			IEnvironment scriptEnvironment) throws CoreException {
 		String mainScriptName = verifyMainScriptName(configuration);
-		if( mainScriptName.length() == 0 ) {
+		if (mainScriptName.length() == 0) {
 			return null;
 		}
 		IProject project = getScriptProject(configuration).getProject();
@@ -715,17 +715,18 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 
 		// Validation already included
 		IEnvironment scriptEnvironment = getScriptEnvironment(configuration);
-		IExecutionEnvironment scriptExecEnvironment = (IExecutionEnvironment) scriptEnvironment.getAdapter(IExecutionEnvironment.class);
+		IExecutionEnvironment scriptExecEnvironment = (IExecutionEnvironment) scriptEnvironment
+				.getAdapter(IExecutionEnvironment.class);
 		String scriptLaunchPath = getScriptLaunchPath(configuration,
 				scriptEnvironment);
-//		if (scriptLaunchPath == null) {
-//			return null;
-//		}
+		// if (scriptLaunchPath == null) {
+		// return null;
+		// }
 		final IPath workingDirectory = new Path(getWorkingDirectory(
 				configuration, scriptEnvironment));
 
 		IPath mainScript = null;//
-		if( scriptLaunchPath != null ) {
+		if (scriptLaunchPath != null) {
 			mainScript = new Path(scriptLaunchPath);
 		}
 		InterpreterConfig config = new InterpreterConfig(scriptEnvironment,
@@ -745,7 +746,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		Map configEnv = configuration.getAttribute(
 				ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap());
 		// build base environment
-		Map env = scriptExecEnvironment.getEnvironmentVariables();
+		Map env = scriptExecEnvironment.getEnvironmentVariables(false);
 		boolean append = configuration.getAttribute(
 				ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES, true);
 		if (configEnv != null) {
@@ -880,8 +881,8 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		}
 	}
 
-	protected String getWorkingDir(ILaunchConfiguration configuration, IEnvironment environment)
-			throws CoreException {
+	protected String getWorkingDir(ILaunchConfiguration configuration,
+			IEnvironment environment) throws CoreException {
 		return verifyWorkingDirectory(configuration, environment);
 	}
 
@@ -1014,7 +1015,6 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 				configuration);
 	}
 
-	
 	/**
 	 * Returns the default working directory for the given launch configuration,
 	 * or <code>null</code> if none. Subclasses may override as necessary.
