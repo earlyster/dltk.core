@@ -20,40 +20,51 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.dltk.core.DLTKCore;
 
-
 /**
- * DLTKCore eclipse preferences initializer.
- * Initially done in DLTKCore.initializeDefaultPreferences which was deprecated
- * with new eclipse preferences mechanism.
+ * DLTKCore eclipse preferences initializer. Initially done in
+ * DLTKCore.initializeDefaultPreferences which was deprecated with new eclipse
+ * preferences mechanism.
  */
-public class DLTKCorePreferenceInitializer extends AbstractPreferenceInitializer {
+public class DLTKCorePreferenceInitializer extends
+		AbstractPreferenceInitializer {
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seeorg.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#
+	 * initializeDefaultPreferences()
 	 */
 	public void initializeDefaultPreferences() {
-		// If modified, also modify the method ModelManager#getDefaultOptionsNoInitialization()
+		// If modified, also modify the method ModelManager#
+		// getDefaultOptionsNoInitialization()
 		// Get options names set
 		HashSet optionNames = ModelManager.getModelManager().optionNames;
-		
-		// Compiler settings
-		Map defaultOptionsMap = new HashMap(); // compiler defaults		
-		
 
-		// DLTKCore settings		
-		defaultOptionsMap.put(DLTKCore.CORE_INCOMPLETE_BUILDPATH, DLTKCore.ERROR); 
-		defaultOptionsMap.put(DLTKCore.CORE_CIRCULAR_BUILDPATH, DLTKCore.ERROR);  
-		defaultOptionsMap.put(DLTKCore.CORE_ENABLE_BUILDPATH_EXCLUSION_PATTERNS, DLTKCore.ENABLED);  
+		// Compiler settings
+		Map defaultOptionsMap = new HashMap(); // compiler defaults
+
+		// DLTKCore settings
+		defaultOptionsMap.put(DLTKCore.CORE_INCOMPLETE_BUILDPATH,
+				DLTKCore.ERROR);
+		defaultOptionsMap.put(DLTKCore.CORE_CIRCULAR_BUILDPATH, DLTKCore.ERROR);
+		defaultOptionsMap.put(
+				DLTKCore.CORE_ENABLE_BUILDPATH_EXCLUSION_PATTERNS,
+				DLTKCore.ENABLED);
+		defaultOptionsMap.put(
+				DLTKCore.CORE_NON_LOCAL_EMPTY_FILE_CONTENT_TYPE_CHECKING,
+				DLTKCore.ENABLED);
 
 		// encoding setting comes from resource plug-in
 		optionNames.add(DLTKCore.CORE_ENCODING);
 
 		// Store default values to default preferences
-	 	IEclipsePreferences defaultPreferences = ((IScopeContext) new DefaultScope()).getNode(DLTKCore.PLUGIN_ID);
-		for (Iterator iter = defaultOptionsMap.entrySet().iterator(); iter.hasNext();) {
+		IEclipsePreferences defaultPreferences = ((IScopeContext) new DefaultScope())
+				.getNode(DLTKCore.PLUGIN_ID);
+		for (Iterator iter = defaultOptionsMap.entrySet().iterator(); iter
+				.hasNext();) {
 			Map.Entry entry = (Map.Entry) iter.next();
 			String optionName = (String) entry.getKey();
-			defaultPreferences.put(optionName, (String)entry.getValue());
+			defaultPreferences.put(optionName, (String) entry.getValue());
 			optionNames.add(optionName);
 		}
 	}

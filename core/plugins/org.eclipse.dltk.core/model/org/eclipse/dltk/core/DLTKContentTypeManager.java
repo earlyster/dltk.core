@@ -24,11 +24,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
-import org.eclipse.dltk.core.environment.IFileHandle;
 
 public class DLTKContentTypeManager {
 	public static boolean isValidFileNameForContentType(
@@ -62,7 +63,7 @@ public class DLTKContentTypeManager {
 							e.printStackTrace();
 						}
 					} finally {
-						closeSream(stream);
+						closeStream(stream);
 					}
 				}
 			}
@@ -70,7 +71,7 @@ public class DLTKContentTypeManager {
 		return false;
 	}
 
-	private static void closeSream(InputStream stream) {
+	private static void closeStream(InputStream stream) {
 		if (stream != null) {
 			try {
 				stream.close();
@@ -98,6 +99,27 @@ public class DLTKContentTypeManager {
 
 	public static boolean isValidResourceForContentType(
 			IDLTKLanguageToolkit toolkit, IResource resource) {
+		if (isValidFileNameForContentType(toolkit, resource.getFullPath()
+				.lastSegment())) {
+			return true;
+		}
+
+		// I've disable file content checking for non local environments.
+		IEnvironment environment = EnvironmentManager.getEnvironment(resource
+				.getProject());
+		if (environment == null) {
+			return false;
+		}
+		if (!EnvironmentManager.isLocal(environment)) {
+			Preferences preferences = DLTKCore.getPlugin()
+					.getPluginPreferences();
+			String value = preferences
+					.getString(DLTKCore.CORE_NON_LOCAL_EMPTY_FILE_CONTENT_TYPE_CHECKING);
+			if (DLTKCore.DISABLED.equals(value)) {
+				return false;
+			}
+		}
+
 		if (resource instanceof IFile) {
 			// Custom filtering via language tookit
 			IStatus status = toolkit.validateSourceModule(resource);
@@ -141,7 +163,8 @@ public class DLTKContentTypeManager {
 					IContentDescription description;
 					InputStream contents = null;
 					try {
-						contents = file.getContents();
+						contents = new BufferedInputStream(file.getContents(),
+								2048);
 						description = type.getDescriptionFor(contents,
 								IContentDescription.ALL);
 						if (description != null) {
@@ -158,11 +181,12 @@ public class DLTKContentTypeManager {
 							e.printStackTrace();
 						}
 					} finally {
-						closeSream(contents);
+						closeStream(contents);
 					}
 				}
 			}
 		}
+
 		return false;
 	}
 

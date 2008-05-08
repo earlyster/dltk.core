@@ -47,6 +47,7 @@ import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ProjectFragment;
@@ -341,7 +342,7 @@ public class Util {
 	 * Finds the first line separator used by the given text.
 	 * 
 	 * @return </code>"\n"</code> or </code>"\r"</code> or </code>"\r\n"</code>,
-	 *         or <code>null</code> if none found
+	 * 	or <code>null</code> if none found
 	 */
 	public static String findLineSeparator(char[] text) {
 		// find the first line separator
@@ -400,7 +401,7 @@ public class Util {
 		// Get resource contents
 		InputStream stream = null;
 		try {
-			stream = new BufferedInputStream(file.openInputStream());
+			stream = new BufferedInputStream(file.openInputStream(null));
 		} catch (Exception e) {
 			throw new ModelException(e,
 					IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
@@ -421,35 +422,30 @@ public class Util {
 
 	public static char[] getResourceContentsAsCharArray(IFile file,
 			String encoding) throws ModelException {
-		// Get file length
-		// workaround https://bugs.eclipse.org/bugs/show_bug.cgi?id=130736 by
-		// using java.io.File if possible
-		IPath location = file.getLocation();
-		long length;
-		if (location == null) {
-			// non local file
-			try {
-				length = EFS.getStore(file.getLocationURI()).fetchInfo()
-						.getLength();
-			} catch (CoreException e) {
-				throw new ModelException(e);
-			}
-		} else {
-			// local file
-			length = location.toFile().length();
-		}
-
 		// Get resource contents
 		InputStream stream = null;
-		try {
-			stream = file.getContents(true);
-		} catch (CoreException e) {
-			throw new ModelException(e,
-					IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
+		int tryCount = 10;
+		while (stream == null) {
+			try {
+				stream = file.getContents(true);
+			} catch (Exception e) {
+				IStatus status = new Status(IStatus.ERROR, DLTKCore.PLUGIN_ID,
+						"Error receiving file content: retrying("
+								+ String.valueOf(tryCount) + ")", e);
+				DLTKCore.getDefault().getLog().log(status);
+
+				// Some times for RSE we can get here if connection is not
+				// established yet, or if connection are lost.
+				if (tryCount == 0) {
+					throw new ModelException(e,
+							IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
+				}
+				tryCount--;
+			}
 		}
 		try {
 			return org.eclipse.dltk.compiler.util.Util
-					.getInputStreamAsCharArray(stream, (int) length, encoding);
+					.getInputStreamAsCharArray(stream, -1, encoding);
 		} catch (IOException e) {
 			throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
 		} finally {
@@ -540,7 +536,6 @@ public class Util {
 	 * Returns whether the given resource path matches one of the
 	 * inclusion/exclusion patterns. NOTE: should not be asked directly using
 	 * pkg root pathes
-	 * 
 	 */
 	public final static boolean isExcluded(IPath resourcePath,
 			char[][] inclusionPatterns, char[][] exclusionPatterns,
@@ -579,8 +574,8 @@ public class Util {
 		} else {
 			toolkit = DLTKLanguageManager.findToolkit(resource);
 			if (toolkit != null) {
-				return DLTKContentTypeManager
-						.isValidResourceForContentType(toolkit, resource);
+				return DLTKContentTypeManager.isValidResourceForContentType(
+						toolkit, resource);
 			}
 			return false;
 		}
@@ -590,11 +585,13 @@ public class Util {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(parent);
 		if (toolkit != null) {
-			return DLTKContentTypeManager.isValidFileNameForContentType(toolkit, path);
+			return DLTKContentTypeManager.isValidFileNameForContentType(
+					toolkit, path);
 		} else {
 			toolkit = DLTKLanguageManager.findToolkit(path);
 			if (toolkit != null) {
-				return DLTKContentTypeManager.isValidFileNameForContentType(toolkit, path);
+				return DLTKContentTypeManager.isValidFileNameForContentType(
+						toolkit, path);
 			}
 			return false;
 		}
@@ -605,7 +602,11 @@ public class Util {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(parent);
 		if (toolkit != null) {
-			return toolkit.validateSourcePackage(path, EnvironmentManager.getEnvironment(parent));
+			if (EnvironmentPathUtils.isFull(path)) {
+				path = EnvironmentPathUtils.getLocalPath(path);
+			}
+			return toolkit.validateSourcePackage(path, EnvironmentManager
+					.getEnvironment(parent));
 		}
 		return false;
 	}
@@ -615,7 +616,8 @@ public class Util {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(parent);
 		if (toolkit != null) {
-			return DLTKContentTypeManager.isValidFileNameForContentType(toolkit, name);
+			return DLTKContentTypeManager.isValidFileNameForContentType(
+					toolkit, name);
 		} else {
 			return false;
 		}
@@ -624,7 +626,8 @@ public class Util {
 	public static boolean isValidSourceModule(IResource res) {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager.findToolkit(res);
 		if (toolkit != null) {
-			return DLTKContentTypeManager.isValidResourceForContentType(toolkit, res);
+			return DLTKContentTypeManager.isValidResourceForContentType(
+					toolkit, res);
 		}
 		return false;
 	}
@@ -881,9 +884,9 @@ public class Util {
 	 * Unicode value of each character in the strings.
 	 * 
 	 * @return the value <code>0</code> if the str1 is equal to str2; a value
-	 *         less than <code>0</code> if str1 is lexicographically less than
-	 *         str2; and a value greater than <code>0</code> if str1 is
-	 *         lexicographically greater than str2.
+	 * 	less than <code>0</code> if str1 is lexicographically less than str2;
+	 * 	and a value greater than <code>0</code> if str1 is lexicographically
+	 * 	greater than str2.
 	 */
 	public static int compare(char[] str1, char[] str2) {
 		int len1 = str1.length;
@@ -918,7 +921,7 @@ public class Util {
 	 * <li>
 	 * 
 	 * <pre>
-	 *       divider = 'b'
+	 * divider = 'b'
 	 *       string = &quot;abbaba&quot;
 	 *       start = 2
 	 *       end = 5
@@ -929,18 +932,17 @@ public class Util {
 	 * </ol>
 	 * 
 	 * @param divider
-	 *            the given divider
+	 * 		the given divider
 	 * @param string
-	 *            the given string
+	 * 		the given string
 	 * @param start
-	 *            the given starting index
+	 * 		the given starting index
 	 * @param end
-	 *            the given ending index
+	 * 		the given ending index
 	 * @return a new array which is the split of the given string using the
-	 *         given divider
+	 * 	given divider
 	 * @throws ArrayIndexOutOfBoundsException
-	 *             if start is lower than 0 or end is greater than the array
-	 *             length
+	 * 		if start is lower than 0 or end is greater than the array length
 	 */
 	public static final String[] splitOn(char divider, String string,
 			int start, int end) {
@@ -972,7 +974,7 @@ public class Util {
 	 * <li>
 	 * 
 	 * <pre>
-	 *       array = {&quot;a&quot;, &quot;b&quot;}
+	 * array = {&quot;a&quot;, &quot;b&quot;}
 	 *       separator = '.'
 	 *       =&gt; result = &quot;a.b&quot;
 	 * </pre>
@@ -981,7 +983,7 @@ public class Util {
 	 * <li>
 	 * 
 	 * <pre>
-	 *       array = {}
+	 * array = {}
 	 *       separator = '.'
 	 *       =&gt; result = &quot;&quot;
 	 * </pre>
@@ -990,11 +992,11 @@ public class Util {
 	 * </ol>
 	 * 
 	 * @param array
-	 *            the given array
+	 * 		the given array
 	 * @param separator
-	 *            the given separator
+	 * 		the given separator
 	 * @return the concatenation of the given array parts using the given
-	 *         separator between each part
+	 * 	separator between each part
 	 */
 	public static final String concatWith(String[] array, char separator) {
 		StringBuffer buffer = new StringBuffer();
@@ -1015,7 +1017,7 @@ public class Util {
 	 * <li>
 	 * 
 	 * <pre>
-	 *       name = &quot;c&quot;
+	 * name = &quot;c&quot;
 	 *       array = { &quot;a&quot;, &quot;b&quot; }
 	 *       separator = '.'
 	 *       =&gt; result = &quot;a.b.c&quot;
@@ -1025,7 +1027,7 @@ public class Util {
 	 * <li>
 	 * 
 	 * <pre>
-	 *       name = null
+	 * name = null
 	 *       array = { &quot;a&quot;, &quot;b&quot; }
 	 *       separator = '.'
 	 *       =&gt; result = &quot;a.b&quot;
@@ -1035,7 +1037,7 @@ public class Util {
 	 * <li>
 	 * 
 	 * <pre>
-	 *       name = &quot; c&quot;
+	 * name = &quot; c&quot;
 	 *       array = null
 	 *       separator = '.'
 	 *       =&gt; result = &quot;c&quot;
@@ -1045,14 +1047,13 @@ public class Util {
 	 * </ol>
 	 * 
 	 * @param array
-	 *            the given array
+	 * 		the given array
 	 * @param name
-	 *            the given name
+	 * 		the given name
 	 * @param separator
-	 *            the given separator
+	 * 		the given separator
 	 * @return the concatenation of the given array parts using the given
-	 *         separator between each part and appending the given name at the
-	 *         end
+	 * 	separator between each part and appending the given name at the end
 	 */
 	public static final String concatWith(String[] array, String name,
 			char separator) {
@@ -1080,7 +1081,7 @@ public class Util {
 	 * <li>
 	 * 
 	 * <pre>
-	 *       first = null
+	 * first = null
 	 *       second = &quot;a&quot;
 	 *       =&gt; result = {&quot;a&quot;}
 	 * </pre>
@@ -1088,7 +1089,7 @@ public class Util {
 	 * <li>
 	 * 
 	 * <pre>
-	 *       first = {&quot;a&quot;}
+	 * first = {&quot;a&quot;}
 	 *       second = null
 	 *       =&gt; result = {&quot;a&quot;}
 	 * </pre>
@@ -1097,7 +1098,7 @@ public class Util {
 	 * <li>
 	 * 
 	 * <pre>
-	 *       first = {&quot;a&quot;}
+	 * first = {&quot;a&quot;}
 	 *       second = {&quot;b&quot;}
 	 *       =&gt; result = {&quot;a&quot;, &quot;b&quot;}
 	 * </pre>
@@ -1106,11 +1107,11 @@ public class Util {
 	 * </ol>
 	 * 
 	 * @param first
-	 *            the first array to concatenate
+	 * 		the first array to concatenate
 	 * @param second
-	 *            the array to add at the end of the first array
+	 * 		the array to add at the end of the first array
 	 * @return a new array adding the second array at the end of first array, or
-	 *         null if the two arrays are null.
+	 * 	null if the two arrays are null.
 	 */
 	public static final String[] arrayConcat(String[] first, String second) {
 		if (second == null)
@@ -1198,15 +1199,15 @@ public class Util {
 	 * detected, or an exception is thrown.
 	 * 
 	 * @param in
-	 *            a data input stream.
+	 * 		a data input stream.
 	 * @return a Unicode string.
 	 * @exception EOFException
-	 *                if the input stream reaches the end before all the bytes.
+	 * 		if the input stream reaches the end before all the bytes.
 	 * @exception IOException
-	 *                if an I/O error occurs.
+	 * 		if an I/O error occurs.
 	 * @exception UTFDataFormatException
-	 *                if the bytes do not represent a valid UTF-8 encoding of a
-	 *                Unicode string.
+	 * 		if the bytes do not represent a valid UTF-8 encoding of a Unicode
+	 * 		string.
 	 * @see java.io.DataInputStream#readUnsignedShort()
 	 */
 	public final static char[] readUTF(DataInput in) throws IOException {
@@ -1226,7 +1227,7 @@ public class Util {
 			case 5:
 			case 6:
 			case 7:
-				// 0xxxxxxx
+				// xxxxxxx
 				count++;
 				str[strlen++] = (char) c;
 				break;
@@ -1269,16 +1270,16 @@ public class Util {
 	 * machine-independent manner.
 	 * <p>
 	 * First, two bytes are written to the output stream as if by the
-	 * <code>writeShort</code> method giving the number of bytes to follow.
-	 * This value is the number of bytes actually written out, not the length of
-	 * the string. Following the length, each character of the string is output,
-	 * in sequence, using the UTF-8 encoding for the character.
+	 * <code>writeShort</code> method giving the number of bytes to follow. This
+	 * value is the number of bytes actually written out, not the length of the
+	 * string. Following the length, each character of the string is output, in
+	 * sequence, using the UTF-8 encoding for the character.
 	 * 
 	 * @param str
-	 *            a string to be written.
+	 * 		a string to be written.
 	 * @return the number of bytes written to the stream.
 	 * @exception IOException
-	 *                if an I/O error occurs.
+	 * 		if an I/O error occurs.
 	 * 
 	 */
 	public static int writeUTF(OutputStream out, char[] str) throws IOException {
@@ -1325,12 +1326,12 @@ public class Util {
 	 * "&lt;", "&gt;", "/", ".".
 	 * 
 	 * @param string
-	 *            the signature string
+	 * 		the signature string
 	 * @param start
-	 *            the 0-based character index of the first character
+	 * 		the 0-based character index of the first character
 	 * @return the 0-based character index of the last character
 	 * @exception IllegalArgumentException
-	 *                if this is not an identifier
+	 * 		if this is not an identifier
 	 */
 	public static int scanIdentifier(char[] string, int start) {
 		// need a minimum 1 char

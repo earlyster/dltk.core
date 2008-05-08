@@ -16,7 +16,15 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 public interface IExecutionEnvironment {
-	Map getEnvironmentVariables();
+	/**
+	 * If realyNeed are set to true then values should be returned in any case.
+	 * if realyNeed are set to false then values could be returned onle if
+	 * platform require override of environment each time.
+	 * 
+	 * Local environment will return environment each time. RSE environment will
+	 * return environment only if realYneed is true.
+	 */
+	Map getEnvironmentVariables(boolean realyNeed);
 
 	IDeployment createDeployment();
 
@@ -24,6 +32,6 @@ public interface IExecutionEnvironment {
 			throws CoreException;
 
 	IEnvironment getEnvironment();
-	
+
 	boolean isValidExecutableAndEquals(String name, IPath fName);
 }

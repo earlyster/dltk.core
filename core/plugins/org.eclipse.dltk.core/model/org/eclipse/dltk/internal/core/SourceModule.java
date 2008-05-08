@@ -30,8 +30,6 @@ import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
 
-/**
- */
 public class SourceModule extends AbstractSourceModule implements ISourceModule {
 	private static int nextId = 1;
 
@@ -59,9 +57,9 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		ModelManager.PerWorkingCopyInfo perWorkingCopyInfo = manager
 				.getPerWorkingCopyInfo(this, false /* don't create */,
 						true /* record usage */, null /*
-														 * no problem requestor
-														 * needed
-														 */);
+				 * no problem requestor
+				 * needed
+				 */);
 		if (perWorkingCopyInfo == null) {
 			// close cu and its children
 			close();
@@ -229,9 +227,9 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		ModelManager.PerWorkingCopyInfo perWorkingCopyInfo = manager
 				.getPerWorkingCopyInfo(workingCopy, false /* don't create */,
 						true /* record usage */, null /*
-														 * not used since don't
-														 * create
-														 */);
+				 * not used since don't
+				 * create
+				 */);
 		if (perWorkingCopyInfo != null) {
 			return perWorkingCopyInfo.getWorkingCopy(); // return existing
 			// handle instead of the
@@ -365,7 +363,8 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	public void save(IProgressMonitor pm, boolean force) throws ModelException {
 		if (isWorkingCopy()) {
 			// no need to save the buffer for a working copy (this is a noop)
-			throw new RuntimeException("not implemented"); // not simply //$NON-NLS-1$
+			throw new RuntimeException("not implemented"); // not simply
+															// //$NON-NLS-1$
 			// makeConsistent,
 			// also computes
 			// fine-grain deltas
@@ -406,7 +405,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		Object lookup = (resource == null) ? (Object) getPath() : resource;
 
 		IDLTKLanguageToolkit lookupLanguageToolkit = lookupLanguageToolkit(lookup);
-		if( lookupLanguageToolkit == null ) {
+		if (lookupLanguageToolkit == null) {
 			return null;
 		}
 		return lookupLanguageToolkit.getNatureId();

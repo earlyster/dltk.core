@@ -12,13 +12,20 @@ public class SourceParserUtil {
 	private static final Object AST = "ast"; //$NON-NLS-1$
 	private static final Object FLAGS = "flags"; //$NON-NLS-1$
 
-	/**
-	 * Used to retrive module declaration from source module.
-	 */
+	public static interface IContentAction {
+		void run(ISourceModule module, char[] content);
+	}
+
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
 			IProblemReporter reporter) {
 		return getModuleDeclaration(module, reporter,
-				ISourceParserConstants.DEFAULT);
+				ISourceParserConstants.DEFAULT, null);
+	}
+
+	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
+			IProblemReporter reporter, IContentAction action) {
+		return getModuleDeclaration(module, reporter,
+				ISourceParserConstants.DEFAULT, action);
 	}
 
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
@@ -26,21 +33,35 @@ public class SourceParserUtil {
 		ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
 				.getModelManager().getSourceModuleInfoCache();
 		ISourceModuleInfo sourceModuleInfo = sourceModuleInfoCache.get(module);
-		return getModuleDeclaration(module, reporter, sourceModuleInfo, flags);
+		return getModuleDeclaration(module, reporter, sourceModuleInfo, flags,
+				null);
 	}
 
-	/**
-	 * Used to retrive module declaration from source module.
-	 */
+	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
+			IProblemReporter reporter, int flags, IContentAction action) {
+		ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
+				.getModelManager().getSourceModuleInfoCache();
+		ISourceModuleInfo sourceModuleInfo = sourceModuleInfoCache.get(module);
+		return getModuleDeclaration(module, reporter, sourceModuleInfo, flags,
+				action);
+	}
 
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
 			IProblemReporter reporter, ISourceModuleInfo mifo) {
 		return getModuleDeclaration(module, reporter, mifo,
-				ISourceParserConstants.DEFAULT);
+				ISourceParserConstants.DEFAULT, null);
 	}
 
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
-			IProblemReporter reporter, ISourceModuleInfo mifo, int flags) {
+			IProblemReporter reporter, ISourceModuleInfo mifo,
+			IContentAction action) {
+		return getModuleDeclaration(module, reporter, mifo,
+				ISourceParserConstants.DEFAULT, action);
+	}
+
+	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
+			IProblemReporter reporter, ISourceModuleInfo mifo, int flags,
+			IContentAction action) {
 
 		IDLTKLanguageToolkit toolkit;
 		toolkit = DLTKLanguageManager.getLanguageToolkit(module);
@@ -65,9 +86,13 @@ public class SourceParserUtil {
 					((ISourceParserExtension) sourceParser).setFlags(flags);
 				}
 				try {
+					char[] sourceAsCharArray = module.getSourceAsCharArray();
 					moduleDeclaration = sourceParser.parse(module.getPath()
-							.toString().toCharArray(), module
-							.getSourceAsCharArray(), reporter);
+							.toString().toCharArray(), sourceAsCharArray,
+							reporter);
+					if (action != null) {
+						action.run(module, sourceAsCharArray);
+					}
 				} catch (ModelException e) {
 					if (DLTKCore.DEBUG) {
 						e.printStackTrace();

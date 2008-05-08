@@ -5,7 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation
+ *     xored software, Inc. - Search All occurences bugfix, 
+ *     						  hilight only class name when class is in search results ( Alex Panchenko <alex@xored.com>)
  *******************************************************************************/
 package org.eclipse.dltk.core.search.matching;
 
@@ -84,7 +87,8 @@ public abstract class PatternLocator implements IIndexConstants {
 	public static final int RULE_MASK = RAW_MASK; // no other values for the
 
 	// while...
-	public static PatternLocator patternLocator(SearchPattern pattern, IDLTKLanguageToolkit toolkit) {
+	public static PatternLocator patternLocator(SearchPattern pattern,
+			IDLTKLanguageToolkit toolkit) {
 		switch (((InternalSearchPattern) pattern).kind) {
 		// case IIndexConstants.PKG_REF_PATTERN:
 		// return new PackageReferenceLocator((PackageReferencePattern)
@@ -370,11 +374,19 @@ public abstract class PatternLocator implements IIndexConstants {
 		matchReportReference(reference, element, accuracy, locator);
 	}
 
-	public SearchMatch newDeclarationMatch(ASTNode reference,
+	/**
+	 * @deprecated
+	 */
+	public final SearchMatch newDeclarationMatch(ASTNode reference,
 			IModelElement element, int accuracy, int length,
 			MatchLocator locator) {
+		return newDeclarationMatch(reference, element, accuracy, locator);
+	}
+
+	public SearchMatch newDeclarationMatch(ASTNode reference,
+			IModelElement element, int accuracy, MatchLocator locator) {
 		return locator.newDeclarationMatch(element, accuracy, reference
-				.sourceStart(), length);
+				.matchStart(), reference.matchLength());
 	}
 
 	protected int referenceType() {

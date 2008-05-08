@@ -18,6 +18,7 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
@@ -103,9 +104,10 @@ public class EFSFileHandle implements IFileHandle {
 		return file.fetchInfo().getAttribute(EFS.ATTRIBUTE_SYMLINK);
 	}
 
-	public InputStream openInputStream() throws IOException {
+	public InputStream openInputStream(IProgressMonitor monitor)
+			throws IOException {
 		try {
-			return file.openInputStream(EFS.NONE, null);
+			return file.openInputStream(EFS.NONE, monitor);
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG)
 				e.printStackTrace();

@@ -21,7 +21,6 @@ import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
-
 /**
  * A archive entry that represents a non-java resource found in a archive.
  * 
@@ -30,13 +29,13 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 public class ExternalEntryFile extends PlatformObject implements IStorage {
 	private IFileHandle file;
 
-	public ExternalEntryFile(IFileHandle file) {		
+	public ExternalEntryFile(IFileHandle file) {
 		this.file = file;
 	}
 
 	public InputStream getContents() throws CoreException {
-		try {			
-			return new BufferedInputStream(file.openInputStream());
+		try {
+			return new BufferedInputStream(file.openInputStream(null));
 		} catch (IOException e) {
 			throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
 		}

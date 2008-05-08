@@ -311,12 +311,12 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		try {
 			monitor.beginTask(MessageFormat.format(
 					Messages.ScriptBuilder_buildingScriptsIn,
-					new Object[] { currentProject.getName() }), 66);
+					new Object[] { currentProject.getName() }), 66 + 9);
 			Set resources = getResourcesFrom(currentProject, monitor, 1);
 			if (monitor.isCanceled()) {
 				return;
 			}
-			Set elements = getExternalElementsFrom(scriptProject, monitor, 1);
+			Set elements = getExternalElementsFrom(scriptProject, monitor, 10);
 			Set externalFolders = new HashSet();
 			externalFolders.addAll(this.lastState.externalFolderLocations);
 			if (monitor.isCanceled()) {
@@ -382,17 +382,46 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		String name = MessageFormat.format(
 				Messages.ScriptBuilder_scanningExternalResourcesFor,
 				new Object[] { currentProject.getName() });
-		monitor.subTask(name);
+		SubProgressMonitor sub = new SubProgressMonitor(monitor, tiks);
 		try {
 			ExternalModuleVisitor visitor = new ExternalModuleVisitor(elements,
 					monitor);
-			prj.accept(visitor);
+
+			IProjectFragment[] fragments = prj.getAllProjectFragments();
+			List extFragments = new ArrayList();
+			List currentFragments = new ArrayList();
+			for (int i = 0; i < fragments.length; i++) {
+				if (fragments[i] instanceof ExternalProjectFragment
+						|| fragments[i] instanceof BuiltinProjectFragment) {
+					IProjectFragment fragment = fragments[i];
+					IPath path = fragment.getPath();
+					if (!this.lastState.externalFolderLocations.contains(path)) {
+						extFragments.add(fragments[i]);
+					} else {
+						currentFragments.add(path);
+					}
+				}
+			}
+			monitor.subTask(name);
+			sub.beginTask(name, extFragments.size());
+			for (Iterator iterator = extFragments.iterator(); iterator
+					.hasNext();) {
+				IProjectFragment fragment = (IProjectFragment) iterator.next();
+				// New project fragment, we need to obtain all modules
+				// from this fragment.
+				fragment.accept(visitor);
+			}
+
 			this.lastState.externalFolderLocations.clear();
 			this.lastState.externalFolderLocations.addAll(visitor
 					.getExternalFolders());
+			this.lastState.externalFolderLocations.addAll(currentFragments);
+
 			return elements;
 		} finally {
-			monitor.worked(tiks);
+			sub.done();
+			// monitor.worked(tiks);
+			// monitor.setTaskName("");
 		}
 	}
 
@@ -411,7 +440,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		try {
 			monitor.beginTask(MessageFormat.format(
 					Messages.ScriptBuilder_buildingScriptsIn,
-					new Object[] { currentProject.getName() }), 67);
+					new Object[] { currentProject.getName() }), 67 + 9);
 
 			Set allresources = getResourcesFrom(currentProject, monitor, 1);
 			if (monitor.isCanceled()) {
@@ -421,7 +450,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			Set elements = getExternalElementsFrom(scriptProject, monitor, 1);
+			Set elements = getExternalElementsFrom(scriptProject, monitor, 10);
 			if (monitor.isCanceled()) {
 				return;
 			}

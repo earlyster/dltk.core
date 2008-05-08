@@ -5,7 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation
+ *     xored software, Inc. - Search All occurences bugfix, 
+ *     						  hilight only class name when class is in search results ( Alex Panchenko <alex@xored.com>)
  *******************************************************************************/
 /*
  * (c) 2002, 2005 xored software and others all rights reserved. http://www.xored.com
@@ -94,23 +97,26 @@ public class TypeDeclaration extends Declaration {
 		setNameEnd(nameEnd);
 		this.enclosingTypeName = ""; //$NON-NLS-1$
 	}
+
 	public List getMethodList() {
-		if( this.fMethods == null ) {
+		if (this.fMethods == null) {
 			initInners();
 		}
- 		return this.fMethods;
+		return this.fMethods;
 	}
+
 	public List getFieldList() {
-		if( this.fVariables == null ) {
+		if (this.fVariables == null) {
 			initInners();
 		}
- 		return this.fVariables;
+		return this.fVariables;
 	}
+
 	public List getTypeList() {
-		if( this.fTypes == null ) {
+		if (this.fTypes == null) {
 			initInners();
 		}
- 		return this.fTypes;
+		return this.fTypes;
 	}
 
 	public void setEnclosingTypeName(String name) {
@@ -462,6 +468,14 @@ public class TypeDeclaration extends Declaration {
 		if ((this.getModifiers() & Modifiers.AccModule) != 0)
 			prev += "(module)"; //$NON-NLS-1$
 		return prev;
+	}
+
+	public int matchStart() {
+		return getNameStart();
+	}
+
+	public int matchLength() {
+		return getNameEnd() - getNameStart();
 	}
 
 }

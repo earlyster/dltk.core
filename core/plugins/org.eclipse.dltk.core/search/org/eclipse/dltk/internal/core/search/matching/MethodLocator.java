@@ -87,9 +87,9 @@ public class MethodLocator extends PatternLocator {
 	}
 
 	public SearchMatch newDeclarationMatch(ASTNode reference,
-			IModelElement element, int accuracy, int length,
+			IModelElement element, int accuracy, 
 			MatchLocator locator) {
-		return super.newDeclarationMatch(reference, element, accuracy, length,
+		return super.newDeclarationMatch(reference, element, accuracy, 
 				locator);
 	}
 
