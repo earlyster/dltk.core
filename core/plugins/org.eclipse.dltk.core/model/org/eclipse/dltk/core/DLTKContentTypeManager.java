@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
@@ -110,7 +111,13 @@ public class DLTKContentTypeManager {
 			return false;
 		}
 		if (!EnvironmentManager.isLocal(environment)) {
-			return false;
+			Preferences preferences = DLTKCore.getPlugin()
+					.getPluginPreferences();
+			String value = preferences
+					.getString(DLTKCore.CORE_NON_LOCAL_EMPTY_FILE_CONTENT_TYPE_CHECKING);
+			if (DLTKCore.DISABLED.equals(value)) {
+				return false;
+			}
 		}
 
 		if (resource instanceof IFile) {

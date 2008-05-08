@@ -46,218 +46,275 @@ import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Util;
 import org.osgi.framework.BundleContext;
 
-
 /**
  * The main plugin class to be used in the desktop.
  */
 public class DLTKCore extends Plugin {
-	
-	//Debug/Verbose constants
+
+	// Debug/Verbose constants
 	public static final boolean VERBOSE = false;
 	public static final boolean VERBOSE_MODEL_MANAGER = false;
 	public static final boolean VERBOSE_BP_RESOLVE = false;
 	public static final boolean VERBOSE_ZIP_ACCESS = false;
 	public static final boolean VERBOSE_EXTERNAL_FRAGMENT = false;
 	public static final boolean VERBOSE_JOBMANAGER = false;
-	public static final boolean VERBOSE_SEARCH = false;	
+	public static final boolean VERBOSE_SEARCH = false;
 	public static final boolean VERBOSE_SEARCH_NAMELOOKUP = false;
 	public static final boolean VERBOSE_COMPLETION = false;
 	public static final boolean VERBOSE_MIXIN = false;
-	
+
 	public static final boolean PERFOMANCE = false;
-	
-	public static final boolean DEBUG = Boolean.valueOf(
-			Platform.getDebugOption("org.eclipse.dltk.core/debug")).booleanValue(); //$NON-NLS-1$
-	
-	public static final boolean SHOW_REINDEX = Boolean.valueOf(
-			Platform.getDebugOption("org.eclipse.dltk.core/show_reindex")).booleanValue(); //$NON-NLS-1$
-	
-	public static final boolean DEBUG_PRINT_MODEL = Boolean.valueOf(
-			Platform.getDebugOption("org.eclipse.dltk.core/debugPrintModel")).booleanValue(); //$NON-NLS-1$
-	public static final boolean DEBUG_SCOPES = Boolean.valueOf(
-			Platform.getDebugOption("org.eclipse.dltk.core/debugScopes")).booleanValue(); //$NON-NLS-1$
-	public static final boolean DEBUG_SCRIPT_BUILDER = Boolean.valueOf(
-			Platform.getDebugOption("org.eclipse.dltk.core/debugScriptBuilder")).booleanValue(); //$NON-NLS-1$
-	
-	public static final boolean TRACE_SCRIPT_BUILDER = Boolean.valueOf(
-			Platform.getDebugOption("org.eclipse.dltk.core/traceScriptBuilder")).booleanValue(); //$NON-NLS-1$
-	
-	public static final boolean DEBUG_COMPLETION = Boolean.valueOf(
-			Platform.getDebugOption("org.eclipse.dltk.core/debugCompletion")).booleanValue(); //$NON-NLS-1$
-	public static final boolean DEBUG_SELECTION = Boolean.valueOf(
-			Platform.getDebugOption("org.eclipse.dltk.core/debugSelection")).booleanValue(); //$NON-NLS-1$
-	public static final boolean DEBUG_PARSER = Boolean.valueOf(
-			Platform.getDebugOption("org.eclipse.dltk.core/debugParser")).booleanValue(); //$NON-NLS-1$
-	public static final boolean DEBUG_INDEX = Boolean.valueOf(
-			Platform.getDebugOption("org.eclipse.dltk.core/debugIndex")).booleanValue(); //$NON-NLS-1$
-	
+
+	public static final boolean DEBUG = Boolean
+			.valueOf(Platform.getDebugOption("org.eclipse.dltk.core/debug")).booleanValue(); //$NON-NLS-1$
+
+	public static final boolean SHOW_REINDEX = Boolean
+			.valueOf(
+					Platform
+							.getDebugOption("org.eclipse.dltk.core/show_reindex")).booleanValue(); //$NON-NLS-1$
+
+	public static final boolean DEBUG_PRINT_MODEL = Boolean
+			.valueOf(
+					Platform
+							.getDebugOption("org.eclipse.dltk.core/debugPrintModel")).booleanValue(); //$NON-NLS-1$
+	public static final boolean DEBUG_SCOPES = Boolean
+			.valueOf(
+					Platform
+							.getDebugOption("org.eclipse.dltk.core/debugScopes")).booleanValue(); //$NON-NLS-1$
+	public static final boolean DEBUG_SCRIPT_BUILDER = Boolean
+			.valueOf(
+					Platform
+							.getDebugOption("org.eclipse.dltk.core/debugScriptBuilder")).booleanValue(); //$NON-NLS-1$
+
+	public static final boolean TRACE_SCRIPT_BUILDER = Boolean
+			.valueOf(
+					Platform
+							.getDebugOption("org.eclipse.dltk.core/traceScriptBuilder")).booleanValue(); //$NON-NLS-1$
+
+	public static final boolean DEBUG_COMPLETION = Boolean
+			.valueOf(
+					Platform
+							.getDebugOption("org.eclipse.dltk.core/debugCompletion")).booleanValue(); //$NON-NLS-1$
+	public static final boolean DEBUG_SELECTION = Boolean
+			.valueOf(
+					Platform
+							.getDebugOption("org.eclipse.dltk.core/debugSelection")).booleanValue(); //$NON-NLS-1$
+	public static final boolean DEBUG_PARSER = Boolean
+			.valueOf(
+					Platform
+							.getDebugOption("org.eclipse.dltk.core/debugParser")).booleanValue(); //$NON-NLS-1$
+	public static final boolean DEBUG_INDEX = Boolean
+			.valueOf(
+					Platform.getDebugOption("org.eclipse.dltk.core/debugIndex")).booleanValue(); //$NON-NLS-1$
+
 	// Log errors into log.
 	public static final boolean DEBUG_LOG = false;
-	
+
 	// The shared instance.
 	private static DLTKCore plugin;
 
 	public final static String PLUGIN_ID = "org.eclipse.dltk.core"; //$NON-NLS-1$
-	
+
 	/**
 	 * Name of the User Library Container id.
-	 *
+	 * 
 	 */
-	public static final String USER_LIBRARY_CONTAINER_ID= "org.eclipse.dltk.USER_LIBRARY"; //$NON-NLS-1$
+	public static final String USER_LIBRARY_CONTAINER_ID = "org.eclipse.dltk.USER_LIBRARY"; //$NON-NLS-1$
 
 	/**
 	 * Possible configurable option value.
 	 */
 	public static final String ERROR = "error"; //$NON-NLS-1$
-	
-	public static final String BUILDER_ID = PLUGIN_ID + ".scriptbuilder" ; //$NON-NLS-1$
-	
+
+	public static final String BUILDER_ID = PLUGIN_ID + ".scriptbuilder"; //$NON-NLS-1$
+
 	/**
-	 * Possible  configurable option value.
+	 * Possible configurable option value.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
 	public static final String ABORT = "abort"; //$NON-NLS-1$	
 	/**
-	 * Possible  configurable option value.
+	 * Possible configurable option value.
+	 * 
 	 * @see #getDefaultOptions()
 	 */
 	public static final String WARNING = "warning"; //$NON-NLS-1$
 	/**
-	 * Possible  configurable option value.
+	 * Possible configurable option value.
+	 * 
 	 * @see #getDefaultOptions()
 	 */
 	public static final String IGNORE = "ignore"; //$NON-NLS-1$
-	
+
 	/**
-	 * Possible  configurable option value.
+	 * Possible configurable option value.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
 	public static final String ENABLED = "enabled"; //$NON-NLS-1$
 	/**
-	 * Possible  configurable option value.
+	 * Possible configurable option value.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
 	public static final String DISABLED = "disabled"; //$NON-NLS-1$
 	/**
-	 * Possible  configurable option value.
+	 * Possible configurable option value.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
 	public static final String CLEAN = "clean"; //$NON-NLS-1$
-	
+
 	/**
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String COMPILER_PB_FORBIDDEN_REFERENCE = PLUGIN_ID + ".compiler.problem.forbiddenReference"; //$NON-NLS-1$
+	public static final String COMPILER_PB_FORBIDDEN_REFERENCE = PLUGIN_ID
+			+ ".compiler.problem.forbiddenReference"; //$NON-NLS-1$
 	/**
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String COMPILER_PB_DISCOURAGED_REFERENCE = PLUGIN_ID + ".compiler.problem.discouragedReference"; //$NON-NLS-1$	
+	public static final String COMPILER_PB_DISCOURAGED_REFERENCE = PLUGIN_ID
+			+ ".compiler.problem.discouragedReference"; //$NON-NLS-1$	
 
 	/**
 	 * Possible configurable option ID.
 	 */
 	public static final String CORE_ENCODING = PLUGIN_ID + ".encoding"; //$NON-NLS-1$
-	
+
 	/**
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
 	 */
-	public static final String CORE_ENABLE_BUILDPATH_EXCLUSION_PATTERNS = PLUGIN_ID + ".buildpath.exclusionPatterns"; //$NON-NLS-1$
+	public static final String CORE_ENABLE_BUILDPATH_EXCLUSION_PATTERNS = PLUGIN_ID
+			+ ".buildpath.exclusionPatterns"; //$NON-NLS-1$
 
 	/**
 	 * Possible configurable option ID.
 	 */
-	public static final String CORE_CIRCULAR_BUILDPATH = PLUGIN_ID + ".circularBuildpath"; //$NON-NLS-1$
-	
-	/**public static final boolean DEBUG_PRINT_MODEL = false;
-	 * Possible  configurable option ID.
+	public static final String CORE_CIRCULAR_BUILDPATH = PLUGIN_ID
+			+ ".circularBuildpath"; //$NON-NLS-1$
+
+	/**
+	 * public static final boolean DEBUG_PRINT_MODEL = false; Possible
+	 * configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String CORE_INCOMPLETE_BUILDPATH = PLUGIN_ID + ".incompleteBuildpath"; //$NON-NLS-1$
-	
+	public static final String CORE_INCOMPLETE_BUILDPATH = PLUGIN_ID
+			+ ".incompleteBuildpath"; //$NON-NLS-1$
+
+	public static final String CORE_NON_LOCAL_EMPTY_FILE_CONTENT_TYPE_CHECKING = PLUGIN_ID
+			+ ".nonLocalEmptyFileContentCheking"; //$NON-NLS-1$
+
 	/*
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
 	 */
-	public static final String CODEASSIST_VISIBILITY_CHECK = PLUGIN_ID + ".codeComplete.visibilityCheck"; //$NON-NLS-1$
+	public static final String CODEASSIST_VISIBILITY_CHECK = PLUGIN_ID
+			+ ".codeComplete.visibilityCheck"; //$NON-NLS-1$
 	/**
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String CODEASSIST_DEPRECATION_CHECK = PLUGIN_ID + ".codeComplete.deprecationCheck"; //$NON-NLS-1$
+	public static final String CODEASSIST_DEPRECATION_CHECK = PLUGIN_ID
+			+ ".codeComplete.deprecationCheck"; //$NON-NLS-1$
 	/**
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String CODEASSIST_CAMEL_CASE_MATCH = PLUGIN_ID + ".codeComplete.camelCaseMatch"; //$NON-NLS-1$
+	public static final String CODEASSIST_CAMEL_CASE_MATCH = PLUGIN_ID
+			+ ".codeComplete.camelCaseMatch"; //$NON-NLS-1$
 	/**
-	 * Possible  configurable option ID.public static final boolean DEBUG_PARSER = false;
+	 * Possible configurable option ID.public static final boolean DEBUG_PARSER
+	 * = false;
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String CODEASSIST_IMPLICIT_QUALIFICATION = PLUGIN_ID + ".codeComplete.forceImplicitQualification"; //$NON-NLS-1$
+	public static final String CODEASSIST_IMPLICIT_QUALIFICATION = PLUGIN_ID
+			+ ".codeComplete.forceImplicitQualification"; //$NON-NLS-1$
 	/**
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String CODEASSIST_FIELD_PREFIXES = PLUGIN_ID + ".codeComplete.fieldPrefixes"; //$NON-NLS-1$	
+	public static final String CODEASSIST_FIELD_PREFIXES = PLUGIN_ID
+			+ ".codeComplete.fieldPrefixes"; //$NON-NLS-1$	
 	/**
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String CODEASSIST_LOCAL_PREFIXES = PLUGIN_ID + ".codeComplete.localPrefixes"; //$NON-NLS-1$
+	public static final String CODEASSIST_LOCAL_PREFIXES = PLUGIN_ID
+			+ ".codeComplete.localPrefixes"; //$NON-NLS-1$
 	/**
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String CODEASSIST_ARGUMENT_PREFIXES = PLUGIN_ID + ".codeComplete.argumentPrefixes"; //$NON-NLS-1$
+	public static final String CODEASSIST_ARGUMENT_PREFIXES = PLUGIN_ID
+			+ ".codeComplete.argumentPrefixes"; //$NON-NLS-1$
 	/**
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String CODEASSIST_FIELD_SUFFIXES = PLUGIN_ID + ".codeComplete.fieldSuffixes"; //$NON-NLS-1$	
+	public static final String CODEASSIST_FIELD_SUFFIXES = PLUGIN_ID
+			+ ".codeComplete.fieldSuffixes"; //$NON-NLS-1$	
 	/**
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String CODEASSIST_LOCAL_SUFFIXES = PLUGIN_ID + ".codeComplete.localSuffixes"; //$NON-NLS-1$
+	public static final String CODEASSIST_LOCAL_SUFFIXES = PLUGIN_ID
+			+ ".codeComplete.localSuffixes"; //$NON-NLS-1$
 	/**
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String CODEASSIST_ARGUMENT_SUFFIXES = PLUGIN_ID + ".codeComplete.argumentSuffixes"; //$NON-NLS-1$
+	public static final String CODEASSIST_ARGUMENT_SUFFIXES = PLUGIN_ID
+			+ ".codeComplete.argumentSuffixes"; //$NON-NLS-1$
 	/**
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String CODEASSIST_FORBIDDEN_REFERENCE_CHECK= PLUGIN_ID + ".codeComplete.forbiddenReferenceCheck"; //$NON-NLS-1$
+	public static final String CODEASSIST_FORBIDDEN_REFERENCE_CHECK = PLUGIN_ID
+			+ ".codeComplete.forbiddenReferenceCheck"; //$NON-NLS-1$
 	/**
-	 * Possible  configurable option ID.
+	 * Possible configurable option ID.
+	 * 
 	 * @see #getDefaultOptions()
-	 *
+	 * 
 	 */
-	public static final String CODEASSIST_DISCOURAGED_REFERENCE_CHECK= PLUGIN_ID + ".codeComplete.discouragedReferenceCheck"; //$NON-NLS-1$					
-
-
+	public static final String CODEASSIST_DISCOURAGED_REFERENCE_CHECK = PLUGIN_ID
+			+ ".codeComplete.discouragedReferenceCheck"; //$NON-NLS-1$					
 
 	/**
 	 * The constructor.
@@ -265,7 +322,7 @@ public class DLTKCore extends Plugin {
 	public DLTKCore() {
 		plugin = this;
 	}
-	
+
 	/**
 	 * Returns the single instance of the DLTK core plug-in runtime class.
 	 * 
@@ -276,8 +333,8 @@ public class DLTKCore extends Plugin {
 	}
 
 	/**
-	 * Adds the given listener for changes to script elements. Has no effect if an
-	 * identical listener is already registered.
+	 * Adds the given listener for changes to script elements. Has no effect if
+	 * an identical listener is already registered.
 	 * 
 	 * This listener will only be notified during the POST_CHANGE resource
 	 * change notification and any reconcile operation (POST_RECONCILE). For
@@ -286,23 +343,25 @@ public class DLTKCore extends Plugin {
 	 * which allows to specify a different eventMask.
 	 * 
 	 * @param listener
-	 *            the listener
+	 * 		the listener
 	 * @see ElementChangedEvent
 	 */
-	public static void addElementChangedListener(IElementChangedListener listener) {
-		addElementChangedListener(listener, ElementChangedEvent.POST_CHANGE | ElementChangedEvent.POST_RECONCILE);
+	public static void addElementChangedListener(
+			IElementChangedListener listener) {
+		addElementChangedListener(listener, ElementChangedEvent.POST_CHANGE
+				| ElementChangedEvent.POST_RECONCILE);
 	}
 
 	/**
-	 * Adds the given listener for changes to script elements. Has no effect if an
-	 * identical listener is already registered. After completion of this
+	 * Adds the given listener for changes to script elements. Has no effect if
+	 * an identical listener is already registered. After completion of this
 	 * method, the given listener will be registered for exactly the specified
 	 * events. If they were previously registered for other events, they will be
 	 * deregistered.
 	 * <p>
 	 * Once registered, a listener starts receiving notification of changes to
-	 * elements in the model. The listener continues to receive
-	 * notifications until it is replaced or removed.
+	 * elements in the model. The listener continues to receive notifications
+	 * until it is replaced or removed.
 	 * </p>
 	 * <p>
 	 * Listeners can listen for several types of event as defined in
@@ -314,16 +373,18 @@ public class DLTKCore extends Plugin {
 	 * </p>
 	 * 
 	 * @param listener
-	 *            the listener
+	 * 		the listener
 	 * @param eventMask
-	 *            the bit-wise OR of all event types of interest to the listener
+	 * 		the bit-wise OR of all event types of interest to the listener
 	 * @see IElementChangedListener
 	 * @see ElementChangedEvent
 	 * @see #removeElementChangedListener(IElementChangedListener)
-	 *
+	 * 
 	 */
-	public static void addElementChangedListener(IElementChangedListener listener, int eventMask) {
-		ModelManager.getModelManager().deltaState.addElementChangedListener(listener, eventMask);
+	public static void addElementChangedListener(
+			IElementChangedListener listener, int eventMask) {
+		ModelManager.getModelManager().deltaState.addElementChangedListener(
+				listener, eventMask);
 	}
 
 	/**
@@ -331,10 +392,12 @@ public class DLTKCore extends Plugin {
 	 * listener is not registered.
 	 * 
 	 * @param listener
-	 *            the listener
+	 * 		the listener
 	 */
-	public static void removeElementChangedListener(IElementChangedListener listener) {
-		ModelManager.getModelManager().deltaState.removeElementChangedListener(listener);
+	public static void removeElementChangedListener(
+			IElementChangedListener listener) {
+		ModelManager.getModelManager().deltaState
+				.removeElementChangedListener(listener);
 	}
 
 	/**
@@ -343,7 +406,7 @@ public class DLTKCore extends Plugin {
 	 * @return the name of the default charset encoding for workspace root.
 	 * @see IContainer#getDefaultCharset()
 	 * @see ResourcesPlugin#getEncoding()
-	 *
+	 * 
 	 */
 	public static String getEncoding() {
 		// Verify that workspace is not shutting down (see bug
@@ -369,10 +432,10 @@ public class DLTKCore extends Plugin {
 	 * of the element's parents if they are not yet open.
 	 * 
 	 * @param file
-	 *            the given file
+	 * 		the given file
 	 * @return the model element corresponding to the given file, or
-	 *         <code>null</code> if unable to associate the given file with a
-	 *         model element
+	 * 	<code>null</code> if unable to associate the given file with a model
+	 * 	element
 	 */
 	public static IModelElement create(IFile file) {
 		return ModelManager.create(file, null/* unknown dltk project */);
@@ -380,13 +443,13 @@ public class DLTKCore extends Plugin {
 
 	public static IModelElement create(IResource resource) {
 		return ModelManager.create(resource, null/* unknown dltk project */);
-	}	
+	}
 
 	/**
 	 * Returns the model.
 	 * 
 	 * @param root
-	 *            the given root
+	 * 		the given root
 	 * @return the model, or <code>null</code> if the root is null
 	 */
 	public static IScriptModel create(IWorkspaceRoot root) {
@@ -406,9 +469,9 @@ public class DLTKCore extends Plugin {
 	 * this project.
 	 * 
 	 * @param project
-	 *            the given project
+	 * 		the given project
 	 * @return the Dylan project corresponding to the given project, null if the
-	 *         given project is null
+	 * 	given project is null
 	 */
 	public static IScriptProject create(IProject project) {
 		if (project == null) {
@@ -424,83 +487,105 @@ public class DLTKCore extends Plugin {
 	 * absolute workspace-relative path.
 	 * <p>
 	 * The convenience method is fully equivalent to:
+	 * 
 	 * <pre>
 	 * newSourceEntry(path, new IPath[] {}, new IPath[] {});
 	 * </pre>
+	 * 
 	 * </p>
 	 * 
-	 * @param path the absolute workspace-relative path of a source folder
+	 * @param path
+	 * 		the absolute workspace-relative path of a source folder
 	 * @return a new source buildpath entry
 	 * @see #newSourceEntry(IPath, IPath[], IPath[])
 	 */
 	public static IBuildpathEntry newSourceEntry(IPath path) {
 
-		return newSourceEntry(path, BuildpathEntry.INCLUDE_ALL, BuildpathEntry.EXCLUDE_NONE);
+		return newSourceEntry(path, BuildpathEntry.INCLUDE_ALL,
+				BuildpathEntry.EXCLUDE_NONE);
 	}
-	
+
 	/**
 	 * Creates and returns a new buildpath entry of kind <code>BPE_SOURCE</code>
-	 * for the project's source folder identified by the given absolute 
+	 * for the project's source folder identified by the given absolute
 	 * workspace-relative path but excluding all source files with paths
 	 * matching any of the given patterns.
 	 * <p>
 	 * The convenience method is fully equivalent to:
+	 * 
 	 * <pre>
 	 * newSourceEntry(path, new IPath[] {}, exclusionPatterns);
 	 * </pre>
+	 * 
 	 * </p>
-	 *
-	 * @param path the absolute workspace-relative path of a source folder
-	 * @param exclusionPatterns the possibly empty list of exclusion patterns
-	 *    represented as relative paths
+	 * 
+	 * @param path
+	 * 		the absolute workspace-relative path of a source folder
+	 * @param exclusionPatterns
+	 * 		the possibly empty list of exclusion patterns represented as
+	 * 		relative paths
 	 * @return a new source buildpath entry
 	 * @see #newSourceEntry(IPath, IPath[], IPath[], IPath)
-	 *
+	 * 
 	 */
-	public static IBuildpathEntry newSourceEntry(IPath path, IPath[] exclusionPatterns) {
+	public static IBuildpathEntry newSourceEntry(IPath path,
+			IPath[] exclusionPatterns) {
 
-		return newSourceEntry(path, BuildpathEntry.INCLUDE_ALL, exclusionPatterns); 
+		return newSourceEntry(path, BuildpathEntry.INCLUDE_ALL,
+				exclusionPatterns);
 	}
-		
+
 	/**
 	 * Creates and returns a new buildpath entry of kind <code>CPE_SOURCE</code>
-	 * for the project's source folder identified by the given absolute 
+	 * for the project's source folder identified by the given absolute
 	 * workspace-relative path but excluding all source files with paths
-	 * matching any of the given patterns, and associated with a specific output location
-	 * (that is, ".class" files are not going to the project default output location). 
+	 * matching any of the given patterns, and associated with a specific output
+	 * location (that is, ".class" files are not going to the project default
+	 * output location).
 	 * <p>
 	 * The convenience method is fully equivalent to:
+	 * 
 	 * <pre>
-	 * newSourceEntry(path, new IPath[] {}, exclusionPatterns, specificOutputLocation, new IBuildpathAttribute[] {});
+	 * newSourceEntry(path, new IPath[] {}, exclusionPatterns, specificOutputLocation,
+	 * 		new IBuildpathAttribute[] {});
 	 * </pre>
+	 * 
 	 * </p>
-	 *
-	 * @param path the absolute workspace-relative path of a source folder
-	 * @param inclusionPatterns the possibly empty list of inclusion patterns
-	 *    represented as relative paths
-	 * @param exclusionPatterns the possibly empty list of exclusion patterns
-	 *    represented as relative paths
-	 * @param specificOutputLocation the specific output location for this source entry (<code>null</code> if using project default ouput location)
+	 * 
+	 * @param path
+	 * 		the absolute workspace-relative path of a source folder
+	 * @param inclusionPatterns
+	 * 		the possibly empty list of inclusion patterns represented as
+	 * 		relative paths
+	 * @param exclusionPatterns
+	 * 		the possibly empty list of exclusion patterns represented as
+	 * 		relative paths
+	 * @param specificOutputLocation
+	 * 		the specific output location for this source entry (
+	 * 		<code>null</code> if using project default ouput location)
 	 * @return a new source buildpath entry
-	 * @see #newSourceEntry(IPath, IPath[], IPath[], IPath, IBuildpathAttribute[])
-	 *
+	 * @see #newSourceEntry(IPath, IPath[], IPath[], IPath,
+	 * 	IBuildpathAttribute[])
+	 * 
 	 */
-	public static IBuildpathEntry newSourceEntry(IPath path, IPath[] inclusionPatterns, IPath[] exclusionPatterns ) {
-		return newSourceEntry(path, inclusionPatterns, exclusionPatterns, BuildpathEntry.NO_EXTRA_ATTRIBUTES);
+	public static IBuildpathEntry newSourceEntry(IPath path,
+			IPath[] inclusionPatterns, IPath[] exclusionPatterns) {
+		return newSourceEntry(path, inclusionPatterns, exclusionPatterns,
+				BuildpathEntry.NO_EXTRA_ATTRIBUTES);
 	}
-	
+
 	/**
 	 * Creates and returns a new buildpath entry of kind <code>CPE_SOURCE</code>
-	 * for the project's source folder identified by the given absolute 
+	 * for the project's source folder identified by the given absolute
 	 * workspace-relative path using the given inclusion and exclusion patterns
 	 * to determine which source files are included, and the given output path
 	 * to control the output location of generated files.
 	 * <p>
 	 * The source folder is referred to using an absolute path relative to the
-	 * workspace root, e.g. <code>/Project/src</code>. A project's source 
-	 * folders are located with that project. That is, a source buildpath
-	 * entry specifying the path <code>/P1/src</code> is only usable for
-	 * project <code>P1</code>.
+	 * workspace root, e.g. <code>/Project/src</code>. A project's source
+	 * folders are located with that project. That is, a source buildpath entry
+	 * specifying the path <code>/P1/src</code> is only usable for project
+	 * <code>P1</code>.
 	 * </p>
 	 * <p>
 	 * The inclusion patterns determines the initial set of source files that
@@ -509,360 +594,391 @@ public class DLTKCore extends Plugin {
 	 * includes all relevent files in the resource tree rooted at the source
 	 * entry's path. On the other hand, specifying one or more inclusion
 	 * patterns means that all <b>and only</b> files matching at least one of
-	 * the specified patterns are to be included. If exclusion patterns are 
+	 * the specified patterns are to be included. If exclusion patterns are
 	 * specified, the initial set of files is then reduced by eliminating files
 	 * matched by at least one of the exclusion patterns. Inclusion and
 	 * exclusion patterns look like relative file paths with wildcards and are
-	 * interpreted relative to the source entry's path. File patterns are 
-	 * case-sensitive can contain '**', '*' or '?' wildcards (see
-	 * {@link IBuildpathEntry#getExclusionPatterns()} for the full description
-	 * of their syntax and semantics). The resulting set of files are included
-	 * in the corresponding package fragment root; all package fragments within
-	 * the root will have children of type <code>ISourceModule</code>.
+	 * interpreted relative to the source entry's path. File patterns are
+	 * case-sensitive can contain '**', '*' or '?' wildcards (see {@link
+	 * IBuildpathEntry#getExclusionPatterns()} for the full description of their
+	 * syntax and semantics). The resulting set of files are included in the
+	 * corresponding package fragment root; all package fragments within the
+	 * root will have children of type <code>ISourceModule</code>.
 	 * </p>
 	 * <p>
-	 * For example, if the source folder path is 
-	 * <code>/Project/src</code>, there are no inclusion filters, and the
-	 * exclusion pattern is 
-	 * <code>com/xyz/tests/&#42;&#42;</code>, then source files
-	 * like <code>/Project/src/com/xyz/Foo.java</code>
-	 * and <code>/Project/src/com/xyz/utils/Bar.java</code> would be included,
-	 * whereas <code>/Project/src/com/xyz/tests/T1.java</code>
-	 * and <code>/Project/src/com/xyz/tests/quick/T2.java</code> would be
-	 * excluded. 
+	 * For example, if the source folder path is <code>/Project/src</code>,
+	 * there are no inclusion filters, and the exclusion pattern is
+	 * <code>com/xyz/tests/&#42;&#42;</code>, then source files like
+	 * <code>/Project/src/com/xyz/Foo.java</code> and
+	 * <code>/Project/src/com/xyz/utils/Bar.java</code> would be included,
+	 * whereas <code>/Project/src/com/xyz/tests/T1.java</code> and
+	 * <code>/Project/src/com/xyz/tests/quick/T2.java</code> would be excluded.
 	 * </p>
 	 * <p>
-	 * Additionally, a source entry can be associated with a specific output location. 
-	 * By doing so, the script builder will ensure that the generated ".class" files will 
-	 * be issued inside this output location, as opposed to be generated into the 
-	 * project default output location (when output location is <code>null</code>). 
-	 * Note that multiple source entries may target the same output location.
-	 * The output location is referred to using an absolute path relative to the 
-	 * workspace root, e.g. <code>"/Project/bin"</code>, it must be located inside 
-	 * the same project as the source folder.
+	 * Additionally, a source entry can be associated with a specific output
+	 * location. By doing so, the script builder will ensure that the generated
+	 * ".class" files will be issued inside this output location, as opposed to
+	 * be generated into the project default output location (when output
+	 * location is <code>null</code>). Note that multiple source entries may
+	 * target the same output location. The output location is referred to using
+	 * an absolute path relative to the workspace root, e.g.
+	 * <code>"/Project/bin"</code>, it must be located inside the same project
+	 * as the source folder.
 	 * </p>
 	 * <p>
-	 * Also note that all sources/binaries inside a project are contributed as
-	 * a whole through a project entry
-	 * (see <code>DLTKCore.newProjectEntry</code>). Particular source entries
-	 * cannot be selectively exported.
+	 * Also note that all sources/binaries inside a project are contributed as a
+	 * whole through a project entry (see <code>DLTKCore.newProjectEntry</code>).
+	 * Particular source entries cannot be selectively exported.
 	 * </p>
 	 * <p>
-	 * The <code>extraAttributes</code> list contains name/value pairs that must be persisted with
-	 * this entry. If no extra attributes are provided, an empty array must be passed in.<br>
+	 * The <code>extraAttributes</code> list contains name/value pairs that must
+	 * be persisted with this entry. If no extra attributes are provided, an
+	 * empty array must be passed in.<br>
 	 * Note that this list should not contain any duplicate name.
 	 * </p>
-	 *
-	 * @param path the absolute workspace-relative path of a source folder
-	 * @param inclusionPatterns the possibly empty list of inclusion patterns
-	 *    represented as relative paths
-	 * @param exclusionPatterns the possibly empty list of exclusion patterns
-	 *    represented as relative paths
-	 * @param specificOutputLocation the specific output location for this source entry (<code>null</code> if using project default ouput location)
-	 * @param extraAttributes the possibly empty list of extra attributes to persist with this entry
+	 * 
+	 * @param path
+	 * 		the absolute workspace-relative path of a source folder
+	 * @param inclusionPatterns
+	 * 		the possibly empty list of inclusion patterns represented as
+	 * 		relative paths
+	 * @param exclusionPatterns
+	 * 		the possibly empty list of exclusion patterns represented as
+	 * 		relative paths
+	 * @param specificOutputLocation
+	 * 		the specific output location for this source entry (
+	 * 		<code>null</code> if using project default ouput location)
+	 * @param extraAttributes
+	 * 		the possibly empty list of extra attributes to persist with this
+	 * 		entry
 	 * @return a new source buildpath entry with the given exclusion patterns
 	 * @see IBuildpoathEntry#getInclusionPatterns()
 	 * @see IBuildpoathEntry#getExclusionPatterns()
 	 * @see IBuildpoathEntry#getOutputLocation()
-	 *
-	 */
-	public static IBuildpathEntry newSourceEntry(IPath path, IPath[] inclusionPatterns, IPath[] exclusionPatterns, IBuildpathAttribute[] extraAttributes) {
-
-		if (path == null) Assert.isTrue(false, "Source path cannot be null"); //$NON-NLS-1$
-		if (!path.isAbsolute()) Assert.isTrue(false, "Path for IBuildpathEntry must be absolute"); //$NON-NLS-1$
-		if (exclusionPatterns == null) Assert.isTrue(false, "Exclusion pattern set cannot be null"); //$NON-NLS-1$
-		if (inclusionPatterns == null) Assert.isTrue(false, "Inclusion pattern set cannot be null"); //$NON-NLS-1$
-
-		return new BuildpathEntry(
-			IProjectFragment.K_SOURCE,
-			IBuildpathEntry.BPE_SOURCE,
-			path,
-			false,
-			inclusionPatterns,
-			exclusionPatterns,						
-			null,
-			false, // no access rules to combine
-			extraAttributes, false); 
-	}
-	
-	/**
-	 * Creates and returns a new non-exported buildpath entry of kind <code>BPE_PROJECT</code>
-	 * for the project identified by the given absolute path.
-	 * This method is fully equivalent to calling
-	 * {@link #newProjectEntry(IPath, boolean, boolean)
-	 * newProjectEntry(path, true, false)}.
 	 * 
-	 * @param path the absolute path of the binary archive
+	 */
+	public static IBuildpathEntry newSourceEntry(IPath path,
+			IPath[] inclusionPatterns, IPath[] exclusionPatterns,
+			IBuildpathAttribute[] extraAttributes) {
+
+		if (path == null)
+			Assert.isTrue(false, "Source path cannot be null"); //$NON-NLS-1$
+		if (!path.isAbsolute())
+			Assert.isTrue(false, "Path for IBuildpathEntry must be absolute"); //$NON-NLS-1$
+		if (exclusionPatterns == null)
+			Assert.isTrue(false, "Exclusion pattern set cannot be null"); //$NON-NLS-1$
+		if (inclusionPatterns == null)
+			Assert.isTrue(false, "Inclusion pattern set cannot be null"); //$NON-NLS-1$
+
+		return new BuildpathEntry(IProjectFragment.K_SOURCE,
+				IBuildpathEntry.BPE_SOURCE, path, false, inclusionPatterns,
+				exclusionPatterns, null, false, // no access rules to combine
+				extraAttributes, false);
+	}
+
+	/**
+	 * Creates and returns a new non-exported buildpath entry of kind
+	 * <code>BPE_PROJECT</code> for the project identified by the given absolute
+	 * path. This method is fully equivalent to calling {@link
+	 * #newProjectEntry(IPath, boolean, boolean) newProjectEntry(path, true,
+	 * false)}.
+	 * 
+	 * @param path
+	 * 		the absolute path of the binary archive
 	 * @return a new project buildpath entry
 	 */
 	public static IBuildpathEntry newProjectEntry(IPath path) {
 		return newProjectEntry(path, false);
 	}
-	
+
 	/**
-	 * Creates and returns a new buildpath entry of kind <code>CPE_PROJECT</code>
-	 * for the project identified by the given absolute path.
-	 * This method is fully equivalent to calling
-	 * {@link #newProjectEntry(IPath, IAccessRule[], boolean, IBuildpathAttribute[], boolean)
-	 * newProjectEntry(path, new IAccessRule[0], true, new IBuildpathAttribute[0], isExported)}.
+	 * Creates and returns a new buildpath entry of kind
+	 * <code>CPE_PROJECT</code> for the project identified by the given absolute
+	 * path. This method is fully equivalent to calling {@link
+	 * #newProjectEntry(IPath, IAccessRule[], boolean, IBuildpathAttribute[],
+	 * boolean) newProjectEntry(path, new IAccessRule[0], true, new
+	 * IBuildpathAttribute[0], isExported)}.
 	 * 
-	 * @param path the absolute path of the prerequisite project
-	 * @param isExported indicates whether this entry is contributed to dependent
-	 * 	  projects in addition to the output location
+	 * @param path
+	 * 		the absolute path of the prerequisite project
+	 * @param isExported
+	 * 		indicates whether this entry is contributed to dependent projects in
+	 * 		addition to the output location
 	 * @return a new project buildpath entry
-	 *
+	 * 
 	 */
 	public static IBuildpathEntry newProjectEntry(IPath path, boolean isExported) {
-		
-		if (!path.isAbsolute()) Assert.isTrue(false, "Path for IBuildpathEntry must be absolute"); //$NON-NLS-1$
-		
-		return newProjectEntry(
-			path,
-			BuildpathEntry.NO_ACCESS_RULES,
-			true,
-			BuildpathEntry.NO_EXTRA_ATTRIBUTES,
-			isExported);
+
+		if (!path.isAbsolute())
+			Assert.isTrue(false, "Path for IBuildpathEntry must be absolute"); //$NON-NLS-1$
+
+		return newProjectEntry(path, BuildpathEntry.NO_ACCESS_RULES, true,
+				BuildpathEntry.NO_EXTRA_ATTRIBUTES, isExported);
 	}
 
 	/**
-	 * Creates and returns a new buildpath entry of kind <code>CPE_PROJECT</code>
-	 * for the project identified by the given absolute path.
+	 * Creates and returns a new buildpath entry of kind
+	 * <code>CPE_PROJECT</code> for the project identified by the given absolute
+	 * path.
 	 * <p>
 	 * A project entry is used to denote a prerequisite project on a buildpath.
-	 * The referenced project will be contributed as a whole, either as sources (in the script Model, it
-	 * contributes all its package fragment roots) or as binaries (when building, it contributes its 
-	 * whole output location).
+	 * The referenced project will be contributed as a whole, either as sources
+	 * (in the script Model, it contributes all its package fragment roots) or
+	 * as binaries (when building, it contributes its whole output location).
 	 * </p>
 	 * <p>
-	 * A project reference allows to indirect through another project, independently from its internal layout. 
-	 * </p><p>
-	 * The prerequisite project is referred to using an absolute path relative to the workspace root.
+	 * A project reference allows to indirect through another project,
+	 * independently from its internal layout.
 	 * </p>
 	 * <p>
-	 * The access rules determine the set of accessible source files
-	 * in the project. If the list of access rules is empty then all files
-	 * in this project are accessible.
-	 * See {@link IAccessRule} for a detailed description of access rules.
+	 * The prerequisite project is referred to using an absolute path relative
+	 * to the workspace root.
 	 * </p>
 	 * <p>
-	 * The <code>combineAccessRules</code> flag indicates whether access rules of one (or more)
-	 * exported entry of the project should be combined with the given access rules. If they should
-	 * be combined, the given access rules are considered first, then the entry's access rules are 
-	 * considered.
+	 * The access rules determine the set of accessible source files in the
+	 * project. If the list of access rules is empty then all files in this
+	 * project are accessible. See {@link IAccessRule} for a detailed
+	 * description of access rules.
 	 * </p>
 	 * <p>
-	 * The <code>extraAttributes</code> list contains name/value pairs that must be persisted with
-	 * this entry. If no extra attributes are provided, an empty array must be passed in.<br>
+	 * The <code>combineAccessRules</code> flag indicates whether access rules
+	 * of one (or more) exported entry of the project should be combined with
+	 * the given access rules. If they should be combined, the given access
+	 * rules are considered first, then the entry's access rules are considered.
+	 * </p>
+	 * <p>
+	 * The <code>extraAttributes</code> list contains name/value pairs that must
+	 * be persisted with this entry. If no extra attributes are provided, an
+	 * empty array must be passed in.<br>
 	 * Note that this list should not contain any duplicate name.
 	 * </p>
 	 * <p>
-	 * The <code>isExported</code> flag indicates whether this entry is contributed to dependent
-	 * projects. If not exported, dependent projects will not see any of the classes from this entry.
-	 * If exported, dependent projects will concatenate the accessible files patterns of this entry with the
-	 * accessible files patterns of the projects, and they will concatenate the non accessible files patterns of this entry
-	 * with the non accessible files patterns of the project. 
+	 * The <code>isExported</code> flag indicates whether this entry is
+	 * contributed to dependent projects. If not exported, dependent projects
+	 * will not see any of the classes from this entry. If exported, dependent
+	 * projects will concatenate the accessible files patterns of this entry
+	 * with the accessible files patterns of the projects, and they will
+	 * concatenate the non accessible files patterns of this entry with the non
+	 * accessible files patterns of the project.
 	 * </p>
 	 * 
-	 * @param path the absolute path of the prerequisite project
-	 * @param accessRules the possibly empty list of access rules for this entry
-	 * @param combineAccessRules whether the access rules of the project's exported entries should be combined with the given access rules
-	 * @param extraAttributes the possibly empty list of extra attributes to persist with this entry
-	 * @param isExported indicates whether this entry is contributed to dependent
-	 * 	  projects in addition to the output location
+	 * @param path
+	 * 		the absolute path of the prerequisite project
+	 * @param accessRules
+	 * 		the possibly empty list of access rules for this entry
+	 * @param combineAccessRules
+	 * 		whether the access rules of the project's exported entries should be
+	 * 		combined with the given access rules
+	 * @param extraAttributes
+	 * 		the possibly empty list of extra attributes to persist with this
+	 * 		entry
+	 * @param isExported
+	 * 		indicates whether this entry is contributed to dependent projects in
+	 * 		addition to the output location
 	 * @return a new project buildpath entry
-	 *
+	 * 
 	 */
-	public static IBuildpathEntry newProjectEntry(
-			IPath path, 
-			IAccessRule[] accessRules, 
-			boolean combineAccessRules,
-			IBuildpathAttribute[] extraAttributes,
-			boolean isExported) {
-		
-		if (!path.isAbsolute()) Assert.isTrue(false, "Path for IBuildpathEntry must be absolute"); //$NON-NLS-1$
-		
-		return new BuildpathEntry(
-			IProjectFragment.K_SOURCE,
-			IBuildpathEntry.BPE_PROJECT,
-			path,
-			isExported,
-			BuildpathEntry.INCLUDE_ALL, // inclusion patterns
-			BuildpathEntry.EXCLUDE_NONE, // exclusion patterns
-			accessRules,
-			combineAccessRules,
-			extraAttributes, false			
-			);
+	public static IBuildpathEntry newProjectEntry(IPath path,
+			IAccessRule[] accessRules, boolean combineAccessRules,
+			IBuildpathAttribute[] extraAttributes, boolean isExported) {
+
+		if (!path.isAbsolute())
+			Assert.isTrue(false, "Path for IBuildpathEntry must be absolute"); //$NON-NLS-1$
+
+		return new BuildpathEntry(IProjectFragment.K_SOURCE,
+				IBuildpathEntry.BPE_PROJECT, path, isExported,
+				BuildpathEntry.INCLUDE_ALL, // inclusion patterns
+				BuildpathEntry.EXCLUDE_NONE, // exclusion patterns
+				accessRules, combineAccessRules, extraAttributes, false);
 	}
-	
+
 	/**
-	 * Creates and returns a new access rule with the given file pattern and kind.
+	 * Creates and returns a new access rule with the given file pattern and
+	 * kind.
 	 * <p>
-	 * The rule kind is one of {@link IAccessRule#K_ACCESSIBLE}, {@link IAccessRule#K_DISCOURAGED}, 
-	 * or {@link IAccessRule#K_NON_ACCESSIBLE}, optionally combined with {@link IAccessRule#IGNORE_IF_BETTER},
-	 * e..g. <code>IAccessRule.K_NON_ACCESSIBLE | IAccessRule.IGNORE_IF_BETTER</code>.
+	 * The rule kind is one of {@link IAccessRule#K_ACCESSIBLE}, {@link
+	 * IAccessRule#K_DISCOURAGED}, or {@link IAccessRule#K_NON_ACCESSIBLE},
+	 * optionally combined with {@link IAccessRule#IGNORE_IF_BETTER}, e..g.
+	 * <code>IAccessRule.K_NON_ACCESSIBLE | IAccessRule.IGNORE_IF_BETTER</code>.
 	 * </p>
 	 * 
-	 * @param filePattern the file pattern this access rule should match
-	 * @param kind one of {@link IAccessRule#K_ACCESSIBLE}, {@link IAccessRule#K_DISCOURAGED}, 
-	 *                     or {@link IAccessRule#K_NON_ACCESSIBLE}, optionally combined with 
-	 *                     {@link IAccessRule#IGNORE_IF_BETTER}
+	 * @param filePattern
+	 * 		the file pattern this access rule should match
+	 * @param kind
+	 * 		one of {@link IAccessRule#K_ACCESSIBLE}, {@link
+	 * 		IAccessRule#K_DISCOURAGED}, or {@link IAccessRule#K_NON_ACCESSIBLE},
+	 * 		optionally combined with {@link IAccessRule#IGNORE_IF_BETTER}
 	 * @return a new access rule
-	 *
+	 * 
 	 */
 	public static IAccessRule newAccessRule(IPath filePattern, int kind) {
 		return new BuildpathAccessRule(filePattern, kind);
 	}
-	
+
 	/**
-	 * Creates and returns a new buildpath attribute with the given name and the given value.
+	 * Creates and returns a new buildpath attribute with the given name and the
+	 * given value.
 	 * 
 	 * @return a new buildpath attribute
-	 *
+	 * 
 	 */
-	public static IBuildpathAttribute newBuildpathAttribute(String name, String value) {
+	public static IBuildpathAttribute newBuildpathAttribute(String name,
+			String value) {
 		return new BuildpathAttribute(name, value);
 	}
 
-
 	/**
-	 * Creates and returns a new buildpath entry of kind <code>CPE_CONTAINER</code>
-	 * for the given path. This method is fully equivalent to calling
-	 * {@link #newContainerEntry(IPath, IAccessRule[], IBuildpathAttribute[], boolean)
-	 * newContainerEntry(containerPath, new IAccessRule[0], new IBuildpathAttribute[0], false)}.
+	 * Creates and returns a new buildpath entry of kind
+	 * <code>CPE_CONTAINER</code> for the given path. This method is fully
+	 * equivalent to calling {@link #newContainerEntry(IPath, IAccessRule[],
+	 * IBuildpathAttribute[], boolean) newContainerEntry(containerPath, new
+	 * IAccessRule[0], new IBuildpathAttribute[0], false)}.
 	 * <p>
-	 * @param containerPath the path identifying the container, it must be formed of two
-	 * 	segments
+	 * 
+	 * @param containerPath
+	 * 		the path identifying the container, it must be formed of two
+	 * 		segments
 	 * @return a new container buildpath entry
 	 * 
 	 * @see DLTKCore#getBuildpathContainer(IPath, IScriptProject)
-	 *
+	 * 
 	 */
 	public static IBuildpathEntry newContainerEntry(IPath containerPath) {
-		return newContainerEntry(
-		containerPath,
-		BuildpathEntry.NO_ACCESS_RULES,
-		BuildpathEntry.NO_EXTRA_ATTRIBUTES,
-		false/*not exported*/);
+		return newContainerEntry(containerPath, BuildpathEntry.NO_ACCESS_RULES,
+				BuildpathEntry.NO_EXTRA_ATTRIBUTES, false/* not exported */);
 	}
 
 	/**
-	 * Creates and returns a new buildpath entry of kind <code>CPE_CONTAINER</code>
-	 * for the given path. This method is fully equivalent to calling
-	 * {@link #newContainerEntry(IPath, IAccessRule[], IBuildpathAttribute[], boolean)
-	 * newContainerEntry(containerPath, new IAccessRule[0], new IBuildpathAttribute[0], isExported)}. 
+	 * Creates and returns a new buildpath entry of kind
+	 * <code>CPE_CONTAINER</code> for the given path. This method is fully
+	 * equivalent to calling {@link #newContainerEntry(IPath, IAccessRule[],
+	 * IBuildpathAttribute[], boolean) newContainerEntry(containerPath, new
+	 * IAccessRule[0], new IBuildpathAttribute[0], isExported)}.
 	 * 
-	 * @param containerPath the path identifying the container, it must be formed of at least
-	 * 	one segment (ID+hints)
-	 * @param isExported a boolean indicating whether this entry is contributed to dependent
-	 *    projects in addition to the output location
+	 * @param containerPath
+	 * 		the path identifying the container, it must be formed of at least
+	 * 		one segment (ID+hints)
+	 * @param isExported
+	 * 		a boolean indicating whether this entry is contributed to dependent
+	 * 		projects in addition to the output location
 	 * @return a new container buildpath entry
 	 * 
 	 * @see DLTKCore#getBuildpathContainer(IPath, IScriptProject)
-	 * @see DLTKCore#setBuildpathContainer(IPath, IScriptProject[], IBuildpathContainer[], IProgressMonitor)
-	 *
+	 * @see DLTKCore#setBuildpathContainer(IPath, IScriptProject[],
+	 * 	IBuildpathContainer[], IProgressMonitor)
+	 * 
 	 */
-	public static IBuildpathEntry newContainerEntry(IPath containerPath, boolean isExported) {
-		return newContainerEntry(
-			containerPath,
-			BuildpathEntry.NO_ACCESS_RULES,
-			BuildpathEntry.NO_EXTRA_ATTRIBUTES,
-			isExported);
+	public static IBuildpathEntry newContainerEntry(IPath containerPath,
+			boolean isExported) {
+		return newContainerEntry(containerPath, BuildpathEntry.NO_ACCESS_RULES,
+				BuildpathEntry.NO_EXTRA_ATTRIBUTES, isExported);
 	}
 
 	/**
-	 * Creates and returns a new buildpath entry of kind <code>CPE_CONTAINER</code>
-	 * for the given path. The path of the container will be used during resolution so as to map this
-	 * container entry to a set of other buildpath entries the container is acting for.
+	 * Creates and returns a new buildpath entry of kind
+	 * <code>CPE_CONTAINER</code> for the given path. The path of the container
+	 * will be used during resolution so as to map this container entry to a set
+	 * of other buildpath entries the container is acting for.
 	 * <p>
-	 * A container entry allows to express indirect references to a set of libraries, projects and variable entries,
-	 * which can be interpreted differently for each script project where it is used.
-	 * A buildpath container entry can be resolved using <code>DLTKCore.getResolvedBuildpathContainer</code>,
-	 * and updated with <code>DLTKCore.buildpathContainerChanged</code>
+	 * A container entry allows to express indirect references to a set of
+	 * libraries, projects and variable entries, which can be interpreted
+	 * differently for each script project where it is used. A buildpath
+	 * container entry can be resolved using
+	 * <code>DLTKCore.getResolvedBuildpathContainer</code>, and updated with
+	 * <code>DLTKCore.buildpathContainerChanged</code>
 	 * <p>
-	 * A container is exclusively resolved by a <code>BuildpathContainerInitializer</code> registered onto the
+	 * A container is exclusively resolved by a
+	 * <code>BuildpathContainerInitializer</code> registered onto the extension
+	 * point "org.eclipse.dltk.core.buildpathContainerInitializer".
+	 * <p>
+	 * A container path must be formed of at least one segment, where:
+	 * <ul>
+	 * <li>the first segment is a unique ID identifying the target container,
+	 * there must be a container initializer registered onto this ID through the
 	 * extension point "org.eclipse.dltk.core.buildpathContainerInitializer".
-	 * <p>
-	 * A container path must be formed of at least one segment, where: <ul>
-	 * <li> the first segment is a unique ID identifying the target container, there must be a container initializer registered
-	 * 	onto this ID through the extension point  "org.eclipse.dltk.core.buildpathContainerInitializer". </li>
-	 * <li> the remaining segments will be passed onto the initializer, and can be used as additional
-	 * 	hints during the initialization phase. </li>
+	 * </li>
+	 * <li>the remaining segments will be passed onto the initializer, and can
+	 * be used as additional hints during the initialization phase.</li>
 	 * </ul>
 	 * The access rules determine the set of accessible source and source files
-	 * in the container. If the list of access rules is empty, then all files
-	 * in this container are accessible.
-	 * See {@link IAccessRule} for a detailed description of access
-	 * rules. Note that if an entry defined by the container defines access rules,
-	 * then these access rules are combined with the given access rules.
-	 * The given access rules are considered first, then the entry's access rules are 
-	 * considered.
+	 * in the container. If the list of access rules is empty, then all files in
+	 * this container are accessible. See {@link IAccessRule} for a detailed
+	 * description of access rules. Note that if an entry defined by the
+	 * container defines access rules, then these access rules are combined with
+	 * the given access rules. The given access rules are considered first, then
+	 * the entry's access rules are considered.
 	 * </p>
 	 * <p>
-	 * The <code>extraAttributes</code> list contains name/value pairs that must be persisted with
-	 * this entry. If no extra attributes are provided, an empty array must be passed in.<br>
+	 * The <code>extraAttributes</code> list contains name/value pairs that must
+	 * be persisted with this entry. If no extra attributes are provided, an
+	 * empty array must be passed in.<br>
 	 * Note that this list should not contain any duplicate name.
 	 * </p>
 	 * <p>
-	 * The <code>isExported</code> flag indicates whether this entry is contributed to dependent
-	 * projects. If not exported, dependent projects will not see any of the classes from this entry.
-	 * If exported, dependent projects will concatenate the accessible files patterns of this entry with the
-	 * accessible files patterns of the projects, and they will concatenate the non accessible files patterns of this entry
-	 * with the non accessible files patterns of the project. 
+	 * The <code>isExported</code> flag indicates whether this entry is
+	 * contributed to dependent projects. If not exported, dependent projects
+	 * will not see any of the classes from this entry. If exported, dependent
+	 * projects will concatenate the accessible files patterns of this entry
+	 * with the accessible files patterns of the projects, and they will
+	 * concatenate the non accessible files patterns of this entry with the non
+	 * accessible files patterns of the project.
 	 * </p>
 	 * <p>
-	 * Note that this operation does not attempt to validate buildpath containers
-	 * or access the resources at the given paths.
+	 * Note that this operation does not attempt to validate buildpath
+	 * containers or access the resources at the given paths.
 	 * </p>
 	 * 
-	 * @param containerPath the path identifying the container, it must be formed of at least
-	 * 	one segment (ID+hints)
-	 * @param accessRules the possibly empty list of access rules for this entry
-	 * @param extraAttributes the possibly empty list of extra attributes to persist with this entry
-	 * @param isExported a boolean indicating whether this entry is contributed to dependent
-	 *    projects in addition to the output location
+	 * @param containerPath
+	 * 		the path identifying the container, it must be formed of at least
+	 * 		one segment (ID+hints)
+	 * @param accessRules
+	 * 		the possibly empty list of access rules for this entry
+	 * @param extraAttributes
+	 * 		the possibly empty list of extra attributes to persist with this
+	 * 		entry
+	 * @param isExported
+	 * 		a boolean indicating whether this entry is contributed to dependent
+	 * 		projects in addition to the output location
 	 * @return a new container buildpath entry
 	 * 
 	 * @see DLTKCore#getBuildpathContainer(IPath, IScriptProject)
-	 * @see DLTKCore#setBuildpathContainer(IPath, IScriptProject[], IBuildpathContainer[], IProgressMonitor)
+	 * @see DLTKCore#setBuildpathContainer(IPath, IScriptProject[],
+	 * 	IBuildpathContainer[], IProgressMonitor)
 	 * @see DLTKCore#newContainerEntry(IPath, boolean)
 	 * @see DLTKCore#newAccessRule(IPath, int)
-	 *
-	 */	
-	public static IBuildpathEntry newContainerEntry(
-			IPath containerPath, 
-			IAccessRule[] accessRules, 
-			IBuildpathAttribute[] extraAttributes,
+	 * 
+	 */
+	public static IBuildpathEntry newContainerEntry(IPath containerPath,
+			IAccessRule[] accessRules, IBuildpathAttribute[] extraAttributes,
 			boolean isExported) {
-			
+
 		if (containerPath == null) {
 			Assert.isTrue(false, "Container path cannot be null"); //$NON-NLS-1$
 		} else if (containerPath.segmentCount() < 1) {
-			Assert.isTrue(
-				false,
-				"Illegal buildpath container path: \'" + containerPath.makeRelative().toString() + "\', must have at least one segment (containerID+hints)"); //$NON-NLS-1$//$NON-NLS-2$
+			Assert
+					.isTrue(
+							false,
+							"Illegal buildpath container path: \'" + containerPath.makeRelative().toString() + "\', must have at least one segment (containerID+hints)"); //$NON-NLS-1$//$NON-NLS-2$
 		}
-		return new BuildpathEntry(
-			IProjectFragment.K_SOURCE,
-			IBuildpathEntry.BPE_CONTAINER,
-			containerPath,
-			isExported,
-			BuildpathEntry.INCLUDE_ALL, // inclusion patterns
-			BuildpathEntry.EXCLUDE_NONE, // exclusion patterns						
-			accessRules,
-			true, // comsbine access rules
-			extraAttributes, false);
-	}	
+		return new BuildpathEntry(IProjectFragment.K_SOURCE,
+				IBuildpathEntry.BPE_CONTAINER, containerPath, isExported,
+				BuildpathEntry.INCLUDE_ALL, // inclusion patterns
+				BuildpathEntry.EXCLUDE_NONE, // exclusion patterns
+				accessRules, true, // comsbine access rules
+				extraAttributes, false);
+	}
+
 	/**
 	 * Helper method for returning one option value only. Equivalent to
-	 * <code>(String)ScriptCore.getOptions().get(optionName)</code> Note that
-	 * it may answer <code>null</code> if this option does not exist.
+	 * <code>(String)ScriptCore.getOptions().get(optionName)</code> Note that it
+	 * may answer <code>null</code> if this option does not exist.
 	 * <p>
 	 * For a complete description of the configurable options, see
 	 * <code>getDefaultOptions</code>.
 	 * </p>
 	 * 
 	 * @param optionName
-	 *            the name of an option
+	 * 		the name of an option
 	 * @return the String value of a given option
 	 * @see ScriptCore#getDefaultOptions()
 	 */
@@ -883,7 +999,7 @@ public class DLTKCore extends Plugin {
 	 * </p>
 	 * 
 	 * @return table of current settings of all options (key type:
-	 *         <code>String</code>; value type: <code>String</code>)
+	 * 	<code>String</code>; value type: <code>String</code>)
 	 * @see #getDefaultOptions()
 	 * @see DLTKCorePreferenceInitializer for changing default settings
 	 */
@@ -930,8 +1046,8 @@ public class DLTKCore extends Plugin {
 	 * <p>
 	 * If this method is called outside the dynamic scope of another such call,
 	 * this method runs the action and then reports a single element changed
-	 * event describing the net effect of all changes done to elements by
-	 * the action.
+	 * event describing the net effect of all changes done to elements by the
+	 * action.
 	 * </p>
 	 * <p>
 	 * If this method is called in the dynamic scope of another such call, this
@@ -939,15 +1055,16 @@ public class DLTKCore extends Plugin {
 	 * </p>
 	 * 
 	 * @param action
-	 *            the action to perform
+	 * 		the action to perform
 	 * @param monitor
-	 *            a progress monitor, or <code>null</code> if progress
-	 *            reporting and cancellation are not desired
+	 * 		a progress monitor, or <code>null</code> if progress reporting and
+	 * 		cancellation are not desired
 	 * @exception CoreException
-	 *                if the operation failed.
-	 *
+	 * 		if the operation failed.
+	 * 
 	 */
-	public static void run(IWorkspaceRunnable action, IProgressMonitor monitor) throws CoreException {
+	public static void run(IWorkspaceRunnable action, IProgressMonitor monitor)
+			throws CoreException {
 		run(action, ResourcesPlugin.getWorkspace().getRoot(), monitor);
 	}
 
@@ -963,8 +1080,8 @@ public class DLTKCore extends Plugin {
 	 * <p>
 	 * If this method is called outside the dynamic scope of another such call,
 	 * this method runs the action and then reports a single element changed
-	 * event describing the net effect of all changes done to elements by
-	 * the action.
+	 * event describing the net effect of all changes done to elements by the
+	 * action.
 	 * </p>
 	 * <p>
 	 * If this method is called in the dynamic scope of another such call, this
@@ -977,84 +1094,106 @@ public class DLTKCore extends Plugin {
 	 * </p>
 	 * 
 	 * @param action
-	 *            the action to perform
+	 * 		the action to perform
 	 * @param rule
-	 *            the scheduling rule to use when running this operation, or
-	 *            <code>null</code> if there are no scheduling restrictions
-	 *            for this operation.
+	 * 		the scheduling rule to use when running this operation, or
+	 * 		<code>null</code> if there are no scheduling restrictions for this
+	 * 		operation.
 	 * @param monitor
-	 *            a progress monitor, or <code>null</code> if progress
-	 *            reporting and cancellation are not desired
+	 * 		a progress monitor, or <code>null</code> if progress reporting and
+	 * 		cancellation are not desired
 	 * @exception CoreException
-	 *                if the operation failed.
-	 *
+	 * 		if the operation failed.
+	 * 
 	 */
-	public static void run(IWorkspaceRunnable action, ISchedulingRule rule, IProgressMonitor monitor) throws CoreException {
+	public static void run(IWorkspaceRunnable action, ISchedulingRule rule,
+			IProgressMonitor monitor) throws CoreException {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		if (workspace.isTreeLocked()) {
 			new BatchOperation(action).run(monitor);
 		} else {
 			// use IWorkspace.run(...) to ensure that a build will be done in
 			// autobuild mode
-			workspace.run(new BatchOperation(action), rule, IWorkspace.AVOID_UPDATE, monitor);
+			workspace.run(new BatchOperation(action), rule,
+					IWorkspace.AVOID_UPDATE, monitor);
 		}
 	}
-	
-	/** 
-	 * Answers the project specific value for a given buildpath container.
-	 * In case this container path could not be resolved, then will answer <code>null</code>.
-	 * Both the container path and the project context are supposed to be non-null.
+
+	/**
+	 * Answers the project specific value for a given buildpath container. In
+	 * case this container path could not be resolved, then will answer
+	 * <code>null</code>. Both the container path and the project context are
+	 * supposed to be non-null.
 	 * <p>
-	 * The containerPath is a formed by a first ID segment followed with extra segments, which can be 
-	 * used as additional hints for resolution. If no container was ever recorded for this container path 
-	 * onto this project (using <code>setBuildpathContainer</code>, then a 
-	 * <code>buildpathContainerInitializer</code> will be activated if any was registered for this container 
-	 * ID onto the extension point "org.eclipse.dltk.core.buildpathContainerInitializer".
+	 * The containerPath is a formed by a first ID segment followed with extra
+	 * segments, which can be used as additional hints for resolution. If no
+	 * container was ever recorded for this container path onto this project
+	 * (using <code>setBuildpathContainer</code>, then a
+	 * <code>buildpathContainerInitializer</code> will be activated if any was
+	 * registered for this container ID onto the extension point
+	 * "org.eclipse.dltk.core.buildpathContainerInitializer".
 	 * <p>
-	 * There is no assumption that the returned container must answer the exact same containerPath
-	 * when requested <code>IBuildpathContainer#getPath</code>. 
-	 * Indeed, the containerPath is just an indication for resolving it to an actual container object.
+	 * There is no assumption that the returned container must answer the exact
+	 * same containerPath when requested
+	 * <code>IBuildpathContainer#getPath</code>. Indeed, the containerPath is
+	 * just an indication for resolving it to an actual container object.
 	 * <p>
-	 * buildpath container values are persisted locally to the workspace, but 
-	 * are not preserved from a session to another. It is thus highly recommended to register a 
-	 * <code>buildpathContainerInitializer</code> for each referenced container 
-	 * (through the extension point "org.eclipse.dltk.core.buildpathContainerInitializer").
+	 * buildpath container values are persisted locally to the workspace, but
+	 * are not preserved from a session to another. It is thus highly
+	 * recommended to register a <code>buildpathContainerInitializer</code> for
+	 * each referenced container (through the extension point
+	 * "org.eclipse.dltk.core.buildpathContainerInitializer").
 	 * <p>
-	 * @param containerPath the name of the container, which needs to be resolved
-	 * @param project a specific project in which the container is being resolved
-	 * @return the corresponding buildpath container or <code>null</code> if unable to find one.
 	 * 
-	 * @exception ModelException if an exception occurred while resolving the container, or if the resolved container
-	 *   contains illegal entries (contains BPE_CONTAINER entries or null entries).	 
+	 * @param containerPath
+	 * 		the name of the container, which needs to be resolved
+	 * @param project
+	 * 		a specific project in which the container is being resolved
+	 * @return the corresponding buildpath container or <code>null</code> if
+	 * 	unable to find one.
+	 * 
+	 * @exception ModelException
+	 * 		if an exception occurred while resolving the container, or if the
+	 * 		resolved container contains illegal entries (contains BPE_CONTAINER
+	 * 		entries or null entries).
 	 * 
 	 * @see buildpathContainerInitializer
 	 * @see IBuildpathContainer
-	 * @see #setbuildpathContainer(IPath, IScriptProject[], IBuildpathContainer[], IProgressMonitor)
-	 *
+	 * @see #setbuildpathContainer(IPath, IScriptProject[],
+	 * 	IBuildpathContainer[], IProgressMonitor)
+	 * 
 	 */
-	public static IBuildpathContainer getBuildpathContainer(IPath containerPath, IScriptProject project) throws ModelException{
+	public static IBuildpathContainer getBuildpathContainer(
+			IPath containerPath, IScriptProject project) throws ModelException {
 		ModelManager manager = ModelManager.getModelManager();
-		IBuildpathContainer container = manager.getBuildpathContainer(containerPath, project);
+		IBuildpathContainer container = manager.getBuildpathContainer(
+				containerPath, project);
 		if (container == ModelManager.CONTAINER_INITIALIZATION_IN_PROGRESS) {
-		    return manager.getPreviousSessionContainer(containerPath, project);
+			return manager.getPreviousSessionContainer(containerPath, project);
 		}
 		return container;
 	}
-	
+
 	/**
-	 * Helper method finding the buildpath container initializer registered for a given buildpath container ID 
-	 * or <code>null</code> if none was found while iterating over the contributions to extension point to
-	 * the extension point "org.eclipse.dltk.core.buildpathContainerInitializer".
+	 * Helper method finding the buildpath container initializer registered for
+	 * a given buildpath container ID or <code>null</code> if none was found
+	 * while iterating over the contributions to extension point to the
+	 * extension point "org.eclipse.dltk.core.buildpathContainerInitializer".
 	 * <p>
-	 * A containerID is the first segment of any container path, used to identify the registered container initializer.
+	 * A containerID is the first segment of any container path, used to
+	 * identify the registered container initializer.
 	 * <p>
-	 * @param containerID - a containerID identifying a registered initializer
-	 * @return BuildpathContainerInitializer - the registered buildpath container initializer or <code>null</code> if 
-	 * none was found.
+	 * 
+	 * @param containerID
+	 * 		- a containerID identifying a registered initializer
+	 * @return BuildpathContainerInitializer - the registered buildpath
+	 * 	container initializer or <code>null</code> if none was found.
 	 */
-	public static BuildpathContainerInitializer getBuildpathContainerInitializer(String containerID) {
+	public static BuildpathContainerInitializer getBuildpathContainerInitializer(
+			String containerID) {
 		HashMap containerInitializersCache = ModelManager.getModelManager().containerInitializersCache;
-		BuildpathContainerInitializer initializer = (BuildpathContainerInitializer) containerInitializersCache.get(containerID);
+		BuildpathContainerInitializer initializer = (BuildpathContainerInitializer) containerInitializersCache
+				.get(containerID);
 		if (initializer == null) {
 			initializer = computeBuildpathContainerInitializer(containerID);
 			if (initializer == null)
@@ -1063,440 +1202,537 @@ public class DLTKCore extends Plugin {
 		}
 		return initializer;
 	}
-	private static BuildpathContainerInitializer computeBuildpathContainerInitializer(String containerID) {
-		Plugin dltkCorePlugin = DLTKCore.getPlugin();
-		if (dltkCorePlugin == null) return null;
 
-		IExtensionPoint extension = Platform.getExtensionRegistry().getExtensionPoint(DLTKCore.PLUGIN_ID, ModelManager.BPCONTAINER_INITIALIZER_EXTPOINT_ID);
+	private static BuildpathContainerInitializer computeBuildpathContainerInitializer(
+			String containerID) {
+		Plugin dltkCorePlugin = DLTKCore.getPlugin();
+		if (dltkCorePlugin == null)
+			return null;
+
+		IExtensionPoint extension = Platform.getExtensionRegistry()
+				.getExtensionPoint(DLTKCore.PLUGIN_ID,
+						ModelManager.BPCONTAINER_INITIALIZER_EXTPOINT_ID);
 		if (extension != null) {
-			IExtension[] extensions =  extension.getExtensions();
-			for(int i = 0; i < extensions.length; i++){
-				IConfigurationElement [] configElements = extensions[i].getConfigurationElements();
-				for(int j = 0; j < configElements.length; j++){
+			IExtension[] extensions = extension.getExtensions();
+			for (int i = 0; i < extensions.length; i++) {
+				IConfigurationElement[] configElements = extensions[i]
+						.getConfigurationElements();
+				for (int j = 0; j < configElements.length; j++) {
 					String initializerID = configElements[j].getAttribute("id"); //$NON-NLS-1$
-					if (initializerID != null && initializerID.equals(containerID)){
+					if (initializerID != null
+							&& initializerID.equals(containerID)) {
 						if (ModelManager.BP_RESOLVE_VERBOSE) {
-							org.eclipse.dltk.internal.core.util.Util.verbose(
-								"BPContainer INIT - found initializer\n" + //$NON-NLS-1$
-								"	container ID: " + containerID + '\n' + //$NON-NLS-1$
-								"	class: " + configElements[j].getAttribute("class")); //$NON-NLS-1$ //$NON-NLS-2$
-						}						
+							org.eclipse.dltk.internal.core.util.Util
+									.verbose("BPContainer INIT - found initializer\n" + //$NON-NLS-1$
+											"	container ID: "
+											+ containerID
+											+ '\n'
+											+ //$NON-NLS-1$
+											"	class: "
+											+ configElements[j]
+													.getAttribute("class")); //$NON-NLS-1$ //$NON-NLS-2$
+						}
 						try {
-							Object execExt = configElements[j].createExecutableExtension("class"); //$NON-NLS-1$
-							if (execExt instanceof BuildpathContainerInitializer){
-								return (BuildpathContainerInitializer)execExt;
+							Object execExt = configElements[j]
+									.createExecutableExtension("class"); //$NON-NLS-1$
+							if (execExt instanceof BuildpathContainerInitializer) {
+								return (BuildpathContainerInitializer) execExt;
 							}
-						} catch(CoreException e) {
-							// executable extension could not be created: ignore this initializer
+						} catch (CoreException e) {
+							// executable extension could not be created: ignore
+							// this initializer
 							if (ModelManager.BP_RESOLVE_VERBOSE) {
-								Util.verbose(
-									"BPContainer INIT - failed to instanciate initializer\n" + //$NON-NLS-1$
-									"	container ID: " + containerID + '\n' + //$NON-NLS-1$
-									"	class: " + configElements[j].getAttribute("class"), //$NON-NLS-1$ //$NON-NLS-2$
-									System.err); 
+								Util
+										.verbose(
+												"BPContainer INIT - failed to instanciate initializer\n" + //$NON-NLS-1$
+														"	container ID: "
+														+ containerID + '\n'
+														+ //$NON-NLS-1$
+														"	class: "
+														+ configElements[j]
+																.getAttribute("class"), //$NON-NLS-1$ //$NON-NLS-2$
+												System.err);
 								e.printStackTrace();
-							}						
+							}
 						}
 					}
 				}
-			}	
+			}
 		}
 		return null;
 	}
-	/** 
-	 * Bind a container reference path to some actual containers (<code>IBuildpathContainer</code>).
-	 * This API must be invoked whenever changes in container need to be reflected onto the Model.
-	 * Containers can have distinct values in different projects, therefore this API considers a
-	 * set of projects with their respective containers.
+
+	/**
+	 * Bind a container reference path to some actual containers (
+	 * <code>IBuildpathContainer</code>). This API must be invoked whenever
+	 * changes in container need to be reflected onto the Model. Containers can
+	 * have distinct values in different projects, therefore this API considers
+	 * a set of projects with their respective containers.
 	 * <p>
-	 * <code>containerPath</code> is the path under which these values can be referenced through
-	 * container buildpath entries (<code>IBuildpathEntry#BPE_CONTAINER</code>). A container path 
-	 * is formed by a first ID segment followed with extra segments, which can be used as additional hints
-	 * for the resolution. The container ID is used to identify a <code>BuildpathContainerInitializer</code> 
-	 * registered on the extension point "org.eclipse.dltk.core.buildpathContainerInitializer".
+	 * <code>containerPath</code> is the path under which these values can be
+	 * referenced through container buildpath entries (
+	 * <code>IBuildpathEntry#BPE_CONTAINER</code>). A container path is formed
+	 * by a first ID segment followed with extra segments, which can be used as
+	 * additional hints for the resolution. The container ID is used to identify
+	 * a <code>BuildpathContainerInitializer</code> registered on the extension
+	 * point "org.eclipse.dltk.core.buildpathContainerInitializer".
 	 * <p>
-	 * There is no assumption that each individual container value passed in argument 
-	 * (<code>respectiveContainers</code>) must answer the exact same path when requested 
-	 * <code>IBuildpathContainer#getPath</code>. 
-	 * Indeed, the containerPath is just an indication for resolving it to an actual container object. It can be 
-	 * delegated to a <code>BuildpathContainerInitializer</code>, which can be activated through the extension
-	 * point "org.eclipse.dltk.core.buildpathContainerInitializer"). 
+	 * There is no assumption that each individual container value passed in
+	 * argument (<code>respectiveContainers</code>) must answer the exact same
+	 * path when requested <code>IBuildpathContainer#getPath</code>. Indeed, the
+	 * containerPath is just an indication for resolving it to an actual
+	 * container object. It can be delegated to a
+	 * <code>BuildpathContainerInitializer</code>, which can be activated
+	 * through the extension point
+	 * "org.eclipse.dltk.core.buildpathContainerInitializer").
 	 * <p>
-	 * In reaction to changing container values, the Model will be updated to reflect the new
-	 * state of the updated container. A combined script element delta will be notified to describe the corresponding 
-	 * buildpath changes resulting from the container update. This operation is batched, and automatically eliminates
-	 * unnecessary updates (new container is same as old one). This operation acquires a lock on the workspace's root.
+	 * In reaction to changing container values, the Model will be updated to
+	 * reflect the new state of the updated container. A combined script element
+	 * delta will be notified to describe the corresponding buildpath changes
+	 * resulting from the container update. This operation is batched, and
+	 * automatically eliminates unnecessary updates (new container is same as
+	 * old one). This operation acquires a lock on the workspace's root.
 	 * <p>
-	 * This functionality cannot be used while the workspace is locked, since
-	 * it may create/remove some resource markers.
+	 * This functionality cannot be used while the workspace is locked, since it
+	 * may create/remove some resource markers.
 	 * <p>
-	 * Buildpath container values are persisted locally to the workspace, but 
-	 * are not preserved from a session to another. It is thus highly recommended to register a 
-	 * <code>BuildpathContainerInitializer</code> for each referenced container 
-	 * (through the extension point "org.eclipse.dltk.core.BuildpathContainerInitializer").
+	 * Buildpath container values are persisted locally to the workspace, but
+	 * are not preserved from a session to another. It is thus highly
+	 * recommended to register a <code>BuildpathContainerInitializer</code> for
+	 * each referenced container (through the extension point
+	 * "org.eclipse.dltk.core.BuildpathContainerInitializer").
 	 * <p>
-	 * Note: setting a container to <code>null</code> will cause it to be lazily resolved again whenever
-	 * its value is required. In particular, this will cause a registered initializer to be invoked
-	 * again.
+	 * Note: setting a container to <code>null</code> will cause it to be lazily
+	 * resolved again whenever its value is required. In particular, this will
+	 * cause a registered initializer to be invoked again.
 	 * <p>
-	 * @param containerPath - the name of the container reference, which is being updated
-	 * @param affectedProjects - the set of projects for which this container is being bound
-	 * @param respectiveContainers - the set of respective containers for the affected projects
-	 * @param monitor a monitor to report progress
+	 * 
+	 * @param containerPath
+	 * 		- the name of the container reference, which is being updated
+	 * @param affectedProjects
+	 * 		- the set of projects for which this container is being bound
+	 * @param respectiveContainers
+	 * 		- the set of respective containers for the affected projects
+	 * @param monitor
+	 * 		a monitor to report progress
 	 * @throws ModelException
 	 * @see BuildpathContainerInitializer
 	 * @see #getBuildpathContainer(IPath, IScriptProject)
 	 * @see IBuildpathContainer
-	 *
+	 * 
 	 */
-	public static void setBuildpathContainer(final IPath containerPath, IScriptProject[] affectedProjects, IBuildpathContainer[] respectiveContainers, IProgressMonitor monitor) throws ModelException {
+	public static void setBuildpathContainer(final IPath containerPath,
+			IScriptProject[] affectedProjects,
+			IBuildpathContainer[] respectiveContainers, IProgressMonitor monitor)
+			throws ModelException {
 
-		if (affectedProjects.length != respectiveContainers.length) Assert.isTrue(false, "Projects and containers collections should have the same size"); //$NON-NLS-1$
-	
-		if (monitor != null && monitor.isCanceled()) return;
-	
-		if (ModelManager.BP_RESOLVE_VERBOSE){
-			Util.verbose(
-				"BPContainer SET  - setting container\n" + //$NON-NLS-1$
-				"	container path: " + containerPath + '\n' + //$NON-NLS-1$
-				"	projects: {" +//$NON-NLS-1$
-				org.eclipse.dltk.internal.core.util.Util.toString(
-					affectedProjects, 
-					new org.eclipse.dltk.internal.core.util.Util.Displayable(){ 
-						public String displayString(Object o) { return ((IScriptProject) o).getElementName(); }
-					}) +
-				"}\n	values: {\n"  +//$NON-NLS-1$
-				org.eclipse.dltk.internal.core.util.Util.toString(
-					respectiveContainers, 
-					new org.eclipse.dltk.internal.core.util.Util.Displayable(){ 
-						public String displayString(Object o) { 
-							StringBuffer buffer = new StringBuffer("		"); //$NON-NLS-1$
-							if (o == null) {
-								buffer.append("<null>"); //$NON-NLS-1$
-								return buffer.toString();
-							}
-							IBuildpathContainer container = (IBuildpathContainer) o;
-							buffer.append(container.getDescription(null));
-							buffer.append(" {\n"); //$NON-NLS-1$
-							IBuildpathEntry[] entries = container.getBuildpathEntries(null);
-							if (entries != null){
-								for (int i = 0; i < entries.length; i++){
-									buffer.append(" 			"); //$NON-NLS-1$
-									buffer.append(entries[i]); 
-									buffer.append('\n'); 
-								}
-							}
-							buffer.append(" 		}"); //$NON-NLS-1$
-							return buffer.toString();
-						}
-					}) +
-				"\n	}\n	invocation stack trace:"); //$NON-NLS-1$
-				new Exception("<Fake exception>").printStackTrace(System.out); //$NON-NLS-1$
-		}
-		
-		ModelManager manager = ModelManager.getModelManager();
-		if (manager.containerPutIfInitializingWithSameEntries(containerPath, affectedProjects, respectiveContainers))
+		if (affectedProjects.length != respectiveContainers.length)
+			Assert
+					.isTrue(false,
+							"Projects and containers collections should have the same size"); //$NON-NLS-1$
+
+		if (monitor != null && monitor.isCanceled())
 			return;
 
-		final int projectLength = affectedProjects.length;	
+		if (ModelManager.BP_RESOLVE_VERBOSE) {
+			Util
+					.verbose("BPContainer SET  - setting container\n" + //$NON-NLS-1$
+							"	container path: "
+							+ containerPath
+							+ '\n'
+							+ //$NON-NLS-1$
+							"	projects: {"
+							+ //$NON-NLS-1$
+							org.eclipse.dltk.internal.core.util.Util
+									.toString(
+											affectedProjects,
+											new org.eclipse.dltk.internal.core.util.Util.Displayable() {
+												public String displayString(
+														Object o) {
+													return ((IScriptProject) o)
+															.getElementName();
+												}
+											})
+							+ "}\n	values: {\n" + //$NON-NLS-1$
+							org.eclipse.dltk.internal.core.util.Util
+									.toString(
+											respectiveContainers,
+											new org.eclipse.dltk.internal.core.util.Util.Displayable() {
+												public String displayString(
+														Object o) {
+													StringBuffer buffer = new StringBuffer(
+															"		"); //$NON-NLS-1$
+													if (o == null) {
+														buffer.append("<null>"); //$NON-NLS-1$
+														return buffer
+																.toString();
+													}
+													IBuildpathContainer container = (IBuildpathContainer) o;
+													buffer
+															.append(container
+																	.getDescription(null));
+													buffer.append(" {\n"); //$NON-NLS-1$
+													IBuildpathEntry[] entries = container
+															.getBuildpathEntries(null);
+													if (entries != null) {
+														for (int i = 0; i < entries.length; i++) {
+															buffer
+																	.append(" 			"); //$NON-NLS-1$
+															buffer
+																	.append(entries[i]);
+															buffer.append('\n');
+														}
+													}
+													buffer.append(" 		}"); //$NON-NLS-1$
+													return buffer.toString();
+												}
+											})
+							+ "\n	}\n	invocation stack trace:"); //$NON-NLS-1$
+			new Exception("<Fake exception>").printStackTrace(System.out); //$NON-NLS-1$
+		}
+
+		ModelManager manager = ModelManager.getModelManager();
+		if (manager.containerPutIfInitializingWithSameEntries(containerPath,
+				affectedProjects, respectiveContainers))
+			return;
+
+		final int projectLength = affectedProjects.length;
 		final IScriptProject[] modifiedProjects;
-		System.arraycopy(affectedProjects, 0, modifiedProjects = new IScriptProject[projectLength], 0, projectLength);
+		System.arraycopy(affectedProjects, 0,
+				modifiedProjects = new IScriptProject[projectLength], 0,
+				projectLength);
 		final IBuildpathEntry[][] oldResolvedPaths = new IBuildpathEntry[projectLength][];
-			
+
 		// filter out unmodified project containers
 		int remaining = 0;
-		for (int i = 0; i < projectLength; i++){
-	
-			if (monitor != null && monitor.isCanceled()) return;
-	
+		for (int i = 0; i < projectLength; i++) {
+
+			if (monitor != null && monitor.isCanceled())
+				return;
+
 			ScriptProject affectedProject = (ScriptProject) affectedProjects[i];
 			IBuildpathContainer newContainer = respectiveContainers[i];
-			if (newContainer == null) newContainer = ModelManager.CONTAINER_INITIALIZATION_IN_PROGRESS; // 30920 - prevent infinite loop
+			if (newContainer == null)
+				newContainer = ModelManager.CONTAINER_INITIALIZATION_IN_PROGRESS; // 30920
+			// -
+			// prevent
+			// infinite
+			// loop
 			boolean found = false;
-			if (ScriptProject.hasScriptNature(affectedProject.getProject())){
-				IBuildpathEntry[] rawClasspath = affectedProject.getRawBuildpath();
-				for (int j = 0, cpLength = rawClasspath.length; j <cpLength; j++) {
+			if (ScriptProject.hasScriptNature(affectedProject.getProject())) {
+				IBuildpathEntry[] rawClasspath = affectedProject
+						.getRawBuildpath();
+				for (int j = 0, cpLength = rawClasspath.length; j < cpLength; j++) {
 					IBuildpathEntry entry = rawClasspath[j];
-					if (entry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER && entry.getPath().equals(containerPath)){
+					if (entry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER
+							&& entry.getPath().equals(containerPath)) {
 						found = true;
 						break;
 					}
 				}
 			}
-			if (!found){
-				modifiedProjects[i] = null; // filter out this project - does not reference the container path, or isnt't yet script project
-				manager.containerPut(affectedProject, containerPath, newContainer);
+			if (!found) {
+				modifiedProjects[i] = null; // filter out this project - does
+				// not reference the container path,
+				// or isnt't yet script project
+				manager.containerPut(affectedProject, containerPath,
+						newContainer);
 				continue;
 			}
-			IBuildpathContainer oldContainer = manager.containerGet(affectedProject, containerPath);
+			IBuildpathContainer oldContainer = manager.containerGet(
+					affectedProject, containerPath);
 			if (oldContainer == ModelManager.CONTAINER_INITIALIZATION_IN_PROGRESS) {
 				oldContainer = null;
 			}
-			if (oldContainer != null && oldContainer.equals(respectiveContainers[i])){
-				modifiedProjects[i] = null; // filter out this project - container did not change
+			if (oldContainer != null
+					&& oldContainer.equals(respectiveContainers[i])) {
+				modifiedProjects[i] = null; // filter out this project -
+				// container did not change
 				continue;
 			}
-			remaining++; 
-			oldResolvedPaths[i] = affectedProject.getResolvedBuildpath(true/*ignoreUnresolvedEntry*/, false/*don't generateMarkerOnError*/, false/*don't returnResolutionInProgress*/);
+			remaining++;
+			oldResolvedPaths[i] = affectedProject.getResolvedBuildpath(
+					true/* ignoreUnresolvedEntry */, false/*
+														 * don't
+														 * generateMarkerOnError
+														 */, false/*
+																 * don't
+																 * returnResolutionInProgress
+																 */);
 			manager.containerPut(affectedProject, containerPath, newContainer);
 		}
-		
-		if (remaining == 0) return;
-		
+
+		if (remaining == 0)
+			return;
+
 		// trigger model refresh
 		try {
-			final boolean canChangeResources = !ResourcesPlugin.getWorkspace().isTreeLocked();
+			final boolean canChangeResources = !ResourcesPlugin.getWorkspace()
+					.isTreeLocked();
 			DLTKCore.run(new IWorkspaceRunnable() {
-				public void run(IProgressMonitor progressMonitor) throws CoreException {
-					for(int i = 0; i < projectLength; i++){
-		
-						if (progressMonitor != null && progressMonitor.isCanceled()) return;
-		
-						ScriptProject affectedProject = (ScriptProject)modifiedProjects[i];
-						if (affectedProject == null) continue; // was filtered out
-						
-						if (ModelManager.BP_RESOLVE_VERBOSE){
-							Util.verbose(
-								"BPContainer SET  - updating affected project due to setting container\n" + //$NON-NLS-1$
-								"	project: " + affectedProject.getElementName() + '\n' + //$NON-NLS-1$
-								"	container path: " + containerPath); //$NON-NLS-1$
+				public void run(IProgressMonitor progressMonitor)
+						throws CoreException {
+					for (int i = 0; i < projectLength; i++) {
+
+						if (progressMonitor != null
+								&& progressMonitor.isCanceled())
+							return;
+
+						ScriptProject affectedProject = (ScriptProject) modifiedProjects[i];
+						if (affectedProject == null)
+							continue; // was filtered out
+
+						if (ModelManager.BP_RESOLVE_VERBOSE) {
+							Util
+									.verbose("BPContainer SET  - updating affected project due to setting container\n" + //$NON-NLS-1$
+											"	project: "
+											+ affectedProject.getElementName()
+											+ '\n' + //$NON-NLS-1$
+											"	container path: " + containerPath); //$NON-NLS-1$
 						}
 
-						// force a refresh of the affected project (will compute deltas)
-						affectedProject.setRawBuildpath(
-								affectedProject.getRawBuildpath(),
-								progressMonitor,
-								canChangeResources,
-								oldResolvedPaths[i],
-								false, // updating - no need for early validation
+						// force a refresh of the affected project (will compute
+						// deltas)
+						affectedProject.setRawBuildpath(affectedProject
+								.getRawBuildpath(), progressMonitor,
+								canChangeResources, oldResolvedPaths[i], false, // updating
+								// -
+								// no
+								// need
+								// for
+								// early
+								// validation
 								false); // updating - no need to save
 					}
 				}
-			},
-			null/*no need to lock anything*/,
-			monitor);
-		} catch(CoreException e) {
-			if (ModelManager.BP_RESOLVE_VERBOSE){
-				Util.verbose(
-					"CPContainer SET  - FAILED DUE TO EXCEPTION\n" + //$NON-NLS-1$
-					"	container path: " + containerPath, //$NON-NLS-1$
-					System.err);
+			}, null/* no need to lock anything */, monitor);
+		} catch (CoreException e) {
+			if (ModelManager.BP_RESOLVE_VERBOSE) {
+				Util.verbose("CPContainer SET  - FAILED DUE TO EXCEPTION\n" + //$NON-NLS-1$
+						"	container path: " + containerPath, //$NON-NLS-1$
+						System.err);
 				e.printStackTrace();
 			}
 			if (e instanceof ModelException) {
-				throw (ModelException)e;
+				throw (ModelException) e;
 			} else {
 				throw new ModelException(e);
 			}
 		} finally {
 			for (int i = 0; i < projectLength; i++) {
 				if (respectiveContainers[i] == null) {
-					manager.containerPut(affectedProjects[i], containerPath, null); // reset init in progress marker
+					manager.containerPut(affectedProjects[i], containerPath,
+							null); // reset init in progress marker
 				}
 			}
 		}
 	}
+
 	/**
-	 * Creates and returns a new non-exported buildpath entry of kind <code>CPE_LIBRARY</code> for the 
-	 * ZIP or folder identified by the given absolute path. This specifies that all package fragments 
-	 * within the root will have children of type <code>IClassFile</code>.
-	 * This method is fully equivalent to calling
-	 * {@link #newLibraryEntry(IPath, IPath, IPath, IAccessRule[], IBuildpathAttribute[], boolean)
-	 * newLibraryEntry(path, sourceAttachmentPath, sourceAttachmentRootPath, new IAccessRule[0], new IBuildpathAttribute[0], false)}.
-	 *
-	 * @param path the absolute path of the binary archive
-	 * @param sourceAttachmentPath the absolute path of the corresponding source archive or folder, 
-	 *    or <code>null</code> if none. Note an empty path is allowed to denote no source attachment.
-	 *   and will be automatically converted to <code>null</code>.
-	 * @param sourceAttachmentRootPath the location of the root of the source files within the source archive or folder
-	 *    or <code>null</code> if this location should be automatically detected.
+	 * Creates and returns a new non-exported buildpath entry of kind
+	 * <code>CPE_LIBRARY</code> for the ZIP or folder identified by the given
+	 * absolute path. This specifies that all package fragments within the root
+	 * will have children of type <code>IClassFile</code>. This method is fully
+	 * equivalent to calling {@link #newLibraryEntry(IPath, IPath, IPath,
+	 * IAccessRule[], IBuildpathAttribute[], boolean) newLibraryEntry(path,
+	 * sourceAttachmentPath, sourceAttachmentRootPath, new IAccessRule[0], new
+	 * IBuildpathAttribute[0], false)}.
+	 * 
+	 * @param path
+	 * 		the absolute path of the binary archive
+	 * @param sourceAttachmentPath
+	 * 		the absolute path of the corresponding source archive or folder, or
+	 * 		<code>null</code> if none. Note an empty path is allowed to denote no
+	 * 		source attachment. and will be automatically converted to
+	 * 		<code>null</code>.
+	 * @param sourceAttachmentRootPath
+	 * 		the location of the root of the source files within the source
+	 * 		archive or folder or <code>null</code> if this location should be
+	 * 		automatically detected.
 	 * @return a new library buildpath entry
 	 */
 	public static IBuildpathEntry newLibraryEntry(IPath path) {
-			
-		return newLibraryEntry(
-			path, 			
-			BuildpathEntry.NO_ACCESS_RULES,
-			BuildpathEntry.NO_EXTRA_ATTRIBUTES,
-			false/*not exported*/, false);
+
+		return newLibraryEntry(path, BuildpathEntry.NO_ACCESS_RULES,
+				BuildpathEntry.NO_EXTRA_ATTRIBUTES, false/* not exported */,
+				false);
 	}
+
 	public static IBuildpathEntry newExtLibraryEntry(IPath path) {
-		
-		return newLibraryEntry(
-			path, 			
-			BuildpathEntry.NO_ACCESS_RULES,
-			BuildpathEntry.NO_EXTRA_ATTRIBUTES,
-			false/*not exported*/, 
-			true);
+
+		return newLibraryEntry(path, BuildpathEntry.NO_ACCESS_RULES,
+				BuildpathEntry.NO_EXTRA_ATTRIBUTES, false/* not exported */,
+				true);
 	}
 
 	/**
-	 * Creates and returns a new buildpath entry of kind <code>CPE_LIBRARY</code> for the ZIP or folder
-	 * identified by the given absolute path. This specifies that all package fragments within the root 
-	 * will have children of type <code>IClassFile</code>.
-	 * This method is fully equivalent to calling
-	 * {@link #newLibraryEntry(IPath, IPath, IPath, IAccessRule[], IBuildpathAttribute[], boolean)
-	 * newLibraryEntry(path, sourceAttachmentPath, sourceAttachmentRootPath, new IAccessRule[0], new IBuildpathAttribute[0], isExported)}.
+	 * Creates and returns a new buildpath entry of kind
+	 * <code>CPE_LIBRARY</code> for the ZIP or folder identified by the given
+	 * absolute path. This specifies that all package fragments within the root
+	 * will have children of type <code>IClassFile</code>. This method is fully
+	 * equivalent to calling {@link #newLibraryEntry(IPath, IPath, IPath,
+	 * IAccessRule[], IBuildpathAttribute[], boolean) newLibraryEntry(path,
+	 * sourceAttachmentPath, sourceAttachmentRootPath, new IAccessRule[0], new
+	 * IBuildpathAttribute[0], isExported)}.
 	 * 
-	 * @param path the absolute path of the binary archive
-	 * @param sourceAttachmentPath the absolute path of the corresponding source archive or folder, 
-	 *    or <code>null</code> if none. Note an empty path is allowed to denote no source attachment.
-	 *   and will be automatically converted to <code>null</code>.
-	 * @param sourceAttachmentRootPath the location of the root of the source files within the source archive or folder
-	 *    or <code>null</code> if this location should be automatically detected.
-	 * @param isExported indicates whether this entry is contributed to dependent
-	 * 	  projects in addition to the output location
+	 * @param path
+	 * 		the absolute path of the binary archive
+	 * @param sourceAttachmentPath
+	 * 		the absolute path of the corresponding source archive or folder, or
+	 * 		<code>null</code> if none. Note an empty path is allowed to denote no
+	 * 		source attachment. and will be automatically converted to
+	 * 		<code>null</code>.
+	 * @param sourceAttachmentRootPath
+	 * 		the location of the root of the source files within the source
+	 * 		archive or folder or <code>null</code> if this location should be
+	 * 		automatically detected.
+	 * @param isExported
+	 * 		indicates whether this entry is contributed to dependent projects in
+	 * 		addition to the output location
 	 * @return a new library buildpath entry
-	 *
+	 * 
 	 */
-	public static IBuildpathEntry newLibraryEntry(
-		IPath path,		
-		boolean isExported) {
-			
-		return newLibraryEntry(
-			path, 			
-			BuildpathEntry.NO_ACCESS_RULES,
-			BuildpathEntry.NO_EXTRA_ATTRIBUTES,
-			isExported, 
-			false);
+	public static IBuildpathEntry newLibraryEntry(IPath path, boolean isExported) {
+
+		return newLibraryEntry(path, BuildpathEntry.NO_ACCESS_RULES,
+				BuildpathEntry.NO_EXTRA_ATTRIBUTES, isExported, false);
 	}
-	public static IBuildpathEntry newLibraryEntry(
-			IPath path,		
+
+	public static IBuildpathEntry newLibraryEntry(IPath path,
 			boolean isExported, boolean externalLib) {
-				
-			return newLibraryEntry(
-				path, 			
-				BuildpathEntry.NO_ACCESS_RULES,
-				BuildpathEntry.NO_EXTRA_ATTRIBUTES,
-				isExported, 
-				externalLib);
-		}
+
+		return newLibraryEntry(path, BuildpathEntry.NO_ACCESS_RULES,
+				BuildpathEntry.NO_EXTRA_ATTRIBUTES, isExported, externalLib);
+	}
 
 	/**
-	 * Creates and returns a new buildpath entry of kind <code>BPE_LIBRARY</code> for the ZIp or folder
-	 * identified by the given absolute path. This specifies that all package fragments within the root 
+	 * Creates and returns a new buildpath entry of kind
+	 * <code>BPE_LIBRARY</code> for the ZIp or folder identified by the given
+	 * absolute path. This specifies that all package fragments within the root
 	 * will have readonly children.
 	 * <p>
-	 * A library entry is used to denote a prerequisite ZIP or root folder containing sources.
-	 * The target ZIP can either be defined internally to the workspace (absolute path relative
-	 * to the workspace root) or externally to the workspace (absolute path in the file system).
-	 * The target root folder can only be defined internally to the workspace (absolute path relative
-	 * to the workspace root). To use a binary folder external to the workspace, it must first be
-	 * linked (see IFolder#createLink(...)).
-	 * 
-	 * Note that on non-Windows platform, a path <code>"/some/lib.zip"</code> is ambiguous. 
-	 * It can be a path to an external ZIP (its file system path being <code>"/some/lib.jar"</code>) 
-	 * or it can be a path to an internal ZIP (<code>"some"</code> being a project in the workspace).
-	 * Such an ambiguity is solved when the buildpath entry is used (e.g. in {@link IScriptProject#getProjectFragments()}).
-	 * If the resource <code>"lib.jar"</code> exists in project <code>"some"</code>, then it is considered an
-	 * internal ZIP. Otherwise it is an external ZIP.
-	 * <p>Also note that this operation does not attempt to validate or access the 
+	 * A library entry is used to denote a prerequisite ZIP or root folder
+	 * containing sources. The target ZIP can either be defined internally to
+	 * the workspace (absolute path relative to the workspace root) or
+	 * externally to the workspace (absolute path in the file system). The
+	 * target root folder can only be defined internally to the workspace
+	 * (absolute path relative to the workspace root). To use a binary folder
+	 * external to the workspace, it must first be linked (see
+	 * IFolder#createLink(...)). Note that on non-Windows platform, a path
+	 * <code>"/some/lib.zip"</code> is ambiguous. It can be a path to an
+	 * external ZIP (its file system path being <code>"/some/lib.jar"</code>) or
+	 * it can be a path to an internal ZIP (<code>"some"</code> being a project
+	 * in the workspace). Such an ambiguity is solved when the buildpath entry
+	 * is used (e.g. in {@link IScriptProject#getProjectFragments()}). If the
+	 * resource <code>"lib.jar"</code> exists in project <code>"some"</code>,
+	 * then it is considered an internal ZIP. Otherwise it is an external ZIP.
+	 * <p>
+	 * Also note that this operation does not attempt to validate or access the
 	 * resources at the given paths.
-	 * </p><p>
-	 * The access rules determine the set of accessible source files
-	 * in the library. If the list of access rules is empty then all files
-	 * in this library are accessible.
-	 * See {@link IAccessRule} for a detailed description of access
-	 * rules.
 	 * </p>
 	 * <p>
-	 * The <code>extraAttributes</code> list contains name/value pairs that must be persisted with
-	 * this entry. If no extra attributes are provided, an empty array must be passed in.<br>
+	 * The access rules determine the set of accessible source files in the
+	 * library. If the list of access rules is empty then all files in this
+	 * library are accessible. See {@link IAccessRule} for a detailed
+	 * description of access rules.
+	 * </p>
+	 * <p>
+	 * The <code>extraAttributes</code> list contains name/value pairs that must
+	 * be persisted with this entry. If no extra attributes are provided, an
+	 * empty array must be passed in.<br>
 	 * Note that this list should not contain any duplicate name.
 	 * </p>
 	 * <p>
-	 * The <code>isExported</code> flag indicates whether this entry is contributed to dependent
-	 * projects. If not exported, dependent projects will not see any of the classes from this entry.
-	 * If exported, dependent projects will concatenate the accessible files patterns of this entry with the
-	 * accessible files patterns of the projects, and they will concatenate the non accessible files patterns of this entry
-	 * with the non accessible files patterns of the project. 
+	 * The <code>isExported</code> flag indicates whether this entry is
+	 * contributed to dependent projects. If not exported, dependent projects
+	 * will not see any of the classes from this entry. If exported, dependent
+	 * projects will concatenate the accessible files patterns of this entry
+	 * with the accessible files patterns of the projects, and they will
+	 * concatenate the non accessible files patterns of this entry with the non
+	 * accessible files patterns of the project.
 	 * </p>
 	 * 
-	 * @param path the absolute path of the binary archive
-	 * @param accessRules the possibly empty list of access rules for this entry
-	 * @param extraAttributes the possibly empty list of extra attributes to persist with this entry
-	 * @param isExported indicates whether this entry is contributed to dependent
-	 * 	  projects in addition to the output location
-	 * @param externalLib TODO
-	 * @param sourceAttachmentPath the absolute path of the corresponding source archive or folder, 
-	 *    or <code>null</code> if none. Note an empty path is allowed to denote no source attachment.
-	 *   and will be automatically converted to <code>null</code>.
-	 * @param sourceAttachmentRootPath the location of the root of the source files within the source archive or folder
-	 *    or <code>null</code> if this location should be automatically detected.
+	 * @param path
+	 * 		the absolute path of the binary archive
+	 * @param accessRules
+	 * 		the possibly empty list of access rules for this entry
+	 * @param extraAttributes
+	 * 		the possibly empty list of extra attributes to persist with this
+	 * 		entry
+	 * @param isExported
+	 * 		indicates whether this entry is contributed to dependent projects in
+	 * 		addition to the output location
+	 * @param externalLib
+	 * 		TODO
+	 * @param sourceAttachmentPath
+	 * 		the absolute path of the corresponding source archive or folder, or
+	 * 		<code>null</code> if none. Note an empty path is allowed to denote no
+	 * 		source attachment. and will be automatically converted to
+	 * 		<code>null</code>.
+	 * @param sourceAttachmentRootPath
+	 * 		the location of the root of the source files within the source
+	 * 		archive or folder or <code>null</code> if this location should be
+	 * 		automatically detected.
 	 * @return a new library buildpath entry
-	 *
-	 */
-	public static IBuildpathEntry newLibraryEntry(
-			IPath path,
-			IAccessRule[] accessRules, 
-			IBuildpathAttribute[] extraAttributes,
-			boolean isExported, 
-			boolean externalLib) {
-			
-		if (path == null) Assert.isTrue(false, "Library path cannot be null"); //$NON-NLS-1$
-		if (!path.isAbsolute()) Assert.isTrue(false, "Path for IBuildpathEntry must be absolute"); //$NON-NLS-1$
-		return new BuildpathEntry(
-			IProjectFragment.K_BINARY,
-			IBuildpathEntry.BPE_LIBRARY,
-			ScriptProject.canonicalizedPath(path),
-			isExported,
-			BuildpathEntry.INCLUDE_ALL, // inclusion patterns
-			BuildpathEntry.EXCLUDE_NONE, // exclusion patterns		
-			accessRules,
-			false, // no access rules to combine
-			extraAttributes, 
-			externalLib);
-	}
-	public static IBuildpathEntry newLibraryEntry(
-			IPath path,
-			IAccessRule[] accessRules, 
-			IBuildpathAttribute[] extraAttributes,
-			IPath[] include, IPath[] exclude,
-			boolean isExported, 
-			boolean externalLib) {
-			
-		if (path == null) Assert.isTrue(false, "Library path cannot be null"); //$NON-NLS-1$
-		if (!path.isAbsolute()) Assert.isTrue(false, "Path for IBuildpathEntry must be absolute"); //$NON-NLS-1$
-		return new BuildpathEntry(
-			IProjectFragment.K_BINARY,
-			IBuildpathEntry.BPE_LIBRARY,
-			ScriptProject.canonicalizedPath(path),
-			isExported,
-			include, // inclusion patterns
-			exclude, // exclusion patterns		
-			accessRules,
-			false, // no access rules to combine
-			extraAttributes, 
-			externalLib);
-	}
-	public static IBuildpathEntry newBuiltinEntry(
-			IPath path,
-			IAccessRule[] accessRules, 
-			IBuildpathAttribute[] extraAttributes,
-			IPath[] include, IPath[] exclude,
-			boolean isExported, 
-			boolean externalLib) {
-			
-		if (path == null) Assert.isTrue(false, "Library path cannot be null"); //$NON-NLS-1$
-		return new BuildpathEntry(
-			IProjectFragment.K_BINARY,
-			IBuildpathEntry.BPE_LIBRARY,
-			path,
-			isExported,
-			include, // inclusion patterns
-			exclude, // exclusion patterns		
-			accessRules,
-			false, // no access rules to combine
-			extraAttributes, 
-			externalLib);
-	}
-	
-	/**
-	 * Returns the script model element corresponding to the given handle identifier
-	 * generated by <code>IModelElement.getHandleIdentifier()</code>, or
-	 * <code>null</code> if unable to create the associated element.
 	 * 
-	 * @param handleIdentifier the given handle identifier
+	 */
+	public static IBuildpathEntry newLibraryEntry(IPath path,
+			IAccessRule[] accessRules, IBuildpathAttribute[] extraAttributes,
+			boolean isExported, boolean externalLib) {
+
+		if (path == null)
+			Assert.isTrue(false, "Library path cannot be null"); //$NON-NLS-1$
+		if (!path.isAbsolute())
+			Assert.isTrue(false, "Path for IBuildpathEntry must be absolute"); //$NON-NLS-1$
+		return new BuildpathEntry(IProjectFragment.K_BINARY,
+				IBuildpathEntry.BPE_LIBRARY, ScriptProject
+						.canonicalizedPath(path), isExported,
+				BuildpathEntry.INCLUDE_ALL, // inclusion patterns
+				BuildpathEntry.EXCLUDE_NONE, // exclusion patterns
+				accessRules, false, // no access rules to combine
+				extraAttributes, externalLib);
+	}
+
+	public static IBuildpathEntry newLibraryEntry(IPath path,
+			IAccessRule[] accessRules, IBuildpathAttribute[] extraAttributes,
+			IPath[] include, IPath[] exclude, boolean isExported,
+			boolean externalLib) {
+
+		if (path == null)
+			Assert.isTrue(false, "Library path cannot be null"); //$NON-NLS-1$
+		if (!path.isAbsolute())
+			Assert.isTrue(false, "Path for IBuildpathEntry must be absolute"); //$NON-NLS-1$
+		return new BuildpathEntry(IProjectFragment.K_BINARY,
+				IBuildpathEntry.BPE_LIBRARY, ScriptProject
+						.canonicalizedPath(path), isExported, include, // inclusion
+				// patterns
+				exclude, // exclusion patterns
+				accessRules, false, // no access rules to combine
+				extraAttributes, externalLib);
+	}
+
+	public static IBuildpathEntry newBuiltinEntry(IPath path,
+			IAccessRule[] accessRules, IBuildpathAttribute[] extraAttributes,
+			IPath[] include, IPath[] exclude, boolean isExported,
+			boolean externalLib) {
+
+		if (path == null)
+			Assert.isTrue(false, "Library path cannot be null"); //$NON-NLS-1$
+		return new BuildpathEntry(IProjectFragment.K_BINARY,
+				IBuildpathEntry.BPE_LIBRARY, path, isExported, include, // inclusion
+				// patterns
+				exclude, // exclusion patterns
+				accessRules, false, // no access rules to combine
+				extraAttributes, externalLib);
+	}
+
+	/**
+	 * Returns the script model element corresponding to the given handle
+	 * identifier generated by <code>IModelElement.getHandleIdentifier()</code>,
+	 * or <code>null</code> if unable to create the associated element.
+	 * 
+	 * @param handleIdentifier
+	 * 		the given handle identifier
 	 * @return the script element corresponding to the handle identifier
 	 */
 	public static IModelElement create(String handleIdentifier) {
@@ -1504,20 +1740,23 @@ public class DLTKCore extends Plugin {
 	}
 
 	/**
-	 * Returns the script model element corresponding to the given handle identifier
-	 * generated by <code>IModelElement.getHandleIdentifier()</code>, or
-	 * <code>null</code> if unable to create the associated element.
-	 * If the returned script element is an <code>ISourceModule</code>, its owner
-	 * is the given owner if such a working copy exists, otherwise the compilation unit 
-	 * is a primary compilation unit.
+	 * Returns the script model element corresponding to the given handle
+	 * identifier generated by <code>IModelElement.getHandleIdentifier()</code>,
+	 * or <code>null</code> if unable to create the associated element. If the
+	 * returned script element is an <code>ISourceModule</code>, its owner is
+	 * the given owner if such a working copy exists, otherwise the compilation
+	 * unit is a primary compilation unit.
 	 * 
-	 * @param handleIdentifier the given handle identifier
-	 * @param owner the owner of the returned compilation unit, ignored if the returned
-	 *   element is not a compilation unit
+	 * @param handleIdentifier
+	 * 		the given handle identifier
+	 * @param owner
+	 * 		the owner of the returned compilation unit, ignored if the returned
+	 * 		element is not a compilation unit
 	 * @return the script element corresponding to the handle identifier
-	 *
+	 * 
 	 */
-	public static IModelElement create(String handleIdentifier, WorkingCopyOwner owner) {
+	public static IModelElement create(String handleIdentifier,
+			WorkingCopyOwner owner) {
 		if (handleIdentifier == null) {
 			return null;
 		}
@@ -1525,31 +1764,41 @@ public class DLTKCore extends Plugin {
 		Model model = ModelManager.getModelManager().getModel();
 		return model.getHandleFromMemento(memento, owner);
 	}
+
 	public static ISourceModule createSourceModuleFrom(IFile file) {
-		return ModelManager.createSourceModuleFrom(file, null/*unknown script project*/);
+		return ModelManager.createSourceModuleFrom(file, null/*
+															 * unknown script
+															 * project
+															 */);
 	}
 
-	public static Hashtable getDefaultOptions() {		
+	public static Hashtable getDefaultOptions() {
 		return ModelManager.getModelManager().getDefaultOptions();
 	}
 
-	public static void setOptions(Hashtable defaultOptions) {		
+	public static void setOptions(Hashtable defaultOptions) {
 		ModelManager.getModelManager().setOptions(defaultOptions);
 	}
 
 	public static IRegion newRegion() {
 		return new Region();
 	}
+
 	public static String[] getUserLibraryNames(IDLTKLanguageToolkit toolkit) {
-		 return ModelManager.getUserLibraryManager().getUserLibraryNames(toolkit);
+		return ModelManager.getUserLibraryManager()
+				.getUserLibraryNames(toolkit);
 	}
 
 	public static void error(String message) {
-		plugin.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, null));
+		plugin.getLog()
+				.log(
+						new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK,
+								message, null));
 	}
-	
+
 	public static void error(String message, Throwable t) {
-		plugin.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, t));
+		plugin.getLog().log(
+				new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, t));
 	}
-	
+
 }
