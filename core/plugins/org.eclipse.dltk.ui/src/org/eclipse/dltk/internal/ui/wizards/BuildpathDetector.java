@@ -124,7 +124,8 @@ public class BuildpathDetector {
 			if (cpEntries.size() == 1) {
 				IBuildpathEntry entry = (IBuildpathEntry) cpEntries.get(0);
 				if (entry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER) {
-					cpEntries.add(0, DLTKCore.newSourceEntry(fProject.getFullPath()));
+					cpEntries.add(0, DLTKCore.newSourceEntry(fProject
+							.getFullPath()));
 				}
 
 			}
@@ -217,8 +218,8 @@ public class BuildpathDetector {
 	}
 
 	private boolean isValidResource(IResource res) {
-		return DLTKContentTypeManager.isValidResourceForContentType(
-				this.fToolkit, res);
+		return DLTKContentTypeManager.isValidFileNameForContentType(
+				this.fToolkit, res.getFullPath().lastSegment());
 	}
 
 	/*
@@ -247,7 +248,7 @@ public class BuildpathDetector {
 
 	protected boolean visitSourceModule(IFile file) {
 		if (DLTKContentTypeManager.isValidFileNameForContentType(fToolkit, file
-				.getFullPath())) {
+				.getFullPath().lastSegment())) {
 			IPath packPath = file.getParent().getFullPath();
 			String cuName = file.getName();
 			addToMap(fSourceFolders, packPath, new Path(cuName));

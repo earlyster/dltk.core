@@ -18,6 +18,7 @@ import org.eclipse.dltk.core.IAccessRule;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.ui.DLTKPluginImages;
@@ -206,7 +207,8 @@ public class BPListLabelProvider extends LabelProvider {
 		// arg= notAvailable;
 		// }
 		// return
-		// Messages.format(NewWizardMessages.CPListLabelProvider_native_library_path,
+		// Messages.format(NewWizardMessages.
+		// CPListLabelProvider_native_library_path,
 		// new String[] { arg });
 		// }
 		return notAvailable;
@@ -218,6 +220,9 @@ public class BPListLabelProvider extends LabelProvider {
 		if (path.toString().startsWith(
 				IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)) {
 			return ScriptElementLabels.BUILTINS_FRAGMENT;
+		}
+		if (EnvironmentPathUtils.isFull(path)) {
+			path = EnvironmentPathUtils.getLocalPath(path);
 		}
 		switch (cpentry.getEntryKind()) {
 		case IBuildpathEntry.BPE_LIBRARY: {
@@ -245,7 +250,11 @@ public class BPListLabelProvider extends LabelProvider {
 				return getPathString(path, resource == null);
 			}
 			// should not get here
-			return path.makeRelative().toString();
+			if (!cpentry.isExternalFolder()) {
+				return path.makeRelative().toString();
+			} else {
+				return path.toString();
+			}
 		}
 		case IBuildpathEntry.BPE_PROJECT:
 			return path.lastSegment();
