@@ -84,7 +84,7 @@ public class BuildpathDetector {
 	 * Method detectBuildpath.
 	 * 
 	 * @param monitor
-	 *            The progress monitor (not null)
+	 * 		The progress monitor (not null)
 	 * @throws CoreException
 	 */
 	public void detectBuildpath(IProgressMonitor monitor) throws CoreException {
@@ -173,20 +173,19 @@ public class BuildpathDetector {
 		Set sourceFolderSet = fSourceFolders.keySet();
 		for (Iterator iter = sourceFolderSet.iterator(); iter.hasNext();) {
 			IPath path = (IPath) iter.next();
-			ArrayList excluded = new ArrayList();
+			// ArrayList excluded = new ArrayList();
+			boolean primary = true;
 			for (Iterator inner = sourceFolderSet.iterator(); inner.hasNext();) {
 				IPath other = (IPath) inner.next();
-				if (!path.equals(other) && path.isPrefixOf(other)) {
-					IPath pathToExclude = other.removeFirstSegments(
-							path.segmentCount()).addTrailingSeparator();
-					excluded.add(pathToExclude);
+				if (!path.equals(other) && other.isPrefixOf(path)) {
+					primary = false;
+					break;
 				}
 			}
-			IPath[] excludedPaths = (IPath[]) excluded
-					.toArray(new IPath[excluded.size()]);
-			IBuildpathEntry entry = DLTKCore
-					.newSourceEntry(path, excludedPaths);
-			res.add(entry);
+			if (primary) {
+				IBuildpathEntry entry = DLTKCore.newSourceEntry(path);
+				res.add(entry);
+			}
 		}
 		Collections.sort(res, new BPSorter());
 		resEntries.addAll(res);
@@ -217,15 +216,12 @@ public class BuildpathDetector {
 		return name.endsWith(ext) && (ext.length() != name.length());
 	}
 
-	private boolean isValidResource(IResource res) {
-		return DLTKContentTypeManager.isValidFileNameForContentType(
-				this.fToolkit, res.getFullPath().lastSegment());
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.core.resources.IResourceProxyVisitor#visit(org.eclipse.core.resources.IResourceProxy)
+	 * @see
+	 * org.eclipse.core.resources.IResourceProxyVisitor#visit(org.eclipse.core
+	 * .resources.IResourceProxy)
 	 */
 	public boolean visit(IResourceProxy proxy, List files) {
 		if (fMonitor.isCanceled()) {
@@ -234,12 +230,10 @@ public class BuildpathDetector {
 		if (proxy.getType() == IResource.FILE) {
 			String name = proxy.getName();
 			IResource res = proxy.requestResource();
-			if (isValidResource(res)) {
-				if (visitSourceModule((IFile) proxy.requestResource())) {
-					files.add(proxy.requestResource());
-				}
+			if (visitSourceModule((IFile) res)) {
+				files.add(res);
 			} else if (hasExtension(name, ".zip")) { //$NON-NLS-1$
-				fZIPFiles.add(proxy.requestFullPath());
+				fZIPFiles.add(res);
 			}
 			return false;
 		}
@@ -247,8 +241,8 @@ public class BuildpathDetector {
 	}
 
 	protected boolean visitSourceModule(IFile file) {
-		if (DLTKContentTypeManager.isValidFileNameForContentType(fToolkit, file
-				.getFullPath().lastSegment())) {
+		if (DLTKContentTypeManager
+				.isValidResourceForContentType(fToolkit, file)) {
 			IPath packPath = file.getParent().getFullPath();
 			String cuName = file.getName();
 			addToMap(fSourceFolders, packPath, new Path(cuName));
