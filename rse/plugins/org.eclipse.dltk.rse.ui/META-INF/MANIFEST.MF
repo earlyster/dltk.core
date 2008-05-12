@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.eclipse.dltk.rse.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.eclipse.dltk.rse.ui.Activator
 Bundle-Vendor: %providerName
+Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.dltk.rse.core,
