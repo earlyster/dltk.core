@@ -86,6 +86,13 @@ public class DLTKLanguageManager {
 				.getLanguageToolkitsManager().getObject(element);
 		if (toolkit == null && element != null
 				&& element.getElementType() == IModelElement.SOURCE_MODULE) {
+			if (element.getResource() != null) {
+				IDLTKLanguageToolkit tk = findAppropriateToolkitByObject(element
+						.getResource());
+				if (tk != null) {
+					return tk;
+				}
+			}
 			return findAppropriateToolkitByObject(element.getPath());
 		}
 		return toolkit;

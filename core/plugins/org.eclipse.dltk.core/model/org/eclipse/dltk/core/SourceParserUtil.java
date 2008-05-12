@@ -68,6 +68,9 @@ public class SourceParserUtil {
 
 		IDLTKLanguageToolkit toolkit;
 		toolkit = DLTKLanguageManager.getLanguageToolkit(module);
+		if (toolkit == null) {
+			return null;
+		}
 		ModuleDeclaration moduleDeclaration = null;
 		Integer flag;
 		if (mifo != null) {
