@@ -34,7 +34,7 @@ public class Util {
 	 * the stream.
 	 * 
 	 * @throws IOException
-	 *             if a problem occured reading the stream.
+	 * 		if a problem occured reading the stream.
 	 */
 	public static byte[] getInputStreamAsByteArray(InputStream stream,
 			int length) throws IOException {
@@ -89,7 +89,7 @@ public class Util {
 	 * /** Returns the contents of the given file as a byte array.
 	 * 
 	 * @throws IOException
-	 *             if a problem occured reading the file.
+	 * 		if a problem occured reading the file.
 	 */
 	public static byte[] getFileByteContent(File file) throws IOException {
 		InputStream stream = null;
@@ -116,67 +116,75 @@ public class Util {
 			int length, String encoding) throws IOException {
 		InputStreamReader reader = null;
 		try {
-			reader = encoding == null ? new InputStreamReader(stream)
-					: new InputStreamReader(stream, encoding);
-		} catch (UnsupportedEncodingException e) {
-			// encoding is not supported
-			reader = new InputStreamReader(stream);
-		}
-		char[] contents;
-		int totalRead = 0;
-		if (length == -1) {
-			contents = CharOperation.NO_CHAR;
-		} else {
-			// length is a good guess when the encoding produces less or the
-			// same amount of characters than the file length
-			contents = new char[length]; // best guess
-		}
-
-		while (true) {
-			int amountRequested;
-			if (totalRead < length) {
-				// until known length is met, reuse same array sized eagerly
-				amountRequested = length - totalRead;
+			try {
+				reader = encoding == null ? new InputStreamReader(stream)
+						: new InputStreamReader(stream, encoding);
+			} catch (UnsupportedEncodingException e) {
+				// encoding is not supported
+				reader = new InputStreamReader(stream);
+			}
+			char[] contents;
+			int totalRead = 0;
+			if (length == -1) {
+				contents = CharOperation.NO_CHAR;
 			} else {
-				// reading beyond known length
-				int current = reader.read();
-				if (current < 0)
+				// length is a good guess when the encoding produces less or the
+				// same amount of characters than the file length
+				contents = new char[length]; // best guess
+			}
+
+			while (true) {
+				int amountRequested;
+				if (totalRead < length) {
+					// until known length is met, reuse same array sized eagerly
+					amountRequested = length - totalRead;
+				} else {
+					// reading beyond known length
+					int current = reader.read();
+					if (current < 0)
+						break;
+
+					amountRequested = Math.max(stream.available(),
+							DEFAULT_READING_SIZE); // read at least 8K
+
+					// resize contents if needed
+					if (totalRead + 1 + amountRequested > contents.length)
+						System.arraycopy(contents, 0,
+								contents = new char[totalRead + 1
+										+ amountRequested], 0, totalRead);
+
+					// add current character
+					contents[totalRead++] = (char) current; // coming from
+					// totalRead==length
+				}
+				// read as many chars as possible
+				int amountRead = reader.read(contents, totalRead,
+						amountRequested);
+				if (amountRead < 0)
 					break;
-
-				amountRequested = Math.max(stream.available(),
-						DEFAULT_READING_SIZE); // read at least 8K
-
-				// resize contents if needed
-				if (totalRead + 1 + amountRequested > contents.length)
-					System.arraycopy(contents, 0, contents = new char[totalRead
-							+ 1 + amountRequested], 0, totalRead);
-
-				// add current character
-				contents[totalRead++] = (char) current; // coming from
-				// totalRead==length
+				totalRead += amountRead;
 			}
-			// read as many chars as possible
-			int amountRead = reader.read(contents, totalRead, amountRequested);
-			if (amountRead < 0)
-				break;
-			totalRead += amountRead;
-		}
 
-		// Do not keep first character for UTF-8 BOM encoding
-		int start = 0;
-		if (totalRead > 0 && UTF_8.equals(encoding)) {
-			if (contents[0] == 0xFEFF) { // if BOM char then skip
-				totalRead--;
-				start = 1;
+			// Do not keep first character for UTF-8 BOM encoding
+			int start = 0;
+			if (totalRead > 0 && UTF_8.equals(encoding)) {
+				if (contents[0] == 0xFEFF) { // if BOM char then skip
+					totalRead--;
+					start = 1;
+				}
+			}
+
+			// resize contents if necessary
+			if (totalRead < contents.length)
+				System.arraycopy(contents, start,
+						contents = new char[totalRead], 0, totalRead);
+
+			return contents;
+		} finally {
+			if (reader != null) {
+				reader.close();
 			}
 		}
-
-		// resize contents if necessary
-		if (totalRead < contents.length)
-			System.arraycopy(contents, start, contents = new char[totalRead],
-					0, totalRead);
-
-		return contents;
 	}
 
 	private final static char[] SUFFIX_zip = new char[] { '.', 'z', 'i', 'p' };
@@ -225,7 +233,7 @@ public class Util {
 						// slash
 						// ->
 						// adds
-						// '**'
+						//' **'
 						// for
 						// free
 						// (see
@@ -263,7 +271,7 @@ public class Util {
 	 * null, then the platform default one is used
 	 * 
 	 * @throws IOException
-	 *             if a problem occured reading the file.
+	 * 		if a problem occured reading the file.
 	 */
 	public static char[] getFileCharContent(File file, String encoding)
 			throws IOException {

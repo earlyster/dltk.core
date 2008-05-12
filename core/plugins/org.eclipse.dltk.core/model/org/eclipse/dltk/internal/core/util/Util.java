@@ -425,34 +425,38 @@ public class Util {
 		// Get resource contents
 		InputStream stream = null;
 		int tryCount = 10;
-		while (stream == null) {
-			try {
-				stream = file.getContents(true);
-			} catch (Exception e) {
-				IStatus status = new Status(IStatus.ERROR, DLTKCore.PLUGIN_ID,
-						"Error receiving file content: retrying("
-								+ String.valueOf(tryCount) + ")", e);
-				DLTKCore.getDefault().getLog().log(status);
-
-				// Some times for RSE we can get here if connection is not
-				// established yet, or if connection are lost.
-				if (tryCount == 0) {
-					throw new ModelException(e,
-							IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
-				}
-				tryCount--;
-			}
-		}
 		try {
+			while (stream == null) {
+				try {
+					stream = file.getContents(true);
+				} catch (Exception e) {
+					IStatus status = new Status(IStatus.ERROR,
+							DLTKCore.PLUGIN_ID, "Error receiving file: "
+									+ file.getFullPath()
+									+ " content: retrying("
+									+ String.valueOf(tryCount) + ")", e);
+					DLTKCore.getDefault().getLog().log(status);
+
+					// Some times for RSE we can get here if connection is not
+					// established yet, or if connection are lost.
+					if (tryCount == 0) {
+						throw new ModelException(e,
+								IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
+					}
+					tryCount--;
+				}
+			}
 			return org.eclipse.dltk.compiler.util.Util
 					.getInputStreamAsCharArray(stream, -1, encoding);
 		} catch (IOException e) {
 			throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
 		} finally {
-			try {
-				stream.close();
-			} catch (IOException e) {
-				// ignore
+			if (stream != null) {
+				try {
+					stream.close();
+				} catch (IOException e) {
+					// ignore
+				}
 			}
 		}
 	}
