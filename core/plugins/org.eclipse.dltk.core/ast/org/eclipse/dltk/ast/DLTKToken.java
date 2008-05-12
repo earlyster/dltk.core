@@ -9,6 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.ast;
 
+/**
+ * @deprecated
+ */
 public class DLTKToken {
 	public static final int INVALID_TYPE = 0;
 	public static final int EOF_TYPE = 1;
