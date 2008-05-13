@@ -26,7 +26,6 @@ public abstract class ContributedExtensionOptionsBlock extends
 
 	private ComboViewerBlock viewer;
 
-	// private ComboViewer contributionViewer;
 	private Composite descriptionPlace;
 
 	public ContributedExtensionOptionsBlock(IStatusChangeListener context,
@@ -117,7 +116,15 @@ public abstract class ContributedExtensionOptionsBlock extends
 			}
 
 			protected Object getDefaultObject() {
-				return getExtensionManager().getSelectedContribution(
+				/*
+				 * no preference value has been set so we want a contribution
+				 * that is returned based upon the 'select by priority' logic
+				 * 
+				 * this is done to handle the case where the plugin implementor
+				 * did not configure a default value via a preference
+				 * initializer
+				 */
+				return getExtensionManager().getPriorityContribution(
 						getProject(), getNatureId());
 			}
 
@@ -164,6 +171,11 @@ public abstract class ContributedExtensionOptionsBlock extends
 		}
 
 		viewer.initialize(contributions);
+	}
+
+	public void performDefaults() {
+		super.performDefaults();
+		viewer.performDefaults();
 	}
 
 	protected final void updateSelection(IDLTKContributedExtension contrib) {

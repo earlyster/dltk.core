@@ -38,19 +38,14 @@ public abstract class ComboViewerBlock {
 	 */
 	public void initialize(Object[] elements) {
 		viewer.add(elements);
+		setSelectedObject();
+	}
 
-		String id = getSavedObjectId();
-		Object selected = null;
-
-		if (id == null || "".equals(id)) { //$NON-NLS-1$
-			// no entry exists in the preference store for the pref key
-			selected = getDefaultObject();
-		} else {
-			selected = getObjectById(id);
-
-		}
-
-		setSelectedObject(selected);
+	/**
+	 * Reset the combo viewer with its default values.
+	 */
+	public void performDefaults() {
+		setSelectedObject();
 	}
 
 	/**
@@ -61,7 +56,7 @@ public abstract class ComboViewerBlock {
 
 	/**
 	 * Returns the name of the object that will be displayed in the drop-down
-	 * seleector.
+	 * selector.
 	 */
 	protected abstract String getObjectName(Object element);
 
@@ -72,7 +67,8 @@ public abstract class ComboViewerBlock {
 	 * Subclasses should use this method to store the changed preference value.
 	 * </p>
 	 * 
-	 * @param element newly selected element
+	 * @param element
+	 *            newly selected element
 	 */
 	protected abstract void selectedObjectChanged(Object element);
 
@@ -97,12 +93,6 @@ public abstract class ComboViewerBlock {
 	 */
 	protected abstract Object getObjectById(String id);
 
-	private void setSelectedObject(Object element) {
-		if (element != null) {
-			viewer.setSelection(new StructuredSelection(element));
-		}
-	}
-
 	private Object getSelectedObject() {
 		IStructuredSelection selection = (IStructuredSelection) viewer
 				.getSelection();
@@ -111,5 +101,25 @@ public abstract class ComboViewerBlock {
 		}
 
 		return null;
+	}
+
+	private void setSelectedObject() {
+		String id = getSavedObjectId();
+		Object selected = null;
+
+		if (id == null || "".equals(id)) { //$NON-NLS-1$
+			// no entry exists in the preference store for the pref key
+			selected = getDefaultObject();
+		} else {
+			selected = getObjectById(id);
+			// saved object no longer exists, fall back to the default
+			if (selected == null) {
+				selected = getDefaultObject();
+			}
+		}
+
+		if (selected != null) {
+			viewer.setSelection(new StructuredSelection(selected));
+		}
 	}
 }
