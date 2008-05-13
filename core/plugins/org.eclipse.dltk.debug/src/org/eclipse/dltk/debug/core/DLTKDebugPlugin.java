@@ -130,6 +130,10 @@ public class DLTKDebugPlugin extends Plugin {
 			while (netInterfaces.hasMoreElements()) {
 				NetworkInterface ni = (NetworkInterface) netInterfaces
 						.nextElement();
+			    // ignore virtual interfaces for vmware, etc
+				if (ni.getName().startsWith("vmnet")) {
+					continue;
+				}				
 				Enumeration inetAddresses = ni.getInetAddresses();
 				while (inetAddresses.hasMoreElements()) {
 					ip = (InetAddress) inetAddresses.nextElement();
