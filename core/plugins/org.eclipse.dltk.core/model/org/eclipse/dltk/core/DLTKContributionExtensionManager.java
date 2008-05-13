@@ -59,7 +59,9 @@ public abstract class DLTKContributionExtensionManager {
 				.toArray(new IDLTKContributedExtension[contributions.size()]);
 	}
 
-	public IDLTKContributedExtension getSelectedContribution(IProject project, String natureId) {
+	public IDLTKContributedExtension getSelectedContribution(IProject project,
+			String natureId) {
+
 		IDLTKContributedExtension[] contributions = getContributions(natureId);
 
 		if (contributions.length > 0) {
@@ -73,6 +75,20 @@ public abstract class DLTKContributionExtensionManager {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Retrieves a registered contribution based upon its priority.
+	 * 
+	 * @param project
+	 *            project
+	 * @param natureId
+	 *            nature id
+	 */
+	public IDLTKContributedExtension getPriorityContribution(IProject project,
+			String natureId) {
+		IDLTKContributedExtension[] contributions = getContributions(natureId);
+		return defaultSelector.select(contributions, project);
 	}
 
 	/**
