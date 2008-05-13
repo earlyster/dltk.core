@@ -3,9 +3,11 @@ package org.eclipse.dltk.internal.debug.ui.interpreters;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.dltk.ui.preferences.ComboViewerBlock;
 import org.eclipse.dltk.ui.preferences.ImprovedAbstractConfigurationBlock;
 import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore;
@@ -98,13 +100,14 @@ public abstract class InternalScriptInterpreterPreferenceBlock extends
 	protected abstract String getSelectorNameLabel();
 
 	/**
-	 * Returns the {@link IInterpreterInstall} that will be auto-selected if 
-	 * an interpreter id is not found in the preference store.
-	 * 
-	 * <p>Subclasses may return <code>null</code> if they do not wish to auto
-	 * select an interpreter or if no interpreters are installed.</p>
+	 * Returns the {@link IInterpreterInstall} that will be auto-selected if an
+	 * interpreter id is not found in the preference store.
 	 */
-	protected abstract Object getDefaultSelectedInterpreter();
+	protected Object getDefaultSelectedInterpreter() {
+		DefaultInterpreterEntry entry = new DefaultInterpreterEntry(
+				getNatureId(), LocalEnvironment.ENVIRONMENT_ID);
+		return ScriptRuntime.getDefaultInterpreterInstall(entry);
+	}
 
 	/*
 	 * @see org.eclipse.dltk.ui.preferences.ImprovedAbstractConfigurationBlock#createOverlayKeys()
@@ -116,6 +119,14 @@ public abstract class InternalScriptInterpreterPreferenceBlock extends
 				OverlayPreferenceStore.STRING, getPreferenceKey()));
 
 		return keys;
+	}
+
+	/*
+	 * @see org.eclipse.dltk.ui.preferences.ImprovedAbstractConfigurationBlock#performDefaults()
+	 */
+	public void performDefaults() {
+		super.performDefaults();
+		viewer.performDefaults();
 	}
 
 	private IInterpreterInstall[] getInterpreterInstalls() {
