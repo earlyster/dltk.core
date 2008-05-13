@@ -223,8 +223,9 @@ public class DLTKSearchScope extends AbstractSearchScope {
 																				 * remove
 																				 * project
 																				 * segment
-																				 */), projectPathString, false/* not a package */,
-								access);
+																				 */), projectPathString, false/*
+														 * not a package
+														 */, access);
 					}
 				}
 				break;
@@ -460,6 +461,10 @@ public class DLTKSearchScope extends AbstractSearchScope {
 	 *            x/y/Z.class 2. x/y 3. X.java 4. (empty)
 	 */
 	private int indexOf(String containerPath, String relativePath) {
+		// normalize containerPath and relativePath
+		containerPath = normalize(containerPath);
+		relativePath = normalize(relativePath);
+
 		// use the hash to get faster comparison
 		int length = this.containerPaths.length, index = (containerPath
 				.hashCode() & 0x7FFFFFFF)
