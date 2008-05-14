@@ -84,8 +84,11 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 				return false;
 			}
 			if (projectToEnvironmentMap.containsKey(project)) {
-				return ((Boolean) projectToEnvironmentMap.get(project))
-						.booleanValue();
+				String id = (String) projectToEnvironmentMap.get(project);
+				if (this.getId().equals(id)) {
+					return true;
+				}
+				return false;
 			}
 			IProjectDescription description;
 			try {
@@ -99,8 +102,8 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 									.getRemoteFileObject(uri.getPath(), null);
 							if (remoteFileObject != null) {
 								if (remoteFileObject.exists()) {
-									projectToEnvironmentMap.put(project,
-											new Boolean(true));
+									projectToEnvironmentMap.put(project, this
+											.getId());
 									return true;
 								}
 							}
