@@ -342,8 +342,14 @@ public class SelectionTransferDropAdapter extends DLTKViewerDropAdapter
 			InvocationTargetException, InterruptedException {
 		IModelElement[] modelElements = ReorgUtils.getModelElements(fElements);
 		IResource[] resources = ReorgUtils.getResources(fElements);
-		ReorgCopyStarter starter = ReorgCopyStarter.create(modelElements,
-				resources, (IModelElement) target);
+		ReorgCopyStarter starter = null;
+		if (target instanceof IModelElement) {
+			starter = ReorgCopyStarter.create(modelElements, resources,
+					(IModelElement) target);
+		} else if (target instanceof IResource) {
+			starter = ReorgCopyStarter.create(modelElements, resources,
+					(IResource) target);
+		}
 
 		if (starter != null)
 			starter.run(getShell());

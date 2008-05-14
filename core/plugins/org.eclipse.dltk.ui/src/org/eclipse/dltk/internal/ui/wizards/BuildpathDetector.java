@@ -154,18 +154,20 @@ public class BuildpathDetector {
 	}
 
 	private void detectLibraries(ArrayList cpEntries) {
-		ArrayList res = new ArrayList();
-		Set sourceFolderSet = fSourceFolders.keySet();
-		for (Iterator iter = fZIPFiles.iterator(); iter.hasNext();) {
-			IPath path = (IPath) iter.next();
-			if (isNested(path, sourceFolderSet.iterator())) {
-				continue;
+		if (this.fToolkit.languageSupportZIPBuildpath()) {
+			ArrayList res = new ArrayList();
+			Set sourceFolderSet = fSourceFolders.keySet();
+			for (Iterator iter = fZIPFiles.iterator(); iter.hasNext();) {
+				IPath path = (IPath) iter.next();
+				if (isNested(path, sourceFolderSet.iterator())) {
+					continue;
+				}
+				IBuildpathEntry entry = DLTKCore.newLibraryEntry(path);
+				res.add(entry);
 			}
-			IBuildpathEntry entry = DLTKCore.newLibraryEntry(path);
-			res.add(entry);
+			Collections.sort(res, new BPSorter());
+			cpEntries.addAll(res);
 		}
-		Collections.sort(res, new BPSorter());
-		cpEntries.addAll(res);
 	}
 
 	private void detectSourceFolders(ArrayList resEntries) {
@@ -232,8 +234,9 @@ public class BuildpathDetector {
 			IResource res = proxy.requestResource();
 			if (visitSourceModule((IFile) res)) {
 				files.add(res);
-			} else if (hasExtension(name, ".zip")) { //$NON-NLS-1$
-				fZIPFiles.add(res);
+			} else if (res.getType() == IResource.FILE
+					&& hasExtension(name, ".zip")) { //$NON-NLS-1$
+				fZIPFiles.add(proxy.requestFullPath());
 			}
 			return false;
 		}
