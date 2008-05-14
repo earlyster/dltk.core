@@ -49,5 +49,32 @@ public class Flags implements Modifiers {
 	public static boolean isStatic(int flags) {
 		return (flags & AccStatic) != 0;
 	}
+	/**
+	 * Returns whether the given integer includes the <code>final</code> modifier.
+	 *
+	 * @param flags the flags
+	 * @return <code>true</code> if the <code>final</code> modifier is included
+	 */
+	public static boolean isFinal(int flags) {
+		return (flags & AccFinal) != 0;
+	}
+	/**
+	 * Returns whether the given integer includes the <code>abstract</code> modifier.
+	 *
+	 * @param flags the flags
+	 * @return <code>true</code> if the <code>abstract</code> modifier is included
+	 */
+	public static boolean isAbstract(int flags) {
+		return (flags & AccAbstract) != 0;
+	}
+	/**
+	 * Returns whether the given integer includes the <code>interface</code> modifier.
+	 *
+	 * @param flags the flags
+	 * @return <code>true</code> if the <code>interface</code> modifier is included
+	 */
+	public static boolean isInterface(int flags) {
+		return (flags & AccInterface) != 0;
+	}
 	
 }
