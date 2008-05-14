@@ -103,6 +103,9 @@ public class DLTKContentTypeManager {
 				.lastSegment())) {
 			return true;
 		}
+		if (!resource.isAccessible()) {
+			return false;
+		}
 
 		// I've disable file content checking for non local environments.
 		IEnvironment environment = EnvironmentManager.getEnvironment(resource

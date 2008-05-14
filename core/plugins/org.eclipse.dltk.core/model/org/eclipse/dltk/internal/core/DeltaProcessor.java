@@ -56,9 +56,9 @@ import org.eclipse.dltk.internal.core.util.Util;
 
 /**
  * This class is used by <code>ModelManager</code> to convert
- * <code>IResourceDelta</code>s into <code>IModelElementDelta</code>s. It
- * also does some processing on the <code>ModelElement</code>s involved (e.g.
- * closing them or updating buildpaths).
+ * <code>IResourceDelta</code>s into <code>IModelElementDelta</code>s. It also
+ * does some processing on the <code>ModelElement</code>s involved (e.g. closing
+ * them or updating buildpaths).
  */
 public class DeltaProcessor {
 	static class RootInfo {
@@ -84,12 +84,12 @@ public class DeltaProcessor {
 				if (resource != null) {
 					this.root = this.project.getProjectFragment(resource);
 				} else {
-					Object target = Model.getTarget(ResourcesPlugin
-							.getWorkspace().getRoot(), this.rootPath, false/*
-																			 * don't
-																			 * check
-																			 * existence
-																			 */);
+					Object target = Model
+							.getTarget(
+									ResourcesPlugin.getWorkspace().getRoot(),
+									this.rootPath, false/*
+														 * don't check existence
+														 */);
 					if (target instanceof IResource) {
 						this.root = this.project
 								.getProjectFragment((IResource) target);
@@ -187,14 +187,14 @@ public class DeltaProcessor {
 	 */
 	ModelManager manager;
 	/*
-	 * The <code>ModelElementDelta</code> corresponding to the <code>IResourceDelta</code>
-	 * being translated.
+	 * The <code>ModelElementDelta</code> corresponding to the
+	 * <code>IResourceDelta</code> being translated.
 	 */
 	private ModelElementDelta currentDelta;
 	/*
 	 * The model element that was last created (see createElement(IResource)).
 	 * This is used as a stack of model elements (using getParent() to pop it,
-	 * and using the various get*(...) to push it.
+	 * and using the various get(...) to push it.
 	 */
 	private Openable currentElement;
 	/*
@@ -416,17 +416,19 @@ public class DeltaProcessor {
 					// ensure project references are updated (see
 					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=121569)
 					try {
-						this.state
-								.updateProjectReferences(scriptProject,
-										null/* no old buildpath */, null/*
-																		 * compute
-																		 * new
-																		 * resolved
+						this.state.updateProjectReferences(scriptProject,
+								null/* no old buildpath */, null/*
+																 * compute new
+																 * resolved
+																 * buildpath
+																 * later
+																 */, null/*
+																		 * read
+																		 * raw
 																		 * buildpath
 																		 * later
 																		 */,
-										null/* read raw buildpath later */,
-										false/* cannot change resources */);
+								false/* cannot change resources */);
 					} catch (ModelException e1) {
 						// project always exists
 					}
@@ -480,7 +482,8 @@ public class DeltaProcessor {
 							this.addToParentInfo(scriptProject);
 							// readRawClasspath(scriptProject);
 							// ensure project references are updated (see
-							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=172666)
+							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=
+							// 172666)
 							this.checkProjectReferenceChange(project,
 									scriptProject);
 						} else {
@@ -1003,7 +1006,8 @@ public class DeltaProcessor {
 							this.elementRemoved(root, null, null);
 
 							this.state.addBuildpathValidation(scriptProject); // see
-							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=185733
+							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=
+							// 185733
 							hasDelta = true;
 						}
 					}
@@ -1046,13 +1050,17 @@ public class DeltaProcessor {
 				this.removedRoots.put(scriptProject, scriptProject
 						.computeProjectFragments(scriptProject
 								.getResolvedBuildpath(
-										true/* ignoreUnresolvedEntry */, false/*
-																				 * don't
-																				 * generateMarkerOnError
-																				 */, false/*
+										true/* ignoreUnresolvedEntry */,
+										false/*
+											 * don't generateMarkerOnError
+											 */, false/*
 													 * don't
 													 * returnResolutionInProgress
-													 */), false, null /* no reverse map */));
+													 */), false, null /*
+																	 * no
+																	 * reverse
+																	 * map
+																	 */));
 			}
 
 			scriptProject.close();
@@ -1070,10 +1078,10 @@ public class DeltaProcessor {
 	}
 
 	/*
-	 * Processing for an element that has been added:<ul> <li>If the element
-	 * is a project, do nothing, and do not process children, as when a project
-	 * is created it does not yet have any natures - specifically a script
-	 * nature. <li>If the elemet is not a project, process it as added (see
+	 * Processing for an element that has been added:<ul> <li>If the element is
+	 * a project, do nothing, and do not process children, as when a project is
+	 * created it does not yet have any natures - specifically a script nature.
+	 * <li>If the elemet is not a project, process it as added (see
 	 * <code>basicElementAdded</code>. </ul> Delta argument could be null if
 	 * processing an external ZIP change
 	 */
@@ -1348,12 +1356,15 @@ public class DeltaProcessor {
 				}
 				return NON_SCRIPT_RESOURCE;
 			}
+
 			// String fileName = res.getName();
 			IProject project = res.getProject();
 			IScriptProject scriptProject = DLTKCore.create(project);
-			if (scriptProject != null
-					&& Util.isValidSourceModule(scriptProject, res)) {
-				return IModelElement.SOURCE_MODULE;
+			if (scriptProject != null) {
+				if (Util.isValidSourceModule(scriptProject, res)) {
+					return IModelElement.SOURCE_MODULE;
+				}
+				// FIXME: Add support of checking files without extensions here.
 			} else if (this.rootInfo(res.getFullPath(), kind) != null) {
 				// case of proj=src=bin and resource is a jar file on the
 				// buildpath
@@ -1745,8 +1756,8 @@ public class DeltaProcessor {
 
 	/*
 	 * Converts a <code>IResourceDelta</code> rooted in a <code>Workspace</code>
-	 * into the corresponding set of <code>IModelElementDelta</code>, rooted
-	 * in the relevant <code>Model</code>s.
+	 * into the corresponding set of <code>IModelElementDelta</code>, rooted in
+	 * the relevant <code>Model</code>s.
 	 */
 	private IModelElementDelta processResourceDelta(IResourceDelta changes) {
 		try {
@@ -1881,10 +1892,11 @@ public class DeltaProcessor {
 	/*
 	 * Notification that some resource changes have happened on the platform,
 	 * and that the script Model should update any required internal structures
-	 * such that its elements remain consistent. Translates <code>IResourceDeltas</code>
-	 * into <code>IModelElementDeltas</code>.
-	 *
+	 * such that its elements remain consistent. Translates
+	 * <code>IResourceDeltas</code> into <code>IModelElementDeltas</code>.
+	 * 
 	 * @see IResourceDelta
+	 * 
 	 * @see IResource
 	 */
 	public void resourceChanged(IResourceChangeEvent event) {
@@ -2416,9 +2428,9 @@ public class DeltaProcessor {
 							.println("Clearing last state for removed project : " + deltaRes); //$NON-NLS-1$
 				}
 				this.manager.setLastBuiltState((IProject) deltaRes, null /*
-																			 * no
-																			 * state
-																			 */);
+																		 * no
+																		 * state
+																		 */);
 				// clean up previous session containers (see
 				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=89850)
 				this.manager.previousSessionContainers.remove(element);
@@ -2507,9 +2519,8 @@ public class DeltaProcessor {
 										.println("Clearing last state for project loosing script nature: " + res); //$NON-NLS-1$
 							}
 							this.manager.setLastBuiltState(res, null /*
-																		 * no
-																		 * state
-																		 */);
+																	 * no state
+																	 */);
 						}
 						return false; // when a project's nature is
 						// added/removed don't process children
@@ -2687,11 +2698,12 @@ public class DeltaProcessor {
 				// this.manager.secondaryTypesRemoving(file, false);
 				break;
 			case IResourceDelta.REMOVED:
-				indexManager.remove(Util.relativePath(file.getFullPath(), 1/*
-																			 * remove
-																			 * project
-																			 * segment
-																			 */), file.getProject().getFullPath());
+				indexManager.remove(Util
+						.relativePath(file.getFullPath(), 1/*
+															 * remove project
+															 * segment
+															 */), file
+						.getProject().getFullPath());
 				// Clean file from secondary types cache and update
 				// indexing
 				// secondary type cache as indexing cannot remove
