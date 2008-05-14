@@ -157,6 +157,7 @@ public class DLTKPluginImages {
 	public static final ImageDescriptor DESC_OBJS_NATIVE_LIB_PATH_ATTRIB = createUnManaged(T_OBJ, "native_lib_path_attrib.gif"); //$NON-NLS-1$
 		
 	public static final ImageDescriptor DESC_OBJS_CLASS= createManagedFromKey(T_OBJ, IMG_OBJS_CLASS);
+	public static final ImageDescriptor DESC_OBJS_INTERFACE= createManagedFromKey(T_OBJ, IMG_OBJS_INTERFACE);
 	public static final ImageDescriptor DESC_OBJS_NAMESPACE= createManagedFromKey(T_OBJ, IMG_OBJS_NAMESPACE);
 	public static final ImageDescriptor DESC_OBJS_ERROR= createManagedFromKey(T_OBJ, IMG_OBJS_ERROROBJ);
 	public static final ImageDescriptor DESC_OBJS_TEST= createManagedFromKey(T_OBJ, IMG_OBJS_TEST);
@@ -164,6 +165,8 @@ public class DLTKPluginImages {
 	public static final ImageDescriptor DESC_OBJS_MODULE= createManagedFromKey(T_OBJ, IMG_OBJS_MODULE);
 	public static final ImageDescriptor DESC_OBJS_TEMPLATE= createManagedFromKey(T_OBJ, IMG_OBJS_TEMPLATE);
 	public static final ImageDescriptor DESC_OVR_ABSTRACT = createUnManaged(T_OVR, "abstract_co.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_FINAL = createUnManaged(T_OVR, "final_co.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_STATIC = createUnManaged(T_OVR, "static_co.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_RECURSIVE = createUnManaged(T_OVR, "recursive_co.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_CALLER = createUnManaged(T_OVR, "read.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_MAX_LEVEL = createUnManaged(T_OVR, "maxlevel_co.gif"); //$NON-NLS-1$

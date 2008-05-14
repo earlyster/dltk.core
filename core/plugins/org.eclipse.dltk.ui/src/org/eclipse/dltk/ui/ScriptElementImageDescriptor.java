@@ -17,6 +17,17 @@ import org.eclipse.swt.graphics.Point;
 
 public class ScriptElementImageDescriptor extends CompositeImageDescriptor
 {
+	/** Flag to render the abstract adornment. */
+	public final static int ABSTRACT= 		0x001;
+	
+	/** Flag to render the final adornment. */
+	public final static int FINAL=			0x002;
+	
+	/** Flag to render the static adornment. */
+	public final static int STATIC=			0x008;
+	
+	/** Flag to render the 'constructor' adornment. */
+	public final static int CONSTRUCTOR= 	0x200;
 	
 	/** Flag to render the warning adornment. */
 	public final static int WARNING=			0x020;
@@ -117,9 +128,10 @@ public class ScriptElementImageDescriptor extends CompositeImageDescriptor
 		if( bg != null ) {
 			drawImage(bg, 0, 0);
 		}
-		
+		drawTopRight();
 		drawBottomLeft();
 	}
+	
 	private void drawBottomLeft() {
 		Point size= getSize();
 		int x= 0;
@@ -136,4 +148,26 @@ public class ScriptElementImageDescriptor extends CompositeImageDescriptor
 
 	}		
 	
+	private void drawTopRight() {
+		Point pos = new Point(getSize().x, 0);
+		if ((fFlags & ABSTRACT) != 0) {
+			addTopRightImage(DLTKPluginImages.DESC_OVR_ABSTRACT, pos);
+		}
+		if ((fFlags & FINAL) != 0) {
+			addTopRightImage(DLTKPluginImages.DESC_OVR_FINAL, pos);
+		}
+		if ((fFlags & STATIC) != 0) {
+			addTopRightImage(DLTKPluginImages.DESC_OVR_STATIC, pos);
+		}
+
+	}
+
+	private void addTopRightImage(ImageDescriptor desc, Point pos) {
+		ImageData data = getImageData(desc);
+		int x = pos.x - data.width;
+		if (x >= 0) {
+			drawImage(data, x, pos.y);
+			pos.x = x;
+		}
+	}
 }

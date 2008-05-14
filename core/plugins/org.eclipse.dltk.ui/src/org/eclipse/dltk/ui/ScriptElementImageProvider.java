@@ -20,17 +20,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.ast.Modifiers;
-import org.eclipse.dltk.core.DLTKLanguageManager;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IExternalSourceModule;
-import org.eclipse.dltk.core.IField;
-import org.eclipse.dltk.core.IMethod;
-import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.IScriptFolder;
-import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.IType;
-import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.*;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
 import org.eclipse.dltk.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -188,12 +178,11 @@ public class ScriptElementImageProvider {
 
 	public ImageDescriptor getScriptImageDescriptor(IModelElement element,
 			int flags) {
-		// int adornmentFlags = computeAdornmentFlags(element, flags);
+		int adornmentFlags = computeAdornmentFlags(element, flags);
 		Point size = useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
 		ImageDescriptor descr = getBaseImageDescriptor(element, flags);
 		if (descr != null) {
-			return new ScriptElementImageDescriptor(descr,
-					0/* adornmentFlags */, size);
+			return new ScriptElementImageDescriptor(descr, adornmentFlags, size);
 		} else {
 			return null;
 		}
@@ -352,7 +341,9 @@ public class ScriptElementImageProvider {
 		if ((flags & Modifiers.AccModule) != 0) {
 			return DLTKPluginImages.DESC_OBJS_MODULE;
 		}
-
+		if ((flags & Modifiers.AccInterface) != 0) {
+			return DLTKPluginImages.DESC_OBJS_INTERFACE;
+		}
 		return DLTKPluginImages.DESC_OBJS_CLASS;
 	}
 
@@ -370,5 +361,38 @@ public class ScriptElementImageProvider {
 		}
 
 		return DLTKPluginImages.DESC_METHOD_PUBLIC;
+	}
+	
+// ---- Methods to compute the adornments flags ---------------------------------
+	
+	private int computeAdornmentFlags(IModelElement element, int renderFlags) {
+		int flags = 0;
+		if (showOverlayIcons(renderFlags) && element instanceof IMember) {
+			try {
+				IMember member = (IMember) element;
+				if (element.getElementType() == IModelElement.METHOD && ((IMethod) element).isConstructor()) {
+					flags |= ScriptElementImageDescriptor.CONSTRUCTOR;
+				}
+
+				IType declaringType = member.getDeclaringType();
+				boolean isInterface = declaringType != null && Flags.isInterface(declaringType.getFlags());
+				int modifiers = member.getFlags();
+
+				if (Flags.isAbstract(modifiers) && !isInterface)
+					flags |= ScriptElementImageDescriptor.ABSTRACT;
+				if (Flags.isFinal(modifiers))
+					flags |= ScriptElementImageDescriptor.FINAL;
+				if (Flags.isStatic(modifiers))
+					flags |= ScriptElementImageDescriptor.STATIC;
+
+			} catch (ModelException e) {
+				// do nothing. Can't compute runnable adornment or get flags
+			}
+		}
+		return flags;
+	}
+
+	private static boolean showOverlayIcons(int flags) {
+		return (flags & OVERLAY_ICONS) != 0;
 	}
 }

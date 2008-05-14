@@ -9,10 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.typehierarchy;
 
-import org.eclipse.dltk.core.IMethod;
-import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IType;
-import org.eclipse.dltk.core.ITypeHierarchy;
+import org.eclipse.dltk.core.*;
+import org.eclipse.dltk.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.ScriptElementImageDescriptor;
@@ -151,23 +149,29 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		
 		int flags= hierarchy.getCachedFlags(type);
 		if (flags == -1) {
-			return new ScriptElementImageDescriptor(DLTKPluginImages.DESC_OBJS_CLASS, 0, ScriptElementImageProvider.BIG_SIZE);
+			try {
+				flags = type.getFlags();
+				if (hierarchy instanceof TypeHierarchy) {
+					((TypeHierarchy) hierarchy).cacheFlags(type, flags);
+				}
+			} catch (ModelException e) {
+			}
 		}
-		
-		boolean isInner= (type.getDeclaringType() != null);
+//		boolean isInner= (type.getDeclaringType() != null);
 		
 		ImageDescriptor desc= ScriptElementImageProvider.getTypeImageDescriptor(flags, false);//(isInner, false, flags, isDifferentScope(type));
 
-		int adornmentFlags= 0;
-//		if (Flags.isFinal(flags)) {
-//			adornmentFlags |= ScriptElementImageDescriptor.FINAL;
-//		}
-//		if (Flags.isAbstract(flags) && !isInterface) {
-//			adornmentFlags |= ScriptElementImageDescriptor.ABSTRACT;
-//		}
-//		if (Flags.isStatic(flags)) {
-//			adornmentFlags |= ScriptElementImageDescriptor.STATIC;
-//		}
+		boolean isInterface = Flags.isInterface(flags);
+		int adornmentFlags = 0;
+		if (Flags.isFinal(flags)) {
+			adornmentFlags |= ScriptElementImageDescriptor.FINAL;
+		}
+		if (Flags.isAbstract(flags) && !isInterface) {
+			adornmentFlags |= ScriptElementImageDescriptor.ABSTRACT;
+		}
+		if (Flags.isStatic(flags)) {
+			adornmentFlags |= ScriptElementImageDescriptor.STATIC;
+		}
 		
 		return new ScriptElementImageDescriptor(desc, adornmentFlags, ScriptElementImageProvider.BIG_SIZE);
 	}
