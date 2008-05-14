@@ -50,7 +50,7 @@ public class MyHostShellProcessAdapter extends Process implements
 	 * Constructor.
 	 * 
 	 * @param hostShell
-	 *            An instance of the IHostShell class.
+	 * 		An instance of the IHostShell class.
 	 * @param postfix
 	 * @throws java.io.IOException
 	 */
@@ -98,7 +98,7 @@ public class MyHostShellProcessAdapter extends Process implements
 		// No way to tell what the exit value was.
 		// TODO it would be possible to get the exit value
 		// when the remote process is started like this:
-		// sh -c 'remotecmd ; echo "-->RSETAG<-- $?\"'
+		// sh -c' remotecmd ; echo" -->RSETAG<-- $?\"'
 		// Then the output steram could be examined for -->RSETAG<-- to get the
 		// exit value.
 		return 0;
@@ -169,9 +169,13 @@ public class MyHostShellProcessAdapter extends Process implements
 	 * Process an RSE Shell event, by writing the lines of text contained in the
 	 * event into the adapter's streams.
 	 * 
-	 * @see org.eclipse.rse.services.shells.IHostShellOutputListener#shellOutputChanged(org.eclipse.rse.services.shells.IHostShellChangeEvent)
+	 * @see org.eclipse.rse.services.shells.IHostShellOutputListener#
+	 * 	shellOutputChanged
+	 * 	(org.eclipse.rse.services.shells.IHostShellChangeEvent)
 	 */
-	boolean skip = true;
+	private boolean skip = true;
+	private int prefixCounter = 0;
+
 	public void shellOutputChanged(IHostShellChangeEvent event) {
 		IHostOutput[] input = event.getLines();
 		OutputStream outputStream = event.isError() ? hostShellError
@@ -179,7 +183,15 @@ public class MyHostShellProcessAdapter extends Process implements
 		try {
 			for (int i = 0; i < input.length; i++) {
 				String line = input[i].getString();
+				System.out.println("RSEExecEnvironment:" + line);
 				if (line.trim().equals(this.pattern1)) {
+					prefixCounter++;
+					if (prefixCounter == 2) {
+						System.out.println("CALL DESTROY");
+						hostShellError.close();
+						hostShellInput.close();
+						return;
+					}
 					skip = !skip;
 					continue;
 				}

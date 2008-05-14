@@ -119,6 +119,8 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		String workingDirectory = null;
 		if (workingDir != null) {
 			workingDirectory = this.environment.convertPathToString(workingDir);
+		} else {
+			workingDirectory = "/";
 		}
 		try {
 			hostShell = shellService.runCommand(workingDirectory, "bash",
@@ -130,7 +132,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 
 		// Sometimes environment variables aren't set, so use export.
 		if (environment != null) {
-			// TODO: Skip environment variables what is alredy in shell.
+			// TODO: Skip environment variables what is already in shell.
 			for (int i = 0; i < environment.length; i++) {
 				hostShell.writeToShell("export "
 						+ toShellArguments(environment[i]));
