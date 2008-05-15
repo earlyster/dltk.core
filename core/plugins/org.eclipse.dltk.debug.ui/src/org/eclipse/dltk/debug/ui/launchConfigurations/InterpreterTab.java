@@ -24,7 +24,7 @@ import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.messages.ScriptLaunchMessages;
 import org.eclipse.dltk.internal.debug.ui.interpreters.AbstractInterpreterComboBlock;
@@ -456,17 +456,20 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 				IScriptProject project = getScriptProject();
 				String name = ScriptLaunchMessages.InterpreterTab_7;
 				if (project == null || project.getProject().isAccessible()) {
-					IInterpreterInstall interpreter = null;
-					interpreter = ScriptRuntime
-							.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
-									getNature(),
-									LocalEnvironment.ENVIRONMENT_ID));
-					if (interpreter != null) {
-						name = interpreter.getName();
+					IEnvironment environment = EnvironmentManager
+							.getEnvironment(project);
+					if (environment != null) {
+						IInterpreterInstall interpreter = null;
+						interpreter = ScriptRuntime
+								.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
+										getNature(), environment.getId()));
+						if (interpreter != null) {
+							name = interpreter.getName();
+						}
+						return MessageFormat.format(
+								ScriptLaunchMessages.InterpreterTab_8,
+								new String[] { name });
 					}
-					return MessageFormat.format(
-							ScriptLaunchMessages.InterpreterTab_8,
-							new String[] { name });
 				}
 				try {
 					IInterpreterInstall interpreter = ScriptRuntime
