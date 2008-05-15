@@ -11,4 +11,15 @@
          </adapter>
       </factory>
    </extension>
+   <extension
+         point="org.eclipse.dltk.ui.dltkElementFilters">
+      <filter
+            description="Hide RSE temp project"
+            enabled="true"
+            id="org.eclipse.dltk.internal.rse.ui.HideRemoteSystemTempFiles"
+            name="Hide RSE temp project"
+            pattern="RemoteSystemsTempFiles"
+            targetId="org.eclipse.dltk.ui.ScriptExplorer">
+      </filter>
+   </extension>
 </plugin>
