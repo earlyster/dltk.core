@@ -68,6 +68,24 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 	// State
 	protected boolean fIsInitializing = false;
 
+	private IMainLaunchConfigurationTabListenerManager listenerManager = null;
+
+	public InterpreterTab(
+			IMainLaunchConfigurationTabListenerManager listenerManager) {
+		this.listenerManager = listenerManager;
+	}
+
+	/**
+	 * @deprecated Using of default constructor not allow listening for project
+	 * 	changes. Project changes are method to obtain environment information.
+	 */
+	public InterpreterTab() {
+	}
+
+	public IMainLaunchConfigurationTabListenerManager getMainTab() {
+		return listenerManager;
+	}
+
 	// Selection changed listener (checked InterpreterEnvironment)
 	private IPropertyChangeListener fCheckListener = new IPropertyChangeListener() {
 		public void propertyChange(PropertyChangeEvent event) {
@@ -94,7 +112,8 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 		Composite topComp = new Composite(parent, SWT.NONE);
 		setControl(topComp);
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(),
-		// IScriptDebugHelpContextIds.LAUNCH_CONFIGURATION_DIALOG_InterpreterEnvironment_TAB);
+		// IScriptDebugHelpContextIds.
+		// LAUNCH_CONFIGURATION_DIALOG_InterpreterEnvironment_TAB);
 		GridLayout topLayout = new GridLayout();
 		topLayout.numColumns = 1;
 		topLayout.marginHeight = 0;
@@ -168,12 +187,13 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 		fInterpreterBlock
 				.setDefaultInterpreterDescriptor(getDefaultInterpreterDescriptor());
 		IScriptProject scriptProject = getScriptProject();
-		if(scriptProject != null ) {
-			fInterpreterBlock.setEnvironment(EnvironmentManager.getEnvironment(scriptProject));
+		if (scriptProject != null) {
+			fInterpreterBlock.setEnvironment(EnvironmentManager
+					.getEnvironment(scriptProject));
 			fInterpreterBlock.refreshInterpreters();
-		}
-		else {
-			fInterpreterBlock.setEnvironment(EnvironmentManager.getLocalEnvironment());
+		} else {
+			fInterpreterBlock.setEnvironment(EnvironmentManager
+					.getLocalEnvironment());
 			fInterpreterBlock.refreshInterpreters();
 		}
 		ILaunchConfigurationTab dynamicTab = getDynamicTab();
@@ -187,7 +207,8 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 	protected abstract String getNature();
 
 	/**
-	 * @see ILaunchConfigurationTab#performApply(ILaunchConfigurationWorkingCopy)
+	 * @see
+	 * 	ILaunchConfigurationTab#performApply(ILaunchConfigurationWorkingCopy)
 	 */
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		configuration.setAttribute(
@@ -416,9 +437,9 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 	 * area if a InterpreterEnvironment supports Interpreter specific arguments.
 	 * 
 	 * @param visible
-	 *            whether this tab will display the Interpreter specific
-	 *            arguments area if a InterpreterEnvironment supports
-	 *            Interpreter specific arguments
+	 * 		whether this tab will display the Interpreter specific arguments
+	 * 		area if a InterpreterEnvironment supports Interpreter specific
+	 * 		arguments
 	 */
 	public void setInterpreterSpecificArgumentsVisible(boolean visible) {
 		fUseDynamicArea = visible;

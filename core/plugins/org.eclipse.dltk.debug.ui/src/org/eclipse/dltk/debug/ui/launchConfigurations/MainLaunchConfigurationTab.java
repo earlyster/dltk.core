@@ -12,9 +12,11 @@ package org.eclipse.dltk.debug.ui.launchConfigurations;
 import java.net.URI;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.IDebugUIConstants;
@@ -45,7 +47,8 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceComparator;
 
 public abstract class MainLaunchConfigurationTab extends
-		ScriptLaunchConfigurationTab {
+		ScriptLaunchConfigurationTab implements
+		IMainLaunchConfigurationTabListenerManager {
 
 	private Text fScriptText;
 
@@ -53,8 +56,26 @@ public abstract class MainLaunchConfigurationTab extends
 
 	private boolean useInteractiveConsoleGroup = false;
 
+	ListenerList listsners = new ListenerList();
+
 	public MainLaunchConfigurationTab(String mode) {
 		super(mode);
+	}
+
+	public void addListener(IMainLaunchConfigurationTabListener listener) {
+		this.listsners.add(listener);
+	}
+
+	public void removeListener(IMainLaunchConfigurationTabListener listener) {
+		this.listsners.remove(listener);
+	}
+
+	private void notifyProjectChangedListeners(IProject project) {
+		Object[] listeners = this.listsners.getListeners();
+		for (int i = 0; i < listeners.length; i++) {
+			((IMainLaunchConfigurationTabListener) listeners[i])
+					.projectChanged(project);
+		}
 	}
 
 	/**
@@ -82,7 +103,7 @@ public abstract class MainLaunchConfigurationTab extends
 	 * Creates the widgets for specifying a main type.
 	 * 
 	 * @param parent
-	 *            the parent composite
+	 * 		the parent composite
 	 */
 	protected void createMainModuleEditor(Composite parent, String text) {
 		Font font = parent.getFont();
@@ -140,14 +161,16 @@ public abstract class MainLaunchConfigurationTab extends
 	 * Loads the main type from the launch configuration's preference store
 	 * 
 	 * @param config
-	 *            the config to load the main type from
+	 * 		the config to load the main type from
 	 */
 	protected void updateMainModuleFromConfig(ILaunchConfiguration config) {
 		fScriptText.setText(getMainModuleName(config));
 	}
 
 	/*
-	 * @see org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab#doCreateControl(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
+	 * #doCreateControl(org.eclipse.swt.widgets.Composite)
 	 */
 	protected void doCreateControl(Composite composite) {
 		createMainModuleEditor(composite,
@@ -162,7 +185,9 @@ public abstract class MainLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab#doPerformApply(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see
+	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
+	 * #doPerformApply(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	protected void doPerformApply(ILaunchConfigurationWorkingCopy config) {
 		config.setAttribute(
@@ -181,7 +206,7 @@ public abstract class MainLaunchConfigurationTab extends
 						false);
 			} else {
 				config.setAttribute(IDebugUIConstants.ATTR_CAPTURE_IN_CONSOLE,
-						(String)null);
+						(String) null);
 			}
 			// config.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, "false");
 		}
@@ -198,10 +223,10 @@ public abstract class MainLaunchConfigurationTab extends
 	 */
 	protected boolean validateScript() {
 		URI script = validatAndGetScriptPath();
+		IScriptProject project = getProject();
+		IEnvironment environment = EnvironmentManager.getEnvironment(project);
 		if (script != null) {
 			FilePathValidator validator = new FieldValidators.FilePathValidator();
-			IScriptProject project = getProject();
-			IEnvironment environment = EnvironmentManager.getEnvironment(project);
 			IStatus result = validator.validate(script.getPath(), environment);
 
 			if (!result.isOK()) {
@@ -226,7 +251,9 @@ public abstract class MainLaunchConfigurationTab extends
 	protected URI validatAndGetScriptPath() {
 		String projectName = getProjectName();
 		IScriptProject proj = getScriptModel().getScriptProject(projectName);
-
+		if (proj != null) {
+			notifyProjectChangedListeners(proj.getProject());
+		}
 		URI location = proj.getProject().getLocationURI();
 		if (location == null) {
 			setErrorMessage(DLTKLaunchConfigurationsMessages.error_notAValidProject);
@@ -246,7 +273,9 @@ public abstract class MainLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab#doCanSave()
+	 * @see
+	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
+	 * #doCanSave()
 	 */
 	protected boolean doCanSave() {
 		return validateScript();

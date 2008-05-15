@@ -15,17 +15,21 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.IDLTKDebugUIConstants;
 import org.eclipse.dltk.debug.ui.actions.ControlAccessibleListener;
+import org.eclipse.dltk.debug.ui.launchConfigurations.IMainLaunchConfigurationTabListener;
+import org.eclipse.dltk.debug.ui.launchConfigurations.IMainLaunchConfigurationTabListenerManager;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.ui.util.SWTUtil;
 import org.eclipse.dltk.launching.IInterpreterInstall;
@@ -116,6 +120,31 @@ public abstract class AbstractInterpreterComboBlock {
 
 	private static IStatus OK_STATUS = new Status(IStatus.OK, DLTKDebugUIPlugin
 			.getUniqueIdentifier(), 0, "", null); //$NON-NLS-1$
+
+	protected AbstractInterpreterComboBlock(
+			IMainLaunchConfigurationTabListenerManager listenerManager) {
+		if (listenerManager != null) {
+			listenerManager
+					.addListener(new IMainLaunchConfigurationTabListener() {
+						public void projectChanged(IProject project) {
+							IEnvironment env = EnvironmentManager
+									.getEnvironment(project);
+							if (env != null) {
+								if (!env.equals(environment)) {
+									environment = env;
+									refreshInterpreters();
+								}
+							}
+						}
+					});
+		}
+	}
+
+	/**
+	 * @deprecated
+	 */
+	protected AbstractInterpreterComboBlock() {
+	}
 
 	public void addPropertyChangeListener(IPropertyChangeListener listener) {
 		fListeners.add(listener);
