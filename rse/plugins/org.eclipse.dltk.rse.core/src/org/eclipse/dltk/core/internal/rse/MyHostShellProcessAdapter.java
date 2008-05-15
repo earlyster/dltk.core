@@ -183,11 +183,11 @@ public class MyHostShellProcessAdapter extends Process implements
 		try {
 			for (int i = 0; i < input.length; i++) {
 				String line = input[i].getString();
-				System.out.println("RSEExecEnvironment:" + line);
+//				System.out.println("RSEExecEnvironment:" + line);
 				if (line.trim().equals(this.pattern1)) {
 					prefixCounter++;
 					if (prefixCounter == 2) {
-						System.out.println("CALL DESTROY");
+//						System.out.println("CALL DESTROY");
 						hostShellError.close();
 						hostShellInput.close();
 						return;
