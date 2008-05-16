@@ -344,8 +344,12 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	}
 
 	public static void logErrorMessage(String message) {
+		logErrorMessage(message, null);
+	}
+
+	public static void logErrorMessage(String message, Throwable throwable) {
 		DLTKUIPlugin.log(new Status(IStatus.ERROR, DLTKUIPlugin.PLUGIN_ID,
-				IDLTKStatusConstants.INTERNAL_ERROR, message, null));
+				IDLTKStatusConstants.INTERNAL_ERROR, message, throwable));
 	}
 
 	public static void logErrorStatus(String message, IStatus status) {

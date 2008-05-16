@@ -138,22 +138,6 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		final ISourceModule module = currentScriptFolder.createSourceModule(
 				fileName, getFileContent(), true, monitor);
 
-		if (module != null) {
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					try {
-						EditorUtility.openInEditor(module);
-					} catch (PartInitException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (ModelException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			});
-		}
-
 		return module;
 	}
 

@@ -13,6 +13,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.ui.editor.EditorUtility;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PartInitException;
 
 public abstract class NewSourceModuleWizard extends NewElementWizard {
 
@@ -37,5 +42,30 @@ public abstract class NewSourceModuleWizard extends NewElementWizard {
 	protected void finishPage(IProgressMonitor monitor)
 			throws InterruptedException, CoreException {
 		module = page.createFile(monitor);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.ui.wizards.NewElementWizard#performFinish()
+	 */
+	public boolean performFinish() {
+		final boolean result = super.performFinish();
+		if (result && module != null) {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					try {
+						EditorUtility.openInEditor(module);
+					} catch (PartInitException e) {
+						DLTKUIPlugin.logErrorMessage("Error in openInEditor("
+								+ module.getElementName() + ")", e);
+					} catch (ModelException e) {
+						DLTKUIPlugin.logErrorMessage("Error in openInEditor("
+								+ module.getElementName() + ")", e);
+					}
+				}
+			});
+		}
+		return result;
 	}
 }
