@@ -4,8 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
- 
+ * 
+ * Contributors:
+ *     xored software, Inc. - initial API and implementation
+ *     xored software, Inc. - fix tab handling (Bug# 200024) (Alex Panchenko) 
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.editor;
 
@@ -2203,6 +2205,12 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 							.equals(property)
 					|| CodeFormatterConstants.FORMATTER_TAB_CHAR
 							.equals(property)) {
+				if (CodeFormatterConstants.FORMATTER_TAB_CHAR.equals(property)) {
+					if (isTabsToSpacesConversionEnabled())
+						installTabsToSpacesConverter();
+					else
+						uninstallTabsToSpacesConverter();
+				}
 				updateIndentPrefixes();
 				StyledText textWidget = sourceViewer.getTextWidget();
 				int tabWidth = getSourceViewerConfiguration().getTabWidth(
@@ -3051,5 +3059,14 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				}
 			}
 		}
+	}
+
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#isTabsToSpacesConversionEnabled()
+	 */
+	protected boolean isTabsToSpacesConversionEnabled() {
+		return getPreferenceStore() != null
+				&& CodeFormatterConstants.SPACE.equals(getPreferenceStore()
+						.getString(CodeFormatterConstants.FORMATTER_TAB_CHAR));
 	}
 }

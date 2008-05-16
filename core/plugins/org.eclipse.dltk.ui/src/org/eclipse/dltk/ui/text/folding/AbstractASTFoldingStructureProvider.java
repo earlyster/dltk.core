@@ -672,7 +672,9 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		Map additions = new HashMap();
 		List deletions = new ArrayList();
 		List updates = new ArrayList();
-		computeFoldingStructure(ctx);
+		if (!computeFoldingStructure(ctx)) {
+			return;
+		}
 		Map updated = ctx.fMap;
 		Map previous = computeCurrentStructure(ctx);
 		Iterator e = updated.keySet().iterator();
@@ -734,16 +736,22 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		ctx.getModel().modifyAnnotations(removals, additions, changes);
 	}
 
-	private void computeFoldingStructure(FoldingStructureComputationContext ctx) {
+	private boolean computeFoldingStructure(
+			FoldingStructureComputationContext ctx) {
 		try {
 			String contents = ((ISourceReference) fInput).getSource();
-			computeFoldingStructure(contents, ctx);
+			return computeFoldingStructure(contents, ctx);
 		} catch (ModelException e) {
+			return false;
 		}
 	}
 
-	protected void computeFoldingStructure(String contents,
+	protected boolean computeFoldingStructure(String contents,
 			FoldingStructureComputationContext ctx) {
+		CodeBlock[] blockRegions = getCodeBlocks(contents);
+		if (blockRegions == null) {
+			return false;
+		}
 		if (fCommentsFolding) {
 			// 1. Compute regions for comments
 			IRegion[] commentRegions = computeCommentsRanges(contents);
@@ -769,7 +777,6 @@ public abstract class AbstractASTFoldingStructureProvider implements
 			}
 		}
 		// 2. Compute blocks regions
-		CodeBlock[] blockRegions = getCodeBlocks(contents);
 		for (int i = 0; i < blockRegions.length; i++) {
 			CodeBlock codeBlock = blockRegions[i];
 			if (!mayCollapse(codeBlock.statement, ctx))
@@ -816,6 +823,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 				}
 			}
 		}
+		return true;
 	}
 
 	protected class CodeBlock {
@@ -851,8 +859,9 @@ public abstract class AbstractASTFoldingStructureProvider implements
 			throws BadLocationException {
 		return isEmptyRegion(d, r.getOffset(), r.getLength());
 	}
-	
-	protected boolean isEmptyRegion(IDocument d, int offset, int length) throws BadLocationException {
+
+	protected boolean isEmptyRegion(IDocument d, int offset, int length)
+			throws BadLocationException {
 		return d.get(offset, length).trim().length() == 0;
 	}
 
@@ -1091,7 +1100,10 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	protected CodeBlock[] getCodeBlocks(String code, int offset) {
 		ISourceParser parser = getSourceParser();
 		ModuleDeclaration decl = parser.parse(null, code.toCharArray(), null);
+		return buildCodeBlocks(decl, offset);
+	}
 
+	protected CodeBlock[] buildCodeBlocks(ModuleDeclaration decl, int offset) {
 		FoldingASTVisitor visitor = getFoldingVisitor(offset);
 
 		try {
@@ -1123,7 +1135,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	 * @param ctx
 	 * @return
 	 * @deprecated will be removed
-	 * @see #initiallyCollapseComments(IRegion, org.eclipse.dltk.ui.text.folding.AbstractASTFoldingStructureProvider.FoldingStructureComputationContext)
+	 * @see #initiallyCollapseComments(IRegion,
+	 *      org.eclipse.dltk.ui.text.folding.AbstractASTFoldingStructureProvider.FoldingStructureComputationContext)
 	 */
 	protected boolean initiallyCollapseComments(
 			FoldingStructureComputationContext ctx) {
@@ -1134,7 +1147,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 			FoldingStructureComputationContext ctx) {
 		return initiallyCollapseComments(ctx);
 	}
-	
+
 	/**
 	 * Checks if the specified region is located at the beginning of the
 	 * document
@@ -1157,7 +1170,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Installs a partitioner with <code>document</code>.
 	 * 
