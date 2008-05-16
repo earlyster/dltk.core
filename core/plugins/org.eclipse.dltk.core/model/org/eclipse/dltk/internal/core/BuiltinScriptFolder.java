@@ -20,7 +20,6 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 
-
 public class BuiltinScriptFolder extends ScriptFolder {
 	public BuiltinScriptFolder(ProjectFragment parent, IPath path) {
 		super(parent, path);
@@ -29,11 +28,14 @@ public class BuiltinScriptFolder extends ScriptFolder {
 	void computeForeignResources(BuiltinScriptFolderInfo info) {
 		info.setForeignResources(ModelElementInfo.NO_NON_SCRIPT_RESOURCES);
 	}
+
 	public ISourceModule getSourceModule(String name) {
-		return new BuiltinSourceModule(this, name, DefaultWorkingCopyOwner.PRIMARY );
+		return new BuiltinSourceModule(this, name,
+				DefaultWorkingCopyOwner.PRIMARY);
 	}
-	
-	protected boolean computeChildren(OpenableElementInfo info, String[] entryNames) {
+
+	protected boolean computeChildren(OpenableElementInfo info,
+			String[] entryNames) {
 		if (entryNames != null && entryNames.length > 0) {
 			ArrayList vChildren = new ArrayList();
 			for (int iter = 0; iter < entryNames.length; iter++) {
@@ -62,31 +64,43 @@ public class BuiltinScriptFolder extends ScriptFolder {
 	}
 
 	// Open my archive: this creates all the pkg infos
-	protected void generateInfos(Object info, HashMap newElements, IProgressMonitor pm) throws ModelException {
+	protected void generateInfos(Object info, HashMap newElements,
+			IProgressMonitor pm) throws ModelException {
 		// Open my archive: this creates all the pkg infos
 		Openable openableParent = (Openable) this.parent;
 		if (!openableParent.isOpen()) {
-			openableParent.generateInfos(openableParent.createElementInfo(), newElements, pm);
+			openableParent.generateInfos(openableParent.createElementInfo(),
+					newElements, pm);
 		}
 	}
-	public IModelElement getHandleFromMemento(String token, MementoTokenizer memento, WorkingCopyOwner owner) {
+
+	public IModelElement getHandleFromMemento(String token,
+			MementoTokenizer memento, WorkingCopyOwner owner) {
 		switch (token.charAt(0)) {
-			case JEM_SOURCEMODULE:
-				if (!memento.hasMoreTokens()) return this;
-				String classFileName = memento.nextToken();
-				ModelElement classFile = (ModelElement)getSourceModule(classFileName);
-				return classFile.getHandleFromMemento(memento, owner);			
+		case JEM_SOURCEMODULE:
+			if (!memento.hasMoreTokens())
+				return this;
+			String classFileName = memento.nextToken();
+			ModelElement classFile = (ModelElement) getSourceModule(classFileName);
+			return classFile.getHandleFromMemento(memento, owner);
 		}
 		return null;
 	}
-	
+
 	protected Object createElementInfo() {
-		return null; // not used for ExternalScriptFolders: info is created when directory are opened.
+		return null; // not used for ExternalScriptFolders: info is created when
+		// directory are opened.
 	}
+
 	protected boolean resourceExists() {
-		return true;
+		if (path.toPortableString().length() == 0) {
+			return true;
+		}
+		return false;
 	}
-	public Object[] getForeignResources() throws ModelException {		
-		return ((BuiltinScriptFolderInfo) getElementInfo()).getForeignResources();		
+
+	public Object[] getForeignResources() throws ModelException {
+		return ((BuiltinScriptFolderInfo) getElementInfo())
+				.getForeignResources();
 	}
 }
