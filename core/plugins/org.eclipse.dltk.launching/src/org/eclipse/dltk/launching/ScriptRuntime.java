@@ -57,6 +57,7 @@ import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.internal.launching.CompositeId;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.DefaultEntryResolver;
@@ -1054,6 +1055,40 @@ public final class ScriptRuntime {
 		} catch (CoreException e) {
 			return null;
 		}
+	}
+
+	/**
+	 * Returns the <code>IInterpreterInstall</code> represented by the
+	 * specified <code>compositeId</code>.
+	 * 
+	 * <p>
+	 * If an interpreter can not be found for the given <code>compositeId</code>,
+	 * the default interpreter for the specified <code>natureId</code> will be
+	 * returned.
+	 * 
+	 * If no default interpreter has been configured, <code>null</code> will
+	 * be returned.
+	 * </p>
+	 * 
+	 * @param compositeId
+	 *            the composite id that specifies an instance of
+	 *            IInterpreterInstall
+	 * @param natureId
+	 *            nature id
+	 * 
+	 * @return IInterpreterInstall instance or <code>null</code> if one can
+	 *         not be found.
+	 */
+	public static IInterpreterInstall getInterpreterInstall(String compositeId,
+			String natureId) {
+		IInterpreterInstall install = getInterpreterFromCompositeId(compositeId);
+		if (install == null) {
+			DefaultInterpreterEntry entry = new DefaultInterpreterEntry(
+					natureId, LocalEnvironment.ENVIRONMENT_ID);
+			install = ScriptRuntime.getDefaultInterpreterInstall(entry);
+		}
+
+		return install;
 	}
 
 	/**
