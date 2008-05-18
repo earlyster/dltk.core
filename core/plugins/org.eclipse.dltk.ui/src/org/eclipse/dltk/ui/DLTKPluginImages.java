@@ -282,6 +282,7 @@ public class DLTKPluginImages {
         
     public static final ImageDescriptor DESC_OBJS_GHOST= createManagedFromKey(T_OBJ, IMG_OBJS_GHOST);
     public static final ImageDescriptor DESC_OBJS_CLASSALT= createManagedFromKey(T_OBJ, IMG_OBJS_CLASSALT);
+    public static final ImageDescriptor DESC_OBJS_INTERFACEALT= createManagedFromKey(T_OBJ, IMG_OBJS_INTERFACEALT);
     
     public static final ImageDescriptor DESC_OBJS_FIELD = createManagedFromKey(T_OBJ, IMG_OBJS_FIELD);
         

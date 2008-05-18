@@ -320,10 +320,13 @@ public class ScriptElementImageProvider {
 
 	public static ImageDescriptor getTypeImageDescriptor(int flags,
 			boolean useLightIcons) {
-		if (useLightIcons) {
+		if (Flags.isInterface(flags)) {
+			if (useLightIcons) {
+				return DLTKPluginImages.DESC_OBJS_INTERFACEALT;
+			}
+		} else if (useLightIcons) {
 			return DLTKPluginImages.DESC_OBJS_CLASSALT;
-		}	
-
+		}
 		return getClassImageDescriptor(flags);
 	}
 
