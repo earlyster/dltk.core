@@ -20,7 +20,19 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.ast.Modifiers;
-import org.eclipse.dltk.core.*;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.Flags;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IExternalSourceModule;
+import org.eclipse.dltk.core.IField;
+import org.eclipse.dltk.core.IMember;
+import org.eclipse.dltk.core.IMethod;
+import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
 import org.eclipse.dltk.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -76,7 +88,7 @@ public class ScriptElementImageProvider {
 	 * for <code>ISourceReference</code>s.
 	 * 
 	 * @param flags
-	 *            Flags as defined by the ScriptImageLabelProvider
+	 * 		Flags as defined by the ScriptImageLabelProvider
 	 */
 	public Image getImageLabel(Object element, int flags) {
 		return getImageLabel(computeDescriptor(element, flags));
@@ -96,9 +108,9 @@ public class ScriptElementImageProvider {
 		return fRegistry;
 	}
 
-	// private static boolean showOverlayIcons(int flags) {
-	// return (flags & OVERLAY_ICONS) != 0;
-	// }
+	private static boolean showOverlayIcons(int flags) {
+		return (flags & OVERLAY_ICONS) != 0;
+	}
 
 	private static boolean useSmallSize(int flags) {
 		return (flags & SMALL_ICONS) != 0;
@@ -126,8 +138,7 @@ public class ScriptElementImageProvider {
 	private static Map labelProviders = null;
 
 	/**
-	 * Creates {@link ILabelProvider} objects from configuration
-	 * elements.
+	 * Creates {@link ILabelProvider} objects from configuration elements.
 	 */
 	private static void createProviders(IConfigurationElement[] elements) {
 		labelProviders = new HashMap();
@@ -315,7 +326,16 @@ public class ScriptElementImageProvider {
 	}
 
 	public static ImageDescriptor getFieldImageDescriptor(int flags) {
-		return DLTKPluginImages.DESC_OBJS_FIELD;
+		if (Flags.isPrivate(flags)) {
+			return DLTKPluginImages.DESC_FIELD_PRIVATE;
+		}
+		if (Flags.isProtected(flags)) {
+			return DLTKPluginImages.DESC_FIELD_PROTECTED;
+		}
+		if (Flags.isPublic(flags)) {
+			return DLTKPluginImages.DESC_FIELD_PUBLIC;
+		}
+		return DLTKPluginImages.DESC_FIELD_DEFAULT;
 	}
 
 	public static ImageDescriptor getTypeImageDescriptor(int flags,
@@ -365,20 +385,23 @@ public class ScriptElementImageProvider {
 
 		return DLTKPluginImages.DESC_METHOD_PUBLIC;
 	}
-	
-// ---- Methods to compute the adornments flags ---------------------------------
-	
-	private int computeAdornmentFlags(IModelElement element, int renderFlags) {
+
+	// ---- Methods to compute the adornments flags ----------------------------
+	// -----
+
+	public static int computeAdornmentFlags(IModelElement element, int renderFlags) {
 		int flags = 0;
 		if (showOverlayIcons(renderFlags) && element instanceof IMember) {
 			try {
 				IMember member = (IMember) element;
-				if (element.getElementType() == IModelElement.METHOD && ((IMethod) element).isConstructor()) {
+				if (element.getElementType() == IModelElement.METHOD
+						&& ((IMethod) element).isConstructor()) {
 					flags |= ScriptElementImageDescriptor.CONSTRUCTOR;
 				}
 
 				IType declaringType = member.getDeclaringType();
-				boolean isInterface = declaringType != null && Flags.isInterface(declaringType.getFlags());
+				boolean isInterface = declaringType != null
+						&& Flags.isInterface(declaringType.getFlags());
 				int modifiers = member.getFlags();
 
 				if (Flags.isAbstract(modifiers) && !isInterface)
@@ -393,9 +416,5 @@ public class ScriptElementImageProvider {
 			}
 		}
 		return flags;
-	}
-
-	private static boolean showOverlayIcons(int flags) {
-		return (flags & OVERLAY_ICONS) != 0;
 	}
 }

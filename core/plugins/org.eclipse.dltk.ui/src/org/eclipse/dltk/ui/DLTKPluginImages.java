@@ -52,7 +52,6 @@ public class DLTKPluginImages {
 	public static final String IMG_OBJS_TEST = NAME_PREFIX + "test_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_TESTCASE = NAME_PREFIX + "testcase_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_MODULE = NAME_PREFIX + "module_obj.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_FIELD = NAME_PREFIX + "field_default_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_LIBRARY = NAME_PREFIX + "library_obj.gif"; //$NON-NLS-1$	
 	public static final String IMG_OBJS_ACCESSRULES_ATTRIB = NAME_PREFIX + "access_restriction_attrib.gif"; //$NON-NLS-1$
 	
@@ -78,6 +77,10 @@ public class DLTKPluginImages {
 	public static final String IMG_OBJS_INNER_INTERFACE_PROTECTED= NAME_PREFIX + "innerinterface_protected_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_INNER_INTERFACE_PRIVATE= NAME_PREFIX + "innerinterface_private_obj.gif"; //$NON-NLS-1$
 
+	public static final String IMG_FIELD_DEFAULT = NAME_PREFIX + "field_default_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_FIELD_PRIVATE = NAME_PREFIX + "field_private_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_FIELD_PROTECTED = NAME_PREFIX + "field_protected_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_FIELD_PUBLIC = NAME_PREFIX + "field_public_obj.gif"; //$NON-NLS-1$
 	
 	public static final String IMG_METHOD_PUBLIC = NAME_PREFIX + "methpub_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_METHOD_PROTECTED = NAME_PREFIX + "methpro_obj.gif"; //$NON-NLS-1$
@@ -124,8 +127,6 @@ public class DLTKPluginImages {
 	public static final String IMG_OBJS_EXTJAR= NAME_PREFIX + "jar_l_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_JAR_WSRC= NAME_PREFIX + "jar_src_obj.gif"; 		//$NON-NLS-1$
 	public static final String IMG_OBJS_EXTJAR_WSRC= NAME_PREFIX + "jar_lsrc_obj.gif";	//$NON-NLS-1$
-	
-	public static final String IMG_FIELD_DEFAULT= NAME_PREFIX + "field_default_obj.gif"; 		//$NON-NLS-1$
 	
 	public static final String IMG_ELCL_VIEW_MENU= NAME_PREFIX + T_ELCL + "view_menu.gif"; //$NON-NLS-1$
 	public static final String IMG_DLCL_VIEW_MENU= NAME_PREFIX + T_DLCL + "view_menu.gif"; //$NON-NLS-1$
@@ -284,8 +285,6 @@ public class DLTKPluginImages {
     public static final ImageDescriptor DESC_OBJS_CLASSALT= createManagedFromKey(T_OBJ, IMG_OBJS_CLASSALT);
     public static final ImageDescriptor DESC_OBJS_INTERFACEALT= createManagedFromKey(T_OBJ, IMG_OBJS_INTERFACEALT);
     
-    public static final ImageDescriptor DESC_OBJS_FIELD = createManagedFromKey(T_OBJ, IMG_OBJS_FIELD);
-        
     public static final ImageDescriptor DESC_OBJS_UNKNOWN= createManagedFromKey(T_OBJ, IMG_OBJS_UNKNOWN);
     
     public static final ImageDescriptor DESC_OBJS_TYPE_SEPARATOR= createUnManaged(T_OBJ, "type_separator.gif");  //$NON-NLS-1$
@@ -302,6 +301,11 @@ public class DLTKPluginImages {
 	public static final ImageDescriptor DESC_DLCL_CODE_ASSIST= createUnManaged(T_DLCL, "metharg_obj.gif"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_FIELD_DEFAULT= createManagedFromKey(T_OBJ, IMG_FIELD_DEFAULT);
+	public static final ImageDescriptor DESC_FIELD_PRIVATE= createManagedFromKey(T_OBJ, IMG_FIELD_DEFAULT);
+	public static final ImageDescriptor DESC_FIELD_PROTECTED= createManagedFromKey(T_OBJ, IMG_FIELD_DEFAULT);
+	public static final ImageDescriptor DESC_FIELD_PUBLIC= createManagedFromKey(T_OBJ, IMG_FIELD_DEFAULT);
+	
+	public static final ImageDescriptor DESC_OBJS_FIELD = DESC_FIELD_DEFAULT;
 	
 	public static final ImageDescriptor DESC_OBJS_LOCAL_VARIABLE= createManagedFromKey(T_OBJ, IMG_OBJS_LOCAL_VARIABLE);
 	public static final ImageDescriptor DESC_OBJS_KEYWORD= createManagedFromKey(T_OBJ, IMG_OBJS_KEYWORD);

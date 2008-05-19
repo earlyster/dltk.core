@@ -369,9 +369,10 @@ public class CompletionProposalLabelProvider {
 	 */
 	private ImageDescriptor decorateImageDescriptor(ImageDescriptor descriptor,
 			CompletionProposal proposal) {
-		int adornments = 0;
+		int adornmentFlags = ScriptElementImageProvider.computeAdornmentFlags(proposal.getModelElement(), 
+				ScriptElementImageProvider.SMALL_ICONS | ScriptElementImageProvider.OVERLAY_ICONS);
 
-		return new ScriptElementImageDescriptor(descriptor, adornments,
+		return new ScriptElementImageDescriptor(descriptor, adornmentFlags,
 				ScriptElementImageProvider.SMALL_SIZE);
 	}
 
