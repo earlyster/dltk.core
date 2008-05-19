@@ -111,7 +111,8 @@ public class DLTKDebugPlugin extends Plugin {
 		String address = getPluginPreferences().getString(
 				DLTKDebugPreferenceConstants.PREF_DBGP_BIND_ADDRESS);
 		if (DLTKDebugPreferenceConstants.DBGP_AUTODETECT_BIND_ADDRESS
-				.equals(address)) {
+				.equals(address)
+				|| address.trim().length() == 0) {
 			String[] ipAddresses = DLTKDebugPlugin.getLocalAddresses();
 			if (ipAddresses.length > 0) {
 				address = ipAddresses[0];
@@ -130,10 +131,10 @@ public class DLTKDebugPlugin extends Plugin {
 			while (netInterfaces.hasMoreElements()) {
 				NetworkInterface ni = (NetworkInterface) netInterfaces
 						.nextElement();
-			    // ignore virtual interfaces for vmware, etc
+				// ignore virtual interfaces for vmware, etc
 				if (ni.getName().startsWith("vmnet")) {
 					continue;
-				}				
+				}
 				Enumeration inetAddresses = ni.getInetAddresses();
 				while (inetAddresses.hasMoreElements()) {
 					ip = (InetAddress) inetAddresses.nextElement();
