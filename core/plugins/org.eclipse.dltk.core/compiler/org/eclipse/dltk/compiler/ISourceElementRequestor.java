@@ -28,6 +28,7 @@ public interface ISourceElementRequestor {
 		public String[] parameterNames;
 		public String[] parameterInitializers;
 		public String[] exceptionTypes;
+		public boolean isConstructor;
 	}
 	
 	public static class FieldInfo extends ElementInfo {		

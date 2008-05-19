@@ -174,6 +174,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 		info.setFlags(methodInfo.modifiers);
 		info.setNameSourceStart(methodInfo.nameSourceStart);
 		info.setNameSourceEnd(methodInfo.nameSourceEnd);
+		info.setIsConstructor(methodInfo.isConstructor);
 
 		String[] parameterNames = methodInfo.parameterNames == null ?
 				EMPTY : methodInfo.parameterNames;
