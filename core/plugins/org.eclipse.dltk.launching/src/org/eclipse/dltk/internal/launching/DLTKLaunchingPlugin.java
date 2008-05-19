@@ -151,7 +151,7 @@ public class DLTKLaunchingPlugin extends Plugin implements
 	 * 
 	 * @return the Document
 	 * @throws ParserConfigurationException
-	 *             if an exception occurs creating the document builder
+	 * 		if an exception occurs creating the document builder
 	 */
 	public static Document getDocument() throws ParserConfigurationException {
 		DocumentBuilderFactory dfactory = DocumentBuilderFactory.newInstance();
@@ -165,7 +165,7 @@ public class DLTKLaunchingPlugin extends Plugin implements
 	 * platform line separators.
 	 * 
 	 * @param doc
-	 *            document to serialize
+	 * 		document to serialize
 	 * @return the document as a string
 	 */
 	public static String serializeDocument(Document doc) throws IOException,
@@ -189,7 +189,7 @@ public class DLTKLaunchingPlugin extends Plugin implements
 	 * 
 	 * @return an XML parser
 	 * @throws CoreException
-	 *             if unable to create a parser
+	 * 		if unable to create a parser
 	 * 
 	 */
 	public static DocumentBuilder getParser() throws CoreException {
@@ -211,9 +211,9 @@ public class DLTKLaunchingPlugin extends Plugin implements
 	 * Throws an exception with the given message and underlying exception.
 	 * 
 	 * @param message
-	 *            error message
+	 * 		error message
 	 * @param exception
-	 *            underlying exception or <code>null</code> if none
+	 * 		underlying exception or <code>null</code> if none
 	 * @throws CoreException
 	 */
 	protected static void abort(String message, Throwable exception)
@@ -227,10 +227,10 @@ public class DLTKLaunchingPlugin extends Plugin implements
 	 * Returns a new runtime buildpath entry of the specified type.
 	 * 
 	 * @param id
-	 *            extension type id
+	 * 		extension type id
 	 * @return new uninitialized runtime buildpath entry
 	 * @throws CoreException
-	 *             if unable to create an entry
+	 * 		if unable to create an entry
 	 */
 	public IRuntimeBuildpathEntry2 newRuntimeBuildpathEntry(String id)
 			throws CoreException {
@@ -314,9 +314,11 @@ public class DLTKLaunchingPlugin extends Plugin implements
 	public void stop(BundleContext context) throws Exception {
 		try {
 			DeploymentManager.getInstance().shutdown();
-			// DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(this);
+			// DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(
+			// this);
 			// DebugPlugin.getDefault().removeDebugEventListener(this);
-			// ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
+			// ResourcesPlugin.getWorkspace().removeResourceChangeListener(this)
+			// ;
 			getPluginPreferences().removePropertyChangeListener(this);
 			ScriptRuntime.removeInterpreterInstallChangedListener(this);
 			ScriptRuntime.saveInterpreterConfiguration();
@@ -339,7 +341,8 @@ public class DLTKLaunchingPlugin extends Plugin implements
 	 * Save preferences whenever the connect timeout changes. Process changes to
 	 * the list of installed InterpreterEnvironments.
 	 * 
-	 * @see org.eclipse.core.runtime.Preferences.IPropertyChangeListener#propertyChange(PropertyChangeEvent)
+	 * @see org.eclipse.core.runtime.Preferences.IPropertyChangeListener#
+	 * 	propertyChange(PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
 		String property = event.getProperty();
@@ -411,7 +414,7 @@ public class DLTKLaunchingPlugin extends Plugin implements
 			List current = newResults.getValidInterpreterList();
 			deleted.removeAll(current);
 
-			// Dispose deleted Interpreters. The 'disposeInterpreterInstall'
+			// Dispose deleted Interpreters. The' disposeInterpreterInstall'
 			// method fires notification of the
 			// deletion.
 			Iterator deletedIterator = deleted.iterator();
@@ -424,7 +427,7 @@ public class DLTKLaunchingPlugin extends Plugin implements
 			}
 
 			// Fire change notification for added and changed Interpreters. The
-			// 'convertToRealInterpreter'
+			//' convertToRealInterpreter'
 			// fires the appropriate notification.
 			Iterator iter = current.iterator();
 			while (iter.hasNext()) {
@@ -433,7 +436,7 @@ public class DLTKLaunchingPlugin extends Plugin implements
 			}
 
 			// set the new default Interpreter installs. This will fire a
-			// 'defaultInterpreterChanged',
+			//' defaultInterpreterChanged',
 			// if it in fact changed
 			String[] newDefaultId = newResults
 					.getDefaultInterpreterInstallCompositeID();
@@ -630,16 +633,15 @@ public class DLTKLaunchingPlugin extends Plugin implements
 		public void interpreterRemoved(IInterpreterInstall Interpreter) {
 		}
 
-		InterpreterUpdateJob job = null;
+		// InterpreterUpdateJob job = null;
 
 		/**
 		 * Re-bind buildpath variables and containers affected by the
 		 * InterpreterEnvironment changes.
 		 */
 		public void process() throws CoreException {
-			if (job == null) {
-				job = new InterpreterUpdateJob(this);
-			}
+			Job job = new InterpreterUpdateJob(this);
+			job.setName("Rebind interpreters");
 			job.schedule();
 		}
 
