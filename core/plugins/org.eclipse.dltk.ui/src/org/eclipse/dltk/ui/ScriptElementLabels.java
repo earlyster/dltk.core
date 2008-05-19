@@ -411,16 +411,16 @@ public class ScriptElementLabels {
 	private static int fgPkgNameLength = -1;
 
 	/**
-	 * Returns the label of the given object. The object must be of type
-	 * {@link IScriptElement} or adapt to {@link IWorkbenchAdapter}. The empty
-	 * string is returned if the element type is not known.
+	 * Returns the label of the given object. The object must be of type {@link
+	 * IScriptElement} or adapt to {@link IWorkbenchAdapter}. The empty string
+	 * is returned if the element type is not known.
 	 * 
 	 * @param obj
-	 *            Object to get the label from.
+	 * 		Object to get the label from.
 	 * @param flags
-	 *            The rendering flags
+	 * 		The rendering flags
 	 * @return Returns the label or the empty string if the object type is not
-	 *         supported.
+	 * 	supported.
 	 */
 	public String getTextLabel(Object obj, long flags) {
 		if (obj instanceof IModelElement) {
@@ -452,9 +452,9 @@ public class ScriptElementLabels {
 	 * class.
 	 * 
 	 * @param element
-	 *            The element to render.
+	 * 		The element to render.
 	 * @param flags
-	 *            The rendering flags.
+	 * 		The rendering flags.
 	 * @return the label of the model element
 	 */
 	public String getElementLabel(IModelElement element, long flags) {
@@ -468,11 +468,11 @@ public class ScriptElementLabels {
 	 * class.
 	 * 
 	 * @param element
-	 *            The element to render.
+	 * 		The element to render.
 	 * @param flags
-	 *            The rendering flags.
+	 * 		The rendering flags.
 	 * @param buf
-	 *            The buffer to append the resulting label to.
+	 * 		The buffer to append the resulting label to.
 	 */
 	public void getElementLabel(IModelElement element, long flags,
 			StringBuffer buf) {
@@ -551,9 +551,9 @@ public class ScriptElementLabels {
 
 	protected void getScriptFolderLabel(IScriptFolder folder, StringBuffer buf) {
 		buf.append(folder.getElementName()/*
-											 * .replace(IScriptFolder.PACKAGE_DELIMITER,
-											 * '.')
-											 */);
+										 * .replace(IScriptFolder.PACKAGE_DELIMITER
+										 * , '.')
+										 */);
 	}
 
 	private void getScriptFolderLabel(IScriptFolder folder, long flags,
@@ -816,6 +816,7 @@ public class ScriptElementLabels {
 	private void getExternalArchiveLabel(IProjectFragment root, long flags,
 			StringBuffer buf) {
 		IPath path = root.getPath();
+		path = EnvironmentPathUtils.getLocalPath(path);
 		IEnvironment env = EnvironmentManager.getEnvironment(root);
 		if (getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED)) {
 			int segements = path.segmentCount();
@@ -823,7 +824,8 @@ public class ScriptElementLabels {
 				buf.append(path.segment(segements - 1));
 				if (segements > 1 || path.getDevice() != null) {
 					buf.append(CONCAT_STRING);
-					buf.append(env.convertPathToString(path.removeLastSegments(1)));
+					buf.append(env.convertPathToString(path
+							.removeLastSegments(1)));
 				}
 			} else {
 				buf.append(env.convertPathToString(path));
@@ -859,7 +861,8 @@ public class ScriptElementLabels {
 				REFERENCED_ROOT_POST_QUALIFIED)
 				&& isReferenced(root);
 		if (rootQualified) {
-			buf.append(root.getPath().makeRelative().toString());
+			buf.append(EnvironmentPathUtils.getLocalPath(root.getPath())
+					.makeRelative().toString());
 		} else {
 			buf.append(root.getElementName());
 			if (referencedQualified) {
@@ -868,9 +871,8 @@ public class ScriptElementLabels {
 						.toString());
 			} else if (getFlag(flags, ROOT_POST_QUALIFIED)) {
 				buf.append(CONCAT_STRING);
-				buf
-						.append(root.getParent().getPath().makeRelative()
-								.toString());
+				buf.append(EnvironmentPathUtils.getLocalPath(
+						root.getParent().getPath()).makeRelative().toString());
 			}
 		}
 	}
@@ -884,7 +886,8 @@ public class ScriptElementLabels {
 				REFERENCED_ROOT_POST_QUALIFIED)
 				&& resource != null;
 		if (rootQualified) {
-			buf.append(root.getPath().makeRelative().toString());
+			buf.append(EnvironmentPathUtils.getLocalPath(root.getPath())
+					.makeRelative().toString());
 		} else {
 			if (resource != null)
 				buf.append(resource.getProjectRelativePath().toString());
@@ -907,7 +910,8 @@ public class ScriptElementLabels {
 		boolean referencedQualified = getFlag(flags,
 				REFERENCED_ROOT_POST_QUALIFIED);
 		if (rootQualified) {
-			buf.append(root.getPath().makeRelative().toString());
+			buf.append(EnvironmentPathUtils.getLocalPath(root.getPath())
+					.makeRelative().toString());
 		} else {
 			buf.append(EnvironmentPathUtils.getLocalPathString(root.getPath()));
 			if (referencedQualified) {
@@ -925,12 +929,12 @@ public class ScriptElementLabels {
 	 * Considers the P_* flags.
 	 * 
 	 * @param pack
-	 *            The element to render.
+	 * 		The element to render.
 	 * @param flags
-	 *            The rendering flags. Flags with names starting with P_' are
-	 *            considered.
+	 * 		The rendering flags. Flags with names starting with P_' are
+	 * 		considered.
 	 * @param buf
-	 *            The buffer to append the resulting label to.
+	 * 		The buffer to append the resulting label to.
 	 */
 	public void getScriptFolderLabel(IProjectFragment pack, long flags,
 			StringBuffer buf) {
@@ -985,12 +989,12 @@ public class ScriptElementLabels {
 	 * Returns the label of a buildpath container
 	 * 
 	 * @param containerPath
-	 *            The path of the container.
+	 * 		The path of the container.
 	 * @param project
-	 *            The project the container is resolved in.
+	 * 		The project the container is resolved in.
 	 * @return Returns the label of the buildpath container
 	 * @throws ModelException
-	 *             Thrown when the resolving of the container failed.
+	 * 		Thrown when the resolving of the container failed.
 	 */
 	public String getContainerEntryLabel(IPath containerPath,
 			IScriptProject project) throws ModelException {
@@ -1012,12 +1016,12 @@ public class ScriptElementLabels {
 	 * to a {@link StringBuffer}. Considers the D_* flags.
 	 * 
 	 * @param declaration
-	 *            The element to render.
+	 * 		The element to render.
 	 * @param flags
-	 *            The rendering flags. Flags with names starting with 'D_' are
-	 *            considered.
+	 * 		The rendering flags. Flags with names starting with 'D_' are
+	 * 		considered.
 	 * @param buf
-	 *            The buffer to append the resulting label to.
+	 * 		The buffer to append the resulting label to.
 	 */
 	public void getDeclarationLabel(IModelElement declaration, long flags,
 			StringBuffer buf) {
