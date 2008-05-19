@@ -153,6 +153,9 @@ public class ScriptElementImageDescriptor extends CompositeImageDescriptor
 		if ((fFlags & ABSTRACT) != 0) {
 			addTopRightImage(DLTKPluginImages.DESC_OVR_ABSTRACT, pos);
 		}
+		if ((fFlags & CONSTRUCTOR) != 0) {
+			addTopRightImage(DLTKPluginImages.DESC_OVR_CONSTRUCTOR, pos);
+		}
 		if ((fFlags & FINAL) != 0) {
 			addTopRightImage(DLTKPluginImages.DESC_OVR_FINAL, pos);
 		}

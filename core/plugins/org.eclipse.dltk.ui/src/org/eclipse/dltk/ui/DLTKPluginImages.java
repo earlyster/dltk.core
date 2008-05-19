@@ -166,6 +166,7 @@ public class DLTKPluginImages {
 	public static final ImageDescriptor DESC_OBJS_TESTCASE= createManagedFromKey(T_OBJ, IMG_OBJS_TESTCASE);
 	public static final ImageDescriptor DESC_OBJS_MODULE= createManagedFromKey(T_OBJ, IMG_OBJS_MODULE);
 	public static final ImageDescriptor DESC_OBJS_TEMPLATE= createManagedFromKey(T_OBJ, IMG_OBJS_TEMPLATE);
+	public static final ImageDescriptor DESC_OVR_CONSTRUCTOR = createUnManaged(T_OVR, "constr_ovr.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ABSTRACT = createUnManaged(T_OVR, "abstract_co.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_FINAL = createUnManaged(T_OVR, "final_co.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_STATIC = createUnManaged(T_OVR, "static_co.gif"); //$NON-NLS-1$
