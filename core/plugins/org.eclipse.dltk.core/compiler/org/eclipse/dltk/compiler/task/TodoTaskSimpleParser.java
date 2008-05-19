@@ -9,6 +9,7 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *     xored software, Inc. - Fixed bug for end of file less whan 4 symbol comments (Andrei Sobolev)
+ *     xored software, Inc. - introduced findCommentStart(), improved tag matching (Alex Panchenko)
  *******************************************************************************/
 package org.eclipse.dltk.compiler.task;
 
@@ -78,9 +79,8 @@ public class TodoTaskSimpleParser {
 			int begin = contentPos;
 			final int end = findEndOfLine(content);
 			if (begin < end) {
-				begin = skipSpaces(content, begin, end);
-				if (begin < end && content[begin] == '#') {
-					++begin;
+				begin = findCommentStart(content, begin, end);
+				if (begin > 0) {
 					begin = skipSpaces(content, begin, end);
 					if (begin + minTagLength <= end) {
 						processLine(content, begin, end);
@@ -91,7 +91,25 @@ public class TodoTaskSimpleParser {
 		}
 	}
 
-	private final int skipSpaces(char[] content, int pos, final int end) {
+	/**
+	 * returns the next index after the comment of -1 if there is no comment in
+	 * this line
+	 * 
+	 * @param content
+	 * @param begin
+	 * @param end
+	 * @return
+	 */
+	protected int findCommentStart(char[] content, int begin, int end) {
+		begin = skipSpaces(content, begin, end);
+		if (begin < end && content[begin] == '#') {
+			return begin + 1;
+		} else {
+			return -1;
+		}
+	}
+
+	private static int skipSpaces(char[] content, int pos, final int end) {
 		while (pos < end && Character.isWhitespace(content[pos])) {
 			++pos;
 		}
@@ -101,45 +119,39 @@ public class TodoTaskSimpleParser {
 	private void processLine(char[] content, int begin, final int end) {
 		for (int i = 0; i < tags.length; ++i) {
 			final char[] tag = tags[i];
-			if (begin + tag.length < content.length) {
-				char ch = content[begin + tag.length];
-				if (begin + tag.length < end && isEnd(ch)
-						|| begin + tag.length == end) {
-					if (compareTag(content, begin, tag)) {
-						final String msg = new String(content, begin, end
-								- begin);
-						try {
-							taskReporter.reportTask(msg, lineNumber,
-									priorities[i], begin, contentPos);
-						} catch (CoreException e) {
-							DLTKCore.error("Error in reportTask()", e);
-						}
-					}
+			if (begin + tag.length <= end
+					&& compareTag(content, begin, end, tag)) {
+				final String msg = new String(content, begin, end - begin);
+				try {
+					taskReporter.reportTask(msg, lineNumber, priorities[i],
+							begin, end);
+				} catch (CoreException e) {
+					DLTKCore.error("Error in reportTask()", e); //$NON-NLS-1$
 				}
 			}
 		}
 	}
 
-	private boolean isEnd(char ch) {
-		return Character.isWhitespace(ch) || ch == ':' || ch == '('
-				|| ch == ';' || ch == ':' || ch == '[' || ch == ']'
-				|| ch == ')' || ch == '@' || ch == '!' || ch == '%'
-				|| ch == '#' || ch == '*' || ch == '^' || ch == '~'
-				|| ch == '&' || ch == '|' || ch == '\\' || ch == '/';
-	}
-
-	private boolean compareTag(char[] content, int pos, final char[] tag) {
+	private boolean compareTag(char[] content, int pos, int end,
+			final char[] tag) {
+		final int tagLen = tag.length;
 		if (caseSensitive) {
-			for (int j = 0; j < tag.length; ++j) {
+			for (int j = 0; j < tagLen; ++j) {
 				if (content[pos + j] != tag[j]) {
 					return false;
 				}
 			}
 		} else {
-			for (int j = 0; j < tag.length; ++j) {
+			for (int j = 0; j < tagLen; ++j) {
 				if (Character.toUpperCase(content[pos + j]) != tag[j]) {
 					return false;
 				}
+			}
+		}
+		if (pos + tagLen < end
+				&& Character.isJavaIdentifierPart(tag[tagLen - 1])) {
+			if (Character.isJavaIdentifierPart(content[pos + tagLen])) {
+				return false;
 			}
 		}
 		return true;

@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
@@ -71,13 +72,14 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 		}
 		return false;
 	}
-	
+
 	public String convertPathToString(IPath path) {
-		return path.toOSString();
+		return EnvironmentPathUtils.getLocalPath(path).toOSString();
 	}
 
 	public Object getAdapter(Class adapter) {
-		return Platform.getAdapterManager().loadAdapter(this, adapter.getName());
+		return Platform.getAdapterManager()
+				.loadAdapter(this, adapter.getName());
 	}
 
 	public URI getURI(IPath location) {
