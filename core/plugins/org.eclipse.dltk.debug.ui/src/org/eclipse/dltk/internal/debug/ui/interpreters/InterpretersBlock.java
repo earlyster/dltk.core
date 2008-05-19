@@ -186,7 +186,9 @@ public abstract class InterpretersBlock implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+	 * @see
+	 * org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener
+	 * (org.eclipse.jface.viewers.ISelectionChangedListener)
 	 */
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		fSelectionListeners.add(listener);
@@ -204,7 +206,9 @@ public abstract class InterpretersBlock implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+	 * @see
+	 * org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener
+	 * (org.eclipse.jface.viewers.ISelectionChangedListener)
 	 */
 	public void removeSelectionChangedListener(
 			ISelectionChangedListener listener) {
@@ -214,7 +218,9 @@ public abstract class InterpretersBlock implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
+	 * @see
+	 * org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse
+	 * .jface.viewers.ISelection)
 	 */
 	public void setSelection(ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
@@ -240,12 +246,12 @@ public abstract class InterpretersBlock implements
 	 * Creates this block's control in the given control.
 	 * 
 	 * @param ancestor
-	 *            containing control
+	 * 		containing control
 	 * @param useManageButton
-	 *            whether to present a single 'manage...' button to the user
-	 *            that opens the installed InterpreterEnvironments pref page for
-	 *            InterpreterEnvironment management, or to provide 'add, remove,
-	 *            edit, and search' buttons.
+	 * 		whether to present a single 'manage...' button to the user that
+	 * 		opens the installed InterpreterEnvironments pref page for
+	 * 		InterpreterEnvironment management, or to provide 'add, remove, edit,
+	 * 		and search' buttons.
 	 */
 	public void createControl(Composite ancestor) {
 
@@ -305,7 +311,8 @@ public abstract class InterpretersBlock implements
 		});
 
 		// Label tableLabel = new Label(parent, SWT.NONE);
-		// tableLabel.setText(InterpretersMessages.InstalledInterpretersBlock_15);
+		// tableLabel.setText(InterpretersMessages.InstalledInterpretersBlock_15
+		// );
 		// data = new GridData();
 		// data.horizontalSpan = 2;
 		// tableLabel.setLayoutData(data);
@@ -335,7 +342,7 @@ public abstract class InterpretersBlock implements
 				sortByName();
 			}
 		});
-		column1.setWidth(conv.convertWidthInCharsToPixels(40));
+		column1.setWidth(conv.convertWidthInCharsToPixels(15));
 
 		TableColumn column2 = new TableColumn(fTable, SWT.NULL);
 		column2.setText(InterpretersMessages.InstalledInterpretersBlock_2);
@@ -344,7 +351,7 @@ public abstract class InterpretersBlock implements
 				sortByType();
 			}
 		});
-		column2.setWidth(conv.convertWidthInCharsToPixels(60));
+		column2.setWidth(conv.convertWidthInCharsToPixels(15));
 
 		TableColumn column3 = new TableColumn(fTable, SWT.NULL);
 		column3.setText(InterpretersMessages.InstalledInterpretersBlock_1);
@@ -353,7 +360,7 @@ public abstract class InterpretersBlock implements
 				sortByLocation();
 			}
 		});
-		column3.setWidth(conv.convertWidthInCharsToPixels(40));
+		column3.setWidth(conv.convertWidthInCharsToPixels(20));
 
 		fInterpreterList = new CheckboxTableViewer(fTable);
 		fInterpreterList.setLabelProvider(new InterpreterLabelProvider());
@@ -394,6 +401,8 @@ public abstract class InterpretersBlock implements
 				}
 			}
 		});
+
+		fTable.layout();
 
 		Composite buttons = new Composite(parent, SWT.NULL);
 		buttons.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
@@ -590,7 +599,7 @@ public abstract class InterpretersBlock implements
 	 * Sets the InterpreterEnvironments to be displayed in this block
 	 * 
 	 * @param Interpreters
-	 *            InterpreterEnvironments to be displayed
+	 * 		InterpreterEnvironments to be displayed
 	 */
 	protected void setInterpreters(IInterpreterInstall[] Interpreters) {
 		fInterpreters.clear();
@@ -726,7 +735,7 @@ public abstract class InterpretersBlock implements
 		} catch (InterruptedException e) {
 			return; // cancelled
 		}
-
+		final int[] widths = { 15, 15 };
 		if (!searcher.hasResults()) {
 			MessageDialog.openInformation(getShell(),
 					InterpretersMessages.InstalledInterpretersBlock_12,
@@ -749,11 +758,29 @@ public abstract class InterpretersBlock implements
 				while (isDuplicateName(nameCopy)) {
 					nameCopy = name + '(' + (j++) + ')';
 				}
-
+				if (widths[0] < nameCopy.length()) {
+					widths[0] = nameCopy.length() + 2;
+				}
+				if (widths[1] < type.getName().length()) {
+					widths[1] = type.getName().length() + 2;
+				}
 				interpreter.setName(nameCopy);
 				interpreter.setInstallLocation(file);
 				interpreterAdded(interpreter);
 			}
+			fTable.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					PixelConverter conv = new PixelConverter(fTable);
+					for (int i = 0; i < 2; i++) {
+						int nw1 = conv.convertWidthInCharsToPixels(widths[i]);
+						TableColumn cl0 = fTable.getColumn(i);
+						if (cl0.getWidth() < nw1) {
+							cl0.setWidth(nw1);
+						}
+					}
+					fTable.layout();
+				}
+			});
 		}
 	}
 
@@ -765,7 +792,7 @@ public abstract class InterpretersBlock implements
 	 * Sets the checked InterpreterEnvironment, possible <code>null</code>
 	 * 
 	 * @param interpreter
-	 *            InterpreterEnvironment or <code>null</code>
+	 * 		InterpreterEnvironment or <code>null</code>
 	 */
 	public void setCheckedInterpreter(IInterpreterInstall interpreter) {
 		if (interpreter == null) {
@@ -799,9 +826,9 @@ public abstract class InterpretersBlock implements
 	 * given key.
 	 * 
 	 * @param settings
-	 *            dialog store
+	 * 		dialog store
 	 * @param qualifier
-	 *            key qualifier
+	 * 		key qualifier
 	 */
 	public void saveColumnSettings(IDialogSettings settings, String qualifier) {
 		int columnCount = fTable.getColumnCount();
@@ -817,9 +844,9 @@ public abstract class InterpretersBlock implements
 	 * Restore table settings from the given dialog store using the given key.
 	 * 
 	 * @param settings
-	 *            dialog settings store
+	 * 		dialog settings store
 	 * @param qualifier
-	 *            key to restore settings from
+	 * 		key to restore settings from
 	 */
 	public void restoreColumnSettings(IDialogSettings settings, String qualifier) {
 		fInterpreterList.getTable().layout(true);
@@ -920,7 +947,7 @@ public abstract class InterpretersBlock implements
 	 * numerical suffix to ensure that it is unique.
 	 * 
 	 * @param name
-	 *            the name with which to ensure uniqueness
+	 * 		the name with which to ensure uniqueness
 	 * @return the unique version of the given name
 	 * 
 	 */
