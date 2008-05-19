@@ -77,6 +77,7 @@ public class DLTKPluginImages {
 	public static final String IMG_OBJS_INNER_INTERFACE_PROTECTED= NAME_PREFIX + "innerinterface_protected_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_INNER_INTERFACE_PRIVATE= NAME_PREFIX + "innerinterface_private_obj.gif"; //$NON-NLS-1$
 
+	public static final String IMG_OBJS_FIELD = NAME_PREFIX + "field_default_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_FIELD_DEFAULT = NAME_PREFIX + "field_default_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_FIELD_PRIVATE = NAME_PREFIX + "field_private_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_FIELD_PROTECTED = NAME_PREFIX + "field_protected_obj.gif"; //$NON-NLS-1$
