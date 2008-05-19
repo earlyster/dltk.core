@@ -42,6 +42,10 @@ public class InternalCompletionProposal {
 	public int getAccessibility() {
 		return this.accessibility;
 	}
+	
+	public void setAccessibility(int accessiblility) {
+		this.accessibility = accessiblility;
+	}
 
 	/**
 	 * Returns whether this proposal is a constructor.
@@ -61,5 +65,9 @@ public class InternalCompletionProposal {
 	 */
 	public boolean isConstructor() {
 		return this.isConstructor;
+	}
+	
+	public void setIsConstructor(boolean isConstructor) {
+		this.isConstructor = isConstructor;
 	}
 }
