@@ -26,6 +26,8 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.StringVariableSelectionDialog;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.debug.ui.launchConfigurations.CommonScriptLaunchTab;
 import org.eclipse.dltk.debug.ui.messages.ScriptLaunchMessages;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
@@ -316,7 +318,11 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 							.create(getWorkspaceRoot()).getScriptProject(
 									projectName);
 					if (project != null) {
-						setDefaultWorkingDirectoryText("${workspace_loc:" + project.getPath().makeRelative().toOSString() + "}"); //$NON-NLS-1$//$NON-NLS-2$
+						IEnvironment environment = EnvironmentManager
+								.getEnvironment(project);
+						String path = "${resource_loc}/../".replace('/',
+								environment.getSeparatorChar());
+						setDefaultWorkingDirectoryText(path); //$NON-NLS-1$
 						return;
 					}
 				}
@@ -373,11 +379,12 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 	 * 	debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
-		// config.setAttribute(ScriptLaunchConfigurationConstants.
-		// ATTR_WORKING_DIRECTORY, (String)null);
 		config.setAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
-				"${resource_loc}/../");
+				(String) null);
+		// config.setAttribute(
+		// ScriptLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
+		// "${resource_loc}/../");
 	}
 
 	/*
