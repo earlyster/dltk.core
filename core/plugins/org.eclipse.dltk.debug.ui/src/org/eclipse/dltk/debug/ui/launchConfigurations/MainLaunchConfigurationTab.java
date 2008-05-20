@@ -15,11 +15,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
@@ -198,9 +200,25 @@ public abstract class MainLaunchConfigurationTab extends
 					.setAttribute(
 							ScriptLaunchConfigurationConstants.ATTR_USE_INTERACTIVE_CONSOLE,
 							this.interactiveConsoleCheck.getSelection());
-			config.setAttribute(
-					ScriptLaunchConfigurationConstants.ATTR_DLTK_CONSOLE_ID,
-					"dltk_" + Long.toString(System.currentTimeMillis()));
+			String old = null;
+			try {
+				old = config
+						.getAttribute(
+								ScriptLaunchConfigurationConstants.ATTR_DLTK_CONSOLE_ID,
+								(String) null);
+			} catch (CoreException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+			if (old == null) {
+				config
+						.setAttribute(
+								ScriptLaunchConfigurationConstants.ATTR_DLTK_CONSOLE_ID,
+								"dltk_"
+										+ Long.toString(System
+												.currentTimeMillis()));
+			}
 			if (this.interactiveConsoleCheck.getSelection()) {
 				config.setAttribute(IDebugUIConstants.ATTR_CAPTURE_IN_CONSOLE,
 						false);

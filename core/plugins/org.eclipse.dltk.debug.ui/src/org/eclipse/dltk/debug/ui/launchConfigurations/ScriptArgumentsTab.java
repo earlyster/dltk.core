@@ -143,7 +143,8 @@ public class ScriptArgumentsTab extends CommonScriptLaunchTab {
 	 */
 	protected void setHelpContextId() {
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(),
-		// IScriptDebugHelpContextIds.LAUNCH_CONFIGURATION_DIALOG_ARGUMENTS_TAB);
+		// IScriptDebugHelpContextIds.LAUNCH_CONFIGURATION_DIALOG_ARGUMENTS_TAB)
+		// ;
 	}
 
 	/**
@@ -153,7 +154,8 @@ public class ScriptArgumentsTab extends CommonScriptLaunchTab {
 	}
 
 	/**
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#isValid(ILaunchConfiguration)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#isValid(
+	 * 	ILaunchConfiguration)
 	 */
 	public boolean isValid(ILaunchConfiguration config) {
 		return fWorkingDirectoryBlock.isValid(config);
@@ -163,6 +165,9 @@ public class ScriptArgumentsTab extends CommonScriptLaunchTab {
 	 * Defaults are empty.
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
+		config.setAttribute(
+				ScriptLaunchConfigurationConstants.ATTR_SCRIPT_ARGUMENTS,
+				(String) null);
 		config.setAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_SCRIPT_ARGUMENTS,
 				(String) null);
@@ -180,7 +185,10 @@ public class ScriptArgumentsTab extends CommonScriptLaunchTab {
 				fInterpreterArgumentsBlock.initializeFrom(configuration);
 			fWorkingDirectoryBlock.initializeFrom(configuration);
 		} catch (CoreException e) {
-			setErrorMessage(MessageFormat.format(ScriptLaunchMessages.ArgumentsTab_Exception_occurred_reading_configuration___15, new Object[] { e.getStatus().getMessage() }));
+			setErrorMessage(MessageFormat
+					.format(
+							ScriptLaunchMessages.ArgumentsTab_Exception_occurred_reading_configuration___15,
+							new Object[] { e.getStatus().getMessage() }));
 			DLTKLaunchingPlugin.log(e);
 		}
 	}
