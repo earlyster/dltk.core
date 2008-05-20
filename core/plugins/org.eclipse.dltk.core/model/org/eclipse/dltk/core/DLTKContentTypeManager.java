@@ -99,6 +99,14 @@ public class DLTKContentTypeManager {
 
 	public static boolean isValidResourceForContentType(
 			IDLTKLanguageToolkit toolkit, IResource resource) {
+		// Custom filtering via language tookit
+		if (resource instanceof IFile) {
+			IStatus status = toolkit.validateSourceModule(resource);
+			if (status.getSeverity() != IStatus.OK) {
+				return false;
+			}
+		}
+
 		if (isValidFileNameForContentType(toolkit, resource.getFullPath()
 				.lastSegment())) {
 			return true;
@@ -124,11 +132,6 @@ public class DLTKContentTypeManager {
 		}
 
 		if (resource instanceof IFile) {
-			// Custom filtering via language tookit
-			IStatus status = toolkit.validateSourceModule(resource);
-			if (status.getSeverity() != IStatus.OK) {
-				return false;
-			}
 			IFile file = (IFile) resource;
 			IContentType masterType = getMasterContentType(toolkit
 					.getLanguageContentType());
