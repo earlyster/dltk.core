@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.variables.IStringVariableManager;
 import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
@@ -85,14 +86,14 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * message, lower level exception, and error code.
 	 * 
 	 * @param message
-	 *            the status message
+	 * 		the status message
 	 * @param exception
-	 *            lower level exception associated with the error, or
-	 *            <code>null</code> if none
+	 * 		lower level exception associated with the error, or
+	 * 		<code>null</code> if none
 	 * @param code
-	 *            error code
+	 * 		error code
 	 * @throws CoreException
-	 *             the "abort" core exception
+	 * 		the "abort" core exception
 	 */
 	protected void abort(String message, Throwable exception, int code)
 			throws CoreException {
@@ -113,11 +114,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * configuration, or <code>null</code> if none.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the Interpreter install specified by the given launch
-	 *         configuration, or <code>null</code> if none
+	 * 	configuration, or <code>null</code> if none
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 */
 	public IInterpreterInstall getInterpreterInstall(
 			ILaunchConfiguration configuration) throws CoreException {
@@ -129,13 +130,12 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * configuration exists and returns the Interpreter install.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the Interpreter install specified by the given launch
-	 *         configuration
+	 * 	configuration
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute, the attribute is
-	 *                unspecified, or if the home location is unspecified or
-	 *                does not exist
+	 * 		if unable to retrieve the attribute, the attribute is unspecified,
+	 * 		or if the home location is unspecified or does not exist
 	 */
 	public IInterpreterInstall verifyInterpreterInstall(
 			ILaunchConfiguration configuration) throws CoreException {
@@ -175,11 +175,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * launch configuration, or <code>null</code> if none.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the Interpreter connector identifier specified by the given
-	 *         launch configuration, or <code>null</code> if none
+	 * 	launch configuration, or <code>null</code> if none
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 */
 	public String getDebugConnectorId(ILaunchConfiguration configuration)
 			throws CoreException {
@@ -195,11 +195,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * specified.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the buildpath specified by the given launch configuration,
-	 *         possibly an empty array
+	 * 	possibly an empty array
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 */
 	public String[] getBuildpath(ILaunchConfiguration configuration)
 			throws CoreException {
@@ -222,17 +222,17 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	/**
 	 * Returns entries that should appear on the bootstrap portion of the
 	 * buildpath as specified by the given launch configuration, as an array of
-	 * resolved strings. The returned array is <code>null</code> if all
-	 * entries are standard (i.e. appear by default), or empty to represent an
-	 * empty bootpath.
+	 * resolved strings. The returned array is <code>null</code> if all entries
+	 * are standard (i.e. appear by default), or empty to represent an empty
+	 * bootpath.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the bootpath specified by the given launch configuration. An
-	 *         empty bootpath is specified by an empty array, and
-	 *         <code>null</code> represents a default bootpath.
+	 * 	empty bootpath is specified by an empty array, and <code>null</code>
+	 * 	represents a default bootpath.
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 */
 	public String[] getBootpath(ILaunchConfiguration configuration)
 			throws CoreException {
@@ -282,11 +282,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * appended to the boot buildpath.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return a description of the boot buildpath specified by the given launch
-	 *         configuration.
+	 * 	configuration.
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 * 
 	 */
 	public String[][] getBootpathExt(ILaunchConfiguration configuration)
@@ -421,11 +421,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * or <code>null</code> if none.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the Script project specified by the given launch configuration,
-	 *         or <code>null</code> if none
+	 * 	or <code>null</code> if none
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 */
 	public static IScriptProject getScriptProject(
 			ILaunchConfiguration configuration) throws CoreException {
@@ -449,11 +449,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * configuration, or <code>null</code> if none.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the Script project name specified by the given launch
-	 *         configuration, or <code>null</code> if none
+	 * 	configuration, or <code>null</code> if none
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 */
 	public static String getScriptProjectName(ILaunchConfiguration configuration)
 			throws CoreException {
@@ -467,11 +467,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * or <code>null</code> if none.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the main type name specified by the given launch configuration,
-	 *         or <code>null</code> if none
+	 * 	or <code>null</code> if none
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 */
 	public static String getMainScriptName(ILaunchConfiguration configuration)
 			throws CoreException {
@@ -491,11 +491,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * arguments are specified.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the program arguments specified by the given launch
-	 *         configuration, possibly an empty string
+	 * 	configuration, possibly an empty string
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 */
 	public String[] getScriptArguments(ILaunchConfiguration configuration)
 			throws CoreException {
@@ -513,11 +513,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * Interpreter arguments are specified.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the Interpreter arguments specified by the given launch
-	 *         configuration, possibly an empty string
+	 * 	configuration, possibly an empty string
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 */
 	protected final String[] getInterpreterArguments(
 			ILaunchConfiguration configuration) throws CoreException {
@@ -536,10 +536,10 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * launch configuration, or <code>null</code> if none.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the <code>Map</code> of Interpreter-specific attributes
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 */
 	public Map getInterpreterSpecificAttributesMap(
 			ILaunchConfiguration configuration) throws CoreException {
@@ -555,11 +555,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * configuration, or <code>null</code> if none.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the working directory specified by the given launch
-	 *         configuration, or <code>null</code> if none
+	 * 	configuration, or <code>null</code> if none
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 */
 	public String getWorkingDirectory(ILaunchConfiguration configuration,
 			IEnvironment environment) throws CoreException {
@@ -571,11 +571,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * configuration, or <code>null</code> if none.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the working directory path specified by the given launch
-	 *         configuration, or <code>null</code> if none
+	 * 	configuration, or <code>null</code> if none
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 */
 	public IPath getWorkingDirectoryPath(ILaunchConfiguration configuration)
 			throws CoreException {
@@ -583,9 +583,17 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 				ScriptLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
 				(String) null);
 		if (path != null) {
-			path = VariablesPlugin.getDefault().getStringVariableManager()
-					.performStringSubstitution(path);
-			return new Path(path);
+			if (path.trim().length() == 0) {
+				return null;
+			}
+			IStringVariableManager manager = VariablesPlugin.getDefault()
+					.getStringVariableManager();
+			try {
+				path = manager.performStringSubstitution(path, false);
+				return new Path(path);
+			} catch (CoreException e) {
+				DLTKLaunchingPlugin.log(e);
+			}
 		}
 		return null;
 	}
@@ -596,11 +604,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * <code>null</code> if none is specified.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the working directory specified by the given launch
-	 *         configuration, or <code>null</code> if none
+	 * 	configuration, or <code>null</code> if none
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute
+	 * 		if unable to retrieve the attribute
 	 */
 	public String verifyWorkingDirectory(ILaunchConfiguration configuration,
 			IEnvironment environment) throws CoreException {
@@ -665,11 +673,10 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * configuration, and returns the script type name.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @return the main type name specified by the given launch configuration
 	 * @exception CoreException
-	 *                if unable to retrieve the attribute or the attribute is
-	 *                unspecified
+	 * 		if unable to retrieve the attribute or the attribute is unspecified
 	 */
 	public String verifyMainScriptName(ILaunchConfiguration configuration)
 			throws CoreException {
@@ -968,15 +975,15 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * launching the given configuration.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @param mode
-	 *            launch node
+	 * 		launch node
 	 * @param project
-	 *            project containing the launched resource
+	 * 		project containing the launched resource
 	 * @return Interpreter runner to use when launching the given configuration
-	 *         in the given mode
+	 * 	in the given mode
 	 * @throws CoreException
-	 *             if a Interpreter runner cannot be determined
+	 * 		if a Interpreter runner cannot be determined
 	 * 
 	 */
 	public IInterpreterRunner getInterpreterRunner(
@@ -1003,10 +1010,10 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * given configuration or <code>null</code> if unspecified.
 	 * 
 	 * @param configuration
-	 *            launch configuration
+	 * 		launch configuration
 	 * @throws CoreException
-	 *             if unable to access associated attribute or if unable to
-	 *             resolve a variable in an environment variable's value
+	 * 		if unable to access associated attribute or if unable to resolve a
+	 * 		variable in an environment variable's value
 	 * 
 	 */
 	public String[] getEnvironment(ILaunchConfiguration configuration)
@@ -1022,8 +1029,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * @param configuration
 	 * @return default working directory or <code>null</code> if none
 	 * @throws CoreException
-	 *             if an exception occurs computing the default working
-	 *             directory
+	 * 		if an exception occurs computing the default working directory
 	 * 
 	 */
 	protected IPath getDefaultWorkingDirectory(
@@ -1031,12 +1037,36 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		// default working directory is the project if this config has a project
 		IScriptProject scriptProject = getScriptProject(configuration);
 		if (scriptProject != null) {
-			IProject project = scriptProject.getProject();
-			URI uri = project.getLocationURI();
-			if (uri != null) {
-				return new Path(uri.getPath());
+			// IProject project = scriptProject.getProject();
+			// URI uri = project.getLocationURI();
+			// IPath path = null;
+			// if (uri != null) {
+			// path = new Path(uri.getPath());
+			// }
+			// else {
+			// path = project.getLocation();
+			// }
+			IEnvironment environment = EnvironmentManager
+					.getEnvironment(scriptProject);
+			String mainScriptName = verifyMainScriptName(configuration);
+			if (mainScriptName.length() == 0) {
+				return null;
 			}
-			return project.getLocation();
+			IProject project = getScriptProject(configuration).getProject();
+			String loc = null;
+			URI location = project.getLocationURI();
+			if (location == null) {
+				loc = project.getLocation().toOSString();
+				return null;
+			} else {
+				loc = location.getPath();
+			}
+
+			IPath environmentLocation = new Path(loc).append(mainScriptName);
+			IFileHandle file = environment.getFile(environmentLocation);
+			if (file.exists()) {
+				return environmentLocation.removeLastSegments(1);
+			}
 		}
 		return null;
 	}

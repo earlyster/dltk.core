@@ -338,7 +338,7 @@ public class InterpreterConfig implements Cloneable {
 	public String[] renderCommandLine(IInterpreterInstall interpreter) {
 		final List items = new ArrayList();
 
-		items.add(interpreter.getInstallLocation().toString());
+		items.add(interpreter.getInstallLocation().toOSString());
 		items.addAll(interpreterArgs);
 
 		String[] interpreterOwnArgs = interpreter.getInterpreterArguments();
@@ -394,6 +394,7 @@ public class InterpreterConfig implements Cloneable {
 	public void setNoFile(boolean value) {
 		this.noFile = value;
 	}
+
 	public boolean isNoFile() {
 		return this.noFile;
 	}
