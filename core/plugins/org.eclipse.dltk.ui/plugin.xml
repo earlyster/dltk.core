@@ -1350,4 +1350,11 @@
        </adapter>
     </factory>
  </extension>
+   <extension
+         point="org.eclipse.dltk.ui.actionFilterTester">
+      <actionFilterTester
+            class="org.eclipse.dltk.internal.ui.ModelElementNatureTest"
+            id="org.eclipse.dltk.ui.nature">
+      </actionFilterTester>
+   </extension>
 </plugin>

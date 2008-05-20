@@ -5,7 +5,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation
+ *     CodeGear - fix for bug 232884 (Atsushi Hasegawa)
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.typehierarchy;
 
@@ -13,7 +15,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class TypeHierarchyMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.dltk..internal.ui.typehierarchy.TypeHierarchyMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.dltk.internal.ui.typehierarchy.TypeHierarchyMessages";//$NON-NLS-1$
 
 	private TypeHierarchyMessages() {
 		// Do not instantiate
