@@ -46,6 +46,7 @@ import org.eclipse.dltk.internal.corext.refactoring.Checks;
 import org.eclipse.dltk.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.dltk.internal.corext.refactoring.changes.CopyProjectFragmentChange;
 import org.eclipse.dltk.internal.corext.refactoring.changes.CopyResourceChange;
+import org.eclipse.dltk.internal.corext.refactoring.changes.CopyScriptFolderChange;
 import org.eclipse.dltk.internal.corext.refactoring.changes.CopySourceModuleChange;
 import org.eclipse.dltk.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.dltk.internal.corext.refactoring.changes.MoveProjectFragmentChange;
@@ -331,15 +332,15 @@ public class ReorgPolicyFactory {
 
 		public boolean getUpdateReferences() {
 			Assert.isTrue(false);// should not be called if
-									// canUpdateReferences is not overridden and
-									// returns false
+			// canUpdateReferences is not overridden and
+			// returns false
 			return false;
 		}
 
 		public void setUpdateReferences(boolean update) {
 			Assert.isTrue(false);// should not be called if
-									// canUpdateReferences is not overridden and
-									// returns false
+			// canUpdateReferences is not overridden and
+			// returns false
 		}
 
 		public boolean canEnableQualifiedNameUpdating() {
@@ -348,35 +349,35 @@ public class ReorgPolicyFactory {
 
 		public boolean canUpdateQualifiedNames() {
 			Assert.isTrue(false);// should not be called if
-									// canEnableQualifiedNameUpdating is not
-									// overridden and returns false
+			// canEnableQualifiedNameUpdating is not
+			// overridden and returns false
 			return false;
 		}
 
 		public String getFilePatterns() {
 			Assert.isTrue(false);// should not be called if
-									// canEnableQualifiedNameUpdating is not
-									// overridden and returns false
+			// canEnableQualifiedNameUpdating is not
+			// overridden and returns false
 			return null;
 		}
 
 		public boolean getUpdateQualifiedNames() {
 			Assert.isTrue(false);// should not be called if
-									// canEnableQualifiedNameUpdating is not
-									// overridden and returns false
+			// canEnableQualifiedNameUpdating is not
+			// overridden and returns false
 			return false;
 		}
 
 		public void setFilePatterns(String patterns) {
 			Assert.isTrue(false);// should not be called if
-									// canEnableQualifiedNameUpdating is not
-									// overridden and returns false
+			// canEnableQualifiedNameUpdating is not
+			// overridden and returns false
 		}
 
 		public void setUpdateQualifiedNames(boolean update) {
 			Assert.isTrue(false);// should not be called if
-									// canEnableQualifiedNameUpdating is not
-									// overridden and returns false
+			// canEnableQualifiedNameUpdating is not
+			// overridden and returns false
 		}
 
 		public boolean canEnable() throws ModelException {
@@ -740,7 +741,7 @@ public class ReorgPolicyFactory {
 			ISourceModule destinationCu = getDestinationCu(destination);
 			Assert.isNotNull(destinationCu);
 			if (destinationCu.isReadOnly())// the resource read-onliness is
-											// handled by validateEdit
+				// handled by validateEdit
 				return RefactoringStatus
 						.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot_modify);
 
@@ -754,20 +755,23 @@ public class ReorgPolicyFactory {
 				break;
 			// case IModelElement.PACKAGE_DECLARATION:
 			// return
-			// RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_package_decl);
+			// RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.
+			// ReorgPolicyFactory_package_decl);
 
 			// case IModelElement.IMPORT_CONTAINER:
 			// if (ReorgUtils.hasElementsNotOfType(getScriptElements(),
 			// IModelElement.IMPORT_DECLARATION))
 			// return
-			// RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+			// RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.
+			// ReorgPolicyFactory_cannot);
 			// break;
-			//					
+			//
 			// case IModelElement.IMPORT_DECLARATION:
 			// if (ReorgUtils.hasElementsNotOfType(getScriptElements(),
 			// IModelElement.IMPORT_DECLARATION))
 			// return
-			// RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+			// RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.
+			// ReorgPolicyFactory_cannot);
 			// break;
 
 			case IModelElement.FIELD:// fall thru
@@ -963,7 +967,7 @@ public class ReorgPolicyFactory {
 			case IModelElement.SCRIPT_MODEL:
 			case IModelElement.SCRIPT_PROJECT:
 			case IModelElement.PROJECT_FRAGMENT: // can be nested (with
-													// exclusion filters)
+				// exclusion filters)
 				return true;
 			default:
 				return false;
@@ -1389,25 +1393,21 @@ public class ReorgPolicyFactory {
 			String newName = nameProposer.createNewName(pack, destination);
 			IDLTKLanguageToolkit tk = null;
 			tk = DLTKLanguageManager.getLanguageToolkit(pack);
-			IPath newPath = destination.getResource().getFullPath().append(
-					newName);
+			IPath newPath = destination.getResource().getFullPath();
+			if (newName != null) {
+				newPath = newPath.append(newName);
+			}
 			if (newName == null
 					|| (tk != null && tk.validateSourcePackage(newPath,
 							EnvironmentManager.getEnvironment(destination)))) {
-				// INewNameQuery nameQuery;
-				// if (newName == null)
-				// nameQuery= copyQueries.createNullQuery();
-				// else
-				// nameQuery= copyQueries.createNewPackageNameQuery(pack,
-				// newName);
-				// //return new CopyPackageChange(pack, destination, nameQuery);
-				// if (DLTKCore.DEBUG) {
-				// System.err.println("TODO:return new CopyPackageChange(pack,
-				// destination, nameQuery);");
-				// }
-				throw new RuntimeException(
-						"return new CopyPackageChange(pack, destination, nameQuery);"); //$NON-NLS-1$
-				// return null;
+				INewNameQuery nameQuery;
+				if (newName == null) {
+					nameQuery = copyQueries.createNullQuery();
+				} else {
+					nameQuery = copyQueries.createNewPackageNameQuery(pack,
+							newName);
+				}
+				return new CopyScriptFolderChange(pack, destination, nameQuery);
 			} else {
 				if (destination.getResource() instanceof IContainer) {
 					IContainer dest = (IContainer) destination.getResource();
@@ -1689,10 +1689,10 @@ public class ReorgPolicyFactory {
 				throws CoreException {
 			if (!ReadOnlyResourceFinder.confirmMoveOfReadOnlyElements(
 					getScriptElements(), getResources(), reorgQueries))
-				throw new OperationCanceledException(); // saying 'no' to this
-														// one is like
-														// cancelling the whole
-														// operation
+				throw new OperationCanceledException(); // saying' no' to this
+			// one is like
+			// cancelling the whole
+			// operation
 		}
 
 		public ICreateTargetQuery getCreateTargetQuery(
@@ -1800,10 +1800,10 @@ public class ReorgPolicyFactory {
 				throws CoreException {
 			if (!ReadOnlyResourceFinder.confirmMoveOfReadOnlyElements(
 					getScriptElements(), getResources(), reorgQueries))
-				throw new OperationCanceledException(); // saying 'no' to this
-														// one is like
-														// cancelling the whole
-														// operation
+				throw new OperationCanceledException(); // saying' no' to this
+			// one is like
+			// cancelling the whole
+			// operation
 		}
 
 		public ICreateTargetQuery getCreateTargetQuery(
@@ -1946,7 +1946,8 @@ public class ReorgPolicyFactory {
 			}
 			// if (fQualifiedNameSearchResult != null) {
 			// return
-			// fQualifiedNameSearchResult.getSingleChange(Changes.getModifiedFiles(participantChanges));
+			// fQualifiedNameSearchResult.getSingleChange(Changes.
+			// getModifiedFiles(participantChanges));
 			// } else {
 			return null;
 			// }
@@ -1965,7 +1966,7 @@ public class ReorgPolicyFactory {
 					fChangeManager = createChangeManager(
 							new SubProgressMonitor(pm, 1),
 							new RefactoringStatus()); // TODO: non-CU matches
-														// silently dropped
+					// silently dropped
 					RefactoringStatus status = Checks.validateModifiesFiles(
 							getAllModifiedFiles(), null);
 					if (status.hasFatalError())
@@ -2144,17 +2145,18 @@ public class ReorgPolicyFactory {
 				throws CoreException {
 			if (!ReadOnlyResourceFinder.confirmMoveOfReadOnlyElements(
 					getScriptElements(), getResources(), reorgQueries))
-				throw new OperationCanceledException(); // saying 'no' to this
-														// one is like
-														// cancelling the whole
-														// operation
+				throw new OperationCanceledException(); // saying' no' to this
+			// one is like
+			// cancelling the whole
+			// operation
 		}
 
 		public IFile[] getAllModifiedFiles() {
 			Set result = new HashSet();
 			result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager
 					.getAllSourceModules())));
-			// result.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
+			// result.addAll(Arrays.asList(fQualifiedNameSearchResult.
+			// getAllFiles()));
 			if (getDestinationAsScriptFolder() != null && getUpdateReferences())
 				result.addAll(Arrays.asList(ResourceUtil.getFiles(getCus())));
 			return (IFile[]) result.toArray(new IFile[result.size()]);

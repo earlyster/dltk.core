@@ -1,44 +1,46 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.dltk.internal.corext.refactoring.changes;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.dltk.internal.corext.refactoring.reorg.INewNameQuery;
-import org.eclipse.dltk.internal.corext.refactoring.reorg.IProjectFragmentManipulationQuery;
 import org.eclipse.dltk.internal.corext.util.Messages;
+import org.eclipse.dltk.ui.ScriptElementLabels;
 import org.eclipse.ltk.core.refactoring.Change;
 
-public class CopyPackageFragmentRootChange extends ProjectFragmentReorgChange {
+public class CopyScriptFolderChange extends PackageReorgChange {
 
-	public CopyPackageFragmentRootChange(IProjectFragment root,
-			IProject destination, INewNameQuery newNameQuery,
-			IProjectFragmentManipulationQuery updateBuildpathQuery) {
-		super(root, destination, newNameQuery, updateBuildpathQuery);
+	public CopyScriptFolderChange(IScriptFolder pack, IProjectFragment dest,
+			INewNameQuery nameQuery) {
+		super(pack, dest, nameQuery);
 	}
 
-	protected Change doPerformReorg(IPath destinationPath, IProgressMonitor pm)
-			throws ModelException {
-		getRoot().copy(destinationPath, getResourceUpdateFlags(),
-				getUpdateModelFlags(true), null, pm);
+	protected Change doPerformReorg(IProgressMonitor pm) throws ModelException,
+			OperationCanceledException {
+		getPackage().copy(getDestination(), null, getNewName(), true, pm);
 		return null;
 	}
 
 	public String getName() {
-		String[] keys = { getRoot().getElementName(),
-				getDestinationProject().getName() };
+		String packageName = ScriptElementLabels.getDefault().getElementLabel(
+				getPackage(), ScriptElementLabels.ALL_DEFAULT);
+		String destinationName = ScriptElementLabels.getDefault()
+				.getElementLabel(getDestination(),
+						ScriptElementLabels.ALL_DEFAULT);
 		return Messages.format(RefactoringCoreMessages.CopyPackageChange_copy,
-				keys);
+				new String[] { packageName, destinationName });
 	}
 }
