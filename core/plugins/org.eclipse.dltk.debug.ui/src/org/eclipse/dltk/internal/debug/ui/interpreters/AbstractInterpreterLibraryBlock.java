@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.EnvironmentVariable;
@@ -294,7 +295,8 @@ public abstract class AbstractInterpreterLibraryBlock implements
 			// IStatus.ERROR,
 			// DLTKDebugUIPlugin.getUniqueIdentifier(),
 			// IDLTKDebugUIConstants.INTERNAL_ERROR,
-			// InterpretersMessages.InterpreterLibraryBlock_Libraries_cannot_be_empty__1,
+			// InterpretersMessages.
+			// InterpreterLibraryBlock_Libraries_cannot_be_empty__1,
 			// null);
 		}
 		LibraryStandin[] standins = fLibraryContentProvider.getStandins();
@@ -373,7 +375,9 @@ public abstract class AbstractInterpreterLibraryBlock implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+	 * @see
+	 * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt
+	 * .events.SelectionEvent)
 	 */
 	public void widgetSelected(SelectionEvent e) {
 		Object source = e.getSource();
@@ -402,7 +406,9 @@ public abstract class AbstractInterpreterLibraryBlock implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+	 * @see
+	 * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse
+	 * .swt.events.SelectionEvent)
 	 */
 	public void widgetDefaultSelected(SelectionEvent e) {
 	}
@@ -421,7 +427,9 @@ public abstract class AbstractInterpreterLibraryBlock implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
+	 * @see
+	 * org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(
+	 * org.eclipse.jface.viewers.SelectionChangedEvent)
 	 */
 	public void selectionChanged(SelectionChangedEvent event) {
 		updateButtons();
@@ -544,7 +552,8 @@ public abstract class AbstractInterpreterLibraryBlock implements
 			return null;
 		}
 
-		IPath path = new Path(res);
+		IPath path = EnvironmentPathUtils.getFullPath(environment,
+				new Path(res));
 		LibraryLocation lib = new LibraryLocation(path.makeAbsolute());
 		return lib;
 	}
