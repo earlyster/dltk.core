@@ -60,15 +60,19 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 			}
 			for (int i = 0; i < launches.length; i++) {
 				if (launches[i].equals(launch)) {
-					ScriptConsoleViewer consoleViewer = (ScriptConsoleViewer) page
+					final ScriptConsoleViewer consoleViewer = (ScriptConsoleViewer) page
 							.getViewer();
-					if (consoleViewer != null) {
-						consoleViewer.disableProcessing();
-						appendInvitation(consoleViewer);
-						updateText(consoleViewer, "Process terminated...",
-								false);
-						consoleViewer.setEditable(false);
-					}
+					page.getControl().getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							if (consoleViewer != null) {
+								consoleViewer.disableProcessing();
+								appendInvitation(consoleViewer);
+								updateText(consoleViewer,
+										"Process terminated...", false);
+								consoleViewer.setEditable(false);
+							}
+						}
+					});
 				}
 			}
 		}
@@ -159,6 +163,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 			}
 		});
 	}
+
 	protected void enableEdit(final ScriptConsoleViewer viewer) {
 		Control control = viewer.getControl();
 		if (control == null) {
@@ -382,7 +387,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 	}
 
 	public String handleCommand(String userInput) throws IOException {
-		if( this.interpreter == null && this.interpreter.isValid() ) {
+		if (this.interpreter == null && this.interpreter.isValid()) {
 			return "";
 		}
 		Object[] listeners = consoleListeners.getListeners();
