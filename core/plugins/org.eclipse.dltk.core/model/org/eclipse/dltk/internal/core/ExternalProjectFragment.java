@@ -89,7 +89,8 @@ public class ExternalProjectFragment extends ProjectFragment {
 			ArrayList vChildren, ArrayList vForeign, Map newElements,
 			char[][] inclusionPatterns, char[][] exclusionPatterns)
 			throws ModelException {
-		IPath lpath = path.removeFirstSegments(this.fPath.segmentCount());
+		IPath lpath = EnvironmentPathUtils.getLocalPath(path
+				.removeFirstSegments(this.fPath.segmentCount()));
 		ExternalScriptFolder fldr = (ExternalScriptFolder) this
 				.getScriptFolder(lpath);
 		boolean valid = Util.isValidSourcePackageName(this, path);

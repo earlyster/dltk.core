@@ -106,8 +106,10 @@ public class UserLibrary {
 			boolean isSystemLibrary) throws IOException {
 		ByteArrayOutputStream s = new ByteArrayOutputStream();
 		OutputStreamWriter writer = new OutputStreamWriter(s, "UTF8"); //$NON-NLS-1$
-		XMLWriter xmlWriter = new XMLWriter(writer,
-				null/* use the workspace line delimiter */, true/*
+		XMLWriter xmlWriter = new XMLWriter(writer, null/*
+														 * use the workspace
+														 * line delimiter
+														 */, true/*
 																 * print XML
 																 * version
 																 */);
@@ -150,16 +152,15 @@ public class UserLibrary {
 			// write archive end tag if necessary
 			if (hasExtraAttributes || hasRestrictions) {
 				xmlWriter.endTag(TAG_ARCHIVE, true/* insert tab */, true/*
-																		 * insert
-																		 * new
-																		 * line
-																		 */);
-			}
-		}
-		xmlWriter.endTag(TAG_USERLIBRARY, true/* insert tab */, true/*
 																	 * insert
 																	 * new line
 																	 */);
+			}
+		}
+		xmlWriter.endTag(TAG_USERLIBRARY, true/* insert tab */, true/*
+																 * insert new
+																 * line
+																 */);
 		writer.flush();
 		writer.close();
 		return s.toString("UTF8");//$NON-NLS-1$
@@ -213,8 +214,9 @@ public class UserLibrary {
 							foundChildren);
 					IAccessRule[] accessRules = BuildpathEntry
 							.decodeAccessRules(attributeList);
-					IBuildpathEntry entry = DLTKCore.newLibraryEntry(new Path(
-							path), accessRules, extraAttributes, false, true);
+					IBuildpathEntry entry = DLTKCore.newLibraryEntry(Path
+							.fromPortableString(path), accessRules,
+							extraAttributes, false, true);
 					res.add(entry);
 				}
 			}

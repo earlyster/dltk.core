@@ -29,13 +29,46 @@ import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 public class DLTKContentTypeManager {
 	public static boolean isValidFileNameForContentType(
 			IDLTKLanguageToolkit toolkit, IPath path) {
 		if (isValidFileNameForContentType(toolkit, path.lastSegment())) {
 			return true;
+		}
+		if (EnvironmentPathUtils.isFull(path)) {
+			IFileHandle file = EnvironmentPathUtils.getFile(path);
+			if (file.exists() && file.isFile()
+					&& (file.getName().indexOf('.') == -1)) {
+				IContentType[] derived = getDerivedContentTypes(toolkit
+						.getLanguageContentType());
+				// Look for derived for associated extensions.
+				for (int i = 0; i < derived.length; i++) {
+					IContentType type = derived[i];
+					InputStream stream = null;
+					try {
+						stream = new BufferedInputStream(file
+								.openInputStream(null), 2048);
+						IContentDescription description = type
+								.getDescriptionFor(stream,
+										IContentDescription.ALL);
+						if (description != null) {
+							if (checkDescription(type, description)) {
+								return true;
+							}
+						}
+					} catch (IOException e) {
+						if (DLTKCore.DEBUG) {
+							e.printStackTrace();
+						}
+					} finally {
+						closeStream(stream);
+					}
+				}
+			}
 		}
 		if (path.isAbsolute()) {
 			File file = path.toFile();
