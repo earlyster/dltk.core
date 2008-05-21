@@ -56,6 +56,8 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.internal.core.UserLibraryBuildpathContainerInitializer;
 import org.eclipse.dltk.internal.core.UserLibraryManager;
 import org.eclipse.dltk.internal.corext.util.Messages;
@@ -162,7 +164,9 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+		 * @see
+		 * org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt
+		 * .widgets.Composite)
 		 */
 		protected Control createDialogArea(Composite parent) {
 			Composite composite = (Composite) super.createDialogArea(parent);
@@ -183,7 +187,10 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
+		 * @see
+		 * org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener
+		 * #dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.
+		 * DialogField)
 		 */
 		public void dialogFieldChanged(DialogField field) {
 			if (field == fNameField) {
@@ -325,6 +332,7 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 
 		/*
 		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
+		 * 
 		 * @since 3.4
 		 */
 		protected boolean isResizable() {
@@ -342,7 +350,9 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+		 * @see
+		 * org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt
+		 * .widgets.Composite)
 		 */
 		protected Control createDialogArea(Composite parent) {
 			Composite composite = (Composite) super.createDialogArea(parent);
@@ -375,7 +385,11 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter#changeControlPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
+		 * @see
+		 * org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter
+		 * #
+		 * changeControlPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields
+		 * .DialogField)
 		 */
 		public void changeControlPressed(DialogField field) {
 			String label = isSave() ? PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_filedialog_save_title
@@ -434,7 +448,10 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
+		 * @see
+		 * org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener
+		 * #dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.
+		 * DialogField)
 		 */
 		public void dialogFieldChanged(DialogField field) {
 			if (field == fLocationField) {
@@ -451,8 +468,10 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField,
-		 *      int)
+		 * @seeorg.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#
+		 * customButtonPressed
+		 * (org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField,
+		 * int)
 		 */
 		public void customButtonPressed(ListDialogField field, int index) {
 		}
@@ -460,7 +479,9 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#selectionChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
+		 * @seeorg.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#
+		 * selectionChanged
+		 * (org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
 		public void selectionChanged(ListDialogField field) {
 		}
@@ -468,7 +489,9 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
+		 * @seeorg.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#
+		 * doubleClicked
+		 * (org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
 		public void doubleClicked(ListDialogField field) {
 			List selectedElements = fExportImportList.getSelectedElements();
@@ -910,8 +933,12 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 				null,
 
 				PreferencesMessages.UserLibraryPreferencePage_libraries_load_button,
-				PreferencesMessages.UserLibraryPreferencePage_libraries_save_button/*,
-				null, "Detect" */};
+				PreferencesMessages.UserLibraryPreferencePage_libraries_save_button /*
+																					 * ,
+																					 * null
+																					 * ,
+																					 * "Detect"
+																					 */};
 
 		fLibraryList = new TreeListDialogField(adapter, buttonLabels,
 				new BPListLabelProvider());
@@ -956,7 +983,8 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
+	 * @see
+	 * org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
 	 */
 	public void applyData(Object data) {
 		if (data instanceof Map) {
@@ -990,7 +1018,9 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets
+	 * .Composite)
 	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
@@ -1117,8 +1147,8 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 			IPath path = new Path(DLTKCore.USER_LIBRARY_CONTAINER_ID)
 					.append(name);
 			try {
-				initializer.requestBuildpathContainerUpdate(path, project,
-						null);
+				initializer
+						.requestBuildpathContainerUpdate(path, project, null);
 			} catch (CoreException e) {
 				multiStatus.add(e.getStatus());
 			}
@@ -1174,7 +1204,7 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 		field.enableButton(IDX_UP, canMoveUp(list));
 		field.enableButton(IDX_DOWN, canMoveDown(list));
 		field.enableButton(IDX_SAVE, field.getSize() > 0);
-//		field.enableButton(IDX_DETECT, isDetectionSupported());
+		// field.enableButton(IDX_DETECT, isDetectionSupported());
 	}
 
 	protected void doCustomButtonPressed(TreeListDialogField field, int index) {
@@ -1585,8 +1615,8 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 			Object parent) {
 		String lastUsedPath;
 		if (existing != null) {
-			lastUsedPath = existing.getPath().removeLastSegments(1)
-					.toOSString();
+			lastUsedPath = EnvironmentPathUtils.getLocalPath(
+					existing.getPath().removeLastSegments(1)).toOSString();
 		} else {
 			lastUsedPath = fDialogSettings
 					.get(IUIConstants.DIALOGSTORE_LASTEXTSOURCE);
@@ -1619,7 +1649,9 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 		IPath path = Path.fromOSString(res).makeAbsolute();
 
 		BPListElement curr = new BPListElement(parent, null,
-				IBuildpathEntry.BPE_LIBRARY, path, null, true);
+				IBuildpathEntry.BPE_LIBRARY, EnvironmentPathUtils.getFullPath(
+						EnvironmentManager.getLocalEnvironment(), path), null,
+				true);
 		elems[0] = curr;
 
 		fDialogSettings.put(IUIConstants.DIALOGSTORE_LASTEXTSOURCE, dialog
