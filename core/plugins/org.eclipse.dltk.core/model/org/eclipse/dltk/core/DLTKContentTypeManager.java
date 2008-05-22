@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -140,8 +141,9 @@ public class DLTKContentTypeManager {
 			}
 		}
 
-		if (isValidFileNameForContentType(toolkit, resource.getFullPath()
-				.lastSegment())) {
+		String lastSegment = resource.getFullPath().lastSegment();
+		if (lastSegment != null
+				&& isValidFileNameForContentType(toolkit, lastSegment)) {
 			return true;
 		}
 		if (!resource.isAccessible()) {
@@ -149,8 +151,11 @@ public class DLTKContentTypeManager {
 		}
 
 		// I've disable file content checking for non local environments.
-		IEnvironment environment = EnvironmentManager.getEnvironment(resource
-				.getProject());
+		IProject project = resource.getProject();
+		if (project == null) { // This is workspace root.
+			return false;
+		}
+		IEnvironment environment = EnvironmentManager.getEnvironment(project);
 		if (environment == null) {
 			return false;
 		}
