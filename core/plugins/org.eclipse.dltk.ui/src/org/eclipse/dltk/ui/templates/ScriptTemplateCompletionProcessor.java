@@ -51,7 +51,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		}
 	}
 
-	private static final Comparator comaparator = new ProposalComparator();
+	private static final Comparator comparator = new ProposalComparator();
 
 	private ScriptContentAssistInvocationContext context;
 
@@ -107,7 +107,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 						getRelevance(template, prefix)));
 		}
 
-		Collections.sort(matches, comaparator);
+		Collections.sort(matches, comparator);
 
 		return (ICompletionProposal[]) matches
 				.toArray(new ICompletionProposal[matches.size()]);
