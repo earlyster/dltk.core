@@ -18,6 +18,21 @@ public class ScriptTemplateProposal extends TemplateProposal {
 		super(template, context, region, image, relevance);
 	}
 
+	private boolean isRelevanceOverriden;
+	private int relevanceOverride;
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.templates.TemplateProposal#getRelevance()
+	 */
+	public int getRelevance() {
+		return isRelevanceOverriden ? relevanceOverride: super.getRelevance();
+	}
+
+	public void setRelevance(int value) {
+		this.relevanceOverride = value;
+		this.isRelevanceOverriden = true;
+	}
+
 	public String getAdditionalProposalInfo() {
 		TemplateContext context = getContext();
 		if (context instanceof ScriptTemplateContext) {
@@ -41,6 +56,10 @@ public class ScriptTemplateProposal extends TemplateProposal {
 			}
 		}
 		return null;
+	}
+
+	public String getPattern() {
+		return getTemplate().getPattern();
 	}
 
 }
