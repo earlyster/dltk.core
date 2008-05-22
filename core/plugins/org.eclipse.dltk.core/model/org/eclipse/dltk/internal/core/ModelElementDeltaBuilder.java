@@ -129,6 +129,13 @@ public class ModelElementDeltaBuilder {
 	 * compilation unit and its new content.
 	 */
 	public void buildDeltas() {
+		this.delta = new ModelElementDelta(modelElement);
+
+		// if building a delta on a compilation unit or below,
+		// it's a fine grained delta
+		if (modelElement.getElementType() >= IModelElement.SOURCE_MODULE) {
+			this.delta.fineGrained();
+		}
 		this.recordNewPositions(this.modelElement, 0);
 		this.findAdditions(this.modelElement, 0);
 		this.findDeletions();
@@ -299,13 +306,6 @@ public class ModelElementDeltaBuilder {
 		this.newPositions = new HashMap(20);
 		this.putOldPosition(this.modelElement, new ListItem(null, null));
 		this.putNewPosition(this.modelElement, new ListItem(null, null));
-		this.delta = new ModelElementDelta(modelElement);
-
-		// if building a delta on a compilation unit or below,
-		// it's a fine grained delta
-		if (modelElement.getElementType() >= IModelElement.SOURCE_MODULE) {
-			this.delta.fineGrained();
-		}
 
 		this.added = new ArrayList(5);
 		this.removed = new ArrayList(5);
