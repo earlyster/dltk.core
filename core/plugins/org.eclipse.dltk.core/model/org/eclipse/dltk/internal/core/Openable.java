@@ -290,9 +290,11 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		if (isReadOnly() || !isOpen()) {
 			return false;
 		}
-		IBuffer buf = this.getBuffer();
-		if (buf != null && buf.hasUnsavedChanges()) {
-			return true;
+		if (hasBuffer()) {
+			IBuffer buf = this.getBufferNotOpen();
+			if (buf != null && buf.hasUnsavedChanges()) {
+				return true;
+			}
 		}
 		// for package fragments, package fragment roots, and projects must
 		// check open buffers

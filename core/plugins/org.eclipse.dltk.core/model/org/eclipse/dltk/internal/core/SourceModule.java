@@ -183,7 +183,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		return this.getPath().toOSString().toCharArray();
 	}
 
-	/*
+	/**
 	 * Returns the per working copy info for the receiver, or null if none
 	 * exist. Note: the use count of the per working copy info is NOT
 	 * incremented.
@@ -276,6 +276,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	 * @see org.eclipse.dltk.internal.core.Openable#makeConsistent(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void makeConsistent(IProgressMonitor monitor) throws ModelException {
+		if (isConsistent()) return;
 		// makeConsistent(false/*don't create AST*/, 0, monitor);
 
 		// Remove AST Cache element
@@ -390,8 +391,13 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 			throws CoreException {
 		// check for the working copy reporter first
 		ModelManager.PerWorkingCopyInfo wcInfo = getPerWorkingCopyInfo();
-		if ((wcInfo != null) && (wcInfo.problemReporter != null)) {
-			return wcInfo.problemReporter;
+		if (wcInfo != null) {
+			if (wcInfo.noProblemReporter) {
+				return null;
+			}
+			if (wcInfo.problemReporter != null) {
+				return wcInfo.problemReporter;
+			}
 		}
 
 		return super.getProblemReporter(natureId);

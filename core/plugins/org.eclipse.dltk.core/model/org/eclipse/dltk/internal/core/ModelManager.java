@@ -212,6 +212,7 @@ public class ModelManager implements ISaveParticipant {
 		IProblemRequestor problemRequestor;
 		IProblemReporter problemReporter;
 		ISourceModule workingCopy;
+		boolean noProblemReporter;
 
 		public PerWorkingCopyInfo(ISourceModule workingCopy,
 				IProblemRequestor problemRequestor) {
@@ -995,7 +996,7 @@ public class ModelManager implements ISaveParticipant {
 		// working copy)
 		// outside the perWorkingCopyInfos lock (see bug 50667)
 		ModelElementDeltaBuilder deltaBuilder = null;
-		if (workingCopy.isPrimary()) {
+		if (workingCopy.isPrimary() && workingCopy.hasUnsavedChanges()) {
 			deltaBuilder = new ModelElementDeltaBuilder(workingCopy);
 		}
 		PerWorkingCopyInfo info = null;

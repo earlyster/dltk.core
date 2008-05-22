@@ -308,14 +308,14 @@ public abstract class AbstractSourceModule extends Openable implements
 	public String getSource() throws ModelException {
 		IBuffer buffer = getBufferNotOpen();
 		if (buffer == null)
-			return new String(getBufferContent()); //$NON-NLS-1$
+			return new String(getBufferContent());
 		return buffer.getContents();
 	}
 
 	public char[] getSourceAsCharArray() throws ModelException {
 		IBuffer buffer = getBufferNotOpen();
 		if (buffer == null)
-			return getBufferContent(); //$NON-NLS-1$
+			return getBufferContent();
 		return buffer.getContents().toCharArray();
 		// return getSource().toCharArray();
 	}
@@ -445,6 +445,14 @@ public abstract class AbstractSourceModule extends Openable implements
 
 			SourceModuleElementInfo moduleInfo = (SourceModuleElementInfo) info;
 
+			// ensure buffer is opened
+			if (hasBuffer()) {
+				IBuffer buffer = getBufferManager().getBuffer(this);
+				if (buffer == null) {
+					openBuffer(pm, moduleInfo);
+				}
+			}
+
 			// generate structure and compute syntax problems if needed
 			SourceModuleStructureRequestor requestor = new SourceModuleStructureRequestor(
 					this, moduleInfo, newElements);
@@ -553,47 +561,63 @@ public abstract class AbstractSourceModule extends Openable implements
 	protected IBuffer openBuffer(IProgressMonitor pm, Object info)
 			throws ModelException {
 		// create buffer
-		boolean isWorkingCopy = isWorkingCopy();
+		final BufferManager bufManager = getBufferManager();
+		final boolean isWorkingCopy = isWorkingCopy();
 		IBuffer buffer = isWorkingCopy ? this.owner.createBuffer(this)
-				: BufferManager.getDefaultBufferManager().createBuffer(this);
+				: BufferManager.createBuffer(this);
 		if (buffer == null) {
 			return null;
 		}
 
-		// set the buffer source
-		char[] chars = buffer.getCharacters();
-		if ((chars == null) || (chars.length == 0)) {
-			if (isWorkingCopy) {
-				ISourceModule original;
-				if (!isPrimary()
-						&& (original = getOriginalSourceModule()).isOpen()) {
-					buffer.setContents(original.getSource());
+		/*
+		 * synchronize to ensure that 2 threads are not putting 2 different
+		 * buffers at the same time see
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=146331
+		 */
+		synchronized(bufManager) {
+			final IBuffer existingBuffer = bufManager.getBuffer(this);
+			if (existingBuffer != null)
+				return existingBuffer;
+			// set the buffer source
+			char[] chars = buffer.getCharacters();
+			if ((chars == null) || (chars.length == 0)) {
+				if (isWorkingCopy) {
+					ISourceModule original;
+					if (!isPrimary()
+							&& (original = getOriginalSourceModule()).isOpen()) {
+						buffer.setContents(original.getSource());
+					} else {
+						// IFile file = (IFile) getResource();
+						// if ((file == null) || ! file.exists())
+						// {
+						// // initialize buffer with empty contents
+						// buffer.setContents(CharOperation.NO_CHAR);
+						// }
+						// else
+						// {
+						// buffer.setContents(Util.getResourceContentsAsCharArray(file));
+						// }
+						char[] content = getBufferContent();
+						buffer.setContents(content);
+					}
 				} else {
-					// IFile file = (IFile) getResource();
-					// if ((file == null) || ! file.exists())
-					// {
-					// // initialize buffer with empty contents
-					// buffer.setContents(CharOperation.NO_CHAR);
-					// }
-					// else
-					// {
-					// buffer.setContents(Util.getResourceContentsAsCharArray(file));
-					// }
 					char[] content = getBufferContent();
 					buffer.setContents(content);
 				}
-			} else {
-				char[] content = getBufferContent();
-				buffer.setContents(content);
 			}
+	
+			// add buffer to buffer cache
+			/*
+			 * note this may cause existing buffers to be removed from the
+			 * buffer cache, but only primary compilation unit's buffer can be
+			 * closed, thus no call to a client's IBuffer#close() can be done in
+			 * this synchronized block.
+			 */
+			bufManager.addBuffer(buffer);
+	
+			// listen to buffer changes
+			buffer.addBufferChangedListener(this);
 		}
-
-		// add buffer to buffer cache
-		BufferManager bufManager = getBufferManager();
-		bufManager.addBuffer(buffer);
-
-		// listen to buffer changes
-		buffer.addBufferChangedListener(this);
 
 		return buffer;
 	}

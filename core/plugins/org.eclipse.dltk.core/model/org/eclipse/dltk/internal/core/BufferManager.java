@@ -49,7 +49,7 @@ public class BufferManager {
 		}
 	}
 
-	public IBuffer createBuffer(IOpenable owner) {
+	public static IBuffer createBuffer(IOpenable owner) {
 		IModelElement element = owner;
 		IResource resource = element.getResource();
 		return new Buffer(resource instanceof IFile ? (IFile) resource : null,

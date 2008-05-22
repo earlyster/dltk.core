@@ -43,8 +43,13 @@ public class BecomeWorkingCopyOperation extends ModelOperation {
 
 		// open the working copy now to ensure contents are that of the current state of this element
 		SourceModule workingCopy = getWorkingCopy();
-		ModelManager.getModelManager().getPerWorkingCopyInfo(workingCopy, true/*create if needed*/, true/*record usage*/, this.problemRequestor, this.problemReporter);
+		// create if needed, record usage
+		ModelManager.PerWorkingCopyInfo perWorkingCopyInfo = ModelManager
+				.getModelManager().getPerWorkingCopyInfo(workingCopy, true,
+						true, this.problemRequestor, this.problemReporter);
+		perWorkingCopyInfo.noProblemReporter = true;
 		workingCopy.openWhenClosed(workingCopy.createElementInfo(), this.progressMonitor);
+		perWorkingCopyInfo.noProblemReporter = false;
 
 		if (!workingCopy.isPrimary()) {
 			// report added script delta for a non-primary working copy

@@ -122,6 +122,13 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 		return true;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#hasBuffer()
+	 */
+	protected boolean hasBuffer() {
+		return false;
+	}
+
 	/*
 	 * @see org.eclipse.dltk.internal.core.Openable#makeConsistent(org.eclipse.core.runtime.IProgressMonitor)
 	 */
