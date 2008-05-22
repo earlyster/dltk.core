@@ -22,6 +22,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.PreferenceConstants;
+import org.eclipse.dltk.ui.templates.ScriptTemplateProposal;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -134,16 +135,43 @@ public abstract class ScriptCompletionProposalComputer implements
 	protected List computeTemplateCompletionProposals(int offset,
 			ScriptContentAssistInvocationContext context,
 			IProgressMonitor monitor) {
-		// Test template proposals
 		TemplateCompletionProcessor templateProcessor = createTemplateProposalComputer(context);
 		if (templateProcessor != null) {
-			ICompletionProposal[] tempalteProposals = templateProcessor
+			ICompletionProposal[] proposals = templateProcessor
 					.computeCompletionProposals(context.getViewer(), offset);
-
-			return Arrays.asList(tempalteProposals);
+			if (proposals != null && proposals.length != 0) {
+				updateTemplateProposalRelevance(context, proposals);
+			}
+			return Arrays.asList(proposals);
 		}
 
 		return Collections.EMPTY_LIST;
+	}
+
+	/**
+	 * Update relevance of template proposals that match with a keyword give
+	 * those templates slightly more relevance than the keyword to sort them
+	 * first.
+	 */
+	protected void updateTemplateProposalRelevance(
+			ScriptContentAssistInvocationContext context,
+			ICompletionProposal[] proposals) {
+		IScriptCompletionProposal[] keywords = context.getKeywordProposals();
+		if (keywords == null || keywords.length == 0) {
+			return;
+		}
+		for (int i = 0; i < proposals.length; ++i) {
+			ICompletionProposal cp = proposals[i];
+			if (cp instanceof ScriptTemplateProposal) {
+				final ScriptTemplateProposal tp = (ScriptTemplateProposal) cp;
+				final String name = tp.getPattern();
+				for (int j = 0; j < keywords.length; ++j) {
+					if (name.startsWith(keywords[j].getDisplayString())) {
+						tp.setRelevance(keywords[j].getRelevance() + 1);
+					}
+				}
+			}
+		}
 	}
 
 	// Script language specific completion proposals like types or keywords
