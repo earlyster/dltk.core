@@ -5,7 +5,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - Initial implementation
+ *     xored software, Inc. - deprecated (Alex Panchenko)  
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
@@ -16,7 +18,7 @@ import org.eclipse.dltk.compiler.problem.IProblem;
  * by some script operation.
  * 
  * @see IProblem
-	 *
+ * @deprecated replaced with IProblemReporter
  */
 public interface IProblemRequestor {
 	
