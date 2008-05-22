@@ -52,6 +52,9 @@ public final class DLTKEditorMessages extends NLS {
 	public static String GotoMatchingBracket_label;
 	public static String EditorUtility_concatModifierStrings;
 	public static String SemanticHighlighting_job;
+	public static String ModelElementHyperlink_defaultText;
+	public static String ModelElementHyperlink_text;
+	public static String ModelElementHyperlink_typeLabel;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, DLTKEditorMessages.class);

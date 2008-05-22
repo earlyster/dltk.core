@@ -137,43 +137,48 @@ public class OpenAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!isProcessable())
 			return;
+		final IModelElement[] elements;
 		try {
-			IModelElement[] elements = SelectionConverter.codeResolveForked(
-					fEditor, false);
-			elements = filterElements(elements);
-			if (elements == null || elements.length == 0) {
-				IEditorStatusLine statusLine = (IEditorStatusLine) fEditor
-						.getAdapter(IEditorStatusLine.class);
-				if (statusLine != null)
-					statusLine
-							.setMessage(
-									true,
-									ActionMessages.OpenAction_error_messageBadSelection,
-									null);
-				getShell().getDisplay().beep();
-				return;
-			}
-			IModelElement element = elements[0];
-			if (elements.length > 1) {
-				element = OpenActionUtil.selectModelElement(elements,
-						getShell(), getDialogTitle(),
-						ActionMessages.OpenAction_select_element);
-				if (element == null)
-					return;
-			}
-
-			int type = element.getElementType();
-			if (type == IModelElement.SCRIPT_PROJECT
-					|| type == IModelElement.PROJECT_FRAGMENT
-					|| type == IModelElement.SCRIPT_FOLDER)
-				element = EditorUtility.getEditorInputModelElement(fEditor,
-						false);
-			run(new Object[] { element });
+			elements = SelectionConverter.codeResolveForked(fEditor, false);
 		} catch (InvocationTargetException e) {
 			showError(e);
+			return;
 		} catch (InterruptedException e) {
-			// ignore
+			return;
 		}
+		selectAndOpen(elements);
+	}
+
+	public void selectAndOpen(IModelElement[] elements) {
+		elements = filterElements(elements);
+		if (elements == null || elements.length == 0) {
+			IEditorStatusLine statusLine = (IEditorStatusLine) fEditor
+					.getAdapter(IEditorStatusLine.class);
+			if (statusLine != null)
+				statusLine
+						.setMessage(
+								true,
+								ActionMessages.OpenAction_error_messageBadSelection,
+								null);
+			getShell().getDisplay().beep();
+			return;
+		}
+		IModelElement element = elements[0];
+		if (elements.length > 1) {
+			element = OpenActionUtil.selectModelElement(elements,
+					getShell(), getDialogTitle(),
+					ActionMessages.OpenAction_select_element);
+			if (element == null)
+				return;
+		}
+
+		int type = element.getElementType();
+		if (type == IModelElement.SCRIPT_PROJECT
+				|| type == IModelElement.PROJECT_FRAGMENT
+				|| type == IModelElement.SCRIPT_FOLDER)
+			element = EditorUtility.getEditorInputModelElement(fEditor,
+					false);
+		run(new Object[] { element });
 	}
 
 	private IModelElement[] filterElements(IModelElement[] elements) {
