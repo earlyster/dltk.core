@@ -25,7 +25,6 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.ScriptDebugManager;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
-import org.eclipse.dltk.debug.core.model.IScriptLineBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptMethodEntryBreakpoint;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.internal.debug.core.model.AbstractScriptBreakpoint;
@@ -45,8 +44,7 @@ public class BreakpointUtils {
 
 	public static IDLTKLanguageToolkit getLanguageToolkit(
 			IScriptBreakpoint breakpoint) {
-		return DLTKLanguageManager
-				.getLanguageToolkit(getNatureId(breakpoint));
+		return DLTKLanguageManager.getLanguageToolkit(getNatureId(breakpoint));
 	}
 
 	public static IDLTKUILanguageToolkit getUILanguageToolkit(
@@ -130,8 +128,11 @@ public class BreakpointUtils {
 		String debugModelId = getDebugModelId(editor, resource);
 		IBreakpoint[] breakpoints = DebugPlugin.getDefault()
 				.getBreakpointManager().getBreakpoints(debugModelId);
-		String location = getBreakpointResourceLocation(editor)
-				.toPortableString();
+		IPath breakPointResourceLocation = getBreakpointResourceLocation(editor);
+		if (breakPointResourceLocation == null) {
+			return null;
+		}
+		String location = breakPointResourceLocation.toPortableString();
 
 		for (int i = 0; i < breakpoints.length; i++) {
 			IBreakpoint breakpoint = breakpoints[i];
@@ -170,10 +171,12 @@ public class BreakpointUtils {
 				int end = start + line.getLength() - 1;
 				// TODO
 				IPath path = resource.getLocation();
-				IScriptMethodEntryBreakpoint methodEntryBreakpoint = ScriptDebugModel.createMethodEntryBreakpoint(resource, path,
+				IScriptMethodEntryBreakpoint methodEntryBreakpoint = ScriptDebugModel
+						.createMethodEntryBreakpoint(resource, path,
 								lineNumber, start, end, false, null, methodName);
 				methodEntryBreakpoint.setBreakOnEntry(true);
-				((AbstractScriptBreakpoint)methodEntryBreakpoint).register(true);
+				((AbstractScriptBreakpoint) methodEntryBreakpoint)
+						.register(true);
 			} catch (BadLocationException e) {
 				DebugPlugin.log(e);
 			}
