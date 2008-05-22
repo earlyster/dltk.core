@@ -80,6 +80,9 @@ public abstract class ScriptTemplateCompletionProcessor extends
 			offset = selection.getOffset() + selection.getLength();
 
 		String prefix = extractPrefix(viewer, offset);
+		if (prefix == null || prefix.length() == 0) {
+			return new ICompletionProposal[0];
+		}
 		Region region = new Region(offset - prefix.length(), prefix.length());
 		TemplateContext context = createContext(viewer, region);
 		if (context == null)
