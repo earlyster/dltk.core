@@ -226,6 +226,10 @@ public class CompletionProposalLabelProvider {
 	public String createSimpleLabel(CompletionProposal proposal) {
 		return String.valueOf(proposal.getCompletion());
 	}
+	
+	public String createKeywordLabel(CompletionProposal proposal) {
+		return String.valueOf(proposal.getName());
+	}
 
 	/**
 	 * Creates the display label for a given <code>CompletionProposal</code>.
@@ -260,6 +264,7 @@ public class CompletionProposalLabelProvider {
 		case CompletionProposal.VARIABLE_DECLARATION:
 			return createSimpleLabelWithType(proposal);
 		case CompletionProposal.KEYWORD:
+			return createKeywordLabel(proposal);
 		case CompletionProposal.PACKAGE_REF:
 		case CompletionProposal.LABEL_REF:
 			return createSimpleLabel(proposal);

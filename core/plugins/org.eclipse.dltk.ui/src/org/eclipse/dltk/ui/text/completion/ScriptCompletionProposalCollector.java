@@ -627,12 +627,19 @@ public abstract class ScriptCompletionProposalCollector extends CompletionReques
 		String completion = String.valueOf(proposal.getCompletion());
 		int start = proposal.getReplaceStart();
 		int length = getLength(proposal);
-		String label = getLabelProvider().createSimpleLabel(proposal);
+		String label = getLabelProvider().createKeywordLabel(proposal);
 		Image img = getImage(getLabelProvider().createImageDescriptor(
 				proposal));
 		int relevance = computeRelevance(proposal);
-		return createScriptCompletionProposal(completion, start, length, img,
-				label, relevance);
+		ScriptCompletionProposal scriptProposal = createScriptCompletionProposal(
+				completion, start, length, img, label, relevance);
+
+		if (fScriptProject != null) {
+			scriptProposal.setProposalInfo(new ProposalInfo(
+					fScriptProject, new String(proposal.getName())));
+		}
+
+		return scriptProposal;
 	}
 	
 
