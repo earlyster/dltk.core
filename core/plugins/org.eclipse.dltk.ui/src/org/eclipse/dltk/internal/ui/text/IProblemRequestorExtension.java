@@ -5,7 +5,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - Initial implementation
+ *     xored software, Inc. - deprecated (Alex Panchenko)  
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.text;
 
@@ -15,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * Extension to <code>IProblemRequestor</code>.
+ * @deprecated replaced with IProblemReporter
  */
 public interface IProblemRequestorExtension {
 
