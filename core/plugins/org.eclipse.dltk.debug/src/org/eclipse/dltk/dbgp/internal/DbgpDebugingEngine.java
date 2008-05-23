@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.dbgp.IDbgpRawListener;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpNotifyPacket;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpPacketReceiver;
@@ -89,8 +90,9 @@ public class DbgpDebugingEngine extends DbgpTermination implements
 			try {
 				socket.close();
 			} catch (IOException e) {
-				// TODO: log exception
-				e.printStackTrace();
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -109,7 +111,7 @@ public class DbgpDebugingEngine extends DbgpTermination implements
 		synchronized (terminatedLock) {
 			if (terminated)
 				return;
-			
+
 			receiver.removeTerminationListener(this);
 			try {
 				receiver.waitTerminated();

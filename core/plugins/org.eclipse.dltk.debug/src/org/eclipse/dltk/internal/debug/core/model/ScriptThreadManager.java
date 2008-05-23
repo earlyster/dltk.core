@@ -22,11 +22,15 @@ import org.eclipse.dltk.dbgp.IDbgpContinuationHandler;
 import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
+import org.eclipse.dltk.debug.core.model.IScriptDebugThreadConfigurator;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
+import org.eclipse.dltk.internal.debug.core.model.operations.DbgpDebugger;
 
 public class ScriptThreadManager implements IScriptThreadManager {
 	private static final boolean DEBUG = DLTKCore.DEBUG;
-	
+
+	private IScriptDebugThreadConfigurator configurator = null;
+
 	// Helper methods
 	private interface IThreadBoolean {
 		boolean get(IThread thread);
@@ -64,8 +68,8 @@ public class ScriptThreadManager implements IScriptThreadManager {
 	protected void fireThreadAccepted(IScriptThread thread, boolean first) {
 		Object[] list = listeners.getListeners();
 		for (int i = 0; i < list.length; ++i) {
-			((IScriptThreadManagerListener) list[i])
-					.threadAccepted(thread, first);
+			((IScriptThreadManagerListener) list[i]).threadAccepted(thread,
+					first);
 		}
 	}
 
@@ -109,11 +113,13 @@ public class ScriptThreadManager implements IScriptThreadManager {
 		this.target = target;
 		this.outputListener = new IDbgpContinuationHandler() {
 			public void stderrReceived(String data) {
-				final IScriptStreamProxy proxy = ScriptThreadManager.this.target.getStreamProxy();
+				final IScriptStreamProxy proxy = ScriptThreadManager.this.target
+						.getStreamProxy();
 				if (proxy != null) {
 					try {
 						final OutputStream err = proxy.getStderr();
-						err.write(data.getBytes(ScriptThreadManager.this.target.getConsoleEncoding()));
+						err.write(data.getBytes(ScriptThreadManager.this.target
+								.getConsoleEncoding()));
 						err.flush();
 
 					} catch (IOException e) {
@@ -127,11 +133,13 @@ public class ScriptThreadManager implements IScriptThreadManager {
 			}
 
 			public void stdoutReceived(String data) {
-				final IScriptStreamProxy proxy = ScriptThreadManager.this.target.getStreamProxy();
+				final IScriptStreamProxy proxy = ScriptThreadManager.this.target
+						.getStreamProxy();
 				if (proxy != null) {
 					try {
 						final OutputStream out = proxy.getStdout();
-						out.write(data.getBytes(ScriptThreadManager.this.target.getConsoleEncoding()));
+						out.write(data.getBytes(ScriptThreadManager.this.target
+								.getConsoleEncoding()));
 						out.flush();
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -140,7 +148,7 @@ public class ScriptThreadManager implements IScriptThreadManager {
 				if (DEBUG) {
 					System.out.println("Received (stdout): " + data); //$NON-NLS-1$
 				}
-			}			
+			}
 		};
 	}
 
@@ -151,7 +159,7 @@ public class ScriptThreadManager implements IScriptThreadManager {
 			if (error != null) {
 				throw error;
 			}
-			
+
 			session.getStreamManager().addListener(outputListener);
 			ScriptThread thread = new ScriptThread(target, session, this);
 			addThread(thread);
@@ -166,14 +174,17 @@ public class ScriptThreadManager implements IScriptThreadManager {
 			// Auto start
 			thread.resume();
 		} catch (Exception e) {
-			try { target.terminate();} catch (DebugException e1) {}
+			try {
+				target.terminate();
+			} catch (DebugException e1) {
+			}
 			DLTKDebugPlugin.log(e);
 		}
 	}
 
 	private void addThread(ScriptThread thread) {
 		synchronized (threads) {
-			threads.add(thread);			
+			threads.add(thread);
 		}
 	}
 
@@ -183,12 +194,12 @@ public class ScriptThreadManager implements IScriptThreadManager {
 
 	public void terminateThread(IScriptThread thread) {
 		synchronized (threads) {
-			threads.remove(thread);	
-			DebugEventHelper.fireTerminateEvent(thread);			
-			
+			threads.remove(thread);
+			DebugEventHelper.fireTerminateEvent(thread);
+
 			IDbgpSession session = ((ScriptThread) thread).getDbgpSession();
 			session.getStreamManager().removeListener(outputListener);
-			
+
 			if (!hasThreads()) {
 				fireAllThreadsTerminated();
 			}
@@ -243,7 +254,7 @@ public class ScriptThreadManager implements IScriptThreadManager {
 			waitingForThreads = false;
 		}
 	}
-	
+
 	public boolean canResume() {
 		return getThreadBoolean(new IThreadBoolean() {
 			public boolean get(IThread thread) {
@@ -285,13 +296,24 @@ public class ScriptThreadManager implements IScriptThreadManager {
 			}
 		}
 	}
-	
+
 	public void refreshThreads() {
-		synchronized(threads) {
+		synchronized (threads) {
 			IThread[] threads = getThreads();
 			for (int i = 0; i < threads.length; ++i) {
 				((IScriptThread) threads[i]).updateStackFrames();
 			}
+		}
+	}
+
+	public void setScriptThreadConfigurator(
+			IScriptDebugThreadConfigurator configurator) {
+		this.configurator = configurator;
+	}
+
+	public void configureThread(DbgpDebugger engine, ScriptThread scriptThread) {
+		if (configurator != null) {
+			configurator.configureThread(engine, scriptThread);
 		}
 	}
 }

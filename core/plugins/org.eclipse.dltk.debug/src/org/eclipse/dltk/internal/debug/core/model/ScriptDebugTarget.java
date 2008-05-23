@@ -41,6 +41,7 @@ import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
 import org.eclipse.dltk.debug.core.IDbgpService;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTargetListener;
+import org.eclipse.dltk.debug.core.model.IScriptDebugThreadConfigurator;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptVariable;
 
@@ -451,11 +452,16 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	public String getConsoleEncoding() {
 		String encoding = "UTF-8"; //$NON-NLS-1$
 		try {
-			encoding = getLaunch().getLaunchConfiguration().getAttribute(DebugPlugin.ATTR_CONSOLE_ENCODING, encoding);
-		}
-		catch (CoreException e) {
+			encoding = getLaunch().getLaunchConfiguration().getAttribute(
+					DebugPlugin.ATTR_CONSOLE_ENCODING, encoding);
+		} catch (CoreException e) {
 			e.printStackTrace();
 		}
 		return encoding;
+	}
+
+	public void setScriptDebugThreadConfigurator(
+			IScriptDebugThreadConfigurator configurator) {
+		this.threadManager.setScriptThreadConfigurator(configurator);
 	}
 }

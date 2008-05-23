@@ -17,8 +17,13 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
+import org.eclipse.dltk.debug.core.model.IScriptDebugThreadConfigurator;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
+import org.eclipse.dltk.internal.debug.core.model.operations.DbgpDebugger;
 
+/**
+ * @Deprecated
+ */
 public class NewScriptThreadManager implements IScriptThreadManager {
 
 	private static final int WAITING = 0;
@@ -59,12 +64,13 @@ public class NewScriptThreadManager implements IScriptThreadManager {
 		threads = newThreads;
 	}
 
-	protected IScriptThread createThread(IDbgpSession session) throws DbgpException, CoreException {
+	protected IScriptThread createThread(IDbgpSession session)
+			throws DbgpException, CoreException {
 		ScriptThread thread = new ScriptThread(debugTarget, session, this);
-		
+
 		addThread(thread);
 		DebugEventHelper.fireCreateEvent(thread);
-		
+
 		return thread;
 	}
 
@@ -186,14 +192,14 @@ public class NewScriptThreadManager implements IScriptThreadManager {
 	}
 
 	public void refreshThreads() {
-		synchronized(lock) {
+		synchronized (lock) {
 			for (int i = 0; i < threads.length; ++i) {
 				ScriptThread thread = threads[i];
 				thread.updateStackFrames();
 			}
 		}
 	}
-	
+
 	// =========================================================================
 	// ============================ ITerminate =================================
 	// =========================================================================
@@ -227,7 +233,7 @@ public class NewScriptThreadManager implements IScriptThreadManager {
 			}
 		}
 	}
-	
+
 	// =========================================================================
 	// ======================= IDbgpThreadAcceptor =============================
 	// =========================================================================
@@ -245,7 +251,7 @@ public class NewScriptThreadManager implements IScriptThreadManager {
 					first = true;
 					state = ACCEPTING;
 				}
-				
+
 				fireThreadAccepted(thread, first);
 			} catch (DbgpException e) {
 				// TODO Auto-generated catch block
@@ -254,7 +260,7 @@ public class NewScriptThreadManager implements IScriptThreadManager {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 	}
 
@@ -289,5 +295,16 @@ public class NewScriptThreadManager implements IScriptThreadManager {
 
 	public boolean isWaitingForThreads() {
 		return state == WAITING;
+	}
+
+	public void configureThread(DbgpDebugger engine, ScriptThread scriptThread) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void setScriptThreadConfigurator(
+			IScriptDebugThreadConfigurator configurator) {
+		// TODO Auto-generated method stub
+
 	}
 }

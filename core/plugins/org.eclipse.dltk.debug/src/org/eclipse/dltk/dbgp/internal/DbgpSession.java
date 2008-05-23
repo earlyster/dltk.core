@@ -21,6 +21,7 @@ import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpCoreCommands;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpDebuggingEngineCommunicator;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpExtendedCommands;
+import org.eclipse.dltk.dbgp.internal.commands.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.internal.managers.DbgpNotificationManager;
 import org.eclipse.dltk.dbgp.internal.managers.DbgpStreamManager;
 import org.eclipse.dltk.dbgp.internal.managers.IDbgpStreamManager;
@@ -43,6 +44,8 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 
 	private final Object terminatedLock = new Object();
 	private boolean terminated = false;
+
+	private DbgpDebuggingEngineCommunicator communicator;
 
 	private void requestTerminateImpl(Object object) {
 		if (object != engine) {
@@ -102,9 +105,7 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 				"DBGP - Stream manager"); //$NON-NLS-1$
 		this.streamManager.addTerminationListener(this);
 
-		// Commands
-		DbgpDebuggingEngineCommunicator communicator = new DbgpDebuggingEngineCommunicator(
-				engine);
+		communicator = new DbgpDebuggingEngineCommunicator(engine);
 
 		this.coreCommands = new DbgpCoreCommands(communicator);
 		this.extendedCommands = new DbgpExtendedCommands(communicator);
@@ -190,5 +191,9 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 
 	public void removeRawListenr(IDbgpRawListener listener) {
 		engine.addRawListener(listener);
+	}
+
+	public IDbgpCommunicator getCommunicator() {
+		return this.communicator;
 	}
 }

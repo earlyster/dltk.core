@@ -112,12 +112,12 @@ public class DbgpDebugger {
 	}
 
 	// Feature helper methods
-	protected IDbgpFeature getFeature(String name) throws DbgpException {
+	public IDbgpFeature getFeature(String name) throws DbgpException {
 		IDbgpCoreCommands core = session.getCoreCommands();
 		return core.getFeature(name);
 	}
 
-	protected void setFeature(String name, String value) throws DbgpException {
+	public void setFeature(String name, String value) throws DbgpException {
 		IDbgpCoreCommands core = session.getCoreCommands();
 		core.setFeature(name, value);
 	}
@@ -358,5 +358,9 @@ public class DbgpDebugger {
 			System.out.println("Support of " + IDbgpFeatureCommands.NOTIFY_OK //$NON-NLS-1$
 					+ ": false"); //$NON-NLS-1$
 		}
+	}
+
+	public IDbgpSession getSession() {
+		return this.session;
 	}
 }
