@@ -36,7 +36,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 
 	protected IScriptProject scriptProject;
 
-	// Accpets completion proposals
+	// Accepts completion proposals
 	protected CompletionRequestor requestor;
 
 	protected int startPosition;
