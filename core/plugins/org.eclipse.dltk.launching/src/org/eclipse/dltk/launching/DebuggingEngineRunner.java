@@ -20,6 +20,7 @@ import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
 import org.eclipse.dltk.debug.core.IDbgpService;
 import org.eclipse.dltk.debug.core.ScriptDebugManager;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
+import org.eclipse.dltk.debug.core.model.IScriptDebugThreadConfigurator;
 import org.eclipse.dltk.internal.debug.core.model.DebugEventHelper;
 import org.eclipse.dltk.internal.debug.core.model.ScriptDebugTarget;
 import org.eclipse.dltk.internal.launching.InterpreterMessages;
@@ -96,11 +97,13 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 
 	/**
 	 * Add the debugging engine configuration.
-	 * @param launch TODO
+	 * 
+	 * @param launch
+	 *            TODO
 	 */
 	protected abstract InterpreterConfig addEngineConfig(
-			InterpreterConfig config, PreferencesLookupDelegate delegate, ILaunch launch)
-			throws CoreException;
+			InterpreterConfig config, PreferencesLookupDelegate delegate,
+			ILaunch launch) throws CoreException;
 
 	public void run(InterpreterConfig config, ILaunch launch,
 			IProgressMonitor monitor) throws CoreException {
@@ -117,7 +120,8 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 			PreferencesLookupDelegate prefDelegate = createPreferencesLookupDelegate(launch);
 
 			initializeLaunch(launch, config, prefDelegate);
-			InterpreterConfig newConfig = addEngineConfig(config, prefDelegate, launch);
+			InterpreterConfig newConfig = addEngineConfig(config, prefDelegate,
+					launch);
 
 			// Starting debugging engine
 			IProcess process = null;
@@ -155,6 +159,13 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	}
 
 	/**
+	 * Used to create new script thread configurator.
+	 */
+	protected IScriptDebugThreadConfigurator createThreadConfigurator() {
+		return null;
+	}
+
+	/**
 	 * Waiting debugging process to connect to current launch
 	 * 
 	 * @param debuggingProcess
@@ -179,6 +190,11 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 						0);
 
 		ScriptDebugTarget target = (ScriptDebugTarget) launch.getDebugTarget();
+		IScriptDebugThreadConfigurator configurator = this
+				.createThreadConfigurator();
+		if (configurator != null) {
+			target.setScriptDebugThreadConfigurator(configurator);
+		}
 		target.setProcess(debuggingProcess);
 
 		try {

@@ -18,15 +18,18 @@ public abstract class ExternalDebuggingEngineRunner extends
 	}
 
 	/**
-	 * @deprecated Use {@link #addEngineConfig(InterpreterConfig,PreferencesLookupDelegate,ILaunch)} instead
+	 * @deprecated Use
+	 *             {@link #addEngineConfig(InterpreterConfig,PreferencesLookupDelegate,ILaunch)}
+	 *             instead
 	 */
 	protected final InterpreterConfig addEngineConfig(InterpreterConfig config,
 			PreferencesLookupDelegate delegate) throws CoreException {
-				return addEngineConfig(config, delegate, null);
-			}
+		return addEngineConfig(config, delegate, null);
+	}
 
 	protected final InterpreterConfig addEngineConfig(InterpreterConfig config,
-			PreferencesLookupDelegate delegate, ILaunch launch) throws CoreException {
+			PreferencesLookupDelegate delegate, ILaunch launch)
+			throws CoreException {
 
 		final IFileHandle file = getDebuggingEnginePath(delegate);
 
@@ -68,8 +71,8 @@ public abstract class ExternalDebuggingEngineRunner extends
 		String path = (String) EnvironmentPathUtils.decodePaths(pathKeyValue)
 				.get(env);
 		if (path != null || "".equals(path)) { //$NON-NLS-1$
-			return PlatformFileUtils
-					.findAbsoluteOrEclipseRelativeFile(env, new Path(path));
+			return PlatformFileUtils.findAbsoluteOrEclipseRelativeFile(env,
+					new Path(path));
 		}
 
 		return null;
