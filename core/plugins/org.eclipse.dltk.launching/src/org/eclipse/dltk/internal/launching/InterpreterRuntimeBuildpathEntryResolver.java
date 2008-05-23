@@ -132,49 +132,98 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		final IEnvironment environment = interpreter.getEnvironment();
 		for (int i = 0; i < libs.length; i++) {
 			IPath systemLibraryPath = libs[i].getLibraryPath();
-			final boolean exists;
-			if (environment != null) {
-				final IFileHandle fileHandle = EnvironmentPathUtils.getFile(
-						environment, systemLibraryPath);
-				if (fileHandle != null) {
-					exists = fileHandle.exists();
+			if (!contains(defaultLibs, systemLibraryPath)) {
+				final boolean exists;
+				if (environment != null) {
+					final IFileHandle fileHandle = EnvironmentPathUtils
+							.getFile(environment, systemLibraryPath);
+					if (fileHandle != null) {
+						exists = fileHandle.exists();
+					} else {
+						exists = true;
+					}
 				} else {
-					exists = true;
+					exists = systemLibraryPath.toFile().exists();
 				}
-			} else {
-				exists = systemLibraryPath.toFile().exists();
-			}
-			if (exists) {
-				resolvedEntries.add(resolveLibraryLocation(interpreter,
-						libs[i], kind));
+				if (exists) {
+					resolvedEntries.add(resolveLibraryLocation(interpreter,
+							libs[i], kind));
+				}
 			}
 		}
 		return (IRuntimeBuildpathEntry[]) resolvedEntries
 				.toArray(new IRuntimeBuildpathEntry[resolvedEntries.size()]);
 	}
 
+	/**
+	 * @param libs
+	 * @param path
+	 * @return
+	 */
+	private static boolean contains(LibraryLocation[] libs, IPath path) {
+		final IPathCompare compare = getPlatformPathCompare();
+		for (int i = 0; i < libs.length; ++i) {
+			if (compare.equals(path, libs[i].getLibraryPath())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static interface IPathCompare {
+		boolean equals(IPath path1, IPath path2);
+	}
+	
+	private static final class Win32PathCompare implements IPathCompare {
+
+		public boolean equals(IPath path1, IPath path2) {
+			/*
+			 * the .equals method of IPath ignores trailing separators so we must as
+			 * well
+			 */
+			return path1.removeTrailingSeparator().toOSString()
+					.equalsIgnoreCase(
+							path2.removeTrailingSeparator().toOSString());
+		}
+
+	}
+	
+	private static final class GenericPathCompare implements IPathCompare {
+
+		public boolean equals(IPath path1, IPath path2) {
+			return path1.equals(path2);
+		}
+		
+	}
+	
 	public static boolean isSamePaths(LibraryLocation[] libs,
 			LibraryLocation[] defaultLibs) {
-		if (libs.length != defaultLibs.length) {
+		final int length = defaultLibs.length;
+		if (libs.length != length) {
 			return false;
 		}
-		IPath dpath = null, lpath = null;
-		for (int i = 0; i < defaultLibs.length; i++) {
-			dpath = defaultLibs[i].getLibraryPath();
-			lpath = libs[i].getLibraryPath();
-			if (Platform.getOS().equals(Platform.OS_WIN32)) {
-				// the .equals method of IPath ignores trailing seperators so we
-				// must as well
-				if (!dpath.removeTrailingSeparator().toOSString()
-						.equalsIgnoreCase(
-								lpath.removeTrailingSeparator().toOSString())) {
+		if (length != 0) {
+			// TODO paths could be remote... 
+			final IPathCompare compare = getPlatformPathCompare();
+			for (int i = 0; i < length; i++) {
+				IPath dpath = defaultLibs[i].getLibraryPath();
+				IPath lpath = libs[i].getLibraryPath();
+				if (!compare.equals(dpath, lpath)) {
 					return false;
 				}
-			} else if (!dpath.equals(lpath)) {
-				return false;
 			}
 		}
 		return true;
+	}
+
+	private static IPathCompare getPlatformPathCompare() {
+		final IPathCompare compare;
+		if (Platform.getOS().equals(Platform.OS_WIN32)) {
+			compare = new Win32PathCompare();
+		} else {
+			compare = new GenericPathCompare();
+		}
+		return compare;
 	}
 
 	/**
