@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.launching;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +23,9 @@ import org.eclipse.dltk.core.IBuildpathAttribute;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.AbstractScriptLaunchConfigurationDelegate;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IRuntimeBuildpathEntry;
@@ -131,13 +132,19 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		final IEnvironment environment = interpreter.getEnvironment();
 		for (int i = 0; i < libs.length; i++) {
 			IPath systemLibraryPath = libs[i].getLibraryPath();
-			final File f;
+			final boolean exists;
 			if (environment != null) {
-				f = new File(environment.convertPathToString(systemLibraryPath));
+				final IFileHandle fileHandle = EnvironmentPathUtils.getFile(
+						environment, systemLibraryPath);
+				if (fileHandle != null) {
+					exists = fileHandle.exists();
+				} else {
+					exists = true;
+				}
 			} else {
-				f = systemLibraryPath.toFile();
+				exists = systemLibraryPath.toFile().exists();
 			}
-			if (f.exists()) {
+			if (exists) {
 				resolvedEntries.add(resolveLibraryLocation(interpreter,
 						libs[i], kind));
 			}
