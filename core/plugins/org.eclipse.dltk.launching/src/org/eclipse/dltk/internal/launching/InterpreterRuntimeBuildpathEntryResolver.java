@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.launching;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -127,9 +128,16 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 			kind = IRuntimeBuildpathEntry.BOOTSTRAP_ENTRY;
 		}
 		List resolvedEntries = new ArrayList(libs.length);
+		final IEnvironment environment = interpreter.getEnvironment();
 		for (int i = 0; i < libs.length; i++) {
 			IPath systemLibraryPath = libs[i].getLibraryPath();
-			if (systemLibraryPath.toFile().exists()) {
+			final File f;
+			if (environment != null) {
+				f = new File(environment.convertPathToString(systemLibraryPath));
+			} else {
+				f = systemLibraryPath.toFile();
+			}
+			if (f.exists()) {
 				resolvedEntries.add(resolveLibraryLocation(interpreter,
 						libs[i], kind));
 			}
