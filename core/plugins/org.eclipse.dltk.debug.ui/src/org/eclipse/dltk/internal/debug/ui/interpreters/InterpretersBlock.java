@@ -919,6 +919,14 @@ public abstract class InterpretersBlock implements
 			setSelection(new StructuredSelection(installs[0]));
 		}
 		fireSelectionChanged();
+		packColumns();
+	}
+
+	protected void packColumns() {
+		final int columnCount = fTable.getColumnCount();
+		for (int i = 0; i < columnCount; ++i) {
+			fTable.getColumn(i).pack();
+		}
 	}
 
 	// Make sure that InterpreterStandin ids are unique if multiple calls to
