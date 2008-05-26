@@ -122,8 +122,7 @@ public abstract class ScriptInterpreterPreferencePage extends PreferencePage
 		data.horizontalSpan = 1;
 		control.setLayoutData(data);
 
-		fInterpretersBlock.restoreColumnSettings(DLTKDebugUIPlugin.getDefault()
-				.getDialogSettings(),
+		fInterpretersBlock.restoreColumnSettings(getDialogSettings(false),
 				IScriptDebugHelpContextIds.INTERPRETER_PREFERENCE_PAGE);
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(ancestor,
@@ -175,12 +174,25 @@ public abstract class ScriptInterpreterPreferencePage extends PreferencePage
 		}
 
 		// save column widths
-		IDialogSettings settings = DLTKDebugUIPlugin.getDefault()
-				.getDialogSettings();
-		fInterpretersBlock.saveColumnSettings(settings,
+		fInterpretersBlock.saveColumnSettings(getDialogSettings(true),
 				IScriptDebugHelpContextIds.INTERPRETER_PREFERENCE_PAGE);
 
 		return super.performOk();
+	}
+
+	protected IDialogSettings getDialogSettings(boolean isSaving) {
+		final IDialogSettings settings = DLTKDebugUIPlugin.getDefault()
+				.getDialogSettings();
+		final String nature = fInterpretersBlock.getCurrentNature();
+		IDialogSettings section = settings.getSection(nature);
+		if (section == null) {
+			if (isSaving) {
+				section = settings.addNewSection(nature);
+			} else {
+				section = settings;
+			}
+		}
+		return section;
 	}
 
 	protected IScriptModel getScriptModel() {
@@ -227,7 +239,7 @@ public abstract class ScriptInterpreterPreferencePage extends PreferencePage
 										DLTKDebugUIPlugin.PLUGIN_ID,
 										IDLTKDebugUIConstants.INTERNAL_ERROR,
 										InterpretersMessages.InterpretersPreferencePage_11,
-										null)); //  
+										null));
 				return;
 			}
 		} else {
