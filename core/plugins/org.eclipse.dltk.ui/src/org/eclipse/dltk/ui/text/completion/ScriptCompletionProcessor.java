@@ -94,6 +94,12 @@ public abstract class ScriptCompletionProcessor extends ContentAssistProcessor {
 
 	protected abstract CompletionProposalLabelProvider getProposalLabelProvider();
 
+	protected void setContextInformationMode(
+			ContentAssistInvocationContext context) {
+		((ScriptContentAssistInvocationContext) context)
+				.setContextInformationMode(true);
+	}
+
 	protected ContentAssistInvocationContext createContext(ITextViewer viewer,
 			int offset) {
 		return new ScriptContentAssistInvocationContext(viewer, offset,

@@ -36,6 +36,7 @@ public abstract class ScriptContentAssistInvocationContext extends
 	private IType fType;
 
 	private String fLangaugeNatureID;
+	private boolean isContextInformationMode; 
 
 	/**
 	 * Creates a new context.
@@ -230,4 +231,15 @@ public abstract class ScriptContentAssistInvocationContext extends
 	}
 
 	protected abstract CompletionProposalLabelProvider createLabelProvider();
+
+	/**
+	 * @param value
+	 */
+	public void setContextInformationMode(boolean value) {
+		isContextInformationMode = value;		
+	}
+	
+	public boolean isContextInformationMode() {
+		return isContextInformationMode;
+	}
 }

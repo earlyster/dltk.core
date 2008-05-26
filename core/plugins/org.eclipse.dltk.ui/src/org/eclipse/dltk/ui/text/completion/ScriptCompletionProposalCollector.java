@@ -753,4 +753,11 @@ public abstract class ScriptCompletionProposalCollector extends CompletionReques
 		return scriptProposal;
 
 	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.dltk.core.CompletionRequestor#isContextInformationMode()
+	 */
+	public boolean isContextInformationMode() {
+		return fInvocationContext != null && fInvocationContext.isContextInformationMode();
+	}
 }

@@ -199,9 +199,9 @@ public abstract class ScriptCompletionProposalComputer implements
 
 		// Filling collector with proposals
 		try {
-			IModelElement element = sourceModule.getElementAt(offset);
-			if (element != null) {
-				if (DLTKCore.DEBUG_COMPLETION) {
+			if (DLTKCore.DEBUG_COMPLETION) {
+				IModelElement element = sourceModule.getElementAt(offset);
+				if (element != null) {
 					System.out.println("========= Model element: " //$NON-NLS-1$
 							+ element.getClass());
 				}

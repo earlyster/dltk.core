@@ -322,6 +322,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 			IProgressMonitor monitor) {
 		List proposals = new ArrayList();
 		ContentAssistInvocationContext context = createContext(viewer, offset);
+		setContextInformationMode(context);
 
 		List providers = getCategories();
 		for (Iterator it = providers.iterator(); it.hasNext();) {
@@ -397,6 +398,11 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 	 */
 	protected IProgressMonitor createProgressMonitor() {
 		return new NullProgressMonitor();
+	}
+	
+	protected void setContextInformationMode(
+			ContentAssistInvocationContext context) {
+		// empty
 	}
 
 	/**
