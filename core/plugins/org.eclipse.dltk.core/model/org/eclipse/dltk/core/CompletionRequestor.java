@@ -180,4 +180,13 @@ public abstract class CompletionRequestor {
 	public void acceptContext(CompletionContext context) {
 		// do nothing
 	}
+
+	/**
+	 * Checks if the current call is made to display context information.
+	 * 
+	 * @return
+	 */
+	public boolean isContextInformationMode() {
+		return false;
+	}
 }
