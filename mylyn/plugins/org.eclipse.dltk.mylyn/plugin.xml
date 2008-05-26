@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension-point id="ScriptEditorContributor" 
+   		name="Mylyn Script Editor Contributor" 
+   		schema="schema/scriptEditorContributor.exsd"/>
+	
+	<extension
+	       point="org.eclipse.mylyn.context.core.bridges">
+	    <structureBridge
+           class="org.eclipse.mylyn.internal.dltk.DLTKStructureBridge"
+           name="Script Structure Bridge"
+           parentContentType="*"/>     
+	</extension>
+	   
+	<extension point="org.eclipse.mylyn.context.ui.bridges">
+	    <uiBridge
+	          class="org.eclipse.mylyn.internal.dltk.ui.DLTKUiBridge"
+	          contentType="script"
+	          activeSearchIcon="icons/elcl16/edge-ref-java.gif"
+           	  activeSearchLabel="Script Search"/>
+	    <labelProvider
+	          class="org.eclipse.mylyn.internal.dltk.ui.DLTKContextLabelProvider"
+	          contentType="script"/>
+        <preservedFilters
+            viewId="org.eclipse.dltk.mylyn.navigatorContent">
+           <filter
+                 class="org.eclipse.mylyn.internal.dltk.ui.DLTKDeclarationsFilter">
+           </filter>
+        </preservedFilters>
+        <preservedFilters
+              viewId="org.eclipse.ui.navigator.ProjectExplorer">
+           <filter
+                 class="org.eclipse.mylyn.internal.dltk.ui.DLTKDeclarationsFilter">
+           </filter>
+        </preservedFilters>
+   </extension>
+
+  	<!-- ==================== Context Editing Common Navigator ==================== -->
+
+	<extension
+			point="org.eclipse.ui.navigator.viewer">
+		<viewerContentBinding 
+			viewerId="org.eclipse.mylyn.context.ui.navigator.context">
+     <includes>
+        <contentExtension
+              pattern="org.eclipse.dltk.core.DLTKContent">
+        </contentExtension>
+     </includes>
+		</viewerContentBinding>
+	</extension>
+ <extension
+       point="org.eclipse.ui.perspectiveExtensions">
+    <perspectiveExtension
+          targetID="org.eclipse.dltk.ruby.ui.RubyPerspective">
+    </perspectiveExtension>
+ </extension>
+
+  	<!-- ==================== Editors ==================== -->
+
+	
+	
+	
+ 
+
+   <extension point="org.eclipse.ui.viewActions"> 
+		<viewContribution 
+		id="org.eclipse.mylyn.dltk.explorer.contribution" 
+   		targetID="org.eclipse.dltk.ui.ScriptExplorer">
+    	<action
+           class="org.eclipse.mylyn.internal.dltk.ui.actions.FocusScriptExplorerAction"
+           disabledIcon="icons/elcl16/focus-disabled.gif"
+           enablesFor="*"
+           icon="icons/elcl16/focus.gif"
+           id="org.eclipse.mylyn.actions.filter.scriptExplorer"
+           label="Focus on Active Task"
+           menubarPath="mylyn"
+           style="toggle"
+           toolbarPath="mylyn"
+           tooltip="Focus on Active Task"> 
+  		</action> 
+      </viewContribution>
+ 	  <viewContribution
+       id="org.eclipse.mylyn.ui.views.active.search.contribution"
+       targetID="org.eclipse.mylyn.ui.views.active.search">
+ 		</viewContribution>
+ 		
+ 	<viewContribution 
+		id="org.eclipse.mylyn.ui.debug.view.contribution" 
+   		targetID="org.eclipse.debug.ui.DebugView">
+    	<action
+           class="org.eclipse.mylyn.internal.dltk.ui.actions.FocusDebugViewAction"
+           disabledIcon="icons/elcl16/focus-disabled.gif"
+           enablesFor="*"
+           icon="icons/elcl16/focus.gif"
+           id="org.eclipse.mylyn.ui.actions.FilterResourceNavigatorAction"
+           label="Focus on Active Task (Experimental)"
+           menubarPath="mylyn"
+           style="toggle"
+           toolbarPath="mylyn"
+           tooltip="Focus on Active Task (Experimental)"> 
+  		</action> 
+      </viewContribution> 
+	</extension>
+	
+  <extension point="org.eclipse.ui.popupMenus"> 
+     <objectContribution
+           adaptable="false"
+           id="org.eclipse.mylyn.internal.dltk.ui.interest"
+           objectClass="org.eclipse.dltk.core.IModelElement">
+     	<action
+            class="org.eclipse.mylyn.internal.context.ui.actions.InterestDecrementAction"
+            enablesFor="*"
+            icon="icons/elcl16/interest-decrease.gif"
+            id="org.eclipse.mylyn.internal.dltk.ui.actions.interest.decrement"
+            label="Remove from Context"
+            menubarPath="additions"
+            tooltip="Mark selected element as uninteresting">
+      </action>
+	    <action  
+  		  	label="Mark as Landmark" 
+	  		tooltip="Mark the selected element as a landmark"
+	  		menubarPath="additions" 
+	  		id="org.eclipse.mylyn.ui.actions.InterestIncrementAction" 
+	  		class="org.eclipse.mylyn.internal.context.ui.actions.InterestIncrementAction"
+	  		icon="icons/elcl16/interest-increase.gif"
+	  		enablesFor="*"/>
+     <visibility>
+        <systemProperty
+              name="org.eclipse.mylyn.context.core.context.active"
+              value="true">
+        </systemProperty>
+     </visibility>
+	 </objectContribution>
+     <objectContribution
+           adaptable="false"
+           id="org.eclipse.dltk.mylyn.ui.interest.contribution.container"
+           objectClass="org.eclipse.dltk.internal.ui.scriptview.BuildPathContainer">
+     	<action
+            class="org.eclipse.mylyn.internal.context.ui.actions.InterestDecrementAction"
+            enablesFor="*"
+            icon="icons/elcl16/interest-decrease.gif"
+            id="org.eclipse.mylyn.internal.dltk.ui.actions.interest.decrement.container"
+            label="Remove from Context"
+            menubarPath="additions"
+            tooltip="Mark selected element as uninteresting">
+      </action>
+      <action
+            class="org.eclipse.mylyn.internal.context.ui.actions.InterestIncrementAction"
+            enablesFor="*"
+            icon="icons/elcl16/interest-increase.gif"
+            id="org.eclipse.mylyn.ui.actions.InterestIncrementAction"
+            label="Mark as Landmark"
+            menubarPath="additions"
+            tooltip="Mark the selected element as a landmark">
+      </action>
+      <visibility>
+         <systemProperty
+               name="org.eclipse.mylyn.context.core.context.active"
+               value="true">
+         </systemProperty>
+      </visibility>
+     </objectContribution>
+  </extension>   
+
+  <extension point="org.eclipse.ui.actionSets">
+	<actionSet
+            id="org.eclipse.dltk.mylyn.actionSet"
+            label="Mylyn DLTK"
+            visible="true"> 
+            
+  		<action
+          class="org.eclipse.mylyn.internal.dltk.ui.actions.ToggleActiveFoldingAction"
+          definitionId="org.eclipse.dltk.mylyn.ui.editor.folding.auto"
+          icon="icons/elcl16/interest-folding.gif"
+          id="org.eclipse.dltk.mylyn.ui.editor.folding.auto"
+          label="Automatically Fold Unintersting Elements"
+          style="toggle"
+          toolbarPath="org.eclipse.ui.edit.text.actionSet.presentation/Presentation"
+          tooltip="Automatically Fold Unintersting Elements">
+       <enablement>
+          <systemProperty
+                name="org.eclipse.mylyn.context.core.context.active"
+                value="true">
+          </systemProperty>
+       </enablement>
+      	</action> 
+        <action
+               definitionId="org.eclipse.mylyn.dltk.ui.search.context"
+               label="Search the current task context"
+               class="org.eclipse.mylyn.internal.dltk.ui.actions.FindReferencesInContextAction"
+               id="org.eclipse.dltk.mylyn.ui.search.context">
+         </action>
+    </actionSet>
+  </extension>
+  
+
+  
+	<extension point="org.eclipse.ui.newWizards">
+      <wizard
+            canFinishEarly="false"
+            category="org.eclipse.mylyn.wizards"
+            class="org.eclipse.mylyn.internal.dltk.ui.wizards.MylynPreferenceWizard"
+            hasPages="true"
+            icon="icons/etool16/wizard-prefs.gif"
+            id="org.eclipse.mylyn.dltk.ui.wizards.preferences"
+            name="Recommended Preferences"
+            project="false">
+      </wizard>
+   </extension>
+
+   <extension point="org.eclipse.ui.commands">
+	  <command
+         categoryId="org.eclipse.mylyn.ui"
+         description="Search the current task context"
+         id="org.eclipse.mylyn.dltk.ui.search.context"
+         name="Search Task Context">
+      </command>
+	  <command
+         categoryId="org.eclipse.mylyn.ui"
+         description="Toggle Active Folding"
+         id="org.eclipse.mylyn.dltk.ui.editor.folding.auto"
+         name="Toggle Active Folding">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSetPartAssociations">
+      <actionSetPartAssociation
+            targetID="org.eclipse.mylyn.dltk.actionSet.browsing">
+         <part
+               id="org.eclipse.dltk.ui.MembersView">
+         </part>
+      </actionSetPartAssociation>
+   </extension>
+   <extension
+         point="org.eclipse.dltk.ui.dltkElementFilters">
+      <filter
+            class="org.eclipse.mylyn.internal.dltk.ui.DLTKDeclarationsFilter"
+            description="Member Filter"
+            enabled="false"
+            id="org.eclipse.dltk.mylyn.MembersFilter"
+            name="Member Filter"
+            targetId="org.eclipse.dltk.ScriptExplorer">
+      </filter>
+   </extension>
+
+</plugin>
+
+     
