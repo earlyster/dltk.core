@@ -17,6 +17,7 @@ import java.net.URL;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
@@ -427,20 +428,10 @@ public abstract class AbstractScriptCompletionProposal implements
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		if (getProposalInfo() != null) {
-			String info = getProposalInfo().getInfo(null);
-			if (info != null && info.length() > 0) {
-				StringBuffer buffer = new StringBuffer();
-				HTMLPrinter.insertPageProlog(buffer, 0, getCSSStyles());
-				buffer.append(info);
-				HTMLPrinter.addPageEpilog(buffer);
-				info = buffer.toString();
-			}
-			return info;
-		}
-		return null;
+		final Object info = getAdditionalProposalInfo(new NullProgressMonitor());
+		return info != null ? info.toString() : null;
 	}
-
+	
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
 	 */
