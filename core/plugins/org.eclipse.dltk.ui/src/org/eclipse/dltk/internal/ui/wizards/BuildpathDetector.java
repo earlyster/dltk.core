@@ -84,7 +84,7 @@ public class BuildpathDetector {
 	 * Method detectBuildpath.
 	 * 
 	 * @param monitor
-	 * 		The progress monitor (not null)
+	 *            The progress monitor (not null)
 	 * @throws CoreException
 	 */
 	public void detectBuildpath(IProgressMonitor monitor) throws CoreException {
@@ -185,8 +185,18 @@ public class BuildpathDetector {
 				}
 			}
 			if (primary) {
-				IBuildpathEntry entry = DLTKCore.newSourceEntry(path);
-				res.add(entry);
+				boolean isHidden = false;
+				// Hidden file filtering.
+				for (int i = 0; i < path.segmentCount(); i++) {
+					if (path.segment(i).startsWith(".")) {
+						isHidden = true;
+						break;
+					}
+				}
+				if (!isHidden) {
+					IBuildpathEntry entry = DLTKCore.newSourceEntry(path);
+					res.add(entry);
+				}
 			}
 		}
 		Collections.sort(res, new BPSorter());
