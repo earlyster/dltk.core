@@ -32,7 +32,8 @@ import org.eclipse.dltk.internal.compiler.lookup.LookupEnvironment;
 
 public abstract class ScriptCompletionEngine extends Engine implements
 		ICompletionEngine {
-	protected static boolean DEBUG = DLTKCore.DEBUG_COMPLETION;
+	protected static final boolean DEBUG = DLTKCore.DEBUG_COMPLETION;
+	protected static final boolean VERBOSE = DEBUG;
 
 	protected IScriptProject scriptProject;
 
@@ -53,10 +54,10 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	protected char[] source;
 
 	public ScriptCompletionEngine(/*
-									 * ISearchableEnvironment nameEnvironment,
-									 * CompletionRequestor requestor, Map
-									 * settings, IScriptProject scriptProject
-									 */) {
+								 * ISearchableEnvironment nameEnvironment,
+								 * CompletionRequestor requestor, Map settings,
+								 * IScriptProject scriptProject
+								 */) {
 		super(null);
 
 		// this.scriptProject = scriptProject;
@@ -124,35 +125,41 @@ public abstract class ScriptCompletionEngine extends Engine implements
 			break;
 
 		}
-
-		buffer.append("{\n");//$NON-NLS-1$
-		buffer
-				.append("\tCompletion[").append(proposal.getCompletion() == null ? "null".toCharArray() : proposal.getCompletion()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		buffer
-				.append("\tDeclarationKey[").append(proposal.getDeclarationKey() == null ? "null".toCharArray() : proposal.getDeclarationKey()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		buffer
-				.append("\tKey[").append(proposal.getKey() == null ? "null".toCharArray() : proposal.getKey()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-		buffer
-				.append("\tName[").append(proposal.getName() == null ? "null".toCharArray() : proposal.getName()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-		buffer
-				.append("\tCompletionLocation[").append(proposal.getCompletionLocation()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		int start = proposal.getReplaceStart();
-		int end = proposal.getReplaceEnd();
-		buffer.append("\tReplaceStart[").append(start).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
-		buffer.append("-ReplaceEnd[").append(end).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		if (this.source != null)
+		if (VERBOSE) {
+			buffer.append("{\n");//$NON-NLS-1$
 			buffer
-					.append("\tReplacedText[").append(this.source, start, end - start).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		buffer
-				.append("\tTokenStart[").append(proposal.getTokenStart()).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
-		buffer
-				.append("-TokenEnd[").append(proposal.getTokenEnd()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		buffer
-				.append("\tRelevance[").append(proposal.getRelevance()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
+					.append("\tCompletion[").append(proposal.getCompletion() == null ? "null".toCharArray() : proposal.getCompletion()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			buffer
+					.append("\tDeclarationKey[").append(proposal.getDeclarationKey() == null ? "null".toCharArray() : proposal.getDeclarationKey()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			buffer
+					.append("\tKey[").append(proposal.getKey() == null ? "null".toCharArray() : proposal.getKey()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-		buffer.append("}\n");//$NON-NLS-1$
+			buffer
+					.append("\tName[").append(proposal.getName() == null ? "null".toCharArray() : proposal.getName()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+			buffer
+					.append("\tCompletionLocation[").append(proposal.getCompletionLocation()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			int start = proposal.getReplaceStart();
+			int end = proposal.getReplaceEnd();
+			buffer.append("\tReplaceStart[").append(start).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
+			buffer.append("-ReplaceEnd[").append(end).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			if (this.source != null)
+				buffer
+						.append("\tReplacedText[").append(this.source, start, end - start).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			buffer
+					.append("\tTokenStart[").append(proposal.getTokenStart()).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
+			buffer
+					.append("-TokenEnd[").append(proposal.getTokenEnd()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			buffer
+					.append("\tRelevance[").append(proposal.getRelevance()).append("]\n"); //$NON-NLS-1$ //$NON-NLS-2$
+
+			buffer.append("}\n");//$NON-NLS-1$
+		} else {
+			if (proposal.getCompletion() != null) {
+				buffer.append(' ').append('"').append(proposal.getCompletion())
+						.append('"');
+			}
+		}
 		System.out.println(buffer.toString());
 	}
 
@@ -200,7 +207,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 							choices[i]);
 					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
 					/*
-					 * access restriction for keywors
+					 * access restriction for keywords
 					 */
 
 					// if (CharOperation.equals(choices[i], Keywords.TRUE)
@@ -298,14 +305,14 @@ public abstract class ScriptCompletionEngine extends Engine implements
 			return;
 
 		int length = token.length;
-		String tok = new String(token);
+		// String tok = new String(token);
 		if (canCompleteEmptyToken || length > 0) {
 			for (int i = 0; i < methods.size(); i++) {
 				IMethod method = (IMethod) methods.get(i);
-				String qname = (String) methodNames.get(i);// processMethodName(method,
-				// tok);
+				String qname = (String) methodNames.get(i);
+				// processMethodName(method, tok);
 				char[] name = qname.toCharArray();
-				if (DLTKCore.DEBUG_COMPLETION) {
+				if (DEBUG) {
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
 				if (length <= name.length
@@ -327,24 +334,18 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						// proposal.setPackageName(q);
 						// proposal.setTypeName(displayName);
 						proposal.setModelElement(method);
+						String[] arguments = null;
 						if (method != null) {
 							try {
 								proposal.setFlags(method.getFlags());
+								arguments = method.getParameters();
 							} catch (ModelException e) {
 								if (DLTKCore.DEBUG) {
 									e.printStackTrace();
 								}
 							}
 						}
-						String[] arguments = null;
 
-						try {
-							arguments = method.getParameters();
-						} catch (ModelException e) {
-							if (DLTKCore.DEBUG) {
-								e.printStackTrace();
-							}
-						}
 						if (arguments != null && arguments.length > 0) {
 							char[][] args = new char[arguments.length][];
 							for (int j = 0; j < arguments.length; ++j) {
@@ -447,7 +448,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 				IMethod method = (IMethod) methods.get(i);
 				String qname = processMethodName(method, tok);
 				char[] name = qname.toCharArray();
-				if (DLTKCore.DEBUG_COMPLETION) {
+				if (DEBUG) {
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
 				if (length <= name.length
@@ -520,7 +521,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 				IField field = (IField) fields.get(i);
 				String qname = processFieldName(field, tok);
 				char[] name = qname.toCharArray();
-				if (DLTKCore.DEBUG_COMPLETION) {
+				if (DEBUG) {
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
 				if (length <= name.length
@@ -569,7 +570,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 				IType type = (IType) types.get(i);
 				String qname = processTypeName(type, tok);
 				char[] name = qname.toCharArray();
-				if (DLTKCore.DEBUG_COMPLETION) {
+				if (DEBUG) {
 					System.out.println("Completion:" + qname); //$NON-NLS-1$
 				}
 				if (length <= name.length
