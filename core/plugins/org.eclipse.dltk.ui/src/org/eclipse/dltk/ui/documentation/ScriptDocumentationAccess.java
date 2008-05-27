@@ -9,9 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.documentation;
 
-import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,10 +81,12 @@ public class ScriptDocumentationAccess {
 		return documentationProviders;
 	}
 
+	private static final int BUFF_SIZE = 2048;
+
 	/**
 	 * Gets a reader for an IMember documentation. Content are found using
 	 * documentation documentationProviders, contributed via extension point.
-	 * The content does contain html code describing member. It may be for ex.
+	 * The content does contain HTML code describing member. It may be for ex.
 	 * header comment or a man page. (if <code>allowExternal</code> is
 	 * <code>true</code>)
 	 * 
@@ -96,16 +97,17 @@ public class ScriptDocumentationAccess {
 	 *            documentation, look into parent types methods.
 	 * @param allowExternal
 	 *            Allows external documentation like man-pages.
-	 * @return Reader for a content, or <code>null</code> if no documentation
-	 *         is found.
+	 * @return Reader for a content, or <code>null</code> if no documentation is
+	 *         found.
 	 * @throws ModelException
-	 *             is thrown when the elements documentaion can not be accessed
+	 *             is thrown when the elements documentation can not be accessed
 	 */
 	public static Reader getHTMLContentReader(String nature, IMember member,
 			boolean allowInherited, boolean allowExternal)
 			throws ModelException {
 		IScriptDocumentationProvider[] providers = getContributedProviders();
 		StringBuffer buffer = new StringBuffer();
+		char[] buff = null;
 		for (int i = 0; i < providers.length; i++) {
 			IScriptDocumentationProvider p = providers[i];
 			String pNature = (String) providerNatures.get(p);
@@ -113,11 +115,12 @@ public class ScriptDocumentationAccess {
 				continue;
 			Reader reader = p.getInfo(member, allowInherited, allowExternal);
 			if (reader != null) {
-				// return reader;
-				char[] buff = new char[1024];
+				if (buff == null) {
+					buff = new char[BUFF_SIZE];
+				}
 				int len = 0;
 				try {
-					while ((len = reader.read(buff,0, 1023)) != -1) {
+					while ((len = reader.read(buff, 0, BUFF_SIZE)) != -1) {
 						buffer.append(buff, 0, len);
 					}
 				} catch (IOException e) {
@@ -128,24 +131,24 @@ public class ScriptDocumentationAccess {
 			}
 		}
 		if (buffer.length() > 0) {
-			ByteArrayInputStream ba = new ByteArrayInputStream(buffer
-					.toString().getBytes());
-			return new InputStreamReader(ba);
+			char[] content = new char[buffer.length()];
+			buffer.getChars(0, buffer.length(), content, 0);
+			return new CharArrayReader(content);
 		}
 		return null;
 	}
 
 	/**
-	 * Gets a reader for an keyword documentaion. Content are found using ALL
+	 * Gets a reader for an keyword documentation. Content are found using ALL
 	 * documentation documentationProviders, contributed via extension point.
-	 * The content does contain html code describing member.
+	 * The content does contain HTML code describing member.
 	 * 
 	 * @param content
 	 *            The keyword to find.
-	 * @return Reader for a content, or <code>null</code> if no documentation
-	 *         is found.
+	 * @return Reader for a content, or <code>null</code> if no documentation is
+	 *         found.
 	 * @throws ModelException
-	 *             is thrown when the elements documentaion can not be accessed
+	 *             is thrown when the elements documentation can not be accessed
 	 */
 	public static Reader getHTMLContentReader(String nature, String content)
 			throws ModelException {
