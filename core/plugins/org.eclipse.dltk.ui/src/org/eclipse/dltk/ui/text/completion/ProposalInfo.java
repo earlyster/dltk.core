@@ -102,15 +102,18 @@ public class ProposalInfo {
 		if (content != null && fElement != null) {
 			IDLTKLanguageToolkit languageToolkit = DLTKLanguageManager
 					.getLanguageToolkit(fElement);
-			StringBuffer buffer = new StringBuffer();
 			Reader reader = ScriptDocumentationAccess.getHTMLContentReader(
 					languageToolkit.getNatureId(), content);
-			HTMLPrinter.addParagraph(buffer, reader);
-			if (buffer.length() > 0) {
-				HTMLPrinter.addPageEpilog(buffer);
-				return buffer.toString();
+			if (reader != null) {
+				StringBuffer buffer = new StringBuffer();
+				HTMLPrinter.addParagraph(buffer, reader);
+				if (buffer.length() > 0) {
+					if (!HTMLPrinter.hasEpilog(buffer)) {
+						HTMLPrinter.addPageEpilog(buffer);
+					}
+					return buffer.toString();
+				}
 			}
-			return null;
 		}
 
 		return null;

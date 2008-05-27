@@ -78,23 +78,26 @@ public class HTMLPrinter {
 	}
 
 	public static String read(Reader rd) {
-
-		StringBuffer buffer= new StringBuffer();
-		char[] readBuffer= new char[2048];
-
-		try {
-			int n= rd.read(readBuffer);
-			while (n > 0) {
-				buffer.append(readBuffer, 0, n);
-				n= rd.read(readBuffer);
-			}
+		final StringBuffer buffer = new StringBuffer();
+		if (read(rd, buffer)) {
 			return buffer.toString();
-		} catch (IOException x) {
 		}
-
 		return null;
 	}
 
+	public static boolean read(Reader rd, StringBuffer buffer) {
+		char[] readBuffer = new char[2048];
+		try {
+			int n;
+			while ((n = rd.read(readBuffer)) > 0) {
+				buffer.append(readBuffer, 0, n);
+			}
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
+	}
+	
 	public static void insertPageProlog(StringBuffer buffer, int position, RGB bgRGB, String styleSheet) {
 		
 		if (bgRGB == null)
@@ -119,7 +122,7 @@ public class HTMLPrinter {
 			return;
 
 		StringBuffer styleBuf= new StringBuffer(10 * styles.length);
-		for (int i= 0; styles != null && i < styles.length; i++) {
+		for (int i= 0; i < styles.length; i++) {
 			styleBuf.append(" style=\""); //$NON-NLS-1$
 			styleBuf.append(styles[i]);
 			styleBuf.append('"');
@@ -216,8 +219,72 @@ public class HTMLPrinter {
 	}
 
 	public static void addParagraph(StringBuffer buffer, Reader paragraphReader) {
-		if (paragraphReader != null)
-			addParagraph(buffer, read(paragraphReader));
+		if (paragraphReader != null) {
+			final int startPos = buffer.length();
+			if (read(paragraphReader, buffer)) {
+				if (startPos != 0 || !hasProlog(buffer, startPos)) {
+					buffer.insert(startPos, "<p>"); //$NON-NLS-1$
+				}
+			}
+		}
+	}
+	
+	private static boolean hasProlog(StringBuffer buffer, int pos) {
+		while (pos < buffer.length()
+				&& Character.isWhitespace(buffer.charAt(pos))) {
+			++pos;
+		}
+		for (int i = 0; i < PROLOG_MARKS.length; ++i) {
+			if (startsWithIgnoreCase(buffer, pos, PROLOG_MARKS[i])) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private static final String[] PROLOG_MARKS = new String[] { "<!DOCTYPE>", //$NON-NLS-1$
+			"<HTML>" }; //$NON-NLS-1$
+	
+	/**
+	 * Checks if the <code>buffer</code> content ends with "</HTML>"
+	 * 
+	 * @param buffer
+	 * @return
+	 */
+	public static boolean hasEpilog(StringBuffer buffer) {
+		int pos = buffer.length();
+		while (pos > 0 && Character.isWhitespace(buffer.charAt(pos - 1))) {
+			--pos;
+		}
+		return pos >= EPILOG_MARK.length()
+				&& startsWithIgnoreCase(buffer, pos - EPILOG_MARK.length(),
+						EPILOG_MARK);
+	}
+	
+	private static final String EPILOG_MARK = "</HTML>"; //$NON-NLS-1$
+
+	/**
+	 * Checks if the <code>buffer</code> content at the specified
+	 * <code>pos</code> contains the <code>prefix</code>
+	 * 
+	 * @param buffer
+	 * @param pos
+	 * @param prefix
+	 *            should be already upper-cased
+	 * @return
+	 */
+	private static boolean startsWithIgnoreCase(StringBuffer buffer, int pos,
+			String prefix) {
+		final int prefixLen = prefix.length();
+		if (pos + prefixLen <= buffer.length()) {
+			for (int i = 0; i < prefixLen; ++i) {
+				if (Character.toUpperCase(buffer.charAt(pos + i)) != prefix
+						.charAt(i)) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	/**
