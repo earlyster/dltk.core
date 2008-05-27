@@ -474,7 +474,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 
 		// code complete
 		ICompletionEngine engine = DLTKLanguageManager
-			.getCompletionEngine(toolkit.getNatureId());
+				.getCompletionEngine(toolkit.getNatureId());
 		if (engine == null) {
 			return;
 		}
@@ -498,8 +498,9 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		ScriptProject project = (ScriptProject) getScriptProject();
 
 		IBuffer buffer = getBuffer();
-		if (buffer == null) {
-			return new IModelElement[0];
+		int end = -1;
+		if (buffer != null) {
+			end = buffer.getLength();
 		}
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(this);
@@ -515,18 +516,17 @@ public abstract class Openable extends ModelElement implements IOpenable,
 			}
 		}
 
-		int end = buffer.getLength();
-		if (offset < 0 || length < 0 || offset + length > end) {
+		if (offset < 0 || length < 0 || (end != -1 && (offset + length > end))) {
 			throw new ModelException(new ModelStatus(
 					IModelStatusConstants.INDEX_OUT_OF_BOUNDS));
 		}
 
 		ISelectionEngine engine = DLTKLanguageManager
-			.getSelectionEngine(toolkit.getNatureId());
+				.getSelectionEngine(toolkit.getNatureId());
 		if (engine == null) {
 			return new IModelElement[0];
 		}
-//		engine.setEnvironment(environment);
+		// engine.setEnvironment(environment);
 		engine.setOptions(project.getOptions(true));
 		// createSelectionEngine(environment,
 		// project.getOptions(true));
