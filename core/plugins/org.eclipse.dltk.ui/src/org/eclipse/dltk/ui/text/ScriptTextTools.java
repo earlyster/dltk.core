@@ -127,4 +127,9 @@ public abstract class ScriptTextTools {
 	public PositionUpdater getSemanticPositionUpdater() {
 		return null;
 	}
+
+	public String getDefaultPartitioning() {
+		return fDefaultPartitioning;
+	}
+
 }
