@@ -255,6 +255,9 @@ public abstract class ScriptSourceViewerConfiguration extends
 	 */
 	public ITextHover getTextHover(ISourceViewer sourceViewer,
 			String contentType, int stateMask) {
+		if (getEditor() == null) {
+			return null;
+		}
 		EditorTextHoverDescriptor[] hoverDescs = DLTKUIPlugin.getDefault()
 				.getEditorTextHoverDescriptors(fPreferenceStore);
 		int i = 0;
