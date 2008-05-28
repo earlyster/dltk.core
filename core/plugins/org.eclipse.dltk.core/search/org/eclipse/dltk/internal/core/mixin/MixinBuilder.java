@@ -135,9 +135,7 @@ public class MixinBuilder implements IScriptBuilder {
 						currentIndex = (Index) indexes.get(path);
 						containerPath = path;
 					} else {
-						String contPath = ((path.getDevice() == null) ? path
-								.toString() : path.toOSString());
-
+						String contPath = path.toString();
 						Index index = manager.getSpecialIndex("mixin", //$NON-NLS-1$
 								path.toString(), contPath);
 						if (index != null) {
