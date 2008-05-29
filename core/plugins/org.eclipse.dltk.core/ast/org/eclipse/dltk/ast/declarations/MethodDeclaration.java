@@ -196,4 +196,20 @@ public class MethodDeclaration extends Declaration {
 				&& (this.declaringTypeName == null || this.declaringTypeName
 						.equals(d.declaringTypeName));
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.dltk.ast.ASTNode#matchStart()
+	 */
+	public int matchStart() {
+		return getNameStart();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.dltk.ast.ASTNode#matchLength()
+	 */
+	public int matchLength() {
+		return getNameEnd() - getNameStart();
+	}
 }
