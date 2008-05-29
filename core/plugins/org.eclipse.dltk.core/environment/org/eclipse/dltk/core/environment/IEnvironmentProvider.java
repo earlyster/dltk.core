@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.environment;
 
+import org.eclipse.core.resources.IProject;
+
 public interface IEnvironmentProvider {
 	public IEnvironment[] getEnvironments();
+
 	public IEnvironment getEnvironment(String envId);
-	
+
 	/**
-	 * Wait until provider are initialzed 
+	 * Wait until provider are initialzed
 	 */
 	public void waitInitialized();
+
+	IEnvironment getProjectEnvironment(IProject project);
 }

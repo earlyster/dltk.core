@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.internal.environment;
 
+import java.io.File;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IEnvironmentProvider;
 
@@ -30,5 +34,18 @@ public class LocalEnvironmentProvider implements IEnvironmentProvider {
 	}
 
 	public void waitInitialized() {
+	}
+
+	public IEnvironment getProjectEnvironment(IProject project) {
+		if (project.isAccessible()) {
+			IPath location = project.getLocation();
+			if (location != null) {
+				File file = new File(location.makeAbsolute().toOSString());
+				if (file.exists()) {
+					return LocalEnvironment.getInstance();
+				}
+			}
+		}
+		return null;
 	}
 }

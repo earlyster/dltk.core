@@ -12,7 +12,6 @@ package org.eclipse.dltk.core.environment;
 
 import java.net.URI;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
@@ -23,7 +22,7 @@ public interface IEnvironment extends IAdaptable {
 	 * id) - you should use {@link EnvironmentPathUtils}
 	 * 
 	 * @param path
-	 * 		environment-local path
+	 *            environment-local path
 	 * @return
 	 */
 	IFileHandle getFile(IPath path);
@@ -39,8 +38,6 @@ public interface IEnvironment extends IAdaptable {
 	char getPathsSeparatorChar();
 
 	String getName();
-
-	boolean hasProject(IProject project);
 
 	String convertPathToString(IPath path);
 

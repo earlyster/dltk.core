@@ -16,7 +16,6 @@ import java.net.URI;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileSystem;
 import org.eclipse.core.filesystem.URIUtil;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
@@ -58,19 +57,6 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 
 	public String getName() {
 		return "Localhost"; //$NON-NLS-1$
-	}
-
-	public boolean hasProject(IProject project) {
-		if (project.isAccessible()) {
-			IPath location = project.getLocation();
-			if (location != null) {
-				File file = new File(location.makeAbsolute().toOSString());
-				if (file.exists()) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	public String convertPathToString(IPath path) {

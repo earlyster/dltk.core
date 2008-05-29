@@ -20,6 +20,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.SimplePriorityClassDLTKExtensionManager;
+import org.eclipse.dltk.core.PriorityDLTKExtensionManager.ElementInfo;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 
 public final class EnvironmentManager {
@@ -49,10 +50,12 @@ public final class EnvironmentManager {
 	}
 
 	public static IEnvironment getEnvironment(IProject project) {
-		IEnvironment[] environments = getEnvironments();
-		for (int i = 0; i < environments.length; i++) {
-			if (environments[i].hasProject(project)) {
-				return environments[i];
+		Object[] objects = manager.getObjects();
+		for (int i = 0; i < objects.length; i++) {
+			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
+			IEnvironment environment = provider.getProjectEnvironment(project);
+			if (environment != null) {
+				return environment;
 			}
 		}
 		return null;
@@ -75,9 +78,10 @@ public final class EnvironmentManager {
 	}
 
 	public static IEnvironment getEnvironmentById(String envId) {
-		Object[] objects = manager.getObjects();
-		for (int i = 0; i < objects.length; i++) {
-			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
+		ElementInfo[] elementInfos = manager.getElementInfos();
+		for (int i = 0; i < elementInfos.length; i++) {
+			IEnvironmentProvider provider = (IEnvironmentProvider) manager
+					.getInitObject(elementInfos[i]);
 			IEnvironment env = provider.getEnvironment(envId);
 			if (env != null) {
 				return env;
@@ -128,10 +132,5 @@ public final class EnvironmentManager {
 	 * Wait white all structures are initialized.
 	 */
 	public static void waitInitialized() {
-		Object[] objects = manager.getObjects();
-		for (int i = 0; i < objects.length; i++) {
-			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
-			provider.waitInitialized();
-		}
 	}
 }
