@@ -30,17 +30,31 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 	protected boolean fInClass = false; // if we are in class
 	protected boolean fInMethod = false; // if we are in method
 
+	protected TypeDeclaration fCurrentClass = null;
 	protected MethodDeclaration fCurrentMethod = null;
 
 	protected Stack fNodes = new Stack(); // Used to hold visited nodes in
-											// deeph
+
+	// deeph
 
 	public SourceElementRequestVisitor(ISourceElementRequestor requesor) {
 		this.fRequestor = requesor;
 	}
 
+	/**
+	 * @return method node that encloses current element, or <code>null</code>
+	 * 	if there's no one.
+	 */
 	protected MethodDeclaration getCurrentMethod() {
 		return this.fCurrentMethod;
+	}
+
+	/**
+	 * @return class node that encloses current element, or <code>null</code> if
+	 * 	there's no one.
+	 */
+	protected TypeDeclaration getCurrentClass() {
+		return this.fCurrentClass;
 	}
 
 	protected String makeLanguageDependentValue(ASTNode expr) {
@@ -57,10 +71,10 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 
 	protected String[] processSuperClasses(TypeDeclaration type) {
 		List names = type.getSuperClassNames();
-		if( names == null ) {
+		if (names == null) {
 			return null;
 		}
-		if (names.isEmpty() ) {
+		if (names.isEmpty()) {
 			return null;
 		}
 
@@ -75,26 +89,40 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 	}
 
 	/**
+	 * Called before method info is propogated to the source element requestor.
+	 * This is a last chance to modify the method info
+	 */
+	protected void modifyMethodInfo(MethodDeclaration methodDeclaration,
+			ISourceElementRequestor.MethodInfo mi) {
+	}
+
+	/**
+	 * Called before method info is propogated to the source element requestor.
+	 * This is a last chance to modify the method info
+	 */
+	protected void modifyClassInfo(TypeDeclaration typeDeclaration,
+			ISourceElementRequestor.TypeInfo ti) {
+	}
+
+	/**
 	 * Creates correct string value from expression. For example for
 	 * StringLiteral returns "value". And so on.
-	 *
+	 * 
 	 * Return "" if it is imposible to make value from expression.
-	 *
+	 * 
 	 * @param expr
 	 * @return
 	 */
 	protected String makeValue(ASTNode stmt) {
-//		if (!(stmt instanceof Expression))
-//			return null;
-
-
+		// if (!(stmt instanceof Expression))
+		// return null;
 
 		String value = ""; //$NON-NLS-1$
 		if (stmt instanceof StringLiteral) {
 			value = "\"" + ((StringLiteral) stmt).getValue() + "\""; //$NON-NLS-1$ //$NON-NLS-2$
 		} else if (stmt instanceof Literal) {
 			value = ((Literal) stmt).getValue();
-		} else /*if (stmt instanceof ExtendedVariableReference) */{
+		} else /* if (stmt instanceof ExtendedVariableReference) */{
 			// If it is Dot.
 			// Lets make recursive value parsing in this case.
 			value += this.makeLanguageDependentValue(stmt);
@@ -117,7 +145,10 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 	public boolean endvisit(TypeDeclaration type) throws Exception {
 		this.fRequestor.exitType(type.sourceEnd());
 		this.fInClass = false;
+		this.fCurrentClass = null;
+
 		this.onEndVisitClass(type);
+
 		this.fNodes.pop();
 		return true;
 	}
@@ -140,6 +171,8 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 		mi.nameSourceEnd = method.getNameEnd() - 1;
 		mi.declarationStart = method.sourceStart();
 
+		modifyMethodInfo(method, mi);
+
 		this.fRequestor.enterMethod(mi);
 
 		this.fInMethod = true;
@@ -158,8 +191,12 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 		info.declarationStart = type.sourceStart();
 		info.superclasses = this.processSuperClasses(type);
 
+		modifyClassInfo(type, info);
+
 		this.fRequestor.enterType(info);
+
 		this.fInClass = true;
+		this.fCurrentClass = type;
 
 		return true;
 	}
