@@ -12,6 +12,7 @@ import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IEnvironmentProvider;
 import org.eclipse.dltk.core.internal.rse.perfomance.RSEPerfomanceStatistics;
 import org.eclipse.rse.core.IRSESystemType;
+import org.eclipse.rse.core.RSECorePlugin;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.model.SystemStartHere;
 import org.eclipse.rse.subsystems.files.core.model.RemoteFileUtility;
@@ -41,6 +42,7 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	}
 
 	private IHost getRSEConnection(String name) {
+		waitForRSEInitialization();
 		IHost[] connections = SystemStartHere.getConnections();
 		for (int i = 0; i < connections.length; i++) {
 			IHost connection = connections[i];
@@ -51,8 +53,18 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 		return null;
 	}
 
+	private void waitForRSEInitialization() {
+		try {
+			RSECorePlugin.waitForInitCompletion();
+		} catch (InterruptedException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	public IEnvironment[] getEnvironments() {
-		System.out.println("ASK for RSE");
+		waitForRSEInitialization();
 		IHost[] connections = SystemStartHere.getConnections();
 		List environments = new LinkedList();
 		if (connections != null) {
