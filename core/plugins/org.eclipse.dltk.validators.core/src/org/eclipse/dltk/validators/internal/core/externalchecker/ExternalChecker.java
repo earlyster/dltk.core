@@ -150,7 +150,6 @@ public class ExternalChecker extends AbstractValidator {
 		}
 		super.loadFrom(element);
 		initialized = true;
-		IEnvironment[] environments = EnvironmentManager.getEnvironments();
 		paths = newEmptyPath();
 		// this.path = new Path(element.getAttribute(PATHS_TAG));
 		NodeList childNodes = element.getChildNodes();
@@ -384,8 +383,7 @@ public class ExternalChecker extends AbstractValidator {
 		String path = null;
 		if (resource.getLocation() != null) {
 			path = resource.getLocation().makeAbsolute().toOSString();
-		}
-		else {
+		} else {
 			URI uri = resource.getLocationURI();
 			IFileHandle file = environment.getFile(uri);
 			path = file.toOSString();
@@ -409,10 +407,10 @@ public class ExternalChecker extends AbstractValidator {
 		}
 		return buffer.toString();
 	}
-	
+
 	public boolean isValidatorValid(IEnvironment environment) {
 		String path = (String) this.paths.get(environment);
-		if( path == null || path.trim().length() == 0 ) {
+		if (path == null || path.trim().length() == 0) {
 			return false;
 		}
 		IFileHandle file = environment.getFile(new Path(path));

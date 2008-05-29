@@ -19,7 +19,7 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.validators.core.IValidator;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 
 public class ValidatorBuilder implements IScriptBuilder {
@@ -39,12 +39,14 @@ public class ValidatorBuilder implements IScriptBuilder {
 	}
 
 	public int estimateElementsToBuild(List elements) {
-		IEnvironment[] environments = EnvironmentManager.getEnvironments();
+		IValidator[] validators = ValidatorRuntime.getAllValidators();
 		int count = 0;
-		for (int i = 0; i < environments.length; i++) {
-			count += ValidatorRuntime.getActiveValidators(environments[i]).length;
+		for (int i = 0; i < validators.length; i++) {
+			if (validators[i].isActive()) {
+				count++;
+			}
 		}
-		if( count == 0 ) {
+		if (count == 0) {
 			return 0;
 		}
 		int estimation = 0;
