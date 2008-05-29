@@ -332,20 +332,19 @@ public abstract class PatternLocator implements IIndexConstants {
 			IModelElement element, int accuracy, MatchLocator locator)
 			throws CoreException {
 		match = null;
-		int referenceType = referenceType();
-		int offset = reference.sourceStart();
-		switch (referenceType) {
+		switch (referenceType()) {
 		case IModelElement.TYPE:
-			match = locator.newTypeReferenceMatch(element, accuracy, offset,
-					reference.sourceEnd() - offset, reference);
+			match = locator.newTypeReferenceMatch(element, accuracy, reference
+					.matchStart(), reference.matchLength(), reference);
 			break;
 		case IModelElement.FIELD:
-			match = locator.newFieldReferenceMatch(element, accuracy, offset,
-					reference.sourceEnd() - offset, reference);
+			match = locator.newFieldReferenceMatch(element, accuracy, reference
+					.matchStart(), reference.matchLength(), reference);
 			break;
 		case IModelElement.METHOD:
-			match = locator.newMethodReferenceMatch(element, accuracy, offset,
-					reference.sourceEnd() - offset, false, false, reference);
+			match = locator.newMethodReferenceMatch(element, accuracy,
+					reference.matchStart(), reference.matchLength(), false,
+					false, reference);
 			break;
 		}
 		if (match != null) {
