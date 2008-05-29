@@ -74,10 +74,6 @@ public class SourceMethod extends NamedMember implements IMethod {
 	 * @see IMethod
 	 */
 	public boolean isConstructor() throws ModelException {
-		if (!this.getElementName().equals(this.parent.getElementName())) {
-			// faster than reaching the info
-			return false;
-		}
 		SourceMethodElementInfo info = (SourceMethodElementInfo) getElementInfo();
 		return info.isConstructor();
 	}
