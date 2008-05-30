@@ -83,23 +83,32 @@ public abstract class SuiteOfTestCases extends TestCase {
 			super.run(result);
 		}
 		public void runTest(Test test, TestResult result) {
-			SuiteOfTestCases current = (SuiteOfTestCases)test;
-			if (this.currentTestCase == null) {
-				// setup suite
+			if (test instanceof SuiteOfTestCases) {
+				final SuiteOfTestCases current = (SuiteOfTestCases) test;
+				if (this.currentTestCase == null) {
+					// setup suite
+					try {
+						current.setUpSuite();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				} else {
+					// copy the values of the previous current test case's
+					// fields into the current one
+					this.initialize(current);
+				}
 				try {
-					current.setUpSuite();
-				} catch (Exception e) {
-					e.printStackTrace();
+					super.runTest(test, result);
+				} finally {
+					// make current
+					this.currentTestCase = current;
 				}
 			} else {
-				// copy the values of the previous current test case's fields into the current one
-				this.initialize(current);
-			}
-			try {
+				/*
+				 * If there was error in TestCase constructor - the test will not be
+				 * of the SuiteOfTestCases type
+				 */
 				super.runTest(test, result);
-			} finally {		
-				// make current
-				this.currentTestCase = current;
 			}
 		}
 	}
