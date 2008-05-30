@@ -39,6 +39,8 @@ import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -57,6 +59,7 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -289,6 +292,31 @@ public class EditorUtility {
 		}
 	}
 
+	/**
+	 * Selects and reveals the given line in the given editor part.
+	 * 
+	 * @param editorPart
+	 * @param lineNumber
+	 * @throws CoreException
+	 */
+	public static void revealInEditor(IEditorPart editorPart, int lineNumber)
+			throws CoreException {
+		if (editorPart instanceof ITextEditor && lineNumber >= 0) {
+			final ITextEditor textEditor = (ITextEditor) editorPart;
+			final IDocumentProvider provider = textEditor.getDocumentProvider();
+			final IEditorInput input = editorPart.getEditorInput();
+			provider.connect(input);
+			final IDocument document = provider.getDocument(input);
+			try {
+				final IRegion line = document.getLineInformation(lineNumber);
+				textEditor.selectAndReveal(line.getOffset(), line.getLength());
+			} catch (BadLocationException e) {
+
+			}
+			provider.disconnect(input);
+		}
+	}
+	
 	/**
 	 * Selects and reveals the given region in the given editor part.
 	 */
