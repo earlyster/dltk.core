@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.core;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -259,27 +260,42 @@ public abstract class ModelElement extends PlatformObject implements
 	 * @see Object#equals
 	 */
 	public boolean equals(Object o) {
-
 		if (this == o)
 			return true;
+		// assume instanceof check is done in subclass
+		final ModelElement other = (ModelElement) o;
+		if (!compareParent(this, other)) {
+			return false;
+		}
+		return getElementName().equals(other.getElementName());
+	}
 
-		IEnvironment environment = EnvironmentManager.getEnvironment(this);
-		if (o instanceof IModelElement && environment != null) {
-			IEnvironment environmento = EnvironmentManager
-					.getEnvironment((IModelElement) o);
-			if (!environment.equals(environmento)) {
+	private static boolean compareParent(IModelElement a, IModelElement b) {
+		for (;;) {
+			if (a == b) {
+				return true;
+			}
+			if (a.getElementType() != b.getElementType()) {
+				return false;
+			}
+			if (a instanceof IScriptProject) {
+				if (!(b instanceof IScriptProject)) {
+					return false;
+				}
+				final IScriptProject spA = (IScriptProject) a;
+				final IScriptProject spB = (IScriptProject) b;
+				final IProject projectA = spA.getProject();
+				return projectA != null && projectA.equals(spB.getProject());
+			}
+			a = a.getParent();
+			if (a == null) {
+				return false;
+			}
+			b = b.getParent();
+			if (b == null) {
 				return false;
 			}
 		}
-
-		// model parent is null
-		if (this.parent == null)
-			return super.equals(o);
-
-		// assume instanceof check is done in subclass
-		ModelElement other = (ModelElement) o;
-		return getElementName().equals(other.getElementName())
-				&& this.parent.equals(other.parent);
 	}
 
 	/**
