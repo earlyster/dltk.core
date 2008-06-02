@@ -105,7 +105,7 @@ public abstract class MainLaunchConfigurationTab extends
 	 * Creates the widgets for specifying a main type.
 	 * 
 	 * @param parent
-	 * 		the parent composite
+	 *            the parent composite
 	 */
 	protected void createMainModuleEditor(Composite parent, String text) {
 		Font font = parent.getFont();
@@ -163,7 +163,7 @@ public abstract class MainLaunchConfigurationTab extends
 	 * Loads the main type from the launch configuration's preference store
 	 * 
 	 * @param config
-	 * 		the config to load the main type from
+	 *            the config to load the main type from
 	 */
 	protected void updateMainModuleFromConfig(ILaunchConfiguration config) {
 		fScriptText.setText(getMainModuleName(config));
@@ -271,6 +271,8 @@ public abstract class MainLaunchConfigurationTab extends
 		IScriptProject proj = getScriptModel().getScriptProject(projectName);
 		if (proj != null) {
 			notifyProjectChangedListeners(proj.getProject());
+		} else {
+			return null;
 		}
 		URI location = proj.getProject().getLocationURI();
 		if (location == null) {
@@ -281,7 +283,7 @@ public abstract class MainLaunchConfigurationTab extends
 		IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
 				.findFilesForLocationURI(script);
 		if (files.length != 1)
-			return null;
+			return script;
 
 		IFile file = files[0];
 		if (file.exists() && file.getLocationURI() != null) {

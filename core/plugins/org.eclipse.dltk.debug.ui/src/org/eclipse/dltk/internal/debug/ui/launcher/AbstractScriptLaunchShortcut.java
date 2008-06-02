@@ -19,7 +19,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -33,8 +32,6 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IParent;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.messages.ScriptLaunchMessages;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
@@ -64,9 +61,9 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 
 	/**
 	 * @param search
-	 * 		the elements to search for a main script
+	 *            the elements to search for a main script
 	 * @param mode
-	 * 		the mode to launch in
+	 *            the mode to launch in
 	 */
 	public void searchAndLaunch(Object[] search, String mode,
 			String selectMessage, String emptyMessage) {
@@ -99,9 +96,9 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 	 * Prompts the user to select a type from the given types.
 	 * 
 	 * @param types
-	 * 		the types to choose from
+	 *            the types to choose from
 	 * @param title
-	 * 		the selection dialog title
+	 *            the selection dialog title
 	 * 
 	 * @return the selected type or <code>null</code> if none.
 	 */
@@ -233,13 +230,14 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 			wc.setAttribute(
 					ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
 					script.getProjectRelativePath().toPortableString());
-
-			IEnvironment environment = EnvironmentManager.getEnvironment(script
-					.getProject());
-			wc.setAttribute(
-					ScriptLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
-					environment.convertPathToString(Path
-							.fromPortableString("${resource_loc}/../")));
+			//
+			// IEnvironment environment =
+			// EnvironmentManager.getEnvironment(script
+			// .getProject());
+			//
+			// wc.setAttribute(
+			// ScriptLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
+			// (String)null);
 
 			wc
 					.setAttribute(
@@ -286,7 +284,7 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 	 * Returns the model elements corresponding to the given objects.
 	 * 
 	 * @param objects
-	 * 		selected objects
+	 *            selected objects
 	 * @return corresponding Script elements
 	 */
 	private IResource[] getScriptResources(Object[] objects, IProgressMonitor pm) {
@@ -341,14 +339,14 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 	 * elements.
 	 * 
 	 * @param elements
-	 * 		scope to search for launchable types
+	 *            scope to search for launchable types
 	 * @param context
-	 * 		progess reporting context
+	 *            progess reporting context
 	 * @return launchable types, possibly empty
 	 * @exception InterruptedException
-	 * 		if the search is cancelled
+	 *                if the search is cancelled
 	 * @exception org.eclipse.core.runtime.CoreException
-	 * 		if the search fails
+	 *                if the search fails
 	 */
 	protected IResource[] findScripts(final Object[] elements,
 			IRunnableContext context) throws InterruptedException,
