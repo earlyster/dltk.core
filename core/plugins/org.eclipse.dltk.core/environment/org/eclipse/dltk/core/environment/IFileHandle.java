@@ -22,6 +22,8 @@ public interface IFileHandle {
 
 	IEnvironment getEnvironment();
 
+	String getEnvironmentId();
+
 	IPath getPath();
 
 	String toOSString();
@@ -53,4 +55,5 @@ public interface IFileHandle {
 	long lastModified();
 
 	long length();
+
 }

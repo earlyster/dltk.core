@@ -142,4 +142,8 @@ public class EFSFileHandle implements IFileHandle {
 	public IPath getFullPath() {
 		return EnvironmentPathUtils.getFullPath(environment, getPath());
 	}
+
+	public String getEnvironmentId() {
+		return environment.getId();
+	}
 }
