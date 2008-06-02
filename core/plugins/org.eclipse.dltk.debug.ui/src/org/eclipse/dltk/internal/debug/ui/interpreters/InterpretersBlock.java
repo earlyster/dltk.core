@@ -246,12 +246,12 @@ public abstract class InterpretersBlock implements
 	 * Creates this block's control in the given control.
 	 * 
 	 * @param ancestor
-	 * 		containing control
+	 *            containing control
 	 * @param useManageButton
-	 * 		whether to present a single 'manage...' button to the user that
-	 * 		opens the installed InterpreterEnvironments pref page for
-	 * 		InterpreterEnvironment management, or to provide 'add, remove, edit,
-	 * 		and search' buttons.
+	 *            whether to present a single 'manage...' button to the user
+	 *            that opens the installed InterpreterEnvironments pref page for
+	 *            InterpreterEnvironment management, or to provide 'add, remove,
+	 *            edit, and search' buttons.
 	 */
 	public void createControl(Composite ancestor) {
 
@@ -599,7 +599,7 @@ public abstract class InterpretersBlock implements
 	 * Sets the InterpreterEnvironments to be displayed in this block
 	 * 
 	 * @param Interpreters
-	 * 		InterpreterEnvironments to be displayed
+	 *            InterpreterEnvironments to be displayed
 	 */
 	protected void setInterpreters(IInterpreterInstall[] Interpreters) {
 		fInterpreters.clear();
@@ -626,7 +626,8 @@ public abstract class InterpretersBlock implements
 		List result = new ArrayList();
 		for (Iterator iterator = fInterpreters.iterator(); iterator.hasNext();) {
 			IInterpreterInstall install = (IInterpreterInstall) iterator.next();
-			if (install.getEnvironment().equals(environment)) {
+			if (install.getInstallLocation().getEnvironmentId().equals(
+					environment.getId())) {
 				result.add(install);
 			}
 		}
@@ -792,7 +793,7 @@ public abstract class InterpretersBlock implements
 	 * Sets the checked InterpreterEnvironment, possible <code>null</code>
 	 * 
 	 * @param interpreter
-	 * 		InterpreterEnvironment or <code>null</code>
+	 *            InterpreterEnvironment or <code>null</code>
 	 */
 	public void setCheckedInterpreter(IInterpreterInstall interpreter) {
 		if (interpreter == null) {
@@ -826,9 +827,9 @@ public abstract class InterpretersBlock implements
 	 * given key.
 	 * 
 	 * @param settings
-	 * 		dialog store
+	 *            dialog store
 	 * @param qualifier
-	 * 		key qualifier
+	 *            key qualifier
 	 */
 	public void saveColumnSettings(IDialogSettings settings, String qualifier) {
 		int columnCount = fTable.getColumnCount();
@@ -844,9 +845,9 @@ public abstract class InterpretersBlock implements
 	 * Restore table settings from the given dialog store using the given key.
 	 * 
 	 * @param settings
-	 * 		dialog settings store
+	 *            dialog settings store
 	 * @param qualifier
-	 * 		key to restore settings from
+	 *            key to restore settings from
 	 */
 	public void restoreColumnSettings(IDialogSettings settings, String qualifier) {
 		fInterpreterList.getTable().layout(true);
@@ -955,7 +956,7 @@ public abstract class InterpretersBlock implements
 	 * numerical suffix to ensure that it is unique.
 	 * 
 	 * @param name
-	 * 		the name with which to ensure uniqueness
+	 *            the name with which to ensure uniqueness
 	 * @return the unique version of the given name
 	 * 
 	 */
