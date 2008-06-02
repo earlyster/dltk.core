@@ -28,8 +28,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.IInterpreterInstall;
@@ -378,14 +376,13 @@ public class InterpreterDefinitionsContainer {
 			defaulte.setAttribute(ID_ATTR,
 					(String) fDefaultInterpreterInstallCompositeID.get(entry));
 		}
-		
+
 		List keys2 = new ArrayList();
 		keys2.addAll(fDefaultInterpreterInstallConnectorTypeID.keySet());
 		Collections.sort(keys2, new DefaultInterpreterComparator());
 
 		// Set the defaultInterpreterConnector attribute on the top-level node
-		for (Iterator iter = keys2
-				.iterator(); iter.hasNext();) {
+		for (Iterator iter = keys2.iterator(); iter.hasNext();) {
 			DefaultInterpreterEntry entry = (DefaultInterpreterEntry) iter
 					.next();
 			Element defaulte = doc.createElement("defaultInterpreterConnector"); //$NON-NLS-1$
@@ -444,34 +441,34 @@ public class InterpreterDefinitionsContainer {
 	 * Document.
 	 */
 	private Element interpreterAsElement(Document doc,
-			IInterpreterInstall Interpreter) {
+			IInterpreterInstall interpreter) {
 
 		// Create the node for the Interpreter and set its 'id' & 'name'
 		// attributes
 		Element element = doc.createElement(INTERPRETER_TAG); //$NON-NLS-1$
-		element.setAttribute(ID_ATTR, Interpreter.getId()); //$NON-NLS-1$
-		element.setAttribute(INTERPRETER_NAME_ATTR, Interpreter.getName()); //$NON-NLS-1$
-		element.setAttribute(ENVIRONMENT_ID, Interpreter.getInstallLocation()
-				.getEnvironment().getId()); //$NON-NLS-1$
+		element.setAttribute(ID_ATTR, interpreter.getId()); //$NON-NLS-1$
+		element.setAttribute(INTERPRETER_NAME_ATTR, interpreter.getName()); //$NON-NLS-1$
+		element.setAttribute(ENVIRONMENT_ID, interpreter.getInstallLocation()
+				.getEnvironmentId()); //$NON-NLS-1$
 
 		// Determine and set the 'path' attribute for the Interpreter
 		String installPath = ""; //$NON-NLS-1$
-		IFileHandle installLocation = Interpreter.getRawInstallLocation();
+		IFileHandle installLocation = interpreter.getRawInstallLocation();
 		if (installLocation != null) {
-			installPath = installLocation.toOSString();
+			installPath = installLocation.getPath().toPortableString();
 		}
 		element.setAttribute(PATH_ATTR, installPath); //$NON-NLS-1$
 
 		// If the 'libraryLocations' attribute is specified, create a node for
 		// it
-		LibraryLocation[] libraryLocations = Interpreter.getLibraryLocations();
+		LibraryLocation[] libraryLocations = interpreter.getLibraryLocations();
 		if (libraryLocations != null) {
 			Element libLocationElement = libraryLocationsAsElement(doc,
 					libraryLocations);
 			element.appendChild(libLocationElement);
 		}
 
-		EnvironmentVariable[] environmentVariables = Interpreter
+		EnvironmentVariable[] environmentVariables = interpreter
 				.getEnvironmentVariables();
 		if (environmentVariables != null) {
 			Element environmentVariableElement = environmentVariablesAsElement(
@@ -479,7 +476,7 @@ public class InterpreterDefinitionsContainer {
 			element.appendChild(environmentVariableElement);
 		}
 
-		String[] InterpreterArgs = Interpreter.getInterpreterArguments();
+		String[] InterpreterArgs = interpreter.getInterpreterArguments();
 		if (InterpreterArgs != null && InterpreterArgs.length > 0) {
 			StringBuffer buffer = new StringBuffer();
 			for (int i = 0; i < InterpreterArgs.length; i++) {
@@ -555,8 +552,7 @@ public class InterpreterDefinitionsContainer {
 	 * @throws IOException
 	 *             if this method fails. Reasons include:
 	 *             <ul>
-	 *             <li>the XML in <code>inputStream</code> was badly
-	 *             formatted</li>
+	 *             <li>the XML in <code>inputStream</code> was badly formatted</li>
 	 *             <li>the top-level node was not 'InterpreterSettings'</li>
 	 *             </ul>
 	 * 
@@ -683,17 +679,20 @@ public class InterpreterDefinitionsContainer {
 			}
 
 			String envId = element.getAttribute(ENVIRONMENT_ID); //$NON-NLS-1$
-			IEnvironment env = EnvironmentManager.getEnvironmentById(envId);
-			if (env == null) {
-				return;
-			}
+			// IEnvironment env = EnvironmentManager.getEnvironmentById(envId);
+			// if (env == null) {
+			// return;
+			// }
 
 			// Create a InterpreterStandin for the node and set its 'name' &
 			// 'installLocation' attributes
 			InterpreterStandin standin = new InterpreterStandin(installType, id);
 			standin.setName(element.getAttribute(INTERPRETER_NAME_ATTR)); //$NON-NLS-1$
-			IFileHandle installLocation = env.getFile(new Path(installPath));
-			standin.setInstallLocation(installLocation);
+			// IFileHandle installLocation = env.getFile(new Path(installPath));
+			// standin.setInstallLocation(installLocation);
+			standin.setInstallLocation(new LazyFileHandle(envId, new Path(
+					installPath)));
+
 			container.addInterpreter(standin);
 
 			// Look for subordinate nodes. These may be 'libraryLocation',
@@ -741,7 +740,8 @@ public class InterpreterDefinitionsContainer {
 		String interpreterEnvironmentArchive = libLocationElement
 				.getAttribute(LIBRARY_PATH_ATTR); //$NON-NLS-1$		
 		if (interpreterEnvironmentArchive != null) {
-			return new LibraryLocation(Path.fromPortableString(interpreterEnvironmentArchive));
+			return new LibraryLocation(Path
+					.fromPortableString(interpreterEnvironmentArchive));
 		}
 		DLTKLaunchingPlugin
 				.log("Library location element is specified incorrectly."); //$NON-NLS-1$
