@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-
 import org.eclipse.dltk.compiler.env.ISourceField;
 import org.eclipse.dltk.compiler.env.ISourceMethod;
 import org.eclipse.dltk.compiler.env.ISourceType;
@@ -17,7 +16,8 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 
-public class SourceTypeElementInfo extends MemberElementInfo implements ISourceType {
+public class SourceTypeElementInfo extends MemberElementInfo implements
+		ISourceType {
 
 	protected static final SourceField[] NO_FIELDS = new SourceField[0];
 
@@ -121,13 +121,13 @@ public class SourceTypeElementInfo extends MemberElementInfo implements ISourceT
 	}
 
 	public SourceField[] getFieldHandles() {
-		int length = this.children.length;
+		int length = size();
 		if (length == 0)
 			return NO_FIELDS;
 		SourceField[] fields = new SourceField[length];
 		int fieldIndex = 0;
 		for (int i = 0; i < length; i++) {
-			IModelElement child = this.children[i];
+			IModelElement child = get(i);
 			if (child instanceof SourceField)
 				fields[fieldIndex++] = (SourceField) child;
 		}
@@ -138,6 +138,7 @@ public class SourceTypeElementInfo extends MemberElementInfo implements ISourceT
 					0, fieldIndex);
 		return fields;
 	}
+
 	public IType getHandle() {
 		return this.handle;
 	}

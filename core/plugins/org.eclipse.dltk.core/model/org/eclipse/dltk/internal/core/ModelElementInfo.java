@@ -9,98 +9,82 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.dltk.core.IModelElement;
 
 /**
- * Holds cached structure and properties for a model element.
- * Subclassed to carry properties for specific kinds of elements.
+ * Holds cached structure and properties for a model element. Subclassed to
+ * carry properties for specific kinds of elements.
  */
-/* package */ class ModelElementInfo {
+/* package */class ModelElementInfo {
 
 	/**
-	 * Collection of handles of immediate children of this
-	 * object. This is an empty array if this element has
-	 * no children.
+	 * Collection of handles of immediate children of this object. This is an
+	 * empty array if this element has no children.
 	 */
-	protected IModelElement[] children;
+	private List children;
 
 	/**
 	 * Shared empty collection used for efficiency.
 	 */
-	static Object[] NO_NON_SCRIPT_RESOURCES = new Object[] {};	
-	
+	static Object[] NO_NON_SCRIPT_RESOURCES = new Object[] {};
+
 	protected ModelElementInfo() {
-		this.children = ModelElement.NO_ELEMENTS;
 	}
+
 	public void addChild(IModelElement child) {
-		if (this.children == ModelElement.NO_ELEMENTS) {
-			setChildren(new IModelElement[] {child});
-		} else {
-			if (!includesChild(child)) {
-				setChildren(growAndAddToArray(this.children, child));
-			}
+		if (this.children == null) {
+			this.children = new ArrayList(5);
+		}
+		if (!this.children.contains(child)) {
+			this.children.add(child);
 		}
 	}
+
+	public int size() {
+		if (this.children == null)
+			return 0;
+		return this.children.size();
+	}
+
+	protected IModelElement get(int i) {
+		if (this.children == null)
+			return null;
+		return (IModelElement) children.get(i);
+	}
+
 	public Object clone() {
 		try {
 			return super.clone();
-		}
-		catch (CloneNotSupportedException e) {
+		} catch (CloneNotSupportedException e) {
 			throw new Error();
 		}
 	}
+
 	public IModelElement[] getChildren() {
-		return this.children;
+		if (children == null)
+			return ModelElement.NO_ELEMENTS;
+		return (IModelElement[]) this.children
+				.toArray(new IModelElement[this.children.size()]);
 	}
-	/**
-	 * Adds the new element to a new array that contains all of the elements of the old array.
-	 * Returns the new array.
-	 */
-	protected IModelElement[] growAndAddToArray(IModelElement[] array, IModelElement addition) {
-		IModelElement[] old = array;
-		array = new IModelElement[old.length + 1];
-		System.arraycopy(old, 0, array, 0, old.length);
-		array[old.length] = addition;
-		return array;
-	}
-	/**
-	 * Returns <code>true</code> if this child is in my children collection
-	 */
-	protected boolean includesChild(IModelElement child) {
-		
-		for (int i= 0; i < this.children.length; i++) {
-			if (child.equals(this.children[i])) {
-				return true;
-			}
-		}
-		return false;
-	}
-	/**
-	 * Returns an array with all the same elements as the specified array except for
-	 * the element to remove. Assumes that the deletion is contained in the array.
-	 */
-	protected IModelElement[] removeAndShrinkArray(IModelElement[] array, IModelElement deletion) {
-		IModelElement[] old = array;
-		array = new IModelElement[old.length - 1];
-		int j = 0;
-		for (int i = 0; i < old.length; i++) {
-			if (!old[i].equals(deletion)) {
-				array[j] = old[i];
-			} else {
-				System.arraycopy(old, i + 1, array, j, old.length - (i + 1));
-				return array;
-			}
-			j++;
-		}
-		return array;
-	}
+
 	public void removeChild(IModelElement child) {
-		if (includesChild(child)) {
-			setChildren(removeAndShrinkArray(this.children, child));
+		if (this.children != null) {
+			this.children.remove(child);
 		}
 	}
+
 	public void setChildren(IModelElement[] children) {
-		this.children = children;
+		if (children == null) {
+			this.children = null;
+		} else {
+			this.children = new ArrayList(children.length);
+			for (int i = 0; i < children.length; i++) {
+				this.children.add(children[i]);
+			}
+		}
 	}
-	
+
 }
