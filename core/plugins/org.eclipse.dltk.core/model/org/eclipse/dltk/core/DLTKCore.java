@@ -960,12 +960,15 @@ public class DLTKCore extends Plugin {
 							false,
 							"Illegal buildpath container path: \'" + containerPath.makeRelative().toString() + "\', must have at least one segment (containerID+hints)"); //$NON-NLS-1$//$NON-NLS-2$
 		}
-		return new BuildpathEntry(IProjectFragment.K_SOURCE,
+		BuildpathEntry entry = new BuildpathEntry(IProjectFragment.K_SOURCE,
 				IBuildpathEntry.BPE_CONTAINER, containerPath, isExported,
 				BuildpathEntry.INCLUDE_ALL, // inclusion patterns
 				BuildpathEntry.EXCLUDE_NONE, // exclusion patterns
 				accessRules, true, // comsbine access rules
 				extraAttributes, false);
+		
+		entry.setIsContainerEntry(true);
+		return entry;
 	}
 
 	/**
