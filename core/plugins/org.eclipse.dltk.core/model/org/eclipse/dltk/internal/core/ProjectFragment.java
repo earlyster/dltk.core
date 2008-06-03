@@ -382,6 +382,13 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 		return this.getRawBuildpathEntry();
 	}
 
+	protected void getHandleMemento(StringBuffer buff) {
+		((ModelElement) getParent()).getHandleMemento(buff);
+		buff.append(getHandleMementoDelimiter());
+		final IPath path = ((IResource) resource).getProjectRelativePath();
+		escapeMementoName(buff, path.toString());
+	}
+
 	public IModelElement getHandleFromMemento(String token, MementoTokenizer memento, WorkingCopyOwner owner) {
 		switch (token.charAt(0)) {
 			case JEM_SCRIPTFOLDER:
