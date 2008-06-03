@@ -122,11 +122,11 @@ public class ModelElementUtil {
 		IModelElement[] allPackages = root.getChildren();
 		ArrayList subpackages = new ArrayList();
 		subpackages.add(pack);
-		String prefix = pack.getElementName() + '.';
 		for (int i = 0; i < allPackages.length; i++) {
 			IScriptFolder currentPackage = (IScriptFolder) allPackages[i];
-			if (currentPackage.getElementName().startsWith(prefix))
+			if (pack.getPath().isPrefixOf(currentPackage.getPath())) {
 				subpackages.add(currentPackage);
+			}
 		}
 		return (IScriptFolder[]) subpackages.toArray(new IScriptFolder[subpackages.size()]);
 	}
