@@ -30,9 +30,6 @@ import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
-import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.internal.compiler.lookup.TypeScope;
 import org.eclipse.dltk.internal.core.Model;
@@ -291,6 +288,20 @@ public class HandleFactory {
 		return null;
 	}
 
+	private static IProject[] getAllProjects() {
+		return ResourcesPlugin.getWorkspace().getRoot().getProjects();
+	}
+
+	private static boolean checkScope(IProject project, IPath[] scopeProjects) {
+		final IPath location = project.getFullPath();
+		for (int j = 0; j < scopeProjects.length; j++) {
+			if (scopeProjects[j].equals(location)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Returns the package fragment root that contains the given resource path.
 	 * 
@@ -300,21 +311,12 @@ public class HandleFactory {
 			IDLTKSearchScope scope) {
 
 		IPath path = Path.fromPortableString(pathString);
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
-				.getProjects();
+		IProject[] projects = getAllProjects();
 		IPath[] enclosingProjectsAndZips = scope.enclosingProjectsAndZips();
 		for (int i = 0, max = projects.length; i < max; i++) {
 			try {
 				IProject project = projects[i];
-				IPath location = project.getFullPath();
-				boolean found = false;
-				for (int j = 0; j < enclosingProjectsAndZips.length; j++) {
-					if (enclosingProjectsAndZips[j].equals(location)) {
-						found = true;
-						break;
-					}
-				}
-				if (!found) {
+				if (!checkScope(project, enclosingProjectsAndZips)) {
 					continue;
 				}
 				if (!project.isAccessible()
