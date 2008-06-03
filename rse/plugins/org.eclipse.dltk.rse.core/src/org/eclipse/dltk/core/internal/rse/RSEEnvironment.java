@@ -75,7 +75,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 
 	public String convertPathToString(IPath path) {
 		if (host.getSystemType().isWindows()) {
-			return path.toString().replaceAll("/", "\\");
+			return path.toString().replace('/', '\\');
 		} else {
 			return path.toString();
 		}
