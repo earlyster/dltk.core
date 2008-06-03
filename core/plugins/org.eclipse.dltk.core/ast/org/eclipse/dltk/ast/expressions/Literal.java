@@ -63,7 +63,7 @@ public abstract class Literal extends Expression {
 	 * Return value of this literal.
 	 */
 	public String toString() {
-		return fLiteralValue;
+		return getValue();
 	}
 
 	/**
