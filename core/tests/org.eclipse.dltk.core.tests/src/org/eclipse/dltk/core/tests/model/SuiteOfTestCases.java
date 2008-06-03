@@ -18,6 +18,8 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
+import org.eclipse.dltk.core.tests.TestSupport;
+
 /**
  * A test case class that can be set up (using the setUpSuite() method) and tore down (using the teardDownSuite() method)
  * once for all test cases of this class.
@@ -128,4 +130,20 @@ public abstract class SuiteOfTestCases extends TestCase {
 	 */
 	public void tearDownSuite() throws Exception {
 	}
+
+    /**
+	 * Convenience method for subclasses of {@link SuiteOfTestCases}, identical
+	 * to
+	 * 
+	 * <pre>
+	 * TestSupport.notYetImplemented(this);
+	 * </pre>
+	 * 
+	 * @see TestSupport#notYetImplemented(junit.framework.TestCase)
+	 * @return <false> when not itself already in the call stack
+	 */
+	public boolean notYetImplemented() {
+		return TestSupport.notYetImplemented(this);
+	}
+
 }
