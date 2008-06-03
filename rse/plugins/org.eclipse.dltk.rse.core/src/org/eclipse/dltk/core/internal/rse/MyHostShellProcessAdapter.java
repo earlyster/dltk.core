@@ -50,7 +50,7 @@ public class MyHostShellProcessAdapter extends Process implements
 	 * Constructor.
 	 * 
 	 * @param hostShell
-	 * 		An instance of the IHostShell class.
+	 *            An instance of the IHostShell class.
 	 * @param postfix
 	 * @throws java.io.IOException
 	 */
@@ -170,8 +170,8 @@ public class MyHostShellProcessAdapter extends Process implements
 	 * event into the adapter's streams.
 	 * 
 	 * @see org.eclipse.rse.services.shells.IHostShellOutputListener#
-	 * 	shellOutputChanged
-	 * 	(org.eclipse.rse.services.shells.IHostShellChangeEvent)
+	 *      shellOutputChanged
+	 *      (org.eclipse.rse.services.shells.IHostShellChangeEvent)
 	 */
 	private boolean skip = true;
 	private int prefixCounter = 0;
@@ -183,11 +183,19 @@ public class MyHostShellProcessAdapter extends Process implements
 		try {
 			for (int i = 0; i < input.length; i++) {
 				String line = input[i].getString();
-//				System.out.println("RSEExecEnvironment:" + line);
-				if (line.trim().equals(this.pattern1)) {
+				// System.out.println("RSEExecEnvironment:" + line);
+				String trimLine = line.trim();
+				if (trimLine.endsWith(this.pattern1)) {
+					if (!trimLine.equals(this.pattern1)) {
+						// We need to output part of line
+						int pos = line.indexOf(this.pattern1);
+						outputStream.write(line.substring(0, pos).getBytes());
+						outputStream.write('\n');
+						outputStream.flush();
+					}
 					prefixCounter++;
 					if (prefixCounter == 2) {
-//						System.out.println("CALL DESTROY");
+						// System.out.println("CALL DESTROY");
 						hostShellError.close();
 						hostShellInput.close();
 						return;
