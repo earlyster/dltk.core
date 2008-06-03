@@ -168,7 +168,7 @@ public abstract class AbstractInterpreterComboBlock {
 	 * Creates this block's control in the given control.
 	 * 
 	 * @param anscestor
-	 * 		containing control
+	 *            containing control
 	 */
 	public void createControl(Composite ancestor) {
 		Font font = ancestor.getFont();
@@ -295,9 +295,9 @@ public abstract class AbstractInterpreterComboBlock {
 	 * Opens the given preference page, and updates when closed.
 	 * 
 	 * @param id
-	 * 		pref page id
+	 *            pref page id
 	 * @param page
-	 * 		pref page
+	 *            pref page
 	 */
 	protected void showPrefPage(String pageId) {
 		PreferencesUtil.createPreferenceDialogOn(getShell(), pageId,
@@ -335,14 +335,15 @@ public abstract class AbstractInterpreterComboBlock {
 	 * Sets the InterpreterEnvironments to be displayed in this block
 	 * 
 	 * @param Interpreters
-	 * 		InterpreterEnvironments to be displayed
+	 *            InterpreterEnvironments to be displayed
 	 */
 	protected void setInterpreters(List interpreterEnvironments) {
 		fInterpreters.clear();
 		for (Iterator iterator = interpreterEnvironments.iterator(); iterator
 				.hasNext();) {
 			IInterpreterInstall install = (IInterpreterInstall) iterator.next();
-			if (install.getEnvironment().equals(environment)) {
+			if (environment != null
+					&& environment.equals(install.getEnvironment())) {
 				fInterpreters.add(install);
 			}
 		}
@@ -383,7 +384,7 @@ public abstract class AbstractInterpreterComboBlock {
 	 * Selects a specific InterpreterEnvironment based on type/name.
 	 * 
 	 * @param Interpreter
-	 * 		InterpreterEnvironment
+	 *            InterpreterEnvironment
 	 */
 	private void selectInterpreter(IInterpreterInstall Interpreter) {
 		fSpecificButton.setSelection(true);
@@ -413,7 +414,7 @@ public abstract class AbstractInterpreterComboBlock {
 	 * Sets the Default InterpreterEnvironment Descriptor for this block.
 	 * 
 	 * @param descriptor
-	 * 		default InterpreterEnvironment descriptor
+	 *            default InterpreterEnvironment descriptor
 	 */
 	public void setDefaultInterpreterDescriptor(InterpreterDescriptor descriptor) {
 		fDefaultDescriptor = descriptor;
@@ -438,7 +439,7 @@ public abstract class AbstractInterpreterComboBlock {
 	 * Sets the specific InterpreterEnvironment Descriptor for this block.
 	 * 
 	 * @param descriptor
-	 * 		specific InterpreterEnvironment descriptor
+	 *            specific InterpreterEnvironment descriptor
 	 */
 	public void setSpecificInterpreterDescriptor(
 			InterpreterDescriptor descriptor) {
@@ -451,7 +452,7 @@ public abstract class AbstractInterpreterComboBlock {
 	 * checked.
 	 * 
 	 * @return whether the 'use default InterpreterEnvironment' button is
-	 * 	checked
+	 *         checked
 	 */
 	public boolean isDefaultInterpreter() {
 		if (fDefaultButton != null) {
@@ -476,7 +477,7 @@ public abstract class AbstractInterpreterComboBlock {
 	 * Sets the title used for this InterpreterEnvironment block
 	 * 
 	 * @param title
-	 * 		title for this InterpreterEnvironment block
+	 *            title for this InterpreterEnvironment block
 	 */
 	public void setTitle(String title) {
 		fTitle = title;
