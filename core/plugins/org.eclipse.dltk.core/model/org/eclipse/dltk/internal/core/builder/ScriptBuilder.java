@@ -45,8 +45,6 @@ import org.eclipse.dltk.core.IModelMarker;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
-import org.eclipse.dltk.core.search.IDLTKSearchScope;
-import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
 import org.eclipse.dltk.internal.core.BuiltinSourceModule;
@@ -484,10 +482,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	protected void buildResources(Set resources, IProgressMonitor monitor,
 			int tiks, int buildType, Set externalFoldersBefore,
 			Set externalFolders, Set allresources) {
-		// HandleFactory factory = new HandleFactory();
-		List status = new ArrayList();
-		IDLTKSearchScope scope = SearchEngine.createSearchScope(scriptProject);
-
 		List realResources = new ArrayList(); // real resources
 		List elements = new ArrayList(); // Model elements
 
@@ -576,7 +570,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	protected void buildElements(List elements, Set allElements,
 			IProgressMonitor monitor, int ticks, int buildType,
 			Set externalFoldersBefore, Set externalFolders) {
-		List status = new ArrayList();
 		IDLTKLanguageToolkit toolkit = null;
 		try {
 			toolkit = DLTKLanguageManager.getLanguageToolkit(scriptProject);

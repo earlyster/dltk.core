@@ -86,7 +86,6 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceModuleInfoCache;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.builder.ScriptBuilder;
 import org.eclipse.dltk.internal.core.search.DLTKWorkspaceScope;
@@ -533,8 +532,8 @@ public class ModelManager implements ISaveParticipant {
 
 	/**
 	 * Returns the model element corresponding to the given file, its project
-	 * being the given project. Returns <code>null</code> if unable to
-	 * associate the given file with a model element.
+	 * being the given project. Returns <code>null</code> if unable to associate
+	 * the given file with a model element.
 	 * 
 	 * Creating a model element has the side effect of creating and opening all
 	 * of the element's parents if they are not yet open.
@@ -827,9 +826,8 @@ public class ModelManager implements ISaveParticipant {
 			return null; // should never be requested on non-Java projects
 		}
 		PerProjectInfo info = getPerProjectInfo(project, true/*
-																 * create if
-																 * missing
-																 */);
+															 * create if missing
+															 */);
 		if (!info.triedRead) {
 			info.triedRead = true;
 			try {
@@ -1106,9 +1104,6 @@ public class ModelManager implements ISaveParticipant {
 			processSavedState.setSystem(true);
 			processSavedState.setPriority(Job.SHORT); // process asap
 			processSavedState.schedule();
-			
-			EnvironmentManager.waitInitialized();
-			
 		} catch (RuntimeException e) {
 			shutdown();
 			throw e;
@@ -1219,9 +1214,9 @@ public class ModelManager implements ISaveParticipant {
 			try {
 				entries = ((ScriptProject) project).decodeBuildpath(
 						containerString, null/*
-												 * not interested in unknown
-												 * elements
-												 */);
+											 * not interested in unknown
+											 * elements
+											 */);
 			} catch (IOException e) {
 				Util
 						.log(
@@ -1360,9 +1355,9 @@ public class ModelManager implements ISaveParticipant {
 		if (DLTKLanguageManager.hasScriptNature(project)) {
 			// should never be requested on non-script projects
 			PerProjectInfo info = getPerProjectInfo(project, true /*
-																	 * create if
-																	 * missing
-																	 */);
+																 * create if
+																 * missing
+																 */);
 			info.triedRead = true; // no point trying to re-read once using
 			// setter
 			info.savedState = state;
@@ -1568,9 +1563,9 @@ public class ModelManager implements ISaveParticipant {
 			else
 				workspace.run(runnable, null/* don't take any lock */,
 						IWorkspace.AVOID_UPDATE, null/*
-														 * no progress available
-														 * here
-														 */);
+													 * no progress available
+													 * here
+													 */);
 			ok = true;
 		} catch (CoreException e) {
 			// ignore
@@ -2168,7 +2163,8 @@ public class ModelManager implements ISaveParticipant {
 							// container has not been initialized yet, use
 							// previous session value
 							// (see
-							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=73969)
+							//https://bugs.eclipse.org/bugs/show_bug.cgi?id=73969
+							// )
 							container = getPreviousSessionContainer(
 									containerPath, project);
 						}
@@ -2177,12 +2173,12 @@ public class ModelManager implements ISaveParticipant {
 									.getBuildpathEntries(project);
 							containerString = ((ScriptProject) project)
 									.encodeBuildpath(entries, false, null/*
-																			 * not
-																			 * interested
-																			 * in
-																			 * unknown
-																			 * elements
-																			 */);
+																		 * not
+																		 * interested
+																		 * in
+																		 * unknown
+																		 * elements
+																		 */);
 						}
 					} catch (ModelException e) {
 						// could not encode entry: will not persist

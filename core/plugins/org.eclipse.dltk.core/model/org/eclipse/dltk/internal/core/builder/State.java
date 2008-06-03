@@ -106,7 +106,8 @@ public class State {
 		for (int i = 0; i < length; i++) {
 			String folderName;
 			if ((folderName = in.readUTF()).length() > 0)
-				newState.externalFolderLocations.add(new Path(folderName));
+				newState.externalFolderLocations.add(Path
+						.fromPortableString(folderName));
 		}
 		try {
 			boolean state = in.readBoolean();
@@ -175,7 +176,7 @@ public class State {
 		for (Iterator iterator = this.externalFolderLocations.iterator(); iterator
 				.hasNext();) {
 			IPath path = (IPath) iterator.next();
-			out.writeUTF(path.toString());
+			out.writeUTF(path.toPortableString());
 		}
 		out.writeBoolean(this.noCleanExternalFolders);
 	}
