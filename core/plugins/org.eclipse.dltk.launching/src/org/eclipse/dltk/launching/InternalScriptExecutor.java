@@ -1,0 +1,107 @@
+package org.eclipse.dltk.launching;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.core.environment.IDeployment;
+import org.eclipse.dltk.core.environment.IExecutionEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.launching.IScriptProcessHandler.ScriptResult;
+
+/**
+ * Utility class which may be used to execute a script, or perform an
+ * interpreter action on a script, such as compilation.
+ * 
+ * @see IScriptProcessHandler
+ */
+public class InternalScriptExecutor {
+
+	public interface IInternalScriptDeployer {
+		/**
+		 * Deploy the internal script to be executed.
+		 */
+		IPath deployScript(IDeployment deployment) throws IOException;
+	}
+
+	private IScriptProcessHandler handler;
+	private IInterpreterInstall install;
+
+	public InternalScriptExecutor(IInterpreterInstall install,
+			IScriptProcessHandler handler) {
+		Assert.isNotNull(install, "IInterpreterInstall must not be null");
+		Assert.isNotNull(handler, "IProcessHandler must not be null");
+
+		this.install = install;
+		this.handler = handler;
+	}
+
+	/**
+	 * Execute a script or interpreter action
+	 * 
+	 * @param deployer
+	 *            implementation of <code>IInternalScriptDeployer</code> to
+	 *            deploy the script being executed.
+	 * 
+	 * @param interpreterArgs
+	 *            command line arguments for the interpreter, may be
+	 *            <code>null</code>
+	 * 
+	 * @param scriptArgs
+	 *            command line arguments for the script, may be
+	 *            <code>null</code>
+	 * @param stdin
+	 *            stdin to pass to script, may be <code>null</code>
+	 * 
+	 * @throws CoreException
+	 *             if there was an error handling the process
+	 * @throws IOException
+	 *             if there was an error deploying the script
+	 */
+	public ScriptResult execute(IInternalScriptDeployer deployer,
+			String[] interpreterArgs, String[] scriptArgs, char[] stdin)
+			throws CoreException, IOException {
+		IExecutionEnvironment execEnv = install.getExecEnvironment();
+
+		IDeployment deployment = execEnv.createDeployment();
+		IPath deploymentPath = deployer.deployScript(deployment);
+
+		try {
+			IFileHandle interpreter = install.getInstallLocation();
+			IFileHandle script = deployment.getFile(deploymentPath);
+
+			String[] cmdLine = buildCommandLine(interpreter, interpreterArgs,
+					script, scriptArgs);
+
+			Process process = execEnv.exec(cmdLine, null, null);
+			ScriptResult result = handler.handle(process, stdin);
+
+			return result;
+		} finally {
+			deployment.dispose();
+		}
+	}
+
+	private void addArgs(ArrayList list, String[] args) {
+		if (args != null) {
+			for (int i = 0; i < args.length; i++) {
+				list.add(args[i]);
+			}
+		}
+	}
+
+	private String[] buildCommandLine(IFileHandle interpreter,
+			String[] interpreterArgs, IFileHandle script, String[] scriptArgs) {
+		ArrayList cmdLine = new ArrayList();
+
+		cmdLine.add(interpreter.getCanonicalPath());
+		addArgs(cmdLine, interpreterArgs);
+
+		cmdLine.add(script.getCanonicalPath());
+		addArgs(cmdLine, scriptArgs);
+
+		return (String[]) cmdLine.toArray(new String[cmdLine.size()]);
+	}
+}
