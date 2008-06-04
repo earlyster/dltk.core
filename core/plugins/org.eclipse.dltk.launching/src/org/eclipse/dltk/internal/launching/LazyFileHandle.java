@@ -208,4 +208,11 @@ public class LazyFileHandle implements IFileHandle {
 		return true;
 	}
 
+	public String toString() {
+		initialize();
+		if (handle != null) {
+			return this.handle.toString();
+		}
+		return "[UNRESOLVED FILE HANDLE]";
+	}
 }
