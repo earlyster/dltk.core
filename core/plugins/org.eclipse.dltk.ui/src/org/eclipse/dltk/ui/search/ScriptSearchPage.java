@@ -5,7 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ * 	   IBM Corporation and others. - initial API and Implementation	
+ *     xored software, Inc. - Ported to DLTK from JDT
+ *     Alon Peled <alon@zend.com> - Fix of bug bug 235137
  *******************************************************************************/
 package org.eclipse.dltk.ui.search;
 
@@ -336,17 +339,13 @@ public abstract class ScriptSearchPage extends DialogPage implements
 	}
 
 	private void setLimitTo(int searchFor, int limitTo) {
-		if (!(searchFor == TYPE) /* && limitTo == IMPLEMENTORS */) {
-			limitTo = REFERENCES;
-		}
-
-		if (!(searchFor == FIELD) /*
-									 * && (limitTo == READ_ACCESSES || limitTo ==
-									 * WRITE_ACCESSES)
-									 */) {
-			limitTo = REFERENCES;
-		}
-
+		/*
+		 * if (!(searchFor == TYPE) && limitTo == IMPLEMENTORS ) { limitTo =
+		 * REFERENCES; }
+		 * 
+		 * if (!(searchFor == FIELD) && (limitTo == READ_ACCESSES || limitTo ==
+		 * WRITE_ACCESSES)) { limitTo = REFERENCES; }
+		 */
 		for (int i = 0; i < fLimitTo.length; i++) {
 			fLimitTo[i].setSelection(limitTo == i);
 		}
@@ -490,7 +489,7 @@ public abstract class ScriptSearchPage extends DialogPage implements
 		fSearchFor[TYPE].addSelectionListener(modelElementInitializer);
 		fSearchFor[METHOD].addSelectionListener(modelElementInitializer);
 		fSearchFor[FIELD].addSelectionListener(modelElementInitializer);
-		// fSearchFor[CONSTRUCTOR].addSelectionListener(modelElementInitializer);
+		//fSearchFor[CONSTRUCTOR].addSelectionListener(modelElementInitializer);
 		// fSearchFor[PACKAGE].addSelectionListener(modelElementInitializer);
 
 		setControl(result);
