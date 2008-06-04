@@ -145,6 +145,12 @@ public class ExternalProjectFragment extends ProjectFragment {
 		}
 	}
 
+	protected void getHandleMemento(StringBuffer buff) {
+		((ModelElement) getParent()).getHandleMemento(buff);
+		buff.append(getHandleMementoDelimiter());
+		escapeMementoName(buff, getElementName());
+	}
+
 	public IScriptFolder getScriptFolder(IPath path) {
 		try {
 			List childs = getChildrenOfType(SCRIPT_FOLDER);

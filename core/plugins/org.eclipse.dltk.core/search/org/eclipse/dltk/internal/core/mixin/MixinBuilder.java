@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -205,7 +206,8 @@ public class MixinBuilder implements IScriptBuilder {
 				for (Iterator ind = saveIndexesSet.iterator(); ind.hasNext();) {
 					Index index = (Index) ind.next();
 					if (monitor != null) {
-						String containerPath = index.containerPath;
+						String containerPath = Path.fromPortableString(
+								index.containerPath).setDevice(null).toString();
 						if (containerPath.startsWith("#special#")) { //$NON-NLS-1$
 							containerPath = containerPath.substring(
 									containerPath.lastIndexOf("#"), //$NON-NLS-1$
