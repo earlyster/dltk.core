@@ -172,35 +172,35 @@ public abstract class OptionsConfigurationBlock {
 		// complete when project settings are enabled
 		boolean completeSettings = fProject != null
 				&& fDisabledProjectSettings == null;
-		boolean needsBuild = false;
-		
+		boolean needsBuild = true;
+
 		/*
-		 * XXX: need to rework this once there are options this affects - 
-		 * this can cause an illegal state exception - probably due to the
-		 * fact that key binding is different from the jdt implementation
+		 * XXX: need to rework this once there are options this affects - this
+		 * can cause an illegal state exception - probably due to the fact that
+		 * key binding is different from the jdt implementation
 		 */
-//		for (int i = 0; i < fAllKeys.length; i++) {
-//			PreferenceKey key = fAllKeys[i];
-//			String oldVal = key.getStoredValue(currContext, null);
-//			String val = key.getStoredValue(currContext, fManager);
-//			if (val == null) {
-//				if (oldVal != null) {
-//					changedSettings.add(key);
-//					needsBuild |= !oldVal.equals(key.getStoredValue(
-//							fLookupOrder, true, fManager));
-//				} else if (completeSettings) {
-//					key.setStoredValue(currContext, key.getStoredValue(
-//							fLookupOrder, true, fManager), fManager);
-//					changedSettings.add(key);
-//					// no build needed
-//				}
-//			} else if (!val.equals(oldVal)) {
-//				changedSettings.add(key);
-//				needsBuild |= oldVal != null
-//						|| !val.equals(key.getStoredValue(fLookupOrder, true,
-//								fManager));
-//			}
-//		}
+		// for (int i = 0; i < fAllKeys.length; i++) {
+		// PreferenceKey key = fAllKeys[i];
+		// String oldVal = key.getStoredValue(currContext, null);
+		// String val = key.getStoredValue(currContext, fManager);
+		// if (val == null) {
+		// if (oldVal != null) {
+		// changedSettings.add(key);
+		// needsBuild |= !oldVal.equals(key.getStoredValue(
+		// fLookupOrder, true, fManager));
+		// } else if (completeSettings) {
+		// key.setStoredValue(currContext, key.getStoredValue(
+		// fLookupOrder, true, fManager), fManager);
+		// changedSettings.add(key);
+		// // no build needed
+		// }
+		// } else if (!val.equals(oldVal)) {
+		// changedSettings.add(key);
+		// needsBuild |= oldVal != null
+		// || !val.equals(key.getStoredValue(fLookupOrder, true,
+		// fManager));
+		// }
+		// }
 		return needsBuild;
 	}
 
@@ -300,7 +300,8 @@ public abstract class OptionsConfigurationBlock {
 	public void performDefaults() {
 		for (int i = 0; i < fAllKeys.length; i++) {
 			PreferenceKey curr = fAllKeys[i];
-			String origValue = curr.getStoredValue(fLookupOrder, true, fManager);
+			String origValue = curr
+					.getStoredValue(fLookupOrder, true, fManager);
 			setValue(curr, origValue);
 		}
 	}

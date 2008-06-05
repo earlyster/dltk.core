@@ -2,13 +2,10 @@ package org.eclipse.dltk.ui.preferences;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.dltk.internal.ui.preferences.PropertyAndPreferencePage;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
@@ -32,7 +29,9 @@ public abstract class AbstractConfigurationBlockPropertyAndPreferencePage
 	}
 
 	/*
-	 * @see org.eclipse.jface.preference.PreferencePage#createControl(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.jface.preference.PreferencePage#createControl(org.eclipse
+	 * .swt.widgets.Composite)
 	 */
 	public final void createControl(Composite parent) {
 		// create the configuration block here so the page works as both types
@@ -80,7 +79,9 @@ public abstract class AbstractConfigurationBlockPropertyAndPreferencePage
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.ui.preferences.PropertyAndPreferencePage#setElement(org.eclipse.core.runtime.IAdaptable)
+	 * @see
+	 * org.eclipse.dltk.internal.ui.preferences.PropertyAndPreferencePage#setElement
+	 * (org.eclipse.core.runtime.IAdaptable)
 	 */
 	public final void setElement(IAdaptable element) {
 		super.setElement(element);
@@ -127,14 +128,16 @@ public abstract class AbstractConfigurationBlockPropertyAndPreferencePage
 	protected abstract void setPreferenceStore();
 
 	/*
-	 * @see org.eclipse.dltk.internal.ui.preferences.PropertyAndPreferencePage#createPreferenceContent(org.eclipse.swt.widgets.Composite)
+	 * @seeorg.eclipse.dltk.internal.ui.preferences.PropertyAndPreferencePage#
+	 * createPreferenceContent(org.eclipse.swt.widgets.Composite)
 	 */
 	protected final Control createPreferenceContent(Composite composite) {
 		return block.createContents(composite);
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
+	 * @seeorg.eclipse.dltk.internal.ui.preferences.PropertyAndPreferencePage#
+	 * enableProjectSpecificSettings(boolean)
 	 */
 	protected final void enableProjectSpecificSettings(
 			boolean useProjectSpecificSettings) {
@@ -145,14 +148,16 @@ public abstract class AbstractConfigurationBlockPropertyAndPreferencePage
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.ui.preferences.PropertyAndPreferencePage#hasProjectSpecificOptions(org.eclipse.core.resources.IProject)
+	 * @seeorg.eclipse.dltk.internal.ui.preferences.PropertyAndPreferencePage#
+	 * hasProjectSpecificOptions(org.eclipse.core.resources.IProject)
 	 */
 	protected final boolean hasProjectSpecificOptions(IProject project) {
 		return block.hasProjectSpecificOptions(project);
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.ui.preferences.PropertyAndPreferencePage#performDefaults()
+	 * @seeorg.eclipse.dltk.internal.ui.preferences.PropertyAndPreferencePage#
+	 * performDefaults()
 	 */
 	protected final void performDefaults() {
 		super.performDefaults();
