@@ -33,7 +33,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Table;
 
 public class EnvironmentPathBlock {
-	// private Text path;
+
+	private static final String EMPTY = ""; //$NON-NLS-1$
+
 	private Table pathTable;
 	private TableViewer pathViewer;
 
@@ -62,7 +64,7 @@ public class EnvironmentPathBlock {
 					if (path != null) {
 						return (String) path;
 					}
-					return "";
+					return EMPTY;
 				default:
 					break;
 				}
@@ -70,18 +72,21 @@ public class EnvironmentPathBlock {
 			return null;
 		}
 	}
+
 	public void createControl(Composite parent) {
 		createControl(parent, 1);
 	}
-	public void createControl(Composite parent, int columns ) {
+
+	public void createControl(Composite parent, int columns) {
 		PixelConverter conv = new PixelConverter(parent);
 
 		pathTable = new Table(parent, SWT.SINGLE | SWT.BORDER
 				| SWT.FULL_SELECTION);
 		pathTable.setHeaderVisible(true);
 		pathTable.setLinesVisible(true);
-		//GridData tableData = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
-		//tableData.heightHint = conv.convertHeightInCharsToPixels(4);
+		// GridData tableData = new GridData(SWT.FILL, SWT.DEFAULT, true,
+		// false);
+		// tableData.heightHint = conv.convertHeightInCharsToPixels(4);
 		GridData tableData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		tableData.heightHint = conv.convertHeightInCharsToPixels(4);
 		tableData.horizontalSpan = columns;
@@ -91,7 +96,8 @@ public class EnvironmentPathBlock {
 
 		TableViewerColumn environmentsColumn = new TableViewerColumn(
 				pathViewer, SWT.NULL);
-		environmentsColumn.getColumn().setText(Messages.EnvironmentPathBlock_environment);
+		environmentsColumn.getColumn().setText(
+				Messages.EnvironmentPathBlock_environment);
 		environmentsColumn.getColumn().setWidth(
 				conv.convertWidthInCharsToPixels(30));
 		TableViewerColumn pathColumn = new TableViewerColumn(pathViewer,
@@ -110,7 +116,8 @@ public class EnvironmentPathBlock {
 
 					protected Control createControl(Composite compositeParent) {
 						composite = new Composite(compositeParent, SWT.NONE);
-						composite.setBackground(compositeParent.getBackground());
+						composite
+								.setBackground(compositeParent.getBackground());
 						GridLayout layout = new GridLayout(2, false);
 						layout.marginLeft = -4;
 						layout.marginTop = -4;
@@ -122,7 +129,8 @@ public class EnvironmentPathBlock {
 								true, false));
 						browse = new Button(composite, SWT.PUSH);
 						browse.setText("..."); //$NON-NLS-1$
-						Font font = new Font(compositeParent.getDisplay(), "arial", 6, 0); //$NON-NLS-1$
+						Font font = new Font(compositeParent.getDisplay(),
+								"arial", 6, 0); //$NON-NLS-1$
 						browse.setFont(font);
 						browse.setLayoutData(new GridData(SWT.DEFAULT,
 								SWT.FILL, false, true));
@@ -133,32 +141,34 @@ public class EnvironmentPathBlock {
 							}
 						});
 						FocusAdapter listener = new FocusAdapter() {
-				            public void focusLost(FocusEvent e) {
-				            	Control cursorControl = composite.getDisplay().getCursorControl();
-				            	if( cursorControl != null ) {
-				            		if(cursorControl.equals( browse )) {
-				            			return;
-				            		}
-				            	}
-				                doFocusLost();
-				            }
-				        };
-				        browse.addFocusListener(listener);
+							public void focusLost(FocusEvent e) {
+								Control cursorControl = composite.getDisplay()
+										.getCursorControl();
+								if (cursorControl != null) {
+									if (cursorControl.equals(browse)) {
+										return;
+									}
+								}
+								doFocusLost();
+							}
+						};
+						browse.addFocusListener(listener);
 						text.addFocusListener(listener);
 						return composite;
 					}
-					
+
 					public void doFocusLost() {
 						super.focusLost();
 					}
-					
+
 					protected void focusLost() {
 					}
 				};
 			}
 
 			protected Object getValue(Object element) {
-				return paths.get(element);
+				Object value = paths.get(element);
+				return value != null ? value : EMPTY;
 			}
 
 			protected void setValue(Object element, Object value) {
@@ -216,10 +226,10 @@ public class EnvironmentPathBlock {
 
 	public void setPaths(Map paths) {
 		this.paths = paths;
-		pathTable.getDisplay().asyncExec(new Runnable(){
+		pathTable.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				pathViewer.refresh();
-			}			
+			}
 		});
 	}
 
