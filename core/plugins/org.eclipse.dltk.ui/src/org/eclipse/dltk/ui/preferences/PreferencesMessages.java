@@ -13,17 +13,17 @@ package org.eclipse.dltk.ui.preferences;
 import org.eclipse.osgi.util.NLS;
 
 public final class PreferencesMessages extends NLS {
-	
-	private static final String BUNDLE_NAME= "org.eclipse.dltk.ui.preferences.PreferencesMessages";//$NON-NLS-1$
-	
+
+	private static final String BUNDLE_NAME = "org.eclipse.dltk.ui.preferences.PreferencesMessages";//$NON-NLS-1$
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, PreferencesMessages.class);
 	}
-	
+
 	private PreferencesMessages() {
 		// Do not instantiate
 	}
-	
+
 	public static String AbstractConfigurationBlock_emptyPath;
 	public static String AbstractConfigurationBlock_fileDoesntExist;
 	public static String AbstractConfigurationBlock_pathIsntAFile;
@@ -39,7 +39,7 @@ public final class PreferencesMessages extends NLS {
 	public static String BuildPathsPropertyPage_unsavedchanges_button_save;
 	public static String BuildPathsPropertyPage_unsavedchanges_button_discard;
 	public static String BuildPathsPropertyPage_unsavedchanges_button_ignore;
-	
+
 	public static String DLTKEditorPreferencePage_singleLineComment;
 	public static String DLTKEditorPreferencePage_returnKeyword;
 	public static String DLTKEditorPreferencePage_keywords;
@@ -85,9 +85,7 @@ public final class PreferencesMessages extends NLS {
 	public static String DLTKEditorHoverConfigurationBlock_insertDelimiterAndModifier;
 	public static String DLTKEditorHoverConfigurationBlock_showAffordance;
 	public static String FoldingConfigurationBlock_noFoldingPreferenceBlock;
-	
-//	
-	
+
 	public static String TodoTaskConfigurationBlock_markers_tasks_high_priority;
 	public static String TodoTaskConfigurationBlock_markers_tasks_normal_priority;
 	public static String TodoTaskConfigurationBlock_markers_tasks_low_priority;
@@ -184,7 +182,7 @@ public final class PreferencesMessages extends NLS {
 	public static String DLTKEditorPreferencePage_coloring_category_DLTK;
 	public static String DLTKEditorPreferencePage_coloring_category_DLTKdoc;
 	public static String DLTKEditorPreferencePage_coloring_category_comments;
-	
+
 	public static String ProjectSelectionDialog_title;
 	public static String ProjectSelectionDialog_desciption;
 	public static String ProjectSelectionDialog_filter;
@@ -197,7 +195,7 @@ public final class PreferencesMessages extends NLS {
 	public static String EditorPreferencePage_subWordNavigation;
 	public static String EditorPreferencePage_smartIndent;
 	public static String EditorPreferencePage_tabAlwaysIndent;
-	
+
 	public static String NewScriptProjectPreferencePage_title;
 	public static String NewScriptProjectPreferencePage_description;
 	public static String NewScriptProjectPreferencePage_sourcefolder_label;
@@ -209,7 +207,7 @@ public final class PreferencesMessages extends NLS {
 	public static String NewScriptProjectPreferencePage_folders_error_invalidcp;
 	public static String NewScriptProjectPreferencePage_error_decode;
 	public static String EditorPreferencePage_folding_title;
-	
+
 	public static String SourceParsers_groupLabel;
 	public static String SourceParsers_nameLabel;
 	public static String SourceParsers_LinkToPreferences;
