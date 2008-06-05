@@ -172,7 +172,11 @@ public class EnvironmentPathBlock {
 			}
 
 			protected void setValue(Object element, Object value) {
-				paths.put(element, value);
+				if (value == null || EMPTY.equals(value)) {
+					paths.remove(element);
+				} else {
+					paths.put(element, value);
+				}
 				pathViewer.refresh();
 			}
 		});
