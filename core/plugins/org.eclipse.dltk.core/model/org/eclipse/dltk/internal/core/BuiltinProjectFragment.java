@@ -234,6 +234,12 @@ public class BuiltinProjectFragment extends ProjectFragment {
 				JEM_SKIP_DELIMETER);
 	}
 
+	protected void getHandleMemento(StringBuffer buff) {
+		((ModelElement) getParent()).getHandleMemento(buff);
+		buff.append(getHandleMementoDelimiter());
+		escapeMementoName(buff, getElementName());
+	}
+
 	public IModelElement getHandleFromMemento(String token,
 			MementoTokenizer memento, WorkingCopyOwner owner) {
 		switch (token.charAt(0)) {

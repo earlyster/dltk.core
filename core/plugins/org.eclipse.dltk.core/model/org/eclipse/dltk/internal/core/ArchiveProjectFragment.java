@@ -250,4 +250,11 @@ public class ArchiveProjectFragment extends ProjectFragment {
 	public String getElementName() {		
 		return this.zipPath.lastSegment();		
 	}
+
+	protected void getHandleMemento(StringBuffer buff) {
+		((ModelElement) getParent()).getHandleMemento(buff);
+		buff.append(getHandleMementoDelimiter());
+		escapeMementoName(buff, getElementName());
+	}
+
 }
