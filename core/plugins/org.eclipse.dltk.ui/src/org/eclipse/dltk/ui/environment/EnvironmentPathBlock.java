@@ -212,7 +212,7 @@ public class EnvironmentPathBlock {
 			IEnvironmentUI ui = (IEnvironmentUI) environment
 					.getAdapter(IEnvironmentUI.class);
 			String file = ui.selectFile(this.pathTable.getShell(),
-					IEnvironmentUI.EXECUTABLE);
+					IEnvironmentUI.DEFAULT);
 			if (file != null) {
 				this.paths.put(environment, file);
 				this.pathViewer.refresh();
