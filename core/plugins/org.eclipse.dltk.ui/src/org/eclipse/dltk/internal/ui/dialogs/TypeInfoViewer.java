@@ -247,7 +247,8 @@ public class TypeInfoViewer {
 			List locations = new ArrayList();
 			List labels = new ArrayList();
 			IInterpreterInstallType[] installs = ScriptRuntime
-					.getInterpreterInstallTypes();
+					.getInterpreterInstallTypes(fToolkit.getCoreToolkit()
+							.getNatureId());
 			for (int i = 0; i < installs.length; i++) {
 				processVMInstallType(installs[i], locations, labels);
 			}
@@ -266,28 +267,38 @@ public class TypeInfoViewer {
 			if (installType != null) {
 				IInterpreterInstall[] installs = installType
 						.getInterpreterInstalls();
-				boolean isMac = Platform.OS_MACOSX.equals(Platform.getOS());
-				final String HOME_SUFFIX = "/Home"; //$NON-NLS-1$
+				final boolean isMac = Platform.OS_MACOSX.equals(Platform
+						.getOS());
 				for (int i = 0; i < installs.length; i++) {
-					String label = getFormattedLabel(installs[i].getName());
-					LibraryLocation[] libLocations = installs[i]
+					final IInterpreterInstall install = installs[i];
+					final String label = getFormattedLabel(install.getName());
+					final LibraryLocation[] libLocations = install
 							.getLibraryLocations();
 					if (libLocations != null) {
 						processLibraryLocation(libLocations, label);
 					} else {
-						String filePath = installs[i].getInstallLocation()
+						String filePath = install.getInstallLocation()
 								.toOSString();
-						// on MacOS X install locations end in an additional
-						// "/Home" segment; remove it
-						if (isMac && filePath.endsWith(HOME_SUFFIX))
-							filePath = filePath.substring(0, filePath.length()
-									- HOME_SUFFIX.length() + 1);
-						locations.add(filePath);
-						labels.add(label);
+						/*
+						 * filePath could be null if environment is configured,
+						 * but environment-specific plugins are absent.
+						 */
+						if (filePath != null) {
+							// on MacOS X install locations end in an additional
+							// "/Home" segment; remove it
+							if (isMac && filePath.endsWith(HOME_SUFFIX))
+								filePath = filePath.substring(0, filePath
+										.length()
+										- (HOME_SUFFIX.length() - 1));
+							locations.add(filePath);
+							labels.add(label);
+						}
 					}
 				}
 			}
 		}
+
+		private static final String HOME_SUFFIX = "/Home"; //$NON-NLS-1$
 
 		private void processLibraryLocation(LibraryLocation[] libLocations,
 				String label) {
