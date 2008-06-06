@@ -5,6 +5,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.dltk.ui.tests.core.ScriptElementLabelsTest;
 import org.eclipse.dltk.ui.tests.navigator.scriptexplorer.PackageExplorerTests;
+import org.eclipse.dltk.ui.tests.templates.ScriptTemplateContextTest;
 
 public class AllTests {
 
@@ -14,6 +15,7 @@ public class AllTests {
 		suite.addTestSuite(ScriptElementLabelsTest.class);
 		
 		suite.addTest(PackageExplorerTests.suite());
+		suite.addTest(ScriptTemplateContextTest.suite());
 
 		//$JUnit-END$
 		return suite;
