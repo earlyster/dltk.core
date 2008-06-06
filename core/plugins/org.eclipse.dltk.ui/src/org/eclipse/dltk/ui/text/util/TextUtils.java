@@ -10,7 +10,7 @@
 package org.eclipse.dltk.ui.text.util;
 
 public abstract class TextUtils {
-	
+
 	private TextUtils() {
 		throw new AssertionError("Cannot instantiate utility class"); //$NON-NLS-1$
 	}
@@ -21,8 +21,8 @@ public abstract class TextUtils {
 	 * 
 	 * <p>
 	 * This method produces a <code>String</code> that can be used to create a
-	 * <code>Pattern</code> that would match the string <code>s</code> as if
-	 * it were a literal pattern.
+	 * <code>Pattern</code> that would match the string <code>s</code> as if it
+	 * were a literal pattern.
 	 * </p>
 	 * Metacharacters or escape sequences in the input sequence will be given no
 	 * special meaning.
@@ -30,25 +30,10 @@ public abstract class TextUtils {
 	 * @param s
 	 *            The string to be literalized
 	 * @return A literal string replacement
-	 * @since JRE 1.5
+	 * @deprecated
 	 */
 	public static String Pattern_quote(String s) {
-		int slashEIndex = s.indexOf("\\E"); //$NON-NLS-1$
-		if (slashEIndex == -1)
-			return "\\Q" + s + "\\E"; //$NON-NLS-1$ //$NON-NLS-2$
-	
-		StringBuffer sb = new StringBuffer(s.length() * 2);
-		sb.append("\\Q"); //$NON-NLS-1$
-		slashEIndex = 0;
-		int current = 0;
-		while ((slashEIndex = s.indexOf("\\E", current)) != -1) { //$NON-NLS-1$
-			sb.append(s.substring(current, slashEIndex));
-			current = slashEIndex + 2;
-			sb.append("\\E\\\\E\\Q"); //$NON-NLS-1$
-		}
-		sb.append(s.substring(current, s.length()));
-		sb.append("\\E"); //$NON-NLS-1$
-		return sb.toString();
+		return org.eclipse.dltk.utils.TextUtils.Pattern_quote(s);
 	}
 
 }
