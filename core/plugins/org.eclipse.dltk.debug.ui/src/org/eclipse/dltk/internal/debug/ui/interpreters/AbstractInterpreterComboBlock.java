@@ -37,6 +37,7 @@ import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterStandin;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
@@ -97,12 +98,14 @@ public abstract class AbstractInterpreterComboBlock {
 	private InterpreterDescriptor fDefaultDescriptor = null;
 
 	/**
-	 * Specific InterpreterEnvironment descriptor or <code>null</code> if none.
+	 * Specific InterpreterEnvironment descriptor or <code>null</code> if
+	 * none.
 	 */
 	private InterpreterDescriptor fSpecificDescriptor = null;
 
 	/**
-	 * Default InterpreterEnvironment radio button or <code>null</code> if none
+	 * Default InterpreterEnvironment radio button or <code>null</code> if
+	 * none
 	 */
 	private Button fDefaultButton = null;
 
@@ -398,11 +401,21 @@ public abstract class AbstractInterpreterComboBlock {
 	}
 
 	/**
-	 * Returns the selected InterpreterEnvironment or <code>null</code> if none.
+	 * Returns the selected InterpreterEnvironment or <code>null</code> if
+	 * none.
 	 * 
-	 * @return the selected InterpreterEnvironment or <code>null</code> if none
+	 * @return the selected InterpreterEnvironment or <code>null</code> if
+	 *         none
 	 */
 	public IInterpreterInstall getInterpreter() {
+		if (this.isDefaultInterpreter()) {
+			if (this.environment != null) {
+				return ScriptRuntime
+						.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
+								getCurrentLanguageNature(), this.environment
+										.getId()));
+			}
+		}
 		int index = fCombo.getSelectionIndex();
 		if (index >= 0) {
 			return (IInterpreterInstall) fInterpreters.get(index);
