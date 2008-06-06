@@ -12,6 +12,7 @@ package org.eclipse.dltk.ui.templates;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
@@ -61,6 +62,11 @@ public abstract class ScriptTemplatePreferencePage extends
 			setDocumentParticioner(document);
 
 			viewer.configure(configuration);
+			if (origConfig instanceof ScriptSourceViewerConfiguration) {
+				final String fontKey = ((ScriptSourceViewerConfiguration) origConfig)
+						.getFontPropertyPreferenceKey();
+				viewer.getTextWidget().setFont(JFaceResources.getFont(fontKey));
+			}
 			viewer.setDocument(document);
 			return viewer;
 		}
