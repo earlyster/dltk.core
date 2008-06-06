@@ -12,6 +12,9 @@
 package org.eclipse.dltk.ui.tests.templates;
 
 import org.eclipse.dltk.core.tests.model.SuiteOfTestCases;
+import org.eclipse.dltk.ui.templates.IScriptTemplateIndenter;
+import org.eclipse.dltk.ui.templates.NopScriptTemplateIndenter;
+import org.eclipse.dltk.ui.templates.TabExpandScriptTemplateIndenter;
 
 public class ScriptTemplateContextTest extends SuiteOfTestCases {
 
@@ -32,4 +35,30 @@ public class ScriptTemplateContextTest extends SuiteOfTestCases {
 		assertEquals("\t  ", TestTemplateContext.calculateIndent("\t  " + "if"));
 	}
 
+	private String tabExpandIndent(String line) {
+		final IScriptTemplateIndenter indenter = new TabExpandScriptTemplateIndenter(
+				4);
+		final StringBuffer sb = new StringBuffer();
+		indenter.indentLine(sb, "", line);
+		return sb.toString();
+	}
+
+	public void testTabExpandIndenter() {
+		assertEquals("if", tabExpandIndent("if"));
+		assertEquals("    if", tabExpandIndent("\t" + "if"));
+		assertEquals("        if", tabExpandIndent("\t\t" + "if"));
+	}
+
+	private String nopIndent(String line) {
+		final IScriptTemplateIndenter indenter = new NopScriptTemplateIndenter();
+		final StringBuffer sb = new StringBuffer();
+		indenter.indentLine(sb, "", line);
+		return sb.toString();
+	}
+
+	public void testNopIndenter() {
+		assertEquals("if", nopIndent("if"));
+		assertEquals("\t" + "if", nopIndent("\t" + "if"));
+		assertEquals("\t\t" + "if", nopIndent("\t\t" + "if"));
+	}
 }
