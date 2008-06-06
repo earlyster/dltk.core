@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 
 public class LazyFileHandle implements IFileHandle {
 	private String environment = null;
@@ -37,6 +38,11 @@ public class LazyFileHandle implements IFileHandle {
 					.getEnvironmentById(this.environment);
 			if (environment != null) {
 				handle = environment.getFile(this.path);
+			}
+			// Local environment for update from latest versions.
+			else if (this.environment.equals("")) {
+				handle = EnvironmentManager.getLocalEnvironment().getFile(
+						this.path);
 			}
 		}
 	}
@@ -175,6 +181,9 @@ public class LazyFileHandle implements IFileHandle {
 	}
 
 	public String getEnvironmentId() {
+		if (this.environment.equals("")) {
+			return LocalEnvironment.ENVIRONMENT_ID;
+		}
 		return this.environment;
 	}
 
