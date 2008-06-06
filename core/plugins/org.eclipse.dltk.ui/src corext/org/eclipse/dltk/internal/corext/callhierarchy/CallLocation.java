@@ -14,116 +14,128 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dltk.core.IBuffer;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IOpenable;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 
-
 public class CallLocation implements IAdaptable {
-    public static final int UNKNOWN_LINE_NUMBER= -1;
-    private IModelElement fMember;
-    private IModelElement fCalledMember;
-    private int fStart;
-    private int fEnd;
+	public static final int UNKNOWN_LINE_NUMBER = -1;
+	private IModelElement fMember;
+	private IModelElement fCalledMember;
+	private int fStart;
+	private int fEnd;
 
-    private String fCallText;
-    private int fLineNumber;
+	private String fCallText;
+	private int fLineNumber;
 
-    public CallLocation(IModelElement member, IModelElement calledMember, int start, int end, int lineNumber) {
-        this.fMember = member;
-        this.fCalledMember = calledMember;
-        this.fStart = start;
-        this.fEnd = end;
-        this.fLineNumber= lineNumber;
-    }
+	public CallLocation(IModelElement member, IModelElement calledMember,
+			int start, int end, int lineNumber) {
+		this.fMember = member;
+		this.fCalledMember = calledMember;
+		this.fStart = start;
+		this.fEnd = end;
+		this.fLineNumber = lineNumber;
+	}
 
-    /**
-     * @return IMethod
-     */
-    public IModelElement getCalledMember() {
-        return fCalledMember;
-    }
+	/**
+	 * @return IMethod
+	 */
+	public IModelElement getCalledMember() {
+		return fCalledMember;
+	}
 
-    /**
+	/**
      *
      */
-    public int getEnd() {
-        return fEnd;
-    }
+	public int getEnd() {
+		return fEnd;
+	}
 
-    public IModelElement getMember() {
-        return fMember;
-    }
+	public IModelElement getMember() {
+		return fMember;
+	}
 
-    /**
+	/**
      *
      */
-    public int getStart() {
-        return fStart;
-    }
+	public int getStart() {
+		return fStart;
+	}
 
-    public int getLineNumber() {
-    	initCallTextAndLineNumber();
-        return fLineNumber;
-    }
-    
-    public String getCallText() {
-    	initCallTextAndLineNumber();
-        return fCallText;
-    }
+	public int getLineNumber() {
+		initCallTextAndLineNumber();
+		return fLineNumber;
+	}
 
-    private void initCallTextAndLineNumber() {
-    	if (fCallText != null)
-    		return;
-    	
-        IBuffer buffer= getBufferForMember();
-        if (buffer == null || buffer.getLength() < fEnd) { //binary, without source attachment || buffer contents out of sync (bug 121900)
-        	fCallText= ""; //$NON-NLS-1$
-        	fLineNumber= UNKNOWN_LINE_NUMBER;
-        	return;
-        }
+	public String getCallText() {
+		initCallTextAndLineNumber();
+		return fCallText;
+	}
 
-        fCallText= buffer.getText(fStart, (fEnd - fStart));
-        
-        if (fLineNumber == UNKNOWN_LINE_NUMBER) {
-            Document document= new Document(buffer.getContents());
-            try {
-                fLineNumber= document.getLineOfOffset(fStart) + 1;
-            } catch (BadLocationException e) {
-                DLTKUIPlugin.log(e);
-            }
-        }
-    }
-    
-    /**
-     * Returns the IBuffer for the IMember represented by this CallLocation.
-     * 
-     * @return IBuffer for the IMember or null if the member doesn't have a buffer (for
-     *          example if it is a binary file without source attachment).
-     */
-    private IBuffer getBufferForMember() {
-        IBuffer buffer = null;
-        try {
-            IOpenable openable = fMember.getOpenable();
-            if (openable != null && fMember.exists()) {
-                buffer = openable.getBuffer();
-            }
-        } catch (ModelException e) {
-            DLTKUIPlugin.log(e);
-        }
-        return buffer;
-    }
+	private void initCallTextAndLineNumber() {
+		if (fCallText != null)
+			return;
 
-    public String toString() {
-        return getCallText();
-    }
-    
-    public Object getAdapter(Class adapter) {
-        if (IModelElement.class.isAssignableFrom(adapter)) {
-            return getMember();
-        }
+		String buffer = getBufferForMember();
+		if (buffer == null || buffer.length() < fEnd) { // binary, without
+			// source attachment
+			// || buffer
+			// contents out of
+			// sync (bug 121900)
+			fCallText = ""; //$NON-NLS-1$
+			fLineNumber = UNKNOWN_LINE_NUMBER;
+			return;
+		}
 
-        return null;
-    }
+		fCallText = buffer.substring(fStart, fEnd);
+
+		if (fLineNumber == UNKNOWN_LINE_NUMBER) {
+			Document document = new Document(buffer);
+			try {
+				fLineNumber = document.getLineOfOffset(fStart) + 1;
+			} catch (BadLocationException e) {
+				DLTKUIPlugin.log(e);
+			}
+		}
+	}
+
+	/**
+	 * Returns the IBuffer for the IMember represented by this CallLocation.
+	 * 
+	 * @return IBuffer for the IMember or null if the member doesn't have a
+	 *         buffer (for example if it is a binary file without source
+	 *         attachment).
+	 */
+	private String getBufferForMember() {
+		IBuffer buffer = null;
+		try {
+			IOpenable openable = fMember.getOpenable();
+			if (openable != null && fMember.exists()) {
+				buffer = openable.getBuffer();
+				if (buffer != null) {
+					return buffer.getContents();
+				}
+				if (openable instanceof ISourceModule) {
+					return ((ISourceModule) openable).getSource();
+				}
+			}
+		} catch (ModelException e) {
+			DLTKUIPlugin.log(e);
+		}
+		return null;
+	}
+
+	public String toString() {
+		return getCallText();
+	}
+
+	public Object getAdapter(Class adapter) {
+		if (IModelElement.class.isAssignableFrom(adapter)) {
+			return getMember();
+		}
+
+		return null;
+	}
 }

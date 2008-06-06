@@ -27,7 +27,6 @@ import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 
-
 class CalleeMethodWrapper extends MethodWrapper {
 	private Comparator fMethodWrapperComparator = new MethodWrapperComparator();
 
@@ -41,8 +40,10 @@ class CalleeMethodWrapper extends MethodWrapper {
 			MethodWrapper m1 = (MethodWrapper) o1;
 			MethodWrapper m2 = (MethodWrapper) o2;
 
-			CallLocation callLocation1 = m1.getMethodCall().getFirstCallLocation();
-			CallLocation callLocation2 = m2.getMethodCall().getFirstCallLocation();
+			CallLocation callLocation1 = m1.getMethodCall()
+					.getFirstCallLocation();
+			CallLocation callLocation2 = m2.getMethodCall()
+					.getFirstCallLocation();
 
 			if ((callLocation1 != null) && (callLocation2 != null)) {
 				if (callLocation1.getStart() == callLocation2.getStart()) {
@@ -65,7 +66,6 @@ class CalleeMethodWrapper extends MethodWrapper {
 
 	/*
 	 * Returns the calls sorted after the call location
-	 * 
 	 */
 	public MethodWrapper[] getCalls(IProgressMonitor progressMonitor) {
 		MethodWrapper[] result = super.getCalls(progressMonitor);
@@ -77,7 +77,7 @@ class CalleeMethodWrapper extends MethodWrapper {
 	protected String getTaskName() {
 		return CallHierarchyMessages.CalleeMethodWrapper_taskname;
 	}
-	
+
 	protected MethodWrapper createMethodWrapper(MethodCall methodCall) {
 		return new CalleeMethodWrapper(this, methodCall);
 	}
@@ -87,11 +87,17 @@ class CalleeMethodWrapper extends MethodWrapper {
 	 * 
 	 */
 	protected Map findChildren(IProgressMonitor progressMonitor) {
-		if (getMember().exists() && getMember().getElementType() == IModelElement.METHOD) {
-			IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLanguageToolkit(getMember());
+		if (getMember().exists()
+				&& getMember().getElementType() == IModelElement.METHOD) {
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit(getMember());
 			if (toolkit != null) {
-				IDLTKSearchScope scope = CallHierarchy.getDefault().getSearchScope(toolkit);
-				ICalleeProcessor processor = DLTKLanguageManager.createCalleeProcessor(toolkit.getNatureId(), (IMethod) getMember(), progressMonitor, scope);
+				IDLTKSearchScope scope = CallHierarchy.getDefault()
+						.getSearchScope(toolkit);
+				ICalleeProcessor processor = DLTKLanguageManager
+						.createCalleeProcessor(toolkit.getNatureId(),
+								(IMethod) getMember(), progressMonitor, scope);
+
 				if (processor != null) {
 					Map result = processor.doOperation();
 					if (result != null) {
@@ -102,7 +108,8 @@ class CalleeMethodWrapper extends MethodWrapper {
 							SimpleReference e = (SimpleReference) i.next();
 							IMethod[] calls = (IMethod[]) result.get(e);
 							for (int j = 0; j < calls.length; ++j) {
-								collector.addMember(getMember(), calls[j], e.sourceStart(), e.sourceEnd());
+								collector.addMember(getMember(), calls[j], e
+										.sourceStart(), e.sourceEnd());
 							}
 						}
 						return collector.getCallers();
@@ -112,7 +119,8 @@ class CalleeMethodWrapper extends MethodWrapper {
 		}
 
 		if (DLTKCore.DEBUG) {
-			System.err.println("TODO:CalleeMethodWrap findChildren not implemented..."); //$NON-NLS-1$
+			System.err
+					.println("TODO:CalleeMethodWrap findChildren not implemented..."); //$NON-NLS-1$
 		}
 		return new HashMap(0);
 	}
