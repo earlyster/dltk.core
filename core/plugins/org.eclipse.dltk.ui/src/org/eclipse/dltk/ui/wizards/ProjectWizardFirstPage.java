@@ -220,7 +220,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		 * (non-Javadoc)
 		 * 
 		 * @see java.util.Observer#update(java.util.Observable,
-		 * java.lang.Object)
+		 *      java.lang.Object)
 		 */
 		public void update(Observable o, Object arg) {
 			if (isInWorkspace()) {
@@ -380,7 +380,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 				IInterpreterInstall[] installs = type.getInterpreterInstalls();
 				for (int j = 0; j < installs.length; j++) {
 					IInterpreterInstall install = installs[j];
-					if (install.getEnvironment().equals(environment)) {
+					IEnvironment env = install.getEnvironment();
+					if (env != null && env.equals(environment)) {
 						standins.add(new InterpreterStandin(install));
 					}
 				}
@@ -426,9 +427,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse
-		 * .swt.events.SelectionEvent)
+		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse
+		 *      .swt.events.SelectionEvent)
 		 */
 		public void widgetSelected(SelectionEvent e) {
 			widgetDefaultSelected(e);
@@ -452,9 +452,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org
-		 * .eclipse.swt.events.SelectionEvent)
+		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org
+		 *      .eclipse.swt.events.SelectionEvent)
 		 */
 		public void widgetDefaultSelected(SelectionEvent e) {
 			showInterpreterPreferencePage();
@@ -568,9 +567,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse
-		 * .swt.events.SelectionEvent)
+		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse
+		 *      .swt.events.SelectionEvent)
 		 */
 		public void widgetSelected(SelectionEvent e) {
 			widgetDefaultSelected(e);
@@ -579,9 +577,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see
-		 * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org
-		 * .eclipse.swt.events.SelectionEvent)
+		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org
+		 *      .eclipse.swt.events.SelectionEvent)
 		 */
 		public void widgetDefaultSelected(SelectionEvent e) {
 			if (DLTKCore.DEBUG) {
