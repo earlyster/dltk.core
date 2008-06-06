@@ -5,12 +5,15 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation
+ *     xored software, Inc. - indenting tab policy fixes (Alex Panchenko) 
  *******************************************************************************/
 package org.eclipse.dltk.ui.templates;
 
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -22,7 +25,7 @@ import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 
 public class ScriptTemplateContext extends DocumentTemplateContext {
-	private ISourceModule sourceModule;
+	private final ISourceModule sourceModule;
 
 	protected ScriptTemplateContext(TemplateContextType type,
 			IDocument document, int completionOffset, int completionLength,
@@ -40,24 +43,28 @@ public class ScriptTemplateContext extends DocumentTemplateContext {
 		return sourceModule;
 	}
 
+	/**
+	 * Tests if specified char is tab or space
+	 * 
+	 * @param ch
+	 * @return
+	 */
+	private static boolean isSpaceOrTab(char ch) {
+		return ch == ' ' || ch == '\t';
+	}
+
 	protected static String calculateIndent(IDocument document, int offset) {
 		try {
-			IRegion region = document.getLineInformationOfOffset(offset);
+			final IRegion region = document.getLineInformationOfOffset(offset);
 			String indent = document.get(region.getOffset(), offset
 					- region.getOffset());
-
-			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < indent.length(); ++i) {
-				char ch = indent.charAt(i);
-				if (ch == ' ' || ch == '\t') {
-					sb.append(' ');
-				}
-				else {
-				  break;
-				}
+			int i = 0;
+			while (i < indent.length() && isSpaceOrTab(indent.charAt(i))) {
+				++i;
 			}
-
-			return sb.toString();
+			if (i > 0) {
+				return indent.substring(0, i);
+			}
 		} catch (BadLocationException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
@@ -72,20 +79,18 @@ public class ScriptTemplateContext extends DocumentTemplateContext {
 		if (!canEvaluate(template)) {
 			return null;
 		}
-
-		final String indentTo = calculateIndent(getDocument(), getStart());
-
-		String delimeter = TextUtilities.getDefaultLineDelimiter(getDocument());
-		String[] lines = template.getPattern().split("\n"); //$NON-NLS-1$
-
-		if (lines.length > 1 && indentTo != null && indentTo.length() > 0) {
-			StringBuffer buffer = new StringBuffer(lines[0]);
+		final String[] lines = TextUtils.splitLines(template.getPattern());
+		if (lines.length > 1) {
+			final String delimeter = TextUtilities
+					.getDefaultLineDelimiter(getDocument());
+			final String indent = calculateIndent(getDocument(), getStart());
+			final IScriptTemplateIndenter indenter = getIndenter();
+			final StringBuffer buffer = new StringBuffer(lines[0]);
 
 			// Except first line
 			for (int i = 1; i < lines.length; i++) {
 				buffer.append(delimeter);
-				buffer.append(indentTo);
-				buffer.append(lines[i]);
+				indenter.indentLine(buffer, indent, lines[i]);
 			}
 
 			template = new Template(template.getName(), template
@@ -94,5 +99,12 @@ public class ScriptTemplateContext extends DocumentTemplateContext {
 		}
 
 		return super.evaluate(template);
+	}
+
+	/**
+	 * @return
+	 */
+	protected IScriptTemplateIndenter getIndenter() {
+		return new NopScriptTemplateIndenter();
 	}
 }
