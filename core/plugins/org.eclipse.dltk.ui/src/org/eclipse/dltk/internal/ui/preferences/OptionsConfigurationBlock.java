@@ -10,6 +10,7 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.internal.ui.util.CoreUtility;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.preferences.PreferenceKey;
@@ -172,35 +173,41 @@ public abstract class OptionsConfigurationBlock {
 		// complete when project settings are enabled
 		boolean completeSettings = fProject != null
 				&& fDisabledProjectSettings == null;
-		boolean needsBuild = true;
+		boolean needsBuild = false;
 
 		/*
 		 * XXX: need to rework this once there are options this affects - this
 		 * can cause an illegal state exception - probably due to the fact that
 		 * key binding is different from the jdt implementation
 		 */
-		// for (int i = 0; i < fAllKeys.length; i++) {
-		// PreferenceKey key = fAllKeys[i];
-		// String oldVal = key.getStoredValue(currContext, null);
-		// String val = key.getStoredValue(currContext, fManager);
-		// if (val == null) {
-		// if (oldVal != null) {
-		// changedSettings.add(key);
-		// needsBuild |= !oldVal.equals(key.getStoredValue(
-		// fLookupOrder, true, fManager));
-		// } else if (completeSettings) {
-		// key.setStoredValue(currContext, key.getStoredValue(
-		// fLookupOrder, true, fManager), fManager);
-		// changedSettings.add(key);
-		// // no build needed
-		// }
-		// } else if (!val.equals(oldVal)) {
-		// changedSettings.add(key);
-		// needsBuild |= oldVal != null
-		// || !val.equals(key.getStoredValue(fLookupOrder, true,
-		// fManager));
-		// }
-		// }
+		for (int i = 0; i < fAllKeys.length; i++) {
+			try {
+				PreferenceKey key = fAllKeys[i];
+				String oldVal = key.getStoredValue(currContext, null);
+				String val = key.getStoredValue(currContext, fManager);
+				if (val == null) {
+					if (oldVal != null) {
+						changedSettings.add(key);
+						needsBuild |= !oldVal.equals(key.getStoredValue(
+								fLookupOrder, true, fManager));
+					} else if (completeSettings) {
+						key.setStoredValue(currContext, key.getStoredValue(
+								fLookupOrder, true, fManager), fManager);
+						changedSettings.add(key);
+						// no build needed
+					}
+				} else if (!val.equals(oldVal)) {
+					changedSettings.add(key);
+					needsBuild |= oldVal != null
+							|| !val.equals(key.getStoredValue(fLookupOrder,
+									true, fManager));
+				}
+			} catch (IllegalStateException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+		}
 		return needsBuild;
 	}
 
