@@ -29,6 +29,7 @@ import javax.xml.transform.TransformerException;
 
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
@@ -604,6 +605,9 @@ public class InterpreterDefinitionsContainer {
 					String id = interpreterTypeElement.getAttribute(ID_ATTR);
 					String environment = interpreterTypeElement
 							.getAttribute(ENVIRONMENT_ATTR);
+					if ("".equals(environment)) {
+						environment = LocalEnvironment.ENVIRONMENT_ID;
+					}
 					DefaultInterpreterEntry entry = new DefaultInterpreterEntry(
 							nature, environment);
 					container
