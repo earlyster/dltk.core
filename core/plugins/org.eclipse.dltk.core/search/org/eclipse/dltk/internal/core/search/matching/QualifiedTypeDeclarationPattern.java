@@ -74,7 +74,7 @@ public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern
 			// this.qualification[length] = '$';
 			if (last == (start + 1) && key[start] == ZERO_CHAR) {
 				this.enclosingTypeNames = ONE_ZERO_CHAR;
-				this.qualification[length + 1] = ZERO_CHAR;
+				this.qualification[length] = ZERO_CHAR;
 			} else {
 				this.enclosingTypeNames = CharOperation.splitOn('$', key,
 						start, last);
