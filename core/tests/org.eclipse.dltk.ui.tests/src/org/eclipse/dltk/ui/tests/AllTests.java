@@ -6,6 +6,7 @@ import junit.framework.TestSuite;
 import org.eclipse.dltk.ui.tests.core.ScriptElementLabelsTest;
 import org.eclipse.dltk.ui.tests.navigator.scriptexplorer.PackageExplorerTests;
 import org.eclipse.dltk.ui.tests.templates.ScriptTemplateContextTest;
+import org.eclipse.dltk.ui.tests.text.TodoHighlightingTest;
 
 public class AllTests {
 
@@ -13,10 +14,10 @@ public class AllTests {
 		TestSuite suite = new TestSuite("Test for org.eclipse.dltk.ui.tests");
 		//$JUnit-BEGIN$
 		suite.addTestSuite(ScriptElementLabelsTest.class);
-		
+
 		suite.addTest(PackageExplorerTests.suite());
 		suite.addTest(ScriptTemplateContextTest.suite());
-
+		suite.addTest(TodoHighlightingTest.suite());
 		//$JUnit-END$
 		return suite;
 	}
