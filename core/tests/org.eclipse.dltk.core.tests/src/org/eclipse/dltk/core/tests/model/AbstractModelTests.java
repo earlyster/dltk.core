@@ -313,8 +313,8 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 
 	/**
 	 * Returns the specified script folder in the given project and fragment, or
-	 * <code>null</code> if it does not exist. The rootPath must be specified
-	 * as a project relative path. The empty path refers to the default package
+	 * <code>null</code> if it does not exist. The rootPath must be specified as
+	 * a project relative path. The empty path refers to the default package
 	 * fragment.
 	 */
 	public IScriptFolder getScriptFolder(String projectName,
@@ -328,8 +328,8 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 
 	/**
 	 * Returns the specified package fragment root in the given project, or
-	 * <code>null</code> if it does not exist. If relative, the rootPath must
-	 * be specified as a project relative path. The empty path refers to the
+	 * <code>null</code> if it does not exist. If relative, the rootPath must be
+	 * specified as a project relative path. The empty path refers to the
 	 * package fragment root that is the project folder iteslf. If absolute, the
 	 * rootPath refers to either an external zip, or a resource internal to the
 	 * workspace
@@ -686,9 +686,8 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 	protected void assertElementsEqual(String message, String expected,
 			IModelElement[] elements) {
 		assertElementsEqual(message, expected, elements, false/*
-																 * don't show
-																 * key
-																 */);
+															 * don't show key
+															 */);
 	}
 
 	protected void assertElementsEqual(String message, String expected,
@@ -930,9 +929,6 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 				IJobManager jobManager = Job.getJobManager();
 				Job[] jobs = Job.getJobManager().find(
 						ResourcesPlugin.FAMILY_AUTO_BUILD);
-				for (int j = 0; j < jobs.length; j++) {
-					System.out.println("#1" + jobs[j]);
-				}
 				jobManager.join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
 				jobs = Job.getJobManager().find(
 						ResourcesPlugin.FAMILY_AUTO_BUILD);
@@ -1013,10 +1009,10 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 		if (owner != null)
 			workingCopy = workingCopy
 					.getWorkingCopy(/* owner, problemRequestor, */null/*
-																		 * no
-																		 * progress
-																		 * monitor
-																		 */);
+																	 * no
+																	 * progress
+																	 * monitor
+																	 */);
 		else
 			workingCopy.becomeWorkingCopy(problemRequestor, null/*
 																 * no progress
