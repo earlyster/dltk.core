@@ -302,18 +302,14 @@ public class BasicSearchEngine {
 										: new SubProgressMonitor(monitor, 50));
 					}
 				} catch (Exception e) {
-					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
-					}
+					DLTKCore.error("Error in findMatches()", e); //$NON-NLS-1$
 				} finally {
 					requestor.exitParticipant(participant);
 					participant.doneSearching();
 				}
 			}
 		} catch (Exception e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
+			DLTKCore.error("Error in findMatches()", e); //$NON-NLS-1$
 		} finally {
 			requestor.endReporting();
 			if (monitor != null) {
@@ -403,7 +399,7 @@ public class BasicSearchEngine {
 						}
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					DLTKCore.error("Error in findMatchesSourceOnly()", e); //$NON-NLS-1$
 				} finally {
 					participant.doneSearching();
 				}
@@ -411,9 +407,7 @@ public class BasicSearchEngine {
 			}
 
 		} catch (Exception e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
+			DLTKCore.error("Error in findMatchesSourceOnly()", e); //$NON-NLS-1$
 		} finally {
 			if (monitor != null) {
 				monitor.done();
