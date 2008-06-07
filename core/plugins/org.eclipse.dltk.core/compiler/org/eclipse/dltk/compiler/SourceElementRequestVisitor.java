@@ -43,15 +43,15 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 
 	/**
 	 * @return method node that encloses current element, or <code>null</code>
-	 * 	if there's no one.
+	 *         if there's no one.
 	 */
-	protected MethodDeclaration getCurrentMethod() {
+	public MethodDeclaration getCurrentMethod() {
 		return this.fCurrentMethod;
 	}
 
 	/**
 	 * @return class node that encloses current element, or <code>null</code> if
-	 * 	there's no one.
+	 *         there's no one.
 	 */
 	protected TypeDeclaration getCurrentClass() {
 		return this.fCurrentClass;
