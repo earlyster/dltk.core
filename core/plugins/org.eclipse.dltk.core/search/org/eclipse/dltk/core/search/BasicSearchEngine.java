@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -285,12 +286,11 @@ public class BasicSearchEngine {
 						SearchDocument[] matches = MatchLocator
 								.addWorkingCopies(pattern, indexMatches,
 										getWorkingCopies(), participant);
-						List paths = new ArrayList();
+						final Set paths = new HashSet();
 						List filteredMatches = new ArrayList();
 						for (int q = 0; q < matches.length; ++q) {
 							IPath path = new Path(matches[q].getPath());
-							if (!paths.contains(path)) {
-								paths.add(path);
+							if (paths.add(path)) {
 								filteredMatches.add(matches[q]);
 							}
 						}
