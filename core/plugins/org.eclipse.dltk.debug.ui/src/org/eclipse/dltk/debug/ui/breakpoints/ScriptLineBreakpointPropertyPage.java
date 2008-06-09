@@ -7,14 +7,9 @@ import org.eclipse.swt.widgets.Composite;
 
 public class ScriptLineBreakpointPropertyPage extends
 		ScriptBreakpointPropertyPage {
-	public ScriptLineBreakpointPropertyPage() {
 
-	}
-
-	protected void createTypeSpecificLabels(Composite parent)
-			throws CoreException {
-		setTitle(BreakpointMessages.LineBreakpointTitle);
-
+	protected void createLocationLabels(Composite parent) throws CoreException {
+		super.createLocationLabels(parent);
 		IScriptLineBreakpoint breakpoint = (IScriptLineBreakpoint) getBreakpoint();
 
 		// Line number
@@ -23,4 +18,5 @@ public class ScriptLineBreakpointPropertyPage extends
 		SWTFactory.createLabel(parent, BreakpointMessages.LineNumberLabel, 1);
 		SWTFactory.createLabel(parent, Integer.toString(lineNumber), 1);
 	}
+
 }

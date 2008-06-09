@@ -113,13 +113,7 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 		SWTFactory.createLabel(labelComposite, BreakpointUtils
 				.getLanguageToolkit(breakpoint).getLanguageName(), 1);
 
-		// Resource name
-		String resourceName = breakpoint.getResourceName();
-		if (resourceName != null) {
-			SWTFactory.createLabel(labelComposite,
-					BreakpointMessages.FileLabel, 1);
-			SWTFactory.createLabel(labelComposite, resourceName, 1);
-		}
+		createLocationLabels(labelComposite);
 
 		// Id
 		SWTFactory.createLabel(labelComposite,
@@ -142,6 +136,16 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 		// from debugging engine
 
 		createTypeSpecificLabels(labelComposite);
+	}
+
+	protected void createLocationLabels(Composite parent) throws CoreException {
+		IScriptBreakpoint breakpoint = getBreakpoint();
+		// Resource name
+		String resourceName = breakpoint.getResourceName();
+		if (resourceName != null && resourceName.length() > 0) {
+			SWTFactory.createLabel(parent, BreakpointMessages.FileLabel, 1);
+			SWTFactory.createLabel(parent, resourceName, 1);
+		}
 	}
 
 	protected void createTypeSpecificLabels(Composite parent)

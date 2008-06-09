@@ -47,6 +47,9 @@ public class BreakpointMessages {
 	
 	public static String SuspendOnModificationLabel;
 	
+	// Exception labels
+	public static String ExceptionType;
+
 	// Errors
 	public static String InvalidNumberOfHits;
 	
