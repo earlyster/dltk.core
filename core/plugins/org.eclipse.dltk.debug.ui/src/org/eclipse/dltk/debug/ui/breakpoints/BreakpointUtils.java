@@ -136,20 +136,18 @@ public class BreakpointUtils {
 
 		for (int i = 0; i < breakpoints.length; i++) {
 			IBreakpoint breakpoint = breakpoints[i];
-			if (breakpoint instanceof IBreakpoint) {
-				IResource bpResource = breakpoint.getMarker().getResource();
-				String bpLocation = (String) breakpoint.getMarker()
-						.getAttribute(IMarker.LOCATION);
+			IResource bpResource = breakpoint.getMarker().getResource();
+			String bpLocation = (String) breakpoint.getMarker().getAttribute(
+					IMarker.LOCATION);
 
-				if (resource.equals(bpResource) && location.equals(bpLocation)) {
-					ILineBreakpoint lineBreakpoint = (ILineBreakpoint) breakpoint;
-					try {
-						if (lineBreakpoint.getLineNumber() == lineNumber) {
-							return lineBreakpoint;
-						}
-					} catch (CoreException e) {
-						DLTKDebugUIPlugin.log(e);
+			if (resource.equals(bpResource) && location.equals(bpLocation)) {
+				ILineBreakpoint lineBreakpoint = (ILineBreakpoint) breakpoint;
+				try {
+					if (lineBreakpoint.getLineNumber() == lineNumber) {
+						return lineBreakpoint;
 					}
+				} catch (CoreException e) {
+					DLTKDebugUIPlugin.log(e);
 				}
 			}
 		}
