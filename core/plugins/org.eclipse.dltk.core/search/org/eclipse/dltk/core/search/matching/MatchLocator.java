@@ -34,6 +34,7 @@ import org.eclipse.dltk.compiler.env.INameEnvironment;
 import org.eclipse.dltk.compiler.env.ISourceType;
 import org.eclipse.dltk.compiler.env.lookup.Scope;
 import org.eclipse.dltk.compiler.util.SimpleLookupTable;
+import org.eclipse.dltk.compiler.util.SimpleSet;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -1105,6 +1106,34 @@ public class MatchLocator implements ITypeRequestor {
 			this.resultCollectorTime += System.currentTimeMillis() - start;
 	}
 
+	private void resolvePotentialMatches(MatchingNodeSet nodeSet) {
+		Object[] nodes = nodeSet.possibleMatchingNodesSet.values;
+		for (int i = 0, l = nodes.length; i < l; i++) {
+			ASTNode node = (ASTNode) nodes[i];
+			if (node != null) {
+				nodeSet.addMatch(node, PatternLocator.ACCURATE_MATCH);
+				/**
+				 * FIXME originally it was
+				 * 
+				 * <pre>
+				 * nodeSet.addMatch(node, this.patternLocator.resolveLevel(node));
+				 * </pre>
+				 * 
+				 * but resolveLevel() are not ported
+				 */
+			}
+		}
+		nodeSet.possibleMatchingNodesSet = new SimpleSet(3);
+		if (BasicSearchEngine.VERBOSE) {
+			int size = nodeSet.matchingNodes == null ? 0
+					: nodeSet.matchingNodes.elementSize;
+			System.out.print("	- node set: accurate=" + size); //$NON-NLS-1$
+			size = nodeSet.possibleMatchingNodesSet == null ? 0
+					: nodeSet.possibleMatchingNodesSet.elementSize;
+			System.out.println(", possible=" + size); //$NON-NLS-1$
+		}
+	}
+	
 	/**
 	 * Visit the given resolved parse tree and report the nodes that match the
 	 * search pattern.
@@ -1122,6 +1151,13 @@ public class MatchLocator implements ITypeRequestor {
 			System.out.println(", possible=" + size); //$NON-NLS-1$			
 
 		}
+
+		/*
+		 * move the possible matching nodes that exactly match the search
+		 * pattern to the matching nodes set
+		 */
+		resolvePotentialMatches(nodeSet);
+
 		this.unitScope = null;
 		if (nodeSet.matchingNodes.elementSize == 0)
 			return; // no matching nodes were found
