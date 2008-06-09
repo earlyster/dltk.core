@@ -40,10 +40,13 @@ public final class PreferencesMessages extends NLS {
 	public static String BuildPathsPropertyPage_unsavedchanges_button_discard;
 	public static String BuildPathsPropertyPage_unsavedchanges_button_ignore;
 
+	public static String DLTKEditorPreferencePage_default;
 	public static String DLTKEditorPreferencePage_singleLineComment;
 	public static String DLTKEditorPreferencePage_returnKeyword;
 	public static String DLTKEditorPreferencePage_keywords;
 	public static String DLTKEditorPreferencePage_strings;
+	public static String DLTKEditorPreferencePage_regexps;
+	public static String DLTKEditorPreferencePage_evaluated_expressions;
 	public static String DLTKEditorPreferencePage_variables;
 	public static String DLTKEditorPreferencePage_numbers;
 	public static String DLTKEditorPreferencePage_decorators;
