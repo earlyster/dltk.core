@@ -12,7 +12,6 @@
 package org.eclipse.dltk.ui.tests.text;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.dltk.core.tests.model.SuiteOfTestCases;
@@ -34,7 +33,7 @@ public class TodoHighlightingTest extends SuiteOfTestCases {
 
 	protected List findTodoTokens(String data, String[] tags) {
 		TestScriptCommentScanner scanner = new TestScriptCommentScanner(tags,
-				COMMENT_KEY, TODO_KEY);
+				COMMENT_KEY, TODO_KEY, true);
 		scanner.setRange(new Document(data), 0, data.length());
 		final IToken todoToken = scanner.getToken(TODO_KEY);
 		List result = new ArrayList();
@@ -61,63 +60,75 @@ public class TodoHighlightingTest extends SuiteOfTestCases {
 		return new TokenPos(data.indexOf(tag), tag.length());
 	}
 
-	public void testBare() throws Exception {
-		if (notYetImplemented())
-			return;
+	private static final String TODO = "TODO";
+	private static final String FIXME = "FIXME";
+
+	public void testBare() {
 		final String data = "#TODO";
-		final String tag = "TODO";
-		List l = findTodoTokens(data, tag);
-		assertEquals(l, Collections.singletonList(newTokenPos(data, tag)));
+		List tokens = findTodoTokens(data, TODO);
+		assertEquals(1, tokens.size());
+		assertEquals(newTokenPos(data, TODO), tokens.get(0));
 	}
 
-	public void testNormal() throws Exception {
+	public void testBare1() {
+		final String data = "#TODO";
+		List tokens = findTodoTokens(data, new String[] { TODO, FIXME });
+		assertEquals(1, tokens.size());
+		assertEquals(newTokenPos(data, TODO), tokens.get(0));
+	}
+
+	public void testBare2() {
+		final String data = "#FIXME";
+		List tokens = findTodoTokens(data, new String[] { TODO, FIXME });
+		assertEquals(1, tokens.size());
+		assertEquals(newTokenPos(data, FIXME), tokens.get(0));
+	}
+
+	public void testNormal() {
 		final String data = "#TODO comment";
-		final String tag = "TODO";
-		List l = findTodoTokens(data, tag);
-		assertEquals(l, Collections.singletonList(newTokenPos(data, tag)));
+		List tokens = findTodoTokens(data, TODO);
+		assertEquals(1, tokens.size());
+		assertEquals(newTokenPos(data, TODO), tokens.get(0));
 	}
 
-	public void testSpaced() throws Exception {
+	public void testSpaced() {
 		final String data = "#   TODO comment";
-		final String tag = "TODO";
-		List l = findTodoTokens(data, tag);
-		assertEquals(l, Collections.singletonList(newTokenPos(data, tag)));
+		List tokens = findTodoTokens(data, TODO);
+		assertEquals(1, tokens.size());
+		assertEquals(newTokenPos(data, TODO), tokens.get(0));
 	}
 
-	public void testPrefixed() throws Exception {
+	public void testPrefixed() {
 		final String data = "# aTODO comment";
-		final String tag = "TODO";
-		List l = findTodoTokens(data, tag);
-		assertEquals(l, Collections.EMPTY_LIST);
+		List tokens = findTodoTokens(data, TODO);
+		assertEquals(0, tokens.size());
 	}
 
-	public void testSuffixed() throws Exception {
+	public void testSuffixed() {
 		final String data = "# TODOa comment";
-		final String tag = "TODO";
-		List l = findTodoTokens(data, tag);
-		assertEquals(l, Collections.EMPTY_LIST);
+		List tokens = findTodoTokens(data, TODO);
+		assertEquals(0, tokens.size());
 	}
 
-	public void testLegallySuffixed() throws Exception {
+	public void testLegallySuffixed() {
 		final String data = "# TODO: comment";
-		final String tag = "TODO";
-		List l = findTodoTokens(data, tag);
-		assertEquals(l, Collections.singletonList(newTokenPos(data, tag)));
+		List tokens = findTodoTokens(data, TODO);
+		assertEquals(1, tokens.size());
+		assertEquals(newTokenPos(data, TODO), tokens.get(0));
 	}
 
 	public void testDoubleTagOccurence() throws Exception {
 		String data = "# TODO add TODO tag support";
-		final String tag = "TODO";
-		List l = findTodoTokens(data, tag);
-		assertEquals(l, Collections.singletonList(newTokenPos(data, tag)));
+		List tokens = findTodoTokens(data, TODO);
+		assertEquals(1, tokens.size());
+		assertEquals(newTokenPos(data, TODO), tokens.get(0));
 	}
 
-	public void testDifferentTags() throws Exception {
+	public void testDifferentTags() {
 		String data = "#FIXME tag support";
-		final String[] tags = { "TODO", "FIXME" };
-		List l = findTodoTokens(data, tags);
-		assertEquals(l, Collections.singletonList(new TokenPos(data
-				.indexOf(tags[1]), tags[1].length())));
+		List tokens = findTodoTokens(data, new String[] { TODO, FIXME });
+		assertEquals(1, tokens.size());
+		assertEquals(newTokenPos(data, FIXME), tokens.get(0));
 	}
 
 }

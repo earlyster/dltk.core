@@ -14,27 +14,15 @@ package org.eclipse.dltk.ui.tests.text;
 import org.eclipse.dltk.internal.ui.text.DLTKColorManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.text.ScriptCommentScanner;
-import org.eclipse.dltk.ui.text.TodoTagRule;
-import org.eclipse.jface.text.rules.IRule;
-import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
 
 class TestScriptCommentScanner extends ScriptCommentScanner {
 
-	private final boolean caseSensitive;
-
-	public TestScriptCommentScanner(String[] tags, String commentKey, String todoKey) {
-		this(tags, commentKey, todoKey, true);
-	}
-
-	public TestScriptCommentScanner(String[] tags, String commentKey, String todoKey, boolean caseSensitive) {
+	public TestScriptCommentScanner(String[] tags, String commentKey,
+			String todoKey, boolean caseSensitive) {
 		super(new DLTKColorManager(true), DLTKUIPlugin.getDefault()
-				.getPreferenceStore(), commentKey, todoKey, tags);
-		this.caseSensitive = caseSensitive;
-	}
-
-	protected IRule createTodoRule(IToken todoToken) {
-		return new TodoTagRule(todoToken, todoTags, caseSensitive);
+				.getPreferenceStore(), commentKey, todoKey,
+				new TestTodoTaskPreferences(tags, caseSensitive));
 	}
 
 	/*
