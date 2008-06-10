@@ -52,7 +52,8 @@ public class TodoTagRule implements IPredicateRule {
 			for (int i = 0; i < todoTags.length; i++) {
 				if (candidates[i]) {
 					allok = true;
-					if (count >= todoTags[i].length) {
+					if (count == todoTags[i].length - 1) {
+						c = scanner.read();
 						if (Character.isJavaIdentifierPart((char) c)) {
 							allok = false;
 							break;
