@@ -36,7 +36,7 @@ public class ScriptSourceHover extends AbstractScriptEditorTextHover implements
 	/*
 	 * @see JavaElementHover
 	 */
-	protected String getHoverInfo(IModelElement[] result) {
+	protected String getHoverInfo(String nature, IModelElement[] result) {
 		int nResults = result.length;
 
 		if (nResults > 1)
@@ -91,7 +91,9 @@ public class ScriptSourceHover extends AbstractScriptEditorTextHover implements
 	}
 
 	/*
-	 * @see IInformationProviderExtension2#getInformationPresenterControlCreator()
+	 * @see
+	 * IInformationProviderExtension2#getInformationPresenterControlCreator()
+	 * 
 	 * @since 3.0
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
@@ -105,7 +107,8 @@ public class ScriptSourceHover extends AbstractScriptEditorTextHover implements
 							.getOrientation();
 				if (editor instanceof ScriptEditor) {
 					return new SourceViewerInformationControl(parent,
-							shellStyle, style, ((ScriptEditor) editor).getLanguageToolkit() );
+							shellStyle, style, ((ScriptEditor) editor)
+									.getLanguageToolkit());
 				}
 				return null;
 			}
