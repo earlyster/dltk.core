@@ -22,17 +22,17 @@ import org.eclipse.swt.widgets.Text;
 public abstract class RemoteLaunchConfigurationTab extends
 		ScriptLaunchConfigurationTab {
 
-
 	private static int DEFAULT_PORT = 10000;
 	private static String DEFAULT_IDEKEY = "idekey"; //$NON-NLS-1$
 
-	private Text port;
-	private Text ideKey;
-	private Text remoteWorkingDir;
+	protected Text port;
+	protected Text ideKey;
+	protected Text remoteWorkingDir;
 
 	public RemoteLaunchConfigurationTab(String mode) {
 		super(mode);
 	}
+
 	/*
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getName()
 	 */
@@ -48,27 +48,52 @@ public abstract class RemoteLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab#doInitializeForm(org.eclipse.debug.core.ILaunchConfiguration)
+	 * @see
+	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
+	 * #doInitializeForm(org.eclipse.debug.core.ILaunchConfiguration)
 	 */
 	protected void doInitializeForm(ILaunchConfiguration config) {
 
 		port.setText(getLaunchAttr(config,
 				ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_PORT, Integer
-						.toString(DEFAULT_PORT)));
+						.toString(getDefaultPort())));
 
 		ideKey.setText(getLaunchAttr(config,
 				ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_SESSION_ID,
-				DEFAULT_IDEKEY));
+				getDefaultIDEKey()));
 
 		remoteWorkingDir
 				.setText(getLaunchAttr(
 						config,
 						ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_REMOTE_WORKING_DIR,
-						"")); //$NON-NLS-1$
+						getDefaultRemoteWorkingDir()));
+	}
+
+	/**
+	 * Override this method to configure other default port.
+	 */
+	protected int getDefaultPort() {
+		return DEFAULT_PORT;
+	}
+
+	/**
+	 * Override this method to configure other default ide key.
+	 */
+	protected String getDefaultIDEKey() {
+		return DEFAULT_IDEKEY;
+	}
+
+	/**
+	 * Override this method to configure other default remote working dir.
+	 */
+	protected String getDefaultRemoteWorkingDir() {
+		return "";//$NON-NLS-1$
 	}
 
 	/*
-	 * @see org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab#doPerformApply(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see
+	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
+	 * #doPerformApply(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	protected void doPerformApply(ILaunchConfigurationWorkingCopy config) {
 		config.setAttribute(
@@ -84,7 +109,9 @@ public abstract class RemoteLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab#doCanSave()
+	 * @see
+	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
+	 * #doCanSave()
 	 */
 	protected boolean doCanSave() {
 		return validatePort() && validateIdeKey() && validateRemoteWorkingDir();
@@ -111,14 +138,16 @@ public abstract class RemoteLaunchConfigurationTab extends
 
 		return true;
 	}
-	
+
 	protected boolean validateRemoteWorkingDir() {
 		// XXX: what validation should be done on this?
 		return true;
 	}
 
 	/*
-	 * @see org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab#guessProjectName()
+	 * @see
+	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
+	 * #guessProjectName()
 	 */
 	protected String guessProjectName() {
 		String[] guesses = getProjectAndScriptNames();
@@ -127,7 +156,9 @@ public abstract class RemoteLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab#doCreateControl(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
+	 * #doCreateControl(org.eclipse.swt.widgets.Composite)
 	 */
 	protected void doCreateControl(Composite composite) {
 		Group group = SWTFactory
