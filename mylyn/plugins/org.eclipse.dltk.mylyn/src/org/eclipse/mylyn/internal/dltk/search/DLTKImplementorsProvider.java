@@ -27,8 +27,8 @@ public class DLTKImplementorsProvider extends AbstractDLTKRelationProvider {
 
 	public static final String NAME = "implemented by";
 
-	public DLTKImplementorsProvider() {
-		super(DLTKStructureBridge.CONTENT_TYPE, ID);
+	public DLTKImplementorsProvider(DLTKStructureBridge bridge) {
+		super(bridge.contentType, ID, bridge);
 	}
 
 	protected boolean acceptElement(IModelElement modelElement) {

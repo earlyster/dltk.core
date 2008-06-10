@@ -47,7 +47,10 @@ public class DLTKUiBridge extends AbstractContextUiBridge {
 
 	private Field scriptOutlineField = null;
 
-	public DLTKUiBridge() {
+	private DLTKStructureBridge bridge;
+
+	public DLTKUiBridge(DLTKStructureBridge bridge) {
+		this.bridge = bridge;
 		try {
 			scriptOutlineField = ScriptOutlinePage.class
 					.getDeclaredField("fOutlineViewer");
@@ -198,7 +201,7 @@ public class DLTKUiBridge extends AbstractContextUiBridge {
 	}
 
 	public String getContentType() {
-		return DLTKStructureBridge.CONTENT_TYPE;
+		return bridge.contentType;
 	}
 
 }

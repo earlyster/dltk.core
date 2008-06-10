@@ -27,8 +27,8 @@ public class DLTKReadAccessProvider extends AbstractDLTKRelationProvider {
 
 	public static final String NAME = "read by";
 
-	public DLTKReadAccessProvider() {
-		super(DLTKStructureBridge.CONTENT_TYPE, ID);
+	public DLTKReadAccessProvider(DLTKStructureBridge bridge) {
+		super(bridge.contentType, ID, bridge);
 	}
 
 	protected boolean acceptElement(IModelElement modelElement) {

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-<?eclipse version="3.0"?>
 <plugin>
    <extension-point id="ScriptEditorContributor" 
    		name="Mylyn Script Editor Contributor" 
@@ -11,9 +10,93 @@
 	    <structureBridge
            class="org.eclipse.mylyn.internal.dltk.DLTKStructureBridge"
            name="Script Structure Bridge"
-           parentContentType="*"/>     
+           parentContentType="*"
+           extension="rb">
+        </structureBridge>     
 	</extension>
-	   
+
+	
+	<extension
+	       point="org.eclipse.mylyn.context.core.bridges">
+	    <structureBridge
+           class="org.eclipse.mylyn.internal.dltk.DLTKStructureBridge"
+           name="Script Structure Bridge"
+           parentContentType="*"
+           extension="tcl">
+        </structureBridge>     
+	</extension>
+		   
+	<extension
+	       point="org.eclipse.mylyn.context.core.bridges">
+	    <structureBridge
+           class="org.eclipse.mylyn.internal.dltk.DLTKStructureBridge"
+           name="Script Structure Bridge"
+           parentContentType="*"
+           extension="itcl">
+        </structureBridge>     
+	</extension>
+
+	<extension
+	       point="org.eclipse.mylyn.context.core.bridges">
+	    <structureBridge
+           class="org.eclipse.mylyn.internal.dltk.DLTKStructureBridge"
+           name="Script Structure Bridge"
+           parentContentType="*"
+           extension="xotcl">
+        </structureBridge>     
+	</extension>
+
+	<extension
+	       point="org.eclipse.mylyn.context.core.bridges">
+	    <structureBridge
+           class="org.eclipse.mylyn.internal.dltk.DLTKStructureBridge"
+           name="Script Structure Bridge"
+           parentContentType="*"
+           extension="py">
+        </structureBridge>     
+	</extension>
+
+	<extension
+	       point="org.eclipse.mylyn.context.core.bridges">
+	    <structureBridge
+           class="org.eclipse.mylyn.internal.dltk.DLTKStructureBridge"
+           name="Script Structure Bridge"
+           parentContentType="*"
+           extension="itk">
+        </structureBridge>     
+	</extension>
+
+	<extension
+	       point="org.eclipse.mylyn.context.core.bridges">
+	    <structureBridge
+           class="org.eclipse.mylyn.internal.dltk.DLTKStructureBridge"
+           name="Script Structure Bridge"
+           parentContentType="*"
+           extension="js">
+        </structureBridge>     
+	</extension>
+
+	<extension
+	       point="org.eclipse.mylyn.context.core.bridges">
+	    <structureBridge
+           class="org.eclipse.mylyn.internal.dltk.DLTKStructureBridge"
+           name="Script Structure Bridge"
+           parentContentType="*"
+           extension="test">
+        </structureBridge>     
+	</extension>
+	
+	<extension
+	      point="org.eclipse.mylyn.context.core.bridges">
+	   <structureBridge
+          class="org.eclipse.mylyn.internal.dltk.DLTKStructureBridge"
+          name="Script Structure Bridge"
+          parentContentType="*"
+          extension="exp">
+        </structureBridge>     
+	</extension>
+	
+
 	<extension point="org.eclipse.mylyn.context.ui.bridges">
 	    <uiBridge
 	          class="org.eclipse.mylyn.internal.dltk.ui.DLTKUiBridge"
@@ -50,12 +133,7 @@
      </includes>
 		</viewerContentBinding>
 	</extension>
- <extension
-       point="org.eclipse.ui.perspectiveExtensions">
-    <perspectiveExtension
-          targetID="org.eclipse.dltk.ruby.ui.RubyPerspective">
-    </perspectiveExtension>
- </extension>
+
 
   	<!-- ==================== Editors ==================== -->
 
@@ -78,7 +156,13 @@
            menubarPath="mylyn"
            style="toggle"
            toolbarPath="mylyn"
-           tooltip="Focus on Active Task"> 
+           tooltip="Focus on Active Task">
+        <enablement>
+           <systemProperty
+                 name="org.eclipse.mylyn.context.core.context.active"
+                 value="true">
+           </systemProperty>
+        </enablement> 
   		</action> 
       </viewContribution>
  	  <viewContribution
@@ -90,7 +174,7 @@
 		id="org.eclipse.mylyn.ui.debug.view.contribution" 
    		targetID="org.eclipse.debug.ui.DebugView">
     	<action
-           class="org.eclipse.mylyn.internal.dltk.ui.actions.FocusDebugViewAction"
+           class="org.eclipse.mylyn.internal.dltk.ui.actions.FocusTaskMarkersViewAction"
            disabledIcon="icons/elcl16/focus-disabled.gif"
            enablesFor="*"
            icon="icons/elcl16/focus.gif"
@@ -101,7 +185,7 @@
            toolbarPath="mylyn"
            tooltip="Focus on Active Task (Experimental)"> 
   		</action> 
-      </viewContribution> 
+      </viewContribution>
 	</extension>
 	
   <extension point="org.eclipse.ui.popupMenus"> 
@@ -168,14 +252,14 @@
 	<actionSet
             id="org.eclipse.dltk.mylyn.actionSet"
             label="Mylyn DLTK"
-            visible="true"> 
+            visible="false"> 
             
   		<action
           class="org.eclipse.mylyn.internal.dltk.ui.actions.ToggleActiveFoldingAction"
           definitionId="org.eclipse.dltk.mylyn.ui.editor.folding.auto"
           icon="icons/elcl16/interest-folding.gif"
           id="org.eclipse.dltk.mylyn.ui.editor.folding.auto"
-          label="Automatically Fold Unintersting Elements"
+          label="Automatically Fold Uninteresting Elements"
           style="toggle"
           toolbarPath="org.eclipse.ui.edit.text.actionSet.presentation/Presentation"
           tooltip="Automatically Fold Unintersting Elements">

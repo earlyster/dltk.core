@@ -63,12 +63,14 @@ public abstract class AbstractDLTKRelationProvider extends
 
 	private static final List runningJobs = new ArrayList();
 
+	private DLTKStructureBridge fBridge;
 	public String getGenericId() {
 		return ID_GENERIC;
 	}
 
-	protected AbstractDLTKRelationProvider(String structureKind, String id) {
+	protected AbstractDLTKRelationProvider(String structureKind, String id, DLTKStructureBridge bridge) {
 		super(structureKind, id);
+		this.fBridge = bridge;
 	}
 
 	protected void findRelated(final IInteractionElement node,
@@ -79,7 +81,7 @@ public abstract class AbstractDLTKRelationProvider extends
 			MylynStatusHandler.log("null content type for: " + node, this);
 			return;
 		}
-		if (!node.getContentType().equals(DLTKStructureBridge.CONTENT_TYPE))
+		if (!node.getContentType().equals(fBridge.contentType))
 			return;
 		IModelElement modelElement = DLTKCore
 				.create(node.getHandleIdentifier());
@@ -211,8 +213,8 @@ public abstract class AbstractDLTKRelationProvider extends
 	 * Only include Script elements and files.
 	 */
 	private boolean includeNodeInScope(IInteractionElement interesting,
-			AbstractContextStructureBridge bridge) {
-		if (interesting == null || bridge == null) {
+			AbstractContextStructureBridge bridge2) {
+		if (interesting == null || bridge2 == null) {
 			return false;
 		} else {
 			if (interesting.getContentType() == null) {
@@ -222,8 +224,8 @@ public abstract class AbstractDLTKRelationProvider extends
 				return false;
 			} else {
 				return interesting.getContentType().equals(
-						DLTKStructureBridge.CONTENT_TYPE)
-						|| bridge.isDocument(interesting.getHandleIdentifier());
+						fBridge.contentType)
+						|| bridge2.isDocument(interesting.getHandleIdentifier());
 			}
 		}
 	}
@@ -283,7 +285,7 @@ public abstract class AbstractDLTKRelationProvider extends
 					IModelElement element = (IModelElement) it.next();
 					if (!acceptResultElement(element))
 						continue;
-					incrementInterest(node, DLTKStructureBridge.CONTENT_TYPE,
+					incrementInterest(node, fBridge.contentType,
 							element.getHandleIdentifier(), degreeOfSeparation);
 				}
 				gathered = true;

@@ -24,7 +24,11 @@ public class InterestInducingProblemListener implements
 		IProblemChangedListener, IPropertyChangeListener {
 
 	// TODO: consider getting rid of this
-	private DLTKStructureBridge scriptStructureBridge = new DLTKStructureBridge();
+	private DLTKStructureBridge scriptStructureBridge;
+
+	public InterestInducingProblemListener(DLTKStructureBridge bridge) {
+		scriptStructureBridge = bridge;
+	}
 
 	public void problemsChanged(IResource[] changedResources,
 			boolean isMarkerChange) {
@@ -46,14 +50,14 @@ public class InterestInducingProblemListener implements
 										.getContextManager()
 										.removeErrorPredictedInterest(
 												element.getHandleIdentifier(),
-												DLTKStructureBridge.CONTENT_TYPE,
+												scriptStructureBridge.contentType,
 												true);
 							} else {
 								ContextCorePlugin
 										.getContextManager()
 										.addErrorPredictedInterest(
 												element.getHandleIdentifier(),
-												DLTKStructureBridge.CONTENT_TYPE,
+												scriptStructureBridge.contentType,
 												true);
 							}
 						}

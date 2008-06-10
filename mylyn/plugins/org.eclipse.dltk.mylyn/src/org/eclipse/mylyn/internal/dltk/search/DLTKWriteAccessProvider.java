@@ -27,8 +27,8 @@ public class DLTKWriteAccessProvider extends AbstractDLTKRelationProvider {
 
 	public static final String NAME = "written by";
 
-	public DLTKWriteAccessProvider() {
-		super(DLTKStructureBridge.CONTENT_TYPE, ID);
+	public DLTKWriteAccessProvider(DLTKStructureBridge bridge) {
+		super(bridge.contentType, ID, bridge);
 	}
 
 	protected boolean acceptElement(IModelElement modelElement) {

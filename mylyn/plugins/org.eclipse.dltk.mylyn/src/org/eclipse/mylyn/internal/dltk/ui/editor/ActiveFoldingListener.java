@@ -28,34 +28,37 @@ import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.text.folding.IFoldingStructureProviderExtension;
 import org.eclipse.mylyn.internal.context.core.ContextCorePlugin;
-import org.eclipse.mylyn.context.core.IInteractionContext;
-//import org.eclipse.mylyn.internal.context.core.IInteractionContextListener;
-import org.eclipse.mylyn.context.core.AbstractContextListener;
-//import org.eclipse.mylyn.context.core.IInteractionContextListener2;
+import org.eclipse.mylyn.context.core.IInteractionContext; //import org.eclipse.mylyn.internal.context.core.IInteractionContextListener;
+import org.eclipse.mylyn.context.core.AbstractContextListener; //import org.eclipse.mylyn.context.core.IInteractionContextListener2;
 import org.eclipse.mylyn.context.core.IInteractionElement;
 import org.eclipse.mylyn.internal.context.ui.ContextUiPlugin;
-import org.eclipse.mylyn.internal.context.core.InteractionContext;
-//import org.eclipse.mylyn.internal.context.ui.ContextUiPrefContstants;
+import org.eclipse.mylyn.internal.context.core.InteractionContext; //import org.eclipse.mylyn.internal.context.ui.ContextUiPrefContstants;
 import org.eclipse.mylyn.internal.dltk.DLTKStructureBridge;
 import org.eclipse.mylyn.internal.dltk.MylynDLTKPrefConstants;
 import org.eclipse.mylyn.internal.dltk.MylynStatusHandler;
+import org.eclipse.mylyn.internal.dltk.ui.DLTKStackTraceFileHyperlink;
 import org.eclipse.dltk.core.IModelElement;
 
-
-public class ActiveFoldingListener /*implements IInteractionContextListener*/extends AbstractContextListener {
+public class ActiveFoldingListener
+		/* implements IInteractionContextListener */extends
+		AbstractContextListener {
 
 	private final ScriptEditor editor;
 
 	private IFoldingStructureProviderExtension updater;
 
-	private static DLTKStructureBridge bridge = (DLTKStructureBridge) ContextCorePlugin.getDefault().getStructureBridge(
-			DLTKStructureBridge.CONTENT_TYPE);
+	private static DLTKStructureBridge bridge;// = (DLTKStructureBridge)
+												// ContextCorePlugin
+												// .getDefault()
+												// .getStructureBridge(
+	// DLTKStructureBridge.contentType);
 
 	private boolean enabled = false;
 
 	private IPropertyChangeListener PREFERENCE_LISTENER = new IPropertyChangeListener() {
 		public void propertyChange(PropertyChangeEvent event) {
-			if (event.getProperty().equals(MylynDLTKPrefConstants.ACTIVE_FOLDING_ENABLED)) {
+			if (event.getProperty().equals(
+					MylynDLTKPrefConstants.ACTIVE_FOLDING_ENABLED)) {
 				if (event.getNewValue().equals(Boolean.TRUE.toString())) {
 					enabled = true;
 				} else {
@@ -66,29 +69,39 @@ public class ActiveFoldingListener /*implements IInteractionContextListener*/ext
 		}
 	};
 
-	public ActiveFoldingListener(ScriptEditor editor) {
+	public ActiveFoldingListener(ScriptEditor editor, DLTKStructureBridge bridge) {
 		this.editor = editor;
+		this.bridge = bridge;
 		ContextCorePlugin.getContextManager().addListener(this);
-		ContextUiPlugin.getDefault().getPluginPreferences().addPropertyChangeListener(PREFERENCE_LISTENER);
+		ContextUiPlugin.getDefault().getPluginPreferences()
+				.addPropertyChangeListener(PREFERENCE_LISTENER);
 
-		enabled = ContextUiPlugin.getDefault().getPreferenceStore().getBoolean(MylynDLTKPrefConstants.ACTIVE_FOLDING_ENABLED);
+		enabled = ContextUiPlugin.getDefault().getPreferenceStore().getBoolean(
+				MylynDLTKPrefConstants.ACTIVE_FOLDING_ENABLED);
 		try {
-			Object adapter = editor.getAdapter(IFoldingStructureProviderExtension.class);
+			Object adapter = editor
+					.getAdapter(IFoldingStructureProviderExtension.class);
 			if (adapter instanceof IFoldingStructureProviderExtension) {
 				updater = (IFoldingStructureProviderExtension) adapter;
 			} else {
-				MylynStatusHandler.log("Could not install active folding on provider: " + adapter + ", must extend "
-						+ IFoldingStructureProviderExtension.class.getName(), this);
+				MylynStatusHandler.log(
+						"Could not install active folding on provider: "
+								+ adapter
+								+ ", must extend "
+								+ IFoldingStructureProviderExtension.class
+										.getName(), this);
 			}
 		} catch (Exception e) {
-			MylynStatusHandler.fail(e, "could not install auto folding, reflection denied", false);
+			MylynStatusHandler.fail(e,
+					"could not install auto folding, reflection denied", false);
 		}
 		updateFolding();
 	}
 
 	public void dispose() {
 		ContextCorePlugin.getContextManager().removeListener(this);
-		ContextUiPlugin.getDefault().getPluginPreferences().removePropertyChangeListener(PREFERENCE_LISTENER);
+		ContextUiPlugin.getDefault().getPluginPreferences()
+				.removePropertyChangeListener(PREFERENCE_LISTENER);
 	}
 
 	public static void resetProjection(ScriptEditor dltk) {
@@ -96,7 +109,8 @@ public class ActiveFoldingListener /*implements IInteractionContextListener*/ext
 	}
 
 	public void updateFolding() {
-		if (!enabled || !ContextCorePlugin.getContextManager().isContextActive()) {
+		if (!enabled
+				|| !ContextCorePlugin.getContextManager().isContextActive()) {
 			editor.resetProjection();
 		} else if (editor.getEditorInput() == null) {
 			return;
@@ -104,16 +118,20 @@ public class ActiveFoldingListener /*implements IInteractionContextListener*/ext
 			try {
 				List toExpand = new ArrayList();
 				List toCollapse = new ArrayList();
-				IModelElement element = DLTKUIPlugin.getEditorInputModelElement(editor.getEditorInput());
+				IModelElement element = DLTKUIPlugin
+						.getEditorInputModelElement(editor.getEditorInput());
 				if (element instanceof ISourceModule) {
 					ISourceModule compilationUnit = (ISourceModule) element;
 					List allChildren = getAllChildren(compilationUnit);
-					//for (IModelElement child : allChildren) {
-					for (ListIterator it = allChildren.listIterator(); it.hasNext();) {
+					// for (IModelElement child : allChildren) {
+					for (ListIterator it = allChildren.listIterator(); it
+							.hasNext();) {
 						IModelElement child = (IModelElement) it.next();
-						IInteractionElement mylarElement = ContextCorePlugin.getContextManager().getElement(
-								bridge.getHandleIdentifier(child));
-						if (mylarElement != null && mylarElement.getInterest().isInteresting()) {
+						IInteractionElement mylarElement = ContextCorePlugin
+								.getContextManager().getElement(
+										bridge.getHandleIdentifier(child));
+						if (mylarElement != null
+								&& mylarElement.getInterest().isInteresting()) {
 							toExpand.add(child);
 						} else {
 							toCollapse.add(child);
@@ -122,7 +140,8 @@ public class ActiveFoldingListener /*implements IInteractionContextListener*/ext
 				}
 				if (updater != null) {
 					updater.collapseMembers();
-					updater.expandElements((IModelElement[]) toExpand.toArray(new IModelElement[toExpand.size()]));
+					updater.expandElements((IModelElement[]) toExpand
+							.toArray(new IModelElement[toExpand.size()]));
 				}
 			} catch (Exception e) {
 				MylynStatusHandler.fail(e, "couldn't update folding", false);
@@ -133,7 +152,7 @@ public class ActiveFoldingListener /*implements IInteractionContextListener*/ext
 	private static List getAllChildren(IParent parentElement) {
 		List allChildren = new ArrayList();
 		try {
-			//for (IModelElement child : parentElement.getChildren()) {
+			// for (IModelElement child : parentElement.getChildren()) {
 			for (int i = 0; i < parentElement.getChildren().length; i++) {
 				IModelElement child = parentElement.getChildren()[i];
 				allChildren.add(child);
@@ -148,27 +167,32 @@ public class ActiveFoldingListener /*implements IInteractionContextListener*/ext
 	}
 
 	public void interestChanged(List elements) {
-		//for (IInteractionElement element : elements) {
-		for (ListIterator it = elements.listIterator(); it.hasNext();)
-		{
+		// for (IInteractionElement element : elements) {
+		for (ListIterator it = elements.listIterator(); it.hasNext();) {
 			IInteractionElement element = (IInteractionElement) it.next();
 			if (updater == null || !enabled) {
 				return;
 			} else {
-				Object object = bridge.getObjectForHandle(element.getHandleIdentifier());
+				Object object = bridge.getObjectForHandle(element
+						.getHandleIdentifier());
 				if (object instanceof IMember) {
 					IMember member = (IMember) object;
 					if (element.getInterest().isInteresting()) {
 						updater.expandElements(new IModelElement[] { member });
-						// expand the next 2 children down (e.g. anonymous types)
+						// expand the next 2 children down (e.g. anonymous
+						// types)
 						try {
-							IModelElement[] children = ((IParent)member).getChildren();
+							IModelElement[] children = ((IParent) member)
+									.getChildren();
 							if (children.length == 1) {
-								updater.expandElements(new IModelElement[] { children[0] });
+								updater
+										.expandElements(new IModelElement[] { children[0] });
 								if (children[0] instanceof IParent) {
-									IModelElement[] childsChildren = ((IParent)children[0]).getChildren();
+									IModelElement[] childsChildren = ((IParent) children[0])
+											.getChildren();
 									if (childsChildren.length == 1) {
-										updater.expandElements(new IModelElement[] { childsChildren[0] });
+										updater
+												.expandElements(new IModelElement[] { childsChildren[0] });
 									}
 								}
 							}
@@ -176,7 +200,8 @@ public class ActiveFoldingListener /*implements IInteractionContextListener*/ext
 							// ignore
 						}
 					} else {
-						updater.collapseElements(new IModelElement[] { member });
+						updater
+								.collapseElements(new IModelElement[] { member });
 					}
 				}
 			}
@@ -184,37 +209,42 @@ public class ActiveFoldingListener /*implements IInteractionContextListener*/ext
 	}
 
 	public void contextActivated(IInteractionContext context) {
-		if (ContextUiPlugin.getDefault().getPreferenceStore().getBoolean(MylynDLTKPrefConstants.ACTIVE_FOLDING_ENABLED)) {
+		if (ContextUiPlugin.getDefault().getPreferenceStore().getBoolean(
+				MylynDLTKPrefConstants.ACTIVE_FOLDING_ENABLED)) {
 			updateFolding();
 		}
 	}
 
 	public void contextDeactivated(IInteractionContext context) {
-		if (ContextUiPlugin.getDefault().getPreferenceStore().getBoolean(MylynDLTKPrefConstants.ACTIVE_FOLDING_ENABLED)) {
+		if (ContextUiPlugin.getDefault().getPreferenceStore().getBoolean(
+				MylynDLTKPrefConstants.ACTIVE_FOLDING_ENABLED)) {
 			updateFolding();
 		}
 	}
-	
-//	public void presentationSettingsChanging(IInteractionContextListener.UpdateKind kind) {
-//		// ignore
-//	}
-//
-//	public void presentationSettingsChanged(IInteractionContextListener.UpdateKind kind) {
-//		
-//		updateFolding();
-//	}
 
-	
-//	public void presentationSettingsChanging(IInteractionContextListener kind) {
-//	// ignore
-//	}
+	// public void
+	// presentationSettingsChanging(IInteractionContextListener.UpdateKind kind)
+	// {
+	// // ignore
+	// }
+	//
+	// public void
+	// presentationSettingsChanged(IInteractionContextListener.UpdateKind kind)
+	// {
+	//		
+	// updateFolding();
+	// }
 
-//	public void presentationSettingsChanged(IInteractionContextListener kind) {
-//	
-//	updateFolding();
-//	}
+	// public void presentationSettingsChanging(IInteractionContextListener
+	// kind) {
+	// // ignore
+	// }
 
-	
+	// public void presentationSettingsChanged(IInteractionContextListener kind)
+	// {
+	//	
+	// updateFolding();
+	// }
 
 	public void landmarkAdded(IInteractionElement element) {
 		// ignore
@@ -234,6 +264,6 @@ public class ActiveFoldingListener /*implements IInteractionContextListener*/ext
 
 	public void contextCleared(IInteractionContext arg0) {
 		// ignore
-		
+
 	}
 }

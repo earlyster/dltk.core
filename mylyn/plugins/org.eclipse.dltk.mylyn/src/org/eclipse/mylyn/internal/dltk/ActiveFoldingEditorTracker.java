@@ -19,11 +19,9 @@ import org.eclipse.mylyn.monitor.ui.AbstractEditorTracker;
 
 import org.eclipse.ui.IEditorPart;
 
-
 public class ActiveFoldingEditorTracker extends AbstractEditorTracker {
 
 	protected Map editorListenerMap = new HashMap();
-
 
 	public void editorOpened(IEditorPart part) {
 		if (part instanceof ScriptEditor)
@@ -39,16 +37,18 @@ public class ActiveFoldingEditorTracker extends AbstractEditorTracker {
 		if (editorListenerMap.containsKey(editor)) {
 			return;
 		} else {
-			ActiveFoldingListener listener = new ActiveFoldingListener(editor);
+			ActiveFoldingListener listener = new ActiveFoldingListener(editor, /* WTF */
+					new DLTKStructureBridge());
 			editorListenerMap.put(editor, listener);
 		}
 	}
 
 	public void unregisterEditor(ScriptEditor editor) {
-		ActiveFoldingListener listener = (ActiveFoldingListener) editorListenerMap.get(editor);
+		ActiveFoldingListener listener = (ActiveFoldingListener) editorListenerMap
+				.get(editor);
 		if (listener != null) {
 			listener.dispose();
-		} 
+		}
 		editorListenerMap.remove(editor);
 	}
 

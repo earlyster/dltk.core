@@ -45,8 +45,11 @@ public class LandmarkMarkerManager /*implements IInteractionContextListener*/ext
 	private static final String MARKER_ID_LANDMARK = "org.eclipse.mylyn.ui.landmark";
 	private Map markerMap = new HashMap();
 
-	public LandmarkMarkerManager() {
+	private DLTKStructureBridge bridge;
+	public LandmarkMarkerManager(DLTKStructureBridge bridge) {
 		super();
+		this.bridge = bridge;
+		
 	}
 
 	public void contextActivated(IInteractionContext taskscape) {
@@ -89,7 +92,7 @@ public class LandmarkMarkerManager /*implements IInteractionContextListener*/ext
 	public void landmarkAdded(final IInteractionElement node) {
 		if (node == null || node.getContentType() == null)
 			return;
-		if (node.getContentType().equals(DLTKStructureBridge.CONTENT_TYPE)) {
+		if (node.getContentType().equals(bridge.contentType)) {
 			final IModelElement element = DLTKCore.create(node.getHandleIdentifier());
 			if (!element.exists())
 				return;
@@ -124,7 +127,7 @@ public class LandmarkMarkerManager /*implements IInteractionContextListener*/ext
 	public void landmarkRemoved(final IInteractionElement node) {
 		if (node == null)
 			return;
-		if (node.getContentType().equals(DLTKStructureBridge.CONTENT_TYPE)) {
+		if (node.getContentType().equals(bridge.contentType)) {
 			IModelElement element = DLTKCore.create(node.getHandleIdentifier());
 			if (!element.exists())
 				return;

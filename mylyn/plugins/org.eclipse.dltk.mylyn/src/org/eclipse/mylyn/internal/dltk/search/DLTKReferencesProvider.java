@@ -15,7 +15,7 @@ import java.util.List;
 
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.mylyn.context.core.IDegreeOfSeparation;
+//import org.eclipse.mylyn.context.core.IDegreeOfSeparation;
 import org.eclipse.mylyn.internal.dltk.DLTKStructureBridge;
 
 
@@ -30,8 +30,8 @@ public class DLTKReferencesProvider extends AbstractDLTKRelationProvider {
 
 	public static final String NAME = "referenced by";
 
-	public DLTKReferencesProvider() {
-		super(DLTKStructureBridge.CONTENT_TYPE, ID);
+	public DLTKReferencesProvider(DLTKStructureBridge bridge) {
+		super(bridge.contentType, ID, bridge);
 	}
 
 	protected boolean acceptResultElement(IModelElement element) {

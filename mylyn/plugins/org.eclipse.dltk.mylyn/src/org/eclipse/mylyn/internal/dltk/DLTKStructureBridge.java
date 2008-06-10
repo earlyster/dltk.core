@@ -21,6 +21,10 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExecutableExtension;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
@@ -33,31 +37,28 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.core.ProjectFragment;
 import org.eclipse.dltk.internal.ui.scriptview.BuildPathContainer;
 import org.eclipse.dltk.ui.util.ExceptionHandler;
+import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.eclipse.mylyn.context.core.AbstractContextStructureBridge;
 import org.eclipse.mylyn.context.core.IInteractionElement;
 import org.eclipse.mylyn.internal.context.core.ContextCorePlugin;
-import org.eclipse.mylyn.internal.context.core.DegreeOfSeparation;
 import org.eclipse.mylyn.internal.resources.ui.ResourceStructureBridge;
 import org.eclipse.ui.internal.WorkingSet;
 import org.eclipse.ui.views.markers.internal.ConcreteMarker;
 
-public class DLTKStructureBridge extends AbstractContextStructureBridge {
+public class DLTKStructureBridge extends AbstractContextStructureBridge
+		implements IExecutableExtension {
 
-	public final static String CONTENT_TYPE = "script";
-
+	public String contentType = "";
+	public static final String ID_PLUGIN = "org.eclipse.dltk.mylyn.ui";
 	public List providers;
 
 	public DLTKStructureBridge() {
 		providers = new ArrayList();
-		// providers.add(new JavaReferencesProvider());
-		// providers.add(new JavaImplementorsProvider());
-		// providers.add(new JavaReadAccessProvider());
-		// providers.add(new JavaWriteAccessProvider());
-		// providers.add(new JUnitReferencesProvider());
+
 	}
 
 	public String getContentType() {
-		return CONTENT_TYPE;
+		return contentType;
 	}
 
 	public Object getAdaptedParent(Object object) {
@@ -188,26 +189,6 @@ public class DLTKStructureBridge extends AbstractContextStructureBridge {
 			return true;
 		}
 
-		// else if (object instanceof PackageFragmentRootContainer) {
-		// // since not in model, check if it contains anything interesting
-		// PackageFragmentRootContainer container =
-		// (PackageFragmentRootContainer) object;
-		//
-		// Object[] children = container.getChildren();
-		// for (int i = 0; i < children.length; i++) {
-		// if (children[i] instanceof JarPackageFragmentRoot) {
-		// JarPackageFragmentRoot element = (JarPackageFragmentRoot)
-		// children[i];
-		// IMylarElement node =
-		// ContextCorePlugin.getContextManager().getElement(
-		// element.getHandleIdentifier());
-		// if (node != null && node.getInterest().isInteresting()) {
-		// return false;
-		// }
-		// }
-		// }
-		// }
-
 		else if (object instanceof WorkingSet) {
 			try {
 				WorkingSet workingSet = (WorkingSet) object;
@@ -232,26 +213,33 @@ public class DLTKStructureBridge extends AbstractContextStructureBridge {
 		return element instanceof ISourceModule;
 	}
 
-	public String getHandleForOffsetInObject(Object resource, int offset) {
-		if (resource == null || !(resource instanceof ConcreteMarker))
+	public String getHandleForOffsetInObject(Object object, int offset) {
+		IMarker marker;
+		if (object instanceof ConcreteMarker) {
+			marker = ((ConcreteMarker) object).getMarker();
+		} else if (object instanceof IMarker) {
+			marker = (IMarker) object;
+		} else {
 			return null;
-		ConcreteMarker marker = (ConcreteMarker) resource;
+		}
+
+		int charStart = marker.getAttribute(IMarker.CHAR_START, 0);
+
 		try {
-			IResource res = marker.getResource();
 			ISourceModule compilationUnit = null;
-			if (res instanceof IFile) {
-				IFile file = (IFile) res;
-				if (file.getFileExtension().equals("java")) {
+			IResource resource = marker.getResource();
+			if (resource instanceof IFile) {
+				IFile file = (IFile) resource;
+				// TODO: get rid of file extension check
+				String ext = file.getFileExtension();
+				if (ext.equals(contentType)) {
 					compilationUnit = DLTKCore.createSourceModuleFrom(file);
-				} else {
-					return null;
 				}
 			}
 			if (compilationUnit != null) {
-				IModelElement javaElement = compilationUnit.getElementAt(marker
-						.getMarker().getAttribute(IMarker.CHAR_START, 0));
+				IModelElement javaElement = compilationUnit
+						.getElementAt(charStart);
 				if (javaElement != null) {
-
 					return javaElement.getHandleIdentifier();
 				} else {
 					return null;
@@ -260,13 +248,15 @@ public class DLTKStructureBridge extends AbstractContextStructureBridge {
 				return null;
 			}
 		} catch (ModelException ex) {
-			if (!ex.isDoesNotExist())
-				ExceptionHandler.handle(ex,
-						"error", "could not find java element"); //$NON-NLS-2$ //$NON-NLS-1$
+			if (!ex.isDoesNotExist()) {
+				ExceptionHandler.handle(ex, "error",
+						"could not find script element");
+			}
 			return null;
 		} catch (Throwable t) {
-			MylynStatusHandler.fail(t, "Could not find element for: " + marker,
-					false);
+			StatusHandler.log(new Status(IStatus.ERROR,
+					DLTKStructureBridge.ID_PLUGIN,
+					"Could not find element for: " + marker, t));
 			return null;
 		}
 	}
@@ -277,24 +267,6 @@ public class DLTKStructureBridge extends AbstractContextStructureBridge {
 
 	public List getRelationshipProviders() {
 		return providers;
-	}
-
-	public List getDegreesOfSeparation() {
-		List separations = new ArrayList();
-
-		// separations.add(new DegreeOfSeparation(DOS_1_LABEL, 0));
-		// separations.add(new DegreeOfSeparation(DOS_1_LABEL, 1));
-		// separations.add(new DegreeOfSeparation(DOS_2_LABEL, 2));
-		// separations.add(new DegreeOfSeparation(DOS_3_LABEL, 3));
-		// separations.add(new DegreeOfSeparation(DOS_4_LABEL, 4));
-		// separations.add(new DegreeOfSeparation(DOS_5_LABEL, 5));
-		separations.add(new DegreeOfSeparation("disabled", 0));
-		separations.add(new DegreeOfSeparation("landmark resources", 1));
-		separations.add(new DegreeOfSeparation("interesting resources", 2));
-		separations.add(new DegreeOfSeparation("interesting projects", 3));
-		separations.add(new DegreeOfSeparation("project dependencies", 4));
-		separations.add(new DegreeOfSeparation("entire workspace (slow)", 5));
-		return separations;
 	}
 
 	/**
@@ -353,5 +325,10 @@ public class DLTKStructureBridge extends AbstractContextStructureBridge {
 	public String getLabel(Object arg0) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public void setInitializationData(IConfigurationElement config,
+			String propertyName, Object data) throws CoreException {
+		contentType = config.getAttribute("extension");
 	}
 }
