@@ -54,7 +54,7 @@ public class ProposalInfo {
 	 * <code>null</code> if no text is available.
 	 * 
 	 * @param monitor
-	 * 		a progress monitor
+	 *            a progress monitor
 	 * @return the additional info text
 	 */
 	public String getInfo(IProgressMonitor monitor) {
@@ -74,7 +74,7 @@ public class ProposalInfo {
 	 * <code>null</code> if no text is available.
 	 * 
 	 * @param monitor
-	 * 		a progress monitor
+	 *            a progress monitor
 	 * @return the additional info text
 	 */
 	private String computeInfo(IProgressMonitor monitor) {
@@ -124,15 +124,15 @@ public class ProposalInfo {
 	 * HTML.
 	 * 
 	 * @param member
-	 * 		the member to get the documentation for
+	 *            the member to get the documentation for
 	 * @param monitor
-	 * 		a progress monitor
+	 *            a progress monitor
 	 * @return the javadoc for <code>member</code> or <code>null</code> if it is
-	 * 	not available
+	 *         not available
 	 * @throws ModelException
-	 * 		if accessing the javadoc fails
+	 *             if accessing the javadoc fails
 	 * @throws IOException
-	 * 		if reading the javadoc fails
+	 *             if reading the javadoc fails
 	 */
 	private String extractScriptdoc(IMember member, IProgressMonitor monitor)
 			throws ModelException, IOException {
@@ -147,7 +147,12 @@ public class ProposalInfo {
 	private Reader getHTMLContentReader(IMember member, IProgressMonitor monitor)
 			throws ModelException {
 		String nature = null;
-		nature = DLTKLanguageManager.getLanguageToolkit(member).getNatureId();
+		IDLTKLanguageToolkit languageToolkit = DLTKLanguageManager
+				.getLanguageToolkit(member);
+		if (languageToolkit == null) {
+			return null;
+		}
+		nature = languageToolkit.getNatureId();
 		if (nature == null)
 			return null;
 		return ScriptDocumentationAccess.getHTMLContentReader(nature, member,
