@@ -12,14 +12,10 @@
 package org.eclipse.dltk.ui.text;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.Preferences;
-import org.eclipse.dltk.compiler.task.TodoTask;
-import org.eclipse.dltk.compiler.task.TodoTaskPreferences;
+import org.eclipse.dltk.compiler.task.ITodoTaskPreferences;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWhitespaceDetector;
 import org.eclipse.jface.text.rules.IWordDetector;
@@ -30,22 +26,13 @@ import org.eclipse.jface.text.rules.WordRule;
 public class ScriptCommentScanner extends AbstractScriptScanner {
 
 	private final String[] fProperty;
-	protected String[] todoTags = null;
-	private Preferences pluginPrefs;
+	private final ITodoTaskPreferences preferences;
 
 	public ScriptCommentScanner(IColorManager manager, IPreferenceStore store,
-			String comment, String todoTag, Preferences pluginPreferences) {
+			String comment, String todoTag, ITodoTaskPreferences preferences) {
 		super(manager, store);
 		fProperty = new String[] { comment, todoTag };
-		pluginPrefs = pluginPreferences;
-		initialize();
-	}
-
-	public ScriptCommentScanner(IColorManager manager, IPreferenceStore store,
-			String comment, String todoTag, String[] tags) {
-		super(manager, store);
-		fProperty = new String[] { comment, todoTag };
-		todoTags = tags;
+		this.preferences = preferences;
 		initialize();
 	}
 
@@ -64,26 +51,10 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 				getToken(fProperty[0]), true);
 		r.addWord(COMMENT_STRING, getToken(fProperty[0]));
 		rules.add(r);
-		rules.add(createTodoRule(getToken(fProperty[1])));
+		rules.add(new TodoTagRule(getToken(fProperty[1]), preferences
+				.getTagNames(), preferences.isCaseSensitive()));
 
 		return rules;
-	}
-
-	protected IRule createTodoRule(IToken todoToken) {
-		final TodoTaskPreferences preferences = new TodoTaskPreferences(
-				pluginPrefs);
-		if (todoTags == null) {
-			List l = preferences.getTaskTags();
-			todoTags = new String[l.size()];
-			int i = 0;
-			for (Iterator it = l.iterator(); it.hasNext();) {
-				todoTags[i] = ((TodoTask) it.next()).name;
-				i++;
-			}
-		}
-
-		boolean caseSensitivity = preferences.isCaseSensitive();
-		return new TodoTagRule(todoToken, todoTags, caseSensitivity);
 	}
 
 	private boolean appeared = false;
