@@ -18,7 +18,7 @@ import java.util.StringTokenizer;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.dltk.core.DLTKCore;
 
-public class TodoTaskPreferences {
+public class TodoTaskPreferences implements ITodoTaskPreferences {
 
 	public static final String CASE_SENSITIVE = DLTKCore.PLUGIN_ID
 			+ "tasks.case_sensitive"; //$NON-NLS-1$
@@ -106,6 +106,16 @@ public class TodoTaskPreferences {
 		store.setDefault(ENABLED, true);
 		store.setDefault(CASE_SENSITIVE, true);
 		store.setDefault(TAGS, encodeTaskTags(getDefaultTags()));
+	}
+
+	public String[] getTagNames() {
+		final List taskTags = getTaskTags();
+		final int size = taskTags.size();
+		final String[] result = new String[size];
+		for (int i = 0; i < size; ++i) {
+			result[i] = ((TodoTask) taskTags.get(i)).name;
+		}
+		return result;
 	}
 
 }

@@ -28,7 +28,7 @@ public class TodoTaskSimpleParser {
 	private final int[] priorities;
 
 	public TodoTaskSimpleParser(ITaskReporter taskReporter,
-			TodoTaskPreferences preferences) {
+			ITodoTaskPreferences preferences) {
 		this.taskReporter = taskReporter;
 		this.caseSensitive = preferences.isCaseSensitive();
 		final List tags = preferences.getTaskTags();

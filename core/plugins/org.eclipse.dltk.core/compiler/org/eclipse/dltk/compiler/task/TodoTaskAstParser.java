@@ -24,7 +24,7 @@ public class TodoTaskAstParser extends TodoTaskSimpleParser {
 	 * @param preferences
 	 */
 	public TodoTaskAstParser(ITaskReporter taskReporter,
-			TodoTaskPreferences preferences, ModuleDeclaration module) {
+			ITodoTaskPreferences preferences, ModuleDeclaration module) {
 		super(taskReporter, preferences);
 		if (isValid()) {
 			processNodes(module);
