@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
+import org.eclipse.dltk.internal.launching.LazyFileHandle;
 import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
@@ -358,14 +359,16 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 					boolean found = false;
 					for (int i = 0; i < this.fInterpreterTypes.length; i++) {
 						IInterpreterInstallType type = this.fInterpreterTypes[i];
-						IInterpreterInstall inst = type.findInterpreterInstallByName(pName);
+						IInterpreterInstall inst = type
+								.findInterpreterInstallByName(pName);
 						if (inst != null) {
-							pName = genName + "(" + String.valueOf(++index) + ")";
+							pName = genName + "(" + String.valueOf(++index)
+									+ ")";
 							found = true;
 							break;
 						}
 					}
-					if( !found ) {
+					if (!found) {
 						break;
 					}
 				}
@@ -466,9 +469,8 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 
 	protected void setFieldValuesToInterpreter(IInterpreterInstall install) {
 		IEnvironment selectedEnv = getEnvironment();
-		IFileHandle dir = selectedEnv.getFile(new Path(fInterpreterPath
-				.getText()));
-		install.setInstallLocation(dir);
+		install.setInstallLocation(new LazyFileHandle(selectedEnv.getId(),
+				new Path(fInterpreterPath.getText())));
 		install.setName(fInterpreterName.getText());
 
 		if (this.useInterpreterArgs()) {
