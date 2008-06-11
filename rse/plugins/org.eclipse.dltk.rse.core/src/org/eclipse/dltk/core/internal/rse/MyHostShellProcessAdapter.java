@@ -57,6 +57,7 @@ public class MyHostShellProcessAdapter extends Process implements
 	public MyHostShellProcessAdapter(IHostShell hostShell, String pattern1)
 			throws java.io.IOException {
 		this.hostShell = hostShell;
+		this.pattern1 = pattern1;
 		hostShellInput = new PipedOutputStream();
 		hostShellError = new PipedOutputStream();
 		inputStream = new PipedInputStream(hostShellInput);
@@ -64,7 +65,6 @@ public class MyHostShellProcessAdapter extends Process implements
 		outputStream = new HostShellOutputStream(hostShell);
 		this.hostShell.getStandardOutputReader().addOutputListener(this);
 		this.hostShell.getStandardErrorReader().addOutputListener(this);
-		this.pattern1 = pattern1;
 	}
 
 	/**
