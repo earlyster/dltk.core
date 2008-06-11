@@ -95,8 +95,8 @@
           extension="exp">
         </structureBridge>     
 	</extension>
-	
 
+	
 	<extension point="org.eclipse.mylyn.context.ui.bridges">
 	    <uiBridge
 	          class="org.eclipse.mylyn.internal.dltk.ui.DLTKUiBridge"
@@ -164,13 +164,14 @@
            </systemProperty>
         </enablement> 
   		</action> 
+
       </viewContribution>
  	  <viewContribution
        id="org.eclipse.mylyn.ui.views.active.search.contribution"
        targetID="org.eclipse.mylyn.ui.views.active.search">
  		</viewContribution>
  		
- 	<viewContribution 
+ 	<!--viewContribution 
 		id="org.eclipse.mylyn.ui.debug.view.contribution" 
    		targetID="org.eclipse.debug.ui.DebugView">
     	<action
@@ -185,7 +186,7 @@
            toolbarPath="mylyn"
            tooltip="Focus on Active Task (Experimental)"> 
   		</action> 
-      </viewContribution>
+      </viewContribution-->
 	</extension>
 	
   <extension point="org.eclipse.ui.popupMenus"> 
@@ -226,7 +227,7 @@
             enablesFor="*"
             icon="icons/elcl16/interest-decrease.gif"
             id="org.eclipse.mylyn.internal.dltk.ui.actions.interest.decrement.container"
-            label="Remove from Context"
+            label="Mark Less Interesting"
             menubarPath="additions"
             tooltip="Mark selected element as uninteresting">
       </action>
@@ -252,7 +253,7 @@
 	<actionSet
             id="org.eclipse.dltk.mylyn.actionSet"
             label="Mylyn DLTK"
-            visible="false"> 
+            visible="true"> 
             
   		<action
           class="org.eclipse.mylyn.internal.dltk.ui.actions.ToggleActiveFoldingAction"
@@ -295,14 +296,20 @@
    </extension>
 
    <extension point="org.eclipse.ui.commands">
+         <category
+            name="Mylyn DLTK"
+            description="Mylyn DLTK Commands"
+            id="org.eclipse.mylyn.internal.dltk.ui.commands">
+      </category>
+   
 	  <command
-         categoryId="org.eclipse.mylyn.ui"
+         categoryId="org.eclipse.mylyn.internal.dltk.ui.commands"
          description="Search the current task context"
          id="org.eclipse.mylyn.dltk.ui.search.context"
          name="Search Task Context">
       </command>
 	  <command
-         categoryId="org.eclipse.mylyn.ui"
+         categoryId="org.eclipse.mylyn.internal.dltk.ui.commands"
          description="Toggle Active Folding"
          id="org.eclipse.mylyn.dltk.ui.editor.folding.auto"
          name="Toggle Active Folding">

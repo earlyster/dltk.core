@@ -50,11 +50,9 @@ public class MylynDLTKPlugin extends AbstractUIPlugin {
 
 	private TypeHistoryManager typeHistoryManager = null;
 
-	private LandmarkMarkerManager landmarkMarkerManager = new LandmarkMarkerManager(
-			/* WTF */new DLTKStructureBridge());
+	private LandmarkMarkerManager landmarkMarkerManager = new LandmarkMarkerManager();
 
-	private InterestInducingProblemListener problemListener = new InterestInducingProblemListener(
-			/* WTF */new DLTKStructureBridge());
+	private InterestInducingProblemListener problemListener = new InterestInducingProblemListener();
 
 	private DLTKEditingMonitor dltkEditingMonitor;
 

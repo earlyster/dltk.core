@@ -34,20 +34,19 @@ public class DLTKContextLabelProvider extends AppearanceAwareLabelProvider {
 	private static final ImageDescriptor EDGE_REF_JUNIT = MylynDLTKPlugin
 			.getImageDescriptor("icons/elcl16/edge-ref-junit.gif");
 
-	private DLTKStructureBridge bridge;
 
-	public DLTKContextLabelProvider(DLTKStructureBridge bridge) {
+	public DLTKContextLabelProvider() {
 		super(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS
 				| ScriptElementLabels.P_COMPRESSED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
 				MylynDLTKPlugin.getDefault().getPreferenceStore());
-		this.bridge = bridge;
 	}
 
 	public String getText(Object object) {
 		if (object instanceof IInteractionElement) {
 			IInteractionElement node = (IInteractionElement) object;
-			if (bridge.contentType.equals(node.getContentType())) {
+			//if (bridge.contentType.equals(node.getContentType())) 
+			{
 				IModelElement element = DLTKCore.create(node
 						.getHandleIdentifier());
 				if (element == null) {
@@ -85,7 +84,8 @@ public class DLTKContextLabelProvider extends AppearanceAwareLabelProvider {
 	public Image getImage(Object object) {
 		if (object instanceof IInteractionElement) {
 			IInteractionElement node = (IInteractionElement) object;
-			if (node.getContentType().equals(bridge.contentType)) {
+//			if (node.getContentType().equals(bridge.contentType)) 
+			{
 				return super.getImage(DLTKCore.create(node
 						.getHandleIdentifier()));
 			}

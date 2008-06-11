@@ -26,8 +26,8 @@ public class InterestInducingProblemListener implements
 	// TODO: consider getting rid of this
 	private DLTKStructureBridge scriptStructureBridge;
 
-	public InterestInducingProblemListener(DLTKStructureBridge bridge) {
-		scriptStructureBridge = bridge;
+	public InterestInducingProblemListener() {
+		scriptStructureBridge = new DLTKStructureBridge();
 	}
 
 	public void problemsChanged(IResource[] changedResources,

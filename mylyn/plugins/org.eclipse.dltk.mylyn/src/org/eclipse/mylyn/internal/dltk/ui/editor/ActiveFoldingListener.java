@@ -69,9 +69,9 @@ public class ActiveFoldingListener
 		}
 	};
 
-	public ActiveFoldingListener(ScriptEditor editor, DLTKStructureBridge bridge) {
+	public ActiveFoldingListener(ScriptEditor editor) {
 		this.editor = editor;
-		this.bridge = bridge;
+		this.bridge = new DLTKStructureBridge();
 		ContextCorePlugin.getContextManager().addListener(this);
 		ContextUiPlugin.getDefault().getPluginPreferences()
 				.addPropertyChangeListener(PREFERENCE_LISTENER);

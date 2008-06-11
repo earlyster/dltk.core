@@ -45,10 +45,10 @@ public class LandmarkMarkerManager /*implements IInteractionContextListener*/ext
 	private static final String MARKER_ID_LANDMARK = "org.eclipse.mylyn.ui.landmark";
 	private Map markerMap = new HashMap();
 
-	private DLTKStructureBridge bridge;
-	public LandmarkMarkerManager(DLTKStructureBridge bridge) {
+	DLTKStructureBridge bridge;
+	public LandmarkMarkerManager() {
 		super();
-		this.bridge = bridge;
+		this.bridge = new DLTKStructureBridge();
 		
 	}
 

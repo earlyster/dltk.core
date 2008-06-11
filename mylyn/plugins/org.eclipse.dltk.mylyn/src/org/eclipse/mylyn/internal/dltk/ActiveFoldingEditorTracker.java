@@ -37,8 +37,7 @@ public class ActiveFoldingEditorTracker extends AbstractEditorTracker {
 		if (editorListenerMap.containsKey(editor)) {
 			return;
 		} else {
-			ActiveFoldingListener listener = new ActiveFoldingListener(editor, /* WTF */
-					new DLTKStructureBridge());
+			ActiveFoldingListener listener = new ActiveFoldingListener(editor);
 			editorListenerMap.put(editor, listener);
 		}
 	}
