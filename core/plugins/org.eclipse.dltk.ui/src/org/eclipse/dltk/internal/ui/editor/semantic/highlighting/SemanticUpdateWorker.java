@@ -19,23 +19,35 @@ import org.eclipse.dltk.internal.ui.editor.SemanticHighlightingManager.Highlight
 
 public class SemanticUpdateWorker extends ASTVisitor {
 
-	private final List positions = new ArrayList();
+	private final List newPositions = new ArrayList();
+	private int oldPositionCount = 0;
+	private HighlightedPosition[] oldPositions;
 	private SemanticHighlightingPresenter presenter;
 
 	private Highlighting[] highlightings;
 
 	protected void addHighlightedPosition(int start, int end,
 			int highlightingIndex) {
+		final int len = end - start;
+		final Highlighting hl = highlightings[highlightingIndex];
+		for (int i = 0; i < oldPositions.length; ++i) {
+			final HighlightedPosition p = oldPositions[i];
+			if (p != null && p.isEqual(start, len, hl)) {
+				oldPositions[i] = null;
+				--oldPositionCount;
+				break;
+			}
+		}
 		final HighlightedPosition hp = presenter.createHighlightedPosition(
-				start, end - start, highlightings[highlightingIndex]);
-		positions.add(hp);
+				start, len, hl);
+		newPositions.add(hp);
 	}
 
 	/**
 	 * @return
 	 */
-	public List getPositions() {
-		return positions;
+	public List getNewPositions() {
+		return newPositions;
 	}
 
 	public void setPresenter(SemanticHighlightingPresenter presenter) {
@@ -44,6 +56,26 @@ public class SemanticUpdateWorker extends ASTVisitor {
 
 	public void setHighlightings(Highlighting[] highlightings) {
 		this.highlightings = highlightings;
+	}
+
+	/**
+	 * @param oldPositions
+	 */
+	public void setOldPositions(List oldPositions) {
+		this.oldPositionCount = oldPositions.size();
+		this.oldPositions = (HighlightedPosition[]) oldPositions
+				.toArray(new HighlightedPosition[oldPositionCount]);
+	}
+
+	public List getOldPositions() {
+		final List result = new ArrayList(oldPositionCount);
+		for (int i = 0, size = oldPositions.length; i < size; ++i) {
+			final HighlightedPosition p = oldPositions[i];
+			if (p != null) {
+				result.add(p);
+			}
+		}
+		return result;
 	}
 
 }
