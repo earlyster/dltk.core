@@ -96,11 +96,19 @@ public class SourceModuleInfoCache implements ISourceModuleInfoCache {
 		private void processDelta(IModelElementDelta delta) {
 			IModelElement element = delta.getElement();
 			if (delta.getKind() == IModelElementDelta.REMOVED
-					|| delta.getKind() == IModelElementDelta.CHANGED
-					|| (delta.getFlags() & IModelElementDelta.F_REMOVED_FROM_BUILDPATH) != 0
-					|| (delta.getFlags() & IModelElementDelta.CHANGED) != 0) {
+					|| delta.getKind() == IModelElementDelta.CHANGED) {
 				if (element.getElementType() == IModelElement.SOURCE_MODULE) {
-					SourceModuleInfoCache.this.remove((ISourceModule) element);
+					if (isContentChanged(delta) || isWorkingCopy(delta)) {
+						if (DEBUG) {
+							System.out
+									.println("[Cache] remove: kind=" + delta.getKind() + " flags=" + Integer.toHexString(delta.getFlags()) + " elementName=" + delta.getElement().getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						}
+						SourceModuleInfoCache.this
+								.remove((ISourceModule) element);
+					} else if (DEBUG) {
+						System.out
+								.println("[Cache] skip delta: kind=" + delta.getKind() + " flags=" + Integer.toHexString(delta.getFlags()) + " elementName=" + delta.getElement().getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					}
 				}
 			}
 			if ((delta.getFlags() & IModelElementDelta.F_CHILDREN) != 0) {
@@ -111,6 +119,14 @@ public class SourceModuleInfoCache implements ISourceModuleInfoCache {
 					processDelta(child);
 				}
 			}
+		}
+
+		private final boolean isContentChanged(IModelElementDelta delta) {
+			return (delta.getFlags() & (IModelElementDelta.F_CONTENT | IModelElementDelta.F_FINE_GRAINED)) == IModelElementDelta.F_CONTENT;
+		}
+
+		private final boolean isWorkingCopy(IModelElementDelta delta) {
+			return (delta.getFlags() & IModelElementDelta.F_PRIMARY_WORKING_COPY) != 0;
 		}
 	};
 
@@ -146,7 +162,12 @@ public class SourceModuleInfoCache implements ISourceModuleInfoCache {
 	}
 
 	public void remove(ISourceModule element) {
+		if (DEBUG) {
+			System.out.println("[Cache] remove " + element.getElementName()); //$NON-NLS-1$
+		}
 		cache.remove(element);
 		cache.resetSpaceLimit(ModelCache.DEFAULT_ROOT_SIZE, element);
 	}
+
+	private static final boolean DEBUG = false;
 }
