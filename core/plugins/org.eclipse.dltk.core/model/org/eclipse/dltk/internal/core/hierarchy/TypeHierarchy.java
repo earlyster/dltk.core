@@ -14,9 +14,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -452,7 +454,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 */
 	private IType[] getAllSubtypesForType(IType type) {
 		ArrayList subTypes = new ArrayList();
-		getAllSubtypesForType0(type, subTypes);
+		getAllSubtypesForType0(type, subTypes, new HashSet());
 		IType[] subClasses = new IType[subTypes.size()];
 		subTypes.toArray(subClasses);
 		return subClasses;
@@ -460,13 +462,17 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 
 	/**
 	 */
-	private void getAllSubtypesForType0(IType type, ArrayList subs) {
+	private void getAllSubtypesForType0(IType type, ArrayList subs,
+			Set alreadyProcessed) {
 		IType[] subTypes = getSubtypesForType(type);
 		if (subTypes.length != 0) {
 			for (int i = 0; i < subTypes.length; i++) {
 				IType subType = subTypes[i];
-				subs.add(subType);
-				getAllSubtypesForType0(subType, subs);
+				if (!alreadyProcessed.contains(subType)) {
+					alreadyProcessed.add(subType);
+					subs.add(subType);
+					getAllSubtypesForType0(subType, subs, alreadyProcessed);
+				}
 			}
 		}
 	}
@@ -1399,11 +1405,10 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("Focus: "); //$NON-NLS-1$
 		buffer.append(this.focusType == null ? "<NONE>" //$NON-NLS-1$
-				: ((ModelElement) this.focusType).toStringWithAncestors(false/*
-																				 * don't
-																				 * show
-																				 * key
-																				 */));
+				: ((ModelElement) this.focusType)
+						.toStringWithAncestors(false/*
+													 * don't show key
+													 */));
 		buffer.append("\n"); //$NON-NLS-1$
 		if (exists()) {
 			if (this.focusType != null) {
