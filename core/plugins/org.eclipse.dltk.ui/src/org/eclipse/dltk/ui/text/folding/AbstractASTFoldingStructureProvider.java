@@ -34,6 +34,9 @@ import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.core.ModelElement;
+import org.eclipse.dltk.internal.core.SourceMethod;
+import org.eclipse.dltk.internal.core.SourceType;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.text.DocumentCharacterIterator;
@@ -68,7 +71,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	 * A context that contains the information needed to compute the folding
 	 * structure of an {@link ISourceModule}. Computed folding regions are
 	 * collected via
-	 * {@linkplain #addProjectionRange(DefaultScriptFoldingStructureProvider.ScriptProjectionAnnotation, Position) addProjectionRange}.
+	 * {@linkplain #addProjectionRange(DefaultScriptFoldingStructureProvider.ScriptProjectionAnnotation, Position)
+	 * addProjectionRange}.
 	 */
 	public final class FoldingStructureComputationContext {
 		private final ProjectionAnnotationModel fModel;
@@ -90,9 +94,9 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		/**
 		 * Returns <code>true</code> if newly created folding regions may be
 		 * collapsed, <code>false</code> if not. This is usually
-		 * <code>false</code> when updating the folding structure while
-		 * typing; it may be <code>true</code> when computing or restoring the
-		 * initial folding structure.
+		 * <code>false</code> when updating the folding structure while typing;
+		 * it may be <code>true</code> when computing or restoring the initial
+		 * folding structure.
 		 * 
 		 * @return <code>true</code> if newly created folding regions may be
 		 *         collapsed, <code>false</code> if not
@@ -313,7 +317,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeFoldingRegions(org.eclipse.jface.text.IDocument)
+		 * @seeorg.eclipse.jface.text.source.projection.IProjectionPosition#
+		 * computeFoldingRegions(org.eclipse.jface.text.IDocument)
 		 */
 		public IRegion[] computeProjectionRegions(IDocument document)
 				throws BadLocationException {
@@ -372,7 +377,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeCaptionOffset(org.eclipse.jface.text.IDocument)
+		 * @seeorg.eclipse.jface.text.source.projection.IProjectionPosition#
+		 * computeCaptionOffset(org.eclipse.jface.text.IDocument)
 		 */
 		public int computeCaptionOffset(IDocument document) {
 			DocumentCharacterIterator sequence = new DocumentCharacterIterator(
@@ -393,7 +399,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeFoldingRegions(org.eclipse.jface.text.IDocument)
+		 * @seeorg.eclipse.jface.text.source.projection.IProjectionPosition#
+		 * computeFoldingRegions(org.eclipse.jface.text.IDocument)
 		 */
 		public IRegion[] computeProjectionRegions(IDocument document)
 				throws BadLocationException {
@@ -434,7 +441,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeCaptionOffset(org.eclipse.jface.text.IDocument)
+		 * @seeorg.eclipse.jface.text.source.projection.IProjectionPosition#
+		 * computeCaptionOffset(org.eclipse.jface.text.IDocument)
 		 */
 		public int computeCaptionOffset(IDocument document)
 				throws BadLocationException {
@@ -471,14 +479,16 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.source.projection.IProjectionListener#projectionEnabled()
+		 * @seeorg.eclipse.jface.text.source.projection.IProjectionListener#
+		 * projectionEnabled()
 		 */
 		public void projectionEnabled() {
 			handleProjectionEnabled();
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.source.projection.IProjectionListener#projectionDisabled()
+		 * @seeorg.eclipse.jface.text.source.projection.IProjectionListener#
+		 * projectionDisabled()
 		 */
 		public void projectionDisabled() {
 			handleProjectionDisabled();
@@ -487,7 +497,9 @@ public abstract class AbstractASTFoldingStructureProvider implements
 
 	private class ElementChangedListener implements IElementChangedListener {
 		/*
-		 * @see org.eclipse.dltk.core.IElementChangedListener#elementChanged(org.eclipse.dltk.core.ElementChangedEvent)
+		 * @see
+		 * org.eclipse.dltk.core.IElementChangedListener#elementChanged(org.
+		 * eclipse.dltk.core.ElementChangedEvent)
 		 */
 		public void elementChanged(ElementChangedEvent e) {
 			IModelElementDelta delta = findElement(fInput, e.getDelta());
@@ -533,8 +545,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	/**
 	 * Creates a new folding provider. It must be
 	 * {@link #install(ITextEditor, ProjectionViewer) installed} on an
-	 * editor/viewer pair before it can be used, and
-	 * {@link #uninstall() uninstalled} when not used any longer.
+	 * editor/viewer pair before it can be used, and {@link #uninstall()
+	 * uninstalled} when not used any longer.
 	 * <p>
 	 * The projection state may be reset by calling {@link #initialize()}.
 	 * </p>
@@ -633,7 +645,9 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	}
 
 	/*
-	 * @see org.eclipse.dltk.ui.text.folding.IScriptFoldingStructureProvider#initialize()
+	 * @see
+	 * org.eclipse.dltk.ui.text.folding.IScriptFoldingStructureProvider#initialize
+	 * ()
 	 */
 	public final void initialize() {
 		update(createInitialContext());
@@ -776,9 +790,16 @@ public abstract class AbstractASTFoldingStructureProvider implements
 				}
 			}
 		}
+
 		// 2. Compute blocks regions
+		IModelElement parent = fInput;
 		for (int i = 0; i < blockRegions.length; i++) {
 			CodeBlock codeBlock = blockRegions[i];
+
+			if (codeBlock.statement instanceof TypeDeclaration)
+				parent = new SourceType((ModelElement) fInput,
+						codeBlock.statement.toString());
+
 			if (!mayCollapse(codeBlock.statement, ctx))
 				continue;
 
@@ -805,7 +826,10 @@ public abstract class AbstractASTFoldingStructureProvider implements
 						if (contents.length() >= len) {
 							int hash = contents.substring(
 									normalized.getOffset(), len).hashCode();
-							IModelElement element = null;
+							// IModelElement element = null;
+							IModelElement element = new SourceMethod(
+									(ModelElement) parent, codeBlock.statement
+											.toString().trim());
 							SourceRangeStamp codeStamp = new SourceRangeStamp(
 									hash, normalized.getLength());
 							ScriptProjectionAnnotation annotation = new ScriptProjectionAnnotation(
@@ -877,8 +901,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 
 	/**
 	 * Creates a comment folding position from an
-	 * {@link #alignRegion(IRegion, DefaultScriptFoldingStructureProvider.FoldingStructureComputationContext) aligned}
-	 * region.
+	 * {@link #alignRegion(IRegion, DefaultScriptFoldingStructureProvider.FoldingStructureComputationContext)
+	 * aligned} region.
 	 * 
 	 * @param aligned
 	 *            an aligned region
@@ -890,8 +914,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 
 	/**
 	 * Creates a folding position that remembers its member from an
-	 * {@link #alignRegion(IRegion, DefaultScriptFoldingStructureProvider.FoldingStructureComputationContext) aligned}
-	 * region.
+	 * {@link #alignRegion(IRegion, DefaultScriptFoldingStructureProvider.FoldingStructureComputationContext)
+	 * aligned} region.
 	 * 
 	 * @param aligned
 	 *            an aligned region
@@ -908,17 +932,17 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	 * Aligns <code>region</code> to start and end at a line offset. The
 	 * region's start is decreased to the next line offset, and the end offset
 	 * increased to the next line start or the end of the document.
-	 * <code>null</code> is returned if <code>region</code> is
-	 * <code>null</code> itself or does not comprise at least one line
-	 * delimiter, as a single line cannot be folded.
+	 * <code>null</code> is returned if <code>region</code> is <code>null</code>
+	 * itself or does not comprise at least one line delimiter, as a single line
+	 * cannot be folded.
 	 * 
 	 * @param region
 	 *            the region to align, may be <code>null</code>
 	 * @param ctx
 	 *            the folding context
 	 * @return a region equal or greater than <code>region</code> that is
-	 *         aligned with line offsets, <code>null</code> if the region is
-	 *         too small to be foldable (e.g. covers only one line)
+	 *         aligned with line offsets, <code>null</code> if the region is too
+	 *         small to be foldable (e.g. covers only one line)
 	 */
 	protected final IRegion alignRegion(IRegion region,
 			FoldingStructureComputationContext ctx) {
@@ -988,7 +1012,6 @@ public abstract class AbstractASTFoldingStructureProvider implements
 
 	/*
 	 * @see IScriptFoldingStructureProviderExtension#collapseMembers()
-	 * 
 	 */
 	public final void collapseMembers() {
 		modifyFiltered(fMemberFilter, false);
@@ -996,7 +1019,6 @@ public abstract class AbstractASTFoldingStructureProvider implements
 
 	/*
 	 * @see IScriptFoldingStructureProviderExtension#collapseComments()
-	 * 
 	 */
 	public final void collapseComments() {
 		modifyFiltered(fCommentFilter, false);
@@ -1136,6 +1158,9 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	 * @return
 	 * @deprecated will be removed
 	 * @see #initiallyCollapseComments(IRegion,
+	 *     
+	 *     
+	 *     
 	 *      org.eclipse.dltk.ui.text.folding.AbstractASTFoldingStructureProvider.FoldingStructureComputationContext)
 	 */
 	protected boolean initiallyCollapseComments(
