@@ -69,8 +69,7 @@ public abstract class AbstractScriptBreakpoint extends Breakpoint implements
 			return new URI("file", "///" //$NON-NLS-1$ //$NON-NLS-2$
 					+ location.toPortableString(), null);
 		} catch (URISyntaxException e) {
-			// TODO: log exception
-			e.printStackTrace();
+			DLTKDebugPlugin.log(e);
 			return null;
 		}
 	}
