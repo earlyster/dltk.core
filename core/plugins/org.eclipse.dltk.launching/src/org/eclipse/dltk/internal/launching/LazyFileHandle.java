@@ -21,6 +21,7 @@ import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
+import org.eclipse.dltk.utils.PlatformFileUtils;
 
 public class LazyFileHandle implements IFileHandle {
 	private String environment = null;
@@ -37,7 +38,8 @@ public class LazyFileHandle implements IFileHandle {
 			IEnvironment environment = EnvironmentManager
 					.getEnvironmentById(this.environment);
 			if (environment != null) {
-				handle = environment.getFile(this.path);
+				handle = PlatformFileUtils.findAbsoluteOrEclipseRelativeFile(
+						environment, this.path);
 			}
 			// Local environment for update from latest versions.
 			else if (this.environment.equals("")) {
@@ -165,8 +167,13 @@ public class LazyFileHandle implements IFileHandle {
 	}
 
 	public String toOSString() {
+		IEnvironment environment = EnvironmentManager
+				.getEnvironmentById(this.environment);
+		if (environment != null) {
+			return environment.convertPathToString(this.path);
+		}
 		initialize();
-		if (handle != null) {
+		if (this.handle != null) {
 			return this.handle.toOSString();
 		}
 		return null;
