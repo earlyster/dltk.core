@@ -183,7 +183,9 @@ public class MyHostShellProcessAdapter extends Process implements
 		try {
 			for (int i = 0; i < input.length; i++) {
 				String line = input[i].getString();
-				// System.out.println("RSEExecEnvironment:" + line);
+				if (line == null) {
+					continue;
+				}
 				String trimLine = line.trim();
 				if (trimLine.endsWith(this.pattern1)) {
 					if (!trimLine.equals(this.pattern1)) {
