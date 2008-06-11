@@ -282,7 +282,6 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		// Remove AST Cache element
 		ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
 				.getModelManager().getSourceModuleInfoCache();
-		// sourceModuleInfoCache.remove(this);
 		sourceModuleInfoCache.remove(this);
 		openWhenClosed(createElementInfo(), monitor);
 	}
