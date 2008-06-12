@@ -33,7 +33,6 @@ import org.eclipse.dltk.internal.ui.actions.ActionUtil;
 import org.eclipse.dltk.internal.ui.actions.OpenActionUtil;
 import org.eclipse.dltk.internal.ui.actions.SelectionConverter;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
-import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.util.ExceptionHandler;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -41,6 +40,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
@@ -59,7 +59,7 @@ import org.eclipse.ui.texteditor.IEditorStatusLine;
  */
 public class OpenAction extends SelectionDispatchAction {
 
-	private ScriptEditor fEditor;
+	private IEditorPart fEditor;
 
 	/**
 	 * Creates a new <code>OpenAction</code>. The action requires that the
@@ -67,7 +67,7 @@ public class OpenAction extends SelectionDispatchAction {
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site
-	 *            the site providing context information for this action
+	 * 		the site providing context information for this action
 	 */
 	public OpenAction(IWorkbenchSite site) {
 		super(site);
@@ -87,9 +87,9 @@ public class OpenAction extends SelectionDispatchAction {
 	 * this constructor.
 	 * 
 	 * @param editor
-	 *            the Script editor
+	 * 		the Script editor
 	 */
-	public OpenAction(ScriptEditor editor) {
+	public OpenAction(IEditorPart editor) {
 		this(editor.getEditorSite());
 		fEditor = editor;
 		setText(ActionMessages.OpenAction_declaration_label);
@@ -155,19 +155,16 @@ public class OpenAction extends SelectionDispatchAction {
 			IEditorStatusLine statusLine = (IEditorStatusLine) fEditor
 					.getAdapter(IEditorStatusLine.class);
 			if (statusLine != null)
-				statusLine
-						.setMessage(
-								true,
-								ActionMessages.OpenAction_error_messageBadSelection,
-								null);
+				statusLine.setMessage(true,
+						ActionMessages.OpenAction_error_messageBadSelection,
+						null);
 			getShell().getDisplay().beep();
 			return;
 		}
 		IModelElement element = elements[0];
 		if (elements.length > 1) {
-			element = OpenActionUtil.selectModelElement(elements,
-					getShell(), getDialogTitle(),
-					ActionMessages.OpenAction_select_element);
+			element = OpenActionUtil.selectModelElement(elements, getShell(),
+					getDialogTitle(), ActionMessages.OpenAction_select_element);
 			if (element == null)
 				return;
 		}
@@ -176,15 +173,14 @@ public class OpenAction extends SelectionDispatchAction {
 		if (type == IModelElement.SCRIPT_PROJECT
 				|| type == IModelElement.PROJECT_FRAGMENT
 				|| type == IModelElement.SCRIPT_FOLDER)
-			element = EditorUtility.getEditorInputModelElement(fEditor,
-					false);
+			element = EditorUtility.getEditorInputModelElement(fEditor, false);
 		run(new Object[] { element });
 	}
 
 	private IModelElement[] filterElements(IModelElement[] elements) {
 		if (elements == null)
 			return null;
-		
+
 		Map uniqueElements = new HashMap();
 		for (int i = 0; i < elements.length; i++) {
 			IModelElement element = elements[i];
@@ -225,7 +221,7 @@ public class OpenAction extends SelectionDispatchAction {
 	 * method.
 	 * 
 	 * @param elements
-	 *            the elements to process
+	 * 		the elements to process
 	 */
 	public void run(Object[] elements) {
 		if (elements == null)
@@ -279,10 +275,10 @@ public class OpenAction extends SelectionDispatchAction {
 	 * method.
 	 * 
 	 * @param object
-	 *            the element to open
+	 * 		the element to open
 	 * @return the real element to open
 	 * @throws ModelException
-	 *             if an error occurs while accessing the Script model
+	 * 		if an error occurs while accessing the Script model
 	 */
 	public Object getElementToOpen(Object object) throws ModelException {
 		Object target = null;
