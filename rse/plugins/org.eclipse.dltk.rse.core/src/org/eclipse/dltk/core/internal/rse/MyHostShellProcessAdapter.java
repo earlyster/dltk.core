@@ -173,7 +173,6 @@ public class MyHostShellProcessAdapter extends Process implements
 	 *      shellOutputChanged
 	 *      (org.eclipse.rse.services.shells.IHostShellChangeEvent)
 	 */
-	private boolean skip = true;
 	private int prefixCounter = 0;
 
 	public void shellOutputChanged(IHostShellChangeEvent event) {
@@ -186,26 +185,28 @@ public class MyHostShellProcessAdapter extends Process implements
 				if (line == null) {
 					continue;
 				}
-				String trimLine = line.trim();
-				if (trimLine.endsWith(this.pattern1)) {
-					if (!trimLine.equals(this.pattern1)) {
-						// We need to output part of line
-						int pos = line.indexOf(this.pattern1);
-						outputStream.write(line.substring(0, pos).getBytes());
-						outputStream.write('\n');
-						outputStream.flush();
+				if (!event.isError()) {
+					String trimLine = line.trim();
+					if (trimLine.endsWith(this.pattern1)) {
+						if (prefixCounter == 1 && !trimLine.equals(pattern1)) {
+							// We need to output part of line
+							int pos = line.indexOf(pattern1);
+							outputStream.write(line.substring(0, pos)
+									.getBytes());
+							outputStream.write('\n');
+							outputStream.flush();
+						}
+						prefixCounter++;
+						if (prefixCounter == 2) {
+							// System.out.println("CALL DESTROY");
+							hostShellError.close();
+							hostShellInput.close();
+							return;
+						}
+						continue;
 					}
-					prefixCounter++;
-					if (prefixCounter == 2) {
-						// System.out.println("CALL DESTROY");
-						hostShellError.close();
-						hostShellInput.close();
-						return;
-					}
-					skip = !skip;
-					continue;
 				}
-				if (!skip) {
+				if (prefixCounter == 1) {
 					outputStream.write(line.getBytes());
 					outputStream.write('\n');
 					outputStream.flush();
