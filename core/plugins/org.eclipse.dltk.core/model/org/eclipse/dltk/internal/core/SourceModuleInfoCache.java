@@ -98,7 +98,8 @@ public class SourceModuleInfoCache implements ISourceModuleInfoCache {
 			if (delta.getKind() == IModelElementDelta.REMOVED
 					|| delta.getKind() == IModelElementDelta.CHANGED) {
 				if (element.getElementType() == IModelElement.SOURCE_MODULE) {
-					if (isContentChanged(delta) || isWorkingCopy(delta)) {
+					if (delta.getKind() == IModelElementDelta.REMOVED
+							|| isContentChanged(delta) || isWorkingCopy(delta)) {
 						if (DEBUG) {
 							System.out
 									.println("[Cache] remove: kind=" + delta.getKind() + " flags=" + Integer.toHexString(delta.getFlags()) + " elementName=" + delta.getElement().getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
