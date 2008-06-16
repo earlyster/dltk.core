@@ -47,8 +47,8 @@ public abstract class OpenTypeAction extends Action implements
 		OpenTypeSelectionDialog2 dialog = new OpenTypeSelectionDialog2(parent,
 				true, PlatformUI.getWorkbench().getProgressService(), null,
 				IDLTKSearchConstants.TYPE, this.getUILanguageToolkit());
-		dialog.setTitle(DLTKUIMessages.OpenTypeAction_dialogTitle);
-		dialog.setMessage(DLTKUIMessages.OpenTypeAction_dialogMessage);
+		dialog.setTitle(getOpenTypeDialogTitle());
+		dialog.setMessage(getOpenTypeDialogMessage());
 
 		int result = dialog.open();
 		if (result != IDialogConstants.OK_ID)
@@ -62,12 +62,27 @@ public abstract class OpenTypeAction extends Action implements
 				try {
 					DLTKUIPlugin.openInEditor(type, true, true);
 				} catch (CoreException x) {
-					ExceptionHandler.handle(x,
-							DLTKUIMessages.OpenTypeAction_errorTitle,
-							DLTKUIMessages.OpenTypeAction_errorMessage);
+					ExceptionHandler.handle(x, getOpenTypeErrorTitle(),
+							getOpenTypeErrorMessage());
 				}
 			}
 		}
+	}
+
+	protected String getOpenTypeErrorMessage() {
+		return DLTKUIMessages.OpenTypeAction_errorMessage;
+	}
+
+	protected String getOpenTypeErrorTitle() {
+		return DLTKUIMessages.OpenTypeAction_errorTitle;
+	}
+
+	protected String getOpenTypeDialogMessage() {
+		return DLTKUIMessages.OpenTypeAction_dialogMessage;
+	}
+
+	protected String getOpenTypeDialogTitle() {
+		return DLTKUIMessages.OpenTypeAction_dialogTitle;
 	}
 
 	// ---- IWorkbenchWindowActionDelegate
