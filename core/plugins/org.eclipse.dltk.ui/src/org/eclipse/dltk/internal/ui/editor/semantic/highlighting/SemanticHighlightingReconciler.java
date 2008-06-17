@@ -44,6 +44,8 @@ import org.eclipse.ui.IWorkbenchPartSite;
 public class SemanticHighlightingReconciler implements
 		IScriptReconcilingListener, ITextInputListener {
 
+	static final boolean DEBUG = false;
+
 	/** The Java editor this semantic highlighting reconciler is installed on */
 	private ScriptEditor fEditor;
 	/** The source viewer this semantic highlighting reconciler is installed on */
@@ -136,6 +138,11 @@ public class SemanticHighlightingReconciler implements
 				final UpdateResult result = reconcilePositions(ast);
 				added = result.addedPositions;
 				removed = result.removedPositions;
+				if (DEBUG) {
+					System.out.println("Add:" + added.size() + " " + added); //$NON-NLS-1$ //$NON-NLS-2$
+					System.out
+							.println("Remove:" + removed.size() + " " + removed); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			}
 
 			TextPresentation textPresentation = null;
