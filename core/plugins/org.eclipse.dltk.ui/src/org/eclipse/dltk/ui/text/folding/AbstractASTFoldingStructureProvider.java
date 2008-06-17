@@ -823,7 +823,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 									normalized.getOffset(), len).hashCode();
 							IModelElement element = null;
 
-							if (codeBlock.statement instanceof MethodDeclaration) {
+							if (fInput != null
+									&& codeBlock.statement instanceof MethodDeclaration) {
 								MethodDeclaration meth = (MethodDeclaration) codeBlock.statement;
 
 								MethodVisitor vis = new MethodVisitor(meth
