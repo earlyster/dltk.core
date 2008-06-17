@@ -35,7 +35,7 @@ public class SemanticUpdateWorker extends ASTVisitor {
 			if (p != null && p.isEqual(start, len, hl)) {
 				oldPositions[i] = null;
 				--oldPositionCount;
-				break;
+				return;
 			}
 		}
 		final HighlightedPosition hp = presenter.createHighlightedPosition(
