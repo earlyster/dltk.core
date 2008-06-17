@@ -96,15 +96,17 @@ public class SemanticHighlightingReconciler implements
 	private PositionUpdater positionUpdated;
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.Script.IScriptReconcilingListener#aboutToBeReconciled()
+	 * @see org.eclipse.jdt.internal.ui.text.Script.IScriptReconcilingListener#
+	 * aboutToBeReconciled()
 	 */
 	public void aboutToBeReconciled() {
 		// Do nothing
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.Script.IScriptReconcilingListener#reconciled(ModuleDeclaration,
-	 *      boolean, IProgressMonitor)
+	 * @see
+	 * org.eclipse.jdt.internal.ui.text.Script.IScriptReconcilingListener#reconciled
+	 * (ModuleDeclaration, boolean, IProgressMonitor)
 	 */
 	public void reconciled(ISourceModule ast, boolean forced,
 			IProgressMonitor progressMonitor) {
@@ -122,7 +124,7 @@ public class SemanticHighlightingReconciler implements
 		fJobHighlightings = fHighlightings;
 
 		try {
-			long t0 = System.currentTimeMillis();
+			// long t0 = System.currentTimeMillis();
 			if (fJobPresenter == null || fJobSemanticHighlightings == null
 					|| fJobHighlightings == null)
 				return;
@@ -309,7 +311,8 @@ public class SemanticHighlightingReconciler implements
 							return Status.CANCEL_STATUS;
 						ISourceModule ast = null;
 						// /
-						// /DLTKUIPlugin.getDefault().getASTProvider().getAST(element,
+						// /DLTKUIPlugin.getDefault().getASTProvider().getAST(
+						// element,
 						// ASTProvider.WAIT_YES, monitor);
 						reconciled(ast, false, monitor);
 						synchronized (fJobLock) {
@@ -328,8 +331,9 @@ public class SemanticHighlightingReconciler implements
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentAboutToBeChanged(org.eclipse.jface.text.IDocument,
-	 *      org.eclipse.jface.text.IDocument)
+	 * @see
+	 * org.eclipse.jface.text.ITextInputListener#inputDocumentAboutToBeChanged
+	 * (org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
 	 */
 	public void inputDocumentAboutToBeChanged(IDocument oldInput,
 			IDocument newInput) {
@@ -342,8 +346,9 @@ public class SemanticHighlightingReconciler implements
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentChanged(org.eclipse.jface.text.IDocument,
-	 *      org.eclipse.jface.text.IDocument)
+	 * @see
+	 * org.eclipse.jface.text.ITextInputListener#inputDocumentChanged(org.eclipse
+	 * .jface.text.IDocument, org.eclipse.jface.text.IDocument)
 	 */
 	public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
 		if (newInput != null)
