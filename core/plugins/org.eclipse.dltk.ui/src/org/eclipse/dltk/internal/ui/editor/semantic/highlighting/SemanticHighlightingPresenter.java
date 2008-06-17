@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
-import org.eclipse.dltk.internal.ui.editor.SemanticHighlightingManager;
 import org.eclipse.dltk.internal.ui.editor.SemanticHighlightingManager.HighlightedPosition;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.text.ScriptPresentationReconciler;
@@ -333,9 +332,9 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 			return null;
 
 		// TODO: do clustering of positions and post multiple fast runnables
-		final HighlightedPosition[] added= new SemanticHighlightingManager.HighlightedPosition[addedPositions.size()];
+		final HighlightedPosition[] added= new HighlightedPosition[addedPositions.size()];
 		addedPositions.toArray(added);
-		final SemanticHighlightingManager.HighlightedPosition[] removed= new SemanticHighlightingManager.HighlightedPosition[removedPositions.size()];
+		final HighlightedPosition[] removed= new HighlightedPosition[removedPositions.size()];
 		removedPositions.toArray(removed);
 
 		if (isCanceled())
