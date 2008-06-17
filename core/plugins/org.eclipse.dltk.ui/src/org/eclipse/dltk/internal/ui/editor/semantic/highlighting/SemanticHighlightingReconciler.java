@@ -93,7 +93,7 @@ public class SemanticHighlightingReconciler implements
 	 * {@link #reconciled(ModuleDeclaration, boolean, IProgressMonitor)}
 	 */
 	private Highlighting[] fJobHighlightings;
-	private PositionUpdater positionUpdated;
+	private PositionUpdater positionUpdater;
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.Script.IScriptReconcilingListener#
@@ -110,7 +110,7 @@ public class SemanticHighlightingReconciler implements
 	 */
 	public void reconciled(ISourceModule ast, boolean forced,
 			IProgressMonitor progressMonitor) {
-		if (positionUpdated == null)
+		if (positionUpdater == null)
 			return;
 		// ensure at most one thread can be reconciling at any time
 		synchronized (fReconcileLock) {
@@ -187,7 +187,7 @@ public class SemanticHighlightingReconciler implements
 
 		ArrayList list = new ArrayList();
 		presenter.addAllPositions(list);
-		UpdateResult reconcile = positionUpdated.reconcile(ast, presenter,
+		UpdateResult reconcile = positionUpdater.reconcile(ast, presenter,
 				fHighlightings, list);
 		fAddedPositions = reconcile.addedPositions;
 		fRemovedPositions = reconcile.removedPositions;
@@ -245,7 +245,7 @@ public class SemanticHighlightingReconciler implements
 		fPresenter = presenter;
 		ScriptTextTools textTools = editor.getTextTools();
 		if (textTools != null) {
-			this.positionUpdated = textTools.getSemanticPositionUpdater();
+			this.positionUpdater = textTools.getSemanticPositionUpdater();
 		}
 		fSemanticHighlightings = semanticHighlightings;
 		fHighlightings = highlightings;
