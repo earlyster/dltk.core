@@ -12,6 +12,7 @@
 package org.eclipse.dltk.internal.ui.editor.semantic.highlighting;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -53,11 +54,6 @@ public class SemanticHighlightingReconciler implements
 	private SemanticHighlighting[] fSemanticHighlightings;
 	/** Highlightings */
 	private Highlighting[] fHighlightings;
-
-	/** Background job's added highlighted positions */
-	private List fAddedPositions = new ArrayList();
-	/** Background job's removed highlighted positions */
-	private List fRemovedPositions = new ArrayList();
 
 	/** Background job */
 	private Job fJob;
@@ -134,21 +130,24 @@ public class SemanticHighlightingReconciler implements
 			if (ast == null || fJobPresenter.isCanceled())
 				return;
 
-			startReconcilingPositions();
-
-			if (!fJobPresenter.isCanceled())
-				reconcilePositions(ast, fPresenter);
+			List added = Collections.EMPTY_LIST;
+			List removed = Collections.EMPTY_LIST;
+			if (!fJobPresenter.isCanceled()) {
+				final UpdateResult result = reconcilePositions(ast);
+				added = result.addedPositions;
+				removed = result.removedPositions;
+			}
 
 			TextPresentation textPresentation = null;
-			if (!fJobPresenter.isCanceled())
-				textPresentation = fJobPresenter.createPresentation(
-						fAddedPositions, fRemovedPositions);
+			if (!fJobPresenter.isCanceled()
+					&& !(added.isEmpty() && removed.isEmpty())) {
+				textPresentation = fJobPresenter.createPresentation(added,
+						removed);
+			}
 
 			if (!fJobPresenter.isCanceled())
-				updatePresentation(textPresentation, fAddedPositions,
-						fRemovedPositions);
+				updatePresentation(textPresentation, added, removed);
 
-			stopReconcilingPositions();
 			// long t1 = System.currentTimeMillis();
 			// System.out.println(t1 - t0);
 
@@ -163,14 +162,6 @@ public class SemanticHighlightingReconciler implements
 	}
 
 	/**
-	 * Start reconciling positions.
-	 */
-	private void startReconcilingPositions() {
-		fJobPresenter.addAllPositions(fRemovedPositions);
-		// fNOfRemovedPositions = fRemovedPositions.size();
-	}
-
-	/**
 	 * Reconcile positions based on the AST subtrees
 	 * 
 	 * @param presenter
@@ -179,18 +170,11 @@ public class SemanticHighlightingReconciler implements
 	 * @param subtrees
 	 *            the AST subtrees
 	 */
-	private void reconcilePositions(ISourceModule ast,
-			SemanticHighlightingPresenter presenter) {
-		// FIXME: remove positions not covered by subtrees
-		// for (int i= 0, n= subtrees.length; i < n; i++)
-		// subtrees[i].accept(fCollector);
-
-		ArrayList list = new ArrayList();
-		presenter.addAllPositions(list);
-		UpdateResult reconcile = positionUpdater.reconcile(ast, presenter,
-				fHighlightings, list);
-		fAddedPositions = reconcile.addedPositions;
-		fRemovedPositions = reconcile.removedPositions;
+	private UpdateResult reconcilePositions(ISourceModule ast) {
+		final List currentPositions = new ArrayList();
+		fJobPresenter.addAllPositions(currentPositions);
+		return positionUpdater.reconcile(ast, fJobPresenter, fHighlightings,
+				currentPositions);
 	}
 
 	/**
@@ -227,15 +211,6 @@ public class SemanticHighlightingReconciler implements
 			return;
 
 		display.asyncExec(runnable);
-	}
-
-	/**
-	 * Stop reconciling positions.
-	 */
-	private void stopReconcilingPositions() {
-		fRemovedPositions.clear();
-		// fNOfRemovedPositions = 0;
-		fAddedPositions.clear();
 	}
 
 	public void install(ScriptEditor editor, ISourceViewer sourceViewer,
