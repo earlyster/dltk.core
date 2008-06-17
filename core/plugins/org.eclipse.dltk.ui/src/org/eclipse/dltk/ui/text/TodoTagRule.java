@@ -20,18 +20,29 @@ import org.eclipse.jface.text.rules.Token;
 
 public class TodoTagRule implements IPredicateRule {
 
-	private IToken token;
-	private char[][] todoTags;
-	private boolean caseSensitive;
-	private boolean[] candidates;
+	private final IToken token;
+	private final char[][] todoTags;
+	private final boolean caseSensitive;
+	private final boolean[] candidates;
+	private final int maxLength;
 
-	public TodoTagRule(IToken t, String[] tags, boolean caseSensitivity) {
+	public TodoTagRule(IToken t, String[] tags, boolean caseSensitive) {
 		token = t;
 		todoTags = new char[tags.length][];
-		for (int i = 0; i < todoTags.length; i++)
-			todoTags[i] = tags[i].toCharArray();
+		int maxLen = 0;
+		for (int i = 0; i < todoTags.length; i++) {
+			final char[] tag = tags[i].toCharArray();
+			if (!caseSensitive) {
+				for (int j = 0; j < tag.length; ++j) {
+					tag[j] = Character.toUpperCase(tag[j]);
+				}
+			}
+			todoTags[i] = tag;
+			maxLen = Math.max(tag.length, maxLen);
+		}
 		candidates = new boolean[todoTags.length];
-		caseSensitive = caseSensitivity;
+		this.caseSensitive = caseSensitive;
+		this.maxLength = maxLen;
 	}
 
 	public IToken evaluate(ICharacterScanner scanner, boolean resume) {
@@ -44,41 +55,57 @@ public class TodoTagRule implements IPredicateRule {
 
 	public IToken evaluate(ICharacterScanner scanner) {
 		Arrays.fill(candidates, true);
+		int candidateCount = todoTags.length;
 		int count = 0;
-
 		int c;
 		while ((c = scanner.read()) != ICharacterScanner.EOF) {
-			boolean allok = false;
 			for (int i = 0; i < todoTags.length; i++) {
 				if (candidates[i]) {
-					allok = true;
-					if (count == todoTags[i].length - 1) {
-						c = scanner.read();
-						if (Character.isJavaIdentifierPart((char) c)) {
-							allok = false;
-							break;
+					final char[] tag = todoTags[i];
+					if (count < tag.length) {
+						final boolean eq = caseSensitive ? c == tag[count]
+								: Character.toUpperCase((char) c) == tag[count];
+						if (!eq) {
+							candidates[i] = false;
+							--candidateCount;
+							if (candidateCount == 0) {
+								unreadScanner(scanner, count + 1);
+								return Token.UNDEFINED;
+							}
 						}
-						scanner.unread();
-						return getSuccessToken();
-					}
-					boolean equals = caseSensitive ? todoTags[i][count] == c
-							: Character.toLowerCase(todoTags[i][count]) == Character
-									.toLowerCase((char) c);
-					if (!equals) {
-						candidates[i] = false;
+					} else if (count == tag.length) {
+						if (!Character.isJavaIdentifierPart((char) c)) {
+							scanner.unread();
+							return getSuccessToken();
+						}
 					}
 				}
 			}
-			if (!allok)
+			++count;
+			if (count == maxLength) {
+				c = scanner.read();
+				if (c != ICharacterScanner.EOF
+						&& !Character.isJavaIdentifierPart((char) c)) {
+					c = ICharacterScanner.EOF;
+				}
+				scanner.unread();
 				break;
-			count++;
+			}
+		}
+		if (c == ICharacterScanner.EOF) {
+			for (int i = 0; i < todoTags.length; i++) {
+				if (candidates[i] && count == todoTags[i].length) {
+					return getSuccessToken();
+				}
+			}
 		}
 		unreadScanner(scanner, count);
 		return Token.UNDEFINED;
 	}
 
 	private void unreadScanner(ICharacterScanner scanner, int num) {
-		for (int i = 0; i < num; i++)
+		for (int i = 0; i < num; i++) {
 			scanner.unread();
+		}
 	}
 }
