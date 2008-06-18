@@ -11,33 +11,33 @@
 
 package org.eclipse.dltk.internal.ui.editor.semantic.highlighting;
 
-
-
 /**
  * Semantic highlighting
  */
 public abstract class SemanticHighlighting {
 
 	/**
-	 * @return the preference key, will be augmented by a prefix and a suffix for each preference
+	 * @return the preference key, will be augmented by a prefix and a suffix
+	 *         for each preference
 	 */
 	public abstract String getPreferenceKey();
 
-	
-		/**
-	 * @return <code>true</code> if the text attribute italic is enabled by default
+	/**
+	 * @return <code>true</code> if the text attribute is enabled by default
 	 */
-	public  boolean isEnabledByDefault(){return true;};
+	public boolean isEnabledByDefault() {
+		return true;
+	}
 
 	/**
 	 * @return the display name
 	 */
-	public  String getDisplayName(){return "";}; //$NON-NLS-1$
+	public String getDisplayName() {
+		return ""; //$NON-NLS-1$
+	}
 
-	
-
-	public String getBackgroundPreferenceKey() {	
+	public String getBackgroundPreferenceKey() {
 		return null;
 	}
-	
+
 }
