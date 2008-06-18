@@ -170,7 +170,10 @@ public class LazyFileHandle implements IFileHandle {
 		IEnvironment environment = EnvironmentManager
 				.getEnvironmentById(this.environment);
 		if (environment != null) {
-			return environment.convertPathToString(this.path);
+			IPath newPath = PlatformFileUtils
+					.findAbsoluteOrEclipseRelativeFile(environment, this.path)
+					.getPath();
+			return environment.convertPathToString(newPath);
 		}
 		initialize();
 		if (this.handle != null) {
