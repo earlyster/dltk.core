@@ -27,4 +27,8 @@ class TokenPos {
 		}
 		return false;
 	}
+
+	public String toString() {
+		return "TokenPos[" + begin + "+" + length + "]";
+	}
 }

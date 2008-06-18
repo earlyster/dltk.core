@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.dltk.core.tests.model.SuiteOfTestCases;
-import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.rules.IToken;
 
 public class TodoHighlightingTest extends SuiteOfTestCases {
@@ -31,10 +30,22 @@ public class TodoHighlightingTest extends SuiteOfTestCases {
 		super(name);
 	}
 
+	private TestScriptCommentScanner createScanner(String[] tags,
+			boolean caseSensitive) {
+		return new TestScriptCommentScanner(tags, COMMENT_KEY, TODO_KEY,
+				caseSensitive);
+	}
+
+	private IToken evaluateTodoRule(final TestScriptCommentScanner scanner) {
+		final int oldOffset = scanner.getTokenOffset();
+		final IToken token = scanner.createTodoRule().evaluate(scanner);
+		assertEquals(oldOffset, scanner.getTokenOffset());
+		return token;
+	}
+
 	protected List findTodoTokens(String data, String[] tags) {
-		TestScriptCommentScanner scanner = new TestScriptCommentScanner(tags,
-				COMMENT_KEY, TODO_KEY, true);
-		scanner.setRange(new Document(data), 0, data.length());
+		TestScriptCommentScanner scanner = createScanner(tags, true);
+		scanner.setText(data);
 		final IToken todoToken = scanner.getToken(TODO_KEY);
 		List result = new ArrayList();
 		IToken t;
@@ -62,6 +73,87 @@ public class TodoHighlightingTest extends SuiteOfTestCases {
 
 	private static final String TODO = "TODO";
 	private static final String FIXME = "FIXME";
+
+	public void testTodoRuleMiss1() {
+		final TestScriptCommentScanner scanner = createScanner(new String[] {
+				TODO, FIXME }, true);
+		scanner.setText("x");
+		final IToken token = evaluateTodoRule(scanner);
+		assertTrue(token.isUndefined());
+		assertEquals(0, scanner.getTokenLength());
+	}
+
+	public void testTodoRuleMiss2() {
+		final TestScriptCommentScanner scanner = createScanner(new String[] {
+				TODO, FIXME }, true);
+		scanner.setText("x" + TODO);
+		final IToken token = evaluateTodoRule(scanner);
+		assertTrue(token.isUndefined());
+		assertEquals(0, scanner.getTokenLength());
+	}
+
+	public void testTodoRuleMiss3() {
+		final TestScriptCommentScanner scanner = createScanner(new String[] {
+				TODO, FIXME }, true);
+		scanner.setText(TODO + "x");
+		final IToken token = evaluateTodoRule(scanner);
+		assertTrue(token.isUndefined());
+		assertEquals(0, scanner.getTokenLength());
+	}
+
+	public void testTodoRuleMiss4() {
+		final TestScriptCommentScanner scanner = createScanner(new String[] {
+				TODO, FIXME }, true);
+		scanner.setText(FIXME + "x");
+		final IToken token = evaluateTodoRule(scanner);
+		assertTrue(token.isUndefined());
+		assertEquals(0, scanner.getTokenLength());
+	}
+
+	public void testTodoRuleMiss5() {
+		final TestScriptCommentScanner scanner = createScanner(new String[] {
+				TODO, FIXME }, true);
+		scanner.setText("x" + FIXME);
+		final IToken token = evaluateTodoRule(scanner);
+		assertTrue(token.isUndefined());
+		assertEquals(0, scanner.getTokenLength());
+	}
+
+	public void testTodoRuleMatch1() {
+		final TestScriptCommentScanner scanner = createScanner(new String[] {
+				TODO, FIXME }, true);
+		scanner.setText(TODO);
+		final IToken token = evaluateTodoRule(scanner);
+		assertTrue(token.isOther());
+		assertEquals(TODO.length(), scanner.getTokenLength());
+	}
+
+	public void testTodoRuleMatch2() {
+		final TestScriptCommentScanner scanner = createScanner(new String[] {
+				TODO, FIXME }, true);
+		scanner.setText(FIXME);
+		final IToken token = evaluateTodoRule(scanner);
+		assertTrue(token.isOther());
+		assertEquals(FIXME.length(), scanner.getTokenLength());
+	}
+
+	public void testTodoRuleMatch3() {
+		final TestScriptCommentScanner scanner = createScanner(new String[] {
+				TODO, FIXME }, true);
+		scanner.setText(TODO + " ");
+		final IToken token = evaluateTodoRule(scanner);
+		assertTrue(token.isOther());
+		assertEquals(TODO.length(), scanner.getTokenLength());
+	}
+
+	public void testTodoRuleMatch4() {
+		final TestScriptCommentScanner scanner = createScanner(new String[] {
+				TODO, FIXME }, true);
+		scanner.setText(FIXME + " ");
+		final IToken token = evaluateTodoRule(scanner);
+		assertTrue(token.isOther());
+		assertEquals(FIXME.length(), scanner.getTokenLength());
+	}
 
 	public void testBare() {
 		final String data = "#TODO";
@@ -100,6 +192,12 @@ public class TodoHighlightingTest extends SuiteOfTestCases {
 
 	public void testPrefixed() {
 		final String data = "# aTODO comment";
+		List tokens = findTodoTokens(data, TODO);
+		assertEquals(0, tokens.size());
+	}
+
+	public void testNoTodo() {
+		final String data = "#hello";
 		List tokens = findTodoTokens(data, TODO);
 		assertEquals(0, tokens.size());
 	}

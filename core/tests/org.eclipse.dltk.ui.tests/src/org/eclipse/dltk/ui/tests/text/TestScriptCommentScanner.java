@@ -14,6 +14,8 @@ package org.eclipse.dltk.ui.tests.text;
 import org.eclipse.dltk.internal.ui.text.DLTKColorManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.text.ScriptCommentScanner;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.Token;
 
 class TestScriptCommentScanner extends ScriptCommentScanner {
@@ -25,10 +27,21 @@ class TestScriptCommentScanner extends ScriptCommentScanner {
 				new TestTodoTaskPreferences(tags, caseSensitive));
 	}
 
+	public void setText(String text) {
+		setRange(new Document(text), 0, text.length());
+	}
+
 	/*
 	 * increase visibility
 	 */
 	public Token getToken(String key) {
 		return super.getToken(key);
+	}
+
+	/*
+	 * increase visibility
+	 */
+	public IRule createTodoRule() {
+		return super.createTodoRule();
 	}
 }
