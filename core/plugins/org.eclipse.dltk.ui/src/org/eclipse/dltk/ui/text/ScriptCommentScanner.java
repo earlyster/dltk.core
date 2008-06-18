@@ -16,107 +16,90 @@ import java.util.List;
 
 import org.eclipse.dltk.compiler.task.ITodoTaskPreferences;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
-import org.eclipse.jface.text.rules.IWhitespaceDetector;
-import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.Token;
-import org.eclipse.jface.text.rules.WhitespaceRule;
-import org.eclipse.jface.text.rules.WordRule;
 
 public class ScriptCommentScanner extends AbstractScriptScanner {
 
-	private final String[] fProperty;
+	private final String[] fProperties;
 	private final ITodoTaskPreferences preferences;
 
 	public ScriptCommentScanner(IColorManager manager, IPreferenceStore store,
 			String comment, String todoTag, ITodoTaskPreferences preferences) {
 		super(manager, store);
-		fProperty = new String[] { comment, todoTag };
+		fProperties = new String[] { comment, todoTag };
 		this.preferences = preferences;
 		initialize();
 	}
 
 	protected String[] getTokenProperties() {
-		return fProperty;
+		return fProperties;
 	}
 
 	protected List createRules() {
-		setDefaultReturnToken(getToken(fProperty[0]));
-
+		setDefaultReturnToken(getToken(fProperties[0]));
 		List rules = new ArrayList();
-
-		// the order of rules is critical
-		rules.add(new WhitespaceRule(new WhitespaceDetector()));
-		WordRule r = new WordRule(new CommentStartDetector(),
-				getToken(fProperty[0]), true);
-		r.addWord(COMMENT_STRING, getToken(fProperty[0]));
-		rules.add(r);
-		rules.add(new TodoTagRule(getToken(fProperty[1]), preferences
-				.getTagNames(), preferences.isCaseSensitive()));
-
+		rules.add(createTodoRule());
 		return rules;
 	}
 
-	private boolean appeared = false;
+	protected IRule createTodoRule() {
+		return new TodoTagRule(getToken(fProperties[1]), preferences
+				.getTagNames(), preferences.isCaseSensitive());
+	}
+
+	public void setRange(IDocument document, int offset, int length) {
+		super.setRange(document, offset, length);
+		state = STATE_START;
+	}
+
+	private int state = STATE_START;
+
+	private static final int STATE_START = 0;
+	private static final int STATE_STARTED = 1;
+	private static final int STATE_BODY = 2;
 
 	/*
-	 * We overload nextToken() because of the way task parsing in implemented:
+	 * We overload nextToken() because of the way task parsing is implemented:
 	 * the TO-DO tasks are recognized only at the beginning of the comment
 	 */
 	public IToken nextToken() {
 		fTokenOffset = fOffset;
 		fColumn = UNDEFINED;
-		if (fRules != null) {
-			for (int i = 0; i < fRules.length; i++) {
-				final IToken token = (fRules[i].evaluate(this));
-				if (!token.isUndefined()) {
-					if (appeared)
-						return fDefaultReturnToken;
-					else
-						return token;
-				} else {
-					if (i == 2) {
-						/*
-						 * a TO-DO rule was processed, and found something
-						 * before TO-DO tag, so no highlighting
-						 */
-						appeared = true;
-					}
-				}
+		if (state == STATE_START) {
+			state = STATE_STARTED;
+			int count = 0;
+			int c = read();
+			if (c == COMMENT_CHAR) {
+				c = read();
+				++count;
+			}
+			while (c != EOF && Character.isWhitespace((char) c)) {
+				c = read();
+				++count;
+			}
+			unread();
+			if (count > 0) {
+				return fDefaultReturnToken;
+			} else if (c == EOF) {
+				return Token.EOF;
 			}
 		}
-		if (read() == EOF) {
-			appeared = false;
-			return Token.EOF;
+		if (state == STATE_STARTED) {
+			state = STATE_BODY;
+			final IToken token = fRules[0].evaluate(this);
+			if (!token.isUndefined()) {
+				return token;
+			}
 		}
-		if (appeared) {
-			int k = read();
-			while (k != EOF)
-				k = read();
-			appeared = false;
-			return fDefaultReturnToken;
+		int count = 0;
+		while (read() != EOF) {
+			++count;
 		}
-		return fDefaultReturnToken;
+		return count > 0 ? fDefaultReturnToken : Token.EOF;
 	}
 
 	private static final char COMMENT_CHAR = '#';
-	private static final String COMMENT_STRING = String.valueOf(COMMENT_CHAR);
-
-	private static class CommentStartDetector implements IWordDetector {
-
-		public boolean isWordPart(char c) {
-			return false;
-		}
-
-		public boolean isWordStart(char c) {
-			return c == COMMENT_CHAR;
-		}
-
-	}
-
-	private static class WhitespaceDetector implements IWhitespaceDetector {
-		public boolean isWhitespace(char character) {
-			return Character.isWhitespace(character);
-		}
-	}
 }

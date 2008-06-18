@@ -190,6 +190,18 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		public int hashCode() {
 			return System.identityHashCode(this);
 		}
+
+		public String toString() {
+			final StringBuffer sb = new StringBuffer();
+			sb.append("HLPos["); //$NON-NLS-1$
+			sb.append(offset);
+			sb.append("+"); //$NON-NLS-1$
+			sb.append(length);
+			sb.append(":"); //$NON-NLS-1$
+			sb.append(fStyle.getSemaHighlighting().getPreferenceKey());
+			sb.append("]"); //$NON-NLS-1$
+			return sb.toString();
+		}
 	}
 
 	/**
@@ -293,8 +305,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 						.getPresentationReconciler(sourceViewer);
 				if (presReconciler instanceof ScriptPresentationReconciler) {
 					fPresentationReconciler = (ScriptPresentationReconciler) presReconciler;
-				}
-				else {
+				} else {
 					fPresentationReconciler = null;
 				}
 			} else {
@@ -512,7 +523,9 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	}
 
 	/*
-	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+	 * @see
+	 * org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse
+	 * .jface.util.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
 		handlePropertyChangeEvent(event);
@@ -604,7 +617,8 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			}
 
 			// String enabledKey=
-			// preferenceKey+PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE;
+			// preferenceKey+PreferenceConstants.
+			// EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE;
 			// if (enabledKey.equals(event.getProperty())) {
 			// adaptToEnablementChange(fHighlightings[i], event);
 			// fPresenter.highlightingStyleChanged(fHighlightings[i]);
@@ -728,8 +742,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	/**
 	 * Returns this hightlighter's reconciler.
 	 * 
-	 * @return the semantic highlighter reconciler or <code>null</code> if
-	 *         none
+	 * @return the semantic highlighter reconciler or <code>null</code> if none
 	 * @since 3.3
 	 */
 	public SemanticHighlightingReconciler getReconciler() {

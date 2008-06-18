@@ -31,12 +31,11 @@ import org.eclipse.dltk.core.ElementChangedEvent;
 import org.eclipse.dltk.core.IElementChangedListener;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
+import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.SourceMethod;
-import org.eclipse.dltk.internal.core.SourceType;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.text.DocumentCharacterIterator;
@@ -792,19 +791,15 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		}
 
 		// 2. Compute blocks regions
-		IModelElement parent = fInput;
 		for (int i = 0; i < blockRegions.length; i++) {
 			CodeBlock codeBlock = blockRegions[i];
-
-			if (codeBlock.statement instanceof TypeDeclaration)
-				parent = new SourceType((ModelElement) fInput,
-						codeBlock.statement.toString());
 
 			if (!mayCollapse(codeBlock.statement, ctx))
 				continue;
 
 			boolean collapseCode = initiallyCollapse(codeBlock.statement, ctx);
 			IRegion reg = codeBlock.region;
+
 			// code
 			boolean multiline = false;
 			try {
@@ -826,10 +821,24 @@ public abstract class AbstractASTFoldingStructureProvider implements
 						if (contents.length() >= len) {
 							int hash = contents.substring(
 									normalized.getOffset(), len).hashCode();
-							// IModelElement element = null;
-							IModelElement element = new SourceMethod(
-									(ModelElement) parent, codeBlock.statement
-											.toString().trim());
+							IModelElement element = null;
+
+							if (fInput != null
+									&& codeBlock.statement instanceof MethodDeclaration) {
+								MethodDeclaration meth = (MethodDeclaration) codeBlock.statement;
+
+								MethodVisitor vis = new MethodVisitor(meth
+										.getPositionInformation().nameStart,
+										meth.getPositionInformation().nameEnd);
+
+								try {
+									fInput.accept(vis);
+								} catch (ModelException e) {
+									// empty
+								}
+
+								element = vis.getResult();
+							}
 							SourceRangeStamp codeStamp = new SourceRangeStamp(
 									hash, normalized.getLength());
 							ScriptProjectionAnnotation annotation = new ScriptProjectionAnnotation(
@@ -1333,4 +1342,41 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		return fFoldNewLines;
 	}
 
+	public class MethodVisitor implements IModelElementVisitor {
+		private int start, end;
+		IModelElement res = null;
+
+		public IModelElement getResult() {
+			return res;
+		}
+
+		public MethodVisitor(int start, int end) {
+			this.start = start;
+			this.end = end;
+		}
+
+		public boolean visit(IModelElement element) {
+
+			if (element instanceof SourceMethod) {
+				SourceMethod meth = (SourceMethod) element;
+				int st = 0;
+				int en = 0;
+				try {
+					st = meth.getNameRange().getOffset();
+					en = st + meth.getNameRange().getLength();
+				} catch (ModelException e) {
+					// empty
+				}
+				if (en == end && st == start) {
+					res = element;
+					return false;
+				}
+
+			}
+
+			return true;
+
+		}
+
+	}
 }

@@ -34,6 +34,7 @@ public abstract class SemanticPositionUpdater extends PositionUpdater {
 				worker.setHighlightings(highlightings);
 				worker.setOldPositions(currentPositions);
 				module.traverse(worker);
+				worker.checkNewPositionOrdering();
 				return new UpdateResult(worker.getNewPositions(), worker
 						.getOldPositions());
 			}

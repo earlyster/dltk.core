@@ -12,10 +12,14 @@
 package org.eclipse.dltk.internal.ui.editor.semantic.highlighting;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.dltk.ast.ASTVisitor;
 import org.eclipse.dltk.internal.ui.editor.SemanticHighlightingManager.HighlightedPosition;
+import org.eclipse.jface.text.Position;
 
 public class SemanticUpdateWorker extends ASTVisitor {
 
@@ -35,7 +39,7 @@ public class SemanticUpdateWorker extends ASTVisitor {
 			if (p != null && p.isEqual(start, len, hl)) {
 				oldPositions[i] = null;
 				--oldPositionCount;
-				break;
+				return;
 			}
 		}
 		final HighlightedPosition hp = presenter.createHighlightedPosition(
@@ -77,5 +81,34 @@ public class SemanticUpdateWorker extends ASTVisitor {
 		}
 		return result;
 	}
+
+	public void checkNewPositionOrdering() {
+		if (newPositions.isEmpty())
+			return;
+		Collections.sort(newPositions, new Comparator() {
+
+			public int compare(Object o1, Object o2) {
+				final Position p1 = (Position) o1;
+				final Position p2 = (Position) o2;
+				return p1.getOffset() - p2.getOffset();
+			}
+		});
+		Position previous = null;
+		for (Iterator i = newPositions.iterator(); i.hasNext();) {
+			final Position current = (Position) i.next();
+			if (previous != null
+					&& previous.getOffset() + previous.getLength() > current
+							.getOffset()) {
+				if (DEBUG) {
+					System.err.println("ERROR: unordered position " + current); //$NON-NLS-1$
+				}
+				i.remove();
+			} else {
+				previous = current;
+			}
+		}
+	}
+
+	private static final boolean DEBUG = SemanticHighlightingReconciler.DEBUG;
 
 }
