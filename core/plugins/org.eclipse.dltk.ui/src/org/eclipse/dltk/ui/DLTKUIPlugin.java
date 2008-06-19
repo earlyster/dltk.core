@@ -132,23 +132,19 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 					if (!fragment.isArchive()) {
 						// IPath path = original.getPath();
 						// return new DocumentAdapter(workingCopy, path);
-						return BufferManager.getDefaultBufferManager()
-								.createBuffer(original);
+						return BufferManager.createBuffer(original);
 					}
-					return BufferManager.getDefaultBufferManager()
-							.createBuffer(original);
+					return BufferManager.createBuffer(original);
 				}
 
 				if (original instanceof DBGPSourceModule) {
-					return BufferManager.getDefaultBufferManager()
-							.createBuffer(original);
+					return BufferManager.createBuffer(original);
 				}
 
 				if (original instanceof BuiltinSourceModule) {
 					// IPath path = original.getPath();
 					// return new DocumentAdapter(workingCopy, path);
-					return BufferManager.getDefaultBufferManager()
-							.createBuffer(original);
+					return BufferManager.createBuffer(original);
 				}
 				return DocumentAdapter.NULL;
 			}
