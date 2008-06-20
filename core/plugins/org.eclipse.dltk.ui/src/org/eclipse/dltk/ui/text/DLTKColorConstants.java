@@ -70,12 +70,23 @@ public final class DLTKColorConstants {
 	public static final String DLTK_CLASS_DEFINITION = "DLTK_class_definition"; //$NON-NLS-1$
 
 	public static final String DLTK_FUNCTION_DEFINITION = "DLTK_function_definition"; //$NON-NLS-1$
-	
+
 	/**
 	 * The color key for numbers in DLTK code (value <code>"DLTK_number"</code>
 	 * ).
 	 */
 	public static final String DLTK_NUMBER = "DLTK_number"; //$NON-NLS-1$
+
+	/**
+	 * The color key for function arguments in DLTK code (value
+	 * <code>"DLTK_argument"</code>).
+	 */
+	public static final String DLTK_ARGUMENT = "DLTK_argument";
+
+	/**
+	 * The color key for base classes in DLTK code (value <code>"DLTK_base_class</code>).
+	 */
+	public static final String DLTK_BASE_CLASS = "DLTK_base_class";
 
 	/**
 	 * The color key for everything in DLTK code for which no other color is

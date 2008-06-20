@@ -49,6 +49,9 @@ public final class PreferencesMessages extends NLS {
 	public static String DLTKEditorPreferencePage_evaluated_expressions;
 	public static String DLTKEditorPreferencePage_variables;
 	public static String DLTKEditorPreferencePage_numbers;
+	public static String DLTKEditorPreferencePage_arguments;
+	public static String DLTKEditorPreferencePage_base_classes;
+
 	public static String DLTKEditorPreferencePage_decorators;
 	public static String DLTKEditorPreferencePage_class_colors;
 	public static String DLTKEditorPreferencePage_function_colors;
