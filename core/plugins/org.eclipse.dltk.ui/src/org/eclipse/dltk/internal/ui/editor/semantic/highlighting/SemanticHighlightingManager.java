@@ -307,7 +307,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		for (int i = 0; i < fSemanticHighlightings.length; ++i) {
 			final SemanticHighlighting sh = fSemanticHighlightings[i];
 			if (!sh.isSemanticOnly()) {
-				continue;
+				return true;
 			}
 			if (fPreferenceStore.getBoolean(sh.getEnabledPreferenceKey())) {
 				return true;
