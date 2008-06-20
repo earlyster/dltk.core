@@ -185,6 +185,7 @@ public final class PreferencesMessages extends NLS {
 	public static String DLTKEditorPreferencePage_coloring_category_DLTK;
 	public static String DLTKEditorPreferencePage_coloring_category_DLTKdoc;
 	public static String DLTKEditorPreferencePage_coloring_category_comments;
+	public static String DLTKEditorPreferencePage_coloring_semantic_not_configurable;
 	public static String DLTKEditorPreferencePage_CommentTaskTags;
 
 	public static String ProjectSelectionDialog_title;

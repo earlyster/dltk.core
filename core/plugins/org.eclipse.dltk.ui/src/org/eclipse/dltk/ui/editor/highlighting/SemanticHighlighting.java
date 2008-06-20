@@ -9,7 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.dltk.internal.ui.editor.semantic.highlighting;
+package org.eclipse.dltk.ui.editor.highlighting;
+
+import org.eclipse.dltk.ui.PreferenceConstants;
 
 /**
  * Semantic highlighting
@@ -23,7 +25,30 @@ public abstract class SemanticHighlighting {
 	public abstract String getPreferenceKey();
 
 	/**
-	 * @return <code>true</code> if the text attribute is enabled by default
+	 * @return the preference key to control enable of this semantic
+	 *         highlighting.
+	 */
+	public String getEnabledPreferenceKey() {
+		return getPreferenceKey()
+				+ PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX;
+	}
+
+	/**
+	 * Tests if this semantic highlighting could be enabled/disabled.
+	 * 
+	 * @return <code>true</code> means that this highlighting is an additional
+	 *         feature that could be disabled in preferences, and
+	 *         <code>false</code> means that this highlighting is used to
+	 *         correct highlighting based on rules, so this could not be
+	 *         disabled in preferences.
+	 */
+	public boolean isSemanticOnly() {
+		return false;
+	}
+
+	/**
+	 * @return <code>true</code> if this highlighting should be enabled by
+	 *         default
 	 */
 	public boolean isEnabledByDefault() {
 		return true;
@@ -33,7 +58,7 @@ public abstract class SemanticHighlighting {
 	 * @return the display name
 	 */
 	public String getDisplayName() {
-		return ""; //$NON-NLS-1$
+		return getPreferenceKey();
 	}
 
 	public String getBackgroundPreferenceKey() {

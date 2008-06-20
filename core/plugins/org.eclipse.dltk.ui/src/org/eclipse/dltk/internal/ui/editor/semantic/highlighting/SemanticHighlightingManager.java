@@ -9,16 +9,23 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.dltk.internal.ui.editor;
+package org.eclipse.dltk.internal.ui.editor.semantic.highlighting;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
-import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.Highlighting;
-import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlighting;
-import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlightingPresenter;
-import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlightingReconciler;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.compiler.env.ISourceModule;
+import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
+import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.ui.PreferenceConstants;
+import org.eclipse.dltk.ui.editor.highlighting.HighlightedPosition;
+import org.eclipse.dltk.ui.editor.highlighting.HighlightingStyle;
+import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlighter;
+import org.eclipse.dltk.ui.editor.highlighting.SemanticHighlighting;
+import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlighter.UpdateResult;
 import org.eclipse.dltk.ui.text.IColorManager;
 import org.eclipse.dltk.ui.text.IColorManagerExtension;
 import org.eclipse.dltk.ui.text.ScriptPresentationReconciler;
@@ -27,182 +34,19 @@ import org.eclipse.dltk.ui.text.ScriptTextTools;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.StringConverter;
-import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 
 /**
  * Semantic highlighting manager
- * 
- * @since 3.0
  */
 public class SemanticHighlightingManager implements IPropertyChangeListener {
-
-	/**
-	 * Highlighted Positions.
-	 */
-	public static class HighlightedPosition extends Position {
-
-		/** Highlighting of the position */
-		private Highlighting fStyle;
-
-		/** Lock object */
-		private Object fLock;
-
-		/**
-		 * Initialize the styled positions with the given offset, length and
-		 * foreground color.
-		 * 
-		 * @param offset
-		 *            The position offset
-		 * @param length
-		 *            The position length
-		 * @param highlighting
-		 *            The position's highlighting
-		 * @param lock
-		 *            The lock object
-		 */
-		public HighlightedPosition(int offset, int length,
-				Highlighting highlighting, Object lock) {
-			super(offset, length);
-			fStyle = highlighting;
-			fLock = lock;
-		}
-
-		/**
-		 * @return Returns a corresponding style range.
-		 */
-		public StyleRange createStyleRange() {
-			int len = 0;
-			if (fStyle.isEnabled())
-				len = getLength();
-
-			TextAttribute textAttribute = fStyle.getTextAttribute();
-			int style = textAttribute.getStyle();
-			int fontStyle = style & (SWT.ITALIC | SWT.BOLD | SWT.NORMAL);
-			StyleRange styleRange = new StyleRange(getOffset(), len,
-					textAttribute.getForeground(), textAttribute
-							.getBackground(), fontStyle);
-			styleRange.strikeout = (style & TextAttribute.STRIKETHROUGH) != 0;
-			styleRange.underline = (style & TextAttribute.UNDERLINE) != 0;
-
-			return styleRange;
-		}
-
-		/**
-		 * Uses reference equality for the highlighting.
-		 * 
-		 * @param off
-		 *            The offset
-		 * @param len
-		 *            The length
-		 * @param highlighting
-		 *            The highlighting
-		 * @return <code>true</code> iff the given offset, length and
-		 *         highlighting are equal to the internal ones.
-		 */
-		public boolean isEqual(int off, int len, Highlighting highlighting) {
-			synchronized (fLock) {
-				return !isDeleted() && getOffset() == off && getLength() == len
-						&& fStyle == highlighting;
-			}
-		}
-
-		/**
-		 * Is this position contained in the given range (inclusive)?
-		 * Synchronizes on position updater.
-		 * 
-		 * @param off
-		 *            The range offset
-		 * @param len
-		 *            The range length
-		 * @return <code>true</code> iff this position is not delete and
-		 *         contained in the given range.
-		 */
-		public boolean isContained(int off, int len) {
-			synchronized (fLock) {
-				return !isDeleted() && off <= getOffset()
-						&& off + len >= getOffset() + getLength();
-			}
-		}
-
-		public void update(int off, int len) {
-			synchronized (fLock) {
-				super.setOffset(off);
-				super.setLength(len);
-			}
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.Position#setLength(int)
-		 */
-		public void setLength(int length) {
-			synchronized (fLock) {
-				super.setLength(length);
-			}
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.Position#setOffset(int)
-		 */
-		public void setOffset(int offset) {
-			synchronized (fLock) {
-				super.setOffset(offset);
-			}
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.Position#delete()
-		 */
-		public void delete() {
-			synchronized (fLock) {
-				super.delete();
-			}
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.Position#undelete()
-		 */
-		public void undelete() {
-			synchronized (fLock) {
-				super.undelete();
-			}
-		}
-
-		/**
-		 * @return Returns the highlighting.
-		 */
-		public Highlighting getHighlighting() {
-			return fStyle;
-		}
-
-		public boolean equals(Object other) {
-			return this == other;
-		}
-
-		public int hashCode() {
-			return System.identityHashCode(this);
-		}
-
-		public String toString() {
-			final StringBuffer sb = new StringBuffer();
-			sb.append("HLPos["); //$NON-NLS-1$
-			sb.append(offset);
-			sb.append("+"); //$NON-NLS-1$
-			sb.append(length);
-			sb.append(":"); //$NON-NLS-1$
-			sb.append(fStyle.getSemaHighlighting().getPreferenceKey());
-			sb.append("]"); //$NON-NLS-1$
-			return sb.toString();
-		}
-	}
 
 	/**
 	 * Highlighted ranges.
@@ -252,6 +96,32 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		}
 	}
 
+	private static class SourceCode implements ISourceModule {
+
+		private final String source;
+
+		public SourceCode(String source) {
+			this.source = source;
+		}
+
+		public IModelElement getModelElement() {
+			return null;
+		}
+
+		public IPath getScriptFolder() {
+			return Path.EMPTY;
+		}
+
+		public String getSourceContents() {
+			return source;
+		}
+
+		public char[] getFileName() {
+			return "SourceCode".toCharArray(); //$NON-NLS-1$
+		}
+
+	}
+
 	/** Semantic highlighting presenter */
 	private SemanticHighlightingPresenter fPresenter;
 	/** Semantic highlighting reconciler */
@@ -260,7 +130,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	/** Semantic highlightings */
 	private SemanticHighlighting[] fSemanticHighlightings;
 	/** Highlightings */
-	private Highlighting[] fHighlightings;
+	private HighlightingStyle[] fHighlightings;
 
 	/** The editor */
 	private ScriptEditor fEditor;
@@ -274,9 +144,6 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	private ScriptSourceViewerConfiguration fConfiguration;
 	/** The presentation reconciler */
 	private ScriptPresentationReconciler fPresentationReconciler;
-
-	/** The hard-coded ranges */
-	private HighlightedRange[][] fHardcodedRanges;
 
 	/**
 	 * Install the semantic highlighting on the given editor infrastructure
@@ -296,20 +163,19 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		fSourceViewer = sourceViewer;
 		fColorManager = colorManager;
 		fPreferenceStore = preferenceStore;
+		final ScriptTextTools textTools = getTextTools();
+		if (textTools != null) {
+			fSemanticHighlightings = textTools.getSemanticHighlightings();
+			fConfiguration = textTools.createSourceViewerConfiguraton(
+					preferenceStore, editor);
+		}
 		if (fEditor != null) {
-			ScriptTextTools textTools = editor.getTextTools();
-			if (textTools != null) {
-				fConfiguration = textTools.createSourceViewerConfiguraton(
-						preferenceStore, editor);
-				IPresentationReconciler presReconciler = fConfiguration
-						.getPresentationReconciler(sourceViewer);
-				if (presReconciler instanceof ScriptPresentationReconciler) {
-					fPresentationReconciler = (ScriptPresentationReconciler) presReconciler;
-				} else {
-					fPresentationReconciler = null;
-				}
+			Assert.isNotNull(fConfiguration);
+			IPresentationReconciler presReconciler = fConfiguration
+					.getPresentationReconciler(sourceViewer);
+			if (presReconciler instanceof ScriptPresentationReconciler) {
+				fPresentationReconciler = (ScriptPresentationReconciler) presReconciler;
 			} else {
-				fConfiguration = null;
 				fPresentationReconciler = null;
 			}
 		} else {
@@ -333,13 +199,29 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 *            the color manager
 	 * @param preferenceStore
 	 *            the preference store
+	 */
+	public void install(ScriptSourceViewer sourceViewer,
+			IColorManager colorManager, IPreferenceStore preferenceStore) {
+		install(null, sourceViewer, colorManager, preferenceStore);
+	}
+
+	/**
+	 * Install the semantic highlighting on the given source viewer
+	 * infrastructure. No reconciliation will be performed.
+	 * 
+	 * @param sourceViewer
+	 *            the source viewer
+	 * @param colorManager
+	 *            the color manager
+	 * @param preferenceStore
+	 *            the preference store
 	 * @param hardcodedRanges
 	 *            the hard-coded ranges to be highlighted
+	 * @deprecated
 	 */
 	public void install(ScriptSourceViewer sourceViewer,
 			IColorManager colorManager, IPreferenceStore preferenceStore,
 			HighlightedRange[][] hardcodedRanges) {
-		fHardcodedRanges = hardcodedRanges;
 		install(null, sourceViewer, colorManager, preferenceStore);
 	}
 
@@ -357,55 +239,24 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			fReconciler.install(fEditor, fSourceViewer, fPresenter,
 					fSemanticHighlightings, fHighlightings);
 		} else {
-			fPresenter.updatePresentation(null, createHardcodedPositions(),
-					new HighlightedPosition[0]);
-		}
-	}
-
-	/**
-	 * Computes the hard-coded positions from the hard-coded ranges
-	 * 
-	 * @return the hard-coded positions
-	 */
-	private HighlightedPosition[] createHardcodedPositions() {
-		List positions = new ArrayList();
-		for (int i = 0; i < fHardcodedRanges.length; i++) {
-			HighlightedRange range = null;
-			Highlighting hl = null;
-			for (int j = 0; j < fHardcodedRanges[i].length; j++) {
-				hl = getHighlighting(fHardcodedRanges[i][j].getKey());
-				if (hl.isEnabled()) {
-					range = fHardcodedRanges[i][j];
-					break;
+			final ScriptTextTools textTools = getTextTools();
+			if (textTools != null) {
+				final ISemanticHighlighter updater = textTools
+						.getSemanticPositionUpdater();
+				if (updater != null) {
+					updater.initialize(fPresenter, fHighlightings);
+					final ISourceModule code = new SourceCode(fSourceViewer
+							.getDocument().get());
+					UpdateResult result = updater.reconcile(code,
+							Collections.EMPTY_LIST);
+					fPresenter.updatePresentation(null, result.addedPositions,
+							HighlightedPosition.NO_POSITIONS);
 				}
 			}
-
-			if (range != null)
-				positions.add(fPresenter.createHighlightedPosition(range
-						.getOffset(), range.getLength(), hl));
 		}
-		return (HighlightedPosition[]) positions
-				.toArray(new HighlightedPosition[positions.size()]);
 	}
 
-	/**
-	 * Returns the highlighting corresponding to the given key.
-	 * 
-	 * @param key
-	 *            the highlighting key as returned by
-	 *            {@link SemanticHighlighting#getPreferenceKey()}
-	 * @return the corresponding highlighting
-	 */
-	private Highlighting getHighlighting(String key) {
-		for (int i = 0; i < fSemanticHighlightings.length; i++) {
-			SemanticHighlighting semanticHighlighting = fSemanticHighlightings[i];
-			if (key.equals(semanticHighlighting.getPreferenceKey()))
-				return fHighlightings[i];
-		}
-		return null;
-	}
-
-	public Highlighting getHighlighting(int pos) {
+	public HighlightingStyle getHighlighting(int pos) {
 		return fHighlightings[pos];
 	}
 
@@ -425,7 +276,6 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		fColorManager = null;
 		fConfiguration = null;
 		fPresentationReconciler = null;
-		fHardcodedRanges = null;
 	}
 
 	/**
@@ -451,7 +301,19 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 *         preferences
 	 */
 	private boolean isEnabled() {
-		return true;
+		if (fSemanticHighlightings == null) {
+			return false;
+		}
+		for (int i = 0; i < fSemanticHighlightings.length; ++i) {
+			final SemanticHighlighting sh = fSemanticHighlightings[i];
+			if (!sh.isSemanticOnly()) {
+				continue;
+			}
+			if (fPreferenceStore.getBoolean(sh.getEnabledPreferenceKey())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private TextAttribute createTextAttribute(IColorManager manager,
@@ -496,19 +358,25 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * Initialize semantic highlightings.
 	 */
 	private void initializeHighlightings() {
-		ScriptTextTools textTools = fEditor.getTextTools();
+		final ScriptTextTools textTools = getTextTools();
 		if (textTools != null) {
-			fSemanticHighlightings = textTools.getSemanticHighlightings();
-			fHighlightings = new Highlighting[fSemanticHighlightings.length];
+			Assert.isNotNull(fSemanticHighlightings);
+			fHighlightings = new HighlightingStyle[fSemanticHighlightings.length];
 			for (int a = 0; a < fSemanticHighlightings.length; a++) {
-				fHighlightings[a] = new Highlighting(
-						createTextAttribute(fColorManager, fPreferenceStore,
-								fSemanticHighlightings[a].getPreferenceKey(),
-								fSemanticHighlightings[a]
-										.getBackgroundPreferenceKey()), true,
-						fSemanticHighlightings[a]);
+				final SemanticHighlighting sh = fSemanticHighlightings[a];
+				final TextAttribute ta = createTextAttribute(fColorManager,
+						fPreferenceStore, sh.getPreferenceKey(), sh
+								.getBackgroundPreferenceKey());
+				final boolean isEnabled = !sh.isSemanticOnly()
+						|| fPreferenceStore.getBoolean(sh
+								.getEnabledPreferenceKey());
+				fHighlightings[a] = new HighlightingStyle(ta, isEnabled, sh);
 			}
 		}
+	}
+
+	protected ScriptTextTools getTextTools() {
+		return fEditor != null ? fEditor.getTextTools() : null;
 	}
 
 	/**
@@ -616,22 +484,22 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 				continue;
 			}
 
-			// String enabledKey=
-			// preferenceKey+PreferenceConstants.
-			// EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE;
-			// if (enabledKey.equals(event.getProperty())) {
-			// adaptToEnablementChange(fHighlightings[i], event);
-			// fPresenter.highlightingStyleChanged(fHighlightings[i]);
-			// refreshNeeded= true;
-			// continue;
-			// }
+			if (semanticHighlighting.isSemanticOnly()) {
+				if (semanticHighlighting.getEnabledPreferenceKey().equals(
+						event.getProperty())) {
+					adaptToEnablementChange(fHighlightings[i], event);
+					fPresenter.highlightingStyleChanged(fHighlightings[i]);
+					refreshNeeded = true;
+					continue;
+				}
+			}
 		}
 
 		if (refreshNeeded && fReconciler != null)
 			fReconciler.refresh();
 	}
 
-	private void adaptToTextBackgroundChange(Highlighting highlighting,
+	private void adaptToTextBackgroundChange(HighlightingStyle highlighting,
 			PropertyChangeEvent event) {
 		RGB rgb = null;
 
@@ -660,7 +528,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		}
 	}
 
-	private void adaptToEnablementChange(Highlighting highlighting,
+	private void adaptToEnablementChange(HighlightingStyle highlighting,
 			PropertyChangeEvent event) {
 		Object value = event.getNewValue();
 		boolean eventValue;
@@ -673,7 +541,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		highlighting.setEnabled(eventValue);
 	}
 
-	private void adaptToTextForegroundChange(Highlighting highlighting,
+	private void adaptToTextForegroundChange(HighlightingStyle highlighting,
 			PropertyChangeEvent event) {
 		RGB rgb = null;
 
@@ -702,7 +570,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		}
 	}
 
-	private void adaptToTextStyleChange(Highlighting highlighting,
+	private void adaptToTextStyleChange(HighlightingStyle highlighting,
 			PropertyChangeEvent event, int styleAttribute) {
 		boolean eventValue = false;
 		Object value = event.getNewValue();

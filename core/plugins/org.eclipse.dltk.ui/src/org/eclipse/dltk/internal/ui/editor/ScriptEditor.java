@@ -39,6 +39,7 @@ import org.eclipse.dltk.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.dltk.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.dltk.internal.ui.actions.refactoring.RefactorActionGroup;
 import org.eclipse.dltk.internal.ui.editor.selectionaction.GoToNextPreviousMemberAction;
+import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlightingManager;
 import org.eclipse.dltk.internal.ui.text.DLTKWordIterator;
 import org.eclipse.dltk.internal.ui.text.DocumentCharacterIterator;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;

@@ -1,11 +1,11 @@
-package org.eclipse.dltk.internal.ui.editor.semantic.highlighting;
+package org.eclipse.dltk.ui.editor.highlighting;
 
 import org.eclipse.jface.text.TextAttribute;
 
 /**
- * Highlighting.
+ * Highlighting Style.
  */
-public class Highlighting { // TODO: rename to HighlightingStyle
+public class HighlightingStyle {
 
 	/** Text attribute */
 	private TextAttribute fTextAttribute;
@@ -15,11 +15,15 @@ public class Highlighting { // TODO: rename to HighlightingStyle
 
 	/**
 	 * Initialize with the given text attribute.
-	 * @param textAttribute The text attribute
-	 * @param isEnabled the enabled state
-	 * @param semanticHighlighting 
+	 * 
+	 * @param textAttribute
+	 *            The text attribute
+	 * @param isEnabled
+	 *            the enabled state
+	 * @param semanticHighlighting
 	 */
-	public Highlighting(TextAttribute textAttribute, boolean isEnabled, SemanticHighlighting semanticHighlighting) {
+	public HighlightingStyle(TextAttribute textAttribute, boolean isEnabled,
+			SemanticHighlighting semanticHighlighting) {
 		setTextAttribute(textAttribute);
 		setEnabled(isEnabled);
 		this.semanticHighlighting = semanticHighlighting;
@@ -33,10 +37,11 @@ public class Highlighting { // TODO: rename to HighlightingStyle
 	}
 
 	/**
-	 * @param textAttribute The background to set.
+	 * @param textAttribute
+	 *            The background to set.
 	 */
 	public void setTextAttribute(TextAttribute textAttribute) {
-		fTextAttribute= textAttribute;
+		fTextAttribute = textAttribute;
 	}
 
 	/**
@@ -47,11 +52,13 @@ public class Highlighting { // TODO: rename to HighlightingStyle
 	}
 
 	/**
-	 * @param isEnabled the new enabled state
+	 * @param isEnabled
+	 *            the new enabled state
 	 */
 	public void setEnabled(boolean isEnabled) {
-		fIsEnabled= isEnabled;
+		fIsEnabled = isEnabled;
 	}
+
 	public SemanticHighlighting getSemaHighlighting() {
 		return this.semanticHighlighting;
 	}

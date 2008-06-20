@@ -15,16 +15,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Preferences;
+import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
+import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlightingManager;
 import org.eclipse.dltk.internal.ui.preferences.ScriptSourcePreviewerUpdater;
 import org.eclipse.dltk.internal.ui.text.DLTKColorManager;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.PreferencesAdapter;
+import org.eclipse.dltk.ui.editor.highlighting.SemanticHighlighting;
 import org.eclipse.dltk.ui.text.IColorManager;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
+import org.eclipse.dltk.ui.text.ScriptTextTools;
 import org.eclipse.dltk.ui.util.PixelConverter;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -44,6 +52,7 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -208,6 +217,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 				String enableKey) {
 			super(displayName, colorKey, boldKey, italicKey, strikethroughKey,
 					underlineKey, category);
+			Assert.isNotNull(enableKey);
 			fEnableKey = enableKey;
 		}
 
@@ -221,13 +231,8 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 
 	/**
 	 * Color list label provider.
-	 * 
-	 * 
 	 */
 	private class ColorListLabelProvider extends LabelProvider {
-		/*
-		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
-		 */
 		public String getText(Object element) {
 			if (element instanceof String)
 				return (String) element;
@@ -237,8 +242,6 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 
 	/**
 	 * Color list content provider.
-	 * 
-	 * 
 	 */
 	protected String[] getCategories() {
 		return new String[] { sCoreCategory, sDocumentationCategory,
@@ -247,9 +250,6 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 
 	private class ColorListContentProvider implements ITreeContentProvider {
 
-		/*
-		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
-		 */
 		public Object[] getElements(Object inputElement) {
 			List categorys = new ArrayList();
 			String[] cats = getCategories();
@@ -267,10 +267,6 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		public void dispose() {
 		}
 
-		/*
-		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer,
-		 *      java.lang.Object, java.lang.Object)
-		 */
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
@@ -302,22 +298,16 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 
 	/**
 	 * Preference key suffix for italic preferences.
-	 * 
-	 * 
 	 */
 	private static final String ITALIC = PreferenceConstants.EDITOR_ITALIC_SUFFIX;
 
 	/**
 	 * Preference key suffix for strikethrough preferences.
-	 * 
-	 * 
 	 */
 	private static final String STRIKETHROUGH = PreferenceConstants.EDITOR_STRIKETHROUGH_SUFFIX;
 
 	/**
 	 * Preference key suffix for underline preferences.
-	 * 
-	 * 
 	 */
 	private static final String UNDERLINE = PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
 
@@ -337,55 +327,39 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 
 	/**
 	 * Check box for italic preference.
-	 * 
-	 * 
 	 */
 	private Button fItalicCheckBox;
 
 	/**
 	 * Check box for strikethrough preference.
-	 * 
-	 * 
 	 */
 	private Button fStrikethroughCheckBox;
 
 	/**
 	 * Check box for underline preference.
-	 * 
-	 * 
 	 */
 	private Button fUnderlineCheckBox;
 
 	/**
 	 * Highlighting color list
-	 * 
-	 * 
 	 */
 	private final java.util.List fListModel = new ArrayList();
 
 	/**
 	 * Highlighting color list viewer
-	 * 
-	 * 
 	 */
 	private StructuredViewer fListViewer;
 
 	/**
 	 * Semantic highlighting manager
-	 * 
-	 * 
 	 */
-	// private SemanticHighlightingManager fSemanticHighlightingManager;
+	private SemanticHighlightingManager fSemanticHighlightingManager;
 	/**
 	 * The previewer.
-	 * 
-	 * 
 	 */
 	private ProjectionViewer fPreviewViewer;
 	/**
 	 * The color manager.
-	 * 
-	 * 
 	 */
 	private IColorManager fColorManager;
 
@@ -421,32 +395,35 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 
 		fColorManager = new DLTKColorManager(false);
 
-		String[][] model = getSyntaxColorListModel();
+		final Set colorKeys = new HashSet();
 
-		for (int i = 0, n = model.length; i < n; i++)
-			fListModel.add(new HighlightingColorListItem(model[i][0],
-					model[i][1], model[i][1] + BOLD, model[i][1] + ITALIC,
-					model[i][1] + STRIKETHROUGH, model[i][1] + UNDERLINE,
-					model[i][2]));
-
-		// SemanticHighlighting[] semanticHighlightings = SemanticHighlightings
-		// .getSemanticHighlightings();
-		// for (int i = 0, n = semanticHighlightings.length; i < n; i++)
-		// fListModel
-		// .add(new SemanticHighlightingColorListItem(
-		// semanticHighlightings[i].getDisplayName(),
-		// SemanticHighlightings
-		// .getColorPreferenceKey(semanticHighlightings[i]),
-		// SemanticHighlightings
-		// .getBoldPreferenceKey(semanticHighlightings[i]),
-		// SemanticHighlightings
-		// .getItalicPreferenceKey(semanticHighlightings[i]),
-		// SemanticHighlightings
-		// .getStrikethroughPreferenceKey(semanticHighlightings[i]),
-		// SemanticHighlightings
-		// .getUnderlinePreferenceKey(semanticHighlightings[i]),
-		// SemanticHighlightings
-		// .getEnabledPreferenceKey(semanticHighlightings[i])));
+		final String[][] model = getSyntaxColorListModel();
+		for (int i = 0, n = model.length; i < n; i++) {
+			final String colorKey = model[i][1];
+			if (colorKeys.add(colorKey)) {
+				fListModel.add(new HighlightingColorListItem(model[i][0],
+						colorKey, colorKey + BOLD, colorKey + ITALIC, colorKey
+								+ STRIKETHROUGH, colorKey + UNDERLINE,
+						model[i][2]));
+			}
+		}
+		final SemanticHighlighting[] highlightings = getSemanticHighlightings();
+		for (int i = 0; i < highlightings.length; ++i) {
+			final SemanticHighlighting h = highlightings[i];
+			if (h.isSemanticOnly()) {
+				final String colorKey = h.getPreferenceKey();
+				if (colorKeys.add(colorKey)) {
+					fListModel.add(new SemanticHighlightingColorListItem(h
+							.getDisplayName(), colorKey, colorKey + BOLD,
+							colorKey + ITALIC, colorKey + STRIKETHROUGH,
+							colorKey + UNDERLINE, sCoreCategory, h
+									.getEnabledPreferenceKey()));
+				}
+			} else if (!colorKeys.contains(h.getPreferenceKey())) {
+				final String msgText = PreferencesMessages.DLTKEditorPreferencePage_coloring_semantic_not_configurable;
+				DLTKUIPlugin.warn(NLS.bind(msgText, h.getPreferenceKey()));
+			}
+		}
 
 		store.addKeys(createOverlayStoreKeys());
 	}
@@ -471,11 +448,12 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
 					OverlayPreferenceStore.BOOLEAN, item.getUnderlineKey()));
 
-			if (item instanceof SemanticHighlightingColorListItem)
+			if (item instanceof SemanticHighlightingColorListItem) {
+				final SemanticHighlightingColorListItem shItem = (SemanticHighlightingColorListItem) item;
+				final String enableKey = shItem.getEnableKey();
 				overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
-						OverlayPreferenceStore.BOOLEAN,
-						((SemanticHighlightingColorListItem) item)
-								.getEnableKey()));
+						OverlayPreferenceStore.BOOLEAN, enableKey));
+			}
 		}
 
 		OverlayPreferenceStore.OverlayKey[] keys = new OverlayPreferenceStore.OverlayKey[overlayKeys
@@ -586,7 +564,8 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		});
 		// TODO replace by link-specific tooltips when
 		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
-		// link.setToolTipText(PreferencesMessages.EditorColoringConfigurationBlock_link_tooltip);
+		// link.setToolTipText(PreferencesMessages.
+		// EditorColoringConfigurationBlock_link_tooltip);
 
 		GridData gridData = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gridData.widthHint = 150; // only expand further if anyone else
@@ -868,29 +847,52 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		return result;
 	}
 
+	protected ScriptTextTools getTextTools() {
+		return null;
+	}
+
+	/**
+	 * Returns the array of the {@link SemanticHighlighting}s that should be
+	 * listed in the color preferences dialog. If there is no semantic
+	 * highlighting - the empty array should be returned.
+	 * 
+	 * If the color key is already listed in the array returned by the
+	 * {@link #getSyntaxColorListModel()} it will not be added again - only new
+	 * items are added to the list.
+	 * 
+	 * @return
+	 */
+	protected SemanticHighlighting[] getSemanticHighlightings() {
+		final ScriptTextTools textTools = getTextTools();
+		return textTools != null ? textTools.getSemanticHighlightings()
+				: new SemanticHighlighting[0];
+	}
+
 	/**
 	 * Install Semantic Highlighting on the previewer
-	 * 
-	 * 
 	 */
 	private void installSemanticHighlighting() {
-		// if (fSemanticHighlightingManager == null) {
-		// fSemanticHighlightingManager = new SemanticHighlightingManager();
-		// fSemanticHighlightingManager.install(fPreviewViewer, fColorManager,
-		// getPreferenceStore(), createPreviewerRanges());
-		// }
+		final ScriptTextTools textTools = getTextTools();
+		if (fSemanticHighlightingManager == null && textTools != null) {
+			fSemanticHighlightingManager = new SemanticHighlightingManager() {
+				protected ScriptTextTools getTextTools() {
+					return textTools;
+				}
+			};
+			fSemanticHighlightingManager.install(
+					(ScriptSourceViewer) fPreviewViewer, fColorManager,
+					getPreferenceStore());
+		}
 	}
 
 	/**
 	 * Uninstall Semantic Highlighting from the previewer
-	 * 
-	 * 
 	 */
 	private void uninstallSemanticHighlighting() {
-		// if (fSemanticHighlightingManager != null) {
-		// fSemanticHighlightingManager.uninstall();
-		// fSemanticHighlightingManager = null;
-		// }
+		if (fSemanticHighlightingManager != null) {
+			fSemanticHighlightingManager.uninstall();
+			fSemanticHighlightingManager = null;
+		}
 	}
 
 	/**
@@ -919,8 +921,10 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 					getPreviewContentReader()));
 			String line = null;
 			while ((line = reader.readLine()) != null) {
+				if (buffer.length() != 0) {
+					buffer.append(separator);
+				}
 				buffer.append(line);
-				buffer.append(separator);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
