@@ -95,16 +95,26 @@ public class DLTKDebugPlugin extends Plugin {
 			}
 		}
 
-		log(new Status(
-				IStatus.ERROR,
-				PLUGIN_ID,
-				INTERNAL_ERROR,
-				Messages.DLTKDebugPlugin_internalErrorLoggedFromDltkDebugPlugin,
-				top));
+		log(new Status(IStatus.ERROR, PLUGIN_ID, INTERNAL_ERROR,
+				Messages.DLTKDebugPlugin_internalErrorLoggedFromDltkDebugPlugin
+						+ top.getMessage(), top));
 	}
 
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
+	}
+
+	public static void error(String message, Throwable t) {
+		Throwable top = t;
+		if (t instanceof DebugException) {
+			Throwable throwable = ((DebugException) t).getStatus()
+					.getException();
+			if (throwable != null) {
+				top = throwable;
+			}
+		}
+
+		log(new Status(IStatus.ERROR, PLUGIN_ID, INTERNAL_ERROR, message, top));
 	}
 
 	public String getBindAddress() {
