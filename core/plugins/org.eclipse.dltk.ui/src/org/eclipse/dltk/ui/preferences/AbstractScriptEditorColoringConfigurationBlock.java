@@ -824,6 +824,9 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		ScriptSourceViewerConfiguration configuration = createSimpleSourceViewerConfiguration(
 				fColorManager, store, null, false);
 		fPreviewViewer.configure(configuration);
+		if (fPreviewViewer.getTextWidget().getTabs() == 0) {
+			fPreviewViewer.getTextWidget().setTabs(4);
+		}
 
 		new ScriptSourcePreviewerUpdater(fPreviewViewer, configuration, store);
 		fPreviewViewer.setEditable(false);
