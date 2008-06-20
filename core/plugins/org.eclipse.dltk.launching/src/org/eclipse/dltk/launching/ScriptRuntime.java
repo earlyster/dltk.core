@@ -482,12 +482,16 @@ public final class ScriptRuntime {
 	public static void setDefaultInterpreterInstall(
 			IInterpreterInstall interpreter, IProgressMonitor monitor,
 			boolean savePreference) throws CoreException {
+		final IEnvironment env = interpreter.getEnvironment();
+		if (env == null) {
+			return;
+		}
+		final String environmentId = env.getId();
 		IInterpreterInstall previous = null;
 		String nature = interpreter.getInterpreterInstallType().getNatureId();
 
-		String environment = interpreter.getEnvironment().getId();
 		DefaultInterpreterEntry defaultInterpreterID = new DefaultInterpreterEntry(
-				nature, environment);
+				nature, environmentId);
 		if (fgDefaultInterpreterId.get(defaultInterpreterID) != null) {
 			previous = getInterpreterFromCompositeId((String) fgDefaultInterpreterId
 					.get(defaultInterpreterID));
