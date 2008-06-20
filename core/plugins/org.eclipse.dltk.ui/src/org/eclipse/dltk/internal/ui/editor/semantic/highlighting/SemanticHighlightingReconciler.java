@@ -275,12 +275,10 @@ public class SemanticHighlightingReconciler implements
 						}
 						if (monitor.isCanceled())
 							return Status.CANCEL_STATUS;
-						ISourceModule ast = null;
-						// /
-						// /DLTKUIPlugin.getDefault().getASTProvider().getAST(
-						// element,
-						// ASTProvider.WAIT_YES, monitor);
-						reconciled(ast, false, monitor);
+						final ISourceModule code = DLTKUIPlugin.getDefault()
+								.getWorkingCopyManager().getWorkingCopy(
+										fEditor.getEditorInput());
+						reconciled(code, false, monitor);
 						synchronized (fJobLock) {
 							// allow the job to be gc'ed
 							if (fJob == this)

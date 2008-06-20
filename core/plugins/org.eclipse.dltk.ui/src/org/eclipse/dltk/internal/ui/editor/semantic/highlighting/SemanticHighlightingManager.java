@@ -271,6 +271,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			fPreferenceStore = null;
 		}
 
+		fSemanticHighlightings = null;
 		fEditor = null;
 		fSourceViewer = null;
 		fColorManager = null;
@@ -292,7 +293,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			fPresenter = null;
 		}
 
-		if (fSemanticHighlightings != null)
+		if (fHighlightings != null)
 			disposeHighlightings();
 	}
 
@@ -386,7 +387,6 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		for (int i = 0, n = fSemanticHighlightings.length; i < n; i++)
 			removeColor(fSemanticHighlightings[i].getPreferenceKey());
 
-		fSemanticHighlightings = null;
 		fHighlightings = null;
 	}
 
@@ -412,13 +412,12 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		if (fConfiguration != null)
 			fConfiguration.handlePropertyChangeEvent(event);
 
-		// if (SemanticHighlightings.affectsEnablement(fPreferenceStore, event))
-		// {
-		// if (isEnabled())
-		// enable();
-		// else
-		// disable();
-		// }
+		if (affectsEnablement(event)) {
+			if (isEnabled())
+				enable();
+			else
+				disable();
+		}
 
 		if (!isEnabled())
 			return;
@@ -497,6 +496,42 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 
 		if (refreshNeeded && fReconciler != null)
 			fReconciler.refresh();
+	}
+
+	/**
+	 * Tests whether <code>event</code> affects the enablement of semantic
+	 * highlighting.
+	 * 
+	 * @param event
+	 *            the property change under examination
+	 * @return <code>true</code> if <code>event</code> changed semantic
+	 *         highlighting enablement, <code>false</code> if it did not
+	 */
+	private boolean affectsEnablement(PropertyChangeEvent event) {
+		if (fSemanticHighlightings == null) {
+			return false;
+		}
+		String relevantKey = null;
+		for (int i = 0; i < fSemanticHighlightings.length; i++) {
+			if (event.getProperty().equals(
+					fSemanticHighlightings[i].getEnabledPreferenceKey())) {
+				relevantKey = event.getProperty();
+				break;
+			}
+		}
+		if (relevantKey == null)
+			return false;
+
+		for (int i = 0; i < fSemanticHighlightings.length; i++) {
+			String key = fSemanticHighlightings[i].getEnabledPreferenceKey();
+			if (key.equals(relevantKey))
+				continue;
+			if (fPreferenceStore.getBoolean(key))
+				return false; // another is still enabled or was enabled before
+		}
+		// all others are disabled, so toggling relevantKey affects the
+		// enablement
+		return true;
 	}
 
 	private void adaptToTextBackgroundChange(HighlightingStyle highlighting,
