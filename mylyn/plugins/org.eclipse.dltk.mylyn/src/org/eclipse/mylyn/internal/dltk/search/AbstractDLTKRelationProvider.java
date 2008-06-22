@@ -47,6 +47,7 @@ import org.eclipse.mylyn.internal.context.core.ContextCorePlugin;
 import org.eclipse.mylyn.internal.context.core.IActiveSearchListener;
 import org.eclipse.mylyn.internal.context.core.IActiveSearchOperation;
 import org.eclipse.mylyn.internal.dltk.DLTKStructureBridge;
+import org.eclipse.mylyn.internal.dltk.MylynDLTKPlugin;
 import org.eclipse.mylyn.internal.dltk.MylynStatusHandler;
 import org.eclipse.mylyn.internal.resources.ui.ResourcesUiBridgePlugin;
 import org.eclipse.search.ui.ISearchResult;
@@ -375,7 +376,7 @@ public abstract class AbstractDLTKRelationProvider extends
 			}
 
 			IStatus status = new Status(IStatus.WARNING,
-					ContextCorePlugin.PLUGIN_ID, IStatus.OK,
+					MylynDLTKPlugin.PLUGIN_ID, IStatus.OK,
 					"could not run Script search", null);
 			notifySearchCompleted(null);
 			return status;
