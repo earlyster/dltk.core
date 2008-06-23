@@ -31,8 +31,7 @@ public class DbgpServiceTests extends AbstractDbgpServiceTests {
 		DbgpService service = new DbgpService(ANY_PORT) {
 
 			protected DbgpServer createServer(int port) {
-				return new DbgpServer(port, SERVER_SOCKET_TIMEOUT,
-						CLIENT_SOCKET_TIMEOUT) {
+				return new DbgpServer(port, CLIENT_SOCKET_TIMEOUT) {
 
 					protected void workingCycle() throws Exception, IOException {
 						Thread.sleep(1000);
