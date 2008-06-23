@@ -23,6 +23,8 @@ import org.eclipse.dltk.dbgp.internal.packets.DbgpPacketSender;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpResponsePacket;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpStreamPacket;
 import org.eclipse.dltk.dbgp.internal.packets.IDbgpRawLogger;
+import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
+import org.eclipse.dltk.internal.debug.core.model.DebugEventHelper;
 
 public class DbgpDebugingEngine extends DbgpTermination implements
 		IDbgpDebugingEngine, IDbgpTerminationListener {
@@ -59,6 +61,8 @@ public class DbgpDebugingEngine extends DbgpTermination implements
 				firePacketSent(output);
 			}
 		});
+		DebugEventHelper.fireExtendedEvent(this,
+				ExtendedDebugEventDetails.DGBP_NEW_CONNECTION);
 	}
 
 	public DbgpStreamPacket getStreamPacket() throws IOException,
