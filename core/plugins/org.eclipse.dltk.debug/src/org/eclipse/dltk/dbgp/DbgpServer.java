@@ -20,7 +20,7 @@ public class DbgpServer extends DbgpWorkingThread {
 
 	private final int serverTimeout;
 	private final int clientTimeout;
-	
+
 	public static int findAvailablePort(int fromPort, int toPort) {
 		if (fromPort > toPort) {
 			throw new IllegalArgumentException(
@@ -110,9 +110,11 @@ public class DbgpServer extends DbgpWorkingThread {
 
 	public void requestTermination() {
 		try {
-			server.close();
+			if (server != null) {
+				server.close();
+			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			DLTKDebugPlugin.log(e);
 		}
 		super.requestTermination();
 	}
