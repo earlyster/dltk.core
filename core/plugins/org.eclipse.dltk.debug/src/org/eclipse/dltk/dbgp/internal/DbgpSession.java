@@ -190,7 +190,7 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 	}
 
 	public void removeRawListenr(IDbgpRawListener listener) {
-		engine.addRawListener(listener);
+		engine.removeRawListenr(listener);
 	}
 
 	public IDbgpCommunicator getCommunicator() {
