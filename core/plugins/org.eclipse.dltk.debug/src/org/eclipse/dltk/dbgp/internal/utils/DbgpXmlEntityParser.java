@@ -101,7 +101,7 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 		final String ATTR_KEY = "key"; //$NON-NLS-1$
 		final String ATTR_PAGE = "page"; //$NON-NLS-1$
 		final String ATTR_PAGE_SIZE = "pagesize"; //$NON-NLS-1$
-		
+
 		/*
 		 * attributes: name, fullname, type, children, numchildren, constant,
 		 * encoding, size, key
@@ -174,11 +174,10 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 					.toArray(new IDbgpProperty[childrenList.size()]);
 		}
 
-		
 		if (childrenCount < 0) {
 			childrenCount = availableChildren.length;
 		}
-		
+
 		return new DbgpProperty(name, fullName, type, value, childrenCount,
 				hasChildren, constant, key, availableChildren, page, pagesize);
 	}
@@ -326,7 +325,9 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 			return parseBase64Content(element);
 		}
 
-		throw new AssertionError(MessageFormat.format(Messages.DbgpXmlEntityParser_invalidEncoding, new Object[] { encoding }));
+		throw new AssertionError(MessageFormat.format(
+				Messages.DbgpXmlEntityParser_invalidEncoding,
+				new Object[] { encoding }));
 	}
 
 }
