@@ -49,6 +49,13 @@ public interface IDbgpFeatureCommands {
 	// and XHTML. An IDE may need this information to to know what types of
 	// breakpoints an engine will accept.
 	final String BREAKPOINT_LANGUAGES = "breakpoint_languages"; //$NON-NLS-1$
+	/**
+	 * returns a space separated list with all the breakpoint types that are
+	 * supported. See 7.6 breakpoints for a list of the 6 defined breakpoint
+	 * types.
+	 * 
+	 */
+	final String BREAKPOINT_TYPES = "breakpoint_types"; //$NON-NLS-1$
 
 	// get|set {0|1}
 	final String MULTIPLE_SESSIONS = "multiple_sessions"; //$NON-NLS-1$

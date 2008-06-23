@@ -109,8 +109,15 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		} else if (breakpoint instanceof IScriptLineBreakpoint) {
 			IScriptLineBreakpoint lineBreakpoint = (IScriptLineBreakpoint) breakpoint;
 
-			id = commands.setLineBreakpoint(lineBreakpoint.getResourceURI(),
-					lineBreakpoint.getLineNumber(), config);
+			if (lineBreakpoint.getExpressionState()) {
+				id = commands.setConditionalBreakpoint(lineBreakpoint
+						.getResourceURI(), lineBreakpoint.getLineNumber(),
+						config);
+			} else {
+				id = commands.setLineBreakpoint(
+						lineBreakpoint.getResourceURI(), lineBreakpoint
+								.getLineNumber(), config);
+			}
 		} else if (breakpoint instanceof IScriptExceptionBreakpoint) {
 			IScriptExceptionBreakpoint lineBreakpoint = (IScriptExceptionBreakpoint) breakpoint;
 			id = commands.setExceptionBreakpoint(lineBreakpoint.getTypeName(),
