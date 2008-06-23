@@ -34,8 +34,8 @@ public class DbgpService implements IDbgpService, IDbgpTerminationListener,
 	private static final int FROM_PORT = 10000;
 	private static final int TO_PORT = 50000;
 
-	private static final int SERVER_SOCKET_TIMEOUT = 500;
-	private static final int CLIENT_SOCKET_TIMEOUT = 10000000;
+	protected static final int SERVER_SOCKET_TIMEOUT = 500;
+	protected static final int CLIENT_SOCKET_TIMEOUT = 10000000;
 
 	private DbgpServer server;
 
@@ -63,11 +63,15 @@ public class DbgpService implements IDbgpService, IDbgpTerminationListener,
 	private void startServer(int port) {
 		serverPort = port;
 
-		server = new DbgpServer(port, SERVER_SOCKET_TIMEOUT,
-				CLIENT_SOCKET_TIMEOUT);
+		server = createServer(port);
 		server.addTerminationListener(this);
 		server.setListener(this);
 		server.start();
+	}
+
+	protected DbgpServer createServer(int port) {
+		return new DbgpServer(port, SERVER_SOCKET_TIMEOUT,
+				CLIENT_SOCKET_TIMEOUT);
 	}
 
 	private void restartServer(int port) {
@@ -88,6 +92,26 @@ public class DbgpService implements IDbgpService, IDbgpTerminationListener,
 
 	public int getPort() {
 		return serverPort;
+	}
+
+	/**
+	 * Waits until the socket is actually started using the default timeout.
+	 * 
+	 * @return <code>true</code> if socket was successfully started and
+	 *         <code>false</code> otherwise.
+	 */
+	public boolean waitStarted() {
+		return server != null && server.waitStarted();
+	}
+
+	/**
+	 * Waits until the socket is actually started using specified timeout.
+	 * 
+	 * @return <code>true</code> if socket was successfully started and
+	 *         <code>false</code> otherwise.
+	 */
+	public boolean waitStarted(long timeout) {
+		return server != null && server.waitStarted(timeout);
 	}
 
 	// Acceptors

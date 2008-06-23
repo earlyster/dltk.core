@@ -48,9 +48,46 @@ public class DbgpServer extends DbgpWorkingThread {
 		return -1;
 	}
 
+	private static final int STATE_NONE = 0;
+	private static final int STATE_STARTED = 1;
+	private static final int STATE_CLOSED = 2;
+
+	private final Object stateLock = new Object();
+	private int state = STATE_NONE;
+
+	public boolean isStarted() {
+		synchronized (stateLock) {
+			return state == STATE_STARTED;
+		}
+	}
+
+	public boolean waitStarted() {
+		return waitStarted(15000);
+	}
+
+	public boolean waitStarted(long timeout) {
+		synchronized (stateLock) {
+			if (state == STATE_STARTED) {
+				return true;
+			} else if (state == STATE_CLOSED) {
+				return false;
+			}
+			try {
+				stateLock.wait(timeout);
+			} catch (InterruptedException e) {
+				// ignore
+			}
+			return state == STATE_STARTED;
+		}
+	}
+
 	protected void workingCycle() throws Exception, IOException {
 		try {
 			server = new ServerSocket(port);
+			synchronized (stateLock) {
+				state = STATE_STARTED;
+				stateLock.notifyAll();
+			}
 			server.setSoTimeout(serverTimeout);
 
 			while (!Thread.interrupted()) {
@@ -61,6 +98,10 @@ public class DbgpServer extends DbgpWorkingThread {
 		} finally {
 			if (server != null && !server.isClosed()) {
 				server.close();
+			}
+			synchronized (stateLock) {
+				state = STATE_CLOSED;
+				stateLock.notifyAll();
 			}
 		}
 	}
