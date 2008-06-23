@@ -15,6 +15,8 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.dltk.dbgp.IDbgpRawListener;
+import org.eclipse.dltk.dbgp.internal.IDbgpDebugingEngine;
+import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
@@ -72,6 +74,12 @@ public class ScriptDebugLogManager implements ILaunchListener,
 
 			if (event.getKind() == DebugEvent.CREATE) {
 				handleCreateEvent(event);
+			} else if (event.getKind() == DebugEvent.MODEL_SPECIFIC
+					&& event.getDetail() == ExtendedDebugEventDetails.DGBP_NEW_CONNECTION) {
+				if (event.getSource() instanceof IDbgpDebugingEngine) {
+					((IDbgpDebugingEngine) event.getSource())
+							.addRawListener(this);
+				}
 			} else if (event.getKind() == DebugEvent.TERMINATE) {
 				handleTerminateEvent(event);
 			}
