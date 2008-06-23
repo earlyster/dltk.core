@@ -13,9 +13,9 @@ import org.eclipse.dltk.dbgp.IDbgpThreadAcceptor;
 
 public interface IDbgpService {
 	boolean available();
-	
+
 	int getPort();
-	
+
 	// Acceptors
 	void registerAcceptor(String id, IDbgpThreadAcceptor acceptor);
 
