@@ -70,8 +70,7 @@ public class DbgpService implements IDbgpService, IDbgpTerminationListener,
 	}
 
 	protected DbgpServer createServer(int port) {
-		return new DbgpServer(port, SERVER_SOCKET_TIMEOUT,
-				CLIENT_SOCKET_TIMEOUT);
+		return new DbgpServer(port, CLIENT_SOCKET_TIMEOUT);
 	}
 
 	private void restartServer(int port) {

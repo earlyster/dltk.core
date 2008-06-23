@@ -3,7 +3,6 @@ package org.eclipse.dltk.dbgp;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -18,7 +17,6 @@ public class DbgpServer extends DbgpWorkingThread {
 	private final int port;
 	private ServerSocket server;
 
-	private final int serverTimeout;
 	private final int clientTimeout;
 
 	public static int findAvailablePort(int fromPort, int toPort) {
@@ -88,10 +86,8 @@ public class DbgpServer extends DbgpWorkingThread {
 				state = STATE_STARTED;
 				stateLock.notifyAll();
 			}
-			server.setSoTimeout(serverTimeout);
-
-			while (!Thread.interrupted()) {
-				Socket client = acceptClient();
+			while (!server.isClosed()) {
+				final Socket client = server.accept();
 				client.setSoTimeout(clientTimeout);
 				createSession(client);
 			}
@@ -130,23 +126,21 @@ public class DbgpServer extends DbgpWorkingThread {
 		job.schedule();
 	}
 
-	private Socket acceptClient() throws IOException {
-		Socket client = null;
-		while (client == null) {
-			try {
-				client = server.accept();
-			} catch (SocketTimeoutException e) {
-			}
-		}
-		return client;
-	}
-
-	public DbgpServer(int port, int serverTimeout, int clientTimeout) {
+	public DbgpServer(int port, int clientTimeout) {
 		super("DbgpServer"); //$NON-NLS-1$
 
 		this.port = port;
-		this.serverTimeout = serverTimeout;
 		this.clientTimeout = clientTimeout;
+	}
+
+	/**
+	 * @param port
+	 * @param serverTimeout
+	 * @param clientTimeout
+	 * @deprecated use {@link #DbgpServer(int, int)}
+	 */
+	public DbgpServer(int port, int serverTimeout, int clientTimeout) {
+		this(port, clientTimeout);
 	}
 
 	public void requestTermination() {
