@@ -52,11 +52,11 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 			engine.requestTermination();
 		}
 
-		if (object != streamManager) {
+		if (object != streamManager && streamManager != null) {
 			streamManager.requestTermination();
 		}
 
-		if (object != notificationManager) {
+		if (object != notificationManager && notificationManager != null) {
 			notificationManager.requestTermination();
 		}
 	}
@@ -170,8 +170,12 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 		}
 
 		engine.removeTerminationListener(this);
-		streamManager.removeTerminationListener(this);
-		notificationManager.removeTerminationListener(this);
+		if (streamManager != null) {
+			streamManager.removeTerminationListener(this);
+		}
+		if (notificationManager != null) {
+			notificationManager.removeTerminationListener(this);
+		}
 
 		// Request terminate
 		requestTerminateImpl(object);
