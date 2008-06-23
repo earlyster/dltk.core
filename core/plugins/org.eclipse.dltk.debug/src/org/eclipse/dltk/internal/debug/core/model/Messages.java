@@ -12,6 +12,7 @@ public class Messages extends NLS {
 	public static String ScriptValue_detailFormatterRequiredToContainIdentifier;
 	public static String ScriptValue_unableToLoadChildrenOf;
 	public static String ScriptVariable_cantAssignVariable;
+	public static String DbgpService_ServerRestart;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

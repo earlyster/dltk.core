@@ -5,7 +5,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation
+ *     xored software, Inc. - remove DbgpService dependency on DLTKDebugPlugin preferences (Alex Panchenko) 
  *******************************************************************************/
 package org.eclipse.dltk.debug.core;
 
@@ -20,6 +22,8 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
+import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
@@ -78,10 +82,25 @@ public class DLTKDebugPlugin extends Plugin {
 
 	public synchronized IDbgpService getDbgpService() {
 		if (dbgpService == null) {
-			dbgpService = new DbgpService();
+			dbgpService = new DbgpService(getPreferencePort());
+			getPluginPreferences().addPropertyChangeListener(
+					new DbgpServicePreferenceUpdater());
+		}
+		return dbgpService;
+	}
+
+	private class DbgpServicePreferenceUpdater implements
+			IPropertyChangeListener {
+
+		public void propertyChange(PropertyChangeEvent event) {
+			final String property = event.getProperty();
+			if (DLTKDebugPreferenceConstants.PREF_DBGP_PORT.equals(property)) {
+				if (dbgpService != null) {
+					dbgpService.restart(getPreferencePort());
+				}
+			}
 		}
 
-		return dbgpService;
 	}
 
 	// Logging
@@ -115,6 +134,11 @@ public class DLTKDebugPlugin extends Plugin {
 		}
 
 		log(new Status(IStatus.ERROR, PLUGIN_ID, INTERNAL_ERROR, message, top));
+	}
+
+	private int getPreferencePort() {
+		return getPluginPreferences().getInt(
+				DLTKDebugPreferenceConstants.PREF_DBGP_PORT);
 	}
 
 	public String getBindAddress() {
