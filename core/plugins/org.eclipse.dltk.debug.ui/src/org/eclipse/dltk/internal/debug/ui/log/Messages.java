@@ -13,6 +13,9 @@ public class Messages extends NLS {
 	public static String EventKind_Suspend;
 	public static String EventKind_Terminate;
 	public static String EventKind_Unknown;
+	public static String ItemType_Input;
+	public static String ItemType_Output;
+	public static String ItemType_Event;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

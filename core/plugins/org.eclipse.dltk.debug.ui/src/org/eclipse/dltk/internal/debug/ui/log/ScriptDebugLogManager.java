@@ -50,7 +50,7 @@ public class ScriptDebugLogManager implements ILaunchListener,
 	 * )
 	 */
 	public void dbgpPacketReceived(String content) {
-		append("<< " + content); //$NON-NLS-1$
+		append(new ScriptDebugLogItem(Messages.ItemType_Input, content));
 	}
 
 	/*
@@ -58,7 +58,7 @@ public class ScriptDebugLogManager implements ILaunchListener,
 	 * org.eclipse.dltk.dbgp.IDbgpRawListener#dbgpPacketSent(java.lang.String)
 	 */
 	public void dbgpPacketSent(String content) {
-		append(">> " + content); //$NON-NLS-1$
+		append(new ScriptDebugLogItem(Messages.ItemType_Output, content));
 	}
 
 	/*
@@ -74,8 +74,9 @@ public class ScriptDebugLogManager implements ILaunchListener,
 		for (int i = 0; i < events.length; ++i) {
 			DebugEvent event = events[i];
 
-			append("Event: " + getDebugEventKind(event) + " from " //$NON-NLS-1$ //$NON-NLS-2$
-					+ event.getSource().getClass().getName());
+			append(new ScriptDebugLogItem(Messages.ItemType_Event,
+					getDebugEventKind(event)
+							+ " from " + event.getSource().getClass().getName()));//$NON-NLS-1$
 
 			if (event.getKind() == DebugEvent.CREATE) {
 				handleCreateEvent(event);
@@ -97,7 +98,7 @@ public class ScriptDebugLogManager implements ILaunchListener,
 	 * core.ILaunch)
 	 */
 	public void launchAdded(ILaunch launch) {
-		// empty implemenation
+		// empty implementation
 	}
 
 	/*
@@ -143,10 +144,10 @@ public class ScriptDebugLogManager implements ILaunchListener,
 		// empty implementation
 	}
 
-	protected synchronized void append(final String text) {
+	protected synchronized void append(final ScriptDebugLogItem item) {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
-				view.append(text + "\n"); //$NON-NLS-1$
+				view.append(item.toString() + "\n"); //$NON-NLS-1$
 			}
 		});
 	}
