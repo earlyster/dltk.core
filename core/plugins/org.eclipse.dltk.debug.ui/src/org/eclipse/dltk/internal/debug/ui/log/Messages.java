@@ -16,6 +16,10 @@ public class Messages extends NLS {
 	public static String ItemType_Input;
 	public static String ItemType_Output;
 	public static String ItemType_Event;
+	public static String Column_Date;
+	public static String Column_Time;
+	public static String Column_Type;
+	public static String Column_Message;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

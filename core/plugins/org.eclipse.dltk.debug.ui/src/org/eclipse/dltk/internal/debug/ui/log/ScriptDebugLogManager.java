@@ -144,12 +144,8 @@ public class ScriptDebugLogManager implements ILaunchListener,
 		// empty implementation
 	}
 
-	protected synchronized void append(final ScriptDebugLogItem item) {
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				view.append(item.toString() + "\n"); //$NON-NLS-1$
-			}
-		});
+	protected void append(final ScriptDebugLogItem item) {
+		view.append(item);
 	}
 
 	private static String getDebugEventKind(DebugEvent event) {

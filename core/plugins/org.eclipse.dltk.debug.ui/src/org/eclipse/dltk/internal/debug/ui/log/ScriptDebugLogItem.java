@@ -50,7 +50,7 @@ public class ScriptDebugLogItem {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return type + ' ' + message;
+		return type + '\t' + message;
 	}
 
 }
