@@ -112,7 +112,9 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 					}
 				} else {
 					String id = breakpoint.getIdentifier();
-					br = thread.getDbgpBreakpoint(id);
+					if (id != null && id.length() != 0) {
+						br = thread.getDbgpBreakpoint(id);
+					}
 				}
 				if (br != null) {
 					breakpoint.setHitCount(br.getHitCount());
