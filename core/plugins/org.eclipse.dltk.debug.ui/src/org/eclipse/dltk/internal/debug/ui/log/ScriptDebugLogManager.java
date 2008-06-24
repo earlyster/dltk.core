@@ -49,16 +49,18 @@ public class ScriptDebugLogManager implements ILaunchListener,
 	 * org.eclipse.dltk.dbgp.IDbgpRawListener#dbgpPacketReceived(java.lang.String
 	 * )
 	 */
-	public void dbgpPacketReceived(String content) {
-		append(new ScriptDebugLogItem(Messages.ItemType_Input, content));
+	public void dbgpPacketReceived(int sessionId, String content) {
+		append(new ScriptDebugLogItem(Messages.ItemType_Input, sessionId,
+				content));
 	}
 
 	/*
 	 * @see
 	 * org.eclipse.dltk.dbgp.IDbgpRawListener#dbgpPacketSent(java.lang.String)
 	 */
-	public void dbgpPacketSent(String content) {
-		append(new ScriptDebugLogItem(Messages.ItemType_Output, content));
+	public void dbgpPacketSent(int sessionId, String content) {
+		append(new ScriptDebugLogItem(Messages.ItemType_Output, sessionId,
+				content));
 	}
 
 	/*

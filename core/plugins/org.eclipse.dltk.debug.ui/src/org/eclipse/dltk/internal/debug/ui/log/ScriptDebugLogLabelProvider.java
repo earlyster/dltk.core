@@ -68,6 +68,12 @@ public class ScriptDebugLogLabelProvider implements ITableLabelProvider,
 			case 2:
 				return item.getType();
 			case 3:
+				if (item.getSessionId() > 0) {
+					return String.valueOf(item.getSessionId());
+				} else {
+					break;
+				}
+			case 4:
 				return item.getMessage();
 			}
 		}

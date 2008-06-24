@@ -15,10 +15,15 @@ public class ScriptDebugLogItem {
 
 	private final long timestamp;
 	private final String type;
+	private final int sessionId;
 	private final String message;
 
 	public ScriptDebugLogItem(String type, String message) {
-		this(System.currentTimeMillis(), type, message);
+		this(System.currentTimeMillis(), type, 0, message);
+	}
+
+	public ScriptDebugLogItem(String type, int sessionId, String message) {
+		this(System.currentTimeMillis(), type, sessionId, message);
 	}
 
 	/**
@@ -26,10 +31,12 @@ public class ScriptDebugLogItem {
 	 * @param timestamp
 	 * @param type
 	 */
-	public ScriptDebugLogItem(long timestamp, String type, String message) {
-		this.message = message;
+	public ScriptDebugLogItem(long timestamp, String type, int sessionId,
+			String message) {
 		this.timestamp = timestamp;
 		this.type = type;
+		this.sessionId = sessionId;
+		this.message = message;
 	}
 
 	public long getTimestamp() {
@@ -38,6 +45,10 @@ public class ScriptDebugLogItem {
 
 	public String getType() {
 		return type;
+	}
+
+	public int getSessionId() {
+		return sessionId;
 	}
 
 	public String getMessage() {

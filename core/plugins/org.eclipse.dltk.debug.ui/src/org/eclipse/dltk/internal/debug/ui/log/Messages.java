@@ -19,6 +19,7 @@ public class Messages extends NLS {
 	public static String Column_Date;
 	public static String Column_Time;
 	public static String Column_Type;
+	public static String Column_Session;
 	public static String Column_Message;
 	static {
 		// initialize resource bundle

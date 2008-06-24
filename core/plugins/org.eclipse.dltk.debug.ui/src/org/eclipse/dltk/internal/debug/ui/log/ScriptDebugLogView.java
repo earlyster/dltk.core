@@ -53,7 +53,8 @@ public class ScriptDebugLogView extends ViewPart {
 		viewer.getTable().setLinesVisible(true);
 		addColumn(Messages.Column_Date, 100, true);
 		addColumn(Messages.Column_Time, 100, true);
-		addColumn(Messages.Column_Type, 100, true);
+		addColumn(Messages.Column_Type, 80, true);
+		addColumn(Messages.Column_Session, 80, true);
 		addColumn(Messages.Column_Message, 400, false);
 		viewer.getTable().addListener(SWT.Resize, new Listener() {
 
