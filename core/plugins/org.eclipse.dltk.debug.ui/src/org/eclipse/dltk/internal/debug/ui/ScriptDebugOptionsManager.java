@@ -121,7 +121,7 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 		});
 	}
 
-	protected void updateBreakpoinInfoToDefualt(IBreakpoint[] breakpoints) {
+	protected void updateBreakpoinInfoToDefault(IBreakpoint[] breakpoints) {
 		updateBreakpoints(breakpoints, new IBreakpointUpdater() {
 			public void update(IScriptBreakpoint breakpoint)
 					throws CoreException {
@@ -154,7 +154,7 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 							.getBreakpointManager()
 							.getBreakpoints(debugModelId);
 
-					updateBreakpoinInfoToDefualt(breakpoints);
+					updateBreakpoinInfoToDefault(breakpoints);
 					updateBreakpointMessages(breakpoints);
 				}
 			} else if (kind == DebugEvent.CREATE) {
