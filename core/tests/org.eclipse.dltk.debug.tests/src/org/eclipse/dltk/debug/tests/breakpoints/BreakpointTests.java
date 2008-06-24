@@ -1,11 +1,16 @@
 package org.eclipse.dltk.debug.tests.breakpoints;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptLineBreakpoint;
 import org.eclipse.dltk.debug.tests.AbstractDebugTests;
+import org.eclipse.dltk.internal.debug.core.model.AbstractScriptBreakpoint;
 import org.eclipse.dltk.internal.debug.core.model.ScriptLineBreakpoint;
 
 public class BreakpointTests extends AbstractDebugTests {
@@ -25,8 +30,8 @@ public class BreakpointTests extends AbstractDebugTests {
 		IResource resource = scriptProject.getProject().findMember(
 				"src/test.rb");
 
-		breakpoint = new ScriptLineBreakpoint("test_debug_model", resource, resource.getLocation(), 1,
-				-1, -1, true);
+		breakpoint = new ScriptLineBreakpoint("test_debug_model", resource,
+				resource.getLocation(), 1, -1, -1, true);
 	}
 
 	public void tearDownSuite() throws Exception {
@@ -73,5 +78,10 @@ public class BreakpointTests extends AbstractDebugTests {
 		assertEquals(-1, breakpoint.getHitValue());
 		breakpoint.setHitValue(hitValue);
 		assertEquals(hitValue, breakpoint.getHitValue());
+	}
+
+	public void testMakeUri() throws UnsupportedEncodingException {
+		assertEquals("file:///" + URLEncoder.encode("[1]", "UTF-8"), String
+				.valueOf(AbstractScriptBreakpoint.makeUri(new Path("[1]"))));
 	}
 }
