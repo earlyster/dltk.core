@@ -94,13 +94,14 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 		updateBreakpoints(breakpoints, new IBreakpointUpdater() {
 			public void update(IScriptBreakpoint breakpoint)
 					throws CoreException {
-				
+
 				IDbgpBreakpoint br = null;
 
 				if (breakpoint instanceof IScriptMethodEntryBreakpoint) {
 					IScriptMethodEntryBreakpoint entryBreakpoint = (IScriptMethodEntryBreakpoint) breakpoint;
 
-					final String entryId = entryBreakpoint.getEntryBreakpointId();
+					final String entryId = entryBreakpoint
+							.getEntryBreakpointId();
 					if (entryId != null) {
 						br = thread.getDbgpBreakpoint(entryId);
 					}
@@ -109,9 +110,7 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 					if (exitId != null) {
 						br = thread.getDbgpBreakpoint(exitId);
 					}
-				}
-				else
-				{
+				} else {
 					String id = breakpoint.getIdentifier();
 					br = thread.getDbgpBreakpoint(id);
 				}
