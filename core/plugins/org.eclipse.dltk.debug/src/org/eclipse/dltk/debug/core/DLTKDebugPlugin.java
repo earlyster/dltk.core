@@ -160,28 +160,26 @@ public class DLTKDebugPlugin extends Plugin {
 	public static String[] getLocalAddresses() {
 		Set addresses = new HashSet();
 		try {
-			InetAddress ip = null;
 			Enumeration netInterfaces = NetworkInterface.getNetworkInterfaces();
 			while (netInterfaces.hasMoreElements()) {
 				NetworkInterface ni = (NetworkInterface) netInterfaces
 						.nextElement();
-				// ignore virtual interfaces for vmware, etc
-				if (ni.getName().startsWith("vmnet")) {
+				// ignore virtual interfaces for VMware, etc
+				if (ni.getName().startsWith("vmnet")) { //$NON-NLS-1$
+					continue;
+				}
+				if (ni.getDisplayName() != null
+						&& ni.getDisplayName().indexOf("VMware") != -1) { //$NON-NLS-1$
 					continue;
 				}
 				Enumeration inetAddresses = ni.getInetAddresses();
 				while (inetAddresses.hasMoreElements()) {
-					ip = (InetAddress) inetAddresses.nextElement();
-					if (!ip.getHostAddress().equals("127.0.0.1")
-							&& !ip.isLoopbackAddress()
-							&& ip.getHostAddress().indexOf(":") == -1) {
-						break;
-					} else {
-						ip = null;
+					InetAddress ip = (InetAddress) inetAddresses.nextElement();
+					// ignore loopback address (127.0.0.1)
+					// use only IPv4 addresses (ignore IPv6)
+					if (!ip.isLoopbackAddress() && ip.getAddress().length == 4) {
+						addresses.add(ip.getHostAddress());
 					}
-				}
-				if (ip != null) {
-					addresses.add(ip.getHostAddress());
 				}
 			}
 
@@ -197,9 +195,7 @@ public class DLTKDebugPlugin extends Plugin {
 				e.printStackTrace();
 			}
 		}
-		String[] result = new String[addresses.size()];
-		addresses.toArray(result);
-		return result;
+		return (String[]) addresses.toArray(new String[addresses.size()]);
 	}
 
 }
