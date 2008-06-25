@@ -113,18 +113,23 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 		try {
 			return lookupSource().toCharArray();
 		} catch (DbgpException e) {
-			throw new ModelException(e, IModelStatus.ERROR);
+			throw new ModelException(e, IStatus.ERROR);
 		}
 	}
 
+	private String cachedSource = null;
+
 	private String lookupSource() throws DbgpException {
-		/*
-		 * XXX: this has problems if the encodings on both hosts don't match -
-		 * see getBufferContents/getContents
-		 */
-		URI uri = frame.getFileName();
-		return frame.getScriptThread().getDbgpSession().getCoreCommands()
-				.getSource(uri);
+		if (cachedSource == null) {
+			/*
+			 * XXX: this has problems if the encodings on both hosts don't match
+			 * - see getBufferContents/getContents
+			 */
+			URI uri = frame.getFileName();
+			cachedSource = frame.getScriptThread().getDbgpSession()
+					.getCoreCommands().getSource(uri);
+		}
+		return cachedSource;
 	}
 
 	/*
