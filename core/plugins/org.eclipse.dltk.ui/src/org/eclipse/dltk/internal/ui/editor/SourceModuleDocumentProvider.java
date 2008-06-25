@@ -1497,10 +1497,24 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			info = new SourceModuleInfo();
 			info.fCopy = cu;
 			info.fElement = element;
-			info.fModel = new AnnotationModel();
+			info.fModel = createAnnotationModel(element);
 			fFakeCUMapForMissingInfo.put(element, info);
 		}
 		info.fCount++;
+	}
+
+	private IAnnotationModel createAnnotationModel(Object element) {
+		if (element instanceof ExternalStorageEditorInput) {
+			final IModelElement modelElement = (IModelElement) ((ExternalStorageEditorInput) element)
+					.getAdapter(IModelElement.class);
+			if (modelElement != null) {
+				final IPath path = modelElement.getPath();
+				if (path != null) {
+					return new ExternalSourceModuleAnnotationModel(path);
+				}
+			}
+		}
+		return new AnnotationModel();
 	}
 
 	/*
