@@ -20,9 +20,23 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.resource.FontDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
@@ -37,6 +51,7 @@ public class ScriptDebugLogView extends ViewPart {
 
 	private final List items = new ArrayList();
 	private TableViewer viewer;
+	private IDocument textDocument;
 
 	public ScriptDebugLogView() {
 		super();
@@ -47,7 +62,8 @@ public class ScriptDebugLogView extends ViewPart {
 	}
 
 	public void createPartControl(Composite parent) {
-		viewer = new TableViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL
+		final SashForm sashForm = new SashForm(parent, SWT.HORIZONTAL);
+		viewer = new TableViewer(sashForm, SWT.H_SCROLL | SWT.V_SCROLL
 				| SWT.MULTI | SWT.FULL_SELECTION | SWT.VIRTUAL);
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().setLinesVisible(true);
@@ -71,10 +87,47 @@ public class ScriptDebugLogView extends ViewPart {
 			}
 
 		});
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+
+			public void selectionChanged(SelectionChangedEvent event) {
+				if (event.getSelection() instanceof IStructuredSelection) {
+					final Object first = ((IStructuredSelection) event
+							.getSelection()).getFirstElement();
+					if (first instanceof ScriptDebugLogItem) {
+						textDocument.set(((ScriptDebugLogItem) first)
+								.getMessage());
+						return;
+					}
+				}
+				textDocument.set(""); //$NON-NLS-1$
+			}
+
+		});
 		viewer.setContentProvider(new ScriptDebugLogContentProvider());
 		viewer.setLabelProvider(new ScriptDebugLogLabelProvider());
 		viewer.setInput(items);
+		textDocument = new Document();
+		final TextViewer textViewer = new TextViewer(sashForm, SWT.V_SCROLL
+				| SWT.H_SCROLL | SWT.WRAP | SWT.READ_ONLY);
+		textViewer.setDocument(textDocument);
+		Font font = JFaceResources.getFont(JFaceResources.TEXT_FONT);
+		FontDescriptor fd = FontDescriptor.createFrom(font);
+		final FontData[] datas = fd.getFontData();
+		if (datas != null && datas.length != 0 && datas[0].getHeight() > 8) {
+			fd = fd.setHeight(8);
+			font = fd.createFont(textViewer.getTextWidget().getDisplay());
+			final Font f = font;
+			textViewer.getTextWidget().addDisposeListener(
+					new DisposeListener() {
 
+						public void widgetDisposed(DisposeEvent e) {
+							f.dispose();
+						}
+
+					});
+		}
+		textViewer.getTextWidget().setFont(font);
+		sashForm.setWeights(new int[] { 75, 25 });
 		createActions();
 		createMenu();
 		createToolbar();
@@ -95,11 +148,18 @@ public class ScriptDebugLogView extends ViewPart {
 		synchronized (items) {
 			items.add(item);
 		}
-		viewer.getTable().getDisplay().asyncExec(new Runnable() {
+		final Table table = viewer.getTable();
+		if (table.isDisposed())
+			return;
+		final Display display = table.getDisplay();
+		if (display.isDisposed())
+			return;
+		display.asyncExec(new Runnable() {
 
 			public void run() {
 				viewer.refresh(false, false);
-				final Table table = viewer.getTable();
+				if (table.isDisposed() || table.getDisplay().isDisposed())
+					return;
 				final int itemCount = table.getItemCount();
 				if (itemCount > 0) {
 					table.showItem(table.getItem(itemCount - 1));
