@@ -239,13 +239,15 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				// if (isQuickFixable()) {
 				// if (!fgQuickFixImagesInitialized) {
 				// fgQuickFixImage=
-				// JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+				//JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM
+				// );
 				// fgQuickFixErrorImage=
-				// JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
+				//JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
 				// fgQuickFixImagesInitialized= true;
 				// }
 				// if
-				// (ScriptMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(getType()))
+				//(ScriptMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(getType()
+				// ))
 				// fImage= fgQuickFixErrorImage;
 				// else
 				// fImage= fgQuickFixImage;
@@ -317,7 +319,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getOverlay()
+		 * @see
+		 * org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getOverlay()
 		 */
 		public IScriptAnnotation getOverlay() {
 			return null;
@@ -353,14 +356,18 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getCompilationUnit()
+		 * @see
+		 * org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getCompilationUnit
+		 * ()
 		 */
 		public ISourceModule getSourceModule() {
 			return fSourceModule;
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getMarkerType()
+		 * @see
+		 * org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getMarkerType
+		 * ()
 		 */
 		public String getMarkerType() {
 			if (fProblem instanceof CategorizedProblem)
@@ -369,7 +376,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#setQuickFixable(boolean)
+		 * @seeorg.eclipse.jface.text.quickassist.IQuickFixableAnnotation#
+		 * setQuickFixable(boolean)
+		 * 
 		 * @since 3.2
 		 */
 		public void setQuickFixable(boolean state) {
@@ -378,7 +387,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#isQuickFixableStateSet()
+		 * @seeorg.eclipse.jface.text.quickassist.IQuickFixableAnnotation#
+		 * isQuickFixableStateSet()
+		 * 
 		 * @since 3.2
 		 */
 		public boolean isQuickFixableStateSet() {
@@ -386,7 +397,10 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#isQuickFixable()
+		 * @see
+		 * org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#isQuickFixable
+		 * ()
+		 * 
 		 * @since 3.2
 		 */
 		public boolean isQuickFixable() {
@@ -508,33 +522,32 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		public void setSourceModule(ISourceModule unit) {
 			fSourceModule = unit;
 		}
-		
+
 		/**
 		 * Re-populates this model with annotations for all markers retrieved
 		 * from the maker source via <code>retrieveMarkers</code>.
-		 *
-		 * @throws CoreException if there is a problem getting the markers
+		 * 
+		 * @throws CoreException
+		 *             if there is a problem getting the markers
 		 */
-		private void catchupWithMarkers() throws CoreException 
-		{
-			for (Iterator e=getAnnotationIterator(false); e.hasNext();) {
-				Annotation a= (Annotation) e.next();
+		private void catchupWithMarkers() throws CoreException {
+			for (Iterator e = getAnnotationIterator(false); e.hasNext();) {
+				Annotation a = (Annotation) e.next();
 				if (a instanceof MarkerAnnotation)
 					removeAnnotation(a, false);
 			}
 
-			IMarker[] markers= retrieveMarkers();
+			IMarker[] markers = retrieveMarkers();
 			if (markers != null) {
-				for (int i= 0; i < markers.length; i++)
+				for (int i = 0; i < markers.length; i++)
 					addMarkerAnnotation(markers[i]);
 			}
 		}
-		
+
 		/**
 		 * @see org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel#updateMarkers(org.eclipse.jface.text.IDocument)
 		 */
-		public void updateMarkers(IDocument document) throws CoreException
-		{
+		public void updateMarkers(IDocument document) throws CoreException {
 			catchupWithMarkers();
 			super.updateMarkers(document);
 		}
@@ -549,7 +562,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.source.AnnotationModel#createAnnotationModelEvent()
+		 * @see
+		 * org.eclipse.jface.text.source.AnnotationModel#createAnnotationModelEvent
+		 * ()
 		 */
 		protected AnnotationModelEvent createAnnotationModelEvent() {
 			return new SourceModuleAnnotationModelEvent(this, getResource());
@@ -578,7 +593,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#beginReportingSequence()
+		 * @see
+		 * org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#
+		 * beginReportingSequence()
 		 */
 		public void beginReportingSequence() {
 			ProblemRequestorState state = (ProblemRequestorState) fProblemRequestorState
@@ -612,10 +629,11 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		 * @see IProblemRequestor#acceptProblem(IProblem)
 		 */
 		public void acceptProblem(IProblem problem) {
-			if (fIsHandlingTemporaryProblems /*
-												 * || problem.getID() ==
-												 * JavaSpellingReconcileStrategy.SPELLING_PROBLEM_ID
-												 */) {
+			if (fIsHandlingTemporaryProblems) {
+				/*
+				 * || problem.getID() == JavaSpellingReconcileStrategy
+				 * .SPELLING_PROBLEM_ID
+				 */
 				ProblemRequestorState state = (ProblemRequestorState) fProblemRequestorState
 						.get();
 				if (state != null)
@@ -634,7 +652,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#endReportingSequence()
+		 * @see
+		 * org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#
+		 * endReportingSequence()
 		 */
 		public void endReportingSequence() {
 			ProblemRequestorState state = (ProblemRequestorState) fProblemRequestorState
@@ -797,7 +817,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see IProblemRequestorExtension#setIsHandlingTemporaryProblems(boolean)
+		 * @see
+		 * IProblemRequestorExtension#setIsHandlingTemporaryProblems(boolean)
+		 * 
 		 * @since 3.1
 		 */
 		public void setIsHandlingTemporaryProblems(boolean enable) {
@@ -1084,7 +1106,10 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider#addGlobalAnnotationModelListener(org.eclipse.jface.text.source.IAnnotationModelListener)
+	 * @see
+	 * org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider
+	 * #addGlobalAnnotationModelListener
+	 * (org.eclipse.jface.text.source.IAnnotationModelListener)
 	 */
 	public void addGlobalAnnotationModelListener(
 			IAnnotationModelListener listener) {
@@ -1092,7 +1117,10 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider#removeGlobalAnnotationModelListener(org.eclipse.jface.text.source.IAnnotationModelListener)
+	 * @see
+	 * org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider
+	 * #removeGlobalAnnotationModelListener
+	 * (org.eclipse.jface.text.source.IAnnotationModelListener)
 	 */
 	public void removeGlobalAnnotationModelListener(
 			IAnnotationModelListener listener) {
@@ -1115,7 +1143,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createEmptyFileInfo()
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#createEmptyFileInfo
+	 * ()
 	 */
 	protected FileInfo createEmptyFileInfo() {
 
@@ -1135,14 +1165,18 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createAnnotationModel(org.eclipse.core.resources.IFile)
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#createAnnotationModel
+	 * (org.eclipse.core.resources.IFile)
 	 */
 	protected IAnnotationModel createAnnotationModel(IFile file) {
 		return new SourceModuleAnnotationModel(file);
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createFileInfo(java.lang.Object)
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#createFileInfo(java
+	 * .lang.Object)
 	 */
 	protected FileInfo createFileInfo(Object element) throws CoreException {
 
@@ -1212,8 +1246,10 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#disposeFileInfo(java.lang.Object,
-	 *      org.eclipse.ui.editors.text.TextFileDocumentProvider.FileInfo)
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#disposeFileInfo(
+	 * java.lang.Object,
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider.FileInfo)
 	 */
 	protected void disposeFileInfo(Object element, FileInfo info) {
 
@@ -1254,8 +1290,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createSaveOperation(java.lang.Object,
-	 *      org.eclipse.jface.text.IDocument, boolean)
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#createSaveOperation
+	 * (java.lang.Object, org.eclipse.jface.text.IDocument, boolean)
 	 */
 	protected DocumentProviderOperation createSaveOperation(
 			final Object element, final IDocument document,
@@ -1287,7 +1324,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 
 			return new DocumentProviderOperation() {
 				/*
-				 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider.DocumentProviderOperation#execute(org.eclipse.core.runtime.IProgressMonitor)
+				 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider.
+				 * DocumentProviderOperation
+				 * #execute(org.eclipse.core.runtime.IProgressMonitor)
 				 */
 				protected void execute(IProgressMonitor monitor)
 						throws CoreException {
@@ -1297,7 +1336,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				}
 
 				/*
-				 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider.DocumentProviderOperation#getSchedulingRule()
+				 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider.
+				 * DocumentProviderOperation#getSchedulingRule()
 				 */
 				public ISchedulingRule getSchedulingRule() {
 
@@ -1429,8 +1469,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#connect(java.lang.Object)
-	 * 
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#connect(java.lang
+	 * .Object)
 	 */
 	public void connect(Object element) throws CoreException {
 		super.connect(element);
@@ -1463,8 +1504,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#getAnnotationModel(java.lang.Object)
-	 * 
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#getAnnotationModel
+	 * (java.lang.Object)
 	 */
 	public IAnnotationModel getAnnotationModel(Object element) {
 		IAnnotationModel model = super.getAnnotationModel(element);
@@ -1483,8 +1525,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#disconnect(java.lang.Object)
-	 * 
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#disconnect(java.
+	 * lang.Object)
 	 */
 	public void disconnect(Object element) {
 		SourceModuleInfo info = (SourceModuleInfo) fFakeCUMapForMissingInfo
@@ -1524,34 +1567,40 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		return null;
 	}
 
-	private ISourceModule createFakeSourceModule(final IURIEditorInput editorInput) {
+	private ISourceModule createFakeSourceModule(
+			final IURIEditorInput editorInput) {
 		try {
-			final URI uri= editorInput.getURI();
-			final IFileStore fileStore= EFS.getStore(uri);
-			final IPath path= URIUtil.toPath(uri);
+			final URI uri = editorInput.getURI();
+			final IFileStore fileStore = EFS.getStore(uri);
+			final IPath path = URIUtil.toPath(uri);
 			if (fileStore.getName() == null || path == null)
 				return null;
-			
-			WorkingCopyOwner woc= new WorkingCopyOwner() {
+
+			WorkingCopyOwner woc = new WorkingCopyOwner() {
 				/*
-				 * @see org.eclipse.jdt.core.WorkingCopyOwner#createBuffer(org.eclipse.jdt.core.ICompilationUnit)
+				 * @see
+				 * org.eclipse.jdt.core.WorkingCopyOwner#createBuffer(org.eclipse
+				 * .jdt.core.ICompilationUnit)
+				 * 
 				 * @since 3.2
 				 */
 				public IBuffer createBuffer(ISourceModule workingCopy) {
 					return new DocumentAdapter(workingCopy, path);
 				}
 			};
-			
-			IBuildpathEntry[] cpEntries= null;
-			IScriptProject jp= findScriptProject(path);
+
+			IBuildpathEntry[] cpEntries = null;
+			IScriptProject jp = findScriptProject(path);
 			if (jp != null)
-				cpEntries= jp.getResolvedBuildpath(true);
-			
+				cpEntries = jp.getResolvedBuildpath(true);
+
 			if (cpEntries == null || cpEntries.length == 0)
-				cpEntries= new IBuildpathEntry[] { ScriptRuntime.getDefaultInterpreterContainerEntry() };
-			
-			final ISourceModule cu= woc.newWorkingCopy(fileStore.getName(), cpEntries, null, getProgressMonitor());
-			
+				cpEntries = new IBuildpathEntry[] { ScriptRuntime
+						.getDefaultInterpreterContainerEntry() };
+
+			final ISourceModule cu = woc.newWorkingCopy(fileStore.getName(),
+					cpEntries, null, getProgressMonitor());
+
 			if (!isModifiable(editorInput))
 				ScriptModelUtil.reconcile(cu);
 
