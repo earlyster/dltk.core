@@ -99,11 +99,40 @@ public class ScriptLineBreakpoint extends AbstractScriptBreakpoint implements
 	}
 
 	// IScriptLineBreakpoint
+	public IResource getResource() {
+		try {
+			final IResource resource = ensureMarker().getResource();
+			if (!resource.equals(ResourcesPlugin.getWorkspace().getRoot())) {
+				return resource;
+			}
+		} catch (CoreException e) {
+			DLTKDebugPlugin.log(e);
+		}
+		return null;
+	}
+
+	public IPath getResourcePath() {
+		try {
+			final IResource resource = ensureMarker().getResource();
+			if (!resource.equals(ResourcesPlugin.getWorkspace().getRoot()))
+				return ensureMarker().getResource().getFullPath();
+			final String path = (String) ensureMarker().getAttribute(
+					IMarker.LOCATION);
+			if (path != null) {
+				return Path.fromPortableString(path);
+			}
+		} catch (CoreException e) {
+			DLTKDebugPlugin.log(e);
+		}
+		return null;
+	}
+
 	public URI getResourceURI() {
 		try {
 			IResource resource = ensureMarker().getResource();
 			if (!resource.equals(ResourcesPlugin.getWorkspace().getRoot()))
-				return makeUri(new Path(ensureMarker().getResource().getLocationURI().getPath()));
+				return makeUri(new Path(ensureMarker().getResource()
+						.getLocationURI().getPath()));
 
 			// else
 			String portablePath = (String) ensureMarker().getAttribute(
