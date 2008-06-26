@@ -24,6 +24,8 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextViewer;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -46,7 +48,9 @@ public class ScriptDebugLogView extends ViewPart {
 
 	private final List items = new ArrayList();
 	private TableViewer viewer;
+	private TextViewer textViewer;
 	private IDocument textDocument;
+	private IPropertyChangeListener fontRegistryChangeListener;
 
 	public ScriptDebugLogView() {
 		super();
@@ -102,15 +106,46 @@ public class ScriptDebugLogView extends ViewPart {
 		viewer.setLabelProvider(new ScriptDebugLogLabelProvider());
 		viewer.setInput(items);
 		textDocument = new Document();
-		final TextViewer textViewer = new TextViewer(sashForm, SWT.V_SCROLL
-				| SWT.H_SCROLL | SWT.WRAP | SWT.READ_ONLY);
+		textViewer = new TextViewer(sashForm, SWT.V_SCROLL | SWT.H_SCROLL
+				| SWT.WRAP | SWT.READ_ONLY);
 		textViewer.setDocument(textDocument);
-		textViewer.getTextWidget().setFont(JFaceResources.getFont(THEME_ID));
+		fontRegistryChangeListener = new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				handlePropertyChangeEvent(event);
+			}
+		};
+		JFaceResources.getFontRegistry()
+				.addListener(fontRegistryChangeListener);
+
+		updateFont();
 		sashForm.setWeights(new int[] { 75, 25 });
 		createActions();
 		createMenu();
 		createToolbar();
 		createContextMenu();
+	}
+
+	public void dispose() {
+		if (fontRegistryChangeListener != null) {
+			JFaceResources.getFontRegistry().removeListener(
+					fontRegistryChangeListener);
+			fontRegistryChangeListener = null;
+		}
+		super.dispose();
+	}
+
+	/**
+	 * @param event
+	 */
+	protected void handlePropertyChangeEvent(PropertyChangeEvent event) {
+		final String key = event.getProperty();
+		if (key.equals(THEME_ID)) {
+			updateFont();
+		}
+	}
+
+	private void updateFont() {
+		textViewer.getTextWidget().setFont(JFaceResources.getFont(THEME_ID));
 	}
 
 	/**
