@@ -1357,4 +1357,11 @@
             id="org.eclipse.dltk.ui.nature">
       </actionFilterTester>
    </extension>
+   
+   <extension point="org.eclipse.ui.themes">
+     <themeElementCategory 
+       id="org.eclipse.dltk.ui.presentation"
+       label="%dltkPresentation.label" />
+   </extension>
+   
 </plugin>
