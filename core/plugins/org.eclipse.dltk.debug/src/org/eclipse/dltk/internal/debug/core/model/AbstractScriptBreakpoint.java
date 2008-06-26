@@ -21,6 +21,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.Breakpoint;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
 
@@ -66,12 +67,16 @@ public abstract class AbstractScriptBreakpoint extends Breakpoint implements
 
 	public static URI makeUri(IPath location) {
 		try {
-			return new URI("file", "///" //$NON-NLS-1$ //$NON-NLS-2$
-					+ location.toPortableString(), null);
+			String path = EnvironmentPathUtils.getLocalPath(location)
+					.toString();
+			if (path.length() != 0 && path.charAt(0) != '/') {
+				path = '/' + path;
+			}
+			return new URI("file", "", path, null); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (URISyntaxException e) {
 			DLTKDebugPlugin.log(e);
-			return null;
 		}
+		return null;
 	}
 
 	protected void addScriptBreakpointAttributes(Map attributes,

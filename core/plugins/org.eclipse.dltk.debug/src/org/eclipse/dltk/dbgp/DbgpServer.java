@@ -3,7 +3,6 @@ package org.eclipse.dltk.dbgp;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -18,9 +17,8 @@ public class DbgpServer extends DbgpWorkingThread {
 	private final int port;
 	private ServerSocket server;
 
-	private final int serverTimeout;
 	private final int clientTimeout;
-	
+
 	public static int findAvailablePort(int fromPort, int toPort) {
 		if (fromPort > toPort) {
 			throw new IllegalArgumentException(
@@ -48,19 +46,58 @@ public class DbgpServer extends DbgpWorkingThread {
 		return -1;
 	}
 
+	private static final int STATE_NONE = 0;
+	private static final int STATE_STARTED = 1;
+	private static final int STATE_CLOSED = 2;
+
+	private final Object stateLock = new Object();
+	private int state = STATE_NONE;
+
+	public boolean isStarted() {
+		synchronized (stateLock) {
+			return state == STATE_STARTED;
+		}
+	}
+
+	public boolean waitStarted() {
+		return waitStarted(15000);
+	}
+
+	public boolean waitStarted(long timeout) {
+		synchronized (stateLock) {
+			if (state == STATE_STARTED) {
+				return true;
+			} else if (state == STATE_CLOSED) {
+				return false;
+			}
+			try {
+				stateLock.wait(timeout);
+			} catch (InterruptedException e) {
+				// ignore
+			}
+			return state == STATE_STARTED;
+		}
+	}
+
 	protected void workingCycle() throws Exception, IOException {
 		try {
 			server = new ServerSocket(port);
-			server.setSoTimeout(serverTimeout);
-
-			while (!Thread.interrupted()) {
-				Socket client = acceptClient();
+			synchronized (stateLock) {
+				state = STATE_STARTED;
+				stateLock.notifyAll();
+			}
+			while (!server.isClosed()) {
+				final Socket client = server.accept();
 				client.setSoTimeout(clientTimeout);
 				createSession(client);
 			}
 		} finally {
 			if (server != null && !server.isClosed()) {
 				server.close();
+			}
+			synchronized (stateLock) {
+				state = STATE_CLOSED;
+				stateLock.notifyAll();
 			}
 		}
 	}
@@ -89,30 +126,30 @@ public class DbgpServer extends DbgpWorkingThread {
 		job.schedule();
 	}
 
-	private Socket acceptClient() throws IOException {
-		Socket client = null;
-		while (client == null) {
-			try {
-				client = server.accept();
-			} catch (SocketTimeoutException e) {
-			}
-		}
-		return client;
-	}
-
-	public DbgpServer(int port, int serverTimeout, int clientTimeout) {
+	public DbgpServer(int port, int clientTimeout) {
 		super("DbgpServer"); //$NON-NLS-1$
 
 		this.port = port;
-		this.serverTimeout = serverTimeout;
 		this.clientTimeout = clientTimeout;
+	}
+
+	/**
+	 * @param port
+	 * @param serverTimeout
+	 * @param clientTimeout
+	 * @deprecated use {@link #DbgpServer(int, int)}
+	 */
+	public DbgpServer(int port, int serverTimeout, int clientTimeout) {
+		this(port, clientTimeout);
 	}
 
 	public void requestTermination() {
 		try {
-			server.close();
+			if (server != null) {
+				server.close();
+			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			DLTKDebugPlugin.log(e);
 		}
 		super.requestTermination();
 	}

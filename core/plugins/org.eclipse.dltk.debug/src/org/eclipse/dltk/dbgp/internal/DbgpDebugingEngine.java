@@ -23,6 +23,8 @@ import org.eclipse.dltk.dbgp.internal.packets.DbgpPacketSender;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpResponsePacket;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpStreamPacket;
 import org.eclipse.dltk.dbgp.internal.packets.IDbgpRawLogger;
+import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
+import org.eclipse.dltk.internal.debug.core.model.DebugEventHelper;
 
 public class DbgpDebugingEngine extends DbgpTermination implements
 		IDbgpDebugingEngine, IDbgpTerminationListener {
@@ -35,8 +37,16 @@ public class DbgpDebugingEngine extends DbgpTermination implements
 	private final Object terminatedLock = new Object();
 	private boolean terminated = false;
 
+	private final int id;
+
+	private static int lastId = 0;
+	private static final Object idLock = new Object();
+
 	public DbgpDebugingEngine(Socket socket) throws IOException {
 		this.socket = socket;
+		synchronized (idLock) {
+			id = ++lastId;
+		}
 
 		receiver = new DbgpPacketReceiver(new BufferedInputStream(socket
 				.getInputStream()));
@@ -59,6 +69,8 @@ public class DbgpDebugingEngine extends DbgpTermination implements
 				firePacketSent(output);
 			}
 		});
+		DebugEventHelper.fireExtendedEvent(this,
+				ExtendedDebugEventDetails.DGBP_NEW_CONNECTION);
 	}
 
 	public DbgpStreamPacket getStreamPacket() throws IOException,
@@ -131,7 +143,7 @@ public class DbgpDebugingEngine extends DbgpTermination implements
 		Object[] list = listeners.getListeners();
 
 		for (int i = 0; i < list.length; ++i) {
-			((IDbgpRawListener) list[i]).dbgpPacketReceived(content);
+			((IDbgpRawListener) list[i]).dbgpPacketReceived(id, content);
 		}
 	}
 
@@ -139,7 +151,7 @@ public class DbgpDebugingEngine extends DbgpTermination implements
 		Object[] list = listeners.getListeners();
 
 		for (int i = 0; i < list.length; ++i) {
-			((IDbgpRawListener) list[i]).dbgpPacketSent(content);
+			((IDbgpRawListener) list[i]).dbgpPacketSent(id, content);
 		}
 	}
 

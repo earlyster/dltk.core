@@ -118,15 +118,14 @@ public class DbgpBreakpointCommands extends DbgpBaseCommands implements
 				null, null, info);
 	}
 
-	public String setCallBreakpoint(URI uri, String function, DbgpBreakpointConfig info)
-			throws DbgpException {
+	public String setCallBreakpoint(URI uri, String function,
+			DbgpBreakpointConfig info) throws DbgpException {
 		return setBreakpoint(CALL_BREAKPOINT, uri, null, function, null, info);
 	}
 
 	public String setReturnBreakpoint(URI uri, String function,
 			DbgpBreakpointConfig info) throws DbgpException {
-		return setBreakpoint(RETURN_BREAKPOINT, uri, null, function,
-				null, info);
+		return setBreakpoint(RETURN_BREAKPOINT, uri, null, function, null, info);
 	}
 
 	public String setExceptionBreakpoint(String exception,
@@ -186,11 +185,11 @@ public class DbgpBreakpointCommands extends DbgpBaseCommands implements
 		if (config.getHitCondition() != -1) {
 			request.addOption("-o", config.getHitConditionString()); //$NON-NLS-1$
 		}
-		
+
 		if (config.getLineNo() != -1) {
 			request.addOption("-n", config.getLineNo()); //$NON-NLS-1$			
 		}
-		
+
 		// not sure that this is correct but it looks that this is possible
 		// TODO review it
 		String conditionExpression = config.getExpression();

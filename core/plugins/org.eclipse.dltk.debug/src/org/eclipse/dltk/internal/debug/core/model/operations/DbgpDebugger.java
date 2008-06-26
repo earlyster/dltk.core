@@ -179,6 +179,10 @@ public class DbgpDebugger {
 		return getFeature(IDbgpFeatureCommands.BREAKPOINT_LANGUAGES).getValue();
 	}
 
+	public String getBreakpointTypes() throws DbgpException {
+		return getFeature(IDbgpFeatureCommands.BREAKPOINT_TYPES).getValue();
+	}
+
 	// Multiple sessions
 	public boolean getMultipleSessions() throws DbgpException {
 		return getFeature(IDbgpFeatureCommands.MULTIPLE_SESSIONS).getValue()
@@ -325,6 +329,8 @@ public class DbgpDebugger {
 				+ d.isSupportsAsync());
 		System.out.println(IDbgpFeatureCommands.BREAKPOINT_LANGUAGES + ": " //$NON-NLS-1$
 				+ d.getBreakpointLanguages());
+		System.out.println(IDbgpFeatureCommands.BREAKPOINT_TYPES + ": " //$NON-NLS-1$
+				+ d.getBreakpointTypes());
 		System.out.println(IDbgpFeatureCommands.MULTIPLE_SESSIONS + ": " //$NON-NLS-1$
 				+ d.getMultipleSessions());
 		System.out.println(IDbgpFeatureCommands.MAX_CHILDREN + ": " //$NON-NLS-1$
