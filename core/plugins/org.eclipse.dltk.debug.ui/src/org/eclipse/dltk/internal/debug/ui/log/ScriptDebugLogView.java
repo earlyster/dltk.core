@@ -20,7 +20,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -31,10 +30,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -47,7 +42,7 @@ import org.eclipse.ui.part.ViewPart;
 
 public class ScriptDebugLogView extends ViewPart {
 	public static final String VIEW_ID = "org.eclipse.dltk.debug.ui.dbgpLogView"; //$NON-NLS-1$
-	public static final String THEME_ID = "org.eclipse.dltk.debug.ui.dbgpLogView.txtViewFont";
+	public static final String THEME_ID = "org.eclipse.dltk.debug.ui.dbgpLogView.txtViewFont"; //$NON-NLS-1$
 
 	private final List items = new ArrayList();
 	private TableViewer viewer;
@@ -110,26 +105,7 @@ public class ScriptDebugLogView extends ViewPart {
 		final TextViewer textViewer = new TextViewer(sashForm, SWT.V_SCROLL
 				| SWT.H_SCROLL | SWT.WRAP | SWT.READ_ONLY);
 		textViewer.setDocument(textDocument);
-		Font font = JFaceResources.getFont(THEME_ID);
-
-		// XXX: not sure what could cause the font to already be diposed
-		if (!font.isDisposed()) {
-			FontDescriptor fd = FontDescriptor.createFrom(font);
-			final FontData[] datas = fd.getFontData();
-			if (datas != null && datas.length != 0) {
-				font = fd.createFont(textViewer.getTextWidget().getDisplay());
-				final Font f = font;
-				textViewer.getTextWidget().addDisposeListener(
-						new DisposeListener() {
-
-							public void widgetDisposed(DisposeEvent e) {
-								f.dispose();
-							}
-
-						});
-				textViewer.getTextWidget().setFont(font);
-			}
-		}
+		textViewer.getTextWidget().setFont(JFaceResources.getFont(THEME_ID));
 		sashForm.setWeights(new int[] { 75, 25 });
 		createActions();
 		createMenu();
