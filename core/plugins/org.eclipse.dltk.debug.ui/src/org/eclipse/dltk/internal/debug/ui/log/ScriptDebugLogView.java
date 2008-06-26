@@ -114,7 +114,8 @@ public class ScriptDebugLogView extends ViewPart {
 		FontDescriptor fd = FontDescriptor.createFrom(font);
 		final FontData[] datas = fd.getFontData();
 		if (datas != null && datas.length != 0 && datas[0].getHeight() > 8) {
-			fd = fd.setHeight(8);
+			// XXX: maybe this should be a preference
+			fd = fd.setHeight(9);
 			font = fd.createFont(textViewer.getTextWidget().getDisplay());
 			final Font f = font;
 			textViewer.getTextWidget().addDisposeListener(
