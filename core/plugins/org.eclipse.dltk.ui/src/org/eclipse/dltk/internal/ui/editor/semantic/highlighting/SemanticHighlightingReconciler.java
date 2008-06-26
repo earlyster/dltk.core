@@ -12,7 +12,6 @@
 package org.eclipse.dltk.internal.ui.editor.semantic.highlighting;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -24,9 +23,13 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.internal.ui.editor.DLTKEditorMessages;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
-import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.PositionUpdater.UpdateResult;
 import org.eclipse.dltk.internal.ui.text.IScriptReconcilingListener;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.editor.highlighting.HighlightedPosition;
+import org.eclipse.dltk.ui.editor.highlighting.HighlightingStyle;
+import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlighter;
+import org.eclipse.dltk.ui.editor.highlighting.SemanticHighlighting;
+import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlighter.UpdateResult;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextInputListener;
@@ -44,8 +47,6 @@ import org.eclipse.ui.IWorkbenchPartSite;
 public class SemanticHighlightingReconciler implements
 		IScriptReconcilingListener, ITextInputListener {
 
-	static final boolean DEBUG = false;
-
 	/** The Java editor this semantic highlighting reconciler is installed on */
 	private ScriptEditor fEditor;
 	/** The source viewer this semantic highlighting reconciler is installed on */
@@ -55,7 +56,7 @@ public class SemanticHighlightingReconciler implements
 	/** Semantic highlightings */
 	private SemanticHighlighting[] fSemanticHighlightings;
 	/** Highlightings */
-	private Highlighting[] fHighlightings;
+	private HighlightingStyle[] fHighlightings;
 
 	/** Background job */
 	private Job fJob;
@@ -90,8 +91,8 @@ public class SemanticHighlightingReconciler implements
 	 * Highlightings - cache for background thread, only valid during
 	 * {@link #reconciled(ModuleDeclaration, boolean, IProgressMonitor)}
 	 */
-	private Highlighting[] fJobHighlightings;
-	private PositionUpdater positionUpdater;
+	private HighlightingStyle[] fJobHighlightings;
+	private ISemanticHighlighter positionUpdater;
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.Script.IScriptReconcilingListener#
@@ -132,28 +133,26 @@ public class SemanticHighlightingReconciler implements
 			if (ast == null || fJobPresenter.isCanceled())
 				return;
 
-			List added = Collections.EMPTY_LIST;
-			List removed = Collections.EMPTY_LIST;
+			HighlightedPosition[] added = HighlightedPosition.NO_POSITIONS;
+			HighlightedPosition[] removed = HighlightedPosition.NO_POSITIONS;
 			if (!fJobPresenter.isCanceled()) {
-				final UpdateResult result = reconcilePositions(ast);
+				final List currentPositions = new ArrayList();
+				fJobPresenter.addAllPositions(currentPositions);
+				final UpdateResult result = positionUpdater.reconcile(
+						(org.eclipse.dltk.compiler.env.ISourceModule) ast,
+						currentPositions);
 				added = result.addedPositions;
 				removed = result.removedPositions;
-				if (DEBUG) {
-					System.out.println("Add:" + added.size() + " " + added); //$NON-NLS-1$ //$NON-NLS-2$
-					System.out
-							.println("Remove:" + removed.size() + " " + removed); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+
+			if (added.length != 0 || removed.length != 0) {
+				if (!fJobPresenter.isCanceled()) {
+					final TextPresentation textPresentation = fJobPresenter
+							.createPresentation(added, removed);
+					if (!fJobPresenter.isCanceled())
+						updatePresentation(textPresentation, added, removed);
 				}
 			}
-
-			TextPresentation textPresentation = null;
-			if (!fJobPresenter.isCanceled()
-					&& !(added.isEmpty() && removed.isEmpty())) {
-				textPresentation = fJobPresenter.createPresentation(added,
-						removed);
-			}
-
-			if (!fJobPresenter.isCanceled())
-				updatePresentation(textPresentation, added, removed);
 
 			// long t1 = System.currentTimeMillis();
 			// System.out.println(t1 - t0);
@@ -169,22 +168,6 @@ public class SemanticHighlightingReconciler implements
 	}
 
 	/**
-	 * Reconcile positions based on the AST subtrees
-	 * 
-	 * @param presenter
-	 * @param ast
-	 * 
-	 * @param subtrees
-	 *            the AST subtrees
-	 */
-	private UpdateResult reconcilePositions(ISourceModule ast) {
-		final List currentPositions = new ArrayList();
-		fJobPresenter.addAllPositions(currentPositions);
-		return positionUpdater.reconcile(ast, fJobPresenter, fHighlightings,
-				currentPositions);
-	}
-
-	/**
 	 * Update the presentation.
 	 * 
 	 * @param textPresentation
@@ -195,7 +178,8 @@ public class SemanticHighlightingReconciler implements
 	 *            the removed positions
 	 */
 	private void updatePresentation(TextPresentation textPresentation,
-			List addedPositions, List removedPositions) {
+			HighlightedPosition[] addedPositions,
+			HighlightedPosition[] removedPositions) {
 		Runnable runnable = fJobPresenter.createUpdateRunnable(
 				textPresentation, addedPositions, removedPositions);
 		if (runnable == null)
@@ -223,21 +207,22 @@ public class SemanticHighlightingReconciler implements
 	public void install(ScriptEditor editor, ISourceViewer sourceViewer,
 			SemanticHighlightingPresenter presenter,
 			SemanticHighlighting[] semanticHighlightings,
-			Highlighting[] highlightings) {
+			HighlightingStyle[] highlightings) {
 		fPresenter = presenter;
+		fSemanticHighlightings = semanticHighlightings;
+		fHighlightings = highlightings;
 		ScriptTextTools textTools = editor.getTextTools();
 		if (textTools != null) {
 			this.positionUpdater = textTools.getSemanticPositionUpdater();
+			this.positionUpdater.initialize(fPresenter, fHighlightings);
 		}
-		fSemanticHighlightings = semanticHighlightings;
-		fHighlightings = highlightings;
 
 		fEditor = editor;
 		fSourceViewer = sourceViewer;
 
-		if (fEditor instanceof ScriptEditor) {
-			((ScriptEditor) fEditor).addReconcileListener(this);
-		} else if (fEditor == null) {
+		if (fEditor != null) {
+			fEditor.addReconcileListener(this);
+		} else {
 			fSourceViewer.addTextInputListener(this);
 			scheduleJob();
 		}
@@ -251,11 +236,10 @@ public class SemanticHighlightingReconciler implements
 			fPresenter.setCanceled(true);
 
 		if (fEditor != null) {
-			if (fEditor instanceof ScriptEditor)
-				((ScriptEditor) fEditor).removeReconcileListener(this);
-			else
-				fSourceViewer.removeTextInputListener(this);
+			fEditor.removeReconcileListener(this);
 			fEditor = null;
+		} else {
+			fSourceViewer.removeTextInputListener(this);
 		}
 
 		fSourceViewer = null;
@@ -291,12 +275,10 @@ public class SemanticHighlightingReconciler implements
 						}
 						if (monitor.isCanceled())
 							return Status.CANCEL_STATUS;
-						ISourceModule ast = null;
-						// /
-						// /DLTKUIPlugin.getDefault().getASTProvider().getAST(
-						// element,
-						// ASTProvider.WAIT_YES, monitor);
-						reconciled(ast, false, monitor);
+						final ISourceModule code = DLTKUIPlugin.getDefault()
+								.getWorkingCopyManager().getWorkingCopy(
+										fEditor.getEditorInput());
+						reconciled(code, false, monitor);
 						synchronized (fJobLock) {
 							// allow the job to be gc'ed
 							if (fJob == this)

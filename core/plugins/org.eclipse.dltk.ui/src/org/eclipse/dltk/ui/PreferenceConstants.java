@@ -40,6 +40,15 @@ public class PreferenceConstants {
 	 * Preference key suffix for underline text style preference keys.
 	 */
 	public static final String EDITOR_UNDERLINE_SUFFIX = "_underline"; //$NON-NLS-1$
+	
+	/**
+	 * Preference key suffix that controls if semantic highlighting is enabled.
+	 * 
+	 * <p>
+	 * Value is of type <code>Boolean</code>: <code>true</code> if enabled.
+	 * </p>
+	 */
+	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX = "_enabled"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether the 'close strings' feature is

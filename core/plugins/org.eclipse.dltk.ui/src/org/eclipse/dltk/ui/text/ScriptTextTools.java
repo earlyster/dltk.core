@@ -9,9 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text;
 
-import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.PositionUpdater;
-import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlighting;
 import org.eclipse.dltk.internal.ui.text.DLTKColorManager;
+import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlighter;
+import org.eclipse.dltk.ui.editor.highlighting.SemanticHighlighting;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
@@ -124,7 +124,7 @@ public abstract class ScriptTextTools {
 		return new SemanticHighlighting[0];
 	}
 
-	public PositionUpdater getSemanticPositionUpdater() {
+	public ISemanticHighlighter getSemanticPositionUpdater() {
 		return null;
 	}
 

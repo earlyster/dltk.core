@@ -132,23 +132,19 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 					if (!fragment.isArchive()) {
 						// IPath path = original.getPath();
 						// return new DocumentAdapter(workingCopy, path);
-						return BufferManager.getDefaultBufferManager()
-								.createBuffer(original);
+						return BufferManager.createBuffer(original);
 					}
-					return BufferManager.getDefaultBufferManager()
-							.createBuffer(original);
+					return BufferManager.createBuffer(original);
 				}
 
 				if (original instanceof DBGPSourceModule) {
-					return BufferManager.getDefaultBufferManager()
-							.createBuffer(original);
+					return BufferManager.createBuffer(original);
 				}
 
 				if (original instanceof BuiltinSourceModule) {
 					// IPath path = original.getPath();
 					// return new DocumentAdapter(workingCopy, path);
-					return BufferManager.getDefaultBufferManager()
-							.createBuffer(original);
+					return BufferManager.createBuffer(original);
 				}
 				return DocumentAdapter.NULL;
 			}
@@ -345,6 +341,11 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 
 	public static void logErrorMessage(String message) {
 		logErrorMessage(message, null);
+	}
+
+	public static void warn(String message) {
+		DLTKUIPlugin.log(new Status(IStatus.WARNING, DLTKUIPlugin.PLUGIN_ID,
+				IDLTKStatusConstants.INTERNAL_ERROR, message, null));
 	}
 
 	public static void logErrorMessage(String message, Throwable throwable) {

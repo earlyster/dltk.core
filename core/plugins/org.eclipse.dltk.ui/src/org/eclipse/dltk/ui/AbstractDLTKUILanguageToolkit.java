@@ -6,8 +6,8 @@ import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.PositionUpdater;
-import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlighting;
+import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlighter;
+import org.eclipse.dltk.ui.editor.highlighting.SemanticHighlighting;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
 import org.eclipse.dltk.ui.viewsupport.ScriptUILabelProvider;
@@ -108,7 +108,7 @@ public abstract class AbstractDLTKUILanguageToolkit implements
 				return null;
 			}
 
-			public PositionUpdater getSemanticPositionUpdater() {
+			public ISemanticHighlighter getSemanticPositionUpdater() {
 				return null;
 			}
 		};

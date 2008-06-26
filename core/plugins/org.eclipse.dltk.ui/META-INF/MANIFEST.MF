@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.dltk.ui;singleton:=true
-Bundle-Version: 0.95.0.qualifier
+Bundle-Version: 0.95.1.qualifier
 Bundle-Activator: org.eclipse.dltk.ui.DLTKUIPlugin
 Bundle-Vendor: %pluginProvider
 Bundle-Localization: plugin
@@ -55,7 +55,6 @@ Export-Package: org.eclipse.dltk.corext,
  org.eclipse.dltk.internal.ui.dnd;x-internal:=true,
  org.eclipse.dltk.internal.ui.editor,
  org.eclipse.dltk.internal.ui.editor.selectionaction;x-internal:=true,
- org.eclipse.dltk.internal.ui.editor.semantic.highlighting,
  org.eclipse.dltk.internal.ui.filters;x-internal:=true,
  org.eclipse.dltk.internal.ui.model;x-internal:=true,
  org.eclipse.dltk.internal.ui.navigator;x-internal:=true,
@@ -84,6 +83,7 @@ Export-Package: org.eclipse.dltk.corext,
  org.eclipse.dltk.ui.dialogs,
  org.eclipse.dltk.ui.documentation,
  org.eclipse.dltk.ui.editor,
+ org.eclipse.dltk.ui.editor.highlighting,
  org.eclipse.dltk.ui.environment,
  org.eclipse.dltk.ui.infoviews,
  org.eclipse.dltk.ui.preferences,
