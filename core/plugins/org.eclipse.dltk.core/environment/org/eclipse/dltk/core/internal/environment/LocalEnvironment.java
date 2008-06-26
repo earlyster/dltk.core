@@ -36,6 +36,9 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 	}
 
 	public IFileHandle getFile(IPath path) {
+		if (path == null) {
+			return null;
+		}
 		return new EFSFileHandle(this, fs.getStore(path));
 	}
 
