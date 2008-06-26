@@ -144,6 +144,20 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 	private Button fAppend;
 	private Button fWorkspaceBrowse;
 
+	public ScriptCommonTab(MainLaunchConfigurationTab mainTab) {
+		mainTab.addListener(new IMainLaunchConfigurationTabListener() {
+			public void interactiveChanged(boolean state) {
+				fConsoleOutput.setSelection(!state);
+			}
+
+			public void projectChanged(IProject project) {
+			}
+		});
+	}
+
+	public ScriptCommonTab() {
+	}
+
 	/**
 	 * Check box list for specifying favorites
 	 */
@@ -162,7 +176,9 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse
+	 * .swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		Composite comp = new Composite(parent, SWT.NONE);
@@ -416,8 +432,7 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 				LaunchConfigurationsMessages.CommonTab_1, 2, 1,
 				GridData.FILL_BOTH);
 
-		fDefaultEncodingButton = createRadioButton(group,
-				"");
+		fDefaultEncodingButton = createRadioButton(group, "");
 		GridData gd = new GridData(SWT.BEGINNING, SWT.NORMAL, true, false);
 		gd.horizontalSpan = 2;
 		fDefaultEncodingButton.setLayoutData(gd);
@@ -569,7 +584,9 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse.debug.core.ILaunchConfiguration)
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse
+	 * .debug.core.ILaunchConfiguration)
 	 */
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		boolean isShared = !configuration.isLocal();
@@ -618,16 +635,16 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 							ScriptLaunchConfigurationConstants.ATTR_USE_INTERACTIVE_CONSOLE,
 							false);
 		} catch (CoreException e) {
-			if(DLTKCore.DEBUG ) {
+			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
 		}
 		fConsoleOutput.setEnabled(!isInteractive);
-		if (!isInteractive) {
-			fConsoleOutput.setSelection(outputToConsole);
-		} else {
-			fConsoleOutput.setSelection(false);
-		}
+		// if (!isInteractive) {
+		// fConsoleOutput.setSelection(outputToConsole);
+		// } else {
+		// fConsoleOutput.setSelection(false);
+		// }
 		fAppend.setSelection(append);
 		boolean haveOutputFile = outputFile != null;
 		if (haveOutputFile) {
@@ -841,7 +858,9 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#isValid(org.eclipse.debug.core.ILaunchConfiguration)
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#isValid(org.eclipse.debug
+	 * .core.ILaunchConfiguration)
 	 */
 	public boolean isValid(ILaunchConfiguration config) {
 		setMessage(null);
@@ -907,7 +926,9 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(org.eclipse.
+	 * debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
 		config.setContainer(null);
@@ -918,7 +939,9 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse
+	 * .debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		boolean isInteractive = false;
@@ -1016,7 +1039,9 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#activated(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#activated(org.eclipse.debug
+	 * .core.ILaunchConfigurationWorkingCopy)
 	 */
 	public void activated(ILaunchConfigurationWorkingCopy workingCopy) {
 		updateConsoleOutput(workingCopy);
@@ -1025,7 +1050,9 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#deactivated(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#deactivated(org.eclipse.
+	 * debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {
 	}

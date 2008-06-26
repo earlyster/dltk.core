@@ -98,14 +98,12 @@ public abstract class AbstractInterpreterComboBlock {
 	private InterpreterDescriptor fDefaultDescriptor = null;
 
 	/**
-	 * Specific InterpreterEnvironment descriptor or <code>null</code> if
-	 * none.
+	 * Specific InterpreterEnvironment descriptor or <code>null</code> if none.
 	 */
 	private InterpreterDescriptor fSpecificDescriptor = null;
 
 	/**
-	 * Default InterpreterEnvironment radio button or <code>null</code> if
-	 * none
+	 * Default InterpreterEnvironment radio button or <code>null</code> if none
 	 */
 	private Button fDefaultButton = null;
 
@@ -138,6 +136,9 @@ public abstract class AbstractInterpreterComboBlock {
 									refreshInterpreters();
 								}
 							}
+						}
+
+						public void interactiveChanged(boolean state) {
 						}
 					});
 		}
@@ -401,11 +402,9 @@ public abstract class AbstractInterpreterComboBlock {
 	}
 
 	/**
-	 * Returns the selected InterpreterEnvironment or <code>null</code> if
-	 * none.
+	 * Returns the selected InterpreterEnvironment or <code>null</code> if none.
 	 * 
-	 * @return the selected InterpreterEnvironment or <code>null</code> if
-	 *         none
+	 * @return the selected InterpreterEnvironment or <code>null</code> if none
 	 */
 	public IInterpreterInstall getInterpreter() {
 		if (this.isDefaultInterpreter()) {

@@ -18,19 +18,21 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.messages.DLTKLaunchConfigurationsMessages;
 import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.preferences.FieldValidators;
 import org.eclipse.dltk.ui.preferences.FieldValidators.FilePathValidator;
+import org.eclipse.dltk.utils.PlatformFileUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -58,25 +60,33 @@ public abstract class MainLaunchConfigurationTab extends
 
 	private boolean useInteractiveConsoleGroup = false;
 
-	ListenerList listsners = new ListenerList();
+	ListenerList listeners = new ListenerList();
 
 	public MainLaunchConfigurationTab(String mode) {
 		super(mode);
 	}
 
 	public void addListener(IMainLaunchConfigurationTabListener listener) {
-		this.listsners.add(listener);
+		this.listeners.add(listener);
 	}
 
 	public void removeListener(IMainLaunchConfigurationTabListener listener) {
-		this.listsners.remove(listener);
+		this.listeners.remove(listener);
 	}
 
 	private void notifyProjectChangedListeners(IProject project) {
-		Object[] listeners = this.listsners.getListeners();
-		for (int i = 0; i < listeners.length; i++) {
-			((IMainLaunchConfigurationTabListener) listeners[i])
+		Object[] list = this.listeners.getListeners();
+		for (int i = 0; i < list.length; i++) {
+			((IMainLaunchConfigurationTabListener) list[i])
 					.projectChanged(project);
+		}
+	}
+
+	private void notifyInteractiveChangedListeners(boolean value) {
+		Object[] list = this.listeners.getListeners();
+		for (int i = 0; i < list.length; i++) {
+			((IMainLaunchConfigurationTabListener) list[i])
+					.interactiveChanged(value);
 		}
 	}
 
@@ -219,14 +229,6 @@ public abstract class MainLaunchConfigurationTab extends
 										+ Long.toString(System
 												.currentTimeMillis()));
 			}
-			if (this.interactiveConsoleCheck.getSelection()) {
-				config.setAttribute(IDebugUIConstants.ATTR_CAPTURE_IN_CONSOLE,
-						false);
-			} else {
-				config.setAttribute(IDebugUIConstants.ATTR_CAPTURE_IN_CONSOLE,
-						(String) null);
-			}
-			// config.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, "false");
 		}
 	}
 
@@ -248,21 +250,25 @@ public abstract class MainLaunchConfigurationTab extends
 			IStatus result = validator.validate(script.getPath(), environment);
 
 			if (!result.isOK()) {
-				setErrorMessage(DLTKLaunchConfigurationsMessages.error_scriptNotFound); //$NON-NLS-1$
-				return false;
-			}
-		} else {
-			if (useInteractiveConsoleGroup) {
-				if (!interactiveConsoleCheck.getSelection()) {
-					setErrorMessage(DLTKLaunchConfigurationsMessages.MainLaunchConfigurationTab_0);
-					return false;
+				IFileHandle file = PlatformFileUtils
+						.findAbsoluteOrEclipseRelativeFile(environment, Path
+								.fromPortableString(script.getPath()));
+				if (file.exists() && file.isDirectory()) {
+					if (useInteractiveConsoleGroup) {
+						if (!interactiveConsoleCheck.getSelection()) {
+							setErrorMessage(DLTKLaunchConfigurationsMessages.MainLaunchConfigurationTab_0);
+							return false;
+						}
+						return true;
+					} else {
+						setErrorMessage(DLTKLaunchConfigurationsMessages.error_scriptNotFound); //$NON-NLS-1$
+						return false;
+					}
 				}
-			} else {
 				setErrorMessage(DLTKLaunchConfigurationsMessages.error_scriptNotFound); //$NON-NLS-1$
 				return false;
 			}
 		}
-
 		return true;
 	}
 
@@ -282,8 +288,9 @@ public abstract class MainLaunchConfigurationTab extends
 		URI script = URI.create(location.toString() + "/" + getScriptName()); //$NON-NLS-1$
 		IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
 				.findFilesForLocationURI(script);
-		if (files.length != 1)
+		if (files.length != 1) {
 			return script;
+		}
 
 		IFile file = files[0];
 		if (file.exists() && file.getLocationURI() != null) {
@@ -339,6 +346,13 @@ public abstract class MainLaunchConfigurationTab extends
 					group,
 					DLTKLaunchConfigurationsMessages.MainLaunchConfigurationTab_2);
 			interactiveConsoleCheck.addSelectionListener(getWidgetListener());
+			interactiveConsoleCheck
+					.addSelectionListener(new SelectionAdapter() {
+						public void widgetSelected(SelectionEvent e) {
+							notifyInteractiveChangedListeners(interactiveConsoleCheck
+									.getSelection());
+						}
+					});
 		}
 	}
 }
