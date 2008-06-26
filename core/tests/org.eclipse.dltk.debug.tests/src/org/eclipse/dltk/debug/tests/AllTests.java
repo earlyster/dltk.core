@@ -24,6 +24,8 @@ import org.eclipse.dltk.debug.dbgp.tests.DbgpStackLevelTests;
 import org.eclipse.dltk.debug.dbgp.tests.DbgpStatusCommandsTests;
 import org.eclipse.dltk.debug.dbgp.tests.DbgpStatusTests;
 import org.eclipse.dltk.debug.dbgp.tests.DbgpStreamCommandsTests;
+import org.eclipse.dltk.debug.dbgp.tests.service.DbgpServiceDispatcherTests;
+import org.eclipse.dltk.debug.dbgp.tests.service.DbgpServiceTests;
 import org.eclipse.dltk.debug.tests.breakpoints.BreakpointTests;
 
 public class AllTests {
@@ -48,6 +50,11 @@ public class AllTests {
 		dbgpSuite.addTestSuite(DbgpBase64Tests.class);
 		dbgpSuite.addTestSuite(DbgpStatusTests.class);
 		suite.addTest(dbgpSuite);
+
+		final TestSuite serviceSuite = new TestSuite("DBGP Service tests");
+		serviceSuite.addTestSuite(DbgpServiceTests.class);
+		serviceSuite.addTestSuite(DbgpServiceDispatcherTests.class);
+		suite.addTest(serviceSuite);
 
 		// Breakpoints
 		suite.addTest(BreakpointTests.suite());
