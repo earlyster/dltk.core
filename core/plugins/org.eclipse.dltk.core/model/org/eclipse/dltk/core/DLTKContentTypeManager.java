@@ -146,7 +146,10 @@ public class DLTKContentTypeManager {
 				&& isValidFileNameForContentType(toolkit, lastSegment)) {
 			return true;
 		}
-		if (!resource.isAccessible()) {
+		// Not DLTK file and not file without extension, or not accessible or
+		// not in sync
+		if (lastSegment != null || !resource.isAccessible()
+				|| !resource.isSynchronized(IResource.DEPTH_ZERO)) {
 			return false;
 		}
 
