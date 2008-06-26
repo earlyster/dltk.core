@@ -46,8 +46,8 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.ViewPart;
 
 public class ScriptDebugLogView extends ViewPart {
-
 	public static final String VIEW_ID = "org.eclipse.dltk.debug.ui.dbgpLogView"; //$NON-NLS-1$
+	public static final String THEME_ID = "org.eclipse.dltk.debug.ui.dbgpLogView.txtViewFont";
 
 	private final List items = new ArrayList();
 	private TableViewer viewer;
@@ -110,24 +110,26 @@ public class ScriptDebugLogView extends ViewPart {
 		final TextViewer textViewer = new TextViewer(sashForm, SWT.V_SCROLL
 				| SWT.H_SCROLL | SWT.WRAP | SWT.READ_ONLY);
 		textViewer.setDocument(textDocument);
-		Font font = JFaceResources.getFont(JFaceResources.TEXT_FONT);
-		FontDescriptor fd = FontDescriptor.createFrom(font);
-		final FontData[] datas = fd.getFontData();
-		if (datas != null && datas.length != 0 && datas[0].getHeight() > 8) {
-			// XXX: maybe this should be a preference
-			fd = fd.setHeight(9);
-			font = fd.createFont(textViewer.getTextWidget().getDisplay());
-			final Font f = font;
-			textViewer.getTextWidget().addDisposeListener(
-					new DisposeListener() {
+		Font font = JFaceResources.getFont(THEME_ID);
 
-						public void widgetDisposed(DisposeEvent e) {
-							f.dispose();
-						}
+		// XXX: not sure what could cause the font to already be diposed
+		if (!font.isDisposed()) {
+			FontDescriptor fd = FontDescriptor.createFrom(font);
+			final FontData[] datas = fd.getFontData();
+			if (datas != null && datas.length != 0) {
+				font = fd.createFont(textViewer.getTextWidget().getDisplay());
+				final Font f = font;
+				textViewer.getTextWidget().addDisposeListener(
+						new DisposeListener() {
 
-					});
+							public void widgetDisposed(DisposeEvent e) {
+								f.dispose();
+							}
+
+						});
+				textViewer.getTextWidget().setFont(font);
+			}
 		}
-		textViewer.getTextWidget().setFont(font);
 		sashForm.setWeights(new int[] { 75, 25 });
 		createActions();
 		createMenu();
@@ -221,4 +223,5 @@ public class ScriptDebugLogView extends ViewPart {
 		manager.add(clearAction);
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
+
 }
