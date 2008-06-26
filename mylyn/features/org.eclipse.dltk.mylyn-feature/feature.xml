@@ -16,7 +16,7 @@
 <feature
       id="org.eclipse.dltk.mylyn"
       label="%featureName"
-      version="0.95.0.qualifier"
+      version="0.95.1.qualifier"
       provider-name="%providerName"
       image="eclipse_update_120.jpg">
 
@@ -44,8 +44,6 @@ http://www.eclipse.org/legal/epl-v10.html
    <requires>
       <import feature="org.eclipse.dltk.core" version="0.95.0" match="compatible"/>
       <import feature="org.eclipse.mylyn.context_feature" version="3.0.0" match="compatible"/>
-      <import feature="org.eclipse.mylyn.ide_feature" version="3.0.0" match="compatible"/>
-      <import feature="org.eclipse.mylyn.monitor_feature" version="3.0.0" match="compatible"/>
       <import feature="org.eclipse.mylyn_feature" version="3.0.0" match="compatible"/>
    </requires>
 
