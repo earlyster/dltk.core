@@ -41,7 +41,8 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#equals(java.lang.Object)
+	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#equals(java.lang.
+	 *      Object)
 	 */
 	public boolean equals(Object obj) {
 		if (!(obj instanceof DBGPSourceModule)) {
@@ -67,7 +68,8 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 			return new ByteArrayInputStream(contents);
 		} catch (DbgpException e) {
 			throw new CoreException(new Status(IStatus.ERROR,
-					DLTKCore.PLUGIN_ID, Messages.DBGPSourceModule_dbgpSourceLookup, e));
+					DLTKCore.PLUGIN_ID,
+					Messages.DBGPSourceModule_dbgpSourceLookup, e));
 		}
 	}
 
@@ -85,6 +87,17 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 	}
 
 	/*
+	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getPath()
+	 */
+	public IPath getPath() {
+		/*
+		 * return the path of the file on the remote host, allows remote
+		 * breakpoints to be set in debugger engine
+		 */
+		return new Path(frame.getFileName().getPath());
+	}
+
+	/*
 	 * @see org.eclipse.core.resources.IStorage#getFullPath()
 	 */
 	public IPath getFullPath() {
@@ -96,10 +109,10 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 	 */
 	public String getName() {
 		Path path = new Path(frame.getFileName().getPath());
-		if( path.lastSegment()== null ) {
+		if (path.lastSegment() == null) {
 			return frame.toString();
 		}
-		return path.lastSegment();
+		return "DBGP: " + path.lastSegment();
 	}
 
 	/*
@@ -109,25 +122,30 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 		try {
 			return lookupSource().toCharArray();
 		} catch (DbgpException e) {
-			throw new ModelException(e, IModelStatus.ERROR);
+			throw new ModelException(e, IStatus.ERROR);
 		}
 	}
 
+	private String cachedSource = null;
+
 	private String lookupSource() throws DbgpException {
-		/*
-		 * XXX: this has problems if the encodings on both hosts don't match -
-		 * see getBufferContents/getContents
-		 */
-		URI uri = frame.getFileName();
-		return frame.getScriptThread().getDbgpSession().getCoreCommands()
-				.getSource(uri);
+		if (cachedSource == null) {
+			/*
+			 * XXX: this has problems if the encodings on both hosts don't match -
+			 * see getBufferContents/getContents
+			 */
+			URI uri = frame.getFileName();
+			cachedSource = frame.getScriptThread().getDbgpSession()
+					.getCoreCommands().getSource(uri);
+		}
+		return cachedSource;
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractExternalSourceModule#getModuleType()
+	 * @see org.eclipse.dltk.internal.core.AbstractExternalSourceModule#getModuleType ()
 	 */
 	protected String getModuleType() {
-		return "DLTK Remote Source Moule: "; //$NON-NLS-1$
+		return "DLTK Remote Source Module: "; //$NON-NLS-1$
 	}
 
 	/*
@@ -135,14 +153,14 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 	 */
 	protected String getNatureId() throws CoreException {
 		IDLTKLanguageToolkit toolkit = lookupLanguageToolkit(getParent());
-		if (toolkit == null) 
+		if (toolkit == null)
 			return null;
-		
+
 		return toolkit.getNatureId();
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getOriginalSourceModule()
+	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getOriginalSourceModule ()
 	 */
 	protected ISourceModule getOriginalSourceModule() {
 		return new DBGPSourceModule((ScriptProject) getParent(),

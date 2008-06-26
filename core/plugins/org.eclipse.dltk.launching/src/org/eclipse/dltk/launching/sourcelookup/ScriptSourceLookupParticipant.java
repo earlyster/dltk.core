@@ -32,9 +32,9 @@ public class ScriptSourceLookupParticipant extends
 		if (path.length() == 0) {
 			return null;
 		}
-//		if (Platform.getOS().equals(Platform.OS_WIN32)) {
-//			path = path.substring(1);
-//		}
+		// if (Platform.getOS().equals(Platform.OS_WIN32)) {
+		// path = path.substring(1);
+		// }
 
 		String root = getProjectRoot();
 
@@ -65,7 +65,7 @@ public class ScriptSourceLookupParticipant extends
 		IScriptProject scriptProject = DLTKCore.create(project);
 		return EnvironmentManager.getEnvironment(scriptProject);
 	}
-	
+
 	protected String getProjectRoot() throws CoreException {
 		IProject project = LaunchConfigurationUtils.getProject(getDirector()
 				.getLaunchConfiguration());
@@ -86,7 +86,7 @@ public class ScriptSourceLookupParticipant extends
 
 		ScriptStackFrame frame = (ScriptStackFrame) object;
 		final String path = frame.getFileName().getPath();
-		IFileHandle file = getEnvironment().getFile(new Path(path));
+		final IFileHandle file = getEnvironment().getFile(new Path(path));
 		final ISourceModule[] result = new ISourceModule[] { null };
 		if (file.exists()) {
 			// Try to open external source module.
@@ -98,10 +98,11 @@ public class ScriptSourceLookupParticipant extends
 							return false;
 						}
 					}
+
 					if (element.getElementType() == IModelElement.SOURCE_MODULE) {
 						ISourceModule module = (ISourceModule) element;
 						IPath modulePath = module.getPath();
-						if (path.equals(modulePath.toOSString())) {
+						if (file.getFullPath().equals(modulePath)) {
 							result[0] = module;
 						}
 
@@ -117,6 +118,6 @@ public class ScriptSourceLookupParticipant extends
 		return new Object[] { new DBGPSourceModule(scriptProject, frame
 				.getFileName().getPath(), DefaultWorkingCopyOwner.PRIMARY,
 				frame) };
-//		return elements;
+		// return elements;
 	}
 }
