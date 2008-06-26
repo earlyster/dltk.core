@@ -139,13 +139,31 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 	}
 
 	protected void createLocationLabels(Composite parent) throws CoreException {
-		IScriptBreakpoint breakpoint = getBreakpoint();
 		// Resource name
-		String resourceName = breakpoint.getResourceName();
+		String resourceName = getBreakpointResourceName();
 		if (resourceName != null && resourceName.length() > 0) {
-			SWTFactory.createLabel(parent, BreakpointMessages.FileLabel, 1);
+			SWTFactory.createLabel(parent, getBreakpointLocationLabel(), 1);
 			SWTFactory.createLabel(parent, resourceName, 1);
 		}
+	}
+
+	/**
+	 * Returns the label text for the location field
+	 * 
+	 * @return
+	 */
+	protected String getBreakpointLocationLabel() {
+		return BreakpointMessages.FileLabel;
+	}
+
+	/**
+	 * Returns the value for the location field
+	 * 
+	 * @return
+	 * @throws CoreException
+	 */
+	protected String getBreakpointResourceName() throws CoreException {
+		return getBreakpoint().getResourceName();
 	}
 
 	protected void createTypeSpecificLabels(Composite parent)

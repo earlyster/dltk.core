@@ -396,7 +396,9 @@
 	<extension point="org.eclipse.ui.views">
 		<view
 			class="org.eclipse.dltk.internal.debug.ui.log.ScriptDebugLogView"
-			id="org.eclipse.dltk.debug.ui.dbgpLogView" name="%view.name.scriptDebugLog">
+			id="org.eclipse.dltk.debug.ui.dbgpLogView" 
+			name="%view.name.scriptDebugLog"
+			category="org.eclipse.dltk.ui.main">
 		</view>
 	</extension>
 	<extension point="org.eclipse.ui.commands">
@@ -467,5 +469,17 @@
 			commandId="org.eclipse.dltk.debug.ui.commands.ScriptInspect"
 			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
 	</extension>
+
+  <extension point="org.eclipse.ui.themes">
+      <fontDefinition
+            label="%dbgpLogView.txtViewFont.label"
+            defaultsTo="org.eclipse.jface.textfont"
+            categoryId="org.eclipse.dltk.ui.presentation"
+            id="org.eclipse.dltk.debug.ui.dbgpLogView.txtViewFont">
+         <description>
+           %dbgpLogView.txtViewFont.description
+         </description>
+      </fontDefinition>
+  </extension>
 
 </plugin>

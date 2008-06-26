@@ -1,0 +1,67 @@
+/*******************************************************************************
+ * Copyright (c) 2008 xored software, Inc.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
+ *******************************************************************************/
+package org.eclipse.dltk.internal.debug.ui.log;
+
+public class ScriptDebugLogItem {
+
+	private final long timestamp;
+	private final String type;
+	private final int sessionId;
+	private final String message;
+
+	public ScriptDebugLogItem(String type, String message) {
+		this(System.currentTimeMillis(), type, 0, message);
+	}
+
+	public ScriptDebugLogItem(String type, int sessionId, String message) {
+		this(System.currentTimeMillis(), type, sessionId, message);
+	}
+
+	/**
+	 * @param message
+	 * @param timestamp
+	 * @param type
+	 */
+	public ScriptDebugLogItem(long timestamp, String type, int sessionId,
+			String message) {
+		this.timestamp = timestamp;
+		this.type = type;
+		this.sessionId = sessionId;
+		this.message = message;
+	}
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public int getSessionId() {
+		return sessionId;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return type + '\t' + message;
+	}
+
+}

@@ -20,6 +20,7 @@ public class BreakpointMessages {
 	
 	public static String EnabledLabel;
 	
+	public static String ResourceLabel;
 	public static String FileLabel;
 	
 	public static String InternalIdLabel;

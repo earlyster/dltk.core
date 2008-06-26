@@ -94,13 +94,14 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 		updateBreakpoints(breakpoints, new IBreakpointUpdater() {
 			public void update(IScriptBreakpoint breakpoint)
 					throws CoreException {
-				
+
 				IDbgpBreakpoint br = null;
 
 				if (breakpoint instanceof IScriptMethodEntryBreakpoint) {
 					IScriptMethodEntryBreakpoint entryBreakpoint = (IScriptMethodEntryBreakpoint) breakpoint;
 
-					final String entryId = entryBreakpoint.getEntryBreakpointId();
+					final String entryId = entryBreakpoint
+							.getEntryBreakpointId();
 					if (entryId != null) {
 						br = thread.getDbgpBreakpoint(entryId);
 					}
@@ -109,11 +110,11 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 					if (exitId != null) {
 						br = thread.getDbgpBreakpoint(exitId);
 					}
-				}
-				else
-				{
+				} else {
 					String id = breakpoint.getIdentifier();
-					br = thread.getDbgpBreakpoint(id);
+					if (id != null && id.length() != 0) {
+						br = thread.getDbgpBreakpoint(id);
+					}
 				}
 				if (br != null) {
 					breakpoint.setHitCount(br.getHitCount());
@@ -122,7 +123,7 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 		});
 	}
 
-	protected void updateBreakpoinInfoToDefualt(IBreakpoint[] breakpoints) {
+	protected void updateBreakpoinInfoToDefault(IBreakpoint[] breakpoints) {
 		updateBreakpoints(breakpoints, new IBreakpointUpdater() {
 			public void update(IScriptBreakpoint breakpoint)
 					throws CoreException {
@@ -155,7 +156,7 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 							.getBreakpointManager()
 							.getBreakpoints(debugModelId);
 
-					updateBreakpoinInfoToDefualt(breakpoints);
+					updateBreakpoinInfoToDefault(breakpoints);
 					updateBreakpointMessages(breakpoints);
 				}
 			} else if (kind == DebugEvent.CREATE) {

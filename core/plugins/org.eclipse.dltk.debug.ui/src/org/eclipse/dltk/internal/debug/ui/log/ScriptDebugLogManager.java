@@ -15,6 +15,8 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.dltk.dbgp.IDbgpRawListener;
+import org.eclipse.dltk.dbgp.internal.IDbgpDebugingEngine;
+import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
@@ -43,21 +45,28 @@ public class ScriptDebugLogManager implements ILaunchListener,
 	}
 
 	/*
-	 * @see org.eclipse.dltk.dbgp.IDbgpRawListener#dbgpPacketReceived(java.lang.String)
+	 * @see
+	 * org.eclipse.dltk.dbgp.IDbgpRawListener#dbgpPacketReceived(java.lang.String
+	 * )
 	 */
-	public void dbgpPacketReceived(String content) {
-		append("<< " + content); //$NON-NLS-1$
+	public void dbgpPacketReceived(int sessionId, String content) {
+		append(new ScriptDebugLogItem(Messages.ItemType_Input, sessionId,
+				content));
 	}
 
 	/*
-	 * @see org.eclipse.dltk.dbgp.IDbgpRawListener#dbgpPacketSent(java.lang.String)
+	 * @see
+	 * org.eclipse.dltk.dbgp.IDbgpRawListener#dbgpPacketSent(java.lang.String)
 	 */
-	public void dbgpPacketSent(String content) {
-		append(">> " + content); //$NON-NLS-1$
+	public void dbgpPacketSent(int sessionId, String content) {
+		append(new ScriptDebugLogItem(Messages.ItemType_Output, sessionId,
+				content));
 	}
 
 	/*
-	 * @see org.eclipse.debug.core.IDebugEventSetListener#handleDebugEvents(org.eclipse.debug.core.DebugEvent[])
+	 * @see
+	 * org.eclipse.debug.core.IDebugEventSetListener#handleDebugEvents(org.eclipse
+	 * .debug.core.DebugEvent[])
 	 */
 	public void handleDebugEvents(DebugEvent[] events) {
 		if (view == null) {
@@ -67,11 +76,18 @@ public class ScriptDebugLogManager implements ILaunchListener,
 		for (int i = 0; i < events.length; ++i) {
 			DebugEvent event = events[i];
 
-			append("Event: " + getDebugEventKind(event.getKind()) + " from " //$NON-NLS-1$ //$NON-NLS-2$
-					+ event.getSource().getClass().getName());
+			append(new ScriptDebugLogItem(Messages.ItemType_Event,
+					getDebugEventKind(event)
+							+ " from " + event.getSource().getClass().getName()));//$NON-NLS-1$
 
 			if (event.getKind() == DebugEvent.CREATE) {
 				handleCreateEvent(event);
+			} else if (event.getKind() == DebugEvent.MODEL_SPECIFIC
+					&& event.getDetail() == ExtendedDebugEventDetails.DGBP_NEW_CONNECTION) {
+				if (event.getSource() instanceof IDbgpDebugingEngine) {
+					((IDbgpDebugingEngine) event.getSource())
+							.addRawListener(this);
+				}
 			} else if (event.getKind() == DebugEvent.TERMINATE) {
 				handleTerminateEvent(event);
 			}
@@ -79,14 +95,18 @@ public class ScriptDebugLogManager implements ILaunchListener,
 	}
 
 	/*
-	 * @see org.eclipse.debug.core.ILaunchListener#launchAdded(org.eclipse.debug.core.ILaunch)
+	 * @see
+	 * org.eclipse.debug.core.ILaunchListener#launchAdded(org.eclipse.debug.
+	 * core.ILaunch)
 	 */
 	public void launchAdded(ILaunch launch) {
-		// empty implemenation
+		// empty implementation
 	}
 
 	/*
-	 * @see org.eclipse.debug.core.ILaunchListener#launchChanged(org.eclipse.debug.core.ILaunch)
+	 * @see
+	 * org.eclipse.debug.core.ILaunchListener#launchChanged(org.eclipse.debug
+	 * .core.ILaunch)
 	 */
 	public void launchChanged(ILaunch launch) {
 		IDebugTarget target = launch.getDebugTarget();
@@ -118,51 +138,34 @@ public class ScriptDebugLogManager implements ILaunchListener,
 	}
 
 	/*
-	 * @see org.eclipse.debug.core.ILaunchListener#launchRemoved(org.eclipse.debug.core.ILaunch)
+	 * @see
+	 * org.eclipse.debug.core.ILaunchListener#launchRemoved(org.eclipse.debug
+	 * .core.ILaunch)
 	 */
 	public void launchRemoved(ILaunch launch) {
 		// empty implementation
 	}
 
-	protected synchronized void append(final String text) {
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				view.append(text + "\n"); //$NON-NLS-1$
-			}
-		});
+	protected void append(final ScriptDebugLogItem item) {
+		view.append(item);
 	}
 
-	private static String getDebugEventKind(int kind) {
-		String eventName = "UNKNOWN"; //$NON-NLS-1$
-
-		switch (kind) {
-		case DebugEvent.CREATE: {
-			eventName = "CREATE"; //$NON-NLS-1$
-			break;
+	private static String getDebugEventKind(DebugEvent event) {
+		switch (event.getKind()) {
+		case DebugEvent.CREATE:
+			return Messages.EventKind_Create;
+		case DebugEvent.TERMINATE:
+			return Messages.EventKind_Terminate;
+		case DebugEvent.CHANGE:
+			return Messages.EventKind_Change;
+		case DebugEvent.SUSPEND:
+			return Messages.EventKind_Suspend;
+		case DebugEvent.RESUME:
+			return Messages.EventKind_Resume;
+		case DebugEvent.MODEL_SPECIFIC:
+			return Messages.EventKind_ModelSpecific + '/' + event.getDetail();
 		}
-		case DebugEvent.TERMINATE: {
-			eventName = "TERMINATE"; //$NON-NLS-1$
-			break;
-		}
-		case DebugEvent.CHANGE: {
-			eventName = "CHANGE"; //$NON-NLS-1$
-			break;
-		}
-		case DebugEvent.SUSPEND: {
-			eventName = "SUSPEND"; //$NON-NLS-1$
-			break;
-		}
-		case DebugEvent.RESUME: {
-			eventName = "RESUME"; //$NON-NLS-1$
-			break;
-		}
-		case DebugEvent.MODEL_SPECIFIC: {
-			eventName = "MODEL_SPECIFIC"; //$NON-NLS-1$
-			break;
-		}
-		}
-
-		return eventName;
+		return Messages.EventKind_Unknown + '(' + event.getKind() + ')';
 	}
 
 	private void handleCreateEvent(DebugEvent event) {

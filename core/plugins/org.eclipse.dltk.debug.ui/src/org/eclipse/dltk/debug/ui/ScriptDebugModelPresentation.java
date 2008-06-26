@@ -513,8 +513,7 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 				HandleFactory fac = new HandleFactory();
 				IDLTKSearchScope scope = DLTKSearchScopeFactory.getInstance()
 						.createWorkspaceScope(true, toolkit);
-				Openable openable = fac
-						.createOpenable(path.toOSString(), scope);
+				Openable openable = fac.createOpenable(path.toString(), scope);
 
 				if (openable instanceof IStorage) {
 					return new ExternalStorageEditorInput((IStorage) openable);
