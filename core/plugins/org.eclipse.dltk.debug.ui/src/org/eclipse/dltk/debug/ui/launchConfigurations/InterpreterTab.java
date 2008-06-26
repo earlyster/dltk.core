@@ -78,7 +78,8 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 
 	/**
 	 * @deprecated Using of default constructor not allow listening for project
-	 * 	changes. Project changes are method to obtain environment information.
+	 *             changes. Project changes are method to obtain environment
+	 *             information.
 	 */
 	public InterpreterTab() {
 	}
@@ -132,7 +133,7 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 		fInterpreterBlock.createControl(topComp);
 		Control control = fInterpreterBlock.getControl();
 		fInterpreterBlock.addPropertyChangeListener(fCheckListener);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd = new GridData(GridData.FILL_BOTH);
 		control.setLayoutData(gd);
 
 		Composite dynTabComp = new Composite(topComp, SWT.NONE);
@@ -208,8 +209,7 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 	protected abstract String getNature();
 
 	/**
-	 * @see
-	 * 	ILaunchConfigurationTab#performApply(ILaunchConfigurationWorkingCopy)
+	 * @see ILaunchConfigurationTab#performApply(ILaunchConfigurationWorkingCopy)
 	 */
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		configuration.setAttribute(
@@ -438,9 +438,9 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 	 * area if a InterpreterEnvironment supports Interpreter specific arguments.
 	 * 
 	 * @param visible
-	 * 		whether this tab will display the Interpreter specific arguments
-	 * 		area if a InterpreterEnvironment supports Interpreter specific
-	 * 		arguments
+	 *            whether this tab will display the Interpreter specific
+	 *            arguments area if a InterpreterEnvironment supports
+	 *            Interpreter specific arguments
 	 */
 	public void setInterpreterSpecificArgumentsVisible(boolean visible) {
 		fUseDynamicArea = visible;
