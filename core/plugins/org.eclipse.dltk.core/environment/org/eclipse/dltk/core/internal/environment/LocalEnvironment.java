@@ -11,6 +11,7 @@
 package org.eclipse.dltk.core.internal.environment;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 
 import org.eclipse.core.filesystem.EFS;
@@ -85,5 +86,16 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 
 	public char getPathsSeparatorChar() {
 		return Platform.getOS().equals(Platform.OS_WIN32) ? ';' : ':';
+	}
+
+	public String getCanonicalPath(IPath path) {
+		try {
+			return path.toFile().getCanonicalFile().toString();
+		} catch (IOException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+			return path.toOSString();
+		}
 	}
 }
