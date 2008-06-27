@@ -160,7 +160,9 @@ public abstract class AbstractScriptBreakpoint extends Breakpoint implements
 	}
 
 	public void setExpression(String expression) throws CoreException {
-		setAttribute(EXPRESSION, expression);
+		if (!StrUtils.equals(getExpression(), expression)) {
+			setAttribute(EXPRESSION, expression);
+		}
 	}
 
 	public boolean getExpressionState() throws CoreException {
