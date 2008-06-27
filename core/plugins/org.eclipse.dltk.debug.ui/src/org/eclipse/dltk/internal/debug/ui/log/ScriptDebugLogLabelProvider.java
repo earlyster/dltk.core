@@ -74,10 +74,29 @@ public class ScriptDebugLogLabelProvider implements ITableLabelProvider,
 					break;
 				}
 			case 4:
-				return item.getMessage();
+				return formatMessage(item);
 			}
 		}
 		return null;
+	}
+
+	private static final String XML_DECL_BEGIN = "<?xml"; //$NON-NLS-1$
+	private static final String XML_DECL_END = "?>"; //$NON-NLS-1$
+
+	private String formatMessage(ScriptDebugLogItem item) {
+		String result = item.getMessage();
+		if (result.startsWith(XML_DECL_BEGIN)) {
+			int end = result.indexOf(XML_DECL_END);
+			if (end >= 0) {
+				end += XML_DECL_END.length();
+				while (end < result.length()
+						&& Character.isWhitespace(result.charAt(end))) {
+					++end;
+				}
+				result = result.substring(end);
+			}
+		}
+		return result;
 	}
 
 	public Color getBackground(Object element) {
