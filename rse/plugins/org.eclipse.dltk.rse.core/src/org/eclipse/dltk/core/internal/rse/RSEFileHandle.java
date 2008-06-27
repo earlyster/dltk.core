@@ -70,16 +70,10 @@ public class RSEFileHandle extends EFSFileHandle {
 		public long skip(long n) throws IOException {
 			return this.stream.skip(n);
 		}
-
 	}
 
 	public RSEFileHandle(IEnvironment env, URI locationURI) {
 		super(env, RSEFileSystem.getInstance().getStore(locationURI));
-	}
-
-	public boolean exists() {
-		// TODO Auto-generated method stub
-		return super.exists();
 	}
 
 	public InputStream openInputStream(IProgressMonitor monitor)
