@@ -224,15 +224,15 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 
 				if (oldValue == null) {
 					if (newValue != null) {
-						return changeType(attr);
+						return classifyChange(attr);
 					}
 					continue;
 				}
 				if (newValue == null) {
-					return changeType(attr);
+					return classifyChange(attr);
 				}
 				if (!oldValue.equals(newValue)) {
-					return changeType(attr);
+					return classifyChange(attr);
 				}
 			}
 		} catch (CoreException e) {
@@ -241,7 +241,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		return NO_CHANGES;
 	}
 
-	private static int changeType(final String attr) {
+	private static int classifyChange(final String attr) {
 		if (AbstractScriptBreakpoint.EXPRESSION.equals(attr)
 				|| AbstractScriptBreakpoint.EXPRESSION_STATE.equals(attr)) {
 			return MAJOR_CHANGE;
