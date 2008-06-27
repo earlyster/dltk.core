@@ -213,7 +213,9 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	private static final int MINOR_CHANGE = 1;
 	private static final int MAJOR_CHANGE = 2;
 
-	private static int hasChanges(IMarkerDelta delta, String[] attrs) {
+	private static int hasChanges(IMarkerDelta delta,
+			IScriptBreakpoint breakpoint) {
+		final String[] attrs = breakpoint.getUpdatableAttributes();
 		try {
 			final IMarker marker = delta.getMarker();
 			for (int i = 0; i < attrs.length; ++i) {
@@ -224,15 +226,15 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 
 				if (oldValue == null) {
 					if (newValue != null) {
-						return classifyChange(attr);
+						return classifyChange(delta, breakpoint);
 					}
 					continue;
 				}
 				if (newValue == null) {
-					return classifyChange(attr);
+					return classifyChange(delta, breakpoint);
 				}
 				if (!oldValue.equals(newValue)) {
-					return classifyChange(attr);
+					return classifyChange(delta, breakpoint);
 				}
 			}
 		} catch (CoreException e) {
@@ -241,9 +243,14 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		return NO_CHANGES;
 	}
 
-	private static int classifyChange(final String attr) {
-		if (AbstractScriptBreakpoint.EXPRESSION.equals(attr)
-				|| AbstractScriptBreakpoint.EXPRESSION_STATE.equals(attr)) {
+	private static int classifyChange(IMarkerDelta delta,
+			IScriptBreakpoint breakpoint) throws CoreException {
+		final boolean oldExprState = delta.getAttribute(
+				AbstractScriptBreakpoint.EXPRESSION_STATE, false);
+		final String oldExpr = delta.getAttribute(
+				AbstractScriptBreakpoint.EXPRESSION, null);
+		if (ScriptBreakpointUtils.isConditional(oldExprState, oldExpr) != ScriptBreakpointUtils
+				.isConditional(breakpoint)) {
 			return MAJOR_CHANGE;
 		} else {
 			return MINOR_CHANGE;
@@ -388,9 +395,8 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	public void breakpointChanged(IBreakpoint breakpoint, IMarkerDelta delta) {
 		try {
 			if (breakpoint instanceof IScriptBreakpoint && delta != null) {
-				final String[] attrs = ((IScriptBreakpoint) breakpoint)
-						.getUpdatableAttributes();
-				final int changes = hasChanges(delta, attrs);
+				final int changes = hasChanges(delta,
+						(IScriptBreakpoint) breakpoint);
 				if (changes != NO_CHANGES) {
 					if (changes == MAJOR_CHANGE) {
 						removeBreakpoint(breakpoint);

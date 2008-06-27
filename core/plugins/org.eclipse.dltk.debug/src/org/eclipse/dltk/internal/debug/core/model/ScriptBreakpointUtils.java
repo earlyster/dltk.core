@@ -14,22 +14,30 @@ package org.eclipse.dltk.internal.debug.core.model;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
 
-/**
- * @author Alexey
- * 
- */
 public class ScriptBreakpointUtils {
 
 	/**
-	 * Checks that {@link #getExpression()} is true and {@link #getExpression()}
-	 * is not empty
+	 * Checks that {@link IScriptBreakpoint#getExpressionState()} is true and
+	 * {@link IScriptBreakpoint#getExpression()} is not empty
 	 * 
 	 * @return
 	 * @throws CoreException
 	 */
 	public static boolean isConditional(IScriptBreakpoint bp)
 			throws CoreException {
-		return bp.getExpressionState() && !StrUtils.isBlank(bp.getExpression());
+		return isConditional(bp.getExpressionState(), bp.getExpression());
+	}
+
+	/**
+	 * Checks that {@link expressionState} is true and {@link expression} is not
+	 * empty
+	 * 
+	 * @return
+	 * @throws CoreException
+	 */
+	public static boolean isConditional(boolean expressionState,
+			String expression) {
+		return expressionState && !StrUtils.isBlank(expression);
 	}
 
 }
