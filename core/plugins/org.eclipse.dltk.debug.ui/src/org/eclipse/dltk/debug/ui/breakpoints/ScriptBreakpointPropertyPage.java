@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
+import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
@@ -304,7 +305,7 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 			loadValues();
 			updateControlsState(UPDATE_INITIAL);
 		} catch (CoreException e) {
-			// TODO: log exception
+			DLTKDebugUIPlugin.log(e);
 		}
 
 		return composite;
