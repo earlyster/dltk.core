@@ -12,6 +12,10 @@ package org.eclipse.dltk.internal.ui.editor;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
@@ -47,6 +51,13 @@ public class ExternalStorageEditorInput implements IEditorInput,
 		IPath path = fStorage.getFullPath();
 		if (path == null) {
 			return ""; //$NON-NLS-1$
+		}
+		if (fStorage instanceof IModelElement) {
+			final IEnvironment environment = EnvironmentManager
+					.getEnvironment((IModelElement) fStorage);
+			if (environment != null) {
+				return environment.convertPathToString(path);
+			}
 		}
 
 		return path.toOSString();
