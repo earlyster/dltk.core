@@ -56,11 +56,11 @@ public class DbgpPacketReceiver extends DbgpWorkingThread {
 			if (map.containsKey(key)) {
 				return (DbgpResponsePacket) map.remove(key);
 			}
-			
+
 			if (terminated) {
 				throw new InterruptedException();
-			}				
-			
+			}
+
 			return null;
 		}
 
@@ -88,11 +88,11 @@ public class DbgpPacketReceiver extends DbgpWorkingThread {
 			while (!terminated && queue.isEmpty()) {
 				wait();
 			}
-			
+
 			if (terminated) {
 				throw new InterruptedException();
-			}							
-			
+			}
+
 			return (DbgpPacket) queue.removeFirst();
 		}
 
@@ -120,7 +120,7 @@ public class DbgpPacketReceiver extends DbgpWorkingThread {
 				DbgpRawPacket packet = DbgpRawPacket.readPacket(input);
 
 				if (logger != null) {
-					logger.log(packet.toString());
+					logger.log(packet.getXml());
 				}
 
 				addDocument(packet.getParsedXml());
