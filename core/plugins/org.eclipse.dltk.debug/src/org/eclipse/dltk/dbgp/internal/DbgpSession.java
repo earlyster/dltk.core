@@ -66,7 +66,7 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 			engine.waitTerminated();
 		}
 
-		if (object != streamManager) {
+		if (streamManager != null && object != streamManager) {
 			streamManager.waitTerminated();
 		}
 
