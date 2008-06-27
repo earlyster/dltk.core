@@ -50,8 +50,10 @@ public class EFSDeployment implements IDeployment {
 			} else {
 				final URL url = bundle.getEntry(bundlePath);
 				if (url == null)
-					throw new IOException(MessageFormat.format(Messages.EFSDeployment_failedToLocateEntryForPath, new Object[] { bundlePath }));
-				
+					throw new IOException(MessageFormat.format(
+							Messages.EFSDeployment_failedToLocateEntryForPath,
+							new Object[] { bundlePath }));
+
 				IFileStore parent = dest.getParent();
 				if (parent != null) {
 					parent.mkdir(EFS.NONE, null);
@@ -72,10 +74,12 @@ public class EFSDeployment implements IDeployment {
 		}
 	}
 
-	private static void copy(InputStream input, IFileStore file) throws IOException, CoreException {
+	private static void copy(InputStream input, IFileStore file)
+			throws IOException, CoreException {
 		OutputStream output = null;
 		try {
-			output = new BufferedOutputStream(file.openOutputStream(EFS.NONE, null));
+			output = new BufferedOutputStream(file.openOutputStream(EFS.NONE,
+					null));
 			copy(input, output);
 		} catch (IOException e) {
 			throw e;
@@ -86,7 +90,8 @@ public class EFSDeployment implements IDeployment {
 		}
 	}
 
-	private static void copy(URL url, IFileStore file) throws IOException, CoreException {
+	private static void copy(URL url, IFileStore file) throws IOException,
+			CoreException {
 		InputStream input = null;
 		try {
 			input = url.openStream();
@@ -132,8 +137,10 @@ public class EFSDeployment implements IDeployment {
 		try {
 			copy(input, dest);
 		} catch (CoreException e) {
-			throw new IOException(MessageFormat.format(Messages.EFSDeployment_failedToDeployStream, new Object[] { e.getMessage() }));
+			throw new IOException(MessageFormat.format(
+					Messages.EFSDeployment_failedToDeployStream,
+					new Object[] { e.getMessage() }));
 		}
-		return new Path( filename );
+		return new Path(filename);
 	}
 }
