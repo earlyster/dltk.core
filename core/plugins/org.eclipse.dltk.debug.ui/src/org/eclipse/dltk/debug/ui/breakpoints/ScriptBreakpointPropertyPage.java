@@ -21,12 +21,12 @@ import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -39,6 +39,10 @@ import org.eclipse.ui.dialogs.PropertyPage;
 
 public class ScriptBreakpointPropertyPage extends PropertyPage {
 
+	private static final int UPDATE_INITIAL = 0;
+	private static final int UPDATE_EXPRESSION_ENABLE = 1;
+	private static final int UPDATE_OTHER = 2;
+
 	// Enabled
 	private Button enabledBreakpointButton;
 
@@ -48,7 +52,7 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 	private Text hitValueText;
 
 	// Expression
-	private SourceViewer expressionViewer;
+	private ScriptSourceViewer expressionViewer;
 	private Button enableExpressionButton;
 
 	// Simple access methods
@@ -198,7 +202,7 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 
 		hitCountCheckingButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				updateControlsState();
+				updateControlsState(UPDATE_OTHER);
 			}
 		});
 
@@ -219,7 +223,7 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 
 		hitConditionCombo.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				updateControlsState();
+				updateControlsState(UPDATE_OTHER);
 			}
 		});
 
@@ -232,7 +236,7 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 
 		hitValueText.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent e) {
-				updateControlsState();
+				updateControlsState(UPDATE_OTHER);
 			}
 		});
 
@@ -249,15 +253,16 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 		enableExpressionButton.setText(BreakpointMessages.UseConditionLabel);
 		enableExpressionButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				updateControlsState();
+				updateControlsState(UPDATE_EXPRESSION_ENABLE);
 			}
 		});
 
-		expressionViewer = new ScriptSourceViewer(group, null, null, false,
-				SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL, null);
-
 		IDLTKUILanguageToolkit toolkit = BreakpointUtils
 				.getUILanguageToolkit(getBreakpoint());
+
+		expressionViewer = new ScriptSourceViewer(group, null, null, false,
+				SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL, toolkit
+						.getPreferenceStore());
 
 		IDocument document = new Document();
 
@@ -297,7 +302,7 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 			}
 
 			loadValues();
-			updateControlsState();
+			updateControlsState(UPDATE_INITIAL);
 		} catch (CoreException e) {
 			// TODO: log exception
 		}
@@ -355,7 +360,7 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 		}
 	}
 
-	protected void updateControlsState() {
+	protected void updateControlsState(int mode) {
 		// Hit count
 		if (hasHitCountEditor()) {
 			boolean hitChecking = hitCountCheckingButton.getSelection();
@@ -368,6 +373,16 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 			boolean expressionEnabled = enableExpressionButton.getSelection();
 			Control control = expressionViewer.getControl();
 			control.setEnabled(expressionEnabled);
+			if (expressionEnabled) {
+				expressionViewer.initializeViewerColors();
+				if (mode == UPDATE_EXPRESSION_ENABLE) {
+					expressionViewer.getTextWidget().setFocus();
+				}
+			} else {
+				Color color = expressionViewer.getControl().getDisplay()
+						.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND);
+				expressionViewer.getTextWidget().setBackground(color);
+			}
 		}
 
 		validateValues();
