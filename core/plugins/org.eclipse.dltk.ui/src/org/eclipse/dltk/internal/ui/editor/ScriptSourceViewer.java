@@ -244,7 +244,7 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 		fIsConfigured = true;
 	}
 
-	protected void initializeViewerColors() {
+	public void initializeViewerColors() {
 		if (fPreferenceStore != null) {
 
 			StyledText styledText = getTextWidget();
