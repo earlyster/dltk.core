@@ -42,7 +42,9 @@ public class EFSDeployment implements IDeployment {
 				while (paths.hasMoreElements()) {
 					final String path = (String) paths.nextElement();
 					if (path.endsWith("/")) { //$NON-NLS-1$
-						add(bundle, path);
+						if (!path.endsWith("/CVS/") && !path.endsWith("/.svn/")) { //$NON-NLS-1$ //$NON-NLS-2$
+							add(bundle, path);
+						}
 					} else {
 						copy(bundle.getEntry(path), root.getChild(path));
 					}
