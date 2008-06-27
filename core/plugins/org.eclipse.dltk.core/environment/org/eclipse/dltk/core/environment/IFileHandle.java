@@ -52,9 +52,7 @@ public interface IFileHandle {
 	String toOSString();
 
 	/**
-	 * Return canonical path
-	 * 
-	 * @deprecated
+	 * Return canonical path.
 	 */
 	String getCanonicalPath();
 
