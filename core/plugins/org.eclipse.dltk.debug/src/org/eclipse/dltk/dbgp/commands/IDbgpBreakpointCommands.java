@@ -14,8 +14,9 @@ import java.net.URI;
 import org.eclipse.dltk.dbgp.breakpoints.DbgpBreakpointConfig;
 import org.eclipse.dltk.dbgp.breakpoints.IDbgpBreakpoint;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
+import org.eclipse.dltk.debug.core.IDebugConfigurable;
 
-public interface IDbgpBreakpointCommands {
+public interface IDbgpBreakpointCommands extends IDebugConfigurable {
 	// Line breakpoint
 	String setLineBreakpoint(URI uri, int lineNumber,
 			DbgpBreakpointConfig config) throws DbgpException;

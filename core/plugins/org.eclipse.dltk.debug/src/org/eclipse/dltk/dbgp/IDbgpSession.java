@@ -13,8 +13,10 @@ import org.eclipse.dltk.dbgp.commands.IDbgpCommands;
 import org.eclipse.dltk.dbgp.internal.IDbgpTermination;
 import org.eclipse.dltk.dbgp.internal.commands.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.internal.managers.IDbgpStreamManager;
+import org.eclipse.dltk.debug.core.IDebugConfigurable;
 
-public interface IDbgpSession extends IDbgpCommands, IDbgpTermination {
+public interface IDbgpSession extends IDbgpCommands, IDbgpTermination,
+		IDebugConfigurable {
 	IDbgpSessionInfo getInfo();
 
 	IDbgpStreamManager getStreamManager();

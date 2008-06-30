@@ -15,6 +15,7 @@ import java.util.WeakHashMap;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugException;
@@ -33,6 +34,8 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
 import org.eclipse.dltk.debug.core.IDbgpService;
+import org.eclipse.dltk.debug.core.IDebugOptions;
+import org.eclipse.dltk.debug.core.model.DefaultDebugOptions;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTargetListener;
 import org.eclipse.dltk.debug.core.model.IScriptDebugThreadConfigurator;
@@ -83,6 +86,8 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	private boolean retrieveClassVariables;
 	private boolean retrieveLocalVariables;
 
+	private final IDebugOptions options;
+
 	public static List getAllTargets() {
 		synchronized (targets) {
 			return new ArrayList(targets.keySet());
@@ -91,6 +96,14 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 
 	public ScriptDebugTarget(String modelId, IDbgpService dbgpService,
 			String sessionId, ILaunch launch, IProcess process) {
+		this(modelId, dbgpService, sessionId, launch, process,
+				DefaultDebugOptions.getDefaultInstance());
+	}
+
+	public ScriptDebugTarget(String modelId, IDbgpService dbgpService,
+			String sessionId, ILaunch launch, IProcess process,
+			IDebugOptions options) {
+		Assert.isNotNull(options);
 
 		this.mondelId = modelId;
 
@@ -98,6 +111,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 
 		this.process = process;
 		this.launch = launch;
+		this.options = options;
 
 		this.threadManager = new /* New */ScriptThreadManager(this);
 		this.sessionId = sessionId;
@@ -485,5 +499,9 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	public void setScriptDebugThreadConfigurator(
 			IScriptDebugThreadConfigurator configurator) {
 		this.threadManager.setScriptThreadConfigurator(configurator);
+	}
+
+	public IDebugOptions getOptions() {
+		return options;
 	}
 }
