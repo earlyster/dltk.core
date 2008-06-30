@@ -261,7 +261,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 					fPreviousExternalLocation = fLocation.getText();
 					fLocation.setText(getDefaultPath(fNameGroup.getName()));
 				} else {
-					fLocation.setText("");
+					fLocation.setText(fPreviousExternalLocation);
 				}
 				updateInterpreters();
 			}
