@@ -158,7 +158,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 
 		// to initialize launching
 		DLTKLaunchingPlugin.getDefault();
-		
+
 		/**
 		 * Close all open editors which has not local Environment files open
 		 */
@@ -207,7 +207,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * This method is called when the plug-in is stopped
 	 */
 	public void stop(BundleContext context) throws Exception {
-		
+
 		if (fMembersOrderPreferenceCache != null) {
 			fMembersOrderPreferenceCache.dispose();
 			fMembersOrderPreferenceCache = null;
@@ -254,7 +254,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * relative path.
 	 * 
 	 * @param path
-	 *            the path
+	 * 		the path
 	 * @return the image descriptor
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
@@ -302,15 +302,15 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * Returns the model element wrapped by the given editor input.
 	 * 
 	 * @param editorInput
-	 *            the editor input
+	 * 		the editor input
 	 * @return the model element wrapped by <code>editorInput</code> or
-	 *         <code>null</code> if none
+	 * 	<code>null</code> if none
 	 */
 	public static IModelElement getEditorInputModelElement(
 			IEditorInput editorInput) {
 		// Performance: check working copy manager first: this is faster
 		IModelElement je = DLTKUIPlugin.getDefault().getWorkingCopyManager()
-				.getWorkingCopy(editorInput);
+				.getWorkingCopy(editorInput, false);
 		if (je != null) {
 			return je;
 		}
@@ -376,7 +376,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * Creates the DLTK plug-in's standard groups for view context menus.
 	 * 
 	 * @param menu
-	 *            the menu manager to be populated
+	 * 		the menu manager to be populated
 	 */
 	public static void createStandardGroups(IMenuManager menu) {
 		if (!menu.isEmpty()) {
@@ -448,7 +448,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * Returns all editor text hovers contributed to the workbench.
 	 * 
 	 * @param store
-	 *            preference store to initialize settings from
+	 * 		preference store to initialize settings from
 	 * @return an array of EditorTextHoverDescriptor *
 	 */
 	public EditorTextHoverDescriptor[] getEditorTextHoverDescriptors(
@@ -458,7 +458,8 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 					.getContributedHovers(store);
 			ConfigurationElementSorter sorter = new ConfigurationElementSorter() {
 				/*
-				 * @see org.eclipse.ui.texteditor.ConfigurationElementSorter#getConfigurationElement(java.lang.Object)
+				 * @seeorg.eclipse.ui.texteditor.ConfigurationElementSorter#
+				 * getConfigurationElement(java.lang.Object)
 				 */
 				public IConfigurationElement getConfigurationElement(
 						Object object) {
@@ -481,18 +482,18 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * open Java editor for the given element, it is returned.
 	 * 
 	 * @param element
-	 *            the input element; either a compilation unit (<code>ICompilationUnit</code>)
-	 *            or a class file (<code>IClassFile</code>) or source
-	 *            references inside.
+	 * 		the input element; either a compilation unit (
+	 * 		<code>ICompilationUnit</code>) or a class file (<code>IClassFile</code>)
+	 * 		or source references inside.
 	 * @return returns the editor part of the opened editor or <code>null</code>
-	 *         if the element is not a {@link ISourceReference} or the file was
-	 *         opened in an external editor.
+	 * 	if the element is not a {@link ISourceReference} or the file was opened
+	 * 	in an external editor.
 	 * @exception PartInitException
-	 *                if the editor could not be initialized or no workbench
-	 *                page is active
+	 * 		if the editor could not be initialized or no workbench page is
+	 * 		active
 	 * @exception JavaModelException
-	 *                if this element does not exist or if an exception occurs
-	 *                while accessing its underlying resource
+	 * 		if this element does not exist or if an exception occurs while
+	 * 		accessing its underlying resource
 	 */
 	public static IEditorPart openInEditor(IModelElement element)
 			throws ModelException, PartInitException {
@@ -507,22 +508,22 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * given element, it is returned.
 	 * 
 	 * @param element
-	 *            the input element; either a compilation unit (<code>ICompilationUnit</code>)
-	 *            or a class file (<code>IClassFile</code>) or source
-	 *            references inside.
+	 * 		the input element; either a compilation unit (
+	 * 		<code>ICompilationUnit</code>) or a class file (<code>IClassFile</code>)
+	 * 		or source references inside.
 	 * @param activate
-	 *            if set, the editor will be activated.
+	 * 		if set, the editor will be activated.
 	 * @param reveal
-	 *            if set, the element will be revealed.
+	 * 		if set, the element will be revealed.
 	 * @return returns the editor part of the opened editor or <code>null</code>
-	 *         if the element is not a {@link ISourceReference} or the file was
-	 *         opened in an external editor.
+	 * 	if the element is not a {@link ISourceReference} or the file was opened
+	 * 	in an external editor.
 	 * @exception PartInitException
-	 *                if the editor could not be initialized or no workbench
-	 *                page is active
+	 * 		if the editor could not be initialized or no workbench page is
+	 * 		active
 	 * @exception JavaModelException
-	 *                if this element does not exist or if an exception occurs
-	 *                while accessing its underlying resource
+	 * 		if this element does not exist or if an exception occurs while
+	 * 		accessing its underlying resource
 	 * @since 3.3
 	 */
 	public static IEditorPart openInEditor(IModelElement element,
