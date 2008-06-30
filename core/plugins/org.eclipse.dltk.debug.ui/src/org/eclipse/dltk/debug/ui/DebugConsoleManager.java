@@ -51,14 +51,22 @@ public class DebugConsoleManager implements ILaunchListener {
 	}
 
 	protected ScriptDebugConsole createConsole(String name, ILaunch launch) {
-		String encoding = WorkbenchEncoding.getWorkbenchDefaultEncoding();
-		try {
-			encoding = launch.getLaunchConfiguration().getAttribute(DebugPlugin.ATTR_CONSOLE_ENCODING, encoding);
+		String encoding = launch
+				.getAttribute(DebugPlugin.ATTR_CONSOLE_ENCODING);
+		if (encoding == null) {
+			try {
+				encoding = launch.getLaunchConfiguration().getAttribute(
+						DebugPlugin.ATTR_CONSOLE_ENCODING,
+						WorkbenchEncoding.getWorkbenchDefaultEncoding());
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+			if (encoding == null) {
+				encoding = WorkbenchEncoding.getWorkbenchDefaultEncoding();
+			}
 		}
-		catch (CoreException e) {
-			e.printStackTrace();
-		}
-		ScriptDebugConsole console = new ScriptDebugConsole(name, null, encoding);
+		ScriptDebugConsole console = new ScriptDebugConsole(name, null,
+				encoding);
 		console.setLaunch(launch);
 		IConsoleManager manager = ConsolePlugin.getDefault()
 				.getConsoleManager();
@@ -82,7 +90,8 @@ public class DebugConsoleManager implements ILaunchListener {
 			return;
 		}
 
-		launchToConsoleMap.put(launch, createConsole(Messages.DebugConsoleManager_debugConsole, launch));
+		launchToConsoleMap.put(launch, createConsole(
+				Messages.DebugConsoleManager_debugConsole, launch));
 	}
 
 	public void launchChanged(ILaunch launch) {
