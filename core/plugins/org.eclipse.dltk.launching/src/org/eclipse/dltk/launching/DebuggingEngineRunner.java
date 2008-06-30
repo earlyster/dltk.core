@@ -41,13 +41,15 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 
 	protected IScriptDebugTarget addDebugTarget(ILaunch launch,
 			IDbgpService dbgpService) throws CoreException {
-
-		final IScriptDebugTarget target = new ScriptDebugTarget(
-				getDebugModelId(), dbgpService, getSessionId(launch
-						.getLaunchConfiguration()), launch, null);
-
+		final IScriptDebugTarget target = createDebugTarget(launch, dbgpService);
 		launch.addDebugTarget(target);
 		return target;
+	}
+
+	protected IScriptDebugTarget createDebugTarget(ILaunch launch,
+			IDbgpService dbgpService) throws CoreException {
+		return new ScriptDebugTarget(getDebugModelId(), dbgpService,
+				getSessionId(launch.getLaunchConfiguration()), launch, null);
 	}
 
 	public DebuggingEngineRunner(IInterpreterInstall install) {
