@@ -70,7 +70,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 
 	private final String mondelId;
 
-	static WeakHashMap targets = new WeakHashMap();
+	private static final WeakHashMap targets = new WeakHashMap();
 	private String[] stepFilters;
 
 	private boolean useStepFilters;
@@ -84,7 +84,9 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	private boolean retrieveLocalVariables;
 
 	public static List getAllTargets() {
-		return new ArrayList(targets.keySet());
+		synchronized (targets) {
+			return new ArrayList(targets.keySet());
+		}
 	}
 
 	public ScriptDebugTarget(String modelId, IDbgpService dbgpService,
@@ -109,7 +111,9 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		this.threadManager.addListener(this);
 
 		DebugEventHelper.fireCreateEvent(this);
-		targets.put(this, ""); //$NON-NLS-1$
+		synchronized (targets) {
+			targets.put(this, ""); //$NON-NLS-1$
+		}
 	}
 
 	public void shutdown() {
