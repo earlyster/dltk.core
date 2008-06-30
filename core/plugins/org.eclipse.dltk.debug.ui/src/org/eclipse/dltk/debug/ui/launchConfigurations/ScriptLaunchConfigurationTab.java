@@ -22,6 +22,7 @@ import org.eclipse.dltk.debug.ui.preferences.ScriptDebugPreferencesMessages;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
+import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils.ILaunchConfigDefaultBooleanProvider;
 import org.eclipse.dltk.internal.ui.DLTKUIStatus;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
@@ -75,7 +76,9 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse
+	 * .swt.widgets.Composite)
 	 */
 	public final void createControl(Composite parent) {
 		Font font = parent.getFont();
@@ -131,7 +134,9 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse.debug.core.ILaunchConfiguration)
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse
+	 * .debug.core.ILaunchConfiguration)
 	 */
 	public final void initializeFrom(ILaunchConfiguration config) {
 		updateProjectFromConfig(config);
@@ -139,7 +144,9 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#isValid(org.eclipse.debug.core.ILaunchConfiguration)
+	 * @see
+	 * org.eclipse.debug.ui.AbstractLaunchConfigurationTab#isValid(org.eclipse
+	 * .debug.core.ILaunchConfiguration)
 	 */
 	public boolean isValid(ILaunchConfiguration launchConfig) {
 		// clear the error messages first
@@ -154,7 +161,9 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse
+	 * .debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public final void performApply(ILaunchConfigurationWorkingCopy config) {
 		String project = fProjText.getText().trim();
@@ -177,7 +186,9 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(org.eclipse.
+	 * debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
 		// do nothing
@@ -497,11 +508,13 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 *            project name
 	 */
 	protected final void setProjectName(String name) {
-		fProjText.setText(name);
-
 		PreferencesLookupDelegate delegate = new PreferencesLookupDelegate(
 				getProject());
+		setProjectName(name, delegate);
+	}
 
+	private void setProjectName(String name, PreferencesLookupDelegate delegate) {
+		fProjText.setText(name);
 		if (ILaunchManager.DEBUG_MODE.equals(fMode)) {
 			if (breakOnFirstLine != null)
 				breakOnFirstLine
@@ -523,15 +536,31 @@ public abstract class ScriptLaunchConfigurationTab extends
 			projectName = guessProjectName();
 		}
 
-		setProjectName(projectName);
+		final PreferencesLookupDelegate delegate = new PreferencesLookupDelegate(
+				getProject());
+
+		setProjectName(projectName, delegate);
 
 		if (ILaunchManager.DEBUG_MODE.equals(fMode)) {
-			if (breakOnFirstLine != null)
+			if (breakOnFirstLine != null) {
+				ILaunchConfigDefaultBooleanProvider provider = new ILaunchConfigDefaultBooleanProvider() {
+					public boolean getDefault() {
+						return breakOnFirstLinePrefEnabled(delegate);
+					}
+				};
 				breakOnFirstLine.setSelection(LaunchConfigurationUtils
-						.isBreakOnFirstLineEnabled(config));
-			if (enableLogging != null)
+						.isBreakOnFirstLineEnabled(config, provider));
+			}
+
+			if (enableLogging != null) {
+				ILaunchConfigDefaultBooleanProvider provider = new ILaunchConfigDefaultBooleanProvider() {
+					public boolean getDefault() {
+						return dbpgLoggingPrefEnabled(delegate);
+					}
+				};
 				enableLogging.setSelection(LaunchConfigurationUtils
-						.isDbgpLoggingEnabled(config));
+						.isDbgpLoggingEnabled(config, provider));
+			}
 		}
 	}
 
