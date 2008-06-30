@@ -186,10 +186,6 @@ public class DbgpBreakpointCommands extends DbgpBaseCommands implements
 			request.addOption("-o", config.getHitConditionString()); //$NON-NLS-1$
 		}
 
-		if (config.getLineNo() != -1) {
-			request.addOption("-n", config.getLineNo()); //$NON-NLS-1$			
-		}
-
 		// not sure that this is correct but it looks that this is possible
 		// TODO review it
 		String conditionExpression = config.getExpression();
