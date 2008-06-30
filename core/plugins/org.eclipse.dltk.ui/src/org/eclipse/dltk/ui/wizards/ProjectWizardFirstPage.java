@@ -140,6 +140,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			fWorkspaceRadio
 					.setLabelText(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_workspace_desc);
 			fExternalRadio = new SelectionButtonDialogField(SWT.RADIO);
+			fExternalRadio.setDialogFieldListener(this);
 			fExternalRadio
 					.setLabelText(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_external_desc);
 			fLocation = new StringButtonDialogField(this);
@@ -183,16 +184,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 					.setHorizontalGrabbing(fEnvironment.getComboControl(null));
 			fExternalRadio.attachDialogFields(new DialogField[] { fLocation,
 					fEnvironment });
-			fWorkspaceRadio.setDialogFieldListener(new IDialogFieldListener() {
-				public void dialogFieldChanged(DialogField field) {
-					updateInterpreters();
-				}
-			});
-			fExternalRadio.setDialogFieldListener(new IDialogFieldListener() {
-				public void dialogFieldChanged(DialogField field) {
-					updateInterpreters();
-				}
-			});
 		}
 
 		protected void fireEvent() {
@@ -211,16 +202,15 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		}
 
 		protected String getDefaultPath(String name) {
-			// final IPath path = Platform.getLocation().append(name);
-			// return path.toOSString();
-			return "";
+			final IPath path = Platform.getLocation().append(name);
+			return path.toOSString();
 		}
 
 		/*
 		 * (non-Javadoc)
 		 * 
 		 * @see java.util.Observer#update(java.util.Observable,
-		 *      java.lang.Object)
+		 * java.lang.Object)
 		 */
 		public void update(Observable o, Object arg) {
 			if (isInWorkspace()) {
@@ -271,9 +261,15 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 					fPreviousExternalLocation = fLocation.getText();
 					fLocation.setText(getDefaultPath(fNameGroup.getName()));
 				} else {
-					fLocation.setText(fPreviousExternalLocation);
+					fLocation.setText("");
 				}
+				updateInterpreters();
 			}
+
+			if (field == fExternalRadio) {
+				updateInterpreters();
+			}
+
 			fireEvent();
 		}
 	}
@@ -427,8 +423,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse
-		 *      .swt.events.SelectionEvent)
+		 * @see
+		 * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse
+		 * .swt.events.SelectionEvent)
 		 */
 		public void widgetSelected(SelectionEvent e) {
 			widgetDefaultSelected(e);
@@ -452,8 +449,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org
-		 *      .eclipse.swt.events.SelectionEvent)
+		 * @see
+		 * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org
+		 * .eclipse.swt.events.SelectionEvent)
 		 */
 		public void widgetDefaultSelected(SelectionEvent e) {
 			showInterpreterPreferencePage();
@@ -567,8 +565,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse
-		 *      .swt.events.SelectionEvent)
+		 * @see
+		 * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse
+		 * .swt.events.SelectionEvent)
 		 */
 		public void widgetSelected(SelectionEvent e) {
 			widgetDefaultSelected(e);
@@ -577,8 +576,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org
-		 *      .eclipse.swt.events.SelectionEvent)
+		 * @see
+		 * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org
+		 * .eclipse.swt.events.SelectionEvent)
 		 */
 		public void widgetDefaultSelected(SelectionEvent e) {
 			if (DLTKCore.DEBUG) {
