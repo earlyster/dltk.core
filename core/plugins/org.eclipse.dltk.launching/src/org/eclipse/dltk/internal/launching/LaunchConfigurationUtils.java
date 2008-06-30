@@ -122,7 +122,7 @@ public final class LaunchConfigurationUtils {
 				return false;
 			}
 		};
-		return isBreakOnFirstLineEnabled(configuration, provider);
+		return isDbgpLoggingEnabled(configuration, provider);
 	}
 
 	public static boolean isDbgpLoggingEnabled(
