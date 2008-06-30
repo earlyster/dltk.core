@@ -38,15 +38,18 @@ public class DLTKLaunchConfigurationsMessages extends NLS {
 	public static String remoteTab_connectionPort;
 	public static String remoteTab_connectionIdeKey;
 	public static String remoteError_ideKeyEmpty;
+	public static String remoteTab_remoteSourceMapping;
 	public static String remoteTab_remoteWorkingDir;
+	public static String remoteTab_scriptSourceFolders;
 	public static String ScriptLaunchConfigurationTab_debugOptions;
-	
-	
+
 	private DLTKLaunchConfigurationsMessages() {
-	// dont instatiate
+		// dont instatiate
 	}
+
 	static {
 		// load message values from bundle file
-		NLS.initializeMessages(BUNDLE_NAME, DLTKLaunchConfigurationsMessages.class);
+		NLS.initializeMessages(BUNDLE_NAME,
+				DLTKLaunchConfigurationsMessages.class);
 	}
 }

@@ -1,20 +1,19 @@
 package org.eclipse.dltk.debug.ui.launchConfigurations;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.dltk.debug.ui.messages.DLTKLaunchConfigurationsMessages;
+import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.ui.preferences.FieldValidators;
 import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
@@ -28,6 +27,7 @@ public abstract class RemoteLaunchConfigurationTab extends
 	protected Text port;
 	protected Text ideKey;
 	protected Text remoteWorkingDir;
+	protected Button stripSourceFolders;
 
 	public RemoteLaunchConfigurationTab(String mode) {
 		super(mode);
@@ -53,20 +53,26 @@ public abstract class RemoteLaunchConfigurationTab extends
 	 * #doInitializeForm(org.eclipse.debug.core.ILaunchConfiguration)
 	 */
 	protected void doInitializeForm(ILaunchConfiguration config) {
-
-		port.setText(getLaunchAttr(config,
+		port.setText(LaunchConfigurationUtils.getString(config,
 				ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_PORT, Integer
 						.toString(getDefaultPort())));
 
-		ideKey.setText(getLaunchAttr(config,
+		ideKey.setText(LaunchConfigurationUtils.getString(config,
 				ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_SESSION_ID,
 				getDefaultIDEKey()));
 
 		remoteWorkingDir
-				.setText(getLaunchAttr(
-						config,
-						ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_REMOTE_WORKING_DIR,
-						getDefaultRemoteWorkingDir()));
+				.setText(LaunchConfigurationUtils
+						.getString(
+								config,
+								ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_REMOTE_WORKING_DIR,
+								getDefaultRemoteWorkingDir()));
+		stripSourceFolders
+				.setSelection(LaunchConfigurationUtils
+						.getBoolean(
+								config,
+								ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_STRIP_SOURCE_FOLDERS,
+								getDefaultStripSourceFolders()));
 	}
 
 	/**
@@ -90,6 +96,10 @@ public abstract class RemoteLaunchConfigurationTab extends
 		return "";//$NON-NLS-1$
 	}
 
+	protected boolean getDefaultStripSourceFolders() {
+		return false;
+	}
+
 	/*
 	 * @see
 	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
@@ -106,6 +116,10 @@ public abstract class RemoteLaunchConfigurationTab extends
 				.setAttribute(
 						ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_REMOTE_WORKING_DIR,
 						remoteWorkingDir.getText().trim());
+		config
+				.setAttribute(
+						ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_STRIP_SOURCE_FOLDERS,
+						stripSourceFolders.getSelection());
 	}
 
 	/*
@@ -170,47 +184,29 @@ public abstract class RemoteLaunchConfigurationTab extends
 		SWTFactory.createLabel(group,
 				DLTKLaunchConfigurationsMessages.remoteTab_connectionPort, 1);
 		port = SWTFactory.createText(group, SWT.BORDER, 1, EMPTY_STRING);
-		port.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				updateLaunchConfigurationDialog();
-			}
-		});
+		port.addModifyListener(getWidgetListener());
 
 		SWTFactory.createLabel(group,
 				DLTKLaunchConfigurationsMessages.remoteTab_connectionIdeKey, 1);
 		ideKey = SWTFactory.createText(group, SWT.BORDER, 1, EMPTY_STRING);
-		ideKey.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				updateLaunchConfigurationDialog();
-			}
-		});
+		ideKey.addModifyListener(getWidgetListener());
 
 		SWTFactory.createHorizontalSpacer(composite, 1);
 
 		group = SWTFactory.createGroup(composite,
-				DLTKLaunchConfigurationsMessages.remoteTab_remoteWorkingDir, 1,
-				1, GridData.FILL_HORIZONTAL);
+				DLTKLaunchConfigurationsMessages.remoteTab_remoteSourceMapping,
+				1, 1, GridData.FILL_HORIZONTAL);
+
+		SWTFactory.createLabel(group,
+				DLTKLaunchConfigurationsMessages.remoteTab_remoteWorkingDir, 1);
 
 		remoteWorkingDir = SWTFactory.createText(group, SWT.BORDER, 1,
 				EMPTY_STRING);
-		remoteWorkingDir.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				updateLaunchConfigurationDialog();
-			}
-		});
-	}
+		remoteWorkingDir.addModifyListener(getWidgetListener());
 
-	private String getLaunchAttr(ILaunchConfiguration config, String key,
-			String defaultValue) {
-		String text = null;
+		stripSourceFolders = createCheckButton(group,
+				DLTKLaunchConfigurationsMessages.remoteTab_scriptSourceFolders);
+		stripSourceFolders.addSelectionListener(getWidgetListener());
 
-		try {
-			text = config.getAttribute(key, defaultValue);
-		} catch (CoreException e) {
-			// log?
-			text = defaultValue;
-		}
-
-		return text;
 	}
 }
