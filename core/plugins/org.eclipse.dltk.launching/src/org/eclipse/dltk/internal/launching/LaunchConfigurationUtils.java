@@ -12,6 +12,14 @@ public final class LaunchConfigurationUtils {
 	 * does a class like this exist elsewhere?
 	 */
 
+	public static interface ILaunchConfigDefaultStringProvider {
+		String getDefault();
+	}
+
+	public static interface ILaunchConfigDefaultBooleanProvider {
+		boolean getDefault();
+	}
+
 	/**
 	 * Retrieve a boolean value from a launch configuration
 	 * 
@@ -90,10 +98,11 @@ public final class LaunchConfigurationUtils {
 	 *         otherwise
 	 */
 	public static boolean isBreakOnFirstLineEnabled(
-			ILaunchConfiguration configuration) {
+			ILaunchConfiguration configuration,
+			ILaunchConfigDefaultBooleanProvider defaultProvider) {
 		return getBoolean(configuration,
 				ScriptLaunchConfigurationConstants.ENABLE_BREAK_ON_FIRST_LINE,
-				false);
+				defaultProvider.getDefault());
 	}
 
 	/**
@@ -108,8 +117,20 @@ public final class LaunchConfigurationUtils {
 	 */
 	public static boolean isDbgpLoggingEnabled(
 			ILaunchConfiguration configuration) {
+		ILaunchConfigDefaultBooleanProvider provider = new ILaunchConfigDefaultBooleanProvider() {
+			public boolean getDefault() {
+				return false;
+			}
+		};
+		return isBreakOnFirstLineEnabled(configuration, provider);
+	}
+
+	public static boolean isDbgpLoggingEnabled(
+			ILaunchConfiguration configuration,
+			ILaunchConfigDefaultBooleanProvider defaultProvider) {
 		return getBoolean(configuration,
-				ScriptLaunchConfigurationConstants.ENABLE_DBGP_LOGGING, false);
+				ScriptLaunchConfigurationConstants.ENABLE_DBGP_LOGGING,
+				defaultProvider.getDefault());
 	}
 
 	/**
