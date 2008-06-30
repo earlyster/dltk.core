@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
-
 /**
  * Constants for launch configurations
  * 
@@ -55,26 +54,26 @@ public class ScriptLaunchConfigurationConstants {
 	 * specific to a particular interpreter install type, used when launching a
 	 * local script application. The map is passed to a
 	 * <code>InterpreterRunner</code> via a
-	 * <code>InterpreterRunnerConfiguration</code> when launching a
-	 * interpreter. The attributes in the map are implementation dependent and
-	 * are limited to String keys and values.
+	 * <code>InterpreterRunnerConfiguration</code> when launching a interpreter.
+	 * The attributes in the map are implementation dependent and are limited to
+	 * String keys and values.
 	 */
 	public static final String ATTR_INTERPRETER_INSTALL_TYPE_SPECIFIC_ATTRS_MAP = "interpreterTypeSpecificAttrs"; //$NON-NLS-1$
 
 	/**
 	 * Launch configuration attribute key. The value is a boolean specifying
 	 * whether a default buildpath should be used when launching a local sctipt
-	 * application. When <code>false</code>, a buildpath must be specified
-	 * via the <code>ATTR_BUILDPATH</code> attribute. When <code>true</code>
-	 * or unspecified, a buildpath is computed by the buildpath provider
-	 * associated with a launch configuration.
+	 * application. When <code>false</code>, a buildpath must be specified via
+	 * the <code>ATTR_BUILDPATH</code> attribute. When <code>true</code> or
+	 * unspecified, a buildpath is computed by the buildpath provider associated
+	 * with a launch configuration.
 	 */
 	public static final String ATTR_DEFAULT_BUILDPATH = "defaultBuildpath"; //$NON-NLS-1$
 
 	public static final String ATTR_DEFAULT_SOURCEPATH = "defaultSourcePath"; //$NON-NLS-1$
-	
+
 	public static final String ATTR_SOURCEPATH = "sourcePath"; //$NON-NLS-1$
-	
+
 	/**
 	 * Launch configuration attribute key. The attribute value is an ordered
 	 * list of strings which are mementos for runtime build path entries. When
@@ -106,7 +105,7 @@ public class ScriptLaunchConfigurationConstants {
 	 * <code>StandardBuildpathProvider</code>.
 	 */
 	public static final String ATTR_BUILDPATH_PROVIDER = "buildpathProvider"; //$NON-NLS-1$
-	
+
 	public static final String ATTR_SOURCEPATH_PROVIDER = "sourcepathProvider"; //$NON-NLS-1$
 
 	public static final String ATTR_DEBUG_CONNECTOR = "debugConnector"; //$NON-NLS-1$
@@ -121,12 +120,13 @@ public class ScriptLaunchConfigurationConstants {
 	 * attempt to map the remote source file to a project in the workspace.
 	 */
 	public static final String ATTR_DLTK_DBGP_REMOTE_WORKING_DIR = "remoteWorkingDir"; //$NON-NLS-1$
-	
+	public static final String ATTR_DLTK_DBGP_STRIP_SOURCE_FOLDERS = "stripSourceFolders";
+
 	public static final String ID_SCRIPT_PROCESS_TYPE = "script"; //$NON-NLS-1$
 
 	public static final String ENABLE_BREAK_ON_FIRST_LINE = "enableBreakOnFirstLine"; //$NON-NLS-1$
 	public static final String ENABLE_DBGP_LOGGING = "enableDbgpLogging"; //$NON-NLS-1$
-	
+
 	// Errors
 	public static final int ERR_INTERNAL_ERROR = 100;
 
