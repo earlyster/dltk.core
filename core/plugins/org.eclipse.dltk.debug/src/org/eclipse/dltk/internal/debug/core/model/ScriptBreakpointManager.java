@@ -236,15 +236,15 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 
 				if (oldValue == null) {
 					if (newValue != null) {
-						return classifyChange(delta, breakpoint);
+						return classifyChange(delta, breakpoint, attr);
 					}
 					continue;
 				}
 				if (newValue == null) {
-					return classifyChange(delta, breakpoint);
+					return classifyChange(delta, breakpoint, attr);
 				}
 				if (!oldValue.equals(newValue)) {
-					return classifyChange(delta, breakpoint);
+					return classifyChange(delta, breakpoint, attr);
 				}
 			}
 		} catch (CoreException e) {
@@ -254,13 +254,17 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	}
 
 	private static int classifyChange(IMarkerDelta delta,
-			IScriptBreakpoint breakpoint) throws CoreException {
+			IScriptBreakpoint breakpoint, String attr) throws CoreException {
+		final boolean conditional = ScriptBreakpointUtils
+				.isConditional(breakpoint);
+		if (conditional && AbstractScriptBreakpoint.EXPRESSION.equals(attr)) {
+			return MAJOR_CHANGE;
+		}
 		final boolean oldExprState = delta.getAttribute(
 				AbstractScriptBreakpoint.EXPRESSION_STATE, false);
 		final String oldExpr = delta.getAttribute(
 				AbstractScriptBreakpoint.EXPRESSION, null);
-		if (ScriptBreakpointUtils.isConditional(oldExprState, oldExpr) != ScriptBreakpointUtils
-				.isConditional(breakpoint)) {
+		if (ScriptBreakpointUtils.isConditional(oldExprState, oldExpr) != conditional) {
 			return MAJOR_CHANGE;
 		}
 		return MINOR_CHANGE;
