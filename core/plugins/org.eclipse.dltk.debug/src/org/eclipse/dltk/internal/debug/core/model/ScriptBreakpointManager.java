@@ -8,12 +8,10 @@
 package org.eclipse.dltk.internal.debug.core.model;
 
 import java.net.URI;
-import java.util.HashMap;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -23,8 +21,6 @@ import org.eclipse.debug.core.IBreakpointManagerListener;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.dbgp.breakpoints.DbgpBreakpointConfig;
 import org.eclipse.dltk.dbgp.commands.IDbgpBreakpointCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
@@ -40,82 +36,7 @@ import org.eclipse.dltk.debug.core.model.IScriptWatchpoint;
 public class ScriptBreakpointManager implements IBreakpointListener,
 		IBreakpointManagerListener {
 
-	private BreakpointPathMapper bpPathMapper;
-
-	static class BreakpointPathMapper {
-		private HashMap cache;
-		private String mapTo;
-		private IScriptProject scriptProject;
-		private boolean stripSrcFolders;
-
-		BreakpointPathMapper(IScriptProject project, String mapTo,
-				boolean stripSrcFolders) {
-			this.mapTo = mapTo;
-			this.scriptProject = project;
-			this.stripSrcFolders = stripSrcFolders;
-
-			this.cache = new HashMap();
-		}
-
-		void clearCache() {
-			cache.clear();
-		}
-
-		URI map(URI uri) {
-			String path = uri.getPath();
-			// no mapTo, return original uri
-			if (mapTo == null || "".equals(mapTo)) {
-				return uri;
-			}
-
-			// check the cache
-			if (cache.containsKey(uri)) {
-				return (URI) cache.get(uri);
-			}
-
-			// now for the fun ;)
-			String projectPath = scriptProject.getProject().getLocation()
-					.toOSString();
-
-			path = path.substring(projectPath.length() + 1);
-
-			if (stripSrcFolders) {
-				path = stripSourceFolders(path);
-			}
-
-			String outgoing = mapTo + "/" + path;
-
-			URI outgoingUri = ScriptLineBreakpoint.makeUri(new Path(outgoing));
-			cache.put(uri, outgoingUri);
-
-			return outgoingUri;
-		}
-
-		private String stripSourceFolders(String path) {
-			try {
-				IProjectFragment[] fragments = scriptProject
-						.getProjectFragments();
-
-				for (int i = 0; i < fragments.length; i++) {
-					IProjectFragment frag = fragments[i];
-					// skip external/archive
-					if (frag.isExternal() || frag.isArchive()) {
-						continue;
-					}
-
-					String name = frag.getElementName();
-					if (path.startsWith(name)) {
-						path = path.substring(name.length() + 1);
-						continue;
-					}
-				}
-			} catch (CoreException e) {
-				DLTKDebugPlugin.log(e);
-			}
-
-			return path;
-		}
-	}
+	private IScriptBreakpointPathMapper bpPathMapper;
 
 	// Utility methods
 	protected static IBreakpointManager getBreakpointManager() {
@@ -541,7 +462,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		}
 	}
 
-	public void setBreakpointPathMapper(BreakpointPathMapper pathMapper) {
+	public void setBreakpointPathMapper(IScriptBreakpointPathMapper pathMapper) {
 		this.bpPathMapper = pathMapper;
 	}
 }
