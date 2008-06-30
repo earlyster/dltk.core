@@ -69,6 +69,10 @@ public class DbgpDebugingEngine extends DbgpTermination implements
 				firePacketSent(output);
 			}
 		});
+		/*
+		 * FIXME this event is delivered on the separate thread, so sometimes
+		 * logging misses a few initial packets.
+		 */
 		DebugEventHelper.fireExtendedEvent(this,
 				ExtendedDebugEventDetails.DGBP_NEW_CONNECTION);
 	}
