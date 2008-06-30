@@ -21,8 +21,8 @@ public interface IDbgpBreakpointCommands {
 			DbgpBreakpointConfig config) throws DbgpException;
 
 	// Call breakpoint
-	String setCallBreakpoint(URI uri, String function, DbgpBreakpointConfig config)
-			throws DbgpException;
+	String setCallBreakpoint(URI uri, String function,
+			DbgpBreakpointConfig config) throws DbgpException;
 
 	// Return breakpoint
 	String setReturnBreakpoint(URI uri, String function,
@@ -39,8 +39,8 @@ public interface IDbgpBreakpointCommands {
 			throws DbgpException;
 
 	// Watch breakpoint
-	String setWatchBreakpoint(URI uri, int line,
-			DbgpBreakpointConfig config) throws DbgpException;
+	String setWatchBreakpoint(URI uri, int line, DbgpBreakpointConfig config)
+			throws DbgpException;
 
 	// Remove
 	void removeBreakpoint(String id) throws DbgpException;
