@@ -4,16 +4,16 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
- 
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.core.model;
 
 import java.net.URI;
+import java.util.HashMap;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -23,6 +23,8 @@ import org.eclipse.debug.core.IBreakpointManagerListener;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.dbgp.breakpoints.DbgpBreakpointConfig;
 import org.eclipse.dltk.dbgp.commands.IDbgpBreakpointCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
@@ -37,6 +39,84 @@ import org.eclipse.dltk.debug.core.model.IScriptWatchpoint;
 
 public class ScriptBreakpointManager implements IBreakpointListener,
 		IBreakpointManagerListener {
+
+	private BreakpointPathMapper bpPathMapper;
+
+	static class BreakpointPathMapper {
+		private HashMap cache;
+		private String mapTo;
+		private IScriptProject scriptProject;
+		private boolean stripSrcFolders;
+
+		BreakpointPathMapper(IScriptProject project, String mapTo,
+				boolean stripSrcFolders) {
+			this.mapTo = mapTo;
+			this.scriptProject = project;
+			this.stripSrcFolders = stripSrcFolders;
+
+			this.cache = new HashMap();
+		}
+
+		void clearCache() {
+			cache.clear();
+		}
+
+		URI map(URI uri) {
+			String path = uri.getPath();
+			// no mapTo, return original uri
+			if (mapTo == null || "".equals(mapTo)) {
+				return uri;
+			}
+
+			// check the cache
+			if (cache.containsKey(uri)) {
+				return (URI) cache.get(uri);
+			}
+
+			// now for the fun ;)
+			String projectPath = scriptProject.getProject().getLocation()
+					.toOSString();
+
+			path = path.substring(projectPath.length() + 1);
+
+			if (stripSrcFolders) {
+				path = stripSourceFolders(path);
+			}
+
+			String outgoing = mapTo + "/" + path;
+
+			URI outgoingUri = ScriptLineBreakpoint.makeUri(new Path(outgoing));
+			cache.put(uri, outgoingUri);
+
+			return outgoingUri;
+		}
+
+		private String stripSourceFolders(String path) {
+			try {
+				IProjectFragment[] fragments = scriptProject
+						.getProjectFragments();
+
+				for (int i = 0; i < fragments.length; i++) {
+					IProjectFragment frag = fragments[i];
+					// skip external/archive
+					if (frag.isExternal() || frag.isArchive()) {
+						continue;
+					}
+
+					String name = frag.getElementName();
+					if (path.startsWith(name)) {
+						path = path.substring(name.length() + 1);
+						continue;
+					}
+				}
+			} catch (CoreException e) {
+				DLTKDebugPlugin.log(e);
+			}
+
+			return path;
+		}
+	}
+
 	// Utility methods
 	protected static IBreakpointManager getBreakpointManager() {
 		return DebugPlugin.getDefault().getBreakpointManager();
@@ -75,35 +155,40 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	}
 
 	// Adding, removing, updating
-	protected static void addBreakpoint(IDbgpBreakpointCommands commands,
+	protected void addBreakpoint(IDbgpBreakpointCommands commands,
 			IScriptBreakpoint breakpoint) throws CoreException, DbgpException {
 
 		DbgpBreakpointConfig config = createBreakpointConfig(breakpoint);
 
 		String id = null;
+		URI bpUri = null;
+
+		// map the outgoing uri if we're a line breakpoint
+		if (breakpoint instanceof IScriptLineBreakpoint) {
+			IScriptLineBreakpoint bp = (IScriptLineBreakpoint) breakpoint;
+			bpUri = bpPathMapper.map(bp.getResourceURI());
+		}
+
 		// Type specific
 		if (breakpoint instanceof IScriptWatchpoint) {
 			IScriptWatchpoint watchpoint = (IScriptWatchpoint) breakpoint;
-
 			config.setExpression(makeWatchpointExpression(watchpoint));
 
-			id = commands.setWatchBreakpoint(watchpoint.getResourceURI(),
-					watchpoint.getLineNumber(), config);
+			id = commands.setWatchBreakpoint(bpUri, watchpoint.getLineNumber(),
+					config);
 		} else if (breakpoint instanceof IScriptMethodEntryBreakpoint) {
 			IScriptMethodEntryBreakpoint entryBreakpoint = (IScriptMethodEntryBreakpoint) breakpoint;
 
 			if (entryBreakpoint.breakOnExit()) {
-				final String exitId = commands.setReturnBreakpoint(
-						entryBreakpoint.getResourceURI(), entryBreakpoint
-								.getMethodName(), config);
+				final String exitId = commands.setReturnBreakpoint(bpUri,
+						entryBreakpoint.getMethodName(), config);
 
 				entryBreakpoint.setExitBreakpointId(exitId);
 			}
 
 			if (entryBreakpoint.breakOnEntry()) {
-				final String entryId = commands.setCallBreakpoint(
-						entryBreakpoint.getResourceURI(), entryBreakpoint
-								.getMethodName(), config);
+				final String entryId = commands.setCallBreakpoint(bpUri,
+						entryBreakpoint.getMethodName(), config);
 
 				entryBreakpoint.setEntryBreakpointId(entryId);
 			}
@@ -111,13 +196,11 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 			IScriptLineBreakpoint lineBreakpoint = (IScriptLineBreakpoint) breakpoint;
 
 			if (ScriptBreakpointUtils.isConditional(lineBreakpoint)) {
-				id = commands.setConditionalBreakpoint(lineBreakpoint
-						.getResourceURI(), lineBreakpoint.getLineNumber(),
-						config);
+				id = commands.setConditionalBreakpoint(bpUri, lineBreakpoint
+						.getLineNumber(), config);
 			} else {
-				id = commands.setLineBreakpoint(
-						lineBreakpoint.getResourceURI(), lineBreakpoint
-								.getLineNumber(), config);
+				id = commands.setLineBreakpoint(bpUri, lineBreakpoint
+						.getLineNumber(), config);
 			}
 		} else if (breakpoint instanceof IScriptExceptionBreakpoint) {
 			IScriptExceptionBreakpoint lineBreakpoint = (IScriptExceptionBreakpoint) breakpoint;
@@ -129,8 +212,16 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		breakpoint.setIdentifier(id);
 	}
 
-	protected static void changeBreakpoint(IDbgpBreakpointCommands commands,
+	protected void changeBreakpoint(IDbgpBreakpointCommands commands,
 			IScriptBreakpoint breakpoint) throws DbgpException, CoreException {
+
+		URI bpUri = null;
+
+		// map the outgoing uri if we're a line breakpoint
+		if (breakpoint instanceof IScriptLineBreakpoint) {
+			IScriptLineBreakpoint bp = (IScriptLineBreakpoint) breakpoint;
+			bpUri = bpPathMapper.map(bp.getResourceURI());
+		}
 
 		if (breakpoint instanceof IScriptMethodEntryBreakpoint) {
 			DbgpBreakpointConfig config = createBreakpointConfig(breakpoint);
@@ -140,9 +231,8 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 			if (entryBreakpoint.breakOnEntry()) {
 				if (entryId == null) {
 					// Create entry breakpoint
-					entryId = commands.setCallBreakpoint(entryBreakpoint
-							.getResourceURI(), entryBreakpoint.getMethodName(),
-							config);
+					entryId = commands.setCallBreakpoint(bpUri, entryBreakpoint
+							.getMethodName(), config);
 					entryBreakpoint.setEntryBreakpointId(entryId);
 				} else {
 					// Update entry breakpoint
@@ -156,13 +246,12 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 				}
 			}
 
-			String exitId = null;
+			String exitId = entryBreakpoint.getExitBreakpointId();
 			if (entryBreakpoint.breakOnExit()) {
 				if (exitId == null) {
 					// Create exit breakpoint
-					exitId = commands.setReturnBreakpoint(entryBreakpoint
-							.getResourceURI(), entryBreakpoint.getMethodName(),
-							config);
+					exitId = commands.setReturnBreakpoint(bpUri,
+							entryBreakpoint.getMethodName(), config);
 					entryBreakpoint.setExitBreakpointId(exitId);
 				} else {
 					// Update exit breakpoint
@@ -252,9 +341,8 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		if (ScriptBreakpointUtils.isConditional(oldExprState, oldExpr) != ScriptBreakpointUtils
 				.isConditional(breakpoint)) {
 			return MAJOR_CHANGE;
-		} else {
-			return MINOR_CHANGE;
 		}
+		return MINOR_CHANGE;
 	}
 
 	// DebugTarget
@@ -308,6 +396,24 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		}
 
 		return false;
+	}
+
+	public void threadAccepted() {
+		IBreakpointManager manager = DebugPlugin.getDefault()
+				.getBreakpointManager();
+
+		manager.addBreakpointListener(target);
+		manager.addBreakpointManagerListener(this);
+	}
+
+	public void threadTerminated() {
+		IBreakpointManager manager = DebugPlugin.getDefault()
+				.getBreakpointManager();
+
+		manager.removeBreakpointListener(target);
+		manager.removeBreakpointManagerListener(this);
+
+		bpPathMapper.clearCache();
 	}
 
 	public void setupDeferredBreakpoints() {
@@ -433,5 +539,9 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 				DLTKDebugPlugin.log(e);
 			}
 		}
+	}
+
+	public void setBreakpointPathMapper(BreakpointPathMapper pathMapper) {
+		this.bpPathMapper = pathMapper;
 	}
 }

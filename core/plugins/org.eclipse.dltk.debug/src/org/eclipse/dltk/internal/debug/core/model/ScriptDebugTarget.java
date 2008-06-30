@@ -4,12 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
- 
  *******************************************************************************/
-/**
- * 
- */
 package org.eclipse.dltk.internal.debug.core.model;
 
 import java.net.URI;
@@ -24,7 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.IBreakpointManager;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IBreakpoint;
@@ -44,11 +38,14 @@ import org.eclipse.dltk.debug.core.model.IScriptDebugTargetListener;
 import org.eclipse.dltk.debug.core.model.IScriptDebugThreadConfigurator;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptVariable;
+import org.eclipse.dltk.internal.debug.core.model.ScriptBreakpointManager.BreakpointPathMapper;
 
 public class ScriptDebugTarget extends ScriptDebugElement implements
 		IScriptDebugTarget, IScriptThreadManagerListener {
 
 	private static final String LAUNCH_CONFIGURATION_ATTR_PROJECT = "project"; //$NON-NLS-1$
+	private static final String LAUNCH_CONFIGURATION_ATTR_REMOTE_WORKING_DIR = "remoteWorkingDir";
+	private static final String LAUNCH_CONFIGURATION_ATTR_STRIP_SRC_FOLDERS = "stripSourceFolders";
 	private static final String LAUNCH_CONFIGURATION_ATTR_BREAK_ON_FIRST_LINE = "enableBreakOnFirstLine"; //$NON-NLS-1$
 
 	private static final int THREAD_TERMINATION_TIMEOUT = 5000; // 5 seconds
@@ -92,8 +89,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	}
 
 	public ScriptDebugTarget(String modelId, IDbgpService dbgpService,
-			String sessionId, ILaunch launch, IProcess process)
-			throws CoreException {
+			String sessionId, ILaunch launch, IProcess process) {
 
 		this.mondelId = modelId;
 
@@ -150,15 +146,15 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		this.process = process;
 	}
 
-	public boolean hasThreads() throws DebugException {
+	public boolean hasThreads() {
 		return threadManager.hasThreads();
 	}
 
-	public IThread[] getThreads() throws DebugException {
+	public IThread[] getThreads() {
 		return threadManager.getThreads();
 	}
 
-	public String getName() throws DebugException {
+	public String getName() {
 		return name;
 	}
 
@@ -180,7 +176,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 				Thread.sleep(WAIT_CHUNK);
 				all += WAIT_CHUNK;
 			} catch (InterruptedException e) {
-
+				// interrupted
 			}
 			if (threadManager.isTerminated()) {
 				return true;
@@ -206,12 +202,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		}
 
 		threadManager.removeListener(this);
-
-		IBreakpointManager manager = DebugPlugin.getDefault()
-				.getBreakpointManager();
-
-		manager.removeBreakpointListener(this);
-		manager.removeBreakpointManagerListener(breakpointManager);
+		breakpointManager.threadTerminated();
 
 		DebugEventHelper.fireTerminateEvent(this);
 	}
@@ -243,7 +234,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		return false;
 	}
 
-	public void disconnect() throws DebugException {
+	public void disconnect() {
 		disconnected = true;
 	}
 
@@ -256,13 +247,11 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		return false;
 	}
 
-	public IMemoryBlock getMemoryBlock(long startAddress, long length)
-			throws DebugException {
+	public IMemoryBlock getMemoryBlock(long startAddress, long length) {
 		return null;
 	}
 
-	public IScriptVariable findVariable(String variableName)
-			throws DebugException {
+	public IScriptVariable findVariable(String variableName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -306,18 +295,41 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 			DebugEventHelper.fireExtendedEvent(this,
 					ExtendedDebugEventDetails.BEFORE_CODE_LOADED);
 
+			breakpointManager.setBreakpointPathMapper(createPathMapper());
 			breakpointManager.setupDeferredBreakpoints();
 
-			IBreakpointManager manager = DebugPlugin.getDefault()
-					.getBreakpointManager();
-
-			manager.addBreakpointListener(this);
-			manager.addBreakpointManagerListener(breakpointManager);
+			/*
+			 * tell the manager the thread was accepted after creating the path
+			 * mapper and setting the deferred breakpoints
+			 */
+			breakpointManager.threadAccepted();
 
 			// DebugEventHelper.fireCreateEvent(this);
 			initialized = true;
 			fireTargetInitialized();
 		}
+	}
+
+	private BreakpointPathMapper createPathMapper() {
+		String remoteWorkingDir = null;
+		boolean stripSrcFolders = false;
+
+		try {
+			remoteWorkingDir = launch.getLaunchConfiguration().getAttribute(
+					LAUNCH_CONFIGURATION_ATTR_REMOTE_WORKING_DIR, "");
+		} catch (CoreException e) {
+			DLTKDebugPlugin.log(e);
+		}
+
+		try {
+			stripSrcFolders = launch.getLaunchConfiguration().getAttribute(
+					LAUNCH_CONFIGURATION_ATTR_STRIP_SRC_FOLDERS, false);
+		} catch (CoreException e) {
+			DLTKDebugPlugin.log(e);
+		}
+
+		return new BreakpointPathMapper(getScriptProject(), remoteWorkingDir,
+				stripSrcFolders);
 	}
 
 	public void allThreadsTerminated() {
@@ -327,8 +339,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 			}
 			terminate();
 		} catch (DebugException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			DLTKDebugPlugin.log(e);
 		}
 	}
 
@@ -385,6 +396,17 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	}
 
 	public IDLTKLanguageToolkit getLanguageToolkit() {
+		IScriptProject scriptProject = getScriptProject();
+		if (scriptProject != null) {
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit(scriptProject);
+			return toolkit;
+		}
+
+		return null;
+	}
+
+	protected IScriptProject getScriptProject() {
 		ILaunchConfiguration configuration = this.getLaunch()
 				.getLaunchConfiguration();
 		String projectName = null;
@@ -396,10 +418,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 				if (projectName.length() > 0) {
 					IProject project = ResourcesPlugin.getWorkspace().getRoot()
 							.getProject(projectName);
-					IScriptProject scriptProject = DLTKCore.create(project);
-					IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-							.getLanguageToolkit(scriptProject);
-					return toolkit;
+					return DLTKCore.create(project);
 				}
 			}
 		} catch (CoreException e) {
