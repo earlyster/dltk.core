@@ -38,7 +38,6 @@ import org.eclipse.dltk.debug.core.model.IScriptDebugTargetListener;
 import org.eclipse.dltk.debug.core.model.IScriptDebugThreadConfigurator;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptVariable;
-import org.eclipse.dltk.internal.debug.core.model.ScriptBreakpointManager.BreakpointPathMapper;
 
 public class ScriptDebugTarget extends ScriptDebugElement implements
 		IScriptDebugTarget, IScriptThreadManagerListener {
@@ -310,7 +309,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		}
 	}
 
-	private BreakpointPathMapper createPathMapper() {
+	private IScriptBreakpointPathMapper createPathMapper() {
 		String remoteWorkingDir = null;
 		boolean stripSrcFolders = false;
 
@@ -328,8 +327,8 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 			DLTKDebugPlugin.log(e);
 		}
 
-		return new BreakpointPathMapper(getScriptProject(), remoteWorkingDir,
-				stripSrcFolders);
+		return new ScriptBreakpointPathMapper(getScriptProject(),
+				remoteWorkingDir, stripSrcFolders);
 	}
 
 	public void allThreadsTerminated() {
