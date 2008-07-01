@@ -36,7 +36,7 @@ import org.eclipse.dltk.debug.core.model.IScriptWatchpoint;
 public class ScriptBreakpointManager implements IBreakpointListener,
 		IBreakpointManagerListener {
 
-	private IScriptBreakpointPathMapper bpPathMapper;
+	private final IScriptBreakpointPathMapper bpPathMapper;
 
 	// Utility methods
 	protected static IBreakpointManager getBreakpointManager() {
@@ -308,8 +308,10 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		}
 	}
 
-	public ScriptBreakpointManager(IScriptDebugTarget target) {
+	public ScriptBreakpointManager(IScriptDebugTarget target,
+			IScriptBreakpointPathMapper pathMapper) {
 		this.target = target;
+		this.bpPathMapper = pathMapper;
 	}
 
 	public boolean supportsBreakpoint(IBreakpoint breakpoint) {
@@ -466,7 +468,4 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		}
 	}
 
-	public void setBreakpointPathMapper(IScriptBreakpointPathMapper pathMapper) {
-		this.bpPathMapper = pathMapper;
-	}
 }
