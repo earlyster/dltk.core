@@ -67,7 +67,7 @@ public class DbgpServiceTests extends AbstractDbgpServiceTests {
 		}
 	}
 
-	public void testRestart() throws IOException {
+	public void _testRestart() throws IOException {
 		int port1 = findAvailablePort(MIN_PORT, MAX_PORT);
 		int port2 = findAvailablePort(port1 + 1, MAX_PORT);
 		for (int i = 0; i < 4; ++i) {
