@@ -120,7 +120,8 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 
 		this.disconnected = false;
 
-		this.breakpointManager = new ScriptBreakpointManager(this);
+		this.breakpointManager = new ScriptBreakpointManager(this,
+				createPathMapper());
 
 		this.threadManager.addListener(this);
 
@@ -312,7 +313,6 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 			DebugEventHelper.fireExtendedEvent(this,
 					ExtendedDebugEventDetails.BEFORE_CODE_LOADED);
 
-			breakpointManager.setBreakpointPathMapper(createPathMapper());
 			breakpointManager.setupDeferredBreakpoints();
 
 			/*
