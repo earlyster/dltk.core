@@ -43,11 +43,11 @@ public class EFSFileHandle implements IFileHandle {
 	}
 
 	public String toOSString() {
-		return getPath().toString();
+		return this.environment.convertPathToString(getPath());
 	}
 
 	public String getCanonicalPath() {
-		return toOSString();
+		return this.environment.getCanonicalPath(getPath());
 	}
 
 	public IFileHandle getChild(final String childname) {
@@ -128,7 +128,7 @@ public class EFSFileHandle implements IFileHandle {
 	}
 
 	public String toString() {
-		return environment.convertPathToString(getPath());
+		return toOSString();
 	}
 
 	public long lastModified() {
