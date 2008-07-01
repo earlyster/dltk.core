@@ -202,8 +202,15 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		}
 
 		protected String getDefaultPath(String name) {
-			final IPath path = Platform.getLocation().append(name);
-			return path.toOSString();
+			IEnvironment environment = this.getEnvironment();
+			if (environment != null
+					&& LocalEnvironment.ENVIRONMENT_ID.equals(environment
+							.getId())) {
+				final IPath path = Platform.getLocation().append(name);
+				return path.toOSString();
+			} else {
+				return "";
+			}
 		}
 
 		/*
@@ -261,7 +268,14 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 					fPreviousExternalLocation = fLocation.getText();
 					fLocation.setText(getDefaultPath(fNameGroup.getName()));
 				} else {
-					fLocation.setText(fPreviousExternalLocation);
+					IEnvironment environment = this.getEnvironment();
+					if (environment != null
+							&& LocalEnvironment.ENVIRONMENT_ID
+									.equals(environment.getId())) {
+						fLocation.setText(fPreviousExternalLocation);
+					} else {
+						fLocation.setText("");
+					}
 				}
 				updateInterpreters();
 			}
