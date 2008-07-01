@@ -92,4 +92,8 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	public char getPathsSeparatorChar() {
 		return host.getSystemType().isWindows() ? ';' : ':';
 	}
+
+	public String getCanonicalPath(IPath path) {
+		return convertPathToString(path);
+	}
 }
