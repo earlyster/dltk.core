@@ -226,9 +226,7 @@ public abstract class MainLaunchConfigurationTab extends
 				config
 						.setAttribute(
 								ScriptLaunchConfigurationConstants.ATTR_DLTK_CONSOLE_ID,
-								"dltk_"
-										+ Long.toString(System
-												.currentTimeMillis()));
+								"dltk_" + System.currentTimeMillis()); //$NON-NLS-1$
 			}
 		}
 	}
@@ -262,11 +260,11 @@ public abstract class MainLaunchConfigurationTab extends
 						}
 						return true;
 					} else {
-						setErrorMessage(DLTKLaunchConfigurationsMessages.error_scriptNotFound); //$NON-NLS-1$
+						setErrorMessage(DLTKLaunchConfigurationsMessages.error_scriptNotFound);
 						return false;
 					}
 				}
-				setErrorMessage(DLTKLaunchConfigurationsMessages.error_scriptNotFound); //$NON-NLS-1$
+				setErrorMessage(DLTKLaunchConfigurationsMessages.error_scriptNotFound);
 				return false;
 			}
 		}
@@ -291,7 +289,7 @@ public abstract class MainLaunchConfigurationTab extends
 		try {
 			script = new URI(location.getScheme(), location.getHost(), location
 					.getPath()
-					+ "/" + getScriptName(), location.getFragment());
+					+ '/' + getScriptName(), location.getFragment());
 		} catch (URISyntaxException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
