@@ -46,8 +46,6 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		IScriptDebugTarget, IScriptThreadManagerListener {
 
 	private static final String LAUNCH_CONFIGURATION_ATTR_PROJECT = "project"; //$NON-NLS-1$
-	private static final String LAUNCH_CONFIGURATION_ATTR_REMOTE_WORKING_DIR = "remoteWorkingDir";
-	private static final String LAUNCH_CONFIGURATION_ATTR_STRIP_SRC_FOLDERS = "stripSourceFolders";
 	private static final String LAUNCH_CONFIGURATION_ATTR_BREAK_ON_FIRST_LINE = "enableBreakOnFirstLine"; //$NON-NLS-1$
 
 	private static final int THREAD_TERMINATION_TIMEOUT = 5000; // 5 seconds
@@ -327,26 +325,8 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		}
 	}
 
-	private IScriptBreakpointPathMapper createPathMapper() {
-		String remoteWorkingDir = null;
-		boolean stripSrcFolders = false;
-
-		try {
-			remoteWorkingDir = launch.getLaunchConfiguration().getAttribute(
-					LAUNCH_CONFIGURATION_ATTR_REMOTE_WORKING_DIR, "");
-		} catch (CoreException e) {
-			DLTKDebugPlugin.log(e);
-		}
-
-		try {
-			stripSrcFolders = launch.getLaunchConfiguration().getAttribute(
-					LAUNCH_CONFIGURATION_ATTR_STRIP_SRC_FOLDERS, false);
-		} catch (CoreException e) {
-			DLTKDebugPlugin.log(e);
-		}
-
-		return new ScriptBreakpointPathMapper(getScriptProject(),
-				remoteWorkingDir, stripSrcFolders);
+	protected IScriptBreakpointPathMapper createPathMapper() {
+		return new NopScriptbreakpointPathMapper();
 	}
 
 	public void allThreadsTerminated() {

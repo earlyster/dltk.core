@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.core.model;
 
+import java.io.File;
 import java.net.URI;
 import java.util.HashMap;
 
@@ -55,13 +56,21 @@ public class ScriptBreakpointPathMapper implements IScriptBreakpointPathMapper {
 		String projectPath = scriptProject.getProject().getLocation()
 				.toOSString();
 
-		path = path.substring(projectPath.length() + 1);
+		String outgoing = path;
 
-		if (stripSrcFolders) {
-			path = stripSourceFolders(path);
+		// only map paths that start w/ the project path
+		if (path.startsWith(projectPath)) {
+			path = path.substring(projectPath.length() + 1);
+
+			if (stripSrcFolders) {
+				path = stripSourceFolders(path);
+			}
+			/*
+			 * use the platform file separator b/c that's what's returned from
+			 * toOSString in the project path
+			 */
+			outgoing = mapTo + File.separator + path;
 		}
-
-		String outgoing = mapTo + "/" + path;
 
 		URI outgoingUri = ScriptLineBreakpoint.makeUri(new Path(outgoing));
 		cache.put(uri, outgoingUri);
@@ -82,6 +91,7 @@ public class ScriptBreakpointPathMapper implements IScriptBreakpointPathMapper {
 
 				String name = frag.getElementName();
 				if (path.startsWith(name)) {
+					// strip the path separator after the name
 					path = path.substring(name.length() + 1);
 					continue;
 				}
