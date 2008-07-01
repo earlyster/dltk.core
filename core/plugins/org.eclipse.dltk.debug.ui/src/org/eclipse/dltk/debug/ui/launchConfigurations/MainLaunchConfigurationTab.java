@@ -10,6 +10,7 @@
 package org.eclipse.dltk.debug.ui.launchConfigurations;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -285,16 +286,28 @@ public abstract class MainLaunchConfigurationTab extends
 			setErrorMessage(DLTKLaunchConfigurationsMessages.error_notAValidProject);
 			return null;
 		}
-		URI script = URI.create(location.toString() + "/" + getScriptName()); //$NON-NLS-1$
-		IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
-				.findFilesForLocationURI(script);
-		if (files.length != 1) {
-			return script;
-		}
 
-		IFile file = files[0];
-		if (file.exists() && file.getLocationURI() != null) {
-			script = file.getLocationURI();
+		URI script = null;
+		try {
+			script = new URI(location.getScheme(), location.getHost(), location
+					.getPath()
+					+ "/" + getScriptName(), location.getFragment());
+		} catch (URISyntaxException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		if (script != null) {
+			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+					.findFilesForLocationURI(script);
+			if (files.length != 1) {
+				return script;
+			}
+
+			IFile file = files[0];
+			if (file.exists() && file.getLocationURI() != null) {
+				script = file.getLocationURI();
+			}
 		}
 		return script;
 	}
