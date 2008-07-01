@@ -548,7 +548,14 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		 * @see org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel#updateMarkers(org.eclipse.jface.text.IDocument)
 		 */
 		public void updateMarkers(IDocument document) throws CoreException {
-			catchupWithMarkers();
+			/*
+			 * TODO Review the code - fix or remove.
+			 * 
+			 * This is commented out because it prevents automatically move
+			 * markers to follow changes to the edited document.
+			 * 
+			 * catchupWithMarkers();
+			 */
 			super.updateMarkers(document);
 		}
 
