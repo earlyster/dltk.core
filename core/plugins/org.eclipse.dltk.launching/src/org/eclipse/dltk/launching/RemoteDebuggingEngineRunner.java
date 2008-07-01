@@ -5,11 +5,20 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.dltk.core.PreferencesLookupDelegate;
+import org.eclipse.dltk.debug.core.IDbgpService;
+import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
+import org.eclipse.dltk.internal.debug.core.model.RemoteScriptDebugTarget;
 
 public abstract class RemoteDebuggingEngineRunner extends DebuggingEngineRunner {
 
 	public RemoteDebuggingEngineRunner(IInterpreterInstall install) {
 		super(install);
+	}
+
+	protected IScriptDebugTarget createDebugTarget(ILaunch launch,
+			IDbgpService dbgpService) throws CoreException {
+		return new RemoteScriptDebugTarget(getDebugModelId(), dbgpService,
+				getSessionId(launch.getLaunchConfiguration()), launch, null);
 	}
 
 	/*
