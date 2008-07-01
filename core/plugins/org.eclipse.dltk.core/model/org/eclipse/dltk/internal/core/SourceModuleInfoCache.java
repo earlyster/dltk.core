@@ -171,4 +171,8 @@ public class SourceModuleInfoCache implements ISourceModuleInfoCache {
 	}
 
 	private static final boolean DEBUG = false;
+
+	public void clear() {
+		this.cache.flush();
+	}
 }
