@@ -9,6 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.core.model;
 
+import java.text.MessageFormat;
+import java.util.Arrays;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -30,9 +33,6 @@ import org.eclipse.dltk.debug.core.model.IScriptType;
 import org.eclipse.dltk.debug.core.model.IScriptTypeFactory;
 import org.eclipse.dltk.debug.core.model.IScriptValue;
 import org.eclipse.dltk.internal.debug.core.eval.ScriptEvaluationCommand;
-
-import java.text.MessageFormat;
-import java.util.Arrays;
 
 public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		IIndexedValue {
@@ -80,8 +80,8 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		this.value = null;
 		this.hasChildren = property.hasChildren();
 		this.variables = new ScriptVariable[property.getChildrenCount()];
-		
-		this.pageSize = property.getPageSize();		
+
+		this.pageSize = property.getPageSize();
 		fillVariables(property.getPage(), property);
 	}
 
@@ -102,14 +102,15 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		}
 		Arrays.sort(this.variables, offset, offset + properties.length,
 				ScriptDebugManager.getInstance()
-        			.getVariableNameComparatorByDebugModel(getDebugTarget().getModelIdentifier()));
+						.getVariableNameComparatorByDebugModel(
+								getDebugTarget().getModelIdentifier()));
 		Assert.isLegal(pageSize > 0 || properties.length == variables.length);
 	}
 
 	private int getPageOffset(int page) {
 		if (pageSize <= 0)
 			pageSize = frame.getScriptThread().getPropertyPageSize();
-		
+
 		if (pageSize <= 0)
 			return 0;
 		return page * pageSize;
@@ -128,8 +129,7 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		if (value == null || value.length() == 0) {
 			if (type.isString()) {
 				value = prepareString(rawValue);
-			}
-			else if (!type.isAtomic()) {
+			} else if (!type.isAtomic()) {
 				StringBuffer sb = new StringBuffer();
 				if ("Array".equals(type.getName())) { //$NON-NLS-1$
 					try {
@@ -137,14 +137,12 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 							sb.append(getVariable(0).getReferenceTypeName());
 						else
 							sb.append("Object"); //$NON-NLS-1$
-					}
-					catch (DebugException e) {
+					} catch (DebugException e) {
 						sb.append("Object"); //$NON-NLS-1$
 					}
 					try {
 						sb.append("[" + getVariables().length + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					catch (DebugException e) {
+					} catch (DebugException e) {
 						sb.append("[]"); //$NON-NLS-1$
 					}
 				} else
@@ -154,8 +152,7 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 					sb.append(" (id = " + id + ")"); // TODO add constant //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				value = sb.toString();
-			}
-			else {
+			} else {
 				value = rawValue;
 			}
 		}
@@ -165,7 +162,7 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 	public String getRawValue() {
 		return rawValue;
 	}
-	
+
 	private String prepareString(String string) {
 		if (string == null) {
 			return null;
@@ -177,12 +174,12 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		for (int i = 0; i < string.length(); i++) {
 			char c = string.charAt(i);
 			switch (c) {
-				case '"':
-					escaped.append("\\\""); //$NON-NLS-1$
-					break;					
-				default:
-					escaped.append(c);
-					break;
+			case '"':
+				escaped.append("\\\""); //$NON-NLS-1$
+				break;
+			default:
+				escaped.append(c);
+				break;
 			}
 		}
 		if ((!string.startsWith("'") || !string.endsWith("'")) //$NON-NLS-1$ //$NON-NLS-2$
@@ -229,9 +226,14 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 			String snippet = replacePattern(messageTemplate, pattern, evalName);
 			return new ScriptEvaluationCommand(engine, snippet, frame);
 		} else {
-			DLTKDebugPlugin.log(new Status(IStatus.WARNING,
-					DLTKDebugPlugin.PLUGIN_ID,
-					MessageFormat.format(Messages.ScriptValue_detailFormatterRequiredToContainIdentifier, new Object[] { pattern })));
+			DLTKDebugPlugin
+					.log(new Status(
+							IStatus.WARNING,
+							DLTKDebugPlugin.PLUGIN_ID,
+							MessageFormat
+									.format(
+											Messages.ScriptValue_detailFormatterRequiredToContainIdentifier,
+											new Object[] { pattern })));
 			return new ScriptEvaluationCommand(engine, evalName, frame);
 		}
 	}
@@ -262,7 +264,9 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 			}
 			return variables[offset];
 		} catch (DbgpException e) {
-			throw wrapDbgpException(MessageFormat.format(Messages.ScriptValue_unableToLoadChildrenOf, new Object[] { name }), e);
+			throw wrapDbgpException(MessageFormat.format(
+					Messages.ScriptValue_unableToLoadChildrenOf,
+					new Object[] { name }), e);
 		}
 	}
 
