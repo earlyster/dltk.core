@@ -13,7 +13,6 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.dltk.dbgp.IDbgpProperty;
-import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.dbgp.commands.IDbgpCoreCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.model.IRefreshableScriptVariable;
@@ -23,25 +22,21 @@ import org.eclipse.dltk.debug.core.model.IScriptVariable;
 
 public class ScriptVariable extends ScriptDebugElement implements
 		IScriptVariable, IRefreshableScriptVariable {
-	private final IDebugTarget target;
-	private final IDbgpSession session;
 	private final IScriptStackFrame frame;
 	private final String name;
 	private IDbgpProperty property;
 	private IValue value;
 	private boolean isValueChanged = false;
 
-	public ScriptVariable(IScriptStackFrame frame, IDbgpProperty property,
-			String name) {
-		this.target = frame.getDebugTarget();
-		this.session = ((IScriptThread) frame.getThread()).getDbgpSession();
+	public ScriptVariable(IScriptStackFrame frame, String name,
+			IDbgpProperty property) {
+		this.frame = frame;
 		this.name = name;
 		this.property = property;
-		this.frame = frame;
 	}
 
 	public IDebugTarget getDebugTarget() {
-		return target;
+		return frame.getDebugTarget();
 	}
 
 	public synchronized IValue getValue() throws DebugException {
@@ -69,7 +64,7 @@ public class ScriptVariable extends ScriptDebugElement implements
 					(!expression.startsWith("'") || !expression.endsWith("'")) && //$NON-NLS-1$ //$NON-NLS-2$
 					(!expression.startsWith("\"") || !expression.endsWith("\""))) //$NON-NLS-1$ //$NON-NLS-2$
 				expression = "\"" + expression.replaceAll("\\\"", "\\\\\"") + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			if (session.getCoreCommands().setProperty(property.getEvalName(),
+			if (getCoreCommands().setProperty(property.getEvalName(),
 					frame.getLevel(), expression)) {
 				clearEvaluationManagerCache();
 				update();
@@ -81,6 +76,11 @@ public class ScriptVariable extends ScriptDebugElement implements
 		}
 	}
 
+	private IDbgpCoreCommands getCoreCommands() {
+		return ((IScriptThread) frame.getThread()).getDbgpSession()
+				.getCoreCommands();
+	}
+
 	private void clearEvaluationManagerCache() {
 		ScriptThread thread = (ScriptThread) frame.getThread();
 		thread.notifyModified();
@@ -90,12 +90,11 @@ public class ScriptVariable extends ScriptDebugElement implements
 	private void update() throws DbgpException {
 		this.value = null;
 
-		IDbgpCoreCommands core = session.getCoreCommands();
 		// String key = property.getKey();
 		String name = property.getEvalName();
 
 		// TODO: Use key if provided
-		this.property = core.getProperty(name, frame.getLevel());
+		this.property = getCoreCommands().getProperty(name, frame.getLevel());
 
 		DebugEventHelper.fireChangeEvent(this);
 	}

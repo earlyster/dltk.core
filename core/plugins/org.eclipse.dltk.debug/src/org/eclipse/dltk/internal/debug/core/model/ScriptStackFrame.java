@@ -72,7 +72,7 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 				if (duplicates.contains(name)) {
 					name = property.getEvalName();
 				}
-				variables[i] = new ScriptVariable(parentFrame, property, name);
+				variables[i] = new ScriptVariable(parentFrame, name, property);
 			}
 
 			return variables;
