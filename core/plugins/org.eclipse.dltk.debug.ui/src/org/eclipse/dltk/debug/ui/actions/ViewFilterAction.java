@@ -74,13 +74,14 @@ public abstract class ViewFilterAction extends ViewerFilter implements
 				break;
 			}
 		}
-		if (filter == null) {
+		boolean checked = action.isChecked();
+		if (filter == null && !checked) {
 			viewer.addFilter(this);
 			viewer.refresh(false);
 
 			viewer.setInput(viewer.getInput());
 
-		} else {
+		} else if (checked && filter != null) {
 			// only refresh is removing - adding will refresh automatically
 			viewer.removeFilter(this);
 			viewer.refresh(false);
@@ -88,7 +89,7 @@ public abstract class ViewFilterAction extends ViewerFilter implements
 		}
 		IPreferenceStore store = getPreferenceStore();
 		String key = getView().getSite().getId() + "." + getPreferenceKey(); //$NON-NLS-1$
-		store.setValue(key, action.isChecked());
+		store.setValue(key, checked);
 	}
 
 	public void selectionChanged(IAction action, ISelection selection) {
