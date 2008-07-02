@@ -15,10 +15,23 @@ public class StringScriptType extends AtomicScriptType {
 		if (string == null) {
 			return null;
 		}
-		StringBuffer escaped = new StringBuffer();
-		if ((!string.startsWith("'") || !string.endsWith("'")) //$NON-NLS-1$ //$NON-NLS-2$
-				&& (!string.startsWith("\"") || !string.endsWith("\""))) //$NON-NLS-1$ //$NON-NLS-2$
+		return escapeString(string);
+	}
+
+	private static String escapeString(String string) {
+		final boolean alreadyQuoted = isQuoted(string);
+		final boolean escapeNeed = isEscapeNeeded(string, alreadyQuoted);
+		if (!escapeNeed) {
+			if (alreadyQuoted) {
+				return string;
+			} else {
+				return '"' + string + '"';
+			}
+		}
+		final StringBuffer escaped = new StringBuffer(string.length() + 8);
+		if (!alreadyQuoted) {
 			escaped.append('"');
+		}
 		for (int i = 0; i < string.length(); i++) {
 			char c = string.charAt(i);
 			switch (c) {
@@ -30,9 +43,35 @@ public class StringScriptType extends AtomicScriptType {
 				break;
 			}
 		}
-		if ((!string.startsWith("'") || !string.endsWith("'")) //$NON-NLS-1$ //$NON-NLS-2$
-				&& (!string.startsWith("\"") || !string.endsWith("\""))) //$NON-NLS-1$ //$NON-NLS-2$
+		if (!alreadyQuoted) {
 			escaped.append('"');
+		}
 		return escaped.toString();
+	}
+
+	private static boolean isQuoted(String string) {
+		if (string.length() >= 2) {
+			final char firstChar = string.charAt(0);
+			final char lastChar = string.charAt(string.length() - 1);
+			if (firstChar == '\'' && lastChar == '\'' || firstChar == '"'
+					&& lastChar == '"') {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean isEscapeNeeded(String string, boolean isQuoted) {
+		int i = 0, len = string.length();
+		if (isQuoted) {
+			++i;
+			--len;
+		}
+		for (; i < len; ++i) {
+			if (string.charAt(i) == '"') {
+				return true;
+			}
+		}
+		return false;
 	}
 }
