@@ -1,8 +1,12 @@
 package org.eclipse.dltk.debug.core.model;
 
 import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.model.IVariable;
 
 public class CollectionScriptType implements IScriptType {
+
+	private static final int MAX_STRING_VALUE = 512;
+
 	private String name;
 
 	protected CollectionScriptType(String name) {
@@ -34,21 +38,30 @@ public class CollectionScriptType implements IScriptType {
 	}
 
 	public String formatValue(IScriptValue value) {
-		StringBuffer sb = new StringBuffer();
+		final StringBuffer sb = new StringBuffer(MAX_STRING_VALUE);
+		sb.append(value.getRawValue()); // == Array
 
 		try {
-			if (value.getVariables().length > 0)
-				sb.append(value.getVariable(0).getReferenceTypeName());
-			else
-				sb.append(getName());
-		} catch (DebugException e) {
-			sb.append(getName());
-		}
+			IVariable[] variables2 = value.getVariables();
+			sb.append("[");
+			sb.append(variables2.length);
+			sb.append("]");
+			if (variables2.length > 0) {
+				sb.append("{"); // == Array
+				for (int i = 0; i < variables2.length; i++) {
+					sb.append(variables2[i].getValue().getValueString());
+					sb.append(",");
 
-		try {
-			sb.append("[" + value.getVariables().length + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (DebugException e) {
-			sb.append("[]"); //$NON-NLS-1$
+					if (sb.length() >= MAX_STRING_VALUE) {
+						sb.append("....");
+						break;
+					}
+				}
+				sb.setLength(sb.length() - 1);
+				sb.append("}"); // == Array
+			}
+		} catch (DebugException ex) {
+			ex.printStackTrace();
 		}
 
 		addInstanceId(value, sb);
