@@ -11,10 +11,10 @@ package org.eclipse.dltk.internal.debug.core.model;
 
 import java.net.URI;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +33,7 @@ import org.eclipse.dltk.dbgp.exceptions.DbgpDebuggingEngineException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.ScriptDebugManager;
+import org.eclipse.dltk.debug.core.model.IRefreshableScriptVariable;
 import org.eclipse.dltk.debug.core.model.IScriptStack;
 import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
@@ -43,13 +44,12 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 
 	private static final String STACK_FRAME_LABEL = Messages.ScriptStackFrame_stackFrame;
 
-	private IScriptStack stack;
-
-	private IScriptThread thread;
-
+	private final IScriptThread thread;
 	private final IDbgpStackLevel level;
+	private final IScriptStack stack;
 
-	private IScriptVariable[] variables;
+	private ScriptVariableContainer variables = null;
+	private boolean needRefreshVariables = false;
 
 	protected static IScriptVariable[] readVariables(
 			ScriptStackFrame parentFrame, int contextId,
@@ -61,31 +61,19 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 
 			IScriptVariable[] variables = new IScriptVariable[properties.length];
 
-			// Workaround for bug 215215 https://bugs.eclipse.org/bugs/show_bug.cgi?id=215215
+			// Workaround for bug 215215
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=215215
 			// Remove this code when Tcl active state debugger fixed
-			Set useFullName = new HashSet();
-			Set alreadyExsisting = new HashSet();
-			for (int i = 0; i < properties.length; ++i) {
-				IDbgpProperty property = properties[i];
-				String name = property.getName();
-				if (alreadyExsisting.contains(name)) {
-					useFullName.add(name);
-				} else {
-					alreadyExsisting.add(name);
-				}
-			}
+			Set duplicates = findDuplicateNames(properties);
 
 			for (int i = 0; i < properties.length; ++i) {
 				IDbgpProperty property = properties[i];
 				String name = property.getName();
-				if (useFullName.contains(name)) {
+				if (duplicates.contains(name)) {
 					name = property.getEvalName();
 				}
 				variables[i] = new ScriptVariable(parentFrame, property, name);
 			}
-
-			Arrays.sort(variables, ScriptDebugManager.getInstance()
-	        		.getVariableNameComparatorByDebugModel(parentFrame.getModelIdentifier()));
 
 			return variables;
 		} catch (DbgpDebuggingEngineException e) {
@@ -96,60 +84,154 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 		}
 	}
 
-	protected IScriptVariable[] readAllVariables() throws DbgpException {
-		IDbgpContextCommands commands = thread.getDbgpSession()
+	private static Set findDuplicateNames(IDbgpProperty[] properties) {
+		final Set duplicates = new HashSet();
+		final Set alreadyExsisting = new HashSet();
+		for (int i = 0; i < properties.length; ++i) {
+			final IDbgpProperty property = properties[i];
+			final String name = property.getName();
+			if (!alreadyExsisting.add(name)) {
+				duplicates.add(name);
+			}
+		}
+		return duplicates;
+	}
+
+	protected ScriptVariableContainer readAllVariables() throws DbgpException {
+		final IDbgpContextCommands commands = thread.getDbgpSession()
 				.getCoreCommands();
-
-		Map names = commands.getContextNames(getLevel());
-
-		final Integer localId = new Integer(
-				IDbgpContextCommands.LOCAL_CONTEXT_ID);
-		final Integer globalId = new Integer(
-				IDbgpContextCommands.GLOBAL_CONTEXT_ID);
-		final Integer classId = new Integer(
-				IDbgpContextCommands.CLASS_CONTEXT_ID);
-
-		boolean showGlobal = thread.retrieveGlobalVariables();
-		boolean showClass = thread.retrieveClassVariables();
-		boolean showLocal = thread.retrieveLocalVariables();
-		
-		ScriptVariableContainer all = new ScriptVariableContainer();
-
-		if (showLocal && names.containsKey(localId)) {
-			all.add(readVariables(this, localId.intValue(), commands));
+		final Map names = commands.getContextNames(getLevel());
+		final ScriptVariableContainer result = new ScriptVariableContainer();
+		if (thread.retrieveLocalVariables()
+				&& names.containsKey(new Integer(
+						IDbgpContextCommands.LOCAL_CONTEXT_ID))) {
+			result.locals = readVariables(this,
+					IDbgpContextCommands.LOCAL_CONTEXT_ID, commands);
 		}
-
-		if (showGlobal && names.containsKey(globalId)) {
-			all.add(new ScriptVariableWrapper(getDebugTarget(),
-					Messages.ScriptStackFrame_globalVariables, readVariables(this,
-							globalId.intValue(), commands)));
+		if (thread.retrieveGlobalVariables()
+				&& names.containsKey(new Integer(
+						IDbgpContextCommands.GLOBAL_CONTEXT_ID))) {
+			result.globals = readVariables(this,
+					IDbgpContextCommands.GLOBAL_CONTEXT_ID, commands);
 		}
-
-		if (showClass && names.containsKey(classId)) {
-			all.add(new ScriptVariableWrapper(getDebugTarget(),
-					Messages.ScriptStackFrame_classVariables, readVariables(this, classId.intValue(),
-							commands)));
+		if (thread.retrieveClassVariables()
+				&& names.containsKey(new Integer(
+						IDbgpContextCommands.CLASS_CONTEXT_ID))) {
+			result.classes = readVariables(this,
+					IDbgpContextCommands.CLASS_CONTEXT_ID, commands);
 		}
-
-		return all.get();
+		return result;
 	}
 
 	private static class ScriptVariableContainer {
-		private final List list = new ArrayList();
+		IScriptVariable[] locals = null;
+		IScriptVariable[] globals = null;
+		IScriptVariable[] classes = null;
+		ScriptVariableWrapper globalsWrapper = null;
+		ScriptVariableWrapper classesWrapper = null;
 
-		public void add(IScriptVariable variable) {
-			list.add(variable);
-		}
-
-		public void add(IScriptVariable[] variables) {
-			for (int i = 0; i < variables.length; ++i) {
-				list.add(variables[i]);
+		ScriptVariableContainer sort(IDebugTarget target) {
+			final Comparator variableComparator = ScriptDebugManager
+					.getInstance().getVariableNameComparatorByDebugModel(
+							target.getModelIdentifier());
+			if (locals != null) {
+				Arrays.sort(locals, variableComparator);
 			}
+			if (globals != null) {
+				Arrays.sort(globals, variableComparator);
+			}
+			if (classes != null) {
+				Arrays.sort(classes, variableComparator);
+			}
+			return this;
 		}
 
-		public IScriptVariable[] get() {
-			return (IScriptVariable[]) list.toArray(new IScriptVariable[list
-					.size()]);
+		private int size() {
+			int size = 0;
+			if (locals != null) {
+				size += locals.length;
+			}
+			if (globals != null) {
+				++size;
+			}
+			if (classes != null) {
+				++size;
+			}
+			return size;
+		}
+
+		IScriptVariable[] toArray(IDebugTarget target) {
+			final int size = size();
+			final IScriptVariable[] result = new IScriptVariable[size];
+			if (size != 0) {
+				int index = 0;
+				if (locals != null) {
+					System.arraycopy(locals, index, result, 0, locals.length);
+					index += locals.length;
+				}
+				if (globals != null) {
+					if (globalsWrapper == null) {
+						globalsWrapper = new ScriptVariableWrapper(target,
+								Messages.ScriptStackFrame_globalVariables,
+								globals);
+					} else {
+						globalsWrapper.refreshValue(globals);
+					}
+					result[index++] = globalsWrapper;
+				}
+				if (classes != null) {
+					if (classesWrapper == null) {
+						classesWrapper = new ScriptVariableWrapper(target,
+								Messages.ScriptStackFrame_classVariables,
+								classes);
+					} else {
+						classesWrapper.refreshValue(classes);
+					}
+					result[index++] = classesWrapper;
+				}
+			}
+			return result;
+		}
+
+		/**
+		 * @return
+		 */
+		public boolean hasVariables() {
+			return locals != null && locals.length != 0 || classes != null
+					|| globals != null;
+		}
+
+		/**
+		 * @param varName
+		 * @return
+		 * @throws DebugException
+		 */
+		public IScriptVariable findVariable(String varName)
+				throws DebugException {
+			if (locals != null) {
+				final IScriptVariable variable = findVariable(varName, locals);
+				if (variable != null) {
+					return variable;
+				}
+			}
+			if (globals != null) {
+				final IScriptVariable variable = findVariable(varName, globals);
+				if (variable != null) {
+					return variable;
+				}
+			}
+			return null;
+		}
+
+		private static IScriptVariable findVariable(String varName,
+				IScriptVariable[] vars) throws DebugException {
+			for (int i = 0; i < vars.length; i++) {
+				final IScriptVariable var = vars[i];
+				if (var.getName().equals(varName)) {
+					return var;
+				}
+			}
+			return null;
 		}
 	}
 
@@ -157,7 +239,6 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 		this.stack = stack;
 		this.thread = stack.getThread();
 		this.level = stackLevel;
-		updateVariables();
 	}
 
 	public void updateVariables() {
@@ -210,26 +291,75 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 
 	public boolean hasVariables() throws DebugException {
 		checkVariablesAvailable();
-		return variables.length > 0;
+		return variables.hasVariables();
 	}
 
 	private synchronized void checkVariablesAvailable() throws DebugException {
-		if (variables == null) {
-			try {
+		try {
+			if (variables == null) {
 				variables = readAllVariables();
-			} catch (DbgpException e) {
-				variables = new IScriptVariable[0];
-				Status status = new Status(IStatus.ERROR,
-						DLTKDebugPlugin.PLUGIN_ID, Messages.ScriptStackFrame_unableToLoadVariables,
-						e);
-				throw new DebugException(status);
+				variables.sort(getDebugTarget());
+			} else if (needRefreshVariables) {
+				try {
+					refreshVariables();
+				} finally {
+					needRefreshVariables = false;
+				}
+			}
+		} catch (DbgpException e) {
+			variables = new ScriptVariableContainer();
+			final Status status = new Status(IStatus.ERROR,
+					DLTKDebugPlugin.PLUGIN_ID,
+					Messages.ScriptStackFrame_unableToLoadVariables, e);
+			DLTKDebugPlugin.log(status);
+			throw new DebugException(status);
+		}
+	}
+
+	/**
+	 * @throws DebugException
+	 * @throws DbgpException
+	 */
+	private void refreshVariables() throws DebugException, DbgpException {
+		final ScriptVariableContainer newVars = readAllVariables();
+		newVars.sort(getDebugTarget());
+		variables.locals = refreshVariables(newVars.locals, variables.locals);
+		variables.globals = refreshVariables(newVars.globals, variables.globals);
+		variables.classes = refreshVariables(newVars.classes, variables.classes);
+	}
+
+	/**
+	 * @param newVars
+	 * @param oldVars
+	 * @return
+	 * @throws DebugException
+	 */
+	private static IScriptVariable[] refreshVariables(
+			IScriptVariable[] newVars, IScriptVariable[] oldVars)
+			throws DebugException {
+		if (oldVars != null) {
+			final Map map = new HashMap();
+			for (int i = 0; i < oldVars.length; ++i) {
+				final IScriptVariable variable = oldVars[i];
+				if (variable instanceof IRefreshableScriptVariable) {
+					map.put(variable.getName(), variable);
+				}
+			}
+			for (int i = 0; i < newVars.length; ++i) {
+				final IScriptVariable variable = newVars[i];
+				final IRefreshableScriptVariable old;
+				old = (IRefreshableScriptVariable) map.get(variable.getName());
+				if (old != null) {
+					newVars[i] = old.refreshVariable(variable);
+				}
 			}
 		}
+		return newVars;
 	}
 
 	public IVariable[] getVariables() throws DebugException {
 		checkVariablesAvailable();
-		return (IVariable[]) variables.clone();
+		return variables.toArray(getDebugTarget());
 	}
 
 	// IStep
@@ -302,12 +432,7 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 
 	public IScriptVariable findVariable(String varName) throws DebugException {
 		checkVariablesAvailable();
-		for (int i = 0; i < variables.length; i++) {
-			if (variables[i].getName().equals(varName)) {
-				return variables[i];
-			}
-		}
-		return null;
+		return variables.findVariable(varName);
 	}
 
 	public int getLevel() {
@@ -316,9 +441,9 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 
 	public boolean equals(Object obj) {
 		if (obj instanceof ScriptStackFrame) {
-			return level.equals(((ScriptStackFrame) obj).level);
+			final ScriptStackFrame other = (ScriptStackFrame) obj;
+			return level.equals(other.level);
 		}
-
 		return false;
 	}
 
@@ -341,5 +466,18 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 
 	public IScriptThread getScriptThread() {
 		return (IScriptThread) getThread();
+	}
+
+	/**
+	 * @param frame
+	 * @param depth
+	 * @return
+	 */
+	public ScriptStackFrame bind(IDbgpStackLevel newLevel) {
+		if (level.equals(newLevel)) {
+			needRefreshVariables = true;
+			return this;
+		}
+		return new ScriptStackFrame(stack, newLevel);
 	}
 }

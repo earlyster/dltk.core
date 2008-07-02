@@ -16,19 +16,20 @@ import org.eclipse.dltk.dbgp.IDbgpProperty;
 import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.dbgp.commands.IDbgpCoreCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
+import org.eclipse.dltk.debug.core.model.IRefreshableScriptVariable;
 import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptVariable;
 
 public class ScriptVariable extends ScriptDebugElement implements
-		IScriptVariable {
+		IScriptVariable, IRefreshableScriptVariable {
 	private final IDebugTarget target;
 	private final IDbgpSession session;
 	private final IScriptStackFrame frame;
 	private final String name;
 	private IDbgpProperty property;
-
 	private IValue value;
+	private boolean isValueChanged = false;
 
 	public ScriptVariable(IScriptStackFrame frame, IDbgpProperty property,
 			String name) {
@@ -59,7 +60,7 @@ public class ScriptVariable extends ScriptDebugElement implements
 	}
 
 	public boolean hasValueChanged() throws DebugException {
-		return false;
+		return isValueChanged;
 	}
 
 	public synchronized void setValue(String expression) throws DebugException {
@@ -126,5 +127,23 @@ public class ScriptVariable extends ScriptDebugElement implements
 
 	public String getId() {
 		return property.getKey();
+	}
+
+	/**
+	 * @param newVariable
+	 * @return
+	 * @throws DebugException
+	 */
+	public IScriptVariable refreshVariable(IScriptVariable newVariable)
+			throws DebugException {
+		if (newVariable instanceof ScriptVariable) {
+			final ScriptVariable v = (ScriptVariable) newVariable;
+			isValueChanged = !v.getValue().equals(getValue());
+			value = v.value;
+			property = v.property;
+			return this;
+		} else {
+			return newVariable;
+		}
 	}
 }
