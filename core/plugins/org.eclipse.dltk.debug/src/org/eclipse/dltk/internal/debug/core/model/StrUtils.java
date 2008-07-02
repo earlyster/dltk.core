@@ -17,6 +17,10 @@ class StrUtils {
 		return s1 == null ? s2 == null : s1.equals(s2);
 	}
 
+	public static boolean isEmpty(String str) {
+		return str == null || str.length() == 0;
+	}
+
 	public static boolean isBlank(String str) {
 		if (str == null) {
 			return true;
