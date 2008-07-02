@@ -22,6 +22,8 @@ public class DbgpStreamManager extends DbgpWorkingThread implements
 	private final IDbgpDebugingEngine engine;
 
 	protected void fireStderrReceived(String data) {
+		if (data == null || data.length() == 0)
+			return;
 		Object[] list = listeners.getListeners();
 		for (int i = 0; i < list.length; ++i) {
 			((IDbgpContinuationHandler) list[i]).stderrReceived(data);
@@ -29,6 +31,8 @@ public class DbgpStreamManager extends DbgpWorkingThread implements
 	}
 
 	protected void fireStdoutReceived(String data) {
+		if (data == null || data.length() == 0)
+			return;
 		Object[] list = listeners.getListeners();
 		for (int i = 0; i < list.length; ++i) {
 			((IDbgpContinuationHandler) list[i]).stdoutReceived(data);
