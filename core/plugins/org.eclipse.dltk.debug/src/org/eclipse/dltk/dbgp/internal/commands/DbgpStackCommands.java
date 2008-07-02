@@ -9,8 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.commands;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.eclipse.dltk.dbgp.IDbgpStackLevel;
 import org.eclipse.dltk.dbgp.commands.IDbgpStatckCommands;
@@ -38,17 +38,25 @@ public class DbgpStackCommands extends DbgpBaseCommands implements
 
 	protected IDbgpStackLevel[] parseStackLevels(Element response)
 			throws DbgpException {
-		List list = new ArrayList();
-
 		NodeList nodes = response.getElementsByTagName(TAG_STACK);
+		IDbgpStackLevel[] list = new IDbgpStackLevel[nodes.getLength()];
 		for (int i = 0; i < nodes.getLength(); ++i) {
-			list.add(DbgpXmlEntityParser.parseStackLevel((Element) nodes
-					.item(i)));
+			final Element level = (Element) nodes.item(i);
+			list[i] = DbgpXmlEntityParser.parseStackLevel(level);
+		}
+		Arrays.sort(list, STACK_LEVEL_COMPARATOR);
+		return list;
+	}
+
+	private static final Comparator STACK_LEVEL_COMPARATOR = new Comparator() {
+
+		public int compare(Object o1, Object o2) {
+			final IDbgpStackLevel level1 = (IDbgpStackLevel) o1;
+			final IDbgpStackLevel level2 = (IDbgpStackLevel) o2;
+			return level1.getLevel() - level2.getLevel();
 		}
 
-		return (IDbgpStackLevel[]) list
-				.toArray(new IDbgpStackLevel[list.size()]);
-	}
+	};
 
 	public DbgpStackCommands(IDbgpCommunicator communicator) {
 		super(communicator);
