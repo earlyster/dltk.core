@@ -1,6 +1,5 @@
 package org.eclipse.dltk.debug.core.model;
 
-
 public class AtomicScriptType implements IScriptType {
 	private String name;
 
@@ -22,5 +21,9 @@ public class AtomicScriptType implements IScriptType {
 
 	public boolean isString() {
 		return false;
+	}
+
+	public String formatValue(IScriptValue value) {
+		return value.getRawValue();
 	}
 }

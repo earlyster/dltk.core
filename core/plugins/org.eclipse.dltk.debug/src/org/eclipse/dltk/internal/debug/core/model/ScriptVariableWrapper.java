@@ -28,7 +28,7 @@ public class ScriptVariableWrapper extends ScriptDebugElement implements
 	}
 
 	public IScriptVariable[] getChildren() throws DebugException {
-		if(children == null ) {
+		if (children == null) {
 			return new IScriptVariable[0];
 		}
 		return (IScriptVariable[]) children.clone();
@@ -108,7 +108,7 @@ public class ScriptVariableWrapper extends ScriptDebugElement implements
 			}
 
 			public String getRawValue() {
-			  return ""; //$NON-NLS-1$
+				return ""; //$NON-NLS-1$
 			}
 
 			public String getValueString() throws DebugException {
@@ -160,7 +160,11 @@ public class ScriptVariableWrapper extends ScriptDebugElement implements
 			public IScriptType getType() {
 				return ScriptVariableWrapper.this.getType();
 			}
-			
+
+			public IVariable getVariable(int offset) {
+				return null;
+			}
+
 		};
 	}
 

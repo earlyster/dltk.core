@@ -9,15 +9,22 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.core.model;
 
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IValue;
+import org.eclipse.debug.core.model.IVariable;
 import org.eclipse.dltk.debug.core.eval.IScriptEvaluationCommand;
 
 public interface IScriptValue extends IValue {
 	String getInstanceId();
+
 	IScriptType getType();
+
 	String getEvalName();
+
 	String getRawValue();
-	
+
+	IVariable getVariable(int offset) throws DebugException;
+
 	IScriptEvaluationCommand createEvaluationCommand(String messageTemplate,
 			IScriptThread thread);
 }

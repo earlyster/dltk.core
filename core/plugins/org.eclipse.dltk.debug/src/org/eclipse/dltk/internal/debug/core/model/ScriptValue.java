@@ -127,65 +127,13 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 
 	public String getValueString() {
 		if (value == null || value.length() == 0) {
-			if (type.isString()) {
-				value = prepareString(rawValue);
-			} else if (!type.isAtomic()) {
-				StringBuffer sb = new StringBuffer();
-				if ("Array".equals(type.getName())) { //$NON-NLS-1$
-					try {
-						if (getVariables().length > 0)
-							sb.append(getVariable(0).getReferenceTypeName());
-						else
-							sb.append("Object"); //$NON-NLS-1$
-					} catch (DebugException e) {
-						sb.append("Object"); //$NON-NLS-1$
-					}
-					try {
-						sb.append("[" + getVariables().length + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-					} catch (DebugException e) {
-						sb.append("[]"); //$NON-NLS-1$
-					}
-				} else
-					sb.append(type.getName());
-				String id = getInstanceId();
-				if (id != null) {
-					sb.append(" (id = " + id + ")"); // TODO add constant //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				value = sb.toString();
-			} else {
-				value = rawValue;
-			}
+			value = type.formatValue(this);
 		}
 		return value;
 	}
 
 	public String getRawValue() {
 		return rawValue;
-	}
-
-	private String prepareString(String string) {
-		if (string == null) {
-			return null;
-		}
-		StringBuffer escaped = new StringBuffer();
-		if ((!string.startsWith("'") || !string.endsWith("'")) //$NON-NLS-1$ //$NON-NLS-2$
-				&& (!string.startsWith("\"") || !string.endsWith("\""))) //$NON-NLS-1$ //$NON-NLS-2$
-			escaped.append('"');
-		for (int i = 0; i < string.length(); i++) {
-			char c = string.charAt(i);
-			switch (c) {
-			case '"':
-				escaped.append("\\\""); //$NON-NLS-1$
-				break;
-			default:
-				escaped.append(c);
-				break;
-			}
-		}
-		if ((!string.startsWith("'") || !string.endsWith("'")) //$NON-NLS-1$ //$NON-NLS-2$
-				&& (!string.startsWith("\"") || !string.endsWith("\""))) //$NON-NLS-1$ //$NON-NLS-2$
-			escaped.append('"');
-		return escaped.toString();
 	}
 
 	public String getEvalName() {
