@@ -355,7 +355,7 @@ public abstract class ScriptSourceViewerConfiguration extends
 		return null;
 	}
 
-	protected abstract ContentAssistPreference getContentAssistPreference();
+	public abstract ContentAssistPreference getContentAssistPreference();
 
 	protected void alterContentAssistant(ContentAssistant assistant) {
 		// empty implementation
