@@ -186,7 +186,10 @@ public class DbgpBreakpointCommands extends DbgpBaseCommands implements
 		DbgpRequest request = createRequest(BREAKPOINT_UPDATE_COMMAND);
 		request.addOption("-d", id); //$NON-NLS-1$
 		request.addOption("-s", config.getStateString()); //$NON-NLS-1$
-		request.addOption("-n", config.getLineNo()); //$NON-NLS-1$
+
+		if (config.getLineNo() > 0) {
+			request.addOption("-n", config.getLineNo()); //$NON-NLS-1$
+		}
 
 		if (config.getHitValue() != -1) {
 			request.addOption("-h", config.getHitValue()); //$NON-NLS-1$
