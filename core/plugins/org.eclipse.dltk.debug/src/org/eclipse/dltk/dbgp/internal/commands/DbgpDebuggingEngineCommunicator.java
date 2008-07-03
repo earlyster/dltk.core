@@ -22,7 +22,7 @@ import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlParser;
 import org.w3c.dom.Element;
 
 public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
-	private static final int TIMEOUT = 500000;
+	private static final int TIMEOUT = 60 * 60 * 1000;
 
 	private final IDbgpDebugingEngine engine;
 
