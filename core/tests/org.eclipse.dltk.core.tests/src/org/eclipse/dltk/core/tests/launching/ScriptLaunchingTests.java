@@ -582,7 +582,7 @@ public abstract class ScriptLaunchingTests extends AbstractModelTests {
 			return stats;
 		}
 
-		assertTrue("Requied interpreter are't found " + name, false);
+		fail("Requied interpreter \"" + name + "\" is not found");
 		return null;
 	}
 
