@@ -19,10 +19,12 @@ import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.dbgp.internal.IDbgpDebugingEngine;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpResponsePacket;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlParser;
+import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
+import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
 import org.w3c.dom.Element;
 
 public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
-	private static final int TIMEOUT = 60 * 60 * 1000;
+	private int TIMEOUT;
 
 	private final IDbgpDebugingEngine engine;
 
@@ -41,6 +43,10 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 		}
 
 		this.engine = engine;
+
+
+		TIMEOUT = DLTKDebugPlugin.getDefault().getPluginPreferences().getInt(
+				DLTKDebugPreferenceConstants.PREF_DBGP_RESPONSE_TIMEOUT);
 	}
 
 	public Element communicate(DbgpRequest request) throws DbgpException {
