@@ -150,7 +150,7 @@ public abstract class ContentAssistPreference {
 	 * Changes the configuration of the given content assistant according to the given property
 	 * change event and the given preference store.
 	 */
-	void changeConfiguration(ContentAssistant assistant, IPreferenceStore store, PropertyChangeEvent event) {
+	public void changeConfiguration(ContentAssistant assistant, IPreferenceStore store, PropertyChangeEvent event) {
 
 		String p= event.getProperty();
 
