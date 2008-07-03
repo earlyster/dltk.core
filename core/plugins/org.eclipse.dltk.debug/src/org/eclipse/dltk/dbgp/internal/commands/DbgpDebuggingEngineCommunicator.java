@@ -24,7 +24,7 @@ import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
 import org.w3c.dom.Element;
 
 public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
-	private int TIMEOUT;
+	private final int timeout;
 
 	private final IDbgpDebugingEngine engine;
 
@@ -34,7 +34,7 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 
 	private DbgpResponsePacket receiveResponse(int transactionId)
 			throws IOException, InterruptedException {
-		return engine.getResponsePacket(transactionId, TIMEOUT);
+		return engine.getResponsePacket(transactionId, timeout);
 	}
 
 	public DbgpDebuggingEngineCommunicator(IDbgpDebugingEngine engine) {
@@ -44,8 +44,7 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 
 		this.engine = engine;
 
-
-		TIMEOUT = DLTKDebugPlugin.getDefault().getPluginPreferences().getInt(
+		timeout = DLTKDebugPlugin.getDefault().getPluginPreferences().getInt(
 				DLTKDebugPreferenceConstants.PREF_DBGP_RESPONSE_TIMEOUT);
 	}
 
