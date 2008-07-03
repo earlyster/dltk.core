@@ -91,6 +91,7 @@ import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension;
@@ -2236,8 +2237,14 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				return;
 			}
 
-			((ScriptSourceViewerConfiguration) getSourceViewerConfiguration())
-					.handlePropertyChangeEvent(event);
+			final ScriptSourceViewerConfiguration ssvc = (ScriptSourceViewerConfiguration) getSourceViewerConfiguration();
+			final IContentAssistant c = ((AdaptedSourceViewer) sourceViewer)
+					.getContentAssistant();
+			if (c instanceof ContentAssistant) {
+				ssvc.getContentAssistPreference().changeConfiguration(
+						(ContentAssistant) c, getPreferenceStore(), event);
+			}
+			ssvc.handlePropertyChangeEvent(event);
 		} finally {
 			super.handlePreferenceStoreChanged(event);
 		}
