@@ -39,18 +39,19 @@ public class DbgpPacketReceiver extends DbgpWorkingThread {
 		public synchronized DbgpResponsePacket waitPacket(int id, int timeout)
 				throws InterruptedException {
 			Integer key = new Integer(id);
+			long endTime = 0;
+			if (timeout > 0) {
+				endTime = System.currentTimeMillis() + timeout;
+			}
 			while (!terminated && !map.containsKey(key)) {
-				if (timeout != 0 && timeout < MIN_TIMEOUT) {
+				long current = System.currentTimeMillis();
+				if (endTime != 0 && current >= endTime) {
 					break;
 				}
-				long begin = System.currentTimeMillis();
-
-				wait(timeout);
-
-				long delta = System.currentTimeMillis() - begin;
-				if (timeout != 0) {
-					timeout -= delta;
-				}
+				if (endTime == 0)
+					wait();
+				else
+					wait(endTime - current);
 			}
 
 			if (map.containsKey(key)) {
