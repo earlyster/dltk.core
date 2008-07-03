@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.text.hover.IScriptEditorTextHover;
@@ -31,16 +32,14 @@ import org.eclipse.ui.IEditorPart;
 public class BestMatchHover extends AbstractScriptEditorTextHover implements
 		ITextHoverExtension, IInformationProviderExtension2 {
 
-	private List fTextHoverSpecifications;
+	private List fTextHoverSpecifications = null;
 	private List fInstantiatedTextHovers;
 	private ITextHover fBestHover;
 
 	public BestMatchHover() {
-		installTextHovers();
 	}
 
 	public BestMatchHover(IEditorPart editor, IPreferenceStore store) {
-		this();
 		setEditor(editor);
 		setPreferenceStore(store);
 	}
@@ -56,7 +55,8 @@ public class BestMatchHover extends AbstractScriptEditorTextHover implements
 
 		// populate list
 		EditorTextHoverDescriptor[] hoverDescs = DLTKUIPlugin.getDefault()
-				.getEditorTextHoverDescriptors(getPreferenceStore());
+				.getEditorTextHoverDescriptors(getPreferenceStore(),
+						getNatureId());
 		for (int i = 0; i < hoverDescs.length; i++) {
 			// ensure that we don't add ourselves to the list
 			if (!PreferenceConstants.ID_BESTMATCH_HOVER.equals(hoverDescs[i]
@@ -65,8 +65,19 @@ public class BestMatchHover extends AbstractScriptEditorTextHover implements
 		}
 	}
 
+	private String getNatureId() {
+		final IEditorPart editor = getEditor();
+		if (editor == null || !(editor instanceof ScriptEditor)) {
+			return null;
+		}
+		return ((ScriptEditor) editor).getLanguageToolkit().getNatureId();
+	}
+
 	private void checkTextHovers() {
-		if (fTextHoverSpecifications.size() == 0)
+		if (fTextHoverSpecifications == null) {
+			installTextHovers();
+		}
+		if (fTextHoverSpecifications.isEmpty())
 			return;
 
 		for (Iterator iterator = new ArrayList(fTextHoverSpecifications)

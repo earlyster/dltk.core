@@ -266,7 +266,8 @@ public class PreferenceConstants {
 	 * should be shown.
 	 * 
 	 * @see JavaUI
-	 * 
+	 * @deprecated there is global preference now 
+	 * @see AbstractDecoratedTextEditorPreferenceConstants#EDITOR_SHOW_TEXT_HOVER_AFFORDANCE
 	 */
 	public static final String EDITOR_SHOW_TEXT_HOVER_AFFORDANCE = "PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE"; //$NON-NLS-1$
 

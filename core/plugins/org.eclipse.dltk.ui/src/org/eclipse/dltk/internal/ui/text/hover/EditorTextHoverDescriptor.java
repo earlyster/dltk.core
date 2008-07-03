@@ -39,6 +39,7 @@ public class EditorTextHoverDescriptor {
 	private static final String LABEL_ATTRIBUTE = "label"; //$NON-NLS-1$
 	private static final String ACTIVATE_PLUG_IN_ATTRIBUTE = "activate"; //$NON-NLS-1$
 	private static final String DESCRIPTION_ATTRIBUTE = "description"; //$NON-NLS-1$
+	private static final String NATURE_ATTRIBUTE = "nature"; //$NON-NLS-1$
 	public static final String NO_MODIFIER = "0"; //$NON-NLS-1$
 	public static final String DISABLED_TAG = "!"; //$NON-NLS-1$
 	public static final String VALUE_SEPARATOR = ";"; //$NON-NLS-1$
@@ -49,13 +50,26 @@ public class EditorTextHoverDescriptor {
 
 	/**
 	 * Returns all editor text hovers contributed to the workbench.
+	 * 
+	 * @deprecated
 	 */
 	public static EditorTextHoverDescriptor[] getContributedHovers(
 			IPreferenceStore store) {
+		return getContributedHovers(null, store);
+	}
+
+	/**
+	 * Returns all editor text hovers contributed to the workbench for the
+	 * specified nature.
+	 */
+	public static EditorTextHoverDescriptor[] getContributedHovers(
+			String natureId, IPreferenceStore store) {
+		System.out.println("getContributedHovers(" + natureId + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
 		IConfigurationElement[] elements = registry
 				.getConfigurationElementsFor(EDITOR_TEXT_HOVER_EXTENSION_POINT);
-		EditorTextHoverDescriptor[] hoverDescs = createDescriptors(elements);
+		EditorTextHoverDescriptor[] hoverDescs = createDescriptors(elements,
+				natureId);
 		initializeFromPreferences(hoverDescs, store);
 		return hoverDescs;
 	}
@@ -158,6 +172,10 @@ public class EditorTextHoverDescriptor {
 		return fElement.getAttribute(DESCRIPTION_ATTRIBUTE);
 	}
 
+	public String getNature() {
+		return fElement.getAttribute(NATURE_ATTRIBUTE);
+	}
+
 	public boolean canActivatePlugIn() {
 		return Boolean.valueOf(
 				fElement.getAttribute(ACTIVATE_PLUG_IN_ATTRIBUTE))
@@ -176,14 +194,18 @@ public class EditorTextHoverDescriptor {
 	}
 
 	private static EditorTextHoverDescriptor[] createDescriptors(
-			IConfigurationElement[] elements) {
+			IConfigurationElement[] elements, String natureId) {
 		List result = new ArrayList(elements.length);
 		for (int i = 0; i < elements.length; i++) {
 			IConfigurationElement element = elements[i];
 			if (HOVER_TAG.equals(element.getName())) {
-				EditorTextHoverDescriptor desc = new EditorTextHoverDescriptor(
-						element);
-				result.add(desc);
+				final String elementNature = element
+						.getAttribute(NATURE_ATTRIBUTE);
+				if (elementNature == null || elementNature.equals(natureId)) {
+					EditorTextHoverDescriptor desc = new EditorTextHoverDescriptor(
+							element);
+					result.add(desc);
+				}
 			}
 		}
 		return (EditorTextHoverDescriptor[]) result

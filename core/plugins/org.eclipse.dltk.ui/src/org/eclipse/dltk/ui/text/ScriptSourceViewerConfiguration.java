@@ -11,6 +11,7 @@ package org.eclipse.dltk.ui.text;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.dltk.internal.ui.editor.ModelElementHyperlinkDetector;
+import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.dltk.internal.ui.text.ScriptCompositeReconcilingStrategy;
@@ -226,8 +227,12 @@ public abstract class ScriptSourceViewerConfiguration extends
 	 */
 	public int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer,
 			String contentType) {
+		final String natureId = getNatureId();
+		if (natureId == null) {
+			return null;
+		}
 		EditorTextHoverDescriptor[] hoverDescs = DLTKUIPlugin.getDefault()
-				.getEditorTextHoverDescriptors(fPreferenceStore);
+				.getEditorTextHoverDescriptors(fPreferenceStore, natureId);
 		int stateMasks[] = new int[hoverDescs.length];
 		int stateMasksLength = 0;
 		for (int i = 0; i < hoverDescs.length; i++) {
@@ -257,11 +262,12 @@ public abstract class ScriptSourceViewerConfiguration extends
 	 */
 	public ITextHover getTextHover(ISourceViewer sourceViewer,
 			String contentType, int stateMask) {
-		if (getEditor() == null) {
+		final String natureId = getNatureId();
+		if (natureId == null) {
 			return null;
 		}
 		EditorTextHoverDescriptor[] hoverDescs = DLTKUIPlugin.getDefault()
-				.getEditorTextHoverDescriptors(fPreferenceStore);
+				.getEditorTextHoverDescriptors(fPreferenceStore, natureId);
 		int i = 0;
 		while (i < hoverDescs.length) {
 			if (hoverDescs[i].isEnabled()
@@ -272,6 +278,14 @@ public abstract class ScriptSourceViewerConfiguration extends
 		}
 
 		return null;
+	}
+
+	private String getNatureId() {
+		final ITextEditor editor = getEditor();
+		if (editor == null || !(editor instanceof ScriptEditor)) {
+			return null;
+		}
+		return ((ScriptEditor) editor).getLanguageToolkit().getNatureId();
 	}
 
 	public ITextHover getTextHover(ISourceViewer sourceViewer,
