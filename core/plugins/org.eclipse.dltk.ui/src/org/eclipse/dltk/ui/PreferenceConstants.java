@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ui;
 
 import org.eclipse.dltk.ui.text.completion.ProposalSorterRegistry;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.swt.SWT;
@@ -40,7 +41,7 @@ public class PreferenceConstants {
 	 * Preference key suffix for underline text style preference keys.
 	 */
 	public static final String EDITOR_UNDERLINE_SUFFIX = "_underline"; //$NON-NLS-1$
-	
+
 	/**
 	 * Preference key suffix that controls if semantic highlighting is enabled.
 	 * 
@@ -142,8 +143,8 @@ public class PreferenceConstants {
 	 * A named preference that holds the number of spaces used per tab in the
 	 * editor.
 	 * <p>
-	 * Value is of type <code>Integer</code>: positive integer value
-	 * specifying the number of spaces per tab.
+	 * Value is of type <code>Integer</code>: positive integer value specifying
+	 * the number of spaces per tab.
 	 * </p>
 	 * 
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants#EDITOR_TAB_WIDTH
@@ -175,9 +176,9 @@ public class PreferenceConstants {
 	 * A named preference that controls whether new projects are generated using
 	 * source and output folder.
 	 * <p>
-	 * Value is of type <code>Boolean</code>. if <code>true</code> new
-	 * projects are created with a source and output folder. If
-	 * <code>false</code> source and output folder equals to the project.
+	 * Value is of type <code>Boolean</code>. if <code>true</code> new projects
+	 * are created with a source and output folder. If <code>false</code> source
+	 * and output folder equals to the project.
 	 * </p>
 	 */
 	public static final String SRCBIN_FOLDERS_IN_NEWPROJ = "com.xore.dltk.ui.wizards.srcBinFoldersInNewProjects"; //$NON-NLS-1$
@@ -266,7 +267,8 @@ public class PreferenceConstants {
 	 * should be shown.
 	 * 
 	 * @see JavaUI
-	 * 
+	 * @deprecated there is global preference now
+	 * @see AbstractDecoratedTextEditorPreferenceConstants#EDITOR_SHOW_TEXT_HOVER_AFFORDANCE
 	 */
 	public static final String EDITOR_SHOW_TEXT_HOVER_AFFORDANCE = "PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE"; //$NON-NLS-1$
 
@@ -281,8 +283,8 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that defines the key for the hover modifier state
 	 * masks. The value is only used if the value of
-	 * <code>EDITOR_TEXT_HOVER_MODIFIERS</code> cannot be resolved to valid
-	 * SWT modifier bits.
+	 * <code>EDITOR_TEXT_HOVER_MODIFIERS</code> cannot be resolved to valid SWT
+	 * modifier bits.
 	 * 
 	 * @see JavaUI
 	 * @see #EDITOR_TEXT_HOVER_MODIFIERS
@@ -359,12 +361,17 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_SORTER,
 				"org.eclipse.dltk.ui.RelevanceSorter"); //$NON-NLS-1$
 
-		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS,
-				"org.eclipse.dltk.ui.BestMatchHover;0"); //$NON-NLS-1$
-		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS,
-				"org.eclipse.dltk.ui.BestMatchHover;0"); //$NON-NLS-1$
-		store.setDefault(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE,
-				true);
+		final int sourceHoverModifier = SWT.MOD2;
+		final String sourceHoverModifierName = Action
+				.findModifierString(sourceHoverModifier); // Shift
+		store
+				.setDefault(
+						PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS,
+						"org.eclipse.dltk.ui.BestMatchHover;0;org.eclipse.dltk.ui.ScriptSourceHover;" + sourceHoverModifierName); //$NON-NLS-1$
+		store
+				.setDefault(
+						PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS,
+						"org.eclipse.dltk.ui.BestMatchHover;0;org.eclipse.dltk.ui.ScriptSourceHover;" + sourceHoverModifier); //$NON-NLS-1$
 
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
 		store.setDefault(PreferenceConstants.EDITOR_TAB_ALWAYS_INDENT, false);

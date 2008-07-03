@@ -10,6 +10,8 @@
 package org.eclipse.dltk.ui;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.filesystem.URIUtil;
 import org.eclipse.core.resources.IFile;
@@ -254,7 +256,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * relative path.
 	 * 
 	 * @param path
-	 * 		the path
+	 *            the path
 	 * @return the image descriptor
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
@@ -302,9 +304,9 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * Returns the model element wrapped by the given editor input.
 	 * 
 	 * @param editorInput
-	 * 		the editor input
+	 *            the editor input
 	 * @return the model element wrapped by <code>editorInput</code> or
-	 * 	<code>null</code> if none
+	 *         <code>null</code> if none
 	 */
 	public static IModelElement getEditorInputModelElement(
 			IEditorInput editorInput) {
@@ -376,7 +378,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * Creates the DLTK plug-in's standard groups for view context menus.
 	 * 
 	 * @param menu
-	 * 		the menu manager to be populated
+	 *            the menu manager to be populated
 	 */
 	public static void createStandardGroups(IMenuManager menu) {
 		if (!menu.isEmpty()) {
@@ -429,7 +431,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		return fContentAssistHistory;
 	}
 
-	private EditorTextHoverDescriptor[] fEditorTextHoverDescriptors;
+	private final Map editorTextHoverDescriptorsByNature = new HashMap();
 
 	/**
 	 * Resets editor text hovers contributed to the workbench.
@@ -438,40 +440,96 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * for them.
 	 * </p>
 	 * 
-	 * 
+	 * @deprecated
 	 */
 	public void resetEditorTextHoverDescriptors() {
-		fEditorTextHoverDescriptors = null;
+		synchronized (editorTextHoverDescriptorsByNature) {
+			editorTextHoverDescriptorsByNature.clear();
+		}
 	}
 
 	/**
-	 * Returns all editor text hovers contributed to the workbench.
+	 * Resets editor text hovers contributed to the workbench.
+	 * <p>
+	 * This will force a rebuild of the descriptors the next time a client asks
+	 * for them.
+	 * </p>
+	 */
+	public void resetEditorTextHoverDescriptors(String natureId) {
+		synchronized (editorTextHoverDescriptorsByNature) {
+			editorTextHoverDescriptorsByNature.remove(natureId);
+		}
+	}
+
+	/**
+	 * Returns all editor text hovers contributed to the workbench without
+	 * specified nature.
 	 * 
 	 * @param store
-	 * 		preference store to initialize settings from
-	 * @return an array of EditorTextHoverDescriptor *
+	 * @return
+	 * @deprecated
 	 */
 	public EditorTextHoverDescriptor[] getEditorTextHoverDescriptors(
 			IPreferenceStore store) {
-		if (fEditorTextHoverDescriptors == null) {
-			fEditorTextHoverDescriptors = EditorTextHoverDescriptor
-					.getContributedHovers(store);
-			ConfigurationElementSorter sorter = new ConfigurationElementSorter() {
-				/*
-				 * @seeorg.eclipse.ui.texteditor.ConfigurationElementSorter#
-				 * getConfigurationElement(java.lang.Object)
-				 */
-				public IConfigurationElement getConfigurationElement(
-						Object object) {
-					return ((EditorTextHoverDescriptor) object)
-							.getConfigurationElement();
-				}
-			};
-			sorter.sort(fEditorTextHoverDescriptors);
+		return initializeEditorTextHoverDescriprtors(store, null);
+	}
 
+	/**
+	 * Returns all editor text hovers contributed to the workbench for the
+	 * specified nature.
+	 * 
+	 * @param store
+	 *            preference store to initialize settings from
+	 * @param natureId
+	 *            the nature to filter text hovers
+	 * @return an array of EditorTextHoverDescriptor
+	 */
+	public EditorTextHoverDescriptor[] getEditorTextHoverDescriptors(
+			IPreferenceStore store, String natureId) {
+		EditorTextHoverDescriptor[] descriptors;
+		synchronized (editorTextHoverDescriptorsByNature) {
+			descriptors = (EditorTextHoverDescriptor[]) editorTextHoverDescriptorsByNature
+					.get(natureId);
 		}
+		if (descriptors == null) {
+			descriptors = initializeEditorTextHoverDescriprtors(store, natureId);
+			if (descriptors != null && natureId != null) {
+				synchronized (editorTextHoverDescriptorsByNature) {
+					editorTextHoverDescriptorsByNature.put(natureId,
+							descriptors);
+				}
+			}
+		}
+		return descriptors;
+	}
 
-		return fEditorTextHoverDescriptors;
+	private EditorTextHoverDescriptor[] initializeEditorTextHoverDescriprtors(
+			IPreferenceStore store, String natureId) {
+		EditorTextHoverDescriptor[] descriptors = EditorTextHoverDescriptor
+				.getContributedHovers(natureId, store);
+		ConfigurationElementSorter sorter = new ConfigurationElementSorter() {
+			/*
+			 * @see org.eclipse.ui.texteditor.ConfigurationElementSorter#
+			 * getConfigurationElement(java.lang.Object)
+			 */
+			public IConfigurationElement getConfigurationElement(Object object) {
+				return ((EditorTextHoverDescriptor) object)
+						.getConfigurationElement();
+			}
+		};
+		sorter.sort(descriptors);
+		// Move Best Match hover to front
+		for (int i = 0; i < descriptors.length - 1; i++) {
+			if (PreferenceConstants.ID_BESTMATCH_HOVER.equals(descriptors[i]
+					.getId())) {
+				final EditorTextHoverDescriptor hoverDescriptor = descriptors[i];
+				for (int j = i; j > 0; j--)
+					descriptors[j] = descriptors[j - 1];
+				descriptors[0] = hoverDescriptor;
+				break;
+			}
+		}
+		return descriptors;
 	}
 
 	/**
@@ -482,18 +540,18 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * open Java editor for the given element, it is returned.
 	 * 
 	 * @param element
-	 * 		the input element; either a compilation unit (
-	 * 		<code>ICompilationUnit</code>) or a class file (<code>IClassFile</code>)
-	 * 		or source references inside.
+	 *            the input element; either a compilation unit (
+	 *            <code>ICompilationUnit</code>) or a class file (
+	 *            <code>IClassFile</code>) or source references inside.
 	 * @return returns the editor part of the opened editor or <code>null</code>
-	 * 	if the element is not a {@link ISourceReference} or the file was opened
-	 * 	in an external editor.
+	 *         if the element is not a {@link ISourceReference} or the file was
+	 *         opened in an external editor.
 	 * @exception PartInitException
-	 * 		if the editor could not be initialized or no workbench page is
-	 * 		active
+	 *                if the editor could not be initialized or no workbench
+	 *                page is active
 	 * @exception JavaModelException
-	 * 		if this element does not exist or if an exception occurs while
-	 * 		accessing its underlying resource
+	 *                if this element does not exist or if an exception occurs
+	 *                while accessing its underlying resource
 	 */
 	public static IEditorPart openInEditor(IModelElement element)
 			throws ModelException, PartInitException {
@@ -508,22 +566,22 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * given element, it is returned.
 	 * 
 	 * @param element
-	 * 		the input element; either a compilation unit (
-	 * 		<code>ICompilationUnit</code>) or a class file (<code>IClassFile</code>)
-	 * 		or source references inside.
+	 *            the input element; either a compilation unit (
+	 *            <code>ICompilationUnit</code>) or a class file (
+	 *            <code>IClassFile</code>) or source references inside.
 	 * @param activate
-	 * 		if set, the editor will be activated.
+	 *            if set, the editor will be activated.
 	 * @param reveal
-	 * 		if set, the element will be revealed.
+	 *            if set, the element will be revealed.
 	 * @return returns the editor part of the opened editor or <code>null</code>
-	 * 	if the element is not a {@link ISourceReference} or the file was opened
-	 * 	in an external editor.
+	 *         if the element is not a {@link ISourceReference} or the file was
+	 *         opened in an external editor.
 	 * @exception PartInitException
-	 * 		if the editor could not be initialized or no workbench page is
-	 * 		active
+	 *                if the editor could not be initialized or no workbench
+	 *                page is active
 	 * @exception JavaModelException
-	 * 		if this element does not exist or if an exception occurs while
-	 * 		accessing its underlying resource
+	 *                if this element does not exist or if an exception occurs
+	 *                while accessing its underlying resource
 	 * @since 3.3
 	 */
 	public static IEditorPart openInEditor(IModelElement element,

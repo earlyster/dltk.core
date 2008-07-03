@@ -11,6 +11,7 @@ package org.eclipse.dltk.ui.text;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.dltk.internal.ui.editor.ModelElementHyperlinkDetector;
+import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.dltk.internal.ui.text.ScriptCompositeReconcilingStrategy;
@@ -67,7 +68,7 @@ public abstract class ScriptSourceViewerConfiguration extends
 	}
 
 	protected void initializeScanners() {
-		
+
 	}
 
 	public String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer) {
@@ -101,17 +102,18 @@ public abstract class ScriptSourceViewerConfiguration extends
 		// return null;
 	}
 
-	public  boolean affectsTextPresentation(PropertyChangeEvent event) {
+	public boolean affectsTextPresentation(PropertyChangeEvent event) {
 		return false;
 	}
 
 	public void handlePropertyChangeEvent(PropertyChangeEvent event) {
-		
+
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getDefaultPrefixes(org.eclipse.jface.text.source.ISourceViewer,
-	 *      java.lang.String)
+	 * @see
+	 * org.eclipse.jface.text.source.SourceViewerConfiguration#getDefaultPrefixes
+	 * (org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
 	 */
 	public String[] getDefaultPrefixes(ISourceViewer sourceViewer,
 			String contentType) {
@@ -122,8 +124,8 @@ public abstract class ScriptSourceViewerConfiguration extends
 	 * Returns the comment prefix.
 	 * 
 	 * <p>
-	 * Default implementation returns a <code>#</code>, sub-classes may
-	 * override if their language uses a different prefix.
+	 * Default implementation returns a <code>#</code>, sub-classes may override
+	 * if their language uses a different prefix.
 	 * </p>
 	 */
 	protected String getCommentPrefix() {
@@ -207,24 +209,30 @@ public abstract class ScriptSourceViewerConfiguration extends
 				: 0;
 		IHyperlinkDetector[] detectors = new IHyperlinkDetector[inheritedDetectorsLength + 1];
 
-		//TODO(mhowe) I reverse these so I can get a shot at finding the hyperlink before DLTK does.
-		//DLTK shouldn't create an action if it does nothing.
-        for (int i = 0; i < inheritedDetectorsLength; i++)
-            detectors[i] = inheritedDetectors[i];
-        detectors[inheritedDetectorsLength] = new ModelElementHyperlinkDetector(fTextEditor);
+		// TODO(mhowe) I reverse these so I can get a shot at finding the
+		// hyperlink before DLTK does.
+		// DLTK shouldn't create an action if it does nothing.
+		for (int i = 0; i < inheritedDetectorsLength; i++)
+			detectors[i] = inheritedDetectors[i];
+		detectors[inheritedDetectorsLength] = new ModelElementHyperlinkDetector(
+				fTextEditor);
 
 		return detectors;
 	}
 
 	/*
-	 * @see SourceViewerConfiguration#getConfiguredTextHoverStateMasks(ISourceViewer,
-	 *      String)
-	 * 
+	 * @see
+	 * SourceViewerConfiguration#getConfiguredTextHoverStateMasks(ISourceViewer,
+	 * String)
 	 */
 	public int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer,
 			String contentType) {
+		final String natureId = getNatureId();
+		if (natureId == null) {
+			return null;
+		}
 		EditorTextHoverDescriptor[] hoverDescs = DLTKUIPlugin.getDefault()
-				.getEditorTextHoverDescriptors(fPreferenceStore);
+				.getEditorTextHoverDescriptors(fPreferenceStore, natureId);
 		int stateMasks[] = new int[hoverDescs.length];
 		int stateMasksLength = 0;
 		for (int i = 0; i < hoverDescs.length; i++) {
@@ -251,15 +259,15 @@ public abstract class ScriptSourceViewerConfiguration extends
 
 	/*
 	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String, int)
-	 * 
 	 */
 	public ITextHover getTextHover(ISourceViewer sourceViewer,
 			String contentType, int stateMask) {
-		if (getEditor() == null) {
+		final String natureId = getNatureId();
+		if (natureId == null) {
 			return null;
 		}
 		EditorTextHoverDescriptor[] hoverDescs = DLTKUIPlugin.getDefault()
-				.getEditorTextHoverDescriptors(fPreferenceStore);
+				.getEditorTextHoverDescriptors(fPreferenceStore, natureId);
 		int i = 0;
 		while (i < hoverDescs.length) {
 			if (hoverDescs[i].isEnabled()
@@ -270,6 +278,14 @@ public abstract class ScriptSourceViewerConfiguration extends
 		}
 
 		return null;
+	}
+
+	private String getNatureId() {
+		final ITextEditor editor = getEditor();
+		if (editor == null || !(editor instanceof ScriptEditor)) {
+			return null;
+		}
+		return ((ScriptEditor) editor).getLanguageToolkit().getNatureId();
 	}
 
 	public ITextHover getTextHover(ISourceViewer sourceViewer,
@@ -315,7 +331,7 @@ public abstract class ScriptSourceViewerConfiguration extends
 		presenter.setSizeConstraints(60, 10, true, true);
 		return presenter;
 	}
-	
+
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 		if (getEditor() != null) {
 			ContentAssistant assistant = new ContentAssistant();
@@ -328,24 +344,23 @@ public abstract class ScriptSourceViewerConfiguration extends
 					.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 			assistant
 					.setInformationControlCreator(getInformationControlCreator(sourceViewer));
-			
+
 			alterContentAssistant(assistant);
-			
+
 			getContentAssistPreference().configure(assistant, fPreferenceStore);
-			
-			
+
 			return assistant;
 		}
 
 		return null;
 	}
-	
+
 	protected abstract ContentAssistPreference getContentAssistPreference();
-	
+
 	protected void alterContentAssistant(ContentAssistant assistant) {
 		// empty implementation
 	}
-	
+
 	public String getFontPropertyPreferenceKey() {
 		return JFaceResources.TEXT_FONT;
 	}
