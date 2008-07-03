@@ -30,7 +30,8 @@ public class DLTKDebugPluginPreferenceInitializer extends
 				10000);
 
 		prefs.setDefault(
-				DLTKDebugPreferenceConstants.PREF_DBGP_RESPONSE_TIMEOUT, 10000);
+				DLTKDebugPreferenceConstants.PREF_DBGP_RESPONSE_TIMEOUT,
+				60 * 60 * 1000);
 
 		prefs.setDefault(
 				DLTKDebugPreferenceConstants.PREF_DBGP_SHOW_SCOPE_LOCAL, true);
