@@ -23,4 +23,6 @@ public interface IDbgpStackLevel {
 	URI getFileURI();
 
 	String getWhere();
+
+	boolean isSameMethod(IDbgpStackLevel other);
 }
