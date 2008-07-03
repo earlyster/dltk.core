@@ -25,11 +25,11 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 import org.eclipse.ui.IEditorPart;
 
-
 /**
  * Caution: this implementation is a layer breaker and contains some "shortcuts"
  */
-public class BestMatchHover extends AbstractScriptEditorTextHover implements ITextHoverExtension, IInformationProviderExtension2 {
+public class BestMatchHover extends AbstractScriptEditorTextHover implements
+		ITextHoverExtension, IInformationProviderExtension2 {
 
 	private List fTextHoverSpecifications;
 	private List fInstantiatedTextHovers;
@@ -51,14 +51,16 @@ public class BestMatchHover extends AbstractScriptEditorTextHover implements ITe
 	private void installTextHovers() {
 
 		// initialize lists - indicates that the initialization happened
-		fTextHoverSpecifications= new ArrayList(2);
-		fInstantiatedTextHovers= new ArrayList(2);
+		fTextHoverSpecifications = new ArrayList(2);
+		fInstantiatedTextHovers = new ArrayList(2);
 
 		// populate list
-		EditorTextHoverDescriptor[] hoverDescs= DLTKUIPlugin.getDefault().getEditorTextHoverDescriptors(getPreferenceStore());
-		for (int i= 0; i < hoverDescs.length; i++) {
+		EditorTextHoverDescriptor[] hoverDescs = DLTKUIPlugin.getDefault()
+				.getEditorTextHoverDescriptors(getPreferenceStore());
+		for (int i = 0; i < hoverDescs.length; i++) {
 			// ensure that we don't add ourselves to the list
-			if (!PreferenceConstants.ID_BESTMATCH_HOVER.equals(hoverDescs[i].getId()))
+			if (!PreferenceConstants.ID_BESTMATCH_HOVER.equals(hoverDescs[i]
+					.getId()))
 				fTextHoverSpecifications.add(hoverDescs[i]);
 		}
 	}
@@ -67,10 +69,12 @@ public class BestMatchHover extends AbstractScriptEditorTextHover implements ITe
 		if (fTextHoverSpecifications.size() == 0)
 			return;
 
-		for (Iterator iterator= new ArrayList(fTextHoverSpecifications).iterator(); iterator.hasNext(); ) {
-			EditorTextHoverDescriptor spec= (EditorTextHoverDescriptor) iterator.next();
+		for (Iterator iterator = new ArrayList(fTextHoverSpecifications)
+				.iterator(); iterator.hasNext();) {
+			EditorTextHoverDescriptor spec = (EditorTextHoverDescriptor) iterator
+					.next();
 
-			IScriptEditorTextHover hover= spec.createTextHover();
+			IScriptEditorTextHover hover = spec.createTextHover();
 			if (hover != null) {
 				hover.setEditor(getEditor());
 				hover.setPreferenceStore(getPreferenceStore());
@@ -91,17 +95,18 @@ public class BestMatchHover extends AbstractScriptEditorTextHover implements ITe
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 
 		checkTextHovers();
-		fBestHover= null;
+		fBestHover = null;
 
 		if (fInstantiatedTextHovers == null)
 			return null;
 
-		for (Iterator iterator= fInstantiatedTextHovers.iterator(); iterator.hasNext(); ) {
-			ITextHover hover= (ITextHover)iterator.next();
+		for (Iterator iterator = fInstantiatedTextHovers.iterator(); iterator
+				.hasNext();) {
+			ITextHover hover = (ITextHover) iterator.next();
 
-			String s= hover.getHoverInfo(textViewer, hoverRegion);
+			String s = hover.getHoverInfo(textViewer, hoverRegion);
 			if (s != null && s.trim().length() > 0) {
-				fBestHover= hover;
+				fBestHover = hover;
 				return s;
 			}
 		}
@@ -111,24 +116,24 @@ public class BestMatchHover extends AbstractScriptEditorTextHover implements ITe
 
 	/*
 	 * @see org.eclipse.jface.text.ITextHoverExtension#getHoverControlCreator()
-	 *
 	 */
 	public IInformationControlCreator getHoverControlCreator() {
 		if (fBestHover instanceof ITextHoverExtension)
-			return ((ITextHoverExtension)fBestHover).getHoverControlCreator();
+			return ((ITextHoverExtension) fBestHover).getHoverControlCreator();
 
 		return null;
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
-	 *
+	 * @seeorg.eclipse.jface.text.information.IInformationProviderExtension2#
+	 * getInformationPresenterControlCreator()
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (fBestHover instanceof IInformationProviderExtension2)
-			return ((IInformationProviderExtension2)fBestHover).getInformationPresenterControlCreator();
+			return ((IInformationProviderExtension2) fBestHover)
+					.getInformationPresenterControlCreator();
 
 		return null;
 	}
-	
+
 }
