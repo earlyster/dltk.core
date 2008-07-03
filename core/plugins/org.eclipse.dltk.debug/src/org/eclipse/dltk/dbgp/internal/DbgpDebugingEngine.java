@@ -98,17 +98,12 @@ public class DbgpDebugingEngine extends DbgpTermination implements
 
 	// IDbgpTerminataion
 	public void requestTermination() {
-		synchronized (terminatedLock) {
-			if (terminated) {
-				return;
-			}
-
-			try {
-				socket.close();
-			} catch (IOException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
-				}
+		// always just close the socket
+		try {
+			socket.close();
+		} catch (IOException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
 			}
 		}
 	}
