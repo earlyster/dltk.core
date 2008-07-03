@@ -338,16 +338,8 @@ public class ScriptEditorHoverConfigurationBlock implements
 
 			public void keyReleased(KeyEvent e) {
 				if (isModifierCandidate && e.stateMask > 0
-						&& e.stateMask == e.stateMask && e.character == 0) {// &&
-																			// e
-																			// .
-																			// time
-																			// -
-																			// time
-																			// <
-																			// 1000
-																			// )
-																			// {
+						&& e.stateMask == e.stateMask && e.character == 0) {
+					// && e.time - time < 1000)
 					String text = fModifierEditor.getText();
 					Point selection = fModifierEditor.getSelection();
 					int i = selection.x - 1;
