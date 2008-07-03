@@ -3,6 +3,7 @@ package org.eclipse.dltk.internal.debug.core.model;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IValue;
+import org.eclipse.debug.core.model.IVariable;
 import org.eclipse.dltk.debug.core.model.AtomicScriptType;
 import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptType;
@@ -14,18 +15,18 @@ public class ScriptVariableWrapper extends ScriptDebugElement implements
 
 	final IDebugTarget target;
 	private final String name;
-	private IScriptVariable[] children;
+	private IVariable[] children;
 
 	private IScriptValue value = null;
 
 	public ScriptVariableWrapper(IDebugTarget target, String name,
-			IScriptVariable[] children) {
+			IVariable[] children) {
 		this.target = target;
 		this.name = name;
 		this.children = children;
 	}
 
-	public IScriptVariable[] getChildren() throws DebugException {
+	public IVariable[] getChildren() throws DebugException {
 		if (children == null) {
 			return new IScriptVariable[0];
 		}
@@ -113,7 +114,7 @@ public class ScriptVariableWrapper extends ScriptDebugElement implements
 	/**
 	 * @param classes
 	 */
-	public void refreshValue(IScriptVariable[] newChildren) {
+	public void refreshValue(IVariable[] newChildren) {
 		this.children = newChildren;
 	}
 }

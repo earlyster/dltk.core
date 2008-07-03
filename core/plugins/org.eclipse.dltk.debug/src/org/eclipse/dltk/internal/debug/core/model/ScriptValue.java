@@ -238,13 +238,4 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		return super.getAdapter(adapter);
 	}
 
-	public boolean equals(Object obj) {
-		if (obj instanceof ScriptValue) {
-			final ScriptValue other = (ScriptValue) obj;
-			// TODO implement more correct comparison
-			return getValueString().equals(other.getValueString());
-		}
-		return false;
-	}
-
 }

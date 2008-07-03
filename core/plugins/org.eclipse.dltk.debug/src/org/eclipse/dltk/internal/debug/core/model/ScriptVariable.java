@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.debug.core.model;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IValue;
+import org.eclipse.debug.core.model.IVariable;
 import org.eclipse.dltk.dbgp.IDbgpProperty;
 import org.eclipse.dltk.dbgp.commands.IDbgpCoreCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
@@ -133,16 +134,36 @@ public class ScriptVariable extends ScriptDebugElement implements
 	 * @return
 	 * @throws DebugException
 	 */
-	public IScriptVariable refreshVariable(IScriptVariable newVariable)
+	public IVariable refreshVariable(IVariable newVariable)
 			throws DebugException {
 		if (newVariable instanceof ScriptVariable) {
 			final ScriptVariable v = (ScriptVariable) newVariable;
-			isValueChanged = !v.getValue().equals(getValue());
+			isValueChanged = !equals(property, v.property);
+			if (!isValueChanged) {
+				if (property.getChildrenCount() != 0
+						&& v.property.getChildrenCount() != 0) {
+					ScriptStackFrame.refreshVariables(v.getValue()
+							.getVariables(), getValue().getVariables());
+				}
+			}
 			value = v.value;
 			property = v.property;
 			return this;
 		} else {
 			return newVariable;
 		}
+	}
+
+	private static boolean equals(IDbgpProperty p1, IDbgpProperty p2) {
+		if (StrUtils.equals(p1.getType(), p2.getType())) {
+			if (!StrUtils.equals(p1.getValue(), p2.getValue())) {
+				return false;
+			}
+		}
+		if (StrUtils.isNotEmpty(p1.getKey())
+				&& StrUtils.isNotEmpty(p2.getKey())) {
+			return p1.getKey().equals(p2.getKey());
+		}
+		return true;
 	}
 }

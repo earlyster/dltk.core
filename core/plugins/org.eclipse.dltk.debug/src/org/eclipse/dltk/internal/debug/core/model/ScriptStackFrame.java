@@ -45,7 +45,7 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 	private static final String STACK_FRAME_LABEL = Messages.ScriptStackFrame_stackFrame;
 
 	private final IScriptThread thread;
-	private final IDbgpStackLevel level;
+	private IDbgpStackLevel level;
 	private final IScriptStack stack;
 
 	private ScriptVariableContainer variables = null;
@@ -124,9 +124,9 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 	}
 
 	private static class ScriptVariableContainer {
-		IScriptVariable[] locals = null;
-		IScriptVariable[] globals = null;
-		IScriptVariable[] classes = null;
+		IVariable[] locals = null;
+		IVariable[] globals = null;
+		IVariable[] classes = null;
 		ScriptVariableWrapper globalsWrapper = null;
 		ScriptVariableWrapper classesWrapper = null;
 
@@ -206,16 +206,15 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 		 * @return
 		 * @throws DebugException
 		 */
-		public IScriptVariable findVariable(String varName)
-				throws DebugException {
+		public IVariable findVariable(String varName) throws DebugException {
 			if (locals != null) {
-				final IScriptVariable variable = findVariable(varName, locals);
+				final IVariable variable = findVariable(varName, locals);
 				if (variable != null) {
 					return variable;
 				}
 			}
 			if (globals != null) {
-				final IScriptVariable variable = findVariable(varName, globals);
+				final IVariable variable = findVariable(varName, globals);
 				if (variable != null) {
 					return variable;
 				}
@@ -223,10 +222,10 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 			return null;
 		}
 
-		private static IScriptVariable findVariable(String varName,
-				IScriptVariable[] vars) throws DebugException {
+		private static IVariable findVariable(String varName, IVariable[] vars)
+				throws DebugException {
 			for (int i = 0; i < vars.length; i++) {
-				final IScriptVariable var = vars[i];
+				final IVariable var = vars[i];
 				if (var.getName().equals(varName)) {
 					return var;
 				}
@@ -334,19 +333,18 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 	 * @return
 	 * @throws DebugException
 	 */
-	private static IScriptVariable[] refreshVariables(
-			IScriptVariable[] newVars, IScriptVariable[] oldVars)
+	static IVariable[] refreshVariables(IVariable[] newVars, IVariable[] oldVars)
 			throws DebugException {
 		if (oldVars != null) {
 			final Map map = new HashMap();
 			for (int i = 0; i < oldVars.length; ++i) {
-				final IScriptVariable variable = oldVars[i];
+				final IVariable variable = oldVars[i];
 				if (variable instanceof IRefreshableScriptVariable) {
 					map.put(variable.getName(), variable);
 				}
 			}
 			for (int i = 0; i < newVars.length; ++i) {
-				final IScriptVariable variable = newVars[i];
+				final IVariable variable = newVars[i];
 				final IRefreshableScriptVariable old;
 				old = (IRefreshableScriptVariable) map.get(variable.getName());
 				if (old != null) {
@@ -432,23 +430,11 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 
 	public IScriptVariable findVariable(String varName) throws DebugException {
 		checkVariablesAvailable();
-		return variables.findVariable(varName);
+		return (IScriptVariable) variables.findVariable(varName);
 	}
 
 	public int getLevel() {
 		return level.getLevel();
-	}
-
-	public boolean equals(Object obj) {
-		if (obj instanceof ScriptStackFrame) {
-			final ScriptStackFrame other = (ScriptStackFrame) obj;
-			return level.equals(other.level);
-		}
-		return false;
-	}
-
-	public int hashCode() {
-		return level.hashCode();
 	}
 
 	public String toString() {
@@ -474,7 +460,8 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 	 * @return
 	 */
 	public ScriptStackFrame bind(IDbgpStackLevel newLevel) {
-		if (level.equals(newLevel)) {
+		if (level.isSameMethod(newLevel)) {
+			level = newLevel;
 			needRefreshVariables = true;
 			return this;
 		}

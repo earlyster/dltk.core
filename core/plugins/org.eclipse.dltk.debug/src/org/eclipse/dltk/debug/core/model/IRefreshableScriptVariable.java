@@ -12,6 +12,7 @@
 package org.eclipse.dltk.debug.core.model;
 
 import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.model.IVariable;
 
 /**
  * {@link IScriptVariable}s could implement this interface to support value
@@ -27,7 +28,6 @@ public interface IRefreshableScriptVariable {
 	 *         <code>newVariable</code> if it was not possible to refresh value.
 	 * @throws DebugException
 	 */
-	IScriptVariable refreshVariable(IScriptVariable newVariable)
-			throws DebugException;
+	IVariable refreshVariable(IVariable newVariable) throws DebugException;
 
 }
