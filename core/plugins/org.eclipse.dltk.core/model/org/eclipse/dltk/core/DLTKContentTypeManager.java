@@ -148,7 +148,8 @@ public class DLTKContentTypeManager {
 		}
 		// Not DLTK file and not file without extension, or not accessible or
 		// not in sync
-		if (lastSegment != null || !resource.isAccessible()
+		String extension = resource.getFullPath().getFileExtension();
+		if (extension != null || !resource.isAccessible()
 				|| !resource.isSynchronized(IResource.DEPTH_ZERO)) {
 			return false;
 		}

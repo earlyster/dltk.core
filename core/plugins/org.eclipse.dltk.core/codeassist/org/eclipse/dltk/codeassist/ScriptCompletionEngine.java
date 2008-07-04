@@ -558,6 +558,51 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		}
 	}
 
+	public void findFields(char[] token, boolean canCompleteEmptyToken,
+			List fields, int kind, List names) {
+		if (fields == null || fields.size() == 0)
+			return;
+
+		int length = token.length;
+		String tok = new String(token);
+		if (canCompleteEmptyToken || length > 0) {
+			for (int i = 0; i < fields.size(); i++) {
+				IField field = (IField) fields.get(i);
+				String qname = (String) names.get(i);
+				char[] name = qname.toCharArray();
+				if (DEBUG) {
+					System.out.println("Completion:" + qname); //$NON-NLS-1$
+				}
+				if (length <= name.length
+						&& CharOperation.prefixEquals(token, name, false)) {
+					int relevance = computeBaseRelevance();
+					relevance += computeRelevanceForInterestingProposal();
+					relevance += computeRelevanceForCaseMatching(token, name);
+					relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE); // no
+
+					// accept result
+					ScriptCompletionEngine.this.noProposal = false;
+					if (!ScriptCompletionEngine.this.requestor.isIgnored(kind)) {
+						CompletionProposal proposal = ScriptCompletionEngine.this
+								.createProposal(
+										kind,
+										ScriptCompletionEngine.this.actualCompletionPosition);
+						proposal.setModelElement(field);
+						proposal.setName(name);
+						proposal.setCompletion(qname.toCharArray());
+						proposal.setReplaceRange(this.startPosition
+								- this.offset, this.endPosition - this.offset);
+						proposal.setRelevance(relevance);
+						this.requestor.accept(proposal);
+						if (DEBUG) {
+							this.printDebug(proposal);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public void findTypes(char[] token, boolean canCompleteEmptyToken,
 			List types) {
 		if (types == null || types.size() == 0)
