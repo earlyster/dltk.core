@@ -64,7 +64,6 @@ public class EditorTextHoverDescriptor {
 	 */
 	public static EditorTextHoverDescriptor[] getContributedHovers(
 			String natureId, IPreferenceStore store) {
-		System.out.println("getContributedHovers(" + natureId + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
 		IConfigurationElement[] elements = registry
 				.getConfigurationElementsFor(EDITOR_TEXT_HOVER_EXTENSION_POINT);
