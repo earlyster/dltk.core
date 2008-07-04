@@ -365,8 +365,9 @@ public abstract class ScriptSourceViewerConfiguration extends
 		return JFaceResources.TEXT_FONT;
 	}
 
-	public void changeConfiguration(ContentAssistant c, IPreferenceStore store,
+	public void changeContentAssistantConfiguration(ContentAssistant c,
 			PropertyChangeEvent event) {
-		getContentAssistPreference().changeConfiguration(c, store, event);
+		getContentAssistPreference().changeConfiguration(c, fPreferenceStore,
+				event);
 	}
 }
