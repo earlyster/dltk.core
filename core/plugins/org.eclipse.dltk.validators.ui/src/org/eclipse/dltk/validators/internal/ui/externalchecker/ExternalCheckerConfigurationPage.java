@@ -1,12 +1,24 @@
 package org.eclipse.dltk.validators.internal.ui.externalchecker;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.dltk.ui.environment.EnvironmentPathBlock;
+import org.eclipse.dltk.ui.environment.IEnvironmentPathBlockListener;
 import org.eclipse.dltk.validators.internal.core.externalchecker.ExternalChecker;
 import org.eclipse.dltk.validators.internal.core.externalchecker.Rule;
+import org.eclipse.dltk.validators.internal.ui.ValidatorMessages;
+import org.eclipse.dltk.validators.internal.ui.ValidatorsUI;
 import org.eclipse.dltk.validators.ui.ValidatorConfigurationPage;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ComboBoxCellEditor;
@@ -41,6 +53,9 @@ public class ExternalCheckerConfigurationPage extends
 	private Button delRule;
 	private RulesList rulesList = new RulesList();
 
+	private String message = "";
+	private int messageType = IStatus.OK;
+
 	private final String TYPES = "TYPES"; //$NON-NLS-1$
 
 	public RulesList getRulesList() {
@@ -50,6 +65,73 @@ public class ExternalCheckerConfigurationPage extends
 	private String[] columnNames = new String[] { "RULES", "TYPES" }; //$NON-NLS-1$ //$NON-NLS-2$
 
 	public ExternalCheckerConfigurationPage() {
+	}
+
+	public IStatus getStatus() {
+		return new Status(messageType, ValidatorsUI.PLUGIN_ID, message);
+	}
+
+	private void resetMessage() {
+		this.message = "";
+		this.messageType = IStatus.OK;
+	}
+
+	private void setMessage(IEnvironment env, String message, int type) {
+		String pattern = ValidatorMessages.ValidatorMessages_path_msgPattern;
+		message = MessageFormat.format(pattern, new String[] { env.getName(),
+				message });
+		setMessage(message, type);
+	}
+
+	private void setMessage(String message, int type) {
+		if (type > messageType) {
+			this.message = message;
+			this.messageType = type;
+		}
+	}
+
+	protected void validateTclCheckerPath() {
+		Map envs = fPath.getPaths();
+		for (Iterator it = envs.keySet().iterator(); it.hasNext();) {
+			IEnvironment env = (IEnvironment) it.next();
+			String txtPath = envs.get(env).toString();
+			txtPath = txtPath.trim();
+
+			if ("".equals(txtPath)) {
+				/*
+				 * setMessage(env,
+				 * ValidatorMessages.ValidatorMessages_path_isempty,
+				 * IStatus.INFO);
+				 */
+				continue;
+			}
+
+			IPath path = Path.fromPortableString(txtPath);
+			IFileHandle file = env.getFile(path);
+
+			if (file == null) {
+				setMessage(env,
+						ValidatorMessages.ValidatorMessages_path_isinvalid,
+						IStatus.ERROR);
+				continue;
+			} else if (!file.isFile()) {
+				setMessage(env,
+						ValidatorMessages.ValidatorMessages_path_notexists,
+						IStatus.ERROR);
+				continue;
+			} else if (!file.exists()) {
+				setMessage(env,
+						ValidatorMessages.ValidatorMessages_path_notexists,
+						IStatus.ERROR);
+				continue;
+			}
+		}
+	}
+
+	protected void validate() {
+		resetMessage();
+		validateTclCheckerPath();
+		updateStatus();
 	}
 
 	public void applyChanges() {
@@ -63,6 +145,11 @@ public class ExternalCheckerConfigurationPage extends
 	private void createPathBrowse(final Composite parent, int columns) {
 		this.fPath = new EnvironmentPathBlock();
 		this.fPath.createControl(parent, columns);
+		fPath.addListener(new IEnvironmentPathBlockListener() {
+			public void valueChanged(Map paths) {
+				validate();
+			}
+		});
 	}
 
 	public void createControl(final Composite ancestor, int columns) {
@@ -72,7 +159,8 @@ public class ExternalCheckerConfigurationPage extends
 		this.fArguments.doFillIntoGrid(ancestor, columns);
 		this.fExtensions.doFillIntoGrid(ancestor, columns);
 		Label label = new Label(ancestor, SWT.WRAP);
-		label.setText(Messages.ExternalCheckerConfigurationPage_commaSeparatedListOfExtensions);
+		label
+				.setText(Messages.ExternalCheckerConfigurationPage_commaSeparatedListOfExtensions);
 		GridData data = new GridData(SWT.FILL, SWT.FILL, false, false);
 		data.horizontalSpan = columns;
 		data.minimumWidth = 100;
@@ -80,7 +168,7 @@ public class ExternalCheckerConfigurationPage extends
 		label.setLayoutData(data);
 		this.rulesList.getRules().clear();
 
-// GridLayout layout = (GridLayout)ancestor.getLayout();
+		// GridLayout layout = (GridLayout)ancestor.getLayout();
 
 		Group group = new Group(ancestor, SWT.NONE);
 		group.setText(Messages.ExternalCheckerConfigurationPage_patternRules);
@@ -98,8 +186,8 @@ public class ExternalCheckerConfigurationPage extends
 		data.minimumWidth = 100;
 		data.widthHint = 100;
 		label.setLayoutData(data);
-// label.
-// label.setSize(label.computeSize(100, SWT.DEFAULT));
+		// label.
+		// label.setSize(label.computeSize(100, SWT.DEFAULT));
 
 		fTable = new Table(group, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL
 				| SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.HIDE_SELECTION);
@@ -108,10 +196,10 @@ public class ExternalCheckerConfigurationPage extends
 		data.heightHint = 100;
 		fTable.setLayoutData(data);
 
-// fTable.setLayout(layout);
+		// fTable.setLayout(layout);
 		fTable.setLinesVisible(true);
 		fTable.setHeaderVisible(true);
-// fTable.setSize(500, 500);
+		// fTable.setSize(500, 500);
 
 		TableColumn col1 = new TableColumn(fTable, SWT.LEFT, 0);
 		col1.setWidth(200);
@@ -194,9 +282,11 @@ public class ExternalCheckerConfigurationPage extends
 
 	private void createFields() {
 		this.fArguments = new StringDialogField();
-		this.fArguments.setLabelText(Messages.ExternalCheckerConfigurationPage_CheckerArguments);
+		this.fArguments
+				.setLabelText(Messages.ExternalCheckerConfigurationPage_CheckerArguments);
 		this.fExtensions = new StringDialogField();
-		this.fExtensions.setLabelText(Messages.ExternalCheckerConfigurationPage_filenameExtensions);
+		this.fExtensions
+				.setLabelText(Messages.ExternalCheckerConfigurationPage_filenameExtensions);
 	}
 
 	public class RulesContentProvider implements IStructuredContentProvider,
