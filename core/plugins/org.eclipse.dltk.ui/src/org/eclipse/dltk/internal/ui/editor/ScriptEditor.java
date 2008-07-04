@@ -2241,8 +2241,8 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			final IContentAssistant c = ((AdaptedSourceViewer) sourceViewer)
 					.getContentAssistant();
 			if (c instanceof ContentAssistant) {
-				ssvc.getContentAssistPreference().changeConfiguration(
-						(ContentAssistant) c, getPreferenceStore(), event);
+				ssvc.changeContentAssistantConfiguration((ContentAssistant) c,
+						event);
 			}
 			ssvc.handlePropertyChangeEvent(event);
 		} finally {

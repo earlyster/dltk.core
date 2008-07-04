@@ -355,7 +355,7 @@ public abstract class ScriptSourceViewerConfiguration extends
 		return null;
 	}
 
-	public abstract ContentAssistPreference getContentAssistPreference();
+	protected abstract ContentAssistPreference getContentAssistPreference();
 
 	protected void alterContentAssistant(ContentAssistant assistant) {
 		// empty implementation
@@ -363,5 +363,11 @@ public abstract class ScriptSourceViewerConfiguration extends
 
 	public String getFontPropertyPreferenceKey() {
 		return JFaceResources.TEXT_FONT;
+	}
+
+	public void changeContentAssistantConfiguration(ContentAssistant c,
+			PropertyChangeEvent event) {
+		getContentAssistPreference().changeConfiguration(c, fPreferenceStore,
+				event);
 	}
 }
