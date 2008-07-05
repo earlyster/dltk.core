@@ -419,6 +419,13 @@ public final class ValidatorRuntime {
 				monitor);
 	}
 
+	public static void executeValidator(IValidator validator,
+			OutputStream stream, List elements, List resources,
+			IProgressMonitor monitor) {
+		process(stream, elements, resources, new IValidator[] { validator },
+				processValidate, monitor);
+	}
+	
 	public static void executeAllValidators(OutputStream stream, List elements,
 			List resources, IEnvironment environment) {
 		executeAllValidators(stream, elements, resources, null, environment);
@@ -543,6 +550,12 @@ public final class ValidatorRuntime {
 				monitor);
 	}
 
+	public static void cleanValidator(IValidator validator, List elements,
+			List resources, IProgressMonitor monitor) {
+		process(null, elements, resources, new IValidator[] { validator },
+				processClean, monitor);
+	}
+	
 	public static void executeValidator(String string, OutputStream out,
 			List elements, List resources, IProgressMonitor monitor) {
 		// Sort elements by environments
