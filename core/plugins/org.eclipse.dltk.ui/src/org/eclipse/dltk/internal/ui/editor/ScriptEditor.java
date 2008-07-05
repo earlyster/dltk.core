@@ -1379,9 +1379,6 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	private static final String ATTR_NATURE = "nature"; //$NON-NLS-1$
 	private static final String ATTR_CLASS = "class"; //$NON-NLS-1$
 
-	/**
-	 * @param contextActionGroups
-	 */
 	private void loadContributedContextActionGroups() {
 		final IConfigurationElement[] elements = Platform
 				.getExtensionRegistry().getConfigurationElementsFor(
