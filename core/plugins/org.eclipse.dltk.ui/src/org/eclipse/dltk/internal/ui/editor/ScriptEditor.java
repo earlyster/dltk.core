@@ -21,8 +21,10 @@ import java.util.Stack;
 import org.eclipse.core.filebuffers.IPersistableAnnotationModel;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.dltk.core.DLTKCore;
@@ -1049,6 +1051,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 		ActionContext context = new ActionContext(getSelectionProvider()
 				.getSelection());
+		context.setInput(getEditorInput());
 		fContextMenuGroup.setContext(context);
 		fContextMenuGroup.fillContextMenu(menu);
 		fContextMenuGroup.setContext(null);
@@ -1300,6 +1303,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 		fContextMenuGroup = new CompositeActionGroup(new ActionGroup[] { oeg,
 				ovg, dsg });
+		loadContributedContextActionGroups();
 
 		fFoldingGroup = createFoldingActionGroup();
 
@@ -1369,6 +1373,40 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		action
 				.setActionDefinitionId(IScriptEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);
+	}
+
+	private static final String EXTENSION_EDITOR_CONTEXT_ACTION_GROUPS = "editorContextActionGroup"; //$NON-NLS-1$
+	private static final String ATTR_NATURE = "nature"; //$NON-NLS-1$
+	private static final String ATTR_CLASS = "class"; //$NON-NLS-1$
+
+	/**
+	 * @param contextActionGroups
+	 */
+	private void loadContributedContextActionGroups() {
+		final IConfigurationElement[] elements = Platform
+				.getExtensionRegistry().getConfigurationElementsFor(
+						DLTKUIPlugin.PLUGIN_ID,
+						EXTENSION_EDITOR_CONTEXT_ACTION_GROUPS);
+		final String natureId = getLanguageToolkit().getNatureId();
+		for (int i = 0; i < elements.length; ++i) {
+			final IConfigurationElement element = elements[i];
+			final String elementNature = element.getAttribute(ATTR_NATURE);
+			if (elementNature == null || elementNature.equals(natureId)) {
+				try {
+					final Object actionGroup = element
+							.createExecutableExtension(ATTR_CLASS);
+					if (actionGroup instanceof ActionGroup) {
+						fContextMenuGroup.addGroup((ActionGroup) actionGroup);
+					} else {
+						DLTKUIPlugin.logErrorMessage(actionGroup.getClass()
+								.getName()
+								+ " should extend ActionGroup"); //$NON-NLS-1$
+					}
+				} catch (CoreException e) {
+					DLTKUIPlugin.log(e);
+				}
+			}
+		}
 	}
 
 	/**

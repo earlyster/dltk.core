@@ -9,6 +9,7 @@
    <extension-point id="scriptDocumentationProviders" name="%extension-point.name.scriptDocumentationProviders" schema="schema/scriptDocumentationProviders.exsd"/>
    <extension-point id="language" name="%extension-point.name.language" schema="schema/language.exsd"/>
    <extension-point id="actionFilterTester" name="%extension-point.name.actionFilterTester" schema="schema/actionFilterTester.exsd"/>  
+   <extension-point id="editorContextActionGroup" name="DLTK editor context menu action group" schema="schema/editorContextActionGroup.exsd"/>  
    <extension
     	id="DLTKSearchResultPage"
         point="org.eclipse.search.searchResultViewPages">
