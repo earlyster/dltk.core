@@ -523,42 +523,6 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			fSourceModule = unit;
 		}
 
-		/**
-		 * Re-populates this model with annotations for all markers retrieved
-		 * from the maker source via <code>retrieveMarkers</code>.
-		 * 
-		 * @throws CoreException
-		 *             if there is a problem getting the markers
-		 */
-		private void catchupWithMarkers() throws CoreException {
-			for (Iterator e = getAnnotationIterator(false); e.hasNext();) {
-				Annotation a = (Annotation) e.next();
-				if (a instanceof MarkerAnnotation)
-					removeAnnotation(a, false);
-			}
-
-			IMarker[] markers = retrieveMarkers();
-			if (markers != null) {
-				for (int i = 0; i < markers.length; i++)
-					addMarkerAnnotation(markers[i]);
-			}
-		}
-
-		/**
-		 * @see org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel#updateMarkers(org.eclipse.jface.text.IDocument)
-		 */
-		public void updateMarkers(IDocument document) throws CoreException {
-			/*
-			 * TODO Review the code - fix or remove.
-			 * 
-			 * This is commented out because it prevents automatically move
-			 * markers to follow changes to the edited document.
-			 * 
-			 * catchupWithMarkers();
-			 */
-			super.updateMarkers(document);
-		}
-
 		protected MarkerAnnotation createMarkerAnnotation(IMarker marker) {
 			String markerType = MarkerUtilities.getMarkerType(marker);
 			if (markerType != null
