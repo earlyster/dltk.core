@@ -19,6 +19,7 @@ import org.eclipse.dltk.validators.internal.core.ValidatorUtils;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IActionDelegate;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
@@ -31,8 +32,6 @@ import org.eclipse.ui.console.IPatternMatchListener;
 
 public abstract class AbstractValidateSelectionWithConsole implements
 		IObjectActionDelegate {
-
-	public static final String DLTK_VALIDATORS_CONSOLE = Messages.AbstractValidateSelectionWithConsole_dltkValidatorOutput;
 
 	protected abstract void invoceValidationFor(final OutputStream out,
 			final List elements, final List resources, IProgressMonitor monitor);
@@ -80,8 +79,8 @@ public abstract class AbstractValidateSelectionWithConsole implements
 					if (isConsoleRequired()) {
 						IConsoleManager consoleManager = ConsolePlugin
 								.getDefault().getConsoleManager();
-						IOConsole ioConsole = new IOConsole(
-								DLTK_VALIDATORS_CONSOLE + getJobName(), null);
+						IOConsole ioConsole = new IOConsole(getConsoleName(),
+								null);
 						IPatternMatchListener[] listeners = ValidatorConsoleTrackerManager
 								.getListeners();
 						for (int i = 0; i < listeners.length; i++) {
@@ -148,6 +147,11 @@ public abstract class AbstractValidateSelectionWithConsole implements
 	}
 
 	protected abstract String getJobName();
+
+	protected String getConsoleName() {
+		final String message = Messages.AbstractValidateSelectionWithConsole_dltkValidatorOutput;
+		return NLS.bind(message, getJobName());
+	}
 
 	protected boolean isConsoleRequired() {
 		return true;
