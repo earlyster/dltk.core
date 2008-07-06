@@ -376,7 +376,7 @@ public class MatchLocator implements ITypeRequestor {
 	}
 
 	/*
-	 * /* Computes the super type names of the focus type if any.
+	 * / Computes the super type names of the focus type if any.
 	 */
 	protected char[][][] computeSuperTypeNames(IType focusType) {
 		return null;
@@ -1133,7 +1133,7 @@ public class MatchLocator implements ITypeRequestor {
 			System.out.println(", possible=" + size); //$NON-NLS-1$
 		}
 	}
-	
+
 	/**
 	 * Visit the given resolved parse tree and report the nodes that match the
 	 * search pattern.
@@ -1214,20 +1214,21 @@ public class MatchLocator implements ITypeRequestor {
 		if (nodes != null) {
 			if ((this.matchContainer & PatternLocator.COMPILATION_UNIT_CONTAINER) != 0) {
 				ISourceModule enclosingElement = createSourceModuleHandle();
-				for (int i = 0, l = nodes.length; i < l; i++) {
-					ASTNode node = nodes[i];
-					Integer level = (Integer) nodeSet.matchingNodes
-							.removeKey(node);
-					if (DLTKCore.DEBUG) {
-						System.out
-								.println("TODO: Searching. Add scope support."); //$NON-NLS-1$
+				if (encloses(enclosingElement)) {
+					for (int i = 0, l = nodes.length; i < l; i++) {
+						ASTNode node = nodes[i];
+						Integer level = (Integer) nodeSet.matchingNodes
+								.removeKey(node);
+						if (DLTKCore.DEBUG) {
+							System.out
+									.println("TODO: Searching. Add scope support."); //$NON-NLS-1$
+						}
+						this.patternLocator.matchReportReference(node,
+								enclosingElement, (Scope) null, level
+										.intValue(), this);
+
 					}
-					this.patternLocator.matchReportReference(node,
-							enclosingElement, (Scope) null, level.intValue(),
-							this);
-
 				}
-
 			}
 			for (int i = 0, l = nodes.length; i < l; i++)
 				nodeSet.matchingNodes.removeKey(nodes[i]);
