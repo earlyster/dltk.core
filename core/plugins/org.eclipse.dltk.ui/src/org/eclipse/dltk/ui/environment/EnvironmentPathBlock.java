@@ -3,9 +3,11 @@ package org.eclipse.dltk.ui.environment;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.ui.util.PixelConverter;
+import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelection;
@@ -38,6 +40,8 @@ public class EnvironmentPathBlock {
 
 	private Table pathTable;
 	private TableViewer pathViewer;
+
+	private ListenerList listeners = new ListenerList();
 
 	/**
 	 * Environment to path association.
@@ -178,6 +182,7 @@ public class EnvironmentPathBlock {
 					paths.put(element, value);
 				}
 				pathViewer.refresh();
+				fireValueChanged();
 			}
 		});
 
@@ -198,6 +203,9 @@ public class EnvironmentPathBlock {
 			}
 		});
 		pathViewer.setInput(EnvironmentManager.getEnvironments());
+		if (pathTable.getItemCount() > 0) {
+			pathTable.select(0);
+		}
 	}
 
 	public void addSelectionListener(ISelectionChangedListener listener) {
@@ -220,6 +228,7 @@ public class EnvironmentPathBlock {
 			if (file != null) {
 				this.paths.put(environment, file);
 				this.pathViewer.refresh();
+				fireValueChanged();
 			}
 		}
 	}
@@ -233,11 +242,32 @@ public class EnvironmentPathBlock {
 		pathTable.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				pathViewer.refresh();
+				fireValueChanged();
 			}
 		});
 	}
 
 	public Map getPaths() {
 		return this.paths;
+	}
+
+	protected void fireValueChanged() {
+		Object[] array = listeners.getListeners();
+		for (int i = 0; i < array.length; i++) {
+			final IEnvironmentPathBlockListener listener = (IEnvironmentPathBlockListener) array[i];
+			SafeRunnable.run(new SafeRunnable() {
+				public void run() {
+					listener.valueChanged(getPaths());
+				}
+			});
+		}
+	}
+
+	public void addListener(IEnvironmentPathBlockListener listener) {
+		listeners.add(listener);
+	}
+
+	public void removeListener(IEnvironmentPathBlockListener listener) {
+		listeners.add(listener);
 	}
 }
