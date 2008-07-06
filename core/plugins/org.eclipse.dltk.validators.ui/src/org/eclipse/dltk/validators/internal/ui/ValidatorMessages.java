@@ -33,6 +33,12 @@ public class ValidatorMessages extends NLS {
 	public static String addValidatorDialog_ValidatorEnvironmentType;
 	public static String ValidatorUpdater_0;
 	
+	public static String ValidatorMessages_path_isempty;
+	public static String ValidatorMessages_path_isinvalid;
+	public static String ValidatorMessages_path_notexists;
+	public static String ValidatorMessages_path_notlookslike;
+	public static String ValidatorMessages_path_msgPattern;
+
 	private ValidatorMessages() {
 	// dont instatiate
 	}
