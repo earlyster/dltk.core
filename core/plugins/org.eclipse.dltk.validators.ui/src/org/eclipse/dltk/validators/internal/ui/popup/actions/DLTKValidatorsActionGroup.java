@@ -97,6 +97,6 @@ public class DLTKValidatorsActionGroup extends ActionGroup {
 		menu.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, subMenu);
 	}
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 }
