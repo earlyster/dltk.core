@@ -9,9 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.core;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,6 +44,7 @@ import org.eclipse.dltk.validators.internal.core.ListenerList;
 import org.eclipse.dltk.validators.internal.core.ValidatorDefinitionsContainer;
 import org.eclipse.dltk.validators.internal.core.ValidatorManager;
 import org.eclipse.dltk.validators.internal.core.ValidatorsCore;
+import org.xml.sax.InputSource;
 
 public final class ValidatorRuntime {
 
@@ -54,8 +55,9 @@ public final class ValidatorRuntime {
 			+ ".marker_validator_id"; //$NON-NLS-1$
 
 	// lock for interpreter initialization
-	private static Object fgValidatorLock = new Object();
+	private static final Object fgValidatorLock = new Object();
 	private static boolean fgInitializingValidators = false;
+	private static boolean isInitialized = false;
 	//
 	private static ListenerList fgValidatorListeners = new ListenerList(5);
 	//	
@@ -91,6 +93,7 @@ public final class ValidatorRuntime {
 	}
 
 	public static IValidatorType[] getValidatorTypes(String nature) {
+		initializeValidators();
 		try {
 			return ValidatorManager.getValidators(nature);
 		} catch (CoreException e) {
@@ -124,7 +127,7 @@ public final class ValidatorRuntime {
 		return null;
 	}
 
-	public static void saveInterpreterConfiguration() throws CoreException {
+	public static void saveValidatorConfiguration() throws CoreException {
 		IValidatorType[] vals = getValidatorTypes();
 		if (vals == null || vals.length == 0) {
 			// if the Interpreter types have not been instantiated, there can be
@@ -173,10 +176,9 @@ public final class ValidatorRuntime {
 
 		if (validatorXMLString.length() > 0) {
 			try {
-				ByteArrayInputStream inputStream = new ByteArrayInputStream(
-						validatorXMLString.getBytes("UTF-8")); //$NON-NLS-1$
 				ValidatorDefinitionsContainer.parseXMLIntoContainer(
-						inputStream, interpreterDefs);
+						new InputSource(new StringReader(validatorXMLString)),
+						interpreterDefs);
 				return false;
 			} catch (IOException ioe) {
 				// DLTKLaunchingPlugin.log(ioe);
@@ -208,7 +210,10 @@ public final class ValidatorRuntime {
 		ValidatorDefinitionsContainer validatorDefs = null;
 		boolean setPref = false;
 		synchronized (fgValidatorLock) {
-
+			if (isInitialized) {
+				return;
+			}
+			isInitialized = true;
 			try {
 				fgInitializingValidators = true;
 				// 1. load Validators type extensions
@@ -242,7 +247,7 @@ public final class ValidatorRuntime {
 				IValidator[] installs = type.getValidators();
 				if (installs != null) {
 					for (int j = 0; j < installs.length; j++) {
-						fireInterpreterAdded(installs[j]);
+						fireValidatorAdded(installs[j]);
 					}
 				}
 			}
@@ -283,7 +288,7 @@ public final class ValidatorRuntime {
 		}
 	}
 
-	public static void fireInterpreterAdded(IValidator Interpreter) {
+	public static void fireValidatorAdded(IValidator Interpreter) {
 		if (!fgInitializingValidators) {
 			Object[] listeners = fgValidatorListeners.getListeners();
 			for (int i = 0; i < listeners.length; i++) {
@@ -293,7 +298,7 @@ public final class ValidatorRuntime {
 		}
 	}
 
-	public static void fireInterpreterRemoved(IValidator Interpreter) {
+	public static void fireValidatorRemoved(IValidator Interpreter) {
 		Object[] listeners = fgValidatorListeners.getListeners();
 		for (int i = 0; i < listeners.length; i++) {
 			IValidatorChangedListener listener = (IValidatorChangedListener) listeners[i];
@@ -580,7 +585,7 @@ public final class ValidatorRuntime {
 		Map envToElementMap = new HashMap();
 		IEnvironment[] environments = fillElementsByEnvironment(elements,
 				resources, envToResMap, envToElementMap);
-		monitor.beginTask("Execute validators...", elements.size() + resources.size());
+		monitor.beginTask(Messages.ValidatorRuntime_executeValidators, elements.size() + resources.size());
 		for (int i = 0; i < environments.length; i++) {
 			List elems = (List) envToElementMap.get(environments[i]);
 			List ress = (List) envToResMap.get(environments[i]);

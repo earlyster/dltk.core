@@ -6,6 +6,7 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.validators.core.messages"; //$NON-NLS-1$
 	public static String ValidatorRuntime_error;
 	public static String ValidatorRuntime_exceptionOccurred;
+	public static String ValidatorRuntime_executeValidators;
 	public static String ValidatorRuntime_for;
 	public static String ValidatorRuntime_runningValidators;
 	public static String ValidatorRuntime_validationCouldNotBePerformed;
