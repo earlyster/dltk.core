@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.ui.typehierarchy;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
@@ -49,6 +50,11 @@ public class OpenTypeHierarchyUtil {
 		} else {
 			input= candidates[0];
 		}
+		if (input instanceof IMember
+				&& input.getElementType() != IModelElement.TYPE) {
+			input = ((IMember) input).getDeclaringType();
+		}
+
 		if (input == null)
 			return null;
 			
