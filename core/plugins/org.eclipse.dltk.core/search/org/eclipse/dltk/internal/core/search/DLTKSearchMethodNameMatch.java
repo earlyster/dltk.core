@@ -11,7 +11,6 @@ package org.eclipse.dltk.internal.core.search;
 
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.search.MethodNameMatch;
-import org.eclipse.dltk.core.search.TypeNameMatch;
 
 /**
  * DLTK Search concrete type for a type name match.
@@ -41,13 +40,13 @@ public class DLTKSearchMethodNameMatch extends MethodNameMatch {
 	public boolean equals(Object obj) {
 		if (obj == this)
 			return true; // avoid unnecessary calls for identical objects
-		if (obj instanceof TypeNameMatch) {
-			TypeNameMatch match = (TypeNameMatch) obj;
+		if (obj instanceof MethodNameMatch) {
+			MethodNameMatch match = (MethodNameMatch) obj;
 			if (this.method == null) {
-				return match.getType() == null
+				return match.getMethod() == null
 						&& match.getModifiers() == this.modifiers;
 			}
-			return this.method.equals(match.getType())
+			return this.method.equals(match.getMethod())
 					&& match.getModifiers() == this.modifiers;
 		}
 		return false;
