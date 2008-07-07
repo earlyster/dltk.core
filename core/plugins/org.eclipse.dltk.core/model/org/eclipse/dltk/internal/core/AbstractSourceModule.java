@@ -38,8 +38,6 @@ import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
 import org.eclipse.dltk.utils.CorePrinter;
 
-/**
- */
 public abstract class AbstractSourceModule extends Openable implements
 		ISourceModule, org.eclipse.dltk.compiler.env.ISourceModule {
 
@@ -88,7 +86,7 @@ public abstract class AbstractSourceModule extends Openable implements
 
 	/*
 	 * @see org.eclipse.dltk.core.ICodeAssist#codeSelect(int, int,
-	 *      org.eclipse.dltk.core.WorkingCopyOwner)
+	 * org.eclipse.dltk.core.WorkingCopyOwner)
 	 */
 	public IModelElement[] codeSelect(int offset, int length,
 			WorkingCopyOwner owner) throws ModelException {
@@ -362,9 +360,8 @@ public abstract class AbstractSourceModule extends Openable implements
 			throws ModelException {
 
 		return getWorkingCopy(new WorkingCopyOwner() /*
-		 * non shared working
-		 * copy
-		 */
+													 * non shared working copy
+													 */
 		{
 		}, null /* no problem requestor */, monitor);
 	}
@@ -555,8 +552,9 @@ public abstract class AbstractSourceModule extends Openable implements
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.Openable#openBuffer(org.eclipse.core.runtime.IProgressMonitor,
-	 *      java.lang.Object)
+	 * @see
+	 * org.eclipse.dltk.internal.core.Openable#openBuffer(org.eclipse.core.runtime
+	 * .IProgressMonitor, java.lang.Object)
 	 */
 	protected IBuffer openBuffer(IProgressMonitor pm, Object info)
 			throws ModelException {
@@ -574,7 +572,7 @@ public abstract class AbstractSourceModule extends Openable implements
 		 * buffers at the same time see
 		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=146331
 		 */
-		synchronized(bufManager) {
+		synchronized (bufManager) {
 			final IBuffer existingBuffer = bufManager.getBuffer(this);
 			if (existingBuffer != null)
 				return existingBuffer;
@@ -595,7 +593,8 @@ public abstract class AbstractSourceModule extends Openable implements
 						// }
 						// else
 						// {
-						// buffer.setContents(Util.getResourceContentsAsCharArray(file));
+						//buffer.setContents(Util.getResourceContentsAsCharArray
+						// (file));
 						// }
 						char[] content = getBufferContent();
 						buffer.setContents(content);
@@ -605,7 +604,7 @@ public abstract class AbstractSourceModule extends Openable implements
 					buffer.setContents(content);
 				}
 			}
-	
+
 			// add buffer to buffer cache
 			/*
 			 * note this may cause existing buffers to be removed from the
@@ -614,7 +613,7 @@ public abstract class AbstractSourceModule extends Openable implements
 			 * this synchronized block.
 			 */
 			bufManager.addBuffer(buffer);
-	
+
 			// listen to buffer changes
 			buffer.addBufferChangedListener(this);
 		}
