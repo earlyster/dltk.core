@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.ui.typehierarchy;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
@@ -19,7 +20,7 @@ import org.eclipse.dltk.internal.ui.actions.OpenActionUtil;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.util.ExceptionHandler;
-import org.eclipse.jface.util.Assert;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -39,7 +40,8 @@ public class OpenTypeHierarchyUtil {
 	}	
 	
 	public static TypeHierarchyViewPart open(IModelElement[] candidates, IWorkbenchWindow window) {
-		Assert.isTrue(candidates != null && candidates.length != 0);
+		Assert.isNotNull(candidates);
+		Assert.isTrue(candidates.length != 0);
 			
 		IModelElement input= null;
 		if (candidates.length > 1) {
@@ -49,6 +51,11 @@ public class OpenTypeHierarchyUtil {
 		} else {
 			input= candidates[0];
 		}
+		if (input instanceof IMember
+				&& input.getElementType() != IModelElement.TYPE) {
+			input = ((IMember) input).getDeclaringType();
+		}
+
 		if (input == null)
 			return null;
 			
