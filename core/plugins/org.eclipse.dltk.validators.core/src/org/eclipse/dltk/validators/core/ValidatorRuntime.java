@@ -126,7 +126,7 @@ public final class ValidatorRuntime {
 		return null;
 	}
 
-	public static void saveInterpreterConfiguration() throws CoreException {
+	public static void saveValidatorConfiguration() throws CoreException {
 		IValidatorType[] vals = getValidatorTypes();
 		if (vals == null || vals.length == 0) {
 			// if the Interpreter types have not been instantiated, there can be
