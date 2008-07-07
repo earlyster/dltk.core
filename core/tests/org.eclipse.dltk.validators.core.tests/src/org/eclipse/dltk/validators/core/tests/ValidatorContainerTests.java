@@ -9,7 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.core.tests;
 
-import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -46,8 +46,8 @@ public class ValidatorContainerTests extends TestCase {
 		assertTrue(validatorList.contains(v1));
 		assertTrue(validatorList.contains(v2));
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-		ValidatorDefinitionsContainer co2 = ValidatorDefinitionsContainer.parseXMLIntoContainer(bais);
+		ValidatorDefinitionsContainer co2 = ValidatorDefinitionsContainer
+				.parseXMLIntoContainer(new StringReader(xml));
 		assertNotNull(co2);
 		List validatorList2 = co2.getValidatorList();
 		assertNotNull(validatorList2);
