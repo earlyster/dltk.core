@@ -16,29 +16,24 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.validators.core.IValidator;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.internal.ui.ValidatorsUI;
 import org.eclipse.dltk.validators.ui.AbstractValidateSelectionWithConsole;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.osgi.util.NLS;
 
-public class RemoveMarkersAction extends Action {
+public class RemoveAllMarkersAction extends Action {
 
-	static final String CLEANUP_IMAGE = "icons/clear_co.gif"; //$NON-NLS-1$
-
-	private final IValidator validator;
 	private final IModelElement element;
 
-	public RemoveMarkersAction(IValidator validator, IModelElement element) {
-		this.validator = validator;
+	/**
+	 * @param element
+	 */
+	public RemoveAllMarkersAction(IModelElement element) {
 		this.element = element;
-		setText(NLS.bind(
-				Messages.DLTKValidatorsEditorContextMenu_validatorCleanup,
-				validator.getName()));
+		setText(Messages.DLTKValidatorsEditorContextMenu_cleanupAll);
 		setImageDescriptor(ValidatorsUI.getDefault().getImageDescriptor(
-				CLEANUP_IMAGE));
+				RemoveMarkersAction.CLEANUP_IMAGE));
 	}
 
 	public void run() {
@@ -49,17 +44,17 @@ public class RemoveMarkersAction extends Action {
 			}
 
 			protected String getJobName() {
-				final String message = Messages.DLTKValidatorsEditorContextMenu_validatorCleanup;
-				return NLS.bind(message, validator.getName());
+				return Messages.RemoveValidatorAllMarkersAction_validatorCleanup;
 			}
 
 			protected void invoceValidationFor(OutputStream out, List elements,
 					List resources, IProgressMonitor monitor) {
-				ValidatorRuntime.cleanValidator(validator, elements, resources,
-						monitor);
+				ValidatorRuntime.executeCleanAllValidatorsWithConsole(elements,
+						resources, monitor);
 			}
 		};
 		delegate.selectionChanged(this, new StructuredSelection(element));
 		delegate.run(this);
 	}
+
 }
