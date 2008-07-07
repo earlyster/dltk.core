@@ -24,21 +24,22 @@ public class ControlBindingManager {
 	private Map textControls;
 	private Map comboControls;
 	private Map buttonControls;
-	
+
 	private IPreferenceDelegate preferenceDelegate;
 	private IStatusChangeListener changeListener;
-	
+
 	private DependencyManager dependencyManager;
 	private ValidatorManager validatorManager;
-	
-	public ControlBindingManager(IPreferenceDelegate delegate, IStatusChangeListener listener) {
+
+	public ControlBindingManager(IPreferenceDelegate delegate,
+			IStatusChangeListener listener) {
 		this.buttonControls = new HashMap();
 		this.comboControls = new HashMap();
 		this.textControls = new HashMap();
 
 		this.validatorManager = new ValidatorManager();
 		this.dependencyManager = new DependencyManager();
-		
+
 		this.changeListener = listener;
 		this.preferenceDelegate = delegate;
 	}
@@ -66,17 +67,17 @@ public class ControlBindingManager {
 			String[] items = combo.getItems();
 			boolean selected = false;
 			for (int i = 0; i < items.length; i++) {
-				if( items[i].equals(value)) {
+				if (items[i].equals(value)) {
 					combo.select(i);
 					selected = true;
 					break;
 				}
 			}
-			if( !selected ) {
+			if (!selected) {
 				combo.select(0);
 			}
 		}
-		
+
 		dependencyManager.initialize();
 	}
 
@@ -143,12 +144,12 @@ public class ControlBindingManager {
 			public void widgetSelected(SelectionEvent e) {
 				int index = combo.getSelectionIndex();
 				preferenceDelegate.setString(key, combo.getItem(index));
-				
+
 				changeListener.statusChanged(new StatusInfo());
 			}
 		});
 	}
-	
+
 	private IStatus validateText(Text text) {
 		IStatus status = new StatusInfo();
 
@@ -206,7 +207,7 @@ public class ControlBindingManager {
 	}
 
 	class ValidatorManager {
-		
+
 		private Map map = new HashMap();
 
 		public IFieldValidator getValidator(Control control) {
