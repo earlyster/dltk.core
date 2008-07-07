@@ -9,8 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.search;
 
-import java.util.Iterator;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
