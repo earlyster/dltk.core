@@ -10,6 +10,8 @@
 package org.eclipse.dltk.dbgp.internal.commands;
 
 import java.io.IOException;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpIOException;
@@ -48,12 +50,40 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 				DLTKDebugPreferenceConstants.PREF_DBGP_RESPONSE_TIMEOUT);
 	}
 
+	private final Map activeRequests = new IdentityHashMap();
+
 	public Element communicate(DbgpRequest request) throws DbgpException {
 		try {
-			sendRequest(request.toString());
-
-			DbgpResponsePacket packet = receiveResponse(Integer
-					.parseInt(request.getOption("-i"))); //$NON-NLS-1$
+			final DbgpResponsePacket packet;
+			final int requestId = Integer.parseInt(request
+					.getOption(DbgpBaseCommands.ID_OPTION));
+			if (request.isAsync()) {
+				sendRequest(request.toString());
+				packet = receiveResponse(requestId);
+			} else {
+				final long startTime = DEBUG ? System.currentTimeMillis() : 0;
+				synchronized (activeRequests) {
+					while (!activeRequests.isEmpty()) {
+						activeRequests.wait();
+					}
+					activeRequests.put(request, request);
+				}
+				if (DEBUG) {
+					final long waited = System.currentTimeMillis() - startTime;
+					if (waited > 0) {
+						System.out.println("Waited " + waited + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}
+				try {
+					sendRequest(request.toString());
+					packet = receiveResponse(requestId);
+				} finally {
+					synchronized (activeRequests) {
+						activeRequests.remove(request);
+						activeRequests.notifyAll();
+					}
+				}
+			}
 
 			if (packet == null) {
 				throw new DbgpTimeoutException();
@@ -81,4 +111,6 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 			throw new DbgpIOException(e);
 		}
 	}
+
+	private static final boolean DEBUG = false;
 }

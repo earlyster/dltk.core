@@ -20,7 +20,7 @@ import org.w3c.dom.NodeList;
 
 public class DbgpExtendedCommands extends DbgpBaseCommands implements
 		IDbgpExtendedCommands {
-	
+
 	private IDbgpProperty parseResponse(Element response) {
 		if (DbgpXmlParser.parseSuccess(response)) {
 			NodeList list = response.getElementsByTagName("property"); //$NON-NLS-1$
@@ -36,7 +36,7 @@ public class DbgpExtendedCommands extends DbgpBaseCommands implements
 
 	public boolean makeBreak() throws DbgpException {
 		return DbgpXmlParser
-				.parseSuccess(communicate(createRequest(BREAK_COMMAND)));
+				.parseSuccess(communicate(createAsyncRequest(BREAK_COMMAND)));
 	}
 
 	public boolean configureStdin(int value) throws DbgpException {
@@ -56,8 +56,9 @@ public class DbgpExtendedCommands extends DbgpBaseCommands implements
 		request.setData(snippet);
 		return parseResponse(communicate(request));
 	}
-	
-	public IDbgpProperty evaluate(String snippet, int depth) throws DbgpException {
+
+	public IDbgpProperty evaluate(String snippet, int depth)
+			throws DbgpException {
 		DbgpRequest request = createRequest(EVAL_COMMAND);
 		request.setData(snippet);
 		request.addOption("-d", depth); //$NON-NLS-1$

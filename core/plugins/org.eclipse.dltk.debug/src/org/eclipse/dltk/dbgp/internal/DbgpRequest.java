@@ -20,11 +20,17 @@ public class DbgpRequest {
 	private final Map options;
 
 	private final String command;
+	private final boolean async;
 
 	private String data;
 
 	public DbgpRequest(String command) {
+		this(command, false);
+	}
+
+	public DbgpRequest(String command, boolean async) {
 		this.command = command;
+		this.async = async;
 		this.options = new HashMap();
 	}
 
@@ -90,11 +96,18 @@ public class DbgpRequest {
 		if (o instanceof DbgpRequest) {
 			DbgpRequest request = (DbgpRequest) o;
 
-			return command.equals(request.command)
+			return command.equals(request.command) && async == request.async
 					&& options.equals(request.options)
 					&& StrUtils.equals(data, request.data);
 		}
 
 		return false;
+	}
+
+	/**
+	 * @return the async
+	 */
+	public boolean isAsync() {
+		return async;
 	}
 }
