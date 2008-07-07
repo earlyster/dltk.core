@@ -40,7 +40,8 @@ public class OpenTypeHierarchyUtil {
 	}	
 	
 	public static TypeHierarchyViewPart open(IModelElement[] candidates, IWorkbenchWindow window) {
-		Assert.isTrue(candidates != null && candidates.length != 0);
+		Assert.isNotNull(candidates);
+		Assert.isTrue(candidates.length != 0);
 			
 		IModelElement input= null;
 		if (candidates.length > 1) {
