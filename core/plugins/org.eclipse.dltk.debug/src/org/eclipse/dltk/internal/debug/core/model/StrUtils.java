@@ -11,10 +11,18 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.core.model;
 
-class StrUtils {
+public class StrUtils {
 
 	public static boolean equals(String s1, String s2) {
 		return s1 == null ? s2 == null : s1.equals(s2);
+	}
+
+	public static boolean isEmpty(String str) {
+		return str == null || str.length() == 0;
+	}
+
+	public static boolean isNotEmpty(String str) {
+		return str != null && str.length() != 0;
 	}
 
 	public static boolean isBlank(String str) {

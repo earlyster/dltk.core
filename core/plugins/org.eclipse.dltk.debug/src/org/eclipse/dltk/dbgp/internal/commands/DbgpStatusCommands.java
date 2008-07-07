@@ -24,6 +24,6 @@ public class DbgpStatusCommands extends DbgpBaseCommands implements
 
 	public IDbgpStatus getStatus() throws DbgpException {
 		return DbgpXmlEntityParser
-				.parseStatus(communicate(createRequest(STATUS_COMMAND)));
+				.parseStatus(communicate(createAsyncRequest(STATUS_COMMAND)));
 	}
 }
