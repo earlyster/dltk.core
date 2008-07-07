@@ -48,7 +48,13 @@ public class EnvironmentPathBlock {
 	 */
 	private Map paths = new HashMap();
 
+	private boolean useFolders = false;
+
 	public EnvironmentPathBlock() {
+	}
+
+	public EnvironmentPathBlock(boolean useFolders) {
+		this.useFolders = useFolders;
 	}
 
 	private class PathLabelProvider extends LabelProvider implements
@@ -223,8 +229,13 @@ public class EnvironmentPathBlock {
 			IEnvironment environment = (IEnvironment) sel.getFirstElement();
 			IEnvironmentUI ui = (IEnvironmentUI) environment
 					.getAdapter(IEnvironmentUI.class);
-			String file = ui.selectFile(this.pathTable.getShell(),
-					IEnvironmentUI.DEFAULT);
+			String file = null;
+			if (!useFolders) {
+				file = ui.selectFile(this.pathTable.getShell(),
+						IEnvironmentUI.DEFAULT);
+			} else {
+				file = ui.selectFolder(this.pathTable.getShell());
+			}
 			if (file != null) {
 				this.paths.put(environment, file);
 				this.pathViewer.refresh();
