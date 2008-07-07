@@ -12,7 +12,13 @@ package org.eclipse.dltk.internal.core.search;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.core.*;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IMethod;
+import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.BasicSearchEngine;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.MethodNameMatchRequestor;
@@ -153,11 +159,13 @@ public class MethodNameMatchRequestorWrapper implements
 		if (unit == null) {
 			return null;
 		}
-		final IMethod[] methods = unit.getMethods();
-		for (int i = 0; i < methods.length; i++) {
-			IMethod method = methods[i];
-			if (method.getElementName().equals(simpleTypeName)) {
-				return method;
+		final IModelElement[] elements = unit.getChildren();
+		for (int i = 0; i < elements.length; i++) {
+			if (elements[i].getElementType() == ISourceModule.METHOD) {
+				IMethod method = (IMethod) elements[i];
+				if (method.getElementName().equals(simpleTypeName)) {
+					return method;
+				}
 			}
 		}
 		return null;
