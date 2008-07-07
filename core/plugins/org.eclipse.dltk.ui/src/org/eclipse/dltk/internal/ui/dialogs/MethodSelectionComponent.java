@@ -200,7 +200,7 @@ public class MethodSelectionComponent extends Composite implements ITypeSelectio
 
 		Label label = new Label(this, SWT.NONE);
 		label.setFont(font);
-		label.setText(DLTKUIMessages.TypeSelectionComponent_label);
+		label.setText(DLTKUIMessages.MethodSelectionComponent_label);
 		label.addTraverseListener(new TraverseListener() {
 			public void keyTraversed(TraverseEvent e) {
 				if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit) {
@@ -224,7 +224,7 @@ public class MethodSelectionComponent extends Composite implements ITypeSelectio
 		table.getAccessible().addAccessibleListener(new AccessibleAdapter() {
 			public void getName(AccessibleEvent e) {
 				if (table.getSelectionCount() == 0) {
-					e.result = Strings.removeMnemonicIndicator(DLTKUIMessages.TypeSelectionComponent_label);
+					e.result = Strings.removeMnemonicIndicator(DLTKUIMessages.MethodSelectionComponent_label);
 				}
 			}
 		});
