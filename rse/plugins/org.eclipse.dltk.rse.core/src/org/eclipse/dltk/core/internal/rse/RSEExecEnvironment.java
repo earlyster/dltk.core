@@ -191,8 +191,8 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 			return new HashMap();
 		}
 		long start = System.currentTimeMillis();
-		if (this.hostToEnvironment.containsKey(this.environment.getHost())) {
-			return (Map) this.hostToEnvironment.get(this.environment.getHost());
+		if (hostToEnvironment.containsKey(this.environment.getHost())) {
+			return (Map) hostToEnvironment.get(this.environment.getHost());
 		}
 		final Map result = new HashMap();
 		try {
@@ -225,7 +225,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 				});
 				t.start();
 				try {
-					t.join(25000);// No more than 5 seconds
+					t.join(25000);// No more than 25 seconds
 				} catch (InterruptedException e) {
 					DLTKRSEPlugin.log(e);
 				}
