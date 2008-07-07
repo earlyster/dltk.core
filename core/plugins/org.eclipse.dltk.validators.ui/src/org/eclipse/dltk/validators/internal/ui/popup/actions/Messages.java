@@ -7,6 +7,8 @@ public class Messages extends NLS {
 	public static String DLTKValidatorsEditorContextMenu_text;
 	public static String DLTKValidatorsEditorContextMenu_validateWith;
 	public static String DLTKValidatorsEditorContextMenu_validatorCleanup;
+	public static String DLTKValidatorsEditorContextMenu_cleanupAll;
+	public static String DLTKValidatorsEditorContextMenu_validateAll;
 	public static String RemoveValidatorAllMarkersAction_validatorCleanup;
 	public static String ValidateSelectionWithConsoleAction_validation;
 	static {

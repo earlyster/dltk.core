@@ -26,7 +26,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class ValidateAction extends Action {
 
-	private static final String VALIDATE_IMAGE = "icons/goto_input.gif"; //$NON-NLS-1$
+	static final String VALIDATE_IMAGE = "icons/goto_input.gif"; //$NON-NLS-1$
 
 	private final IValidator validator;
 	private final IModelElement element;
