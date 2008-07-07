@@ -144,7 +144,7 @@ public class OpenMethodHistory extends History {
 
 	private class UpdateJob extends Job {
 		public UpdateJob() {
-			super(CorextMessages.TypeInfoHistory_consistency_check);
+			super(CorextMessages.MethodInfoHistory_consistency_check);
 		}
 
 		protected IStatus run(IProgressMonitor monitor) {
@@ -290,9 +290,9 @@ public class OpenMethodHistory extends History {
 		// markAsInconsistent isn't synchronized.
 		fNeedsConsistencyCheck = true;
 		List typesToCheck = new ArrayList(getKeys());
-		monitor.beginTask(CorextMessages.TypeInfoHistory_consistency_check,
+		monitor.beginTask(CorextMessages.MethodInfoHistory_consistency_check,
 				typesToCheck.size());
-		monitor.setTaskName(CorextMessages.TypeInfoHistory_consistency_check);
+		monitor.setTaskName(CorextMessages.MethodInfoHistory_consistency_check);
 		for (Iterator iter = typesToCheck.iterator(); iter.hasNext();) {
 			MethodNameMatch type = (MethodNameMatch) iter.next();
 			long currentTimestamp = getContainerTimestamp(type);
