@@ -54,8 +54,9 @@ public final class ValidatorRuntime {
 			+ ".marker_validator_id"; //$NON-NLS-1$
 
 	// lock for interpreter initialization
-	private static Object fgValidatorLock = new Object();
+	private static final Object fgValidatorLock = new Object();
 	private static boolean fgInitializingValidators = false;
+	private static boolean isInitialized = false;
 	//
 	private static ListenerList fgValidatorListeners = new ListenerList(5);
 	//	
@@ -91,6 +92,7 @@ public final class ValidatorRuntime {
 	}
 
 	public static IValidatorType[] getValidatorTypes(String nature) {
+		initializeValidators();
 		try {
 			return ValidatorManager.getValidators(nature);
 		} catch (CoreException e) {
@@ -208,7 +210,10 @@ public final class ValidatorRuntime {
 		ValidatorDefinitionsContainer validatorDefs = null;
 		boolean setPref = false;
 		synchronized (fgValidatorLock) {
-
+			if (isInitialized) {
+				return;
+			}
+			isInitialized = true;
 			try {
 				fgInitializingValidators = true;
 				// 1. load Validators type extensions
