@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.dltk.dbgp.internal.utils.Base64Helper;
+import org.eclipse.dltk.internal.debug.core.model.StrUtils;
 
 public class DbgpRequest {
 	private final Map options;
@@ -91,7 +92,7 @@ public class DbgpRequest {
 
 			return command.equals(request.command)
 					&& options.equals(request.options)
-					&& (data != null ? data.equals(request.data) : true);
+					&& StrUtils.equals(data, request.data);
 		}
 
 		return false;
