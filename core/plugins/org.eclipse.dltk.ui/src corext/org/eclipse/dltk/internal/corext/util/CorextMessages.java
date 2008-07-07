@@ -13,7 +13,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class CorextMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.dltk.internal.corext.util.CorextMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.dltk.internal.corext.util.CorextMessages";//$NON-NLS-1$
 
 	private CorextMessages() {
 		// Do not instantiate
@@ -23,10 +23,11 @@ public final class CorextMessages extends NLS {
 	public static String Resources_outOfSync;
 	public static String Resources_modifiedResources;
 	public static String Resources_fileModified;
-	
+
 	public static String History_error_serialize;
 	public static String History_error_read;
 	public static String TypeInfoHistory_consistency_check;
+	public static String MethodInfoHistory_consistency_check;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, CorextMessages.class);

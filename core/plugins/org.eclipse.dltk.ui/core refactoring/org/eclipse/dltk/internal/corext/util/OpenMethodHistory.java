@@ -1,0 +1,432 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ 
+ *******************************************************************************/
+package org.eclipse.dltk.internal.corext.util;
+
+import java.net.URI;
+import java.util.*;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileInfo;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dltk.core.*;
+import org.eclipse.dltk.core.search.MethodNameMatch;
+import org.eclipse.dltk.core.search.SearchEngine;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
+import org.w3c.dom.Element;
+
+/**
+ * History for the open type dialog. Object and keys are both
+ * {@link MethodNameMatch}s.
+ */
+public class OpenMethodHistory extends History {
+
+	// private IDLTKUILanguageToolkit fToolkit = null;
+	MethodFilter fMethodFilter = null;
+
+	private static Map sToolkitHistory = new HashMap();
+
+	public static OpenMethodHistory getInstance(IDLTKUILanguageToolkit toolkit) {
+		if (sToolkitHistory.containsKey(toolkit)) {
+			return (OpenMethodHistory) sToolkitHistory.get(toolkit);
+		} else {
+			OpenMethodHistory his = new OpenMethodHistory(toolkit);
+			sToolkitHistory.put(toolkit, his);
+			return his;
+		}
+
+	}
+
+	private class MethodHistoryDeltaListener implements IElementChangedListener {
+		public void elementChanged(ElementChangedEvent event) {
+			if (processDelta(event.getDelta())) {
+				markAsInconsistent();
+			}
+		}
+
+		/**
+		 * Computes whether the history needs a consistency check or not.
+		 * 
+		 * @param delta
+		 *            the Java element delta
+		 * 
+		 * @return <code>true</code> if consistency must be checked
+		 *         <code>false</code> otherwise.
+		 */
+		private boolean processDelta(IModelElementDelta delta) {
+			IModelElement elem = delta.getElement();
+
+			boolean isChanged = delta.getKind() == IModelElementDelta.CHANGED;
+			boolean isRemoved = delta.getKind() == IModelElementDelta.REMOVED;
+
+			switch (elem.getElementType()) {
+			case IModelElement.SCRIPT_PROJECT:
+				if (isRemoved
+						|| (isChanged && (delta.getFlags() & IModelElementDelta.F_CLOSED) != 0)) {
+					return true;
+				}
+				return processChildrenDelta(delta);
+			case IModelElement.PROJECT_FRAGMENT:
+				if (isRemoved
+						|| (isChanged && ((delta.getFlags() & IModelElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0 || (delta
+								.getFlags() & IModelElementDelta.F_REMOVED_FROM_BUILDPATH) != 0))) {
+					return true;
+				}
+				return processChildrenDelta(delta);
+			case IModelElement.METHOD:
+				if (isRemoved
+						|| isChanged
+						&& (delta.getFlags() & IModelElementDelta.F_MODIFIERS) != 0) {
+					return true;
+				}
+				return false;
+			case IModelElement.SCRIPT_MODEL:
+			case IModelElement.SCRIPT_FOLDER:
+				if (isRemoved) {
+					return true;
+				}
+				return processChildrenDelta(delta);
+			case IModelElement.SOURCE_MODULE:
+				// Not the primary compilation unit. Ignore it
+				if (!ScriptModelUtil.isPrimary((ISourceModule) elem)) {
+					return false;
+				}
+
+				if (isRemoved
+						|| (isChanged && isUnknownStructuralChange(delta
+								.getFlags()))) {
+					return true;
+				}
+				return processChildrenDelta(delta);
+			default:
+				// fields, methods, imports ect
+				return false;
+			}
+		}
+
+		private boolean isUnknownStructuralChange(int flags) {
+			if ((flags & IModelElementDelta.F_CONTENT) == 0)
+				return false;
+			return (flags & IModelElementDelta.F_FINE_GRAINED) == 0;
+		}
+
+		/*
+		 * private boolean isPossibleStructuralChange(int flags) { return (flags
+		 * & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED))
+		 * == IJavaElementDelta.F_CONTENT; }
+		 */
+
+		private boolean processChildrenDelta(IModelElementDelta delta) {
+			IModelElementDelta[] children = delta.getAffectedChildren();
+			for (int i = 0; i < children.length; i++) {
+				if (processDelta(children[i])) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	private static final String FAMILY = UpdateJob.class.getName();
+
+	private class UpdateJob extends Job {
+		public UpdateJob() {
+			super(CorextMessages.TypeInfoHistory_consistency_check);
+		}
+
+		protected IStatus run(IProgressMonitor monitor) {
+			internalCheckConsistency(monitor);
+			return new Status(IStatus.OK, DLTKUIPlugin.getPluginId(),
+					IStatus.OK, "", null); //$NON-NLS-1$
+		}
+
+		public boolean belongsTo(Object family) {
+			return FAMILY.equals(family);
+		}
+	}
+
+	// Needs to be volatile since accesses aren't synchronized.
+	private volatile boolean fNeedsConsistencyCheck;
+	// Map of cached time stamps
+	private Map fTimestampMapping;
+
+	private final IElementChangedListener fDeltaListener;
+	private final UpdateJob fUpdateJob;
+
+	private static final String FILENAME = "OpenMethodHistory"; //$NON-NLS-1$
+	private static final String NODE_ROOT = "methodInfoHistroy"; //$NON-NLS-1$
+	private static final String NODE_TYPE_INFO = "methodInfo"; //$NON-NLS-1$
+	private static final String NODE_HANDLE = "handle"; //$NON-NLS-1$
+	private static final String NODE_MODIFIERS = "modifiers"; //$NON-NLS-1$
+	private static final String NODE_TIMESTAMP = "timestamp"; //$NON-NLS-1$
+
+	private OpenMethodHistory(IDLTKUILanguageToolkit toolkit) {
+		super(FILENAME
+				+ toolkit.getCoreToolkit().getNatureId().replace('.', '_')
+				+ ".xml", NODE_ROOT, NODE_TYPE_INFO); //$NON-NLS-1$
+		fTimestampMapping = new HashMap();
+		fNeedsConsistencyCheck = true;
+		load();
+		fDeltaListener = new MethodHistoryDeltaListener();
+		DLTKCore.addElementChangedListener(fDeltaListener);
+		fUpdateJob = new UpdateJob();
+		// It is not necessary anymore that the update job has a rule since
+		// markAsInconsistent isn't synchronized anymore. See bugs
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=128399 and
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=135278
+		// for details.
+		fUpdateJob.setPriority(Job.SHORT);
+
+		// this.fToolkit = toolkit;
+		this.fMethodFilter = new MethodFilter(toolkit);
+	}
+
+	public void markAsInconsistent() {
+		fNeedsConsistencyCheck = true;
+		// cancel the old job. If no job is running this is a NOOP.
+		fUpdateJob.cancel();
+		fUpdateJob.schedule();
+	}
+
+	public boolean needConsistencyCheck() {
+		return fNeedsConsistencyCheck;
+	}
+
+	public void checkConsistency(IProgressMonitor monitor)
+			throws OperationCanceledException {
+		if (!fNeedsConsistencyCheck)
+			return;
+		if (fUpdateJob.getState() == Job.RUNNING) {
+			try {
+				Job.getJobManager().join(FAMILY, monitor);
+			} catch (OperationCanceledException e) {
+				// Ignore and do the consistency check without
+				// waiting for the update job.
+			} catch (InterruptedException e) {
+				// Ignore and do the consistency check without
+				// waiting for the update job.
+			}
+		}
+		if (!fNeedsConsistencyCheck)
+			return;
+		internalCheckConsistency(monitor);
+	}
+
+	public synchronized boolean contains(MethodNameMatch type) {
+		return super.contains(type);
+	}
+
+	public synchronized void accessed(MethodNameMatch info) {
+		// Fetching the timestamp might not be cheap (remote file system
+		// external Jars. So check if we alreay have one.
+		if (!fTimestampMapping.containsKey(info)) {
+			fTimestampMapping.put(info, new Long(getContainerTimestamp(info)));
+		}
+		super.accessed(info);
+	}
+
+	public synchronized MethodNameMatch remove(MethodNameMatch info) {
+		fTimestampMapping.remove(info);
+		return (MethodNameMatch) super.remove(info);
+	}
+
+	public synchronized void replace(MethodNameMatch old,
+			MethodNameMatch newMatch) {
+		fTimestampMapping.remove(old);
+		fTimestampMapping.put(newMatch, new Long(
+				getContainerTimestamp(newMatch)));
+		super.remove(old);
+		super.accessed(newMatch);
+	}
+
+	public synchronized MethodNameMatch[] getTypeInfos() {
+		Collection values = getValues();
+		int size = values.size();
+		MethodNameMatch[] result = new MethodNameMatch[size];
+		int i = size - 1;
+		for (Iterator iter = values.iterator(); iter.hasNext();) {
+			result[i] = (MethodNameMatch) iter.next();
+			i--;
+		}
+		return result;
+	}
+
+	public synchronized MethodNameMatch[] getFilteredTypeInfos(
+			MethodInfoFilter filter) {
+		Collection values = getValues();
+		List result = new ArrayList();
+		for (Iterator iter = values.iterator(); iter.hasNext();) {
+			MethodNameMatch method = (MethodNameMatch) iter.next();
+			if ((filter == null || filter.matchesHistoryElement(method))
+					&& !fMethodFilter.isFiltered(method.getFullyQualifiedName()))
+				result.add(method);
+		}
+		Collections.reverse(result);
+		return (MethodNameMatch[]) result.toArray(new MethodNameMatch[result
+				.size()]);
+
+	}
+
+	protected Object getKey(Object object) {
+		return object;
+	}
+
+	private synchronized void internalCheckConsistency(IProgressMonitor monitor)
+			throws OperationCanceledException {
+		// Setting fNeedsConsistencyCheck is necessary here since
+		// markAsInconsistent isn't synchronized.
+		fNeedsConsistencyCheck = true;
+		List typesToCheck = new ArrayList(getKeys());
+		monitor.beginTask(CorextMessages.TypeInfoHistory_consistency_check,
+				typesToCheck.size());
+		monitor.setTaskName(CorextMessages.TypeInfoHistory_consistency_check);
+		for (Iterator iter = typesToCheck.iterator(); iter.hasNext();) {
+			MethodNameMatch type = (MethodNameMatch) iter.next();
+			long currentTimestamp = getContainerTimestamp(type);
+			Long lastTested = (Long) fTimestampMapping.get(type);
+			if (lastTested != null && currentTimestamp != IResource.NULL_STAMP
+					&& currentTimestamp == lastTested.longValue()
+					&& !isContainerDirty(type))
+				continue;
+			try {
+				IMethod sMethod = type.getMethod();
+				if (sMethod == null || !sMethod.exists()) {
+					remove(type);
+				} else {
+					// copy over the modifiers since they may have changed
+					int modifiers = sMethod.getFlags();
+					if (modifiers != type.getModifiers()) {
+						replace(type, SearchEngine.createMethodNameMatch(
+								sMethod, modifiers));
+					} else {
+						fTimestampMapping.put(type, new Long(currentTimestamp));
+					}
+				}
+			} catch (ModelException e) {
+				remove(type);
+			}
+			if (monitor.isCanceled())
+				throw new OperationCanceledException();
+			monitor.worked(1);
+		}
+		monitor.done();
+		fNeedsConsistencyCheck = false;
+	}
+
+	private long getContainerTimestamp(MethodNameMatch match) {
+		try {
+			IMethod method = match.getMethod();
+			IResource resource = method.getResource();
+			if (resource != null) {
+				URI location = resource.getLocationURI();
+				if (location != null) {
+					IFileInfo info = EFS.getStore(location).fetchInfo();
+					if (info.exists()) {
+						// The element could be removed from the build path. So
+						// check
+						// if the Java element still exists.
+						IModelElement element = DLTKCore.create(resource);
+						if (element != null && element.exists())
+							return info.getLastModified();
+					}
+				}
+			} else { // external JAR
+				IProjectFragment root = match.getProjectFragment();
+				if (root.exists()) {
+					IFileInfo info = EFS.getLocalFileSystem().getStore(
+							root.getPath()).fetchInfo();
+					if (info.exists()) {
+						return info.getLastModified();
+					}
+				}
+			}
+		} catch (CoreException e) {
+			// Fall through
+		}
+		return IResource.NULL_STAMP;
+	}
+
+	public boolean isContainerDirty(MethodNameMatch match) {
+		ISourceModule cu = match.getMethod().getSourceModule();
+		if (cu == null) {
+			return false;
+		}
+		IResource resource = cu.getResource();
+		if (resource != null) {
+			ITextFileBufferManager manager = FileBuffers
+					.getTextFileBufferManager();
+			ITextFileBuffer textFileBuffer = manager.getTextFileBuffer(resource
+					.getFullPath(), LocationKind.NORMALIZE);
+			if (textFileBuffer != null) {
+				return textFileBuffer.isDirty();
+			}
+		}
+		return false;
+	}
+
+	public void shutdown() {
+		DLTKCore.removeElementChangedListener(fDeltaListener);
+		save();
+	}
+
+	protected Object createFromElement(Element type) {
+		String handle = type.getAttribute(NODE_HANDLE);
+		if (handle == null)
+			return null;
+
+		IModelElement element = DLTKCore.create(handle);
+		if (!(element instanceof IMethod))
+			return null;
+
+		int modifiers = 0;
+		try {
+			modifiers = Integer.parseInt(type.getAttribute(NODE_MODIFIERS));
+		} catch (NumberFormatException e) {
+			// take zero
+		}
+		MethodNameMatch info = SearchEngine.createMethodNameMatch(
+				(IMethod) element, modifiers);
+		long timestamp = IResource.NULL_STAMP;
+		String timestampValue = type.getAttribute(NODE_TIMESTAMP);
+		if (timestampValue != null && timestampValue.length() > 0) {
+			try {
+				timestamp = Long.parseLong(timestampValue);
+			} catch (NumberFormatException e) {
+				// take null stamp
+			}
+		}
+		if (timestamp != IResource.NULL_STAMP) {
+			fTimestampMapping.put(info, new Long(timestamp));
+		}
+		return info;
+	}
+
+	protected void setAttributes(Object object, Element typeElement) {
+		MethodNameMatch method = (MethodNameMatch) object;
+		String handleId = method.getMethod().getHandleIdentifier();
+		typeElement.setAttribute(NODE_HANDLE, handleId);
+		typeElement.setAttribute(NODE_MODIFIERS, Integer.toString(method
+				.getModifiers()));
+		Long timestamp = (Long) fTimestampMapping.get(method);
+		if (timestamp == null) {
+			typeElement.setAttribute(NODE_TIMESTAMP, Long
+					.toString(IResource.NULL_STAMP));
+		} else {
+			typeElement.setAttribute(NODE_TIMESTAMP, timestamp.toString());
+		}
+	}
+
+}

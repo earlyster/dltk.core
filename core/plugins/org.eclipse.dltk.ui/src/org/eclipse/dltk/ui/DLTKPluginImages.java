@@ -274,6 +274,7 @@ public class DLTKPluginImages {
     
     public static final ImageDescriptor DESC_OBJS_LIBRARY= createManagedFromKey(T_OBJ, IMG_OBJS_LIBRARY);
     
+    public static final ImageDescriptor DESC_TOOL_OPENMETHOD= createUnManaged(T_ETOOL, "opentype.gif"); 					//$NON-NLS-1$
     public static final ImageDescriptor DESC_TOOL_OPENTYPE= createUnManaged(T_ETOOL, "opentype.gif"); 					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_TOOL_NEWPROJECT= createUnManaged(T_ETOOL, "newjprj_wiz.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_TOOL_NEWPACKAGE= createUnManaged(T_ETOOL, "newpack_wiz.gif"); 			//$NON-NLS-1$

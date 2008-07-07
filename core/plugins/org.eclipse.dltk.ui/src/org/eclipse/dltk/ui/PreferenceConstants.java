@@ -655,6 +655,7 @@ public class PreferenceConstants {
 	 * qualified type names with wild card characters.
 	 */
 	public static final String TYPEFILTER_ENABLED = "org.eclipse.dltk.ui.typefilter.enabled"; //$NON-NLS-1$
+	public static final String METHODFILTER_ENABLED = "org.eclipse.dltk.ui.methodfilter.enabled"; //$NON-NLS-1$
 
 	public static final String LINK_BROWSING_MEMBERS_TO_EDITOR = "org.eclipse.dltk.ui.browsing.member.to.editor"; //$NON-NLS-1$
 	public static final String LINK_BROWSING_PROJECTS_TO_EDITOR = "org.eclipse.dltk.ui.browsing.projects.to.editor"; //$NON-NLS-1$

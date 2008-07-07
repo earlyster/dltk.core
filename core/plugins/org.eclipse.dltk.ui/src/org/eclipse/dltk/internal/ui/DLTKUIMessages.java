@@ -38,6 +38,13 @@ public final class DLTKUIMessages extends NLS {
 	public static String OpenTypeAction_label;
 	public static String OpenTypeAction_dialogTitle;
 	public static String OpenTypeAction_dialogMessage;
+	public static String OpenMethodAction_description;
+	public static String OpenMethodAction_tooltip;
+	public static String OpenMethodAction_errorMessage;
+	public static String OpenMethodAction_errorTitle;
+	public static String OpenMethodAction_label;
+	public static String OpenMethodAction_dialogTitle;
+	public static String OpenMethodAction_dialogMessage;
 	public static String TypeSelectionDialog_dialogMessage;
 	public static String TypeSelectionDialog_errorTitle;
 	public static String TypeSelectionDialog_error3Message;
@@ -61,7 +68,7 @@ public final class DLTKUIMessages extends NLS {
 	public static String CoreUtility_job_title;
 	public static String CoreUtility_buildall_taskname;
 	public static String CoreUtility_buildproject_taskname;
-	
+
 	public static String ScriptAnnotationHover_multipleMarkersAtThisLine;
 	public static String ScriptEditor_codeassist_noCompletions;
 
@@ -89,7 +96,7 @@ public final class DLTKUIMessages extends NLS {
 	public static String TypeInfoViewer_remove_from_history;
 	public static String TypeInfoViewer_separator_message;
 	public static String TypeInfoViewer_library_name_format;
-	
+
 	public static String HistoryListAction_remove;
 	public static String HistoryListAction_max_entries_constraint;
 	public static String HistoryListAction_remove_all;
