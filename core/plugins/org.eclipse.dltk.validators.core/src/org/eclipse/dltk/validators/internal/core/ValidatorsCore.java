@@ -9,9 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.internal.core;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
 
@@ -106,7 +106,7 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 
 	public static String serializeDocument(Document doc) throws IOException,
 			TransformerException {
-		ByteArrayOutputStream s = new ByteArrayOutputStream();
+		StringWriter s = new StringWriter();
 
 		TransformerFactory factory = TransformerFactory.newInstance();
 		Transformer transformer = factory.newTransformer();
@@ -117,7 +117,7 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 		StreamResult outputTarget = new StreamResult(s);
 		transformer.transform(source, outputTarget);
 
-		return s.toString("UTF8"); //$NON-NLS-1$			
+		return s.toString();
 	}
 	public void setIgnoreValidatorDefPropertyChangeEvents(boolean ignore) {
 		fIgnoreValidatorDefPropertyChangeEvents = ignore;
@@ -139,10 +139,8 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 	private ValidatorDefinitionsContainer getValidatorDefinitions(String xml) {
 		if (xml.length() > 0) {
 			try {
-				ByteArrayInputStream stream = new ByteArrayInputStream(xml
-						.getBytes("UTF8")); //$NON-NLS-1$
 				return ValidatorDefinitionsContainer
-						.parseXMLIntoContainer(stream);
+						.parseXMLIntoContainer(new StringReader(xml));
 			} catch (IOException e) {
 				ValidatorsCore.getDefault().getLog().log(new Status( 0, ValidatorsCore.PLUGIN_ID, 0, Messages.ValidatorsCore_exception, e ));
 			}

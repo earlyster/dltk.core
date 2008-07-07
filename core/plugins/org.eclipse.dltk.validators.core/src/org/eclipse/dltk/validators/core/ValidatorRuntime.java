@@ -9,9 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.core;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,6 +44,7 @@ import org.eclipse.dltk.validators.internal.core.ListenerList;
 import org.eclipse.dltk.validators.internal.core.ValidatorDefinitionsContainer;
 import org.eclipse.dltk.validators.internal.core.ValidatorManager;
 import org.eclipse.dltk.validators.internal.core.ValidatorsCore;
+import org.xml.sax.InputSource;
 
 public final class ValidatorRuntime {
 
@@ -175,10 +176,9 @@ public final class ValidatorRuntime {
 
 		if (validatorXMLString.length() > 0) {
 			try {
-				ByteArrayInputStream inputStream = new ByteArrayInputStream(
-						validatorXMLString.getBytes("UTF-8")); //$NON-NLS-1$
 				ValidatorDefinitionsContainer.parseXMLIntoContainer(
-						inputStream, interpreterDefs);
+						new InputSource(new StringReader(validatorXMLString)),
+						interpreterDefs);
 				return false;
 			} catch (IOException ioe) {
 				// DLTKLaunchingPlugin.log(ioe);
@@ -585,7 +585,7 @@ public final class ValidatorRuntime {
 		Map envToElementMap = new HashMap();
 		IEnvironment[] environments = fillElementsByEnvironment(elements,
 				resources, envToResMap, envToElementMap);
-		monitor.beginTask("Execute validators...", elements.size() + resources.size());
+		monitor.beginTask(Messages.ValidatorRuntime_executeValidators, elements.size() + resources.size());
 		for (int i = 0; i < environments.length; i++) {
 			List elems = (List) envToElementMap.get(environments[i]);
 			List ress = (List) envToResMap.get(environments[i]);

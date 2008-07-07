@@ -9,9 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.internal.core;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,11 +41,11 @@ public class ValidatorDefinitionsContainer {
 
 	private List fValidatorList;
 
-//	private List fInvalidValidatorList;
+	// private List fInvalidValidatorList;
 
 	public ValidatorDefinitionsContainer() {
 		fValidatorTypeToValidatorMap = new HashMap(10);
-//		fInvalidValidatorList = new ArrayList(10);
+		// fInvalidValidatorList = new ArrayList(10);
 		fValidatorList = new ArrayList(10);
 	}
 
@@ -62,9 +61,9 @@ public class ValidatorDefinitionsContainer {
 						validatorList);
 			}
 			validatorList.add(validator);
-//			if (!validator.isValidatorValid()) {
-//				fInvalidValidatorList.add(validator);
-//			}
+			// if (!validator.isValidatorValid()) {
+			// fInvalidValidatorList.add(validator);
+			// }
 			fValidatorList.add(validator);
 		}
 	}
@@ -102,7 +101,7 @@ public class ValidatorDefinitionsContainer {
 		List validators = getValidatorList();
 		List resultList = new ArrayList(validators.size());
 		resultList.addAll(validators);
-//		resultList.removeAll(fInvalidValidatorList);
+		// resultList.removeAll(fInvalidValidatorList);
 		return resultList;
 	}
 
@@ -110,7 +109,7 @@ public class ValidatorDefinitionsContainer {
 		List Interpreters = getValidatorList(nature);
 		List resultList = new ArrayList(Interpreters.size());
 		resultList.addAll(Interpreters);
-//		resultList.removeAll(fInvalidValidatorList);
+		// resultList.removeAll(fInvalidValidatorList);
 		return resultList;
 	}
 
@@ -172,17 +171,14 @@ public class ValidatorDefinitionsContainer {
 	}
 
 	public static ValidatorDefinitionsContainer parseXMLIntoContainer(
-			InputStream inputStream) throws IOException {
+			Reader input) throws IOException {
 		ValidatorDefinitionsContainer container = new ValidatorDefinitionsContainer();
-		parseXMLIntoContainer(inputStream, container);
+		parseXMLIntoContainer(new InputSource(input), container);
 		return container;
 	}
 
-	public static void parseXMLIntoContainer(InputStream inputStream,
+	public static void parseXMLIntoContainer(InputSource input,
 			ValidatorDefinitionsContainer container) throws IOException {
-
-		// Wrapper the stream for efficient parsing
-		InputStream stream = new BufferedInputStream(inputStream);
 
 		// Do the parsing and obtain the top-level node
 		Element config = null;
@@ -190,14 +186,11 @@ public class ValidatorDefinitionsContainer {
 			DocumentBuilder parser = DocumentBuilderFactory.newInstance()
 					.newDocumentBuilder();
 			parser.setErrorHandler(new DefaultHandler());
-			config = parser.parse(new InputSource(stream)).getDocumentElement();
+			config = parser.parse(input).getDocumentElement();
 		} catch (SAXException e) {
 			throw new IOException(ValidatorMessages.ValidatorRuntime_badFormat);
 		} catch (ParserConfigurationException e) {
-			stream.close();
 			throw new IOException(ValidatorMessages.ValidatorRuntime_badFormat);
-		} finally {
-			stream.close();
 		}
 
 		// If the top-level node wasn't what we expected, bail out
@@ -272,9 +265,13 @@ public class ValidatorDefinitionsContainer {
 						validatorElement);
 				container.addValidator(validator);
 			} catch (IOException e) {
-				DLTKCore.getDefault().getLog().log(
-						new Status(0, ValidatorsCore.PLUGIN_ID, 0,
-								ValidatorMessages.ValidatorDefinitionsContainer_failedToLoadValidatorFromXml, null));
+				final Status errorStatus = new Status(
+						0,
+						ValidatorsCore.PLUGIN_ID,
+						0,
+						ValidatorMessages.ValidatorDefinitionsContainer_failedToLoadValidatorFromXml,
+						null);
+				DLTKCore.getDefault().getLog().log(errorStatus);
 			}
 		} else {
 			if (DLTKCore.DEBUG) {
@@ -292,7 +289,7 @@ public class ValidatorDefinitionsContainer {
 	 */
 	public void removeValidator(IValidator Interpreter) {
 		fValidatorList.remove(Interpreter);
-//		fInvalidValidatorList.remove(Interpreter);
+		// fInvalidValidatorList.remove(Interpreter);
 		List list = (List) fValidatorTypeToValidatorMap.get(Interpreter
 				.getValidatorType());
 		if (list != null) {
