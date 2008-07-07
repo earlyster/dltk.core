@@ -22,6 +22,7 @@ import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.preferences.FieldValidators;
 import org.eclipse.dltk.ui.preferences.ImprovedAbstractConfigurationBlock;
+import org.eclipse.dltk.ui.preferences.NumberTransformer;
 import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore;
 import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -149,6 +150,18 @@ public class ScriptDebugConfigurationBlock extends
 			}
 		});
 
+		final NumberTransformer timeoutTransformer = new NumberTransformer() {
+
+			protected int convertPreference(int value) {
+				return value / 1000;
+			}
+
+			protected int convertInput(int input) {
+				return input * 1000;
+			}
+
+		};
+
 		// Connection timeout
 		SWTFactory.createLabel(group,
 				ScriptDebugPreferencesMessages.ConnectionTimeoutLabel, 1);
@@ -156,7 +169,7 @@ public class ScriptDebugConfigurationBlock extends
 				1, ""); //$NON-NLS-1$
 		bindControl(connectionTimeout,
 				DLTKDebugPreferenceConstants.PREF_DBGP_CONNECTION_TIMEOUT,
-				FieldValidators.POSITIVE_NUMBER_VALIDATOR);
+				FieldValidators.POSITIVE_NUMBER_VALIDATOR, timeoutTransformer);
 
 		// Response timeout
 		SWTFactory.createLabel(group,
@@ -165,7 +178,7 @@ public class ScriptDebugConfigurationBlock extends
 				1, ""); //$NON-NLS-1$
 		bindControl(responseTimeout,
 				DLTKDebugPreferenceConstants.PREF_DBGP_RESPONSE_TIMEOUT,
-				FieldValidators.POSITIVE_NUMBER_VALIDATOR);
+				FieldValidators.POSITIVE_NUMBER_VALIDATOR, timeoutTransformer);
 
 		return group;
 	}
