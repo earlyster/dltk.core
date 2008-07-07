@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Text;
 public class ControlBindingManager {
 
 	private Map textControls;
+	private final Map textTransformers = new HashMap();
 	private Map comboControls;
 	private Map buttonControls;
 
@@ -49,7 +50,13 @@ public class ControlBindingManager {
 		while (it.hasNext()) {
 			final Text text = (Text) it.next();
 			final Object key = textControls.get(text);
-			text.setText(preferenceDelegate.getString(key));
+			String value = preferenceDelegate.getString(key);
+			final ITextConverter textTransformer = (ITextConverter) textTransformers
+					.get(text);
+			if (textTransformer != null) {
+				value = textTransformer.convertPreference(value);
+			}
+			text.setText(value);
 		}
 
 		it = buttonControls.keySet().iterator();
@@ -107,8 +114,16 @@ public class ControlBindingManager {
 
 	public void bindControl(final Text text, final Object key,
 			IFieldValidator validator) {
+		bindControl(text, key, validator, null);
+	}
+
+	public void bindControl(final Text text, final Object key,
+			IFieldValidator validator, final ITextConverter transformer) {
 		if (key != null) {
 			textControls.put(text, key);
+			if (transformer != null) {
+				textTransformers.put(text, transformer);
+			}
 		}
 
 		if (validator != null) {
@@ -117,12 +132,14 @@ public class ControlBindingManager {
 
 		text.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				final String value = text.getText();
-
 				IStatus status = validateText(text);
 
 				if (key != null) {
 					if (status.getSeverity() != IStatus.ERROR) {
+						String value = text.getText();
+						if (transformer != null) {
+							value = transformer.convertInput(value);
+						}
 						preferenceDelegate.setString(key, value);
 					}
 				}

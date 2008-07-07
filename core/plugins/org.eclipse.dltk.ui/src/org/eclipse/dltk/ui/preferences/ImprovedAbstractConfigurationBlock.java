@@ -114,6 +114,11 @@ public abstract class ImprovedAbstractConfigurationBlock implements
 		bindManager.bindControl(text, key, validator);
 	}
 
+	protected void bindControl(final Text text, final String key,
+			IFieldValidator validator, ITextConverter transformer) {
+		bindManager.bindControl(text, key, validator, transformer);
+	}
+
 	protected void bindControl(final Text text, final String key) {
 		bindControl(text, key, null);
 	}
