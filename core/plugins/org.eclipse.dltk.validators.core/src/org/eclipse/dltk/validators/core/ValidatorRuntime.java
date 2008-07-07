@@ -242,7 +242,7 @@ public final class ValidatorRuntime {
 				IValidator[] installs = type.getValidators();
 				if (installs != null) {
 					for (int j = 0; j < installs.length; j++) {
-						fireInterpreterAdded(installs[j]);
+						fireValidatorAdded(installs[j]);
 					}
 				}
 			}
@@ -283,7 +283,7 @@ public final class ValidatorRuntime {
 		}
 	}
 
-	public static void fireInterpreterAdded(IValidator Interpreter) {
+	public static void fireValidatorAdded(IValidator Interpreter) {
 		if (!fgInitializingValidators) {
 			Object[] listeners = fgValidatorListeners.getListeners();
 			for (int i = 0; i < listeners.length; i++) {
