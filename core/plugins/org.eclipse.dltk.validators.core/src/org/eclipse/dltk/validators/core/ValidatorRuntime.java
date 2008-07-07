@@ -293,7 +293,7 @@ public final class ValidatorRuntime {
 		}
 	}
 
-	public static void fireInterpreterRemoved(IValidator Interpreter) {
+	public static void fireValidatorRemoved(IValidator Interpreter) {
 		Object[] listeners = fgValidatorListeners.getListeners();
 		for (int i = 0; i < listeners.length; i++) {
 			IValidatorChangedListener listener = (IValidatorChangedListener) listeners[i];
