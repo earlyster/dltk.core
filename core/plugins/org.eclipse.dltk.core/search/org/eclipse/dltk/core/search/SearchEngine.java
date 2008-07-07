@@ -22,6 +22,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
@@ -34,7 +35,7 @@ import org.eclipse.dltk.internal.core.search.TypeNameMatchRequestorWrapper;
 import org.eclipse.dltk.internal.core.search.TypeNameRequestorWrapper;
 import org.eclipse.dltk.internal.core.search.matching.MixinPattern;
 import org.eclipse.dltk.internal.core.util.HandleFactory;
-
+import org.eclipse.dltk.internal.core.search.MethodNameMatchRequestorWrapper;
 /**
  * A {@link SearchEngine} searches for Script elements following a search
  * pattern. The search can be limited to a search scope.
@@ -1002,4 +1003,117 @@ public class SearchEngine {
 				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
 		return (String[]) result.toArray(new String[result.size()]);
 	}
+	
+	/**
+	 * Create a method name match on a given type with specific modifiers.
+	 * 
+	 * @param type
+	 *            The java model handle of the type
+	 * @param modifiers
+	 *            Modifiers of the method
+	 * @return A non-null match on the given method.
+	 */
+	public static MethodNameMatch createMethodNameMatch(IMethod method,
+			int modifiers) {
+		return BasicSearchEngine.createMethodNameMatch(method, modifiers);
+	}
+
+
+	/**
+	 * Searches for all top-level methods (aka functions) in the given scope.
+	 * The search can be selecting specific methods (given a package name using
+	 * specific match mode and/or a method name using another specific match
+	 * mode).
+	 * 
+	 * @param packageName
+	 *            the full name of the package of the searched methods, or a
+	 *            prefix for this package, or a wild-carded string for this
+	 *            package.
+	 * @param methodName
+	 *            the dot-separated qualified name of the searched method, or a
+	 *            prefix for this method, or a wild-carded string for this
+	 *            method.
+	 * @param packageMatchRule
+	 *            one of
+	 *            <ul>
+	 *            <li>{@link SearchPattern#R_EXACT_MATCH} if the package name
+	 *            and method name are the full names of the searched method.</li>
+	 *            <li>{@link SearchPattern#R_PREFIX_MATCH} if the package name
+	 *            and method name are prefixes of the names of the searched
+	 *            methods.</li>
+	 *            <li>{@link SearchPattern#R_PATTERN_MATCH} if the package name
+	 *            and method name contain wild-cards.</li>
+	 *            <li>{@link SearchPattern#R_CAMELCASE_MATCH} if method name are
+	 *            camel case of the names of the searched methods.</li>
+	 *            </ul>
+	 *            combined with {@link SearchPattern#R_CASE_SENSITIVE}, e.g.
+	 *            {@link SearchPattern#R_EXACT_MATCH} |
+	 *            {@link SearchPattern#R_CASE_SENSITIVE} if an exact and case
+	 *            sensitive match is requested, or
+	 *            {@link SearchPattern#R_PREFIX_MATCH} if a prefix non case
+	 *            sensitive match is requested.
+	 * @param methodMatchRule
+	 *            one of
+	 *            <ul>
+	 *            <li>{@link SearchPattern#R_EXACT_MATCH} if the package name
+	 *            and method name are the full names of the searched methods.</li>
+	 *            <li>{@link SearchPattern#R_PREFIX_MATCH} if the package name
+	 *            and method name are prefixes of the names of the searched
+	 *            methods.</li>
+	 *            <li>{@link SearchPattern#R_PATTERN_MATCH} if the package name
+	 *            and method name contain wild-cards.</li>
+	 *            <li>{@link SearchPattern#R_CAMELCASE_MATCH} if method name are
+	 *            camel case of the names of the searched methods.</li>
+	 *            </ul>
+	 *            combined with {@link SearchPattern#R_CASE_SENSITIVE}, e.g.
+	 *            {@link SearchPattern#R_EXACT_MATCH} |
+	 *            {@link SearchPattern#R_CASE_SENSITIVE} if an exact and case
+	 *            sensitive match is requested, or
+	 *            {@link SearchPattern#R_PREFIX_MATCH} if a prefix non case
+	 *            sensitive match is requested.
+	 * @param searchFor
+	 *            determines the nature of the searched elements
+	 *            <ul>
+	 *            <li>{@link IDLTKSearchConstants#METHOD}: only look for methods
+	 *            </li>
+	 *            </ul>
+	 * @param scope
+	 *            the scope to search in
+	 * @param nameRequestor
+	 *            the requestor that collects the results of the search
+	 * @param waitingPolicy
+	 *            one of
+	 *            <ul>
+	 *            <li>{@link IDLTKSearchConstants#FORCE_IMMEDIATE_SEARCH} if the
+	 *            search should start immediately</li>
+	 *            <li>{@link IDLTKSearchConstants#CANCEL_IF_NOT_READY_TO_SEARCH}
+	 *            if the search should be cancelled if the underlying indexer
+	 *            has not finished indexing the workspace</li>
+	 *            <li>{@link IDLTKSearchConstants#WAIT_UNTIL_READY_TO_SEARCH} if
+	 *            the search should wait for the underlying indexer to finish
+	 *            indexing the workspace</li>
+	 *            </ul>
+	 * @param progressMonitor
+	 *            the progress monitor to report progress to, or
+	 *            <code>null</code> if no progress monitor is provided
+	 * @exception ModelException
+	 *                if the search failed. Reasons include:
+	 *                <ul>
+	 *                <li>the buildpath is incorrectly set</li>
+	 *                </ul>
+	 * 
+	 */
+	public void searchAllMethodNames(final char[] packageName,
+			final int packageMatchRule, final char[] methodName,
+			final int methodMatchRule, int searchFor, IDLTKSearchScope scope,
+			final MethodNameMatchRequestor nameRequestor, int waitingPolicy,
+			IProgressMonitor progressMonitor) throws ModelException {
+
+		MethodNameMatchRequestorWrapper requestorWrapper = new MethodNameMatchRequestorWrapper(
+				nameRequestor, scope);
+		this.basicEngine.searchAllMethodNames(packageName, packageMatchRule,
+				methodName, methodMatchRule, searchFor, scope,
+				requestorWrapper, waitingPolicy, progressMonitor);
+	}
+	
 }

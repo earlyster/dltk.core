@@ -296,7 +296,19 @@ public interface ISourceModule extends IModule, ISourceReference,ISourceManipula
 	 *		exception occurs while accessing its corresponding resource
 	 */
 	IPackageDeclaration[] getPackageDeclarations() throws ModelException;
-	
+
+
+	/**
+	 * Returns the top-level methods (functions) declared in this compilation
+	 * unit in the order in which they appear in the source.
+	 * 
+	 * @return the top-level methods declared in this compilation unit
+	 * @throws ModelException
+	 *             if this element does not exist or if an exception occurs
+	 *             while accessing its corresponding resource
+	 */
+	IMethod[] getMethods() throws ModelException;
+
 	/**
 	 * Returns the method with the specified name and parameter types
 	 * in this type (for example, <code>"foo", {"I", "QString;"}</code>).

@@ -25,16 +25,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.ast.declarations.TypeDeclaration;
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IMember;
-import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.IType;
-import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.*;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
@@ -44,17 +35,8 @@ import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.SourceModule;
-import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
-import org.eclipse.dltk.internal.core.search.DLTKSearchScope;
-import org.eclipse.dltk.internal.core.search.DLTKSearchTypeNameMatch;
-import org.eclipse.dltk.internal.core.search.HierarchyScope;
-import org.eclipse.dltk.internal.core.search.IRestrictedAccessTypeRequestor;
-import org.eclipse.dltk.internal.core.search.IndexQueryRequestor;
-import org.eclipse.dltk.internal.core.search.PathCollector;
-import org.eclipse.dltk.internal.core.search.PatternSearchJob;
-import org.eclipse.dltk.internal.core.search.matching.DLTKSearchPattern;
-import org.eclipse.dltk.internal.core.search.matching.QualifiedTypeDeclarationPattern;
-import org.eclipse.dltk.internal.core.search.matching.TypeDeclarationPattern;
+import org.eclipse.dltk.internal.core.search.*;
+import org.eclipse.dltk.internal.core.search.matching.*;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
 
@@ -1498,4 +1480,208 @@ public class BasicSearchEngine {
 		// DeclarationOfReferencedMethodsPattern(enclosingElement);
 		// searchDeclarations(enclosingElement, requestor, pattern, monitor);
 	}
+
+	/**
+	 * @see SearchEngine#createTypeNameMatch(IType, int) for detailed comment.
+	 */
+	public static MethodNameMatch createMethodNameMatch(IMethod type, int modifiers) {
+		return new DLTKSearchMethodNameMatch(type, modifiers);
+	}
+	
+	/**
+	 * Searches for all top-level types and member types in the given scope. The
+	 * search can be selecting specific types (given a package or a type name
+	 * prefix and match modes).
+	 * 
+	 * @throws ModelException
+	 * 
+	 * @see SearchEngine#searchAllTypeNames(char[], char[], int, int,
+	 *      IJavaSearchScope, TypeNameRequestor, int, IProgressMonitor) for
+	 *      detailed comment
+	 */
+	public void searchAllMethodNames(char[] packageName, int packageMatchRule,
+			char[] methodName, int methodMatchRule, int searchFor,
+			IDLTKSearchScope scope,
+			final IRestrictedAccessMethodRequestor nameRequestor,
+			int waitingPolicy, IProgressMonitor progressMonitor)
+			throws ModelException {
+
+		if (VERBOSE) {
+			Util
+					.verbose("BasicSearchEngine.searchAllTypeNames(char[], char[], int, int, IJavaSearchScope, IRestrictedAccessTypeRequestor, int, IProgressMonitor)"); //$NON-NLS-1$
+			Util
+					.verbose("	- package name: " + (packageName == null ? "null" : new String(packageName))); //$NON-NLS-1$ //$NON-NLS-2$
+			Util
+					.verbose("	- match rule: " + getMatchRuleString(packageMatchRule)); //$NON-NLS-1$
+			Util
+					.verbose("	- type name: " + (methodName == null ? "null" : new String(methodName))); //$NON-NLS-1$ //$NON-NLS-2$
+			Util
+					.verbose("	- match rule: " + getMatchRuleString(methodMatchRule)); //$NON-NLS-1$
+			Util.verbose("	- search for: " + searchFor); //$NON-NLS-1$
+			Util.verbose("	- scope: " + scope); //$NON-NLS-1$
+		}
+
+		// Return on invalid combination of package and type names
+		if (packageName == null || packageName.length == 0) {
+			if (methodName != null && methodName.length == 0) {
+				// TODO (frederic) Throw a JME instead?
+				if (VERBOSE) {
+					Util
+							.verbose("	=> return no result due to invalid empty values for package and type names!"); //$NON-NLS-1$
+				}
+				return;
+			}
+		}
+
+		// Create pattern
+		IndexManager indexManager = ModelManager.getModelManager()
+				.getIndexManager();
+		final char typeSuffix;
+		typeSuffix = IIndexConstants.TYPE_SUFFIX;
+		final MethodDeclarationPattern pattern = packageMatchRule == SearchPattern.R_EXACT_MATCH ? new MethodDeclarationPattern(
+				packageName, methodName, typeSuffix, methodMatchRule, scope
+						.getLanguageToolkit())
+				: new QualifiedMethodDeclarationPattern(packageName,
+						packageMatchRule, methodName, typeSuffix,
+						methodMatchRule, scope.getLanguageToolkit());
+
+		// Get working copy path(s). Store in a single string in case of only
+		// one to optimize comparison in requestor
+		final HashSet workingCopyPaths = new HashSet();
+		String workingCopyPath = null;
+		ISourceModule[] copies = getWorkingCopies();
+		final int copiesLength = copies == null ? 0 : copies.length;
+		if (copies != null) {
+			if (copiesLength == 1) {
+				workingCopyPath = copies[0].getPath().toString();
+			} else {
+				for (int i = 0; i < copiesLength; i++) {
+					ISourceModule workingCopy = copies[i];
+					workingCopyPaths.add(workingCopy.getPath().toString());
+				}
+			}
+		}
+		final String singleWkcpPath = workingCopyPath;
+		// final List documentPathFilter = new ArrayList();
+		// Index requestor
+		IndexQueryRequestor searchRequestor = new IndexQueryRequestor() {
+			public boolean acceptIndexMatch(String documentPath,
+					SearchPattern indexRecord, SearchParticipant participant,
+					AccessRuleSet access) {
+				// IPath fullPath = new Path(documentPath);
+				// if( documentPathFilter.contains(fullPath)) {
+				// return true;
+				// }
+				// documentPathFilter.add(fullPath);
+				// Filter unexpected types
+				MethodDeclarationPattern record = (MethodDeclarationPattern) indexRecord;
+				switch (copiesLength) {
+				case 0:
+					break;
+				case 1:
+					if (singleWkcpPath.equals(documentPath)) {
+						return true; // fliter out *the* working copy
+					}
+					break;
+				default:
+					if (workingCopyPaths.contains(documentPath)) {
+						return true; // filter out working copies
+					}
+					break;
+				}
+
+				// Accept document path
+				AccessRestriction accessRestriction = null;
+				if (access != null) {
+					// Compute document relative path
+					int pkgLength = (record.pkg == null || record.pkg.length == 0) ? 0
+							: record.pkg.length + 1;
+					int nameLength = record.simpleName == null ? 0
+							: record.simpleName.length;
+					char[] path = new char[pkgLength + nameLength];
+					int pos = 0;
+					if (pkgLength > 0) {
+						System.arraycopy(record.pkg, 0, path, pos,
+								pkgLength - 1);
+						CharOperation.replace(path, '.', '/');
+						path[pkgLength - 1] = '/';
+						pos += pkgLength;
+					}
+					if (nameLength > 0) {
+						System.arraycopy(record.simpleName, 0, path, pos,
+								nameLength);
+						pos += nameLength;
+					}
+					// Update access restriction if path is not empty
+					if (pos > 0) {
+						accessRestriction = access.getViolatedRestriction(path);
+					}
+				}
+				if (match(record.methodSuffix, record.modifiers)) {
+					nameRequestor.acceptMethod(record.modifiers, record.pkg,
+							record.simpleName, documentPath, accessRestriction);
+				}
+				return true;
+			}
+		};
+
+		try {
+			if (progressMonitor != null) {
+				progressMonitor.beginTask(Messages.engine_searching, 100);
+			}
+			// add type names from indexes
+			indexManager.performConcurrentJob(new PatternSearchJob(pattern,
+					getDefaultSearchParticipant(), // Script search only
+					scope, searchRequestor), waitingPolicy,
+					progressMonitor == null ? null : new SubProgressMonitor(
+							progressMonitor, 100));
+
+			// add type names from working copies
+			if (copies != null) {
+				for (int i = 0; i < copiesLength; i++) {
+					ISourceModule workingCopy = copies[i];
+					if (!scope.encloses(workingCopy)) {
+						continue;
+					}
+					final String path = workingCopy.getPath().toString();
+					// if (workingCopy.isConsistent()) {
+					// IPackageDeclaration[] packageDeclarations =
+					// workingCopy.getPackageDeclarations();
+					// char[] packageDeclaration = packageDeclarations.length ==
+					// 0 ? CharOperation.NO_CHAR :
+					// packageDeclarations[0].getElementName().toCharArray();
+					IType[] allTypes = workingCopy.getTypes();
+					for (int j = 0; j < allTypes.length; j++) {
+						IType type = allTypes[i];
+						IModelElement parent = type.getParent();
+						char[][] enclosingTypeNames;
+						if (parent instanceof IType) {
+							char[] parentQualifiedName = ((IType) parent)
+									.getTypeQualifiedName().toCharArray();
+							enclosingTypeNames = CharOperation.splitOn('.',
+									parentQualifiedName);
+						} else {
+							enclosingTypeNames = CharOperation.NO_CHAR_CHAR;
+						}
+						char[] simpleName = type.getElementName().toCharArray();
+						int kind = 0;
+						if (match(typeSuffix, packageName, methodName,
+								methodMatchRule, kind, /* packageDeclaration, */
+								simpleName)) {
+							nameRequestor.acceptMethod(type.getFlags(),
+									new char[0], /* packageDeclaration, */
+									simpleName, path, null);
+						}
+					}
+					// }
+				}
+			}
+		} finally {
+			if (progressMonitor != null) {
+				progressMonitor.done();
+			}
+		}
+
+	}
+	
 }
