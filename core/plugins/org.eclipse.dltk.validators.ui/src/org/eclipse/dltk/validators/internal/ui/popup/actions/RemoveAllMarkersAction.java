@@ -15,22 +15,21 @@ import java.io.OutputStream;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.internal.ui.ValidatorsUI;
 import org.eclipse.dltk.validators.ui.AbstractValidateSelectionWithConsole;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 public class RemoveAllMarkersAction extends Action {
 
-	private final IModelElement element;
+	private final IStructuredSelection selection;
 
 	/**
 	 * @param element
 	 */
-	public RemoveAllMarkersAction(IModelElement element) {
-		this.element = element;
+	public RemoveAllMarkersAction(IStructuredSelection selection) {
+		this.selection = selection;
 		setText(Messages.DLTKValidatorsEditorContextMenu_cleanupAll);
 		setImageDescriptor(ValidatorsUI.getDefault().getImageDescriptor(
 				RemoveMarkersAction.CLEANUP_IMAGE));
@@ -53,7 +52,7 @@ public class RemoveAllMarkersAction extends Action {
 						resources, monitor);
 			}
 		};
-		delegate.selectionChanged(this, new StructuredSelection(element));
+		delegate.selectionChanged(this, selection);
 		delegate.run(this);
 	}
 

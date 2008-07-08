@@ -15,22 +15,21 @@ import java.io.OutputStream;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.internal.ui.ValidatorsUI;
 import org.eclipse.dltk.validators.ui.AbstractValidateSelectionWithConsole;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 public class ValidateAllAction extends Action {
 
-	private final IModelElement element;
+	private final IStructuredSelection selection;
 
 	/**
 	 * @param element
 	 */
-	public ValidateAllAction(IModelElement element) {
-		this.element = element;
+	public ValidateAllAction(IStructuredSelection selection) {
+		this.selection = selection;
 		setText(Messages.DLTKValidatorsEditorContextMenu_validateAll);
 		setImageDescriptor(ValidatorsUI.getDefault().getImageDescriptor(
 				ValidateAction.VALIDATE_IMAGE));
@@ -53,7 +52,7 @@ public class ValidateAllAction extends Action {
 						monitor);
 			}
 		};
-		delegate.selectionChanged(this, new StructuredSelection(element));
+		delegate.selectionChanged(this, selection);
 		delegate.run(this);
 	}
 

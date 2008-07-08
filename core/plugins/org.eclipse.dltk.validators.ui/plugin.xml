@@ -29,26 +29,12 @@
                id="org.eclipse.dltk.validators.ui.menu"
                label="%menu.label.dltkValidators"
                path="additions">
-            <separator
-                  name="sep">
-            </separator>
-            <groupMarker
-                  name="bottom">
-            </groupMarker>
+            <groupMarker name="bottom"/>
          </menu>
          <action
-               class="org.eclipse.dltk.validators.internal.ui.popup.actions.ValidateSelectionWithConsoleAction"
-               icon="icons/goto_input.gif"
-               id="org.eclipse.dltk.validators.ui.execActive"
-               label="%action.label.validateSelectionWithConsole"
-               menubarPath="org.eclipse.dltk.validators.ui.menu/top">
-         </action>
-         <action
-               class="org.eclipse.dltk.validators.internal.ui.popup.actions.RemoveValidatorAllMarkersAction"
-               icon="icons/clear_co.gif"
-               id="org.eclipse.dltk.validators.ui.clean"
-               label="%action.label.removeValidatorAllMarkers"
-               menubarPath="org.eclipse.dltk.validators.ui.menu/top">
+            class="org.eclipse.dltk.validators.internal.ui.popup.actions.DLTKValidatorsModelElementAction"
+            id="org.eclipse.dltk.validators.ui.menu"
+            label="%menu.label.dltkValidators">
          </action>
          <visibility>
             <objectState
