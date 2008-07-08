@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.validators.core.IValidator;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.internal.ui.ValidatorsUI;
-import org.eclipse.dltk.validators.ui.AbstractValidateSelectionWithConsole;
+import org.eclipse.dltk.validators.ui.AbstractValidateJob;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
@@ -45,19 +45,15 @@ public class ValidateAction extends Action {
 	}
 
 	public void run() {
-		final AbstractValidateSelectionWithConsole delegate = new AbstractValidateSelectionWithConsole() {
+		final AbstractValidateJob delegate = new AbstractValidateJob(validator
+				.getName()) {
 
-			protected String getJobName() {
-				return validator.getName();
-			}
-
-			protected void invoceValidationFor(OutputStream out, List elements,
+			protected void invokeValidationFor(OutputStream out, List elements,
 					List resources, IProgressMonitor monitor) {
 				ValidatorRuntime.executeValidator(validator, out, elements,
 						resources, monitor);
 			}
 		};
-		delegate.selectionChanged(this, selection);
-		delegate.run(this);
+		delegate.run(selection);
 	}
 }

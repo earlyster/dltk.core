@@ -19,7 +19,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.validators.core.IValidator;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.internal.ui.ValidatorsUI;
-import org.eclipse.dltk.validators.ui.AbstractValidateSelectionWithConsole;
+import org.eclipse.dltk.validators.ui.AbstractValidateJob;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.osgi.util.NLS;
@@ -42,24 +42,21 @@ public class RemoveMarkersAction extends Action {
 	}
 
 	public void run() {
-		final AbstractValidateSelectionWithConsole delegate = new AbstractValidateSelectionWithConsole() {
+		final String message = NLS.bind(
+				Messages.DLTKValidatorsEditorContextMenu_validatorCleanup,
+				validator.getName());
+		final AbstractValidateJob delegate = new AbstractValidateJob(message) {
 
 			protected boolean isConsoleRequired() {
 				return false;
 			}
 
-			protected String getJobName() {
-				final String message = Messages.DLTKValidatorsEditorContextMenu_validatorCleanup;
-				return NLS.bind(message, validator.getName());
-			}
-
-			protected void invoceValidationFor(OutputStream out, List elements,
+			protected void invokeValidationFor(OutputStream out, List elements,
 					List resources, IProgressMonitor monitor) {
 				ValidatorRuntime.cleanValidator(validator, elements, resources,
 						monitor);
 			}
 		};
-		delegate.selectionChanged(this, new StructuredSelection(element));
-		delegate.run(this);
+		delegate.run(new StructuredSelection(element));
 	}
 }

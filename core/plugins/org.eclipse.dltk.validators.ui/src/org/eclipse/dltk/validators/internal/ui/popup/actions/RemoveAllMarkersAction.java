@@ -17,7 +17,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.internal.ui.ValidatorsUI;
-import org.eclipse.dltk.validators.ui.AbstractValidateSelectionWithConsole;
+import org.eclipse.dltk.validators.ui.AbstractValidateJob;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -36,24 +36,20 @@ public class RemoveAllMarkersAction extends Action {
 	}
 
 	public void run() {
-		final AbstractValidateSelectionWithConsole delegate = new AbstractValidateSelectionWithConsole() {
+		final AbstractValidateJob delegate = new AbstractValidateJob(
+				Messages.RemoveValidatorAllMarkersAction_validatorCleanup) {
 
 			protected boolean isConsoleRequired() {
 				return false;
 			}
 
-			protected String getJobName() {
-				return Messages.RemoveValidatorAllMarkersAction_validatorCleanup;
-			}
-
-			protected void invoceValidationFor(OutputStream out, List elements,
+			protected void invokeValidationFor(OutputStream out, List elements,
 					List resources, IProgressMonitor monitor) {
 				ValidatorRuntime.executeCleanAllValidatorsWithConsole(elements,
 						resources, monitor);
 			}
 		};
-		delegate.selectionChanged(this, selection);
-		delegate.run(this);
+		delegate.run(selection);
 	}
 
 }
