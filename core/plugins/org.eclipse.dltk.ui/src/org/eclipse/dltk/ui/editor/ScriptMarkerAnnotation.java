@@ -25,9 +25,9 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 public class ScriptMarkerAnnotation extends MarkerAnnotation implements IScriptAnnotation {
 
 	public static final String JAVA_MARKER_TYPE_PREFIX= "org.eclipse.jdt"; //$NON-NLS-1$
-	public static final String ERROR_ANNOTATION_TYPE= "org.eclipse.jdt.ui.error"; //$NON-NLS-1$
-	public static final String WARNING_ANNOTATION_TYPE= "org.eclipse.jdt.ui.warning"; //$NON-NLS-1$
-	public static final String INFO_ANNOTATION_TYPE= "org.eclipse.jdt.ui.info"; //$NON-NLS-1$
+	public static final String ERROR_ANNOTATION_TYPE= "org.eclipse.dltk.ui.error"; //$NON-NLS-1$
+	public static final String WARNING_ANNOTATION_TYPE= "org.eclipse.dltk.ui.warning"; //$NON-NLS-1$
+	public static final String INFO_ANNOTATION_TYPE= "org.eclipse.dltk.ui.info"; //$NON-NLS-1$
 	public static final String TASK_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.task"; //$NON-NLS-1$
 
 	private IScriptAnnotation fOverlay;
