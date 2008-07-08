@@ -329,15 +329,23 @@ public class DefaultProblem extends CategorizedProblem {
 	}
 
 	public String toString() {
-		String s = "Pb(" + (this.id & IProblem.IgnoreCategoriesMask) + ") "; //$NON-NLS-1$ //$NON-NLS-2$
+		StringBuffer sb = new StringBuffer();
+		sb.append("Pb#"); //$NON-NLS-1$
+		sb.append(this.id & IProblem.IgnoreCategoriesMask);
+		sb.append(' ');
+		sb.append(line);
+		sb.append(':');
 		if (this.message != null) {
-			s += this.message;
+			sb.append(this.message);
 		} else {
-			if (this.arguments != null)
-				for (int i = 0; i < this.arguments.length; i++)
-					s += " " + this.arguments[i]; //$NON-NLS-1$
+			if (this.arguments != null) {
+				for (int i = 0; i < this.arguments.length; i++) {
+					sb.append(' ');
+					sb.append(this.arguments[i]);
+				}
+			}
 		}
-		return s;
+		return sb.toString();
 	}
 
 	public int hashCode() {
