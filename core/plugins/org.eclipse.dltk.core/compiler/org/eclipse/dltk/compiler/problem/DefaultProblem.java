@@ -49,8 +49,7 @@ public class DefaultProblem extends CategorizedProblem {
 
 	public DefaultProblem(String originatingFileName, String message, int id,
 			String[] stringArguments, int severity, int startPosition,
-			int endPosition, int line, int column ) {
-
+			int endPosition, int line, int column) {
 		this.fileName = originatingFileName;
 		this.message = message;
 		this.id = id;
@@ -61,35 +60,14 @@ public class DefaultProblem extends CategorizedProblem {
 		this.line = line;
 		this.column = column;
 	}
+
 	public DefaultProblem(String originatingFileName, String message, int id,
 			String[] stringArguments, int severity, int startPosition,
 			int endPosition, int line) {
-
-		this(originatingFileName, message, id, stringArguments, severity, startPosition, endPosition, line, 0);
+		this(originatingFileName, message, id, stringArguments, severity,
+				startPosition, endPosition, line, 0);
 	}
-	
-	
 
-//	public boolean equals(Object obj) {
-//		if( !(obj instanceof DefaultProblem ) ) {
-//			return false;
-//		}
-//		DefaultProblem p = (DefaultProblem) obj;
-//		if( this.line != p.line ) {
-//			return false;
-//		}
-//		if( this.startPosition != p.startPosition ) {
-//			return false;
-//		}
-//		if( this.endPosition != p.endPosition ) {
-//			return false;
-//		}
-//		if( this.message != null && !this.message.equals(p.message)) {
-//			return false;
-//		}
-//		return super.equals(obj);
-//	}
-	
 	public String errorReportSource(char[] unitSource) {
 		return errorReportSource(unitSource, 0);
 	}
@@ -252,6 +230,7 @@ public class DefaultProblem extends CategorizedProblem {
 	public String getMessage() {
 		return this.message;
 	}
+
 	public int getColumn() {
 		return this.column;
 	}
@@ -294,6 +273,7 @@ public class DefaultProblem extends CategorizedProblem {
 
 	/*
 	 * Helper method: checks the severity to see if the Error bit is set.
+	 * 
 	 * @return boolean
 	 */
 	public boolean isError() {
@@ -302,6 +282,7 @@ public class DefaultProblem extends CategorizedProblem {
 
 	/*
 	 * Helper method: checks the severity to see if the Error bit is not set.
+	 * 
 	 * @return boolean
 	 */
 	public boolean isWarning() {
@@ -358,6 +339,7 @@ public class DefaultProblem extends CategorizedProblem {
 		}
 		return s;
 	}
+
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -373,6 +355,7 @@ public class DefaultProblem extends CategorizedProblem {
 		result = prime * result + startPosition;
 		return result;
 	}
+
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
