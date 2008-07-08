@@ -329,11 +329,20 @@ public class DefaultProblem extends CategorizedProblem {
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append("Pb#"); //$NON-NLS-1$
-		sb.append(this.id & IProblem.IgnoreCategoriesMask);
+		final StringBuffer sb = new StringBuffer();
+		sb.append("Pb"); //$NON-NLS-1$
+		final int maskedId = this.id & IProblem.IgnoreCategoriesMask;
+		if (maskedId != 0) {
+			sb.append('#');
+			sb.append(maskedId);
+		}
 		sb.append(' ');
 		sb.append(line);
+		sb.append('[');
+		sb.append(startPosition);
+		sb.append(".."); //$NON-NLS-1$
+		sb.append(endPosition);
+		sb.append(']');
 		sb.append(':');
 		if (this.message != null) {
 			sb.append(this.message);
