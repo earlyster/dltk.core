@@ -91,11 +91,14 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IURIEditorInput;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.ide.FileStoreEditorInput;
+import org.eclipse.ui.ide.IDE.SharedImages;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
@@ -162,13 +165,16 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		private static final int ERROR_LAYER;
 
 		static {
-			AnnotationPreferenceLookup lookup = EditorsUI
+			final AnnotationPreferenceLookup lookup = EditorsUI
 					.getAnnotationPreferenceLookup();
 			TASK_LAYER = computeLayer(
-					"org.eclipse.ui.workbench.texteditor.task", lookup); //$NON-NLS-1$
-			INFO_LAYER = computeLayer("org.eclipse.jdt.ui.info", lookup); //$NON-NLS-1$
-			WARNING_LAYER = computeLayer("org.eclipse.jdt.ui.warning", lookup); //$NON-NLS-1$
-			ERROR_LAYER = computeLayer("org.eclipse.jdt.ui.error", lookup); //$NON-NLS-1$
+					ScriptMarkerAnnotation.TASK_ANNOTATION_TYPE, lookup);
+			INFO_LAYER = computeLayer(
+					ScriptMarkerAnnotation.INFO_ANNOTATION_TYPE, lookup);
+			WARNING_LAYER = computeLayer(
+					ScriptMarkerAnnotation.WARNING_ANNOTATION_TYPE, lookup);
+			ERROR_LAYER = computeLayer(
+					ScriptMarkerAnnotation.ERROR_ANNOTATION_TYPE, lookup);
 		}
 
 		private static int computeLayer(String annotationType,
@@ -182,15 +188,17 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				return IAnnotationAccessExtension.DEFAULT_LAYER + 1;
 		}
 
-		// private static Image fgQuickFixImage;
-		// private static Image fgQuickFixErrorImage;
-		// private static boolean fgQuickFixImagesInitialized = false;
+		private static Image fgTaskImage;
+		private static Image fgInfoImage;
+		private static Image fgWarningImage;
+		private static Image fgErrorImage;
+		private static boolean fgImagesInitialized = false;
 
 		private ISourceModule fSourceModule;
 		private List fOverlaids;
-		private org.eclipse.dltk.compiler.problem.IProblem fProblem;
+		private IProblem fProblem;
 		private Image fImage;
-		private boolean fQuickFixImagesInitialized = false;
+		private boolean fImageInitialized = false;
 		private int fLayer = IAnnotationAccessExtension.DEFAULT_LAYER;
 		private boolean fIsQuickFixable;
 		private boolean fIsQuickFixableStateSet = false;
@@ -204,7 +212,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			 * if (JavaSpellingReconcileStrategy.SPELLING_PROBLEM_ID ==
 			 * fProblem.getID()) { setType(SPELLING_ANNOTATION_TYPE); fLayer=
 			 * WARNING_LAYER; } else
-			 */if (IProblem.Task == fProblem.getID()) {
+			 */
+			if (IProblem.Task == fProblem.getID()) {
 				setType(ScriptMarkerAnnotation.TASK_ANNOTATION_TYPE);
 				fLayer = TASK_LAYER;
 			} else if (fProblem.isWarning()) {
@@ -226,34 +235,44 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			return fLayer;
 		}
 
-		private void initializeImages() {
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18936
-			if (DLTKCore.DEBUG) {
-				System.err.println("TODO: Add quick fixes here."); //$NON-NLS-1$
+		/**
+		 * delayed image loading - to be sure it is called on the UI thread
+		 */
+		private void initializeImage() {
+			if (!fImageInitialized) {
+				initializeImages();
+				// TODO: Add quick fix images in ProblemAnnotation
+				final String type = getType();
+				if (ScriptMarkerAnnotation.TASK_ANNOTATION_TYPE.equals(type))
+					fImage = fgTaskImage;
+				else if (ScriptMarkerAnnotation.INFO_ANNOTATION_TYPE
+						.equals(type))
+					fImage = fgInfoImage;
+				else if (ScriptMarkerAnnotation.WARNING_ANNOTATION_TYPE
+						.equals(type))
+					fImage = fgWarningImage;
+				else if (ScriptMarkerAnnotation.ERROR_ANNOTATION_TYPE
+						.equals(type))
+					fImage = fgErrorImage;
+				fImageInitialized = true;
 			}
-			if (!fQuickFixImagesInitialized) {
-				// if (!isQuickFixableStateSet())
-				// setQuickFixable(isProblem() && indicateQuixFixableProblems()
-				// && JavaCorrectionProcessor.hasCorrections(this)); // no light
-				// bulb for tasks
-				// if (isQuickFixable()) {
-				// if (!fgQuickFixImagesInitialized) {
-				// fgQuickFixImage=
-				//JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM
-				// );
-				// fgQuickFixErrorImage=
-				//JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
-				// fgQuickFixImagesInitialized= true;
-				// }
-				// if
-				//(ScriptMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(getType()
-				// ))
-				// fImage= fgQuickFixErrorImage;
-				// else
-				// fImage= fgQuickFixImage;
-				// }
-				fQuickFixImagesInitialized = true;
-			}
+		}
+
+		private static void initializeImages() {
+			if (fgImagesInitialized)
+				return;
+
+			final ISharedImages sharedImages = PlatformUI.getWorkbench()
+					.getSharedImages();
+			fgTaskImage = sharedImages.getImage(SharedImages.IMG_OBJS_TASK_TSK);
+			fgInfoImage = sharedImages
+					.getImage(ISharedImages.IMG_OBJS_INFO_TSK);
+			fgWarningImage = sharedImages
+					.getImage(ISharedImages.IMG_OBJS_WARN_TSK);
+			fgErrorImage = sharedImages
+					.getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
+
+			fgImagesInitialized = true;
 		}
 
 		// private boolean indicateQuixFixableProblems() {
@@ -265,7 +284,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		 * @see Annotation#paint
 		 */
 		public void paint(GC gc, Canvas canvas, Rectangle r) {
-			initializeImages();
+			initializeImage();
 			if (fImage != null)
 				ImageUtilities.drawImage(fImage, gc, canvas, r, SWT.CENTER,
 						SWT.TOP);
@@ -275,7 +294,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		 * @see IJavaAnnotation#getImage(Display)
 		 */
 		public Image getImage(Display display) {
-			initializeImages();
+			initializeImage();
 			return fImage;
 		}
 
