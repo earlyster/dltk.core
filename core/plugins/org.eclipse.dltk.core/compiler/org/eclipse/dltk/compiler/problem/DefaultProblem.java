@@ -73,7 +73,7 @@ public class DefaultProblem extends CategorizedProblem {
 	}
 
 	public String errorReportSource(char[] unitSource, int tagBits) {
-		// extra from the source the innacurate token
+		// extra from the source the inaccurate token
 		// and "highlight" it using some underneath ^^^^^
 		// put some context around too.
 
