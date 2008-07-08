@@ -59,11 +59,7 @@ public abstract class AbstractMenuCreatorObjectActionDelegate implements
 	private boolean fFillMenu = true;
 
 	// current selection
-	private IStructuredSelection selection;
-
-	public IStructuredSelection getSelection() {
-		return selection;
-	}
+	private IStructuredSelection currentSelection;
 
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 		// We don't have a need for the active part.
@@ -83,11 +79,11 @@ public abstract class AbstractMenuCreatorObjectActionDelegate implements
 			}
 			// enable our menu
 			action.setEnabled(true);
-			selection = (IStructuredSelection) newSelection;
+			currentSelection = (IStructuredSelection) newSelection;
 			return;
 		}
 		action.setEnabled(false);
-		selection = null;
+		currentSelection = null;
 	}
 
 	public void dispose() {
@@ -118,7 +114,7 @@ public abstract class AbstractMenuCreatorObjectActionDelegate implements
 					for (int i = 0; i < items.length; i++) {
 						items[i].dispose();
 					}
-					fillMenu(new MenuBuilder(m));
+					fillMenu(new MenuBuilder(m), currentSelection);
 					fFillMenu = false;
 				}
 			}
@@ -129,6 +125,7 @@ public abstract class AbstractMenuCreatorObjectActionDelegate implements
 	/**
 	 * @param menu
 	 */
-	protected abstract void fillMenu(IMenuBuilder menu);
+	protected abstract void fillMenu(IMenuBuilder menu,
+			IStructuredSelection selection);
 
 }
