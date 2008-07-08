@@ -120,8 +120,8 @@ public class DefaultProblem extends CategorizedProblem {
 		// trim left and right spaces/tabs
 		while ((c = unitSource[begin]) == ' ' || c == '\t')
 			begin++;
-		// while ((c = unitSource[end]) == ' ' || c == '\t') end--; TODO
-		// (philippe) should also trim right, but all tests are to be updated
+		while ((c = unitSource[end]) == ' ' || c == '\t')
+			end--;
 
 		// copy source
 		errorBuffer.append(unitSource, begin, end - begin + 1);
