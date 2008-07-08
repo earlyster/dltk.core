@@ -17,7 +17,6 @@ import org.eclipse.dltk.dbgp.commands.IDbgpStatckCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpStackCommands;
-import org.eclipse.dltk.dbgp.internal.commands.IDbgpCommunicator;
 import org.w3c.dom.Element;
 
 public class DbgpStackCommandsTests extends DbgpProtocolTests {
@@ -49,7 +48,7 @@ public class DbgpStackCommandsTests extends DbgpProtocolTests {
 		final Element response = getStackDepthResponse(0, 3);
 
 		IDbgpStatckCommands commands = new DbgpStackCommands(
-				new IDbgpCommunicator() {
+				new AbstractCommunicator() {
 					public Element communicate(DbgpRequest request)
 							throws DbgpException {
 
@@ -57,10 +56,6 @@ public class DbgpStackCommandsTests extends DbgpProtocolTests {
 						assertTrue(request.hasOption("-i"));
 
 						return response;
-					}
-
-					public void send(DbgpRequest request) throws DbgpException {
-						// TODO Auto-generated method stub
 					}
 				});
 
@@ -72,17 +67,13 @@ public class DbgpStackCommandsTests extends DbgpProtocolTests {
 		final Element response = getStackGetResponse(0);
 
 		IDbgpStatckCommands commands = new DbgpStackCommands(
-				new IDbgpCommunicator() {
+				new AbstractCommunicator() {
 					public Element communicate(DbgpRequest request)
 							throws DbgpException {
 
 						assertTrue(request.hasOption("-i"));
 
 						return response;
-					}
-
-					public void send(DbgpRequest request) throws DbgpException {
-						// TODO Auto-generated method stub
 					}
 				});
 
