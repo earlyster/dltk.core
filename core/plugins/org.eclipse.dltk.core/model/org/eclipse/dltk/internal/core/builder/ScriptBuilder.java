@@ -45,6 +45,7 @@ import org.eclipse.dltk.core.IModelMarker;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
 import org.eclipse.dltk.internal.core.BuiltinSourceModule;
@@ -136,6 +137,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				IProjectFragment fragment = (IProjectFragment) element;
 
 				fragments.add(fragment.getPath());
+				this.monitor.subTask("Checking folder:"
+						+ EnvironmentPathUtils.getLocalPath(fragment.getPath())
+								.lastSegment());
 				if (lastState.externalFolderLocations.contains(fragment
 						.getPath())) {
 					return false;
@@ -307,9 +311,14 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		State newState = clearLastState();
 		this.lastState = newState;
 		try {
-			monitor.beginTask(MessageFormat.format(
+			monitor.setTaskName(MessageFormat.format(
 					Messages.ScriptBuilder_buildingScriptsIn,
-					new Object[] { currentProject.getName() }), 66 + 9);
+					new Object[] { currentProject.getName() }));
+			monitor.beginTask(""
+			/*
+			 * MessageFormat.format( Messages.ScriptBuilder_buildingScriptsIn,
+			 * new Object[] { currentProject.getName() })
+			 */, 66 + 9);
 			Set resources = getResourcesFrom(currentProject, monitor, 1);
 			if (monitor.isCanceled()) {
 				return;
@@ -328,13 +337,16 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				totalFiles = 1;
 			int resourceTicks = 64 * resources.size() / totalFiles;
 
-			buildResources(resources, monitor, resourceTicks,
+			List relements = buildResources(resources, monitor, resourceTicks,
 					IScriptBuilder.FULL_BUILD, new HashSet(), externalFolders,
 					resources);
 			if (monitor.isCanceled()) {
 				return;
 			}
 			List els = new ArrayList();
+			if (relements != null) {
+				els.addAll(relements);
+			}
 			els.addAll(elements);
 
 			buildElements(els, elements, monitor, 64 - resourceTicks,
@@ -346,6 +358,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				e.printStackTrace();
 			}
 		} finally {
+			monitor.done();
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
 					this.lastState);
 		}
@@ -354,9 +367,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	private Set getResourcesFrom(Object el, final IProgressMonitor monitor,
 			int ticks) throws CoreException {
 		Set resources = new HashSet();
-		String name = MessageFormat.format(
-				Messages.ScriptBuilder_scanningResourcesIn,
-				new Object[] { currentProject.getName() });
+		String name = Messages.ScriptBuilder_scanningResourcesIn;
 		monitor.subTask(name);
 		try {
 			ResourceVisitor resourceVisitor = new ResourceVisitor(resources,
@@ -371,19 +382,20 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			return resources;
 		} finally {
 			monitor.worked(ticks);
+			monitor.done();
 		}
 	}
 
 	private Set getExternalElementsFrom(ScriptProject prj,
 			final IProgressMonitor monitor, int tiks) throws ModelException {
 		Set elements = new HashSet();
-		String name = MessageFormat.format(
-				Messages.ScriptBuilder_scanningExternalResourcesFor,
-				new Object[] { currentProject.getName() });
-		SubProgressMonitor sub = new SubProgressMonitor(monitor, tiks);
+		String name = Messages.ScriptBuilder_scanningExternalResourcesFor;
+		// SubProgressMonitor sub = new SubProgressMonitor(monitor, tiks);
+		monitor.subTask(name);
 		try {
+			SubProgressMonitor mon = new SubProgressMonitor(monitor, tiks);
 			ExternalModuleVisitor visitor = new ExternalModuleVisitor(elements,
-					monitor);
+					mon);
 
 			IProjectFragment[] fragments = prj.getAllProjectFragments();
 			List extFragments = new ArrayList();
@@ -400,15 +412,17 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					}
 				}
 			}
-			monitor.subTask(name);
-			sub.beginTask(name, extFragments.size());
+			// monitor.subTask(name);
+			mon.beginTask(name, extFragments.size());
 			for (Iterator iterator = extFragments.iterator(); iterator
 					.hasNext();) {
 				IProjectFragment fragment = (IProjectFragment) iterator.next();
 				// New project fragment, we need to obtain all modules
 				// from this fragment.
 				fragment.accept(visitor);
+				mon.worked(1);
 			}
+			mon.done();
 
 			this.lastState.externalFolderLocations.clear();
 			this.lastState.externalFolderLocations.addAll(visitor
@@ -417,7 +431,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 			return elements;
 		} finally {
-			sub.done();
+			monitor.done();
+			// monitor.done();
 			// monitor.worked(tiks);
 			// monitor.setTaskName("");
 		}
@@ -460,13 +475,16 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				totalFiles = 1;
 			int resourceTicks = 64 * resources.size() / totalFiles;
 
-			buildResources(resources, monitor, resourceTicks,
+			List relements = buildResources(resources, monitor, resourceTicks,
 					IScriptBuilder.INCREMENTAL_BUILD, externalFoldersBefore,
 					externalFolders, allresources);
 			if (monitor.isCanceled()) {
 				return;
 			}
 			List els = new ArrayList();
+			if (relements != null) {
+				els.addAll(relements);
+			}
 			els.addAll(elements);
 			buildElements(els, elements, monitor, 64 - resourceTicks,
 					IScriptBuilder.INCREMENTAL_BUILD, externalFoldersBefore,
@@ -479,7 +497,11 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	protected void buildResources(Set resources, IProgressMonitor monitor,
+	/**
+	 * Build only resources, if some resources are elements they they will be
+	 * returned.
+	 */
+	protected List buildResources(Set resources, IProgressMonitor monitor,
 			int tiks, int buildType, Set externalFoldersBefore,
 			Set externalFolders, Set allresources) {
 		List realResources = new ArrayList(); // real resources
@@ -487,18 +509,20 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 		Set allElements = new HashSet();
 		Set allResources = new HashSet();
-		String name = MessageFormat.format(
-				Messages.ScriptBuilder_locatingResourcesFor,
-				new Object[] { this.scriptProject.getElementName() });
+		String name = Messages.ScriptBuilder_locatingResourcesFor;
 		IProgressMonitor sub = new SubProgressMonitor(monitor, tiks / 3);
 		// sub.subTask(name);
 		sub.beginTask(name, allresources.size());
+		monitor.subTask(name);
+		int id = 0;
 		for (Iterator iterator = allresources.iterator(); iterator.hasNext();) {
 			IResource res = (IResource) iterator.next();
 
+			sub.subTask("Locating source module (" + (allresources.size() - id)
+					+ "):" + res.getName());
 			sub.worked(1);
 			if (sub.isCanceled()) {
-				return;
+				return null;
 			}
 			// IModelElement element2 = DLTKCore.create(res);
 			IModelElement element = DLTKCore.create(res);
@@ -512,12 +536,14 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				}
 			} else {
 				if (resources.contains(res)) {
-					realResources.add(element);
+					realResources.add(res);
 				}
 				allResources.add(res);
 			}
+			id++;
 		}
 		sub.done();
+		monitor.done();
 		lastBuildSourceFiles += elements.size();
 		// Else build as resource.
 		String[] natureIds = null;
@@ -527,7 +553,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
-			return;
+			return null;
 		}
 		if (realResources.size() == 0) {
 			monitor.worked(tiks / 3);
@@ -562,9 +588,10 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			}
 		}
 
-		buildElements(elements, allElements, monitor, tiks / 3, buildType,
-				externalFoldersBefore, externalFolders);
+		// buildElements(elements, allElements, monitor, tiks / 3, buildType,
+		// externalFoldersBefore, externalFolders);
 		// sub.done();
+		return elements;
 	}
 
 	protected void buildElements(List elements, Set allElements,
