@@ -57,12 +57,12 @@ public class DbgpExtendedCommands extends DbgpBaseCommands implements
 		return parseResponse(communicate(request));
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public IDbgpProperty evaluate(String snippet, int depth)
 			throws DbgpException {
-		DbgpRequest request = createRequest(EVAL_COMMAND);
-		request.setData(snippet);
-		request.addOption("-d", depth); //$NON-NLS-1$
-		return parseResponse(communicate(request));
+		return evaluate(snippet);
 	}
 
 	public IDbgpProperty expression(String expression) throws DbgpException {

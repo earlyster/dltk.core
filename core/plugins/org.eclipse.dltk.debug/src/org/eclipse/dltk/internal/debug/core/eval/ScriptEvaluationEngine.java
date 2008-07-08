@@ -54,9 +54,7 @@ public class ScriptEvaluationEngine implements IScriptEvaluationEngine {
 			final IDbgpExtendedCommands extended = session
 					.getExtendedCommands();
 
-			final IDbgpProperty property = (frame == null) ? extended
-					.evaluate(snippet) : extended.evaluate(snippet, frame
-					.getLevel());
+			final IDbgpProperty property = extended.evaluate(snippet);
 
 			if (property != null) {
 				IScriptValue value = ScriptValue.createValue(frame, property);

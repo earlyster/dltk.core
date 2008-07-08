@@ -34,7 +34,11 @@ public interface IDbgpExtendedCommands {
 	boolean makeBreak() throws DbgpException;
 
 	IDbgpProperty evaluate(String snippet) throws DbgpException;
-	
+
+	/**
+	 * @deprecated <code>eval</code> command does not support <code>depth</code>
+	 *             parameter, so this method will be removed
+	 */
 	IDbgpProperty evaluate(String snippet, int depth) throws DbgpException;
 
 	IDbgpProperty expression(String expression) throws DbgpException;
