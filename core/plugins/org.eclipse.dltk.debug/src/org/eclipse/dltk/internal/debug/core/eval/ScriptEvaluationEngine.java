@@ -24,27 +24,25 @@ import org.eclipse.dltk.internal.debug.core.model.ScriptValue;
 public class ScriptEvaluationEngine implements IScriptEvaluationEngine {
 	private final IScriptThread thread;
 
-	private int count;
+	// private int count;
 	private final WeakHashMap cache;
 
-	
-	
 	protected void putToCache(String snippet, IScriptEvaluationResult result) {
-//		if (result != null) {
-//			cache.put(snippet, result);
-//		}
+		// if (result != null) {
+		// cache.put(snippet, result);
+		// }
 	}
 
 	protected IScriptEvaluationResult getFromCache(String snippet) {
 		return null;
-//		int newCount = thread.getModificationsCount();
-//		if (count != newCount) {
-//			cache.clear();
-//			count = newCount;
-//			return null;
-//		}
-//
-//		return (IScriptEvaluationResult) cache.get(snippet);
+		// int newCount = thread.getModificationsCount();
+		// if (count != newCount) {
+		// cache.clear();
+		// count = newCount;
+		// return null;
+		// }
+		//
+		// return (IScriptEvaluationResult) cache.get(snippet);
 	}
 
 	private IScriptEvaluationResult evaluate(String snippet,
@@ -53,18 +51,21 @@ public class ScriptEvaluationEngine implements IScriptEvaluationEngine {
 		try {
 			final IDbgpSession session = thread.getDbgpSession();
 
-			final IDbgpExtendedCommands extended = session.getExtendedCommands();
+			final IDbgpExtendedCommands extended = session
+					.getExtendedCommands();
 
-			final IDbgpProperty property = (frame == null) ? 
-					extended.evaluate(snippet) : 
-					extended.evaluate(snippet, frame.getLevel());
+			final IDbgpProperty property = (frame == null) ? extended
+					.evaluate(snippet) : extended.evaluate(snippet, frame
+					.getLevel());
 
 			if (property != null) {
 				IScriptValue value = ScriptValue.createValue(frame, property);
 				result = new ScriptEvaluationResult(thread, snippet, value);
 			} else {
 				// TODO: localize
-				result = new FailedScriptEvaluationResult(thread, snippet,
+				result = new FailedScriptEvaluationResult(
+						thread,
+						snippet,
 						new String[] { Messages.ScriptEvaluationEngine_cantEvaluate });
 			}
 
@@ -79,7 +80,7 @@ public class ScriptEvaluationEngine implements IScriptEvaluationEngine {
 
 	public ScriptEvaluationEngine(IScriptThread thread) {
 		this.thread = thread;
-		this.count = thread.getModificationsCount();
+		// this.count = thread.getModificationsCount();
 		this.cache = new WeakHashMap();
 	}
 
@@ -106,7 +107,9 @@ public class ScriptEvaluationEngine implements IScriptEvaluationEngine {
 			final IScriptStackFrame frame,
 			final IScriptEvaluationListener listener) {
 		// TODO: localize
-		Job job = new Job(MessageFormat.format(Messages.ScriptEvaluationEngine_evaluationOf, new Object[] { snippet })) { // TODO: make constant
+		Job job = new Job(MessageFormat.format(
+				Messages.ScriptEvaluationEngine_evaluationOf,
+				new Object[] { snippet })) { // TODO: make constant
 			protected IStatus run(IProgressMonitor monitor) {
 				if (getScriptDebugTarget().isTerminated()) {
 					return Status.OK_STATUS;
