@@ -140,8 +140,10 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 				String localPath = EnvironmentPathUtils.getLocalPath(
 						fragment.getPath()).toString();
-				if (!localPath.startsWith("#")) {
-					this.monitor.subTask("Looking into folder:" + localPath);
+				if (!localPath.startsWith("#")) { //$NON-NLS-1$
+					this.monitor
+							.subTask(Messages.ScriptBuilder_Looking_into_folder
+									+ localPath);
 				}
 				if (lastState.externalFolderLocations.contains(fragment
 						.getPath())) {
@@ -316,11 +318,12 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			monitor.setTaskName(MessageFormat.format(
 					Messages.ScriptBuilder_buildingScriptsIn,
 					new Object[] { currentProject.getName() }));
-			monitor.beginTask(""
-			/*
-			 * MessageFormat.format( Messages.ScriptBuilder_buildingScriptsIn,
-			 * new Object[] { currentProject.getName() })
-			 */, 66 + 9 + 10);
+			monitor.beginTask("" //$NON-NLS-1$
+					/*
+					 * MessageFormat.format(
+					 * Messages.ScriptBuilder_buildingScriptsIn, new Object[] {
+					 * currentProject.getName() })
+					 */, 66 + 9 + 10);
 			Set resources = getResourcesFrom(currentProject, monitor, 1);
 			if (monitor.isCanceled()) {
 				return;
@@ -460,7 +463,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			monitor.setTaskName(MessageFormat.format(
 					Messages.ScriptBuilder_buildingScriptsIn,
 					new Object[] { currentProject.getName() }));
-			monitor.beginTask("", 67 + 9 + 10);
+			monitor.beginTask("", 67 + 9 + 10); //$NON-NLS-1$
 
 			// Set allresources = getResourcesFrom(currentProject, monitor, 1);
 			if (monitor.isCanceled()) {
@@ -527,8 +530,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		for (Iterator iterator = allresources.iterator(); iterator.hasNext();) {
 			IResource res = (IResource) iterator.next();
 
-			sub.subTask("Locating source modules ("
-					+ (allresources.size() - id) + "):" + res.getName());
+			sub.subTask(Messages.ScriptBuilder_Location_source_modules + " ("
+					+ (allresources.size() - id) + "):" + res.getName()); //$NON-NLS-1$
 			sub.worked(1);
 			if (sub.isCanceled()) {
 				return null;

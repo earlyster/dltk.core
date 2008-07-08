@@ -7,6 +7,8 @@ public class Messages extends NLS {
 	public static String ScriptBuilder_building;
 	public static String ScriptBuilder_buildingScriptsIn;
 	public static String ScriptBuilder_locatingResourcesFor;
+	public static String ScriptBuilder_Location_source_modules;
+	public static String ScriptBuilder_Looking_into_folder;
 	public static String ScriptBuilder_scanningExternalResourcesFor;
 	public static String ScriptBuilder_scanningResourcesIn;
 	static {
