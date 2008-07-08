@@ -1,6 +1,5 @@
 package org.eclipse.dltk.internal.debug.core.eval;
 
-import java.text.MessageFormat;
 import java.util.WeakHashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,6 +19,7 @@ import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptValue;
 import org.eclipse.dltk.internal.debug.core.model.ScriptDebugTarget;
 import org.eclipse.dltk.internal.debug.core.model.ScriptValue;
+import org.eclipse.osgi.util.NLS;
 
 public class ScriptEvaluationEngine implements IScriptEvaluationEngine {
 	private final IScriptThread thread;
@@ -62,7 +62,6 @@ public class ScriptEvaluationEngine implements IScriptEvaluationEngine {
 				IScriptValue value = ScriptValue.createValue(frame, property);
 				result = new ScriptEvaluationResult(thread, snippet, value);
 			} else {
-				// TODO: localize
 				result = new FailedScriptEvaluationResult(
 						thread,
 						snippet,
@@ -106,10 +105,8 @@ public class ScriptEvaluationEngine implements IScriptEvaluationEngine {
 	public void asyncEvaluate(final String snippet,
 			final IScriptStackFrame frame,
 			final IScriptEvaluationListener listener) {
-		// TODO: localize
-		Job job = new Job(MessageFormat.format(
-				Messages.ScriptEvaluationEngine_evaluationOf,
-				new Object[] { snippet })) { // TODO: make constant
+		Job job = new Job(NLS.bind(
+				Messages.ScriptEvaluationEngine_evaluationOf, snippet)) {
 			protected IStatus run(IProgressMonitor monitor) {
 				if (getScriptDebugTarget().isTerminated()) {
 					return Status.OK_STATUS;
