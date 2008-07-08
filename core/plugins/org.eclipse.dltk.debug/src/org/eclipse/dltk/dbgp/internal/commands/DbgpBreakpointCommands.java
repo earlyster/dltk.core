@@ -19,7 +19,6 @@ import org.eclipse.dltk.dbgp.commands.IDbgpBreakpointCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlEntityParser;
-import org.eclipse.dltk.debug.core.IDebugOptions;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -109,16 +108,8 @@ public class DbgpBreakpointCommands extends DbgpBaseCommands implements
 		return parseSetBreakpointResponse(communicate(request));
 	}
 
-	private IDebugOptions options;
-
-	public DbgpBreakpointCommands(IDbgpCommunicator communicator,
-			IDebugOptions options) {
+	public DbgpBreakpointCommands(IDbgpCommunicator communicator) {
 		super(communicator);
-		this.options = options;
-	}
-
-	public void configure(IDebugOptions debugOptions) {
-		this.options = debugOptions;
 	}
 
 	public String setLineBreakpoint(URI uri, int lineNumber,

@@ -30,7 +30,6 @@ import org.eclipse.dltk.dbgp.commands.IDbgpStatckCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpStatusCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpStreamCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
-import org.eclipse.dltk.debug.core.IDebugOptions;
 
 public class DbgpCoreCommands implements IDbgpCoreCommands {
 
@@ -54,12 +53,10 @@ public class DbgpCoreCommands implements IDbgpCoreCommands {
 
 	private final IDbgpPropertyCommands propertyCommands;
 
-	public DbgpCoreCommands(IDbgpCommunicator communicator,
-			IDebugOptions options) {
+	public DbgpCoreCommands(IDbgpCommunicator communicator) {
 		this.featureCommands = new DbgpFeatureCommands(communicator);
 		this.statusCommands = new DbgpStatusCommands(communicator);
-		this.breakpointCommands = new DbgpBreakpointCommands(communicator,
-				options);
+		this.breakpointCommands = new DbgpBreakpointCommands(communicator);
 		this.sourceCommands = new DbgpSourceCommands(communicator);
 		this.contextCommands = new DbgpContextCommands(communicator);
 		this.stackCommands = new DbgpStackCommands(communicator);
@@ -67,10 +64,6 @@ public class DbgpCoreCommands implements IDbgpCoreCommands {
 		this.streamCommands = new DbgpStreamCommands(communicator);
 		this.propertyCommands = new DbgpPropertyCommands(communicator);
 		this.dataTypeCommands = new DbgpDataTypeCommands(communicator);
-	}
-
-	public void configure(IDebugOptions debugOptions) {
-		breakpointCommands.configure(debugOptions);
 	}
 
 	public IDbgpFeature getFeature(String featureName) throws DbgpException {

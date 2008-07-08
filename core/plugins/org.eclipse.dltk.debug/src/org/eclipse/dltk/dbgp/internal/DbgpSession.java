@@ -107,10 +107,10 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 				"DBGP - Stream manager"); //$NON-NLS-1$
 		this.streamManager.addTerminationListener(this);
 
-		communicator = new DbgpDebuggingEngineCommunicator(engine);
-
-		this.coreCommands = new DbgpCoreCommands(communicator,
+		communicator = new DbgpDebuggingEngineCommunicator(engine,
 				DefaultDebugOptions.getDefaultInstance());
+
+		this.coreCommands = new DbgpCoreCommands(communicator);
 		this.extendedCommands = new DbgpExtendedCommands(communicator);
 
 		// Starting all
@@ -205,6 +205,6 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 	}
 
 	public void configure(IDebugOptions debugOptions) {
-		coreCommands.configure(debugOptions);
+		communicator.configure(debugOptions);
 	}
 }
