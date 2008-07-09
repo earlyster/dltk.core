@@ -65,7 +65,10 @@ public class Util {
 		int compare(Object a, Object b);
 	}
 
-	private static final String ARGUMENTS_DELIMITER = "#"; //$NON-NLS-1$
+	private static final char NEW_FORMAT_MARK = '+';
+	private static final char ARGUMENTS_DELIMITER = '#';
+	private static final String ARGUMENTS_DELIMITER_STR = String
+			.valueOf(ARGUMENTS_DELIMITER);
 	private static final String EMPTY_ARGUMENT = "   "; //$NON-NLS-1$
 	public final static String UTF_8 = "UTF-8"; //$NON-NLS-1$
 
@@ -199,10 +202,22 @@ public class Util {
 		return true;
 	}
 
+	private static boolean isNewProblemArgumentsFormat(String[] arguments) {
+		for (int i = 0; i < arguments.length; ++i) {
+			if (arguments[i].indexOf(ARGUMENTS_DELIMITER) != -1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Put all the arguments in one String.
 	 */
 	public static String getProblemArgumentsForMarker(String[] arguments) {
+		if (isNewProblemArgumentsFormat(arguments)) {
+			return encodeProblemArguments(arguments);
+		}
 		StringBuffer args = new StringBuffer(10);
 		args.append(arguments.length);
 		args.append(':');
@@ -218,9 +233,29 @@ public class Util {
 		return args.toString();
 	}
 
+	/**
+	 * @param arguments
+	 * @return
+	 */
+	private static String encodeProblemArguments(String[] arguments) {
+		StringBuffer args = new StringBuffer();
+		args.append(NEW_FORMAT_MARK);
+		args.append(arguments.length);
+		for (int j = 0; j < arguments.length; j++) {
+			args.append(ARGUMENTS_DELIMITER);
+			args.append(arguments[j].length());
+			args.append(ARGUMENTS_DELIMITER);
+			args.append(arguments[j]);
+		}
+		return args.toString();
+	}
+
 	public static String[] getProblemArgumentsFromMarker(String argumentsString) {
-		if (argumentsString == null)
+		if (argumentsString == null || argumentsString.length() == 0)
 			return null;
+		if (argumentsString.charAt(0) == NEW_FORMAT_MARK) {
+			return decodeProblemArguments(argumentsString);
+		}
 		int index = argumentsString.indexOf(':');
 		if (index == -1)
 			return null;
@@ -238,7 +273,7 @@ public class Util {
 		int count = 0;
 
 		StringTokenizer tokenizer = new StringTokenizer(argumentsString,
-				ARGUMENTS_DELIMITER);
+				ARGUMENTS_DELIMITER_STR);
 		while (tokenizer.hasMoreTokens()) {
 			String argument = tokenizer.nextToken();
 			if (argument.equals(EMPTY_ARGUMENT))
@@ -250,6 +285,53 @@ public class Util {
 			return null;
 
 		System.arraycopy(args, 0, args = new String[count], 0, count);
+		return args;
+	}
+
+	/**
+	 * @param s
+	 * @return
+	 */
+	private static String[] decodeProblemArguments(String s) {
+		int begin = 1;
+		int pos = s.indexOf(ARGUMENTS_DELIMITER, begin);
+		if (pos == -1) {
+			return null;
+		}
+		final int numberOfArg;
+		try {
+			numberOfArg = Integer.parseInt(s.substring(begin, pos));
+		} catch (NumberFormatException e) {
+			return null;
+		}
+		begin = pos;
+		final String[] args = new String[numberOfArg];
+		final int length = s.length();
+		for (int i = 0; i < numberOfArg; ++i) {
+			if (begin >= length || s.charAt(begin) != ARGUMENTS_DELIMITER) {
+				return null;
+			}
+			++begin;
+			pos = s.indexOf(ARGUMENTS_DELIMITER, begin);
+			if (pos == -1) {
+				return null;
+			}
+			final int argLen;
+			try {
+				argLen = Integer.parseInt(s.substring(begin, pos));
+			} catch (NumberFormatException e) {
+				return null;
+			}
+			begin = pos + 1;
+			if (begin + argLen > length) {
+				return null;
+			}
+			args[i] = s.substring(begin, begin + argLen);
+			begin += argLen;
+		}
+		if (begin != length) {
+			return null;
+		}
 		return args;
 	}
 
