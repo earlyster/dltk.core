@@ -39,11 +39,10 @@ public class ProblemReporterProxy implements IProblemReporter {
 		return original != null && original.isMarkersCleaned();
 	}
 
-	public IMarker reportProblem(IProblem problem) throws CoreException {
+	public void reportProblem(IProblem problem) throws CoreException {
 		if (original != null) {
-			return original.reportProblem(problem);
+			original.reportProblem(problem);
 		}
-		return null;
 	}
 
 	public Object getAdapter(Class adapter) {
