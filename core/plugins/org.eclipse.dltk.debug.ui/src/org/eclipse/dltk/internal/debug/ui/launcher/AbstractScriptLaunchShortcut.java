@@ -32,6 +32,8 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IParent;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
+import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.messages.ScriptLaunchMessages;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
@@ -242,13 +244,18 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 			wc
 					.setAttribute(
 							ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_WAITING_TIMEOUT,
-							10000);
+							getConnectionTimeout());
 			wc.setMappedResources(new IResource[] { script.getProject() });
 			config = wc.doSave();
 		} catch (CoreException exception) {
 			exception.printStackTrace();
 		}
 		return config;
+	}
+
+	protected int getConnectionTimeout() {
+		return DLTKDebugPlugin.getDefault().getPluginPreferences().getInt(
+				DLTKDebugPreferenceConstants.PREF_DBGP_CONNECTION_TIMEOUT);
 	}
 
 	/**
