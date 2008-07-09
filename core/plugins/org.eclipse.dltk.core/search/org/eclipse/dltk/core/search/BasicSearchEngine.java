@@ -52,6 +52,7 @@ import org.eclipse.dltk.internal.core.search.IRestrictedAccessTypeRequestor;
 import org.eclipse.dltk.internal.core.search.IndexQueryRequestor;
 import org.eclipse.dltk.internal.core.search.PathCollector;
 import org.eclipse.dltk.internal.core.search.PatternSearchJob;
+import org.eclipse.dltk.internal.core.search.SuperHierarchyScope;
 import org.eclipse.dltk.internal.core.search.matching.DLTKSearchPattern;
 import org.eclipse.dltk.internal.core.search.matching.QualifiedTypeDeclarationPattern;
 import org.eclipse.dltk.internal.core.search.matching.TypeDeclarationPattern;
@@ -133,6 +134,25 @@ public class BasicSearchEngine {
 		IDLTKLanguageToolkit toolkit;
 		toolkit = DLTKLanguageManager.getLanguageToolkit(type);
 		return new HierarchyScope(toolkit, type, owner);
+	}
+
+	/**
+	 * @see SearchEngine#createSuperHierarchyScope(IType) for detailed comment.
+	 */
+	public static IDLTKSearchScope createSuperHierarchyScope(IType type)
+			throws ModelException {
+		return createSuperHierarchyScope(type, DefaultWorkingCopyOwner.PRIMARY);
+	}
+
+	/**
+	 * @see SearchEngine#createSuperHierarchyScope(IType,WorkingCopyOwner) for
+	 *      detailed comment.
+	 */
+	public static IDLTKSearchScope createSuperHierarchyScope(IType type,
+			WorkingCopyOwner owner) throws ModelException {
+		IDLTKLanguageToolkit toolkit;
+		toolkit = DLTKLanguageManager.getLanguageToolkit(type);
+		return new SuperHierarchyScope(toolkit, type, owner);
 	}
 
 	/**
@@ -513,10 +533,11 @@ public class BasicSearchEngine {
 		ISourceModule[] copies;
 		if (this.workingCopies != null) {
 			if (this.workingCopyOwner == null) {
-				copies = ModelManager
-						.getModelManager()
-						.getWorkingCopies(DefaultWorkingCopyOwner.PRIMARY,
-								false/* don't add primary WCs a second time */);
+				copies = ModelManager.getModelManager().getWorkingCopies(
+						DefaultWorkingCopyOwner.PRIMARY, false/*
+															 * don't add primary
+															 * WCs a second time
+															 */);
 				if (copies == null) {
 					copies = this.workingCopies;
 				} else {
@@ -543,9 +564,9 @@ public class BasicSearchEngine {
 		} else {
 			copies = ModelManager.getModelManager().getWorkingCopies(
 					DefaultWorkingCopyOwner.PRIMARY, false/*
-															 * don't add primary
-															 * WCs a second time
-															 */);
+														 * don't add primary WCs
+														 * a second time
+														 */);
 		}
 		if (copies == null) {
 			return null;
@@ -704,7 +725,8 @@ public class BasicSearchEngine {
 			throws ModelException {
 		//
 		// if (VERBOSE) {
-		// Util.verbose("BasicSearchEngine.searchAllSecondaryTypeNames(IProjectFragment[],
+		// Util.verbose(
+		// "BasicSearchEngine.searchAllSecondaryTypeNames(IProjectFragment[],
 		// IRestrictedAccessTypeRequestor, boolean, IProgressMonitor)");
 		// //$NON-NLS-1$
 		// StringBuffer buffer = new StringBuffer(" - source folders: ");
@@ -1305,7 +1327,8 @@ public class BasicSearchEngine {
 		// SearchPattern decodedPattern =
 		// new QualifiedTypeDeclarationPattern(qualification,
 		// memberTypeDeclaration.name,
-		// convertTypeKind(TypeDeclaration.kind(memberTypeDeclaration.modifiers)),
+		//convertTypeKind(TypeDeclaration.kind(memberTypeDeclaration.modifiers))
+		// ,
 		// matchRule);
 		// if (pattern.matchesDecodedKey(decodedPattern)) {
 		// nameRequestor.acceptType(memberTypeDeclaration.modifiers,
@@ -1339,7 +1362,8 @@ public class BasicSearchEngine {
 		// SearchPattern decodedPattern =
 		// new QualifiedTypeDeclarationPattern(qualification,
 		// memberTypeDeclaration.name,
-		// convertTypeKind(TypeDeclaration.kind(memberTypeDeclaration.modifiers)),
+		//convertTypeKind(TypeDeclaration.kind(memberTypeDeclaration.modifiers))
+		// ,
 		// matchRule);
 		// if (pattern.matchesDecodedKey(decodedPattern)) {
 		// nameRequestor.acceptType(memberTypeDeclaration.modifiers,
@@ -1451,7 +1475,8 @@ public class BasicSearchEngine {
 			IModelElement enclosingElement, SearchRequestor requestor,
 			IProgressMonitor monitor) throws ModelException {
 		// if (VERBOSE) {
-		// Util.verbose("BasicSearchEngine.searchDeclarationsOfAccessedFields(IModelElement,
+		// Util.verbose(
+		// "BasicSearchEngine.searchDeclarationsOfAccessedFields(IModelElement,
 		// SearchRequestor, SearchPattern, IProgressMonitor)"); //$NON-NLS-1$
 		// }
 		// SearchPattern pattern = new
@@ -1471,7 +1496,8 @@ public class BasicSearchEngine {
 			IModelElement enclosingElement, SearchRequestor requestor,
 			IProgressMonitor monitor) throws ModelException {
 		// if (VERBOSE) {
-		// Util.verbose("BasicSearchEngine.searchDeclarationsOfReferencedTypes(IModelElement,
+		// Util.verbose(
+		// "BasicSearchEngine.searchDeclarationsOfReferencedTypes(IModelElement,
 		// SearchRequestor, SearchPattern, IProgressMonitor)"); //$NON-NLS-1$
 		// }
 		// SearchPattern pattern = new
@@ -1491,7 +1517,8 @@ public class BasicSearchEngine {
 			IModelElement enclosingElement, SearchRequestor requestor,
 			IProgressMonitor monitor) throws ModelException {
 		// if (VERBOSE) {
-		// Util.verbose("BasicSearchEngine.searchDeclarationsOfSentMessages(IModelElement,
+		// Util.verbose(
+		// "BasicSearchEngine.searchDeclarationsOfSentMessages(IModelElement,
 		// SearchRequestor, SearchPattern, IProgressMonitor)"); //$NON-NLS-1$
 		// }
 		// SearchPattern pattern = new

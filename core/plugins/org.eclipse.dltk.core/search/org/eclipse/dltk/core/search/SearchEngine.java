@@ -143,6 +143,46 @@ public class SearchEngine {
 	}
 
 	/**
+	 * Returns a Script search scope limited to the super hierarchy of the given
+	 * type. The Script elements resulting from a search with this scope will be
+	 * types in this super hierarchy, or members of the types in this super
+	 * hierarchy.
+	 * 
+	 * @param type
+	 *            the focus of the hierarchy scope
+	 * @return a new super hierarchy scope
+	 * @exception ModelException
+	 *                if the hierarchy could not be computed on the given type
+	 */
+	public static IDLTKSearchScope createSuperHierarchyScope(IType type)
+			throws ModelException {
+		return BasicSearchEngine.createSuperHierarchyScope(type);
+	}
+
+	/**
+	 * Returns a Script search scope limited to the super hierarchy of the given
+	 * type. When the super hierarchy is computed, the types defined in the
+	 * working copies owned by the given owner take precedence over the original
+	 * compilation units. The Script elements resulting from a search with this
+	 * scope will be types in this super hierarchy, or members of the types in
+	 * this super hierarchy.
+	 * 
+	 * @param type
+	 *            the focus of the hierarchy scope
+	 * @param owner
+	 *            the owner of working copies that take precedence over original
+	 *            compilation units
+	 * @return a new super hierarchy scope
+	 * @exception ModelException
+	 *                if the hierarchy could not be computed on the given type
+	 * 
+	 */
+	public static IDLTKSearchScope createSuperHierarchyScope(IType type,
+			WorkingCopyOwner owner) throws ModelException {
+		return BasicSearchEngine.createSuperHierarchyScope(type, owner);
+	}
+
+	/**
 	 * Returns a Script search scope limited to the given Script elements. The
 	 * Script elements resulting from a search with this scope will be children
 	 * of the given elements.
@@ -340,7 +380,8 @@ public class SearchEngine {
 	 *            <li>{@link SearchPattern#R_EXACT_MATCH} if the package name
 	 *            and type name are the full names of the searched types.</li>
 	 *            <li>{@link SearchPattern#R_PREFIX_MATCH} if the package name
-	 *            and type name are prefixes of the names of the searched types.</li>
+	 *            and type name are prefixes of the names of the searched types.
+	 *            </li>
 	 *            <li>{@link SearchPattern#R_PATTERN_MATCH} if the package name
 	 *            and type name contain wild-cards.</li>
 	 *            <li>{@link SearchPattern#R_CAMELCASE_MATCH} if type name are
@@ -355,20 +396,19 @@ public class SearchEngine {
 	 * @param searchFor
 	 *            determines the nature of the searched elements
 	 *            <ul>
-	 *            <li>{@link IDLTKSearchConstants#CLASS}: only look for
-	 *            classes</li>
+	 *            <li>{@link IDLTKSearchConstants#CLASS}: only look for classes</li>
 	 *            <li>{@link IDLTKSearchConstants#INTERFACE}: only look for
 	 *            interfaces</li>
 	 *            <li>{@link IDLTKSearchConstants#ENUM}: only look for
 	 *            enumeration</li>
 	 *            <li>{@link IDLTKSearchConstants#ANNOTATION_TYPE}: only look
 	 *            for annotation type</li>
-	 *            <li>{@link IDLTKSearchConstants#CLASS_AND_ENUM}: only look
-	 *            for classes and enumerations</li>
+	 *            <li>{@link IDLTKSearchConstants#CLASS_AND_ENUM}: only look for
+	 *            classes and enumerations</li>
 	 *            <li>{@link IDLTKSearchConstants#CLASS_AND_INTERFACE}: only
 	 *            look for classes and interfaces</li>
-	 *            <li>{@link IDLTKSearchConstants#TYPE}: look for all types
-	 *            (ie. classes, interfaces, enum and annotation types)</li>
+	 *            <li>{@link IDLTKSearchConstants#TYPE}: look for all types (ie.
+	 *            classes, interfaces, enum and annotation types)</li>
 	 *            </ul>
 	 * @param scope
 	 *            the scope to search in
@@ -377,13 +417,13 @@ public class SearchEngine {
 	 * @param waitingPolicy
 	 *            one of
 	 *            <ul>
-	 *            <li>{@link IDLTKSearchConstants#FORCE_IMMEDIATE_SEARCH} if
-	 *            the search should start immediately</li>
+	 *            <li>{@link IDLTKSearchConstants#FORCE_IMMEDIATE_SEARCH} if the
+	 *            search should start immediately</li>
 	 *            <li>{@link IDLTKSearchConstants#CANCEL_IF_NOT_READY_TO_SEARCH}
 	 *            if the search should be cancelled if the underlying indexer
 	 *            has not finished indexing the workspace</li>
-	 *            <li>{@link IDLTKSearchConstants#WAIT_UNTIL_READY_TO_SEARCH}
-	 *            if the search should wait for the underlying indexer to finish
+	 *            <li>{@link IDLTKSearchConstants#WAIT_UNTIL_READY_TO_SEARCH} if
+	 *            the search should wait for the underlying indexer to finish
 	 *            indexing the workspace</li>
 	 *            </ul>
 	 * @param progressMonitor
@@ -428,7 +468,8 @@ public class SearchEngine {
 	 *            <li>{@link SearchPattern#R_EXACT_MATCH} if the package name
 	 *            and type name are the full names of the searched types.</li>
 	 *            <li>{@link SearchPattern#R_PREFIX_MATCH} if the package name
-	 *            and type name are prefixes of the names of the searched types.</li>
+	 *            and type name are prefixes of the names of the searched types.
+	 *            </li>
 	 *            <li>{@link SearchPattern#R_PATTERN_MATCH} if the package name
 	 *            and type name contain wild-cards.</li>
 	 *            <li>{@link SearchPattern#R_CAMELCASE_MATCH} if type name are
@@ -446,7 +487,8 @@ public class SearchEngine {
 	 *            <li>{@link SearchPattern#R_EXACT_MATCH} if the package name
 	 *            and type name are the full names of the searched types.</li>
 	 *            <li>{@link SearchPattern#R_PREFIX_MATCH} if the package name
-	 *            and type name are prefixes of the names of the searched types.</li>
+	 *            and type name are prefixes of the names of the searched types.
+	 *            </li>
 	 *            <li>{@link SearchPattern#R_PATTERN_MATCH} if the package name
 	 *            and type name contain wild-cards.</li>
 	 *            <li>{@link SearchPattern#R_CAMELCASE_MATCH} if type name are
@@ -461,20 +503,19 @@ public class SearchEngine {
 	 * @param searchFor
 	 *            determines the nature of the searched elements
 	 *            <ul>
-	 *            <li>{@link IDLTKSearchConstants#CLASS}: only look for
-	 *            classes</li>
+	 *            <li>{@link IDLTKSearchConstants#CLASS}: only look for classes</li>
 	 *            <li>{@link IDLTKSearchConstants#INTERFACE}: only look for
 	 *            interfaces</li>
 	 *            <li>{@link IDLTKSearchConstants#ENUM}: only look for
 	 *            enumeration</li>
 	 *            <li>{@link IDLTKSearchConstants#ANNOTATION_TYPE}: only look
 	 *            for annotation type</li>
-	 *            <li>{@link IDLTKSearchConstants#CLASS_AND_ENUM}: only look
-	 *            for classes and enumerations</li>
+	 *            <li>{@link IDLTKSearchConstants#CLASS_AND_ENUM}: only look for
+	 *            classes and enumerations</li>
 	 *            <li>{@link IDLTKSearchConstants#CLASS_AND_INTERFACE}: only
 	 *            look for classes and interfaces</li>
-	 *            <li>{@link IDLTKSearchConstants#TYPE}: look for all types
-	 *            (ie. classes, interfaces, enum and annotation types)</li>
+	 *            <li>{@link IDLTKSearchConstants#TYPE}: look for all types (ie.
+	 *            classes, interfaces, enum and annotation types)</li>
 	 *            </ul>
 	 * @param scope
 	 *            the scope to search in
@@ -483,13 +524,13 @@ public class SearchEngine {
 	 * @param waitingPolicy
 	 *            one of
 	 *            <ul>
-	 *            <li>{@link IDLTKSearchConstants#FORCE_IMMEDIATE_SEARCH} if
-	 *            the search should start immediately</li>
+	 *            <li>{@link IDLTKSearchConstants#FORCE_IMMEDIATE_SEARCH} if the
+	 *            search should start immediately</li>
 	 *            <li>{@link IDLTKSearchConstants#CANCEL_IF_NOT_READY_TO_SEARCH}
 	 *            if the search should be cancelled if the underlying indexer
 	 *            has not finished indexing the workspace</li>
-	 *            <li>{@link IDLTKSearchConstants#WAIT_UNTIL_READY_TO_SEARCH}
-	 *            if the search should wait for the underlying indexer to finish
+	 *            <li>{@link IDLTKSearchConstants#WAIT_UNTIL_READY_TO_SEARCH} if
+	 *            the search should wait for the underlying indexer to finish
 	 *            indexing the workspace</li>
 	 *            </ul>
 	 * @param progressMonitor
@@ -536,7 +577,8 @@ public class SearchEngine {
 	 *            <li>{@link SearchPattern#R_EXACT_MATCH} if the package name
 	 *            and type name are the full names of the searched types.</li>
 	 *            <li>{@link SearchPattern#R_PREFIX_MATCH} if the package name
-	 *            and type name are prefixes of the names of the searched types.</li>
+	 *            and type name are prefixes of the names of the searched types.
+	 *            </li>
 	 *            <li>{@link SearchPattern#R_PATTERN_MATCH} if the package name
 	 *            and type name contain wild-cards.</li>
 	 *            <li>{@link SearchPattern#R_CAMELCASE_MATCH} if type name are
@@ -552,15 +594,16 @@ public class SearchEngine {
 	 *            the dot-separated qualified name of the searched type (the
 	 *            qualification include the enclosing types if the searched type
 	 *            is a member type), or a prefix for this type, or a wild-carded
-	 *            string for this type. May be <code>null</code>, then any
-	 *            type name is accepted.
+	 *            string for this type. May be <code>null</code>, then any type
+	 *            name is accepted.
 	 * @param typeMatchRule
 	 *            one of
 	 *            <ul>
 	 *            <li>{@link SearchPattern#R_EXACT_MATCH} if the package name
 	 *            and type name are the full names of the searched types.</li>
 	 *            <li>{@link SearchPattern#R_PREFIX_MATCH} if the package name
-	 *            and type name are prefixes of the names of the searched types.</li>
+	 *            and type name are prefixes of the names of the searched types.
+	 *            </li>
 	 *            <li>{@link SearchPattern#R_PATTERN_MATCH} if the package name
 	 *            and type name contain wild-cards.</li>
 	 *            <li>{@link SearchPattern#R_CAMELCASE_MATCH} if type name are
@@ -575,20 +618,19 @@ public class SearchEngine {
 	 * @param searchFor
 	 *            determines the nature of the searched elements
 	 *            <ul>
-	 *            <li>{@link IJavaSearchConstants#CLASS}: only look for
-	 *            classes</li>
+	 *            <li>{@link IJavaSearchConstants#CLASS}: only look for classes</li>
 	 *            <li>{@link IJavaSearchConstants#INTERFACE}: only look for
 	 *            interfaces</li>
 	 *            <li>{@link IJavaSearchConstants#ENUM}: only look for
 	 *            enumeration</li>
 	 *            <li>{@link IJavaSearchConstants#ANNOTATION_TYPE}: only look
 	 *            for annotation type</li>
-	 *            <li>{@link IJavaSearchConstants#CLASS_AND_ENUM}: only look
-	 *            for classes and enumerations</li>
+	 *            <li>{@link IJavaSearchConstants#CLASS_AND_ENUM}: only look for
+	 *            classes and enumerations</li>
 	 *            <li>{@link IJavaSearchConstants#CLASS_AND_INTERFACE}: only
 	 *            look for classes and interfaces</li>
-	 *            <li>{@link IJavaSearchConstants#TYPE}: look for all types
-	 *            (ie. classes, interfaces, enum and annotation types)</li>
+	 *            <li>{@link IJavaSearchConstants#TYPE}: look for all types (ie.
+	 *            classes, interfaces, enum and annotation types)</li>
 	 *            </ul>
 	 * @param scope
 	 *            the scope to search in
@@ -598,13 +640,13 @@ public class SearchEngine {
 	 * @param waitingPolicy
 	 *            one of
 	 *            <ul>
-	 *            <li>{@link IJavaSearchConstants#FORCE_IMMEDIATE_SEARCH} if
-	 *            the search should start immediately</li>
+	 *            <li>{@link IJavaSearchConstants#FORCE_IMMEDIATE_SEARCH} if the
+	 *            search should start immediately</li>
 	 *            <li>{@link IJavaSearchConstants#CANCEL_IF_NOT_READY_TO_SEARCH}
 	 *            if the search should be cancelled if the underlying indexer
 	 *            has not finished indexing the workspace</li>
-	 *            <li>{@link IJavaSearchConstants#WAIT_UNTIL_READY_TO_SEARCH}
-	 *            if the search should wait for the underlying indexer to finish
+	 *            <li>{@link IJavaSearchConstants#WAIT_UNTIL_READY_TO_SEARCH} if
+	 *            the search should wait for the underlying indexer to finish
 	 *            indexing the workspace</li>
 	 *            </ul>
 	 * @param progressMonitor
@@ -647,13 +689,13 @@ public class SearchEngine {
 	 * @param waitingPolicy
 	 *            one of
 	 *            <ul>
-	 *            <li>{@link IDLTKSearchConstants#FORCE_IMMEDIATE_SEARCH} if
-	 *            the search should start immediately</li>
+	 *            <li>{@link IDLTKSearchConstants#FORCE_IMMEDIATE_SEARCH} if the
+	 *            search should start immediately</li>
 	 *            <li>{@link IDLTKSearchConstants#CANCEL_IF_NOT_READY_TO_SEARCH}
 	 *            if the search should be cancelled if the underlying indexer
 	 *            has not finished indexing the workspace</li>
-	 *            <li>{@link IDLTKSearchConstants#WAIT_UNTIL_READY_TO_SEARCH}
-	 *            if the search should wait for the underlying indexer to finish
+	 *            <li>{@link IDLTKSearchConstants#WAIT_UNTIL_READY_TO_SEARCH} if
+	 *            the search should wait for the underlying indexer to finish
 	 *            indexing the workspace</li>
 	 *            </ul>
 	 * @param progressMonitor
@@ -703,13 +745,13 @@ public class SearchEngine {
 	 * @param waitingPolicy
 	 *            one of
 	 *            <ul>
-	 *            <li>{@link IJavaSearchConstants#FORCE_IMMEDIATE_SEARCH} if
-	 *            the search should start immediately</li>
+	 *            <li>{@link IJavaSearchConstants#FORCE_IMMEDIATE_SEARCH} if the
+	 *            search should start immediately</li>
 	 *            <li>{@link IJavaSearchConstants#CANCEL_IF_NOT_READY_TO_SEARCH}
 	 *            if the search should be cancelled if the underlying indexer
 	 *            has not finished indexing the workspace</li>
-	 *            <li>{@link IJavaSearchConstants#WAIT_UNTIL_READY_TO_SEARCH}
-	 *            if the search should wait for the underlying indexer to finish
+	 *            <li>{@link IJavaSearchConstants#WAIT_UNTIL_READY_TO_SEARCH} if
+	 *            the search should wait for the underlying indexer to finish
 	 *            indexing the workspace</li>
 	 *            </ul>
 	 * @param progressMonitor
@@ -757,8 +799,8 @@ public class SearchEngine {
 	 * }
 	 * </pre>
 	 * </code> then searching for declarations of accessed fields in method
-	 * <code>X.test()</code> would collect the fields <code>B.value</code>
-	 * and <code>A.field1</code>.
+	 * <code>X.test()</code> would collect the fields <code>B.value</code> and
+	 * <code>A.field1</code>.
 	 * </p>
 	 * 
 	 * @param enclosingElement
@@ -988,7 +1030,8 @@ public class SearchEngine {
 		if (key.indexOf('*') != -1 || key.indexOf('?') != -1)
 			flags |= SearchPattern.R_PATTERN_MATCH;
 
-		MixinPattern pattern = new MixinPattern(key.toCharArray(), flags, toolkit);
+		MixinPattern pattern = new MixinPattern(key.toCharArray(), flags,
+				toolkit);
 
 		SearchParticipant participant = SearchEngine
 				.getDefaultSearchParticipant();
