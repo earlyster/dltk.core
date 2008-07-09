@@ -12,7 +12,6 @@ package org.eclipse.dltk.internal.core;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,8 +63,8 @@ public abstract class ModelElement extends PlatformObject implements
 	public static final char JEM_SKIP_DELIMETER = '>';
 
 	/**
-	 * This element's parent, or <code>null</code> if this element does not
-	 * have a parent.
+	 * This element's parent, or <code>null</code> if this element does not have
+	 * a parent.
 	 */
 	protected ModelElement parent;
 
@@ -260,40 +259,14 @@ public abstract class ModelElement extends PlatformObject implements
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
+		// model parent is null
+		if (this.parent == null) {
+			return super.equals(o);
+		}
 		// assume instanceof check is done in subclass
 		final ModelElement other = (ModelElement) o;
-		if (!compareParent(this, other)) {
-			return false;
-		}
-		return getElementName().equals(other.getElementName());
-	}
-
-	private static boolean compareParent(IModelElement a, IModelElement b) {
-		for (;;) {
-			if (a == b) {
-				return true;
-			}
-			if (a.getElementType() != b.getElementType()) {
-				return false;
-			}
-			if (a instanceof IScriptProject) {
-				if (!(b instanceof IScriptProject)) {
-					return false;
-				}
-				final IScriptProject spA = (IScriptProject) a;
-				final IScriptProject spB = (IScriptProject) b;
-				final IProject projectA = spA.getProject();
-				return projectA != null && projectA.equals(spB.getProject());
-			}
-			a = a.getParent();
-			if (a == null) {
-				return false;
-			}
-			b = b.getParent();
-			if (b == null) {
-				return false;
-			}
-		}
+		return getElementName().equals(other.getElementName())
+				&& this.parent.equals(other.parent);
 	}
 
 	/**
@@ -331,8 +304,8 @@ public abstract class ModelElement extends PlatformObject implements
 	 * Returns a collection of (immediate) children of this node of the
 	 * specified type.
 	 * 
-	 * @param type -
-	 *            one of the EM_* constants defined by ModelElement
+	 * @param type
+	 *            - one of the EM_* constants defined by ModelElement
 	 */
 	protected ArrayList getChildrenOfType(int type) throws ModelException {
 		return getChildrenOfType(type, null);
@@ -479,10 +452,9 @@ public abstract class ModelElement extends PlatformObject implements
 		ModelElement parentElement = (ModelElement) this.getParent();
 		if (parentElement != null && parentElement.getParent() != null) {
 			buffer.append(" [in "); //$NON-NLS-1$
-			parentElement.toStringInfo(0, buffer, NO_INFO, false/*
-			 * don't show
-			 * resolved info
-			 */);
+			parentElement.toStringInfo(0, buffer, NO_INFO, false); // don't show
+																	// resolved
+																	// info
 			parentElement.toStringAncestors(buffer);
 			buffer.append("]"); //$NON-NLS-1$
 		}
@@ -588,7 +560,8 @@ public abstract class ModelElement extends PlatformObject implements
 					if (start <= position && position <= end) {
 						if (child instanceof IField) {
 							// check muti-declaration case (see
-							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=39943)
+							//https://bugs.eclipse.org/bugs/show_bug.cgi?id=39943
+							// )
 							int declarationStart = start;
 							SourceRefElement candidate = null;
 							do {
