@@ -374,10 +374,15 @@ public class MethodInfoViewer {
 						qualifications = Math.max(qualifications, 1);
 				}
 			}
-			if (qualifications > 1)
+			if (qualifications > 1) {
+				System.err.println("2:" + current2);
 				return current2;
-			if (qualifications > 0)
+			}
+			if (qualifications > 0) {
+				System.err.println("1:" + current1);
 				return current1;
+			}
+			System.err.println(current0);
 			return current0;
 		}
 
@@ -1374,13 +1379,13 @@ public class MethodInfoViewer {
 					String label = item.getText();
 					String newLabel = fLabelProvider.getText(null,
 							(MethodNameMatch) item.getData(), next);
-					if (newLabel.length() != label.length())
-						item.setText(newLabel);
-					if (fLastSelection != null && fLastSelection.length > 0) {
-						TableItem last = fLastSelection[fLastSelection.length - 1];
-						if (last == item) {
-							fLastLabels[fLastLabels.length - 1] = newLabel;
-						}
+					if (fLastSelection != null
+							&& fLastSelection.length > 0
+							&& fLastSelection[fLastSelection.length - 1] == item) {
+						fLastLabels[fLastLabels.length - 1] = newLabel;
+					} else {
+						if (newLabel.length() != label.length())
+							item.setText(newLabel);
 					}
 				}
 				fDashLineIndex = fNextElement;
