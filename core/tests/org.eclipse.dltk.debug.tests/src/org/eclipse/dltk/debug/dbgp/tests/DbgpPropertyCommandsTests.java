@@ -17,7 +17,6 @@ import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpProtocolException;
 import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpPropertyCommands;
-import org.eclipse.dltk.dbgp.internal.commands.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -58,7 +57,7 @@ public class DbgpPropertyCommandsTests extends DbgpProtocolTests {
 		final Element response = makePropertyGetResponse("xxx", "test::xxx",
 				"string");
 
-		commands = new DbgpPropertyCommands(new IDbgpCommunicator() {
+		commands = new DbgpPropertyCommands(new AbstractCommunicator() {
 			public Element communicate(DbgpRequest request)
 					throws DbgpException {
 
@@ -68,15 +67,10 @@ public class DbgpPropertyCommandsTests extends DbgpProtocolTests {
 
 				return response;
 			}
-
-			public void send(DbgpRequest request) throws DbgpException {
-				// TODO Auto-generated method stub
-				
-			}
 		});
 
-		//IDbgpProperty property = commands.getPropery("my_var");
-		//System.out.println(property);
+		// IDbgpProperty property = commands.getPropery("my_var");
+		// System.out.println(property);
 	}
 
 	public void testGetPropertyByNameAndStackDepth() throws Exception {
@@ -93,7 +87,7 @@ public class DbgpPropertyCommandsTests extends DbgpProtocolTests {
 	public void testSetProperty() throws Exception {
 		final Element response = makePropertySetResponse(123, true);
 
-		commands = new DbgpPropertyCommands(new IDbgpCommunicator() {
+		commands = new DbgpPropertyCommands(new AbstractCommunicator() {
 
 			public Element communicate(DbgpRequest request)
 					throws DbgpException {
@@ -102,14 +96,9 @@ public class DbgpPropertyCommandsTests extends DbgpProtocolTests {
 
 				return response;
 			}
-
-			public void send(DbgpRequest request) throws DbgpException {
-				// TODO Auto-generated method stub
-				
-			}
 		});
-		
-		//boolean success = commands.setPropery("prop", 1, "val");
-		//assertTrue(success);		
+
+		// boolean success = commands.setPropery("prop", 1, "val");
+		// assertTrue(success);
 	}
 }
