@@ -9,37 +9,83 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.dialogs;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.ProgressMonitorWrapper;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.search.*;
-import org.eclipse.dltk.internal.corext.util.*;
+import org.eclipse.dltk.core.search.IDLTKSearchConstants;
+import org.eclipse.dltk.core.search.IDLTKSearchScope;
+import org.eclipse.dltk.core.search.MethodNameMatch;
+import org.eclipse.dltk.core.search.MethodNameMatchRequestor;
+import org.eclipse.dltk.core.search.SearchEngine;
+import org.eclipse.dltk.core.search.SearchPattern;
+import org.eclipse.dltk.core.search.TypeNameRequestor;
 import org.eclipse.dltk.internal.corext.util.Messages;
+import org.eclipse.dltk.internal.corext.util.MethodFilter;
+import org.eclipse.dltk.internal.corext.util.MethodInfoFilter;
+import org.eclipse.dltk.internal.corext.util.OpenMethodHistory;
+import org.eclipse.dltk.internal.corext.util.Strings;
+import org.eclipse.dltk.internal.corext.util.TypeInfoRequestorAdapter;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.LibraryLocation;
 import org.eclipse.dltk.launching.ScriptRuntime;
-import org.eclipse.dltk.ui.*;
+import org.eclipse.dltk.ui.DLTKPluginImages;
+import org.eclipse.dltk.ui.DLTKUILanguageManager;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
+import org.eclipse.dltk.ui.ScriptElementImageProvider;
+import org.eclipse.dltk.ui.ScriptElementLabels;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MenuAdapter;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.progress.UIJob;
 
 /**
- * A viewer to present method queried form the method history and form the search
- * engine. All viewer updating takes place in the UI thread. Therefore no
+ * A viewer to present method queried form the method history and form the
+ * search engine. All viewer updating takes place in the UI thread. Therefore no
  * synchronization of the methods is necessary.
  * 
  */
@@ -117,8 +163,9 @@ public class MethodInfoViewer {
 					.getSimpleMethodName());
 			if (result != 0)
 				return result;
-			result = compareTypeContainerName(leftInfo.getMethodContainerName(),
-					rightInfo.getMethodContainerName());
+			result = compareTypeContainerName(
+					leftInfo.getMethodContainerName(), rightInfo
+							.getMethodContainerName());
 			if (result != 0)
 				return result;
 
@@ -286,6 +333,8 @@ public class MethodInfoViewer {
 		public String getFullyQualifiedText(MethodNameMatch type) {
 			StringBuffer result = new StringBuffer();
 			result.append(getTypeContainerName(type, 2));
+			result.append(" - ");
+			result.append(type.getPackageName());
 			// IType dltkType = ((DLTKSearchMethodNameMatch) type).getType();
 			// ISourceModule sourceModule = (ISourceModule)
 			// dltkType.getAncestor(IModelElement.SOURCE_MODULE);
