@@ -375,14 +375,11 @@ public class MethodInfoViewer {
 				}
 			}
 			if (qualifications > 1) {
-				System.err.println("2:" + current2);
 				return current2;
 			}
 			if (qualifications > 0) {
-				System.err.println("1:" + current1);
 				return current1;
 			}
-			System.err.println(current0);
 			return current0;
 		}
 
