@@ -25,7 +25,17 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.ast.declarations.TypeDeclaration;
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.core.*;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IMember;
+import org.eclipse.dltk.core.IMethod;
+import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
@@ -35,8 +45,22 @@ import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.SourceModule;
-import org.eclipse.dltk.internal.core.search.*;
-import org.eclipse.dltk.internal.core.search.matching.*;
+import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
+import org.eclipse.dltk.internal.core.search.DLTKSearchMethodNameMatch;
+import org.eclipse.dltk.internal.core.search.DLTKSearchScope;
+import org.eclipse.dltk.internal.core.search.DLTKSearchTypeNameMatch;
+import org.eclipse.dltk.internal.core.search.HierarchyScope;
+import org.eclipse.dltk.internal.core.search.IRestrictedAccessMethodRequestor;
+import org.eclipse.dltk.internal.core.search.IRestrictedAccessTypeRequestor;
+import org.eclipse.dltk.internal.core.search.IndexQueryRequestor;
+import org.eclipse.dltk.internal.core.search.PathCollector;
+import org.eclipse.dltk.internal.core.search.PatternSearchJob;
+import org.eclipse.dltk.internal.core.search.SuperHierarchyScope;
+import org.eclipse.dltk.internal.core.search.matching.DLTKSearchPattern;
+import org.eclipse.dltk.internal.core.search.matching.MethodDeclarationPattern;
+import org.eclipse.dltk.internal.core.search.matching.QualifiedMethodDeclarationPattern;
+import org.eclipse.dltk.internal.core.search.matching.QualifiedTypeDeclarationPattern;
+import org.eclipse.dltk.internal.core.search.matching.TypeDeclarationPattern;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
 
@@ -115,6 +139,25 @@ public class BasicSearchEngine {
 		IDLTKLanguageToolkit toolkit;
 		toolkit = DLTKLanguageManager.getLanguageToolkit(type);
 		return new HierarchyScope(toolkit, type, owner);
+	}
+
+	/**
+	 * @see SearchEngine#createSuperHierarchyScope(IType) for detailed comment.
+	 */
+	public static IDLTKSearchScope createSuperHierarchyScope(IType type)
+			throws ModelException {
+		return createSuperHierarchyScope(type, DefaultWorkingCopyOwner.PRIMARY);
+	}
+
+	/**
+	 * @see SearchEngine#createSuperHierarchyScope(IType,WorkingCopyOwner) for
+	 *      detailed comment.
+	 */
+	public static IDLTKSearchScope createSuperHierarchyScope(IType type,
+			WorkingCopyOwner owner) throws ModelException {
+		IDLTKLanguageToolkit toolkit;
+		toolkit = DLTKLanguageManager.getLanguageToolkit(type);
+		return new SuperHierarchyScope(toolkit, type, owner);
 	}
 
 	/**
@@ -495,10 +538,11 @@ public class BasicSearchEngine {
 		ISourceModule[] copies;
 		if (this.workingCopies != null) {
 			if (this.workingCopyOwner == null) {
-				copies = ModelManager
-						.getModelManager()
-						.getWorkingCopies(DefaultWorkingCopyOwner.PRIMARY,
-								false/* don't add primary WCs a second time */);
+				copies = ModelManager.getModelManager().getWorkingCopies(
+						DefaultWorkingCopyOwner.PRIMARY, false/*
+															 * don't add primary
+															 * WCs a second time
+															 */);
 				if (copies == null) {
 					copies = this.workingCopies;
 				} else {
@@ -525,9 +569,9 @@ public class BasicSearchEngine {
 		} else {
 			copies = ModelManager.getModelManager().getWorkingCopies(
 					DefaultWorkingCopyOwner.PRIMARY, false/*
-															 * don't add primary
-															 * WCs a second time
-															 */);
+														 * don't add primary WCs
+														 * a second time
+														 */);
 		}
 		if (copies == null) {
 			return null;
@@ -686,7 +730,8 @@ public class BasicSearchEngine {
 			throws ModelException {
 		//
 		// if (VERBOSE) {
-		// Util.verbose("BasicSearchEngine.searchAllSecondaryTypeNames(IProjectFragment[],
+		// Util.verbose(
+		// "BasicSearchEngine.searchAllSecondaryTypeNames(IProjectFragment[],
 		// IRestrictedAccessTypeRequestor, boolean, IProgressMonitor)");
 		// //$NON-NLS-1$
 		// StringBuffer buffer = new StringBuffer(" - source folders: ");
@@ -1287,7 +1332,8 @@ public class BasicSearchEngine {
 		// SearchPattern decodedPattern =
 		// new QualifiedTypeDeclarationPattern(qualification,
 		// memberTypeDeclaration.name,
-		// convertTypeKind(TypeDeclaration.kind(memberTypeDeclaration.modifiers)),
+		//convertTypeKind(TypeDeclaration.kind(memberTypeDeclaration.modifiers))
+		// ,
 		// matchRule);
 		// if (pattern.matchesDecodedKey(decodedPattern)) {
 		// nameRequestor.acceptType(memberTypeDeclaration.modifiers,
@@ -1321,7 +1367,8 @@ public class BasicSearchEngine {
 		// SearchPattern decodedPattern =
 		// new QualifiedTypeDeclarationPattern(qualification,
 		// memberTypeDeclaration.name,
-		// convertTypeKind(TypeDeclaration.kind(memberTypeDeclaration.modifiers)),
+		//convertTypeKind(TypeDeclaration.kind(memberTypeDeclaration.modifiers))
+		// ,
 		// matchRule);
 		// if (pattern.matchesDecodedKey(decodedPattern)) {
 		// nameRequestor.acceptType(memberTypeDeclaration.modifiers,
@@ -1433,7 +1480,8 @@ public class BasicSearchEngine {
 			IModelElement enclosingElement, SearchRequestor requestor,
 			IProgressMonitor monitor) throws ModelException {
 		// if (VERBOSE) {
-		// Util.verbose("BasicSearchEngine.searchDeclarationsOfAccessedFields(IModelElement,
+		// Util.verbose(
+		// "BasicSearchEngine.searchDeclarationsOfAccessedFields(IModelElement,
 		// SearchRequestor, SearchPattern, IProgressMonitor)"); //$NON-NLS-1$
 		// }
 		// SearchPattern pattern = new
@@ -1453,7 +1501,8 @@ public class BasicSearchEngine {
 			IModelElement enclosingElement, SearchRequestor requestor,
 			IProgressMonitor monitor) throws ModelException {
 		// if (VERBOSE) {
-		// Util.verbose("BasicSearchEngine.searchDeclarationsOfReferencedTypes(IModelElement,
+		// Util.verbose(
+		// "BasicSearchEngine.searchDeclarationsOfReferencedTypes(IModelElement,
 		// SearchRequestor, SearchPattern, IProgressMonitor)"); //$NON-NLS-1$
 		// }
 		// SearchPattern pattern = new
@@ -1473,7 +1522,8 @@ public class BasicSearchEngine {
 			IModelElement enclosingElement, SearchRequestor requestor,
 			IProgressMonitor monitor) throws ModelException {
 		// if (VERBOSE) {
-		// Util.verbose("BasicSearchEngine.searchDeclarationsOfSentMessages(IModelElement,
+		// Util.verbose(
+		// "BasicSearchEngine.searchDeclarationsOfSentMessages(IModelElement,
 		// SearchRequestor, SearchPattern, IProgressMonitor)"); //$NON-NLS-1$
 		// }
 		// SearchPattern pattern = new
@@ -1484,10 +1534,11 @@ public class BasicSearchEngine {
 	/**
 	 * @see SearchEngine#createTypeNameMatch(IType, int) for detailed comment.
 	 */
-	public static MethodNameMatch createMethodNameMatch(IMethod type, int modifiers) {
+	public static MethodNameMatch createMethodNameMatch(IMethod type,
+			int modifiers) {
 		return new DLTKSearchMethodNameMatch(type, modifiers);
 	}
-	
+
 	/**
 	 * Searches for all top-level types and member types in the given scope. The
 	 * search can be selecting specific types (given a package or a type name
@@ -1683,5 +1734,5 @@ public class BasicSearchEngine {
 		}
 
 	}
-	
+
 }
