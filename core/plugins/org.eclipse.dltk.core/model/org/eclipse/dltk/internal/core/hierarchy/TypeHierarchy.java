@@ -343,9 +343,9 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * @see ITypeHierarchy
 	 */
 	public boolean contains(IType type) {
+
 		// classes
-		TypeVector superTypes = (TypeVector) this.classToSuperclass.get(type);
-		if (superTypes != null && superTypes.contains(type)) {
+		if (this.classToSuperclass.get(type) != null) {
 			return true;
 		}
 
