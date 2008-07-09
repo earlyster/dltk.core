@@ -12,6 +12,7 @@ package org.eclipse.dltk.dbgp.internal;
 import java.net.URI;
 
 import org.eclipse.dltk.dbgp.IDbgpStackLevel;
+import org.eclipse.dltk.internal.debug.core.model.StrUtils;
 
 public class DbgpStackLevel implements IDbgpStackLevel {
 
@@ -78,6 +79,14 @@ public class DbgpStackLevel implements IDbgpStackLevel {
 		return result;
 	}
 
+	private static boolean equals(URI u1, URI u2) {
+		if (u1 == null) {
+			return u2 == null;
+		} else {
+			return u1.equals(u2);
+		}
+	}
+
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -89,11 +98,7 @@ public class DbgpStackLevel implements IDbgpStackLevel {
 			return false;
 		}
 		final DbgpStackLevel other = (DbgpStackLevel) obj;
-		if (fileUri == null) {
-			if (other.fileUri != null) {
-				return false;
-			}
-		} else if (!fileUri.equals(other.fileUri)) {
+		if (!equals(fileUri, other.fileUri)) {
 			return false;
 		}
 		if (level != other.level) {
@@ -108,13 +113,14 @@ public class DbgpStackLevel implements IDbgpStackLevel {
 		if (lineNumber != other.lineNumber) {
 			return false;
 		}
-		if (where == null) {
-			if (other.where != null) {
-				return false;
-			}
-		} else if (!where.equals(other.where)) {
+		if (!StrUtils.equals(where, other.where)) {
 			return false;
 		}
 		return true;
+	}
+
+	public boolean isSameMethod(IDbgpStackLevel other) {
+		return equals(fileUri, other.getFileURI())
+				&& StrUtils.equals(where, other.getWhere());
 	}
 }

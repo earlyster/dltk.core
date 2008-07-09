@@ -23,12 +23,15 @@ import org.eclipse.dltk.dbgp.internal.packets.DbgpResponsePacket;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlParser;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
+import org.eclipse.dltk.debug.core.DebugOption;
+import org.eclipse.dltk.debug.core.IDebugOptions;
 import org.w3c.dom.Element;
 
 public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 	private final int timeout;
 
 	private final IDbgpDebugingEngine engine;
+	private IDebugOptions options;
 
 	private void sendRequest(String command) throws IOException {
 		engine.sendCommand(command);
@@ -39,12 +42,14 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 		return engine.getResponsePacket(transactionId, timeout);
 	}
 
-	public DbgpDebuggingEngineCommunicator(IDbgpDebugingEngine engine) {
+	public DbgpDebuggingEngineCommunicator(IDbgpDebugingEngine engine,
+			IDebugOptions options) {
 		if (engine == null) {
 			throw new IllegalArgumentException();
 		}
 
 		this.engine = engine;
+		this.options = options;
 
 		timeout = DLTKDebugPlugin.getDefault().getPluginPreferences().getInt(
 				DLTKDebugPreferenceConstants.PREF_DBGP_RESPONSE_TIMEOUT);
@@ -57,7 +62,7 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 			final DbgpResponsePacket packet;
 			final int requestId = Integer.parseInt(request
 					.getOption(DbgpBaseCommands.ID_OPTION));
-			if (request.isAsync()) {
+			if (options.get(DebugOption.DBGP_ASYNC) || request.isAsync()) {
 				sendRequest(request.toString());
 				packet = receiveResponse(requestId);
 			} else {
@@ -113,4 +118,8 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 	}
 
 	private static final boolean DEBUG = false;
+
+	public void configure(IDebugOptions debugOptions) {
+		this.options = debugOptions;
+	}
 }

@@ -11,9 +11,10 @@ package org.eclipse.dltk.dbgp.internal.commands;
 
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.DbgpRequest;
+import org.eclipse.dltk.debug.core.IDebugConfigurable;
 import org.w3c.dom.Element;
 
-public interface IDbgpCommunicator {
+public interface IDbgpCommunicator extends IDebugConfigurable {
 	Element communicate(DbgpRequest request) throws DbgpException;
 
 	void send(DbgpRequest request) throws DbgpException;

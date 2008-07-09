@@ -159,6 +159,7 @@ public class ScriptThreadManager implements IScriptThreadManager {
 			if (error != null) {
 				throw error;
 			}
+			session.configure(target.getOptions());
 
 			session.getStreamManager().addListener(outputListener);
 			ScriptThread thread = new ScriptThread(target, session, this);

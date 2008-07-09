@@ -27,6 +27,8 @@ import org.eclipse.dltk.dbgp.internal.managers.DbgpStreamManager;
 import org.eclipse.dltk.dbgp.internal.managers.IDbgpStreamManager;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpResponsePacket;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlEntityParser;
+import org.eclipse.dltk.debug.core.IDebugOptions;
+import org.eclipse.dltk.debug.core.model.DefaultDebugOptions;
 
 public class DbgpSession extends DbgpTermination implements IDbgpSession,
 		IDbgpTerminationListener {
@@ -105,7 +107,8 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 				"DBGP - Stream manager"); //$NON-NLS-1$
 		this.streamManager.addTerminationListener(this);
 
-		communicator = new DbgpDebuggingEngineCommunicator(engine);
+		communicator = new DbgpDebuggingEngineCommunicator(engine,
+				DefaultDebugOptions.getDefaultInstance());
 
 		this.coreCommands = new DbgpCoreCommands(communicator);
 		this.extendedCommands = new DbgpExtendedCommands(communicator);
@@ -199,5 +202,9 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 
 	public IDbgpCommunicator getCommunicator() {
 		return this.communicator;
+	}
+
+	public void configure(IDebugOptions debugOptions) {
+		communicator.configure(debugOptions);
 	}
 }
