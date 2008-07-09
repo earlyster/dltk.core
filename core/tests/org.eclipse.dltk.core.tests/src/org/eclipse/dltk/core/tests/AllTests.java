@@ -20,6 +20,7 @@ import org.eclipse.dltk.core.tests.launching.InterpreterConfigTests;
 import org.eclipse.dltk.core.tests.model.BufferTests;
 import org.eclipse.dltk.core.tests.model.ModelMembersTests;
 import org.eclipse.dltk.core.tests.model.WorkingCopyTests;
+import org.eclipse.dltk.core.tests.utils.InternalCoreUtilTest;
 import org.eclipse.dltk.core.tests.utils.TextUtilsTest;
 
 public class AllTests {
@@ -29,6 +30,7 @@ public class AllTests {
 				"Test for org.eclipse.dltk.core.tests.model");
 		// $JUnit-BEGIN$
 		suite.addTest(new TestSuite(CompilerUtilTests.class));
+		suite.addTest(new TestSuite(InternalCoreUtilTest.class));
 		suite.addTest(BuildpathTests.suite());
 
 		suite.addTest(CoreDDPTests.suite());
