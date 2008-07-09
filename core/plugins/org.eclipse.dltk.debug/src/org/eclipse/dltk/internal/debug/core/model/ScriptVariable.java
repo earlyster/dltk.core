@@ -140,8 +140,8 @@ public class ScriptVariable extends ScriptDebugElement implements
 			final ScriptVariable v = (ScriptVariable) newVariable;
 			isValueChanged = !equals(property, v.property);
 			if (!isValueChanged) {
-				if (property.getChildrenCount() != 0
-						&& v.property.getChildrenCount() != 0) {
+				if (property.getAvailableChildren().length != 0
+						&& v.property.getAvailableChildren().length != 0) {
 					ScriptStackFrame.refreshVariables(v.getValue()
 							.getVariables(), getValue().getVariables());
 				}
