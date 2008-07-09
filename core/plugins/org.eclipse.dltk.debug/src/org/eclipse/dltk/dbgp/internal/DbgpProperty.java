@@ -13,6 +13,8 @@ import org.eclipse.dltk.dbgp.IDbgpProperty;
 
 public class DbgpProperty implements IDbgpProperty {
 
+	private final String address;
+
 	private final String name;
 
 	private final String fullName;
@@ -37,12 +39,13 @@ public class DbgpProperty implements IDbgpProperty {
 
 	public DbgpProperty(String name, String fullName, String type,
 			String value, int childrenCount, boolean hasChildren,
-			boolean constant, String key, IDbgpProperty[] availableChildren,
-			int page, int pageSize) {
+			boolean constant, String key, String address,
+			IDbgpProperty[] availableChildren, int page, int pageSize) {
 		this.name = name;
 		this.fullName = fullName;
 		this.type = type;
 		this.value = value;
+		this.address = address;
 		this.childrenCount = childrenCount;
 		this.availableChildren = availableChildren;
 		this.hasChildren = hasChildren;
@@ -86,7 +89,7 @@ public class DbgpProperty implements IDbgpProperty {
 
 	public String toString() {
 		return "DbgpProperty (Name: " + name + "; Full name: " + fullName //$NON-NLS-1$ //$NON-NLS-2$
-				+ "; Type: " + type + "; Value: " + value + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ "; Type: " + type + "; Value: " + value + " Address: " + address + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	public String getKey() {
@@ -99,5 +102,9 @@ public class DbgpProperty implements IDbgpProperty {
 
 	public int getPageSize() {
 		return pageSize;
+	}
+
+	public String getAddress() {
+		return address;
 	}
 }

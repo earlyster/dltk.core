@@ -20,6 +20,8 @@ public interface IDbgpProperty {
 
 	String getValue();
 
+	String getAddress();
+
 	boolean isConstant();
 
 	boolean hasChildren();
@@ -27,8 +29,8 @@ public interface IDbgpProperty {
 	int getChildrenCount();
 
 	IDbgpProperty[] getAvailableChildren();
-	
+
 	int getPage();
-	
+
 	int getPageSize();
 }

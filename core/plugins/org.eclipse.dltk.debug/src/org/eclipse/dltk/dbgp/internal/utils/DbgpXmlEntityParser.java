@@ -101,15 +101,17 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 		final String ATTR_KEY = "key"; //$NON-NLS-1$
 		final String ATTR_PAGE = "page"; //$NON-NLS-1$
 		final String ATTR_PAGE_SIZE = "pagesize"; //$NON-NLS-1$
+		final String ATTR_ADDRESS = "address";
 
 		/*
 		 * attributes: name, fullname, type, children, numchildren, constant,
-		 * encoding, size, key
+		 * encoding, size, key, address
 		 */
 
 		// may exist as an attribute of the property or as child element
 		final String name = getFromChildOrAttr(property, ATTR_NAME);
 		final String fullName = getFromChildOrAttr(property, ATTR_FULLNAME);
+
 		final String type = property.getAttribute(ATTR_TYPE);
 
 		// hasChildren
@@ -149,6 +151,12 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 			key = property.getAttribute(ATTR_KEY);
 		}
 
+		// memory address
+		String address = null;
+		if (property.hasAttribute(ATTR_ADDRESS)) {
+			address = property.getAttribute(ATTR_ADDRESS);
+		}
+
 		// Value
 		String value = ""; //$NON-NLS-1$
 
@@ -179,7 +187,8 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 		}
 
 		return new DbgpProperty(name, fullName, type, value, childrenCount,
-				hasChildren, constant, key, availableChildren, page, pagesize);
+				hasChildren, constant, key, address, availableChildren, page,
+				pagesize);
 	}
 
 	public static IDbgpStatus parseStatus(Element element)
