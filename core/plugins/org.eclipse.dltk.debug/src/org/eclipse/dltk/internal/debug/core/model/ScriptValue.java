@@ -36,8 +36,11 @@ import org.eclipse.dltk.internal.debug.core.eval.ScriptEvaluationCommand;
 
 public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		IIndexedValue {
-	final private IScriptType type;
-	final private IVariable[] variables;
+
+	private static final IVariable[] NO_VARIABLES = new IVariable[0];
+
+	private final IScriptType type;
+	private final IVariable[] variables;
 	private IScriptStackFrame frame;
 	private int pageSize;
 	private String name;
@@ -79,10 +82,14 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		this.rawValue = property.getValue();
 		this.value = null;
 		this.hasChildren = property.hasChildren();
-		this.variables = new ScriptVariable[property.getChildrenCount()];
-
 		this.pageSize = property.getPageSize();
-		fillVariables(property.getPage(), property);
+		final int childrenCount = property.getChildrenCount();
+		if (childrenCount > 0) {
+			this.variables = new ScriptVariable[childrenCount];
+			fillVariables(property.getPage(), property);
+		} else {
+			this.variables = NO_VARIABLES;
+		}
 	}
 
 	private void loadPage(int page) throws DbgpException {
