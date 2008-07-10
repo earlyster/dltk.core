@@ -29,23 +29,24 @@ public class ValidatorManager {
 
 	// Contains list of validators for selected nature.
 	private static Map validators;
-	
+
 	private static Map idToValidatorType = null;
-	
-	public static IValidatorType getValidatorTypeFromID( String id ) {
-		if( idToValidatorType == null ) {
+
+	public static IValidatorType getValidatorTypeFromID(String id) {
+		if (idToValidatorType == null) {
 			idToValidatorType = new HashMap();
 			try {
 				IValidatorType[] allValidatorTypes = getAllValidatorTypes();
 				for (int i = 0; i < allValidatorTypes.length; i++) {
-					idToValidatorType.put(allValidatorTypes[i].getID(), allValidatorTypes[i] );
+					idToValidatorType.put(allValidatorTypes[i].getID(),
+							allValidatorTypes[i]);
 				}
 			} catch (CoreException e) {
 				idToValidatorType = null;
 				return null;
 			}
 		}
-		return (IValidatorType)idToValidatorType.get(id);
+		return (IValidatorType) idToValidatorType.get(id);
 	}
 
 	private static void initialize() {
@@ -60,19 +61,20 @@ public class ValidatorManager {
 		for (int i = 0; i < cfg.length; i++) {
 			String nature = cfg[i].getAttribute(NATURE_ATTR);
 			if (validators.get(nature) != null) {
-				List elements = (List)validators.get(nature);
+				List elements = (List) validators.get(nature);
 				elements.add(cfg[i]);
 				continue;
-			}
-			else {
+			} else {
 				List elements = new ArrayList();
-				elements.add( cfg[i] );
-				validators.put( nature, elements );
+				elements.add(cfg[i]);
+				validators.put(nature, elements);
 			}
 		}
 	}
+
 	/**
 	 * Return merged with all elements with nature #
+	 * 
 	 * @param natureId
 	 * @return
 	 * @throws CoreException
@@ -84,40 +86,40 @@ public class ValidatorManager {
 		List results = new ArrayList();
 		processNature(natureId, results);
 		// Add from # nature.
-		processNature( "#", results ); //$NON-NLS-1$
-		return (IValidatorType[])results.toArray(new IValidatorType[results.size()]);
+		processNature("#", results); //$NON-NLS-1$
+		return (IValidatorType[]) results.toArray(new IValidatorType[results
+				.size()]);
 	}
+
 	private static void processNature(String natureId, List results)
 			throws CoreException {
 		Object ext = validators.get(natureId);
-		
+
 		if (ext != null) {
-			if( ext instanceof IValidatorType[]) {
-				IValidatorType[] b = (IValidatorType[])ext;
+			if (ext instanceof IValidatorType[]) {
+				IValidatorType[] b = (IValidatorType[]) ext;
 				for (int i = 0; i < b.length; i++) {
-					if( !results.contains(b[i])) {
+					if (!results.contains(b[i])) {
 						results.add(b[i]);
 					}
 				}
-			}
-			else if ( ext instanceof List ) {
-				List elements = (List)ext;
+			} else if (ext instanceof List) {
+				List elements = (List) ext;
 				IValidatorType[] result = new IValidatorType[elements.size()];
-				for( int i = 0; i < elements.size(); ++i ) {
+				for (int i = 0; i < elements.size(); ++i) {
 					Object e = elements.get(i);
-					if( e instanceof IValidatorType ) {
-						result[i] = (IValidatorType)e;
-					}
-					else {
+					if (e instanceof IValidatorType) {
+						result[i] = (IValidatorType) e;
+					} else {
 						IConfigurationElement cfg = (IConfigurationElement) e;
 						IValidatorType builder = (IValidatorType) cfg
 								.createExecutableExtension("class"); //$NON-NLS-1$
 						result[i] = builder;
 					}
 				}
-				validators.put(natureId, result) ;
+				validators.put(natureId, result);
 				for (int i = 0; i < result.length; i++) {
-					if( !results.contains(result[i])) {
+					if (!results.contains(result[i])) {
 						results.add(result[i]);
 					}
 				}
@@ -126,19 +128,20 @@ public class ValidatorManager {
 	}
 
 	public static IValidatorType[] getAllValidatorTypes() throws CoreException {
-		
+
 		initialize();
 		List result = new ArrayList();
 		Iterator iterator = validators.keySet().iterator();
-		while( iterator.hasNext() ) {
-			String nature = (String)iterator.next();
+		while (iterator.hasNext()) {
+			String nature = (String) iterator.next();
 			IValidatorType[] b = getValidators(nature);
-			for( int i = 0; i < b.length; ++i ) {
-				if( !result.contains(b[i])) {
+			for (int i = 0; i < b.length; ++i) {
+				if (!result.contains(b[i])) {
 					result.add(b[i]);
 				}
 			}
 		}
-		return (IValidatorType[])result.toArray(new IValidatorType[result.size()]);
+		return (IValidatorType[]) result.toArray(new IValidatorType[result
+				.size()]);
 	}
 }
