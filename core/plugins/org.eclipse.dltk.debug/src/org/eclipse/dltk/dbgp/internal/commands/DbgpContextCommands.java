@@ -31,8 +31,6 @@ public class DbgpContextCommands extends DbgpBaseCommands implements
 
 	private static final String TAG_CONTEXT = "context"; //$NON-NLS-1$
 
-	private static final String TAG_PROPERTY = "property"; //$NON-NLS-1$
-
 	private static final String ATTR_NAME = "name"; //$NON-NLS-1$
 
 	private static final String ATTR_ID = "id"; //$NON-NLS-1$
@@ -65,7 +63,7 @@ public class DbgpContextCommands extends DbgpBaseCommands implements
 
 			Node item = properties.item(i);
 			if (item instanceof Element) {
-				if (item.getNodeName().equals(TAG_PROPERTY)) {
+				if (item.getNodeName().equals(DbgpXmlEntityParser.TAG_PROPERTY)) {
 					list.add(DbgpXmlEntityParser.parseProperty((Element) item));
 				}
 			}

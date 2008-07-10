@@ -24,14 +24,11 @@ public class DbgpPropertyCommands extends DbgpBaseCommands implements
 
 	private static final String PROPERTY_SET_COMMAND = "property_set"; //$NON-NLS-1$
 
-	// private static final String PROPERTY_VALUE_COMMAND = "property_value";
-
-	private static final String PROPERTY_TAG = "property"; //$NON-NLS-1$
-
 	protected IDbgpProperty parsePropertyResponse(Element response)
 			throws DbgpException {
 		// TODO: check length!!!
-		NodeList properties = response.getElementsByTagName(PROPERTY_TAG);
+		NodeList properties = response
+				.getElementsByTagName(DbgpXmlEntityParser.TAG_PROPERTY);
 		return DbgpXmlEntityParser.parseProperty((Element) properties.item(0));
 	}
 
@@ -44,8 +41,8 @@ public class DbgpPropertyCommands extends DbgpBaseCommands implements
 		return getProperty(null, name, stackDepth, contextId);
 	}
 
-	protected IDbgpProperty getProperty(Integer page, String name, Integer stackDepth,
-			Integer contextId) throws DbgpException {
+	protected IDbgpProperty getProperty(Integer page, String name,
+			Integer stackDepth, Integer contextId) throws DbgpException {
 		DbgpRequest request = createRequest(PROPERTY_GET_COMMAND);
 		request.addOption("-n", name); //$NON-NLS-1$
 
@@ -88,7 +85,8 @@ public class DbgpPropertyCommands extends DbgpBaseCommands implements
 
 	public IDbgpProperty getProperty(int page, String name, int stackDepth)
 			throws DbgpException {
-		return getProperty(new Integer(page),name, new Integer(stackDepth), null);
+		return getProperty(new Integer(page), name, new Integer(stackDepth),
+				null);
 	}
 
 	public boolean setProperty(IDbgpProperty property) throws DbgpException {
