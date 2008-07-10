@@ -23,6 +23,12 @@ public interface IScriptValue extends IValue {
 
 	String getRawValue();
 
+	/**
+	 * Returns the physical memory address or <code>null</code> if it is not
+	 * available.
+	 */
+	String getMemoryAddress();
+
 	IVariable getVariable(int offset) throws DebugException;
 
 	IScriptEvaluationCommand createEvaluationCommand(String messageTemplate,

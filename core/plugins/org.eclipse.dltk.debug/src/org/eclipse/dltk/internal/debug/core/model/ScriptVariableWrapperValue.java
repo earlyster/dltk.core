@@ -28,7 +28,7 @@ final class ScriptVariableWrapperValue implements IScriptValue {
 		this.owner = scriptVariableWrapper;
 	}
 
-	public String getReferenceTypeName() throws DebugException {
+	public String getReferenceTypeName() {
 		return ""; //$NON-NLS-1$
 	}
 
@@ -36,7 +36,7 @@ final class ScriptVariableWrapperValue implements IScriptValue {
 		return ""; //$NON-NLS-1$
 	}
 
-	public String getValueString() throws DebugException {
+	public String getValueString() {
 		return ""; //$NON-NLS-1$
 	}
 
@@ -44,11 +44,11 @@ final class ScriptVariableWrapperValue implements IScriptValue {
 		return this.owner.getChildren();
 	}
 
-	public boolean hasVariables() throws DebugException {
+	public boolean hasVariables() {
 		return this.owner.hasChildren();
 	}
 
-	public boolean isAllocated() throws DebugException {
+	public boolean isAllocated() {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -87,6 +87,10 @@ final class ScriptVariableWrapperValue implements IScriptValue {
 	}
 
 	public IVariable getVariable(int offset) {
+		return null;
+	}
+
+	public String getMemoryAddress() {
 		return null;
 	}
 }

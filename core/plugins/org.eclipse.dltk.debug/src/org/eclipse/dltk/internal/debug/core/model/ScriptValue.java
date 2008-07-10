@@ -49,6 +49,7 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 	private boolean hasChildren;
 	private String key;
 	private String rawValue;
+	private String address;
 
 	public static IScriptValue createValue(IScriptStackFrame frame,
 			IDbgpProperty property) {
@@ -83,6 +84,8 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		this.value = null;
 		this.hasChildren = property.hasChildren();
 		this.pageSize = property.getPageSize();
+		this.address = property.getAddress();
+
 		final int childrenCount = property.getChildrenCount();
 		if (childrenCount > 0) {
 			this.variables = new IVariable[childrenCount];
@@ -134,7 +137,7 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		return offset / pageSize;
 	}
 
-	public String getReferenceTypeName() throws DebugException {
+	public String getReferenceTypeName() {
 		return getType().getName();
 	}
 
@@ -153,11 +156,11 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		return fullname;
 	}
 
-	public boolean hasVariables() throws DebugException {
+	public boolean hasVariables() {
 		return hasChildren;
 	}
 
-	public boolean isAllocated() throws DebugException {
+	public boolean isAllocated() {
 		return true;
 	}
 
@@ -186,17 +189,16 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		if (messageTemplate.indexOf(pattern) != -1) {
 			String snippet = replacePattern(messageTemplate, pattern, evalName);
 			return new ScriptEvaluationCommand(engine, snippet, frame);
-		} else {
-			DLTKDebugPlugin
-					.log(new Status(
-							IStatus.WARNING,
-							DLTKDebugPlugin.PLUGIN_ID,
-							MessageFormat
-									.format(
-											Messages.ScriptValue_detailFormatterRequiredToContainIdentifier,
-											new Object[] { pattern })));
-			return new ScriptEvaluationCommand(engine, evalName, frame);
 		}
+		DLTKDebugPlugin
+				.log(new Status(
+						IStatus.WARNING,
+						DLTKDebugPlugin.PLUGIN_ID,
+						MessageFormat
+								.format(
+										Messages.ScriptValue_detailFormatterRequiredToContainIdentifier,
+										new Object[] { pattern })));
+		return new ScriptEvaluationCommand(engine, evalName, frame);
 	}
 
 	private static String replacePattern(String messageTemplate,
@@ -214,7 +216,7 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		return 0;
 	}
 
-	public int getSize() throws DebugException {
+	public int getSize() {
 		return variables.length;
 	}
 
@@ -255,4 +257,10 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		return name;
 	}
 
+	/*
+	 * @see org.eclipse.dltk.debug.core.model.IScriptValue#getMemoryAddress()
+	 */
+	public String getMemoryAddress() {
+		return address;
+	}
 }
