@@ -37,7 +37,7 @@ import org.eclipse.dltk.internal.debug.core.eval.ScriptEvaluationCommand;
 public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		IIndexedValue {
 
-	private static final IVariable[] NO_VARIABLES = new IVariable[0];
+	static final IVariable[] NO_VARIABLES = new IVariable[0];
 
 	private final IScriptType type;
 	private final IVariable[] variables;
@@ -85,7 +85,7 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		this.pageSize = property.getPageSize();
 		final int childrenCount = property.getChildrenCount();
 		if (childrenCount > 0) {
-			this.variables = new ScriptVariable[childrenCount];
+			this.variables = new IVariable[childrenCount];
 			fillVariables(property.getPage(), property);
 		} else {
 			this.variables = NO_VARIABLES;
@@ -98,6 +98,12 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		IDbgpProperty pageProperty = commands.getProperty(page, fullname, frame
 				.getLevel());
 		fillVariables(page, pageProperty);
+		final int endIndex = Math.min((page + 1) * pageSize, variables.length);
+		for (int i = page * pageSize; i < endIndex; ++i) {
+			if (variables[i] == null) {
+				variables[i] = new UnknownVariable(frame, this, i);
+			}
+		}
 	}
 
 	private void fillVariables(int page, IDbgpProperty pageProperty) {
@@ -243,6 +249,10 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 			return this;
 		}
 		return super.getAdapter(adapter);
+	}
+
+	public String getName() {
+		return name;
 	}
 
 }
