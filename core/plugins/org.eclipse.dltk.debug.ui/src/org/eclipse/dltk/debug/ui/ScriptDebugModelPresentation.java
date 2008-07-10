@@ -418,14 +418,21 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 
 	// Details
 	public void computeDetail(IValue value, IValueDetailListener listener) {
-		IScriptDebugTarget target = (IScriptDebugTarget) value.getDebugTarget();
-		IScriptThread thread = getEvaluationThread(target);
-		if (thread == null) {
-			listener.detailComputed(value, getValueText((IScriptValue) value));
+		if (value instanceof IScriptValue) {
+			IScriptDebugTarget target = (IScriptDebugTarget) value
+					.getDebugTarget();
+			IScriptThread thread = getEvaluationThread(target);
+			if (thread == null) {
+				listener.detailComputed(value,
+						getValueText((IScriptValue) value));
+			} else {
+				String natureId = target.getLanguageToolkit().getNatureId();
+				ScriptDetailFormattersManager.getDefault(natureId)
+						.computeValueDetail((IScriptValue) value, thread,
+								listener);
+			}
 		} else {
-			String natureId = target.getLanguageToolkit().getNatureId();
-			ScriptDetailFormattersManager.getDefault(natureId)
-					.computeValueDetail((IScriptValue) value, thread, listener);
+			listener.detailComputed(value, value.toString());
 		}
 	}
 
