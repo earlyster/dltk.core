@@ -247,7 +247,7 @@ public class ValidatorDefinitionsContainer {
 			}
 		} else {
 			final String msg = ValidatorMessages.ValidatorDefinitionsContainer_unknownValidatorType;
-			ValidatorsCore.error(NLS.bind(msg, id));
+			ValidatorsCore.warn(NLS.bind(msg, id));
 		}
 	}
 
