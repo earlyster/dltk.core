@@ -71,13 +71,33 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 
 		int lineNumber = Integer.parseInt(element.getAttribute(ATTR_LINENO));
 
-		final String fileName = element.getAttribute(ATTR_FILENAME);
-		final URI fileUri = URI.create(fileName);
+		final URI fileUri = parseURI(element.getAttribute(ATTR_FILENAME));
 
 		final String where = element.getAttribute(ATTR_WHERE);
 
 		return new DbgpStackLevel(fileUri, where, level, lineNumber, lineBegin,
 				lineEnd);
+	}
+
+	private static final String FILE_SCHEME = "file:///"; //$NON-NLS-1$
+
+	private static URI parseURI(String fileName) {
+		/*
+		 * ActiveState python debugger on windows sends URI as
+		 * "file:///C|/path/to/file.py" we need to convert it.
+		 */
+		if (fileName.startsWith(FILE_SCHEME)) {
+			final int pos = FILE_SCHEME.length();
+			if (fileName.length() > pos + 3) {
+				if (Character.isLetter(fileName.charAt(pos))
+						&& fileName.charAt(pos + 1) == '|'
+						&& fileName.charAt(pos + 2) == '/') {
+					fileName = fileName.substring(0, pos + 1) + ':'
+							+ fileName.substring(pos + 2);
+				}
+			}
+		}
+		return URI.create(fileName);
 	}
 
 	public static DbgpFeature parseFeature(Element element)
@@ -101,7 +121,7 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 		final String ATTR_KEY = "key"; //$NON-NLS-1$
 		final String ATTR_PAGE = "page"; //$NON-NLS-1$
 		final String ATTR_PAGE_SIZE = "pagesize"; //$NON-NLS-1$
-		final String ATTR_ADDRESS = "address";
+		final String ATTR_ADDRESS = "address"; //$NON-NLS-1$
 
 		/*
 		 * attributes: name, fullname, type, children, numchildren, constant,
