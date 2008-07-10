@@ -91,12 +91,10 @@ public class DLTKValidatorsActionGroup extends ActionGroup {
 		}
 		if (validatorCount != 0) {
 			subMenu.add(new Separator());
-		}
-		subMenu.add(new RemoveAllMarkersAction(selection));
-		if (validatorCount != 0) {
+			subMenu.add(new RemoveAllMarkersAction(selection));
 			subMenu.add(new ValidateAllAction(selection));
+			menu.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, subMenu);
 		}
-		menu.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, subMenu);
 	}
 
 	private static final boolean DEBUG = false;
