@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.validators.core.IValidator;
 import org.eclipse.dltk.validators.core.IValidatorType;
+import org.eclipse.osgi.util.NLS;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -245,9 +246,8 @@ public class ValidatorDefinitionsContainer {
 				}
 			}
 		} else {
-			if (DLTKCore.DEBUG) {
-				System.err.println("Interpreter type element with unknown id."); //$NON-NLS-1$
-			}
+			final String msg = ValidatorMessages.ValidatorDefinitionsContainer_unknownValidatorType;
+			ValidatorsCore.error(NLS.bind(msg, id));
 		}
 	}
 
