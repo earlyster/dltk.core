@@ -22,25 +22,24 @@ import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.internal.core.ValidatorDefinitionsContainer;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
-
 /**
  * Processes add/removed/changed Interpreters.
  */
 public class ValidatorUpdater {
-	
+
 	// the Interpreters defined when this updated is instantiated
-	private ValidatorDefinitionsContainer fOriginalValidators;	
-	
+	private ValidatorDefinitionsContainer fOriginalValidators;
+
 	/**
 	 * Contstructs a new Validator updater to update Validator install settings.
 	 */
 	public ValidatorUpdater() {
-		saveCurrentAsOriginal ();
+		saveCurrentAsOriginal();
 	}
-	
-	private void saveCurrentAsOriginal () {
+
+	private void saveCurrentAsOriginal() {
 		fOriginalValidators = new ValidatorDefinitionsContainer();
-	
+
 		IValidatorType[] types = ValidatorRuntime.getValidatorTypes();
 		for (int i = 0; i < types.length; i++) {
 			IValidator[] validators = types[i].getValidators();
@@ -50,40 +49,49 @@ public class ValidatorUpdater {
 				}
 		}
 	}
-	
+
 	/**
 	 * Updates Validator settings and returns whether the update was successful.
 	 * 
-	 * @param validatorEnvironments new installed ValidatorEnvironments
-	 * @param defaultInterp new default Validator
+	 * @param validatorEnvironments
+	 *            new installed ValidatorEnvironments
+	 * @param defaultInterp
+	 *            new default Validator
 	 * @return whether the update was successful
 	 */
 	public boolean updateValidatorSettings(IValidator[] validatorEnvironments) {
-		
+
 		// Create a Validator definition container
 		ValidatorDefinitionsContainer validatorContainer = new ValidatorDefinitionsContainer();
-		
+
 		// Set the Validators on the container
 		for (int i = 0; i < validatorEnvironments.length; i++) {
 			validatorContainer.addValidator(validatorEnvironments[i]);
-		}	
-		
-		// Generate XML for the Validator defs and save it as the new value of the Validator preference
+		}
+
+		// Generate XML for the Validator defs and save it as the new value of
+		// the Validator preference
 		saveValidatorDefinitions(validatorContainer);
-		
-		saveCurrentAsOriginal ();
-		
+
+		saveCurrentAsOriginal();
+
 		return true;
 	}
-	
-	private void saveValidatorDefinitions(final ValidatorDefinitionsContainer container) {
+
+	private void saveValidatorDefinitions(
+			final ValidatorDefinitionsContainer container) {
 		IRunnableWithProgress runnable = new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+			public void run(IProgressMonitor monitor)
+					throws InvocationTargetException, InterruptedException {
 				try {
-					monitor.beginTask(ValidatorMessages.ValidatorUpdater_0, 100); 
+					monitor
+							.beginTask(ValidatorMessages.ValidatorUpdater_0,
+									100);
 					String ValidatorDefXML = container.getAsXML();
 					monitor.worked(40);
-					ValidatorRuntime.getPreferences().setValue(ValidatorRuntime.PREF_VALIDATOR_XML, ValidatorDefXML);
+					ValidatorRuntime.getPreferences().setValue(
+							ValidatorRuntime.PREF_VALIDATOR_XML,
+							ValidatorDefXML);
 					monitor.worked(30);
 					ValidatorRuntime.savePreferences();
 					monitor.worked(30);
@@ -99,11 +107,12 @@ public class ValidatorUpdater {
 			}
 		};
 		try {
-			ValidatorsUI.getDefault().getWorkbench().getProgressService().busyCursorWhile(runnable);			
+			ValidatorsUI.getDefault().getWorkbench().getProgressService()
+					.busyCursorWhile(runnable);
 		} catch (InvocationTargetException e) {
 			ValidatorsUI.log(e);
 		} catch (InterruptedException e) {
 			ValidatorsUI.log(e);
-		} 
+		}
 	}
 }
