@@ -503,8 +503,7 @@ public class ValidatorBlock implements ISelectionProvider,
 			Iterator iterator = selection.iterator();
 			while (iterator.hasNext()) {
 				IValidator install = (IValidator) iterator.next();
-				boolean builtin = install.getValidatorType().isBuiltin();
-				if (isContributed(install) || builtin) {
+				if (isContributed(install)) {
 					removeEnabled = false;
 					copyEnabled = false;
 				}
@@ -523,7 +522,7 @@ public class ValidatorBlock implements ISelectionProvider,
 	}
 
 	private boolean isContributed(IValidator install) {
-		return ValidatorRuntime.isContributedValidator(install.getID());
+		return install.getValidatorType().isBuiltin();
 	}
 
 	/**
