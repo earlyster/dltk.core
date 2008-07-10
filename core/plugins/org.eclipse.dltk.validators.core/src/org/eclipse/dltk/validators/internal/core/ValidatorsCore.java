@@ -25,6 +25,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
@@ -212,4 +213,13 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 //			fBatchingChanges = false;
 		}
 	}
+
+	public static void log(IStatus status) {
+		getDefault().getLog().log(status);
+	}
+
+	public static void error(String message) {
+		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, message, null));
+	}
+
 }
