@@ -58,7 +58,6 @@ public class AddValidatorDialog extends StatusDialog implements IStatusHandler {
 	private ValidatorConfigurationPage fConfigurationPage = null;
 
 	private Composite configPage = null;
-	private Composite ancestor;
 
 	public AddValidatorDialog(IAddValidatorDialogRequestor requestor,
 			Shell shell, IValidatorType[] validatorTypes,
@@ -119,7 +118,6 @@ public class AddValidatorDialog extends StatusDialog implements IStatusHandler {
 	}
 
 	protected Control createDialogArea(Composite ancestor) {
-		this.ancestor = ancestor;
 		createDialogFields();
 		Composite parent = (Composite) super.createDialogArea(ancestor);
 		((GridLayout) parent.getLayout()).numColumns = 3;
@@ -128,7 +126,8 @@ public class AddValidatorDialog extends StatusDialog implements IStatusHandler {
 		((GridData) fValidatorTypeCombo.getComboControl(null).getLayoutData()).widthHint = convertWidthInCharsToPixels(50);
 		((GridData) fValidatorTypeCombo.getComboControl(null).getLayoutData()).grabExcessHorizontalSpace = true;
 
-		// ((GridData)fValidatorName.getLabelControl(null).getLayoutData()).grabExcessHorizontalSpace
+		// ((GridData)fValidatorName.getLabelControl(null).getLayoutData()).
+		// grabExcessHorizontalSpace
 		// = true;
 
 		fValidatorName.doFillIntoGrid(parent, 3);
@@ -229,14 +228,9 @@ public class AddValidatorDialog extends StatusDialog implements IStatusHandler {
 			recreateConfigPage(configPage);
 			this.configPage.redraw();
 			this.configPage.layout(true, true);
-			// this.configPage.setSize(this.configPage.computeSize(SWT.DEFAULT,
-			// SWT.DEFAULT));
-			// this.ancestor.setSize(this.ancestor.computeSize(400, 300));
-			this.ancestor.getShell().setSize(
-					this.ancestor.getShell().computeSize(SWT.DEFAULT,
-							SWT.DEFAULT));
-			this.ancestor.layout(true, true);
-			this.ancestor.getShell().layout(true, true);
+			final Shell shell = getShell();
+			shell.setSize(shell.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+			shell.layout(true, true);
 		}
 
 		updateStatusLine();
