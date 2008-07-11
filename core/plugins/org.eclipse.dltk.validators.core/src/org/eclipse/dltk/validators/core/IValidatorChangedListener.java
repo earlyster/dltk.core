@@ -5,12 +5,15 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation
  *******************************************************************************/
 package org.eclipse.dltk.validators.core;
 
 public interface IValidatorChangedListener {
-	public void validatorChanged(IValidator validator);	
-	public void validatorAdded(IValidator validator);		
-	public void validatorRemoved(IValidator validator);				
+	public void validatorChanged(IValidator validator);
+
+	public void validatorAdded(IValidator validator);
+
+	public void validatorRemoved(IValidator validator);
 }
