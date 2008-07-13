@@ -467,12 +467,6 @@
             categoryId="org.eclipse.ui.category.textEditor"
             id="org.eclipse.dltk.ui.edit.text.script.folding.collapseComments">
       </command>
-      <command
-            name="%ActionDefinition.openEditor.name"
-            description="%ActionDefinition.openEditor.description"
-            categoryId="org.eclipse.ui.category.navigate"
-            id="org.eclipse.dltk.ui.edit.text.script.open.editor">
-      </command>
       <!--command
             name="%ActionDefinition.showDocumentation.name"
             description="%ActionDefinition.showDocumentation.description"
@@ -486,14 +480,6 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.dltk.ui.edit.text.script.show.outline">
       </command>
-      
-      <command
-            name="%ActionDefinition.open.hierarchy.name"
-            description="%ActionDefinition.open.hierarchy.description"
-            categoryId="org.eclipse.ui.category.navigate"
-            id="org.eclipse.dltk.ui.edit.text.script.open.hierarchy">
-      </command>
-      
 	  <command
             name="%ActionDefinition.gotoMatchingBracket.name"
             description="%ActionDefinition.gotoMatchingBracket.description"
@@ -530,13 +516,6 @@
             description="%ActionDefinition.toggleComment.description"
             categoryId="org.eclipse.dltk.ui.category.source"
             id="org.eclipse.dltk.ui.edit.text.script.toggle.comment">
-      </command>
-      <!-- Navigate -->
-       <command
-            name="%ActionDefinition.openType.name"
-            description="%ActionDefinition.openType.description"
-            categoryId="org.eclipse.ui.category.navigate"
-            id="org.eclipse.dltk.ui.navigate.open.type">
       </command>
       <!-- navigate -->
       <command
