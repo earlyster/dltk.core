@@ -53,6 +53,7 @@ import org.eclipse.dltk.internal.core.ExternalProjectFragment;
 import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ScriptProject;
+import org.eclipse.osgi.util.NLS;
 
 public class ScriptBuilder extends IncrementalProjectBuilder {
 	public static final boolean DEBUG = DLTKCore.DEBUG_SCRIPT_BUILDER;
@@ -529,9 +530,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		int id = 0;
 		for (Iterator iterator = allresources.iterator(); iterator.hasNext();) {
 			IResource res = (IResource) iterator.next();
-
-			sub.subTask(Messages.ScriptBuilder_Location_source_modules + " ("
-					+ (allresources.size() - id) + "):" + res.getName()); //$NON-NLS-1$
+			sub.subTask(NLS.bind(
+					Messages.ScriptBuilder_Location_source_modules, String
+							.valueOf(allresources.size() - id), res.getName()));
 			sub.worked(1);
 			if (sub.isCanceled()) {
 				return null;
@@ -590,8 +591,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 											/ (builders.length * natureIds.length));
 							ssub.beginTask(Messages.ScriptBuilder_building, 1);
 							IScriptBuilder builder = builders[k];
-							if (!alreadyPassed.contains(builder)) {
-								alreadyPassed.add(builder);
+							if (alreadyPassed.add(builder)) {
 								IStatus st = builder.buildResources(
 										this.scriptProject, realResources,
 										ssub, buildType);
