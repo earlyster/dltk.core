@@ -1633,8 +1633,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			WorkingCopyOwner woc = new WorkingCopyOwner() {
 				public IBuffer createBuffer(ISourceModule workingCopy) {
 					// return new DocumentAdapter(workingCopy, documentPath);
-					return BufferManager.getDefaultBufferManager()
-							.createBuffer(workingCopy);
+					return BufferManager.createBuffer(workingCopy);
 				}
 			};
 
