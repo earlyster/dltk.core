@@ -55,11 +55,11 @@ public class ValidatorUpdater {
 					monitor
 							.beginTask(ValidatorMessages.ValidatorUpdater_0,
 									100);
-					String ValidatorDefXML = container.getAsXML();
+					String xml = container.getAsXML();
 					monitor.worked(40);
 					ValidatorRuntime.getPreferences().setValue(
 							ValidatorRuntime.PREF_VALIDATOR_XML,
-							ValidatorDefXML);
+							xml);
 					monitor.worked(30);
 					ValidatorRuntime.savePreferences();
 					monitor.worked(30);
