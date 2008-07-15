@@ -9,25 +9,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.core.tests;
 
-import java.io.IOException;
-
 import org.eclipse.dltk.validators.core.AbstractValidatorType;
+import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidator;
-import org.w3c.dom.Element;
+import org.eclipse.dltk.validators.core.ValidatorRuntime;
 
 public class SimpleValidatorType extends AbstractValidatorType {
-	public final String ID = "org.eclipse.dltk.validators.core.tests.simpleValidator";
-	
-	public IValidator createValidator(String id) {
-		SimpleValidator simpleValidator = new SimpleValidator(id, this);
-		validators.put(id, simpleValidator);
-		return simpleValidator;
-	}
+	private static final String ID = "org.eclipse.dltk.validators.core.tests.simpleValidator";
 
-	public IValidator createValidatorFrom(String id, Element validatorElement) throws IOException {
-		SimpleValidator simpleValidator = new SimpleValidator(id, validatorElement, this);
-		validators.put(id, simpleValidator);
-		return simpleValidator;
+	public IValidator createValidator(String id) {
+		return new SimpleValidator(id, this);
 	}
 
 	public String getID() {
@@ -39,14 +30,14 @@ public class SimpleValidatorType extends AbstractValidatorType {
 	}
 
 	public String getNature() {
-		return "#";
-	}
-
-	public boolean isConfigurable() {
-		return true;
+		return ValidatorRuntime.ANY_NATURE;
 	}
 
 	public boolean isBuiltin() {
 		return false;
+	}
+
+	public boolean supports(Class validatorType) {
+		return ISourceModuleValidator.class.equals(validatorType);
 	}
 }

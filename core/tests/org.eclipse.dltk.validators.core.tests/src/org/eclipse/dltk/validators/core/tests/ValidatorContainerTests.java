@@ -16,28 +16,27 @@ import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.validators.core.IValidator;
-import org.eclipse.dltk.validators.core.IValidatorType;
+import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.internal.core.ValidatorDefinitionsContainer;
-import org.eclipse.dltk.validators.internal.core.ValidatorManager;
 
 public class ValidatorContainerTests extends TestCase {
 	public void testValidatorContainer001() throws Exception {
 		ValidatorDefinitionsContainer co = new ValidatorDefinitionsContainer();
 		assertNotNull(co);
-		SimpleValidatorType vt = findSimpleValidtor();
+		SimpleValidatorType vt = SimpleValidatorUtils.find();
 		assertNotNull(vt);
 		assertTrue(vt.isConfigurable());
 		IValidator v1 = vt.createValidator("v1");
 		assertNotNull(v1);
 		co.addValidator(v1);
 		IValidator v2 = vt.createValidator("v2");
-		((SimpleValidator)v2).setValid(false);
+		((SimpleValidator) v2).setValid(false);
 		assertNotNull(v2);
 		co.addValidator(v2);
 		String xml = co.getAsXML();
 		assertNotNull(xml);
 		System.out.println(xml);
-		List validValidatorsList = co.getValidatorsList();
+		List validValidatorsList = co.getValidatorList();
 		List validatorList = co.getValidatorList();
 		assertNotNull(validValidatorsList);
 		assertNotNull(validatorList);
@@ -45,9 +44,9 @@ public class ValidatorContainerTests extends TestCase {
 		assertTrue(validValidatorsList.contains(v2));
 		assertTrue(validatorList.contains(v1));
 		assertTrue(validatorList.contains(v2));
-		
+
 		ValidatorDefinitionsContainer co2 = ValidatorDefinitionsContainer
-				.parseXMLIntoContainer(new StringReader(xml));
+				.createFromXML(new StringReader(xml));
 		assertNotNull(co2);
 		List validatorList2 = co2.getValidatorList();
 		assertNotNull(validatorList2);
@@ -56,26 +55,45 @@ public class ValidatorContainerTests extends TestCase {
 		assertNotNull(validatorList3);
 		assertEquals(2, validatorList.size());
 		for (int i = 0; i < validatorList2.size(); i++) {
-			IValidator v = (IValidator)validatorList2.get(i);
+			IValidator v = (IValidator) validatorList2.get(i);
 			assertNotNull(v);
-			assertTrue(v.getID().equals("v1") || v.getID().equals("v2") );
-			if( v.getID().equals("v1")) {
-				assertTrue( ((SimpleValidator)v).valid );
+			assertTrue(v.getID().equals("v1") || v.getID().equals("v2"));
+			if (v.getID().equals("v1")) {
+				assertTrue(((SimpleValidator) v).isValid());
 			}
-			if( v.getID().equals("v2")) {
-				assertFalse( ((SimpleValidator)v).valid );
+			if (v.getID().equals("v2")) {
+				assertFalse(((SimpleValidator) v).isValid());
 			}
 		}
 	}
 
-	private SimpleValidatorType findSimpleValidtor() throws CoreException {
-		IValidatorType[] allValidatorTypes;
-		allValidatorTypes = ValidatorManager.getAllValidatorTypes();
-		for (int i = 0; i < allValidatorTypes.length; i++) {
-			if( allValidatorTypes[i] instanceof SimpleValidatorType ) {
-				return (SimpleValidatorType)allValidatorTypes[i];
-			}
-		}
-		return null;
+	public void testValidatorContainerNatures() throws CoreException {
+		ValidatorDefinitionsContainer container = new ValidatorDefinitionsContainer();
+		final SimpleValidatorType type = SimpleValidatorUtils.find();
+		final IValidator v = type.createValidator("v");
+		final SimpleValidatorType2 type2 = new SimpleValidatorType2();
+		final IValidator v2 = type2.createValidator("v2");
+		container.addValidator(v);
+		container.addValidator(v2);
+
+		List all = container.getValidatorList();
+		assertEquals(2, all.size());
+		assertTrue(all.contains(v));
+		assertTrue(all.contains(v2));
+
+		List byNature = container.getValidatorList(SimpleValidatorType2.NATURE);
+		assertEquals(2, byNature.size());
+		assertTrue(byNature.contains(v));
+		assertTrue(byNature.contains(v2));
+
+		List otherNature = container.getValidatorList("ABC");
+		assertEquals(1, otherNature.size());
+		assertTrue(otherNature.contains(v));
+
+		List universal = container
+				.getValidatorList(ValidatorRuntime.ANY_NATURE);
+		assertEquals(1, universal.size());
+		assertTrue(universal.contains(v));
 	}
+
 }
