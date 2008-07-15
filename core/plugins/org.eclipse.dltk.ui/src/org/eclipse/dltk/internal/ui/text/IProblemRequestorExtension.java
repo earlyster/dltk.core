@@ -7,52 +7,52 @@
  *
  * Contributors:
  *     xored software, Inc. - Initial implementation
- *     xored software, Inc. - deprecated (Alex Panchenko)  
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.text;
 
-
 import org.eclipse.core.runtime.IProgressMonitor;
-
 
 /**
  * Extension to <code>IProblemRequestor</code>.
- * @deprecated replaced with IProblemReporter
  */
 public interface IProblemRequestorExtension {
 
 	/**
 	 * Sets the progress monitor to this problem requestor.
-	 *
-	 * @param monitor the progress monitor to be used
+	 * 
+	 * @param monitor
+	 *            the progress monitor to be used
 	 */
 	void setProgressMonitor(IProgressMonitor monitor);
 
 	/**
 	 * Sets the active state of this problem requestor.
-	 *
-	 * @param isActive the state of this problem requestor
+	 * 
+	 * @param isActive
+	 *            the state of this problem requestor
 	 */
 	void setIsActive(boolean isActive);
 
 	/**
-	 * Informs the problem requestor that a sequence of reportings is about to start. While
-	 * a sequence is active, multiple peering calls of <code>beginReporting</code> and
-	 * <code>endReporting</code> can appear.
-	 *
+	 * Informs the problem requestor that a sequence of reportings is about to
+	 * start. While a sequence is active, multiple peering calls of
+	 * <code>beginReporting</code> and <code>endReporting</code> can appear.
+	 * 
 	 */
 	void beginReportingSequence();
 
 	/**
-	 * Informs the problem requestor that the sequence of reportings has been finished.
-	 *
+	 * Informs the problem requestor that the sequence of reportings has been
+	 * finished.
+	 * 
 	 */
 	void endReportingSequence();
 
 	/**
 	 * Tells the problem requestor to handle temporary problems.
-	 *
-	 * @param enable <code>true</code> if temporary problems are handled
+	 * 
+	 * @param enable
+	 *            <code>true</code> if temporary problems are handled
 	 */
 	void setIsHandlingTemporaryProblems(boolean enable);
 }
