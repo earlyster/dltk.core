@@ -78,8 +78,7 @@ public abstract class WorkingCopyOwner {
 	 * @see IBuffer
 	 */
 	public IBuffer createBuffer(ISourceModule workingCopy) {
-		return BufferManager.getDefaultBufferManager()
-				.createBuffer(workingCopy);
+		return BufferManager.createBuffer(workingCopy);
 	}
 
 	/**
