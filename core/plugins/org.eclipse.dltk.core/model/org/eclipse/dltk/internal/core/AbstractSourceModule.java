@@ -2,6 +2,8 @@ package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -10,6 +12,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.dltk.compiler.problem.AbstractProblemReporter;
+import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
@@ -23,6 +27,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IPackageDeclaration;
+import org.eclipse.dltk.core.IProblemRequestor;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
@@ -33,6 +38,7 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.internal.core.ModelManager.PerWorkingCopyInfo;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -420,6 +426,55 @@ public abstract class AbstractSourceModule extends Openable implements
 
 	protected abstract ISourceModule getOriginalSourceModule();
 
+	protected ModelManager.PerWorkingCopyInfo getPerWorkingCopyInfo() {
+		return null;
+	}
+
+	private static class AccumulatingProblemReporter extends
+			AbstractProblemReporter implements IProblemReporter {
+
+		private final List problems = new ArrayList();
+		private final IProblemRequestor problemRequestor;
+
+		/**
+		 * @param problemRequestor
+		 */
+		public AccumulatingProblemReporter(IProblemRequestor problemRequestor) {
+			this.problemRequestor = problemRequestor;
+		}
+
+		public void reportProblem(IProblem problem) throws CoreException {
+			problems.add(problem);
+		}
+
+		public void reportToRequestor() {
+			problemRequestor.beginReporting();
+			for (Iterator i = problems.iterator(); i.hasNext();) {
+				final IProblem problem = (IProblem) i.next();
+				problemRequestor.acceptProblem(problem);
+			}
+			problemRequestor.endReporting();
+		}
+
+	}
+
+	/**
+	 * Returns {@link AccumulatingProblemReporter} or <code>null</code>
+	 * 
+	 * @return
+	 */
+	private AccumulatingProblemReporter getAccumulatingProblemReporter() {
+		final PerWorkingCopyInfo perWorkingCopyInfo = getPerWorkingCopyInfo();
+		if (perWorkingCopyInfo != null && perWorkingCopyInfo.isActive()) {
+			final IScriptProject project = getScriptProject();
+			if (project != null
+					&& ScriptProject.hasScriptNature(project.getProject())) {
+				return new AccumulatingProblemReporter(perWorkingCopyInfo);
+			}
+		}
+		return null;
+	}
+
 	protected boolean buildStructure(OpenableElementInfo info,
 			IProgressMonitor pm, Map newElements, IResource underlyingResource)
 			throws ModelException {
@@ -461,7 +516,6 @@ public abstract class AbstractSourceModule extends Openable implements
 						ModelStatus.INVALID_NAME));
 			}
 
-			IProblemReporter problemReporter = getProblemReporter(natureId);
 			ISourceElementParser parser = getSourceElementParser(natureId);
 			if (!isReadOnly()) {
 				if (parser instanceof ISourceElementParserExtension) {
@@ -471,9 +525,14 @@ public abstract class AbstractSourceModule extends Openable implements
 			}
 
 			parser.setRequestor(requestor);
+
+			final AccumulatingProblemReporter problemReporter = getAccumulatingProblemReporter();
 			parser.setReporter(problemReporter);
 
 			SourceParserUtil.parseSourceModule(this, parser);
+			if (problemReporter != null) {
+				problemReporter.reportToRequestor();
+			}
 
 			if (DEBUG_PRINT_MODEL) {
 				System.out.println("Source Module Debug print:"); //$NON-NLS-1$
