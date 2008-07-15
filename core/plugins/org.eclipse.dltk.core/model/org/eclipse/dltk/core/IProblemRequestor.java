@@ -7,49 +7,51 @@
  *
  * Contributors:
  *     xored software, Inc. - Initial implementation
- *     xored software, Inc. - deprecated (Alex Panchenko)  
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
 import org.eclipse.dltk.compiler.problem.IProblem;
 
 /**
- * A callback interface for receiving problem as they are discovered
- * by some script operation.
+ * A callback interface for receiving problem as they are discovered by some
+ * script operation.
  * 
  * @see IProblem
- * @deprecated replaced with IProblemReporter
  */
 public interface IProblemRequestor {
-	
+
 	/**
 	 * Notification of a script problem.
 	 * 
-	 * @param problem IProblem - The discovered script problem.
-	 */	
+	 * @param problem
+	 *            IProblem - The discovered script problem.
+	 */
 	void acceptProblem(IProblem problem);
 
 	/**
 	 * Notification sent before starting the problem detection process.
-	 * Typically, this would tell a problem collector to clear previously recorded problems.
+	 * Typically, this would tell a problem collector to clear previously
+	 * recorded problems.
 	 */
 	void beginReporting();
 
 	/**
 	 * Notification sent after having completed problem detection process.
-	 * Typically, this would tell a problem collector that no more problems should be expected in this
-	 * iteration.
+	 * Typically, this would tell a problem collector that no more problems
+	 * should be expected in this iteration.
 	 */
 	void endReporting();
 
 	/**
-	 * Predicate allowing the problem requestor to signal whether or not it is currently
-	 * interested by problem reports. When answering <code>false</false>, problem will
+	 * Predicate allowing the problem requestor to signal whether or not it is
+	 * currently interested by problem reports. When answering
+	 * <code>false</false>, problem will
 	 * not be discovered any more until the next iteration.
 	 * 
 	 * This  predicate will be invoked once prior to each problem detection iteration.
 	 * 
-	 * @return boolean - indicates whether the requestor is currently interested by problems.
+	 * @return boolean - indicates whether the requestor is currently interested
+	 *         by problems.
 	 */
 	boolean isActive();
 }
