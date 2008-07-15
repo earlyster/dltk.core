@@ -5,7 +5,8 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation
  *******************************************************************************/
 package org.eclipse.dltk.validators.internal.core;
 
@@ -19,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.validators.core.IValidatorType;
+import org.eclipse.dltk.validators.core.ValidatorRuntime;
 
 public class ValidatorManager {
 
@@ -28,7 +30,7 @@ public class ValidatorManager {
 	private final static String NATURE_ATTR = "nature"; //$NON-NLS-1$
 
 	// Contains list of validators for selected nature.
-	private static Map validators;
+	private static Map validators = null;
 
 	private static Map idToValidatorType = null;
 
@@ -59,16 +61,13 @@ public class ValidatorManager {
 				.getConfigurationElementsFor(LANGUAGE_EXTPOINT);
 
 		for (int i = 0; i < cfg.length; i++) {
-			String nature = cfg[i].getAttribute(NATURE_ATTR);
-			if (validators.get(nature) != null) {
-				List elements = (List) validators.get(nature);
-				elements.add(cfg[i]);
-				continue;
-			} else {
-				List elements = new ArrayList();
-				elements.add(cfg[i]);
+			final String nature = cfg[i].getAttribute(NATURE_ATTR);
+			List elements = (List) validators.get(nature);
+			if (elements == null) {
+				elements = new ArrayList();
 				validators.put(nature, elements);
 			}
+			elements.add(cfg[i]);
 		}
 	}
 
@@ -85,8 +84,7 @@ public class ValidatorManager {
 
 		List results = new ArrayList();
 		processNature(natureId, results);
-		// Add from # nature.
-		processNature("#", results); //$NON-NLS-1$
+		processNature(ValidatorRuntime.ANY_NATURE, results);
 		return (IValidatorType[]) results.toArray(new IValidatorType[results
 				.size()]);
 	}
@@ -144,4 +142,5 @@ public class ValidatorManager {
 		return (IValidatorType[]) result.toArray(new IValidatorType[result
 				.size()]);
 	}
+
 }

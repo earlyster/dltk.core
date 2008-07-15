@@ -12,6 +12,7 @@ package org.eclipse.dltk.validators.internal.core;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,13 +46,13 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 
 	// The shared instance
 	private static ValidatorsCore plugin;
-	
+
 	private boolean fIgnoreValidatorDefPropertyChangeEvents = false;
 
-//	private boolean fBatchingChanges;
-	
+	// private boolean fBatchingChanges;
+
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
-	
+
 	private String fOldInterpreterPrefString = EMPTY_STRING;
 
 	/**
@@ -63,19 +64,21 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
+	 * @see
+	 * org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		
+
 		getPluginPreferences().addPropertyChangeListener(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
+	 * @see
+	 * org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
@@ -120,6 +123,7 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 
 		return s.toString();
 	}
+
 	public void setIgnoreValidatorDefPropertyChangeEvents(boolean ignore) {
 		fIgnoreValidatorDefPropertyChangeEvents = ignore;
 	}
@@ -137,22 +141,25 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 			}
 		}
 	}
+
 	private ValidatorDefinitionsContainer getValidatorDefinitions(String xml) {
 		if (xml.length() > 0) {
 			try {
 				return ValidatorDefinitionsContainer
-						.parseXMLIntoContainer(new StringReader(xml));
+						.createFromXML(new StringReader(xml));
 			} catch (IOException e) {
-				ValidatorsCore.getDefault().getLog().log(new Status( 0, ValidatorsCore.PLUGIN_ID, 0, Messages.ValidatorsCore_exception, e ));
+				getLog().log(
+						new Status(IStatus.ERROR, PLUGIN_ID, 0,
+								Messages.ValidatorsCore_exception, e));
 			}
 		}
 		return new ValidatorDefinitionsContainer();
 	}
-	protected void processValidatorPrefsChanged(String oldValue,
-			String newValue) {
+
+	protected void processValidatorPrefsChanged(String oldValue, String newValue) {
 
 		// batch changes
-//		fBatchingChanges = true;
+		// fBatchingChanges = true;
 		try {
 
 			String oldPrefString;
@@ -185,10 +192,9 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 			// Generate the current
 			ValidatorDefinitionsContainer newResults = getValidatorDefinitions(newPrefString);
 
-			// Determine the deteled Interpreters
-			List deleted = oldResults.getValidatorList();
-			List current = newResults.getValidatorList();
-			deleted.removeAll(current);
+			// Determine the deleted validators
+			List deleted = new ArrayList(oldResults.getValidatorList());
+			deleted.removeAll(newResults.getValidatorList());
 
 			// Dispose deleted Validators. The 'disposeInterpreterInstall'
 			// method fires notification of the
@@ -197,20 +203,21 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 			while (deletedIterator.hasNext()) {
 				IValidator deletedValidatorStandin = (IValidator) deletedIterator
 						.next();
-				deletedValidatorStandin.getValidatorType()
-						.disposeValidator(
-								deletedValidatorStandin.getID());
+				deletedValidatorStandin.getValidatorType().disposeValidator(
+						deletedValidatorStandin.getID());
 			}
-			
-//			Iterator currentIterator = current.iterator();
-//			
-//			while(currentIterator.hasNext()){
-//				IValidator currentValidatorStandin = (IValidator) currentIterator.next();
-//				currentValidatorStandin.getValidatorType().createValidator(currentValidatorStandin.getID());
-//			}
+
+			// Iterator currentIterator = current.iterator();
+			//			
+			// while(currentIterator.hasNext()){
+			// IValidator currentValidatorStandin = (IValidator)
+			// currentIterator.next();
+			// currentValidatorStandin.getValidatorType().createValidator(
+			// currentValidatorStandin.getID());
+			// }
 		} finally {
 			// stop batch changes
-//			fBatchingChanges = false;
+			// fBatchingChanges = false;
 		}
 	}
 
@@ -220,6 +227,10 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 
 	public static void error(String message) {
 		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, null));
+	}
+
+	public static void error(String message, Throwable e) {
+		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, e));
 	}
 
 	public static void warn(String message) {

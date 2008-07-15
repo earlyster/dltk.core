@@ -10,16 +10,10 @@
 package org.eclipse.dltk.validators.core;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.StringReader;
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -28,18 +22,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.IEnvironment;
-import org.eclipse.dltk.validators.internal.core.CompositeId;
 import org.eclipse.dltk.validators.internal.core.ListenerList;
 import org.eclipse.dltk.validators.internal.core.ValidatorDefinitionsContainer;
 import org.eclipse.dltk.validators.internal.core.ValidatorManager;
@@ -59,24 +49,18 @@ public final class ValidatorRuntime {
 	private static boolean fgInitializingValidators = false;
 	private static boolean isInitialized = false;
 	//
-	private static ListenerList fgValidatorListeners = new ListenerList(5);
-	//	
-	//
-	// private static ThreadLocal fgProjects = new ThreadLocal(); // Lists
-	// private static ThreadLocal fgEntryCount = new ThreadLocal(); // Integers
+	private static final ListenerList fgValidatorListeners = new ListenerList(5);
 
-	private static Set fgContributedValidators = new HashSet();
-
-	// private static List markerList = new ArrayList();
+	public static final String ANY_NATURE = "#"; //$NON-NLS-1$
 
 	private ValidatorRuntime() {
 	}
 
 	public static IValidatorType getValidatorType(String id) {
-		IValidatorType[] interpreterTypes = getValidatorTypes();
-		for (int i = 0; i < interpreterTypes.length; i++) {
-			if (interpreterTypes[i].getID().equals(id)) {
-				return interpreterTypes[i];
+		IValidatorType[] types = getValidatorTypes();
+		for (int i = 0; i < types.length; i++) {
+			if (types[i].getID().equals(id)) {
+				return types[i];
 			}
 		}
 		return null;
@@ -102,31 +86,6 @@ public final class ValidatorRuntime {
 		}
 	}
 
-	public static String getCompositeIdFromValidator(IValidator validator) {
-		if (validator == null) {
-			return null;
-		}
-		IValidatorType validatorType = validator.getValidatorType();
-		String typeID = validatorType.getID();
-		CompositeId id = new CompositeId(new String[] { typeID,
-				validator.getID() });
-		return id.toString();
-	}
-
-	public static IValidator getValidatorFromCompositeId(String idString) {
-		if (idString == null || idString.length() == 0) {
-			return null;
-		}
-		CompositeId id = CompositeId.fromString(idString);
-		if (id.getPartCount() == 2) {
-			IValidatorType validatorType = getValidatorType(id.get(0));
-			if (validatorType != null) {
-				return validatorType.findValidator(id.get(1));
-			}
-		}
-		return null;
-	}
-
 	public static void saveValidatorConfiguration() throws CoreException {
 		IValidatorType[] vals = getValidatorTypes();
 		if (vals == null || vals.length == 0) {
@@ -140,15 +99,15 @@ public final class ValidatorRuntime {
 			savePreferences();
 		} catch (IOException e) {
 			throw new CoreException(new Status(IStatus.ERROR,
-					Messages.ValidatorRuntime_error, IStatus.ERROR,
+					ValidatorsCore.PLUGIN_ID, IStatus.OK,
 					Messages.ValidatorRuntime_exceptionOccurred, e));
 		} catch (ParserConfigurationException e) {
 			throw new CoreException(new Status(IStatus.ERROR,
-					Messages.ValidatorRuntime_error, IStatus.ERROR,
+					ValidatorsCore.PLUGIN_ID, IStatus.OK,
 					Messages.ValidatorRuntime_exceptionOccurred, e));
 		} catch (TransformerException e) {
 			throw new CoreException(new Status(IStatus.ERROR,
-					Messages.ValidatorRuntime_error, IStatus.ERROR,
+					ValidatorsCore.PLUGIN_ID, IStatus.OK,
 					Messages.ValidatorRuntime_exceptionOccurred, e));
 		}
 	}
@@ -159,11 +118,7 @@ public final class ValidatorRuntime {
 
 		IValidatorType[] validatorTypes = getValidatorTypes();
 		for (int i = 0; i < validatorTypes.length; ++i) {
-			IValidator[] Interpreters = validatorTypes[i].getValidators();
-			for (int j = 0; j < Interpreters.length; j++) {
-				IValidator install = Interpreters[j];
-				container.addValidator(install);
-			}
+			container.addValidators(validatorTypes[i].getValidators());
 		}
 		return container.getAsXML();
 	}
@@ -176,20 +131,14 @@ public final class ValidatorRuntime {
 
 		if (validatorXMLString.length() > 0) {
 			try {
-				ValidatorDefinitionsContainer.parseXMLIntoContainer(
-						new InputSource(new StringReader(validatorXMLString)),
-						interpreterDefs);
+				interpreterDefs.parseXML(new InputSource(new StringReader(
+						validatorXMLString)));
 				return false;
 			} catch (IOException ioe) {
 				// DLTKLaunchingPlugin.log(ioe);
 			}
 		}
 		return true;
-	}
-
-	public static boolean isContributedValidator(String id) {
-		getValidatorTypes();
-		return fgContributedValidators.contains(id);
 	}
 
 	public static Preferences getPreferences() {
@@ -211,7 +160,7 @@ public final class ValidatorRuntime {
 		boolean setPref = false;
 		synchronized (fgValidatorLock) {
 			if (isInitialized) {
-				return;
+				// return;
 			}
 			isInitialized = true;
 			try {
@@ -243,11 +192,15 @@ public final class ValidatorRuntime {
 				return;
 			}
 			for (int i = 0; i < validatorTypes.length; i++) {
-				IValidatorType type = validatorTypes[i];
-				IValidator[] installs = type.getValidators();
-				if (installs != null) {
-					for (int j = 0; j < installs.length; j++) {
-						fireValidatorAdded(installs[j]);
+				final IValidatorType type = validatorTypes[i];
+				final IValidator[] validators = type.getValidators();
+				if (validators != null) {
+					for (int j = 0; j < validators.length; j++) {
+						final IValidator validator = validators[j];
+						if (type.findValidator(validator.getID()) == null) {
+							type.addValidator(validator);
+						}
+						fireValidatorAdded(validator);
 					}
 				}
 			}
@@ -275,7 +228,7 @@ public final class ValidatorRuntime {
 		fgValidatorListeners.add(listener);
 	}
 
-	public static void removeValidatorInstallChangedListener(
+	public static void removeValidatorChangedListener(
 			IValidatorChangedListener listener) {
 		fgValidatorListeners.remove(listener);
 	}
@@ -306,6 +259,12 @@ public final class ValidatorRuntime {
 		}
 	}
 
+	/**
+	 * Returns array of validator types which are not built-in, i.e. new
+	 * instances of that types could be added by the user.
+	 * 
+	 * @return
+	 */
 	public static IValidatorType[] getPossibleValidatorTypes() {
 		List possible = new ArrayList();
 		IValidatorType[] vals = getValidatorTypes();
@@ -316,38 +275,6 @@ public final class ValidatorRuntime {
 		}
 		return (IValidatorType[]) possible.toArray(new IValidatorType[possible
 				.size()]);
-	}
-
-	public static IValidator[] getActiveValidators(IEnvironment environment) {
-		List possible = new ArrayList();
-		IValidatorType[] vals = getValidatorTypes();
-		for (int i = 0; i < vals.length; i++) {
-			IValidator[] v = vals[i].getValidators();
-			for (int j = 0; j < v.length; j++) {
-				if (v[j].isActive() && v[j].isValidatorValid(environment)) {
-					if (!possible.contains(v[j])) {
-						possible.add(v[j]);
-					}
-				}
-			}
-		}
-		return (IValidator[]) possible.toArray(new IValidator[possible.size()]);
-	}
-
-	public static IValidator[] getValidValidators(IEnvironment environment) {
-		List possible = new ArrayList();
-		IValidatorType[] vals = getValidatorTypes();
-		for (int i = 0; i < vals.length; i++) {
-			IValidator[] v = vals[i].getValidators();
-			for (int j = 0; j < v.length; j++) {
-				if (v[j].isValidatorValid(environment)) {
-					if (!possible.contains(v[j])) {
-						possible.add(v[j]);
-					}
-				}
-			}
-		}
-		return (IValidator[]) possible.toArray(new IValidator[possible.size()]);
 	}
 
 	public static IValidator[] getAllValidators() {
@@ -364,169 +291,11 @@ public final class ValidatorRuntime {
 		return (IValidator[]) possible.toArray(new IValidator[possible.size()]);
 	}
 
-	public static void executeActiveValidators(OutputStream stream,
-			List elements, List resources, IProgressMonitor monitor,
-			IEnvironment environment) {
-		IValidator[] activeValidators = getActiveValidators(environment);
-		process(stream, elements, resources, activeValidators, processValidate,
-				monitor);
-	}
-
-	public static void executeActiveValidators(OutputStream stream,
-			List elements, List resources, IEnvironment environment) {
-		executeActiveValidators(stream, elements, resources, null, environment);
-	}
-
-	public static void executeAllValidators(OutputStream stream, List elements,
-			List resources, IProgressMonitor monitor, IEnvironment environment) {
-		IValidator[] activeValidators = getValidValidators(environment);
-		process(stream, elements, resources, activeValidators, processValidate,
-				monitor);
-	}
-
-	public static void executeValidator(String id, OutputStream stream,
-			List elements, List resources, IProgressMonitor monitor,
-			IEnvironment environment) {
-		IValidator[] validValidators = getValidValidators(environment);
-		List required = new ArrayList();
-		for (int i = 0; i < validValidators.length; i++) {
-			if (id.equals(validValidators[i].getValidatorType().getID())) {
-				required.add(validValidators[i]);
-			}
-		}
-		IValidator[] activeValidators = (IValidator[]) required
-				.toArray(new IValidator[required.size()]);
-		if (activeValidators.length == 0) {
-			if (stream != null) {
-				try {
-					IValidatorType type = getValidatorType(id);
-					String sub = "..."; //$NON-NLS-1$
-					if (type != null) {
-						sub = MessageFormat.format(
-								Messages.ValidatorRuntime_for,
-								new Object[] { type.getName() });
-					}
-					stream
-							.write((MessageFormat
-									.format(
-											Messages.ValidatorRuntime_validationCouldNotBePerformed,
-											new Object[] { sub })).getBytes());
-				} catch (IOException e) {
-					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
-					}
-				}
-			}
-			return;
-		}
-		process(stream, elements, resources, (IValidator[]) required
-				.toArray(new IValidator[required.size()]), processValidate,
-				monitor);
-	}
-
-	public static void executeValidator(IValidator validator,
-			OutputStream stream, List elements, List resources,
-			IProgressMonitor monitor) {
-		process(stream, elements, resources, new IValidator[] { validator },
-				processValidate, monitor);
-	}
-	
-	public static void executeAllValidators(OutputStream stream, List elements,
-			List resources, IEnvironment environment) {
-		executeAllValidators(stream, elements, resources, null, environment);
-	}
-
-	private interface IProcessAction {
-		IStatus execute(IValidator validator, ISourceModule[] o,
-				OutputStream out, IProgressMonitor monitor);
-
-		IStatus execute(IValidator validator, IResource[] o, OutputStream out,
-				IProgressMonitor monitor);
-	}
-
-	public static IProcessAction processValidate = new IProcessAction() {
-		public IStatus execute(IValidator validator, ISourceModule[] o,
-				OutputStream out, IProgressMonitor monitor) {
-			return validator.validate(o, out, monitor);
-		}
-
-		public IStatus execute(IValidator validator, IResource[] o,
-				OutputStream out, IProgressMonitor monitor) {
-			return validator.validate(o, out, monitor);
-		}
-	};
-	public static IProcessAction processClean = new IProcessAction() {
-		public IStatus execute(IValidator validator, ISourceModule[] o,
-				OutputStream out, IProgressMonitor monitor) {
-			validator.clean(o);
-			return null;
-		}
-
-		public IStatus execute(IValidator validator, IResource[] o,
-				OutputStream out, IProgressMonitor monitor) {
-			validator.clean(o);
-			return null;
-		}
-	};
-
-	private static void process(OutputStream stream, List elements,
-			List resources, IValidator[] activeValidators,
-			IProcessAction action, IProgressMonitor monitor) {
-		if (monitor == null)
-			monitor = new NullProgressMonitor();
-		monitor.beginTask(Messages.ValidatorRuntime_runningValidators,
-				activeValidators.length * 100);
-		try {
-			if (elements != null) {
-				for (int i = 0; i < activeValidators.length; i++) {
-					ISourceModule[] modules = filterModulesForValidator(
-							elements, activeValidators[i], monitor);
-					if (monitor.isCanceled())
-						return;
-					IProgressMonitor subMonitor = new SubProgressMonitor(
-							monitor, 100);
-					action.execute(activeValidators[i], modules, stream,
-							subMonitor);
-				}
-			}
-		} finally {
-			monitor.done();
-		}
-		// if (resources != null) {
-		// for (Iterator iterator = resources.iterator(); iterator.hasNext();) {
-		// if (monitor != null) {
-		// if (monitor.isCanceled()) {
-		// return;
-		// }
-		// }
-		// IResource el = (IResource) iterator.next();
-		// for (int i = 0; i < activeValidators.length; i++) {
-		// IValidator v = activeValidators[i];
-		// IProgressMonitor sub = null;
-		// if (monitor != null) {
-		// sub = new SubProgressMonitor(monitor, 1);
-		// }
-		// v.setProgressMonitor(sub);
-		// v.validate(el, stream);
-		// action.execute(v, el, stream);
-		// if (sub != null) {
-		// sub.done();
-		// }
-		// }
-		// }
-		// }
-	}
-
 	private static ISourceModule[] filterModulesForValidator(List elements,
 			IValidator v, IProgressMonitor monitor) {
-		List result = new ArrayList();
-		String nature = v.getValidatorType().getNature();
+		final List result = new ArrayList();
+		final String nature = v.getValidatorType().getNature();
 		for (Iterator iterator = elements.iterator(); iterator.hasNext();) {
-			if (monitor != null) {
-				if (monitor.isCanceled()) {
-					return null;
-				}
-			}
 			IModelElement el = (IModelElement) iterator.next();
 			if (el instanceof ISourceModule) {
 				ISourceModule module = (ISourceModule) el;
@@ -534,7 +303,7 @@ public final class ValidatorRuntime {
 				toolkit = DLTKLanguageManager.getLanguageToolkit(module);
 
 				if (toolkit != null && toolkit.getNatureId().equals(nature)
-						|| nature.equals("#")) { //$NON-NLS-1$
+						|| nature.equals(ANY_NATURE)) {
 					result.add(module);
 				}
 			}
@@ -548,81 +317,211 @@ public final class ValidatorRuntime {
 		executeCleanAllValidatorsWithConsole(elements, resources);
 	}
 
-	public static void executeCleanAllValidatorsWithConsole(List elements,
-			List resources, IProgressMonitor monitor) {
-		IValidator[] activeValidators = getAllValidators();
-		process(null, elements, resources, activeValidators, processClean,
+	public static final IValidatorPredicate AUTOMATIC = new IValidatorPredicate() {
+
+		public boolean evaluate(IValidator validator) {
+			return validator.isAutomatic();
+		}
+
+	};
+
+	public static final IValidatorPredicate ALL = new IValidatorPredicate() {
+
+		public boolean evaluate(IValidator validator) {
+			return true;
+		}
+
+	};
+
+	public static IValidator[] getProjectValidators(IScriptProject project,
+			Class validatorType, IValidatorPredicate predicate) {
+		String[] natureIds;
+		try {
+			natureIds = project.getProject().getDescription().getNatureIds();
+		} catch (CoreException e) {
+			ValidatorsCore.log(e.getStatus());
+			natureIds = new String[0];
+		}
+		final List result = new ArrayList();
+		final IValidatorType[] types = ValidatorRuntime.getValidatorTypes();
+		for (int i = 0; i < types.length; ++i) {
+			final IValidatorType type = types[i];
+			if (checkValidatorTypeNature(type, natureIds)
+					&& type.supports(validatorType)) {
+				final IValidator[] validators = type.getValidators();
+				for (int j = 0; j < validators.length; ++j) {
+					final IValidator validator = validators[i];
+					if (predicate.evaluate(validator)
+							&& validator.isValidatorValid(project)) {
+						result.add(validator);
+					}
+				}
+			}
+		}
+		return (IValidator[]) result.toArray(new IValidator[result.size()]);
+	}
+
+	public static IBuildParticipant[] getBuildParticipants(
+			IScriptProject project, String natureId,
+			IValidatorPredicate predicate) {
+		final List result = new ArrayList();
+		final IValidatorType[] types = ValidatorRuntime.getValidatorTypes();
+		for (int i = 0; i < types.length; ++i) {
+			final IValidatorType type = types[i];
+			if (checkValidatorTypeNature(type, natureId)
+					&& type.supports(IBuildParticipant.class)) {
+				final IValidator[] validators = type.getValidators();
+				for (int j = 0; j < validators.length; ++j) {
+					final IValidator validator = validators[i];
+					if (predicate.evaluate(validator)
+							&& validator.isValidatorValid(project)) {
+						final IBuildParticipant participant = (IBuildParticipant) validator
+								.getValidator(project, IBuildParticipant.class);
+						if (participant != null) {
+							result.add(participant);
+						}
+					}
+				}
+			}
+		}
+		return (IBuildParticipant[]) result
+				.toArray(new IBuildParticipant[result.size()]);
+	}
+
+	/**
+	 * @param type
+	 * @param natureIds
+	 * @return
+	 */
+	private static boolean checkValidatorTypeNature(IValidatorType type,
+			String[] natureIds) {
+		final String natureId = type.getNature();
+		if (ANY_NATURE.equals(natureId)) {
+			return true;
+		}
+		for (int i = 0; i < natureIds.length; ++i) {
+			if (natureId.equals(natureIds[i])) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @param type
+	 * @param natureIds
+	 * @return
+	 */
+	private static boolean checkValidatorTypeNature(IValidatorType type,
+			String natureIds) {
+		final String typeNature = type.getNature();
+		return ANY_NATURE.equals(typeNature) || natureIds.equals(typeNature);
+	}
+
+	public static IStatus executeAutomaticSourceModuleValidators(
+			IScriptProject project, List sourceModules,
+			IValidatorOutput output, IProgressMonitor monitor) {
+		return executeSourceModuleValidators(project, sourceModules, output,
+				AUTOMATIC, monitor);
+	}
+
+	public static IStatus executeSourceModuleValidators(IScriptProject project,
+			List sourceModules, IValidatorOutput output,
+			IValidatorPredicate predicate, IProgressMonitor monitor) {
+		final IValidator[] validators = getProjectValidators(project,
+				ISourceModuleValidator.class, predicate);
+		if (validators.length != 0) {
+			monitor.beginTask(Messages.ValidatorRuntime_runningValidators,
+					validators.length * 100);
+			for (int i = 0; i < validators.length; ++i) {
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+				final IValidator validator = validators[i];
+				final ISourceModuleValidator mValidator = (ISourceModuleValidator) validator
+						.getValidator(project, ISourceModuleValidator.class);
+				if (mValidator != null) {
+					final ISourceModule[] mArray = filterModulesForValidator(
+							sourceModules, validator, monitor);
+					if (monitor.isCanceled()) {
+						return Status.CANCEL_STATUS;
+					}
+					final IProgressMonitor submonitor = new SubProgressMonitor(
+							monitor, 100);
+					if (mArray.length != 0) {
+						mValidator.validate(mArray, output, submonitor);
+					}
+					submonitor.done();
+				}
+			}
+			monitor.done();
+		}
+		return Status.OK_STATUS;
+	}
+
+	public static IStatus executeAutomaticResourceValidators(
+			IScriptProject project, List resources, IValidatorOutput output,
+			IProgressMonitor monitor) {
+		return executeResourceValidators(project, resources, output, AUTOMATIC,
 				monitor);
 	}
 
-	public static void cleanValidator(IValidator validator, List elements,
-			List resources, IProgressMonitor monitor) {
-		process(null, elements, resources, new IValidator[] { validator },
-				processClean, monitor);
-	}
-	
-	public static void executeValidator(String string, OutputStream out,
-			List elements, List resources, IProgressMonitor monitor) {
-		// Sort elements by environments
-		Map envToResMap = new HashMap();
-		Map envToElementMap = new HashMap();
-		IEnvironment[] environments = fillElementsByEnvironment(elements,
-				resources, envToResMap, envToElementMap);
-		for (int i = 0; i < environments.length; i++) {
-			List elems = (List) envToElementMap.get(environments[i]);
-			List ress = (List) envToResMap.get(environments[i]);
-			if (elems.size() + ress.size() > 0) {
-				SubProgressMonitor mon = new SubProgressMonitor(monitor, elems.size() + ress.size());
-				executeValidator(string, out, elements, resources, mon, environments[i]);
-				mon.done();
+	public static IStatus executeResourceValidators(IScriptProject project,
+			List resources, IValidatorOutput output,
+			IValidatorPredicate predicate, IProgressMonitor monitor) {
+		final IValidator[] validators = getProjectValidators(project,
+				IResourceValidator.class, predicate);
+		if (validators.length != 0) {
+			final IResource[] resArray = (IResource[]) resources
+					.toArray(new IResource[resources.size()]);
+			monitor.beginTask(Messages.ValidatorRuntime_runningValidators,
+					validators.length * 100);
+			for (int i = 0; i < validators.length; ++i) {
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+				final IValidator validator = validators[i];
+				final IResourceValidator resourceValidator = (IResourceValidator) validator
+						.getValidator(project, IResourceValidator.class);
+				if (resourceValidator != null) {
+					final IProgressMonitor submonitor = new SubProgressMonitor(
+							monitor, 100);
+					resourceValidator.validate(resArray, output, submonitor);
+					submonitor.done();
+				}
 			}
+			monitor.done();
 		}
-	}
-	public static void executeAllValidators(OutputStream out,
-			List elements, List resources, IProgressMonitor monitor) {
-		// Sort elements by environments
-		Map envToResMap = new HashMap();
-		Map envToElementMap = new HashMap();
-		IEnvironment[] environments = fillElementsByEnvironment(elements,
-				resources, envToResMap, envToElementMap);
-		monitor.beginTask(Messages.ValidatorRuntime_executeValidators, elements.size() + resources.size());
-		for (int i = 0; i < environments.length; i++) {
-			List elems = (List) envToElementMap.get(environments[i]);
-			List ress = (List) envToResMap.get(environments[i]);
-			if (elems.size() + ress.size() > 0) {
-				SubProgressMonitor mon = new SubProgressMonitor(monitor, elems.size() + ress.size());
-				executeAllValidators(out, elements, resources, mon, environments[i]);
-				mon.done();
-			}
-		}
-		monitor.done();
+		return Status.OK_STATUS;
 	}
 
-
-	private static IEnvironment[] fillElementsByEnvironment(List elements,
-			List resources, Map envToResMap, Map envToElementMap) {
-		IEnvironment[] environments = EnvironmentManager.getEnvironments();
-		for (int i = 0; i < environments.length; i++) {
-			envToElementMap.put(environments[i], new ArrayList());
-			envToResMap.put(environments[i], new ArrayList());
-		}
-
-		for (Iterator iterator = elements.iterator(); iterator.hasNext();) {
-			IModelElement element = (IModelElement) iterator.next();
-			IEnvironment environment = EnvironmentManager
-					.getEnvironment(element);
-			if (environment != null) {
-				((List) envToElementMap.get(environment)).add(element);
+	/**
+	 * @param project
+	 * @param modules
+	 * @param resources
+	 * @param monitor
+	 */
+	public static void cleanAll(IScriptProject project,
+			ISourceModule[] modules, IResource[] resources,
+			IProgressMonitor monitor) {
+		final IValidatorType[] types = ValidatorRuntime.getValidatorTypes();
+		for (int i = 0; i < types.length; ++i) {
+			final IValidatorType type = types[i];
+			final IValidator[] validators = type.getValidators();
+			for (int j = 0; j < validators.length; ++j) {
+				final IValidator validator = validators[i];
+				final ISourceModuleValidator smValidator = (ISourceModuleValidator) validator
+						.getValidator(project, ISourceModuleValidator.class);
+				if (smValidator != null) {
+					smValidator.clean(modules);
+				}
+				final IResourceValidator rValidator = (IResourceValidator) validator
+						.getValidator(project, IResourceValidator.class);
+				if (rValidator != null) {
+					rValidator.clean(resources);
+				}
 			}
 		}
-		for (Iterator iterator = resources.iterator(); iterator.hasNext();) {
-			IResource element = (IResource) iterator.next();
-			IEnvironment environment = EnvironmentManager
-					.getEnvironment(element.getProject());
-			if (environment != null) {
-				((List) envToResMap.get(environment)).add(element);
-			}
-		}
-		return environments;
 	}
+
 }

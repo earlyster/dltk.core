@@ -4,6 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.validators.internal.core.messages"; //$NON-NLS-1$
+	public static String ValidatorBuilder_unknownError;
 	public static String ValidatorsCore_exception;
 	static {
 		// initialize resource bundle

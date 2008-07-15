@@ -12,7 +12,7 @@ package org.eclipse.dltk.validators.internal.core;
 import org.eclipse.osgi.util.NLS;
 
 public class ValidatorMessages extends NLS {
-	private static final String BUNDLE_NAME = ValidatorMessages.class.getName();//$NON-NLS-1$
+	private static final String BUNDLE_NAME = ValidatorMessages.class.getName();
 	public static String ValidatorDefinitionsContainer_failedToLoadValidatorFromXml;
 	public static String ValidatorDefinitionsContainer_unknownValidatorType;
 	public static String ValidatorRuntime_badFormat;

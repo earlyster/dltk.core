@@ -9,21 +9,27 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.core;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public abstract class AbstractValidator implements IValidator {
-	private String id;
+public abstract class AbstractValidator implements IValidator, Cloneable {
+
+	private static final String ATTR_ACTIVE = "active"; //$NON-NLS-1$
+	private static final String ATTR_NAME = "name"; //$NON-NLS-1$
+
+	private final String id;
 	private String name;
-	private IValidatorType type;
-	private boolean active = true;
+	private final IValidatorType type;
+	private boolean automatic = true;
+	private boolean workingCopy;
 
 	protected AbstractValidator(String id, String name, IValidatorType type) {
 		this.id = id;
-		this.name = name;
 		this.type = type;
+		this.name = name;
 	}
 
 	public String getID() {
@@ -34,44 +40,76 @@ public abstract class AbstractValidator implements IValidator {
 		return this.name;
 	}
 
-	protected void loadFrom(Element element) {
-		this.name = element.getAttribute("name"); //$NON-NLS-1$
-		this.active = (new Boolean(element.getAttribute("active"))) //$NON-NLS-1$
-				.booleanValue();
+	public final void loadFrom(Element element) {
+		final boolean savedWorkingCopy = workingCopy;
+		workingCopy = true;
+		try {
+			load(element);
+		} finally {
+			workingCopy = savedWorkingCopy;
+		}
+	}
+
+	protected void load(Element element) {
+		this.name = element.getAttribute(ATTR_NAME);
+		this.automatic = loadBoolean(element, ATTR_ACTIVE);
+	}
+
+	protected boolean loadBoolean(Element element, final String attribute) {
+		return Boolean.valueOf(element.getAttribute(attribute)).booleanValue();
 	}
 
 	public void storeTo(Document doc, Element element) {
-		element.setAttribute("name", getName()); //$NON-NLS-1$
-		element.setAttribute("active", Boolean.toString(isActive())); //$NON-NLS-1$
-	}
-
-	public void clean(IResource resource) {
-	}
-
-	public void clean(ISourceModule module) {
-	}
-
-	public boolean isValidatorValid() {
-		return false;
+		element.setAttribute(ATTR_NAME, getName());
+		element.setAttribute(ATTR_ACTIVE, Boolean.toString(isAutomatic()));
 	}
 
 	public IValidatorType getValidatorType() {
 		return this.type;
 	}
 
-	protected void setID(String id) {
-		this.id = id;
-	}
-
 	public void setName(String name) {
 		this.name = name;
+		fireChanged();
 	}
 
-	public boolean isActive() {
-		return active;
+	public boolean isAutomatic() {
+		return automatic;
 	}
 
-	public void setActive(boolean active) {
-		this.active = active;
+	public void setAutomatic(boolean value) {
+		this.automatic = value;
+		fireChanged();
+	}
+
+	protected void fireChanged() {
+		if (!workingCopy) {
+			ValidatorRuntime.fireValidatorChanged(this);
+		}
+	}
+
+	public boolean isWorkingCopy() {
+		return workingCopy;
+	}
+
+	public IValidator getWorkingCopy() {
+		if (isWorkingCopy()) {
+			return this;
+		}
+		try {
+			final AbstractValidator copy = (AbstractValidator) clone();
+			copy.workingCopy = true;
+			return copy;
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * @param project
+	 * @return
+	 */
+	protected IEnvironment getEnvrironment(IScriptProject project) {
+		return EnvironmentManager.getEnvironment(project);
 	}
 }

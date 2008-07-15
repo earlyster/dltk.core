@@ -93,14 +93,13 @@ public class ValidatorUtils {
 				}
 			}
 			for (Iterator iterator = els.iterator(); iterator.hasNext();) {
-				Object object = (Object) iterator.next();
+				Object object = iterator.next();
 
 				Object eo = convertResourceToModelElement(object);
 				if (eo != null) {
-					if (eo instanceof IModelElement && !elements.contains(eo)) {
+					if (eo instanceof IModelElement) {
 						elements.add(eo);
-					} else if (eo instanceof IResource
-							&& !resources.contains(eo)) {
+					} else if (eo instanceof IResource) {
 						resources.add(eo);
 					}
 				}
@@ -118,18 +117,16 @@ public class ValidatorUtils {
 			} else if (!(o instanceof ISourceModule)) {
 				ISourceModule module = (ISourceModule) ((IModelElement) o)
 						.getAncestor(IModelElement.SOURCE_MODULE);
-				if (elements.contains(module)) {
+				if (module != null) {
 					elements.add(module);
 				}
 			} else if (o instanceof ISourceModule) {
-				if (!elements.contains(o)) {
-					elements.add(o);
-				}
+				elements.add(o);
 			}
 		}
 	}
 
-	private static HandleFactory factory = new HandleFactory();
+	private static final HandleFactory factory = new HandleFactory();
 
 	private static Object convertResourceToModelElement(Object o) {
 		if (o instanceof IModelElement) {

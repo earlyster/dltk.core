@@ -9,43 +9,48 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.core;
 
-import java.io.OutputStream;
-
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.IScriptProject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
  * Contains validator properties.
+ * 
  * @author Haiodo
- *
  */
 public interface IValidator {
+
 	String getID();
+
 	String getName();
-	void setName(String name);
+
+	boolean isWorkingCopy();
+
+	IValidator getWorkingCopy();
+
+	boolean isAutomatic();
+
 	IValidatorType getValidatorType();
-	boolean isValidatorValid(IEnvironment environment);
-	
-	//Per-resouce operations
-	// If console is non null then output to console are possible.
-	IStatus validate(ISourceModule[] modules, OutputStream console, IProgressMonitor monitor );
-	IStatus validate(IResource[] resources, OutputStream console, IProgressMonitor monitor);
-	
-	// Used to store information into
-	void storeTo(Document doc, Element element);
-	
-	boolean isActive();
-	void setActive(boolean active);
-	
+
+	boolean isValidatorValid(IScriptProject project);
+
 	/**
-	 * Remove all reported markers.
-	 * @param module
+	 * Returns the {@link IValidatorWorker} to operate on the specified
+	 * <code>environment</code> and send output to the specified
+	 * <code>output</code>
+	 * 
+	 * @param project
+	 * @return
+	 * @see IValidatorType#supports(Class)
 	 */
-	void clean(ISourceModule[] module);
-	void clean(IResource[] resource);	
+	Object getValidator(IScriptProject project, Class validatorType);
+
+	void loadFrom(Element element);
+
+	void storeTo(Document doc, Element element);
+
+	void setName(String name);
+
+	void setAutomatic(boolean active);
+
 }

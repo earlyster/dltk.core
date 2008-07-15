@@ -5,29 +5,31 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+ * Contributors:
+ *     xored software, Inc. - initial API and Implementation
  *******************************************************************************/
 package org.eclipse.dltk.validators.internal.core;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.validators.core.IValidator;
 import org.eclipse.dltk.validators.core.IValidatorType;
+import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.osgi.util.NLS;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -38,80 +40,69 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class ValidatorDefinitionsContainer {
 
-	private Map fValidatorTypeToValidatorMap;
+	private static final String NODE_VALIDATOR_SETTINGS = "validatorSettings"; //$NON-NLS-1$
+	private static final String NODE_VALIDATOR_TYPE = "validatorType"; //$NON-NLS-1$
+	private static final String NODE_VALIDATOR = "validator"; //$NON-NLS-1$
 
-	private List fValidatorList;
+	private static final String ATTR_ID = "id"; //$NON-NLS-1$
 
-	// private List fInvalidValidatorList;
-
-	public ValidatorDefinitionsContainer() {
-		fValidatorTypeToValidatorMap = new HashMap(10);
-		// fInvalidValidatorList = new ArrayList(10);
-		fValidatorList = new ArrayList(10);
-	}
+	private final Map fValidatorsByType = new HashMap(10);
+	private final List fValidatorList = new ArrayList(10);
 
 	public void addValidator(IValidator validator) {
 		if (!fValidatorList.contains(validator)) {
-			IValidatorType InterpreterInstallType = validator
-					.getValidatorType();
-			List validatorList = (List) fValidatorTypeToValidatorMap
-					.get(InterpreterInstallType);
-			if (validatorList == null) {
-				validatorList = new ArrayList(3);
-				fValidatorTypeToValidatorMap.put(InterpreterInstallType,
-						validatorList);
-			}
-			validatorList.add(validator);
-			// if (!validator.isValidatorValid()) {
-			// fInvalidValidatorList.add(validator);
-			// }
 			fValidatorList.add(validator);
+			IValidatorType type = validator.getValidatorType();
+			List typeValidators = (List) fValidatorsByType.get(type);
+			if (typeValidators == null) {
+				typeValidators = new ArrayList(3);
+				fValidatorsByType.put(type, typeValidators);
+			}
+			typeValidators.add(validator);
 		}
 	}
 
-	public void addValidatorList(List validatorList) {
-		Iterator iterator = validatorList.iterator();
-		while (iterator.hasNext()) {
-			IValidator validator = (IValidator) iterator.next();
+	public void addValidators(List validatorList) {
+		for (Iterator i = validatorList.iterator(); i.hasNext();) {
+			final IValidator validator = (IValidator) i.next();
 			addValidator(validator);
 		}
 	}
 
-	public Map getValidateTypeToValidatorsMap() {
-		return fValidatorTypeToValidatorMap;
+	public void addValidators(IValidator[] validators) {
+		for (int i = 0; i < validators.length; ++i) {
+			addValidator(validators[i]);
+		}
 	}
 
+	/**
+	 * Returns unmodifiable list of all {@link IValidator}s
+	 * 
+	 * @return
+	 */
 	public List getValidatorList() {
-		return fValidatorList;
+		return Collections.unmodifiableList(fValidatorList);
 	}
 
+	/**
+	 * Returns unmodifiable list of {@link IValidator}s of the specified nature,
+	 * validators contributed to all natures are also returned.
+	 * 
+	 * @param nature
+	 * @return
+	 */
 	public List getValidatorList(String nature) {
-		List res = new ArrayList(fValidatorList.size());
-		for (Iterator iter = fValidatorList.iterator(); iter.hasNext();) {
-			IValidator validator = (IValidator) iter.next();
-			String sharp = "#"; //$NON-NLS-1$
-			String nature2 = validator.getValidatorType().getNature();
-			if (nature2.equals(nature) || nature2.equals(sharp)) {
-				res.add(validator);
+		final List result = new ArrayList(fValidatorList.size());
+		for (Iterator i = fValidatorsByType.entrySet().iterator(); i.hasNext();) {
+			final Map.Entry entry = (Map.Entry) i.next();
+			final IValidatorType type = (IValidatorType) entry.getKey();
+			final String typeNature = type.getNature();
+			if (nature.equals(typeNature)
+					|| ValidatorRuntime.ANY_NATURE.equals(typeNature)) {
+				result.addAll((List) entry.getValue());
 			}
 		}
-		return res;
-	}
-
-	public List getValidatorsList() {
-		List validators = getValidatorList();
-		List resultList = new ArrayList(validators.size());
-		resultList.addAll(validators);
-		// resultList.removeAll(fInvalidValidatorList);
-		return resultList;
-	}
-
-	public List getValidatorsList(String nature) {
-		List Interpreters = getValidatorList(nature);
-		List resultList = new ArrayList(Interpreters.size());
-		resultList.addAll(Interpreters);
-		// resultList.removeAll(fInvalidValidatorList);
-		return resultList;
+		return Collections.unmodifiableList(result);
 	}
 
 	public String getAsXML() throws ParserConfigurationException, IOException,
@@ -119,17 +110,17 @@ public class ValidatorDefinitionsContainer {
 
 		// Create the Document and the top-level node
 		Document doc = ValidatorsCore.getDocument();
-		Element config = doc.createElement("validatorSettings"); //$NON-NLS-1$
+		Element config = doc.createElement(NODE_VALIDATOR_SETTINGS);
 		doc.appendChild(config);
 
-		// Create a node for each install type represented in this container
-		Set validatorTypeSet = getValidateTypeToValidatorsMap().keySet();
-		Iterator keyIterator = validatorTypeSet.iterator();
-		while (keyIterator.hasNext()) {
-			IValidatorType validatorType = (IValidatorType) keyIterator.next();
+		// Create a node for each validator type represented in this container
+		for (Iterator i = fValidatorsByType.entrySet().iterator(); i.hasNext();) {
+			final Map.Entry entry = (Map.Entry) i.next();
+			final IValidatorType validatorType = (IValidatorType) entry
+					.getKey();
 			if (validatorType.isConfigurable()) {
 				Element valiatorTypeElement = validatorTypeAsElement(doc,
-						validatorType);
+						validatorType, (List) entry.getValue());
 				config.appendChild(valiatorTypeElement);
 			}
 		}
@@ -139,19 +130,16 @@ public class ValidatorDefinitionsContainer {
 	}
 
 	private Element validatorTypeAsElement(Document doc,
-			IValidatorType validatorType) {
+			IValidatorType validatorType, List validatorList) {
 
 		// Create a node for the Interpreter type and set its 'id' attribute
-		Element element = doc.createElement("validatorType"); //$NON-NLS-1$
-		element.setAttribute("id", validatorType.getID()); //$NON-NLS-1$
+		Element element = doc.createElement(NODE_VALIDATOR_TYPE);
+		element.setAttribute(ATTR_ID, validatorType.getID());
 
-		// For each Interpreter of the specified type, create a subordinate node
+		// For each validator of the specified type, create a subordinate node
 		// for it
-		List validatorList = (List) getValidateTypeToValidatorsMap().get(
-				validatorType);
-		Iterator validatorIterator = validatorList.iterator();
-		while (validatorIterator.hasNext()) {
-			IValidator validator = (IValidator) validatorIterator.next();
+		for (Iterator i = validatorList.iterator(); i.hasNext();) {
+			IValidator validator = (IValidator) i.next();
 			Element validatorElement = validatorAsElement(doc, validator);
 			element.appendChild(validatorElement);
 		}
@@ -160,26 +148,23 @@ public class ValidatorDefinitionsContainer {
 	}
 
 	private Element validatorAsElement(Document doc, IValidator validator) {
-
-		// Create the node for the Interpreter and set its 'id' & 'name'
+		// Create the node for the validator and set its 'id' & 'name'
 		// attributes
-		Element element = doc.createElement("validator"); //$NON-NLS-1$
-		element.setAttribute("id", validator.getID()); //$NON-NLS-1$
+		Element element = doc.createElement(NODE_VALIDATOR);
+		element.setAttribute(ATTR_ID, validator.getID());
 
 		validator.storeTo(doc, element);
-
 		return element;
 	}
 
-	public static ValidatorDefinitionsContainer parseXMLIntoContainer(
-			Reader input) throws IOException {
+	public static ValidatorDefinitionsContainer createFromXML(Reader input)
+			throws IOException {
 		ValidatorDefinitionsContainer container = new ValidatorDefinitionsContainer();
-		parseXMLIntoContainer(new InputSource(input), container);
+		container.parseXML(new InputSource(input));
 		return container;
 	}
 
-	public static void parseXMLIntoContainer(InputSource input,
-			ValidatorDefinitionsContainer container) throws IOException {
+	public void parseXML(InputSource input) throws IOException {
 
 		// Do the parsing and obtain the top-level node
 		Element config = null;
@@ -195,7 +180,7 @@ public class ValidatorDefinitionsContainer {
 		}
 
 		// If the top-level node wasn't what we expected, bail out
-		if (!config.getNodeName().equalsIgnoreCase("validatorSettings")) { //$NON-NLS-1$
+		if (!config.getNodeName().equalsIgnoreCase(NODE_VALIDATOR_SETTINGS)) {
 			throw new IOException(ValidatorMessages.ValidatorRuntime_badFormat);
 		}
 
@@ -209,8 +194,8 @@ public class ValidatorDefinitionsContainer {
 			if (type == Node.ELEMENT_NODE) {
 				Element validatorTypeElement = (Element) node;
 				if (validatorTypeElement.getNodeName().equalsIgnoreCase(
-						"validatorType")) { //$NON-NLS-1$
-					populateValidatorTypes(validatorTypeElement, container);
+						NODE_VALIDATOR_TYPE)) {
+					populateValidatorType(validatorTypeElement);
 				}
 			}
 		}
@@ -220,28 +205,26 @@ public class ValidatorDefinitionsContainer {
 	 * For the specified Interpreter type node, parse all subordinate
 	 * Interpreter definitions and add them to the specified container.
 	 */
-	private static void populateValidatorTypes(Element validatorTypeElement,
-			ValidatorDefinitionsContainer container) {
+	private void populateValidatorType(Element validatorTypeElement) {
 
 		// Retrieve the 'id' attribute and the corresponding Interpreter type
 		// object
-		String id = validatorTypeElement.getAttribute("id"); //$NON-NLS-1$
+		String id = validatorTypeElement.getAttribute(ATTR_ID);
 		IValidatorType validatorType = ValidatorManager
 				.getValidatorTypeFromID(id);
 		if (validatorType != null) {
 
-			// For each Interpreter child node, populate the container with a
+			// For each validator child node, populate the container with a
 			// subordinate node
 			NodeList validatorNodeList = validatorTypeElement.getChildNodes();
 			for (int i = 0; i < validatorNodeList.getLength(); ++i) {
-				Node InterpreterNode = validatorNodeList.item(i);
-				short type = InterpreterNode.getNodeType();
+				Node childNode = validatorNodeList.item(i);
+				short type = childNode.getNodeType();
 				if (type == Node.ELEMENT_NODE) {
-					Element InterpreterElement = (Element) InterpreterNode;
-					if (InterpreterElement.getNodeName().equalsIgnoreCase(
-							"validator")) { //$NON-NLS-1$
-						populateValidatorForType(validatorType,
-								InterpreterElement, container);
+					Element validatorElement = (Element) childNode;
+					if (validatorElement.getNodeName().equalsIgnoreCase(
+							NODE_VALIDATOR)) {
+						populateValidator(validatorType, validatorElement);
 					}
 				}
 			}
@@ -255,45 +238,45 @@ public class ValidatorDefinitionsContainer {
 	 * Parse the specified Interpreter node, create a InterpreterStandin for it,
 	 * and add this to the specified container.
 	 */
-	private static void populateValidatorForType(
-			IValidatorType interpreterType, Element validatorElement,
-			ValidatorDefinitionsContainer container) {
-		String id = validatorElement.getAttribute("id"); //$NON-NLS-1$
+	private void populateValidator(IValidatorType type, Element element) {
+		String id = element.getAttribute(ATTR_ID);
 		if (id != null) {
 			try {
-				IValidator validator = interpreterType.createValidatorFrom(id,
-						validatorElement);
-				container.addValidator(validator);
-			} catch (IOException e) {
-				final Status errorStatus = new Status(
-						0,
-						ValidatorsCore.PLUGIN_ID,
-						0,
-						ValidatorMessages.ValidatorDefinitionsContainer_failedToLoadValidatorFromXml,
-						null);
-				DLTKCore.getDefault().getLog().log(errorStatus);
+				final IValidator validator;
+				if (type.isBuiltin()) {
+					validator = type.findValidator(id);
+				} else {
+					validator = type.createValidator(id);
+				}
+				if (validator != null) {
+					if (type.isConfigurable()) {
+						validator.loadFrom(element);
+					}
+					addValidator(validator);
+				}
+			} catch (DOMException e) {
+				final String msg = ValidatorMessages.ValidatorDefinitionsContainer_failedToLoadValidatorFromXml;
+				ValidatorsCore.error(msg, e);
 			}
 		} else {
 			if (DLTKCore.DEBUG) {
 				System.err
-						.println("id attribute missing from Interpreter element specification."); //$NON-NLS-1$
+						.println("id attribute missing from validator element specification."); //$NON-NLS-1$
 			}
 		}
 	}
 
 	/**
-	 * Removes the Interpreter from this container.
+	 * Removes the specified {@link IValidator} from this container.
 	 * 
-	 * @param Interpreter
-	 *            Interpreter intall
+	 * @param validator
+	 *            validator instance
 	 */
-	public void removeValidator(IValidator Interpreter) {
-		fValidatorList.remove(Interpreter);
-		// fInvalidValidatorList.remove(Interpreter);
-		List list = (List) fValidatorTypeToValidatorMap.get(Interpreter
-				.getValidatorType());
+	public void removeValidator(IValidator validator) {
+		fValidatorList.remove(validator);
+		List list = (List) fValidatorsByType.get(validator.getValidatorType());
 		if (list != null) {
-			list.remove(Interpreter);
+			list.remove(validator);
 		}
 	}
 
