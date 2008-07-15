@@ -87,6 +87,7 @@ public class ScriptEvaluationEngine implements IScriptEvaluationEngine {
 
 	public IScriptEvaluationResult syncEvaluate(String snippet,
 			IScriptStackFrame frame) {
+		snippet = snippet.trim();
 		synchronized (cache) {
 			IScriptEvaluationResult result = getFromCache(snippet);
 
