@@ -203,6 +203,7 @@ public final class PreferencesMessages extends NLS {
 	public static String EditorPreferencePage_subWordNavigation;
 	public static String EditorPreferencePage_smartIndent;
 	public static String EditorPreferencePage_tabAlwaysIndent;
+	public static String EditorPreferencePage_evaluateTemporaryProblems;
 
 	public static String NewScriptProjectPreferencePage_title;
 	public static String NewScriptProjectPreferencePage_description;
