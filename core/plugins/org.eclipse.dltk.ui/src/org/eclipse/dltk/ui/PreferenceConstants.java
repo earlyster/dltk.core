@@ -378,6 +378,8 @@ public class PreferenceConstants {
 		PreferenceConverter.setDefault(store,
 				PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, new RGB(
 						192, 192, 192));
+		store.setDefault(PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS,
+				true);
 
 		// PreferenceConverter.setDefault(store,
 		// PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR, new
