@@ -21,6 +21,7 @@ import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.debug.core.model.IDebugTarget;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.PriorityClassDLTKExtensionManager;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.IHotCodeReplaceListener;
@@ -71,36 +72,40 @@ public class HotCodeReplaceManager implements IResourceChangeListener,
 	public void addHotCodeReplaceListener(IHotCodeReplaceListener listener) {
 		fHotCodeReplaceListeners.add(listener);
 	}
-	
+
 	/**
-	 * Removes the given listener from the collection of hot code replace listeners.
-	 * Once a listener is removed, it will no longer be notified of hot code replace
-	 * attempt successes or failures.
+	 * Removes the given listener from the collection of hot code replace
+	 * listeners. Once a listener is removed, it will no longer be notified of
+	 * hot code replace attempt successes or failures.
 	 */
 	public void removeHotCodeReplaceListener(IHotCodeReplaceListener listener) {
 		fHotCodeReplaceListeners.remove(listener);
 	}
-		
+
 	/**
 	 * Notifies listeners that a hot code replace attempt succeeded
 	 */
 	private void fireHCRSucceeded(IScriptDebugTarget target) {
-		Object[] listeners= fHotCodeReplaceListeners.getListeners();
-		for (int i=0; i<listeners.length; i++) {
-			((IHotCodeReplaceListener)listeners[i]).hotCodeReplaceSucceeded(target);
-		}		
-	}
-	
-	/**
-	 * Notifies listeners that a hot code replace attempt failed with the given exception
-	 */
-	private void fireHCRFailed(IScriptDebugTarget target, DebugException exception) {
-		Object[] listeners= fHotCodeReplaceListeners.getListeners();
-		for (int i=0; i<listeners.length; i++) {
-			((IHotCodeReplaceListener)listeners[i]).hotCodeReplaceFailed(target, exception);
+		Object[] listeners = fHotCodeReplaceListeners.getListeners();
+		for (int i = 0; i < listeners.length; i++) {
+			((IHotCodeReplaceListener) listeners[i])
+					.hotCodeReplaceSucceeded(target);
 		}
 	}
-	
+
+	/**
+	 * Notifies listeners that a hot code replace attempt failed with the given
+	 * exception
+	 */
+	private void fireHCRFailed(IScriptDebugTarget target,
+			DebugException exception) {
+		Object[] listeners = fHotCodeReplaceListeners.getListeners();
+		for (int i = 0; i < listeners.length; i++) {
+			((IHotCodeReplaceListener) listeners[i]).hotCodeReplaceFailed(
+					target, exception);
+		}
+	}
+
 	public void launchAdded(ILaunch launch) {
 		IDebugTarget[] debugTargets = launch.getDebugTargets();
 		for (int i = 0; i < debugTargets.length; i++) {
@@ -117,8 +122,9 @@ public class HotCodeReplaceManager implements IResourceChangeListener,
 	}
 
 	public boolean supportsHotCodeReplace(IScriptDebugTarget target) {
-		String natureId = target.getLanguageToolkit().getNatureId();
-		return getHotCodeReplaceProvider(natureId) != null;
+		final IDLTKLanguageToolkit toolkit = target.getLanguageToolkit();
+		return toolkit != null
+				&& getHotCodeReplaceProvider(toolkit.getNatureId()) != null;
 	}
 
 	public void launchChanged(ILaunch launch) {
@@ -222,15 +228,17 @@ public class HotCodeReplaceManager implements IResourceChangeListener,
 		}
 	}
 
-	protected void notifyUnsupportedHCR(IScriptDebugTarget[] noHotSwapTargets, IResource[] resources) {
-		for (int i=0; i<noHotSwapTargets.length; i++) {
+	protected void notifyUnsupportedHCR(IScriptDebugTarget[] noHotSwapTargets,
+			IResource[] resources) {
+		for (int i = 0; i < noHotSwapTargets.length; i++) {
 			IScriptDebugTarget target = noHotSwapTargets[i];
 			fireHCRFailed(target, null);
 		}
 	}
 
-	protected void doHotCodeReplace(IScriptDebugTarget[] hotSwapTargets, IResource[] resources) {
-		for (int i=0; i<hotSwapTargets.length; i++) {
+	protected void doHotCodeReplace(IScriptDebugTarget[] hotSwapTargets,
+			IResource[] resources) {
+		for (int i = 0; i < hotSwapTargets.length; i++) {
 			IScriptDebugTarget target = hotSwapTargets[i];
 			String natureId = target.getLanguageToolkit().getNatureId();
 			IHotCodeReplaceProvider provider = getHotCodeReplaceProvider(natureId);
@@ -239,7 +247,10 @@ public class HotCodeReplaceManager implements IResourceChangeListener,
 					provider.performCodeReplace(target, resources);
 					fireHCRSucceeded(target);
 				} else {
-					fail(MessageFormat.format(Messages.HotCodeReplaceManager_hotCodeReplaceProviderForNotFound, new Object[] { natureId }));
+					fail(MessageFormat
+							.format(
+									Messages.HotCodeReplaceManager_hotCodeReplaceProviderForNotFound,
+									new Object[] { natureId }));
 				}
 			} catch (DebugException e) {
 				fireHCRFailed(target, e);
@@ -248,24 +259,22 @@ public class HotCodeReplaceManager implements IResourceChangeListener,
 	}
 
 	private void fail(String message) throws DebugException {
-		fail(message, null);		
+		fail(message, null);
 	}
-	
+
 	private void fail(String message, Throwable e) throws DebugException {
 		throw new DebugException(new Status(IStatus.ERROR,
 				DLTKDebugPlugin.PLUGIN_ID, DebugPlugin.INTERNAL_ERROR, message,
 				e));
 	}
-	
-	private IHotCodeReplaceProvider getHotCodeReplaceProvider(
-			String natureId) {
-		return (IHotCodeReplaceProvider) providerManager
-				.getObject(natureId);
+
+	private IHotCodeReplaceProvider getHotCodeReplaceProvider(String natureId) {
+		return (IHotCodeReplaceProvider) providerManager.getObject(natureId);
 	}
 
 	/**
-	 * Returns the changed class files. Returns <code>null</code> if the
-	 * visitor encounters an exception, or the delta is not a POST_BUILD.
+	 * Returns the changed class files. Returns <code>null</code> if the visitor
+	 * encounters an exception, or the delta is not a POST_BUILD.
 	 */
 	private IResource[] getChangedFiles(IResourceChangeEvent event) {
 		IResourceDelta delta = event.getDelta();
