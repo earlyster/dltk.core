@@ -51,7 +51,9 @@ public abstract class AbstractValidator implements IValidator, Cloneable {
 	}
 
 	protected void load(Element element) {
-		this.name = element.getAttribute(ATTR_NAME);
+		if (!type.isBuiltin()) {
+			this.name = element.getAttribute(ATTR_NAME);
+		}
 		this.automatic = loadBoolean(element, ATTR_ACTIVE);
 	}
 
