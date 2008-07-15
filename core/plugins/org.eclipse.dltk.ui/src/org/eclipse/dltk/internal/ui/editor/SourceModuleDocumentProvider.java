@@ -546,7 +546,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			String markerType = MarkerUtilities.getMarkerType(marker);
 			if (markerType != null
 					&& markerType
-							.startsWith(ScriptMarkerAnnotation.JAVA_MARKER_TYPE_PREFIX))
+							.startsWith(ScriptMarkerAnnotation.DLTK_MARKER_TYPE_PREFIX))
 				return new ScriptMarkerAnnotation(marker);
 			return super.createMarkerAnnotation(marker);
 		}
@@ -564,8 +564,11 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			int start = problem.getSourceStart();
 			if (start < 0)
 				return null;
-
-			int length = problem.getSourceEnd() - problem.getSourceStart() + 1;
+			int end = problem.getSourceEnd();
+			if (end == 0 && start == 0) {
+				return new Position(0, 0);
+			}
+			int length = end - start;
 			if (length < 0)
 				return null;
 
