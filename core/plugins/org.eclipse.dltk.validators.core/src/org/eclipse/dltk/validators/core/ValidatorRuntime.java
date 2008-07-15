@@ -350,7 +350,7 @@ public final class ValidatorRuntime {
 					&& type.supports(validatorType)) {
 				final IValidator[] validators = type.getValidators();
 				for (int j = 0; j < validators.length; ++j) {
-					final IValidator validator = validators[i];
+					final IValidator validator = validators[j];
 					if (predicate.evaluate(validator)
 							&& validator.isValidatorValid(project)) {
 						result.add(validator);
