@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IProblemRequestor;
@@ -23,7 +22,6 @@ import org.eclipse.dltk.core.ModelException;
 public class BecomeWorkingCopyOperation extends ModelOperation {
 	
 	IProblemRequestor problemRequestor;
-	IProblemReporter problemReporter;
 	
 	/*
 	 * Creates a BecomeWorkingCopyOperation for the given working copy.
@@ -34,22 +32,14 @@ public class BecomeWorkingCopyOperation extends ModelOperation {
 		this.problemRequestor = problemRequestor;
 	}
 	
-	public BecomeWorkingCopyOperation(SourceModule workingCopy, IProblemRequestor problemRequestor, IProblemReporter problemReporter) {
-		this(workingCopy, problemRequestor);
-		this.problemReporter = problemReporter;
-	}
-	
 	protected void executeOperation() throws ModelException {
 
 		// open the working copy now to ensure contents are that of the current state of this element
 		SourceModule workingCopy = getWorkingCopy();
 		// create if needed, record usage
-		ModelManager.PerWorkingCopyInfo perWorkingCopyInfo = ModelManager
-				.getModelManager().getPerWorkingCopyInfo(workingCopy, true,
-						true, this.problemRequestor, this.problemReporter);
-		perWorkingCopyInfo.noProblemReporter = true;
+		ModelManager.getModelManager().getPerWorkingCopyInfo(workingCopy, true,
+				true, this.problemRequestor);
 		workingCopy.openWhenClosed(workingCopy.createElementInfo(), this.progressMonitor);
-		perWorkingCopyInfo.noProblemReporter = false;
 
 		if (!workingCopy.isPrimary()) {
 			// report added script delta for a non-primary working copy

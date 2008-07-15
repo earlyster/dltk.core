@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuffer;
@@ -238,7 +237,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		}
 
 		BecomeWorkingCopyOperation op = new BecomeWorkingCopyOperation(
-				workingCopy, problemRequestor, null);
+				workingCopy, problemRequestor);
 		op.runOperation(monitor);
 		return workingCopy;
 	}
@@ -381,25 +380,6 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	 */
 	protected boolean preventReopen() {
 		return super.preventReopen() && (getPerWorkingCopyInfo() == null);
-	}
-
-	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getProblemReporter(java.lang.String)
-	 */
-	protected IProblemReporter getProblemReporter(String natureId)
-			throws CoreException {
-		// check for the working copy reporter first
-		ModelManager.PerWorkingCopyInfo wcInfo = getPerWorkingCopyInfo();
-		if (wcInfo != null) {
-			if (wcInfo.noProblemReporter) {
-				return null;
-			}
-			if (wcInfo.problemReporter != null) {
-				return wcInfo.problemReporter;
-			}
-		}
-
-		return super.getProblemReporter(natureId);
 	}
 
 	/*

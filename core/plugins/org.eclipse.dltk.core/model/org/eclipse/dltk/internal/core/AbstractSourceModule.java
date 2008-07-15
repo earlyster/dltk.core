@@ -14,8 +14,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.compiler.problem.AbstractProblemReporter;
 import org.eclipse.dltk.compiler.problem.IProblem;
-import org.eclipse.dltk.compiler.problem.IProblemFactory;
-import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -431,7 +429,7 @@ public abstract class AbstractSourceModule extends Openable implements
 	}
 
 	private static class AccumulatingProblemReporter extends
-			AbstractProblemReporter implements IProblemReporter {
+			AbstractProblemReporter {
 
 		private final List problems = new ArrayList();
 		private final IProblemRequestor problemRequestor;
@@ -565,22 +563,6 @@ public abstract class AbstractSourceModule extends Openable implements
 
 	protected char getHandleMementoDelimiter() {
 		return JEM_SOURCEMODULE;
-	}
-
-	protected IProblemReporter getProblemReporter(String natureId)
-			throws CoreException {
-		IScriptProject project = getScriptProject();
-		if (project != null
-				&& ExternalScriptProject.EXTERNAL_PROJECT_NAME.equals(project
-						.getElementName())) {
-			return null;
-		}
-		if (project == null || !project.getProject().hasNature(natureId))
-			return null;
-
-		IProblemFactory factory = DLTKLanguageManager
-				.getProblemFactory(natureId);
-		return factory.createReporter(getResource());
 	}
 
 	protected ISourceElementParser getSourceElementParser(String natureId)
