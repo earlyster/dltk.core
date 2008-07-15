@@ -11,17 +11,18 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.internal.ui.popup.actions;
 
-import java.io.OutputStream;
-import java.util.List;
-
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.validators.core.IResourceValidator;
+import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidator;
-import org.eclipse.dltk.validators.core.ValidatorRuntime;
+import org.eclipse.dltk.validators.core.IValidatorOutput;
 import org.eclipse.dltk.validators.internal.ui.ValidatorsUI;
-import org.eclipse.dltk.validators.ui.AbstractValidateJob;
+import org.eclipse.dltk.validators.ui.AbstractConsoleValidateJob;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.osgi.util.NLS;
 
 public class RemoveMarkersAction extends Action {
@@ -45,18 +46,29 @@ public class RemoveMarkersAction extends Action {
 		final String message = NLS.bind(
 				Messages.DLTKValidatorsEditorContextMenu_validatorCleanup,
 				validator.getName());
-		final AbstractValidateJob delegate = new AbstractValidateJob(message) {
+		final AbstractConsoleValidateJob delegate = new AbstractConsoleValidateJob(
+				message) {
 
 			protected boolean isConsoleRequired() {
 				return false;
 			}
 
-			protected void invokeValidationFor(OutputStream out, List elements,
-					List resources, IProgressMonitor monitor) {
-				ValidatorRuntime.cleanValidator(validator, elements, resources,
-						monitor);
+			protected void invokeValidationFor(IValidatorOutput out,
+					IScriptProject project, ISourceModule[] modules,
+					IResource[] resources, IProgressMonitor monitor) {
+				// TODO create submonitors
+				final ISourceModuleValidator sourceModuleValidator = (ISourceModuleValidator) validator
+						.getValidator(project, ISourceModuleValidator.class);
+				if (sourceModuleValidator != null) {
+					sourceModuleValidator.clean(modules);
+				}
+				final IResourceValidator resourceValidator = (IResourceValidator) validator
+						.getValidator(project, IResourceValidator.class);
+				if (resourceValidator != null) {
+					resourceValidator.clean(resources);
+				}
 			}
 		};
-		delegate.run(new StructuredSelection(element));
+		delegate.run(new Object[] { element });
 	}
 }

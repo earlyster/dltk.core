@@ -17,64 +17,32 @@ import javax.xml.transform.TransformerException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.validators.core.IValidator;
-import org.eclipse.dltk.validators.core.IValidatorType;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.internal.core.ValidatorDefinitionsContainer;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 /**
- * Processes add/removed/changed Interpreters.
+ * Saves validator settings.
  */
 public class ValidatorUpdater {
-
-	// the Interpreters defined when this updated is instantiated
-	private ValidatorDefinitionsContainer fOriginalValidators;
-
-	/**
-	 * Contstructs a new Validator updater to update Validator install settings.
-	 */
-	public ValidatorUpdater() {
-		saveCurrentAsOriginal();
-	}
-
-	private void saveCurrentAsOriginal() {
-		fOriginalValidators = new ValidatorDefinitionsContainer();
-
-		IValidatorType[] types = ValidatorRuntime.getValidatorTypes();
-		for (int i = 0; i < types.length; i++) {
-			IValidator[] validators = types[i].getValidators();
-			if (validators != null)
-				for (int j = 0; j < validators.length; j++) {
-					fOriginalValidators.addValidator(validators[j]);
-				}
-		}
-	}
 
 	/**
 	 * Updates Validator settings and returns whether the update was successful.
 	 * 
-	 * @param validatorEnvironments
+	 * @param validators
 	 *            new installed ValidatorEnvironments
 	 * @param defaultInterp
 	 *            new default Validator
 	 * @return whether the update was successful
 	 */
-	public boolean updateValidatorSettings(IValidator[] validatorEnvironments) {
-
+	public boolean updateValidatorSettings(IValidator[] validators) {
 		// Create a Validator definition container
-		ValidatorDefinitionsContainer validatorContainer = new ValidatorDefinitionsContainer();
-
+		final ValidatorDefinitionsContainer container = new ValidatorDefinitionsContainer();
 		// Set the Validators on the container
-		for (int i = 0; i < validatorEnvironments.length; i++) {
-			validatorContainer.addValidator(validatorEnvironments[i]);
-		}
-
+		container.addValidators(validators);
 		// Generate XML for the Validator defs and save it as the new value of
 		// the Validator preference
-		saveValidatorDefinitions(validatorContainer);
-
-		saveCurrentAsOriginal();
-
+		saveValidatorDefinitions(container);
 		return true;
 	}
 

@@ -14,9 +14,9 @@ package org.eclipse.dltk.validators.internal.ui.popup.actions;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidator;
 import org.eclipse.dltk.validators.core.IValidatorType;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
@@ -45,9 +45,8 @@ public class DLTKValidatorsActionGroup extends ActionGroup {
 		if (toolkit == null) {
 			return;
 		}
-		final IEnvironment environment = EnvironmentManager
-				.getEnvironment(element);
-		if (environment == null) {
+		final IScriptProject project = element.getScriptProject();
+		if (project == null) {
 			return;
 		}
 		final IValidatorType[] validatorTypes = ValidatorRuntime
@@ -67,21 +66,24 @@ public class DLTKValidatorsActionGroup extends ActionGroup {
 			if (DEBUG) {
 				System.out.println("validatorType " + type.getName()); //$NON-NLS-1$
 			}
-			final IValidator[] validators = type.getValidators();
-			if (validators != null && validators.length != 0) {
-				for (int j = 0; j < validators.length; ++j) {
-					final IValidator validator = validators[j];
-					if (DEBUG) {
-						System.out.println("validator " + validator.getName()); //$NON-NLS-1$
-					}
-					++validatorCount;
-					final ValidateAction action = new ValidateAction(validator,
-							selection);
-					action.setEnabled(validator.isValidatorValid(environment));
-					subMenu.add(action);
-					if (false) {
-						subMenu
-								.add(new RemoveMarkersAction(validator, element));
+			if (type.supports(ISourceModuleValidator.class)) {
+				final IValidator[] validators = type.getValidators();
+				if (validators != null && validators.length != 0) {
+					for (int j = 0; j < validators.length; ++j) {
+						final IValidator validator = validators[j];
+						if (DEBUG) {
+							System.out
+									.println("validator " + validator.getName()); //$NON-NLS-1$
+						}
+						++validatorCount;
+						final ValidateAction action = new ValidateAction(
+								validator, selection);
+						action.setEnabled(validator.isValidatorValid(project));
+						subMenu.add(action);
+						if (false) {
+							subMenu.add(new RemoveMarkersAction(validator,
+									element));
+						}
 					}
 				}
 			}

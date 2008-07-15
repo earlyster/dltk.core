@@ -11,13 +11,14 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.internal.ui.popup.actions;
 
-import java.io.OutputStream;
-import java.util.List;
-
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.validators.core.IValidatorOutput;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.internal.ui.ValidatorsUI;
-import org.eclipse.dltk.validators.ui.AbstractValidateJob;
+import org.eclipse.dltk.validators.ui.AbstractConsoleValidateJob;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -36,20 +37,20 @@ public class RemoveAllMarkersAction extends Action {
 	}
 
 	public void run() {
-		final AbstractValidateJob delegate = new AbstractValidateJob(
+		final AbstractConsoleValidateJob delegate = new AbstractConsoleValidateJob(
 				Messages.RemoveValidatorAllMarkersAction_validatorCleanup) {
 
 			protected boolean isConsoleRequired() {
 				return false;
 			}
 
-			protected void invokeValidationFor(OutputStream out, List elements,
-					List resources, IProgressMonitor monitor) {
-				ValidatorRuntime.executeCleanAllValidatorsWithConsole(elements,
-						resources, monitor);
+			protected void invokeValidationFor(IValidatorOutput out,
+					IScriptProject project, ISourceModule[] modules,
+					IResource[] resources, IProgressMonitor monitor) {
+				ValidatorRuntime.cleanAll(project, modules, resources, monitor);
 			}
 		};
-		delegate.run(selection);
+		delegate.run(selection.toArray());
 	}
 
 }

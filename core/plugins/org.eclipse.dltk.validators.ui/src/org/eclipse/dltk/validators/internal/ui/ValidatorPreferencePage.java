@@ -94,7 +94,7 @@ public class ValidatorPreferencePage extends PreferencePage implements
 		final boolean[] canceled = new boolean[] { false };
 		BusyIndicator.showWhile(null, new Runnable() {
 			public void run() {
-				IValidator[] vnterpreters = fInterpretersBlock.getValidator();
+				IValidator[] vnterpreters = fInterpretersBlock.getValidators();
 				ValidatorUpdater updater = new ValidatorUpdater();
 				if (!updater.updateValidatorSettings(vnterpreters)) {
 					canceled[0] = true;

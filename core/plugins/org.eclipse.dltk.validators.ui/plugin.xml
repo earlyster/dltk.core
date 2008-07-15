@@ -60,19 +60,6 @@
       </actionFilterTester>
    </extension>
    <extension
-         point="org.eclipse.dltk.validators.ui.validatorConfigPage">
-      <validatorConfigPage
-            class="org.eclipse.dltk.validators.internal.ui.externalchecker.ExternalCheckerConfigurationPage"
-            id="org.eclipse.dltk.validators.core.externalChecker">
-      </validatorConfigPage>
-   </extension>
-   <extension
-         point="org.eclipse.dltk.validators.ui.validatorConsoleTracker">
-      <validatorConsoleTracker
-            class="org.eclipse.dltk.validators.internal.ui.externalchecker.ExternalCheckerConsoleTracker">
-      </validatorConsoleTracker>
-   </extension>
-   <extension
          point="org.eclipse.dltk.ui.editorContextActionGroup">
       <editorContextActionGroup
             class="org.eclipse.dltk.validators.internal.ui.popup.actions.DLTKValidatorsActionGroup">

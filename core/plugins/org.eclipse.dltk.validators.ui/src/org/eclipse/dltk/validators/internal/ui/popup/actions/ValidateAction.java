@@ -11,14 +11,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.internal.ui.popup.actions;
 
-import java.io.OutputStream;
-import java.util.List;
-
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.validators.core.IResourceValidator;
+import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidator;
-import org.eclipse.dltk.validators.core.ValidatorRuntime;
+import org.eclipse.dltk.validators.core.IValidatorOutput;
 import org.eclipse.dltk.validators.internal.ui.ValidatorsUI;
-import org.eclipse.dltk.validators.ui.AbstractValidateJob;
+import org.eclipse.dltk.validators.ui.AbstractConsoleValidateJob;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.osgi.util.NLS;
@@ -45,15 +47,28 @@ public class ValidateAction extends Action {
 	}
 
 	public void run() {
-		final AbstractValidateJob delegate = new AbstractValidateJob(validator
-				.getName()) {
+		final AbstractConsoleValidateJob delegate = new AbstractConsoleValidateJob(
+				validator.getName()) {
 
-			protected void invokeValidationFor(OutputStream out, List elements,
-					List resources, IProgressMonitor monitor) {
-				ValidatorRuntime.executeValidator(validator, out, elements,
-						resources, monitor);
+			protected void invokeValidationFor(IValidatorOutput output,
+					IScriptProject project, ISourceModule[] modules,
+					IResource[] resources, IProgressMonitor monitor) {
+				if (validator.isValidatorValid(project)) {
+					// TODO create submonitors
+					final ISourceModuleValidator sourceModuleValidator = (ISourceModuleValidator) validator
+							.getValidator(project, ISourceModuleValidator.class);
+					if (sourceModuleValidator != null) {
+						sourceModuleValidator
+								.validate(modules, output, monitor);
+					}
+					final IResourceValidator resourceValidator = (IResourceValidator) validator
+							.getValidator(project, IResourceValidator.class);
+					if (resourceValidator != null) {
+						resourceValidator.validate(resources, output, monitor);
+					}
+				}
 			}
 		};
-		delegate.run(selection);
+		delegate.run(selection.toArray());
 	}
 }
