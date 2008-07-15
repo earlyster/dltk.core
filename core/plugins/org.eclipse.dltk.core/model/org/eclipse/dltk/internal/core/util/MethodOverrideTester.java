@@ -102,8 +102,8 @@ public class MethodOverrideTester {
 	 *            The type to find methods in
 	 * @param overriding
 	 *            The overriding method
-	 * @return The first overridden method or <code>null</code> if no method
-	 *         is overridden
+	 * @return The first overridden method or <code>null</code> if no method is
+	 *         overridden
 	 * @throws ModelException
 	 */
 	public IMethod findOverriddenMethodInHierarchy(IType type,
@@ -135,12 +135,18 @@ public class MethodOverrideTester {
 	 *            The type to find methods in
 	 * @param overriding
 	 *            The overriding method
-	 * @return The first overridden method or <code>null</code> if no method
-	 *         is overridden
+	 * @return The first overridden method or <code>null</code> if no method is
+	 *         overridden
 	 * @throws ModelException
 	 */
 	public IMethod findOverriddenMethodInType(IType overriddenType,
 			IMethod overriding) throws ModelException {
+		IMethod[] overriddenMethods = overriddenType.getMethods();
+		for (int i = 0; i < overriddenMethods.length; i++) {
+			if (isSubsignature(overriding, overriddenMethods[i])) {
+				return overriddenMethods[i];
+			}
+		}
 		return null;
 	}
 
@@ -157,6 +163,33 @@ public class MethodOverrideTester {
 	 */
 	public IMethod findOverridingMethodInType(IType overridingType,
 			IMethod overridden) throws ModelException {
+		IMethod[] overridingMethods = overridingType.getMethods();
+		for (int i = 0; i < overridingMethods.length; i++) {
+			if (isSubsignature(overridingMethods[i], overridden)) {
+				return overridingMethods[i];
+			}
+		}
 		return null;
+	}
+
+	/**
+	 * Tests if a method is a subsignature of another method.
+	 * 
+	 * @param overriding
+	 *            overriding method (m1)
+	 * @param overridden
+	 *            overridden method (m2)
+	 * @return <code>true</code> iff the method <code>m1</code> is a
+	 *         subsignature of the method <code>m2</code>. This is one of the
+	 *         requirements for m1 to override m2. Note that subsignature is
+	 *         <em>not</em> symmetric!
+	 * @throws ModelException
+	 */
+	public boolean isSubsignature(IMethod overriding, IMethod overridden)
+			throws ModelException {
+		if (!overridden.getElementName().equals(overriding.getElementName())) {
+			return false;
+		}
+		return true;
 	}
 }
