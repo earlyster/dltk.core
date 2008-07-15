@@ -13,12 +13,12 @@ package org.eclipse.dltk.compiler.problem;
  * Description of a problem, as detected by the compiler or some of the
  * underlying technology reusing the compiler. A problem provides access to:
  * <ul>
- * <li> its location (originating source file name, source position, line
- * number), </li>
- * <li> its message description and a predicate to check its severity (warning
- * or error). </li>
- * <li> its ID : a number identifying the very nature of this problem. All
- * possible IDs are listed as constants on this interface. </li>
+ * <li>its location (originating source file name, source position, line
+ * number),</li>
+ * <li>its message description and a predicate to check its severity (warning or
+ * error).</li>
+ * <li>its ID : a number identifying the very nature of this problem. All
+ * possible IDs are listed as constants on this interface.</li>
  * </ul>
  * 
  * Note: the compiler produces IProblems internally, which are turned into
@@ -27,9 +27,12 @@ package org.eclipse.dltk.compiler.problem;
  * compiling. However, the problem markers carry equivalent information to
  * IProblem, in particular their ID (attribute "id") is set to one of the IDs
  * defined on this interface.
+ * 
+ * FIXME updated documentation: end position is documented as inclusive, but it
+ * is generated and used as not inclusive.
  */
 public interface IProblem {
-	
+
 	/**
 	 * Answer back the original arguments recorded into the problem.
 	 * 
@@ -121,18 +124,19 @@ public interface IProblem {
 	 *            the given start position
 	 */
 	void setSourceStart(int sourceStart);
-	
+
 	/**
-	 * Problem Categories
-	 * The high bits of a problem ID contains information about the category of a problem. 
-	 * For example, (problemID & TypeRelated) != 0, indicates that this problem is type related.
+	 * Problem Categories The high bits of a problem ID contains information
+	 * about the category of a problem. For example, (problemID & TypeRelated)
+	 * != 0, indicates that this problem is type related.
 	 * 
-	 * A problem category can help to implement custom problem filters. Indeed, when numerous problems
-	 * are listed, focusing on import related problems first might be relevant.
+	 * A problem category can help to implement custom problem filters. Indeed,
+	 * when numerous problems are listed, focusing on import related problems
+	 * first might be relevant.
 	 * 
-	 * When a problem is tagged as Internal, it means that no change other than a local source code change
-	 * can  fix the corresponding problem. A type related problem could be addressed by changing the type
-	 * involved in it.
+	 * When a problem is tagged as Internal, it means that no change other than
+	 * a local source code change can fix the corresponding problem. A type
+	 * related problem could be addressed by changing the type involved in it.
 	 */
 	int TypeRelated = 0x01000000;
 	int FieldRelated = 0x02000000;
@@ -143,24 +147,25 @@ public interface IProblem {
 	int Syntax = 0x40000000;
 
 	int Documentation = 0x80000000;
-	
-	//	 detected task	
+
+	// detected task
 	int Task = Internal + 450;
-	
-	
+
 	/**
-	 * Mask to use in order to filter out the category portion of the problem ID.
+	 * Mask to use in order to filter out the category portion of the problem
+	 * ID.
 	 */
 	int IgnoreCategoriesMask = 0xFFFFFF;
-	
+
 	/**
-	 * ID reserved for referencing an internal error inside the DLTKCore implementation which
-	 * may be surfaced as a problem associated with the compilation unit which caused it to occur.
+	 * ID reserved for referencing an internal error inside the DLTKCore
+	 * implementation which may be surfaced as a problem associated with the
+	 * compilation unit which caused it to occur.
 	 */
 	int Unclassified = 0;
-	
+
 	// Type related problems
 	int ForbiddenReference = TypeRelated + 307;
 	int DiscouragedReference = TypeRelated + 280;
-	
+
 }
