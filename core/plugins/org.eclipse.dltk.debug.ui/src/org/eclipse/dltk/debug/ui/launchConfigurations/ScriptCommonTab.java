@@ -640,11 +640,11 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 			}
 		}
 		fConsoleOutput.setEnabled(!isInteractive);
-		// if (!isInteractive) {
-		// fConsoleOutput.setSelection(outputToConsole);
-		// } else {
-		// fConsoleOutput.setSelection(false);
-		// }
+		if (!isInteractive) {
+			fConsoleOutput.setSelection(outputToConsole);
+		} else {
+			fConsoleOutput.setSelection(false);
+		}
 		fAppend.setSelection(append);
 		boolean haveOutputFile = outputFile != null;
 		if (haveOutputFile) {
