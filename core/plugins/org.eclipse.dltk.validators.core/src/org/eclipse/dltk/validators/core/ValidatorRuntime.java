@@ -509,7 +509,7 @@ public final class ValidatorRuntime {
 			final IValidatorType type = types[i];
 			final IValidator[] validators = type.getValidators();
 			for (int j = 0; j < validators.length; ++j) {
-				final IValidator validator = validators[i];
+				final IValidator validator = validators[j];
 				final ISourceModuleValidator smValidator = (ISourceModuleValidator) validator
 						.getValidator(project, ISourceModuleValidator.class);
 				if (smValidator != null) {
