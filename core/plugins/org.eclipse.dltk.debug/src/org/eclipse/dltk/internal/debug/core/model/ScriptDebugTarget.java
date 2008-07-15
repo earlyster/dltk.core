@@ -404,23 +404,24 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	}
 
 	protected IScriptProject getScriptProject() {
-		ILaunchConfiguration configuration = this.getLaunch()
+		final ILaunchConfiguration configuration = launch
 				.getLaunchConfiguration();
-		String projectName = null;
-		try {
-			projectName = configuration.getAttribute(
-					LAUNCH_CONFIGURATION_ATTR_PROJECT, (String) null);
-			if (projectName != null) {
-				projectName = projectName.trim();
-				if (projectName.length() > 0) {
-					IProject project = ResourcesPlugin.getWorkspace().getRoot()
-							.getProject(projectName);
-					return DLTKCore.create(project);
+		if (configuration != null) {
+			try {
+				String projectName = configuration.getAttribute(
+						LAUNCH_CONFIGURATION_ATTR_PROJECT, (String) null);
+				if (projectName != null) {
+					projectName = projectName.trim();
+					if (projectName.length() > 0) {
+						IProject project = ResourcesPlugin.getWorkspace()
+								.getRoot().getProject(projectName);
+						return DLTKCore.create(project);
+					}
 				}
-			}
-		} catch (CoreException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
+			} catch (CoreException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return null;
