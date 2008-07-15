@@ -3,7 +3,7 @@ package org.eclipse.dltk.validators.internal.externalchecker.ui;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.dltk.validators.internal.ui.externalchecker.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.dltk.validators.internal.externalchecker.ui.messages"; //$NON-NLS-1$
 	public static String CustomWildcardsList_enterDescription;
 	public static String CustomWildcardsList_enterPattern;
 	public static String ExternalCheckerConfigurationPage_addRule;

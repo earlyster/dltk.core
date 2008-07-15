@@ -3,7 +3,7 @@ package org.eclipse.dltk.validators.internal.externalchecker.core;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.dltk.validators.internal.core.externalchecker.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.dltk.validators.internal.externalchecker.core.messages"; //$NON-NLS-1$
 	public static String ExternalChecker_checkingWithExternalExecutable;
 	public static String ExternalChecker_error;
 	public static String ExternalChecker_sourceModuleResourceIsNull;
