@@ -68,6 +68,14 @@ public class DefaultProblem extends CategorizedProblem {
 				startPosition, endPosition, line, 0);
 	}
 
+	public DefaultProblem(String message, int id, String[] stringArguments,
+			int severity, int startPosition, int endPosition, int line) {
+		this(NONAME, message, id, stringArguments, severity, startPosition,
+				endPosition, line, 0);
+	}
+
+	private static final String NONAME = ""; //$NON-NLS-1$
+
 	public String errorReportSource(char[] unitSource) {
 		return errorReportSource(unitSource, 0);
 	}
