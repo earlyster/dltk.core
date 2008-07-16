@@ -28,14 +28,19 @@ import org.eclipse.dltk.internal.core.util.Util;
 public class BuildProblemReporter extends AbstractProblemReporter implements
 		IProblemReporter {
 
+	private final IResource resource;
 	private final List problems = new ArrayList();
+	private boolean oldMarkersDeleted = false;
+
+	/**
+	 * @param resource
+	 */
+	public BuildProblemReporter(IResource resource) {
+		this.resource = resource;
+	}
 
 	public void reportProblem(IProblem problem) {
 		problems.add(problem);
-	}
-
-	public void reset() {
-		problems.clear();
 	}
 
 	/**
@@ -45,13 +50,14 @@ public class BuildProblemReporter extends AbstractProblemReporter implements
 		return problems.isEmpty();
 	}
 
-	/**
-	 * @param resource
-	 */
-	public void saveTo(IResource resource) {
+	public void flush() {
 		final String markerType = DefaultProblem.MARKER_TYPE_PROBLEM;
 		try {
-			resource.deleteMarkers(markerType, true, IResource.DEPTH_INFINITE);
+			if (!oldMarkersDeleted) {
+				oldMarkersDeleted = true;
+				resource.deleteMarkers(markerType, true,
+						IResource.DEPTH_INFINITE);
+			}
 			for (Iterator i = problems.iterator(); i.hasNext();) {
 				final IProblem problem = (IProblem) i.next();
 
@@ -79,6 +85,7 @@ public class BuildProblemReporter extends AbstractProblemReporter implements
 							.getProblemArgumentsForMarker(arguments));
 				}
 			}
+			problems.clear();
 		} catch (CoreException e) {
 			ValidatorsCore.log(e.getStatus());
 		}
