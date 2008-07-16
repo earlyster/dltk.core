@@ -17,6 +17,8 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.ui.actions.AbstractMenuCreatorObjectActionDelegate;
+import org.eclipse.dltk.validators.core.IResourceValidator;
+import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidator;
 import org.eclipse.dltk.validators.core.IValidatorType;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
@@ -52,6 +54,9 @@ public class DLTKValidatorsModelElementAction extends
 		int validatorCount = 0;
 		for (int i = 0; i < validatorTypes.length; ++i) {
 			final IValidatorType type = validatorTypes[i];
+			if (!isSupported(type)) {
+				continue;
+			}
 			final IValidator[] validators = type.getValidators();
 			if (validators != null && validators.length != 0) {
 				for (int j = 0; j < validators.length; ++j) {
@@ -68,6 +73,11 @@ public class DLTKValidatorsModelElementAction extends
 		if (validatorCount != 0) {
 			menu.addAction(new ValidateAllAction(selection));
 		}
+	}
+
+	private static boolean isSupported(final IValidatorType type) {
+		return type.supports(ISourceModuleValidator.class)
+				|| type.supports(IResourceValidator.class);
 	}
 
 }
