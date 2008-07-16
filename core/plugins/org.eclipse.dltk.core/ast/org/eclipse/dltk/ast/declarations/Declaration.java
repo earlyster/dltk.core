@@ -35,7 +35,7 @@ public abstract class Declaration extends Statement implements Modifiers {
 	SimpleReference ref;
 
 	protected int modifiers;
-	
+
 	private String comments;
 
 	protected Declaration() {
@@ -52,8 +52,7 @@ public abstract class Declaration extends Statement implements Modifiers {
 		super(start, end);
 		if (name != null) {
 			this.ref = new SimpleReference(name);
-		}
-		else {
+		} else {
 			this.ref = new SimpleReference(start, end, null);
 		}
 	}
@@ -66,8 +65,9 @@ public abstract class Declaration extends Statement implements Modifiers {
 		return this.ref.sourceEnd();
 	}
 
-	protected ISourceRange getNameSourceRange () {
-		return new SourceRange(this.getNameStart(), this.getNameEnd() - this.getNameStart() + 1);
+	protected ISourceRange getNameSourceRange() {
+		return new SourceRange(this.getNameStart(), this.getNameEnd()
+				- this.getNameStart() + 1);
 	}
 
 	public String getName() {
@@ -79,8 +79,8 @@ public abstract class Declaration extends Statement implements Modifiers {
 	}
 
 	public final PositionInformation getPositionInformation() {
-		return new PositionInformation(this.getNameStart(), this.getNameEnd(), this.sourceStart(),
-				this.sourceEnd());
+		return new PositionInformation(this.getNameStart(), this.getNameEnd(),
+				this.sourceStart(), this.sourceEnd());
 	}
 
 	public final void setModifier(int mods) {
@@ -92,10 +92,9 @@ public abstract class Declaration extends Statement implements Modifiers {
 	}
 
 	public final void setName(String name) {
-		if( this.ref == null ) {
+		if (this.ref == null) {
 			this.ref = new SimpleReference(0, 0, name);
-		}
-		else {
+		} else {
 			this.ref.setName(name);
 		}
 	}
@@ -138,15 +137,20 @@ public abstract class Declaration extends Statement implements Modifiers {
 	}
 
 	public String toString() {
-		String buf = ""; //$NON-NLS-1$
-
+		StringBuffer sb = new StringBuffer();
 		if (this.isStatic()) {
-			buf += "static "; //$NON-NLS-1$
+			if (sb.length() != 0) {
+				sb.append(' ');
+			}
+			sb.append("static"); //$NON-NLS-1$
 		}
 		if (this.ref.getName() != null) {
-			buf += " " + this.ref.getName(); //$NON-NLS-1$
+			if (sb.length() != 0) {
+				sb.append(' ');
+			}
+			sb.append(this.ref.getName());
 		}
-		return buf;
+		return sb.toString();
 	}
 
 	public int getKind() {
@@ -172,34 +176,36 @@ public abstract class Declaration extends Statement implements Modifiers {
 		}
 		Declaration d = (Declaration) obj;
 		// Only name.
-		return d.ref.getName().equals(this.ref.getName()) && d.ref.sourceStart() == this.ref.sourceStart()
-				&& d.ref.sourceEnd() == this.ref.sourceEnd() && super.equals(obj);
+		return d.ref.getName().equals(this.ref.getName())
+				&& d.ref.sourceStart() == this.ref.sourceStart()
+				&& d.ref.sourceEnd() == this.ref.sourceEnd()
+				&& super.equals(obj);
 	}
 
 	public int hashCode() {
 		return this.ref.getName().hashCode();
 	}
 
-	public String debugString () {
+	public String debugString() {
 		return super.debugString() + this.getNameSourceRange().toString();
 	}
+
 	public SimpleReference getRef() {
 		return this.ref;
 	}
 
 	/**
-	 * @param comments the comments to set
+	 * @param comments
+	 *            the comments to set
 	 */
-	public void setComments(String comments)
-	{
+	public void setComments(String comments) {
 		this.comments = comments;
 	}
 
 	/**
 	 * @return the comments
 	 */
-	public String getComments()
-	{
+	public String getComments() {
 		return comments;
 	}
 }
