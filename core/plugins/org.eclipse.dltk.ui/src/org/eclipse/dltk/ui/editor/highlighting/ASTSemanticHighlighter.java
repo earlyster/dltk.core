@@ -57,7 +57,7 @@ public abstract class ASTSemanticHighlighter extends
 
 	protected ModuleDeclaration parseSourceModule(
 			final ISourceModule sourceModule) {
-		return SourceParserUtil.getModuleDeclaration(sourceModule, null);
+		return SourceParserUtil.getModuleDeclaration(sourceModule);
 	}
 
 	protected abstract String getNature();
