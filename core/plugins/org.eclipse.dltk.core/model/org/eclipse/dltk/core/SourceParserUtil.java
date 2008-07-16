@@ -19,6 +19,11 @@ public class SourceParserUtil {
 		void run(ISourceModule module, char[] content);
 	}
 
+	public static ModuleDeclaration getModuleDeclaration(ISourceModule module) {
+		return getModuleDeclaration(module, null,
+				ISourceParserConstants.DEFAULT, null);
+	}
+
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
 			IProblemReporter reporter) {
 		return getModuleDeclaration(module, reporter,
