@@ -16,20 +16,15 @@ package org.eclipse.dltk.compiler.task;
 import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.dltk.core.DLTKCore;
 
 public class TodoTaskSimpleParser {
 
-	private final ITaskReporter taskReporter;
 	private final boolean caseSensitive;
 	private final char[][] tags;
 	private final int minTagLength;
 	private final int[] priorities;
 
-	public TodoTaskSimpleParser(ITaskReporter taskReporter,
-			ITodoTaskPreferences preferences) {
-		this.taskReporter = taskReporter;
+	public TodoTaskSimpleParser(ITodoTaskPreferences preferences) {
 		this.caseSensitive = preferences.isCaseSensitive();
 		final List tags = preferences.getTaskTags();
 		if (!tags.isEmpty()) {
@@ -71,7 +66,7 @@ public class TodoTaskSimpleParser {
 	private int contentPos;
 	private int contentEnd;
 
-	public void parse(char[] content) {
+	public void parse(ITaskReporter reporter, char[] content) {
 		lineNumber = 0;
 		contentPos = 0;
 		contentEnd = content.length;
@@ -83,7 +78,7 @@ public class TodoTaskSimpleParser {
 				if (begin > 0) {
 					begin = skipSpaces(content, begin, end);
 					if (begin + minTagLength <= end) {
-						processLine(content, begin, end);
+						processLine(reporter, content, begin, end);
 					}
 				}
 			}
@@ -116,18 +111,14 @@ public class TodoTaskSimpleParser {
 		return pos;
 	}
 
-	private void processLine(char[] content, int begin, final int end) {
+	private void processLine(ITaskReporter reporter, char[] content, int begin,
+			final int end) {
 		for (int i = 0; i < tags.length; ++i) {
 			final char[] tag = tags[i];
 			if (begin + tag.length <= end
 					&& compareTag(content, begin, end, tag)) {
 				final String msg = new String(content, begin, end - begin);
-				try {
-					taskReporter.reportTask(msg, lineNumber, priorities[i],
-							begin, end);
-				} catch (CoreException e) {
-					DLTKCore.error("Error in reportTask()", e); //$NON-NLS-1$
-				}
+				reporter.reportTask(msg, lineNumber, priorities[i], begin, end);
 			}
 		}
 	}

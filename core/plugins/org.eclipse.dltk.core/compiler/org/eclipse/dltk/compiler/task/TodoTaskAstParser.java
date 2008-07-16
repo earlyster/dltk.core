@@ -11,24 +11,22 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.task;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.ASTVisitor;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.ast.expressions.Literal;
+import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.ISourceModule;
 
 public class TodoTaskAstParser extends TodoTaskSimpleParser {
 
 	/**
-	 * @param taskReporter
 	 * @param preferences
 	 */
-	public TodoTaskAstParser(ITaskReporter taskReporter,
-			ITodoTaskPreferences preferences, ModuleDeclaration module) {
-		super(taskReporter, preferences);
-		if (isValid()) {
-			processNodes(module);
-		}
+	public TodoTaskAstParser(ITodoTaskPreferences preferences) {
+		super(preferences);
 	}
 
 	private static final int ALLOC_INCREMENT = 1024;
@@ -67,7 +65,16 @@ public class TodoTaskAstParser extends TodoTaskSimpleParser {
 	/**
 	 * @param module
 	 */
-	private void processNodes(ModuleDeclaration module) {
+	public void build(ISourceModule module, ModuleDeclaration ast,
+			IProblemReporter reporter) throws CoreException {
+		if (!isValid()) {
+			return;
+		}
+		final ITaskReporter taskReporter = (ITaskReporter) reporter
+				.getAdapter(ITaskReporter.class);
+		if (taskReporter == null) {
+			return;
+		}
 		final ASTVisitor visitor = new ASTVisitor() {
 
 			public boolean visitGeneral(ASTNode node) throws Exception {
@@ -79,10 +86,11 @@ public class TodoTaskAstParser extends TodoTaskSimpleParser {
 
 		};
 		try {
-			module.traverse(visitor);
+			ast.traverse(visitor);
 		} catch (Exception e) {
 			DLTKCore.error("Unexpected error", e); //$NON-NLS-1$
 		}
+		parse(taskReporter, module.getSourceAsCharArray());
 	}
 
 	protected boolean isSimpleNode(ASTNode node) {

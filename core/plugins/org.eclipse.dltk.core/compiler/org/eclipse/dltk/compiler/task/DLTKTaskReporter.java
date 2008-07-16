@@ -14,9 +14,12 @@ package org.eclipse.dltk.compiler.task;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.core.DLTKCore;
 
 /**
  * Default implementation of the {@link ITaskReporter}
+ * 
+ * @deprecated
  */
 public class DLTKTaskReporter implements ITaskReporter {
 
@@ -41,14 +44,18 @@ public class DLTKTaskReporter implements ITaskReporter {
 	}
 
 	public void reportTask(String message, int lineNumber, int priority,
-			int charStart, int charEnd) throws CoreException {
-		IMarker m = resource.createMarker(IMarker.TASK);
-		m.setAttribute(IMarker.LINE_NUMBER, lineNumber + 1);
-		m.setAttribute(IMarker.MESSAGE, message);
-		m.setAttribute(IMarker.PRIORITY, priority);
-		m.setAttribute(IMarker.CHAR_START, charStart);
-		m.setAttribute(IMarker.CHAR_END, charEnd);
-		m.setAttribute(IMarker.USER_EDITABLE, Boolean.FALSE);
+			int charStart, int charEnd) {
+		try {
+			IMarker m = resource.createMarker(IMarker.TASK);
+			m.setAttribute(IMarker.LINE_NUMBER, lineNumber + 1);
+			m.setAttribute(IMarker.MESSAGE, message);
+			m.setAttribute(IMarker.PRIORITY, priority);
+			m.setAttribute(IMarker.CHAR_START, charStart);
+			m.setAttribute(IMarker.CHAR_END, charEnd);
+			m.setAttribute(IMarker.USER_EDITABLE, Boolean.FALSE);
+		} catch (CoreException e) {
+			DLTKCore.error("reportTask", e); //$NON-NLS-1$
+		}
 	}
 
 	public Object getAdapter(Class adapter) {

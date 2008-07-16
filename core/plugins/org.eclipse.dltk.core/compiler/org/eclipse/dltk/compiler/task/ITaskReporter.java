@@ -22,11 +22,6 @@ import org.eclipse.core.runtime.IAdaptable;
 public interface ITaskReporter extends IAdaptable {
 
 	/**
-	 * Clears all tasks related to the attached resource.
-	 */
-	void clearTasks();
-
-	/**
 	 * Creates new task for the attached resource.
 	 * 
 	 * @param message
@@ -37,6 +32,6 @@ public interface ITaskReporter extends IAdaptable {
 	 * @throws CoreException
 	 */
 	void reportTask(String message, int lineNumber, int priority,
-			int charStart, int charEnd) throws CoreException;
+			int charStart, int charEnd);
 
 }

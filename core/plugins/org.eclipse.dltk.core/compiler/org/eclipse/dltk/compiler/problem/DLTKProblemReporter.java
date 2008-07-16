@@ -18,6 +18,9 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptModelMarker;
 import org.eclipse.dltk.internal.core.util.Util;
 
+/**
+ * @deprecated
+ */
 public class DLTKProblemReporter implements IProblemReporter {
 
 	private IResource resource;

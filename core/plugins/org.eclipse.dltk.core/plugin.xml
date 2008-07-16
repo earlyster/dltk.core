@@ -62,6 +62,15 @@
 	<attribute name="arguments"/>
 </extension>
 
+<!-- =================================================================================== -->
+<!-- Extension: Task                                                                     -->
+<!-- =================================================================================== -->
+<extension id="task" point="org.eclipse.core.resources.markers" name="%dltkTaskName">
+	<super type="org.eclipse.core.resources.taskmarker"/>
+	<super type="org.eclipse.core.resources.textmarker"/>
+	<persistent value="true"/>
+</extension>
+
 <extension 
 	point="org.eclipse.core.resources.builders" 
 	id="scriptbuilder"
