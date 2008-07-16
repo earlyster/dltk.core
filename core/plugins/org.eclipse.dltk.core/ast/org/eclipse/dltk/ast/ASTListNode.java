@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.dltk.utils.CorePrinter;
+
 public class ASTListNode extends ASTNode {
 
 	private final List nodes;
@@ -44,8 +46,8 @@ public class ASTListNode extends ASTNode {
 
 	/**
 	 * 
-	 * @deprecated use getChilds(), this method are present only for compatiblity
-	 *             with old code
+	 * @deprecated use getChilds(), this method are present only for
+	 *             compatiblity with old code
 	 */
 	public List getExpressions() {
 		return nodes;
@@ -53,8 +55,8 @@ public class ASTListNode extends ASTNode {
 
 	/**
 	 * 
-	 * @deprecated use getChilds(), this method are present only for compatiblity
-	 *             with old code
+	 * @deprecated use getChilds(), this method are present only for
+	 *             compatiblity with old code
 	 */
 	public List getStatements() {
 		return nodes;
@@ -79,6 +81,17 @@ public class ASTListNode extends ASTNode {
 				}
 			}
 			visitor.endvisit(this);
+		}
+	}
+
+	public void printNode(CorePrinter output) {
+		if (this.nodes != null) {
+			output.print("[");
+			for (Iterator iter = nodes.iterator(); iter.hasNext();) {
+				ASTNode s = (ASTNode) iter.next();
+				s.printNode(output);
+			}
+			output.print("");
 		}
 	}
 
