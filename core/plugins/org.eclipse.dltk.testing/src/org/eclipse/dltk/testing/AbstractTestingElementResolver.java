@@ -68,8 +68,7 @@ public abstract class AbstractTestingElementResolver implements ITestingElementR
 
 	private ModuleDeclaration parseModule(ISourceModule module)
 			throws CoreException, ModelException {
-		return SourceParserUtil.getModuleDeclaration(module, null);
+		return SourceParserUtil.getModuleDeclaration(module);
 	}
-	
 
 }
