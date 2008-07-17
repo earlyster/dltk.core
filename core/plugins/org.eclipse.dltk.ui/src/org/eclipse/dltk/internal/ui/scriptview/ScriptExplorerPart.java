@@ -254,8 +254,9 @@ public class ScriptExplorerPart extends ViewPart implements
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jface.viewers.AbstractTreeViewer#internalRefresh(java.lang.Object,
-		 *      boolean)
+		 * @see
+		 * org.eclipse.jface.viewers.AbstractTreeViewer#internalRefresh(java
+		 * .lang.Object, boolean)
 		 */
 		protected void internalRefresh(Object element, boolean updateLabels) {
 			try {
@@ -608,7 +609,9 @@ public class ScriptExplorerPart extends ViewPart implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets
+	 * .Composite)
 	 */
 	public void createPartControl(Composite parent) {
 
@@ -1016,7 +1019,9 @@ public class ScriptExplorerPart extends ViewPart implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.ui.part.ISetSelectionTarget#selectReveal(org.eclipse.jface.viewers.ISelection)
+	 * @see
+	 * org.eclipse.ui.part.ISetSelectionTarget#selectReveal(org.eclipse.jface
+	 * .viewers.ISelection)
 	 */
 	public void selectReveal(final ISelection selection) {
 		Control ctrl = getTreeViewer().getControl();
@@ -1462,7 +1467,8 @@ public class ScriptExplorerPart extends ViewPart implements
 					.println("Add members order preference cach support here..."); //$NON-NLS-1$
 		}
 		// } else if
-		// (MembersOrderPreferenceCache.isMemberOrderProperty(event.getProperty()))
+		//(MembersOrderPreferenceCache.isMemberOrderProperty(event.getProperty()
+		// ))
 		// {
 		// refreshViewer= true;
 		// }
@@ -1497,7 +1503,8 @@ public class ScriptExplorerPart extends ViewPart implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.ui.part.IShowInTarget#show(org.eclipse.ui.part.ShowInContext)
+	 * @see
+	 * org.eclipse.ui.part.IShowInTarget#show(org.eclipse.ui.part.ShowInContext)
 	 */
 	public boolean show(ShowInContext context) {
 
@@ -1764,11 +1771,12 @@ public class ScriptExplorerPart extends ViewPart implements
 	private void createWorkingSetModel() {
 		SafeRunner.run(new ISafeRunnable() {
 			public void run() throws Exception {
-				fWorkingSetModel = new WorkingSetModel(fMemento);
+				fWorkingSetModel = (fMemento != null) ? new WorkingSetModel(
+						fMemento) : new WorkingSetModel();
 			}
 
 			public void handleException(Throwable exception) {
-				fWorkingSetModel = new WorkingSetModel(null);
+				fWorkingSetModel = new WorkingSetModel();
 			}
 		});
 	}
