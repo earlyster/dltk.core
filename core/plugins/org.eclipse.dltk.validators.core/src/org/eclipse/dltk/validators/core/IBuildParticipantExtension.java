@@ -11,9 +11,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.core;
 
+import org.eclipse.dltk.core.builder.IScriptBuilder;
+
 public interface IBuildParticipantExtension {
 
-	void beginBuild(int kind);
+	public static final int FULL_BUILD = IScriptBuilder.FULL_BUILD;
+	public static final int INCREMENTAL_BUILD = IScriptBuilder.INCREMENTAL_BUILD;
+
+	public static final int STRUCTURE_BUILD = 10;
+
+	void beginBuild(int buildType);
 
 	void endBuild();
 
