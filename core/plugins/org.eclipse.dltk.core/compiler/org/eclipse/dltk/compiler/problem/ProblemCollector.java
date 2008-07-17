@@ -69,12 +69,12 @@ public class ProblemCollector extends AbstractProblemReporter implements
 		 * @param charStart
 		 */
 		public TaskInfo(String message, int lineNumber, int priority,
-				int charEnd, int charStart) {
+				int charStart, int charEnd) {
+			this.message = message;
+			this.lineNumber = lineNumber;
+			this.priority = priority;
 			this.charEnd = charEnd;
 			this.charStart = charStart;
-			this.lineNumber = lineNumber;
-			this.message = message;
-			this.priority = priority;
 		}
 
 		public int getCategoryID() {
@@ -135,6 +135,23 @@ public class ProblemCollector extends AbstractProblemReporter implements
 
 		public void setSourceStart(int sourceStart) {
 			// unsupported
+		}
+
+		public String toString() {
+			final StringBuffer sb = new StringBuffer();
+			sb.append("Task"); //$NON-NLS-1$
+			sb.append(' ');
+			sb.append(lineNumber);
+			sb.append('[');
+			sb.append(charStart);
+			sb.append(".."); //$NON-NLS-1$
+			sb.append(charEnd);
+			sb.append(']');
+			sb.append(':');
+			if (this.message != null) {
+				sb.append(this.message);
+			}
+			return sb.toString();
 		}
 
 	}
