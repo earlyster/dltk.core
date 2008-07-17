@@ -9,12 +9,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 
 public interface IProblemReporter extends IAdaptable {
 
-	void reportProblem(IProblem problem) throws CoreException;
+	void reportProblem(IProblem problem);
 
 	/**
 	 * @deprecated

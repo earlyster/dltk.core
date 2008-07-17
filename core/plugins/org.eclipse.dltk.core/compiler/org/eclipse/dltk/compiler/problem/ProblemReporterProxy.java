@@ -11,9 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.problem;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
-
 /**
  * The {@link IProblemReporter} implementation which forwards all methods call
  * to the instance passed in the constructor.
@@ -39,7 +36,7 @@ public class ProblemReporterProxy implements IProblemReporter {
 		return original != null && original.isMarkersCleaned();
 	}
 
-	public void reportProblem(IProblem problem) throws CoreException {
+	public void reportProblem(IProblem problem) {
 		if (original != null) {
 			original.reportProblem(problem);
 		}

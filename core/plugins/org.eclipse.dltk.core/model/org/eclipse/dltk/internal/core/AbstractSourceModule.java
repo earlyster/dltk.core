@@ -441,7 +441,7 @@ public abstract class AbstractSourceModule extends Openable implements
 			this.problemRequestor = problemRequestor;
 		}
 
-		public void reportProblem(IProblem problem) throws CoreException {
+		public void reportProblem(IProblem problem) {
 			problems.add(problem);
 		}
 

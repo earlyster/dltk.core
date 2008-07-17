@@ -27,29 +27,35 @@ public class DLTKProblemReporter implements IProblemReporter {
 	private IProblemFactory factory;
 	private boolean cleaned = false;
 
-	public void reportProblem(IProblem problem) throws CoreException {
-		int severity = IMarker.SEVERITY_INFO;
+	public void reportProblem(IProblem problem) {
+		try {
+			int severity = IMarker.SEVERITY_INFO;
 
-		if (problem.isError()) {
-			severity = IMarker.SEVERITY_ERROR;
-		} else if (problem.isWarning()) {
-			severity = IMarker.SEVERITY_WARNING;
-		}
-		IMarker m = resource.createMarker(DefaultProblem.MARKER_TYPE_PROBLEM);
+			if (problem.isError()) {
+				severity = IMarker.SEVERITY_ERROR;
+			} else if (problem.isWarning()) {
+				severity = IMarker.SEVERITY_WARNING;
+			}
+			IMarker m = resource
+					.createMarker(DefaultProblem.MARKER_TYPE_PROBLEM);
 
-		m.setAttribute(IMarker.LINE_NUMBER, problem.getSourceLineNumber() + 1);
-		m.setAttribute(IMarker.MESSAGE, problem.getMessage());
-		m.setAttribute(IMarker.SEVERITY, severity);
-		m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
-		m.setAttribute(IMarker.CHAR_START, problem.getSourceStart());
-		m.setAttribute(IMarker.CHAR_END, problem.getSourceEnd());
-		if (problem.getID() != 0) {
-			m.setAttribute(IScriptModelMarker.ID, problem.getID());
-		}
-		final String[] arguments = problem.getArguments();
-		if (arguments != null && arguments.length != 0) {
-			m.setAttribute(IScriptModelMarker.ARGUMENTS, Util
-					.getProblemArgumentsForMarker(arguments));
+			m.setAttribute(IMarker.LINE_NUMBER,
+					problem.getSourceLineNumber() + 1);
+			m.setAttribute(IMarker.MESSAGE, problem.getMessage());
+			m.setAttribute(IMarker.SEVERITY, severity);
+			m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_NORMAL);
+			m.setAttribute(IMarker.CHAR_START, problem.getSourceStart());
+			m.setAttribute(IMarker.CHAR_END, problem.getSourceEnd());
+			if (problem.getID() != 0) {
+				m.setAttribute(IScriptModelMarker.ID, problem.getID());
+			}
+			final String[] arguments = problem.getArguments();
+			if (arguments != null && arguments.length != 0) {
+				m.setAttribute(IScriptModelMarker.ARGUMENTS, Util
+						.getProblemArgumentsForMarker(arguments));
+			}
+		} catch (CoreException e) {
+			DLTKCore.error("reportProblem", e); //$NON-NLS-1$
 		}
 	}
 
@@ -70,17 +76,6 @@ public class DLTKProblemReporter implements IProblemReporter {
 
 		this.resource = resource;
 		this.factory = factory;
-	}
-
-	// dummy method
-	public void reportTestProblem() {
-		IProblem problem = new DefaultProblem("originatingFileName", "message", //$NON-NLS-1$ //$NON-NLS-2$
-				0, null, IMarker.SEVERITY_INFO, 0, 1, 0, 0);
-		try {
-			reportProblem(problem);
-		} catch (CoreException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public void clearMarkers() {
