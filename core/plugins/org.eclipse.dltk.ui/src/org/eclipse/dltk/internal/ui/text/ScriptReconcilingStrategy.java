@@ -30,7 +30,6 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-
 public class ScriptReconcilingStrategy implements IReconcilingStrategy,
 		IReconcilingStrategyExtension {
 	private ITextEditor fEditor;
@@ -40,36 +39,37 @@ public class ScriptReconcilingStrategy implements IReconcilingStrategy,
 	private IDocumentProvider fDocumentProvider;
 
 	private IProgressMonitor fProgressMonitor;
-	
+
 	private IScriptReconcilingListener fScriptReconcilingListener;
 	private boolean fIsScriptReconcilingListener;
-	
-	private boolean fNotify= true;
-	
+
+	private boolean fNotify = true;
+
 	public ScriptReconcilingStrategy(ITextEditor editor) {
 		fEditor = editor;
 		fManager = DLTKUIPlugin.getDefault().getWorkingCopyManager();
 		fDocumentProvider = DLTKUIPlugin.getDefault()
 				.getSourceModuleDocumentProvider();
-		
-		fIsScriptReconcilingListener= fEditor instanceof IScriptReconcilingListener;
-		if (fIsScriptReconcilingListener){
-			fScriptReconcilingListener=(IScriptReconcilingListener) fEditor;	
+
+		fIsScriptReconcilingListener = fEditor instanceof IScriptReconcilingListener;
+		if (fIsScriptReconcilingListener) {
+			fScriptReconcilingListener = (IScriptReconcilingListener) fEditor;
 		}
 	}
-	
+
 	private IProblemRequestorExtension getProblemRequestorExtension() {
-		IAnnotationModel model= fDocumentProvider.getAnnotationModel(fEditor.getEditorInput());
+		IAnnotationModel model = fDocumentProvider.getAnnotationModel(fEditor
+				.getEditorInput());
 		if (model instanceof IProblemRequestorExtension)
 			return (IProblemRequestorExtension) model;
 		return null;
 	}
-	
-	protected void reconcile(final boolean initialReconcile) {	
+
+	protected void reconcile(final boolean initialReconcile) {
 		if (fEditor == null) {
 			return;
 		}
-		
+
 		final ISourceModule unit = fManager.getWorkingCopy(fEditor
 				.getEditorInput());
 
@@ -79,54 +79,55 @@ public class ScriptReconcilingStrategy implements IReconcilingStrategy,
 
 		try {
 			SafeRunner.run(new ISafeRunnable() {
-			public void run() {
-				try {					
-					/* fix for missing cancel flag communication */
-					IProblemRequestorExtension extension= getProblemRequestorExtension();
-					if (extension != null) {
-						extension.setProgressMonitor(fProgressMonitor);
-						extension.setIsActive(true);
-					}
-
+				public void run() {
 					try {
-						// reconcile
-						synchronized (unit) {
-							unit.reconcile(true, null, fProgressMonitor);
-						}
-					} catch (OperationCanceledException ex) {
-						Assert.isTrue(fProgressMonitor == null
-								|| fProgressMonitor.isCanceled());
-					} finally {
 						/* fix for missing cancel flag communication */
+						IProblemRequestorExtension extension = getProblemRequestorExtension();
 						if (extension != null) {
-							extension.setProgressMonitor(null);
-							extension.setIsActive(false);
+							extension.setProgressMonitor(fProgressMonitor);
+							extension.setIsActive(true);
 						}
-					}
-				} catch (ModelException ex) {
-					handleException(ex);
-				}
-			}
 
-			public void handleException(Throwable ex) {
-				IStatus status = new Status(IStatus.ERROR,
-						DLTKUIPlugin.PLUGIN_ID, IStatus.OK,
-						"Error in DLTK Core during reconcile", ex); //$NON-NLS-1$
-				DLTKUIPlugin.getDefault().getLog().log(status);
-			}
-		});
-		}
-		finally {
-			// Always notify listeners, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=55969 for the final solution
+						try {
+							// reconcile
+							synchronized (unit) {
+								unit.reconcile(true, null, fProgressMonitor);
+							}
+						} catch (OperationCanceledException ex) {
+							Assert.isTrue(fProgressMonitor == null
+									|| fProgressMonitor.isCanceled());
+						} finally {
+							/* fix for missing cancel flag communication */
+							if (extension != null) {
+								extension.setProgressMonitor(null);
+								extension.setIsActive(false);
+							}
+						}
+					} catch (ModelException ex) {
+						handleException(ex);
+					}
+				}
+
+				public void handleException(Throwable ex) {
+					IStatus status = new Status(IStatus.ERROR,
+							DLTKUIPlugin.PLUGIN_ID, IStatus.OK,
+							"Error in DLTK Core during reconcile", ex); //$NON-NLS-1$
+					DLTKUIPlugin.getDefault().getLog().log(status);
+				}
+			});
+		} finally {
+			// Always notify listeners, see
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=55969 for the final
+			// solution
 			try {
 				if (fIsScriptReconcilingListener) {
-					IProgressMonitor pm= fProgressMonitor;
+					IProgressMonitor pm = fProgressMonitor;
 					if (pm == null)
-						pm= new NullProgressMonitor();
+						pm = new NullProgressMonitor();
 					fScriptReconcilingListener.reconciled(unit, !fNotify, pm);
 				}
 			} finally {
-				fNotify= true;
+				fNotify = true;
 			}
 		}
 	}
@@ -138,7 +139,7 @@ public class ScriptReconcilingStrategy implements IReconcilingStrategy,
 	}
 
 	public void setDocument(IDocument document) {
-		
+
 	}
 
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
@@ -156,7 +157,8 @@ public class ScriptReconcilingStrategy implements IReconcilingStrategy,
 	public void initialReconcile() {
 		reconcile(true);
 	}
+
 	public void notifyListeners(boolean notify) {
-		fNotify= notify;
+		fNotify = notify;
 	}
 }
