@@ -10,16 +10,15 @@
 package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProblemRequestor;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
@@ -30,8 +29,6 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 	boolean forceProblemDetection;
 
 	WorkingCopyOwner workingCopyOwner;
-
-	public HashMap problems;
 
 	public ModelElementDeltaBuilder deltaBuilder;
 
@@ -80,8 +77,6 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 			IProblemRequestor problemRequestor) throws ModelException {
 		if (!workingCopy.isConsistent()) {
 			// make working copy consistent
-			if (this.problems == null)
-				this.problems = new HashMap();
 			workingCopy.makeConsistent(this.progressMonitor);
 			this.deltaBuilder.buildDeltas();
 			// Mixin source index operation required.
