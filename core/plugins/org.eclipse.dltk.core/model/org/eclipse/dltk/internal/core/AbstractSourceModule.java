@@ -471,11 +471,10 @@ public abstract class AbstractSourceModule extends Openable implements
 			throws ModelException {
 		try {
 			// check if this source module can be opened
-			if (!isWorkingCopy()) // no check is done on root kind or
-			{
-				// exclusion
-				// pattern for working copies
-				IStatus status = validateSourceModule(underlyingResource);
+			if (!isWorkingCopy()) {
+				// no check is done on root kind or
+				// exclusion pattern for working copies
+				final IStatus status = validateSourceModule(underlyingResource);
 				if (!status.isOK()) {
 					throw newModelException(status);
 				}
@@ -486,28 +485,28 @@ public abstract class AbstractSourceModule extends Openable implements
 				throw newNotPresentException();
 			}
 
-			SourceModuleElementInfo moduleInfo = (SourceModuleElementInfo) info;
+			final SourceModuleElementInfo moduleInfo = (SourceModuleElementInfo) info;
 
 			// ensure buffer is opened
 			if (hasBuffer()) {
-				IBuffer buffer = getBufferManager().getBuffer(this);
+				final IBuffer buffer = getBufferManager().getBuffer(this);
 				if (buffer == null) {
 					openBuffer(pm, moduleInfo);
 				}
 			}
 
 			// generate structure and compute syntax problems if needed
-			SourceModuleStructureRequestor requestor = new SourceModuleStructureRequestor(
+			final SourceModuleStructureRequestor requestor = new SourceModuleStructureRequestor(
 					this, moduleInfo, newElements);
 
 			// System.out.println("==> Parsing: " + resource.getName());
-			String natureId = getNatureId();
+			final String natureId = getNatureId();
 			if (natureId == null) {
 				throw new ModelException(new ModelStatus(
 						ModelStatus.INVALID_NAME));
 			}
 
-			ISourceElementParser parser = getSourceElementParser(natureId);
+			final ISourceElementParser parser = getSourceElementParser(natureId);
 			if (!isReadOnly()) {
 				if (parser instanceof ISourceElementParserExtension) {
 					((ISourceElementParserExtension) parser)
