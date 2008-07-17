@@ -3,7 +3,6 @@ package org.eclipse.dltk.internal.core;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -12,8 +11,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.dltk.compiler.problem.AbstractProblemReporter;
 import org.eclipse.dltk.compiler.problem.IProblem;
+import org.eclipse.dltk.compiler.problem.ProblemCollector;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -428,10 +427,8 @@ public abstract class AbstractSourceModule extends Openable implements
 		return null;
 	}
 
-	private static class AccumulatingProblemReporter extends
-			AbstractProblemReporter {
+	private static class AccumulatingProblemReporter extends ProblemCollector {
 
-		private final List problems = new ArrayList();
 		private final IProblemRequestor problemRequestor;
 
 		/**
@@ -439,10 +436,6 @@ public abstract class AbstractSourceModule extends Openable implements
 		 */
 		public AccumulatingProblemReporter(IProblemRequestor problemRequestor) {
 			this.problemRequestor = problemRequestor;
-		}
-
-		public void reportProblem(IProblem problem) {
-			problems.add(problem);
 		}
 
 		public void reportToRequestor() {
