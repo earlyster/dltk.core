@@ -86,9 +86,6 @@ public class SourceParserUtil {
 			}
 		}
 		if (moduleDeclaration == null) {
-			if (reporter != null) {
-				reporter.clearMarkers();
-			}
 			ISourceParser sourceParser = null;
 			sourceParser = DLTKLanguageManager.getSourceParser(toolkit
 					.getNatureId());
@@ -138,9 +135,6 @@ public class SourceParserUtil {
 		ModuleDeclaration moduleDeclaration = SourceParserUtil
 				.getModuleFromCache(mifo, flags);
 		if (moduleDeclaration == null) {
-			if (reporter != null) {
-				reporter.clearMarkers();
-			}
 			moduleDeclaration = sourceParser.parse(filename, content, reporter);
 			SourceParserUtil.putModuleToCache(mifo, moduleDeclaration, flags);
 		}

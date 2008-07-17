@@ -26,16 +26,6 @@ public class ProblemReporterProxy implements IProblemReporter {
 		this.original = original;
 	}
 
-	public void clearMarkers() {
-		if (original != null) {
-			original.clearMarkers();
-		}
-	}
-
-	public boolean isMarkersCleaned() {
-		return original != null && original.isMarkersCleaned();
-	}
-
 	public void reportProblem(IProblem problem) {
 		if (original != null) {
 			original.reportProblem(problem);

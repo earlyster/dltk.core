@@ -15,14 +15,4 @@ public interface IProblemReporter extends IAdaptable {
 
 	void reportProblem(IProblem problem);
 
-	/**
-	 * @deprecated
-	 */
-	void clearMarkers();
-
-	/**
-	 * @deprecated
-	 * @return
-	 */
-	boolean isMarkersCleaned();
 }

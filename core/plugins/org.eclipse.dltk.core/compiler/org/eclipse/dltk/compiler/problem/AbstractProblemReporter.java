@@ -17,14 +17,6 @@ package org.eclipse.dltk.compiler.problem;
  */
 public abstract class AbstractProblemReporter implements IProblemReporter {
 
-	public void clearMarkers() {
-		// empty
-	}
-
-	public boolean isMarkersCleaned() {
-		return false;
-	}
-
 	public Object getAdapter(Class adapter) {
 		return null;
 	}
