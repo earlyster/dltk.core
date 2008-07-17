@@ -4,6 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.core.messages"; //$NON-NLS-1$
+	public static String SourceParserUtil_errorRetrievingContent;
 	public static String SourceParserUtil_failedToCreateSourceParser;
 	static {
 		// initialize resource bundle

@@ -1,8 +1,5 @@
 package org.eclipse.dltk.core;
 
-import org.eclipse.core.runtime.ILog;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.ast.parser.ISourceParser;
 import org.eclipse.dltk.ast.parser.ISourceParserConstants;
@@ -102,11 +99,8 @@ public class SourceParserUtil {
 						action.run(module, sourceAsCharArray);
 					}
 				} catch (ModelException e) {
-					ILog log = DLTKCore.getDefault().getLog();
-					IStatus status = new Status(IStatus.ERROR,
-							DLTKCore.PLUGIN_ID,
-							"Error to get source module content", e);
-					log.log(status);
+					final String msg = Messages.SourceParserUtil_errorRetrievingContent;
+					DLTKCore.error(msg, e);
 				}
 				if (moduleDeclaration != null && mifo != null) {
 					mifo.put(AST, moduleDeclaration);
