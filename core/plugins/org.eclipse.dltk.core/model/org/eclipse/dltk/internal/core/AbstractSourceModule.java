@@ -36,6 +36,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ModelManager.PerWorkingCopyInfo;
+import org.eclipse.dltk.internal.core.builder.StructureBuilderManager;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -521,6 +522,16 @@ public abstract class AbstractSourceModule extends Openable implements
 
 			SourceParserUtil.parseSourceModule(this, parser);
 			if (problemReporter != null) {
+				if (!problemReporter.hasErrors()) {
+					final IStructureBuilder[] builders = StructureBuilderManager
+							.getBuilders(natureId);
+					if (builders != null) {
+						for (int i = 0; i < builders.length; ++i) {
+							builders[i].buildStructure(natureId, this,
+									requestor, problemReporter);
+						}
+					}
+				}
 				problemReporter.reportToRequestor();
 			}
 
