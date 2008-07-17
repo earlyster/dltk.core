@@ -11,27 +11,21 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.internal.core;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.dltk.compiler.problem.AbstractProblemReporter;
 import org.eclipse.dltk.compiler.problem.CategorizedProblem;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.compiler.problem.IProblem;
-import org.eclipse.dltk.compiler.problem.IProblemReporter;
-import org.eclipse.dltk.compiler.task.ITaskReporter;
+import org.eclipse.dltk.compiler.problem.ProblemCollector;
 import org.eclipse.dltk.core.IScriptModelMarker;
 import org.eclipse.dltk.internal.core.util.Util;
 
-public class BuildProblemReporter extends AbstractProblemReporter implements
-		IProblemReporter, ITaskReporter {
+public class BuildProblemReporter extends ProblemCollector {
 
 	private final IResource resource;
-	private final List problems = new ArrayList();
 	private boolean oldMarkersDeleted = false;
 
 	/**
@@ -39,17 +33,6 @@ public class BuildProblemReporter extends AbstractProblemReporter implements
 	 */
 	public BuildProblemReporter(IResource resource) {
 		this.resource = resource;
-	}
-
-	public void reportProblem(IProblem problem) {
-		problems.add(problem);
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean isEmpty() {
-		return problems.isEmpty();
 	}
 
 	public void flush() {
@@ -104,28 +87,6 @@ public class BuildProblemReporter extends AbstractProblemReporter implements
 		} catch (CoreException e) {
 			ValidatorsCore.log(e.getStatus());
 		}
-	}
-
-	/**
-	 * @return
-	 */
-	public boolean hasErrors() {
-		// TODO check severity
-		return !problems.isEmpty();
-	}
-
-	public void reportTask(String message, int lineNumber, int priority,
-			int charStart, int charEnd) {
-		reportProblem(new TaskInfo(message, lineNumber, priority, charStart,
-				charEnd));
-	}
-
-	public Object getAdapter(Class adapter) {
-		if (ITaskReporter.class.equals(adapter)
-				|| IProblemReporter.class.equals(adapter)) {
-			return this;
-		}
-		return super.getAdapter(adapter);
 	}
 
 }
