@@ -14,6 +14,7 @@ package org.eclipse.dltk.compiler.task;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.core.DLTKCore;
 
 /**
@@ -22,6 +23,8 @@ import org.eclipse.dltk.core.DLTKCore;
  * @deprecated
  */
 public class DLTKTaskReporter implements ITaskReporter {
+
+	private static final String MARKER_TYPE = DefaultProblem.MARKER_TYPE_TASK;
 
 	private final IResource resource;
 	private boolean tasksCleared;
@@ -34,7 +37,7 @@ public class DLTKTaskReporter implements ITaskReporter {
 	public void clearTasks() {
 		if (!tasksCleared) {
 			try {
-				resource.deleteMarkers(IMarker.TASK, true,
+				resource.deleteMarkers(MARKER_TYPE, true,
 						IResource.DEPTH_INFINITE);
 			} catch (CoreException e) {
 				System.err.println(e);
@@ -46,7 +49,7 @@ public class DLTKTaskReporter implements ITaskReporter {
 	public void reportTask(String message, int lineNumber, int priority,
 			int charStart, int charEnd) {
 		try {
-			IMarker m = resource.createMarker(IMarker.TASK);
+			IMarker m = resource.createMarker(MARKER_TYPE);
 			m.setAttribute(IMarker.LINE_NUMBER, lineNumber + 1);
 			m.setAttribute(IMarker.MESSAGE, message);
 			m.setAttribute(IMarker.PRIORITY, priority);
