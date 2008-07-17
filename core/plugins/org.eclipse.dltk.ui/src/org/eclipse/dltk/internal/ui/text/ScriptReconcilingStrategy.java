@@ -12,11 +12,9 @@ package org.eclipse.dltk.internal.ui.text;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SafeRunner;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -109,10 +107,8 @@ public class ScriptReconcilingStrategy implements IReconcilingStrategy,
 				}
 
 				public void handleException(Throwable ex) {
-					IStatus status = new Status(IStatus.ERROR,
-							DLTKUIPlugin.PLUGIN_ID, IStatus.OK,
-							"Error in DLTK Core during reconcile", ex); //$NON-NLS-1$
-					DLTKUIPlugin.getDefault().getLog().log(status);
+					DLTKUIPlugin.logErrorMessage(
+							"Error in DLTK Core during reconcile", ex);//$NON-NLS-1$
 				}
 			});
 		} finally {
