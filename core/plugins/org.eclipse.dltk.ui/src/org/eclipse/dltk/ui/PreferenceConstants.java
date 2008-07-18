@@ -380,6 +380,9 @@ public class PreferenceConstants {
 						192, 192, 192));
 		store.setDefault(PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS,
 				true);
+		store
+				.setDefault(PreferenceConstants.EDITOR_CORRECTION_INDICATION,
+						true);
 
 		// PreferenceConverter.setDefault(store,
 		// PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR, new

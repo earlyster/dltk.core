@@ -60,7 +60,11 @@ import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.BufferManager;
 import org.eclipse.dltk.internal.ui.text.IProblemRequestorExtension;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.ui.DLTKPluginImages;
+import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.IDLTKCorrectionProcessor;
+import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.editor.IScriptAnnotation;
 import org.eclipse.dltk.ui.editor.ScriptMarkerAnnotation;
@@ -188,15 +192,18 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				return IAnnotationAccessExtension.DEFAULT_LAYER + 1;
 		}
 
+		private static Image fgQuickFixImage;
+		private static Image fgQuickFixErrorImage;
+
 		private static Image fgTaskImage;
 		private static Image fgInfoImage;
 		private static Image fgWarningImage;
 		private static Image fgErrorImage;
 		private static boolean fgImagesInitialized = false;
 
-		private ISourceModule fSourceModule;
+		private final ISourceModule fSourceModule;
 		private List fOverlaids;
-		private IProblem fProblem;
+		private final IProblem fProblem;
 		private Image fImage;
 		private boolean fImageInitialized = false;
 		private int fLayer = IAnnotationAccessExtension.DEFAULT_LAYER;
@@ -241,19 +248,30 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		private void initializeImage() {
 			if (!fImageInitialized) {
 				initializeImages();
-				// TODO: Add quick fix images in ProblemAnnotation
-				final String type = getType();
-				if (ScriptMarkerAnnotation.TASK_ANNOTATION_TYPE.equals(type))
-					fImage = fgTaskImage;
-				else if (ScriptMarkerAnnotation.INFO_ANNOTATION_TYPE
-						.equals(type))
-					fImage = fgInfoImage;
-				else if (ScriptMarkerAnnotation.WARNING_ANNOTATION_TYPE
-						.equals(type))
-					fImage = fgWarningImage;
-				else if (ScriptMarkerAnnotation.ERROR_ANNOTATION_TYPE
-						.equals(type))
-					fImage = fgErrorImage;
+				if (!isQuickFixableStateSet()) {
+					setQuickFixable(isProblem() && hasCorrections());
+				}
+				if (isQuickFixable()) {
+					if (ScriptMarkerAnnotation.ERROR_ANNOTATION_TYPE
+							.equals(getType()))
+						fImage = fgQuickFixErrorImage;
+					else
+						fImage = fgQuickFixImage;
+				} else {
+					final String type = getType();
+					if (ScriptMarkerAnnotation.TASK_ANNOTATION_TYPE
+							.equals(type))
+						fImage = fgTaskImage;
+					else if (ScriptMarkerAnnotation.INFO_ANNOTATION_TYPE
+							.equals(type))
+						fImage = fgInfoImage;
+					else if (ScriptMarkerAnnotation.WARNING_ANNOTATION_TYPE
+							.equals(type))
+						fImage = fgWarningImage;
+					else if (ScriptMarkerAnnotation.ERROR_ANNOTATION_TYPE
+							.equals(type))
+						fImage = fgErrorImage;
+				}
 				fImageInitialized = true;
 			}
 		}
@@ -261,6 +279,11 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		private static void initializeImages() {
 			if (fgImagesInitialized)
 				return;
+
+			fgQuickFixImage = DLTKPluginImages
+					.get(DLTKPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+			fgQuickFixErrorImage = DLTKPluginImages
+					.get(DLTKPluginImages.IMG_OBJS_FIXABLE_ERROR);
 
 			final ISharedImages sharedImages = PlatformUI.getWorkbench()
 					.getSharedImages();
@@ -275,10 +298,23 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			fgImagesInitialized = true;
 		}
 
-		// private boolean indicateQuixFixableProblems() {
-		// return DLTKUIPlugin.getDefault().getPreferenceStore().getBoolean(
-		// PreferenceConstants.EDITOR_CORRECTION_INDICATION);
-		// }
+		private boolean hasCorrections() {
+			final IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager
+					.getLanguageToolkit(fSourceModule);
+			if (uiToolkit == null) {
+				return false;
+			}
+			if (!uiToolkit.getPreferenceStore().getBoolean(
+					PreferenceConstants.EDITOR_CORRECTION_INDICATION)) {
+				return false;
+			}
+			final IDLTKCorrectionProcessor correctionProcessor = DLTKUIPlugin
+					.getCorrectionProcessor(uiToolkit);
+			if (correctionProcessor == null) {
+				return false;
+			}
+			return correctionProcessor.hasCorrections(this);
+		}
 
 		/*
 		 * @see Annotation#paint

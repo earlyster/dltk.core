@@ -676,4 +676,20 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		return modules[0];
 	}
 
+	/**
+	 * Returns {@link IDLTKCorrectionProcessor} for the specified
+	 * {@link IDLTKUILanguageToolkit} or <code>null</code>.
+	 * 
+	 * @param uiToolkit
+	 * @return
+	 */
+	public static IDLTKCorrectionProcessor getCorrectionProcessor(
+			IDLTKUILanguageToolkit uiToolkit) {
+		if (uiToolkit instanceof IDLTKCorrectionProcessor) {
+			return (IDLTKCorrectionProcessor) uiToolkit;
+		} else {
+			return null;
+		}
+	}
+
 }
