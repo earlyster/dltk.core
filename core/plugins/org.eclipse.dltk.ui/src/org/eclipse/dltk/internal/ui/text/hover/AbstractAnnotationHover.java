@@ -31,6 +31,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 
 /**
@@ -40,8 +41,6 @@ import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 public abstract class AbstractAnnotationHover extends
 		AbstractScriptEditorTextHover {
 
-	private IPreferenceStore fStore = DLTKUIPlugin.getDefault()
-			.getPreferenceStore();
 	private DefaultMarkerAnnotationAccess fAnnotationAccess = new DefaultMarkerAnnotationAccess();
 	private boolean fAllAnnotations;
 
@@ -89,14 +88,15 @@ public abstract class AbstractAnnotationHover extends
 				Annotation a = (Annotation) e.next();
 
 				AnnotationPreference preference = getAnnotationPreference(a);
-				if (preference == null
-						|| !(preference.getTextPreferenceKey() != null
-								&& fStore.getBoolean(preference
-										.getTextPreferenceKey()) || (preference
-								.getHighlightPreferenceKey() != null && fStore
-								.getBoolean(preference
-										.getHighlightPreferenceKey()))))
+				if (preference == null) {
 					continue;
+				}
+				final IPreferenceStore store = getCombinedPreferenceStore();
+				if (!isActive(store, preference.getTextPreferenceKey())
+						&& !isActive(store, preference
+								.getHighlightPreferenceKey())) {
+					continue;
+				}
 
 				Position p = model.getPosition(a);
 
@@ -129,6 +129,20 @@ public abstract class AbstractAnnotationHover extends
 		}
 
 		return null;
+	}
+
+	private static boolean isActive(IPreferenceStore store, String preference) {
+		return preference != null && store.getBoolean(preference);
+	}
+
+	private IPreferenceStore combinedStore = null;
+
+	private IPreferenceStore getCombinedPreferenceStore() {
+		if (combinedStore == null) {
+			combinedStore = new ChainedPreferenceStore(new IPreferenceStore[] {
+					getPreferenceStore(), EditorsUI.getPreferenceStore() });
+		}
+		return combinedStore;
 	}
 
 	private IPath getEditorInputPath() {
@@ -185,7 +199,7 @@ public abstract class AbstractAnnotationHover extends
 		if (annotation.isMarkedDeleted()) {
 			return null;
 		}
-		
+
 		return EditorsUI.getAnnotationPreferenceLookup()
 				.getAnnotationPreference(annotation);
 	}
