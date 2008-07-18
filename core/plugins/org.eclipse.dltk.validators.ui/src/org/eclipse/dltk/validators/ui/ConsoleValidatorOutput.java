@@ -30,10 +30,12 @@ public class ConsoleValidatorOutput implements IValidatorOutput {
 	private final IOConsoleOutputStream stream;
 	private boolean error = false;
 
+	public static final String CONSOLE_TYPE = "org.eclipse.dltk.validators.ConsoleValidatorOutput"; //$NON-NLS-1$
+
 	public ConsoleValidatorOutput(String consoleName) {
 		final IConsoleManager consoleManager = ConsolePlugin.getDefault()
 				.getConsoleManager();
-		final IOConsole console = new IOConsole(consoleName, null);
+		final IOConsole console = new IOConsole(consoleName, CONSOLE_TYPE, null);
 		final IPatternMatchListener[] listeners = ValidatorConsoleTrackerManager
 				.getListeners();
 		for (int i = 0; i < listeners.length; i++) {

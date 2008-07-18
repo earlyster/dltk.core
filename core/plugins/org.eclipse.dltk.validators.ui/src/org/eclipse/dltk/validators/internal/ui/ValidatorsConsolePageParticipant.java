@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.internal.ui;
 
+import org.eclipse.dltk.validators.ui.ConsoleValidatorOutput;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.console.IConsole;
@@ -19,7 +20,7 @@ import org.eclipse.ui.part.IPageBookViewPage;
 
 public class ValidatorsConsolePageParticipant implements
 		IConsolePageParticipant {
-	public static final String DLTK_VALIDATORS_CONSOLE = Messages.ValidatorsConsolePageParticipant_dltkValidatorOutput;
+
 	public void activated() {
 	}
 
@@ -30,16 +31,13 @@ public class ValidatorsConsolePageParticipant implements
 	}
 
 	public void init(IPageBookViewPage page, IConsole console) {
-		if( console.getName().equals(DLTK_VALIDATORS_CONSOLE) && console instanceof IOConsole ) {					
+		if (console instanceof IOConsole
+				&& ConsoleValidatorOutput.CONSOLE_TYPE
+						.equals(console.getType())) {
 			IActionBars bars = page.getSite().getActionBars();
 			IToolBarManager toolbarManager = bars.getToolBarManager();
-			
-			CloseValidatorsConsoleAction closeConsoleAction = new CloseValidatorsConsoleAction(
-					(IOConsole) console,
-					Messages.ValidatorsConsolePageParticipant_close,
-					Messages.ValidatorsConsolePageParticipant_closeConsole);
-
-			toolbarManager.appendToGroup(IConsoleConstants.LAUNCH_GROUP, closeConsoleAction );
+			toolbarManager.appendToGroup(IConsoleConstants.LAUNCH_GROUP,
+					new CloseValidatorsConsoleAction(console));
 		}
 	}
 

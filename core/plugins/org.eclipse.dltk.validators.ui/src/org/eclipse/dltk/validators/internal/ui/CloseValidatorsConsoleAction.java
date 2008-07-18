@@ -13,26 +13,20 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.IOConsole;
-
 
 public class CloseValidatorsConsoleAction extends Action {
 
-	private IOConsole console;
+	private final IConsole console;
 
-	public CloseValidatorsConsoleAction(IOConsole console, String text,
-			String tooltip) {
+	public CloseValidatorsConsoleAction(IConsole console) {
 		this.console = console;
-
-		setText(text);
-		setToolTipText(tooltip);		
+		setText(Messages.ValidatorsConsolePageParticipant_close);
+		setToolTipText(Messages.ValidatorsConsolePageParticipant_closeConsole);
 	}
 
 	public void run() {
-		IConsoleManager consoleManager = ConsolePlugin.getDefault()
-		.getConsoleManager();
-		consoleManager.removeConsoles(new IConsole[]{this.console});
+		ConsolePlugin.getDefault().getConsoleManager().removeConsoles(
+				new IConsole[] { this.console });
 	}
 
 	public void update() {
@@ -41,6 +35,6 @@ public class CloseValidatorsConsoleAction extends Action {
 
 	public ImageDescriptor getImageDescriptor() {
 		return ValidatorsUI.getDefault().getImageDescriptor(
-				"icons/terminate.gif"); //$NON-NLS-1$
-	}	
+				"icons/remove_console.gif"); //$NON-NLS-1$
+	}
 }
