@@ -172,10 +172,10 @@ public class MethodSelectionDialog2 extends SelectionStatusDialog {
 					String text = ((ITextSelection) selection).getText();
 					if (text != null) {
 						text = text.trim();
-						if (text.length() > 0 /*
-																																																				 * TODO: Add validate source
-																																																				 * type call
-																																																				 */) {
+						if (text.length() > 0) {
+							/*
+							 * TODO: Add validate source type call
+							 */
 							fInitialFilter = text;
 							fSelectionMode = FULL_SELECTION;
 						}
