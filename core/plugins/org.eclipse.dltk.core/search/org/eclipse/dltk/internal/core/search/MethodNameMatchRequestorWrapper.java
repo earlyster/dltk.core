@@ -76,7 +76,7 @@ public class MethodNameMatchRequestorWrapper implements
 	 * org.eclipse.jdt.internal.compiler.env.AccessRestriction)
 	 */
 	public void acceptMethod(int modifiers, char[] packageName,
-			char[] simpleTypeName, String path, AccessRestriction access) {
+			char[] simpleMethodName, String path, AccessRestriction access) {
 		try {
 			IMethod method = null;
 			if (this.handleFactory != null) {
@@ -87,14 +87,14 @@ public class MethodNameMatchRequestorWrapper implements
 				switch (openable.getElementType()) {
 				case IModelElement.SOURCE_MODULE:
 					ISourceModule cu = (ISourceModule) openable;
-					method = cu.getMethod(new String(simpleTypeName));
+					method = cu.getMethod(new String(simpleMethodName));
 					break;
 				}
 			} else {
 				int separatorIndex = path
 						.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR);
 				method = separatorIndex == -1 ? createMethodFromPath(path,
-						new String(simpleTypeName)) : null/*
+						new String(simpleMethodName)) : null/*
 														 * createTypeFrom( path
 														 * , separatorIndex )
 														 */;
@@ -113,7 +113,7 @@ public class MethodNameMatchRequestorWrapper implements
 	}
 
 	private IMethod createMethodFromPath(String resourcePath,
-			String simpleTypeName) throws ModelException {
+			String simpleMethodName) throws ModelException {
 		// path to a file in a directory
 		// Optimization: cache package fragment root handle and package handles
 		int rootPathLength = -1;
@@ -159,11 +159,16 @@ public class MethodNameMatchRequestorWrapper implements
 		if (unit == null) {
 			return null;
 		}
+		return findMethod(unit, simpleMethodName);
+	}
+
+	private IMethod findMethod(ISourceModule unit, String simpleMethodName)
+			throws ModelException {
 		final IModelElement[] elements = unit.getChildren();
 		for (int i = 0; i < elements.length; i++) {
 			if (elements[i].getElementType() == ISourceModule.METHOD) {
 				IMethod method = (IMethod) elements[i];
-				if (method.getElementName().equals(simpleTypeName)) {
+				if (method.getElementName().equals(simpleMethodName)) {
 					return method;
 				}
 			}
