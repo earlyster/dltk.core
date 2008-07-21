@@ -5,12 +5,14 @@ import org.eclipse.dltk.ast.parser.ISourceParser;
 import org.eclipse.dltk.ast.parser.ISourceParserConstants;
 import org.eclipse.dltk.ast.parser.ISourceParserExtension;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
+import org.eclipse.dltk.compiler.problem.ProblemCollector;
 import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 public class SourceParserUtil {
 	private static final Object AST = "ast"; //$NON-NLS-1$
 	private static final Object FLAGS = "flags"; //$NON-NLS-1$
+	private static final Object ERRORS = "errors"; //$NON-NLS-1$
 
 	public static interface IContentAction {
 		void run(ISourceModule module, char[] content);
@@ -74,12 +76,19 @@ public class SourceParserUtil {
 			return null;
 		}
 		ModuleDeclaration moduleDeclaration = null;
-		Integer flag;
 		if (mifo != null) {
 			moduleDeclaration = (ModuleDeclaration) mifo.get(AST);
-			flag = (Integer) mifo.get(FLAGS);
-			if (flag != null && flag.intValue() != flags) {
-				moduleDeclaration = null;
+			if (moduleDeclaration != null) {
+				final Integer flag = (Integer) mifo.get(FLAGS);
+				if (flag != null && flag.intValue() != flags) {
+					moduleDeclaration = null;
+				} else if (reporter != null) {
+					final ProblemCollector collector = (ProblemCollector) mifo
+							.get(ERRORS);
+					if (collector != null) {
+						collector.copyTo(reporter);
+					}
+				}
 			}
 		}
 		if (moduleDeclaration == null) {
@@ -90,11 +99,16 @@ public class SourceParserUtil {
 				if (sourceParser instanceof ISourceParserExtension) {
 					((ISourceParserExtension) sourceParser).setFlags(flags);
 				}
+				final ProblemCollector collector = mifo != null ? new ProblemCollector()
+						: null;
 				try {
 					char[] sourceAsCharArray = module.getSourceAsCharArray();
 					moduleDeclaration = sourceParser.parse(module.getPath()
 							.toString().toCharArray(), sourceAsCharArray,
-							reporter);
+							collector != null ? collector : reporter);
+					if (collector != null && reporter != null) {
+						collector.copyTo(reporter);
+					}
 					if (action != null) {
 						action.run(module, sourceAsCharArray);
 					}
@@ -105,6 +119,11 @@ public class SourceParserUtil {
 				if (moduleDeclaration != null && mifo != null) {
 					mifo.put(AST, moduleDeclaration);
 					mifo.put(FLAGS, new Integer(flags));
+					if (collector != null && !collector.isEmpty()) {
+						mifo.put(ERRORS, collector);
+					} else {
+						mifo.remove(ERRORS);
+					}
 				}
 			}
 		}
@@ -126,11 +145,22 @@ public class SourceParserUtil {
 		if (sourceParser instanceof ISourceParserExtension) {
 			((ISourceParserExtension) sourceParser).setFlags(flags);
 		}
-		ModuleDeclaration moduleDeclaration = SourceParserUtil
-				.getModuleFromCache(mifo, flags);
+		ModuleDeclaration moduleDeclaration = getModuleFromCache(mifo, flags);
 		if (moduleDeclaration == null) {
-			moduleDeclaration = sourceParser.parse(filename, content, reporter);
-			SourceParserUtil.putModuleToCache(mifo, moduleDeclaration, flags);
+			final ProblemCollector collector = mifo != null ? new ProblemCollector()
+					: null;
+			moduleDeclaration = sourceParser.parse(filename, content,
+					collector != null ? collector : reporter);
+			if (collector != null && reporter != null) {
+				collector.copyTo(reporter);
+			}
+			putModuleToCache(mifo, moduleDeclaration, flags, collector);
+		} else if (reporter != null) {
+			final ProblemCollector collector = (ProblemCollector) mifo
+					.get(ERRORS);
+			if (collector != null) {
+				collector.copyTo(reporter);
+			}
 		}
 		return moduleDeclaration;
 	}
@@ -151,10 +181,15 @@ public class SourceParserUtil {
 	}
 
 	public static void putModuleToCache(ISourceModuleInfo info,
-			ModuleDeclaration module, int flags) {
+			ModuleDeclaration module, int flags, ProblemCollector collector) {
 		if (info != null) {
 			info.put(AST, module);
 			info.put(FLAGS, new Integer(flags));
+			if (collector != null && !collector.isEmpty()) {
+				info.put(ERRORS, collector);
+			} else {
+				info.remove(ERRORS);
+			}
 		}
 	}
 
