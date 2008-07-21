@@ -755,13 +755,10 @@ public class MethodInfoViewer {
 			fReqestor.setHistory(matchIdsInHistory);
 			// consider primary working copies during searching
 			SearchEngine engine = new SearchEngine((WorkingCopyOwner) null);
-			String packPattern = fFilter.getPackagePattern();
 			monitor
 					.setTaskName(DLTKUIMessages.TypeInfoViewer_searchJob_taskName);
-			engine.searchAllMethodNames(packPattern == null ? null
-					: packPattern.toCharArray(), fFilter.getPackageFlags(),
-					fFilter.getNamePattern().toCharArray(), fFilter
-							.getSearchFlags(), fElementKind, fScope, fReqestor,
+			engine.searchAllMethodNames(fFilter.getNamePattern().toCharArray(),
+					fFilter.getSearchFlags(), fElementKind, fScope, fReqestor,
 					IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 			if (DEBUG)
 				System.out
