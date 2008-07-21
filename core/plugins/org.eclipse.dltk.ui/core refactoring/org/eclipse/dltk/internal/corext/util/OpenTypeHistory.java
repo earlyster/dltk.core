@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IShutdownListener;
 import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.ElementChangedEvent;
 import org.eclipse.dltk.core.IElementChangedListener;
@@ -50,7 +51,7 @@ import org.w3c.dom.Element;
 /**
  * History for the open type dialog. Object and keys are both {@link TypeNameMatch}s.
  */
-public class OpenTypeHistory extends History {
+public class OpenTypeHistory extends History implements IShutdownListener {
 	
 	//private IDLTKUILanguageToolkit fToolkit = null;
 	TypeFilter fTypeFilter = null;
@@ -190,6 +191,7 @@ public class OpenTypeHistory extends History {
 		load();
 		fDeltaListener= new TypeHistoryDeltaListener();
 		DLTKCore.addElementChangedListener(fDeltaListener);
+		DLTKUIPlugin.getDefault().addShutdownListener(this);
 		fUpdateJob= new UpdateJob();
 		// It is not necessary anymore that the update job has a rule since
 		// markAsInconsistent isn't synchronized anymore. See bugs

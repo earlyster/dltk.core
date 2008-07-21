@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
@@ -33,6 +34,7 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.IShutdownListener;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
@@ -205,6 +207,12 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 				});
 	}
 
+	private final ListenerList shutdownListeners = new ListenerList();
+	
+	public void addShutdownListener(IShutdownListener listener) {
+		shutdownListeners.add(listener);
+	}
+	
 	/**
 	 * This method is called when the plug-in is stopped
 	 */
@@ -214,6 +222,11 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 			fMembersOrderPreferenceCache.dispose();
 			fMembersOrderPreferenceCache = null;
 		}
+		Object[] listeners = shutdownListeners.getListeners();
+		for (int i = 0; i < listeners.length; ++i) {
+			((IShutdownListener) listeners[i]).shutdown();
+		}
+		shutdownListeners.clear();
 		super.stop(context);
 		DLTKUIPlugin.plugin = null;
 	}
