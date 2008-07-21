@@ -101,13 +101,10 @@ public class IndexAllProject extends IndexRequest {
 
 				// nothing to index but want to save an empty index file so its
 				// not 'rebuilt' when part of a search request
-				Index index = this.manager
-						.getIndexForUpdate(this.containerPath, true, /*
-																		 * reuse
-																		 * index
-																		 * file
-																		 */
-								true /* create if none */);
+				Index index = this.manager.getIndexForUpdate(
+						this.containerPath, true, true);
+				/* reuse index file */
+				/* create if none */
 				if (index != null) {
 					this.manager.saveIndex(index);
 				}
@@ -174,7 +171,8 @@ public class IndexAllProject extends IndexRequest {
 								switch (proxy.getType()) {
 								case IResource.FILE:
 									// if
-									// (org.eclipse.dltk.internal.core.util.Util.isValidSourceModuleName(parent,
+									//(org.eclipse.dltk.internal.core.util.Util.
+									// isValidSourceModuleName(parent,
 									// proxy.getName())) {
 									IScriptProject scriptProject = DLTKCore
 											.create(IndexAllProject.this.project);
@@ -191,18 +189,9 @@ public class IndexAllProject extends IndexRequest {
 												return false;
 											}
 										}
-										indexedFileNames
-												.put(
-														Util
-																.relativePath(
-																		file
-																				.getFullPath(),
-																		1/*
-																			 * remove
-																			 * project
-																			 * segment
-																			 */),
-														file);
+										indexedFileNames.put(Util.relativePath(
+												file.getFullPath(), 1), file);
+										/* remove project segment */
 									}
 									return false;
 								case IResource.FOLDER:
@@ -251,11 +240,8 @@ public class IndexAllProject extends IndexRequest {
 										}
 										String relativePathString = Util
 												.relativePath(file
-														.getFullPath(), 1/*
-																			 * remove
-																			 * project
-																			 * segment
-																			 */);
+														.getFullPath(), 1);
+										/* remove project segment */
 										indexedFileNames
 												.put(
 														relativePathString,
