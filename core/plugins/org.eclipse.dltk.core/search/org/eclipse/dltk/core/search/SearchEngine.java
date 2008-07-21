@@ -966,15 +966,15 @@ public class SearchEngine {
 				}
 
 				if (keys != null) {
-					String val = new String(indexRecord.getIndexKey());
+					final String val = new String(indexRecord.getIndexKey());
+					final Set keysList;
 					if (keys.containsKey(module)) {
-						Set keysList = (Set) keys.get(module);
-						keysList.add(val);
+						keysList = (Set) keys.get(module);
 					} else {
-						Set keysList = new HashSet();
-						keysList.add(val);
+						keysList = new HashSet();
 						keys.put(module, keysList);
 					}
+					keysList.add(val);
 				}
 
 				return true;
