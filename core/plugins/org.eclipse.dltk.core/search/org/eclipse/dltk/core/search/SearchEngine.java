@@ -1057,8 +1057,7 @@ public class SearchEngine {
 	 *            Modifiers of the method
 	 * @return A non-null match on the given method.
 	 */
-	public static MethodNameMatch createMethodNameMatch(IMethod method,
-			int modifiers) {
+	public static MethodNameMatch createMethodNameMatch(IMethod method, int modifiers) {
 		return BasicSearchEngine.createMethodNameMatch(method, modifiers);
 	}
 
@@ -1146,17 +1145,16 @@ public class SearchEngine {
 	 *                </ul>
 	 * 
 	 */
-	public void searchAllMethodNames(final char[] packageName,
-			final int packageMatchRule, final char[] methodName,
+	public void searchAllMethodNames(final char[] methodName,
 			final int methodMatchRule, int searchFor, IDLTKSearchScope scope,
 			final MethodNameMatchRequestor nameRequestor, int waitingPolicy,
 			IProgressMonitor progressMonitor) throws ModelException {
 
 		MethodNameMatchRequestorWrapper requestorWrapper = new MethodNameMatchRequestorWrapper(
 				nameRequestor, scope);
-		this.basicEngine.searchAllMethodNames(packageName, packageMatchRule,
-				methodName, methodMatchRule, searchFor, scope,
-				requestorWrapper, waitingPolicy, progressMonitor);
+		this.basicEngine.searchAllMethodNames(methodName, methodMatchRule,
+				searchFor, scope, requestorWrapper, waitingPolicy,
+				progressMonitor);
 	}
 
 }

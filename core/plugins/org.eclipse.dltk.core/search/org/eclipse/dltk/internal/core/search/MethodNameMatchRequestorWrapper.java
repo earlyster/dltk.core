@@ -23,7 +23,6 @@ import org.eclipse.dltk.core.search.BasicSearchEngine;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.MethodNameMatchRequestor;
 import org.eclipse.dltk.core.search.TypeNameRequestor;
-import org.eclipse.dltk.internal.compiler.env.AccessRestriction;
 import org.eclipse.dltk.internal.core.Openable;
 import org.eclipse.dltk.internal.core.ProjectFragment;
 import org.eclipse.dltk.internal.core.util.HandleFactory;
@@ -75,8 +74,7 @@ public class MethodNameMatchRequestorWrapper implements
 	 * acceptType(int, char[], char[], char[][], java.lang.String,
 	 * org.eclipse.jdt.internal.compiler.env.AccessRestriction)
 	 */
-	public void acceptMethod(int modifiers, char[] packageName,
-			char[] simpleMethodName, String path, AccessRestriction access) {
+	public void acceptMethod(char[] simpleMethodName, String path) {
 		try {
 			IMethod method = null;
 			if (this.handleFactory != null) {
@@ -105,7 +103,7 @@ public class MethodNameMatchRequestorWrapper implements
 			if (method != null) {
 				this.requestor
 						.acceptMethodNameMatch(new DLTKSearchMethodNameMatch(
-								method, modifiers));
+								method, method.getFlags()));
 			}
 		} catch (ModelException e) {
 			// skip

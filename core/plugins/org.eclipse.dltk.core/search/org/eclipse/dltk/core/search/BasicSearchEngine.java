@@ -58,7 +58,6 @@ import org.eclipse.dltk.internal.core.search.PatternSearchJob;
 import org.eclipse.dltk.internal.core.search.SuperHierarchyScope;
 import org.eclipse.dltk.internal.core.search.matching.DLTKSearchPattern;
 import org.eclipse.dltk.internal.core.search.matching.MethodDeclarationPattern;
-import org.eclipse.dltk.internal.core.search.matching.QualifiedMethodDeclarationPattern;
 import org.eclipse.dltk.internal.core.search.matching.QualifiedTypeDeclarationPattern;
 import org.eclipse.dltk.internal.core.search.matching.TypeDeclarationPattern;
 import org.eclipse.dltk.internal.core.util.Messages;
@@ -1534,9 +1533,8 @@ public class BasicSearchEngine {
 	/**
 	 * @see SearchEngine#createTypeNameMatch(IType, int) for detailed comment.
 	 */
-	public static MethodNameMatch createMethodNameMatch(IMethod type,
-			int modifiers) {
-		return new DLTKSearchMethodNameMatch(type, modifiers);
+	public static MethodNameMatch createMethodNameMatch(IMethod method, int modifiers) {
+		return new DLTKSearchMethodNameMatch(method, modifiers);
 	}
 
 	/**
@@ -1550,9 +1548,8 @@ public class BasicSearchEngine {
 	 *      IJavaSearchScope, TypeNameRequestor, int, IProgressMonitor) for
 	 *      detailed comment
 	 */
-	public void searchAllMethodNames(char[] packageName, int packageMatchRule,
-			char[] methodName, int methodMatchRule, int searchFor,
-			IDLTKSearchScope scope,
+	public void searchAllMethodNames(char[] methodName, int methodMatchRule,
+			int searchFor, IDLTKSearchScope scope,
 			final IRestrictedAccessMethodRequestor nameRequestor,
 			int waitingPolicy, IProgressMonitor progressMonitor)
 			throws ModelException {
@@ -1561,11 +1558,7 @@ public class BasicSearchEngine {
 			Util
 					.verbose("BasicSearchEngine.searchAllTypeNames(char[], char[], int, int, IJavaSearchScope, IRestrictedAccessTypeRequestor, int, IProgressMonitor)"); //$NON-NLS-1$
 			Util
-					.verbose("	- package name: " + (packageName == null ? "null" : new String(packageName))); //$NON-NLS-1$ //$NON-NLS-2$
-			Util
-					.verbose("	- match rule: " + getMatchRuleString(packageMatchRule)); //$NON-NLS-1$
-			Util
-					.verbose("	- type name: " + (methodName == null ? "null" : new String(methodName))); //$NON-NLS-1$ //$NON-NLS-2$
+					.verbose("	- method name: " + (methodName == null ? "null" : new String(methodName))); //$NON-NLS-1$ //$NON-NLS-2$
 			Util
 					.verbose("	- match rule: " + getMatchRuleString(methodMatchRule)); //$NON-NLS-1$
 			Util.verbose("	- search for: " + searchFor); //$NON-NLS-1$
@@ -1573,28 +1566,20 @@ public class BasicSearchEngine {
 		}
 
 		// Return on invalid combination of package and type names
-		if (packageName == null || packageName.length == 0) {
-			if (methodName != null && methodName.length == 0) {
-				// TODO (frederic) Throw a JME instead?
-				if (VERBOSE) {
-					Util
-							.verbose("	=> return no result due to invalid empty values for package and type names!"); //$NON-NLS-1$
-				}
-				return;
+		if (methodName != null && methodName.length == 0) {
+			// TODO (frederic) Throw a JME instead?
+			if (VERBOSE) {
+				Util
+						.verbose("	=> return no result due to invalid empty values for package and type names!"); //$NON-NLS-1$
 			}
+			return;
 		}
 
 		// Create pattern
 		IndexManager indexManager = ModelManager.getModelManager()
 				.getIndexManager();
-		final char typeSuffix;
-		typeSuffix = IIndexConstants.TYPE_SUFFIX;
-		final MethodDeclarationPattern pattern = packageMatchRule == SearchPattern.R_EXACT_MATCH ? new MethodDeclarationPattern(
-				packageName, methodName, typeSuffix, methodMatchRule, scope
-						.getLanguageToolkit())
-				: new QualifiedMethodDeclarationPattern(packageName,
-						packageMatchRule, methodName, typeSuffix,
-						methodMatchRule, scope.getLanguageToolkit());
+		final MethodDeclarationPattern pattern = new MethodDeclarationPattern(
+				methodName, methodMatchRule, scope.getLanguageToolkit());
 
 		// Get working copy path(s). Store in a single string in case of only
 		// one to optimize comparison in requestor
@@ -1641,37 +1626,7 @@ public class BasicSearchEngine {
 					break;
 				}
 
-				// Accept document path
-				AccessRestriction accessRestriction = null;
-				if (access != null) {
-					// Compute document relative path
-					int pkgLength = (record.pkg == null || record.pkg.length == 0) ? 0
-							: record.pkg.length + 1;
-					int nameLength = record.simpleName == null ? 0
-							: record.simpleName.length;
-					char[] path = new char[pkgLength + nameLength];
-					int pos = 0;
-					if (pkgLength > 0) {
-						System.arraycopy(record.pkg, 0, path, pos,
-								pkgLength - 1);
-						CharOperation.replace(path, '.', '/');
-						path[pkgLength - 1] = '/';
-						pos += pkgLength;
-					}
-					if (nameLength > 0) {
-						System.arraycopy(record.simpleName, 0, path, pos,
-								nameLength);
-						pos += nameLength;
-					}
-					// Update access restriction if path is not empty
-					if (pos > 0) {
-						accessRestriction = access.getViolatedRestriction(path);
-					}
-				}
-				if (match(record.methodSuffix, record.modifiers)) {
-					nameRequestor.acceptMethod(record.modifiers, record.pkg,
-							record.simpleName, documentPath, accessRestriction);
-				}
+				nameRequestor.acceptMethod(record.simpleName, documentPath);
 				return true;
 			}
 		};
@@ -1716,13 +1671,12 @@ public class BasicSearchEngine {
 						}
 						char[] simpleName = type.getElementName().toCharArray();
 						int kind = 0;
-						if (match(typeSuffix, packageName, methodName,
-								methodMatchRule, kind, /* packageDeclaration, */
-								simpleName)) {
-							nameRequestor.acceptMethod(type.getFlags(),
-									new char[0], /* packageDeclaration, */
-									simpleName, path, null);
-						}
+						// FIXME search working copies
+						// if (match(typeSuffix, packageName, methodName,
+						// methodMatchRule, kind, /* packageDeclaration, */
+						// simpleName)) {
+						// nameRequestor.acceptMethod(simpleName, path, null);
+						// }
 					}
 					// }
 				}

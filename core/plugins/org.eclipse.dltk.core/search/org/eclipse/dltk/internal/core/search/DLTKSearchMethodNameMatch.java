@@ -14,20 +14,17 @@ import org.eclipse.dltk.core.search.MethodNameMatch;
 
 /**
  * DLTK Search concrete type for a type name match.
- * 
  */
 public class DLTKSearchMethodNameMatch extends MethodNameMatch {
 
-	private IMethod method;
-	private int modifiers = -1; // store modifiers to avoid java model
-
-	// population
+	private final IMethod method;
+	private final int modifiers;
 
 	/**
 	 * Creates a new Java Search type name match.
 	 */
-	public DLTKSearchMethodNameMatch(IMethod type, int modifiers) {
-		this.method = type;
+	public DLTKSearchMethodNameMatch(IMethod method, int modifiers) {
+		this.method = method;
 		this.modifiers = modifiers;
 	}
 
@@ -80,26 +77,6 @@ public class DLTKSearchMethodNameMatch extends MethodNameMatch {
 		if (this.method == null)
 			return this.modifiers;
 		return this.method.hashCode();
-	}
-
-	/**
-	 * Set modifiers of the matched type.
-	 * 
-	 * @param modifiers
-	 *            the modifiers of the matched type.
-	 */
-	public void setModifiers(int modifiers) {
-		this.modifiers = modifiers;
-	}
-
-	/**
-	 * Set matched type.
-	 * 
-	 * @param type
-	 *            the matched type.
-	 */
-	public void setMethod(IMethod method) {
-		this.method = method;
 	}
 
 	/*
