@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.CRC32;
@@ -69,18 +68,16 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	/* need to save ? */
 	private boolean needToSave = false;
 	private static final CRC32 checksumCalculator = new CRC32();
-	private IPath javaPluginLocation = null;
+	private IPath scriptPluginLocation = null;
 	/* can only replace a current state if its less than the new one */
 	private SimpleLookupTable indexStates = null;
 	private File savedIndexNamesFile = new File(
 			this.getScriptPluginWorkingLocation()
 					.append("savedIndexNames.txt").toOSString()); //$NON-NLS-1$
-	public static Integer SAVED_STATE = new Integer(0);
-	public static Integer UPDATING_STATE = new Integer(1);
-	public static Integer UNKNOWN_STATE = new Integer(2);
-	public static Integer REBUILDING_STATE = new Integer(3);
-
-	public static List sourcesToMixin = new ArrayList();
+	public static final Integer SAVED_STATE = new Integer(0);
+	public static final Integer UPDATING_STATE = new Integer(1);
+	public static final Integer UNKNOWN_STATE = new Integer(2);
+	public static final Integer REBUILDING_STATE = new Integer(3);
 
 	public synchronized void aboutToUpdateIndex(IPath containerPath,
 			Integer newIndexState) {
@@ -581,11 +578,11 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	}
 
 	private IPath getScriptPluginWorkingLocation() {
-		if (this.javaPluginLocation != null) {
-			return this.javaPluginLocation;
+		if (this.scriptPluginLocation != null) {
+			return this.scriptPluginLocation;
 		}
 		IPath stateLocation = DLTKCore.getPlugin().getStateLocation();
-		return this.javaPluginLocation = stateLocation;
+		return this.scriptPluginLocation = stateLocation;
 	}
 
 	public void indexDocument(SearchDocument searchDocument,
@@ -949,8 +946,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			this.indexStates = null;
 		}
 		this.indexLocations = new SimpleLookupTable();
-		this.javaPluginLocation = null;
-	}
+		this.scriptPluginLocation = null;
+	} 
 
 	public synchronized void saveIndex(Index index) throws IOException {
 		// must have permission to write from the write monitor
