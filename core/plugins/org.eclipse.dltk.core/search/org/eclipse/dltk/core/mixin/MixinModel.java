@@ -51,15 +51,18 @@ public class MixinModel {
 	 * Contains map of source modules to mixin elemens.
 	 */
 	private Map elementToMixinCache = new HashMap();
-	private IDLTKLanguageToolkit toolkit = null;
+	private final IDLTKLanguageToolkit toolkit;
 
 	private MixinRequestor mixinRequestor = new MixinRequestor();
 
 	private ISourceModule currentModule;
-	private Set modulesToReparse = new HashSet(); // list of modules required
-	// to be reparsed.
+
+	/**
+	 * modules required to be reparsed
+	 */
+	private Set modulesToReparse = new HashSet();
 	public long removes = 1;
-	double ratio = 10000;
+	private final double ratio = 10000;
 
 	public MixinModel(IDLTKLanguageToolkit toolkit) {
 		this.toolkit = toolkit;
@@ -117,7 +120,7 @@ public class MixinModel {
 				pattern, toolkit, set);
 		Set modules = new HashSet();
 		modules.addAll(Arrays.asList(containedModules));
-		
+
 		if (modules.size() == 0) {
 			return new IMixinElement[0];
 		}
@@ -203,7 +206,7 @@ public class MixinModel {
 	}
 
 	private void buildElementTree(MixinElement element) {
-		// TODO: This is consistend cache stage
+		// TODO: This is consistent cache stage
 		if (element.isFinal()) {
 			return;
 		}
@@ -238,10 +241,9 @@ public class MixinModel {
 		if (!this.elementToMixinCache.containsKey(sourceModule)) {
 			this.elementToMixinCache.put(sourceModule, new ArrayList());
 		} else { // Module already in model. So we do not to rebuild it.
-			if (!this.modulesToReparse.contains(sourceModule)) {
+			if (!this.modulesToReparse.remove(sourceModule)) {
 				return;
 			}
-			this.modulesToReparse.remove(sourceModule);
 			// We need to reparse module if some elements are moved from it.
 		}
 		IMixinParser mixinParser;
@@ -256,14 +258,13 @@ public class MixinModel {
 				this.currentModule = null;
 			}
 		} catch (CoreException e) {
-			if (DLTKCore.DEBUG)
-				e.printStackTrace();
+			DLTKCore.error("Error in reportModule", e); //$NON-NLS-1$
 			return;
 		}
 	}
 
 	/**
-	 * Should find all elements source modules to be shure we build complete
+	 * Should find all elements source modules to be sure we build complete
 	 * child tree.
 	 * 
 	 * @param element
@@ -333,8 +334,7 @@ public class MixinModel {
 			}
 			if (delta.getKind() == IModelElementDelta.ADDED) {
 				if (element.getElementType() == IModelElement.SOURCE_MODULE) {
-					if (!modulesToReparse.contains(element)) {
-						modulesToReparse.add(element);
+					if (modulesToReparse.add(element)) {
 						reportModule((ISourceModule) element);
 					}
 				}
@@ -683,9 +683,7 @@ public class MixinModel {
 				MixinModel.this.elementToMixinCache
 						.put(currentModule, elements);
 			}
-			// if( !elements.contains(element)) {
 			elements.add(element);
-			// }
 		}
 	}
 
