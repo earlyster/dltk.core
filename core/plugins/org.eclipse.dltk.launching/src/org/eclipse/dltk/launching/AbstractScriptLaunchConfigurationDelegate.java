@@ -1032,15 +1032,6 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		// default working directory is the project if this config has a project
 		IScriptProject scriptProject = getScriptProject(configuration);
 		if (scriptProject != null) {
-			// IProject project = scriptProject.getProject();
-			// URI uri = project.getLocationURI();
-			// IPath path = null;
-			// if (uri != null) {
-			// path = new Path(uri.getPath());
-			// }
-			// else {
-			// path = project.getLocation();
-			// }
 			IEnvironment environment = EnvironmentManager
 					.getEnvironment(scriptProject);
 			String mainScriptName = verifyMainScriptName(configuration);
@@ -1053,6 +1044,9 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 			IFileHandle file = environment.getFile(environmentLocation);
 			if (file.exists()) {
 				return environmentLocation.removeLastSegments(1);
+			}
+			else {
+				return new Path(loc);
 			}
 		}
 		return null;
