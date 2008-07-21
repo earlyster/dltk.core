@@ -12,6 +12,7 @@
 package org.eclipse.dltk.compiler.problem;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.dltk.compiler.task.ITaskReporter;
@@ -154,6 +155,16 @@ public class ProblemCollector extends AbstractProblemReporter implements
 			return sb.toString();
 		}
 
+	}
+
+	/**
+	 * @param destination
+	 */
+	public void copyTo(IProblemReporter destination) {
+		for (Iterator i = problems.iterator(); i.hasNext();) {
+			final IProblem problem = (IProblem) i.next();
+			destination.reportProblem(problem);
+		}
 	}
 
 }
