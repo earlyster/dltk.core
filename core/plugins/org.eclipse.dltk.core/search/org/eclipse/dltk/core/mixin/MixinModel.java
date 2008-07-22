@@ -481,22 +481,20 @@ public class MixinModel {
 
 		void addInfo(ElementInfo info, ISourceModule module) {
 			if (info.object != null) {
-				Object object = this.sourceModuleToObject.get(module);
+				final Object object = this.sourceModuleToObject.get(module);
 				if (object != null) {
 					if (object instanceof List) {
 						((List) object).add(info.object);
 					} else {
-						List l = new ArrayList();
-						l.add(object);
-						l.add(info.object);
-						object = l;
-						this.sourceModuleToObject.put(module, object);
+						List list = new ArrayList();
+						list.add(object);
+						list.add(info.object);
+						this.sourceModuleToObject.put(module, list);
 					}
 				} else {
-					List l = new ArrayList();
-					l.add(info.object);
-					object = l;
-					this.sourceModuleToObject.put(module, object);
+					List list = new ArrayList();
+					list.add(info.object);
+					this.sourceModuleToObject.put(module, list);
 				}
 			}
 		}
