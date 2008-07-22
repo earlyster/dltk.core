@@ -36,7 +36,7 @@ import org.eclipse.dltk.internal.core.search.processing.JobManager;
 import org.eclipse.dltk.internal.core.util.Util;
 
 public class IndexAllProject extends IndexRequest {
-	IProject project;
+	private final IProject project;
 
 	public IndexAllProject(IProject project, IndexManager manager) {
 		super(project.getFullPath(), manager);
