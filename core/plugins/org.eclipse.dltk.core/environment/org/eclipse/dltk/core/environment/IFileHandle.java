@@ -30,7 +30,7 @@ public interface IFileHandle {
 	/**
 	 * Return associated environment.
 	 * 
-	 * @return associated environemnt
+	 * @return associated environment
 	 */
 	IEnvironment getEnvironment();
 
@@ -91,7 +91,7 @@ public interface IFileHandle {
 	/**
 	 * Return children of this directory.
 	 * 
-	 * @return children
+	 * @return children or <code>null</code> on error
 	 */
 	IFileHandle[] getChildren();
 
@@ -105,15 +105,15 @@ public interface IFileHandle {
 	IFileHandle getChild(String path);
 
 	/**
-	 * Return if file or directory are exists.
+	 * Tests file or directory existence.
 	 * 
-	 * @return existance
+	 * @return <code>true</code> if file or directory exists.
 	 */
 	boolean exists();
 
 	/**
-	 * Return input stream for this file, or throws exception if file is not
-	 * exits.
+	 * Returns input stream for this file, or throws exception if file does not
+	 * exist.
 	 * 
 	 * @param monitor
 	 *            - progress monitor
@@ -130,19 +130,19 @@ public interface IFileHandle {
 	boolean isSymlink();
 
 	/**
-	 * Return true if file is a directory
+	 * Return <code>true</code> if file is a directory
 	 */
 	boolean isDirectory();
 
 	/**
-	 * Return true if this file is a regular file
+	 * Return <code>true</code> if this file is a regular file
 	 */
 	boolean isFile();
 
 	/**
 	 * Return last modified time
 	 * 
-	 * @return last modifed time
+	 * @return last modified time
 	 */
 	long lastModified();
 
