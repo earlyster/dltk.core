@@ -274,6 +274,8 @@ public class IndexAllProject extends IndexRequest {
 					.getSourceElementParser(scriptProject);
 			SourceIndexerRequestor requestor = this.manager
 					.getSourceRequestor(scriptProject);
+			final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit(scriptProject);
 			Object[] names = indexedFileNames.keyTable;
 			Object[] values = indexedFileNames.valueTable;
 			for (int i = 0, namesLength = names.length; i < namesLength; i++) {
@@ -288,8 +290,6 @@ public class IndexAllProject extends IndexRequest {
 						if (value == DELETED) {
 							this.manager.remove(name, this.containerPath);
 						} else {
-							IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-									.getLanguageToolkit(scriptProject);
 							this.manager.addSource((IFile) value,
 									this.containerPath, parser, requestor,
 									toolkit);
