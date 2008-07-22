@@ -71,9 +71,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	private IPath scriptPluginLocation = null;
 	/* can only replace a current state if its less than the new one */
 	private SimpleLookupTable indexStates = null;
-	private File savedIndexNamesFile = new File(
-			getScriptPluginWorkingLocation()
-					.append("savedIndexNames.txt").toOSString()); //$NON-NLS-1$
+	private File savedIndexNamesFile = getScriptPluginWorkingLocation().append(
+			"savedIndexNames.txt").toFile(); //$NON-NLS-1$
 	public static final Integer SAVED_STATE = new Integer(0);
 	public static final Integer UPDATING_STATE = new Integer(1);
 	public static final Integer UNKNOWN_STATE = new Integer(2);
@@ -189,8 +188,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 				this.removeIndexesState(locations);
 			}
 		}
-		File indexesDirectory = new File(this.getScriptPluginWorkingLocation()
-				.toOSString());
+		File indexesDirectory = this.getScriptPluginWorkingLocation().toFile();
 		if (indexesDirectory.isDirectory()) {
 			File[] indexesFiles = indexesDirectory.listFiles();
 			if (indexesFiles != null) {
@@ -525,8 +523,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			if (names.length > 0) {
 				// check to see if workspace has moved, if so then do not trust
 				// saved indexes
-				File indexesDirectory = new File(
-						getScriptPluginWorkingLocation().toOSString());
+				File indexesDirectory = getScriptPluginWorkingLocation()
+						.toFile();
 				char[] dirName = indexesDirectory.getAbsolutePath()
 						.toCharArray();
 				int delimiterPos = dirName.length;
@@ -1160,8 +1158,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 
 	public synchronized void rebuild() {
 		this.disable();
-		File indexesDirectory = new File(this.getScriptPluginWorkingLocation()
-				.toOSString());
+		File indexesDirectory = this.getScriptPluginWorkingLocation().toFile();
 		// this.
 		if (indexesDirectory.isDirectory()) {
 			File[] indexesFiles = indexesDirectory.listFiles();
