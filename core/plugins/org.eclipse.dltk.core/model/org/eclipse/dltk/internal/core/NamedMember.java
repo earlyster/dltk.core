@@ -40,13 +40,14 @@ public abstract class NamedMember extends Member {
 	}
 
 	public String getFullyQualifiedName(String enclosingTypeSeparator, boolean showParameters) throws ModelException {
-		String packageName = getScriptFolder().getElementName();
-		if (packageName.equals(IScriptFolder.DEFAULT_FOLDER_NAME)) {
-			return getTypeQualifiedName(enclosingTypeSeparator, showParameters);
+		IScriptFolder scriptFolder = getScriptFolder();
+		if (null != scriptFolder) {
+			String packageName = scriptFolder.getElementName();
+			return packageName + IScriptFolder.PACKAGE_DELIMETER_STR + 	getTypeQualifiedName(enclosingTypeSeparator, showParameters);
 		}
-		return packageName + IScriptFolder.PACKAGE_DELIMETER_STR + getTypeQualifiedName(enclosingTypeSeparator, showParameters);
+		return getTypeQualifiedName(enclosingTypeSeparator, showParameters);
 	}
-
+	
 	public String getTypeQualifiedName(String typeSeparator, boolean showParameters) throws ModelException {
 		NamedMember declaringType;
 		String thisName = this.name;
