@@ -64,4 +64,13 @@ public class Strings {
 		}
 		return buffer.toString();
 	}
+
+	public static boolean containsOnlyWhitespaces(String s) {
+		int size = s.length();
+		for (int i = 0; i < size; i++) {
+			if (!Character.isWhitespace(s.charAt(i)))
+				return false;
+		}
+		return true;
+	}
 }
