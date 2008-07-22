@@ -2637,8 +2637,7 @@ public class DeltaProcessor {
 					if (resource instanceof IFile) {
 						String name = resource.getName();
 						if (isSource) {
-							if (org.eclipse.dltk.internal.core.util.Util
-									.isValidSourceModule(pkg, resource)) {
+							if (Util.isValidSourceModule(pkg, resource)) {
 								Openable cu = (Openable) pkg
 										.getSourceModule(name);
 								this.updateIndex(cu, child);
