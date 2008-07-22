@@ -177,9 +177,8 @@ public class IndexAllProject extends IndexRequest {
 											.create(IndexAllProject.this.project);
 									IFile file = (IFile) proxy
 											.requestResource();
-									if (org.eclipse.dltk.internal.core.util.Util
-											.isValidSourceModule(scriptProject,
-													file)) {
+									if (Util.isValidSourceModule(scriptProject,
+											file)) {
 										if (exclusionPatterns != null
 												|| inclusionPatterns != null) {
 											if (Util.isExcluded(file,
@@ -222,9 +221,8 @@ public class IndexAllProject extends IndexRequest {
 											.create(IndexAllProject.this.project);
 									IFile file = (IFile) proxy
 											.requestResource();
-									if (org.eclipse.dltk.internal.core.util.Util
-											.isValidSourceModule(scriptProject,
-													file)) {
+									if (Util.isValidSourceModule(scriptProject,
+											file)) {
 										URI location = file.getLocationURI();
 										if (location == null) {
 											return false;
