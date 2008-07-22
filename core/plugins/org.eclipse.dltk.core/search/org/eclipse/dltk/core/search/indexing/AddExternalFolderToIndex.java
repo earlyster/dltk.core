@@ -81,30 +81,29 @@ class AddExternalFolderToIndex extends IndexRequest {
 			return true; // nothing to do, source folder was removed
 		}
 		/* ensure no concurrent write access to index */
-		Index index = this.manager.getIndex(this.containerPath, true, /*
-																		 * reuse
-																		 * index
-																		 * file
-																		 */false /*
-					 * create if none
-					 */);
+		Index index = this.manager
+				.getIndex(this.containerPath, true, /*
+													 * reuse index file
+													 */false /*
+															 * create if none
+															 */);
 		if (index != null) {
 			if (JobManager.VERBOSE) {
-				org.eclipse.dltk.internal.core.util.Util
+				Util
 						.verbose("-> no indexing required (index already exists) for " + this.containerPath); //$NON-NLS-1$
 			}
 			return true;
 		}
-		index = this.manager.getIndexForUpdate(this.containerPath, true, /*
-																			 * reuse
-																			 * index
-																			 * file
-																			 */true /*
-				 * create if none
-				 */);
+		index = this.manager
+				.getIndexForUpdate(this.containerPath, true, /*
+															 * reuse index file
+															 */true /*
+																	 * create if
+																	 * none
+																	 */);
 		if (index == null) {
 			if (JobManager.VERBOSE) {
-				org.eclipse.dltk.internal.core.util.Util
+				Util
 						.verbose("-> index could not be created for " + this.containerPath); //$NON-NLS-1$
 			}
 			return true;
@@ -112,7 +111,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 		ReadWriteMonitor monitor = index.monitor;
 		if (monitor == null) {
 			if (JobManager.VERBOSE) {
-				org.eclipse.dltk.internal.core.util.Util
+				Util
 						.verbose("-> index for " + this.containerPath + " just got deleted"); //$NON-NLS-1$//$NON-NLS-2$
 			}
 			return true; // index got deleted since acquired
@@ -127,8 +126,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 			final SourceIndexerRequestor requestor = indexManager
 					.getSourceRequestor(project);
 			if (JobManager.VERBOSE) {
-				org.eclipse.dltk.internal.core.util.Util
-						.verbose("-> indexing " + this.containerPath.toString()); //$NON-NLS-1$
+				Util.verbose("-> indexing " + this.containerPath.toString()); //$NON-NLS-1$
 			}
 			long initialTime = System.currentTimeMillis();
 			String[] paths = index.queryDocumentNames(""); // all file names //$NON-NLS-1$
@@ -145,8 +143,8 @@ class AddExternalFolderToIndex extends IndexRequest {
 				for (int i = 0; i < max; i++) {
 					indexedFileNames.put(paths[i], DELETED);
 				}
-				this.visit(indexedFileNames, project, folder, parser, requestor,
-						indexManager, container, false, null, index);
+				this.visit(indexedFileNames, project, folder, parser,
+						requestor, indexManager, container, false, null, index);
 				boolean needToReindex = indexedFileNames.elementSize != max; // a
 				// new
 				// file
@@ -163,7 +161,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 					}
 					if (!needToReindex) {
 						if (JobManager.VERBOSE) {
-							org.eclipse.dltk.internal.core.util.Util
+							Util
 									.verbose("-> no indexing required (index is consistent with library) for " //$NON-NLS-1$
 											+ this.containerPath.toString()
 											+ " (" //$NON-NLS-1$
@@ -192,16 +190,13 @@ class AddExternalFolderToIndex extends IndexRequest {
 					container, true, participant, index);
 			this.manager.saveIndex(index);
 			if (JobManager.VERBOSE) {
-				org.eclipse.dltk.internal.core.util.Util
-						.verbose("-> done indexing of " //$NON-NLS-1$
-								+ this.containerPath.toString()
-								+ " (" //$NON-NLS-1$
-								+ (System.currentTimeMillis() - initialTime)
-								+ "ms)"); //$NON-NLS-1$
+				Util.verbose("-> done indexing of " //$NON-NLS-1$
+						+ this.containerPath.toString() + " (" //$NON-NLS-1$
+						+ (System.currentTimeMillis() - initialTime) + "ms)"); //$NON-NLS-1$
 			}
 		} catch (IOException ex) {
 			if (JobManager.VERBOSE) {
-				org.eclipse.dltk.internal.core.util.Util
+				Util
 						.verbose("-> failed to index " + this.containerPath + " because of the following exception:"); //$NON-NLS-1$ //$NON-NLS-2$
 				ex.printStackTrace();
 			}
@@ -226,7 +221,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 			for (int i = 0; i < files.length; ++i) {
 				if (this.isCancelled) {
 					if (JobManager.VERBOSE) {
-						org.eclipse.dltk.internal.core.util.Util
+						Util
 								.verbose("-> indexing of " + this.containerPath.toString() + " has been cancelled"); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					return;
@@ -247,8 +242,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 				} else {
 					String path = files[i].toOSString();
 					IPath rPath = new Path(path);
-					if (org.eclipse.dltk.internal.core.util.Util
-							.isValidSourceModuleName(project, path)) {
+					if (Util.isValidSourceModuleName(project, path)) {
 						if (DLTKCore.DEBUG) {
 							System.err.println("Out:" + path); //$NON-NLS-1$
 						}
@@ -257,8 +251,8 @@ class AddExternalFolderToIndex extends IndexRequest {
 							if (!operation) {
 								table.put(rPath.toString(), EXISTS);
 							} else {
-								this.indexDocument(parser, requestor, participant,
-										index, path, toolkit);
+								this.indexDocument(parser, requestor,
+										participant, index, path, toolkit);
 							}
 						} else {
 							if (!Util.isExcluded(rPath, this.inclusionPatterns,
