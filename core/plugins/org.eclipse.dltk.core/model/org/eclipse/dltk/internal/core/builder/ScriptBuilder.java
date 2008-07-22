@@ -411,12 +411,12 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			List extFragments = new ArrayList();
 			List currentFragments = new ArrayList();
 			for (int i = 0; i < fragments.length; i++) {
-				if (fragments[i] instanceof ExternalProjectFragment
-						|| fragments[i] instanceof BuiltinProjectFragment) {
-					IProjectFragment fragment = fragments[i];
+				final IProjectFragment fragment = fragments[i];
+				if (fragment instanceof ExternalProjectFragment
+						|| fragment instanceof BuiltinProjectFragment) {
 					IPath path = fragment.getPath();
 					if (!this.lastState.externalFolderLocations.contains(path)) {
-						extFragments.add(fragments[i]);
+						extFragments.add(fragment);
 					} else {
 						currentFragments.add(path);
 					}
