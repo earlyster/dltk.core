@@ -605,11 +605,10 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			for (int i = 0; i < entries.length; i++) {
 				IBuildpathEntry entry = entries[i];
 				if (entry.getEntryKind() == IBuildpathEntry.BPE_LIBRARY) {
-					this.indexLibrary(entry.getPath(), project,
-							((BuildpathEntry) entry)
-									.fullInclusionPatternChars(),
-							((BuildpathEntry) entry)
-									.fullExclusionPatternChars());
+					final BuildpathEntry bpEntry = (BuildpathEntry) entry;
+					this.indexLibrary(entry.getPath(), project, bpEntry
+							.fullInclusionPatternChars(), bpEntry
+							.fullExclusionPatternChars());
 				}
 			}
 		} catch (ModelException e) { // cannot retrieve buildpath info
