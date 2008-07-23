@@ -43,7 +43,12 @@ public abstract class NamedMember extends Member {
 		IScriptFolder scriptFolder = getScriptFolder();
 		if (null != scriptFolder) {
 			String packageName = scriptFolder.getElementName();
-			return packageName + IScriptFolder.PACKAGE_DELIMETER_STR + 	getTypeQualifiedName(enclosingTypeSeparator, showParameters);
+			if (!IScriptFolder.DEFAULT_FOLDER_NAME.equals(packageName)) {
+				return packageName
+						+ IScriptFolder.PACKAGE_DELIMETER_STR
+						+ getTypeQualifiedName(enclosingTypeSeparator,
+								showParameters);
+			}
 		}
 		return getTypeQualifiedName(enclosingTypeSeparator, showParameters);
 	}
