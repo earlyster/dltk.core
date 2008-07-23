@@ -198,6 +198,11 @@ public final class PreferencesMessages extends NLS {
 	public static String UserLibraryPreferencePage_UserLibraryPreferencePage_libraries_up_button;
 	public static String UserLibraryPreferencePage_UserLibraryPreferencePage_libraries_down_button;
 
+	public static String BuildpathVariablesPreferencePage_title;
+	public static String BuildpathVariablesPreferencePage_description;
+	public static String BuildpathVariablesPreferencePage_savechanges_title;
+	public static String BuildpathVariablesPreferencePage_savechanges_message;
+
 	public static String EditorPreferencePage_title0;
 	public static String EditorPreferencePage_smartHomeEnd;
 	public static String EditorPreferencePage_subWordNavigation;

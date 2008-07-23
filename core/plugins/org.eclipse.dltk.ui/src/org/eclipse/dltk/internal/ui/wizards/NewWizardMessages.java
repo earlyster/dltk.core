@@ -13,8 +13,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class NewWizardMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.dltk.internal.ui.wizards.NewWizardMessages";//$NON-NLS-1$
-	
+	private static final String BUNDLE_NAME = "org.eclipse.dltk.internal.ui.wizards.NewWizardMessages";//$NON-NLS-1$
 
 	private NewWizardMessages() {
 		// Do not instantiate
@@ -25,28 +24,31 @@ public final class NewWizardMessages extends NLS {
 	public static String AbstractOpenWizardAction_createerror_title;
 	public static String AbstractOpenWizardAction_createerror_message;
 	public static String AddArchiveToBuildpathAction_ErrorTitle;
-	
+
 	public static String AddLibraryToBuildpathAction_ErrorTitle;
-	
+
 	public static String AddSelectedLibraryToBuildpathAction_ErrorTitle;
-	
+
 	public static String AddSourceFolderToBuildpathAction_ErrorTitle;
-	
-	public static String AddSourceFolderWizardPage_description;	
+
+	public static String AddSourceFolderWizardPage_description;
 	public static String AddSourceFolderWizardPage_addSinglePattern;
 	public static String AddSourceFolderWizardPage_conflictWarning;
 	public static String AddSourceFolderWizardPage_ignoreNestingConflicts;
 	public static String AddSourceFolderWizardPage_replaceSourceFolderInfo;
-	
+	public static String BPVariableElementLabelProvider_one_restriction;
+	public static String BPVariableElementLabelProvider_read_only;
+	public static String BPVariableElementLabelProvider_two_restrictions;
+	public static String BPVariableElementLabelProvider_appendix;
 	public static String ExcludeFromBuildathAction_ErrorTitle;
-	
+
 	public static String IncludeToBuildpathAction_ErrorTitle;
-	
+
 	public static String NewElementWizard_op_error_title;
 	public static String NewElementWizard_op_error_message;
 	public static String NewElementWizard_typecomment_deprecated_title;
 	public static String NewElementWizard_typecomment_deprecated_message;
-	
+
 	public static String NewContainerWizardPage_container_label;
 	public static String NewContainerWizardPage_container_button;
 	public static String NewContainerWizardPage_error_EnterContainerName;
@@ -57,9 +59,9 @@ public final class NewWizardMessages extends NLS {
 	public static String NewContainerWizardPage_warning_NotInAScriptProject;
 	public static String NewContainerWizardPage_ChooseSourceContainerDialog_title;
 	public static String NewContainerWizardPage_ChooseSourceContainerDialog_description;
-	
+
 	public static String NewPackageCreationWizard_title;
-	
+
 	public static String NewPackageWizardPage_package_label;
 	public static String NewPackageWizardPage_error_PackageExists;
 	public static String NewPackageWizardPage_error_PackageExistsDifferentCase;
@@ -70,17 +72,17 @@ public final class NewWizardMessages extends NLS {
 	public static String NewPackageWizardPage_info;
 	public static String ProjectWizardFirstPage_atLeastOneInterpreterMustBeConfigured;
 	public static String ProjectWizardFirstPage_host;
-	
+
 	public static String RemoveFromBuildpathAction_ErrorTitle;
-	
+
 	public static String ScriptCapabilityConfigurationPage_title;
 	public static String ScriptCapabilityConfigurationPage_description;
 	public static String ScriptCapabilityConfigurationPage_op_desc_Script;
-	
+
 	public static String NewScriptProjectWizardPage_title;
 	public static String NewScriptProjectWizardPage_description;
 	public static String NewScriptProjectWizardPage_op_desc;
-	
+
 	public static String NewSourceFolderCreationWizard_title;
 	public static String NewSourceFolderCreationWizard_edit_title;
 	public static String NewSourceFolderCreationWizard_link_title;
@@ -109,11 +111,11 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceFolderWizardPage_warning_AddedExclusions;
 	public static String NewSourceFolderWizardPage_ReplaceExistingSourceFolder_label;
 	public static String NewSourceFolderWizardPage_edit_description;
-	
+
 	public static String BuildPathsBlock_tab_source;
 	public static String BuildPathsBlock_tab_projects;
 	public static String BuildPathsBlock_tab_libraries;
-	public static String BuildPathsBlock_tab_order;	
+	public static String BuildPathsBlock_tab_order;
 	public static String BuildPathsBlock_buildpath_up_button;
 	public static String BuildPathsBlock_buildpath_down_button;
 	public static String BuildPathsBlock_buildpath_checkall_button;
@@ -128,7 +130,7 @@ public final class NewWizardMessages extends NLS {
 	public static String BuildPathsBlock_ChooseOutputFolderDialog_description;
 	public static String BuildPathsBlock_RemoveBinariesDialog_title;
 	public static String BuildPathsBlock_RemoveBinariesDialog_description;
-	
+
 	public static String CPListLabelProvider_new;
 	public static String CPListLabelProvider_classcontainer;
 	public static String CPListLabelProvider_twopart;
@@ -144,14 +146,14 @@ public final class NewWizardMessages extends NLS {
 	public static String SourceContainerWorkbookPage_exclusion_added_title;
 	public static String SourceContainerWorkbookPage_exclusion_added_message;
 	public static String SourceContainerWorkbookPage_folders_link_source_button;
-	
+
 	public static String ProjectsWorkbookPage_projects_label;
 	public static String ProjectsWorkbookPage_projects_add_button;
 	public static String ProjectsWorkbookPage_projects_edit_button;
 	public static String ProjectsWorkbookPage_projects_remove_button;
 	public static String ProjectsWorkbookPage_chooseProjects_message;
 	public static String ProjectsWorkbookPage_chooseProjects_title;
-	
+
 	public static String LibrariesWorkbookPage_libraries_label;
 	public static String LibrariesWorkbookPage_libraries_without_label;
 	public static String LibrariesWorkbookPage_libraries_remove_button;
@@ -169,7 +171,7 @@ public final class NewWizardMessages extends NLS {
 	public static String LibrariesWorkbookPage_NewClassFolderDialog_description;
 	public static String LibrariesWorkbookPage_exclusion_added_title;
 	public static String LibrariesWorkbookPage_exclusion_added_message;
-	
+
 	public static String BuildPathDialogAccess_ExistingClassFolderDialog_new_title;
 	public static String BuildPathDialogAccess_ExistingClassFolderDialog_new_description;
 	public static String BuildPathDialogAccess_ZIPArchiveDialog_new_title;
@@ -178,19 +180,17 @@ public final class NewWizardMessages extends NLS {
 	public static String BuildPathDialogAccess_ZIPArchiveDialog_edit_description;
 	public static String BuildPathDialogAccess_ExtZIPArchiveDialog_new_title;
 	public static String BuildPathDialogAccess_ExtZIPArchiveDialog_edit_title;
-	
+
 	public static String NewContainerDialog_error_invalidpath;
 	public static String NewContainerDialog_error_enterpath;
 	public static String NewContainerDialog_error_pathexists;
 	public static String NewSourceFolderDialog_error_invalidpath;
 	public static String NewSourceFolderDialog_error_enterpath;
 	public static String NewSourceFolderDialog_error_pathexists;
-	
-	
+
 	public static String BuildPathSupport_putoncpdialog_title;
 	public static String BuildPathSupport_putoncpdialog_message;
-	
-	
+
 	public static String ExclusionInclusionDialog_title;
 	public static String ExclusionInclusionDialog_description;
 	public static String ExclusionInclusionDialog_description2;
@@ -224,7 +224,7 @@ public final class NewWizardMessages extends NLS {
 	public static String ExclusionInclusionEntryDialog_ChooseExclusionPattern_description;
 	public static String ExclusionInclusionEntryDialog_ChooseInclusionPattern_title;
 	public static String ExclusionInclusionEntryDialog_ChooseInclusionPattern_description;
-	
+
 	public static String AccessRulesDialog_title;
 	public static String AccessRulesDialog_container_description;
 	public static String AccessRulesDialog_project_description;
@@ -239,7 +239,7 @@ public final class NewWizardMessages extends NLS {
 	public static String AccessRulesLabelProvider_kind_accessible;
 	public static String AccessRulesLabelProvider_kind_discouraged;
 	public static String AccessRulesLabelProvider_kind_non_accessible;
-	
+
 	public static String TypeRestrictionEntryDialog_add_title;
 	public static String TypeRestrictionEntryDialog_edit_title;
 	public static String TypeRestrictionEntryDialog_pattern_label;
@@ -251,7 +251,7 @@ public final class NewWizardMessages extends NLS {
 	public static String TypeRestrictionEntryDialog_kind_label;
 	public static String TypeRestrictionEntryDialog_kind_discourraged;
 	public static String TypeRestrictionEntryDialog_kind_non_accessible;
-	
+
 	public static String BuildpathContainerDefaultPage_title;
 	public static String BuildpathContainerDefaultPage_description;
 	public static String BuildpathContainerDefaultPage_path_label;
@@ -265,10 +265,63 @@ public final class NewWizardMessages extends NLS {
 	public static String BuildpathContainerWizard_pagecreationerror_message;
 	public static String BuildpathContainerWizard_new_title;
 	public static String BuildpathContainerWizard_edit_title;
-	
+
+	public static String EditVariableEntryDialog_title;
+	public static String EditVariableEntryDialog_filename_varlabel;
+	public static String EditVariableEntryDialog_filename_variable_button;
+	public static String EditVariableEntryDialog_filename_external_varbutton;
+	public static String EditVariableEntryDialog_extvardialog_title;
+	public static String EditVariableEntryDialog_extvardialog_description;
+	public static String EditVariableEntryDialog_filename_error_notvalid;
+	public static String EditVariableEntryDialog_filename_error_filenotexists;
+	public static String EditVariableEntryDialog_filename_error_varnotexists;
+	public static String EditVariableEntryDialog_filename_error_deviceinpath;
+	public static String EditVariableEntryDialog_filename_warning_varempty;
+	public static String EditVariableEntryDialog_filename_error_alreadyexists;
+
+	public static String VariableBlock_vars_label;
+	public static String VariableBlock_vars_add_button;
+	public static String VariableBlock_vars_edit_button;
+	public static String VariableBlock_vars_remove_button;
+	public static String VariableBlock_operation_desc;
+	public static String VariableBlock_needsbuild_title;
+	public static String VariableBlock_needsbuild_message;
+	public static String VariableBlock_variableSettingError_titel;
+	public static String VariableBlock_variableSettingError_message;
+	public static String VariablePathDialogField_variabledialog_title;
+
+	public static String BPVariableElementLabelProvider_empty;
+
+	public static String VariableCreationDialog_titlenew;
+	public static String VariableCreationDialog_titleedit;
+	public static String VariableCreationDialog_name_label;
+	public static String VariableCreationDialog_path_label;
+	public static String VariableCreationDialog_path_file_button;
+	public static String VariableCreationDialog_path_dir_button;
+	public static String VariableCreationDialog_error_entername;
+	public static String VariableCreationDialog_error_whitespace;
+	public static String VariableCreationDialog_error_invalidname;
+	public static String VariableCreationDialog_error_nameexists;
+	public static String VariableCreationDialog_error_invalidpath;
+	public static String VariableCreationDialog_warning_pathnotexists;
+	public static String VariableCreationDialog_extzipdialog_text;
+	public static String VariableCreationDialog_extdirdialog_text;
+	public static String VariableCreationDialog_extdirdialog_message;
+
+	public static String NewVariableEntryDialog_title;
+	public static String NewVariableEntryDialog_vars_extend;
+	public static String NewVariableEntryDialog_configbutton_label;
+	public static String NewVariableEntryDialog_vars_label;
+	public static String NewVariableEntryDialog_ExtensionDialog_title;
+	public static String NewVariableEntryDialog_ExtensionDialog_description;
+	public static String NewVariableEntryDialog_info_isfolder;
+	public static String NewVariableEntryDialog_info_notexists;
+	public static String NewVariableEntryDialog_info_noselection;
+	public static String NewVariableEntryDialog_info_selected;
+
 	public static String FolderSelectionDialog_button;
 	public static String MultipleFolderSelectionDialog_button;
-	
+
 	public static String CPListLabelProvider_none;
 	public static String CPListLabelProvider_all;
 	public static String CPListLabelProvider_exclusion_filter_label;
@@ -281,11 +334,11 @@ public final class NewWizardMessages extends NLS {
 	public static String CPListLabelProvider_project_access_rules_no_rules;
 	public static String CPListLabelProvider_project_access_rules_not_combined;
 	public static String CPListLabelProvider_access_rules_disabled;
-	
+
 	public static String NewSourceFolderDialog_useproject_button;
 	public static String NewSourceFolderDialog_usefolder_button;
 	public static String NewSourceFolderDialog_sourcefolder_label;
-	
+
 	public static String ScriptProjectWizardFirstPage_NameGroup_label_text;
 	public static String ScriptProjectWizardFirstPage_LocationGroup_title;
 	public static String ScriptProjectWizardFirstPage_LocationGroup_external_desc;
@@ -299,14 +352,14 @@ public final class NewWizardMessages extends NLS {
 	public static String ScriptProjectWizardFirstPage_Message_invalidDirectory;
 	public static String ScriptProjectWizardFirstPage_Message_cannotCreateInWorkspace;
 	public static String ScriptProjectWizardFirstPage_page_pageName;
-	
+
 	public static String ScriptProjectWizardFirstPage_page_title;
 	public static String ScriptProjectWizardFirstPage_page_description;
-			
+
 	public static String HintTextGroup_Exception_Title;
 	public static String HintTextGroup_Exception_Title_refresh;
 	public static String HintTextGroup_NoAction;
-	
+
 	public static String NewSourceContainerWorkbookPage_HintTextGroup_title;
 	public static String NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_tooltip;
 	public static String NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label;
@@ -318,7 +371,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label;
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_tooltip;
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_label;
-	
+
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddZIPCP_tooltip;
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddZIPCP_label;
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip;
@@ -338,7 +391,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceContainerWorkbookPage_ToolBar_Link_label;
 	public static String NewSourceContainerWorkbookPage_ToolBar_CreateSrcFolder_label;
 	public static String NewSourceContainerWorkbookPage_ToolBar_CreateSrcFolder_tooltip;
-	
+
 	public static String NewFolderDialog_linkTargetNonExistent;
 	public static String NewFolderDialog_linkTargetNotFolder;
 	public static String NewFolderDialog_folderNameEmpty;
@@ -347,14 +400,14 @@ public final class NewWizardMessages extends NLS {
 	public static String NewFolderDialog_internalError;
 	public static String NewFolderDialog_progress;
 	public static String NewFolderDialog_createIn;
-	
+
 	public static String LinkFolderDialog_title;
 	public static String LinkFolderDialog_createIn;
 	public static String LinkFolderDialog_folderNameGroup_label;
 	public static String LinkFolderDialog_dependenciesGroup_locationLabel_desc;
 	public static String LinkFolderDialog_dependenciesGroup_browseButton_desc;
 	public static String LinkFolderDialog_dependenciesGroup_variables_desc;
-	
+
 	public static String PackageExplorerActionGroup_NoAction_File;
 	public static String PackageExplorerActionGroup_NoAction_DefaultPackage;
 	public static String PackageExplorerActionGroup_NoAction_NullSelection;
@@ -389,11 +442,11 @@ public final class NewWizardMessages extends NLS {
 	public static String PackageExplorerActionGroup_FormText_Default_Reset;
 	public static String PackageExplorerActionGroup_FormText_Default_ResetAll;
 	public static String PackageExplorerActionGroup_FormText_createNewSourceFolder;
-	
+
 	public static String DialogPackageExplorer_LabelProvider_Excluded;
 	public static String DialogPackageExplorer_LabelProvider_SingleExcluded;
 	public static String DialogPackageExplorer_LabelProvider_MultiExcluded;
-	
+
 	public static String BuildpathModifier_Monitor_AddToBuildpath;
 	public static String BuildpathModifier_Monitor_RemoveFromBuildpath;
 	public static String BuildpathModifier_Monitor_ResetFilters;
@@ -410,8 +463,8 @@ public final class NewWizardMessages extends NLS {
 	public static String BuildpathModifier_Monitor_ComparePaths;
 	public static String BuildpathModifier_Error_NoNatures;
 
-//	public static String ClassPathDetector_error_closing_file;
-	
+	// public static String ClassPathDetector_error_closing_file;
+
 	public static String ScriptProjectWizardSecondPage_error_title;
 	public static String ScriptProjectWizardSecondPage_error_message;
 	public static String ScriptProjectWizardSecondPage_problem_backup;
@@ -423,16 +476,14 @@ public final class NewWizardMessages extends NLS {
 	public static String ScriptProjectWizardSecondPage_problem_restore_project;
 	public static String ScriptProjectWizardSecondPage_problem_restore_buildpath;
 	public static String ScriptProjectWizardFirstPage_directory_message;
-	
-	
+
 	public static String GenerateBuildPathActionGroup_no_action_available;
 
-	
 	public static String CPListLabelProvider_non_modifiable_attribute;
 	public static String CPListLabelProvider_access_rules_label;
 	public static String CPListLabelProvider_container_access_rules;
 	public static String CPListLabelProvider_container_no_access_rules;
-	
+
 	public static String AccessRulesDialog_severity_info_with_link;
 	public static String AccessRulesDialog_severity_info_no_link;
 	public static String AccessRulesDialog_severity_error;
@@ -448,7 +499,7 @@ public final class NewWizardMessages extends NLS {
 	public static String BuildpathModifierQueries_confirm_remove_linked_folder_message;
 	public static String BuildpathModifierQueries_delete_linked_folder;
 	public static String BuildpathModifierQueries_do_not_delete_linked_folder;
-	
+
 	public static String UserLibraryWizardPage_title;
 	public static String UserLibraryWizardPage_list_config_button;
 	public static String UserLibraryWizardPage_list_label;
@@ -457,7 +508,7 @@ public final class NewWizardMessages extends NLS {
 	public static String UserLibraryWizardPage_error_selectentry;
 	public static String UserLibraryWizardPage_error_selectonlyone;
 	public static String UserLibraryWizardPage_error_alreadyoncp;
-	
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, NewWizardMessages.class);
 	}

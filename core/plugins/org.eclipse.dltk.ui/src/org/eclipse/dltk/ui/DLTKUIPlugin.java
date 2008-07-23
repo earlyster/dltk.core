@@ -18,27 +18,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IBuffer;
-import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IModelElementVisitor;
-import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.IScriptFolder;
-import org.eclipse.dltk.core.IScriptModel;
-import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.IShutdownListener;
-import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ISourceReference;
-import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.core.runtime.*;
+import org.eclipse.dltk.core.*;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
@@ -49,12 +30,7 @@ import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
 import org.eclipse.dltk.internal.ui.IDLTKStatusConstants;
-import org.eclipse.dltk.internal.ui.editor.DocumentAdapter;
-import org.eclipse.dltk.internal.ui.editor.EditorUtility;
-import org.eclipse.dltk.internal.ui.editor.ISourceModuleDocumentProvider;
-import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
-import org.eclipse.dltk.internal.ui.editor.SourceModuleDocumentProvider;
-import org.eclipse.dltk.internal.ui.editor.WorkingCopyManager;
+import org.eclipse.dltk.internal.ui.editor.*;
 import org.eclipse.dltk.internal.ui.text.hover.EditorTextHoverDescriptor;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.BuildpathAttributeConfigurationDescriptors;
 import org.eclipse.dltk.launching.sourcelookup.DBGPSourceModule;
@@ -68,16 +44,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchListener;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.*;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -92,6 +59,14 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "org.eclipse.dltk.ui"; //$NON-NLS-1$
 	public static final String ID_SCRIPTEXPLORER = "org.eclipse.dltk.ui.ScriptExplorer"; //$NON-NLS-1$
 	public static final String ID_TYPE_HIERARCHY = "org.eclipse.dltk.ui.TypeHierarchy"; //$NON-NLS-1$
+	/**
+	 * The preference page id of the build path variables preference page (value
+	 * 
+	 * <code>"org.eclipse.dltk.ui.preferences.BuildpathVariablesPreferencePage"</code>
+	 * ).
+	 * 
+	 */
+	public static final String ID_BUILDPATH_VARIABLES_PREFERENCE_PAGE = "org.eclipse.dltk.ui.preferences.BuildpathVariablesPreferencePage"; //$NON-NLS-1$
 	// The shared instance.
 	private static DLTKUIPlugin plugin;
 
@@ -208,11 +183,11 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	}
 
 	private final ListenerList shutdownListeners = new ListenerList();
-	
+
 	public void addShutdownListener(IShutdownListener listener) {
 		shutdownListeners.add(listener);
 	}
-	
+
 	/**
 	 * This method is called when the plug-in is stopped
 	 */
