@@ -13,6 +13,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.dltk.core.tests.buildpath.BuildpathTests;
+import org.eclipse.dltk.core.tests.compiler.CompilerCharOperationTests;
 import org.eclipse.dltk.core.tests.compiler.CompilerUtilTests;
 import org.eclipse.dltk.core.tests.ddp.CoreDDPTests;
 import org.eclipse.dltk.core.tests.launching.EnvironmentResolverTests;
@@ -30,6 +31,7 @@ public class AllTests {
 				"Test for org.eclipse.dltk.core.tests.model");
 		// $JUnit-BEGIN$
 		suite.addTest(new TestSuite(CompilerUtilTests.class));
+		suite.addTest(new TestSuite(CompilerCharOperationTests.class));
 		suite.addTest(new TestSuite(InternalCoreUtilTest.class));
 		suite.addTest(BuildpathTests.suite());
 
