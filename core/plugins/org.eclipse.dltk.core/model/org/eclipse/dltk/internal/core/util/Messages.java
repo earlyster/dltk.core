@@ -22,11 +22,10 @@ public class Messages extends NLS {
 	public static String hierarchy_nullFocusType;
 	public static String hierarchy_creating;
 	public static String hierarchy_creatingOnType;
-	
-	
+
 	public static String build_readStateProgress;
 	public static String build_wrongFileFormat;
-	
+
 	public static String buildpath_buildPath;
 	public static String buildpath_cannotNestEntryInEntry;
 	public static String buildpath_cannotNestEntryInEntryNoExclusion;
@@ -55,12 +54,12 @@ public class Messages extends NLS {
 	public static String buildpath_unknownKind;
 	public static String buildpath_xmlFormatError;
 	public static String buildpath_duplicateEntryExtraAttribute;
-	
-	//convention
+
+	// convention
 	public static String convention_unit_nullName;
-	public static String convention_unit_notScriptName;						
-	
-	//status
+	public static String convention_unit_notScriptName;
+
+	// status
 	public static String status_cannotUseDeviceOnPath;
 	public static String status_coreException;
 	public static String status_IOException;
@@ -77,16 +76,15 @@ public class Messages extends NLS {
 	public static String status_nameCollision;
 	public static String status_noLocalContents;
 	public static String status_readOnly;
-	public static String status_targetException;	
+	public static String status_targetException;
 	public static String status_updateConflict;
-	
+
 	//
 	public static String element_doesNotExist;
 	public static String element_notOnClasspath;
 	public static String element_reconciling;
 	public static String element_nullName;
-	
-	
+
 	// operations
 	public static String operation_needElements;
 	public static String operation_needName;
@@ -113,81 +111,92 @@ public class Messages extends NLS {
 	public static String restrictedAccess_field_library;
 	public static String restrictedAccess_method_project;
 	public static String restrictedAccess_method_library;
-	
+
 	public static String file_badFormat;
 	public static String file_notFound;
-	
+
 	public static String path_mustBeAbsolute;
 
 	public static String savedState_jobName;
-	
+
 	public static String workingCopy_commit;
-	
+
 	public static String cache_invalidLoadFactor;
-	
+
 	public static String manager_filesToIndex;
 	public static String manager_indexingInProgress;
-	
+
 	public static String exception_wrongFormat;
-	
-	
+
 	public static String engine_searching;
 	public static String engine_searching_indexing;
 	public static String engine_searching_matching;
 
 	public static String process_name;
-	
-	
+
 	public static String build_saveStateProgress;
 	public static String build_saveStateComplete;
 	public static String build_cannotSaveState;
 	public static String build_cannotSaveStates;
-	
+
 	private Messages() {
 		// Do not instantiate
 	}
-	
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
 	}
-	
+
 	/**
-	 * Bind the given message's substitution locations with the given string values.
+	 * Bind the given message's substitution locations with the given string
+	 * values.
 	 * 
-	 * @param message the message to be manipulated
+	 * @param message
+	 *            the message to be manipulated
 	 * @return the manipulated String
 	 */
 	public static String bind(String message) {
 		return bind(message, null);
 	}
-	
+
 	/**
-	 * Bind the given message's substitution locations with the given string values.
+	 * Bind the given message's substitution locations with the given string
+	 * values.
 	 * 
-	 * @param message the message to be manipulated
-	 * @param binding the object to be inserted into the message
+	 * @param message
+	 *            the message to be manipulated
+	 * @param binding
+	 *            the object to be inserted into the message
 	 * @return the manipulated String
 	 */
 	public static String bind(String message, Object binding) {
-		return bind(message, new Object[] {binding});
-	}	
-	/**
-	 * Bind the given message's substitution locations with the given string values.
-	 * 
-	 * @param message the message to be manipulated
-	 * @param binding1 An object to be inserted into the message
-	 * @param binding2 A second object to be inserted into the message
-	 * @return the manipulated String
-	 */
-	public static String bind(String message, Object binding1, Object binding2) {
-		return bind(message, new Object[] {binding1, binding2});
+		return bind(message, new Object[] { binding });
 	}
 
 	/**
-	 * Bind the given message's substitution locations with the given string values.
+	 * Bind the given message's substitution locations with the given string
+	 * values.
 	 * 
-	 * @param message the message to be manipulated
-	 * @param bindings An array of objects to be inserted into the message
+	 * @param message
+	 *            the message to be manipulated
+	 * @param binding1
+	 *            An object to be inserted into the message
+	 * @param binding2
+	 *            A second object to be inserted into the message
+	 * @return the manipulated String
+	 */
+	public static String bind(String message, Object binding1, Object binding2) {
+		return bind(message, new Object[] { binding1, binding2 });
+	}
+
+	/**
+	 * Bind the given message's substitution locations with the given string
+	 * values.
+	 * 
+	 * @param message
+	 *            the message to be manipulated
+	 * @param bindings
+	 *            An array of objects to be inserted into the message
 	 * @return the manipulated String
 	 */
 	public static String bind(String message, Object[] bindings) {
