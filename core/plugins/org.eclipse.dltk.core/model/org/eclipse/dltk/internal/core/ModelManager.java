@@ -9,82 +9,21 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.zip.ZipFile;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.ISaveContext;
-import org.eclipse.core.resources.ISaveParticipant;
-import org.eclipse.core.resources.ISavedState;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Plugin;
-import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.preferences.DefaultScope;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IPreferencesService;
-import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.core.runtime.preferences.*;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.util.HashtableOfObjectToInt;
-import org.eclipse.dltk.core.BuildpathContainerInitializer;
-import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
-import org.eclipse.dltk.core.IAccessRule;
-import org.eclipse.dltk.core.IBuildpathAttribute;
-import org.eclipse.dltk.core.IBuildpathContainer;
-import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IBuiltinModuleProvider;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IModelStatus;
-import org.eclipse.dltk.core.IParent;
-import org.eclipse.dltk.core.IProblemRequestor;
-import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.IScriptFolder;
-import org.eclipse.dltk.core.IScriptModel;
-import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ISourceModuleInfoCache;
-import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.*;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.builder.ScriptBuilder;
 import org.eclipse.dltk.internal.core.search.DLTKWorkspaceScope;
@@ -95,16 +34,28 @@ import org.osgi.service.prefs.BackingStoreException;
 
 public class ModelManager implements ISaveParticipant {
 	private final static int CONTAINERS_FILE_VERSION = 1;
+	public final static String BP_VARIABLE_PREFERENCES_PREFIX = DLTKCore.PLUGIN_ID
+			+ ".buildpathVariable."; //$NON-NLS-1$
 	public final static String BP_CONTAINER_PREFERENCES_PREFIX = DLTKCore.PLUGIN_ID
 			+ ".buildpathContainer."; //$NON-NLS-1$
 	public final static String BP_USERLIBRARY_PREFERENCES_PREFIX = DLTKCore.PLUGIN_ID
 			+ ".userLibrary."; //$NON-NLS-1$
 	public final static String BP_ENTRY_IGNORE = "##<cp entry ignore>##"; //$NON-NLS-1$
 	public final static IPath BP_ENTRY_IGNORE_PATH = new Path(BP_ENTRY_IGNORE);
+	public final static String TRUE = "true"; //$NON-NLS-1$
 	/**
 	 * Unique handle onto the Model
 	 */
 	final Model model = new Model();
+	/**
+	 * Buildpath variables pool
+	 */
+	public HashMap variables = new HashMap(5);
+	public HashSet variablesWithInitializer = new HashSet(5);
+	public HashSet readOnlyVariables = new HashSet(5);
+	public HashMap previousSessionVariables = new HashMap(5);
+	private ThreadLocal variableInitializationInProgress = new ThreadLocal();
+
 	/**
 	 * Buildpath containers pool
 	 */
@@ -113,6 +64,13 @@ public class ModelManager implements ISaveParticipant {
 	private ThreadLocal containerInitializationInProgress = new ThreadLocal();
 	public boolean batchContainerInitializations = false;
 	public HashMap containerInitializersCache = new HashMap(5);
+	/**
+	 * Special value used for recognizing ongoing initialization and breaking
+	 * initialization cycles
+	 */
+	public final static IPath VARIABLE_INITIALIZATION_IN_PROGRESS = new Path(
+			"Variable Initialization In Progress"); //$NON-NLS-1$
+
 	public final static IBuildpathContainer CONTAINER_INITIALIZATION_IN_PROGRESS = new IBuildpathContainer() {
 		public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 			return null;
@@ -163,7 +121,26 @@ public class ModelManager implements ISaveParticipant {
 		}
 
 		public void rememberExternalLibTimestamps() {
-			// TODO remember external lib timestamps
+			IBuildpathEntry[] buildpath = this.resolvedBuildpath;
+			if (buildpath == null)
+				return;
+			Map externalTimeStamps = ModelManager.getModelManager().deltaState
+					.getExternalLibTimeStamps();
+			for (int i = 0, length = buildpath.length; i < length; i++) {
+				IBuildpathEntry entry = buildpath[i];
+				if (entry.getEntryKind() == IBuildpathEntry.BPE_LIBRARY) {
+					IPath path = entry.getPath();
+					if (externalTimeStamps.get(path) == null) {
+						Object target = Model.getTarget(ResourcesPlugin
+								.getWorkspace().getRoot(), path, true);
+						if (target instanceof IFileHandle) {
+							long timestamp = DeltaProcessor
+									.getTimeStamp((IFileHandle) target);
+							externalTimeStamps.put(path, new Long(timestamp));
+						}
+					}
+				}
+			}
 		}
 
 		// updating raw buildpath need to flush obsoleted cached information
@@ -259,6 +236,12 @@ public class ModelManager implements ISaveParticipant {
 	public static boolean VERBOSE = DLTKCore.VERBOSE_MODEL_MANAGER;
 	public static boolean BP_RESOLVE_VERBOSE = DLTKCore.VERBOSE_BP_RESOLVE;
 	/**
+	 * Name of the extension point for contributing buildpath variable
+	 * initializers
+	 */
+	public static final String BPVARIABLE_INITIALIZER_EXTPOINT_ID = "buildpathVariableInitializer"; //$NON-NLS-1$
+
+	/**
 	 * Name of the extension point for contributing buildpath container
 	 * initializers
 	 */
@@ -320,6 +303,8 @@ public class ModelManager implements ISaveParticipant {
 	Map workspaceScope = null;
 	public static final String DELTA_LISTENER_PERF = DLTKCore.PLUGIN_ID
 			+ "/perf/deltalistener"; //$NON-NLS-1$
+
+	private ExternalFoldersManager externalFoldersManager = new ExternalFoldersManager();
 
 	/**
 	 * Constructs a new ModelManager
@@ -795,6 +780,10 @@ public class ModelManager implements ISaveParticipant {
 
 	public DeltaProcessor getDeltaProcessor() {
 		return this.deltaState.getDeltaProcessor();
+	}
+
+	public static ExternalFoldersManager getExternalManager() {
+		return MANAGER.externalFoldersManager;
 	}
 
 	public IndexManager getIndexManager() {
@@ -1330,6 +1319,109 @@ public class ModelManager implements ISaveParticipant {
 		}
 	}
 
+	public synchronized IPath variableGet(String variableName) {
+		// check initialization in progress first
+		HashSet initializations = variableInitializationInProgress();
+		if (initializations.contains(variableName)) {
+			return VARIABLE_INITIALIZATION_IN_PROGRESS;
+		}
+		return (IPath) this.variables.get(variableName);
+	}
+
+	private synchronized IPath variableGetDefaultToPreviousSession(
+			String variableName) {
+		IPath variablePath = (IPath) this.variables.get(variableName);
+		if (variablePath == null)
+			return getPreviousSessionVariable(variableName);
+		return variablePath;
+	}
+
+	/*
+	 * Returns the set of variable names that are being initialized in the
+	 * current thread.
+	 */
+	private HashSet variableInitializationInProgress() {
+		HashSet initializations = (HashSet) this.variableInitializationInProgress
+				.get();
+		if (initializations == null) {
+			initializations = new HashSet();
+			this.variableInitializationInProgress.set(initializations);
+		}
+		return initializations;
+	}
+
+	public synchronized String[] variableNames() {
+		int length = this.variables.size();
+		String[] result = new String[length];
+		Iterator vars = this.variables.keySet().iterator();
+		int index = 0;
+		while (vars.hasNext()) {
+			result[index++] = (String) vars.next();
+		}
+		return result;
+	}
+
+	public synchronized void variablePut(String variableName, IPath variablePath) {
+
+		// set/unset the initialization in progress
+		HashSet initializations = variableInitializationInProgress();
+		if (variablePath == VARIABLE_INITIALIZATION_IN_PROGRESS) {
+			initializations.add(variableName);
+
+			// do not write out intermediate initialization value
+			return;
+		} else {
+			initializations.remove(variableName);
+
+			// update cache - do not only rely on listener refresh
+			if (variablePath == null) {
+				// if path is null, record that the variable was removed to
+				// avoid asking the initializer to initialize it again
+				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=112609
+				this.variables.put(variableName, BP_ENTRY_IGNORE_PATH);
+				// clean other variables caches
+				this.variablesWithInitializer.remove(variableName);
+			} else {
+				this.variables.put(variableName, variablePath);
+			}
+			// discard obsoleted information about previous session
+			this.previousSessionVariables.remove(variableName);
+		}
+	}
+
+	public void variablePreferencesPut(String variableName, IPath variablePath) {
+		String variableKey = BP_VARIABLE_PREFERENCES_PREFIX + variableName;
+		if (variablePath == null) {
+			getInstancePreferences().remove(variableKey);
+		} else {
+			getInstancePreferences().put(variableKey, variablePath.toString());
+		}
+		try {
+			getInstancePreferences().flush();
+		} catch (BackingStoreException e) {
+			// ignore exception
+		}
+	}
+
+	/*
+	 * Optimize startup case where 1 variable is initialized at a time with the
+	 * same value as on shutdown.
+	 */
+	public boolean variablePutIfInitializingWithSameValue(
+			String[] variableNames, IPath[] variablePaths) {
+		if (variableNames.length != 1)
+			return false;
+		String variableName = variableNames[0];
+		IPath oldPath = variableGetDefaultToPreviousSession(variableName);
+		if (oldPath == null)
+			return false;
+		IPath newPath = variablePaths[0];
+		if (!oldPath.equals(newPath))
+			return false;
+		variablePut(variableName, newPath);
+		return true;
+	}
+
 	/**
 	 * Sets the last built state for the given project, or null to reset it.
 	 */
@@ -1712,6 +1804,20 @@ public class ModelManager implements ISaveParticipant {
 			}
 		}
 		return null; // break cycle if none found
+	}
+
+	/**
+	 * Returns a persisted container from previous session if any
+	 */
+	public IPath getPreviousSessionVariable(String variableName) {
+		IPath previousPath = (IPath) this.previousSessionVariables
+				.get(variableName);
+		if (previousPath != null) {
+			// if (BP_RESOLVE_VERBOSE_ADVANCED)
+			// verbose_reentering_variable_access(variableName, previousPath);
+			return previousPath;
+		}
+		return null; // break cycle
 	}
 
 	public synchronized void containerPut(IScriptProject project,
@@ -2379,8 +2485,8 @@ public class ModelManager implements ISaveParticipant {
 	public void loadContainers() throws CoreException {
 		// backward compatibility, load variables and containers from
 		// preferences into cache
-		loadContainers(getDefaultPreferences());
-		loadContainers(getInstancePreferences());
+		loadVariablesAndContainers(getDefaultPreferences());
+		loadVariablesAndContainers(getInstancePreferences());
 		// load variables and containers from saved file into cache
 		File file = getContainersFile();
 		DataInputStream in = null;
@@ -2414,14 +2520,33 @@ public class ModelManager implements ISaveParticipant {
 		containersReset(getRegisteredContainerIDs());
 	}
 
-	private void loadContainers(IEclipsePreferences preferences) {
+	private void loadVariablesAndContainers(IEclipsePreferences preferences) {
 		try {
 			// only get variable from preferences not set to their default
 			String[] propertyNames = preferences.keys();
-
+			int variablePrefixLength = BP_VARIABLE_PREFERENCES_PREFIX.length();
 			for (int i = 0; i < propertyNames.length; i++) {
 				String propertyName = propertyNames[i];
-				if (propertyName.startsWith(BP_CONTAINER_PREFERENCES_PREFIX)) {
+				if (propertyName.startsWith(BP_VARIABLE_PREFERENCES_PREFIX)) {
+					String varName = propertyName
+							.substring(variablePrefixLength);
+					String propertyValue = preferences.get(propertyName, null);
+					if (propertyValue != null) {
+						String pathString = propertyValue.trim();
+
+						if (BP_ENTRY_IGNORE.equals(pathString)) {
+							// cleanup old preferences
+							preferences.remove(propertyName);
+							continue;
+						}
+
+						// add variable to table
+						IPath varPath = new Path(pathString);
+						this.variables.put(varName, varPath);
+						this.previousSessionVariables.put(varName, varPath);
+					}
+				} else if (propertyName
+						.startsWith(BP_CONTAINER_PREFERENCES_PREFIX)) {
 					String propertyValue = preferences.get(propertyName, null);
 					if (propertyValue != null) {
 						// cleanup old preferences

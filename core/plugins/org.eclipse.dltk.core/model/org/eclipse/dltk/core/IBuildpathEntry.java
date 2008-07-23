@@ -32,7 +32,13 @@ public interface IBuildpathEntry {
 	 * to be compiled.
 	 */
 	int BPE_SOURCE = 3;
-	
+
+	/**
+	 * Entry kind constant describing a buildpath entry defined using a path
+	 * that begins with a buildpath variable reference.
+	 */
+	int BPE_VARIABLE = 4;
+
 	/**
 	 * Entry kind constant describing a buildpath entry representing
 	 * a name buildpath container.

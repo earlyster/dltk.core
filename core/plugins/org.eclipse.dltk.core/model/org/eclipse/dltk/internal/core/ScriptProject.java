@@ -9,62 +9,20 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ProjectScope;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.AssertionFailedException;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.dltk.compiler.util.ObjectVector;
-import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
-import org.eclipse.dltk.core.IBuildpathContainer;
-import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IModelMarker;
-import org.eclipse.dltk.core.IModelStatus;
-import org.eclipse.dltk.core.IModelStatusConstants;
-import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.IRegion;
-import org.eclipse.dltk.core.IScriptFolder;
-import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.ISearchableEnvironment;
-import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.IType;
-import org.eclipse.dltk.core.ITypeHierarchy;
-import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.*;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -234,17 +192,18 @@ public class ScriptProject extends Openable implements IScriptProject {
 		}
 	}
 
-	// /*
-	// * Returns the cached resolved buildpath, or compute it ignoring
-	// unresolved
-	// * entries and cache it.
-	// */
+	/*
+	 * Returns the cached resolved buildpath, or compute it ignoring unresolved
+	 * entries and cache it.
+	 */
 	public IBuildpathEntry[] getResolvedBuildpath() throws ModelException {
-		return getResolvedBuildpath(true/* ignoreUnresolvedEntry */,
-				false/* don't generateMarkerOnError */, false/*
-		 * don't
-		 * returnResolutionInProgress
-		 */); // force
+		return getResolvedBuildpath(true/* ignoreUnresolvedEntry */, false/*
+																		 * don't
+																		 * generateMarkerOnError
+																		 */,
+				false/*
+					 * don't returnResolutionInProgress
+					 */); // force
 		// the
 		// reverse
 		// rawEntry
@@ -376,9 +335,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 			if (generateMarkerOnError || !ignoreUnresolvedEntry) {
 				status = BuildpathEntry.validateBuildpathEntry(this, rawEntry,
 						false /*
-				 * do not recurse in containers, done later to
-				 * accumulate
-				 */);
+							 * do not recurse in containers, done later to
+							 * accumulate
+							 */);
 				if (generateMarkerOnError && !status.isOK()) {
 					if (status.getCode() == IModelStatusConstants.INVALID_PATH
 							&& ((BuildpathEntry) rawEntry).isOptional())
@@ -485,8 +444,11 @@ public class ScriptProject extends Openable implements IScriptProject {
 	public IBuildpathEntry[] getExpandedBuildpath(
 			boolean ignoreUnresolvedVariable) throws ModelException {
 
-		return getExpandedBuildpath(ignoreUnresolvedVariable,
-				false/* don't create markers */, null);
+		return getExpandedBuildpath(ignoreUnresolvedVariable, false/*
+																	 * don't
+																	 * create
+																	 * markers
+																	 */, null);
 	}
 
 	/**
@@ -545,9 +507,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 				generateMarkerOnError, null /* no reverse map */)
 				: getResolvedBuildpath(ignoreUnresolvedVariable,
 						generateMarkerOnError, false/*
-				 * don't
-				 * returnResolutionInProgress
-				 */);
+													 * don't
+													 * returnResolutionInProgress
+													 */);
 
 		IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
 		boolean isInitialProject = referringEntry == null;
@@ -582,9 +544,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 							scriptProject.computeExpandedBuildpath(
 									combinedEntry, ignoreUnresolvedVariable,
 									false /*
-									 * no marker when recursing in
-									 * prereq
-									 */, rootIDs, accumulatedEntries,
+										 * no marker when recursing in prereq
+										 */, rootIDs, accumulatedEntries,
 									preferredBuildpaths);
 						}
 					}
@@ -846,10 +807,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 		ArrayList prerequisites = new ArrayList();
 		// need resolution
 		entries = getResolvedBuildpath(entries, true, false, null/*
-		 * no
-		 * reverse
-		 * map
-		 */);
+																 * no reverse
+																 * map
+																 */);
 		for (int i = 0, length = entries.length; i < length; i++) {
 			IBuildpathEntry entry = entries[i];
 			if (entry.getEntryKind() == IBuildpathEntry.BPE_PROJECT) {
@@ -1012,8 +972,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 		if (projectCache != null) {
 			IProjectFragment[] newRoots = computeProjectFragments(buildpath,
 					true, null /*
-			 * no reverse map
-			 */);
+								 * no reverse map
+								 */);
 			checkIdentical: { // compare all pkg fragment root lists
 				IProjectFragment[] oldRoots = projectCache.allProjectFragmentCache;
 				if (oldRoots.length == newRoots.length) {
@@ -1028,10 +988,10 @@ public class ScriptProject extends Openable implements IScriptProject {
 		}
 		info.setForeignResources(null);
 		info.setChildren(computeProjectFragments(buildpath, false, null /*
-		 * no
-		 * reverse
-		 * map
-		 */));
+																		 * no
+																		 * reverse
+																		 * map
+																		 */));
 	}
 
 	public IBuildpathEntry[] getRawBuildpath() throws ModelException {
@@ -1073,11 +1033,11 @@ public class ScriptProject extends Openable implements IScriptProject {
 	protected IBuildpathEntry[] readBuildpathFile(boolean createMarker,
 			boolean logProblems) {
 		return readBuildpathFile(createMarker, logProblems, null/*
-		 * not
-		 * interested in
-		 * unknown
-		 * elements
-		 */);
+																 * not
+																 * interested in
+																 * unknown
+																 * elements
+																 */);
 	}
 
 	protected IBuildpathEntry[] readBuildpathFile(boolean createMarker,
@@ -1213,12 +1173,12 @@ public class ScriptProject extends Openable implements IScriptProject {
 	protected IBuildpathEntry[] decodeBuildpath(String xmlBuildpath,
 			boolean createMarker, boolean logProblems) {
 		return decodeBuildpath(xmlBuildpath, createMarker, logProblems, null/*
-		 * not
-		 * interested
-		 * in
-		 * unknown
-		 * elements
-		 */);
+																			 * not
+																			 * interested
+																			 * in
+																			 * unknown
+																			 * elements
+																			 */);
 	}
 
 	/**
@@ -1359,11 +1319,11 @@ public class ScriptProject extends Openable implements IScriptProject {
 				return null;
 			}
 			return BuildpathEntry.elementDecode(node, this, null/*
-			 * not
-			 * interested in
-			 * unknown
-			 * elements
-			 */);
+																 * not
+																 * interested in
+																 * unknown
+																 * elements
+																 */);
 		} catch (IOException e) {
 			// bad format
 			return null;
@@ -1391,7 +1351,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 			byte[] bytes = Util.getResourceContentsAsByteArray(rscFile);
 			try {
 				property = new String(bytes,
-						org.eclipse.dltk.compiler.util.Util.UTF_8); // .buildpath
+						org.eclipse.dltk.compiler.util.Util.UTF_8); //.buildpath
 				// always
 				// encoded
 				// with
@@ -1409,9 +1369,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 			URI location = rscFile.getLocationURI();
 			if (location != null) {
 				File file = Util.toLocalFile(location, null/*
-				 * no progress
-				 * monitor available
-				 */);
+															 * no progress
+															 * monitor available
+															 */);
 				if (file != null && file.exists()) {
 					byte[] bytes;
 					try {
@@ -1422,7 +1382,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 					}
 					try {
 						property = new String(bytes,
-								org.eclipse.dltk.compiler.util.Util.UTF_8); // .buildpath
+								org.eclipse.dltk.compiler.util.Util.UTF_8); // .
+						// buildpath
 						// always
 						// encoded
 						// with
@@ -1468,13 +1429,14 @@ public class ScriptProject extends Openable implements IScriptProject {
 			return false;
 		Map unknownElements = new HashMap();
 		IBuildpathEntry[] fileEntries = readBuildpathFile(false /*
-		 * don't create
-		 * markers
-		 */, false/*
-		 * don't
-		 * log
-		 * problems
-		 */, unknownElements);
+																 * don't create
+																 * markers
+																 */, false/*
+																		 * don't
+																		 * log
+																		 * problems
+																		 */,
+				unknownElements);
 		if (fileEntries != null
 				&& isBuildpathEqualsTo(newBuildpath, fileEntries)) {
 			// no need to save it, it is the same
@@ -1515,7 +1477,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 		IFile rscFile = this.project.getFile(key);
 		byte[] bytes = null;
 		try {
-			bytes = value.getBytes(org.eclipse.dltk.compiler.util.Util.UTF_8); // .buildpath
+			bytes = value.getBytes(org.eclipse.dltk.compiler.util.Util.UTF_8); // .
+			// buildpath
 			// always
 			// encoded
 			// with
@@ -1577,9 +1540,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 			ByteArrayOutputStream s = new ByteArrayOutputStream();
 			OutputStreamWriter writer = new OutputStreamWriter(s, "UTF8"); //$NON-NLS-1$
 			XMLWriter xmlWriter = new XMLWriter(writer, this, true/*
-			 * print XML
-			 * version
-			 */);
+																 * print XML
+																 * version
+																 */);
 			xmlWriter.startTag(BuildpathEntry.TAG_BUILDPATH, indent);
 			for (int i = 0; i < buildpath.length; ++i) {
 				((BuildpathEntry) buildpath[i]).elementEncode(xmlWriter,
@@ -1587,10 +1550,10 @@ public class ScriptProject extends Openable implements IScriptProject {
 						unknownElements);
 			}
 			xmlWriter.endTag(BuildpathEntry.TAG_BUILDPATH, indent, true/*
-			 * insert
-			 * new
-			 * line
-			 */);
+																		 * insert
+																		 * new
+																		 * line
+																		 */);
 			writer.flush();
 			writer.close();
 			return s.toString("UTF8");//$NON-NLS-1$
@@ -1604,22 +1567,18 @@ public class ScriptProject extends Openable implements IScriptProject {
 			ByteArrayOutputStream s = new ByteArrayOutputStream();
 			OutputStreamWriter writer = new OutputStreamWriter(s, "UTF8"); //$NON-NLS-1$
 			XMLWriter xmlWriter = new XMLWriter(writer, this, false/*
-			 * don't
-			 * print XML
-			 * version
-			 */);
-			((BuildpathEntry) buildpathEntry).elementEncode(xmlWriter,
-					this.project.getFullPath(), true/* indent */, true/*
-					 * insert
-					 * new
-					 * line
-					 */, null/*
-			 * not
-			 * interested
-			 * in
-			 * unknown
-			 * elements
-			 */);
+																	 * don't
+																	 * print XML
+																	 * version
+																	 */);
+			((BuildpathEntry) buildpathEntry)
+					.elementEncode(xmlWriter, this.project.getFullPath(),
+							true/* indent */, true/*
+												 * insert new line
+												 */, null/*
+														 * not interested in
+														 * unknown elements
+														 */);
 			writer.flush();
 			writer.close();
 			return s.toString("UTF8");//$NON-NLS-1$
@@ -1874,11 +1833,13 @@ public class ScriptProject extends Openable implements IScriptProject {
 			throws ModelException {
 
 		setRawBuildpath(entries, monitor, canModifyResources,
-				getResolvedBuildpath(true/* ignoreUnresolvedEntry */,
-						false/* don't generateMarkerOnError */, false/*
-				 * don't
-				 * returnResolutionInProgress
-				 */), true, // needValidation
+				getResolvedBuildpath(true/* ignoreUnresolvedEntry */, false/*
+																		 * don't
+																		 * generateMarkerOnError
+																		 */,
+						false/*
+							 * don't returnResolutionInProgress
+							 */), true, // needValidation
 				canModifyResources); // save only if modifying resources is
 		// allowed
 	}
@@ -1891,11 +1852,13 @@ public class ScriptProject extends Openable implements IScriptProject {
 
 		setRawBuildpath(entries, monitor, true, // canChangeResource (as per API
 				// contract)
-				getResolvedBuildpath(true/* ignoreUnresolvedEntry */,
-						false/* don't generateMarkerOnError */, false/*
-				 * don't
-				 * returnResolutionInProgress
-				 */), true, // needValidation
+				getResolvedBuildpath(true/* ignoreUnresolvedEntry */, false/*
+																		 * don't
+																		 * generateMarkerOnError
+																		 */,
+						false/*
+							 * don't returnResolutionInProgress
+							 */), true, // needValidation
 				true); // need to save
 	}
 
@@ -1973,8 +1936,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 	public void updateBuildpathMarkers(Map preferredBuildpaths) {
 
 		this.flushBuildpathProblemMarkers(false/* cycle */, true/* format */);
-		this
-				.flushBuildpathProblemMarkers(false/* cycle */, false/* format */);
+		this.flushBuildpathProblemMarkers(false/* cycle */, false/* format */);
 
 		IBuildpathEntry[] buildpath = this.readBuildpathFile(true/* marker */,
 				false/* log */);
@@ -2175,9 +2137,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 				throw new IOException(
 						"Cannot obtain a location URI for " + rscFile); //$NON-NLS-1$
 			File file = Util.toLocalFile(location, null/*
-			 * no progress monitor
-			 * available
-			 */);
+														 * no progress monitor
+														 * available
+														 */);
 			if (file == null)
 				throw new IOException("Unable to fetch file from " + location); //$NON-NLS-1$
 			byte[] bytes;
@@ -2306,20 +2268,20 @@ public class ScriptProject extends Openable implements IScriptProject {
 
 			String extension = path.getFileExtension();
 			if (extension == null) {
-				String packageName = path.toString();// .replace(IPath.SEPARATOR,
+				String packageName = path.toString();//.replace(IPath.SEPARATOR,
 				// '.');
 
 				NameLookup lookup = newNameLookup((WorkingCopyOwner) null/*
-				 * no
-				 * need
-				 * to
-				 * look
-				 * at
-				 * working
-				 * copies
-				 * for
-				 * pkgs
-				 */);
+																		 * no
+																		 * need
+																		 * to
+																		 * look
+																		 * at
+																		 * working
+																		 * copies
+																		 * for
+																		 * pkgs
+																		 */);
 				IScriptFolder[] pkgFragments = lookup.findScriptFolders(
 						packageName, false);
 				if (pkgFragments == null) {
@@ -2339,7 +2301,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 				}
 			} else if (Util.isValidSourceModule(this, path)) {
 				IPath packagePath = path.removeLastSegments(1);
-				String packageName = packagePath.toString();// .replace(IPath.SEPARATOR,
+				String packageName = packagePath.toString();// .replace(IPath.
+				// SEPARATOR,
 				// '.');
 				String typeName = path.lastSegment();
 				typeName = typeName.substring(0, typeName.length()
@@ -2355,10 +2318,18 @@ public class ScriptProject extends Openable implements IScriptProject {
 				// lookup type
 				NameLookup lookup = newNameLookup(owner);
 				NameLookup.Answer answer = lookup.findType(qualifiedName,
-						false, NameLookup.ACCEPT_ALL,
-						true/* consider secondary types */,
-						false/* do NOT wait for indexes */,
-						false/* don't check restrictions */, null);
+						false, NameLookup.ACCEPT_ALL, true/*
+														 * consider secondary
+														 * types
+														 */, false/*
+																 * do NOT wait
+																 * for indexes
+																 */, false/*
+																		 * don't
+																		 * check
+																		 * restrictions
+																		 */,
+						null);
 
 				if (answer != null) {
 					return answer.type.getParent();
@@ -2433,7 +2404,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 					return computeProjectFragments(
 							getResolvedBuildpath(
 									new IBuildpathEntry[] { entry }, true,
-									false, null/* no reverse map */), false, // don't
+									false, null/* no reverse map */), false, // don
+							// 't
 							// retrieve
 							// exported
 							// roots
@@ -2547,9 +2519,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 	public IBuildpathEntry[] readRawBuildpath() {
 		// Read buildpath file without creating markers nor logging problems
 		IBuildpathEntry[] buildpath = readFileEntries(null/*
-		 * not interested in
-		 * unknown elements
-		 */);
+														 * not interested in
+														 * unknown elements
+														 */);
 		if (buildpath == ScriptProject.INVALID_BUILDPATH)
 			return defaultBuildpath();
 		return buildpath;
@@ -2904,23 +2876,24 @@ public class ScriptProject extends Openable implements IScriptProject {
 		ModelManager manager = ModelManager.getModelManager();
 		ISourceModule[] workingCopies = owner == null ? null : manager
 				.getWorkingCopies(owner, true/*
-				 * add primary WCs
-				 */);
+											 * add primary WCs
+											 */);
 		return newNameLookup(workingCopies);
 	}
 
 	/*
 	 * Force the project to reload its <code>.buildpath</code> file from disk
-	 * and update the buildpath accordingly. Usually, a change to the <code>.buildpath</code>
-	 * file is automatically noticed and reconciled at the next resource change
-	 * notification event. If required to consider such a change prior to the
-	 * next automatic refresh, then this functionnality should be used to
-	 * trigger a refresh. In particular, if a change to the file is performed,
-	 * during an operation where this change needs to be reflected before the
-	 * operation ends, then an explicit refresh is necessary. Note that
-	 * buildpath markers are NOT created.
+	 * and update the buildpath accordingly. Usually, a change to the
+	 * <code>.buildpath</code> file is automatically noticed and reconciled at
+	 * the next resource change notification event. If required to consider such
+	 * a change prior to the next automatic refresh, then this functionnality
+	 * should be used to trigger a refresh. In particular, if a change to the
+	 * file is performed, during an operation where this change needs to be
+	 * reflected before the operation ends, then an explicit refresh is
+	 * necessary. Note that buildpath markers are NOT created.
 	 * 
 	 * @param monitor a progress monitor for reporting operation progress
+	 * 
 	 * @exception ModelException if the buildpath could not be updated. Reasons
 	 * include: <ul> <li> This Script element does not exist
 	 * (ELEMENT_DOES_NOT_EXIST)</li> <li> Two or more entries specify source
@@ -2928,11 +2901,11 @@ public class ScriptProject extends Openable implements IScriptProject {
 	 * kind <code>CPE_PROJECT</code> refers to this project (INVALID_PATH)
 	 * <li>This Script element does not exist (ELEMENT_DOES_NOT_EXIST)</li>
 	 * <li>The output location path refers to a location not contained in this
-	 * project (<code>PATH_OUTSIDE_PROJECT</code>) <li>The output location
-	 * path is not an absolute path (<code>RELATIVE_PATH</code>) <li>The
-	 * output location path is nested inside a package fragment root of this
-	 * project (<code>INVALID_PATH</code>) <li> The buildpath is being
-	 * modified during resource change event notification (CORE_EXCEPTION) </ul>
+	 * project (<code>PATH_OUTSIDE_PROJECT</code>) <li>The output location path
+	 * is not an absolute path (<code>RELATIVE_PATH</code>) <li>The output
+	 * location path is nested inside a package fragment root of this project
+	 * (<code>INVALID_PATH</code>) <li> The buildpath is being modified during
+	 * resource change event notification (CORE_EXCEPTION) </ul>
 	 */
 	protected void forceBuildpathReload(IProgressMonitor monitor)
 			throws ModelException {
@@ -2945,11 +2918,15 @@ public class ScriptProject extends Openable implements IScriptProject {
 		// change got reflected
 		try {
 			// force to (re)read the property file
-			IBuildpathEntry[] fileEntries = readBuildpathFile(
-					false/* don't create markers */, false/*
-			 * don't log
-			 * problems
-			 */);
+			IBuildpathEntry[] fileEntries = readBuildpathFile(false/*
+																	 * don't
+																	 * create
+																	 * markers
+																	 */, false/*
+																			 * don't
+																			 * log
+																			 * problems
+																			 */);
 			if (fileEntries == null) {
 				return; // could not read, ignore
 			}
@@ -2972,8 +2949,10 @@ public class ScriptProject extends Openable implements IScriptProject {
 					!ResourcesPlugin.getWorkspace().isTreeLocked(), // canChangeResource
 					oldResolvedBuildpath != null ? oldResolvedBuildpath
 							: getResolvedBuildpath(
-									true/* ignoreUnresolvedEntry */,
-									false/* don't generateMarkerOnError */,
+									true/* ignoreUnresolvedEntry */, false/*
+																		 * don't
+																		 * generateMarkerOnError
+																		 */,
 									false/* don't returnResolutionInProgress */),
 					true, // needValidation
 					false); // no need to save
@@ -3034,11 +3013,14 @@ public class ScriptProject extends Openable implements IScriptProject {
 	public IProjectFragment[] getAllProjectFragments(Map rootToResolvedEntries)
 			throws ModelException {
 		return computeProjectFragments(getResolvedBuildpath(
-				true/* ignoreUnresolvedEntry */,
-				false/* don't generateMarkerOnError */, false/*
-		 * don't
-		 * returnResolutionInProgress
-		 */), true/* retrieveExportedRoots */, rootToResolvedEntries);
+				true/* ignoreUnresolvedEntry */, false/*
+													 * don't
+													 * generateMarkerOnError
+													 */, false/*
+															 * don't
+															 * returnResolutionInProgress
+															 */),
+				true/* retrieveExportedRoots */, rootToResolvedEntries);
 	}
 
 	public static boolean hasScriptNature(IProject p) {

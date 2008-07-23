@@ -6,6 +6,7 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.internal.core.messages"; //$NON-NLS-1$
 	public static String Model_invalidResourceForTheProject;
 	public static String ModelOperation_operationCancelled;
+	public static String refreshing_external_folders;
 	public static String Openable_completionRequesterCannotBeNull;
 	public static String UserLibraryBuildpathContainerInitializer_dltkLanguageToolkitIsNull;
 	static {
