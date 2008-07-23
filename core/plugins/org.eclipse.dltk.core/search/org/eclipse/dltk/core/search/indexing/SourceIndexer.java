@@ -9,16 +9,14 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search.indexing;
 
-import java.util.Date;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
@@ -54,7 +52,7 @@ public class SourceIndexer extends AbstractIndexer {
 
 	public void indexDocument() {
 
-		long started = (new Date()).getTime();
+		long started = System.currentTimeMillis();
 
 		// Create a new Parser
 		SourceIndexerRequestor requestor = ((InternalSearchDocument) this.document).requestor;
@@ -139,7 +137,7 @@ public class SourceIndexer extends AbstractIndexer {
 			// discarded)
 			parser.parseSourceModule(source, null, name);
 
-			long ended = (new Date()).getTime();
+			long ended = System.currentTimeMillis();
 
 			if (ended - started > maxWorkTime) {
 				maxWorkTime = ended - started;
