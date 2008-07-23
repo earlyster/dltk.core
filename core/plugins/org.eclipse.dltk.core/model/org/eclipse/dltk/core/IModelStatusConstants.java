@@ -10,8 +10,8 @@
 package org.eclipse.dltk.core;
 
 public interface IModelStatusConstants {
-	
-	public static final int INTERNAL_ERROR= 10001;
+
+	public static final int INTERNAL_ERROR = 10001;
 	/**
 	 * Status constant indicating a core exception occurred. Use
 	 * <code>getException</code> to retrieve a <code>CoreException</code>.
@@ -42,7 +42,7 @@ public interface IModelStatusConstants {
 	 * Status constant indicating that a container path was not resolvable
 	 * indicating either the referred container is undefined, unbound.
 	 * 
-	 *
+	 * 
 	 */
 	public static final int BP_CONTAINER_PATH_UNBOUND = 963;
 
@@ -85,8 +85,8 @@ public interface IModelStatusConstants {
 
 	/**
 	 * Status constant indicating that one or more elements supplied do not
-	 * exist. The element(s) can be retrieved using <code>getElements</code>
-	 * on the status object.
+	 * exist. The element(s) can be retrieved using <code>getElements</code> on
+	 * the status object.
 	 * 
 	 * @see IModelStatus#isDoesNotExist()
 	 */
@@ -136,8 +136,8 @@ public interface IModelStatusConstants {
 	public static final int INVALID_DESTINATION = 978;
 
 	/**
-	 * Status constant indicating that <code>null</code> was specified as a
-	 * name argument.
+	 * Status constant indicating that <code>null</code> was specified as a name
+	 * argument.
 	 */
 	public static final int NULL_NAME = 982;
 
@@ -175,8 +175,8 @@ public interface IModelStatusConstants {
 	public static final int INVALID_SIBLING = 993;
 
 	/**
-	 * Status constant indicating that a <code>null</code> path was supplied
-	 * to the operation.
+	 * Status constant indicating that a <code>null</code> path was supplied to
+	 * the operation.
 	 */
 	public static final int NULL_PATH = 970;
 
@@ -201,8 +201,7 @@ public interface IModelStatusConstants {
 	public static final int RELATIVE_PATH = 972;
 
 	/**
-	 * Status constant indicating that a <code>TargetException</code>
-	 * occurred.
+	 * Status constant indicating that a <code>TargetException</code> occurred.
 	 */
 	public static final int TARGET_EXCEPTION = 987;
 
@@ -216,18 +215,19 @@ public interface IModelStatusConstants {
 	/**
 	 * Status constant indicating that a container path was resolved to invalid
 	 * entries (null or container).
-	 * 	
+	 * 
 	 */
 	public static final int INVALID_BP_CONTAINER_ENTRY = 962;
-	
+
 	/**
-	 * Status constant indicating that an inclusion or an exclusion pattern got specified
-	 * on a buildpath source entry, though it was explicitely disabled 
+	 * Status constant indicating that an inclusion or an exclusion pattern got
+	 * specified on a buildpath source entry, though it was explicitely disabled
 	 * according to its project preference settings.
+	 * 
 	 * @see org.eclipse.dltk.core.IScriptProject#getOptions(boolean)
-	 *
+	 * 
 	 */
 	public static final int DISABLED_BP_EXCLUSION_PATTERNS = 1002;
-	
-	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
+
+	public static final int VALIDATE_EDIT_CHANGED_CONTENT = 10003;
 }
