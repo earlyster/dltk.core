@@ -44,8 +44,7 @@ public interface IFileHandle {
 	IPath getPath();
 
 	/**
-	 * Return OS specific path representation of this handle. If system are
-	 * unix, path will be in unix format.
+	 * Return OS specific path representation of this handle.
 	 * 
 	 * @return
 	 */
@@ -57,7 +56,7 @@ public interface IFileHandle {
 	String getCanonicalPath();
 
 	/**
-	 * Return full path associated with this handle. Full path contain
+	 * Return full path associated with this handle. Full path contains
 	 * environment identifier.
 	 * 
 	 * @see EnvironmentPathUtils for more information about full path to path
