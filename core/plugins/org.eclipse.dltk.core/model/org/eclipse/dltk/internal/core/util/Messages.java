@@ -39,6 +39,7 @@ public class Messages extends NLS {
 	public static String buildpath_duplicateEntryPath;
 	public static String buildpath_illegalContainerPath;
 	public static String buildpath_illegalEntryInBuildpathFile;
+	public static String buildpath_illegalVariablePath;
 	public static String buildpath_illegalLibraryPath;
 	public static String buildpath_illegalLibraryArchive;
 	public static String buildpath_illegalExternalFolder;

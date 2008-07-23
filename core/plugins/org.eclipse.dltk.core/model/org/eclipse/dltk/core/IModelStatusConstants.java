@@ -47,6 +47,13 @@ public interface IModelStatusConstants {
 	public static final int BP_CONTAINER_PATH_UNBOUND = 963;
 
 	/**
+	 * Status constant indicating that a variable path was not resolvable
+	 * indicating either the referred variable is undefined, unbound or the
+	 * resolved variable path does not correspond to an existing file or folder.
+	 */
+	public static final int BP_VARIABLE_PATH_UNBOUND = 965;
+
+	/**
 	 * Status constant indicating that a path provided to an operation is
 	 * invalid. The path can be retrieved using <code>getPath</code> on the
 	 * status object.

@@ -1304,6 +1304,34 @@ public class BuildpathEntry implements IBuildpathEntry {
 								new String[] { entryPathMsg, projectName }));
 			}
 			break;
+		// variable entry check
+		case IBuildpathEntry.BPE_VARIABLE:
+			if (path.segmentCount() >= 1) {
+				try {
+					entry = DLTKCore.getResolvedBuildpathEntry(entry);
+				} catch (AssertionFailedException e) {
+					// Catch the assertion failure and throw java model
+					// exception instead
+					return new ModelStatus(IModelStatusConstants.INVALID_PATH,
+							e.getMessage());
+				}
+				if (entry == null) {
+					return new ModelStatus(
+							IModelStatusConstants.BP_VARIABLE_PATH_UNBOUND,
+							project, path);
+				}
+
+				// get validation status
+				IModelStatus status = validateBuildpathEntry(project, entry,
+				/* checkSourceAttachment, */recurseInContainers);
+				if (!status.isOK())
+					return status;
+			} else {
+				return new ModelStatus(IModelStatusConstants.INVALID_BUILDPATH,
+						Messages.bind(Messages.buildpath_illegalVariablePath,
+								new String[] { entryPathMsg, projectName }));
+			}
+			break;
 		// library entry check
 		case IBuildpathEntry.BPE_LIBRARY:
 			if (path.toString().startsWith(

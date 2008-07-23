@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Hashtable;
 
@@ -32,6 +33,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.BatchOperation;
 import org.eclipse.dltk.internal.core.BuildpathAccessRule;
 import org.eclipse.dltk.internal.core.BuildpathAttribute;
@@ -1472,6 +1474,125 @@ public class DLTKCore extends Plugin {
 			// TODO: add verbose method for initializer not found
 		}
 		return variablePath;
+	}
+
+	/**
+	 * This is a helper method, which returns the resolved buildpath entry
+	 * denoted by a given entry (if it is a variable entry). It is obtained by
+	 * resolving the variable reference in the first segment. Returns
+	 * <code>null</code> if unable to resolve using the following algorithm:
+	 * <ul>
+	 * <li> if variable segment cannot be resolved, returns <code>null</code>
+	 * </li> <li> finds a project, JAR or binary folder in the workspace at the
+	 * resolved path location</li> <li> if none finds an external JAR file or
+	 * folder outside the workspace at the resolved path location </li> <li> if
+	 * none returns <code>null</code></li>
+	 * </ul>
+	 * <p>
+	 * Variable source attachment path and root path are also resolved and
+	 * recorded in the resulting buildpath entry.
+	 * <p>
+	 * NOTE: This helper method does not handle buildpath containers, for which
+	 * should rather be used
+	 * <code>DLTKCore#getBuildpathContainer(IPath, IScriptProject)</code>.
+	 * <p>
+	 * 
+	 * @param entry
+	 *            the given variable entry
+	 * @return the resolved library or project buildpath entry, or
+	 *         <code>null</code> if the given variable entry could not be
+	 *         resolved to a valid buildpath entry
+	 */
+	public static IBuildpathEntry getResolvedBuildpathEntry(
+			IBuildpathEntry entry) {
+
+		if (entry.getEntryKind() != IBuildpathEntry.BPE_VARIABLE)
+			return entry;
+
+		IPath resolvedPath = DLTKCore.getResolvedVariablePath(entry.getPath());
+		if (resolvedPath == null)
+			return null;
+
+		Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
+				.getRoot(), resolvedPath, false);
+		if (target == null)
+			return null;
+
+		// inside the workspace
+		if (target instanceof IResource) {
+			IResource resolvedResource = (IResource) target;
+			switch (resolvedResource.getType()) {
+
+			case IResource.PROJECT:
+				// internal project
+				return DLTKCore.newProjectEntry(resolvedPath, entry
+						.getAccessRules(), entry.combineAccessRules(), entry
+						.getExtraAttributes(), entry.isExported());
+			case IResource.FILE:
+				// internal binary archive
+				return DLTKCore.newLibraryEntry(resolvedPath,/*
+															 * getResolvedVariablePath(
+															 * entry.
+															 * getSourceAttachmentPath
+															 * ()),
+															 * getResolvedVariablePath
+															 * (entry.
+															 * getSourceAttachmentRootPath
+															 * ()),
+															 */entry
+						.getAccessRules(), entry.getExtraAttributes(), entry
+						.isExported(), entry.isExternal());
+			case IResource.FOLDER:
+				// internal binary folder
+				return DLTKCore.newLibraryEntry(resolvedPath,/*
+															 * getResolvedVariablePath(
+															 * entry.
+															 * getSourceAttachmentPath
+															 * ()),
+															 * getResolvedVariablePath
+															 * (entry.
+															 * getSourceAttachmentRootPath
+															 * ()),
+															 */entry
+						.getAccessRules(), entry.getExtraAttributes(), entry
+						.isExported(), entry.isExternal());
+			}
+		}
+		if (target instanceof File) {
+			IFileHandle externalFile = Model.getFile(target);
+			if (externalFile != null) {
+				// external binary archive
+				return DLTKCore.newLibraryEntry(resolvedPath,/*
+															 * getResolvedVariablePath(
+															 * entry.
+															 * getSourceAttachmentPath
+															 * ()),
+															 * getResolvedVariablePath
+															 * (entry.
+															 * getSourceAttachmentRootPath
+															 * ()),
+															 */entry
+						.getAccessRules(), entry.getExtraAttributes(), entry
+						.isExported(), entry.isExternal());
+			} else {
+				// non-existing file
+				if (resolvedPath.isAbsolute()) {
+					return DLTKCore.newLibraryEntry(resolvedPath,/*
+																 * getResolvedVariablePath(
+																 * entry.
+																 * getSourceAttachmentPath
+																 * ()),
+																 * getResolvedVariablePath
+																 * (entry.
+																 * getSourceAttachmentRootPath
+																 * ()),
+																 */entry
+							.getAccessRules(), entry.getExtraAttributes(),
+							entry.isExported(), entry.isExternal());
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
