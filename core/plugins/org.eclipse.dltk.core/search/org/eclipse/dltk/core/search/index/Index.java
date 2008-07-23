@@ -231,7 +231,7 @@ public class Index {
 		if (DLTKCore.DEBUG_INDEX) {
 			System.out.println("Index for " + this.containerPath + " (" + new Path(diskIndex.fileName).lastSegment() + ") saved"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$		
 		}
-		int numberOfChanges = this.memoryIndex.docsToReferences.elementSize;
+		// int numberOfChanges = this.memoryIndex.docsToReferences.elementSize;
 		this.diskIndex = this.diskIndex.mergeWith(this.memoryIndex);
 		this.memoryIndex = new MemoryIndex();
 //		if (numberOfChanges > 1000)
