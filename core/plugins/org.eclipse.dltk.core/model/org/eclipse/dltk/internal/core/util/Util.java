@@ -104,7 +104,7 @@ public class Util {
 	 * Add a log entry
 	 */
 	public static void log(Throwable e, String message) {
-		if (e == null || message != null) {
+		if (e == null && message == null) {
 			return;
 		}
 		Throwable nestedException;
@@ -113,7 +113,7 @@ public class Util {
 			e = nestedException;
 		}
 		IStatus status = new Status(IStatus.ERROR, DLTKCore.PLUGIN_ID,
-				IStatus.ERROR, message, e);
+				IStatus.ERROR, message != null ? message : e.toString(), e);
 		DLTKCore.getDefault().getLog().log(status);
 	}
 
