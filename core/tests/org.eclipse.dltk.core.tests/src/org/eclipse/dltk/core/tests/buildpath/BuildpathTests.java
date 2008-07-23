@@ -546,6 +546,27 @@ public class BuildpathTests extends ModifyingResourceTests {
 		}
 	}
 
+	public void testClasspathValidation04() throws CoreException {
+
+		IScriptProject[] p = null;
+		try {
+
+			p = new IScriptProject[] { this.createScriptProject("P0var", TEST_NATURE, new String[] { "src0" }), this.createScriptProject("P1var", TEST_NATURE, new String[] { "src1" }), };
+
+			DLTKCore.setBuildpathVariable("var", new Path("/P1var"), null);
+
+			IBuildpathEntry[] newBuildpath = new IBuildpathEntry[] { DLTKCore.newSourceEntry(new Path("/P0var/src0")), DLTKCore.newVariableEntry(new Path("var/src1")), };
+
+			// validate Buildpath
+			IModelStatus status = BuildpathEntry.validateBuildpath(p[0], newBuildpath);
+			assertStatus("should not detect external source folder through a variable on the buildpath", "OK", status);
+
+		} finally {
+			this.deleteProject("P0var");
+			this.deleteProject("P1var");
+		}
+	}
+	
 	public void testBuildpathValidation05() throws CoreException {
 
 		IScriptProject[] p = null;
