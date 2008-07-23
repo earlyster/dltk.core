@@ -529,19 +529,19 @@ public class MixinModel {
 		}
 
 		protected String getParentKey() {
-			if (this.key.indexOf(IMixinRequestor.MIXIN_NAME_SEPARATOR) == -1) {
+			int pos = key.lastIndexOf(IMixinRequestor.MIXIN_NAME_SEPARATOR);
+			if (pos == -1) {
 				return null;
 			}
-			return this.key.substring(0, this.key
-					.lastIndexOf(IMixinRequestor.MIXIN_NAME_SEPARATOR));
+			return key.substring(0, pos);
 		}
 
 		public String getLastKeySegment() {
-			if (this.key.indexOf(IMixinRequestor.MIXIN_NAME_SEPARATOR) == -1) {
-				return this.key;
+			int pos = key.lastIndexOf(IMixinRequestor.MIXIN_NAME_SEPARATOR);
+			if (pos == -1) {
+				return key;
 			}
-			return this.key.substring(1 + this.key
-					.lastIndexOf(IMixinRequestor.MIXIN_NAME_SEPARATOR));
+			return key.substring(pos + 1);
 		}
 
 		public IMixinElement getParent() {
