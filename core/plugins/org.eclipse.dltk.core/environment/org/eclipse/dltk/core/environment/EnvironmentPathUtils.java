@@ -20,8 +20,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 public class EnvironmentPathUtils {
-	public static final String PATH_DELIMITER = ";";
-	private static char SEPARATOR = '/';
+	public static final String PATH_DELIMITER = ";"; //$NON-NLS-1$
+	private static final char SEPARATOR = '/';
 
 	public static IPath getFullPath(IEnvironment env, IPath path) {
 		if (isFull(path)) {
