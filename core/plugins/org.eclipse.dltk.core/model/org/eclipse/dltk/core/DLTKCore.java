@@ -2403,4 +2403,10 @@ public class DLTKCore extends Plugin {
 				new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, t));
 	}
 
+	public static void warn(String message) {
+		plugin.getLog().log(
+				new Status(IStatus.WARNING, PLUGIN_ID, IStatus.OK, message,
+						null));
+	}
+
 }
