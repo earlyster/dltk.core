@@ -21,41 +21,48 @@ import junit.framework.TestSuite;
 import org.eclipse.dltk.core.tests.TestSupport;
 
 /**
- * A test case class that can be set up (using the setUpSuite() method) and tore down (using the teardDownSuite() method)
- * once for all test cases of this class.
+ * A test case class that can be set up (using the setUpSuite() method) and tore
+ * down (using the teardDownSuite() method) once for all test cases of this
+ * class.
  */
 public abstract class SuiteOfTestCases extends TestCase {
-		
+
 	/*
-	 * A test suite that initialize the test case's fields once, then that copies the values
-	 * of these fields intto each subsequent test case.
+	 * A test suite that initialize the test case's fields once, then that
+	 * copies the values of these fields intto each subsequent test case.
 	 */
 	public static class Suite extends TestSuite {
 		public SuiteOfTestCases currentTestCase;
-		
+
 		/*
-		 * Creates a new suite on the given class. This class must be a subclass of SetupableTestSuite.
+		 * Creates a new suite on the given class. This class must be a subclass
+		 * of SetupableTestSuite.
 		 */
 		public Suite(Class theClass) {
 			super(theClass);
 		}
+
 		public Suite(String name) {
 			super(name);
 		}
+
 		private void initialize(SuiteOfTestCases test) {
 			Class currentClass = test.getClass();
-			while (currentClass != null && !currentClass.equals(SuiteOfTestCases.class)) {
+			while (currentClass != null
+					&& !currentClass.equals(SuiteOfTestCases.class)) {
 				Field[] fields = currentClass.getDeclaredFields();
 				for (int i = 0, length = fields.length; i < length; i++) {
 					Field field = fields[i];
-					
+
 					// skip static and final fields
 					int modifiers = field.getModifiers();
-					if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) continue;
-					
+					if (Modifier.isStatic(modifiers)
+							|| Modifier.isFinal(modifiers))
+						continue;
+
 					// make the field accessible
 					field.setAccessible(true);
-					
+
 					try {
 						Object value = field.get(this.currentTestCase);
 						field.set(test, value);
@@ -65,15 +72,17 @@ public abstract class SuiteOfTestCases extends TestCase {
 				currentClass = currentClass.getSuperclass();
 			}
 		}
+
 		public void run(final TestResult result) {
-			Protectable p= new Protectable() {
+			Protectable p = new Protectable() {
 				public void protect() throws Exception {
 					try {
 						// run suite (first test run will setup the suite)
 						superRun(result);
-					} finally {	
+					} finally {
 						// tear down the suite
-						if (Suite.this.currentTestCase != null) { // protect against empty test suite
+						if (Suite.this.currentTestCase != null) {
+							// protect against empty test suite
 							Suite.this.currentTestCase.tearDownSuite();
 						}
 					}
@@ -81,9 +90,11 @@ public abstract class SuiteOfTestCases extends TestCase {
 			};
 			result.runProtected(this, p);
 		}
+
 		public void superRun(TestResult result) {
 			super.run(result);
 		}
+
 		public void runTest(Test test, TestResult result) {
 			if (test instanceof SuiteOfTestCases) {
 				final SuiteOfTestCases current = (SuiteOfTestCases) test;
@@ -107,31 +118,31 @@ public abstract class SuiteOfTestCases extends TestCase {
 				}
 			} else {
 				/*
-				 * If there was error in TestCase constructor - the test will not be
-				 * of the SuiteOfTestCases type
+				 * If there was error in TestCase constructor - the test will
+				 * not be of the SuiteOfTestCases type
 				 */
 				super.runTest(test, result);
 			}
 		}
 	}
-			
+
 	public SuiteOfTestCases(String name) {
 		super(name);
 	}
-			
+
 	/**
 	 * Setup the test suite once before all test cases run.
 	 */
 	public void setUpSuite() throws Exception {
 	}
-	
+
 	/**
 	 * Tear down the test suite once after all test cases have run.
 	 */
 	public void tearDownSuite() throws Exception {
 	}
 
-    /**
+	/**
 	 * Convenience method for subclasses of {@link SuiteOfTestCases}, identical
 	 * to
 	 * 
