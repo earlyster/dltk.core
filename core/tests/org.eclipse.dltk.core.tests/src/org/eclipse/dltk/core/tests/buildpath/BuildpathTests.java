@@ -268,7 +268,7 @@ public class BuildpathTests extends ModifyingResourceTests {
 	public void test004() throws Exception {
 		try {
 			setUpScriptProject(BUILDPATH_PRJ_2);
-			IScriptProject project = (IScriptProject) getScriptProject(BUILDPATH_PRJ_2);
+			IScriptProject project = getScriptProject(BUILDPATH_PRJ_2);
 			assertNotNull(project);
 			IBuildpathEntry entrys[] = project.getRawBuildpath();
 			assertEquals(1, entrys.length);
