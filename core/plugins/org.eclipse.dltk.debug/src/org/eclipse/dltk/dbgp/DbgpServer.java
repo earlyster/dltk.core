@@ -106,14 +106,16 @@ public class DbgpServer extends DbgpWorkingThread {
 		Job job = new Job(
 				Messages.DbgpServer_acceptingDebuggingEngineConnection) {
 			protected IStatus run(IProgressMonitor monitor) {
-				if (listener != null) {
+				// copy to local variable to prevent NPE
+				final IDbgpServerListener savedListener = listener;
+				if (savedListener != null) {
 					DbgpDebugingEngine dbgpDebugingEngine = null;
 					DbgpSession session = null;
 
 					try {
 						dbgpDebugingEngine = new DbgpDebugingEngine(client);
 						session = new DbgpSession(dbgpDebugingEngine);
-						listener.clientConnected(session);
+						savedListener.clientConnected(session);
 					} catch (Exception e) {
 						DLTKDebugPlugin.log(e);
 						if (dbgpDebugingEngine != null)
