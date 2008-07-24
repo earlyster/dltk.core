@@ -10,6 +10,7 @@
 package org.eclipse.dltk.core.tests.model;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import junit.framework.Protectable;
@@ -40,6 +41,42 @@ public abstract class SuiteOfTestCases extends TestCase {
 		 */
 		public Suite(Class theClass) {
 			super(theClass);
+		}
+
+		/**
+		 * Creates a new suite on the given class. Only the methods specified in
+		 * the second parameter and included in the suite.
+		 * 
+		 * @param theClass
+		 * @param methodNames
+		 */
+		public Suite(Class theClass, String[] methodNames) {
+			super(theClass.getName());
+			for (int i = 0; i < methodNames.length; ++i) {
+				final String methodName = methodNames[i];
+				try {
+					final Method method = theClass.getMethod(methodName,
+							new Class[0]);
+					if (Modifier.isPublic(method.getModifiers())
+							&& !Modifier.isStatic(method.getModifiers())) {
+						addTest(createTest(theClass, methodName));
+					} else {
+						warning(methodName, "Wrong modifiers");
+					}
+				} catch (SecurityException e) {
+					warning(methodName, e.toString());
+				} catch (NoSuchMethodException e) {
+					warning(methodName, e.toString());
+				}
+			}
+		}
+
+		private void warning(final String name, final String message) {
+			addTest(new TestCase(name) {
+				protected void runTest() {
+					fail(message);
+				}
+			});
 		}
 
 		public Suite(String name) {
