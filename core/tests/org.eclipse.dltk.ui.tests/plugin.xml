@@ -44,5 +44,11 @@
             id="org.eclipse.dltk.ui.tests.packageview.MockPluginView">
       </view>
    </extension>
+
+   <extension point="org.eclipse.dltk.ui.language">
+      <language
+        class="org.eclipse.dltk.ui.tests.core.DLTKUITestLanguageToolkit"
+        nature="org.eclipse.dltk.core.tests.testnature" />
+   </extension>
    
 </plugin>
