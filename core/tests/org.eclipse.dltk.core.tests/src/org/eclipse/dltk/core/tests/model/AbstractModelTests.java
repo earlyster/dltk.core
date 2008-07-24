@@ -59,13 +59,9 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.search.IDLTKSearchConstants;
-import org.eclipse.dltk.core.search.IDLTKSearchScope;
-import org.eclipse.dltk.core.search.SearchEngine;
-import org.eclipse.dltk.core.search.SearchPattern;
-import org.eclipse.dltk.core.search.TypeNameRequestor;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.core.ModelElement;
+import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.util.Util;
 import org.eclipse.dltk.internal.core.util.Util.Comparer;
 import org.osgi.framework.Bundle;
@@ -1027,22 +1023,7 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 	}
 
 	public static void waitUntilIndexesReady() {
-		// dummy query for waiting until the indexes are ready
-		SearchEngine engine = new SearchEngine();
-		IDLTKSearchScope scope = SearchEngine
-				.createWorkspaceScope(TestLanguageToolkit.getDefault());
-		try {
-			engine.searchAllTypeNames(null, "!@$#!@".toCharArray(),
-					SearchPattern.R_PATTERN_MATCH
-							| SearchPattern.R_CASE_SENSITIVE,
-					IDLTKSearchConstants.TYPE, scope, new TypeNameRequestor() {
-						public void acceptType(int modifiers,
-								char[] packageName, char[] simpleTypeName,
-								char[][] enclosingTypeNames, String path) {
-						}
-					}, IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
-		} catch (CoreException e) {
-		}
+		ModelManager.getModelManager().getIndexManager().waitUntilReady();
 	}
 
 	public static void storeFile(File dest, URL url) throws IOException {
