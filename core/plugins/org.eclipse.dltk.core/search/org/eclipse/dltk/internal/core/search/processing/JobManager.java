@@ -131,7 +131,7 @@ public abstract class JobManager implements Runnable {
 			Util.verbose("ENABLING  background indexing"); //$NON-NLS-1$
 		this.notifyAll(); // wake up the background thread if it is waiting (context must be synchronized)			
 	}
-	protected synchronized boolean isJobWaiting(IJob request) {
+	public synchronized boolean isJobWaiting(IJob request) {
 		for (int i = this.jobEnd; i > this.jobStart; i--) // don't check job at jobStart, as it may have already started
 			if (request.equals(this.awaitingJobs[i])) return true;
 		return false;
@@ -269,6 +269,28 @@ public abstract class JobManager implements Runnable {
 	}
 	public abstract String processName();
 	
+	public void waitUntilReady() {
+		performConcurrentJob(new IJob() {
+			public boolean belongsTo(String jobFamily) {
+				return false;
+			}
+
+			public void cancel() {
+			}
+
+			public void ensureReadyToRun() {
+			}
+
+			public boolean execute(IProgressMonitor progress) {
+				return false;
+			}
+
+			public String toString() {
+				return "WAIT-UNTIL-READY-JOB"; //$NON-NLS-1$
+			}
+		}, IJob.WaitUntilReady, null);
+	}
+
 	public synchronized void request(IJob job) {
 
 		job.ensureReadyToRun();
@@ -368,7 +390,9 @@ public abstract class JobManager implements Runnable {
 						if (this.progressJob == null) {
 							this.progressJob = new ProgressJob(Messages.manager_indexingInProgress); 
 							this.progressJob.setPriority(Job.LONG);
-							this.progressJob.setSystem(true);
+							if (!VERBOSE) {
+								this.progressJob.setSystem(true);
+							}
 							this.progressJob.schedule();
 						}
 						/*boolean status = */job.execute(null);
