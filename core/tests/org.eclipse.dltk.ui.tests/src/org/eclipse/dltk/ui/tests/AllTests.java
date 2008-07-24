@@ -3,6 +3,7 @@ package org.eclipse.dltk.ui.tests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.dltk.ui.tests.core.DLTKUILanguageManagerTests;
 import org.eclipse.dltk.ui.tests.core.ScriptElementLabelsTest;
 import org.eclipse.dltk.ui.tests.navigator.scriptexplorer.PackageExplorerTests;
 import org.eclipse.dltk.ui.tests.templates.ScriptTemplateContextTest;
@@ -14,6 +15,7 @@ public class AllTests {
 		TestSuite suite = new TestSuite("Test for org.eclipse.dltk.ui.tests");
 		//$JUnit-BEGIN$
 		suite.addTestSuite(ScriptElementLabelsTest.class);
+		suite.addTestSuite(DLTKUILanguageManagerTests.class);
 
 		suite.addTest(PackageExplorerTests.suite());
 		suite.addTest(ScriptTemplateContextTest.suite());
