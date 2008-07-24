@@ -305,4 +305,8 @@ public class BuiltinProjectFragment extends ProjectFragment {
 	public boolean exists() {
 		return true;
 	}
+	
+	public long lastModified() {
+		return builtinProvider != null ? builtinProvider.lastModified() : 0;
+	}
 }

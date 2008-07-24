@@ -277,7 +277,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 			SourceIndexerRequestor requestor, SearchParticipant participant,
 			Index index, String path, IDLTKLanguageToolkit toolkit) {
 		char[] contents = null;
-		IFileHandle ffile = getEnvironment().getFile(new Path(path));
+		final IFileHandle ffile = getFile(path);
 		if (ffile != null && ffile.exists()) {
 			try {
 				contents = Util.getResourceContentsAsCharArray(ffile);
@@ -288,9 +288,8 @@ class AddExternalFolderToIndex extends IndexRequest {
 				contents = new char[0];
 			}
 		}
-		IPath dpath = (new Path(path)).removeFirstSegments(this.containerPath
-				.segmentCount());
-		dpath = dpath.setDevice(null);
+		IPath dpath = new Path(path).removeFirstSegments(
+				containerPath.segmentCount()).setDevice(null);
 		DLTKSearchDocument entryDocument = new DLTKSearchDocument(dpath
 				.toString(), this.containerPath, contents, participant, true);
 		entryDocument.parser = parser;
@@ -300,12 +299,15 @@ class AddExternalFolderToIndex extends IndexRequest {
 				this.containerPath);
 	}
 
-	private IEnvironment getEnvironment() {
+	private IFileHandle getFile(String path) {
 		if (environment == null) {
-			IScriptProject scriptProject = DLTKCore.create(project);
-			environment = EnvironmentManager.getEnvironment(scriptProject);
+			environment = EnvironmentManager.getEnvironment(DLTKCore
+					.create(project));
+			if (environment == null) {
+				return null;
+			}
 		}
-		return environment;
+		return environment.getFile(new Path(path));
 	}
 
 	public String toString() {

@@ -48,7 +48,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		}
 	}
 
-	private char[] erasure(char[] typeName) {		
+	private char[] erasure(char[] typeName) {
 		return typeName;
 	}
 
@@ -56,7 +56,8 @@ public abstract class AbstractIndexer implements IIndexConstants {
 			String[] parameterTypes, String[] exceptionTypes) {
 		// int argCount = parameterTypes == null ? 0 : parameterTypes.length;
 		// addIndexEntry(CONSTRUCTOR_DECL,
-		// ConstructorPattern.createIndexKey(CharOperation.lastSegment(typeName,'.'),
+		// ConstructorPattern.createIndexKey(CharOperation.lastSegment(typeName,
+		// '.'),
 		// argCount));
 		//	
 		// if (parameterTypes != null) {
@@ -129,8 +130,5 @@ public abstract class AbstractIndexer implements IIndexConstants {
 	}
 
 	public abstract void indexDocument();
-	
-	public void addMixin(char[] name) {
-		addIndexEntry(MIXIN, name);
-	}
+
 }

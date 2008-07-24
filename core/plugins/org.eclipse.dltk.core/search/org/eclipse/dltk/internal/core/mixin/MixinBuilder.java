@@ -46,6 +46,9 @@ import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.SourceModule;
 import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 
+/**
+ *@deprecated
+ */
 public class MixinBuilder implements IScriptBuilder {
 	public IStatus buildResources(IScriptProject project, List resources,
 			IProgressMonitor monitor, int status) {
@@ -59,7 +62,7 @@ public class MixinBuilder implements IScriptBuilder {
 
 	public IStatus buildModelElements(IScriptProject project, List elements,
 			final IProgressMonitor monitor, boolean saveIndex) {
-		if (elements.size() == 0) {
+		if (true || elements.size() == 0) {
 			return null;
 		}
 		IndexManager manager = ModelManager.getModelManager().getIndexManager();
@@ -177,8 +180,7 @@ public class MixinBuilder implements IScriptBuilder {
 				currentIndex.remove(containerRelativePath);
 				((InternalSearchDocument) document).setIndex(currentIndex);
 
-				new MixinIndexer(document, element, currentIndex)
-						.indexDocument();
+				new MixinIndexer(document, element).indexDocument();
 				if (monitor != null) {
 					monitor.worked(1);
 				}

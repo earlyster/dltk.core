@@ -244,7 +244,8 @@ public abstract class JobManager implements Runnable {
 							try {
 								if (VERBOSE)
 									Util.verbose("-> GOING TO SLEEP - " + searchJob);//$NON-NLS-1$
-								Thread.sleep(50);
+								Thread.sleep(searchJob instanceof WaitJob ? 250
+									: 50);
 							} catch (InterruptedException e) {
 								// ignore
 							}
@@ -269,26 +270,28 @@ public abstract class JobManager implements Runnable {
 	}
 	public abstract String processName();
 	
+	private static final class WaitJob implements IJob {
+		public boolean belongsTo(String jobFamily) {
+			return false;
+		}
+
+		public void cancel() {
+		}
+
+		public void ensureReadyToRun() {
+		}
+
+		public boolean execute(IProgressMonitor progress) {
+			return false;
+		}
+
+		public String toString() {
+			return "WAIT-UNTIL-READY-JOB"; //$NON-NLS-1$
+		}
+	}
+
 	public void waitUntilReady() {
-		performConcurrentJob(new IJob() {
-			public boolean belongsTo(String jobFamily) {
-				return false;
-			}
-
-			public void cancel() {
-			}
-
-			public void ensureReadyToRun() {
-			}
-
-			public boolean execute(IProgressMonitor progress) {
-				return false;
-			}
-
-			public String toString() {
-				return "WAIT-UNTIL-READY-JOB"; //$NON-NLS-1$
-			}
-		}, IJob.WaitUntilReady, null);
+		performConcurrentJob(new WaitJob(), IJob.WaitUntilReady, null);
 	}
 
 	public synchronized void request(IJob job) {

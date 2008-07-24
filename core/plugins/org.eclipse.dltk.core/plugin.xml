@@ -6,6 +6,7 @@
    <extension-point id="mixin" name="%extension-point.name.mixin" schema="schema/mixin.exsd"/>
    <extension-point id="builder" name="%extension-point.name.builder" schema="schema/builder.exsd"/>
    <extension-point id="structureBuilder" name="%extension-point.name.structureBuilder" schema="schema/structureBuilder.exsd"/>
+   <extension-point id="projectIndexer" name="%extension-point.name.projectIndexer" schema="schema/projectIndexer.exsd"/>
    <extension-point id="typeEvaluators" name="%extension-point.name.typeEvaluators" schema="schema/goalEvaluators.exsd"/>
    <extension-point id="sourceParsers" name="%extension-point.name.sourceParsers" schema="schema/sourceParsers.exsd"/>
    <extension-point id="sourceElementParsers" name="%extension-point.name.sourceElementParsers" schema="schema/sourceElementParsers.exsd"/>
@@ -87,13 +88,12 @@
    <initializer class="org.eclipse.dltk.internal.core.DLTKCorePreferenceInitializer"/>
 </extension>
 <extension
-      point="org.eclipse.dltk.core.builder">
-   <builder
-         class="org.eclipse.dltk.internal.core.mixin.MixinBuilder"
-         nature="#">
-   </builder>
+      point="org.eclipse.dltk.core.projectIndexer">
+      <projectIndexer
+            class="org.eclipse.dltk.internal.core.mixin.MixinProjectIndexer"
+            nature="#">
+      </projectIndexer>
 </extension>
-
 <extension 
 	point="org.eclipse.core.resources.builders" 
 	id="scriptbuilder"

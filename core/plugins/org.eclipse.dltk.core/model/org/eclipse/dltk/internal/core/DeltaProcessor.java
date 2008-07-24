@@ -46,12 +46,14 @@ import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
 import org.eclipse.dltk.internal.core.builder.ScriptBuilder;
 import org.eclipse.dltk.internal.core.search.DLTKWorkspaceScope;
+import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.dltk.internal.core.util.Util;
 
 /**
@@ -236,6 +238,8 @@ public class DeltaProcessor {
 
 	/* A set of IDylanProject whose package fragment roots need to be refreshed */
 	private HashSet rootsToRefresh = new HashSet();
+	/** {@link Runnable}s that should be called after model is updated */
+	private final ArrayList postActions = new ArrayList();
 	/*
 	 * Type of event that should be processed no matter what the real event type
 	 * is.
@@ -908,6 +912,8 @@ public class DeltaProcessor {
 								// index
 								this.manager.indexManager
 										.removeIndex(entryPath);
+								ProjectIndexerManager.removeLibrary(
+										scriptProject, entryPath);
 							}
 						} else if (targetLibrary instanceof IFileHandle) { // external
 							// JAR
@@ -917,6 +923,7 @@ public class DeltaProcessor {
 							Long oldTimestamp = (Long) this.state
 									.getExternalLibTimeStamps().get(entryPath);
 							long newTimeStamp = getTimeStamp(externalFile);
+							final BuildpathEntry bpEntry = (BuildpathEntry) entry;
 							if (oldTimestamp != null) {
 								if (newTimeStamp == 0) { // file doesn't
 									// exist
@@ -927,6 +934,8 @@ public class DeltaProcessor {
 									// remove the index
 									this.manager.indexManager
 											.removeIndex(entryPath);
+									ProjectIndexerManager.removeLibrary(
+											scriptProject, entryPath);
 								} else if (oldTimestamp.longValue() != newTimeStamp) {
 									externalArchivesStatus.put(entryPath,
 											EXTERNAL_ZIP_CHANGED);
@@ -941,10 +950,12 @@ public class DeltaProcessor {
 											.indexLibrary(
 													entryPath,
 													project.getProject(),
-													((BuildpathEntry) entry)
+													bpEntry
 															.fullInclusionPatternChars(),
-													((BuildpathEntry) entry)
+													bpEntry
 															.fullExclusionPatternChars());
+									ProjectIndexerManager.indexLibrary(
+											scriptProject, entryPath);
 								} else {
 									externalArchivesStatus.put(entryPath,
 											EXTERNAL_ZIP_UNCHANGED);
@@ -964,9 +975,9 @@ public class DeltaProcessor {
 											.indexLibrary(
 													entryPath,
 													project.getProject(),
-													((BuildpathEntry) entry)
+													bpEntry
 															.fullInclusionPatternChars(),
-													((BuildpathEntry) entry)
+													bpEntry
 															.fullExclusionPatternChars());
 								}
 							}
@@ -1819,11 +1830,22 @@ public class DeltaProcessor {
 			}
 			this.refreshProjectFragments();
 			this.resetProjectCaches();
+			this.executePostActions();
 			return this.currentDelta;
 		} finally {
 			this.currentDelta = null;
 			this.rootsToRefresh.clear();
 			this.projectCachesToReset.clear();
+			this.postActions.clear();
+		}
+	}
+
+	private void executePostActions() {
+		if (postActions.size() == 0) {
+			return;
+		}
+		for (Iterator i = postActions.iterator(); i.hasNext();) {
+			((Runnable) i.next()).run();
 		}
 	}
 
@@ -2451,7 +2473,7 @@ public class DeltaProcessor {
 			} else if (elementType == IModelElement.SCRIPT_PROJECT) {
 				if ((flags & IResourceDelta.OPEN) != 0) {
 					// project has been opened or closed
-					IProject res = (IProject) delta.getResource();
+					final IProject res = (IProject) delta.getResource();
 					element = this.createElement(res, elementType, rootInfo);
 					if (element == null) {
 						// resource might be containing shared roots (see
@@ -2471,6 +2493,11 @@ public class DeltaProcessor {
 							this.rootsToRefresh.add(element);
 							this.projectCachesToReset.add(element);
 							this.manager.indexManager.indexAll(res);
+							this.postActions.add(new Runnable() {
+								public void run() {
+									ProjectIndexerManager.indexProject(res);
+								}
+							});
 						}
 					} else {
 						boolean wasDylanProject = this.state.findProject(res
@@ -2481,8 +2508,10 @@ public class DeltaProcessor {
 							this.currentDelta().closed(element);
 							this.manager.indexManager.discardJobs(element
 									.getElementName());
-							this.manager.indexManager.removeIndexFamily(res
-									.getFullPath());
+							final IPath projectPath = res.getFullPath();
+							this.manager.indexManager
+									.removeIndexFamily(projectPath);
+							ProjectIndexerManager.removeProject(projectPath);
 						}
 					}
 					return false; // when a project is open/closed don't
@@ -2506,12 +2535,15 @@ public class DeltaProcessor {
 						if (isDylanProject) {
 							this.elementAdded(element, delta, rootInfo);
 							this.manager.indexManager.indexAll(res);
+							ProjectIndexerManager.indexProject(res);
 						} else {
 							this.elementRemoved(element, delta, rootInfo);
 							this.manager.indexManager.discardJobs(element
 									.getElementName());
-							this.manager.indexManager.removeIndexFamily(res
-									.getFullPath());
+							final IPath projectPath = res.getFullPath();
+							this.manager.indexManager
+									.removeIndexFamily(projectPath);
+							ProjectIndexerManager.removeProject(projectPath);
 							// reset the corresponding project built state,
 							// since cannot reuse if added back
 							if (DLTKCore.DEBUG) {
@@ -2541,11 +2573,19 @@ public class DeltaProcessor {
 		case IModelElement.SCRIPT_PROJECT:
 			switch (delta.getKind()) {
 			case IResourceDelta.ADDED:
-				indexManager.indexAll(element.getScriptProject().getProject());
+				final IScriptProject scriptProject = element.getScriptProject();
+				indexManager.indexAll(scriptProject.getProject());
+				this.postActions.add(new Runnable() {
+					public void run() {
+						ProjectIndexerManager.indexProject(scriptProject);
+					}
+				});
 				break;
 			case IResourceDelta.REMOVED:
-				indexManager.removeIndexFamily(element.getScriptProject()
-						.getProject().getFullPath());
+				final IPath projectPath = element.getScriptProject()
+						.getProject().getFullPath();
+				indexManager.removeIndexFamily(projectPath);
+				ProjectIndexerManager.removeProject(projectPath);
 				// NB: Discarding index jobs belonging to this project
 				// was done
 				// during PRE_DELETE
@@ -2578,26 +2618,30 @@ public class DeltaProcessor {
 						e.printStackTrace();
 					}
 				}
+				final IScriptProject scriptProject = root.getScriptProject();
 				switch (delta.getKind()) {
 				case IResourceDelta.ADDED:
 					// index the new jar
-					indexManager.indexLibrary(jarPath, root.getScriptProject()
+					indexManager.indexLibrary(jarPath, scriptProject
 							.getProject(), fullInclusionPatternChars,
 							fullExclusionPatternChars);
+					ProjectIndexerManager.indexLibrary(scriptProject, jarPath);
 					break;
 				case IResourceDelta.CHANGED:
 					// first remove the index so that it is forced to be
 					// re-indexed
 					indexManager.removeIndex(jarPath);
 					// then index the jar
-					indexManager.indexLibrary(jarPath, root.getScriptProject()
+					indexManager.indexLibrary(jarPath, scriptProject
 							.getProject(), fullInclusionPatternChars,
 							fullExclusionPatternChars);
+					ProjectIndexerManager.indexLibrary(scriptProject, jarPath);
 					break;
 				case IResourceDelta.REMOVED:
 					// the jar was physically removed: remove the index
 					indexManager.discardJobs(jarPath.toString());
 					indexManager.removeIndex(jarPath);
+					ProjectIndexerManager.removeLibrary(scriptProject, jarPath);
 					break;
 				}
 				break;
@@ -2685,6 +2729,8 @@ public class DeltaProcessor {
 				indexManager.addSource(file, file.getProject().getFullPath(),
 						this.getSourceElementParser(element), this
 								.getSourceRequestor(element), toolkit);
+				ProjectIndexerManager.indexSourceModule(
+						(ISourceModule) element, toolkit);
 				if (DLTKCore.DEBUG) {
 					System.err
 							.println("update index: some actions are required to perform here...."); //$NON-NLS-1$
@@ -2697,12 +2743,12 @@ public class DeltaProcessor {
 				// this.manager.secondaryTypesRemoving(file, false);
 				break;
 			case IResourceDelta.REMOVED:
-				indexManager.remove(Util
-						.relativePath(file.getFullPath(), 1/*
-															 * remove project
-															 * segment
-															 */), file
-						.getProject().getFullPath());
+				final IProject project = file.getProject();
+				/* remove project segment */
+				final String path = Util.relativePath(file.getFullPath(), 1);
+				indexManager.remove(path, project.getFullPath());
+				ProjectIndexerManager.removeSourceModule(DLTKCore
+						.create(project), path);
 				// Clean file from secondary types cache and update
 				// indexing
 				// secondary type cache as indexing cannot remove

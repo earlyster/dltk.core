@@ -11,12 +11,14 @@ package org.eclipse.dltk.core.search;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IMethod;
@@ -36,6 +38,7 @@ import org.eclipse.dltk.internal.core.search.TypeNameMatchRequestorWrapper;
 import org.eclipse.dltk.internal.core.search.TypeNameRequestorWrapper;
 import org.eclipse.dltk.internal.core.search.matching.MixinPattern;
 import org.eclipse.dltk.internal.core.util.HandleFactory;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * A {@link SearchEngine} searches for Script elements following a search
@@ -997,6 +1000,16 @@ public class SearchEngine {
 				participant, // Script search only
 				scope, searchRequestor),
 				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
+		if (DLTKCore.VERBOSE_MIXIN) {
+			System.out.println(NLS.bind("mixin search for ''{0}'': {1} results ", //$NON-NLS-1$
+					key, String.valueOf(modules.size())));
+			if (!modules.isEmpty() && modules.size() <= 8) {
+				for (Iterator i = modules.iterator(); i.hasNext();) {
+					ISourceModule module = (ISourceModule) i.next();
+					System.out.println("- " + module.getElementName()); //$NON-NLS-1$
+				}
+			}
+		}
 		return (ISourceModule[]) modules.toArray(new ISourceModule[modules
 				.size()]);
 	}
@@ -1057,7 +1070,8 @@ public class SearchEngine {
 	 *            Modifiers of the method
 	 * @return A non-null match on the given method.
 	 */
-	public static MethodNameMatch createMethodNameMatch(IMethod method, int modifiers) {
+	public static MethodNameMatch createMethodNameMatch(IMethod method,
+			int modifiers) {
 		return BasicSearchEngine.createMethodNameMatch(method, modifiers);
 	}
 

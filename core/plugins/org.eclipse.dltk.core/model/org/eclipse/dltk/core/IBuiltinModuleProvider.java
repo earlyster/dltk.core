@@ -11,14 +11,24 @@ package org.eclipse.dltk.core;
 
 /**
  * Used to provide builtin information into model.
+ * 
  * @author Haiodo
- *
  */
 public interface IBuiltinModuleProvider {
 	/**
 	 * Used to builtin model contributions.
+	 * 
 	 * @return
 	 */
 	String[] getBuiltinModules();
-	String getBuiltinModuleContent( String name );
+
+	String getBuiltinModuleContent(String name);
+
+	/**
+	 * Returns the time that the content denoted by this provider was last
+	 * modified.
+	 * 
+	 * @return
+	 */
+	long lastModified();
 }

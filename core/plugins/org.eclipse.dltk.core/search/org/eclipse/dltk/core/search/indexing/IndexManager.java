@@ -53,6 +53,7 @@ import org.eclipse.dltk.internal.core.Model;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.search.PatternSearchJob;
+import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.dltk.internal.core.search.processing.IJob;
 import org.eclipse.dltk.internal.core.search.processing.JobManager;
 import org.eclipse.dltk.internal.core.util.Messages;
@@ -77,6 +78,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	public static final Integer UPDATING_STATE = new Integer(1);
 	public static final Integer UNKNOWN_STATE = new Integer(2);
 	public static final Integer REBUILDING_STATE = new Integer(3);
+
+	public static final String MIXIN_ID = "mixin"; //$NON-NLS-1$
 
 	public synchronized void aboutToUpdateIndex(IPath containerPath,
 			Integer newIndexState) {
@@ -207,7 +210,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		}
 	}
 
-	public String computeIndexLocation(IPath containerPath) {
+	public synchronized String computeIndexLocation(IPath containerPath) {
 		String indexLocation = (String) this.indexLocations.get(containerPath);
 		if (indexLocation == null) {
 			String pathString = containerPath.toString();
@@ -295,61 +298,42 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	}
 
 	/**
-	 * This indexes aren't required to be rebuilded.
+	 * This indexes aren't required to be rebuilt.
 	 * 
 	 * @param id
 	 * @return
 	 */
 	public synchronized Index getSpecialIndex(String id, String path,
-			String containerPath/* , IProject project */) {
-		// String containerPath = project.getFullPath().toOSString();
-		// String path = project.getFullPath();
+			String containerPath) {
 
-		boolean mixin = id.equals("mixin"); //$NON-NLS-1$
+		final boolean mixin = id.equals(MIXIN_ID);
 
-		String indexLocation = this.computeIndexLocation(new Path(
-				"#special#" + id //$NON-NLS-1$
-						+ "#" + path)); //$NON-NLS-1$
+		final String indexLocation = getSpecialIndexLocation(id, path);
 
 		Index index = (Index) this.indexes.get(indexLocation);
 
 		if (index == null) {
-			Object state = this.getIndexStates().get(indexLocation);
-			Integer currentIndexState = state == null ? UNKNOWN_STATE
-					: (Integer) state;
-			// index isn't cached, consider reusing an existing index file
-
-			File indexFile = new File(indexLocation);
-			if (indexFile.exists()) { // check before creating index so as
+			final File indexFile = new File(indexLocation);
+			if (indexFile.exists()) {
+				// check before creating index so as
 				// to avoid creating a new empty
 				// index if file is missing
 				try {
+					/* reuse index file */
 					if (mixin) {
 						index = new MixinIndex(indexLocation, containerPath,
 								true);
-						/* reuse index file */
 					} else {
 						index = new Index(indexLocation, containerPath, true);
-						/* reuse index file */
 					}
 					this.indexes.put(indexLocation, index);
 					return index;
 				} catch (IOException e) {
-					// failed to read the existing file or its no longer
-					// compatible
-					if (currentIndexState != REBUILDING_STATE) { // rebuild
-						/*
-						 * index if existing file is corrupt, unless the index
-						 * is already being rebuilt
-						 */
-						if (VERBOSE) {
-							Util
-									.verbose("-> cannot reuse existing index: " + indexLocation + " path: " + id); //$NON-NLS-1$ //$NON-NLS-2$
-						}
+					if (VERBOSE) {
+						Util
+								.verbose("-> cannot reuse existing index: " + indexLocation + " path: " + id); //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					/* index = null; */// will fall thru to createIfMissing
-					// & create a empty index for the
-					// rebuild all job to populate
+					// fall thru
 				}
 			}
 
@@ -361,12 +345,11 @@ public class IndexManager extends JobManager implements IIndexConstants {
 							.verbose("-> create empty index: " + indexLocation + " path: " + id); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 
+				/* do not reuse index file */
 				if (mixin) {
 					index = new MixinIndex(indexLocation, containerPath, false);
-					/* do not reuse index file */
 				} else {
 					index = new Index(indexLocation, containerPath, false);
-					/* do not reuse index file */
 				}
 				this.indexes.put(indexLocation, index);
 				return index;
@@ -380,10 +363,12 @@ public class IndexManager extends JobManager implements IIndexConstants {
 				return null;
 			}
 		}
-		// System.out.println(" index name: " + path.toOSString() + " <----> " +
-		// index.getIndexFile().getName());
-		this.updateIndexState(indexLocation, REBUILDING_STATE);
 		return index;
+	}
+
+	public String getSpecialIndexLocation(String id, String path) {
+		return this.computeIndexLocation(new Path("#special#" + id //$NON-NLS-1$
+				+ "#" + path)); //$NON-NLS-1$
 	}
 
 	/**
@@ -934,6 +919,9 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			}
 			index.save();
 		}
+		if (!index.isRebuildable()) {
+			return;
+		}
 		// TODO should use getJavaPluginWorkingLocation()+index simple name to
 		// avoid bugs such as
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=62267
@@ -1177,6 +1165,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		for (int i = 0; i < projects.length; i++) {
 			if (DLTKLanguageManager.hasScriptNature(projects[i])) {
 				this.indexAll(projects[i]);
+				ProjectIndexerManager.indexProject(projects[i]);
 			}
 		}
 	}

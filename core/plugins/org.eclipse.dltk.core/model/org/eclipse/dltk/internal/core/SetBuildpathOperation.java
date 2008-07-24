@@ -34,6 +34,7 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
+import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
 
@@ -414,6 +415,8 @@ public class SetBuildpathOperation extends ModelOperation {
 										SetBuildpathOperation.this.project,
 										path, inclusionPatterns,
 										exclusionPatterns);
+								ProjectIndexerManager.removeProjectFragment(
+										project, path);
 							}
 						}, REMOVEALL_APPEND);
 						break;
@@ -425,13 +428,12 @@ public class SetBuildpathOperation extends ModelOperation {
 							}
 
 							public void run() /* throws ModelException */{
-								if (deltaState.otherRoots.get(path) == null) { // if
-									// root
-									// was
-									// not
-									// shared
+								if (deltaState.otherRoots.get(path) == null) {
+									/* if root was not shared */
 									indexManager.discardJobs(path.toString());
 									indexManager.removeIndex(path);
+									ProjectIndexerManager.removeLibrary(
+											project, path);
 									// TODO (kent) we could just remove the
 									// in-memory index and have the indexing
 									// check for timestamps
@@ -462,29 +464,23 @@ public class SetBuildpathOperation extends ModelOperation {
 						AccessRuleSet oldRuleSet = oldEntry.getAccessRuleSet();
 						AccessRuleSet newRuleSet = newEntry.getAccessRuleSet();
 						if (index != i) { // entry has been moved
-							needToUpdateDependents |= (oldRuleSet != null || newRuleSet != null); // there's
-							// an
-							// access
-							// restriction,
-							// this
-							// may
-							// change
-							// combination
+							needToUpdateDependents |= (oldRuleSet != null || newRuleSet != null);
+							/*
+							 * there's an access restriction, this may change
+							 * combination
+							 */
 						} else if (oldRuleSet == null) {
-							needToUpdateDependents |= newRuleSet != null; // access
-							// restriction
-							// was
-							// added
+							needToUpdateDependents |= newRuleSet != null;
+							/*
+							 * access restriction was added
+							 */
 						} else {
 							needToUpdateDependents |= !oldRuleSet
-									.equals(newRuleSet); // access
-							// restriction
-							// has
-							// changed
-							// or
-							// has
-							// been
-							// removed
+									.equals(newRuleSet);
+							/*
+							 * access restriction has changed or has been
+							 * removed
+							 */
 						}
 					}
 					this.needCycleCheck |= (oldEntry.isExported() != newEntry
@@ -547,6 +543,8 @@ public class SetBuildpathOperation extends ModelOperation {
 													.getProject(),
 											entry.fullInclusionPatternChars(),
 											entry.fullExclusionPatternChars());
+									ProjectIndexerManager.indexLibrary(project,
+											newPath);
 								}
 							}, REMOVEALL_APPEND);
 						}
@@ -567,6 +565,8 @@ public class SetBuildpathOperation extends ModelOperation {
 										SetBuildpathOperation.this.project,
 										path, inclusionPatterns,
 										exclusionPatterns);
+								ProjectIndexerManager.indexProjectFragment(
+										project, path);
 							}
 						}, APPEND); // append so that a removeSourceFolder
 						// action is not removed
@@ -658,10 +658,8 @@ public class SetBuildpathOperation extends ModelOperation {
 		// resolve new path (asking for marker creation if problems)
 		if (this.newResolvedPath == null) {
 			this.newResolvedPath = this.project.getResolvedBuildpath(true,
-					this.canChangeResources, false/*
-													 * don't
-													 * returnResolutionInProgress
-													 */);
+					this.canChangeResources, false);
+			/* don't returnResolutionInProgress */
 		}
 
 		if (this.oldResolvedPath != null) {
@@ -732,12 +730,14 @@ public class SetBuildpathOperation extends ModelOperation {
 															.getResolvedBuildpath(
 																	true/* ignoreUnresolvedEntry */,
 																	false/*
-																			 * don't
-																			 * generateMarkerOnError
-																			 */, false/*
-																				 * don't
-																				 * returnResolutionInProgress
-																				 */), false, // updating
+																		 * don't
+																		 * generateMarkerOnError
+																		 */,
+																	false/*
+																		 * don't
+																		 * returnResolutionInProgress
+																		 */),
+													false, // updating
 													// only
 													// - no
 													// validation

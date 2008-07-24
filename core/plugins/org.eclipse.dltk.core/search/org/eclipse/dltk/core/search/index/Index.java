@@ -251,4 +251,8 @@ public class Index {
 	public String toString() {
 		return "Index for " + this.containerPath; //$NON-NLS-1$
 	}
+
+	public boolean isRebuildable() {
+		return true;
+	}
 }

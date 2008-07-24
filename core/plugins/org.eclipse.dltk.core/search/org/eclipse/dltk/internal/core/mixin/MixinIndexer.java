@@ -18,21 +18,16 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.mixin.IMixinParser;
 import org.eclipse.dltk.core.mixin.IMixinRequestor;
 import org.eclipse.dltk.core.search.SearchDocument;
-import org.eclipse.dltk.core.search.index.Index;
+import org.eclipse.dltk.core.search.index.MixinIndex;
 import org.eclipse.dltk.core.search.indexing.AbstractIndexer;
 
 public class MixinIndexer extends AbstractIndexer {
-	MixinIndexRequestor requestor = new MixinIndexRequestor();
-	ISourceModule sourceModule;
-	Index currentIndex;
-	public int index;
-	public String elementName;
 
-	public MixinIndexer(SearchDocument document, ISourceModule module,
-			Index currentIndex) {
+	private final ISourceModule sourceModule;
+
+	public MixinIndexer(SearchDocument document, ISourceModule module) {
 		super(document);
 		this.sourceModule = module;
-		this.currentIndex = currentIndex;
 	}
 
 	public void indexDocument() {
@@ -48,23 +43,26 @@ public class MixinIndexer extends AbstractIndexer {
 			IMixinParser parser = MixinManager.getMixinParser(toolkit
 					.getNatureId());
 			if (parser != null) {
-				parser.setRequirestor(this.requestor);
+				final MixinIndexRequestor requestor = new MixinIndexRequestor();
+				parser.setRequirestor(requestor);
 				parser.parserSourceModule(false, this.sourceModule);
+				if (requestor.count == 0) {
+					((MixinIndex) document.getIndex()).addDocumentName(document
+							.getContainerRelativePath());
+				}
 			}
 		} catch (CoreException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
+			DLTKCore.error("Error in MixinIndexer", e); //$NON-NLS-1$
 		}
 	}
 
 	private class MixinIndexRequestor implements IMixinRequestor {
+		int count = 0;
+
 		public void reportElement(ElementInfo info) {
 			if (info.key.length() > 0) {
-				// Thread safe support
-//				synchronized (currentIndex) {
-				MixinIndexer.this.addMixin(info.key.toCharArray());
-//				}
+				addIndexEntry(MIXIN, info.key.toCharArray());
+				++count;
 			}
 		}
 	}

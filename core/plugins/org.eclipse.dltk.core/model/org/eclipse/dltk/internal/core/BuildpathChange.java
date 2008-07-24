@@ -28,6 +28,7 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.ModelManager.PerProjectInfo;
+import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 
 public class BuildpathChange {
 	public static int NO_DELTA = 0x00;
@@ -401,12 +402,14 @@ public class BuildpathChange {
 							.fullExclusionPatternChars();
 					indexManager.removeSourceFolderFromIndex(this.project,
 							path, inclusionPatterns, exclusionPatterns);
+					ProjectIndexerManager.removeProjectFragment(project, path);
 					break;
 				case IBuildpathEntry.BPE_LIBRARY:
 					if (state.otherRoots.get(path) == null) { // if root was not
 						// shared
 						indexManager.discardJobs(path.toString());
 						indexManager.removeIndex(path);
+						ProjectIndexerManager.removeLibrary(project, path);
 					}
 					break;
 				}
@@ -444,6 +447,7 @@ public class BuildpathChange {
 						indexManager.indexLibrary(newPath, this.project
 								.getProject(), inclusionPatterns,
 								exclusionPatterns);
+						ProjectIndexerManager.indexLibrary(project, newPath);
 					}
 					break;
 				case IBuildpathEntry.BPE_SOURCE:
@@ -455,6 +459,7 @@ public class BuildpathChange {
 							.fullExclusionPatternChars();
 					indexManager.indexSourceFolder(this.project, path,
 							inclusionPatterns, exclusionPatterns);
+					ProjectIndexerManager.indexProjectFragment(project, path);
 					break;
 				}
 			}

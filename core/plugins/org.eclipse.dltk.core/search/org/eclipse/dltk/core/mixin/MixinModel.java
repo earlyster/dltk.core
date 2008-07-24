@@ -83,8 +83,8 @@ public class MixinModel {
 	}
 
 	public IMixinElement get(String key) {
-
 		if (DLTKCore.VERBOSE) {
+			System.out.println("MixinModel.get(" + key + ')'); //$NON-NLS-1$
 		}
 		if (notExistKeysCache.contains(key)) {
 			return null;
