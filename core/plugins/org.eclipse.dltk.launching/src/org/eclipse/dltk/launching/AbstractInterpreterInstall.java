@@ -260,6 +260,10 @@ public abstract class AbstractInterpreterInstall implements IInterpreterInstall 
 	public String getBuiltinModuleContent(String name) {
 		return null;
 	}
+	
+	public long lastModified() {
+		return 0;
+	}
 
 	protected IInterpreterRunner getDebugInterpreterRunner() {
 		return new DebugRunnerDelegate(this);
