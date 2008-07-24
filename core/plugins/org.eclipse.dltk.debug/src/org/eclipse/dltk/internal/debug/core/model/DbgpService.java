@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.dbgp.DbgpServer;
 import org.eclipse.dltk.dbgp.IDbgpServerListener;
 import org.eclipse.dltk.dbgp.IDbgpSession;
+import org.eclipse.dltk.dbgp.IDbgpSessionInfo;
 import org.eclipse.dltk.dbgp.IDbgpThreadAcceptor;
 import org.eclipse.dltk.dbgp.internal.IDbgpTerminationListener;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
@@ -151,15 +152,15 @@ public class DbgpService implements IDbgpService, IDbgpTerminationListener,
 
 	// INewDbgpServerListener
 	public void clientConnected(IDbgpSession session) {
-		final String id = session.getInfo().getIdeKey();
-
-		final IDbgpThreadAcceptor acceptor = (IDbgpThreadAcceptor) acceptors
-				.get(id);
-
-		if (acceptor != null) {
-			acceptor.acceptDbgpThread(session);
-		} else {
-			session.requestTermination();
+		final IDbgpSessionInfo info = session.getInfo();
+		if (info != null) {
+			final IDbgpThreadAcceptor acceptor = (IDbgpThreadAcceptor) acceptors
+					.get(info.getIdeKey());
+			if (acceptor != null) {
+				acceptor.acceptDbgpThread(session);
+			} else {
+				session.requestTermination();
+			}
 		}
 	}
 }
