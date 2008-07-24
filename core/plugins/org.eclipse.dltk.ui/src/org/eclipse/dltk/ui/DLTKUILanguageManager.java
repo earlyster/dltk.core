@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -28,17 +27,7 @@ public class DLTKUILanguageManager extends PriorityClassDLTKExtensionManager {
 	}
 
 	public static IDLTKUILanguageToolkit[] getLanguageToolkits() {
-		ElementInfo[] elementInfos = instance.getElementInfos();
-		List toolkits = new ArrayList();
-		for (int j = 0; j < elementInfos.length; j++) {
-			IDLTKUILanguageToolkit toolkit = (IDLTKUILanguageToolkit) instance
-					.getInitObject(elementInfos[j]);
-
-			if (toolkit != null) {
-				toolkits.add(toolkit);
-			}
-		}
-
+		List toolkits = instance.getObjectList();
 		return (IDLTKUILanguageToolkit[]) toolkits
 				.toArray(new IDLTKUILanguageToolkit[toolkits.size()]);
 	}
@@ -52,7 +41,8 @@ public class DLTKUILanguageManager extends PriorityClassDLTKExtensionManager {
 		IDLTKLanguageToolkit coreToolkit = DLTKLanguageManager
 				.getLanguageToolkit(element);
 		if (coreToolkit != null) {
-			return (IDLTKUILanguageToolkit) instance.getObject(coreToolkit.getNatureId());
+			return (IDLTKUILanguageToolkit) instance.getObject(coreToolkit
+					.getNatureId());
 		}
 		return null;
 	}
