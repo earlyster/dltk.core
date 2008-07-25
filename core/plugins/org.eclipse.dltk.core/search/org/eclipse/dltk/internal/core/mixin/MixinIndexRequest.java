@@ -52,14 +52,14 @@ abstract class MixinIndexRequest extends AbstractJob {
 	protected Index getProjectMixinIndex(IPath path) {
 		final String containerPath = path.getDevice() == null ? path.toString()
 				: path.toOSString();
-		return getIndexManager().getSpecialIndex(IndexManager.MIXIN_ID,
+		return getIndexManager().getSpecialIndex(IndexManager.SPECIAL_MIXIN,
 				path.toString(), containerPath);
 	}
 
 	protected Index getProjectFragmentIndex(IProjectFragment fragment) {
 		final String path = fragment.getPath().toString();
-		return getIndexManager()
-				.getSpecialIndex(IndexManager.MIXIN_ID, path, path);
+		return getIndexManager().getSpecialIndex(IndexManager.SPECIAL_MIXIN,
+				path, path);
 	}
 
 	/**
@@ -150,40 +150,41 @@ abstract class MixinIndexRequest extends AbstractJob {
 	 * @throws ModelException
 	 * @throws IOException
 	 */
-	protected List checkChanges(Index index, Collection modules, IPath containerPath,
-			IEnvironment environment) throws ModelException, IOException {
-				final String[] documents = queryDocumentNames(index);
-				if (documents != null && documents.length != 0) {
-					final long indexLastModified = index.getIndexFile().lastModified();
-					final List changes = new ArrayList();
-					final Map m = collectSourceModulePaths(modules, containerPath);
-					if (DEBUG) {
-						log("documents.length=" + documents.length); //$NON-NLS-1$
-						log("modules.size=" + modules.size()); //$NON-NLS-1$
-						log("map.size=" + m.size()); //$NON-NLS-1$
+	protected List checkChanges(Index index, Collection modules,
+			IPath containerPath, IEnvironment environment)
+			throws ModelException, IOException {
+		final String[] documents = queryDocumentNames(index);
+		if (documents != null && documents.length != 0) {
+			final long indexLastModified = index.getIndexFile().lastModified();
+			final List changes = new ArrayList();
+			final Map m = collectSourceModulePaths(modules, containerPath);
+			if (DEBUG) {
+				log("documents.length=" + documents.length); //$NON-NLS-1$
+				log("modules.size=" + modules.size()); //$NON-NLS-1$
+				log("map.size=" + m.size()); //$NON-NLS-1$
+			}
+			for (int i = 0; i < documents.length; ++i) {
+				final String document = documents[i];
+				final ISourceModule module = (ISourceModule) m.remove(document);
+				if (module == null) {
+					changes.add(document);
+				} else if (environment != null) {
+					final IFileHandle handle = environment
+							.getFile(EnvironmentPathUtils.getLocalPath(module
+									.getPath()));
+					if (handle != null
+							&& handle.lastModified() > indexLastModified) {
+						changes.add(module);
 					}
-					for (int i = 0; i < documents.length; ++i) {
-						final String document = documents[i];
-						final ISourceModule module = (ISourceModule) m.remove(document);
-						if (module == null) {
-							changes.add(document);
-						} else if (environment != null) {
-							final IFileHandle handle = environment
-									.getFile(EnvironmentPathUtils.getLocalPath(module
-											.getPath()));
-							if (handle != null
-									&& handle.lastModified() > indexLastModified) {
-								changes.add(module);
-							}
-						}
-					}
-					if (!m.isEmpty()) {
-						changes.addAll(m.values());
-					}
-					return changes;
-				} else {
-					return new ArrayList(modules);
 				}
 			}
+			if (!m.isEmpty()) {
+				changes.addAll(m.values());
+			}
+			return changes;
+		} else {
+			return new ArrayList(modules);
+		}
+	}
 
 }

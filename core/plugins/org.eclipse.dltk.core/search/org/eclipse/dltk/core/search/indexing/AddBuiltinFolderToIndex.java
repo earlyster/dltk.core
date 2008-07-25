@@ -80,8 +80,8 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 		}
 		String pathToString = containerPath.toString();
 
-		Index index = this.manager
-				.getSpecialIndex("builtin", cfp, pathToString); //$NON-NLS-1$
+		Index index = this.manager.getSpecialIndex(
+				IndexManager.SPECIAL_BUILTIN, cfp, pathToString);
 		if (index == null) {
 			if (JobManager.VERBOSE)
 				org.eclipse.dltk.internal.core.util.Util

@@ -79,7 +79,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	public static final Integer UNKNOWN_STATE = new Integer(2);
 	public static final Integer REBUILDING_STATE = new Integer(3);
 
-	public static final String MIXIN_ID = "mixin"; //$NON-NLS-1$
+	public static final String SPECIAL_MIXIN = "#special#mixin#"; //$NON-NLS-1$
+	public static final String SPECIAL_BUILTIN = "#special#builtin#"; //$NON-NLS-1$
 
 	public synchronized void aboutToUpdateIndex(IPath containerPath,
 			Integer newIndexState) {
@@ -300,15 +301,15 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	/**
 	 * This indexes aren't required to be rebuilt.
 	 * 
-	 * @param id
+	 * @param prefix
 	 * @return
 	 */
-	public synchronized Index getSpecialIndex(String id, String path,
+	public synchronized Index getSpecialIndex(String prefix, String path,
 			String containerPath) {
 
-		final boolean mixin = id.equals(MIXIN_ID);
+		final boolean mixin = prefix.equals(SPECIAL_MIXIN);
 
-		final String indexLocation = getSpecialIndexLocation(id, path);
+		final String indexLocation = getSpecialIndexLocation(prefix, path);
 
 		Index index = (Index) this.indexes.get(indexLocation);
 
@@ -331,7 +332,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 				} catch (IOException e) {
 					if (VERBOSE) {
 						Util
-								.verbose("-> cannot reuse existing index: " + indexLocation + " path: " + id); //$NON-NLS-1$ //$NON-NLS-2$
+								.verbose("-> cannot reuse existing index: " + indexLocation + " path: " + prefix); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					// fall thru
 				}
@@ -342,7 +343,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			try {
 				if (VERBOSE) {
 					Util
-							.verbose("-> create empty index: " + indexLocation + " path: " + id); //$NON-NLS-1$ //$NON-NLS-2$
+							.verbose("-> create empty index: " + indexLocation + " path: " + prefix); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 
 				/* do not reuse index file */
@@ -366,9 +367,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		return index;
 	}
 
-	public String getSpecialIndexLocation(String id, String path) {
-		return this.computeIndexLocation(new Path("#special#" + id //$NON-NLS-1$
-				+ "#" + path)); //$NON-NLS-1$
+	public String getSpecialIndexLocation(String prefix, String path) {
+		return computeIndexLocation(new Path(prefix + path));
 	}
 
 	/**
@@ -383,7 +383,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	public synchronized Index getIndex(IPath containerPath,
 			String indexLocation, boolean reuseExistingFile,
 			boolean createIfMissing) {
-		boolean mixin = containerPath.toString().startsWith("#special#mixin#"); //$NON-NLS-1$
+		boolean mixin = containerPath.toString().startsWith(SPECIAL_MIXIN);
 		// Path is already canonical per construction
 		Index index = (Index) this.indexes.get(indexLocation);
 		if (index == null) {
@@ -749,7 +749,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	 * Warning: Does not check whether index is consistent (not being used)
 	 */
 	public synchronized Index recreateIndex(IPath containerPath) {
-		boolean mixin = containerPath.toString().startsWith("#special#mixin#"); //$NON-NLS-1$
+		boolean mixin = containerPath.toString().startsWith(SPECIAL_MIXIN);
 		// only called to over write an existing cached index...
 		String containerPathString = containerPath.toString();
 		try {

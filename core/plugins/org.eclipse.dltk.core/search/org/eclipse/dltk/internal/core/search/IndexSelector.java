@@ -285,7 +285,7 @@ public class IndexSelector {
 	private void checkSpecial(IPath projectsAndArchives, IndexManager manager,
 			SimpleSet locations, IScriptModel model) {
 		// check for special cases
-		String prjPath = "#special#mixin#" + projectsAndArchives.toString(); //$NON-NLS-1$
+		String prjPath = IndexManager.SPECIAL_MIXIN + projectsAndArchives.toString();
 		// checkSpecialCase(manager, locations, prjPath);
 		locations.add(manager.computeIndexLocation(new Path(prjPath)));
 		// add builtin indexes

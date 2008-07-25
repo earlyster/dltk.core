@@ -94,10 +94,8 @@ public class MixinBuilder implements IScriptBuilder {
 					.toString()
 					: fullPath.toOSString());
 
-			mixinIndex = manager.getSpecialIndex(
-					"mixin", //$NON-NLS-1$
-					/* project.getProject() */fullPath.toString(),
-					fullContainerPath);
+			mixinIndex = manager.getSpecialIndex(IndexManager.SPECIAL_MIXIN,
+					fullPath.toString(), fullContainerPath);
 			imon = mixinIndex.monitor;
 			imon.enterWrite();
 			String name = MessageFormat.format(

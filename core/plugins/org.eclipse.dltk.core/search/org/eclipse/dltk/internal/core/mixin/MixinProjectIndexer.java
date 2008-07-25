@@ -83,13 +83,13 @@ public class MixinProjectIndexer implements IProjectIndexer {
 
 	public void removeProject(IPath projectPath) {
 		final String indexLocation = manager.getSpecialIndexLocation(
-				IndexManager.MIXIN_ID, projectPath.toString());
+				IndexManager.SPECIAL_MIXIN, projectPath.toString());
 		requestIfNotWaiting(new RemoveIndexRequest(indexLocation));
 	}
 
 	public void removeLibrary(IScriptProject project, IPath path) {
 		final String indexLocation = manager.getSpecialIndexLocation(
-				IndexManager.MIXIN_ID, path.toString());
+				IndexManager.SPECIAL_MIXIN, path.toString());
 		requestIfNotWaiting(new RemoveIndexRequest(indexLocation));
 	}
 
