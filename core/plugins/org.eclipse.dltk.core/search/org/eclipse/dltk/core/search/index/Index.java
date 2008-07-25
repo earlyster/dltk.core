@@ -112,16 +112,6 @@ public class Index {
 		this.monitor = new ReadWriteMonitor();
 	}
 	
-	/*public static Index smartCreateIndex (String fileName, String containerPath,
-			boolean reuseExistingFile) throws IOException {
-		if (containerPath.startsWith("#special#builtin#")) {
-			return new MixinIndex(fileName, containerPath, reuseExistingFile);
-		} else {
-			return new Index(fileName, containerPath, reuseExistingFile);
-		}
-			
-	}*/
-
 	public void addIndexEntry(char[] category, char[] key,
 			String containerRelativePath) {
 		if( DLTKCore.DEBUG_INDEX ) {
