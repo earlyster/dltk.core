@@ -150,7 +150,7 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 			} catch (IOException e) {
 				getLog().log(
 						new Status(IStatus.ERROR, PLUGIN_ID, 0,
-								Messages.ValidatorsCore_exception, e));
+								ValidatorMessages.ValidatorsCore_exception, e));
 			}
 		}
 		return new ValidatorDefinitionsContainer();

@@ -17,6 +17,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IModelElement;
@@ -153,5 +156,14 @@ public class ValidatorUtils {
 		} else {
 			return res;
 		}
+	}
+
+	public static IProgressMonitor subMonitorFor(IProgressMonitor monitor,
+			int ticks) {
+		if (monitor == null)
+			return new NullProgressMonitor();
+		if (monitor instanceof NullProgressMonitor)
+			return monitor;
+		return new SubProgressMonitor(monitor, ticks);
 	}
 }

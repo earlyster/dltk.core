@@ -16,6 +16,10 @@ public class ValidatorMessages extends NLS {
 	public static String ValidatorDefinitionsContainer_failedToLoadValidatorFromXml;
 	public static String ValidatorDefinitionsContainer_unknownValidatorType;
 	public static String ValidatorRuntime_badFormat;
+	public static String ValidatorBuilder_buildingModules;
+	public static String ValidatorBuilder_buildModuleSubTask;
+	public static String ValidatorBuilder_unknownError;
+	public static String ValidatorsCore_exception;
 	
 
 	static {

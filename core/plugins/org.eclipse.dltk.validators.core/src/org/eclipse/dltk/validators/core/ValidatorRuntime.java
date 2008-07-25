@@ -418,44 +418,45 @@ public final class ValidatorRuntime {
 		return ANY_NATURE.equals(typeNature) || natureIds.equals(typeNature);
 	}
 
-	public static IStatus executeAutomaticSourceModuleValidators(
-			IScriptProject project, List sourceModules,
-			IValidatorOutput output, IProgressMonitor monitor) {
-		return executeSourceModuleValidators(project, sourceModules, output,
-				AUTOMATIC, monitor);
-	}
-
 	public static IStatus executeSourceModuleValidators(IScriptProject project,
 			List sourceModules, IValidatorOutput output,
 			IValidatorPredicate predicate, IProgressMonitor monitor) {
 		final IValidator[] validators = getProjectValidators(project,
 				ISourceModuleValidator.class, predicate);
 		if (validators.length != 0) {
-			monitor.beginTask(Messages.ValidatorRuntime_runningValidators,
-					validators.length * 100);
-			for (int i = 0; i < validators.length; ++i) {
+			return executeSourceModuleValidators(project, sourceModules,
+					output, validators, monitor);
+		}
+		return Status.OK_STATUS;
+	}
+
+	public static IStatus executeSourceModuleValidators(IScriptProject project,
+			List sourceModules, IValidatorOutput output,
+			final IValidator[] validators, IProgressMonitor monitor) {
+		monitor.beginTask(Messages.ValidatorRuntime_runningValidators,
+				validators.length * 100);
+		for (int i = 0; i < validators.length; ++i) {
+			if (monitor.isCanceled()) {
+				return Status.CANCEL_STATUS;
+			}
+			final IValidator validator = validators[i];
+			final ISourceModuleValidator mValidator = (ISourceModuleValidator) validator
+					.getValidator(project, ISourceModuleValidator.class);
+			if (mValidator != null) {
+				final ISourceModule[] mArray = filterModulesForValidator(
+						sourceModules, validator, monitor);
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
 				}
-				final IValidator validator = validators[i];
-				final ISourceModuleValidator mValidator = (ISourceModuleValidator) validator
-						.getValidator(project, ISourceModuleValidator.class);
-				if (mValidator != null) {
-					final ISourceModule[] mArray = filterModulesForValidator(
-							sourceModules, validator, monitor);
-					if (monitor.isCanceled()) {
-						return Status.CANCEL_STATUS;
-					}
-					final IProgressMonitor submonitor = new SubProgressMonitor(
-							monitor, 100);
-					if (mArray.length != 0) {
-						mValidator.validate(mArray, output, submonitor);
-					}
-					submonitor.done();
+				final IProgressMonitor submonitor = new SubProgressMonitor(
+						monitor, 100);
+				if (mArray.length != 0) {
+					mValidator.validate(mArray, output, submonitor);
 				}
+				submonitor.done();
 			}
-			monitor.done();
 		}
+		monitor.done();
 		return Status.OK_STATUS;
 	}
 

@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.ast.declarations.FakeModuleDeclaration;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
@@ -27,53 +28,81 @@ import org.eclipse.dltk.compiler.problem.ProblemSeverities;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.validators.core.IBuildParticipant;
 import org.eclipse.dltk.validators.core.IBuildParticipantExtension;
+import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidator;
 import org.eclipse.dltk.validators.core.NullValidatorOutput;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
+import org.eclipse.osgi.util.NLS;
 
 public class ValidatorBuilder implements IScriptBuilder {
 
 	private static final boolean DEBUG = false;
 
+	private static final int WORK_BUILD = 100;
+	private static final int WORK_EXTERNAL = 200;
+
 	public IStatus buildModelElements(IScriptProject project, List elements,
 			IProgressMonitor monitor, int buildType) {
-		if (DEBUG) {
-			System.out.println("Build " + project.getElementName()); //$NON-NLS-1$
-			for (Iterator i = elements.iterator(); i.hasNext();) {
-				IModelElement element = (IModelElement) i.next();
-				if (element.getElementType() == IModelElement.SOURCE_MODULE) {
-					final IProjectFragment fragment = (IProjectFragment) element
-							.getAncestor(IModelElement.PROJECT_FRAGMENT);
-					if (!fragment.isExternal()) {
-						System.out.println("- " + element.getElementName()); //$NON-NLS-1$
-					}
+		final IValidator[] validators = ValidatorRuntime.getProjectValidators(
+				project, ISourceModuleValidator.class,
+				ValidatorRuntime.AUTOMATIC);
+		final int validatorWork = validators.length * WORK_EXTERNAL;
+		monitor.beginTask("", validatorWork + WORK_BUILD); //$NON-NLS-1$
+		try {
+			buildModules(project, elements, buildType, ValidatorUtils
+					.subMonitorFor(monitor, WORK_BUILD));
+			if (validators.length != 0) {
+				final long startTime = DEBUG ? System.currentTimeMillis() : 0;
+				final IStatus status = ValidatorRuntime
+						.executeSourceModuleValidators(project, elements,
+								new NullValidatorOutput(), validators,
+								ValidatorUtils.subMonitorFor(monitor,
+										validatorWork));
+				if (DEBUG) {
+					System.out
+							.println("Validate " + project.getElementName() + "(" //$NON-NLS-1$ //$NON-NLS-2$
+									+ elements.size()
+									+ ") in " //$NON-NLS-1$
+									+ (System.currentTimeMillis() - startTime)
+									+ "ms"); //$NON-NLS-1$
 				}
+				return status;
 			}
+			return Status.OK_STATUS;
+		} finally {
+			monitor.done();
 		}
-		buildModules(project, elements, buildType);
-		return ValidatorRuntime.executeAutomaticSourceModuleValidators(project,
-				elements, new NullValidatorOutput(), monitor);
 	}
 
 	private void buildModules(IScriptProject project, List elements,
-			int buildType) {
+			int buildType, IProgressMonitor monitor) {
+		final long startTime = DEBUG ? System.currentTimeMillis() : 0;
+		monitor.beginTask(ValidatorMessages.ValidatorBuilder_buildingModules,
+				elements.size());
 		final Map modulesByNature = splitByNature(elements);
 		for (Iterator i = modulesByNature.entrySet().iterator(); i.hasNext();) {
 			final Map.Entry entry = (Map.Entry) i.next();
-			buildNatureModules(project, buildType, (String) entry.getKey(),
-					(List) entry.getValue());
+			final List natureModules = (List) entry.getValue();
+			final String natureId = (String) entry.getKey();
+			buildNatureModules(project, buildType, natureId, natureModules,
+					monitor);
+		}
+		monitor.done();
+		if (DEBUG) {
+			System.out.println("Build " + project.getElementName() + "(" //$NON-NLS-1$ //$NON-NLS-2$
+					+ elements.size() + ") in " //$NON-NLS-1$
+					+ (System.currentTimeMillis() - startTime) + "ms"); //$NON-NLS-1$
 		}
 	}
 
 	private void buildNatureModules(IScriptProject project, int buildType,
-			final String nature, final List modules) {
+			final String nature, final List modules, IProgressMonitor monitor) {
 		final IBuildParticipant[] validators = ValidatorRuntime
 				.getBuildParticipants(project, nature, ValidatorRuntime.ALL);
 		boolean secondPass = false;
@@ -85,9 +114,16 @@ public class ValidatorBuilder implements IScriptBuilder {
 				secondPass = true;
 			}
 		}
+		int counter = 0;
 		final List reporters = secondPass ? new ArrayList() : null;
 		for (Iterator j = modules.iterator(); j.hasNext();) {
+			if (monitor.isCanceled())
+				return;
 			final ISourceModule module = (ISourceModule) j.next();
+			monitor.subTask(NLS.bind(
+					ValidatorMessages.ValidatorBuilder_buildModuleSubTask,
+					String.valueOf(modules.size() - counter), module
+							.getElementName()));
 			final IResource resource = module.getResource();
 			if (resource != null) {
 				final BuildProblemReporter reporter = new BuildProblemReporter(
@@ -98,6 +134,8 @@ public class ValidatorBuilder implements IScriptBuilder {
 					reporters.add(reporter);
 				}
 			}
+			monitor.worked(1);
+			++counter;
 		}
 		for (int j = 0; j < validators.length; ++j) {
 			final IBuildParticipant participant = validators[j];
@@ -123,10 +161,9 @@ public class ValidatorBuilder implements IScriptBuilder {
 				|| reporter.hasErrors();
 		if (isError) {
 			if (reporter.isEmpty()) {
-				reporter.reportProblem(new DefaultProblem(module
-						.getElementName(),
-						Messages.ValidatorBuilder_unknownError, 0, null,
-						ProblemSeverities.Error, 0, 0, 0));
+				reporter.reportProblem(new DefaultProblem(
+						ValidatorMessages.ValidatorBuilder_unknownError, 0,
+						null, ProblemSeverities.Error, 0, 0, 0));
 			}
 		} else {
 			for (int k = 0; k < validators.length; ++k) {
@@ -172,27 +209,7 @@ public class ValidatorBuilder implements IScriptBuilder {
 	}
 
 	public int estimateElementsToBuild(List elements) {
-		IValidator[] validators = ValidatorRuntime.getAllValidators();
-		int count = 0;
-		for (int i = 0; i < validators.length; i++) {
-			if (validators[i].isAutomatic()) {
-				count++;
-			}
-		}
-		if (count == 0) {
-			return 0;
-		}
-		int estimation = 0;
-		for (int i = 0; i < elements.size(); i++) {
-			IModelElement element = (IModelElement) elements.get(i);
-			if (element.getElementType() == IModelElement.SOURCE_MODULE) {
-				IProjectFragment projectFragment = (IProjectFragment) element
-						.getAncestor(IModelElement.PROJECT_FRAGMENT);
-				if (!projectFragment.isExternal())
-					estimation++;
-			}
-		}
-		return estimation;
+		return elements.size();
 	}
 
 	public Set getDependencies(IScriptProject project, Set resources,
