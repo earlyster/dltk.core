@@ -20,12 +20,12 @@ public class DLTKExecuteExtensionHelper {
 			IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLanguageToolkit(nature);
 			if( toolkit == null ) {
 				throw new RuntimeException(
-						Messages.DLTKExecuteExtensionHelper_natureAttributeMustBeSpecifiedAndCirrect);
+						Messages.DLTKExecuteExtensionHelper_natureAttributeMustBeSpecifiedAndCorrect);
 			}
 			return toolkit;
 		} else {
 			throw new RuntimeException(
-					Messages.DLTKExecuteExtensionHelper_natureAttributeMustBeSpecifiedAndCirrect);
+					Messages.DLTKExecuteExtensionHelper_natureAttributeMustBeSpecifiedAndCorrect);
 		}
 	}
 }
