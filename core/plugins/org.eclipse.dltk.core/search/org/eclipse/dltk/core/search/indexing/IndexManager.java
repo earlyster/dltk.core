@@ -806,12 +806,14 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		if (indexFile.exists()) {
 			indexFile.delete();
 		}
-		Object o = this.indexes.get(indexLocation);
+		final Object o = this.indexes.remove(indexLocation);
 		if (o instanceof Index) {
-			((Index) o).monitor = null;
+			final Index index = (Index) o;
+			index.monitor = null;
+			if (index.isRebuildable()) {
+				this.updateIndexState(indexLocation, null);
+			}
 		}
-		this.indexes.remove(indexLocation);
-		this.updateIndexState(indexLocation, null);
 	}
 
 	/**

@@ -12,6 +12,7 @@
 package org.eclipse.dltk.internal.core.mixin;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -82,15 +83,13 @@ public class MixinProjectIndexer implements IProjectIndexer {
 	}
 
 	public void removeProject(IPath projectPath) {
-		final String indexLocation = manager.getSpecialIndexLocation(
-				IndexManager.SPECIAL_MIXIN, projectPath.toString());
-		requestIfNotWaiting(new RemoveIndexRequest(indexLocation));
+		requestIfNotWaiting(new RemoveIndexRequest(new Path(
+				IndexManager.SPECIAL_MIXIN + projectPath.toString())));
 	}
 
 	public void removeLibrary(IScriptProject project, IPath path) {
-		final String indexLocation = manager.getSpecialIndexLocation(
-				IndexManager.SPECIAL_MIXIN, path.toString());
-		requestIfNotWaiting(new RemoveIndexRequest(indexLocation));
+		requestIfNotWaiting(new RemoveIndexRequest(new Path(
+				IndexManager.SPECIAL_MIXIN + path.toString())));
 	}
 
 }

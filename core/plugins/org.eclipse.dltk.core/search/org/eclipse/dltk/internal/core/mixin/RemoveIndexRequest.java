@@ -11,31 +11,31 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.mixin;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
 public class RemoveIndexRequest extends MixinIndexRequest {
 
-	private final String indexLocation;
+	private final IPath path;
 
-	public RemoveIndexRequest(String indexLocation) {
-		this.indexLocation = indexLocation;
+	public RemoveIndexRequest(IPath path) {
+		this.path = path;
 	}
 
 	protected String getName() {
-		return indexLocation;
+		return path.toString();
 	}
 
 	protected void run() throws CoreException, IOException {
-		new File(indexLocation).delete();
+		getIndexManager().removeIndex(path);
 	}
 
 	public boolean equals(Object obj) {
 		if (obj instanceof RemoveIndexRequest) {
 			final RemoveIndexRequest other = (RemoveIndexRequest) obj;
-			return indexLocation.equals(other.indexLocation);
+			return path.equals(other.path);
 		}
 		return false;
 	}

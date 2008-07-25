@@ -41,7 +41,7 @@ import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 
 abstract class MixinIndexRequest extends AbstractJob {
 
-	private final IndexManager getIndexManager() {
+	protected final IndexManager getIndexManager() {
 		return ModelManager.getModelManager().getIndexManager();
 	}
 
