@@ -124,6 +124,7 @@ public class Messages extends NLS {
 
 	public static String cache_invalidLoadFactor;
 
+	public static String manager_indexingTask;
 	public static String manager_filesToIndex;
 	public static String manager_indexingInProgress;
 

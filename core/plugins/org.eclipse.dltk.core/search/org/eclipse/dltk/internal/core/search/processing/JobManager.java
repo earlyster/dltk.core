@@ -344,6 +344,8 @@ public abstract class JobManager implements Runnable {
 				}
 				protected IStatus run(IProgressMonitor monitor) {
 					int awaitingJobsCount;
+					monitor.beginTask(Messages.manager_indexingTask,
+							IProgressMonitor.UNKNOWN);
 					while (!monitor.isCanceled() && (awaitingJobsCount = awaitingJobsCount()) > 0) {
 						monitor.subTask(Messages.bind(Messages.manager_filesToIndex, Integer.toString(awaitingJobsCount))); 
 						try {
@@ -352,6 +354,7 @@ public abstract class JobManager implements Runnable {
 							// ignore
 						}
 					}
+					monitor.done();
 					return Status.OK_STATUS;
 				}
 			}
@@ -393,9 +396,7 @@ public abstract class JobManager implements Runnable {
 						if (this.progressJob == null) {
 							this.progressJob = new ProgressJob(Messages.manager_indexingInProgress); 
 							this.progressJob.setPriority(Job.LONG);
-							if (!VERBOSE) {
-								this.progressJob.setSystem(true);
-							}
+							// this.progressJob.setSystem(true);
 							this.progressJob.schedule();
 						}
 						/*boolean status = */job.execute(null);
