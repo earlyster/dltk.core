@@ -9,6 +9,28 @@ import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.jface.preference.IPreferenceStore;
 
+/**
+ * Abstract base class for script preference pages.
+ * 
+ * <p>
+ * Preferenece pages that extend from this class will have their preference
+ * values stored in the <code>IPreferenceStore</code> returned from the plugin's
+ * {@link IDLTKUILanguageToolkit} implementation.
+ * </p>
+ * 
+ * <p>
+ * These pages will also need to be configured with the specific nature id for
+ * the plugin in the <code>plugin.xml</code> file. ie:
+ * </p>
+ * 
+ * <pre>
+ * &lt;page 
+ *   category=&quot;...&quot;
+ *   class=&quot;class:nature_id&quot;
+ *   id=&quot;...&quot;
+ *   name=&quot;...&quot; /&gt;
+ * </pre>
+ */
 public abstract class AbstractScriptPreferencePage extends
 		AbstractConfigurationBlockPreferencePage implements
 		IExecutableExtension {
@@ -21,16 +43,12 @@ public abstract class AbstractScriptPreferencePage extends
 	 * .eclipse.core.runtime.IConfigurationElement, java.lang.String,
 	 * java.lang.Object)
 	 */
-	public void setInitializationData(IConfigurationElement config,
+	public final void setInitializationData(IConfigurationElement config,
 			String propertyName, Object data) {
 		fToolkit = DLTKExecuteExtensionHelper.getLanguageToolkit(config,
 				propertyName, data);
-		IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager
-				.getLanguageToolkit(fToolkit.getNatureId());
 
-		IPreferenceStore preferenceStore = uiToolkit.getPreferenceStore();
-		Assert.isNotNull(preferenceStore);
-		setPreferenceStore(preferenceStore);
+		Assert.isNotNull(fToolkit);
 	}
 
 	/*
@@ -48,11 +66,17 @@ public abstract class AbstractScriptPreferencePage extends
 	 * #setPreferenceStore()
 	 */
 	protected final void setPreferenceStore() {
-		// do nothing, see setInitializationData
+		IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager
+				.getLanguageToolkit(fToolkit.getNatureId());
+		Assert.isNotNull(uiToolkit);
+
+		IPreferenceStore store = uiToolkit.getPreferenceStore();
+
+		Assert.isNotNull(store);
+		setPreferenceStore(store);
 	}
 
-	protected IDLTKLanguageToolkit getToolkit() {
+	protected final IDLTKLanguageToolkit getToolkit() {
 		return fToolkit;
 	}
-
 }

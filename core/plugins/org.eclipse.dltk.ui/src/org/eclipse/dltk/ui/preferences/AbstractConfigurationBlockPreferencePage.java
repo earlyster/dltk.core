@@ -12,6 +12,7 @@ package org.eclipse.dltk.ui.preferences;
 
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -20,7 +21,13 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * Abstract preference page which is used to wrap
+ * Generic base class for preference pages.
+ * 
+ * <p>
+ * A number of {@link IPreferenceConfigurationBlock} implementations already
+ * exist that can be used to provide standard preference options for editor
+ * color options, code folding, etc.
+ * </p>
  */
 public abstract class AbstractConfigurationBlockPreferencePage extends
 		PreferencePage implements IWorkbenchPreferencePage {
@@ -29,6 +36,18 @@ public abstract class AbstractConfigurationBlockPreferencePage extends
 	private OverlayPreferenceStore fOverlayStore;
 
 	public AbstractConfigurationBlockPreferencePage() {
+		// empty constructor
+	}
+
+	/*
+	 * @see
+	 * org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
+	 */
+	public void init(IWorkbench workbench) {
+		/*
+		 * delay setup until here so sub-classes implementing the
+		 * IExecutableExtension can look up the plugin specific preference store
+		 */
 		setDescription();
 		setPreferenceStore();
 
@@ -37,15 +56,22 @@ public abstract class AbstractConfigurationBlockPreferencePage extends
 		fConfigurationBlock = createConfigurationBlock(fOverlayStore);
 	}
 
-	public void init(IWorkbench workbench) {
-	}
-
+	/*
+	 * @see
+	 * org.eclipse.jface.preference.PreferencePage#createControl(org.eclipse
+	 * .swt.widgets.Composite)
+	 */
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(),
 				getHelpId());
 	}
 
+	/*
+	 * @see
+	 * org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse
+	 * .swt.widgets.Composite)
+	 */
 	protected Control createContents(Composite parent) {
 		fOverlayStore.load();
 		fOverlayStore.start();
@@ -62,6 +88,9 @@ public abstract class AbstractConfigurationBlockPreferencePage extends
 		fConfigurationBlock.initialize();
 	}
 
+	/*
+	 * @see org.eclipse.jface.preference.PreferencePage#performOk()
+	 */
 	public boolean performOk() {
 		fConfigurationBlock.performOk();
 		fOverlayStore.propagate();
@@ -71,6 +100,9 @@ public abstract class AbstractConfigurationBlockPreferencePage extends
 		return true;
 	}
 
+	/*
+	 * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
+	 */
 	public void performDefaults() {
 		fOverlayStore.loadDefaults();
 		fConfigurationBlock.performDefaults();
@@ -78,6 +110,9 @@ public abstract class AbstractConfigurationBlockPreferencePage extends
 		super.performDefaults();
 	}
 
+	/*
+	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
+	 */
 	public void dispose() {
 		fConfigurationBlock.dispose();
 
@@ -89,10 +124,30 @@ public abstract class AbstractConfigurationBlockPreferencePage extends
 		super.dispose();
 	}
 
+	/**
+	 * Returns the help id for the preference page
+	 */
 	protected abstract String getHelpId();
 
+	/**
+	 * Set the preference page description.
+	 * 
+	 * <p>
+	 * Sub-classes should make a call to {@link #setDescription(String)} to set
+	 * description.
+	 * </p>
+	 */
 	protected abstract void setDescription();
 
+	/**
+	 * Set the preference store that will hold the preference settings.
+	 * 
+	 * <p>
+	 * Sub-classes should make a call to
+	 * {@link #setPreferenceStore(IPreferenceStore)} to set the preference
+	 * store.
+	 * </p>
+	 */
 	protected abstract void setPreferenceStore();
 
 	protected abstract IPreferenceConfigurationBlock createConfigurationBlock(
