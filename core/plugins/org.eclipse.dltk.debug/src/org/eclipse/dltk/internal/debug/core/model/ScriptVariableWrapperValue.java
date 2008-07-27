@@ -93,4 +93,8 @@ final class ScriptVariableWrapperValue implements IScriptValue {
 	public String getMemoryAddress() {
 		return null;
 	}
+
+	public String getDetailsString() {
+		return getValueString();
+	}
 }

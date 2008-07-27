@@ -29,6 +29,12 @@ public interface IScriptValue extends IValue {
 	 */
 	String getMemoryAddress();
 
+	/**
+	 * Returns the text that will be displayed in the 'details' pane of the
+	 * 'Variables' view.
+	 */
+	String getDetailsString();
+
 	IVariable getVariable(int offset) throws DebugException;
 
 	IScriptEvaluationCommand createEvaluationCommand(String messageTemplate,

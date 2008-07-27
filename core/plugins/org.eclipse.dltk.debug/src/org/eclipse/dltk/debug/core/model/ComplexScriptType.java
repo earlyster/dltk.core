@@ -1,26 +1,17 @@
 package org.eclipse.dltk.debug.core.model;
 
-public class ComplexScriptType implements IScriptType {
-	private String name;
+public class ComplexScriptType extends AtomicScriptType {
 
 	public ComplexScriptType(String name) {
-		this.name = name;
-	}
-
-	public String getName() {
-		return this.name;
+		super(name);
 	}
 
 	public boolean isAtomic() {
 		return false;
 	}
 
-	public boolean isCollection() {
-		return false;
-	}
-
-	public boolean isString() {
-		return false;
+	public boolean isComplex() {
+		return true;
 	}
 
 	public String formatValue(IScriptValue value) {

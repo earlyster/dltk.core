@@ -9,5 +9,9 @@ public interface IScriptType {
 
 	boolean isString();
 
+	boolean isComplex();
+
 	String formatValue(IScriptValue value);
+
+	String formatDetails(IScriptValue scriptValue);
 }

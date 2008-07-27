@@ -46,6 +46,7 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 	private String name;
 	private String fullname;
 	private String value;
+	private String details;
 	private boolean hasChildren;
 	private String key;
 	private String rawValue;
@@ -146,6 +147,14 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 			value = type.formatValue(this);
 		}
 		return value;
+	}
+
+	public String getDetailsString() {
+		if (details == null || details.length() == 0) {
+			details = type.formatDetails(this);
+		}
+
+		return details;
 	}
 
 	public String getRawValue() {

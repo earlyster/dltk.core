@@ -15,12 +15,20 @@ public class AtomicScriptType implements IScriptType {
 		return true;
 	}
 
+	public boolean isComplex() {
+		return false;
+	}
+
 	public boolean isCollection() {
 		return false;
 	}
 
 	public boolean isString() {
 		return false;
+	}
+
+	public String formatDetails(IScriptValue value) {
+		return formatValue(value);
 	}
 
 	public String formatValue(IScriptValue value) {
