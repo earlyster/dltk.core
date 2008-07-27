@@ -9,6 +9,16 @@ public class ScriptDebugPreferencesMessages {
 
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.debug.ui.preferences.ScriptDebugPreferencesMessages"; //$NON-NLS-1$
 
+	public static String ScriptDebugConfigurationBlock_AutoDetectBindAddress;
+	public static String ScriptDebugConfigurationBlock_BindAddress;
+	public static String ScriptStepFilterPreferencePage_search;
+
+	public static String ScriptDetailFormattersPreferencePage_description;
+	public static String ScriptDetailFormattersPreferencePage_1;
+	public static String ScriptDetailFormattersPreferencePage_2;
+	public static String ScriptDetailFormattersPreferencePage_3;
+	public static String ScriptDetailFormattersPreferencePage_4;
+
 	public static String ScriptStepFilterPreferencePage_title;
 	public static String ScriptStepFilterPreferencePage_description;
 	public static String ScriptStepFilterPreferencePage__Use_step_filters;
@@ -48,12 +58,12 @@ public class ScriptDebugPreferencesMessages {
 	}
 
 	public static String GeneralPreferencesDescription;
-	
+
 	public static String DebuggingEngine;
 	public static String NameLabel;
 	public static String DescriptionLabel;
 	public static String PathLabel;
-	
+
 	public static String ExternalEngineGroup;
 	public static String LoggingGroupLabel;
 	public static String EnableLoggingLabel;
@@ -61,28 +71,28 @@ public class ScriptDebugPreferencesMessages {
 	public static String LogNameFormatLabel;
 	public static String LogFolderLabel;
 	public static String BrowseButton;
-	
+
 	public static String CommunicationLabel;
 	public static String PortLabel;
 	public static String AutoSelectLabel;
 	public static String CustomLabel;
 	public static String ConnectionTimeoutLabel;
 	public static String ResponseTimeoutLabel;
-	
+
 	//
 	public static String EngineSettingsLabel;
-	public static String BreakOnFirstLineLabel;	
+	public static String BreakOnFirstLineLabel;
 	public static String EnableDbgpLoggingLabel;
-	
+
 	public static String VariableSettingsLabel;
 	public static String ShowLocalVarsLabel;
 	public static String ShowGlobalVarsLabel;
 	public static String ShowClassVarsLabel;
-	
+
 	public static String HCRLabel;
 	public static String HCRFailedLabel;
 	public static String HCRNotSupportedLabel;
-	
+
 	public static String LinkToGlobalDebugOptions;
 	public static String LinkToLanguageDebugOptions;
 	public static String LinkToDebuggingEnginePreferences;

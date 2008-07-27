@@ -68,8 +68,8 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * The preference page for Java step filtering, located at the node Java > Debug >
- * Step Filtering
+ * The preference page for Java step filtering, located at the node Java > Debug
+ * > Step Filtering
  */
 public class ScriptStepFilterPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage, IExecutableExtension {
@@ -103,7 +103,7 @@ public class ScriptStepFilterPreferencePage extends PreferencePage implements
 	private Button fAddAllButton;
 	private Button fAddTypeButton;
 	private Button fRemoveFilterButton;
-//	private Button fAddFilterButton;
+	// private Button fAddFilterButton;
 	private Button fSelectAllButton;
 	private Button fDeselectAllButton;
 	private IDLTKLanguageToolkit fToolkit;
@@ -121,7 +121,9 @@ public class ScriptStepFilterPreferencePage extends PreferencePage implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse
+	 * .swt.widgets.Composite)
 	 */
 	protected Control createContents(Composite parent) {
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(),
@@ -136,7 +138,8 @@ public class ScriptStepFilterPreferencePage extends PreferencePage implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
+	 * @see
+	 * org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
 	public void init(IWorkbench workbench) {
 	}
@@ -235,7 +238,7 @@ public class ScriptStepFilterPreferencePage extends PreferencePage implements
 	 * @since 3.2
 	 */
 	protected void setPageEnablement(boolean enabled) {
-//		fAddFilterButton.setEnabled(enabled);
+		// fAddFilterButton.setEnabled(enabled);
 		fAddAllButton.setEnabled(enabled);
 		fAddTypeButton.setEnabled(enabled);
 		fDeselectAllButton.setEnabled(enabled);
@@ -263,17 +266,20 @@ public class ScriptStepFilterPreferencePage extends PreferencePage implements
 		buttonLayout.marginWidth = 0;
 		buttonContainer.setLayout(buttonLayout);
 		// Add filter button
-//		fAddFilterButton = SWTFactory
-//				.createPushButton(
-//						buttonContainer,
-//						ScriptDebugPreferencesMessages.ScriptStepFilterPreferencePage_Add__Filter_9,
-//						ScriptDebugPreferencesMessages.ScriptStepFilterPreferencePage_Key_in_the_name_of_a_new_step_filter_10,
-//						null);
-//		fAddFilterButton.addListener(SWT.Selection, new Listener() {
-//			public void handleEvent(Event e) {
-//				addFilter();
-//			}
-//		});
+		// fAddFilterButton = SWTFactory
+		// .createPushButton(
+		// buttonContainer,
+		// ScriptDebugPreferencesMessages.
+		// ScriptStepFilterPreferencePage_Add__Filter_9,
+		// ScriptDebugPreferencesMessages.
+		// ScriptStepFilterPreferencePage_Key_in_the_name_of_a_new_step_filter_10
+		// ,
+		// null);
+		// fAddFilterButton.addListener(SWT.Selection, new Listener() {
+		// public void handleEvent(Event e) {
+		// addFilter();
+		// }
+		// });
 		// Add type button
 		fAddTypeButton = SWTFactory
 				.createPushButton(
@@ -359,7 +365,8 @@ public class ScriptStepFilterPreferencePage extends PreferencePage implements
 						.getProgressService(), SearchEngine
 						.createWorkspaceScope(fToolkit),
 				IDLTKSearchConstants.TYPE, fToolkit);
-		dialog.setMessage(Messages.ScriptStepFilterPreferencePage_search);
+		dialog
+				.setMessage(ScriptDebugPreferencesMessages.ScriptStepFilterPreferencePage_search);
 		dialog.setInitialPattern(""); //$NON-NLS-1$
 		dialog
 				.setTitle(ScriptDebugPreferencesMessages.ScriptStepFilterPreferencePage_Add_type_to_step_filters_20);
@@ -390,10 +397,12 @@ public class ScriptStepFilterPreferencePage extends PreferencePage implements
 		try {
 			model.accept(new IModelElementVisitor() {
 				public boolean visit(IModelElement element) {
-					if (element.getElementType() == IModelElement.SCRIPT_PROJECT ) {
+					if (element.getElementType() == IModelElement.SCRIPT_PROJECT) {
 						IDLTKLanguageToolkit languageToolkit;
-						languageToolkit = DLTKLanguageManager.getLanguageToolkit(element);
-						if( !fToolkit.getNatureId().equals(languageToolkit.getNatureId()) ) {
+						languageToolkit = DLTKLanguageManager
+								.getLanguageToolkit(element);
+						if (!fToolkit.getNatureId().equals(
+								languageToolkit.getNatureId())) {
 							return false;
 						}
 					}
@@ -441,7 +450,8 @@ public class ScriptStepFilterPreferencePage extends PreferencePage implements
 	 * @see org.eclipse.jface.preference.PreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		StepFilterManager.setUseStepFilters(fUseStepFiltersButton.getSelection(), getPreferenceStore());
+		StepFilterManager.setUseStepFilters(fUseStepFiltersButton
+				.getSelection(), getPreferenceStore());
 		IPreferenceStore store = getPreferenceStore();
 		ArrayList active = new ArrayList();
 		ArrayList inactive = new ArrayList();
@@ -459,12 +469,13 @@ public class ScriptStepFilterPreferencePage extends PreferencePage implements
 		}
 		String pref = ScriptDebugOptionsManager.serializeList((String[]) active
 				.toArray(new String[active.size()]));
-		store.setValue(IDLTKDebugUIPreferenceConstants.PREF_ACTIVE_FILTERS_LIST,
-				pref);
+		store.setValue(
+				IDLTKDebugUIPreferenceConstants.PREF_ACTIVE_FILTERS_LIST, pref);
 		pref = ScriptDebugOptionsManager.serializeList((String[]) inactive
 				.toArray(new String[inactive.size()]));
 		store.setValue(
-				IDLTKDebugUIPreferenceConstants.PREF_INACTIVE_FILTERS_LIST, pref);
+				IDLTKDebugUIPreferenceConstants.PREF_INACTIVE_FILTERS_LIST,
+				pref);
 		return super.performOk();
 	}
 

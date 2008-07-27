@@ -103,15 +103,22 @@ public class ScriptDebugConfigurationBlock extends
 				GridData.FILL_HORIZONTAL);
 
 		// Port
-		SWTFactory.createLabel(group, Messages.ScriptDebugConfigurationBlock_BindAddress, 1);
+		SWTFactory
+				.createLabel(
+						group,
+						ScriptDebugPreferencesMessages.ScriptDebugConfigurationBlock_BindAddress,
+						1);
 
 		ipCombo = SWTFactory.createCombo(group, SWT.READ_ONLY | SWT.BORDER, 0,
 				new String[] {});
 
-		ipCombo.add(Messages.ScriptDebugConfigurationBlock_AutoDetectBindAddress, AUTODETECT_BIND_ADDRESS_INDEX);
+		ipCombo
+				.add(
+						ScriptDebugPreferencesMessages.ScriptDebugConfigurationBlock_AutoDetectBindAddress,
+						AUTODETECT_BIND_ADDRESS_INDEX);
 
 		String[] ipAddresses = DLTKDebugPlugin.getLocalAddresses();
-		for (int i=0; i<ipAddresses.length; i++) {
+		for (int i = 0; i < ipAddresses.length; i++) {
 			ipCombo.add(ipAddresses[i]);
 		}
 
