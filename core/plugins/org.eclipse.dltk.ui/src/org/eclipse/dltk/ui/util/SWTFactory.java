@@ -1,6 +1,7 @@
 package org.eclipse.dltk.ui.util;
 
 import org.eclipse.dltk.internal.ui.preferences.ScrolledPageContent;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
@@ -15,6 +16,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
 /**
@@ -35,8 +37,8 @@ public class SWTFactory {
 	}
 
 	/**
-	 * Sets width and height hint for the button control. <b>Note:</b> This is
-	 * a NOP if the button's layout data is not an instance of
+	 * Sets width and height hint for the button control. <b>Note:</b> This is a
+	 * NOP if the button's layout data is not an instance of
 	 * <code>GridData</code>.
 	 * 
 	 * @param the
@@ -111,15 +113,7 @@ public class SWTFactory {
 	 * @return a new radio button
 	 */
 	public static Button createRadioButton(Composite parent, String label) {
-		Button button = new Button(parent, SWT.RADIO);
-		button.setFont(parent.getFont());
-		if (label != null) {
-			button.setText(label);
-		}
-		GridData gd = new GridData();
-		button.setLayoutData(gd);
-		SWTFactory.setButtonDimensionHint(button);
-		return button;
+		return createRadioButton(parent, label, 1);
 	}
 
 	/**
@@ -340,30 +334,29 @@ public class SWTFactory {
 	 * @param id
 	 *            the id of pref page to show
 	 */
-	// public static void showPreferencePage(String id) {
-	// PreferencesUtil.createPreferenceDialogOn(JDIDebugUIPlugin.getShell(),
-	// id, new String[] { id }, null).open();
-	// }
+	public static void showPreferencePage(String id) {
+		showPreferencePage(id, new String[] { id });
+	}
+
 	/**
 	 * This method allows users to open a specific preference page and supply a
 	 * custom set of page filter items.
 	 * 
-	 * This alternative to <code>showPreferencePage(String)</code> allows
-	 * other related pref pages to be shown at the same time at the
-	 * developers/context discretion. All pages can be shown if
-	 * <code>null</code> is passed.
+	 * This alternative to <code>showPreferencePage(String)</code> allows other
+	 * related pref pages to be shown at the same time at the developers/context
+	 * discretion. All pages can be shown if <code>null</code> is passed.
 	 * 
 	 * @param page_id
 	 *            the id for the page to open
 	 * @param page_filters
 	 *            the listing of pages to be shown in the dialog
-	 * @since 3.3
 	 */
-	// public static void showPreferencePage(String page_id, String[]
-	// page_filters) {
-	// PreferencesUtil.createPreferenceDialogOn(JDIDebugUIPlugin.getShell(),
-	// page_id, page_filters, null).open();
-	// }
+	public static void showPreferencePage(String page_id, String[] page_filters) {
+		PreferencesUtil.createPreferenceDialogOn(
+				DLTKUIPlugin.getActiveWorkbenchShell(), page_id, page_filters,
+				null).open();
+	}
+
 	/**
 	 * Creates a Composite widget
 	 * 

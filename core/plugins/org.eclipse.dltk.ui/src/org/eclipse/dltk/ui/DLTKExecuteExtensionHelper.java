@@ -7,25 +7,31 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 
 public class DLTKExecuteExtensionHelper {
-	public static IDLTKLanguageToolkit getLanguageToolkit(IConfigurationElement config,
-			String propertyName, Object data) {
-		String nature = null;
-		if (data instanceof String) {
-			nature = (String) data;
 
-		} else if (data instanceof Map) {
-			nature = (String) ((Map) data).get("nature"); //$NON-NLS-1$
+	public static String getNatureId(IConfigurationElement config,
+			String propertyName, Object data) {
+		if (data instanceof String) {
+			return (String) data;
 		}
-		if (nature != null) {
-			IDLTKLanguageToolkit toolkit = DLTKLanguageManager.getLanguageToolkit(nature);
-			if( toolkit == null ) {
-				throw new RuntimeException(
-						Messages.DLTKExecuteExtensionHelper_natureAttributeMustBeSpecifiedAndCorrect);
-			}
-			return toolkit;
-		} else {
+
+		if (data instanceof Map) {
+			return (String) ((Map) data).get("nature"); //$NON-NLS-1$
+		}
+
+		throw new RuntimeException(
+				Messages.DLTKExecuteExtensionHelper_natureAttributeMustBeSpecifiedAndCorrect);
+	}
+
+	public static IDLTKLanguageToolkit getLanguageToolkit(
+			IConfigurationElement config, String propertyName, Object data) {
+		String nature = getNatureId(config, propertyName, data);
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(nature);
+
+		if (toolkit == null) {
 			throw new RuntimeException(
 					Messages.DLTKExecuteExtensionHelper_natureAttributeMustBeSpecifiedAndCorrect);
 		}
+		return toolkit;
 	}
 }
