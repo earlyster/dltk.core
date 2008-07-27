@@ -53,6 +53,7 @@ import org.eclipse.dltk.debug.core.model.IScriptWatchpoint;
 import org.eclipse.dltk.debug.ui.breakpoints.BreakpointUtils;
 import org.eclipse.dltk.internal.core.Openable;
 import org.eclipse.dltk.internal.core.util.HandleFactory;
+import org.eclipse.dltk.internal.debug.ui.DetailFormatter;
 import org.eclipse.dltk.internal.debug.ui.ExternalFileEditorInput;
 import org.eclipse.dltk.internal.debug.ui.ScriptDetailFormattersManager;
 import org.eclipse.dltk.internal.debug.ui.ScriptEvaluationContextManager;
@@ -63,6 +64,7 @@ import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.launching.debug.DebuggingEngineManager;
 import org.eclipse.dltk.launching.debug.IDebuggingEngine;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -248,9 +250,18 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 		return stackFrame.toString();
 	}
 
+	protected String getVariableName(IScriptVariable variable)
+			throws DebugException {
+		return variable.getName();
+	}
+
+	/**
+	 * Returns the text that will be displayed in the Variable view when the
+	 * 'Show Columns' layout option <strong>is not</strong> enabled.
+	 */
 	public String getVariableText(IScriptVariable variable) {
 		try {
-			String name = variable.getName();
+			String name = getVariableName(variable);
 			IScriptValue value = (IScriptValue) variable.getValue();
 			if (value != null) {
 				if (isShowVariableTypeNames()) {
@@ -260,7 +271,9 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 						name = typeName + " " + name; //$NON-NLS-1$
 					}
 				}
+
 				String valueText = getValueText(value);
+
 				if (valueText != null && valueText.length() > 0) {
 					return name + " = " + valueText; //$NON-NLS-1$
 				}
@@ -274,17 +287,84 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 		return variable.toString();
 	}
 
-	protected String getValueText(IScriptValue value) {
-		try {
-			return value.getValueString();
-		} catch (DebugException e) {
-			DebugPlugin.log(e);
+	/**
+	 * Returns <code>true</code> if the contents of the variable should be
+	 * displayed in the Variables view instead of information about the variable
+	 * type.
+	 */
+	protected boolean isShowLabelDetails(IScriptValue value) {
+		IScriptDebugTarget target = (IScriptDebugTarget) value.getDebugTarget();
+		String natureId = target.getLanguageToolkit().getNatureId();
+
+		IPreferenceStore store = DLTKDebugUILanguageManager.getLanguageToolkit(
+				natureId).getPreferenceStore();
+		String details = store
+				.getString(IDLTKDebugUIPreferenceConstants.PREF_SHOW_DETAILS);
+
+		boolean showDetails = false;
+		if (IDLTKDebugUIPreferenceConstants.INLINE_ALL.equals(details)) {
+			showDetails = true;
+		} else if (IDLTKDebugUIPreferenceConstants.INLINE_FORMATTERS
+				.equals(details)) {
+			DetailFormatter formatter = ScriptDetailFormattersManager
+					.getDefault(natureId).getDetailFormatter(value);
+			showDetails = (formatter != null && formatter.isEnabled());
 		}
-		return value.toString();
+
+		return showDetails;
 	}
 
+	/**
+	 * Returns the text that will be displayed in the Variable view when the
+	 * 'Show Columns' layout option <strong>is</strong> enabled.
+	 */
+	protected String getValueText(IScriptValue value) {
+		String text = null;
+		if (isShowLabelDetails(value)) {
+			// the same value shown in the details pane will be displayed here
+			text = getVariableDetail(value);
+		} else {
+			try {
+				text = value.getValueString();
+			} catch (DebugException e) {
+				DebugPlugin.log(e);
+				text = value.toString();
+			}
+		}
+
+		return text;
+	}
+
+	private String getVariableDetail(IScriptValue value) {
+		final String[] detail = new String[1];
+		final Object lock = new Object();
+		computeDetail(value, new IValueDetailListener() {
+			public void detailComputed(IValue computedValue, String result) {
+				synchronized (lock) {
+					detail[0] = result;
+					lock.notifyAll();
+				}
+			}
+		});
+		synchronized (lock) {
+			if (detail[0] == null) {
+				try {
+					lock.wait(5000);
+				} catch (InterruptedException e1) {
+					// Fall through
+				}
+			}
+		}
+		return detail[0];
+	}
+
+	/**
+	 * Returns the text that will be displayed in the 'details' pane of the
+	 * Variables view. This method will be invoked when no detail formatter is
+	 * available for the script variable.
+	 */
 	public String getDetailPaneText(IScriptValue value) {
-		return getValueText(value);
+		return value.getDetailsString();
 	}
 
 	protected String renderUnknownValue(IScriptValue value)

@@ -13,8 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdapterFactory;
-import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -24,7 +22,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
-import org.eclipse.debug.internal.ui.LazyModelPresentation;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
@@ -100,10 +97,9 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 		launchManager.addLaunchListener(DebugConsoleManager.getInstance());
 		launchManager.addLaunchListener(ScriptDebugLogManager.getInstance());
 
-		IAdapterManager manager = Platform.getAdapterManager();
-
-		IAdapterFactory variableFactory = new ScriptDebugElementAdapterFactory();
-		manager.registerAdapters(variableFactory, IScriptVariable.class);
+		Platform.getAdapterManager().registerAdapters(
+				ScriptDebugElementAdapterFactory.getInstance(),
+				IScriptVariable.class);
 
 		ScriptDebugOptionsManager.getDefault().startup();
 
@@ -156,6 +152,7 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 			setShuttingDown(true);
 
 			ScriptDebugOptionsManager.getDefault().shutdown();
+			ScriptDebugElementAdapterFactory.getInstance().dispose();
 
 			ILaunchManager launchManager = DebugPlugin.getDefault()
 					.getLaunchManager();
@@ -297,8 +294,8 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 		if (shell != null) {
 			ErrorDialog
 					.openError(shell,
-							"DebugUIM0essages.JDIDebugUIPlugin_Error_1", //$NON-NLS-1$
-							message, status);
+					"DebugUIM0essages.JDIDebugUIPlugin_Error_1", //$NON-NLS-1$
+					message, status);
 		}
 	}
 
@@ -314,8 +311,8 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 					"Error logged from DLTK Debug UI: ", t); //$NON-NLS-1$	
 			ErrorDialog
 					.openError(shell,
-							"DebugUIMessages.JDIDebugUIPlugin_Error_1", //$NON-NLS-1$
-							message, status);
+					"DebugUIMessages.JDIDebugUIPlugin_Error_1", //$NON-NLS-1$
+					message, status);
 		}
 	}
 
@@ -402,7 +399,7 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 
 	public synchronized ScriptDebugModelPresentation getModelPresentation(
 			String modelId) {
-		if (!fPresentations.containsKey(modelId)) {			
+		if (!fPresentations.containsKey(modelId)) {
 			fPresentations.put(modelId, loadDebugModelPresentation(modelId));
 		}
 		return (ScriptDebugModelPresentation) fPresentations.get(modelId);

@@ -2,10 +2,14 @@ package org.eclipse.dltk.internal.debug.ui;
 
 import java.util.HashMap;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IValue;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.IValueDetailListener;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.SimpleDLTKExtensionManager;
@@ -13,12 +17,17 @@ import org.eclipse.dltk.core.SimpleDLTKExtensionManager.ElementInfo;
 import org.eclipse.dltk.debug.core.eval.IScriptEvaluationCommand;
 import org.eclipse.dltk.debug.core.eval.IScriptEvaluationListener;
 import org.eclipse.dltk.debug.core.eval.IScriptEvaluationResult;
+import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptValue;
+import org.eclipse.dltk.debug.ui.DLTKDebugUILanguageManager;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
+import org.eclipse.dltk.debug.ui.IDLTKDebugUIPreferenceConstants;
 import org.eclipse.dltk.debug.ui.ScriptDebugModelPresentation;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
-public class ScriptDetailFormattersManager {
+public class ScriptDetailFormattersManager implements IPropertyChangeListener {
 	private static final String DEFAULT_FORMATTER_TYPE = "#DEFAULT#"; //$NON-NLS-1$
 	private static final String ATTR_SNIPPET = "snippet"; //$NON-NLS-1$
 	private static final String ATTR_TYPE = "type"; //$NON-NLS-1$
@@ -48,8 +57,11 @@ public class ScriptDetailFormattersManager {
 		return instance;
 	}
 
-	public ScriptDetailFormattersManager(String natureId) {
+	private ScriptDetailFormattersManager(String natureId) {
 		populateDetailFormatters(natureId);
+
+		DLTKDebugUILanguageManager.getLanguageToolkit(natureId)
+				.getPreferenceStore().addPropertyChangeListener(this);
 	}
 
 	private void populateDetailFormatters(String natureId) {
@@ -75,8 +87,9 @@ public class ScriptDetailFormattersManager {
 
 	private String getValueText(IValue value) {
 		if (value instanceof IScriptValue) {
-			ScriptDebugModelPresentation presentation = DLTKDebugUIPlugin.getDefault()
-					.getModelPresentation(value.getModelIdentifier());
+			ScriptDebugModelPresentation presentation = DLTKDebugUIPlugin
+					.getDefault().getModelPresentation(
+							value.getModelIdentifier());
 			return presentation.getDetailPaneText((IScriptValue) value);
 		}
 		return null;
@@ -89,6 +102,11 @@ public class ScriptDetailFormattersManager {
 				DetailFormatter formatter = getDetailFormatter(value);
 				if (thread == null || !thread.isSuspended()
 						|| formatter == null || !formatter.isEnabled()) {
+					/*
+					 * if the client doesn't define a formatter, or the engine
+					 * doesn't support the 'eval' command, fall back to using
+					 * the value returned in the 'property' response
+					 */
 					listener.detailComputed(value, getValueText(value));
 				} else {
 					final IScriptEvaluationCommand command = value
@@ -127,7 +145,7 @@ public class ScriptDetailFormattersManager {
 		DebugPlugin.getDefault().asyncExec(postEventDispatch);
 	}
 
-	protected DetailFormatter getDetailFormatter(IScriptValue value) {
+	public DetailFormatter getDetailFormatter(IScriptValue value) {
 		DetailFormatter formatter = (DetailFormatter) formatters.get(value
 				.getType().getName());
 		if (formatter == null)
@@ -150,4 +168,48 @@ public class ScriptDetailFormattersManager {
 	public void removeFormatter(DetailFormatter formatter) {
 		formatters.remove(formatter.getTypeName());
 	}
+
+	public void propertyChange(PropertyChangeEvent event) {
+		String property = event.getProperty();
+		if (handlesPropertyEvent(property)) {
+			// TODO: uncomment when supported
+			// populateDetailFormatters(natureId);
+			// cacheMap.clear();
+
+			/*
+			 * fire a change event on it so the variables view will update for
+			 * any formatter changes.
+			 */
+			IAdaptable selected = DebugUITools.getDebugContext();
+			if (selected != null) {
+				IScriptStackFrame frame = (IScriptStackFrame) selected
+						.getAdapter(IScriptStackFrame.class);
+				if (frame != null) {
+					DebugPlugin.getDefault().fireDebugEventSet(
+							new DebugEvent[] { new DebugEvent(frame,
+									DebugEvent.CHANGE) });
+				}
+			}
+		}
+	}
+
+	private boolean handlesPropertyEvent(String property) {
+		// TODO: uncomment when supported
+		// if
+		// (IDLTKDebugUIPreferenceConstants.PREF_DETAIL_FORMATTERS_LIST.equals
+		// (property)) {
+		// return true;
+		// }
+
+		if (IDLTKDebugUIPreferenceConstants.PREF_SHOW_DETAILS.equals(property)) {
+			return true;
+		}
+
+		if (IDebugUIConstants.PREF_MAX_DETAIL_LENGTH.equals(property)) {
+			return true;
+		}
+
+		return false;
+	}
+
 }
