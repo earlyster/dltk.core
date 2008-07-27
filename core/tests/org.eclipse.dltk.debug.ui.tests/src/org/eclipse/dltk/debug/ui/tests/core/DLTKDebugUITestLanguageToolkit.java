@@ -8,7 +8,17 @@ public class DLTKDebugUITestLanguageToolkit extends
 		AbstractDebugUILanguageToolkit {
 
 	/*
-	 * @see org.eclipse.dltk.debug.ui.IDLTKDebugUILanguageToolkit#getPreferenceStore()
+	 * @see
+	 * org.eclipse.dltk.debug.ui.IDLTKDebugUILanguageToolkit#getDebugModelId()
+	 */
+	public String getDebugModelId() {
+		return null;
+	}
+
+	/*
+	 * @see
+	 * org.eclipse.dltk.debug.ui.IDLTKDebugUILanguageToolkit#getPreferenceStore
+	 * ()
 	 */
 	public IPreferenceStore getPreferenceStore() {
 		return DLTKDebugUITestsPlugin.getDefault().getPreferenceStore();
