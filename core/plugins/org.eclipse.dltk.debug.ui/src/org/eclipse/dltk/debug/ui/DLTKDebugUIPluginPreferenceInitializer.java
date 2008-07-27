@@ -2,7 +2,6 @@ package org.eclipse.dltk.debug.ui;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
-import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.preferences.AbstractScriptPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -32,7 +31,7 @@ public abstract class DLTKDebugUIPluginPreferenceInitializer extends
 		 * anything that uses the preferences it controls, will not work
 		 * properly.
 		 */
-		IPreferenceStore store = DLTKUILanguageManager.getLanguageToolkit(
+		IPreferenceStore store = DLTKDebugUILanguageManager.getLanguageToolkit(
 				getNatureId()).getPreferenceStore();
 		Assert.isNotNull(store);
 
