@@ -51,8 +51,15 @@ public class ProblemCollector extends AbstractProblemReporter implements
 	 * @return
 	 */
 	public boolean hasErrors() {
-		// TODO check severity
-		return !problems.isEmpty();
+		if (!problems.isEmpty()) {
+			for (Iterator i = problems.iterator(); i.hasNext();) {
+				final IProblem problem = (IProblem) i.next();
+				if (problem.isError()) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	protected static class TaskInfo extends CategorizedProblem {
@@ -165,6 +172,20 @@ public class ProblemCollector extends AbstractProblemReporter implements
 			final IProblem problem = (IProblem) i.next();
 			destination.reportProblem(problem);
 		}
+	}
+
+	/**
+	 * @return
+	 */
+	public List getErrors() {
+		final List result = new ArrayList();
+		for (Iterator i = problems.iterator(); i.hasNext();) {
+			final IProblem problem = (IProblem) i.next();
+			if (problem.isError()) {
+				result.add(problem);
+			}
+		}
+		return result;
 	}
 
 }
