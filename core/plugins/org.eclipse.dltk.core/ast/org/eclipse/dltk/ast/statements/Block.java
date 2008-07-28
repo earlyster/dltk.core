@@ -31,9 +31,8 @@ public class Block extends Expression {
 	
 	public Block(int start, int end, List statems) {
 		super(start, end);
-		if (statems == null)
-			statems = new ArrayList();
-		this.statements = new ArrayList(statems);
+		this.statements = statems != null ? new ArrayList(statems)
+				: new ArrayList();
 	}
 
 	public void traverse(ASTVisitor visitor) throws Exception {
