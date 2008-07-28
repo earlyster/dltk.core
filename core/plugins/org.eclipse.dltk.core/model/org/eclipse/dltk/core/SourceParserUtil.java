@@ -10,9 +10,8 @@ import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 public class SourceParserUtil {
-	private static final Object AST = "ast"; //$NON-NLS-1$
-	private static final Object FLAGS = "flags"; //$NON-NLS-1$
-	private static final Object ERRORS = "errors"; //$NON-NLS-1$
+	private static final String AST = "ast"; //$NON-NLS-1$
+	private static final String ERRORS = "errors"; //$NON-NLS-1$
 
 	public static interface IContentAction {
 		void run(ISourceModule module, char[] content);
@@ -76,20 +75,24 @@ public class SourceParserUtil {
 			return null;
 		}
 		ModuleDeclaration moduleDeclaration = null;
+		final String errorKey;
+		final String astKey;
 		if (mifo != null) {
-			moduleDeclaration = (ModuleDeclaration) mifo.get(AST);
+			errorKey = getKey(ERRORS, flags);
+			astKey = getKey(AST, flags);
+			moduleDeclaration = (ModuleDeclaration) mifo.get(astKey);
 			if (moduleDeclaration != null) {
-				final Integer flag = (Integer) mifo.get(FLAGS);
-				if (flag != null && flag.intValue() != flags) {
-					moduleDeclaration = null;
-				} else if (reporter != null) {
+				if (reporter != null) {
 					final ProblemCollector collector = (ProblemCollector) mifo
-							.get(ERRORS);
+							.get(errorKey);
 					if (collector != null) {
 						collector.copyTo(reporter);
 					}
 				}
 			}
+		} else {
+			errorKey = null;
+			astKey = null;
 		}
 		if (moduleDeclaration == null) {
 			ISourceParser sourceParser = null;
@@ -117,17 +120,25 @@ public class SourceParserUtil {
 					DLTKCore.error(msg, e);
 				}
 				if (moduleDeclaration != null && mifo != null) {
-					mifo.put(AST, moduleDeclaration);
-					mifo.put(FLAGS, new Integer(flags));
+					mifo.put(astKey, moduleDeclaration);
 					if (collector != null && !collector.isEmpty()) {
-						mifo.put(ERRORS, collector);
+						mifo.put(errorKey, collector);
 					} else {
-						mifo.remove(ERRORS);
+						mifo.remove(errorKey);
 					}
 				}
 			}
 		}
 		return moduleDeclaration;
+	}
+
+	/**
+	 * @param baseKey
+	 * @param flags
+	 * @return
+	 */
+	private static String getKey(String baseKey, int flags) {
+		return flags == 0 ? baseKey : baseKey + flags;
 	}
 
 	public static ModuleDeclaration getModuleDeclaration(char[] filename,
@@ -157,7 +168,7 @@ public class SourceParserUtil {
 			putModuleToCache(mifo, moduleDeclaration, flags, collector);
 		} else if (reporter != null) {
 			final ProblemCollector collector = (ProblemCollector) mifo
-					.get(ERRORS);
+					.get(getKey(ERRORS, flags));
 			if (collector != null) {
 				collector.copyTo(reporter);
 			}
@@ -171,11 +182,7 @@ public class SourceParserUtil {
 	public static ModuleDeclaration getModuleFromCache(ISourceModuleInfo mifo,
 			int flags) {
 		if (mifo != null) {
-			Integer flag = (Integer) mifo.get(FLAGS);
-			if (flag != null && flag.intValue() != flags) {
-				return null;
-			}
-			return (ModuleDeclaration) mifo.get(AST);
+			return (ModuleDeclaration) mifo.get(getKey(AST, flags));
 		}
 		return null;
 	}
@@ -183,12 +190,12 @@ public class SourceParserUtil {
 	public static void putModuleToCache(ISourceModuleInfo info,
 			ModuleDeclaration module, int flags, ProblemCollector collector) {
 		if (info != null) {
-			info.put(AST, module);
-			info.put(FLAGS, new Integer(flags));
+			info.put(getKey(AST, flags), module);
+			final String errorKey = getKey(ERRORS, flags);
 			if (collector != null && !collector.isEmpty()) {
-				info.put(ERRORS, collector);
+				info.put(errorKey, collector);
 			} else {
-				info.remove(ERRORS);
+				info.remove(errorKey);
 			}
 		}
 	}
