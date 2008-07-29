@@ -165,14 +165,13 @@ public class ValidatorBuilder implements IScriptBuilder {
 						ValidatorMessages.ValidatorBuilder_unknownError, 0,
 						null, ProblemSeverities.Error, 0, 0, 0));
 			}
-		} else {
-			for (int k = 0; k < validators.length; ++k) {
-				final IBuildParticipant participant = validators[k];
-				try {
-					participant.build(module, moduleDeclaration, reporter);
-				} catch (CoreException e) {
-					ValidatorsCore.log(e.getStatus());
-				}
+		}
+		for (int k = 0; k < validators.length; ++k) {
+			final IBuildParticipant participant = validators[k];
+			try {
+				participant.build(module, moduleDeclaration, reporter);
+			} catch (CoreException e) {
+				ValidatorsCore.log(e.getStatus());
 			}
 		}
 	}
