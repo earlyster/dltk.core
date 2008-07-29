@@ -86,12 +86,12 @@ public class ASTListNode extends ASTNode {
 
 	public void printNode(CorePrinter output) {
 		if (this.nodes != null) {
-			output.print("[");
+			output.print('[');
 			for (Iterator iter = nodes.iterator(); iter.hasNext();) {
 				ASTNode s = (ASTNode) iter.next();
 				s.printNode(output);
 			}
-			output.print("");
+			output.print(']');
 		}
 	}
 
