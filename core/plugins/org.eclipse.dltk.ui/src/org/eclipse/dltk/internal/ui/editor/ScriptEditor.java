@@ -56,6 +56,7 @@ import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.IWorkingCopyManager;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.PreferencesAdapter;
+import org.eclipse.dltk.ui.actions.DLTKActionConstants;
 import org.eclipse.dltk.ui.actions.IScriptEditorActionDefinitionIds;
 import org.eclipse.dltk.ui.actions.OpenEditorActionGroup;
 import org.eclipse.dltk.ui.actions.OpenViewActionGroup;
@@ -84,6 +85,7 @@ import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
@@ -1055,33 +1057,6 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		fContextMenuGroup.setContext(context);
 		fContextMenuGroup.fillContextMenu(menu);
 		fContextMenuGroup.setContext(null);
-
-		// Show outline
-		IAction action = getAction(IScriptEditorActionDefinitionIds.SHOW_OUTLINE);
-		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
-
-		// Open hierarchy
-		action = getAction(IScriptEditorActionDefinitionIds.OPEN_HIERARCHY);
-		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
-
-		// Source group
-		MenuManager sourceMenu = new MenuManager("Source"); //$NON-NLS-1$
-		action = getAction("Comment"); //$NON-NLS-1$
-		if (action != null) {
-			sourceMenu.add(action); //$NON-NLS-1$
-		}
-
-		action = getAction("Uncomment"); //$NON-NLS-1$
-		if (action != null) {
-			sourceMenu.add(action); //$NON-NLS-1$
-		}
-
-		action = getAction("ToggleComment"); //$NON-NLS-1$
-		if (action != null) {
-			sourceMenu.add(action); //$NON-NLS-1$
-		}
-
-		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, sourceMenu);
 	}
 
 	/**
@@ -1327,7 +1302,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 		Action outlineAction = new TextOperationAction(DLTKEditorMessages
 				.getBundleForConstructedKeys(), "ShowOutline.", this, //$NON-NLS-1$
-				ScriptSourceViewer.SHOW_OUTLINE, true); //$NON-NLS-1$
+				ScriptSourceViewer.SHOW_OUTLINE, true);
 		outlineAction
 				.setActionDefinitionId(IScriptEditorActionDefinitionIds.SHOW_OUTLINE);
 		setAction(IScriptEditorActionDefinitionIds.SHOW_OUTLINE, outlineAction);
@@ -1373,6 +1348,33 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		action
 				.setActionDefinitionId(IScriptEditorActionDefinitionIds.GOTO_PREVIOUS_MEMBER);
 		setAction(GoToNextPreviousMemberAction.PREVIOUS_MEMBER, action);
+
+		// Source menu actions
+		action = new TextOperationAction(DLTKEditorMessages
+				.getBundleForConstructedKeys(),
+				"Comment.", this, ITextOperationTarget.PREFIX); //$NON-NLS-1$
+		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.COMMENT);
+		setAction(DLTKActionConstants.COMMENT, action);
+		markAsStateDependentAction(DLTKActionConstants.COMMENT, true);
+
+		action = new TextOperationAction(DLTKEditorMessages
+				.getBundleForConstructedKeys(),
+				"Uncomment.", this, ITextOperationTarget.STRIP_PREFIX); //$NON-NLS-1$
+		action
+				.setActionDefinitionId(IScriptEditorActionDefinitionIds.UNCOMMENT);
+		setAction(DLTKActionConstants.UNCOMMENT, action);
+		markAsStateDependentAction(DLTKActionConstants.UNCOMMENT, true);
+
+		action = new ToggleCommentAction(DLTKEditorMessages
+				.getBundleForConstructedKeys(), "ToggleComment.", this); //$NON-NLS-1$
+		action
+				.setActionDefinitionId(IScriptEditorActionDefinitionIds.TOGGLE_COMMENT);
+		setAction(DLTKActionConstants.TOGGLE_COMMENT, action);
+		markAsStateDependentAction(DLTKActionConstants.TOGGLE_COMMENT, true);
+
+		ISourceViewer sourceViewer = getSourceViewer();
+		SourceViewerConfiguration configuration = getSourceViewerConfiguration();
+		((ToggleCommentAction) action).configure(sourceViewer, configuration);
 	}
 
 	private static final String EXTENSION_EDITOR_CONTEXT_ACTION_GROUPS = "editorContextActionGroup"; //$NON-NLS-1$

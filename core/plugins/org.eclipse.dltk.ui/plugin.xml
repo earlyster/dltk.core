@@ -517,6 +517,36 @@
             categoryId="org.eclipse.dltk.ui.category.source"
             id="org.eclipse.dltk.ui.edit.text.script.toggle.comment">
       </command>
+      <command
+            categoryId="org.eclipse.dltk.ui.category.source"
+            description="%ActionDefinition.addBlockComment.description"
+            id="org.eclipse.dltk.ui.edit.text.script.add.block.comment"
+            name="%ActionDefinition.addBlockComment.name">
+      </command>
+      <command
+            categoryId="org.eclipse.dltk.ui.category.source"
+            description="%ActionDefinition.removeBlockComment.description"
+            id="org.eclipse.dltk.ui.edit.text.script.remove.block.comment"
+            name="%ActionDefinition.removeBlockComment.name">
+      </command>
+      <command
+            categoryId="org.eclipse.dltk.ui.category.source"
+            description="%ActionDefinition.format.description"
+            id="org.eclipse.dltk.ui.edit.text.script.format"
+            name="%ActionDefinition.format.name">
+      </command>
+      <command
+            categoryId="org.eclipse.dltk.ui.category.source"
+            description="%ActionDefinition.quickformat.description"
+            id="org.eclipse.dltk.ui.edit.text.script.quick.format"
+            name="%ActionDefinition.quickformat.name">
+      </command>
+      <command
+            categoryId="org.eclipse.dltk.ui.category.source"
+            description="%ActionDefinition.indent.description"
+            id="org.eclipse.dltk.ui.edit.text.script.indent"
+            name="%ActionDefinition.indent.name">
+      </command>
       <!-- navigate -->
       <command
             name="%ActionDefinition.gotoNextMember.name"
@@ -658,76 +688,6 @@
                menubarPath="org.eclipse.dltk.ui.refactoring.menu/reorgGroup"
                id="org.eclipse.dltk.ui.actions.Rename">
        </action>
-<!-- =========================================================================== -->
-<!-- Source Menu                                                                 -->
-<!-- =========================================================================== -->
-         <menu
-               label="%SourceMenu.label"
-               path="edit"
-               id="org.eclipse.dltk.ui.source.menu">
-		    <separator
-                  name="commentGroup">
-            </separator>
-            <separator
-                  name="editGroup">
-            </separator>
-            <separator
-                  name="importGroup">
-            </separator>
-            <separator
-                  name="generateGroup">
-            </separator>
-            <separator
-                  name="codeGroup">
-            </separator>
-            <separator
-                  name="externalizeGroup">
-            </separator>
-            <separator
-                  name="convertGroup">
-            </separator>
-         </menu>
-         <!-- Comment Group -->
-         <!--action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.add.javadoc.comment"
-               label="%AddJavaDocCommentAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.jdt.ui.source.menu/commentGroup"
-               id="org.eclipse.jdt.ui.actions.AddJavaDocComment">
-         </action-->
-         <action
-               definitionId="org.eclipse.dltk.ui.edit.text.script.uncomment"
-               label="%UncommentAction.label"
-               retarget="true"
-               id="org.eclipse.dltk.ui.actions.Uncomment">
-         </action>
-         <action
-               definitionId="org.eclipse.dltk.ui.edit.text.script.comment"
-               label="%CommentAction.label"
-               retarget="true"
-               id="org.eclipse.dltk.ui.actions.Comment">
-         </action>
-         <!--action
-               definitionId="org.eclipse.dltk.ui.edit.text.script.remove.block.comment"
-               label="%RemoveBlockCommentAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.dltk.ui.source.menu/commentGroup"
-               id="org.eclipse.dltk.ui.actions.RemoveBlockComment">
-         </action>
-         <action
-               definitionId="org.eclipse.dltk.ui.edit.text.script.add.block.comment"
-               label="%AddBlockCommentAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.dltk.ui.source.menu/commentGroup"
-               id="org.eclipse.dltk.ui.actions.AddBlockComment">
-         </action-->
-         <action
-               definitionId="org.eclipse.dltk.ui.edit.text.script.toggle.comment"
-               label="%ToggleCommentAction.label"
-               retarget="true"
-               menubarPath="org.eclipse.dltk.ui.source.menu/commentGroup"
-               id="org.eclipse.dltk.ui.actions.ToggleComment">
-         </action>
       </actionSet>
  </extension>
    <extension
@@ -1366,4 +1326,40 @@
       </type>
    </extension>
 
+ <extension
+       point="org.eclipse.ui.menus">
+    <menuContribution
+          locationURI="menu:org.eclipse.ui.main.menu?after=edit">
+         <menu
+               label="%SourceMenu.label"
+               id="org.eclipse.dltk.ui.source.menu">
+		    <separator name="commentGroup" visible="true" />
+            <separator name="editGroup" visible="true" />
+            <separator name="importGroup" visible="true" />
+            <separator name="generateGroup" visible="true" />
+            <separator name="codeGroup" visible="true" />
+            <separator name="externalizeGroup" visible="true" />
+            <separator name="convertGroup" visible="true" />
+			<visibleWhen>
+	           <with variable="activeEditor">
+	              <instanceof value="org.eclipse.dltk.internal.ui.editor.ScriptEditor" />
+	           </with>
+	        </visibleWhen>       
+         </menu>
+    </menuContribution>
+    
+    <!-- Comment Group -->
+    <menuContribution
+          locationURI="menu:org.eclipse.dltk.ui.source.menu?after=commentGroup">     
+         <command commandId="org.eclipse.dltk.ui.edit.text.script.toggle.comment" />
+         <command commandId="org.eclipse.dltk.ui.edit.text.script.comment" />
+         <command commandId="org.eclipse.dltk.ui.edit.text.script.uncomment" />
+	</menuContribution>
+
+    <menuContribution
+          locationURI="menu:org.eclipse.dltk.ui.source.menu?after=editGroup">     
+         <command commandId="org.eclipse.ui.edit.text.shiftRight" />
+         <command commandId="org.eclipse.ui.edit.text.shiftLeft" />
+    </menuContribution>
+ </extension>
 </plugin>

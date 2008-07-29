@@ -12,10 +12,8 @@ package org.eclipse.dltk.internal.ui.editor;
 import java.util.ResourceBundle;
 
 import org.eclipse.dltk.ui.IContextMenuConstants;
-import org.eclipse.dltk.ui.actions.DLTKActionConstants;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -53,17 +51,6 @@ public class SourceModuleEditorActionContributor extends BasicSourceModuleEditor
 		ITextEditor textEditor= null;
 		if (part instanceof ITextEditor)
 			textEditor= (ITextEditor) part;
-
-		// Source menu.
-		IActionBars bars= getActionBars();
-		bars.setGlobalActionHandler(DLTKActionConstants.COMMENT, getAction(textEditor, "Comment")); //$NON-NLS-1$
-		bars.setGlobalActionHandler(DLTKActionConstants.UNCOMMENT, getAction(textEditor, "Uncomment")); //$NON-NLS-1$
-		bars.setGlobalActionHandler(DLTKActionConstants.TOGGLE_COMMENT, getAction(textEditor, "ToggleComment")); //$NON-NLS-1$
-		bars.setGlobalActionHandler(DLTKActionConstants.FORMAT, getAction(textEditor, "Format")); //$NON-NLS-1$
-		bars.setGlobalActionHandler(DLTKActionConstants.FORMAT_ELEMENT, getAction(textEditor, "QuickFormat")); //$NON-NLS-1$
-		bars.setGlobalActionHandler(DLTKActionConstants.ADD_BLOCK_COMMENT, getAction(textEditor, "AddBlockComment")); //$NON-NLS-1$
-		bars.setGlobalActionHandler(DLTKActionConstants.REMOVE_BLOCK_COMMENT, getAction(textEditor, "RemoveBlockComment")); //$NON-NLS-1$
-		bars.setGlobalActionHandler(DLTKActionConstants.INDENT, getAction(textEditor, "Indent")); //$NON-NLS-1$ 
 
 		fToggleInsertModeAction.setAction(getAction(textEditor, ITextEditorActionConstants.TOGGLE_INSERT_MODE));
 	}
