@@ -81,7 +81,7 @@ public class EFSDeployment implements IDeployment {
 		OutputStream output = null;
 		try {
 			output = new BufferedOutputStream(file.openOutputStream(EFS.NONE,
-					null));
+					null), 4096);
 			copy(input, output);
 		} catch (IOException e) {
 			throw e;
