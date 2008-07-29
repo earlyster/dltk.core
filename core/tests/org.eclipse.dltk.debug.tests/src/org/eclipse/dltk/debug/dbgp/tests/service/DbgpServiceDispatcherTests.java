@@ -28,11 +28,13 @@ public class DbgpServiceDispatcherTests extends AbstractDbgpServiceTests {
 
 	volatile int count1;
 	volatile int count2;
+	volatile int count3;
 
 	protected void setUp() throws Exception {
 		super.setUp();
 		count1 = 0;
 		count2 = 0;
+		count3 = 0;
 	}
 
 	public void testInitPacketParser() throws IOException {
@@ -49,6 +51,13 @@ public class DbgpServiceDispatcherTests extends AbstractDbgpServiceTests {
 				public void acceptDbgpThread(IDbgpSession session) {
 					synchronized (DbgpServiceDispatcherTests.this) {
 						++count2;
+					}
+				}
+			});
+			service.registerAcceptor(IDE3, new AbstractDbgpAcceptor() {
+				public void acceptDbgpThread(IDbgpSession session) {
+					synchronized (DbgpServiceDispatcherTests.this) {
+						++count3;
 					}
 				}
 			});
@@ -70,15 +79,23 @@ public class DbgpServiceDispatcherTests extends AbstractDbgpServiceTests {
 				performOperation(service.getPort(), new SendPacketOperation(
 						packet));
 			}
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// 
+			for (int i = 0; i < 40; ++i) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// 
+				}
+				synchronized (DbgpServiceDispatcherTests.this) {
+					if (count1 + count2 + count3 == COUNT1 + COUNT2 + COUNT3) {
+						break;
+					}
+				}
 			}
 		} finally {
 			service.shutdown();
 		}
 		assertEquals(COUNT1, count1);
 		assertEquals(COUNT2, count2);
+		assertEquals(COUNT3, count3);
 	}
 }
