@@ -12,7 +12,8 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 /**
- * Delegates preferences lookup to the preferences service ({@link IPreferencesService})
+ * Delegates preferences lookup to the {@link IPreferencesService preference
+ * service}
  * 
  * <p>
  * The following scopes are searched for the preference value:
@@ -53,7 +54,7 @@ public class PreferencesLookupDelegate {
 	public PreferencesLookupDelegate(IScriptProject scriptProject) {
 		this((scriptProject == null) ? null : scriptProject.getProject());
 	}
-	
+
 	/**
 	 * Returns a string preference value
 	 * 
@@ -67,6 +68,21 @@ public class PreferencesLookupDelegate {
 	 */
 	public String getString(String qualifier, String key) {
 		return service.getString(qualifier, key, "", contexts); //$NON-NLS-1$
+	}
+
+	/**
+	 * Returns a int preference value
+	 * 
+	 * @param qualifier
+	 *            preference key qualifier (plugin id)
+	 * @param key
+	 *            preference key
+	 * 
+	 * @return preference value or an empty string if the preference is not
+	 *         defined
+	 */
+	public int getInt(String qualifier, String key) {
+		return service.getInt(qualifier, key, 0, contexts);
 	}
 
 	/**
