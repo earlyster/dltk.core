@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKContributionExtensionManager;
 import org.eclipse.dltk.core.IDLTKContributedExtension;
 import org.eclipse.dltk.ui.dialogs.PropertyLinkArea;
@@ -73,6 +74,9 @@ public abstract class ContributedExtensionOptionsBlock extends
 				.getFont(), 1, 1, GridData.FILL);
 
 		String desc = contrib.getDescription();
+		if (desc == null) {
+			desc = Util.EMPTY_STRING;
+		}
 		SWTFactory.createLabel(composite, desc, 1);
 
 		String prefPageId = contrib.getPreferencePageId();
@@ -104,7 +108,11 @@ public abstract class ContributedExtensionOptionsBlock extends
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		viewer = new ComboViewerBlock(group, gd) {
 			protected String getObjectName(Object element) {
-				return ((IDLTKContributedExtension) element).getName();
+				final IDLTKContributedExtension item = (IDLTKContributedExtension) element;
+				if (item.getName() != null && item.getName().length() != 0) {
+					return item.getName();
+				}
+				return item.getClass().getName();
 			}
 
 			protected void selectedObjectChanged(Object element) {
