@@ -44,7 +44,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
-
 public class ScriptSourceViewer extends ProjectionViewer implements
 		IPropertyChangeListener {
 
@@ -72,43 +71,31 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 
 	/**
 	 * This viewer's foreground color.
-	 * 
-	 *
 	 */
 	private Color fForegroundColor;
 
 	/**
 	 * The viewer's background color.
-	 * 
-	 *
 	 */
 	private Color fBackgroundColor;
 
 	/**
 	 * This viewer's selection foreground color.
-	 * 
-	 *
 	 */
 	private Color fSelectionForegroundColor;
 
 	/**
 	 * The viewer's selection background color.
-	 * 
-	 *
 	 */
 	private Color fSelectionBackgroundColor;
 
 	/**
 	 * The preference store.
-	 * 
-	 *
 	 */
 	private IPreferenceStore fPreferenceStore;
 
 	/**
 	 * Is this source viewer configured?
-	 * 
-	 *
 	 */
 	private boolean fIsConfigured;
 
@@ -126,7 +113,6 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 	 * </p>
 	 * 
 	 * @see #prepareDelayedProjection()
-	 *
 	 */
 	private boolean fIsSetVisibleDocumentDelayed = false;
 
@@ -140,20 +126,20 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewer#createFormattingContext()
-	 *
 	 */
 	public IFormattingContext createFormattingContext() {
 
 		// it's ok to use instance preferences here as subclasses replace
 		// with project dependent versions (see
 		// SourceModuleEditor.AdaptedSourceViewer)
-//		System.err.println("ScriptSourceViewer: TODO: Add CommentFormattingContext here...");
-//		IFormattingContext context = new CommentFormattingContext();
-//		Map map = new HashMap(DLTKCore.getOptions());
-//		context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES,
-//				map);
-//
-//		return context;
+		// System.err.println(
+		// "ScriptSourceViewer: TODO: Add CommentFormattingContext here...");
+		// IFormattingContext context = new CommentFormattingContext();
+		// Map map = new HashMap(DLTKCore.getOptions());
+		// context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES,
+		// map);
+		//
+		// return context;
 		return super.createFormattingContext();
 	}
 
@@ -233,7 +219,10 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 					this, true);
 			if (fHierarchyPresenter != null)
 				fHierarchyPresenter.install(this);
-			textWidget.setFont(JFaceResources.getFont(dltkSVCconfiguration.getFontPropertyPreferenceKey()));
+			if (textWidget != null) {
+				textWidget.setFont(JFaceResources.getFont(dltkSVCconfiguration
+						.getFontPropertyPreferenceKey()));
+			}
 		}
 
 		if (fPreferenceStore != null) {
@@ -318,7 +307,6 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 	 *            the display used create the color
 	 * @return the created color according to the specification in the
 	 *         preference store
-	 *
 	 */
 	private Color createColor(IPreferenceStore store, String key,
 			Display display) {
@@ -341,7 +329,6 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 
 	/*
 	 * @see org.eclipse.jface.text.source.ISourceViewerExtension2#unconfigure()
-	 *
 	 */
 	public void unconfigure() {
 		if (fOutlinePresenter != null) {
@@ -388,7 +375,7 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 	}
 
 	/*
-	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
 		String property = event.getProperty();
@@ -416,8 +403,6 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 	 * 
 	 * @param store
 	 *            the preference store
-	 * 
-	 *
 	 */
 	public void setPreferenceStore(IPreferenceStore store) {
 		if (fIsConfigured && fPreferenceStore != null)
@@ -433,23 +418,21 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 
 	/*
 	 * @see org.eclipse.jface.text.ITextViewer#resetVisibleRegion()
-	 *
 	 */
 	public void resetVisibleRegion() {
 		super.resetVisibleRegion();
 		// re-enable folding if ProjectionViewer failed to due so
-		//TODO: Add editor folding option here.
-		System.err.println("ScriptSourceViwer: Add editor folding option check here"); //$NON-NLS-1$
-		if (fPreferenceStore != null
-				/*&& fPreferenceStore
-						.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED)*/
-				&& !isProjectionMode())
+		// TODO: Add editor folding option here.
+		if (fPreferenceStore != null && !isProjectionMode())
 			enableProjection();
+		/*
+		 * && fPreferenceStore.getBoolean(PreferenceConstants.
+		 * EDITOR_FOLDING_ENABLED)
+		 */
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.source.SourceViewer#createControl(org.eclipse.swt.widgets.Composite,
-	 *      int)
+	 * @see SourceViewer#createControl(Composite, int)
 	 */
 	protected void createControl(Composite parent, int styles) {
 
@@ -460,29 +443,29 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 
 		super.createControl(parent, styles);
 
-		//System.err.println("Add backup manager");
+		// System.err.println("Add backup manager");
 		// fBackspaceManager= new SmartBackspaceManager();
-		// fBackspaceManager.install(this);		
+		// fBackspaceManager.install(this);
 	}
 
-//	/**
-//	 * Returns the backspace manager for this viewer.
-//	 * 
-//	 * @return the backspace manager for this viewer, or <code>null</code> if
-//	 *         there is none
-//	 */
-//	public SmartBackspaceManager getBackspaceManager() {
-//		return fBackspaceManager;
-//	}
+	// /**
+	// * Returns the backspace manager for this viewer.
+	// *
+	// * @return the backspace manager for this viewer, or <code>null</code> if
+	// * there is none
+	// */
+	// public SmartBackspaceManager getBackspaceManager() {
+	// return fBackspaceManager;
+	// }
 
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewer#handleDispose()
 	 */
 	protected void handleDispose() {
-//		if (fBackspaceManager != null) {
-//			fBackspaceManager.uninstall();
-//			fBackspaceManager = null;
-//		}
+		// if (fBackspaceManager != null) {
+		// fBackspaceManager.uninstall();
+		// fBackspaceManager = null;
+		// }
 
 		super.handleDispose();
 	}
@@ -495,7 +478,6 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 	 * 
 	 * @param listener
 	 *            the text presentation listener
-	 *
 	 */
 	public void prependTextPresentationListener(
 			ITextPresentationListener listener) {
@@ -514,7 +496,6 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 	 * 
 	 * @param reconciler
 	 *            the reconciler
-	 *
 	 */
 	void setReconciler(IReconciler reconciler) {
 		fReconciler = reconciler;
@@ -524,7 +505,6 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 	 * Returns the reconciler.
 	 * 
 	 * @return the reconciler or <code>null</code> if not set
-	 *
 	 */
 	IReconciler getReconciler() {
 		return fReconciler;
@@ -540,7 +520,6 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 	 * </p>
 	 * 
 	 * @see #setVisibleDocument(IDocument)
-	 *
 	 */
 	void prepareDelayedProjection() {
 		Assert.isTrue(!fIsSetVisibleDocumentDelayed);
@@ -555,14 +534,13 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 	 * </p>
 	 * 
 	 * @see #prepareDelayedProjection()
-	 *
 	 */
 	protected void setVisibleDocument(IDocument document) {
 		if (fIsSetVisibleDocumentDelayed) {
 			fIsSetVisibleDocumentDelayed = false;
 			IDocument previous = getVisibleDocument();
-			enableProjection(); // will set the visible document if anything is
-								// folded
+			// will set the visible document if anything is folded
+			enableProjection();
 			IDocument current = getVisibleDocument();
 			// if the visible document was not replaced, continue as usual
 			if (current != null && current != previous)
