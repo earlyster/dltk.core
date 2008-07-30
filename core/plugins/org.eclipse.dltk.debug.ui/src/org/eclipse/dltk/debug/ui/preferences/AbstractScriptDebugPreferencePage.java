@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.debug.core.DLTKDebugPluginPreferenceInitializer;
 import org.eclipse.dltk.debug.ui.DLTKDebugUILanguageManager;
 import org.eclipse.dltk.debug.ui.IDLTKDebugUILanguageToolkit;
 import org.eclipse.dltk.ui.DLTKExecuteExtensionHelper;
@@ -31,6 +32,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
  *   id=&quot;...&quot;
  *   name=&quot;...&quot; /&gt;
  * </pre>
+ * 
+ * @see DLTKDebugPluginPreferenceInitializer
  */
 public abstract class AbstractScriptDebugPreferencePage extends
 		AbstractConfigurationBlockPreferencePage implements

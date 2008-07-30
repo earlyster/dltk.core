@@ -3,6 +3,7 @@ package org.eclipse.dltk.debug.ui.preferences;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.dltk.debug.core.DLTKDebugPluginPreferenceInitializer;
 import org.eclipse.dltk.debug.ui.IDLTKDebugUIPreferenceConstants;
 import org.eclipse.dltk.ui.preferences.IPreferenceConfigurationBlock;
 import org.eclipse.dltk.ui.preferences.ImprovedAbstractConfigurationBlock;
@@ -28,11 +29,13 @@ import org.eclipse.swt.widgets.Group;
  * &lt;extension point=&quot;org.eclipse.ui.preferencePages&quot;&gt;
  *   &lt;page
  *     category=&quot;...&quot;
- *     class=&quot;org.eclipse.dltk.debug.ui.preferences.ScriptDetailFormattersPreferencePage:[nature_id]&quot;
+ *     class=&quot;org.eclipse.dltk.debug.ui.preferences.ScriptDetailFormattersPreferencePage:nature_id&quot;
  *     id=&quot;...&quot;
  *     name=&quot;...&quot; /&gt;  
  * &lt;extension&gt;
  * </pre>
+ * 
+ * @see DLTKDebugPluginPreferenceInitializer
  */
 public class ScriptDetailFormattersPreferencePage extends
 		AbstractScriptDebugPreferencePage {
