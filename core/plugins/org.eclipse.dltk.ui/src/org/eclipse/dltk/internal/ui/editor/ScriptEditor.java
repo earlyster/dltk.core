@@ -15,10 +15,12 @@ import java.text.CharacterIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Stack;
 
 import org.eclipse.core.filebuffers.IPersistableAnnotationModel;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -36,6 +38,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.PreferencesLookupDelegate;
 import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.dltk.internal.ui.actions.FoldingActionGroup;
@@ -62,6 +65,9 @@ import org.eclipse.dltk.ui.actions.OpenEditorActionGroup;
 import org.eclipse.dltk.ui.actions.OpenViewActionGroup;
 import org.eclipse.dltk.ui.actions.SearchActionGroup;
 import org.eclipse.dltk.ui.editor.IScriptAnnotation;
+import org.eclipse.dltk.ui.formatter.IScriptFormatterFactory;
+import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
+import org.eclipse.dltk.ui.formatter.ScriptFormattingContextProperties;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
 import org.eclipse.dltk.ui.text.folding.IFoldingStructureProvider;
@@ -97,6 +103,8 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.formatter.FormattingContextProperties;
+import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
@@ -471,6 +479,38 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 					.isContextHelpDisplayed())
 				return false;
 			return super.requestWidgetToken(requester, priority);
+		}
+
+		private IProject getProject() {
+			final IModelElement input = getInputModelElement();
+			if (input != null) {
+				final IScriptProject scriptProject = input.getScriptProject();
+				if (scriptProject != null) {
+					return scriptProject.getProject();
+				}
+			}
+			return null;
+		}
+
+		public IFormattingContext createFormattingContext() {
+			final IFormattingContext context = super.createFormattingContext();
+			final IProject project = getProject();
+			context.setProperty(
+					ScriptFormattingContextProperties.CONTEXT_PROJECT, project);
+			final IScriptFormatterFactory factory = ScriptFormatterManager
+					.getSelected(getLanguageToolkit().getNatureId(), project);
+			if (factory != null) {
+				context.setProperty(
+						ScriptFormattingContextProperties.CONTEXT_FORMATTER_ID,
+						factory.getId());
+				final Map preferences = factory
+						.retrievePreferences(new PreferencesLookupDelegate(
+								project));
+				context.setProperty(
+						FormattingContextProperties.CONTEXT_PREFERENCES,
+						preferences);
+			}
+			return context;
 		}
 	}
 

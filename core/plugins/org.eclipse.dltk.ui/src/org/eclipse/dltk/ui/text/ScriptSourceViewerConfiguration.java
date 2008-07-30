@@ -22,6 +22,8 @@ import org.eclipse.dltk.internal.ui.text.hover.EditorTextHoverProxy;
 import org.eclipse.dltk.internal.ui.text.hover.ScriptInformationProvider;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.actions.IScriptEditorActionDefinitionIds;
+import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
+import org.eclipse.dltk.ui.formatter.ScriptFormattingStrategy;
 import org.eclipse.dltk.ui.text.completion.ContentAssistPreference;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -35,6 +37,8 @@ import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.formatter.IContentFormatter;
+import org.eclipse.jface.text.formatter.MultiPassContentFormatter;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
@@ -370,4 +374,17 @@ public abstract class ScriptSourceViewerConfiguration extends
 		getContentAssistPreference().changeConfiguration(c, fPreferenceStore,
 				event);
 	}
+
+	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
+		final String natureId = getNatureId();
+		if (ScriptFormatterManager.getInstance().getContributions(natureId).length != 0) {
+			final MultiPassContentFormatter formatter = new MultiPassContentFormatter(
+					getConfiguredDocumentPartitioning(sourceViewer),
+					IDocument.DEFAULT_CONTENT_TYPE);
+			formatter.setMasterStrategy(new ScriptFormattingStrategy(natureId));
+			return formatter;
+		}
+		return super.getContentFormatter(sourceViewer);
+	}
+
 }

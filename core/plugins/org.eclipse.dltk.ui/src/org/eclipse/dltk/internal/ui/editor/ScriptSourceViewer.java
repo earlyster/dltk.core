@@ -24,7 +24,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextPresentationListener;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.source.IOverviewRuler;
@@ -122,25 +121,6 @@ public class ScriptSourceViewer extends ProjectionViewer implements
 		super(parent, verticalRuler, overviewRuler, showAnnotationsOverview,
 				styles);
 		setPreferenceStore(store);
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.source.SourceViewer#createFormattingContext()
-	 */
-	public IFormattingContext createFormattingContext() {
-
-		// it's ok to use instance preferences here as subclasses replace
-		// with project dependent versions (see
-		// SourceModuleEditor.AdaptedSourceViewer)
-		// System.err.println(
-		// "ScriptSourceViewer: TODO: Add CommentFormattingContext here...");
-		// IFormattingContext context = new CommentFormattingContext();
-		// Map map = new HashMap(DLTKCore.getOptions());
-		// context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES,
-		// map);
-		//
-		// return context;
-		return super.createFormattingContext();
 	}
 
 	/*
