@@ -353,7 +353,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 				addBreakpoint(breakpoints[i]);
 			} catch (Exception e) {
 				DLTKDebugPlugin
-						.error(
+						.logError(
 								org.eclipse.dltk.debug.core.Messages.ErrorSetupDeferredBreakpoints,
 								e);
 				if (DLTKCore.DEBUG) {

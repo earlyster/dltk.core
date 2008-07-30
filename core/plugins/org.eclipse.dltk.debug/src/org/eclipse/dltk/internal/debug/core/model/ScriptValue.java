@@ -13,8 +13,6 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IIndexedValue;
@@ -113,14 +111,22 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 	private void fillVariables(int page, IDbgpProperty pageProperty) {
 		int offset = getPageOffset(page);
 		IDbgpProperty[] properties = pageProperty.getAvailableChildren();
-		for (int i = 0; i < properties.length; ++i) {
-			IDbgpProperty p = properties[i];
-			variables[offset + i] = new ScriptVariable(frame, p.getName(), p);
+		final int size = Math.min(properties.length, variables.length - offset);
+		if (size != properties.length) {
+			DLTKDebugPlugin.logWarning(
+					Messages.AvailableChildrenExceedsVariableLength, null);
 		}
-		Arrays.sort(this.variables, offset, offset + properties.length,
-				ScriptDebugManager.getInstance()
-						.getVariableNameComparatorByDebugModel(
-								getDebugTarget().getModelIdentifier()));
+		if (size > 0) {
+			for (int i = 0; i < size; ++i) {
+				IDbgpProperty p = properties[i];
+				variables[offset + i] = new ScriptVariable(frame, p.getName(),
+						p);
+			}
+			Arrays.sort(this.variables, offset, offset + size,
+					ScriptDebugManager.getInstance()
+							.getVariableNameComparatorByDebugModel(
+									getDebugTarget().getModelIdentifier()));
+		}
 		Assert.isLegal(pageSize > 0 || properties.length == variables.length);
 	}
 
@@ -200,13 +206,11 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 			return new ScriptEvaluationCommand(engine, snippet, frame);
 		}
 		DLTKDebugPlugin
-				.log(new Status(
-						IStatus.WARNING,
-						DLTKDebugPlugin.PLUGIN_ID,
+				.logWarning(
 						MessageFormat
 								.format(
 										Messages.ScriptValue_detailFormatterRequiredToContainIdentifier,
-										new Object[] { pattern })));
+										new Object[] { pattern }), null);
 		return new ScriptEvaluationCommand(engine, evalName, frame);
 	}
 
