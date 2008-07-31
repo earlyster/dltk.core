@@ -47,4 +47,8 @@ public abstract class AbstractScriptFormatterFactory extends
 			return 0;
 		}
 	}
+
+	public boolean isValid() {
+		return true;
+	}
 }

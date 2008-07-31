@@ -39,7 +39,8 @@ public class ScriptFormatterManager extends DLTKContributionExtensionManager {
 	}
 
 	protected boolean isValidContribution(Object object) {
-		return object instanceof IScriptFormatterFactory;
+		return object instanceof IScriptFormatterFactory
+				&& ((IScriptFormatterFactory) object).isValid();
 	}
 
 	public static IScriptFormatterFactory getSelected(IScriptProject project) {

@@ -50,4 +50,11 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 	 */
 	int detectIndentationLevel(IDocument document, int offset, Map prefs);
 
+	/**
+	 * Validates that this formatter factory is correctly installed.
+	 * 
+	 * @return
+	 */
+	boolean isValid();
+
 }
