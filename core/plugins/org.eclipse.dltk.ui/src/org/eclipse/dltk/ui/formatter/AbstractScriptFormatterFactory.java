@@ -31,21 +31,25 @@ public abstract class AbstractScriptFormatterFactory extends
 
 	public int detectIndentationLevel(IDocument document, int offset, Map prefs) {
 		final int tabSize = 4;
-		try {
-			int indent = 0;
-			for (int i = offset, docLength = document.getLength(); i < docLength; i++) {
-				final char c = document.getChar(i);
-				if (c == ' ') {
-					++indent;
-				} else if (c == '\t') {
-					indent = indent - indent % tabSize + tabSize;
-				} else
-					break;
+		int indent = 0;
+		if (offset > 0) {
+			try {
+				final int line = document.getLineOfOffset(offset);
+				final int lineStart = document.getLineOffset(line);
+				for (int i = lineStart, docLength = document.getLength(); i < docLength; i++) {
+					final char c = document.getChar(i);
+					if (c == ' ') {
+						++indent;
+					} else if (c == '\t') {
+						indent = indent - indent % tabSize + tabSize;
+					} else
+						break;
+				}
+			} catch (BadLocationException e) {
+				return 0;
 			}
-			return indent / tabSize;
-		} catch (BadLocationException e) {
-			return 0;
 		}
+		return indent / tabSize;
 	}
 
 	public boolean isValid() {
