@@ -98,17 +98,22 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 						edit.apply(document);
 					}
 				}
-
-			} catch (MalformedTreeException exception) {
-				DLTKUIPlugin.logErrorMessage(
-						FormatterMessages.ScriptFormattingStrategy_formattingError,
-						exception);
-			} catch (BadLocationException exception) {
-				// Can only happen on concurrent document modification - log and
-				// bail out
-				DLTKUIPlugin.logErrorMessage(
-						FormatterMessages.ScriptFormattingStrategy_formattingError,
-						exception);
+			} catch (MalformedTreeException e) {
+				DLTKUIPlugin
+						.warn(
+								FormatterMessages.ScriptFormattingStrategy_formattingError,
+								e);
+			} catch (BadLocationException e) {
+				// Can only happen on concurrent document modification
+				DLTKUIPlugin
+						.warn(
+								FormatterMessages.ScriptFormattingStrategy_formattingError,
+								e);
+			} catch (Exception e) {
+				DLTKUIPlugin
+						.logErrorMessage(
+								FormatterMessages.ScriptFormattingStrategy_unexpectedFormatterError,
+								e);
 			} finally {
 				if (partitioners != null)
 					TextUtilities.addDocumentPartitioners(document,

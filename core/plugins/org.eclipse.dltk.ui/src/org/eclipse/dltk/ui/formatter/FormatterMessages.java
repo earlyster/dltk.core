@@ -19,6 +19,7 @@ public class FormatterMessages extends NLS {
 	public static String FormatterPreferencePage_selectionLabel;
 	public static String FormatterPreferencePage_settingsLink;
 	public static String ScriptFormattingStrategy_formattingError;
+	public static String ScriptFormattingStrategy_unexpectedFormatterError;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, FormatterMessages.class);
