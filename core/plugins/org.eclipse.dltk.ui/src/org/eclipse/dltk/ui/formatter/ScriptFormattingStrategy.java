@@ -21,6 +21,7 @@ import org.eclipse.jface.text.TypedPosition;
 import org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
@@ -110,10 +111,11 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 								FormatterMessages.ScriptFormattingStrategy_formattingError,
 								e);
 			} catch (Exception e) {
-				DLTKUIPlugin
-						.logErrorMessage(
+				final String msg = NLS
+						.bind(
 								FormatterMessages.ScriptFormattingStrategy_unexpectedFormatterError,
-								e);
+								e.toString());
+				DLTKUIPlugin.logErrorMessage(msg, e);
 			} finally {
 				if (partitioners != null)
 					TextUtilities.addDocumentPartitioners(document,

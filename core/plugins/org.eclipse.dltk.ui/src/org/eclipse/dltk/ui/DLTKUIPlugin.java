@@ -367,12 +367,11 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	}
 
 	public static void warn(String message) {
-		DLTKUIPlugin.log(new Status(IStatus.WARNING, DLTKUIPlugin.PLUGIN_ID,
-				IDLTKStatusConstants.INTERNAL_ERROR, message, null));
+		warn(message, null);
 	}
 
 	public static void warn(String message, Throwable throwable) {
-		DLTKUIPlugin.log(new Status(IStatus.WARNING, DLTKUIPlugin.PLUGIN_ID,
+		log(new Status(IStatus.WARNING, PLUGIN_ID,
 				IDLTKStatusConstants.INTERNAL_ERROR, message, throwable));
 	}
 
