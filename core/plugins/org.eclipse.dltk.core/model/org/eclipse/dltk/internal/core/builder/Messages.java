@@ -6,6 +6,7 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.internal.core.builder.messages"; //$NON-NLS-1$
 	public static String ScriptBuilder_building;
 	public static String ScriptBuilder_buildingScriptsIn;
+	public static String ScriptBuilder_cleaningScriptsIn;
 	public static String ScriptBuilder_errorBuildElements;
 	public static String ScriptBuilder_locatingResourcesFor;
 	public static String ScriptBuilder_Location_source_modules;

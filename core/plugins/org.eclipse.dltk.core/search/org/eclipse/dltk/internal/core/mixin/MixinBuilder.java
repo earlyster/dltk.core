@@ -47,7 +47,7 @@ import org.eclipse.dltk.internal.core.SourceModule;
 import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 
 /**
- *@deprecated
+ * @deprecated
  */
 public class MixinBuilder implements IScriptBuilder {
 	public IStatus buildResources(IScriptProject project, List resources,
@@ -236,18 +236,27 @@ public class MixinBuilder implements IScriptBuilder {
 		return null;
 	}
 
+	public void clean(IScriptProject project, IProgressMonitor monitor) {
+	}
+
 	private static MixinBuilder builder = new MixinBuilder();
 
 	public static MixinBuilder getDefault() {
 		return builder;
 	}
 
-	public int estimateElementsToBuild(List elements) {
+	public int estimateElementsToBuild(IScriptProject project, List elements) {
 		return elements.size();
 	}
 
 	public Set getDependencies(IScriptProject project, Set resources,
 			Set allResources, Set oldExternalFolders, Set externalFolders) {
 		return null;
+	}
+
+	public void initialize(IScriptProject project) {
+	}
+
+	public void reset(IScriptProject project) {
 	}
 }

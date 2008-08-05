@@ -207,7 +207,12 @@ public class ValidatorBuilder implements IScriptBuilder {
 				resources, new NullValidatorOutput(), monitor);
 	}
 
-	public int estimateElementsToBuild(List elements) {
+	public void clean(IScriptProject project, IProgressMonitor monitor) {
+		ValidatorRuntime.cleanAll(project, new ISourceModule[] {}, new IResource[] { project
+				.getProject() }, monitor);
+	}
+		
+	public int estimateElementsToBuild(IScriptProject project, List elements) {
 		return elements.size();
 	}
 
@@ -215,5 +220,11 @@ public class ValidatorBuilder implements IScriptBuilder {
 			Set allResources, Set oldExternalFolders, Set externalFolders) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public void initialize(IScriptProject project) {
+	}
+
+	public void reset(IScriptProject project) {
 	}
 }

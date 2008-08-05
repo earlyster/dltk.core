@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.core.builder;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -244,6 +245,72 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		return requiredProjects;
 	}
 
+	protected void clean(IProgressMonitor monitor) throws CoreException {
+		long start = 0;
+		if (TRACE) {
+			start = System.currentTimeMillis();
+		}
+
+		this.currentProject = getProject();
+
+		if (!DLTKLanguageManager.hasScriptNature(this.currentProject)) {
+			return;
+		}
+		this.scriptProject = (ScriptProject) DLTKCore.create(currentProject);
+
+		if (currentProject == null || !currentProject.isAccessible())
+			return;
+
+		try {
+			monitor.beginTask(MessageFormat.format(
+					Messages.ScriptBuilder_cleaningScriptsIn,
+					new Object[] { currentProject.getName() }), 66);
+			if (monitor.isCanceled()) {
+				return;
+			}
+
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit(scriptProject);
+			IScriptBuilder[] builders = ScriptBuilderManager
+					.getScriptBuilders(toolkit.getNatureId());
+
+			if (builders != null) {
+				for (int k = 0; k < builders.length; k++) {
+					builders[k].initialize(scriptProject);
+				}
+
+				for (int k = 0; k < builders.length; k++) {
+					IProgressMonitor sub = new SubProgressMonitor(monitor, 1);
+					builders[k].clean(scriptProject, sub);
+
+					if (monitor.isCanceled()) {
+						break;
+					}
+				}
+
+				for (int k = 0; k < builders.length; k++) {
+					builders[k].reset(scriptProject);
+				}
+			}
+		} catch (CoreException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+
+		if (TRACE) {
+			System.out
+					.println("-----SCRIPT-BUILDER-INFORMATION-TRACE----------------------------"); //$NON-NLS-1$
+			System.out.println("Finished clean of project:" //$NON-NLS-1$
+					+ currentProject.getName() + "\n" //$NON-NLS-1$
+					+ "Building time:" //$NON-NLS-1$
+					+ Long.toString(System.currentTimeMillis() - start));
+			System.out
+					.println("-----------------------------------------------------------------"); //$NON-NLS-1$
+		}
+		monitor.done();
+	}
+
 	private IProject[] getRequiredProjects(boolean includeBinaryPrerequisites) {
 		if (scriptProject == null)
 			return new IProject[0];
@@ -321,6 +388,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 		State newState = clearLastState();
 		this.lastState = newState;
+		IScriptBuilder[] builders = null;
 		try {
 			monitor.setTaskName(NLS.bind(
 					Messages.ScriptBuilder_buildingScriptsIn, currentProject
@@ -346,6 +414,19 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (totalFiles == 0)
 				totalFiles = 1;
 
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit(scriptProject);
+			if (toolkit != null) {
+				builders = ScriptBuilderManager.getScriptBuilders(toolkit
+						.getNatureId());
+			}
+
+			if (builders != null) {
+				for (int k = 0; k < builders.length; k++) {
+					builders[k].initialize(scriptProject);
+				}
+			}
+
 			List realResources = new ArrayList();
 
 			List relements = locateSourceModule(resources, monitor,
@@ -358,7 +439,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					* (resources.size() - relements.size()) / totalFiles;
 			resourceTicks = Math.min(resourceTicks, WORK_BUILD / 4);
 
-			buildResources(realResources, monitor, resourceTicks, FULL_BUILD);
 			List els = new ArrayList();
 
 			els.addAll(relements);
@@ -373,12 +453,23 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				DLTKCore.error(Messages.ScriptBuilder_errorBuildElements, e);
 			}
 
+			if (monitor.isCanceled()) {
+				return;
+			}
+			buildResources(realResources, monitor, resourceTicks, FULL_BUILD);
+
 			lastBuildResources = resources.size() + elements.size();
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
 		} finally {
+			if (builders != null) {
+				for (int k = 0; k < builders.length; k++) {
+					builders[k].reset(scriptProject);
+				}
+			}
+
 			monitor.done();
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
 					this.lastState);
@@ -459,6 +550,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 
 		this.lastState = newState;
+		IScriptBuilder[] builders = null;
 		try {
 			monitor.setTaskName(NLS.bind(
 					Messages.ScriptBuilder_buildingScriptsIn, currentProject
@@ -485,6 +577,19 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (totalFiles == 0)
 				totalFiles = 1;
 
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit(scriptProject);
+			if (toolkit != null) {
+				builders = ScriptBuilderManager.getScriptBuilders(toolkit
+						.getNatureId());
+			}
+
+			if (builders != null) {
+				for (int k = 0; k < builders.length; k++) {
+					builders[k].initialize(scriptProject);
+				}
+			}
+
 			List realResources = new ArrayList();
 
 			List relements = locateSourceModule(resources, monitor,
@@ -496,7 +601,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			int resourceTicks = WORK_BUILD
 					* (resources.size() - relements.size()) / totalFiles;
 
-			buildResources(realResources, monitor, resourceTicks, FULL_BUILD);
 			if (monitor.isCanceled()) {
 				return;
 			}
@@ -512,8 +616,20 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				DLTKCore.error(Messages.ScriptBuilder_errorBuildElements, e);
 			}
 			lastBuildSourceFiles += elements.size();
+
+			if (monitor.isCanceled()) {
+				return;
+			}
+			buildResources(realResources, monitor, resourceTicks, FULL_BUILD);
+
 			lastBuildResources = resources.size() + elements.size();
 		} finally {
+			if (builders != null) {
+				for (int k = 0; k < builders.length; k++) {
+					builders[k].reset(scriptProject);
+				}
+			}
+
 			monitor.done();
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
 					this.lastState);
@@ -569,42 +685,31 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	protected void buildResources(List realResources, IProgressMonitor monitor,
 			int tiks, int buildType) {
 		// Else build as resource.
-		String[] natureIds = null;
-		try {
-			natureIds = currentProject.getDescription().getNatureIds();
-		} catch (CoreException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
-			return;
-		}
 		if (realResources.size() == 0) {
 			monitor.worked(tiks);
 		} else {
 			Set alreadyPassed = new HashSet();
-			for (int j = 0; j < natureIds.length; j++) {
-				try {
-					IScriptBuilder[] builders = ScriptBuilderManager
-							.getScriptBuilders(natureIds[j]);
-					if (builders != null) {
-						for (int k = 0; k < builders.length; k++) {
-							IProgressMonitor ssub = new SubProgressMonitor(
-									monitor,
-									(tiks)
-											/ (builders.length * natureIds.length));
-							ssub.beginTask(Messages.ScriptBuilder_building, 1);
-							IScriptBuilder builder = builders[k];
-							if (alreadyPassed.add(builder)) {
-								builder.buildResources(this.scriptProject,
-										realResources, ssub, buildType);
-							}
-							ssub.done();
+			try {
+				IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+						.getLanguageToolkit(scriptProject);
+				IScriptBuilder[] builders = ScriptBuilderManager
+						.getScriptBuilders(toolkit.getNatureId());
+				if (builders != null) {
+					for (int k = 0; k < builders.length; k++) {
+						IProgressMonitor ssub = new SubProgressMonitor(monitor,
+								(tiks) / builders.length);
+						ssub.beginTask(Messages.ScriptBuilder_building, 1);
+						IScriptBuilder builder = builders[k];
+						if (alreadyPassed.add(builder)) {
+							builder.buildResources(this.scriptProject,
+									realResources, ssub, buildType);
 						}
+						ssub.done();
 					}
-				} catch (CoreException e) {
-					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
-					}
+				}
+			} catch (CoreException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
 				}
 			}
 		}
@@ -629,8 +734,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				List buildElementsList = getDependencies(elements, allElements,
 						externalFoldersBefore, externalFolders, builder);
 				builderToElements.put(builder, buildElementsList);
-				workEstimations[k] = Math.max(builder
-						.estimateElementsToBuild(buildElementsList), 1);
+				workEstimations[k] = Math.max(builder.estimateElementsToBuild(
+						scriptProject, buildElementsList), 1);
 				total += workEstimations[k];
 			}
 
@@ -658,7 +763,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		Set buildElements = new HashSet();
 		buildElements.addAll(elements);
 		Set dependencies = builder.getDependencies(this.scriptProject,
-				allElements, allElements, externalFoldersBefore,
+				new HashSet(elements), allElements, externalFoldersBefore,
 				externalFolders);
 		if (dependencies != null) {
 			buildElements.addAll(dependencies);

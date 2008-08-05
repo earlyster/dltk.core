@@ -12,6 +12,7 @@ package org.eclipse.dltk.core.builder;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.core.IScriptProject;
@@ -27,11 +28,18 @@ public interface IScriptBuilder {
 	public static final int FULL_BUILD = 1;
 
 	/**
+	 * Initialize before a build session
+	 * 
+	 * @param project
+	 */
+	void initialize(IScriptProject project);
+
+	/**
 	 * Estimate number of elements will be build from given set.
 	 * 
 	 * @return
 	 */
-	int estimateElementsToBuild(List elements);
+	int estimateElementsToBuild(IScriptProject project, List elements);
 
 	/**
 	 * Called for each resource required to build. Only resources with specified
@@ -67,4 +75,18 @@ public interface IScriptBuilder {
 	 */
 	Set getDependencies(IScriptProject project, Set resources,
 			Set allResources, Set oldExternalFolders, Set externalFolders);
+
+	/**
+	 * @see IncrementalProjectBuilder
+	 * 
+	 * @return
+	 */
+	void clean(IScriptProject project, IProgressMonitor monitor);
+
+	/**
+	 * Reset after a build session
+	 * 
+	 * @param project
+	 */
+	void reset(IScriptProject project);
 }

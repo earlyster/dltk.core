@@ -81,8 +81,15 @@ public class DLTKProblemReporter implements IProblemReporter {
 	public void clearMarkers() {
 		if (this.resource != null) {
 			try {
-				this.resource.deleteMarkers(DefaultProblem.MARKER_TYPE_PROBLEM,
-						true, IResource.DEPTH_INFINITE);
+				// ssanders: Avoid acquisition of workspace lock when operation
+				// would be no-op anyway
+				if (this.resource.findMarkers(
+						DefaultProblem.MARKER_TYPE_PROBLEM, true,
+						IResource.DEPTH_INFINITE).length > 0) {
+					this.resource.deleteMarkers(
+							DefaultProblem.MARKER_TYPE_PROBLEM, true,
+							IResource.DEPTH_INFINITE);
+				}
 			} catch (CoreException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
