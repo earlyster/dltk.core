@@ -17,8 +17,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
@@ -63,9 +71,9 @@ public class ExternalFoldersManager {
 		if (externalFolder.isFile())
 			return false;
 		if (externalPath.getFileExtension() != null/*
-													 * likely a .jar, .zip, .rar
-													 * or other file
-													 */
+		 * likely a .jar, .zip, .rar
+		 * or other file
+		 */
 				&& !externalFolder.exists())
 			return false;
 		return true;
@@ -139,10 +147,10 @@ public class ExternalFoldersManager {
 		}
 		IProject project = getExternalFoldersProject();
 		if (project.isAccessible() && project.members().length == 1/*
-																	 * remaining
-																	 * member is
-																	 * .project
-																	 */)
+		 * remaining
+		 * member is
+		 * .project
+		 */)
 			project.delete(true, monitor);
 	}
 
@@ -162,8 +170,12 @@ public class ExternalFoldersManager {
 							.getStateLocation();
 					desc.setLocation(stateLocation
 							.append(EXTERNAL_PROJECT_NAME));
-					project.create(DEBUG ? null : desc, DEBUG ? IResource.NONE
-							: IResource.HIDDEN, monitor);
+					// TODO(alon): Figure out the best compatibility mode for
+					// 3.3 vs 3.4
+					project.create(DEBUG ? null : desc, monitor);
+					// project.create(DEBUG ? null : desc, DEBUG ?
+					// IResource.NONE
+					// : IResource.HIDDEN, monitor);
 				}
 				try {
 					project.open(monitor);
@@ -261,7 +273,10 @@ public class ExternalFoldersManager {
 			final Iterator iterator = externalFolders.iterator();
 			Job refreshJob = new Job(Messages.refreshing_external_folders) {
 				public boolean belongsTo(Object family) {
-					return family == ResourcesPlugin.FAMILY_MANUAL_REFRESH;
+					// TODO(alon): Figure out the best compatibility mode for
+					// 3.3 vs 3.4
+					return family == ResourcesPlugin.FAMILY_AUTO_REFRESH;
+					// return family == ResourcesPlugin.FAMILY_MANUAL_REFRESH;
 				}
 
 				protected IStatus run(IProgressMonitor pm) {
