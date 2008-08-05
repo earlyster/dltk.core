@@ -36,7 +36,8 @@ public final class LaunchConfigurationUtils {
 			String name, boolean defaultValue) {
 		boolean value = defaultValue;
 		try {
-			value = configuration.getAttribute(name, defaultValue);
+			if (configuration != null)
+				value = configuration.getAttribute(name, defaultValue);
 		} catch (CoreException e) {
 			DLTKLaunchingPlugin.log(e);
 		}
@@ -149,7 +150,8 @@ public final class LaunchConfigurationUtils {
 			String name, String defaultValue) {
 		String value = defaultValue;
 		try {
-			value = configuration.getAttribute(name, defaultValue);
+			if (configuration != null)
+				value = configuration.getAttribute(name, defaultValue);
 		} catch (CoreException e) {
 			DLTKLaunchingPlugin.log(e);
 		}
