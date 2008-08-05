@@ -49,7 +49,6 @@ public interface IScriptEvaluationResult {
 	 * performing some action in the target.
 	 * 
 	 * @return The exception that occurred during the evaluation
-	 * @see com.sun.jdi.InvocationException
 	 * @see org.eclipse.debug.core.DebugException
 	 */
 	DebugException getException();
