@@ -13,13 +13,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringTokenizer;
 
+import org.eclipse.dltk.console.IScriptConsoleInterpreter;
+import org.eclipse.dltk.console.IScriptInterpreter;
 import org.eclipse.dltk.console.ScriptConsoleHistory;
 import org.eclipse.dltk.console.ScriptConsolePrompt;
-import org.eclipse.dltk.console.ui.IConsoleStyleProvider;
+import org.eclipse.dltk.console.ui.AnsiColorHelper;
 import org.eclipse.dltk.console.ui.IScriptConsoleViewer;
 import org.eclipse.dltk.console.ui.ScriptConsole;
 import org.eclipse.dltk.console.ui.ScriptConsolePartitioner;
+import org.eclipse.dltk.console.ui.AnsiColorHelper.IAnsiColorHandler;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
@@ -27,6 +31,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.hyperlink.HyperlinkManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.StyleRange;
@@ -55,10 +60,16 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 		private IDocument doc;
 
+		private AnsiColorHelper ansiHelper = new AnsiColorHelper();
+
 		private List viewerList = new ArrayList();
 
 		private void addViewer(ScriptConsoleViewer viewer) {
 			viewerList.add(viewer);
+		}
+
+		private void removeViewer(ScriptConsoleViewer viewer) {
+			viewerList.remove(viewer);
 		}
 
 		protected void connectListener() {
@@ -70,14 +81,28 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 		}
 
 		public void clear() {
-			disconnectListener();
-			doc.set(""); //$NON-NLS-1$
-			// appendInvitation();
-			for (Iterator iter = viewerList.iterator(); iter.hasNext();) {
-				((ScriptConsoleViewer) iter.next()).setCaretPosition(doc
-						.getLength());
+			try {
+				disconnectListener();
+				doc.set(""); //$NON-NLS-1$
+				ScriptConsoleViewer viewer;
+				for (Iterator iter = viewerList.iterator(); iter.hasNext();) {
+					viewer = (ScriptConsoleViewer) iter.next();
+					IDocumentPartitioner partitioner = viewer.getDocument()
+							.getDocumentPartitioner();
+					if (partitioner instanceof ScriptConsolePartitioner) {
+						ScriptConsolePartitioner scriptConsolePartitioner = (ScriptConsolePartitioner) partitioner;
+						scriptConsolePartitioner.clearRanges();
+					}
+				}
+				appendInvitation();
+				for (Iterator iter = viewerList.iterator(); iter.hasNext();) {
+					((ScriptConsoleViewer) iter.next()).setCaretPosition(doc
+							.getLength());
+				}
+				connectListener();
+			} catch (BadLocationException e) {
+				e.printStackTrace();
 			}
-			connectListener();
 		}
 
 		public ConsoleDocumentListener(ICommandHandler handler,
@@ -109,55 +134,142 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 		protected void handleCommandLine() throws BadLocationException,
 				IOException {
-			// viewer.getTextWidget().setEditable(false);
-
 			final String command = getCommandLine();
+			ansiHelper.reset();
 			appendDelimeter();
 
-			processResult(handler.handleCommand(command));
+			Thread handlerThread = new Thread(new Runnable() {
 
+				public void run() {
+					try {
+						final String result = handler.handleCommand(command);
+
+						if (((ScriptConsole) handler).getState() != IScriptConsoleInterpreter.WAIT_USER_INPUT) {
+							((ScriptConsole) handler).getPage().getSite()
+									.getShell().getDisplay().asyncExec(
+											new Runnable() {
+
+												public void run() {
+													try {
+														disconnectListener();
+														processResult(result);
+														connectListener();
+													} catch (BadLocationException bxcn) {
+														bxcn.printStackTrace();
+													}
+												}
+
+											});
+						}
+					} catch (IOException ixcn) {
+						ixcn.printStackTrace();
+					}
+				}
+
+			}, Messages.ScriptConsoleViewer_scriptConsoleCommandHandler);
+			handlerThread.setDaemon(true);
+			handlerThread.setPriority(Thread.MIN_PRIORITY);
+			handlerThread.start();
+		}
+
+		protected void appendText(String text) throws BadLocationException {
+			doc.replace(doc.getLength(), 0, text);
+		}
+
+		protected void processText(int originalOffset, String content,
+				boolean isInput, boolean isError, final boolean shouldReveal,
+				final boolean shouldRedraw) throws BadLocationException {
+			if (originalOffset == -1) {
+				originalOffset = doc.getLength();
+			}
+
+			ansiHelper.processText(originalOffset, content, isInput, isError,
+					new IAnsiColorHandler() {
+
+						public void handleText(int start, String content,
+								boolean isInput, boolean isError)
+								throws BadLocationException {
+							appendText(content);
+							addToPartitioner(start, content, isInput, isError);
+						}
+
+						public void processingComplete(int start, int length) {
+							ScriptConsoleViewer viewer;
+							for (Iterator iter = viewerList.iterator(); iter
+									.hasNext();) {
+								viewer = (ScriptConsoleViewer) iter.next();
+								if (shouldReveal == true) {
+									viewer.setCaretPosition(doc.getLength());
+									viewer.revealEndOfDocument();
+								}
+
+								if (shouldRedraw == true) {
+									if (viewer.getTextWidget() != null) {
+										viewer.getTextWidget().redrawRange(
+												start, length, true);
+									}
+								}
+							}
+						}
+
+					});
 		}
 
 		protected void processResult(final String result)
 				throws BadLocationException {
 			if (result != null) {
-				int start = appendText(result);
-				ScriptConsoleViewer viewer;
-
-				for (Iterator iter = viewerList.iterator(); iter.hasNext();) {
-					viewer = (ScriptConsoleViewer) iter.next();
-					if (viewer.styleProvider != null) {
-						StyleRange[] styles = viewer.styleProvider
-								.createInterpreterOutputStyle(result, start);
-						if ((styles != null) && (styles.length > 0)) {
-							addToPartitioner(viewer, styles);
-						}
-					}
-				}
-
+				processText(-1, result, false, false, false, true);
 				history.commit();
-				offset = getLastLineLength();
 			}
+			offset = getLastLineLength();
 			appendInvitation();
 		}
 
 		private void addToPartitioner(ScriptConsoleViewer viewer,
-				StyleRange[] styles) {
+				StyleRange style) {
 			IDocumentPartitioner partitioner = viewer.getDocument()
 					.getDocumentPartitioner();
 			if (partitioner instanceof ScriptConsolePartitioner) {
 				ScriptConsolePartitioner scriptConsolePartitioner = (ScriptConsolePartitioner) partitioner;
-				scriptConsolePartitioner.addRanges(styles);
+				scriptConsolePartitioner.addRange(style);
 				viewer.getTextWidget().redraw();
 			}
 		}
 
-		protected void proccessAddition(int offset, String text) {
+		protected void addToPartitioner(int start, String content,
+				boolean isInput, boolean isError) {
+			// ssanders: Content has to be tokenized in order for style and
+			// hyperlinks to display correctly
+			StringTokenizer tokenizer = new StringTokenizer(content,
+					" \t\n\r\f@#=|,()[]{}<>'\"", true); //$NON-NLS-1$
+			String token;
+			int tokenStart = start;
+			ScriptConsoleViewer viewer;
+			while (tokenizer.hasMoreTokens() == true) {
+				token = tokenizer.nextToken();
+
+				for (Iterator iter = viewerList.iterator(); iter.hasNext();) {
+					viewer = (ScriptConsoleViewer) iter.next();
+					if (isInput == true) {
+						addToPartitioner(viewer, new StyleRange(tokenStart,
+								token.length(), AnsiColorHelper.COLOR_BLACK,
+								null, SWT.BOLD));
+					} else {
+						addToPartitioner(viewer, ansiHelper.resolveStyleRange(
+								tokenStart, token.length(), isError));
+					}
+				}
+
+				tokenStart += token.length();
+			}
+		}
+
+		protected void processAddition(int offset, String text) {
 			if (!bEnabled) {
 				return;
 			}
 			try {
-				String delim = getDelimeter();
+				String delim = TextUtilities.getDefaultLineDelimiter(doc);
 
 				text = doc.get(offset, doc.getLength() - offset);
 
@@ -167,30 +279,19 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 				int start = 0;
 				int index = -1;
+				String cmd;
 				while ((index = text.indexOf(delim, start)) != -1) {
-					String cmd = text.substring(start, index);
-					appendText(cmd);
-					ScriptConsoleViewer viewer;
-
-					for (Iterator iter = viewerList.iterator(); iter.hasNext();) {
-						viewer = (ScriptConsoleViewer) iter.next();
-						if (viewer.styleProvider != null) {
-							StyleRange[] styles = viewer.styleProvider
-									.createUserInputStyle(getCommandLine(),
-											getCommandLineOffset());
-							if ((styles != null) && (styles.length > 0)) {
-								addToPartitioner(viewer, styles);
-							}
-						}
-					}
+					cmd = text.substring(start, index);
+					processText(getCommandLineOffset(), cmd, true, false,
+							false, true);
 
 					history.update(getCommandLine());
 					start = index + delim.length();
 					handleCommandLine();
 				}
 
-				appendText(text.substring(start, text.length()));
-				history.update(getCommandLine());
+				processText(-1, text.substring(start, text.length()), true,
+						false, false, true);
 			} catch (BadLocationException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
@@ -202,43 +303,25 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 			}
 		}
 
-		public void documentChanged(DocumentEvent event) {
-			disconnectListener();
-			proccessAddition(event.getOffset(), event.getText());
-			connectListener();
-		}
+		public void documentChanged(final DocumentEvent event) {
+			ansiHelper.disableWhile(new Runnable() {
 
-		protected int appendText(String text) throws BadLocationException {
-			int offset = doc.getLength();
-			doc.replace(doc.getLength(), 0, text);
-			return offset;
+				public void run() {
+					disconnectListener();
+					processAddition(event.getOffset(), event.getText());
+					connectListener();
+				}
+
+			});
 		}
 
 		public void appendInvitation() throws BadLocationException {
-			int start = doc.getLength();
-			appendText(prompt.toString());
-			ScriptConsoleViewer viewer;
-
-			for (Iterator iter = viewerList.iterator(); iter.hasNext();) {
-				viewer = (ScriptConsoleViewer) iter.next();
-				viewer.setCaretPosition(doc.getLength());
-				viewer.revealEndOfDocument();
-				if (viewer.styleProvider != null) {
-					StyleRange[] styles = viewer.styleProvider
-							.createPromptStyle(prompt, start);
-					if ((styles != null) && (styles.length > 0)) {
-						addToPartitioner(viewer, styles);
-					}
-				}
-			}
+			processText(-1, prompt.toString(), true, false, true, true);
 		}
 
 		public void appendDelimeter() throws BadLocationException {
-			appendText(getDelimeter());
-		}
-
-		protected String getDelimeter() {
-			return TextUtilities.getDefaultLineDelimiter(doc);
+			processText(-1, TextUtilities.getDefaultLineDelimiter(doc), false,
+					false, false, true);
 		}
 
 		protected int getLastLineLength() throws BadLocationException {
@@ -247,7 +330,8 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 		}
 
 		public int getLastLineReadOnlySize() {
-			return prompt.toString().length() + offset;
+			return (((((ScriptConsole) handler).getState() == IScriptInterpreter.WAIT_USER_INPUT) ? 0
+					: prompt.toString().length()) + offset);
 		}
 
 		public int getCommandLineOffset() throws BadLocationException {
@@ -264,55 +348,57 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 			return doc.get(getCommandLineOffset(), getCommandLineLength());
 		}
 
-		public void setCommandLine(String command) throws BadLocationException {
-			doc
-					.replace(getCommandLineOffset(), getCommandLineLength(),
-							command);
+		public void setCommandLine(final String command) {
+			ansiHelper.disableWhile(new Runnable() {
+
+				public void run() {
+					try {
+						doc.replace(getCommandLineOffset(),
+								getCommandLineLength(), command);
+					} catch (BadLocationException bxcn) {
+						bxcn.printStackTrace();
+					}
+				}
+
+			});
 		}
+
 	}
 
 	private class ScriptCnosoleStyledText extends StyledText {
 
 		public ScriptCnosoleStyledText(Composite parent, int style) {
-			super(parent, style);
+			super(parent, (style | SWT.WRAP));
 		}
 
 		public void invokeAction(int action) {
 			if (isCaretOnLastLine()) {
-				try {
-					switch (action) {
-					case ST.LINE_UP:
-						history.prev();
-						console.getDocumentListener().setCommandLine(
-								history.get());
-						setCaretOffset(getDocument().getLength());
-						return;
+				switch (action) {
+				case ST.LINE_UP:
+					history.prev();
+					console.getDocumentListener().setCommandLine(history.get());
+					setCaretOffset(getDocument().getLength());
+					return;
 
-					case ST.LINE_DOWN:
-						history.next();
-						console.getDocumentListener().setCommandLine(
-								history.get());
-						setCaretOffset(getDocument().getLength());
-						return;
+				case ST.LINE_DOWN:
+					history.next();
+					console.getDocumentListener().setCommandLine(history.get());
+					setCaretOffset(getDocument().getLength());
+					return;
 
-					case ST.DELETE_PREVIOUS:
-						if (getCaretOffset() <= getCommandLineOffset()) {
-							return;
-						}
-						break;
-
-					case ST.DELETE_NEXT:
-						if (getCaretOffset() < getCommandLineOffset()) {
-							return;
-						}
-						break;
-
-					case ST.DELETE_WORD_PREVIOUS:
+				case ST.DELETE_PREVIOUS:
+					if (getCaretOffset() <= getCommandLineOffset()) {
 						return;
 					}
+					break;
 
-				} catch (BadLocationException e) {
-					e.printStackTrace();
+				case ST.DELETE_NEXT:
+					if (getCaretOffset() < getCommandLineOffset()) {
+						return;
+					}
+					break;
+
+				case ST.DELETE_WORD_PREVIOUS:
 					return;
 				}
 
@@ -328,18 +414,28 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 			}
 		}
 
+		public void superPaste() {
+			super.paste();
+		}
+
 		public void paste() {
 			if (isCaretOnLastLine()) {
-				super.paste();
+				console.getDocumentListener().ansiHelper
+						.disableWhile(new Runnable() {
+
+							public void run() {
+								superPaste();
+							}
+
+						});
 			}
 		}
+
 	}
 
 	private ScriptConsoleHistory history;
 
 	private ScriptConsole console;
-
-	private IConsoleStyleProvider styleProvider;
 
 	public int getCaretPosition() {
 		return getTextWidget().getCaretOffset();
@@ -356,11 +452,16 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 	}
 
 	public void setCaretPosition(final int offset) {
-		getTextWidget().getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				getTextWidget().setCaretOffset(offset);
-			}
-		});
+		if (getTextWidget() != null) {
+			getTextWidget().getDisplay().asyncExec(new Runnable() {
+
+				public void run() {
+					if (getTextWidget() != null) {
+						getTextWidget().setCaretOffset(offset);
+					}
+				}
+			});
+		}
 	}
 
 	public int beginLineOffset() throws BadLocationException {
@@ -386,12 +487,10 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 	}
 
 	public ScriptConsoleViewer(Composite parent, final ScriptConsole console,
-			final IScriptConsoleContentHandler contentHandler,
-			IConsoleStyleProvider styleProvider) {
+			final IScriptConsoleContentHandler contentHandler) {
 		super(parent, console);
 
 		this.console = console;
-		this.styleProvider = styleProvider;
 
 		this.history = console.getHistory();
 
@@ -399,7 +498,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 		final StyledText styledText = getTextWidget();
 
-		this.setEditable(false);
+		// styledText.setEditable(false);
 
 		// Correct keyboard actions
 		styledText.addFocusListener(new FocusListener() {
@@ -451,12 +550,18 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 									getDocument().getLength());
 							return;
 						}
-						if (event.keyCode == 9) {
+
+						// ssanders: Avoid outputting " " when invoking
+						// completion on Mac OS X
+						if (event.keyCode == 32
+								&& (event.stateMask & SWT.CTRL) > 0) {
 							event.doit = false;
 							return;
 						}
-						if (event.keyCode == 32
-								&& (event.stateMask & SWT.CTRL) > 0) {
+
+						// ssanders: Avoid outputting "<Tab>" when invoking
+						// completion on Mac OS X
+						if (event.keyCode == 9) {
 							event.doit = false;
 							return;
 						}
@@ -525,7 +630,17 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 		return canDoOperation;
 	}
 
-	public void setStyleProvider(IConsoleStyleProvider provider) {
-		this.styleProvider = provider;
+	public void activatePlugins() {
+		fHyperlinkManager = new HyperlinkManager(
+				HyperlinkManager.LONGEST_REGION_FIRST);
+		fHyperlinkManager.install(this, fHyperlinkPresenter,
+				fHyperlinkDetectors, fHyperlinkStateMask);
+
+		super.activatePlugins();
 	}
+
+	public void dispose() {
+		console.getDocumentListener().removeViewer(this);
+	}
+
 }

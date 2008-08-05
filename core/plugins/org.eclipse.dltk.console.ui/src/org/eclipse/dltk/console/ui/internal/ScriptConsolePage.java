@@ -11,7 +11,6 @@ package org.eclipse.dltk.console.ui.internal;
 
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.dltk.console.ScriptConsoleConstants;
-import org.eclipse.dltk.console.ui.IConsoleStyleProvider;
 import org.eclipse.dltk.console.ui.ScriptConsole;
 import org.eclipse.dltk.console.ui.internal.actions.CloseScriptConsoleAction;
 import org.eclipse.dltk.console.ui.internal.actions.SaveConsoleSessionAction;
@@ -54,8 +53,6 @@ public class ScriptConsolePage extends TextConsolePage implements
 
 	private TextViewerAction proposalsAction;
 	private IHandler proposalsHandler;
-
-	private IConsoleStyleProvider styleProvider;
 
 	protected void createActions() {
 		super.createActions();
@@ -100,7 +97,7 @@ public class ScriptConsolePage extends TextConsolePage implements
 
 	protected TextConsoleViewer createViewer(Composite parent) {
 		viewer = new ScriptConsoleViewer(parent, (ScriptConsole) getConsole(),
-				this, styleProvider);
+				this);
 		viewer.configure(cfg);
 		return viewer;
 	}
@@ -124,13 +121,10 @@ public class ScriptConsolePage extends TextConsolePage implements
 		viewer.insertText(text);
 	}
 
-	public void setStyleProviser(IConsoleStyleProvider provider) {
-		this.styleProvider = provider;
-	}
-
 	public void dispose() {
 		proposalsHandler.dispose();
 
 		super.dispose();
 	}
+
 }
