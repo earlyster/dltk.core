@@ -75,6 +75,7 @@ public class TodoTaskAstParser extends TodoTaskSimpleParser {
 		if (taskReporter == null) {
 			return;
 		}
+		rangeCount = 0;
 		final ASTVisitor visitor = new ASTVisitor() {
 
 			public boolean visitGeneral(ASTNode node) throws Exception {
