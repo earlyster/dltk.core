@@ -14,7 +14,6 @@ package org.eclipse.dltk.ui.infoviews;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.text.ScriptWordFinder;
 import org.eclipse.dltk.internal.ui.util.SelectionUtil;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -30,7 +29,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -47,6 +45,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
@@ -54,6 +53,7 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 /**
@@ -400,7 +400,7 @@ public abstract class AbstractInfoView extends ViewPart implements
 		try {
 			if (isValidWorkbenchPart(part)
 					&& selection instanceof ITextSelection) {
-				final ScriptEditor editor = (ScriptEditor) part;
+				final IEditorPart editor = (IEditorPart) part;
 				IModelElement[] elements = TextSelectionConverter.codeResolve(
 						editor, (ITextSelection) selection);
 				if (elements != null && elements.length > 0) {
@@ -418,14 +418,14 @@ public abstract class AbstractInfoView extends ViewPart implements
 	}
 
 	/**
-	 * Checks that specified {@link IWorkbenchPart} is an {@link ScriptEditor}
+	 * Checks that specified {@link IWorkbenchPart} is an {@link ITextEditor}
 	 * and is suitable to retrieve selected {@link IModelElement}s
 	 * 
 	 * @param part
 	 * @return
 	 */
 	protected boolean isValidWorkbenchPart(IWorkbenchPart part) {
-		return part instanceof ScriptEditor;
+		return part instanceof IEditorPart;
 	}
 
 	/**
@@ -493,15 +493,22 @@ public abstract class AbstractInfoView extends ViewPart implements
 				if (je != null) {
 					tmp = je;
 				} else {
-					if (part instanceof ScriptEditor
+					if (part instanceof ITextEditor
 							&& selection instanceof ITextSelection) {
-						IDocument doc = ((ScriptEditor) part).getViewer()
-								.getDocument();
-						IRegion reg = ScriptWordFinder.findWord(doc,
+						IRegion reg = ScriptWordFinder.findWord(
+								((ITextEditor) part).getDocumentProvider()
+										.getDocument(
+												((ITextEditor) part)
+														.getEditorInput()),
 								((ITextSelection) selection).getOffset());
 						if (reg != null) {
 							try {
-								tmp = doc.get(reg.getOffset(), reg.getLength());
+								tmp = ((ITextEditor) part)
+										.getDocumentProvider().getDocument(
+												((ITextEditor) part)
+														.getEditorInput()).get(
+												reg.getOffset(),
+												reg.getLength());
 							} catch (BadLocationException e) {
 								tmp = null;
 							}
