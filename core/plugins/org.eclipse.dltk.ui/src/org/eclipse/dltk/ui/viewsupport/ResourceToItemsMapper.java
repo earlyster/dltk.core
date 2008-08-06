@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Stack;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.swt.widgets.Item;
@@ -151,7 +152,21 @@ public class ResourceToItemsMapper {
 	public boolean isEmpty() {
 		return fResourceToItem.isEmpty();
 	}	
-	
+
+	private static IResource getCorrespondingResource(IModelElement elem) {
+		IResource res = elem.getResource();
+		if (res == null) {
+			ISourceModule cu = (ISourceModule) elem
+					.getAncestor(IModelElement.SOURCE_MODULE);
+			if (cu != null) {
+				// elements in compilation units are mapped to the underlying
+				// resource of the original cu
+				res = cu.getResource();
+			}
+		}
+		return res;
+	}
+
 	/**
 	 * Method that decides which elements can have error markers
 	 * Returns null if an element can not have error markers.
@@ -160,18 +175,20 @@ public class ResourceToItemsMapper {
 	 */	
 	private static IResource getCorrespondingResource(Object element) {
 		if (element instanceof IModelElement) {
-			IModelElement elem= (IModelElement) element;
-			IResource res= elem.getResource();
-			if (res == null) {
-				ISourceModule cu= (ISourceModule) elem.getAncestor(IModelElement.SOURCE_MODULE);
-				if (cu != null) {
-					// elements in compilation units are mapped to the underlying resource of the original cu
-					res= cu.getResource();
-				}
-			}
-			return res; 
+			return getCorrespondingResource((IModelElement) element);
 		} else if (element instanceof IResource) {
 			return (IResource) element;
+		} else if (element instanceof IAdaptable) {
+			IResource res;
+			IModelElement elem = (IModelElement) ((IAdaptable) element)
+					.getAdapter(IModelElement.class);
+			if (elem != null) {
+				return getCorrespondingResource(elem);
+			} else {
+				res = ((IResource) ((IAdaptable) element)
+						.getAdapter(IResource.class));
+			}
+			return res;
 		}
 		return null;
 	}
