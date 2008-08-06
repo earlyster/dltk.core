@@ -25,10 +25,6 @@
        point="org.eclipse.core.runtime.preferences">
     <initializer class="org.eclipse.dltk.internal.ui.DLTKUIPreferenceInitializer"/>
  </extension>
-   <extension
-         point="org.eclipse.core.runtime.preferences">
-      <initializer class="org.eclipse.dltk.internal.ui.preferences.PreferenceInitializer"/>      
-   </extension>
    <!--extension
          point="org.eclipse.ui.propertyPages">
       <page name="%buildPathPrefName"
