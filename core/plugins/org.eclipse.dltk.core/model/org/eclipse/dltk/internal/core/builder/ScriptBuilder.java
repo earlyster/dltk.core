@@ -269,10 +269,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				return;
 			}
 
-			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-					.getLanguageToolkit(scriptProject);
-			IScriptBuilder[] builders = ScriptBuilderManager
-					.getScriptBuilders(toolkit.getNatureId());
+			IScriptBuilder[] builders = getScriptBuilders();
 
 			initializeBuilders(builders);
 			if (builders != null) {
@@ -408,12 +405,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (totalFiles == 0)
 				totalFiles = 1;
 
-			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-					.getLanguageToolkit(scriptProject);
-			if (toolkit != null) {
-				builders = ScriptBuilderManager.getScriptBuilders(toolkit
-						.getNatureId());
-			}
+			builders = getScriptBuilders();
 
 			initializeBuilders(builders);
 
@@ -579,12 +571,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (totalFiles == 0)
 				totalFiles = 1;
 
-			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-					.getLanguageToolkit(scriptProject);
-			if (toolkit != null) {
-				builders = ScriptBuilderManager.getScriptBuilders(toolkit
-						.getNatureId());
-			}
+			builders = getScriptBuilders();
 
 			initializeBuilders(builders);
 
@@ -627,6 +614,17 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			monitor.done();
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
 					this.lastState);
+		}
+	}
+
+	private IScriptBuilder[] getScriptBuilders() throws CoreException {
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(scriptProject);
+		if (toolkit != null) {
+			return ScriptBuilderManager
+					.getScriptBuilders(toolkit.getNatureId());
+		} else {
+			return null;
 		}
 	}
 
@@ -713,10 +711,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			IProgressMonitor monitor, int ticks, int buildType,
 			Set externalFoldersBefore, Set externalFolders)
 			throws CoreException {
-		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-				.getLanguageToolkit(scriptProject);
-		IScriptBuilder[] builders = ScriptBuilderManager
-				.getScriptBuilders(toolkit.getNatureId());
+		IScriptBuilder[] builders = getScriptBuilders();
 
 		// TODO: replace this stuff with multistatus
 		if (builders != null) {
