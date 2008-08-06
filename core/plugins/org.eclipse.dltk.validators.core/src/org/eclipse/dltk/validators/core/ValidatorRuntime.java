@@ -374,7 +374,8 @@ public final class ValidatorRuntime {
 				for (int j = 0; j < validators.length; ++j) {
 					final IValidator validator = validators[j];
 					if (predicate.evaluate(validator)
-							&& validator.isValidatorValid(project)) {
+							&& validator.isValidatorValid(project)
+							&& validator.isAutomatic()) {
 						final IBuildParticipant participant = (IBuildParticipant) validator
 								.getValidator(project, IBuildParticipant.class);
 						if (participant != null) {

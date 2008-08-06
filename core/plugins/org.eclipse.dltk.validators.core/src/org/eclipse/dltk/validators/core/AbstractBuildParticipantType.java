@@ -45,7 +45,7 @@ public abstract class AbstractBuildParticipantType extends
 	}
 
 	public boolean isConfigurable() {
-		return false;
+		return true;
 	}
 
 	public boolean supports(Class validatorType) {

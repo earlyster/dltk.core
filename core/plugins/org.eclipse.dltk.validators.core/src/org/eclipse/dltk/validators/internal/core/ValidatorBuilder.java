@@ -25,7 +25,6 @@ import org.eclipse.dltk.ast.declarations.FakeModuleDeclaration;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.compiler.problem.ProblemSeverities;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
@@ -41,7 +40,6 @@ import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.osgi.util.NLS;
 
 public class ValidatorBuilder implements IScriptBuilder {
-
 	private static final boolean DEBUG = false;
 
 	private static final int WORK_BUILD = 100;
@@ -129,7 +127,7 @@ public class ValidatorBuilder implements IScriptBuilder {
 				final BuildProblemReporter reporter = new BuildProblemReporter(
 						resource);
 				buildModule(module, validators, reporter);
-				reporter.flush();
+				//reporter.flush();
 				if (reporters != null) {
 					reporters.add(reporter);
 				}
@@ -185,8 +183,9 @@ public class ValidatorBuilder implements IScriptBuilder {
 		for (Iterator i = elements.iterator(); i.hasNext();) {
 			final IModelElement element = (IModelElement) i.next();
 			if (element.getElementType() == IModelElement.SOURCE_MODULE) {
-				final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-						.getLanguageToolkit(element);
+				final IDLTKLanguageToolkit toolkit = element.getScriptProject()
+						.getLanguageToolkit();
+				;
 				if (toolkit != null) {
 					List natureModules = (List) result.get(toolkit
 							.getNatureId());
@@ -218,7 +217,6 @@ public class ValidatorBuilder implements IScriptBuilder {
 
 	public Set getDependencies(IScriptProject project, Set resources,
 			Set allResources, Set oldExternalFolders, Set externalFolders) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
