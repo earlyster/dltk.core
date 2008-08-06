@@ -127,9 +127,10 @@ public class ValidatorBuilder implements IScriptBuilder {
 				final BuildProblemReporter reporter = new BuildProblemReporter(
 						resource);
 				buildModule(module, validators, reporter);
-				//reporter.flush();
 				if (reporters != null) {
 					reporters.add(reporter);
+				} else {
+					reporter.flush();
 				}
 			}
 			monitor.worked(1);
@@ -207,10 +208,10 @@ public class ValidatorBuilder implements IScriptBuilder {
 	}
 
 	public void clean(IScriptProject project, IProgressMonitor monitor) {
-		ValidatorRuntime.cleanAll(project, new ISourceModule[] {}, new IResource[] { project
-				.getProject() }, monitor);
+		ValidatorRuntime.cleanAll(project, new ISourceModule[0],
+				new IResource[] { project.getProject() }, monitor);
 	}
-		
+
 	public int estimateElementsToBuild(IScriptProject project, List elements) {
 		return elements.size();
 	}
