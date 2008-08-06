@@ -274,11 +274,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			IScriptBuilder[] builders = ScriptBuilderManager
 					.getScriptBuilders(toolkit.getNatureId());
 
+			initializeBuilders(builders);
 			if (builders != null) {
-				for (int k = 0; k < builders.length; k++) {
-					builders[k].initialize(scriptProject);
-				}
-
 				for (int k = 0; k < builders.length; k++) {
 					IProgressMonitor sub = new SubProgressMonitor(monitor, 1);
 					builders[k].clean(scriptProject, sub);
@@ -287,11 +284,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 						break;
 					}
 				}
-
-				for (int k = 0; k < builders.length; k++) {
-					builders[k].reset(scriptProject);
-				}
 			}
+			resetBuilders(builders);
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
@@ -421,11 +415,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 						.getNatureId());
 			}
 
-			if (builders != null) {
-				for (int k = 0; k < builders.length; k++) {
-					builders[k].initialize(scriptProject);
-				}
-			}
+			initializeBuilders(builders);
 
 			List realResources = new ArrayList();
 
@@ -464,15 +454,27 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				e.printStackTrace();
 			}
 		} finally {
-			if (builders != null) {
-				for (int k = 0; k < builders.length; k++) {
-					builders[k].reset(scriptProject);
-				}
-			}
+			resetBuilders(builders);
 
 			monitor.done();
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
 					this.lastState);
+		}
+	}
+
+	private void initializeBuilders(IScriptBuilder[] builders) {
+		if (builders != null) {
+			for (int k = 0; k < builders.length; k++) {
+				builders[k].initialize(scriptProject);
+			}
+		}
+	}
+
+	private void resetBuilders(IScriptBuilder[] builders) {
+		if (builders != null) {
+			for (int k = 0; k < builders.length; k++) {
+				builders[k].reset(scriptProject);
+			}
 		}
 	}
 
@@ -584,11 +586,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 						.getNatureId());
 			}
 
-			if (builders != null) {
-				for (int k = 0; k < builders.length; k++) {
-					builders[k].initialize(scriptProject);
-				}
-			}
+			initializeBuilders(builders);
 
 			List realResources = new ArrayList();
 
@@ -624,11 +622,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 			lastBuildResources = resources.size() + elements.size();
 		} finally {
-			if (builders != null) {
-				for (int k = 0; k < builders.length; k++) {
-					builders[k].reset(scriptProject);
-				}
-			}
+			resetBuilders(builders);
 
 			monitor.done();
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
