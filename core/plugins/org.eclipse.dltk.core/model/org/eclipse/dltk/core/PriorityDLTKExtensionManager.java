@@ -181,6 +181,9 @@ public class PriorityDLTKExtensionManager {
 
 	public String findScriptNature(IProject project) {
 		try {
+			if (project.isAccessible()) {
+				return null;
+			}
 			String[] natureIds = project.getDescription().getNatureIds();
 			for (int i = 0; i < natureIds.length; i++) {
 				String natureId = natureIds[i];
