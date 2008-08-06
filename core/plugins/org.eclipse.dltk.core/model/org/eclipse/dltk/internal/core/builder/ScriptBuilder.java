@@ -271,7 +271,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 			IScriptBuilder[] builders = getScriptBuilders();
 
-			initializeBuilders(builders);
 			if (builders != null) {
 				for (int k = 0; k < builders.length; k++) {
 					IProgressMonitor sub = new SubProgressMonitor(monitor, 1);
@@ -407,8 +406,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 			builders = getScriptBuilders();
 
-			initializeBuilders(builders);
-
 			List realResources = new ArrayList();
 
 			List relements = locateSourceModule(resources, monitor,
@@ -451,14 +448,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			monitor.done();
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
 					this.lastState);
-		}
-	}
-
-	private void initializeBuilders(IScriptBuilder[] builders) {
-		if (builders != null) {
-			for (int k = 0; k < builders.length; k++) {
-				builders[k].initialize(scriptProject);
-			}
 		}
 	}
 
@@ -573,8 +562,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 			builders = getScriptBuilders();
 
-			initializeBuilders(builders);
-
 			List realResources = new ArrayList();
 
 			List relements = locateSourceModule(resources, monitor,
@@ -617,12 +604,26 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
+	/**
+	 * Return script builders for the current project. ScriptBuilders are
+	 * initialized here so this method should be called only once during build
+	 * operation.
+	 * 
+	 * @return
+	 * @throws CoreException
+	 */
 	private IScriptBuilder[] getScriptBuilders() throws CoreException {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(scriptProject);
 		if (toolkit != null) {
-			return ScriptBuilderManager
+			IScriptBuilder[] builders = ScriptBuilderManager
 					.getScriptBuilders(toolkit.getNatureId());
+			if (builders != null) {
+				for (int k = 0; k < builders.length; k++) {
+					builders[k].initialize(scriptProject);
+				}
+			}
+			return builders;
 		} else {
 			return null;
 		}
