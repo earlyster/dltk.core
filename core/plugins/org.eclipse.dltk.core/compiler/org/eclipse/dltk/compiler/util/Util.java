@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.util;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class Util {
 	 * the stream.
 	 * 
 	 * @throws IOException
-	 * 		if a problem occured reading the stream.
+	 *             if a problem occured reading the stream.
 	 */
 	public static byte[] getInputStreamAsByteArray(InputStream stream,
 			int length) throws IOException {
@@ -90,7 +91,7 @@ public class Util {
 	 * /** Returns the contents of the given file as a byte array.
 	 * 
 	 * @throws IOException
-	 * 		if a problem occured reading the file.
+	 *             if a problem occured reading the file.
 	 */
 	public static byte[] getFileByteContent(File file) throws IOException {
 		InputStream stream = null;
@@ -118,11 +119,13 @@ public class Util {
 		InputStreamReader reader = null;
 		try {
 			try {
-				reader = encoding == null ? new InputStreamReader(stream)
+				reader = encoding == null ? new InputStreamReader(
+						new BufferedInputStream(stream, 4096))
 						: new InputStreamReader(stream, encoding);
 			} catch (UnsupportedEncodingException e) {
 				// encoding is not supported
-				reader = new InputStreamReader(stream);
+				reader = new InputStreamReader(new BufferedInputStream(stream,
+						4096));
 			}
 			char[] contents;
 			int totalRead = 0;
@@ -234,7 +237,7 @@ public class Util {
 						// slash
 						// ->
 						// adds
-						//' **'
+						// ' **'
 						// for
 						// free
 						// (see
@@ -272,7 +275,7 @@ public class Util {
 	 * null, then the platform default one is used
 	 * 
 	 * @throws IOException
-	 * 		if a problem occured reading the file.
+	 *             if a problem occured reading the file.
 	 */
 	public static char[] getFileCharContent(File file, String encoding)
 			throws IOException {

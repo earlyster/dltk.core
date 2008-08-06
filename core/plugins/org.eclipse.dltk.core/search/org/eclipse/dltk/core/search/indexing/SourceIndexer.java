@@ -24,7 +24,8 @@ import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 /**
- * A SourceIndexer indexes script files using a script parser. The following items are indexed:
+ * A SourceIndexer indexes script files using a script parser. The following
+ * items are indexed:
  * <ul>
  * <li>Declarations of:
  * <ul>
@@ -104,7 +105,8 @@ public class SourceIndexer extends AbstractIndexer {
 		} else { // This is for external documents
 			if (parser == null || requestor == null) {
 				// parser =
-				// ModelManager.getModelManager().indexManager.getSourceElementParser(scriptProject,
+				// ModelManager.getModelManager().indexManager.
+				// getSourceElementParser(scriptProject,
 				// requestor);
 				if (DLTKCore.DEBUG) {
 					System.err
