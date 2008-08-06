@@ -429,7 +429,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			try {
 				buildElements(els, elements, monitor, WORK_BUILD
 						- resourceTicks, IScriptBuilder.FULL_BUILD,
-						new HashSet(), externalFolders);
+						new HashSet(), externalFolders, builders);
 				lastBuildSourceFiles += elements.size();
 			} catch (CoreException e) {
 				DLTKCore.error(Messages.ScriptBuilder_errorBuildElements, e);
@@ -596,7 +596,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			try {
 				buildElements(els, elements, monitor, WORK_BUILD
 						- resourceTicks, IScriptBuilder.INCREMENTAL_BUILD,
-						externalFoldersBefore, externalFolders);
+						externalFoldersBefore, externalFolders, builders);
 			} catch (CoreException e) {
 				DLTKCore.error(Messages.ScriptBuilder_errorBuildElements, e);
 			}
@@ -709,9 +709,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 	protected void buildElements(List elements, Set allElements,
 			IProgressMonitor monitor, int ticks, int buildType,
-			Set externalFoldersBefore, Set externalFolders)
-			throws CoreException {
-		IScriptBuilder[] builders = getScriptBuilders();
+			Set externalFoldersBefore, Set externalFolders,
+			IScriptBuilder[] builders) throws CoreException {
 
 		// TODO: replace this stuff with multistatus
 		if (builders != null) {
