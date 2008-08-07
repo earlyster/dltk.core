@@ -67,7 +67,7 @@ public class OpenAction extends SelectionDispatchAction {
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param site
-	 * 		the site providing context information for this action
+	 *            the site providing context information for this action
 	 */
 	public OpenAction(IWorkbenchSite site) {
 		super(site);
@@ -87,7 +87,7 @@ public class OpenAction extends SelectionDispatchAction {
 	 * this constructor.
 	 * 
 	 * @param editor
-	 * 		the Script editor
+	 *            the Script editor
 	 */
 	public OpenAction(IEditorPart editor) {
 		this(editor.getEditorSite());
@@ -131,6 +131,19 @@ public class OpenAction extends SelectionDispatchAction {
 		return true;
 	}
 
+	/**
+	 * This method allows alternative editor implementations to override the
+	 * resolution logic.
+	 * 
+	 * @return
+	 * @throws InvocationTargetException
+	 * @throws InterruptedException
+	 */
+	protected IModelElement[] resolveModelElements()
+			throws InvocationTargetException, InterruptedException {
+		return SelectionConverter.codeResolveForked(fEditor, false);
+	}
+
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction.
 	 */
@@ -139,7 +152,7 @@ public class OpenAction extends SelectionDispatchAction {
 			return;
 		final IModelElement[] elements;
 		try {
-			elements = SelectionConverter.codeResolveForked(fEditor, false);
+			elements = resolveModelElements();
 		} catch (InvocationTargetException e) {
 			showError(e);
 			return;
@@ -221,7 +234,7 @@ public class OpenAction extends SelectionDispatchAction {
 	 * method.
 	 * 
 	 * @param elements
-	 * 		the elements to process
+	 *            the elements to process
 	 */
 	public void run(Object[] elements) {
 		if (elements == null)
@@ -275,17 +288,17 @@ public class OpenAction extends SelectionDispatchAction {
 	 * method.
 	 * 
 	 * @param object
-	 * 		the element to open
+	 *            the element to open
 	 * @return the real element to open
 	 * @throws ModelException
-	 * 		if an error occurs while accessing the Script model
+	 *             if an error occurs while accessing the Script model
 	 */
 	public Object getElementToOpen(Object object) throws ModelException {
 		Object target = null;
 
 		if (((object instanceof ISourceReference) != true)
-				&& ((object instanceof ISourceReference) != true)
-				&& ((object instanceof ISourceReference) != true)
+				&& ((object instanceof IModelElement) != true)
+				&& ((object instanceof IFile) != true)
 				&& (object instanceof IAdaptable)) {
 			IAdaptable adaptable = (IAdaptable) object;
 
