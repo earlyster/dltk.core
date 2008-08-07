@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
@@ -41,9 +42,8 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	}
 
 	/*
-	 * @see
-	 * org.eclipse.dltk.internal.core.AbstractSourceModule#equals(java.lang.
-	 * Object)
+	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#equals(java.lang.
+	 *      Object)
 	 */
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ExternalSourceModule)) {
@@ -90,8 +90,7 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	}
 
 	/*
-	 * @see
-	 * org.eclipse.dltk.internal.core.AbstractSourceModule#getBufferContent()
+	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getBufferContent()
 	 */
 	protected char[] getBufferContent() throws ModelException {
 		IFileHandle file = EnvironmentPathUtils.getFile(getPath());
@@ -144,9 +143,7 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	}
 
 	/*
-	 * @see
-	 * org.eclipse.dltk.internal.core.AbstractExternalSourceModule#getModuleType
-	 * ()
+	 * @see org.eclipse.dltk.internal.core.AbstractExternalSourceModule#getModuleType ()
 	 */
 	protected String getModuleType() {
 		return "DLTK External Source Moule: "; //$NON-NLS-1$
@@ -157,13 +154,12 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	 */
 	protected String getNatureId() throws CoreException {
 		IPath path = getFullPath();
-		return lookupLanguageToolkit(path).getNatureId();
+		IDLTKLanguageToolkit toolkit = lookupLanguageToolkit(path);
+		return (toolkit != null) ? toolkit.getNatureId() : null;
 	}
 
 	/*
-	 * @see
-	 * org.eclipse.dltk.internal.core.AbstractSourceModule#getOriginalSourceModule
-	 * ()
+	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getOriginalSourceModule ()
 	 */
 	protected ISourceModule getOriginalSourceModule() {
 		return new ExternalSourceModule((ScriptFolder) getParent(),
