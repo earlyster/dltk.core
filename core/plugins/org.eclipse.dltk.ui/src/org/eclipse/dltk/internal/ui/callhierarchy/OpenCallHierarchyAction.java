@@ -124,6 +124,18 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
         }
     }
     
+	/**
+	 * This allows alternative editor implementations to override resolution
+	 * 
+	 * @return
+	 * @throws InvocationTargetException
+	 * @throws InterruptedException
+	 */
+	protected IModelElement[] resolveModelElements()
+			throws InvocationTargetException, InterruptedException {
+		return SelectionConverter.codeResolveOrInputForked(fEditor);
+	}
+
     /* (non-Javadoc)
      * Method declared on SelectionDispatchAction.
      */
@@ -133,7 +145,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
             return;     
         
         try {
-			IModelElement[] elements= SelectionConverter.codeResolveOrInputForked(fEditor);
+			IModelElement[] elements = resolveModelElements();
 			if (elements == null)
 			    return;
 			List candidates= new ArrayList(elements.length);
