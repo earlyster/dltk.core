@@ -115,7 +115,8 @@ public class SelectionConverter {
 
 	/**
 	 * @param primaryOnly
-	 * 		if <code>true</code> only primary working copies will be returned
+	 *            if <code>true</code> only primary working copies will be
+	 *            returned
 	 * 
 	 */
 	public static IModelElement[] codeResolve(IEditorPart editor,
@@ -129,7 +130,8 @@ public class SelectionConverter {
 	 * Perform a code resolve in a separate thread.
 	 * 
 	 * @param primaryOnly
-	 * 		if <code>true</code> only primary working copies will be returned
+	 *            if <code>true</code> only primary working copies will be
+	 *            returned
 	 * @throws InterruptedException
 	 * @throws InvocationTargetException
 	 * 
@@ -149,7 +151,8 @@ public class SelectionConverter {
 
 	/**
 	 * @param primaryOnly
-	 * 		if <code>true</code> only primary working copies will be returned
+	 *            if <code>true</code> only primary working copies will be
+	 *            returned
 	 * 
 	 */
 	private static IModelElement getElementAtOffset(IEditorPart editor,
@@ -165,7 +168,8 @@ public class SelectionConverter {
 
 	/**
 	 * @param primaryOnly
-	 * 		if <code>true</code> only primary working copies will be returned
+	 *            if <code>true</code> only primary working copies will be
+	 *            returned
 	 * 
 	 */
 	private static IModelElement getInput(IEditorPart editor,
@@ -223,6 +227,8 @@ public class SelectionConverter {
 	public static IModelElement getElementAtOffset(IModelElement input,
 			ITextSelection selection) throws ModelException {
 		if (input instanceof ISourceModule) {
+			if (!((ISourceModule) input).exists())
+				return null;
 			ISourceModule cunit = (ISourceModule) input;
 			ScriptModelUtil.reconcile(cunit);
 			IModelElement ref = cunit.getElementAt(selection.getOffset());
