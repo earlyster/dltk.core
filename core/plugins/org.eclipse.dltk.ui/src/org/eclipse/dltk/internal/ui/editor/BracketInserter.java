@@ -28,19 +28,20 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.VerifyEvent;
 
-public abstract class BracketInserter implements VerifyKeyListener, ILinkedModeListener {
+public abstract class BracketInserter implements VerifyKeyListener,
+		ILinkedModeListener {
 
 	protected final ScriptEditor editor;
 	protected boolean fCloseBrackets = true;
 	protected boolean fCloseStrings = true;
 	protected boolean fCloseAngularBrackets = true;
-	protected final String CATEGORY ;
+	protected final String CATEGORY;
 	protected IPositionUpdater fUpdater;
 	protected Stack fBracketLevelStack = new Stack();
 
 	protected BracketInserter(ScriptEditor editor) {
 		this.editor = editor;
-		CATEGORY= this.editor.toString();
+		CATEGORY = this.editor.toString();
 		fUpdater = new ScriptEditor.ExclusivePositionUpdater(CATEGORY);
 	}
 
@@ -59,48 +60,55 @@ public abstract class BracketInserter implements VerifyKeyListener, ILinkedModeL
 	protected boolean isAngularIntroducer(String identifier) {
 		return false;
 	}
-	
+
 	protected static char getEscapeCharacter(char character) {
 		switch (character) {
-			case '"':
-			case '\'':
-				return '\\';
-			default:
-				return 0;
+		case '"':
+		case '\'':
+			return '\\';
+		default:
+			return 0;
 		}
 	}
+
 	protected static char getPeerCharacter(char character) {
 		switch (character) {
-			case '(':
-				return ')';
+		case '(':
+			return ')';
 
-			case ')':
-				return '(';
+		case ')':
+			return '(';
 
-			case '<':
-				return '>';
+		case '<':
+			return '>';
 
-			case '>':
-				return '<';
+		case '>':
+			return '<';
 
-			case '[':
-				return ']';
+		case '[':
+			return ']';
 
-			case ']':
-				return '[';
+		case ']':
+			return '[';
 
-			case '"':
-				return character;
+		case '{':
+			return '}';
 
-			case '\'':
-				return character;
+		case '}':
+			return '{';
 
-			default:
-				throw new IllegalArgumentException();
+		case '"':
+			return character;
+
+		case '\'':
+			return character;
+
+		default:
+			throw new IllegalArgumentException();
 		}
 	}
 
-	public abstract void verifyKey(VerifyEvent event) ;
+	public abstract void verifyKey(VerifyEvent event);
 
 	public void left(LinkedModeModel environment, int flags) {
 
@@ -111,8 +119,7 @@ public abstract class BracketInserter implements VerifyKeyListener, ILinkedModeL
 		}
 
 		// remove brackets
-		final ISourceViewer sourceViewer = this.editor
-				.getScriptSourceViewer();
+		final ISourceViewer sourceViewer = this.editor.getScriptSourceViewer();
 		final IDocument document = sourceViewer.getDocument();
 		if (document instanceof IDocumentExtension) {
 			IDocumentExtension extension = (IDocumentExtension) document;
