@@ -104,7 +104,7 @@ public class InterpreterContainerInitializer extends
 	 * @return the Interpreter name from the given container ID path
 	 */
 	public static String getInterpreterName(IPath path) {
-		return path.segment(2);
+		return path.segment(2).replaceAll("%2F", "/"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
