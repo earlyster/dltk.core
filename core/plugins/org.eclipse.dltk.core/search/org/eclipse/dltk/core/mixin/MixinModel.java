@@ -108,7 +108,7 @@ public class MixinModel {
 		synchronized (this.cache) {
 			this.cache.remove(element);
 			cache.resetSpaceLimit(ModelCache.DEFAULT_ROOT_SIZE, element);
-			this.cache.removeKey(element);
+			this.cache.removeKey(element.key);
 		}
 		return null;
 	}
@@ -154,6 +154,7 @@ public class MixinModel {
 					markElementAsFinal(element);
 					result.add(element);
 					existKeysCache.add(key);
+					notExistKeysCache.remove(key);
 				}
 			}
 		}
@@ -326,6 +327,10 @@ public class MixinModel {
 			if (delta.getKind() == IModelElementDelta.CHANGED
 					&& ((delta.getFlags() & IModelElementDelta.F_REMOVED_FROM_BUILDPATH) != 0)) {
 				MixinModel.this.cache.flush();
+				MixinModel.this.elementToMixinCache.clear();
+				MixinModel.this.existKeysCache.clear();
+				MixinModel.this.notExistKeysCache.clear();
+				MixinModel.this.modulesToReparse.clear();
 			}
 
 			if (delta.getKind() == IModelElementDelta.CHANGED
@@ -426,6 +431,7 @@ public class MixinModel {
 					// Remove from cache
 					cache.remove(mixin);
 					cache.resetSpaceLimit(ModelCache.DEFAULT_ROOT_SIZE, mixin);
+					cache.removeKey(mixin.key);
 				}
 			}
 			this.elementToMixinCache.remove(element);
@@ -455,6 +461,8 @@ public class MixinModel {
 		private Set children = new HashSet();
 
 		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
 			if (obj instanceof MixinElement) {
 				return this.key.equals(((MixinElement) obj).key);
 			}
@@ -629,6 +637,7 @@ public class MixinModel {
 				if (parent != null) {
 					existKeysCache.remove(parent.key);
 					notExistKeysCache.remove(parent.key);
+					removes++;
 					parent.children.remove(element);
 					parent.bFinal = false;
 					element = parent;
@@ -653,6 +662,7 @@ public class MixinModel {
 			// System.out.println("Append mixin:" + info.key);
 			// }
 			existKeysCache.add(info.key);
+			notExistKeysCache.remove(info.key);
 			String[] list = info.key.split("\\" //$NON-NLS-1$
 					+ IMixinRequestor.MIXIN_NAME_SEPARATOR);
 			MixinElement element = getCreateEmpty(info.key);
