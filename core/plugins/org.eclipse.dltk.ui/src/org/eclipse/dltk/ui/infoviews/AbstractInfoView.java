@@ -29,6 +29,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -495,20 +496,15 @@ public abstract class AbstractInfoView extends ViewPart implements
 				} else {
 					if (part instanceof ITextEditor
 							&& selection instanceof ITextSelection) {
-						IRegion reg = ScriptWordFinder.findWord(
-								((ITextEditor) part).getDocumentProvider()
-										.getDocument(
-												((ITextEditor) part)
-														.getEditorInput()),
+						ITextEditor edit = (ITextEditor) part;
+						IDocument document = edit.getDocumentProvider()
+								.getDocument(edit.getEditorInput());
+						IRegion reg = ScriptWordFinder.findWord(document,
 								((ITextSelection) selection).getOffset());
 						if (reg != null) {
 							try {
-								tmp = ((ITextEditor) part)
-										.getDocumentProvider().getDocument(
-												((ITextEditor) part)
-														.getEditorInput()).get(
-												reg.getOffset(),
-												reg.getLength());
+								tmp = document.get(reg.getOffset(), reg
+										.getLength());
 							} catch (BadLocationException e) {
 								tmp = null;
 							}
