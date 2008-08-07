@@ -13,6 +13,7 @@ import java.io.InputStream;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.WorkingCopyOwner;
@@ -105,7 +106,8 @@ public class BuiltinSourceModule extends AbstractExternalSourceModule implements
 	 */
 	protected String getNatureId() throws CoreException {
 		IScriptProject project = getScriptProject();
-		return lookupLanguageToolkit(project).getNatureId();
+		IDLTKLanguageToolkit toolkit = lookupLanguageToolkit(project);
+		return toolkit != null ? toolkit.getNatureId() : null;
 	}
 
 	/*
