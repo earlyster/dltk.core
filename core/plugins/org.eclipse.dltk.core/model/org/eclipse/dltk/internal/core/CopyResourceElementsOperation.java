@@ -22,7 +22,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKCore;
@@ -107,9 +106,9 @@ public class CopyResourceElementsOperation extends MultiOperation {
 	// }
 	/**
 	 * Returns the children of <code>source</code> which are affected by this
-	 * operation. If <code>source</code> is a <code>K_SOURCE</code>, these
-	 * are the <code>.java</code> files, if it is a <code>K_BINARY</code>,
-	 * they are the <code>.class</code> files.
+	 * operation. If <code>source</code> is a <code>K_SOURCE</code>, these are
+	 * the <code>.java</code> files, if it is a <code>K_BINARY</code>, they are
+	 * the <code>.class</code> files.
 	 */
 	private IResource[] collectResourcesOfInterest(IScriptFolder source)
 			throws ModelException {
@@ -228,11 +227,11 @@ public class CopyResourceElementsOperation extends MultiOperation {
 	 * this source element and its destination. If the operation is a cross
 	 * project operation
 	 * <ul>
-	 * <li>On a copy, the delta should be rooted in the dest project
-	 * <li>On a move, two deltas are generated
+	 * <li>On a copy, the delta should be rooted in the dest project <li>On a
+	 * move, two deltas are generated
 	 * <ul>
-	 * <li>one rooted in the source project
-	 * <li>one rooted in the destination project
+	 * <li>one rooted in the source project <li>one rooted in the destination
+	 * project
 	 * </ul>
 	 * </ul>
 	 * If the operation is rooted in a single project, the delta is rooted in
@@ -334,7 +333,7 @@ public class CopyResourceElementsOperation extends MultiOperation {
 							destFile.create(bais, IResource.FORCE,
 									getSubProgressMonitor(1));
 							destCU.getBuffer().setContents(
-									source.getBuffer().getContents());
+									source.getSourceAsCharArray());
 							destCU.save(getSubProgressMonitor(1), true);
 						} else {
 							sourceResource.copy(destFile.getFullPath(), flags,
@@ -372,7 +371,8 @@ public class CopyResourceElementsOperation extends MultiOperation {
 				}
 				String oldName = /* Util.getNameWithoutScriptLikeExtension( */source
 						.getElementName();// );
-				String newName = /* Util.getNameWithoutScriptLikeExtension( */newCUName;// );
+				String newName = /* Util.getNameWithoutScriptLikeExtension( */newCUName;// )
+																						// ;
 				prepareDeltas(source.getType(oldName), destCU.getType(newName),
 						isMove());
 			}
@@ -411,8 +411,8 @@ public class CopyResourceElementsOperation extends MultiOperation {
 	/**
 	 * @see MultiOperation This method delegates to
 	 *      <code>processSourceModuleResource</code> or
-	 *      <code>processScriptFolderResource</code>, depending on the type
-	 *      of <code>element</code>.
+	 *      <code>processScriptFolderResource</code>, depending on the type of
+	 *      <code>element</code>.
 	 */
 	protected void processElement(IModelElement element) throws ModelException {
 		IModelElement dest = getDestinationParent(element);
@@ -451,8 +451,8 @@ public class CopyResourceElementsOperation extends MultiOperation {
 	}
 
 	/**
-	 * Copies/moves a package fragment with the name <code>newName</code> to
-	 * the destination package.<br>
+	 * Copies/moves a package fragment with the name <code>newName</code> to the
+	 * destination package.<br>
 	 * 
 	 * @exception ScriptModelException
 	 *                if the operation is unable to complete
@@ -581,8 +581,8 @@ public class CopyResourceElementsOperation extends MultiOperation {
 			// Update package statement in compilation unit if needed
 			if (!Util.equalArraysOrNull(new Object[] { newFragName },
 					new Object[] { source.path })) { // if package has been
-														// renamed, update the
-														// compilation units
+				// renamed, update the
+				// compilation units
 				char[][] inclusionPatterns = root.fullInclusionPatternChars();
 				char[][] exclusionPatterns = root.fullExclusionPatternChars();
 				for (int i = 0; i < resources.length; i++) {
@@ -712,9 +712,9 @@ public class CopyResourceElementsOperation extends MultiOperation {
 	/**
 	 * Possible failures:
 	 * <ul>
-	 * <li>NO_ELEMENTS_TO_PROCESS - no elements supplied to the operation
-	 * <li>INDEX_OUT_OF_BOUNDS - the number of renamings supplied to the
-	 * operation does not match the number of elements that were supplied.
+	 * <li>NO_ELEMENTS_TO_PROCESS - no elements supplied to the operation <li>
+	 * INDEX_OUT_OF_BOUNDS - the number of renamings supplied to the operation
+	 * does not match the number of elements that were supplied.
 	 * </ul>
 	 */
 	protected IModelStatus verify() {
