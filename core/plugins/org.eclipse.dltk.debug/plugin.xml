@@ -28,8 +28,10 @@
 	<extension id="scriptLineBreakpointMarker"
 		point="org.eclipse.core.resources.markers">
 		<persistent value="true" />
-		
+
 		<super type="org.eclipse.dltk.debug.scriptBreakpointMarker" />
+		<super type="org.eclipse.debug.core.lineBreakpointMarker" />
+
 	</extension>
 	
 	<extension id="scriptExceptionBreakpointMarker"
