@@ -11,9 +11,34 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter;
 
+import java.util.Map;
+
 /**
  * Abstract base class for the {@link IScriptFormatter} implementations.
  */
 public abstract class AbstractScriptFormatter implements IScriptFormatter {
+
+	private final Map preferences;
+
+	/**
+	 * @param preferences
+	 */
+	protected AbstractScriptFormatter(Map preferences) {
+		this.preferences = preferences;
+	}
+
+	protected boolean getBoolean(String key) {
+		Object value = preferences.get(key);
+		if (value != null) {
+			if (value instanceof Boolean) {
+				return ((Boolean) value).booleanValue();
+			}
+			if (value instanceof Number) {
+				return ((Number) value).intValue() != 0;
+			}
+			return Boolean.valueOf(value.toString()).booleanValue();
+		}
+		return false;
+	}
 
 }

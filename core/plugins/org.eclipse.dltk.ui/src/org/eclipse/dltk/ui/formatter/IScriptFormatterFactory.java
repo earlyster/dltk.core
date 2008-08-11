@@ -14,7 +14,10 @@ package org.eclipse.dltk.ui.formatter;
 import java.util.Map;
 
 import org.eclipse.dltk.core.IDLTKContributedExtension;
-import org.eclipse.dltk.core.PreferencesLookupDelegate;
+import org.eclipse.dltk.core.IPreferencesLookupDelegate;
+import org.eclipse.dltk.core.IPreferencesSaveDelegate;
+import org.eclipse.dltk.ui.formatter.preferences.IFormatterDialogOwner;
+import org.eclipse.dltk.ui.formatter.preferences.IFormatterModifyDialog;
 import org.eclipse.jface.text.IDocument;
 
 /**
@@ -28,7 +31,13 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 	 * @param delegate
 	 * @return
 	 */
-	Map retrievePreferences(PreferencesLookupDelegate delegate);
+	Map retrievePreferences(IPreferencesLookupDelegate delegate);
+
+	String getPreferenceQualifier();
+
+	String[] getPreferenceKeys();
+
+	void savePreferences(Map preferences, IPreferencesSaveDelegate delegate);
 
 	/**
 	 * Creates the {@link IScriptFormatter} with the specified preferences.
@@ -56,5 +65,18 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 	 * @return
 	 */
 	boolean isValid();
+
+	/**
+	 * Return the preview content to use with this formatter or
+	 * <code>null</code> if no preview is available.
+	 * 
+	 * @return
+	 */
+	String getPreviewContent();
+
+	/**
+	 * @return
+	 */
+	IFormatterModifyDialog createDialog(IFormatterDialogOwner dialogOwner);
 
 }

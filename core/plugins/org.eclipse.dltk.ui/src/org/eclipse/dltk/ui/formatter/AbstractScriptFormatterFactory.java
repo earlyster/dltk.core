@@ -15,7 +15,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.dltk.core.DLTKContributedExtension;
-import org.eclipse.dltk.core.PreferencesLookupDelegate;
+import org.eclipse.dltk.core.IPreferencesLookupDelegate;
+import org.eclipse.dltk.core.IPreferencesSaveDelegate;
+import org.eclipse.dltk.ui.formatter.preferences.IFormatterDialogOwner;
+import org.eclipse.dltk.ui.formatter.preferences.IFormatterModifyDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
@@ -25,8 +28,21 @@ import org.eclipse.jface.text.IDocument;
 public abstract class AbstractScriptFormatterFactory extends
 		DLTKContributedExtension implements IScriptFormatterFactory {
 
-	public Map retrievePreferences(PreferencesLookupDelegate delegate) {
+	public Map retrievePreferences(IPreferencesLookupDelegate delegate) {
 		return new HashMap();
+	}
+
+	public void savePreferences(Map preferences,
+			IPreferencesSaveDelegate delegate) {
+		// empty
+	}
+
+	public String getPreferenceQualifier() {
+		return null;
+	}
+
+	public String[] getPreferenceKeys() {
+		return null;
 	}
 
 	public int detectIndentationLevel(IDocument document, int offset, Map prefs) {
@@ -54,5 +70,13 @@ public abstract class AbstractScriptFormatterFactory extends
 
 	public boolean isValid() {
 		return true;
+	}
+
+	public String getPreviewContent() {
+		return null;
+	}
+
+	public IFormatterModifyDialog createDialog(IFormatterDialogOwner dialogOwner) {
+		return null;
 	}
 }

@@ -93,7 +93,7 @@ public abstract class ComboViewerBlock {
 	 */
 	protected abstract Object getObjectById(String id);
 
-	private Object getSelectedObject() {
+	public Object getSelectedObject() {
 		IStructuredSelection selection = (IStructuredSelection) viewer
 				.getSelection();
 		if (selection != null) {

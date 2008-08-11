@@ -15,6 +15,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class FormatterMessages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.ui.formatter.FormatterMessages"; //$NON-NLS-1$
+	public static String FormatterPreferencePage_edit;
+	public static String FormatterPreferencePage_preview;
 	public static String FormatterPreferencePage_groupName;
 	public static String FormatterPreferencePage_selectionLabel;
 	public static String FormatterPreferencePage_settingsLink;

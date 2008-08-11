@@ -149,7 +149,7 @@ public class ControlBindingManager {
 		});
 	}
 
-	public void bindControl(final Combo combo, final String key) {
+	public void bindControl(final Combo combo, final Object key) {
 		if (key != null) {
 			comboControls.put(combo, key);
 		}

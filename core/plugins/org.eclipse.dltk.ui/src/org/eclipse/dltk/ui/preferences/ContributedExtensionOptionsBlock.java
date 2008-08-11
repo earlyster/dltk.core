@@ -15,7 +15,6 @@ import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.dialogs.PreferenceLinkArea;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
@@ -98,15 +97,24 @@ public abstract class ContributedExtensionOptionsBlock extends
 	}
 
 	protected void createSelectorBlock(Composite composite) {
+		final int groupColumns = getSelectorGroupColumns();
 		// Group
-		Group group = SWTFactory.createGroup(composite,
-				getSelectorGroupLabel(), 1, 1, GridData.FILL_HORIZONTAL);
+		Composite group = createSelectorGroup(composite, groupColumns);
 
 		// Name
 		SWTFactory.createLabel(group, getSelectorNameLabel(), 1);
 
+		viewer = createComboViewerBlock(group);
+
+		// Description
+		descriptionPlace = SWTFactory.createComposite(group, group.getFont(),
+				1, groupColumns, GridData.FILL);
+		descriptionPlace.setLayout(new StackLayout());
+	}
+
+	protected ComboViewerBlock createComboViewerBlock(Composite group) {
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		viewer = new ComboViewerBlock(group, gd) {
+		return new ComboViewerBlock(group, gd) {
 			protected String getObjectName(Object element) {
 				final IDLTKContributedExtension item = (IDLTKContributedExtension) element;
 				if (item.getName() != null && item.getName().length() != 0) {
@@ -144,11 +152,16 @@ public abstract class ContributedExtensionOptionsBlock extends
 				return getExtensionManager().getContributionById(id);
 			}
 		};
+	}
 
-		// Description
-		descriptionPlace = SWTFactory.createComposite(group, group.getFont(),
-				1, 1, GridData.FILL);
-		descriptionPlace.setLayout(new StackLayout());
+	protected int getSelectorGroupColumns() {
+		return 1;
+	}
+
+	protected Composite createSelectorGroup(Composite composite,
+			int groupColumns) {
+		return SWTFactory.createGroup(composite, getSelectorGroupLabel(),
+				groupColumns, 1, GridData.FILL_HORIZONTAL);
 	}
 
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
@@ -194,6 +207,15 @@ public abstract class ContributedExtensionOptionsBlock extends
 
 		((StackLayout) descriptionPlace.getLayout()).topControl = composite;
 		descriptionPlace.layout();
+		selectionChanged(contrib);
+	}
+
+	protected void selectionChanged(IDLTKContributedExtension extension) {
+		// empty, override in descendants
+	}
+
+	protected IDLTKContributedExtension getSelectedExtension() {
+		return (IDLTKContributedExtension) viewer.getSelectedObject();
 	}
 
 	private boolean hasValidId(String id) {
