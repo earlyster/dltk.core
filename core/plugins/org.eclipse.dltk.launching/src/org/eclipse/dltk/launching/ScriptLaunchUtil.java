@@ -9,6 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -18,13 +21,16 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.Launch;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.IDeployment;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.EnvironmentResolver;
 import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
+import org.osgi.framework.Bundle;
 
 public class ScriptLaunchUtil {
 	// Creating of InterpreterConfig
@@ -188,5 +194,82 @@ public class ScriptLaunchUtil {
 		}
 
 		return runScript(natureId, environment.getId(), config, monitor);
+	}
+
+	/**
+	 * Read content from specified stream.
+	 * 
+	 * @return Return empty string in error.
+	 */
+	public static String runEmbeddedScriptReadContent(
+			IExecutionEnvironment exeEnv, String scriptPath, Bundle bundle,
+			IFileHandle installLocations, final IProgressMonitor monitor) {
+		IDeployment deployment = exeEnv.createDeployment();
+		try {
+			final StringBuffer source = new StringBuffer();
+
+			IPath builder;
+			try {
+				builder = deployment.add(bundle, scriptPath);
+
+				IFileHandle builderFile = deployment.getFile(builder);
+				InterpreterConfig config = ScriptLaunchUtil
+						.createInterpreterConfig(exeEnv, builderFile,
+								builderFile.getParent());
+				config.removeEnvVar("DISPLAY"); //$NON-NLS-1$
+				final Process process = ScriptLaunchUtil
+						.runScriptWithInterpreter(exeEnv, installLocations
+								.toOSString(), config);
+				Thread readerThread = new Thread(new Runnable() {
+					public void run() {
+						BufferedReader input = null;
+						try {
+							input = new BufferedReader(new InputStreamReader(
+									process.getInputStream()));
+
+							String line = null;
+							while ((line = input.readLine()) != null) {
+								source.append(line);
+								source.append("\n"); //$NON-NLS-1$
+								monitor.worked(1);
+							}
+						} catch (IOException e) {
+							if (DLTKCore.DEBUG) {
+								e.printStackTrace();
+							}
+						} finally {
+							if (input != null) {
+								try {
+									input.close();
+								} catch (IOException e) {
+									if (DLTKCore.DEBUG) {
+										e.printStackTrace();
+									}
+								}
+							}
+						}
+					}
+				});
+				try {
+					readerThread.start();
+					readerThread.join(10000);
+				} catch (InterruptedException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
+			} catch (IOException e1) {
+				if (DLTKCore.DEBUG) {
+					e1.printStackTrace();
+				}
+			} catch (CoreException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+			return source.toString();
+		} finally {
+			deployment.dispose();
+		}
 	}
 }

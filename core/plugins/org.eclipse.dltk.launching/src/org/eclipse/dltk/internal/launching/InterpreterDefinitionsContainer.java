@@ -28,6 +28,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.launching.EnvironmentVariable;
@@ -238,11 +239,14 @@ public class InterpreterDefinitionsContainer {
 		List res = new ArrayList(fInterpreterList.size());
 		for (Iterator iter = fInterpreterList.iterator(); iter.hasNext();) {
 			IInterpreterInstall interpreter = (IInterpreterInstall) iter.next();
-			if (interpreter.getInterpreterInstallType().getNatureId().equals(
-					nature.getNature())
-					&& interpreter.getEnvironment().getId().equals(
-							nature.getEnvironment()))
-				res.add(interpreter);
+			IEnvironment environment = interpreter.getEnvironment();
+			if (environment != null) {
+				String id = environment.getId();
+				if (interpreter.getInterpreterInstallType().getNatureId()
+						.equals(nature.getNature())
+						&& id.equals(nature.getEnvironment()))
+					res.add(interpreter);
+			}
 		}
 		return res;
 	}

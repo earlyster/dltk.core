@@ -136,9 +136,8 @@ public abstract class AbstractInterpreterInstallType implements
 	 * 
 	 * @param id
 	 *            The Interpreter's id. The <code>IInterpreterInstall</code>
-	 *            instance that is created must return <code>id</code> from
-	 *            its <code>getId()</code> method. Must not be
-	 *            <code>null</code>.
+	 *            instance that is created must return <code>id</code> from its
+	 *            <code>getId()</code> method. Must not be <code>null</code>.
 	 * @return the newly created IInterpreterInstall instance. Must not return
 	 *         <code>null</code>.
 	 */
@@ -154,10 +153,9 @@ public abstract class AbstractInterpreterInstallType implements
 	 *            configuration properties
 	 * @param propertyName
 	 *            the name of an attribute of the configuration element used on
-	 *            the <code>createExecutableExtension(String)</code> call.
-	 *            This argument can be used in the cases where a single
-	 *            configuration element is used to define multiple executable
-	 *            extensions.
+	 *            the <code>createExecutableExtension(String)</code> call. This
+	 *            argument can be used in the cases where a single configuration
+	 *            element is used to define multiple executable extensions.
 	 * @param data
 	 *            adapter data in the form of a <code>String</code>, a
 	 *            <code>Hashtable</code>, or <code>null</code>.
@@ -438,9 +436,9 @@ public abstract class AbstractInterpreterInstallType implements
 		runnable.run(monitor);
 	}
 
-	protected abstract String getPluginId();
-
 	protected abstract String[] getPossibleInterpreterNames();
+
+	protected abstract String getPluginId();
 
 	protected abstract ILog getLog();
 
@@ -501,13 +499,15 @@ public abstract class AbstractInterpreterInstallType implements
 	}
 
 	public IStatus validateInstallLocation(IFileHandle installLocation) {
-		if (!installLocation.exists() || !installLocation.isFile()
-		/* || installLocation.isHidden() */) {
+		if (!installLocation.exists() || !installLocation.isFile()) {
 			return createStatus(IStatus.ERROR,
 					InterpreterMessages.errNonExistentOrInvalidInstallLocation,
 					null);
 		}
+		return validatePossiblyName(installLocation);
+	}
 
+	public IStatus validatePossiblyName(IFileHandle installLocation) {
 		String possibleNames[] = getPossibleInterpreterNames();
 
 		boolean matchFound = false;
@@ -518,13 +518,9 @@ public abstract class AbstractInterpreterInstallType implements
 				.getEnvironment().getAdapter(IExecutionEnvironment.class);
 
 		if (execEnv != null) {
-			// name.matches(possibleName + ".*\\.exe")
 			for (int i = 0; i < possibleNames.length; ++i) {
 				final String possibleName = possibleNames[i].toLowerCase();
-				// String fName = nPath.removeFileExtension().toString()
-				// .toLowerCase();
 				if (execEnv.isValidExecutableAndEquals(possibleName, nPath)) {
-					//$NON-NLS-1$ 
 					matchFound = true;
 					break;
 				}
