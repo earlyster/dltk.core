@@ -31,7 +31,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
  * ensure the <code>DefaultScope</code> has been properly initialized.
  * </p>
  */
-public class PreferencesLookupDelegate {
+public class PreferencesLookupDelegate implements IPreferencesLookupDelegate {
 
 	private IPreferencesService service;
 	private IScopeContext[] contexts;
