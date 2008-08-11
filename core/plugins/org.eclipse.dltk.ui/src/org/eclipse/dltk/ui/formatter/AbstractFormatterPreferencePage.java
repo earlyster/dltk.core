@@ -30,8 +30,6 @@ import org.eclipse.dltk.internal.ui.text.DLTKColorManager;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
-import org.eclipse.dltk.ui.formatter.preferences.IFormatterDialogOwner;
-import org.eclipse.dltk.ui.formatter.preferences.IFormatterModifyDialog;
 import org.eclipse.dltk.ui.preferences.AbstractConfigurationBlockPropertyAndPreferencePage;
 import org.eclipse.dltk.ui.preferences.AbstractOptionsBlock;
 import org.eclipse.dltk.ui.preferences.ComboViewerBlock;

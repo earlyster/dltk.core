@@ -16,8 +16,6 @@ import java.util.Map;
 import org.eclipse.dltk.core.IDLTKContributedExtension;
 import org.eclipse.dltk.core.IPreferencesLookupDelegate;
 import org.eclipse.dltk.core.IPreferencesSaveDelegate;
-import org.eclipse.dltk.ui.formatter.preferences.IFormatterDialogOwner;
-import org.eclipse.dltk.ui.formatter.preferences.IFormatterModifyDialog;
 import org.eclipse.jface.text.IDocument;
 
 /**
