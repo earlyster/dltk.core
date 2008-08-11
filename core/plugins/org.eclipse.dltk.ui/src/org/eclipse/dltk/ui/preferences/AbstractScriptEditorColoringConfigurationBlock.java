@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Preferences;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlightingManager;
 import org.eclipse.dltk.internal.ui.preferences.ScriptSourcePreviewerUpdater;
@@ -914,8 +915,6 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 	}
 
 	protected String getPreviewContent() {
-		String separator = System.getProperty("line.separator"); //$NON-NLS-1$
-
 		StringBuffer buffer = new StringBuffer(512);
 
 		BufferedReader reader = null;
@@ -925,7 +924,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				if (buffer.length() != 0) {
-					buffer.append(separator);
+					buffer.append(Util.LINE_SEPARATOR);
 				}
 				buffer.append(line);
 			}
