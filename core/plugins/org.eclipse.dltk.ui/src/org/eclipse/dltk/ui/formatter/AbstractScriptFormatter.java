@@ -41,4 +41,15 @@ public abstract class AbstractScriptFormatter implements IScriptFormatter {
 		return false;
 	}
 
+	protected int getInt(String key) {
+		Object value = preferences.get(key);
+		if (value != null) {
+			if (value instanceof Number) {
+				return ((Number) value).intValue();
+			}
+			return Integer.parseInt(value.toString());
+		}
+		return 0;
+	}
+
 }
