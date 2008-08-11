@@ -304,8 +304,8 @@ public class BasicSearchEngine {
 						int indexMatchLength = indexMatchPaths.length;
 						SearchDocument[] indexMatches = new SearchDocument[indexMatchLength];
 						for (int j = 0; j < indexMatchLength; j++) {
-							indexMatches[j] = participant
-									.getDocument(indexMatchPaths[j]);
+							indexMatches[j] = participant.getDocument(
+									indexMatchPaths[j], null);
 						}
 						SearchDocument[] matches = MatchLocator
 								.addWorkingCopies(pattern, indexMatches,
@@ -408,8 +408,8 @@ public class BasicSearchEngine {
 						int indexMatchLength = indexMatchPaths.length;
 						SearchDocument[] indexMatches = new SearchDocument[indexMatchLength];
 						for (int j = 0; j < indexMatchLength; j++) {
-							indexMatches[j] = participant
-									.getDocument(indexMatchPaths[j]);
+							indexMatches[j] = participant.getDocument(
+									indexMatchPaths[j], null);
 						}
 						SearchDocument[] matches = MatchLocator
 								.addWorkingCopies(pattern, indexMatches,
@@ -1446,7 +1446,9 @@ public class BasicSearchEngine {
 							pattern,
 							new SearchDocument[] { new DLTKSearchDocument(
 									enclosingElement.getPath().toString(),
-									contents, participant, external) },
+									contents, participant, external,
+									enclosingElement.getScriptProject()
+											.getProject()) },
 							getWorkingCopies(enclosingElement), participant);
 					participant.locateMatches(documents, pattern, scope,
 							requestor, monitor);
@@ -1533,7 +1535,8 @@ public class BasicSearchEngine {
 	/**
 	 * @see SearchEngine#createTypeNameMatch(IType, int) for detailed comment.
 	 */
-	public static MethodNameMatch createMethodNameMatch(IMethod method, int modifiers) {
+	public static MethodNameMatch createMethodNameMatch(IMethod method,
+			int modifiers) {
 		return new DLTKSearchMethodNameMatch(method, modifiers);
 	}
 

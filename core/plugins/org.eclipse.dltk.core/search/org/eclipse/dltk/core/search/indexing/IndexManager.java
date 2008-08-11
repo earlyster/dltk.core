@@ -135,10 +135,11 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		SearchParticipant participant = SearchEngine
 				.getDefaultSearchParticipant();
 		SearchDocument document = participant.getDocument(resource
-				.getFullPath().toString());
+				.getFullPath().toString(), resource.getProject());
 		((InternalSearchDocument) document).parser = parser;
 		((InternalSearchDocument) document).requestor = requestor;
 		((InternalSearchDocument) document).toolkit = toolkit;
+		document.fullPath = resource.getFullPath();
 		String indexLocation = this.computeIndexLocation(containerPath);
 		this.scheduleDocumentIndexing(document, containerPath, indexLocation,
 				participant);
@@ -155,7 +156,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		SearchParticipant participant = SearchEngine
 				.getDefaultSearchParticipant();
 		SearchDocument document = participant.getDocument(resource
-				.getFullPath().toString());
+				.getFullPath().toString(), resource.getProject());
 		String indexLocation = this.computeIndexLocation(containerPath);
 		this.scheduleDocumentIndexing(document, containerPath, indexLocation,
 				participant);

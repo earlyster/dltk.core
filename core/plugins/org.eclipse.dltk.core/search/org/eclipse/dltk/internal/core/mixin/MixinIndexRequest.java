@@ -88,7 +88,8 @@ abstract class MixinIndexRequest extends AbstractJob {
 		final IPath path = module.getPath();
 		final DLTKSearchDocument document = new DLTKSearchDocument(path
 				.toString(), containerPath, null, participant,
-				module instanceof ExternalSourceModule);
+				module instanceof ExternalSourceModule, module
+						.getScriptProject().getProject());
 		document.toolkit = toolkit;
 		final String relativePath = containerRelativePath(containerPath,
 				module, path);

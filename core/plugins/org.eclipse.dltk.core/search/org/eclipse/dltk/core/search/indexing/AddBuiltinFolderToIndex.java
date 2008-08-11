@@ -170,10 +170,11 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 		IPath dpath = new Path(path).setDevice(null);
 		DLTKSearchDocument entryDocument = new DLTKSearchDocument(dpath
 				.toString(), Path.EMPTY, contents.toCharArray(), participant,
-				true);
+				true, this.project);
 		entryDocument.parser = parser;
 		entryDocument.requestor = requestor;
 		entryDocument.toolkit = toolkit;
+		entryDocument.fullPath = this.containerPath.append(dpath);
 		this.manager.indexDocument(entryDocument, participant, index,
 				this.containerPath);
 	}

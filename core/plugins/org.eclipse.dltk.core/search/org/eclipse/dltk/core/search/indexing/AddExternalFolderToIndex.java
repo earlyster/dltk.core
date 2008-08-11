@@ -291,7 +291,10 @@ class AddExternalFolderToIndex extends IndexRequest {
 		IPath dpath = new Path(path).removeFirstSegments(
 				containerPath.segmentCount()).setDevice(null);
 		DLTKSearchDocument entryDocument = new DLTKSearchDocument(dpath
-				.toString(), this.containerPath, contents, participant, true);
+				.toString(), this.containerPath, contents, participant, true,
+				project);
+		entryDocument.fullPath = EnvironmentPathUtils.getLocalPath(ffile
+				.getFullPath());
 		entryDocument.parser = parser;
 		entryDocument.requestor = requestor;
 		entryDocument.toolkit = toolkit;

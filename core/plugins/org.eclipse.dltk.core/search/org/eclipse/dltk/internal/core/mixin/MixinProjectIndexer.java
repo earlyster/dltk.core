@@ -49,10 +49,12 @@ public class MixinProjectIndexer implements IProjectIndexer {
 		try {
 			final IProjectFragment fragment = project.findProjectFragment(path);
 			if (fragment != null) {
-				final MixinIndexRequest request = new MixinExternalProjectFragmentRequest(
-						fragment, DLTKLanguageManager
-								.getLanguageToolkit(fragment));
-				requestIfNotWaiting(request);
+				if (!path.segment(0).equals(IndexManager.SPECIAL_BUILTIN)) {
+					final MixinIndexRequest request = new MixinExternalProjectFragmentRequest(
+							fragment, DLTKLanguageManager
+									.getLanguageToolkit(fragment));
+					requestIfNotWaiting(request);
+				}
 			} else {
 				DLTKCore.warn(NLS.bind(
 						Messages.MixinIndexer_unknownProjectFragment, path));
