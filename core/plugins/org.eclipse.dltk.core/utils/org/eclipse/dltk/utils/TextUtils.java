@@ -68,6 +68,17 @@ public abstract class TextUtils {
 		return splitter.split();
 	}
 
+	/**
+	 * Counts the number of lines in the specified string. Lines are counter by
+	 * the separators ("\n", "\r", "\r\n")
+	 * 
+	 * @param content
+	 * @return
+	 */
+	public static int countLines(String content) {
+		return new LineSplitter(content).countLines();
+	}
+
 	private static class LineSplitter {
 
 		private final String content;
@@ -88,6 +99,16 @@ public abstract class TextUtils {
 				result.add(content.substring(begin, end));
 			}
 			return (String[]) result.toArray(new String[result.size()]);
+		}
+
+		public int countLines() {
+			contentPos = 0;
+			int count = 0;
+			while (contentPos < contentEnd) {
+				findEndOfLine();
+				++count;
+			}
+			return count;
 		}
 
 		private int findEndOfLine() {
