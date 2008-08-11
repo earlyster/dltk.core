@@ -88,6 +88,10 @@ public abstract class PropertyAndPreferencePage extends PreferencePage
 		return getPropertyPageId() != null;
 	}
 
+	protected String getNatureId() {
+		return null;
+	}
+
 	protected boolean offerLink() {
 		return fData == null || !Boolean.TRUE.equals(fData.get(DATA_NO_LINK));
 	}
@@ -223,7 +227,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage
 				// ignore
 			}
 			ProjectSelectionDialog dialog = new ProjectSelectionDialog(
-					getShell(), projectsWithSpecifics);
+					getShell(), projectsWithSpecifics, getNatureId());
 			if (dialog.open() == Window.OK) {
 				IScriptProject res = (IScriptProject) dialog.getFirstResult();
 				openProjectProperties(res.getProject(), data);

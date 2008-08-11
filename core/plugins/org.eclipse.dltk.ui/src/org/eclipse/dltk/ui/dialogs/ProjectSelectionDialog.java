@@ -6,6 +6,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptModel;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.ui.ModelElementComparator;
 import org.eclipse.dltk.internal.ui.StandardModelElementContentProvider;
 import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
@@ -38,6 +39,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 	// the visual selection widget group
 	private TableViewer fTableViewer;
 	private Set fProjectsWithSpecifics;
+	private final String natureId;
 
 	// sizing constants
 	private final static int SIZING_SELECTION_WIDGET_HEIGHT= 250;
@@ -48,7 +50,13 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 	private ViewerFilter fFilter;
 
 	public ProjectSelectionDialog(Shell parentShell, Set projectsWithSpecifics) {
+		this(parentShell, projectsWithSpecifics, null);
+	}
+
+	public ProjectSelectionDialog(Shell parentShell, Set projectsWithSpecifics,
+			String natureId) {
 		super(parentShell);
+		this.natureId = natureId;
 		setTitle(PreferencesMessages.ProjectSelectionDialog_title);  
 		setMessage(PreferencesMessages.ProjectSelectionDialog_desciption); 
 		fProjectsWithSpecifics= projectsWithSpecifics;
@@ -93,6 +101,19 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 		fTableViewer.setContentProvider(new StandardModelElementContentProvider());
 		fTableViewer.setComparator(new ModelElementComparator());
 		fTableViewer.getControl().setFont(font);
+		if (natureId != null) {
+			fTableViewer.addFilter(new ViewerFilter() {
+				public boolean select(Viewer viewer, Object parentElement,
+						Object element) {
+					if (element instanceof IScriptProject) {
+						IScriptProject project = (IScriptProject) element;
+						return natureId.equals(project.getLanguageToolkit()
+								.getNatureId());
+					}
+					return true;
+				}
+			});
+		}
 
 		Button checkbox= new Button(composite, SWT.CHECK);
 		checkbox.setText(PreferencesMessages.ProjectSelectionDialog_filter); 
