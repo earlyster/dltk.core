@@ -17,6 +17,7 @@ import java.net.URI;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -42,7 +43,7 @@ public class LazyFileHandle implements IFileHandle {
 						environment, this.path);
 			}
 			// Local environment for update from latest versions.
-			else if (this.environment.equals("")) {
+			else if (this.environment.equals(Util.EMPTY_STRING)) {
 				handle = EnvironmentManager.getLocalEnvironment().getFile(
 						this.path);
 			}
@@ -191,7 +192,7 @@ public class LazyFileHandle implements IFileHandle {
 	}
 
 	public String getEnvironmentId() {
-		if (this.environment.equals("")) {
+		if (this.environment.equals(Util.EMPTY_STRING)) {
 			return LocalEnvironment.ENVIRONMENT_ID;
 		}
 		return this.environment;
@@ -215,8 +216,12 @@ public class LazyFileHandle implements IFileHandle {
 		if (environment == null) {
 			if (other.getEnvironment() != null)
 				return false;
-		} else if (!environment.equals(other.getEnvironment().getId()))
-			return false;
+		} else {
+			final IEnvironment otherEnvironment = other.getEnvironment();
+			if (otherEnvironment == null
+					|| !environment.equals(otherEnvironment.getId()))
+				return false;
+		}
 		if (path == null) {
 			if (other.getPath() != null)
 				return false;
@@ -230,6 +235,6 @@ public class LazyFileHandle implements IFileHandle {
 		if (handle != null) {
 			return this.handle.toString();
 		}
-		return "[UNRESOLVED FILE HANDLE]";
+		return "[UNRESOLVED FILE HANDLE]"; //$NON-NLS-1$
 	}
 }
