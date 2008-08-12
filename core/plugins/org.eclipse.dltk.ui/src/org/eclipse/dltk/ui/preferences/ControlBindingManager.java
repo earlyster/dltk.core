@@ -8,7 +8,9 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -120,6 +122,14 @@ public class ControlBindingManager {
 	public void bindControl(final Text text, final Object key,
 			IFieldValidator validator, final ITextConverter transformer) {
 		if (key != null) {
+			if (textControls.containsKey(key)) {
+				final RuntimeException error = new IllegalArgumentException(
+						"Duplicate control " + key); //$NON-NLS-1$ 
+				DLTKUIPlugin.log(error);
+				if (DLTKCore.DEBUG) {
+					throw error;
+				}
+			}
 			textControls.put(text, key);
 			if (transformer != null) {
 				textTransformers.put(text, transformer);
