@@ -18,11 +18,11 @@ import org.eclipse.osgi.service.datalocation.Location;
 public class PlatformFileUtils {
 	public static IFileHandle findAbsoluteOrEclipseRelativeFile(
 			IEnvironment env, IPath path) {
-		if( path == null || path.isEmpty()) {
-			throw new InvalidParameterException("Path could not be empty");
+		if (path == null || path.isEmpty()) {
+			throw new InvalidParameterException(Messages.PlatformFileUtils_pathMustNotBeEmpty);
 		}
 		IFileHandle file = env.getFile(path);
-		if( !env.getId().equals(LocalEnvironment.ENVIRONMENT_ID)) {
+		if (!env.getId().equals(LocalEnvironment.ENVIRONMENT_ID)) {
 			return file;
 		}
 		if (EnvironmentManager.isLocal(env) && !file.exists()

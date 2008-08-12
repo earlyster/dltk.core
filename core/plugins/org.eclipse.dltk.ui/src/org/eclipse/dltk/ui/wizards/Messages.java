@@ -12,6 +12,7 @@ public class Messages extends NLS {
 	public static String NewSourceModulePage_noFoldersAvailable;
 	public static String NewSourceModulePage_pathCannotBeEmpty;
 	public static String NewSourceModulePage_selectScriptFolder;
+	public static String NewSourceModuleWizard_errorInOpenInEditor;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

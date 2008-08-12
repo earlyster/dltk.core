@@ -394,9 +394,9 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 				cu = cu.getPrimary();
 				return cu.getResource();
 			} /*
-				 * else if (input instanceof IClassFile) { return ((IClassFile)
-				 * input).getResource(); }
-				 */
+			 * else if (input instanceof IClassFile) { return ((IClassFile)
+			 * input).getResource(); }
+			 */
 			return null;
 		}
 
@@ -439,8 +439,8 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 				if (i.getData() instanceof IModelElement) {
 					IModelElement je = (IModelElement) i.getData();
 					if (/*
-						 * je.getElementType() == IModelElement.IMPORT_CONTAINER ||
-						 */isInnerType(je)) {
+					 * je.getElementType() == IModelElement.IMPORT_CONTAINER ||
+					 */isInnerType(je)) {
 						if (i != fReusedExpandedItem) {
 							setExpanded(i, false);
 							return;
@@ -1038,18 +1038,21 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 					.addPostSelectionChangedListener((ISelectionChangedListener) listeners[i]);
 		}
 
-		 MenuManager manager = new MenuManager(DLTKUIPlugin.getPluginId() + ".outline",DLTKUIPlugin.getPluginId() + ".outline");
-		 manager.setRemoveAllWhenShown(true);
-		 manager.addMenuListener(new IMenuListener() {
-		 public void menuAboutToShow(IMenuManager m) {
-		 contextMenuAboutToShow(m);
-		 }
-		 });
-		 fMenu = manager.createContextMenu(tree);
-		 tree.setMenu(fMenu);
+		MenuManager manager = new MenuManager(DLTKUIPlugin.getPluginId()
+				+ ".outline", DLTKUIPlugin.getPluginId() + ".outline"); //$NON-NLS-1$ //$NON-NLS-2$
+		manager.setRemoveAllWhenShown(true);
+		manager.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager m) {
+				contextMenuAboutToShow(m);
+			}
+		});
+		fMenu = manager.createContextMenu(tree);
+		tree.setMenu(fMenu);
 
 		IPageSite site = getSite();
-		site.registerContextMenu(DLTKUIPlugin.getPluginId() + ".outline", manager, fOutlineViewer); //$NON-NLS-1$
+		site
+				.registerContextMenu(
+						DLTKUIPlugin.getPluginId() + ".outline", manager, fOutlineViewer); //$NON-NLS-1$
 
 		updateSelectionProvider(site);
 

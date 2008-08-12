@@ -193,11 +193,9 @@ public class ExternalFoldersManager {
 					try {
 						output
 								.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + //$NON-NLS-1$
-										"<projectDescription>\n"
-										+ //$NON-NLS-1$
-										"	<name>"
-										+ EXTERNAL_PROJECT_NAME
-										+ "</name>\n" + //$NON-NLS-1$ //$NON-NLS-2$
+										"<projectDescription>\n" //$NON-NLS-1$
+										+ "	<name>" //$NON-NLS-1$
+										+ EXTERNAL_PROJECT_NAME + "</name>\n" + //$NON-NLS-1$
 										"	<comment></comment>\n" + //$NON-NLS-1$
 										"	<projects>\n" + //$NON-NLS-1$
 										"	</projects>\n" + //$NON-NLS-1$

@@ -362,8 +362,8 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 						IInterpreterInstall inst = type
 								.findInterpreterInstallByName(pName);
 						if (inst != null) {
-							pName = genName + "(" + String.valueOf(++index)
-									+ ")";
+							pName = genName + "(" + String.valueOf(++index) //$NON-NLS-1$
+									+ ")"; //$NON-NLS-1$
 							found = true;
 							break;
 						}

@@ -261,7 +261,8 @@ public class BuildpathChange {
 				if (removedRoots != null) {
 					ProjectFragment oldRoot = (ProjectFragment) removedRoots
 							.get(this.oldResolvedBuildpath[i].getPath());
-					if (oldRoot != null) { // use old root if any (could be none
+					if (oldRoot != null) { // use old root if any (could be
+											// none
 						// if entry wasn't bound)
 						pkgFragmentRoots = new ProjectFragment[] { oldRoot };
 					}
@@ -309,8 +310,9 @@ public class BuildpathChange {
 						if (file == null)
 							continue;
 						// long timeStamp = DeltaProcessor.getTimeStamp(file);
-						IPath externalPath = new org.eclipse.core.runtime.Path(
-								file.getAbsolutePath());
+						// IPath externalPath = new
+						// org.eclipse.core.runtime.Path(
+						// file.getAbsolutePath());
 						// state.getExternalLibTimeStamps().put(externalPath,
 						// new Long(timeStamp));
 					}
@@ -405,7 +407,8 @@ public class BuildpathChange {
 					ProjectIndexerManager.removeProjectFragment(project, path);
 					break;
 				case IBuildpathEntry.BPE_LIBRARY:
-					if (state.otherRoots.get(path) == null) { // if root was not
+					if (state.otherRoots.get(path) == null) { // if root was
+																// not
 						// shared
 						indexManager.discardJobs(path.toString());
 						indexManager.removeIndex(path);

@@ -51,12 +51,11 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 	private static IPath getTempDirPath() {
 		if (temp == null) {
 			try {
-				File tempFile = File.createTempFile("dltk", "temp");
+				File tempFile = File.createTempFile("dltk", "temp"); //$NON-NLS-1$ //$NON-NLS-2$
 				tempFile.delete();
 				temp = new Path(tempFile.getParent());
 			} catch (IOException e) {
-				throw new RuntimeException(
-						"DLTK: Failed to locate temp folder...");
+				throw new RuntimeException(Messages.LocalExecEnvironment_failedToLocateTempFolder);
 			}
 		}
 		return temp;

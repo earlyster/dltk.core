@@ -120,6 +120,8 @@ public class Messages extends NLS {
 
 	public static String savedState_jobName;
 
+	public static String Util_errorReceivingFile;
+
 	public static String workingCopy_commit;
 
 	public static String cache_invalidLoadFactor;

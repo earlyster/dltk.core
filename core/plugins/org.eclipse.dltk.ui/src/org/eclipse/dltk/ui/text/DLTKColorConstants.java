@@ -72,8 +72,7 @@ public final class DLTKColorConstants {
 	public static final String DLTK_FUNCTION_DEFINITION = "DLTK_function_definition"; //$NON-NLS-1$
 
 	/**
-	 * The color key for numbers in DLTK code (value <code>"DLTK_number"</code>
-	 * ).
+	 * The color key for numbers in DLTK code (value <code>"DLTK_number"</code> ).
 	 */
 	public static final String DLTK_NUMBER = "DLTK_number"; //$NON-NLS-1$
 
@@ -81,12 +80,13 @@ public final class DLTKColorConstants {
 	 * The color key for function arguments in DLTK code (value
 	 * <code>"DLTK_argument"</code>).
 	 */
-	public static final String DLTK_ARGUMENT = "DLTK_argument";
+	public static final String DLTK_ARGUMENT = "DLTK_argument"; //$NON-NLS-1$
 
 	/**
-	 * The color key for base classes in DLTK code (value <code>"DLTK_base_class</code>).
+	 * The color key for base classes in DLTK code (value
+	 * <code>"DLTK_base_class</code>).
 	 */
-	public static final String DLTK_BASE_CLASS = "DLTK_base_class";
+	public static final String DLTK_BASE_CLASS = "DLTK_base_class"; //$NON-NLS-1$
 
 	/**
 	 * The color key for everything in DLTK code for which no other color is
@@ -107,8 +107,7 @@ public final class DLTKColorConstants {
 	public static final String TASK_TAG = "DLTK_comment_task_tag"; //$NON-NLS-1$
 
 	/**
-	 * The color key for DLTKDoc keywords (<code>@foo</code>) in DLTKDoc
-	 * comments (value <code>"DLTK_doc_keyword"</code>).
+	 * The color key for DLTKDoc keywords (<code>@foo</code>) in DLTKDoc comments (value <code>"DLTK_doc_keyword"</code>).
 	 */
 	public static final String DLTKDOC_KEYWORD = "DLTK_doc_keyword"; //$NON-NLS-1$
 
@@ -119,8 +118,8 @@ public final class DLTKColorConstants {
 	public static final String DLTKDOC_TAG = "DLTK_doc_tag"; //$NON-NLS-1$
 
 	/**
-	 * The color key for DLTKDoc links (<code>{foo}</code>) in DLTKDoc comments
-	 * (value <code>"DLTK_doc_link"</code>).
+	 * The color key for DLTKDoc links (<code>{foo}</code>) in DLTKDoc
+	 * comments (value <code>"DLTK_doc_link"</code>).
 	 */
 	public static final String DLTKDOC_LINK = "DLTK_doc_link"; //$NON-NLS-1$
 

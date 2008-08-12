@@ -59,8 +59,8 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 							if (consoleViewer != null) {
 								consoleViewer.disableProcessing();
 								appendInvitation(consoleViewer);
-								updateText(consoleViewer,
-										"Process terminated...", false);
+								updateText(consoleViewer, Messages.ScriptConsole_processTerminated,
+										false);
 								consoleViewer.setEditable(false);
 							}
 						}
@@ -323,7 +323,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 
 	public String handleCommand(String userInput) throws IOException {
 		if (this.interpreter == null && this.interpreter.isValid()) {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 		Object[] listeners = consoleListeners.getListeners();
 		for (int i = 0; i < listeners.length; i++) {

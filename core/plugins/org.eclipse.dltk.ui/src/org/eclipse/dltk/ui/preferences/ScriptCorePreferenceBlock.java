@@ -68,11 +68,11 @@ final class ScriptCorePreferenceBlock extends
 		GridData layoutData = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
 		layoutData.horizontalSpan = 2;
 		g.setLayoutData(layoutData);
-		g.setText("Core options");
+		g.setText(Messages.ScriptCorePreferenceBlock_coreOptions);
 
 		nonLocalEmptyFileContentTypeChecking = new Button(g, SWT.CHECK);
 		nonLocalEmptyFileContentTypeChecking
-				.setText("Empty file content checking for non local projects");
+				.setText(Messages.ScriptCorePreferenceBlock_emptyFileContentCheckingForNonLocalProjects);
 
 		createReIndex(composite);
 
@@ -87,7 +87,7 @@ final class ScriptCorePreferenceBlock extends
 					false);
 			layoutData.horizontalSpan = 2;
 			g.setLayoutData(layoutData);
-			g.setText("Debug options/operations");
+			g.setText(Messages.ScriptCorePreferenceBlock_debugOptionsOperations);
 			Label l = new Label(g, SWT.PUSH);
 			l.setText(Messages.ScriptCorePreferencePage_manualReindex);
 			Button reCreateIndex = new Button(g, SWT.PUSH);

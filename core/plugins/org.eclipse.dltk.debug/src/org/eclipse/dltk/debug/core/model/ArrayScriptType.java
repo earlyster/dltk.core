@@ -5,7 +5,7 @@ package org.eclipse.dltk.debug.core.model;
  */
 public class ArrayScriptType extends CollectionScriptType {
 
-	private static String ARRAY = "array";
+	private static String ARRAY = "array"; //$NON-NLS-1$
 
 	public ArrayScriptType() {
 		super(ARRAY);

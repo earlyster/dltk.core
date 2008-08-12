@@ -5,9 +5,9 @@ public abstract class AbstractDebugUILanguageToolkit implements
 
 	/*
 	 * @see org.eclipse.dltk.debug.ui.IDLTKDebugUILanguageToolkit#
-	 * getVariablesViewPreferencePages()
+	 *      getVariablesViewPreferencePages()
 	 */
 	public String[] getVariablesViewPreferencePages() {
-		return new String[] { "" };
+		return new String[] { "" }; //$NON-NLS-1$
 	}
 }

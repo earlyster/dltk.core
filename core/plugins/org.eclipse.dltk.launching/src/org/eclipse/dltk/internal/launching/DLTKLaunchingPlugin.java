@@ -642,7 +642,7 @@ public class DLTKLaunchingPlugin extends Plugin implements
 		public void process() throws CoreException {
 			if (job == null) {
 				job = new InterpreterUpdateJob(this);
-				job.setName("Rebind interpreters");
+				job.setName(LaunchingMessages.DLTKLaunchingPlugin_rebindInterpreters);
 				job.schedule();
 			} else {
 				try {

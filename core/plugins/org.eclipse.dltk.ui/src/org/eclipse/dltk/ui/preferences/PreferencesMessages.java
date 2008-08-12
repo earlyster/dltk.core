@@ -91,6 +91,7 @@ public final class PreferencesMessages extends NLS {
 	public static String DLTKEditorHoverConfigurationBlock_insertDelimiterAndModifier;
 	public static String DLTKEditorHoverConfigurationBlock_showAffordance;
 	public static String FoldingConfigurationBlock_noFoldingPreferenceBlock;
+	public static String TodoTaskConfigurationBlock_enableTaskTags;
 
 	public static String TodoTaskConfigurationBlock_markers_tasks_high_priority;
 	public static String TodoTaskConfigurationBlock_markers_tasks_normal_priority;

@@ -111,9 +111,8 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse
-	 * .swt.widgets.Composite)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse
+	 *      .swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		Font font = parent.getFont();
@@ -320,9 +319,9 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 					if (project != null) {
 						IEnvironment environment = EnvironmentManager
 								.getEnvironment(project);
-						String path = "${resource_loc}/../".replace('/',
+						String path = "${resource_loc}/../".replace('/', //$NON-NLS-1$
 								environment.getSeparatorChar());
-						setDefaultWorkingDirectoryText(path); //$NON-NLS-1$
+						setDefaultWorkingDirectoryText(path);
 						return;
 					}
 				}
@@ -335,9 +334,8 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.eclipse.debug.ui.ILaunchConfigurationTab#isValid(org.eclipse.debug
-	 * .core.ILaunchConfiguration)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#isValid(org.eclipse.debug
+	 *      .core.ILaunchConfiguration)
 	 */
 	public boolean isValid(ILaunchConfiguration config) {
 		setErrorMessage(null);
@@ -374,9 +372,8 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 	/**
 	 * Defaults are empty.
 	 * 
-	 * @see
-	 * 	org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(org.eclipse.
-	 * 	debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(org.eclipse.
+	 *      debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
 		config.setAttribute(
@@ -390,9 +387,8 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse
-	 * .debug.core.ILaunchConfiguration)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse
+	 *      .debug.core.ILaunchConfiguration)
 	 */
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		setLaunchConfiguration(configuration);
@@ -417,9 +413,8 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse
-	 * .debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse
+	 *      .debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		if (fUseDefaultDirButton.getSelection()) {
@@ -460,7 +455,7 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 	 * sets the default working directory text
 	 * 
 	 * @param dir
-	 * 		the dir to set the widget to
+	 *            the dir to set the widget to
 	 * 
 	 */
 	protected void setDefaultWorkingDirectoryText(String dir) {
@@ -475,7 +470,7 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 	 * sets the other dir text
 	 * 
 	 * @param dir
-	 * 		the new text
+	 *            the new text
 	 * 
 	 */
 	protected void setOtherWorkingDirectoryText(String dir) {
@@ -506,7 +501,7 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 	 * Allows this entire block to be enabled/disabled
 	 * 
 	 * @param enabled
-	 * 		whether to enable it or not
+	 *            whether to enable it or not
 	 */
 	protected void setEnabled(boolean enabled) {
 		fUseDefaultDirButton.setEnabled(enabled);

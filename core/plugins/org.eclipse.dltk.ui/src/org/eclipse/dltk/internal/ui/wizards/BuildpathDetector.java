@@ -188,7 +188,7 @@ public class BuildpathDetector {
 				boolean isHidden = false;
 				// Hidden file filtering.
 				for (int i = 0; i < path.segmentCount(); i++) {
-					if (path.segment(i).startsWith(".")) {
+					if (path.segment(i).startsWith(".")) { //$NON-NLS-1$
 						isHidden = true;
 						break;
 					}
@@ -231,9 +231,8 @@ public class BuildpathDetector {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.eclipse.core.resources.IResourceProxyVisitor#visit(org.eclipse.core
-	 * .resources.IResourceProxy)
+	 * @see org.eclipse.core.resources.IResourceProxyVisitor#visit(org.eclipse.core
+	 *      .resources.IResourceProxy)
 	 */
 	public boolean visit(IResourceProxy proxy, List files) {
 		if (fMonitor.isCanceled()) {

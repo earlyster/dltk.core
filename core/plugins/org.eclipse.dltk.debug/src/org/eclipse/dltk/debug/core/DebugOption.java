@@ -19,6 +19,6 @@ public class DebugOption {
 	 * All commands should be treated as asynchronous
 	 */
 	public static final BooleanOption DBGP_ASYNC = new BooleanOption(
-			"DBGP_ASYNC", true);
+			"DBGP_ASYNC", true); //$NON-NLS-1$
 
 }

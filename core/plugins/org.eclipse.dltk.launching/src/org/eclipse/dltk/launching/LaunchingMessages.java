@@ -65,6 +65,8 @@ public class LaunchingMessages extends NLS {
 	public static String DefaultProjectBuildpathEntry_3;
 	public static String DefaultProjectBuildpathEntry_4;
 
+	public static String DLTKLaunchingPlugin_rebindInterpreters;
+
 	public static String errDebuggingEngineScriptFileDoesntExist;
 
 	public static String errDebuggingEngineWorkingDirectoryDoesntExist;

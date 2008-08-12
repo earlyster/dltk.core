@@ -56,9 +56,9 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		ModelManager.PerWorkingCopyInfo perWorkingCopyInfo = manager
 				.getPerWorkingCopyInfo(this, false /* don't create */,
 						true /* record usage */, null /*
-				 * no problem requestor
-				 * needed
-				 */);
+														 * no problem requestor
+														 * needed
+														 */);
 		if (perWorkingCopyInfo == null) {
 			// close cu and its children
 			close();
@@ -226,9 +226,9 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		ModelManager.PerWorkingCopyInfo perWorkingCopyInfo = manager
 				.getPerWorkingCopyInfo(workingCopy, false /* don't create */,
 						true /* record usage */, null /*
-				 * not used since don't
-				 * create
-				 */);
+														 * not used since don't
+														 * create
+														 */);
 		if (perWorkingCopyInfo != null) {
 			return perWorkingCopyInfo.getWorkingCopy(); // return existing
 			// handle instead of the
@@ -275,7 +275,8 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	 * @see org.eclipse.dltk.internal.core.Openable#makeConsistent(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void makeConsistent(IProgressMonitor monitor) throws ModelException {
-		if (isConsistent()) return;
+		if (isConsistent())
+			return;
 		// makeConsistent(false/*don't create AST*/, 0, monitor);
 
 		// Remove AST Cache element
@@ -362,8 +363,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	public void save(IProgressMonitor pm, boolean force) throws ModelException {
 		if (isWorkingCopy()) {
 			// no need to save the buffer for a working copy (this is a noop)
-			throw new RuntimeException("not implemented"); // not simply
-															// //$NON-NLS-1$
+			throw new RuntimeException("not implemented"); //$NON-NLS-1$ // not simply
 			// makeConsistent,
 			// also computes
 			// fine-grain deltas

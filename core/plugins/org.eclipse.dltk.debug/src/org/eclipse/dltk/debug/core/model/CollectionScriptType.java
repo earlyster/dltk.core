@@ -22,7 +22,7 @@ public class CollectionScriptType extends AtomicScriptType {
 	protected void addInstanceId(IScriptValue value, StringBuffer buffer) {
 		String id = value.getInstanceId();
 		if (id != null) {
-			buffer.append(" (id = " + id + ")"); // TODO add constant //$NON-NLS-1$ //$NON-NLS-2$
+			buffer.append(" (id = " + id + ")"); //$NON-NLS-1$ //$NON-NLS-2$ // TODO add constant
 		}
 
 	}
@@ -32,13 +32,13 @@ public class CollectionScriptType extends AtomicScriptType {
 		try {
 			IVariable[] variables2 = value.getVariables();
 			if (variables2.length > 0) {
-				sb.append("{"); // == Array
+				sb.append("{"); //$NON-NLS-1$ // == Array
 				for (int i = 0; i < variables2.length; i++) {
 					sb.append(variables2[i].getValue().getValueString());
-					sb.append(",");
+					sb.append(",");//$NON-NLS-1$
 				}
 				sb.setLength(sb.length() - 1);
-				sb.append("}"); // == Array
+				sb.append("}"); //$NON-NLS-1$ // == Array
 			}
 		} catch (DebugException ex) {
 			ex.printStackTrace();

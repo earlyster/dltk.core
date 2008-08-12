@@ -208,7 +208,7 @@ public class TodoTaskConfigurationBlock extends AbstractConfigurationBlock {
 		markersComposite.setFont(parent.getFont());
 
 		final Button enableCheckbox = addCheckBox(markersComposite,
-				"Enable task tags", TodoTaskPreferences.ENABLED, 0);
+				PreferencesMessages.TodoTaskConfigurationBlock_enableTaskTags, TodoTaskPreferences.ENABLED, 0);
 
 		fCaseSensitiveCheckbox = addCheckBox(
 				markersComposite,

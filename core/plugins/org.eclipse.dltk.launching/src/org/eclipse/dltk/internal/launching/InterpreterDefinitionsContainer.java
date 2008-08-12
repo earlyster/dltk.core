@@ -68,8 +68,8 @@ public class InterpreterDefinitionsContainer {
 		public int compare(Object arg0, Object arg1) {
 			DefaultInterpreterEntry entry0 = (DefaultInterpreterEntry) arg0;
 			DefaultInterpreterEntry entry1 = (DefaultInterpreterEntry) arg1;
-			String k0 = entry0.getEnvironment() + ":" + entry0.getNature();
-			String k1 = entry1.getEnvironment() + ":" + entry1.getNature();
+			String k0 = entry0.getEnvironment() + ":" + entry0.getNature(); //$NON-NLS-1$
+			String k1 = entry1.getEnvironment() + ":" + entry1.getNature(); //$NON-NLS-1$
 			return k0.compareTo(k1);
 		}
 	}
@@ -557,7 +557,8 @@ public class InterpreterDefinitionsContainer {
 	 * @throws IOException
 	 *             if this method fails. Reasons include:
 	 *             <ul>
-	 *             <li>the XML in <code>inputStream</code> was badly formatted</li>
+	 *             <li>the XML in <code>inputStream</code> was badly
+	 *             formatted</li>
 	 *             <li>the top-level node was not 'InterpreterSettings'</li>
 	 *             </ul>
 	 * 
@@ -609,7 +610,7 @@ public class InterpreterDefinitionsContainer {
 					String id = interpreterTypeElement.getAttribute(ID_ATTR);
 					String environment = interpreterTypeElement
 							.getAttribute(ENVIRONMENT_ATTR);
-					if ("".equals(environment)) {
+					if ("".equals(environment)) { //$NON-NLS-1$
 						environment = LocalEnvironment.ENVIRONMENT_ID;
 					}
 					DefaultInterpreterEntry entry = new DefaultInterpreterEntry(

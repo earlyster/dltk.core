@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UTFDataFormatException;
 import java.net.URI;
+import java.text.MessageFormat;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.filesystem.EFS;
@@ -513,10 +514,10 @@ public class Util {
 					stream = file.getContents(true);
 				} catch (Exception e) {
 					IStatus status = new Status(IStatus.ERROR,
-							DLTKCore.PLUGIN_ID, "Error receiving file: "
-									+ file.getFullPath()
-									+ " content: retrying("
-									+ String.valueOf(tryCount) + ")", e);
+							DLTKCore.PLUGIN_ID, MessageFormat.format(
+									Messages.Util_errorReceivingFile,
+									new Object[] { file.getFullPath(),
+											String.valueOf(tryCount) }), e);
 					DLTKCore.getDefault().getLog().log(status);
 
 					// Some times for RSE we can get here if connection is not
@@ -999,7 +1000,8 @@ public class Util {
 
 	/**
 	 * Return a new array which is the split of the given string using the given
-	 * divider. The given end is exclusive and the given start is inclusive. <br>
+	 * divider. The given end is exclusive and the given start is inclusive.
+	 * <br>
 	 * <br>
 	 * For example:
 	 * <ol>
@@ -1357,10 +1359,10 @@ public class Util {
 	 * machine-independent manner.
 	 * <p>
 	 * First, two bytes are written to the output stream as if by the
-	 * <code>writeShort</code> method giving the number of bytes to follow. This
-	 * value is the number of bytes actually written out, not the length of the
-	 * string. Following the length, each character of the string is output, in
-	 * sequence, using the UTF-8 encoding for the character.
+	 * <code>writeShort</code> method giving the number of bytes to follow.
+	 * This value is the number of bytes actually written out, not the length of
+	 * the string. Following the length, each character of the string is output,
+	 * in sequence, using the UTF-8 encoding for the character.
 	 * 
 	 * @param str
 	 *            a string to be written.

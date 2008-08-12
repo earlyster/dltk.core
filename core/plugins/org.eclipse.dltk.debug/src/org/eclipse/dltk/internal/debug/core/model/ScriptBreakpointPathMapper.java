@@ -43,7 +43,7 @@ public class ScriptBreakpointPathMapper implements IScriptBreakpointPathMapper {
 	public URI map(URI uri) {
 		String path = uri.getPath();
 		// no mapTo, return original uri
-		if (mapTo == null || "".equals(mapTo)) {
+		if (mapTo == null || "".equals(mapTo)) { //$NON-NLS-1$
 			return uri;
 		}
 

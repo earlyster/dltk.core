@@ -333,7 +333,7 @@ public class MethodInfoViewer {
 		public String getFullyQualifiedText(MethodNameMatch type) {
 			StringBuffer result = new StringBuffer();
 			result.append(getTypeContainerName(type, 2));
-			result.append(" - ");
+			result.append(" - "); //$NON-NLS-1$
 			result.append(type.getPackageName());
 			// IType dltkType = ((DLTKSearchMethodNameMatch) type).getType();
 			// ISourceModule sourceModule = (ISourceModule)

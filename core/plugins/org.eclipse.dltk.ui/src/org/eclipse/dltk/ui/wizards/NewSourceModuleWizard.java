@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IModelElement;
@@ -57,11 +59,23 @@ public abstract class NewSourceModuleWizard extends NewElementWizard {
 					try {
 						EditorUtility.openInEditor(module);
 					} catch (PartInitException e) {
-						DLTKUIPlugin.logErrorMessage("Error in openInEditor("
-								+ module.getElementName() + ")", e);
+						DLTKUIPlugin
+								.logErrorMessage(
+										MessageFormat
+												.format(
+														Messages.NewSourceModuleWizard_errorInOpenInEditor,
+														new Object[] { module
+																.getElementName() }),
+										e);
 					} catch (ModelException e) {
-						DLTKUIPlugin.logErrorMessage("Error in openInEditor("
-								+ module.getElementName() + ")", e);
+						DLTKUIPlugin
+								.logErrorMessage(
+										MessageFormat
+												.format(
+														Messages.NewSourceModuleWizard_errorInOpenInEditor,
+														new Object[] { module
+																.getElementName() }),
+										e);
 					}
 				}
 			});

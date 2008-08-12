@@ -112,7 +112,7 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 		if (path.lastSegment() == null) {
 			return frame.toString();
 		}
-		return "DBGP: " + path.lastSegment();
+		return "DBGP: " + path.lastSegment(); //$NON-NLS-1$
 	}
 
 	/*

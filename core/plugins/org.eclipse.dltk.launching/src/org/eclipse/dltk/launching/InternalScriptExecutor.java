@@ -31,8 +31,8 @@ public class InternalScriptExecutor {
 
 	public InternalScriptExecutor(IInterpreterInstall install,
 			IScriptProcessHandler handler) {
-		Assert.isNotNull(install, "IInterpreterInstall must not be null");
-		Assert.isNotNull(handler, "IProcessHandler must not be null");
+		Assert.isNotNull(install, Messages.InternalScriptExecutor_iInterpreterInstallMustNotBeNull);
+		Assert.isNotNull(handler, Messages.InternalScriptExecutor_iProcessHandlerMustNotBeNull);
 
 		this.install = install;
 		this.handler = handler;
