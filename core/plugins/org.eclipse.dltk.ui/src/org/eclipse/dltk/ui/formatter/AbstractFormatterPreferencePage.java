@@ -50,6 +50,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.editors.text.EditorsUI;
@@ -85,16 +86,24 @@ public abstract class AbstractFormatterPreferencePage extends
 			return 3;
 		}
 
+		private Button modifyButton;
+
 		protected ComboViewerBlock createComboViewerBlock(Composite group) {
-			ComboViewerBlock result = super.createComboViewerBlock(group);
-			SWTFactory.createPushButton(group,
-					FormatterMessages.FormatterPreferencePage_edit, null)
-					.addSelectionListener(new SelectionAdapter() {
-						public void widgetSelected(SelectionEvent e) {
-							editButtonPressed();
-						}
-					});
-			return result;
+			final ComboViewerBlock combo = super.createComboViewerBlock(group);
+			modifyButton = SWTFactory.createPushButton(group,
+					FormatterMessages.FormatterPreferencePage_edit, null);
+			modifyButton.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					editButtonPressed();
+				}
+			});
+			return combo;
+		}
+
+		protected void initialize() {
+			super.initialize();
+			modifyButton.setEnabled(getExtensionManager().getContributions(
+					getNatureId()).length != 0);
 		}
 
 		protected void editButtonPressed() {
