@@ -13,6 +13,8 @@ package org.eclipse.dltk.ui.formatter;
 
 import java.util.Map;
 
+import org.eclipse.dltk.ui.CodeFormatterConstants;
+
 /**
  * Abstract base class for the {@link IScriptFormatter} implementations.
  */
@@ -47,9 +49,31 @@ public abstract class AbstractScriptFormatter implements IScriptFormatter {
 			if (value instanceof Number) {
 				return ((Number) value).intValue();
 			}
-			return Integer.parseInt(value.toString());
+			try {
+				return Integer.parseInt(value.toString());
+			} catch (NumberFormatException e) {
+				// ignore
+			}
 		}
 		return 0;
+	}
+
+	protected String getString(String key) {
+		Object value = preferences.get(key);
+		if (value != null) {
+			return value.toString();
+		}
+		return null;
+	}
+
+	protected IFormatterIndentGenerator createIndentGenerator() {
+		final int indentSize = getInt(CodeFormatterConstants.FORMATTER_INDENTATION_SIZE);
+		final String indentType = getString(CodeFormatterConstants.FORMATTER_TAB_CHAR);
+		if (CodeFormatterConstants.SPACE.equals(indentType)) {
+			return new FormatterIndentGenerator(' ', indentSize);
+		} else {
+			return new FormatterIndentGenerator('\t', indentSize);
+		}
 	}
 
 }
