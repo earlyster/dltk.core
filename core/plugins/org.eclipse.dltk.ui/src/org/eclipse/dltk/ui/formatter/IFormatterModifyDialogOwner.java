@@ -11,12 +11,17 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter;
 
-import org.eclipse.jface.text.source.projection.ProjectionViewer;
-import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
-public interface IFormatterDialogOwner extends IShellProvider {
+public interface IFormatterModifyDialogOwner {
 
-	ProjectionViewer createPreview(Composite composite);
+	Shell getShell();
+
+	ISourceViewer createPreview(Composite composite);
+
+	IDialogSettings getDialogSettings();
 
 }

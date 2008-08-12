@@ -13,27 +13,31 @@ package org.eclipse.dltk.ui.formatter;
 
 import java.util.Map;
 
-import org.eclipse.dltk.ui.preferences.ControlBindingManager;
-
 public interface IFormatterModifyDialog {
 
-	IFormatterDialogOwner getOwner();
-
-	ControlBindingManager getBindingManager();
-
 	/**
+	 * Sets the preferences the dialog should use
+	 * 
 	 * @param prefs
 	 */
 	void setPreferences(Map prefs);
 
 	/**
-	 * 
+	 * Opens the modal dialog and returns only after the dialog was completed.
+	 * The return value should be {@link org.eclipse.jface.window.Window#OK} or
+	 * {@link org.eclipse.jface.window.Window#CANCEL}
 	 */
 	int open();
 
 	/**
+	 * Returns the preferences modified by the dialog
+	 * 
 	 * @return
 	 */
 	Map getPreferences();
+
+	IFormatterModifyDialogOwner getOwner();
+
+	IScriptFormatterFactory getFormatterFactory();
 
 }

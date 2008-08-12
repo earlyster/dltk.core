@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.swt.events.ModifyEvent;
@@ -107,7 +107,7 @@ public class ControlBindingManager {
 				boolean state = button.getSelection();
 				preferenceDelegate.setBoolean(key, state);
 
-				updateStatus(new StatusInfo());
+				updateStatus(Status.OK_STATUS);
 			}
 		});
 	}
@@ -162,20 +162,27 @@ public class ControlBindingManager {
 				int index = combo.getSelectionIndex();
 				preferenceDelegate.setString(key, combo.getItem(index));
 
-				changeListener.statusChanged(new StatusInfo());
+				changeListener.statusChanged(Status.OK_STATUS);
 			}
 		});
 	}
 
 	private IStatus validateText(Text text) {
-		IStatus status = new StatusInfo();
-
 		IFieldValidator validator = validatorManager.getValidator(text);
-
 		if ((validator != null) && text.isEnabled()) {
-			status = validator.validate(text.getText());
+			return validator.validate(text.getText());
+		} else {
+			return Status.OK_STATUS;
 		}
+	}
 
+	public IStatus getStatus() {
+		IStatus status = Status.OK_STATUS;
+		Iterator iter = textControls.keySet().iterator();
+		while (iter.hasNext()) {
+			IStatus s = validateText((Text) iter.next());
+			status = StatusUtil.getMoreSevere(s, status);
+		}
 		return status;
 	}
 
@@ -210,7 +217,7 @@ public class ControlBindingManager {
 
 					}
 
-					changeListener.statusChanged(new StatusInfo());
+					changeListener.statusChanged(Status.OK_STATUS);
 				}
 
 				public void widgetDefaultSelected(SelectionEvent e) {

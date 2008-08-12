@@ -12,19 +12,19 @@
 package org.eclipse.dltk.ui.formatter;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.dltk.compiler.util.Util;
-import org.eclipse.dltk.ui.preferences.ControlBindingManager;
-import org.eclipse.dltk.ui.preferences.IPreferenceDelegate;
+import org.eclipse.dltk.ui.formatter.internal.FormatterControlManager;
+import org.eclipse.dltk.ui.formatter.internal.FormatterDialogPreferences;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -32,23 +32,76 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
 public abstract class FormatterModifyDialog extends StatusDialog implements
-		IFormatterModifyDialog, IPreferenceDelegate, IStatusChangeListener {
+		IFormatterModifyDialog, IStatusChangeListener {
 
-	protected final IFormatterDialogOwner dialogOwner;
+	private final FormatterDialogPreferences preferences = new FormatterDialogPreferences();
 
-	private final ControlBindingManager bindingManager = new ControlBindingManager(
-			this, this);
+	private final FormatterControlManager controlManager = new FormatterControlManager(
+			preferences, this);
 
-	private final Map preferences = new HashMap();
+	private final IFormatterModifyDialogOwner dialogOwner;
+	private final IScriptFormatterFactory formatterFactory;
+	final IDialogSettings fDialogSettings;
 
 	/**
 	 * @param parent
 	 */
-	public FormatterModifyDialog(IFormatterDialogOwner dialogOwner) {
+	public FormatterModifyDialog(IFormatterModifyDialogOwner dialogOwner,
+			IScriptFormatterFactory formatterFactory) {
 		super(dialogOwner.getShell());
 		this.dialogOwner = dialogOwner;
+		this.formatterFactory = formatterFactory;
+		this.fDialogSettings = getDialogSettingsSection(dialogOwner
+				.getDialogSettings(), formatterFactory.getId());
 		setStatusLineAboveButtons(false);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
+	}
+
+	private static IDialogSettings getDialogSettingsSection(
+			IDialogSettings settings, String sectionId) {
+		IDialogSettings section = settings.getSection(sectionId);
+		if (section == null) {
+			section = settings.addNewSection(sectionId);
+		}
+		return section;
+	}
+
+	private static final String KEY_X = "x"; //$NON-NLS-1$
+	private static final String KEY_Y = "y"; //$NON-NLS-1$
+	private static final String KEY_WIDTH = "width"; //$NON-NLS-1$
+	private static final String KEY_HEIGHT = "height"; //$NON-NLS-1$
+
+	protected Point getInitialSize() {
+		Point initialSize = super.getInitialSize();
+		try {
+			int lastWidth = fDialogSettings.getInt(KEY_WIDTH);
+			if (initialSize.x > lastWidth)
+				lastWidth = initialSize.x;
+			int lastHeight = fDialogSettings.getInt(KEY_HEIGHT);
+			if (initialSize.y > lastHeight)
+				lastHeight = initialSize.y;
+			return new Point(lastWidth, lastHeight);
+		} catch (NumberFormatException ex) {
+		}
+		return initialSize;
+	}
+
+	protected Point getInitialLocation(Point initialSize) {
+		try {
+			return new Point(fDialogSettings.getInt(KEY_X), fDialogSettings
+					.getInt(KEY_Y));
+		} catch (NumberFormatException ex) {
+			return super.getInitialLocation(initialSize);
+		}
+	}
+
+	public boolean close() {
+		final Rectangle shell = getShell().getBounds();
+		fDialogSettings.put(KEY_WIDTH, shell.width);
+		fDialogSettings.put(KEY_HEIGHT, shell.height);
+		fDialogSettings.put(KEY_X, shell.x);
+		fDialogSettings.put(KEY_Y, shell.y);
+		return super.close();
 	}
 
 	private TabFolder fTabFolder;
@@ -60,7 +113,7 @@ public abstract class FormatterModifyDialog extends StatusDialog implements
 		fTabFolder.setFont(composite.getFont());
 		fTabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		addPages();
-		bindingManager.initialize();
+		controlManager.initialize();
 		return composite;
 	}
 
@@ -71,16 +124,8 @@ public abstract class FormatterModifyDialog extends StatusDialog implements
 		applyDialogFont(tabItem.getControl());
 		tabItem.setText(title);
 		tabItem.setData(tabPage);
-		tabItem.setControl(tabPage.createContents(fTabFolder));
+		tabItem.setControl(tabPage.createContents(controlManager, fTabFolder));
 		fTabPages.add(tabPage);
-	}
-
-	public IFormatterDialogOwner getOwner() {
-		return dialogOwner;
-	}
-
-	public ControlBindingManager getBindingManager() {
-		return bindingManager;
 	}
 
 	public void statusChanged(IStatus status) {
@@ -92,32 +137,20 @@ public abstract class FormatterModifyDialog extends StatusDialog implements
 		}
 	}
 
-	public String getString(Object key) {
-		final String value = (String) preferences.get(key);
-		return value != null ? value : Util.EMPTY_STRING;
+	public IFormatterModifyDialogOwner getOwner() {
+		return dialogOwner;
 	}
 
-	public boolean getBoolean(Object key) {
-		return Boolean.valueOf(getString(key)).booleanValue();
-	}
-
-	public void setString(Object key, String value) {
-		preferences.put(key, value);
-	}
-
-	public void setBoolean(Object key, boolean value) {
-		setString(key, String.valueOf(value));
+	public IScriptFormatterFactory getFormatterFactory() {
+		return formatterFactory;
 	}
 
 	public void setPreferences(Map prefs) {
-		if (prefs != null) {
-			preferences.clear();
-			preferences.putAll(prefs);
-		}
+		preferences.set(prefs);
 	}
 
 	public Map getPreferences() {
-		return Collections.unmodifiableMap(preferences);
+		return preferences.get();
 	}
 
 }

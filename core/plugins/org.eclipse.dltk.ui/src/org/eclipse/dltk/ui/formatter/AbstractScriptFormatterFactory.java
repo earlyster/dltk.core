@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,20 +28,31 @@ public abstract class AbstractScriptFormatterFactory extends
 		DLTKContributedExtension implements IScriptFormatterFactory {
 
 	public Map retrievePreferences(IPreferencesLookupDelegate delegate) {
-		return new HashMap();
+		final Map result = new HashMap();
+		final String qualifier = getPreferenceQualifier();
+		final String[] keys = getPreferenceKeys();
+		if (qualifier != null && keys != null) {
+			for (int i = 0; i < keys.length; ++i) {
+				final String key = keys[i];
+				result.put(key, delegate.getString(qualifier, key));
+			}
+		}
+		return result;
 	}
 
 	public void savePreferences(Map preferences,
 			IPreferencesSaveDelegate delegate) {
-		// empty
-	}
-
-	public String getPreferenceQualifier() {
-		return null;
-	}
-
-	public String[] getPreferenceKeys() {
-		return null;
+		final String qualifier = getPreferenceQualifier();
+		final String[] keys = getPreferenceKeys();
+		if (qualifier != null && keys != null) {
+			for (int i = 0; i < keys.length; ++i) {
+				final String key = keys[i];
+				if (preferences.containsKey(key)) {
+					final String value = (String) preferences.get(key);
+					delegate.setString(qualifier, key, value);
+				}
+			}
+		}
 	}
 
 	public int detectIndentationLevel(IDocument document, int offset, Map prefs) {
@@ -70,11 +82,12 @@ public abstract class AbstractScriptFormatterFactory extends
 		return true;
 	}
 
-	public String getPreviewContent() {
+	public URL getPreviewContent() {
 		return null;
 	}
 
-	public IFormatterModifyDialog createDialog(IFormatterDialogOwner dialogOwner) {
+	public IFormatterModifyDialog createDialog(
+			IFormatterModifyDialogOwner dialogOwner) {
 		return null;
 	}
 }

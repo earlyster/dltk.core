@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter;
 
+import java.net.URL;
 import java.util.Map;
 
 import org.eclipse.dltk.core.IDLTKContributedExtension;
@@ -70,11 +71,11 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 	 * 
 	 * @return
 	 */
-	String getPreviewContent();
+	URL getPreviewContent();
 
 	/**
 	 * @return
 	 */
-	IFormatterModifyDialog createDialog(IFormatterDialogOwner dialogOwner);
+	IFormatterModifyDialog createDialog(IFormatterModifyDialogOwner dialogOwner);
 
 }

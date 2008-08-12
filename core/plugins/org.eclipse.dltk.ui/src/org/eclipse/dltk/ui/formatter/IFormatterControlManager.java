@@ -11,12 +11,17 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter;
 
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Text;
 
-public interface IFormatterModifiyTabPage {
+public interface IFormatterControlManager {
 
-	Composite createContents(IFormatterControlManager manager, Composite parent);
+	Button createCheckbox(Composite parent, Object key, String text);
 
-	void updatePreview();
+	Combo createCombo(Composite parent, Object key, String label, String[] items);
+
+	Text createNumber(Composite parent, Object key, String label);
 
 }

@@ -11,74 +11,105 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter;
 
-import org.eclipse.dltk.compiler.util.Util;
-import org.eclipse.dltk.ui.preferences.FieldValidators;
+import java.net.URL;
+
+import org.eclipse.dltk.ui.formatter.internal.WhitespaceCharacterPainter;
 import org.eclipse.dltk.ui.util.SWTFactory;
-import org.eclipse.jface.text.source.projection.ProjectionViewer;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.text.ITextViewerExtension2;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
 
 public abstract class FormatterModifyTabPage implements
 		IFormatterModifiyTabPage {
 
-	protected final IFormatterModifyDialog dialog;
-	private ProjectionViewer previewViewer;
+	protected static final String SHOW_INVISIBLE_PREFERENCE_KEY = "invisible.characters"; //$NON-NLS-1$
+
+	private final IFormatterModifyDialog dialog;
+	private ISourceViewer previewViewer;
 
 	/**
-	 * @param dialogOwner
+	 * @param dialog
 	 */
 	public FormatterModifyTabPage(IFormatterModifyDialog dialog) {
 		this.dialog = dialog;
 	}
 
-	public Composite createContents(Composite parent) {
+	private Button fShowInvisibleButton;
+
+	public Composite createContents(IFormatterControlManager manager,
+			Composite parent) {
 		final SashForm page = new SashForm(parent, SWT.HORIZONTAL);
 		Composite options = SWTFactory.createComposite(page, page.getFont(), 1,
 				1, GridData.FILL_BOTH);
-		createOptions(options);
+		createOptions(manager, options);
 		Composite previewBlock = SWTFactory.createComposite(page, page
 				.getFont(), 1, 1, GridData.FILL_BOTH);
+		//
+		fShowInvisibleButton = new Button(previewBlock, SWT.CHECK);
+		fShowInvisibleButton
+				.setText(FormatterMessages.FormatterModifyTabPage_showInvisible);
+		fShowInvisibleButton.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP,
+				true, false));
+		fShowInvisibleButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				final boolean newValue = fShowInvisibleButton.getSelection();
+				updateShowInvisible(newValue);
+				getDialogSettings()
+						.put(SHOW_INVISIBLE_PREFERENCE_KEY, newValue);
+			}
+		});
 		previewViewer = dialog.getOwner().createPreview(previewBlock);
-		// TODO load preview text
+		//
+		final boolean savedValue = getDialogSettings().getBoolean(
+				SHOW_INVISIBLE_PREFERENCE_KEY);
+		fShowInvisibleButton.setSelection(savedValue);
+		updateShowInvisible(savedValue);
 		return page;
+	}
+
+	private WhitespaceCharacterPainter whitespaceCharacterPainter = null;
+
+	protected void updateShowInvisible(boolean value) {
+		if (value) {
+			if (whitespaceCharacterPainter == null) {
+				whitespaceCharacterPainter = new WhitespaceCharacterPainter(
+						previewViewer);
+				((ITextViewerExtension2) previewViewer)
+						.addPainter(whitespaceCharacterPainter);
+			}
+		} else {
+			if (whitespaceCharacterPainter != null) {
+				((ITextViewerExtension2) previewViewer)
+						.removePainter(whitespaceCharacterPainter);
+				whitespaceCharacterPainter = null;
+			}
+		}
+	}
+
+	private IDialogSettings getDialogSettings() {
+		return ((FormatterModifyDialog) dialog).fDialogSettings;
 	}
 
 	public void updatePreview() {
 		if (previewViewer != null) {
-			// TODO update
+			FormatterPreviewUtils.updatePreview(previewViewer,
+					getPreviewContent(), dialog.getFormatterFactory(), dialog
+							.getPreferences());
 		}
 	}
 
-	protected abstract void createOptions(Composite parent);
+	protected abstract void createOptions(IFormatterControlManager manager,
+			Composite parent);
 
-	protected Button createCheckbox(Composite parent, Object key, String text) {
-		Button button = SWTFactory.createCheckButton(parent, text, null, false,
-				1);
-		dialog.getBindingManager().bindControl(button, key, null);
-		return button;
-	}
-
-	protected Combo createCombo(Composite parent, Object key, String label,
-			String[] items) {
-		SWTFactory.createLabel(parent, label, 1);
-		Combo combo = SWTFactory.createCombo(parent,
-				SWT.READ_ONLY | SWT.BORDER, 1, items);
-		dialog.getBindingManager().bindControl(combo, key);
-		return combo;
-	}
-
-	protected Text createNumber(Composite parent, Object key, String label) {
-		SWTFactory.createLabel(parent, label, 1);
-		Text text = SWTFactory.createText(parent, SWT.BORDER, 1,
-				Util.EMPTY_STRING);
-		dialog.getBindingManager().bindControl(text, key,
-				FieldValidators.POSITIVE_NUMBER_VALIDATOR);
-		return text;
+	protected URL getPreviewContent() {
+		return null;
 	}
 
 }

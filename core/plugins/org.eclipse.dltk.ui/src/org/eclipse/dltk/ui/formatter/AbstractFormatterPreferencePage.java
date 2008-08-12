@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKContributionExtensionManager;
 import org.eclipse.dltk.core.IDLTKContributedExtension;
 import org.eclipse.dltk.core.IPreferencesSaveDelegate;
@@ -28,7 +27,6 @@ import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.internal.ui.preferences.ScriptSourcePreviewerUpdater;
 import org.eclipse.dltk.internal.ui.text.DLTKColorManager;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
-import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.preferences.AbstractConfigurationBlockPropertyAndPreferencePage;
 import org.eclipse.dltk.ui.preferences.AbstractOptionsBlock;
@@ -39,11 +37,12 @@ import org.eclipse.dltk.ui.text.IColorManager;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.dltk.ui.util.SWTFactory;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.IOverviewRuler;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.window.Window;
@@ -53,7 +52,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
@@ -63,10 +61,10 @@ public abstract class AbstractFormatterPreferencePage extends
 		AbstractConfigurationBlockPropertyAndPreferencePage {
 
 	protected class FormatterSelectionBlock extends
-			ContributedExtensionOptionsBlock implements IFormatterDialogOwner {
+			ContributedExtensionOptionsBlock {
 
 		private IColorManager fColorManager;
-		private ProjectionViewer fPreviewViewer;
+		private ISourceViewer fPreviewViewer;
 
 		public FormatterSelectionBlock(IStatusChangeListener context,
 				IProject project, IWorkbenchPreferenceContainer container) {
@@ -103,7 +101,7 @@ public abstract class AbstractFormatterPreferencePage extends
 			IScriptFormatterFactory factory = (IScriptFormatterFactory) getSelectedExtension();
 			if (factory != null) {
 				final IFormatterModifyDialog dialog = factory
-						.createDialog(this);
+						.createDialog(new FormatterModifyDialogOwner());
 				if (dialog != null) {
 					final Map oldPrefs = getFormatterPrefs(factory);
 					dialog.setPreferences(oldPrefs);
@@ -119,6 +117,23 @@ public abstract class AbstractFormatterPreferencePage extends
 					}
 				}
 			}
+		}
+
+		private class FormatterModifyDialogOwner implements
+				IFormatterModifyDialogOwner {
+
+			public ISourceViewer createPreview(Composite composite) {
+				return FormatterSelectionBlock.this.createPreview(composite);
+			}
+
+			public Shell getShell() {
+				return AbstractFormatterPreferencePage.this.getShell();
+			}
+
+			public IDialogSettings getDialogSettings() {
+				return AbstractFormatterPreferencePage.this.getDialogSettings();
+			}
+
 		}
 
 		private class SaveDelegate implements IPreferencesSaveDelegate {
@@ -164,13 +179,6 @@ public abstract class AbstractFormatterPreferencePage extends
 			}
 		}
 
-		/*
-		 * increase visibility
-		 */
-		public Shell getShell() {
-			return super.getShell();
-		}
-
 		protected String getSelectorGroupLabel() {
 			return FormatterMessages.FormatterPreferencePage_groupName;
 		}
@@ -190,7 +198,7 @@ public abstract class AbstractFormatterPreferencePage extends
 		/**
 		 * @param composite
 		 */
-		public ProjectionViewer createPreview(Composite composite) {
+		public ISourceViewer createPreview(Composite composite) {
 			IPreferenceStore generalTextStore = EditorsUI.getPreferenceStore();
 			IPreferenceStore store = new ChainedPreferenceStore(
 					new IPreferenceStore[] { getPreferenceStore(),
@@ -261,30 +269,9 @@ public abstract class AbstractFormatterPreferencePage extends
 		}
 
 		private void updatePreview(IScriptFormatterFactory formatterFactory) {
-			String content = formatterFactory.getPreviewContent();
-			if (content != null) {
-				fPreviewViewer.getControl().setEnabled(true);
-				// TODO change background to white
-				IScriptFormatter formatter = formatterFactory.createFormatter(
-						Util.LINE_SEPARATOR,
-						getFormatterPrefs(formatterFactory));
-				try {
-					TextEdit textEdit = formatter.format(content, 0, content
-							.length(), 0);
-					if (textEdit != null) {
-						IDocument document = new Document(content);
-						textEdit.apply(document);
-						content = document.get();
-					}
-				} catch (BadLocationException e) {
-					DLTKUIPlugin.log(e);
-				}
-				fPreviewViewer.getDocument().set(content);
-			} else {
-				fPreviewViewer.getControl().setEnabled(false);
-				// TODO change background to gray
-				fPreviewViewer.getDocument().set(Util.EMPTY_STRING);
-			}
+			FormatterPreviewUtils.updatePreview(fPreviewViewer,
+					formatterFactory.getPreviewContent(), formatterFactory,
+					getFormatterPrefs(formatterFactory));
 		}
 
 		private final Map formatterPrefs = new IdentityHashMap();
@@ -357,6 +344,8 @@ public abstract class AbstractFormatterPreferencePage extends
 	protected abstract String getNatureId();
 
 	protected abstract PreferenceKey getFormatterPreferenceKey();
+
+	protected abstract IDialogSettings getDialogSettings();
 
 	protected String getHelpId() {
 		return null;
