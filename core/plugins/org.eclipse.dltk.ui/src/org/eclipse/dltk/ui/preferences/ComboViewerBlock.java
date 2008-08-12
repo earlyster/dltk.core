@@ -39,6 +39,8 @@ public abstract class ComboViewerBlock {
 	public void initialize(Object[] elements) {
 		viewer.add(elements);
 		setSelectedObject();
+		final int itemCount = viewer.getCombo().getItemCount();
+		viewer.getCombo().setEnabled(itemCount != 0);
 	}
 
 	/**
