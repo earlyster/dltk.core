@@ -79,4 +79,18 @@ public class TextUtilsTest extends SuiteOfTestCases {
 		assertEquals("3", lines[2]);
 	}
 
+	public void testSelectHeadLines1() {
+		assertEquals("123", TextUtils.selectHeadLines("123", 1));
+		assertEquals("123\n", TextUtils.selectHeadLines("123\n", 1));
+		assertEquals("123\n", TextUtils.selectHeadLines("123\n456", 1));
+		assertEquals("123\n", TextUtils.selectHeadLines("123\n456\n", 1));
+	}
+
+	public void testSelectHeadLines2() {
+		assertEquals("123\n456\n", TextUtils
+				.selectHeadLines("123\n456\n789", 2));
+		assertEquals("123\n456\n789", TextUtils.selectHeadLines(
+				"123\n456\n789", 10));
+	}
+
 }
