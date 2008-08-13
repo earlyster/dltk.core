@@ -648,19 +648,51 @@
 				values="org.eclipse.dltk.ui.text.completion.ContentAssistComputerParameter"/>
 		</command>
 	</extension>
- <extension
-       point="org.eclipse.ui.actionSets">
-        <actionSet
-            label="%ScriptCodingActionSet.label"
-            description="%ScriptCodingActionSet.description"
-            visible="false"
-            id="org.eclipse.dltk.ui.ScriptCodingActionSet">
+
+	<extension
+		point="org.eclipse.ui.menus">
+	    <menuContribution
+	    	locationURI="menu:org.eclipse.ui.main.menu?after=edit">
+			<menu
+               label="%SourceMenu.label"
+               id="org.eclipse.dltk.ui.source.menu">
+		    <separator name="commentGroup" visible="true" />
+            <separator name="editGroup" visible="true" />
+            <separator name="importGroup" visible="true" />
+            <separator name="generateGroup" visible="true" />
+            <separator name="codeGroup" visible="true" />
+            <separator name="externalizeGroup" visible="true" />
+            <separator name="convertGroup" visible="true" />
+			<visibleWhen>
+	           <with variable="activeEditor">
+	              <instanceof value="org.eclipse.dltk.internal.ui.editor.ScriptEditor" />
+	           </with>
+	        </visibleWhen>
+         	</menu>
+		</menuContribution>
+		<!-- Comment Group -->
+    	<menuContribution
+			locationURI="menu:org.eclipse.dltk.ui.source.menu?after=commentGroup">     
+			<command commandId="org.eclipse.dltk.ui.edit.text.script.toggle.comment" />
+			<command commandId="org.eclipse.dltk.ui.edit.text.script.comment" />
+			<command commandId="org.eclipse.dltk.ui.edit.text.script.uncomment" />
+		</menuContribution>
+		<menuContribution
+			locationURI="menu:org.eclipse.dltk.ui.source.menu?after=editGroup">     
+			<command commandId="org.eclipse.ui.edit.text.shiftRight" />
+			<command commandId="org.eclipse.ui.edit.text.shiftLeft" />
+		</menuContribution>
+	</extension>
+
 <!-- =========================================================================== -->
 <!-- Refactoring Menu                                                            -->
 <!-- =========================================================================== -->       
-	   <menu
+	<extension
+		point="org.eclipse.ui.menus">
+	    <menuContribution
+	    	locationURI="menu:org.eclipse.ui.main.menu?after=org.eclipse.dltk.ui.source.menu">
+			<menu
                label="%Refactoring.menu.label"
-               path="edit"
                id="org.eclipse.dltk.ui.refactoring.menu">
             <separator name="undoRedoGroup"/>
             <separator name="reorgGroup"/>
@@ -670,7 +702,17 @@
             <separator name="codingGroup2"/>
             <separator name="typeGroup2"/>
             <separator name="scriptGroup"/>
-       </menu>       
+            </menu>
+		</menuContribution>
+	</extension>
+
+ <extension
+       point="org.eclipse.ui.actionSets">
+        <actionSet
+            label="%ScriptCodingActionSet.label"
+            description="%ScriptCodingActionSet.description"
+            visible="false"
+            id="org.eclipse.dltk.ui.ScriptCodingActionSet">
        <action
                definitionId="org.eclipse.dltk.ui.edit.text.script.move.element"
                label="%Refactoring.moveAction.label"
@@ -1338,41 +1380,4 @@
             annotationImageProvider="org.eclipse.dltk.internal.ui.editor.ScriptAnnotationImageProvider">
       </specification>
    </extension>
-
- <extension
-       point="org.eclipse.ui.menus">
-    <menuContribution
-          locationURI="menu:org.eclipse.ui.main.menu?after=edit">
-         <menu
-               label="%SourceMenu.label"
-               id="org.eclipse.dltk.ui.source.menu">
-		    <separator name="commentGroup" visible="true" />
-            <separator name="editGroup" visible="true" />
-            <separator name="importGroup" visible="true" />
-            <separator name="generateGroup" visible="true" />
-            <separator name="codeGroup" visible="true" />
-            <separator name="externalizeGroup" visible="true" />
-            <separator name="convertGroup" visible="true" />
-			<visibleWhen>
-	           <with variable="activeEditor">
-	              <instanceof value="org.eclipse.dltk.internal.ui.editor.ScriptEditor" />
-	           </with>
-	        </visibleWhen>       
-         </menu>
-    </menuContribution>
-    
-    <!-- Comment Group -->
-    <menuContribution
-          locationURI="menu:org.eclipse.dltk.ui.source.menu?after=commentGroup">     
-         <command commandId="org.eclipse.dltk.ui.edit.text.script.toggle.comment" />
-         <command commandId="org.eclipse.dltk.ui.edit.text.script.comment" />
-         <command commandId="org.eclipse.dltk.ui.edit.text.script.uncomment" />
-	</menuContribution>
-
-    <menuContribution
-          locationURI="menu:org.eclipse.dltk.ui.source.menu?after=editGroup">     
-         <command commandId="org.eclipse.ui.edit.text.shiftRight" />
-         <command commandId="org.eclipse.ui.edit.text.shiftLeft" />
-    </menuContribution>
- </extension>
 </plugin>
