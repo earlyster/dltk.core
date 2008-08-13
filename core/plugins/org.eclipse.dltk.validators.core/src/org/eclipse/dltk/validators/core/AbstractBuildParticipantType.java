@@ -44,8 +44,15 @@ public abstract class AbstractBuildParticipantType extends
 		return true;
 	}
 
+	/**
+	 * The default behavior for the {@link IBuildParticipant} implementations is
+	 * return <code>false</code>, since most of the time there will single
+	 * built-in instance of the validator with standalone configuration page.
+	 * 
+	 * @see AbstractValidatorType#isConfigurable()
+	 */
 	public boolean isConfigurable() {
-		return true;
+		return false;
 	}
 
 	public boolean supports(Class validatorType) {
