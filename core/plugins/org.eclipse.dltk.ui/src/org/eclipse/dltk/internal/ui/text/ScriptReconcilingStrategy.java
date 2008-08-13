@@ -77,33 +77,8 @@ public class ScriptReconcilingStrategy implements IReconcilingStrategy,
 
 		try {
 			SafeRunner.run(new ISafeRunnable() {
-				public void run() {
-					try {
-						/* fix for missing cancel flag communication */
-						IProblemRequestorExtension extension = getProblemRequestorExtension();
-						if (extension != null) {
-							extension.setProgressMonitor(fProgressMonitor);
-							extension.setIsActive(true);
-						}
-
-						try {
-							// reconcile
-							synchronized (unit) {
-								unit.reconcile(true, null, fProgressMonitor);
-							}
-						} catch (OperationCanceledException ex) {
-							Assert.isTrue(fProgressMonitor == null
-									|| fProgressMonitor.isCanceled());
-						} finally {
-							/* fix for missing cancel flag communication */
-							if (extension != null) {
-								extension.setProgressMonitor(null);
-								extension.setIsActive(false);
-							}
-						}
-					} catch (ModelException ex) {
-						handleException(ex);
-					}
+				public void run() throws ModelException {
+					reconcile(unit, initialReconcile);
 				}
 
 				public void handleException(Throwable ex) {
@@ -124,6 +99,30 @@ public class ScriptReconcilingStrategy implements IReconcilingStrategy,
 				}
 			} finally {
 				fNotify = true;
+			}
+		}
+	}
+
+	private void reconcile(ISourceModule unit, boolean initialReconcile)
+			throws ModelException {
+		/* fix for missing cancel flag communication */
+		IProblemRequestorExtension extension = getProblemRequestorExtension();
+		if (extension != null) {
+			extension.setProgressMonitor(fProgressMonitor);
+			extension.setIsActive(true);
+		}
+
+		try {
+			// reconcile
+			unit.reconcile(true, null, fProgressMonitor);
+		} catch (OperationCanceledException ex) {
+			Assert.isTrue(fProgressMonitor == null
+					|| fProgressMonitor.isCanceled());
+		} finally {
+			/* fix for missing cancel flag communication */
+			if (extension != null) {
+				extension.setProgressMonitor(null);
+				extension.setIsActive(false);
 			}
 		}
 	}

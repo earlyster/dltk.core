@@ -61,10 +61,7 @@ import org.eclipse.dltk.internal.core.BufferManager;
 import org.eclipse.dltk.internal.ui.text.IProblemRequestorExtension;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.ui.DLTKPluginImages;
-import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
-import org.eclipse.dltk.ui.IDLTKCorrectionProcessor;
-import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.editor.IScriptAnnotation;
 import org.eclipse.dltk.ui.editor.ScriptMarkerAnnotation;
@@ -249,7 +246,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			if (!fImageInitialized) {
 				initializeImages();
 				if (!isQuickFixableStateSet()) {
-					setQuickFixable(isProblem() && hasCorrections());
+					setQuickFixable(isProblem()
+							&& ScriptAnnotationUtils.hasCorrections(this));
 				}
 				if (isQuickFixable()) {
 					if (ScriptMarkerAnnotation.ERROR_ANNOTATION_TYPE
@@ -296,24 +294,6 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 					.getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
 
 			fgImagesInitialized = true;
-		}
-
-		private boolean hasCorrections() {
-			final IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager
-					.getLanguageToolkit(fSourceModule);
-			if (uiToolkit == null) {
-				return false;
-			}
-			if (!uiToolkit.getPreferenceStore().getBoolean(
-					PreferenceConstants.EDITOR_CORRECTION_INDICATION)) {
-				return false;
-			}
-			final IDLTKCorrectionProcessor correctionProcessor = DLTKUIPlugin
-					.getCorrectionProcessor(uiToolkit);
-			if (correctionProcessor == null) {
-				return false;
-			}
-			return correctionProcessor.hasCorrections(this);
 		}
 
 		/*
