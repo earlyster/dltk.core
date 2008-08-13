@@ -78,7 +78,7 @@ public class ValidatorBlock implements ISelectionProvider,
 	private Composite fControl;
 
 	/**
-	 * Interpreters being displayed
+	 * Validators being displayed
 	 */
 	protected List fValidators = new ArrayList();
 
@@ -661,7 +661,10 @@ public class ValidatorBlock implements ISelectionProvider,
 		List all = new ArrayList();
 		IValidatorType[] types = ValidatorRuntime.getValidatorTypes();
 		for (int i = 0; i < types.length; i++) {
-			IValidator[] validators = types[i].getValidators();
+			final IValidatorType type = types[i];
+			if (type.isBuiltin() && !type.isConfigurable())
+				continue;
+			IValidator[] validators = type.getValidators();
 			if (validators != null) {
 				for (int j = 0; j < validators.length; j++) {
 					all.add(validators[j].getWorkingCopy());
