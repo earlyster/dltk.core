@@ -2,7 +2,6 @@ package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -11,8 +10,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.dltk.compiler.problem.IProblem;
-import org.eclipse.dltk.compiler.problem.ProblemCollector;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -24,7 +21,6 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IPackageDeclaration;
-import org.eclipse.dltk.core.IProblemRequestor;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
@@ -426,28 +422,6 @@ public abstract class AbstractSourceModule extends Openable implements
 
 	protected ModelManager.PerWorkingCopyInfo getPerWorkingCopyInfo() {
 		return null;
-	}
-
-	private static class AccumulatingProblemReporter extends ProblemCollector {
-
-		private final IProblemRequestor problemRequestor;
-
-		/**
-		 * @param problemRequestor
-		 */
-		public AccumulatingProblemReporter(IProblemRequestor problemRequestor) {
-			this.problemRequestor = problemRequestor;
-		}
-
-		public void reportToRequestor() {
-			problemRequestor.beginReporting();
-			for (Iterator i = problems.iterator(); i.hasNext();) {
-				final IProblem problem = (IProblem) i.next();
-				problemRequestor.acceptProblem(problem);
-			}
-			problemRequestor.endReporting();
-		}
-
 	}
 
 	/**

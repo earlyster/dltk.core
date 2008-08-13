@@ -21,16 +21,17 @@ import org.eclipse.dltk.core.IProblemRequestor;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.mixin.MixinBuilder;
 import org.eclipse.dltk.internal.core.util.Messages;
 
 public class ReconcileWorkingCopyOperation extends ModelOperation {
-	boolean forceProblemDetection;
+	private boolean forceProblemDetection;
 
-	WorkingCopyOwner workingCopyOwner;
+	private WorkingCopyOwner workingCopyOwner;
 
-	public ModelElementDeltaBuilder deltaBuilder;
+	private ModelElementDeltaBuilder deltaBuilder;
 
 	public ReconcileWorkingCopyOperation(ISourceModule module,
 			boolean forceProblemDetection, WorkingCopyOwner workingCopyOwner) {
@@ -88,7 +89,11 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 				MixinBuilder.getDefault().buildModelElements(project, elements,
 						new NullProgressMonitor(), false);
 			}
-			return;
+		} else if (forceProblemDetection && problemRequestor.isActive()) {
+			AccumulatingProblemReporter reporter = new AccumulatingProblemReporter(
+					problemRequestor);
+			SourceParserUtil.getModuleDeclaration(workingCopy, reporter);
+			reporter.reportToRequestor();
 		}
 	}
 
