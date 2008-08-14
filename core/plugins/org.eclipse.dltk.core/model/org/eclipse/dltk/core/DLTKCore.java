@@ -664,8 +664,7 @@ public class DLTKCore extends Plugin {
 			IPath[] inclusionPatterns, IPath[] exclusionPatterns,
 			IBuildpathAttribute[] extraAttributes) {
 
-		if (path == null)
-			Assert.isTrue(false, "Source path cannot be null"); //$NON-NLS-1$
+		Assert.isNotNull(path, "Source path cannot be null"); //$NON-NLS-1$
 		if (!path.isAbsolute())
 			Assert.isTrue(false, "Path for IBuildpathEntry must be absolute"); //$NON-NLS-1$
 		if (exclusionPatterns == null)
