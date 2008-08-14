@@ -227,7 +227,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 					return;
 				}
 				if (files[i].isDirectory()) {
-					IPath fPath = new Path(files[i].toOSString());
+					IPath fPath = files[i].getFullPath();
 					boolean valid = Util.isValidSourcePackageName(project,
 							fPath);
 					if (!((fPath.segmentCount() == 0 || valid))) {
