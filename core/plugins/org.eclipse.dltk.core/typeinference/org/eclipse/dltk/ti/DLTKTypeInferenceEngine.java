@@ -157,7 +157,7 @@ public class DLTKTypeInferenceEngine implements ITypeInferencer {
 		if (!superClassSet.isEmpty()) {
 			for (Iterator iter = typeSet.iterator(); iter.hasNext();) {
 				type = (IEvaluatedType) iter.next();
-				if (superClassSet.contains(type.getTypeName())) { //$NON-NLS-1$
+				if (superClassSet.contains(type.getTypeName())) {
 					iter.remove();
 				}
 			}
