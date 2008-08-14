@@ -50,9 +50,9 @@ public class FormatterPreviewUtils {
 			viewer.getTextWidget().setEnabled(true);
 			IScriptFormatter formatter = factory.createFormatter(
 					LINE_SEPARATOR, preferences);
-			TextEdit textEdit = formatter.format(content, 0, content.length(),
-					0);
 			try {
+				TextEdit textEdit = formatter.format(content, 0, content
+						.length(), 0);
 				if (textEdit != null) {
 					IDocument document = new Document(content);
 					textEdit.apply(document);
@@ -63,6 +63,10 @@ public class FormatterPreviewUtils {
 			} catch (BadLocationException e) {
 				DLTKUIPlugin.log(e);
 			} catch (MalformedTreeException e) {
+				DLTKUIPlugin.log(e);
+			} catch (FormatterSyntaxProblemException e) {
+				// skip
+			} catch (FormatterException e) {
 				DLTKUIPlugin.log(e);
 			}
 			// TODO indicate error/warning state

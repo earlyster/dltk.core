@@ -99,6 +99,8 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 						edit.apply(document);
 					}
 				}
+			} catch (FormatterSyntaxProblemException e) {
+				// TODO show error in status line
 			} catch (MalformedTreeException e) {
 				DLTKUIPlugin
 						.warn(

@@ -35,6 +35,7 @@ public interface IScriptFormatter {
 	 * @param indentationLevel
 	 *            the additional indent level
 	 */
-	TextEdit format(String source, int offset, int length, int indentationLevel);
+	TextEdit format(String source, int offset, int length, int indentationLevel)
+			throws FormatterException;
 
 }
