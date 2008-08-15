@@ -547,7 +547,7 @@ public class BasicSearchEngine {
 				} else {
 					HashMap pathToCUs = new HashMap();
 					for (int i = 0; i < copies.length; i++) {
-						ISourceModule unit = (ISourceModule) copies[i];
+						ISourceModule unit = copies[i];
 						pathToCUs.put(unit.getPath(), unit);
 
 					}
