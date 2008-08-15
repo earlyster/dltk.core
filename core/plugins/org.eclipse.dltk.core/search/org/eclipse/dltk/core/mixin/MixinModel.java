@@ -722,7 +722,7 @@ public class MixinModel {
 		removes = 0;
 	}
 
-	public void clearKeysCashe(String key) {
+	public void clearKeysCache(String key) {
 		existKeysCache.remove(key);
 		notExistKeysCache.remove(key);
 		// MixinElement e = (MixinElement)this.cache.get(key);
