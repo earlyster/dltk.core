@@ -35,6 +35,17 @@ public interface IScriptModel extends IModelElement, IParent, IOpenable {
 	 *                if this request fails.
 	 */
 	IScriptProject[] getScriptProjects() throws ModelException;
+	
+	/**
+	 * Returns the script projects in this model of the specified nature, or an
+	 * empty array if there are none.
+	 * 
+	 * @return the script projects in this model of the specified nature, or an
+	 *         empty array if there are none
+	 * @exception ModelException
+	 *                if this request fails.
+	 */
+	IScriptProject[] getScriptProjects(String nature) throws ModelException;
 
 	/**
 	 * Deletes the given elements, forcing the operation if necessary and
