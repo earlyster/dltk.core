@@ -34,7 +34,7 @@ public class CommandLine {
 
 	public void add(String[] parts) {
 		for (int i = 0; i < parts.length; ++i) {
-			args.add(parts);
+			args.add(parts[i]);
 		}
 	}
 
@@ -83,6 +83,17 @@ public class CommandLine {
 
 	public String[] toArray() {
 		return (String[]) args.toArray(new String[args.size()]);
+	}
+
+	public String toString() {
+		final StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < args.size(); ++i) {
+			if (i != 0) {
+				sb.append(' ');
+			}
+			sb.append(args.get(i));
+		}
+		return sb.toString();
 	}
 
 	/**
