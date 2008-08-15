@@ -10,6 +10,7 @@ public class AllTests {
 				"Test for org.eclipse.dltk.validators.core.tests");
 		//$JUnit-BEGIN$
 		suite.addTestSuite(ValidatorContainerTests.class);
+		suite.addTestSuite(CommandLineTests.class);
 		//$JUnit-END$
 		return suite;
 	}
