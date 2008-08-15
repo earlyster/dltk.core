@@ -16,6 +16,8 @@ import java.util.List;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IAccessRule;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
@@ -376,7 +378,11 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		
 		try {
 			ArrayList selectable= new ArrayList();
-			selectable.addAll(Arrays.asList(fCurrJProject.getModel().getScriptProjects()));
+			final IScriptModel model = fCurrJProject.getModel();
+			final IDLTKLanguageToolkit toolkit = fCurrJProject.getLanguageToolkit();
+			selectable.addAll(Arrays.asList(toolkit != null ? model
+					.getScriptProjects(toolkit.getNatureId()) : model
+					.getScriptProjects()));
 			selectable.remove(fCurrJProject);
 			
 			List elements= fProjectsList.getElements();
