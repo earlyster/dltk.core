@@ -44,11 +44,11 @@ import org.eclipse.dltk.internal.core.mixin.MixinCache;
 import org.eclipse.dltk.internal.core.mixin.MixinManager;
 
 public class MixinModel {
-	public static final String SEPARATOR = "" + IIndexConstants.SEPARATOR; //$NON-NLS-1$
-	private MixinCache cache = null;
+	public static final String SEPARATOR = String.valueOf(IIndexConstants.SEPARATOR);
+	private final MixinCache cache;
 
 	/**
-	 * Contains map of source modules to mixin elemens.
+	 * Contains map of source modules to mixin elements.
 	 */
 	private Map elementToMixinCache = new HashMap();
 	private final IDLTKLanguageToolkit toolkit;
