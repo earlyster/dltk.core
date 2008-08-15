@@ -276,17 +276,18 @@ class AddExternalFolderToIndex extends IndexRequest {
 	private void indexDocument(ISourceElementParser parser,
 			SourceIndexerRequestor requestor, SearchParticipant participant,
 			Index index, String path, IDLTKLanguageToolkit toolkit) {
-		char[] contents = null;
 		final IFileHandle ffile = getFile(path);
-		if (ffile != null && ffile.exists()) {
-			try {
-				contents = Util.getResourceContentsAsCharArray(ffile);
-			} catch (ModelException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
-				}
-				contents = new char[0];
+		if (ffile == null) {
+			return;
+		}
+		final char[] contents;
+		try {
+			contents = Util.getResourceContentsAsCharArray(ffile);
+		} catch (ModelException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
 			}
+			return;
 		}
 		IPath dpath = new Path(path).removeFirstSegments(
 				containerPath.segmentCount()).setDevice(null);
