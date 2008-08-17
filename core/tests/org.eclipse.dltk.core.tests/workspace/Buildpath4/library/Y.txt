@@ -1,0 +1,3 @@
+public class Y {
+  //this content is never used
+}

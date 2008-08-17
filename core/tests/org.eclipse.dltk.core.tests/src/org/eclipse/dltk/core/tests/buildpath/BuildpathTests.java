@@ -61,6 +61,8 @@ public class BuildpathTests extends ModifyingResourceTests {
 
 	private static final String BUILDPATH_PRJ_2 = "Buildpath2";
 
+	private static final String BUILDPATH_PRJ_4 = "Buildpath4";
+
 	public class TestContainer implements IBuildpathContainer {
 		IPath path;
 
@@ -322,7 +324,7 @@ public class BuildpathTests extends ModifyingResourceTests {
 			CorePrinter printer = new CorePrinter(System.out, true);
 			((ScriptProject) proj).printNode(printer);
 			printer.flush();
-			
+
 		} finally {
 			this.deleteProject("P");
 		}
@@ -551,22 +553,31 @@ public class BuildpathTests extends ModifyingResourceTests {
 		IScriptProject[] p = null;
 		try {
 
-			p = new IScriptProject[] { this.createScriptProject("P0var", TEST_NATURE, new String[] { "src0" }), this.createScriptProject("P1var", TEST_NATURE, new String[] { "src1" }), };
+			p = new IScriptProject[] {
+					this.createScriptProject("P0var", TEST_NATURE,
+							new String[] { "src0" }),
+					this.createScriptProject("P1var", TEST_NATURE,
+							new String[] { "src1" }), };
 
 			DLTKCore.setBuildpathVariable("var", new Path("/P1var"), null);
 
-			IBuildpathEntry[] newBuildpath = new IBuildpathEntry[] { DLTKCore.newSourceEntry(new Path("/P0var/src0")), DLTKCore.newVariableEntry(new Path("var/src1")), };
+			IBuildpathEntry[] newBuildpath = new IBuildpathEntry[] {
+					DLTKCore.newSourceEntry(new Path("/P0var/src0")),
+					DLTKCore.newVariableEntry(new Path("var/src1")), };
 
 			// validate Buildpath
-			IModelStatus status = BuildpathEntry.validateBuildpath(p[0], newBuildpath);
-			assertStatus("should not detect external source folder through a variable on the buildpath", "OK", status);
+			IModelStatus status = BuildpathEntry.validateBuildpath(p[0],
+					newBuildpath);
+			assertStatus(
+					"should not detect external source folder through a variable on the buildpath",
+					"OK", status);
 
 		} finally {
 			this.deleteProject("P0var");
 			this.deleteProject("P1var");
 		}
 	}
-	
+
 	public void testBuildpathValidation05() throws CoreException {
 
 		IScriptProject[] p = null;
@@ -1106,6 +1117,22 @@ public class BuildpathTests extends ModifyingResourceTests {
 		} finally {
 			stopDeltas();
 			this.deleteProjects(new String[] { "P1c", "P2c" });
+		}
+	}
+
+	public void testGetProjectFragmentByResource() throws CoreException,
+			IOException {
+		try {
+			setUpScriptProject(BUILDPATH_PRJ_4);
+			String folderName = "library";
+			IModelElement element = DLTKCore.create(getWorkspaceRoot()
+					.getFolder(new Path(BUILDPATH_PRJ_4 + "/" + folderName)));
+			assertNotNull(element);
+			assertEquals(IModelElement.PROJECT_FRAGMENT, element
+					.getElementType());
+			assertEquals(folderName, element.getElementName());
+		} finally {
+			deleteProject(BUILDPATH_PRJ_4);
 		}
 	}
 }
