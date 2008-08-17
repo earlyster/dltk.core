@@ -9,20 +9,82 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.zip.ZipFile;
 
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.ISaveContext;
+import org.eclipse.core.resources.ISaveParticipant;
+import org.eclipse.core.resources.ISavedState;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.preferences.*;
+import org.eclipse.core.runtime.preferences.DefaultScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.util.HashtableOfObjectToInt;
-import org.eclipse.dltk.core.*;
+import org.eclipse.dltk.core.BuildpathContainerInitializer;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IAccessRule;
+import org.eclipse.dltk.core.IBuildpathAttribute;
+import org.eclipse.dltk.core.IBuildpathContainer;
+import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IBuiltinModuleProvider;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IModelStatus;
+import org.eclipse.dltk.core.IParent;
+import org.eclipse.dltk.core.IProblemRequestor;
+import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptModel;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ISourceModuleInfoCache;
+import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.builder.ScriptBuilder;
@@ -628,22 +690,29 @@ public class ModelManager implements ISaveParticipant {
 				if (rootPath.equals(resourcePath)) {
 					return project.getProjectFragment(resource);
 				} else if (rootPath.isPrefixOf(resourcePath)) {
-					// given we have a resource child of the root, it cannot
-					// be
-					// a ZIP fragment
-					ProjectFragment root = (ProjectFragment) ((ScriptProject) project)
-							.getFolderProjectFragment(rootPath);
-					if (root == null)
-						return null;
-					IPath folderPath = resourcePath
-							.removeFirstSegments(rootPath.segmentCount());
-					if (resource.getType() == IResource.FILE) {
-						// if the resource is a file, then remove the last
-						// segment which
-						// is the file name in the folder
-						folderPath = folderPath.removeLastSegments(1);
+					BuildpathEntry bpe = (BuildpathEntry) entry;
+					if (!Util.isExcluded(resource, bpe
+							.fullInclusionPatternChars(), bpe
+							.fullExclusionPatternChars())) {
+						/*
+						 * given we have a resource child of the root, it cannot
+						 * be a ZIP fragment
+						 */
+						ProjectFragment root = (ProjectFragment) ((ScriptProject) project)
+								.getFolderProjectFragment(rootPath);
+						if (root == null)
+							return null;
+						IPath folderPath = resourcePath
+								.removeFirstSegments(rootPath.segmentCount());
+						if (resource.getType() == IResource.FILE) {
+							/*
+							 * if the resource is a file, then remove the last
+							 * segment which is the file name in the folder
+							 */
+							folderPath = folderPath.removeLastSegments(1);
+						}
+						return root.getScriptFolder(folderPath);
 					}
-					return root.getScriptFolder(folderPath);
 				}
 			}
 		} catch (ModelException npe) {
