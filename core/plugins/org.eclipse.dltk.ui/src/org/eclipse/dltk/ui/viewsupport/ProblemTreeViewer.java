@@ -11,6 +11,7 @@
 package org.eclipse.dltk.ui.viewsupport;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.dltk.core.IMember;
@@ -174,44 +175,74 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		return super.isExpandable(parent);
 	}
 	
+	/**
+	 * method to test if a element has any children that passed the filters
+	 * 
+	 * @param parent
+	 *            the element to test
+	 * @return return <code>true</code> if the element has at least a child that
+	 *         passed the filters
+	 */
     protected final boolean hasFilteredChildren(Object parent) {
-		Object[] children = getRawChildren(parent);
-		if (children.length == 0) {
+		Object[] rawChildren = getRawChildren(parent);
+		return containsNonFiltered(rawChildren, parent);
+	}
+
+    /*
+	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#getFilteredChildren(java.lang.Object)
+	 */
+	protected Object[] getFilteredChildren(Object parent) {
+		return filter(getRawChildren(parent), parent);
+	}
+
+	private Object[] filter(Object[] elements, Object parent) {
+		if (!hasFilters() || elements.length == 0) {
+			return elements;
+		}
+		List list = new ArrayList(elements.length);
+		ViewerFilter[] filters = getFilters();
+		for (int i = 0; i < elements.length; i++) {
+			Object object = elements[i];
+			if (!isFiltered(object, parent, filters)) {
+				list.add(object);
+			}
+		}
+		return list.toArray();
+	}
+
+	private boolean containsNonFiltered(Object[] elements, Object parent) {
+		if (elements.length == 0) {
 			return false;
 		}
 		if (!hasFilters()) {
-			return children.length > 0;
+			return true;
 		}
 		ViewerFilter[] filters = getFilters();
-
-		for (int i = 0; i < children.length; i++) {
-			Object object = children[i];
+		for (int i = 0; i < elements.length; i++) {
+			Object object = elements[i];
 			if (!isFiltered(object, parent, filters)) {
 				return true;
 			}
 		}
 		return false;
-    }
-	
-	
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object[])
 	 */
 	protected final Object[] filter(Object[] elements) {
-		ViewerFilter[] filters= getFilters();
-		if (filters == null || filters.length == 0)
-			return elements;
-		
-		ArrayList filtered= new ArrayList(elements.length);
-		Object root= getRoot();
-		for (int i= 0; i < elements.length; i++) {
-			Object curr= elements[i];
-			if (!isFiltered(curr, root, filters))
-				filtered.add(curr);
-		}
-		return filtered.toArray();
+		return filter(elements, getRoot());
 	}
 	
+	/**
+	 * All element filter tests must go through this method.
+	 * Can be overridden by subclasses.
+	 * 
+	 * @param object the object to filter
+	 * @param parent the parent
+	 * @param filters the filters to apply
+	 * @return true if the element is filtered
+	 */
 	protected boolean isFiltered(Object object, Object parent, ViewerFilter[] filters) {
 		for (int i = 0; i < filters.length; i++) {
 			ViewerFilter filter = filters[i];
