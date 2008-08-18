@@ -120,12 +120,11 @@ public class Util {
 		try {
 			try {
 				reader = encoding == null ? new InputStreamReader(
-						new BufferedInputStream(stream, 4096))
-						: new InputStreamReader(stream, encoding);
+						toBufferedInputStream(stream)) : new InputStreamReader(
+						stream, encoding);
 			} catch (UnsupportedEncodingException e) {
 				// encoding is not supported
-				reader = new InputStreamReader(new BufferedInputStream(stream,
-						4096));
+				reader = new InputStreamReader(toBufferedInputStream(stream));
 			}
 			char[] contents;
 			int totalRead = 0;
@@ -188,6 +187,14 @@ public class Util {
 			if (reader != null) {
 				reader.close();
 			}
+		}
+	}
+
+	private static InputStream toBufferedInputStream(InputStream stream) {
+		if (stream instanceof BufferedInputStream) {
+			return stream;
+		} else {
+			return new BufferedInputStream(stream, DEFAULT_READING_SIZE);
 		}
 	}
 
