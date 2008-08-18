@@ -11,7 +11,6 @@ package org.eclipse.dltk.core.search;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +59,6 @@ import org.eclipse.osgi.util.NLS;
  */
 public class SearchEngine {
 
-	private static final String SPECIAL_MIXIN = "#special#mixin#"; //$NON-NLS-1$
 	// Search engine now uses basic engine functionalities
 	private BasicSearchEngine basicEngine;
 
@@ -942,10 +940,9 @@ public class SearchEngine {
 	 * @param keys
 	 * @return
 	 */
-	public static ISourceModule[] searchMixinSources(String key,
+	public static ISourceModule[] searchMixinSources(
+			final IDLTKSearchScope scope, String key,
 			IDLTKLanguageToolkit toolkit, final Map keys) {
-		final IDLTKSearchScope scope = SearchEngine
-				.createWorkspaceScope(toolkit);
 		// Index requestor
 		final HandleFactory factory = new HandleFactory();
 		final List modules = new ArrayList();
@@ -953,9 +950,9 @@ public class SearchEngine {
 			public boolean acceptIndexMatch(String documentPath,
 					SearchPattern indexRecord, SearchParticipant participant,
 					AccessRuleSet access) {
-				if (documentPath.startsWith(SPECIAL_MIXIN)) {
-					documentPath = documentPath.substring(SPECIAL_MIXIN
-							.length());
+				if (documentPath.startsWith(IndexManager.SPECIAL_MIXIN)) {
+					documentPath = documentPath
+							.substring(IndexManager.SPECIAL_MIXIN.length());
 				}
 				// String s = IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY.toString();
 				if (documentPath.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR) != -1) {
@@ -1001,28 +998,22 @@ public class SearchEngine {
 				scope, searchRequestor),
 				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
 		if (DLTKCore.VERBOSE_MIXIN) {
-			System.out.println(NLS.bind("mixin search for ''{0}'': {1} results ", //$NON-NLS-1$
-					key, String.valueOf(modules.size())));
-			if (!modules.isEmpty() && modules.size() <= 8) {
-				for (Iterator i = modules.iterator(); i.hasNext();) {
-					ISourceModule module = (ISourceModule) i.next();
-					System.out.println("- " + module.getElementName()); //$NON-NLS-1$
-				}
-			}
+			final String msg = "mixin search for \"{0}\": {1} results";//$NON-NLS-1$
+			System.out.println(NLS.bind(msg, key, String
+					.valueOf(modules.size())));
 		}
 		return (ISourceModule[]) modules.toArray(new ISourceModule[modules
 				.size()]);
 	}
 
-	public static ISourceModule[] searchMixinSources(String key,
+	public static ISourceModule[] searchMixinSources(
+			final IDLTKSearchScope scope, String key,
 			IDLTKLanguageToolkit toolkit) {
-		return searchMixinSources(key, toolkit, null);
+		return searchMixinSources(scope, key, toolkit, null);
 	}
 
-	public static String[] searchMixinPatterns(String key,
-			IDLTKLanguageToolkit toolkit) {
-		final IDLTKSearchScope scope = SearchEngine
-				.createWorkspaceScope(toolkit);
+	public static String[] searchMixinPatterns(final IDLTKSearchScope scope,
+			String key, IDLTKLanguageToolkit toolkit) {
 		// Index requestor
 		final List result = new ArrayList();
 		IndexQueryRequestor searchRequestor = new IndexQueryRequestor() {

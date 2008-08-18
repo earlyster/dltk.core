@@ -36,6 +36,7 @@ import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.mixin.IMixinRequestor.ElementInfo;
+import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.internal.core.ModelCache;
@@ -44,7 +45,9 @@ import org.eclipse.dltk.internal.core.mixin.MixinCache;
 import org.eclipse.dltk.internal.core.mixin.MixinManager;
 
 public class MixinModel {
-	public static final String SEPARATOR = String.valueOf(IIndexConstants.SEPARATOR);
+	public static final String SEPARATOR = String
+			.valueOf(IIndexConstants.SEPARATOR);
+
 	private final MixinCache cache;
 
 	/**
@@ -52,6 +55,9 @@ public class MixinModel {
 	 */
 	private Map elementToMixinCache = new HashMap();
 	private final IDLTKLanguageToolkit toolkit;
+
+	private final IScriptProject project;
+	private IDLTKSearchScope projectScope = null;
 
 	private MixinRequestor mixinRequestor = new MixinRequestor();
 
@@ -64,8 +70,17 @@ public class MixinModel {
 	public long removes = 1;
 	private final double ratio = 10000;
 
+	/**
+	 * @param toolkit
+	 * @deprecated
+	 */
 	public MixinModel(IDLTKLanguageToolkit toolkit) {
+		this(toolkit, null);
+	}
+
+	public MixinModel(IDLTKLanguageToolkit toolkit, IScriptProject project) {
 		this.toolkit = toolkit;
+		this.project = project;
 
 		// long maxMemory = Runtime.getRuntime().freeMemory();
 
@@ -113,11 +128,22 @@ public class MixinModel {
 		return null;
 	}
 
+	private IDLTKSearchScope createSearchScope() {
+		if (project != null) {
+			if (projectScope == null) {
+				projectScope = SearchEngine.createSearchScope(project);
+			}
+			return projectScope;
+		} else {
+			return SearchEngine.createWorkspaceScope(toolkit);
+		}
+	}
+
 	public IMixinElement[] find(String pattern, long delta) {
 		Map set = new HashMap();
 
 		ISourceModule[] containedModules = SearchEngine.searchMixinSources(
-				pattern, toolkit, set);
+				createSearchScope(), pattern, toolkit, set);
 		Set modules = new HashSet();
 		modules.addAll(Arrays.asList(containedModules));
 
@@ -168,7 +194,8 @@ public class MixinModel {
 	}
 
 	public String[] findKeys(String pattern) {
-		return SearchEngine.searchMixinPatterns(pattern, toolkit);
+		return SearchEngine.searchMixinPatterns(createSearchScope(), pattern,
+				toolkit);
 	}
 
 	private Set existKeysCache = new HashSet();
@@ -273,7 +300,7 @@ public class MixinModel {
 	 */
 	private ISourceModule[] findModules(String key) {
 		ISourceModule[] searchMixinSources = SearchEngine.searchMixinSources(
-				key, toolkit);
+				createSearchScope(), key, toolkit);
 		return searchMixinSources;
 	}
 
@@ -324,18 +351,11 @@ public class MixinModel {
 				}
 			}
 
-			if (delta.getKind() == IModelElementDelta.CHANGED
-					&& ((delta.getFlags() & IModelElementDelta.F_REMOVED_FROM_BUILDPATH) != 0)) {
-				MixinModel.this.cache.flush();
-				MixinModel.this.elementToMixinCache.clear();
-				MixinModel.this.existKeysCache.clear();
-				MixinModel.this.notExistKeysCache.clear();
-				MixinModel.this.modulesToReparse.clear();
-			}
-
-			if (delta.getKind() == IModelElementDelta.CHANGED
-					&& ((delta.getFlags() & IModelElementDelta.F_ADDED_TO_BUILDPATH) != 0)) {
-				MixinModel.this.notExistKeysCache.clear();
+			if (element.getElementType() == IModelElement.SCRIPT_PROJECT
+					&& delta.getKind() == IModelElementDelta.CHANGED
+					&& (delta.getFlags() & IModelElementDelta.F_BUILDPATH_CHANGED) != 0) {
+				clear();
+				return;
 			}
 			if (delta.getKind() == IModelElementDelta.ADDED) {
 				if (element.getElementType() == IModelElement.SOURCE_MODULE) {
@@ -366,6 +386,11 @@ public class MixinModel {
 				if (resource.getType() == IResource.PROJECT
 						&& DLTKLanguageManager
 								.hasScriptNature((IProject) resource)) {
+					if (project != null
+							&& resource.equals(project.getProject())) {
+						// TODO destroy this model
+						return;
+					}
 					// remove all resources with given project from model.
 					List toRemove = new ArrayList();
 					synchronized (elementToMixinCache) {
@@ -747,5 +772,14 @@ public class MixinModel {
 			((IMixinObjectInitializeListener) (listeners[i])).initialize(
 					element, o, module);
 		}
+	}
+
+	protected void clear() {
+		projectScope = null;
+		cache.flush();
+		elementToMixinCache.clear();
+		existKeysCache.clear();
+		notExistKeysCache.clear();
+		modulesToReparse.clear();
 	}
 }
