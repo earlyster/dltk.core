@@ -71,13 +71,20 @@ public class MixinModel {
 	private final double ratio = 10000;
 
 	/**
+	 * Creates workspace instance
+	 * 
 	 * @param toolkit
-	 * @deprecated
 	 */
 	public MixinModel(IDLTKLanguageToolkit toolkit) {
 		this(toolkit, null);
 	}
 
+	/**
+	 * Creates project instance
+	 * 
+	 * @param toolkit
+	 * @param project
+	 */
 	public MixinModel(IDLTKLanguageToolkit toolkit, IScriptProject project) {
 		this.toolkit = toolkit;
 		this.project = project;
