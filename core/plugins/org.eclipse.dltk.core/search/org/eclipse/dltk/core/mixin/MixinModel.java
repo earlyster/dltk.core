@@ -395,6 +395,7 @@ public class MixinModel {
 								.hasScriptNature((IProject) resource)) {
 					if (project != null
 							&& resource.equals(project.getProject())) {
+						clear();
 						// TODO destroy this model
 						return;
 					}
