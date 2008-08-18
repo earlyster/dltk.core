@@ -227,16 +227,8 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 				}
 			}
 		} catch (IllegalArgumentException e) {
-			throw new ModelException(e, IModelStatusConstants.ELEMENT_DOES_NOT_EXIST); // could
-																						// be
-																						// thrown
-																						// by
-																						// ElementTree
-																						// when
-																						// path
-																						// is
-																						// not
-																						// found
+			/* could be thrown by ElementTree when path is not found */
+			throw new ModelException(e, IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
 		} catch (CoreException e) {
 			throw new ModelException(e);
 		}
