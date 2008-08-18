@@ -27,6 +27,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.index.MixinIndex;
+import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.SourceIndexer;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.internal.core.Model;
@@ -183,7 +184,7 @@ public class DLTKSearchParticipant extends SearchParticipant {
 				return false;
 			}
 			String containerPath = index.containerPath;
-			if (containerPath.startsWith("#special#mixin")) { //$NON-NLS-1$
+			if (containerPath.startsWith(IndexManager.SPECIAL_MIXIN)) {
 				return false;
 			}
 			return true;
