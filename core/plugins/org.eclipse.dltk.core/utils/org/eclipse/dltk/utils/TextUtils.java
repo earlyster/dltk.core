@@ -60,7 +60,7 @@ public abstract class TextUtils {
 	 * @param content
 	 * @return
 	 */
-	public static String[] splitLines(String content) {
+	public static String[] splitLines(CharSequence content) {
 		if (content == null) {
 			return null;
 		}
