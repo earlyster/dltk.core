@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
@@ -109,7 +109,7 @@ public class ControlBindingManager {
 				boolean state = button.getSelection();
 				preferenceDelegate.setBoolean(key, state);
 
-				updateStatus(Status.OK_STATUS);
+				updateStatus(StatusInfo.OK_STATUS);
 			}
 		});
 	}
@@ -172,7 +172,7 @@ public class ControlBindingManager {
 				int index = combo.getSelectionIndex();
 				preferenceDelegate.setString(key, combo.getItem(index));
 
-				changeListener.statusChanged(Status.OK_STATUS);
+				changeListener.statusChanged(StatusInfo.OK_STATUS);
 			}
 		});
 	}
@@ -182,12 +182,12 @@ public class ControlBindingManager {
 		if ((validator != null) && text.isEnabled()) {
 			return validator.validate(text.getText());
 		} else {
-			return Status.OK_STATUS;
+			return StatusInfo.OK_STATUS;
 		}
 	}
 
 	public IStatus getStatus() {
-		IStatus status = Status.OK_STATUS;
+		IStatus status = StatusInfo.OK_STATUS;
 		Iterator iter = textControls.keySet().iterator();
 		while (iter.hasNext()) {
 			IStatus s = validateText((Text) iter.next());
@@ -227,7 +227,7 @@ public class ControlBindingManager {
 
 					}
 
-					changeListener.statusChanged(Status.OK_STATUS);
+					changeListener.statusChanged(StatusInfo.OK_STATUS);
 				}
 
 				public void widgetDefaultSelected(SelectionEvent e) {
