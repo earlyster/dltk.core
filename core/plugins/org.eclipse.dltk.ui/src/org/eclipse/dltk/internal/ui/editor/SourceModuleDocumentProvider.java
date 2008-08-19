@@ -1025,6 +1025,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 					enableHandlingTemporaryProblems();
 			}
 		};
+		DLTKUIPlugin.getDefault().getPreferenceStore()
+				.addPropertyChangeListener(fPropertyListener);
 	}
 
 	/**
