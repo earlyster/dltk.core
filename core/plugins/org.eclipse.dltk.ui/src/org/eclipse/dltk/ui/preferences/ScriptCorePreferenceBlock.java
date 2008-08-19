@@ -12,6 +12,7 @@
 package org.eclipse.dltk.ui.preferences;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -22,6 +23,7 @@ import org.eclipse.core.runtime.Preferences;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.ModelManager;
+import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferencePage;
@@ -61,18 +63,27 @@ final class ScriptCorePreferenceBlock extends
 
 	public Control createControl(Composite parent) {
 		Composite composite = SWTFactory.createComposite(parent, parent
-				.getFont(), 2, 1, GridData.FILL);
+				.getFont(), 1, 1, GridData.FILL_BOTH);
 
-		Group g = new Group(composite, SWT.NONE);
-		g.setLayout(new GridLayout(1, false));
-		GridData layoutData = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
-		layoutData.horizontalSpan = 2;
-		g.setLayoutData(layoutData);
-		g.setText(Messages.ScriptCorePreferenceBlock_coreOptions);
+		Group coreGroup = SWTFactory.createGroup(composite,
+				Messages.ScriptCorePreferenceBlock_coreOptions, 1, 1,
+				GridData.FILL_HORIZONTAL);
 
-		nonLocalEmptyFileContentTypeChecking = new Button(g, SWT.CHECK);
-		nonLocalEmptyFileContentTypeChecking
-				.setText(Messages.ScriptCorePreferenceBlock_emptyFileContentCheckingForNonLocalProjects);
+		nonLocalEmptyFileContentTypeChecking = SWTFactory
+				.createCheckButton(
+						coreGroup,
+						Messages.ScriptCorePreferenceBlock_emptyFileContentCheckingForNonLocalProjects);
+
+		Group editorGroup = SWTFactory.createGroup(composite,
+				Messages.ScriptCorePreferenceBlock_editOptions, 1, 1,
+				GridData.FILL_HORIZONTAL);
+
+		bindControl(
+				SWTFactory
+						.createCheckButton(
+								editorGroup,
+								PreferencesMessages.EditorPreferencePage_evaluateTemporaryProblems),
+				PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS);
 
 		createReIndex(composite);
 
@@ -81,13 +92,10 @@ final class ScriptCorePreferenceBlock extends
 
 	private void createReIndex(Composite composite) {
 		if (DLTKCore.SHOW_REINDEX) {
-			Group g = new Group(composite, SWT.NONE);
-			g.setLayout(new GridLayout(2, false));
-			GridData layoutData = new GridData(SWT.FILL, SWT.DEFAULT, true,
-					false);
-			layoutData.horizontalSpan = 2;
-			g.setLayoutData(layoutData);
-			g.setText(Messages.ScriptCorePreferenceBlock_debugOptionsOperations);
+			Group g = SWTFactory.createGroup(composite,
+					Messages.ScriptCorePreferenceBlock_debugOptionsOperations,
+					2, 1, GridData.FILL_HORIZONTAL); 
+				
 			Label l = new Label(g, SWT.PUSH);
 			l.setText(Messages.ScriptCorePreferencePage_manualReindex);
 			Button reCreateIndex = new Button(g, SWT.PUSH);
@@ -120,7 +128,11 @@ final class ScriptCorePreferenceBlock extends
 	}
 
 	protected List createOverlayKeys() {
-		return null;
+		ArrayList overlayKeys = new ArrayList();
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
+				OverlayPreferenceStore.BOOLEAN,
+				PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS));
+		return overlayKeys;
 	}
 
 	public void initialize() {

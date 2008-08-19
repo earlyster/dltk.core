@@ -6,6 +6,7 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.ui.preferences.messages"; //$NON-NLS-1$
 	public static String FieldValidators_0;
 	public static String ScriptCorePreferenceBlock_coreOptions;
+	public static String ScriptCorePreferenceBlock_editOptions;
 	public static String ScriptCorePreferenceBlock_debugOptionsOperations;
 	public static String ScriptCorePreferenceBlock_emptyFileContentCheckingForNonLocalProjects;
 	public static String ScriptCorePreferencePage_manualReindex;

@@ -72,9 +72,6 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
 				OverlayPreferenceStore.BOOLEAN,
 				PreferenceConstants.EDITOR_TAB_ALWAYS_INDENT));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
-				OverlayPreferenceStore.BOOLEAN,
-				PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS));
 
 		OverlayPreferenceStore.OverlayKey[] keys = new OverlayPreferenceStore.OverlayKey[overlayKeys
 				.size()];
@@ -94,11 +91,6 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 
 		Composite control = new Composite(parent, SWT.NONE);
 		control.setLayout(new GridLayout());
-
-		addCheckBox(
-				control,
-				PreferencesMessages.EditorPreferencePage_evaluateTemporaryProblems,
-				PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS, 0);
 
 		if (!smartDisabled) {
 			Composite composite;
