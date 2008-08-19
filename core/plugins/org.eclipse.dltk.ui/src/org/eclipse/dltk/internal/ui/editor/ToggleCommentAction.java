@@ -14,9 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
-import org.eclipse.dltk.ui.text.folding.IFoldingStructureProviderExtension;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
