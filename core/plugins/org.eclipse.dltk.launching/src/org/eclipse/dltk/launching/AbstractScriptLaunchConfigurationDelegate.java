@@ -749,7 +749,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 				ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map) null);
 		// build base environment
 		final Map env = new HashMap();
-		if (append) {
+		if (append || configEnv == null) {
 			env.putAll(scriptExecEnvironment.getEnvironmentVariables(false));
 		}
 		if (configEnv != null) {
