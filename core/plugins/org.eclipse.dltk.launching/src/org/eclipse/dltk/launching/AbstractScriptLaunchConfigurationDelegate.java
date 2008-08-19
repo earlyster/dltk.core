@@ -13,7 +13,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -744,20 +743,21 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		// Environment
 		// config.addEnvVars(DebugPlugin.getDefault().getLaunchManager()
 		// .getNativeEnvironmentCasePreserved());
-		Map configEnv = configuration.getAttribute(
-				ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap());
-		// build base environment
-		Map env = scriptExecEnvironment.getEnvironmentVariables(false);
-		boolean append = configuration.getAttribute(
+		final boolean append = configuration.getAttribute(
 				ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES, true);
+		final Map configEnv = configuration.getAttribute(
+				ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map) null);
+		// build base environment
+		final Map env = new HashMap();
+		if (append) {
+			env.putAll(scriptExecEnvironment.getEnvironmentVariables(false));
+		}
 		if (configEnv != null) {
-			for (Iterator iterator = configEnv.keySet().iterator(); iterator
-					.hasNext();) {
-				String name = (String) iterator.next();
-				if (!env.containsKey(name) || !append) {
-					env.put(name, configEnv.get(name));
-				}
-			}
+			env.putAll(configEnv);
+			/*
+			 * TODO for win32 override values in case-insensitive way like in
+			 * org.eclipse.debug.internal.core.LaunchManager#getEnvironment(...)
+			 */
 		}
 		config.addEnvVars(env);
 
@@ -1044,8 +1044,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 			IFileHandle file = environment.getFile(environmentLocation);
 			if (file.exists()) {
 				return environmentLocation.removeLastSegments(1);
-			}
-			else {
+			} else {
 				return new Path(loc);
 			}
 		}
