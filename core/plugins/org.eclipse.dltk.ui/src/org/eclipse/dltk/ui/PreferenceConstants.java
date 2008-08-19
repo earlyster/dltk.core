@@ -312,6 +312,17 @@ public class PreferenceConstants {
 	public static final String CODEASSIST_SORTER = "content_assist_sorter"; //$NON-NLS-1$
 
 	public static void initializeDefaultValues(IPreferenceStore store) {
+		initializeDefaultValues(store, false);
+	}
+
+	/**
+	 * @param store
+	 * @param commonPreferences
+	 *            should be <code>true</code> for the DLTKUI preferences and
+	 *            <code>false</code> for the language specific preferences
+	 */
+	public static void initializeDefaultValues(IPreferenceStore store,
+			boolean commonPreferences) {
 		store.setDefault(PreferenceConstants.SHOW_SOURCE_MODULE_CHILDREN, true);
 		store.setDefault(PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS, false);
 
@@ -378,8 +389,12 @@ public class PreferenceConstants {
 		PreferenceConverter.setDefault(store,
 				PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, new RGB(
 						192, 192, 192));
-		store.setDefault(PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS,
-				true);
+		if (commonPreferences) {
+			store
+					.setDefault(
+							PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS,
+							true);
+		}
 		store
 				.setDefault(PreferenceConstants.EDITOR_CORRECTION_INDICATION,
 						true);

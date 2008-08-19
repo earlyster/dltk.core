@@ -22,6 +22,6 @@ public class DLTKUIPreferenceInitializer extends AbstractPreferenceInitializer {
 
 		EditorsUI.useAnnotationsPreferencePage(store);
 		EditorsUI.useQuickDiffPreferencePage(store);
-		PreferenceConstants.initializeDefaultValues(store);
+		PreferenceConstants.initializeDefaultValues(store, true);
 	}
 }
