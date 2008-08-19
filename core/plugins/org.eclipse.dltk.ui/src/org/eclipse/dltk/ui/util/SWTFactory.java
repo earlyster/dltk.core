@@ -149,6 +149,27 @@ public class SWTFactory {
 	 *            the parent to add the button to
 	 * @param label
 	 *            the label for the button
+	 * @return a new check box button
+	 */
+	public static Button createCheckButton(Composite parent, String label) {
+		Button button = new Button(parent, SWT.CHECK);
+		button.setFont(parent.getFont());
+		if (label != null) {
+			button.setText(label);
+		}
+		GridData gd = new GridData();
+		button.setLayoutData(gd);
+		setButtonDimensionHint(button);
+		return button;
+	}
+
+	/**
+	 * Creates a check box button using the parents' font
+	 * 
+	 * @param parent
+	 *            the parent to add the button to
+	 * @param label
+	 *            the label for the button
 	 * @param image
 	 *            the image for the button
 	 * @param checked
