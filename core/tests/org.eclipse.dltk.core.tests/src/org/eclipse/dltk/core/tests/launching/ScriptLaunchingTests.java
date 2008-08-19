@@ -116,7 +116,7 @@ public abstract class ScriptLaunchingTests extends AbstractModelTests {
 					return true;
 				} else if (attributeName
 						.equals(ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES)) {
-					return false;
+					return true;
 				}
 
 				return defaultValue;
