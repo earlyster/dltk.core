@@ -11,8 +11,8 @@ package org.eclipse.dltk.internal.ui.dialogs;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
-
 
 /**
  * A settable IStatus. 
@@ -21,7 +21,27 @@ import org.eclipse.dltk.ui.DLTKUIPlugin;
  */
 public class StatusInfo implements IStatus {
 	
-	public static final IStatus OK_STATUS= new StatusInfo();
+	/**
+	 * The static OK instance similar to the {@link Status#OK_STATUS}, but this
+	 * instance returns <code>null</code> message.
+	 */
+	public static final IStatus OK_STATUS = new StatusInfo() {
+		public void setOK() {
+			throw new UnsupportedOperationException();
+		}
+
+		public void setError(String arg0) {
+			throw new UnsupportedOperationException();
+		}
+
+		public void setWarning(String arg0) {
+			throw new UnsupportedOperationException();
+		}
+
+		public void setInfo(String arg0) {
+			throw new UnsupportedOperationException();
+		}
+	};
 	
 	private String fStatusMessage;
 	private int fSeverity;
@@ -167,7 +187,7 @@ public class StatusInfo implements IStatus {
 	 * @see IStatus#getChildren()
 	 */
 	public IStatus[] getChildren() {
-		return new IStatus[0];
+		return Status.OK_STATUS.getChildren();
 	}	
 	
 	/**
