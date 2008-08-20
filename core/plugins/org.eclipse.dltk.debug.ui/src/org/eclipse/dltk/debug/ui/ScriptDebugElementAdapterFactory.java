@@ -83,7 +83,7 @@ public class ScriptDebugElementAdapterFactory implements IAdapterFactory {
 	}
 
 	private void disposeVariableLabelProviders() {
-		Iterator iter = variableLabelProviders.entrySet().iterator();
+		Iterator iter = variableLabelProviders.values().iterator();
 		while (iter.hasNext()) {
 			((ScriptVariableLabelProvider) iter.next()).dispose();
 		}
