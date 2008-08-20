@@ -17,7 +17,7 @@ public class ScriptDebugElementAdapterFactory implements IAdapterFactory {
 
 	private static ScriptDebugElementAdapterFactory instance;
 	// assume only 1 plugin installed
-	private HashMap variableLabelProviders = new HashMap(1);
+	private final HashMap variableLabelProviders = new HashMap(1, 1);
 
 	// private static final IElementLabelProvider fgLPVariable = new
 	// ScriptVariableLableProvider();
@@ -30,7 +30,7 @@ public class ScriptDebugElementAdapterFactory implements IAdapterFactory {
 
 	private static final IWatchExpressionFactoryAdapter watchExpressionFactory = new ScriptWatchExpressionFilter();
 
-	public static ScriptDebugElementAdapterFactory getInstance() {
+	public synchronized static ScriptDebugElementAdapterFactory getInstance() {
 		if (instance == null) {
 			instance = new ScriptDebugElementAdapterFactory();
 		}
@@ -83,9 +83,12 @@ public class ScriptDebugElementAdapterFactory implements IAdapterFactory {
 	}
 
 	private void disposeVariableLabelProviders() {
-		Iterator iter = variableLabelProviders.values().iterator();
-		while (iter.hasNext()) {
-			((ScriptVariableLabelProvider) iter.next()).dispose();
+		synchronized (variableLabelProviders) {
+			for (Iterator i = variableLabelProviders.values().iterator(); i
+					.hasNext();) {
+				((ScriptVariableLabelProvider) i.next()).dispose();
+			}
+			variableLabelProviders.clear();
 		}
 	}
 
@@ -97,12 +100,16 @@ public class ScriptDebugElementAdapterFactory implements IAdapterFactory {
 	}
 
 	private Object getVariableLabelProvider(IDebugElement toAdapt) {
-		String id = toAdapt.getModelIdentifier();
-		if (!variableLabelProviders.containsKey(id)) {
-			variableLabelProviders.put(id, new ScriptVariableLabelProvider(
-					getPreferenceStore(toAdapt)));
+		final String id = toAdapt.getModelIdentifier();
+		Object provider;
+		synchronized (variableLabelProviders) {
+			provider = variableLabelProviders.get(id);
+			if (provider == null) {
+				provider = new ScriptVariableLabelProvider(
+						getPreferenceStore(toAdapt));
+				variableLabelProviders.put(id, provider);
+			}
 		}
-
-		return variableLabelProviders.get(id);
+		return provider;
 	}
 }
