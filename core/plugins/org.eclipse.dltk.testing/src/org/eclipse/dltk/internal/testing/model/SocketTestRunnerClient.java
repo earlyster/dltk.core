@@ -32,7 +32,7 @@ import org.eclipse.dltk.testing.MessageIds;
  * The client side of the RemoteTestRunner. Handles the marshaling of the
  * different messages.
  */
-public class SocketTestRunnerClient {
+public class SocketTestRunnerClient implements ITestRunnerClient {
 	public abstract class ListenerSafeRunnable implements ISafeRunnable {
 		public void handleException(Throwable exception) {
 			DLTKTestingPlugin.log(exception);
@@ -214,7 +214,7 @@ public class SocketTestRunnerClient {
 	 */
 	private ServerSocket fServerSocket;
 	private Socket fSocket;
-	private int fPort = -1;
+	private final int fPort;
 	private PrintWriter fWriter;
 	private BufferedReader fBufferedReader;
 	/**
@@ -282,17 +282,23 @@ public class SocketTestRunnerClient {
 	}
 
 	/**
+	 * Constructs the instance
+	 * 
+	 * @param port
+	 */
+	public SocketTestRunnerClient(int port) {
+		this.fPort = port;
+	}
+
+	/**
 	 * Start listening to a test run. Start a server connection that the
 	 * RemoteTestRunner can connect to.
 	 * 
 	 * @param listeners
-	 * @param port
 	 */
-	public synchronized void startListening(ITestRunListener2[] listeners,
-			int port) {
+	public synchronized void startListening(ITestRunListener2[] listeners) {
 		fListeners = listeners;
-		fPort = port;
-		ServerConnection connection = new ServerConnection(port);
+		ServerConnection connection = new ServerConnection(fPort);
 		connection.start();
 	}
 
