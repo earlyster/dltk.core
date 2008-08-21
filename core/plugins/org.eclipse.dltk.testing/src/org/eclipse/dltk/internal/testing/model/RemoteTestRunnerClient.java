@@ -28,7 +28,7 @@ import org.eclipse.dltk.testing.MessageIds;
  * The client side of the RemoteTestRunner. Handles the
  * marshaling of the different messages.
  */
-public class RemoteTestRunnerClient implements ITestingClient {
+public class RemoteTestRunnerClient implements ITestingClient, ITestRunnerClient {
 	public RemoteTestRunnerClient() {
 		operationsThread= new Thread(runner);
 		operationsThread.start();

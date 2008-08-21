@@ -63,7 +63,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 	/**
 	 * Test runner client or <code>null</code>.
 	 */
-	private RemoteTestRunnerClient fTestRunnerClient;
+	private ITestRunnerClient fTestRunnerClient;
 
 	private final ListenerList/*<ITestSessionListener>*/ fSessionListeners;
 	
@@ -144,8 +144,10 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 	}
 	
 	
-	public TestRunSession(ILaunch launch, IScriptProject project) {
+	public TestRunSession(ILaunch launch, IScriptProject project,
+			ITestRunnerClient runnerClient) {
 		Assert.isNotNull(launch);
+		Assert.isNotNull(runnerClient);
 		
 		fLaunch= launch;
 		fProject= project;
@@ -162,7 +164,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		fTestRoot= new TestRoot(this);
 		fIdToTest= new HashMap();
 		
-		fTestRunnerClient= new RemoteTestRunnerClient();
+		fTestRunnerClient= runnerClient;
 		fTestRunnerClient.startListening(new ITestRunListener2[] { new TestSessionNotifier() } );
 		
 		final ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
@@ -831,6 +833,10 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		}
 	}
 	public ITestingClient getTestRunnerClient() {
-		return fTestRunnerClient;
+		if (fTestRunnerClient instanceof ITestingClient) {
+			return (ITestingClient) fTestRunnerClient;
+		} else {
+			return null;
+		}
 	}
 }

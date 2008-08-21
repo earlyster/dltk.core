@@ -150,7 +150,7 @@ public final class DLTKTestingModel {
 			}
 
 			TestRunSession testRunSession = new TestRunSession(launch,
-					javaProject);
+					javaProject, new RemoteTestRunnerClient());
 			addTestRunSession(testRunSession);
 		}
 
