@@ -1129,6 +1129,11 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		fContextMenuGroup.setContext(context);
 		fContextMenuGroup.fillContextMenu(menu);
 		fContextMenuGroup.setContext(null);
+		// Quick views
+		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN,
+				getAction(IScriptEditorActionDefinitionIds.SHOW_OUTLINE));
+		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN,
+				getAction(IScriptEditorActionDefinitionIds.OPEN_HIERARCHY));
 	}
 
 	/**
