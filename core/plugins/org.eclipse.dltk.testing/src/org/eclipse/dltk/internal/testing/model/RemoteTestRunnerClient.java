@@ -495,17 +495,13 @@ public class RemoteTestRunnerClient implements ITestingClient {
 	 * @see org.eclipse.dltk.internal.testing.model.ITestingClient#testRunStart(int)
 	 */
 	public void testRunStart(final int count) {
-		if(isTerminated) {
-			return;
-		}
-		synchronized (operations) {
-			operations.add(new Runnable() {
+		if (!isTerminated) {
+			addOperation(new Runnable() {
 				public void run() {
 					fCurrentState= fDefaultState;
 					notifyTestRunStarted(count);
 				}
 			});
-			operations.notify();
 		}
 	}
 
@@ -513,17 +509,13 @@ public class RemoteTestRunnerClient implements ITestingClient {
 	 * @see org.eclipse.dltk.internal.testing.model.ITestingClient#testTree(int, java.lang.String, boolean, int)
 	 */
 	public void testTree(final int testId, final String testName, final boolean issuite, final int testCound) {
-		if(isTerminated) {
-			return;
-		}
-		synchronized (operations) {
-			operations.add(new Runnable() {
+		if (!isTerminated) {
+			addOperation(new Runnable() {
 				public void run() {
 					fCurrentState= fDefaultState;
 					notifyTestTreeEntry(Integer.toString(testId) + "," + testName + "," + Boolean.toString(issuite) + "," + Integer.toString(testCound));
 				}
 			});
-			operations.notify();
 		}
 	}
 
@@ -531,17 +523,13 @@ public class RemoteTestRunnerClient implements ITestingClient {
 	 * @see org.eclipse.dltk.internal.testing.model.ITestingClient#testTerminated()
 	 */
 	public void testTerminated(final int elapse) {
-		if(isTerminated) {
-			return;
-		}
-		synchronized (operations) {
-			operations.add(new Runnable() {
+		if (!isTerminated) {
+			addOperation(new Runnable() {
 				public void run() {
 					fCurrentState= fDefaultState;
 					testRunEnded(elapse);
 				}
 			});
-			operations.notify();
 		}
 	}
 
@@ -549,17 +537,13 @@ public class RemoteTestRunnerClient implements ITestingClient {
 	 * @see org.eclipse.dltk.internal.testing.model.ITestingClient#testStarted(int, java.lang.String)
 	 */
 	public void testStarted(final int id, final String name) {
-		if(isTerminated) {
-			return;
-		}
-		synchronized (operations) {
-			operations.add(new Runnable() {
+		if (!isTerminated) {
+			addOperation(new Runnable() {
 				public void run() {
 					fCurrentState= fDefaultState;
 					notifyTestStarted(Integer.toString(id) + "," + name);
 				}
 			});
-			operations.notify();
 		}
 	}
 
@@ -567,48 +551,36 @@ public class RemoteTestRunnerClient implements ITestingClient {
 	 * @see org.eclipse.dltk.internal.testing.model.ITestingClient#testEnded(int, java.lang.String)
 	 */
 	public void testEnded(final int id, final String name) {
-		if(isTerminated) {
-			return;
-		}
-		synchronized (operations) {
-			operations.add(new Runnable() {
+		if (!isTerminated) {
+			addOperation(new Runnable() {
 				public void run() {
 					fCurrentState= fDefaultState;
 					notifyTestEnded(Integer.toString(id) + "," + name);
 				}
 			});
-			operations.notify();
 		}
 	}
 
 	public void testFailed(final int id, final String name) {
-		if(isTerminated) {
-			return;
-		}
-		synchronized (operations) {
-			operations.add(new Runnable() {
+		if (!isTerminated) {
+			addOperation(new Runnable() {
 				public void run() {
 					fCurrentState= fDefaultState;
 //					notifyTestFailed();(Integer.toString(id) + "," + name);
 					extractFailure(Integer.toString(id) + "," + name, ITestRunListener2.STATUS_FAILURE, -1);
 				}
 			});
-			operations.notify();
 		}
 	}
 	public void testFailed(final int code,final int id, final String name) {
-		if(isTerminated) {
-			return;
-		}
-		synchronized (operations) {
-			operations.add(new Runnable() {
+		if (!isTerminated) {
+			addOperation(new Runnable() {
 				public void run() {
 					fCurrentState= fDefaultState;
 //					notifyTestFailed();(Integer.toString(id) + "," + name);
 					extractFailure(Integer.toString(id) + "," + name, code, ITestRunListener2.STATUS_FAILURE);
 				}
 			});
-			operations.notify();
 		}
 	}
 
@@ -616,11 +588,8 @@ public class RemoteTestRunnerClient implements ITestingClient {
 	 * @see org.eclipse.dltk.internal.testing.model.ITestingClient#traceMessage(java.lang.String)
 	 */
 	public void traceMessage(final String message) {
-		if(isTerminated) {
-			return;
-		}
-		synchronized (operations) {
-			operations.add(new Runnable() {
+		if (!isTerminated) {
+			addOperation(new Runnable() {
 				public void run() {
 //					fCurrentState= fDefaultState;
 //					notifyTestFailed();(Integer.toString(id) + "," + name);
@@ -629,7 +598,6 @@ public class RemoteTestRunnerClient implements ITestingClient {
 //					receiveMessage(MessageIds.TRACE_END);
 				}
 			});
-			operations.notify();
 		}
 	}
 
@@ -637,27 +605,20 @@ public class RemoteTestRunnerClient implements ITestingClient {
 	 * @see org.eclipse.dltk.internal.testing.model.ITestingClient#testError(int, java.lang.String)
 	 */
 	public void testError(final int id, final String name) {
-		if(isTerminated) {
-			return;
-		}
-		synchronized (operations) {
-			operations.add(new Runnable() {
+		if (!isTerminated) {
+			addOperation(new Runnable() {
 				public void run() {
 					fCurrentState= fDefaultState;
 //					notifyTestFailed();(Integer.toString(id) + "," + name);
 					extractFailure(Integer.toString(id) + "," + name, ITestRunListener2.STATUS_ERROR);
 				}
 			});
-			operations.notify();
 		}
 	}
 	
 	public void testActual(final String actual) {
-		if(isTerminated) {
-			return;
-		}
-		synchronized (operations) {
-			operations.add(new Runnable() {
+		if (!isTerminated) {
+			addOperation(new Runnable() {
 				public void run() {
 //					fCurrentState= fDefaultState;
 //					notifyTestFailed();(Integer.toString(id) + "," + name);
@@ -666,15 +627,11 @@ public class RemoteTestRunnerClient implements ITestingClient {
 					receiveMessage(MessageIds.ACTUAL_END);
 				}
 			});
-			operations.notify();
 		}
 	}
 	public void testExpected(final String expected) {
-		if(isTerminated) {
-			return;
-		}
-		synchronized (operations) {
-			operations.add(new Runnable() {
+		if (!isTerminated) {
+			addOperation(new Runnable() {
 				public void run() {
 //					fCurrentState= fDefaultState;
 //					notifyTestFailed();(Integer.toString(id) + "," + name);
@@ -683,39 +640,33 @@ public class RemoteTestRunnerClient implements ITestingClient {
 					receiveMessage(MessageIds.EXPECTED_END);
 				}
 			});
-			operations.notify();
 		}
 	}
 	public void traceStart() {
-		if(isTerminated) {
-			return;
-		}
-		synchronized (operations) {
-			operations.add(new Runnable() {
+		if (!isTerminated) {
+			addOperation(new Runnable() {
 				public void run() {
 					receiveMessage(MessageIds.TRACE_START);
 				}
 			});
-			operations.notify();
 		}
 	}
 	public void traceEnd() {
-		if(isTerminated) {
-			return;
-		}
-		synchronized (operations) {
-			if(operations == null) {
-				return;
-			}
-			operations.add(new Runnable() {
+		if (!isTerminated) {
+			addOperation(new Runnable() {
 				public void run() {
 					receiveMessage(MessageIds.TRACE_END);
 				}
 			});
-			operations.notify();
 		}
 	}
 
+	private void addOperation(Runnable runnable) {
+		synchronized (operations) {
+			operations.add(runnable);
+			operations.notify();
+		}
+	}
 
 	private List operations= new ArrayList();
 	private Thread operationsThread;
