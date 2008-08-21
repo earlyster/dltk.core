@@ -389,16 +389,6 @@ public class RemoteTestRunnerClient implements ITestingClient {
 			});
 		}
 	}
-	private static class RRunner {
-		public static void run(final ListenerSafeRunnable run) {
-//			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-//				public void run() {
-//					SafeRunner.run(run);
-//				}
-//			});
-			SafeRunner.run(run);
-		}
-	}
 
 	private void testRunEnded(final long elapsedTime) {
 		if (DLTKTestingPlugin.isStopped())
@@ -448,7 +438,7 @@ public class RemoteTestRunnerClient implements ITestingClient {
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener2 listener= fListeners[i];
 
-			RRunner.run(new ListenerSafeRunnable() {
+			SafeRunner.run(new ListenerSafeRunnable() {
 				public void run() {
 					listener.testRunStarted(count);
 				}
@@ -461,7 +451,7 @@ public class RemoteTestRunnerClient implements ITestingClient {
 			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener2 listener= fListeners[i];
-			RRunner.run(new ListenerSafeRunnable() {
+			SafeRunner.run(new ListenerSafeRunnable() {
 				public void run() {
 					listener.testFailed(fFailureKind, fFailedTestId, fFailedTest, fFailedTrace.toString(), fExpectedResult.toString(), fActualResult.toString(), fFailedCode);
 				}
@@ -475,7 +465,7 @@ public class RemoteTestRunnerClient implements ITestingClient {
 			return;
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener2 listener= fListeners[i];
-			RRunner.run(new ListenerSafeRunnable() {
+			SafeRunner.run(new ListenerSafeRunnable() {
 				public void run() {
 					listener.testRunTerminated();
 				}
