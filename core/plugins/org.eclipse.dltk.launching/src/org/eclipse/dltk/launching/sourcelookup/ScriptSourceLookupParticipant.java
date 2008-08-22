@@ -20,7 +20,9 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.debug.core.model.ScriptStackFrame;
+import org.eclipse.dltk.internal.launching.IPathEquality;
 import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
+import org.eclipse.dltk.internal.launching.PathEqualityUtils;
 
 public class ScriptSourceLookupParticipant extends
 		AbstractSourceLookupParticipant {
@@ -91,6 +93,9 @@ public class ScriptSourceLookupParticipant extends
 		if (file.exists()) {
 			// Try to open external source module.
 			scriptProject.accept(new IModelElementVisitor() {
+				final IPathEquality pathEquality = PathEqualityUtils
+						.getInstance();
+
 				public boolean visit(IModelElement element) {
 					if (element.getElementType() == IModelElement.PROJECT_FRAGMENT) {
 						IProjectFragment fragment = (IProjectFragment) element;
@@ -102,7 +107,7 @@ public class ScriptSourceLookupParticipant extends
 					if (element.getElementType() == IModelElement.SOURCE_MODULE) {
 						ISourceModule module = (ISourceModule) element;
 						IPath modulePath = module.getPath();
-						if (file.getFullPath().equals(modulePath)) {
+						if (pathEquality.equals(file.getFullPath(), modulePath)) {
 							result[0] = module;
 						}
 
