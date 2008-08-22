@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelStatus;
@@ -41,8 +42,7 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#equals(java.lang.
-	 *      Object)
+	 * @see AbstractSourceModule#equals(java.lang.Object)
 	 */
 	public boolean equals(Object obj) {
 		if (!(obj instanceof DBGPSourceModule)) {
@@ -83,7 +83,7 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 		 * remove this and just make the other sub-classes implement
 		 * org.eclipse.dltk.compiler.env.IDependent directly?
 		 */
-		return new char[0];
+		return CharOperation.NO_CHAR;
 	}
 
 	/*
@@ -116,7 +116,7 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getBufferContent()
+	 * @see AbstractSourceModule#getBufferContent()
 	 */
 	protected char[] getBufferContent() throws ModelException {
 		try {
@@ -131,8 +131,8 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 	private String lookupSource() throws DbgpException {
 		if (cachedSource == null) {
 			/*
-			 * XXX: this has problems if the encodings on both hosts don't match -
-			 * see getBufferContents/getContents
+			 * XXX: this has problems if the encodings on both hosts don't match
+			 * - see getBufferContents/getContents
 			 */
 			URI uri = frame.getFileName();
 			cachedSource = frame.getScriptThread().getDbgpSession()
@@ -142,7 +142,7 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractExternalSourceModule#getModuleType ()
+	 * @see AbstractExternalSourceModule#getModuleType()
 	 */
 	protected String getModuleType() {
 		return "DLTK Remote Source Module: "; //$NON-NLS-1$
@@ -160,7 +160,7 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getOriginalSourceModule ()
+	 * @see AbstractSourceModule#getOriginalSourceModule()
 	 */
 	protected ISourceModule getOriginalSourceModule() {
 		return new DBGPSourceModule((ScriptProject) getParent(),
