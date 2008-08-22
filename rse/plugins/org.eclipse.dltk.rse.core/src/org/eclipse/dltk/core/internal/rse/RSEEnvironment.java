@@ -21,6 +21,13 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 		this.host = fs.getConnectorService().getHost();
 	}
 
+	/*
+	 * @see org.eclipse.dltk.core.environment.IEnvironment#isLocal()
+	 */
+	public boolean isLocal() {
+		return false;
+	}
+
 	public IFileHandle getFile(IPath path) {
 		if (Path.EMPTY.equals(path)) {
 			throw new RuntimeException(
