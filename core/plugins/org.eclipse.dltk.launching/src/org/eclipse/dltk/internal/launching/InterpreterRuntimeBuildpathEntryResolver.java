@@ -14,7 +14,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -161,7 +160,7 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 	 * @return
 	 */
 	private static boolean contains(LibraryLocation[] libs, IPath path) {
-		final IPathCompare compare = getPlatformPathCompare();
+		final IPathEquality compare = PathEqualityUtils.getInstance();
 		for (int i = 0; i < libs.length; ++i) {
 			if (compare.equals(path, libs[i].getLibraryPath())) {
 				return true;
@@ -170,32 +169,6 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		return false;
 	}
 
-	private static interface IPathCompare {
-		boolean equals(IPath path1, IPath path2);
-	}
-	
-	private static final class Win32PathCompare implements IPathCompare {
-
-		public boolean equals(IPath path1, IPath path2) {
-			/*
-			 * the .equals method of IPath ignores trailing separators so we must as
-			 * well
-			 */
-			return path1.removeTrailingSeparator().toOSString()
-					.equalsIgnoreCase(
-							path2.removeTrailingSeparator().toOSString());
-		}
-
-	}
-	
-	private static final class GenericPathCompare implements IPathCompare {
-
-		public boolean equals(IPath path1, IPath path2) {
-			return path1.equals(path2);
-		}
-		
-	}
-	
 	public static boolean isSamePaths(LibraryLocation[] libs,
 			LibraryLocation[] defaultLibs) {
 		final int length = defaultLibs.length;
@@ -203,8 +176,8 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 			return false;
 		}
 		if (length != 0) {
-			// TODO paths could be remote... 
-			final IPathCompare compare = getPlatformPathCompare();
+			// TODO paths could be remote...
+			final IPathEquality compare = PathEqualityUtils.getInstance();
 			for (int i = 0; i < length; i++) {
 				IPath dpath = defaultLibs[i].getLibraryPath();
 				IPath lpath = libs[i].getLibraryPath();
@@ -214,16 +187,6 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 			}
 		}
 		return true;
-	}
-
-	private static IPathCompare getPlatformPathCompare() {
-		final IPathCompare compare;
-		if (Platform.getOS().equals(Platform.OS_WIN32)) {
-			compare = new Win32PathCompare();
-		} else {
-			compare = new GenericPathCompare();
-		}
-		return compare;
 	}
 
 	/**
@@ -269,8 +232,8 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		return null;
 	}
 
-	public boolean isInterpreterInstallReference(String lang, String environment,
-			IBuildpathEntry entry) {
+	public boolean isInterpreterInstallReference(String lang,
+			String environment, IBuildpathEntry entry) {
 		if (entry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER)
 			if (entry.getPath().segment(0).equals(
 					ScriptRuntime.INTERPRETER_CONTAINER)) {
