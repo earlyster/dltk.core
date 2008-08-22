@@ -173,7 +173,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			int local = 0;
 			for (int i = 0; i < items.length; i++) {
 				items[i] = environments[i].getName();
-				if (items[i].equals(LocalEnvironment.ENVIRONMENT_ID)) {
+				if (environments[i].isLocal()) {
 					local = i;
 				}
 			}
