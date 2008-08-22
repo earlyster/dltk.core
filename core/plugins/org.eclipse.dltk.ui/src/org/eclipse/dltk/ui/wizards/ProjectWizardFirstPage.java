@@ -203,9 +203,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 
 		protected String getDefaultPath(String name) {
 			IEnvironment environment = this.getEnvironment();
-			if (environment != null
-					&& LocalEnvironment.ENVIRONMENT_ID.equals(environment
-							.getId())) {
+			if (environment != null && environment.isLocal()) {
 				final IPath path = Platform.getLocation().append(name);
 				return path.toOSString();
 			} else {
@@ -269,9 +267,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 					fLocation.setText(getDefaultPath(fNameGroup.getName()));
 				} else {
 					IEnvironment environment = this.getEnvironment();
-					if (environment != null
-							&& LocalEnvironment.ENVIRONMENT_ID
-									.equals(environment.getId())) {
+					if (environment != null && environment.isLocal()) {
 						fLocation.setText(fPreviousExternalLocation);
 					} else {
 						fLocation.setText(""); //$NON-NLS-1$
