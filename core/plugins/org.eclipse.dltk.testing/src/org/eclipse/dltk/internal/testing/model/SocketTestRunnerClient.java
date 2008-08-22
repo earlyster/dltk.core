@@ -243,7 +243,7 @@ public class SocketTestRunnerClient implements ITestRunnerClient {
 		int fServerPort;
 
 		public ServerConnection(int port) {
-			super("ServerConnection"); //$NON-NLS-1$
+			super("DLTK Testing Client Connection"); //$NON-NLS-1$
 			fServerPort = port;
 		}
 
