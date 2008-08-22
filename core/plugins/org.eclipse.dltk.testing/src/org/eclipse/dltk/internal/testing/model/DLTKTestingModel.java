@@ -75,8 +75,16 @@ public final class DLTKTestingModel implements ITestingModel {
 		 * a TestRunner once to a launch. Once a test runner is connected, it is
 		 * removed from the set.
 		 */
-		private HashSet fTrackedLaunches = new HashSet(20);
+		private final HashSet fTrackedLaunches = new HashSet(20);
 
+		protected void initialize(ILaunchManager launchManager) {
+			fTrackedLaunches.clear();
+			ILaunch[] launchs = launchManager.getLaunches();
+			for (int i = 0, size = launchs.length; i < size; ++i) {
+				fTrackedLaunches.add(launchs[i]);
+			}
+		}
+		
 		/*
 		 * @see ILaunchListener#launchAdded(ILaunch)
 		 */
@@ -362,7 +370,7 @@ public final class DLTKTestingModel implements ITestingModel {
 	 * Active test run sessions, youngest first.
 	 */
 	private final LinkedList/* <TestRunSession> */fTestRunSessions = new LinkedList();
-	private final ILaunchListener fLaunchListener = new DLTKTestingLaunchListener();
+	private final DLTKTestingLaunchListener fLaunchListener = new DLTKTestingLaunchListener();
 
 	private boolean started = false;
 
@@ -377,6 +385,7 @@ public final class DLTKTestingModel implements ITestingModel {
 		ILaunchManager launchManager = DebugPlugin.getDefault()
 				.getLaunchManager();
 		launchManager.addLaunchListener(fLaunchListener);
+		fLaunchListener.initialize(launchManager);
 
 		/*
 		 * TODO: restore on restart: - only import headers! - only import last n
