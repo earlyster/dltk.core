@@ -54,6 +54,8 @@ import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.testing.ITestKind;
 import org.eclipse.dltk.testing.ITestSession;
+import org.eclipse.dltk.testing.model.ITestRunSession;
+import org.eclipse.dltk.testing.model.ITestingModel;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -64,7 +66,7 @@ import org.xml.sax.SAXException;
 /**
  * Central registry for JUnit test runs.
  */
-public final class DLTKTestingModel {
+public final class DLTKTestingModel implements ITestingModel {
 
 	private final class DLTKTestingLaunchListener implements ILaunchListener {
 
@@ -116,26 +118,51 @@ public final class DLTKTestingModel {
 				return;
 
 			// test whether the launch defines the JUnit attributes
-			String atr = launch
-					.getAttribute(org.eclipse.dltk.testing.ITestKind.LAUNCH_ATTR_TEST_KIND);
-			if ((atr != null)) {
-				// org.eclipse.dltk.testing.ITestKind testKind =
-				// TestKindHandler.getInstance().getTestKind(atr);
-				// if (testKind != null) {
-				fTrackedLaunches.remove(launch);
-				getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						connectTestRunner(launch, javaProject);
-					}
-				});
-				// }
+			String portStr = launch
+					.getAttribute(DLTKTestingLaunchConfigurationConstants.ATTR_PORT);
+			if (portStr != null) {
+				try {
+					final int port = Integer.parseInt(portStr);
+					fTrackedLaunches.remove(launch);
+					getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							connectTestRunner(launch, javaProject, port);
+						}
+					});
+				} catch (NumberFormatException e) {
+					return;
+				}
+			} else {
+				String atr = launch
+						.getAttribute(org.eclipse.dltk.testing.ITestKind.LAUNCH_ATTR_TEST_KIND);
+				if (atr != null) {
+					fTrackedLaunches.remove(launch);
+					getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							connectTestRunner(launch, javaProject);
+						}
+					});
+				}
 			}
 		}
 
 		private void connectTestRunner(ILaunch launch,
 				IScriptProject javaProject) {
 			showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
+			limitSessionHistory();
+			addTestRunSession(new TestRunSession(launch, javaProject,
+					new RemoteTestRunnerClient()));
+		}
 
+		private void connectTestRunner(ILaunch launch,
+				IScriptProject javaProject, int port) {
+			showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
+			limitSessionHistory();
+			addTestRunSession(new TestRunSession(launch, javaProject,
+					new SocketTestRunnerClient(port)));
+		}
+
+		private void limitSessionHistory() {
 			// TODO: Do notifications have to be sent in UI thread?
 			// Check concurrent access to fTestRunSessions (no problem inside
 			// asyncExec())
@@ -148,10 +175,6 @@ public final class DLTKTestingModel {
 						.removeLast();
 				notifyTestRunSessionRemoved(session);
 			}
-
-			TestRunSession testRunSession = new TestRunSession(launch,
-					javaProject, new RemoteTestRunnerClient());
-			addTestRunSession(testRunSession);
 		}
 
 		private TestRunnerViewPart showTestRunnerViewPartInActivePage(
@@ -341,10 +364,16 @@ public final class DLTKTestingModel {
 	private final LinkedList/* <TestRunSession> */fTestRunSessions = new LinkedList();
 	private final ILaunchListener fLaunchListener = new DLTKTestingLaunchListener();
 
+	private boolean started = false;
+
 	/**
 	 * Starts the model (called by the {@link DLTKTestingPlugin} on startup).
 	 */
-	public void start() {
+	public synchronized void start() {
+		if (started) {
+			return;
+		}
+		started = true;
 		ILaunchManager launchManager = DebugPlugin.getDefault()
 				.getLaunchManager();
 		launchManager.addLaunchListener(fLaunchListener);
@@ -405,6 +434,7 @@ public final class DLTKTestingModel {
 		// }
 		// });
 		// }
+		started = false;
 	}
 
 	public void addTestRunSessionListener(ITestRunSessionListener listener) {
@@ -425,7 +455,7 @@ public final class DLTKTestingModel {
 		return new ArrayList(fTestRunSessions);
 	}
 
-	public TestRunSession getTestRunSession(ILaunch launch) {
+	public ITestRunSession getTestRunSession(ILaunch launch) {
 		for (Iterator it = fTestRunSessions.iterator(); it.hasNext();) {
 			TestRunSession session = (TestRunSession) it.next();
 			if (session.getLaunch().getAttribute(

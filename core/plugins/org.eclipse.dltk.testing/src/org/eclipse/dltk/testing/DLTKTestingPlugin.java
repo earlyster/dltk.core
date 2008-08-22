@@ -47,6 +47,7 @@ import org.eclipse.debug.core.ILaunch;
 
 import org.eclipse.dltk.internal.testing.model.DLTKTestingModel;
 import org.eclipse.dltk.testing.model.ITestRunSession;
+import org.eclipse.dltk.testing.model.ITestingModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -230,7 +231,7 @@ public class DLTKTestingPlugin extends AbstractUIPlugin {
 		fBundleContext= null;
 	}
 
-	public static DLTKTestingModel getModel() {
+	public static ITestingModel getModel() {
 		return getDefault().fTestingModel;
 	}
 
