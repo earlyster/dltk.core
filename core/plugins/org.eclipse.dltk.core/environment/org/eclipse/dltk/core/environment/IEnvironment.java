@@ -18,6 +18,13 @@ import org.eclipse.core.runtime.IPath;
 
 public interface IEnvironment extends IAdaptable {
 	/**
+	 * Tests if this environment is local
+	 * 
+	 * @return
+	 */
+	boolean isLocal();
+	
+	/**
 	 * Returns {@link IFileHandle} for the specified local path. The path should
 	 * be local to this environment. If you have full path (with the environment
 	 * id) - you should use {@link EnvironmentPathUtils}

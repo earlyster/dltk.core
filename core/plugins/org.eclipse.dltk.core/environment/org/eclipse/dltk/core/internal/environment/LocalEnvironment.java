@@ -39,6 +39,13 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 		this.fs = EFS.getLocalFileSystem();
 	}
 
+	/*
+	 * @see org.eclipse.dltk.core.environment.IEnvironment#isLocal()
+	 */
+	public boolean isLocal() {
+		return true;
+	}
+
 	public IFileHandle getFile(IPath path) {
 		if (path == null) {
 			return null;
