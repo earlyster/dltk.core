@@ -1595,12 +1595,14 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 		for (int i = 0; i < nChosen; i++) {
 			IPath path = filterPath.append(fileNames[i]).makeAbsolute();
 
-			IFile file = root.getFileForLocation(path); // support internal
-			// JARs: bug 133191
+			IFile file = root.getFileForLocation(path);
+			// support internal	JARs: bug 133191
 			if (file != null) {
 				path = file.getFullPath();
 			}
 
+			path = EnvironmentPathUtils.getFullPath(EnvironmentManager
+					.getLocalEnvironment(), path);
 			BPListElement curr = new BPListElement(parent, null,
 					IBuildpathEntry.BPE_LIBRARY, path, file, true);
 			elems[i] = curr;
