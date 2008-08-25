@@ -10,17 +10,15 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.testing.launcher;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationMigrationDelegate;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptModel;
@@ -67,6 +65,33 @@ public class DLTKTestingMigrationDelegate implements ILaunchConfigurationMigrati
 		ILaunchConfigurationWorkingCopy wc= candidate.getWorkingCopy();
 		mapResources(wc);
 		wc.doSave();
+	}
+
+	public static ILaunchConfiguration fixMappedResources(
+			ILaunchConfiguration config) throws CoreException {
+		if (config.getMappedResources() == null) {
+			final String projectName = config.getAttribute(
+					ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+					Util.EMPTY_STRING);
+			if (Path.ROOT.isValidSegment(projectName)) {
+				final IScriptProject project = getModel().getScriptProject(
+						projectName);
+				if (project != null && project.exists()) {
+					final IResource resource = project.getResource();
+					if (resource != null) {
+						final ILaunchConfigurationWorkingCopy wc;
+						if (config.isWorkingCopy()) {
+							wc = (ILaunchConfigurationWorkingCopy) config;
+						} else {
+							wc = config.getWorkingCopy();
+						}
+						wc.setMappedResources(new IResource[] { resource });
+						return wc.doSave();
+					}
+				}
+			}
+		}
+		return config;
 	}
 
 	/**
