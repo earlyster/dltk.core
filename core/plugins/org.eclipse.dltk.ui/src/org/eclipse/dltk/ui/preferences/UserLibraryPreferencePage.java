@@ -96,6 +96,7 @@ import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Point;
@@ -118,7 +119,6 @@ import org.xml.sax.SAXException;
 public abstract class UserLibraryPreferencePage extends PreferencePage
 		implements IWorkbenchPreferencePage {
 
-	public static final String ID = "org.eclipse.dltk.ui.preferences.UserLibraryPreferencePage"; //$NON-NLS-1$
 	public static final String DATA_DO_CREATE = "do_create"; //$NON-NLS-1$
 	public static final String DATA_LIBRARY_TO_SELECT = "select_library"; //$NON-NLS-1$
 
@@ -1711,4 +1711,14 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 	}
 
 	protected abstract IDLTKLanguageToolkit getLanguageToolkit();
+
+	private static final String ID_TEMPLATE = "org.eclipse.dltk.{0}.preferences.UserLibraryPreferencePage"; //$NON-NLS-1$
+
+	/**
+	 * @param toolkit
+	 * @return
+	 */
+	public static String getPreferencePageId(IDLTKLanguageToolkit toolkit) {
+		return NLS.bind(ID_TEMPLATE, toolkit.getLanguageName().toLowerCase());
+	}
 }

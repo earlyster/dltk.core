@@ -67,7 +67,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements
 	private boolean fIsEditMode;
 	private IScriptProject fProject;
 	private boolean fIsExported;
-	private IDLTKLanguageToolkit langaugeToolkit;
+	private IDLTKLanguageToolkit languageToolkit;
 
 	public UserLibraryWizardPage() {
 		super("UserLibraryWizardPage"); //$NON-NLS-1$
@@ -127,7 +127,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements
 		IDLTKLanguageToolkit toolkit = null;
 		toolkit = DLTKLanguageManager.getLanguageToolkit(fProject);
 		if( toolkit == null ) {
-			toolkit = this.langaugeToolkit;
+			toolkit = this.languageToolkit;
 		}
 		String[] names = DLTKCore.getUserLibraryNames(toolkit);
 		Arrays.sort(names, Collator.getInstance());
@@ -212,7 +212,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements
 				data.put(UserLibraryPreferencePage.DATA_LIBRARY_TO_SELECT,
 						fEditResult.getName());
 			}
-			String id = UserLibraryPreferencePage.ID;
+			String id = UserLibraryPreferencePage.getPreferencePageId(languageToolkit);
 			PreferencesUtil.createPreferenceDialogOn(getShell(), id,
 					new String[] { id }, data).open();
 
@@ -362,7 +362,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements
 	 */
 	public void initialize(IScriptProject project,
 			IBuildpathEntry[] currentEntries) {
-		this.langaugeToolkit = DLTKLanguageManager
+		this.languageToolkit = DLTKLanguageManager
 				.getLanguageToolkit(project);
 		for (int i = 0; i < currentEntries.length; i++) {
 			IBuildpathEntry curr = currentEntries[i];
