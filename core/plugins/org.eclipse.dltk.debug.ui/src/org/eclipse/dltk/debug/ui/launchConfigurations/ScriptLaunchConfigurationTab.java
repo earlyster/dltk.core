@@ -248,8 +248,15 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 * 
 	 * @return <code>true</code> if the toolkit is valid for the launch
 	 *         configuration, <code>false</code> otherwise
+	 * @deprecated
 	 */
-	protected abstract boolean isValidToolkit(IDLTKLanguageToolkit toolkit);
+	protected final boolean isValidToolkit(IDLTKLanguageToolkit toolkit) {
+		/*
+		 * This method is not used anymore - the test in validateProject() is
+		 * now performed comparing natureId.
+		 */
+		return false;
+	}
 
 	/**
 	 * Add the 'break on first line' option to a group composite.
@@ -584,14 +591,9 @@ public abstract class ScriptLaunchConfigurationTab extends
 		if (project == null) {
 			return false;
 		}
-
-		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(project);
-		if ((toolkit != null) && isValidToolkit(toolkit)) {
-			return true;
-		}
-
-		return false;
+		return toolkit != null && toolkit.getNatureId().equals(getNatureID());
 	}
 
 	/**
