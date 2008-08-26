@@ -221,17 +221,16 @@ public abstract class ScriptTemplateCompletionProcessor extends
 
 	protected String getTrigger(ITextViewer viewer, IRegion region)
 			throws BadLocationException {
-		IDocument doc = viewer.getDocument();
-		IRegion line = doc.getLineInformationOfOffset(region.getOffset()
-				+ region.getLength());
-		int len = region.getOffset() + region.getLength() - line.getOffset();
-		String s = doc.get(line.getOffset(), len);
-
-		int spaceIndex = s.lastIndexOf(' ');
+		final IDocument doc = viewer.getDocument();
+		final int regionEnd = region.getOffset() + region.getLength();
+		final IRegion line = doc.getLineInformationOfOffset(regionEnd);
+		final String s = doc
+				.get(line.getOffset(), regionEnd - line.getOffset());
+		final int spaceIndex = s.lastIndexOf(' ');
 		if (spaceIndex != -1) {
-			s = s.substring(spaceIndex);
+			return s.substring(spaceIndex);
+		} else {
+			return s;
 		}
-
-		return s;
 	}
 }
