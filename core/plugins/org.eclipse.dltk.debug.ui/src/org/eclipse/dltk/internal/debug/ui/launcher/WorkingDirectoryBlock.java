@@ -24,6 +24,7 @@ import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.StringVariableSelectionDialog;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
@@ -65,11 +66,6 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 	private Text fWorkingDirText;
 
 	/**
-	 * The last launch config this tab was initialized from
-	 */
-	private ILaunchConfiguration fLaunchConfiguration;
-
-	/**
 	 * A listener to update for text changes and widget selection
 	 */
 	private class WidgetListener extends SelectionAdapter implements
@@ -109,10 +105,8 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 	private WidgetListener fListener = new WidgetListener();
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse
-	 *      .swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
 		Font font = parent.getFont();
@@ -302,28 +296,26 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
+	private static final String DEFAULT_WORKING_DIRECTORY = "${resource_loc}/../"; //$NON-NLS-1$
+
 	/**
 	 * Sets the default working directory
 	 */
 	protected void setDefaultWorkingDir() {
 		try {
-			ILaunchConfiguration config = getLaunchConfiguration();
+			ILaunchConfiguration config = getCurrentLaunchConfiguration();
 			if (config != null) {
-				String projectName = config.getAttribute(
-						ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME,
-						""); //$NON-NLS-1$
-				if (!projectName.equals("")) { //$NON-NLS-1$
-					IScriptProject project = DLTKCore
-							.create(getWorkspaceRoot()).getScriptProject(
-									projectName);
-					if (project != null) {
-						IEnvironment environment = EnvironmentManager
-								.getEnvironment(project);
-						String path = "${resource_loc}/../".replace('/', //$NON-NLS-1$
-								environment.getSeparatorChar());
-						setDefaultWorkingDirectoryText(path);
-						return;
+				IScriptProject project = getProject(config);
+				if (project != null) {
+					String path = DEFAULT_WORKING_DIRECTORY;
+					IEnvironment environment = EnvironmentManager
+							.getEnvironment(project);
+					if (environment != null) {
+						path = path
+								.replace('/', environment.getSeparatorChar());
 					}
+					setDefaultWorkingDirectoryText(path);
+					return;
 				}
 			}
 		} catch (CoreException ce) {
@@ -331,11 +323,30 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 		setDefaultWorkingDirectoryText(System.getProperty("user.dir")); //$NON-NLS-1$
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Returns the project associated with the specified launch configuration or
+	 * <code>null</code> if none.
 	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#isValid(org.eclipse.debug
-	 *      .core.ILaunchConfiguration)
+	 * @param configuration
+	 * @return
+	 * @throws CoreException
+	 */
+	protected IScriptProject getProject(ILaunchConfiguration configuration)
+			throws CoreException {
+		String projectName = configuration.getAttribute(
+				ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+				Util.EMPTY_STRING);
+		if (!projectName.equals(Util.EMPTY_STRING)) {
+			return DLTKCore.create(getWorkspaceRoot()).getScriptProject(
+					projectName);
+		}
+		return null;
+	}
+
+	/*
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#isValid(ILaunchConfiguration
+	 * )
 	 */
 	public boolean isValid(ILaunchConfiguration config) {
 		setErrorMessage(null);
@@ -379,19 +390,17 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 		config.setAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
 				(String) null);
-		// config.setAttribute(
-		// ScriptLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
-		// "${resource_loc}/../");
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse
-	 *      .debug.core.ILaunchConfiguration)
+	 * @see
+	 * org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse
+	 * .debug.core.ILaunchConfiguration)
 	 */
 	public void initializeFrom(ILaunchConfiguration configuration) {
-		setLaunchConfiguration(configuration);
+		super.initializeFrom(configuration);
 		try {
 			String wd = configuration.getAttribute(
 					ScriptLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
@@ -411,10 +420,8 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse
-	 *      .debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(
+	 * ILaunchConfigurationWorkingCopy)
 	 */
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		if (fUseDefaultDirButton.getSelection()) {
@@ -481,21 +488,6 @@ public class WorkingDirectoryBlock extends CommonScriptLaunchTab {
 			handleUseOtherWorkingDirButtonSelected();
 		}// end if
 	}// end setOtherWorkingDirectoryText
-
-	/**
-	 * Sets thescriptproject currently specified by the given launch config, if
-	 * any.
-	 */
-	protected void setLaunchConfiguration(ILaunchConfiguration config) {
-		fLaunchConfiguration = config;
-	}
-
-	/**
-	 * Returns the currentscriptproject context
-	 */
-	protected ILaunchConfiguration getLaunchConfiguration() {
-		return fLaunchConfiguration;
-	}
 
 	/**
 	 * Allows this entire block to be enabled/disabled
