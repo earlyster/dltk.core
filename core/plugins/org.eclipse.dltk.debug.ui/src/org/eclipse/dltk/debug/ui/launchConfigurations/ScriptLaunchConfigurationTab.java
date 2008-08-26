@@ -80,7 +80,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 * org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse
 	 * .swt.widgets.Composite)
 	 */
-	public final void createControl(Composite parent) {
+	public void createControl(Composite parent) {
 		Font font = parent.getFont();
 		Composite comp = new Composite(parent, SWT.NONE);
 		setControl(comp);
