@@ -258,7 +258,7 @@ public final class CompletionProposalCategory {
 			CompletionProposalComputerDescriptor desc= (CompletionProposalComputerDescriptor) it.next();
 			if(context instanceof ScriptContentAssistInvocationContext ) {
 				ScriptContentAssistInvocationContext scriptContext = (ScriptContentAssistInvocationContext)context;
-				if( !scriptContext.getLangaugeNatureID().equals(desc.getLanguageToolkitID())) {
+				if( !scriptContext.getLanguageNatureID().equals(desc.getLanguageToolkitID())) {
 					continue;
 				}
 			}
@@ -289,7 +289,7 @@ public final class CompletionProposalCategory {
 			CompletionProposalComputerDescriptor desc= (CompletionProposalComputerDescriptor) it.next();
 			if(context instanceof ScriptContentAssistInvocationContext ) {
 				ScriptContentAssistInvocationContext scriptContext = (ScriptContentAssistInvocationContext)context;
-				if( !scriptContext.getLangaugeNatureID().equals(desc.getLanguageToolkitID())) {
+				if( !scriptContext.getLanguageNatureID().equals(desc.getLanguageToolkitID())) {
 					continue;
 				}
 			}

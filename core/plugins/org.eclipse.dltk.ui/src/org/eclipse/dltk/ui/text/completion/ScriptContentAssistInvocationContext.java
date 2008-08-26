@@ -35,7 +35,7 @@ public abstract class ScriptContentAssistInvocationContext extends
 	private RHSHistory fRHSHistory;
 	private IType fType;
 
-	private String fLangaugeNatureID;
+	private String fLanguageNatureID;
 	private boolean isContextInformationMode; 
 
 	/**
@@ -53,7 +53,7 @@ public abstract class ScriptContentAssistInvocationContext extends
 		super(viewer, offset);
 		
 		fEditor = editor;
-		fLangaugeNatureID = natureId;
+		fLanguageNatureID = natureId;
 	}
 
 	/**
@@ -73,8 +73,8 @@ public abstract class ScriptContentAssistInvocationContext extends
 	  return fEditor;
 	}
 
-	public String getLangaugeNatureID() {
-		return fLangaugeNatureID;
+	public String getLanguageNatureID() {
+		return fLanguageNatureID;
 	}
 
 	/**
