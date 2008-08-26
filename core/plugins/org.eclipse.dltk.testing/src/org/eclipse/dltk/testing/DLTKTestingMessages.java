@@ -9,13 +9,13 @@
  *     IBM Corporation - initial API and implementation
  *     David Saff (saff@mit.edu) - bug 102632: [JUnit] Support for JUnit 4.
  *******************************************************************************/
-package org.eclipse.dltk.internal.testing.ui;
+package org.eclipse.dltk.testing;
 
 import org.eclipse.osgi.util.NLS;
 
 public final class DLTKTestingMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.dltk.internal.testing.ui.TestingMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.dltk.testing.TestingMessages";//$NON-NLS-1$
 
 	public static String ClasspathVariableMarkerResolutionGenerator_use_JUnit3;
 

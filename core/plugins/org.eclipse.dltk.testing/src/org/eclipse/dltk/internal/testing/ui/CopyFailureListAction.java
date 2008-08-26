@@ -22,6 +22,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.dltk.internal.testing.model.TestElement;
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 
 

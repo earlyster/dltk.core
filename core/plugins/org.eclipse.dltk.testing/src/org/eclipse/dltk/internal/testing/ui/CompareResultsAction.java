@@ -17,6 +17,7 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.jface.action.Action;
 
 import org.eclipse.dltk.internal.testing.model.TestElement;
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 
 

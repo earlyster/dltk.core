@@ -24,7 +24,8 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.testing.MemberResolverManager;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
-import org.eclipse.dltk.testing.IDLTKTestingConstants;
+import org.eclipse.dltk.testing.DLTKTestingConstants;
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.ITestingElementResolver;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.action.Action;
@@ -111,7 +112,7 @@ public abstract class OpenEditorAction extends Action {
 		String id = null;
 		try {
 			id = launchConfiguration.getAttribute(
-					IDLTKTestingConstants.ENGINE_ID_ATR, "");
+					DLTKTestingConstants.ATTR_ENGINE_ID, "");
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();

@@ -30,6 +30,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionListenerAction;
 
 import org.eclipse.dltk.internal.testing.model.TestElement;
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 
 /**
  * Copies a test failure stack trace to the clipboard.

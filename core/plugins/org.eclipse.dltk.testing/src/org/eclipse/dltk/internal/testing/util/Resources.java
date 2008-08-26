@@ -27,7 +27,7 @@ import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.dltk.internal.testing.Messages;
-import org.eclipse.dltk.internal.testing.ui.DLTKTestingMessages;
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 
 

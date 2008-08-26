@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.testing.ui;
 
 import org.eclipse.jface.action.Action;
 
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 
 class ShowPreviousFailureAction extends Action {

@@ -15,6 +15,7 @@ import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 
 /**

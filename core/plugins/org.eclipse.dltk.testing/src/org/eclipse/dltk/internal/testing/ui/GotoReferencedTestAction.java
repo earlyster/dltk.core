@@ -43,6 +43,7 @@ import org.eclipse.dltk.internal.testing.Messages;
 import org.eclipse.dltk.internal.ui.actions.SelectionConverter;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 

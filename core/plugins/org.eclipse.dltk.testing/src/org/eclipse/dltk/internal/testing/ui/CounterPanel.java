@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.dltk.internal.testing.Messages;
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 
 /**
  * A panel with counters for the number of Runs, Errors and Failures.

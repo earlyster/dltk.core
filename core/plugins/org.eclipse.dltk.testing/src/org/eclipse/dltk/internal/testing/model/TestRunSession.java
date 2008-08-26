@@ -30,10 +30,10 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.testing.Messages;
-import org.eclipse.dltk.internal.testing.launcher.DLTKTestingLaunchConfigurationConstants;
 import org.eclipse.dltk.internal.testing.launcher.ITestKind;
 import org.eclipse.dltk.internal.testing.model.TestElement.Status;
-import org.eclipse.dltk.internal.testing.ui.DLTKTestingMessages;
+import org.eclipse.dltk.testing.DLTKTestingConstants;
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.testing.ITestSession;
 import org.eclipse.dltk.testing.ITestingClient;
@@ -155,7 +155,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
 		if (launchConfiguration != null) {
 			fTestRunName= launchConfiguration.getName();
-			fTestRunnerKind= DLTKTestingLaunchConfigurationConstants.getTestRunnerKind(launchConfiguration);
+			fTestRunnerKind= DLTKTestingConstants.getTestRunnerKind(launchConfiguration);
 		} else {
 			fTestRunName= project.getElementName();
 			fTestRunnerKind= ITestKind.NULL;
@@ -441,7 +441,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 			ILaunchConfiguration config= fLaunch.getLaunchConfiguration();
 			try {
 				return config != null
-				&& config.getAttribute(DLTKTestingLaunchConfigurationConstants.ATTR_KEEPRUNNING, false);
+				&& config.getAttribute(DLTKTestingConstants.ATTR_KEEPRUNNING, false);
 			} catch (CoreException e) {
 				return false;
 			}
@@ -490,9 +490,9 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 				// fix for bug: 64838  junit view run single test does not use correct class [JUnit] 
 //				tmp.setAttribute(ScriptLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, className);
 				// reset the container
-				tmp.setAttribute(DLTKTestingLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
+				tmp.setAttribute(DLTKTestingConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
 				if (testName != null) {
-					tmp.setAttribute(DLTKTestingLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, testName);
+					tmp.setAttribute(DLTKTestingConstants.ATTR_TEST_METHOD_NAME, testName);
 					//	String args= "-rerun "+testId;
 					//	tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, args);
 				}

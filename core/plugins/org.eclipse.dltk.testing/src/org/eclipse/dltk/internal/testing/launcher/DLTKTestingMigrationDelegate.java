@@ -24,6 +24,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
+import org.eclipse.dltk.testing.DLTKTestingConstants;
 
 public class DLTKTestingMigrationDelegate implements ILaunchConfigurationMigrationDelegate {
 
@@ -119,7 +120,7 @@ public class DLTKTestingMigrationDelegate implements ILaunchConfigurationMigrati
 	 */
 	private static IResource getResource(ILaunchConfiguration config) throws CoreException {
 		String projName= config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String) null);
-		String containerHandle= config.getAttribute(DLTKTestingLaunchConfigurationConstants.ATTR_TEST_CONTAINER, (String) null);
+		String containerHandle= config.getAttribute(DLTKTestingConstants.ATTR_TEST_CONTAINER, (String) null);
 //		String typeName = config.getAttribute(ScriptLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
 		IModelElement element= null;
 		if (projName != null && Path.ROOT.isValidSegment(projName)) {

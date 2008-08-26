@@ -15,6 +15,7 @@ import org.eclipse.dltk.internal.testing.Messages;
 import org.eclipse.dltk.internal.testing.model.TestCaseElement;
 import org.eclipse.dltk.internal.testing.model.TestSuiteElement;
 import org.eclipse.dltk.internal.testing.model.TestElement.Status;
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.ITestingClient;
 import org.eclipse.dltk.testing.model.ITestCaseElement;
 import org.eclipse.dltk.testing.model.ITestElement;

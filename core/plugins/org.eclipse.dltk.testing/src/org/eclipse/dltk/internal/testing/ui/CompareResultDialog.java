@@ -58,6 +58,7 @@ import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 
 import org.eclipse.dltk.internal.testing.model.TestElement;
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 
 

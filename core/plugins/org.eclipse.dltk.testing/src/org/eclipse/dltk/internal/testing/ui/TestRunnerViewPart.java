@@ -46,7 +46,6 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.testing.Messages;
-import org.eclipse.dltk.internal.testing.launcher.DLTKTestingLaunchConfigurationConstants;
 import org.eclipse.dltk.internal.testing.launcher.ITestKind;
 import org.eclipse.dltk.internal.testing.model.DLTKTestingModel;
 import org.eclipse.dltk.internal.testing.model.ITestRunSessionListener;
@@ -54,6 +53,8 @@ import org.eclipse.dltk.internal.testing.model.ITestSessionListener;
 import org.eclipse.dltk.internal.testing.model.TestCaseElement;
 import org.eclipse.dltk.internal.testing.model.TestElement;
 import org.eclipse.dltk.internal.testing.model.TestRunSession;
+import org.eclipse.dltk.testing.DLTKTestingConstants;
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.testing.ITestSession;
 import org.eclipse.dltk.testing.model.ITestElement.Result;
@@ -999,11 +1000,11 @@ public class TestRunnerViewPart extends ViewPart {
 
 	private ILaunchConfiguration prepareLaunchConfigForRelaunch(ILaunchConfiguration configuration) {
 		try {
-			String attribute= configuration.getAttribute(DLTKTestingLaunchConfigurationConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
+			String attribute= configuration.getAttribute(DLTKTestingConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
 			if (attribute.length() != 0) {
 				String configName= Messages.format(DLTKTestingMessages.TestRunnerViewPart_configName, configuration.getName()); 
 				ILaunchConfigurationWorkingCopy tmp= configuration.copy(configName); 
-				tmp.setAttribute(DLTKTestingLaunchConfigurationConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
+				tmp.setAttribute(DLTKTestingConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
 				return tmp;
 			}
 		} catch (CoreException e) {
@@ -1026,7 +1027,7 @@ public class TestRunnerViewPart extends ViewPart {
 				if (launchConfiguration != null) {
 					try {
 						String oldName= launchConfiguration.getName(); 
-						String oldFailuresFilename= launchConfiguration.getAttribute(DLTKTestingLaunchConfigurationConstants.ATTR_FAILURES_NAMES, (String) null);
+						String oldFailuresFilename= launchConfiguration.getAttribute(DLTKTestingConstants.ATTR_FAILURES_NAMES, (String) null);
 						String configName;
 						if (oldFailuresFilename != null) {
 							configName= oldName;
@@ -1034,7 +1035,7 @@ public class TestRunnerViewPart extends ViewPart {
 							configName= Messages.format(DLTKTestingMessages.TestRunnerViewPart_rerunFailedFirstLaunchConfigName, oldName); 
 						}
 						ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy(configName); 
-						tmp.setAttribute(DLTKTestingLaunchConfigurationConstants.ATTR_FAILURES_NAMES, createFailureNamesFile());
+						tmp.setAttribute(DLTKTestingConstants.ATTR_FAILURES_NAMES, createFailureNamesFile());
 						relaunch(tmp, launch.getLaunchMode());	
 						return;	
 					} catch (CoreException e) {

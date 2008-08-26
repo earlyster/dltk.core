@@ -46,11 +46,11 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.testing.Messages;
-import org.eclipse.dltk.internal.testing.launcher.DLTKTestingLaunchConfigurationConstants;
 import org.eclipse.dltk.internal.testing.model.TestElement.Status;
 import org.eclipse.dltk.internal.testing.ui.DLTKTestingPreferencesConstants;
 import org.eclipse.dltk.internal.testing.ui.TestRunnerViewPart;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
+import org.eclipse.dltk.testing.DLTKTestingConstants;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.testing.ITestKind;
 import org.eclipse.dltk.testing.ITestSession;
@@ -120,14 +120,14 @@ public final class DLTKTestingModel implements ITestingModel {
 			if (config == null)
 				return;
 
-			final IScriptProject javaProject = DLTKTestingLaunchConfigurationConstants
+			final IScriptProject javaProject = DLTKTestingConstants
 					.getScriptProject(config);
 			if (javaProject == null)
 				return;
 
 			// test whether the launch defines the JUnit attributes
 			String portStr = launch
-					.getAttribute(DLTKTestingLaunchConfigurationConstants.ATTR_PORT);
+					.getAttribute(DLTKTestingConstants.ATTR_PORT);
 			if (portStr != null) {
 				try {
 					final int port = Integer.parseInt(portStr);

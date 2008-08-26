@@ -28,6 +28,7 @@ import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.SearchRequestor;
 import org.eclipse.dltk.internal.testing.Messages;
+import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.ui.ModelElementLabelProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
