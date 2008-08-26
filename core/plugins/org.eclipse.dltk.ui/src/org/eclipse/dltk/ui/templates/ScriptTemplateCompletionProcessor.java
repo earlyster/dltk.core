@@ -12,8 +12,11 @@ package org.eclipse.dltk.ui.templates;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -53,14 +56,11 @@ public abstract class ScriptTemplateCompletionProcessor extends
 
 	private static final Comparator comparator = new ProposalComparator();
 
-	private ScriptContentAssistInvocationContext context;
+	private final ScriptContentAssistInvocationContext context;
 
 	public ScriptTemplateCompletionProcessor(
 			ScriptContentAssistInvocationContext context) {
-		if (context == null) {
-			throw new IllegalArgumentException();
-		}
-
+		Assert.isNotNull(context);
 		this.context = context;
 	}
 
@@ -68,7 +68,6 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		return this.context;
 	}
 
-	// TODO: add more customizations
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer,
 			int offset) {
 
@@ -80,7 +79,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 			offset = selection.getOffset() + selection.getLength();
 
 		String prefix = extractPrefix(viewer, offset);
-		if (prefix == null || prefix.length() == 0) {
+		if (!isValidPrefix(prefix)) {
 			return new ICompletionProposal[0];
 		}
 		Region region = new Region(offset - prefix.length(), prefix.length());
@@ -91,9 +90,9 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		// name of the selection variables {line, word}_selection
 		context.setVariable("selection", selection.getText()); //$NON-NLS-1$
 
-		Template[] templates = getTemplates(context.getContextType().getId());
-
 		List matches = new ArrayList();
+
+		Template[] templates = getTemplates(context.getContextType().getId());
 		for (int i = 0; i < templates.length; i++) {
 			Template template = templates[i];
 			try {
@@ -101,19 +100,31 @@ public abstract class ScriptTemplateCompletionProcessor extends
 			} catch (TemplateException e) {
 				continue;
 			}
-
-			// Addes check of startsWith
-			if (template.getName().startsWith(prefix)
-					&& template.matches(prefix, context.getContextType()
-							.getId()))
+			if (isMatchingTemplate(template, prefix, context))
 				matches.add(createProposal(template, context, (IRegion) region,
 						getRelevance(template, prefix)));
 		}
 
 		Collections.sort(matches, comparator);
 
+		final IInformationControlCreator controlCreator = getInformationControlCreator();
+		for (Iterator i = matches.iterator(); i.hasNext();) {
+			TemplateProposal proposal = (TemplateProposal) i.next();
+			proposal.setInformationControlCreator(controlCreator);
+		}
+
 		return (ICompletionProposal[]) matches
 				.toArray(new ICompletionProposal[matches.size()]);
+	}
+
+	protected boolean isValidPrefix(String prefix) {
+		return prefix.length() != 0;
+	}
+
+	protected boolean isMatchingTemplate(Template template, String prefix,
+			TemplateContext context) {
+		return template.getName().startsWith(prefix)
+				&& template.matches(prefix, context.getContextType().getId());
 	}
 
 	protected TemplateContext createContext(ITextViewer viewer, IRegion region) {
@@ -129,16 +140,13 @@ public abstract class ScriptTemplateCompletionProcessor extends
 					document, region.getOffset(), region.getLength(),
 					sourceModule);
 		}
-
-		return super.createContext(viewer, region);
+		return null;
 	}
 
 	protected ICompletionProposal createProposal(Template template,
 			TemplateContext context, IRegion region, int relevance) {
-		TemplateProposal proposal = new ScriptTemplateProposal(template,
-				context, region, getImage(template), relevance);
-		proposal.setInformationControlCreator(getInformationControlCreator());
-		return proposal;
+		return new ScriptTemplateProposal(template, context, region,
+				getImage(template), relevance);
 	}
 
 	private IInformationControlCreator getInformationControlCreator() {
@@ -168,37 +176,43 @@ public abstract class ScriptTemplateCompletionProcessor extends
 		return new Template[0];
 	}
 
-	protected abstract char[] getIgnore();
+	protected char[] getIgnore() {
+		return CharOperation.NO_CHAR;
+	}
 
 	protected TemplateContextType getContextType(ITextViewer viewer,
 			IRegion region) {
+		if (isValidLocation(viewer, region)) {
+			return getTemplateAccess().getContextTypeRegistry().getContextType(
+					getContextTypeId());
+		}
+		return null;
+	}
 
-		boolean contains = false;
-
-		// TODO: make smarter
+	/**
+	 * Validates the current location
+	 * 
+	 * @param viewer
+	 * @param region
+	 * @return <code>true</code> if the location is valid and could be used to
+	 *         display template proposals or <code>false</code> if not
+	 */
+	protected boolean isValidLocation(ITextViewer viewer, IRegion region) {
 		try {
-			String trigger = getTrigger(viewer, region);
-
-			char[] ignore = getIgnore();
+			final String trigger = getTrigger(viewer, region);
+			final char[] ignore = getIgnore();
 			for (int i = 0; i < ignore.length; i++) {
 				if (trigger.indexOf(ignore[i]) != -1) {
-					contains = true;
-					// don't bother checking the rest of the array
-					break;
+					return false;
 				}
 			}
 		} catch (BadLocationException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
+			return false;
 		}
-
-		if (!contains) {
-			return getTemplateAccess().getContextTypeRegistry().getContextType(
-					getContextTypeId());
-		}
-
-		return null;
+		return true;
 	}
 
 	protected Image getImage(Template template) {
