@@ -71,13 +71,6 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#canSave()
-	 */
-	public boolean canSave() {
-		return validateProject() && doCanSave();
-	}
-
-	/*
 	 * @see
 	 * org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse
 	 * .swt.widgets.Composite)
@@ -150,15 +143,32 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 * .debug.core.ILaunchConfiguration)
 	 */
 	public boolean isValid(ILaunchConfiguration launchConfig) {
-		// clear the error messages first
-		setMessage(null);
+		validatePage();
+		return !isError();
+	}
+
+	/**
+	 * This is a top level method to initiate the page validation.
+	 */
+	protected final void validatePage() {
 		setErrorMessage(null);
+		setMessage(null);
+		validate();
+	}
 
-		// if the configuration can be saved, it can be launched
-		boolean canSave = canSave();
+	/**
+	 * Validates the page. This method should be overridden when more checks are
+	 * needed.
+	 * 
+	 * @return <code>true</code> if input is correct and <code>false</code>
+	 *         otherwise
+	 */
+	protected boolean validate() {
+		return validateProject();
+	}
 
-		// TODO: check launch configuration?
-		return canSave;
+	protected boolean isError() {
+		return getErrorMessage() != null;
 	}
 
 	/*
@@ -209,7 +219,13 @@ public abstract class ScriptLaunchConfigurationTab extends
 	protected abstract boolean dbpgLoggingPrefEnabled(
 			PreferencesLookupDelegate delegate);
 
-	protected abstract boolean doCanSave();
+	/**
+	 * @deprecated not used anymore
+	 * @return
+	 */
+	protected final boolean doCanSave() {
+		return false;
+	}
 
 	/**
 	 * Creates the sub-class specific control.
@@ -612,7 +628,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 		}
 
 		IScriptProject proj = getScriptModel().getScriptProject(projectName);
-		if ((proj == null) || !validateProject(proj)) {
+		if (proj == null || !validateProject(proj)) {
 			setErrorMessage(DLTKLaunchConfigurationsMessages.error_notAValidProject);
 			return false;
 		}

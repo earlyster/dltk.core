@@ -122,13 +122,9 @@ public abstract class RemoteLaunchConfigurationTab extends
 						stripSourceFolders.getSelection());
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
-	 * #doCanSave()
-	 */
-	protected boolean doCanSave() {
-		return validatePort() && validateIdeKey() && validateRemoteWorkingDir();
+	protected boolean validate() {
+		return super.validate() && validatePort() && validateIdeKey()
+				&& validateRemoteWorkingDir();
 	}
 
 	protected boolean validatePort() {

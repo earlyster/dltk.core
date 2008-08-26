@@ -15,7 +15,6 @@ import java.net.URISyntaxException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
@@ -267,7 +266,7 @@ public abstract class MainLaunchConfigurationTab extends
 	 * @return true if the selected script is valid, false otherwise
 	 */
 	protected boolean validateScript() {
-		URI script = validatAndGetScriptPath();
+		URI script = validateAndGetScriptPath();
 		IScriptProject project = getProject();
 		IEnvironment environment = EnvironmentManager.getEnvironment(project);
 		if (script != null) {
@@ -297,7 +296,15 @@ public abstract class MainLaunchConfigurationTab extends
 		return true;
 	}
 
-	protected URI validatAndGetScriptPath() {
+	/**
+	 * @deprecated typo in method name
+	 * @return
+	 */
+	protected final URI validatAndGetScriptPath() {
+		return null;
+	}
+
+	protected URI validateAndGetScriptPath() {
 		String projectName = getProjectName();
 		IScriptProject proj = getScriptModel().getScriptProject(projectName);
 		if (proj != null) {
@@ -322,8 +329,7 @@ public abstract class MainLaunchConfigurationTab extends
 			}
 		}
 		if (script != null) {
-			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
-					.findFilesForLocationURI(script);
+			IFile[] files = getWorkspaceRoot().findFilesForLocationURI(script);
 			if (files.length != 1) {
 				return script;
 			}
@@ -336,13 +342,8 @@ public abstract class MainLaunchConfigurationTab extends
 		return script;
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
-	 * #doCanSave()
-	 */
-	protected boolean doCanSave() {
-		return validateScript();
+	protected boolean validate() {
+		return super.validate() && validateScript();
 	}
 
 	/*
