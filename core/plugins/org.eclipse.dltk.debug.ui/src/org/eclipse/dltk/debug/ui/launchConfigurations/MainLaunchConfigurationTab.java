@@ -38,7 +38,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -112,6 +111,8 @@ public abstract class MainLaunchConfigurationTab extends
 
 	private Button fSearchButton;
 
+	protected static final String FIELD_SCRIPT = "mainScript"; //$NON-NLS-1$
+
 	/**
 	 * Creates the widgets for specifying a main type.
 	 * 
@@ -119,25 +120,29 @@ public abstract class MainLaunchConfigurationTab extends
 	 *            the parent composite
 	 */
 	protected void createMainModuleEditor(Composite parent, String text) {
-		Font font = parent.getFont();
-		Group mainGroup = new Group(parent, SWT.NONE);
-		mainGroup.setText(text);
+		final Composite editParent;
+		if (needGroupForField(FIELD_SCRIPT)) {
+			Group mainGroup = new Group(parent, SWT.NONE);
+			mainGroup.setText(text);
+			GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+			mainGroup.setLayoutData(gd);
+			GridLayout layout = new GridLayout();
+			layout.numColumns = 2;
+			mainGroup.setLayout(layout);
+			editParent = mainGroup;
+		} else {
+			createLabelForField(parent, FIELD_SCRIPT, text);
+			editParent = parent;
+		}
+		fScriptText = new Text(editParent, SWT.SINGLE | SWT.BORDER);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		mainGroup.setLayoutData(gd);
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 2;
-		mainGroup.setLayout(layout);
-		mainGroup.setFont(font);
-		fScriptText = new Text(mainGroup, SWT.SINGLE | SWT.BORDER);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
 
 		WidgetListener listener = getWidgetListener();
 
 		fScriptText.setLayoutData(gd);
-		fScriptText.setFont(font);
 		fScriptText.addModifyListener(listener);
 
-		fSearchButton = createPushButton(mainGroup,
+		fSearchButton = createPushButton(editParent,
 				DLTKLaunchConfigurationsMessages.mainTab_searchButton, null);
 		fSearchButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -343,7 +348,6 @@ public abstract class MainLaunchConfigurationTab extends
 
 	protected void createCustomSections(Composite parent) {
 		if (useInteractiveConsoleGroup) {
-			Font font = parent.getFont();
 			Group group = new Group(parent, SWT.NONE);
 			group
 					.setText(DLTKLaunchConfigurationsMessages.MainLaunchConfigurationTab_1);
@@ -352,7 +356,6 @@ public abstract class MainLaunchConfigurationTab extends
 			GridLayout layout = new GridLayout();
 			layout.numColumns = 2;
 			group.setLayout(layout);
-			group.setFont(font);
 			interactiveConsoleCheck = createCheckButton(
 					group,
 					DLTKLaunchConfigurationsMessages.MainLaunchConfigurationTab_2);

@@ -27,6 +27,7 @@ import org.eclipse.dltk.internal.ui.DLTKUIStatus;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.window.Window;
@@ -42,6 +43,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -81,14 +83,12 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 * .swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
-		Font font = parent.getFont();
 		Composite comp = new Composite(parent, SWT.NONE);
 		setControl(comp);
 
 		GridLayout topLayout = new GridLayout();
 		topLayout.verticalSpacing = 0;
 		comp.setLayout(topLayout);
-		comp.setFont(font);
 
 		createProjectEditor(comp);
 		createVerticalSpacer(comp, 1);
@@ -99,6 +99,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 		createDebugOptionsGroup(comp);
 
 		createCustomSections(comp);
+		Dialog.applyDialogFont(comp);
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(),
 		// IScriptDebugHelpContextIds.LAUNCH_CONFIGURATION_DIALOG_MAIN_TAB);
 	}
@@ -330,6 +331,24 @@ public abstract class ScriptLaunchConfigurationTab extends
 		return null;
 	}
 
+	protected boolean needGroupForField(String fieldName) {
+		return true;
+	}
+
+	/**
+	 * @param parent
+	 * @param fieldName
+	 * @param text
+	 */
+	protected Label createLabelForField(Composite parent, String fieldName,
+			String text) {
+		final Label label = new Label(parent, SWT.NONE);
+		label.setText(text);
+		return label;
+	}
+
+	protected static final String FIELD_PROJECT = "project"; //$NON-NLS-1$
+
 	/**
 	 * Creates a project editor
 	 * 
@@ -342,24 +361,30 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 *            the parent composite
 	 */
 	protected void createProjectEditor(Composite parent) {
-		Font font = parent.getFont();
-		Group group = new Group(parent, SWT.NONE);
-		group.setText(DLTKLaunchConfigurationsMessages.mainTab_projectGroup);
+		final Composite editParent;
+		if (needGroupForField(FIELD_PROJECT)) {
+			Group group = new Group(parent, SWT.NONE);
+			group
+					.setText(DLTKLaunchConfigurationsMessages.mainTab_projectGroup);
 
+			GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+			group.setLayoutData(gd);
+
+			GridLayout layout = new GridLayout();
+			layout.numColumns = 2;
+			group.setLayout(layout);
+			editParent = group;
+		} else {
+			createLabelForField(parent, FIELD_PROJECT,
+					DLTKLaunchConfigurationsMessages.mainTab_projectGroup);
+			editParent = parent;
+		}
+		fProjText = new Text(editParent, SWT.SINGLE | SWT.BORDER);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		group.setLayoutData(gd);
-
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 2;
-		group.setLayout(layout);
-		group.setFont(font);
-		fProjText = new Text(group, SWT.SINGLE | SWT.BORDER);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
 		fProjText.setLayoutData(gd);
-		fProjText.setFont(font);
 		fProjText.addModifyListener(fListener);
 
-		fProjButton = createPushButton(group,
+		fProjButton = createPushButton(editParent,
 				DLTKLaunchConfigurationsMessages.mainTab_projectButton, null);
 		fProjButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
