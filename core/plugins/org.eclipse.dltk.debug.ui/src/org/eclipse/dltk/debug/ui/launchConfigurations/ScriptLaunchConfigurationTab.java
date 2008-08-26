@@ -347,6 +347,14 @@ public abstract class ScriptLaunchConfigurationTab extends
 		return label;
 	}
 
+	/**
+	 * @param enabled
+	 */
+	protected void setEnableProjectField(boolean enabled) {
+		fProjText.setEnabled(enabled);
+		fProjButton.setEnabled(enabled);
+	}
+
 	protected static final String FIELD_PROJECT = "project"; //$NON-NLS-1$
 
 	/**

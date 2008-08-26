@@ -99,6 +99,10 @@ public abstract class MainLaunchConfigurationTab extends
 
 	protected void doInitializeForm(ILaunchConfiguration config) {
 		updateMainModuleFromConfig(config);
+		initializeInteractiveConsoleFrom(config);
+	}
+
+	protected void initializeInteractiveConsoleFrom(ILaunchConfiguration config) {
 		if (useInteractiveConsoleGroup) {
 			boolean console = LaunchConfigurationUtils
 					.getBoolean(
@@ -149,6 +153,14 @@ public abstract class MainLaunchConfigurationTab extends
 				handleSearchButtonSelected();
 			}
 		});
+	}
+
+	/**
+	 * @param enabled
+	 */
+	protected void setEnableScriptField(boolean enabled) {
+		fScriptText.setEnabled(enabled);
+		fSearchButton.setEnabled(enabled && getProjectName().length() > 0);
 	}
 
 	/**
@@ -211,6 +223,11 @@ public abstract class MainLaunchConfigurationTab extends
 		config.setAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
 				getScriptName());
+		performApplyInteractiveConsole(config);
+	}
+
+	protected void performApplyInteractiveConsole(
+			ILaunchConfigurationWorkingCopy config) {
 		if (useInteractiveConsoleGroup) {
 			config
 					.setAttribute(
@@ -238,6 +255,10 @@ public abstract class MainLaunchConfigurationTab extends
 
 	protected String getScriptName() {
 		return fScriptText.getText().trim();
+	}
+
+	protected void setScriptName(String value) {
+		fScriptText.setText(value);
 	}
 
 	/**
