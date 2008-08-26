@@ -88,7 +88,8 @@ public abstract class DLTKContributedExtension implements
 		preferencePageId = config.getAttribute(PREF_PAGE_ID);
 
 		// get the natureId from the parent
-		natureId = ((IConfigurationElement) config.getParent())
-				.getAttribute(NATURE_ID);
+		final Object parent = config.getParent();
+		if (parent instanceof IConfigurationElement)
+			natureId = ((IConfigurationElement) parent).getAttribute(NATURE_ID);
 	}
 }
