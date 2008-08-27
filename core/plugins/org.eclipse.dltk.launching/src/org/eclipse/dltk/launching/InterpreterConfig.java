@@ -382,7 +382,7 @@ public class InterpreterConfig implements Cloneable {
 		final List items = new ArrayList();
 		items.add("<interpreter>"); //$NON-NLS-1$
 		items.addAll(interpreterArgs);
-		items.add(scriptFile.toPortableString());
+		items.add(String.valueOf(scriptFile));
 		items.addAll(scriptArgs);
 
 		Iterator it = items.iterator();
