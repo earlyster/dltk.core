@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -853,6 +854,16 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 
 		} catch (CoreException e) {
 			tryHandleStatus(e, this);
+		} catch (AssertionFailedException e) {
+			tryHandleStatus(new CoreException(new Status(IStatus.ERROR,
+					DLTKLaunchingPlugin.PLUGIN_ID,
+					ScriptLaunchConfigurationConstants.ERR_INTERNAL_ERROR, e
+							.getMessage(), e)), this);
+		} catch (IllegalArgumentException e) {
+			tryHandleStatus(new CoreException(new Status(IStatus.ERROR,
+					DLTKLaunchingPlugin.PLUGIN_ID,
+					ScriptLaunchConfigurationConstants.ERR_INTERNAL_ERROR, e
+							.getMessage(), e)), this);
 		} finally {
 			monitor.done();
 		}
@@ -1051,7 +1062,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		return null;
 	}
 
-	private String getProjectLocation(ILaunchConfiguration configuration)
+	protected String getProjectLocation(ILaunchConfiguration configuration)
 			throws CoreException {
 		IProject project = getScriptProject(configuration).getProject();
 		String loc = null;
