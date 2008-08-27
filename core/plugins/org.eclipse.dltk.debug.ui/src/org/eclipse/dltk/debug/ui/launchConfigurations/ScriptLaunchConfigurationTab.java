@@ -114,6 +114,9 @@ public abstract class ScriptLaunchConfigurationTab extends
 			Group group = new Group(parent, SWT.NONE);
 			group.setText(text);
 			GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+			if (parent.getLayout() instanceof GridLayout) {
+				gd.horizontalSpan = ((GridLayout) parent.getLayout()).numColumns;
+			}
 			group.setLayoutData(gd);
 			GridLayout layout = new GridLayout();
 			layout.numColumns = 2;
