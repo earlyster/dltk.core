@@ -37,7 +37,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -112,7 +111,6 @@ public abstract class ScriptLaunchConfigurationTab extends
 	protected void createDebugOptionsGroup(Composite parent) {
 		if (ILaunchManager.DEBUG_MODE.equals(fMode)) {
 			String text = DLTKLaunchConfigurationsMessages.ScriptLaunchConfigurationTab_debugOptions;
-			Font font = parent.getFont();
 			Group group = new Group(parent, SWT.NONE);
 			group.setText(text);
 			GridData gd = new GridData(GridData.FILL_HORIZONTAL);
@@ -120,7 +118,6 @@ public abstract class ScriptLaunchConfigurationTab extends
 			GridLayout layout = new GridLayout();
 			layout.numColumns = 2;
 			group.setLayout(layout);
-			group.setFont(font);
 
 			addBreakOnFirstLineButton(group);
 			addDbgpLoggingButton(group);
