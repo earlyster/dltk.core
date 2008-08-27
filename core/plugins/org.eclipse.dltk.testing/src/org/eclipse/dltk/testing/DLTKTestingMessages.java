@@ -321,4 +321,7 @@ public final class DLTKTestingMessages extends NLS {
 	public static String TestRunnerViewPart_clear_history_label;
 
 	public static String TestRunnerViewPart_layout_menu;
+
+	public static String InternalError;
+	public static String TestingNoEngineConfigured;
 }
