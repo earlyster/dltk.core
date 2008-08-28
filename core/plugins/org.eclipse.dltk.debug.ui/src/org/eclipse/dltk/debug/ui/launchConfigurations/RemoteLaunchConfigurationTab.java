@@ -140,8 +140,8 @@ public abstract class RemoteLaunchConfigurationTab extends
 	}
 
 	protected boolean validateIdeKey() {
-		String projectName = ideKey.getText().trim();
-		if (projectName.length() == 0) {
+		String key = ideKey.getText().trim();
+		if (key.length() == 0) {
 			setErrorMessage(DLTKLaunchConfigurationsMessages.remoteError_ideKeyEmpty);
 			return false;
 		}
@@ -152,17 +152,6 @@ public abstract class RemoteLaunchConfigurationTab extends
 	protected boolean validateRemoteWorkingDir() {
 		// XXX: what validation should be done on this?
 		return true;
-	}
-
-	/*
-	 * @see
-	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
-	 * #guessProjectName()
-	 */
-	protected String guessProjectName() {
-		String[] guesses = getProjectAndScriptNames();
-
-		return (guesses == null) ? EMPTY_STRING : guesses[0];
 	}
 
 	/*

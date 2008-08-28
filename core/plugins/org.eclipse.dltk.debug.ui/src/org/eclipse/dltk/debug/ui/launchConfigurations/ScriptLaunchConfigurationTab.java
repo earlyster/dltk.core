@@ -22,7 +22,6 @@ import org.eclipse.dltk.debug.ui.preferences.ScriptDebugPreferencesMessages;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
-import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils.ILaunchConfigDefaultBooleanProvider;
 import org.eclipse.dltk.internal.ui.DLTKUIStatus;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
@@ -216,7 +215,21 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 * debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		// do nothing
+		IModelElement element = getContextModelElement();
+		if (element != null) {
+			setDefaults(configuration, element);
+		}
+	}
+
+	/**
+	 * @param configuration
+	 * @param element
+	 */
+	protected void setDefaults(ILaunchConfigurationWorkingCopy configuration,
+			IModelElement element) {
+		configuration.setAttribute(
+				ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, element
+						.getScriptProject().getElementName());
 	}
 
 	/**
@@ -459,18 +472,18 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/**
-	 * Attemps to guess the current project and script being launched.
-	 * 
-	 * <p>
-	 * If the project and script are able to be determined, the string array
-	 * returned will contain the project name in position 0 and the script name
-	 * in position 1.
-	 * </p>
-	 * 
-	 * @return project name and script name as string array, or
-	 *         <code>null</code> if they could not be determined.
+	 * @deprecated
 	 */
-	protected String[] getProjectAndScriptNames() {
+	protected final String[] getProjectAndScriptNames() {
+		return null;
+	}
+
+	/**
+	 * Attempts to guess the current project and script being launched.
+	 * 
+	 * @return model element - the script or the project.
+	 */
+	protected IModelElement getContextModelElement() {
 		IWorkbenchPage page = DLTKUIPlugin.getActivePage();
 		if (page == null) {
 			return null;
@@ -489,23 +502,16 @@ public abstract class ScriptLaunchConfigurationTab extends
 		IModelElement me = DLTKUIPlugin.getEditorInputModelElement(editorInput);
 		if (me != null) {
 			IScriptProject project = me.getScriptProject();
-
-			if ((project != null) && validateProject(project)) {
-				String projectName = project.getProject().getName();
-
+			if (project != null && validateProject(project)) {
 				/*
 				 * TODO: validate script is an executable and not library/module
 				 * otherwise, return null and make user select
 				 */
 				IResource resource = me.getResource();
 				if (resource != null) {
-					String scriptName = resource.getProjectRelativePath()
-							.toPortableString();
-					// me.getResource().getLocation().toPortableString();
-					// /*me.getResource().getFullPath().toPortableString();*/
-
-					return new String[] { projectName, scriptName };
+					return me;
 				}
+				return project;
 			}
 		}
 
@@ -534,7 +540,10 @@ public abstract class ScriptLaunchConfigurationTab extends
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
-	protected String guessProjectName() {
+	/**
+	 * @deprecated
+	 */
+	protected final String guessProjectName() {
 		return EMPTY_STRING;
 	}
 
@@ -578,14 +587,13 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 *            project name
 	 */
 	protected final void setProjectName(String name) {
-		PreferencesLookupDelegate delegate = new PreferencesLookupDelegate(
-				getProject());
-		setProjectName(name, delegate);
+		setProjectName(name, new PreferencesLookupDelegate(getScriptModel()
+				.getScriptProject(name)));
 	}
 
 	private void setProjectName(String name, PreferencesLookupDelegate delegate) {
 		fProjText.setText(name);
-		if (ILaunchManager.DEBUG_MODE.equals(fMode)) {
+		if (delegate != null && ILaunchManager.DEBUG_MODE.equals(fMode)) {
 			if (breakOnFirstLine != null)
 				breakOnFirstLine
 						.setSelection(breakOnFirstLinePrefEnabled(delegate));
@@ -602,34 +610,23 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 */
 	protected void updateProjectFromConfig(ILaunchConfiguration config) {
 		String projectName = LaunchConfigurationUtils.getProjectName(config);
-		if (projectName == null) {
-			projectName = guessProjectName();
-		}
+		if (projectName != null) {
+			setProjectName(projectName, null);
 
-		final PreferencesLookupDelegate delegate = new PreferencesLookupDelegate(
-				getProject());
+			if (ILaunchManager.DEBUG_MODE.equals(fMode)) {
+				final PreferencesLookupDelegate delegate = new PreferencesLookupDelegate(
+						getScriptModel().getScriptProject(projectName));
+				if (breakOnFirstLine != null) {
+					breakOnFirstLine.setSelection(LaunchConfigurationUtils
+							.isBreakOnFirstLineEnabled(config,
+									breakOnFirstLinePrefEnabled(delegate)));
+				}
 
-		setProjectName(projectName, delegate);
-
-		if (ILaunchManager.DEBUG_MODE.equals(fMode)) {
-			if (breakOnFirstLine != null) {
-				ILaunchConfigDefaultBooleanProvider provider = new ILaunchConfigDefaultBooleanProvider() {
-					public boolean getDefault() {
-						return breakOnFirstLinePrefEnabled(delegate);
-					}
-				};
-				breakOnFirstLine.setSelection(LaunchConfigurationUtils
-						.isBreakOnFirstLineEnabled(config, provider));
-			}
-
-			if (enableLogging != null) {
-				ILaunchConfigDefaultBooleanProvider provider = new ILaunchConfigDefaultBooleanProvider() {
-					public boolean getDefault() {
-						return dbpgLoggingPrefEnabled(delegate);
-					}
-				};
-				enableLogging.setSelection(LaunchConfigurationUtils
-						.isDbgpLoggingEnabled(config, provider));
+				if (enableLogging != null) {
+					enableLogging.setSelection(LaunchConfigurationUtils
+							.isDbgpLoggingEnabled(config,
+									dbpgLoggingPrefEnabled(delegate)));
+				}
 			}
 		}
 	}

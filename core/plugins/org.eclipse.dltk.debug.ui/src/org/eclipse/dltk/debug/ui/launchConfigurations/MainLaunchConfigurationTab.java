@@ -22,7 +22,9 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -213,6 +215,16 @@ public abstract class MainLaunchConfigurationTab extends
 		return DLTKLaunchConfigurationsMessages.mainTab_title;
 	}
 
+	protected void setDefaults(ILaunchConfigurationWorkingCopy configuration,
+			IModelElement element) {
+		super.setDefaults(configuration, element);
+		if (element instanceof ISourceModule) {
+			configuration.setAttribute(
+					ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
+					element.getResource().getProjectRelativePath().toString());
+		}
+	}
+
 	/*
 	 * @see
 	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
@@ -304,6 +316,24 @@ public abstract class MainLaunchConfigurationTab extends
 		return null;
 	}
 
+	/**
+	 * Gets the currently selected {@link ISourceModule}.
+	 * 
+	 * @return the selected source module or <code>null</code>
+	 */
+	protected ISourceModule getSourceModule() {
+		final IScriptProject project = this.getProject();
+		if (project == null) {
+			return null;
+		}
+		final String scriptName = getScriptName();
+		if (scriptName.length() == 0) {
+			return null;
+		}
+		final IFile file = project.getProject().getFile(scriptName);
+		return (ISourceModule) DLTKCore.create(file);
+	}
+
 	protected URI validateAndGetScriptPath() {
 		String projectName = getProjectName();
 		IScriptProject proj = getScriptModel().getScriptProject(projectName);
@@ -354,18 +384,9 @@ public abstract class MainLaunchConfigurationTab extends
 	}
 
 	private String getMainModuleName(ILaunchConfiguration config) {
-		String mainModuleName = LaunchConfigurationUtils.getString(config,
+		return LaunchConfigurationUtils.getString(config,
 				ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
 				EMPTY_STRING);
-		if (EMPTY_STRING.equals(mainModuleName)) {
-			String[] guesses = getProjectAndScriptNames();
-			if (guesses != null) {
-				super.setProjectName(guesses[0]);
-				mainModuleName = guesses[1];
-			}
-		}
-
-		return mainModuleName;
 	}
 
 	protected void createCustomSections(Composite parent) {
