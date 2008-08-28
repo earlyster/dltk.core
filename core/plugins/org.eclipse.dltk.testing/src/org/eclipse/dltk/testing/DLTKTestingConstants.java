@@ -84,8 +84,9 @@ public class DLTKTestingConstants {
 	}
 
 	public final static String ATTR_ENGINE_ID = DLTKTestingPlugin.PLUGIN_ID
-			+ ".engineId";
+			+ ".engineId"; //$NON-NLS-1$
 
-	public static final String LAUNCH_ATTR_TEST_KIND = DLTKTestingPlugin.PLUGIN_ID + ".TEST_KIND";	 //$NON-NLS-1$
+	public static final String LAUNCH_ATTR_TEST_KIND = DLTKTestingPlugin.PLUGIN_ID
+			+ ".TEST_KIND"; //$NON-NLS-1$
 
 }
