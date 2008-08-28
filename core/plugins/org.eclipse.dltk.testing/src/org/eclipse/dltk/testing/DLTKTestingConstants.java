@@ -86,7 +86,11 @@ public class DLTKTestingConstants {
 	public final static String ATTR_ENGINE_ID = DLTKTestingPlugin.PLUGIN_ID
 			+ ".engineId"; //$NON-NLS-1$
 
-	public static final String LAUNCH_ATTR_TEST_KIND = DLTKTestingPlugin.PLUGIN_ID
-			+ ".TEST_KIND"; //$NON-NLS-1$
+	/**
+	 * This attribute is assigned to the launch to uniquely identify it and
+	 * connect console with the testing engine.
+	 */
+	public static final String LAUNCH_ATTR_KEY = DLTKTestingPlugin.PLUGIN_ID
+			+ ".LAUNCH_KEY"; //$NON-NLS-1$
 
 }

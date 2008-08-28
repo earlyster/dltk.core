@@ -141,7 +141,7 @@ public final class DLTKTestingModel implements ITestingModel {
 				}
 			} else {
 				String atr = launch
-						.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND);
+						.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_KEY);
 				if (atr != null) {
 					fTrackedLaunches.remove(launch);
 					getDisplay().asyncExec(new Runnable() {
@@ -464,15 +464,19 @@ public final class DLTKTestingModel implements ITestingModel {
 	}
 
 	public ITestRunSession getTestRunSession(ILaunch launch) {
-		for (Iterator it = fTestRunSessions.iterator(); it.hasNext();) {
-			TestRunSession session = (TestRunSession) it.next();
-			if (session
-					.getLaunch()
-					.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND)
-					.equals(
-							launch
-									.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND)))
-				return session;
+		final String inputLaunchKey = launch
+				.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_KEY);
+		if (inputLaunchKey != null) {
+			for (Iterator it = fTestRunSessions.iterator(); it.hasNext();) {
+				final TestRunSession session = (TestRunSession) it.next();
+				final ILaunch sessionLaunch = session.getLaunch();
+				if (sessionLaunch != null
+						&& inputLaunchKey
+								.equals(sessionLaunch
+										.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_KEY))) {
+					return session;
+				}
+			}
 		}
 		return null;
 	}

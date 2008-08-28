@@ -2,7 +2,6 @@ package org.eclipse.dltk.internal.testing.util;
 
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
 import org.eclipse.dltk.debug.ui.ScriptDebugConsole;
 import org.eclipse.dltk.testing.DLTKTestingConstants;
 import org.eclipse.dltk.testing.ITestingProcessor;
@@ -10,25 +9,29 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleListener;
+import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.TextConsole;
 
 public class TestingConsoleListener implements IConsoleListener {
-	private ILaunch launch;
-	private ITestingProcessor processor;
+	private final String launchKey;
+	private final ILaunch launch;
+	private final ITestingProcessor processor;
 	private boolean initialized = false;
 	private boolean finalized = false;
 
-	public TestingConsoleListener(ILaunch launch, ITestingProcessor processor) {
+	public TestingConsoleListener(String launchKey, ILaunch launch,
+			ITestingProcessor processor) {
+		this.launchKey = launchKey;
 		this.launch = launch;
 		this.processor = processor;
-		IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager()
-				.getConsoles();
-		checkConsoles(consoles);
 	}
 
 	public synchronized void consolesAdded(IConsole[] consoles) {
 		// System.out.println("consolesAdded:" + consoles.length);
 		checkConsoles(consoles);
+		if (initialized) {
+			uninstall();
+		}
 	}
 
 	private synchronized void checkConsoles(IConsole[] consoles) {
@@ -36,30 +39,24 @@ public class TestingConsoleListener implements IConsoleListener {
 			return;
 		}
 		for (int i = 0; i < consoles.length; i++) {
-			if (consoles[i] instanceof ProcessConsole) {
-				ProcessConsole pc = (ProcessConsole) consoles[i];
-
+			final IConsole console = consoles[i];
+			if (console instanceof org.eclipse.debug.ui.console.IConsole) {
+				org.eclipse.debug.ui.console.IConsole pc = (org.eclipse.debug.ui.console.IConsole) console;
 				IProcess process = pc.getProcess();
 				if (process != null
-						&& process
-								.getLaunch()
-								.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND)
-								.equals(
-										launch
-												.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND))) {
-					process(pc, launch);
+						&& launchKey.equals(process.getLaunch().getAttribute(
+								DLTKTestingConstants.LAUNCH_ATTR_KEY))) {
+					process((TextConsole) console);
 					initialized = true;
 				}
-			} else if (consoles[i] instanceof ScriptDebugConsole) {
-				ScriptDebugConsole cl = (ScriptDebugConsole) consoles[i];
+			} else if (console instanceof ScriptDebugConsole) {
+				ScriptDebugConsole cl = (ScriptDebugConsole) console;
 				ILaunch launch2 = cl.getLaunch();
-				String attribute = launch2
-						.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND);
 				if (launch2 != null
-						&& attribute != null
-						&& attribute.equals(launch
-								.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND))) {
-					process(cl, launch);
+						&& launchKey
+								.equals(launch2
+										.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_KEY))) {
+					process(cl);
 					initialized = true;
 				}
 			}
@@ -70,12 +67,11 @@ public class TestingConsoleListener implements IConsoleListener {
 		if (!finalized) {
 			finalized = true;
 			processor.done();
-			ConsolePlugin.getDefault().getConsoleManager()
-					.removeConsoleListener(this);
+			uninstall();
 		}
 	}
 
-	private void process(TextConsole pc, final ILaunch launch) {
+	private void process(TextConsole pc) {
 		pc.addPatternMatchListener(new ConsoleLineNotifier() {
 			private boolean first = true;
 
@@ -105,17 +101,11 @@ public class TestingConsoleListener implements IConsoleListener {
 	}
 
 	public void consolesRemoved(IConsole[] consoles) {
+		// empty
 	}
 
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime
-				* result
-				+ ((launch.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND) == null) ? 0
-						: launch.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND)
-								.hashCode());
-		return result;
+		return launchKey.hashCode();
 	}
 
 	public boolean equals(Object obj) {
@@ -126,15 +116,28 @@ public class TestingConsoleListener implements IConsoleListener {
 		if (getClass() != obj.getClass())
 			return false;
 		final TestingConsoleListener other = (TestingConsoleListener) obj;
-		if (launch.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND) == null) {
-			if (other.launch.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND) != null)
-				return false;
-		} else if (!launch.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND)
-				.equals(
-						other.launch
-								.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND)))
-			return false;
-		return true;
+		return launchKey.equals(other.launchKey);
+	}
+
+	/**
+	 * 
+	 */
+	public void install() {
+		if (initialized) {
+			return;
+		}
+		checkConsoles(getConsoleManager().getConsoles());
+		if (!initialized) {
+			getConsoleManager().addConsoleListener(this);
+		}
+	}
+
+	public void uninstall() {
+		getConsoleManager().removeConsoleListener(this);
+	}
+
+	private static IConsoleManager getConsoleManager() {
+		return ConsolePlugin.getDefault().getConsoleManager();
 	}
 
 }
