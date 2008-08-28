@@ -237,6 +237,28 @@ public abstract class MainLaunchConfigurationTab extends
 		performApplyInteractiveConsole(config);
 	}
 
+	protected IResource getResource(ILaunchConfiguration config)
+			throws CoreException {
+		final String projectName = LaunchConfigurationUtils
+				.getProjectName(config);
+		if (projectName == null) {
+			return null;
+		}
+		final IProject project = getWorkspaceRoot().getProject(projectName);
+		if (project.exists() && project.isOpen()) {
+			final String scriptName = config.getAttribute(
+					ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
+					(String) null);
+			if (scriptName != null) {
+				final IFile scriptFile = project.getFile(scriptName);
+				if (scriptFile.exists()) {
+					return scriptFile;
+				}
+			}
+		}
+		return project;
+	}
+
 	protected void performApplyInteractiveConsole(
 			ILaunchConfigurationWorkingCopy config) {
 		if (useInteractiveConsoleGroup) {

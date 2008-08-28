@@ -3,7 +3,9 @@ package org.eclipse.dltk.debug.ui.launchConfigurations;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
@@ -207,6 +209,51 @@ public abstract class ScriptLaunchConfigurationTab extends
 		}
 
 		doPerformApply(config);
+		try {
+			mapResources(config);
+		} catch (CoreException e) {
+			DLTKLaunchingPlugin.log(e);
+		}
+	}
+
+	/**
+	 * @param config
+	 * @throws CoreException
+	 */
+	protected void mapResources(ILaunchConfigurationWorkingCopy config)
+			throws CoreException {
+		IResource resource = getResource(config);
+		if (resource == null) {
+			config.setMappedResources(null);
+		} else {
+			config.setMappedResources(new IResource[] { resource });
+		}
+	}
+
+	/**
+	 * Returns a resource mapping for the given launch configuration, or
+	 * <code>null</code> if none.
+	 * 
+	 * @param config
+	 *            working copy
+	 * @throws CoreException
+	 * @returns resource or <code>null</code>
+	 * @throws CoreException
+	 *             if an exception occurs mapping resource
+	 */
+	protected IResource getResource(ILaunchConfiguration config)
+			throws CoreException {
+		final String projName = config.getAttribute(
+				ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+				(String) null);
+		if (projName != null && Path.ROOT.isValidSegment(projName)) {
+			IScriptProject project = getScriptModel()
+					.getScriptProject(projName);
+			if (project.exists()) {
+				return project.getProject();
+			}
+		}
+		return null;
 	}
 
 	/*
