@@ -99,11 +99,10 @@ public final class LaunchConfigurationUtils {
 	 *         otherwise
 	 */
 	public static boolean isBreakOnFirstLineEnabled(
-			ILaunchConfiguration configuration,
-			ILaunchConfigDefaultBooleanProvider defaultProvider) {
+			ILaunchConfiguration configuration, boolean defaultValue) {
 		return getBoolean(configuration,
 				ScriptLaunchConfigurationConstants.ENABLE_BREAK_ON_FIRST_LINE,
-				defaultProvider.getDefault());
+				defaultValue);
 	}
 
 	/**
@@ -118,20 +117,14 @@ public final class LaunchConfigurationUtils {
 	 */
 	public static boolean isDbgpLoggingEnabled(
 			ILaunchConfiguration configuration) {
-		ILaunchConfigDefaultBooleanProvider provider = new ILaunchConfigDefaultBooleanProvider() {
-			public boolean getDefault() {
-				return false;
-			}
-		};
-		return isDbgpLoggingEnabled(configuration, provider);
+		return isDbgpLoggingEnabled(configuration, false);
 	}
 
 	public static boolean isDbgpLoggingEnabled(
-			ILaunchConfiguration configuration,
-			ILaunchConfigDefaultBooleanProvider defaultProvider) {
+			ILaunchConfiguration configuration, boolean defaultValue) {
 		return getBoolean(configuration,
 				ScriptLaunchConfigurationConstants.ENABLE_DBGP_LOGGING,
-				defaultProvider.getDefault());
+				defaultValue);
 	}
 
 	/**
