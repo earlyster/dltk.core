@@ -235,6 +235,10 @@ public final class DLTKTestingMessages extends NLS {
 	
 	public static String Resources_outOfSync;
 	public static String Resources_outOfSyncResources;
+
+	public static String MainLaunchConfigurationTab_detectEngine;
+
+	public static String MainLaunchConfigurationTab_ErrorEngineNotSelected;
 	public static String ScrollLockAction_action_label;
 	public static String ScrollLockAction_action_tooltip;
 	public static String ShowNextFailureAction_label;
