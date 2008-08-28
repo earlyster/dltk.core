@@ -11,16 +11,12 @@
 
 package org.eclipse.dltk.testing;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.resources.ResourcesPlugin;
-
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
-
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.internal.testing.launcher.ITestKind;
-import org.eclipse.dltk.internal.testing.launcher.TestKindRegistry;
+import org.eclipse.dltk.internal.testing.launcher.NullTestingEngine;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 
 /**
@@ -55,20 +51,21 @@ public class DLTKTestingConstants {
 	public static final String ATTR_FAILURES_NAMES = DLTKTestingPlugin.PLUGIN_ID
 			+ ".FAILURENAMES"; //$NON-NLS-1$
 
-	public static final String ATTR_TEST_RUNNER_KIND = DLTKTestingPlugin.PLUGIN_ID
-			+ ".TEST_KIND"; //$NON-NLS-1$
-
-	public static ITestKind getTestRunnerKind(
+	public static ITestingEngine getTestRunnerKind(
 			ILaunchConfiguration launchConfiguration) {
 		try {
 			String loaderId = launchConfiguration.getAttribute(
-					DLTKTestingConstants.ATTR_TEST_RUNNER_KIND, (String) null);
+					DLTKTestingConstants.ATTR_ENGINE_ID, (String) null);
 			if (loaderId != null) {
-				return TestKindRegistry.getDefault().getKind(loaderId);
+				final ITestingEngine engine = TestingEngineManager
+						.getEngine(loaderId);
+				if (engine != null) {
+					return engine;
+				}
 			}
 		} catch (CoreException e) {
 		}
-		return ITestKind.NULL;
+		return NullTestingEngine.getInstance();
 	}
 
 	public static IScriptProject getScriptProject(

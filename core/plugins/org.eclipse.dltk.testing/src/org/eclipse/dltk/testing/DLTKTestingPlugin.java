@@ -140,7 +140,11 @@ public class DLTKTestingPlugin extends AbstractUIPlugin {
 	}
 
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, "Error", e)); //$NON-NLS-1$
+		log("Error", e); //$NON-NLS-1$
+	}
+
+	public static void log(String message, Throwable e) {
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, e));
 	}
 
 	public static void log(IStatus status) {

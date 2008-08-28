@@ -30,13 +30,15 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.testing.Messages;
-import org.eclipse.dltk.internal.testing.launcher.ITestKind;
+import org.eclipse.dltk.internal.testing.launcher.NullTestingEngine;
 import org.eclipse.dltk.internal.testing.model.TestElement.Status;
 import org.eclipse.dltk.testing.DLTKTestingConstants;
 import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
+import org.eclipse.dltk.testing.ITestKind;
 import org.eclipse.dltk.testing.ITestSession;
 import org.eclipse.dltk.testing.ITestingClient;
+import org.eclipse.dltk.testing.ITestingEngine;
 import org.eclipse.dltk.testing.MessageIds;
 import org.eclipse.dltk.testing.model.ITestElement;
 import org.eclipse.dltk.testing.model.ITestElementContainer;
@@ -58,7 +60,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 	 */
 	private final IScriptProject fProject;
 
-	private final ITestKind fTestRunnerKind;
+	private final ITestingEngine fTestRunnerKind;
 	
 	/**
 	 * Test runner client or <code>null</code>.
@@ -133,7 +135,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		
 		Assert.isNotNull(testRunName);
 		fTestRunName= testRunName;
-		fTestRunnerKind= ITestKind.NULL; //TODO
+		fTestRunnerKind= NullTestingEngine.getInstance();
 		
 		fTestRoot= new TestRoot(this);
 		fIdToTest= new HashMap();
@@ -158,7 +160,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 			fTestRunnerKind= DLTKTestingConstants.getTestRunnerKind(launchConfiguration);
 		} else {
 			fTestRunName= project.getElementName();
-			fTestRunnerKind= ITestKind.NULL;
+			fTestRunnerKind= NullTestingEngine.getInstance();
 		}
 		
 		fTestRoot= new TestRoot(this);
@@ -275,7 +277,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		return fProject;
 	}
 	
-	public ITestKind getTestRunnerKind() {
+	public ITestingEngine getTestRunnerKind() {
 		return fTestRunnerKind;
 	}
 	

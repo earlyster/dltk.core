@@ -6,6 +6,7 @@
    <extension-point id="testingLaunchConfigs" name="%testingLaunchConfigs.name" schema="schema/testingLaunchConfigs.exsd"/>
    <extension-point id="internal_testKinds" name="%testKinds.name" schema="schema/internal_testKinds.exsd"/>
    <extension-point id="memberResolver" name="%extension-point.name.memberResolver" schema="schema/memberResolver.exsd"/>
+   <extension-point id="engine" name="engine" schema="schema/testingEngine.exsd"/>
 
    <extension
          point="org.eclipse.ui.views">

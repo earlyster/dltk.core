@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.testing.util;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -36,9 +34,6 @@ import org.eclipse.dltk.core.search.SearchMatch;
 import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.SearchRequestor;
-import org.eclipse.dltk.internal.testing.launcher.ITestKind;
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 
 /**
  * Custom Search engine for suite() methods
@@ -51,25 +46,25 @@ public class TestSearchEngine {
 	// return testKind.getFinder().isTest(declaringType);
 	// }
 
-	public static IType[] findTests(IRunnableContext context,
-			final IModelElement element, final ITestKind testKind)
-			throws InvocationTargetException, InterruptedException {
-		final Set result = new HashSet();
-
-		IRunnableWithProgress runnable = new IRunnableWithProgress() {
-			public void run(IProgressMonitor pm) throws InterruptedException,
-					InvocationTargetException {
-				try {
-					testKind.getFinder().findTestsInContainer(element, result,
-							pm);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				}
-			}
-		};
-		context.run(true, true, runnable);
-		return (IType[]) result.toArray(new IType[result.size()]);
-	}
+	// public static IType[] findTests(IRunnableContext context,
+	// final IModelElement element, final ITestKind testKind)
+	// throws InvocationTargetException, InterruptedException {
+	// final Set result = new HashSet();
+	//
+	// IRunnableWithProgress runnable = new IRunnableWithProgress() {
+	// public void run(IProgressMonitor pm) throws InterruptedException,
+	// InvocationTargetException {
+	// try {
+	// testKind.getFinder().findTestsInContainer(element, result,
+	// pm);
+	// } catch (CoreException e) {
+	// throw new InvocationTargetException(e);
+	// }
+	// }
+	// };
+	// context.run(true, true, runnable);
+	// return (IType[]) result.toArray(new IType[result.size()]);
+	// }
 
 	public static boolean isAccessibleClass(IType type) throws ModelException {
 		int flags = type.getFlags();

@@ -46,7 +46,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.testing.Messages;
-import org.eclipse.dltk.internal.testing.launcher.ITestKind;
+import org.eclipse.dltk.internal.testing.launcher.NullTestingEngine;
 import org.eclipse.dltk.internal.testing.model.DLTKTestingModel;
 import org.eclipse.dltk.internal.testing.model.ITestRunSessionListener;
 import org.eclipse.dltk.internal.testing.model.ITestSessionListener;
@@ -57,6 +57,7 @@ import org.eclipse.dltk.testing.DLTKTestingConstants;
 import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.testing.ITestSession;
+import org.eclipse.dltk.testing.ITestingEngine;
 import org.eclipse.dltk.testing.model.ITestElement.Result;
 import org.eclipse.dltk.ui.viewsupport.ViewHistory;
 import org.eclipse.jface.action.Action;
@@ -120,8 +121,8 @@ public class TestRunnerViewPart extends ViewPart {
 
 	public static final String NAME= "org.eclipse.dltk.testing.ResultView"; //$NON-NLS-1$
 	
-	private static final String RERUN_LAST_COMMAND= "org.eclipse.dltk.testing.testingShortcut.rerunLast"; //$NON-NLS-1$
-	private static final String RERUN_FAILED_FIRST_COMMAND= "org.eclipse.dltk.testing.testingShortcut.rerunFailedFirst"; //$NON-NLS-1$
+	private static final String RERUN_LAST_COMMAND = "org.eclipse.dltk.testing.testingShortcut.rerunLast"; //$NON-NLS-1$
+	//private static final String RERUN_FAILED_FIRST_COMMAND= "org.eclipse.dltk.testing.testingShortcut.rerunFailedFirst"; //$NON-NLS-1$
 
 	static final int REFRESH_INTERVAL= 200;
 	
@@ -705,20 +706,21 @@ public class TestRunnerViewPart extends ViewPart {
 			rerunTestRun();
 		}
 	}
-	
-	private class RerunLastFailedFirstAction extends Action {
-		public RerunLastFailedFirstAction() {
-			setText(DLTKTestingMessages.TestRunnerViewPart_rerunfailuresaction_label);  
-			setToolTipText(DLTKTestingMessages.TestRunnerViewPart_rerunfailuresaction_tooltip);  
-			DLTKTestingPlugin.setLocalImageDescriptors(this, "relaunchf.gif"); //$NON-NLS-1$
-			setEnabled(false);
-			setActionDefinitionId(RERUN_FAILED_FIRST_COMMAND);
-		}
-		
-		public void run(){
-			rerunTestFailedFirst();
-		}
-	}
+
+	// private class RerunLastFailedFirstAction extends Action {
+	// public RerunLastFailedFirstAction() {
+	//setText(DLTKTestingMessages.TestRunnerViewPart_rerunfailuresaction_label);
+	// setToolTipText(DLTKTestingMessages.
+	// TestRunnerViewPart_rerunfailuresaction_tooltip);
+	//			DLTKTestingPlugin.setLocalImageDescriptors(this, "relaunchf.gif"); //$NON-NLS-1$
+	// setEnabled(false);
+	// setActionDefinitionId(RERUN_FAILED_FIRST_COMMAND);
+	// }
+	//		
+	// public void run(){
+	// rerunTestFailedFirst();
+	// }
+	// }
 
 	private class ToggleOrientationAction extends Action {
 		private final int fActionOrientation;
@@ -1244,16 +1246,19 @@ action enablement
 	}
 
 	private void updateRerunFailedFirstAction() {
-		boolean state= hasErrorsOrFailures() && fTestRunSession.getLaunch() != null;
-//	    fRerunFailedFirstAction.setEnabled(state);
-    }
-    /**
-     * @return the display name of the current test run sessions kind, or <code>null</code>
-     */
-    public String getTestKindDisplayName() {
-    	ITestKind kind= fTestRunSession.getTestRunnerKind();
-		if (!kind.isNull()) {
-			return  kind.getDisplayName();
+		// boolean state= hasErrorsOrFailures() && fTestRunSession.getLaunch()
+		// != null;
+		// fRerunFailedFirstAction.setEnabled(state);
+	}
+
+	/**
+	 * @return the display name of the current test run sessions kind, or
+	 *         <code>null</code>
+	 */
+	public String getTestKindDisplayName() {
+		ITestingEngine kind = fTestRunSession.getTestRunnerKind();
+		if (!(kind instanceof NullTestingEngine)) {
+			return kind.getName();
 		}
 		return null;
 	}
