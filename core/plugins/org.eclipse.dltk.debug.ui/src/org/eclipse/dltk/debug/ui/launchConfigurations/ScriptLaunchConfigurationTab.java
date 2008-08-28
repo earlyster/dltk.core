@@ -127,14 +127,21 @@ public abstract class ScriptLaunchConfigurationTab extends
 		}
 	}
 
+	private boolean initializing = false;
+
 	/*
 	 * @see
 	 * org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse
 	 * .debug.core.ILaunchConfiguration)
 	 */
 	public final void initializeFrom(ILaunchConfiguration config) {
-		updateProjectFromConfig(config);
-		doInitializeForm(config);
+		initializing = true;
+		try {
+			updateProjectFromConfig(config);
+			doInitializeForm(config);
+		} finally {
+			initializing = false;
+		}
 	}
 
 	/*
@@ -143,14 +150,21 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 * .debug.core.ILaunchConfiguration)
 	 */
 	public boolean isValid(ILaunchConfiguration launchConfig) {
-		validatePage();
+		validatePage(false);
 		return !isError();
+	}
+
+	/**
+	 * This is a top level method to initiate the manual page validation.
+	 */
+	protected final void validatePage() {
+		validatePage(true);
 	}
 
 	/**
 	 * This is a top level method to initiate the page validation.
 	 */
-	protected final void validatePage() {
+	private final void validatePage(boolean manual) {
 		setErrorMessage(null);
 		setMessage(null);
 		validate();
@@ -651,18 +665,23 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 */
 	class WidgetListener implements ModifyListener, SelectionListener {
 		public void modifyText(ModifyEvent e) {
-			setErrorMessage(null);
-			if (e.getSource() == fProjText) {
-				IScriptProject proj = getProject();
-				if (proj != null) {
-					if (!validateProject(proj)) {
-						setErrorMessage(DLTKLaunchConfigurationsMessages.error_notAValidProject);
-					}
-				} else {
-					setErrorMessage(DLTKLaunchConfigurationsMessages.error_selectProject);
-				}
+			if (initializing) {
+				return;
 			}
-
+			validatePage();
+			// setErrorMessage(null);
+			// if (e.getSource() == fProjText) {
+			// IScriptProject proj = getProject();
+			// if (proj != null) {
+			// if (!validateProject(proj)) {
+			// setErrorMessage(DLTKLaunchConfigurationsMessages.
+			// error_notAValidProject);
+			// }
+			// } else {
+			// setErrorMessage(DLTKLaunchConfigurationsMessages.
+			// error_selectProject);
+			// }
+			// }
 			updateLaunchConfigurationDialog();
 		}
 
