@@ -54,7 +54,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 		AbstractLaunchConfigurationTab {
 	protected static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
-	private String fMode;
+	private final String fMode;
 	// this options only active then mode is ILaunchManager.DEBUG
 	private Button breakOnFirstLine;
 	private Button enableLogging;
