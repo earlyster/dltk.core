@@ -52,7 +52,6 @@ import org.eclipse.dltk.internal.testing.ui.TestRunnerViewPart;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.testing.DLTKTestingConstants;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
-import org.eclipse.dltk.testing.ITestKind;
 import org.eclipse.dltk.testing.ITestSession;
 import org.eclipse.dltk.testing.model.ITestRunSession;
 import org.eclipse.dltk.testing.model.ITestingModel;
@@ -84,7 +83,7 @@ public final class DLTKTestingModel implements ITestingModel {
 				fTrackedLaunches.add(launchs[i]);
 			}
 		}
-		
+
 		/*
 		 * @see ILaunchListener#launchAdded(ILaunch)
 		 */
@@ -142,7 +141,7 @@ public final class DLTKTestingModel implements ITestingModel {
 				}
 			} else {
 				String atr = launch
-						.getAttribute(org.eclipse.dltk.testing.ITestKind.LAUNCH_ATTR_TEST_KIND);
+						.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND);
 				if (atr != null) {
 					fTrackedLaunches.remove(launch);
 					getDisplay().asyncExec(new Runnable() {
@@ -467,9 +466,12 @@ public final class DLTKTestingModel implements ITestingModel {
 	public ITestRunSession getTestRunSession(ILaunch launch) {
 		for (Iterator it = fTestRunSessions.iterator(); it.hasNext();) {
 			TestRunSession session = (TestRunSession) it.next();
-			if (session.getLaunch().getAttribute(
-					ITestKind.LAUNCH_ATTR_TEST_KIND).equals(
-					launch.getAttribute(ITestKind.LAUNCH_ATTR_TEST_KIND)))
+			if (session
+					.getLaunch()
+					.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND)
+					.equals(
+							launch
+									.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND)))
 				return session;
 		}
 		return null;

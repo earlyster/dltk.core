@@ -53,7 +53,7 @@ public class DLTKTestingCore {
 
 	public static void registerTestingProcessor(final ILaunch launch,
 			ITestingProcessor processor) {
-		launch.setAttribute(ITestKind.LAUNCH_ATTR_TEST_KIND,
+		launch.setAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND,
 				"#" + Integer.toString(++index)); //$NON-NLS-1$
 		ConsolePlugin.getDefault().getConsoleManager().addConsoleListener(
 				new TestingConsoleListener(launch, processor));

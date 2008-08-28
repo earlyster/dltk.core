@@ -4,7 +4,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.internal.ui.views.console.ProcessConsole;
 import org.eclipse.dltk.debug.ui.ScriptDebugConsole;
-import org.eclipse.dltk.testing.ITestKind;
+import org.eclipse.dltk.testing.DLTKTestingConstants;
 import org.eclipse.dltk.testing.ITestingProcessor;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.ui.console.ConsolePlugin;
@@ -43,10 +43,10 @@ public class TestingConsoleListener implements IConsoleListener {
 				if (process != null
 						&& process
 								.getLaunch()
-								.getAttribute(ITestKind.LAUNCH_ATTR_TEST_KIND)
+								.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND)
 								.equals(
 										launch
-												.getAttribute(ITestKind.LAUNCH_ATTR_TEST_KIND))) {
+												.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND))) {
 					process(pc, launch);
 					initialized = true;
 				}
@@ -54,11 +54,11 @@ public class TestingConsoleListener implements IConsoleListener {
 				ScriptDebugConsole cl = (ScriptDebugConsole) consoles[i];
 				ILaunch launch2 = cl.getLaunch();
 				String attribute = launch2
-						.getAttribute(ITestKind.LAUNCH_ATTR_TEST_KIND);
+						.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND);
 				if (launch2 != null
 						&& attribute != null
 						&& attribute.equals(launch
-								.getAttribute(ITestKind.LAUNCH_ATTR_TEST_KIND))) {
+								.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND))) {
 					process(cl, launch);
 					initialized = true;
 				}
@@ -112,8 +112,8 @@ public class TestingConsoleListener implements IConsoleListener {
 		int result = 1;
 		result = prime
 				* result
-				+ ((launch.getAttribute(ITestKind.LAUNCH_ATTR_TEST_KIND) == null) ? 0
-						: launch.getAttribute(ITestKind.LAUNCH_ATTR_TEST_KIND)
+				+ ((launch.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND) == null) ? 0
+						: launch.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND)
 								.hashCode());
 		return result;
 	}
@@ -126,13 +126,13 @@ public class TestingConsoleListener implements IConsoleListener {
 		if (getClass() != obj.getClass())
 			return false;
 		final TestingConsoleListener other = (TestingConsoleListener) obj;
-		if (launch.getAttribute(ITestKind.LAUNCH_ATTR_TEST_KIND) == null) {
-			if (other.launch.getAttribute(ITestKind.LAUNCH_ATTR_TEST_KIND) != null)
+		if (launch.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND) == null) {
+			if (other.launch.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND) != null)
 				return false;
-		} else if (!launch.getAttribute(ITestKind.LAUNCH_ATTR_TEST_KIND)
+		} else if (!launch.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND)
 				.equals(
 						other.launch
-								.getAttribute(ITestKind.LAUNCH_ATTR_TEST_KIND)))
+								.getAttribute(DLTKTestingConstants.LAUNCH_ATTR_TEST_KIND)))
 			return false;
 		return true;
 	}

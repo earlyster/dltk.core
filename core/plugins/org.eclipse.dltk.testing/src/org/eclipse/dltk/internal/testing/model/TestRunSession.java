@@ -35,7 +35,6 @@ import org.eclipse.dltk.internal.testing.model.TestElement.Status;
 import org.eclipse.dltk.testing.DLTKTestingConstants;
 import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
-import org.eclipse.dltk.testing.ITestKind;
 import org.eclipse.dltk.testing.ITestSession;
 import org.eclipse.dltk.testing.ITestingClient;
 import org.eclipse.dltk.testing.ITestingEngine;
