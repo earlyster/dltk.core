@@ -34,3 +34,4 @@ Export-Package: org.eclipse.dltk.internal.testing;x-internal:=true,
  org.eclipse.dltk.internal.testing.wizards;x-internal:=true,
  org.eclipse.dltk.testing,
  org.eclipse.dltk.testing.model
+Bundle-ActivationPolicy: lazy
