@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.testing;
 
-import org.eclipse.dltk.testing.model.ITestElement;
 import org.eclipse.jface.action.IAction;
 
 public abstract class AbstractTestRunnerUI implements ITestRunnerUI {
@@ -25,10 +24,6 @@ public abstract class AbstractTestRunnerUI implements ITestRunnerUI {
 	}
 
 	public IAction createOpenEditorAction(String traceLine) {
-		return null;
-	}
-
-	public TestElementResolution resolveElement(ITestElement element) {
 		return null;
 	}
 
