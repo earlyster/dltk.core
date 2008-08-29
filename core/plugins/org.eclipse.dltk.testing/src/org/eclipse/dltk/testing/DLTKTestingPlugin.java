@@ -66,7 +66,6 @@ public class DLTKTestingPlugin extends AbstractUIPlugin {
 	public static final String PLUGIN_ID= "org.eclipse.dltk.testing"; //$NON-NLS-1$
 	public static final String ID_EXTENSION_POINT_TESTRUN_LISTENERS= PLUGIN_ID + "." + "testRunListeners"; //$NON-NLS-1$ //$NON-NLS-2$
 	public static final String ID_EXTENSION_POINT_JUNIT_LAUNCHCONFIGS= PLUGIN_ID + "." + "junitLaunchConfigs"; //$NON-NLS-1$ //$NON-NLS-2$
-	public static final String ID_EXTENSION_POINT_TEST_KINDS= PLUGIN_ID + "." + "internal_testKinds"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
 	 * The class path variable referring to the junit home location
