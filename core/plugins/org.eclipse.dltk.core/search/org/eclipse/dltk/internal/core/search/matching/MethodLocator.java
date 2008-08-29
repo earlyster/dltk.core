@@ -131,7 +131,7 @@ public class MethodLocator extends PatternLocator {
 				.createSearchPatternProcessor();
 		if (processor != null) {
 			if (this.pattern.declaringSimpleName != null) {
-				char[] delimeter = processor.getDelimeterReplacementString()
+				char[] delimeter = processor.getDelimiterReplacementString()
 						.toCharArray();
 				char[] typeName = CharOperation.concatWithSeparator(
 						this.pattern.declaringQualificationName,

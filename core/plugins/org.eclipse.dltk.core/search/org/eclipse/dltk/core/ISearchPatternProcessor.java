@@ -14,20 +14,58 @@ package org.eclipse.dltk.core;
 public interface ISearchPatternProcessor {
 
 	/**
-	 * Delimeter replacement string. For example "::" for tcl, "." for python.
+	 * Delimiter replacement string. For example "::" for tcl, "." for python.
+	 * 
+	 * In java this is used to replace internal class name separator '$' with
+	 * the returned value. It is used to check the method calls like
+	 * "ClassName::methodName()", at the moment this is used in TCL only.
 	 */
-	String getDelimeterReplacementString();
+	String getDelimiterReplacementString();
 
-	// Method pattern operations
+	/**
+	 * Extracts the "package" from the specified method search pattern. If the
+	 * pattern have no type the method should return <code>null</code>.
+	 * 
+	 * @param patternString
+	 * @return
+	 */
 	char[] extractDeclaringTypeQualification(String patternString);
 
+	/**
+	 * Extracts the "base" class name from the specified method search pattern.
+	 * If the pattern have no type the method should return <code>null</code>.
+	 * 
+	 * @param patternString
+	 * @return
+	 */
 	char[] extractDeclaringTypeSimpleName(String patternString);
 
+	/**
+	 * Extracts the method name from the specified method search pattern. If the
+	 * pattern have no type - just return it as is.
+	 * 
+	 * @param patternString
+	 * @return
+	 */
 	char[] extractSelector(String patternString);
 
-
-	// Type pattern operations
+	/**
+	 * Extracts the "package" from the specified full type name. If the
+	 * specified pattern have no package - the method should return
+	 * <code>null</code>.
+	 * 
+	 * @param patternString
+	 * @return
+	 */
 	char[] extractTypeQualification(String patternString);
+
+	/**
+	 * Extracts the "base" class name from the specified full type name. If the
+	 * specified pattern have no package - it should be returned as is.
+	 * 
+	 * @param patternString
+	 * @return
+	 */
 	char[] extractTypeChars(String patternString);
-	// Field pattern operations
+
 }
