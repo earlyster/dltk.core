@@ -303,7 +303,7 @@ public class TestViewer {
 		registerViewersRefresh();
 	}
 
-	void handleDefaultSelected() {
+	protected void handleDefaultSelected() {
 		IStructuredSelection selection = (IStructuredSelection) fSelectionProvider
 				.getSelection();
 		if (selection.size() != 1)
