@@ -13,7 +13,6 @@ package org.eclipse.dltk.testing;
 
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.dltk.internal.testing.util.TestingConsoleListener;
-import org.eclipse.ui.console.ConsolePlugin;
 
 /**
  * Class for accessing JUnit support; all functionality is provided by static
