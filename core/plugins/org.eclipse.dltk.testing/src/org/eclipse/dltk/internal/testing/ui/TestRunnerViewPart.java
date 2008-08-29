@@ -58,6 +58,7 @@ import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.testing.ITestSession;
 import org.eclipse.dltk.testing.ITestingEngine;
+import org.eclipse.dltk.testing.ITestRunnerUI;
 import org.eclipse.dltk.testing.model.ITestElement.Result;
 import org.eclipse.dltk.ui.viewsupport.ViewHistory;
 import org.eclipse.jface.action.Action;
@@ -1251,20 +1252,8 @@ action enablement
 		// fRerunFailedFirstAction.setEnabled(state);
 	}
 
-	/**
-	 * @return the display name of the current test run sessions kind, or
-	 *         <code>null</code>
-	 */
-	public String getTestKindDisplayName() {
-		ITestingEngine kind = fTestRunSession.getTestRunnerKind();
-		if (!(kind instanceof NullTestingEngine)) {
-			return kind.getName();
-		}
-		return null;
-	}
-    
 	private void setTitleToolTip() {
-		String testKindDisplayStr= getTestKindDisplayName();
+		String testKindDisplayStr= fTestRunSession.getTestRunnerUI().getDisplayName();
 		
 		if (testKindDisplayStr != null)
 			setTitleToolTip(MessageFormat.format(DLTKTestingMessages.TestRunnerViewPart_titleToolTip, new String[] {fTestRunSession.getTestRunName(), testKindDisplayStr}));
@@ -1660,6 +1649,11 @@ action enablement
 					fFailureTrace.showFailure(test);
 			}
 		});		
+	}
+
+	public ITestRunnerUI getTestRunnerUI() {
+		return fTestRunSession == null ? null : fTestRunSession
+				.getTestRunnerUI();
 	}
 
 	/**

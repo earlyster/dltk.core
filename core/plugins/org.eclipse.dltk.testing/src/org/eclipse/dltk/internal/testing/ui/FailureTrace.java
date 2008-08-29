@@ -13,7 +13,15 @@
 package org.eclipse.dltk.internal.testing.ui;
 
 import org.eclipse.core.runtime.Assert;
-
+import org.eclipse.dltk.internal.testing.model.TestElement;
+import org.eclipse.dltk.testing.ITestRunnerUI;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.util.IOpenEventListener;
+import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.SelectionEvent;
@@ -24,25 +32,12 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.ToolBar;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.util.IOpenEventListener;
-import org.eclipse.jface.util.OpenStrategy;
-
-import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.internal.testing.model.TestElement;
-
-
 /**
  * A pane that shows a stack trace of a failed test.
  */
 public class FailureTrace implements IMenuListener {
     private static final int MAX_LABEL_LENGTH = 256;
     
-    static final String FRAME_PREFIX= "at "; //$NON-NLS-1$
 	private Table fTable;
 	private TestRunnerViewPart fTestRunner;
 	private String fInputTrace;
@@ -73,7 +68,7 @@ public class FailureTrace implements IMenuListener {
 					fCompareAction.run();
 				}
 				if (fTable.getSelection().length != 0) {
-					Action a = null;//createOpenEditorAction(getSelectedText());
+					IAction a = createOpenEditorAction(getSelectedText());
 					if (a != null)
 						a.run();
 				}
@@ -95,7 +90,7 @@ public class FailureTrace implements IMenuListener {
 	
 	public void menuAboutToShow(IMenuManager manager) {
 		if (fTable.getSelectionCount() > 0) {
-			Action a= createOpenEditorAction(getSelectedText());
+			IAction a= createOpenEditorAction(getSelectedText());
 			if (a != null)
 				manager.add(a);		
 			manager.add(new DLTKTestingCopyAction(FailureTrace.this, fClipboard));
@@ -113,27 +108,9 @@ public class FailureTrace implements IMenuListener {
 		return fTable.getSelection()[0].getText();
 	}				
 
-	private Action createOpenEditorAction(String traceLine) {
-		try { 
-			String testName= traceLine;
-			testName= testName.substring(testName.indexOf(FRAME_PREFIX)); 
-			testName= testName.substring(FRAME_PREFIX.length(), testName.lastIndexOf('(')).trim();
-			testName= testName.substring(0, testName.lastIndexOf('.'));
-			int innerSeparatorIndex= testName.indexOf('$');
-			if (innerSeparatorIndex != -1)
-				testName= testName.substring(0, innerSeparatorIndex);
-			
-			String lineNumber= traceLine;
-			lineNumber= lineNumber.substring(lineNumber.indexOf(':') + 1, lineNumber.lastIndexOf(')'));
-			int line= Integer.valueOf(lineNumber).intValue();
-			//fix for bug 37333	
-			String cuName= traceLine.substring(traceLine.lastIndexOf('(') + 1, traceLine.lastIndexOf(':'));
-			return new OpenEditorAtLineAction(fTestRunner, cuName, testName, line);
-		} catch(NumberFormatException e) {
-		}
-		catch(IndexOutOfBoundsException e) {	
-		}	
-		return null;
+	private IAction createOpenEditorAction(String traceLine) {
+		final ITestRunnerUI runnerUI = fTestRunner.getTestRunnerUI();
+		return runnerUI.createOpenEditorAction(traceLine);
 	}
 	
 	/**
@@ -183,15 +160,9 @@ public class FailureTrace implements IMenuListener {
 		trace= trace.trim();
 		fTable.setRedraw(false);
 		fTable.removeAll();
-		new TextualTrace(trace, getFilterPatterns()).display(
+		new TextualTrace(trace, fTestRunner.getTestRunnerUI()).display(
 				fFailureTableDisplay, MAX_LABEL_LENGTH);
 		fTable.setRedraw(true);
-	}
-
-	private String[] getFilterPatterns() {
-//		if (JUnitPreferencePage.getFilterStack())
-//			return JUnitPreferencePage.getFilterPatterns();
-		return CharOperation.NO_STRINGS;
 	}
 
 	/**

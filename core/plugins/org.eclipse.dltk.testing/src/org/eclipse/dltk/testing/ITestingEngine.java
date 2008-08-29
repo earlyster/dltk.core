@@ -31,4 +31,6 @@ public interface ITestingEngine extends IAdaptable {
 	 */
 	String getContainerLauncher(ILaunchConfiguration configuration,
 			IEnvironment scriptEnvironment) throws CoreException;
+
+	ITestRunnerUI getTestRunnerUI(ILaunchConfiguration configuration);
 }

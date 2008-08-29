@@ -90,8 +90,8 @@ public class TestSessionLabelProvider extends LabelProvider implements
 		}
 		if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
 			if (((ITestElement) element).getParentContainer() instanceof ITestRunSession) {
-				String testKindDisplayName = fTestRunnerPart
-						.getTestKindDisplayName();
+				String testKindDisplayName = fTestRunnerPart.getTestRunnerUI()
+						.getDisplayName();
 				if (testKindDisplayName != null) {
 					return Messages
 							.format(

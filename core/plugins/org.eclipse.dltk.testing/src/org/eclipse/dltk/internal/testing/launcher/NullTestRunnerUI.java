@@ -11,38 +11,29 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.testing.launcher;
 
-import org.eclipse.dltk.testing.AbstractTestingEngine;
-import org.eclipse.dltk.testing.ITestingEngine;
+import org.eclipse.dltk.testing.AbstractTestRunnerUI;
+import org.eclipse.dltk.testing.ITestRunnerUI;
 
-public class NullTestingEngine extends AbstractTestingEngine {
+public class NullTestRunnerUI extends AbstractTestRunnerUI {
 
-	private NullTestingEngine() {
+	private NullTestRunnerUI() {
 		// hidden constructor
 	}
 
-	private static ITestingEngine instance = null;
+	private static ITestRunnerUI instance;
 
-	public static ITestingEngine getInstance() {
+	public static ITestRunnerUI getInstance() {
 		if (instance == null) {
-			instance = new NullTestingEngine();
+			instance = new NullTestRunnerUI();
 		}
 		return instance;
 	}
 
 	/*
-	 * @see org.eclipse.dltk.testing.ITestingEngine#getId()
+	 * @see org.eclipse.dltk.testing.ITestRunnerUI#getDisplayName()
 	 */
-	public String getId() {
-		return getClass().getName();
-	}
-
-	/*
-	 * @see org.eclipse.dltk.testing.ITestingEngine#getName()
-	 */
-	public String getName() {
-		final String fullName = getClass().getName();
-		final int pos = fullName.lastIndexOf('.');
-		return pos > 0 ? fullName.substring(pos + 1) : fullName;
+	public String getDisplayName() {
+		return null;
 	}
 
 }

@@ -15,9 +15,9 @@ package org.eclipse.dltk.internal.testing.ui;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
-import java.io.StringWriter;
+
+import org.eclipse.dltk.testing.ITestRunnerUI;
 
 public class TextualTrace {
 	public static final int LINE_TYPE_EXCEPTION = 1;
@@ -27,10 +27,11 @@ public class TextualTrace {
 	public static final int LINE_TYPE_STACKFRAME = 2;
 
 	private final String fTrace;
+	private final ITestRunnerUI engineUI;
 
-	public TextualTrace(String trace, String[] filterPatterns) {
-		super();
-		fTrace = filterStack(trace, filterPatterns);
+	public TextualTrace(String trace, ITestRunnerUI engineUI) {
+		this.engineUI = engineUI;
+		this.fTrace = engineUI.filterStackTrace(trace);
 	}
 
 	public void display(ITraceDisplay display, int maxLabelLength) {
@@ -49,7 +50,7 @@ public class TextualTrace {
 
 			// the stack frames of the trace
 			while ((line = readLine(bufferedReader)) != null) {
-				int type = isAStackFrame(line) ? LINE_TYPE_STACKFRAME
+				int type = engineUI.isStackFrame(line) ? LINE_TYPE_STACKFRAME
 						: LINE_TYPE_NORMAL;
 				displayWrappedLine(display, maxLabelLength, line, type);
 			}
@@ -75,60 +76,6 @@ public class TextualTrace {
 				offset = nextOffset;
 			}
 		}
-	}
-
-	private boolean filterLine(String[] patterns, String line) {
-		String pattern;
-		int len;
-		for (int i = (patterns.length - 1); i >= 0; --i) {
-			pattern = patterns[i];
-			len = pattern.length() - 1;
-			if (pattern.charAt(len) == '*') {
-				// strip trailing * from a package filter
-				pattern = pattern.substring(0, len);
-			} else if (Character.isUpperCase(pattern.charAt(0))) {
-				// class in the default package
-				pattern = FailureTrace.FRAME_PREFIX + pattern + '.';
-			} else {
-				// class names start w/ an uppercase letter after the .
-				final int lastDotIndex = pattern.lastIndexOf('.');
-				if ((lastDotIndex != -1)
-					&& (lastDotIndex != len)
-					&& Character.isUpperCase(pattern.charAt(lastDotIndex + 1)))
-					pattern += '.'; // append . to a class filter
-			}
-
-			if (line.indexOf(pattern) > 0)
-				return true;
-		}
-		return false;
-	}
-
-	private String filterStack(String stackTrace, String[] filterPatterns) {
-		if (filterPatterns.length == 0 || stackTrace == null)
-			return stackTrace;
-
-		StringWriter stringWriter = new StringWriter();
-		PrintWriter printWriter = new PrintWriter(stringWriter);
-		StringReader stringReader = new StringReader(stackTrace);
-		BufferedReader bufferedReader = new BufferedReader(stringReader);
-
-		String line;
-		String[] patterns = filterPatterns;
-		try {
-			while ((line = bufferedReader.readLine()) != null) {
-				if (!filterLine(patterns, line))
-					printWriter.println(line);
-			}
-		} catch (IOException e) {
-			return stackTrace; // return the stack unfiltered
-		}
-		return stringWriter.toString();
-	}
-
-	private boolean isAStackFrame(String itemLabel) {
-		// heuristic for detecting a stack frame - works for JDK
-		return itemLabel.indexOf(" at ") >= 0; //$NON-NLS-1$
 	}
 
 	private String readLine(BufferedReader bufferedReader) throws IOException {

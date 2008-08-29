@@ -51,7 +51,7 @@ public class DLTKTestingConstants {
 	public static final String ATTR_FAILURES_NAMES = DLTKTestingPlugin.PLUGIN_ID
 			+ ".FAILURENAMES"; //$NON-NLS-1$
 
-	public static ITestingEngine getTestRunnerKind(
+	public static ITestingEngine getTestingEngine(
 			ILaunchConfiguration launchConfiguration) {
 		try {
 			String loaderId = launchConfiguration.getAttribute(

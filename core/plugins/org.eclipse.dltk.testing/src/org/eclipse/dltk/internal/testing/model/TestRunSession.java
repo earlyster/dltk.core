@@ -30,11 +30,13 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.testing.Messages;
+import org.eclipse.dltk.internal.testing.launcher.NullTestRunnerUI;
 import org.eclipse.dltk.internal.testing.launcher.NullTestingEngine;
 import org.eclipse.dltk.internal.testing.model.TestElement.Status;
 import org.eclipse.dltk.testing.DLTKTestingConstants;
 import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
+import org.eclipse.dltk.testing.ITestRunnerUI;
 import org.eclipse.dltk.testing.ITestSession;
 import org.eclipse.dltk.testing.ITestingClient;
 import org.eclipse.dltk.testing.ITestingEngine;
@@ -59,7 +61,8 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 	 */
 	private final IScriptProject fProject;
 
-	private final ITestingEngine fTestRunnerKind;
+	private final ITestingEngine fTestingEngine;
+	private final ITestRunnerUI testRunnerUI;
 	
 	/**
 	 * Test runner client or <code>null</code>.
@@ -134,7 +137,8 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		
 		Assert.isNotNull(testRunName);
 		fTestRunName= testRunName;
-		fTestRunnerKind= NullTestingEngine.getInstance();
+		fTestingEngine= NullTestingEngine.getInstance();
+		testRunnerUI= NullTestRunnerUI.getInstance();
 		
 		fTestRoot= new TestRoot(this);
 		fIdToTest= new HashMap();
@@ -156,10 +160,12 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
 		if (launchConfiguration != null) {
 			fTestRunName= launchConfiguration.getName();
-			fTestRunnerKind= DLTKTestingConstants.getTestRunnerKind(launchConfiguration);
+			fTestingEngine= DLTKTestingConstants.getTestingEngine(launchConfiguration);
+			testRunnerUI= fTestingEngine.getTestRunnerUI(launchConfiguration);
 		} else {
 			fTestRunName= project.getElementName();
-			fTestRunnerKind= NullTestingEngine.getInstance();
+			fTestingEngine= NullTestingEngine.getInstance();
+			testRunnerUI= NullTestRunnerUI.getInstance();
 		}
 		
 		fTestRoot= new TestRoot(this);
@@ -276,11 +282,10 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		return fProject;
 	}
 	
-	public ITestingEngine getTestRunnerKind() {
-		return fTestRunnerKind;
+	public ITestingEngine getTestingEngine() {
+		return fTestingEngine;
 	}
-	
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.dltk.internal.testing.model.ITestSession#getLaunch()
 	 */
@@ -839,5 +844,12 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * @return
+	 */
+	public ITestRunnerUI getTestRunnerUI() {
+		return testRunnerUI;
 	}
 }
