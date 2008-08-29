@@ -11,10 +11,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.testing;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 
-public interface ITestRunnerUI {
+public interface ITestRunnerUI extends IAdaptable {
 
 	/**
 	 * Filters the stack trace if filtering is enabled for this engine.

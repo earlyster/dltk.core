@@ -18,6 +18,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.dltk.core.DLTKContributedExtension;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.testing.launcher.NullTestRunnerUI;
@@ -49,7 +50,8 @@ public abstract class AbstractTestingEngine extends DLTKContributedExtension
 		return null;
 	}
 
-	public ITestRunnerUI getTestRunnerUI(ILaunchConfiguration configuration) {
+	public ITestRunnerUI getTestRunnerUI(IScriptProject project,
+			ILaunchConfiguration configuration) {
 		return NullTestRunnerUI.getInstance();
 	}
 

@@ -161,7 +161,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		if (launchConfiguration != null) {
 			fTestRunName= launchConfiguration.getName();
 			fTestingEngine= DLTKTestingConstants.getTestingEngine(launchConfiguration);
-			testRunnerUI= fTestingEngine.getTestRunnerUI(launchConfiguration);
+			testRunnerUI= fTestingEngine.getTestRunnerUI(project, launchConfiguration);
 		} else {
 			fTestRunName= project.getElementName();
 			fTestingEngine= NullTestingEngine.getInstance();

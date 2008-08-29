@@ -223,10 +223,10 @@ public class TestViewer {
 		if (!selection.isEmpty()) {
 			TestElement testElement = (TestElement) selection.getFirstElement();
 
-			String testLabel = testElement.getTestName();
+			// String testLabel = testElement.getTestName();
 			String className = testElement.getClassName();
 			if (testElement instanceof TestSuiteElement) {
-				manager.add(new OpenTestAction(fTestRunnerPart, testLabel));
+				manager.add(new OpenTestAction(fTestRunnerPart, testElement));
 				manager.add(new Separator());
 				if (testClassExists(className)
 						&& !fTestRunnerPart.lastLaunchIsKeptAlive()) {
@@ -242,8 +242,7 @@ public class TestViewer {
 			} else {
 				TestCaseElement testCaseElement = (TestCaseElement) testElement;
 				String testMethodName = testCaseElement.getTestMethodName();
-				manager.add(new OpenTestAction(fTestRunnerPart, className,
-						testMethodName));
+				manager.add(new OpenTestAction(fTestRunnerPart, testElement));
 				manager.add(new Separator());
 				if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
 					manager.add(new RerunAction(
@@ -313,38 +312,15 @@ public class TestViewer {
 
 		OpenTestAction action;
 		if (testElement instanceof TestSuiteElement) {
-			action = new OpenTestAction(fTestRunnerPart,
-					getRootRelativeName(testElement));
+			action = new OpenTestAction(fTestRunnerPart, testElement);
 		} else if (testElement instanceof TestCaseElement) {
-			TestCaseElement testCase = (TestCaseElement) testElement;
-			action = new OpenTestAction(fTestRunnerPart,
-					getRootRelativeName(testCase), testCase.getTestMethodName());
+			action = new OpenTestAction(fTestRunnerPart, testElement);
 		} else {
 			throw new IllegalStateException(String.valueOf(testElement));
 		}
 
 		if (action.isEnabled())
 			action.run();
-	}
-
-	private String getRootRelativeName(TestElement testCase) {
-		String name = null;
-		TestElement el = testCase;
-		while (el != null) {
-			if (name != null) {
-				name = el.getClassName() + "." + name;
-			} else {
-				name = el.getClassName();
-			}
-			el = el.getParent();
-			if (el instanceof TestRoot) {
-				break;
-			}
-		}
-		if (name.startsWith(".")) {
-			return name.substring(1);
-		}
-		return name;
 	}
 
 	private void handleSelected() {

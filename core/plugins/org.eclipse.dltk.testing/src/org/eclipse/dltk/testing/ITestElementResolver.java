@@ -11,32 +11,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.testing;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dltk.testing.model.ITestElement;
-import org.eclipse.jface.action.IAction;
 
-public abstract class AbstractTestRunnerUI implements ITestRunnerUI {
+public interface ITestElementResolver extends IAdaptable {
 
-	public String filterStackTrace(String trace) {
-		return trace;
-	}
-
-	public boolean isStackFrame(String line) {
-		return false;
-	}
-
-	public IAction createOpenEditorAction(String traceLine) {
-		return null;
-	}
-
-	public TestElementResolution resolveElement(ITestElement element) {
-		return null;
-	}
-
-	/*
-	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
-	 */
-	public Object getAdapter(Class adapter) {
-		return null;
-	}
+	TestElementResolution resolveElement(ITestElement element);
 
 }
