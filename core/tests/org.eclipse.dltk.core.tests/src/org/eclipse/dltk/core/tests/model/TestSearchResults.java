@@ -18,6 +18,7 @@ import java.util.List;
 import junit.framework.Assert;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
@@ -44,6 +45,10 @@ public class TestSearchResults extends SearchRequestor {
 		assertExists(IType.class, name);
 	}
 
+	public void assertMethod(String name) {
+		assertExists(IMethod.class, name);
+	}
+
 	public void assertExists(Class modelElementClass, String modelElementName) {
 		if (locate(modelElementClass, modelElementName) == null) {
 			Assert.fail("Not found " + modelElementName + ":"
@@ -51,7 +56,7 @@ public class TestSearchResults extends SearchRequestor {
 		}
 	}
 
-	public SearchMatch locate(Class modelElementClass, String modelElementName) {
+	public IModelElement locate(Class modelElementClass, String modelElementName) {
 		Assert.assertNotNull(modelElementClass);
 		Assert.assertTrue(IModelElement.class
 				.isAssignableFrom(modelElementClass));
@@ -60,8 +65,16 @@ public class TestSearchResults extends SearchRequestor {
 			if (modelElementClass.isAssignableFrom(match.getElement()
 					.getClass())) {
 				IModelElement element = (IModelElement) match.getElement();
-				if (modelElementName.equals(element.getElementName())) {
-					return match;
+				final String matchName;
+				if (element instanceof IType) {
+					final IType type = (IType) element;
+					// TODO use separator defined for the target language
+					matchName = type.getFullyQualifiedName("::");
+				} else {
+					matchName = element.getElementName();
+				}
+				if (modelElementName.equals(matchName)) {
+					return element;
 				}
 			}
 		}
