@@ -1082,11 +1082,11 @@ public class BuildpathEntry implements IBuildpathEntry {
 			boolean isProjectRelative = projectName
 					.equals(entryPath.segment(0));
 			String entryPathMsg = isProjectRelative ? entryPath
-					.removeFirstSegments(1).toString() : entryPath
-					.makeRelative().toString();
+					.removeFirstSegments(1).toString() : EnvironmentPathUtils
+					.getLocalPath(entryPath).makeRelative().toString();
 			boolean external = entry.isExternal();
 			// complain if duplicate path
-			if (!pathes.add(entryPath) && !external) {
+			if (!pathes.add(entryPath.toOSString()) /* && !external */) {
 				return new ModelStatus(IModelStatusConstants.NAME_COLLISION,
 						Messages.bind(Messages.buildpath_duplicateEntryPath,
 								new String[] { entryPathMsg, projectName }));
@@ -1137,7 +1137,9 @@ public class BuildpathEntry implements IBuildpathEntry {
 														Messages.buildpath_mustEndWithSlash,
 														new String[] {
 																exclusionPattern,
-																entryPath
+																EnvironmentPathUtils
+																		.getLocalPath(
+																				entryPath)
 																		.makeRelative()
 																		.toString() }));
 							} else {
@@ -1150,11 +1152,15 @@ public class BuildpathEntry implements IBuildpathEntry {
 														.bind(
 																Messages.buildpath_cannotNestEntryInEntry,
 																new String[] {
-																		entryPath
+																		EnvironmentPathUtils
+																				.getLocalPath(
+																						entryPath)
 																				.makeRelative()
 																				.toString(),
-																		otherEntry
-																				.getPath()
+																		EnvironmentPathUtils
+																				.getLocalPath(
+																						otherEntry
+																								.getPath())
 																				.makeRelative()
 																				.toString(),
 																		exclusionPattern }));
@@ -1165,11 +1171,15 @@ public class BuildpathEntry implements IBuildpathEntry {
 														.bind(
 																Messages.buildpath_cannotNestEntryInEntryNoExclusion,
 																new String[] {
-																		entryPath
+																		EnvironmentPathUtils
+																				.getLocalPath(
+																						entryPath)
 																				.makeRelative()
 																				.toString(),
-																		otherEntry
-																				.getPath()
+																		EnvironmentPathUtils
+																				.getLocalPath(
+																						otherEntry
+																								.getPath())
 																				.makeRelative()
 																				.toString(),
 																		exclusionPattern }));
@@ -1181,11 +1191,15 @@ public class BuildpathEntry implements IBuildpathEntry {
 													.bind(
 															Messages.buildpath_cannotNestEntryInLibrary,
 															new String[] {
-																	entryPath
+																	EnvironmentPathUtils
+																			.getLocalPath(
+																					entryPath)
 																			.makeRelative()
 																			.toString(),
-																	otherEntry
-																			.getPath()
+																	EnvironmentPathUtils
+																			.getLocalPath(
+																					otherEntry
+																							.getPath())
 																			.makeRelative()
 																			.toString() }));
 								}
@@ -1225,7 +1239,8 @@ public class BuildpathEntry implements IBuildpathEntry {
 		String projectName = project.getElementName();
 		boolean pathStartsWithProject = projectName.equals(path.segment(0));
 		String entryPathMsg = pathStartsWithProject ? path.removeFirstSegments(
-				1).makeRelative().toString() : path.toString();
+				1).makeRelative().toString() : EnvironmentPathUtils
+				.getLocalPath(path).toString();
 		switch (entry.getEntryKind()) {
 		// container entry check
 		case IBuildpathEntry.BPE_CONTAINER:
@@ -1359,7 +1374,10 @@ public class BuildpathEntry implements IBuildpathEntry {
 											.bind(
 													Messages.buildpath_illegalLibraryArchive,
 													new String[] {
-															path.toString(),
+															EnvironmentPathUtils
+																	.getLocalPath(
+																			path)
+																	.toString(),
 															projectName }));
 						}
 					}
@@ -1372,7 +1390,11 @@ public class BuildpathEntry implements IBuildpathEntry {
 								Messages
 										.bind(
 												Messages.buildpath_illegalExternalFolder,
-												new String[] { path.toString(),
+												new String[] {
+														EnvironmentPathUtils
+																.getLocalPath(
+																		path)
+																.toString(),
 														projectName }));
 					}
 				}
