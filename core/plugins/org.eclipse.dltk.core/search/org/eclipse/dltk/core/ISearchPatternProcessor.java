@@ -16,9 +16,9 @@ public interface ISearchPatternProcessor {
 	/**
 	 * Delimiter replacement string. For example "::" for tcl, "." for python.
 	 * 
-	 * In java this is used to replace internal class name separator '$' with
-	 * the returned value. It is used to check the method calls like
-	 * "ClassName::methodName()", at the moment this is used in TCL only.
+	 * The returned value is used to replace internal class name separator '$'.
+	 * It is used to check the match of the method calls like
+	 * "ClassName::methodName()".
 	 */
 	String getDelimiterReplacementString();
 
