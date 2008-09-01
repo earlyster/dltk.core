@@ -494,7 +494,8 @@ public class BuildpathTests extends ModifyingResourceTests {
 
 			assertStatus("should detect not pressent folders",
 					"Required library cannot denote external folder or archive: \'"
-							+ libPath.toString() + "\' for project Pv0", status);
+							+ EnvironmentPathUtils.getLocalPath(libPath)
+									.toString() + "\' for project Pv0", status);
 		} finally {
 			this.deleteProject("Pv0");
 		}
