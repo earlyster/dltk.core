@@ -859,7 +859,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		return true;
 	}
 
-	protected class CodeBlock {
+	protected static class CodeBlock {
 		public ASTNode statement;
 		public IRegion region;
 
@@ -1083,7 +1083,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		return new FoldingASTVisitor(offset);
 	}
 
-	protected class FoldingASTVisitor extends ASTVisitor {
+	protected static class FoldingASTVisitor extends ASTVisitor {
 		private List result = new ArrayList();
 		private int offset;
 
