@@ -52,8 +52,8 @@ public class DLTKTestingCore {
 
 	public static void registerTestingProcessor(final ILaunch launch,
 			ITestingProcessor processor) {
-		final String launchKey = "#" + Integer.toString(++index);
-		launch.setAttribute(DLTKTestingConstants.LAUNCH_ATTR_KEY, launchKey); //$NON-NLS-1$
+		final String launchKey = "#" + Integer.toString(++index); //$NON-NLS-1$
+		launch.setAttribute(DLTKTestingConstants.LAUNCH_ATTR_KEY, launchKey);
 		final TestingConsoleListener listener = new TestingConsoleListener(
 				launchKey, launch, processor);
 		listener.install();
