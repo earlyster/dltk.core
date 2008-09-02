@@ -17,37 +17,29 @@ package org.eclipse.dltk.testing;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.widgets.Shell;
-
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.dltk.internal.testing.model.DLTKTestingModel;
+import org.eclipse.dltk.testing.model.ITestRunSession;
+import org.eclipse.dltk.testing.model.ITestingModel;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
-
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-
-import org.eclipse.debug.core.ILaunch;
-
-import org.eclipse.dltk.internal.testing.model.DLTKTestingModel;
-import org.eclipse.dltk.testing.model.ITestRunSession;
-import org.eclipse.dltk.testing.model.ITestingModel;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -76,11 +68,6 @@ public class DLTKTestingPlugin extends AbstractUIPlugin {
 	private static final String HISTORY_DIR_NAME= "history"; //$NON-NLS-1$
 
 	private final DLTKTestingModel fTestingModel= new DLTKTestingModel();
-
-	/**
-	 * List storing the registered test run listeners
-	 */
-	private List/*<ITestRunListener>*/fLegacyTestRunListeners;
 
 	/**
 	 * List storing the registered test run listeners
@@ -239,34 +226,6 @@ public class DLTKTestingPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Initializes TestRun Listener extensions
-	 * @deprecated
-	 */
-	private void loadTestRunListeners() {
-		fLegacyTestRunListeners= new ArrayList();
-		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_LISTENERS);
-		if (extensionPoint == null) {
-			return;
-		}
-		IConfigurationElement[] configs= extensionPoint.getConfigurationElements();
-		MultiStatus status= new MultiStatus(PLUGIN_ID, IStatus.OK, "Could not load some testRunner extension points", null); //$NON-NLS-1$ 	
-
-		for (int i= 0; i < configs.length; i++) {
-			try {
-				Object testRunListener= configs[i].createExecutableExtension("class"); //$NON-NLS-1$
-				if (testRunListener instanceof org.eclipse.dltk.testing.ITestRunListener) {
-					fLegacyTestRunListeners.add(testRunListener);
-				}
-			} catch (CoreException e) {
-				status.add(e.getStatus());
-			}
-		}
-		if (!status.isOK()) {
-			DLTKTestingPlugin.log(status);
-		}
-	}
-
-	/**
 	 * Loads the registered JUnit launch configurations
 	 */
 	private void loadLaunchConfigTypeIDs() {
@@ -281,17 +240,6 @@ public class DLTKTestingPlugin extends AbstractUIPlugin {
 			String configTypeID= configs[i].getAttribute("configTypeID"); //$NON-NLS-1$
 			fJUnitLaunchConfigTypeIDs.add(configTypeID);
 		}
-	}
-
-	/**
-	 * @return an array of all TestRun listeners
-	 * @deprecated
-	 */
-	public org.eclipse.dltk.testing.ITestRunListener[] getTestRunListeners() {
-		if (fLegacyTestRunListeners == null) {
-			loadTestRunListeners();
-		}
-		return (org.eclipse.dltk.testing.ITestRunListener[]) fLegacyTestRunListeners.toArray(new org.eclipse.dltk.testing.ITestRunListener[fLegacyTestRunListeners.size()]);
 	}
 
 	/**
@@ -337,33 +285,6 @@ public class DLTKTestingPlugin extends AbstractUIPlugin {
 		if (bundles != null && bundles.length > 0)
 			return bundles;
 		return null;
-	}
-
-	/**
-	 * Adds a TestRun listener to the collection of listeners
-	 * @param newListener the listener to add
-	 * @deprecated
-	 */
-	public void addTestRunListener(org.eclipse.dltk.testing.ITestRunListener newListener) {
-		if (fLegacyTestRunListeners == null)
-			loadTestRunListeners();
-
-		for (Iterator iter= fLegacyTestRunListeners.iterator(); iter.hasNext();) {
-			Object o= iter.next();
-			if (o == newListener)
-				return;
-		}
-		fLegacyTestRunListeners.add(newListener);
-	}
-
-	/**
-	 * Removes a TestRun listener to the collection of listeners
-	 * @param newListener the listener to remove
-	 * @deprecated
-	 */
-	public void removeTestRunListener(org.eclipse.dltk.testing.ITestRunListener newListener) {
-		if (fLegacyTestRunListeners != null)
-			fLegacyTestRunListeners.remove(newListener);
 	}
 
 	/**
