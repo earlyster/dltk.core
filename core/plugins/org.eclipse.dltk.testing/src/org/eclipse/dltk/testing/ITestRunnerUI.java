@@ -12,6 +12,7 @@
 package org.eclipse.dltk.testing;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.dltk.testing.model.ITestCaseElement;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 
@@ -47,5 +48,11 @@ public interface ITestRunnerUI extends IAdaptable {
 	 * @return
 	 */
 	String getDisplayName();
+
+	/**
+	 * @param caseElement
+	 * @return
+	 */
+	String getTestCaseLabel(ITestCaseElement caseElement);
 
 }

@@ -65,7 +65,7 @@ public interface IXMLTags {
 	/**
 	 * value: String
 	 */
-	public static final String ATTR_CLASSNAME= "classname"; //$NON-NLS-1$
+	//public static final String ATTR_CLASSNAME= "classname"; //$NON-NLS-1$
 	/**
 	 * value: Boolean
 	 */

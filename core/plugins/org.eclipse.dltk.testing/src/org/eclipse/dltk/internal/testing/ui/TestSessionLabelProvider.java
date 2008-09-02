@@ -12,10 +12,12 @@
 package org.eclipse.dltk.internal.testing.ui;
 
 import org.eclipse.dltk.internal.testing.Messages;
+import org.eclipse.dltk.internal.testing.launcher.NullTestRunnerUI;
 import org.eclipse.dltk.internal.testing.model.TestCaseElement;
 import org.eclipse.dltk.internal.testing.model.TestSuiteElement;
 import org.eclipse.dltk.internal.testing.model.TestElement.Status;
 import org.eclipse.dltk.testing.DLTKTestingMessages;
+import org.eclipse.dltk.testing.ITestRunnerUI;
 import org.eclipse.dltk.testing.ITestingClient;
 import org.eclipse.dltk.testing.model.ITestCaseElement;
 import org.eclipse.dltk.testing.model.ITestElement;
@@ -31,11 +33,13 @@ public class TestSessionLabelProvider extends LabelProvider implements
 
 	private final TestRunnerViewPart fTestRunnerPart;
 	private final int fLayoutMode;
+	private ITestRunnerUI runnerUI;
 
 	public TestSessionLabelProvider(TestRunnerViewPart testRunnerPart,
 			int layoutMode) {
 		fTestRunnerPart = testRunnerPart;
 		fLayoutMode = layoutMode;
+		runnerUI = NullTestRunnerUI.getInstance();
 	}
 
 	/*
@@ -76,7 +80,9 @@ public class TestSessionLabelProvider extends LabelProvider implements
 
 	private String getSimpleLabel(Object element) {
 		if (element instanceof ITestCaseElement) {
-			return ((ITestCaseElement) element).getTestMethodName();
+			final ITestCaseElement caseElement = (ITestCaseElement) element;
+			return runnerUI != null ? runnerUI.getTestCaseLabel(caseElement)
+					: caseElement.getTestName(); 
 		} else if (element instanceof ITestSuiteElement) {
 			return ((ITestSuiteElement) element).getSuiteTypeName();
 		}
@@ -172,5 +178,12 @@ public class TestSessionLabelProvider extends LabelProvider implements
 		} else {
 			throw new IllegalArgumentException(String.valueOf(element));
 		}
+	}
+
+	/**
+	 * @param value
+	 */
+	public void setRunnerUI(ITestRunnerUI value) {
+		this.runnerUI = value;		
 	}
 }

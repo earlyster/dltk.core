@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.testing;
 
+import org.eclipse.dltk.testing.model.ITestCaseElement;
 import org.eclipse.jface.action.IAction;
 
 public abstract class AbstractTestRunnerUI implements ITestRunnerUI {
@@ -25,6 +26,20 @@ public abstract class AbstractTestRunnerUI implements ITestRunnerUI {
 
 	public IAction createOpenEditorAction(String traceLine) {
 		return null;
+	}
+
+	/*
+	 * @see ITestRunnerUI#getTestCaseLabel(ITestCaseElement)
+	 */
+	public String getTestCaseLabel(ITestCaseElement caseElement) {
+		String testName = caseElement.getTestName();
+		int index = testName.indexOf('(');
+		if (index > 0)
+			return testName.substring(0, index);
+		index = testName.indexOf('@');
+		if (index > 0)
+			return testName.substring(0, index);
+		return testName;
 	}
 
 	/*

@@ -24,6 +24,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.testing.launcher.NullTestRunnerUI;
 import org.eclipse.dltk.internal.testing.model.TestCaseElement;
 import org.eclipse.dltk.internal.testing.model.TestElement;
 import org.eclipse.dltk.internal.testing.model.TestRoot;
@@ -31,6 +32,7 @@ import org.eclipse.dltk.internal.testing.model.TestRunSession;
 import org.eclipse.dltk.internal.testing.model.TestSuiteElement;
 import org.eclipse.dltk.internal.testing.model.TestElement.Status;
 import org.eclipse.dltk.testing.DLTKTestingMessages;
+import org.eclipse.dltk.testing.ITestRunnerUI;
 import org.eclipse.dltk.ui.viewsupport.SelectionProviderMediator;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -300,6 +302,14 @@ public class TestViewer {
 		fTestRunSession = testRunSession;
 		registerAutoScrollTarget(null);
 		registerViewersRefresh();
+		final ITestRunnerUI runnerUI;
+		if (testRunSession != null) {
+			runnerUI = testRunSession.getTestRunnerUI();
+		} else {
+			runnerUI = NullTestRunnerUI.getInstance();
+		}
+		fTreeLabelProvider.setRunnerUI(runnerUI);
+		fTableLabelProvider.setRunnerUI(runnerUI);
 	}
 
 	protected void handleDefaultSelected() {

@@ -28,7 +28,6 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 	
 	/**
 	 * {@inheritDoc}
-	 * @see org.eclipse.dltk.testing.model.ITestCaseElement#getTestMethodName()
 	 * @see org.eclipse.jdt.internal.junit.runner.MessageIds#TEST_IDENTIFIER_MESSAGE_FORMAT
 	 * @see org.eclipse.jdt.internal.junit.runner.MessageIds#IGNORED_TEST_PREFIX
 	 */
@@ -60,6 +59,6 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 	}
 	
 	public String toString() {
-		return "TestCase: " + getTestClassName() + "." + getTestMethodName() + " : " + super.toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return "TestCase: " + getTestName() + " : " + super.toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

@@ -104,9 +104,11 @@ public class TestRunSessionSerializer implements XMLReader {
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
 			
 			AttributesImpl atts= new AttributesImpl();
-			addCDATA(atts, IXMLTags.ATTR_NAME, testCaseElement.getTestMethodName());
-			addCDATA(atts, IXMLTags.ATTR_CLASSNAME, testCaseElement.getClassName());
-//			addCDATA(atts, IXMLTags.ATTR_TIME, Integer.toString(testCaseElement.getTime()));
+			addCDATA(atts, IXMLTags.ATTR_NAME, testCaseElement.getTestName());
+			// addCDATA(atts, IXMLTags.ATTR_CLASSNAME,
+			// testCaseElement.getClassName());
+			// addCDATA(atts, IXMLTags.ATTR_TIME,
+			// Integer.toString(testCaseElement.getTime()));
 			if (testElement.getProgressState() != ProgressState.COMPLETED)
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
 			if (testCaseElement.isIgnored())
