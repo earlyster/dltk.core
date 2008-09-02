@@ -86,17 +86,15 @@ public class BuildpathEntry implements IBuildpathEntry {
 	/**
 	 * The meaning of the path of a buildpath entry depends on its entry kind:
 	 * <ul>
-	 * <li>Source code in the current project (<code>BPE_SOURCE</code>) -
-	 * The path associated with this entry is the absolute path to the root
-	 * folder. </li>
-	 * <li>A required project (<code>BPE_PROJECT</code>) - the path of the
-	 * entry denotes the path to the corresponding project resource.</li>
-	 * <li> A container entry (<code>BPE_CONTAINER</code>) - the first
-	 * segment of the path is denoting the unique container identifier (for
-	 * which a <code>BuildpathContainerInitializer</code> could be
-	 * registered), and the remaining segments are used as additional hints for
-	 * resolving the container entry to an actual
-	 * <code>IBuildpathContainer</code>.</li>
+	 * <li>Source code in the current project (<code>BPE_SOURCE</code>) - The
+	 * path associated with this entry is the absolute path to the root folder.</li>
+	 * <li>A required project (<code>BPE_PROJECT</code>) - the path of the entry
+	 * denotes the path to the corresponding project resource.</li>
+	 * <li>A container entry (<code>BPE_CONTAINER</code>) - the first segment of
+	 * the path is denoting the unique container identifier (for which a
+	 * <code>BuildpathContainerInitializer</code> could be registered), and the
+	 * remaining segments are used as additional hints for resolving the
+	 * container entry to an actual <code>IBuildpathContainer</code>.</li>
 	 */
 	private IPath path;
 	/**
@@ -724,11 +722,10 @@ public class BuildpathEntry implements IBuildpathEntry {
 		try {
 			writer = new OutputStreamWriter(s, "UTF8"); //$NON-NLS-1$
 			XMLWriter xmlWriter = new XMLWriter(writer, project, false/*
-																		 * don't
-																		 * print
-																		 * XML
-																		 * version
-																		 */);
+																	 * don't
+																	 * print XML
+																	 * version
+																	 */);
 			decodeUnknownNode(node, xmlWriter, true/* insert new line */);
 			xmlWriter.flush();
 			xmlWriter.close();
@@ -753,12 +750,12 @@ public class BuildpathEntry implements IBuildpathEntry {
 			NodeList children = node.getChildNodes();
 			int childrenLength = children.getLength();
 			String nodeName = node.getNodeName();
-			xmlWriter.printTag(nodeName, parameters,
-					false/* don't insert tab */, false/*
-														 * don't insert new line
-														 */, childrenLength == 0/*
-											 * close tag if no children
-											 */);
+			xmlWriter.printTag(nodeName, parameters, false/* don't insert tab */,
+					false/*
+						 * don't insert new line
+						 */, childrenLength == 0/*
+												 * close tag if no children
+												 */);
 			if (childrenLength > 0) {
 				for (int i = 0; i < childrenLength; i++) {
 					decodeUnknownNode(children.item(i), xmlWriter, false/*
@@ -775,11 +772,11 @@ public class BuildpathEntry implements IBuildpathEntry {
 		case Node.TEXT_NODE:
 			String data = ((Text) node).getData();
 			xmlWriter.printString(data, false/* don't insert tab */, false/*
-																			 * don't
-																			 * insert
-																			 * new
-																			 * line
-																			 */);
+																		 * don't
+																		 * insert
+																		 * new
+																		 * line
+																		 */);
 			break;
 		}
 	}
@@ -917,21 +914,15 @@ public class BuildpathEntry implements IBuildpathEntry {
 		ArrayList unknownChildren = unknownXmlElements != null ? unknownXmlElements.children
 				: null;
 		boolean hasUnknownChildren = unknownChildren != null;
-		writer.printTag(TAG_BUILDPATHENTRY, parameters, indent, newLine,
-				!hasExtraAttributes && !hasRestrictions && !hasUnknownChildren/*
-																				 * close
-																				 * tag
-																				 * if
-																				 * no
-																				 * extra
-																				 * attributes,
-																				 * no
-																				 * restriction
-																				 * and
-																				 * no
-																				 * unknown
-																				 * children
-																				 */);
+		writer
+				.printTag(TAG_BUILDPATHENTRY, parameters, indent, newLine,
+						!hasExtraAttributes && !hasRestrictions
+								&& !hasUnknownChildren/*
+													 * close tag if no extra
+													 * attributes, no
+													 * restriction and no
+													 * unknown children
+													 */);
 		if (hasExtraAttributes)
 			encodeExtraAttributes(writer, indent, newLine);
 		if (hasRestrictions)
@@ -939,11 +930,9 @@ public class BuildpathEntry implements IBuildpathEntry {
 		if (hasUnknownChildren)
 			encodeUnknownChildren(writer, indent, newLine, unknownChildren);
 		if (hasUnknownChildren)
-			writer
-					.endTag(TAG_BUILDPATHENTRY, indent, true/* insert new line */);
+			writer.endTag(TAG_BUILDPATHENTRY, indent, true/* insert new line */);
 		if (hasExtraAttributes || hasRestrictions || hasUnknownChildren)
-			writer
-					.endTag(TAG_BUILDPATHENTRY, indent, true/* insert new line */);
+			writer.endTag(TAG_BUILDPATHENTRY, indent, true/* insert new line */);
 	}
 
 	void encodeExtraAttributes(XMLWriter writer, boolean indent, boolean newLine) {
@@ -1017,11 +1006,11 @@ public class BuildpathEntry implements IBuildpathEntry {
 	/**
 	 * Validate a given buildpath for a project, using the following rules:
 	 * <ul>
-	 * <li> Buildpath entries cannot collide with each other; that is, all entry
+	 * <li>Buildpath entries cannot collide with each other; that is, all entry
 	 * paths must be unique. *
-	 * <li> A project entry cannot refer to itself directly (that is, a project
+	 * <li>A project entry cannot refer to itself directly (that is, a project
 	 * cannot prerequisite itself).
-	 * <li> Buildpath entries cannot coincidate or be nested in each other.
+	 * <li>Buildpath entries cannot coincidate or be nested in each other.
 	 * </ul>
 	 * 
 	 * Note that the buildpath entries are not validated automatically. Only
@@ -1039,8 +1028,8 @@ public class BuildpathEntry implements IBuildpathEntry {
 	 *            the given script project
 	 * @param rawBuildpath
 	 *            a given buildpath
-	 * @return a status object with code <code>ModelStatus.VERIFIED_OK</code>
-	 *         if the given buildpath are correct, otherwise a status object
+	 * @return a status object with code <code>ModelStatus.VERIFIED_OK</code> if
+	 *         the given buildpath are correct, otherwise a status object
 	 *         indicating what is wrong with the buildpath
 	 */
 	public static IModelStatus validateBuildpath(IScriptProject scriptProject,
@@ -1056,9 +1045,9 @@ public class BuildpathEntry implements IBuildpathEntry {
 		// retrieve resolved buildpath
 		IBuildpathEntry[] buildpath;
 		try {
-			buildpath = ((ScriptProject) scriptProject).getResolvedBuildpath(
-					rawBuildpath, true/* ignore pb */, false/* no marker */,
-					null /* no reverse map */);
+			buildpath = ((ScriptProject) scriptProject)
+					.getResolvedBuildpath(rawBuildpath, true/* ignore pb */,
+							false/* no marker */, null /* no reverse map */);
 		} catch (ModelException e) {
 			return e.getModelStatus();
 		}
@@ -1093,11 +1082,11 @@ public class BuildpathEntry implements IBuildpathEntry {
 			boolean isProjectRelative = projectName
 					.equals(entryPath.segment(0));
 			String entryPathMsg = isProjectRelative ? entryPath
-					.removeFirstSegments(1).toString() : entryPath
-					.makeRelative().toString();
-			boolean external = entry.isExternal();
+					.removeFirstSegments(1).toString() : EnvironmentPathUtils
+					.getLocalPath(entryPath).makeRelative().toString();
+			// boolean external = entry.isExternal();
 			// complain if duplicate path
-			if (!pathes.add(entryPath) && !external) {
+			if (!pathes.add(entryPath.toOSString()) /* && !external */) {
 				return new ModelStatus(IModelStatusConstants.NAME_COLLISION,
 						Messages.bind(Messages.buildpath_duplicateEntryPath,
 								new String[] { entryPathMsg, projectName }));
@@ -1148,7 +1137,9 @@ public class BuildpathEntry implements IBuildpathEntry {
 														Messages.buildpath_mustEndWithSlash,
 														new String[] {
 																exclusionPattern,
-																entryPath
+																EnvironmentPathUtils
+																		.getLocalPath(
+																				entryPath)
 																		.makeRelative()
 																		.toString() }));
 							} else {
@@ -1161,11 +1152,15 @@ public class BuildpathEntry implements IBuildpathEntry {
 														.bind(
 																Messages.buildpath_cannotNestEntryInEntry,
 																new String[] {
-																		entryPath
+																		EnvironmentPathUtils
+																				.getLocalPath(
+																						entryPath)
 																				.makeRelative()
 																				.toString(),
-																		otherEntry
-																				.getPath()
+																		EnvironmentPathUtils
+																				.getLocalPath(
+																						otherEntry
+																								.getPath())
 																				.makeRelative()
 																				.toString(),
 																		exclusionPattern }));
@@ -1176,11 +1171,15 @@ public class BuildpathEntry implements IBuildpathEntry {
 														.bind(
 																Messages.buildpath_cannotNestEntryInEntryNoExclusion,
 																new String[] {
-																		entryPath
+																		EnvironmentPathUtils
+																				.getLocalPath(
+																						entryPath)
 																				.makeRelative()
 																				.toString(),
-																		otherEntry
-																				.getPath()
+																		EnvironmentPathUtils
+																				.getLocalPath(
+																						otherEntry
+																								.getPath())
 																				.makeRelative()
 																				.toString(),
 																		exclusionPattern }));
@@ -1192,11 +1191,15 @@ public class BuildpathEntry implements IBuildpathEntry {
 													.bind(
 															Messages.buildpath_cannotNestEntryInLibrary,
 															new String[] {
-																	entryPath
+																	EnvironmentPathUtils
+																			.getLocalPath(
+																					entryPath)
 																			.makeRelative()
 																			.toString(),
-																	otherEntry
-																			.getPath()
+																	EnvironmentPathUtils
+																			.getLocalPath(
+																					otherEntry
+																							.getPath())
 																			.makeRelative()
 																			.toString() }));
 								}
@@ -1236,7 +1239,8 @@ public class BuildpathEntry implements IBuildpathEntry {
 		String projectName = project.getElementName();
 		boolean pathStartsWithProject = projectName.equals(path.segment(0));
 		String entryPathMsg = pathStartsWithProject ? path.removeFirstSegments(
-				1).makeRelative().toString() : path.toString();
+				1).makeRelative().toString() : EnvironmentPathUtils
+				.getLocalPath(path).toString();
 		switch (entry.getEntryKind()) {
 		// container entry check
 		case IBuildpathEntry.BPE_CONTAINER:
@@ -1342,7 +1346,10 @@ public class BuildpathEntry implements IBuildpathEntry {
 											.bind(
 													Messages.buildpath_illegalLibraryArchive,
 													new String[] {
-															path.toString(),
+															EnvironmentPathUtils
+																	.getLocalPath(
+																			path)
+																	.toString(),
 															projectName }));
 						}
 					}
@@ -1355,7 +1362,11 @@ public class BuildpathEntry implements IBuildpathEntry {
 								Messages
 										.bind(
 												Messages.buildpath_illegalExternalFolder,
-												new String[] { path.toString(),
+												new String[] {
+														EnvironmentPathUtils
+																.getLocalPath(
+																		path)
+																.toString(),
 														projectName }));
 					}
 				}
