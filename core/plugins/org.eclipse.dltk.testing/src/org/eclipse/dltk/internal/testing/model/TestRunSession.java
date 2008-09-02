@@ -336,6 +336,15 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 //		System.out.println("COUNT:" + count);
 	}
 
+	/**
+	 * @param value
+	 */
+	protected void adjustTotalCount(int value) {
+		if (value > fTotalCount) {
+			fTotalCount = value;
+		}
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.dltk.internal.testing.model.ITestSession#getStartTime()
 	 */
@@ -528,6 +537,9 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		
 		int testCount= Integer.parseInt(treeEntry.substring(index2 + 1));
 		
+		if (isSuite && testCount > 1) {
+			adjustTotalCount(fStartedCount + testCount);
+		}
 		if (fIncompleteTestSuites.isEmpty()) {
 			return createTestElement(fTestRoot, id, testName, isSuite, testCount);
 		} else {
@@ -685,6 +697,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 			setStatus(testCaseElement, Status.RUNNING);
 			
 			fStartedCount++;
+			adjustTotalCount(fStartedCount);
 			
 			Object[] listeners= fSessionListeners.getListeners();
 			for (int i= 0; i < listeners.length; ++i) {
