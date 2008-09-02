@@ -46,7 +46,6 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.testing.Messages;
-import org.eclipse.dltk.internal.testing.model.TestElement.Status;
 import org.eclipse.dltk.internal.testing.ui.DLTKTestingPreferencesConstants;
 import org.eclipse.dltk.internal.testing.ui.TestRunnerViewPart;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
@@ -245,125 +244,6 @@ public final class DLTKTestingModel implements ITestingModel {
 		return null;
 	}
 
-	/** @deprecated */
-	private static final class LegacyTestRunSessionListener implements
-			ITestRunSessionListener {
-		private TestRunSession fActiveTestRunSession;
-		private ITestSessionListener fTestSessionListener;
-
-		public void sessionAdded(TestRunSession testRunSession) {
-			// Only serve one legacy ITestRunListener at a time, since they
-			// cannot distinguish between different concurrent test sessions:
-			if (fActiveTestRunSession != null)
-				return;
-
-			fActiveTestRunSession = testRunSession;
-
-			fTestSessionListener = new ITestSessionListener() {
-				public void testAdded(TestElement testElement) {
-				}
-
-				public void sessionStarted() {
-					org.eclipse.dltk.testing.ITestRunListener[] testRunListeners = DLTKTestingPlugin
-							.getDefault().getTestRunListeners();
-					for (int i = 0; i < testRunListeners.length; i++) {
-						testRunListeners[i]
-								.testRunStarted(fActiveTestRunSession
-										.getTotalCount());
-					}
-				}
-
-				public void sessionTerminated() {
-					org.eclipse.dltk.testing.ITestRunListener[] testRunListeners = DLTKTestingPlugin
-							.getDefault().getTestRunListeners();
-					for (int i = 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testRunTerminated();
-					}
-					sessionRemoved(fActiveTestRunSession);
-				}
-
-				public void sessionStopped(long elapsedTime) {
-					org.eclipse.dltk.testing.ITestRunListener[] testRunListeners = DLTKTestingPlugin
-							.getDefault().getTestRunListeners();
-					for (int i = 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testRunStopped(elapsedTime);
-					}
-					sessionRemoved(fActiveTestRunSession);
-				}
-
-				public void sessionEnded(long elapsedTime) {
-					org.eclipse.dltk.testing.ITestRunListener[] testRunListeners = DLTKTestingPlugin
-							.getDefault().getTestRunListeners();
-					for (int i = 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testRunEnded(elapsedTime);
-					}
-					sessionRemoved(fActiveTestRunSession);
-				}
-
-				public void runningBegins() {
-					// ignore
-				}
-
-				public void testStarted(TestCaseElement testCaseElement) {
-					org.eclipse.dltk.testing.ITestRunListener[] testRunListeners = DLTKTestingPlugin
-							.getDefault().getTestRunListeners();
-					for (int i = 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testStarted(
-								testCaseElement.getId(), testCaseElement
-										.getTestName());
-					}
-				}
-
-				public void testFailed(TestElement testElement, Status status,
-						String trace, String expected, String actual, int code) {
-					org.eclipse.dltk.testing.ITestRunListener[] testRunListeners = DLTKTestingPlugin
-							.getDefault().getTestRunListeners();
-					for (int i = 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testFailed(status.getOldCode(),
-								testElement.getId(), testElement.getTestName(),
-								trace);
-					}
-				}
-
-				public void testEnded(TestCaseElement testCaseElement) {
-					org.eclipse.dltk.testing.ITestRunListener[] testRunListeners = DLTKTestingPlugin
-							.getDefault().getTestRunListeners();
-					for (int i = 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testEnded(testCaseElement.getId(),
-								testCaseElement.getTestName());
-					}
-				}
-
-				public void testReran(TestCaseElement testCaseElement,
-						Status status, String trace, String expectedResult,
-						String actualResult) {
-					org.eclipse.dltk.testing.ITestRunListener[] testRunListeners = DLTKTestingPlugin
-							.getDefault().getTestRunListeners();
-					for (int i = 0; i < testRunListeners.length; i++) {
-						testRunListeners[i].testReran(testCaseElement.getId(),
-								testCaseElement.getClassName(), testCaseElement
-										.getTestMethodName(), status
-										.getOldCode(), trace);
-					}
-				}
-
-				public boolean acceptsSwapToDisk() {
-					return true;
-				}
-			};
-			fActiveTestRunSession.addTestSessionListener(fTestSessionListener);
-		}
-
-		public void sessionRemoved(TestRunSession testRunSession) {
-			if (fActiveTestRunSession == testRunSession) {
-				fActiveTestRunSession
-						.removeTestSessionListener(fTestSessionListener);
-				fTestSessionListener = null;
-				fActiveTestRunSession = null;
-			}
-		}
-	}
-
 	private final ListenerList fTestRunSessionListeners = new ListenerList();
 	/**
 	 * Active test run sessions, youngest first.
@@ -412,7 +292,6 @@ public final class DLTKTestingModel implements ITestingModel {
 		// });
 		// }
 		// }
-		addTestRunSessionListener(new LegacyTestRunSessionListener());
 	}
 
 	/**
