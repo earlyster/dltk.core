@@ -25,11 +25,9 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.internal.testing.Messages;
 import org.eclipse.dltk.internal.testing.launcher.NullTestRunnerUI;
 import org.eclipse.dltk.internal.testing.launcher.NullTestingEngine;
 import org.eclipse.dltk.internal.testing.model.TestElement.Status;
@@ -213,7 +211,14 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		fTestResult= null;
 		fIdToTest= new HashMap();
 	}
-	
+
+	/*
+	 * @see org.eclipse.dltk.testing.model.ITestElement#getId()
+	 */
+	public String getId() {
+		return fTestRunName;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.junit.ITestRunSession#getProgressState()
 	 */
@@ -481,15 +486,15 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 	 * @return <code>false</code> iff the rerun could not be started
 	 * @throws CoreException 
 	 */
-	public boolean rerunTest(String testId, String className, String testName, String launchMode) throws CoreException {
+	public boolean rerunTest(ITestElement testElement, String launchMode) throws CoreException {
 		if (isKeptAlive()) {
-			Status status= ((TestCaseElement) getTestElement(testId)).getStatus();
+			Status status= ((TestCaseElement) getTestElement(testElement.getId())).getStatus();
 			if (status == Status.ERROR) {
 				fErrorCount--;
 			} else if (status == Status.FAILURE) {
 				fFailureCount--;
 			}
-			fTestRunnerClient.rerunTest(testId, className, testName);
+			/* TODO fTestRunnerClient.rerunTest(testId, className, testName); */
 			return true;
 			
 		} else if (fLaunch != null) {
@@ -497,21 +502,21 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 			ILaunchConfiguration launchConfiguration= fLaunch.getLaunchConfiguration();
 			if (launchConfiguration != null) {
 
-				String name= className;
-				if (testName != null) 
-					name+= "."+testName; //$NON-NLS-1$
-				String configName= Messages.format(DLTKTestingMessages.TestRunnerViewPart_configName, name); 
-				ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy(configName); 
+				//String name= className;
+				//if (testName != null) 
+					//name+= "."+testName; //$NON-NLS-1$
+				//String configName= Messages.format(DLTKTestingMessages.TestRunnerViewPart_configName, name); 
+				//ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy(configName); 
 				// fix for bug: 64838  junit view run single test does not use correct class [JUnit] 
 //				tmp.setAttribute(ScriptLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, className);
 				// reset the container
-				tmp.setAttribute(DLTKTestingConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
-				if (testName != null) {
-					tmp.setAttribute(DLTKTestingConstants.ATTR_TEST_METHOD_NAME, testName);
+				//tmp.setAttribute(DLTKTestingConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
+				//if (testName != null) {
+					//tmp.setAttribute(DLTKTestingConstants.ATTR_TEST_METHOD_NAME, testName);
 					//	String args= "-rerun "+testId;
 					//	tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, args);
-				}
-				tmp.launch(launchMode, null);	
+				//}
+				//tmp.launch(launchMode, null);	
 				return true;
 			}
 		}

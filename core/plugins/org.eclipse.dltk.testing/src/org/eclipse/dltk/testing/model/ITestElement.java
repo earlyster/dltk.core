@@ -114,6 +114,8 @@ public interface ITestElement {
 		}
 	}
 	
+	String getId();
+	
 	/**
 	 * Returns the progress state of this test element.
 	 * <dl>

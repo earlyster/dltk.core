@@ -57,6 +57,7 @@ import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.testing.ITestRunnerUI;
 import org.eclipse.dltk.testing.ITestSession;
+import org.eclipse.dltk.testing.model.ITestElement;
 import org.eclipse.dltk.testing.model.ITestElement.Result;
 import org.eclipse.dltk.ui.viewsupport.ViewHistory;
 import org.eclipse.jface.action.Action;
@@ -629,7 +630,8 @@ public class TestRunnerViewPart extends ViewPart {
 		public void testStarted(TestCaseElement testCaseElement) {
 			fTestViewer.registerAutoScrollTarget(testCaseElement);
 			fTestViewer.registerViewerUpdate(testCaseElement);
-			registerInfoMessage(getTestRunnerUI().getTestStartedMessage(testCaseElement));
+			registerInfoMessage(getTestRunnerUI().getTestStartedMessage(
+					testCaseElement));
 		}
 
 		public void testFailed(TestElement testElement,
@@ -1865,12 +1867,11 @@ public class TestRunnerViewPart extends ViewPart {
 		return fCounterPanel != null;
 	}
 
-	public void rerunTest(String testId, String className, String testName,
-			String launchMode) {
+	public void rerunTest(ITestElement testElement, String launchMode) {
 		DebugUITools.saveAndBuildBeforeLaunch();
 		try {
-			boolean couldLaunch = fTestRunSession.rerunTest(testId, className,
-					testName, launchMode);
+			boolean couldLaunch = fTestRunSession.rerunTest(testElement,
+					launchMode);
 			if (!couldLaunch) {
 				MessageDialog
 						.openInformation(
@@ -1879,7 +1880,7 @@ public class TestRunnerViewPart extends ViewPart {
 								DLTKTestingMessages.TestRunnerViewPart_cannotrerurn_message);
 			} else if (fTestRunSession.isKeptAlive()) {
 				TestCaseElement testCaseElement = (TestCaseElement) fTestRunSession
-						.getTestElement(testId);
+						.getTestElement(testElement.getId());
 				testCaseElement.setStatus(TestElement.Status.RUNNING, null,
 						null, null);
 				fTestViewer.registerViewerUpdate(testCaseElement);

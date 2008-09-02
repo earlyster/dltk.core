@@ -234,33 +234,31 @@ public class TestViewer {
 						&& !fTestRunnerPart.lastLaunchIsKeptAlive()) {
 					manager.add(new RerunAction(
 							DLTKTestingMessages.RerunAction_label_run,
-							fTestRunnerPart, testElement.getId(), className,
-							null, ILaunchManager.RUN_MODE));
+							fTestRunnerPart, testElement,
+							ILaunchManager.RUN_MODE));
 					manager.add(new RerunAction(
 							DLTKTestingMessages.RerunAction_label_debug,
-							fTestRunnerPart, testElement.getId(), className,
-							null, ILaunchManager.DEBUG_MODE));
+							fTestRunnerPart, testElement,
+							ILaunchManager.DEBUG_MODE));
 				}
 			} else {
-				TestCaseElement testCaseElement = (TestCaseElement) testElement;
-				String testMethodName = testCaseElement.getTestMethodName();
 				manager.add(new OpenTestAction(fTestRunnerPart, testElement));
 				manager.add(new Separator());
 				if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
 					manager.add(new RerunAction(
 							DLTKTestingMessages.RerunAction_label_rerun,
-							fTestRunnerPart, testElement.getId(), className,
-							testMethodName, ILaunchManager.RUN_MODE));
+							fTestRunnerPart, testElement,
+							ILaunchManager.RUN_MODE));
 
 				} else {
 					manager.add(new RerunAction(
 							DLTKTestingMessages.RerunAction_label_run,
-							fTestRunnerPart, testElement.getId(), className,
-							testMethodName, ILaunchManager.RUN_MODE));
+							fTestRunnerPart, testElement,
+							ILaunchManager.RUN_MODE));
 					manager.add(new RerunAction(
 							DLTKTestingMessages.RerunAction_label_debug,
-							fTestRunnerPart, testElement.getId(), className,
-							testMethodName, ILaunchManager.DEBUG_MODE));
+							fTestRunnerPart, testElement,
+							ILaunchManager.DEBUG_MODE));
 				}
 			}
 			if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
@@ -350,9 +348,8 @@ public class TestViewer {
 	public synchronized void setShowFailuresOnly(boolean failuresOnly,
 			int layoutMode) {
 		/*
-		 * Management of fTreeViewer and fTableViewer
-		 * ****************************************** - invisible viewer is
-		 * updated on registerViewerUpdate unless its f*NeedsRefresh is true -
+		 * Management of fTreeViewer and fTableViewer - invisible viewer is
+		 * updated on registerViewerUpdate unless its fNeedsRefresh is true -
 		 * invisible viewer is not refreshed upfront - on layout change, new
 		 * viewer is refreshed if necessary - filter only applies to "current"
 		 * layout mode / viewer

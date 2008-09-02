@@ -12,29 +12,26 @@ package org.eclipse.dltk.internal.testing.ui;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.dltk.testing.model.ITestElement;
 import org.eclipse.jface.action.Action;
 
 /**
  * Requests to rerun a test.
  */
 public class RerunAction extends Action {
-	private String fTestId;
-	private String fClassName;
-	private String fTestName;
+	private final ITestElement fTestElement;
 	private TestRunnerViewPart fTestRunner;
 	private String fLaunchMode;
 	
 	/**
 	 * Constructor for RerunAction.
 	 */
-	public RerunAction(String actionName, TestRunnerViewPart runner, String testId, String className, String testName,
+	public RerunAction(String actionName, TestRunnerViewPart runner, ITestElement testElement,
 			String launchMode) {
 		super(actionName); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IDLTKTestingHelpContextIds.RERUN_ACTION);
 		fTestRunner= runner;
-		fTestId= testId;
-		fClassName= className;
-		fTestName= testName;
+		fTestElement = testElement;
 		fLaunchMode= launchMode;
 	}
 
@@ -42,6 +39,6 @@ public class RerunAction extends Action {
 	 * @see IAction#run()
 	 */
 	public void run() {
-		fTestRunner.rerunTest(fTestId, fClassName, fTestName, fLaunchMode);
+		fTestRunner.rerunTest(fTestElement, fLaunchMode);
 	}
 }
