@@ -366,8 +366,10 @@ public final class ScriptRuntime {
 
 	private static String getNatureFromProject(IScriptProject project) {
 		try {
-			return DLTKLanguageManager.getLanguageToolkit(project)
-					.getNatureId();
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit(project);
+			if (toolkit != null)
+				return toolkit.getNatureId();
 		} catch (Exception e) {
 			DLTKLaunchingPlugin.log(e);
 		}
@@ -1036,7 +1038,7 @@ public final class ScriptRuntime {
 
 		IPath path = newDefaultInterpreterContainerPath();
 		path = path.append(typeId);
-		path = path.append(name);
+		path = path.append(name.replaceAll("/", "%2F")); //$NON-NLS-1$ //$NON-NLS-2$
 		return path;
 	}
 
@@ -2388,8 +2390,8 @@ public final class ScriptRuntime {
 										new String[] { entry.getPath()
 												.toString() }), null);
 			}
-			IFileHandle fileHandle = EnvironmentPathUtils.getFile(new Path(
-					location));
+			IFileHandle fileHandle = EnvironmentPathUtils.getFile(Path
+					.fromPortableString(location));
 			if (!fileHandle.exists()) {
 				abort(
 						MessageFormat
