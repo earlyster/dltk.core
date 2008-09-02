@@ -640,9 +640,23 @@ public abstract class InterpretersBlock implements
 	 */
 	public boolean isDuplicateName(String name) {
 		for (int i = 0; i < fInterpreters.size(); i++) {
-			IInterpreterInstall Interpreter = (IInterpreterInstall) fInterpreters
+			IInterpreterInstall interpreter = (IInterpreterInstall) fInterpreters
 					.get(i);
-			if (Interpreter.getName().equals(name)) {
+			if (interpreter.getName().equals(name)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @see IAddInterpreterDialogRequestor#isDuplicateName(String)
+	 */
+	public boolean isDuplicate(IFileHandle location) {
+		for (int i = 0; i < fInterpreters.size(); i++) {
+			IInterpreterInstall interpreter = (IInterpreterInstall) fInterpreters
+					.get(i);
+			if (interpreter.getInstallLocation().equals(location)) {
 				return true;
 			}
 		}
@@ -745,10 +759,14 @@ public abstract class InterpretersBlock implements
 			final IFileHandle[] locations = searcher.getFoundFiles();
 			final IInterpreterInstallType[] types = searcher
 					.getFoundInstallTypes();
-
+			boolean added = false;
 			for (int i = 0; i < locations.length; ++i) {
 				final IFileHandle file = locations[i];
 				final IInterpreterInstallType type = types[i];
+				if (isDuplicate(file)) {
+					continue;
+				}
+				added = true;
 
 				IInterpreterInstall interpreter = new InterpreterStandin(type,
 						createUniqueId(type));
@@ -768,6 +786,11 @@ public abstract class InterpretersBlock implements
 				interpreter.setName(nameCopy);
 				interpreter.setInstallLocation(file);
 				interpreterAdded(interpreter);
+			}
+			if (!added) {
+				MessageDialog.openInformation(getShell(),
+						InterpretersMessages.InstalledInterpretersBlock_12,
+						InterpretersMessages.InstalledInterpretersBlock_113);
 			}
 			fTable.getDisplay().asyncExec(new Runnable() {
 				public void run() {
