@@ -75,9 +75,15 @@ public class LegacyTestElementResolver implements ITestElementResolver {
 		if (element == null) {
 			return null;
 		}
-		final String method = testElement instanceof ITestCaseElement ? ((ITestCaseElement) testElement)
-				.getTestMethodName()
-				: null;
+		final String method;
+		if (testElement instanceof ITestCaseElement) {
+			final String testName = ((ITestCaseElement) testElement)
+					.getTestName();
+			int index = testName.indexOf('(');
+			method = index > 0 ? testName.substring(0, index) : testName;
+		} else {
+			method = null;
+		}
 		ISourceRange range = resolver.resolveRange(project,
 				launchConfiguration, relativeName, module, element, method);
 		return new TestElementResolution(element, range);
@@ -108,16 +114,16 @@ public class LegacyTestElementResolver implements ITestElementResolver {
 		TestElement el = testCase;
 		while (el != null) {
 			if (name.length() != 0) {
-				name = el.getClassName() + "." + name;
+				name = el.getTestName() + "." + name; //$NON-NLS-1$
 			} else {
-				name = el.getClassName();
+				name = el.getTestName();
 			}
 			el = el.getParent();
 			if (el instanceof TestRoot) {
 				break;
 			}
 		}
-		if (name.startsWith(".")) {
+		if (name.startsWith(".")) { //$NON-NLS-1$
 			return name.substring(1);
 		}
 		return name;
