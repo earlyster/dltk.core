@@ -43,6 +43,13 @@ public abstract class AbstractTestRunnerUI implements ITestRunnerUI {
 	}
 
 	/*
+	 * @see ITestRunnerUI#getTestStartedMessage(ITestCaseElement)
+	 */
+	public String getTestStartedMessage(ITestCaseElement caseElement) {
+		return caseElement.getTestName();
+	}
+
+	/*
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
 	public Object getAdapter(Class adapter) {

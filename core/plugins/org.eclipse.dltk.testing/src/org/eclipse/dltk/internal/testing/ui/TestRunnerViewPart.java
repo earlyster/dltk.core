@@ -629,13 +629,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public void testStarted(TestCaseElement testCaseElement) {
 			fTestViewer.registerAutoScrollTarget(testCaseElement);
 			fTestViewer.registerViewerUpdate(testCaseElement);
-
-			String className = testCaseElement.getClassName();
-			String method = testCaseElement.getTestMethodName();
-			String status = Messages.format(
-					DLTKTestingMessages.TestRunnerViewPart_message_started,
-					new String[] { className, method });
-			registerInfoMessage(status);
+			registerInfoMessage(getTestRunnerUI().getTestStartedMessage(testCaseElement));
 		}
 
 		public void testFailed(TestElement testElement,

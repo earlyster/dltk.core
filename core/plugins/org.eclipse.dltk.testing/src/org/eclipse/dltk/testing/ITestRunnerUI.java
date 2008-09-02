@@ -55,4 +55,9 @@ public interface ITestRunnerUI extends IAdaptable {
 	 */
 	String getTestCaseLabel(ITestCaseElement caseElement);
 
+	/**
+	 * @param caseElement
+	 */
+	String getTestStartedMessage(ITestCaseElement caseElement);
+
 }
