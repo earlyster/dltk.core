@@ -31,14 +31,6 @@ public interface ITestCaseElement extends ITestElement {
 	public String getTestName();
 
 	/**
-	 * Returns the name of the test method.
-	 * 
-	 * @return returns the name of the test method.
-	 * @deprecated
-	 */
-	public String getTestMethodName();
-
-	/**
 	 * Returns the qualified type name of the class the test is contained in.
 	 * 
 	 * @return the qualified type name of the class the test is contained in.

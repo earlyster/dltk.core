@@ -28,22 +28,6 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 	
 	/**
 	 * {@inheritDoc}
-	 * @see org.eclipse.jdt.internal.junit.runner.MessageIds#TEST_IDENTIFIER_MESSAGE_FORMAT
-	 * @see org.eclipse.jdt.internal.junit.runner.MessageIds#IGNORED_TEST_PREFIX
-	 */
-	public String getTestMethodName() {
-		String testName= getTestName();
-		int index= testName.indexOf('(');
-		if (index > 0)
-			return testName.substring(0, index);
-		index= testName.indexOf('@');
-		if (index > 0)
-			return testName.substring(0, index);
-		return testName;
-	}
-	
-	/**
-	 * {@inheritDoc}
 	 * @see org.eclipse.dltk.testing.model.ITestCaseElement#getTestClassName()
 	 */
 	public String getTestClassName() {
