@@ -139,7 +139,7 @@ public class InterpreterSearcher {
 					}
 
 					final IInterpreterInstallType installType = installTypes[j];
-					IStatus status = installType.validateInstallLocation(file);
+					IStatus status = installType.validatePossiblyName(file);
 
 					if (status.isOK()) {
 						found.add(file);

@@ -501,13 +501,15 @@ public abstract class AbstractInterpreterInstallType implements
 	}
 
 	public IStatus validateInstallLocation(IFileHandle installLocation) {
-		if (!installLocation.exists() || !installLocation.isFile()
-		/* || installLocation.isHidden() */) {
+		if (!installLocation.exists() || !installLocation.isFile()) {
 			return createStatus(IStatus.ERROR,
 					InterpreterMessages.errNonExistentOrInvalidInstallLocation,
 					null);
 		}
+		return validatePossiblyName(installLocation);
+	}
 
+	public IStatus validatePossiblyName(IFileHandle installLocation) {
 		String possibleNames[] = getPossibleInterpreterNames();
 
 		boolean matchFound = false;
@@ -518,13 +520,9 @@ public abstract class AbstractInterpreterInstallType implements
 				.getEnvironment().getAdapter(IExecutionEnvironment.class);
 
 		if (execEnv != null) {
-			// name.matches(possibleName + ".*\\.exe")
 			for (int i = 0; i < possibleNames.length; ++i) {
 				final String possibleName = possibleNames[i].toLowerCase();
-				// String fName = nPath.removeFileExtension().toString()
-				// .toLowerCase();
 				if (execEnv.isValidExecutableAndEquals(possibleName, nPath)) {
-					//$NON-NLS-1$ 
 					matchFound = true;
 					break;
 				}

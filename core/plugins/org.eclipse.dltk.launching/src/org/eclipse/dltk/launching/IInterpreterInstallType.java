@@ -96,11 +96,8 @@ public interface IInterpreterInstallType {
 	String getId();
 
 	/**
-	 * Validates the given location of a interpreter installation.
-	 * <p>
-	 * For example, an implementation might check whether the interpreter
-	 * executable is present.
-	 * </p>
+	 * Validates the given interpreter installation. Execute interpreter to
+	 * ensure what interpreter are correct.
 	 * 
 	 * @param file
 	 *            the root directory of a potential installation for this type
@@ -110,10 +107,18 @@ public interface IInterpreterInstallType {
 	IStatus validateInstallLocation(IFileHandle file);
 
 	/**
-	 * Returns a collection of <code>LibraryLocation</code>s that represent
-	 * the default system libraries of this interpreter install type, if a
-	 * interpreter was installed at the given <code>installLocation</code>.
-	 * The returned <code>LibraryLocation</code>s may not exist if the
+	 * Used to search interpreters.
+	 * 
+	 * @param installLocation
+	 * @return
+	 */
+	IStatus validatePossiblyName(IFileHandle installLocation);
+
+	/**
+	 * Returns a collection of <code>LibraryLocation</code>s that represent the
+	 * default system libraries of this interpreter install type, if a
+	 * interpreter was installed at the given <code>installLocation</code>. The
+	 * returned <code>LibraryLocation</code>s may not exist if the
 	 * <code>installLocation</code> is not a valid install location.
 	 * 
 	 * @param installLocation
