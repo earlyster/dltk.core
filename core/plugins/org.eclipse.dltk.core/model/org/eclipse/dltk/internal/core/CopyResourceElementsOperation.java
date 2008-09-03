@@ -334,7 +334,7 @@ public class CopyResourceElementsOperation extends MultiOperation {
 							destFile.create(bais, IResource.FORCE,
 									getSubProgressMonitor(1));
 							destCU.getBuffer().setContents(
-									source.getBuffer().getContents());
+									source.getSourceAsCharArray());
 							destCU.save(getSubProgressMonitor(1), true);
 						} else {
 							sourceResource.copy(destFile.getFullPath(), flags,
