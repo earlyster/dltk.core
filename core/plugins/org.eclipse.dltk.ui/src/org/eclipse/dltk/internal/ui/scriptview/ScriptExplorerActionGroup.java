@@ -29,6 +29,7 @@ import org.eclipse.dltk.internal.ui.wizards.buildpath.newsourcepage.GenerateBuil
 import org.eclipse.dltk.internal.ui.workingsets.ViewActionGroup;
 import org.eclipse.dltk.internal.ui.workingsets.WorkingSetActionGroup;
 import org.eclipse.dltk.ui.IContextMenuConstants;
+import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.actions.CustomFiltersActionGroup;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -351,8 +352,7 @@ class ScriptExplorerActionGroup extends CompositeActionGroup {
 	}
 
 	private boolean doubleClickGoesInto() {
-		//return PreferenceConstants.DOUBLE_CLICK_GOES_INTO.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.DOUBLE_CLICK));
-		return false;
+		return PreferenceConstants.DOUBLE_CLICK_GOES_INTO.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.DOUBLE_CLICK));
 	}
 
 	public FrameAction getUpAction() {

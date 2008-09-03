@@ -315,6 +315,10 @@ public class PreferenceConstants {
 		initializeDefaultValues(store, false);
 	}
 
+	public static IPreferenceStore getPreferenceStore() {
+		return DLTKUIPlugin.getDefault().getPreferenceStore();
+	}
+
 	/**
 	 * @param store
 	 * @param commonPreferences
@@ -371,6 +375,10 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_LRU_HISTORY, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_SORTER,
 				"org.eclipse.dltk.ui.RelevanceSorter"); //$NON-NLS-1$
+
+		store
+				.setDefault(PreferenceConstants.DOUBLE_CLICK,
+						DOUBLE_CLICK_EXPANDS);
 
 		final int sourceHoverModifier = SWT.MOD2;
 		final String sourceHoverModifierName = Action
@@ -623,6 +631,35 @@ public class PreferenceConstants {
 	 * </p>
 	 * 
 	 */
+
+	/**
+	 * A named preference that controls the behavior when double clicking on a
+	 * container in the folders view.
+	 * <p>
+	 * Value is of type <code>String</code>: possible values are <code>
+	 * DOUBLE_CLICK_GOES_INTO</code>
+	 * or <code>
+	 * DOUBLE_CLICK_EXPANDS</code>.
+	 * </p>
+	 * 
+	 * @see #DOUBLE_CLICK_EXPANDS
+	 * @see #DOUBLE_CLICK_GOES_INTO
+	 */
+	public static final String DOUBLE_CLICK = "scriptExplorerDoubleclick"; //$NON-NLS-1$
+	/**
+	 * A string value used by the named preference <code>DOUBLE_CLICK</code>.
+	 * 
+	 * @see #DOUBLE_CLICK
+	 */
+	public static final String DOUBLE_CLICK_EXPANDS = "scriptExplorerDoubleclickExpands"; //$NON-NLS-1$
+
+	/**
+	 * A string value used by the named preference <code>DOUBLE_CLICK</code>.
+	 * 
+	 * @see #DOUBLE_CLICK
+	 */
+	public static final String DOUBLE_CLICK_GOES_INTO = "scriptExplorerDoubleclickGointo"; //$NON-NLS-1$
+
 	public static final String EDITOR_ANNOTATION_ROLL_OVER = "editor_annotation_roll_over"; //$NON-NLS-1$
 
 	/**
