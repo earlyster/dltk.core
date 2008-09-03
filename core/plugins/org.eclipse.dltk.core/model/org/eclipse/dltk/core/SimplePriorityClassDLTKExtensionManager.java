@@ -44,6 +44,11 @@ public class SimplePriorityClassDLTKExtensionManager extends
 	}
 
 	public Object[] getObjects() {
+		List objs = getObjectList();
+		return objs.toArray(new Object[objs.size()]);
+	}
+
+	protected List getObjectList() {
 		ElementInfo[] infos = this.getElementInfos();
 		List objs = new ArrayList();
 		for (int i = 0; i < infos.length; i++) {
@@ -52,6 +57,6 @@ public class SimplePriorityClassDLTKExtensionManager extends
 				objs.add(o);
 			}
 		}
-		return objs.toArray(new Object[objs.size()]);
+		return objs;
 	}
 }

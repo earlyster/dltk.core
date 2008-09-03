@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.search.indexing.InternalSearchDocument;
 
 /**
@@ -23,6 +25,8 @@ import org.eclipse.dltk.core.search.indexing.InternalSearchDocument;
 public abstract class SearchDocument extends InternalSearchDocument {
 	private String documentPath;
 	private SearchParticipant participant;
+	private IProject project;
+	public IPath fullPath;
 
 	/**
 	 * Creates a new search document. The given document path is a string that
@@ -35,15 +39,18 @@ public abstract class SearchDocument extends InternalSearchDocument {
 	 * @param participant
 	 *            the participant that creates the search document
 	 */
-	protected SearchDocument(String documentPath, SearchParticipant participant) {
+	protected SearchDocument(String documentPath,
+			SearchParticipant participant, IProject project) {
 		this.documentPath = documentPath;
 		this.participant = participant;
+		this.project = project;
 	}
 
 	/**
 	 * Adds the given index entry (category and key) coming from this document
 	 * to the index. This method must be called from
-	 * {@link SearchParticipant#indexDocument(SearchDocument document, org.eclipse.core.runtime.IPath indexPath)}.
+	 * {@link SearchParticipant#indexDocument(SearchDocument document, org.eclipse.core.runtime.IPath indexPath)}
+	 * .
 	 * 
 	 * @param category
 	 *            the category of the index entry
@@ -99,7 +106,7 @@ public abstract class SearchDocument extends InternalSearchDocument {
 		String ret = new String(contents);
 		return ret;
 	}
-	
+
 	/**
 	 * Returns the encoding for this document.
 	 * <p>
@@ -134,11 +141,16 @@ public abstract class SearchDocument extends InternalSearchDocument {
 	/**
 	 * Removes all index entries from the index for the given document. This
 	 * method must be called from
-	 * {@link SearchParticipant#indexDocument(SearchDocument document, org.eclipse.core.runtime.IPath indexPath)}.
+	 * {@link SearchParticipant#indexDocument(SearchDocument document, org.eclipse.core.runtime.IPath indexPath)}
+	 * .
 	 */
 	public void removeAllIndexEntries() {
 		super.removeAllIndexEntries();
 	}
 
 	public abstract boolean isExternal();
+
+	public IProject getProject() {
+		return this.project;
+	}
 }

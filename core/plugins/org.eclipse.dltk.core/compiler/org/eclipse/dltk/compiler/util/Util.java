@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.util;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class Util {
 	private static final int DEFAULT_READING_SIZE = 8192;
 	public final static String UTF_8 = "UTF-8"; //$NON-NLS-1$			
 	public static String LINE_SEPARATOR = System.getProperty("line.separator"); //$NON-NLS-1$
+	public static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
 	/**
 	 * Returns the given input stream's contents as a byte array. If a length is
@@ -34,7 +36,7 @@ public class Util {
 	 * the stream.
 	 * 
 	 * @throws IOException
-	 * 		if a problem occured reading the stream.
+	 *             if a problem occured reading the stream.
 	 */
 	public static byte[] getInputStreamAsByteArray(InputStream stream,
 			int length) throws IOException {
@@ -89,7 +91,7 @@ public class Util {
 	 * /** Returns the contents of the given file as a byte array.
 	 * 
 	 * @throws IOException
-	 * 		if a problem occured reading the file.
+	 *             if a problem occured reading the file.
 	 */
 	public static byte[] getFileByteContent(File file) throws IOException {
 		InputStream stream = null;
@@ -117,11 +119,12 @@ public class Util {
 		InputStreamReader reader = null;
 		try {
 			try {
-				reader = encoding == null ? new InputStreamReader(stream)
-						: new InputStreamReader(stream, encoding);
+				reader = encoding == null ? new InputStreamReader(
+						toBufferedInputStream(stream)) : new InputStreamReader(
+						stream, encoding);
 			} catch (UnsupportedEncodingException e) {
 				// encoding is not supported
-				reader = new InputStreamReader(stream);
+				reader = new InputStreamReader(toBufferedInputStream(stream));
 			}
 			char[] contents;
 			int totalRead = 0;
@@ -187,6 +190,14 @@ public class Util {
 		}
 	}
 
+	private static InputStream toBufferedInputStream(InputStream stream) {
+		if (stream instanceof BufferedInputStream) {
+			return stream;
+		} else {
+			return new BufferedInputStream(stream, DEFAULT_READING_SIZE);
+		}
+	}
+
 	private final static char[] SUFFIX_zip = new char[] { '.', 'z', 'i', 'p' };
 	private final static char[] SUFFIX_ZIP = new char[] { '.', 'Z', 'I', 'P' };
 
@@ -233,7 +244,7 @@ public class Util {
 						// slash
 						// ->
 						// adds
-						//' **'
+						// ' **'
 						// for
 						// free
 						// (see
@@ -271,7 +282,7 @@ public class Util {
 	 * null, then the platform default one is used
 	 * 
 	 * @throws IOException
-	 * 		if a problem occured reading the file.
+	 *             if a problem occured reading the file.
 	 */
 	public static char[] getFileCharContent(File file, String encoding)
 			throws IOException {

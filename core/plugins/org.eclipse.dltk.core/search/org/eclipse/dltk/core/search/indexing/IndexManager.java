@@ -72,9 +72,9 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	private IPath javaPluginLocation = null;
 	/* can only replace a current state if its less than the new one */
 	private SimpleLookupTable indexStates = null;
-	private File savedIndexNamesFile = new File(
-			this.getScriptPluginWorkingLocation()
-					.append("savedIndexNames.txt").toOSString()); //$NON-NLS-1$
+	private File savedIndexNamesFile = new File(this
+			.getScriptPluginWorkingLocation()
+			.append("savedIndexNames.txt").toOSString()); //$NON-NLS-1$
 	public static Integer SAVED_STATE = new Integer(0);
 	public static Integer UPDATING_STATE = new Integer(1);
 	public static Integer UNKNOWN_STATE = new Integer(2);
@@ -135,10 +135,11 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		SearchParticipant participant = SearchEngine
 				.getDefaultSearchParticipant();
 		SearchDocument document = participant.getDocument(resource
-				.getFullPath().toString());
+				.getFullPath().toString(), resource.getProject());
 		((InternalSearchDocument) document).parser = parser;
 		((InternalSearchDocument) document).requestor = requestor;
 		((InternalSearchDocument) document).toolkit = toolkit;
+		document.fullPath = resource.getFullPath();
 		String indexLocation = this.computeIndexLocation(containerPath);
 		this.scheduleDocumentIndexing(document, containerPath, indexLocation,
 				participant);
@@ -155,7 +156,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		SearchParticipant participant = SearchEngine
 				.getDefaultSearchParticipant();
 		SearchDocument document = participant.getDocument(resource
-				.getFullPath().toString());
+				.getFullPath().toString(), resource.getProject());
 		String indexLocation = this.computeIndexLocation(containerPath);
 		this.scheduleDocumentIndexing(document, containerPath, indexLocation,
 				participant);
@@ -212,7 +213,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		}
 	}
 
-	public String computeIndexLocation(IPath containerPath) {
+	public synchronized String computeIndexLocation(IPath containerPath) {
 		String indexLocation = (String) this.indexLocations.get(containerPath);
 		if (indexLocation == null) {
 			String pathString = containerPath.toString();
@@ -224,8 +225,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 				Util
 						.verbose("-> index name for " + pathString + " is " + fileName); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			indexLocation = this.getScriptPluginWorkingLocation().append(fileName)
-					.toOSString();
+			indexLocation = this.getScriptPluginWorkingLocation().append(
+					fileName).toOSString();
 			this.indexLocations.put(containerPath, indexLocation);
 		}
 		return indexLocation;
@@ -266,7 +267,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		}
 		return parser;
 	}
-	
+
 	/**
 	 * Method to be used when <i>requestor will be set by indexer</i>
 	 */
@@ -289,7 +290,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	 * (reuseExistingFile) then read it and return this index and record it in
 	 * memory - if (createIfMissing) then create a new empty index and record it
 	 * in memory
-	 *
+	 * 
 	 * Warning: Does not check whether index is consistent (not being used)
 	 */
 	public synchronized Index getIndex(IPath containerPath,
@@ -301,7 +302,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 
 	/**
 	 * This indexes aren't required to be rebuilded.
-	 *
+	 * 
 	 * @param id
 	 * @return
 	 */
@@ -312,8 +313,9 @@ public class IndexManager extends JobManager implements IIndexConstants {
 
 		boolean mixin = id.equals("mixin"); //$NON-NLS-1$
 
-		String indexLocation = this.computeIndexLocation(new Path("#special#" + id //$NON-NLS-1$
-				+ "#" + path)); //$NON-NLS-1$
+		String indexLocation = this.computeIndexLocation(new Path(
+				"#special#" + id //$NON-NLS-1$
+						+ "#" + path)); //$NON-NLS-1$
 
 		Index index = (Index) this.indexes.get(indexLocation);
 
@@ -335,10 +337,10 @@ public class IndexManager extends JobManager implements IIndexConstants {
 						);
 					} else {
 						index = new Index(indexLocation, containerPath, true /*
-																				 * reuse
-																				 * index
-																				 * file
-																				 */);
+																			 * reuse
+																			 * index
+																			 * file
+																			 */);
 					}
 					this.indexes.put(indexLocation, index);
 					return index;
@@ -377,12 +379,12 @@ public class IndexManager extends JobManager implements IIndexConstants {
 					);
 				} else {
 					index = new Index(indexLocation, containerPath, false /*
-																			 * do
-																			 * not
-																			 * reuse
-																			 * index
-																			 * file
-																			 */);
+																		 * do
+																		 * not
+																		 * reuse
+																		 * index
+																		 * file
+																		 */);
 				}
 				this.indexes.put(indexLocation, index);
 				return index;
@@ -408,7 +410,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	 * (reuseExistingFile) then read it and return this index and record it in
 	 * memory - if (createIfMissing) then create a new empty index and record it
 	 * in memory
-	 *
+	 * 
 	 * Warning: Does not check whether index is consistent (not being used)
 	 */
 	public synchronized Index getIndex(IPath containerPath,
@@ -426,7 +428,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 				// IF you put an index in the cache, then AddArchiveFileToIndex
 				// fails because it thinks there is nothing to do
 				this.rebuildIndex(indexLocation, containerPath);
-				if( !mixin ) {
+				if (!mixin) {
 					return null;
 				}
 			}
@@ -441,15 +443,13 @@ public class IndexManager extends JobManager implements IIndexConstants {
 						if (mixin) {
 							index = new MixinIndex(indexLocation,
 									containerPathString, true /*
-																 * reuse index
-																 * file
-																 */);
+															 * reuse index file
+															 */);
 						} else {
 							index = new Index(indexLocation,
 									containerPathString, true /*
-																 * reuse index
-																 * file
-																 */);
+															 * reuse index file
+															 */);
 						}
 						this.indexes.put(indexLocation, index);
 						return index;
@@ -496,8 +496,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 					} else {
 						index = new Index(indexLocation, containerPathString,
 								false /*
-										 * do not reuse index file
-										 */);
+									 * do not reuse index file
+									 */);
 					}
 					this.indexes.put(indexLocation, index);
 					return index;
@@ -518,7 +518,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	}
 
 	public synchronized Index getIndex(String indexLocation) {
-		return (Index) this.indexes.get(indexLocation); // is null if unknown, call
+		return (Index) this.indexes.get(indexLocation); // is null if unknown,
+														// call
 		// if the containerPath must
 		// be computed
 	}
@@ -527,8 +528,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			boolean reuseExistingFile, boolean createIfMissing) {
 		String indexLocation = this.computeIndexLocation(containerPath);
 		if (this.getIndexStates().get(indexLocation) == REBUILDING_STATE) {
-			return this.getIndex(containerPath, indexLocation, reuseExistingFile,
-					createIfMissing);
+			return this.getIndex(containerPath, indexLocation,
+					reuseExistingFile, createIfMissing);
 		}
 		return null; // abort the job since the index has been removed from
 		// the REBUILDING_STATE
@@ -545,8 +546,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			if (names.length > 0) {
 				// check to see if workspace has moved, if so then do not trust
 				// saved indexes
-				File indexesDirectory = new File(
-						this.getScriptPluginWorkingLocation().toOSString());
+				File indexesDirectory = new File(this
+						.getScriptPluginWorkingLocation().toOSString());
 				char[] dirName = indexesDirectory.getAbsolutePath()
 						.toCharArray();
 				int delimiterPos = dirName.length;
@@ -618,15 +619,21 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			// 19303, so that initializers
 			// will be run in the current thread.
 			IBuildpathEntry[] entries = scriptProject.getResolvedBuildpath(
-					true/* ignoreUnresolvedEntry */,
-					false/* don't generateMarkerOnError */, false/*
-																	 * don't
-																	 * returnResolutionInProgress
-																	 */);
+					true/* ignoreUnresolvedEntry */, false/*
+														 * don't
+														 * generateMarkerOnError
+														 */, false/*
+																 * don't
+																 * returnResolutionInProgress
+																 */);
 			for (int i = 0; i < entries.length; i++) {
 				IBuildpathEntry entry = entries[i];
 				if (entry.getEntryKind() == IBuildpathEntry.BPE_LIBRARY) {
-					this.indexLibrary(entry.getPath(), project, ((BuildpathEntry)entry).fullInclusionPatternChars(), ((BuildpathEntry)entry).fullExclusionPatternChars());
+					this.indexLibrary(entry.getPath(), project,
+							((BuildpathEntry) entry)
+									.fullInclusionPatternChars(),
+							((BuildpathEntry) entry)
+									.fullExclusionPatternChars());
 				}
 			}
 		} catch (ModelException e) { // cannot retrieve buildpath info
@@ -641,12 +648,12 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	/**
 	 * Trigger addition of a library to an index Note: the actual operation is
 	 * performed in background
-	 *
+	 * 
 	 * @param exclusionPatterns
 	 * @param inclusionPatterns
 	 */
-	public void indexLibrary(IPath path, IProject requestingProject, char[][] inclusionPatterns,
-			char[][] exclusionPatterns) {
+	public void indexLibrary(IPath path, IProject requestingProject,
+			char[][] inclusionPatterns, char[][] exclusionPatterns) {
 		// requestingProject is no longer used to cancel jobs but leave it here
 		// just in case
 		if (DLTKCore.getPlugin() == null) {
@@ -755,7 +762,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			Util
 					.verbose("-> request to rebuild index: " + indexLocation + " path: " + containerPath.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		
+
 		this.updateIndexState(indexLocation, REBUILDING_STATE);
 		IndexRequest request = null;
 		if (target instanceof IProject) {
@@ -799,8 +806,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			if (mixin) {
 				index = new MixinIndex(indexLocation, containerPathString,
 						false /*
-								 * reuse index file
-								 */);
+							 * reuse index file
+							 */);
 			} else {
 				index = new Index(indexLocation, containerPathString, false /*
 																			 * do
@@ -830,8 +837,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	 * performed in background
 	 */
 	public void remove(String containerRelativePath, IPath indexedContainer) {
-		this.request(new RemoveFromIndex(containerRelativePath, indexedContainer,
-				this));
+		this.request(new RemoveFromIndex(containerRelativePath,
+				indexedContainer, this));
 	}
 
 	/**
@@ -847,12 +854,14 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		if (indexFile.exists()) {
 			indexFile.delete();
 		}
-		Object o = this.indexes.get(indexLocation);
+		final Object o = this.indexes.remove(indexLocation);
 		if (o instanceof Index) {
-			((Index) o).monitor = null;
+			final Index index = (Index) o;
+			index.monitor = null;
+			if (index.isRebuildable()) {
+				this.updateIndexState(indexLocation, null);
+			}
 		}
-		this.indexes.remove(indexLocation);
-		this.updateIndexState(indexLocation, null);
 	}
 
 	/**
@@ -960,6 +969,9 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			}
 			index.save();
 		}
+		if (!index.isRebuildable()) {
+			return;
+		}
 		// TODO should use getJavaPluginWorkingLocation()+index simple name to
 		// avoid bugs such as
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=62267
@@ -1050,13 +1062,12 @@ public class IndexManager extends JobManager implements IIndexConstants {
 					return true;
 				}
 				/* ensure no concurrent write access to index */
-				Index index = IndexManager.this.getIndex(this.containerPath, indexLocation, true, /*
-																				 * reuse
-																				 * index
-																				 * file
-																				 */true /*
-						 * create if none
-						 */);
+				Index index = IndexManager.this.getIndex(this.containerPath,
+						indexLocation, true, /*
+											 * reuse index file
+											 */true /*
+													 * create if none
+													 */);
 				if (index == null) {
 					return true;
 				}
@@ -1066,8 +1077,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 				}
 				try {
 					monitor.enterWrite(); // ask permission to write
-					IndexManager.this.indexDocument(searchDocument, searchParticipant, index,
-							new Path(indexLocation));
+					IndexManager.this.indexDocument(searchDocument,
+							searchParticipant, index, new Path(indexLocation));
 				} finally {
 					monitor.exitWrite(); // free write lock
 				}
@@ -1160,7 +1171,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	private void writeSavedIndexNamesFile() {
 		BufferedWriter writer = null;
 		try {
-			writer = new BufferedWriter(new FileWriter(this.savedIndexNamesFile));
+			writer = new BufferedWriter(
+					new FileWriter(this.savedIndexNamesFile));
 			Object[] keys = this.indexStates.keyTable;
 			Object[] states = this.indexStates.valueTable;
 			for (int i = 0, l = states.length; i < l; i++) {
@@ -1205,7 +1217,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject[] projects = root.getProjects();
 		for (int i = 0; i < projects.length; i++) {
-			if( DLTKLanguageManager.hasScriptNature(projects[i]) ) {
+			if (DLTKLanguageManager.hasScriptNature(projects[i])) {
 				this.indexAll(projects[i]);
 			}
 		}

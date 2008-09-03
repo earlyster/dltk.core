@@ -112,16 +112,6 @@ public class Index {
 		this.monitor = new ReadWriteMonitor();
 	}
 	
-	/*public static Index smartCreateIndex (String fileName, String containerPath,
-			boolean reuseExistingFile) throws IOException {
-		if (containerPath.startsWith("#special#builtin#")) {
-			return new MixinIndex(fileName, containerPath, reuseExistingFile);
-		} else {
-			return new Index(fileName, containerPath, reuseExistingFile);
-		}
-			
-	}*/
-
 	public void addIndexEntry(char[] category, char[] key,
 			String containerRelativePath) {
 		if( DLTKCore.DEBUG_INDEX ) {
@@ -231,7 +221,7 @@ public class Index {
 		if (DLTKCore.DEBUG_INDEX) {
 			System.out.println("Index for " + this.containerPath + " (" + new Path(diskIndex.fileName).lastSegment() + ") saved"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$		
 		}
-		int numberOfChanges = this.memoryIndex.docsToReferences.elementSize;
+		// int numberOfChanges = this.memoryIndex.docsToReferences.elementSize;
 		this.diskIndex = this.diskIndex.mergeWith(this.memoryIndex);
 		this.memoryIndex = new MemoryIndex();
 //		if (numberOfChanges > 1000)
@@ -250,5 +240,9 @@ public class Index {
 
 	public String toString() {
 		return "Index for " + this.containerPath; //$NON-NLS-1$
+	}
+
+	public boolean isRebuildable() {
+		return true;
 	}
 }

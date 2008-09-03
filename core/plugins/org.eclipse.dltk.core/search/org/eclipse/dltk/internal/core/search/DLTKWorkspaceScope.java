@@ -18,6 +18,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
+import org.eclipse.dltk.internal.core.Model;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.ModelManager;
 
@@ -87,13 +88,15 @@ public class DLTKWorkspaceScope extends DLTKSearchScope {
 	public void initialize(int size) {
 		super.initialize(size);
 		try {
-			IScriptProject[] projects = ModelManager.getModelManager().getModel()
+			final Model model = ModelManager.getModelManager().getModel();
+			final IScriptProject[] projects = toolkit != null ? model
+					.getScriptProjects(toolkit.getNatureId()) : model
 					.getScriptProjects();
 			for (int i = 0, length = projects.length; i < length; i++) {
 				int includeMask = SOURCES | APPLICATION_LIBRARIES
 						| SYSTEM_LIBRARIES;
-				add((ScriptProject) projects[i], null, includeMask, new HashSet(
-						length * 2, 1), null);
+				add((ScriptProject) projects[i], null, includeMask,
+						new HashSet(length * 2, 1), null);
 			}
 		} catch (ModelException ignored) {
 			// ignore

@@ -9,24 +9,28 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search.indexing;
 
-import java.util.Date;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ISourceModuleInfoCache;
+import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 /**
- * A SourceIndexer indexes script files using a script parser. The following items are indexed:
+ * A SourceIndexer indexes script files using a script parser. The following
+ * items are indexed:
  * <ul>
  * <li>Declarations of:
  * <ul>
@@ -54,7 +58,7 @@ public class SourceIndexer extends AbstractIndexer {
 
 	public void indexDocument() {
 
-		long started = (new Date()).getTime();
+		long started = System.currentTimeMillis();
 
 		// Create a new Parser
 		SourceIndexerRequestor requestor = ((InternalSearchDocument) this.document).requestor;
@@ -62,8 +66,12 @@ public class SourceIndexer extends AbstractIndexer {
 		IPath path = new Path(documentPath);
 		ISourceElementParser parser = ((InternalSearchDocument) this.document).parser;
 		if (!this.document.isExternal()) {
-			IProject project = ResourcesPlugin.getWorkspace().getRoot()
-					.getProject(path.segment(0));
+			IProject project = document.getProject();
+			if (project == null) {
+				project = ResourcesPlugin.getWorkspace().getRoot().getProject(
+						path.segment(0));
+			}
+
 			IScriptProject scriptProject = DLTKCore.create(project);
 
 			if (requestor == null) {
@@ -79,9 +87,9 @@ public class SourceIndexer extends AbstractIndexer {
 			parser.setRequestor(requestor);
 			String pkgName = ""; //$NON-NLS-1$
 			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-			// ISourceModule sourceModule = null;
+			ISourceModule module = null;
 			if (file.exists()) {
-				ISourceModule module = (ISourceModule) DLTKCore.create(file);
+				module = (ISourceModule) DLTKCore.create(file);
 				if (module != null) {
 					// sourceModule = module;
 					IScriptFolder folder = (IScriptFolder) module.getParent();
@@ -89,6 +97,7 @@ public class SourceIndexer extends AbstractIndexer {
 				}
 			}
 			requestor.setPackageName(pkgName);
+			// We need to get already
 			// Launch the parser
 			char[] source = null;
 			char[] name = null;
@@ -101,17 +110,21 @@ public class SourceIndexer extends AbstractIndexer {
 			if (source == null || name == null)
 				return; // could not retrieve document info (e.g. resource was
 			// discarded)
-			parser.parseSourceModule(source, null, name);
+
+			/**
+			 * Using cache to build module.
+			 */
+			ISourceModuleInfo info = null;
+			ISourceModuleInfoCache cache = ModelManager.getModelManager()
+					.getSourceModuleInfoCache();
+			if (module != null) {
+				info = cache.get(module);
+			}
+
+			parser.parseSourceModule(source, info, name);
 
 		} else { // This is for external documents
 			if (parser == null || requestor == null) {
-				// parser =
-				// ModelManager.getModelManager().indexManager.getSourceElementParser(scriptProject,
-				// requestor);
-				if (DLTKCore.DEBUG) {
-					System.err
-							.println("TODO: Add getSourceElementParser here."); //$NON-NLS-1$
-				}
 				return;
 			} else {
 				parser.setRequestor(requestor);
@@ -137,9 +150,57 @@ public class SourceIndexer extends AbstractIndexer {
 			if (source == null || name == null)
 				return; // could not retrieve document info (e.g. resource was
 			// discarded)
-			parser.parseSourceModule(source, null, name);
 
-			long ended = (new Date()).getTime();
+			// We need to obtain ISourceModule handle to do caching. This will
+			// improve parsing performance.
+			ISourceModuleInfo info = null;
+
+			if (document.getProject() != null) {
+				IProject project = document.getProject();
+				IScriptProject scriptProject = DLTKCore.create(project);
+				try {
+					IProjectFragment[] fragments = scriptProject
+							.getProjectFragments();
+					IProjectFragment frag = null;
+					for (int i = 0; i < fragments.length; i++) {
+						IPath fragmentPath = EnvironmentPathUtils
+								.getLocalPath(fragments[i].getPath());
+						if (fragments[i].isExternal()
+								&& fragmentPath.isPrefixOf(document.fullPath)) {
+							if (frag != null
+									&& frag.getPath().isPrefixOf(
+											fragments[i].getPath())) {
+								frag = fragments[i];
+							} else {
+								frag = fragments[i];
+							}
+						}
+					}
+					if (frag != null) {
+						IPath fragmentRelativePath = document.fullPath
+								.removeFirstSegments(frag.getPath()
+										.segmentCount());
+						IScriptFolder folder = frag
+								.getScriptFolder(fragmentRelativePath
+										.removeLastSegments(1));
+						ISourceModule module = folder
+								.getSourceModule(document.fullPath
+										.lastSegment());
+						if (module.exists()) {
+							info = ModelManager.getModelManager()
+									.getSourceModuleInfoCache().get(module);
+						}
+					}
+				} catch (ModelException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+			parser.parseSourceModule(source, info, name);
+
+			long ended = System.currentTimeMillis();
 
 			if (ended - started > maxWorkTime) {
 				maxWorkTime = ended - started;

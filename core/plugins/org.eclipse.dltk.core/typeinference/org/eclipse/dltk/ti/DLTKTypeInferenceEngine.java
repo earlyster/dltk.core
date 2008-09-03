@@ -157,53 +157,74 @@ public class DLTKTypeInferenceEngine implements ITypeInferencer {
 		if (!superClassSet.isEmpty()) {
 			for (Iterator iter = typeSet.iterator(); iter.hasNext();) {
 				type = (IEvaluatedType) iter.next();
-				if (superClassSet.contains(type.getTypeName())) { //$NON-NLS-1$
+				if (superClassSet.contains(type.getTypeName())) {
 					iter.remove();
 				}
 			}
 		}
 	}
 
+	private static ThreadLocal goals = new ThreadLocal() {
+		protected Object initialValue() {
+			return new ArrayList();
+		}
+	};
+
 	public IEvaluatedType evaluateType(AbstractTypeGoal goal, int time) {
 		String nature = goal.getContext().getLangNature();
 		List list = (List) evaluatorsByNatures.get(nature);
 		if (list != null) {
-			Set typeSet = new HashSet();
-			for (Iterator iterator = list.iterator(); iterator.hasNext();) {
-				IConfigurationElement element = (IConfigurationElement) iterator
-						.next();
-				ITypeInferencer ti;
-				try {
-					ti = (ITypeInferencer) element
-							.createExecutableExtension("evaluator"); //$NON-NLS-1$
-				} catch (CoreException e) {
-					e.printStackTrace();
-					continue;
-				}
-				// ITypeInferencer ti = (ITypeInferencer) iterator.next();
-				IEvaluatedType type = ti.evaluateType(goal, time);
-				if (type != null && !(type instanceof UnknownType)) {
-					if (type instanceof AmbiguousType) {
-						flattenTypes((AmbiguousType) type, typeSet);
-					} else {
-						typeSet.add(type);
-					}
-				}
+			final List threadGoals = (List) goals.get();
+			if (threadGoals.size() > 32) {
+				return null;
 			}
-
-			if ((typeSet.size() > 1)
-					&& (goal.getContext() instanceof BasicContext)) {
-				reduceTypes((BasicContext) goal.getContext(), typeSet);
-			}
-
-			if (typeSet.size() == 1) {
-				return (IEvaluatedType) typeSet.iterator().next();
-			} else if (typeSet.size() > 1) {
-				return new AmbiguousType((IEvaluatedType[]) typeSet
-						.toArray(new IEvaluatedType[typeSet.size()]));
+			threadGoals.add(goal);
+			try {
+				return evaluateType(goal, time, list);
+			} finally {
+				threadGoals.remove(goal);
 			}
 		}
 		return null;
+	}
+
+	private IEvaluatedType evaluateType(AbstractTypeGoal goal, int time,
+			List list) {
+		Set typeSet = new HashSet();
+		for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+			IConfigurationElement element = (IConfigurationElement) iterator
+					.next();
+			ITypeInferencer ti;
+			try {
+				ti = (ITypeInferencer) element
+						.createExecutableExtension("evaluator"); //$NON-NLS-1$
+			} catch (CoreException e) {
+				e.printStackTrace();
+				continue;
+			}
+			// ITypeInferencer ti = (ITypeInferencer)
+			// iterator.next();
+			IEvaluatedType type = ti.evaluateType(goal, time);
+			if (type != null && !(type instanceof UnknownType)) {
+				if (type instanceof AmbiguousType) {
+					flattenTypes((AmbiguousType) type, typeSet);
+				} else {
+					typeSet.add(type);
+				}
+			}
+		}
+		if ((typeSet.size() > 1) && (goal.getContext() instanceof BasicContext)) {
+			reduceTypes((BasicContext) goal.getContext(), typeSet);
+		}
+
+		if (typeSet.size() == 1) {
+			return (IEvaluatedType) typeSet.iterator().next();
+		} else if (typeSet.size() > 1) {
+			return new AmbiguousType((IEvaluatedType[]) typeSet
+					.toArray(new IEvaluatedType[typeSet.size()]));
+		} else {
+			return null;
+		}
 	}
 
 }

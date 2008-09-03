@@ -1442,7 +1442,9 @@ public class BasicSearchEngine {
 							pattern,
 							new SearchDocument[] { new DLTKSearchDocument(
 									enclosingElement.getPath().toString(),
-									contents, participant, external) },
+									contents, participant, external,
+									enclosingElement.getScriptProject()
+											.getProject()) },
 							getWorkingCopies(enclosingElement), participant);
 					participant.locateMatches(documents, pattern, scope,
 							requestor, monitor);

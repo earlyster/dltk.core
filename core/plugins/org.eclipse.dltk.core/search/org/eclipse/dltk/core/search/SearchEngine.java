@@ -941,6 +941,12 @@ public class SearchEngine {
 			IDLTKLanguageToolkit toolkit, final Map keys) {
 		final IDLTKSearchScope scope = SearchEngine
 				.createWorkspaceScope(toolkit);
+		return searchMixinSources(scope, key, toolkit, keys);
+	}
+
+	public static ISourceModule[] searchMixinSources(
+			final IDLTKSearchScope scope, String key,
+			IDLTKLanguageToolkit toolkit, final Map keys) {
 		// Index requestor
 		final HandleFactory factory = new HandleFactory();
 		final List modules = new ArrayList();
@@ -1004,10 +1010,20 @@ public class SearchEngine {
 		return searchMixinSources(key, toolkit, null);
 	}
 
+	public static ISourceModule[] searchMixinSources(IDLTKSearchScope scope,
+			String key, IDLTKLanguageToolkit toolkit) {
+		return searchMixinSources(scope, key, toolkit, null);
+	}
+
 	public static String[] searchMixinPatterns(String key,
 			IDLTKLanguageToolkit toolkit) {
 		final IDLTKSearchScope scope = SearchEngine
 				.createWorkspaceScope(toolkit);
+		return searchMixinPatterns(scope, key, toolkit);
+	}
+
+	public static String[] searchMixinPatterns(IDLTKSearchScope scope,
+			String key, IDLTKLanguageToolkit toolkit) {
 		// Index requestor
 		final List result = new ArrayList();
 		IndexQueryRequestor searchRequestor = new IndexQueryRequestor() {

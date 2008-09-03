@@ -166,17 +166,14 @@ class AddBuiltinFolderToIndex extends IndexRequest {
 			SourceIndexerRequestor requestor, SearchParticipant participant,
 			Index index, String path, IDLTKLanguageToolkit toolkit,
 			String contents) {
-		IPath dpath = (new Path(path));/*
-										 * .removeFirstSegments(this.containerPath
-										 * .segmentCount());
-										 */
-		dpath = dpath.setDevice(null);
-
+		IPath dpath = new Path(path).setDevice(null);
 		DLTKSearchDocument entryDocument = new DLTKSearchDocument(dpath
-				.toString(), new Path( "" ), contents.toCharArray(), participant, true); //$NON-NLS-1$
+				.toString(), Path.EMPTY, contents.toCharArray(), participant,
+				true, this.project);
 		entryDocument.parser = parser;
 		entryDocument.requestor = requestor;
 		entryDocument.toolkit = toolkit;
+		entryDocument.fullPath = this.containerPath.append(dpath);
 		this.manager.indexDocument(entryDocument, participant, index,
 				this.containerPath);
 	}

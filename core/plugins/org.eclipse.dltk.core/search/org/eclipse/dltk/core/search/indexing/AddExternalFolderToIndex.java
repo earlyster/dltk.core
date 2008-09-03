@@ -232,7 +232,7 @@ class AddExternalFolderToIndex extends IndexRequest {
 					return;
 				}
 				if (files[i].isDirectory()) {
-					IPath fPath = new Path(files[i].toOSString());
+					IPath fPath = files[i].getFullPath();
 					boolean valid = Util.isValidSourcePackageName(project,
 							fPath);
 					if (!((fPath.segmentCount() == 0 || valid))) {
@@ -282,23 +282,26 @@ class AddExternalFolderToIndex extends IndexRequest {
 	private void indexDocument(ISourceElementParser parser,
 			SourceIndexerRequestor requestor, SearchParticipant participant,
 			Index index, String path, IDLTKLanguageToolkit toolkit) {
-		char[] contents = null;
-		IFileHandle ffile = getEnvironment().getFile(new Path(path));
-		if (ffile != null && ffile.exists()) {
+		final IFileHandle ffile = getFile(path);
+		if (ffile == null) {
+			return;
+		}
+		final char[] contents;
 			try {
 				contents = Util.getResourceContentsAsCharArray(ffile);
 			} catch (ModelException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
-				contents = new char[0];
+			return;
 			}
-		}
-		IPath dpath = (new Path(path)).removeFirstSegments(this.containerPath
-				.segmentCount());
-		dpath = dpath.setDevice(null);
+		IPath dpath = new Path(path).removeFirstSegments(
+				containerPath.segmentCount()).setDevice(null);
 		DLTKSearchDocument entryDocument = new DLTKSearchDocument(dpath
-				.toString(), this.containerPath, contents, participant, true);
+				.toString(), this.containerPath, contents, participant, true,
+				project);
+		entryDocument.fullPath = EnvironmentPathUtils.getLocalPath(ffile
+				.getFullPath());
 		entryDocument.parser = parser;
 		entryDocument.requestor = requestor;
 		entryDocument.toolkit = toolkit;
@@ -306,12 +309,15 @@ class AddExternalFolderToIndex extends IndexRequest {
 				this.containerPath);
 	}
 
-	private IEnvironment getEnvironment() {
+	private IFileHandle getFile(String path) {
 		if (environment == null) {
-			IScriptProject scriptProject = DLTKCore.create(project);
-			environment = EnvironmentManager.getEnvironment(scriptProject);
+			environment = EnvironmentManager.getEnvironment(DLTKCore
+					.create(project));
+		if (environment == null) {
+				return null;
+			}
 		}
-		return environment;
+		return environment.getFile(new Path(path));
 	}
 
 	public String toString() {

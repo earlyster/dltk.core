@@ -66,7 +66,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 	private int threshold;
 
 	private IPath[] enclosingProjectsAndArchives;
-	IDLTKLanguageToolkit toolkit;
+	protected final IDLTKLanguageToolkit toolkit;
 
 	public final static AccessRuleSet NOT_ENCLOSED = new AccessRuleSet(null,
 			null);
@@ -219,13 +219,13 @@ public class DLTKSearchScope extends AbstractSearchScope {
 				if ((includeMask & SOURCES) != 0) {
 					IPath path = entry.getPath();
 					if (pathToAdd == null || pathToAdd.equals(path)) {
-						add(projectPath.toString(), Util.relativePath(path, 1/*
-																				 * remove
-																				 * project
-																				 * segment
-																				 */), projectPathString, false/*
-														 * not a package
-														 */, access);
+						add(projectPath.toString(), Util
+								.relativePath(path, 1/*
+													 * remove project segment
+													 */), projectPathString,
+								false/*
+									 * not a package
+									 */, access);
 					}
 				}
 				break;
@@ -273,17 +273,18 @@ public class DLTKSearchScope extends AbstractSearchScope {
 					add(projectPath, relativePath, containerPathToString,
 							false/* not a package */, null);
 				} else {
-					add(
-							projectPath,
-							"", containerPathToString, false/* not a package */, null); //$NON-NLS-1$
+					add(projectPath,
+							org.eclipse.dltk.compiler.util.Util.EMPTY_STRING,
+							containerPathToString, false/* not a package */,
+							null);
 				}
 			} else {
 				projectPath = root.getScriptProject().getPath().toString();
 				containerPath = root.getPath();
 				containerPathToString = containerPath.toString();
-				add(
-						projectPath,
-						"", containerPathToString, false/* not a package */, null); //$NON-NLS-1$
+				add(projectPath,
+						org.eclipse.dltk.compiler.util.Util.EMPTY_STRING,
+						containerPathToString, false/* not a package */, null);
 			}
 			break;
 		case IModelElement.SCRIPT_FOLDER:
@@ -332,20 +333,23 @@ public class DLTKSearchScope extends AbstractSearchScope {
 			String relativePath;
 			if (root.getKind() == IProjectFragment.K_SOURCE) {
 				containerPath = root.getParent().getPath();
-				relativePath = Util.relativePath(
-						getPath(element, false/* full path */), 1/*
-																	 * remove
-																	 * project
-																	 * segmet
-																	 */);
+				relativePath = Util
+						.relativePath(getPath(element, false/* full path */), 1/*
+																				 * remove
+																				 * project
+																				 * segmet
+																				 */);
 			} else {
 				containerPath = root.getPath();
 				relativePath = getPath(element, true/* relative path */)
 						.toString();
 			}
 			containerPathToString = containerPath.toString();
-			add(projectPath, relativePath, containerPathToString,
-					false/* not a package */, null);
+			add(projectPath, relativePath, containerPathToString, false/*
+																		 * not a
+																		 * package
+																		 */,
+					null);
 		}
 
 		if (containerPath != null)
@@ -353,17 +357,14 @@ public class DLTKSearchScope extends AbstractSearchScope {
 	}
 
 	private boolean natureFilter(IModelElement element) {
-		IDLTKLanguageToolkit languageToolkit = DLTKLanguageManager
+		IDLTKLanguageToolkit elementToolkit = DLTKLanguageManager
 				.getLanguageToolkit(element);
-		IDLTKLanguageToolkit languageToolkit2 = this.getLanguageToolkit();
-
 		// For all projects scope
-		if (languageToolkit2 == null) {
+		if (toolkit == null) {
 			return true;
 		}
-		if (languageToolkit != null
-				&& languageToolkit.getNatureId().equals(
-						languageToolkit2.getNatureId())) {
+		if (elementToolkit != null
+				&& elementToolkit.getNatureId().equals(toolkit.getNatureId())) {
 			// Filter by nature.
 			return true;
 		}
@@ -530,12 +531,9 @@ public class DLTKSearchScope extends AbstractSearchScope {
 	 * @see IJavaSearchScope#encloses(IModelElement)
 	 */
 	public boolean encloses(IModelElement element) {
-
-		IDLTKLanguageToolkit languageToolkit = getLanguageToolkit();
-		IDLTKLanguageToolkit langaugeToolkit2 = DLTKLanguageManager
+		IDLTKLanguageToolkit elementToolkit = DLTKLanguageManager
 				.getLanguageToolkit(element);
-		if (!languageToolkit.getNatureId().equals(
-				langaugeToolkit2.getNatureId())) {
+		if (!toolkit.getNatureId().equals(elementToolkit.getNatureId())) {
 			return false;
 		}
 
@@ -611,6 +609,9 @@ public class DLTKSearchScope extends AbstractSearchScope {
 		// containerPath = IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR +
 		// relativePath;
 		// }
+		if (containerPath.startsWith("#special#mixin#")) {
+			containerPath = containerPath.substring("#special#mixin#".length());
+		}
 		int index = indexOf(containerPath, relativePath);
 		if (index == -1) {
 			// this search scope does not enclose given path

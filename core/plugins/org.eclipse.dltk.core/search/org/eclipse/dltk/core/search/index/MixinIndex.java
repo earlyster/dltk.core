@@ -26,7 +26,6 @@ import org.eclipse.dltk.compiler.util.HashtableOfObject;
 import org.eclipse.dltk.compiler.util.SimpleSetOfCharArray;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
-import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.internal.core.util.Util;
 
@@ -64,6 +63,25 @@ public class MixinIndex extends Index {
 		addIndexEntry(key, containerRelativePath.toCharArray());
 	}
 
+	/**
+	 * Adds document to the index without any associated words. This method is
+	 * needed to save in the index names of all indexed documents - some
+	 * documents contains no MIXIN-related information, so this method is used
+	 * to record just the document name.
+	 * 
+	 * @param containerRelativePath
+	 */
+	public void addDocumentName(String containerRelativePath) {
+		addDocumentName(containerRelativePath.toCharArray());
+	}
+
+	private void addDocumentName(final char[] containerRelativePath) {
+		if (!docNamesToKeys.containsKey(containerRelativePath)) {
+			docNamesToKeys.put(containerRelativePath, new SimpleSetOfCharArray(
+					1));
+		}
+	}
+
 	private void addIndexEntry(char[] key, char[] containerRelativePath) {
 		SimpleSetOfCharArray names = (SimpleSetOfCharArray) docNamesToKeys
 				.get(containerRelativePath);
@@ -93,15 +111,18 @@ public class MixinIndex extends Index {
 		return this.dirty;
 	}
 
-	public EntryResult[] query(char[][] categories, char[] key, int matchRule)
-			throws IOException {
-		boolean found = false;
+	private static boolean isMixinCategory(char[][] categories) {
 		for (int i = 0; i < categories.length; i++) {
 			if (CharOperation.equals(categories[i], IIndexConstants.MIXIN)) {
-				found = true;
+				return true;
 			}
+			}
+		return false;
 		}
-		if (!found)
+
+	public EntryResult[] query(char[][] categories, char[] key, int matchRule)
+			throws IOException {
+		if (!isMixinCategory(categories))
 			return new EntryResult[0];
 
 		HashtableOfObject results = new HashtableOfObject(10);
@@ -144,14 +165,32 @@ public class MixinIndex extends Index {
 		}
 	}
 
-	private String[] extractKeysFromTable(HashtableOfObject table) {
+	private static String[] extractKeysFromTable(HashtableOfObject table) {
 		String[] documentNames = new String[table.elementSize];
 		int count = 0;
-		Object[] values = table.keyTable;
+		char[][] values = table.keyTable;
 		for (int i = 0, l = values.length; i < l; i++) {
-			char[] result = (char[]) values[i];
+			char[] result = values[i];
 			if (result != null)
 				documentNames[count++] = new String(result);
+		}
+		return documentNames;
+	}
+
+	private static String[] extractKeysFromTable(HashtableOfObject table,
+			char[] substring) {
+		String[] documentNames = new String[table.elementSize];
+		int count = 0;
+		char[][] values = table.keyTable;
+		for (int i = 0, l = values.length; i < l; i++) {
+			char[] result = values[i];
+			if (result != null && CharOperation.startsWith(result, substring))
+				documentNames[count++] = new String(result);
+		}
+		if (count != documentNames.length) {
+			final String[] result = new String[count];
+			System.arraycopy(documentNames, 0, result, 0, count);
+			documentNames = result;
 		}
 		return documentNames;
 	}
@@ -163,14 +202,9 @@ public class MixinIndex extends Index {
 	public String[] queryDocumentNames(String substring) throws IOException {
 		if (substring == null) {
 			return extractKeysFromTable(docNamesToKeys);
+		} else {
+			return extractKeysFromTable(docNamesToKeys, substring.toCharArray());
 		}
-
-		HashtableOfObject results = new HashtableOfObject(10);
-
-		performQuery(substring.toCharArray(), SearchPattern.R_PATTERN_MATCH,
-				results);
-
-		return extractKeysFromTable(results);
 	}
 
 	public void remove(String containerRelativePath) {
@@ -179,7 +213,7 @@ public class MixinIndex extends Index {
 	}
 
 	public void save() throws IOException {
-		long t = System.currentTimeMillis();
+		long start = DLTKCore.VERBOSE_MIXIN ? System.currentTimeMillis() : 0;
 		if (docNamesToKeys == null)
 			docNamesToKeys = new HashtableOfObject(0);
 		if (!hasChanged()) {
@@ -215,10 +249,10 @@ public class MixinIndex extends Index {
 		stream.close();
 		fouts.close();
 		this.dirty = false;
-		if (DLTKCore.DEBUG_INDEX) {
+		if (DLTKCore.VERBOSE_MIXIN) {
 			System.out.println("Mixin index for " + this.containerPath + " (" //$NON-NLS-1$ //$NON-NLS-2$
 					+ new Path(this.fileName).lastSegment() + ") saved, took " //$NON-NLS-1$
-					+ (System.currentTimeMillis() - t));
+					+ (System.currentTimeMillis() - start));
 			System.out.println("Mixin modules: " + this.docNamesToKeys.size()); //$NON-NLS-1$
 		}
 	}
@@ -240,9 +274,14 @@ public class MixinIndex extends Index {
 						for (int i = 0; i < documentsCount; i++) {
 							char[] docName = Util.readUTF(stream);
 							int wordsCount = stream.readInt();
+							if (wordsCount > 0) {
 							for (int j = 0; j < wordsCount; j++) {
 								char[] word = Util.readUTF(stream);
 								addIndexEntry(word, docName);
+							}
+							} else {
+								// see comment in the #addDocumentName(String)
+								addDocumentName(docName);
 							}
 						}
 						successful = true;
@@ -288,5 +327,9 @@ public class MixinIndex extends Index {
 
 	public String toString() {
 		return "Mixin Index for " + this.containerPath; //$NON-NLS-1$
+	}
+
+	public boolean isRebuildable() {
+		return false;
 	}
 }

@@ -178,7 +178,8 @@ public class MatchLocator implements ITypeRequestor {
 		WorkingCopyDocument(org.eclipse.dltk.core.ISourceModule workingCopy,
 				SearchParticipant participant, boolean external) {
 			super(workingCopy.getPath().toString(), getContents(workingCopy),
-					participant, external);
+					participant, external, workingCopy.getScriptProject()
+							.getProject());
 			this.workingCopy = workingCopy;
 		}
 

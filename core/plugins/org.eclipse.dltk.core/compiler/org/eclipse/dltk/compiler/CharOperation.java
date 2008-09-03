@@ -1164,6 +1164,24 @@ public final class CharOperation {
 	}
 
 	/**
+	 * Return <code>true</code> if array starts with the sequence of characters
+	 * contained in toBeFound, otherwise <code>false</code>.
+	 * 
+	 * @param array
+	 * @param toBeFound
+	 * @return
+	 */
+	public static final boolean startsWith(char[] array, char[] toBeFound) {
+		int i = toBeFound.length;
+		if (array.length < i)
+			return false;
+		while (--i >= 0)
+			if (toBeFound[i] != array[i])
+				return false;
+		return true;
+	}
+
+	/**
 	 * Return true if array ends with the sequence of characters contained in
 	 * toBeFound, otherwise false. <br>
 	 * <br>

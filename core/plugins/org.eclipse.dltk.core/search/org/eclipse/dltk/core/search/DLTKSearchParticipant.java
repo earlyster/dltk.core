@@ -10,6 +10,7 @@
 package org.eclipse.dltk.core.search;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -26,6 +27,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.index.MixinIndex;
+import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.SourceIndexer;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.internal.core.Model;
@@ -63,10 +65,16 @@ public class DLTKSearchParticipant extends SearchParticipant {
 		return "DLTK"; //$NON-NLS-1$
 	}
 
+	public SearchDocument getDocument(String documentPath, IProject project) {
+		return new DLTKSearchDocument(documentPath,
+				getDocumentContents(documentPath), this,
+				isExternal(documentPath), project);
+	}
+
 	public SearchDocument getDocument(String documentPath) {
 		return new DLTKSearchDocument(documentPath,
 				getDocumentContents(documentPath), this,
-				isExternal(documentPath));
+				isExternal(documentPath), null);
 	}
 
 	private boolean isExternal(String documentPath) {
@@ -110,7 +118,7 @@ public class DLTKSearchParticipant extends SearchParticipant {
 	 * (non-Javadoc)
 	 * 
 	 * @see SearchParticipant#locateMatches(SearchDocument[], SearchPattern,
-	 *      IDLTKSearchScope, SearchRequestor, IProgressMonitor)
+	 * IDLTKSearchScope, SearchRequestor, IProgressMonitor)
 	 */
 	public void locateMatches(SearchDocument[] indexMatches,
 			SearchPattern pattern, IDLTKSearchScope scope,

@@ -60,7 +60,7 @@ public abstract class TextUtils {
 	 * @param content
 	 * @return
 	 */
-	public static String[] splitLines(String content) {
+	public static String[] splitLines(CharSequence content) {
 		if (content == null) {
 			return null;
 		}
@@ -68,15 +68,48 @@ public abstract class TextUtils {
 		return splitter.split();
 	}
 
+	/**
+	 * Counts the number of lines in the specified string. Lines are counter by
+	 * the separators ("\n", "\r", "\r\n")
+	 * 
+	 * @param content
+	 * @return
+	 */
+	public static int countLines(CharSequence content) {
+		return new LineSplitter(content).countLines();
+	}
+
+	/**
+	 * @param content
+	 * @param lines
+	 * @return
+	 */
+	public static CharSequence selectHeadLines(CharSequence content, int lines) {
+		return new LineSplitter(content).selectHeadLines(lines);
+	}
+
 	private static class LineSplitter {
 
-		private final String content;
+		private final CharSequence content;
 		private final int contentEnd;
 		private int contentPos;
 
-		public LineSplitter(String content) {
+		public LineSplitter(CharSequence content) {
 			this.content = content;
 			this.contentEnd = content.length();
+		}
+
+		/**
+		 * @param lines
+		 * @return
+		 */
+		public CharSequence selectHeadLines(int lines) {
+			contentPos = 0;
+			while (lines > 0 && contentPos < contentEnd) {
+				findEndOfLine();
+				--lines;
+			}
+			return content.subSequence(0, contentPos);
 		}
 
 		public String[] split() {
@@ -85,9 +118,19 @@ public abstract class TextUtils {
 			while (contentPos < contentEnd) {
 				final int begin = contentPos;
 				final int end = findEndOfLine();
-				result.add(content.substring(begin, end));
+				result.add(content.subSequence(begin, end).toString());
 			}
 			return (String[]) result.toArray(new String[result.size()]);
+		}
+
+		public int countLines() {
+			contentPos = 0;
+			int count = 0;
+			while (contentPos < contentEnd) {
+				findEndOfLine();
+				++count;
+			}
+			return count;
 		}
 
 		private int findEndOfLine() {

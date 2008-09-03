@@ -181,11 +181,13 @@ public class DLTKContentTypeManager {
 				return false;
 			}
 			try {
+				if (file.exists()) {
 				IContentDescription descr = file.getContentDescription();
 				if (descr != null) {
 					if (descr.getContentType().isKindOf(masterType)) {
 						return true;
 					}
+				}
 				}
 			} catch (CoreException e1) {
 				if (DLTKCore.DEBUG) {
