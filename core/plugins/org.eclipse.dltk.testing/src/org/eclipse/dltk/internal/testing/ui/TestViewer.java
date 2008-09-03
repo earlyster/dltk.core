@@ -242,7 +242,8 @@ public class TestViewer {
 							DLTKTestingMessages.RerunAction_label_rerun,
 							fTestRunnerPart, testElement,
 							ILaunchManager.RUN_MODE));
-				} else {
+				} else if (fTestRunSession.getTestRunnerUI().canRerun(
+						testElement)) {
 					manager.add(new RerunAction(
 							DLTKTestingMessages.RerunAction_label_run,
 							fTestRunnerPart, testElement,
