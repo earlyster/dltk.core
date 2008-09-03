@@ -301,7 +301,9 @@ public class ScriptExplorerPart extends ViewPart implements
 			try {
 				if (!isFlatLayout() && object instanceof IScriptFolder) {
 					IScriptFolder fragment = (IScriptFolder) object;
-					return !fragment.isRootFolder() && fragment.hasSubfolders();
+					if (!fragment.isRootFolder() && fragment.hasSubfolders()) {
+						return hasFilteredChildren(fragment);
+					}
 				}
 			} catch (ModelException e) {
 				DLTKUIPlugin.log(e);
