@@ -23,18 +23,8 @@ public interface ITestCaseElement extends ITestElement {
 	/**
 	 * Returns the full name of the test case.
 	 * 
-	 * Other two methods are too specific to the testing framework, so probably
-	 * we should deprecate them.
-	 * 
 	 * @return
 	 */
 	public String getTestName();
-
-	/**
-	 * Returns the qualified type name of the class the test is contained in.
-	 * 
-	 * @return the qualified type name of the class the test is contained in.
-	 */
-	public String getTestClassName();
 
 }

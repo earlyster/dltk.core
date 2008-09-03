@@ -350,18 +350,6 @@ public abstract class TestElement implements ITestElement {
 		return fExpected != null && fActual != null;
 	}
 
-	/**
-	 * @see org.eclipse.jdt.internal.junit.runner.ITestIdentifier#getName()
-	 * @see org.eclipse.jdt.internal.junit.runner.MessageIds#TEST_IDENTIFIER_MESSAGE_FORMAT
-	 */
-	public String getClassName() {
-		return extractClassName(getTestName());
-	}
-
-	private String extractClassName(String testNameString) {
-		return testNameString;
-	}
-
 	public TestRoot getRoot() {
 		return getParent().getRoot();
 	}

@@ -26,14 +26,6 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 		Assert.isNotNull(parent);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * @see org.eclipse.dltk.testing.model.ITestCaseElement#getTestClassName()
-	 */
-	public String getTestClassName() {
-		return getClassName();
-	}
-	
 	public void setIgnored(boolean ignored) {
 		fIgnored= ignored;
 	}

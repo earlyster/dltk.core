@@ -21,10 +21,6 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.IType;
-import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.internal.testing.launcher.NullTestRunnerUI;
 import org.eclipse.dltk.internal.testing.model.TestCaseElement;
 import org.eclipse.dltk.internal.testing.model.TestElement;
 import org.eclipse.dltk.internal.testing.model.TestRoot;
@@ -32,7 +28,6 @@ import org.eclipse.dltk.internal.testing.model.TestRunSession;
 import org.eclipse.dltk.internal.testing.model.TestSuiteElement;
 import org.eclipse.dltk.internal.testing.model.TestElement.Status;
 import org.eclipse.dltk.testing.DLTKTestingMessages;
-import org.eclipse.dltk.testing.ITestRunnerUI;
 import org.eclipse.dltk.ui.viewsupport.SelectionProviderMediator;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -225,12 +220,10 @@ public class TestViewer {
 		if (!selection.isEmpty()) {
 			TestElement testElement = (TestElement) selection.getFirstElement();
 
-			// String testLabel = testElement.getTestName();
-			String className = testElement.getClassName();
 			if (testElement instanceof TestSuiteElement) {
 				manager.add(new OpenTestAction(fTestRunnerPart, testElement));
 				manager.add(new Separator());
-				if (testClassExists(className)
+				if (fTestRunSession.getTestRunnerUI().canRerun(testElement)
 						&& !fTestRunnerPart.lastLaunchIsKeptAlive()) {
 					manager.add(new RerunAction(
 							DLTKTestingMessages.RerunAction_label_run,
@@ -249,7 +242,6 @@ public class TestViewer {
 							DLTKTestingMessages.RerunAction_label_rerun,
 							fTestRunnerPart, testElement,
 							ILaunchManager.RUN_MODE));
-
 				} else {
 					manager.add(new RerunAction(
 							DLTKTestingMessages.RerunAction_label_run,
@@ -265,7 +257,6 @@ public class TestViewer {
 				manager.add(new Separator());
 				manager.add(new ExpandAllAction());
 			}
-
 		}
 		if (fTestRunSession != null
 				&& fTestRunSession.getFailureCount()
@@ -279,19 +270,6 @@ public class TestViewer {
 				+ "-end")); //$NON-NLS-1$
 	}
 
-	private boolean testClassExists(String className) {
-		IScriptProject project = fTestRunnerPart.getLaunchedProject();
-		if (project == null)
-			return false;
-		try {
-			IType type = project.findType(className);
-			return type != null;
-		} catch (ModelException e) {
-			// fall through
-		}
-		return false;
-	}
-
 	public Control getTestViewerControl() {
 		return fViewerbook;
 	}
@@ -300,14 +278,6 @@ public class TestViewer {
 		fTestRunSession = testRunSession;
 		registerAutoScrollTarget(null);
 		registerViewersRefresh();
-		final ITestRunnerUI runnerUI;
-		if (testRunSession != null) {
-			runnerUI = testRunSession.getTestRunnerUI();
-		} else {
-			runnerUI = NullTestRunnerUI.getInstance();
-		}
-		fTreeLabelProvider.setRunnerUI(runnerUI);
-		fTableLabelProvider.setRunnerUI(runnerUI);
 	}
 
 	protected void handleDefaultSelected() {

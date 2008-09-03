@@ -44,7 +44,7 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 	 * @see org.eclipse.jdt.junit.ITestSuiteElement#getSuiteTypeName()
 	 */
 	public String getSuiteTypeName() {
-		return getClassName();
+		return getTestName();
 	}
 		
 	/* (non-Javadoc)

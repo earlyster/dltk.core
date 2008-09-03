@@ -13,6 +13,7 @@ package org.eclipse.dltk.testing;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dltk.testing.model.ITestCaseElement;
+import org.eclipse.dltk.testing.model.ITestElement;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 
@@ -53,11 +54,17 @@ public interface ITestRunnerUI extends IAdaptable {
 	 * @param caseElement
 	 * @return
 	 */
-	String getTestCaseLabel(ITestCaseElement caseElement);
+	String getTestCaseLabel(ITestCaseElement caseElement, boolean full);
 
 	/**
 	 * @param caseElement
 	 */
 	String getTestStartedMessage(ITestCaseElement caseElement);
+
+	/**
+	 * @param testElement
+	 * @return
+	 */
+	boolean canRerun(ITestElement testElement);
 
 }

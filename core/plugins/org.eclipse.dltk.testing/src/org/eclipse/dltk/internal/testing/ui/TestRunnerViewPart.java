@@ -46,6 +46,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.testing.Messages;
+import org.eclipse.dltk.internal.testing.launcher.NullTestRunnerUI;
 import org.eclipse.dltk.internal.testing.model.DLTKTestingModel;
 import org.eclipse.dltk.internal.testing.model.ITestRunSessionListener;
 import org.eclipse.dltk.internal.testing.model.ITestSessionListener;
@@ -1801,9 +1802,9 @@ public class TestRunnerViewPart extends ViewPart {
 		});
 	}
 
-	public ITestRunnerUI getTestRunnerUI() {
-		return fTestRunSession == null ? null : fTestRunSession
-				.getTestRunnerUI();
+	public final ITestRunnerUI getTestRunnerUI() {
+		return fTestRunSession == null ? NullTestRunnerUI.getInstance()
+				: fTestRunSession.getTestRunnerUI();
 	}
 
 	/**

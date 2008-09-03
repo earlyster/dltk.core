@@ -867,7 +867,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 	/**
 	 * @return
 	 */
-	public ITestRunnerUI getTestRunnerUI() {
+	public final ITestRunnerUI getTestRunnerUI() {
 		return testRunnerUI;
 	}
 }

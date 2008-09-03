@@ -12,7 +12,9 @@
 package org.eclipse.dltk.testing;
 
 import org.eclipse.dltk.testing.model.ITestCaseElement;
+import org.eclipse.dltk.testing.model.ITestElement;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.osgi.util.NLS;
 
 public abstract class AbstractTestRunnerUI implements ITestRunnerUI {
 
@@ -31,14 +33,32 @@ public abstract class AbstractTestRunnerUI implements ITestRunnerUI {
 	/*
 	 * @see ITestRunnerUI#getTestCaseLabel(ITestCaseElement)
 	 */
-	public String getTestCaseLabel(ITestCaseElement caseElement) {
+	public String getTestCaseLabel(ITestCaseElement caseElement, boolean full) {
 		String testName = caseElement.getTestName();
 		int index = testName.indexOf('(');
-		if (index > 0)
-			return testName.substring(0, index);
+		if (index > 0) {
+			if (full) {
+				int end = testName.length();
+				if (end > index + 1 && testName.charAt(end - 1) == ')') {
+					--end;
+				}
+				final String template = DLTKTestingMessages.TestSessionLabelProvider_testMethodName_className;
+				return NLS.bind(template, testName.substring(index + 1, end),
+						testName.substring(0, index));
+			} else {
+				return testName.substring(0, index);
+			}
+		}
 		index = testName.indexOf('@');
-		if (index > 0)
-			return testName.substring(0, index);
+		if (index > 0) {
+			if (full) {
+				final String template = DLTKTestingMessages.TestSessionLabelProvider_testMethodName_className;
+				return NLS.bind(template, testName.substring(index + 1),
+						testName.substring(0, index));
+			} else {
+				return testName.substring(0, index);
+			}
+		}
 		return testName;
 	}
 
@@ -47,6 +67,22 @@ public abstract class AbstractTestRunnerUI implements ITestRunnerUI {
 	 */
 	public String getTestStartedMessage(ITestCaseElement caseElement) {
 		return caseElement.getTestName();
+	}
+
+	/*
+	 * @see ITestRunnerUI#canRerun(ITestElement)
+	 */
+	public boolean canRerun(ITestElement testElement) {
+		// IScriptProject project = fTestRunnerPart.getLaunchedProject();
+		// if (project == null)
+		// return false;
+		// try {
+		// IType type = project.findType(className);
+		// return type != null;
+		// } catch (ModelException e) {
+		// // fall through
+		// }
+		return false;
 	}
 
 	/*
