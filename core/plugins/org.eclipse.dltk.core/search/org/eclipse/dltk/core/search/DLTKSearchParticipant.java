@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -19,21 +18,17 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.index.MixinIndex;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.SourceIndexer;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.internal.core.Model;
-import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 import org.eclipse.dltk.internal.core.search.IndexSelector;
-import org.eclipse.dltk.internal.core.util.Util;
+import org.eclipse.dltk.internal.core.search.LazyDLTKSearchDocument;
 
 /**
  * A search participant describes a particular extension to a generic search
@@ -66,8 +61,7 @@ public class DLTKSearchParticipant extends SearchParticipant {
 	}
 
 	public SearchDocument getDocument(String documentPath, IProject project) {
-		return new DLTKSearchDocument(documentPath,
-				getDocumentContents(documentPath), this,
+		return new LazyDLTKSearchDocument(documentPath, this,
 				isExternal(documentPath), project);
 	}
 
@@ -79,24 +73,6 @@ public class DLTKSearchParticipant extends SearchParticipant {
 		else
 			return true;
 
-	}
-
-	private char[] getDocumentContents(String documentPath) {
-		Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
-				.getRoot(), new Path(documentPath), true);
-		try {
-			if (target instanceof IFile) {
-				return Util.getResourceContentsAsCharArray((IFile) target);
-			} else if (target instanceof IFileHandle) {
-				return Util
-						.getResourceContentsAsCharArray((IFileHandle) target);
-			}
-		} catch (ModelException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
-		}
-		return new char[0];
 	}
 
 	public void indexDocument(SearchDocument document, IPath indexPath) {
