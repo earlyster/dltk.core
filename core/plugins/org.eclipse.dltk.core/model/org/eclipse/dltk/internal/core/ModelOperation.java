@@ -718,20 +718,11 @@ public abstract class ModelOperation implements IWorkspaceRunnable, IProgressMon
 				for (int i = 0, length = this.resultElements.length; i < length; i++) {
 					IModelElement element = this.resultElements[i];
 					Openable openable = (Openable) element.getOpenable();
-					if (!(openable instanceof SourceModule) || !((SourceModule) openable).isWorkingCopy()) { // a
-						// working
-						// copy
-						// must
-						// remain
-						// a
-						// child
-						// of
-						// its
-						// parent
-						// even
-						// after
-						// a
-						// move
+					if (!(openable instanceof SourceModule) || !((SourceModule) openable).isWorkingCopy()) { 
+						/*
+						 * a working copy must remain a child of its parent even
+						 * after a move
+						 */
 						((ModelElement) openable.getParent()).close();
 					}
 					switch (element.getElementType()) {
