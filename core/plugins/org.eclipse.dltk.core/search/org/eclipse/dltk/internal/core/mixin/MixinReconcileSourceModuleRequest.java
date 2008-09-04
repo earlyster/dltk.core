@@ -12,44 +12,35 @@
 package org.eclipse.dltk.internal.core.mixin;
 
 import java.io.IOException;
+import java.util.TooManyListenersException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.search.index.Index;
-import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
+import org.eclipse.dltk.core.mixin.MixinModelRegistry;
 
-public class MixinSourceModuleRequest extends MixinIndexRequest {
+public class MixinReconcileSourceModuleRequest extends MixinSourceModuleRequest {
 
-	protected final ISourceModule module;
-	protected final IDLTKLanguageToolkit toolkit;
-
-	public MixinSourceModuleRequest(ISourceModule module,
+	/**
+	 * @param module
+	 * @param toolkit
+	 */
+	public MixinReconcileSourceModuleRequest(ISourceModule module,
 			IDLTKLanguageToolkit toolkit) {
-		this.module = module;
-		this.toolkit = toolkit;
+		super(module, toolkit);
 	}
 
-	protected String getName() {
-		return module.getElementName();
-	}
-
+	/*
+	 * @see org.eclipse.dltk.internal.core.mixin.MixinSourceModuleRequest#run()
+	 */
 	protected void run() throws CoreException, IOException {
-		final IScriptProject project = module.getScriptProject();
-		final Index index = getProjectMixinIndex(project);
-		final ReadWriteMonitor imon = index.monitor;
-		imon.enterWrite();
-		try {
-			indexSourceModule(index, toolkit, module, project.getPath());
-		} finally {
-			imon.exitWrite();
-		}
+		MixinModelRegistry.removeSourceModule(toolkit, module);
+		super.run();
 	}
 
 	public boolean equals(Object obj) {
-		if (obj instanceof MixinSourceModuleRequest) {
-			final MixinSourceModuleRequest other = (MixinReconcileSourceModuleRequest) obj;
+		if (obj instanceof MixinReconcileSourceModuleRequest) {
+			final MixinReconcileSourceModuleRequest other = (MixinReconcileSourceModuleRequest) obj;
 			return module.equals(other.module);
 		}
 		return false;
