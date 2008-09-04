@@ -751,6 +751,10 @@ public class ModelManager implements ISaveParticipant {
 																			 * info
 																			 */);
 		if (info == null) {
+			if (!ScriptProject.hasScriptNature(project)) {
+				throw ((ScriptProject) DLTKCore.create(project))
+						.newNotPresentException();
+			}
 			info = getPerProjectInfo(project, true /* create info */);
 		}
 		return info;
