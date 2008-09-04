@@ -15,8 +15,6 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.dltk.testing.model.ITestCaseElement;
 
-
-
 public class TestCaseElement extends TestElement implements ITestCaseElement {
 
 	private boolean fIgnored;
@@ -25,16 +23,23 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 		super(parent, id, testName);
 		Assert.isNotNull(parent);
 	}
-	
+
 	public void setIgnored(boolean ignored) {
-		fIgnored= ignored;
+		fIgnored = ignored;
 	}
-	
+
 	public boolean isIgnored() {
 		return fIgnored;
 	}
-	
+
 	public String toString() {
 		return "TestCase: " + getTestName() + " : " + super.toString(); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	/**
+	 * @param value
+	 */
+	public void setTestName(String value) {
+		super.setTestName(value);
 	}
 }

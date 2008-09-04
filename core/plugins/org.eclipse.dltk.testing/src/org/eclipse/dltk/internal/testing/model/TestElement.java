@@ -45,7 +45,7 @@ public abstract class TestElement implements ITestElement {
 
 		private static final Status[] OLD_CODE = { OK, ERROR, FAILURE };
 
-		private final String fName;
+		private String fName;
 		private final int fOldCode;
 		private int failedCode;
 
@@ -356,5 +356,9 @@ public abstract class TestElement implements ITestElement {
 
 	public String toString() {
 		return getProgressState() + " - " + getTestResult(true); //$NON-NLS-1$
+	}
+
+	protected void setTestName(String value) {
+		this.fTestName = value;		
 	}
 }
