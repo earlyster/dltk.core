@@ -9,21 +9,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProblemRequestor;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.internal.core.mixin.MixinBuilder;
+import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.dltk.internal.core.util.Messages;
 
 public class ReconcileWorkingCopyOperation extends ModelOperation {
@@ -83,11 +78,7 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 			// Mixin source index operation required.
 			int sum = this.deltaBuilder.delta.getAffectedChildren().length;
 			if (sum > 0) {
-				List elements = new ArrayList();
-				IScriptProject project = workingCopy.getScriptProject();
-				elements.add(workingCopy);
-				MixinBuilder.getDefault().buildModelElements(project, elements,
-						new NullProgressMonitor(), false);
+				ProjectIndexerManager.reconciled(workingCopy);
 			}
 		} else if (forceProblemDetection && problemRequestor.isActive()) {
 			AccumulatingProblemReporter reporter = new AccumulatingProblemReporter(

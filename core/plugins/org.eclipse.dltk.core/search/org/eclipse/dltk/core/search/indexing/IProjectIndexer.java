@@ -60,4 +60,10 @@ public interface IProjectIndexer {
 	 */
 	void removeLibrary(IScriptProject project, IPath path);
 
+	/**
+	 * @param workingCopy
+	 * @param toolkit
+	 */
+	void reconciled(ISourceModule workingCopy, IDLTKLanguageToolkit toolkit);
+
 }

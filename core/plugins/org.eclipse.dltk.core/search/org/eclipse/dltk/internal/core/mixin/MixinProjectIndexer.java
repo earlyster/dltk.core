@@ -75,6 +75,11 @@ public class MixinProjectIndexer implements IProjectIndexer {
 		request(new MixinSourceModuleRequest(module, toolkit));
 	}
 
+	public void reconciled(ISourceModule workingCopy,
+			IDLTKLanguageToolkit toolkit) {
+		request(new MixinSourceModuleRequest(workingCopy, toolkit));
+	}
+
 	public void removeProjectFragment(IScriptProject project, IPath sourceFolder) {
 		// TODO optimize
 		requestIfNotWaiting(new MixinProjectRequest(project));

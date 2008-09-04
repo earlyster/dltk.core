@@ -266,4 +266,25 @@ public class ProjectIndexerManager {
 		}
 	}
 
+	/**
+	 * @param workingCopy
+	 */
+	public static void reconciled(ISourceModule workingCopy) {
+		final IScriptProject project = workingCopy.getScriptProject();
+		if (project == null) {
+			return;
+		}
+		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(project);
+		if (toolkit == null) {
+			return;
+		}
+		final IProjectIndexer[] indexers = getIndexers(toolkit.getNatureId());
+		if (indexers != null) {
+			for (int i = 0; i < indexers.length; ++i) {
+				indexers[i].reconciled(workingCopy, toolkit);
+			}
+		}
+	}
+
 }
