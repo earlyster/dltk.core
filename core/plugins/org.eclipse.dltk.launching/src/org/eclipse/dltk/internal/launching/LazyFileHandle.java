@@ -209,20 +209,22 @@ public class LazyFileHandle implements IFileHandle {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (obj == null || !(obj instanceof IFileHandle))
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		LazyFileHandle other = (LazyFileHandle) obj;
+		IFileHandle other = (IFileHandle) obj;
 		if (environment == null) {
-			if (other.environment != null)
+			if (other.getEnvironment() != null)
 				return false;
-		} else if (!environment.equals(other.environment))
+		} else {
+			final IEnvironment otherEnvironment = other.getEnvironment();
+			if (otherEnvironment == null
+					|| !environment.equals(otherEnvironment.getId()))
 			return false;
+		}
 		if (path == null) {
-			if (other.path != null)
+			if (other.getPath() != null)
 				return false;
-		} else if (!path.equals(other.path))
+		} else if (!path.equals(other.getPath()))
 			return false;
 		return true;
 	}
