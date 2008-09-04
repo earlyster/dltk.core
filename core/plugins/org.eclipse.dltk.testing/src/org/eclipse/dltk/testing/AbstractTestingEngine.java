@@ -33,7 +33,7 @@ public abstract class AbstractTestingEngine extends DLTKContributedExtension
 		// empty
 	}
 
-	public String getContainerLauncher(ILaunchConfiguration configuration,
+	public String getMainScriptPath(ILaunchConfiguration configuration,
 			IEnvironment scriptEnvironment) throws CoreException {
 		return null;
 	}

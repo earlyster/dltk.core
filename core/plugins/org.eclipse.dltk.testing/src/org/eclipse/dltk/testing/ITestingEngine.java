@@ -25,12 +25,17 @@ public interface ITestingEngine extends IAdaptable {
 			throws CoreException;
 
 	/**
+	 * Get the path of the main script to be used in the launch configuration.
+	 * Return the special launcher path for this testing engine or
+	 * <code>null</code> to use the script specified in the launch
+	 * configuration.
+	 * 
 	 * @param configuration
 	 * @param scriptEnvironment
 	 * @return
 	 * @throws CoreException
 	 */
-	String getContainerLauncher(ILaunchConfiguration configuration,
+	String getMainScriptPath(ILaunchConfiguration configuration,
 			IEnvironment scriptEnvironment) throws CoreException;
 
 	ITestRunnerUI getTestRunnerUI(IScriptProject project,
