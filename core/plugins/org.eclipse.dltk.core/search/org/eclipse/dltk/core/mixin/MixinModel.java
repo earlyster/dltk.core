@@ -389,6 +389,18 @@ public class MixinModel {
 			// IResourceDelta delta = event.getDelta();
 
 			switch (eventType) {
+			case IResourceChangeEvent.PRE_CLOSE:
+				if (resource.getType() == IResource.PROJECT
+						&& DLTKLanguageManager
+								.hasScriptNature((IProject) resource)) {
+					if (project != null
+							&& resource.equals(project.getProject())) {
+						clear();
+						// TODO destroy this model
+						return;
+					}
+				}
+				break;
 			case IResourceChangeEvent.PRE_DELETE:
 				if (resource.getType() == IResource.PROJECT
 						&& DLTKLanguageManager
