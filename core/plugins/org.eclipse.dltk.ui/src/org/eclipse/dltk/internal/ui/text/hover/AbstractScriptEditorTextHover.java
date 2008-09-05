@@ -191,18 +191,9 @@ public abstract class AbstractScriptEditorTextHover implements
 	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				// return new DefaultInformationControl(parent, SWT.NONE,
-				// new HTMLTextPresenter(true), EditorsUI
-				// .getTooltipAffordanceString());
-				int shellStyle = SWT.RESIZE | SWT.TOOL;
-				int style = SWT.V_SCROLL | SWT.H_SCROLL;
-				if (BrowserInformationControl.isAvailable(parent))
-					return new BrowserInformationControl(parent, shellStyle,
-							style, EditorsUI.getTooltipAffordanceString());
-				else
-					return new DefaultInformationControl(parent, SWT.NONE,
-							new HTMLTextPresenter(false), EditorsUI
-									.getTooltipAffordanceString());
+				return new DefaultInformationControl(parent, SWT.NONE,
+						new HTMLTextPresenter(true),
+						EditorsUI.getTooltipAffordanceString());
 			}
 		};
 	}
