@@ -319,13 +319,16 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		 */
 		public String getText() {
 			String[] arguments = getArguments();
-			for (int i = 0; i < arguments.length; i++) {
-				String ar = arguments[i];
-				if (ar.startsWith(IProblem.DESCRIPTION_ARGUMENT_PREFIX)) {
-					return fProblem.getMessage()
-							+ "\n"
-							+ ar.substring(IProblem.DESCRIPTION_ARGUMENT_PREFIX
-									.length());
+			if (arguments != null) {
+				for (int i = 0; i < arguments.length; i++) {
+					String ar = arguments[i];
+					if (ar.startsWith(IProblem.DESCRIPTION_ARGUMENT_PREFIX)) {
+						return fProblem.getMessage()
+								+ "\n"
+								+ ar
+										.substring(IProblem.DESCRIPTION_ARGUMENT_PREFIX
+												.length());
+					}
 				}
 			}
 			return fProblem.getMessage();
