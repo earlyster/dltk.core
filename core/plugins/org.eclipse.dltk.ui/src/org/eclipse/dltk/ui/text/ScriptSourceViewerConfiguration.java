@@ -315,13 +315,6 @@ public abstract class ScriptSourceViewerConfiguration extends
 			public IInformationControl createInformationControl(Shell parent) {
 				int shellStyle = SWT.RESIZE | SWT.TOOL;
 				int style = SWT.V_SCROLL | SWT.H_SCROLL;
-				// return new DefaultInformationControl(parent, shellStyle,
-				// style,
-				// new HTMLTextPresenter(false));
-				// if (BrowserInformationControl.isAvailable(parent))
-				// return new BrowserInformationControl(parent, shellStyle,
-				// style);
-				// else
 				return new DefaultInformationControl(parent, shellStyle, style,
 						new HTMLTextPresenter(false));
 			}
