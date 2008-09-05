@@ -168,4 +168,5 @@ public interface IProblem {
 	int ForbiddenReference = TypeRelated + 307;
 	int DiscouragedReference = TypeRelated + 280;
 
+	final String DESCRIPTION_ARGUMENT_PREFIX = "description:";
 }

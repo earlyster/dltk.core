@@ -21,6 +21,8 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -101,6 +103,11 @@ public class DLTKContentTypeManager {
 					}
 				}
 			}
+		}
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		IResource member = root.findMember(path);
+		if (member != null && isValidResourceForContentType(toolkit, member)) {
+			return true;
 		}
 		return false;
 	}

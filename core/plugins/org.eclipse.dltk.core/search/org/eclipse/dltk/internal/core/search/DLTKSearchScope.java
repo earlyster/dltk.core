@@ -448,7 +448,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 			String currentContainerPath = containerPaths[i];
 			String currentFullPath = currentRelativePath.length() == 0 ? currentContainerPath
 					: (currentContainerPath + "/" + currentRelativePath); //$NON-NLS-1$
-			if (encloses(currentFullPath, fullPath, i))
+			if (encloses(currentFullPath, fullPath, i, currentFullPath))
 				return i;
 		}
 		return -1;
@@ -475,7 +475,8 @@ public class DLTKSearchScope extends AbstractSearchScope {
 		while ((currentContainerPath = this.containerPaths[index]) != null) {
 			if (currentContainerPath.equals(containerPath)) {
 				String currentRelativePath = this.relativePaths[index];
-				if (encloses(currentRelativePath, relativePath, index))
+				if (encloses(currentRelativePath, relativePath, index,
+						containerPath))
 					return index;
 			}
 			if (++index == length) {
@@ -489,14 +490,19 @@ public class DLTKSearchScope extends AbstractSearchScope {
 	 * Returns whether the enclosing path encloses the given path (or is equal
 	 * to it)
 	 */
-	private boolean encloses(String enclosingPath, String path, int index) {
+	private boolean encloses(String enclosingPath, String path, int index,
+			String containerPath) {
 		// normalize given path as it can come from outside
 		enclosingPath = (new Path(enclosingPath)).toString();
 		path = new Path(normalize(path)).toString();
 		IPath realPath = new Path(path);
 		if (!DLTKContentTypeManager.isValidFileNameForContentType(toolkit,
 				realPath)) {
-			return false;
+			realPath = new Path(containerPath).append(path);
+			if (!DLTKContentTypeManager.isValidFileNameForContentType(toolkit,
+					realPath)) {
+				return false;
+			}
 		}
 		int pathLength = path.length();
 		int enclosingLength = enclosingPath.length();
