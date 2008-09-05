@@ -21,6 +21,7 @@ import org.eclipse.dltk.core.ICodeAssist;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.ui.BrowserInformationControl;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.dltk.internal.ui.text.ScriptWordFinder;
@@ -190,9 +191,18 @@ public abstract class AbstractScriptEditorTextHover implements
 	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, SWT.NONE,
-						new HTMLTextPresenter(true),
-						EditorsUI.getTooltipAffordanceString());
+				// return new DefaultInformationControl(parent, SWT.NONE,
+				// new HTMLTextPresenter(true), EditorsUI
+				// .getTooltipAffordanceString());
+				int shellStyle = SWT.RESIZE | SWT.TOOL;
+				int style = SWT.V_SCROLL | SWT.H_SCROLL;
+				if (BrowserInformationControl.isAvailable(parent))
+					return new BrowserInformationControl(parent, shellStyle,
+							style, EditorsUI.getTooltipAffordanceString());
+				else
+					return new DefaultInformationControl(parent, SWT.NONE,
+							new HTMLTextPresenter(false), EditorsUI
+									.getTooltipAffordanceString());
 			}
 		};
 	}
@@ -200,29 +210,29 @@ public abstract class AbstractScriptEditorTextHover implements
 	/**
 	 * Returns the tool tip affordance string.
 	 * 
-	 * @return the affordance string or <code>null</code> if disabled or no
-	 *         key binding is defined
+	 * @return the affordance string or <code>null</code> if disabled or no key
+	 *         binding is defined
 	 * 
 	 */
-//	protected String getTooltipAffordanceString() {
-//		if (this.getPreferenceStore() == null) {
-//			return "{0}";
-//		}
-//		if (fBindingService == null
-//				|| !getPreferenceStore().getBoolean(
-//						PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
-//			return null;
-//
-//		String keySequence = fBindingService
-//				.getBestActiveBindingFormattedFor(IScriptEditorActionDefinitionIds.SHOW_DOCUMENTATION);
-//		if (keySequence == null)
-//			return null;
-//
-//		return Messages.format(
-//				ScriptHoverMessages.ScriptTextHover_makeStickyHint,
-//				keySequence == null ? "" : keySequence); //$NON-NLS-1$
-//	}
-
+	// protected String getTooltipAffordanceString() {
+	// if (this.getPreferenceStore() == null) {
+	// return "{0}";
+	// }
+	// if (fBindingService == null
+	// || !getPreferenceStore().getBoolean(
+	// PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
+	// return null;
+	//
+	// String keySequence = fBindingService
+	// .getBestActiveBindingFormattedFor(IScriptEditorActionDefinitionIds.
+	// SHOW_DOCUMENTATION);
+	// if (keySequence == null)
+	// return null;
+	//
+	// return Messages.format(
+	// ScriptHoverMessages.ScriptTextHover_makeStickyHint,
+	//				keySequence == null ? "" : keySequence); //$NON-NLS-1$
+	// }
 	/**
 	 * Returns the style sheet.
 	 * 

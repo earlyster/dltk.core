@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.text.hover;
 
-
 import org.eclipse.dltk.internal.ui.BrowserInformationControl;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.dltk.internal.ui.text.ScriptWordFinder;
@@ -31,9 +30,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
-
-
-public class ScriptInformationProvider implements IInformationProvider, IInformationProviderExtension2 {
+public class ScriptInformationProvider implements IInformationProvider,
+		IInformationProviderExtension2 {
 
 	class EditorWatcher implements IPartListener {
 
@@ -45,8 +43,9 @@ public class ScriptInformationProvider implements IInformationProvider, IInforma
 
 		public void partClosed(IWorkbenchPart part) {
 			if (part == fEditor) {
-				fEditor.getSite().getWorkbenchWindow().getPartService().removePartListener(fPartListener);
-				fPartListener= null;
+				fEditor.getSite().getWorkbenchWindow().getPartService()
+						.removePartListener(fPartListener);
+				fPartListener = null;
 			}
 		}
 
@@ -72,12 +71,12 @@ public class ScriptInformationProvider implements IInformationProvider, IInforma
 
 	public ScriptInformationProvider(IEditorPart editor) {
 
-		fEditor= editor;
+		fEditor = editor;
 
 		if (fEditor != null) {
 
-			fPartListener= new EditorWatcher();
-			IWorkbenchWindow window= fEditor.getSite().getWorkbenchWindow();
+			fPartListener = new EditorWatcher();
+			IWorkbenchWindow window = fEditor.getSite().getWorkbenchWindow();
 			window.getPartService().addPartListener(fPartListener);
 
 			update();
@@ -86,24 +85,25 @@ public class ScriptInformationProvider implements IInformationProvider, IInforma
 
 	protected void update() {
 
-		IWorkbenchWindow window= fEditor.getSite().getWorkbenchWindow();
-		IWorkbenchPage page= window.getActivePage();
+		IWorkbenchWindow window = fEditor.getSite().getWorkbenchWindow();
+		IWorkbenchPage page = window.getActivePage();
 		if (page != null) {
 
-			IPerspectiveDescriptor perspective= page.getPerspective();
-			if (perspective != null)  {
-				String perspectiveId= perspective.getId();
+			IPerspectiveDescriptor perspective = page.getPerspective();
+			if (perspective != null) {
+				String perspectiveId = perspective.getId();
 
-				if (fCurrentPerspective == null || fCurrentPerspective != perspectiveId) {
-					fCurrentPerspective= perspectiveId;
+				if (fCurrentPerspective == null
+						|| fCurrentPerspective != perspectiveId) {
+					fCurrentPerspective = perspectiveId;
 
-					fImplementation= new ScriptTypeHover();
+					fImplementation = new ScriptTypeHover();
 					fImplementation.setEditor(fEditor);
 				}
 			}
 		}
 	}
-	
+
 	public IRegion getSubject(ITextViewer textViewer, int offset) {
 
 		if (textViewer != null)
@@ -114,7 +114,7 @@ public class ScriptInformationProvider implements IInformationProvider, IInforma
 
 	public String getInformation(ITextViewer textViewer, IRegion subject) {
 		if (fImplementation != null) {
-			String s= fImplementation.getHoverInfo(textViewer, subject);
+			String s = fImplementation.getHoverInfo(textViewer, subject);
 			if (s != null && s.trim().length() > 0) {
 				return s;
 			}
@@ -122,18 +122,21 @@ public class ScriptInformationProvider implements IInformationProvider, IInforma
 
 		return null;
 	}
-	
+
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (fPresenterControlCreator == null) {
-			fPresenterControlCreator= new AbstractReusableInformationControlCreator() {
-				
-				public IInformationControl doCreateInformationControl(Shell parent) {
-					int shellStyle= SWT.RESIZE | SWT.TOOL;
-					int style= SWT.V_SCROLL | SWT.H_SCROLL;
+			fPresenterControlCreator = new AbstractReusableInformationControlCreator() {
+
+				public IInformationControl doCreateInformationControl(
+						Shell parent) {
+					int shellStyle = SWT.RESIZE | SWT.TOOL;
+					int style = SWT.V_SCROLL | SWT.H_SCROLL;
 					if (BrowserInformationControl.isAvailable(parent))
-						return new BrowserInformationControl(parent, shellStyle, style);
+						return new BrowserInformationControl(parent,
+								shellStyle, style);
 					else
-						return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
+						return new DefaultInformationControl(parent,
+								shellStyle, style, new HTMLTextPresenter(false));
 				}
 			};
 		}

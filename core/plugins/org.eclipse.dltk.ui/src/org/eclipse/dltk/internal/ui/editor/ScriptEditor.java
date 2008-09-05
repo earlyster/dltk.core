@@ -40,6 +40,7 @@ import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.PreferencesLookupDelegate;
 import org.eclipse.dltk.core.ScriptModelUtil;
+import org.eclipse.dltk.internal.ui.BrowserInformationControl;
 import org.eclipse.dltk.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.dltk.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.dltk.internal.ui.actions.refactoring.RefactorActionGroup;
@@ -219,9 +220,10 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy
-		 *      #doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager,
-		 *      org.eclipse.swt.events.VerifyEvent, int, int)
+		 * @see
+		 * org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy
+		 * #doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager,
+		 * org.eclipse.swt.events.VerifyEvent, int, int)
 		 */
 		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event,
 				int offset, int length) {
@@ -284,8 +286,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.IPositionUpdater#update(org.eclipse.jface.
-		 *      text.DocumentEvent)
+		 * @see
+		 * org.eclipse.jface.text.IPositionUpdater#update(org.eclipse.jface.
+		 * text.DocumentEvent)
 		 */
 		public void update(DocumentEvent event) {
 
@@ -491,8 +494,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		}
 
 		/*
-		 * @see IWidgetTokenOwnerExtension#requestWidgetToken(IWidgetTokenKeeper,
-		 *      int)
+		 * @see
+		 * IWidgetTokenOwnerExtension#requestWidgetToken(IWidgetTokenKeeper,
+		 * int)
 		 */
 		public boolean requestWidgetToken(IWidgetTokenKeeper requester,
 				int priority) {
@@ -952,8 +956,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	private class EditorSelectionChangedListener extends
 			AbstractSelectionChangedListener {
 		/*
-		 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged
-		 *      (org.eclipse.jface.viewers.SelectionChangedEvent)
+		 * @see
+		 * org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged
+		 * (org.eclipse.jface.viewers.SelectionChangedEvent)
 		 */
 		public void selectionChanged(SelectionChangedEvent event) {
 			// XXX: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=56161
@@ -1157,34 +1162,37 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.information.IInformationProvider#getSubject
-		 *      (org.eclipse.jface.text.ITextViewer, int)
+		 * @see
+		 * org.eclipse.jface.text.information.IInformationProvider#getSubject
+		 * (org.eclipse.jface.text.ITextViewer, int)
 		 */
 		public IRegion getSubject(ITextViewer textViewer, int invocationOffset) {
 			return fHoverRegion;
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.information.IInformationProvider#getInformation
-		 *      (org.eclipse.jface.text.ITextViewer,
-		 *      org.eclipse.jface.text.IRegion)
+		 * @see
+		 * org.eclipse.jface.text.information.IInformationProvider#getInformation
+		 * (org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 		 */
 		public String getInformation(ITextViewer textViewer, IRegion subject) {
 			return fHoverInfo.toString();
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.information.IInformationProviderExtension#
-		 *      getInformation2(org.eclipse.jface.text.ITextViewer,
-		 *      org.eclipse.jface.text.IRegion)
+		 * @see
+		 * org.eclipse.jface.text.information.IInformationProviderExtension#
+		 * getInformation2(org.eclipse.jface.text.ITextViewer,
+		 * org.eclipse.jface.text.IRegion)
 		 */
 		public Object getInformation2(ITextViewer textViewer, IRegion subject) {
 			return fHoverInfo;
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.information.IInformationProviderExtension2
-		 *      #getInformationPresenterControlCreator()
+		 * @see
+		 * org.eclipse.jface.text.information.IInformationProviderExtension2
+		 * #getInformationPresenterControlCreator()
 		 */
 		public IInformationControlCreator getInformationPresenterControlCreator() {
 			return fControlCreator;
@@ -1266,8 +1274,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		 *            the source viewer to display the hover over
 		 * @param textHover
 		 *            the hover to make focusable
-		 * @return <code>true</code> if successful, <code>false</code>
-		 *         otherwise
+		 * @return <code>true</code> if successful, <code>false</code> otherwise
 		 * 
 		 */
 		private boolean makeTextHoverFocusable(ISourceViewer sourceViewer,
@@ -1533,8 +1540,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	}
 
 	/**
-	 * Returns the folding action group, or <code>null</code> if there is
-	 * none.
+	 * Returns the folding action group, or <code>null</code> if there is none.
 	 * 
 	 * @return the folding action group, or <code>null</code> if there is none
 	 * 
@@ -1790,8 +1796,8 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	 * @param element
 	 *            thescriptelement to select
 	 * @param checkIfOutlinePageActive
-	 *            <code>true</code> if check for active outline page needs to
-	 *            be done
+	 *            <code>true</code> if check for active outline page needs to be
+	 *            done
 	 */
 	protected void synchronizeOutlinePage(ISourceReference element,
 			boolean checkIfOutlinePageActive) {
@@ -1946,8 +1952,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	}
 
 	/*
-	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#gotoAnnotation(
-	 *      boolean)
+	 * @see
+	 * org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#gotoAnnotation(
+	 * boolean)
 	 * 
 	 * @since 3.2
 	 */
@@ -2007,8 +2014,14 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			public IInformationControl createInformationControl(Shell shell) {
 				boolean cutDown = false;
 				int style = cutDown ? SWT.NONE : (SWT.V_SCROLL | SWT.H_SCROLL);
-				return new DefaultInformationControl(shell, SWT.RESIZE
-						| SWT.TOOL, style, new HTMLTextPresenter(cutDown));
+				// return new DefaultInformationControl(shell, SWT.RESIZE
+				// | SWT.TOOL, style, new HTMLTextPresenter(cutDown));
+				if (BrowserInformationControl.isAvailable(shell))
+					return new BrowserInformationControl(shell, SWT.RESIZE
+							| SWT.TOOL, style);
+				else
+					return new DefaultInformationControl(shell, SWT.RESIZE
+							| SWT.TOOL, style, new HTMLTextPresenter(cutDown));
 			}
 		};
 
@@ -2093,10 +2106,10 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 	/**
 	 * Returns the most narrow element including the given offset. If
-	 * <code>reconcile</code> is <code>true</code> the editor's input
-	 * element is reconciled in advance. If it is <code>false</code> this
-	 * method only returns a result if the editor's input element does not need
-	 * to be reconciled.
+	 * <code>reconcile</code> is <code>true</code> the editor's input element is
+	 * reconciled in advance. If it is <code>false</code> this method only
+	 * returns a result if the editor's input element does not need to be
+	 * reconciled.
 	 * 
 	 * @param offset
 	 *            the offset included by the retrieved element
@@ -2730,7 +2743,8 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	}
 
 	/*
-	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#createNavigationActions()
+	 * @see
+	 * org.eclipse.ui.texteditor.AbstractTextEditor#createNavigationActions()
 	 */
 	protected void createNavigationActions() {
 		super.createNavigationActions();
@@ -2874,8 +2888,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	}
 
 	/*
-	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#rulerContextMenuAboutToShow
-	 *      (org.eclipse.jface.action.IMenuManager)
+	 * @see
+	 * org.eclipse.ui.texteditor.AbstractTextEditor#rulerContextMenuAboutToShow
+	 * (org.eclipse.jface.action.IMenuManager)
 	 */
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
 		super.rulerContextMenuAboutToShow(menu);
@@ -2953,7 +2968,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#performSave(boolean,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected void performSave(boolean overwrite,
 			IProgressMonitor progressMonitor) {
@@ -3102,8 +3117,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled
-	 *      (CompilationUnit, boolean, IProgressMonitor)
+	 * @see
+	 * org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled
+	 * (CompilationUnit, boolean, IProgressMonitor)
 	 * 
 	 * @since 3.0
 	 */

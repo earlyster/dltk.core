@@ -41,20 +41,25 @@ import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 public abstract class AbstractAnnotationHover extends
 		AbstractScriptEditorTextHover {
 
-	private DefaultMarkerAnnotationAccess fAnnotationAccess = new DefaultMarkerAnnotationAccess();
-	private boolean fAllAnnotations;
+	protected DefaultMarkerAnnotationAccess fAnnotationAccess = new DefaultMarkerAnnotationAccess();
+	protected boolean fAllAnnotations;
 
 	public AbstractAnnotationHover(boolean allAnnotations) {
 		fAllAnnotations = allAnnotations;
 	}
 
+	protected String postUpdateMessage(String message) {
+		return message;
+	}
+
 	/*
 	 * Formats a message as HTML text.
 	 */
-	private String formatMessage(String message) {
+	protected String formatMessage(String message) {
 		StringBuffer buffer = new StringBuffer();
 		HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheet());
-		buffer.append(HTMLPrinter.convertToHTMLContent(message));
+		buffer.append(postUpdateMessage(HTMLPrinter
+				.convertToHTMLContent(message)));
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
 	}
@@ -106,7 +111,7 @@ public abstract class AbstractAnnotationHover extends
 						&& p != null
 						&& p.overlapsWith(hoverRegion.getOffset(), hoverRegion
 								.getLength())) {
-					String msg = a.getText();
+					String msg = getMessageFromAnnotation(a);
 					if (msg != null && msg.trim().length() > 0) {
 						message = msg;
 						layer = l;
@@ -131,13 +136,17 @@ public abstract class AbstractAnnotationHover extends
 		return null;
 	}
 
-	private static boolean isActive(IPreferenceStore store, String preference) {
+	protected String getMessageFromAnnotation(Annotation a) {
+		return a.getText();
+	}
+
+	protected static boolean isActive(IPreferenceStore store, String preference) {
 		return preference != null && store.getBoolean(preference);
 	}
 
 	private IPreferenceStore combinedStore = null;
 
-	private IPreferenceStore getCombinedPreferenceStore() {
+	protected IPreferenceStore getCombinedPreferenceStore() {
 		if (combinedStore == null) {
 			combinedStore = new ChainedPreferenceStore(new IPreferenceStore[] {
 					getPreferenceStore(), EditorsUI.getPreferenceStore() });
@@ -145,7 +154,7 @@ public abstract class AbstractAnnotationHover extends
 		return combinedStore;
 	}
 
-	private IPath getEditorInputPath() {
+	protected IPath getEditorInputPath() {
 		if (getEditor() == null)
 			return null;
 
@@ -160,7 +169,7 @@ public abstract class AbstractAnnotationHover extends
 		return null;
 	}
 
-	private IAnnotationModel getAnnotationModel(IPath path) {
+	protected IAnnotationModel getAnnotationModel(IPath path) {
 		if (path == null)
 			return null;
 
@@ -195,7 +204,7 @@ public abstract class AbstractAnnotationHover extends
 	 *            the annotation
 	 * @return the annotation preference or <code>null</code> if none
 	 */
-	private AnnotationPreference getAnnotationPreference(Annotation annotation) {
+	protected AnnotationPreference getAnnotationPreference(Annotation annotation) {
 		if (annotation.isMarkedDeleted()) {
 			return null;
 		}

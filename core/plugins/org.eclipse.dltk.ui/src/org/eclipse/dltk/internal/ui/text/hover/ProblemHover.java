@@ -9,14 +9,17 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.text.hover;
 
+import org.eclipse.dltk.compiler.problem.IProblem;
+import org.eclipse.dltk.core.IScriptModelMarker;
+import org.eclipse.dltk.internal.core.util.Util;
+import org.eclipse.dltk.internal.ui.text.HTMLPrinter;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.ui.texteditor.MarkerAnnotation;
+
 /**
- * This annotation hover shows the description of the
- * selected java annotation.
- *
- * XXX: Currently this problem hover only works for
- *		Java problems.
- *		see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=62081
- *
+ * This annotation hover shows the description of the selected java annotation.
+ * 
+ * 
  * @since 3.0
  */
 public class ProblemHover extends AbstractAnnotationHover {
@@ -25,4 +28,34 @@ public class ProblemHover extends AbstractAnnotationHover {
 		super(false);
 	}
 
+	protected String postUpdateMessage(String message) {
+		return super.postUpdateMessage(HTMLPrinter.replace(message, '\n',
+				"<br/>\n"));
+	}
+
+	protected String getMessageFromAnnotation(Annotation a) {
+		if (a instanceof MarkerAnnotation) {
+			MarkerAnnotation ma = (MarkerAnnotation) a;
+			String args = ma.getMarker().getAttribute(
+					IScriptModelMarker.ARGUMENTS, null);
+			if (args != null) {
+				String[] arguments = Util.getProblemArgumentsFromMarker(args);
+				return returnText(a, arguments);
+			}
+		}
+		return a.getText();
+	}
+
+	private String returnText(Annotation a, String[] arguments) {
+		for (int i = 0; i < arguments.length; i++) {
+			String ar = arguments[i];
+			if (ar.startsWith(IProblem.DESCRIPTION_ARGUMENT_PREFIX)) {
+				return a.getText()
+						+ "\n"
+						+ ar.substring(IProblem.DESCRIPTION_ARGUMENT_PREFIX
+								.length());
+			}
+		}
+		return a.getText();
+	}
 }
