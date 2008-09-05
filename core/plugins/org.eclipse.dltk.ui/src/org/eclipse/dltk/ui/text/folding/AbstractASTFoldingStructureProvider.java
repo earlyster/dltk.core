@@ -1084,8 +1084,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	}
 
 	protected static class FoldingASTVisitor extends ASTVisitor {
-		private List result = new ArrayList();
-		private int offset;
+		private final List result = new ArrayList();
+		private final int offset;
 
 		protected FoldingASTVisitor(int offset) {
 			this.offset = offset;
