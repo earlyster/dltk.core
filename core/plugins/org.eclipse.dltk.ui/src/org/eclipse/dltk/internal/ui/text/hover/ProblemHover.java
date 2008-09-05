@@ -10,8 +10,7 @@
 package org.eclipse.dltk.internal.ui.text.hover;
 
 import org.eclipse.dltk.compiler.problem.IProblem;
-import org.eclipse.dltk.core.IScriptModelMarker;
-import org.eclipse.dltk.internal.core.util.Util;
+import org.eclipse.dltk.core.CorrectionEngine;
 import org.eclipse.dltk.internal.ui.text.HTMLPrinter;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
@@ -36,10 +35,9 @@ public class ProblemHover extends AbstractAnnotationHover {
 	protected String getMessageFromAnnotation(Annotation a) {
 		if (a instanceof MarkerAnnotation) {
 			MarkerAnnotation ma = (MarkerAnnotation) a;
-			String args = ma.getMarker().getAttribute(
-					IScriptModelMarker.ARGUMENTS, null);
-			if (args != null) {
-				String[] arguments = Util.getProblemArgumentsFromMarker(args);
+			String[] arguments = CorrectionEngine.getProblemArguments(ma
+					.getMarker());
+			if (arguments != null) {
 				return returnText(a, arguments);
 			}
 		}
