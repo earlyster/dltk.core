@@ -504,7 +504,7 @@ public abstract class AbstractConfigurationBlock implements
 		Text textControl = new Text(composite, SWT.BORDER | SWT.SINGLE);
 		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.widthHint = pixelConverter
-				.convertWidthInCharsToPixels(textLimit + 1);
+				.convertWidthInCharsToPixels(textLimit + 2);
 		textControl.setLayoutData(gd);
 		textControl.setTextLimit(textLimit);
 		if (validator != null)
