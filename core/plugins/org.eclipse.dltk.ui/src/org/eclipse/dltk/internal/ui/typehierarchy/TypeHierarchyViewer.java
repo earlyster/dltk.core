@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.typehierarchy;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.ui.ScriptElementLabels;
@@ -19,7 +20,6 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.OpenEvent;
