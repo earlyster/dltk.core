@@ -9,9 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.typehierarchy;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.ui.PlatformUI;
 
 /**
