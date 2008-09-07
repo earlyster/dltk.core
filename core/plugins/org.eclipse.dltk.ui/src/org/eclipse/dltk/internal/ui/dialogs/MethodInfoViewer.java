@@ -44,7 +44,6 @@ import org.eclipse.dltk.internal.corext.util.MethodFilter;
 import org.eclipse.dltk.internal.corext.util.MethodInfoFilter;
 import org.eclipse.dltk.internal.corext.util.OpenMethodHistory;
 import org.eclipse.dltk.internal.corext.util.Strings;
-import org.eclipse.dltk.internal.corext.util.TypeInfoRequestorAdapter;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
@@ -234,13 +233,9 @@ public class MethodInfoViewer {
 
 	protected class MethodInfoLabelProvider {
 
-		private TypeInfoRequestorAdapter fAdapter = new TypeInfoRequestorAdapter();
-
 		private Map fLib2Name = new HashMap();
 		private String[] fInstallLocations;
 		private String[] fVMNames;
-
-		// private boolean fFullyQualifyDuplicates;
 
 		public MethodInfoLabelProvider() {
 			List locations = new ArrayList();
@@ -333,8 +328,6 @@ public class MethodInfoViewer {
 		public String getFullyQualifiedText(MethodNameMatch type) {
 			StringBuffer result = new StringBuffer();
 			result.append(getTypeContainerName(type, 2));
-			result.append(" - "); //$NON-NLS-1$
-			result.append(type.getPackageName());
 			// IType dltkType = ((DLTKSearchMethodNameMatch) type).getType();
 			// ISourceModule sourceModule = (ISourceModule)
 			// dltkType.getAncestor(IModelElement.SOURCE_MODULE);
@@ -411,7 +404,14 @@ public class MethodInfoViewer {
 					.getLanguageToolkit(info.getMethod());
 			if (toolkit != null) {
 				ScriptElementLabels labels = toolkit.getScriptElementLabels();
-				result = labels.getElementLabel(info.getMethod(), 0);
+				result = labels
+						.getElementLabel(
+								info.getMethod(),
+								ScriptElementLabels.T_CONTAINER_QUALIFIED
+										| (infoLevel > 0 ? ScriptElementLabels.APPEND_FILE
+												: 0)
+										| (infoLevel > 1 ? ScriptElementLabels.CU_POST_QUALIFIED
+												: 0));
 			}
 			if (result.length() > 0)
 				return result;
