@@ -28,6 +28,7 @@ import org.eclipse.dltk.internal.ui.actions.refactoring.RefactorActionGroup;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.newsourcepage.GenerateBuildPathActionGroup;
 import org.eclipse.dltk.internal.ui.workingsets.ViewActionGroup;
 import org.eclipse.dltk.internal.ui.workingsets.WorkingSetActionGroup;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IContextMenuConstants;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.actions.CustomFiltersActionGroup;
@@ -352,7 +353,7 @@ class ScriptExplorerActionGroup extends CompositeActionGroup {
 	}
 
 	private boolean doubleClickGoesInto() {
-		return PreferenceConstants.DOUBLE_CLICK_GOES_INTO.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.DOUBLE_CLICK));
+		return PreferenceConstants.DOUBLE_CLICK_GOES_INTO.equals(DLTKUIPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.DOUBLE_CLICK));
 	}
 
 	public FrameAction getUpAction() {

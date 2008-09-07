@@ -315,10 +315,6 @@ public class PreferenceConstants {
 		initializeDefaultValues(store, false);
 	}
 
-	public static IPreferenceStore getPreferenceStore() {
-		return DLTKUIPlugin.getDefault().getPreferenceStore();
-	}
-
 	/**
 	 * @param store
 	 * @param commonPreferences
