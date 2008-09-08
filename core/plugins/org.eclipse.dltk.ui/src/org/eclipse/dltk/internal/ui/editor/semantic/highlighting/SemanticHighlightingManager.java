@@ -120,6 +120,13 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			return "SourceCode".toCharArray(); //$NON-NLS-1$
 		}
 
+		/**
+		 * @see org.eclipse.dltk.compiler.env.ISourceModule#getContentsAsCharArray()
+		 */
+		public char[] getContentsAsCharArray() {
+			return source.toCharArray();
+		}
+
 	}
 
 	/** Semantic highlighting presenter */
@@ -391,9 +398,8 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	}
 
 	/*
-	 * @see
-	 * org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse
-	 * .jface.util.PropertyChangeEvent)
+	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse
+	 *      .jface.util.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
 		handlePropertyChangeEvent(event);
@@ -527,7 +533,8 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			if (key.equals(relevantKey))
 				continue;
 			if (fPreferenceStore.getBoolean(key))
-				return false; // another is still enabled or was enabled before
+				return false; // another is still enabled or was enabled
+								// before
 		}
 		// all others are disabled, so toggling relevantKey affects the
 		// enablement
@@ -645,7 +652,8 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	/**
 	 * Returns this hightlighter's reconciler.
 	 * 
-	 * @return the semantic highlighter reconciler or <code>null</code> if none
+	 * @return the semantic highlighter reconciler or <code>null</code> if
+	 *         none
 	 * @since 3.3
 	 */
 	public SemanticHighlightingReconciler getReconciler() {
