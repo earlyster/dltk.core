@@ -1057,7 +1057,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (getCurrentViewer().containsElements() != null) {
 				Runnable runnable= new Runnable() {
 					public void run() {
-						getCurrentViewer().updateContent(doExpand); // refresh
+						final TypeHierarchyViewer viewer = getCurrentViewer();
+						((TypeHierarchyContentProvider) viewer
+								.getContentProvider()).resetState();
+						viewer.updateContent(doExpand); // refresh
 					}
 				};
 				BusyIndicator.showWhile(getDisplay(), runnable);

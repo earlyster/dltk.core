@@ -339,6 +339,10 @@ public abstract class TypeHierarchyContentProvider implements
 		this.alreadyAddedElements.clear();
 	}
 
+	public void resetState() {
+		this.alreadyAddedElements.clear();
+	}
+
 	/*
 	 * @see IContentProvider#dispose
 	 */
