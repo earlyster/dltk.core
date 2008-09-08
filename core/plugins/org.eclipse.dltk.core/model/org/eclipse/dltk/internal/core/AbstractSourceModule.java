@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -325,7 +326,21 @@ public abstract class AbstractSourceModule extends Openable implements
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
-			return ""; //$NON-NLS-1$
+			return org.eclipse.dltk.compiler.util.Util.EMPTY_STRING;
+		}
+	}
+
+	/*
+	 * @see org.eclipse.dltk.compiler.env.ISourceModule#getContentsAsCharArray()
+	 */
+	public char[] getContentsAsCharArray() {
+		try {
+			return getSourceAsCharArray();
+		} catch (ModelException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+			return CharOperation.NO_CHAR;
 		}
 	}
 
