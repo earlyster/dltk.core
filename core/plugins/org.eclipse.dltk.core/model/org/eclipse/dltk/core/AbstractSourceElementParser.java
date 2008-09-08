@@ -22,12 +22,10 @@ public abstract class AbstractSourceElementParser implements
 	private ISourceElementRequestor sourceElementRequestor = null;
 	private IProblemReporter problemReporter;
 
-	public void parseSourceModule(char[] contents, ISourceModuleInfo astCache,
-			char[] filename) {
-
-		ModuleDeclaration moduleDeclaration = SourceParserUtil
-				.getModuleDeclaration(filename, contents, getNatureId(),
-						problemReporter, astCache);
+	public void parseSourceModule(
+			org.eclipse.dltk.compiler.env.ISourceModule module,
+			ISourceModuleInfo astCache) {
+		final ModuleDeclaration moduleDeclaration = parse(module, astCache);
 
 		SourceElementRequestVisitor requestor = createVisitor();
 
@@ -38,6 +36,21 @@ public abstract class AbstractSourceElementParser implements
 				e.printStackTrace();
 			}
 		}
+	}
+
+	protected ModuleDeclaration parse(
+			org.eclipse.dltk.compiler.env.ISourceModule module,
+			ISourceModuleInfo astCache) {
+		final ModuleDeclaration moduleDeclaration;
+		if (module instanceof ISourceModule) {
+			moduleDeclaration = SourceParserUtil.getModuleDeclaration(
+					(ISourceModule) module, problemReporter, astCache);
+		} else {
+			moduleDeclaration = SourceParserUtil.getModuleDeclaration(module
+					.getFileName(), module.getContentsAsCharArray(),
+					getNatureId(), problemReporter, astCache);
+		}
+		return moduleDeclaration;
 	}
 
 	public void setReporter(IProblemReporter reporter) {
