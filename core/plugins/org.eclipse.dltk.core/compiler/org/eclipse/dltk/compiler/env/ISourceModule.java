@@ -32,5 +32,8 @@ public interface ISourceModule extends IDependent {
 	 */
 	String getSourceContents();
 
+	char[] getContentsAsCharArray();
+
 	IModelElement getModelElement();
+
 }
