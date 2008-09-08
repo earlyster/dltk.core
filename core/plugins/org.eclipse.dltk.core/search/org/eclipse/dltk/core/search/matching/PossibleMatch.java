@@ -67,6 +67,13 @@ public class PossibleMatch implements ISourceModule {
 			return this.source;
 		return this.source = this.document.getContents();
 	}
+	
+	/*
+	 * @see org.eclipse.dltk.compiler.env.ISourceModule#getContentsAsCharArray()
+	 */
+	public char[] getContentsAsCharArray() {
+		return getSourceContents().toCharArray();
+	}
 
 	/**
 	 * The exact openable file name. In particular, will be the originating
