@@ -14,6 +14,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.compiler.env.CompilerSourceCode;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
@@ -59,11 +60,12 @@ public class SourceIndexer extends AbstractIndexer {
 	public void indexDocument() {
 
 		long started = System.currentTimeMillis();
+		ISourceModule module = null;
+		ISourceModuleInfo info = null;
 
 		// Create a new Parser
 		SourceIndexerRequestor requestor = ((InternalSearchDocument) this.document).requestor;
-		String documentPath = this.document.getPath();
-		IPath path = new Path(documentPath);
+		IPath path = new Path(this.document.getPath());
 		ISourceElementParser parser = ((InternalSearchDocument) this.document).parser;
 		if (!this.document.isExternal()) {
 			IProject project = document.getProject();
@@ -87,7 +89,6 @@ public class SourceIndexer extends AbstractIndexer {
 			parser.setRequestor(requestor);
 			String pkgName = ""; //$NON-NLS-1$
 			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-			ISourceModule module = null;
 			if (file.exists()) {
 				module = (ISourceModule) DLTKCore.create(file);
 				if (module != null) {
@@ -99,29 +100,26 @@ public class SourceIndexer extends AbstractIndexer {
 			requestor.setPackageName(pkgName);
 			// We need to get already
 			// Launch the parser
-			char[] source = null;
-			char[] name = null;
-			try {
-				source = document.getCharContents();
-				name = documentPath.toCharArray();
-			} catch (Exception e) {
-				// ignore
-			}
-			if (source == null || name == null)
-				return; // could not retrieve document info (e.g. resource was
+			// char[] source = null;
+			// char[] name = null;
+			// try {
+			// source = document.getCharContents();
+			// name = documentPath.toCharArray();
+			// } catch (Exception e) {
+			// // ignore
+			// }
+			// if (source == null || name == null)
+			// return; // could not retrieve document info (e.g. resource was
 			// discarded)
 
 			/**
 			 * Using cache to build module.
 			 */
-			ISourceModuleInfo info = null;
 			ISourceModuleInfoCache cache = ModelManager.getModelManager()
 					.getSourceModuleInfoCache();
 			if (module != null) {
 				info = cache.get(module);
 			}
-
-			parser.parseSourceModule(source, info, name);
 
 		} else { // This is for external documents
 			if (parser == null || requestor == null) {
@@ -139,21 +137,20 @@ public class SourceIndexer extends AbstractIndexer {
 					.removeLastSegments(1)).toString();
 			requestor.setPackageName(pkgName);
 			// Launch the parser
-			char[] source = null;
-			char[] name = null;
-			try {
-				source = document.getCharContents();
-				name = documentPath.toCharArray();
-			} catch (Exception e) {
-				// ignore
-			}
-			if (source == null || name == null)
-				return; // could not retrieve document info (e.g. resource was
+			// char[] source = null;
+			// char[] name = null;
+			// try {
+			// source = document.getCharContents();
+			// name = documentPath.toCharArray();
+			// } catch (Exception e) {
+			// // ignore
+			// }
+			// if (source == null || name == null)
+			// return; // could not retrieve document info (e.g. resource was
 			// discarded)
 
 			// We need to obtain ISourceModule handle to do caching. This will
 			// improve parsing performance.
-			ISourceModuleInfo info = null;
 
 			if (document.getProject() != null) {
 				IProject project = document.getProject();
@@ -183,9 +180,8 @@ public class SourceIndexer extends AbstractIndexer {
 						IScriptFolder folder = frag
 								.getScriptFolder(fragmentRelativePath
 										.removeLastSegments(1));
-						ISourceModule module = folder
-								.getSourceModule(document.fullPath
-										.lastSegment());
+						module = folder.getSourceModule(document.fullPath
+								.lastSegment());
 						if (module.exists()) {
 							info = ModelManager.getModelManager()
 									.getSourceModuleInfoCache().get(module);
@@ -198,17 +194,23 @@ public class SourceIndexer extends AbstractIndexer {
 				}
 			}
 
-			parser.parseSourceModule(source, info, name);
+		}
+		if (module instanceof org.eclipse.dltk.compiler.env.ISourceModule) {
+			parser.parseSourceModule(
+					(org.eclipse.dltk.compiler.env.ISourceModule) module, info);
+		} else {
+			parser.parseSourceModule(new CompilerSourceCode(document
+					.getContents()), info);
+		}
+		long ended = System.currentTimeMillis();
 
-			long ended = System.currentTimeMillis();
-
-			if (ended - started > maxWorkTime) {
-				maxWorkTime = ended - started;
-				if (DLTKCore.VERBOSE) {
-					System.err.println("Max indexDocument() work time " //$NON-NLS-1$
-							+ maxWorkTime + " on " + document.getPath()); //$NON-NLS-1$
-				}
+		if (ended - started > maxWorkTime) {
+			maxWorkTime = ended - started;
+			if (DLTKCore.VERBOSE) {
+				System.err.println("Max indexDocument() work time " //$NON-NLS-1$
+						+ maxWorkTime + " on " + document.getPath()); //$NON-NLS-1$
 			}
 		}
+
 	}
 }

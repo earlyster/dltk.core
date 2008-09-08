@@ -14,11 +14,12 @@ import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
 
 public interface ISourceElementParser {
 	/**
-	 * Parses selected contens with ast creation. Also it is recommended to use
-	 * SourceParserUtils to put delcaration into cache, and retrive it from it.
+	 * Parses contents of the module with ast creation. Also it is recommended to
+	 * use SourceParserUtils to put delcaration into cache, and retrieve it from
+	 * it.
 	 */
-	void parseSourceModule(char[] contents, ISourceModuleInfo cache,
-			char[] filename);
+	void parseSourceModule(org.eclipse.dltk.compiler.env.ISourceModule module,
+			ISourceModuleInfo mifo);
 
 	void setRequestor(ISourceElementRequestor requestor);
 

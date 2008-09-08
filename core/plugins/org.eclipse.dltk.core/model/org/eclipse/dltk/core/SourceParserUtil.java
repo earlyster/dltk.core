@@ -4,6 +4,7 @@ import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.ast.parser.ISourceParser;
 import org.eclipse.dltk.ast.parser.ISourceParserConstants;
 import org.eclipse.dltk.ast.parser.ISourceParserExtension;
+import org.eclipse.dltk.compiler.env.CompilerSourceCode;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.compiler.problem.ProblemCollector;
 import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
@@ -200,19 +201,20 @@ public class SourceParserUtil {
 		}
 	}
 
-	public static void parseSourceModule(ISourceModule module,
+	public static void parseSourceModule(final ISourceModule module,
 			ISourceElementParser parser) {
-		char[] contents;
-		try {
-			contents = module.getSourceAsCharArray();
-			ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
-					.getModelManager().getSourceModuleInfoCache();
-			ISourceModuleInfo mifo = sourceModuleInfoCache.get(module);
-			parser.parseSourceModule(contents, mifo, module.getPath()
-					.toString().toCharArray());
-		} catch (ModelException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
+		ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
+				.getModelManager().getSourceModuleInfoCache();
+		ISourceModuleInfo mifo = sourceModuleInfoCache.get(module);
+		if (module instanceof org.eclipse.dltk.compiler.env.ISourceModule) {
+			parser.parseSourceModule(
+					(org.eclipse.dltk.compiler.env.ISourceModule) module, mifo);
+		} else {
+			try {
+				parser.parseSourceModule(new CompilerSourceCode(module
+						.getSource()), mifo);
+			} catch (ModelException ex) {
+				DLTKCore.error("Error parsing source module: " + module, ex);
 			}
 		}
 	}
