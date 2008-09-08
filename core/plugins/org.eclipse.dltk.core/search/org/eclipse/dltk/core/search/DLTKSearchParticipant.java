@@ -44,7 +44,7 @@ import org.eclipse.dltk.internal.core.search.LazyDLTKSearchDocument;
  */
 public class DLTKSearchParticipant extends SearchParticipant {
 	private IndexSelector indexSelector;
-	private boolean bSkipMixinIndexes = false;
+	private boolean bOnlyMixin = false;
 
 	public void beginSearching() {
 		super.beginSearching();
@@ -151,20 +151,29 @@ public class DLTKSearchParticipant extends SearchParticipant {
 	}
 
 	public void skipNotMixin() {
-		this.bSkipMixinIndexes = true;
+		this.bOnlyMixin = true;
 	}
 
 	public boolean isSkipped(Index index) {
-		if (this.bSkipMixinIndexes) {
-			if (index instanceof MixinIndex) {
-				return false;
-			}
+		boolean mixin = false;
+		if (index instanceof MixinIndex) {
+			mixin = true;
+		} else {
 			String containerPath = index.containerPath;
 			if (containerPath.startsWith(IndexManager.SPECIAL_MIXIN)) {
+				mixin = true;
+			}
+		}
+		if (this.bOnlyMixin) {
+			if (mixin) {
 				return false;
 			}
 			return true;
+		} else {
+			if (mixin) {
+				return true;
+			}
+			return false;
 		}
-		return false;
 	}
 }
