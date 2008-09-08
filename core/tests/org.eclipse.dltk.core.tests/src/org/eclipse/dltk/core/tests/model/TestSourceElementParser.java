@@ -27,9 +27,9 @@ public class TestSourceElementParser implements ISourceElementParser {
 // this.requestor = requestor;
 // }
 
-	public void parseSourceModule(char[] contents,
-			ISourceModuleInfo astCashe, char[] filename) {
-		String file = new String(contents);
+	public void parseSourceModule(org.eclipse.dltk.compiler.env.ISourceModule module,
+			ISourceModuleInfo astCashe) {
+		String file = module.getSourceContents();
 		if (file.startsWith(PARSEME_HEADER)) {
 			parsePseudo(file);
 			return;
