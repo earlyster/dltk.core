@@ -52,7 +52,7 @@ public abstract class ASTSemanticHighlighter extends
 			org.eclipse.dltk.compiler.env.ISourceModule code)
 			throws ModelException {
 		return SourceParserUtil.getModuleDeclaration(code.getFileName(), code
-				.getSourceContents().toCharArray(), getNature(), null, null);
+				.getContentsAsCharArray(), getNature(), null, null);
 	}
 
 	protected ModuleDeclaration parseSourceModule(
