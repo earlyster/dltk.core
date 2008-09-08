@@ -108,6 +108,7 @@ public class ScriptDocumentationAccess {
 		IScriptDocumentationProvider[] providers = getContributedProviders();
 		StringBuffer buffer = new StringBuffer();
 		char[] buff = null;
+		boolean prev = false;
 		for (int i = 0; i < providers.length; i++) {
 			IScriptDocumentationProvider p = providers[i];
 			String pNature = (String) providerNatures.get(p);
@@ -115,6 +116,7 @@ public class ScriptDocumentationAccess {
 				continue;
 			Reader reader = p.getInfo(member, allowInherited, allowExternal);
 			if (reader != null) {
+				int size = 0;
 				if (buff == null) {
 					buff = new char[BUFF_SIZE];
 				}
@@ -127,6 +129,12 @@ public class ScriptDocumentationAccess {
 					if (DLTKCore.DEBUG) {
 						e.printStackTrace();
 					}
+				}
+				if (prev && size > 0) {
+					buffer.append("<hr/>");
+				}
+				if (size > 0) {
+					prev = true;
 				}
 			}
 		}
@@ -153,16 +161,43 @@ public class ScriptDocumentationAccess {
 	public static Reader getHTMLContentReader(String nature, String content)
 			throws ModelException {
 		IScriptDocumentationProvider[] providers = getContributedProviders();
+		StringBuffer buffer = new StringBuffer();
+		char[] buff = null;
+		boolean prev = false;
 		for (int i = 0; i < providers.length; i++) {
 			IScriptDocumentationProvider p = providers[i];
 			String pNature = (String) providerNatures.get(p);
 			if (pNature == null || !pNature.equals(nature))
 				continue;
 			Reader reader = p.getInfo(content);
+			int size = 0;
 			if (reader != null) {
-				// TODO: add mechanism to combine several sources to one
-				return reader;
+				if (buff == null) {
+					buff = new char[BUFF_SIZE];
+				}
+				int len = 0;
+				try {
+					while ((len = reader.read(buff, 0, BUFF_SIZE)) != -1) {
+						size += len;
+						buffer.append(buff, 0, len);
+					}
+				} catch (IOException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
 			}
+			if (prev && size > 0) {
+				buffer.append("<hr/>");
+			}
+			if (size > 0) {
+				prev = true;
+			}
+		}
+		if (buffer.length() > 0) {
+			char[] cnt = new char[buffer.length()];
+			buffer.getChars(0, buffer.length(), cnt, 0);
+			return new CharArrayReader(cnt);
 		}
 		return null;
 	}
