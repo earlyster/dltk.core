@@ -73,7 +73,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	 * {@linkplain #addProjectionRange(DefaultScriptFoldingStructureProvider.ScriptProjectionAnnotation, Position)
 	 * addProjectionRange}.
 	 */
-	public final class FoldingStructureComputationContext {
+	public static final class FoldingStructureComputationContext {
 		private final ProjectionAnnotationModel fModel;
 		private final IDocument fDocument;
 		private final boolean fAllowCollapsing;
