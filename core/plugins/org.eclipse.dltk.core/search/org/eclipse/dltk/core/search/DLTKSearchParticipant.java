@@ -164,16 +164,6 @@ public class DLTKSearchParticipant extends SearchParticipant {
 				mixin = true;
 			}
 		}
-		if (this.bOnlyMixin) {
-			if (mixin) {
-				return false;
-			}
-			return true;
-		} else {
-			if (mixin) {
-				return true;
-			}
-			return false;
-		}
+		return this.bOnlyMixin != mixin; 
 	}
 }
