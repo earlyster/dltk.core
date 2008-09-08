@@ -78,9 +78,8 @@ import org.eclipse.dltk.internal.core.ModelStatus;
 import org.eclipse.dltk.internal.core.NameLookup;
 import org.eclipse.dltk.internal.core.Openable;
 import org.eclipse.dltk.internal.core.ScriptProject;
-import org.eclipse.dltk.internal.core.SourceField;
-import org.eclipse.dltk.internal.core.SourceMethod;
 import org.eclipse.dltk.internal.core.SourceModule;
+import org.eclipse.dltk.internal.core.SourceRefElement;
 import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 import org.eclipse.dltk.internal.core.search.IndexQueryRequestor;
 import org.eclipse.dltk.internal.core.search.IndexSelector;
@@ -166,11 +165,8 @@ public class MatchLocator implements ITypeRequestor {
 
 	protected SimpleLookupTable bindings;
 
-	// Cache for method handles
-	protected HashSet methodHandles;
-
-	// Cache for field handles
-	protected HashSet fieldHandles;
+	// Cache for handles
+	private HashSet handles;
 
 	public static class WorkingCopyDocument extends DLTKSearchDocument {
 		public org.eclipse.dltk.core.ISourceModule workingCopy;
@@ -419,33 +415,40 @@ public class MatchLocator implements ITypeRequestor {
 	 */
 	protected IModelElement createMethodHandle(IType type, String methodName) {
 		IMethod methodHandle = type.getMethod(methodName);
-		if (methodHandle instanceof SourceMethod) {
-			while (this.methodHandles.contains(methodHandle)) {
-				((SourceMethod) methodHandle).occurrenceCount++;
-			}
-		}
-		this.methodHandles.add(methodHandle);
+		resolveDuplicates(methodHandle);
 		return methodHandle;
 	}
 
+	/**
+	 * Increment the {@link SourceRefElement#occurrenceCount} until the
+	 * specified handle is unique.
+	 * 
+	 * @param handle
+	 */
+	protected void resolveDuplicates(IMember handle) {
+		if (handle instanceof SourceRefElement) {
+			while (this.handles.contains(handle)) {
+				((SourceRefElement) handle).occurrenceCount++;
+			}
+			this.handles.add(handle);
+		}
+	}
+
 	protected IModelElement createTypeHandle(IType parent, String name) {
-		return parent.getType(name);
+		final IType typeHandle = parent.getType(name);
+		resolveDuplicates(typeHandle);
+		return typeHandle;
 	}
 
 	/*
-	 * Create method handle. Store occurences for create handle to retrieve
+	 * Create method handle. Store occurrences for create handle to retrieve
 	 * possible duplicate ones.
 	 */
 	protected IModelElement createMethodHandle(ISourceModule module,
 			String methodName) {
 
 		IMethod methodHandle = module.getMethod(methodName);
-		if (methodHandle instanceof SourceMethod) {
-			while (this.methodHandles.contains(methodHandle)) {
-				((SourceMethod) methodHandle).occurrenceCount++;
-			}
-		}
-		this.methodHandles.add(methodHandle);
+		resolveDuplicates(methodHandle);
 		return methodHandle;
 	}
 
@@ -455,12 +458,7 @@ public class MatchLocator implements ITypeRequestor {
 	 */
 	protected IModelElement createFieldHandle(IType type, String methodName) {
 		IField fieldHandle = type.getField(methodName);
-		if (fieldHandle instanceof SourceField) {
-			while (this.fieldHandles.contains(fieldHandle)) {
-				((SourceField) fieldHandle).occurrenceCount++;
-			}
-		}
-		this.fieldHandles.add(fieldHandle);
+		resolveDuplicates(fieldHandle);
 		return fieldHandle;
 	}
 
@@ -472,12 +470,7 @@ public class MatchLocator implements ITypeRequestor {
 			String methodName) {
 
 		IField fieldHandle = module.getField(methodName);
-		if (fieldHandle instanceof SourceField) {
-			while (this.fieldHandles.contains(fieldHandle)) {
-				((SourceField) fieldHandle).occurrenceCount++;
-			}
-		}
-		this.fieldHandles.add(fieldHandle);
+		resolveDuplicates(fieldHandle);
 		return fieldHandle;
 	}
 
@@ -486,14 +479,16 @@ public class MatchLocator implements ITypeRequestor {
 	 */
 	protected IType createTypeHandle(String simpleTypeName) {
 		Openable openable = this.currentPossibleMatch.openable;
+		IType type = null;
 		if (openable instanceof SourceModule)
-			return ((SourceModule) openable).getType(simpleTypeName);
+			type = ((SourceModule) openable).getType(simpleTypeName);
 		else if (openable instanceof ExternalSourceModule) {
-			return ((ExternalSourceModule) openable).getType(simpleTypeName);
+			type = ((ExternalSourceModule) openable).getType(simpleTypeName);
 		} else if (openable instanceof BuiltinSourceModule) {
-			return ((BuiltinSourceModule) openable).getType(simpleTypeName);
+			type = ((BuiltinSourceModule) openable).getType(simpleTypeName);
 		}
-		return null;
+		resolveDuplicates(type);
+		return type;
 	}
 
 	/**
@@ -511,12 +506,15 @@ public class MatchLocator implements ITypeRequestor {
 	 */
 	protected IMethod createMethodHandle(String simpleTypeName) {
 		Openable openable = this.currentPossibleMatch.openable;
+		IMethod method = null;
 		if (openable instanceof SourceModule)
-			return ((SourceModule) openable).getMethod(simpleTypeName);
+			method = ((SourceModule) openable).getMethod(simpleTypeName);
 		if (openable instanceof ExternalSourceModule) {
-			return ((ExternalSourceModule) openable).getMethod(simpleTypeName);
+			method = ((ExternalSourceModule) openable)
+					.getMethod(simpleTypeName);
 		}
-		return null;
+		resolveDuplicates(method);
+		return method;
 	}
 
 	/**
@@ -524,12 +522,16 @@ public class MatchLocator implements ITypeRequestor {
 	 */
 	protected IField createFieldHandle(String simpleTypeName) {
 		Openable openable = this.currentPossibleMatch.openable;
+		IField field;
 		if (openable instanceof SourceModule)
-			return ((SourceModule) openable).getField(simpleTypeName);
+			field = ((SourceModule) openable).getField(simpleTypeName);
 		if (openable instanceof ExternalSourceModule) {
-			return ((ExternalSourceModule) openable).getField(simpleTypeName);
+			field = ((ExternalSourceModule) openable).getField(simpleTypeName);
+		} else {
+			field = null;
 		}
-		return null;
+		resolveDuplicates(field);
+		return field;
 	}
 
 	protected boolean encloses(IModelElement element) {
@@ -792,6 +794,7 @@ public class MatchLocator implements ITypeRequestor {
 							displayed = i;
 						} catch (ModelException e) {
 							// problem with buildpath in this project -> skip it
+							DLTKCore.error("error in locateMatches", e); //$NON-NLS-1$
 						}
 						matchSet.reset();
 					}
@@ -807,6 +810,7 @@ public class MatchLocator implements ITypeRequestor {
 							- displayed);
 				} catch (ModelException e) {
 					// problem with buildpath in last project -> ignore
+					DLTKCore.error("error in locateMatches", e); //$NON-NLS-1$
 				}
 			}
 			if (this.progressMonitor != null)
@@ -1162,8 +1166,7 @@ public class MatchLocator implements ITypeRequestor {
 		this.unitScope = null;
 		if (nodeSet.matchingNodes.elementSize == 0)
 			return; // no matching nodes were found
-		this.methodHandles = new HashSet();
-		this.fieldHandles = new HashSet();
+		this.handles = new HashSet();
 		boolean matchedUnitContainer = (this.matchContainer & PatternLocator.COMPILATION_UNIT_CONTAINER) != 0;
 		// report references in javadoc
 
@@ -1236,7 +1239,7 @@ public class MatchLocator implements ITypeRequestor {
 		}
 
 		// Clear handle cache
-		this.methodHandles = null;
+		this.handles = null;
 		this.bindings.removeKey(this.pattern);
 	}
 
