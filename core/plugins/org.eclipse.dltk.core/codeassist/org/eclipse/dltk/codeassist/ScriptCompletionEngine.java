@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.codeassist;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -54,10 +53,10 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	protected char[] source;
 
 	public ScriptCompletionEngine(/*
-								 * ISearchableEnvironment nameEnvironment,
-								 * CompletionRequestor requestor, Map settings,
-								 * IScriptProject scriptProject
-								 */) {
+									 * ISearchableEnvironment nameEnvironment,
+									 * CompletionRequestor requestor, Map
+									 * settings, IScriptProject scriptProject
+									 */) {
 		super(null);
 
 		// this.scriptProject = scriptProject;
@@ -239,13 +238,11 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	protected void findLocalVariables(char[] token, char[][] choices,
 			boolean canCompleteEmptyToken, boolean provideDollar) {
 		int kind = CompletionProposal.LOCAL_VARIABLE_REF;
-		findElements(token, choices, canCompleteEmptyToken, provideDollar,
-				kind, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
+		findElements(token, choices, canCompleteEmptyToken, provideDollar, kind);
 	}
 
 	protected void findElements(char[] token, char[][] choices,
-			boolean canCompleteEmptyToken, boolean provideDollar, int kind,
-			Map parameterNames, Map proposalInfos) {
+			boolean canCompleteEmptyToken, boolean provideDollar, int kind) {
 		if (choices == null || choices.length == 0)
 			return;
 
@@ -278,12 +275,6 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						// proposal.setTypeName(displayName);
 						proposal.setName(co);
 						proposal.setCompletion(co);
-						proposal.setParameterNames((char[][]) parameterNames
-								.get(choices[i]));
-						Object proposalInfo = proposalInfos.get(choices[i]);
-						if (proposalInfo != null) {
-							proposal.extraInfo = proposalInfo;
-						}
 
 						// proposal.setFlags(Flags.AccDefault);
 						proposal.setReplaceRange(this.startPosition
