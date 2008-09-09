@@ -30,8 +30,7 @@ public class CompletionProposalLabelProvider {
 	/**
 	 * The completion context.
 	 */
-//	private CompletionContext fContext;
-
+	// private CompletionContext fContext;
 	/**
 	 * Creates a new label provider.
 	 */
@@ -99,7 +98,7 @@ public class CompletionProposalLabelProvider {
 	 *         arguments
 	 */
 	protected StringBuffer appendParameterSignature(StringBuffer buffer,
-			char[][] parameterTypes, char[][] parameterNames) {		
+			char[][] parameterTypes, char[][] parameterNames) {
 		if (parameterNames != null) {
 			for (int i = 0; i < parameterNames.length; i++) {
 				if (i > 0) {
@@ -111,7 +110,7 @@ public class CompletionProposalLabelProvider {
 		}
 		return buffer;
 	}
-	
+
 	/**
 	 * Creates a display label for the given method proposal. The display label
 	 * consists of:
@@ -125,8 +124,8 @@ public class CompletionProposalLabelProvider {
 	 * Examples: For the <code>get(int)</code> method of a variable of type
 	 * <code>List<? extends Number></code>, the following display name is
 	 * returned: <code>get(int index)  Number - List</code>.<br>
-	 * For the <code>add(E)</code> method of a variable of type
-	 * returned: <code>add(Number o)  void - List</code>.<br>
+	 * For the <code>add(E)</code> method of a variable of type returned:
+	 * <code>add(Number o)  void - List</code>.<br>
 	 * <code>List<? super Number></code>, the following display name is
 	 * </p>
 	 * 
@@ -159,7 +158,7 @@ public class CompletionProposalLabelProvider {
 		nameBuffer.append('(');
 		appendUnboundedParameterList(nameBuffer, methodProposal);
 		nameBuffer.append(")  "); //$NON-NLS-1$
-		
+
 		return nameBuffer.toString();
 	}
 
@@ -215,7 +214,7 @@ public class CompletionProposalLabelProvider {
 		return lastDot;
 	}
 
-	String createSimpleLabelWithType(CompletionProposal proposal) {		
+	String createSimpleLabelWithType(CompletionProposal proposal) {
 		return new String(proposal.getCompletion());
 	}
 
@@ -226,7 +225,7 @@ public class CompletionProposalLabelProvider {
 	public String createSimpleLabel(CompletionProposal proposal) {
 		return String.valueOf(proposal.getCompletion());
 	}
-	
+
 	public String createKeywordLabel(CompletionProposal proposal) {
 		return String.valueOf(proposal.getName());
 	}
@@ -246,8 +245,8 @@ public class CompletionProposalLabelProvider {
 			return createMethodProposalLabel(proposal);
 		case CompletionProposal.METHOD_DECLARATION:
 			return createOverrideMethodProposalLabel(proposal);
-		case CompletionProposal.TYPE_REF:			
-			return createTypeProposalLabel(proposal);			
+		case CompletionProposal.TYPE_REF:
+			return createTypeProposalLabel(proposal);
 			// case CompletionProposal.JAVADOC_TYPE_REF:
 			// return createJavadocTypeProposalLabel(proposal);
 			// case CompletionProposal.JAVADOC_FIELD_REF:
@@ -290,7 +289,8 @@ public class CompletionProposalLabelProvider {
 		case CompletionProposal.METHOD_NAME_REFERENCE:
 		case CompletionProposal.METHOD_REF:
 		case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
-			descriptor = ScriptElementImageProvider.getMethodImageDescriptor(proposal.getFlags());
+			descriptor = ScriptElementImageProvider
+					.getMethodImageDescriptor(proposal.getFlags());
 			break;
 		case CompletionProposal.TYPE_REF:
 			descriptor = DLTKPluginImages.DESC_OBJS_CLASSALT;
@@ -306,8 +306,8 @@ public class CompletionProposalLabelProvider {
 			descriptor = DLTKPluginImages.DESC_OBJS_PACKAGE;
 			break;
 		case CompletionProposal.KEYWORD:
-		    descriptor = DLTKPluginImages.DESC_OBJS_KEYWORD;
-		    break;
+			descriptor = DLTKPluginImages.DESC_OBJS_KEYWORD;
+			break;
 		case CompletionProposal.LABEL_REF:
 			descriptor = null;
 			break;
@@ -337,7 +337,8 @@ public class CompletionProposalLabelProvider {
 				.getMethodImageDescriptor(flags), proposal);
 	}
 
-	ImageDescriptor createTypeImageDescriptor(CompletionProposal proposal) {
+	protected ImageDescriptor createTypeImageDescriptor(
+			CompletionProposal proposal) {
 		final int flags = proposal.getFlags();
 		// boolean isInterfaceOrAnnotation= Flags.isInterface(flags) ||
 		// Flags.isAnnotation(flags);
@@ -345,18 +346,21 @@ public class CompletionProposalLabelProvider {
 				.getTypeImageDescriptor(flags, false), proposal);
 	}
 
-	ImageDescriptor createFieldImageDescriptor(CompletionProposal proposal) {
+	protected ImageDescriptor createFieldImageDescriptor(
+			CompletionProposal proposal) {
 		final int flags = proposal.getFlags();
 		return decorateImageDescriptor(ScriptElementImageProvider
 				.getFieldImageDescriptor(flags), proposal);
 	}
 
-	ImageDescriptor createLocalImageDescriptor(CompletionProposal proposal) {
+	protected ImageDescriptor createLocalImageDescriptor(
+			CompletionProposal proposal) {
 		return decorateImageDescriptor(
 				DLTKPluginImages.DESC_OBJS_LOCAL_VARIABLE, proposal);
 	}
 
-	ImageDescriptor createPackageImageDescriptor(CompletionProposal proposal) {
+	protected ImageDescriptor createPackageImageDescriptor(
+			CompletionProposal proposal) {
 		return decorateImageDescriptor(DLTKPluginImages.DESC_OBJS_PACKAGE,
 				proposal);
 	}
@@ -372,11 +376,13 @@ public class CompletionProposalLabelProvider {
 	 * @return an image descriptor for a method proposal
 	 * @see Flags
 	 */
-	private ImageDescriptor decorateImageDescriptor(ImageDescriptor descriptor,
-			CompletionProposal proposal) {
-		int adornmentFlags = ScriptElementImageProvider.computeAdornmentFlags(proposal.getModelElement(), 
-				ScriptElementImageProvider.SMALL_ICONS | ScriptElementImageProvider.OVERLAY_ICONS);
-		
+	protected ImageDescriptor decorateImageDescriptor(
+			ImageDescriptor descriptor, CompletionProposal proposal) {
+		int adornmentFlags = ScriptElementImageProvider.computeAdornmentFlags(
+				proposal.getModelElement(),
+				ScriptElementImageProvider.SMALL_ICONS
+						| ScriptElementImageProvider.OVERLAY_ICONS);
+
 		if (proposal.isConstructor()) {
 			adornmentFlags |= ScriptElementImageDescriptor.CONSTRUCTOR;
 		}
@@ -393,6 +399,6 @@ public class CompletionProposalLabelProvider {
 	 * 
 	 */
 	void setContext(CompletionContext context) {
-//		fContext = context;
+		// fContext = context;
 	}
 }
