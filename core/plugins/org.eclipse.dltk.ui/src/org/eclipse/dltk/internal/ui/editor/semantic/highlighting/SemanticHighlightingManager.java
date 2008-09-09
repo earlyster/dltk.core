@@ -14,10 +14,8 @@ package org.eclipse.dltk.internal.ui.editor.semantic.highlighting;
 import java.util.Collections;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.compiler.env.CompilerSourceCode;
 import org.eclipse.dltk.compiler.env.ISourceModule;
-import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.ui.PreferenceConstants;
@@ -96,35 +94,10 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		}
 	}
 
-	private static class SourceCode implements ISourceModule {
-
-		private final String source;
+	private static class SourceCode extends CompilerSourceCode {
 
 		public SourceCode(String source) {
-			this.source = source;
-		}
-
-		public IModelElement getModelElement() {
-			return null;
-		}
-
-		public IPath getScriptFolder() {
-			return Path.EMPTY;
-		}
-
-		public String getSourceContents() {
-			return source;
-		}
-
-		public char[] getFileName() {
-			return "SourceCode".toCharArray(); //$NON-NLS-1$
-		}
-
-		/**
-		 * @see org.eclipse.dltk.compiler.env.ISourceModule#getContentsAsCharArray()
-		 */
-		public char[] getContentsAsCharArray() {
-			return source.toCharArray();
+			super(source);
 		}
 
 	}
@@ -398,8 +371,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	}
 
 	/*
-	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse
-	 *      .jface.util.PropertyChangeEvent)
+	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
 		handlePropertyChangeEvent(event);
@@ -533,8 +505,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			if (key.equals(relevantKey))
 				continue;
 			if (fPreferenceStore.getBoolean(key))
-				return false; // another is still enabled or was enabled
-								// before
+				return false; // another is still enabled or was enabled before
 		}
 		// all others are disabled, so toggling relevantKey affects the
 		// enablement
@@ -652,8 +623,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	/**
 	 * Returns this hightlighter's reconciler.
 	 * 
-	 * @return the semantic highlighter reconciler or <code>null</code> if
-	 *         none
+	 * @return the semantic highlighter reconciler or <code>null</code> if none
 	 * @since 3.3
 	 */
 	public SemanticHighlightingReconciler getReconciler() {
