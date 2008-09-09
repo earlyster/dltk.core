@@ -62,7 +62,7 @@ import org.eclipse.dltk.internal.core.util.Util;
  */
 public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 
-	public static boolean DEBUG = false;
+	public static boolean DEBUG = true;
 
 	static final byte VERSION = 0x0000;
 	// SEPARATOR
@@ -522,11 +522,11 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * @see ITypeHierarchy
 	 */
 	public IType[] getAllTypes() {
-		IType[] classes = getAllClasses();
-		int classesLength = classes.length;
-		IType[] all = new IType[classesLength];
-		System.arraycopy(classes, 0, all, 0, classesLength);
-		return all;
+		// IType[] classes = getAllClasses();
+		// int classesLength = classes.length;
+		// IType[] all = new IType[classesLength];
+		// System.arraycopy(classes, 0, all, 0, classesLength);
+		return getAllClasses();
 	}
 
 	/**
