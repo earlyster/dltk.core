@@ -14,8 +14,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.compiler.env.CompilerSourceCode;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
@@ -55,6 +55,40 @@ public class SourceIndexer extends AbstractIndexer {
 
 	public SourceIndexer(SearchDocument document) {
 		super(document);
+	}
+
+	private static class ParserInput implements
+			org.eclipse.dltk.compiler.env.ISourceModule {
+
+		private final SearchDocument document;
+
+		/**
+		 * @param document
+		 */
+		public ParserInput(SearchDocument document) {
+			this.document = document;
+		}
+
+		public char[] getContentsAsCharArray() {
+			return document.getCharContents();
+		}
+
+		public IModelElement getModelElement() {
+			return null;
+		}
+
+		public IPath getScriptFolder() {
+			return new Path(document.getPath()).removeLastSegments(1);
+		}
+
+		public String getSourceContents() {
+			return document.getContents();
+		}
+
+		public char[] getFileName() {
+			return document.getPath().toCharArray();
+		}
+
 	}
 
 	public void indexDocument() {
@@ -194,13 +228,7 @@ public class SourceIndexer extends AbstractIndexer {
 			}
 
 		}
-		if (module instanceof org.eclipse.dltk.compiler.env.ISourceModule) {
-			parser.parseSourceModule(
-					(org.eclipse.dltk.compiler.env.ISourceModule) module, info);
-		} else {
-			parser.parseSourceModule(new CompilerSourceCode(document
-					.getContents()), info);
-		}
+		parser.parseSourceModule(new ParserInput(document), info);
 		long ended = System.currentTimeMillis();
 
 		if (ended - started > maxWorkTime) {
