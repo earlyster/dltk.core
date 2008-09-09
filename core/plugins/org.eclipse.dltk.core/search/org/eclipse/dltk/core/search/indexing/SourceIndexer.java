@@ -115,18 +115,17 @@ public class SourceIndexer extends AbstractIndexer {
 			/**
 			 * Using cache to build module.
 			 */
-			ISourceModuleInfoCache cache = ModelManager.getModelManager()
-					.getSourceModuleInfoCache();
 			if (module != null) {
+				ISourceModuleInfoCache cache = ModelManager.getModelManager()
+						.getSourceModuleInfoCache();
 				info = cache.get(module);
 			}
 
 		} else { // This is for external documents
 			if (parser == null || requestor == null) {
 				return;
-			} else {
-				parser.setRequestor(requestor);
 			}
+			parser.setRequestor(requestor);
 			requestor.setIndexer(this);
 			String ppath = path.toString();
 			if (DLTKCore.DEBUG) {
