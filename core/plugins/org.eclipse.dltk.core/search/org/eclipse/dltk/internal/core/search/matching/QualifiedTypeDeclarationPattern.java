@@ -18,7 +18,7 @@ public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern
 		implements IIndexConstants {
 	public char[] qualification;
 	// PackageDeclarationPattern packagePattern;
-	public int packageIndex = -1;
+	// public int packageIndex = -1;
 
 	public QualifiedTypeDeclarationPattern(char[] qualification,
 			char[] simpleName, char typeSuffix, int matchRule,
