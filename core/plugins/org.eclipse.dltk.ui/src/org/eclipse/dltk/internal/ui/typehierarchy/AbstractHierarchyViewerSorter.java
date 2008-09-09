@@ -22,41 +22,44 @@ import org.eclipse.jface.viewers.ViewerSorter;
 /**
   */
 public abstract class AbstractHierarchyViewerSorter extends ViewerSorter {
-	
-	private static final int OTHER= 1;
-	private static final int CLASS= 2;
-	private static final int ANONYM= 3;
-	
+
+	private static final int OTHER = 1;
+	private static final int CLASS = 2;
+	private static final int ANONYM = 3;
+
 	private ModelElementSorter fNormalSorter;
 	private SourcePositionSorter fSourcePositonSorter;
-	
+
 	public AbstractHierarchyViewerSorter() {
-		fNormalSorter= new ModelElementSorter();
-		fSourcePositonSorter= new SourcePositionSorter();
+		fNormalSorter = new ModelElementSorter();
+		fSourcePositonSorter = new SourcePositionSorter();
 	}
-	
+
 	protected abstract ITypeHierarchy getHierarchy(IType type);
+
 	public abstract boolean isSortByDefiningType();
+
 	public abstract boolean isSortAlphabetically();
-	
-	
+
 	protected int getTypeFlags(IType type) throws ModelException {
 		return type.getFlags();
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.viewers.ViewerSorter#category(java.lang.Object)
 	 */
 	public int category(Object element) {
 		if (element instanceof IType) {
-			IType type= (IType) element;
+			IType type = (IType) element;
 			if (type.getElementName().length() == 0) {
 				return ANONYM;
 			}
 			try {
-				int flags= getTypeFlags(type);
+				int flags = getTypeFlags(type);
 				return CLASS;
-				
+
 			} catch (ModelException e) {
 				// ignore
 			}
@@ -64,20 +67,22 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerSorter {
 		return OTHER;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.viewers.ViewerSorter#compare(null, null, null)
 	 */
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		if (!isSortAlphabetically() && !isSortByDefiningType()) {
 			return fSourcePositonSorter.compare(viewer, e1, e2);
 		}
-		
-		int cat1= category(e1);
-		int cat2= category(e2);
+
+		int cat1 = category(e1);
+		int cat2 = category(e2);
 
 		if (cat1 != cat2)
 			return cat1 - cat2;
-		
+
 		if (cat1 == OTHER) { // method or field
 			if (isSortByDefiningType()) {
 				try {
@@ -103,36 +108,39 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerSorter {
 				}
 			}
 			if (isSortAlphabetically()) {
-				return fNormalSorter.compare(viewer, e1, e2); // use appearance pref page settings
+				return fNormalSorter.compare(viewer, e1, e2); // use appearance
+																// pref page
+																// settings
 			}
 			return 0;
 		} else if (cat1 == ANONYM) {
 			return 0;
 		} else if (isSortAlphabetically()) {
-			String name1= ((IType) e1).getElementName(); 
-			String name2= ((IType) e2).getElementName(); 
+			String name1 = ((IType) e1).getElementName();
+			String name2 = ((IType) e2).getElementName();
 			return getCollator().compare(name1, name2);
 		}
 		return 0;
 	}
-	
+
 	private IType getDefiningType(IMethod method) throws ModelException {
-//		int flags= method.getFlags();
-//		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || method.isConstructor()) {
-//			return null;
-//		}
-//	
-//		IType declaringType= method.getDeclaringType();
-//		MethodOverrideTester tester= new MethodOverrideTester(declaringType, getHierarchy(declaringType));
-//		IMethod res= tester.findDeclaringMethod(method, true);
-//		if (res == null) {
-//			return null;
-//		}
-//		return res.getDeclaringType();
-		
+		// int flags= method.getFlags();
+		// if (Flags.isPrivate(flags) || Flags.isStatic(flags) ||
+		// method.isConstructor()) {
+		// return null;
+		// }
+		//	
+		// IType declaringType= method.getDeclaringType();
+		// MethodOverrideTester tester= new MethodOverrideTester(declaringType,
+		// getHierarchy(declaringType));
+		// IMethod res= tester.findDeclaringMethod(method, true);
+		// if (res == null) {
+		// return null;
+		// }
+		// return res.getDeclaringType();
+
 		return null;
 	}
-	
 
 	private int compareInHierarchy(IType def1, IType def2) {
 		if (ScriptModelUtil.isSuperType(getHierarchy(def1), def2, def1)) {
@@ -140,10 +148,10 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerSorter {
 		} else if (ScriptModelUtil.isSuperType(getHierarchy(def2), def1, def2)) {
 			return -1;
 		}
-		
-		String name1= def1.getElementName();
-		String name2= def2.getElementName();
-		
+
+		String name1 = def1.getElementName();
+		String name2 = def2.getElementName();
+
 		return getCollator().compare(name1, name2);
 	}
 
