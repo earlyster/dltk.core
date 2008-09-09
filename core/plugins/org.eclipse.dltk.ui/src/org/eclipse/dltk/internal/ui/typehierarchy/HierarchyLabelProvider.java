@@ -29,53 +29,63 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 
 /**
- * Label provider for the hierarchy viewers. Types in the hierarchy that are not belonging to the
- * input scope are rendered differntly.
-  */
+ * Label provider for the hierarchy viewers. Types in the hierarchy that are not
+ * belonging to the input scope are rendered differntly.
+ */
 public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 
 	private static class FocusDescriptor extends CompositeImageDescriptor {
 		private ImageDescriptor fBase;
+
 		public FocusDescriptor(ImageDescriptor base) {
-			fBase= base;
+			fBase = base;
 		}
+
 		protected void drawCompositeImage(int width, int height) {
 			drawImage(getImageData(fBase), 0, 0);
-			//drawImage(getImageData(DLTKPluginImages.DESC_OVR_FOCUS), 0, 0);
+			// drawImage(getImageData(DLTKPluginImages.DESC_OVR_FOCUS), 0, 0);
 		}
-		
+
 		private ImageData getImageData(ImageDescriptor descriptor) {
-			ImageData data= descriptor.getImageData(); // see bug 51965: getImageData can return null
+			ImageData data = descriptor.getImageData(); // see bug 51965:
+														// getImageData can
+														// return null
 			if (data == null) {
-				data= DEFAULT_IMAGE_DATA;
-				DLTKUIPlugin.logErrorMessage("Image data not available: " + descriptor.toString()); //$NON-NLS-1$
+				data = DEFAULT_IMAGE_DATA;
+				DLTKUIPlugin
+						.logErrorMessage("Image data not available: " + descriptor.toString()); //$NON-NLS-1$
 			}
 			return data;
 		}
-		
+
 		protected Point getSize() {
 			return ScriptElementImageProvider.BIG_SIZE;
 		}
+
 		public int hashCode() {
 			return fBase.hashCode();
 		}
+
 		public boolean equals(Object object) {
-			return object != null && FocusDescriptor.class.equals(object.getClass()) && ((FocusDescriptor)object).fBase.equals(fBase);
-		}		
+			return object != null
+					&& FocusDescriptor.class.equals(object.getClass())
+					&& ((FocusDescriptor) object).fBase.equals(fBase);
+		}
 	}
 
 	private Color fGrayedColor;
 	private Color fSpecialColor;
 
 	private ViewerFilter fFilter;
-	
+
 	private TypeHierarchyLifeCycle fHierarchy;
-	
-	public HierarchyLabelProvider(TypeHierarchyLifeCycle lifeCycle, IPreferenceStore store) {
-		super(DEFAULT_TEXTFLAGS | ScriptElementLabels.USE_RESOLVED, DEFAULT_IMAGEFLAGS, 
-				store); 
-		fHierarchy= lifeCycle;
-		fFilter= null;
+
+	public HierarchyLabelProvider(TypeHierarchyLifeCycle lifeCycle,
+			IPreferenceStore store) {
+		super(DEFAULT_TEXTFLAGS | ScriptElementLabels.USE_RESOLVED,
+				DEFAULT_IMAGEFLAGS, store);
+		fHierarchy = lifeCycle;
+		fFilter = null;
 	}
 
 	/**
@@ -86,25 +96,27 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	}
 
 	/**
-	 * @param filter The filter to set.
+	 * @param filter
+	 *            The filter to set.
 	 */
 	public void setFilter(ViewerFilter filter) {
-		fFilter= filter;
+		fFilter = filter;
 	}
 
 	protected boolean isDifferentScope(IType type) {
 		if (fFilter != null && !fFilter.select(null, null, type)) {
 			return true;
 		}
-		
-		IModelElement input= fHierarchy.getInputElement();
+
+		IModelElement input = fHierarchy.getInputElement();
 		if (input == null || input.getElementType() == IModelElement.TYPE) {
 			return false;
 		}
-			
-		IModelElement parent= type.getAncestor(input.getElementType());
+
+		IModelElement parent = type.getAncestor(input.getElementType());
 		if (input.getElementType() == IModelElement.PROJECT_FRAGMENT) {
-			if (parent == null || parent.getElementName().equals(input.getElementName())) {
+			if (parent == null
+					|| parent.getElementName().equals(input.getElementName())) {
 				return false;
 			}
 		} else if (input.equals(parent)) {
@@ -112,42 +124,48 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}
 		return true;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see ILabelProvider#getText
-	 */ 	
+	 */
 	public String getText(Object element) {
-		String text= super.getText(element);
+		String text = super.getText(element);
 		return decorateText(text, element);
-	}	
-	
-	
-	/* (non-Javadoc)
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see ILabelProvider#getImage
-	 */ 
+	 */
 	public Image getImage(Object element) {
-		Image result= null;
+		Image result = null;
 		if (element instanceof IType) {
-			ImageDescriptor desc= getTypeImageDescriptor((IType) element);
+			ImageDescriptor desc = getTypeImageDescriptor((IType) element);
 			if (desc != null) {
 				if (element.equals(fHierarchy.getInputElement())) {
-					desc= new FocusDescriptor(desc);
+					desc = new FocusDescriptor(desc);
 				}
-				result= DLTKUIPlugin.getImageDescriptorRegistry().get(desc);
+				result = DLTKUIPlugin.getImageDescriptorRegistry().get(desc);
 			}
 		} else {
-			result= fImageLabelProvider.getImageLabel(element, evaluateImageFlags(element));
+			result = fImageLabelProvider.getImageLabel(element,
+					evaluateImageFlags(element));
 		}
 		return decorateImage(result, element);
 	}
 
 	private ImageDescriptor getTypeImageDescriptor(IType type) {
-		ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
+		ITypeHierarchy hierarchy = fHierarchy.getHierarchy();
 		if (hierarchy == null) {
-			return new ScriptElementImageDescriptor(DLTKPluginImages.DESC_OBJS_CLASS, 0, ScriptElementImageProvider.BIG_SIZE);
+			return new ScriptElementImageDescriptor(
+					DLTKPluginImages.DESC_OBJS_CLASS, 0,
+					ScriptElementImageProvider.BIG_SIZE);
 		}
-		
-		int flags= hierarchy.getCachedFlags(type);
+
+		int flags = hierarchy.getCachedFlags(type);
 		if (flags == -1) {
 			try {
 				flags = type.getFlags();
@@ -157,9 +175,19 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			} catch (ModelException e) {
 			}
 		}
-//		boolean isInner= (type.getDeclaringType() != null);
-		
-		ImageDescriptor desc= ScriptElementImageProvider.getTypeImageDescriptor(flags, isDifferentScope(type));//(isInner, false, flags, isDifferentScope(type));
+		// boolean isInner= (type.getDeclaringType() != null);
+
+		ImageDescriptor desc = ScriptElementImageProvider
+				.getTypeImageDescriptor(flags, isDifferentScope(type));//(isInner
+																		// ,
+																		// false
+																		// ,
+																		// flags
+																		// ,
+																		// isDifferentScope
+																		// (
+																		// type)
+																		// );
 
 		boolean isInterface = Flags.isInterface(flags);
 		int adornmentFlags = 0;
@@ -172,28 +200,33 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		if (Flags.isStatic(flags)) {
 			adornmentFlags |= ScriptElementImageDescriptor.STATIC;
 		}
-		
-		return new ScriptElementImageDescriptor(desc, adornmentFlags, ScriptElementImageProvider.BIG_SIZE);
+
+		return new ScriptElementImageDescriptor(desc, adornmentFlags,
+				ScriptElementImageProvider.BIG_SIZE);
 	}
-		
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 	 */
 	public Color getForeground(Object element) {
 		if (element instanceof IMethod) {
 			if (fSpecialColor == null) {
-				fSpecialColor= Display.getCurrent().getSystemColor(SWT.COLOR_DARK_BLUE);
+				fSpecialColor = Display.getCurrent().getSystemColor(
+						SWT.COLOR_DARK_BLUE);
 			}
 			return fSpecialColor;
-		} else if (element instanceof IType && isDifferentScope((IType) element)) {
+		} else if (element instanceof IType
+				&& isDifferentScope((IType) element)) {
 			if (fGrayedColor == null) {
-				fGrayedColor= Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
+				fGrayedColor = Display.getCurrent().getSystemColor(
+						SWT.COLOR_DARK_GRAY);
 			}
 			return fGrayedColor;
 		}
 		return null;
-	}	
-	
-	
+	}
 
 }
