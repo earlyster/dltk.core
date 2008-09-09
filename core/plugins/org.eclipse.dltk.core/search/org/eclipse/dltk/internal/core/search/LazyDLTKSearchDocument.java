@@ -13,6 +13,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -63,7 +64,7 @@ public class LazyDLTKSearchDocument extends DLTKSearchDocument {
 				e.printStackTrace();
 			}
 		}
-		return new char[0];
+		return CharOperation.NO_CHAR;
 	}
 
 	public String getContents() {
