@@ -18,18 +18,19 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptUtils;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.internal.ui.actions.SelectionConverter;
 import org.eclipse.dltk.internal.ui.dialogs.TextFieldNavigationHandler;
-import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.search.DLTKSearchQuery;
 import org.eclipse.dltk.internal.ui.search.DLTKSearchScopeFactory;
 import org.eclipse.dltk.internal.ui.search.PatternStrings;
@@ -680,15 +681,20 @@ public abstract class ScriptSearchPage extends DialogPage implements
 			initData = tryStructuredSelection((IStructuredSelection) sel);
 		} else if (sel instanceof ITextSelection) {
 			IEditorPart activePart = getActiveEditor();
-			if (activePart instanceof ScriptEditor) {
-				try {
-					IModelElement[] elements = SelectionConverter
-							.codeResolve(activePart);
-					if (elements != null && elements.length > 0) {
-						initData = determineInitValuesFrom(elements[0]);
+			if (activePart != null) {
+				if (ScriptUtils.checkNature(getLanguageToolkit().getNatureId(),
+						activePart, true)) {
+					try {
+						IModelElement[] elements = SelectionConverter
+								.codeResolve(activePart);
+						if (elements != null && elements.length > 0) {
+							initData = determineInitValuesFrom(elements[0]);
+						}
+					} catch (ModelException e) {
+						// ignore
 					}
-				} catch (ModelException e) {
-					// ignore
+				} else {
+					initData = getDefaultInitValues();
 				}
 			}
 			if (initData == null) {
@@ -781,6 +787,13 @@ public abstract class ScriptSearchPage extends DialogPage implements
 	}
 
 	private SearchPatternData determineInitValuesFrom(IModelElement element) {
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(element);
+		if (toolkit != null
+				&& !toolkit.getNatureId().equals(
+						getLanguageToolkit().getNatureId())) {
+			return null;
+		}
 		DLTKSearchScopeFactory factory = DLTKSearchScopeFactory.getInstance();
 		boolean isInsideInterpreterEnvironment = factory
 				.isInsideInterpreter(element);
@@ -893,11 +906,13 @@ public abstract class ScriptSearchPage extends DialogPage implements
 	 * @return the page settings to be used
 	 */
 	private IDialogSettings getDialogSettings() {
+		final String pageName = getLanguageToolkit().getLanguageName()
+				+ PAGE_NAME;
 		IDialogSettings settings = DLTKUIPlugin.getDefault()
 				.getDialogSettings();
-		fDialogSettings = settings.getSection(PAGE_NAME);
+		fDialogSettings = settings.getSection(pageName);
 		if (fDialogSettings == null)
-			fDialogSettings = settings.addNewSection(PAGE_NAME);
+			fDialogSettings = settings.addNewSection(pageName);
 		return fDialogSettings;
 	}
 
