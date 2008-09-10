@@ -214,7 +214,8 @@ public class SourceParserUtil {
 				parser.parseSourceModule(new CompilerSourceCode(module
 						.getSource()), mifo);
 			} catch (ModelException ex) {
-				DLTKCore.error("Error parsing source module: " + module, ex);
+				final String msg = Messages.SourceParserUtil_errorRetrievingContent;
+				DLTKCore.error(msg, ex);
 			}
 		}
 	}
