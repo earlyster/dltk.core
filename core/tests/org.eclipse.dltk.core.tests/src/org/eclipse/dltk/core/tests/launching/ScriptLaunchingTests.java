@@ -42,6 +42,7 @@ import org.eclipse.dltk.internal.debug.core.model.ScriptThread;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterConfig;
+import org.eclipse.dltk.launching.InterpreterSearcher;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 
 public abstract class ScriptLaunchingTests extends AbstractModelTests {
@@ -115,7 +116,7 @@ public abstract class ScriptLaunchingTests extends AbstractModelTests {
 					return true;
 				} else if (attributeName
 						.equals(ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES)) {
-					return false;
+					return true;
 				}
 
 				return defaultValue;
