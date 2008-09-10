@@ -25,11 +25,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.dltk.ast.ASTListNode;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.declarations.FieldDeclaration;
 import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.ast.declarations.TypeDeclaration;
+import org.eclipse.dltk.ast.references.TypeReference;
 import org.eclipse.dltk.compiler.env.INameEnvironment;
 import org.eclipse.dltk.compiler.env.ISourceType;
 import org.eclipse.dltk.compiler.env.lookup.Scope;
@@ -1270,6 +1272,19 @@ public class MatchLocator implements ITypeRequestor {
 			report(match);
 		}
 		boolean matchedClassContainer = (this.matchContainer & PatternLocator.CLASS_CONTAINER) != 0;
+
+		final ASTListNode supers = type.getSuperClasses();
+		if (supers != null) {
+			for (Iterator i = supers.getChilds().iterator(); i.hasNext();) {
+				final ASTNode superClass = (ASTNode) i.next();
+				final String name = type.resolveSuperClassReference(superClass);
+				if (name != null) {
+					this.patternLocator.match(new TypeReference(superClass
+							.sourceStart(), superClass.sourceEnd(), name),
+							nodeSet);
+				}
+			}
+		}
 
 		// filter out element not in hierarchy scope
 		if (DLTKCore.DEBUG) {
