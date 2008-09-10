@@ -114,21 +114,27 @@ public class OpenAction extends SelectionDispatchAction {
 			return false;
 		for (Iterator iter = selection.iterator(); iter.hasNext();) {
 			Object element = iter.next();
-			if ((element instanceof ISourceReference)
-					|| ((element instanceof IAdaptable) && (((IAdaptable) element)
-							.getAdapter(ISourceReference.class) != null)))
-				continue;
-			if ((element instanceof IFile)
-					|| ((element instanceof IAdaptable) && (((IAdaptable) element)
-							.getAdapter(IFile.class) != null)))
-				continue;
-			if ((element instanceof IStorage)
-					|| ((element instanceof IAdaptable) && (((IAdaptable) element)
-							.getAdapter(IStorage.class) != null)))
-				continue;
-			return false;
+			if (!checkElement(element)) {
+				return false;
+			}
 		}
 		return true;
+	}
+
+	protected boolean checkElement(Object element) {
+		if ((element instanceof ISourceReference)
+				|| ((element instanceof IAdaptable) && (((IAdaptable) element)
+						.getAdapter(ISourceReference.class) != null)))
+			return true;
+		if ((element instanceof IFile)
+				|| ((element instanceof IAdaptable) && (((IAdaptable) element)
+						.getAdapter(IFile.class) != null)))
+			return true;
+		if ((element instanceof IStorage)
+				|| ((element instanceof IAdaptable) && (((IAdaptable) element)
+						.getAdapter(IStorage.class) != null)))
+			return true;
+		return false;
 	}
 
 	/**
