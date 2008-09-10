@@ -89,7 +89,19 @@ public abstract class ScriptUtils {
 		}
 	}
 
-	public static boolean checkNature(String natureId, Object input) {
+	/**
+	 * Tests if the nature of the specified input object is the same as
+	 * specified value. If the input object does not implement neither
+	 * {@link IScriptLanguageDependent} nor {@link IScriptNatureDependent} then
+	 * <code>defaultValue<code> is returned.
+	 * 
+	 * @param natureId
+	 * @param input
+	 * @param defaultValue
+	 * @return
+	 */
+	public static boolean checkNature(String natureId, Object input,
+			boolean defaultValue) {
 		if (input instanceof IScriptNatureDependent) {
 			return natureId.equals(((IScriptNatureDependent) input)
 					.getNatureId());
@@ -97,7 +109,7 @@ public abstract class ScriptUtils {
 			return natureId.equals((((IScriptLanguageDependent) input)
 					.getLanguageToolkit().getNatureId()));
 		} else {
-			return false;
+			return defaultValue;
 		}
 	}
 }
