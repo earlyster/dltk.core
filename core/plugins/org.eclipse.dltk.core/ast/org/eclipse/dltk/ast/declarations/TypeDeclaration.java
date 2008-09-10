@@ -16,6 +16,7 @@
 package org.eclipse.dltk.ast.declarations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -81,11 +82,11 @@ public class TypeDeclaration extends Declaration {
 	 * Creates new type declaration from type name ANTLR token, start and end
 	 * position.
 	 * 
-	 * @param name -
-	 *            type name ANTLR token.
-	 * @param start -
+	 * @param name
+	 *            type name.
+	 * @param start
 	 *            type start position in associated file.
-	 * @param end -
+	 * @param end
 	 *            type end position in associated file.
 	 */
 	public TypeDeclaration(String name, int nameStart, int nameEnd, int start,
@@ -135,7 +136,7 @@ public class TypeDeclaration extends Declaration {
 	/**
 	 * Creates type declaration from name token.
 	 * 
-	 * @param name -
+	 * @param name
 	 *            name ANTRL token.
 	 */
 	public TypeDeclaration(DLTKToken name) {
@@ -356,11 +357,11 @@ public class TypeDeclaration extends Declaration {
 	/**
 	 * Set inner statements with start and end position in associated file.
 	 * 
-	 * @param startBody -
+	 * @param startBody
 	 *            start position.
-	 * @param body -
+	 * @param body
 	 *            inner statements.
-	 * @param endBody -
+	 * @param endBody
 	 *            end position.
 	 */
 	public void setBody(int startBody, Block body, int endBody) {
@@ -375,20 +376,29 @@ public class TypeDeclaration extends Declaration {
 	 * 
 	 * @return
 	 */
-	public List/* <String> */getSuperClassNames() {
-		List/* < String > */names = new ArrayList/* < String > */();
+	public List getSuperClassNames() {
 		if (this.fSuperClasses != null) {
-			List/* < Expression > */superClasseExpressions = this.fSuperClasses
-					.getChilds();
-			Iterator i = superClasseExpressions.iterator();
-			while (i.hasNext()) {
-				ASTNode expr = (ASTNode) i.next();
-				if (expr instanceof SimpleReference) {
-					names.add(((SimpleReference) expr).getName());
+			final List superClasses = this.fSuperClasses.getChilds();
+			final List names = new ArrayList(superClasses.size());
+			for (Iterator i = superClasses.iterator(); i.hasNext();) {
+				final ASTNode expr = (ASTNode) i.next();
+				final String name = resolveSuperClassReference(expr);
+				if (name != null) {
+					names.add(name);
 				}
 			}
+			return names;
+		} else {
+			return Collections.EMPTY_LIST;
 		}
-		return names;
+	}
+
+	public String resolveSuperClassReference(ASTNode node) {
+		if (node instanceof SimpleReference) {
+			return ((SimpleReference) node).getName();
+		} else {
+			return null;
+		}
 	}
 
 	/**
