@@ -13,7 +13,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.ui.ScriptElementLabels;
-import org.eclipse.dltk.ui.actions.OpenAction;
 import org.eclipse.dltk.ui.viewsupport.DecoratingModelLabelProvider;
 import org.eclipse.dltk.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jface.action.IMenuListener;
@@ -33,7 +32,7 @@ import org.eclipse.ui.IWorkbenchPartSite;
 
 public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 
-	private OpenAction fOpen;
+	private HierarchyOpenAction fOpen;
 	private HierarchyLabelProvider fLabelProvider;
 
 	public TypeHierarchyViewer(Composite parent,
@@ -49,7 +48,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 		setContentProvider(contentProvider);
 		setSorter(new HierarchyViewerSorter(lifeCycle));
 
-		fOpen = new OpenAction(part.getSite());
+		fOpen = new HierarchyOpenAction(part.getSite());
 		addOpenListener(new IOpenListener() {
 			public void open(OpenEvent event) {
 				fOpen.run();

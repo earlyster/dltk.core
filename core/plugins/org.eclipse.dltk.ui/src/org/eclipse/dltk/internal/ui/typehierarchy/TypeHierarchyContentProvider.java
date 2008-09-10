@@ -10,8 +10,12 @@
 package org.eclipse.dltk.internal.ui.typehierarchy;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -173,7 +177,41 @@ public abstract class TypeHierarchyContentProvider implements
 				// ignore
 			}
 		}
+		compactTypes(types);
 		return types.toArray();
+	}
+
+	protected void compactTypes(List types) {
+		final Map map = new HashMap();
+		for (Iterator i = types.iterator(); i.hasNext();) {
+			final IType type = (IType) i.next();
+			final String qName = type.getTypeQualifiedName();
+			Object value = map.get(qName);
+			if (value == null) {
+				map.put(qName, type);
+			} else if (value instanceof List) {
+				((List) value).add(type);
+			} else {
+				List list = new ArrayList(4);
+				list.add(value);
+				list.add(type);
+				map.put(qName, list);
+			}
+		}
+		types.clear();
+		final List qNames = new ArrayList(map.keySet());
+		Collections.sort(qNames);
+		for (Iterator i = qNames.iterator(); i.hasNext();) {
+			final String qName = (String) i.next();
+			final Object value = map.get(qName);
+			if (value instanceof List) {
+				final List list = (List) value;
+				types.add(new CumulativeType(qName, (IType[]) list
+						.toArray(new IType[list.size()])));
+			} else {
+				types.add(value);
+			}
+		}
 	}
 
 	protected void getRootTypes(List res) {
@@ -237,7 +275,24 @@ public abstract class TypeHierarchyContentProvider implements
 				}
 
 				addTypeChildren(type, children);
-
+				compactTypes(children);
+				return children.toArray();
+			} catch (ModelException e) {
+				// ignore
+			}
+		} else if (element instanceof CumulativeType) {
+			try {
+				final CumulativeType cType = (CumulativeType) element;
+				final IType[] types = cType.getTypes();
+				final List children = new ArrayList();
+				for (int i = 0; i < types.length; ++i) {
+					if (fMemberFilter != null) {
+						addFilteredMemberChildren(types[i], children);
+					}
+					addTypeChildren(types[i], children);
+				}
+				compactTypes(children);
+				cType.insertTo(children, 0);
 				return children.toArray();
 			} catch (ModelException e) {
 				// ignore
@@ -258,6 +313,8 @@ public abstract class TypeHierarchyContentProvider implements
 			} catch (ModelException e) {
 				return false;
 			}
+		} else if (element instanceof CumulativeType) {
+			return true;
 		}
 		return false;
 	}
@@ -283,8 +340,7 @@ public abstract class TypeHierarchyContentProvider implements
 		int len = types.size();
 		for (int i = 0; i < len; i++) {
 			IType curr = (IType) types.get(i);
-			if (!alreadyAddedElements.contains(curr)) {
-				alreadyAddedElements.add(curr);
+			if (alreadyAddedElements.add(curr)) {
 				if (isInTree(curr)) {
 					children.add(curr);
 				}
@@ -361,6 +417,8 @@ public abstract class TypeHierarchyContentProvider implements
 				return getParentType((IType) member);
 			}
 			return member.getDeclaringType();
+		} else if (element instanceof CumulativeType.Part) {
+			return ((CumulativeType.Part) element).getParent();
 		}
 		return null;
 	}

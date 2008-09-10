@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -55,7 +56,6 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
@@ -1152,7 +1152,10 @@ public class TypeHierarchyViewPart extends ViewPart implements
 			if (getCurrentViewer().containsElements() != null) {
 				Runnable runnable = new Runnable() {
 					public void run() {
-						getCurrentViewer().updateContent(doExpand); // refresh
+						final TypeHierarchyViewer viewer = getCurrentViewer();
+						((TypeHierarchyContentProvider) viewer
+								.getContentProvider()).resetState();
+						viewer.updateContent(doExpand); // refresh
 					}
 				};
 				BusyIndicator.showWhile(getDisplay(), runnable);
@@ -1238,8 +1241,15 @@ public class TypeHierarchyViewPart extends ViewPart implements
 				List types = new ArrayList(nSelected);
 				for (int i = nSelected - 1; i >= 0; i--) {
 					Object elem = selected.get(i);
-					if (elem instanceof IType && !types.contains(elem)) {
-						types.add(elem);
+					if (elem instanceof IType) {
+						if (!types.contains(elem)) {
+							types.add(elem);
+						}
+					} else if (elem instanceof CumulativeType.Part) {
+						final CumulativeType.Part part = (CumulativeType.Part) elem;
+						if (!types.contains(part.type)) {
+							types.add(part.type);
+						}
 					}
 				}
 				if (types.size() == 1) {
@@ -1565,8 +1575,8 @@ public class TypeHierarchyViewPart extends ViewPart implements
 		int position = bar != null ? bar.getSelection() : 0;
 		memento.putInteger(TAG_VERTICAL_SCROLL, position);
 
-		IModelElement selection = (IModelElement) ((IStructuredSelection) getCurrentViewer()
-				.getSelection()).getFirstElement();
+		IModelElement selection = toModelElement(((IStructuredSelection) getCurrentViewer()
+				.getSelection()).getFirstElement());
 		if (selection != null) {
 			memento.putString(TAG_SELECTION, selection.getHandleIdentifier());
 		}
@@ -1581,6 +1591,21 @@ public class TypeHierarchyViewPart extends ViewPart implements
 	private void saveLinkingEnabled(IMemento memento) {
 		memento.putInteger(PreferenceConstants.LINK_TYPEHIERARCHY_TO_EDITOR,
 				fLinkingEnabled ? 1 : 0);
+	}
+
+	/**
+	 * @param element
+	 * @return
+	 */
+	private IModelElement toModelElement(Object element) {
+		if (element instanceof IModelElement) {
+			return (IModelElement) element;
+		} else if (element instanceof CumulativeType) {
+			return ((CumulativeType) element).getFirst();
+		} else if (element instanceof CumulativeType.Part) {
+			return ((CumulativeType.Part) element).type;
+		}
+		return null;
 	}
 
 	/*

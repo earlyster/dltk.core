@@ -9,11 +9,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.typehierarchy;
 
-import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.ui.ModelElementSorter;
 import org.eclipse.dltk.ui.viewsupport.SourcePositionSorter;
 import org.eclipse.jface.viewers.Viewer;
@@ -23,9 +23,11 @@ import org.eclipse.jface.viewers.ViewerSorter;
   */
 public abstract class AbstractHierarchyViewerSorter extends ViewerSorter {
 
-	private static final int OTHER = 1;
-	private static final int CLASS = 2;
-	private static final int ANONYM = 3;
+	private static final int OTHER = 10;
+	private static final int CLASS = 20;
+	private static final int CUMULATIVE_PART = 18;
+	private static final int CUMULATIVE_CLASS = 19;
+	private static final int ANONYM = 30;
 
 	private ModelElementSorter fNormalSorter;
 	private SourcePositionSorter fSourcePositonSorter;
@@ -56,13 +58,16 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerSorter {
 			if (type.getElementName().length() == 0) {
 				return ANONYM;
 			}
-			try {
-				int flags = getTypeFlags(type);
-				return CLASS;
-
-			} catch (ModelException e) {
-				// ignore
-			}
+			// try {
+			// int flags = getTypeFlags(type);
+			return CLASS;
+			// } catch (ModelException e) {
+			// ignore
+			// }
+		} else if (element instanceof CumulativeType) {
+			return CUMULATIVE_CLASS;
+		} else if (element instanceof CumulativeType.Part) {
+			return CUMULATIVE_PART;
 		}
 		return OTHER;
 	}
@@ -108,19 +113,31 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerSorter {
 				}
 			}
 			if (isSortAlphabetically()) {
-				return fNormalSorter.compare(viewer, e1, e2); // use appearance
-																// pref page
-																// settings
+				return fNormalSorter.compare(viewer, e1, e2);
+				// use appearance pref page settings
 			}
 			return 0;
 		} else if (cat1 == ANONYM) {
 			return 0;
 		} else if (isSortAlphabetically()) {
-			String name1 = ((IType) e1).getElementName();
-			String name2 = ((IType) e2).getElementName();
-			return getCollator().compare(name1, name2);
+			String name1 = getTypeName(e1);
+			String name2 = getTypeName(e2);
+			return getComparator().compare(name1, name2);
 		}
 		return 0;
+	}
+
+	private String getTypeName(Object e) {
+		if (e instanceof IType) {
+			return ((IType) e).getElementName();
+		} else if (e instanceof CumulativeType) {
+			return ((CumulativeType) e).getFirst().getElementName();
+		} else if (e instanceof CumulativeType.Part) {
+			return ((CumulativeType.Part) e).type.getSourceModule().getPath()
+					.toString();
+		} else {
+			return e.toString();
+		}
 	}
 
 	private IType getDefiningType(IMethod method) throws ModelException {

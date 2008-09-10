@@ -9,7 +9,12 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.typehierarchy;
 
-import org.eclipse.dltk.core.*;
+import org.eclipse.dltk.core.Flags;
+import org.eclipse.dltk.core.IMethod;
+import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.core.ITypeHierarchy;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -47,9 +52,10 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		}
 
 		private ImageData getImageData(ImageDescriptor descriptor) {
-			ImageData data = descriptor.getImageData(); // see bug 51965:
-														// getImageData can
-														// return null
+			ImageData data = descriptor.getImageData();
+			// see bug 51965:
+			// getImageData can
+			// return null
 			if (data == null) {
 				data = DEFAULT_IMAGE_DATA;
 				DLTKUIPlugin
@@ -126,18 +132,23 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see ILabelProvider#getText
 	 */
 	public String getText(Object element) {
-		String text = super.getText(element);
-		return decorateText(text, element);
+		if (element instanceof CumulativeType) {
+			CumulativeType cType = (CumulativeType) element;
+			return super.getText(cType.getFirst());
+		} else if (element instanceof CumulativeType.Part) {
+			CumulativeType.Part part = (CumulativeType.Part) element;
+			return ScriptElementLabels.getDefault().getTextLabel(
+					part.type.getSourceModule(),
+					ScriptElementLabels.ALL_FULLY_QUALIFIED);
+		} else {
+			return super.getText(element);
+		}
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see ILabelProvider#getImage
 	 */
 	public Image getImage(Object element) {
@@ -150,6 +161,22 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 				}
 				result = DLTKUIPlugin.getImageDescriptorRegistry().get(desc);
 			}
+		} else if (element instanceof CumulativeType) {
+			final CumulativeType cType = (CumulativeType) element;
+			ImageDescriptor desc = getTypeImageDescriptor(cType.getFirst());
+			if (desc != null) {
+				if (cType.contains(fHierarchy.getInputElement())) {
+					desc = new FocusDescriptor(desc);
+				}
+				result = DLTKUIPlugin.getImageDescriptorRegistry().get(desc);
+			}
+		} else if (element instanceof CumulativeType.Part) {
+			final CumulativeType.Part part = (CumulativeType.Part) element;
+			result = super.getImage(part.type.getSourceModule());
+			ImageDescriptor desc = new ScriptElementImageDescriptor(
+					ImageDescriptor.createFromImage(result), 0,
+					ScriptElementImageProvider.BIG_SIZE);
+			result = DLTKUIPlugin.getImageDescriptorRegistry().get(desc);
 		} else {
 			result = fImageLabelProvider.getImageLabel(element,
 					evaluateImageFlags(element));
@@ -178,17 +205,8 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		// boolean isInner= (type.getDeclaringType() != null);
 
 		ImageDescriptor desc = ScriptElementImageProvider
-				.getTypeImageDescriptor(flags, isDifferentScope(type));//(isInner
-																		// ,
-																		// false
-																		// ,
-																		// flags
-																		// ,
-																		// isDifferentScope
-																		// (
-																		// type)
-																		// );
-
+				.getTypeImageDescriptor(flags, isDifferentScope(type));
+		// (isInner, false, flags, isDifferentScope (type) );
 		boolean isInterface = Flags.isInterface(flags);
 		int adornmentFlags = 0;
 		if (Flags.isFinal(flags)) {
@@ -206,8 +224,6 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see
 	 * org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 	 */
