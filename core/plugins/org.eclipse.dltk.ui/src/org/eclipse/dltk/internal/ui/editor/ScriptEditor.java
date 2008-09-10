@@ -33,6 +33,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptLanguageDependent;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
@@ -181,7 +182,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import com.ibm.icu.text.BreakIterator;
 
 public abstract class ScriptEditor extends AbstractDecoratedTextEditor
-		implements IScriptReconcilingListener {
+		implements IScriptReconcilingListener, IScriptLanguageDependent {
 
 	/** The editor's save policy */
 	protected ISavePolicy fSavePolicy = null;
