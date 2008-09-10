@@ -66,6 +66,6 @@ public interface ISearchPatternProcessor {
 	 * @param patternString
 	 * @return
 	 */
-	char[] extractTypeChars(String patternString);
+	String extractTypeChars(String patternString);
 
 }

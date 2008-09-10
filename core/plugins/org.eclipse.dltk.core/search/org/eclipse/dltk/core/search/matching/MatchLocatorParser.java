@@ -107,11 +107,7 @@ public abstract class MatchLocatorParser implements IMatchLocatorParser {
 				if (name != null) {
 					initPatternProcessor();
 					if (patternProcessor != null) {
-						final char[] chars = patternProcessor
-								.extractTypeChars(name);
-						if (chars != null) {
-							name = new String(chars);
-						}
+						name = patternProcessor.extractTypeChars(name);
 					}
 					// TODO create QualifiedTypeReference if needed
 					patternLocator.match(new TypeReference(superClass

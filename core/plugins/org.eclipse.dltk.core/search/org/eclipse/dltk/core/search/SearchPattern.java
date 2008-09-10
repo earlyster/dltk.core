@@ -582,26 +582,21 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		String declaringTypeSignature = null;
 		char declaringTypeQualification[] = null;
 		char declaringTypeSimpleName[] = null;
-		char[] selectorChars = patternString.toCharArray();
+		char[] selectorChars;
 
 		// extract declaring type infos
 		// extract parameter types infos
 		// Create method/constructor pattern
 
-		if (toolkit != null) {
-			ISearchFactory factory = DLTKLanguageManager
-					.getSearchFactory(toolkit.getNatureId());
-			if (factory != null) {
-				ISearchPatternProcessor processor = factory
-						.createSearchPatternProcessor();
-				if (processor != null) {
-					declaringTypeQualification = processor
-							.extractDeclaringTypeQualification(patternString);
-					declaringTypeSimpleName = processor
-							.extractDeclaringTypeSimpleName(patternString);
-					selectorChars = processor.extractSelector(patternString);
-				}
-			}
+		ISearchPatternProcessor processor = getSearchPatternProcessor(toolkit);
+		if (processor != null) {
+			declaringTypeQualification = processor
+					.extractDeclaringTypeQualification(patternString);
+			declaringTypeSimpleName = processor
+					.extractDeclaringTypeSimpleName(patternString);
+			selectorChars = processor.extractSelector(patternString);
+		} else {
+			selectorChars = patternString.toCharArray();
 		}
 
 		boolean findDeclarations = true;
@@ -1078,6 +1073,18 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		return null;
 	}
 
+	private static ISearchPatternProcessor getSearchPatternProcessor(
+			IDLTKLanguageToolkit toolkit) {
+		if (toolkit != null) {
+			ISearchFactory factory = DLTKLanguageManager
+					.getSearchFactory(toolkit.getNatureId());
+			if (factory != null) {
+				return factory.createSearchPatternProcessor();
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Type pattern are formed by [qualification '.']type [typeArguments]. e.g.
 	 * java.lang.Object Runnable List&lt;String&gt;
@@ -1098,20 +1105,13 @@ public abstract class SearchPattern extends InternalSearchPattern {
 
 		char[] qualificationChars = null, typeChars = null;
 		
-		typeChars = patternString.toCharArray();
-		
-		if (toolkit != null) {
-			ISearchFactory factory = DLTKLanguageManager
-					.getSearchFactory(toolkit.getNatureId());
-			if (factory != null) {
-				ISearchPatternProcessor processor = factory
-						.createSearchPatternProcessor();
-				if (processor != null) {
-					qualificationChars = processor
-							.extractTypeQualification(patternString);
-					typeChars = processor.extractTypeChars(patternString);
-				}
-			}
+		ISearchPatternProcessor processor = getSearchPatternProcessor(toolkit);
+		if (processor != null) {
+			qualificationChars = processor
+					.extractTypeQualification(patternString);
+			typeChars = processor.extractTypeChars(patternString).toCharArray();
+		} else {
+			typeChars = patternString.toCharArray();
 		}
 		
 		if (typeChars.length == 1 && typeChars[0] == '*') {

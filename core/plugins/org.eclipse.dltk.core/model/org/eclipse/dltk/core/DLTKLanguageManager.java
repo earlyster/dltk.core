@@ -203,6 +203,7 @@ public class DLTKLanguageManager {
 		if (factory != null) {
 			SourceIndexerRequestor requestor = factory.createSourceRequestor();
 			if (requestor != null) {
+				requestor.setSearchFactory(factory);
 				return requestor;
 			}
 		}

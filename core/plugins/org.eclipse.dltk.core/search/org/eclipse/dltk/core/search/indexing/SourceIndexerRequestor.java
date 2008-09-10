@@ -12,6 +12,8 @@ package org.eclipse.dltk.core.search.indexing;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.ISearchFactory;
+import org.eclipse.dltk.core.ISearchPatternProcessor;
 
 /**
  * This class is used by the JavaParserIndexer. When parsing thescriptfile, the
@@ -27,6 +29,9 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	protected int methodDepth = 0;
 	protected char[] pkgName = CharOperation.NO_CHAR;
 
+	protected ISearchFactory searchFactory;
+	protected ISearchPatternProcessor searchPatternProcessor;
+
 	public SourceIndexerRequestor(SourceIndexer indexer) {
 		this.indexer = indexer;
 	}
@@ -36,6 +41,16 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 
 	public void setIndexer(SourceIndexer indexer) {
 		this.indexer = indexer;
+	}
+	
+	public void setSearchFactory(ISearchFactory searchFactory) {
+		this.searchFactory = searchFactory;
+		if (searchFactory != null) {
+			searchPatternProcessor = searchFactory
+					.createSearchPatternProcessor();
+		} else {
+			searchPatternProcessor = null;
+		}
 	}
 
 	/**
@@ -136,8 +151,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 		if (typeInfo.superclasses != null) {
 			// typeInfo.superclasses = typeInfo.superclasses;
 			for (int i = 0, length = typeInfo.superclasses.length; i < length; i++) {
-				typeInfo.superclasses[i] = new String(
-						getSimpleName(typeInfo.superclasses[i].toCharArray()));
+				typeInfo.superclasses[i] = getSimpleName(typeInfo.superclasses[i]);
 			}
 			// add implicit constructor reference to default constructor
 			if (DLTKCore.DEBUG) {
@@ -189,35 +203,12 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	/*
 	 * Returns the unqualified name without parameters from the given type name.
 	 */
-	private char[] getSimpleName(char[] typeName) {
-		int lastDot = -1, lastGenericStart = -1;
-		int depthCount = 0;
-		int length = typeName.length;
-		lastDotLookup: for (int i = length - 1; i >= 0; i--) {
-			switch (typeName[i]) {
-			case '.':
-				if (depthCount == 0) {
-					lastDot = i;
-					break lastDotLookup;
-				}
-				break;
-			case '<':
-				depthCount--;
-				if (depthCount == 0)
-					lastGenericStart = i;
-				break;
-			case '>':
-				depthCount++;
-				break;
-			}
+	private String getSimpleName(String typeName) {
+		if (searchPatternProcessor != null) {
+			return searchPatternProcessor.extractTypeChars(typeName);
+		} else {
+			return typeName;
 		}
-		if (lastGenericStart < 0) {
-			if (lastDot < 0) {
-				return typeName;
-			}
-			return CharOperation.subarray(typeName, lastDot + 1, length);
-		}
-		return CharOperation.subarray(typeName, lastDot + 1, lastGenericStart);
 	}
 
 	public void popTypeName() {
