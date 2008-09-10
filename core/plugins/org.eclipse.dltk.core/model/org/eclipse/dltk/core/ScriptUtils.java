@@ -16,12 +16,12 @@ import java.io.OutputStream;
 import java.net.URL;
 
 /**
- * Utility functions useful for interacting with internal scripts that may
- * need to be excuted by the plugin itself to obtain information about
- * the underlying interpreter, etc.
+ * Utility functions useful for interacting with internal scripts that may need
+ * to be excuted by the plugin itself to obtain information about the underlying
+ * interpreter, etc.
  */
 public abstract class ScriptUtils {
-	
+
 	/**
 	 * Store an internal executable script inside a plugin's metadata directory.
 	 * 
@@ -38,11 +38,14 @@ public abstract class ScriptUtils {
 	 *     test.script
 	 * </pre>
 	 * 
-	 * <p>you would invoke this method using the following invocation:</p>
+	 * <p>
+	 * you would invoke this method using the following invocation:
+	 * </p>
 	 * 
 	 * <code>storeToMetaData(DLTKCore.getDefault(), "test.script", "scripts/test.script")</code>
 	 * 
-	 * @param plugin plugin that owns the script to be saved
+	 * @param plugin
+	 *            plugin that owns the script to be saved
 	 * @param name
 	 *            name script will be saved as
 	 * @param path
@@ -86,4 +89,15 @@ public abstract class ScriptUtils {
 		}
 	}
 
+	public static boolean checkNature(String natureId, Object input) {
+		if (input instanceof IScriptNatureDependent) {
+			return natureId.equals(((IScriptNatureDependent) input)
+					.getNatureId());
+		} else if (input instanceof IScriptLanguageDependent) {
+			return natureId.equals((((IScriptLanguageDependent) input)
+					.getLanguageToolkit().getNatureId()));
+		} else {
+			return false;
+		}
+	}
 }
