@@ -683,7 +683,7 @@ public abstract class ScriptSearchPage extends DialogPage implements
 			if (activePart instanceof ScriptEditor) {
 				try {
 					IModelElement[] elements = SelectionConverter
-							.codeResolve((ScriptEditor) activePart);
+							.codeResolve(activePart);
 					if (elements != null && elements.length > 0) {
 						initData = determineInitValuesFrom(elements[0]);
 					}
