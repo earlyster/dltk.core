@@ -4,15 +4,21 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
-*******************************************************************************/
+ *******************************************************************************/
 package org.eclipse.dltk.core.search.matching;
 
+import java.util.Iterator;
+
+import org.eclipse.dltk.ast.ASTListNode;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.ASTVisitor;
 import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.ast.declarations.TypeDeclaration;
+import org.eclipse.dltk.ast.references.TypeReference;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.search.IMatchLocatorParser;
 import org.eclipse.dltk.internal.core.search.matching.MatchingNodeSet;
@@ -20,47 +26,47 @@ import org.eclipse.dltk.internal.core.search.matching.MatchingNodeSet;
 public abstract class MatchLocatorParser implements IMatchLocatorParser {
 	private MatchLocator matchLocator;
 	private PatternLocator patternLocator;
-	
-	private MatchingNodeSet nodeSet;	
-		
+
+	private MatchingNodeSet nodeSet;
+
 	public ModuleDeclaration parse(PossibleMatch possibleMatch) {
 		ModuleDeclaration module = SourceParserUtil.getModuleDeclaration(
 				(org.eclipse.dltk.core.ISourceModule) possibleMatch
 						.getModelElement(), null);
 		return module;
 	}
-	
+
 	public void parseBodies(ModuleDeclaration unit) {
 		try {
 			unit.traverse(getMatchVisitor());
 		} catch (Exception e) {
-			if (DLTKCore.DEBUG) {			
+			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
 	public void setNodeSet(MatchingNodeSet nodeSet) {
 		this.nodeSet = nodeSet;
 	}
-	
-	protected MatchingNodeSet getNodeSet(){
+
+	protected MatchingNodeSet getNodeSet() {
 		return nodeSet;
 	}
-		
+
 	protected MatchLocatorParser(MatchLocator locator) {
 		this.matchLocator = locator;
 		this.patternLocator = locator.patternLocator;
 	}
-	
-	protected MatchLocator getMatchLocator(){
+
+	protected MatchLocator getMatchLocator() {
 		return matchLocator;
 	}
-	
-	protected PatternLocator getPatternLocator(){
-		return patternLocator; 
-	}	
-	
+
+	protected PatternLocator getPatternLocator() {
+		return patternLocator;
+	}
+
 	public MethodDeclaration processMethod(MethodDeclaration m) {
 		return m;
 	}
@@ -68,15 +74,54 @@ public abstract class MatchLocatorParser implements IMatchLocatorParser {
 	public TypeDeclaration processType(TypeDeclaration t) {
 		return t;
 	}
-	
+
 	protected void processStatement(ASTNode node, PatternLocator locator) {
 		// empty implementation
 	}
-	
+
 	protected MatchVisitor getMatchVisitor() {
 		return new MatchVisitor();
 	}
-	
+
+	private boolean patternProcessorInitialized = false;
+	private ISearchPatternProcessor patternProcessor = null;
+
+	private void initPatternProcessor() {
+		if (patternProcessorInitialized) {
+			return;
+		}
+		patternProcessorInitialized = true;
+		final String natureId = matchLocator.scope.getLanguageToolkit()
+				.getNatureId();
+		patternProcessor = DLTKLanguageManager.getSearchFactory(natureId)
+				.createSearchPatternProcessor();
+	}
+
+	protected void visitTypeDeclaration(TypeDeclaration t) {
+		patternLocator.match(processType(t), nodeSet);
+		final ASTListNode supers = t.getSuperClasses();
+		if (supers != null) {
+			for (Iterator i = supers.getChilds().iterator(); i.hasNext();) {
+				final ASTNode superClass = (ASTNode) i.next();
+				String name = t.resolveSuperClassReference(superClass);
+				if (name != null) {
+					initPatternProcessor();
+					if (patternProcessor != null) {
+						final char[] chars = patternProcessor
+								.extractTypeChars(name);
+						if (chars != null) {
+							name = new String(chars);
+						}
+					}
+					// TODO create QualifiedTypeReference if needed
+					patternLocator.match(new TypeReference(superClass
+							.sourceStart(), superClass.sourceEnd(), name),
+							nodeSet);
+				}
+			}
+		}
+	}
+
 	protected class MatchVisitor extends ASTVisitor {
 		public boolean visitGeneral(ASTNode node) throws Exception {
 			processStatement(node, getPatternLocator());
@@ -89,7 +134,7 @@ public abstract class MatchLocatorParser implements IMatchLocatorParser {
 		}
 
 		public boolean visit(TypeDeclaration t) throws Exception {
-			getPatternLocator().match(processType(t), getNodeSet());
+			visitTypeDeclaration(t);
 			return true;
 		}
 	}

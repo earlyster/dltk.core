@@ -49,7 +49,7 @@ public class TypeReferenceLocator extends PatternLocator {
 		
 		if (this.pattern.simpleName == null)
 			return nodeSet.addMatch(node, POSSIBLE_MATCH);
-		
+		// TODO handle qualifiedTypeReference
 		if (matchesName(this.pattern.simpleName, ((SimpleReference) node).getName().toCharArray()))
 			return nodeSet.addMatch(node, ACCURATE_MATCH);
 		
