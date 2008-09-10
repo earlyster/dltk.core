@@ -69,7 +69,7 @@ public class TestSearchResults extends SearchRequestor {
 				if (element instanceof IType) {
 					final IType type = (IType) element;
 					// TODO use separator defined for the target language
-					matchName = type.getFullyQualifiedName("::");
+					matchName = type.getTypeQualifiedName("::");
 				} else {
 					matchName = element.getElementName();
 				}
