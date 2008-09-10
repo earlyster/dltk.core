@@ -35,6 +35,11 @@ import org.eclipse.dltk.internal.core.Openable;
 
 public class HierarchyResolver {
 
+	/**
+	 * FIXME use language specific separator
+	 */
+	private static final String TWO_COLONS = "::"; //$NON-NLS-1$
+
 	private HierarchyBuilder hierarchyBuilder;
 	private SearchEngine engine;
 
@@ -63,17 +68,17 @@ public class HierarchyResolver {
 		SearchRequestor typesCollector = new SearchRequestor() {
 			public void acceptSearchMatch(SearchMatch match)
 					throws CoreException {
-
 				IType element = (IType) match.getElement();
 				String[] superClasses = element.getSuperClasses();
 				if (superClasses != null) {
 					for (int i = 0; i < superClasses.length; i++) {
-						String s = superClasses[i];
-						if (!superTypeToExtender.containsKey(s)) {
-							superTypeToExtender.put(s, new LinkedList());
-						}
+						final String s = superClasses[i];
 						List extenders = (List) superTypeToExtender.get(s);
-						extenders.add(element.getElementName());
+						if (extenders == null) {
+							extenders = new LinkedList();
+							superTypeToExtender.put(s, extenders);
+						}
+						extenders.add(element.getTypeQualifiedName(TWO_COLONS));
 					}
 				}
 			}
@@ -81,13 +86,12 @@ public class HierarchyResolver {
 		SearchPattern pattern = SearchPattern.createPattern(
 				"*", //$NON-NLS-1$
 				IDLTKSearchConstants.TYPE, IDLTKSearchConstants.DECLARATIONS,
-				SearchPattern.R_REGEXP_MATCH, hierarchyBuilder.hierarchy.scope
+				SearchPattern.R_PATTERN_MATCH, hierarchyBuilder.hierarchy.scope
 						.getLanguageToolkit());
 		engine.search(pattern, new SearchParticipant[] { SearchEngine
 				.getDefaultSearchParticipant() },
 				hierarchyBuilder.hierarchy.scope, typesCollector,
 				hierarchyBuilder.hierarchy.progressMonitor);
-
 		IFileHierarchyResolver fileHierarchyResolver = createFileHierarchyResolver(focusType);
 		IFileHierarchyInfo hierarchyInfo = null;
 		if (fileHierarchyResolver != null) {
@@ -101,13 +105,11 @@ public class HierarchyResolver {
 	}
 
 	protected void computeSubtypesFor(IType focusType, Map superTypeToExtender,
-			Map subTypesCache, IFileHierarchyInfo hierarchyInfo, Set processedTypes)
-			throws CoreException {
-		
-		processedTypes.add(focusType);
-		
+			Map subTypesCache, IFileHierarchyInfo hierarchyInfo,
+			Set processedTypes) throws CoreException {
+
 		List extenders = (List) superTypeToExtender.get(focusType
-				.getElementName());
+				.getTypeQualifiedName(TWO_COLONS));
 		if (extenders != null) {
 			IType[] subTypes = searchTypes((String[]) extenders
 					.toArray(new String[extenders.size()]), subTypesCache,
@@ -119,9 +121,9 @@ public class HierarchyResolver {
 
 			for (int i = 0; i < subTypes.length; i++) {
 				IType subType = subTypes[i];
-				if (!processedTypes.contains(subType)) {
-					computeSubtypesFor(subType, superTypeToExtender, subTypesCache,
-						hierarchyInfo, processedTypes);
+				if (processedTypes.add(subType)) {
+					computeSubtypesFor(subType, superTypeToExtender,
+							subTypesCache, hierarchyInfo, processedTypes);
 				}
 			}
 		}
@@ -140,10 +142,11 @@ public class HierarchyResolver {
 	}
 
 	protected void computeSupertypesFor(IType focusType,
-			IFileHierarchyInfo hierarchyInfo, Set processedTypes) throws CoreException {
-		
+			IFileHierarchyInfo hierarchyInfo, Set processedTypes)
+			throws CoreException {
+
 		processedTypes.add(focusType);
-		
+
 		// Build superclasses hieararchy:
 		String[] superClasses = focusType.getSuperClasses();
 		if (superClasses != null && superClasses.length > 0) {
@@ -158,7 +161,8 @@ public class HierarchyResolver {
 			for (int i = 0; i < searchTypes.length; i++) {
 				IType superclass = searchTypes[i];
 				if (!processedTypes.contains(superclass)) {
-					computeSupertypesFor(superclass, hierarchyInfo, processedTypes);
+					computeSupertypesFor(superclass, hierarchyInfo,
+							processedTypes);
 				}
 			}
 		} else {
@@ -212,7 +216,8 @@ public class HierarchyResolver {
 		};
 		SearchPattern pattern = SearchPattern.createPattern(type,
 				IDLTKSearchConstants.TYPE, IDLTKSearchConstants.DECLARATIONS,
-				SearchPattern.R_EXACT_MATCH, hierarchyBuilder.hierarchy.scope.getLanguageToolkit());
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
+				hierarchyBuilder.hierarchy.scope.getLanguageToolkit());
 		engine.search(pattern, new SearchParticipant[] { SearchEngine
 				.getDefaultSearchParticipant() },
 				hierarchyBuilder.hierarchy.scope, typesCollector,
