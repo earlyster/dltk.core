@@ -55,8 +55,8 @@ public class TypeReferencePattern extends AndPattern implements IIndexConstants 
 	}
 
 	/*
-	 * Instanciate a type reference pattern with additional information for
-	 * generics search
+	 * Instantiate a type reference pattern with additional information for
+	 * generic search
 	 */
 	public TypeReferencePattern(char[] qualification, char[] simpleName,
 			IType type, int matchRule, IDLTKLanguageToolkit toolkit) {
