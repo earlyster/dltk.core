@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.IBuildpathEntry;
@@ -122,9 +123,12 @@ public class ModelElementUtil {
 		IModelElement[] allPackages = root.getChildren();
 		ArrayList subpackages = new ArrayList();
 		subpackages.add(pack);
+		final IPath folderPath = pack.getPath();
 		for (int i = 0; i < allPackages.length; i++) {
-			IScriptFolder currentPackage = (IScriptFolder) allPackages[i];
-			if (pack.getPath().isPrefixOf(currentPackage.getPath())) {
+			final IScriptFolder currentPackage = (IScriptFolder) allPackages[i];
+			final IPath currentPackagePath = currentPackage.getPath();
+			if (folderPath.isPrefixOf(currentPackagePath)
+					&& !folderPath.equals(currentPackagePath)) {
 				subpackages.add(currentPackage);
 			}
 		}
