@@ -45,6 +45,8 @@ import org.eclipse.dltk.internal.core.mixin.MixinCache;
 import org.eclipse.dltk.internal.core.mixin.MixinManager;
 
 public class MixinModel {
+	private static final boolean DEBUG = false;
+
 	public static final String SEPARATOR = String
 			.valueOf(IIndexConstants.SEPARATOR);
 
@@ -93,19 +95,21 @@ public class MixinModel {
 
 		this.cache = new MixinCache(
 				(int) (ModelCache.DEFAULT_ROOT_SIZE * ratio));
-		DLTKCore.addElementChangedListener(changedListener);
+		DLTKCore.addElementChangedListener(changedListener,
+				ElementChangedEvent.POST_CHANGE);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(
 				changedListener);
+		MixinModelRegistry.register(this);
 	}
 
 	public void stop() {
 		DLTKCore.removeElementChangedListener(changedListener);
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(
 				changedListener);
+		MixinModelRegistry.unregister(this);
 	}
 
 	public IMixinElement get(String key) {
-
 		if (DLTKCore.VERBOSE) {
 			System.out.println("MixinModel.get(" + key + ')'); //$NON-NLS-1$
 		}
@@ -390,6 +394,18 @@ public class MixinModel {
 			// IResourceDelta delta = event.getDelta();
 
 			switch (eventType) {
+			case IResourceChangeEvent.PRE_CLOSE:
+				if (resource.getType() == IResource.PROJECT
+						&& DLTKLanguageManager
+								.hasScriptNature((IProject) resource)) {
+					if (project != null
+							&& resource.equals(project.getProject())) {
+						clear();
+						// TODO destroy this model
+						return;
+					}
+				}
+				break;
 			case IResourceChangeEvent.PRE_DELETE:
 				if (resource.getType() == IResource.PROJECT
 						&& DLTKLanguageManager
@@ -440,7 +456,22 @@ public class MixinModel {
 	// }
 	// }
 
+	private final String getLogContext() {
+		if (project == null) {
+			return "[MixinModel|$" + toolkit.getLanguageName() + "$]"; //$NON-NLS-1$ //$NON-NLS-2$
+		} else {
+			return "[MixinModel|" + project.getElementName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}
+
+	private final void log(String message) {
+		System.out.println(getLogContext() + " " + message); //$NON-NLS-1$
+	}
+
 	public synchronized void remove(ISourceModule element) {
+		if (DEBUG) {
+			log("remove " + element.getElementName()); //$NON-NLS-1$
+		}
 		if (this.elementToMixinCache.containsKey(element)) {
 			List elements = (List) this.elementToMixinCache.get(element);
 			for (int i = 0; i < elements.size(); ++i) {
@@ -797,5 +828,9 @@ public class MixinModel {
 		existKeysCache.clear();
 		notExistKeysCache.clear();
 		modulesToReparse.clear();
+	}
+
+	public String getNature() {
+		return toolkit.getNatureId();
 	}
 }

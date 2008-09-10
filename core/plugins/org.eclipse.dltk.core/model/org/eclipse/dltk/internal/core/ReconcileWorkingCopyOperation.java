@@ -15,14 +15,16 @@ import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProblemRequestor;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.mixin.MixinModelRegistry;
 import org.eclipse.dltk.internal.core.mixin.MixinBuilder;
 import org.eclipse.dltk.internal.core.util.Messages;
 
@@ -87,8 +89,10 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 			// Mixin source index operation required.
 			int sum = this.deltaBuilder.delta.getAffectedChildren().length;
 			if (sum > 0) {
-				List elements = new ArrayList();
 				IScriptProject project = workingCopy.getScriptProject();
+				MixinModelRegistry.removeSourceModule(DLTKLanguageManager
+						.getLanguageToolkit(project), workingCopy);
+				List elements = new ArrayList();
 				elements.add(workingCopy);
 				MixinBuilder.getDefault().buildModelElements(project, elements,
 						new NullProgressMonitor(), false);
