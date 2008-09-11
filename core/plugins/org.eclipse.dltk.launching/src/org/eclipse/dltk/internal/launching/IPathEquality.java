@@ -17,4 +17,6 @@ public interface IPathEquality {
 
 	boolean equals(IPath path1, IPath path2);
 
+	boolean isPrefixOf(IPath path1, IPath path2);
+
 }

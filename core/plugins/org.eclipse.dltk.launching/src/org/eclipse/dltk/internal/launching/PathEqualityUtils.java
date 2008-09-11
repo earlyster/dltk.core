@@ -28,12 +28,40 @@ public class PathEqualityUtils {
 							path2.removeTrailingSeparator().toOSString());
 		}
 
+		public boolean isPrefixOf(IPath path, IPath anotherPath) {
+			if (path.getDevice() == null) {
+				if (anotherPath.getDevice() != null) {
+					return false;
+				}
+			} else {
+				if (!path.getDevice().equalsIgnoreCase(anotherPath.getDevice())) {
+					return false;
+				}
+			}
+			if (path.isEmpty() || (path.isRoot() && anotherPath.isAbsolute())) {
+				return true;
+			}
+			int len = path.segmentCount();
+			if (len > anotherPath.segmentCount()) {
+				return false;
+			}
+			for (int i = 0; i < len; i++) {
+				if (!path.segment(i).equalsIgnoreCase(anotherPath.segment(i)))
+					return false;
+			}
+			return true;
+		}
+
 	}
 
 	private static final class GenericPathCompare implements IPathEquality {
 
 		public boolean equals(IPath path1, IPath path2) {
 			return path1.equals(path2);
+		}
+
+		public boolean isPrefixOf(IPath path, IPath anotherPath) {
+			return path.isPrefixOf(anotherPath);
 		}
 
 	}
