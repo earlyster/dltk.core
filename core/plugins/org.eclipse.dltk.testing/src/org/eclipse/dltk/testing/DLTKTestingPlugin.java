@@ -16,12 +16,8 @@ package org.eclipse.dltk.testing;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
@@ -56,8 +52,6 @@ public class DLTKTestingPlugin extends AbstractUIPlugin {
 	private static DLTKTestingPlugin fgPlugin= null;
 
 	public static final String PLUGIN_ID= "org.eclipse.dltk.testing"; //$NON-NLS-1$
-	public static final String ID_EXTENSION_POINT_TESTRUN_LISTENERS= PLUGIN_ID + "." + "testRunListeners"; //$NON-NLS-1$ //$NON-NLS-2$
-	public static final String ID_EXTENSION_POINT_JUNIT_LAUNCHCONFIGS= PLUGIN_ID + "." + "junitLaunchConfigs"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	/**
 	 * The class path variable referring to the junit home location
@@ -74,15 +68,9 @@ public class DLTKTestingPlugin extends AbstractUIPlugin {
 	 */
 	private ListenerList/*<TestRunListener>*/fNewTestRunListeners;
 
-	/**
-	 * List storing the registered JUnit launch configuration types
-	 */
-	private List fJUnitLaunchConfigTypeIDs;
-
 	private BundleContext fBundleContext;
 
 	private static boolean fIsStopped= false;
-
 
 	public DLTKTestingPlugin() {
 		fgPlugin= this;
@@ -223,33 +211,6 @@ public class DLTKTestingPlugin extends AbstractUIPlugin {
 
 	public static ITestingModel getModel() {
 		return getDefault().fTestingModel;
-	}
-
-	/**
-	 * Loads the registered JUnit launch configurations
-	 */
-	private void loadLaunchConfigTypeIDs() {
-		fJUnitLaunchConfigTypeIDs= new ArrayList();
-		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_JUNIT_LAUNCHCONFIGS);
-		if (extensionPoint == null) {
-			return;
-		}
-		IConfigurationElement[] configs= extensionPoint.getConfigurationElements();
-
-		for (int i= 0; i < configs.length; i++) {
-			String configTypeID= configs[i].getAttribute("configTypeID"); //$NON-NLS-1$
-			fJUnitLaunchConfigTypeIDs.add(configTypeID);
-		}
-	}
-
-	/**
-	 * @return a list of all JUnit launch configuration types
-	 */
-	public List/*<String>*/getJUnitLaunchConfigTypeIDs() {
-		if (fJUnitLaunchConfigTypeIDs == null) {
-			loadLaunchConfigTypeIDs();
-		}
-		return fJUnitLaunchConfigTypeIDs;
 	}
 
 	/**
