@@ -36,6 +36,7 @@ public class EnableStackFilterAction extends Action {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IDLTKTestingHelpContextIds.ENABLEFILTER_ACTION);
 
 		fView= view;
+		setChecked(false);
 		setEnabled(false);
 	}
 
