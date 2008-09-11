@@ -20,14 +20,6 @@ import org.eclipse.jface.action.IAction;
 public interface ITestRunnerUI extends IAdaptable {
 
 	/**
-	 * Filters the stack trace if filtering is enabled for this engine.
-	 * 
-	 * @param trace
-	 * @return
-	 */
-	String filterStackTrace(String trace);
-
-	/**
 	 * Tests that the specified line looks like a stack frame
 	 * 
 	 * @param line
@@ -66,5 +58,35 @@ public interface ITestRunnerUI extends IAdaptable {
 	 * @return
 	 */
 	boolean canRerun(ITestElement testElement);
+
+	/**
+	 * Tests that this testing engine can filter the stack.
+	 * 
+	 * @return
+	 */
+	boolean canFilterStack();
+
+	/**
+	 * Filters the stack trace. This method is called only if filtering is
+	 * enabled for this engine.
+	 * 
+	 * @param trace
+	 * @return
+	 */
+	String filterStackTrace(String trace);
+
+	/**
+	 * Tests that stack filtering is enabled for this engine.
+	 * 
+	 * @return
+	 */
+	boolean isFilterStack();
+
+	/**
+	 * Sets the filtering value for this engine.
+	 * 
+	 * @param value
+	 */
+	void setFilterStack(boolean value);
 
 }

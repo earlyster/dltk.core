@@ -27,11 +27,15 @@ public class TextualTrace {
 	public static final int LINE_TYPE_STACKFRAME = 2;
 
 	private final String fTrace;
-	private final ITestRunnerUI engineUI;
+	private final ITestRunnerUI runnerUI;
 
-	public TextualTrace(String trace, ITestRunnerUI engineUI) {
-		this.engineUI = engineUI;
-		this.fTrace = engineUI.filterStackTrace(trace);
+	public TextualTrace(String trace, ITestRunnerUI runnerUI) {
+		this.runnerUI = runnerUI;
+		if (runnerUI.canFilterStack() && runnerUI.isFilterStack()) {
+			this.fTrace = runnerUI.filterStackTrace(trace);
+		} else {
+			this.fTrace = trace;
+		}
 	}
 
 	public void display(ITraceDisplay display, int maxLabelLength) {
@@ -50,7 +54,7 @@ public class TextualTrace {
 
 			// the stack frames of the trace
 			while ((line = readLine(bufferedReader)) != null) {
-				int type = engineUI.isStackFrame(line) ? LINE_TYPE_STACKFRAME
+				int type = runnerUI.isStackFrame(line) ? LINE_TYPE_STACKFRAME
 						: LINE_TYPE_NORMAL;
 				displayWrappedLine(display, maxLabelLength, line, type);
 			}

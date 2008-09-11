@@ -36,14 +36,14 @@ public class EnableStackFilterAction extends Action {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IDLTKTestingHelpContextIds.ENABLEFILTER_ACTION);
 
 		fView= view;
-//		setChecked(JUnitPreferencePage.getFilterStack());
+		setEnabled(false);
 	}
 
 	/*
 	 * @see Action#actionPerformed
 	 */		
 	public void run() {
-//		JUnitPreferencePage.setFilterStack(isChecked());
+		fView.getTestRunnerUI().setFilterStack(isChecked());
 		fView.refresh();
 	}
 }

@@ -14,9 +14,17 @@ package org.eclipse.dltk.testing;
 import org.eclipse.dltk.testing.model.ITestCaseElement;
 import org.eclipse.dltk.testing.model.ITestElement;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.osgi.util.NLS;
 
 public abstract class AbstractTestRunnerUI implements ITestRunnerUI {
+
+	/*
+	 * @see org.eclipse.dltk.testing.ITestRunnerUI#canFilterStack()
+	 */
+	public boolean canFilterStack() {
+		return false;
+	}
 
 	public String filterStackTrace(String trace) {
 		return trace;
@@ -90,6 +98,28 @@ public abstract class AbstractTestRunnerUI implements ITestRunnerUI {
 	 */
 	public Object getAdapter(Class adapter) {
 		return null;
+	}
+
+	public boolean isFilterStack() {
+		final IPreferenceStore store = getPreferenceStore();
+		if (store != null) {
+			return store
+					.getBoolean(DLTKTestingPreferencesConstants.DO_FILTER_STACK);
+		} else {
+			return false;
+		}
+	}
+
+	public void setFilterStack(boolean value) {
+		final IPreferenceStore store = getPreferenceStore();
+		if (store != null) {
+			store.setValue(DLTKTestingPreferencesConstants.DO_FILTER_STACK,
+					value);
+		}
+	}
+
+	protected IPreferenceStore getPreferenceStore() {
+		return DLTKTestingPlugin.getDefault().getPreferenceStore();
 	}
 
 }

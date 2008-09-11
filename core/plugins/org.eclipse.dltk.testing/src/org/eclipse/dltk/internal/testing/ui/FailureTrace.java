@@ -44,22 +44,24 @@ public class FailureTrace implements IMenuListener {
 	private final Clipboard fClipboard;
     private TestElement fFailure;
     private CompareResultsAction fCompareAction;
+    private EnableStackFilterAction fStackTraceFilterAction;
 	private final FailureTableDisplay fFailureTableDisplay;
 
 	public FailureTrace(Composite parent, Clipboard clipboard, TestRunnerViewPart testRunner, ToolBar toolBar) {
 		Assert.isNotNull(clipboard);
 		
+		fTestRunner= testRunner;
+		fClipboard= clipboard;
 		// fill the failure trace viewer toolbar
 		ToolBarManager failureToolBarmanager= new ToolBarManager(toolBar);
-		failureToolBarmanager.add(new EnableStackFilterAction(this));			
+		fStackTraceFilterAction = new EnableStackFilterAction(this);
+		failureToolBarmanager.add(fStackTraceFilterAction);			
 		fCompareAction = new CompareResultsAction(this);
 		fCompareAction.setEnabled(false);
         failureToolBarmanager.add(fCompareAction);			
 		failureToolBarmanager.update(true);
 		
 		fTable= new Table(parent, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
-		fTestRunner= testRunner;
-		fClipboard= clipboard;
 		
 		OpenStrategy handler = new OpenStrategy(fTable);
 		handler.addOpenListener(new IOpenEventListener() {
@@ -111,6 +113,10 @@ public class FailureTrace implements IMenuListener {
 	private IAction createOpenEditorAction(String traceLine) {
 		final ITestRunnerUI runnerUI = fTestRunner.getTestRunnerUI();
 		return runnerUI.createOpenEditorAction(traceLine);
+	}
+	
+	ITestRunnerUI getTestRunnerUI() {
+		return fTestRunner.getTestRunnerUI();
 	}
 	
 	/**
@@ -173,6 +179,21 @@ public class FailureTrace implements IMenuListener {
 		clear();
 		TableItem tableItem= fFailureTableDisplay.newTableItem();
 		tableItem.setText(text);
+	}
+
+	/**
+	 * Prepares the trace view for the new test session.
+	 */
+	public void reset() {
+		clear();
+		final ITestRunnerUI runnerUI = fTestRunner.getTestRunnerUI();
+		if (runnerUI.canFilterStack()) {
+			fStackTraceFilterAction.setEnabled(true);
+			fStackTraceFilterAction.setChecked(runnerUI.isFilterStack());
+		} else {
+			fStackTraceFilterAction.setEnabled(false);
+			fStackTraceFilterAction.setChecked(false);
+		}
 	}
 
 	/**

@@ -1333,7 +1333,7 @@ public class TestRunnerViewPart extends ViewPart {
 			setTitleToolTip(null);
 			resetViewIcon();
 			clearStatus();
-			fFailureTrace.clear();
+			fFailureTrace.reset();
 
 			registerInfoMessage(" "); //$NON-NLS-1$
 			stopUpdateJobs();
@@ -1349,7 +1349,7 @@ public class TestRunnerViewPart extends ViewPart {
 			setTitleToolTip();
 
 			clearStatus();
-			fFailureTrace.clear();
+			fFailureTrace.reset();
 			registerInfoMessage(fTestRunSession.getTestRunName());
 
 			updateRerunFailedFirstAction();
