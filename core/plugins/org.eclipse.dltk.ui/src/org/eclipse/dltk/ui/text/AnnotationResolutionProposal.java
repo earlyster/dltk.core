@@ -37,9 +37,7 @@ public class AnnotationResolutionProposal implements ICompletionProposal {
 	}
 
 	public void apply(IDocument document) {
-		if (resolution.run(annotation, document)) {
-			model.removeAnnotation(annotation);
-		}
+		resolution.run(annotation, document);
 	}
 
 	public String getAdditionalProposalInfo() {
