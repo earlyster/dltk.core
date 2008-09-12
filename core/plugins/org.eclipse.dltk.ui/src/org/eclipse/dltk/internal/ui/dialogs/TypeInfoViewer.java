@@ -163,8 +163,20 @@ public class TypeInfoViewer {
 					.getSimpleTypeName());
 			if (result != 0)
 				return result;
-			result = compareTypeContainerName(leftInfo.getTypeContainerName(),
-					rightInfo.getTypeContainerName());
+			boolean leftHasNamespace = (leftInfo.getTypeQualifiedName()
+					.indexOf('$') != -1);
+			boolean rightHasNamespace = (rightInfo.getTypeQualifiedName()
+					.indexOf('$') != -1);
+			if (!leftHasNamespace && rightHasNamespace)
+				return -1;
+			if (leftHasNamespace && !rightHasNamespace)
+				return +1;
+			result = compareTypeContainerName(leftInfo.getTypeQualifiedName(),
+					rightInfo.getTypeQualifiedName());
+			if (result != 0)
+				return result;
+			result = compareTypeContainerName(leftInfo.getType().getPath()
+					.lastSegment(), rightInfo.getType().getPath().lastSegment());
 			if (result != 0)
 				return result;
 
@@ -240,7 +252,7 @@ public class TypeInfoViewer {
 		private String[] fInstallLocations;
 		private String[] fVMNames;
 
-// private boolean fFullyQualifyDuplicates;
+		// private boolean fFullyQualifyDuplicates;
 
 		public TypeInfoLabelProvider(ITypeInfoImageProvider extension) {
 			fProviderExtension = extension;
@@ -259,7 +271,7 @@ public class TypeInfoViewer {
 		}
 
 		public void setFullyQualifyDuplicates(boolean value) {
-// fFullyQualifyDuplicates= value;
+			// fFullyQualifyDuplicates= value;
 		}
 
 		private void processVMInstallType(IInterpreterInstallType installType,
@@ -321,29 +333,29 @@ public class TypeInfoViewer {
 		public String getQualifiedText(TypeNameMatch type) {
 			StringBuffer result = new StringBuffer();
 			result.append(getTypeContainerName(type, 2));
-// String containerName= type.getTypeContainerName();
-// result.append(ScriptElementLabels.CONCAT_STRING);
-// if (containerName.length() > 0) {
-// result.append(containerName);
-// } else {
-// result.append(DLTKUIMessages.TypeInfoViewer_default_package);
-// }
+			// String containerName= type.getTypeContainerName();
+			// result.append(ScriptElementLabels.CONCAT_STRING);
+			// if (containerName.length() > 0) {
+			// result.append(containerName);
+			// } else {
+			// result.append(DLTKUIMessages.TypeInfoViewer_default_package);
+			// }
 			return result.toString();
 		}
 
 		public String getFullyQualifiedText(TypeNameMatch type) {
 			StringBuffer result = new StringBuffer();
 			result.append(getTypeContainerName(type, 2));
-// IType dltkType = ((DLTKSearchTypeNameMatch) type).getType();
-// ISourceModule sourceModule = (ISourceModule)
-// dltkType.getAncestor(IModelElement.SOURCE_MODULE);
-// String sourceModuleName = sourceModule.getElementName();
-// if (sourceModuleName.length() > 0) {
-// result.append(ScriptElementLabels.CONCAT_STRING);
-// result.append(sourceModuleName);
-// }
-// result.append(ScriptElementLabels.CONCAT_STRING);
-// result.append(getContainerName(type));
+			// IType dltkType = ((DLTKSearchTypeNameMatch) type).getType();
+			// ISourceModule sourceModule = (ISourceModule)
+			// dltkType.getAncestor(IModelElement.SOURCE_MODULE);
+			// String sourceModuleName = sourceModule.getElementName();
+			// if (sourceModuleName.length() > 0) {
+			// result.append(ScriptElementLabels.CONCAT_STRING);
+			// result.append(sourceModuleName);
+			// }
+			// result.append(ScriptElementLabels.CONCAT_STRING);
+			// result.append(getContainerName(type));
 			return result.toString();
 		}
 
@@ -391,9 +403,9 @@ public class TypeInfoViewer {
 			return result.toString();
 		}
 
-// private boolean isInnerType(TypeNameMatch match) {
-// return match.getTypeQualifiedName().indexOf('.') != -1;
-// }
+		// private boolean isInnerType(TypeNameMatch match) {
+		// return match.getTypeQualifiedName().indexOf('.') != -1;
+		// }
 
 		public ImageDescriptor getImageDescriptor(Object element) {
 			TypeNameMatch type = (TypeNameMatch) element;
@@ -409,7 +421,7 @@ public class TypeInfoViewer {
 		}
 
 		private String getTypeContainerName(TypeNameMatch info, int infoLevel) {
-// String result= info.getTypeContainerName();
+			// String result= info.getTypeContainerName();
 			String result = ""; //$NON-NLS-1$
 			IDLTKUILanguageToolkit toolkit = DLTKUILanguageManager
 					.getLanguageToolkit(info.getType());
@@ -422,6 +434,7 @@ public class TypeInfoViewer {
 										| (infoLevel > 0 ? ScriptElementLabels.APPEND_FILE
 												: 0)
 										| (infoLevel > 1 ? ScriptElementLabels.CU_POST_QUALIFIED
+												| ScriptElementLabels.APPEND_ROOT_PATH
 												: 0));
 			}
 			if (result.length() > 0)
