@@ -71,40 +71,35 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 	static class ResourceVisitor implements IResourceDeltaVisitor,
 			IResourceVisitor {
-		private Set resources;
-		private IProgressMonitor monitor;
+		final Set resources = new HashSet();
+		private final IProgressMonitor monitor;
 
-		public ResourceVisitor(Set resources, IProgressMonitor monitor) {
-			this.resources = resources;
+		public ResourceVisitor(IProgressMonitor monitor) {
 			this.monitor = monitor;
 		}
 
 		public boolean visit(IResourceDelta delta) throws CoreException {
-			// monitor.worked(1);
 			if (monitor.isCanceled()) {
 				return false;
 			}
 			IResource resource = delta.getResource();
-			switch (delta.getKind()) {
-			case IResourceDelta.ADDED:
-			case IResourceDelta.CHANGED:
-				if (!this.resources.contains(resource)
-						&& resource.getType() == IResource.FILE) {
+			if (resource.getType() == IResource.FILE) {
+				switch (delta.getKind()) {
+				case IResourceDelta.ADDED:
+				case IResourceDelta.CHANGED:
 					resources.add(resource);
-					return false;
+					break;
 				}
-				break;
+				return false;
 			}
 			return true;
 		}
 
 		public boolean visit(IResource resource) {
-			// monitor.worked(1);
 			if (monitor.isCanceled()) {
 				return false;
 			}
-			if (!this.resources.contains(resource)
-					&& resource.getType() == IResource.FILE) {
+			if (resource.getType() == IResource.FILE) {
 				resources.add(resource);
 				return false;
 			}
@@ -462,11 +457,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 	private Set getResourcesFrom(Object el, final IProgressMonitor monitor,
 			int ticks) throws CoreException {
-		Set resources = new HashSet();
 		monitor.subTask(Messages.ScriptBuilder_scanningResourcesIn);
 		try {
-			ResourceVisitor resourceVisitor = new ResourceVisitor(resources,
-					monitor);
+			ResourceVisitor resourceVisitor = new ResourceVisitor(monitor);
 			if (el instanceof IProject) {
 				IProject prj = (IProject) el;
 				prj.accept(resourceVisitor);
@@ -474,7 +467,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				IResourceDelta delta = (IResourceDelta) el;
 				delta.accept(resourceVisitor);
 			}
-			return resources;
+			return resourceVisitor.resources;
 		} finally {
 			monitor.worked(ticks);
 		}
