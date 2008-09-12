@@ -455,42 +455,42 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 	private Set getExternalElementsFrom(ScriptProject prj,
 			final IProgressMonitor monitor, int tiks) throws ModelException {
-		String name = Messages.ScriptBuilder_scanningExternalResourcesFor;
+		final String name = Messages.ScriptBuilder_scanningExternalResourcesFor;
 		monitor.subTask(name);
-		SubProgressMonitor mon = new SubProgressMonitor(monitor, tiks);
+		final SubProgressMonitor mon = new SubProgressMonitor(monitor, tiks);
 
-		IProjectFragment[] fragments = prj.getAllProjectFragments();
+		final IProjectFragment[] fragments = prj.getAllProjectFragments();
 		// new external fragments
-		List extFragments = new ArrayList(fragments.length);
-		// old external fragments
-		List currentFragments = new ArrayList(fragments.length);
+		final List extFragments = new ArrayList(fragments.length);
+		// external fragments paths
+		final List fragmentPaths = new ArrayList(fragments.length);
 		for (int i = 0; i < fragments.length; i++) {
 			final IProjectFragment fragment = fragments[i];
 			if (fragment instanceof ExternalProjectFragment
 					|| fragment instanceof BuiltinProjectFragment) {
-				IPath path = fragment.getPath();
+				final IPath path = fragment.getPath();
 				if (!this.lastState.externalFolderLocations.contains(path)) {
 					extFragments.add(fragment);
 				} else {
-					currentFragments.add(path);
+					fragmentPaths.add(path);
 				}
 			}
 		}
 		// monitor.subTask(name);
-		ExternalModuleVisitor visitor = new ExternalModuleVisitor(mon);
+		final ExternalModuleVisitor visitor = new ExternalModuleVisitor(mon);
 		mon.beginTask(name, extFragments.size());
 		for (Iterator iterator = extFragments.iterator(); iterator.hasNext();) {
 			IProjectFragment fragment = (IProjectFragment) iterator.next();
 			// New project fragment, we need to obtain all modules
 			// from this fragment.
 			fragment.accept(visitor);
+			fragmentPaths.add(fragment.getPath());
 			mon.worked(1);
 		}
 		mon.done();
 
 		this.lastState.externalFolderLocations.clear();
-		this.lastState.externalFolderLocations.addAll(extFragments);
-		this.lastState.externalFolderLocations.addAll(currentFragments);
+		this.lastState.externalFolderLocations.addAll(fragmentPaths);
 
 		return visitor.elements;
 	}
