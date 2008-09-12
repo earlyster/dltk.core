@@ -121,17 +121,17 @@ public abstract class MatchLocatorParser implements IMatchLocatorParser {
 	protected class MatchVisitor extends ASTVisitor {
 		public boolean visitGeneral(ASTNode node) throws Exception {
 			processStatement(node, getPatternLocator());
-			return true;
+			return super.visitGeneral(node);
 		}
 
 		public boolean visit(MethodDeclaration m) throws Exception {
 			getPatternLocator().match(processMethod(m), getNodeSet());
-			return true;
+			return super.visit(m);
 		}
 
 		public boolean visit(TypeDeclaration t) throws Exception {
 			visitTypeDeclaration(t);
-			return true;
+			return super.visit(t);
 		}
 	}
 }

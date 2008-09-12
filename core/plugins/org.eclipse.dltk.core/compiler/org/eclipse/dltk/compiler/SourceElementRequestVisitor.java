@@ -30,6 +30,7 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 	protected boolean fInClass = false; // if we are in class
 	protected boolean fInMethod = false; // if we are in method
 
+	protected ModuleDeclaration fCurrentModule = null;
 	protected TypeDeclaration fCurrentClass = null;
 	protected MethodDeclaration fCurrentMethod = null;
 
@@ -50,8 +51,8 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * @return class node that encloses current element, or <code>null</code> if
-	 *         there's no one.
+	 * @return class node that encloses current element, or <code>null</code>
+	 *         if there's no one.
 	 */
 	protected TypeDeclaration getCurrentClass() {
 		return this.fCurrentClass;
@@ -203,6 +204,9 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 
 	public boolean endvisit(ModuleDeclaration declaration) throws Exception {
 		this.fRequestor.exitModule(declaration.sourceEnd());
+
+		this.fCurrentModule = null;
+
 		this.fNodes.pop();
 		return true;
 	}
@@ -210,6 +214,9 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 	public boolean visit(ModuleDeclaration declaration) throws Exception {
 		this.fNodes.push(declaration);
 		this.fRequestor.enterModule();
+
+		this.fCurrentModule = declaration;
+
 		return true;
 	}
 
