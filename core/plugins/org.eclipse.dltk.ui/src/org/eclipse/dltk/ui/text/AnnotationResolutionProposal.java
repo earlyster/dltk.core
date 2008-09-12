@@ -15,7 +15,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
@@ -23,16 +22,14 @@ public class AnnotationResolutionProposal implements ICompletionProposal {
 
 	private final IAnnotationResolution resolution;
 	private final Annotation annotation;
-	private final IAnnotationModel model;
 
 	/**
 	 * @param annotation
 	 * @param resolution
 	 */
 	public AnnotationResolutionProposal(IAnnotationResolution resolution,
-			IAnnotationModel model, Annotation annotation) {
+			Annotation annotation) {
 		this.resolution = resolution;
-		this.model = model;
 		this.annotation = annotation;
 	}
 
