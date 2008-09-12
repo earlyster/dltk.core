@@ -82,8 +82,8 @@ public class NatureExtensionManager {
 
 	/**
 	 * Return array of instances for the specified natureId. If there are no
-	 * contributed instances for the specified natureId the empty array is
-	 * returned.
+	 * contributed instances for the specified natureId the result of the
+	 * {@link #createEmptyResult()} is returned.
 	 * 
 	 * @param natureId
 	 * @return
