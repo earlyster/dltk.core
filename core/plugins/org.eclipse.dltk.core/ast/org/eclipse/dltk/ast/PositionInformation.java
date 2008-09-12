@@ -28,15 +28,32 @@ public final class PositionInformation {
 		return "[" + sourceStart + "," + sourceEnd + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
-	public boolean equals(Object o) {
-		if (o instanceof PositionInformation) {
-			PositionInformation position = (PositionInformation) o;
-			return sourceStart == position.sourceStart
-					&& sourceEnd == position.sourceEnd
-					&& nameStart == position.nameStart
-					&& nameEnd == position.nameEnd;
-		}
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + nameEnd;
+		result = prime * result + nameStart;
+		result = prime * result + sourceEnd;
+		result = prime * result + sourceStart;
+		return result;
+	}
 
-		return false;
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PositionInformation other = (PositionInformation) obj;
+		if (nameEnd != other.nameEnd)
+			return false;
+		if (nameStart != other.nameStart)
+			return false;
+		if (sourceEnd != other.sourceEnd)
+			return false;
+		if (sourceStart != other.sourceStart)
+			return false;
+		return true;
 	}
 }

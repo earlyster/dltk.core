@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ast.statements;
 
 import org.eclipse.dltk.ast.ASTNode;
+import org.eclipse.dltk.ast.ASTVisitor;
 import org.eclipse.dltk.ast.DLTKToken;
 
 /**
@@ -38,11 +39,20 @@ public abstract class Statement extends ASTNode implements StatementConstants {
 			Statement s = (Statement) obj;
 			if (s.sourceEnd() < 0 || s.sourceStart() < 0) {
 				return false;
-			}				
+			}
 			return sourceStart() == s.sourceStart()
 					&& sourceEnd() == s.sourceEnd();
 		}
 
 		return false;
+	}
+
+	public void traverse(ASTVisitor visitor) throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	public int hashCode() {
+		return this.sourceEnd() * 1001 + this.sourceEnd();
 	}
 }

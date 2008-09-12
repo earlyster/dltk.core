@@ -47,12 +47,26 @@ public class MixinSourceModuleRequest extends MixinIndexRequest {
 		}
 	}
 
-	public boolean equals(Object obj) {
-		if (obj instanceof MixinSourceModuleRequest) {
-			final MixinSourceModuleRequest other = (MixinReconcileSourceModuleRequest) obj;
-			return module.equals(other.module);
-		}
-		return false;
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((module == null) ? 0 : module.hashCode());
+		return result;
 	}
 
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MixinSourceModuleRequest other = (MixinSourceModuleRequest) obj;
+		if (module == null) {
+			if (other.module != null)
+				return false;
+		} else if (!module.equals(other.module))
+			return false;
+		return true;
+	}
 }

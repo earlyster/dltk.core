@@ -230,7 +230,7 @@ public class ExternalProjectFragment extends ProjectFragment {
 		if (o instanceof ExternalProjectFragment) {
 			ExternalProjectFragment other = (ExternalProjectFragment) o;
 			IEnvironment environment = EnvironmentManager.getEnvironment(this);
-			if (o instanceof IModelElement && environment != null) {
+			if (environment != null) {
 				IEnvironment environmento = EnvironmentManager
 						.getEnvironment((IModelElement) other);
 				if (!environment.equals(environmento)) {

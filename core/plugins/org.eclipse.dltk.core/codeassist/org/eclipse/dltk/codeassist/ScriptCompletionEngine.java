@@ -53,10 +53,10 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	protected char[] source;
 
 	public ScriptCompletionEngine(/*
-									 * ISearchableEnvironment nameEnvironment,
-									 * CompletionRequestor requestor, Map
-									 * settings, IScriptProject scriptProject
-									 */) {
+								 * ISearchableEnvironment nameEnvironment,
+								 * CompletionRequestor requestor, Map settings,
+								 * IScriptProject scriptProject
+								 */) {
 		super(null);
 
 		// this.scriptProject = scriptProject;
@@ -555,7 +555,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 			return;
 
 		int length = token.length;
-		String tok = new String(token);
+		// String tok = new String(token);
 		if (canCompleteEmptyToken || length > 0) {
 			for (int i = 0; i < fields.size(); i++) {
 				IField field = (IField) fields.get(i);

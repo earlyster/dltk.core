@@ -197,13 +197,7 @@ public class SourceIndexer extends AbstractIndexer {
 								.getLocalPath(fragments[i].getPath());
 						if (fragments[i].isExternal()
 								&& fragmentPath.isPrefixOf(document.fullPath)) {
-							if (frag != null
-									&& frag.getPath().isPrefixOf(
-											fragments[i].getPath())) {
-								frag = fragments[i];
-							} else {
-								frag = fragments[i];
-							}
+							frag = fragments[i];
 						}
 					}
 					if (frag != null) {

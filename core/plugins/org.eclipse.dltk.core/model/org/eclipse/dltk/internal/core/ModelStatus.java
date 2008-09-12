@@ -26,8 +26,8 @@ public class ModelStatus extends Status implements IModelStatus,
 		IModelStatusConstants {
 
 	/**
-	 * The elements related to the failure, or <code>null</code> if no
-	 * elements are involved.
+	 * The elements related to the failure, or <code>null</code> if no elements
+	 * are involved.
 	 */
 	protected IModelElement[] elements = new IModelElement[0];
 
@@ -38,8 +38,8 @@ public class ModelStatus extends Status implements IModelStatus,
 	protected IPath path;
 
 	/**
-	 * The <code>String</code> related to the failure, or <code>null</code>
-	 * if no <code>String</code> is involved.
+	 * The <code>String</code> related to the failure, or <code>null</code> if
+	 * no <code>String</code> is involved.
 	 */
 	protected String string;
 
@@ -347,7 +347,7 @@ public class ModelStatus extends Status implements IModelStatus,
 				scriptProject = (ScriptProject) elements[0];
 				String projectName = scriptProject.getElementName();
 				IPath newPath = path;
-				if (path.segment(0).toString().equals(projectName)) {
+				if (path.segment(0).equals(projectName)) {
 					newPath = path.removeFirstSegments(1);
 				}
 				return Messages.bind(

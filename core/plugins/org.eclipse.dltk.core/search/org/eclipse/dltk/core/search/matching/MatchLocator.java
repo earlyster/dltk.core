@@ -387,7 +387,7 @@ public class MatchLocator implements ITypeRequestor {
 		// if (!(parent instanceof IType)) return parent;
 		if (parent instanceof IType) {
 			IType type = (IType) parent;
-			return createMethodHandle(type, new String(method.getName()));
+			return createMethodHandle(type, method.getName());
 		} else if (parent instanceof ISourceModule) {
 			return createMethodHandle((ISourceModule) parent, method.getName());
 		}

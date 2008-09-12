@@ -80,16 +80,30 @@ class MixinProjectRequest extends MixinIndexRequest {
 				moduleCollector.modules));
 	}
 
-	public boolean equals(Object obj) {
-		if (obj instanceof MixinProjectRequest) {
-			final MixinProjectRequest other = (MixinProjectRequest) obj;
-			return project.equals(other.project);
-		}
-		return false;
-	}
-
 	public boolean belongsTo(String jobFamily) {
 		return jobFamily.equals(project.getProject().getName());
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((project == null) ? 0 : project.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MixinProjectRequest other = (MixinProjectRequest) obj;
+		if (project == null) {
+			if (other.project != null)
+				return false;
+		} else if (!project.equals(other.project))
+			return false;
+		return true;
+	}
 }

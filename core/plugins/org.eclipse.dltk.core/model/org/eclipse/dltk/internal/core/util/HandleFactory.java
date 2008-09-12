@@ -90,7 +90,8 @@ public class HandleFactory {
 			}
 			// create handle
 			String classFilePath = resourcePath.substring(separatorIndex + 1);
-			String[] simpleNames = Path.fromPortableString(classFilePath).segments();
+			String[] simpleNames = Path.fromPortableString(classFilePath)
+					.segments();
 			String[] pkgName;
 			int length = simpleNames.length - 1;
 			if (length > 0) {
@@ -131,7 +132,8 @@ public class HandleFactory {
 			// create handle
 			resourcePath = resourcePath.substring(this.lastPkgFragmentRootPath
 					.length() + 1);
-			String[] simpleNames = Path.fromPortableString(resourcePath).segments();
+			String[] simpleNames = Path.fromPortableString(resourcePath)
+					.segments();
 			String[] pkgName;
 			int length = simpleNames.length - 1;
 			if (length > 0) {
@@ -244,7 +246,10 @@ public class HandleFactory {
 
 		// not found in the scope, walk all projects
 		try {
-			IDLTKLanguageToolkit toolkit = scope.getLanguageToolkit();
+			IDLTKLanguageToolkit toolkit = null;
+			if (scope != null) {
+				toolkit = scope.getLanguageToolkit();
+			}
 			if (toolkit == null) {
 				return null;
 			}
@@ -264,9 +269,9 @@ public class HandleFactory {
 				IBuildpathEntry[] classpathEntries = scriptProject
 						.getResolvedBuildpath(true/* ignoreUnresolvedEntry */,
 								false/* don't generateMarkerOnError */, false/*
-																				 * don't
-																				 * returnResolutionInProgress
-																				 */);
+																			 * don't
+																			 * returnResolutionInProgress
+																			 */);
 				for (int j = 0, entryCount = classpathEntries.length; j < entryCount; j++) {
 					if (classpathEntries[j].getPath().equals(archivePath)) {
 						if (target instanceof IFile) {

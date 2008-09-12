@@ -108,12 +108,27 @@ public class MixinExternalProjectFragmentRequest extends MixinIndexRequest {
 		return visitor.modules;
 	}
 
-	public boolean equals(Object obj) {
-		if (obj instanceof MixinExternalProjectFragmentRequest) {
-			final MixinExternalProjectFragmentRequest other = (MixinExternalProjectFragmentRequest) obj;
-			return fragment.equals(other) && toolkit.equals(other.toolkit);
-		}
-		return false;
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((fragment == null) ? 0 : fragment.hashCode());
+		return result;
 	}
 
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MixinExternalProjectFragmentRequest other = (MixinExternalProjectFragmentRequest) obj;
+		if (fragment == null) {
+			if (other.fragment != null)
+				return false;
+		} else if (!fragment.equals(other.fragment))
+			return false;
+		return true;
+	}
 }

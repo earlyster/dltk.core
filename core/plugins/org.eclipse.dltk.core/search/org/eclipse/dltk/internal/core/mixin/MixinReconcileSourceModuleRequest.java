@@ -12,7 +12,6 @@
 package org.eclipse.dltk.internal.core.mixin;
 
 import java.io.IOException;
-import java.util.TooManyListenersException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -40,10 +39,8 @@ public class MixinReconcileSourceModuleRequest extends MixinSourceModuleRequest 
 
 	public boolean equals(Object obj) {
 		if (obj instanceof MixinReconcileSourceModuleRequest) {
-			final MixinReconcileSourceModuleRequest other = (MixinReconcileSourceModuleRequest) obj;
-			return module.equals(other.module);
+			return super.equals(obj);
 		}
 		return false;
 	}
-
 }
