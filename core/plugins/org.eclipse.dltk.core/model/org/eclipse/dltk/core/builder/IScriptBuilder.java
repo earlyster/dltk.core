@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.builder;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -59,6 +60,30 @@ public interface IScriptBuilder {
 	IStatus buildModelElements(IScriptProject project, List elements,
 			IProgressMonitor monitor, int status);
 
+	public static class DependencyResponse {
+		public boolean isFullBuild() {
+			return false;
+		}
+
+		public Set getDependencies() {
+			return Collections.EMPTY_SET;
+		}
+
+		public static final DependencyResponse FULL_BUILD = new DependencyResponse() {
+			public boolean isFullBuild() {
+				return true;
+			}
+		};
+
+		public static DependencyResponse create(final Set dependencies) {
+			return new DependencyResponse() {
+				public Set getDependencies() {
+					return dependencies;
+				}
+			};
+		}
+	}
+
 	/**
 	 * Return all dependencies for selected resource. Should also return all
 	 * dependencies of returned elements.
@@ -69,12 +94,23 @@ public interface IScriptBuilder {
 	 * Resources should be checked for type. Because different kind of resource
 	 * could be here.
 	 * 
-	 * @param resource
-	 * @return null, if no dependencies are found. Should not return elements
-	 *         from resources list.
+	 * @param buildType
+	 *            build type {@link #FULL_BUILD} or {@link #INCREMENTAL_BUILD}
+	 * @param localElements
+	 *            changed source modules
+	 * @param externalElements
+	 *            newly added external source modules
+	 * @param oldExternalFolders
+	 *            old external fragments
+	 * @param externalFolders
+	 *            new external fragments
+	 * @return <code>null</code> if there are no dependencies found,
+	 *         {@link DependencyResponse#FULL_BUILD} to promote to the full
+	 *         build, or the result of {@link DependencyResponse#create(Set)}
 	 */
-	Set getDependencies(IScriptProject project, Set resources,
-			Set allResources, Set oldExternalFolders, Set externalFolders);
+	DependencyResponse getDependencies(IScriptProject project, int buildType,
+			Set localElements, Set externalElements, Set oldExternalFolders,
+			Set externalFolders);
 
 	/**
 	 * @see IncrementalProjectBuilder
