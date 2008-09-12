@@ -33,9 +33,7 @@ public interface IAnnotationResolution {
 	 * @param annotation
 	 *            the annotation to resolve
 	 * @param document
-	 * @return <code>true</code> if the resolution was successful and annotation
-	 *         should be removed.
 	 */
-	boolean run(Annotation annotation, IDocument document);
+	void run(Annotation annotation, IDocument document);
 
 }
