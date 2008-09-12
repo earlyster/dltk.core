@@ -9,7 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
@@ -18,6 +21,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.internal.core.builder.StructureBuilderManager;
 import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.dltk.internal.core.util.Messages;
 
@@ -84,6 +88,24 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 			AccumulatingProblemReporter reporter = new AccumulatingProblemReporter(
 					problemRequestor);
 			SourceParserUtil.getModuleDeclaration(workingCopy, reporter);
+			final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit(workingCopy);
+			if (toolkit != null) {
+				IStructureBuilder[] builders = null;
+				try {
+					builders = StructureBuilderManager.getBuilders(toolkit
+							.getNatureId());
+				} catch (CoreException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if (builders != null) {
+					for (int i = 0; i < builders.length; ++i) {
+						builders[i].buildStructure(toolkit.getNatureId(),
+								workingCopy, reporter);
+					}
+				}
+			}
 			reporter.reportToRequestor();
 		}
 	}

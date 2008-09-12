@@ -517,7 +517,7 @@ public abstract class AbstractSourceModule extends Openable implements
 					if (builders != null) {
 						for (int i = 0; i < builders.length; ++i) {
 							builders[i].buildStructure(natureId, this,
-									requestor, problemReporter);
+									problemReporter);
 						}
 					}
 				}

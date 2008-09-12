@@ -11,13 +11,12 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.ISourceModule;
 
 public interface IStructureBuilder {
 
 	void buildStructure(String natureId, ISourceModule module,
-			ISourceElementRequestor requestor, IProblemReporter reporter);
+			IProblemReporter reporter);
 
 }
