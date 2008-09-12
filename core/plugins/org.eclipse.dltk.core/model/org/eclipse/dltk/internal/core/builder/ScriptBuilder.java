@@ -371,44 +371,43 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			Set elements = getExternalElementsFrom(scriptProject, monitor,
-					WORK_EXTERNAL);
-			Set externalFolders = new HashSet();
-			externalFolders.addAll(this.lastState.externalFolderLocations);
+			Set externalElements = getExternalElementsFrom(scriptProject,
+					monitor, WORK_EXTERNAL);
+			Set externalFolders = new HashSet(
+					this.lastState.externalFolderLocations);
 			if (monitor.isCanceled()) {
 				return;
 			}
 			// Project external resources should also be added into list. Only
 			// on full build we need to manage this.
 			// Call builders for resources.
-			int totalFiles = resources.size() + elements.size();
+			int totalFiles = resources.size() + externalElements.size();
 			if (totalFiles == 0)
 				totalFiles = 1;
 
 			builders = getScriptBuilders();
 
-			List realResources = new ArrayList();
-
-			List relements = locateSourceModule(resources, monitor,
-					WORK_SOURCES, resources, realResources);
+			List localResources = new ArrayList();
+			List localElements = new ArrayList();
+			locateSourceModules(monitor, WORK_SOURCES, resources,
+					localElements, localResources);
 
 			if (monitor.isCanceled()) {
 				return;
 			}
 			int resourceTicks = WORK_BUILD
-					* (resources.size() - relements.size()) / totalFiles;
+					* (resources.size() - localElements.size()) / totalFiles;
 			resourceTicks = Math.min(resourceTicks, WORK_BUILD / 4);
 
-			List els = new ArrayList();
-
-			els.addAll(relements);
-			els.addAll(elements);
-
+			List elements = new ArrayList(localElements.size()
+					+ externalElements.size());
+			elements.addAll(localElements);
+			elements.addAll(externalElements);
 			try {
-				buildElements(els, elements, monitor, WORK_BUILD
+				buildElements(elements, externalElements, monitor, WORK_BUILD
 						- resourceTicks, IScriptBuilder.FULL_BUILD,
 						new HashSet(), externalFolders, builders);
-				lastBuildSourceFiles += elements.size();
+				lastBuildSourceFiles += externalElements.size();
 			} catch (CoreException e) {
 				DLTKCore.error(Messages.ScriptBuilder_errorBuildElements, e);
 			}
@@ -416,10 +415,10 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			buildResources(realResources, monitor, resourceTicks, FULL_BUILD,
+			buildResources(localResources, monitor, resourceTicks, FULL_BUILD,
 					builders);
 
-			lastBuildResources = resources.size() + elements.size();
+			lastBuildResources = resources.size() + externalElements.size();
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
@@ -506,7 +505,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		State newState = new State(this);
 
 		Set externalFoldersBefore = new HashSet();
-		Set externalFolders = new HashSet();
 		if (this.lastState != null) {
 			newState.copyFrom(this.lastState);
 			externalFoldersBefore.addAll(newState.getExternalFolders());
@@ -528,54 +526,54 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			Set elements = getExternalElementsFrom(scriptProject, monitor,
-					WORK_EXTERNAL);
+			Set externalElements = getExternalElementsFrom(scriptProject,
+					monitor, WORK_EXTERNAL);
+			// New external folders set
+			Set externalFolders = new HashSet(lastState.externalFolderLocations);
 			if (monitor.isCanceled()) {
 				return;
 			}
-			// New external folders set
-			externalFolders.addAll(this.lastState.externalFolderLocations);
 
-			int totalFiles = resources.size() + elements.size();
+			int totalFiles = resources.size() + externalElements.size();
 			if (totalFiles == 0)
 				totalFiles = 1;
 
 			builders = getScriptBuilders();
 
-			List realResources = new ArrayList();
-
-			List relements = locateSourceModule(resources, monitor,
-					WORK_SOURCES, resources, realResources);
+			List localResources = new ArrayList();
+			List localElements = new ArrayList();
+			locateSourceModules(monitor, WORK_SOURCES, resources,
+					localElements, localResources);
 
 			if (monitor.isCanceled()) {
 				return;
 			}
 			int resourceTicks = WORK_BUILD
-					* (resources.size() - relements.size()) / totalFiles;
+					* (resources.size() - localElements.size()) / totalFiles;
 
 			if (monitor.isCanceled()) {
 				return;
 			}
-			List els = new ArrayList();
-
-			els.addAll(relements);
-			els.addAll(elements);
+			List elements = new ArrayList(localElements.size()
+					+ externalElements.size());
+			elements.addAll(localElements);
+			elements.addAll(externalElements);
 			try {
-				buildElements(els, elements, monitor, WORK_BUILD
+				buildElements(elements, externalElements, monitor, WORK_BUILD
 						- resourceTicks, IScriptBuilder.INCREMENTAL_BUILD,
 						externalFoldersBefore, externalFolders, builders);
 			} catch (CoreException e) {
 				DLTKCore.error(Messages.ScriptBuilder_errorBuildElements, e);
 			}
-			lastBuildSourceFiles += elements.size();
+			lastBuildSourceFiles += externalElements.size();
 
 			if (monitor.isCanceled()) {
 				return;
 			}
-			buildResources(realResources, monitor, resourceTicks, FULL_BUILD,
+			buildResources(localResources, monitor, resourceTicks, FULL_BUILD,
 					builders);
 
-			lastBuildResources = resources.size() + elements.size();
+			lastBuildResources = resources.size() + externalElements.size();
 		} finally {
 			resetBuilders(builders);
 
@@ -610,46 +608,42 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	protected List locateSourceModule(Set resources, IProgressMonitor monitor,
-			int tiks, Set allresources, List realResources) {
-		List elements = new ArrayList(); // Model elements
-
-		Set allElements = new HashSet();
-		Set allResources = new HashSet();
-		String name = Messages.ScriptBuilder_locatingResourcesFor;
+	/**
+	 * Splits the <code>resources</code> into <code>realElements</code> and
+	 * <code>realResources</code>
+	 * 
+	 * @param monitor
+	 * @param tiks
+	 * @param resources
+	 * @param realResources
+	 * @return
+	 */
+	protected void locateSourceModules(IProgressMonitor monitor, int tiks,
+			Set resources, List realElements, List realResources) {
 		IProgressMonitor sub = new SubProgressMonitor(monitor, tiks / 3);
-		// sub.subTask(name);
-		sub.beginTask(name, allresources.size());
-		monitor.subTask(name);
-		int id = 0;
-		for (Iterator iterator = allresources.iterator(); iterator.hasNext();) {
+		sub.beginTask(NONAME, resources.size());
+		int remainingWork = resources.size();
+		for (Iterator iterator = resources.iterator(); iterator.hasNext();) {
 			IResource res = (IResource) iterator.next();
 			sub.subTask(NLS.bind(
 					Messages.ScriptBuilder_Location_source_modules, String
-							.valueOf(allresources.size() - id), res.getName()));
+							.valueOf(remainingWork), res.getName()));
 			sub.worked(1);
 			if (sub.isCanceled()) {
-				return null;
+				return;
 			}
 			IModelElement element = DLTKCore.create(res);
 			if (element != null
 					&& element.getElementType() == IModelElement.SOURCE_MODULE
 					&& element.exists()) {
-				allElements.add(element);
-				if (resources.contains(res)) {
-					elements.add(element);
-				}
+				realElements.add(element);
 			} else {
-				if (resources.contains(res)) {
-					realResources.add(res);
-				}
-				allResources.add(res);
+				realResources.add(res);
 			}
-			id++;
+			--remainingWork;
 		}
 		sub.done();
-		lastBuildSourceFiles += elements.size();
-		return elements;
+		lastBuildSourceFiles += realElements.size();
 	}
 
 	/**
@@ -675,51 +669,53 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	protected void buildElements(List elements, Set allElements,
+	protected void buildElements(List elements, Set externalElements,
 			IProgressMonitor monitor, int ticks, int buildType,
 			Set externalFoldersBefore, Set externalFolders,
 			IScriptBuilder[] builders) throws CoreException {
 
 		// TODO: replace this stuff with multistatus
-		if (builders != null) {
-			int total = 0;
-			final int[] workEstimations = new int[builders.length];
-			Map builderToElements = new HashMap();
-			for (int k = 0; k < builders.length; k++) {
-				IScriptBuilder builder = builders[k];
-				List buildElementsList = getDependencies(elements, allElements,
-						externalFoldersBefore, externalFolders, builder);
-				builderToElements.put(builder, buildElementsList);
-				workEstimations[k] = Math.max(builder.estimateElementsToBuild(
-						scriptProject, buildElementsList), 1);
-				total += workEstimations[k];
-			}
+		if (builders == null) {
+			return;
+		}
+		int total = 0;
+		final int[] workEstimations = new int[builders.length];
+		Map builderToElements = new HashMap();
+		for (int k = 0; k < builders.length; k++) {
+			IScriptBuilder builder = builders[k];
+			List buildElementsList = getDependencies(elements,
+					externalElements, externalFoldersBefore, externalFolders,
+					builder);
+			builderToElements.put(builder, buildElementsList);
+			workEstimations[k] = Math.max(builder.estimateElementsToBuild(
+					scriptProject, buildElementsList), 1);
+			total += workEstimations[k];
+		}
 
-			for (int k = 0; k < builders.length; k++) {
-				IScriptBuilder builder = builders[k];
+		for (int k = 0; k < builders.length; k++) {
+			IScriptBuilder builder = builders[k];
 
-				List buildElementsList = (List) builderToElements.get(builder);
-				final int builderWork = ticks * workEstimations[k] / total;
-				if (buildElementsList.size() > 0) {
-					IProgressMonitor sub = new SubProgressMonitor(monitor,
-							builderWork);
-					builder.buildModelElements(scriptProject,
-							buildElementsList, sub, buildType);
-				} else {
-					monitor.worked(builderWork);
-				}
+			List buildElementsList = (List) builderToElements.get(builder);
+			final int builderWork = ticks * workEstimations[k] / total;
+			if (buildElementsList.size() > 0) {
+				IProgressMonitor sub = new SubProgressMonitor(monitor,
+						builderWork);
+				builder.buildModelElements(scriptProject, buildElementsList,
+						sub, buildType);
+			} else {
+				monitor.worked(builderWork);
 			}
 		}
 		// TODO: Do something with status.
 	}
 
-	private List getDependencies(List elements, Set allElements,
+	private List getDependencies(List elements, Set externalElements,
 			Set externalFoldersBefore, Set externalFolders,
 			IScriptBuilder builder) {
 		Set buildElements = new HashSet();
 		buildElements.addAll(elements);
 		Set dependencies = builder.getDependencies(this.scriptProject,
-				new HashSet(elements), allElements, externalFoldersBefore,
+				new HashSet(elements), externalElements, externalFoldersBefore,
 				externalFolders);
 		if (dependencies != null) {
 			buildElements.addAll(dependencies);
