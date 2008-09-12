@@ -435,7 +435,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			buildResources(realResources, monitor, resourceTicks, FULL_BUILD);
+			buildResources(realResources, monitor, resourceTicks, FULL_BUILD,
+					builders);
 
 			lastBuildResources = resources.size() + elements.size();
 		} catch (CoreException e) {
@@ -592,7 +593,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			buildResources(realResources, monitor, resourceTicks, FULL_BUILD);
+			buildResources(realResources, monitor, resourceTicks, FULL_BUILD,
+					builders);
 
 			lastBuildResources = resources.size() + elements.size();
 		} finally {
@@ -676,35 +678,21 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	 * returned.
 	 */
 	protected void buildResources(List realResources, IProgressMonitor monitor,
-			int tiks, int buildType) {
-		// Else build as resource.
-		if (realResources.size() == 0) {
+			int tiks, int buildType, IScriptBuilder[] builders) {
+		if (builders == null || builders.length == 0 || realResources.isEmpty()) {
 			monitor.worked(tiks);
-		} else {
-			Set alreadyPassed = new HashSet();
-			try {
-				IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-						.getLanguageToolkit(scriptProject);
-				IScriptBuilder[] builders = ScriptBuilderManager
-						.getScriptBuilders(toolkit.getNatureId());
-				if (builders != null) {
-					for (int k = 0; k < builders.length; k++) {
-						IProgressMonitor ssub = new SubProgressMonitor(monitor,
-								(tiks) / builders.length);
-						ssub.beginTask(Messages.ScriptBuilder_building, 1);
-						IScriptBuilder builder = builders[k];
-						if (alreadyPassed.add(builder)) {
-							builder.buildResources(this.scriptProject,
-									realResources, ssub, buildType);
-						}
-						ssub.done();
-					}
-				}
-			} catch (CoreException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
-				}
+			return;
+		}
+		final IProgressMonitor ssub = new SubProgressMonitor(monitor, tiks);
+		try {
+			ssub.beginTask(Messages.ScriptBuilder_building, builders.length);
+			for (int k = 0; k < builders.length; k++) {
+				builders[k].buildResources(scriptProject, realResources, ssub,
+						buildType);
+				ssub.worked(1);
 			}
+		} finally {
+			ssub.done();
 		}
 	}
 
@@ -757,9 +745,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		if (dependencies != null) {
 			buildElements.addAll(dependencies);
 		}
-		List buildElementsList = new ArrayList();
-		buildElementsList.addAll(buildElements);
-		return buildElementsList;
+		return new ArrayList(buildElements);
 	}
 
 	public static void removeProblemsAndTasksFor(IResource resource) {
