@@ -768,19 +768,6 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 					annotation.setOverlay(null);
 				}
 			}
-			/*
-			 * XXX Explicitly call markDeleted() for marker annotations without
-			 * overlay. In theory it should happen automatically.
-			 */
-			for (Iterator i = getAnnotationIterator(); i.hasNext();) {
-				Object annotation = i.next();
-				if (annotation instanceof ScriptMarkerAnnotation) {
-					ScriptMarkerAnnotation ma = (ScriptMarkerAnnotation) annotation;
-					if (!ma.isMarkedDeleted() && ma.getOverlay() == null) {
-						ma.markDeleted(true);
-					}
-				}
-			}
 		}
 
 		/**
