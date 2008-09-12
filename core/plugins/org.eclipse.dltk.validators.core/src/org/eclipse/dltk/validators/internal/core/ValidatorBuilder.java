@@ -10,10 +10,9 @@
 package org.eclipse.dltk.validators.internal.core;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
@@ -26,12 +25,12 @@ import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.compiler.problem.ProblemSeverities;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.validators.core.IBuildParticipant;
+import org.eclipse.dltk.validators.core.IBuildParticipantExtension2;
 import org.eclipse.dltk.validators.core.IBuildParticipantExtension;
 import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidator;
@@ -83,13 +82,9 @@ public class ValidatorBuilder implements IScriptBuilder {
 		final long startTime = DEBUG ? System.currentTimeMillis() : 0;
 		monitor.beginTask(ValidatorMessages.ValidatorBuilder_buildingModules,
 				elements.size());
-		final Map modulesByNature = splitByNature(elements);
-		for (Iterator i = modulesByNature.entrySet().iterator(); i.hasNext();) {
-			final Map.Entry entry = (Map.Entry) i.next();
-			final List natureModules = (List) entry.getValue();
-			final String natureId = (String) entry.getKey();
-			buildNatureModules(project, buildType, natureId, natureModules,
-					monitor);
+		if (toolkit != null) {
+			buildNatureModules(project, buildType, toolkit.getNatureId(),
+					elements, monitor);
 		}
 		monitor.done();
 		if (DEBUG) {
@@ -101,15 +96,15 @@ public class ValidatorBuilder implements IScriptBuilder {
 
 	private void buildNatureModules(IScriptProject project, int buildType,
 			final String nature, final List modules, IProgressMonitor monitor) {
-		final IBuildParticipant[] validators = ValidatorRuntime
-				.getBuildParticipants(project, nature, ValidatorRuntime.ALL);
 		boolean secondPass = false;
-		for (int j = 0; j < validators.length; ++j) {
-			final IBuildParticipant participant = validators[j];
-			if (participant instanceof IBuildParticipantExtension) {
-				((IBuildParticipantExtension) participant)
-						.beginBuild(buildType);
-				secondPass = true;
+		if (validators != null) {
+			for (int j = 0; j < validators.length; ++j) {
+				final IBuildParticipant participant = validators[j];
+				if (participant instanceof IBuildParticipantExtension) {
+					((IBuildParticipantExtension) participant)
+							.beginBuild(buildType);
+					secondPass = true;
+				}
 			}
 		}
 		int counter = 0;
@@ -126,7 +121,7 @@ public class ValidatorBuilder implements IScriptBuilder {
 			if (resource != null) {
 				final BuildProblemReporter reporter = new BuildProblemReporter(
 						resource);
-				buildModule(module, validators, reporter);
+				buildModule(module, reporter);
 				if (reporters != null) {
 					reporters.add(reporter);
 				} else {
@@ -136,13 +131,15 @@ public class ValidatorBuilder implements IScriptBuilder {
 			monitor.worked(1);
 			++counter;
 		}
-		for (int j = 0; j < validators.length; ++j) {
-			final IBuildParticipant participant = validators[j];
-			if (participant instanceof IBuildParticipantExtension) {
-				((IBuildParticipantExtension) participant).endBuild();
-			}
-		}
 		if (reporters != null) {
+			if (validators != null) {
+				for (int j = 0; j < validators.length; ++j) {
+					final IBuildParticipant participant = validators[j];
+					if (participant instanceof IBuildParticipantExtension) {
+						((IBuildParticipantExtension) participant).endBuild();
+					}
+				}
+			}
 			for (Iterator j = reporters.iterator(); j.hasNext();) {
 				final BuildProblemReporter reporter = (BuildProblemReporter) j
 						.next();
@@ -152,7 +149,7 @@ public class ValidatorBuilder implements IScriptBuilder {
 	}
 
 	private void buildModule(final ISourceModule module,
-			final IBuildParticipant[] validators, BuildProblemReporter reporter) {
+			BuildProblemReporter reporter) {
 		final ModuleDeclaration moduleDeclaration = SourceParserUtil
 				.getModuleDeclaration(module, reporter);
 		final boolean isError = moduleDeclaration == null
@@ -165,40 +162,16 @@ public class ValidatorBuilder implements IScriptBuilder {
 						null, ProblemSeverities.Error, 0, 0, 0));
 			}
 		}
-		for (int k = 0; k < validators.length; ++k) {
-			final IBuildParticipant participant = validators[k];
-			try {
-				participant.build(module, moduleDeclaration, reporter);
-			} catch (CoreException e) {
-				ValidatorsCore.log(e.getStatus());
-			}
-		}
-	}
-
-	/**
-	 * @param elements
-	 * @return
-	 */
-	private Map splitByNature(List elements) {
-		final Map result = new HashMap();
-		for (Iterator i = elements.iterator(); i.hasNext();) {
-			final IModelElement element = (IModelElement) i.next();
-			if (element.getElementType() == IModelElement.SOURCE_MODULE) {
-				final IDLTKLanguageToolkit toolkit = element.getScriptProject()
-						.getLanguageToolkit();
-				;
-				if (toolkit != null) {
-					List natureModules = (List) result.get(toolkit
-							.getNatureId());
-					if (natureModules == null) {
-						natureModules = new ArrayList();
-						result.put(toolkit.getNatureId(), natureModules);
-					}
-					natureModules.add(element);
+		if (validators != null) {
+			for (int k = 0; k < validators.length; ++k) {
+				final IBuildParticipant participant = validators[k];
+				try {
+					participant.build(module, moduleDeclaration, reporter);
+				} catch (CoreException e) {
+					ValidatorsCore.log(e.getStatus());
 				}
 			}
 		}
-		return result;
 	}
 
 	public IStatus buildResources(IScriptProject project, List resources,
@@ -216,14 +189,52 @@ public class ValidatorBuilder implements IScriptBuilder {
 		return elements.size();
 	}
 
-	public Set getDependencies(IScriptProject project, Set resources,
-			Set allResources, Set oldExternalFolders, Set externalFolders) {
-		return null;
+	public DependencyResponse getDependencies(IScriptProject project,
+			int buildType, Set localElements, Set externalElements,
+			Set oldExternalFolders, Set externalFolders) {
+		if (validators == null) {
+			return null;
+		}
+		Set dependencies = null;
+		for (int i = 0; i < validators.length; ++i) {
+			final IBuildParticipant participant = validators[i];
+			if (participant instanceof IBuildParticipantExtension2) {
+				final DependencyResponse response = ((IBuildParticipantExtension2) participant)
+						.getDependencies(buildType, localElements,
+								externalElements, oldExternalFolders,
+								externalFolders);
+				if (response != null) {
+					if (response.isFullBuild()) {
+						return response;
+					} else {
+						if (dependencies == null) {
+							dependencies = new HashSet();
+						}
+						dependencies.addAll(response.getDependencies());
+					}
+				}
+			}
+		}
+		if (dependencies != null) {
+			return DependencyResponse.create(dependencies);
+		} else {
+			return null;
+		}
 	}
 
+	private IBuildParticipant[] validators = null;
+	private IDLTKLanguageToolkit toolkit = null;
+
 	public void initialize(IScriptProject project) {
+		toolkit = project.getLanguageToolkit();
+		if (toolkit != null) {
+			validators = ValidatorRuntime.getBuildParticipants(project, toolkit
+					.getNatureId(), ValidatorRuntime.ALL);
+		}
 	}
 
 	public void reset(IScriptProject project) {
+		validators = null;
+		toolkit = null;
 	}
 }
