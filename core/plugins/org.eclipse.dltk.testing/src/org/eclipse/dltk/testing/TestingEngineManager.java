@@ -8,8 +8,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.internal.testing.util.NatureExtensionManager;
 import org.eclipse.dltk.internal.testing.util.NumberUtils;
+import org.eclipse.dltk.utils.NatureExtensionManager;
 
 public final class TestingEngineManager extends NatureExtensionManager {
 
