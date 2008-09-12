@@ -13,7 +13,6 @@ package org.eclipse.dltk.validators.internal.core;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
-import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
@@ -26,7 +25,7 @@ import org.eclipse.dltk.validators.core.ValidatorRuntime;
 public class ValidatorStructureBuilder implements IStructureBuilder {
 
 	public void buildStructure(String natureId, ISourceModule module,
-			ISourceElementRequestor requestor, IProblemReporter reporter) {
+			IProblemReporter reporter) {
 		final IScriptProject project = module.getScriptProject();
 		final IBuildParticipant[] validators = ValidatorRuntime
 				.getBuildParticipants(project, natureId, ValidatorRuntime.ALL);
