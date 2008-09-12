@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -91,14 +90,8 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 			final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 					.getLanguageToolkit(workingCopy);
 			if (toolkit != null) {
-				IStructureBuilder[] builders = null;
-				try {
-					builders = StructureBuilderManager.getBuilders(toolkit
-							.getNatureId());
-				} catch (CoreException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				final IStructureBuilder[] builders = StructureBuilderManager
+						.getBuilders(toolkit.getNatureId());
 				if (builders != null) {
 					for (int i = 0; i < builders.length; ++i) {
 						builders[i].buildStructure(toolkit.getNatureId(),
