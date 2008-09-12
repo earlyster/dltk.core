@@ -329,10 +329,10 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 * @return the model element wrapped by <code>editorInput</code> or
 	 *         <code>null</code> if none
 	 */
-	public static IModelElement getEditorInputModelElement(
+	public static ISourceModule getEditorInputModelElement(
 			IEditorInput editorInput) {
 		// Performance: check working copy manager first: this is faster
-		IModelElement je = DLTKUIPlugin.getDefault().getWorkingCopyManager()
+		ISourceModule je = DLTKUIPlugin.getDefault().getWorkingCopyManager()
 				.getWorkingCopy(editorInput, false);
 		if (je != null) {
 			return je;
@@ -344,8 +344,12 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 				return module;
 			}
 		}
-
-		return (IModelElement) editorInput.getAdapter(IModelElement.class);
+		IModelElement me = (IModelElement) editorInput
+				.getAdapter(IModelElement.class);
+		if (me instanceof ISourceModule) {
+			return (ISourceModule) me;
+		}
+		return null;
 	}
 
 	public static IWorkspace getWorkspace() {

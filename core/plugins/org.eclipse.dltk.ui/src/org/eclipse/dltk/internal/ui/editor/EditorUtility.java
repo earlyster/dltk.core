@@ -107,12 +107,12 @@ public class EditorUtility {
 	 * @return the given editor's input as model element or <code>null</code>
 	 *         if none
 	 */
-	public static IModelElement getEditorInputModelElement(IEditorPart editor,
+	public static ISourceModule getEditorInputModelElement(IEditorPart editor,
 			boolean primaryOnly) {
 		IEditorInput editorInput = editor.getEditorInput();
 		if (editorInput == null)
 			return null;
-		IModelElement je = DLTKUIPlugin.getEditorInputModelElement(editorInput);
+		ISourceModule je = DLTKUIPlugin.getEditorInputModelElement(editorInput);
 		if (je != null || primaryOnly)
 			return je;
 		return DLTKUIPlugin.getDefault().getWorkingCopyManager()
