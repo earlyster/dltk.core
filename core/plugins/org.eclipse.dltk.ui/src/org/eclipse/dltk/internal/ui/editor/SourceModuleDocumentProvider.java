@@ -778,7 +778,6 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 					ScriptMarkerAnnotation ma = (ScriptMarkerAnnotation) annotation;
 					if (!ma.isMarkedDeleted() && ma.getOverlay() == null) {
 						ma.markDeleted(true);
-						System.out.println(ma);
 					}
 				}
 			}
