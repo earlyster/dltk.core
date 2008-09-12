@@ -27,7 +27,7 @@ public class NatureExtensionManager {
 
 	private final String natureAttr = "nature"; //$NON-NLS-1$
 	private final String classAttr = "class"; //$NON-NLS-1$
-	private final String universalNatureId = null;
+	private final String universalNatureId;
 	private final Class elementType;
 
 	/**
@@ -35,8 +35,14 @@ public class NatureExtensionManager {
 	 * @param elementType
 	 */
 	public NatureExtensionManager(String extensionPoint, Class elementType) {
+		this(extensionPoint, elementType, null);
+	}
+
+	public NatureExtensionManager(String extensionPoint, Class elementType,
+			String universalNatureId) {
 		this.extensionPoint = extensionPoint;
 		this.elementType = elementType;
+		this.universalNatureId = universalNatureId;
 	}
 
 	// Contains list of instances for selected nature.
