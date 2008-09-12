@@ -9,47 +9,24 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.builder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.internal.core.IStructureBuilder;
+import org.eclipse.dltk.utils.NatureExtensionManager;
 
 public class StructureBuilderManager {
 
 	private final static String EXTPOINT = DLTKCore.PLUGIN_ID
 			+ ".structureBuilder"; //$NON-NLS-1$
 
-	private final static String NATURE_ATTR = "nature"; //$NON-NLS-1$
+	private static NatureExtensionManager manager = null;
 
-	// Contains list of builders for selected nature.
-	private static Map builders;
-
-	private synchronized static void initialize() {
-		if (builders != null) {
-			return;
+	private synchronized static NatureExtensionManager getManager() {
+		if (manager == null) {
+			manager = new NatureExtensionManager(EXTPOINT,
+					IStructureBuilder.class, "#"); //$NON-NLS-1$
 		}
-
-		builders = new HashMap(5);
-		IConfigurationElement[] cfg = Platform.getExtensionRegistry()
-				.getConfigurationElementsFor(EXTPOINT);
-
-		for (int i = 0; i < cfg.length; i++) {
-			String nature = cfg[i].getAttribute(NATURE_ATTR);
-			if (builders.get(nature) != null) {
-				List elements = (List) builders.get(nature);
-				elements.add(cfg[i]);
-			} else {
-				List elements = new ArrayList();
-				elements.add(cfg[i]);
-				builders.put(nature, elements);
-			}
-		}
+		return manager;
 	}
 
 	/**
@@ -59,49 +36,8 @@ public class StructureBuilderManager {
 	 * @return
 	 * @throws CoreException
 	 */
-	public static IStructureBuilder[] getBuilders(String natureId)
-			throws CoreException {
-		initialize();
-		IStructureBuilder[] nature = getByNature(natureId);
-		IStructureBuilder[] all = getByNature("#"); //$NON-NLS-1$
-		if (all == null) {
-			return nature;
-		}
-		if (nature == null) {
-			return all;
-		}
-		final IStructureBuilder[] result = new IStructureBuilder[nature.length
-				+ all.length];
-		System.arraycopy(nature, 0, result, 0, nature.length);
-		System.arraycopy(all, 0, result, nature.length, all.length);
-		return result;
+	public static IStructureBuilder[] getBuilders(String natureId) {
+		return (IStructureBuilder[]) getManager().getInstances(natureId);
 	}
 
-	private static IStructureBuilder[] getByNature(String natureId)
-			throws CoreException {
-		final Object ext = builders.get(natureId);
-		if (ext != null) {
-			if (ext instanceof IStructureBuilder[]) {
-				return (IStructureBuilder[]) ext;
-			} else if (ext instanceof List) {
-				final List elements = (List) ext;
-				final IStructureBuilder[] result = new IStructureBuilder[elements
-						.size()];
-				for (int i = 0; i < elements.size(); ++i) {
-					Object e = elements.get(i);
-					if (e instanceof IStructureBuilder) {
-						result[i] = (IStructureBuilder) e;
-					} else {
-						final IConfigurationElement cfg = (IConfigurationElement) e;
-						final IStructureBuilder builder = (IStructureBuilder) cfg
-								.createExecutableExtension("class"); //$NON-NLS-1$
-						result[i] = builder;
-					}
-				}
-				builders.put(natureId, result);
-				return result;
-			}
-		}
-		return null;
-	}
 }
