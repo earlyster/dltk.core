@@ -107,13 +107,11 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	class ExternalModuleVisitor implements IModelElementVisitor {
-		private Set elements;
-		private IProgressMonitor monitor;
-		private Set fragments = new HashSet();
+	static class ExternalModuleVisitor implements IModelElementVisitor {
+		final Set elements = new HashSet();
+		private final IProgressMonitor monitor;
 
-		public ExternalModuleVisitor(Set elements, IProgressMonitor monitor) {
-			this.elements = elements;
+		public ExternalModuleVisitor(IProgressMonitor monitor) {
 			this.monitor = monitor;
 		}
 
@@ -132,8 +130,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				}
 				IProjectFragment fragment = (IProjectFragment) element;
 
-				fragments.add(fragment.getPath());
-
 				String localPath = EnvironmentPathUtils.getLocalPath(
 						fragment.getPath()).toString();
 				if (!localPath.startsWith("#")) { //$NON-NLS-1$
@@ -141,16 +137,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 							.subTask(Messages.ScriptBuilder_Looking_into_folder
 									+ localPath);
 				}
-				if (lastState.externalFolderLocations.contains(fragment
-						.getPath())) {
-					return false;
-				} else {
-					lastState.externalFolderLocations.add(fragment.getPath());
-				}
-			}
-			if (element.getElementType() == IModelElement.SOURCE_MODULE
-					&& (element instanceof ExternalSourceModule || element instanceof BuiltinSourceModule)) {
-				if (!elements.contains(element)) {
+			} else if (element.getElementType() == IModelElement.SOURCE_MODULE) {
+				if (element instanceof ExternalSourceModule
+						|| element instanceof BuiltinSourceModule) {
 					elements.add(element);
 				}
 				return false; // do not enter into source module content.
@@ -158,9 +147,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			return true;
 		}
 
-		public Set getExternalFolders() {
-			return this.fragments;
-		}
 	}
 
 	/**
@@ -475,15 +461,15 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 	private Set getExternalElementsFrom(ScriptProject prj,
 			final IProgressMonitor monitor, int tiks) throws ModelException {
-		Set elements = new HashSet();
 		String name = Messages.ScriptBuilder_scanningExternalResourcesFor;
 		monitor.subTask(name);
 		SubProgressMonitor mon = new SubProgressMonitor(monitor, tiks);
-		ExternalModuleVisitor visitor = new ExternalModuleVisitor(elements, mon);
 
 		IProjectFragment[] fragments = prj.getAllProjectFragments();
-		List extFragments = new ArrayList();
-		List currentFragments = new ArrayList();
+		// new external fragments
+		List extFragments = new ArrayList(fragments.length);
+		// old external fragments
+		List currentFragments = new ArrayList(fragments.length);
 		for (int i = 0; i < fragments.length; i++) {
 			final IProjectFragment fragment = fragments[i];
 			if (fragment instanceof ExternalProjectFragment
@@ -497,6 +483,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			}
 		}
 		// monitor.subTask(name);
+		ExternalModuleVisitor visitor = new ExternalModuleVisitor(mon);
 		mon.beginTask(name, extFragments.size());
 		for (Iterator iterator = extFragments.iterator(); iterator.hasNext();) {
 			IProjectFragment fragment = (IProjectFragment) iterator.next();
@@ -508,11 +495,10 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		mon.done();
 
 		this.lastState.externalFolderLocations.clear();
-		this.lastState.externalFolderLocations.addAll(visitor
-				.getExternalFolders());
+		this.lastState.externalFolderLocations.addAll(extFragments);
 		this.lastState.externalFolderLocations.addAll(currentFragments);
 
-		return elements;
+		return visitor.elements;
 	}
 
 	protected void incrementalBuild(IResourceDelta delta,
