@@ -12,10 +12,8 @@ package org.eclipse.dltk.internal.ui.text;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.ISourceModule;
 
-
 /**
- * Interface of an object listening to Java reconciling.
- *
+ * Interface of an object listening to script reconciling.
  */
 public interface IScriptReconcilingListener {
 
@@ -26,10 +24,15 @@ public interface IScriptReconcilingListener {
 
 	/**
 	 * Called after reconciling has been finished.
-	 * @param ast				the compilation unit AST or <code>null</code> if
- * 								the working copy was consistent or reconciliation has been cancelled
-	 * @param forced			<code>true</code> iff this reconciliation was forced
-	 * @param progressMonitor	the progress monitor
+	 * 
+	 * @param ast
+	 *            the compilation unit AST or <code>null</code> if the working
+	 *            copy was consistent or reconciliation has been cancelled
+	 * @param forced
+	 *            <code>true</code> iff this reconciliation was forced
+	 * @param progressMonitor
+	 *            the progress monitor
 	 */
-	void reconciled(ISourceModule module, boolean forced, IProgressMonitor progressMonitor);
+	void reconciled(ISourceModule module, boolean forced,
+			IProgressMonitor progressMonitor);
 }
