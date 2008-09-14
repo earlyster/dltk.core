@@ -7,7 +7,7 @@ package org.eclipse.dltk.internal.ui;
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
+
  *******************************************************************************/
 
 import java.io.IOException;
@@ -17,6 +17,7 @@ import java.util.Iterator;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.internal.ui.text.HTML2TextReader;
 import org.eclipse.dltk.ui.text.completion.HTMLPrinter;
+import org.eclipse.dltk.ui.util.PixelConverter;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension3;
@@ -50,66 +51,72 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
-
 /**
- * Displays textual information in a {@link org.eclipse.swt.browser.Browser} widget.
+ * Displays textual information in a {@link org.eclipse.swt.browser.Browser}
+ * widget.
  * <p>
- * Moved into this package from <code>org.eclipse.jface.internal.text.revisions</code>.</p>
+ * Moved into this package from
+ * <code>org.eclipse.jface.internal.text.revisions</code>.
+ * </p>
  * <p>
- * This class may be instantiated; it is not intended to be subclassed.</p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
  * <p>
  * Current problems:
  * <ul>
- * 	<li>the size computation is too small</li>
- * 	<li>focusLost event is not sent - see https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532</li>
+ * <li>the size computation is too small</li>
+ * <li>focusLost event is not sent - see
+ * https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532</li>
  * </ul>
  * </p>
  * 
  * @since 3.2
  */
-public class BrowserInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension3, DisposeListener {
-
+public class BrowserInformationControl implements IInformationControl,
+		IInformationControlExtension, IInformationControlExtension3,
+		DisposeListener {
 
 	/**
-	 * Tells whether the SWT Browser widget and hence this information
-	 * control is available.
-	 *
-	 * @param parent the parent component used for checking or <code>null</code> if none
+	 * Tells whether the SWT Browser widget and hence this information control
+	 * is available.
+	 * 
+	 * @param parent
+	 *            the parent component used for checking or <code>null</code> if
+	 *            none
 	 * @return <code>true</code> if this control is available
 	 */
 	public static boolean isAvailable(Composite parent) {
 		if (!fgAvailabilityChecked) {
 			try {
-				Browser browser= new Browser(parent, SWT.NONE);
+				Browser browser = new Browser(parent, SWT.NONE);
 				browser.dispose();
-				fgIsAvailable= true;
+				fgIsAvailable = true;
 			} catch (SWTError er) {
-				fgIsAvailable= false;
+				fgIsAvailable = false;
 			} finally {
-				fgAvailabilityChecked= true;
+				fgAvailabilityChecked = true;
 			}
 		}
 
 		return fgIsAvailable;
 	}
 
-
 	/** Border thickness in pixels. */
-	private static final int BORDER= 1;
-	
+	private static final int BORDER = 1;
+
 	/**
 	 * Minimal size constraints.
+	 * 
 	 * @since 3.2
 	 */
-	private static final int MIN_WIDTH= 80;
-	private static final int MIN_HEIGHT= 80;
+	private static final int MIN_WIDTH = 80;
+	private static final int MIN_HEIGHT = 80;
 
-	
 	/**
 	 * Availability checking cache.
 	 */
-	private static boolean fgIsAvailable= false;
-	private static boolean fgAvailabilityChecked= false;
+	private static boolean fgIsAvailable = false;
+	private static boolean fgAvailabilityChecked = false;
 
 	/** The control's shell */
 	private Shell fShell;
@@ -118,15 +125,15 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/** Tells whether the browser has content */
 	private boolean fBrowserHasContent;
 	/** The control width constraint */
-	private int fMaxWidth= SWT.DEFAULT;
+	private int fMaxWidth = SWT.DEFAULT;
 	/** The control height constraint */
-	private int fMaxHeight= SWT.DEFAULT;
+	private int fMaxHeight = SWT.DEFAULT;
 	private Font fStatusTextFont;
 	private Label fStatusTextField;
 	private String fStatusFieldText;
 	private boolean fHideScrollBars;
 	private Listener fDeactivateListener;
-	private ListenerList fFocusListeners= new ListenerList();
+	private ListenerList fFocusListeners = new ListenerList();
 	private Label fSeparator;
 	private String fInputText;
 	private TextLayout fTextLayout;
@@ -134,98 +141,118 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	private TextStyle fBoldStyle;
 
 	/**
-	 * Creates a default information control with the given shell as parent. The given
-	 * information presenter is used to process the information to be displayed. The given
-	 * styles are applied to the created styled text widget.
-	 *
-	 * @param parent the parent shell
-	 * @param shellStyle the additional styles for the shell
-	 * @param style the additional styles for the styled text widget
+	 * Creates a default information control with the given shell as parent. The
+	 * given information presenter is used to process the information to be
+	 * displayed. The given styles are applied to the created styled text
+	 * widget.
+	 * 
+	 * @param parent
+	 *            the parent shell
+	 * @param shellStyle
+	 *            the additional styles for the shell
+	 * @param style
+	 *            the additional styles for the styled text widget
 	 */
 	public BrowserInformationControl(Shell parent, int shellStyle, int style) {
 		this(parent, shellStyle, style, null);
 	}
 
 	/**
-	 * Creates a default information control with the given shell as parent. The given
-	 * information presenter is used to process the information to be displayed. The given
-	 * styles are applied to the created styled text widget.
-	 *
-	 * @param parent the parent shell
-	 * @param shellStyle the additional styles for the shell
-	 * @param style the additional styles for the styled text widget
-	 * @param statusFieldText the text to be used in the optional status field
-	 *                         or <code>null</code> if the status field should be hidden
+	 * Creates a default information control with the given shell as parent. The
+	 * given information presenter is used to process the information to be
+	 * displayed. The given styles are applied to the created styled text
+	 * widget.
+	 * 
+	 * @param parent
+	 *            the parent shell
+	 * @param shellStyle
+	 *            the additional styles for the shell
+	 * @param style
+	 *            the additional styles for the styled text widget
+	 * @param statusFieldText
+	 *            the text to be used in the optional status field or
+	 *            <code>null</code> if the status field should be hidden
 	 */
-	public BrowserInformationControl(Shell parent, int shellStyle, int style, String statusFieldText) {
-		fStatusFieldText= statusFieldText;
-		
-		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.ON_TOP | shellStyle);
-		Display display= fShell.getDisplay();
-		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
-		fTextLayout= new TextLayout(display);
+	public BrowserInformationControl(Shell parent, int shellStyle, int style,
+			String statusFieldText) {
+		fStatusFieldText = statusFieldText;
 
-		Composite composite= fShell;
-		GridLayout layout= new GridLayout(1, false);
-		int border= ((shellStyle & SWT.NO_TRIM) == 0) ? 0 : BORDER;
-		layout.marginHeight= border;
-		layout.marginWidth= border;
+		fShell = new Shell(parent, SWT.NO_FOCUS | SWT.ON_TOP | shellStyle);
+		Display display = fShell.getDisplay();
+		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
+		fTextLayout = new TextLayout(display);
+
+		Composite composite = fShell;
+		GridLayout layout = new GridLayout(1, false);
+		int border = ((shellStyle & SWT.NO_TRIM) == 0) ? 0 : BORDER;
+		layout.marginHeight = border;
+		layout.marginWidth = border;
 		composite.setLayout(layout);
-		
+
 		if (statusFieldText != null) {
-			composite= new Composite(composite, SWT.NONE);
-			layout= new GridLayout(1, false);
-			layout.marginHeight= 0;
-			layout.marginWidth= 0;
-			layout.verticalSpacing= 1;
-			layout.horizontalSpacing= 1;
+			composite = new Composite(composite, SWT.NONE);
+			layout = new GridLayout(1, false);
+			layout.marginHeight = 0;
+			layout.marginWidth = 0;
+			layout.verticalSpacing = 1;
+			layout.horizontalSpacing = 1;
 			composite.setLayout(layout);
-			
-			GridData  gd= new GridData(GridData.FILL_BOTH);
+
+			GridData gd = new GridData(GridData.FILL_BOTH);
 			composite.setLayoutData(gd);
-			
-			composite.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-			composite.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+
+			composite.setForeground(display
+					.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+			composite.setBackground(display
+					.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 		}
 
 		// Browser field
-		fBrowser= new Browser(composite, SWT.NONE);
-		fHideScrollBars= (style & SWT.V_SCROLL) == 0 && (style & SWT.H_SCROLL) == 0;
-		
-		GridData gd= new GridData(GridData.BEGINNING | GridData.FILL_BOTH);
+		fBrowser = new Browser(composite, SWT.NONE);
+		fHideScrollBars = (style & SWT.V_SCROLL) == 0
+				&& (style & SWT.H_SCROLL) == 0;
+
+		GridData gd = new GridData(GridData.BEGINNING | GridData.FILL_BOTH);
 		fBrowser.setLayoutData(gd);
-		
-		fBrowser.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-		fBrowser.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+
+		fBrowser.setForeground(display
+				.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+		fBrowser.setBackground(display
+				.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 		fBrowser.addKeyListener(new KeyListener() {
 
-			public void keyPressed(KeyEvent e)  {
+			public void keyPressed(KeyEvent e) {
 				if (e.character == 0x1B) // ESC
 					fShell.dispose();
 			}
 
-			public void keyReleased(KeyEvent e) {}
+			public void keyReleased(KeyEvent e) {
+			}
 		});
 		/*
-		 * XXX revisit when the Browser support is better 
-		 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=107629. Choosing a link to a
-		 * non-available target will show an error dialog behind the ON_TOP shell that seemingly
-		 * blocks the workbench. Disable links completely for now.
+		 * XXX revisit when the Browser support is better See
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=107629. Choosing a link
+		 * to a non-available target will show an error dialog behind the ON_TOP
+		 * shell that seemingly blocks the workbench. Disable links completely
+		 * for now.
 		 */
 		fBrowser.addLocationListener(new LocationAdapter() {
 			/*
-			 * @see org.eclipse.swt.browser.LocationAdapter#changing(org.eclipse.swt.browser.LocationEvent)
+			 * @see
+			 * org.eclipse.swt.browser.LocationAdapter#changing(org.eclipse.
+			 * swt.browser.LocationEvent)
 			 */
 			public void changing(LocationEvent event) {
-				String location= event.location;
+				String location = event.location;
 				/*
-				 * Using the Browser.setText API triggers a location change to "about:blank" with
-				 * the mozilla widget. The Browser on carbon uses yet another kind of special
-				 * initialization URLs. 
-				 * TODO remove this code once https://bugs.eclipse.org/bugs/show_bug.cgi?id=130314 is fixed
+				 * Using the Browser.setText API triggers a location change to
+				 * "about:blank" with the mozilla widget. The Browser on carbon
+				 * uses yet another kind of special initialization URLs. TODO
+				 * remove this code once
+				 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=130314 is fixed
 				 */
 				if (!"about:blank".equals(location) && !("carbon".equals(SWT.getPlatform()) && location.startsWith("applewebdata:"))) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					event.doit= false;
+					event.doit = false;
 			}
 		});
 
@@ -235,92 +262,105 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		// Status field
 		if (statusFieldText != null) {
 
-			fSeparator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.LINE_DOT);
+			fSeparator = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL
+					| SWT.LINE_DOT);
 			fSeparator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 			// Status field label
-			fStatusTextField= new Label(composite, SWT.RIGHT);
+			fStatusTextField = new Label(composite, SWT.RIGHT);
 			fStatusTextField.setText(statusFieldText);
-			Font font= fStatusTextField.getFont();
-			FontData[] fontDatas= font.getFontData();
-			for (int i= 0; i < fontDatas.length; i++)
+			Font font = fStatusTextField.getFont();
+			FontData[] fontDatas = font.getFontData();
+			for (int i = 0; i < fontDatas.length; i++)
 				fontDatas[i].setHeight(fontDatas[i].getHeight() * 9 / 10);
-			fStatusTextFont= new Font(fStatusTextField.getDisplay(), fontDatas);
+			fStatusTextFont = new Font(fStatusTextField.getDisplay(), fontDatas);
 			fStatusTextField.setFont(fStatusTextFont);
-			gd= new GridData(GridData.FILL_HORIZONTAL | GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING);
+			gd = new GridData(GridData.FILL_HORIZONTAL
+					| GridData.HORIZONTAL_ALIGN_BEGINNING
+					| GridData.VERTICAL_ALIGN_BEGINNING);
 			fStatusTextField.setLayoutData(gd);
 
-			fStatusTextField.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
+			fStatusTextField.setForeground(display
+					.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
 
-			fStatusTextField.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+			fStatusTextField.setBackground(display
+					.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 		}
 
-		addDisposeListener(this);		
+		addDisposeListener(this);
 		createTextLayout();
 	}
 
 	/**
-	 * Creates a default information control with the given shell as parent. The given
-	 * information presenter is used to process the information to be displayed. The given
-	 * styles are applied to the created styled text widget.
-	 *
-	 * @param parent the parent shell
-	 * @param style the additional styles for the browser widget
+	 * Creates a default information control with the given shell as parent. The
+	 * given information presenter is used to process the information to be
+	 * displayed. The given styles are applied to the created styled text
+	 * widget.
+	 * 
+	 * @param parent
+	 *            the parent shell
+	 * @param style
+	 *            the additional styles for the browser widget
 	 */
-	public BrowserInformationControl(Shell parent,int style) {
+	public BrowserInformationControl(Shell parent, int style) {
 		this(parent, SWT.TOOL | SWT.NO_TRIM, style);
 	}
 
 	/**
-	 * Creates a default information control with the given shell as parent.
-	 * No information presenter is used to process the information
-	 * to be displayed. No additional styles are applied to the styled text widget.
-	 *
-	 * @param parent the parent shell
+	 * Creates a default information control with the given shell as parent. No
+	 * information presenter is used to process the information to be displayed.
+	 * No additional styles are applied to the styled text widget.
+	 * 
+	 * @param parent
+	 *            the parent shell
 	 */
 	public BrowserInformationControl(Shell parent) {
 		this(parent, SWT.NONE);
 	}
 
-
 	/*
 	 * @see IInformationControl#setInformation(String)
 	 */
 	public void setInformation(String content) {
-		fBrowserHasContent= content != null && content.length() > 0;
+		fBrowserHasContent = content != null && content.length() > 0;
 
 		if (!fBrowserHasContent)
-			content= "<html><body ></html>"; //$NON-NLS-1$
-		
-		fInputText= content;
+			content = "<html><body ></html>"; //$NON-NLS-1$
 
-		int shellStyle= fShell.getStyle();
-		boolean RTL= (shellStyle & SWT.RIGHT_TO_LEFT) != 0;
+		fInputText = content;
 
-		String[] styles= null;
+		int shellStyle = fShell.getStyle();
+		boolean RTL = (shellStyle & SWT.RIGHT_TO_LEFT) != 0;
+
+		String[] styles = null;
 		if (RTL && !fHideScrollBars)
-			styles= new String[] { "direction:rtl;", "word-wrap:break-word;" }; //$NON-NLS-1$ //$NON-NLS-2$
+			styles = new String[] { "direction:rtl;", "word-wrap:break-word;" }; //$NON-NLS-1$ //$NON-NLS-2$
 		else if (RTL && fHideScrollBars)
-			styles= new String[] { "direction:rtl;", "overflow:hidden;", "word-wrap:break-word;" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			styles = new String[] {
+					"direction:rtl;", "overflow:hidden;", "word-wrap:break-word;" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		else if (fHideScrollBars && true)
-			styles= new String[] { "overflow:hidden;", "word-wrap: break-word;" }; //$NON-NLS-1$ //$NON-NLS-2$
-		
+			styles = new String[] {
+					"overflow:hidden;", "word-wrap: break-word;" }; //$NON-NLS-1$ //$NON-NLS-2$
+
 		if (styles != null) {
-			StringBuffer buffer= new StringBuffer(content);
+			StringBuffer buffer = new StringBuffer(content);
 			HTMLPrinter.insertStyles(buffer, styles);
-			content= buffer.toString();
+			content = buffer.toString();
 		}
-		
+
 		fBrowser.setText(content);
-	
+
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.IInformationControlExtension4#setStatusText(java.lang.String)
+	 * @see
+	 * org.eclipse.jdt.internal.ui.text.IInformationControlExtension4#setStatusText
+	 * (java.lang.String)
+	 * 
 	 * @since 3.2
 	 */
 	public void setStatusText(String statusFieldText) {
-		fStatusFieldText= statusFieldText;
+		fStatusFieldText = statusFieldText;
 	}
 
 	/*
@@ -329,10 +369,10 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	public void setVisible(boolean visible) {
 		if (fShell.isVisible() == visible)
 			return;
-		
+
 		if (visible) {
 			if (fStatusTextField != null) {
-				boolean state= fStatusFieldText != null;
+				boolean state = fStatusFieldText != null;
 				if (state)
 					fStatusTextField.setText(fStatusFieldText);
 				fStatusTextField.setVisible(state);
@@ -346,28 +386,27 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	}
 
 	/**
-	 * Creates and initializes the text layout used
-	 * to compute the size hint.
+	 * Creates and initializes the text layout used to compute the size hint.
 	 * 
 	 * @since 3.2
 	 */
 	private void createTextLayout() {
-		fTextLayout= new TextLayout(fBrowser.getDisplay());
-		
+		fTextLayout = new TextLayout(fBrowser.getDisplay());
+
 		// Initialize fonts
-		Font font= fBrowser.getFont();
+		Font font = fBrowser.getFont();
 		fTextLayout.setFont(font);
 		fTextLayout.setWidth(-1);
-		FontData[] fontData= font.getFontData();
-		for (int i= 0; i < fontData.length; i++)
+		FontData[] fontData = font.getFontData();
+		for (int i = 0; i < fontData.length; i++)
 			fontData[i].setStyle(SWT.BOLD);
-		font= new Font(fShell.getDisplay(), fontData);
-		fBoldStyle= new TextStyle(font, null, null);
-		
+		font = new Font(fShell.getDisplay(), fontData);
+		fBoldStyle = new TextStyle(font, null, null);
+
 		// Compute and set tab width
 		fTextLayout.setText("    "); //$NON-NLS-1$
 		int tabWidth = fTextLayout.getBounds().width;
-		fTextLayout.setTabs(new int[] {tabWidth});
+		fTextLayout.setTabs(new int[] { tabWidth });
 
 		fTextLayout.setText(""); //$NON-NLS-1$
 	}
@@ -377,9 +416,9 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 */
 	public void dispose() {
 		fTextLayout.dispose();
-		fTextLayout= null;
+		fTextLayout = null;
 		fBoldStyle.font.dispose();
-		fBoldStyle= null;
+		fBoldStyle = null;
 		if (fShell != null && !fShell.isDisposed())
 			fShell.dispose();
 		else
@@ -387,22 +426,26 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	}
 
 	/*
-	 * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
+	 * @see
+	 * org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt
+	 * .events.DisposeEvent)
 	 */
 	public void widgetDisposed(DisposeEvent event) {
 		if (fStatusTextFont != null && !fStatusTextFont.isDisposed())
 			fStatusTextFont.dispose();
 
-		fShell= null;
-		fBrowser= null;
-		fStatusTextFont= null;
+		fShell = null;
+		fBrowser = null;
+		fStatusTextFont = null;
 	}
 
 	/*
 	 * @see IInformationControl#setSize(int, int)
 	 */
 	public void setSize(int width, int height) {
-		fShell.setSize(Math.min(width, fMaxWidth), Math.min(height, fMaxHeight));
+		fShell
+				.setSize(Math.min(width, fMaxWidth), Math.min(height,
+						fMaxHeight));
 	}
 
 	/*
@@ -416,55 +459,58 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 * @see IInformationControl#setSizeConstraints(int, int)
 	 */
 	public void setSizeConstraints(int maxWidth, int maxHeight) {
-		fMaxWidth= maxWidth;
-		fMaxHeight= maxHeight;
+		fMaxWidth = maxWidth;
+		fMaxHeight = maxHeight;
 	}
 
 	/*
 	 * @see IInformationControl#computeSizeHint()
 	 */
 	public Point computeSizeHint() {
-		TextPresentation presentation= new TextPresentation();
-		HTML2TextReader reader= new HTML2TextReader(new StringReader(fInputText), presentation);
+		TextPresentation presentation = new TextPresentation();
+		HTML2TextReader reader = new HTML2TextReader(new StringReader(
+				fInputText), presentation);
 		String text;
 		try {
-			text= reader.getString();
+			text = reader.getString();
 		} catch (IOException e) {
-			text= ""; //$NON-NLS-1$
+			text = ""; //$NON-NLS-1$
 		}
 
 		fTextLayout.setText(text);
-		Iterator iter= presentation.getAllStyleRangeIterator();
+		Iterator iter = presentation.getAllStyleRangeIterator();
 		while (iter.hasNext()) {
-			StyleRange sr= (StyleRange)iter.next();
+			StyleRange sr = (StyleRange) iter.next();
 			if (sr.fontStyle == SWT.BOLD)
-				fTextLayout.setStyle(fBoldStyle, sr.start, sr.start + sr.length - 1);
+				fTextLayout.setStyle(fBoldStyle, sr.start, sr.start + sr.length
+						- 1);
 		}
-		Rectangle bounds= fTextLayout.getBounds();
-		int width= bounds.width;
-		int height= bounds.height;
-		
-		width += 15; 
-		height += 25; 
+		Rectangle bounds = fTextLayout.getBounds();
+		int width = bounds.width;
+		int height = bounds.height;
+
+		PixelConverter pixelConverter = new PixelConverter(fBrowser);
+		width += pixelConverter.convertWidthInCharsToPixels(15);
+		height += pixelConverter.convertHeightInCharsToPixels(1);
 
 		if (fStatusFieldText != null && fSeparator != null) {
 			fTextLayout.setText(fStatusFieldText);
-			Rectangle statusBounds= fTextLayout.getBounds();
-			Rectangle separatorBounds= fSeparator.getBounds();
-			width= Math.max(width, statusBounds.width);
-			height= height + statusBounds.height + separatorBounds.height;
+			Rectangle statusBounds = fTextLayout.getBounds();
+			Rectangle separatorBounds = fSeparator.getBounds();
+			width = Math.max(width, statusBounds.width);
+			height = height + statusBounds.height + separatorBounds.height;
 		}
 
 		// Apply size constraints
 		if (fMaxWidth != SWT.DEFAULT)
-			width= Math.min(fMaxWidth, width);
+			width = Math.min(fMaxWidth, width);
 		if (fMaxHeight != SWT.DEFAULT)
-			height= Math.min(fMaxHeight, height);
+			height = Math.min(fMaxHeight, height);
 
 		// Ensure minimal size
-		width= Math.max(MIN_WIDTH, width);
-		height= Math.max(MIN_HEIGHT, height);
-		
+		width = Math.max(MIN_WIDTH, width);
+		height = Math.max(MIN_HEIGHT, height);
+
 		return new Point(width, height);
 	}
 
@@ -483,7 +529,8 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.IInformationControlExtension3#restoresLocation()
+	 * @see
+	 * org.eclipse.jface.text.IInformationControlExtension3#restoresLocation()
 	 */
 	public boolean restoresLocation() {
 		return false;
@@ -546,18 +593,21 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		fBrowser.addFocusListener(listener);
 
 		/*
-		 * FIXME:	This is a workaround for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532
-		 * 			(Browser widget does not send focusLost event)
+		 * FIXME: This is a workaround for bug
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532 (Browser widget
+		 * does not send focusLost event)
 		 */
 		if (fFocusListeners.isEmpty()) {
-			fDeactivateListener=  new Listener() {
+			fDeactivateListener = new Listener() {
 				public void handleEvent(Event event) {
-					Object[] listeners= fFocusListeners.getListeners();
+					Object[] listeners = fFocusListeners.getListeners();
 					for (int i = 0; i < listeners.length; i++)
-						((FocusListener)listeners[i]).focusLost(new FocusEvent(event));
+						((FocusListener) listeners[i])
+								.focusLost(new FocusEvent(event));
 				}
 			};
-			fBrowser.getShell().addListener(SWT.Deactivate, fDeactivateListener);
+			fBrowser.getShell()
+					.addListener(SWT.Deactivate, fDeactivateListener);
 		}
 		fFocusListeners.add(listener);
 	}
@@ -569,13 +619,15 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		fBrowser.removeFocusListener(listener);
 
 		/*
-		 * FIXME:	This is a workaround for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532
-		 * 			(Browser widget does not send focusLost event)
+		 * FIXME: This is a workaround for bug
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=84532 (Browser widget
+		 * does not send focusLost event)
 		 */
 		fFocusListeners.remove(listener);
 		if (fFocusListeners.isEmpty()) {
-			fBrowser.getShell().removeListener(SWT.Deactivate, fDeactivateListener);
-			fDeactivateListener= null;
+			fBrowser.getShell().removeListener(SWT.Deactivate,
+					fDeactivateListener);
+			fDeactivateListener = null;
 		}
 	}
 
@@ -586,4 +638,3 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		return fBrowserHasContent;
 	}
 }
-
