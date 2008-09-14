@@ -85,6 +85,7 @@ public abstract class AbstractAnnotationHover extends
 		}
 
 		try {
+			final IPreferenceStore store = getCombinedPreferenceStore();
 			Iterator e = new ScriptAnnotationIterator(model, true,
 					fAllAnnotations);
 			int layer = -1;
@@ -96,7 +97,6 @@ public abstract class AbstractAnnotationHover extends
 				if (preference == null) {
 					continue;
 				}
-				final IPreferenceStore store = getCombinedPreferenceStore();
 				if (!isActive(store, preference.getTextPreferenceKey())
 						&& !isActive(store, preference
 								.getHighlightPreferenceKey())) {
@@ -146,7 +146,7 @@ public abstract class AbstractAnnotationHover extends
 
 	private IPreferenceStore combinedStore = null;
 
-	protected IPreferenceStore getCombinedPreferenceStore() {
+	protected synchronized IPreferenceStore getCombinedPreferenceStore() {
 		if (combinedStore == null) {
 			combinedStore = new ChainedPreferenceStore(new IPreferenceStore[] {
 					getPreferenceStore(), EditorsUI.getPreferenceStore() });
