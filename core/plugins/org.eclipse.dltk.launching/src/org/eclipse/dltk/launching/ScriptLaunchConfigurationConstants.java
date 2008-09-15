@@ -26,6 +26,9 @@ public class ScriptLaunchConfigurationConstants {
 
 	public static final String ATTR_DLTK_DBGP_REMOTE = "dbgp_remote"; //$NON-NLS-1$
 	public static final String ATTR_DLTK_DBGP_SESSION_ID = "dbgp_session_id"; //$NON-NLS-1$
+	/**
+	 * @deprecated
+	 */
 	public static final String ATTR_DLTK_DBGP_PORT = "dbpg_port"; //$NON-NLS-1$
 	public static final String ATTR_DLTK_DBGP_WAITING_TIMEOUT = "dbpg_waiting_timeout"; //$NON-NLS-1$
 
