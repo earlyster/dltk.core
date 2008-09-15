@@ -13,6 +13,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -754,7 +755,17 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 			env.putAll(scriptExecEnvironment.getEnvironmentVariables(false));
 		}
 		if (configEnv != null) {
-			env.putAll(configEnv);
+			for (Iterator i = configEnv.entrySet().iterator(); i.hasNext();) {
+				final Map.Entry entry = (Map.Entry) i.next();
+				final String key = (String) entry.getKey();
+				String value = (String) entry.getValue();
+				if (value != null) {
+					value = VariablesPlugin.getDefault()
+							.getStringVariableManager()
+							.performStringSubstitution(value);
+				}
+				env.put(key, value);
+			}
 			/*
 			 * TODO for win32 override values in case-insensitive way like in
 			 * org.eclipse.debug.internal.core.LaunchManager#getEnvironment(...)
