@@ -72,6 +72,8 @@ import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
 import org.eclipse.dltk.ui.formatter.ScriptFormattingContextProperties;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
+import org.eclipse.dltk.ui.text.folding.AbstractASTFoldingStructureProvider;
+import org.eclipse.dltk.ui.text.folding.IElementCommentResolver;
 import org.eclipse.dltk.ui.text.folding.IFoldingStructureProvider;
 import org.eclipse.dltk.ui.text.folding.IFoldingStructureProviderExtension;
 import org.eclipse.jface.action.Action;
@@ -2150,6 +2152,18 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			}
 		}
 		return null;
+	}
+
+	public IModelElement getElementByCommentPosition(int offset, int length) {
+		IFoldingStructureProvider prov = this.getFoldingStructureProvider();
+		if (!(prov instanceof AbstractASTFoldingStructureProvider))
+			return null;
+
+		AbstractASTFoldingStructureProvider provider = (AbstractASTFoldingStructureProvider) prov;
+
+		IElementCommentResolver res = provider.getElementCommentResolver();
+		return res == null ? null : res.getElementByCommentPosition(
+				(ISourceModule) this.getInputModelElement(), offset, length);
 	}
 
 	/**

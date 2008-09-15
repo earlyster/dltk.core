@@ -29,6 +29,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.ElementChangedEvent;
 import org.eclipse.dltk.core.IElementChangedListener;
+import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IModelElementVisitor;
@@ -297,7 +298,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	 */
 	private static final class MemberFilter implements Filter {
 		public boolean match(ScriptProjectionAnnotation annotation) {
-			if (!annotation.isComment() && !annotation.isMarkedDeleted()) {
+			if (!annotation.isMarkedDeleted()
+					&& annotation.getElement() instanceof IMember) {
 				return true;
 			}
 			return false;
@@ -781,6 +783,10 @@ public abstract class AbstractASTFoldingStructureProvider implements
 												+ normalized.getLength())
 								.hashCode();
 						IModelElement element = null;
+						IElementCommentResolver res = getElementCommentResolver();
+						if (res != null)
+							element = res.getElementByCommentPosition(
+									(ISourceModule) fInput, position.offset, 0);
 						ctx.addProjectionRange(new ScriptProjectionAnnotation(
 								initiallyCollapseComments(normalized, ctx),
 								true, new SourceRangeStamp(hash, normalized
@@ -1340,6 +1346,10 @@ public abstract class AbstractASTFoldingStructureProvider implements
 
 	protected boolean collapseEmptyLines() {
 		return fFoldNewLines;
+	}
+
+	public IElementCommentResolver getElementCommentResolver() {
+		return null;
 	}
 
 	public class MethodVisitor implements IModelElementVisitor {

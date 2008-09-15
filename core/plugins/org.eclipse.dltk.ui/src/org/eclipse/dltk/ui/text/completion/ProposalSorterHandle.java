@@ -173,7 +173,7 @@ public final class ProposalSorterHandle {
 			
 			PerformanceStats stats= startMeter(SORT, sorter);
 			
-			sorter.beginSorting(context);
+			sorter.beginSorting(context, proposals);
 			Collections.sort(proposals, sorter);
 			sorter.endSorting();
 			
