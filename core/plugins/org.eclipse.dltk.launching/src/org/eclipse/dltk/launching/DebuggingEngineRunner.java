@@ -189,7 +189,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 		int timeout = configuration
 				.getAttribute(
 						ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_WAITING_TIMEOUT,
-						0);
+						DLTKDebugPlugin.getConnectionTimeout());
 
 		ScriptDebugTarget target = (ScriptDebugTarget) launch.getDebugTarget();
 		IScriptDebugThreadConfigurator configurator = this
