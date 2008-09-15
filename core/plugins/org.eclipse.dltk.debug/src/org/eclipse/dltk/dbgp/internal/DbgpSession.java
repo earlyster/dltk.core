@@ -72,7 +72,7 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 			streamManager.waitTerminated();
 		}
 
-		if (object != notificationManager) {
+		if (notificationManager != null && object != notificationManager) {
 			notificationManager.waitTerminated();
 		}
 	}
