@@ -234,7 +234,14 @@ public abstract class MainLaunchConfigurationTab extends
 		config.setAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
 				getScriptName());
+		performApplyConnectionTimeout(config);
 		performApplyInteractiveConsole(config);
+	}
+
+	protected void performApplyConnectionTimeout(
+			ILaunchConfigurationWorkingCopy config) {
+		config
+				.removeAttribute(ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_WAITING_TIMEOUT);
 	}
 
 	protected IResource getResource(ILaunchConfiguration config)
