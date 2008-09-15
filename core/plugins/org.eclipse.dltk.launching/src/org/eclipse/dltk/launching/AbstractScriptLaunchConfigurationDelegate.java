@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -744,20 +745,31 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		// Environment
 		// config.addEnvVars(DebugPlugin.getDefault().getLaunchManager()
 		// .getNativeEnvironmentCasePreserved());
-		Map configEnv = configuration.getAttribute(
-				ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, new HashMap());
-		// build base environment
-		Map env = scriptExecEnvironment.getEnvironmentVariables(false);
-		boolean append = configuration.getAttribute(
+		final boolean append = configuration.getAttribute(
 				ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES, true);
+		final Map configEnv = configuration.getAttribute(
+				ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map) null);
+		// build base environment
+		final Map env = new HashMap();
+		if (append || configEnv == null) {
+			env.putAll(scriptExecEnvironment.getEnvironmentVariables(false));
+		}
 		if (configEnv != null) {
-			for (Iterator iterator = configEnv.keySet().iterator(); iterator
-					.hasNext();) {
-				String name = (String) iterator.next();
-				if (!env.containsKey(name) || !append) {
-					env.put(name, configEnv.get(name));
+			for (Iterator i = configEnv.entrySet().iterator(); i.hasNext();) {
+				final Map.Entry entry = (Map.Entry) i.next();
+				final String key = (String) entry.getKey();
+				String value = (String) entry.getValue();
+				if (value != null) {
+					value = VariablesPlugin.getDefault()
+							.getStringVariableManager()
+							.performStringSubstitution(value);
 				}
+				env.put(key, value);
 			}
+			/*
+			 * TODO for win32 override values in case-insensitive way like in
+			 * org.eclipse.debug.internal.core.LaunchManager#getEnvironment(...)
+			 */
 		}
 		config.addEnvVars(env);
 
@@ -853,6 +865,16 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 
 		} catch (CoreException e) {
 			tryHandleStatus(e, this);
+		} catch (AssertionFailedException e) {
+			tryHandleStatus(new CoreException(new Status(IStatus.ERROR,
+					DLTKLaunchingPlugin.PLUGIN_ID,
+					ScriptLaunchConfigurationConstants.ERR_INTERNAL_ERROR, e
+							.getMessage(), e)), this);
+		} catch (IllegalArgumentException e) {
+			tryHandleStatus(new CoreException(new Status(IStatus.ERROR,
+					DLTKLaunchingPlugin.PLUGIN_ID,
+					ScriptLaunchConfigurationConstants.ERR_INTERNAL_ERROR, e
+							.getMessage(), e)), this);
 		} finally {
 			monitor.done();
 		}
@@ -1032,15 +1054,6 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		// default working directory is the project if this config has a project
 		IScriptProject scriptProject = getScriptProject(configuration);
 		if (scriptProject != null) {
-			// IProject project = scriptProject.getProject();
-			// URI uri = project.getLocationURI();
-			// IPath path = null;
-			// if (uri != null) {
-			// path = new Path(uri.getPath());
-			// }
-			// else {
-			// path = project.getLocation();
-			// }
 			IEnvironment environment = EnvironmentManager
 					.getEnvironment(scriptProject);
 			String mainScriptName = verifyMainScriptName(configuration);
@@ -1053,12 +1066,14 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 			IFileHandle file = environment.getFile(environmentLocation);
 			if (file.exists()) {
 				return environmentLocation.removeLastSegments(1);
+			} else {
+				return new Path(loc);
 			}
 		}
 		return null;
 	}
 
-	private String getProjectLocation(ILaunchConfiguration configuration)
+	protected String getProjectLocation(ILaunchConfiguration configuration)
 			throws CoreException {
 		IProject project = getScriptProject(configuration).getProject();
 		String loc = null;
