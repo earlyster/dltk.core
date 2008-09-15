@@ -14,6 +14,8 @@ import java.io.InputStream;
 
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlParser;
+import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
+import org.eclipse.osgi.util.NLS;
 import org.w3c.dom.Document;
 
 public class DbgpRawPacket {
@@ -32,8 +34,15 @@ public class DbgpRawPacket {
 			if (b == 0) {
 				break;
 			}
-
-			sb.append((char) b);
+			if (b >= '0' && b <= '9') {
+				sb.append((char) b);
+			} else {
+				final String msg = NLS.bind(
+						Messages.DbgpRawPacket_invalidCharInPacketSize, Integer
+								.toString(b));
+				DLTKDebugPlugin.logError(msg); 
+				throw new IOException(msg);
+			}
 		}
 
 		return Integer.parseInt(sb.toString());

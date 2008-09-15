@@ -127,6 +127,10 @@ public class DLTKDebugPlugin extends Plugin {
 		log(new Status(IStatus.WARNING, PLUGIN_ID, INTERNAL_ERROR, message, t));
 	}
 
+	public static void logError(String message) {
+		logError(message, null);
+	}
+
 	public static void logError(String message, Throwable t) {
 		Throwable top = t;
 		if (t instanceof DebugException) {
