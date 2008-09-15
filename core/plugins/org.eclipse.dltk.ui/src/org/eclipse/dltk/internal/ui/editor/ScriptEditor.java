@@ -1560,6 +1560,21 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		return super.getAdapter(required);
 	}
 
+	/**
+	 * Returns the mutex for the reconciler. See
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=63898 for a description of
+	 * the problem.
+	 * <p>
+	 * XXX remove once the underlying problem
+	 * (https://bugs.eclipse.org/bugs/show_bug.cgi?id=66176) is solved.
+	 * </p>
+	 * 
+	 * @return the lock reconcilers may use to synchronize on
+	 */
+	public Object getReconcilerLock() {
+		return fReconcilerLock;
+	}
+
 	protected void doSelectionChanged(SelectionChangedEvent event) {
 		ISourceReference reference = null;
 		ISelection selection = event.getSelection();
@@ -2994,6 +3009,17 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 	private ListenerList fReconcilingListeners = new ListenerList(
 			ListenerList.IDENTITY);
+
+	/**
+	 * Mutex for the reconciler. See
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=63898 for a description of
+	 * the problem.
+	 * <p>
+	 * XXX remove once the underlying problem
+	 * (https://bugs.eclipse.org/bugs/show_bug.cgi?id=66176) is solved.
+	 * </p>
+	 */
+	private final Object fReconcilerLock = new Object();
 
 	public void aboutToBeReconciled() {
 
