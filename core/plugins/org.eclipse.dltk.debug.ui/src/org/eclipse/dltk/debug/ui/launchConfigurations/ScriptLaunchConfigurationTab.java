@@ -660,9 +660,12 @@ public abstract class ScriptLaunchConfigurationTab extends
 		if (projectName != null) {
 			setProjectName(projectName, null);
 
-			if (ILaunchManager.DEBUG_MODE.equals(fMode)) {
+			if (ILaunchManager.DEBUG_MODE.equals(fMode)
+					&& Path.EMPTY.isValidSegment(projectName)) {
+				final IScriptProject scriptProject = getScriptModel()
+						.getScriptProject(projectName);
 				final PreferencesLookupDelegate delegate = new PreferencesLookupDelegate(
-						getScriptModel().getScriptProject(projectName));
+						scriptProject);
 				if (breakOnFirstLine != null) {
 					breakOnFirstLine.setSelection(LaunchConfigurationUtils
 							.isBreakOnFirstLineEnabled(config,
