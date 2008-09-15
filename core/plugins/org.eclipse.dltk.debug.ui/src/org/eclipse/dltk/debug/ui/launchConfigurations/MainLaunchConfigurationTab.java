@@ -241,7 +241,9 @@ public abstract class MainLaunchConfigurationTab extends
 	protected void performApplyConnectionTimeout(
 			ILaunchConfigurationWorkingCopy config) {
 		config
-				.removeAttribute(ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_WAITING_TIMEOUT);
+				.setAttribute(
+						ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_WAITING_TIMEOUT,
+						(String) null);
 	}
 
 	protected IResource getResource(ILaunchConfiguration config)
