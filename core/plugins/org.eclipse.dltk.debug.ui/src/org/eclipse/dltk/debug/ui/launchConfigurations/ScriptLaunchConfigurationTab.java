@@ -1,5 +1,6 @@
 package org.eclipse.dltk.debug.ui.launchConfigurations;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -662,20 +663,22 @@ public abstract class ScriptLaunchConfigurationTab extends
 
 			if (ILaunchManager.DEBUG_MODE.equals(fMode)
 					&& Path.EMPTY.isValidSegment(projectName)) {
-				final IScriptProject scriptProject = getScriptModel()
-						.getScriptProject(projectName);
-				final PreferencesLookupDelegate delegate = new PreferencesLookupDelegate(
-						scriptProject);
-				if (breakOnFirstLine != null) {
-					breakOnFirstLine.setSelection(LaunchConfigurationUtils
-							.isBreakOnFirstLineEnabled(config,
-									breakOnFirstLinePrefEnabled(delegate)));
-				}
+				final IProject project = getWorkspaceRoot().getProject(
+						projectName);
+				if (project.isAccessible()) {
+					final PreferencesLookupDelegate delegate = new PreferencesLookupDelegate(
+							project);
+					if (breakOnFirstLine != null) {
+						breakOnFirstLine.setSelection(LaunchConfigurationUtils
+								.isBreakOnFirstLineEnabled(config,
+										breakOnFirstLinePrefEnabled(delegate)));
+					}
 
-				if (enableLogging != null) {
-					enableLogging.setSelection(LaunchConfigurationUtils
-							.isDbgpLoggingEnabled(config,
-									dbpgLoggingPrefEnabled(delegate)));
+					if (enableLogging != null) {
+						enableLogging.setSelection(LaunchConfigurationUtils
+								.isDbgpLoggingEnabled(config,
+										dbpgLoggingPrefEnabled(delegate)));
+					}
 				}
 			}
 		}
