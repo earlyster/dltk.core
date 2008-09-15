@@ -15,12 +15,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -29,12 +33,19 @@ import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
+import org.eclipse.core.runtime.jobs.ILock;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
 public class DLTKContentTypeManager {
+
+	private static Map derivedContentTypesCache = new HashMap();
+	private static ILock derivedContentTypesCacheLock = Job.getJobManager()
+			.newLock();
+
 	public static boolean isValidFileNameForContentType(
 			IDLTKLanguageToolkit toolkit, IPath path) {
 		if (isValidFileNameForContentType(toolkit, path.lastSegment())) {
@@ -101,6 +112,11 @@ public class DLTKContentTypeManager {
 					}
 				}
 			}
+		}
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		IResource member = root.findMember(path);
+		if (member != null && isValidResourceForContentType(toolkit, member)) {
+			return true;
 		}
 		return false;
 	}
@@ -258,11 +274,14 @@ public class DLTKContentTypeManager {
 	}
 
 	private static IContentType[] getDerivedContentTypes(String name) {
+		derivedContentTypesCacheLock.acquire();
+		try {
+			if (!derivedContentTypesCache.containsKey(name)) {
 		IContentTypeManager manager = Platform.getContentTypeManager();
 		IContentType masterContentType = manager.getContentType(name);
 		if (masterContentType == null) {
-			return new IContentType[0];
-		}
+					derivedContentTypesCache.put(name, new IContentType[0]);
+				} else {
 		IContentType[] types = manager.getAllContentTypes();
 		Set derived = new HashSet();
 		for (int i = 0; i < types.length; i++) {
@@ -270,7 +289,13 @@ public class DLTKContentTypeManager {
 				derived.add(types[i]);
 			}
 		}
-		return (IContentType[]) derived
-				.toArray(new IContentType[derived.size()]);
+					derivedContentTypesCache.put(name, derived
+							.toArray(new IContentType[derived.size()]));
+				}
+			}
+			return (IContentType[]) derivedContentTypesCache.get(name);
+		} finally {
+			derivedContentTypesCacheLock.release();
+		}
 	}
 }
