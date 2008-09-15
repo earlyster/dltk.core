@@ -236,8 +236,7 @@ public abstract class AbstractScriptCompletionProposal implements
 	 * Returns the additional proposal info, or <code>null</code> if none
 	 * exists.
 	 * 
-	 * @return the additional proposal info, or <code>null</code> if none
-	 *         exists
+	 * @return the additional proposal info, or <code>null</code> if none exists
 	 */
 	protected ProposalInfo getProposalInfo() {
 		return fProposalInfo;
@@ -431,9 +430,10 @@ public abstract class AbstractScriptCompletionProposal implements
 		final Object info = getAdditionalProposalInfo(new NullProgressMonitor());
 		return info != null ? info.toString() : null;
 	}
-	
+
 	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
+	 * @seeorg.eclipse.jface.text.contentassist.ICompletionProposalExtension5#
+	 * getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 		if (getProposalInfo() != null) {
@@ -651,9 +651,9 @@ public abstract class AbstractScriptCompletionProposal implements
 
 	/**
 	 * Returns the text in <code>document</code> from
-	 * {@link #getReplacementOffset()} to <code>offset</code>. Returns the
-	 * empty string if <code>offset</code> is before the replacement offset or
-	 * if an exception occurs when accessing the document.
+	 * {@link #getReplacementOffset()} to <code>offset</code>. Returns the empty
+	 * string if <code>offset</code> is before the replacement offset or if an
+	 * exception occurs when accessing the document.
 	 * 
 	 * 
 	 */
@@ -669,8 +669,8 @@ public abstract class AbstractScriptCompletionProposal implements
 
 	/**
 	 * Case insensitive comparison of <code>prefix</code> with the start of
-	 * <code>string</code>. Returns <code>false</code> if
-	 * <code>prefix</code> is longer than <code>string</code>
+	 * <code>string</code>. Returns <code>false</code> if <code>prefix</code> is
+	 * longer than <code>string</code>
 	 * 
 	 * 
 	 */
@@ -686,10 +686,10 @@ public abstract class AbstractScriptCompletionProposal implements
 	}
 
 	/**
-	 * Matches <code>prefix</code> against <code>string</code> and replaces
-	 * the matched region by prefix. Case is preserved as much as possible. This
-	 * method returns <code>string</code> if camel case completion is
-	 * disabled. Examples when camel case completion is enabled:
+	 * Matches <code>prefix</code> against <code>string</code> and replaces the
+	 * matched region by prefix. Case is preserved as much as possible. This
+	 * method returns <code>string</code> if camel case completion is disabled.
+	 * Examples when camel case completion is enabled:
 	 * <ul>
 	 * <li>getCamelCompound("NuPo", "NullPointerException") ->
 	 * "NuPointerException"</li>
@@ -756,7 +756,7 @@ public abstract class AbstractScriptCompletionProposal implements
 				.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
 	}
 
-	private static Color getForegroundColor(StyledText text) {
+	protected Color getForegroundColor(StyledText text) {
 
 		IPreferenceStore preference = DLTKUIPlugin.getDefault()
 				.getPreferenceStore();
@@ -769,12 +769,11 @@ public abstract class AbstractScriptCompletionProposal implements
 		return textTools.getColorManager().getColor(rgb);
 	}
 
-	private static ScriptTextTools getTextTools() {
-		// TODO Auto-generated method stub
+	protected ScriptTextTools getTextTools() {
 		return null;
 	}
 
-	private static Color getBackgroundColor(StyledText text) {
+	protected Color getBackgroundColor(StyledText text) {
 
 		IPreferenceStore preference = DLTKUIPlugin.getDefault()
 				.getPreferenceStore();
