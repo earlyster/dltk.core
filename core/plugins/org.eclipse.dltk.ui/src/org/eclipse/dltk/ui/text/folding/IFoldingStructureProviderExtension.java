@@ -11,11 +11,8 @@ package org.eclipse.dltk.ui.text.folding;
 
 import org.eclipse.dltk.core.IModelElement;
 
-
-
 /**
- * Extends {@link IFoldingStructureProvider} with the following
- * functions:
+ * Extends {@link IFoldingStructureProvider} with the following functions:
  * <ul>
  * <li>collapsing of comments and members</li>
  * <li>expanding and collapsing of certainscriptelements</li>
