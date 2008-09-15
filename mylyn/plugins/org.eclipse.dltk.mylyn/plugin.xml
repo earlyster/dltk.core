@@ -121,6 +121,14 @@
    </extension>
 
   	<!-- ==================== Context Editing Common Navigator ==================== -->
+   <extension
+         point="org.eclipse.dltk.ui.scriptCompletionProposalSorters">
+      <proposalSorter
+            class="org.eclipse.mylyn.internal.dltk.ui.editor.MylynProposalSorter"
+            id="org.eclipse.dltk.mylyn.MylynInterestSorter"
+            name="by Mylyn interest">
+      </proposalSorter>
+   </extension>
 
 	<extension
 			point="org.eclipse.ui.navigator.viewer">
@@ -144,7 +152,7 @@
 
    <extension point="org.eclipse.ui.viewActions"> 
 		<viewContribution 
-		id="org.eclipse.mylyn.dltk.explorer.contribution" 
+		id="org.eclipse.dltk.mylyn.explorer.contribution" 
    		targetID="org.eclipse.dltk.ui.ScriptExplorer">
     	<action
            class="org.eclipse.mylyn.internal.dltk.ui.actions.FocusScriptExplorerAction"
@@ -153,7 +161,6 @@
            icon="icons/elcl16/focus.gif"
            id="org.eclipse.mylyn.actions.filter.scriptExplorer"
            label="Focus on Active Task"
-           menubarPath="mylyn"
            style="toggle"
            toolbarPath="mylyn"
            tooltip="Focus on Active Task">
@@ -247,13 +254,28 @@
          </systemProperty>
       </visibility>
      </objectContribution>
-  </extension>   
+  </extension>
+  
+
+  
+	<extension point="org.eclipse.ui.newWizards">
+      <wizard
+            canFinishEarly="false"
+            category="org.eclipse.mylyn.wizards"
+            class="org.eclipse.mylyn.internal.dltk.ui.wizards.MylynPreferenceWizard"
+            hasPages="true"
+            icon="icons/etool16/wizard-prefs.gif"
+            id="org.eclipse.mylyn.dltk.ui.wizards.preferences"
+            name="Recommended Preferences"
+            project="false">
+      </wizard>
+   </extension>   
 
   <extension point="org.eclipse.ui.actionSets">
 	<actionSet
-            id="org.eclipse.dltk.mylyn.actionSet"
-            label="Mylyn DLTK"
-            visible="true"> 
+       id="org.eclipse.dltk.mylyn.actionSet"
+       label="Mylyn DLTK"
+       visible="false">
             
   		<action
           class="org.eclipse.mylyn.internal.dltk.ui.actions.ToggleActiveFoldingAction"
@@ -271,49 +293,39 @@
           </systemProperty>
        </enablement>
       	</action> 
-        <action
-               definitionId="org.eclipse.mylyn.dltk.ui.search.context"
-               label="Search the current task context"
-               class="org.eclipse.mylyn.internal.dltk.ui.actions.FindReferencesInContextAction"
-               id="org.eclipse.dltk.mylyn.ui.search.context">
-         </action>
     </actionSet>
   </extension>
-  
-
-  
-	<extension point="org.eclipse.ui.newWizards">
-      <wizard
-            canFinishEarly="false"
-            category="org.eclipse.mylyn.wizards"
-            class="org.eclipse.mylyn.internal.dltk.ui.wizards.MylynPreferenceWizard"
-            hasPages="true"
-            icon="icons/etool16/wizard-prefs.gif"
-            id="org.eclipse.mylyn.dltk.ui.wizards.preferences"
-            name="Recommended Preferences"
-            project="false">
-      </wizard>
+   <extension
+         point="org.eclipse.ui.actionSetPartAssociations">
+      <actionSetPartAssociation
+            targetID="org.eclipse.dltk.mylyn.actionSet">
+         <part
+               id="org.eclipse.dltk.ruby.ui.editor.RubyEditor">
+         </part>
+         <part
+               id="org.eclipse.dltk.tcl.ui.editor.TclEditor">
+         </part>
+         <part
+               id="org.eclipse.dltk.python.ui.editor.PythonEditor">
+         </part>
+         <part
+               id="org.eclipse.dltk.javascript.ui.editor.JavaScriptEditor">
+         </part>
+      </actionSetPartAssociation>
    </extension>
-
-   <extension point="org.eclipse.ui.commands">
-         <category
-            name="Mylyn DLTK"
-            description="Mylyn DLTK Commands"
-            id="org.eclipse.mylyn.internal.dltk.ui.commands">
-      </category>
-   
-	  <command
-         categoryId="org.eclipse.mylyn.internal.dltk.ui.commands"
-         description="Search the current task context"
-         id="org.eclipse.mylyn.dltk.ui.search.context"
-         name="Search Task Context">
-      </command>
-	  <command
-         categoryId="org.eclipse.mylyn.internal.dltk.ui.commands"
-         description="Toggle Active Folding"
-         id="org.eclipse.mylyn.dltk.ui.editor.folding.auto"
-         name="Toggle Active Folding">
-      </command>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="org.eclipse.mylyn.dltk.actionSet.browsing"
+            label="Mylyn DLTK Browsing"
+            visible="false">
+         <action
+               class="org.eclipse.mylyn.internal.dltk.ui.actions.FindReferencesInContextAction"
+               definitionId="org.eclipse.mylyn.dltk.ui.search.context"
+               id="org.eclipse.dltk.mylyn.ui.search.context"
+               label="Search the current task context">
+         </action>
+      </actionSet>
    </extension>
    <extension
          point="org.eclipse.ui.actionSetPartAssociations">
@@ -334,6 +346,27 @@
             name="Member Filter"
             targetId="org.eclipse.dltk.ScriptExplorer">
       </filter>
+   </extension>
+
+   <extension point="org.eclipse.ui.commands">
+         <category
+            name="Mylyn DLTK"
+            description="Mylyn DLTK Commands"
+            id="org.eclipse.mylyn.internal.dltk.ui.commands">
+      </category>
+   
+	  <command
+         categoryId="org.eclipse.mylyn.internal.dltk.ui.commands"
+         description="Search the current task context"
+         id="org.eclipse.mylyn.dltk.ui.search.context"
+         name="Search Task Context">
+      </command>
+	  <command
+         categoryId="org.eclipse.mylyn.internal.dltk.ui.commands"
+         description="Toggle Active Folding"
+         id="org.eclipse.dltk.mylyn.ui.editor.folding.auto"
+         name="Toggle Active Folding">
+      </command>
    </extension>
 
 </plugin>

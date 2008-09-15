@@ -27,31 +27,22 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.text.folding.IFoldingStructureProviderExtension;
-import org.eclipse.mylyn.internal.context.core.ContextCorePlugin;
-import org.eclipse.mylyn.context.core.IInteractionContext; //import org.eclipse.mylyn.internal.context.core.IInteractionContextListener;
-import org.eclipse.mylyn.context.core.AbstractContextListener; //import org.eclipse.mylyn.context.core.IInteractionContextListener2;
+import org.eclipse.mylyn.context.core.AbstractContextListener;
+import org.eclipse.mylyn.context.core.IInteractionContext;
 import org.eclipse.mylyn.context.core.IInteractionElement;
+import org.eclipse.mylyn.internal.context.core.ContextCorePlugin;
 import org.eclipse.mylyn.internal.context.ui.ContextUiPlugin;
-import org.eclipse.mylyn.internal.context.core.InteractionContext; //import org.eclipse.mylyn.internal.context.ui.ContextUiPrefContstants;
 import org.eclipse.mylyn.internal.dltk.DLTKStructureBridge;
 import org.eclipse.mylyn.internal.dltk.MylynDLTKPrefConstants;
 import org.eclipse.mylyn.internal.dltk.MylynStatusHandler;
-import org.eclipse.mylyn.internal.dltk.ui.DLTKStackTraceFileHyperlink;
-import org.eclipse.dltk.core.IModelElement;
 
-public class ActiveFoldingListener
-		/* implements IInteractionContextListener */extends
-		AbstractContextListener {
+public class ActiveFoldingListener extends AbstractContextListener {
 
 	private final ScriptEditor editor;
 
 	private IFoldingStructureProviderExtension updater;
 
-	private static DLTKStructureBridge bridge;// = (DLTKStructureBridge)
-												// ContextCorePlugin
-												// .getDefault()
-												// .getStructureBridge(
-	// DLTKStructureBridge.contentType);
+	private static DLTKStructureBridge bridge;
 
 	private boolean enabled = false;
 
@@ -69,9 +60,20 @@ public class ActiveFoldingListener
 		}
 	};
 
+	private static synchronized void createBrigde() {
+		/*
+		 * FIXME why we create bridge here?
+		 * 
+		 * We should call the same code without bridge.
+		 */
+		if (bridge == null) {
+			bridge = new DLTKStructureBridge();
+		}
+	}
+
 	public ActiveFoldingListener(ScriptEditor editor) {
 		this.editor = editor;
-		this.bridge = new DLTKStructureBridge();
+		createBrigde();
 		ContextCorePlugin.getContextManager().addListener(this);
 		ContextUiPlugin.getDefault().getPluginPreferences()
 				.addPropertyChangeListener(PREFERENCE_LISTENER);

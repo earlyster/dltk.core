@@ -17,7 +17,6 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.mylyn.internal.context.core.ContextCorePlugin;
 import org.eclipse.mylyn.internal.dltk.ui.DLTKEditingMonitor;
 import org.eclipse.mylyn.internal.dltk.ui.DLTKUiUtil;
@@ -25,7 +24,6 @@ import org.eclipse.mylyn.internal.dltk.ui.LandmarkMarkerManager;
 import org.eclipse.mylyn.internal.dltk.ui.editor.ActiveFoldingListener;
 import org.eclipse.mylyn.internal.dltk.ui.wizards.MylynPreferenceWizard;
 import org.eclipse.mylyn.internal.monitor.ui.MonitorUiPlugin;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
@@ -38,6 +36,8 @@ import org.osgi.framework.BundleContext;
 public class MylynDLTKPlugin extends AbstractUIPlugin {
 
 	public static final String PLUGIN_ID = "org.eclipse.dltk.mylyn";
+
+	public static final String SORTER_ID = "org.eclipse.dltk.mylyn.MylynInterestSorter";
 
 	private static MylynDLTKPlugin INSTANCE;
 
@@ -119,25 +119,12 @@ public class MylynDLTKPlugin extends AbstractUIPlugin {
 								.getDefault().getPreferenceStore(), true);
 					}
 
-					if (!getPreferenceStore().contains(
-							MylynPreferenceWizard.MYLYN_FIRST_RUN)) {
-						MylynPreferenceWizard wizard = new MylynPreferenceWizard();
-						Shell shell = PlatformUI.getWorkbench()
-								.getActiveWorkbenchWindow().getShell();
-						if (wizard != null && shell != null
-								&& !shell.isDisposed()) {
-							WizardDialog dialog = new WizardDialog(shell,
-									wizard);
-							dialog.create();
-							dialog.open();
-							getPreferenceStore().putValue(
-									MylynPreferenceWizard.MYLYN_FIRST_RUN,
-									"false");
-						}
-					}
-
 					DLTKCore
 							.addElementChangedListener(dltkElementChangeListener);
+
+					DLTKUIPlugin.getDefault().getPreferenceStore().setValue(
+							"content_assist_sorter", SORTER_ID);
+
 				} catch (Throwable t) {
 					MylynStatusHandler.fail(t,
 							"Mylyn DLTK plug-in initialization failed", true);

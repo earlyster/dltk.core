@@ -26,7 +26,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.mylyn.resources.ui,
  org.eclipse.mylyn.tasks.core,
  org.eclipse.mylyn.tasks.ui,
- org.eclipse.mylyn.commons.core
+ org.eclipse.mylyn.commons.core,
+ org.eclipse.mylyn.commons.ui
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.ui.navigator,
  org.eclipse.ui.views.contentoutline

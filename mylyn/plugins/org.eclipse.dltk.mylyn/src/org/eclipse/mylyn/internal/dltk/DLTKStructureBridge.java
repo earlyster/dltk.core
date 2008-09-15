@@ -170,10 +170,7 @@ public class DLTKStructureBridge extends AbstractContextStructureBridge
 
 		boolean accepts = object instanceof IModelElement
 				|| object instanceof ProjectFragment
-				|| object instanceof BuildPathContainer.RequiredProjectWrapper // ||
-				// object
-				// instanceof
-				// EntryFile
+				|| object instanceof BuildPathContainer.RequiredProjectWrapper
 				|| object instanceof IProjectFragment
 				|| object instanceof WorkingSet;
 
@@ -231,10 +228,10 @@ public class DLTKStructureBridge extends AbstractContextStructureBridge
 			if (resource instanceof IFile) {
 				IFile file = (IFile) resource;
 				// TODO: get rid of file extension check
-				String ext = file.getFileExtension();
-				if (ext.equals(contentType)) {
-					compilationUnit = DLTKCore.createSourceModuleFrom(file);
-				}
+				// String ext = file.getFileExtension();
+				// if (ext.equals(contentType)) {
+				compilationUnit = DLTKCore.createSourceModuleFrom(file);
+				// }
 			}
 			if (compilationUnit != null) {
 				IModelElement javaElement = compilationUnit

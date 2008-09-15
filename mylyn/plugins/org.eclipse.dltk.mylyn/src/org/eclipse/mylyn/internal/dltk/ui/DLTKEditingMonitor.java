@@ -70,7 +70,19 @@ public class DLTKEditingMonitor extends AbstractUserInteractionMonitor {
 				if (selection instanceof TextSelection && part instanceof ScriptEditor) {
 					currentEditor = (ScriptEditor) part;
 					TextSelection textSelection = (TextSelection) selection;
-					selectedElement = SelectionConverter.resolveEnclosingElement(currentEditor, textSelection);
+
+					// first try to resolve if the user has clicked on a comment
+					selectedElement = currentEditor
+							.getElementByCommentPosition(textSelection
+									.getOffset(), textSelection.getLength());
+
+					// if user has clicked outside the comment, resolve the
+					// desired element
+					if (selectedElement == null)
+						selectedElement = SelectionConverter
+								.resolveEnclosingElement(currentEditor,
+										textSelection);
+					
 					if (selectedElement instanceof IPackageDeclaration)
 						return; // HACK: ignoring these selections
 					IModelElement[] resolved = SelectionConverter.codeResolve(currentEditor);
