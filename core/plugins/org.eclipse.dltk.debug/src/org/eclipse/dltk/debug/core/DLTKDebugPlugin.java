@@ -161,6 +161,11 @@ public class DLTKDebugPlugin extends Plugin {
 		return address;
 	}
 
+	public static int getConnectionTimeout() {
+		return getDefault().getPluginPreferences().getInt(
+				DLTKDebugPreferenceConstants.PREF_DBGP_CONNECTION_TIMEOUT);
+	}
+
 	public static String[] getLocalAddresses() {
 		Set addresses = new HashSet();
 		try {
