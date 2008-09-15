@@ -412,6 +412,7 @@ public class ScriptReconciler extends MonoReconciler {
 	 * @see org.eclipse.jface.text.reconciler.MonoReconciler#initialProcess()
 	 */
 	protected void initialProcess() {
+		this.reconcilerThread = Thread.currentThread();
 		synchronized (fMutex) {
 			super.initialProcess();
 		}
@@ -459,4 +460,17 @@ public class ScriptReconciler extends MonoReconciler {
 	private synchronized void setEditorActive(boolean state) {
 		fIsEditorActive = state;
 	}
+
+	/**
+	 * XXX Eclipse 3.3 compatibility
+	 */
+	private volatile Thread reconcilerThread = null;
+
+	/*
+	 * XXX Eclipse 3.3 compatibility
+	 */
+	protected boolean isRunningInReconcilerThread() {
+		return Thread.currentThread() == reconcilerThread;
+	}
+
 }
