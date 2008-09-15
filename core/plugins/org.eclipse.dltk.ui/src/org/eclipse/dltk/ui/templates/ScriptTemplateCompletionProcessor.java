@@ -149,7 +149,7 @@ public abstract class ScriptTemplateCompletionProcessor extends
 				getImage(template), relevance);
 	}
 
-	private IInformationControlCreator getInformationControlCreator() {
+	protected IInformationControlCreator getInformationControlCreator() {
 		int orientation = Window.getDefaultOrientation();
 		IEditorPart editor = getContext().getEditor();
 		if (editor == null)
