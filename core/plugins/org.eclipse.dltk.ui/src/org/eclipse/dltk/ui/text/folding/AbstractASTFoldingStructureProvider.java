@@ -784,9 +784,10 @@ public abstract class AbstractASTFoldingStructureProvider implements
 								.hashCode();
 						IModelElement element = null;
 						IElementCommentResolver res = getElementCommentResolver();
-						if (res != null)
+						if (res != null && fInput != null) {
 							element = res.getElementByCommentPosition(
 									(ISourceModule) fInput, position.offset, 0);
+						}
 						ctx.addProjectionRange(new ScriptProjectionAnnotation(
 								initiallyCollapseComments(normalized, ctx),
 								true, new SourceRangeStamp(hash, normalized

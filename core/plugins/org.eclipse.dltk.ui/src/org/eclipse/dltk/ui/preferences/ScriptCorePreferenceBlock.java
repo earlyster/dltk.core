@@ -31,7 +31,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -42,6 +41,7 @@ import org.eclipse.ui.PlatformUI;
 final class ScriptCorePreferenceBlock extends
 		ImprovedAbstractConfigurationBlock {
 	private Button nonLocalEmptyFileContentTypeChecking;
+	private Button filesWithExtensionsContentChecking;
 
 	private final class ReindexOperation implements IRunnableWithProgress {
 		public void run(IProgressMonitor monitor)
@@ -69,10 +69,15 @@ final class ScriptCorePreferenceBlock extends
 				Messages.ScriptCorePreferenceBlock_coreOptions, 1, 1,
 				GridData.FILL_HORIZONTAL);
 
-		nonLocalEmptyFileContentTypeChecking = SWTFactory
+		this.nonLocalEmptyFileContentTypeChecking = SWTFactory
 				.createCheckButton(
 						coreGroup,
 						Messages.ScriptCorePreferenceBlock_emptyFileContentCheckingForNonLocalProjects);
+
+		this.filesWithExtensionsContentChecking = SWTFactory
+				.createCheckButton(
+						coreGroup,
+						Messages.ScriptCorePreferenceBlock_filesWithExtensionContentCheking);
 
 		Group editorGroup = SWTFactory.createGroup(composite,
 				Messages.ScriptCorePreferenceBlock_editOptions, 1, 1,
@@ -94,8 +99,8 @@ final class ScriptCorePreferenceBlock extends
 		if (DLTKCore.SHOW_REINDEX) {
 			Group g = SWTFactory.createGroup(composite,
 					Messages.ScriptCorePreferenceBlock_debugOptionsOperations,
-					2, 1, GridData.FILL_HORIZONTAL); 
-				
+					2, 1, GridData.FILL_HORIZONTAL);
+
 			Label l = new Label(g, SWT.PUSH);
 			l.setText(Messages.ScriptCorePreferencePage_manualReindex);
 			Button reCreateIndex = new Button(g, SWT.PUSH);
@@ -143,6 +148,10 @@ final class ScriptCorePreferenceBlock extends
 		this.nonLocalEmptyFileContentTypeChecking.setSelection(DLTKCore.ENABLED
 				.equals(value));
 
+		value = preferences
+				.getString(DLTKCore.CORE_FILES_WITH_EXTENSION_CONTENT_CHECKING);
+		this.filesWithExtensionsContentChecking.setSelection(DLTKCore.ENABLED
+				.equals(value));
 	}
 
 	public void performDefaults() {
@@ -151,6 +160,10 @@ final class ScriptCorePreferenceBlock extends
 		String value = preferences
 				.getDefaultString(DLTKCore.CORE_NON_LOCAL_EMPTY_FILE_CONTENT_TYPE_CHECKING);
 		this.nonLocalEmptyFileContentTypeChecking.setSelection(DLTKCore.ENABLED
+				.equals(value));
+		value = preferences
+				.getDefaultString(DLTKCore.CORE_FILES_WITH_EXTENSION_CONTENT_CHECKING);
+		this.filesWithExtensionsContentChecking.setSelection(DLTKCore.ENABLED
 				.equals(value));
 	}
 
@@ -166,6 +179,11 @@ final class ScriptCorePreferenceBlock extends
 						DLTKCore.CORE_NON_LOCAL_EMPTY_FILE_CONTENT_TYPE_CHECKING,
 						this.nonLocalEmptyFileContentTypeChecking
 								.getSelection() ? DLTKCore.ENABLED
+								: DLTKCore.DISABLED);
+		preferences
+				.setValue(
+						DLTKCore.CORE_FILES_WITH_EXTENSION_CONTENT_CHECKING,
+						this.filesWithExtensionsContentChecking.getSelection() ? DLTKCore.ENABLED
 								: DLTKCore.DISABLED);
 		DLTKCore.getDefault().savePluginPreferences();
 	}

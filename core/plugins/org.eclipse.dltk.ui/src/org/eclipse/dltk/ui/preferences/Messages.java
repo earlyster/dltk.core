@@ -9,6 +9,7 @@ public class Messages extends NLS {
 	public static String ScriptCorePreferenceBlock_editOptions;
 	public static String ScriptCorePreferenceBlock_debugOptionsOperations;
 	public static String ScriptCorePreferenceBlock_emptyFileContentCheckingForNonLocalProjects;
+	public static String ScriptCorePreferenceBlock_filesWithExtensionContentCheking;
 	public static String ScriptCorePreferencePage_manualReindex;
 	public static String ScriptCorePreferencePage_reindex;
 	static {
