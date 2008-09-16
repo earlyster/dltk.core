@@ -126,6 +126,7 @@
       <proposalSorter
             class="org.eclipse.mylyn.internal.dltk.ui.editor.MylynProposalSorter"
             id="org.eclipse.dltk.mylyn.MylynInterestSorter"
+            activate="true"
             name="by Mylyn interest">
       </proposalSorter>
    </extension>
