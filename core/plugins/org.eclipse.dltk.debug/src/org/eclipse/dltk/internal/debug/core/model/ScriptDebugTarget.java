@@ -26,6 +26,7 @@ import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IMemoryBlock;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.core.model.ITerminate;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -76,8 +77,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 
 	private boolean useStepFilters;
 
-	private final Object terminatedLock = new Object();
-	private boolean terminated = false;
+	private final Object processLock = new Object();
 
 	private boolean initialized = false;
 	private boolean retrieveGlobalVariables;
@@ -131,7 +131,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 
 	public void shutdown() {
 		try {
-			terminate();
+			terminate(true);
 		} catch (DebugException e) {
 			DLTKDebugPlugin.log(e);
 		}
@@ -155,11 +155,15 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 
 	// IDebugTarget
 	public IProcess getProcess() {
-		return process;
+		synchronized (processLock) {
+			return process;
+		}
 	}
 
 	public void setProcess(IProcess process) {
-		this.process = process;
+		synchronized (processLock) {
+			this.process = process;
+		}
 	}
 
 	public boolean hasThreads() {
@@ -176,45 +180,54 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 
 	// ITerminate
 	public boolean canTerminate() {
-		return !terminated;
+		synchronized (processLock) {
+			return threadManager.canTerminate() || process != null
+					&& process.canTerminate();
+		}
 	}
 
 	public boolean isTerminated() {
-		return threadManager.isTerminated();
+		synchronized (processLock) {
+			return threadManager.isTerminated()
+					&& (process == null || process.isTerminated());
+		}
 	}
 
-	protected boolean waitTermianted() {
-		final int WAIT_CHUNK = 400; // 200 ms
-
-		int all = 0;
-		while (all < THREAD_TERMINATION_TIMEOUT) {
+	protected static boolean waitTermianted(ITerminate terminate, int chunk,
+			long timeout) {
+		final long start = System.currentTimeMillis();
+		while (!terminate.isTerminated()) {
+			if (System.currentTimeMillis() - start > timeout) {
+				return false;
+			}
 			try {
-				Thread.sleep(WAIT_CHUNK);
-				all += WAIT_CHUNK;
+				Thread.sleep(chunk);
 			} catch (InterruptedException e) {
 				// interrupted
 			}
-			if (threadManager.isTerminated()) {
-				return true;
-			}
 		}
-		return false;
+		return true;
 	}
 
 	public void terminate() throws DebugException {
-		synchronized (terminatedLock) {
-			if (terminated)
-				return;
-			terminated = true;
-		}
+		terminate(true);
+	}
 
+	protected void terminate(boolean waitTermination) throws DebugException {
 		dbgpService.unregisterAcceptor(sessionId);
 
 		threadManager.sendTerminationRequest();
-		if (!waitTermianted()) {
-			// Debugging process is not answering, so terminating it
-			if (process != null && process.canTerminate())
-				process.terminate();
+		if (waitTermination) {
+			final IProcess p = getProcess();
+			final int CHUNK = 500;
+			if (!(waitTermianted(threadManager, CHUNK,
+					THREAD_TERMINATION_TIMEOUT) && (p == null || waitTermianted(
+					p, CHUNK, THREAD_TERMINATION_TIMEOUT)))) {
+				// Debugging process is not answering, so terminating it
+				if (p != null && p.canTerminate()) {
+					p.terminate();
+				}
+			}
 		}
 
 		threadManager.removeListener(this);
@@ -334,7 +347,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 			if (streamProxy != null) {
 				streamProxy.close();
 			}
-			terminate();
+			terminate(false);
 		} catch (DebugException e) {
 			DLTKDebugPlugin.log(e);
 		}
