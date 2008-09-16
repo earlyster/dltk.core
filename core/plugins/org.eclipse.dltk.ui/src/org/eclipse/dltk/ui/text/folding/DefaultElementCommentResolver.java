@@ -21,12 +21,11 @@ public class DefaultElementCommentResolver implements IElementCommentResolver {
 			int length) throws ModelException {
 		final PositionVisitor visitor = new PositionVisitor(offset, length);
 		el.accept(visitor);
-		return visitor.getResult();
+		return visitor.result;
 	}
 
 	/**
 	 * Returns the model element that the comment corresponds to
-	 * 
 	 */
 	public IModelElement getElementByCommentPosition(ISourceModule content,
 			int offset, int length) {
@@ -132,23 +131,17 @@ public class DefaultElementCommentResolver implements IElementCommentResolver {
 	}
 
 	/**
-	 * 
 	 * Visitor to search the AST for elements that contain the clicked comment
-	 * 
 	 */
-	static class PositionVisitor implements IModelElementVisitor {
+	private static class PositionVisitor implements IModelElementVisitor {
 
-		static IModelElement res = null;
-		private int offset;
-		private int length;
+		IModelElement result = null;
+		private final int offset;
+		private final int length;
 
 		public PositionVisitor(int offset, int length) {
 			this.offset = offset;
 			this.length = length;
-		}
-
-		public IModelElement getResult() {
-			return res;
 		}
 
 		public boolean visit(IModelElement el) {
@@ -167,7 +160,7 @@ public class DefaultElementCommentResolver implements IElementCommentResolver {
 								+ range.getLength()) {
 					if (element.getElementType() == IModelElement.METHOD
 							|| element.getElementType() == IModelElement.TYPE)
-						res = element;
+						result = element;
 				}
 			}
 
