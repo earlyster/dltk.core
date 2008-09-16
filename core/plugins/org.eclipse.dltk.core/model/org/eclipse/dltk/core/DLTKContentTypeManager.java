@@ -162,10 +162,19 @@ public class DLTKContentTypeManager {
 				&& isValidFileNameForContentType(toolkit, lastSegment)) {
 			return true;
 		}
-		// Not DLTK file and not file without extension, or not accessible or
+		Preferences preferences = DLTKCore.getPlugin().getPluginPreferences();
+		String cvalue = preferences
+				.getString(DLTKCore.CORE_FILES_WITH_EXTENSION_CONTENT_CHECKING);
+		boolean checkWithExtension = DLTKCore.ENABLED.equals(cvalue);
+		// Not DLTK file and not accessible or
 		// not in sync
-		String extension = resource.getFullPath().getFileExtension();
-		if (extension != null || !resource.isAccessible()
+		if (!checkWithExtension) {
+			String extension = resource.getFullPath().getFileExtension();
+			if (extension == null) {
+				return false;
+			}
+		}
+		if (/* extension != null || */!resource.isAccessible()
 				|| !resource.isSynchronized(IResource.DEPTH_ZERO)) {
 			return false;
 		}
@@ -180,8 +189,6 @@ public class DLTKContentTypeManager {
 			return false;
 		}
 		if (!EnvironmentManager.isLocal(environment)) {
-			Preferences preferences = DLTKCore.getPlugin()
-					.getPluginPreferences();
 			String value = preferences
 					.getString(DLTKCore.CORE_NON_LOCAL_EMPTY_FILE_CONTENT_TYPE_CHECKING);
 			if (DLTKCore.DISABLED.equals(value)) {
@@ -223,7 +230,7 @@ public class DLTKContentTypeManager {
 			}
 			// Check resource contents if name without extension
 			IPath path = file.getFullPath();
-			if (path.getFileExtension() == null) {
+			if (checkWithExtension || path.getFileExtension() == null) {
 				for (int i = 0; i < derived.length; i++) {
 					IContentType type = derived[i];
 					IContentDescription description;

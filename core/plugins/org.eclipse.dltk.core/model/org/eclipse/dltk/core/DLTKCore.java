@@ -221,6 +221,9 @@ public class DLTKCore extends Plugin {
 	public static final String CORE_NON_LOCAL_EMPTY_FILE_CONTENT_TYPE_CHECKING = PLUGIN_ID
 			+ ".nonLocalEmptyFileContentCheking"; //$NON-NLS-1$
 
+	public static final String CORE_FILES_WITH_EXTENSION_CONTENT_CHECKING = PLUGIN_ID
+			+ ".filesWithExtensionsContentChecking"; //$NON-NLS-1$
+
 	/*
 	 * Possible configurable option ID.
 	 * 
@@ -245,8 +248,8 @@ public class DLTKCore extends Plugin {
 	public static final String CODEASSIST_CAMEL_CASE_MATCH = PLUGIN_ID
 			+ ".codeComplete.camelCaseMatch"; //$NON-NLS-1$
 	/**
-	 * Possible configurable option ID.public static final boolean DEBUG_PARSER =
-	 * false;
+	 * Possible configurable option ID.public static final boolean DEBUG_PARSER
+	 * = false;
 	 * 
 	 * @see #getDefaultOptions()
 	 * 
@@ -614,8 +617,7 @@ public class DLTKCore extends Plugin {
 	 * <code>/Project/src/com/xyz/Foo.java</code> and
 	 * <code>/Project/src/com/xyz/utils/Bar.java</code> would be included,
 	 * whereas <code>/Project/src/com/xyz/tests/T1.java</code> and
-	 * <code>/Project/src/com/xyz/tests/quick/T2.java</code> would be
-	 * excluded.
+	 * <code>/Project/src/com/xyz/tests/quick/T2.java</code> would be excluded.
 	 * </p>
 	 * <p>
 	 * Additionally, a source entry can be associated with a specific output
@@ -625,18 +627,18 @@ public class DLTKCore extends Plugin {
 	 * location is <code>null</code>). Note that multiple source entries may
 	 * target the same output location. The output location is referred to using
 	 * an absolute path relative to the workspace root, e.g.
-	 * <code>"/Project/bin"</code>, it must be located inside the same
-	 * project as the source folder.
+	 * <code>"/Project/bin"</code>, it must be located inside the same project
+	 * as the source folder.
 	 * </p>
 	 * <p>
 	 * Also note that all sources/binaries inside a project are contributed as a
-	 * whole through a project entry (see <code>DLTKCore.newProjectEntry</code> ).
-	 * Particular source entries cannot be selectively exported.
+	 * whole through a project entry (see <code>DLTKCore.newProjectEntry</code>
+	 * ). Particular source entries cannot be selectively exported.
 	 * </p>
 	 * <p>
-	 * The <code>extraAttributes</code> list contains name/value pairs that
-	 * must be persisted with this entry. If no extra attributes are provided,
-	 * an empty array must be passed in.<br>
+	 * The <code>extraAttributes</code> list contains name/value pairs that must
+	 * be persisted with this entry. If no extra attributes are provided, an
+	 * empty array must be passed in.<br>
 	 * Note that this list should not contain any duplicate name.
 	 * </p>
 	 * 
@@ -680,8 +682,8 @@ public class DLTKCore extends Plugin {
 
 	/**
 	 * Creates and returns a new non-exported buildpath entry of kind
-	 * <code>BPE_PROJECT</code> for the project identified by the given
-	 * absolute path. This method is fully equivalent to calling
+	 * <code>BPE_PROJECT</code> for the project identified by the given absolute
+	 * path. This method is fully equivalent to calling
 	 * {@link #newProjectEntry(IPath, boolean, boolean) newProjectEntry(path,
 	 * true, false)}.
 	 * 
@@ -695,8 +697,8 @@ public class DLTKCore extends Plugin {
 
 	/**
 	 * Creates and returns a new buildpath entry of kind
-	 * <code>CPE_PROJECT</code> for the project identified by the given
-	 * absolute path. This method is fully equivalent to calling
+	 * <code>CPE_PROJECT</code> for the project identified by the given absolute
+	 * path. This method is fully equivalent to calling
 	 * {@link #newProjectEntry(IPath, IAccessRule[], boolean, IBuildpathAttribute[], boolean)
 	 * newProjectEntry(path, new IAccessRule[0], true, new
 	 * IBuildpathAttribute[0], isExported)}.
@@ -720,8 +722,8 @@ public class DLTKCore extends Plugin {
 
 	/**
 	 * Creates and returns a new buildpath entry of kind
-	 * <code>CPE_PROJECT</code> for the project identified by the given
-	 * absolute path.
+	 * <code>CPE_PROJECT</code> for the project identified by the given absolute
+	 * path.
 	 * <p>
 	 * A project entry is used to denote a prerequisite project on a buildpath.
 	 * The referenced project will be contributed as a whole, either as sources
@@ -749,9 +751,9 @@ public class DLTKCore extends Plugin {
 	 * rules are considered first, then the entry's access rules are considered.
 	 * </p>
 	 * <p>
-	 * The <code>extraAttributes</code> list contains name/value pairs that
-	 * must be persisted with this entry. If no extra attributes are provided,
-	 * an empty array must be passed in.<br>
+	 * The <code>extraAttributes</code> list contains name/value pairs that must
+	 * be persisted with this entry. If no extra attributes are provided, an
+	 * empty array must be passed in.<br>
 	 * Note that this list should not contain any duplicate name.
 	 * </p>
 	 * <p>
@@ -810,8 +812,8 @@ public class DLTKCore extends Plugin {
 	 * @param kind
 	 *            one of {@link IAccessRule#K_ACCESSIBLE},
 	 *            {@link IAccessRule#K_DISCOURAGED}, or
-	 *            {@link IAccessRule#K_NON_ACCESSIBLE}, optionally combined
-	 *            with {@link IAccessRule#IGNORE_IF_BETTER}
+	 *            {@link IAccessRule#K_NON_ACCESSIBLE}, optionally combined with
+	 *            {@link IAccessRule#IGNORE_IF_BETTER}
 	 * @return a new access rule
 	 * 
 	 */
@@ -856,16 +858,16 @@ public class DLTKCore extends Plugin {
 	 * @return a new library buildpath entry
 	 */
 	public static IBuildpathEntry newVariableEntry(IPath variablePath /*
-																		 * ,IPath
-																		 * variableSourceAttachmentPath ,
-																		 * IPath
-																		 * sourceAttachmentRootPath
-																		 */) {
+																	 * ,IPath
+																	 * variableSourceAttachmentPath
+																	 * , IPath
+																	 * sourceAttachmentRootPath
+																	 */) {
 
 		return newVariableEntry(variablePath, /*
-												 * variableSourceAttachmentPath,
-												 * sourceAttachmentRootPath,
-												 */false);
+											 * variableSourceAttachmentPath,
+											 * sourceAttachmentRootPath,
+											 */false);
 	}
 
 	/**
@@ -903,9 +905,9 @@ public class DLTKCore extends Plugin {
 	 */boolean isExported) {
 
 		return newVariableEntry(variablePath, /*
-												 * variableSourceAttachmentPath,
-												 * variableSourceAttachmentRootPath,
-												 */
+											 * variableSourceAttachmentPath,
+											 * variableSourceAttachmentRootPath,
+											 */
 		BuildpathEntry.NO_ACCESS_RULES, BuildpathEntry.NO_EXTRA_ATTRIBUTES,
 				isExported);
 	}
@@ -921,11 +923,10 @@ public class DLTKCore extends Plugin {
 	 * referring.
 	 * <p>
 	 * It is possible to register an automatic initializer (
-	 * <code>BuildpathVariableInitializer</code>), which will be invoked
-	 * through the extension point
-	 * "org.eclipse.dltk.core.buildpathVariableInitializer". After resolution, a
-	 * buildpath variable entry may either correspond to a project or a library
-	 * entry.
+	 * <code>BuildpathVariableInitializer</code>), which will be invoked through
+	 * the extension point "org.eclipse.dltk.core.buildpathVariableInitializer".
+	 * After resolution, a buildpath variable entry may either correspond to a
+	 * project or a library entry.
 	 * <p>
 	 * e.g. Here are some examples of variable path usage
 	 * <ul>
@@ -935,10 +936,9 @@ public class DLTKCore extends Plugin {
 	 * <li>"JDTCORE" where variable <code>JDTCORE</code> is bound to
 	 * "/Project_JDTCORE". The resolved buildpath entry is denoting the project
 	 * "/Project_JDTCORE"</li>
-	 * <li>"PLUGINS/com.example/example.jar" where variable
-	 * <code>PLUGINS</code> is bound to "c:/eclipse/plugins". The resolved
-	 * buildpath entry is denoting the library
-	 * "c:\eclipse\plugins\com.example\example.jar"</li>
+	 * <li>"PLUGINS/com.example/example.jar" where variable <code>PLUGINS</code>
+	 * is bound to "c:/eclipse/plugins". The resolved buildpath entry is
+	 * denoting the library "c:\eclipse\plugins\com.example\example.jar"</li>
 	 * </ul>
 	 * <p>
 	 * The access rules determine the set of accessible class files in the
@@ -947,9 +947,9 @@ public class DLTKCore extends Plugin {
 	 * detailed description of access rules.
 	 * </p>
 	 * <p>
-	 * The <code>extraAttributes</code> list contains name/value pairs that
-	 * must be persisted with this entry. If no extra attributes are provided,
-	 * an empty array must be passed in.<br>
+	 * The <code>extraAttributes</code> list contains name/value pairs that must
+	 * be persisted with this entry. If no extra attributes are provided, an
+	 * empty array must be passed in.<br>
 	 * Note that this list should not contain any duplicate name.
 	 * </p>
 	 * <p>
@@ -1035,9 +1035,9 @@ public class DLTKCore extends Plugin {
 		try {
 			SetVariablesOperation operation = new SetVariablesOperation(
 					new String[] { variableName }, new IPath[] { null }, true/*
-																				 * update
-																				 * preferences
-																				 */);
+																			 * update
+																			 * preferences
+																			 */);
 			operation.runOperation(monitor);
 		} catch (ModelException e) {
 			Util.log(e, "Exception while removing variable " + variableName); //$NON-NLS-1$
@@ -1095,9 +1095,9 @@ public class DLTKCore extends Plugin {
 
 	/**
 	 * Creates and returns a new buildpath entry of kind
-	 * <code>CPE_CONTAINER</code> for the given path. The path of the
-	 * container will be used during resolution so as to map this container
-	 * entry to a set of other buildpath entries the container is acting for.
+	 * <code>CPE_CONTAINER</code> for the given path. The path of the container
+	 * will be used during resolution so as to map this container entry to a set
+	 * of other buildpath entries the container is acting for.
 	 * <p>
 	 * A container entry allows to express indirect references to a set of
 	 * libraries, projects and variable entries, which can be interpreted
@@ -1107,8 +1107,8 @@ public class DLTKCore extends Plugin {
 	 * <code>DLTKCore.buildpathContainerChanged</code>
 	 * <p>
 	 * A container is exclusively resolved by a
-	 * <code>BuildpathContainerInitializer</code> registered onto the
-	 * extension point "org.eclipse.dltk.core.buildpathContainerInitializer".
+	 * <code>BuildpathContainerInitializer</code> registered onto the extension
+	 * point "org.eclipse.dltk.core.buildpathContainerInitializer".
 	 * <p>
 	 * A container path must be formed of at least one segment, where:
 	 * <ul>
@@ -1127,9 +1127,9 @@ public class DLTKCore extends Plugin {
 	 * the entry's access rules are considered.
 	 * </p>
 	 * <p>
-	 * The <code>extraAttributes</code> list contains name/value pairs that
-	 * must be persisted with this entry. If no extra attributes are provided,
-	 * an empty array must be passed in.<br>
+	 * The <code>extraAttributes</code> list contains name/value pairs that must
+	 * be persisted with this entry. If no extra attributes are provided, an
+	 * empty array must be passed in.<br>
 	 * Note that this list should not contain any duplicate name.
 	 * </p>
 	 * <p>
@@ -1191,8 +1191,8 @@ public class DLTKCore extends Plugin {
 
 	/**
 	 * Helper method for returning one option value only. Equivalent to
-	 * <code>(String)ScriptCore.getOptions().get(optionName)</code> Note that
-	 * it may answer <code>null</code> if this option does not exist.
+	 * <code>(String)ScriptCore.getOptions().get(optionName)</code> Note that it
+	 * may answer <code>null</code> if this option does not exist.
 	 * <p>
 	 * For a complete description of the configurable options, see
 	 * <code>getDefaultOptions</code>.
@@ -1278,8 +1278,8 @@ public class DLTKCore extends Plugin {
 	 * @param action
 	 *            the action to perform
 	 * @param monitor
-	 *            a progress monitor, or <code>null</code> if progress
-	 *            reporting and cancellation are not desired
+	 *            a progress monitor, or <code>null</code> if progress reporting
+	 *            and cancellation are not desired
 	 * @exception CoreException
 	 *                if the operation failed.
 	 * 
@@ -1318,11 +1318,11 @@ public class DLTKCore extends Plugin {
 	 *            the action to perform
 	 * @param rule
 	 *            the scheduling rule to use when running this operation, or
-	 *            <code>null</code> if there are no scheduling restrictions
-	 *            for this operation.
+	 *            <code>null</code> if there are no scheduling restrictions for
+	 *            this operation.
 	 * @param monitor
-	 *            a progress monitor, or <code>null</code> if progress
-	 *            reporting and cancellation are not desired
+	 *            a progress monitor, or <code>null</code> if progress reporting
+	 *            and cancellation are not desired
 	 * @exception CoreException
 	 *                if the operation failed.
 	 * 
@@ -1485,12 +1485,10 @@ public class DLTKCore extends Plugin {
 	 * <code>null</code> if unable to resolve using the following algorithm:
 	 * <ul>
 	 * <li> if variable segment cannot be resolved, returns <code>null</code>
-	 * </li>
-	 * <li> finds a project, JAR or binary folder in the workspace at the
-	 * resolved path location</li>
-	 * <li> if none finds an external JAR file or folder outside the workspace
-	 * at the resolved path location </li>
-	 * <li> if none returns <code>null</code></li>
+	 * </li> <li> finds a project, JAR or binary folder in the workspace at the
+	 * resolved path location</li> <li> if none finds an external JAR file or
+	 * folder outside the workspace at the resolved path location </li> <li> if
+	 * none returns <code>null</code></li>
 	 * </ul>
 	 * <p>
 	 * Variable source attachment path and root path are also resolved and
@@ -1535,28 +1533,30 @@ public class DLTKCore extends Plugin {
 			case IResource.FILE:
 				// internal binary archive
 				return DLTKCore.newLibraryEntry(resolvedPath,/*
-																 * getResolvedVariablePath(
-																 * entry.
-																 * getSourceAttachmentPath
-																 * ()),
-																 * getResolvedVariablePath
-																 * (entry.
-																 * getSourceAttachmentRootPath
-																 * ()),
-																 */entry.getAccessRules(), entry.getExtraAttributes(), entry
+															 * getResolvedVariablePath(
+															 * entry.
+															 * getSourceAttachmentPath
+															 * ()),
+															 * getResolvedVariablePath
+															 * (entry.
+															 * getSourceAttachmentRootPath
+															 * ()),
+															 */entry
+						.getAccessRules(), entry.getExtraAttributes(), entry
 						.isExported(), entry.isExternal());
 			case IResource.FOLDER:
 				// internal binary folder
 				return DLTKCore.newLibraryEntry(resolvedPath,/*
-																 * getResolvedVariablePath(
-																 * entry.
-																 * getSourceAttachmentPath
-																 * ()),
-																 * getResolvedVariablePath
-																 * (entry.
-																 * getSourceAttachmentRootPath
-																 * ()),
-																 */entry.getAccessRules(), entry.getExtraAttributes(), entry
+															 * getResolvedVariablePath(
+															 * entry.
+															 * getSourceAttachmentPath
+															 * ()),
+															 * getResolvedVariablePath
+															 * (entry.
+															 * getSourceAttachmentRootPath
+															 * ()),
+															 */entry
+						.getAccessRules(), entry.getExtraAttributes(), entry
 						.isExported(), entry.isExternal());
 			}
 		}
@@ -1565,6 +1565,21 @@ public class DLTKCore extends Plugin {
 			if (externalFile != null) {
 				// external binary archive
 				return DLTKCore.newLibraryEntry(resolvedPath,/*
+															 * getResolvedVariablePath(
+															 * entry.
+															 * getSourceAttachmentPath
+															 * ()),
+															 * getResolvedVariablePath
+															 * (entry.
+															 * getSourceAttachmentRootPath
+															 * ()),
+															 */entry
+						.getAccessRules(), entry.getExtraAttributes(), entry
+						.isExported(), entry.isExternal());
+			} else {
+				// non-existing file
+				if (resolvedPath.isAbsolute()) {
+					return DLTKCore.newLibraryEntry(resolvedPath,/*
 																 * getResolvedVariablePath(
 																 * entry.
 																 * getSourceAttachmentPath
@@ -1573,22 +1588,9 @@ public class DLTKCore extends Plugin {
 																 * (entry.
 																 * getSourceAttachmentRootPath
 																 * ()),
-																 */entry.getAccessRules(), entry.getExtraAttributes(), entry
-						.isExported(), entry.isExternal());
-			} else {
-				// non-existing file
-				if (resolvedPath.isAbsolute()) {
-					return DLTKCore.newLibraryEntry(resolvedPath,/*
-																	 * getResolvedVariablePath(
-																	 * entry.
-																	 * getSourceAttachmentPath
-																	 * ()),
-																	 * getResolvedVariablePath
-																	 * (entry.
-																	 * getSourceAttachmentRootPath
-																	 * ()),
-																	 */entry.getAccessRules(), entry.getExtraAttributes(), entry
-							.isExported(), entry.isExternal());
+																 */entry
+							.getAccessRules(), entry.getExtraAttributes(),
+							entry.isExported(), entry.isExternal());
 				}
 			}
 		}
@@ -1645,8 +1647,8 @@ public class DLTKCore extends Plugin {
 	 * <p>
 	 * buildpath container values are persisted locally to the workspace, but
 	 * are not preserved from a session to another. It is thus highly
-	 * recommended to register a <code>buildpathContainerInitializer</code>
-	 * for each referenced container (through the extension point
+	 * recommended to register a <code>buildpathContainerInitializer</code> for
+	 * each referenced container (through the extension point
 	 * "org.eclipse.dltk.core.buildpathContainerInitializer").
 	 * <p>
 	 * 
@@ -1689,8 +1691,8 @@ public class DLTKCore extends Plugin {
 	 * identify the registered container initializer.
 	 * <p>
 	 * 
-	 * @param containerID -
-	 *            a containerID identifying a registered initializer
+	 * @param containerID
+	 *            - a containerID identifying a registered initializer
 	 * @return BuildpathContainerInitializer - the registered buildpath
 	 *         container initializer or <code>null</code> if none was found.
 	 */
@@ -1775,17 +1777,17 @@ public class DLTKCore extends Plugin {
 	 * <p>
 	 * <code>containerPath</code> is the path under which these values can be
 	 * referenced through container buildpath entries (
-	 * <code>IBuildpathEntry#BPE_CONTAINER</code>). A container path is
-	 * formed by a first ID segment followed with extra segments, which can be
-	 * used as additional hints for the resolution. The container ID is used to
-	 * identify a <code>BuildpathContainerInitializer</code> registered on the
-	 * extension point "org.eclipse.dltk.core.buildpathContainerInitializer".
+	 * <code>IBuildpathEntry#BPE_CONTAINER</code>). A container path is formed
+	 * by a first ID segment followed with extra segments, which can be used as
+	 * additional hints for the resolution. The container ID is used to identify
+	 * a <code>BuildpathContainerInitializer</code> registered on the extension
+	 * point "org.eclipse.dltk.core.buildpathContainerInitializer".
 	 * <p>
 	 * There is no assumption that each individual container value passed in
-	 * argument (<code>respectiveContainers</code>) must answer the exact
-	 * same path when requested <code>IBuildpathContainer#getPath</code>.
-	 * Indeed, the containerPath is just an indication for resolving it to an
-	 * actual container object. It can be delegated to a
+	 * argument (<code>respectiveContainers</code>) must answer the exact same
+	 * path when requested <code>IBuildpathContainer#getPath</code>. Indeed, the
+	 * containerPath is just an indication for resolving it to an actual
+	 * container object. It can be delegated to a
 	 * <code>BuildpathContainerInitializer</code>, which can be activated
 	 * through the extension point
 	 * "org.eclipse.dltk.core.buildpathContainerInitializer").
@@ -1802,21 +1804,21 @@ public class DLTKCore extends Plugin {
 	 * <p>
 	 * Buildpath container values are persisted locally to the workspace, but
 	 * are not preserved from a session to another. It is thus highly
-	 * recommended to register a <code>BuildpathContainerInitializer</code>
-	 * for each referenced container (through the extension point
+	 * recommended to register a <code>BuildpathContainerInitializer</code> for
+	 * each referenced container (through the extension point
 	 * "org.eclipse.dltk.core.BuildpathContainerInitializer").
 	 * <p>
-	 * Note: setting a container to <code>null</code> will cause it to be
-	 * lazily resolved again whenever its value is required. In particular, this
-	 * will cause a registered initializer to be invoked again.
+	 * Note: setting a container to <code>null</code> will cause it to be lazily
+	 * resolved again whenever its value is required. In particular, this will
+	 * cause a registered initializer to be invoked again.
 	 * <p>
 	 * 
-	 * @param containerPath -
-	 *            the name of the container reference, which is being updated
-	 * @param affectedProjects -
-	 *            the set of projects for which this container is being bound
-	 * @param respectiveContainers -
-	 *            the set of respective containers for the affected projects
+	 * @param containerPath
+	 *            - the name of the container reference, which is being updated
+	 * @param affectedProjects
+	 *            - the set of projects for which this container is being bound
+	 * @param respectiveContainers
+	 *            - the set of respective containers for the affected projects
 	 * @param monitor
 	 *            a monitor to report progress
 	 * @throws ModelException
@@ -1955,11 +1957,12 @@ public class DLTKCore extends Plugin {
 			remaining++;
 			oldResolvedPaths[i] = affectedProject.getResolvedBuildpath(
 					true/* ignoreUnresolvedEntry */, false/*
-															 * don't
-															 * generateMarkerOnError
-															 */, false/*
-								 * don't returnResolutionInProgress
-								 */);
+														 * don't
+														 * generateMarkerOnError
+														 */, false/*
+																 * don't
+																 * returnResolutionInProgress
+																 */);
 			manager.containerPut(affectedProject, containerPath, newContainer);
 		}
 
@@ -2103,8 +2106,8 @@ public class DLTKCore extends Plugin {
 	 * Creates and returns a new non-exported buildpath entry of kind
 	 * <code>CPE_LIBRARY</code> for the ZIP or folder identified by the given
 	 * absolute path. This specifies that all package fragments within the root
-	 * will have children of type <code>IClassFile</code>. This method is
-	 * fully equivalent to calling
+	 * will have children of type <code>IClassFile</code>. This method is fully
+	 * equivalent to calling
 	 * {@link #newLibraryEntry(IPath, IPath, IPath, IAccessRule[], IBuildpathAttribute[], boolean)
 	 * newLibraryEntry(path, sourceAttachmentPath, sourceAttachmentRootPath, new
 	 * IAccessRule[0], new IBuildpathAttribute[0], false)}.
@@ -2118,8 +2121,8 @@ public class DLTKCore extends Plugin {
 	 *            automatically converted to <code>null</code>.
 	 * @param sourceAttachmentRootPath
 	 *            the location of the root of the source files within the source
-	 *            archive or folder or <code>null</code> if this location
-	 *            should be automatically detected.
+	 *            archive or folder or <code>null</code> if this location should
+	 *            be automatically detected.
 	 * @return a new library buildpath entry
 	 */
 	public static IBuildpathEntry newLibraryEntry(IPath path) {
@@ -2140,8 +2143,8 @@ public class DLTKCore extends Plugin {
 	 * Creates and returns a new buildpath entry of kind
 	 * <code>CPE_LIBRARY</code> for the ZIP or folder identified by the given
 	 * absolute path. This specifies that all package fragments within the root
-	 * will have children of type <code>IClassFile</code>. This method is
-	 * fully equivalent to calling
+	 * will have children of type <code>IClassFile</code>. This method is fully
+	 * equivalent to calling
 	 * {@link #newLibraryEntry(IPath, IPath, IPath, IAccessRule[], IBuildpathAttribute[], boolean)
 	 * newLibraryEntry(path, sourceAttachmentPath, sourceAttachmentRootPath, new
 	 * IAccessRule[0], new IBuildpathAttribute[0], isExported)}.
@@ -2155,8 +2158,8 @@ public class DLTKCore extends Plugin {
 	 *            automatically converted to <code>null</code>.
 	 * @param sourceAttachmentRootPath
 	 *            the location of the root of the source files within the source
-	 *            archive or folder or <code>null</code> if this location
-	 *            should be automatically detected.
+	 *            archive or folder or <code>null</code> if this location should
+	 *            be automatically detected.
 	 * @param isExported
 	 *            indicates whether this entry is contributed to dependent
 	 *            projects in addition to the output location
@@ -2191,13 +2194,12 @@ public class DLTKCore extends Plugin {
 	 * external to the workspace, it must first be linked (see
 	 * IFolder#createLink(...)). Note that on non-Windows platform, a path
 	 * <code>"/some/lib.zip"</code> is ambiguous. It can be a path to an
-	 * external ZIP (its file system path being <code>"/some/lib.jar"</code>)
-	 * or it can be a path to an internal ZIP (<code>"some"</code> being a
-	 * project in the workspace). Such an ambiguity is solved when the buildpath
-	 * entry is used (e.g. in {@link IScriptProject#getProjectFragments()}). If
-	 * the resource <code>"lib.jar"</code> exists in project
-	 * <code>"some"</code>, then it is considered an internal ZIP. Otherwise
-	 * it is an external ZIP.
+	 * external ZIP (its file system path being <code>"/some/lib.jar"</code>) or
+	 * it can be a path to an internal ZIP (<code>"some"</code> being a project
+	 * in the workspace). Such an ambiguity is solved when the buildpath entry
+	 * is used (e.g. in {@link IScriptProject#getProjectFragments()}). If the
+	 * resource <code>"lib.jar"</code> exists in project <code>"some"</code>,
+	 * then it is considered an internal ZIP. Otherwise it is an external ZIP.
 	 * <p>
 	 * Also note that this operation does not attempt to validate or access the
 	 * resources at the given paths.
@@ -2209,9 +2211,9 @@ public class DLTKCore extends Plugin {
 	 * description of access rules.
 	 * </p>
 	 * <p>
-	 * The <code>extraAttributes</code> list contains name/value pairs that
-	 * must be persisted with this entry. If no extra attributes are provided,
-	 * an empty array must be passed in.<br>
+	 * The <code>extraAttributes</code> list contains name/value pairs that must
+	 * be persisted with this entry. If no extra attributes are provided, an
+	 * empty array must be passed in.<br>
 	 * Note that this list should not contain any duplicate name.
 	 * </p>
 	 * <p>
@@ -2243,8 +2245,8 @@ public class DLTKCore extends Plugin {
 	 *            automatically converted to <code>null</code>.
 	 * @param sourceAttachmentRootPath
 	 *            the location of the root of the source files within the source
-	 *            archive or folder or <code>null</code> if this location
-	 *            should be automatically detected.
+	 *            archive or folder or <code>null</code> if this location should
+	 *            be automatically detected.
 	 * @return a new library buildpath entry
 	 * 
 	 */
@@ -2339,10 +2341,9 @@ public class DLTKCore extends Plugin {
 
 	public static ISourceModule createSourceModuleFrom(IFile file) {
 		return ModelManager.createSourceModuleFrom(file, null/*
-																 * unknown
-																 * script
-																 * project
-																 */);
+															 * unknown script
+															 * project
+															 */);
 	}
 
 	/**
