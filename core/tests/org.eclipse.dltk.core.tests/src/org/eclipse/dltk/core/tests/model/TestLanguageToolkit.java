@@ -25,6 +25,7 @@ import org.eclipse.dltk.codeassist.ISelectionEngine;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
+import org.eclipse.dltk.core.AbstractLanguageToolkit;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.ICallProcessor;
 import org.eclipse.dltk.core.ICalleeProcessor;
@@ -47,7 +48,8 @@ import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.internal.core.util.Messages;
 
-public class TestLanguageToolkit implements IDLTKLanguageToolkit {
+public class TestLanguageToolkit extends AbstractLanguageToolkit implements
+		IDLTKLanguageToolkit {
 	private static TestLanguageToolkit toolkit = new TestLanguageToolkit();
 
 	public IProblemReporter createProblemReporter(IResource resource,
@@ -169,9 +171,8 @@ public class TestLanguageToolkit implements IDLTKLanguageToolkit {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	public String getLanguageName()
-	{
+
+	public String getLanguageName() {
 		return "Test";
 	}
 
