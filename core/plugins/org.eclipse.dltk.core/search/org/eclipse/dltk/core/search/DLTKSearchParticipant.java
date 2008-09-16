@@ -155,15 +155,8 @@ public class DLTKSearchParticipant extends SearchParticipant {
 	}
 
 	public boolean isSkipped(Index index) {
-		boolean mixin = false;
-		if (index instanceof MixinIndex) {
-			mixin = true;
-		} else {
-			String containerPath = index.containerPath;
-			if (containerPath.startsWith(IndexManager.SPECIAL_MIXIN)) {
-				mixin = true;
-			}
-		}
-		return this.bOnlyMixin != mixin; 
+		final boolean mixinIndex = index instanceof MixinIndex
+				|| index.containerPath.startsWith(IndexManager.SPECIAL_MIXIN);
+		return this.bOnlyMixin != mixinIndex;
 	}
 }
