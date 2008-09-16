@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.net.URI;
 
 import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -97,7 +98,8 @@ public class EFSFileHandle implements IFileHandle {
 	}
 
 	public boolean isFile() {
-		return !isDirectory();
+		final IFileInfo info = file.fetchInfo();
+		return info.exists() && !info.isDirectory();
 	}
 
 	public boolean isSymlink() {
