@@ -950,10 +950,6 @@ public class SearchEngine {
 			public boolean acceptIndexMatch(String documentPath,
 					SearchPattern indexRecord, SearchParticipant participant,
 					AccessRuleSet access) {
-				if (documentPath.startsWith(IndexManager.SPECIAL_MIXIN)) {
-					documentPath = documentPath
-							.substring(IndexManager.SPECIAL_MIXIN.length());
-				}
 				// String s = IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY.toString();
 				if (documentPath.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR) != -1) {
 					documentPath = documentPath

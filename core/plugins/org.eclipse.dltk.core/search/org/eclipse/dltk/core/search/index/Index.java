@@ -245,4 +245,13 @@ public class Index {
 	public boolean isRebuildable() {
 		return true;
 	}
+	
+	/**
+	 * Returns the containerPath of this index without any additional prefixes.
+	 * 
+	 * @return
+	 */
+	public String getContainerPath() {
+		return containerPath;
+	}
 }

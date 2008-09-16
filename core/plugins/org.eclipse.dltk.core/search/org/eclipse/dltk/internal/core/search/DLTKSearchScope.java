@@ -32,7 +32,6 @@ import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
-import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.core.ExternalProjectFragment;
@@ -616,10 +615,6 @@ public class DLTKSearchScope extends AbstractSearchScope {
 		// containerPath = IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR +
 		// relativePath;
 		// }
-		if (containerPath.startsWith(IndexManager.SPECIAL_MIXIN)) {
-			containerPath = containerPath.substring(IndexManager.SPECIAL_MIXIN
-					.length());
-		}
 		int index = indexOf(containerPath, relativePath);
 		if (index == -1) {
 			// this search scope does not enclose given path

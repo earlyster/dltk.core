@@ -27,6 +27,7 @@ import org.eclipse.dltk.compiler.util.SimpleSetOfCharArray;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
+import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.util.Util;
 
 public class MixinIndex extends Index {
@@ -331,5 +332,13 @@ public class MixinIndex extends Index {
 
 	public boolean isRebuildable() {
 		return false;
+	}
+
+	public String getContainerPath() {
+		if (containerPath.startsWith(IndexManager.SPECIAL_MIXIN)) {
+			return containerPath.substring(IndexManager.SPECIAL_MIXIN.length());
+		} else {
+			return containerPath;
+		}
 	}
 }

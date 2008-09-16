@@ -23,6 +23,7 @@ import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.index.EntryResult;
 import org.eclipse.dltk.core.search.index.Index;
+import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
 import org.eclipse.dltk.internal.core.search.DLTKSearchScope;
 import org.eclipse.dltk.internal.core.search.IndexQueryRequestor;
@@ -109,7 +110,7 @@ public abstract class InternalSearchPattern {
 				return;
 
 			SearchPattern decodedResult = pattern.getBlankPattern();
-			String containerPath = index.containerPath;
+			String containerPath = index.getContainerPath();
 			for (int i = 0, l = entries.length; i < l; i++) {
 				if (monitor != null && monitor.isCanceled())
 					throw new OperationCanceledException();

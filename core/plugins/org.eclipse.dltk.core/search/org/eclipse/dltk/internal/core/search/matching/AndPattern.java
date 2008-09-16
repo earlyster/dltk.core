@@ -79,7 +79,7 @@ public abstract class AndPattern extends DLTKSearchPattern {
 			index.stopQuery();
 		}
 
-		String containerPath = index.containerPath;
+		String containerPath = index.getContainerPath();
 		Object[] names = intersectedNames.values;
 		for (int i = 0, l = names.length; i < l; i++)
 			if (names[i] != null)
