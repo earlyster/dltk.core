@@ -11,19 +11,15 @@ package org.eclipse.dltk.internal.core.search.matching;
 
 import java.io.IOException;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.util.Util;
-import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.index.EntryResult;
 import org.eclipse.dltk.core.search.index.Index;
-import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
 import org.eclipse.dltk.internal.core.search.DLTKSearchScope;
 import org.eclipse.dltk.internal.core.search.IndexQueryRequestor;
@@ -46,7 +42,7 @@ public abstract class InternalSearchPattern {
 
 		if (scope instanceof DLTKSearchScope) {
 			DLTKSearchScope javaSearchScope = (DLTKSearchScope) scope;
-			// Get document path access restriction fromscriptsearch scope
+			// Get document path access restriction from script search scope
 			// Note that requestor has to verify if needed whether the document
 			// violates the access restriction or not
 			AccessRuleSet access = javaSearchScope.getAccessRuleSet(
@@ -54,12 +50,6 @@ public abstract class InternalSearchPattern {
 			if (access != DLTKSearchScope.NOT_ENCLOSED) { // scope encloses
 				// the document path
 				String documentPath = documentPath(containerPath, relativePath);
-
-				IPath realPath = new Path(documentPath);
-				if (!DLTKContentTypeManager.isValidFileNameForContentType(scope
-						.getLanguageToolkit(), realPath)) {
-					return;
-				}
 				if (!requestor.acceptIndexMatch(documentPath, pattern,
 						participant, access))
 					throw new OperationCanceledException();
