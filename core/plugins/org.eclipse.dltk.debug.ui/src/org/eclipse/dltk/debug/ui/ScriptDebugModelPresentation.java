@@ -33,6 +33,7 @@ import org.eclipse.debug.core.model.ILineBreakpoint;
 import org.eclipse.debug.core.model.ISourceLocator;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.debug.core.model.IValue;
+import org.eclipse.debug.core.model.IVariable;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IValueDetailListener;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -250,8 +251,11 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 		return stackFrame.toString();
 	}
 
-	protected String getVariableName(IScriptVariable variable)
-			throws DebugException {
+	/**
+	 * Returns the text that will be displayed for the variable name when the
+	 * 'Show Columns' layout option <strong>is</strong> enabled.
+	 */
+	public String getVariableName(IVariable variable) throws DebugException {
 		return variable.getName();
 	}
 

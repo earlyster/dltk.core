@@ -3,11 +3,11 @@ package org.eclipse.dltk.internal.debug.ui.variables;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.core.model.IVariable;
-import org.eclipse.debug.internal.ui.DelegatingModelPresentation;
 import org.eclipse.debug.internal.ui.model.elements.VariableLabelProvider;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
-import org.eclipse.debug.internal.ui.views.DebugModelPresentationContext;
 import org.eclipse.debug.ui.IDebugModelPresentation;
+import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
+import org.eclipse.dltk.debug.ui.ScriptDebugModelPresentation;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -27,25 +27,36 @@ public class ScriptVariableLabelProvider extends VariableLabelProvider
 		store = null;
 	}
 
-	/**
-	 * XXX 3.3 compatibility getModelPresentation(IPresentationContext,String)
-	 * 
-	 * @param context
-	 * @param modelId
-	 * @return
-	 */
 	protected IDebugModelPresentation getModelPresentation(
 			IPresentationContext context, String modelId) {
-		if (context instanceof DebugModelPresentationContext) {
-			DebugModelPresentationContext debugContext = (DebugModelPresentationContext) context;
-			IDebugModelPresentation presentation = debugContext
-					.getModelPresentation();
-			if (presentation instanceof DelegatingModelPresentation) {
-				return ((DelegatingModelPresentation) presentation)
-						.getPresentation(modelId);
-			}
+		/*
+		 * no longer here for 3.3 compatibility...
+		 * 
+		 * we need to use the langugage specific implementation so we can get
+		 * access to addtional presentation methods by downcasting to the
+		 * ScriptDebugModelPresentation.
+		 * 
+		 * the IDebugModelPresentation impl normally returned from a this method
+		 * is an instance of LazyModelPresentation, which does not provide a way
+		 * to obtain the underlying model presentation it is being lazy for.
+		 * 
+		 * the jdt instanciates its IDebugModelPresentation implementation
+		 * outright in its VariableLabelProvider implenentation, so this should
+		 * be ok to do.
+		 */
+		return DLTKDebugUIPlugin.getDefault().getModelPresentation(modelId);
+	}
+
+	protected String getVariableName(IVariable variable,
+			IPresentationContext context) throws CoreException {
+		IDebugModelPresentation presentation = getModelPresentation(context,
+				variable.getModelIdentifier());
+		if (presentation != null) {
+			return ((ScriptDebugModelPresentation) presentation)
+					.getVariableName(variable);
 		}
-		return null;
+
+		return super.getVariableName(variable, context);
 	}
 
 	protected String getValueText(IVariable variable, IValue value,
