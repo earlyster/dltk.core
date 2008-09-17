@@ -77,12 +77,7 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 		if (!workingCopy.isConsistent()) {
 			// make working copy consistent
 			workingCopy.makeConsistent(this.progressMonitor);
-			this.deltaBuilder.buildDeltas();
-			// Mixin source index operation required.
-			int sum = this.deltaBuilder.delta.getAffectedChildren().length;
-			if (sum > 0) {
-				ProjectIndexerManager.reconciled(workingCopy);
-			}
+			ProjectIndexerManager.reconciled(workingCopy);
 		} else if (forceProblemDetection && problemRequestor.isActive()) {
 			AccumulatingProblemReporter reporter = new AccumulatingProblemReporter(
 					problemRequestor);
