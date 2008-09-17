@@ -7,6 +7,7 @@ public class Messages extends NLS {
 	public static String DbgpRawPacket_cantReadPacketBody;
 	public static String DbgpRawPacket_invalidCharInPacketSize;
 	public static String DbgpRawPacket_noTerminationByte;
+	public static String DbgpRawPacket_zeroPacketSize;
 	public static String DbgpWorkingThread_threadAlreadyStarted;
 	static {
 		// initialize resource bundle

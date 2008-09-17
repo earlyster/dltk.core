@@ -21,31 +21,29 @@ import org.w3c.dom.Document;
 public class DbgpRawPacket {
 
 	protected static int readPacketSize(InputStream input) throws IOException {
-		StringBuffer sb = new StringBuffer();
-
-		int b = -1;
-		while (true) {
-			b = input.read();
-
+		int size = 0;
+		for (;;) {
+			int b = input.read();
 			if (b == -1) {
 				throw new IOException();
 			}
-
 			if (b == 0) {
 				break;
 			}
 			if (b >= '0' && b <= '9') {
-				sb.append((char) b);
+				size = size * 10 + (b - '0');
 			} else {
 				final String msg = NLS.bind(
 						Messages.DbgpRawPacket_invalidCharInPacketSize, Integer
 								.toString(b));
-				DLTKDebugPlugin.logError(msg); 
+				DLTKDebugPlugin.logWarning(msg);
 				throw new IOException(msg);
 			}
 		}
-
-		return Integer.parseInt(sb.toString());
+		if (size == 0) {
+			throw new IOException(Messages.DbgpRawPacket_zeroPacketSize);
+		}
+		return size;
 	}
 
 	protected static String readPacketXml(InputStream input, int size)
