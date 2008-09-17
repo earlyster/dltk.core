@@ -19,7 +19,6 @@ import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Preferences;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.ModelManager;
@@ -40,12 +39,9 @@ import org.eclipse.ui.PlatformUI;
 
 final class ScriptCorePreferenceBlock extends
 		ImprovedAbstractConfigurationBlock {
-	private Button nonLocalEmptyFileContentTypeChecking;
-	private Button filesWithExtensionsContentChecking;
 
 	private final class ReindexOperation implements IRunnableWithProgress {
-		public void run(IProgressMonitor monitor)
-				throws InvocationTargetException, InterruptedException {
+		public void run(IProgressMonitor monitor) {
 			try {
 				ResourcesPlugin.getWorkspace().build(
 						IncrementalProjectBuilder.FULL_BUILD, monitor);
@@ -65,19 +61,9 @@ final class ScriptCorePreferenceBlock extends
 		Composite composite = SWTFactory.createComposite(parent, parent
 				.getFont(), 1, 1, GridData.FILL_BOTH);
 
-		Group coreGroup = SWTFactory.createGroup(composite,
-				Messages.ScriptCorePreferenceBlock_coreOptions, 1, 1,
-				GridData.FILL_HORIZONTAL);
-
-		this.nonLocalEmptyFileContentTypeChecking = SWTFactory
-				.createCheckButton(
-						coreGroup,
-						Messages.ScriptCorePreferenceBlock_emptyFileContentCheckingForNonLocalProjects);
-
-		this.filesWithExtensionsContentChecking = SWTFactory
-				.createCheckButton(
-						coreGroup,
-						Messages.ScriptCorePreferenceBlock_filesWithExtensionContentCheking);
+		// Group coreGroup = SWTFactory.createGroup(composite,
+		// Messages.ScriptCorePreferenceBlock_coreOptions, 1, 1,
+		// GridData.FILL_HORIZONTAL);
 
 		Group editorGroup = SWTFactory.createGroup(composite,
 				Messages.ScriptCorePreferenceBlock_editOptions, 1, 1,
@@ -142,29 +128,10 @@ final class ScriptCorePreferenceBlock extends
 
 	public void initialize() {
 		super.initialize();
-		Preferences preferences = DLTKCore.getPlugin().getPluginPreferences();
-		String value = preferences
-				.getString(DLTKCore.CORE_NON_LOCAL_EMPTY_FILE_CONTENT_TYPE_CHECKING);
-		this.nonLocalEmptyFileContentTypeChecking.setSelection(DLTKCore.ENABLED
-				.equals(value));
-
-		value = preferences
-				.getString(DLTKCore.CORE_FILES_WITH_EXTENSION_CONTENT_CHECKING);
-		this.filesWithExtensionsContentChecking.setSelection(DLTKCore.ENABLED
-				.equals(value));
 	}
 
 	public void performDefaults() {
 		super.performDefaults();
-		Preferences preferences = DLTKCore.getPlugin().getPluginPreferences();
-		String value = preferences
-				.getDefaultString(DLTKCore.CORE_NON_LOCAL_EMPTY_FILE_CONTENT_TYPE_CHECKING);
-		this.nonLocalEmptyFileContentTypeChecking.setSelection(DLTKCore.ENABLED
-				.equals(value));
-		value = preferences
-				.getDefaultString(DLTKCore.CORE_FILES_WITH_EXTENSION_CONTENT_CHECKING);
-		this.filesWithExtensionsContentChecking.setSelection(DLTKCore.ENABLED
-				.equals(value));
 	}
 
 	protected void initializeFields() {
@@ -173,18 +140,6 @@ final class ScriptCorePreferenceBlock extends
 
 	public void performOk() {
 		super.performOk();
-		Preferences preferences = DLTKCore.getPlugin().getPluginPreferences();
-		preferences
-				.setValue(
-						DLTKCore.CORE_NON_LOCAL_EMPTY_FILE_CONTENT_TYPE_CHECKING,
-						this.nonLocalEmptyFileContentTypeChecking
-								.getSelection() ? DLTKCore.ENABLED
-								: DLTKCore.DISABLED);
-		preferences
-				.setValue(
-						DLTKCore.CORE_FILES_WITH_EXTENSION_CONTENT_CHECKING,
-						this.filesWithExtensionsContentChecking.getSelection() ? DLTKCore.ENABLED
-								: DLTKCore.DISABLED);
 		DLTKCore.getDefault().savePluginPreferences();
 	}
 
