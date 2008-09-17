@@ -466,10 +466,6 @@ public class BufferTests extends ModifyingResourceTests implements IBufferChange
 		}
 	}
 
-	public static void waitUntilIndexesReady() {
-		// TODO: dummy query for waiting until the indexes are ready
-	}
-
 	public void bufferChanged(BufferChangedEvent bufferChangedEvent) {
 		this.events.add(bufferChangedEvent);
 	}
