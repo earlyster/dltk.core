@@ -18,7 +18,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathContainer;
@@ -446,8 +445,8 @@ public class DLTKSearchScope extends AbstractSearchScope {
 
 			String currentContainerPath = containerPaths[i];
 			String currentFullPath = currentRelativePath.length() == 0 ? currentContainerPath
-					: (currentContainerPath + "/" + currentRelativePath); //$NON-NLS-1$
-			if (encloses(currentFullPath, fullPath, i, currentFullPath))
+					: (currentContainerPath + '/' + currentRelativePath);
+			if (encloses(currentFullPath, fullPath, i))
 				return i;
 		}
 		return -1;
@@ -474,8 +473,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 		while ((currentContainerPath = this.containerPaths[index]) != null) {
 			if (currentContainerPath.equals(containerPath)) {
 				String currentRelativePath = this.relativePaths[index];
-				if (encloses(currentRelativePath, relativePath, index,
-						containerPath))
+				if (encloses(currentRelativePath, relativePath, index))
 					return index;
 			}
 			if (++index == length) {
@@ -489,20 +487,9 @@ public class DLTKSearchScope extends AbstractSearchScope {
 	 * Returns whether the enclosing path encloses the given path (or is equal
 	 * to it)
 	 */
-	private boolean encloses(String enclosingPath, String path, int index,
-			String containerPath) {
+	private boolean encloses(String enclosingPath, String path, int index) {
 		// normalize given path as it can come from outside
-		enclosingPath = (new Path(enclosingPath)).toString();
-		path = new Path(normalize(path)).toString();
-		IPath realPath = new Path(path);
-		if (!DLTKContentTypeManager.isValidFileNameForContentType(toolkit,
-				realPath)) {
-			realPath = new Path(containerPath).append(path);
-			if (!DLTKContentTypeManager.isValidFileNameForContentType(toolkit,
-					realPath)) {
-				return false;
-			}
-		}
+		path = normalize(path); // new Path(normalize(path)).toString();
 		int pathLength = path.length();
 		int enclosingLength = enclosingPath.length();
 		if (pathLength < enclosingLength) {
