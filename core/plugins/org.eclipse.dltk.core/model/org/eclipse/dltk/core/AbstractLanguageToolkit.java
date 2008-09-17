@@ -27,6 +27,10 @@ public abstract class AbstractLanguageToolkit implements IDLTKLanguageToolkit {
 		return Status.OK_STATUS;
 	}
 
+	protected static boolean isEmptyExtension(String name) {
+		return name.indexOf('.') == -1;
+	}
+
 	public boolean canValidateContent(IResource resource) {
 		final IProject project = resource.getProject();
 		if (project == null) { // This is workspace root.
@@ -37,11 +41,11 @@ public abstract class AbstractLanguageToolkit implements IDLTKLanguageToolkit {
 		if (environment == null || !environment.isLocal()) {
 			return false;
 		}
-		return resource.getName().indexOf('.') == -1;
+		return isEmptyExtension(resource.getName());
 	}
 
 	public boolean canValidateContent(File file) {
-		return file.getName().indexOf('.') == -1;
+		return isEmptyExtension(file.getName());
 	}
 
 	public boolean canValidateContent(IFileHandle file) {
