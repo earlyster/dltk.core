@@ -123,6 +123,10 @@ public class DLTKDebugPlugin extends Plugin {
 		getDefault().getLog().log(status);
 	}
 
+	public static void logWarning(String message) {
+		logWarning(message, null);
+	}
+
 	public static void logWarning(String message, Throwable t) {
 		log(new Status(IStatus.WARNING, PLUGIN_ID, INTERNAL_ERROR, message, t));
 	}
