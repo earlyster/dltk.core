@@ -218,9 +218,15 @@ public class DLTKCore extends Plugin {
 	public static final String CORE_INCOMPLETE_BUILDPATH = PLUGIN_ID
 			+ ".incompleteBuildpath"; //$NON-NLS-1$
 
+	/**
+	 * @deprecated
+	 */
 	public static final String CORE_NON_LOCAL_EMPTY_FILE_CONTENT_TYPE_CHECKING = PLUGIN_ID
 			+ ".nonLocalEmptyFileContentCheking"; //$NON-NLS-1$
 
+	/**
+	 * @deprecated
+	 */
 	public static final String CORE_FILES_WITH_EXTENSION_CONTENT_CHECKING = PLUGIN_ID
 			+ ".filesWithExtensionsContentChecking"; //$NON-NLS-1$
 
