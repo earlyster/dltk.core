@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -29,94 +28,143 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.core.runtime.jobs.ILock;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
-import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
 public class DLTKContentTypeManager {
 
-	private static Map derivedContentTypesCache = new HashMap();
-	private static ILock derivedContentTypesCacheLock = Job.getJobManager()
-			.newLock();
+	private static boolean DEBUG = false;
+
+	private static void logMethodEntry(IDLTKLanguageToolkit toolkit,
+			Object input) {
+		if (input != null) {
+			String className = input.getClass().getName();
+			int pos = className.lastIndexOf('.');
+			if (pos > 0) {
+				className = className.substring(pos + 1);
+			}
+			System.out.println("isValidFileNameForContentType " + input + ':' //$NON-NLS-1$
+					+ className + ' ' + toolkit.getLanguageName());
+		}
+	}
+
+	public static boolean isValidFileNameForContentType(
+			IDLTKLanguageToolkit toolkit, String name) {
+		if (DEBUG) {
+			logMethodEntry(toolkit, name);
+		}
+		final IContentType masterType = getMasterContentType(toolkit
+				.getLanguageContentType());
+		if (masterType == null) {
+			return false;
+		}
+		// Acquire derived content types
+		final IContentType[] derived = getDerivedContentTypes(masterType);
+		return isValidFileNameForContentType(derived, name);
+	}
 
 	public static boolean isValidFileNameForContentType(
 			IDLTKLanguageToolkit toolkit, IPath path) {
-		if (isValidFileNameForContentType(toolkit, path.lastSegment())) {
+		if (DEBUG) {
+			logMethodEntry(toolkit, path);
+		}
+		final IContentType masterType = getMasterContentType(toolkit
+				.getLanguageContentType());
+		if (masterType == null) {
+			return false;
+		}
+		final IContentType[] derived = getDerivedContentTypes(masterType);
+		if (isValidFileNameForContentType(derived, path.lastSegment())) {
 			return true;
 		}
 		if (EnvironmentPathUtils.isFull(path)) {
-			IFileHandle file = EnvironmentPathUtils.getFile(path);
-			if (file.exists() && file.isFile()
-					&& (file.getName().indexOf('.') == -1)) {
-				IContentType[] derived = getDerivedContentTypes(toolkit
-						.getLanguageContentType());
-				// Look for derived for associated extensions.
-				for (int i = 0; i < derived.length; i++) {
-					IContentType type = derived[i];
-					InputStream stream = null;
-					try {
-						stream = new BufferedInputStream(file
-								.openInputStream(null), 2048);
-						IContentDescription description = type
-								.getDescriptionFor(stream,
-										IContentDescription.ALL);
-						if (description != null) {
-							if (checkDescription(type, description)) {
-								return true;
-							}
-						}
-					} catch (IOException e) {
-						if (DLTKCore.DEBUG) {
-							e.printStackTrace();
-						}
-					} finally {
-						closeStream(stream);
-					}
+			final IFileHandle file = EnvironmentPathUtils.getFile(path);
+			if (file != null && file.isFile()) {
+				if (file.getEnvironment().isLocal()) {
+					final File localFile = new File(file.toOSString());
+					return toolkit.canValidateContent(file)
+							&& validateLocalFileContent(masterType, derived,
+									localFile);
+				} else {
+					return toolkit.canValidateContent(file)
+							&& validateRemoteFileContent(masterType, derived,
+									file);
 				}
 			}
+			return false;
 		}
 		if (path.isAbsolute()) {
-			File file = path.toFile();
-			if (file.exists() && file.isFile()
-					&& (file.getName().indexOf('.') == -1)) {
-				IContentType[] derived = getDerivedContentTypes(toolkit
-						.getLanguageContentType());
-				// Look for derived for associated extensions.
-				for (int i = 0; i < derived.length; i++) {
-					IContentType type = derived[i];
-					InputStream stream = null;
-					try {
-						stream = new BufferedInputStream(new FileInputStream(
-								file), 2048);
-						IContentDescription description = type
-								.getDescriptionFor(stream,
-										IContentDescription.ALL);
-						if (description != null) {
-							if (checkDescription(type, description)) {
-								return true;
-							}
-						}
-					} catch (IOException e) {
-						if (DLTKCore.DEBUG) {
-							e.printStackTrace();
-						}
-					} finally {
-						closeStream(stream);
-					}
-				}
+			final File file = path.toFile();
+			if (file.isFile()) {
+				return toolkit.canValidateContent(file)
+						&& validateLocalFileContent(masterType, derived, file);
 			}
 		}
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		IResource member = root.findMember(path);
-		if (member != null && isValidResourceForContentType(toolkit, member)) {
-			return true;
+		final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		final IResource member = root.findMember(path);
+		return member != null && member.getType() == IResource.FILE
+				&& validateResourceContent(masterType, derived, (IFile) member);
+	}
+
+	private static boolean validateRemoteFileContent(IContentType masterType,
+			final IContentType[] derived, IFileHandle file) {
+		for (int i = 0; i < derived.length; i++) {
+			IContentType type = derived[i];
+			InputStream stream = null;
+			try {
+				stream = new BufferedInputStream(file.openInputStream(null),
+						2048);
+				IContentDescription description = type.getDescriptionFor(
+						stream, IContentDescription.ALL);
+				if (description != null) {
+					if (checkDescription(type, description)) {
+						return true;
+					}
+				}
+			} catch (IOException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			} finally {
+				closeStream(stream);
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @param masterType
+	 * @param derived
+	 * @param file
+	 * @return
+	 */
+	private static boolean validateLocalFileContent(IContentType masterType,
+			IContentType[] derived, File file) {
+		for (int i = 0; i < derived.length; i++) {
+			IContentType type = derived[i];
+			InputStream stream = null;
+			try {
+				stream = new BufferedInputStream(new FileInputStream(file),
+						2048);
+				IContentDescription description = type.getDescriptionFor(
+						stream, IContentDescription.ALL);
+				if (description != null) {
+					if (checkDescription(type, description)) {
+						return true;
+					}
+				}
+			} catch (IOException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			} finally {
+				closeStream(stream);
+			}
 		}
 		return false;
 	}
@@ -133,11 +181,11 @@ public class DLTKContentTypeManager {
 		}
 	}
 
-	public static boolean isValidFileNameForContentType(
-			IDLTKLanguageToolkit toolkit, String name) {
-		IContentType[] derived = getDerivedContentTypes(toolkit
-				.getLanguageContentType());
-		// Look for derived for associated extensions.
+	/**
+	 * Look for derived for associated extensions
+	 */
+	private static boolean isValidFileNameForContentType(
+			IContentType[] derived, String name) {
 		for (int i = 0; i < derived.length; i++) {
 			IContentType type = derived[i];
 			if (type.isAssociatedWith(name)) {
@@ -149,125 +197,88 @@ public class DLTKContentTypeManager {
 
 	public static boolean isValidResourceForContentType(
 			IDLTKLanguageToolkit toolkit, IResource resource) {
-		// Custom filtering via language tookit
-		if (resource instanceof IFile) {
-			IStatus status = toolkit.validateSourceModule(resource);
-			if (status.getSeverity() != IStatus.OK) {
-				return false;
-			}
+		if (DEBUG) {
+			logMethodEntry(toolkit, resource);
 		}
-
-		String lastSegment = resource.getFullPath().lastSegment();
-		if (lastSegment != null
-				&& isValidFileNameForContentType(toolkit, lastSegment)) {
+		if (!(resource instanceof IFile)) {
+			return false;
+		}
+		// Custom filtering via language toolkit
+		IStatus status = toolkit.validateSourceModule(resource);
+		if (status.getSeverity() != IStatus.OK) {
+			return false;
+		}
+		// Acquire master content type
+		final IContentType masterType = getMasterContentType(toolkit
+				.getLanguageContentType());
+		if (masterType == null) {
+			return false;
+		}
+		// Acquire derived content types
+		final IContentType[] derived = getDerivedContentTypes(masterType);
+		if (isValidFileNameForContentType(derived, resource.getName())) {
 			return true;
 		}
-		Preferences preferences = DLTKCore.getPlugin().getPluginPreferences();
-		String cvalue = preferences
-				.getString(DLTKCore.CORE_FILES_WITH_EXTENSION_CONTENT_CHECKING);
-		boolean checkWithExtension = DLTKCore.ENABLED.equals(cvalue);
-		// Not DLTK file and not accessible or
-		// not in sync
-		if (!checkWithExtension) {
-			String extension = resource.getFullPath().getFileExtension();
-			if (extension == null) {
-				return false;
-			}
-		}
-		if (/* extension != null || */!resource.isAccessible()
+		// Check resources accessibility and synchronization
+		if (!resource.isAccessible()
 				|| !resource.isSynchronized(IResource.DEPTH_ZERO)) {
 			return false;
 		}
-
-		// I've disable file content checking for non local environments.
-		IProject project = resource.getProject();
-		if (project == null) { // This is workspace root.
+		// Delegate the decision if we should validate content to the language
+		// toolkit.
+		if (!toolkit.canValidateContent(resource)) {
 			return false;
 		}
-		IEnvironment environment = EnvironmentManager.getEnvironment(project);
-		if (environment == null) {
-			return false;
-		}
-		if (!EnvironmentManager.isLocal(environment)) {
-			String value = preferences
-					.getString(DLTKCore.CORE_NON_LOCAL_EMPTY_FILE_CONTENT_TYPE_CHECKING);
-			if (DLTKCore.DISABLED.equals(value)) {
-				return false;
-			}
-		}
+		return validateResourceContent(masterType, derived, (IFile) resource);
+	}
 
-		if (resource instanceof IFile) {
-			IFile file = (IFile) resource;
-			IContentType masterType = getMasterContentType(toolkit
-					.getLanguageContentType());
-			if (masterType == null) {
-				return false;
+	private static boolean validateResourceContent(
+			final IContentType masterType, final IContentType[] derived,
+			final IFile file) {
+		try {
+			if (file.exists()) {
+				final IContentDescription descr = file.getContentDescription();
+				if (descr != null) {
+					if (descr.getContentType().isKindOf(masterType)) {
+						return true;
+					}
+				}
 			}
+		} catch (CoreException e1) {
+			if (DLTKCore.DEBUG) {
+				e1.printStackTrace();
+			}
+		}
+		for (int i = 0; i < derived.length; i++) {
+			final IContentType type = derived[i];
+			InputStream contents = null;
 			try {
-				if (file.exists()) {
-					IContentDescription descr = file.getContentDescription();
-					if (descr != null) {
-						if (descr.getContentType().isKindOf(masterType)) {
-							return true;
-						}
+				contents = new BufferedInputStream(file.getContents(), 2048);
+				final IContentDescription description = type.getDescriptionFor(
+						contents, IContentDescription.ALL);
+				if (description != null) {
+					if (checkDescription(type, description)) {
+						return true;
 					}
 				}
-			} catch (CoreException e1) {
+			} catch (IOException e) {
 				if (DLTKCore.DEBUG) {
-					e1.printStackTrace();
+					e.printStackTrace();
 				}
-			}
-
-			IContentType[] derived = getDerivedContentTypes(toolkit
-					.getLanguageContentType());
-			String name = resource.getName();
-			// Look for derived for associated extensions.
-			for (int i = 0; i < derived.length; i++) {
-				IContentType type = derived[i];
-				if (type.isAssociatedWith(name)) {
-					return true;
+			} catch (CoreException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
 				}
-			}
-			// Check resource contents if name without extension
-			IPath path = file.getFullPath();
-			if (checkWithExtension || path.getFileExtension() == null) {
-				for (int i = 0; i < derived.length; i++) {
-					IContentType type = derived[i];
-					IContentDescription description;
-					InputStream contents = null;
-					try {
-						contents = new BufferedInputStream(file.getContents(),
-								2048);
-						description = type.getDescriptionFor(contents,
-								IContentDescription.ALL);
-						if (description != null) {
-							if (checkDescription(type, description)) {
-								return true;
-							}
-						}
-					} catch (IOException e) {
-						if (DLTKCore.DEBUG) {
-							e.printStackTrace();
-						}
-					} catch (CoreException e) {
-						if (DLTKCore.DEBUG) {
-							e.printStackTrace();
-						}
-					} finally {
-						closeStream(contents);
-					}
-				}
+			} finally {
+				closeStream(contents);
 			}
 		}
-
 		return false;
 	}
 
 	private static IContentType getMasterContentType(String languageContentType) {
-		IContentTypeManager manager = Platform.getContentTypeManager();
-		IContentType masterContentType = manager
-				.getContentType(languageContentType);
-		return masterContentType;
+		final IContentTypeManager manager = Platform.getContentTypeManager();
+		return manager.getContentType(languageContentType);
 	}
 
 	private static boolean checkDescription(IContentType type,
@@ -275,32 +286,32 @@ public class DLTKContentTypeManager {
 		Object object = description
 				.getProperty(ScriptContentDescriber.DLTK_VALID);
 		if (object != null && ScriptContentDescriber.TRUE.equals(object)) {
-			return description.getContentType().isKindOf(type);
+			final IContentType contentType = description.getContentType();
+			return contentType.isKindOf(type);
 		}
 		return false;
 	}
 
-	private static IContentType[] getDerivedContentTypes(String name) {
+	private static final Map derivedContentTypesCache = new HashMap();
+	private static final ILock derivedContentTypesCacheLock = Job
+			.getJobManager().newLock();
+
+	private static IContentType[] getDerivedContentTypes(IContentType masterType) {
 		derivedContentTypesCacheLock.acquire();
 		try {
-			if (!derivedContentTypesCache.containsKey(name)) {
+			if (!derivedContentTypesCache.containsKey(masterType)) {
 				IContentTypeManager manager = Platform.getContentTypeManager();
-				IContentType masterContentType = manager.getContentType(name);
-				if (masterContentType == null) {
-					derivedContentTypesCache.put(name, new IContentType[0]);
-				} else {
-					IContentType[] types = manager.getAllContentTypes();
-					Set derived = new HashSet();
-					for (int i = 0; i < types.length; i++) {
-						if (types[i].isKindOf(masterContentType)) {
-							derived.add(types[i]);
-						}
+				IContentType[] types = manager.getAllContentTypes();
+				Set derived = new HashSet();
+				for (int i = 0; i < types.length; i++) {
+					if (types[i].isKindOf(masterType)) {
+						derived.add(types[i]);
 					}
-					derivedContentTypesCache.put(name, derived
-							.toArray(new IContentType[derived.size()]));
 				}
+				derivedContentTypesCache.put(masterType, derived
+						.toArray(new IContentType[derived.size()]));
 			}
-			return (IContentType[]) derivedContentTypesCache.get(name);
+			return (IContentType[]) derivedContentTypesCache.get(masterType);
 		} finally {
 			derivedContentTypesCacheLock.release();
 		}

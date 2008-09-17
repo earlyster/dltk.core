@@ -1,15 +1,20 @@
 package org.eclipse.dltk.core;
 
+import java.io.File;
+
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 public abstract class AbstractLanguageToolkit implements IDLTKLanguageToolkit {
 	public AbstractLanguageToolkit() {
 	}
-	
+
 	public boolean languageSupportZIPBuildpath() {
 		return false;
 	}
@@ -18,10 +23,29 @@ public abstract class AbstractLanguageToolkit implements IDLTKLanguageToolkit {
 		return true;
 	}
 
-	public IType[] getParentTypes(IType type) {
-		return null;
-	}
 	public IStatus validateSourceModule(IResource resource) {
-		return Status.OK_STATUS; 
+		return Status.OK_STATUS;
 	}
+
+	public boolean canValidateContent(IResource resource) {
+		final IProject project = resource.getProject();
+		if (project == null) { // This is workspace root.
+			return false;
+		}
+		final IEnvironment environment = EnvironmentManager
+				.getEnvironment(project);
+		if (environment == null || !environment.isLocal()) {
+			return false;
+		}
+		return resource.getName().indexOf('.') == -1;
+	}
+
+	public boolean canValidateContent(File file) {
+		return file.getName().indexOf('.') == -1;
+	}
+
+	public boolean canValidateContent(IFileHandle file) {
+		return false;
+	}
+
 }

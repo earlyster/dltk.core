@@ -8,10 +8,13 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
+import java.io.File;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 
 public interface IDLTKLanguageToolkit {
 
@@ -22,6 +25,15 @@ public interface IDLTKLanguageToolkit {
 	String getLanguageContentType();
 
 	boolean validateSourcePackage(IPath path, IEnvironment environment);
+
+	/**
+	 * Preliminary resource validation. This method is here to give the language
+	 * toolkit the chances to skip this resource.
+	 * 
+	 * @param resource
+	 * @return {@link IStatus#OK} if this resource should be processed or other
+	 *         value to skip this resource.
+	 */
 	IStatus validateSourceModule(IResource resource);
 
 	boolean languageSupportZIPBuildpath();
@@ -29,4 +41,32 @@ public interface IDLTKLanguageToolkit {
 	String getNatureId();
 
 	String getLanguageName();
+
+	/**
+	 * Tests if is is allowed to determine ContentType from content for the
+	 * specified resource.
+	 * 
+	 * @param resource
+	 * @return
+	 */
+	boolean canValidateContent(IResource resource);
+
+	/**
+	 * Tests if it is allowed to determine ContentType from content for the
+	 * specified local file.
+	 * 
+	 * @param file
+	 * @return
+	 */
+	boolean canValidateContent(File file);
+
+	/**
+	 * Tests if it is allowed to determine ContentType from content for the
+	 * specified remote file.
+	 * 
+	 * @param file
+	 * @return
+	 */
+	boolean canValidateContent(IFileHandle file);
+
 }
