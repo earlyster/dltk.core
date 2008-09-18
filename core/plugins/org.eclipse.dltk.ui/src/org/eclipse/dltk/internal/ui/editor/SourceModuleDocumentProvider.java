@@ -1327,7 +1327,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 
 			// Delegate handling of non-primary SourceModules
 			ISourceModule cu = ((SourceModuleInfo) info).fCopy;
-			if (cu != null && !ScriptModelUtil.isPrimary(cu))
+			// condition should be the same as for becomeWorkingCopy() above
+			if (cu != null && !(cu.exists() && ScriptModelUtil.isPrimary(cu)))
 				return super.createSaveOperation(element, document, overwrite);
 
 			if (info.fTextFileBuffer.getDocument() != document) {
