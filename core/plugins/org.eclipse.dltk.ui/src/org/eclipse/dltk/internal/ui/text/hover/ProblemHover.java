@@ -11,7 +11,7 @@ package org.eclipse.dltk.internal.ui.text.hover;
 
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.core.CorrectionEngine;
-import org.eclipse.dltk.internal.ui.text.HTMLPrinter;
+import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
@@ -28,7 +28,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 	}
 
 	protected String postUpdateMessage(String message) {
-		return super.postUpdateMessage(HTMLPrinter.replace(message, '\n',
+		return super.postUpdateMessage(TextUtils.replace(message, '\n',
 				"<br/>\n"));
 	}
 

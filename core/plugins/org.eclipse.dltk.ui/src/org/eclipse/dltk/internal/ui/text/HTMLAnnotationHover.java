@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
+import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.text.source.DefaultAnnotationHover;
 
 
@@ -30,7 +31,7 @@ public class HTMLAnnotationHover extends DefaultAnnotationHover {
 	protected String formatSingleMessage(String message) {
 		StringBuffer buffer= new StringBuffer();
 		HTMLPrinter.addPageProlog(buffer);
-		HTMLPrinter.addParagraph(buffer, HTMLPrinter.convertToHTMLContent(message));
+		HTMLPrinter.addParagraph(buffer, TextUtils.escapeHTML(message));
 		HTMLPrinter.addPageEpilog(buffer);
 		return buffer.toString();
 	}
@@ -41,12 +42,12 @@ public class HTMLAnnotationHover extends DefaultAnnotationHover {
 	protected String formatMultipleMessages(List messages) {
 		StringBuffer buffer= new StringBuffer();
 		HTMLPrinter.addPageProlog(buffer);
-		HTMLPrinter.addParagraph(buffer, HTMLPrinter.convertToHTMLContent(DLTKUIMessages.ScriptAnnotationHover_multipleMarkersAtThisLine));
+		HTMLPrinter.addParagraph(buffer, TextUtils.escapeHTML(DLTKUIMessages.ScriptAnnotationHover_multipleMarkersAtThisLine));
 
 		HTMLPrinter.startBulletList(buffer);
 		Iterator e= messages.iterator();
 		while (e.hasNext())
-			HTMLPrinter.addBullet(buffer, HTMLPrinter.convertToHTMLContent((String) e.next()));
+			HTMLPrinter.addBullet(buffer, TextUtils.escapeHTML((String) e.next()));
 		HTMLPrinter.endBulletList(buffer);
 
 		HTMLPrinter.addPageEpilog(buffer);

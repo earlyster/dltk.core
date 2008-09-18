@@ -13,67 +13,15 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTError;
+import org.eclipse.dltk.ui.text.HTMLUtils;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Display;
 
 /**
  * Provides a set of convenience methods for creating HTML pages.
  */
 public class HTMLPrinter {
 
-	private static RGB BG_COLOR_RGB = null;
-
-	static {
-		final Display display = Display.getDefault();
-		if (display != null && !display.isDisposed()) {
-			try {
-				display.asyncExec(new Runnable() {
-					/*
-					 * @see java.lang.Runnable#run()
-					 */
-					public void run() {
-						BG_COLOR_RGB = display.getSystemColor(
-								SWT.COLOR_INFO_BACKGROUND).getRGB();
-					}
-				});
-			} catch (SWTError err) {
-				// see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=45294
-				if (err.code != SWT.ERROR_DEVICE_DISPOSED)
-					throw err;
-			}
-		}
-	}
-
 	private HTMLPrinter() {
-	}
-
-	public static String replace(String text, char c, String s) {
-
-		int previous = 0;
-		int current = text.indexOf(c, previous);
-
-		if (current == -1)
-			return text;
-
-		StringBuffer buffer = new StringBuffer();
-		while (current > -1) {
-			buffer.append(text.substring(previous, current));
-			buffer.append(s);
-			previous = current + 1;
-			current = text.indexOf(c, previous);
-		}
-		buffer.append(text.substring(previous));
-
-		return buffer.toString();
-	}
-
-	public static String convertToHTMLContent(String content) {
-		content = replace(content, '&', "&amp;"); //$NON-NLS-1$
-		content = replace(content, '"', "&quot;"); //$NON-NLS-1$
-		content = replace(content, '<', "&lt;"); //$NON-NLS-1$
-		return replace(content, '>', "&gt;"); //$NON-NLS-1$
 	}
 
 	public static String read(Reader rd) {
@@ -198,25 +146,18 @@ public class HTMLPrinter {
 	}
 
 	public static void insertPageProlog(StringBuffer buffer, int position) {
-		insertPageProlog(buffer, position, getBgColor());
+		insertPageProlog(buffer, position, HTMLUtils.getBgColor());
 	}
 
 	public static void insertPageProlog(StringBuffer buffer, int position,
 			URL styleSheetURL) {
-		insertPageProlog(buffer, position, getBgColor(), styleSheetURL);
+		insertPageProlog(buffer, position, HTMLUtils.getBgColor(),
+				styleSheetURL);
 	}
 
 	public static void insertPageProlog(StringBuffer buffer, int position,
 			String styleSheet) {
-		insertPageProlog(buffer, position, getBgColor(), styleSheet);
-	}
-
-	private static RGB getBgColor() {
-		if (BG_COLOR_RGB != null)
-			return BG_COLOR_RGB;
-		return new RGB(255, 255, 225); // RGB value of info bg color on
-										// WindowsXP
-
+		insertPageProlog(buffer, position, HTMLUtils.getBgColor(), styleSheet);
 	}
 
 	public static void addPageProlog(StringBuffer buffer) {
