@@ -29,16 +29,19 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
+import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
+import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.validators.core.IBuildParticipant;
-import org.eclipse.dltk.validators.core.IBuildParticipantExtension2;
 import org.eclipse.dltk.validators.core.IBuildParticipantExtension;
+import org.eclipse.dltk.validators.core.IBuildParticipantExtension2;
 import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidator;
 import org.eclipse.dltk.validators.core.NullValidatorOutput;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.osgi.util.NLS;
 
-public class ValidatorBuilder implements IScriptBuilder {
+public class ValidatorBuilder implements IScriptBuilder,
+		IScriptBuilderExtension {
 	private static final boolean DEBUG = false;
 
 	private static final int WORK_BUILD = 100;
@@ -77,6 +80,34 @@ public class ValidatorBuilder implements IScriptBuilder {
 		}
 	}
 
+	public void buildExternalElements(ScriptProject project,
+			List externalElements, IProgressMonitor monitor, int buildType) {
+		beginBuild(buildType);
+		if (participants != null) {
+			for (int i = 0; i < participants.length; ++i) {
+				final IBuildParticipant participant = participants[i];
+				if (participant instanceof IBuildParticipantExtension2) {
+					final IBuildParticipantExtension2 ext = (IBuildParticipantExtension2) participant;
+					for (Iterator j = externalElements.iterator(); j.hasNext();) {
+						if (monitor.isCanceled())
+							return;
+						final ISourceModule module = (ISourceModule) j.next();
+						final ModuleDeclaration moduleDeclaration = SourceParserUtil
+								.getModuleDeclaration(module);
+						if (moduleDeclaration != null) {
+							try {
+								ext.buildExternalModule(module,
+										moduleDeclaration);
+							} catch (CoreException e) {
+								ValidatorsCore.log(e.getStatus());
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	private void buildModules(IScriptProject project, List elements,
 			int buildType, IProgressMonitor monitor) {
 		final long startTime = DEBUG ? System.currentTimeMillis() : 0;
@@ -96,19 +127,9 @@ public class ValidatorBuilder implements IScriptBuilder {
 
 	private void buildNatureModules(IScriptProject project, int buildType,
 			final String nature, final List modules, IProgressMonitor monitor) {
-		boolean secondPass = false;
-		if (validators != null) {
-			for (int j = 0; j < validators.length; ++j) {
-				final IBuildParticipant participant = validators[j];
-				if (participant instanceof IBuildParticipantExtension) {
-					((IBuildParticipantExtension) participant)
-							.beginBuild(buildType);
-					secondPass = true;
-				}
-			}
-		}
-		int counter = 0;
+		final boolean secondPass = beginBuild(buildType);
 		final List reporters = secondPass ? new ArrayList() : null;
+		int counter = 0;
 		for (Iterator j = modules.iterator(); j.hasNext();) {
 			if (monitor.isCanceled())
 				return;
@@ -132,9 +153,9 @@ public class ValidatorBuilder implements IScriptBuilder {
 			++counter;
 		}
 		if (reporters != null) {
-			if (validators != null) {
-				for (int j = 0; j < validators.length; ++j) {
-					final IBuildParticipant participant = validators[j];
+			if (participants != null) {
+				for (int j = 0; j < participants.length; ++j) {
+					final IBuildParticipant participant = participants[j];
 					if (participant instanceof IBuildParticipantExtension) {
 						((IBuildParticipantExtension) participant).endBuild();
 					}
@@ -146,6 +167,35 @@ public class ValidatorBuilder implements IScriptBuilder {
 				reporter.flush();
 			}
 		}
+	}
+
+	/**
+	 * Calls {@link IBuildParticipantExtension#beginBuild(int)} for all
+	 * {@link #participants}. Returns <code>true</code> if it was called for
+	 * some of them so it is required to call
+	 * {@link IBuildParticipantExtension#endBuild()}. If called multiple times
+	 * only first time actual work are performed, so subsequent calls returns
+	 * result of the first call.
+	 * 
+	 * @param buildType
+	 * @return
+	 */
+	private boolean beginBuild(int buildType) {
+		if (!beginBuildDone) {
+			endBuildNeeded = false;
+			if (participants != null) {
+				for (int j = 0; j < participants.length; ++j) {
+					final IBuildParticipant participant = participants[j];
+					if (participant instanceof IBuildParticipantExtension) {
+						((IBuildParticipantExtension) participant)
+								.beginBuild(buildType);
+						endBuildNeeded = true;
+					}
+				}
+			}
+			beginBuildDone = true;
+		}
+		return endBuildNeeded;
 	}
 
 	private void buildModule(final ISourceModule module,
@@ -162,9 +212,9 @@ public class ValidatorBuilder implements IScriptBuilder {
 						null, ProblemSeverities.Error, 0, 0, 0));
 			}
 		}
-		if (validators != null) {
-			for (int k = 0; k < validators.length; ++k) {
-				final IBuildParticipant participant = validators[k];
+		if (participants != null) {
+			for (int k = 0; k < participants.length; ++k) {
+				final IBuildParticipant participant = participants[k];
 				try {
 					participant.build(module, moduleDeclaration, reporter);
 				} catch (CoreException e) {
@@ -185,56 +235,78 @@ public class ValidatorBuilder implements IScriptBuilder {
 				new IResource[] { project.getProject() }, monitor);
 	}
 
-	public int estimateElementsToBuild(IScriptProject project, List elements) {
-		return elements.size();
-	}
-
 	public DependencyResponse getDependencies(IScriptProject project,
 			int buildType, Set localElements, Set externalElements,
 			Set oldExternalFolders, Set externalFolders) {
-		if (validators == null) {
+		if (participants == null) {
 			return null;
 		}
-		Set dependencies = null;
-		for (int i = 0; i < validators.length; ++i) {
-			final IBuildParticipant participant = validators[i];
+		Set localDependencies = null;
+		Set externalDependencies = null;
+		boolean fullLocal = false;
+		for (int i = 0; i < participants.length; ++i) {
+			final IBuildParticipant participant = participants[i];
 			if (participant instanceof IBuildParticipantExtension2) {
 				final DependencyResponse response = ((IBuildParticipantExtension2) participant)
 						.getDependencies(buildType, localElements,
 								externalElements, oldExternalFolders,
 								externalFolders);
 				if (response != null) {
-					if (response.isFullBuild()) {
+					if (response.isFullExternalBuild()) {
 						return response;
 					} else {
-						if (dependencies == null) {
-							dependencies = new HashSet();
+						if (response.isFullLocalBuild()) {
+							fullLocal = true;
+						} else if (!response.getLocalDependencies().isEmpty()) {
+							if (localDependencies == null) {
+								localDependencies = new HashSet();
+							}
+							localDependencies.addAll(response
+									.getLocalDependencies());
 						}
-						dependencies.addAll(response.getDependencies());
+						if (!response.getExternalDependencies().isEmpty()) {
+							if (externalDependencies == null) {
+								externalDependencies = new HashSet();
+							}
+							externalDependencies.addAll(response
+									.getExternalDependencies());
+						}
 					}
 				}
 			}
 		}
-		if (dependencies != null) {
-			return DependencyResponse.create(dependencies);
+		if (externalDependencies == null) {
+			if (fullLocal) {
+				return DependencyResponse.FULL_LOCAL_BUILD;
+			} else {
+				return DependencyResponse.createLocal(localDependencies);
+			}
 		} else {
-			return null;
+			return DependencyResponse.create(fullLocal, localDependencies,
+					externalDependencies);
 		}
 	}
 
-	private IBuildParticipant[] validators = null;
+	private boolean beginBuildDone = false;
+	private boolean endBuildNeeded = false;
+	private IBuildParticipant[] participants = null;
 	private IDLTKLanguageToolkit toolkit = null;
 
 	public void initialize(IScriptProject project) {
 		toolkit = project.getLanguageToolkit();
 		if (toolkit != null) {
-			validators = ValidatorRuntime.getBuildParticipants(project, toolkit
-					.getNatureId(), ValidatorRuntime.ALL);
+			participants = ValidatorRuntime.getBuildParticipants(project,
+					toolkit.getNatureId(), ValidatorRuntime.ALL);
 		}
+		beginBuildDone = false;
+		endBuildNeeded = false;
 	}
 
 	public void reset(IScriptProject project) {
-		validators = null;
+		participants = null;
 		toolkit = null;
+		beginBuildDone = false;
+		endBuildNeeded = false;
 	}
+
 }
