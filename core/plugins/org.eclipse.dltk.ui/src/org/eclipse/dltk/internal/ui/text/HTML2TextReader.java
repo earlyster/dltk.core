@@ -123,8 +123,6 @@ public class HTML2TextReader extends SubstitutionTextReader {
 
 		if (c == '<')
 			return processHTMLTag();
-		else if (c == -1)
-			return null;
 		else if (fIgnore)
 			return EMPTY_STRING;
 		else if (c == '&')
