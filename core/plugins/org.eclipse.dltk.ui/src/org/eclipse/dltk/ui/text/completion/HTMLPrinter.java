@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 import org.eclipse.dltk.ui.text.HTMLUtils;
+import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
@@ -23,6 +24,15 @@ import org.eclipse.swt.graphics.RGB;
 public class HTMLPrinter {
 
 	private HTMLPrinter() {
+	}
+
+	/**
+	 * @param content
+	 * @return
+	 * @deprecated
+	 */
+	public static String convertToHTMLContent(String content) {
+		return TextUtils.escapeHTML(content);
 	}
 
 	public static String read(Reader rd) {
