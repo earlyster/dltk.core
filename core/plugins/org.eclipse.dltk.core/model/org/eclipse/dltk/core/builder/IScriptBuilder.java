@@ -36,13 +36,6 @@ public interface IScriptBuilder {
 	void initialize(IScriptProject project);
 
 	/**
-	 * Estimate number of elements will be build from given set.
-	 * 
-	 * @return
-	 */
-	int estimateElementsToBuild(IScriptProject project, List elements);
-
-	/**
 	 * Called for each resource required to build. Only resources with specified
 	 * project nature are here.
 	 * 
@@ -61,24 +54,62 @@ public interface IScriptBuilder {
 			IProgressMonitor monitor, int status);
 
 	public static class DependencyResponse {
-		public boolean isFullBuild() {
+		public boolean isFullLocalBuild() {
 			return false;
 		}
 
-		public Set getDependencies() {
+		public boolean isFullExternalBuild() {
+			return false;
+		}
+
+		public Set getLocalDependencies() {
 			return Collections.EMPTY_SET;
 		}
 
-		public static final DependencyResponse FULL_BUILD = new DependencyResponse() {
-			public boolean isFullBuild() {
+		public Set getExternalDependencies() {
+			return Collections.EMPTY_SET;
+		}
+
+		public static final DependencyResponse FULL_LOCAL_BUILD = new DependencyResponse() {
+			public boolean isFullLocalBuild() {
 				return true;
 			}
 		};
 
-		public static DependencyResponse create(final Set dependencies) {
+		public static final DependencyResponse FULL_EXTERNAL_BUILD = new DependencyResponse() {
+			public boolean isFullLocalBuild() {
+				return true;
+			}
+
+			public boolean isFullExternalBuild() {
+				return true;
+			}
+		};
+
+		public static DependencyResponse createLocal(final Set localDependencies) {
 			return new DependencyResponse() {
-				public Set getDependencies() {
-					return dependencies;
+				public Set getLocalDependencies() {
+					return localDependencies;
+				}
+			};
+		}
+
+		public static DependencyResponse create(final boolean fullLocal,
+				final Set localDependencies, final Set externalDependencies) {
+			return new DependencyResponse() {
+
+				public boolean isFullLocalBuild() {
+					return fullLocal;
+				}
+
+				public Set getLocalDependencies() {
+					return !fullLocal && localDependencies != null ? localDependencies
+							: Collections.EMPTY_SET;
+				}
+
+				public Set getExternalDependencies() {
+					return externalDependencies != null ? externalDependencies
+							: Collections.EMPTY_SET;
 				}
 			};
 		}
@@ -105,8 +136,9 @@ public interface IScriptBuilder {
 	 * @param externalFolders
 	 *            new external fragments
 	 * @return <code>null</code> if there are no dependencies found,
-	 *         {@link DependencyResponse#FULL_BUILD} to promote to the full
-	 *         build, or the result of {@link DependencyResponse#create(Set)}
+	 *         {@link DependencyResponse#FULL_LOCAL_BUILD} to promote to the
+	 *         full build, or the result of
+	 *         {@link DependencyResponse#create(Set)}
 	 */
 	DependencyResponse getDependencies(IScriptProject project, int buildType,
 			Set localElements, Set externalElements, Set oldExternalFolders,

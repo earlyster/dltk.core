@@ -14,6 +14,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -45,6 +46,7 @@ import org.eclipse.dltk.core.IModelMarker;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
+import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
@@ -372,7 +374,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				return;
 			}
 			Set externalElements = getExternalElementsFrom(scriptProject,
-					monitor, WORK_EXTERNAL);
+					monitor, WORK_EXTERNAL, true);
 			Set externalFolders = new HashSet(
 					this.lastState.externalFolderLocations);
 			if (monitor.isCanceled()) {
@@ -455,7 +457,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	}
 
 	private Set getExternalElementsFrom(ScriptProject prj,
-			final IProgressMonitor monitor, int tiks) throws ModelException {
+			final IProgressMonitor monitor, int tiks, boolean updateState)
+			throws ModelException {
 		final String name = Messages.ScriptBuilder_scanningExternalResourcesFor;
 		monitor.subTask(name);
 		final SubProgressMonitor mon = new SubProgressMonitor(monitor, tiks);
@@ -470,7 +473,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (fragment instanceof ExternalProjectFragment
 					|| fragment instanceof BuiltinProjectFragment) {
 				final IPath path = fragment.getPath();
-				if (!this.lastState.externalFolderLocations.contains(path)) {
+				if (!updateState
+						|| !this.lastState.externalFolderLocations
+								.contains(path)) {
 					extFragments.add(fragment);
 				} else {
 					fragmentPaths.add(path);
@@ -485,13 +490,16 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			// New project fragment, we need to obtain all modules
 			// from this fragment.
 			fragment.accept(visitor);
-			fragmentPaths.add(fragment.getPath());
+			if (updateState) {
+				fragmentPaths.add(fragment.getPath());
+			}
 			mon.worked(1);
 		}
 		mon.done();
-
-		this.lastState.externalFolderLocations.clear();
-		this.lastState.externalFolderLocations.addAll(fragmentPaths);
+		if (updateState) {
+			this.lastState.externalFolderLocations.clear();
+			this.lastState.externalFolderLocations.addAll(fragmentPaths);
+		}
 
 		return visitor.elements;
 	}
@@ -523,7 +531,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				return;
 			}
 			Set externalElements = getExternalElementsFrom(scriptProject,
-					monitor, WORK_EXTERNAL);
+					monitor, WORK_EXTERNAL, true);
 			// New external folders set
 			Set externalFolders = new HashSet(lastState.externalFolderLocations);
 			if (monitor.isCanceled()) {
@@ -674,9 +682,12 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 		final int[] workEstimations = new int[builders.length];
 		final List[] builderToElements = new List[builders.length];
+		final List[] builderExternalElements = new List[builders.length];
+		final int[] buildTypes = new int[builders.length];
+		Arrays.fill(buildTypes, buildType);
 		estimateBuild(localElements, externalElements, externalFoldersBefore,
-				externalFolders, buildType, builders, workEstimations,
-				builderToElements);
+				externalFolders, builders, workEstimations, builderToElements,
+				builderExternalElements, buildTypes);
 
 		int total = 0;
 		for (int k = 0; k < builders.length; k++) {
@@ -685,15 +696,25 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 		for (int k = 0; k < builders.length; k++) {
 			final IScriptBuilder builder = builders[k];
-
+			int builderWork = workEstimations[k] * ticks / total;
+			final List buildExternalElements = builderExternalElements[k];
+			if (buildExternalElements != null
+					&& buildExternalElements.size() > 0
+					&& builder instanceof IScriptBuilderExtension) {
+				final int step = buildExternalElements.size() * ticks / total;
+				builderWork -= step;
+				((IScriptBuilderExtension) builder).buildExternalElements(
+						scriptProject, buildExternalElements,
+						new SubProgressMonitor(monitor, step), buildTypes[k]);
+			}
 			final List buildElementsList = builderToElements[k];
-			final int builderWork = ticks * workEstimations[k] / total;
 			if (buildElementsList.size() > 0) {
-				IProgressMonitor sub = new SubProgressMonitor(monitor,
-						builderWork);
+				final int step = buildElementsList.size() * ticks / total;
+				builderWork -= step;
 				builder.buildModelElements(scriptProject, buildElementsList,
-						sub, buildType);
-			} else {
+						new SubProgressMonitor(monitor, step), buildTypes[k]);
+			}
+			if (builderWork > 0) {
 				monitor.worked(builderWork);
 			}
 		}
@@ -701,8 +722,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	}
 
 	/**
-	 * Processes input data and fills the <code>workEstimations</code> and
-	 * <code>builderToElements</code> arrays.
+	 * Processes input data and fills the <code>workEstimations</code>,
+	 * <code>builderToElements</code> and <code>builderExternalElements</code>
+	 * arrays.
 	 * 
 	 * @param localElements
 	 *            changed source modules
@@ -712,63 +734,105 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	 *            old external fragments
 	 * @param externalFolders
 	 *            new external fragments
-	 * @param buildType
-	 *            build type {@link IScriptBuilder#FULL_BUILD} or
-	 *            {@link IScriptBuilder#INCREMENTAL_BUILD}
 	 * @param builders
 	 *            array of builders
 	 * @param workEstimations
 	 *            arrays of work estimations
 	 * @param builderToElements
 	 *            arrays of elements to be build by each builder
+	 * @param builderExternalElements
+	 *            arrays of external elements to be build by each builder
+	 * @param buildTypes
+	 *            resulting build types for each builder
 	 * @throws CoreException
 	 */
 	private void estimateBuild(List localElements, Set externalElements,
-			Set externalFoldersBefore, Set externalFolders, int buildType,
+			Set externalFoldersBefore, Set externalFolders,
 			IScriptBuilder[] builders, final int[] workEstimations,
-			final List[] builderToElements) throws CoreException {
+			final List[] builderToElements, List[] builderExternalElements,
+			int[] buildTypes) throws CoreException {
 		final HashSet elementsAsSet = new HashSet(localElements);
 		List projectElements = null;
+		List projectExternalElements = null;
 		for (int k = 0; k < builders.length; k++) {
 			final IScriptBuilder builder = builders[k];
 			final IScriptBuilder.DependencyResponse response = builder
-					.getDependencies(this.scriptProject, buildType,
+					.getDependencies(this.scriptProject, buildTypes[k],
 							elementsAsSet, externalElements,
 							externalFoldersBefore, externalFolders);
 			final List buildElementsList;
+			final List buildExternalElements;
 			if (response == null) {
 				buildElementsList = localElements;
-			} else if (response.isFullBuild()) {
-				if (buildType == IScriptBuilder.FULL_BUILD) {
-					buildElementsList = localElements;
-				} else {
-					if (projectElements == null) {
-						projectElements = new ArrayList();
-						final IProgressMonitor nullMon = new NullProgressMonitor();
-						final Set projectResources = getResourcesFrom(
-								currentProject, nullMon, 1);
-						locateSourceModules(nullMon, 1, projectResources,
-								projectElements, new ArrayList());
-					}
-					buildElementsList = projectElements;
-				}
+				buildExternalElements = null;
 			} else {
-				final Set dependencies = response.getDependencies();
-				if (dependencies != null && !dependencies.isEmpty()
-						&& !elementsAsSet.containsAll(dependencies)) {
-					final Set e = new HashSet(elementsAsSet.size()
-							+ dependencies.size());
-					e.addAll(elementsAsSet);
-					e.addAll(dependencies);
-					buildElementsList = new ArrayList(e);
+				if (response.isFullLocalBuild()) {
+					if (buildTypes[k] == IScriptBuilder.FULL_BUILD) {
+						buildElementsList = localElements;
+					} else {
+						if (projectElements == null) {
+							projectElements = collectLocalElements();
+						}
+						buildElementsList = projectElements;
+					}
 				} else {
-					buildElementsList = localElements;
+					final Set dependencies = response.getLocalDependencies();
+					if (dependencies != null && !dependencies.isEmpty()
+							&& !elementsAsSet.containsAll(dependencies)) {
+						final Set e = new HashSet(elementsAsSet.size()
+								+ dependencies.size());
+						e.addAll(elementsAsSet);
+						e.addAll(dependencies);
+						buildElementsList = new ArrayList(e);
+					} else {
+						buildElementsList = localElements;
+					}
+				}
+				if (response.isFullExternalBuild()) {
+					if (buildTypes[k] == IScriptBuilder.FULL_BUILD) {
+						buildExternalElements = new ArrayList(externalElements);
+					} else {
+						if (projectExternalElements == null) {
+							projectExternalElements = new ArrayList(
+									getExternalElementsFrom(scriptProject,
+											new NullProgressMonitor(), 1, false));
+						}
+						buildExternalElements = projectExternalElements;
+					}
+				} else {
+					final Set dependencies = response.getExternalDependencies();
+					if (dependencies != null && !dependencies.isEmpty()
+							&& !externalElements.containsAll(dependencies)) {
+						final Set e = new HashSet(externalElements.size()
+								+ dependencies.size());
+						e.addAll(externalElements);
+						e.addAll(dependencies);
+						buildExternalElements = new ArrayList(e);
+					} else {
+						buildExternalElements = null;
+					}
+				}
+				if (response.isFullLocalBuild()
+						|| response.isFullExternalBuild()) {
+					buildTypes[k] = IScriptBuilder.FULL_BUILD;
 				}
 			}
 			builderToElements[k] = buildElementsList;
-			workEstimations[k] = Math.max(builder.estimateElementsToBuild(
-					scriptProject, buildElementsList), 1);
+			builderExternalElements[k] = buildExternalElements;
+			int work = buildElementsList.size();
+			if (buildExternalElements != null) {
+				work += buildExternalElements.size();
+			}
+			workEstimations[k] = Math.max(work, 1);
 		}
+	}
+
+	private List collectLocalElements() throws CoreException {
+		final IProgressMonitor nullMon = new NullProgressMonitor();
+		final Set resources = getResourcesFrom(currentProject, nullMon, 1);
+		final List elements = new ArrayList();
+		locateSourceModules(nullMon, 1, resources, elements, new ArrayList());
+		return elements;
 	}
 
 	public static void removeProblemsAndTasksFor(IResource resource) {
