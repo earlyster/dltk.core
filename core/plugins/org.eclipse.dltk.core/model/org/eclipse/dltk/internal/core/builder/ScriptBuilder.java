@@ -739,15 +739,19 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (response == null) {
 				buildElementsList = localElements;
 			} else if (response.isFullBuild()) {
-				if (projectElements == null) {
-					projectElements = new ArrayList();
-					final IProgressMonitor nullMon = new NullProgressMonitor();
-					final Set projectResources = getResourcesFrom(
-							currentProject, nullMon, 1);
-					locateSourceModules(nullMon, 1, projectResources,
-							projectElements, new ArrayList());
+				if (buildType == IScriptBuilder.FULL_BUILD) {
+					buildElementsList = localElements;
+				} else {
+					if (projectElements == null) {
+						projectElements = new ArrayList();
+						final IProgressMonitor nullMon = new NullProgressMonitor();
+						final Set projectResources = getResourcesFrom(
+								currentProject, nullMon, 1);
+						locateSourceModules(nullMon, 1, projectResources,
+								projectElements, new ArrayList());
+					}
+					buildElementsList = projectElements;
 				}
-				buildElementsList = projectElements;
 			} else {
 				final Set dependencies = response.getDependencies();
 				if (dependencies != null && !dependencies.isEmpty()
