@@ -25,6 +25,7 @@ import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -34,46 +35,51 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
-
 /**
  * 
  */
-public class ConfigureBuildPathAction extends Action implements ISelectionChangedListener {
+public class ConfigureBuildPathAction extends Action implements
+		ISelectionChangedListener {
 
 	private final IWorkbenchSite fSite;
 	private IProject fProject;
 
 	public ConfigureBuildPathAction(IWorkbenchSite site) {
-		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label, DLTKPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH);
+		super(
+				NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label,
+				DLTKPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_tooltip);
-		setDisabledImageDescriptor(DLTKPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH);		
-		fSite= site;
+		setDisabledImageDescriptor(DLTKPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH);
+		fSite = site;
 	}
-	
+
 	private Shell getShell() {
 		return fSite.getShell();
 	}
-	
+
 	public void run() {
 		if (fProject != null) {
-			PreferenceDialog dialog = PreferencesUtil.createPropertyDialogOn(getShell(), fProject, null, null, null);			
-			List elements = dialog.getPreferenceManager().getElements(0);
-			String id = null;
-			if(elements != null ) {
-				Iterator i = elements.iterator();
-				while(i.hasNext()) {
-					IPreferenceNode node =  (IPreferenceNode)i.next();
-					if( node.getId().endsWith("BuildpathProperties")) { //$NON-NLS-1$
-						id = node.getId();
-						break;
-					}
+			// TODO retrieve the page id via project nature
+			PreferenceDialog dialog = PreferencesUtil.createPropertyDialogOn(
+					getShell(), fProject, null, null, null);
+			// search for the language specific page
+			final List elements = dialog.getPreferenceManager().getElements(
+					PreferenceManager.PRE_ORDER);
+			for (Iterator i = elements.iterator(); i.hasNext();) {
+				final IPreferenceNode node = (IPreferenceNode) i.next();
+				final String nodeId = node.getId();
+				if (nodeId.endsWith("BuildpathProperties")) { //$NON-NLS-1$
+					// recreate dialog and select page found
+					dialog.close();
+					dialog = PreferencesUtil.createPropertyDialogOn(getShell(),
+							fProject, nodeId, null, null);
+					break;
 				}
 			}
-			PreferencesUtil.createPropertyDialogOn(getShell(), fProject, id, null, null).open();
+			dialog.open();
 		}
 	}
-	
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -89,30 +95,31 @@ public class ConfigureBuildPathAction extends Action implements ISelectionChange
 	private boolean canHandle(IStructuredSelection elements) {
 		if (elements.size() != 1)
 			return false;
-	
-		Object firstElement= elements.getFirstElement();
-		fProject= getProjectFromSelectedElement(firstElement);
+
+		Object firstElement = elements.getFirstElement();
+		fProject = getProjectFromSelectedElement(firstElement);
 		return fProject != null;
 	}
 
-
 	private IProject getProjectFromSelectedElement(Object firstElement) {
 		if (firstElement instanceof IModelElement) {
-			IModelElement element= (IModelElement) firstElement;
-			IProjectFragment root= ScriptModelUtil.getProjectFragment(element);
-						
+			IModelElement element = (IModelElement) firstElement;
+			IProjectFragment root = ScriptModelUtil.getProjectFragment(element);
+
 			if (root != null && root != element && root.isArchive()) {
 				return null;
 			}
-			IScriptProject project= element.getScriptProject();
+			IScriptProject project = element.getScriptProject();
 			if (project != null) {
 				return project.getProject();
 			}
 			return null;
 		} else if (firstElement instanceof BuildPathContainer) {
-			return ((BuildPathContainer) firstElement).getScriptProject().getProject();
+			return ((BuildPathContainer) firstElement).getScriptProject()
+					.getProject();
 		} else if (firstElement instanceof IAdaptable) {
-			IResource res= (IResource) ((IAdaptable) firstElement).getAdapter(IResource.class);
+			IResource res = (IResource) ((IAdaptable) firstElement)
+					.getAdapter(IResource.class);
 			if (res != null) {
 				return res.getProject();
 			}
