@@ -33,6 +33,9 @@ import org.eclipse.dltk.testing.MessageIds;
  * different messages.
  */
 public class SocketTestRunnerClient implements ITestRunnerClient {
+
+	private static boolean DEBUG = false;
+
 	public abstract class ListenerSafeRunnable implements ISafeRunnable {
 		public void handleException(Throwable exception) {
 			DLTKTestingPlugin.log(exception);
@@ -360,6 +363,9 @@ public class SocketTestRunnerClient implements ITestRunnerClient {
 	}
 
 	private void receiveMessage(String message) {
+		if (DEBUG) {
+			System.out.println(message);
+		}
 		fCurrentState = fCurrentState.readMessage(message);
 	}
 
@@ -426,7 +432,13 @@ public class SocketTestRunnerClient implements ITestRunnerClient {
 		}
 		int i = arg.indexOf(',');
 		result[0] = arg.substring(0, i);
-		result[1] = arg.substring(i + 1, arg.length());
+		if (arg.indexOf(',', i + 1) >= 0 || arg.indexOf('\\', i + 1) >= 0) {
+			StringBuffer sb = new StringBuffer(arg.length() - i - 1);
+			TestRunSession.scanTestName(arg, i + 1, sb, false);
+			result[1] = sb.toString().trim();
+		} else {
+			result[1] = arg.substring(i + 1, arg.length());
+		}
 		return result;
 	}
 
