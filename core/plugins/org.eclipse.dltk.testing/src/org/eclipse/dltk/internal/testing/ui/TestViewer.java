@@ -178,6 +178,7 @@ public class TestViewer {
 		fTreeLabelProvider = new TestSessionLabelProvider(fTestRunnerPart,
 				TestRunnerViewPart.LAYOUT_HIERARCHICAL);
 		fTreeViewer.setLabelProvider(fTreeLabelProvider);
+		fTreeViewer.setComparator(new TestTreeComparator());
 
 		fTableViewer = new TableViewer(fViewerbook, SWT.V_SCROLL | SWT.H_SCROLL
 				| SWT.SINGLE);
