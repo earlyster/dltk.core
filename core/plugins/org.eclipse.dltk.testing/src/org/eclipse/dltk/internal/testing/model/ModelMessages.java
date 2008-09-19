@@ -14,7 +14,7 @@ package org.eclipse.dltk.internal.testing.model;
 import org.eclipse.osgi.util.NLS;
 
 public class ModelMessages extends NLS {
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.junit.model.ModelMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.dltk.internal.testing.model.ModelMessages"; //$NON-NLS-1$
 	public static String JUnitModel_could_not_read;
 	public static String JUnitModel_could_not_write;
 	static {
