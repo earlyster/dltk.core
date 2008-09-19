@@ -168,44 +168,53 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			System.out.println("build finished"); //$NON-NLS-1$
 	}
 
+	private static void log(String message) {
+		System.out.println(message);
+	}
+
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
+		this.currentProject = getProject();
+		if (currentProject == null || !currentProject.isAccessible())
+			return new IProject[0];
+		if (!DLTKLanguageManager.hasScriptNature(this.currentProject)) {
+			return null;
+		}
+		if (DEBUG)
+			log("\nStarting build of " + this.currentProject.getName() //$NON-NLS-1$
+					+ " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
+		this.scriptProject = (ScriptProject) DLTKCore.create(currentProject);
 		lastBuildResources = 0;
 		lastBuildSourceFiles = 0;
 		final long start = TRACE ? System.currentTimeMillis() : 0;
 		if (monitor == null) {
 			monitor = new NullProgressMonitor();
 		}
-		this.currentProject = getProject();
-
-		if (!DLTKLanguageManager.hasScriptNature(this.currentProject)) {
-			return null;
-		}
-		this.scriptProject = (ScriptProject) DLTKCore.create(currentProject);
-
-		if (currentProject == null || !currentProject.isAccessible())
-			return new IProject[0];
-
 		if (kind == FULL_BUILD) {
+			if (DEBUG)
+				log("Performing full build as requested by user"); //$NON-NLS-1$
 			fullBuild(monitor);
 		} else {
 			if ((this.lastState = getLastState(currentProject, monitor)) == null) {
 				if (DEBUG)
-					System.out
-							.println("Performing full build since last saved state was not found"); //$NON-NLS-1$
+					log("Performing full build since last saved state was not found"); //$NON-NLS-1$
 				fullBuild(monitor);
 			} else {
 				IResourceDelta delta = getDelta(getProject());
 				if (delta == null) {
+					if (DEBUG)
+						log("Performing full build since deltas are missing after incremental request"); //$NON-NLS-1$
 					fullBuild(monitor);
 				} else {
+					if (DEBUG)
+						log("Performing incremental build"); //$NON-NLS-1$
 					incrementalBuild(delta, monitor);
 				}
 			}
 		}
 		IProject[] requiredProjects = getRequiredProjects(true);
 		if (DEBUG)
-			System.out.println("Finished build of " + currentProject.getName() //$NON-NLS-1$
+			log("Finished build of " + currentProject.getName() //$NON-NLS-1$
 					+ " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
 		if (TRACE) {
 			System.out
@@ -298,22 +307,20 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				IProject p = null;
 				switch (entry.getEntryKind()) {
 				case IBuildpathEntry.BPE_PROJECT:
-					p = workspaceRoot.getProject(path.lastSegment()); // missing
-					// projects
-					// are
-					// considered
-					// too
+					p = workspaceRoot.getProject(path.lastSegment());
+					// missing projects are considered too
 					if (((BuildpathEntry) entry).isOptional()
-							&& !ScriptProject.hasScriptNature(p)) // except if
-						// entry is
-						// optional
+							&& !ScriptProject.hasScriptNature(p))
+						// except if entry is optional
 						p = null;
 					break;
 				case IBuildpathEntry.BPE_LIBRARY:
 					if (includeBinaryPrerequisites && path.segmentCount() > 1) {
-						// some binary resources on the class path can come from
-						// projects that are not included in the project
-						// references
+						/*
+						 * some binary resources on the class path can come from
+						 * projects that are not included in the project
+						 * references
+						 */
 						IResource resource = workspaceRoot.findMember(path
 								.segment(0));
 						if (resource instanceof IProject)
@@ -530,6 +537,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (monitor.isCanceled()) {
 				return;
 			}
+			if (DEBUG)
+				log("Number of changed resources in delta: " + resources.size()); //$NON-NLS-1$
 			Set externalElements = getExternalElementsFrom(scriptProject,
 					monitor, WORK_EXTERNAL, true);
 			// New external folders set
