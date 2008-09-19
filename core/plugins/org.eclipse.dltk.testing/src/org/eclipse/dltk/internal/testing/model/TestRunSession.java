@@ -29,17 +29,20 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.internal.testing.TestCategoryEngineManager;
 import org.eclipse.dltk.internal.testing.launcher.NullTestRunnerUI;
 import org.eclipse.dltk.internal.testing.launcher.NullTestingEngine;
 import org.eclipse.dltk.internal.testing.model.TestElement.Status;
 import org.eclipse.dltk.testing.DLTKTestingConstants;
 import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
+import org.eclipse.dltk.testing.ITestCategoryEngine;
 import org.eclipse.dltk.testing.ITestRunnerUI;
 import org.eclipse.dltk.testing.ITestSession;
 import org.eclipse.dltk.testing.ITestingClient;
 import org.eclipse.dltk.testing.ITestingEngine;
 import org.eclipse.dltk.testing.MessageIds;
+import org.eclipse.dltk.testing.TestCategoryDescriptor;
 import org.eclipse.dltk.testing.model.ITestElement;
 import org.eclipse.dltk.testing.model.ITestElementContainer;
 import org.eclipse.dltk.testing.model.ITestRunSession;
@@ -62,6 +65,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 
 	private final ITestingEngine fTestingEngine;
 	private final ITestRunnerUI testRunnerUI;
+	private final ITestCategoryEngine[] categoryEngines;
 	
 	/**
 	 * Test runner client or <code>null</code>.
@@ -143,6 +147,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		fTestRunName= testRunName;
 		fTestingEngine= NullTestingEngine.getInstance();
 		testRunnerUI= NullTestRunnerUI.getInstance();
+		categoryEngines = null;
 		
 		fTestRoot= new TestRoot(this);
 		fIdToTest= new HashMap();
@@ -167,10 +172,13 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 			fTestRunName= launchConfiguration.getName();
 			fTestingEngine= DLTKTestingConstants.getTestingEngine(launchConfiguration);
 			testRunnerUI= fTestingEngine.getTestRunnerUI(project, launchConfiguration);
+			categoryEngines = TestCategoryEngineManager
+					.getCategoryEngines(testRunnerUI);
 		} else {
 			fTestRunName= project.getElementName();
 			fTestingEngine= NullTestingEngine.getInstance();
 			testRunnerUI= NullTestRunnerUI.getInstance();
+			categoryEngines = null;
 		}
 		
 		fTestRoot= new TestRoot(this);
@@ -540,17 +548,23 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 
 	private TestCategoryElement selectCategory(String id, String testName,
 			boolean isSuite) {
+		if (categoryEngines != null) {
+			for (int i = 0; i < categoryEngines.length; ++i) {
+				final TestCategoryDescriptor descriptor = categoryEngines[i]
+						.getCategory(id, testName, isSuite);
+				if (descriptor != null) {
+					TestCategoryElement categoryElement = (TestCategoryElement) fCategoryMap
+							.get(descriptor.getId());
+					if (categoryElement == null) {
+						categoryElement = new TestCategoryElement(fTestRoot,
+								descriptor.getId(), descriptor.getName());
+						fCategoryMap.put(descriptor.getId(), categoryElement);
+					}
+					return categoryElement;
+				}
+			}
+		}
 		return null;
-//		TestCategoryElement category;
-//		if (fCategoryMap.isEmpty()) {
-//			category = new TestCategoryElement(fTestRoot, "AAAAAAAAAAAAAA",
-//					"AAAAAAAAAAAAAAAAAA");
-//			fCategoryMap.put(category.getId(), category);
-//		} else {
-//			category = (TestCategoryElement) fCategoryMap.values().iterator()
-//					.next();
-//		}
-//		return category;
 	}
 
 	private TestElement addTreeEntry(String treeEntry) {

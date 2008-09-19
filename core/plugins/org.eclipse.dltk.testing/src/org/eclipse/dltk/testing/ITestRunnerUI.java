@@ -12,11 +12,22 @@
 package org.eclipse.dltk.testing;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.internal.testing.launcher.NullTestRunnerUI;
 import org.eclipse.dltk.testing.model.ITestCaseElement;
 import org.eclipse.dltk.testing.model.ITestElement;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 
+/**
+ * UI part of the testing engine implementation. New instances of this interface
+ * are supposed to be created for each test session (=launch).
+ * 
+ * Instances of this interface are acquire via the call to the
+ * {@link ITestingEngine#getTestRunnerUI(org.eclipse.dltk.core.IScriptProject, org.eclipse.debug.core.ILaunchConfiguration)}
+ * 
+ * The implementations should support adapting to {@link ITestElementResolver}
+ */
 public interface ITestRunnerUI extends IAdaptable {
 
 	/**
@@ -88,5 +99,18 @@ public interface ITestRunnerUI extends IAdaptable {
 	 * @param value
 	 */
 	void setFilterStack(boolean value);
+
+	/**
+	 * Returns the engine this UI is acquired from. Should not be
+	 * <code>null</code> (at the moment only {@link NullTestRunnerUI} designed
+	 * for compatibility issues returns <code>null</code> here).
+	 */
+	ITestingEngine getTestingEngine();
+
+	/**
+	 * Returns the project of the current launch. Could return <code>null</code>
+	 * if the session was loaded from XML and there is no such project now.
+	 */
+	IScriptProject getProject();
 
 }

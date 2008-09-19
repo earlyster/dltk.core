@@ -11,8 +11,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.testing.launcher;
 
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.testing.AbstractTestRunnerUI;
 import org.eclipse.dltk.testing.ITestRunnerUI;
+import org.eclipse.dltk.testing.ITestingEngine;
 
 public class NullTestRunnerUI extends AbstractTestRunnerUI {
 
@@ -33,6 +35,20 @@ public class NullTestRunnerUI extends AbstractTestRunnerUI {
 	 * @see org.eclipse.dltk.testing.ITestRunnerUI#getDisplayName()
 	 */
 	public String getDisplayName() {
+		return null;
+	}
+
+	/*
+	 * @see org.eclipse.dltk.testing.ITestRunnerUI#getProject()
+	 */
+	public IScriptProject getProject() {
+		return null;
+	}
+
+	/*
+	 * @see org.eclipse.dltk.testing.ITestRunnerUI#getTestingEngine()
+	 */
+	public ITestingEngine getTestingEngine() {
 		return null;
 	}
 
