@@ -15,6 +15,7 @@ public interface IXMLTags {
 
 	public static final String NODE_TESTRUN= "testrun"; //$NON-NLS-1$
 	public static final String NODE_TESTSUITES= "testsuites"; //$NON-NLS-1$
+	public static final String NODE_CATEGORY= "category"; //$NON-NLS-1$
 	public static final String NODE_TESTSUITE= "testsuite"; //$NON-NLS-1$
 	public static final String NODE_PROPERTIES= "properties"; //$NON-NLS-1$
 	public static final String NODE_PROPERTY= "property"; //$NON-NLS-1$

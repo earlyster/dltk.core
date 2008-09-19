@@ -86,6 +86,10 @@ public class TestRunHandler extends DefaultHandler {
 		} else if (qName.equals(IXMLTags.NODE_TESTSUITES)) { 
 			// support Ant's 'junitreport' task; create suite from NODE_TESTSUITE
 			
+		} else if (qName.equals(IXMLTags.NODE_CATEGORY)) {
+			String id = attributes.getValue(IXMLTags.ATTR_ID);
+			String name = attributes.getValue(IXMLTags.ATTR_NAME);
+			fTestSuite = new TestCategoryElement(fTestSuite, id, name);
 		} else if (qName.equals(IXMLTags.NODE_TESTSUITE)) {
 			String name= attributes.getValue(IXMLTags.ATTR_NAME);
 			
@@ -155,6 +159,8 @@ public class TestRunHandler extends DefaultHandler {
 		} else if (qName.equals(IXMLTags.NODE_TESTSUITES)) { 
 			// OK
 			
+		} else if (qName.equals(IXMLTags.NODE_CATEGORY)) {
+			fTestSuite = fTestSuite.getParent();
 		} else if (qName.equals(IXMLTags.NODE_TESTSUITE)) {
 			handleTestElementEnd(fTestSuite);
 			fTestSuite= fTestSuite.getParent();

@@ -82,7 +82,19 @@ public class TestRunSessionSerializer implements XMLReader {
 	}
 
 	private void handleTestElement(ITestElement testElement) throws SAXException {
-		if (testElement instanceof TestSuiteElement) {
+		if (testElement instanceof TestCategoryElement) {
+			TestCategoryElement category = (TestCategoryElement) testElement;
+			AttributesImpl atts = new AttributesImpl();
+			addCDATA(atts, IXMLTags.ATTR_ID, category.getId());
+			addCDATA(atts, IXMLTags.ATTR_NAME, category.getCategoryName());
+			startElement(IXMLTags.NODE_CATEGORY, atts);
+			ITestElement[] children = category.getChildren();
+			for (int i = 0; i < children.length; i++) {
+				handleTestElement(children[i]);
+			}
+			endElement(IXMLTags.NODE_CATEGORY);
+		}
+		else if (testElement instanceof TestSuiteElement) {
 			TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
 			
 			AttributesImpl atts= new AttributesImpl();
