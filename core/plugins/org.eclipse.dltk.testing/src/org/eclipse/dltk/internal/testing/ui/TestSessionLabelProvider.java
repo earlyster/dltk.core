@@ -44,8 +44,7 @@ public class TestSessionLabelProvider extends LabelProvider {
 			return getTestRunnerUI().getTestCaseLabel(caseElement, false);
 		} else if (element instanceof ITestSuiteElement) {
 			return ((ITestSuiteElement) element).getSuiteTypeName();
-		}
-		else if (element instanceof ITestCategoryElement) {
+		} else if (element instanceof ITestCategoryElement) {
 			return ((ITestCategoryElement) element).getCategoryName();
 		}
 		return element.toString();
@@ -60,13 +59,19 @@ public class TestSessionLabelProvider extends LabelProvider {
 		final String label = getSimpleLabel(element);
 		if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL
 				&& element instanceof ITestElement
-				&& ((ITestElement) element).getParentContainer() instanceof ITestRunSession) {
-			final String runnerDisplayName = getTestRunnerUI().getDisplayName();
-			if (runnerDisplayName != null) {
-				return Messages
-						.format(
-								DLTKTestingMessages.TestSessionLabelProvider_testName_JUnitVersion,
-								new Object[] { label, runnerDisplayName });
+				&& !(element instanceof ITestCategoryElement)) {
+			final ITestElement parent = ((ITestElement) element)
+					.getParentContainer();
+			if (parent instanceof ITestRunSession
+					|| parent instanceof ITestCategoryElement) {
+				final String runnerDisplayName = getTestRunnerUI()
+						.getDisplayName();
+				if (runnerDisplayName != null) {
+					return Messages
+							.format(
+									DLTKTestingMessages.TestSessionLabelProvider_testName_JUnitVersion,
+									new Object[] { label, runnerDisplayName });
+				}
 			}
 		}
 		return label;
