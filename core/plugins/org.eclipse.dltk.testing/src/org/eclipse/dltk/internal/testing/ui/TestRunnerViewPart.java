@@ -250,6 +250,25 @@ public class TestRunnerViewPart extends ViewPart {
 
 	final Image fSuiteRunningIcon = fSuiteRunningIconDescriptor.createImage();
 
+	final Image fCategoryIcon = TestRunnerViewPart
+			.createImage("obj16/category.gif"); //$NON-NLS-1$
+	final Image fCategoryOkIcon = TestRunnerViewPart
+			.createImage("obj16/category-ok.gif"); //$NON-NLS-1$
+	final Image fCategoryErrorIcon = TestRunnerViewPart
+			.createImage("obj16/category-error.gif"); //$NON-NLS-1$
+	final Image fCategoryFailIcon = TestRunnerViewPart
+			.createImage("obj16/category-fail.gif"); //$NON-NLS-1$
+	final Image fCategoryAbortedIcon = TestRunnerViewPart
+			.createImage("obj16/category-abort.gif"); //$NON-NLS-1$
+	final Image fCategorySkippedIcon = TestRunnerViewPart
+			.createImage("obj16/category-skipped.gif"); //$NON-NLS-1$
+	final Image fCategoryBlockedIcon = TestRunnerViewPart
+			.createImage("obj16/category-blocked.gif"); //$NON-NLS-1$
+	final Image fCategoryUnknownIcon = TestRunnerViewPart
+			.createImage("obj16/category-unknown.gif"); //$NON-NLS-1$
+	final Image fCategoryRunningIcon = TestRunnerViewPart
+			.createImage("obj16/category-run.gif"); //$NON-NLS-1$
+
 	// Persistence tags.
 	static final String TAG_PAGE = "page"; //$NON-NLS-1$
 	static final String TAG_RATIO = "ratio"; //$NON-NLS-1$
@@ -1437,6 +1456,16 @@ public class TestRunnerViewPart extends ViewPart {
 		fSuiteRunningIcon.dispose();
 		fSuiteErrorIcon.dispose();
 		fSuiteFailIcon.dispose();
+
+		fCategoryIcon.dispose();
+		fCategoryOkIcon.dispose();
+		fCategoryErrorIcon.dispose();
+		fCategoryFailIcon.dispose();
+		fCategoryAbortedIcon.dispose();
+		fCategorySkippedIcon.dispose();
+		fCategoryBlockedIcon.dispose();
+		fCategoryUnknownIcon.dispose();
+		fCategoryRunningIcon.dispose();
 	}
 
 	private void postSyncRunnable(Runnable r) {

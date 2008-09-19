@@ -13,7 +13,8 @@ package org.eclipse.dltk.internal.testing.ui;
 
 import org.eclipse.dltk.internal.testing.Messages;
 import org.eclipse.dltk.internal.testing.model.TestCaseElement;
-import org.eclipse.dltk.internal.testing.model.TestContainerElement;
+import org.eclipse.dltk.internal.testing.model.TestCategoryElement;
+import org.eclipse.dltk.internal.testing.model.TestSuiteElement;
 import org.eclipse.dltk.internal.testing.model.TestElement.Status;
 import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.ITestRunnerUI;
@@ -106,8 +107,8 @@ public class TestSessionLabelProvider extends LabelProvider {
 			else
 				throw new IllegalStateException(element.toString());
 
-		} else if (element instanceof TestContainerElement) {
-			Status status = ((TestContainerElement) element).getStatus();
+		} else if (element instanceof TestSuiteElement) {
+			Status status = ((TestSuiteElement) element).getStatus();
 			if (status.isNotRun())
 				return fTestRunnerPart.fSuiteIcon;
 			else if (status.isRunning())
@@ -129,6 +130,32 @@ public class TestSessionLabelProvider extends LabelProvider {
 				}
 			else if (status.isOK())
 				return fTestRunnerPart.fSuiteOkIcon;
+			else
+				throw new IllegalStateException(element.toString());
+
+		} else if (element instanceof TestCategoryElement) {
+			Status status = ((TestCategoryElement) element).getStatus();
+			if (status.isNotRun())
+				return fTestRunnerPart.fCategoryIcon;
+			else if (status.isRunning())
+				return fTestRunnerPart.fCategoryRunningIcon;
+			else if (status.isError())
+				return fTestRunnerPart.fCategoryErrorIcon;
+			else if (status.isFailure())
+				switch (status.getFailedCode()) {
+				case ITestingClient.ABORTED:
+					return fTestRunnerPart.fCategoryAbortedIcon;
+				case ITestingClient.BLOCKED:
+					return fTestRunnerPart.fCategoryBlockedIcon;
+				case ITestingClient.SKIPPED:
+					return fTestRunnerPart.fCategorySkippedIcon;
+				case ITestingClient.UNKNOWN:
+					return fTestRunnerPart.fCategoryUnknownIcon;
+				default:
+					return fTestRunnerPart.fCategoryFailIcon;
+				}
+			else if (status.isOK())
+				return fTestRunnerPart.fCategoryOkIcon;
 			else
 				throw new IllegalStateException(element.toString());
 
