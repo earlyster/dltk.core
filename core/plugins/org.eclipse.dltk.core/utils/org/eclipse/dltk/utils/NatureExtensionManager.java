@@ -24,8 +24,6 @@ import org.eclipse.dltk.core.DLTKCore;
 public class NatureExtensionManager {
 
 	private final String extensionPoint;
-
-	private final String natureAttr = "nature"; //$NON-NLS-1$
 	private final String classAttr = "class"; //$NON-NLS-1$
 	private final String universalNatureId;
 	private final Class elementType;
@@ -56,6 +54,7 @@ public class NatureExtensionManager {
 		extensions = new HashMap(5);
 		IConfigurationElement[] confElements = Platform.getExtensionRegistry()
 				.getConfigurationElementsFor(extensionPoint);
+		final String natureAttr = getCategoryAttributeName();
 
 		for (int i = 0; i < confElements.length; i++) {
 			final IConfigurationElement confElement = confElements[i];
@@ -71,6 +70,15 @@ public class NatureExtensionManager {
 			final List descriptors = (List) i.next();
 			initializeDescriptors(descriptors);
 		}
+	}
+
+	/**
+	 * Returns the name of the attribute used to categorized the extensions
+	 * 
+	 * @return
+	 */
+	protected String getCategoryAttributeName() {
+		return "nature"; //$NON-NLS-1$
 	}
 
 	/**
