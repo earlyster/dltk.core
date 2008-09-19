@@ -791,6 +791,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		}
 
 		// 2. Compute blocks regions
+		Document d = new Document(contents);
 		for (int i = 0; i < blockRegions.length; i++) {
 			CodeBlock codeBlock = blockRegions[i];
 
@@ -803,7 +804,6 @@ public abstract class AbstractASTFoldingStructureProvider implements
 			// code
 			boolean multiline = false;
 			try {
-				Document d = new Document(contents);
 				multiline = isMultilineRegion(d, reg);
 			} catch (BadLocationException e) {
 				// nothing to do
