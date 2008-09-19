@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -85,6 +86,11 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 	private HashMap/*<String, TestElement>*/ fIdToTest;
 	
 	/**
+	 * test categories
+	 */
+	private Map fCategoryMap;
+
+	/**
 	 * The TestSuites for which additional children are expected. 
 	 */
 	private List/*<IncompleteTestSuite>*/ fIncompleteTestSuites;
@@ -140,6 +146,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		
 		fTestRoot= new TestRoot(this);
 		fIdToTest= new HashMap();
+		fCategoryMap = new HashMap();
 		
 		fTestRunnerClient= null;
 
@@ -168,6 +175,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		
 		fTestRoot= new TestRoot(this);
 		fIdToTest= new HashMap();
+		fCategoryMap = new HashMap();
 		
 		fTestRunnerClient= runnerClient;
 		fTestRunnerClient.startListening(new ITestRunListener2[] { new TestSessionNotifier() } );
@@ -210,6 +218,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		fTestRoot= new TestRoot(this);
 		fTestResult= null;
 		fIdToTest= new HashMap();
+		fCategoryMap = new HashMap();
 	}
 
 	/*
@@ -394,6 +403,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 			fTestRoot= null;
 			fTestRunnerClient= null;
 			fIdToTest= new HashMap();
+			fCategoryMap = new HashMap();
 			fIncompleteTestSuites= null;
 			fUnrootedSuite= null;
 			
@@ -528,13 +538,28 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		return (TestElement) fIdToTest.get(id);
 	}
 
+	private TestCategoryElement selectCategory(String id, String testName,
+			boolean isSuite) {
+		return null;
+//		TestCategoryElement category;
+//		if (fCategoryMap.isEmpty()) {
+//			category = new TestCategoryElement(fTestRoot, "AAAAAAAAAAAAAA",
+//					"AAAAAAAAAAAAAAAAAA");
+//			fCategoryMap.put(category.getId(), category);
+//		} else {
+//			category = (TestCategoryElement) fCategoryMap.values().iterator()
+//					.next();
+//		}
+//		return category;
+	}
+
 	private TestElement addTreeEntry(String treeEntry) {
 		// format: testId","testName","isSuite","testcount
 		int index0= treeEntry.indexOf(',');
 		String id= treeEntry.substring(0, index0);
 		
 		StringBuffer testNameBuffer= new StringBuffer(100);
-		int index1= scanTestName(treeEntry, index0 + 1, testNameBuffer);
+		int index1 = scanTestName(treeEntry, index0 + 1, testNameBuffer, true);
 		String testName= testNameBuffer.toString().trim();
 		
 		int index2= treeEntry.indexOf(',', index1 + 1);
@@ -546,7 +571,12 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 			adjustTotalCount(fStartedCount + testCount);
 		}
 		if (fIncompleteTestSuites.isEmpty()) {
-			return createTestElement(fTestRoot, id, testName, isSuite, testCount);
+			TestContainerElement category = selectCategory(id, testName,
+					isSuite);
+			if (category == null) {
+				category = fTestRoot;
+			}
+			return createTestElement(category, id, testName, isSuite, testCount);
 		} else {
 			int suiteIndex= fIncompleteTestSuites.size() - 1;
 			IncompleteTestSuite openSuite= (IncompleteTestSuite) fIncompleteTestSuites.get(suiteIndex);
@@ -557,7 +587,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		}
 	}
 
-	public TestElement createTestElement(TestSuiteElement parent, String id, String testName, boolean isSuite, int testCount) {
+	public TestElement createTestElement(TestContainerElement parent, String id, String testName, boolean isSuite, int testCount) {
 		TestElement testElement;
 		if (isSuite) {
 			TestSuiteElement testSuiteElement= new TestSuiteElement(parent, id, testName, testCount);
@@ -580,7 +610,8 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 	 * 
 	 * @return the index of the next ','
 	 */
-	private int scanTestName(String s, int start, StringBuffer testName) {
+	static int scanTestName(String s, int start, StringBuffer testName,
+			boolean breakOnComma) {
 		boolean inQuote= false;
 		int i= start;
 		for (; i < s.length(); i++) {
@@ -591,7 +622,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 			} else if (inQuote) {
 				inQuote= false;
 				testName.append(c);
-			} else if (c == ',')
+			} else if (breakOnComma && c == ',')
 				break;
 			else
 				testName.append(c);

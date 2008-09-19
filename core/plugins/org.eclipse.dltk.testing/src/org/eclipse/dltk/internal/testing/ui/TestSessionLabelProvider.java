@@ -13,12 +13,13 @@ package org.eclipse.dltk.internal.testing.ui;
 
 import org.eclipse.dltk.internal.testing.Messages;
 import org.eclipse.dltk.internal.testing.model.TestCaseElement;
-import org.eclipse.dltk.internal.testing.model.TestSuiteElement;
+import org.eclipse.dltk.internal.testing.model.TestContainerElement;
 import org.eclipse.dltk.internal.testing.model.TestElement.Status;
 import org.eclipse.dltk.testing.DLTKTestingMessages;
 import org.eclipse.dltk.testing.ITestRunnerUI;
 import org.eclipse.dltk.testing.ITestingClient;
 import org.eclipse.dltk.testing.model.ITestCaseElement;
+import org.eclipse.dltk.testing.model.ITestCategoryElement;
 import org.eclipse.dltk.testing.model.ITestElement;
 import org.eclipse.dltk.testing.model.ITestRunSession;
 import org.eclipse.dltk.testing.model.ITestSuiteElement;
@@ -42,6 +43,9 @@ public class TestSessionLabelProvider extends LabelProvider {
 			return getTestRunnerUI().getTestCaseLabel(caseElement, false);
 		} else if (element instanceof ITestSuiteElement) {
 			return ((ITestSuiteElement) element).getSuiteTypeName();
+		}
+		else if (element instanceof ITestCategoryElement) {
+			return ((ITestCategoryElement) element).getCategoryName();
 		}
 		return element.toString();
 	}
@@ -102,8 +106,8 @@ public class TestSessionLabelProvider extends LabelProvider {
 			else
 				throw new IllegalStateException(element.toString());
 
-		} else if (element instanceof TestSuiteElement) {
-			Status status = ((TestSuiteElement) element).getStatus();
+		} else if (element instanceof TestContainerElement) {
+			Status status = ((TestContainerElement) element).getStatus();
 			if (status.isNotRun())
 				return fTestRunnerPart.fSuiteIcon;
 			else if (status.isRunning())

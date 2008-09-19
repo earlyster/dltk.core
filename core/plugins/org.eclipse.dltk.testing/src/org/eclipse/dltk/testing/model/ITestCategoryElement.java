@@ -9,22 +9,10 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.testing.model;
+package org.eclipse.dltk.testing.model;
 
-import org.eclipse.dltk.testing.model.ITestSuiteElement;
+public interface ITestCategoryElement extends ITestElementContainer {
 
-public class TestSuiteElement extends TestContainerElement implements
-		ITestSuiteElement {
-
-	/**
-	 * @param parent
-	 * @param id
-	 * @param testName
-	 * @param childrenCount
-	 */
-	public TestSuiteElement(TestContainerElement parent, String id,
-			String testName, int childrenCount) {
-		super(parent, id, testName, childrenCount);
-	}
+	String getCategoryName();
 
 }

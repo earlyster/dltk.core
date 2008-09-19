@@ -19,7 +19,7 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 
 	private boolean fIgnored;
 
-	public TestCaseElement(TestSuiteElement parent, String id, String testName) {
+	public TestCaseElement(TestContainerElement parent, String id, String testName) {
 		super(parent, id, testName);
 		Assert.isNotNull(parent);
 	}

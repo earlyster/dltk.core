@@ -209,7 +209,7 @@ public abstract class TestElement implements ITestElement {
 
 	}
 
-	private final TestSuiteElement fParent;
+	private final TestContainerElement fParent;
 	private final String fId;
 	private String fTestName;
 
@@ -226,7 +226,7 @@ public abstract class TestElement implements ITestElement {
 	 * @param testName
 	 *            the test name
 	 */
-	public TestElement(TestSuiteElement parent, String id, String testName) {
+	public TestElement(TestContainerElement parent, String id, String testName) {
 		Assert.isNotNull(id);
 		Assert.isNotNull(testName);
 		fParent = parent;
@@ -292,7 +292,7 @@ public abstract class TestElement implements ITestElement {
 	/**
 	 * @return the parent suite, or <code>null</code> for the root
 	 */
-	public TestSuiteElement getParent() {
+	public TestContainerElement getParent() {
 		return fParent;
 	}
 
@@ -314,7 +314,7 @@ public abstract class TestElement implements ITestElement {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=125296
 
 		fStatus = status;
-		TestSuiteElement parent = getParent();
+		TestContainerElement parent = getParent();
 		if (parent != null)
 			parent.childChangedStatus(this, status);
 	}

@@ -11,12 +11,11 @@
 
 package org.eclipse.dltk.internal.testing.ui;
 
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
-
+import org.eclipse.dltk.internal.testing.model.TestContainerElement;
 import org.eclipse.dltk.internal.testing.model.TestElement;
 import org.eclipse.dltk.internal.testing.model.TestRoot;
-import org.eclipse.dltk.internal.testing.model.TestSuiteElement;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
 
 
 
@@ -28,8 +27,8 @@ public class TestSessionTreeContentProvider implements ITreeContentProvider {
 	}
 
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof TestSuiteElement)
-			return ((TestSuiteElement) parentElement).getChildren();
+		if (parentElement instanceof TestContainerElement)
+			return ((TestContainerElement) parentElement).getChildren();
 		else
 			return NO_CHILDREN;
 	}
@@ -43,8 +42,8 @@ public class TestSessionTreeContentProvider implements ITreeContentProvider {
 	}
 
 	public boolean hasChildren(Object element) {
-		if (element instanceof TestSuiteElement)
-			return ((TestSuiteElement) element).getChildren().length != 0;
+		if (element instanceof TestContainerElement)
+			return ((TestContainerElement) element).getChildren().length != 0;
 		else
 			return false;
 	}

@@ -11,20 +11,23 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.testing.model;
 
-import org.eclipse.dltk.testing.model.ITestSuiteElement;
+import org.eclipse.dltk.testing.model.ITestCategoryElement;
 
-public class TestSuiteElement extends TestContainerElement implements
-		ITestSuiteElement {
+public class TestCategoryElement extends TestContainerElement implements
+		ITestCategoryElement {
 
 	/**
 	 * @param parent
 	 * @param id
 	 * @param testName
-	 * @param childrenCount
 	 */
-	public TestSuiteElement(TestContainerElement parent, String id,
-			String testName, int childrenCount) {
-		super(parent, id, testName, childrenCount);
+	public TestCategoryElement(TestContainerElement parent, String id,
+			String testName) {
+		super(parent, id, testName);
+	}
+
+	public String getCategoryName() {
+		return getTestName();
 	}
 
 }

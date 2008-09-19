@@ -34,7 +34,7 @@ public class TestRunHandler extends DefaultHandler {
 	private int fId;
 	
 	private TestRunSession fTestRunSession;
-	private TestSuiteElement fTestSuite;
+	private TestContainerElement fTestSuite;
 	private TestCaseElement fTestCase;
 	private Stack/*<Boolean>*/ fNotRun= new Stack();
 

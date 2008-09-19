@@ -22,6 +22,8 @@ import java.util.ListIterator;
 
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.dltk.internal.testing.model.TestCaseElement;
+import org.eclipse.dltk.internal.testing.model.TestCategoryElement;
+import org.eclipse.dltk.internal.testing.model.TestContainerElement;
 import org.eclipse.dltk.internal.testing.model.TestElement;
 import org.eclipse.dltk.internal.testing.model.TestRoot;
 import org.eclipse.dltk.internal.testing.model.TestRunSession;
@@ -294,6 +296,8 @@ public class TestViewer {
 			action = new OpenTestAction(fTestRunnerPart, testElement);
 		} else if (testElement instanceof TestCaseElement) {
 			action = new OpenTestAction(fTestRunnerPart, testElement);
+		} else if (testElement instanceof TestCategoryElement) {
+			return;
 		} else {
 			throw new IllegalStateException(String.valueOf(testElement));
 		}
@@ -496,7 +500,7 @@ public class TestViewer {
 			// check
 			return;
 
-		TestSuiteElement parent = testElement.getParent();
+		TestContainerElement parent = testElement.getParent();
 		updateShownElementInTree(parent); // make sure parent is shown and
 		// up-to-date
 
@@ -613,9 +617,9 @@ public class TestViewer {
 	}
 
 	private TestElement getNextFailure(TestElement selected, boolean showNext) {
-		if (selected instanceof TestSuiteElement) {
+		if (selected instanceof TestContainerElement) {
 			TestElement nextChild = getNextChildFailure(
-					(TestSuiteElement) selected, showNext);
+					(TestContainerElement) selected, showNext);
 			if (nextChild != null)
 				return nextChild;
 		}
@@ -624,7 +628,7 @@ public class TestViewer {
 
 	private TestCaseElement getNextFailureSibling(TestElement current,
 			boolean showNext) {
-		TestSuiteElement parent = current.getParent();
+		TestContainerElement parent = current.getParent();
 		if (parent == null)
 			return null;
 
@@ -638,8 +642,8 @@ public class TestViewer {
 			if (sibling.getStatus().isErrorOrFailure()) {
 				if (sibling instanceof TestCaseElement) {
 					return (TestCaseElement) sibling;
-				} else {
-					return getNextChildFailure((TestSuiteElement) sibling,
+				} else if (sibling instanceof TestContainerElement) {
+					return getNextChildFailure((TestContainerElement) sibling,
 							showNext);
 				}
 			}
@@ -647,7 +651,7 @@ public class TestViewer {
 		return getNextFailureSibling(parent, showNext);
 	}
 
-	private TestCaseElement getNextChildFailure(TestSuiteElement root,
+	private TestCaseElement getNextChildFailure(TestContainerElement root,
 			boolean showNext) {
 		List children = Arrays.asList(root.getChildren());
 		if (!showNext)
@@ -657,8 +661,8 @@ public class TestViewer {
 			if (child.getStatus().isErrorOrFailure()) {
 				if (child instanceof TestCaseElement) {
 					return (TestCaseElement) child;
-				} else {
-					return getNextChildFailure((TestSuiteElement) child,
+				} else if (child instanceof TestContainerElement) {
+					return getNextChildFailure((TestContainerElement) child,
 							showNext);
 				}
 			}

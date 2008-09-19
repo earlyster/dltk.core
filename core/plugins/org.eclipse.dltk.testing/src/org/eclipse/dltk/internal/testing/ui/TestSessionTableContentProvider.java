@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.dltk.internal.testing.model.TestCaseElement;
+import org.eclipse.dltk.internal.testing.model.TestContainerElement;
 import org.eclipse.dltk.internal.testing.model.TestRoot;
 import org.eclipse.dltk.internal.testing.model.TestSuiteElement;
 import org.eclipse.dltk.testing.model.ITestElement;
@@ -35,14 +36,17 @@ public class TestSessionTableContentProvider implements IStructuredContentProvid
 		return all.toArray();
 	}
 
-	private void addAll(ArrayList all, TestSuiteElement suite) {
+	private void addAll(ArrayList all, TestContainerElement suite) {
 		ITestElement[] children= suite.getChildren();
 		for (int i= 0; i < children.length; i++) {
 			ITestElement element= children[i];
-			if (element instanceof TestSuiteElement) {
-				if (((TestSuiteElement) element).getSuiteStatus().isErrorOrFailure())
-					all.add(element); // add failed suite to flat list too
-				addAll(all, (TestSuiteElement) element);
+			if (element instanceof TestContainerElement) {
+				final TestContainerElement container = (TestContainerElement) element;
+				if (element instanceof TestSuiteElement) {
+					if (container.getSuiteStatus().isErrorOrFailure())
+						all.add(element); // add failed suite to flat list too
+				}
+				addAll(all, container);
 			} else if (element instanceof TestCaseElement) {
 				all.add(element);
 			}
