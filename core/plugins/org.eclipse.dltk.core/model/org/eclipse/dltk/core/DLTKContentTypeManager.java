@@ -219,11 +219,6 @@ public class DLTKContentTypeManager {
 		if (isValidFileNameForContentType(derived, resource.getName())) {
 			return true;
 		}
-		// Check resources accessibility and synchronization
-		if (!resource.isAccessible()
-				|| !resource.isSynchronized(IResource.DEPTH_ZERO)) {
-			return false;
-		}
 		// Delegate the decision if we should validate content to the language
 		// toolkit.
 		if (!toolkit.canValidateContent(resource)) {
@@ -249,28 +244,40 @@ public class DLTKContentTypeManager {
 				e1.printStackTrace();
 			}
 		}
-		for (int i = 0; i < derived.length; i++) {
-			final IContentType type = derived[i];
-			InputStream contents = null;
-			try {
-				contents = new BufferedInputStream(file.getContents(), 2048);
-				final IContentDescription description = type.getDescriptionFor(
-						contents, IContentDescription.ALL);
-				if (description != null) {
-					if (checkDescription(type, description)) {
-						return true;
+		try {
+			for (int i = 0; i < derived.length; i++) {
+				final IContentType type = derived[i];
+				/*
+				 * TODO use something like LazyInputStream if there are multiple
+				 * content types
+				 */
+				final InputStream contents = new BufferedInputStream(file
+						.getContents(), 2048);
+				try {
+					final IContentDescription description = type
+							.getDescriptionFor(contents,
+									IContentDescription.ALL);
+					if (description != null) {
+						if (checkDescription(type, description)) {
+							return true;
+						}
 					}
+				} catch (IOException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				} finally {
+					closeStream(contents);
 				}
-			} catch (IOException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
-				}
-			} catch (CoreException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
-				}
-			} finally {
-				closeStream(contents);
+			}
+		} catch (CoreException e) {
+			/*
+			 * CoreException is thrown when resource does not exist, is out of
+			 * sync or something similar - there is no need to process other
+			 * content types if it happens.
+			 */
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
 			}
 		}
 		return false;
