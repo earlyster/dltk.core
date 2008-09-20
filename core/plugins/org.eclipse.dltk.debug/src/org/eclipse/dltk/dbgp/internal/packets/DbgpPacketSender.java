@@ -12,6 +12,8 @@ package org.eclipse.dltk.dbgp.internal.packets;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.eclipse.dltk.dbgp.internal.DbgpRequest;
+
 public class DbgpPacketSender {
 	private final Object lock = new Object();
 
@@ -31,13 +33,13 @@ public class DbgpPacketSender {
 		this.logger = logger;
 	}
 
-	public void sendCommand(String command) throws IOException {
+	public void sendCommand(DbgpRequest command) throws IOException {
 		if (logger != null) {
 			logger.log(command);
 		}
 
 		synchronized (lock) {
-			output.write(command.getBytes("ASCII")); //$NON-NLS-1$
+			command.writeTo(output);
 			output.write(0);
 			output.flush();
 		}

@@ -33,7 +33,7 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 	private final IDbgpDebugingEngine engine;
 	private IDebugOptions options;
 
-	private void sendRequest(String command) throws IOException {
+	private void sendRequest(DbgpRequest command) throws IOException {
 		engine.sendCommand(command);
 	}
 
@@ -63,7 +63,7 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 			final int requestId = Integer.parseInt(request
 					.getOption(DbgpBaseCommands.ID_OPTION));
 			if (options.get(DebugOption.DBGP_ASYNC) || request.isAsync()) {
-				sendRequest(request.toString());
+				sendRequest(request);
 				packet = receiveResponse(requestId);
 			} else {
 				final long startTime = DEBUG ? System.currentTimeMillis() : 0;
@@ -80,7 +80,7 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 					}
 				}
 				try {
-					sendRequest(request.toString());
+					sendRequest(request);
 					packet = receiveResponse(requestId);
 				} finally {
 					synchronized (activeRequests) {
@@ -111,7 +111,7 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 
 	public void send(DbgpRequest request) throws DbgpException {
 		try {
-			sendRequest(request.toString());
+			sendRequest(request);
 		} catch (IOException e) {
 			throw new DbgpIOException(e);
 		}

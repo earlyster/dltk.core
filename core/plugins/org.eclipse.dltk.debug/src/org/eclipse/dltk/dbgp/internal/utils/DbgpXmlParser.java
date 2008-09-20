@@ -11,8 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.utils;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringReader;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -39,13 +39,12 @@ public class DbgpXmlParser {
 		return Integer.parseInt(s) == 0 ? false : true;
 	}
 
-	public static Document parseXml(String xml) throws DbgpProtocolException {
+	public static Document parseXml(byte[] xml) throws DbgpProtocolException {
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory
 					.newInstance();
 
 			DocumentBuilder builder = factory.newDocumentBuilder();
-			StringReader reader = new StringReader(xml);
 
 			// builder.setErrorHandler(new ErrorHandler() {
 			// public void error(SAXParseException exception)
@@ -61,8 +60,7 @@ public class DbgpXmlParser {
 			// }
 			// });
 
-			InputSource source = new InputSource(reader);
-			source.setEncoding("UTF-8"); //$NON-NLS-1$
+			InputSource source = new InputSource(new ByteArrayInputStream(xml));
 			return builder.parse(source);
 		} catch (ParserConfigurationException e) {
 			throw new DbgpProtocolException(e);

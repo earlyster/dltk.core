@@ -12,13 +12,14 @@ package org.eclipse.dltk.dbgp.internal;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.eclipse.dltk.dbgp.IDbgpPacket;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlParser;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.osgi.util.NLS;
 import org.w3c.dom.Document;
 
-public class DbgpRawPacket {
+public class DbgpRawPacket implements IDbgpPacket {
 
 	protected static int readPacketSize(InputStream input) throws IOException {
 		int size = 0;
@@ -46,7 +47,7 @@ public class DbgpRawPacket {
 		return size;
 	}
 
-	protected static String readPacketXml(InputStream input, int size)
+	protected static byte[] readPacketXml(InputStream input, int size)
 			throws IOException {
 		byte[] bytes = new byte[size];
 
@@ -65,21 +66,21 @@ public class DbgpRawPacket {
 			throw new IOException(Messages.DbgpRawPacket_noTerminationByte);
 		}
 
-		return new String(bytes, "ASCII"); //$NON-NLS-1$
+		return bytes;
 	}
 
 	public static DbgpRawPacket readPacket(InputStream input)
 			throws IOException {
 		int size = readPacketSize(input);
-		String xml = readPacketXml(input, size);
+		byte[] xml = readPacketXml(input, size);
 		return new DbgpRawPacket(size, xml);
 	}
 
 	private final int size;
 
-	private final String xml;
+	private final byte[] xml;
 
-	protected DbgpRawPacket(int size, String xml) {
+	protected DbgpRawPacket(int size, byte[] xml) {
 		this.size = size;
 		this.xml = xml;
 	}
@@ -88,7 +89,7 @@ public class DbgpRawPacket {
 		return size;
 	}
 
-	public String getXml() {
+	public byte[] getXml() {
 		return xml;
 	}
 

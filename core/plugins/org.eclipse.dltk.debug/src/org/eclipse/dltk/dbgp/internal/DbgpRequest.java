@@ -9,14 +9,17 @@
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.dltk.dbgp.IDbgpPacket;
 import org.eclipse.dltk.dbgp.internal.utils.Base64Helper;
 import org.eclipse.dltk.internal.debug.core.model.StrUtils;
 
-public class DbgpRequest {
+public class DbgpRequest implements IDbgpPacket {
 	private final Map options;
 
 	private final String command;
@@ -109,5 +112,10 @@ public class DbgpRequest {
 	 */
 	public boolean isAsync() {
 		return async;
+	}
+
+	public void writeTo(OutputStream output) throws IOException {
+		// TODO optimize - send directly to stream without string
+		output.write(toString().getBytes("ASCII"));
 	}
 }

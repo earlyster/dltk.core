@@ -121,7 +121,7 @@ public class DbgpPacketReceiver extends DbgpWorkingThread {
 				DbgpRawPacket packet = DbgpRawPacket.readPacket(input);
 
 				if (logger != null) {
-					logger.log(packet.getXml());
+					logger.log(packet);
 				}
 
 				addDocument(packet.getParsedXml());
