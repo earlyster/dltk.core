@@ -14,6 +14,7 @@ import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.debug.core.model.IDebugTarget;
+import org.eclipse.dltk.dbgp.IDbgpPacket;
 import org.eclipse.dltk.dbgp.IDbgpRawListener;
 import org.eclipse.dltk.dbgp.internal.IDbgpDebugingEngine;
 import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
@@ -49,7 +50,7 @@ public class ScriptDebugLogManager implements ILaunchListener,
 	 * org.eclipse.dltk.dbgp.IDbgpRawListener#dbgpPacketReceived(java.lang.String
 	 * )
 	 */
-	public void dbgpPacketReceived(int sessionId, String content) {
+	public void dbgpPacketReceived(int sessionId, IDbgpPacket content) {
 		append(new ScriptDebugLogItem(Messages.ItemType_Input, sessionId,
 				content));
 	}
@@ -58,7 +59,7 @@ public class ScriptDebugLogManager implements ILaunchListener,
 	 * @see
 	 * org.eclipse.dltk.dbgp.IDbgpRawListener#dbgpPacketSent(java.lang.String)
 	 */
-	public void dbgpPacketSent(int sessionId, String content) {
+	public void dbgpPacketSent(int sessionId, IDbgpPacket content) {
 		append(new ScriptDebugLogItem(Messages.ItemType_Output, sessionId,
 				content));
 	}
