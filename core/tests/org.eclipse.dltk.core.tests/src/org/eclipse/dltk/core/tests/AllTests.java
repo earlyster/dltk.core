@@ -21,8 +21,10 @@ import org.eclipse.dltk.core.tests.launching.InterpreterConfigTests;
 import org.eclipse.dltk.core.tests.model.BufferTests;
 import org.eclipse.dltk.core.tests.model.ModelMembersTests;
 import org.eclipse.dltk.core.tests.model.WorkingCopyTests;
+import org.eclipse.dltk.core.tests.util.CharacterStackTests;
 import org.eclipse.dltk.core.tests.utils.InternalCoreUtilTest;
 import org.eclipse.dltk.core.tests.utils.TextUtilsTest;
+import org.eclipse.dltk.utils.CharacterStack;
 
 public class AllTests {
 
@@ -46,6 +48,7 @@ public class AllTests {
 		suite.addTest(EnvironmentResolverTests.suite());
 		
 		suite.addTest(TextUtilsTest.suite());
+		suite.addTestSuite(CharacterStackTests.class);
 		// $JUnit-END$
 		return suite;
 	}
