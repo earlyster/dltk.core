@@ -17,8 +17,6 @@ import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpProtocolException;
 import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpPropertyCommands;
-import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlParser;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class DbgpPropertyCommandsTests extends DbgpProtocolTests {
@@ -32,8 +30,7 @@ public class DbgpPropertyCommandsTests extends DbgpProtocolTests {
 		String xml = getResourceAsString(GET_PROPERTY_RESPONSE);
 		xml = MessageFormat.format(xml, new Object[] { name, fullName, type,
 				"_size", "_children" });
-		Document doc = DbgpXmlParser.parseXml(xml);
-		return (Element) doc.getFirstChild();
+		return parseResponse(xml);
 	}
 
 	protected Element makePropertySetResponse(int transaction_id,
@@ -41,8 +38,7 @@ public class DbgpPropertyCommandsTests extends DbgpProtocolTests {
 		String xml = getResourceAsString(SET_PROPERTY_RESPONSE);
 		xml = MessageFormat.format(xml, new Object[] { success ? "1" : "0",
 				Integer.toString(transaction_id) });
-		Document doc = DbgpXmlParser.parseXml(xml);
-		return (Element) doc.getFirstChild();
+		return parseResponse(xml);
 	}
 
 	protected String makePropertyValueResponse(String name) {

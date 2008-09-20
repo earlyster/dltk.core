@@ -12,6 +12,7 @@ package org.eclipse.dltk.debug.dbgp.tests;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 import junit.framework.TestCase;
 
@@ -54,9 +55,11 @@ public class DbgpProtocolTests extends TestCase {
 	
 	protected Element parseResponse(String xml) {
 		try {
-			Document doc = DbgpXmlParser.parseXml(xml);
+			Document doc = DbgpXmlParser.parseXml(xml.getBytes("ISO-8859-1"));
 			return (Element) doc.getFirstChild();
 		} catch (DbgpProtocolException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
 		
