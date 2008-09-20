@@ -70,7 +70,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	private final IDbgpService dbgpService;
 	private final String sessionId;
 
-	private final String mondelId;
+	private final String modelId;
 
 	private static final WeakHashMap targets = new WeakHashMap();
 	private String[] stepFilters;
@@ -103,7 +103,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 			IDebugOptions options) {
 		Assert.isNotNull(options);
 
-		this.mondelId = modelId;
+		this.modelId = modelId;
 
 		this.listeners = new ListenerList();
 
@@ -146,7 +146,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	}
 
 	public String getModelIdentifier() {
-		return mondelId;
+		return modelId;
 	}
 
 	public ILaunch getLaunch() {
