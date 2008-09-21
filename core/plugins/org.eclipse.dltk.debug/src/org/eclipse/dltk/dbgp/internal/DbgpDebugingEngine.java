@@ -16,7 +16,7 @@ import java.net.Socket;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.dbgp.IDbgpPacket;
+import org.eclipse.dltk.dbgp.IDbgpRawPacket;
 import org.eclipse.dltk.dbgp.IDbgpRawListener;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpNotifyPacket;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpPacketReceiver;
@@ -53,7 +53,7 @@ public class DbgpDebugingEngine extends DbgpTermination implements
 				.getInputStream()));
 
 		receiver.setLogger(new IDbgpRawLogger() {
-			public void log(IDbgpPacket output) {
+			public void log(IDbgpRawPacket output) {
 				firePacketReceived(output);
 			}
 		});
@@ -66,7 +66,7 @@ public class DbgpDebugingEngine extends DbgpTermination implements
 				.getOutputStream()));
 
 		sender.setLogger(new IDbgpRawLogger() {
-			public void log(IDbgpPacket output) {
+			public void log(IDbgpRawPacket output) {
 				firePacketSent(output);
 			}
 		});
@@ -139,7 +139,7 @@ public class DbgpDebugingEngine extends DbgpTermination implements
 
 	private final ListenerList listeners = new ListenerList();
 
-	protected void firePacketReceived(IDbgpPacket content) {
+	protected void firePacketReceived(IDbgpRawPacket content) {
 		Object[] list = listeners.getListeners();
 
 		for (int i = 0; i < list.length; ++i) {
@@ -147,7 +147,7 @@ public class DbgpDebugingEngine extends DbgpTermination implements
 		}
 	}
 
-	protected void firePacketSent(IDbgpPacket content) {
+	protected void firePacketSent(IDbgpRawPacket content) {
 		Object[] list = listeners.getListeners();
 
 		for (int i = 0; i < list.length; ++i) {

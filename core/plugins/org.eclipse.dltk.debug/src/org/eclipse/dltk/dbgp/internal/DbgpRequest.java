@@ -15,11 +15,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.dltk.dbgp.IDbgpPacket;
+import org.eclipse.dltk.dbgp.IDbgpRawPacket;
 import org.eclipse.dltk.dbgp.internal.utils.Base64Helper;
 import org.eclipse.dltk.internal.debug.core.model.StrUtils;
 
-public class DbgpRequest implements IDbgpPacket {
+public class DbgpRequest implements IDbgpRawPacket {
 	private final Map options;
 
 	private final String command;
@@ -117,5 +117,9 @@ public class DbgpRequest implements IDbgpPacket {
 	public void writeTo(OutputStream output) throws IOException {
 		// TODO optimize - send directly to stream without string
 		output.write(toString().getBytes("ASCII"));
+	}
+
+	public String getPacketAsString() {
+		return toString();
 	}
 }

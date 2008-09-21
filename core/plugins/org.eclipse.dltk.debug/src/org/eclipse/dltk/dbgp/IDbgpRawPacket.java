@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.dbgp;
 
-public interface IDbgpPacket {
+public interface IDbgpRawPacket {
+
+	String getPacketAsString();
 
 }

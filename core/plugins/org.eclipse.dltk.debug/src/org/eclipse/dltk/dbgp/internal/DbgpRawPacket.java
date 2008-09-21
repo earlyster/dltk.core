@@ -11,15 +11,16 @@ package org.eclipse.dltk.dbgp.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
-import org.eclipse.dltk.dbgp.IDbgpPacket;
+import org.eclipse.dltk.dbgp.IDbgpRawPacket;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlParser;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.osgi.util.NLS;
 import org.w3c.dom.Document;
 
-public class DbgpRawPacket implements IDbgpPacket {
+public class DbgpRawPacket implements IDbgpRawPacket {
 
 	protected static int readPacketSize(InputStream input) throws IOException {
 		int size = 0;
@@ -99,5 +100,13 @@ public class DbgpRawPacket implements IDbgpPacket {
 
 	public String toString() {
 		return "DbgpPacket (" + size + " bytes) " + xml; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	public String getPacketAsString() {
+		try {
+			return new String(xml, "ASCII");
+		} catch (UnsupportedEncodingException e) {
+			return new String(xml);
+		}
 	}
 }

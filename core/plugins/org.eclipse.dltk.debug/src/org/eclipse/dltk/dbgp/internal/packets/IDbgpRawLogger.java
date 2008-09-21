@@ -9,8 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.packets;
 
-import org.eclipse.dltk.dbgp.IDbgpPacket;
+import org.eclipse.dltk.dbgp.IDbgpRawPacket;
 
 public interface IDbgpRawLogger {
-	void log(IDbgpPacket packet);
+	void log(IDbgpRawPacket packet);
 }
