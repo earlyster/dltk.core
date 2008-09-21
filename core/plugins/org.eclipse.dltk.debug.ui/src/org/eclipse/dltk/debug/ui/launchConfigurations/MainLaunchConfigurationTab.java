@@ -34,6 +34,7 @@ import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.preferences.FieldValidators;
 import org.eclipse.dltk.ui.preferences.FieldValidators.FilePathValidator;
+import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.dltk.utils.PlatformFileUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -100,7 +101,19 @@ public abstract class MainLaunchConfigurationTab extends
 
 	protected void doInitializeForm(ILaunchConfiguration config) {
 		updateMainModuleFromConfig(config);
+		initializeDebugConsole(config);
 		initializeInteractiveConsoleFrom(config);
+	}
+
+	private void initializeDebugConsole(ILaunchConfiguration config) {
+		if (debugConsole != null) {
+			debugConsole
+					.setSelection(LaunchConfigurationUtils
+							.getBoolean(
+									config,
+									ScriptLaunchConfigurationConstants.ATTR_DEBUG_CONSOLE,
+									true));
+		}
 	}
 
 	protected void initializeInteractiveConsoleFrom(ILaunchConfiguration config) {
@@ -208,6 +221,21 @@ public abstract class MainLaunchConfigurationTab extends
 				DLTKLaunchConfigurationsMessages.mainTab_mainModule);
 	}
 
+	protected void createDebugOptions(Composite group) {
+		super.createDebugOptions(group);
+		if (canSelectDebugConsoleType()) {
+			debugConsole = SWTFactory.createCheckButton(group,
+					"Debug console redirection");
+			debugConsole.addSelectionListener(getWidgetListener());
+		}
+	}
+
+	protected boolean canSelectDebugConsoleType() {
+		return false;
+	}
+
+	private Button debugConsole;
+
 	/*
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getName()
 	 */
@@ -223,6 +251,14 @@ public abstract class MainLaunchConfigurationTab extends
 					ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
 					element.getResource().getProjectRelativePath().toString());
 		}
+		setDefaultsDebugConsole(configuration, element);
+	}
+
+	private void setDefaultsDebugConsole(
+			ILaunchConfigurationWorkingCopy configuration, IModelElement element) {
+		if (debugConsole != null) {
+			debugConsole.setSelection(true);
+		}
 	}
 
 	/*
@@ -234,6 +270,11 @@ public abstract class MainLaunchConfigurationTab extends
 		config.setAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
 				getScriptName());
+		if (debugConsole != null) {
+			config.setAttribute(
+					ScriptLaunchConfigurationConstants.ATTR_DEBUG_CONSOLE,
+					debugConsole.getSelection());
+		}
 		performApplyConnectionTimeout(config);
 		performApplyInteractiveConsole(config);
 	}
@@ -344,7 +385,7 @@ public abstract class MainLaunchConfigurationTab extends
 	 * @return
 	 */
 	protected final URI validatAndGetScriptPath() {
-		return null;
+		return validateAndGetScriptPath();
 	}
 
 	/**

@@ -124,9 +124,13 @@ public abstract class ScriptLaunchConfigurationTab extends
 			layout.numColumns = 2;
 			group.setLayout(layout);
 
-			addBreakOnFirstLineButton(group);
-			addDbgpLoggingButton(group);
+			createDebugOptions(group);
 		}
+	}
+
+	protected void createDebugOptions(Composite group) {
+		addBreakOnFirstLineButton(group);
+		addDbgpLoggingButton(group);
 	}
 
 	private boolean initializing = false;
@@ -264,9 +268,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
 		IModelElement element = getContextModelElement();
-		if (element != null) {
-			setDefaults(configuration, element);
-		}
+		setDefaults(configuration, element);
 	}
 
 	/**
@@ -275,9 +277,11 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 */
 	protected void setDefaults(ILaunchConfigurationWorkingCopy configuration,
 			IModelElement element) {
-		configuration.setAttribute(
-				ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME, element
-						.getScriptProject().getElementName());
+		if (element != null) {
+			configuration.setAttribute(
+					ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+					element.getScriptProject().getElementName());
+		}
 	}
 
 	/**

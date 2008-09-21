@@ -17,6 +17,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.dltk.debug.core.DLTKDebugLaunchConstants;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
 import org.eclipse.ui.WorkbenchEncoding;
 import org.eclipse.ui.console.ConsolePlugin;
@@ -42,12 +43,10 @@ public class DebugConsoleManager implements ILaunchListener {
 		if (launch == null) {
 			return false;
 		}
-
-		if (!launch.getLaunchMode().equals(ILaunchManager.DEBUG_MODE)) {
+		if (!ILaunchManager.DEBUG_MODE.equals(launch.getLaunchMode())) {
 			return false;
 		}
-
-		return true;
+		return DLTKDebugLaunchConstants.isDebugConsole(launch);
 	}
 
 	protected ScriptDebugConsole createConsole(String name, ILaunch launch) {
