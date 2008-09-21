@@ -94,7 +94,7 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 		String[] cmdLine = renderCommandLine(config);
 		return renderCommandLineLabel(cmdLine);
 	}
-	
+
 	protected void abort(String message, Throwable exception)
 			throws CoreException {
 		throw new CoreException(new Status(IStatus.ERROR,
@@ -110,12 +110,12 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 	}
 
 	// Execution helpers
-//	protected Process exec(String[] cmdLine, File workingDirectory)
-//			throws CoreException {
-//		return DebugPlugin.exec(cmdLine, workingDirectory);
-//	}
+	// protected Process exec(String[] cmdLine, File workingDirectory)
+	// throws CoreException {
+	// return DebugPlugin.exec(cmdLine, workingDirectory);
+	// }
 
-	// 
+	//
 	protected Map getDefaultProcessMap() {
 		Map map = new HashMap();
 		map.put(IProcess.ATTR_PROCESS_TYPE, getProcessType());
@@ -130,8 +130,8 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 		this.interpreterInstall = install;
 	}
 
-
-	protected void checkConfig(InterpreterConfig config, IEnvironment environment) throws CoreException {
+	protected void checkConfig(InterpreterConfig config,
+			IEnvironment environment) throws CoreException {
 		IPath workingDirectoryPath = config.getWorkingDirectoryPath();
 		IFileHandle dir = environment.getFile(workingDirectoryPath);
 		if (!dir.exists()) {
@@ -141,7 +141,7 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 									InterpreterMessages.errDebuggingEngineWorkingDirectoryDoesntExist,
 									new Object[] { dir.toString() }), null);
 		}
-		if( config.getScriptFilePath() == null ) {
+		if (config.getScriptFilePath() == null) {
 			return;
 		}
 		IFileHandle script = environment.getFile(config.getScriptFilePath());
@@ -153,7 +153,7 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 									new Object[] { script.toString() }), null);
 		}
 	}
-	
+
 	/**
 	 * Returns a new process aborting if the process could not be created.
 	 * 
@@ -186,12 +186,14 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 
 	protected IProcess rawRun(ILaunch launch, InterpreterConfig config)
 			throws CoreException {
-		
+
 		checkConfig(config, getInstall().getEnvironment());
-		
+
 		String[] cmdLine = renderCommandLine(config);
 		IPath workingDirectory = config.getWorkingDirectoryPath();
-		String[] environment = config.getEnvironmentAsStringsIncluding(interpreterInstall.getEnvironmentVariables());
+		String[] environment = config
+				.getEnvironmentAsStringsIncluding(interpreterInstall
+						.getEnvironmentVariables());
 
 		final String cmdLineLabel = renderCommandLineLabel(cmdLine);
 		final String processLabel = renderProcessLabel(cmdLine);
@@ -200,11 +202,13 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 			traceExecution(processLabel, cmdLineLabel, workingDirectory,
 					environment);
 		}
-		
+
 		IExecutionEnvironment exeEnv = interpreterInstall.getExecEnvironment();
 		Process p = exeEnv.exec(cmdLine, workingDirectory, environment);
 		if (p == null) {
-			abort(LaunchingMessages.AbstractInterpreterRunner_executionWasCancelled, null);
+			abort(
+					LaunchingMessages.AbstractInterpreterRunner_executionWasCancelled,
+					null);
 		}
 
 		launch.setAttribute(DLTKLaunchingPlugin.LAUNCH_COMMAND_LINE,
@@ -216,15 +220,15 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 		return process;
 	}
 
-	private void traceExecution(String processLabel,
-			String cmdLineLabel, IPath workingDirectory, String[] environment) {
+	private void traceExecution(String processLabel, String cmdLineLabel,
+			IPath workingDirectory, String[] environment) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("-----------------------------------------------\n"); //$NON-NLS-1$
 		sb.append("Running ").append(processLabel).append('\n'); //$NON-NLS-1$
 		sb.append("Command line: ").append(cmdLineLabel).append('\n'); //$NON-NLS-1$
 		sb.append("Working directory: ").append(workingDirectory).append('\n'); //$NON-NLS-1$
 		sb.append("Environment:\n"); //$NON-NLS-1$
-		for (int i=0; i<environment.length; i++) {
+		for (int i = 0; i < environment.length; i++) {
 			sb.append('\t').append(environment[i]).append('\n');
 		}
 		sb.append("-----------------------------------------------\n"); //$NON-NLS-1$
@@ -238,13 +242,15 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 		}
 
 		try {
-			monitor.beginTask(LaunchingMessages.AbstractInterpreterRunner_launching, 5);
+			monitor.beginTask(
+					LaunchingMessages.AbstractInterpreterRunner_launching, 5);
 			if (monitor.isCanceled()) {
 				return;
 			}
 			alterConfig(launch, config);
 			monitor.worked(1);
-			monitor.subTask(LaunchingMessages.AbstractInterpreterRunner_running);
+			monitor
+					.subTask(LaunchingMessages.AbstractInterpreterRunner_running);
 			rawRun(launch, config);
 			monitor.worked(4);
 
