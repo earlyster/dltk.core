@@ -31,8 +31,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
-import org.eclipse.core.runtime.jobs.ILock;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
@@ -300,27 +298,28 @@ public class DLTKContentTypeManager {
 	}
 
 	private static final Map derivedContentTypesCache = new HashMap();
-	private static final ILock derivedContentTypesCacheLock = Job
-			.getJobManager().newLock();
 
 	private static IContentType[] getDerivedContentTypes(IContentType masterType) {
-		derivedContentTypesCacheLock.acquire();
-		try {
-			if (!derivedContentTypesCache.containsKey(masterType)) {
-				IContentTypeManager manager = Platform.getContentTypeManager();
-				IContentType[] types = manager.getAllContentTypes();
-				Set derived = new HashSet();
-				for (int i = 0; i < types.length; i++) {
-					if (types[i].isKindOf(masterType)) {
-						derived.add(types[i]);
-					}
-				}
-				derivedContentTypesCache.put(masterType, derived
-						.toArray(new IContentType[derived.size()]));
-			}
-			return (IContentType[]) derivedContentTypesCache.get(masterType);
-		} finally {
-			derivedContentTypesCacheLock.release();
+		IContentType[] result;
+		synchronized (derivedContentTypesCache) {
+			result = (IContentType[]) derivedContentTypesCache.get(masterType);
 		}
+		if (result != null) {
+			return result;
+		}
+		final IContentTypeManager manager = Platform.getContentTypeManager();
+		final IContentType[] types = manager.getAllContentTypes();
+		final Set derived = new HashSet();
+		for (int i = 0; i < types.length; i++) {
+			if (types[i].isKindOf(masterType)) {
+				derived.add(types[i]);
+			}
+		}
+		result = (IContentType[]) derived.toArray(new IContentType[derived
+				.size()]);
+		synchronized (derivedContentTypesCache) {
+			derivedContentTypesCache.put(masterType, result);
+		}
+		return result;
 	}
 }
