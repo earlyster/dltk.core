@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.log;
 
-import org.eclipse.dltk.dbgp.IDbgpPacket;
+import org.eclipse.dltk.dbgp.IDbgpRawPacket;
 
 public class ScriptDebugLogItem {
 
@@ -27,7 +27,7 @@ public class ScriptDebugLogItem {
 		this.message = message;
 	}
 
-	public ScriptDebugLogItem(String type, int sessionId, IDbgpPacket message) {
+	public ScriptDebugLogItem(String type, int sessionId, IDbgpRawPacket message) {
 		this(System.currentTimeMillis(), type, sessionId, message);
 	}
 
@@ -37,11 +37,11 @@ public class ScriptDebugLogItem {
 	 * @param type
 	 */
 	public ScriptDebugLogItem(long timestamp, String type, int sessionId,
-			IDbgpPacket message) {
+			IDbgpRawPacket message) {
 		this.timestamp = timestamp;
 		this.type = type;
 		this.sessionId = sessionId;
-		this.message = message.toString();
+		this.message = message.getPacketAsString();
 	}
 
 	public long getTimestamp() {
