@@ -26,6 +26,7 @@ import org.eclipse.dltk.dbgp.breakpoints.IDbgpBreakpoint;
 import org.eclipse.dltk.dbgp.commands.IDbgpExtendedCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.IDbgpTerminationListener;
+import org.eclipse.dltk.debug.core.DLTKDebugLaunchConstants;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
 import org.eclipse.dltk.debug.core.IHotCodeReplaceListener;
@@ -181,14 +182,20 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 
 		manager.configureThread(engine, this);
 
-		if (engine.isFeatureSupported(IDbgpExtendedCommands.STDIN_COMMAND)) {
+		final boolean isDebugConsole = DLTKDebugLaunchConstants
+				.isDebugConsole(target.getLaunch());
+
+		if (isDebugConsole
+				&& engine
+						.isFeatureSupported(IDbgpExtendedCommands.STDIN_COMMAND)) {
 			engine.redirectStdin();
 		}
 
 		engine.setNotifyOk(true);
-
-		engine.redirectStdout();
-		engine.redirectStderr();
+		if (isDebugConsole) {
+			engine.redirectStdout();
+			engine.redirectStderr();
+		}
 
 		HotCodeReplaceManager.getDefault().addHotCodeReplaceListener(this);
 		// final IDbgpExtendedCommands extended = session.getExtendedCommands();
