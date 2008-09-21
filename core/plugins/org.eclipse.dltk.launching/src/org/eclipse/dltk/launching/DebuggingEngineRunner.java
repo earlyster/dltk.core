@@ -14,6 +14,7 @@ import org.eclipse.dltk.core.PreferencesLookupDelegate;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.dbgp.DbgpSessionIdGenerator;
+import org.eclipse.dltk.debug.core.DLTKDebugLaunchConstants;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
 import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
@@ -77,8 +78,10 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 				showLocalVarsPreferenceKey()));
 
 		// Disable the output of the debugging engine process
-		launch.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, Boolean.FALSE
-				.toString());
+		if (DLTKDebugLaunchConstants.isDebugConsole(launch)) {
+			launch.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, Boolean.FALSE
+					.toString());
+		}
 
 		// Debugging engine id
 		launch.setAttribute(LAUNCH_ATTR_DEBUGGING_ENGINE_ID,

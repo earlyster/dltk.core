@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
+import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
+
 /**
  * Constants for launch configurations
  * 
@@ -129,6 +131,13 @@ public class ScriptLaunchConfigurationConstants {
 
 	public static final String ENABLE_BREAK_ON_FIRST_LINE = "enableBreakOnFirstLine"; //$NON-NLS-1$
 	public static final String ENABLE_DBGP_LOGGING = "enableDbgpLogging"; //$NON-NLS-1$
+
+	/**
+	 * Boolean launch attribute to specify if DBGP console redirection should be
+	 * used. Default value is <code>true</code>.
+	 */
+	public static final String ATTR_DEBUG_CONSOLE = DLTKLaunchingPlugin.PLUGIN_ID
+			+ ".debugConsole";
 
 	// Errors
 	public static final int ERR_INTERNAL_ERROR = 100;

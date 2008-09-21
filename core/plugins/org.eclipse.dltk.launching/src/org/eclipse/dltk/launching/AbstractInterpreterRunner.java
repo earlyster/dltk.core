@@ -25,6 +25,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.debug.core.DLTKDebugLaunchConstants;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.InterpreterMessages;
 
@@ -251,7 +252,10 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 			monitor.worked(1);
 			monitor
 					.subTask(LaunchingMessages.AbstractInterpreterRunner_running);
-			rawRun(launch, config);
+			IProcess process = rawRun(launch, config);
+			if (!DLTKDebugLaunchConstants.isDebugConsole(launch)) {
+				launch.addProcess(process);
+			}
 			monitor.worked(4);
 
 		} finally {

@@ -40,6 +40,7 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.IStatusHandler;
+import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.eclipse.dltk.core.DLTKCore;
@@ -50,6 +51,7 @@ import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.debug.core.DLTKDebugLaunchConstants;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.InterpreterRuntimeBuildpathEntryResolver;
 import org.eclipse.dltk.launching.debug.DebuggingEngineManager;
@@ -797,6 +799,21 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 						null,
 						ScriptLaunchConfigurationConstants.ERR_NO_DEFAULT_DEBUGGING_ENGINE);
 			}
+		}
+	}
+
+	public ILaunch getLaunch(ILaunchConfiguration configuration, String mode)
+			throws CoreException {
+		if (ILaunchManager.DEBUG_MODE.equals(mode)
+				&& !configuration.getAttribute(
+						ScriptLaunchConfigurationConstants.ATTR_DEBUG_CONSOLE,
+						true)) {
+			final Launch launch = new Launch(configuration, mode, null);
+			launch.setAttribute(DLTKDebugLaunchConstants.ATTR_DEBUG_CONSOLE,
+					Boolean.FALSE.toString());
+			return launch;
+		} else {
+			return super.getLaunch(configuration, mode);
 		}
 	}
 
