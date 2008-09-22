@@ -66,8 +66,7 @@ public interface IValidatorType {
 	 * Tests that this type supports the specified type of checks
 	 * 
 	 * @param validatorType
-	 *            one of {@link IBuildParticipant},
-	 *            {@link ISourceModuleValidator}, {@link IResourceValidator}
+	 *            {@link ISourceModuleValidator} or {@link IResourceValidator}
 	 * @return
 	 */
 	boolean supports(Class validatorType);
