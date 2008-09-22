@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.osgi.util.NLS;
 
 public class NatureExtensionManager {
 
@@ -52,23 +53,40 @@ public class NatureExtensionManager {
 		}
 
 		extensions = new HashMap(5);
-		IConfigurationElement[] confElements = Platform.getExtensionRegistry()
-				.getConfigurationElementsFor(extensionPoint);
-		final String natureAttr = getCategoryAttributeName();
-
-		for (int i = 0; i < confElements.length; i++) {
-			final IConfigurationElement confElement = confElements[i];
-			final String nature = confElement.getAttribute(natureAttr);
-			List elements = (List) extensions.get(nature);
-			if (elements == null) {
-				elements = new ArrayList();
-				extensions.put(nature, elements);
-			}
-			elements.add(createDescriptor(confElement));
-		}
+		registerConfigurationElements();
 		for (Iterator i = extensions.values().iterator(); i.hasNext();) {
 			final List descriptors = (List) i.next();
 			initializeDescriptors(descriptors);
+		}
+	}
+
+	protected void registerConfigurationElements() {
+		registerConfigurationElements(Platform.getExtensionRegistry()
+				.getConfigurationElementsFor(extensionPoint),
+				getCategoryAttributeName());
+	}
+
+	protected void registerConfigurationElements(
+			IConfigurationElement[] confElements, final String categoryAttr) {
+		for (int i = 0; i < confElements.length; i++) {
+			final IConfigurationElement confElement = confElements[i];
+			final String category = confElement.getAttribute(categoryAttr);
+			if (category != null) {
+				List elements = (List) extensions.get(category);
+				if (elements == null) {
+					elements = new ArrayList();
+					extensions.put(category, elements);
+				}
+				elements.add(createDescriptor(confElement));
+			} else {
+				final String[] bindings = new String[] { categoryAttr,
+						extensionPoint, confElement.getContributor().getName() };
+				final String msg = NLS
+						.bind(
+								Messages.NatureExtensionManager_missingCategoryAttribute,
+								bindings);
+				DLTKCore.warn(msg);
+			}
 		}
 	}
 
@@ -82,7 +100,7 @@ public class NatureExtensionManager {
 	}
 
 	/**
-	 * @param natureExtensions
+	 * @param descriptors
 	 */
 	protected void initializeDescriptors(List descriptors) {
 		// empty
@@ -146,6 +164,10 @@ public class NatureExtensionManager {
 		return elementType.isAssignableFrom(e.getClass());
 	}
 
+	protected boolean isValidInstance(Object e) {
+		return isInstance(e);
+	}
+
 	private Object[] getByNature(String natureId) {
 		final Object ext = extensions.get(natureId);
 		if (ext != null) {
@@ -161,11 +183,15 @@ public class NatureExtensionManager {
 					} else {
 						try {
 							final Object instance = createInstanceByDescriptor(element);
-							if (instance != null) {
+							if (instance != null && isValidInstance(instance)) {
 								result.add(instance);
 							}
 						} catch (Exception e) {
-							DLTKCore.error("Error creating instance", e); //$NON-NLS-1$
+							final String msg = NLS
+									.bind(
+											Messages.NatureExtensionManager_instantiantionError,
+											elementType.getName());
+							DLTKCore.error(msg, e);
 						}
 					}
 				}
