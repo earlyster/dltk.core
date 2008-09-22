@@ -2,6 +2,7 @@
 <?eclipse version="3.2"?>
 <plugin>
    <extension-point id="validator" name="%extension-point.name.validator" schema="schema/validator.exsd"/>
+   <extension-point id="buildParticipant" name="%extension-point.name.buildParticipant" schema="schema/buildParticipant.exsd"/>
    <extension
          point="org.eclipse.dltk.core.builder">
       <builder

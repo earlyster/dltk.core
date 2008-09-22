@@ -18,17 +18,17 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.internal.core.IStructureBuilder;
+import org.eclipse.dltk.validators.core.BuildParticipantManager;
 import org.eclipse.dltk.validators.core.IBuildParticipant;
 import org.eclipse.dltk.validators.core.IBuildParticipantExtension;
-import org.eclipse.dltk.validators.core.ValidatorRuntime;
 
 public class ValidatorStructureBuilder implements IStructureBuilder {
 
 	public void buildStructure(String natureId, ISourceModule module,
 			IProblemReporter reporter) {
 		final IScriptProject project = module.getScriptProject();
-		final IBuildParticipant[] validators = ValidatorRuntime
-				.getBuildParticipants(project, natureId, ValidatorRuntime.ALL);
+		final IBuildParticipant[] validators = BuildParticipantManager
+				.getBuildParticipants(project, natureId);
 		if (validators.length == 0) {
 			return;
 		}

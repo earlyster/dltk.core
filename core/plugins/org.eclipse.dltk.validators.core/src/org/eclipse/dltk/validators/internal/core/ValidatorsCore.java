@@ -234,6 +234,10 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 	}
 
 	public static void warn(String message) {
-		log(new Status(IStatus.WARNING, PLUGIN_ID, IStatus.OK, message, null));
+		warn(message, null);
+	}
+
+	public static void warn(String message, Exception e) {
+		log(new Status(IStatus.WARNING, PLUGIN_ID, IStatus.OK, message, e));
 	}
 }

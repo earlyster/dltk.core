@@ -14,31 +14,13 @@ package org.eclipse.dltk.validators.core;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.IScriptProject;
 
-public abstract class AbstractBuildParticipantType implements
-		IBuildParticipantFactory {
+public interface IBuildParticipantFactory {
 
-	private final String id;
-	private final String name;
+	String getID();
 
-	protected AbstractBuildParticipantType(String id, String name) {
-		this.id = id;
-		this.name = name;
-	}
+	String getName();
 
-	public String getID() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public final IBuildParticipant newBuildParticipant(IScriptProject project)
-			throws CoreException {
-		return createBuildParticipant(project);
-	}
-
-	protected abstract IBuildParticipant createBuildParticipant(
-			IScriptProject project) throws CoreException;
+	IBuildParticipant newBuildParticipant(IScriptProject project)
+			throws CoreException;
 
 }

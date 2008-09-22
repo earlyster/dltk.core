@@ -361,34 +361,6 @@ public final class ValidatorRuntime {
 		return (IValidator[]) result.toArray(new IValidator[result.size()]);
 	}
 
-	public static IBuildParticipant[] getBuildParticipants(
-			IScriptProject project, String natureId,
-			IValidatorPredicate predicate) {
-		final List result = new ArrayList();
-		final IValidatorType[] types = ValidatorRuntime.getValidatorTypes();
-		for (int i = 0; i < types.length; ++i) {
-			final IValidatorType type = types[i];
-			if (checkValidatorTypeNature(type, natureId)
-					&& type.supports(IBuildParticipant.class)) {
-				final IValidator[] validators = type.getValidators();
-				for (int j = 0; j < validators.length; ++j) {
-					final IValidator validator = validators[j];
-					if (predicate.evaluate(validator)
-							&& validator.isValidatorValid(project)
-							&& validator.isAutomatic()) {
-						final IBuildParticipant participant = (IBuildParticipant) validator
-								.getValidator(project, IBuildParticipant.class);
-						if (participant != null) {
-							result.add(participant);
-						}
-					}
-				}
-			}
-		}
-		return (IBuildParticipant[]) result
-				.toArray(new IBuildParticipant[result.size()]);
-	}
-
 	/**
 	 * @param type
 	 * @param natureIds
@@ -406,17 +378,6 @@ public final class ValidatorRuntime {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * @param type
-	 * @param natureIds
-	 * @return
-	 */
-	private static boolean checkValidatorTypeNature(IValidatorType type,
-			String natureIds) {
-		final String typeNature = type.getNature();
-		return ANY_NATURE.equals(typeNature) || natureIds.equals(typeNature);
 	}
 
 	public static IStatus executeSourceModuleValidators(IScriptProject project,

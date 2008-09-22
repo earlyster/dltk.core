@@ -31,6 +31,7 @@ import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
 import org.eclipse.dltk.internal.core.ScriptProject;
+import org.eclipse.dltk.validators.core.BuildParticipantManager;
 import org.eclipse.dltk.validators.core.IBuildParticipant;
 import org.eclipse.dltk.validators.core.IBuildParticipantExtension;
 import org.eclipse.dltk.validators.core.IBuildParticipantExtension2;
@@ -295,8 +296,8 @@ public class ValidatorBuilder implements IScriptBuilder,
 	public void initialize(IScriptProject project) {
 		toolkit = project.getLanguageToolkit();
 		if (toolkit != null) {
-			participants = ValidatorRuntime.getBuildParticipants(project,
-					toolkit.getNatureId(), ValidatorRuntime.ALL);
+			participants = BuildParticipantManager.getBuildParticipants(
+					project, toolkit.getNatureId());
 		}
 		beginBuildDone = false;
 		endBuildNeeded = false;

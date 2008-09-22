@@ -10,27 +10,32 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.internal.core;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.dltk.utils.NatureExtensionManager;
 import org.eclipse.dltk.validators.core.IValidatorType;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 
-public class ValidatorManager {
+public class ValidatorManager extends NatureExtensionManager {
 
-	private final static String LANGUAGE_EXTPOINT = ValidatorsCore.PLUGIN_ID
+	public final static String LANGUAGE_EXTPOINT = ValidatorsCore.PLUGIN_ID
 			+ ".validator"; //$NON-NLS-1$
 
-	private final static String NATURE_ATTR = "nature"; //$NON-NLS-1$
+	private ValidatorManager() {
+		super(LANGUAGE_EXTPOINT, IValidatorType.class,
+				ValidatorRuntime.ANY_NATURE);
+	}
 
-	// Contains list of validators for selected nature.
-	private static Map validators = null;
+	private static ValidatorManager instance = null;
+
+	private static ValidatorManager getInstance() {
+		if (instance == null) {
+			instance = new ValidatorManager();
+		}
+		return instance;
+	}
 
 	private static Map idToValidatorType = null;
 
@@ -51,28 +56,18 @@ public class ValidatorManager {
 		return (IValidatorType) idToValidatorType.get(id);
 	}
 
-	private static void initialize() {
-		if (validators != null) {
-			return;
-		}
+	private static final IValidatorType[] NO_VALIDATORS = new IValidatorType[0];
 
-		validators = new HashMap(5);
-		IConfigurationElement[] cfg = Platform.getExtensionRegistry()
-				.getConfigurationElementsFor(LANGUAGE_EXTPOINT);
-
-		for (int i = 0; i < cfg.length; i++) {
-			final String nature = cfg[i].getAttribute(NATURE_ATTR);
-			List elements = (List) validators.get(nature);
-			if (elements == null) {
-				elements = new ArrayList();
-				validators.put(nature, elements);
-			}
-			elements.add(cfg[i]);
-		}
+	/*
+	 * @see org.eclipse.dltk.utils.NatureExtensionManager#createEmptyResult()
+	 */
+	protected Object[] createEmptyResult() {
+		return NO_VALIDATORS;
 	}
 
 	/**
-	 * Return merged with all elements with nature #
+	 * Return merged with all elements with nature #. If there are no validators
+	 * then the empty array is returned.
 	 * 
 	 * @param natureId
 	 * @return
@@ -80,67 +75,18 @@ public class ValidatorManager {
 	 */
 	public static IValidatorType[] getValidators(String natureId)
 			throws CoreException {
-		initialize();
-
-		List results = new ArrayList();
-		processNature(natureId, results);
-		processNature(ValidatorRuntime.ANY_NATURE, results);
-		return (IValidatorType[]) results.toArray(new IValidatorType[results
-				.size()]);
+		return (IValidatorType[]) getInstance().getInstances(natureId);
 	}
 
-	private static void processNature(String natureId, List results)
-			throws CoreException {
-		Object ext = validators.get(natureId);
-
-		if (ext != null) {
-			if (ext instanceof IValidatorType[]) {
-				IValidatorType[] b = (IValidatorType[]) ext;
-				for (int i = 0; i < b.length; i++) {
-					if (!results.contains(b[i])) {
-						results.add(b[i]);
-					}
-				}
-			} else if (ext instanceof List) {
-				List elements = (List) ext;
-				IValidatorType[] result = new IValidatorType[elements.size()];
-				for (int i = 0; i < elements.size(); ++i) {
-					Object e = elements.get(i);
-					if (e instanceof IValidatorType) {
-						result[i] = (IValidatorType) e;
-					} else {
-						IConfigurationElement cfg = (IConfigurationElement) e;
-						IValidatorType builder = (IValidatorType) cfg
-								.createExecutableExtension("class"); //$NON-NLS-1$
-						result[i] = builder;
-					}
-				}
-				validators.put(natureId, result);
-				for (int i = 0; i < result.length; i++) {
-					if (!results.contains(result[i])) {
-						results.add(result[i]);
-					}
-				}
-			}
-		}
-	}
-
+	/**
+	 * Return all validator types. If there are no validators then the empty
+	 * array is returned.
+	 * 
+	 * @return
+	 * @throws CoreException
+	 */
 	public static IValidatorType[] getAllValidatorTypes() throws CoreException {
-
-		initialize();
-		List result = new ArrayList();
-		Iterator iterator = validators.keySet().iterator();
-		while (iterator.hasNext()) {
-			String nature = (String) iterator.next();
-			IValidatorType[] b = getValidators(nature);
-			for (int i = 0; i < b.length; ++i) {
-				if (!result.contains(b[i])) {
-					result.add(b[i]);
-				}
-			}
-		}
-		return (IValidatorType[]) result.toArray(new IValidatorType[result
-				.size()]);
+		return (IValidatorType[]) getInstance().getAllInstances();
 	}
 
 }
