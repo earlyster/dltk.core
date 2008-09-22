@@ -11,7 +11,6 @@ package org.eclipse.dltk.internal.core.builder;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
@@ -33,8 +32,10 @@ public class State {
 	long lastStructuralBuildTime;
 	SimpleLookupTable structuralBuildTimes;
 
-	public static final byte VERSION = 0x0015; // changed access rule
-	// presentation
+	/**
+	 * 0x16 boolean noCleanExternalFolders is always present
+	 **/
+	public static final byte VERSION = 0x0016;
 
 	Set externalFolderLocations = new HashSet();
 
@@ -104,39 +105,17 @@ public class State {
 		int length = in.readInt();
 		newState.externalFolderLocations.clear();
 		for (int i = 0; i < length; i++) {
-			String folderName;
-			if ((folderName = in.readUTF()).length() > 0)
+			String folderName = in.readUTF();
+			if (folderName.length() > 0)
 				newState.externalFolderLocations.add(Path
 						.fromPortableString(folderName));
 		}
-		try {
-			boolean state = in.readBoolean();
-			newState.noCleanExternalFolders = state;
-		} catch (EOFException e) {
-			newState.noCleanExternalFolders = false;
-		}
+		newState.noCleanExternalFolders = in.readBoolean();
 		if (ScriptBuilder.DEBUG)
 			System.out
 					.println("Successfully read state for " + newState.scriptProjectName); //$NON-NLS-1$
 		return newState;
 	}
-
-	// private static char[] readName(DataInputStream in) throws IOException {
-	// int nLength = in.readInt();
-	// char[] name = new char[nLength];
-	// for (int j = 0; j < nLength; j++)
-	// name[j] = in.readChar();
-	// return name;
-	// }
-
-	// private static char[][] readNames(DataInputStream in) throws IOException
-	// {
-	// int length = in.readInt();
-	// char[][] names = new char[length][];
-	// for (int i = 0; i < length; i++)
-	// names[i] = readName(in);
-	// return names;
-	// }
 
 	void tagAsNoopBuild() {
 		this.buildNumber = -1; // tag the project since it has no source
@@ -158,11 +137,11 @@ public class State {
 	}
 
 	void write(DataOutputStream out) throws IOException {
-		int length;
-
-		/*
-		 * byte VERSION String project name int build number int last structural
-		 * build number
+		/**
+		 * byte VERSION<br>
+		 * String project name<br>
+		 * int build number<br>
+		 * int last structural build number
 		 */
 		out.writeByte(VERSION);
 		out.writeUTF(scriptProjectName);
@@ -172,7 +151,7 @@ public class State {
 		/*
 		 * ClasspathMultiDirectory[] int id String path(s)
 		 */
-		out.writeInt(length = externalFolderLocations.size());
+		out.writeInt(externalFolderLocations.size());
 		for (Iterator iterator = this.externalFolderLocations.iterator(); iterator
 				.hasNext();) {
 			IPath path = (IPath) iterator.next();
