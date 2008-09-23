@@ -5,8 +5,6 @@ import org.eclipse.debug.core.model.IVariable;
 
 public class CollectionScriptType extends AtomicScriptType {
 
-	private static final int MAX_STRING_VALUE = 512;
-
 	protected CollectionScriptType(String name) {
 		super(name);
 	}
@@ -19,32 +17,23 @@ public class CollectionScriptType extends AtomicScriptType {
 		return true;
 	}
 
-	protected void addInstanceId(IScriptValue value, StringBuffer buffer) {
-		String id = value.getInstanceId();
-		if (id != null) {
-			buffer.append(" (id = " + id + ")"); //$NON-NLS-1$ //$NON-NLS-2$ // TODO add constant
-		}
-
-	}
-
 	public String formatDetails(IScriptValue value) {
 		final StringBuffer sb = new StringBuffer();
 		try {
 			IVariable[] variables2 = value.getVariables();
 			if (variables2.length > 0) {
-				sb.append("{"); //$NON-NLS-1$ // == Array
+				sb.append(getOpenBrace());
 				for (int i = 0; i < variables2.length; i++) {
-					sb.append(variables2[i].getValue().getValueString());
-					sb.append(",");//$NON-NLS-1$
+					String details = buildDetailString(variables2[i]);
+					sb.append(details);
+					sb.append(","); //$NON-NLS-1$
 				}
 				sb.setLength(sb.length() - 1);
-				sb.append("}"); //$NON-NLS-1$ // == Array
+				sb.append(getCloseBrace());
 			}
 		} catch (DebugException ex) {
 			ex.printStackTrace();
 		}
-
-		addInstanceId(value, sb);
 
 		return sb.toString();
 	}
@@ -52,14 +41,7 @@ public class CollectionScriptType extends AtomicScriptType {
 	public String formatValue(IScriptValue value) {
 		StringBuffer sb = new StringBuffer();
 
-		try {
-			if (value.getVariables().length > 0)
-				sb.append(value.getVariable(0).getReferenceTypeName());
-			else
-				sb.append(getName());
-		} catch (DebugException e) {
-			sb.append(getName());
-		}
+		sb.append(getName());
 
 		try {
 			sb.append("[" + value.getVariables().length + "]"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -67,8 +49,47 @@ public class CollectionScriptType extends AtomicScriptType {
 			sb.append("[]"); //$NON-NLS-1$
 		}
 
-		addInstanceId(value, sb);
+		appendInstanceId(value, sb);
 
 		return sb.toString();
 	}
+
+	/**
+	 * Build the detail string for the given variable.
+	 * 
+	 * <p>
+	 * Default implementation just returns the value of the specified variable.
+	 * Subclasses may override if they wish to return something different. For
+	 * example, a hash collection may wish to return key/value pairs.
+	 * </p>
+	 */
+	protected String buildDetailString(IVariable variable)
+			throws DebugException {
+		return variable.getValue().getValueString();
+	}
+
+	/**
+	 * Returns the brace that will be used to close the collection.
+	 * 
+	 * <p>
+	 * Default implementation returns <code>[</code>. Subclasses may override if
+	 * they wish to use something different.
+	 * </p>
+	 */
+	protected char getCloseBrace() {
+		return ']';
+	}
+
+	/**
+	 * Returns the brace that will be used to close the collection.
+	 * 
+	 * <p>
+	 * Default implementation returns <code>]</code>. Subclasses may override if
+	 * they wish to use something different.
+	 * </p>
+	 */
+	protected char getOpenBrace() {
+		return '[';
+	}
+
 }
