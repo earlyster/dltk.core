@@ -58,8 +58,8 @@ import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.osgi.util.NLS;
 
 public class ScriptBuilder extends IncrementalProjectBuilder {
-	public static final boolean DEBUG = DLTKCore.DEBUG_SCRIPT_BUILDER;
-	public static final boolean TRACE = DLTKCore.TRACE_SCRIPT_BUILDER;
+	public static final boolean DEBUG = false;
+	public static final boolean TRACE = false;
 
 	public IProject currentProject = null;
 	ScriptProject scriptProject = null;
@@ -180,13 +180,15 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		if (!DLTKLanguageManager.hasScriptNature(this.currentProject)) {
 			return null;
 		}
-		if (DEBUG)
+		final long startTime;
+		if (DEBUG || TRACE) {
+			startTime = System.currentTimeMillis();
 			log("\nStarting build of " + this.currentProject.getName() //$NON-NLS-1$
-					+ " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
+					+ " @ " + new Date(startTime)); //$NON-NLS-1$
+		}
 		this.scriptProject = (ScriptProject) DLTKCore.create(currentProject);
 		lastBuildResources = 0;
 		lastBuildSourceFiles = 0;
-		final long start = TRACE ? System.currentTimeMillis() : 0;
 		if (monitor == null) {
 			monitor = new NullProgressMonitor();
 		}
@@ -213,16 +215,21 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			}
 		}
 		IProject[] requiredProjects = getRequiredProjects(true);
-		if (DEBUG)
+		final long endTime;
+		if (DEBUG || TRACE) {
+			endTime = System.currentTimeMillis();
+		}
+		if (DEBUG) {
 			log("Finished build of " + currentProject.getName() //$NON-NLS-1$
-					+ " @ " + new Date(System.currentTimeMillis())); //$NON-NLS-1$
+					+ " @ " + new Date(endTime) + ", elapsed " + (endTime - startTime) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
 		if (TRACE) {
 			System.out
 					.println("-----SCRIPT-BUILDER-INFORMATION-TRACE----------------------------"); //$NON-NLS-1$
 			System.out.println("Finished build of project:" //$NON-NLS-1$
 					+ currentProject.getName() + "\n" //$NON-NLS-1$
 					+ "Building time:" //$NON-NLS-1$
-					+ Long.toString(System.currentTimeMillis() - start) + "\n" //$NON-NLS-1$
+					+ Long.toString(endTime - startTime) + "\n" //$NON-NLS-1$
 					+ "Resources count:" //$NON-NLS-1$
 					+ this.lastBuildResources + "\n" //$NON-NLS-1$
 					+ "Sources count:" //$NON-NLS-1$
