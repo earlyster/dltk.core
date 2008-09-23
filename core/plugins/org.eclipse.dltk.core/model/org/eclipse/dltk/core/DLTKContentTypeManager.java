@@ -36,25 +36,24 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 
 public class DLTKContentTypeManager {
 
-	private static boolean DEBUG = false;
+	private static final boolean DEBUG = false;
+	private static final boolean DEBUG_CONTENT = false;
 
-	private static void logMethodEntry(IDLTKLanguageToolkit toolkit,
-			Object input) {
+	private static void log(String message, Object input) {
 		if (input != null) {
 			String className = input.getClass().getName();
 			int pos = className.lastIndexOf('.');
 			if (pos > 0) {
 				className = className.substring(pos + 1);
 			}
-			System.out.println("isValidFileNameForContentType " + input + ':' //$NON-NLS-1$
-					+ className + ' ' + toolkit.getLanguageName());
+			System.out.println(message + ' ' + input + ':' + className);
 		}
 	}
 
 	public static boolean isValidFileNameForContentType(
 			IDLTKLanguageToolkit toolkit, String name) {
 		if (DEBUG) {
-			logMethodEntry(toolkit, name);
+			log(toolkit.getLanguageName(), name);
 		}
 		final IContentType masterType = getMasterContentType(toolkit
 				.getLanguageContentType());
@@ -69,7 +68,7 @@ public class DLTKContentTypeManager {
 	public static boolean isValidFileNameForContentType(
 			IDLTKLanguageToolkit toolkit, IPath path) {
 		if (DEBUG) {
-			logMethodEntry(toolkit, path);
+			log(toolkit.getLanguageName(), path);
 		}
 		final IContentType masterType = getMasterContentType(toolkit
 				.getLanguageContentType());
@@ -111,6 +110,9 @@ public class DLTKContentTypeManager {
 
 	private static boolean validateRemoteFileContent(IContentType masterType,
 			final IContentType[] derived, IFileHandle file) {
+		if (DEBUG_CONTENT) {
+			log("validateContent", file); //$NON-NLS-1$
+		}
 		for (int i = 0; i < derived.length; i++) {
 			IContentType type = derived[i];
 			InputStream stream = null;
@@ -143,6 +145,9 @@ public class DLTKContentTypeManager {
 	 */
 	private static boolean validateLocalFileContent(IContentType masterType,
 			IContentType[] derived, File file) {
+		if (DEBUG_CONTENT) {
+			log("validateContent", file); //$NON-NLS-1$
+		}
 		for (int i = 0; i < derived.length; i++) {
 			IContentType type = derived[i];
 			InputStream stream = null;
@@ -196,7 +201,7 @@ public class DLTKContentTypeManager {
 	public static boolean isValidResourceForContentType(
 			IDLTKLanguageToolkit toolkit, IResource resource) {
 		if (DEBUG) {
-			logMethodEntry(toolkit, resource);
+			log(toolkit.getLanguageName(), resource);
 		}
 		if (!(resource instanceof IFile)) {
 			return false;
@@ -228,6 +233,9 @@ public class DLTKContentTypeManager {
 	private static boolean validateResourceContent(
 			final IContentType masterType, final IContentType[] derived,
 			final IFile file) {
+		if (DEBUG_CONTENT) {
+			log("validateContent", file); //$NON-NLS-1$
+		}
 		try {
 			if (file.exists()) {
 				final IContentDescription descr = file.getContentDescription();
