@@ -1,6 +1,5 @@
 package org.eclipse.dltk.core;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -15,6 +14,7 @@ import java.util.regex.Pattern;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.ITextContentDescriber;
+import org.eclipse.dltk.utils.CharArraySequence;
 
 public abstract class ScriptContentDescriber implements ITextContentDescriber {
 	public static final QualifiedName DLTK_VALID = new QualifiedName(
@@ -121,43 +121,108 @@ public abstract class ScriptContentDescriber implements ITextContentDescriber {
 		return false;
 	}
 
-	public static boolean checkPatterns(Reader stream,
-			Pattern[] headerPatterns, Pattern[] footerPatterns) {
-		BufferedReader reader = new BufferedReader(stream);
-		StringBuffer buffer = new StringBuffer();
-		char buff[] = new char[8096];
-		while (true) {
-			try {
-				int len = reader.read(buff);
-				if (len != -1) {
-					buffer.append(buff, 0, len);
-				} else {
-					break;
+	/**
+	 * Reads the specified number of bytes from the specified reader. Calls
+	 * {@link Reader#read(char[], int, int)} multiple times until EOF of the
+	 * specified number of bytes is read. Also catches {@link IOException} and
+	 * return -1 on it.
+	 * 
+	 * @param reader
+	 * @param bufffer
+	 * @param offset
+	 * @param len
+	 * @return
+	 */
+	private static int read(Reader reader, char[] bufffer, int offset, int len) {
+		try {
+			int count = 0;
+			while (len > 0) {
+				final int result = reader.read(bufffer, offset, len);
+				if (result > 0) {
+					offset += result;
+					len -= result;
+					count += result;
+				} else if (result < 0) {
+					if (count == 0) {
+						return result;
+					} else {
+						break;
+					}
 				}
-			} catch (IOException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
+			}
+			return count;
+		} catch (IOException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace(); // ignore
+			}
+			return -1;
+		}
+	}
+
+	public static boolean checkPatterns(Reader reader,
+			Pattern[] headerPatterns, Pattern[] footerPatterns) {
+		/*
+		 * There is no need to use BufferedReader here since a) we read blocks,
+		 * b) implementation provided by eclipse.core already do buffering.
+		 */
+		final int bufferSize = Math.max(HEADER_LENGTH, FOOTER_LENGTH);
+		char[] buffer = new char[bufferSize];
+		int len = read(reader, buffer, 0, HEADER_LENGTH);
+		if (len > 0) {
+			if (headerPatterns != null && headerPatterns.length > 0) {
+				if (checkBufferForPatterns(new CharArraySequence(buffer, len),
+						headerPatterns)) {
+					return true;
+				}
+			}
+		}
+		if (footerPatterns != null && footerPatterns.length > 0) {
+			char[] prevBuffer = new char[bufferSize];
+			int prevLen = 0;
+			for (;;) {
+				final char[] tempBuffer = buffer;
+				buffer = prevBuffer;
+				prevBuffer = tempBuffer;
+				//
+				final int savedLen = prevLen;
+				prevLen = len;
+				len = savedLen;
+				//
+				len = read(reader, buffer, 0, bufferSize);
+				if (len <= 0) {
+					final CharSequence footer;
+					if (savedLen >= FOOTER_LENGTH) {
+						footer = new CharArraySequence(buffer, savedLen
+								- FOOTER_LENGTH, FOOTER_LENGTH);
+					} else {
+						int footerLength = prevLen;
+						if (savedLen > 0) {
+							footerLength += savedLen;
+						}
+						if (footerLength > FOOTER_LENGTH) {
+							footerLength = FOOTER_LENGTH;
+						}
+						int prevOffset = Math.max(prevLen - footerLength, 0);
+						int prevSize = Math.min(prevLen, footerLength);
+						if (savedLen > 0) {
+							System.arraycopy(buffer, 0, buffer, footerLength
+									- savedLen, savedLen);
+							prevOffset += savedLen;
+							prevSize -= savedLen;
+						}
+						if (prevSize > 0) {
+							System.arraycopy(prevBuffer, prevOffset, buffer, 0,
+									prevSize);
+						}
+						footer = new CharArraySequence(buffer, footerLength);
+					}
+					if (checkBufferForPatterns(footer, footerPatterns)) {
+						return true;
+					}
 				}
 				break;
 			}
 		}
-		String content = buffer.toString();
-		String header = content;
-		if (header.length() > HEADER_LENGTH) {
-			header = header.substring(0, HEADER_LENGTH);
-		}
-		String footer = content;
-		if (footer.length() > FOOTER_LENGTH) {
-			footer = footer.substring(footer.length() - FOOTER_LENGTH, footer
-					.length() - 1);
-		}
-		if (checkBufferForPatterns(header, headerPatterns)) {
-			return true;
-		}
-		if (checkBufferForPatterns(footer, footerPatterns)) {
-			return true;
-		}
-
 		return false;
 	}
 
