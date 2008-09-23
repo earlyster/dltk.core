@@ -22,6 +22,13 @@ public class CharArraySequence implements CharSequence {
 
 	/**
 	 * @param buff
+	 */
+	public CharArraySequence(char[] buff) {
+		this(buff, 0, buff.length);
+	}
+
+	/**
+	 * @param buff
 	 * @param count
 	 */
 	public CharArraySequence(char[] buff, int count) {
