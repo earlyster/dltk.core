@@ -44,6 +44,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IModelMarker;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
@@ -85,6 +86,11 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				return false;
 			}
 			IResource resource = delta.getResource();
+			if (resource.getType() == IResource.FOLDER) {
+				this.monitor
+						.subTask(Messages.ScriptBuilder_scanningProjectFolder
+								+ resource.getProjectRelativePath().toString());
+			}
 			if (resource.getType() == IResource.FILE) {
 				switch (delta.getKind()) {
 				case IResourceDelta.ADDED:
@@ -100,6 +106,11 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		public boolean visit(IResource resource) {
 			if (monitor.isCanceled()) {
 				return false;
+			}
+			if (resource.getType() == IResource.FOLDER) {
+				this.monitor
+						.subTask(Messages.ScriptBuilder_scanningProjectFolder
+								+ resource.getProjectRelativePath().toString());
 			}
 			if (resource.getType() == IResource.FILE) {
 				resources.add(resource);
@@ -136,7 +147,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 						fragment.getPath()).toString();
 				if (!localPath.startsWith("#")) { //$NON-NLS-1$
 					this.monitor
-							.subTask(Messages.ScriptBuilder_Looking_into_folder
+							.subTask(Messages.ScriptBuilder_scanningExternalFolder
 									+ localPath);
 				}
 			} else if (element.getElementType() == IModelElement.SOURCE_MODULE) {
@@ -145,6 +156,15 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					elements.add(element);
 				}
 				return false; // do not enter into source module content.
+			} else if (element.getElementType() == IModelElement.SCRIPT_FOLDER) {
+				IScriptFolder folder = (IScriptFolder) element;
+				String localPath = EnvironmentPathUtils.getLocalPath(
+						folder.getPath()).toString();
+				if (!localPath.startsWith("#")) { //$NON-NLS-1$
+					this.monitor
+							.subTask(Messages.ScriptBuilder_scanningExternalFolder
+									+ localPath);
+				}
 			}
 			return true;
 		}
@@ -454,7 +474,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 	private Set getResourcesFrom(Object el, final IProgressMonitor monitor,
 			int ticks) throws CoreException {
-		monitor.subTask(Messages.ScriptBuilder_scanningResourcesIn);
+		monitor.subTask(Messages.ScriptBuilder_scanningProject);
 		try {
 			ResourceVisitor resourceVisitor = new ResourceVisitor(monitor);
 			if (el instanceof IProject) {
@@ -473,7 +493,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	private Set getExternalElementsFrom(ScriptProject prj,
 			final IProgressMonitor monitor, int tiks, boolean updateState)
 			throws ModelException {
-		final String name = Messages.ScriptBuilder_scanningExternalResourcesFor;
+		final String name = Messages.ScriptBuilder_scanningExternalFolders;
 		monitor.subTask(name);
 		final SubProgressMonitor mon = new SubProgressMonitor(monitor, tiks);
 
@@ -643,7 +663,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		for (Iterator iterator = resources.iterator(); iterator.hasNext();) {
 			IResource res = (IResource) iterator.next();
 			sub.subTask(NLS.bind(
-					Messages.ScriptBuilder_Location_source_modules, String
+					Messages.ScriptBuilder_Locating_source_modules, String
 							.valueOf(remainingWork), res.getName()));
 			sub.worked(1);
 			if (sub.isCanceled()) {
@@ -719,6 +739,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					&& builder instanceof IScriptBuilderExtension) {
 				final int step = buildExternalElements.size() * ticks / total;
 				builderWork -= step;
+				monitor.setTaskName(NLS.bind(
+						Messages.ScriptBuilder_building_N_externalModules,
+						Integer.toString(buildExternalElements.size())));
 				((IScriptBuilderExtension) builder).buildExternalElements(
 						scriptProject, buildExternalElements,
 						new SubProgressMonitor(monitor, step), buildTypes[k]);
@@ -727,6 +750,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (buildElementsList.size() > 0) {
 				final int step = buildElementsList.size() * ticks / total;
 				builderWork -= step;
+				monitor.setTaskName(NLS.bind(
+						Messages.ScriptBuilder_building_N_localModules, Integer
+								.toString(buildElementsList.size())));
 				builder.buildModelElements(scriptProject, buildElementsList,
 						new SubProgressMonitor(monitor, step), buildTypes[k]);
 			}
