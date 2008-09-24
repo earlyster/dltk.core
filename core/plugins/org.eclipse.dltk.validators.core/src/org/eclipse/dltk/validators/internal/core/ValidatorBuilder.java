@@ -187,11 +187,14 @@ public class ValidatorBuilder implements IScriptBuilder,
 		}
 		if (reporters != null) {
 			monitor.subTask(ValidatorMessages.ValidatorBuilder_finalizeBuild);
+			final IProgressMonitor finalizeMonitor = new SubTaskProgressMonitor(
+					monitor, ValidatorMessages.ValidatorBuilder_finalizeBuild);
 			if (participants != null) {
 				for (int j = 0; j < participants.length; ++j) {
 					final IBuildParticipant participant = participants[j];
 					if (participant instanceof IBuildParticipantExtension) {
-						((IBuildParticipantExtension) participant).endBuild();
+						((IBuildParticipantExtension) participant)
+								.endBuild(finalizeMonitor);
 					}
 				}
 			}

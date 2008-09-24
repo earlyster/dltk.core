@@ -12,6 +12,7 @@
 package org.eclipse.dltk.validators.internal.core;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.IScriptProject;
@@ -26,6 +27,7 @@ public class ValidatorStructureBuilder implements IStructureBuilder {
 
 	public void buildStructure(String natureId, ISourceModule module,
 			IProblemReporter reporter) {
+		final NullProgressMonitor monitor = new NullProgressMonitor();
 		final IScriptProject project = module.getScriptProject();
 		final IBuildParticipant[] validators = BuildParticipantManager
 				.getBuildParticipants(project, natureId);
@@ -52,7 +54,7 @@ public class ValidatorStructureBuilder implements IStructureBuilder {
 		for (int j = 0; j < validators.length; ++j) {
 			final IBuildParticipant participant = validators[j];
 			if (participant instanceof IBuildParticipantExtension) {
-				((IBuildParticipantExtension) participant).endBuild();
+				((IBuildParticipantExtension) participant).endBuild(monitor);
 			}
 		}
 	}

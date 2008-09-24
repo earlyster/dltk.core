@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.core;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 
 public interface IBuildParticipantExtension {
@@ -22,6 +23,6 @@ public interface IBuildParticipantExtension {
 
 	void beginBuild(int buildType);
 
-	void endBuild();
+	void endBuild(IProgressMonitor monitor);
 
 }
