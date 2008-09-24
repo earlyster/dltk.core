@@ -83,30 +83,62 @@ public class ValidatorBuilder implements IScriptBuilder,
 
 	public void buildExternalElements(ScriptProject project,
 			List externalElements, IProgressMonitor monitor, int buildType) {
-		beginBuild(buildType);
-		if (participants != null) {
-			for (int i = 0; i < participants.length; ++i) {
-				final IBuildParticipant participant = participants[i];
-				if (participant instanceof IBuildParticipantExtension2) {
-					final IBuildParticipantExtension2 ext = (IBuildParticipantExtension2) participant;
-					for (Iterator j = externalElements.iterator(); j.hasNext();) {
-						if (monitor.isCanceled())
-							return;
-						final ISourceModule module = (ISourceModule) j.next();
-						final ModuleDeclaration moduleDeclaration = SourceParserUtil
-								.getModuleDeclaration(module);
-						if (moduleDeclaration != null) {
-							try {
-								ext.buildExternalModule(module,
-										moduleDeclaration);
-							} catch (CoreException e) {
-								ValidatorsCore.log(e.getStatus());
-							}
+		beginBuild(buildType, monitor);
+		final IBuildParticipantExtension2[] extensions = selectExtension2();
+		if (extensions != null) {
+			int remainingWork = externalElements.size();
+			for (Iterator j = externalElements.iterator(); j.hasNext();) {
+				if (monitor.isCanceled())
+					return;
+				final ISourceModule module = (ISourceModule) j.next();
+				monitor
+						.subTask(NLS
+								.bind(
+										ValidatorMessages.ValidatorBuilder_buildExternalModuleSubTask,
+										String.valueOf(remainingWork), module
+												.getElementName()));
+				final ModuleDeclaration moduleDeclaration = SourceParserUtil
+						.getModuleDeclaration(module);
+				if (moduleDeclaration != null) {
+					for (int i = 0; i < extensions.length; ++i) {
+						try {
+							extensions[i].buildExternalModule(module,
+									moduleDeclaration);
+						} catch (CoreException e) {
+							ValidatorsCore.log(e.getStatus());
 						}
 					}
 				}
+				--remainingWork;
 			}
 		}
+	}
+
+	/**
+	 * @return
+	 */
+	private IBuildParticipantExtension2[] selectExtension2() {
+		if (participants != null) {
+			int count = 0;
+			for (int i = 0; i < participants.length; ++i) {
+				final IBuildParticipant participant = participants[i];
+				if (participant instanceof IBuildParticipantExtension2) {
+					++count;
+				}
+			}
+			if (count != 0) {
+				final IBuildParticipantExtension2[] result = new IBuildParticipantExtension2[count];
+				count = 0;
+				for (int i = 0; i < participants.length; ++i) {
+					final IBuildParticipant participant = participants[i];
+					if (participant instanceof IBuildParticipantExtension2) {
+						result[count++] = (IBuildParticipantExtension2) participant;
+					}
+				}
+				return result;
+			}
+		}
+		return null;
 	}
 
 	private void buildModules(IScriptProject project, List elements,
@@ -128,7 +160,7 @@ public class ValidatorBuilder implements IScriptBuilder,
 
 	private void buildNatureModules(IScriptProject project, int buildType,
 			final String nature, final List modules, IProgressMonitor monitor) {
-		final boolean secondPass = beginBuild(buildType);
+		final boolean secondPass = beginBuild(buildType, monitor);
 		final List reporters = secondPass ? new ArrayList() : null;
 		int counter = 0;
 		for (Iterator j = modules.iterator(); j.hasNext();) {
@@ -154,6 +186,7 @@ public class ValidatorBuilder implements IScriptBuilder,
 			++counter;
 		}
 		if (reporters != null) {
+			monitor.subTask(ValidatorMessages.ValidatorBuilder_finalizeBuild);
 			if (participants != null) {
 				for (int j = 0; j < participants.length; ++j) {
 					final IBuildParticipant participant = participants[j];
@@ -179,10 +212,13 @@ public class ValidatorBuilder implements IScriptBuilder,
 	 * result of the first call.
 	 * 
 	 * @param buildType
+	 * @param monitor
 	 * @return
 	 */
-	private boolean beginBuild(int buildType) {
+	private boolean beginBuild(int buildType, IProgressMonitor monitor) {
 		if (!beginBuildDone) {
+			monitor
+					.subTask(ValidatorMessages.ValidatorBuilder_InitializeBuilders);
 			endBuildNeeded = false;
 			if (participants != null) {
 				for (int j = 0; j < participants.length; ++j) {
