@@ -16,13 +16,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.ui.ScriptElementLabels;
+import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.osgi.util.NLS;
 
 public class ModelElementArray {
@@ -124,8 +124,8 @@ public class ModelElementArray {
 
 	/**
 	 * <p>
-	 * Joins the elements of the provided <code>Collection</code> into a
-	 * single String containing the provided elements.
+	 * Joins the elements of the provided <code>Collection</code> into a single
+	 * String containing the provided elements.
 	 * </p>
 	 * 
 	 * <p>
@@ -134,40 +134,14 @@ public class ModelElementArray {
 	 * </p>
 	 * 
 	 * @param collection
-	 *            the <code>Collection</code> of values to join together, may
-	 *            be null
+	 *            the <code>Collection</code> of values to join together, may be
+	 *            null
 	 * @param separator
 	 *            the separator character to use, null treated as ""
 	 * @return the joined String, <code>null</code> if null collection input
 	 */
 	private static String join(Collection collection, String separator) {
-		// handle null, zero and one elements before building a buffer
-		if (collection == null) {
-			return null;
-		}
-		if (collection.isEmpty()) {
-			return ""; //$NON-NLS-1$
-		}
-		final Iterator iterator = collection.iterator();
-		final Object first = iterator.next();
-		if (!iterator.hasNext()) {
-			return first != null ? first.toString() : ""; //$NON-NLS-1$
-		}
-		// two or more elements
-		final StringBuffer buf = new StringBuffer(256);
-		if (first != null) {
-			buf.append(first);
-		}
-		while (iterator.hasNext()) {
-			if (separator != null) {
-				buf.append(separator);
-			}
-			final Object obj = iterator.next();
-			if (obj != null) {
-				buf.append(obj);
-			}
-		}
-		return buf.toString();
+		return TextUtils.join(collection, separator);
 	}
 
 }
