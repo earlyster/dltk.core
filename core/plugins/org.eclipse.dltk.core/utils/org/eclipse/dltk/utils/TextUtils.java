@@ -10,7 +10,11 @@
 package org.eclipse.dltk.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.dltk.compiler.CharOperation;
 
 public abstract class TextUtils {
 
@@ -157,13 +161,13 @@ public abstract class TextUtils {
 	}
 
 	public static String replace(String text, char c, String s) {
-	
+
 		int previous = 0;
 		int current = text.indexOf(c, previous);
-	
+
 		if (current == -1)
 			return text;
-	
+
 		StringBuffer buffer = new StringBuffer();
 		while (current > -1) {
 			buffer.append(text.substring(previous, current));
@@ -172,7 +176,7 @@ public abstract class TextUtils {
 			current = text.indexOf(c, previous);
 		}
 		buffer.append(text.substring(previous));
-	
+
 		return buffer.toString();
 	}
 
@@ -182,4 +186,132 @@ public abstract class TextUtils {
 		content = replace(content, '<', "&lt;"); //$NON-NLS-1$
 		return replace(content, '>', "&gt;"); //$NON-NLS-1$
 	}
+
+	/**
+	 * <p>
+	 * Joins the elements of the provided <code>Collection</code> into a single
+	 * String containing the provided elements.
+	 * </p>
+	 * 
+	 * <p>
+	 * No delimiter is added before or after the list. A <code>null</code>
+	 * separator is the same as an empty String ("").
+	 * </p>
+	 * 
+	 * @param collection
+	 *            the <code>Collection</code> of values to join together, may be
+	 *            null
+	 * @param separator
+	 *            the separator character to use, null treated as ""
+	 * @return the joined String, <code>null</code> if null collection input
+	 */
+	public static String join(Collection collection, String separator) {
+		// handle null, zero and one elements before building a buffer
+		if (collection == null) {
+			return null;
+		}
+		if (collection.isEmpty()) {
+			return ""; //$NON-NLS-1$
+		}
+		final Iterator iterator = collection.iterator();
+		final Object first = iterator.next();
+		if (!iterator.hasNext()) {
+			return first != null ? first.toString() : ""; //$NON-NLS-1$
+		}
+		// two or more elements
+		final StringBuffer buf = new StringBuffer(256);
+		if (first != null) {
+			buf.append(first);
+		}
+		while (iterator.hasNext()) {
+			if (separator != null) {
+				buf.append(separator);
+			}
+			final Object obj = iterator.next();
+			if (obj != null) {
+				buf.append(obj);
+			}
+		}
+		return buf.toString();
+	}
+
+	/**
+	 * <p>
+	 * Joins the elements of the provided <code>Collection</code> into a single
+	 * String containing the provided elements.
+	 * </p>
+	 * 
+	 * <p>
+	 * No delimiter is added before or after the list. A <code>null</code>
+	 * separator is the same as an empty String ("").
+	 * </p>
+	 * 
+	 * @param collection
+	 *            the <code>Collection</code> of values to join together, may be
+	 *            null
+	 * @param separator
+	 *            the separator character to use, null treated as ""
+	 * @return the joined String, <code>null</code> if null collection input
+	 */
+	public static String join(Collection collection, char separator) {
+		// handle null, zero and one elements before building a buffer
+		if (collection == null) {
+			return null;
+		}
+		if (collection.isEmpty()) {
+			return ""; //$NON-NLS-1$
+		}
+		final Iterator iterator = collection.iterator();
+		final Object first = iterator.next();
+		if (!iterator.hasNext()) {
+			return first != null ? first.toString() : ""; //$NON-NLS-1$
+		}
+		// two or more elements
+		final StringBuffer buf = new StringBuffer(256);
+		if (first != null) {
+			buf.append(first);
+		}
+		while (iterator.hasNext()) {
+			buf.append(separator);
+			final Object obj = iterator.next();
+			if (obj != null) {
+				buf.append(obj);
+			}
+		}
+		return buf.toString();
+	}
+
+	public static String[] split(String str, char separatorChar) {
+		if (str == null) {
+			return null;
+		}
+		int len = str.length();
+		if (len == 0) {
+			return CharOperation.NO_STRINGS;
+		}
+		int i = str.indexOf(separatorChar);
+		if (i == -1) {
+			return new String[] { str };
+		}
+		final List list = new ArrayList();
+		int start = 0;
+		boolean match = i != 0;
+		while (i < len) {
+			if (str.charAt(i) == separatorChar) {
+				if (match) {
+					list.add(str.substring(start, i));
+					match = false;
+				}
+				start = ++i;
+				continue;
+			}
+			match = true;
+			i++;
+		}
+		if (match) {
+			list.add(str.substring(start, i));
+		}
+		return (String[]) list.toArray(new String[list.size()]);
+	}
+
 }
