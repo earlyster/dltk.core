@@ -739,7 +739,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					&& builder instanceof IScriptBuilderExtension) {
 				final int step = buildExternalElements.size() * ticks / total;
 				builderWork -= step;
-				monitor.setTaskName(NLS.bind(
+				monitor.subTask(NLS.bind(
 						Messages.ScriptBuilder_building_N_externalModules,
 						Integer.toString(buildExternalElements.size())));
 				((IScriptBuilderExtension) builder).buildExternalElements(
@@ -750,7 +750,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (buildElementsList.size() > 0) {
 				final int step = buildElementsList.size() * ticks / total;
 				builderWork -= step;
-				monitor.setTaskName(NLS.bind(
+				monitor.subTask(NLS.bind(
 						Messages.ScriptBuilder_building_N_localModules, Integer
 								.toString(buildElementsList.size())));
 				builder.buildModelElements(scriptProject, buildElementsList,
