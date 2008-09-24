@@ -1042,6 +1042,20 @@ public class BuildpathEntry implements IBuildpathEntry {
 		if (rawBuildpath == null) {
 			return ModelStatus.VERIFIED_OK;
 		}
+		int interpreterCount = 0;
+		for (int i = 0; i < rawBuildpath.length; ++i) {
+			final IBuildpathEntry entry = rawBuildpath[i];
+			if (entry.isContainerEntry()
+					&& BuiltinProjectFragment.INTERPRETER_CONTAINER
+							.equals(entry.getPath().segment(0))) {
+				++interpreterCount;
+				if (interpreterCount > 1) {
+					return new ModelStatus(
+							IModelStatusConstants.NAME_COLLISION,
+							Messages.buildpath_multipleInterpreters);
+				}
+			}
+		}
 		// retrieve resolved buildpath
 		IBuildpathEntry[] buildpath;
 		try {
@@ -1070,7 +1084,7 @@ public class BuildpathEntry implements IBuildpathEntry {
 						scriptProject, resolvedEntry.getPath());
 			}
 		}
-		HashSet pathes = new HashSet(length);
+		final HashSet paths = new HashSet(length);
 		// check all entries
 		for (int i = 0; i < length; i++) {
 			IBuildpathEntry entry = buildpath[i];
@@ -1084,9 +1098,9 @@ public class BuildpathEntry implements IBuildpathEntry {
 			String entryPathMsg = isProjectRelative ? entryPath
 					.removeFirstSegments(1).toString() : EnvironmentPathUtils
 					.getLocalPath(entryPath).makeRelative().toString();
-			boolean external = entry.isExternal();
+			// boolean external = entry.isExternal();
 			// complain if duplicate path
-			if (!pathes.add(entryPath.toOSString()) /* && !external */) {
+			if (!paths.add(entryPath.toString()) /* && !external */) {
 				return new ModelStatus(IModelStatusConstants.NAME_COLLISION,
 						Messages.bind(Messages.buildpath_duplicateEntryPath,
 								new String[] { entryPathMsg, projectName }));

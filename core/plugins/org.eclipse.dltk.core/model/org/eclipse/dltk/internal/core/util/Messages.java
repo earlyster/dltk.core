@@ -47,6 +47,7 @@ public class Messages extends NLS {
 	public static String buildpath_illegalSourceFolderPath;
 	public static String buildpath_invalidBuildpathInBuildpathFile;
 	public static String buildpath_invalidContainer;
+	public static String buildpath_multipleInterpreters;
 	public static String buildpath_mustEndWithSlash;
 	public static String buildpath_unboundContainerPath;
 	public static String buildpath_unboundProject;
