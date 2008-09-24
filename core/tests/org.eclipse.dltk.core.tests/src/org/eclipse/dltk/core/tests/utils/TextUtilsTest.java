@@ -93,4 +93,23 @@ public class TextUtilsTest extends SuiteOfTestCases {
 				"123\n456\n789", 10));
 	}
 
+	public void testSplit1() {
+		final String[] parts = TextUtils.split("123456", ':');
+		assertEquals(1, parts.length);
+		assertEquals("123456", parts[0]);
+	}
+
+	public void testSplit2() {
+		final String[] parts = TextUtils.split("123:456", ':');
+		assertEquals(2, parts.length);
+		assertEquals("123", parts[0]);
+		assertEquals("456", parts[1]);
+	}
+
+	public void testSplitAtBounds() {
+		final String[] parts = TextUtils.split(":123456:", ':');
+		assertEquals(1, parts.length);
+		assertEquals("123456", parts[0]);
+	}
+
 }
