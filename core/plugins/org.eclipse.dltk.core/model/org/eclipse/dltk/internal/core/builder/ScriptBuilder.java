@@ -59,8 +59,8 @@ import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.osgi.util.NLS;
 
 public class ScriptBuilder extends IncrementalProjectBuilder {
-	public static final boolean DEBUG = false;
-	public static final boolean TRACE = false;
+	public static final boolean DEBUG = DLTKCore.DEBUG_SCRIPT_BUILDER;
+	public static final boolean TRACE = DLTKCore.TRACE_SCRIPT_BUILDER;
 
 	public IProject currentProject = null;
 	ScriptProject scriptProject = null;
@@ -200,7 +200,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		if (!DLTKLanguageManager.hasScriptNature(this.currentProject)) {
 			return null;
 		}
-		final long startTime;
+		long startTime = 0;
 		if (DEBUG || TRACE) {
 			startTime = System.currentTimeMillis();
 			log("\nStarting build of " + this.currentProject.getName() //$NON-NLS-1$
@@ -235,7 +235,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			}
 		}
 		IProject[] requiredProjects = getRequiredProjects(true);
-		final long endTime;
+		long endTime = 0;
 		if (DEBUG || TRACE) {
 			endTime = System.currentTimeMillis();
 		}
