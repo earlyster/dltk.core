@@ -99,7 +99,7 @@ public class CompletionTestsRequestor extends CompletionRequestor {
 				}
 				resultString += ")";
 				//fElements.addElement(resultString);
-				fElements.addElement(new String(resultString));
+				fElements.addElement(resultString);
 				
 				//fElements.addElement(new String(proposal.getName()));
 				this.acceptCommon(proposal);
