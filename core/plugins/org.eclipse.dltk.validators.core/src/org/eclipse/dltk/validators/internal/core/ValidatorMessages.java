@@ -19,6 +19,8 @@ public class ValidatorMessages extends NLS {
 	public static String ValidatorBuilder_buildingModules;
 	public static String ValidatorBuilder_buildModuleSubTask;
 	public static String ValidatorBuilder_buildExternalModuleSubTask;
+	public static String ValidatorBuilder_clearingResourceMarkers;
+	public static String ValidatorBuilder_errorDeleteResourceMarkers;
 	public static String ValidatorBuilder_finalizeBuild;
 	public static String ValidatorBuilder_InitializeBuilders;
 	public static String ValidatorBuilder_unknownError;

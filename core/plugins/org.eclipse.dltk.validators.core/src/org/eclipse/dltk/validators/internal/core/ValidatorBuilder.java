@@ -20,10 +20,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.ast.declarations.FakeModuleDeclaration;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.compiler.problem.ProblemSeverities;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
@@ -266,8 +268,31 @@ public class ValidatorBuilder implements IScriptBuilder,
 
 	public IStatus buildResources(IScriptProject project, List resources,
 			IProgressMonitor monitor, int buildType) {
-		return ValidatorRuntime.executeAutomaticResourceValidators(project,
-				resources, new NullValidatorOutput(), monitor);
+		final IProgressMonitor sub = new SubProgressMonitor(monitor, resources
+				.size() * 2);
+		try {
+			sub.beginTask(Util.EMPTY_STRING, resources.size());
+			try {
+				for (Iterator i = resources.iterator(); i.hasNext();) {
+					final IResource resource = (IResource) i.next();
+					final String template = ValidatorMessages.ValidatorBuilder_clearingResourceMarkers;
+					sub.subTask(NLS.bind(template, resource.getName()));
+					resource.deleteMarkers(DefaultProblem.MARKER_TYPE_PROBLEM,
+							true, IResource.DEPTH_INFINITE);
+					resource.deleteMarkers(DefaultProblem.MARKER_TYPE_TASK,
+							true, IResource.DEPTH_INFINITE);
+					sub.worked(1);
+				}
+			} catch (CoreException e) {
+				final String msg = ValidatorMessages.ValidatorBuilder_errorDeleteResourceMarkers;
+				ValidatorsCore.error(msg, e);
+			}
+			return ValidatorRuntime.executeAutomaticResourceValidators(project,
+					resources, new NullValidatorOutput(),
+					new SubProgressMonitor(sub, resources.size()));
+		} finally {
+			sub.done();
+		}
 	}
 
 	public void clean(IScriptProject project, IProgressMonitor monitor) {
