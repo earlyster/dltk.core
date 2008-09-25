@@ -772,7 +772,7 @@ public abstract class InterpretersBlock implements
 						createUniqueId(type));
 				final String name = file.getName();
 
-				String nameCopy = new String(name);
+				String nameCopy = name;
 				int j = 1;
 				while (isDuplicateName(nameCopy)) {
 					nameCopy = name + '(' + (j++) + ')';
