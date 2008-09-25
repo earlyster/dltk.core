@@ -721,7 +721,7 @@ public abstract class ScriptCompletionProposalCollector extends
 		scriptProposal.setProposalInfo(info);
 
 		scriptProposal.setRelevance(computeRelevance(proposal));
-		fSuggestedMethodNames.add(new String(name));
+		fSuggestedMethodNames.add(name);
 		return scriptProposal;
 	}
 
