@@ -81,4 +81,7 @@ public class CharArraySequence implements CharSequence {
 						- beginIndex);
 	}
 
+	public String toString() {
+		return new String(this.buff, this.offset, this.count);
+	}
 }
