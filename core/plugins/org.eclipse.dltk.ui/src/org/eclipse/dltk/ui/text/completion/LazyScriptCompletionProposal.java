@@ -11,6 +11,7 @@
 package org.eclipse.dltk.ui.text.completion;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.dltk.core.CompletionContext;
 import org.eclipse.dltk.core.CompletionProposal;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.text.IDocument;
@@ -34,7 +35,7 @@ public abstract class LazyScriptCompletionProposal extends
 	private boolean fContextInformationComputed;
 	private boolean fProposalInfoComputed;
 	private boolean fTriggerCharactersComputed;
-//	private boolean fSortStringComputed;
+	// private boolean fSortStringComputed;
 	private boolean fRelevanceComputed;
 
 	/**
@@ -51,7 +52,8 @@ public abstract class LazyScriptCompletionProposal extends
 			ScriptContentAssistInvocationContext context) {
 		Assert.isNotNull(proposal);
 		Assert.isNotNull(context);
-		Assert.isNotNull(context.getCoreContext());
+		// FIXME it should not be null but it is
+		// Assert.isNotNull(context.getCoreContext());
 
 		fInvocationContext = context;
 		fProposal = proposal;
@@ -97,8 +99,7 @@ public abstract class LazyScriptCompletionProposal extends
 	 * Returns the additional proposal info, or <code>null</code> if none
 	 * exists.
 	 * 
-	 * @return the additional proposal info, or <code>null</code> if none
-	 *         exists
+	 * @return the additional proposal info, or <code>null</code> if none exists
 	 */
 	protected final ProposalInfo getProposalInfo() {
 		if (!fProposalInfoComputed) {
@@ -137,7 +138,10 @@ public abstract class LazyScriptCompletionProposal extends
 	}
 
 	protected final boolean isInDoc() {
-		return fInvocationContext.getCoreContext().isInDoc();
+		final CompletionContext coreContext = fInvocationContext
+				.getCoreContext();
+		// FIXME it should not be null but it is
+		return coreContext != null && coreContext.isInDoc();
 	}
 
 	public final IContextInformation getContextInformation() {
@@ -358,7 +362,7 @@ public abstract class LazyScriptCompletionProposal extends
 	}
 
 	public final void setSortString(String string) {
-//		fSortStringComputed = true;
+		// fSortStringComputed = true;
 		super.setSortString(string);
 	}
 }

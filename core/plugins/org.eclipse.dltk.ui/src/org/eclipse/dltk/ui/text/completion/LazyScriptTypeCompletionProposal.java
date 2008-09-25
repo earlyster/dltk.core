@@ -61,6 +61,7 @@ public abstract class LazyScriptTypeCompletionProposal extends
 		 */
 		// TODO fix
 		if (fProposal.getKind() == CompletionProposal.TYPE_REF
+				&& fInvocationContext.getCoreContext() != null
 				&& fInvocationContext.getCoreContext().isInDoc())
 			return getSimpleTypeName();
 
@@ -190,6 +191,7 @@ public abstract class LazyScriptTypeCompletionProposal extends
 			// if (!fContext.isInJavadocFormalReference())
 			// return false;
 			if (fProposal.getKind() == CompletionProposal.TYPE_REF
+					&& fInvocationContext.getCoreContext() != null
 					&& fInvocationContext.getCoreContext().isInDoc())
 				return false;
 
