@@ -697,9 +697,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		try {
 			ssub.beginTask(Messages.ScriptBuilder_building, builders.length);
 			for (int k = 0; k < builders.length; k++) {
-				builders[k].buildResources(scriptProject, realResources, ssub,
-						buildType);
-				ssub.worked(1);
+				builders[k].buildResources(scriptProject, realResources,
+						new SubProgressMonitor(ssub, 1), buildType);
 			}
 		} finally {
 			ssub.done();
