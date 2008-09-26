@@ -447,7 +447,7 @@ public abstract class JobManager implements Runnable {
 							this.progressJob = new ProgressJob(
 									Messages.manager_indexingInProgress);
 							this.progressJob.setPriority(Job.LONG);
-							// this.progressJob.setSystem(true);
+							this.progressJob.setSystem(true);
 							this.progressJob.schedule();
 						}
 						/* boolean status = */job.execute(null);
@@ -457,8 +457,8 @@ public abstract class JobManager implements Runnable {
 						if (VERBOSE)
 							Util.verbose("FINISHED background job - " + job); //$NON-NLS-1$
 						moveToNextJob();
-						// if (this.awaitingClients == 0)
-						// Thread.sleep(50);
+						if (this.awaitingClients == 0)
+							Thread.sleep(50);
 					}
 				} catch (InterruptedException e) { // background indexing was
 					// interrupted
