@@ -110,8 +110,8 @@ public class Buffer implements IBuffer {
 		}
 		notifyChanged(event); // notify outside of synchronized block
 		synchronized (this) { // ensure that no other thread is
-								// adding/removing a listener at the same time
-								// (https://bugs.eclipse.org/bugs/show_bug.cgi?id=126673)
+			// adding/removing a listener at the same time
+			// (https://bugs.eclipse.org/bugs/show_bug.cgi?id=126673)
 			this.changeListeners = null;
 		}
 	}
@@ -363,7 +363,9 @@ public class Buffer implements IBuffer {
 
 			// Special case for UTF-8 BOM files
 			// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=110576
-			if (encoding != null && encoding.equals(org.eclipse.dltk.compiler.util.Util.UTF_8)) {
+			if (encoding != null
+					&& encoding
+							.equals(org.eclipse.dltk.compiler.util.Util.UTF_8)) {
 				IContentDescription description = this.file
 						.getContentDescription();
 				if (description != null
@@ -400,6 +402,14 @@ public class Buffer implements IBuffer {
 	}
 
 	public void setContents(char[] newContents) {
+
+		// We need to clean content cache.
+		ISourceCodeCache cache = ModelManager.getModelManager()
+				.getSourceCodeCache();
+		if (cache != null && this.file != null) {
+			cache.remove(this.file);
+		}
+
 		// allow special case for first initialization
 		// after creation by buffer factory
 		if (this.contents == null) {

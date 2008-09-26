@@ -137,4 +137,9 @@ public class SourceModuleCodeCache implements ISourceCodeCache {
 		return result;
 	}
 
+	public void remove(IFile file) {
+		synchronized (resourceMap) {
+			resourceMap.remove(file);
+		}
+	}
 }

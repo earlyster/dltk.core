@@ -30,4 +30,5 @@ public interface ISourceCodeCache {
 	 */
 	char[] get(IFileHandle file) throws ModelException;
 
+	void remove(IFile file);
 }
