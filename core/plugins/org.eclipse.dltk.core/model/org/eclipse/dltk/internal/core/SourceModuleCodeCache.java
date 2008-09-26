@@ -71,19 +71,14 @@ public class SourceModuleCodeCache implements ISourceCodeCache {
 	private static final long EXTERNAL_CACHE_LIFETIME = 10 * 60 * 1000;
 
 	private static class ExternalCacheEntry {
-		final String content;
+		final char[] content;
 		final long addTime;
-
-		public ExternalCacheEntry(long addTime, String content) {
-			this.addTime = addTime;
-			this.content = content;
-		}
 
 		/**
 		 * @param result
 		 * @param currentTimeMillis
 		 */
-		public ExternalCacheEntry(String result, long currentTimeMillis) {
+		public ExternalCacheEntry(char[] result, long currentTimeMillis) {
 			this.content = result;
 			this.addTime = currentTimeMillis;
 		}
@@ -102,9 +97,9 @@ public class SourceModuleCodeCache implements ISourceCodeCache {
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(listener);
 	}
 
-	public String get(IFile file) throws ModelException {
+	public char[] get(IFile file) throws ModelException {
 		synchronized (resourceMap) {
-			final String result = (String) resourceMap.get(file);
+			final char[] result = (char[]) resourceMap.get(file);
 			if (result != null) {
 				return result;
 			}
@@ -116,15 +111,15 @@ public class SourceModuleCodeCache implements ISourceCodeCache {
 		} catch (CoreException ce) {
 			// do not use any encoding
 		}
-		final String result = new String(Util.getResourceContentsAsCharArray(
-				file, encoding));
+		final char[] result = Util.getResourceContentsAsCharArray(file,
+				encoding);
 		synchronized (resourceMap) {
 			resourceMap.put(file, result);
 		}
 		return result;
 	}
 
-	public String get(IFileHandle file) throws ModelException {
+	public char[] get(IFileHandle file) throws ModelException {
 		synchronized (externalResourceMap) {
 			final ExternalCacheEntry entry = (ExternalCacheEntry) externalResourceMap
 					.get(file);
@@ -134,8 +129,7 @@ public class SourceModuleCodeCache implements ISourceCodeCache {
 				return entry.content;
 			}
 		}
-		final String result = new String(Util
-				.getResourceContentsAsCharArrayNoCache(file));
+		final char[] result = Util.getResourceContentsAsCharArrayNoCache(file);
 		synchronized (externalResourceMap) {
 			externalResourceMap.put(file, new ExternalCacheEntry(result, System
 					.currentTimeMillis()));

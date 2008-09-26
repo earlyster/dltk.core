@@ -470,10 +470,10 @@ public class Util {
 	 */
 	public static char[] getResourceContentsAsCharArray(IFile file)
 			throws ModelException {
-		final String result = ModelManager.getModelManager()
+		final char[] result = ModelManager.getModelManager()
 				.getSourceCodeCache().get(file);
 		if (result != null) {
-			return result.toCharArray();
+			return result;
 		}
 		// Get encoding from file
 		String encoding = null;
@@ -487,14 +487,14 @@ public class Util {
 
 	public static char[] getResourceContentsAsCharArray(IFileHandle file)
 			throws ModelException {
-		final String result = ModelManager.getModelManager()
+		final char[] result = ModelManager.getModelManager()
 				.getSourceCodeCache().get(file);
 		if (result != null) {
-			result.toCharArray();
+			return result;
 		}
 		return getResourceContentsAsCharArrayNoCache(file);
 	}
-	
+
 	public static char[] getResourceContentsAsCharArrayNoCache(IFileHandle file)
 			throws ModelException {
 		// Get resource contents
@@ -1016,8 +1016,7 @@ public class Util {
 
 	/**
 	 * Return a new array which is the split of the given string using the given
-	 * divider. The given end is exclusive and the given start is inclusive.
-	 * <br>
+	 * divider. The given end is exclusive and the given start is inclusive. <br>
 	 * <br>
 	 * For example:
 	 * <ol>
@@ -1375,10 +1374,10 @@ public class Util {
 	 * machine-independent manner.
 	 * <p>
 	 * First, two bytes are written to the output stream as if by the
-	 * <code>writeShort</code> method giving the number of bytes to follow.
-	 * This value is the number of bytes actually written out, not the length of
-	 * the string. Following the length, each character of the string is output,
-	 * in sequence, using the UTF-8 encoding for the character.
+	 * <code>writeShort</code> method giving the number of bytes to follow. This
+	 * value is the number of bytes actually written out, not the length of the
+	 * string. Following the length, each character of the string is output, in
+	 * sequence, using the UTF-8 encoding for the character.
 	 * 
 	 * @param str
 	 *            a string to be written.

@@ -22,12 +22,12 @@ public interface ISourceCodeCache {
 	 * @return
 	 * @throws ModelException
 	 */
-	String get(IFile resource) throws ModelException;
+	char[] get(IFile resource) throws ModelException;
 
 	/**
 	 * @param file
 	 * @return
 	 */
-	String get(IFileHandle file) throws ModelException;
+	char[] get(IFileHandle file) throws ModelException;
 
 }
