@@ -315,6 +315,11 @@ public class ModelManager implements ISaveParticipant {
 	 */
 	private ThreadLocal zipFiles = new ThreadLocal();
 
+	/**
+	 * A cache of module source code.
+	 */
+	private SourceModuleCodeCache sourceCodeCache = null;
+
 	private UserLibraryManager userLibraryManager;
 
 	public final static ISourceModule[] NO_WORKING_COPY = new ISourceModule[0];
@@ -1369,6 +1374,9 @@ public class ModelManager implements ISaveParticipant {
 		if (sourceModuleInfoCach != null) {
 			sourceModuleInfoCach.stop();
 		}
+		if (sourceCodeCache != null) {
+			sourceCodeCache.stop();
+		}
 		if (this.indexManager != null) { // no more indexing
 			this.indexManager.shutdown();
 		}
@@ -2106,6 +2114,13 @@ public class ModelManager implements ISaveParticipant {
 			throw new CoreException(new Status(IStatus.ERROR,
 					DLTKCore.PLUGIN_ID, -1, Messages.status_IOException, e));
 		}
+	}
+
+	public ISourceCodeCache getSourceCodeCache() {
+		if (sourceCodeCache == null) {
+			sourceCodeCache = new SourceModuleCodeCache();
+		}
+		return sourceCodeCache;
 	}
 
 	/**
