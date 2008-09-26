@@ -23,9 +23,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.ast.declarations.FakeModuleDeclaration;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
+import org.eclipse.dltk.ast.parser.ISourceParser;
+import org.eclipse.dltk.ast.parser.ISourceParserExtension2;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
 import org.eclipse.dltk.compiler.problem.ProblemSeverities;
 import org.eclipse.dltk.compiler.util.Util;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
@@ -45,7 +48,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class ValidatorBuilder implements IScriptBuilder,
 		IScriptBuilderExtension {
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 
 	private static final int WORK_BUILD = 100;
 	private static final int WORK_EXTERNAL = 200;
@@ -99,16 +102,19 @@ public class ValidatorBuilder implements IScriptBuilder,
 										ValidatorMessages.ValidatorBuilder_buildExternalModuleSubTask,
 										String.valueOf(remainingWork), module
 												.getElementName()));
-				final ModuleDeclaration moduleDeclaration = SourceParserUtil
-						.getModuleDeclaration(module);
-				if (moduleDeclaration != null) {
-					for (int i = 0; i < extensions.length; ++i) {
-						try {
-							extensions[i].buildExternalModule(module,
-									moduleDeclaration);
-						} catch (CoreException e) {
-							ValidatorsCore.log(e.getStatus());
-						}
+				final ModuleDeclaration moduleDeclaration;
+				if (useSourceParser) {
+					moduleDeclaration = SourceParserUtil.getModuleDeclaration(
+							module, null);
+				} else {
+					moduleDeclaration = null;
+				}
+				for (int i = 0; i < extensions.length; ++i) {
+					try {
+						extensions[i].buildExternalModule(module,
+								moduleDeclaration);
+					} catch (CoreException e) {
+						ValidatorsCore.log(e.getStatus());
 					}
 				}
 				--remainingWork;
@@ -149,8 +155,7 @@ public class ValidatorBuilder implements IScriptBuilder,
 		monitor.beginTask(ValidatorMessages.ValidatorBuilder_buildingModules,
 				elements.size());
 		if (toolkit != null) {
-			buildNatureModules(project, buildType, toolkit.getNatureId(),
-					elements, monitor);
+			buildNatureModules(project, buildType, elements, monitor);
 		}
 		monitor.done();
 		if (DEBUG) {
@@ -161,7 +166,7 @@ public class ValidatorBuilder implements IScriptBuilder,
 	}
 
 	private void buildNatureModules(IScriptProject project, int buildType,
-			final String nature, final List modules, IProgressMonitor monitor) {
+			final List modules, IProgressMonitor monitor) {
 		final boolean secondPass = beginBuild(buildType, monitor);
 		final List reporters = secondPass ? new ArrayList() : null;
 		int counter = 0;
@@ -242,17 +247,20 @@ public class ValidatorBuilder implements IScriptBuilder,
 
 	private void buildModule(final ISourceModule module,
 			BuildProblemReporter reporter) {
-		final ModuleDeclaration moduleDeclaration = SourceParserUtil
-				.getModuleDeclaration(module, reporter);
-		final boolean isError = moduleDeclaration == null
-				|| moduleDeclaration instanceof FakeModuleDeclaration
-				|| reporter.hasErrors();
-		if (isError) {
-			if (reporter.isEmpty()) {
+		final ModuleDeclaration moduleDeclaration;
+		if (useSourceParser) {
+			moduleDeclaration = SourceParserUtil.getModuleDeclaration(module,
+					reporter);
+			final boolean isError = moduleDeclaration == null
+					|| moduleDeclaration instanceof FakeModuleDeclaration
+					|| reporter.hasErrors();
+			if (isError && reporter.isEmpty()) {
 				reporter.reportProblem(new DefaultProblem(
 						ValidatorMessages.ValidatorBuilder_unknownError, 0,
 						null, ProblemSeverities.Error, 0, 0, 0));
 			}
+		} else {
+			moduleDeclaration = null;
 		}
 		if (participants != null) {
 			for (int k = 0; k < participants.length; ++k) {
@@ -357,11 +365,18 @@ public class ValidatorBuilder implements IScriptBuilder,
 	private IBuildParticipant[] participants = null;
 	private IDLTKLanguageToolkit toolkit = null;
 
+	private boolean useSourceParser = false;
+
 	public void initialize(IScriptProject project) {
 		toolkit = project.getLanguageToolkit();
 		if (toolkit != null) {
 			participants = BuildParticipantManager.getBuildParticipants(
 					project, toolkit.getNatureId());
+			final ISourceParser sourceParser = DLTKLanguageManager
+					.getSourceParser(toolkit.getNatureId());
+			useSourceParser = sourceParser != null
+					&& (!(sourceParser instanceof ISourceParserExtension2) || ((ISourceParserExtension2) sourceParser)
+							.useInBuilder());
 		}
 		beginBuildDone = false;
 		endBuildNeeded = false;
