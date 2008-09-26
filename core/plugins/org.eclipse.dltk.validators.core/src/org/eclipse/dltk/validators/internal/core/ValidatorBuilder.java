@@ -48,7 +48,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class ValidatorBuilder implements IScriptBuilder,
 		IScriptBuilderExtension {
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	private static final int WORK_BUILD = 100;
 	private static final int WORK_EXTERNAL = 200;
