@@ -67,15 +67,19 @@ public class TodoTaskAstParser extends TodoTaskSimpleParser {
 	 */
 	public void build(ISourceModule module, ModuleDeclaration ast,
 			IProblemReporter reporter) throws CoreException {
-		if (!isValid()) {
+		if (!isValid() || ast == null) {
 			return;
 		}
 		final ITaskReporter taskReporter = (ITaskReporter) reporter
 				.getAdapter(ITaskReporter.class);
-		if (taskReporter == null) {
-			return;
+		if (taskReporter != null) {
+			initializeLiteralRanges(ast);
+			parse(taskReporter, module.getSourceAsCharArray());
 		}
-		rangeCount = 0;
+	}
+
+	protected void initializeLiteralRanges(ModuleDeclaration ast) {
+		resetRanges();
 		final ASTVisitor visitor = new ASTVisitor() {
 
 			public boolean visitGeneral(ASTNode node) throws Exception {
@@ -91,7 +95,10 @@ public class TodoTaskAstParser extends TodoTaskSimpleParser {
 		} catch (Exception e) {
 			DLTKCore.error("Unexpected error", e); //$NON-NLS-1$
 		}
-		parse(taskReporter, module.getSourceAsCharArray());
+	}
+
+	protected void resetRanges() {
+		rangeCount = 0;
 	}
 
 	protected boolean isSimpleNode(ASTNode node) {
