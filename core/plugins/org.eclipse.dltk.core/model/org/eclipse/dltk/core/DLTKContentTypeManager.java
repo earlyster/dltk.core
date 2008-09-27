@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
-import org.eclipse.dltk.internal.core.ISourceCodeCache;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 public class DLTKContentTypeManager {
@@ -259,22 +258,9 @@ public class DLTKContentTypeManager {
 				 * TODO use something like LazyInputStream if there are multiple
 				 * content types
 				 */
-				InputStream contents = null;
-				ISourceCodeCache cache = ModelManager.getModelManager()
-						.getSourceCodeCache();
-				final char[] cs = cache.get(file);
-				if (cs != null) {
-					contents = new InputStream() {
-						int pos = 0;
-
-						public int read() throws IOException {
-							if (pos >= cs.length) {
-								return -1;
-							}
-							return cs[pos++];
-						}
-					};
-				} else {
+				InputStream contents = ModelManager.getModelManager()
+						.getSourceCodeCache().getContentsIfCached(file);
+				if (contents == null) {
 					contents = new BufferedInputStream(file.getContents(), 2048);
 				}
 				try {
