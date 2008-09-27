@@ -403,13 +403,6 @@ public class Buffer implements IBuffer {
 
 	public void setContents(char[] newContents) {
 
-		// We need to clean content cache.
-		ISourceCodeCache cache = ModelManager.getModelManager()
-				.getSourceCodeCache();
-		if (cache != null && this.file != null) {
-			cache.remove(this.file);
-		}
-
 		// allow special case for first initialization
 		// after creation by buffer factory
 		if (this.contents == null) {
