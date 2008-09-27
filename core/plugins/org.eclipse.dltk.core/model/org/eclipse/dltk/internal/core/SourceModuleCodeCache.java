@@ -11,6 +11,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.apache.commons.collections.map.ReferenceMap;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -21,6 +25,7 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -42,20 +47,24 @@ public class SourceModuleCodeCache implements ISourceCodeCache {
 
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			final IResource resource = delta.getResource();
-			if (resource.getType() == IResource.FILE
-					&& (delta.getFlags() & IResourceDelta.CONTENT) != 0) {
-				switch (delta.getKind()) {
-				case IResourceDelta.ADDED:
-				case IResourceDelta.CHANGED:
+			if (resource.getType() == IResource.FILE) {
+				if (isChanged(delta) || isRemoved(delta)) {
 					removeFileEntry((IFile) resource);
-					break;
 				}
 				return false;
 			}
 			return true;
 		}
-
 	};
+
+	private static boolean isChanged(IResourceDelta delta) {
+		return delta.getKind() == IResourceDelta.CHANGED
+				&& (delta.getFlags() & IResourceDelta.CONTENT) != 0;
+	}
+
+	private static boolean isRemoved(IResourceDelta delta) {
+		return delta.getKind() == IResourceDelta.REMOVED;
+	}
 
 	private IResourceChangeListener listener = new ChangeListener();
 
@@ -69,6 +78,17 @@ public class SourceModuleCodeCache implements ISourceCodeCache {
 			ReferenceMap.HARD, ReferenceMap.SOFT);
 
 	private static final long EXTERNAL_CACHE_LIFETIME = 10 * 60 * 1000;
+
+	private static class ResourceCacheEntry {
+		final byte[] content;
+		final int charLength;
+
+		public ResourceCacheEntry(int charLength, byte[] content) {
+			this.charLength = charLength;
+			this.content = content;
+		}
+
+	}
 
 	private static class ExternalCacheEntry {
 		final char[] content;
@@ -97,12 +117,22 @@ public class SourceModuleCodeCache implements ISourceCodeCache {
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(listener);
 	}
 
-	public char[] get(IFile file) throws ModelException {
+	public InputStream getContentsIfCached(IFile file) {
+		final ResourceCacheEntry entry;
 		synchronized (resourceMap) {
-			final char[] result = (char[]) resourceMap.get(file);
-			if (result != null) {
-				return result;
-			}
+			entry = (ResourceCacheEntry) resourceMap.get(file);
+		}
+		if (entry != null) {
+			return new ByteArrayInputStream(entry.content);
+		} else {
+			return null;
+		}
+	}
+
+	public char[] get(IFile file) throws ModelException {
+		final ResourceCacheEntry entry;
+		synchronized (resourceMap) {
+			entry = (ResourceCacheEntry) resourceMap.get(file);
 		}
 		// Get encoding from file
 		String encoding = null;
@@ -111,10 +141,30 @@ public class SourceModuleCodeCache implements ISourceCodeCache {
 		} catch (CoreException ce) {
 			// do not use any encoding
 		}
-		final char[] result = Util.getResourceContentsAsCharArray(file,
-				encoding);
+		if (entry != null) {
+			try {
+				return org.eclipse.dltk.compiler.util.Util
+						.getInputStreamAsCharArray(new ByteArrayInputStream(
+								entry.content), entry.charLength, encoding);
+			} catch (IOException e) {
+				// should not happen actually
+				throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
+			}
+		}
+		final byte[] content = Util.getResourceContentsAsByteArray(file);
+		final char[] result;
+		try {
+			result = org.eclipse.dltk.compiler.util.Util
+					.getInputStreamAsCharArray(
+							new ByteArrayInputStream(content), content.length,
+							encoding);
+		} catch (IOException e) {
+			// should not happen actually
+			throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
+		}
 		synchronized (resourceMap) {
-			resourceMap.put(file, result);
+			resourceMap.put(file,
+					new ResourceCacheEntry(result.length, content));
 		}
 		return result;
 	}
@@ -137,9 +187,7 @@ public class SourceModuleCodeCache implements ISourceCodeCache {
 		return result;
 	}
 
-	public void remove(IFile file) {
-		synchronized (resourceMap) {
-			resourceMap.remove(file);
-		}
+	public final void remove(IFile file) {
+		removeFileEntry(file);
 	}
 }
