@@ -97,10 +97,10 @@ public class ExternalCheckerWildcardManager {
 		try {
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document document = builder.newDocument();
-			Element root = (Element) document.createElement(STRING);
+			Element root = document.createElement(STRING);
 			document.appendChild(root);
 			for (int i = 0; i < customWildcards.length; i++) {
-				Element wildcard = (Element) document.createElement(WILDCARD);
+				Element wildcard = document.createElement(WILDCARD);
 				String name = customWildcards[i].getLetter();
 				String value = customWildcards[i].getSpattern();
 				String description = customWildcards[i].getDescription();

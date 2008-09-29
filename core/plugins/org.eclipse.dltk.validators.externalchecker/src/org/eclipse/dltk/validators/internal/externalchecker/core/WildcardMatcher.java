@@ -25,9 +25,9 @@ public class WildcardMatcher {
 			String fileName = null;
 			int lineNumber = -1;
 			String message = ""; //$NON-NLS-1$
-			Pattern lPattern = Pattern.compile(this.getPattern('n', wcards));
-			Pattern mPattern = Pattern.compile(this.getPattern('m', wcards));
-			Pattern fPattern = Pattern.compile(this.getPattern('f', wcards));
+			Pattern lPattern = Pattern.compile(getPattern('n', wcards));
+			Pattern mPattern = Pattern.compile(getPattern('m', wcards));
+			Pattern fPattern = Pattern.compile(getPattern('f', wcards));
 			for (int i = 1; i <= matcher.groupCount(); i++) {
 				if (matcher.group(i) != null) {
 					String group = matcher.group(i);
