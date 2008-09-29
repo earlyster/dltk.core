@@ -13,16 +13,17 @@ package org.eclipse.dltk.ui.formatter;
 
 import java.util.Arrays;
 
-
 public class FormatterIndentGenerator implements IFormatterIndentGenerator {
 
 	private final char[] chars;
 	private final int indentationSize;
+	private final int tabSize;
 
-	public FormatterIndentGenerator(char ch, int indentationSize) {
+	public FormatterIndentGenerator(char ch, int indentationSize, int tabSize) {
 		this.chars = new char[256];
 		Arrays.fill(chars, ch);
 		this.indentationSize = indentationSize;
+		this.tabSize = tabSize;
 	}
 
 	public void generateIndent(final int indentLevel, StringBuffer target) {
@@ -34,6 +35,10 @@ public class FormatterIndentGenerator implements IFormatterIndentGenerator {
 				size -= step;
 			}
 		}
+	}
+
+	public int getTabSize() {
+		return tabSize;
 	}
 
 }

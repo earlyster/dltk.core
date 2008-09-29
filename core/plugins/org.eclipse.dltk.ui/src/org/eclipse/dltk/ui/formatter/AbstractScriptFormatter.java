@@ -68,12 +68,13 @@ public abstract class AbstractScriptFormatter implements IScriptFormatter {
 	}
 
 	protected IFormatterIndentGenerator createIndentGenerator() {
+		final int tabSize = getInt(CodeFormatterConstants.FORMATTER_TAB_SIZE);
 		final int indentSize = getInt(CodeFormatterConstants.FORMATTER_INDENTATION_SIZE);
 		final String indentType = getString(CodeFormatterConstants.FORMATTER_TAB_CHAR);
 		if (CodeFormatterConstants.SPACE.equals(indentType)) {
-			return new FormatterIndentGenerator(' ', indentSize);
+			return new FormatterIndentGenerator(' ', indentSize, tabSize);
 		} else {
-			return new FormatterIndentGenerator('\t', indentSize);
+			return new FormatterIndentGenerator('\t', indentSize, tabSize);
 		}
 	}
 

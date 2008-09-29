@@ -38,8 +38,13 @@ public class FormatterControlManager implements IFormatterControlManager,
 	}
 
 	public Button createCheckbox(Composite parent, Object key, String text) {
+		return createCheckbox(parent, key, text, 1);
+	}
+
+	public Button createCheckbox(Composite parent, Object key, String text,
+			int hspan) {
 		Button button = SWTFactory.createCheckButton(parent, text, null, false,
-				1);
+				hspan);
 		bindingManager.bindControl(button, key, null);
 		return button;
 	}

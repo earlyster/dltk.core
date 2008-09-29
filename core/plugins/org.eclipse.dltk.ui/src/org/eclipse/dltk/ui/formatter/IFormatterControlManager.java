@@ -20,6 +20,8 @@ public interface IFormatterControlManager {
 
 	Button createCheckbox(Composite parent, Object key, String text);
 
+	Button createCheckbox(Composite parent, Object key, String text, int hspan);
+
 	Combo createCombo(Composite parent, Object key, String label, String[] items);
 
 	Text createNumber(Composite parent, Object key, String label);

@@ -15,4 +15,6 @@ public interface IFormatterIndentGenerator {
 
 	void generateIndent(int indentLevel, StringBuffer target);
 
+	int getTabSize();
+
 }
