@@ -81,4 +81,5 @@ public final class ActionMessages extends NLS {
 	public static String OpenTypeHierarchyAction_messages_no_script_resources;
 	public static String OpenTypeHierarchyAction_messages_no_types;
 	public static String OpenTypeHierarchyAction_messages_no_valid_script_element;
+	public static String FormatAction_label;
 }

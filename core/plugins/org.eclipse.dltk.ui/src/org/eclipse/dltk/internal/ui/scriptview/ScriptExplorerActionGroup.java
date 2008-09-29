@@ -32,6 +32,7 @@ import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IContextMenuConstants;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.actions.CustomFiltersActionGroup;
+import org.eclipse.dltk.ui.actions.GenerateActionGroup;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -108,7 +109,7 @@ class ScriptExplorerActionGroup extends CompositeActionGroup {
 			fNavigateActionGroup= new NavigateActionGroup(fPart), 
 			new CCPActionGroup(fPart),
             new GenerateBuildPathActionGroup(fPart),
-			//new GenerateActionGroup(fPart), 
+			new GenerateActionGroup(fPart, IContextMenuConstants.GROUP_SHOW), 
 			fRefactorActionGroup= new RefactorActionGroup(fPart),
 			new ImportActionGroup(fPart),
 			new BuildActionGroup(fPart),

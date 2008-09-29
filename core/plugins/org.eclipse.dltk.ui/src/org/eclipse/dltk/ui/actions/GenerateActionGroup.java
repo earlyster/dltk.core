@@ -12,13 +12,13 @@ package org.eclipse.dltk.ui.actions;
 
 import org.eclipse.dltk.internal.ui.actions.DLTKQuickMenuAction;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
-import org.eclipse.dltk.ui.IContextMenuConstants;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.commands.ActionHandler;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.handlers.IHandlerActivation;
@@ -70,7 +70,7 @@ public class GenerateActionGroup extends ActionGroup {
 
 	private ScriptEditor fEditor;
 	private IWorkbenchSite fSite;
-	private String fGroupName = IContextMenuConstants.GROUP_REORGANIZE;
+	private final String fGroupName;
 
 	private static final String QUICK_MENU_ID = "org.eclipse.dltk.ui.edit.text.java.source.quickMenu"; //$NON-NLS-1$
 
@@ -105,6 +105,15 @@ public class GenerateActionGroup extends ActionGroup {
 		installQuickAccessAction();
 	}
 
+	private FormatAction formatAction;
+
+	public GenerateActionGroup(IViewPart part, String groupName) {
+		fSite = part.getSite();
+		fGroupName = groupName;
+		formatAction = new FormatAction(fSite);
+		installQuickAccessAction();
+	}
+
 	private void installQuickAccessAction() {
 		fHandlerService = (IHandlerService) fSite
 				.getService(IHandlerService.class);
@@ -118,7 +127,12 @@ public class GenerateActionGroup extends ActionGroup {
 
 	public void fillActionBars(IActionBars actionBar) {
 		super.fillActionBars(actionBar);
-		setGlobalActionHandlers(actionBar);
+		if (fEditor != null) {
+			setGlobalActionHandlers(actionBar);
+		} else {
+			actionBar.setGlobalActionHandler(DLTKActionConstants.FORMAT,
+					formatAction);
+		}
 	}
 
 	public void fillContextMenu(IMenuManager menu) {
@@ -150,7 +164,8 @@ public class GenerateActionGroup extends ActionGroup {
 		int added = 0;
 		source.add(new Separator(GROUP_COMMENT));
 		added += addEditorAction(source, DLTKActionConstants.ADD_BLOCK_COMMENT);
-		added += addEditorAction(source, DLTKActionConstants.REMOVE_BLOCK_COMMENT);
+		added += addEditorAction(source,
+				DLTKActionConstants.REMOVE_BLOCK_COMMENT);
 		added += addEditorAction(source, DLTKActionConstants.TOGGLE_COMMENT);
 		added += addEditorAction(source, DLTKActionConstants.COMMENT);
 		added += addEditorAction(source, DLTKActionConstants.UNCOMMENT);
@@ -165,7 +180,8 @@ public class GenerateActionGroup extends ActionGroup {
 	}
 
 	private int fillViewSubMenu(IMenuManager source) {
-		return 0;
+		source.add(formatAction);
+		return 1;
 	}
 
 	/*
