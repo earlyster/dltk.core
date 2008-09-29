@@ -88,8 +88,8 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 					final Map prefs = getPreferences();
 					final IScriptFormatter formatter = formatterFactory
 							.createFormatter(lineDelimiter, prefs);
-					final int indentationLevel = formatterFactory
-							.detectIndentationLevel(document, offset, prefs);
+					final int indentationLevel = formatter
+							.detectIndentationLevel(document, offset);
 					final TextEdit edit = formatter.format(document.get(),
 							offset, partition.getLength(), indentationLevel);
 					if (edit != null) {

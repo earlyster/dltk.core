@@ -14,6 +14,7 @@ package org.eclipse.dltk.ui.formatter;
 import java.util.Map;
 
 import org.eclipse.dltk.ui.CodeFormatterConstants;
+import org.eclipse.jface.text.IDocument;
 
 /**
  * Abstract base class for the {@link IScriptFormatter} implementations.
@@ -74,6 +75,10 @@ public abstract class AbstractScriptFormatter implements IScriptFormatter {
 		} else {
 			return new FormatterIndentGenerator('\t', indentSize);
 		}
+	}
+
+	public int detectIndentationLevel(IDocument document, int offset) {
+		return 0;
 	}
 
 }

@@ -11,12 +11,22 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.TextEdit;
 
 /**
  * Script source code formatter interface.
  */
 public interface IScriptFormatter {
+
+	/**
+	 * Detects the indentation level at the specified offset
+	 * 
+	 * @param document
+	 * @param offset
+	 * @return
+	 */
+	int detectIndentationLevel(IDocument document, int offset);
 
 	/**
 	 * Format <code>source</code>, and returns a text edit that correspond to
