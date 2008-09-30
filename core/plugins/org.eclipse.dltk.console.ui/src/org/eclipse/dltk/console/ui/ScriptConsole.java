@@ -59,7 +59,9 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 							if (consoleViewer != null) {
 								consoleViewer.disableProcessing();
 								appendInvitation(consoleViewer);
-								updateText(consoleViewer, Messages.ScriptConsole_processTerminated,
+								updateText(
+										consoleViewer,
+										Messages.ScriptConsole_processTerminated,
 										false);
 								consoleViewer.setEditable(false);
 							}
@@ -125,7 +127,14 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 							break;
 						}
 					}
-					appendInvitation(viewer);
+					if (!first) {
+						/*
+						 * output invitation only if there was some output -
+						 * initially invitation is printed from the clear()
+						 * called from the ScriptConsoleViewer constructor
+						 */
+						appendInvitation(viewer);
+					}
 					enableEdit(viewer);
 				}
 
