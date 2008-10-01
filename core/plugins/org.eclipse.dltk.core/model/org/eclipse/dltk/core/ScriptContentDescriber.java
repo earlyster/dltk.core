@@ -225,4 +225,39 @@ public abstract class ScriptContentDescriber implements ITextContentDescriber {
 			throws IOException {
 		return describe(new InputStreamReader(contents), description);
 	}
+
+	public int describe(Reader contents, IContentDescription description)
+			throws IOException {
+		Pattern[] header = getHeaderPatterns();
+		Pattern[] footer = getFooterPatterns();
+
+		if (checkPatterns(contents, header, footer)) {
+			if (description != null) {
+				description.setProperty(DLTKContentTypeManager.DLTK_VALID,
+						Boolean.TRUE);
+			}
+			return VALID;
+		}
+		return INDETERMINATE;
+	}
+
+	/**
+	 * Returns an array of patterns that will be used to scan file headers to
+	 * determine the script content type.
+	 */
+	protected abstract Pattern[] getHeaderPatterns();
+
+	/**
+	 * Returns an array of patterns that will be used to scan file footers to
+	 * determine the script content type.
+	 * 
+	 * <p>
+	 * Default implementation returns <code>null</code>. Subclasses are free to
+	 * override if they wish to provide footer patterns.
+	 * </p>
+	 */
+	protected Pattern[] getFooterPatterns() {
+		return null;
+	}
+
 }
