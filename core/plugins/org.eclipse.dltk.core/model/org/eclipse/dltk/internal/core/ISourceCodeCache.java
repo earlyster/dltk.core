@@ -56,4 +56,19 @@ public interface ISourceCodeCache {
 	 * @param file
 	 */
 	void remove(IFile file);
+
+	/**
+	 * Changes caching mode to get better performance for resource intensive
+	 * operations.
+	 * 
+	 * This method should be called at the beginning of the long operations,
+	 * e.g. build. After the operation is completed the {@link #endOperation()}
+	 * method should be called.
+	 */
+	void beginOperation();
+
+	/**
+	 * Restores caching mode back to the standard mode.
+	 */
+	void endOperation();
 }

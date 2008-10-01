@@ -190,4 +190,12 @@ public class SourceModuleCodeCache implements ISourceCodeCache {
 	public final void remove(IFile file) {
 		removeFileEntry(file);
 	}
+
+	public void beginOperation() {
+		// NOP
+	}
+
+	public void endOperation() {
+		// NOP
+	}
 }
