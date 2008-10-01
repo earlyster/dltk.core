@@ -10,8 +10,10 @@
 package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -66,9 +68,11 @@ public class ExternalProjectFragment extends ProjectFragment {
 		ArrayList vForeign = new ArrayList(5);
 		char[][] inclusionPatterns = this.fullInclusionPatternChars();
 		char[][] exclusionPatterns = this.fullExclusionPatternChars();
+		Set realPaths = new HashSet();
 		this.computeFolderChildren(this.fPath, !Util.isExcluded(this.fPath,
 				inclusionPatterns, exclusionPatterns, true), vChildren,
-				vForeign, newElements, inclusionPatterns, exclusionPatterns);
+				vForeign, newElements, inclusionPatterns, exclusionPatterns,
+				realPaths);
 		IModelElement[] children = new IModelElement[vChildren.size()];
 		vChildren.toArray(children);
 		info.setChildren(children);
@@ -87,10 +91,21 @@ public class ExternalProjectFragment extends ProjectFragment {
 	 */
 	protected void computeFolderChildren(IPath path, boolean isIncluded,
 			ArrayList vChildren, ArrayList vForeign, Map newElements,
-			char[][] inclusionPatterns, char[][] exclusionPatterns)
-			throws ModelException {
+			char[][] inclusionPatterns, char[][] exclusionPatterns,
+			Set realPaths) throws ModelException {
 		IPath lpath = EnvironmentPathUtils.getLocalPath(path
 				.removeFirstSegments(this.fPath.segmentCount()));
+		IEnvironment environment = EnvironmentPathUtils
+				.getPathEnvironment(path);
+		if (environment != null) {
+			IFileHandle file = environment.getFile(EnvironmentPathUtils
+					.getLocalPath(path));
+			String canonicalPath = file.getCanonicalPath();
+			if (!realPaths.add(canonicalPath)) {
+				return;
+			}
+		}
+
 		ExternalScriptFolder fldr = (ExternalScriptFolder) this
 				.getScriptFolder(lpath);
 		boolean valid = Util.isValidSourcePackageName(this, path);
@@ -118,7 +133,7 @@ public class ExternalProjectFragment extends ProjectFragment {
 								inclusionPatterns, exclusionPatterns, true);
 						computeFolderChildren(memberPath, isMemberIncluded,
 								vChildren, vForeign, newElements,
-								inclusionPatterns, exclusionPatterns);
+								inclusionPatterns, exclusionPatterns, realPaths);
 					} else {
 						if (Util.isValidSourceModule(this, memberPath)) {
 							scriptElements.add(memberPath);
