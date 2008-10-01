@@ -59,7 +59,7 @@ public class SourceCodeCache implements ISourceCodeCache {
 
 	private static boolean isChanged(IResourceDelta delta) {
 		return delta.getKind() == IResourceDelta.CHANGED
-				&& (delta.getFlags() & IResourceDelta.CONTENT) != 0;
+				&& (delta.getFlags() & (IResourceDelta.CONTENT | IResourceDelta.REPLACED)) != 0;
 	}
 
 	private static boolean isRemoved(IResourceDelta delta) {
