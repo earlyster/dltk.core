@@ -318,7 +318,7 @@ public class ModelManager implements ISaveParticipant {
 	/**
 	 * A cache of module source code.
 	 */
-	private SourceModuleCodeCache sourceCodeCache = null;
+	private SourceCodeCache sourceCodeCache = null;
 
 	private UserLibraryManager userLibraryManager;
 
@@ -2118,7 +2118,7 @@ public class ModelManager implements ISaveParticipant {
 
 	public ISourceCodeCache getSourceCodeCache() {
 		if (sourceCodeCache == null) {
-			sourceCodeCache = new SourceModuleCodeCache();
+			sourceCodeCache = new SourceCodeCache();
 		}
 		return sourceCodeCache;
 	}
