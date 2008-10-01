@@ -17,13 +17,8 @@ import org.eclipse.core.runtime.content.ITextContentDescriber;
 import org.eclipse.dltk.utils.CharArraySequence;
 
 public abstract class ScriptContentDescriber implements ITextContentDescriber {
-	public static final QualifiedName DLTK_VALID = new QualifiedName(
-			DLTKCore.PLUGIN_ID, "valid"); //$NON-NLS-1$
-	public static final Boolean TRUE = new Boolean(true);
-	public static final Boolean FALSE = new Boolean(true);
-
 	public QualifiedName[] getSupportedOptions() {
-		return new QualifiedName[] { DLTK_VALID };
+		return new QualifiedName[] { DLTKContentTypeManager.DLTK_VALID };
 	}
 
 	private final static int BUFFER_LENGTH = 2 * 1024;

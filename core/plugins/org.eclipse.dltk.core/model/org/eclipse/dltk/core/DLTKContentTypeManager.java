@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
@@ -36,6 +37,9 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 public class DLTKContentTypeManager {
+
+	public static final QualifiedName DLTK_VALID = new QualifiedName(
+			DLTKCore.PLUGIN_ID, "valid"); //$NON-NLS-1$
 
 	private static final boolean DEBUG = false;
 	private static final boolean DEBUG_CONTENT = false;
@@ -300,9 +304,8 @@ public class DLTKContentTypeManager {
 
 	private static boolean checkDescription(IContentType type,
 			IContentDescription description) {
-		Object object = description
-				.getProperty(ScriptContentDescriber.DLTK_VALID);
-		if (object != null && ScriptContentDescriber.TRUE.equals(object)) {
+		Object object = description.getProperty(DLTK_VALID);
+		if (object != null && Boolean.TRUE.equals(object)) {
 			final IContentType contentType = description.getContentType();
 			return contentType.isKindOf(type);
 		}
