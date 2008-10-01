@@ -117,8 +117,10 @@ public class SourceParserUtil {
 						action.run(module, sourceAsCharArray);
 					}
 				} catch (ModelException e) {
-					final String msg = Messages.SourceParserUtil_errorRetrievingContent;
-					DLTKCore.error(msg, e);
+					if (DLTKCore.DEBUG) {
+						final String msg = Messages.SourceParserUtil_errorRetrievingContent;
+						DLTKCore.error(msg, e);
+					}
 				}
 				if (moduleDeclaration != null && mifo != null) {
 					mifo.put(astKey, moduleDeclaration);

@@ -28,10 +28,10 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Util;
 import org.eclipse.dltk.utils.CorePrinter;
-
 
 public class ProjectFragment extends Openable implements IProjectFragment {
 	/**
@@ -80,7 +80,7 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 	/**
 	 * Compares two objects for equality; for <code>ProjectFragments</code>s,
 	 * equality is having the same parent, same resources, and occurrence count.
-	 *
+	 * 
 	 */
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -96,7 +96,8 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 		if (this.resource != null && other.resource == null) {
 			return false;
 		}
-		if( this.resource != null && other.resource != null && !this.resource.equals(other.resource) ) {
+		if (this.resource != null && other.resource != null
+				&& !this.resource.equals(other.resource)) {
 			return false;
 		}
 
@@ -107,7 +108,8 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 		return this.resource.hashCode();
 	}
 
-	protected boolean buildStructure(OpenableElementInfo info, IProgressMonitor pm, Map newElements, IResource underlyingResource)
+	protected boolean buildStructure(OpenableElementInfo info,
+			IProgressMonitor pm, Map newElements, IResource underlyingResource)
 			throws ModelException {
 		// check whether this project fragment can be opened
 		IStatus status = this.validateOnBuildpath();
@@ -141,17 +143,19 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 			// could not read buildpath, then assume it is outside
 			return e.getModelStatus();
 		}
-		return new ModelStatus(IModelStatusConstants.ELEMENT_NOT_ON_BUILDPATH, this);
+		return new ModelStatus(IModelStatusConstants.ELEMENT_NOT_ON_BUILDPATH,
+				this);
 	}
 
 	/**
 	 * Compute the project fragment children of this project fragment.
-	 *
+	 * 
 	 * @exception ModelException
 	 *                The resource associated with this project fragment does
 	 *                not exist
 	 */
-	protected boolean computeChildren(OpenableElementInfo info, Map newElements) throws ModelException {
+	protected boolean computeChildren(OpenableElementInfo info, Map newElements)
+			throws ModelException {
 		// Note the children are not opened (so not added to newElements) for a
 		// regular package fragment root
 		// However they are opened for a ZIP project fragment.
@@ -160,13 +164,16 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 			// that the project folder
 			// is actually the package fragment root)
 			IResource underlyingResource = this.getResource();
-			if (underlyingResource.getType() == IResource.FOLDER || underlyingResource.getType() == IResource.PROJECT) {
+			if (underlyingResource.getType() == IResource.FOLDER
+					|| underlyingResource.getType() == IResource.PROJECT) {
 				ArrayList vChildren = new ArrayList(5);
 				IContainer rootFolder = (IContainer) underlyingResource;
 				char[][] inclusionPatterns = this.fullInclusionPatternChars();
 				char[][] exclusionPatterns = this.fullExclusionPatternChars();
-				this.computeFolderChildren(rootFolder, !Util.isExcluded(rootFolder, inclusionPatterns, exclusionPatterns), Path.EMPTY,
-						vChildren, inclusionPatterns, exclusionPatterns);
+				this.computeFolderChildren(rootFolder, !Util.isExcluded(
+						rootFolder, inclusionPatterns, exclusionPatterns),
+						Path.EMPTY, vChildren, inclusionPatterns,
+						exclusionPatterns);
 				IModelElement[] children = new IModelElement[vChildren.size()];
 				vChildren.toArray(children);
 				info.setChildren(children);
@@ -182,19 +189,21 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 	/**
 	 * Starting at this folder, create folders and add them to the collection of
 	 * children.
-	 *
+	 * 
 	 * @exception ModelException
 	 *                The resource associated with this project fragment does
 	 *                not exist
 	 */
-	protected void computeFolderChildren(IContainer folder, boolean isIncluded, IPath path, ArrayList vChildren,
-			char[][] inclusionPatterns, char[][] exclusionPatterns) throws ModelException {
+	protected void computeFolderChildren(IContainer folder, boolean isIncluded,
+			IPath path, ArrayList vChildren, char[][] inclusionPatterns,
+			char[][] exclusionPatterns) throws ModelException {
 		if (isIncluded) {
 			IScriptFolder pkg = this.getScriptFolder(path);
 			vChildren.add(pkg);
 		}
 		try {
-			ScriptProject scriptProject = (ScriptProject) this.getScriptProject();
+			ScriptProject scriptProject = (ScriptProject) this
+					.getScriptProject();
 			ModelManager manager = ModelManager.getModelManager();
 			IResource[] members = folder.members();
 			boolean hasIncluded = isIncluded;
@@ -202,33 +211,39 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 				IResource member = members[i];
 				String memberName = member.getName();
 				switch (member.getType()) {
-					case IResource.FOLDER:
-						// TODO check is folder is valid for a package
-						if (Util.isValidFolderNameForPackage(memberName)) {
-							if (scriptProject.contains(member)) {
-								IPath newPath = path.append(manager.intern(memberName));
-								boolean isMemberIncluded = !Util.isExcluded(member, inclusionPatterns, exclusionPatterns);
-								this.computeFolderChildren((IFolder) member, isMemberIncluded, newPath, vChildren, inclusionPatterns,
-										exclusionPatterns);
-							}
+				case IResource.FOLDER:
+					// TODO check is folder is valid for a package
+					if (Util.isValidFolderNameForPackage(memberName)) {
+						if (scriptProject.contains(member)) {
+							IPath newPath = path.append(manager
+									.intern(memberName));
+							boolean isMemberIncluded = !Util.isExcluded(member,
+									inclusionPatterns, exclusionPatterns);
+							this.computeFolderChildren((IFolder) member,
+									isMemberIncluded, newPath, vChildren,
+									inclusionPatterns, exclusionPatterns);
 						}
-						break;
-					case IResource.FILE:
-						// inclusion filter may only include files, in which
-						// case we still want to include the immediate parent
-						// package (lazily)
-						if (!hasIncluded && Util.isValidSourceModule(this, member)
-								&& !Util.isExcluded(member, inclusionPatterns, exclusionPatterns)) {
-							hasIncluded = true;
-							IScriptFolder pkg = this.getScriptFolder(path);
-							vChildren.add(pkg);
-						}
-						break;
+					}
+					break;
+				case IResource.FILE:
+					// inclusion filter may only include files, in which
+					// case we still want to include the immediate parent
+					// package (lazily)
+					if (!hasIncluded
+							&& Util.isValidSourceModule(this, member)
+							&& !Util.isExcluded(member, inclusionPatterns,
+									exclusionPatterns)) {
+						hasIncluded = true;
+						IScriptFolder pkg = this.getScriptFolder(path);
+						vChildren.add(pkg);
+					}
+					break;
 				}
 			}
 		} catch (IllegalArgumentException e) {
 			/* could be thrown by ElementTree when path is not found */
-			throw new ModelException(e, IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
+			throw new ModelException(e,
+					IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
 		} catch (CoreException e) {
 			throw new ModelException(e);
 		}
@@ -263,9 +278,10 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 	/**
 	 * @private Debugging purposes
 	 */
-	protected void toStringInfo(int tab, StringBuffer buffer, Object info, boolean showResolvedInfo) {
+	protected void toStringInfo(int tab, StringBuffer buffer, Object info,
+			boolean showResolvedInfo) {
 		buffer.append(this.tabString(tab));
-		IPath path = this.getPath();
+		IPath path = EnvironmentPathUtils.getLocalPath(this.getPath());
 		if (this.getScriptProject().getElementName().equals(path.segment(0))) {
 			if (path.segmentCount() == 1) {
 				buffer.append("<project root>"); //$NON-NLS-1$
@@ -285,7 +301,8 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 	}
 
 	public void printNode(CorePrinter output) {
-		output.formatPrint("ScriptProject fragment:" + this.getPath().toOSString()); //$NON-NLS-1$
+		output
+				.formatPrint("ScriptProject fragment:" + this.getPath().toOSString()); //$NON-NLS-1$
 		output.indent();
 		try {
 			IModelElement modelElements[] = this.getChildren();
@@ -310,7 +327,9 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 	}
 
 	public Object[] getForeignResources() throws ModelException {
-		return ((ProjectFragmentInfo) this.getElementInfo()).getForeignResources(this.getScriptProject(), this.getResource(), this);
+		return ((ProjectFragmentInfo) this.getElementInfo())
+				.getForeignResources(this.getScriptProject(), this
+						.getResource(), this);
 	}
 
 	/*
@@ -359,17 +378,21 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 	 */
 	public IBuildpathEntry getRawBuildpathEntry() throws ModelException {
 		IBuildpathEntry rawEntry = null;
-		ScriptProject project = (ScriptProject)this.getScriptProject();
-		project.getResolvedBuildpath(); // force the reverse rawEntry cache to be populated
+		ScriptProject project = (ScriptProject) this.getScriptProject();
+		project.getResolvedBuildpath(); // force the reverse rawEntry cache to
+		// be populated
 		Map rootPathToRawEntries = project.getPerProjectInfo().resolvedPathToRawEntries;
 		if (rootPathToRawEntries != null) {
-			rawEntry = (IBuildpathEntry) rootPathToRawEntries.get(this.getPath());
+			rawEntry = (IBuildpathEntry) rootPathToRawEntries.get(this
+					.getPath());
 		}
 		if (rawEntry == null) {
-			throw new ModelException(new ModelStatus(IModelStatusConstants.ELEMENT_NOT_ON_BUILDPATH, this));
+			throw new ModelException(new ModelStatus(
+					IModelStatusConstants.ELEMENT_NOT_ON_BUILDPATH, this));
 		}
 		return rawEntry;
 	}
+
 	public IBuildpathEntry getBuildpathEntry() throws ModelException {
 		return this.getRawBuildpathEntry();
 	}
@@ -381,29 +404,30 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 		escapeMementoName(buff, path.toString());
 	}
 
-	public IModelElement getHandleFromMemento(String token, MementoTokenizer memento, WorkingCopyOwner owner) {
+	public IModelElement getHandleFromMemento(String token,
+			MementoTokenizer memento, WorkingCopyOwner owner) {
 		switch (token.charAt(0)) {
-			case JEM_SCRIPTFOLDER:
-				String pkgName;
-				if (memento.hasMoreTokens()) {
-					pkgName = memento.nextToken();
-					char firstChar = pkgName.charAt(0);
-					if (firstChar == JEM_SOURCEMODULE || firstChar == JEM_COUNT) {
-						token = pkgName;
-						pkgName = IProjectFragment.DEFAULT_SCRIPT_FOLDER_NAME;
-					} else {
-						token = null;
-					}
+		case JEM_SCRIPTFOLDER:
+			String pkgName;
+			if (memento.hasMoreTokens()) {
+				pkgName = memento.nextToken();
+				char firstChar = pkgName.charAt(0);
+				if (firstChar == JEM_SOURCEMODULE || firstChar == JEM_COUNT) {
+					token = pkgName;
+					pkgName = IProjectFragment.DEFAULT_SCRIPT_FOLDER_NAME;
 				} else {
-					pkgName = IScriptFolder.DEFAULT_FOLDER_NAME;
 					token = null;
 				}
-				ModelElement pkg = (ModelElement) this.getScriptFolder(pkgName);
-				if (token == null) {
-					return pkg.getHandleFromMemento(memento, owner);
-				} else {
-					return pkg.getHandleFromMemento(token, memento, owner);
-				}
+			} else {
+				pkgName = IScriptFolder.DEFAULT_FOLDER_NAME;
+				token = null;
+			}
+			ModelElement pkg = (ModelElement) this.getScriptFolder(pkgName);
+			if (token == null) {
+				return pkg.getHandleFromMemento(memento, owner);
+			} else {
+				return pkg.getHandleFromMemento(token, memento, owner);
+			}
 		}
 		return null;
 	}
@@ -415,35 +439,45 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 	/**
 	 * @see IProjectFragment
 	 */
-	public IScriptFolder createScriptFolder(String pkgName, boolean force, IProgressMonitor monitor) throws ModelException {
-		CreateScriptFolderOperation op = new CreateScriptFolderOperation(this, pkgName, force);
+	public IScriptFolder createScriptFolder(String pkgName, boolean force,
+			IProgressMonitor monitor) throws ModelException {
+		CreateScriptFolderOperation op = new CreateScriptFolderOperation(this,
+				pkgName, force);
 		op.runOperation(monitor);
 		return this.getScriptFolder(op.pkgName);
 	}
 
-	public void delete(int updateResourceFlags, int updateModelFlags, IProgressMonitor monitor) throws ModelException {
-		DeleteProjectFragmentOperation op = new DeleteProjectFragmentOperation(this, updateResourceFlags, updateModelFlags);
+	public void delete(int updateResourceFlags, int updateModelFlags,
+			IProgressMonitor monitor) throws ModelException {
+		DeleteProjectFragmentOperation op = new DeleteProjectFragmentOperation(
+				this, updateResourceFlags, updateModelFlags);
 		op.runOperation(monitor);
 	}
 
-	public void copy(IPath destination, int updateResourceFlags, int updateModelFlags, IBuildpathEntry sibling, IProgressMonitor monitor) throws ModelException {
-		CopyProjectFragmentOperation op = new CopyProjectFragmentOperation(this, destination, updateResourceFlags,
-				updateModelFlags, sibling);
+	public void copy(IPath destination, int updateResourceFlags,
+			int updateModelFlags, IBuildpathEntry sibling,
+			IProgressMonitor monitor) throws ModelException {
+		CopyProjectFragmentOperation op = new CopyProjectFragmentOperation(
+				this, destination, updateResourceFlags, updateModelFlags,
+				sibling);
 		op.runOperation(monitor);
 	}
 
-	public void move(IPath destination, int updateResourceFlags, int updateModelFlags, IBuildpathEntry sibling, IProgressMonitor monitor) throws ModelException {
-		MoveProjectFragmentOperation op = new MoveProjectFragmentOperation(this, destination, updateResourceFlags,
-				updateModelFlags, sibling);
+	public void move(IPath destination, int updateResourceFlags,
+			int updateModelFlags, IBuildpathEntry sibling,
+			IProgressMonitor monitor) throws ModelException {
+		MoveProjectFragmentOperation op = new MoveProjectFragmentOperation(
+				this, destination, updateResourceFlags, updateModelFlags,
+				sibling);
 		op.runOperation(monitor);
 	}
 
 	public IScriptFolder getScriptFolder(String[] pkgName) {
-		if( pkgName.length == 0 ) {
+		if (pkgName.length == 0) {
 			return this.getScriptFolder(Path.EMPTY);
 		}
 		IPath path = new Path(pkgName[0]);
-		for( int i = 1; i < pkgName.length; ++i ) {
+		for (int i = 1; i < pkgName.length; ++i) {
 			path = path.append(pkgName[i]);
 		}
 		return this.getScriptFolder(path);

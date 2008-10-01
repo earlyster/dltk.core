@@ -661,6 +661,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		sub.beginTask(NONAME, resources.size());
 		int remainingWork = resources.size();
 		for (Iterator iterator = resources.iterator(); iterator.hasNext();) {
+			if (monitor.isCanceled()) {
+				return;
+			}
 			IResource res = (IResource) iterator.next();
 			sub.subTask(NLS.bind(
 					Messages.ScriptBuilder_Locating_source_modules, String
@@ -730,6 +733,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 
 		for (int k = 0; k < builders.length; k++) {
+			if (monitor.isCanceled()) {
+				return;
+			}
 			final IScriptBuilder builder = builders[k];
 			int builderWork = workEstimations[k] * ticks / total;
 			final List buildExternalElements = builderExternalElements[k];
