@@ -157,15 +157,13 @@ public final class ValidatorRuntime {
 	/**
 	 * Perform Interpreter type and Interpreter install initialization. Does not
 	 * hold locks while performing change notification.
-	 * 
-	 * 
 	 */
 	private static void initializeValidators() {
 		ValidatorDefinitionsContainer validatorDefs = null;
 		boolean setPref = false;
 		synchronized (fgValidatorLock) {
 			if (isInitialized) {
-				// return;
+				return;
 			}
 			isInitialized = true;
 			try {
@@ -196,16 +194,18 @@ public final class ValidatorRuntime {
 			} catch (CoreException e1) {
 				return;
 			}
-			for (int i = 0; i < validatorTypes.length; i++) {
-				final IValidatorType type = validatorTypes[i];
-				final IValidator[] validators = type.getValidators();
-				if (validators != null) {
-					for (int j = 0; j < validators.length; j++) {
-						final IValidator validator = validators[j];
-						if (type.findValidator(validator.getID()) == null) {
-							type.addValidator(validator);
+			// register loaded validators with corresponding types
+			for (Iterator i = validatorDefs.getValidatorList().iterator(); i
+					.hasNext();) {
+				final IValidator validator = (IValidator) i.next();
+				final String typeId = validator.getValidatorType().getID();
+				for (int j = 0; j < validatorTypes.length; ++j) {
+					final IValidatorType validatorType = validatorTypes[j];
+					if (typeId.equals(validatorType.getID())) {
+						if (validatorType.findValidator(validator.getID()) == null) {
+							validatorType.addValidator(validator);
 						}
-						fireValidatorAdded(validator);
+						break;
 					}
 				}
 			}
@@ -241,8 +241,9 @@ public final class ValidatorRuntime {
 	public static void fireValidatorChanged(IValidator validator) {
 		Object[] listeners = fgValidatorListeners.getListeners();
 		for (int i = 0; i < listeners.length; i++) {
-			IValidatorChangedListener listener = (IValidatorChangedListener) listeners[i];
-			listener.validatorChanged(validator);
+			// IValidatorChangedListener listener = (IValidatorChangedListener)
+			// listeners[i];
+			// listener.validatorChanged(validator);
 		}
 	}
 
@@ -250,8 +251,9 @@ public final class ValidatorRuntime {
 		if (!fgInitializingValidators) {
 			Object[] listeners = fgValidatorListeners.getListeners();
 			for (int i = 0; i < listeners.length; i++) {
-				IValidatorChangedListener listener = (IValidatorChangedListener) listeners[i];
-				listener.validatorAdded(Interpreter);
+				// IValidatorChangedListener listener =
+				// (IValidatorChangedListener) listeners[i];
+				// listener.validatorAdded(Interpreter);
 			}
 		}
 	}
@@ -259,8 +261,9 @@ public final class ValidatorRuntime {
 	public static void fireValidatorRemoved(IValidator Interpreter) {
 		Object[] listeners = fgValidatorListeners.getListeners();
 		for (int i = 0; i < listeners.length; i++) {
-			IValidatorChangedListener listener = (IValidatorChangedListener) listeners[i];
-			listener.validatorRemoved(Interpreter);
+			// IValidatorChangedListener listener = (IValidatorChangedListener)
+			// listeners[i];
+			// listener.validatorRemoved(Interpreter);
 		}
 	}
 
@@ -489,6 +492,17 @@ public final class ValidatorRuntime {
 					rValidator.clean(resources);
 				}
 			}
+		}
+	}
+
+	public static void fireValidatorChanged() {
+		synchronized (fgValidatorLock) {
+			isInitialized = false;
+		}
+		Object[] listeners = fgValidatorListeners.getListeners();
+		for (int i = 0; i < listeners.length; i++) {
+			IValidatorChangedListener listener = (IValidatorChangedListener) listeners[i];
+			listener.validatorChanged();
 		}
 	}
 

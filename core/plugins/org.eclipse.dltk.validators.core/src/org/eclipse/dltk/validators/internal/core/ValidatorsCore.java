@@ -49,12 +49,6 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 
 	private boolean fIgnoreValidatorDefPropertyChangeEvents = false;
 
-	// private boolean fBatchingChanges;
-
-	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
-
-	private String fOldInterpreterPrefString = EMPTY_STRING;
-
 	/**
 	 * The constructor
 	 */
@@ -81,6 +75,7 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 	 * org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+		getPluginPreferences().removePropertyChangeListener(this);
 		plugin = null;
 		super.stop(context);
 	}
@@ -143,7 +138,7 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 	}
 
 	private ValidatorDefinitionsContainer getValidatorDefinitions(String xml) {
-		if (xml.length() > 0) {
+		if (xml != null && xml.length() > 0) {
 			try {
 				return ValidatorDefinitionsContainer
 						.createFromXML(new StringReader(xml));
@@ -157,68 +152,32 @@ public class ValidatorsCore extends Plugin implements IPropertyChangeListener {
 	}
 
 	protected void processValidatorPrefsChanged(String oldValue, String newValue) {
-
-		// batch changes
-		// fBatchingChanges = true;
-		try {
-
-			String oldPrefString;
-			String newPrefString;
-
-			// If empty new value, save the old value and wait for 2nd
-			// propertyChange notification
-			if (newValue == null || newValue.equals(EMPTY_STRING)) {
-				fOldInterpreterPrefString = oldValue;
-				return;
-			}
-			// An empty old value signals the second notification in the import
-			// preferences
-			// sequence. Now that we have both old & new prefs, we can parse and
-			// compare them.
-			else if (oldValue == null || oldValue.equals(EMPTY_STRING)) {
-				oldPrefString = fOldInterpreterPrefString;
-				newPrefString = newValue;
-			}
-			// If both old & new values are present, this is a normal user
-			// change
-			else {
-				oldPrefString = oldValue;
-				newPrefString = newValue;
-			}
-
-			// Generate the previous Validators
-			ValidatorDefinitionsContainer oldResults = getValidatorDefinitions(oldPrefString);
-
-			// Generate the current
-			ValidatorDefinitionsContainer newResults = getValidatorDefinitions(newPrefString);
-
-			// Determine the deleted validators
-			List deleted = new ArrayList(oldResults.getValidatorList());
-			deleted.removeAll(newResults.getValidatorList());
-
-			// Dispose deleted Validators. The 'disposeInterpreterInstall'
-			// method fires notification of the
-			// deletion.
-			Iterator deletedIterator = deleted.iterator();
-			while (deletedIterator.hasNext()) {
-				IValidator deletedValidatorStandin = (IValidator) deletedIterator
-						.next();
-				deletedValidatorStandin.getValidatorType().disposeValidator(
-						deletedValidatorStandin.getID());
-			}
-
-			// Iterator currentIterator = current.iterator();
-			//			
-			// while(currentIterator.hasNext()){
-			// IValidator currentValidatorStandin = (IValidator)
-			// currentIterator.next();
-			// currentValidatorStandin.getValidatorType().createValidator(
-			// currentValidatorStandin.getID());
-			// }
-		} finally {
-			// stop batch changes
-			// fBatchingChanges = false;
+		if (oldValue == null && newValue == null) {
+			return;
 		}
+		if (oldValue != null && oldValue.equals(newValue)) {
+			return;
+		}
+
+		// Generate the previous Validators
+		ValidatorDefinitionsContainer oldResults = getValidatorDefinitions(oldValue);
+
+		// Generate the current
+		ValidatorDefinitionsContainer newResults = getValidatorDefinitions(newValue);
+
+		// Determine the deleted validators
+		List deleted = new ArrayList(oldResults.getValidatorList());
+		deleted.removeAll(newResults.getValidatorList());
+
+		// Dispose ALL but built-in validators
+		for (Iterator i = deleted.iterator(); i.hasNext();) {
+			IValidator validator = (IValidator) i.next();
+			validator.getValidatorType().disposeValidator(validator.getID());
+		}
+
+		// fire event and reset initialized flag - during next call new
+		// validators would be loaded and added to the validatorType
+		ValidatorRuntime.fireValidatorChanged();
 	}
 
 	public static void log(IStatus status) {
