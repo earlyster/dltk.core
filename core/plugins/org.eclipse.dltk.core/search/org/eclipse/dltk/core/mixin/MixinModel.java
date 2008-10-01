@@ -179,7 +179,7 @@ public class MixinModel {
 			// }
 		}
 
-		List result = new ArrayList();
+		Set result = new HashSet();
 
 		// int i = 0;
 		for (Iterator iterator = set.keySet().iterator(); iterator.hasNext();) {
@@ -310,7 +310,7 @@ public class MixinModel {
 	 * @param element
 	 * @return
 	 */
-	private ISourceModule[] findModules(String key) {
+	public ISourceModule[] findModules(String key) {
 		ISourceModule[] searchMixinSources = SearchEngine.searchMixinSources(
 				createSearchScope(), key, toolkit);
 		return searchMixinSources;
