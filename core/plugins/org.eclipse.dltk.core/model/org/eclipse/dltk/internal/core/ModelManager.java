@@ -65,6 +65,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.util.HashtableOfObjectToInt;
 import org.eclipse.dltk.core.BuildpathContainerInitializer;
+import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IAccessRule;
@@ -1116,6 +1117,7 @@ public class ModelManager implements ISaveParticipant {
 							| IResourceChangeEvent.POST_CHANGE
 							| IResourceChangeEvent.PRE_DELETE
 							| IResourceChangeEvent.PRE_CLOSE);
+			DLTKContentTypeManager.installListener();
 			startIndexing();
 			// process deltas since last activated in indexer thread so that
 			// indexes are up-to-date.
@@ -1369,6 +1371,7 @@ public class ModelManager implements ISaveParticipant {
 		DLTKCore.getDefault().savePluginPreferences();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(this.deltaState);
+		DLTKContentTypeManager.uninstallListener();
 		workspace.removeSaveParticipant(DLTKCore.getDefault());
 
 		if (sourceModuleInfoCach != null) {

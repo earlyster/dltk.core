@@ -22,6 +22,10 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -35,11 +39,22 @@ import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.ModelManager;
+import org.eclipse.dltk.internal.core.ScriptFileConfiguratorManager;
 
 public class DLTKContentTypeManager {
 
 	public static final QualifiedName DLTK_VALID = new QualifiedName(
 			DLTKCore.PLUGIN_ID, "valid"); //$NON-NLS-1$
+
+	/**
+	 * Persisted value of the {@link #DLTK_VALID} property
+	 */
+	private static final String TRUE_VALUE = "true"; //$NON-NLS-1$
+
+	/**
+	 * Persisted value of the {@link #DLTK_VALID} property
+	 */
+	private static final String FALSE_VALUE = "false"; //$NON-NLS-1$
 
 	private static final boolean DEBUG = false;
 	private static final boolean DEBUG_CONTENT = false;
@@ -232,7 +247,21 @@ public class DLTKContentTypeManager {
 		if (!toolkit.canValidateContent(resource)) {
 			return false;
 		}
-		return validateResourceContent(masterType, derived, (IFile) resource);
+		try {
+			final String value = resource.getPersistentProperty(DLTK_VALID);
+			if (value != null) {
+				return TRUE_VALUE.equals(value);
+			}
+		} catch (CoreException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+			return false;
+		}
+		final boolean result = validateResourceContent(masterType, derived,
+				(IFile) resource);
+		setValidScript((IFile) resource, toolkit.getNatureId(), result);
+		return result;
 	}
 
 	private static boolean validateResourceContent(
@@ -297,6 +326,34 @@ public class DLTKContentTypeManager {
 		return false;
 	}
 
+	/**
+	 * Sets value of {@link #DLTK_VALID} property
+	 * 
+	 * @param file
+	 * @param natureId
+	 * @param value
+	 */
+	private static void setValidScript(IFile file, String natureId,
+			boolean value) {
+		try {
+			file.setPersistentProperty(DLTK_VALID, value ? TRUE_VALUE
+					: FALSE_VALUE);
+			if (value) {
+				final IScriptFileConfigurator[] configurators = ScriptFileConfiguratorManager
+						.get(natureId);
+				if (configurators != null) {
+					for (int i = 0; i < configurators.length; ++i) {
+						configurators[i].configure(file);
+					}
+				}
+			}
+		} catch (CoreException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	private static IContentType getMasterContentType(String languageContentType) {
 		final IContentTypeManager manager = Platform.getContentTypeManager();
 		return manager.getContentType(languageContentType);
@@ -336,5 +393,50 @@ public class DLTKContentTypeManager {
 			derivedContentTypesCache.put(masterType, result);
 		}
 		return result;
+	}
+
+	private static IResourceChangeListener listener = null;
+
+	private static class ResetScriptValidPropertyListener implements
+			IResourceChangeListener, IResourceDeltaVisitor {
+
+		public void resourceChanged(IResourceChangeEvent event) {
+			try {
+				event.getDelta().accept(this);
+			} catch (CoreException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		public boolean visit(IResourceDelta delta) throws CoreException {
+			final IResource resource = delta.getResource();
+			if (resource.getType() == IResource.FILE) {
+				if (delta.getKind() == IResourceDelta.CHANGED
+						&& (delta.getFlags() & (IResourceDelta.CONTENT | IResourceDelta.REPLACED)) != 0) {
+					resource.setPersistentProperty(DLTK_VALID, null);
+				}
+				return false;
+			}
+			return true;
+		}
+
+	}
+
+	public static void installListener() {
+		if (listener == null) {
+			listener = new ResetScriptValidPropertyListener();
+			ResourcesPlugin.getWorkspace().addResourceChangeListener(listener,
+					IResourceChangeEvent.POST_CHANGE);
+		}
+	}
+
+	public static void uninstallListener() {
+		if (listener != null) {
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(
+					listener);
+			listener = null;
+		}
 	}
 }
