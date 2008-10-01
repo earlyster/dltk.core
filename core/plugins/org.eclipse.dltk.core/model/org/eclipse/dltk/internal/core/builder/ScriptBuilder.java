@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
@@ -35,6 +37,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -56,6 +59,9 @@ import org.eclipse.dltk.internal.core.ExternalProjectFragment;
 import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ScriptProject;
+import org.eclipse.dltk.internal.core.util.Util;
+import org.eclipse.dltk.utils.CharArraySequence;
+import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.osgi.util.NLS;
 
 public class ScriptBuilder extends IncrementalProjectBuilder {
@@ -192,6 +198,11 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		System.out.println(message);
 	}
 
+	private static final QualifiedName BUILDER_VERSION = new QualifiedName(
+			DLTKCore.PLUGIN_ID, "builderVersion"); //$NON-NLS-1$
+
+	private static final String VERSION = "200810012003"; //$NON-NLS-1$
+
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
 		this.currentProject = getProject();
@@ -205,6 +216,15 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			startTime = System.currentTimeMillis();
 			log("\nStarting build of " + this.currentProject.getName() //$NON-NLS-1$
 					+ " @ " + new Date(startTime)); //$NON-NLS-1$
+		}
+		String version = currentProject.getPersistentProperty(BUILDER_VERSION);
+		if (version == null) {
+			removeTaskMarkers(currentProject);
+			currentProject.setPersistentProperty(BUILDER_VERSION, VERSION);
+			kind = FULL_BUILD;
+		} else if (!VERSION.equals(version)) {
+			currentProject.setPersistentProperty(BUILDER_VERSION, VERSION);
+			kind = FULL_BUILD;
 		}
 		this.scriptProject = (ScriptProject) DLTKCore.create(currentProject);
 		lastBuildResources = 0;
@@ -262,6 +282,54 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 		monitor.done();
 		return requiredProjects;
+	}
+
+	/**
+	 * Remove incorrect task markers.
+	 * 
+	 * DLTK 0.95 were creating wrong task markers, so this function is here to
+	 * remove them. New markers will be created by the builder later.
+	 * 
+	 * @param project
+	 * @throws CoreException
+	 */
+	private void removeTaskMarkers(IProject project) throws CoreException {
+		final IMarker[] markers = project.findMarkers(IMarker.TASK, false,
+				IResource.DEPTH_INFINITE);
+		for (int i = 0; i < markers.length; ++i) {
+			final IMarker marker = markers[i];
+			if (marker.getResource().getType() != IResource.FILE) {
+				continue;
+			}
+			final Map attributes = marker.getAttributes();
+			if (attributes == null) {
+				continue;
+			}
+			if (!Boolean.FALSE.equals(attributes.get(IMarker.USER_EDITABLE))) {
+				continue;
+			}
+			if (attributes.containsKey(IMarker.LINE_NUMBER)
+					&& attributes.containsKey(IMarker.MESSAGE)
+					&& attributes.containsKey(IMarker.PRIORITY)
+					&& attributes.containsKey(IMarker.CHAR_START)
+					&& attributes.containsKey(IMarker.CHAR_END)) {
+				final Object numberAttr = attributes.get(IMarker.LINE_NUMBER);
+				if (numberAttr instanceof Integer) {
+					final int number = ((Integer) numberAttr).intValue();
+					final char content[] = Util
+							.getResourceContentsAsCharArray((IFile) marker
+									.getResource());
+					final String[] lines = TextUtils
+							.splitLines(new CharArraySequence(content));
+					if (number >= 0 && number < lines.length) {
+						if (lines[number - 1].indexOf(attributes.get(
+								IMarker.MESSAGE).toString()) >= 0) {
+							marker.delete();
+						}
+					}
+				}
+			}
+		}
 	}
 
 	protected void clean(IProgressMonitor monitor) throws CoreException {
