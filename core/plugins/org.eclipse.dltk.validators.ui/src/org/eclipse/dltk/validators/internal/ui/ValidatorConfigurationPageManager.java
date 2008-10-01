@@ -15,6 +15,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.validators.ui.ValidatorConfigurationPage;
 
 public class ValidatorConfigurationPageManager {
@@ -37,8 +38,11 @@ public class ValidatorConfigurationPageManager {
 
 		for (int i = 0; i < cfg.length; i++) {
 			String id = cfg[i].getAttribute(ID_ATTR);
-			if (toolkits.get(id) != null)
-				System.err.println("TODO log redeclaration"); //$NON-NLS-1$
+			if (toolkits.get(id) != null) {
+				if (DLTKCore.DEBUG) {
+					System.err.println("TODO log redeclaration"); //$NON-NLS-1$
+				}
+			}
 			toolkits.put(id, cfg[i]);
 		}
 	}

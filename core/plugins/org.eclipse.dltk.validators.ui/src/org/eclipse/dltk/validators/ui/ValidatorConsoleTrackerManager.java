@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.validators.internal.ui.ValidatorsUI;
 import org.eclipse.ui.console.IPatternMatchListener;
 
@@ -40,13 +41,17 @@ public class ValidatorConsoleTrackerManager {
 			listeners.add(listener);
 		}
 	}
+
 	public static IPatternMatchListener[] getListeners() {
 		try {
 			initialize();
 		} catch (CoreException e) {
-			e.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 			return null;
 		}
-		return (IPatternMatchListener[])listeners.toArray(new IPatternMatchListener[listeners.size()]);
+		return (IPatternMatchListener[]) listeners
+				.toArray(new IPatternMatchListener[listeners.size()]);
 	}
 }
