@@ -110,6 +110,9 @@ public class ValidatorBuilder implements IScriptBuilder,
 					moduleDeclaration = null;
 				}
 				for (int i = 0; i < extensions.length; ++i) {
+					if (monitor.isCanceled()) {
+						return;
+					}
 					try {
 						extensions[i].buildExternalModule(module,
 								moduleDeclaration);

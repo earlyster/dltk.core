@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
@@ -71,7 +72,9 @@ public final class ValidatorRuntime {
 		try {
 			return ValidatorManager.getAllValidatorTypes();
 		} catch (CoreException e) {
-			e.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 			return null;
 		}
 	}
@@ -81,7 +84,9 @@ public final class ValidatorRuntime {
 		try {
 			return ValidatorManager.getValidators(nature);
 		} catch (CoreException e) {
-			e.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 			return null;
 		}
 	}

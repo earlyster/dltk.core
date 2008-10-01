@@ -135,7 +135,9 @@ public abstract class AbstractValidateJob extends Job {
 					output.getStream().close();
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return Status.OK_STATUS;
