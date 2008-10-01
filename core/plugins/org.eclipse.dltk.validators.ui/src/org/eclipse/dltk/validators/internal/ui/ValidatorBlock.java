@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.internal.ui.util.SWTUtil;
@@ -29,9 +28,7 @@ import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -69,8 +66,7 @@ import org.eclipse.swt.widgets.TableColumn;
  * "use default" button check state changes.
  * </p>
  */
-public class ValidatorBlock implements ISelectionProvider,
-		IAddValidatorDialogRequestor {
+public class ValidatorBlock implements IAddValidatorDialogRequestor {
 
 	/**
 	 * This block's control
@@ -96,24 +92,15 @@ public class ValidatorBlock implements ISelectionProvider,
 	// index of column used for sorting
 	private int fSortColumn = 0;
 
-	/**
-	 * Selection listeners (checked InterpreterEnvironment changes)
-	 */
-	private ListenerList fSelectionListeners = new ListenerList();
-
-	/**
-	 * Previous selection
-	 */
-	private ISelection fPrevSelection = new StructuredSelection();
-
 	private Table fTable;
 
 	/**
 	 * Content provider to show a list of InterpreterEnvironments
 	 */
-	class ValidatorContentProvider implements IStructuredContentProvider {
+	private static class ValidatorContentProvider implements
+			IStructuredContentProvider {
 		public Object[] getElements(Object input) {
-			return fValidators.toArray();
+			return ((List) input).toArray();
 		}
 
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -126,7 +113,7 @@ public class ValidatorBlock implements ISelectionProvider,
 	/**
 	 * Label provider for installed InterpreterEnvironments table.
 	 */
-	class ValidatorLabelProvider extends LabelProvider implements
+	private static class ValidatorLabelProvider extends LabelProvider implements
 			ITableLabelProvider {
 
 		/**
@@ -142,7 +129,7 @@ public class ValidatorBlock implements ISelectionProvider,
 					return validator.getValidatorType().getName();
 				case 2:
 					String nature = validator.getValidatorType().getNature();
-					if (nature == "#") { //$NON-NLS-1$
+					if (ValidatorRuntime.ANY_NATURE.equals(nature)) {
 						return ValidatorMessages.ValidatorBlock_all;
 					}
 					IDLTKLanguageToolkit languageToolkit = DLTKLanguageManager
@@ -166,65 +153,6 @@ public class ValidatorBlock implements ISelectionProvider,
 			return null;
 		}
 
-	}
-
-	public ValidatorBlock() {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener
-	 * (org.eclipse.jface.viewers.ISelectionChangedListener)
-	 */
-	public void addSelectionChangedListener(ISelectionChangedListener listener) {
-		fSelectionListeners.add(listener);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.viewers.ISelectionProvider#getSelection()
-	 */
-	public ISelection getSelection() {
-		return new StructuredSelection(fValidatorList.getCheckedElements());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener
-	 * (org.eclipse.jface.viewers.ISelectionChangedListener)
-	 */
-	public void removeSelectionChangedListener(
-			ISelectionChangedListener listener) {
-		fSelectionListeners.remove(listener);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse
-	 * .jface.viewers.ISelection)
-	 */
-	public void setSelection(ISelection selection) {
-		if (selection instanceof IStructuredSelection) {
-			if (!selection.equals(fPrevSelection)) {
-				fPrevSelection = selection;
-				// Object interp = ((IStructuredSelection) selection)
-				// .getFirstElement();
-				// if (interp == null) {
-				// fValidatorList.setCheckedElements(new Object[0]);
-				// } else {
-				// fValidatorList.setCheckedElements(new Object[] { interp });
-				// fValidatorList.reveal(interp);
-				// }
-				fireSelectionChanged();
-			}
-		}
 	}
 
 	/**
@@ -392,19 +320,6 @@ public class ValidatorBlock implements ISelectionProvider,
 	}
 
 	/**
-	 * Fire current selection
-	 */
-	private void fireSelectionChanged() {
-		SelectionChangedEvent event = new SelectionChangedEvent(this,
-				getSelection());
-		Object[] listeners = fSelectionListeners.getListeners();
-		for (int i = 0; i < listeners.length; i++) {
-			ISelectionChangedListener listener = (ISelectionChangedListener) listeners[i];
-			listener.selectionChanged(event);
-		}
-	}
-
-	/**
 	 * Sorts by Interpreter type, and name within type.
 	 */
 	private void sortByType() {
@@ -566,21 +481,10 @@ public class ValidatorBlock implements ISelectionProvider,
 	 * @param validators
 	 */
 	public void removeValidators(IValidator[] validators) {
-		IStructuredSelection prev = (IStructuredSelection) getSelection();
 		for (int i = 0; i < validators.length; i++) {
 			fValidators.remove(validators[i]);
 		}
 		fValidatorList.refresh();
-		IStructuredSelection curr = (IStructuredSelection) getSelection();
-		if (!curr.equals(prev)) {
-			IValidator[] installs = getValidators();
-			if (curr.size() == 0 && installs.length == 1) {
-				// pick a default Interpreter automatically
-				setSelection(new StructuredSelection(installs[0]));
-			} else {
-				fireSelectionChanged();
-			}
-		}
 	}
 
 	protected Shell getShell() {
@@ -674,16 +578,11 @@ public class ValidatorBlock implements ISelectionProvider,
 		setValidators((IValidator[]) all.toArray(new IValidator[all.size()]));
 	}
 
-	public void validatorAdded(IValidator Interpreter) {
-		fValidators.add(Interpreter);
-		fValidatorList.refresh();
-
-		IValidator[] installs = getValidators();
-		if (installs.length == 1) {
-			// pick a default Interpreter automatically
-			setSelection(new StructuredSelection(installs[0]));
-		}
-		fireSelectionChanged();
+	public void validatorAdded(IValidator validator) {
+		fValidators.add(validator);
+		fValidatorList.add(validator);
+		fValidatorList.setChecked(validator, validator.isAutomatic());
+		fValidatorList.setSelection(new StructuredSelection(validator));
 	}
 
 	// Make sure that Validatortandin ids are unique if multiple calls to
