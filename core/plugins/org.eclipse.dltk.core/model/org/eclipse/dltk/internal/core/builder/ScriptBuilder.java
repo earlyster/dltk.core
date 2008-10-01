@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -39,6 +38,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
@@ -48,6 +48,7 @@ import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IModelMarker;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
@@ -59,9 +60,6 @@ import org.eclipse.dltk.internal.core.ExternalProjectFragment;
 import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ScriptProject;
-import org.eclipse.dltk.internal.core.util.Util;
-import org.eclipse.dltk.utils.CharArraySequence;
-import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.osgi.util.NLS;
 
 public class ScriptBuilder extends IncrementalProjectBuilder {
@@ -201,7 +199,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	private static final QualifiedName BUILDER_VERSION = new QualifiedName(
 			DLTKCore.PLUGIN_ID, "builderVersion"); //$NON-NLS-1$
 
-	private static final String VERSION = "200810012003"; //$NON-NLS-1$
+	private static final String VERSION = "200810012003-2123"; //$NON-NLS-1$
 
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
@@ -223,6 +221,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			currentProject.setPersistentProperty(BUILDER_VERSION, VERSION);
 			kind = FULL_BUILD;
 		} else if (!VERSION.equals(version)) {
+			removeTaskMarkers(currentProject);
 			currentProject.setPersistentProperty(BUILDER_VERSION, VERSION);
 			kind = FULL_BUILD;
 		}
@@ -298,7 +297,13 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				IResource.DEPTH_INFINITE);
 		for (int i = 0; i < markers.length; ++i) {
 			final IMarker marker = markers[i];
-			if (marker.getResource().getType() != IResource.FILE) {
+			IResource resource = marker.getResource();
+			if (resource.getType() != IResource.FILE) {
+				continue;
+			}
+			IScriptProject scriptProject = DLTKCore.create(project);
+			if (!DLTKContentTypeManager.isValidResourceForContentType(
+					scriptProject.getLanguageToolkit(), resource)) {
 				continue;
 			}
 			final Map attributes = marker.getAttributes();
@@ -315,18 +320,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					&& attributes.containsKey(IMarker.CHAR_END)) {
 				final Object numberAttr = attributes.get(IMarker.LINE_NUMBER);
 				if (numberAttr instanceof Integer) {
-					final int number = ((Integer) numberAttr).intValue();
-					final char content[] = Util
-							.getResourceContentsAsCharArray((IFile) marker
-									.getResource());
-					final String[] lines = TextUtils
-							.splitLines(new CharArraySequence(content));
-					if (number >= 0 && number < lines.length) {
-						if (lines[number - 1].indexOf(attributes.get(
-								IMarker.MESSAGE).toString()) >= 0) {
-							marker.delete();
-						}
-					}
+					marker.delete();
 				}
 			}
 		}
