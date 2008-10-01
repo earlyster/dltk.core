@@ -48,7 +48,6 @@ import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IModelMarker;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
@@ -196,10 +195,10 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		System.out.println(message);
 	}
 
-	private static final QualifiedName BUILDER_VERSION = new QualifiedName(
+	private static final QualifiedName PROPERTY_BUILDER_VERSION = new QualifiedName(
 			DLTKCore.PLUGIN_ID, "builderVersion"); //$NON-NLS-1$
 
-	private static final String VERSION = "200810012003-2123"; //$NON-NLS-1$
+	private static final String CURRENT_VERSION = "200810012003-2123"; //$NON-NLS-1$
 
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
@@ -215,17 +214,22 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			log("\nStarting build of " + this.currentProject.getName() //$NON-NLS-1$
 					+ " @ " + new Date(startTime)); //$NON-NLS-1$
 		}
-		String version = currentProject.getPersistentProperty(BUILDER_VERSION);
+		this.scriptProject = (ScriptProject) DLTKCore.create(currentProject);
+		final String version = currentProject
+				.getPersistentProperty(PROPERTY_BUILDER_VERSION);
 		if (version == null) {
-			removeTaskMarkers(currentProject);
-			currentProject.setPersistentProperty(BUILDER_VERSION, VERSION);
+			removeWrongTaskMarkers();
+			currentProject.setPersistentProperty(PROPERTY_BUILDER_VERSION,
+					CURRENT_VERSION);
 			kind = FULL_BUILD;
-		} else if (!VERSION.equals(version)) {
-			removeTaskMarkers(currentProject);
-			currentProject.setPersistentProperty(BUILDER_VERSION, VERSION);
+		} else if (!CURRENT_VERSION.equals(version)) {
+			if ("200810012003".equals(version)) { //$NON-NLS-1$
+				removeWrongTaskMarkers();
+			}
+			currentProject.setPersistentProperty(PROPERTY_BUILDER_VERSION,
+					CURRENT_VERSION);
 			kind = FULL_BUILD;
 		}
-		this.scriptProject = (ScriptProject) DLTKCore.create(currentProject);
 		lastBuildResources = 0;
 		lastBuildSourceFiles = 0;
 		if (monitor == null) {
@@ -292,16 +296,15 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	 * @param project
 	 * @throws CoreException
 	 */
-	private void removeTaskMarkers(IProject project) throws CoreException {
-		final IMarker[] markers = project.findMarkers(IMarker.TASK, false,
-				IResource.DEPTH_INFINITE);
+	private void removeWrongTaskMarkers() throws CoreException {
+		final IMarker[] markers = currentProject.findMarkers(IMarker.TASK,
+				false, IResource.DEPTH_INFINITE);
 		for (int i = 0; i < markers.length; ++i) {
 			final IMarker marker = markers[i];
-			IResource resource = marker.getResource();
+			final IResource resource = marker.getResource();
 			if (resource.getType() != IResource.FILE) {
 				continue;
 			}
-			IScriptProject scriptProject = DLTKCore.create(project);
 			if (!DLTKContentTypeManager.isValidResourceForContentType(
 					scriptProject.getLanguageToolkit(), resource)) {
 				continue;
@@ -318,10 +321,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					&& attributes.containsKey(IMarker.PRIORITY)
 					&& attributes.containsKey(IMarker.CHAR_START)
 					&& attributes.containsKey(IMarker.CHAR_END)) {
-				final Object numberAttr = attributes.get(IMarker.LINE_NUMBER);
-				if (numberAttr instanceof Integer) {
-					marker.delete();
-				}
+				marker.delete();
 			}
 		}
 	}
