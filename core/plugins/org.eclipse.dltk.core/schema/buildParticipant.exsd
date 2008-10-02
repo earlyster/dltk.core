@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.dltk.core" xmlns="http://www.w3.org/2001/XMLSchema">
+<schema targetNamespace="org.eclipse.dltk.validators.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="org.eclipse.dltk.core" id="structureBuilder" name="Structure Builder"/>
+         <meta.schema plugin="org.eclipse.dltk.validators.core" id="buildParticipant" name="Build Participant"/>
       </appinfo>
       <documentation>
          
@@ -18,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence>
-            <element ref="structureBuilder"/>
+            <element ref="buildParticipant" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,27 +47,29 @@
       </complexType>
    </element>
 
-   <element name="structureBuilder">
-      <annotation>
-         <appinfo>
-            <meta.element labelAttribute="nature"/>
-         </appinfo>
-      </annotation>
+   <element name="buildParticipant">
       <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.internal.core.IStructureBuilder"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.validators.core.IBuildParticipantFactory"/>
                </appinfo>
             </annotation>
          </attribute>
          <attribute name="nature" type="string" use="required">
             <annotation>
                <documentation>
-                  If nature are # then builder is available for all script natures.
+                  Used to filter validators only for selected type of projects.
                </documentation>
             </annotation>
          </attribute>

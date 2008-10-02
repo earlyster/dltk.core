@@ -20,7 +20,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.internal.core.builder.StructureBuilderManager;
+import org.eclipse.dltk.internal.core.builder.StructureBuilder;
 import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.dltk.internal.core.util.Messages;
 
@@ -85,14 +85,8 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 			final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 					.getLanguageToolkit(workingCopy);
 			if (toolkit != null) {
-				final IStructureBuilder[] builders = StructureBuilderManager
-						.getBuilders(toolkit.getNatureId());
-				if (builders != null) {
-					for (int i = 0; i < builders.length; ++i) {
-						builders[i].buildStructure(toolkit.getNatureId(),
-								workingCopy, reporter);
-					}
-				}
+				StructureBuilder.build(toolkit.getNatureId(), workingCopy,
+						reporter);
 			}
 			reporter.reportToRequestor();
 		}

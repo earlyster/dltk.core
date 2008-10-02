@@ -9,14 +9,24 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.core;
+package org.eclipse.dltk.core.builder;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.ISourceModule;
 
-public interface IStructureBuilder {
+public interface IBuildParticipant {
 
-	void buildStructure(String natureId, ISourceModule module,
-			IProblemReporter reporter);
+	/**
+	 * Validates specified ISourceModule or it's AST and reports any problems
+	 * found via {@link IProblemReporter}
+	 * 
+	 * @param module
+	 * @param ast
+	 * @param reporter
+	 */
+	void build(ISourceModule module, ModuleDeclaration ast,
+			IProblemReporter reporter) throws CoreException;
 
 }
