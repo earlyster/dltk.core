@@ -16,11 +16,7 @@ import org.eclipse.dltk.core.IScriptProject;
 
 public interface IBuildParticipantFactory {
 
-	String getID();
-
-	String getName();
-
-	IBuildParticipant newBuildParticipant(IScriptProject project)
+	IBuildParticipant createBuildParticipant(IScriptProject project)
 			throws CoreException;
 
 }
