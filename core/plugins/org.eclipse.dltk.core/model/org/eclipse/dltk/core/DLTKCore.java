@@ -2397,9 +2397,16 @@ public class DLTKCore extends Plugin {
 	}
 
 	public static void warn(String message) {
+		warn(message, null);
+	}
+
+	/**
+	 * @param message
+	 * @param t
+	 */
+	public static void warn(String message, Throwable t) {
 		plugin.getLog().log(
-				new Status(IStatus.WARNING, PLUGIN_ID, IStatus.OK, message,
-						null));
+				new Status(IStatus.WARNING, PLUGIN_ID, IStatus.OK, message, t));
 	}
 
 }
