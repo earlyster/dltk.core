@@ -12,14 +12,15 @@
 package org.eclipse.dltk.core.tests.utils;
 
 import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
-import org.eclipse.dltk.core.tests.model.SuiteOfTestCases;
 import org.eclipse.dltk.utils.TextUtils;
 
-public class TextUtilsTest extends SuiteOfTestCases {
+public class TextUtilsTest extends TestCase {
 
 	public static Test suite() {
-		return new Suite(TextUtilsTest.class);
+		return new TestSuite(TextUtilsTest.class);
 	}
 
 	public TextUtilsTest(String name) {
