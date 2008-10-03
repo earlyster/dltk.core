@@ -12,7 +12,6 @@
 package org.eclipse.dltk.compiler.task;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 
 /**
@@ -29,7 +28,6 @@ public interface ITaskReporter extends IAdaptable {
 	 * @param priority
 	 * @param charStart
 	 * @param charEnd
-	 * @throws CoreException
 	 */
 	void reportTask(String message, int lineNumber, int priority,
 			int charStart, int charEnd);
