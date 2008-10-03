@@ -15,6 +15,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.core.ISourceRange;
+import org.eclipse.dltk.core.builder.ISourceLineTracker;
+import org.eclipse.dltk.internal.core.SourceRange;
 
 public abstract class TextUtils {
 
@@ -95,8 +98,13 @@ public abstract class TextUtils {
 	private static class LineSplitter {
 
 		private final CharSequence content;
-		private final int contentEnd;
-		private int contentPos;
+		protected final int contentEnd;
+		protected int contentPos;
+		protected String lastLineDelimiter = null;
+
+		private static final String DELIMITER_WINDOWS = "\r\n"; //$NON-NLS-1$
+		private static final String DELIMITER_UNIX = "\n"; //$NON-NLS-1$
+		private static final String DELIMITER_MAC = "\r"; //$NON-NLS-1$
 
 		public LineSplitter(CharSequence content) {
 			this.content = content;
@@ -137,7 +145,7 @@ public abstract class TextUtils {
 			return count;
 		}
 
-		private int findEndOfLine() {
+		protected final int findEndOfLine() {
 			while (contentPos < contentEnd) {
 				if (content.charAt(contentPos) == '\r') {
 					final int endLine = contentPos;
@@ -145,17 +153,156 @@ public abstract class TextUtils {
 					if (contentPos < contentEnd
 							&& content.charAt(contentPos) == '\n') {
 						++contentPos;
+						lastLineDelimiter = DELIMITER_WINDOWS;
+					} else {
+						lastLineDelimiter = DELIMITER_MAC;
 					}
 					return endLine;
 				} else if (content.charAt(contentPos) == '\n') {
 					final int endLine = contentPos;
 					++contentPos;
+					lastLineDelimiter = DELIMITER_UNIX;
 					return endLine;
 				} else {
 					++contentPos;
 				}
 			}
+			lastLineDelimiter = null;
 			return contentPos;
+		}
+
+	}
+
+	public static ISourceLineTracker createLineTracker(char[] content) {
+		final LineTrackerBuilder builder = new LineTrackerBuilder(
+				new CharArraySequence(content));
+		return builder.buildLineTracker();
+	}
+
+	public static ISourceLineTracker createLineTracker(String content) {
+		final LineTrackerBuilder builder = new LineTrackerBuilder(content);
+		return builder.buildLineTracker();
+	}
+
+	private static class LineTrackerBuilder extends LineSplitter {
+
+		public LineTrackerBuilder(CharSequence content) {
+			super(content);
+		}
+
+		public ISourceLineTracker buildLineTracker() {
+			final List delimiters = new ArrayList();
+			int[] lineOffsets = new int[256];
+			int lineCount = 0;
+			contentPos = 0;
+			while (contentPos < contentEnd) {
+				final int begin = contentPos;
+				findEndOfLine();
+				if (lineCount >= lineOffsets.length) {
+					int[] newLineOffsets = new int[lineOffsets.length * 2 + 1];
+					System.arraycopy(lineOffsets, 0, newLineOffsets, 0,
+							lineOffsets.length);
+					lineOffsets = newLineOffsets;
+				}
+				lineOffsets[lineCount++] = begin;
+				delimiters.add(lastLineDelimiter);
+			}
+			if (lineCount < lineOffsets.length) {
+				int[] newLineOffsets = new int[lineCount];
+				System.arraycopy(lineOffsets, 0, newLineOffsets, 0, lineCount);
+				lineOffsets = newLineOffsets;
+			}
+			return new DefaultSourceLineTracker(contentEnd, lineOffsets,
+					(String[]) delimiters
+							.toArray(new String[delimiters.size()]));
+		}
+
+	}
+
+	private static class DefaultSourceLineTracker implements ISourceLineTracker {
+
+		private final int contentLength;
+		private final int[] lineOffsets;
+		private final String[] delimiters;
+
+		private DefaultSourceLineTracker(int contentLength, int[] lineOffsets,
+				String[] delimiters) {
+			this.contentLength = contentLength;
+			this.lineOffsets = lineOffsets;
+			this.delimiters = delimiters;
+		}
+
+		public int getLength() {
+			return contentLength;
+		}
+
+		public String getLineDelimiter(int line) {
+			if (line < delimiters.length) {
+				return delimiters[line];
+			} else {
+				return null;
+			}
+		}
+
+		public ISourceRange getLineInformation(int line) {
+			if (line < lineOffsets.length) {
+				int length;
+				if (line == lineOffsets.length - 1) {
+					length = contentLength - lineOffsets[line];
+				} else {
+					length = lineOffsets[line + 1] - lineOffsets[line];
+				}
+				if (delimiters[line] != null) {
+					length -= delimiters[line].length();
+				}
+				return new SourceRange(lineOffsets[line], length);
+			} else {
+				return NULL_RANGE;
+			}
+		}
+
+		public ISourceRange getLineInformationOfOffset(int offset) {
+			if (offset < contentLength) {
+				return getLineInformation(findLine(offset));
+			}
+			return NULL_RANGE;
+		}
+
+		public int getLineLength(int line) {
+			if (line < lineOffsets.length) {
+				if (line == lineOffsets.length - 1) {
+					return contentLength - lineOffsets[line];
+				} else {
+					return lineOffsets[line + 1] - lineOffsets[line];
+				}
+			} else {
+				return 0;
+			}
+		}
+
+		public int getLineNumberOfOffset(int offset) {
+			if (offset < contentLength) {
+				return findLine(offset);
+			}
+			return 0;
+		}
+
+		private int findLine(int offset) {
+			// TODO use binary search
+			for (int i = lineOffsets.length; --i >= 0;) {
+				if (offset >= lineOffsets[i]) {
+					return i;
+				}
+			}
+			return 0;
+		}
+
+		public int getLineOffset(int line) {
+			return line < lineOffsets.length ? lineOffsets[line] : 0;
+		}
+
+		public int getNumberOfLines() {
+			return lineOffsets.length;
 		}
 
 	}
