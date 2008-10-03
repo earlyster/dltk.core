@@ -11,7 +11,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.builder;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
@@ -24,11 +28,53 @@ public class BuildParticipantManager extends NatureExtensionManager {
 	private static final String EXT_POINT = DLTKCore.PLUGIN_ID
 			+ ".buildParticipant"; //$NON-NLS-1$
 
-	private BuildParticipantManager() {
-		super(EXT_POINT, IBuildParticipantFactory.class);
+	public static class BuildParticipantDescriptor {
+		final IBuildParticipantFactory factory;
+		final String id;
+		final String name;
+		public final Set requirements = new HashSet();
+
+		/**
+		 * @param factory
+		 */
+		public BuildParticipantDescriptor(IBuildParticipantFactory factory,
+				String id, String name) {
+			this.factory = factory;
+			this.id = id != null ? id : factory.getClass().getName();
+			this.name = name;
+		}
+
 	}
 
-	private static final IBuildParticipant[] NO_PARTICIPANTS = new IBuildParticipant[0];
+	private BuildParticipantManager() {
+		super(EXT_POINT, BuildParticipantDescriptor.class);
+	}
+
+	private static final String REQUIRES = "requires"; //$NON-NLS-1$
+	private static final String REQUIRES_ID = "id"; //$NON-NLS-1$
+
+	private static final String ATTR_ID = "id"; //$NON-NLS-1$
+	private static final String ATTR_NAME = "name"; //$NON-NLS-1$
+
+	protected Object createInstanceByDescriptor(Object input)
+			throws CoreException {
+		final IConfigurationElement element = (IConfigurationElement) input;
+		final Object factory = element.createExecutableExtension(classAttr);
+		if (!(factory instanceof IBuildParticipantFactory)) {
+			return null;
+		}
+		final BuildParticipantDescriptor descriptor = new BuildParticipantDescriptor(
+				(IBuildParticipantFactory) factory, element
+						.getAttribute(ATTR_ID), element.getAttribute(ATTR_NAME));
+		final IConfigurationElement[] requires = element.getChildren(REQUIRES);
+		for (int i = 0; i < requires.length; ++i) {
+			final String id = requires[i].getAttribute(REQUIRES_ID);
+			if (id != null) {
+				descriptor.requirements.add(id);
+			}
+		}
+		return descriptor;
+	}
 
 	private static BuildParticipantManager instance = null;
 
@@ -38,6 +84,8 @@ public class BuildParticipantManager extends NatureExtensionManager {
 		}
 		return instance;
 	}
+
+	private static final IBuildParticipant[] NO_PARTICIPANTS = new IBuildParticipant[0];
 
 	/**
 	 * Returns {@link IBuildParticipant} instances of the specified nature. If
@@ -49,28 +97,47 @@ public class BuildParticipantManager extends NatureExtensionManager {
 	 */
 	public static IBuildParticipant[] getBuildParticipants(
 			IScriptProject project, String natureId) {
-		final IBuildParticipantFactory[] factories = (IBuildParticipantFactory[]) getInstance()
+		final BuildParticipantDescriptor[] descriptors = (BuildParticipantDescriptor[]) getInstance()
 				.getInstances(natureId);
-		if (factories == null || factories.length == 0) {
+		if (descriptors == null || descriptors.length == 0) {
 			return NO_PARTICIPANTS;
 		}
-		final IBuildParticipant[] result = new IBuildParticipant[factories.length];
-		int index = 0;
-		for (int i = 0; i < factories.length; ++i) {
-			try {
-				final IBuildParticipant participant = factories[i]
-						.newBuildParticipant(project);
-				if (participant != null) {
-					result[index++] = participant;
+		return createParticipants(project, descriptors);
+	}
+
+	public static IBuildParticipant[] createParticipants(
+			IScriptProject project, BuildParticipantDescriptor[] descriptors) {
+		final IBuildParticipant[] result = new IBuildParticipant[descriptors.length];
+		final Set processed = new HashSet();
+		final Set created = new HashSet();
+		for (;;) {
+			final int iterationStartCount = created.size();
+			for (int i = 0; i < descriptors.length; ++i) {
+				final BuildParticipantDescriptor desc = descriptors[i];
+				if (!processed.contains(desc.id)
+						&& created.containsAll(desc.requirements)) {
+					processed.add(desc.id);
+					try {
+						final IBuildParticipant participant = desc.factory
+								.createBuildParticipant(project);
+						if (participant != null) {
+							result[created.size()] = participant;
+							created.add(desc.id);
+						}
+					} catch (CoreException e) {
+						final String tpl = Messages.BuildParticipantManager_buildParticipantCreateError;
+						DLTKCore.warn(NLS.bind(tpl, desc.id), e);
+					}
 				}
-			} catch (CoreException e) {
-				final String tpl = Messages.BuildParticipantManager_buildParticipantCreateError;
-				DLTKCore.warn(NLS.bind(tpl, factories[i].getName()), e);
+			}
+			if (iterationStartCount == created.size()) {
+				break;
 			}
 		}
-		if (index != result.length) {
-			final IBuildParticipant[] newResult = new IBuildParticipant[index];
-			System.arraycopy(result, 0, newResult, 0, index);
+		if (created.size() != result.length) {
+			final IBuildParticipant[] newResult = new IBuildParticipant[created
+					.size()];
+			System.arraycopy(result, 0, newResult, 0, created.size());
 			return newResult;
 		} else {
 			return result;

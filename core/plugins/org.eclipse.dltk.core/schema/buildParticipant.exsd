@@ -49,6 +49,9 @@
 
    <element name="buildParticipant">
       <complexType>
+         <sequence>
+            <element ref="requires" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
@@ -70,6 +73,25 @@
             <annotation>
                <documentation>
                   Used to filter validators only for selected type of projects.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="requires">
+      <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
                </documentation>
             </annotation>
          </attribute>
