@@ -9,23 +9,55 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.builder;
+package org.eclipse.dltk.internal.core;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
+import org.eclipse.dltk.compiler.task.ITaskReporter;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension;
+import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.internal.core.builder.AbstractBuildContext;
+import org.eclipse.dltk.internal.core.builder.BuildParticipantManager;
 
-public class StructureBuilder {
+class StructureBuilder {
 
-	public static void build(String natureId, ISourceModule module,
-			IProblemReporter reporter) {
+	private static class ReconcileBuildContext extends AbstractBuildContext {
+
+		final AccumulatingProblemReporter reporter;
+
+		/**
+		 * @param module
+		 */
+		protected ReconcileBuildContext(ISourceModule module,
+				AccumulatingProblemReporter reporter) {
+			super(module);
+			this.reporter = reporter;
+		}
+
+		/*
+		 * @see org.eclipse.dltk.core.builder.IBuildContext#getFileHandle()
+		 */
+		public IFileHandle getFileHandle() {
+			return null;
+		}
+
+		public IProblemReporter getProblemReporter() {
+			return reporter;
+		}
+
+		public ITaskReporter getTaskReporter() {
+			return reporter;
+		}
+
+	}
+
+	static void build(String natureId, ISourceModule module,
+			AccumulatingProblemReporter reporter) {
 		final NullProgressMonitor monitor = new NullProgressMonitor();
 		final IScriptProject project = module.getScriptProject();
 		final IBuildParticipant[] validators = BuildParticipantManager
@@ -40,15 +72,15 @@ public class StructureBuilder {
 						.beginBuild(IBuildParticipantExtension.RECONCILE_BUILD);
 			}
 		}
-		final ModuleDeclaration moduleDeclaration = SourceParserUtil
-				.getModuleDeclaration(module);
-		for (int k = 0; k < validators.length; ++k) {
-			final IBuildParticipant participant = validators[k];
-			try {
-				participant.build(module, moduleDeclaration, reporter);
-			} catch (CoreException e) {
-				DLTKCore.error("error", e);
+		final ReconcileBuildContext context = new ReconcileBuildContext(module,
+				reporter);
+		try {
+			for (int k = 0; k < validators.length; ++k) {
+				final IBuildParticipant participant = validators[k];
+				participant.build(context);
 			}
+		} catch (CoreException e) {
+			DLTKCore.error("error", e);
 		}
 		for (int j = 0; j < validators.length; ++j) {
 			final IBuildParticipant participant = validators[j];

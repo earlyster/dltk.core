@@ -1,14 +1,10 @@
 package org.eclipse.dltk.core.builder;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Preferences;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
-import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.compiler.task.ITodoTaskPreferences;
 import org.eclipse.dltk.compiler.task.TodoTaskAstParser;
-import org.eclipse.dltk.compiler.task.TodoTaskPreferences;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.ISourceModule;
 
 /**
  * Abstract class that may be used to add build support for 'todo' type task
@@ -32,14 +28,8 @@ import org.eclipse.dltk.core.ISourceModule;
 public abstract class AbstractTodoTaskBuildParticipantType extends
 		AbstractBuildParticipantType {
 
-	protected AbstractTodoTaskBuildParticipantType(String id, String name) {
-		super(id, name);
-	}
-
-	protected final IBuildParticipant createBuildParticipant(
-			IScriptProject project) {
-		final ITodoTaskPreferences prefs = new TodoTaskPreferences(
-				getPreferences());
+	public final IBuildParticipant createBuildParticipant(IScriptProject project) {
+		final ITodoTaskPreferences prefs = getPreferences(project);
 		if (prefs.isEnabled()) {
 			return getBuildParticipant(prefs);
 		}
@@ -48,10 +38,18 @@ public abstract class AbstractTodoTaskBuildParticipantType extends
 	}
 
 	/**
+	 * @deprecated
+	 */
+	protected final void getPreferences() {
+		//
+	}
+
+	/**
 	 * Returns the <code>Preferences</code> object that contains the settings
 	 * for 'todo' tasks.
 	 */
-	protected abstract Preferences getPreferences();
+	protected abstract ITodoTaskPreferences getPreferences(
+			IScriptProject project);
 
 	/**
 	 * Returns the build participant that will be used to report 'todo' task
@@ -68,17 +66,18 @@ public abstract class AbstractTodoTaskBuildParticipantType extends
 		return new TodoTaskBuildParticipant(preferences);
 	}
 
-	private class TodoTaskBuildParticipant implements IBuildParticipant {
-
-		private TodoTaskAstParser parser;
+	protected static class TodoTaskBuildParticipant extends TodoTaskAstParser
+			implements IBuildParticipant {
 
 		public TodoTaskBuildParticipant(ITodoTaskPreferences preferences) {
-			parser = new TodoTaskAstParser(preferences);
+			super(preferences);
 		}
 
-		public void build(ISourceModule module, ModuleDeclaration ast,
-				IProblemReporter reporter) throws CoreException {
-			parser.build(module, ast, reporter);
+		public void build(IBuildContext context) throws CoreException {
+			final ModuleDeclaration ast = (ModuleDeclaration) context
+					.get(IBuildContext.ATTR_MODULE_DECLARATION);
+			initialize(ast);
+			parse(context.getTaskReporter(), context.getContents());
 		}
 	}
 }

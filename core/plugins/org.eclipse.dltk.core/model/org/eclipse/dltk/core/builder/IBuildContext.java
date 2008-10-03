@@ -12,6 +12,9 @@
 package org.eclipse.dltk.core.builder;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
+import org.eclipse.dltk.compiler.problem.IProblemReporter;
+import org.eclipse.dltk.compiler.task.ITaskReporter;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
@@ -19,6 +22,13 @@ import org.eclipse.dltk.core.environment.IFileHandle;
  * The context of the building a module.
  */
 public interface IBuildContext {
+
+	/**
+	 * The name of the attribute to store the {@link ModuleDeclaration}
+	 * instance.
+	 */
+	public static final String ATTR_MODULE_DECLARATION = ModuleDeclaration.class
+			.getName();
 
 	/**
 	 * Returns the contents of the source module
@@ -32,7 +42,13 @@ public interface IBuildContext {
 	 * 
 	 * @return
 	 */
-	ISourceModule getModelElement();
+	ISourceModule getSourceModule();
+
+	ISourceLineTracker getLineTracker();
+
+	IProblemReporter getProblemReporter();
+
+	ITaskReporter getTaskReporter();
 
 	/**
 	 * Returns the workspace {@link IFile} being compiled or <code>null</code>
@@ -48,56 +64,6 @@ public interface IBuildContext {
 	 * @return
 	 */
 	IFileHandle getFileHandle();
-
-	/**
-	 * Adds problem to the current build result. Line number is calculated
-	 * automatically
-	 * 
-	 * @param problemId
-	 * @param message
-	 * @param arguments
-	 * @param start
-	 * @param end
-	 * @param severity
-	 */
-	void reportProblem(int problemId, String message, String[] arguments,
-			int start, int end, int severity);
-
-	/**
-	 * Adds problem to the current build result
-	 * 
-	 * @param problemId
-	 * @param message
-	 * @param arguments
-	 * @param lineNumber
-	 * @param start
-	 * @param end
-	 * @param severity
-	 */
-	void reportProblem(int problemId, String message, String[] arguments,
-			int lineNumber, int start, int end, int severity);
-
-	/**
-	 * Adds task. Line number is calculated automatically
-	 * 
-	 * @param message
-	 * @param priority
-	 * @param charStart
-	 * @param charEnd
-	 */
-	void reportTask(String message, int priority, int charStart, int charEnd);
-
-	/**
-	 * Adds task
-	 * 
-	 * @param message
-	 * @param lineNumber
-	 * @param priority
-	 * @param charStart
-	 * @param charEnd
-	 */
-	void reportTask(String message, int lineNumber, int priority,
-			int charStart, int charEnd);
 
 	/**
 	 * Returns the value of the specified attribute.

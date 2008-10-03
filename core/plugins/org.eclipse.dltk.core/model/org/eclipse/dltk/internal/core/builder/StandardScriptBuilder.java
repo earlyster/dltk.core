@@ -21,19 +21,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.dltk.ast.declarations.FakeModuleDeclaration;
-import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
-import org.eclipse.dltk.ast.parser.ISourceParser;
-import org.eclipse.dltk.ast.parser.ISourceParserExtension2;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
-import org.eclipse.dltk.compiler.problem.ProblemSeverities;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.SourceParserUtil;
+import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension2;
@@ -42,7 +36,7 @@ import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.osgi.util.NLS;
 
-public class DLTKStandardBuilder implements IScriptBuilder,
+public class StandardScriptBuilder implements IScriptBuilder,
 		IScriptBuilderExtension {
 	private static final boolean DEBUG = false;
 
@@ -76,20 +70,14 @@ public class DLTKStandardBuilder implements IScriptBuilder,
 										Messages.ValidatorBuilder_buildExternalModuleSubTask,
 										String.valueOf(remainingWork), module
 												.getElementName()));
-				final ModuleDeclaration moduleDeclaration;
-				if (useSourceParser) {
-					moduleDeclaration = SourceParserUtil.getModuleDeclaration(
-							module, null);
-				} else {
-					moduleDeclaration = null;
-				}
+				final ExternalModuleBuildContext context = new ExternalModuleBuildContext(
+						module);
 				try {
 					for (int i = 0; i < extensions.length; ++i) {
 						if (monitor.isCanceled()) {
 							return;
 						}
-						extensions[i].buildExternalModule(module,
-								moduleDeclaration);
+						extensions[i].buildExternalModule(context);
 					}
 				} catch (CoreException e) {
 					DLTKCore.error(NLS.bind(
@@ -131,8 +119,8 @@ public class DLTKStandardBuilder implements IScriptBuilder,
 	private void buildModules(IScriptProject project, List elements,
 			int buildType, IProgressMonitor monitor) {
 		final long startTime = DEBUG ? System.currentTimeMillis() : 0;
-		monitor.beginTask(Messages.ValidatorBuilder_buildingModules,
-				elements.size());
+		monitor.beginTask(Messages.ValidatorBuilder_buildingModules, elements
+				.size());
 		if (toolkit != null) {
 			buildNatureModules(project, buildType, elements, monitor);
 		}
@@ -154,18 +142,17 @@ public class DLTKStandardBuilder implements IScriptBuilder,
 				return;
 			final ISourceModule module = (ISourceModule) j.next();
 			monitor.subTask(NLS.bind(
-					Messages.ValidatorBuilder_buildModuleSubTask,
-					String.valueOf(modules.size() - counter), module
+					Messages.ValidatorBuilder_buildModuleSubTask, String
+							.valueOf(modules.size() - counter), module
 							.getElementName()));
-			final IResource resource = module.getResource();
-			if (resource != null) {
-				final BuildProblemReporter reporter = new BuildProblemReporter(
-						resource);
-				buildModule(module, reporter);
+			final SourceModuleBuildContext context = new SourceModuleBuildContext(
+					module);
+			if (context.reporter != null) {
+				buildModule(context);
 				if (reporters != null) {
-					reporters.add(reporter);
+					reporters.add(context.reporter);
 				} else {
-					reporter.flush();
+					context.reporter.flush();
 				}
 			}
 			monitor.worked(1);
@@ -206,17 +193,14 @@ public class DLTKStandardBuilder implements IScriptBuilder,
 	 */
 	private boolean beginBuild(int buildType, IProgressMonitor monitor) {
 		if (!beginBuildDone) {
-			monitor
-					.subTask(Messages.ValidatorBuilder_InitializeBuilders);
+			monitor.subTask(Messages.ValidatorBuilder_InitializeBuilders);
 			endBuildNeeded = false;
-			if (participants != null) {
-				for (int j = 0; j < participants.length; ++j) {
-					final IBuildParticipant participant = participants[j];
-					if (participant instanceof IBuildParticipantExtension) {
-						((IBuildParticipantExtension) participant)
-								.beginBuild(buildType);
-						endBuildNeeded = true;
-					}
+			for (int j = 0; j < participants.length; ++j) {
+				final IBuildParticipant participant = participants[j];
+				if (participant instanceof IBuildParticipantExtension) {
+					((IBuildParticipantExtension) participant)
+							.beginBuild(buildType);
+					endBuildNeeded = true;
 				}
 			}
 			beginBuildDone = true;
@@ -224,31 +208,13 @@ public class DLTKStandardBuilder implements IScriptBuilder,
 		return endBuildNeeded;
 	}
 
-	private void buildModule(final ISourceModule module,
-			BuildProblemReporter reporter) {
-		final ModuleDeclaration moduleDeclaration;
-		if (useSourceParser) {
-			moduleDeclaration = SourceParserUtil.getModuleDeclaration(module,
-					reporter);
-			final boolean isError = moduleDeclaration == null
-					|| moduleDeclaration instanceof FakeModuleDeclaration
-					|| reporter.hasErrors();
-			if (isError && reporter.isEmpty()) {
-				reporter.reportProblem(new DefaultProblem(
-						Messages.ValidatorBuilder_unknownError, 0,
-						null, ProblemSeverities.Error, 0, 0, 0));
-			}
-		} else {
-			moduleDeclaration = null;
-		}
-		if (participants != null) {
-			for (int k = 0; k < participants.length; ++k) {
-				final IBuildParticipant participant = participants[k];
-				try {
-					participant.build(module, moduleDeclaration, reporter);
-				} catch (CoreException e) {
-					DLTKCore.error("", e);
-				}
+	private void buildModule(IBuildContext context) {
+		for (int k = 0; k < participants.length; ++k) {
+			final IBuildParticipant participant = participants[k];
+			try {
+				participant.build(context);
+			} catch (CoreException e) {
+				DLTKCore.error("", e);
 			}
 		}
 	}
@@ -341,18 +307,11 @@ public class DLTKStandardBuilder implements IScriptBuilder,
 	private IBuildParticipant[] participants = null;
 	private IDLTKLanguageToolkit toolkit = null;
 
-	private boolean useSourceParser = false;
-
 	public void initialize(IScriptProject project) {
 		toolkit = project.getLanguageToolkit();
 		if (toolkit != null) {
 			participants = BuildParticipantManager.getBuildParticipants(
 					project, toolkit.getNatureId());
-			final ISourceParser sourceParser = DLTKLanguageManager
-					.getSourceParser(toolkit.getNatureId());
-			useSourceParser = sourceParser != null
-					&& (!(sourceParser instanceof ISourceParserExtension2) || ((ISourceParserExtension2) sourceParser)
-							.useInBuilder());
 		}
 		beginBuildDone = false;
 		endBuildNeeded = false;

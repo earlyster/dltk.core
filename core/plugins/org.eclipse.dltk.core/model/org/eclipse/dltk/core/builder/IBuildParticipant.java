@@ -12,9 +12,7 @@
 package org.eclipse.dltk.core.builder;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
-import org.eclipse.dltk.core.ISourceModule;
 
 public interface IBuildParticipant {
 
@@ -26,7 +24,6 @@ public interface IBuildParticipant {
 	 * @param ast
 	 * @param reporter
 	 */
-	void build(ISourceModule module, ModuleDeclaration ast,
-			IProblemReporter reporter) throws CoreException;
+	void build(IBuildContext context) throws CoreException;
 
 }

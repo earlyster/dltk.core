@@ -14,8 +14,6 @@ package org.eclipse.dltk.core.builder;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
-import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.builder.IScriptBuilder.DependencyResponse;
 
 public interface IBuildParticipantExtension2 {
@@ -31,7 +29,6 @@ public interface IBuildParticipantExtension2 {
 	DependencyResponse getDependencies(int buildType, Set localElements,
 			Set externalElements, Set oldExternalFolders, Set externalFolders);
 
-	void buildExternalModule(ISourceModule module, ModuleDeclaration ast)
-			throws CoreException;
+	void buildExternalModule(IBuildContext context) throws CoreException;
 
 }

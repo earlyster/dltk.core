@@ -122,7 +122,7 @@
    <extension
          point="org.eclipse.dltk.core.builder">
       <builder
-            class="org.eclipse.dltk.internal.core.builder.DLTKStandardBuilder"
+            class="org.eclipse.dltk.internal.core.builder.StandardScriptBuilder"
             nature="#">
       </builder>
    </extension>

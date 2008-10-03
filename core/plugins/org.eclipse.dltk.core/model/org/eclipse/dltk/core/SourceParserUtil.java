@@ -159,7 +159,8 @@ public class SourceParserUtil {
 		if (sourceParser instanceof ISourceParserExtension) {
 			((ISourceParserExtension) sourceParser).setFlags(flags);
 		}
-		ModuleDeclaration moduleDeclaration = getModuleFromCache(mifo, flags);
+		ModuleDeclaration moduleDeclaration = getModuleFromCache(mifo, flags,
+				reporter);
 		if (moduleDeclaration == null) {
 			final ProblemCollector collector = mifo != null ? new ProblemCollector()
 					: null;
@@ -169,12 +170,6 @@ public class SourceParserUtil {
 				collector.copyTo(reporter);
 			}
 			putModuleToCache(mifo, moduleDeclaration, flags, collector);
-		} else if (reporter != null) {
-			final ProblemCollector collector = (ProblemCollector) mifo
-					.get(getKey(ERRORS, flags));
-			if (collector != null) {
-				collector.copyTo(reporter);
-			}
 		}
 		return moduleDeclaration;
 	}
@@ -183,9 +178,18 @@ public class SourceParserUtil {
 	 * This is for use in parsers.
 	 */
 	public static ModuleDeclaration getModuleFromCache(ISourceModuleInfo mifo,
-			int flags) {
+			int flags, IProblemReporter reporter) {
 		if (mifo != null) {
-			return (ModuleDeclaration) mifo.get(getKey(AST, flags));
+			final ModuleDeclaration moduleDeclaration = (ModuleDeclaration) mifo
+					.get(getKey(AST, flags));
+			if (moduleDeclaration != null && reporter != null) {
+				final ProblemCollector collector = (ProblemCollector) mifo
+						.get(getKey(ERRORS, flags));
+				if (collector != null) {
+					collector.copyTo(reporter);
+				}
+			}
+			return moduleDeclaration;
 		}
 		return null;
 	}

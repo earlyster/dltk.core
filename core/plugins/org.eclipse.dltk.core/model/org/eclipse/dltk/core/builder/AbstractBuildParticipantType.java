@@ -17,28 +17,25 @@ import org.eclipse.dltk.core.IScriptProject;
 public abstract class AbstractBuildParticipantType implements
 		IBuildParticipantFactory {
 
-	private final String id;
-	private final String name;
-
-	protected AbstractBuildParticipantType(String id, String name) {
-		this.id = id;
-		this.name = name;
+	/**
+	 * @deprecated
+	 */
+	protected final void getID() {
 	}
 
-	public String getID() {
-		return id;
+	/**
+	 * @deprecated
+	 */
+	protected final void getName() {
 	}
 
-	public String getName() {
-		return name;
+	/**
+	 * @deprecated
+	 */
+	protected final void getNature() {
 	}
 
-	public final IBuildParticipant newBuildParticipant(IScriptProject project)
-			throws CoreException {
-		return createBuildParticipant(project);
-	}
-
-	protected abstract IBuildParticipant createBuildParticipant(
+	public abstract IBuildParticipant createBuildParticipant(
 			IScriptProject project) throws CoreException;
 
 }
