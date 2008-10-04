@@ -67,7 +67,7 @@ public class TodoTaskRangeParser extends TodoTaskSimpleParser {
 	 * @param location
 	 * @return
 	 */
-	private boolean isValid(int location) {
+	protected boolean isValid(int location) {
 		for (int i = 0; i < rangeCount; ++i) {
 			if (location >= ranges[i * 2] && location < ranges[i * 2 + 1]) {
 				return false;

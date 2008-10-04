@@ -104,7 +104,7 @@ public class TodoTaskSimpleParser {
 		}
 	}
 
-	private static int skipSpaces(char[] content, int pos, final int end) {
+	protected static int skipSpaces(char[] content, int pos, final int end) {
 		while (pos < end && Character.isWhitespace(content[pos])) {
 			++pos;
 		}
