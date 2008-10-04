@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
@@ -88,7 +89,7 @@ public class ExternalCheckerWorker extends AbstractExternalValidator implements
 		final String[] parts = extensions.split("[\\s;]+"); //$NON-NLS-1$
 		for (int i = 0; i < parts.length; ++i) {
 			if ("*".equals(parts[i])) { //$NON-NLS-1$
-				return new String[0];
+				return CharOperation.NO_STRINGS;
 			}
 		}
 		return parts;
