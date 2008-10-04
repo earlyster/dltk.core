@@ -15,7 +15,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.validators.internal.core.ValidatorsCore;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
