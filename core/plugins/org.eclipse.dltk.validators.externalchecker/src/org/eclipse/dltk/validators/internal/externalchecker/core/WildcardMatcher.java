@@ -18,14 +18,13 @@ public class WildcardMatcher {
 			throws WildcardException {
 		tokenList = parseWildcard(pattern.getDescription());
 		String bigpattern = makeBigPattern(pattern.getDescription(), wcards);
-		System.out.println(bigpattern);
 		Pattern pat = Pattern.compile(bigpattern);
 		Matcher matcher = pat.matcher(input);
 
 		if (matcher.matches()) {
 			String fileName = null;
 			int lineNumber = -1;
-			String message = ""; //$NON-NLS-1$
+			String message = null;
 			Pattern lPattern = Pattern.compile(getPattern('n', wcards));
 			Pattern mPattern = Pattern.compile(getPattern('m', wcards));
 			Pattern fPattern = Pattern.compile(getPattern('f', wcards));
@@ -53,7 +52,7 @@ public class WildcardMatcher {
 					}
 				}
 			}
-			if( message == null ) {
+			if (message == null) {
 				message = input;
 			}
 			ExternalCheckerProblem problem = new ExternalCheckerProblem(pattern
@@ -113,13 +112,13 @@ public class WildcardMatcher {
 
 		status = UNDEFINED;
 		StringBuffer sb = new StringBuffer();
-//		sb.append(".*");
+		// sb.append(".*");
 		for (int i = 0; i < input.length(); i++) {
 			char c = input.charAt(i);
 			if (c != '%') {
 				if (status == UNDEFINED) {
 					status = IN_STRING;
-// sb.append("(");
+					// sb.append("(");
 				}
 				if (Character.isWhitespace(c)) {
 					sb.append("[\\s]+"); //$NON-NLS-1$
@@ -128,7 +127,7 @@ public class WildcardMatcher {
 				}
 			} else {
 				if (status == IN_STRING) {
-// sb.append(")");
+					// sb.append(")");
 
 				}
 
