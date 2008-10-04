@@ -34,12 +34,11 @@ import org.eclipse.dltk.validators.core.AbstractExternalValidator;
 import org.eclipse.dltk.validators.core.IResourceValidator;
 import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidatorOutput;
-import org.eclipse.dltk.validators.internal.core.ValidatorsCore;
 
 public class ExternalCheckerWorker extends AbstractExternalValidator implements
 		ISourceModuleValidator, IResourceValidator {
 
-	public static final String PROBLEM_ID = ValidatorsCore.PLUGIN_ID
+	public static final String PROBLEM_ID = ExternalCheckerPlugin.PLUGIN_ID
 			+ ".externalcheckerproblem"; //$NON-NLS-1$
 
 	private final IEnvironment environment;
@@ -139,7 +138,7 @@ public class ExternalCheckerWorker extends AbstractExternalValidator implements
 		}
 		IResource resource = module.getResource();
 		if (resource == null) {
-			return new Status(IStatus.ERROR, ValidatorsCore.PLUGIN_ID,
+			return new Status(IStatus.ERROR, ExternalCheckerPlugin.PLUGIN_ID,
 					Messages.ExternalChecker_sourceModuleResourceIsNull);
 		}
 

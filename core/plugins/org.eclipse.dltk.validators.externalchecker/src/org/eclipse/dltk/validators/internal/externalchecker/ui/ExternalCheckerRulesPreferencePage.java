@@ -9,8 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.internal.externalchecker.ui;
 
-import org.eclipse.dltk.validators.internal.core.ValidatorsCore;
 import org.eclipse.dltk.validators.internal.externalchecker.core.CustomWildcard;
+import org.eclipse.dltk.validators.internal.externalchecker.core.ExternalCheckerPlugin;
 import org.eclipse.dltk.validators.internal.externalchecker.core.ExternalCheckerWildcardManager;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.layout.GridData;
@@ -23,8 +23,8 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 public class ExternalCheckerRulesPreferencePage extends PreferencePage
 		implements IWorkbenchPreferencePage {
 
-// private static final String EXTERNALCHECKER_PREFERENCE_PAGE =
-// ValidatorsUI.PLUGIN_ID + ".ExternalCheckerPreferencePage";
+	// private static final String EXTERNALCHECKER_PREFERENCE_PAGE =
+	// ValidatorsUI.PLUGIN_ID + ".ExternalCheckerPreferencePage";
 
 	private ExternalCheckerRulesBlock fRulesBlock;
 
@@ -71,13 +71,14 @@ public class ExternalCheckerRulesPreferencePage extends PreferencePage
 	}
 
 	protected void performDefaults() {
-// System.out.println("Defaults");
+		// System.out.println("Defaults");
 		String xmlString = ExternalCheckerWildcardManager.getDefaultWildcards();
-// ValidatorsCore.getDefault().getPluginPreferences().setDefault("wildcards",
-// xmlString);
-		ValidatorsCore.getDefault().getPluginPreferences().setValue(
+		// ValidatorsCore.getDefault().getPluginPreferences().setDefault(
+		// "wildcards",
+		// xmlString);
+		ExternalCheckerPlugin.getDefault().getPluginPreferences().setValue(
 				ExternalCheckerWildcardManager.WILDCARDS, xmlString);
-		ValidatorsCore.getDefault().savePluginPreferences();
+		ExternalCheckerPlugin.getDefault().savePluginPreferences();
 		fRulesBlock.removeAll();
 		fRulesBlock.loadWildcards();
 	}

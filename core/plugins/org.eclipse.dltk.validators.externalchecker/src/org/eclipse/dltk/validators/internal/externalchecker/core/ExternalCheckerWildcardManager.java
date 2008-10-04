@@ -28,21 +28,25 @@ public class ExternalCheckerWildcardManager {
 	private static final String DESCRIPTION = "description"; //$NON-NLS-1$
 	private static final String PATTERN = "pattern"; //$NON-NLS-1$
 	private static final String LETTER = "letter"; //$NON-NLS-1$
-	public static final String WILDCARDS = ValidatorsCore.PLUGIN_ID
+	public static final String WILDCARDS = ExternalCheckerPlugin.PLUGIN_ID
 			+ ".wildcards"; //$NON-NLS-1$
 
 	public static String getDefaultWildcards() {
 		CustomWildcard[] wildcards = {
-				new CustomWildcard("f", "[\\w]?:?.+", Messages.ExternalCheckerWildcardManager_fileName), //$NON-NLS-1$ //$NON-NLS-2$
-				new CustomWildcard("m", ".*", Messages.ExternalCheckerWildcardManager_message), //$NON-NLS-1$ //$NON-NLS-2$
-				new CustomWildcard("n", "[0-9]+", Messages.ExternalCheckerWildcardManager_lineNumber) }; //$NON-NLS-1$ //$NON-NLS-2$
+				new CustomWildcard(
+						"f", "[\\w]?:?.+", Messages.ExternalCheckerWildcardManager_fileName), //$NON-NLS-1$ //$NON-NLS-2$
+				new CustomWildcard(
+						"m", ".*", Messages.ExternalCheckerWildcardManager_message), //$NON-NLS-1$ //$NON-NLS-2$
+				new CustomWildcard(
+						"n", "[0-9]+", Messages.ExternalCheckerWildcardManager_lineNumber) }; //$NON-NLS-1$ //$NON-NLS-2$
 		return rulesToXML(wildcards);
 	}
 
 	public static List loadCustomWildcards() {
 		List wildcards = new ArrayList();
-		String preference = ValidatorsCore.getDefault().getPluginPreferences()
-				.getString(ExternalCheckerWildcardManager.WILDCARDS);
+		String preference = ExternalCheckerPlugin.getDefault()
+				.getPluginPreferences().getString(
+						ExternalCheckerWildcardManager.WILDCARDS);
 		if (DLTKCore.DEBUG) {
 			System.out.println(preference);
 		}
@@ -85,9 +89,9 @@ public class ExternalCheckerWildcardManager {
 
 	public static void storeWildcards(CustomWildcard[] customWildcards) {
 		String xmlString = rulesToXML(customWildcards);
-		ValidatorsCore.getDefault().getPluginPreferences().setValue(WILDCARDS,
-				xmlString);
-		ValidatorsCore.getDefault().savePluginPreferences();
+		ExternalCheckerPlugin.getDefault().getPluginPreferences().setValue(
+				WILDCARDS, xmlString);
+		ExternalCheckerPlugin.getDefault().savePluginPreferences();
 	}
 
 	private static String rulesToXML(CustomWildcard[] customWildcards)

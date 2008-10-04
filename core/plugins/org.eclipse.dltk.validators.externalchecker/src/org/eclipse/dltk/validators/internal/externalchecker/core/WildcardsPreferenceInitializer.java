@@ -1,7 +1,6 @@
 package org.eclipse.dltk.validators.internal.externalchecker.core;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
-import org.eclipse.dltk.validators.internal.core.ValidatorsCore;
 
 public class WildcardsPreferenceInitializer extends
 		AbstractPreferenceInitializer {
@@ -11,7 +10,7 @@ public class WildcardsPreferenceInitializer extends
 
 	public void initializeDefaultPreferences() {
 		String xmlString = ExternalCheckerWildcardManager.getDefaultWildcards();
-		ValidatorsCore.getDefault().getPluginPreferences().setDefault(ExternalCheckerWildcardManager.WILDCARDS, xmlString);
-		ValidatorsCore.getDefault().savePluginPreferences();
+		ExternalCheckerPlugin.getDefault().getPluginPreferences().setDefault(ExternalCheckerWildcardManager.WILDCARDS, xmlString);
+		ExternalCheckerPlugin.getDefault().savePluginPreferences();
 	}
 }

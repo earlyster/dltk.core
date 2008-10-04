@@ -18,6 +18,7 @@ public class WildcardMatcher {
 			throws WildcardException {
 		tokenList = parseWildcard(pattern.getDescription());
 		String bigpattern = makeBigPattern(pattern.getDescription(), wcards);
+		System.out.println(bigpattern);
 		Pattern pat = Pattern.compile(bigpattern);
 		Matcher matcher = pat.matcher(input);
 
