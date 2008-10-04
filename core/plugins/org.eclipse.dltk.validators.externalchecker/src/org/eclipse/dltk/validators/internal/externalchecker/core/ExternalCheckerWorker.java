@@ -27,9 +27,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ISourceRange;
+import org.eclipse.dltk.core.builder.ISourceLineTracker;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.dltk.validators.core.AbstractExternalValidator;
 import org.eclipse.dltk.validators.core.IResourceValidator;
 import org.eclipse.dltk.validators.core.ISourceModuleValidator;
@@ -132,7 +135,7 @@ public class ExternalCheckerWorker extends AbstractExternalValidator implements
 		return false;
 	}
 
-	public IStatus validate(ISourceModule module, IValidatorOutput console) {
+	private IStatus validate(ISourceModule module, IValidatorOutput console) {
 		if (!checkExtension(module)) {
 			return Status.OK_STATUS;
 		}
@@ -179,22 +182,28 @@ public class ExternalCheckerWorker extends AbstractExternalValidator implements
 				lines.add(line);
 			}
 
-			ExternalCheckerCodeModel model = new ExternalCheckerCodeModel(
-					module.getSource());
+			ISourceLineTracker model = null;
 
 			for (Iterator iterator = lines.iterator(); iterator.hasNext();) {
 				String line1 = (String) iterator.next();
 				ExternalCheckerProblem problem = parseProblem(line1);
 				if (problem != null) {
-					int[] bounds = model.getBounds(problem.getLineNumber() - 1);
+					if (model == null) {
+						model = TextUtils.createLineTracker(module
+								.getSourceAsCharArray());
+					}
+					ISourceRange bounds = model.getLineInformation(problem
+							.getLineNumber() - 1);
 					if (problem.getType().indexOf(
 							Messages.ExternalChecker_error) != -1) {
-						reportErrorProblem(resource, problem, bounds[0],
-								bounds[1]);
+						reportErrorProblem(resource, problem, bounds
+								.getOffset(), bounds.getOffset()
+								+ bounds.getLength());
 					} else if (problem.getType().indexOf(
 							Messages.ExternalChecker_warning) != -1) {
-						reportWarningProblem(resource, problem, bounds[0],
-								bounds[1]);
+						reportWarningProblem(resource, problem, bounds
+								.getOffset(), bounds.getOffset()
+								+ bounds.getLength());
 					}
 				}
 			}
