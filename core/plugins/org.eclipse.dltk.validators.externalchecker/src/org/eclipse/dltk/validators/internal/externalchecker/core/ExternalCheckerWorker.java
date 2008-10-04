@@ -15,13 +15,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -35,6 +32,7 @@ import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.dltk.validators.core.AbstractExternalValidator;
+import org.eclipse.dltk.validators.core.CommandLine;
 import org.eclipse.dltk.validators.core.IResourceValidator;
 import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidatorOutput;
@@ -148,26 +146,18 @@ public class ExternalCheckerWorker extends AbstractExternalValidator implements
 
 		clean(resource);
 
-		List lines = new ArrayList();
 		if (command == null || command.trim().length() == 0) {
 			return Status.CANCEL_STATUS;
 		}
-		String args = this.processArguments(resource);
-		String[] sArgs = args.split("::"); //$NON-NLS-1$
-
-		List coms = new ArrayList();
-		coms.add(command);
-		for (int i = 0; i < sArgs.length; i++) {
-			coms.add(sArgs[i]);
-		}
-
-		String[] extcom = (String[]) coms.toArray(new String[coms.size()]);
+		CommandLine cmdLine = new CommandLine(arguments);
+		cmdLine.replaceSequence('f', getResourcePath(resource));
+		cmdLine.add(0, command);
 
 		BufferedReader input = null;
 		Process process = null;
 		try {
 			try {
-				process = execEnvironment.exec(extcom, null, null);
+				process = execEnvironment.exec(cmdLine.toArray(), null, null);
 			} catch (Throwable e) {
 				if (DLTKCore.DEBUG) {
 					System.out.println(e.toString());
@@ -177,17 +167,11 @@ public class ExternalCheckerWorker extends AbstractExternalValidator implements
 			input = new BufferedReader(new InputStreamReader(process
 					.getInputStream()));
 
+			ISourceLineTracker model = null;
 			String line = null;
 			while ((line = input.readLine()) != null) {
 				console.println(line);
-				lines.add(line);
-			}
-
-			ISourceLineTracker model = null;
-
-			for (Iterator iterator = lines.iterator(); iterator.hasNext();) {
-				String line1 = (String) iterator.next();
-				ExternalCheckerProblem problem = parseProblem(line1);
+				ExternalCheckerProblem problem = parseProblem(line);
 				if (problem != null) {
 					if (model == null) {
 						model = TextUtils.createLineTracker(module
@@ -197,20 +181,18 @@ public class ExternalCheckerWorker extends AbstractExternalValidator implements
 							.getLineNumber() - 1);
 					if (problem.getType().indexOf(
 							Messages.ExternalChecker_error) != -1) {
-						reportErrorProblem(resource, problem, bounds
-								.getOffset(), bounds.getOffset()
-								+ bounds.getLength());
+						reportError(resource, problem.getLineNumber(), bounds
+								.getOffset(), (bounds.getOffset() + bounds
+								.getLength()), problem.getDescription());
 					} else if (problem.getType().indexOf(
 							Messages.ExternalChecker_warning) != -1) {
-						reportWarningProblem(resource, problem, bounds
-								.getOffset(), bounds.getOffset()
-								+ bounds.getLength());
+						reportWarning(resource, problem.getLineNumber(), bounds
+								.getOffset(), (bounds.getOffset() + bounds
+								.getLength()), problem.getDescription());
 					}
 				}
 			}
-		}
-
-		catch (Exception e) {
+		} catch (Exception e) {
 			if (DLTKCore.DEBUG) {
 				System.out.println(e.toString());
 			}
@@ -218,33 +200,14 @@ public class ExternalCheckerWorker extends AbstractExternalValidator implements
 		return Status.OK_STATUS;
 	}
 
-	private String processArguments(IResource resource) {
-		String path = null;
+	private String getResourcePath(IResource resource) {
 		if (resource.getLocation() != null) {
-			path = resource.getLocation().makeAbsolute().toOSString();
+			return resource.getLocation().makeAbsolute().toOSString();
 		} else {
 			URI uri = resource.getLocationURI();
 			IFileHandle file = environment.getFile(uri);
-			path = file.toOSString();
+			return file.toOSString();
 		}
-		String user = replaceSequence(arguments.replaceAll("\\s+", "::"), 'f', //$NON-NLS-1$ //$NON-NLS-2$
-				path);
-		return user;
-	}
-
-	private String replaceSequence(String from, char pattern, String value) {
-		StringBuffer buffer = new StringBuffer();
-		for (int i = 0; i < from.length(); ++i) {
-			char c = from.charAt(i);
-			if (c == '%' && i < from.length() - 1
-					&& from.charAt(i + 1) == pattern) {
-				buffer.append(value);
-				i++;
-			} else {
-				buffer.append(c);
-			}
-		}
-		return buffer.toString();
 	}
 
 	public ExternalCheckerProblem parseProblem(String problem) {
@@ -267,20 +230,6 @@ public class ExternalCheckerWorker extends AbstractExternalValidator implements
 			}
 		}
 		return null;
-	}
-
-	protected IMarker reportErrorProblem(IResource resource,
-			ExternalCheckerProblem problem, int start, int end)
-			throws CoreException {
-		return reportError(resource, problem.getLineNumber(), start, end,
-				problem.getDescription());
-	}
-
-	protected IMarker reportWarningProblem(IResource resource,
-			ExternalCheckerProblem problem, int start, int end)
-			throws CoreException {
-		return reportWarning(resource, problem.getLineNumber(), start, end,
-				problem.getDescription());
 	}
 
 }
