@@ -523,9 +523,9 @@ public class MatchLocator implements ITypeRequestor {
 	protected IField createFieldHandle(String simpleTypeName) {
 		Openable openable = this.currentPossibleMatch.openable;
 		IField field;
-		if (openable instanceof SourceModule)
+		if (openable instanceof SourceModule) {
 			field = ((SourceModule) openable).getField(simpleTypeName);
-		if (openable instanceof ExternalSourceModule) {
+		} else if (openable instanceof ExternalSourceModule) {
 			field = ((ExternalSourceModule) openable).getField(simpleTypeName);
 		} else {
 			field = null;
