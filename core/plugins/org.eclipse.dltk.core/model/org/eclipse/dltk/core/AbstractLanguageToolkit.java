@@ -52,4 +52,8 @@ public abstract class AbstractLanguageToolkit implements IDLTKLanguageToolkit {
 		return false;
 	}
 
+	public String getPreferenceQualifier() {
+		return null;
+	}
+
 }

@@ -69,4 +69,11 @@ public interface IDLTKLanguageToolkit {
 	 */
 	boolean canValidateContent(IFileHandle file);
 
+	/**
+	 * Return the qualifier for the "core" language preferences. It should match
+	 * plugin-id most of the time.
+	 * 
+	 * @return
+	 */
+	String getPreferenceQualifier();
 }
