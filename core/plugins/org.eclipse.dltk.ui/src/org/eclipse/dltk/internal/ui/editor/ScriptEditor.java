@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IMember;
@@ -1037,19 +1038,28 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	 *            The editor input for which to create the preference store
 	 * @return the preference store for this editor
 	 */
-	// protected abstract IPreferenceStore createCombinedPreferenceStore(
-	// IEditorInput input);
 	private IPreferenceStore createCombinedPreferenceStore(IEditorInput input) {
-		List stores = new ArrayList(3);
-		IScriptProject project = EditorUtility.getScriptProject(input);
+		final List stores = new ArrayList(8);
+		final IScriptProject project = EditorUtility.getScriptProject(input);
+		final IDLTKLanguageToolkit toolkit = getLanguageToolkit();
+		final String preferenceQualifier = toolkit.getPreferenceQualifier();
 		if (project != null) {
+			if (preferenceQualifier != null) {
+				stores.add(new EclipsePreferencesAdapter(new ProjectScope(
+						project.getProject()), preferenceQualifier));
+			}
 			stores.add(new EclipsePreferencesAdapter(new ProjectScope(project
 					.getProject()), DLTKCore.PLUGIN_ID));
 		}
 		stores.add(getScriptPreferenceStore());
+		if (preferenceQualifier != null) {
+			stores.add(new EclipsePreferencesAdapter(new InstanceScope(),
+					preferenceQualifier));
+		}
 		stores.add(new PreferencesAdapter(DLTKCore.getDefault()
 				.getPluginPreferences()));
 		stores.add(EditorsUI.getPreferenceStore());
+		stores.add(PlatformUI.getPreferenceStore());
 		return new ChainedPreferenceStore((IPreferenceStore[]) stores
 				.toArray(new IPreferenceStore[stores.size()]));
 	}
