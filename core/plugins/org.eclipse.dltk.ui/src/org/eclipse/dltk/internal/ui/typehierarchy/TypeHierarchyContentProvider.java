@@ -184,21 +184,24 @@ public abstract class TypeHierarchyContentProvider implements
 	protected void compactTypes(List types) {
 		final Map map = new HashMap();
 		for (Iterator i = types.iterator(); i.hasNext();) {
-			final IType type = (IType) i.next();
-			final String qName = type.getTypeQualifiedName();
-			Object value = map.get(qName);
-			if (value == null) {
-				map.put(qName, type);
-			} else if (value instanceof List) {
-				((List) value).add(type);
-			} else {
-				List list = new ArrayList(4);
-				list.add(value);
-				list.add(type);
-				map.put(qName, list);
+			final Object item = i.next();
+			if (item instanceof IType) {
+				final IType type = (IType) item;
+				final String qName = type.getTypeQualifiedName();
+				Object value = map.get(qName);
+				if (value == null) {
+					map.put(qName, type);
+				} else if (value instanceof List) {
+					((List) value).add(type);
+				} else {
+					List list = new ArrayList(4);
+					list.add(value);
+					list.add(type);
+					map.put(qName, list);
+				}
+				i.remove();
 			}
 		}
-		types.clear();
 		final List qNames = new ArrayList(map.keySet());
 		Collections.sort(qNames);
 		for (Iterator i = qNames.iterator(); i.hasNext();) {
