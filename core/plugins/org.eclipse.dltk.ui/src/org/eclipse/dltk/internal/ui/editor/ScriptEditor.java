@@ -1599,6 +1599,22 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 					.updateEditorImage(getInputModelElement());
 	}
 
+	protected void setPreferenceStore(IPreferenceStore store) {
+		super.setPreferenceStore(store);
+		final SourceViewerConfiguration svConfiguration = getSourceViewerConfiguration();
+		if (svConfiguration == null
+				|| svConfiguration instanceof ScriptSourceViewerConfiguration) {
+			final ScriptTextTools textTools = getTextTools();
+			if (textTools != null) {
+				setSourceViewerConfiguration(textTools
+						.createSourceViewerConfiguraton(store, this));
+			}
+		}
+		if (getSourceViewer() instanceof ScriptSourceViewer) {
+			((ScriptSourceViewer) getSourceViewer()).setPreferenceStore(store);
+		}
+	}
+
 	private ScriptOutlinePage createOutlinePage() {
 		final ScriptOutlinePage page = doCreateOutlinePage();
 		fOutlineSelectionChangedListener.install(page);
