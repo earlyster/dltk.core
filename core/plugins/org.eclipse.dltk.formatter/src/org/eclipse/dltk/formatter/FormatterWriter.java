@@ -37,17 +37,16 @@ public class FormatterWriter implements IFormatterWriter {
 	private final IFormatterDocument document;
 	private final IFormatterIndentGenerator indentGenerator;
 	private int linesPreserve = -1;
-	private final int wrapLength;
+	private int wrapLength = -1;
 
 	/**
 	 * @param lineDelimiter
 	 */
 	public FormatterWriter(IFormatterDocument document, String lineDelimiter,
-			IFormatterIndentGenerator indentGenerator, int wrapLength) {
+			IFormatterIndentGenerator indentGenerator) {
 		this.document = document;
 		this.lineDelimiter = lineDelimiter;
 		this.indentGenerator = indentGenerator;
-		this.wrapLength = wrapLength;
 	}
 
 	public void ensureLineStarted(IFormatterContext context) throws Exception {
@@ -93,7 +92,7 @@ public class FormatterWriter implements IFormatterWriter {
 						offset = calculateOffset(start);
 						savedLineNumber = lineNumber;
 					}
-					if (offset > wrapLength) {
+					if (wrapLength > 0 && offset > wrapLength) {
 						int begin = start;
 						while (begin < writer.length()
 								&& FormatterUtils.isSpace(writer.charAt(begin))) {
@@ -298,4 +297,20 @@ public class FormatterWriter implements IFormatterWriter {
 	public void setLinesPreserve(int value) {
 		this.linesPreserve = value;
 	}
+
+	/**
+	 * @return the wrapLength
+	 */
+	public int getWrapLength() {
+		return wrapLength;
+	}
+
+	/**
+	 * @param wrapLength
+	 *            the wrapLength to set
+	 */
+	public void setWrapLength(int wrapLength) {
+		this.wrapLength = wrapLength;
+	}
+
 }
