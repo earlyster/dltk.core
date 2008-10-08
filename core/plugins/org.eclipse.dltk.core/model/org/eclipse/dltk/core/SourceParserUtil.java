@@ -18,7 +18,7 @@ public class SourceParserUtil {
 		void run(ISourceModule module, char[] content);
 	}
 
-	private static boolean useASTCaching;
+	private static boolean useASTCaching = true;
 
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module) {
 		return getModuleDeclaration(module, null,
