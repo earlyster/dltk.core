@@ -215,16 +215,10 @@ public class Util {
 					continue;
 				}
 				// if it is a file, extract it
-				String filePath = zEntry.getName();
-				int lastSeparator = filePath.lastIndexOf("/"); //$NON-NLS-1$
-				String fileDir = ""; //$NON-NLS-1$
-				if (lastSeparator >= 0) {
-					fileDir = filePath.substring(0, lastSeparator);
-				}
+				File outFile = new File(destDir, zEntry.getName());
 				// create directory for a file
-				new File(destDir, fileDir).mkdirs();
+				outFile.getParentFile().mkdirs();
 				// write file
-				File outFile = new File(destDir, filePath);
 				fos = new FileOutputStream(outFile);
 				int n = 0;
 				while ((n = zis.read(buf)) >= 0) {
