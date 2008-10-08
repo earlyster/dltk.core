@@ -23,7 +23,8 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.util.HashtableOfObject;
-import org.eclipse.dltk.compiler.util.SimpleSetOfCharArray;
+import org.eclipse.dltk.compiler.util.ObjectVector;
+import org.eclipse.dltk.compiler.util.SimpleSet;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
@@ -32,9 +33,11 @@ import org.eclipse.dltk.internal.core.util.Util;
 
 public class MixinIndex extends Index {
 
-	private static final String HEADER = "MIXIN INDEX 0.1"; //$NON-NLS-1$
+	private static final char[] OLD_HEADER = "MIXIN INDEX 0.1".toCharArray(); //$NON-NLS-1$
+	private static final char[] HEADER = "MIXIN INDEX 0.2".toCharArray(); //$NON-NLS-1$
 
-	private HashtableOfObject docNamesToKeys;
+	private final HashtableOfObject keyToDocs = new HashtableOfObject(10);
+	private final SimpleSet documentNames = new SimpleSet(10);
 
 	private final String fileName;
 
@@ -61,7 +64,7 @@ public class MixinIndex extends Index {
 		// + containerRelativePath);
 		// }
 		Assert.isTrue(CharOperation.equals(category, IIndexConstants.MIXIN));
-		addIndexEntry(key, containerRelativePath.toCharArray());
+		addIndexEntry(key, containerRelativePath);
 	}
 
 	/**
@@ -73,24 +76,16 @@ public class MixinIndex extends Index {
 	 * @param containerRelativePath
 	 */
 	public void addDocumentName(String containerRelativePath) {
-		addDocumentName(containerRelativePath.toCharArray());
+		documentNames.addIntern(containerRelativePath);
 	}
 
-	private void addDocumentName(final char[] containerRelativePath) {
-		if (!docNamesToKeys.containsKey(containerRelativePath)) {
-			docNamesToKeys.put(containerRelativePath, new SimpleSetOfCharArray(
-					1));
+	private void addIndexEntry(char[] key, String containerRelativePath) {
+		SimpleSet docs = (SimpleSet) keyToDocs.get(key);
+		if (docs == null) {
+			docs = new SimpleSet(1);
+			keyToDocs.put(key, docs);
 		}
-	}
-
-	private void addIndexEntry(char[] key, char[] containerRelativePath) {
-		SimpleSetOfCharArray names = (SimpleSetOfCharArray) docNamesToKeys
-				.get(containerRelativePath);
-		if (names == null) {
-			names = new SimpleSetOfCharArray(1);
-			docNamesToKeys.put(containerRelativePath, names);
-		}
-		names.add(key);
+		docs.add(containerRelativePath);
 	}
 
 	public String containerRelativePath(String documentPath) {
@@ -125,68 +120,44 @@ public class MixinIndex extends Index {
 			throws IOException {
 		if (!isMixinCategory(categories))
 			return new EntryResult[0];
-
-		HashtableOfObject results = new HashtableOfObject(10);
-
+		final ObjectVector results = new ObjectVector();
 		performQuery(key, matchRule, results);
-
-		EntryResult[] entryResults = new EntryResult[results.elementSize];
-		int count = 0;
-		Object[] values = results.valueTable;
-		for (int i = 0, l = values.length; i < l; i++) {
-			EntryResult result = (EntryResult) values[i];
-			if (result != null)
-				entryResults[count++] = result;
-		}
+		final EntryResult[] entryResults = new EntryResult[results.size];
+		results.copyInto(entryResults);
 		return entryResults;
 	}
 
-	private void performQuery(char[] key, int matchRule,
-			HashtableOfObject results) {
-		char[][] keyTable = docNamesToKeys.keyTable;
-		for (int i = 0; i < keyTable.length; i++) {
-			char[] docName = keyTable[i];
-			if (docName == null)
+	private void performQuery(char[] key, int matchRule, ObjectVector results) {
+		final char[][] keyTable = keyToDocs.keyTable;
+		for (int i = 0, keyLen = keyTable.length; i < keyLen; i++) {
+			final char[] nextKey = keyTable[i];
+			if (nextKey == null)
 				continue;
-			SimpleSetOfCharArray keys = (SimpleSetOfCharArray) docNamesToKeys
-					.get(docName);
-			if (keys != null) {
-				for (int j = 0; j < keys.values.length; j++) {
-					char[] k = keys.values[j];
-					if (k != null && Index.isMatch(key, k, matchRule)) {
-						EntryResult s = (EntryResult) results.get(k);
-						if (s == null) {
-							s = new EntryResult(k, null);
-							results.put(k, s);
-						}
-						s.addDocumentName(new String(docName));
+			if (Index.isMatch(key, nextKey, matchRule)) {
+				final EntryResult s = new EntryResult(nextKey, null);
+				results.add(s);
+				final SimpleSet docs = (SimpleSet) keyToDocs.valueTable[i];
+				for (int j = 0; j < docs.values.length; j++) {
+					final String doc = (String) docs.values[j];
+					if (doc != null) {
+						s.addDocumentName(doc);
 					}
 				}
 			}
 		}
 	}
 
-	private static String[] extractKeysFromTable(HashtableOfObject table) {
+	private static String[] extractKeysFromTable(SimpleSet table,
+			String substring) {
 		String[] documentNames = new String[table.elementSize];
 		int count = 0;
-		char[][] values = table.keyTable;
+		final Object[] values = table.values;
 		for (int i = 0, l = values.length; i < l; i++) {
-			char[] result = values[i];
-			if (result != null)
-				documentNames[count++] = new String(result);
-		}
-		return documentNames;
-	}
-
-	private static String[] extractKeysFromTable(HashtableOfObject table,
-			char[] substring) {
-		String[] documentNames = new String[table.elementSize];
-		int count = 0;
-		char[][] values = table.keyTable;
-		for (int i = 0, l = values.length; i < l; i++) {
-			char[] result = values[i];
-			if (result != null && CharOperation.startsWith(result, substring))
-				documentNames[count++] = new String(result);
+			final String result = (String) values[i];
+			if (result != null
+					&& (substring == null || result.startsWith(substring))) {
+				documentNames[count++] = result;
+			}
 		}
 		if (count != documentNames.length) {
 			final String[] result = new String[count];
@@ -201,22 +172,24 @@ public class MixinIndex extends Index {
 	 * returns all of them.
 	 */
 	public String[] queryDocumentNames(String substring) throws IOException {
-		if (substring == null) {
-			return extractKeysFromTable(docNamesToKeys);
-		} else {
-			return extractKeysFromTable(docNamesToKeys, substring.toCharArray());
-		}
+		return extractKeysFromTable(documentNames, substring);
 	}
 
 	public void remove(String containerRelativePath) {
 		this.dirty = true;
-		docNamesToKeys.removeKey(containerRelativePath.toCharArray());
+		if (documentNames.remove(containerRelativePath) != null) {
+			final char[][] keyTable = keyToDocs.keyTable;
+			for (int i = 0; i < keyTable.length; i++) {
+				final SimpleSet docs = (SimpleSet) keyToDocs.valueTable[i];
+				if (docs != null) {
+					docs.remove(containerRelativePath);
+				}
+			}
+		}
 	}
 
 	public void save() throws IOException {
 		long start = DLTKCore.VERBOSE_MIXIN ? System.currentTimeMillis() : 0;
-		if (docNamesToKeys == null)
-			docNamesToKeys = new HashtableOfObject(0);
 		if (!hasChanged()) {
 			return;
 		}
@@ -225,26 +198,33 @@ public class MixinIndex extends Index {
 		FileOutputStream fouts = new FileOutputStream(f, false);
 		BufferedOutputStream bufout = new BufferedOutputStream(fouts, 2048);
 		DataOutputStream stream = new DataOutputStream(bufout);
-		int docNamesCount = docNamesToKeys.elementSize;
-		Util.writeUTF(stream, HEADER.toCharArray());
-		stream.writeInt(docNamesCount);
-		for (int i = 0; i < docNamesToKeys.keyTable.length; i++) {
-			char[] docName = docNamesToKeys.keyTable[i];
-			if (docName == null)
+		final SimpleSet allDocuments = new SimpleSet();
+		allDocuments.addAll(documentNames);
+		Util.writeUTF(stream, HEADER);
+		int keyCount = keyToDocs.elementSize;
+		stream.writeInt(keyCount);
+		for (int i = 0; i < keyToDocs.keyTable.length; i++) {
+			char[] key = keyToDocs.keyTable[i];
+			if (key == null)
 				continue;
-			Util.writeUTF(stream, docName);
-			SimpleSetOfCharArray wordSet = (SimpleSetOfCharArray) docNamesToKeys
-					.get(docName);
-			if (wordSet != null) {
-				stream.writeInt(wordSet.elementSize);
-				for (int j = 0; j < wordSet.values.length; j++) {
-					char[] word = wordSet.values[j];
-					if (word != null) {
-						Util.writeUTF(stream, word);
-					}
+			Util.writeUTF(stream, key);
+			final SimpleSet docs = (SimpleSet) keyToDocs.valueTable[i];
+			stream.writeInt(docs.elementSize);
+			for (int j = 0; j < docs.values.length; j++) {
+				final String docName = (String) docs.values[j];
+				if (docName != null) {
+					Util.writeUTF(stream, docName.toCharArray());
+					allDocuments.remove(docName);
 				}
-			} else
-				stream.writeInt(0);
+			}
+		}
+		stream.writeInt(allDocuments.size());
+		int docTableSize = allDocuments.elementSize;
+		for (int i = 0; i < docTableSize; ++i) {
+			String docName = (String) allDocuments.values[i];
+			if (docName != null) {
+				Util.writeUTF(stream, docName.toCharArray());
+			}
 		}
 		bufout.close();
 		stream.close();
@@ -254,7 +234,8 @@ public class MixinIndex extends Index {
 			System.out.println("Mixin index for " + this.containerPath + " (" //$NON-NLS-1$ //$NON-NLS-2$
 					+ new Path(this.fileName).lastSegment() + ") saved, took " //$NON-NLS-1$
 					+ (System.currentTimeMillis() - start));
-			System.out.println("Mixin modules: " + this.docNamesToKeys.size()); //$NON-NLS-1$
+			System.out.println("Mixin modules: " + this.documentNames.size()); //$NON-NLS-1$
+			System.out.println("Mixin keys: " + this.keyToDocs.size()); //$NON-NLS-1$
 		}
 	}
 
@@ -263,31 +244,23 @@ public class MixinIndex extends Index {
 		File indexFile = getIndexFile();
 		if (indexFile.exists()) {
 			if (reuseExistingFile) {
-				this.docNamesToKeys = new HashtableOfObject(0);
 				try {
 					monitor.enterRead();
 					DataInputStream stream = new DataInputStream(
 							new BufferedInputStream(new FileInputStream(
 									indexFile), 2048));
-					char[] header = Util.readUTF(stream);
-					if (new String(header).equals(HEADER)) {
-						int documentsCount = stream.readInt();
-						for (int i = 0; i < documentsCount; i++) {
-							char[] docName = Util.readUTF(stream);
-							int wordsCount = stream.readInt();
-							if (wordsCount > 0) {
-								for (int j = 0; j < wordsCount; j++) {
-									char[] word = Util.readUTF(stream);
-									addIndexEntry(word, docName);
-								}
-							} else {
-								// see comment in the #addDocumentName(String)
-								addDocumentName(docName);
-							}
+					try {
+						final char[] header = Util.readUTF(stream);
+						if (CharOperation.equals(OLD_HEADER, header)) {
+							loadDocToKeyFormat(stream);
+							successful = true;
+						} else if (CharOperation.equals(HEADER, header)) {
+							loadKeyToDocFormat(stream);
+							successful = true;
 						}
-						successful = true;
+					} finally {
+						stream.close();
 					}
-					stream.close();
 				} catch (FileNotFoundException e) {
 					if (DLTKCore.DEBUG_INDEX)
 						e.printStackTrace();
@@ -309,7 +282,6 @@ public class MixinIndex extends Index {
 			}
 		}
 		if (indexFile.createNewFile()) {
-			this.docNamesToKeys = new HashtableOfObject();
 			save();
 		} else {
 			if (DLTKCore.DEBUG_INDEX)
@@ -318,6 +290,39 @@ public class MixinIndex extends Index {
 			throw new IOException("Failed to create new index " + this.fileName); //$NON-NLS-1$
 		}
 		this.dirty = false;
+	}
+
+	private void loadKeyToDocFormat(DataInputStream stream) throws IOException {
+		final int keyCount = stream.readInt();
+		for (int i = 0; i < keyCount; i++) {
+			final char[] key = Util.readUTF(stream);
+			final int docCount = stream.readInt();
+			for (int j = 0; j < docCount; j++) {
+				String docName = new String(Util.readUTF(stream));
+				docName = (String) documentNames.addIntern(docName);
+				addIndexEntry(key, docName);
+			}
+		}
+		final int docCount = stream.readInt();
+		for (int i = 0; i < docCount; ++i) {
+			String docName = new String(Util.readUTF(stream));
+			documentNames.addIntern(docName);
+		}
+	}
+
+	private void loadDocToKeyFormat(DataInputStream stream) throws IOException {
+		int documentsCount = stream.readInt();
+		for (int i = 0; i < documentsCount; i++) {
+			String docName = new String(Util.readUTF(stream));
+			docName = (String) documentNames.addIntern(docName);
+			int wordsCount = stream.readInt();
+			if (wordsCount > 0) {
+				for (int j = 0; j < wordsCount; j++) {
+					char[] word = Util.readUTF(stream);
+					addIndexEntry(word, docName);
+				}
+			}
+		}
 	}
 
 	public void startQuery() {
