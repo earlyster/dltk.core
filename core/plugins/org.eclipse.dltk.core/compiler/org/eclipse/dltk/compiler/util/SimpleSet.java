@@ -149,4 +149,59 @@ public final class SimpleSet implements Cloneable {
 			rehash();
 		return object;
 	}
+
+	/**
+	 * If this object is already added then return previous instance, else add
+	 * and return the specified object.
+	 * 
+	 * In any case after this method specified object is added to the set and
+	 * the instance contained in the set is returned.
+	 * 
+	 * @param object
+	 * @return
+	 */
+	public Object addIntern(Object object) {
+		int length = this.values.length;
+		int index = (object.hashCode() & 0x7FFFFFFF) % length;
+		Object current;
+		while ((current = this.values[index]) != null) {
+			if (current.equals(object))
+				return current; // already existed
+			if (++index == length)
+				index = 0;
+		}
+		this.values[index] = object;
+
+		// assumes the threshold is never equal to the size of the table
+		if (++this.elementSize > this.threshold)
+			rehash();
+		return object;
+	}
+
+	/**
+	 * @param documentNames
+	 */
+	public void addAll(SimpleSet set) {
+		for (int i = 0; i < set.elementSize; ++i) {
+			final Object obj = set.values[i];
+			if (obj != null) {
+				addIntern(obj);
+			}
+		}
+	}
+
+	/**
+	 * Returns the real number of elements in this set.
+	 * 
+	 * @return
+	 */
+	public int size() {
+		int result = 0;
+		for (int i = 0; i < elementSize; ++i) {
+			if (values[i] != null) {
+				++result;
+			}
+		}
+		return result;
+	}
 }
