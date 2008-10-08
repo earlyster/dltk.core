@@ -181,7 +181,7 @@ public class SourceParserUtil {
 	 */
 	public static ModuleDeclaration getModuleFromCache(ISourceModuleInfo mifo,
 			int flags, IProblemReporter reporter) {
-		if (mifo != null) {
+		if (mifo != null && useASTCaching) {
 			final ModuleDeclaration moduleDeclaration = (ModuleDeclaration) mifo
 					.get(getKey(AST, flags));
 			if (moduleDeclaration != null && reporter != null) {
@@ -198,7 +198,7 @@ public class SourceParserUtil {
 
 	public static void putModuleToCache(ISourceModuleInfo info,
 			ModuleDeclaration module, int flags, ProblemCollector collector) {
-		if (info != null) {
+		if (info != null && useASTCaching) {
 			info.put(getKey(AST, flags), module);
 			final String errorKey = getKey(ERRORS, flags);
 			if (collector != null && !collector.isEmpty()) {

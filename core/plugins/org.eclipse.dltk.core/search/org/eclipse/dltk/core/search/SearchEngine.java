@@ -10,6 +10,7 @@
 package org.eclipse.dltk.core.search;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -948,6 +949,7 @@ public class SearchEngine {
 		// Index requestor
 		final HandleFactory factory = new HandleFactory();
 		final List modules = new ArrayList();
+		final Map processed = new HashMap();
 		IndexQueryRequestor searchRequestor = new IndexQueryRequestor() {
 			public boolean acceptIndexMatch(String documentPath,
 					SearchPattern indexRecord, SearchParticipant participant,
@@ -958,11 +960,17 @@ public class SearchEngine {
 							.substring(documentPath
 									.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR) + 1);
 				}
-				Openable module = factory.createOpenable(documentPath, scope);
-				if (module instanceof ISourceModule) {
-					modules.add(module);
+				if (!processed.containsKey(documentPath)) {
+					Openable module = factory.createOpenable(documentPath,
+							scope);
+					if (module instanceof ISourceModule) {
+						modules.add(module);
+					}
+					processed.put(documentPath, module);
 				}
 
+				ISourceModule module = (ISourceModule) processed
+						.get(documentPath);
 				if (keys != null) {
 					final String val = new String(indexRecord.getIndexKey());
 					final Set keysList;

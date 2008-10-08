@@ -11,6 +11,7 @@ package org.eclipse.dltk.core.mixin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,9 +41,11 @@ import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.internal.core.ModelCache;
+import org.eclipse.dltk.internal.core.OverflowingLRUCache;
 import org.eclipse.dltk.internal.core.mixin.IInternalMixinElement;
 import org.eclipse.dltk.internal.core.mixin.MixinCache;
 import org.eclipse.dltk.internal.core.mixin.MixinManager;
+import org.eclipse.dltk.internal.core.util.LRUCache;
 
 public class MixinModel {
 	private static final boolean DEBUG = false;
@@ -70,7 +73,7 @@ public class MixinModel {
 	 */
 	private Set modulesToReparse = new HashSet();
 	public long removes = 1;
-	private final double ratio = 10000;
+	private final double ratio = 50000;
 
 	/**
 	 * Creates workspace instance
@@ -151,50 +154,73 @@ public class MixinModel {
 		}
 	}
 
+	private static class RequestCache extends OverflowingLRUCache {
+		private static class RequestCacheEntry {
+			String prefix = null;
+			Set modules = null;
+			Set keys = null;
+		}
+
+		public RequestCache(int size) {
+			super(size);
+		}
+
+		public RequestCache(int size, int overflow) {
+			super(size, overflow);
+		}
+
+		protected boolean close(LRUCacheEntry entry) {
+			return true;
+		}
+
+		protected LRUCache newInstance(int size, int overflow) {
+			return new RequestCache(size, overflow);
+		}
+	};
+
+	RequestCache requestCache = new RequestCache(500);
+
 	public IMixinElement[] find(String pattern, long delta) {
-		Map set = new HashMap();
+		// Set set = new HashSet();
 
-		ISourceModule[] containedModules = SearchEngine.searchMixinSources(
-				createSearchScope(), pattern, toolkit, set);
-		Set modules = new HashSet();
-		modules.addAll(Arrays.asList(containedModules));
+		RequestCache.RequestCacheEntry entry = (org.eclipse.dltk.core.mixin.MixinModel.RequestCache.RequestCacheEntry) requestCache
+				.get(pattern);
+		// Set modules = new HashSet();
+		if (entry == null) {
+			Map keys = new HashMap();
+			ISourceModule[] containedModules = SearchEngine.searchMixinSources(
+					createSearchScope(), pattern, toolkit, keys);
+			entry = new RequestCache.RequestCacheEntry();
+			entry.modules = new HashSet(Arrays.asList(containedModules));
+			entry.prefix = pattern;
+			Collection values = keys.values();
+			entry.keys = new HashSet();
+			for (Iterator iterator = values.iterator(); iterator.hasNext();) {
+				Set vals = (Set) iterator.next();
+				entry.keys.addAll(vals);
+			}
+			this.requestCache.put(pattern, entry);
+		}
 
-		if (modules.size() == 0) {
+		if (entry.modules == null || entry.modules.size() == 0) {
 			return new IMixinElement[0];
 		}
 
-		// long start = System.currentTimeMillis();
-		// for (int i = 0; i < containedModules.length; ++i) {
-		for (Iterator iterator = modules.iterator(); iterator.hasNext();) {
+		for (Iterator iterator = entry.modules.iterator(); iterator.hasNext();) {
 			ISourceModule module = (ISourceModule) iterator.next();
 			reportModule(module);
-			// if (delta != -1) {
-			// // if (System.currentTimeMillis() - start > delta) {
-			// // System.out.println("Mixin timeout break:"
-			// // + Long.toString(System.currentTimeMillis() - start)
-			// // + ":"
-			// // + Integer.toString(containedModules.length - i));
-			// // break;
-			// // }
-			// }
 		}
 
 		Set result = new HashSet();
 
 		// int i = 0;
-		for (Iterator iterator = set.keySet().iterator(); iterator.hasNext();) {
-			ISourceModule module = (ISourceModule) iterator.next();
-			if (this.elementToMixinCache.containsKey(module)) {
-				Set keys = (Set) set.get(module);
-				for (Iterator iterator2 = keys.iterator(); iterator2.hasNext();) {
-					String key = (String) iterator2.next();
-					MixinElement element = getCreateEmpty(key);
-					markElementAsFinal(element);
-					result.add(element);
-					existKeysCache.add(key);
-					notExistKeysCache.remove(key);
-				}
-			}
+		for (Iterator iterator = entry.keys.iterator(); iterator.hasNext();) {
+			String key = (String) iterator.next();
+			MixinElement element = getCreateEmpty(key);
+			markElementAsFinal(element);
+			result.add(element);
+			existKeysCache.add(key);
+			notExistKeysCache.remove(key);
 		}
 
 		return (IMixinElement[]) result
@@ -473,6 +499,8 @@ public class MixinModel {
 			log("remove " + element.getElementName()); //$NON-NLS-1$
 		}
 		if (this.elementToMixinCache.containsKey(element)) {
+			removeFromRequestCache(element);
+
 			List elements = (List) this.elementToMixinCache.get(element);
 			for (int i = 0; i < elements.size(); ++i) {
 				removes++;
@@ -500,6 +528,25 @@ public class MixinModel {
 				}
 			}
 			this.elementToMixinCache.remove(element);
+		}
+	}
+
+	private void removeFromRequestCache(ISourceModule element) {
+		// Clear requests cache.
+		List keysToRemove = new ArrayList();
+		Enumeration enumeration = this.requestCache.elements();
+		while (enumeration.hasMoreElements()) {
+			RequestCache.RequestCacheEntry entry = (org.eclipse.dltk.core.mixin.MixinModel.RequestCache.RequestCacheEntry) enumeration
+					.nextElement();
+			if (entry.modules != null) {
+				if (entry.modules.contains(element)) {
+					keysToRemove.add(entry.prefix);
+				}
+			}
+		}
+		for (Iterator iterator = keysToRemove.iterator(); iterator.hasNext();) {
+			String key = (String) iterator.next();
+			this.requestCache.remove(key);
 		}
 	}
 
