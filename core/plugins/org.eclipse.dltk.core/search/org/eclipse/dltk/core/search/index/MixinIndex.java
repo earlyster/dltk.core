@@ -64,7 +64,8 @@ public class MixinIndex extends Index {
 		// + containerRelativePath);
 		// }
 		Assert.isTrue(CharOperation.equals(category, IIndexConstants.MIXIN));
-		addIndexEntry(key, containerRelativePath);
+		addIndexEntry(key, (String) documentNames
+				.addIntern(containerRelativePath));
 	}
 
 	/**
