@@ -198,4 +198,10 @@ public class SourceCodeCache implements ISourceCodeCache {
 	public void endOperation() {
 		// NOP
 	}
+
+	public void clear() {
+		synchronized (resourceMap) {
+			resourceMap.clear();
+		}
+	}
 }

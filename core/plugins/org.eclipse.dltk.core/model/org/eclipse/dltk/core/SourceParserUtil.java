@@ -18,6 +18,8 @@ public class SourceParserUtil {
 		void run(ISourceModule module, char[] content);
 	}
 
+	private static boolean useASTCaching;
+
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module) {
 		return getModuleDeclaration(module, null,
 				ISourceParserConstants.DEFAULT, null);
@@ -78,7 +80,7 @@ public class SourceParserUtil {
 		ModuleDeclaration moduleDeclaration = null;
 		final String errorKey;
 		final String astKey;
-		if (mifo != null) {
+		if (mifo != null && useASTCaching) {
 			errorKey = getKey(ERRORS, flags);
 			astKey = getKey(AST, flags);
 			moduleDeclaration = (ModuleDeclaration) mifo.get(astKey);
@@ -122,7 +124,7 @@ public class SourceParserUtil {
 						DLTKCore.error(msg, e);
 					}
 				}
-				if (moduleDeclaration != null && mifo != null) {
+				if (moduleDeclaration != null && mifo != null && useASTCaching) {
 					mifo.put(astKey, moduleDeclaration);
 					if (collector != null && !collector.isEmpty()) {
 						mifo.put(errorKey, collector);
@@ -224,5 +226,21 @@ public class SourceParserUtil {
 				DLTKCore.error(msg, ex);
 			}
 		}
+	}
+
+	/**
+	 * Perfomance testing only
+	 */
+	public static void disableCache() {
+		useASTCaching = false;
+	}
+
+	public static void enableCache() {
+		useASTCaching = true;
+	}
+
+	public static void clearCache() {
+		ModelManager.getModelManager().getSourceModuleInfoCache().clear();
+		ModelManager.getModelManager().getSourceCodeCache().clear();
 	}
 }

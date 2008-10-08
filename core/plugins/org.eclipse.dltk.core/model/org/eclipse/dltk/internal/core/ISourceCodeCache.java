@@ -71,4 +71,6 @@ public interface ISourceCodeCache {
 	 * Restores caching mode back to the standard mode.
 	 */
 	void endOperation();
+
+	void clear();
 }
