@@ -136,9 +136,9 @@ public class MixinIndex extends Index {
 			if (Index.isMatch(key, nextKey, matchRule)) {
 				final EntryResult s = new EntryResult(nextKey, null);
 				results.add(s);
-				final SimpleSet docs = (SimpleSet) keyToDocs.valueTable[i];
-				for (int j = 0; j < docs.values.length; j++) {
-					final String doc = (String) docs.values[j];
+				final Object[] docTable = ((SimpleSet) keyToDocs.valueTable[i]).values;
+				for (int j = 0, docLen = docTable.length; j < docLen; j++) {
+					final String doc = (String) docTable[j];
 					if (doc != null) {
 						s.addDocumentName(doc);
 					}
