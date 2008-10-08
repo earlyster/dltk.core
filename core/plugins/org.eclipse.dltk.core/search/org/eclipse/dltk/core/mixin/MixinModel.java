@@ -868,6 +868,7 @@ public class MixinModel {
 		existKeysCache.clear();
 		notExistKeysCache.clear();
 		modulesToReparse.clear();
+		requestCache.flush();
 	}
 
 	public String getNature() {
