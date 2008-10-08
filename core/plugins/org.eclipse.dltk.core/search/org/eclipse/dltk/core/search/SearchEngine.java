@@ -943,6 +943,8 @@ public class SearchEngine {
 	public static ISourceModule[] searchMixinSources(
 			final IDLTKSearchScope scope, String key,
 			IDLTKLanguageToolkit toolkit, final Map keys) {
+		final long startTime = DLTKCore.VERBOSE_MIXIN ? System
+				.currentTimeMillis() : 0;
 		// Index requestor
 		final HandleFactory factory = new HandleFactory();
 		final List modules = new ArrayList();
@@ -994,9 +996,10 @@ public class SearchEngine {
 				scope, searchRequestor),
 				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
 		if (DLTKCore.VERBOSE_MIXIN) {
-			final String msg = "mixin search for \"{0}\": {1} results";//$NON-NLS-1$
-			System.out.println(NLS.bind(msg, key, String
-					.valueOf(modules.size())));
+			final String msg = "mixin search for \"{0}\": {1} results in {2} ms";//$NON-NLS-1$
+			System.out.println(NLS.bind(msg, new Object[] { key,
+					String.valueOf(modules.size()),
+					Long.toString(System.currentTimeMillis() - startTime) }));
 		}
 		return (ISourceModule[]) modules.toArray(new ISourceModule[modules
 				.size()]);
