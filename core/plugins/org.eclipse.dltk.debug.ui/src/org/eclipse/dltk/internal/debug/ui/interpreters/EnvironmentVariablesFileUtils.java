@@ -13,13 +13,13 @@ package org.eclipse.dltk.internal.debug.ui.interpreters;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.launching.EnvironmentVariable;
+import org.eclipse.osgi.util.NLS;
 
 public class EnvironmentVariablesFileUtils {
 
@@ -37,8 +38,8 @@ public class EnvironmentVariablesFileUtils {
 			writer = new OutputStreamWriter(new BufferedOutputStream(
 					new FileOutputStream(new File(file)), 4096));
 			for (int i = 0; i < variables.length; i++) {
-				writer.write(variables[i].getName() + " "
-						+ variables[i].getValue() + "\n");
+				writer.write(variables[i].getName() + " " //$NON-NLS-1$
+						+ variables[i].getValue() + "\n"); //$NON-NLS-1$
 			}
 		} catch (FileNotFoundException e) {
 			if (DLTKCore.DEBUG) {
@@ -64,13 +65,12 @@ public class EnvironmentVariablesFileUtils {
 	}
 
 	public static EnvironmentVariable[] load(String file) throws Exception {
-		BufferedReader reader = null;
+		LineNumberReader reader = null;
 		List results = new ArrayList();
 		try {
-			reader = new BufferedReader(
+			reader = new LineNumberReader(
 					new InputStreamReader(new BufferedInputStream(
 							new FileInputStream(new File(file)))));
-			int ln = 1;
 			while (true) {
 				String line = reader.readLine();
 				if (line == null) {
@@ -80,18 +80,19 @@ public class EnvironmentVariablesFileUtils {
 				if (line.length() > 0) {
 					int pos = line.indexOf(' ');
 					if (pos == -1) {
-						throw new Exception("Incorrect file format at line:"
-								+ ln);
+						final String template = Messages.EnvironmentVariablesFileUtils_incorrectFormat;
+						throw new Exception(NLS.bind(template, Integer
+								.toString(reader.getLineNumber())));
 					}
 					String varName = line.substring(0, pos).trim();
 					if (varName.length() == 0) {
-						throw new Exception("Incorrect file format at line:"
-								+ ln);
+						final String template = Messages.EnvironmentVariablesFileUtils_incorrectFormat;
+						throw new Exception(NLS.bind(template, Integer
+								.toString(reader.getLineNumber())));
 					}
 					String value = line.substring(pos + 1).trim();
 					results.add(new EnvironmentVariable(varName, value));
 				}// else skip line
-				ln++;
 			}
 			if (results.size() > 0) {
 				return (EnvironmentVariable[]) results
@@ -106,7 +107,7 @@ public class EnvironmentVariablesFileUtils {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
-			throw new Exception("IOError:" + e.getMessage());
+			throw new Exception("IOError:" + e.getMessage()); //$NON-NLS-1$
 		} finally {
 			if (reader != null) {
 				try {
