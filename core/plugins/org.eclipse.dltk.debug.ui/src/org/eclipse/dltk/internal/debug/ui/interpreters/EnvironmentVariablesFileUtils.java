@@ -38,7 +38,7 @@ public class EnvironmentVariablesFileUtils {
 			writer = new OutputStreamWriter(new BufferedOutputStream(
 					new FileOutputStream(new File(file)), 4096));
 			for (int i = 0; i < variables.length; i++) {
-				writer.write(variables[i].getName() + " " //$NON-NLS-1$
+				writer.write(variables[i].getName() + "=" //$NON-NLS-1$
 						+ variables[i].getValue() + "\n"); //$NON-NLS-1$
 			}
 		} catch (FileNotFoundException e) {
@@ -78,7 +78,7 @@ public class EnvironmentVariablesFileUtils {
 				}
 				// line = line.trim();
 				if (line.length() > 0) {
-					int pos = line.indexOf(' ');
+					int pos = line.indexOf('=');
 					if (pos == -1) {
 						final String template = Messages.EnvironmentVariablesFileUtils_incorrectFormat;
 						throw new Exception(NLS.bind(template, Integer
