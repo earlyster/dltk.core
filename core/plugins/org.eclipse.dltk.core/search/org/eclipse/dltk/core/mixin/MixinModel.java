@@ -155,12 +155,13 @@ public class MixinModel {
 		}
 	}
 
+	private static class RequestCacheEntry {
+		String prefix = null;
+		Set modules = null;
+		Set keys = null;
+	}
+
 	private static class RequestCache extends OverflowingLRUCache {
-		private static class RequestCacheEntry {
-			String prefix = null;
-			Set modules = null;
-			Set keys = null;
-		}
 
 		public RequestCache(int size) {
 			super(size);
@@ -179,12 +180,12 @@ public class MixinModel {
 		}
 	};
 
-	RequestCache requestCache = new RequestCache(500);
+	private final RequestCache requestCache = new RequestCache(500);
 
 	public IMixinElement[] find(String pattern, long delta) {
 		long start = TRACE ? System.currentTimeMillis() : 0;
 
-		RequestCache.RequestCacheEntry entry = findFromMixin(pattern);
+		RequestCacheEntry entry = findFromMixin(pattern);
 
 		if (entry.modules == null || entry.modules.size() == 0) {
 			return new IMixinElement[0];
@@ -220,15 +221,14 @@ public class MixinModel {
 				.toArray(new IMixinElement[result.size()]);
 	}
 
-	private RequestCache.RequestCacheEntry findFromMixin(String pattern) {
-		RequestCache.RequestCacheEntry entry = (org.eclipse.dltk.core.mixin.MixinModel.RequestCache.RequestCacheEntry) requestCache
-				.get(pattern);
+	private RequestCacheEntry findFromMixin(String pattern) {
+		RequestCacheEntry entry = (RequestCacheEntry) requestCache.get(pattern);
 		// Set modules = new HashSet();
 		if (entry == null) {
 			Map keys = new HashMap();
 			ISourceModule[] containedModules = SearchEngine.searchMixinSources(
 					createSearchScope(), pattern, toolkit, keys);
-			entry = new RequestCache.RequestCacheEntry();
+			entry = new RequestCacheEntry();
 			entry.modules = new HashSet(Arrays.asList(containedModules));
 			entry.prefix = pattern;
 			Collection values = keys.values();
@@ -247,7 +247,7 @@ public class MixinModel {
 	}
 
 	public String[] findKeys(String pattern) {
-		RequestCache.RequestCacheEntry entry = findFromMixin(pattern);
+		RequestCacheEntry entry = findFromMixin(pattern);
 		return (String[]) entry.keys.toArray(new String[entry.keys.size()]);
 	}
 
@@ -346,7 +346,7 @@ public class MixinModel {
 	 * @return
 	 */
 	public ISourceModule[] findModules(String key) {
-		RequestCache.RequestCacheEntry entry = findFromMixin(key);
+		RequestCacheEntry entry = findFromMixin(key);
 		return (ISourceModule[]) entry.modules
 				.toArray(new ISourceModule[entry.modules.size()]);
 	}
@@ -545,7 +545,7 @@ public class MixinModel {
 		List keysToRemove = new ArrayList();
 		Enumeration enumeration = this.requestCache.elements();
 		while (enumeration.hasMoreElements()) {
-			RequestCache.RequestCacheEntry entry = (org.eclipse.dltk.core.mixin.MixinModel.RequestCache.RequestCacheEntry) enumeration
+			RequestCacheEntry entry = (RequestCacheEntry) enumeration
 					.nextElement();
 			if (entry.modules != null) {
 				if (entry.modules.contains(element)) {
