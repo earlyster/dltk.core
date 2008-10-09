@@ -411,6 +411,7 @@ public class MixinModel {
 					}
 				}
 				MixinModel.this.notExistKeysCache.clear();
+				requestCache.flush();
 			}
 
 			if ((delta.getFlags() & IModelElementDelta.F_CHILDREN) != 0) {
