@@ -49,6 +49,7 @@ import org.eclipse.dltk.internal.core.util.LRUCache;
 
 public class MixinModel {
 	private static final boolean DEBUG = false;
+	private static final boolean TRACE = false;
 
 	public static final String SEPARATOR = String
 			.valueOf(IIndexConstants.SEPARATOR);
@@ -181,8 +182,45 @@ public class MixinModel {
 	RequestCache requestCache = new RequestCache(500);
 
 	public IMixinElement[] find(String pattern, long delta) {
-		// Set set = new HashSet();
+		long start = TRACE ? System.currentTimeMillis() : 0;
 
+		RequestCache.RequestCacheEntry entry = findFromMixin(pattern);
+
+		if (entry.modules == null || entry.modules.size() == 0) {
+			return new IMixinElement[0];
+		}
+
+		long parses = TRACE ? System.currentTimeMillis() : 0;
+		for (Iterator iterator = entry.modules.iterator(); iterator.hasNext();) {
+			ISourceModule module = (ISourceModule) iterator.next();
+			reportModule(module);
+		}
+		long parsee = TRACE ? System.currentTimeMillis() : 0;
+
+		Set result = new HashSet();
+
+		// int i = 0;
+		for (Iterator iterator = entry.keys.iterator(); iterator.hasNext();) {
+			String key = (String) iterator.next();
+			MixinElement element = getCreateEmpty(key);
+			markElementAsFinal(element);
+			result.add(element);
+			existKeysCache.add(key);
+			notExistKeysCache.remove(key);
+		}
+		if (TRACE) {
+			long end = System.currentTimeMillis();
+			System.out.println("MixinModel::find.time:"
+					+ String.valueOf(end - start));
+			System.out.println("MixinModel::find.parsetime:"
+					+ String.valueOf(parsee - parses));
+		}
+
+		return (IMixinElement[]) result
+				.toArray(new IMixinElement[result.size()]);
+	}
+
+	private RequestCache.RequestCacheEntry findFromMixin(String pattern) {
 		RequestCache.RequestCacheEntry entry = (org.eclipse.dltk.core.mixin.MixinModel.RequestCache.RequestCacheEntry) requestCache
 				.get(pattern);
 		// Set modules = new HashSet();
@@ -201,30 +239,7 @@ public class MixinModel {
 			}
 			this.requestCache.put(pattern, entry);
 		}
-
-		if (entry.modules == null || entry.modules.size() == 0) {
-			return new IMixinElement[0];
-		}
-
-		for (Iterator iterator = entry.modules.iterator(); iterator.hasNext();) {
-			ISourceModule module = (ISourceModule) iterator.next();
-			reportModule(module);
-		}
-
-		Set result = new HashSet();
-
-		// int i = 0;
-		for (Iterator iterator = entry.keys.iterator(); iterator.hasNext();) {
-			String key = (String) iterator.next();
-			MixinElement element = getCreateEmpty(key);
-			markElementAsFinal(element);
-			result.add(element);
-			existKeysCache.add(key);
-			notExistKeysCache.remove(key);
-		}
-
-		return (IMixinElement[]) result
-				.toArray(new IMixinElement[result.size()]);
+		return entry;
 	}
 
 	public IMixinElement[] find(String pattern) {
@@ -232,8 +247,8 @@ public class MixinModel {
 	}
 
 	public String[] findKeys(String pattern) {
-		return SearchEngine.searchMixinPatterns(createSearchScope(), pattern,
-				toolkit);
+		RequestCache.RequestCacheEntry entry = findFromMixin(pattern);
+		return (String[]) entry.keys.toArray(new String[entry.keys.size()]);
 	}
 
 	private Set existKeysCache = new HashSet();
@@ -300,10 +315,6 @@ public class MixinModel {
 	}
 
 	public synchronized void reportModule(ISourceModule sourceModule) {
-		// if (DLTKCore.VERBOSE) {
-		// System.out.println("Filling ratio:" + this.cache.fillingRatio());
-		// this.cache.printStats();
-		// }
 		if (!this.elementToMixinCache.containsKey(sourceModule)) {
 			this.elementToMixinCache.put(sourceModule, new ArrayList());
 		} else { // Module already in model. So we do not to rebuild it.
@@ -318,8 +329,6 @@ public class MixinModel {
 			if (mixinParser != null) {
 				this.currentModule = sourceModule;
 				mixinParser.setRequirestor(mixinRequestor);
-				// System.out.println("Mixins: reporting " +
-				// sourceModule.getPath());
 				mixinParser.parserSourceModule(true, sourceModule);
 				this.currentModule = null;
 			}
@@ -337,9 +346,9 @@ public class MixinModel {
 	 * @return
 	 */
 	public ISourceModule[] findModules(String key) {
-		ISourceModule[] searchMixinSources = SearchEngine.searchMixinSources(
-				createSearchScope(), key, toolkit);
-		return searchMixinSources;
+		RequestCache.RequestCacheEntry entry = findFromMixin(key);
+		return (ISourceModule[]) entry.modules
+				.toArray(new ISourceModule[entry.modules.size()]);
 	}
 
 	/**
