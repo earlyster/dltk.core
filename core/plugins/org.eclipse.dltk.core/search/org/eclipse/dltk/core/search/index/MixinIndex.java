@@ -64,8 +64,7 @@ public class MixinIndex extends Index {
 		// + containerRelativePath);
 		// }
 		Assert.isTrue(CharOperation.equals(category, IIndexConstants.MIXIN));
-		addIndexEntry(key, (String) documentNames
-				.addIntern(containerRelativePath));
+		addIndexEntry(key, internDocName(containerRelativePath));
 	}
 
 	/**
@@ -77,7 +76,7 @@ public class MixinIndex extends Index {
 	 * @param containerRelativePath
 	 */
 	public void addDocumentName(String containerRelativePath) {
-		documentNames.addIntern(containerRelativePath);
+		internDocName(containerRelativePath);
 	}
 
 	private void addIndexEntry(char[] key, String containerRelativePath) {
@@ -299,23 +298,20 @@ public class MixinIndex extends Index {
 			final char[] key = Util.readUTF(stream);
 			final int docCount = stream.readInt();
 			for (int j = 0; j < docCount; j++) {
-				String docName = new String(Util.readUTF(stream));
-				docName = (String) documentNames.addIntern(docName);
+				String docName = internDocName(new String(Util.readUTF(stream)));
 				addIndexEntry(key, docName);
 			}
 		}
 		final int docCount = stream.readInt();
 		for (int i = 0; i < docCount; ++i) {
-			String docName = new String(Util.readUTF(stream));
-			documentNames.addIntern(docName);
+			internDocName(new String(Util.readUTF(stream)));
 		}
 	}
 
 	private void loadDocToKeyFormat(DataInputStream stream) throws IOException {
 		int documentsCount = stream.readInt();
 		for (int i = 0; i < documentsCount; i++) {
-			String docName = new String(Util.readUTF(stream));
-			docName = (String) documentNames.addIntern(docName);
+			String docName = internDocName(new String(Util.readUTF(stream)));
 			int wordsCount = stream.readInt();
 			if (wordsCount > 0) {
 				for (int j = 0; j < wordsCount; j++) {
@@ -324,6 +320,10 @@ public class MixinIndex extends Index {
 				}
 			}
 		}
+	}
+
+	private final String internDocName(String docName) {
+		return (String) documentNames.addIntern(docName);
 	}
 
 	public void startQuery() {
