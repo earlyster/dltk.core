@@ -583,7 +583,9 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 			}
 		});
 
-		clear();
+		if (console.getDocumentListener().viewerList.size() == 1) {
+			clear();
+		}
 	}
 
 	// IConsoleTextViewer
