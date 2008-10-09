@@ -365,9 +365,9 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 	}
 
-	private class ScriptCnosoleStyledText extends StyledText {
+	private class ScriptConsoleStyledText extends StyledText {
 
-		public ScriptCnosoleStyledText(Composite parent, int style) {
+		public ScriptConsoleStyledText(Composite parent, int style) {
 			super(parent, (style | SWT.WRAP));
 		}
 
@@ -483,7 +483,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 	}
 
 	protected StyledText createTextWidget(Composite parent, int styles) {
-		return new ScriptCnosoleStyledText(parent, styles);
+		return new ScriptConsoleStyledText(parent, styles);
 	}
 
 	public ScriptConsoleViewer(Composite parent, final ScriptConsole console,
