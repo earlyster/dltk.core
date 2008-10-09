@@ -203,8 +203,8 @@ public class MixinModel {
 		// int i = 0;
 		for (Iterator iterator = entry.keys.iterator(); iterator.hasNext();) {
 			MixinElement element = getCreateEmpty((String) iterator.next());
-			addKeyToSet(result, element);
 			markElementAsFinal(element);
+			addKeyToSet(result, element);
 		}
 		if (TRACE) {
 			long end = System.currentTimeMillis();
@@ -222,7 +222,8 @@ public class MixinModel {
 		result.add(element);
 		existKeysCache.add(element.key);
 		notExistKeysCache.remove(element.key);
-		IMixinElement[] children = element.getChildren();
+		IMixinElement[] children = (IMixinElement[]) element.children
+				.toArray(new IMixinElement[element.children.size()]);
 		for (int i = 0; i < children.length; i++) {
 			addKeyToSet(result, (MixinElement) children[i]);
 		}
