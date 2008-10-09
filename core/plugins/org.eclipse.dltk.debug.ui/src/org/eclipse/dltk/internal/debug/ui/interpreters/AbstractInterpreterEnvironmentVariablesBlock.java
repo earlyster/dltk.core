@@ -9,11 +9,15 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
+import java.io.File;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.eclipse.core.runtime.IStatus;
@@ -48,6 +52,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
@@ -85,6 +90,8 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	private Button fAddExistedButton;
 	private Button fAddButton;
 	private Button fEditButton;
+	private Button fImportButton;
+	private Button fExportButton;
 
 	protected AddScriptInterpreterDialog fDialog;
 
@@ -150,17 +157,11 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 				InterpretersMessages.InterpreterLibraryBlock_6);
 		fRemoveButton.addSelectionListener(this);
 
-		// fUpButton = createPushButton(pathButtonComp,
-		// InterpretersMessages.InterpreterLibraryBlock_4);
-		// fUpButton.addSelectionListener(this);
-		//
-		// fDownButton = createPushButton(pathButtonComp,
-		// InterpretersMessages.InterpreterLibraryBlock_5);
-		// fDownButton.addSelectionListener(this);
-		//
-		// fDefaultButton = createPushButton(pathButtonComp,
-		// InterpretersMessages.InterpreterLibraryBlock_9);
-		// fDefaultButton.addSelectionListener(this);
+		fImportButton = createPushButton(pathButtonComp, "Import...");
+		fImportButton.addSelectionListener(this);
+
+		fExportButton = createPushButton(pathButtonComp, "Export...");
+		fExportButton.addSelectionListener(this);
 
 		return comp;
 	}
@@ -282,7 +283,9 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+	 * @see
+	 * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt
+	 * .events.SelectionEvent)
 	 */
 	public void widgetSelected(SelectionEvent e) {
 		Object source = e.getSource();
@@ -309,11 +312,65 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 			edit((IStructuredSelection) fVariablesViewer.getSelection());
 			fDialog.updateLibraries(this.fEnvironmentVariablesContentProvider
 					.getVariables(), old);
+		} else if (source == fImportButton) {
+			performImport();
+		} else if (source == fExportButton) {
+			performExport();
 		}
-		/*
-		 * else if (source == fDefaultButton) { restoreDefaultVariables(); }
-		 */
 		update();
+	}
+
+	private void performExport() {
+		FileDialog dialog = new FileDialog(this.fDialog.getShell(), SWT.SAVE);
+		dialog.setText("Export environment variables to file");
+		String file = dialog.open();
+		if (file != null) {
+			EnvironmentVariable[] variables = this.fEnvironmentVariablesContentProvider
+					.getVariables();
+			try {
+				EnvironmentVariablesFileUtils.save(variables, file);
+			} catch (Exception e) {
+				// String text = "Failed to save environment variables";
+				showErrorMessage("Environment export", e.getMessage());
+			}
+		}
+	}
+
+	private void showErrorMessage(String title, String text) {
+		MessageBox box = new MessageBox(this.fDialog.getShell(), SWT.ERROR);
+		box.setText(title);
+		box.setMessage(text);
+		box.open();
+	}
+
+	private void performImport() {
+		FileDialog dialog = new FileDialog(this.fDialog.getShell(), SWT.OPEN);
+		dialog.setText("Export environment variables to file");
+		String file = dialog.open();
+		if (file != null) {
+			File handle = new File(file);
+			if (!handle.exists()) {
+				String text = "Selected file not exists.";
+				showErrorMessage("Environment import", text);
+				return;
+			}
+			EnvironmentVariable[] vars = null;
+			try {
+				vars = EnvironmentVariablesFileUtils.load(file);
+			} catch (Exception e) {
+				showErrorMessage("Environment import", e.getMessage());
+			}
+			if (vars != null) {
+				EnvironmentVariable[] variables = this.fEnvironmentVariablesContentProvider
+						.getVariables();
+				Set nvars = new HashSet();
+				nvars.addAll(Arrays.asList(vars));
+				nvars.addAll(Arrays.asList(variables));
+				this.fEnvironmentVariablesContentProvider
+						.setVariables((EnvironmentVariable[]) nvars
+								.toArray(new EnvironmentVariable[nvars.size()]));
+			}
+		}
 	}
 
 	private void edit(IStructuredSelection selection) {
@@ -348,7 +405,9 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+	 * @see
+	 * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse
+	 * .swt.events.SelectionEvent)
 	 */
 	public void widgetDefaultSelected(SelectionEvent e) {
 	}
@@ -402,7 +461,9 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
+	 * @see
+	 * org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(
+	 * org.eclipse.jface.viewers.SelectionChangedEvent)
 	 */
 	public void selectionChanged(SelectionChangedEvent event) {
 		updateButtons();
