@@ -202,12 +202,9 @@ public class MixinModel {
 
 		// int i = 0;
 		for (Iterator iterator = entry.keys.iterator(); iterator.hasNext();) {
-			String key = (String) iterator.next();
-			MixinElement element = getCreateEmpty(key);
+			MixinElement element = getCreateEmpty((String) iterator.next());
+			addKeyToSet(result, element);
 			markElementAsFinal(element);
-			result.add(element);
-			existKeysCache.add(key);
-			notExistKeysCache.remove(key);
 		}
 		if (TRACE) {
 			long end = System.currentTimeMillis();
@@ -219,6 +216,16 @@ public class MixinModel {
 
 		return (IMixinElement[]) result
 				.toArray(new IMixinElement[result.size()]);
+	}
+
+	private void addKeyToSet(Set result, MixinElement element) {
+		result.add(element);
+		existKeysCache.add(element.key);
+		notExistKeysCache.remove(element.key);
+		IMixinElement[] children = element.getChildren();
+		for (int i = 0; i < children.length; i++) {
+			addKeyToSet(result, (MixinElement) children[i]);
+		}
 	}
 
 	private RequestCacheEntry findFromMixin(String pattern) {
