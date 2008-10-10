@@ -43,6 +43,10 @@ public class ScriptFormatterManager extends DLTKContributionExtensionManager {
 				&& ((IScriptFormatterFactory) object).isValid();
 	}
 
+	public static boolean hasFormatterFor(final String natureId) {
+		return getInstance().hasContributions(natureId);
+	}
+
 	public static IScriptFormatterFactory getSelected(IScriptProject project) {
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(project);
