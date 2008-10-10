@@ -18,6 +18,7 @@ import org.eclipse.dltk.core.tests.compiler.CompilerUtilTests;
 import org.eclipse.dltk.core.tests.ddp.CoreDDPTests;
 import org.eclipse.dltk.core.tests.launching.EnvironmentResolverTests;
 import org.eclipse.dltk.core.tests.launching.InterpreterConfigTests;
+import org.eclipse.dltk.core.tests.mixin.MixinIndexTests;
 import org.eclipse.dltk.core.tests.model.BufferTests;
 import org.eclipse.dltk.core.tests.model.ModelMembersTests;
 import org.eclipse.dltk.core.tests.model.WorkingCopyTests;
@@ -35,6 +36,7 @@ public class AllTests {
 		suite.addTest(new TestSuite(CompilerUtilTests.class));
 		suite.addTest(new TestSuite(CompilerCharOperationTests.class));
 		suite.addTest(new TestSuite(InternalCoreUtilTest.class));
+		suite.addTest(new TestSuite(MixinIndexTests.class));
 		suite.addTest(BuildpathTests.suite());
 
 		suite.addTest(CoreDDPTests.suite());
