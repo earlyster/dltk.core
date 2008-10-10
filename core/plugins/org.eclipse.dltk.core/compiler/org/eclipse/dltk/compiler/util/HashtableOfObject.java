@@ -146,14 +146,8 @@ public final class HashtableOfObject implements Cloneable {
 		this.threshold = newHashtable.threshold;
 	}
 
-	public int size() {
-		int result = 0;
-		for (int i = 0; i < elementSize; ++i) {
-			if (keyTable[i] != null) {
-				++result;
-			}
-		}
-		return result;
+	public final int size() {
+		return elementSize;
 	}
 
 	public String toString() {

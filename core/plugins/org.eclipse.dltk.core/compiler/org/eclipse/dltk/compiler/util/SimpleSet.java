@@ -182,7 +182,7 @@ public final class SimpleSet implements Cloneable {
 	 * @param documentNames
 	 */
 	public void addAll(SimpleSet set) {
-		for (int i = 0; i < set.elementSize; ++i) {
+		for (int i = 0, len = set.values.length; i < len; ++i) {
 			final Object obj = set.values[i];
 			if (obj != null) {
 				addIntern(obj);
@@ -195,13 +195,7 @@ public final class SimpleSet implements Cloneable {
 	 * 
 	 * @return
 	 */
-	public int size() {
-		int result = 0;
-		for (int i = 0; i < elementSize; ++i) {
-			if (values[i] != null) {
-				++result;
-			}
-		}
-		return result;
+	public final int size() {
+		return elementSize;
 	}
 }
