@@ -1045,7 +1045,7 @@ public class BasicSearchEngine {
 								typeMatchRule, kind, /* packageDeclaration, */
 								simpleName)) {
 							nameRequestor.acceptType(type.getFlags(),
-									new char[0], /* packageDeclaration, */
+									CharOperation.NO_CHAR, /* packageDeclaration, */
 									simpleName, enclosingTypeNames, path, null);
 						}
 					}
