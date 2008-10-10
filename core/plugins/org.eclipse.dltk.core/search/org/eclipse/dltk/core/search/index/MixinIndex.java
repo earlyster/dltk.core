@@ -246,7 +246,7 @@ public class MixinIndex extends Index {
 					monitor.enterRead();
 					DataInputStream stream = new DataInputStream(
 							new BufferedInputStream(new FileInputStream(
-									indexFile), 2048));
+									indexFile), 8192));
 					try {
 						final char[] header = Util.readUTF(stream);
 						if (CharOperation.equals(OLD_HEADER, header)) {
