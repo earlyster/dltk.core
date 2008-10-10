@@ -58,12 +58,11 @@ public class MixinIndex extends Index {
 	public void addIndexEntry(char[] category, char[] key,
 			String containerRelativePath) {
 		this.dirty = true;
-		// if (DLTKCore.DEBUG_INDEX) {
-		// System.out.println("DEBUG INDEX: Add Index Entry:"
-		// + new String(category) + " " + new String(key) + " path:"
-		// + containerRelativePath);
-		// }
 		Assert.isTrue(CharOperation.equals(category, IIndexConstants.MIXIN));
+		if (false) {
+			System.out.println("MIXIN: addIndexEntry '" + new String(key) //$NON-NLS-1$
+					+ "' path '" + containerRelativePath + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		addIndexEntry(key, internDocName(containerRelativePath));
 	}
 
@@ -219,8 +218,7 @@ public class MixinIndex extends Index {
 			}
 		}
 		stream.writeInt(allDocuments.size());
-		int docTableSize = allDocuments.elementSize;
-		for (int i = 0; i < docTableSize; ++i) {
+		for (int i = 0, docTableLen = allDocuments.values.length; i < docTableLen; ++i) {
 			String docName = (String) allDocuments.values[i];
 			if (docName != null) {
 				Util.writeUTF(stream, docName.toCharArray());
