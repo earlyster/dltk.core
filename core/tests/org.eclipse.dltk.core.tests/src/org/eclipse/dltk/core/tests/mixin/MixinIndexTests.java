@@ -93,11 +93,23 @@ public class MixinIndexTests extends TestCase {
 
 	public void testDocumentsWithoutKeys() throws IOException {
 		index.addDocumentName("A");
+		assertTrue(index.hasChanged());
 		index.save();
 		index = createIndex(false);
 		String[] docNames = index.queryDocumentNames(null);
 		assertEquals(1, docNames.length);
 		assertEquals("A", docNames[0]);
+	}
+
+	public void testDocumentsWithoutKeysHasChanged() throws IOException {
+		index.addDocumentName("A");
+		assertTrue(index.hasChanged());
+		index.save();
+		assertFalse(index.hasChanged());
+		index.addDocumentName("A");
+		assertFalse(index.hasChanged());
+		index.addDocumentName("B");
+		assertTrue(index.hasChanged());
 	}
 
 }
