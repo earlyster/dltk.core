@@ -75,7 +75,11 @@ public class MixinIndex extends Index {
 	 * @param containerRelativePath
 	 */
 	public void addDocumentName(String containerRelativePath) {
+		final int savedCount = documentNames.elementSize;
 		internDocName(containerRelativePath);
+		if (documentNames.elementSize > savedCount) {
+			dirty = true;
+		}
 	}
 
 	private void addIndexEntry(char[] key, String containerRelativePath) {
