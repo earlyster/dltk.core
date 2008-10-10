@@ -376,7 +376,7 @@ public abstract class ScriptSourceViewerConfiguration extends
 
 	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
 		final String natureId = getNatureId();
-		if (ScriptFormatterManager.getInstance().getContributions(natureId).length != 0) {
+		if (ScriptFormatterManager.hasFormatterFor(natureId)) {
 			final MultiPassContentFormatter formatter = new MultiPassContentFormatter(
 					getConfiguredDocumentPartitioning(sourceViewer),
 					IDocument.DEFAULT_CONTENT_TYPE);
