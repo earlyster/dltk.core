@@ -66,4 +66,9 @@ public interface IProjectIndexer {
 	 */
 	void reconciled(ISourceModule workingCopy, IDLTKLanguageToolkit toolkit);
 
+	/**
+	 * Is called just after initialization to verify the indexes
+	 */
+	void startIndexing();
+
 }

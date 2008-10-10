@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.mixin;
 
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
@@ -41,7 +43,8 @@ public class MixinProjectIndexer implements IProjectIndexer {
 	}
 
 	public void indexProject(IScriptProject project) {
-		final MixinProjectRequest request = new MixinProjectRequest(project);
+		final MixinProjectRequest request = new MixinProjectRequest(project,
+				true);
 		requestIfNotWaiting(request);
 	}
 
@@ -67,7 +70,7 @@ public class MixinProjectIndexer implements IProjectIndexer {
 
 	public void indexProjectFragment(IScriptProject project, IPath path) {
 		// TODO optimize
-		requestIfNotWaiting(new MixinProjectRequest(project));
+		requestIfNotWaiting(new MixinProjectRequest(project, false));
 	}
 
 	public void indexSourceModule(ISourceModule module,
@@ -82,7 +85,7 @@ public class MixinProjectIndexer implements IProjectIndexer {
 
 	public void removeProjectFragment(IScriptProject project, IPath sourceFolder) {
 		// TODO optimize
-		requestIfNotWaiting(new MixinProjectRequest(project));
+		requestIfNotWaiting(new MixinProjectRequest(project, false));
 	}
 
 	public void removeSourceModule(IScriptProject project, String path) {
@@ -97,6 +100,23 @@ public class MixinProjectIndexer implements IProjectIndexer {
 	public void removeLibrary(IScriptProject project, IPath path) {
 		requestIfNotWaiting(new RemoveIndexRequest(new Path(
 				IndexManager.SPECIAL_MIXIN + path.toString())));
+	}
+
+	public void startIndexing() {
+		final IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		try {
+			IScriptProject[] projects = DLTKCore.create(workspace.getRoot())
+					.getScriptProjects();
+			for (int i = 0; i < projects.length; ++i) {
+				requestIfNotWaiting(new MixinProjectRequest(projects[i], false));
+			}
+		} catch (Exception e) {
+			DLTKCore.error(Messages.MixinIndexer_startIndexingError, e);
+
+			if (AbstractJob.DEBUG) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

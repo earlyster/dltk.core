@@ -29,9 +29,11 @@ import org.eclipse.dltk.internal.core.ModelManager;
 class MixinProjectRequest extends MixinIndexRequest {
 
 	private final IScriptProject project;
+	private final boolean indexExternal;
 
-	public MixinProjectRequest(IScriptProject project) {
+	public MixinProjectRequest(IScriptProject project, boolean indexExternal) {
 		this.project = project;
+		this.indexExternal = indexExternal;
 	}
 
 	protected String getName() {
@@ -63,15 +65,21 @@ class MixinProjectRequest extends MixinIndexRequest {
 			}
 			final IProjectFragment fragment = fragments[i];
 			if (DEBUG) {
-				log(" fragment " + fragment.getElementName()); //$NON-NLS-1$
+				log(" fragment " + fragment.getPath()); //$NON-NLS-1$
 			}
 			if (fragment instanceof BuiltinProjectFragment) {
-				manager.request(new MixinBuiltinProjectFragmentRequest(
-						fragment, toolkit, ((BuiltinProjectFragment) fragment)
-								.lastModified()));
+				if (indexExternal) {
+					manager
+							.request(new MixinBuiltinProjectFragmentRequest(
+									fragment, toolkit,
+									((BuiltinProjectFragment) fragment)
+											.lastModified()));
+				}
 			} else if (fragment instanceof ExternalProjectFragment) {
-				manager.request(new MixinExternalProjectFragmentRequest(
-						fragment, toolkit));
+				if (indexExternal) {
+					manager.request(new MixinExternalProjectFragmentRequest(
+							fragment, toolkit));
+				}
 			} else {
 				fragment.accept(moduleCollector);
 			}

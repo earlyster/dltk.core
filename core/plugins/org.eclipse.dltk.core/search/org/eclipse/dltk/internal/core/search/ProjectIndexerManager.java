@@ -287,4 +287,13 @@ public class ProjectIndexerManager {
 		}
 	}
 
+	public static void startIndexing() {
+		final IProjectIndexer[] indexers = getAllIndexers();
+		if (indexers != null) {
+			for (int i = 0; i < indexers.length; ++i) {
+				indexers[i].startIndexing();
+			}
+		}
+	}
+
 }
