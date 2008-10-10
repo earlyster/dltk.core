@@ -19,15 +19,19 @@ import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 
 public interface ISearchFactory {
-	
-	IMatchLocatorParser createMatchParser(MatchLocator locator); //to ext point
 
-	SourceIndexerRequestor createSourceRequestor(); //to ext point
-	
+	IMatchLocatorParser createMatchParser(MatchLocator locator); // to ext point
+
+	SourceIndexerRequestor createSourceRequestor(); // to ext point
+
 	// Is this method really need?
 	DLTKSearchParticipant createSearchParticipant(); // to ext point
 
-	MatchLocator createMatchLocator(SearchPattern pattern, SearchRequestor requestor, IDLTKSearchScope scope, SubProgressMonitor monitor); // to ext point
-	
+	MatchLocator createMatchLocator(SearchPattern pattern,
+			SearchRequestor requestor, IDLTKSearchScope scope,
+			SubProgressMonitor monitor); // to ext point
+
 	ISearchPatternProcessor createSearchPatternProcessor();
+
+	String getNormalizedTypeName(IType type);
 }

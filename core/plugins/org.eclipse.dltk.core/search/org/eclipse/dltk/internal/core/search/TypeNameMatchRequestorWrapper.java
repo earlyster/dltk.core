@@ -13,9 +13,11 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.ISearchFactory;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
@@ -46,7 +48,8 @@ import org.eclipse.dltk.internal.core.util.HashtableOfArrayToObject;
 public class TypeNameMatchRequestorWrapper implements
 		IRestrictedAccessTypeRequestor {
 	TypeNameMatchRequestor requestor;
-	private IDLTKSearchScope scope; // scope is needed to retrieve project path
+	private final IDLTKSearchScope scope; // scope is needed to retrieve project path
+	private final ISearchFactory searchFactory;
 	// for external resource
 	private HandleFactory handleFactory; // in case of IJavaSearchScope
 	// defined by clients, use an
@@ -70,6 +73,8 @@ public class TypeNameMatchRequestorWrapper implements
 		if (!(scope instanceof DLTKSearchScope)) {
 			this.handleFactory = new HandleFactory();
 		}
+		this.searchFactory = DLTKLanguageManager.getSearchFactory(scope
+				.getLanguageToolkit().getNatureId());
 	}
 
 	/*
@@ -176,7 +181,7 @@ public class TypeNameMatchRequestorWrapper implements
 	    IType type = null;
 	    IType[] containerTypes = unit.getTypes();
 	    for (int cnt = 0, max = containerTypes.length; cnt < max; cnt++) {
-	      if (containerTypeName.equals(containerTypes[cnt].getElementName())) {
+	      if (checkTypeName(containerTypeName, containerTypes[cnt])) {
 	        if (etnLength > 1) {
 	          type = resolveType(containerTypes[cnt], enclosingTypeNames, 1);
 	          if (type != null) {
@@ -198,12 +203,17 @@ public class TypeNameMatchRequestorWrapper implements
 		return type;
 	}
 
+	private boolean checkTypeName(String name, IType type) {
+		return name.equals(searchFactory.getNormalizedTypeName(type));
+	}
+
 	private IType resolveType(IType parentType, char[][] enclosingTypeNames, int index) throws ModelException {
 	  IType resolvedType = null;
 
 	  IType[] childTypes = parentType.getTypes();
 	  for (int cnt = 0, max = childTypes.length; cnt < max; cnt++) {
-	    if (childTypes[cnt].getElementName().equals(new String(enclosingTypeNames[index]))) {
+	    if (checkTypeName(new String(enclosingTypeNames[index]),
+					childTypes[cnt])) {
 	      if (index != (enclosingTypeNames.length - 1)) {
 	        resolvedType = resolveType(childTypes[cnt], enclosingTypeNames, (index + 1));
 	      }

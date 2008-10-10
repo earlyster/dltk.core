@@ -3,6 +3,7 @@ package org.eclipse.dltk.core.search;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.ISearchFactory;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
+import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 
@@ -20,8 +21,12 @@ public abstract class AbstractSearchFactory implements ISearchFactory {
 			SubProgressMonitor monitor) {
 		return new MatchLocator(pattern, requestor, scope, monitor);
 	}
-	
+
 	public ISearchPatternProcessor createSearchPatternProcessor() {
 		return null;
+	}
+
+	public String getNormalizedTypeName(IType type) {
+		return type.getElementName();
 	}
 }
