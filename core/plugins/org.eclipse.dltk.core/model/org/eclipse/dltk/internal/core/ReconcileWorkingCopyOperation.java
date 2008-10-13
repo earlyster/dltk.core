@@ -44,20 +44,19 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 				throw new OperationCanceledException();
 			this.progressMonitor.beginTask(Messages.element_reconciling, 2);
 		}
-
-		SourceModule workingCopy = getWorkingCopy();
-		// boolean wasConsistent = workingCopy.isConsistent();
-		IProblemRequestor problemRequestor = workingCopy
-				.getPerWorkingCopyInfo();
-
-		// create the delta builder (this remembers the current content of the
-		// cu)
-		this.deltaBuilder = new ModelElementDeltaBuilder(workingCopy);
-
-		// make working copy consistent if needed and compute AST if needed
-		makeConsistent(workingCopy, problemRequestor);
-		// report delta
 		try {
+			SourceModule workingCopy = getWorkingCopy();
+			// boolean wasConsistent = workingCopy.isConsistent();
+			IProblemRequestor requestor = workingCopy.getPerWorkingCopyInfo();
+
+			// create the delta builder (this remembers the current content of
+			// the cu)
+			this.deltaBuilder = new ModelElementDeltaBuilder(workingCopy);
+
+			// make working copy consistent if needed and compute AST if needed
+			makeConsistent(workingCopy, requestor);
+			// report delta
+			this.deltaBuilder.buildDeltas();
 			ModelElementDelta delta = this.deltaBuilder.delta;
 			if (delta != null) {
 				addReconcileDelta(workingCopy, delta);
