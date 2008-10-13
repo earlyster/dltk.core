@@ -122,6 +122,8 @@ public class ScriptConsolePage extends TextConsolePage implements
 	}
 
 	public void dispose() {
+		viewer.dispose();
+		viewer = null;
 		proposalsHandler.dispose();
 
 		super.dispose();
