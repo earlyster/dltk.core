@@ -466,10 +466,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 
 		toolkit = DLTKLanguageManager.getLanguageToolkit(this);
 		if (toolkit == null) {
-			toolkit = DLTKLanguageManager.findToolkit(this.getResource());
-			if (toolkit == null) {
-				return;
-			}
+			return;
 		}
 
 		// code complete
@@ -505,15 +502,12 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(this);
 		if (toolkit == null) {
-			toolkit = DLTKLanguageManager.findToolkit(this.getResource());
-			if (toolkit == null) {
-				if (DLTKCore.VERBOSE) {
-					System.out
-							.println("DLTK.Openable.VERBOSE: Failed to detect language toolkit... for module:" //$NON-NLS-1$
-									+ this.getResource().getName());
-				}
-				return new IModelElement[0];
+			if (DLTKCore.VERBOSE) {
+				System.out
+						.println("DLTK.Openable.VERBOSE: Failed to detect language toolkit... for module:" //$NON-NLS-1$
+								+ this.getResource().getName());
 			}
+			return new IModelElement[0];
 		}
 
 		if (offset < 0 || length < 0 || (end != -1 && (offset + length > end))) {
