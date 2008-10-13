@@ -98,6 +98,13 @@ public class DLTKLanguageManager {
 		return toolkit;
 	}
 
+	/**
+	 * The behavior of this method was not correct - it could return incorrect
+	 * results for files without extension. For compatibility purposes and to
+	 * allow smooth migration it is marked as deprecated -- AlexPanchenko
+	 * 
+	 * @deprecated
+	 */
 	public static IDLTKLanguageToolkit findToolkit(IResource resource) {
 		IDLTKLanguageToolkit toolkit = findAppropriateToolkitByObject(resource);
 		if (toolkit == null) {
@@ -106,6 +113,33 @@ public class DLTKLanguageManager {
 			toolkit = getLanguageToolkit(scriptProject);
 		}
 		return toolkit;
+	}
+
+	/**
+	 * Return the language toolkit of the specified resource in the specified
+	 * project. Until multiple languages are allowed for the same project - it
+	 * will just return the first matching toolkit of the project.
+	 * 
+	 * @param scriptProject
+	 * @param resource
+	 * @return
+	 */
+	public static IDLTKLanguageToolkit findToolkit(
+			IModelElement parent, IResource resource) {
+		final IDLTKLanguageToolkit toolkit = getLanguageToolkit(parent);
+		if (toolkit != null) {
+			if (DLTKContentTypeManager.isValidResourceForContentType(toolkit,
+					resource)) {
+				return toolkit;
+			}
+			/*
+			 * TODO check other toolkits of the projects when projects will be
+			 * supporting multiple DLTK languages
+			 */
+			return toolkit;
+		} else {
+			return findAppropriateToolkitByObject(resource);
+		}
 	}
 
 	public static IDLTKLanguageToolkit findToolkit(IPath path) {

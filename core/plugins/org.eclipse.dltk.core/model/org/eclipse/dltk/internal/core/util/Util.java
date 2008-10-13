@@ -726,6 +726,12 @@ public class Util {
 		}
 	}
 
+	/**
+	 * This is deprecated since the main part of the implementation
+	 * DLTKLanguageManager.findToolkit() is deprecated too.
+	 * 
+	 * @deprecated
+	 */
 	public static boolean isValidSourceModule(IResource res) {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager.findToolkit(res);
 		if (toolkit != null) {
