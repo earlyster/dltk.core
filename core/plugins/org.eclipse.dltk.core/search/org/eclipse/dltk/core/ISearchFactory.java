@@ -32,6 +32,4 @@ public interface ISearchFactory {
 			SubProgressMonitor monitor); // to ext point
 
 	ISearchPatternProcessor createSearchPatternProcessor();
-
-	String getNormalizedTypeName(IType type);
 }
