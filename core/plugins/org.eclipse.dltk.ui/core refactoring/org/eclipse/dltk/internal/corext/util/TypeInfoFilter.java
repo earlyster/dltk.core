@@ -10,8 +10,6 @@
 package org.eclipse.dltk.internal.corext.util;
 
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
-import org.eclipse.dltk.core.ISearchFactory;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -121,7 +119,6 @@ public class TypeInfoFilter {
 	
 	private String fText;
 	private final IDLTKSearchScope fSearchScope;
-	private final ISearchFactory searchFactory;
 	private boolean fIsWorkspaceScope;
 	private int fElementKind;
 	private ITypeInfoFilterExtension fFilterExtension;
@@ -135,8 +132,6 @@ public class TypeInfoFilter {
 	public TypeInfoFilter(String text, IDLTKSearchScope scope, int elementKind, ITypeInfoFilterExtension extension) {
 		fText= text;
 		fSearchScope= scope;
-		searchFactory = DLTKLanguageManager.getSearchFactory(scope
-				.getLanguageToolkit().getNatureId());
 		fIsWorkspaceScope= fSearchScope.equals(SearchEngine.createWorkspaceScope(scope.getLanguageToolkit()));
 		fElementKind= elementKind;
 		fFilterExtension= extension;
@@ -217,9 +212,8 @@ public class TypeInfoFilter {
 	}
 
 	public boolean matchesRawNamePattern(TypeNameMatch type) {
-		return Strings.startsWithIgnoreCase(searchFactory
-				.getNormalizedTypeName(type.getType()), fNameMatcher
-				.getPattern());
+		return Strings.startsWithIgnoreCase(type.getSimpleTypeName(),
+				fNameMatcher.getPattern());
 	}
 
 	public boolean matchesCachedResult(TypeNameMatch type) {
@@ -242,8 +236,7 @@ public class TypeInfoFilter {
 	}
 	
 	private boolean matchesName(TypeNameMatch type) {
-		return fNameMatcher.matches(searchFactory.getNormalizedTypeName(type
-				.getType()));
+		return fNameMatcher.matches(type.getSimpleTypeName());
 	}
 
 	private boolean matchesPackage(TypeNameMatch type) {
