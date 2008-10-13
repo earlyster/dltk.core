@@ -194,10 +194,10 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 						}
 
 						public void processingComplete(int start, int length) {
-							ScriptConsoleViewer viewer;
 							for (Iterator iter = viewerList.iterator(); iter
 									.hasNext();) {
-								viewer = (ScriptConsoleViewer) iter.next();
+								final ScriptConsoleViewer viewer = (ScriptConsoleViewer) iter
+										.next();
 								if (shouldReveal == true) {
 									viewer.setCaretPosition(doc.getLength());
 									viewer.revealEndOfDocument();
