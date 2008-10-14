@@ -35,7 +35,9 @@ public class ScriptLineBreakpoint extends AbstractScriptBreakpoint implements
 
 	protected void addLineBreakpointAttributes(Map attributes, IPath path,
 			int lineNumber, int charStart, int charEnd) {
-		attributes.put(IMarker.LOCATION, path.toPortableString());
+		if (path != null) {
+			attributes.put(IMarker.LOCATION, path.toPortableString());
+		}
 		attributes.put(IMarker.LINE_NUMBER, new Integer(lineNumber));
 		attributes.put(IMarker.CHAR_START, new Integer(charStart));
 		attributes.put(IMarker.CHAR_END, new Integer(charEnd));
@@ -93,8 +95,12 @@ public class ScriptLineBreakpoint extends AbstractScriptBreakpoint implements
 		// else
 		String portablePath = (String) ensureMarker().getAttribute(
 				IMarker.LOCATION);
-		IPath path = Path.fromPortableString(portablePath);
-		return path.lastSegment();
+		if (portablePath != null) {
+			IPath path = Path.fromPortableString(portablePath);
+			return path.lastSegment();
+		} else {
+			return null;
+		}
 	}
 
 	// IScriptLineBreakpoint
@@ -136,12 +142,14 @@ public class ScriptLineBreakpoint extends AbstractScriptBreakpoint implements
 			// else
 			String portablePath = (String) ensureMarker().getAttribute(
 					IMarker.LOCATION);
-			IPath path = Path.fromPortableString(portablePath);
-			return makeUri(path);
+			if (portablePath != null) {
+				IPath path = Path.fromPortableString(portablePath);
+				return makeUri(path);
+			}
 		} catch (CoreException e) {
 			DLTKDebugPlugin.log(e);
-			return null;
 		}
+		return null;
 	}
 
 	private static final String[] UPDATABLE_ATTRS = new String[] {
