@@ -18,6 +18,7 @@ Require-Bundle: org.junit,
 Eclipse-LazyStart: true
 Export-Package: org.eclipse.dltk.core.tests,
  org.eclipse.dltk.core.tests.buildpath,
+ org.eclipse.dltk.core.tests.compiler,
  org.eclipse.dltk.core.tests.launching,
  org.eclipse.dltk.core.tests.model,
  org.eclipse.dltk.core.tests.util,
