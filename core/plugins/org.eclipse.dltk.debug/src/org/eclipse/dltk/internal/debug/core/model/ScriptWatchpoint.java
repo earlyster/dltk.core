@@ -12,11 +12,15 @@ package org.eclipse.dltk.internal.debug.core.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.model.IScriptWatchpoint;
 
@@ -31,11 +35,30 @@ public class ScriptWatchpoint extends ScriptLineBreakpoint implements
 	private static final String MODIFICATION = DLTKDebugPlugin.PLUGIN_ID
 			+ ".modification"; //$NON-NLS-1$
 
-	public ScriptWatchpoint(String debugModelId, IResource resource,
-			IPath path, int lineNumber, int start, int end, String fieldName)
+	public ScriptWatchpoint(final String debugModelId,
+			final IResource resource, final IPath path, final int lineNumber,
+			final int start, final int end, final String fieldName)
 			throws CoreException {
-		super(debugModelId, resource, path, lineNumber, start, end, true);
-		this.setFieldName(fieldName);
+		IWorkspaceRunnable wr = new IWorkspaceRunnable() {
+			public void run(IProgressMonitor monitor) throws CoreException {
+				// create the marker
+				setMarker(resource.createMarker(getMarkerId()));
+
+				final Map attributes = new HashMap();
+				// add attributes
+				addScriptBreakpointAttributes(attributes, debugModelId, true);
+				addLineBreakpointAttributes(attributes, path, lineNumber,
+						start, end);
+				attributes.put(FIELD_NAME, fieldName);
+
+				// set attributes
+				ensureMarker().setAttributes(attributes);
+
+				// add to breakpoint manager if requested
+				register(true);
+			}
+		};
+		run(getMarkerRule(resource), wr);
 	}
 
 	public ScriptWatchpoint() {
