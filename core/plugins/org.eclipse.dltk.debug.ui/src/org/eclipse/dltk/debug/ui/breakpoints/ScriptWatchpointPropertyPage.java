@@ -1,6 +1,8 @@
 package org.eclipse.dltk.debug.ui.breakpoints;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dltk.debug.core.IDLTKDebugToolkit;
+import org.eclipse.dltk.debug.core.ScriptDebugManager;
 import org.eclipse.dltk.debug.core.model.IScriptWatchpoint;
 import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.swt.widgets.Button;
@@ -41,15 +43,29 @@ public class ScriptWatchpointPropertyPage extends ScriptBreakpointPropertyPage {
 		super.loadValues();
 
 		IScriptWatchpoint watchpoint = (IScriptWatchpoint) getBreakpoint();
-		suspendOnAccessButton.setSelection(watchpoint.isAccess());
-		suspendOnModificationButton.setSelection(watchpoint.isModification());
+		final IDLTKDebugToolkit debugToolkit = ScriptDebugManager.getInstance()
+				.getDebugToolkitByDebugModel(watchpoint.getModelIdentifier());
+		if (debugToolkit.isAccessWatchpointSupported()) {
+			suspendOnAccessButton.setSelection(watchpoint.isAccess());
+			suspendOnModificationButton.setSelection(watchpoint
+					.isModification());
+		} else {
+			suspendOnAccessButton.setEnabled(false);
+			suspendOnModificationButton.setEnabled(false);
+			suspendOnModificationButton.setSelection(true);
+		}
 	}
 
 	protected void saveValues() throws CoreException {
 		super.saveValues();
 
 		IScriptWatchpoint watchpoint = (IScriptWatchpoint) getBreakpoint();
-		watchpoint.setAccess(suspendOnAccessButton.getSelection());
-		watchpoint.setModification(suspendOnModificationButton.getSelection());
+		final IDLTKDebugToolkit debugToolkit = ScriptDebugManager.getInstance()
+				.getDebugToolkitByDebugModel(watchpoint.getModelIdentifier());
+		if (debugToolkit.isAccessWatchpointSupported()) {
+			watchpoint.setAccess(suspendOnAccessButton.getSelection());
+			watchpoint.setModification(suspendOnModificationButton
+					.getSelection());
+		}
 	}
 }
