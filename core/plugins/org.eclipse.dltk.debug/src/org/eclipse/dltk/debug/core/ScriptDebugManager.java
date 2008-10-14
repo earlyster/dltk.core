@@ -18,6 +18,7 @@ public class ScriptDebugManager {
 	private static final String DEBUG_MODEL_ID = "debugModelId"; //$NON-NLS-1$
 	private static final String TYPE_FACTORY = "typeFactory"; //$NON-NLS-1$
 	private static final String VARIABLE_NAME_COMPARATOR = "variableNameComparator"; //$NON-NLS-1$
+	private static final String DEBUG_TOOLKIT = "debugToolkit"; //$NON-NLS-1$
 
 	private static ScriptDebugManager instance;
 
@@ -36,11 +37,13 @@ public class ScriptDebugManager {
 		public final String debugModelId;
 		public final IScriptTypeFactory typeFactory;
 		public final Comparator comparator;
+		public final IDLTKDebugToolkit debugToolkit;
 
 		public Info(String debugModelId, IScriptTypeFactory typeFactory,
-				Comparator comparator) {
+				IDLTKDebugToolkit debugToolkit, Comparator comparator) {
 			this.debugModelId = debugModelId;
 			this.typeFactory = typeFactory;
+			this.debugToolkit = debugToolkit;
 			this.comparator = comparator;
 		}
 	}
@@ -84,14 +87,30 @@ public class ScriptDebugManager {
 				if (comparator == null) {
 					comparator = new VariableNameComparator();
 				}
+				IDLTKDebugToolkit debugToolkit = null;
+				if (element.getAttribute(DEBUG_TOOLKIT) != null) {
+					try {
+						debugToolkit = (IDLTKDebugToolkit) element
+								.createExecutableExtension(DEBUG_TOOLKIT);
+					} catch (Exception e) {
+						DLTKDebugPlugin.log(e);
+					}
+				}
+				if (debugToolkit == null) {
+					debugToolkit = new DefaultDebugToolkit();
+				}
 
 				if (natureId != null && debugModelId != null) {
 					natureToInfoMap.put(natureId, new Info(debugModelId,
-							typeFactory, comparator));
+							typeFactory, debugToolkit, comparator));
 					modelToNatureMap.put(debugModelId, natureId);
 				}
 			}
 		}
+	}
+
+	private static class DefaultDebugToolkit extends AbstractDLTKDebugToolkit {
+
 	}
 
 	protected Info getInfo(String natureId) {
@@ -127,5 +146,13 @@ public class ScriptDebugManager {
 
 	public Comparator getVariableNameComparatorByDebugModel(String debugModelId) {
 		return getVariableNameComparatorByNature(getNatureByDebugModel(debugModelId));
+	}
+
+	public IDLTKDebugToolkit getDebugToolkitByNature(String natureId) {
+		return getInfo(natureId).debugToolkit;
+	}
+
+	public IDLTKDebugToolkit getDebugToolkitByDebugModel(String debugModelId) {
+		return getDebugToolkitByNature(getNatureByDebugModel(debugModelId));
 	}
 }

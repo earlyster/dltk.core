@@ -25,6 +25,8 @@ import org.eclipse.dltk.dbgp.breakpoints.DbgpBreakpointConfig;
 import org.eclipse.dltk.dbgp.commands.IDbgpBreakpointCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
+import org.eclipse.dltk.debug.core.IDLTKDebugToolkit;
+import org.eclipse.dltk.debug.core.ScriptDebugManager;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
 import org.eclipse.dltk.debug.core.model.IScriptExceptionBreakpoint;
@@ -72,8 +74,15 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 
 	protected static String makeWatchpointExpression(
 			IScriptWatchpoint watchpoint) throws CoreException {
-		return watchpoint.getFieldName() + (watchpoint.isAccess() ? '1' : '0')
-				+ (watchpoint.isModification() ? '1' : '0');
+		final IDLTKDebugToolkit debugToolkit = ScriptDebugManager.getInstance()
+				.getDebugToolkitByDebugModel(watchpoint.getModelIdentifier());
+		if (debugToolkit.isAccessWatchpointSupported()) {
+			return watchpoint.getFieldName()
+					+ (watchpoint.isAccess() ? '1' : '0')
+					+ (watchpoint.isModification() ? '1' : '0');
+		} else {
+			return watchpoint.getFieldName();
+		}
 	}
 
 	// Adding, removing, updating
