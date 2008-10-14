@@ -116,16 +116,38 @@ public class DLTKLanguageManager {
 	}
 
 	/**
+	 * Return the toolkit of the specified resource or <code>null</code>.
+	 * 
+	 * @param resource
+	 * @return
+	 */
+	public static IDLTKLanguageToolkit findToolkitForResource(IResource resource) {
+		if (resource.getType() == IResource.PROJECT) {
+			return DLTKLanguageManager.getLanguageToolkit(DLTKCore
+					.create((IProject) resource));
+		} else {
+			final IModelElement parent = DLTKCore.create(resource.getParent());
+			if (parent == null) {
+				return null;
+			}
+			return DLTKLanguageManager.findToolkit(parent, resource, false);
+		}
+	}
+
+	/**
 	 * Return the language toolkit of the specified resource in the specified
 	 * project. Until multiple languages are allowed for the same project - it
 	 * will just return the first matching toolkit of the project.
 	 * 
 	 * @param scriptProject
 	 * @param resource
+	 * @param useDefault
+	 *            if resource does not match project toolkit - return project
+	 *            toolkit or <code>null</code>
 	 * @return
 	 */
-	public static IDLTKLanguageToolkit findToolkit(
-			IModelElement parent, IResource resource) {
+	public static IDLTKLanguageToolkit findToolkit(IModelElement parent,
+			IResource resource, boolean useDefault) {
 		final IDLTKLanguageToolkit toolkit = getLanguageToolkit(parent);
 		if (toolkit != null) {
 			if (DLTKContentTypeManager.isValidResourceForContentType(toolkit,
@@ -136,7 +158,7 @@ public class DLTKLanguageManager {
 			 * TODO check other toolkits of the projects when projects will be
 			 * supporting multiple DLTK languages
 			 */
-			return toolkit;
+			return useDefault ? toolkit : null;
 		} else {
 			return findAppropriateToolkitByObject(resource);
 		}

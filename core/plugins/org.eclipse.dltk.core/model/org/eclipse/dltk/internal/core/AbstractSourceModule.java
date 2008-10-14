@@ -565,7 +565,7 @@ public abstract class AbstractSourceModule extends Openable implements
 			toolkit = DLTKLanguageManager.findToolkit((IPath) object);
 		} else if (object instanceof IResource) {
 			toolkit = DLTKLanguageManager.findToolkit(getParent(),
-					(IResource) object);
+					(IResource) object, true);
 		} else if (object instanceof IScriptProject) {
 			toolkit = DLTKLanguageManager
 					.getLanguageToolkit((IScriptProject) object);
@@ -701,7 +701,8 @@ public abstract class AbstractSourceModule extends Openable implements
 	protected IStatus validateSorceModule(IDLTKLanguageToolkit toolkit,
 			IResource resource) {
 		if (toolkit == null) {
-			toolkit = DLTKLanguageManager.findToolkit(getParent(), resource);
+			toolkit = DLTKLanguageManager.findToolkit(getParent(), resource,
+					true);
 		}
 
 		if (toolkit != null) {
