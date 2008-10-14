@@ -50,14 +50,13 @@ public class ScriptLineBreakpoint extends AbstractScriptBreakpoint implements
 			final int charStart, final int charEnd, final boolean add)
 			throws DebugException {
 
-		final Map attributes = new HashMap();
-
 		IWorkspaceRunnable wr = new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
 				// create the marker
 				setMarker(resource.createMarker(getMarkerId()));
 
 				// add attributes
+				final Map attributes = new HashMap();
 				addScriptBreakpointAttributes(attributes, debugModelId, true);
 				addLineBreakpointAttributes(attributes, path, lineNumber,
 						charStart, charEnd);
