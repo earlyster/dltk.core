@@ -391,11 +391,21 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 				final String file = w.getResourceName();
 				final int lineNumber = w.getLineNumber();
 				final String fieldName = w.getFieldName();
-
-				sb.append(MessageFormat.format(
-						Messages.ScriptDebugModelPresentation_breakpointText,
-						new Object[] { language, file, new Integer(lineNumber),
-								fieldName }));
+				if (lineNumber >= 0 && file != null) {
+					sb
+							.append(MessageFormat
+									.format(
+											Messages.ScriptDebugModelPresentation_breakpointText,
+											new Object[] { language, file,
+													new Integer(lineNumber),
+													fieldName }));
+				} else {
+					sb
+							.append(MessageFormat
+									.format(
+											Messages.ScriptDebugModelPresentation_breakpointNoResourceText,
+											new Object[] { language, fieldName }));
+				}
 			} else if (breakpoint instanceof IScriptLineBreakpoint) { // IScriptLineBreakpoint
 				IScriptLineBreakpoint b = (IScriptLineBreakpoint) breakpoint;
 
@@ -593,8 +603,12 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 
 		// else
 		try {
-			IPath path = Path.fromPortableString((String) marker
-					.getAttribute(IMarker.LOCATION));
+			final String location = (String) marker
+					.getAttribute(IMarker.LOCATION);
+			if (location == null) {
+				return null;
+			}
+			IPath path = Path.fromPortableString(location);
 			String debugModelId = bp.getModelIdentifier();
 			String natureId = ScriptDebugManager.getInstance()
 					.getNatureByDebugModel(debugModelId);

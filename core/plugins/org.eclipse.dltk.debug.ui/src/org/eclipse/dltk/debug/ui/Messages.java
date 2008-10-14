@@ -8,6 +8,7 @@ public class Messages extends NLS {
 	public static String DLTKDebugUIPlugin_internalError;
 	public static String ScriptDebuggerConsoleToFileHyperlink_error;
 	public static String ScriptDebugModelPresentation_breakpointText;
+	public static String ScriptDebugModelPresentation_breakpointNoResourceText;
 	public static String ScriptDebugModelPresentation_breakpointText2;
 	public static String ScriptDebugModelPresentation_breakpointText3;
 	public static String ScriptDebugModelPresentation_breakpointText4;

@@ -10,6 +10,10 @@
 package org.eclipse.dltk.debug.ui.breakpoints;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -19,10 +23,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.ui.actions.IToggleBreakpointsTargetExtension;
+import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.debug.core.model.IScriptVariable;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
+import org.eclipse.dltk.internal.ui.editor.WorkingCopyManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IWorkingCopyManager;
 import org.eclipse.jface.text.BadLocationException;
@@ -260,11 +268,18 @@ public abstract class ScriptToggleBreakpointAdapter implements
 									BreakpointUtils.addLineBreakpoint(editor,
 											lineNumber);
 								} else {
-									report(MessageFormat.format(Messages.ScriptToggleBreakpointAdapter_breakpointAlreadySetAtLine,
-											new Object[] { new Integer( lineNumber ) }), part);
+									report(
+											MessageFormat
+													.format(
+															Messages.ScriptToggleBreakpointAdapter_breakpointAlreadySetAtLine,
+															new Object[] { new Integer(
+																	lineNumber) }),
+											part);
 								}
 							} else {
-								report(Messages.ScriptToggleBreakpointAdapter_invalidBreakpointPosition, part);
+								report(
+										Messages.ScriptToggleBreakpointAdapter_invalidBreakpointPosition,
+										part);
 							}
 						}
 					} catch (CoreException e) {
@@ -278,6 +293,104 @@ public abstract class ScriptToggleBreakpointAdapter implements
 		};
 		job.setSystem(true);
 		job.schedule();
+	}
+
+	/**
+	 * gets the <code>IJavaElement</code> from the editor input
+	 * 
+	 * @param input
+	 *            the current editor input
+	 * @return the corresponding <code>IJavaElement</code>
+	 */
+	protected IModelElement getModelElement(IEditorInput input) {
+		IModelElement je = DLTKUIPlugin.getEditorInputModelElement(input);
+		if (je != null) {
+			return je;
+		}
+		// try to get from the working copy manager
+		return ((WorkingCopyManager) DLTKUIPlugin.getDefault()
+				.getWorkingCopyManager()).getWorkingCopy(input, false);
+	}
+
+	/**
+	 * Returns if the text selection is a field selection or not
+	 * 
+	 * @param selection
+	 *            the text selection
+	 * @param part
+	 *            the associated workbench part
+	 * @return true if the text selection is a valid field for a watchpoint,
+	 *         false otherwise
+	 * @since 3.3
+	 */
+	protected boolean isField(ITextSelection selection, IWorkbenchPart part) {
+		ITextEditor editor = getTextEditor(part);
+		if (editor != null) {
+			IModelElement element = getModelElement(editor.getEditorInput());
+			if (element != null) {
+				try {
+					if (element instanceof ISourceModule) {
+						element = ((ISourceModule) element)
+								.getElementAt(selection.getOffset());
+					}
+					return element != null
+							&& element.getElementType() == IModelElement.FIELD;
+				} catch (ModelException e) {
+					return false;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Determines if the selection is a field or not
+	 * 
+	 * @param selection
+	 *            the current selection
+	 * @return true if the selection is a field false otherwise
+	 */
+	protected boolean isFields(IStructuredSelection selection) {
+		if (!selection.isEmpty()) {
+			for (Iterator i = selection.iterator(); i.hasNext();) {
+				Object thing = i.next();
+				if (thing instanceof IField) {
+					return true;
+				} else if (thing instanceof IScriptVariable) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns a list of <code>IField</code> and <code>IJavaFieldVariable</code>
+	 * in the given selection. When an <code>IField</code> can be resolved for
+	 * an <code>IJavaFieldVariable</code>, it is returned in favour of the
+	 * variable.
+	 * 
+	 * @param selection
+	 * @return list of <code>IField</code> and <code>IJavaFieldVariable</code>,
+	 *         possibly empty
+	 * @throws CoreException
+	 */
+	protected List getFields(IStructuredSelection selection)
+			throws CoreException {
+		if (selection.isEmpty()) {
+			return Collections.EMPTY_LIST;
+		}
+		List fields = new ArrayList(selection.size());
+		Iterator iterator = selection.iterator();
+		while (iterator.hasNext()) {
+			Object thing = iterator.next();
+			if (thing instanceof IField) {
+				fields.add(thing);
+			} else if (thing instanceof IScriptVariable) {
+				fields.add(thing);
+			}
+		}
+		return fields;
 	}
 
 	protected abstract String getDebugModelId();
