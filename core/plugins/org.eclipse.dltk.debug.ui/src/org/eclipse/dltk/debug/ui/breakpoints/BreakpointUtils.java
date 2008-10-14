@@ -215,7 +215,7 @@ public class BreakpointUtils {
 		}
 		if (resource != null) {
 			ScriptDebugModel.createExceptionBreakpoint(debugModelId, resource,
-					type.getFullyQualifiedName(), caught, uncaught, true, null);
+					type.getTypeQualifiedName(), caught, uncaught, true, null);
 		}
 	}
 }
