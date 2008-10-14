@@ -82,7 +82,7 @@ public abstract class AbstractScriptBreakpoint extends Breakpoint implements
 	protected void addScriptBreakpointAttributes(Map attributes,
 			String debugModelId, boolean enabled) {
 		attributes.put(IBreakpoint.ID, debugModelId);
-		attributes.put(IBreakpoint.ENABLED, new Boolean(enabled));
+		attributes.put(IBreakpoint.ENABLED, Boolean.valueOf(enabled));
 	}
 
 	public AbstractScriptBreakpoint() {
