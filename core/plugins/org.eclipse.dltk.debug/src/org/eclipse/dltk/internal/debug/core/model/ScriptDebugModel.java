@@ -23,9 +23,10 @@ import org.eclipse.dltk.debug.core.model.IScriptMethodEntryBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptWatchpoint;
 
 public class ScriptDebugModel {
+
 	public static String getDebugModelId(IResource resource) {
-		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-				.findToolkit(resource);
+		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.findToolkitForResource(resource);
 		if (toolkit != null) {
 			String natureId = toolkit.getNatureId();
 			return ScriptDebugManager.getInstance().getDebugModelByNature(
@@ -35,33 +36,34 @@ public class ScriptDebugModel {
 	}
 
 	public static IScriptLineBreakpoint createLineBreakpoint(
-			IResource resource, IPath path, int lineNumber, int charStart, int charEnd,
-			boolean register, Map attributes) throws CoreException {
+			IResource resource, IPath path, int lineNumber, int charStart,
+			int charEnd, boolean register, Map attributes) throws CoreException {
 
-		return new ScriptLineBreakpoint(getDebugModelId(resource), resource, path,
-				lineNumber, charStart, charEnd, register);
+		return new ScriptLineBreakpoint(getDebugModelId(resource), resource,
+				path, lineNumber, charStart, charEnd, register);
 	}
 
 	public static IScriptLineBreakpoint createLineBreakpoint(
-			String debugModelId, IResource resource, IPath path, int lineNumber,
-			int charStart, int charEnd, boolean register, Map attributes)
-			throws CoreException {
+			String debugModelId, IResource resource, IPath path,
+			int lineNumber, int charStart, int charEnd, boolean register,
+			Map attributes) throws CoreException {
 
-		return new ScriptLineBreakpoint(debugModelId, resource, path, lineNumber,
-				charStart, charEnd, register);
+		return new ScriptLineBreakpoint(debugModelId, resource, path,
+				lineNumber, charStart, charEnd, register);
 	}
 
 	public static IScriptMethodEntryBreakpoint createMethodEntryBreakpoint(
-			IResource resource, IPath path, int lineNumber, int charStart, int charEnd,
-			boolean register, Map attributes, String methodName)
+			IResource resource, IPath path, int lineNumber, int charStart,
+			int charEnd, boolean register, Map attributes, String methodName)
 			throws CoreException {
 
 		return new ScriptMethodEntryBreakpoint(getDebugModelId(resource),
-				resource, path, lineNumber, charStart, charEnd, register, methodName);
+				resource, path, lineNumber, charStart, charEnd, register,
+				methodName);
 	}
 
-	public static IScriptWatchpoint createWatchPoint(IResource resource, IPath path,
-			int lineNumber, int start, int end, String fieldName)
+	public static IScriptWatchpoint createWatchPoint(IResource resource,
+			IPath path, int lineNumber, int start, int end, String fieldName)
 			throws CoreException {
 		return new ScriptWatchpoint(getDebugModelId(resource), resource, path,
 				lineNumber, start, end, fieldName);
