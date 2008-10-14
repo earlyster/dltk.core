@@ -337,7 +337,8 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	}
 
 	private void showErrorMessage(String title, String text) {
-		MessageBox box = new MessageBox(this.fDialog.getShell(), SWT.ERROR);
+		MessageBox box = new MessageBox(this.fDialog.getShell(),
+				SWT.ERROR_UNSPECIFIED);
 		box.setText(title);
 		box.setMessage(text);
 		box.open();
