@@ -17,6 +17,8 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -397,6 +399,54 @@ public class DLTKCore extends Plugin {
 			IElementChangedListener listener) {
 		ModelManager.getModelManager().deltaState
 				.removeElementChangedListener(listener);
+	}
+
+	/**
+	 * Adds the given listener for resource change events of the given types to
+	 * the DLTK core. The listener is guaranteed to be notified of the resource
+	 * change event before the DLTK core starts processing the resource change
+	 * event itself.
+	 * <p>
+	 * If an identical listener is already registered, the given event types are
+	 * added to the event types of interest to the listener.
+	 * </p>
+	 * <p>
+	 * Supported event types are:
+	 * <ul>
+	 * <li>{@link IResourceChangeEvent#PRE_BUILD}</li>
+	 * <li>{@link IResourceChangeEvent#POST_BUILD}</li>
+	 * <li>{@link IResourceChangeEvent#POST_CHANGE}</li>
+	 * <li>{@link IResourceChangeEvent#PRE_DELETE}</li>
+	 * <li>{@link IResourceChangeEvent#PRE_CLOSE}</li>
+	 * </ul>
+	 * This list may increase in the future.
+	 * </p>
+	 * 
+	 * @param listener
+	 *            the listener
+	 * @param eventMask
+	 *            the bit-wise OR of all event types of interest to the listener
+	 * @see #removePreProcessingResourceChangedListener(IResourceChangeListener)
+	 * @see IResourceChangeEvent
+	 */
+	public static void addPreProcessingResourceChangedListener(
+			IResourceChangeListener listener, int eventMask) {
+		ModelManager.getModelManager().deltaState
+				.addPreResourceChangedListener(listener, eventMask);
+	}
+
+	/**
+	 * Removes the given pre-processing resource changed listener.
+	 * <p>
+	 * Has no affect if an identical listener is not registered.
+	 * 
+	 * @param listener
+	 *            the listener
+	 */
+	public static void removePreProcessingResourceChangedListener(
+			IResourceChangeListener listener) {
+		ModelManager.getModelManager().deltaState
+				.removePreResourceChangedListener(listener);
 	}
 
 	/**

@@ -22,7 +22,6 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelStatusConstants;
@@ -109,12 +108,12 @@ public class SourceCodeCache implements ISourceCodeCache {
 			ReferenceMap.HARD, ReferenceMap.SOFT);
 
 	public SourceCodeCache() {
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(listener,
+		DLTKCore.addPreProcessingResourceChangedListener(listener,
 				IResourceChangeEvent.POST_CHANGE);
 	}
 
 	public void stop() {
-		ResourcesPlugin.getWorkspace().removeResourceChangeListener(listener);
+		DLTKCore.removePreProcessingResourceChangedListener(listener);
 	}
 
 	public InputStream getContentsIfCached(IFile file) {
