@@ -30,7 +30,7 @@ import org.eclipse.dltk.core.ISourceModuleInfoCache;
  * 
  */
 public class SourceModuleInfoCache implements ISourceModuleInfoCache {
-	private ElementCache cache = null;
+	private final ElementCache cache;
 	static long allAccess = 0;
 	static long miss = 0;
 	static long closes = 0;
@@ -52,6 +52,9 @@ public class SourceModuleInfoCache implements ISourceModuleInfoCache {
 				closes++;
 			}
 		});
+	}
+
+	public void start() {
 		DLTKCore.addElementChangedListener(changedListener);
 	}
 

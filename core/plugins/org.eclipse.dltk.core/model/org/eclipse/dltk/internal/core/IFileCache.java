@@ -17,7 +17,14 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
-public interface ISourceCodeCache {
+public interface IFileCache {
+
+	/**
+	 * Returns the identifier of this cache instance.
+	 * 
+	 * @return
+	 */
+	String getId();
 
 	/**
 	 * Tests if there is cached content of the specified {@link IFile}. Returns

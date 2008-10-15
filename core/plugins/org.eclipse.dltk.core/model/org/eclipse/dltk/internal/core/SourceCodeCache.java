@@ -29,7 +29,16 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.util.Util;
 
-public class SourceCodeCache implements ISourceCodeCache {
+public class SourceCodeCache implements IFileCacheManagement {
+
+	private static final String ID = "org.eclipse.dltk.core.fileCache.default"; //$NON-NLS-1$
+
+	/*
+	 * @see org.eclipse.dltk.internal.core.ISourceCodeCache#getId()
+	 */
+	public String getId() {
+		return ID;
+	}
 
 	private class ChangeListener implements IResourceChangeListener,
 			IResourceDeltaVisitor {
@@ -107,7 +116,7 @@ public class SourceCodeCache implements ISourceCodeCache {
 	private final ReferenceMap externalResourceMap = new ReferenceMap(
 			ReferenceMap.HARD, ReferenceMap.SOFT);
 
-	public SourceCodeCache() {
+	public void start() {
 		DLTKCore.addPreProcessingResourceChangedListener(listener,
 				IResourceChangeEvent.POST_CHANGE);
 	}

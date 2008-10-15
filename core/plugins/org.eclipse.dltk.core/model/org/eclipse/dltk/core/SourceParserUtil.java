@@ -241,6 +241,6 @@ public class SourceParserUtil {
 
 	public static void clearCache() {
 		ModelManager.getModelManager().getSourceModuleInfoCache().clear();
-		ModelManager.getModelManager().getSourceCodeCache().clear();
+		ModelManager.getModelManager().getFileCache().clear();
 	}
 }

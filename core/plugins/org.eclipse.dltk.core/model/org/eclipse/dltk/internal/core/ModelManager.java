@@ -318,9 +318,9 @@ public class ModelManager implements ISaveParticipant {
 	private ThreadLocal zipFiles = new ThreadLocal();
 
 	/**
-	 * A cache of module source code.
+	 * A cache of resource content.
 	 */
-	private SourceCodeCache sourceCodeCache = null;
+	private IFileCache fileCache = null;
 
 	private UserLibraryManager userLibraryManager;
 
@@ -1101,6 +1101,18 @@ public class ModelManager implements ISaveParticipant {
 			Preferences.IPropertyChangeListener propertyListener = new Preferences.IPropertyChangeListener() {
 				public void propertyChange(Preferences.PropertyChangeEvent event) {
 					ModelManager.this.optionsCache = null;
+					if (DLTKCore.FILE_CACHE.equals(event.getProperty())) {
+						final IFileCache newCache = createFileCache();
+						if (newCache instanceof IFileCacheManagement) {
+							((IFileCacheManagement) newCache).start();
+						}
+						final IFileCache oldCache = fileCache;
+						fileCache = newCache;
+						if (oldCache != null
+								&& oldCache instanceof IFileCacheManagement) {
+							((IFileCacheManagement) oldCache).stop();
+						}
+					}
 				}
 			};
 			DLTKCore.getPlugin().getPluginPreferences()
@@ -1119,6 +1131,12 @@ public class ModelManager implements ISaveParticipant {
 							| IResourceChangeEvent.PRE_DELETE
 							| IResourceChangeEvent.PRE_CLOSE);
 			DLTKContentTypeManager.installListener();
+			fileCache = createFileCache();
+			if (fileCache instanceof IFileCacheManagement) {
+				((IFileCacheManagement) fileCache).start();
+			}
+			sourceModuleInfoCache = new SourceModuleInfoCache();
+			sourceModuleInfoCache.start();
 			startIndexing();
 			// process deltas since last activated in indexer thread so that
 			// indexes are up-to-date.
@@ -1160,6 +1178,36 @@ public class ModelManager implements ISaveParticipant {
 			shutdown();
 			throw e;
 		}
+	}
+
+	/**
+	 * @return
+	 */
+	private IFileCache createFileCache() {
+		final String selectedCacheId = DLTKCore.getPlugin()
+				.getPluginPreferences().getString(DLTKCore.FILE_CACHE);
+		if (selectedCacheId != null) {
+			final String fileCacheExtPoint = DLTKCore.PLUGIN_ID + ".fileCache"; //$NON-NLS-1$
+			final IConfigurationElement[] elements = Platform
+					.getExtensionRegistry().getConfigurationElementsFor(
+							fileCacheExtPoint);
+			for (int i = 0; i < elements.length; ++i) {
+				final IConfigurationElement element = elements[i];
+				if (selectedCacheId.equals(element.getAttribute("id"))) { //$NON-NLS-1$
+					try {
+						final IFileCache cache = (IFileCache) element
+								.createExecutableExtension("class"); //$NON-NLS-1$
+						if (selectedCacheId.equals(cache.getId())) {
+							return cache;
+						}
+					} catch (Exception e) {
+						DLTKCore.error("FileCache create error", e); //$NON-NLS-1$
+					}
+					break;
+				}
+			}
+		}
+		return new FileCacheStub();
 	}
 
 	private void startIndexing() {
@@ -1376,11 +1424,13 @@ public class ModelManager implements ISaveParticipant {
 		DLTKContentTypeManager.uninstallListener();
 		workspace.removeSaveParticipant(DLTKCore.getDefault());
 
-		if (sourceModuleInfoCach != null) {
-			sourceModuleInfoCach.stop();
+		if (fileCache != null) {
+			if (fileCache instanceof IFileCacheManagement) {
+				((IFileCacheManagement) fileCache).stop();
+			}
 		}
-		if (sourceCodeCache != null) {
-			sourceCodeCache.stop();
+		if (sourceModuleInfoCache != null) {
+			sourceModuleInfoCache.stop();
 		}
 		if (this.indexManager != null) { // no more indexing
 			this.indexManager.shutdown();
@@ -1751,12 +1801,8 @@ public class ModelManager implements ISaveParticipant {
 				.getBuildpathContainerInitializer(containerPath.segment(0));
 		if (initializer != null) {
 			if (BP_RESOLVE_VERBOSE) {
-				Util.verbose("BPContainer INIT - triggering initialization\n" + //$NON-NLS-1$
-						"	project: " + project.getElementName() + '\n' + //$NON-NLS-1$
-						"	container path: " + containerPath + '\n' + //$NON-NLS-1$
-						"	initializer: " + initializer + '\n' + //$NON-NLS-1$
-						"	invocation stack trace:"); //$NON-NLS-1$
-				new Exception("<Fake exception>").printStackTrace(System.out); //$NON-NLS-1$
+				verbose_triggering_container_initialization(project,
+						containerPath, initializer);
 			}
 			// PerformanceStats stats = null;
 			containerPut(project, containerPath,
@@ -1797,46 +1843,14 @@ public class ModelManager implements ISaveParticipant {
 					containerRemoveInitializationInProgress(project,
 							containerPath);
 					if (BP_RESOLVE_VERBOSE) {
-						if (container == CONTAINER_INITIALIZATION_IN_PROGRESS) {
-							Util
-									.verbose("CPContainer INIT - FAILED (initializer did not initialize container)\n" + //$NON-NLS-1$
-											"	project: " //$NON-NLS-1$
-											+ project.getElementName() + '\n' + //$NON-NLS-1$
-											"	container path: " //$NON-NLS-1$
-											+ containerPath + '\n' + //$NON-NLS-1$
-											"	initializer: " + initializer); //$NON-NLS-1$
-						} else {
-							Util
-									.verbose("CPContainer INIT - FAILED (see exception above)\n" + //$NON-NLS-1$
-											"	project: " //$NON-NLS-1$
-											+ project.getElementName() + '\n' + //$NON-NLS-1$
-											"	container path: " //$NON-NLS-1$
-											+ containerPath + '\n' + //$NON-NLS-1$
-											"	initializer: " + initializer); //$NON-NLS-1$
-						}
+						verbose_container_initialization_failed(project,
+								containerPath, container, initializer);
 					}
 				}
 			}
 			if (BP_RESOLVE_VERBOSE) {
-				StringBuffer buffer = new StringBuffer();
-				buffer.append("CPContainer INIT - after resolution\n"); //$NON-NLS-1$
-				buffer.append("	project: " + project.getElementName() + '\n'); //$NON-NLS-1$
-				buffer.append("	container path: " + containerPath + '\n'); //$NON-NLS-1$
-				if (container != null) {
-					buffer
-							.append("	container: " + container.getDescription(project) + " {\n"); //$NON-NLS-2$//$NON-NLS-1$
-					IBuildpathEntry[] entries = container
-							.getBuildpathEntries(project);
-					if (entries != null) {
-						for (int i = 0; i < entries.length; i++) {
-							buffer.append("		" + entries[i] + '\n'); //$NON-NLS-1$
-						}
-					}
-					buffer.append("	}");//$NON-NLS-1$
-				} else {
-					buffer.append("	container: {unbound}");//$NON-NLS-1$
-				}
-				Util.verbose(buffer.toString());
+				verbose_container_value_after_initialization(project,
+						containerPath, container);
 			}
 		} else {
 			if (BP_RESOLVE_VERBOSE) {
@@ -1846,6 +1860,62 @@ public class ModelManager implements ISaveParticipant {
 			}
 		}
 		return container;
+	}
+
+	private void verbose_triggering_container_initialization(
+			IScriptProject project, IPath containerPath,
+			final BuildpathContainerInitializer initializer) {
+		Util.verbose("BPContainer INIT - triggering initialization\n" + //$NON-NLS-1$
+				"	project: " + project.getElementName() + '\n' + //$NON-NLS-1$
+				"	container path: " + containerPath + '\n' + //$NON-NLS-1$
+				"	initializer: " + initializer + '\n' + //$NON-NLS-1$
+				"	invocation stack trace:"); //$NON-NLS-1$
+		new Exception("<Fake exception>").printStackTrace(System.out); //$NON-NLS-1$
+	}
+
+	private void verbose_container_value_after_initialization(
+			IScriptProject project, IPath containerPath,
+			IBuildpathContainer container) {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("CPContainer INIT - after resolution\n"); //$NON-NLS-1$
+		buffer.append("	project: " + project.getElementName() + '\n'); //$NON-NLS-1$
+		buffer.append("	container path: " + containerPath + '\n'); //$NON-NLS-1$
+		if (container != null) {
+			buffer
+					.append("	container: " + container.getDescription(project) + " {\n"); //$NON-NLS-2$//$NON-NLS-1$
+			IBuildpathEntry[] entries = container.getBuildpathEntries(project);
+			if (entries != null) {
+				for (int i = 0; i < entries.length; i++) {
+					buffer.append("		" + entries[i] + '\n'); //$NON-NLS-1$
+				}
+			}
+			buffer.append("	}");//$NON-NLS-1$
+		} else {
+			buffer.append("	container: {unbound}");//$NON-NLS-1$
+		}
+		Util.verbose(buffer.toString());
+	}
+
+	private void verbose_container_initialization_failed(
+			IScriptProject project, IPath containerPath,
+			IBuildpathContainer container,
+			final BuildpathContainerInitializer initializer) {
+		if (container == CONTAINER_INITIALIZATION_IN_PROGRESS) {
+			Util
+					.verbose("CPContainer INIT - FAILED (initializer did not initialize container)\n" + //$NON-NLS-1$
+							"	project: " //$NON-NLS-1$
+							+ project.getElementName()
+							+ '\n'
+							+ "	container path: " //$NON-NLS-1$
+							+ containerPath
+							+ '\n'
+							+ "	initializer: " + initializer); //$NON-NLS-1$
+		} else {
+			Util.verbose("CPContainer INIT - FAILED (see exception above)\n" + //$NON-NLS-1$
+					"	project: " //$NON-NLS-1$
+					+ project.getElementName() + '\n' + "	container path: " //$NON-NLS-1$
+					+ containerPath + '\n' + "	initializer: " + initializer); //$NON-NLS-1$
+		}
 	}
 
 	/**
@@ -1999,10 +2069,8 @@ public class ModelManager implements ISaveParticipant {
 							"	container path: " //$NON-NLS-1$
 							+ containerPath
 							+ '\n'
-							+ //$NON-NLS-1$
-							"	projects: {" //$NON-NLS-1$
-							+ //$NON-NLS-1$
-							Util.toString(projects, new Util.Displayable() {
+							+ "	projects: {" //$NON-NLS-1$
+							+ Util.toString(projects, new Util.Displayable() {
 								public String displayString(Object o) {
 									return ((IScriptProject) o)
 											.getElementName();
@@ -2121,11 +2189,8 @@ public class ModelManager implements ISaveParticipant {
 		}
 	}
 
-	public ISourceCodeCache getSourceCodeCache() {
-		if (sourceCodeCache == null) {
-			sourceCodeCache = new SourceCodeCache();
-		}
-		return sourceCodeCache;
+	public IFileCache getFileCache() {
+		return fileCache;
 	}
 
 	/**
@@ -2215,18 +2280,16 @@ public class ModelManager implements ISaveParticipant {
 		synchronized (this.perProjectInfos) {
 			values = new ArrayList(this.perProjectInfos.values());
 		}
-		if (values != null) {
-			Iterator iterator = values.iterator();
-			while (iterator.hasNext()) {
-				try {
-					PerProjectInfo info = (PerProjectInfo) iterator.next();
-					saveState(info, context);
-					info.rememberExternalLibTimestamps();
-				} catch (CoreException e) {
-					if (vStats == null)
-						vStats = new ArrayList();
-					vStats.add(e.getStatus());
-				}
+		Iterator iterator = values.iterator();
+		while (iterator.hasNext()) {
+			try {
+				PerProjectInfo info = (PerProjectInfo) iterator.next();
+				saveState(info, context);
+				info.rememberExternalLibTimestamps();
+			} catch (CoreException e) {
+				if (vStats == null)
+					vStats = new ArrayList();
+				vStats.add(e.getStatus());
 			}
 		}
 		if (vStats != null) {
@@ -2959,13 +3022,10 @@ public class ModelManager implements ISaveParticipant {
 		}
 	}
 
-	private SourceModuleInfoCache sourceModuleInfoCach;
+	private SourceModuleInfoCache sourceModuleInfoCache = null;
 
 	public ISourceModuleInfoCache getSourceModuleInfoCache() {
-		if (sourceModuleInfoCach == null) {
-			sourceModuleInfoCach = new SourceModuleInfoCache();
-		}
-		return sourceModuleInfoCach;
+		return sourceModuleInfoCache;
 	}
 
 	public static UserLibraryManager getUserLibraryManager() {

@@ -471,7 +471,7 @@ public class Util {
 	public static char[] getResourceContentsAsCharArray(IFile file)
 			throws ModelException {
 		final char[] result = ModelManager.getModelManager()
-				.getSourceCodeCache().get(file);
+				.getFileCache().get(file);
 		if (result != null) {
 			return result;
 		}
@@ -488,7 +488,7 @@ public class Util {
 	public static char[] getResourceContentsAsCharArray(IFileHandle file)
 			throws ModelException {
 		final char[] result = ModelManager.getModelManager()
-				.getSourceCodeCache().get(file);
+				.getFileCache().get(file);
 		if (result != null) {
 			return result;
 		}

@@ -318,6 +318,13 @@ public class DLTKCore extends Plugin {
 			+ ".codeComplete.discouragedReferenceCheck"; //$NON-NLS-1$					
 
 	/**
+	 * Possible configurable option ID. Value is the identifier of
+	 * implementation contributed to the org.eclipse.dltk.core.fileCache
+	 * extension point.
+	 */
+	public static final String FILE_CACHE = PLUGIN_ID + ".contentCache"; //$NON-NLS-1$					
+
+	/**
 	 * The constructor.
 	 */
 	public DLTKCore() {

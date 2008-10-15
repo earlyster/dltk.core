@@ -50,6 +50,7 @@ public class DLTKCorePreferenceInitializer extends
 		defaultOptionsMap.put(
 				DLTKCore.CORE_ENABLE_BUILDPATH_EXCLUSION_PATTERNS,
 				DLTKCore.ENABLED);
+		defaultOptionsMap.put(DLTKCore.FILE_CACHE, FileCacheStub.ID);
 
 		// encoding setting comes from resource plug-in
 		optionNames.add(DLTKCore.CORE_ENCODING);

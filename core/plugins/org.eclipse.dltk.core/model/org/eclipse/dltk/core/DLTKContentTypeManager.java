@@ -292,7 +292,7 @@ public class DLTKContentTypeManager {
 				 * content types
 				 */
 				InputStream contents = ModelManager.getModelManager()
-						.getSourceCodeCache().getContentsIfCached(file);
+						.getFileCache().getContentsIfCached(file);
 				if (contents == null) {
 					contents = new BufferedInputStream(file.getContents(), 2048);
 				}
