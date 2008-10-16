@@ -39,7 +39,7 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 	static final IVariable[] NO_VARIABLES = new IVariable[0];
 
 	private final IScriptType type;
-	private final IVariable[] variables;
+	final IVariable[] variables;
 	private IScriptStackFrame frame;
 	private int pageSize;
 	private String name;
@@ -277,5 +277,19 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 	 */
 	public String getMemoryAddress() {
 		return address;
+	}
+
+	/**
+	 * Tests that some of the children are already created.
+	 * 
+	 * @return
+	 */
+	protected boolean hasChildrenValuesLoaded() {
+		for (int i = 0; i < variables.length; ++i) {
+			if (variables[i] != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

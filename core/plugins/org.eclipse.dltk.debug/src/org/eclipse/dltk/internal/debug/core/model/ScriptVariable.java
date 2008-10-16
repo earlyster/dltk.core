@@ -138,16 +138,26 @@ public class ScriptVariable extends ScriptDebugElement implements
 			throws DebugException {
 		if (newVariable instanceof ScriptVariable) {
 			final ScriptVariable v = (ScriptVariable) newVariable;
-			isValueChanged = !equals(property, v.property);
-			if (!isValueChanged) {
-				if (property.getAvailableChildren().length != 0
-						&& v.property.getAvailableChildren().length != 0) {
+			if (property.hasChildren() && v.property.hasChildren()) {
+				isValueChanged = false;
+				if (value != null
+						&& ((ScriptValue) value).hasChildrenValuesLoaded()) {
+					/*
+					 * Refresh children if some of them are loaded. Since it
+					 * could be a hash - it is safer to get all of the new
+					 * children.
+					 */
 					ScriptStackFrame.refreshVariables(v.getValue()
-							.getVariables(), getValue().getVariables());
+							.getVariables(), ((ScriptValue) value).variables);
+				} else {
+					property = v.property;
+					value = v.value;
 				}
+			} else {
+				isValueChanged = !equals(property, v.property);
+				value = v.value;
+				property = v.property;
 			}
-			value = v.value;
-			property = v.property;
 			return this;
 		} else {
 			return newVariable;
@@ -155,10 +165,14 @@ public class ScriptVariable extends ScriptDebugElement implements
 	}
 
 	private static boolean equals(IDbgpProperty p1, IDbgpProperty p2) {
-		if (StrUtils.equals(p1.getType(), p2.getType())) {
-			if (!StrUtils.equals(p1.getValue(), p2.getValue())) {
-				return false;
-			}
+		if (p1.hasChildren() != p2.hasChildren()) {
+			return false;
+		}
+		if (!StrUtils.equals(p1.getType(), p2.getType())) {
+			return false;
+		}
+		if (!StrUtils.equals(p1.getValue(), p2.getValue())) {
+			return false;
 		}
 		if (StrUtils.isNotEmpty(p1.getKey())
 				&& StrUtils.isNotEmpty(p2.getKey())) {
