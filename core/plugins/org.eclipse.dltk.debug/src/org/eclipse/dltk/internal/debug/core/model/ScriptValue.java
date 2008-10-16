@@ -31,6 +31,7 @@ import org.eclipse.dltk.debug.core.model.IScriptType;
 import org.eclipse.dltk.debug.core.model.IScriptTypeFactory;
 import org.eclipse.dltk.debug.core.model.IScriptValue;
 import org.eclipse.dltk.internal.debug.core.eval.ScriptEvaluationCommand;
+import org.eclipse.osgi.util.NLS;
 
 public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		IIndexedValue {
@@ -113,8 +114,9 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		IDbgpProperty[] properties = pageProperty.getAvailableChildren();
 		final int size = Math.min(properties.length, variables.length - offset);
 		if (size != properties.length) {
-			DLTKDebugPlugin.logWarning(
-					Messages.AvailableChildrenExceedsVariableLength, null);
+			DLTKDebugPlugin.logWarning(NLS.bind(
+					Messages.AvailableChildrenExceedsVariableLength, name),
+					null);
 		}
 		if (size > 0) {
 			for (int i = 0; i < size; ++i) {
