@@ -12,13 +12,7 @@ package org.eclipse.dltk.internal.core.search;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IMethod;
-import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.IScriptFolder;
-import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.*;
 import org.eclipse.dltk.core.search.BasicSearchEngine;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.MethodNameMatchRequestor;
@@ -93,9 +87,10 @@ public class MethodNameMatchRequestorWrapper implements
 						.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR);
 				method = separatorIndex == -1 ? createMethodFromPath(path,
 						new String(simpleMethodName)) : null/*
-														 * createTypeFrom( path
-														 * , separatorIndex )
-														 */;
+															 * createTypeFrom(
+															 * path ,
+															 * separatorIndex )
+															 */;
 				if (DLTKCore.DEBUG) {
 					System.err.println("TODO: Add types from zips..."); //$NON-NLS-1$
 				}
@@ -165,9 +160,18 @@ public class MethodNameMatchRequestorWrapper implements
 		final IModelElement[] elements = unit.getChildren();
 		for (int i = 0; i < elements.length; i++) {
 			if (elements[i].getElementType() == ISourceModule.METHOD) {
-				IMethod method = (IMethod) elements[i];
-				if (method.getElementName().equals(simpleMethodName)) {
-					return method;
+				IMethod function = (IMethod) elements[i];
+				if (function.getElementName().equals(simpleMethodName)) {
+					return function;
+				}
+			} else if (elements[i].getElementType() == ISourceModule.TYPE) {
+				IType type = (IType) elements[i];
+				final IMethod[] methods = type.getMethods();
+				for (int j = 0; j < methods.length; j++) {
+					IMethod method = methods[j];
+					if (method.getElementName().equals(simpleMethodName)) {
+						return method;
+					}
 				}
 			}
 		}
