@@ -76,7 +76,6 @@ public class MethodSelectionComponent extends Composite implements ITypeSelectio
 
 	private static final String DIALOG_SETTINGS = "org.eclipse.jdt.internal.ui.dialogs.TypeSelectionComponent"; //$NON-NLS-1$
 	private static final String SHOW_STATUS_LINE = "show_status_line"; //$NON-NLS-1$
-	private static final String FULLY_QUALIFY_DUPLICATES = "fully_qualify_duplicates"; //$NON-NLS-1$
 	private static final String WORKINGS_SET_SETTINGS = "workingset_settings"; //$NON-NLS-1$
 
 	private IDLTKUILanguageToolkit fToolkit;
@@ -95,18 +94,6 @@ public class MethodSelectionComponent extends Composite implements ITypeSelectio
 			fForm.setVisible(checked);
 			fSettings.put(SHOW_STATUS_LINE, checked);
 			MethodSelectionComponent.this.layout();
-		}
-	}
-
-	private class FullyQualifyDuplicatesAction extends Action {
-		public FullyQualifyDuplicatesAction() {
-			super(DLTKUIMessages.TypeSelectionComponent_fully_qualify_duplicates_label, IAction.AS_CHECK_BOX);
-		}
-
-		public void run() {
-			boolean checked = isChecked();
-			fViewer.setFullyQualifyDuplicates(checked, true);
-			fSettings.put(FULLY_QUALIFY_DUPLICATES, checked);
 		}
 	}
 
@@ -228,7 +215,7 @@ public class MethodSelectionComponent extends Composite implements ITypeSelectio
 				}
 			}
 		});
-		fViewer.setFullyQualifyDuplicates(fSettings.getBoolean(FULLY_QUALIFY_DUPLICATES), false);
+
 		if (!fMultipleSelection) {
 			fForm = new ViewForm(this, SWT.BORDER | SWT.FLAT);
 			fForm.setFont(font);
@@ -354,9 +341,6 @@ public class MethodSelectionComponent extends Composite implements ITypeSelectio
 			showStatusLineAction.setChecked(fSettings.getBoolean(SHOW_STATUS_LINE));
 			viewMenu.add(showStatusLineAction);
 		}
-		FullyQualifyDuplicatesAction fullyQualifyDuplicatesAction = new FullyQualifyDuplicatesAction();
-		fullyQualifyDuplicatesAction.setChecked(fSettings.getBoolean(FULLY_QUALIFY_DUPLICATES));
-		viewMenu.add(fullyQualifyDuplicatesAction);
 		if (fScope == null) {
 			fFilterActionGroup = new WorkingSetFilterActionGroup(getShell(), DLTKUIPlugin.getActivePage(), new IPropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent event) {

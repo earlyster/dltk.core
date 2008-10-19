@@ -252,7 +252,6 @@ public class TypeInfoViewer {
 		private String[] fInstallLocations;
 		private String[] fVMNames;
 
-		// private boolean fFullyQualifyDuplicates;
 
 		public TypeInfoLabelProvider(ITypeInfoImageProvider extension) {
 			fProviderExtension = extension;
@@ -268,10 +267,6 @@ public class TypeInfoViewer {
 					.toArray(new String[locations.size()]);
 			fVMNames = (String[]) labels.toArray(new String[labels.size()]);
 
-		}
-
-		public void setFullyQualifyDuplicates(boolean value) {
-			// fFullyQualifyDuplicates= value;
 		}
 
 		private void processVMInstallType(IInterpreterInstallType installType,
@@ -1224,17 +1219,6 @@ public class TypeInfoViewer {
 		}
 	}
 
-	public void setFullyQualifyDuplicates(boolean value, boolean refresh) {
-		fLabelProvider.setFullyQualifyDuplicates(value);
-		if (!refresh)
-			return;
-		stop(false, false);
-		if (fTypeInfoFilter == null) {
-			reset();
-		} else {
-			scheduleSearchJob(isSyncJobRunning() ? HISTORY : FULL);
-		}
-	}
 
 	public void reset() {
 		fLastSelection = null;

@@ -252,10 +252,6 @@ public class MethodInfoViewer {
 
 		}
 
-		public void setFullyQualifyDuplicates(boolean value) {
-			// fFullyQualifyDuplicates= value;
-		}
-
 		private void processVMInstallType(IInterpreterInstallType installType,
 				List locations, List labels) {
 			if (installType != null) {
@@ -1185,18 +1181,6 @@ public class MethodInfoViewer {
 		stop(false, false);
 		fLastCompletedFilter = null;
 		fLastCompletedResult = null;
-		if (fMethodInfoFilter == null) {
-			reset();
-		} else {
-			scheduleSearchJob(isSyncJobRunning() ? HISTORY : FULL);
-		}
-	}
-
-	public void setFullyQualifyDuplicates(boolean value, boolean refresh) {
-		fLabelProvider.setFullyQualifyDuplicates(value);
-		if (!refresh)
-			return;
-		stop(false, false);
 		if (fMethodInfoFilter == null) {
 			reset();
 		} else {
