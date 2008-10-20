@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.ElementChangedEvent;
@@ -204,7 +205,7 @@ public class MixinModel {
 		for (Iterator iterator = entry.keys.iterator(); iterator.hasNext();) {
 			MixinElement element = getCreateEmpty((String) iterator.next());
 			markElementAsFinal(element);
-			addKeyToSet(result, element);
+			addKeyToSet(result, element, pattern);
 		}
 		if (TRACE) {
 			long end = System.currentTimeMillis();
@@ -218,14 +219,19 @@ public class MixinModel {
 				.toArray(new IMixinElement[result.size()]);
 	}
 
-	private void addKeyToSet(Set result, MixinElement element) {
+	private void addKeyToSet(Set result, MixinElement element, String pattern) {
+		// Skip all not matched keys
+		if (!CharOperation.match(pattern.toCharArray(), element.key
+				.toCharArray(), true)) {
+			return;
+		}
 		result.add(element);
 		existKeysCache.add(element.key);
 		notExistKeysCache.remove(element.key);
 		IMixinElement[] children = (IMixinElement[]) element.children
 				.toArray(new IMixinElement[element.children.size()]);
 		for (int i = 0; i < children.length; i++) {
-			addKeyToSet(result, (MixinElement) children[i]);
+			addKeyToSet(result, (MixinElement) children[i], pattern);
 		}
 	}
 
