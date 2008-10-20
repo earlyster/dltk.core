@@ -1022,6 +1022,7 @@ public class ModelManager implements ISaveParticipant {
 			workingCopy.closeBuffer();
 			// compute the delta if needed and register it if there are changes
 			if (deltaBuilder != null) {
+				getSourceModuleInfoCache().remove(workingCopy);
 				deltaBuilder.buildDeltas();
 				if ((deltaBuilder.delta != null)
 						&& (deltaBuilder.delta.getAffectedChildren().length > 0)) {
