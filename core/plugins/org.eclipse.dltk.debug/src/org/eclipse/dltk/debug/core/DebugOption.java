@@ -21,4 +21,10 @@ public class DebugOption {
 	public static final BooleanOption DBGP_ASYNC = new BooleanOption(
 			"DBGP_ASYNC", true); //$NON-NLS-1$
 
+	/**
+	 * <code>breakpoint_update</code> command can update line number
+	 */
+	public static final BooleanOption DBGP_BREAKPOINT_UPDATE_LINE_NUMBER = new BooleanOption(
+			"DBGP_BREAKPOINT_UPDATE_LINE_NUMBER", true); //$NON-NLS-1$
+
 }

@@ -29,6 +29,7 @@ import org.eclipse.dltk.dbgp.commands.IDbgpCoreCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpSpawnpointCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
+import org.eclipse.dltk.debug.core.DebugOption;
 import org.eclipse.dltk.debug.core.IDLTKDebugToolkit;
 import org.eclipse.dltk.debug.core.ScriptDebugManager;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
@@ -165,6 +166,17 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		}
 	}
 
+	private void addSpawnpoint(IScriptSpawnpoint spawnpoint)
+			throws DbgpException, CoreException {
+		if (supportsBreakpoint(spawnpoint)) {
+			final IDbgpSession session = getSession();
+			if (session != null) {
+				addSpawnpoint((IDbgpSpawnpointCommands) session
+						.get(IDbgpSpawnpointCommands.class), spawnpoint);
+			}
+		}
+	}
+
 	protected void changeBreakpoint(IDbgpBreakpointCommands commands,
 			IScriptBreakpoint breakpoint) throws DbgpException, CoreException {
 
@@ -235,6 +247,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 			IScriptBreakpoint breakpoint) throws DbgpException, CoreException {
 
 		commands.removeBreakpoint(breakpoint.getIdentifier());
+		breakpoint.setIdentifier(null);
 
 		if (breakpoint instanceof IScriptMethodEntryBreakpoint) {
 			IScriptMethodEntryBreakpoint entryBreakpoint = (IScriptMethodEntryBreakpoint) breakpoint;
@@ -255,7 +268,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	private static final int MINOR_CHANGE = 1;
 	private static final int MAJOR_CHANGE = 2;
 
-	private static int hasBreakpointChanges(IMarkerDelta delta,
+	private int hasBreakpointChanges(IMarkerDelta delta,
 			IScriptBreakpoint breakpoint) {
 		final String[] attrs = breakpoint.getUpdatableAttributes();
 		try {
@@ -292,20 +305,24 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 			final IMarker marker = delta.getMarker();
 			for (int i = 0; i < attrs.length; ++i) {
 				final String attr = attrs[i];
-				if (IBreakpoint.ENABLED.equals(attr)) {
+				if (IBreakpoint.ENABLED.equals(attr)
+						|| IMarker.LINE_NUMBER.equals(attr)) {
 					final Object oldValue = delta.getAttribute(attr);
 					final Object newValue = marker.getAttribute(attr);
 					if (oldValue == null) {
 						if (newValue != null) {
-							return MINOR_CHANGE;
+							return IMarker.LINE_NUMBER.equals(attr) ? MAJOR_CHANGE
+									: MINOR_CHANGE;
 						}
 						continue;
 					}
 					if (newValue == null) {
-						return MINOR_CHANGE;
+						return IMarker.LINE_NUMBER.equals(attr) ? MAJOR_CHANGE
+								: MINOR_CHANGE;
 					}
 					if (!oldValue.equals(newValue)) {
-						return MINOR_CHANGE;
+						return IMarker.LINE_NUMBER.equals(attr) ? MAJOR_CHANGE
+								: MINOR_CHANGE;
 					}
 				}
 			}
@@ -315,7 +332,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		return NO_CHANGES;
 	}
 
-	private static int classifyBreakpointChange(IMarkerDelta delta,
+	private int classifyBreakpointChange(IMarkerDelta delta,
 			IScriptBreakpoint breakpoint, String attr) throws CoreException {
 		final boolean conditional = ScriptBreakpointUtils
 				.isConditional(breakpoint);
@@ -327,6 +344,11 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		final String oldExpr = delta.getAttribute(
 				AbstractScriptBreakpoint.EXPRESSION, null);
 		if (ScriptBreakpointUtils.isConditional(oldExprState, oldExpr) != conditional) {
+			return MAJOR_CHANGE;
+		}
+		if (IMarker.LINE_NUMBER.equals(attr)
+				&& !target.getOptions().get(
+						DebugOption.DBGP_BREAKPOINT_UPDATE_LINE_NUMBER)) {
 			return MAJOR_CHANGE;
 		}
 		return MINOR_CHANGE;
@@ -400,6 +422,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 						.get(IDbgpSpawnpointCommands.class);
 				if (commands != null) {
 					commands.removeSpawnpoint(spawnpoint.getIdentifier());
+					spawnpoint.setIdentifier(null);
 				}
 			}
 		}
@@ -532,9 +555,15 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		try {
 			if (breakpoint instanceof IScriptBreakpoint && delta != null) {
 				if (breakpoint instanceof IScriptSpawnpoint) {
-					if (hasSpawnpointChanges(delta,
-							(IScriptSpawnpoint) breakpoint) == MINOR_CHANGE) {
-						changeSpawnpoint((IScriptSpawnpoint) breakpoint);
+					final int changes = hasSpawnpointChanges(delta,
+							(IScriptSpawnpoint) breakpoint);
+					if (changes != NO_CHANGES) {
+						if (changes == MAJOR_CHANGE) {
+							removeSpawnpoint((IScriptSpawnpoint) breakpoint);
+							addSpawnpoint((IScriptSpawnpoint) breakpoint);
+						} else {
+							changeSpawnpoint((IScriptSpawnpoint) breakpoint);
+						}
 					}
 				} else {
 					final int changes = hasBreakpointChanges(delta,
