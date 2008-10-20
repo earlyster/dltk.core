@@ -76,6 +76,29 @@ public class BreakpointUtils {
 		}
 	}
 
+	public static void addSpawnpoint(ITextEditor textEditor, int lineNumber)
+			throws CoreException {
+		IDocument document = textEditor.getDocumentProvider().getDocument(
+				textEditor.getEditorInput());
+
+		IResource resource = getBreakpointResource(textEditor);
+		try {
+			IRegion line = document.getLineInformation(lineNumber - 1);
+			int start = line.getOffset();
+			int end = start + line.getLength();
+
+			String debugModelId = getDebugModelId(textEditor, resource);
+			if (debugModelId == null)
+				return;
+
+			IPath location = getBreakpointResourceLocation(textEditor);
+			ScriptDebugModel.createSpawnpoint(debugModelId, resource, location,
+					lineNumber, start, end, true, null);
+		} catch (BadLocationException e) {
+			DLTKDebugPlugin.log(e);
+		}
+	}
+
 	public static IResource getBreakpointResource(ITextEditor textEditor) {
 		IResource resource = (IResource) textEditor.getEditorInput()
 				.getAdapter(IResource.class);

@@ -114,6 +114,8 @@ public class ScriptDebugImages {
 	public static final String IMG_OBJS_METHOD_ENTRY_ENABLED = "IMG_OBJS_METHOD_ENTRY"; //$NON-NLS-1$
 	public static final String IMG_OBJS_METHOD_ENTRY_DIABLED = "IMG_OBJS_METHOD_ENTRY_DISABLED"; //$NON-NLS-1$
 	
+	public static final String IMG_OBJS_SPAWNPOINT = "IMG_OBJS_SPAWNPOINT"; //$NON-NLS-1$
+	public static final String IMG_OBJS_SPAWNPOINT_DISABLED = "IMG_OBJS_SPAWNPOINT_DISABLED"; //$NON-NLS-1$
 
 	/**
 	 * Returns the image managed under the given key in this registry.
@@ -252,6 +254,9 @@ public class ScriptDebugImages {
 		fgImageRegistry.put(IMG_OBJS_METHOD_ENTRY_DIABLED, new ScriptDebugImageDescriptor(
 				DebugUITools.getImageDescriptor(IDebugUIConstants.IMG_OBJS_BREAKPOINT_DISABLED),
 				ScriptDebugImageDescriptor.ENTRY));
+		declareRegistryImage(IMG_OBJS_SPAWNPOINT, T_OBJ + "spawn_e.gif"); //$NON-NLS-1$
+		declareRegistryImage(IMG_OBJS_SPAWNPOINT_DISABLED, T_OBJ
+				+ "spawn_d.gif"); //$NON-NLS-1$
 	}
 
 	/**

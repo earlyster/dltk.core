@@ -34,6 +34,7 @@ import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpointListener;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
 import org.eclipse.dltk.debug.core.model.IScriptMethodEntryBreakpoint;
+import org.eclipse.dltk.debug.core.model.IScriptSpawnpoint;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.preferences.StepFilterManager;
@@ -110,6 +111,8 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 					if (exitId != null) {
 						br = thread.getDbgpBreakpoint(exitId);
 					}
+				} else if (breakpoint instanceof IScriptSpawnpoint) {
+					// NOP
 				} else {
 					String id = breakpoint.getIdentifier();
 					if (id != null && id.length() != 0) {

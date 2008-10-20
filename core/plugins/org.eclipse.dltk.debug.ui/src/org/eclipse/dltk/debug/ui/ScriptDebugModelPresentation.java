@@ -45,6 +45,7 @@ import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
 import org.eclipse.dltk.debug.core.model.IScriptExceptionBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptLineBreakpoint;
+import org.eclipse.dltk.debug.core.model.IScriptSpawnpoint;
 import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptType;
@@ -550,6 +551,15 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 
 	// Images
 	protected Image getBreakpointImage(IScriptBreakpoint breakpoint) {
+		if (breakpoint instanceof IScriptSpawnpoint) {
+			try {
+				return ScriptDebugImages
+						.get(breakpoint.isEnabled() ? ScriptDebugImages.IMG_OBJS_SPAWNPOINT
+								: ScriptDebugImages.IMG_OBJS_SPAWNPOINT_DISABLED);
+			} catch (CoreException e) {
+				DLTKDebugUIPlugin.log(e);
+			}
+		}
 		return null;
 	}
 

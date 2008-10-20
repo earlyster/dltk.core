@@ -130,13 +130,15 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 		SWTFactory.createLabel(labelComposite, engineIdText, 1);
 
 		// Hit count
-		SWTFactory.createLabel(labelComposite,
-				BreakpointMessages.HitCountLabel, 1);
+		if (hasHitCountAttribute()) {
+			SWTFactory.createLabel(labelComposite,
+					BreakpointMessages.HitCountLabel, 1);
 
-		int hitCount = breakpoint.getHitCount();
-		String hitCountText = hitCount == -1 ? BreakpointMessages.HitCountNotAvailableMessage
-				: Integer.toString(hitCount);
-		SWTFactory.createLabel(labelComposite, hitCountText, 1);
+			int hitCount = breakpoint.getHitCount();
+			String hitCountText = hitCount == -1 ? BreakpointMessages.HitCountNotAvailableMessage
+					: Integer.toString(hitCount);
+			SWTFactory.createLabel(labelComposite, hitCountText, 1);
+		}
 
 		// from debugging engine
 
@@ -309,6 +311,10 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 		}
 
 		return composite;
+	}
+
+	protected boolean hasHitCountAttribute() {
+		return true;
 	}
 
 	protected boolean hasHitCountEditor() {

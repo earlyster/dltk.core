@@ -308,6 +308,9 @@
 						<instanceof
 							value="org.eclipse.dltk.debug.core.model.IScriptMethodEntryBreakpoint" />
 					</not>
+					<not>
+						<instanceof value="org.eclipse.dltk.debug.core.model.IScriptSpawnpoint" />
+					</not>
 				</and>
 			</enabledWhen>
 		</page>
@@ -322,6 +325,21 @@
 					</instanceof>
 					<adapt
 						type="org.eclipse.dltk.debug.core.model.IScriptWatchpoint">
+					</adapt>
+				</or>
+			</enabledWhen>
+		</page>
+		<page
+			class="org.eclipse.dltk.debug.ui.breakpoints.ScriptSpawnpointPropertyPage"
+			id="org.eclipse.dltk.debug.ui.breakpoints.ScriptSpawnpointPropertyPage"
+			name="%page.name.scriptSpawnpoint">
+			<enabledWhen>
+				<or>
+					<instanceof
+						value="org.eclipse.dltk.debug.core.model.IScriptSpawnpoint">
+					</instanceof>
+					<adapt
+						type="org.eclipse.dltk.debug.core.model.IScriptSpawnpoint">
 					</adapt>
 				</or>
 			</enabledWhen>
