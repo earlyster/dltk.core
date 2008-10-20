@@ -1071,6 +1071,7 @@ public class ModelManager implements ISaveParticipant {
 			// outside the perWorkingCopyInfos lock (see bug 50667)
 			removeInfoAndChildren(workingCopy);
 			workingCopy.closeBuffer();
+			getSourceModuleInfoCache().remove(workingCopy);
 			// compute the delta if needed and register it if there are changes
 			if (deltaBuilder != null) {
 				deltaBuilder.buildDeltas();
