@@ -17,10 +17,12 @@ import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.dbgp.IDbgpSessionInfo;
 import org.eclipse.dltk.dbgp.commands.IDbgpCoreCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpExtendedCommands;
+import org.eclipse.dltk.dbgp.commands.IDbgpSpawnpointCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpCoreCommands;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpDebuggingEngineCommunicator;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpExtendedCommands;
+import org.eclipse.dltk.dbgp.internal.commands.DbgpSpawnpointCommands;
 import org.eclipse.dltk.dbgp.internal.commands.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.internal.managers.DbgpNotificationManager;
 import org.eclipse.dltk.dbgp.internal.managers.DbgpStreamManager;
@@ -37,6 +39,7 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 	private final IDbgpCoreCommands coreCommands;
 
 	private final IDbgpExtendedCommands extendedCommands;
+	private final IDbgpSpawnpointCommands spawnpointCommands;
 
 	private final DbgpNotificationManager notificationManager;
 
@@ -112,6 +115,7 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 
 		this.coreCommands = new DbgpCoreCommands(communicator);
 		this.extendedCommands = new DbgpExtendedCommands(communicator);
+		this.spawnpointCommands = new DbgpSpawnpointCommands(communicator, this);
 
 		// Starting all
 		this.notificationManager.start();
@@ -206,5 +210,16 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 
 	public void configure(IDebugOptions debugOptions) {
 		communicator.configure(debugOptions);
+	}
+
+	public Object get(Class type) {
+		if (type == IDbgpSpawnpointCommands.class) {
+			return spawnpointCommands;
+		} else if (type == IDbgpCoreCommands.class) {
+			return coreCommands;
+		} else if (type == IDbgpExtendedCommands.class) {
+			return extendedCommands;
+		}
+		return null;
 	}
 }

@@ -64,12 +64,20 @@
 		<persistent value="true" />		
 		
 		<super type="org.eclipse.dltk.debug.scriptLineBreakpointMarker" />
+		<super type="org.eclipse.debug.core.lineBreakpointMarker" />
 		
 		<attribute name="org.eclipse.dltk.debug.fieldName"/>
 		<attribute name="org.eclipse.dltk.debug.access"/>
 		<attribute name="org.eclipse.dltk.debug.modification"/>
 	</extension>
 	
+	<extension id="scriptSpawnpointMarker"
+		point="org.eclipse.core.resources.markers">
+		<persistent value="true" />		
+		<super type="org.eclipse.dltk.debug.scriptLineBreakpointMarker" />
+		<super type="org.eclipse.debug.core.lineBreakpointMarker" />
+	</extension>
+
 	<extension point="org.eclipse.debug.core.breakpoints">
 		<breakpoint
       	  	class="org.eclipse.dltk.internal.debug.core.model.ScriptLineBreakpoint"
@@ -88,6 +96,11 @@
     	    id="scriptWatchpoint"
         	markerType="org.eclipse.dltk.debug.scriptWatchPointMarker"
         	name="%ScriptWatchpoint.name"/>
+		<breakpoint
+	        class="org.eclipse.dltk.internal.debug.core.model.ScriptSpawnpoint"
+    	    id="scriptSpawnpoint"
+        	markerType="org.eclipse.dltk.debug.scriptSpawnpointMarker"
+        	name="%ScriptSpawnpoint.name"/>
   <breakpoint
         class="org.eclipse.dltk.internal.debug.core.model.ScriptExceptionBreakpoint"
         id="scriptExceptionBreakpoint"

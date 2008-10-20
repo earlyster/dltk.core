@@ -21,8 +21,12 @@ import org.eclipse.debug.core.IBreakpointManagerListener;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.dbgp.IDbgpSession;
+import org.eclipse.dltk.dbgp.IDbgpSpawnpoint;
 import org.eclipse.dltk.dbgp.breakpoints.DbgpBreakpointConfig;
 import org.eclipse.dltk.dbgp.commands.IDbgpBreakpointCommands;
+import org.eclipse.dltk.dbgp.commands.IDbgpCoreCommands;
+import org.eclipse.dltk.dbgp.commands.IDbgpSpawnpointCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.IDLTKDebugToolkit;
@@ -32,8 +36,10 @@ import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
 import org.eclipse.dltk.debug.core.model.IScriptExceptionBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptLineBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptMethodEntryBreakpoint;
+import org.eclipse.dltk.debug.core.model.IScriptSpawnpoint;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptWatchpoint;
+import org.eclipse.osgi.util.NLS;
 
 public class ScriptBreakpointManager implements IBreakpointListener,
 		IBreakpointManagerListener {
@@ -86,7 +92,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	}
 
 	// Adding, removing, updating
-	protected void addBreakpoint(IDbgpBreakpointCommands commands,
+	protected void addBreakpoint(IDbgpCoreCommands commands,
 			IScriptBreakpoint breakpoint) throws CoreException, DbgpException {
 
 		DbgpBreakpointConfig config = createBreakpointConfig(breakpoint);
@@ -141,6 +147,22 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 
 		// Identifier
 		breakpoint.setIdentifier(id);
+	}
+
+	/**
+	 * @param session
+	 * @param spawnpoint
+	 * @throws CoreException
+	 * @throws DbgpException
+	 */
+	private void addSpawnpoint(IDbgpSpawnpointCommands commands,
+			IScriptSpawnpoint spawnpoint) throws DbgpException, CoreException {
+		final IDbgpSpawnpoint p = commands.setSpawnpoint(bpPathMapper
+				.map(spawnpoint.getResourceURI()), spawnpoint.getLineNumber(),
+				spawnpoint.isEnabled());
+		if (p != null) {
+			spawnpoint.setIdentifier(p.getId());
+		}
 	}
 
 	protected void changeBreakpoint(IDbgpBreakpointCommands commands,
@@ -233,7 +255,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	private static final int MINOR_CHANGE = 1;
 	private static final int MAJOR_CHANGE = 2;
 
-	private static int hasChanges(IMarkerDelta delta,
+	private static int hasBreakpointChanges(IMarkerDelta delta,
 			IScriptBreakpoint breakpoint) {
 		final String[] attrs = breakpoint.getUpdatableAttributes();
 		try {
@@ -246,15 +268,15 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 
 				if (oldValue == null) {
 					if (newValue != null) {
-						return classifyChange(delta, breakpoint, attr);
+						return classifyBreakpointChange(delta, breakpoint, attr);
 					}
 					continue;
 				}
 				if (newValue == null) {
-					return classifyChange(delta, breakpoint, attr);
+					return classifyBreakpointChange(delta, breakpoint, attr);
 				}
 				if (!oldValue.equals(newValue)) {
-					return classifyChange(delta, breakpoint, attr);
+					return classifyBreakpointChange(delta, breakpoint, attr);
 				}
 			}
 		} catch (CoreException e) {
@@ -263,7 +285,37 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		return NO_CHANGES;
 	}
 
-	private static int classifyChange(IMarkerDelta delta,
+	private static int hasSpawnpointChanges(IMarkerDelta delta,
+			IScriptBreakpoint breakpoint) {
+		final String[] attrs = breakpoint.getUpdatableAttributes();
+		try {
+			final IMarker marker = delta.getMarker();
+			for (int i = 0; i < attrs.length; ++i) {
+				final String attr = attrs[i];
+				if (IBreakpoint.ENABLED.equals(attr)) {
+					final Object oldValue = delta.getAttribute(attr);
+					final Object newValue = marker.getAttribute(attr);
+					if (oldValue == null) {
+						if (newValue != null) {
+							return MINOR_CHANGE;
+						}
+						continue;
+					}
+					if (newValue == null) {
+						return MINOR_CHANGE;
+					}
+					if (!oldValue.equals(newValue)) {
+						return MINOR_CHANGE;
+					}
+				}
+			}
+		} catch (CoreException e) {
+			DLTKDebugPlugin.log(e);
+		}
+		return NO_CHANGES;
+	}
+
+	private static int classifyBreakpointChange(IMarkerDelta delta,
 			IScriptBreakpoint breakpoint, String attr) throws CoreException {
 		final boolean conditional = ScriptBreakpointUtils
 				.isConditional(breakpoint);
@@ -287,11 +339,17 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	protected void addBreakpoint(IBreakpoint breakpoint) throws CoreException,
 			DbgpException {
 		if (supportsBreakpoint(breakpoint)) {
-			IScriptThread[] threads = (IScriptThread[]) target.getThreads();
+			final IDbgpSession session = getSession();
 
-			if (threads.length > 0) {
-				addBreakpoint(threads[0].getDbgpSession().getCoreCommands(),
-						(IScriptBreakpoint) breakpoint);
+			if (session != null) {
+				if (breakpoint instanceof IScriptSpawnpoint) {
+					addSpawnpoint((IDbgpSpawnpointCommands) session
+							.get(IDbgpSpawnpointCommands.class),
+							(IScriptSpawnpoint) breakpoint);
+				} else {
+					addBreakpoint(session.getCoreCommands(),
+							(IScriptBreakpoint) breakpoint);
+				}
 			}
 		}
 	}
@@ -299,10 +357,25 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	protected void changeBreakpoint(IBreakpoint breakpoint)
 			throws CoreException, DbgpException {
 		if (supportsBreakpoint(breakpoint)) {
-			IScriptThread[] threads = (IScriptThread[]) target.getThreads();
-			if (threads.length > 0) {
-				changeBreakpoint(threads[0].getDbgpSession().getCoreCommands(),
+			final IDbgpSession session = getSession();
+			if (session != null) {
+				changeBreakpoint(session.getCoreCommands(),
 						(IScriptBreakpoint) breakpoint);
+			}
+		}
+	}
+
+	private void changeSpawnpoint(IScriptSpawnpoint spawnpoint)
+			throws DbgpException, CoreException {
+		if (supportsBreakpoint(spawnpoint)) {
+			final IDbgpSession session = getSession();
+			if (session != null) {
+				final IDbgpSpawnpointCommands commands = (IDbgpSpawnpointCommands) session
+						.get(IDbgpSpawnpointCommands.class);
+				if (commands != null) {
+					commands.updateSpawnpoint(spawnpoint.getIdentifier(),
+							spawnpoint.isEnabled());
+				}
 			}
 		}
 	}
@@ -310,11 +383,34 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	protected void removeBreakpoint(IBreakpoint breakpoint)
 			throws CoreException, DbgpException {
 		if (supportsBreakpoint(breakpoint)) {
-			IScriptThread[] threads = (IScriptThread[]) target.getThreads();
-			if (threads.length > 0) {
-				removeBreakpoint(threads[0].getDbgpSession().getCoreCommands(),
+			final IDbgpSession session = getSession();
+			if (session != null) {
+				removeBreakpoint(session.getCoreCommands(),
 						(IScriptBreakpoint) breakpoint);
 			}
+		}
+	}
+
+	protected void removeSpawnpoint(IScriptSpawnpoint spawnpoint)
+			throws DbgpException, CoreException {
+		if (supportsBreakpoint(spawnpoint)) {
+			final IDbgpSession session = getSession();
+			if (session != null) {
+				final IDbgpSpawnpointCommands commands = (IDbgpSpawnpointCommands) session
+						.get(IDbgpSpawnpointCommands.class);
+				if (commands != null) {
+					commands.removeSpawnpoint(spawnpoint.getIdentifier());
+				}
+			}
+		}
+	}
+
+	private IDbgpSession getSession() throws DebugException {
+		final IScriptThread[] threads = (IScriptThread[]) target.getThreads();
+		if (threads.length > 0) {
+			return threads[0].getDbgpSession();
+		} else {
+			return null;
 		}
 	}
 
@@ -361,10 +457,9 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 			try {
 				addBreakpoint(breakpoints[i]);
 			} catch (Exception e) {
-				DLTKDebugPlugin
-						.logError(
-								org.eclipse.dltk.debug.core.Messages.ErrorSetupDeferredBreakpoints,
-								e);
+				DLTKDebugPlugin.logError(NLS.bind(
+						Messages.ErrorSetupDeferredBreakpoints, e.toString()),
+						e);
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
@@ -375,14 +470,13 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	// Simple breakpoint management
 	public String addBreakpoint(URI uri, int line) {
 		try {
-			IScriptThread[] threads = (IScriptThread[]) target.getThreads();
-			if (threads.length > 0) {
-				IScriptThread thread = threads[0];
+			final IDbgpSession session = getSession();
+			if (session != null) {
 
 				DbgpBreakpointConfig config = new DbgpBreakpointConfig(true);
 
-				return thread.getDbgpSession().getCoreCommands()
-						.setLineBreakpoint(uri, line, config);
+				return session.getCoreCommands().setLineBreakpoint(uri, line,
+						config);
 			}
 
 		} catch (DebugException e) {
@@ -396,10 +490,9 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 
 	public void removeBreakpoint(String id) {
 		try {
-			IScriptThread[] threads = (IScriptThread[]) target.getThreads();
-			if (threads.length > 0) {
-				IScriptThread thread = threads[0];
-				thread.getDbgpSession().getCoreCommands().removeBreakpoint(id);
+			final IDbgpSession session = getSession();
+			if (session != null) {
+				session.getCoreCommands().removeBreakpoint(id);
 			}
 		} catch (DebugException e) {
 			DLTKDebugPlugin.log(e);
@@ -438,14 +531,21 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	public void breakpointChanged(IBreakpoint breakpoint, IMarkerDelta delta) {
 		try {
 			if (breakpoint instanceof IScriptBreakpoint && delta != null) {
-				final int changes = hasChanges(delta,
-						(IScriptBreakpoint) breakpoint);
-				if (changes != NO_CHANGES) {
-					if (changes == MAJOR_CHANGE) {
-						removeBreakpoint(breakpoint);
-						addBreakpoint(breakpoint);
-					} else {
-						changeBreakpoint(breakpoint);
+				if (breakpoint instanceof IScriptSpawnpoint) {
+					if (hasSpawnpointChanges(delta,
+							(IScriptSpawnpoint) breakpoint) == MINOR_CHANGE) {
+						changeSpawnpoint((IScriptSpawnpoint) breakpoint);
+					}
+				} else {
+					final int changes = hasBreakpointChanges(delta,
+							(IScriptBreakpoint) breakpoint);
+					if (changes != NO_CHANGES) {
+						if (changes == MAJOR_CHANGE) {
+							removeBreakpoint(breakpoint);
+							addBreakpoint(breakpoint);
+						} else {
+							changeBreakpoint(breakpoint);
+						}
 					}
 				}
 			}
@@ -456,7 +556,11 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 
 	public void breakpointRemoved(IBreakpoint breakpoint, IMarkerDelta delta) {
 		try {
-			removeBreakpoint(breakpoint);
+			if (breakpoint instanceof IScriptSpawnpoint) {
+				removeSpawnpoint((IScriptSpawnpoint) breakpoint);
+			} else {
+				removeBreakpoint(breakpoint);
+			}
 		} catch (Exception e) {
 			DLTKDebugPlugin.log(e);
 		}
@@ -471,7 +575,12 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 
 		for (int i = 0; i < breakpoints.length; ++i) {
 			try {
-				changeBreakpoint(breakpoints[i]);
+				final IBreakpoint breakpoint = breakpoints[i];
+				if (breakpoint instanceof IScriptSpawnpoint) {
+					changeSpawnpoint((IScriptSpawnpoint) breakpoint);
+				} else {
+					changeBreakpoint(breakpoint);
+				}
 			} catch (Exception e) {
 				DLTKDebugPlugin.log(e);
 			}
