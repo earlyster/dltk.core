@@ -196,6 +196,9 @@ public class DbgpSpawnpointCommands extends DbgpBaseCommands implements
 	}
 
 	public void removeSpawnpoint(String spawnpointId) throws DbgpException {
+		if (spawnpointId == null) {
+			return;
+		}
 		initSpawnpoints();
 		final DbgpRequest request = createRequest(CMD_REMOVE);
 		request.addOption(OPTION_ID, spawnpointId);
