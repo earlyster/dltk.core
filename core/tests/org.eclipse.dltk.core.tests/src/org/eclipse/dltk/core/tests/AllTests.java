@@ -19,13 +19,13 @@ import org.eclipse.dltk.core.tests.ddp.CoreDDPTests;
 import org.eclipse.dltk.core.tests.launching.EnvironmentResolverTests;
 import org.eclipse.dltk.core.tests.launching.InterpreterConfigTests;
 import org.eclipse.dltk.core.tests.mixin.MixinIndexTests;
+import org.eclipse.dltk.core.tests.mixin.MixinModelTests;
 import org.eclipse.dltk.core.tests.model.BufferTests;
 import org.eclipse.dltk.core.tests.model.ModelMembersTests;
 import org.eclipse.dltk.core.tests.model.WorkingCopyTests;
 import org.eclipse.dltk.core.tests.util.CharacterStackTests;
 import org.eclipse.dltk.core.tests.utils.InternalCoreUtilTest;
 import org.eclipse.dltk.core.tests.utils.TextUtilsTest;
-import org.eclipse.dltk.utils.CharacterStack;
 
 public class AllTests {
 
@@ -37,6 +37,7 @@ public class AllTests {
 		suite.addTest(new TestSuite(CompilerCharOperationTests.class));
 		suite.addTest(new TestSuite(InternalCoreUtilTest.class));
 		suite.addTest(new TestSuite(MixinIndexTests.class));
+		suite.addTest(new TestSuite(MixinModelTests.class));
 		suite.addTest(BuildpathTests.suite());
 
 		suite.addTest(CoreDDPTests.suite());
@@ -46,9 +47,9 @@ public class AllTests {
 		suite.addTest(WorkingCopyTests.suite());
 
 		suite.addTest(InterpreterConfigTests.suite());
-		
+
 		suite.addTest(EnvironmentResolverTests.suite());
-		
+
 		suite.addTest(TextUtilsTest.suite());
 		suite.addTestSuite(CharacterStackTests.class);
 		// $JUnit-END$

@@ -63,5 +63,13 @@
            priority="high">
      </content-type>
   </extension>
+  <extension
+        point="org.eclipse.dltk.core.mixin">
+     <mixin
+           class="org.eclipse.dltk.core.tests.TestMixinParser"
+           nature="org.eclipse.dltk.core.tests.testnature"
+           priority="0">
+     </mixin>
+  </extension>
 
 </plugin>
