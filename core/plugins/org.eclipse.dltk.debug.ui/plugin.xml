@@ -414,6 +414,16 @@
 			category="org.eclipse.dltk.ui.main">
 		</view>
 	</extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            name="%displayViewName"
+            icon="$nl$/icons/full/etool16/disp_sbook.gif"
+            category="org.eclipse.dltk.ui.main"
+            class="org.eclipse.dltk.debug.ui.display.ScriptDisplayView"
+            id="org.eclipse.dltk.debug.ui.ScriptDisplayView">
+      </view>
+   </extension>
 	<extension point="org.eclipse.ui.commands">
 		<!--command
 			name="%ActionDefinition.stepIntoSelection.name"
