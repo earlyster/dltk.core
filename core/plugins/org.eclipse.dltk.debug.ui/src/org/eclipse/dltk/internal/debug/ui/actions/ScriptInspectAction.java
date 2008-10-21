@@ -12,7 +12,7 @@ package org.eclipse.dltk.internal.debug.ui.actions;
 
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.dltk.debug.core.eval.IScriptEvaluationResult;
-import org.eclipse.dltk.debug.core.eval.InsepctEvaluatedScriptExpression;
+import org.eclipse.dltk.debug.core.eval.InspectEvaluatedScriptExpression;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.swt.widgets.Display;
 
@@ -26,7 +26,7 @@ public class ScriptInspectAction extends ScriptEvaluationAction {
 			public void run() {
 				if (!display.isDisposed()) {
 					showExpressionView();
-					InsepctEvaluatedScriptExpression expression = new InsepctEvaluatedScriptExpression(
+					InspectEvaluatedScriptExpression expression = new InspectEvaluatedScriptExpression(
 							result);
 					DebugPlugin.getDefault().getExpressionManager()
 							.addExpression(expression);
