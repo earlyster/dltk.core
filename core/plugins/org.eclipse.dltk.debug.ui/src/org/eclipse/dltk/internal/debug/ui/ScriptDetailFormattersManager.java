@@ -97,52 +97,47 @@ public class ScriptDetailFormattersManager implements IPropertyChangeListener {
 
 	public void computeValueDetail(final IScriptValue value,
 			final IScriptThread thread, final IValueDetailListener listener) {
-		Runnable postEventDispatch = new Runnable() {
-			public void run() {
-				DetailFormatter formatter = getDetailFormatter(value);
-				if (thread == null || !thread.isSuspended()
-						|| formatter == null || !formatter.isEnabled()) {
-					/*
-					 * if the client doesn't define a formatter, or the engine
-					 * doesn't support the 'eval' command, fall back to using
-					 * the value returned in the 'property' response
-					 */
-					listener.detailComputed(value, getValueText(value));
-				} else {
-					final IScriptEvaluationCommand command = value
-							.createEvaluationCommand(formatter.getSnippet(),
-									thread);
-					if (command != null) {
-						command.asyncEvaluate(new IScriptEvaluationListener() {
-							public void evaluationComplete(
-									IScriptEvaluationResult result) {
-								if (result == null)
-									return;
+		if (thread == null || !thread.isSuspended()) {
+			listener.detailComputed(value, getValueText(value));
+			return;
+		}
+		final DetailFormatter formatter = getDetailFormatter(value);
+		if (formatter == null || !formatter.isEnabled()) {
+			/*
+			 * if the client doesn't define a formatter, or the engine doesn't
+			 * support the 'eval' command, fall back to using the value returned
+			 * in the 'property' response
+			 */
+			listener.detailComputed(value, getValueText(value));
+			return;
+		}
+		final IScriptEvaluationCommand command = value.createEvaluationCommand(
+				formatter.getSnippet(), thread);
+		if (command == null) {
+			listener.detailComputed(value, getValueText(value));
+			return;
+		}
+		command.asyncEvaluate(new IScriptEvaluationListener() {
+			public void evaluationComplete(IScriptEvaluationResult result) {
+				if (result == null)
+					return;
 
-								IScriptValue resultValue = result.getValue();
-								if (resultValue != null) {
-									listener.detailComputed(value,
-											getValueText(resultValue));
-								} else {
-									try {
-										listener
-												.detailComputed(value, value
-														.getValueString()/* CANNOT_EVALUATE */);
-									} catch (DebugException e) {
-										if (DLTKCore.DEBUG) {
-											e.printStackTrace();
-										}
-										listener.detailComputed(value,
-												CANNOT_EVALUATE);
-									}
-								}
-							}
-						});
+				IScriptValue resultValue = result.getValue();
+				if (resultValue != null) {
+					listener.detailComputed(value, getValueText(resultValue));
+				} else {
+					try {
+						listener
+								.detailComputed(value, value.getValueString()/* CANNOT_EVALUATE */);
+					} catch (DebugException e) {
+						if (DLTKCore.DEBUG) {
+							e.printStackTrace();
+						}
+						listener.detailComputed(value, CANNOT_EVALUATE);
 					}
 				}
 			}
-		};
-		DebugPlugin.getDefault().asyncExec(postEventDispatch);
+		});
 	}
 
 	public DetailFormatter getDetailFormatter(IScriptValue value) {
