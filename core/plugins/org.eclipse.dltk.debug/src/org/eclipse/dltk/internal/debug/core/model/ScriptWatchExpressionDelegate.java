@@ -21,7 +21,7 @@ import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 
 public class ScriptWatchExpressionDelegate implements IWatchExpressionDelegate {
-	private class ListenerAdpater implements IScriptEvaluationListener {
+	private static class ListenerAdpater implements IScriptEvaluationListener {
 		private final IWatchExpressionListener listener;
 
 		public ListenerAdpater(IWatchExpressionListener listener) {
@@ -33,6 +33,7 @@ public class ScriptWatchExpressionDelegate implements IWatchExpressionDelegate {
 					result));
 		}
 	}
+
 	protected static IScriptThread getScriptThread(Object context) {
 		if (context instanceof IScriptThread) {
 			return (IScriptThread) context;
@@ -67,8 +68,8 @@ public class ScriptWatchExpressionDelegate implements IWatchExpressionDelegate {
 		if (thread != null && frame != null) {
 			IScriptEvaluationEngine engine = thread.getEvaluationEngine();
 			if (engine != null) {
-				engine.asyncEvaluate(prepareExpression(expression), frame, new ListenerAdpater(
-						listener));
+				engine.asyncEvaluate(prepareExpression(expression), frame,
+						new ListenerAdpater(listener));
 			}
 		}
 	}
