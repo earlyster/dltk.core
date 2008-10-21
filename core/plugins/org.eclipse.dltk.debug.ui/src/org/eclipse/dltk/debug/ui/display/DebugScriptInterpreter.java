@@ -17,8 +17,10 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.eclipse.dltk.compiler.util.Util;
+import org.eclipse.dltk.console.IScriptExecResult;
 import org.eclipse.dltk.console.IScriptConsoleIO;
 import org.eclipse.dltk.console.IScriptInterpreter;
+import org.eclipse.dltk.console.ScriptExecResult;
 import org.eclipse.dltk.debug.core.eval.IScriptEvaluationResult;
 import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
@@ -70,7 +72,7 @@ public class DebugScriptInterpreter implements IScriptInterpreter {
 		return null;
 	}
 
-	public void exec(String command) throws IOException {
+	public IScriptExecResult exec(String command) throws IOException {
 		final IScriptStackFrame frame = ScriptEvaluationContextManager
 				.getEvaluationContext(part);
 		if (frame != null) {
@@ -81,14 +83,14 @@ public class DebugScriptInterpreter implements IScriptInterpreter {
 				if (result != null) {
 					final IScriptValue value = result.getValue();
 					if (value != null) {
-						output = value.getDetailsString();
+						String output = value.getDetailsString();
 						if (output == null) {
 							output = Messages.DebugScriptInterpreter_null;
 						}
 						if (!output.endsWith("\n")) { //$NON-NLS-1$
 							output = output + "\n"; //$NON-NLS-1$
 						}
-						return;
+						return new ScriptExecResult(output);
 					}
 					final StringBuffer buffer = new StringBuffer();
 					final String[] errors = result.getErrorMessages();
@@ -101,19 +103,13 @@ public class DebugScriptInterpreter implements IScriptInterpreter {
 								.append(Messages.DebugScriptInterpreter_unknownEvaluationError);
 						buffer.append(Util.LINE_SEPARATOR);
 					}
-					output = buffer.toString();
-					return;
+					return new ScriptExecResult(buffer.toString(), true);
 				}
 			}
 		}
-		output = Messages.DebugScriptInterpreter_NoDebugger
-				+ Util.LINE_SEPARATOR;
-	}
-
-	private String output;
-
-	public String getOutput() {
-		return output;
+		return new ScriptExecResult(
+				Messages.DebugScriptInterpreter_NoDebugger
+						+ Util.LINE_SEPARATOR, true);
 	}
 
 	public int getState() {
