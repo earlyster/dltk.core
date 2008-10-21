@@ -70,8 +70,11 @@ public class ScriptWatchExpressionDelegate implements IWatchExpressionDelegate {
 			if (engine != null) {
 				engine.asyncEvaluate(prepareExpression(expression), frame,
 						new ListenerAdpater(listener));
+				return;
 			}
 		}
+		listener
+				.watchEvaluationFinished(new NoWatchExpressionResult(expression));
 	}
 
 	protected String prepareExpression(String expression) {

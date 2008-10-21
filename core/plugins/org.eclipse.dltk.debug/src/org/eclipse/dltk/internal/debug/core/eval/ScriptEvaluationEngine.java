@@ -9,7 +9,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.dbgp.IDbgpProperty;
 import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.dbgp.commands.IDbgpExtendedCommands;
-import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.eval.IScriptEvaluationEngine;
 import org.eclipse.dltk.debug.core.eval.IScriptEvaluationListener;
 import org.eclipse.dltk.debug.core.eval.IScriptEvaluationResult;
@@ -66,7 +65,7 @@ public class ScriptEvaluationEngine implements IScriptEvaluationEngine {
 						new String[] { Messages.ScriptEvaluationEngine_cantEvaluate });
 			}
 
-		} catch (DbgpException e) {
+		} catch (Exception e) {
 			// TODO: improve
 			result = new FailedScriptEvaluationResult(thread, snippet,
 					new String[] { e.getMessage() });
@@ -108,11 +107,11 @@ public class ScriptEvaluationEngine implements IScriptEvaluationEngine {
 				Messages.ScriptEvaluationEngine_evaluationOf, snippet)) {
 			protected IStatus run(IProgressMonitor monitor) {
 				if (getScriptDebugTarget().isTerminated()) {
-					return Status.OK_STATUS;
+					listener.evaluationComplete(new NoEvaluationResult(snippet,
+							thread));
+				} else {
+					listener.evaluationComplete(syncEvaluate(snippet, frame));
 				}
-
-				listener.evaluationComplete(syncEvaluate(snippet, frame));
-
 				return Status.OK_STATUS;
 			}
 		};
