@@ -5,10 +5,10 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.model.IDebugElement;
 
-public class InsepctEvaluatedScriptExpression extends EvaluatedScriptExpression
+public class InspectEvaluatedScriptExpression extends EvaluatedScriptExpression
 		implements IDebugEventSetListener {
 
-	public InsepctEvaluatedScriptExpression(IScriptEvaluationResult result) {
+	public InspectEvaluatedScriptExpression(IScriptEvaluationResult result) {
 		super(result);
 
 		DebugPlugin.getDefault().addDebugEventListener(this);
