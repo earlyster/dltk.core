@@ -14,7 +14,7 @@ package org.eclipse.dltk.debug.ui.display;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.dltk.tcl.internal.debug.ui.display.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.dltk.debug.ui.display.messages"; //$NON-NLS-1$
 	public static String DebugScriptInterpreter_NoDebugger;
 	public static String DebugScriptInterpreter_null;
 	public static String DebugScriptInterpreter_unknownEvaluationError;
