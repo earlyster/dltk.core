@@ -314,8 +314,13 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 	public IPageBookViewPage createPage(IConsoleView view) {
 		SourceViewerConfiguration cfg = new ScriptConsoleSourceViewerConfiguration(
 				processor, hover);
-		page = new ScriptConsolePage(this, view, cfg);
+		page = createPage(view, cfg);
 		return page;
+	}
+
+	protected ScriptConsolePage createPage(IConsoleView view,
+			SourceViewerConfiguration cfg) {
+		return new ScriptConsolePage(this, view, cfg);
 	}
 
 	public void clearConsole() {

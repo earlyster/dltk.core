@@ -15,6 +15,7 @@ import org.eclipse.dltk.console.ui.ScriptConsole;
 import org.eclipse.dltk.console.ui.internal.actions.CloseScriptConsoleAction;
 import org.eclipse.dltk.console.ui.internal.actions.SaveConsoleSessionAction;
 import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.commands.ActionHandler;
@@ -72,10 +73,7 @@ public class ScriptConsolePage extends TextConsolePage implements
 				ScriptConsoleMessages.SaveSessionAction,
 				ScriptConsoleMessages.SaveSessionTooltip);
 
-		CloseScriptConsoleAction closeConsoleAction = new CloseScriptConsoleAction(
-				(ScriptConsole) getConsole(),
-				ScriptConsoleMessages.TerminateConsoleAction,
-				ScriptConsoleMessages.TerminateConsoleTooltip);
+		IAction closeConsoleAction = createTerminateConsoleAction();
 
 		IActionBars bars = getSite().getActionBars();
 
@@ -86,13 +84,21 @@ public class ScriptConsolePage extends TextConsolePage implements
 		toolbarManager.appendToGroup(ScriptConsoleConstants.SCRIPT_GROUP,
 				new Separator());
 
-		toolbarManager.appendToGroup(ScriptConsoleConstants.SCRIPT_GROUP,
-				closeConsoleAction);
+		if (closeConsoleAction != null) {
+			toolbarManager.appendToGroup(ScriptConsoleConstants.SCRIPT_GROUP,
+					closeConsoleAction);
+		}
 
 		toolbarManager.appendToGroup(ScriptConsoleConstants.SCRIPT_GROUP,
 				saveSessionAction);
 
 		bars.updateActionBars();
+	}
+
+	protected IAction createTerminateConsoleAction() {
+		return new CloseScriptConsoleAction((ScriptConsole) getConsole(),
+				ScriptConsoleMessages.TerminateConsoleAction,
+				ScriptConsoleMessages.TerminateConsoleTooltip);
 	}
 
 	protected TextConsoleViewer createViewer(Composite parent) {
