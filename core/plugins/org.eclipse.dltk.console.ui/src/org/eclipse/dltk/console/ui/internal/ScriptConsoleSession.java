@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.console.ui.internal;
 
+import org.eclipse.dltk.console.IScriptExecResult;
 import org.eclipse.dltk.console.ui.IScriptConsoleListener;
 import org.eclipse.dltk.console.ui.IScriptConsoleSession;
 
@@ -20,10 +21,10 @@ public class ScriptConsoleSession implements IScriptConsoleListener,
 		this.session = new StringBuffer();
 	}
 
-	public void interpreterResponse(String text) {		
+	public void interpreterResponse(IScriptExecResult text) {
 		if (text != null) {
 			session.append("> "); //$NON-NLS-1$
-			session.append(text);
+			session.append(text.getOutput());
 		}
 	}
 

@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.dltk.console.IScriptExecResult;
 import org.eclipse.dltk.console.IScriptConsoleInterpreter;
 import org.eclipse.dltk.console.IScriptInterpreter;
 import org.eclipse.dltk.console.ScriptConsoleHistory;
@@ -142,7 +143,8 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 				public void run() {
 					try {
-						final String result = handler.handleCommand(command);
+						final IScriptExecResult result = handler
+								.handleCommand(command);
 
 						if (((ScriptConsole) handler).getState() != IScriptConsoleInterpreter.WAIT_USER_INPUT) {
 							((ScriptConsole) handler).getPage().getSite()
@@ -215,10 +217,11 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 					});
 		}
 
-		protected void processResult(final String result)
+		protected void processResult(final IScriptExecResult result)
 				throws BadLocationException {
 			if (result != null) {
-				processText(-1, result, false, false, false, true);
+				processText(-1, result.getOutput(), false, result.isError(),
+						false, true);
 				history.commit();
 			}
 			offset = getLastLineLength();

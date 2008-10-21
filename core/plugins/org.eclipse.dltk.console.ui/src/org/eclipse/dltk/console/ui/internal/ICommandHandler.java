@@ -11,6 +11,8 @@ package org.eclipse.dltk.console.ui.internal;
 
 import java.io.IOException;
 
+import org.eclipse.dltk.console.IScriptExecResult;
+
 public interface ICommandHandler {
-	String handleCommand(String userInput) throws IOException;	
+	IScriptExecResult handleCommand(String userInput) throws IOException;
 }

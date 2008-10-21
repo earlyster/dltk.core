@@ -9,7 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.console.ui;
 
+import org.eclipse.dltk.console.IScriptExecResult;
+
 public interface IScriptConsoleListener {
 	void userRequest(String text);
-	void interpreterResponse(String text); 
+
+	void interpreterResponse(IScriptExecResult text);
 }

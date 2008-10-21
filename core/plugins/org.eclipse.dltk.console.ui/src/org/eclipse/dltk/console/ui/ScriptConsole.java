@@ -18,7 +18,10 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchesListener2;
+import org.eclipse.dltk.compiler.util.Util;
+import org.eclipse.dltk.console.IScriptExecResult;
 import org.eclipse.dltk.console.IScriptInterpreter;
+import org.eclipse.dltk.console.ScriptExecResult;
 import org.eclipse.dltk.console.ScriptConsoleHistory;
 import org.eclipse.dltk.console.ScriptConsolePrompt;
 import org.eclipse.dltk.console.ui.internal.ICommandHandler;
@@ -335,18 +338,17 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		return interpreter.getState();
 	}
 
-	public String handleCommand(String userInput) throws IOException {
+	public IScriptExecResult handleCommand(String userInput)
+			throws IOException {
 		if (this.interpreter == null && this.interpreter.isValid()) {
-			return ""; //$NON-NLS-1$
+			return new ScriptExecResult(Util.EMPTY_STRING);
 		}
 		Object[] listeners = consoleListeners.getListeners();
 		for (int i = 0; i < listeners.length; i++) {
 			((IScriptConsoleListener) listeners[i]).userRequest(userInput);
 		}
 
-		interpreter.exec(userInput);
-
-		String output = interpreter.getOutput();
+		IScriptExecResult output = interpreter.exec(userInput);
 
 		if (interpreter.getState() == IScriptInterpreter.WAIT_NEW_COMMAND) {
 			prompt.setMode(true);
