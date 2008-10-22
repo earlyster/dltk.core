@@ -37,4 +37,8 @@ public class ScriptExecResult implements IScriptExecResult {
 		return error;
 	}
 
+	public String toString() {
+		return output;
+	}
+
 }
