@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.core;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -130,14 +129,8 @@ public abstract class AbstractValidateJob extends Job {
 						.elementsToArray(), info.resourcesToArray(), monitor);
 			}
 		} finally {
-			try {
-				if (output != null) {
-					output.getStream().close();
-				}
-			} catch (IOException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
-				}
+			if (output != null) {
+				output.close();
 			}
 		}
 		return Status.OK_STATUS;

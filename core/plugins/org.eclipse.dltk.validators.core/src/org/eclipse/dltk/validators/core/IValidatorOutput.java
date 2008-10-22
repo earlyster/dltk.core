@@ -48,4 +48,9 @@ public interface IValidatorOutput {
 	 */
 	void println(String x);
 
+	/**
+	 * Closes this instance.
+	 */
+	void close();
+
 }

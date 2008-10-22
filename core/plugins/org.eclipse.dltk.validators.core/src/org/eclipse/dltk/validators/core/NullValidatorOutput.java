@@ -47,4 +47,8 @@ public class NullValidatorOutput extends OutputStream implements
 		// empty
 	}
 
+	public void close() {
+		// empty
+	}
+
 }
