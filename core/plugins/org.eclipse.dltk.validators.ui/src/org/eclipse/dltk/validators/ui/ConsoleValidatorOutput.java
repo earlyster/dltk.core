@@ -14,11 +14,12 @@ package org.eclipse.dltk.validators.ui;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.validators.core.IValidatorOutput;
+import org.eclipse.dltk.validators.internal.ui.ValidatorConsole;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.console.IPatternMatchListener;
 
@@ -29,13 +30,12 @@ public class ConsoleValidatorOutput implements IValidatorOutput {
 
 	private final IOConsoleOutputStream stream;
 	private boolean error = false;
-
-	public static final String CONSOLE_TYPE = "org.eclipse.dltk.validators.ConsoleValidatorOutput"; //$NON-NLS-1$
+	private final ValidatorConsole console;
 
 	public ConsoleValidatorOutput(String consoleName) {
 		final IConsoleManager consoleManager = ConsolePlugin.getDefault()
 				.getConsoleManager();
-		final IOConsole console = new IOConsole(consoleName, CONSOLE_TYPE, null);
+		console = new ValidatorConsole(consoleName);
 		final IPatternMatchListener[] listeners = ValidatorConsoleTrackerManager
 				.getListeners();
 		for (int i = 0; i < listeners.length; i++) {
@@ -44,13 +44,6 @@ public class ConsoleValidatorOutput implements IValidatorOutput {
 		consoleManager.addConsoles(new IConsole[] { console });
 		consoleManager.showConsoleView(console);
 		this.stream = console.newOutputStream();
-	}
-
-	/**
-	 * @param stream
-	 */
-	public ConsoleValidatorOutput(IOConsoleOutputStream stream) {
-		this.stream = stream;
 	}
 
 	public OutputStream getStream() {
@@ -66,12 +59,32 @@ public class ConsoleValidatorOutput implements IValidatorOutput {
 	}
 
 	public void println(String x) {
+		if (closed) {
+			return;
+		}
 		try {
 			stream.write(x);
 			stream.write("\n"); //$NON-NLS-1$
 		} catch (IOException e) {
 			error = true;
 		}
+	}
+
+	private boolean closed = false;
+
+	public void close() {
+		if (closed) {
+			return;
+		}
+		closed = true;
+		try {
+			stream.close();
+		} catch (IOException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		console.close();
 	}
 
 }

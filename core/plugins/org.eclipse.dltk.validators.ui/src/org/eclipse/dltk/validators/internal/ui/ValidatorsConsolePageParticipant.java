@@ -9,7 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.internal.ui;
 
-import org.eclipse.dltk.validators.ui.ConsoleValidatorOutput;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.console.IConsole;
@@ -31,14 +31,15 @@ public class ValidatorsConsolePageParticipant implements
 	}
 
 	public void init(IPageBookViewPage page, IConsole console) {
-		if (console instanceof IOConsole
-				&& ConsoleValidatorOutput.CONSOLE_TYPE
-						.equals(console.getType())) {
-			IActionBars bars = page.getSite().getActionBars();
-			IToolBarManager toolbarManager = bars.getToolBarManager();
-			toolbarManager.appendToGroup(IConsoleConstants.LAUNCH_GROUP,
-					new CloseValidatorsConsoleAction(console));
-		}
+		Assert.isLegal(console instanceof IOConsole);
+		Assert.isLegal(ValidatorConsole.TYPE.equals(console
+				.getType()));
+		IActionBars bars = page.getSite().getActionBars();
+		IToolBarManager toolbarManager = bars.getToolBarManager();
+		toolbarManager.appendToGroup(IConsoleConstants.LAUNCH_GROUP,
+				new CloseValidatorsConsoleAction(console));
+		toolbarManager.appendToGroup(IConsoleConstants.LAUNCH_GROUP,
+				new RemoveAllValidatorConsolesAction());
 	}
 
 	public Object getAdapter(Class adapter) {

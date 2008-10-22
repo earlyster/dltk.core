@@ -10,7 +10,6 @@
 package org.eclipse.dltk.validators.internal.ui;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 
@@ -22,6 +21,8 @@ public class CloseValidatorsConsoleAction extends Action {
 		this.console = console;
 		setText(Messages.ValidatorsConsolePageParticipant_close);
 		setToolTipText(Messages.ValidatorsConsolePageParticipant_closeConsole);
+		setImageDescriptor(ValidatorsUI.getDefault().getImageDescriptor(
+				"icons/remove_console.gif")); //$NON-NLS-1$
 	}
 
 	public void run() {
@@ -33,8 +34,4 @@ public class CloseValidatorsConsoleAction extends Action {
 		setEnabled(true);
 	}
 
-	public ImageDescriptor getImageDescriptor() {
-		return ValidatorsUI.getDefault().getImageDescriptor(
-				"icons/remove_console.gif"); //$NON-NLS-1$
-	}
 }

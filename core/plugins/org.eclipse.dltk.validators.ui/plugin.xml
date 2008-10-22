@@ -49,7 +49,15 @@
       <consolePageParticipant
             class="org.eclipse.dltk.validators.internal.ui.ValidatorsConsolePageParticipant"
             id="org.eclipse.dltk.validators.ui.validatorsConsolePageParticipant">
-         <enablement></enablement>
+         <enablement>
+         	<and>
+         		<instanceof value="org.eclipse.dltk.validators.internal.ui.ValidatorConsole"/>
+				<test
+					property="org.eclipse.ui.console.consoleTypeTest"
+					value="org.eclipse.dltk.validators.ConsoleValidatorOutput" />
+				<!-- value of org.eclipse.dltk.validators.internal.ui.ValidatorConsole.TYPE -->
+         	</and>
+         </enablement>
       </consolePageParticipant>
    </extension>
    <extension
