@@ -31,6 +31,7 @@ import org.eclipse.dltk.internal.debug.ui.ScriptDebugOptionsManager;
 import org.eclipse.dltk.internal.debug.ui.ScriptHotCodeReplaceListener;
 import org.eclipse.dltk.internal.debug.ui.log.ScriptDebugLogManager;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.IPreferencePage;
@@ -216,11 +217,7 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 	 * is returned. Otherwise the method returns the default display.
 	 */
 	public static Display getStandardDisplay() {
-		Display display;
-		display = Display.getCurrent();
-		if (display == null)
-			display = Display.getDefault();
-		return display;
+		return DLTKUIPlugin.getStandardDisplay();
 	}
 
 	/**
