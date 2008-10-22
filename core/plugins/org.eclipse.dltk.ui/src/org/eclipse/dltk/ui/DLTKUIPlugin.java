@@ -67,6 +67,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -719,6 +720,19 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		} else {
 			return null;
 		}
+	}
+	
+	/**
+	 * Returns the standard display to be used. The method first checks, if the
+	 * thread calling this method has an associated display. If so, this display
+	 * is returned. Otherwise the method returns the default display.
+	 */
+	public static Display getStandardDisplay() {
+		Display display;
+		display = Display.getCurrent();
+		if (display == null)
+			display = Display.getDefault();
+		return display;
 	}
 
 }

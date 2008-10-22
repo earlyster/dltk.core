@@ -12,6 +12,7 @@ package org.eclipse.dltk.ui.viewsupport;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
@@ -27,16 +28,7 @@ public class ImageDescriptorRegistry
 	 * display, respectively.
 	 */
 	public ImageDescriptorRegistry() {
-		this(getStandardDisplay());
-	}
-
-	private static Display getStandardDisplay()
-	{
-		Display display;
-		display= Display.getCurrent();
-		if (display == null)
-			display= Display.getDefault();
-		return display;
+		this(DLTKUIPlugin.getStandardDisplay());
 	}
 
 	/**
