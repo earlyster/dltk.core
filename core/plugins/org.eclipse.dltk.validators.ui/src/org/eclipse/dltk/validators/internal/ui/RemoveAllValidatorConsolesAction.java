@@ -18,7 +18,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.IOConsole;
 
 public class RemoveAllValidatorConsolesAction extends Action {
 
@@ -36,9 +35,9 @@ public class RemoveAllValidatorConsolesAction extends Action {
 		final List toRemove = new ArrayList();
 		for (int i = 0; i < consoles.length; ++i) {
 			IConsole console = consoles[i];
-			if (console instanceof IOConsole
-					&& ValidatorConsole.TYPE.equals(console
-							.getType())) {
+			if (console instanceof ValidatorConsole
+					&& ValidatorConsole.TYPE.equals(console.getType())
+					&& ((ValidatorConsole) console).isClosed()) {
 				toRemove.add(console);
 			}
 		}

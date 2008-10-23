@@ -15,9 +15,9 @@ import org.eclipse.ui.console.IConsole;
 
 public class CloseValidatorsConsoleAction extends Action {
 
-	private final IConsole console;
+	private final ValidatorConsole console;
 
-	public CloseValidatorsConsoleAction(IConsole console) {
+	public CloseValidatorsConsoleAction(ValidatorConsole console) {
 		this.console = console;
 		setText(Messages.ValidatorsConsolePageParticipant_close);
 		setToolTipText(Messages.ValidatorsConsolePageParticipant_closeConsole);
@@ -31,7 +31,7 @@ public class CloseValidatorsConsoleAction extends Action {
 	}
 
 	public void update() {
-		setEnabled(true);
+		setEnabled(console.isClosed());
 	}
 
 }

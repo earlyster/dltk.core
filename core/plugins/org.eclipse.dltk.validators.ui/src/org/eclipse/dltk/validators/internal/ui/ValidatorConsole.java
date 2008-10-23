@@ -19,6 +19,7 @@ public class ValidatorConsole extends IOConsole {
 	public static final String TYPE = "org.eclipse.dltk.validators.ConsoleValidatorOutput"; //$NON-NLS-1$
 
 	private final String initialName;
+	private boolean closed = false;
 
 	/**
 	 * @param name
@@ -29,12 +30,23 @@ public class ValidatorConsole extends IOConsole {
 	}
 
 	public void close() {
+		if (closed) {
+			return;
+		}
+		closed = true;
 		Runnable r = new Runnable() {
 			public void run() {
 				setName(Messages.ValidatorConsole_terminated + initialName);
 			}
 		};
 		DLTKUIPlugin.getStandardDisplay().asyncExec(r);
+	}
+
+	/**
+	 * @return the closed
+	 */
+	public boolean isClosed() {
+		return closed;
 	}
 
 }

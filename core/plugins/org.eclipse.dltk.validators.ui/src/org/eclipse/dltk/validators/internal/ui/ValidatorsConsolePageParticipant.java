@@ -15,7 +15,6 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsolePageParticipant;
-import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.part.IPageBookViewPage;
 
 public class ValidatorsConsolePageParticipant implements
@@ -31,13 +30,12 @@ public class ValidatorsConsolePageParticipant implements
 	}
 
 	public void init(IPageBookViewPage page, IConsole console) {
-		Assert.isLegal(console instanceof IOConsole);
-		Assert.isLegal(ValidatorConsole.TYPE.equals(console
-				.getType()));
+		Assert.isLegal(console instanceof ValidatorConsole);
+		Assert.isLegal(ValidatorConsole.TYPE.equals(console.getType()));
 		IActionBars bars = page.getSite().getActionBars();
 		IToolBarManager toolbarManager = bars.getToolBarManager();
 		toolbarManager.appendToGroup(IConsoleConstants.LAUNCH_GROUP,
-				new CloseValidatorsConsoleAction(console));
+				new CloseValidatorsConsoleAction((ValidatorConsole) console));
 		toolbarManager.appendToGroup(IConsoleConstants.LAUNCH_GROUP,
 				new RemoveAllValidatorConsolesAction());
 	}
