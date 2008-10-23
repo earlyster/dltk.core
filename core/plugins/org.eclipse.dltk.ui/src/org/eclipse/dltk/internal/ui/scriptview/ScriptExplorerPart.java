@@ -234,7 +234,7 @@ public class ScriptExplorerPart extends ViewPart implements
 		}
 	};
 
-	private class PackageExplorerProblemTreeViewer extends ProblemTreeViewer {
+	protected class PackageExplorerProblemTreeViewer extends ProblemTreeViewer {
 		// fix for 64372 Projects showing up in Package Explorer twice [package
 		// explorer]
 		private List fPendingRefreshes;
@@ -702,7 +702,7 @@ public class ScriptExplorerPart extends ViewPart implements
 	 * 
 	 * 
 	 */
-	private ProblemTreeViewer createViewer(Composite composite) {
+	protected ProblemTreeViewer createViewer(Composite composite) {
 		return new PackageExplorerProblemTreeViewer(composite, SWT.MULTI
 				| SWT.H_SCROLL | SWT.V_SCROLL);
 	}
@@ -1469,7 +1469,7 @@ public class ScriptExplorerPart extends ViewPart implements
 					.println("Add members order preference cach support here..."); //$NON-NLS-1$
 		}
 		// } else if
-		//(MembersOrderPreferenceCache.isMemberOrderProperty(event.getProperty()
+		// (MembersOrderPreferenceCache.isMemberOrderProperty(event.getProperty()
 		// ))
 		// {
 		// refreshViewer= true;
