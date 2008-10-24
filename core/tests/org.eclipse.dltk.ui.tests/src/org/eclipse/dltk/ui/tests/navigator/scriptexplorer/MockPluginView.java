@@ -71,7 +71,7 @@ public class MockPluginView extends ScriptExplorerPart {
 		
 	}
 	
-	private TreeViewer createViewer(Composite parent) {
+	protected ProblemTreeViewer createViewer(Composite parent) {
 		return new TestProblemTreeViewer(parent, SWT.MULTI);
 	}
 
