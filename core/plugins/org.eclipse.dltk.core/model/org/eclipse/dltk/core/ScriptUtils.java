@@ -112,4 +112,25 @@ public abstract class ScriptUtils {
 			return defaultValue;
 		}
 	}
+
+	/**
+	 * Retrieves the nature of the specified input object. If the input object
+	 * does not implement neither {@link IScriptLanguageDependent} nor
+	 * {@link IScriptNatureDependent} then <code>null<code> is returned.
+	 * 
+	 * @param natureId
+	 * @param input
+	 * @param defaultValue
+	 * @return
+	 */
+	public static String getNatureId(Object input) {
+		if (input instanceof IScriptNatureDependent) {
+			return ((IScriptNatureDependent) input).getNatureId();
+		} else if (input instanceof IScriptLanguageDependent) {
+			return ((IScriptLanguageDependent) input).getLanguageToolkit()
+					.getNatureId();
+		} else {
+			return null;
+		}
+	}
 }
