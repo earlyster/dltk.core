@@ -39,13 +39,19 @@ public abstract class AbstractBuildContext implements IBuildContext {
 		}
 	}
 
+	private final int buildType;
 	protected final ISourceModule module;
 
 	/**
 	 * @param module
 	 */
-	protected AbstractBuildContext(ISourceModule module) {
+	protected AbstractBuildContext(ISourceModule module, int buildType) {
 		this.module = module;
+		this.buildType = buildType;
+	}
+
+	public int getBuildType() {
+		return buildType;
 	}
 
 	private char[] contents;

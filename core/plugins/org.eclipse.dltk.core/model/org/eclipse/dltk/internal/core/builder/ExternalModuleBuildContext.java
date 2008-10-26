@@ -24,8 +24,8 @@ public class ExternalModuleBuildContext extends AbstractBuildContext implements
 	/**
 	 * @param module
 	 */
-	protected ExternalModuleBuildContext(ISourceModule module) {
-		super(module);
+	protected ExternalModuleBuildContext(ISourceModule module, int buildType) {
+		super(module, buildType);
 	}
 
 	/*

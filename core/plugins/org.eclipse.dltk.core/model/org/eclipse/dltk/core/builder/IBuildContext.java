@@ -30,6 +30,12 @@ public interface IBuildContext {
 	public static final String ATTR_MODULE_DECLARATION = ModuleDeclaration.class
 			.getName();
 
+	int FULL_BUILD = IScriptBuilder.FULL_BUILD;
+	int INCREMENTAL_BUILD = IScriptBuilder.INCREMENTAL_BUILD;
+	int RECONCILE_BUILD = 10;
+
+	int getBuildType();
+
 	/**
 	 * Returns the contents of the source module
 	 * 

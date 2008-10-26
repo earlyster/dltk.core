@@ -71,7 +71,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 										String.valueOf(remainingWork), module
 												.getElementName()));
 				final ExternalModuleBuildContext context = new ExternalModuleBuildContext(
-						module);
+						module, buildType);
 				try {
 					for (int i = 0; i < extensions.length; ++i) {
 						if (monitor.isCanceled()) {
@@ -146,7 +146,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 							.valueOf(modules.size() - counter), module
 							.getElementName()));
 			final SourceModuleBuildContext context = new SourceModuleBuildContext(
-					module);
+					module, buildType);
 			if (context.reporter != null) {
 				buildModule(context);
 				if (reporters != null) {

@@ -15,10 +15,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 public interface IBuildParticipantExtension {
 
-	public static final int FULL_BUILD = IScriptBuilder.FULL_BUILD;
-	public static final int INCREMENTAL_BUILD = IScriptBuilder.INCREMENTAL_BUILD;
-
-	public static final int RECONCILE_BUILD = 10;
+	int FULL_BUILD = IBuildContext.FULL_BUILD;
+	int INCREMENTAL_BUILD = IBuildContext.INCREMENTAL_BUILD;
+	int RECONCILE_BUILD = IBuildContext.RECONCILE_BUILD;
 
 	void beginBuild(int buildType);
 

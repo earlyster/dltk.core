@@ -18,6 +18,7 @@ import org.eclipse.dltk.compiler.task.ITaskReporter;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -35,7 +36,7 @@ class StructureBuilder {
 		 */
 		protected ReconcileBuildContext(ISourceModule module,
 				AccumulatingProblemReporter reporter) {
-			super(module);
+			super(module, IBuildContext.RECONCILE_BUILD);
 			this.reporter = reporter;
 		}
 
@@ -69,7 +70,7 @@ class StructureBuilder {
 			final IBuildParticipant participant = validators[j];
 			if (participant instanceof IBuildParticipantExtension) {
 				((IBuildParticipantExtension) participant)
-						.beginBuild(IBuildParticipantExtension.RECONCILE_BUILD);
+						.beginBuild(IBuildContext.RECONCILE_BUILD);
 			}
 		}
 		final ReconcileBuildContext context = new ReconcileBuildContext(module,

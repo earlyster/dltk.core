@@ -24,8 +24,8 @@ public class SourceModuleBuildContext extends AbstractBuildContext {
 	/**
 	 * @param module
 	 */
-	public SourceModuleBuildContext(ISourceModule module) {
-		super(module);
+	public SourceModuleBuildContext(ISourceModule module, int buildType) {
+		super(module, buildType);
 		final IResource resource = module.getResource();
 		reporter = resource != null ? new BuildProblemReporter(resource) : null;
 	}
