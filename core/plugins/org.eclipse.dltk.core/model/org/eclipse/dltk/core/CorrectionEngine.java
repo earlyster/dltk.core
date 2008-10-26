@@ -15,7 +15,36 @@ import org.eclipse.dltk.internal.core.util.Util;
 
 public class CorrectionEngine {
 	public static String[] getProblemArguments(IMarker problemMarker) {
-		String argumentsString = problemMarker.getAttribute(IScriptModelMarker.ARGUMENTS, null);
+		String argumentsString = problemMarker.getAttribute(
+				IScriptModelMarker.ARGUMENTS, null);
 		return Util.getProblemArgumentsFromMarker(argumentsString);
+	}
+
+	/**
+	 * returns <code>null</code> or string array
+	 * 
+	 * @param arguments
+	 * @return
+	 */
+	public static String[] decodeArguments(String arguments) {
+		if (arguments != null && arguments.length() != 0) {
+			return Util.getProblemArgumentsFromMarker(arguments);
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * returns <code>null</code> or string
+	 * 
+	 * @param arguments
+	 * @return
+	 */
+	public static String encodeArguments(String[] arguments) {
+		if (arguments != null && arguments.length != 0) {
+			return Util.getProblemArgumentsForMarker(arguments);
+		} else {
+			return null;
+		}
 	}
 }
