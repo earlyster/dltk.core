@@ -9,12 +9,12 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.ui;
+package org.eclipse.dltk.ui.text;
 
-import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.ui.IMarkerResolution;
 
-public interface IDLTKCorrectionProcessor {
+public class ScriptMarkerResoltionUtils {
 
-	boolean hasCorrections(Annotation annotation);
+	public static final IMarkerResolution[] NO_RESOLUTIONS = new IMarkerResolution[0];
 
 }

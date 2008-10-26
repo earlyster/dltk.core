@@ -707,22 +707,6 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns {@link IDLTKCorrectionProcessor} for the specified
-	 * {@link IDLTKUILanguageToolkit} or <code>null</code>.
-	 * 
-	 * @param uiToolkit
-	 * @return
-	 */
-	public static IDLTKCorrectionProcessor getCorrectionProcessor(
-			IDLTKUILanguageToolkit uiToolkit) {
-		if (uiToolkit instanceof IDLTKCorrectionProcessor) {
-			return (IDLTKCorrectionProcessor) uiToolkit;
-		} else {
-			return null;
-		}
-	}
-	
-	/**
 	 * Returns the standard display to be used. The method first checks, if the
 	 * thread calling this method has an associated display. If so, this display
 	 * is returned. Otherwise the method returns the default display.

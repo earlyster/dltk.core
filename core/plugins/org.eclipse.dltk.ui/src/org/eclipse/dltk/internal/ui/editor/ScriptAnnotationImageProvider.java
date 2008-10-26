@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.ui.editor;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.editor.IScriptAnnotation;
 import org.eclipse.dltk.ui.editor.ScriptMarkerAnnotation;
+import org.eclipse.dltk.ui.text.ScriptAnnotationUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.text.source.Annotation;
