@@ -12,7 +12,9 @@
 package org.eclipse.dltk.validators.core;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -63,7 +65,8 @@ public abstract class AbstractExternalValidator {
 	}
 
 	protected IMarker createMarker(IResource res, int line, int start, int end,
-			String msg, int severity, int priority) throws CoreException {
+			String msg, int severity, int priority, Map attributes)
+			throws CoreException {
 		final IMarker m = res.createMarker(getMarkerType());
 		m.setAttribute(IMarker.LINE_NUMBER, line);
 		m.setAttribute(IMarker.MESSAGE, msg);
@@ -71,18 +74,34 @@ public abstract class AbstractExternalValidator {
 		m.setAttribute(IMarker.PRIORITY, priority);
 		m.setAttribute(IMarker.CHAR_START, start);
 		m.setAttribute(IMarker.CHAR_END, end);
+		if (attributes != null && !attributes.isEmpty()) {
+			for (Iterator i = attributes.entrySet().iterator(); i.hasNext();) {
+				final Map.Entry entry = (Map.Entry) i.next();
+				m.setAttribute((String) entry.getKey(), entry.getValue());
+			}
+		}
 		return m;
 	}
 
 	protected IMarker reportWarning(IResource res, int line, int start,
 			int end, String msg) throws CoreException {
+		return reportWarning(res, line, start, end, msg, null);
+	}
+
+	protected IMarker reportWarning(IResource res, int line, int start,
+			int end, String msg, Map attributes) throws CoreException {
 		return createMarker(res, line, start, end, msg,
-				IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL);
+				IMarker.SEVERITY_WARNING, IMarker.PRIORITY_NORMAL, attributes);
 	}
 
 	protected IMarker reportError(IResource res, int line, int start, int end,
 			String msg) throws CoreException {
+		return reportError(res, line, start, end, msg, null);
+	}
+
+	protected IMarker reportError(IResource res, int line, int start, int end,
+			String msg, Map attributes) throws CoreException {
 		return createMarker(res, line, start, end, msg, IMarker.SEVERITY_ERROR,
-				IMarker.PRIORITY_NORMAL);
+				IMarker.PRIORITY_NORMAL, attributes);
 	}
 }
