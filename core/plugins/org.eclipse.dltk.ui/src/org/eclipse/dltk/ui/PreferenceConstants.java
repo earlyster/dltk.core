@@ -419,6 +419,10 @@ public class PreferenceConstants {
 		PreferenceConverter.setValue(store,
 				PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR,
 				rgb[0]);
+
+		// Fix bug 252155 - contributed by Eden Klein
+		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER,
+				"F,T,C,M"); //$NON-NLS-1$
 	}
 
 	/**
