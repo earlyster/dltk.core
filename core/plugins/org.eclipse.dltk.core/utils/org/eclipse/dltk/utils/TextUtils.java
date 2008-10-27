@@ -76,6 +76,23 @@ public abstract class TextUtils {
 	}
 
 	/**
+	 * Split this string around line boundaries (handles any line boundaries -
+	 * "\n", "\r", "\r\n" so it is not equivalent to String#split("\n"))
+	 * 
+	 * @param content
+	 * @param limit
+	 *            the maximal number of lines to return
+	 * @return
+	 */
+	public static String[] splitLines(CharSequence content, int limit) {
+		if (content == null) {
+			return null;
+		}
+		final LineSplitter splitter = new LineSplitter(content);
+		return splitter.split(limit);
+	}
+
+	/**
 	 * Counts the number of lines in the specified string. Lines are counter by
 	 * the separators ("\n", "\r", "\r\n")
 	 * 
@@ -131,6 +148,18 @@ public abstract class TextUtils {
 				final int begin = contentPos;
 				final int end = findEndOfLine();
 				result.add(content.subSequence(begin, end).toString());
+			}
+			return (String[]) result.toArray(new String[result.size()]);
+		}
+
+		public String[] split(int lines) {
+			final List result = new ArrayList(lines);
+			contentPos = 0;
+			while (lines > 0 && contentPos < contentEnd) {
+				final int begin = contentPos;
+				final int end = findEndOfLine();
+				result.add(content.subSequence(begin, end).toString());
+				--lines;
 			}
 			return (String[]) result.toArray(new String[result.size()]);
 		}
@@ -426,6 +455,22 @@ public abstract class TextUtils {
 			}
 		}
 		return buf.toString();
+	}
+
+	/**
+	 * @param lines
+	 * @param separator
+	 * @return
+	 */
+	public static String join(String[] lines, char separator) {
+		final StringBuffer sb = new StringBuffer(256);
+		for (int i = 0; i < lines.length; ++i) {
+			if (i != 0) {
+				sb.append(separator);
+			}
+			sb.append(lines[i]);
+		}
+		return sb.toString();
 	}
 
 	public static String[] split(String str, char separatorChar) {
