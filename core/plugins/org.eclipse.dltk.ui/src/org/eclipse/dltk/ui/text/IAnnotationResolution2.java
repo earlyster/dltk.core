@@ -11,29 +11,13 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text;
 
-import org.eclipse.dltk.ui.editor.IScriptAnnotation;
-import org.eclipse.jface.text.IDocument;
-
-/**
- * Resolution for a annotation. When run, a resolution would typically eliminate
- * the need for the annotation.
- */
-public interface IAnnotationResolution {
+public interface IAnnotationResolution2 extends IAnnotationResolution {
 
 	/**
-	 * Returns a short label indicating what the resolution will do.
+	 * Returns a description indicating what the resolution will do.
 	 * 
-	 * @return a short label for this resolution
+	 * @return
 	 */
-	public String getLabel();
-
-	/**
-	 * Runs this resolution.
-	 * 
-	 * @param annotation
-	 *            the annotation to resolve
-	 * @param document
-	 */
-	void run(IScriptAnnotation annotation, IDocument document);
+	public String getDescription();
 
 }

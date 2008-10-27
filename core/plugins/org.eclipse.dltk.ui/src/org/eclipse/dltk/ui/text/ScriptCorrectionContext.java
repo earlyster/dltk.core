@@ -16,10 +16,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.ui.editor.IScriptAnnotation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
+import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
  * Default implementation of the {@link IScriptCorrectionContext}.
@@ -41,6 +45,15 @@ public class ScriptCorrectionContext implements IScriptCorrectionContext {
 		proposals.add(proposal);
 	}
 
+	public void addResolution(IMarkerResolution resolution, IMarker marker) {
+		addProposal(new MarkerResolutionProposal(resolution, marker));
+	}
+
+	public void addResolution(IAnnotationResolution resolution,
+			IScriptAnnotation annotation) {
+		addProposal(new AnnotationResolutionProposal(resolution, annotation));
+	}
+
 	public ICompletionProposal[] getProposals() {
 		if (proposals != null) {
 			return (ICompletionProposal[]) proposals
@@ -51,6 +64,7 @@ public class ScriptCorrectionContext implements IScriptCorrectionContext {
 	}
 
 	private final IQuickAssistInvocationContext invocationContext;
+	private final ITextEditor editor;
 	private final ISourceModule module;
 
 	/**
@@ -59,9 +73,14 @@ public class ScriptCorrectionContext implements IScriptCorrectionContext {
 	 */
 	public ScriptCorrectionContext(
 			IQuickAssistInvocationContext invocationContext,
-			ISourceModule module) {
+			ITextEditor editor, ISourceModule module) {
 		this.invocationContext = invocationContext;
+		this.editor = editor;
 		this.module = module;
+	}
+
+	public ITextEditor getEditor() {
+		return editor;
 	}
 
 	public ISourceModule getModule() {

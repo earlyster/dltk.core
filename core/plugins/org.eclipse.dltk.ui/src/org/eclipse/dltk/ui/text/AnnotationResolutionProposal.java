@@ -11,24 +11,24 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text;
 
+import org.eclipse.dltk.ui.editor.IScriptAnnotation;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 public class AnnotationResolutionProposal implements ICompletionProposal {
 
 	private final IAnnotationResolution resolution;
-	private final Annotation annotation;
+	private final IScriptAnnotation annotation;
 
 	/**
 	 * @param annotation
 	 * @param resolution
 	 */
 	public AnnotationResolutionProposal(IAnnotationResolution resolution,
-			Annotation annotation) {
+			IScriptAnnotation annotation) {
 		this.resolution = resolution;
 		this.annotation = annotation;
 	}
@@ -38,6 +38,9 @@ public class AnnotationResolutionProposal implements ICompletionProposal {
 	}
 
 	public String getAdditionalProposalInfo() {
+		if (resolution instanceof IAnnotationResolution2) {
+			return ((IAnnotationResolution2) resolution).getDescription();
+		}
 		return annotation.getText();
 	}
 
