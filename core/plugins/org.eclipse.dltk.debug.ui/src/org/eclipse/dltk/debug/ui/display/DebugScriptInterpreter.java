@@ -17,8 +17,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.eclipse.dltk.compiler.util.Util;
-import org.eclipse.dltk.console.IScriptExecResult;
 import org.eclipse.dltk.console.IScriptConsoleIO;
+import org.eclipse.dltk.console.IScriptExecResult;
 import org.eclipse.dltk.console.IScriptInterpreter;
 import org.eclipse.dltk.console.ScriptExecResult;
 import org.eclipse.dltk.debug.core.eval.IScriptEvaluationResult;
