@@ -21,9 +21,9 @@ import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.console.IScriptExecResult;
 import org.eclipse.dltk.console.IScriptInterpreter;
-import org.eclipse.dltk.console.ScriptExecResult;
 import org.eclipse.dltk.console.ScriptConsoleHistory;
 import org.eclipse.dltk.console.ScriptConsolePrompt;
+import org.eclipse.dltk.console.ScriptExecResult;
 import org.eclipse.dltk.console.ui.internal.ICommandHandler;
 import org.eclipse.dltk.console.ui.internal.ScriptConsoleInput;
 import org.eclipse.dltk.console.ui.internal.ScriptConsolePage;
@@ -338,8 +338,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		return interpreter.getState();
 	}
 
-	public IScriptExecResult handleCommand(String userInput)
-			throws IOException {
+	public IScriptExecResult handleCommand(String userInput) throws IOException {
 		if (this.interpreter == null && this.interpreter.isValid()) {
 			return new ScriptExecResult(Util.EMPTY_STRING);
 		}
@@ -361,6 +360,15 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		}
 
 		return output;
+	}
+
+	/**
+	 * Executes the specified code and displays the results
+	 * 
+	 * @param command
+	 */
+	public void executeCommand(String command) {
+		getDocumentListener().executeCommand(command);
 	}
 
 	public void terminate() {

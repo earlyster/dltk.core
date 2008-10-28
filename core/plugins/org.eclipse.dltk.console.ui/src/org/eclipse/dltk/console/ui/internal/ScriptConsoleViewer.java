@@ -15,8 +15,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.eclipse.dltk.console.IScriptExecResult;
 import org.eclipse.dltk.console.IScriptConsoleInterpreter;
+import org.eclipse.dltk.console.IScriptExecResult;
 import org.eclipse.dltk.console.IScriptInterpreter;
 import org.eclipse.dltk.console.ScriptConsoleHistory;
 import org.eclipse.dltk.console.ScriptConsolePrompt;
@@ -133,9 +133,8 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 		}
 
-		protected void handleCommandLine() throws BadLocationException,
-				IOException {
-			final String command = getCommandLine();
+		protected void handleCommandLine(final String command)
+				throws BadLocationException {
 			ansiHelper.reset();
 			appendDelimeter();
 
@@ -282,24 +281,20 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 				int start = 0;
 				int index = -1;
-				String cmd;
 				while ((index = text.indexOf(delim, start)) != -1) {
-					cmd = text.substring(start, index);
+					String cmd = text.substring(start, index);
 					processText(getCommandLineOffset(), cmd, true, false,
 							false, true);
 
-					history.update(getCommandLine());
+					final String commandLine = getCommandLine();
+					history.update(commandLine);
 					start = index + delim.length();
-					handleCommandLine();
+					handleCommandLine(commandLine);
 				}
 
 				processText(-1, text.substring(start, text.length()), true,
 						false, false, true);
 			} catch (BadLocationException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
-				}
-			} catch (IOException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
@@ -364,6 +359,24 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 				}
 
 			});
+		}
+
+		/**
+		 * @param command
+		 */
+		public void executeCommand(String command) {
+			disconnectListener();
+			try {
+				processText(getCommandLineOffset(), command, true, false, true,
+						true);
+				handleCommandLine(command);
+			} catch (BadLocationException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			} finally {
+				connectListener();
+			}
 		}
 
 	}
