@@ -23,6 +23,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.TextConsoleViewer;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -89,7 +90,9 @@ public class DebugConsolePage extends ScriptConsolePage {
 	}
 
 	public void closeInputField() {
-		sash.setMaximizedControl(getControl());
+		final Control consoleControl = getControl();
+		sash.setMaximizedControl(consoleControl);
+		consoleControl.setFocus();
 		updateActions();
 	}
 
