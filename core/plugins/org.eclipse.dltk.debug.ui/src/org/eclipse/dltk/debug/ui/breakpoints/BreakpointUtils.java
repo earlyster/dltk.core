@@ -107,12 +107,79 @@ public class BreakpointUtils {
 		return resource;
 	}
 
+	private static interface IBreakpointLocationTester {
+
+		/**
+		 * @param bpLocation
+		 * @return
+		 */
+		boolean evaluate(String bpLocation);
+	}
+
+	private static class ResourceBreakpointLocationTester implements
+			IBreakpointLocationTester {
+
+		private final String workspacePath;
+		private final String filesystemPath;
+
+		/**
+		 * @param resource
+		 */
+		public ResourceBreakpointLocationTester(IResource resource) {
+			this.workspacePath = resource.getFullPath().toPortableString();
+			this.filesystemPath = new Path(resource.getLocationURI().getPath())
+					.toPortableString();
+		}
+
+		public boolean evaluate(String bpLocation) {
+			return workspacePath.equals(bpLocation)
+					|| filesystemPath.equals(bpLocation);
+		}
+
+	}
+
+	private static class SimpleBreakpointLocationTester implements
+			IBreakpointLocationTester {
+
+		private final String path;
+
+		/**
+		 * @param path
+		 */
+		public SimpleBreakpointLocationTester(IPath path) {
+			this.path = path.toPortableString();
+		}
+
+		public boolean evaluate(String bpLocation) {
+			return path.equals(bpLocation);
+		}
+
+	}
+
+	public static IBreakpointLocationTester getBreakpointLocationTester(
+			ITextEditor textEditor) throws CoreException {
+		IResource resource = (IResource) textEditor.getEditorInput()
+				.getAdapter(IResource.class);
+		if (resource != null) {
+			return new ResourceBreakpointLocationTester(resource);
+		}
+
+		// else
+		IModelElement element = (IModelElement) textEditor.getEditorInput()
+				.getAdapter(IModelElement.class);
+		if (element != null) {
+			return new SimpleBreakpointLocationTester(element.getPath());
+		}
+		return null;
+	}
+
 	public static IPath getBreakpointResourceLocation(ITextEditor textEditor)
 			throws CoreException {
 		IResource resource = (IResource) textEditor.getEditorInput()
 				.getAdapter(IResource.class);
-		if (resource != null)
-			return new Path(resource.getLocationURI().getPath());
+		if (resource != null) {
+			return resource.getFullPath();
+		}
 
 		// else
 		IModelElement element = (IModelElement) textEditor.getEditorInput()
@@ -151,11 +218,10 @@ public class BreakpointUtils {
 		String debugModelId = getDebugModelId(editor, resource);
 		IBreakpoint[] breakpoints = DebugPlugin.getDefault()
 				.getBreakpointManager().getBreakpoints(debugModelId);
-		IPath breakPointResourceLocation = getBreakpointResourceLocation(editor);
-		if (breakPointResourceLocation == null) {
+		IBreakpointLocationTester tester = getBreakpointLocationTester(editor);
+		if (tester == null) {
 			return null;
 		}
-		String location = breakPointResourceLocation.toPortableString();
 
 		for (int i = 0; i < breakpoints.length; i++) {
 			IBreakpoint breakpoint = breakpoints[i];
@@ -163,7 +229,7 @@ public class BreakpointUtils {
 			String bpLocation = (String) breakpoint.getMarker().getAttribute(
 					IMarker.LOCATION);
 
-			if (resource.equals(bpResource) && location.equals(bpLocation)) {
+			if (resource.equals(bpResource) && tester.evaluate(bpLocation)) {
 				ILineBreakpoint lineBreakpoint = (ILineBreakpoint) breakpoint;
 				try {
 					if (lineBreakpoint.getLineNumber() == lineNumber) {
