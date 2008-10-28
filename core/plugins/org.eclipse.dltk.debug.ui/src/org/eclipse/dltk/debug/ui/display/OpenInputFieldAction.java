@@ -21,7 +21,7 @@ public class OpenInputFieldAction extends Action {
 	public OpenInputFieldAction(DebugConsolePage page) {
 		super(Messages.OpenInputFieldAction_openCodeField, AS_CHECK_BOX);
 		setImageDescriptor(ScriptDebugImages
-				.getImageDescriptor(ScriptDebugImages.IMG_OBJS_MONITOR));
+				.getImageDescriptor(ScriptDebugImages.IMG_OBJS_SHOW_SNIPPET_FIELD));
 		this.page = page;
 	}
 

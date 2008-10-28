@@ -64,6 +64,7 @@ public class ScriptDebugImages {
 	public static final String IMG_OVR_CAUGHT_BREAKPOINT = "IMG_OBJS_CAUGHT_BREAKPOINT"; //$NON-NLS-1$
 	public static final String IMG_OVR_CAUGHT_BREAKPOINT_DISABLED = "IMG_OBJS_CAUGHT_BREAKPOINT_DISABLED"; //$NON-NLS-1$
 
+	public static final String IMG_OBJS_SHOW_SNIPPET_FIELD = "IMG_OBJS_SHOW_SNIPPET_FIELD"; //$NON-NLS-1$
 	public static final String IMG_OBJS_SNIPPET_EVALUATING = "IMG_OBJS_SNIPPET_EVALUATING"; //$NON-NLS-1$
 
 	// used
@@ -197,7 +198,9 @@ public class ScriptDebugImages {
 		declareRegistryImage(IMG_OBJS_ERROR, T_OBJ + "jrtexception_obj.gif"); //$NON-NLS-1$
 
 		declareRegistryImage(IMG_OBJS_SNIPPET_EVALUATING, T_OBJ
-				+ "jsbook_run_obj.gif"); //$NON-NLS-1$
+				+ "code_run_obj.gif"); //$NON-NLS-1$
+		declareRegistryImage(IMG_OBJS_SHOW_SNIPPET_FIELD, T_OBJ
+				+ "code_show_field_obj.gif"); //$NON-NLS-1$
 
 		declareRegistryImage(IMG_VIEW_ARGUMENTS_TAB, T_EVIEW
 				+ "variable_tab.gif"); //$NON-NLS-1$
