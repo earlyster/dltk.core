@@ -11,10 +11,13 @@ package org.eclipse.dltk.internal.core;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.CompletionRequestor;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
@@ -435,15 +438,34 @@ public class SourceType extends NamedMember implements IType {
 		return op.getResult();
 	}
 
+	private IDLTKSearchScope createReferencingProjectsScope() {
+
+		IScriptProject scriptProject = getScriptProject();
+		IProject project = scriptProject.getProject();
+		IProject[] referencingProjects = project.getReferencingProjects();
+
+		List scriptProjects = new ArrayList(referencingProjects.length + 1);
+		scriptProjects.add(scriptProject);
+
+		for (int i = 0; i < referencingProjects.length; ++i) {
+			IProject p = referencingProjects[i];
+			if (p.isAccessible()) {
+				scriptProjects.add(DLTKCore.create(p));
+			}
+		}
+		return SearchEngine.createSearchScope((IModelElement[]) scriptProjects
+				.toArray(new IModelElement[scriptProjects.size()]), false,
+				DLTKLanguageManager.getLanguageToolkit(this));
+	}
+
 	/**
 	 * @see IType
 	 */
 	public ITypeHierarchy newTypeHierarchy(IProgressMonitor monitor)
 			throws ModelException {
 		CreateTypeHierarchyOperation op;
-		op = new CreateTypeHierarchyOperation(this, null, SearchEngine
-				.createWorkspaceScope(DLTKLanguageManager
-						.getLanguageToolkit(this)), true);
+		op = new CreateTypeHierarchyOperation(this, null,
+				createReferencingProjectsScope(), true);
 		op.runOperation(monitor);
 		return op.getResult();
 	}
@@ -455,9 +477,8 @@ public class SourceType extends NamedMember implements IType {
 			IProgressMonitor monitor) throws ModelException {
 
 		CreateTypeHierarchyOperation op;
-		op = new CreateTypeHierarchyOperation(this, workingCopies, SearchEngine
-				.createWorkspaceScope(DLTKLanguageManager
-						.getLanguageToolkit(this)), true);
+		op = new CreateTypeHierarchyOperation(this, workingCopies,
+				createReferencingProjectsScope(), true);
 		op.runOperation(monitor);
 		return op.getResult();
 	}
@@ -471,9 +492,8 @@ public class SourceType extends NamedMember implements IType {
 		ISourceModule[] workingCopies = ModelManager.getModelManager()
 				.getWorkingCopies(owner, true/* add primary working copies */);
 		CreateTypeHierarchyOperation op;
-		op = new CreateTypeHierarchyOperation(this, workingCopies, SearchEngine
-				.createWorkspaceScope(DLTKLanguageManager
-						.getLanguageToolkit(this)), true);
+		op = new CreateTypeHierarchyOperation(this, workingCopies,
+				createReferencingProjectsScope(), true);
 		op.runOperation(monitor);
 		return op.getResult();
 	}
