@@ -12,48 +12,13 @@ package org.eclipse.dltk.internal.core.hierarchy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.ISafeRunnable;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SafeRunner;
-import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
-import org.eclipse.dltk.core.ElementChangedEvent;
-import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IElementChangedListener;
-import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IModelElementDelta;
-import org.eclipse.dltk.core.IModelStatusConstants;
-import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.IScriptFolder;
-import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.IType;
-import org.eclipse.dltk.core.ITypeHierarchy;
-import org.eclipse.dltk.core.ITypeHierarchyChangedListener;
-import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.core.runtime.*;
+import org.eclipse.dltk.core.*;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
-import org.eclipse.dltk.internal.core.ModelElement;
-import org.eclipse.dltk.internal.core.ModelStatus;
-import org.eclipse.dltk.internal.core.Openable;
-import org.eclipse.dltk.internal.core.Region;
-import org.eclipse.dltk.internal.core.ScriptFolder;
-import org.eclipse.dltk.internal.core.ScriptProject;
-import org.eclipse.dltk.internal.core.SourceModule;
-import org.eclipse.dltk.internal.core.TypeVector;
+import org.eclipse.dltk.internal.core.*;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
 
@@ -486,11 +451,16 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 		if (superclass == null) {
 			return supers.elements();
 		}
-		supers.addAll(superclass);
-		for (int i = 0; i < superclass.length; ++i) {
-			IType[] superclass2 = getAllSuperclasses(superclass[i]);
-			supers.addAll(superclass2);
+
+		for (int i = 0; i < superclass.length; i++) {
+			// to eliminate conflicts in dynamic situations
+			if (!type.equals(superclass[i])) {
+				supers.add(superclass[i]);
+				IType[] superclass2 = getAllSuperclasses(superclass[i]);
+				supers.addAll(superclass2);
+			}
 		}
+
 		return supers.elements();
 	}
 
