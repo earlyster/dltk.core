@@ -861,6 +861,7 @@ public class MixinModel {
 	public void clearKeysCache(String key) {
 		existKeysCache.remove(key);
 		notExistKeysCache.remove(key);
+		requestCache.remove(key);
 		// MixinElement e = (MixinElement)this.cache.get(key);
 	}
 
