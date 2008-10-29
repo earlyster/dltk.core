@@ -291,7 +291,8 @@ public abstract class MainLaunchConfigurationTab extends
 			throws CoreException {
 		final String projectName = LaunchConfigurationUtils
 				.getProjectName(config);
-		if (projectName == null) {
+		if (projectName == null || projectName.length() == 0
+				|| !Path.ROOT.isValidSegment(projectName)) {
 			return null;
 		}
 		final IProject project = getWorkspaceRoot().getProject(projectName);
@@ -299,7 +300,9 @@ public abstract class MainLaunchConfigurationTab extends
 			final String scriptName = config.getAttribute(
 					ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
 					(String) null);
-			if (scriptName != null) {
+			if (scriptName != null && scriptName.length() != 0
+					&& new Path(scriptName).segmentCount() > 0
+					&& Path.ROOT.isValidPath(scriptName)) {
 				final IFile scriptFile = project.getFile(scriptName);
 				if (scriptFile.exists()) {
 					return scriptFile;
