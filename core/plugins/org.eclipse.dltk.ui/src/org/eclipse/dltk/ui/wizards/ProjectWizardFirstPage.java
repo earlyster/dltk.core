@@ -504,14 +504,12 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		private boolean fDetect;
 
 		public DetectGroup(Composite composite) {
-			Link InterpreterEnvironment50Text = new Link(composite, SWT.WRAP);
-			InterpreterEnvironment50Text.setFont(composite.getFont());
-			InterpreterEnvironment50Text.addSelectionListener(this);
-			GridData gridData = new GridData(GridData.FILL, SWT.FILL, true,
-					false);
-			gridData.widthHint = convertWidthInCharsToPixels(50);
-			InterpreterEnvironment50Text.setLayoutData(gridData);
-			fHintText = InterpreterEnvironment50Text;
+			fHintText = new Link(composite, SWT.WRAP);
+			fHintText.setFont(composite.getFont());
+			fHintText.addSelectionListener(this);
+			GridData gd = new GridData(GridData.FILL, SWT.FILL, true, true);
+			gd.widthHint = convertWidthInCharsToPixels(50);
+			fHintText.setLayoutData(gd);
 			if (supportInterpreter()) {
 				handlePossibleInterpreterChange();
 			}
