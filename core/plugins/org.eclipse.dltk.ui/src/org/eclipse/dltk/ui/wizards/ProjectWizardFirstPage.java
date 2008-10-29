@@ -421,7 +421,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		private void updateEnableState() {
 			if (fDetectGroup == null)
 				return;
-			final boolean detect = fDetectGroup.mustDetect();
+			final boolean detect = fDetectGroup.mustDetect()
+					&& interpretersPresent;
 			fUseDefaultInterpreterEnvironment.setEnabled(!detect);
 			fUseProjectInterpreterEnvironment.setEnabled(!detect);
 			fInterpreterEnvironmentCombo.setEnabled(!detect
@@ -464,6 +465,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		public void widgetDefaultSelected(SelectionEvent e) {
 			showInterpreterPreferencePage();
 			handlePossibleInterpreterChange();
+			updateEnableState();
 			// fDetectGroup.handlePossibleJInterpreterChange();
 		}
 
