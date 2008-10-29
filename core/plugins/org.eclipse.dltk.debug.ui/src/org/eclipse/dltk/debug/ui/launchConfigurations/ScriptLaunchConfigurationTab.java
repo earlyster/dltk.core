@@ -217,7 +217,9 @@ public abstract class ScriptLaunchConfigurationTab extends
 		try {
 			mapResources(config);
 		} catch (CoreException e) {
-			DLTKLaunchingPlugin.log(e);
+			DLTKLaunchingPlugin.logWarning(e);
+		} catch (IllegalArgumentException e) {
+			DLTKLaunchingPlugin.logWarning(e);
 		}
 	}
 
