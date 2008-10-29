@@ -224,8 +224,10 @@ public abstract class MainLaunchConfigurationTab extends
 	protected void createDebugOptions(Composite group) {
 		super.createDebugOptions(group);
 		if (canSelectDebugConsoleType()) {
-			debugConsole = SWTFactory.createCheckButton(group,
-					"Debug console redirection");
+			debugConsole = SWTFactory
+					.createCheckButton(
+							group,
+							DLTKLaunchConfigurationsMessages.mainTab_debugConsoleRedirect);
 			debugConsole.addSelectionListener(getWidgetListener());
 		}
 	}
