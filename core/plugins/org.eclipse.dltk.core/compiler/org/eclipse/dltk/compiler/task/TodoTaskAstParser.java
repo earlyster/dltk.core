@@ -27,7 +27,7 @@ public class TodoTaskAstParser extends TodoTaskRangeParser {
 	}
 
 	public void initialize(ModuleDeclaration ast) {
-		resetRanges();
+		reset();
 		if (ast != null) {
 			setCheckRanges(true);
 			final ASTVisitor visitor = new ASTVisitor() {

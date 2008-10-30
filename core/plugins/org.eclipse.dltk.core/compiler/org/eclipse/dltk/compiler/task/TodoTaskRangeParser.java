@@ -42,7 +42,7 @@ public class TodoTaskRangeParser extends TodoTaskSimpleParser {
 	private int[] ranges = new int[ALLOC_INCREMENT];
 	private int rangeCount = 0;
 
-	protected void resetRanges() {
+	protected void reset() {
 		rangeCount = 0;
 	}
 
