@@ -304,7 +304,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 * @deprecated not used anymore
 	 * @return
 	 */
-	protected final boolean doCanSave() {
+	protected boolean doCanSave() {
 		return false;
 	}
 
