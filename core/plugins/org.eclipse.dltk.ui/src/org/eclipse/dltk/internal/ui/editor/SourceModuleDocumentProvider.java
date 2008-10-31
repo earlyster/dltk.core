@@ -1253,7 +1253,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 					.setIsHandlingTemporaryProblems(isHandlingTemporaryProblems());
 		}
 
-		if (original.exists() && ScriptModelUtil.isPrimary(original))
+		if (ScriptModelUtil.isPrimary(original))
 			original.becomeWorkingCopy(requestor, getProgressMonitor());
 		cuInfo.fCopy = original;
 
@@ -1329,7 +1329,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			// Delegate handling of non-primary SourceModules
 			ISourceModule cu = ((SourceModuleInfo) info).fCopy;
 			// condition should be the same as for becomeWorkingCopy() above
-			if (cu != null && !(cu.exists() && ScriptModelUtil.isPrimary(cu)))
+			if (cu != null && !ScriptModelUtil.isPrimary(cu))
 				return super.createSaveOperation(element, document, overwrite);
 
 			if (info.fTextFileBuffer.getDocument() != document) {
