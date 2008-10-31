@@ -23,60 +23,85 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 public class EditorConfigurationBlock extends AbstractConfigurationBlock {
-	private boolean smartDisabled = false;
-	boolean tabAlwaysIndent = false;
+	public static final int FLAG_TAB_POLICY = 1;
+	public static final int FLAG_EDITOR_SMART_NAVIGATION = 2;
+	public static final int FLAG_TAB_ALWAYS_INDENT = 4;
+
+	private final int flags;
 
 	public EditorConfigurationBlock(PreferencePage mainPreferencePage,
 			OverlayPreferenceStore store) {
-		super(store, mainPreferencePage);
-		getPreferenceStore().addKeys(createOverlayStoreKeys());
+		this(mainPreferencePage, store, FLAG_TAB_POLICY
+				| FLAG_EDITOR_SMART_NAVIGATION);
 	}
 
+	/**
+	 * @param mainPreferencePage
+	 * @param store
+	 * @param disableSmart
+	 * @deprecated
+	 */
 	public EditorConfigurationBlock(PreferencePage mainPreferencePage,
 			OverlayPreferenceStore store, boolean disableSmart) {
-		super(store, mainPreferencePage);
-		getPreferenceStore().addKeys(createOverlayStoreKeys());
-		this.smartDisabled = disableSmart;
+		this(mainPreferencePage, store, FLAG_TAB_POLICY
+				| (disableSmart ? 0 : FLAG_EDITOR_SMART_NAVIGATION));
 	}
 
+	/**
+	 * @param mainPreferencePage
+	 * @param store
+	 * @param disableSmart
+	 * @param tabAlwaysIndent
+	 * @deprecated
+	 */
 	public EditorConfigurationBlock(PreferencePage mainPreferencePage,
 			OverlayPreferenceStore store, boolean disableSmart,
 			boolean tabAlwaysIndent) {
-		super(store, mainPreferencePage);
-		getPreferenceStore().addKeys(createOverlayStoreKeys());
-		this.smartDisabled = disableSmart;
-		this.tabAlwaysIndent = tabAlwaysIndent;
+		this(mainPreferencePage, store, FLAG_TAB_POLICY
+				| (disableSmart ? 0 : FLAG_EDITOR_SMART_NAVIGATION)
+				| (tabAlwaysIndent ? FLAG_TAB_ALWAYS_INDENT : 0));
 	}
 
-	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
-		ArrayList overlayKeys = new ArrayList();
+	public EditorConfigurationBlock(PreferencePage mainPreferencePage,
+			OverlayPreferenceStore store, int flags) {
+		super(store, mainPreferencePage);
+		this.flags = flags;
+		getPreferenceStore().addKeys(createOverlayStoreKeys(flags));
+	}
 
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
-				OverlayPreferenceStore.BOOLEAN,
-				PreferenceConstants.EDITOR_SMART_HOME_END));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
-				OverlayPreferenceStore.BOOLEAN,
-				PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
-				OverlayPreferenceStore.BOOLEAN,
-				PreferenceConstants.EDITOR_SMART_INDENT));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
-				OverlayPreferenceStore.STRING,
-				CodeFormatterConstants.FORMATTER_TAB_CHAR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
-				OverlayPreferenceStore.INT,
-				CodeFormatterConstants.FORMATTER_TAB_SIZE));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
-				OverlayPreferenceStore.INT,
-				CodeFormatterConstants.FORMATTER_INDENTATION_SIZE));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
-				OverlayPreferenceStore.BOOLEAN,
-				PreferenceConstants.EDITOR_TAB_ALWAYS_INDENT));
+	private static OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys(
+			int flags) {
+		ArrayList keys = new ArrayList();
+		if ((flags & FLAG_EDITOR_SMART_NAVIGATION) != 0) {
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.BOOLEAN,
+					PreferenceConstants.EDITOR_SMART_HOME_END));
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.BOOLEAN,
+					PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION));
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.BOOLEAN,
+					PreferenceConstants.EDITOR_SMART_INDENT));
+		}
+		if ((flags & FLAG_TAB_POLICY) != 0) {
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.STRING,
+					CodeFormatterConstants.FORMATTER_TAB_CHAR));
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.INT,
+					CodeFormatterConstants.FORMATTER_TAB_SIZE));
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.INT,
+					CodeFormatterConstants.FORMATTER_INDENTATION_SIZE));
+		}
+		if ((flags & FLAG_TAB_ALWAYS_INDENT) != 0) {
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.BOOLEAN,
+					PreferenceConstants.EDITOR_TAB_ALWAYS_INDENT));
+		}
 
-		OverlayPreferenceStore.OverlayKey[] keys = new OverlayPreferenceStore.OverlayKey[overlayKeys
-				.size()];
-		overlayKeys.toArray(keys);
-		return keys;
+		return (OverlayPreferenceStore.OverlayKey[]) keys
+				.toArray(new OverlayPreferenceStore.OverlayKey[keys.size()]);
 	}
 
 	/**
@@ -92,7 +117,7 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 		Composite control = new Composite(parent, SWT.NONE);
 		control.setLayout(new GridLayout());
 
-		if (!smartDisabled) {
+		if ((flags & FLAG_EDITOR_SMART_NAVIGATION) != 0) {
 			Composite composite;
 
 			composite = createSubsection(control, null,
@@ -113,31 +138,34 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 		layout.numColumns = 2;
 		generalGroup.setLayout(layout);
 
-		final String[] tabPolicyValues = new String[] {
-				CodeFormatterConstants.SPACE, CodeFormatterConstants.TAB,
-				CodeFormatterConstants.MIXED };
-		final String[] tabPolicyLabels = new String[] {
-				FormatterMessages.IndentationTabPage_general_group_option_tab_policy_SPACE,
-				FormatterMessages.IndentationTabPage_general_group_option_tab_policy_TAB,
-				FormatterMessages.IndentationTabPage_general_group_option_tab_policy_MIXED };
+		if ((flags & FLAG_TAB_POLICY) != 0) {
+			final String[] tabPolicyValues = new String[] {
+					CodeFormatterConstants.SPACE, CodeFormatterConstants.TAB,
+					CodeFormatterConstants.MIXED };
+			final String[] tabPolicyLabels = new String[] {
+					FormatterMessages.IndentationTabPage_general_group_option_tab_policy_SPACE,
+					FormatterMessages.IndentationTabPage_general_group_option_tab_policy_TAB,
+					FormatterMessages.IndentationTabPage_general_group_option_tab_policy_MIXED };
 
-		addComboBox(
-				generalGroup,
-				FormatterMessages.IndentationTabPage_general_group_option_tab_policy,
-				CodeFormatterConstants.FORMATTER_TAB_CHAR, tabPolicyLabels,
-				tabPolicyValues);
+			addComboBox(
+					generalGroup,
+					FormatterMessages.IndentationTabPage_general_group_option_tab_policy,
+					CodeFormatterConstants.FORMATTER_TAB_CHAR, tabPolicyLabels,
+					tabPolicyValues);
 
-		addLabelledTextField(
-				generalGroup,
-				FormatterMessages.IndentationTabPage_general_group_option_indent_size,
-				CodeFormatterConstants.FORMATTER_INDENTATION_SIZE, 2, 1, true);
+			addLabelledTextField(
+					generalGroup,
+					FormatterMessages.IndentationTabPage_general_group_option_indent_size,
+					CodeFormatterConstants.FORMATTER_INDENTATION_SIZE, 2, 1,
+					true);
 
-		addLabelledTextField(
-				generalGroup,
-				FormatterMessages.IndentationTabPage_general_group_option_tab_size,
-				CodeFormatterConstants.FORMATTER_TAB_SIZE, 2, 1, true);
+			addLabelledTextField(
+					generalGroup,
+					FormatterMessages.IndentationTabPage_general_group_option_tab_size,
+					CodeFormatterConstants.FORMATTER_TAB_SIZE, 2, 1, true);
+		}
 
-		if (tabAlwaysIndent) {
+		if ((flags & FLAG_TAB_ALWAYS_INDENT) != 0) {
 			addCheckBox(generalGroup,
 					PreferencesMessages.EditorPreferencePage_tabAlwaysIndent,
 					PreferenceConstants.EDITOR_TAB_ALWAYS_INDENT, 2);
@@ -149,19 +177,17 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 		layout.numColumns = 2;
 		composite.setLayout(layout);
 
-		String label;
-
-		label = PreferencesMessages.EditorPreferencePage_smartHomeEnd;
-		addCheckBox(composite, label,
+		addCheckBox(composite,
+				PreferencesMessages.EditorPreferencePage_smartHomeEnd,
 				PreferenceConstants.EDITOR_SMART_HOME_END, 0);
 
-		label = PreferencesMessages.EditorPreferencePage_subWordNavigation;
-		addCheckBox(composite, label,
+		addCheckBox(composite,
+				PreferencesMessages.EditorPreferencePage_subWordNavigation,
 				PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, 0);
 
-		label = PreferencesMessages.EditorPreferencePage_smartIndent;
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_SMART_INDENT,
-				0);
+		addCheckBox(composite,
+				PreferencesMessages.EditorPreferencePage_smartIndent,
+				PreferenceConstants.EDITOR_SMART_INDENT, 0);
 
 		return composite;
 	}
