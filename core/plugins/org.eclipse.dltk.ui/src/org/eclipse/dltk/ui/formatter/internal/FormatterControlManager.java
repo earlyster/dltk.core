@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter.internal;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.ui.formatter.IFormatterControlManager;
@@ -23,6 +26,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 public class FormatterControlManager implements IFormatterControlManager,
@@ -51,20 +56,40 @@ public class FormatterControlManager implements IFormatterControlManager,
 
 	public Combo createCombo(Composite parent, Object key, String label,
 			String[] items) {
-		SWTFactory.createLabel(parent, label, 1);
+		final Label labelControl = SWTFactory.createLabel(parent, label, 1);
 		Combo combo = SWTFactory.createCombo(parent,
 				SWT.READ_ONLY | SWT.BORDER, 1, items);
 		bindingManager.bindControl(combo, key);
+		registerAssociatedLabel(combo, labelControl);
 		return combo;
 	}
 
 	public Text createNumber(Composite parent, Object key, String label) {
-		SWTFactory.createLabel(parent, label, 1);
+		final Label labelControl = SWTFactory.createLabel(parent, label, 1);
 		Text text = SWTFactory.createText(parent, SWT.BORDER, 1,
 				Util.EMPTY_STRING);
 		bindingManager.bindControl(text, key,
 				FieldValidators.POSITIVE_NUMBER_VALIDATOR);
+		registerAssociatedLabel(text, labelControl);
 		return text;
+	}
+
+	private final Map labelAssociations = new HashMap();
+
+	/**
+	 * @param control
+	 * @param label
+	 */
+	private void registerAssociatedLabel(Control control, Label label) {
+		labelAssociations.put(control, label);
+	}
+
+	public void enableControl(Control control, boolean enabled) {
+		control.setEnabled(enabled);
+		final Label label = (Label) labelAssociations.get(control);
+		if (label != null) {
+			label.setEnabled(enabled);
+		}
 	}
 
 	private boolean initialization;

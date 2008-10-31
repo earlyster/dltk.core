@@ -14,6 +14,7 @@ package org.eclipse.dltk.ui.formatter;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
 public interface IFormatterControlManager {
@@ -25,5 +26,7 @@ public interface IFormatterControlManager {
 	Combo createCombo(Composite parent, Object key, String label, String[] items);
 
 	Text createNumber(Composite parent, Object key, String label);
+
+	void enableControl(Control control, boolean enabled);
 
 }

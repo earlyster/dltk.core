@@ -73,8 +73,10 @@ public abstract class AbstractScriptFormatter implements IScriptFormatter {
 		final String indentType = getString(CodeFormatterConstants.FORMATTER_TAB_CHAR);
 		if (CodeFormatterConstants.SPACE.equals(indentType)) {
 			return new FormatterIndentGenerator(' ', indentSize, tabSize);
+		} else if (CodeFormatterConstants.MIXED.equals(indentType)) {
+			return new FormatterMixedIndentGenerator(indentSize, tabSize);
 		} else {
-			return new FormatterIndentGenerator('\t', indentSize, tabSize);
+			return new FormatterIndentGenerator('\t', 1, tabSize);
 		}
 	}
 
