@@ -13,6 +13,10 @@ public final class PreferenceKey {
 	private final String fKey;
 
 	public PreferenceKey(String qualifier, String key) {
+		// it is here to declare the parameter precondition, not to check
+		// values at runtime.
+		assert (qualifier != null);
+		assert (key != null);
 		fQualifier = qualifier;
 		fKey = key;
 	}
@@ -53,6 +57,19 @@ public final class PreferenceKey {
 		} else {
 			getNode(context, manager).remove(fKey);
 		}
+	}
+
+	public int hashCode() {
+		return fQualifier.hashCode() ^ fKey.hashCode();
+	}
+
+	public boolean equals(Object obj) {
+		if (obj instanceof PreferenceKey) {
+			final PreferenceKey other = (PreferenceKey) obj;
+			return other.fQualifier.equals(other.fQualifier)
+					&& other.fKey.equals(other.fKey);
+		}
+		return false;
 	}
 
 	public String toString() {
