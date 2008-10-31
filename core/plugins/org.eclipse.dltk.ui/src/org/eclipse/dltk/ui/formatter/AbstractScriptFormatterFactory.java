@@ -18,6 +18,7 @@ import java.util.Map;
 import org.eclipse.dltk.core.DLTKContributedExtension;
 import org.eclipse.dltk.core.IPreferencesLookupDelegate;
 import org.eclipse.dltk.core.IPreferencesSaveDelegate;
+import org.eclipse.dltk.ui.preferences.PreferenceKey;
 
 /**
  * Abstract base class for the {@link IScriptFormatterFactory} implementations.
@@ -27,12 +28,14 @@ public abstract class AbstractScriptFormatterFactory extends
 
 	public Map retrievePreferences(IPreferencesLookupDelegate delegate) {
 		final Map result = new HashMap();
-		final String qualifier = getPreferenceQualifier();
-		final String[] keys = getPreferenceKeys();
-		if (qualifier != null && keys != null) {
+		final PreferenceKey[] keys = getPreferenceKeys();
+		if (keys != null) {
 			for (int i = 0; i < keys.length; ++i) {
-				final String key = keys[i];
-				result.put(key, delegate.getString(qualifier, key));
+				final PreferenceKey prefKey = keys[i];
+				final String key = prefKey.getName();
+				result
+						.put(key, delegate.getString(prefKey.getQualifier(),
+								key));
 			}
 		}
 		return result;
@@ -40,14 +43,14 @@ public abstract class AbstractScriptFormatterFactory extends
 
 	public void savePreferences(Map preferences,
 			IPreferencesSaveDelegate delegate) {
-		final String qualifier = getPreferenceQualifier();
-		final String[] keys = getPreferenceKeys();
-		if (qualifier != null && keys != null) {
+		final PreferenceKey[] keys = getPreferenceKeys();
+		if (keys != null) {
 			for (int i = 0; i < keys.length; ++i) {
-				final String key = keys[i];
+				final PreferenceKey prefKey = keys[i];
+				final String key = prefKey.getName();
 				if (preferences.containsKey(key)) {
 					final String value = (String) preferences.get(key);
-					delegate.setString(qualifier, key, value);
+					delegate.setString(prefKey.getQualifier(), key, value);
 				}
 			}
 		}

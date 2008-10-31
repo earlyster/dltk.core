@@ -153,26 +153,27 @@ public abstract class AbstractFormatterPreferencePage extends
 				this.keyMap = keyMap;
 			}
 
-			private PreferenceKey getPrefKey(String key) {
-				return (PreferenceKey) keyMap.get(key);
+			private PreferenceKey getPrefKey(String qualifier, String key) {
+				final PreferenceKey pkey = new PreferenceKey(qualifier, key);
+				return (PreferenceKey) keyMap.get(pkey);
 			}
 
 			public void setBoolean(String qualifier, String key, boolean value) {
-				PreferenceKey pKey = getPrefKey(key);
+				PreferenceKey pKey = getPrefKey(qualifier, key);
 				if (pKey != null) {
 					setValue(pKey, value);
 				}
 			}
 
 			public void setInt(String qualifier, String key, int value) {
-				PreferenceKey pKey = getPrefKey(key);
+				PreferenceKey pKey = getPrefKey(qualifier, key);
 				if (pKey != null) {
 					setValue(pKey, String.valueOf(value));
 				}
 			}
 
 			public void setString(String qualifier, String key, String value) {
-				PreferenceKey pKey = getPrefKey(key);
+				PreferenceKey pKey = getPrefKey(qualifier, key);
 				if (pKey != null) {
 					setValue(pKey, value);
 				}
@@ -320,14 +321,12 @@ public abstract class AbstractFormatterPreferencePage extends
 				.getInstance().getContributions(getNatureId());
 		for (int i = 0; i < extensions.length; ++i) {
 			IScriptFormatterFactory factory = (IScriptFormatterFactory) extensions[i];
-			final String qualifier = factory.getPreferenceQualifier();
-			final String[] keys = factory.getPreferenceKeys();
-			if (qualifier != null && keys != null) {
+			final PreferenceKey[] keys = factory.getPreferenceKeys();
+			if (keys != null) {
 				final Map keyMap = new HashMap();
 				for (int j = 0; j < keys.length; ++j) {
-					final PreferenceKey prefKey = new PreferenceKey(qualifier,
-							keys[j]);
-					keyMap.put(keys[j], prefKey);
+					final PreferenceKey prefKey = keys[j];
+					keyMap.put(prefKey, prefKey);
 					result.add(prefKey);
 				}
 				prefKeys.put(factory, keyMap);

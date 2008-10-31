@@ -17,7 +17,7 @@ import java.util.Map;
 import org.eclipse.dltk.core.IDLTKContributedExtension;
 import org.eclipse.dltk.core.IPreferencesLookupDelegate;
 import org.eclipse.dltk.core.IPreferencesSaveDelegate;
-import org.eclipse.jface.text.IDocument;
+import org.eclipse.dltk.ui.preferences.PreferenceKey;
 
 /**
  * Script source code formatter factory interface.
@@ -32,9 +32,7 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 	 */
 	Map retrievePreferences(IPreferencesLookupDelegate delegate);
 
-	String getPreferenceQualifier();
-
-	String[] getPreferenceKeys();
+	PreferenceKey[] getPreferenceKeys();
 
 	void savePreferences(Map preferences, IPreferencesSaveDelegate delegate);
 
@@ -47,8 +45,6 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 	 *            the formatting options
 	 */
 	IScriptFormatter createFormatter(String lineDelimiter, Map preferences);
-
-	
 
 	/**
 	 * Validates that this formatter factory is correctly installed.
