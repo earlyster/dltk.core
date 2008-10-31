@@ -26,6 +26,7 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
@@ -35,6 +36,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IElementChangedListener;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
+import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.mixin.IMixinRequestor.ElementInfo;
@@ -435,6 +437,10 @@ public class MixinModel {
 					IModelElementDelta child = affectedChildren[i];
 					processDelta(child);
 				}
+			} else if (delta.getKind() == IModelElementDelta.REMOVED
+					&& element.getElementType() == IModelElement.SCRIPT_FOLDER) {
+				/* folder delete delta has no children */
+				MixinModel.this.removeFolder((IScriptFolder) element);
 			}
 		}
 
@@ -552,6 +558,24 @@ public class MixinModel {
 				}
 			}
 			this.elementToMixinCache.remove(element);
+		}
+	}
+
+	/**
+	 * @param folder
+	 */
+	protected void removeFolder(IScriptFolder folder) {
+		final IPath folderPath = folder.getPath();
+		final List modulesToRemove = new ArrayList();
+		for (Iterator i = elementToMixinCache.keySet().iterator(); i.hasNext();) {
+			final ISourceModule module = (ISourceModule) i.next();
+			final IPath path = module.getPath();
+			if (folderPath.isPrefixOf(path)) {
+				modulesToRemove.add(module);
+			}
+		}
+		for (Iterator i = modulesToRemove.iterator(); i.hasNext();) {
+			remove((ISourceModule) i.next());
 		}
 	}
 
