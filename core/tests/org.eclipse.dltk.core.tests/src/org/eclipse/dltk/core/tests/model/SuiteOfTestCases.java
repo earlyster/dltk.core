@@ -43,6 +43,10 @@ public abstract class SuiteOfTestCases extends TestCase {
 			super(theClass);
 		}
 
+		public Suite(Class theClass, String methodName) {
+			this(theClass, new String[] { methodName });
+		}
+
 		/**
 		 * Creates a new suite on the given class. Only the methods specified in
 		 * the second parameter and included in the suite.
