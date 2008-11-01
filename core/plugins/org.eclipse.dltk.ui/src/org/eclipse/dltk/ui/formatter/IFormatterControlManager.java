@@ -11,13 +11,22 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter;
 
+import org.eclipse.dltk.ui.preferences.IPreferenceDelegate;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
-public interface IFormatterControlManager {
+public interface IFormatterControlManager extends IPreferenceDelegate {
+
+	public interface IInitializeListener {
+		void initialize();
+	}
+
+	void addInitializeListener(IInitializeListener listener);
+
+	void removeInitializeListener(IInitializeListener listener);
 
 	Button createCheckbox(Composite parent, Object key, String text);
 

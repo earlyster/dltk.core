@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.internal.corext.util.Strings;
+import org.eclipse.dltk.ui.CodeFormatterConstants;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.text.BadLocationException;
@@ -46,6 +47,11 @@ public class FormatterPreviewUtils {
 				DLTKUIPlugin.log(e);
 				disablePreview(viewer);
 				return;
+			}
+			final int tabSize = AbstractScriptFormatter.toInt(preferences
+					.get(CodeFormatterConstants.FORMATTER_TAB_SIZE));
+			if (tabSize != viewer.getTextWidget().getTabs()) {
+				viewer.getTextWidget().setTabs(tabSize);
 			}
 			viewer.getTextWidget().setEnabled(true);
 			IScriptFormatter formatter = factory.createFormatter(

@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.ui.formatter.IFormatterControlManager;
 import org.eclipse.dltk.ui.preferences.ControlBindingManager;
@@ -33,12 +34,14 @@ import org.eclipse.swt.widgets.Text;
 public class FormatterControlManager implements IFormatterControlManager,
 		IStatusChangeListener {
 
+	private final IPreferenceDelegate delegate;
 	private final ControlBindingManager bindingManager;
 	private final IStatusChangeListener listener;
 
 	public FormatterControlManager(IPreferenceDelegate delegate,
 			IStatusChangeListener listener) {
-		bindingManager = new ControlBindingManager(delegate, this);
+		this.delegate = delegate;
+		this.bindingManager = new ControlBindingManager(delegate, this);
 		this.listener = listener;
 	}
 
@@ -92,12 +95,26 @@ public class FormatterControlManager implements IFormatterControlManager,
 		}
 	}
 
+	private final ListenerList initListeners = new ListenerList();
+
+	public void addInitializeListener(IInitializeListener listener) {
+		initListeners.add(listener);
+	}
+
+	public void removeInitializeListener(IInitializeListener listener) {
+		initListeners.remove(listener);
+	}
+
 	private boolean initialization;
 
 	public void initialize() {
 		initialization = true;
 		try {
 			bindingManager.initialize();
+			final Object[] listeners = initListeners.getListeners();
+			for (int i = 0; i < listeners.length; ++i) {
+				((IInitializeListener) listeners[i]).initialize();
+			}
 		} finally {
 			initialization = false;
 		}
@@ -108,6 +125,22 @@ public class FormatterControlManager implements IFormatterControlManager,
 		if (!initialization) {
 			listener.statusChanged(status);
 		}
+	}
+
+	public boolean getBoolean(Object key) {
+		return delegate.getBoolean(key);
+	}
+
+	public String getString(Object key) {
+		return delegate.getString(key);
+	}
+
+	public void setBoolean(Object key, boolean value) {
+		delegate.setBoolean(key, value);
+	}
+
+	public void setString(Object key, String value) {
+		delegate.setString(key, value);
 	}
 
 }
