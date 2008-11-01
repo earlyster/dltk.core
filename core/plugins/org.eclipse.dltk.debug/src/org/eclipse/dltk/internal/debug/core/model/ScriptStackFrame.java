@@ -264,6 +264,10 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 		return level.getLineNumber();
 	}
 
+	public String getWhere() {
+		return level.getWhere().trim();
+	}
+
 	public String getName() throws DebugException {
 		String name = level.getWhere().trim();
 

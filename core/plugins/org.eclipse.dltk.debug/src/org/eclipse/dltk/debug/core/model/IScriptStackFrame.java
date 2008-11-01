@@ -16,14 +16,16 @@ import org.eclipse.debug.core.model.IStackFrame;
 
 public interface IScriptStackFrame extends IStackFrame {
 	IScriptStack getStack();
-	
+
 	IScriptThread getScriptThread();
 
 	int getLevel();
-	
+
 	String getSourceLine();
 
 	URI getSourceURI();
 
 	IScriptVariable findVariable(String varName) throws DebugException;
+
+	String getWhere();
 }
