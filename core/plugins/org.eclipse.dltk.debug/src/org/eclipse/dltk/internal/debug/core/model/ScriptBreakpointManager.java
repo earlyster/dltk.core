@@ -445,10 +445,8 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 
 	public boolean supportsBreakpoint(IBreakpoint breakpoint) {
 		if (breakpoint instanceof IScriptBreakpoint) {
-			final String modelId = target.getModelIdentifier();
-			final String breakpointModelId = breakpoint.getModelIdentifier();
-
-			return breakpointModelId.equals(modelId);
+			return StrUtils.equals(breakpoint.getModelIdentifier(), target
+					.getModelIdentifier());
 		}
 
 		return false;
