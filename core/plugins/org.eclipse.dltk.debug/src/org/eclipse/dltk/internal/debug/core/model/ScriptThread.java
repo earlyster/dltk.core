@@ -90,7 +90,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 				ISmartStepEvaluator evaluator = SmartStepEvaluatorManager
 						.getEvaluator(toolkit.getNatureId());
 				if (evaluator != null) {
-					if (evaluator.skipSuspend(filters, this)) {
+					if (evaluator.isFiltered(filters, this)) {
 						try {
 							this.stepReturn();
 							return true;
