@@ -26,8 +26,10 @@ import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IMemoryBlock;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.core.model.IStepFilters;
 import org.eclipse.debug.core.model.ITerminate;
 import org.eclipse.debug.core.model.IThread;
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -44,7 +46,7 @@ import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptVariable;
 
 public class ScriptDebugTarget extends ScriptDebugElement implements
-		IScriptDebugTarget, IScriptThreadManagerListener {
+		IScriptDebugTarget, IScriptThreadManagerListener, IStepFilters {
 
 	private static final String LAUNCH_CONFIGURATION_ATTR_PROJECT = "project"; //$NON-NLS-1$
 	private static final String LAUNCH_CONFIGURATION_ATTR_BREAK_ON_FIRST_LINE = "enableBreakOnFirstLine"; //$NON-NLS-1$
@@ -394,7 +396,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		if (this.stepFilters != null) {
 			return this.stepFilters;
 		}
-		return new String[0];
+		return CharOperation.NO_STRINGS;
 	}
 
 	public boolean isUseStepFilters() {
@@ -497,5 +499,17 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 
 	public IDebugOptions getOptions() {
 		return options;
+	}
+
+	public boolean isStepFiltersEnabled() {
+		return isUseStepFilters();
+	}
+
+	public void setStepFiltersEnabled(boolean enabled) {
+		setUseStepFilters(enabled);
+	}
+
+	public boolean supportsStepFilters() {
+		return true;
 	}
 }
