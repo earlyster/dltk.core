@@ -948,9 +948,9 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog
 			List locations = new ArrayList();
 			List labels = new ArrayList();
 			IInterpreterInstallType[] installs = ScriptRuntime
-					.getInterpreterInstallTypes();
+					.getInterpreterInstallTypes(fToolkit.getNatureId());
 			for (int i = 0; i < installs.length; i++) {
-				processInteroreterInstallType(installs[i], locations, labels);
+				processInterpreterInstallType(installs[i], locations, labels);
 			}
 			fInstallLocations = (String[]) locations
 					.toArray(new String[locations.size()]);
@@ -962,7 +962,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog
 			fFullyQualifyDuplicates = value;
 		}
 
-		private void processInteroreterInstallType(
+		private void processInterpreterInstallType(
 				IInterpreterInstallType installType, List locations, List labels) {
 			if (installType != null) {
 				IInterpreterInstall[] installs = installType
@@ -978,13 +978,16 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog
 					} else {
 						String filePath = installs[i].getInstallLocation()
 								.toOSString();
-						// on MacOS X install locations end in an additional
-						// "/Home" segment; remove it
-						if (isMac && filePath.endsWith(HOME_SUFFIX))
-							filePath = filePath.substring(0, filePath.length()
-									- HOME_SUFFIX.length() + 1);
-						locations.add(filePath);
-						labels.add(label);
+						if (filePath != null) {
+							// on MacOS X install locations end in an additional
+							// "/Home" segment; remove it
+							if (isMac && filePath.endsWith(HOME_SUFFIX))
+								filePath = filePath.substring(0, filePath
+										.length()
+										- HOME_SUFFIX.length() + 1);
+							locations.add(filePath);
+							labels.add(label);
+						}
 					}
 				}
 			}
