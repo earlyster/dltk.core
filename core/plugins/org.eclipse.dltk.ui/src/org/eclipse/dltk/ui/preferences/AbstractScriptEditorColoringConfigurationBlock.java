@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Preferences;
+import org.eclipse.dltk.compiler.task.TaskTagUtils;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlightingManager;
@@ -844,11 +845,10 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 	}
 
 	private Preferences createTemporaryCorePreferenceStore() {
-		Preferences result = new Preferences();
+		Preferences store = new Preferences();
+		TaskTagUtils.initializeDefaultValues(store);
 
-		// result.setValue(COMPILER_TASK_TAGS, "TASK,TODO"); //$NON-NLS-1$
-
-		return result;
+		return store;
 	}
 
 	protected ScriptTextTools getTextTools() {
