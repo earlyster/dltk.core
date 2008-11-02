@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -1054,6 +1055,8 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		stores.add(getScriptPreferenceStore());
 		if (preferenceQualifier != null) {
 			stores.add(new EclipsePreferencesAdapter(new InstanceScope(),
+					preferenceQualifier));
+			stores.add(new EclipsePreferencesAdapter(new DefaultScope(),
 					preferenceQualifier));
 		}
 		stores.add(new PreferencesAdapter(DLTKCore.getDefault()
@@ -3197,7 +3200,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		// JavaPlugin javaPlugin= JavaPlugin.getDefault();
 		// if (javaPlugin == null)
 		// return;
-		//		
+		//
 		// // Always notify AST provider
 		// javaPlugin.getASTProvider().reconciled(ast, getInputJavaElement(),
 		// progressMonitor);
