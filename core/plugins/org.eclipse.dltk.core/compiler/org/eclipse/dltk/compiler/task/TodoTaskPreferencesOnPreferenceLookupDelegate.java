@@ -20,13 +20,13 @@ import org.eclipse.dltk.core.PreferencesLookupDelegate;
  * Implementation of the {@link ITodoTaskPreferences} backed by
  * {@link IPreferencesLookupDelegate}
  */
-public class TodoTaskPreferencesOnPrefernceLookupDelegate extends
+public class TodoTaskPreferencesOnPreferenceLookupDelegate extends
 		AbstractTodoTaskPreferences implements ITodoTaskPreferences {
 
 	private String pluginId;
 	private IPreferencesLookupDelegate delegate;
 
-	public TodoTaskPreferencesOnPrefernceLookupDelegate(String pluginId,
+	public TodoTaskPreferencesOnPreferenceLookupDelegate(String pluginId,
 			IPreferencesLookupDelegate delegate) {
 		Assert.isNotNull(pluginId);
 		Assert.isNotNull(delegate);
@@ -35,7 +35,7 @@ public class TodoTaskPreferencesOnPrefernceLookupDelegate extends
 		this.delegate = delegate;
 	}
 
-	public TodoTaskPreferencesOnPrefernceLookupDelegate(String pluginId,
+	public TodoTaskPreferencesOnPreferenceLookupDelegate(String pluginId,
 			IScriptProject project) {
 		this(pluginId, new PreferencesLookupDelegate(project));
 	}
