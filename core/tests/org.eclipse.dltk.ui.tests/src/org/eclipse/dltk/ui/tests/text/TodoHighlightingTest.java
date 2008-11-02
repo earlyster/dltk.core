@@ -89,7 +89,7 @@ public class TodoHighlightingTest extends SuiteOfTestCases {
 				TODO, FIXME }, true);
 		scanner.setText("x" + TODO);
 		final IToken token = evaluateTodoRule(scanner);
-		//assertTrue(token.isUndefined());
+		assertTrue(token.isUndefined());
 		assertEquals(0, scanner.getTokenLength());
 	}
 
