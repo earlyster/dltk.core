@@ -113,6 +113,10 @@ public final class PreferencesMessages extends NLS {
 	public static String TodoTaskInputDialog_error_comma;
 	public static String TodoTaskInputDialog_error_entryExists;
 	public static String TodoTaskInputDialog_error_noSpace;
+	public static String TodoTaskConfigurationBlock_needsbuild_title;
+	// public static String TodoTaskConfigurationBlock_tasks_default;
+	public static String TodoTaskConfigurationBlock_needsfullbuild_message;
+	public static String TodoTaskConfigurationBlock_needsprojectbuild_message;
 
 	public static String PropertyAndPreferencePage_useworkspacesettings_change;
 	public static String PropertyAndPreferencePage_showprojectspecificsettings_label;

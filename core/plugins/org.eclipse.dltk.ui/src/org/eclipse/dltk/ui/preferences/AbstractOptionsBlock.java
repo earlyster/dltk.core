@@ -52,7 +52,66 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	}
 
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
-		// TODO Auto-generated method stub
+		String title = getBuildDialogTitle();
+		String message;
+		if (workspaceSettings) {
+			message = getFullBuildDialogMessage();
+		} else {
+			message = getProjectBuildDialogMessage();
+		}
+
+		if (title == null || message == null) {
+			return null;
+		}
+
+		return new String[] { title, message };
+	}
+
+	/**
+	 * Returns the string that should be used as the title in the popup box that
+	 * indicates a build needs to occur.
+	 * 
+	 * <p>
+	 * Default implementation returns null. Clients should override to return
+	 * context approprite title. Clients must also override
+	 * <code>getFullBuildDialogMessage()</code> and
+	 * <code>getProjectBuildDialogMessage()</code> in order to trigger the popup
+	 * box.
+	 * </p>
+	 */
+	protected String getBuildDialogTitle() {
+		return null;
+	}
+
+	/**
+	 * Returns the string that should be used in the popup box that indicates a
+	 * full build needs to occur.
+	 * 
+	 * <p>
+	 * Default implementation returns null. Clients should override to return
+	 * context approprite message. Clients must also override
+	 * <code>getBuildDialogTitle()</code> and
+	 * <code>getProjectBuildDialogMessage()</code> in order to trigger the popup
+	 * box.
+	 * </p>
+	 */
+	protected String getFullBuildDialogMessage() {
+		return null;
+	}
+
+	/**
+	 * Returns the string that should be used in the popup box that indicates a
+	 * project build needs to occur.
+	 * 
+	 * <p>
+	 * Default implementation returns null. Clients should override to return
+	 * context approprite message. Clients must also override
+	 * <code>getBuildDialogTitle()</code> and
+	 * <code>getFullBuildDialogMessage()</code> in order to trigger the popup
+	 * box.
+	 * </p>
+	 */
+	protected String getProjectBuildDialogMessage() {
 		return null;
 	}
 
@@ -61,7 +120,8 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.ui.preferences.OptionsConfigurationBlock#performDefaults()
+	 * @seeorg.eclipse.dltk.internal.ui.preferences.OptionsConfigurationBlock#
+	 * performDefaults()
 	 */
 	public void performDefaults() {
 		super.performDefaults();
@@ -69,30 +129,36 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	}
 
 	/*
-	 * @see org.eclipse.dltk.ui.preferences.IPreferenceDelegate#getBoolean(java.lang.Object)
+	 * @see
+	 * org.eclipse.dltk.ui.preferences.IPreferenceDelegate#getBoolean(java.lang
+	 * .Object)
 	 */
 	public final boolean getBoolean(Object key) {
 		return getBooleanValue((PreferenceKey) key);
 	}
 
 	/*
-	 * @see org.eclipse.dltk.ui.preferences.IPreferenceDelegate#getString(java.lang.Object)
+	 * @see
+	 * org.eclipse.dltk.ui.preferences.IPreferenceDelegate#getString(java.lang
+	 * .Object)
 	 */
 	public final String getString(Object key) {
 		return getValue((PreferenceKey) key);
 	}
 
 	/*
-	 * @see org.eclipse.dltk.ui.preferences.IPreferenceDelegate#setBoolean(java.lang.Object,
-	 *      boolean)
+	 * @see
+	 * org.eclipse.dltk.ui.preferences.IPreferenceDelegate#setBoolean(java.lang
+	 * .Object, boolean)
 	 */
 	public final void setBoolean(Object key, boolean value) {
 		super.setValue((PreferenceKey) key, value);
 	}
 
 	/*
-	 * @see org.eclipse.dltk.ui.preferences.IPreferenceDelegate#setString(java.lang.Object,
-	 *      java.lang.String)
+	 * @see
+	 * org.eclipse.dltk.ui.preferences.IPreferenceDelegate#setString(java.lang
+	 * .Object, java.lang.String)
 	 */
 	public final void setString(Object key, String value) {
 		setValue((PreferenceKey) key, value);

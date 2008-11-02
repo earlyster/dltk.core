@@ -13,8 +13,8 @@ package org.eclipse.dltk.ui.preferences;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.dltk.compiler.task.TaskTagUtils;
 import org.eclipse.dltk.compiler.task.TodoTask;
-import org.eclipse.dltk.compiler.task.TodoTaskPreferences;
 import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
@@ -140,7 +140,7 @@ public class TodoTaskInputDialog extends StatusDialog {
 			status
 					.setError(PreferencesMessages.TodoTaskInputDialog_error_enterName);
 		} else {
-			if (!TodoTaskPreferences.isValidName(newText)) {
+			if (!TaskTagUtils.isValidName(newText)) {
 				status
 						.setError(PreferencesMessages.TodoTaskInputDialog_error_comma);
 			} else if (fExistingNames.contains(newText)) {

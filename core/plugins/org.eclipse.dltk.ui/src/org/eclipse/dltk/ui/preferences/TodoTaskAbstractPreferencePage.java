@@ -14,6 +14,12 @@ package org.eclipse.dltk.ui.preferences;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.dltk.ui.PreferencesAdapter;
 
+/**
+ * @deprecated use an implementation of
+ *             {@link AbstractConfigurationBlockPropertyAndPreferencePage}
+ * 
+ * @see AbstractTodoTaskOptionsBlock
+ */
 public abstract class TodoTaskAbstractPreferencePage extends
 		AbstractConfigurationBlockPreferencePage {
 

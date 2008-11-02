@@ -10,6 +10,9 @@
 package org.eclipse.dltk.ui.text;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.dltk.compiler.task.ITodoTaskPreferences;
+import org.eclipse.dltk.compiler.task.TodoTaskPreferences;
+import org.eclipse.dltk.core.IPreferencesLookupDelegate;
 import org.eclipse.dltk.internal.ui.editor.ModelElementHyperlinkDetector;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
@@ -21,6 +24,7 @@ import org.eclipse.dltk.internal.ui.text.hover.EditorTextHoverDescriptor;
 import org.eclipse.dltk.internal.ui.text.hover.EditorTextHoverProxy;
 import org.eclipse.dltk.internal.ui.text.hover.ScriptInformationProvider;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.PreferenceStoreLookupDelegate;
 import org.eclipse.dltk.ui.actions.IScriptEditorActionDefinitionIds;
 import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
 import org.eclipse.dltk.ui.formatter.ScriptFormattingStrategy;
@@ -73,6 +77,56 @@ public abstract class ScriptSourceViewerConfiguration extends
 
 	protected void initializeScanners() {
 
+	}
+
+	/**
+	 * Returns a scanner that is capable of detecting single line comments that
+	 * contain todo tasks.
+	 * 
+	 * <p>
+	 * Clients should make a call to this method to create the scanner in their
+	 * overriden <code>initalizeScanners()</code> implementation.
+	 * </p>
+	 * 
+	 * @param commentColor
+	 *            comment color key
+	 * @param tagColor
+	 *            tag color key
+	 * 
+	 * @see #createCommentScanner(String, String, ITodoTaskPreferences)
+	 */
+	protected final AbstractScriptScanner createCommentScanner(
+			String commentColor, String tagColor) {
+		/*
+		 * need to use an IPreferenceLookupDelegate here b/c the build
+		 * participant only has access to an IScriptProject
+		 * 
+		 * ok pass "" for the pluginId, the delegate implementation just makes a
+		 * call to the underlying preference store
+		 */
+		IPreferencesLookupDelegate delegate = new PreferenceStoreLookupDelegate(
+				fPreferenceStore);
+		ITodoTaskPreferences taskPrefs = new TodoTaskPreferences("", delegate);
+
+		return createCommentScanner(commentColor, tagColor, taskPrefs);
+	}
+
+	/**
+	 * Returns a scanner that is capable of detecting single line comments that
+	 * contain todo tasks.
+	 * 
+	 * <p>
+	 * Default implementation returns an instance of
+	 * {@link ScriptCommentScanner}. Clients that need to define an alternate
+	 * comment scanner implementation should override this method.
+	 * </p>
+	 * 
+	 * @see #createCommentScanner(String, String)
+	 */
+	protected AbstractScriptScanner createCommentScanner(String commentColor,
+			String tagColor, ITodoTaskPreferences taskPrefs) {
+		return new ScriptCommentScanner(getColorManager(), fPreferenceStore,
+				commentColor, tagColor, taskPrefs);
 	}
 
 	public String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer) {
