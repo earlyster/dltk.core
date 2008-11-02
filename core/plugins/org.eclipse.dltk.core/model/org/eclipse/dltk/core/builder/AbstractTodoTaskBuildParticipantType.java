@@ -74,10 +74,12 @@ public abstract class AbstractTodoTaskBuildParticipantType extends
 		}
 
 		public void build(IBuildContext context) throws CoreException {
-			final ModuleDeclaration ast = (ModuleDeclaration) context
-					.get(IBuildContext.ATTR_MODULE_DECLARATION);
-			initialize(ast);
-			parse(context.getTaskReporter(), context.getContents());
+			if (isValid()) {
+				final ModuleDeclaration ast = (ModuleDeclaration) context
+						.get(IBuildContext.ATTR_MODULE_DECLARATION);
+				initialize(ast);
+				parse(context.getTaskReporter(), context.getContents());
+			}
 		}
 	}
 }
