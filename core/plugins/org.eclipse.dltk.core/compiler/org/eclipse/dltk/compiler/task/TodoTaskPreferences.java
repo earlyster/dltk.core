@@ -11,101 +11,59 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.task;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Preferences;
-import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IPreferencesLookupDelegate;
+import org.eclipse.dltk.core.PluginPreferencesLookupDelegate;
 
+/**
+ */
 public class TodoTaskPreferences implements ITodoTaskPreferences {
 
-	public static final String CASE_SENSITIVE = DLTKCore.PLUGIN_ID
-			+ "tasks.case_sensitive"; //$NON-NLS-1$
-	public static final String TAGS = DLTKCore.PLUGIN_ID + "tasks.tags"; //$NON-NLS-1$
-	public static final String ENABLED = DLTKCore.PLUGIN_ID + "tasks.enabled"; //$NON-NLS-1$
+	private String pluginId;
+	private IPreferencesLookupDelegate delegate;
 
-	private static final String TAG_SEPARATOR = ","; //$NON-NLS-1$
-	private static final String PRIORITY_SEPARATOR = ";"; //$NON-NLS-1$
+	private Preferences store;
 
-	public static boolean isValidName(String newText) {
-		return newText.indexOf(TAG_SEPARATOR.charAt(0)) < 0
-				&& newText.indexOf(PRIORITY_SEPARATOR.charAt(0)) < 0;
-	}
-
-	private final Preferences store;
-
+	/**
+	 * @deprecated use
+	 *             {@link #TodoTaskPreferences(String, IPreferencesLookupDelegate)}
+	 *             instead
+	 */
 	public TodoTaskPreferences(Preferences store) {
 		this.store = store;
+		delegate = new PluginPreferencesLookupDelegate(store);
 	}
 
-	protected String[] getTokens(String text, String separator) {
-		final StringTokenizer tok = new StringTokenizer(text, separator);
-		final int nTokens = tok.countTokens();
-		final String[] res = new String[nTokens];
-		for (int i = 0; i < res.length; i++) {
-			res[i] = tok.nextToken().trim();
-		}
-		return res;
+	public TodoTaskPreferences(String pluginId,
+			IPreferencesLookupDelegate delegate) {
+		Assert.isNotNull(pluginId);
+		Assert.isNotNull(delegate);
+
+		this.pluginId = pluginId;
+		this.delegate = delegate;
 	}
 
 	public boolean isEnabled() {
-		return store.getBoolean(ENABLED);
+		return delegate.getBoolean(pluginId, ENABLED);
 	}
 
 	public boolean isCaseSensitive() {
-		return store.getBoolean(CASE_SENSITIVE);
+		return delegate.getBoolean(pluginId, CASE_SENSITIVE);
 	}
 
 	public List getTaskTags() {
-		final String tags = store.getString(TAGS);
-		final String[] tagPairs = getTokens(tags, TAG_SEPARATOR);
-		final List elements = new ArrayList();
-		for (int i = 0; i < tagPairs.length; ++i) {
-			final String[] values = getTokens(tagPairs[i], PRIORITY_SEPARATOR);
-			final TodoTask task = new TodoTask();
-			task.name = values[0];
-			if (values.length == 2) {
-				task.priority = values[1];
-			} else {
-				task.priority = TodoTask.PRIORITY_NORMAL;
-			}
-			elements.add(task);
-		}
-		return elements;
+		final String tags = delegate.getString(pluginId, TAGS);
+		return TaskTagUtils.decodeTaskTags(tags);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public void setTaskTags(List elements) {
-		store.setValue(TAGS, encodeTaskTags(elements));
-	}
-
-	private static String encodeTaskTags(List elements) {
-		final StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < elements.size(); ++i) {
-			final TodoTask task = (TodoTask) elements.get(i);
-			if (i > 0) {
-				sb.append(TAG_SEPARATOR);
-			}
-			sb.append(task.name);
-			sb.append(PRIORITY_SEPARATOR);
-			sb.append(task.priority);
-		}
-		final String string = sb.toString();
-		return string;
-	}
-
-	public static List getDefaultTags() {
-		final List defaultTags = new ArrayList();
-		defaultTags.add(new TodoTask("TODO", TodoTask.PRIORITY_NORMAL)); //$NON-NLS-1$
-		defaultTags.add(new TodoTask("FIXME", TodoTask.PRIORITY_HIGH)); //$NON-NLS-1$ 
-		defaultTags.add(new TodoTask("XXX", TodoTask.PRIORITY_NORMAL)); //$NON-NLS-1$
-		return defaultTags;
-	}
-
-	public static void initializeDefaultValues(Preferences store) {
-		store.setDefault(ENABLED, true);
-		store.setDefault(CASE_SENSITIVE, true);
-		store.setDefault(TAGS, encodeTaskTags(getDefaultTags()));
+		store.setValue(TAGS, TaskTagUtils.encodeTaskTags(elements));
 	}
 
 	public String[] getTagNames() {
@@ -118,4 +76,11 @@ public class TodoTaskPreferences implements ITodoTaskPreferences {
 		return result;
 	}
 
+	/**
+	 * @deprecated use
+	 *             {@link TaskTagUtils#initializeDefaultValues(Preferences)}
+	 */
+	public static void initializeDefaultValues(Preferences store) {
+		TaskTagUtils.initializeDefaultValues(store);
+	}
 }

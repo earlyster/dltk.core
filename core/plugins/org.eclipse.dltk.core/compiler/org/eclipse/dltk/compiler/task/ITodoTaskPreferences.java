@@ -13,7 +13,14 @@ package org.eclipse.dltk.compiler.task;
 
 import java.util.List;
 
+import org.eclipse.dltk.core.DLTKCore;
+
 public interface ITodoTaskPreferences {
+
+	public static final String CASE_SENSITIVE = DLTKCore.PLUGIN_ID
+			+ "tasks.case_sensitive"; //$NON-NLS-1$
+	public static final String TAGS = DLTKCore.PLUGIN_ID + "tasks.tags"; //$NON-NLS-1$
+	public static final String ENABLED = DLTKCore.PLUGIN_ID + "tasks.enabled"; //$NON-NLS-1$
 
 	/**
 	 * Checks if the tags are enabled
@@ -37,10 +44,7 @@ public interface ITodoTaskPreferences {
 	List getTaskTags();
 
 	/**
-	 * saves task tags
-	 * 
-	 * @param elements
-	 *            list of {@link TodoTask}
+	 * @deprecated
 	 */
 	void setTaskTags(List elements);
 
