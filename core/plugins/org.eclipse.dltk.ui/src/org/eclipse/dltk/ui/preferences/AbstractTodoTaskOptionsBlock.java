@@ -3,9 +3,9 @@ package org.eclipse.dltk.ui.preferences;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.dltk.compiler.task.ITodoTaskPreferences;
 import org.eclipse.dltk.compiler.task.TaskTagUtils;
 import org.eclipse.dltk.compiler.task.TodoTask;
-import org.eclipse.dltk.compiler.task.TodoTaskPreferences;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IListAdapter;
@@ -138,10 +138,6 @@ public abstract class AbstractTodoTaskOptionsBlock extends AbstractOptionsBlock 
 	private static final int IDX_EDIT = 1;
 	private static final int IDX_REMOVE = 2;
 
-	private static PreferenceKey caseSensitiveKey;
-	private static PreferenceKey enabledKey;
-	private static PreferenceKey tagsKey;
-
 	private ListDialogField fTodoTasksList;
 	private Button fCaseSensitiveCheckbox;
 
@@ -160,21 +156,21 @@ public abstract class AbstractTodoTaskOptionsBlock extends AbstractOptionsBlock 
 	 * Creates a 'case sensitive' preference key
 	 */
 	public static PreferenceKey createCaseSensitiveKey(String pluginId) {
-		return new PreferenceKey(pluginId, TodoTaskPreferences.CASE_SENSITIVE);
+		return new PreferenceKey(pluginId, ITodoTaskPreferences.CASE_SENSITIVE);
 	}
 
 	/**
 	 * Creates an 'enabled' preference key
 	 */
 	public static PreferenceKey createEnabledKey(String pluginId) {
-		return new PreferenceKey(pluginId, TodoTaskPreferences.ENABLED);
+		return new PreferenceKey(pluginId, ITodoTaskPreferences.ENABLED);
 	}
 
 	/**
 	 * Creates a 'tags' preference key
 	 */
 	public static PreferenceKey createTagKey(String pluginId) {
-		return new PreferenceKey(pluginId, TodoTaskPreferences.TAGS);
+		return new PreferenceKey(pluginId, ITodoTaskPreferences.TAGS);
 	}
 
 	protected Control createOptionsBlock(Composite parent) {
