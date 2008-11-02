@@ -13,50 +13,31 @@ package org.eclipse.dltk.compiler.task;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Preferences;
-import org.eclipse.dltk.core.IPreferencesLookupDelegate;
-import org.eclipse.dltk.core.PluginPreferencesLookupDelegate;
 
 /**
+ * Implementation of the {@link ITodoTaskPreferences} backed by
+ * {@link Preferences}
  */
-public class TodoTaskPreferences implements ITodoTaskPreferences {
-
-	private String pluginId;
-	private IPreferencesLookupDelegate delegate;
+public class TodoTaskPreferences extends AbstractTodoTaskPreferences implements
+		ITodoTaskPreferences {
 
 	private Preferences store;
 
-	/**
-	 * @deprecated use
-	 *             {@link #TodoTaskPreferences(String, IPreferencesLookupDelegate)}
-	 *             instead
-	 */
 	public TodoTaskPreferences(Preferences store) {
 		this.store = store;
-		delegate = new PluginPreferencesLookupDelegate(store);
-	}
-
-	public TodoTaskPreferences(String pluginId,
-			IPreferencesLookupDelegate delegate) {
-		Assert.isNotNull(pluginId);
-		Assert.isNotNull(delegate);
-
-		this.pluginId = pluginId;
-		this.delegate = delegate;
 	}
 
 	public boolean isEnabled() {
-		return delegate.getBoolean(pluginId, ENABLED);
+		return store.getBoolean(ENABLED);
 	}
 
 	public boolean isCaseSensitive() {
-		return delegate.getBoolean(pluginId, CASE_SENSITIVE);
+		return store.getBoolean(CASE_SENSITIVE);
 	}
 
-	public List getTaskTags() {
-		final String tags = delegate.getString(pluginId, TAGS);
-		return TaskTagUtils.decodeTaskTags(tags);
+	protected String getRawTaskTags() {
+		return store.getString(TAGS);
 	}
 
 	/**
@@ -66,19 +47,8 @@ public class TodoTaskPreferences implements ITodoTaskPreferences {
 		store.setValue(TAGS, TaskTagUtils.encodeTaskTags(elements));
 	}
 
-	public String[] getTagNames() {
-		final List taskTags = getTaskTags();
-		final int size = taskTags.size();
-		final String[] result = new String[size];
-		for (int i = 0; i < size; ++i) {
-			result[i] = ((TodoTask) taskTags.get(i)).name;
-		}
-		return result;
-	}
-
 	/**
-	 * @deprecated use
-	 *             {@link TaskTagUtils#initializeDefaultValues(Preferences)}
+	 * @deprecated use {@link TaskTagUtils#initializeDefaultValues(Preferences)}
 	 */
 	public static void initializeDefaultValues(Preferences store) {
 		TaskTagUtils.initializeDefaultValues(store);

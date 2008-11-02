@@ -44,11 +44,8 @@ public interface ITodoTaskPreferences {
 	List getTaskTags();
 
 	/**
-	 * @deprecated
-	 */
-	void setTaskTags(List elements);
-
-	/**
+	 * returns just the names of the tags
+	 * 
 	 * @return
 	 */
 	String[] getTagNames();
