@@ -188,24 +188,27 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 						IWorkbenchWindow window = PlatformUI.getWorkbench()
 								.getActiveWorkbenchWindow();
 						if (window != null) {
-							IEditorReference[] references = window
-									.getActivePage().getEditorReferences();
-							for (int i = 0; i < references.length; i++) {
-								IEditorPart editor = references[i]
-										.getEditor(false);
-								if (editor != null
-										&& editor instanceof ScriptEditor) {
-									ScriptEditor scriptEditor = (ScriptEditor) editor;
-									IModelElement modelElement = scriptEditor
-											.getInputModelElement();
-									IEnvironment environment = EnvironmentManager
-											.getEnvironment(modelElement);
-									if (environment != null) {
-										if (!environment
-												.getId()
-												.equals(
-														LocalEnvironment.ENVIRONMENT_ID)) {
-											scriptEditor.close(false);
+							IWorkbenchPage activePage = window.getActivePage();
+							if (activePage != null) {
+								IEditorReference[] references = activePage
+										.getEditorReferences();
+								for (int i = 0; i < references.length; i++) {
+									IEditorPart editor = references[i]
+											.getEditor(false);
+									if (editor != null
+											&& editor instanceof ScriptEditor) {
+										ScriptEditor scriptEditor = (ScriptEditor) editor;
+										IModelElement modelElement = scriptEditor
+												.getInputModelElement();
+										IEnvironment environment = EnvironmentManager
+												.getEnvironment(modelElement);
+										if (environment != null) {
+											if (!environment
+													.getId()
+													.equals(
+															LocalEnvironment.ENVIRONMENT_ID)) {
+												scriptEditor.close(false);
+											}
 										}
 									}
 								}
