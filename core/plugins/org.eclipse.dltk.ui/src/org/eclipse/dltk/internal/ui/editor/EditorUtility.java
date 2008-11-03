@@ -32,7 +32,6 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -66,8 +65,8 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 
 public class EditorUtility {
 	/**
-	 * Returns the DLTK project for a given editor input or <code>null</code>
-	 * if no corresponding DLTK project exists.
+	 * Returns the DLTK project for a given editor input or <code>null</code> if
+	 * no corresponding DLTK project exists.
 	 * 
 	 * @param input
 	 *            the editor input
@@ -104,8 +103,8 @@ public class EditorUtility {
 	 * @param primaryOnly
 	 *            if <code>true</code> only primary working copies will be
 	 *            returned
-	 * @return the given editor's input as model element or <code>null</code>
-	 *         if none
+	 * @return the given editor's input as model element or <code>null</code> if
+	 *         none
 	 */
 	public static ISourceModule getEditorInputModelElement(IEditorPart editor,
 			boolean primaryOnly) {
@@ -121,8 +120,8 @@ public class EditorUtility {
 
 	/**
 	 * Opens a Script editor for an element such as <code>IModelElement</code>,
-	 * <code>IFile</code>, or <code>IStorage</code>. The editor is
-	 * activated by default.
+	 * <code>IFile</code>, or <code>IStorage</code>. The editor is activated by
+	 * default.
 	 * 
 	 * @return the IEditorPart or null if wrong element type or opening failed
 	 */
@@ -142,29 +141,6 @@ public class EditorUtility {
 			return openInEditor((IFile) inputElement, activate);
 		}
 
-		if (inputElement instanceof IModelElement) {
-			IModelElement modelElement = (IModelElement) inputElement;
-			ISourceModule cu = (ISourceModule) (modelElement)
-					.getAncestor(IModelElement.SOURCE_MODULE);
-			if (cu != null && !ScriptModelUtil.isPrimary(cu)) {
-				/*
-				 * Support for non-primary working copy. Try to reveal it in the
-				 * active editor.
-				 */
-				IWorkbenchPage page = DLTKUIPlugin.getActivePage();
-				if (page != null) {
-					IEditorPart editor = page.getActiveEditor();
-					if (editor != null) {
-						IModelElement editorCU = EditorUtility
-								.getEditorInputModelElement(editor, false);
-						if (editorCU == cu) {
-							EditorUtility.revealInEditor(editor, modelElement);
-							return editor;
-						}
-					}
-				}
-			}
-		}
 		if (inputElement instanceof IForeignElement) {
 			IForeignElement el = (IForeignElement) inputElement;
 			el.codeSelect();
@@ -192,6 +168,29 @@ public class EditorUtility {
 				} else
 					return openInEditor(input,
 							getEditorID(input, inputElement), activate);
+			}
+		}
+		if (inputElement instanceof IModelElement) {
+			IModelElement modelElement = (IModelElement) inputElement;
+			ISourceModule cu = (ISourceModule) (modelElement)
+					.getAncestor(IModelElement.SOURCE_MODULE);
+			if (cu != null) {
+				/*
+				 * Support for non-primary or RSE working copy. Try to reveal it
+				 * in the active editor.
+				 */
+				IWorkbenchPage page = DLTKUIPlugin.getActivePage();
+				if (page != null) {
+					IEditorPart editor = page.getActiveEditor();
+					if (editor != null) {
+						IModelElement editorCU = EditorUtility
+								.getEditorInputModelElement(editor, false);
+						if (editorCU == cu) {
+							EditorUtility.revealInEditor(editor, modelElement);
+							return editor;
+						}
+					}
+				}
 			}
 		}
 		return null;
@@ -316,7 +315,7 @@ public class EditorUtility {
 			provider.disconnect(input);
 		}
 	}
-	
+
 	/**
 	 * Selects and reveals the given region in the given editor part.
 	 */
@@ -424,7 +423,8 @@ public class EditorUtility {
 			boolean enable = toggleAction != null;
 			// if (enable && editorPart instanceof Editor)
 			// enable=
-			// DLTKUIPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS);
+			// DLTKUIPlugin.getDefault().getPreferenceStore().getBoolean(
+			// PreferenceConstants.EDITOR_SHOW_SEGMENTS);
 			// else
 			if (DLTKCore.DEBUG) {
 				System.err
