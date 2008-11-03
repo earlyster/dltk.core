@@ -21,7 +21,6 @@ import org.eclipse.dltk.core.ICodeAssist;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.internal.ui.BrowserInformationControl;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.dltk.internal.ui.text.ScriptWordFinder;
@@ -154,7 +153,18 @@ public abstract class AbstractScriptEditorTextHover implements
 					}
 					return null;
 				}
-
+				if (nResults > 1) {
+					for (int i = 1; i < result.length; i++) {
+						String elementName = result[i].getElementName();
+						if (content.equals(elementName)) {
+							// exact match is found swap this with the first
+							IModelElement first = result[0];
+							result[0] = result[i];
+							result[i] = first;
+							break;
+						}
+					}
+				}
 				return getHoverInfo(nature, result);
 
 			} catch (ModelException x) {
@@ -192,8 +202,8 @@ public abstract class AbstractScriptEditorTextHover implements
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
 				return new DefaultInformationControl(parent, SWT.NONE,
-						new HTMLTextPresenter(true),
-						EditorsUI.getTooltipAffordanceString());
+						new HTMLTextPresenter(true), EditorsUI
+								.getTooltipAffordanceString());
 			}
 		};
 	}
