@@ -105,26 +105,26 @@ public abstract class BuildpathsBlock {
 		 */
 		boolean doQuery(IPath oldOutputLocation) throws OperationCanceledException;
 	}
-	private IWorkspaceRoot fWorkspaceRoot;
-	private CheckedListDialogField fBuildPathList;
-	private StringButtonDialogField fBuildPathDialogField;
-	private StatusInfo fPathStatus;
-	private StatusInfo fBuildPathStatus;
-	private IScriptProject fCurrScriptProject;
-	private IStatusChangeListener fContext;
-	private Control fSWTWidget;
-	private TabFolder fTabFolder;
-	private int fPageIndex;
-	private BuildPathBasePage fSourceContainerPage;
-	private ProjectsWorkbookPage fProjectsPage;
-	private LibrariesWorkbookPage fLibrariesPage;
-	private BuildPathBasePage fCurrPage;
-	private String fUserSettingsTimeStamp;
-	private long fFileTimeStamp;
-	private IRunnableContext fRunnableContext;
-	private boolean fUseNewPage;
+	protected IWorkspaceRoot fWorkspaceRoot;
+	protected CheckedListDialogField fBuildPathList;
+	protected StringButtonDialogField fBuildPathDialogField;
+	protected StatusInfo fPathStatus;
+	protected StatusInfo fBuildPathStatus;
+	protected IScriptProject fCurrScriptProject;
+	protected IStatusChangeListener fContext;
+	protected Control fSWTWidget;
+	protected TabFolder fTabFolder;
+	protected int fPageIndex;
+	protected BuildPathBasePage fSourceContainerPage;
+	protected ProjectsWorkbookPage fProjectsPage;
+	protected LibrariesWorkbookPage fLibrariesPage;
+	protected BuildPathBasePage fCurrPage;
+	protected String fUserSettingsTimeStamp;
+	protected long fFileTimeStamp;
+	protected IRunnableContext fRunnableContext;
+	protected boolean fUseNewPage;
 	
-	private final IWorkbenchPreferenceContainer fPageContainer; // null when
+	protected final IWorkbenchPreferenceContainer fPageContainer; // null when
 																// invoked from
 																// a
 																// non-property
