@@ -496,7 +496,7 @@ public abstract class BuildpathsBlock {
 		updateBuildPathStatus();
 	}
 
-	private void updateBuildPathStatus() {
+	protected void updateBuildPathStatus() {
 		List elements = fBuildPathList.getElements();
 		IBuildpathEntry[] entries = new IBuildpathEntry[elements.size()];
 		for (int i = elements.size() - 1; i >= 0; i--) {
@@ -754,7 +754,7 @@ public abstract class BuildpathsBlock {
 	}
 
 	// -------- tab switching ----------
-	private void tabChanged(Widget widget) {
+	protected void tabChanged(Widget widget) {
 		if (widget instanceof TabItem) {
 			TabItem tabItem = (TabItem) widget;
 			BuildPathBasePage newPage = (BuildPathBasePage) tabItem.getData();

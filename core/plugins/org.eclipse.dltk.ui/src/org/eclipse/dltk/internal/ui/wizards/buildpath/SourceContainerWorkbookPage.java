@@ -114,7 +114,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private IScriptProject fCurrJProject;
 	
 	private Control fSWTControl;
-	private TreeListDialogField fFoldersList;	
+	protected TreeListDialogField fFoldersList;	
 	
 	private final int IDX_ADD= 0;
 	private final int IDX_ADD_LINK= 1;
@@ -206,7 +206,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}
 	
 	
-	private class SourceContainerAdapter implements ITreeListAdapter, IDialogFieldListener {
+	public class SourceContainerAdapter implements ITreeListAdapter, IDialogFieldListener {
 	
 		private final Object[] EMPTY_ARR= new Object[0];
 		
