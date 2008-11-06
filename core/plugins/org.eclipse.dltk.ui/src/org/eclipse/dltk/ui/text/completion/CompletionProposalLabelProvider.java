@@ -21,8 +21,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 /**
  * Provides labels forscriptcontent assist proposals. The functionality is
- * similar to the one provided by {@link org.eclipse.dltk.ui.ModelElementLabels},
- * but based on signatures and {@link CompletionProposal}s.
+ * similar to the one provided by {@link org.eclipse.dltk.ui.ModelElementLabels}
+ * , but based on signatures and {@link CompletionProposal}s.
  * 
  */
 public class CompletionProposalLabelProvider {
@@ -81,7 +81,7 @@ public class CompletionProposalLabelProvider {
 		char[][] parameterTypes = null;
 		// for (int i= 0; i < parameterTypes.length; i++) {
 		// parameterTypes[i]=
-		// createTypeDisplayName(SignatureUtil.getLowerBound(parameterTypes[i]));
+		//createTypeDisplayName(SignatureUtil.getLowerBound(parameterTypes[i]));
 		// }
 		return appendParameterSignature(buffer, parameterTypes, parameterNames);
 	}
@@ -215,15 +215,15 @@ public class CompletionProposalLabelProvider {
 	}
 
 	String createSimpleLabelWithType(CompletionProposal proposal) {
-		return new String(proposal.getCompletion());
+		return new String(proposal.getName());
 	}
 
 	String createLabelWithTypeAndDeclaration(CompletionProposal proposal) {
-		return new String(proposal.getCompletion());
+		return new String(proposal.getName());
 	}
 
 	public String createSimpleLabel(CompletionProposal proposal) {
-		return String.valueOf(proposal.getCompletion());
+		return String.valueOf(proposal.getName());
 	}
 
 	public String createKeywordLabel(CompletionProposal proposal) {
@@ -279,8 +279,8 @@ public class CompletionProposalLabelProvider {
 	 * 
 	 * @param proposal
 	 *            the proposal for which to create an image descriptor
-	 * @return the created image descriptor, or <code>null</code> if no image
-	 *         is available
+	 * @return the created image descriptor, or <code>null</code> if no image is
+	 *         available
 	 */
 	public ImageDescriptor createImageDescriptor(CompletionProposal proposal) {
 		ImageDescriptor descriptor;
