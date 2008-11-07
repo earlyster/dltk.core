@@ -14,27 +14,17 @@ public class SourceParserUtil {
 	private static final String AST = "ast"; //$NON-NLS-1$
 	private static final String ERRORS = "errors"; //$NON-NLS-1$
 
-	public static interface IContentAction {
-		void run(ISourceModule module, char[] content);
-	}
-
 	private static boolean useASTCaching = true;
 
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module) {
 		return getModuleDeclaration(module, null,
-				ISourceParserConstants.DEFAULT, null);
+				ISourceParserConstants.DEFAULT);
 	}
 
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
 			IProblemReporter reporter) {
 		return getModuleDeclaration(module, reporter,
-				ISourceParserConstants.DEFAULT, null);
-	}
-
-	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
-			IProblemReporter reporter, IContentAction action) {
-		return getModuleDeclaration(module, reporter,
-				ISourceParserConstants.DEFAULT, action);
+				ISourceParserConstants.DEFAULT);
 	}
 
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
@@ -42,35 +32,17 @@ public class SourceParserUtil {
 		ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
 				.getModelManager().getSourceModuleInfoCache();
 		ISourceModuleInfo sourceModuleInfo = sourceModuleInfoCache.get(module);
-		return getModuleDeclaration(module, reporter, sourceModuleInfo, flags,
-				null);
-	}
-
-	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
-			IProblemReporter reporter, int flags, IContentAction action) {
-		ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
-				.getModelManager().getSourceModuleInfoCache();
-		ISourceModuleInfo sourceModuleInfo = sourceModuleInfoCache.get(module);
-		return getModuleDeclaration(module, reporter, sourceModuleInfo, flags,
-				action);
+		return getModuleDeclaration(module, reporter, sourceModuleInfo, flags);
 	}
 
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
 			IProblemReporter reporter, ISourceModuleInfo mifo) {
 		return getModuleDeclaration(module, reporter, mifo,
-				ISourceParserConstants.DEFAULT, null);
+				ISourceParserConstants.DEFAULT);
 	}
 
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
-			IProblemReporter reporter, ISourceModuleInfo mifo,
-			IContentAction action) {
-		return getModuleDeclaration(module, reporter, mifo,
-				ISourceParserConstants.DEFAULT, action);
-	}
-
-	public static ModuleDeclaration getModuleDeclaration(ISourceModule module,
-			IProblemReporter reporter, ISourceModuleInfo mifo, int flags,
-			IContentAction action) {
+			IProblemReporter reporter, ISourceModuleInfo mifo, int flags) {
 
 		IDLTKLanguageToolkit toolkit;
 		toolkit = DLTKLanguageManager.getLanguageToolkit(module);
@@ -114,9 +86,6 @@ public class SourceParserUtil {
 							collector != null ? collector : reporter);
 					if (collector != null && reporter != null) {
 						collector.copyTo(reporter);
-					}
-					if (action != null) {
-						action.run(module, sourceAsCharArray);
 					}
 				} catch (ModelException e) {
 					if (DLTKCore.DEBUG) {
