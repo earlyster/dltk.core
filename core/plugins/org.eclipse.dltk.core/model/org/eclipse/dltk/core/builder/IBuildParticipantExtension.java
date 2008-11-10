@@ -19,7 +19,15 @@ public interface IBuildParticipantExtension {
 	int INCREMENTAL_BUILD = IBuildContext.INCREMENTAL_BUILD;
 	int RECONCILE_BUILD = IBuildContext.RECONCILE_BUILD;
 
-	void beginBuild(int buildType);
+	/**
+	 * Notifies the build participant about starting of the build operation.
+	 * Returns <code>true</code> if participant should be called during build or
+	 * <code>false</code> if this participant should be skipped.
+	 * 
+	 * @param buildType
+	 * @return
+	 */
+	boolean beginBuild(int buildType);
 
 	void endBuild(IProgressMonitor monitor);
 

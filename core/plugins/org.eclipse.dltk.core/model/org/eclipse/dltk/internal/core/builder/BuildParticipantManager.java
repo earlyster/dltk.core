@@ -143,4 +143,19 @@ public class BuildParticipantManager extends NatureExtensionManager {
 			return result;
 		}
 	}
+
+	public static IBuildParticipant[] copyFirst(IBuildParticipant[] array,
+			int length) {
+		if (length == array.length) {
+			return array;
+		}
+		if (length == 0) {
+			return BuildParticipantManager.NO_PARTICIPANTS;
+		} else {
+			IBuildParticipant[] temp = new IBuildParticipant[length];
+			System.arraycopy(array, 0, temp, 0, length);
+			return temp;
+		}
+	}
+
 }

@@ -61,34 +61,50 @@ class StructureBuilder {
 			AccumulatingProblemReporter reporter) {
 		final NullProgressMonitor monitor = new NullProgressMonitor();
 		final IScriptProject project = module.getScriptProject();
-		final IBuildParticipant[] validators = BuildParticipantManager
-				.getBuildParticipants(project, natureId);
-		if (validators.length == 0) {
+		final IBuildParticipant[] participants = beginBuild(natureId, project);
+		if (participants.length == 0) {
 			return;
-		}
-		for (int j = 0; j < validators.length; ++j) {
-			final IBuildParticipant participant = validators[j];
-			if (participant instanceof IBuildParticipantExtension) {
-				((IBuildParticipantExtension) participant)
-						.beginBuild(IBuildContext.RECONCILE_BUILD);
-			}
 		}
 		final ReconcileBuildContext context = new ReconcileBuildContext(module,
 				reporter);
 		try {
-			for (int k = 0; k < validators.length; ++k) {
-				final IBuildParticipant participant = validators[k];
+			for (int k = 0; k < participants.length; ++k) {
+				final IBuildParticipant participant = participants[k];
 				participant.build(context);
 			}
 		} catch (CoreException e) {
-			DLTKCore.error("error", e);
+			DLTKCore.error("error", e); //$NON-NLS-1$
 		}
-		for (int j = 0; j < validators.length; ++j) {
-			final IBuildParticipant participant = validators[j];
+		for (int j = 0; j < participants.length; ++j) {
+			final IBuildParticipant participant = participants[j];
 			if (participant instanceof IBuildParticipantExtension) {
 				((IBuildParticipantExtension) participant).endBuild(monitor);
 			}
 		}
+	}
+
+	private static IBuildParticipant[] beginBuild(String natureId,
+			final IScriptProject project) {
+		final IBuildParticipant[] participants = BuildParticipantManager
+				.getBuildParticipants(project, natureId);
+		int count = 0;
+		for (int j = 0; j < participants.length; ++j) {
+			final IBuildParticipant participant = participants[j];
+			final boolean useParticipant;
+			if (participant instanceof IBuildParticipantExtension) {
+				useParticipant = ((IBuildParticipantExtension) participant)
+						.beginBuild(IBuildContext.RECONCILE_BUILD);
+			} else {
+				useParticipant = true;
+			}
+			if (useParticipant) {
+				if (count < j) {
+					participants[count] = participants[j];
+				}
+				++count;
+			}
+		}
+		return BuildParticipantManager.copyFirst(participants, count);
 	}
 
 }

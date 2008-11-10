@@ -135,6 +135,9 @@ public class StandardScriptBuilder implements IScriptBuilder,
 	private void buildNatureModules(IScriptProject project, int buildType,
 			final List modules, IProgressMonitor monitor) {
 		final boolean secondPass = beginBuild(buildType, monitor);
+		if (participants.length == 0) {
+			return;
+		}
 		final List reporters = secondPass ? new ArrayList() : null;
 		int counter = 0;
 		for (Iterator j = modules.iterator(); j.hasNext();) {
@@ -162,13 +165,11 @@ public class StandardScriptBuilder implements IScriptBuilder,
 			monitor.subTask(Messages.ValidatorBuilder_finalizeBuild);
 			final IProgressMonitor finalizeMonitor = new SubTaskProgressMonitor(
 					monitor, Messages.ValidatorBuilder_finalizeBuild);
-			if (participants != null) {
-				for (int j = 0; j < participants.length; ++j) {
-					final IBuildParticipant participant = participants[j];
-					if (participant instanceof IBuildParticipantExtension) {
-						((IBuildParticipantExtension) participant)
-								.endBuild(finalizeMonitor);
-					}
+			for (int j = 0; j < participants.length; ++j) {
+				final IBuildParticipant participant = participants[j];
+				if (participant instanceof IBuildParticipantExtension) {
+					((IBuildParticipantExtension) participant)
+							.endBuild(finalizeMonitor);
 				}
 			}
 			for (Iterator j = reporters.iterator(); j.hasNext();) {
@@ -195,14 +196,26 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		if (!beginBuildDone) {
 			monitor.subTask(Messages.ValidatorBuilder_InitializeBuilders);
 			endBuildNeeded = false;
+			int count = 0;
 			for (int j = 0; j < participants.length; ++j) {
 				final IBuildParticipant participant = participants[j];
+				final boolean useParticipant;
 				if (participant instanceof IBuildParticipantExtension) {
-					((IBuildParticipantExtension) participant)
+					useParticipant = ((IBuildParticipantExtension) participant)
 							.beginBuild(buildType);
 					endBuildNeeded = true;
+				} else {
+					useParticipant = true;
+				}
+				if (useParticipant) {
+					if (count < j) {
+						participants[count] = participants[j];
+					}
+					++count;
 				}
 			}
+			participants = BuildParticipantManager.copyFirst(participants,
+					count);
 			beginBuildDone = true;
 		}
 		return endBuildNeeded;
