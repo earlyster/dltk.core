@@ -9,24 +9,28 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search.index;
 
+import java.util.regex.Pattern;
+
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.util.HashtableOfObject;
 import org.eclipse.dltk.compiler.util.SimpleLookupTable;
 import org.eclipse.dltk.compiler.util.SimpleSet;
 import org.eclipse.dltk.core.search.SearchPattern;
+import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.internal.core.util.SimpleWordSet;
 
 public class MemoryIndex {
 
 	public int NUM_CHANGES = 500; // number of separate document changes...
-									// used to decide when to merge
+	// used to decide when to merge
 
 	SimpleLookupTable docsToReferences; // document paths ->
-										// HashtableOfObject(category names ->
-										// set of words)
+	// HashtableOfObject(category names ->
+	// set of words)
 
 	SimpleWordSet allWords; // save space by locally interning the referenced
-							// words, since an indexer can generate numerous
-							// duplicates
+	// words, since an indexer can generate numerous
+	// duplicates
 
 	String lastDocumentName;
 
@@ -101,6 +105,51 @@ public class MemoryIndex {
 										null));
 							result.addDocumentName((String) paths[i]);
 							continue nextPath;
+						}
+					}
+				}
+			}
+		} else if ((matchRule & SearchPattern.R_REGEXP_MATCH) != 0) {
+			Pattern regexpPattern = Pattern
+					.compile(
+							new String(key),
+							(matchRule & SearchPattern.R_CASE_SENSITIVE) == 0 ? Pattern.CASE_INSENSITIVE
+									: 0);
+			for (int i = 0, l = referenceTables.length; i < l; i++) {
+				HashtableOfObject categoryToWords = (HashtableOfObject) referenceTables[i];
+				if (categoryToWords != null) {
+					for (int j = 0, m = categories.length; j < m; j++) {
+						SimpleWordSet wordSet = (SimpleWordSet) categoryToWords
+								.get(categories[j]);
+						if (wordSet != null) {
+							char[][] words = wordSet.words;
+							for (int k = 0, n = words.length; k < n; k++) {
+								char[] word = words[k];
+								if (word != null) {
+									char decodedWord[];
+									int sep = CharOperation.indexOf(
+											IIndexConstants.SEPARATOR, word);
+									if (sep > 0) {
+										decodedWord = CharOperation.subarray(
+												word, 0, sep);
+									} else {
+										decodedWord = word;
+									}
+									if (regexpPattern.matcher(
+											new String(decodedWord)).matches()) {
+										if (results == null)
+											results = new HashtableOfObject(13);
+										EntryResult result = (EntryResult) results
+												.get(word);
+										if (result == null)
+											results.put(word,
+													result = new EntryResult(
+															word, null));
+										result
+												.addDocumentName((String) paths[i]);
+									}
+								}
+							}
 						}
 					}
 				}

@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.regex.Pattern;
 
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.util.HashtableOfIntValues;
@@ -26,6 +27,7 @@ import org.eclipse.dltk.compiler.util.HashtableOfObject;
 import org.eclipse.dltk.compiler.util.SimpleLookupTable;
 import org.eclipse.dltk.compiler.util.SimpleSet;
 import org.eclipse.dltk.core.search.SearchPattern;
+import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.SimpleWordSet;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -234,6 +236,40 @@ public class DiskIndex {
 					}
 				}
 				break;
+			case SearchPattern.R_REGEXP_MATCH:
+			case SearchPattern.R_REGEXP_MATCH | SearchPattern.R_CASE_SENSITIVE:
+				Pattern regexpPattern = Pattern
+						.compile(
+								new String(key),
+								(matchRule & SearchPattern.R_CASE_SENSITIVE) == 0 ? Pattern.CASE_INSENSITIVE
+										: 0);
+				for (int i = 0, l = categories.length; i < l; i++) {
+					HashtableOfObject wordsToDocNumbers = readCategoryTable(
+							categories[i], false);
+					if (wordsToDocNumbers != null) {
+						char[][] words = wordsToDocNumbers.keyTable;
+						for (int j = 0, m = words.length; j < m; j++) {
+							char[] word = words[j];
+							if (word != null) {
+								char decodedWord[];
+								int sep = CharOperation.indexOf(
+										IIndexConstants.SEPARATOR, word);
+								if (sep > 0) {
+									decodedWord = CharOperation.subarray(word,
+											0, sep);
+								} else {
+									decodedWord = word;
+								}
+								if (regexpPattern.matcher(
+										new String(decodedWord)).matches()) {
+									results = addQueryResult(results, word,
+											wordsToDocNumbers, memoryIndex);
+								}
+							}
+						}
+					}
+				}
+				break;
 			default:
 				for (int i = 0, l = categories.length; i < l; i++) {
 					HashtableOfObject wordsToDocNumbers = readCategoryTable(
@@ -243,9 +279,10 @@ public class DiskIndex {
 						for (int j = 0, m = words.length; j < m; j++) {
 							char[] word = words[j];
 							if (word != null
-									&& Index.isMatch(key, word, matchRule))
+									&& Index.isMatch(key, word, matchRule)) {
 								results = addQueryResult(results, word,
 										wordsToDocNumbers, memoryIndex);
+							}
 						}
 					}
 				}

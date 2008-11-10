@@ -9,6 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search;
 
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.util.ScannerHelper;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -38,8 +41,8 @@ import org.eclipse.dltk.internal.core.search.matching.TypeReferencePattern;
  * were added during the indexing phase (see
  * {@link SearchDocument#addIndexEntry(char[], char[])}). When an index is
  * queried, the index categories and keys to consider are retrieved from the
- * search pattern using {@link #getIndexCategories()} and {@link #getIndexKey()},
- * as well as the match rule (see {@link #getMatchRule()}). A blank pattern is
+ * search pattern using {@link #getIndexCategories()} and {@link #getIndexKey()}
+ * , as well as the match rule (see {@link #getMatchRule()}). A blank pattern is
  * then created (see {@link #getBlankPattern()}). This blank pattern is used as
  * a record as follows. For each index entry in the given index categories and
  * that starts with the given key, the blank pattern is fed using
@@ -99,8 +102,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * <li>pattern: <code>&lt;Exception&gt;foo(new Exception())</code></li>
 	 * <li>match: <code>&lt;Object&gt;foo(new Object())</code></li>
 	 * </ul>
-	 * Can be combined to all other match rules, e.g. {@link #R_CASE_SENSITIVE} |
-	 * {@link #R_ERASURE_MATCH} This rule is not activated by default, so raw
+	 * Can be combined to all other match rules, e.g. {@link #R_CASE_SENSITIVE}
+	 * | {@link #R_ERASURE_MATCH} This rule is not activated by default, so raw
 	 * types or parameterized types with same erasure will not be found for
 	 * pattern List&lt;String&gt;, Note that with this pattern, the match
 	 * selection will be only on the erasure even for parameterized types.
@@ -134,14 +137,14 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * <li><code>foo(new Exception())</code></li>
 	 * </ul>
 	 * </ul>
-	 * Can be combined to all other match rules, e.g. {@link #R_CASE_SENSITIVE} |
-	 * {@link #R_EQUIVALENT_MATCH} This rule is not activated by default, so raw
-	 * types or equivalent parameterized types will not be found for pattern
-	 * List&lt;String&gt;, This mode is overridden by {@link  #R_ERASURE_MATCH}
+	 * Can be combined to all other match rules, e.g. {@link #R_CASE_SENSITIVE}
+	 * | {@link #R_EQUIVALENT_MATCH} This rule is not activated by default, so
+	 * raw types or equivalent parameterized types will not be found for pattern
+	 * List&lt;String&gt;, This mode is overridden by {@link #R_ERASURE_MATCH}
 	 * as erasure matches obviously include equivalent ones. That means that
 	 * pattern with rule set to {@link #R_EQUIVALENT_MATCH} |
-	 * {@link  #R_ERASURE_MATCH} will return same results than rule only set
-	 * with {@link  #R_ERASURE_MATCH}.
+	 * {@link #R_ERASURE_MATCH} will return same results than rule only set with
+	 * {@link #R_ERASURE_MATCH}.
 	 * 
 	 * 
 	 */
@@ -158,8 +161,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * Examples:
 	 * <ul>
 	 * <li><code>NPE</code> type string pattern will match
-	 * <code>NullPointerException</code> and
-	 * <code>NpPermissionException</code> types,</li>
+	 * <code>NullPointerException</code> and <code>NpPermissionException</code>
+	 * types,</li>
 	 * <li><code>NuPoEx</code> type string pattern will only match
 	 * <code>NullPointerException</code> type.</li>
 	 * </ul>
@@ -168,8 +171,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 *      explanation of Camel Case matching. <br>
 	 *      Can be combined to {@link #R_PREFIX_MATCH} match rule. For example,
 	 *      when prefix match rule is combined with Camel Case match rule,
-	 *      <code>"nPE"</code> pattern will match <code>nPException</code>.
-	 *      <br>
+	 *      <code>"nPE"</code> pattern will match <code>nPException</code>. <br>
 	 *      Match rule {@link #R_PATTERN_MATCH} may also be combined but both
 	 *      rules will not be used simultaneously as they are mutually
 	 *      exclusive. Used match rule depends on whether string pattern
@@ -189,6 +191,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 
 	private IDLTKLanguageToolkit toolkit;
 
+	private Pattern regexpCompiledPattern;
+
 	/**
 	 * Creates a search pattern with the rule to apply for matching index keys.
 	 * It can be exact match, prefix match, pattern match or regexp match. Rule
@@ -198,8 +202,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 *            one of {@link #R_EXACT_MATCH}, {@link #R_PREFIX_MATCH},
 	 *            {@link #R_PATTERN_MATCH}, {@link #R_REGEXP_MATCH},
 	 *            {@link #R_CAMELCASE_MATCH} combined with one of following
-	 *            values: {@link #R_CASE_SENSITIVE}, {@link #R_ERASURE_MATCH}
-	 *            or {@link #R_EQUIVALENT_MATCH}. e.g. {@link #R_EXACT_MATCH} |
+	 *            values: {@link #R_CASE_SENSITIVE}, {@link #R_ERASURE_MATCH} or
+	 *            {@link #R_EQUIVALENT_MATCH}. e.g. {@link #R_EXACT_MATCH} |
 	 *            {@link #R_CASE_SENSITIVE} if an exact and case sensitive match
 	 *            is requested, {@link #R_PREFIX_MATCH} if a prefix non case
 	 *            sensitive match is requested or {@link #R_EXACT_MATCH} |
@@ -674,9 +678,11 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * <code>createSearchPattern("Object", TYPE, REFERENCES, false);</code></li>
 	 * <li>search for case sensitive references to exact <code>Object()</code>
 	 * constructor:
-	 * <code>createSearchPattern("java.lang.Object()", CONSTRUCTOR, REFERENCES, true);</code></li>
+	 * <code>createSearchPattern("java.lang.Object()", CONSTRUCTOR, REFERENCES, true);</code>
+	 * </li>
 	 * <li>search for implementers of <code>java.lang.Runnable</code>:
-	 * <code>createSearchPattern("java.lang.Runnable", TYPE, IMPLEMENTORS, true);</code></li>
+	 * <code>createSearchPattern("java.lang.Runnable", TYPE, IMPLEMENTORS, true);</code>
+	 * </li>
 	 * </ul>
 	 * 
 	 * @param stringPattern
@@ -684,20 +690,19 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * @param searchFor
 	 *            determines the nature of the searched elements
 	 *            <ul>
-	 *            <li>{@link IDLTKSearchConstants#CLASS}: only look for
-	 *            classes</li>
+	 *            <li>{@link IDLTKSearchConstants#CLASS}: only look for classes</li>
 	 *            <li>{@link IDLTKSearchConstants#INTERFACE}: only look for
 	 *            interfaces</li>
 	 *            <li>{@link IDLTKSearchConstants#ENUM}: only look for
 	 *            enumeration</li>
 	 *            <li>{@link IDLTKSearchConstants#ANNOTATION_TYPE}: only look
 	 *            for annotation type</li>
-	 *            <li>{@link IDLTKSearchConstants#CLASS_AND_ENUM}: only look
-	 *            for classes and enumerations</li>
+	 *            <li>{@link IDLTKSearchConstants#CLASS_AND_ENUM}: only look for
+	 *            classes and enumerations</li>
 	 *            <li>{@link IDLTKSearchConstants#CLASS_AND_INTERFACE}: only
 	 *            look for classes and interfaces</li>
-	 *            <li>{@link IDLTKSearchConstants#TYPE}: look for all types
-	 *            (ie. classes, interfaces, enum and annotation types)</li>
+	 *            <li>{@link IDLTKSearchConstants#TYPE}: look for all types (ie.
+	 *            classes, interfaces, enum and annotation types)</li>
 	 *            <li>{@link IDLTKSearchConstants#FIELD}: look for fields</li>
 	 *            <li>{@link IDLTKSearchConstants#METHOD}: look for methods</li>
 	 *            <li>{@link IDLTKSearchConstants#CONSTRUCTOR}: look for
@@ -716,26 +721,24 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 *            {@link IDLTKSearchConstants#IGNORE_DECLARING_TYPE} and
 	 *            {@link IDLTKSearchConstants#IGNORE_RETURN_TYPE} are ignored
 	 *            for string patterns. This is due to the fact that client may
-	 *            omit to define them in string pattern to have same behavior.
-	 *            </li>
+	 *            omit to define them in string pattern to have same behavior.</li>
 	 *            <li>{@link IDLTKSearchConstants#REFERENCES}: will search
 	 *            references to the given element.</li>
-	 *            <li>{@link IDLTKSearchConstants#ALL_OCCURRENCES}: will
-	 *            search for either declarations or references as specified
-	 *            above. </li>
-	 *            <li>{@link IDLTKSearchConstants#IMPLEMENTORS}: for types,
-	 *            will find all types which directly implement/extend a given
+	 *            <li>{@link IDLTKSearchConstants#ALL_OCCURRENCES}: will search
+	 *            for either declarations or references as specified above.</li>
+	 *            <li>{@link IDLTKSearchConstants#IMPLEMENTORS}: for types, will
+	 *            find all types which directly implement/extend a given
 	 *            interface. Note that types may be only classes or only
 	 *            interfaces if {@link IDLTKSearchConstants#CLASS } or
 	 *            {@link IDLTKSearchConstants#INTERFACE} is respectively used
-	 *            instead of {@link IDLTKSearchConstants#TYPE}. </li>
+	 *            instead of {@link IDLTKSearchConstants#TYPE}.</li>
 	 *            </ul>
 	 * @param matchRule
 	 *            one of {@link #R_EXACT_MATCH}, {@link #R_PREFIX_MATCH},
 	 *            {@link #R_PATTERN_MATCH}, {@link #R_REGEXP_MATCH},
 	 *            {@link #R_CAMELCASE_MATCH} combined with one of following
-	 *            values: {@link #R_CASE_SENSITIVE}, {@link #R_ERASURE_MATCH}
-	 *            or {@link #R_EQUIVALENT_MATCH}. e.g. {@link #R_EXACT_MATCH} |
+	 *            values: {@link #R_CASE_SENSITIVE}, {@link #R_ERASURE_MATCH} or
+	 *            {@link #R_EQUIVALENT_MATCH}. e.g. {@link #R_EXACT_MATCH} |
 	 *            {@link #R_CASE_SENSITIVE} if an exact and case sensitive match
 	 *            is requested, {@link #R_PREFIX_MATCH} if a prefix non case
 	 *            sensitive match is requested or {@link #R_EXACT_MATCH} |
@@ -799,8 +802,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * @param limitTo
 	 *            determines the nature of the expected matches
 	 *            <ul>
-	 *            switch (limitTo) { // case IDLTKSearchConstants.DECLARATIONS : //
-	 *            return new
+	 *            switch (limitTo) { // case IDLTKSearchConstants.DECLARATIONS :
+	 *            // return new
 	 *            PackageDeclarationPattern(patternString.toCharArray(),
 	 *            matchRule); // case IDLTKSearchConstants.REFERENCES : //
 	 *            return new
@@ -822,7 +825,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 *            declaring type will be ignored during the search.<br>
 	 *            For example using following test case:
 	 * 
-	 * <pre>
+	 *            <pre>
 	 * class A {
 	 * 	A method() {
 	 * 		return null;
@@ -842,26 +845,27 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * }
 	 * </pre>
 	 * 
-	 * search for <code>method</code> declaration with this flag will return 2
-	 * matches: in A and in C </li>
-	 * <li>{@link IDLTKSearchConstants#IGNORE_RETURN_TYPE}: return type will
-	 * be ignored during the search.<br>
-	 * Using same example, search for <code>method</code> declaration with
-	 * this flag will return 2 matches: in A and in B. </li>
-	 * </ul>
-	 * Note that these two flags may be combined and both declaring and return
-	 * types can be ignored during the search. Then, using same example, search
-	 * for <code>method</code> declaration with these 2 flags will return 3
-	 * matches: in A, in B and in C </li>
-	 * <li>{@link IDLTKSearchConstants#REFERENCES}: will search references to
-	 * the given element.</li>
-	 * <li>{@link IDLTKSearchConstants#ALL_OCCURRENCES}: will search for
-	 * either declarations or references as specified above. </li>
-	 * <li>{@link IDLTKSearchConstants#IMPLEMENTORS}: for types, will find all
-	 * types which directly implement/extend a given interface. </li>
-	 * </ul>
-	 * @return a search pattern for a Script element or <code>null</code> if
-	 *         the given element is ill-formed
+	 *            search for <code>method</code> declaration with this flag will
+	 *            return 2 matches: in A and in C</li>
+	 *            <li>{@link IDLTKSearchConstants#IGNORE_RETURN_TYPE}: return
+	 *            type will be ignored during the search.<br>
+	 *            Using same example, search for <code>method</code> declaration
+	 *            with this flag will return 2 matches: in A and in B.</li>
+	 *            </ul>
+	 *            Note that these two flags may be combined and both declaring
+	 *            and return types can be ignored during the search. Then, using
+	 *            same example, search for <code>method</code> declaration with
+	 *            these 2 flags will return 3 matches: in A, in B and in C</li>
+	 *            <li>{@link IDLTKSearchConstants#REFERENCES}: will search
+	 *            references to the given element.</li>
+	 *            <li>{@link IDLTKSearchConstants#ALL_OCCURRENCES}: will search
+	 *            for either declarations or references as specified above.</li>
+	 *            <li>{@link IDLTKSearchConstants#IMPLEMENTORS}: for types, will
+	 *            find all types which directly implement/extend a given
+	 *            interface.</li>
+	 *            </ul>
+	 * @return a search pattern for a Script element or <code>null</code> if the
+	 *         given element is ill-formed
 	 */
 	public static SearchPattern createPattern(IModelElement element, int limitTo) {
 		return createPattern(element, limitTo, R_EXACT_MATCH | R_CASE_SENSITIVE
@@ -890,7 +894,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 *            declaring type will be ignored during the search.<br>
 	 *            For example using following test case:
 	 * 
-	 * <pre>
+	 *            <pre>
 	 * class A {
 	 * 	A method() {
 	 * 		return null;
@@ -910,41 +914,43 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * }
 	 * </pre>
 	 * 
-	 * search for <code>method</code> declaration with this flag will return 2
-	 * matches: in A and in C </li>
-	 * <li>{@link IDLTKSearchConstants#IGNORE_RETURN_TYPE}: return type will
-	 * be ignored during the search.<br>
-	 * Using same example, search for <code>method</code> declaration with
-	 * this flag will return 2 matches: in A and in B. </li>
-	 * </ul>
-	 * Note that these two flags may be combined and both declaring and return
-	 * types can be ignored during the search. Then, using same example, search
-	 * for <code>method</code> declaration with these 2 flags will return 3
-	 * matches: in A, in B and in C </li>
-	 * <li>{@link IDLTKSearchConstants#REFERENCES}: will search references to
-	 * the given element.</li>
-	 * <li>{@link IDLTKSearchConstants#ALL_OCCURRENCES}: will search for
-	 * either declarations or references as specified above. </li>
-	 * <li>{@link IDLTKSearchConstants#IMPLEMENTORS}: for types, will find all
-	 * types which directly implement/extend a given interface. </li>
-	 * </ul>
+	 *            search for <code>method</code> declaration with this flag will
+	 *            return 2 matches: in A and in C</li>
+	 *            <li>{@link IDLTKSearchConstants#IGNORE_RETURN_TYPE}: return
+	 *            type will be ignored during the search.<br>
+	 *            Using same example, search for <code>method</code> declaration
+	 *            with this flag will return 2 matches: in A and in B.</li>
+	 *            </ul>
+	 *            Note that these two flags may be combined and both declaring
+	 *            and return types can be ignored during the search. Then, using
+	 *            same example, search for <code>method</code> declaration with
+	 *            these 2 flags will return 3 matches: in A, in B and in C</li>
+	 *            <li>{@link IDLTKSearchConstants#REFERENCES}: will search
+	 *            references to the given element.</li>
+	 *            <li>{@link IDLTKSearchConstants#ALL_OCCURRENCES}: will search
+	 *            for either declarations or references as specified above.</li>
+	 *            <li>{@link IDLTKSearchConstants#IMPLEMENTORS}: for types, will
+	 *            find all types which directly implement/extend a given
+	 *            interface.</li>
+	 *            </ul>
 	 * @param matchRule
 	 *            one of {@link #R_EXACT_MATCH}, {@link #R_PREFIX_MATCH},
 	 *            {@link #R_PATTERN_MATCH}, {@link #R_REGEXP_MATCH},
 	 *            {@link #R_CAMELCASE_MATCH} combined with one of following
-	 *            values: {@link #R_CASE_SENSITIVE}, {@link #R_ERASURE_MATCH}
-	 *            or {@link #R_EQUIVALENT_MATCH}. e.g. {@link #R_EXACT_MATCH} |
+	 *            values: {@link #R_CASE_SENSITIVE}, {@link #R_ERASURE_MATCH} or
+	 *            {@link #R_EQUIVALENT_MATCH}. e.g. {@link #R_EXACT_MATCH} |
 	 *            {@link #R_CASE_SENSITIVE} if an exact and case sensitive match
 	 *            is requested, {@link #R_PREFIX_MATCH} if a prefix non case
-	 *            sensitive match is requested or {@link #R_EXACT_MATCH} |{@link #R_ERASURE_MATCH}
-	 *            if a non case sensitive and erasure match is requested.<br>
+	 *            sensitive match is requested or {@link #R_EXACT_MATCH} |
+	 *            {@link #R_ERASURE_MATCH} if a non case sensitive and erasure
+	 *            match is requested.<br>
 	 *            Note that {@link #R_ERASURE_MATCH} or
 	 *            {@link #R_EQUIVALENT_MATCH} have no effect on non-generic
 	 *            types or methods search.<br>
 	 *            Note also that default behavior for generic types or methods
 	 *            is to find exact matches.
-	 * @return a search pattern for a Script element or <code>null</code> if
-	 *         the given element is ill-formed
+	 * @return a search pattern for a Script element or <code>null</code> if the
+	 *         given element is ill-formed
 	 * 
 	 */
 	public static SearchPattern createPattern(IModelElement element,
@@ -980,10 +986,11 @@ public abstract class SearchPattern extends InternalSearchPattern {
 				if (declaringClass != null) {
 					declaringSimpleName = declaringClass.getElementName()
 							.toCharArray();
-					IModelElement parent = declaringClass.getParent();
-//					if (parent.getElementType() == IModelElement.TYPE) {
-//						declaringQualification = ((IType)parent).getTypeQualifiedName().toCharArray(); 
-//					}
+					// IModelElement parent = declaringClass.getParent();
+					// if (parent.getElementType() == IModelElement.TYPE) {
+					// declaringQualification =
+					// ((IType)parent).getTypeQualifiedName().toCharArray();
+					// }
 					char[][] enclosingNames = enclosingTypeNames(declaringClass);
 					if (enclosingNames.length > 0) {
 						declaringQualification = CharOperation.concat(
@@ -1084,7 +1091,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Type pattern are formed by [qualification '.']type [typeArguments]. e.g.
 	 * java.lang.Object Runnable List&lt;String&gt;
@@ -1104,7 +1111,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			return null;
 
 		char[] qualificationChars = null, typeChars = null;
-		
+
 		ISearchPatternProcessor processor = getSearchPatternProcessor(toolkit);
 		if (processor != null) {
 			qualificationChars = processor
@@ -1113,11 +1120,10 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		} else {
 			typeChars = patternString.toCharArray();
 		}
-		
+
 		if (typeChars.length == 1 && typeChars[0] == '*') {
 			typeChars = null;
 		}
-
 
 		switch (limitTo) {
 		case IDLTKSearchConstants.DECLARATIONS: // cannot search for explicit
@@ -1210,8 +1216,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * down the index query.
 	 * </p>
 	 * 
-	 * @return an index key from this pattern, or <code>null</code> if all
-	 *         index entries are matched.
+	 * @return an index key from this pattern, or <code>null</code> if all index
+	 *         entries are matched.
 	 */
 	public char[] getIndexKey() {
 		return null; // called from queryIn(), override as necessary
@@ -1240,8 +1246,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * with a case sensitivity flag.
 	 * 
 	 * @return one of R_EXACT_MATCH, R_PREFIX_MATCH, R_PATTERN_MATCH,
-	 *         R_REGEXP_MATCH combined with R_CASE_SENSITIVE, e.g. R_EXACT_MATCH |
-	 *         R_CASE_SENSITIVE if an exact and case sensitive match is
+	 *         R_REGEXP_MATCH combined with R_CASE_SENSITIVE, e.g. R_EXACT_MATCH
+	 *         | R_CASE_SENSITIVE if an exact and case sensitive match is
 	 *         requested, or R_PREFIX_MATCH if a prefix non case sensitive match
 	 *         is requested. [TODO (frederic) I hope R_ERASURE_MATCH doesn't
 	 *         need to be on this list. Because it would be a breaking API
@@ -1322,14 +1328,17 @@ public abstract class SearchPattern extends InternalSearchPattern {
 					pattern = CharOperation.toLowerCase(pattern);
 				return CharOperation.match(pattern, name, isCaseSensitive);
 			case R_REGEXP_MATCH:
-				// TODO (frederic) implement regular expression match
-				return true;
+				if (regexpCompiledPattern == null) {
+					regexpCompiledPattern = Pattern.compile(new String(pattern),
+							isCaseSensitive ? 0 : Pattern.CASE_INSENSITIVE);
+				}
+				return regexpCompiledPattern.matcher(new String(name)).matches();
 			}
 		}
 		return false;
 	}
 
-	/**
+/**
 	 * Validate compatibility between given string pattern and match rule. <br>
 	 * Optimized (ie. returned match rule is modified) combinations are:
 	 * <ul>
@@ -1351,6 +1360,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	 * Rejected (ie. returned match rule -1) combinations are:
 	 * <ul>
 	 * <li>{@link #R_REGEXP_MATCH} with any other match mode bit set, </li>
+	 * <li>{@link #R_REGEXP_MATCH} with wrong regular expression pattern given, </li>
 	 * </ul>
 	 * 
 	 * @param stringPattern
@@ -1367,6 +1377,11 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			if ((matchRule & R_PATTERN_MATCH) != 0
 					|| (matchRule & R_PREFIX_MATCH) != 0
 					|| (matchRule & R_CAMELCASE_MATCH) != 0) {
+				return -1;
+			}
+			try {
+				Pattern.compile(stringPattern);
+			} catch (PatternSyntaxException e) {
 				return -1;
 			}
 		}

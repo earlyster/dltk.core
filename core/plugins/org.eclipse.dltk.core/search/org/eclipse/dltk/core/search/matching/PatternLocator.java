@@ -13,6 +13,7 @@
 package org.eclipse.dltk.core.search.matching;
 
 import java.text.Annotation;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.ast.ASTNode;
@@ -52,6 +53,8 @@ public abstract class PatternLocator implements IIndexConstants {
 	protected boolean isCamelCase;
 	protected boolean isEquivalentMatch;
 	protected boolean isErasureMatch;
+	protected Pattern compiledPattern;
+
 	// match to report
 	SearchMatch match = null;
 	/* match levels */
@@ -258,12 +261,12 @@ public abstract class PatternLocator implements IIndexConstants {
 	 * @param name
 	 * @return Possible values are:
 	 *         <ul>
-	 *         <li>{@link #POSSIBLE_FULL_MATCH}: Given name is equals to
-	 *         pattern</li>
+	 *         <li>{@link #POSSIBLE_FULL_MATCH}: Given name is equals to pattern
+	 *         </li>
 	 *         <li>{@link #POSSIBLE_PREFIX_MATCH}: Given name prefix equals to
 	 *         pattern</li>
-	 *         <li>{@link #POSSIBLE_CAMELCASE_MATCH}: Given name matches
-	 *         pattern as Camel Case</li>
+	 *         <li>{@link #POSSIBLE_CAMELCASE_MATCH}: Given name matches pattern
+	 *         as Camel Case</li>
 	 *         <li>{@link #POSSIBLE_PATTERN_MATCH}: Given name matches pattern
 	 *         as Pattern (ie. using '*' and '?' characters)</li>
 	 *         </ul>
@@ -319,7 +322,13 @@ public abstract class PatternLocator implements IIndexConstants {
 			}
 			break;
 		case SearchPattern.R_REGEXP_MATCH:
-			// TODO (frederic) implement regular expression match
+			if (compiledPattern == null) {
+				compiledPattern = Pattern.compile(new String(pattern),
+						this.isCaseSensitive ? 0 : Pattern.CASE_INSENSITIVE);
+			}
+			if (compiledPattern.matcher(new String(name)).matches()) {
+				return POSSIBLE_REGEXP_MATCH;
+			}
 			break;
 		}
 		return IMPOSSIBLE_MATCH;
