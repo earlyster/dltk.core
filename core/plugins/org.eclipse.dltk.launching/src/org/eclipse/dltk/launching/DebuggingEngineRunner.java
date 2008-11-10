@@ -25,6 +25,7 @@ import org.eclipse.dltk.debug.core.model.IScriptDebugThreadConfigurator;
 import org.eclipse.dltk.internal.debug.core.model.DebugEventHelper;
 import org.eclipse.dltk.internal.debug.core.model.ScriptDebugTarget;
 import org.eclipse.dltk.internal.launching.InterpreterMessages;
+import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
 import org.eclipse.dltk.launching.debug.DbgpInterpreterConfig;
 import org.eclipse.dltk.launching.debug.DebuggingEngineManager;
 import org.eclipse.dltk.launching.debug.IDebuggingEngine;
@@ -189,10 +190,8 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 		final int WAIT_CHUNK = 100;
 
 		ILaunchConfiguration configuration = launch.getLaunchConfiguration();
-		int timeout = configuration
-				.getAttribute(
-						ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_WAITING_TIMEOUT,
-						DLTKDebugPlugin.getConnectionTimeout());
+		int timeout = LaunchConfigurationUtils.getConnectionTimeout(
+				configuration, DLTKDebugPlugin.getConnectionTimeout());
 
 		ScriptDebugTarget target = (ScriptDebugTarget) launch.getDebugTarget();
 		IScriptDebugThreadConfigurator configurator = this

@@ -151,4 +151,16 @@ public final class LaunchConfigurationUtils {
 
 		return value;
 	}
+
+	public static int getConnectionTimeout(ILaunchConfiguration configuration,
+			int defaultValue) {
+		try {
+			return configuration
+					.getAttribute(
+							ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_WAITING_TIMEOUT,
+							defaultValue);
+		} catch (CoreException e) {
+			return defaultValue;
+		}
+	}
 }
