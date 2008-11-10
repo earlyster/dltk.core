@@ -5,6 +5,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.ui.messages.DLTKLaunchConfigurationsMessages;
 import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
@@ -26,6 +27,7 @@ public abstract class RemoteLaunchConfigurationTab extends
 
 	protected Text port;
 	protected Text ideKey;
+	protected Text timeoutText;
 	protected Text remoteWorkingDir;
 	protected Button stripSourceFolders;
 
@@ -60,6 +62,10 @@ public abstract class RemoteLaunchConfigurationTab extends
 		ideKey.setText(LaunchConfigurationUtils.getString(config,
 				ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_SESSION_ID,
 				getDefaultIDEKey()));
+
+		timeoutText.setText(Integer
+				.toString(LaunchConfigurationUtils.getConnectionTimeout(config,
+						getDefaultRemoteTimeout()) / 1000));
 
 		remoteWorkingDir
 				.setText(LaunchConfigurationUtils
@@ -112,6 +118,17 @@ public abstract class RemoteLaunchConfigurationTab extends
 		config.setAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_SESSION_ID,
 				ideKey.getText().trim());
+		int timeout;
+		try {
+			timeout = Integer.parseInt(timeoutText.getText().trim());
+		} catch (NumberFormatException e) {
+			timeout = getDefaultRemoteTimeout() / 1000;
+		}
+		config
+				.setAttribute(
+						ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_WAITING_TIMEOUT,
+						timeout * 1000);
+
 		config
 				.setAttribute(
 						ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_REMOTE_WORKING_DIR,
@@ -120,6 +137,10 @@ public abstract class RemoteLaunchConfigurationTab extends
 				.setAttribute(
 						ScriptLaunchConfigurationConstants.ATTR_DLTK_DBGP_STRIP_SOURCE_FOLDERS,
 						stripSourceFolders.getSelection());
+	}
+
+	private int getDefaultRemoteTimeout() {
+		return DLTKDebugPlugin.getConnectionTimeout() * 3;
 	}
 
 	protected boolean validate() {
@@ -175,6 +196,11 @@ public abstract class RemoteLaunchConfigurationTab extends
 				DLTKLaunchConfigurationsMessages.remoteTab_connectionIdeKey, 1);
 		ideKey = SWTFactory.createText(group, SWT.BORDER, 1, EMPTY_STRING);
 		ideKey.addModifyListener(getWidgetListener());
+
+		SWTFactory.createLabel(group,
+				DLTKLaunchConfigurationsMessages.remoteTab_timeout, 1);
+		timeoutText = SWTFactory.createText(group, SWT.BORDER, 1, EMPTY_STRING);
+		timeoutText.addModifyListener(getWidgetListener());
 
 		SWTFactory.createHorizontalSpacer(composite, 1);
 

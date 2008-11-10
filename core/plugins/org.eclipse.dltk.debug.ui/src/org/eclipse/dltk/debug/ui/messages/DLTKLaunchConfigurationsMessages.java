@@ -38,6 +38,7 @@ public class DLTKLaunchConfigurationsMessages extends NLS {
 	public static String remoteTab_connectionProperties;
 	public static String remoteTab_connectionPort;
 	public static String remoteTab_connectionIdeKey;
+	public static String remoteTab_timeout;
 	public static String remoteError_ideKeyEmpty;
 	public static String remoteTab_remoteSourceMapping;
 	public static String remoteTab_remoteWorkingDir;
