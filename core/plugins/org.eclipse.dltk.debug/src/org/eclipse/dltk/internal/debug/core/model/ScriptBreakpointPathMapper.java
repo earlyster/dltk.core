@@ -11,11 +11,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.core.model;
 
-import java.io.File;
 import java.net.URI;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
@@ -41,7 +41,6 @@ public class ScriptBreakpointPathMapper implements IScriptBreakpointPathMapper {
 	}
 
 	public URI map(URI uri) {
-		String path = uri.getPath();
 		// no mapTo, return original uri
 		if (mapTo == null || "".equals(mapTo)) { //$NON-NLS-1$
 			return uri;
@@ -53,32 +52,28 @@ public class ScriptBreakpointPathMapper implements IScriptBreakpointPathMapper {
 		}
 
 		// now for the fun ;)
-		String projectPath = scriptProject.getProject().getLocation()
-				.toOSString();
-
-		String outgoing = path;
-
-		// only map paths that start w/ the project path
-		if (path.startsWith(projectPath)) {
-			path = path.substring(projectPath.length() + 1);
-
-			if (stripSrcFolders) {
-				path = stripSourceFolders(path);
-			}
-			/*
-			 * use the platform file separator b/c that's what's returned from
-			 * toOSString in the project path
-			 */
-			outgoing = mapTo + File.separator + path;
+		final IPath projectPath = scriptProject.getProject().getLocation();
+		if (projectPath == null) {
+			return uri;
 		}
-
-		URI outgoingUri = ScriptLineBreakpoint.makeUri(new Path(outgoing));
-		cache.put(uri, outgoingUri);
-
-		return outgoingUri;
+		final IPath path = new Path(uri.getPath());
+		// only map paths that start w/ the project path
+		if (projectPath.isPrefixOf(path)) {
+			IPath temp = path.removeFirstSegments(projectPath.segmentCount())
+					.setDevice(null);
+			if (stripSrcFolders) {
+				temp = stripSourceFolders(temp);
+			}
+			final IPath outgoing = new Path(mapTo).append(temp);
+			final URI result = ScriptLineBreakpoint.makeUri(outgoing);
+			cache.put(uri, result);
+			return result;
+		}
+		cache.put(uri, uri);
+		return uri;
 	}
 
-	private String stripSourceFolders(String path) {
+	private IPath stripSourceFolders(IPath path) {
 		try {
 			IProjectFragment[] fragments = scriptProject.getProjectFragments();
 
@@ -89,11 +84,9 @@ public class ScriptBreakpointPathMapper implements IScriptBreakpointPathMapper {
 					continue;
 				}
 
-				String name = frag.getElementName();
-				if (path.startsWith(name)) {
-					// strip the path separator after the name
-					path = path.substring(name.length() + 1);
-					continue;
+				final String name = frag.getElementName();
+				if (path.segmentCount() > 0 && path.segment(0).equals(name)) {
+					return path.removeFirstSegments(1);
 				}
 			}
 		} catch (CoreException e) {
