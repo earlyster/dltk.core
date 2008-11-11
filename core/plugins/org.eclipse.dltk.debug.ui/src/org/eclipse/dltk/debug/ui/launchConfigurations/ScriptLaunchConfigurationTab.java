@@ -706,6 +706,28 @@ public abstract class ScriptLaunchConfigurationTab extends
 		return true;
 	}
 
+	/**
+	 * Tests if the project field is valid. Returns <code>true</code> if valid
+	 * project is selected or <code>false</code> otherwise.
+	 * 
+	 * @return
+	 */
+	protected boolean isValidProject() {
+		final String projectName = getProjectName();
+		if (projectName.length() == 0) {
+			return false;
+		}
+		IScriptProject proj = getScriptModel().getScriptProject(projectName);
+		return proj != null && validateProject(proj);
+	}
+
+	/**
+	 * Tests if the specified project is valid for this launch configuration
+	 * type.
+	 * 
+	 * @param project
+	 * @return
+	 */
 	protected boolean validateProject(IScriptProject project) {
 		if (project == null) {
 			return false;
@@ -713,6 +735,10 @@ public abstract class ScriptLaunchConfigurationTab extends
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(project);
 		return toolkit != null && toolkit.getNatureId().equals(getNatureID());
+	}
+
+	protected void projectChanged() {
+		// empty
 	}
 
 	/**
@@ -723,6 +749,9 @@ public abstract class ScriptLaunchConfigurationTab extends
 		public void modifyText(ModifyEvent e) {
 			if (initializing) {
 				return;
+			}
+			if (e.getSource() == fProjText) {
+				projectChanged();
 			}
 			validatePage();
 			// setErrorMessage(null);
