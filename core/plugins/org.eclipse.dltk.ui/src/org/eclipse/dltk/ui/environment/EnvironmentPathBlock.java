@@ -88,6 +88,15 @@ public class EnvironmentPathBlock {
 	}
 
 	public void createControl(Composite parent, int columns) {
+		createControl(parent, columns, null);
+	}
+
+	public void createControl(Composite parent, IEnvironment[] environments) {
+		createControl(parent, 1, environments);
+	}
+
+	public void createControl(Composite parent, int columns,
+			IEnvironment[] environments) {
 		PixelConverter conv = new PixelConverter(parent);
 
 		pathTable = new Table(parent, SWT.SINGLE | SWT.BORDER
@@ -208,7 +217,8 @@ public class EnvironmentPathBlock {
 					Object newInput) {
 			}
 		});
-		pathViewer.setInput(EnvironmentManager.getEnvironments());
+		pathViewer.setInput(environments != null ? environments
+				: EnvironmentManager.getEnvironments());
 		if (pathTable.getItemCount() > 0) {
 			pathTable.select(0);
 		}
