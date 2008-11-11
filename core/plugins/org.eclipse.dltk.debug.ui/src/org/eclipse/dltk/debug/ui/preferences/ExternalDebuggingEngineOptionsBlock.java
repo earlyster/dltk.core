@@ -84,7 +84,7 @@ public abstract class ExternalDebuggingEngineOptionsBlock extends
 				getExternalEngineBlockFillType());
 
 		enginePaths = new EnvironmentPathBlock();
-		enginePaths.createControl(group);
+		enginePaths.createControl(group, getRelevantEnvironments());
 		enginePaths.setPaths(getEnvironmentPaths());
 	}
 
@@ -103,7 +103,7 @@ public abstract class ExternalDebuggingEngineOptionsBlock extends
 	}
 
 	private void setEnvironmentPaths(Map env2path) {
-		String pathKeyValue = EnvironmentPathUtils.encodePaths(env2path); 
+		String pathKeyValue = EnvironmentPathUtils.encodePaths(env2path);
 		setString(getDebuggingEnginePathKey(), pathKeyValue);
 	}
 

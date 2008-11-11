@@ -3,7 +3,9 @@ package org.eclipse.dltk.debug.ui.preferences;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.ui.environment.EnvironmentPathBlock;
 import org.eclipse.dltk.ui.preferences.AbstractOptionsBlock;
 import org.eclipse.dltk.ui.preferences.PreferenceKey;
@@ -33,7 +35,7 @@ public abstract class DebuggingEngineConfigOptionsBlock extends
 	}
 
 	/*
-	 * @see org.eclipse.dltk.ui.preferences.AbstractOptionsBlock#createOptionsBlock(org.eclipse.swt.widgets.Composite)
+	 * @see AbstractOptionsBlock#createOptionsBlock(Composite)
 	 */
 	protected final Control createOptionsBlock(Composite parent) {
 		final Composite composite = SWTFactory.createComposite(parent, parent
@@ -75,7 +77,7 @@ public abstract class DebuggingEngineConfigOptionsBlock extends
 				ScriptDebugPreferencesMessages.LoggingGroupLabel, 3, 1,
 				GridData.FILL_BOTH);
 		logFilePaths = new EnvironmentPathBlock();
-		logFilePaths.createControl(group);
+		logFilePaths.createControl(group, getRelevantEnvironments());
 		Map paths = EnvironmentPathUtils
 				.decodePaths(getString(getLogFileNamePreferenceKey()));
 		logFilePaths.setPaths(paths);
@@ -119,6 +121,24 @@ public abstract class DebuggingEngineConfigOptionsBlock extends
 		// FieldValidators.DIR_VALIDATOR);
 	}
 
+	/**
+	 * Returns the array of {@link IEnvironment}s relevant for this
+	 * preference/property page.
+	 * 
+	 * If it is used as preference page - all {@link IEnvironment} are returned,
+	 * otherwise only {@link IEnvironment} of the current project is returned.
+	 * 
+	 * @return
+	 */
+	protected IEnvironment[] getRelevantEnvironments() {
+		if (fProject != null) {
+			return new IEnvironment[] { EnvironmentManager
+					.getEnvironment(fProject) };
+		} else {
+			return EnvironmentManager.getEnvironments();
+		}
+	}
+
 	protected boolean processChanges(IWorkbenchPreferenceContainer container) {
 		if (logFilePaths != null) {
 			String loggingPaths = EnvironmentPathUtils.encodePaths(logFilePaths
@@ -129,8 +149,8 @@ public abstract class DebuggingEngineConfigOptionsBlock extends
 	}
 
 	/**
-	 * Creates an an options block for items that fall into the 'other' category -
-	 * ie: adding a link to download an external debugging engine.
+	 * Creates an an options block for items that fall into the 'other' category
+	 * - ie: adding a link to download an external debugging engine.
 	 * 
 	 * <p>
 	 * This block will be placed after the 'logging options' block.
