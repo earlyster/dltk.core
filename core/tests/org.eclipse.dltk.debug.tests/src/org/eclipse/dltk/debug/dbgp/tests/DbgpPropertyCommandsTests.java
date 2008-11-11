@@ -12,10 +12,10 @@ package org.eclipse.dltk.debug.dbgp.tests;
 import java.io.IOException;
 import java.text.MessageFormat;
 
+import org.eclipse.dltk.dbgp.DbgpRequest;
 import org.eclipse.dltk.dbgp.commands.IDbgpPropertyCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpProtocolException;
-import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpPropertyCommands;
 import org.w3c.dom.Element;
 

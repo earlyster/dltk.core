@@ -11,7 +11,7 @@ package org.eclipse.dltk.debug.dbgp.tests;
 
 import junit.framework.TestCase;
 
-import org.eclipse.dltk.dbgp.internal.DbgpRequest;
+import org.eclipse.dltk.dbgp.DbgpRequest;
 
 public class DbgpRequestTests extends TestCase {
 

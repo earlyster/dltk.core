@@ -11,9 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.dbgp.tests;
 
+import org.eclipse.dltk.dbgp.DbgpRequest;
+import org.eclipse.dltk.dbgp.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
-import org.eclipse.dltk.dbgp.internal.DbgpRequest;
-import org.eclipse.dltk.dbgp.internal.commands.IDbgpCommunicator;
 import org.eclipse.dltk.debug.core.IDebugOptions;
 
 public abstract class AbstractCommunicator implements IDbgpCommunicator {
