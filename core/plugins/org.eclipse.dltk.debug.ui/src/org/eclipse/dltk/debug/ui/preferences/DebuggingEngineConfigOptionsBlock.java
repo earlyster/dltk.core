@@ -37,7 +37,7 @@ public abstract class DebuggingEngineConfigOptionsBlock extends
 	/*
 	 * @see AbstractOptionsBlock#createOptionsBlock(Composite)
 	 */
-	protected final Control createOptionsBlock(Composite parent) {
+	protected Control createOptionsBlock(Composite parent) {
 		final Composite composite = SWTFactory.createComposite(parent, parent
 				.getFont(), 1, 1, GridData.FILL);
 		createEngineBlock(composite);
@@ -169,8 +169,12 @@ public abstract class DebuggingEngineConfigOptionsBlock extends
 	 * Note: this preference controls logging for the actual debugging engine,
 	 * and not the DBGP protocol output.
 	 * </p>
+	 * 
+	 * @deprecated
 	 */
-	protected abstract PreferenceKey getEnableLoggingPreferenceKey();
+	protected PreferenceKey getEnableLoggingPreferenceKey() {
+		return null;
+	}
 
 	/**
 	 * Returns the log file name preference key
@@ -179,6 +183,10 @@ public abstract class DebuggingEngineConfigOptionsBlock extends
 
 	/**
 	 * Returns the log file path preference key
+	 * 
+	 * @deprecated
 	 */
-	protected abstract PreferenceKey getLogFilePathPreferenceKey();
+	protected PreferenceKey getLogFilePathPreferenceKey() {
+		return null;
+	}
 }
