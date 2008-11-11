@@ -40,42 +40,28 @@ public abstract class AbstractTodoTaskOptionsBlock extends AbstractOptionsBlock 
 			ITableLabelProvider {
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
+		 * @see ILabelProvider#getImage(java.lang.Object)
 		 */
 		public Image getImage(Object element) {
 			return null;
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
+		 * @see ILabelProvider#getText(java.lang.Object)
 		 */
 		public String getText(Object element) {
 			return getColumnText(element, 0);
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java
-		 * .lang.Object, int)
+		 * @see ITableLabelProvider#getColumnImage(java.lang.Object, int)
 		 */
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.
-		 * lang.Object, int)
+		 * @see ITableLabelProvider#getColumnText(java.lang.Object, int)
 		 */
 		public String getColumnText(Object element, int columnIndex) {
 			final TodoTask task = (TodoTask) element;
