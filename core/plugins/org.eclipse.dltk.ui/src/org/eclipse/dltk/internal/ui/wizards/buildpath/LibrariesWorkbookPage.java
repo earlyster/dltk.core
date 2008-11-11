@@ -224,7 +224,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	private void libaryPageCustomButtonPressed(DialogField field, int index) {
 		BPListElement[] libentries = null;
-		IEnvironment environment = EnvironmentManager.getEnvironment(this.scriptProject);
+		IEnvironment environment = EnvironmentManager
+				.getEnvironment(this.scriptProject);
 		switch (index - IDX_ADD) {
 		case IDX_ADDZIP: /* add archive */
 			if (fWithZip) {
@@ -527,11 +528,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			break;
 		case IBuildpathEntry.BPE_LIBRARY:
 			IEnvironment environment = EnvironmentManager
-			.getEnvironment(this.scriptProject);
+					.getEnvironment(this.scriptProject);
 			IResource resource = elem.getResource();
 			if (resource == null) {
 				if (Util.isArchiveFileName(elem.getPath().toOSString())) {
-					res = openExtZipFileDialog(elem, environment );
+					res = openExtZipFileDialog(elem, environment);
 				} else {
 					res = opensExtSourceFolderDialog(elem, environment);
 				}
@@ -765,7 +766,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				res.getFullPath(), res, external);
 	}
 
-	private BPListElement[] openExtZipFileDialog(BPListElement existing, IEnvironment environment) {
+	private BPListElement[] openExtZipFileDialog(BPListElement existing,
+			IEnvironment environment) {
 		if (existing == null) {
 			IPath[] selected = BuildpathDialogAccess
 					.chooseExternalArchiveEntries(getShell(), environment);

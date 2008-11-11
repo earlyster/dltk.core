@@ -21,31 +21,31 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-
-
 public class BuildpathOrderingWorkbookPage extends BuildPathBasePage {
-	
+
 	private ListDialogField fBuildpathList;
-	
+
 	public BuildpathOrderingWorkbookPage(ListDialogField buildpathList) {
-		fBuildpathList= buildpathList;
+		fBuildpathList = buildpathList;
 	}
-	
+
 	public Control getControl(Composite parent) {
-		PixelConverter converter= new PixelConverter(parent);
-		
-		Composite composite= new Composite(parent, SWT.NONE);
+		PixelConverter converter = new PixelConverter(parent);
+
+		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
-		
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fBuildpathList }, true, SWT.DEFAULT, SWT.DEFAULT);
+
+		LayoutUtil.doDefaultLayout(composite,
+				new DialogField[] { fBuildpathList }, true, SWT.DEFAULT,
+				SWT.DEFAULT);
 		LayoutUtil.setHorizontalGrabbing(fBuildpathList.getListControl(null));
 
-		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
+		int buttonBarWidth = converter.convertWidthInCharsToPixels(24);
 		fBuildpathList.setButtonsMinWidth(buttonBarWidth);
-			
+
 		return composite;
 	}
-	
+
 	/*
 	 * @see BuildPathBasePage#getSelection
 	 */
@@ -55,16 +55,15 @@ public class BuildpathOrderingWorkbookPage extends BuildPathBasePage {
 
 	/*
 	 * @see BuildPathBasePage#setSelection
-	 */	
+	 */
 	public void setSelection(List selElements, boolean expand) {
 		fBuildpathList.selectElements(new StructuredSelection(selElements));
 	}
-	
-	
+
 	public boolean isEntryKind(int kind) {
 		return true;
 	}
-	
+
 	public void init(IScriptProject scriptProject) {
 	}
 
