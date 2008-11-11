@@ -174,7 +174,7 @@ public abstract class MainLaunchConfigurationTab extends
 	 */
 	protected void setEnableScriptField(boolean enabled) {
 		fScriptText.setEnabled(enabled);
-		fSearchButton.setEnabled(enabled && getProjectName().length() > 0);
+		fSearchButton.setEnabled(enabled && isValidProject());
 	}
 
 	/**
