@@ -12,6 +12,7 @@ package org.eclipse.dltk.dbgp.internal.commands;
 import java.net.URI;
 import java.util.Map;
 
+import org.eclipse.dltk.dbgp.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.IDbgpFeature;
 import org.eclipse.dltk.dbgp.IDbgpProperty;
 import org.eclipse.dltk.dbgp.IDbgpStackLevel;

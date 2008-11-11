@@ -9,10 +9,12 @@
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.commands;
 
+import org.eclipse.dltk.dbgp.DbgpBaseCommands;
+import org.eclipse.dltk.dbgp.DbgpRequest;
+import org.eclipse.dltk.dbgp.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.IDbgpProperty;
 import org.eclipse.dltk.dbgp.commands.IDbgpPropertyCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
-import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlEntityParser;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlParser;
 import org.w3c.dom.Element;

@@ -14,10 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.dltk.dbgp.DbgpBaseCommands;
+import org.eclipse.dltk.dbgp.DbgpRequest;
+import org.eclipse.dltk.dbgp.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.IDbgpProperty;
 import org.eclipse.dltk.dbgp.commands.IDbgpContextCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
-import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlEntityParser;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

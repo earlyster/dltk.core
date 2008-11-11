@@ -11,7 +11,6 @@ package org.eclipse.dltk.dbgp;
 
 import org.eclipse.dltk.dbgp.commands.IDbgpCommands;
 import org.eclipse.dltk.dbgp.internal.IDbgpTermination;
-import org.eclipse.dltk.dbgp.internal.commands.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.internal.managers.IDbgpStreamManager;
 import org.eclipse.dltk.debug.core.IDebugConfigurable;
 

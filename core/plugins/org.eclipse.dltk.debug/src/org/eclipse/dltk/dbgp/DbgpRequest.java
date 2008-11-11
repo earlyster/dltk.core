@@ -7,7 +7,7 @@
  *
  
  *******************************************************************************/
-package org.eclipse.dltk.dbgp.internal;
+package org.eclipse.dltk.dbgp;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.dltk.dbgp.IDbgpRawPacket;
 import org.eclipse.dltk.dbgp.internal.utils.Base64Helper;
 import org.eclipse.dltk.internal.debug.core.model.StrUtils;
 
@@ -116,7 +115,7 @@ public class DbgpRequest implements IDbgpRawPacket {
 
 	public void writeTo(OutputStream output) throws IOException {
 		// TODO optimize - send directly to stream without string
-		output.write(toString().getBytes("ASCII"));
+		output.write(toString().getBytes("ASCII")); //$NON-NLS-1$
 	}
 
 	public String getPacketAsString() {

@@ -12,11 +12,13 @@ package org.eclipse.dltk.dbgp.internal.commands;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.eclipse.dltk.dbgp.DbgpBaseCommands;
+import org.eclipse.dltk.dbgp.DbgpRequest;
+import org.eclipse.dltk.dbgp.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.IDbgpStackLevel;
 import org.eclipse.dltk.dbgp.commands.IDbgpStatckCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpDebuggingEngineException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
-import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlEntityParser;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

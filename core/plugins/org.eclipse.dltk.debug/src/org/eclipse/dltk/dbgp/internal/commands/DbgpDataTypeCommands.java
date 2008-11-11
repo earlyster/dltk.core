@@ -12,9 +12,11 @@ package org.eclipse.dltk.dbgp.internal.commands;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.dltk.dbgp.DbgpBaseCommands;
+import org.eclipse.dltk.dbgp.DbgpRequest;
+import org.eclipse.dltk.dbgp.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.commands.IDbgpDataTypeCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
-import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -63,7 +65,8 @@ public class DbgpDataTypeCommands extends DbgpBaseCommands implements
 			Integer intType = typeToInteger(type);
 
 			if (intType == null) {
-				throw new DbgpException(Messages.DbgpDataTypeCommands_invalidTypeAttribute);
+				throw new DbgpException(
+						Messages.DbgpDataTypeCommands_invalidTypeAttribute);
 			}
 
 			String name = map.getAttribute(ATTR_NAME);

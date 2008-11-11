@@ -7,10 +7,9 @@
  *
  
  *******************************************************************************/
-package org.eclipse.dltk.dbgp.internal.commands;
+package org.eclipse.dltk.dbgp;
 
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
-import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.debug.core.IDebugConfigurable;
 import org.w3c.dom.Element;
 

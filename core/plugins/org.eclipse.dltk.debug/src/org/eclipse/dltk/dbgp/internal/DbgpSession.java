@@ -11,6 +11,7 @@ package org.eclipse.dltk.dbgp.internal;
 
 import java.io.IOException;
 
+import org.eclipse.dltk.dbgp.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.IDbgpNotificationManager;
 import org.eclipse.dltk.dbgp.IDbgpRawListener;
 import org.eclipse.dltk.dbgp.IDbgpSession;
@@ -23,7 +24,6 @@ import org.eclipse.dltk.dbgp.internal.commands.DbgpCoreCommands;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpDebuggingEngineCommunicator;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpExtendedCommands;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpSpawnpointCommands;
-import org.eclipse.dltk.dbgp.internal.commands.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.internal.managers.DbgpNotificationManager;
 import org.eclipse.dltk.dbgp.internal.managers.DbgpStreamManager;
 import org.eclipse.dltk.dbgp.internal.managers.IDbgpStreamManager;

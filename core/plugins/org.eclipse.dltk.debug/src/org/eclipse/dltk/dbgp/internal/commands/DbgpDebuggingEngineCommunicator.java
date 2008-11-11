@@ -13,11 +13,13 @@ import java.io.IOException;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.eclipse.dltk.dbgp.DbgpBaseCommands;
+import org.eclipse.dltk.dbgp.DbgpRequest;
+import org.eclipse.dltk.dbgp.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpIOException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpOpertionCanceledException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpTimeoutException;
-import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.dbgp.internal.IDbgpDebugingEngine;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpResponsePacket;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlParser;

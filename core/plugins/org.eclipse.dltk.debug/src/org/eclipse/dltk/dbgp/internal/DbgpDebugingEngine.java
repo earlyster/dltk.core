@@ -16,8 +16,9 @@ import java.net.Socket;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.dbgp.IDbgpRawPacket;
+import org.eclipse.dltk.dbgp.DbgpRequest;
 import org.eclipse.dltk.dbgp.IDbgpRawListener;
+import org.eclipse.dltk.dbgp.IDbgpRawPacket;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpNotifyPacket;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpPacketReceiver;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpPacketSender;

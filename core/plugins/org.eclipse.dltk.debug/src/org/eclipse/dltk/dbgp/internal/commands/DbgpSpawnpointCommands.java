@@ -13,13 +13,15 @@ package org.eclipse.dltk.dbgp.internal.commands;
 
 import java.net.URI;
 
+import org.eclipse.dltk.dbgp.DbgpBaseCommands;
+import org.eclipse.dltk.dbgp.DbgpRequest;
+import org.eclipse.dltk.dbgp.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.IDbgpFeature;
 import org.eclipse.dltk.dbgp.IDbgpSpawnpoint;
 import org.eclipse.dltk.dbgp.commands.IDbgpCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpFeatureCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpSpawnpointCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
-import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

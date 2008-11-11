@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.commands;
 
+import org.eclipse.dltk.dbgp.DbgpBaseCommands;
+import org.eclipse.dltk.dbgp.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.IDbgpStatus;
 import org.eclipse.dltk.dbgp.commands.IDbgpContinuationCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
@@ -37,23 +39,19 @@ public class DbgpContinuationCommands extends DbgpBaseCommands implements
 		super(communicator);
 	}
 
-	public IDbgpStatus run()
-			throws DbgpException {
+	public IDbgpStatus run() throws DbgpException {
 		return execCommand(RUN_COMMAND);
 	}
 
-	public IDbgpStatus stepInto()
-			throws DbgpException {
+	public IDbgpStatus stepInto() throws DbgpException {
 		return execCommand(STEP_INTO_COMMAND);
 	}
 
-	public IDbgpStatus stepOut()
-			throws DbgpException {
+	public IDbgpStatus stepOut() throws DbgpException {
 		return execCommand(STEP_OUT_COMMAND);
 	}
 
-	public IDbgpStatus stepOver()
-			throws DbgpException {
+	public IDbgpStatus stepOver() throws DbgpException {
 		return execCommand(STEP_OVER_COMMAND);
 	}
 

@@ -7,16 +7,15 @@
  *
  
  *******************************************************************************/
-package org.eclipse.dltk.dbgp.internal.commands;
+package org.eclipse.dltk.dbgp;
 
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
-import org.eclipse.dltk.dbgp.internal.DbgpRequest;
 import org.eclipse.dltk.dbgp.internal.DbgpTransactionManager;
 import org.w3c.dom.Element;
 
 public class DbgpBaseCommands {
 
-	static final String ID_OPTION = "-i"; //$NON-NLS-1$
+	public static final String ID_OPTION = "-i"; //$NON-NLS-1$
 
 	private final IDbgpCommunicator communicator;
 
@@ -24,13 +23,13 @@ public class DbgpBaseCommands {
 		this.communicator = communicator;
 	}
 
-	protected DbgpRequest createRequest(String command) {
+	public static DbgpRequest createRequest(String command) {
 		DbgpRequest request = new DbgpRequest(command);
 		request.addOption(ID_OPTION, generateRequestId());
 		return request;
 	}
 
-	protected DbgpRequest createAsyncRequest(String command) {
+	public static DbgpRequest createAsyncRequest(String command) {
 		DbgpRequest request = new DbgpRequest(command, true);
 		request.addOption(ID_OPTION, generateRequestId());
 		return request;

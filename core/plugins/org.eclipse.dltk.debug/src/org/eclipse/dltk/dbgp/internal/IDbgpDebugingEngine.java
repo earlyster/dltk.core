@@ -11,6 +11,7 @@ package org.eclipse.dltk.dbgp.internal;
 
 import java.io.IOException;
 
+import org.eclipse.dltk.dbgp.DbgpRequest;
 import org.eclipse.dltk.dbgp.IDbgpRawListener;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpNotifyPacket;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpResponsePacket;

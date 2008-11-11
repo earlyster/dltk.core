@@ -12,7 +12,7 @@ package org.eclipse.dltk.dbgp.internal.packets;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.eclipse.dltk.dbgp.internal.DbgpRequest;
+import org.eclipse.dltk.dbgp.DbgpRequest;
 
 public class DbgpPacketSender {
 	private final Object lock = new Object();

@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.commands;
 
+import org.eclipse.dltk.dbgp.DbgpBaseCommands;
+import org.eclipse.dltk.dbgp.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.IDbgpStatus;
 import org.eclipse.dltk.dbgp.commands.IDbgpStatusCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
