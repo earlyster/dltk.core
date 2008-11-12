@@ -61,6 +61,7 @@ public class ScriptWordRule implements IRule {
 
 	private boolean fIgnoreCase = false;
 
+	private int fLastSeenEnd = 0;
 	private String fLastSeen = "";
 	private Map fNext = new HashMap();
 
@@ -199,12 +200,15 @@ public class ScriptWordRule implements IRule {
 				String buffer = fBuffer.toString();
 
 				/*
-				 * if 'lastSeen' can be replaced and we're not currently
-				 * processing it, return the 'next after seen' token
+				 * if 'lastSeen' can be replaced, we're not currently processing
+				 * it, and the scanner has not moved back to a position before
+				 * 'lastSeenEnd', return the 'next after seen' token.
 				 */
-				if (fNext.containsKey(fLastSeen) && !buffer.equals(fLastSeen)) {
+				if (fNext.containsKey(fLastSeen) && !buffer.equals(fLastSeen)
+						&& scanner.getColumn() > fLastSeenEnd) {
 					IToken replace = (IToken) fNext.get(fLastSeen);
 					fLastSeen = buffer;
+					fLastSeenEnd = scanner.getColumn();
 					return replace;
 				}
 
@@ -222,6 +226,7 @@ public class ScriptWordRule implements IRule {
 
 				if (token != null) {
 					fLastSeen = buffer;
+					fLastSeenEnd = scanner.getColumn();
 					return token;
 				}
 
