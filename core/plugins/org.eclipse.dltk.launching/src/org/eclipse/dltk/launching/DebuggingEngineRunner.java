@@ -166,9 +166,22 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 
 	/**
 	 * Used to create new script thread configurator.
+	 * 
+	 * @return
+	 * @deprecated
 	 */
 	protected IScriptDebugThreadConfigurator createThreadConfigurator() {
 		return null;
+	}
+
+	/**
+	 * Used to create new script thread configurator.
+	 * 
+	 * @param configuration
+	 */
+	protected IScriptDebugThreadConfigurator createThreadConfigurator(
+			ILaunchConfiguration configuration) {
+		return createThreadConfigurator();
 	}
 
 	/**
@@ -194,8 +207,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 				configuration, DLTKDebugPlugin.getConnectionTimeout());
 
 		ScriptDebugTarget target = (ScriptDebugTarget) launch.getDebugTarget();
-		IScriptDebugThreadConfigurator configurator = this
-				.createThreadConfigurator();
+		IScriptDebugThreadConfigurator configurator = createThreadConfigurator(configuration);
 		if (configurator != null) {
 			target.setScriptDebugThreadConfigurator(configurator);
 		}
