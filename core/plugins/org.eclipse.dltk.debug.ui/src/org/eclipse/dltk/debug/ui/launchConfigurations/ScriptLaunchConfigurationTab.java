@@ -32,6 +32,8 @@ import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -542,7 +544,26 @@ public abstract class ScriptLaunchConfigurationTab extends
 		if (page == null) {
 			return null;
 		}
-
+		final ISelection selection = page.getSelection();
+		if (selection instanceof IStructuredSelection) {
+			final IStructuredSelection ss = (IStructuredSelection) selection;
+			if (!ss.isEmpty()) {
+				final Object obj = ss.getFirstElement();
+				if (obj instanceof IModelElement) {
+					return (IModelElement) obj;
+				}
+				if (obj instanceof IResource) {
+					IModelElement me = DLTKCore.create((IResource) obj);
+					if (me == null) {
+						final IProject project = ((IResource) obj).getProject();
+						me = DLTKCore.create(project);
+					}
+					if (me != null) {
+						return me;
+					}
+				}
+			}
+		}
 		IEditorPart editor = page.getActiveEditor();
 		if (editor == null) {
 			return null;
