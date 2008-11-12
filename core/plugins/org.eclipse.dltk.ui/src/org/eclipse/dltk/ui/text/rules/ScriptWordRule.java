@@ -199,12 +199,16 @@ public class ScriptWordRule implements IRule {
 
 				String buffer = fBuffer.toString();
 
-				/*
-				 * if 'lastSeen' can be replaced, we're not currently processing
-				 * it, and the scanner has not moved back to a position before
-				 * 'lastSeenEnd', return the 'next after seen' token.
-				 */
-				if (fNext.containsKey(fLastSeen) && !buffer.equals(fLastSeen)
+				//
+				// our swap criteria:
+				//
+				// 1) we have a mapping for the 'lastSeen' word
+				// 2) the current word doesn't start w/ the 'lastSeen'
+				// 3) the current position in the scanner is > the end column of
+				// 'lastSeen'
+				//
+				if (fNext.containsKey(fLastSeen)
+						&& !buffer.startsWith(fLastSeen)
 						&& scanner.getColumn() > fLastSeenEnd) {
 					IToken replace = (IToken) fNext.get(fLastSeen);
 					fLastSeen = buffer;
