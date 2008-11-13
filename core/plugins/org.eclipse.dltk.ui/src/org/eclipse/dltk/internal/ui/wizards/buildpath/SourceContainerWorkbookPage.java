@@ -46,7 +46,7 @@ import org.eclipse.ui.INewWizard;
 
 public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
-	private class OpenBuildPathWizardAction extends AbstractOpenWizardAction
+	public class OpenBuildPathWizardAction extends AbstractOpenWizardAction
 			implements IPropertyChangeListener {
 
 		private final BuildPathWizard fWizard;
@@ -91,7 +91,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 	}
 
-	private static AddSourceFolderWizard newSourceFolderWizard(
+	protected static AddSourceFolderWizard newSourceFolderWizard(
 			BPListElement element, List/* <BPListElement> */existingElements,
 			boolean newFolder) {
 		BPListElement[] existing = (BPListElement[]) existingElements
@@ -127,7 +127,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}
 
 	private ListDialogField fBuildpathList;
-	private IScriptProject fCurrJProject;
+	protected IScriptProject fCurrJProject;
 
 	private Control fSWTControl;
 	protected TreeListDialogField fFoldersList;
@@ -139,9 +139,14 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 	public SourceContainerWorkbookPage(ListDialogField buildpathList) {
 		fBuildpathList = buildpathList;
-
 		fSWTControl = null;
+	}
 
+	/**
+	 * Initialize container elements. This code should not be in the constructor
+	 * in order to enable extensibility
+	 */
+	protected void initContainerElements() {
 		SourceContainerAdapter adapter = new SourceContainerAdapter();
 
 		String[] buttonLabels;
@@ -163,12 +168,23 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fFoldersList.enableButton(IDX_EDIT, false);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.dltk.internal.ui.wizards.buildpath.BuildPathBasePage#setTitle
+	 * (java.lang.String)
+	 */
+	public void setTitle(String title) {
+		fFoldersList.setLabelText(title);
+	}
+
 	public void init(IScriptProject jproject) {
 		fCurrJProject = jproject;
 		updateFoldersList();
 	}
 
-	private void updateFoldersList() {
+	protected void updateFoldersList() {
 		ArrayList folders = new ArrayList();
 
 		List cpelements = fBuildpathList.getElements();
@@ -193,6 +209,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}
 
 	public Control getControl(Composite parent) {
+
+		initContainerElements();
+
 		PixelConverter converter = new PixelConverter(parent);
 		Composite composite = new Composite(parent, SWT.NONE);
 
@@ -221,7 +240,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		return composite;
 	}
 
-	private Shell getShell() {
+	protected Shell getShell() {
 		if (fSWTControl != null) {
 			return fSWTControl.getShell();
 		}
@@ -336,7 +355,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 	}
 
-	private boolean hasFolders(IContainer container) {
+	protected boolean hasFolders(IContainer container) {
 
 		try {
 			IResource[] members = container.members();
@@ -577,7 +596,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		return kind == IBuildpathEntry.BPE_SOURCE;
 	}
 
-	private void refresh(List insertedElements, List removedElements,
+	protected void refresh(List insertedElements, List removedElements,
 			List modifiedElements) {
 		fFoldersList.addElements(insertedElements);
 		for (Iterator iter = insertedElements.iterator(); iter.hasNext();) {

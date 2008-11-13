@@ -87,6 +87,17 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	public void init(IScriptProject jproject) {
 		updateProjectsList(jproject);
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.dltk.internal.ui.wizards.buildpath.BuildPathBasePage#setTitle
+	 * (java.lang.String)
+	 */
+	public void setTitle(String title) {
+		fProjectsList.setLabelText(title);
+	}
 
 	private void updateProjectsList(IScriptProject currJProject) {
 		// add the projects-cpentries that are already on the class path

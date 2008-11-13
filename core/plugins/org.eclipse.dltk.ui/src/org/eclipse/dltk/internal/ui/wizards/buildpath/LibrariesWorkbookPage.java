@@ -39,7 +39,6 @@ import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.dltk.internal.ui.wizards.BuildpathDialogAccess;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.dltk.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.ITreeListAdapter;
@@ -81,7 +80,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private IScriptProject scriptProject;
 
 	public LibrariesWorkbookPage(boolean supportZips,
-			CheckedListDialogField classPathList,
+			ListDialogField classPathList,
 			IWorkbenchPreferenceContainer pageContainer) {
 		fBuildPathList = classPathList;
 		fPageContainer = pageContainer;
@@ -130,6 +129,17 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			fLibrariesList.enableButton(IDX_REPLACE + IDX_ADD, false);
 		}
 		fLibrariesList.setViewerSorter(new BPListElementSorter());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.dltk.internal.ui.wizards.buildpath.BuildPathBasePage#setTitle
+	 * (java.lang.String)
+	 */
+	public void setTitle(String title) {
+		fLibrariesList.setLabelText(title);
 	}
 
 	public void init(IScriptProject jproject) {

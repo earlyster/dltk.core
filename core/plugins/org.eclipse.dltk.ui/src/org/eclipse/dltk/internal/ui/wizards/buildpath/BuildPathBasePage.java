@@ -22,6 +22,8 @@ import org.eclipse.swt.widgets.Control;
 
 public abstract class BuildPathBasePage {
 
+	protected String fTitle = null;
+
 	public abstract List getSelection();
 
 	public abstract void setSelection(List selection, boolean expand);
@@ -52,6 +54,15 @@ public abstract class BuildPathBasePage {
 		for (int i = 0; i < newEntries.length; i++) {
 			addExclusionPatterns(newEntries[i], existing, modifiedSourceEntries);
 		}
+	}
+
+	/**
+	 * Update page title. Needs to be called before getControl()
+	 * 
+	 * @param title
+	 */
+	public void setTitle(String title) {
+		fTitle = title;
 	}
 
 	private static void addExclusionPatterns(BPListElement newEntry,
