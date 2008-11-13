@@ -27,7 +27,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 
 /*
- * TODO: Need to implement storage label provider usage here. TODO: Need to implements image provider usage here.
+ * TODO: Need to implement storage label provider usage here. 
+ * TODO: Need to implements image provider usage here.
  */
 public class ScriptUILabelProvider implements ILabelProvider, IColorProvider {
 
@@ -191,7 +192,7 @@ public class ScriptUILabelProvider implements ILabelProvider, IColorProvider {
 		Object[] listeners = fListeners.getListeners();
 		for (int i = 0; i < listeners.length; ++i) {
 			final ILabelProviderListener l = (ILabelProviderListener) listeners[i];
-			
+
 			SafeRunner.run(new SafeRunnable() {
 				public void run() {
 					l.labelProviderChanged(event);
