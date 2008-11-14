@@ -27,6 +27,7 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.ILaunchShortcut;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IParent;
@@ -172,12 +173,13 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 				if (config
 						.getAttribute(
 								ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
-								"").equals( //$NON-NLS-1$
+								Util.EMPTY_STRING).equals(
 								script.getProjectRelativePath().toString())
 						&& config
 								.getAttribute(
 										ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME,
-										"").equals(script.getProject().getName())) { //$NON-NLS-1$
+										Util.EMPTY_STRING).equals(
+										script.getProject().getName())) {
 					candidateConfigs.add(config);
 				}
 			}
@@ -239,7 +241,7 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 			// ScriptLaunchConfigurationConstants.ATTR_WORKING_DIRECTORY,
 			// (String)null);
 
-			wc.setMappedResources(new IResource[] { script.getProject() });
+			wc.setMappedResources(new IResource[] { script });
 			config = wc.doSave();
 		} catch (CoreException exception) {
 			exception.printStackTrace();
