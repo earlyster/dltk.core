@@ -174,8 +174,8 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 						String[] activeFilters = StepFilterManager
 								.getActiveFilters(scriptProject);
 						target.setFilters(activeFilters);
-						target.setUseStepFilters(StepFilterManager
-								.isUseStepFilters(scriptProject));
+						// target.setUseStepFilters(StepFilterManager
+						// .isUseStepFilters(scriptProject));
 					} catch (CoreException e) {
 						if (DLTKCore.DEBUG) {
 							e.printStackTrace();

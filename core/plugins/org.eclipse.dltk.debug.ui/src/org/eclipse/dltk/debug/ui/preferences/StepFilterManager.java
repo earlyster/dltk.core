@@ -1,9 +1,9 @@
 package org.eclipse.dltk.debug.ui.preferences;
 
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.ui.IDLTKDebugUIPreferenceConstants;
 import org.eclipse.dltk.internal.debug.ui.ScriptDebugOptionsManager;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
@@ -57,25 +57,32 @@ public class StepFilterManager {
 
 		return filters;
 	}
+
+	/**
+	 * @param project
+	 * @return
+	 * @deprecated
+	 */
 	public static boolean isUseStepFilters(IScriptProject project) {
-		try {
-			IDLTKLanguageToolkit coreToolkit = DLTKLanguageManager
-					.getLanguageToolkit(project);
-			IDLTKUILanguageToolkit languageToolkit = DLTKUILanguageManager
-					.getLanguageToolkit(coreToolkit.getNatureId());
-			return isUseStepFilters(languageToolkit.getPreferenceStore());
-		} catch (Exception e) {
-			return false;
-		}
-	}
-	public static boolean isUseStepFilters(IPreferenceStore preferenceStore) {
-		return preferenceStore.getBoolean(DLTKDebugPlugin.PLUGIN_ID
-				+ ".useStepFilters"); //$NON-NLS-1$
+		return DebugPlugin.isUseStepFilters();
 	}
 
+	/**
+	 * @param preferenceStore
+	 * @return
+	 * @deprecated
+	 */
+	public static boolean isUseStepFilters(IPreferenceStore preferenceStore) {
+		return DebugPlugin.isUseStepFilters();
+	}
+
+	/**
+	 * @param selection
+	 * @param preferenceStore
+	 * @deprecated
+	 */
 	public static void setUseStepFilters(boolean selection,
 			IPreferenceStore preferenceStore) {
-		preferenceStore.setValue(DLTKDebugPlugin.PLUGIN_ID + ".useStepFilters", //$NON-NLS-1$
-				selection);
+		DebugPlugin.setUseStepFilters(selection);
 	}
 }
