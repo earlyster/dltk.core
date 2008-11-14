@@ -541,7 +541,12 @@ public abstract class AbstractInterpreterLibraryBlock implements
 		fDialog.setButtonLayoutData(button);
 	}
 
-	protected abstract IDialogSettings getDialogSettions();
+	/**
+	 * @deprecated
+	 */
+	protected IDialogSettings getDialogSettions() {
+		return null;
+	}
 
 	protected LibraryLocation add() {
 		IEnvironment environment = fDialog.getEnvironment();
