@@ -137,6 +137,22 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private final int IDX_EDIT = 3;
 	private final int IDX_REMOVE = 4;
 
+	protected int getIDX_ADD() {
+		return IDX_ADD;
+	}
+
+	protected int getIDX_ADD_LINK() {
+		return IDX_ADD_LINK;
+	}
+
+	protected int getIDX_EDIT() {
+		return IDX_EDIT;
+	}
+
+	protected int getIDX_REMOVE() {
+		return IDX_REMOVE;
+	}
+
 	public SourceContainerWorkbookPage(ListDialogField buildpathList) {
 		fBuildpathList = buildpathList;
 		fSWTControl = null;
@@ -165,7 +181,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				.setLabelText(NewWizardMessages.SourceContainerWorkbookPage_folders_label);
 
 		fFoldersList.setViewerSorter(new BPListElementSorter());
-		fFoldersList.enableButton(IDX_EDIT, false);
+		fFoldersList.enableButton(getIDX_EDIT(), false);
 	}
 
 	/*
@@ -317,7 +333,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 	protected void sourcePageCustomButtonPressed(DialogField field, int index) {
 		if (field == fFoldersList) {
-			if (index == IDX_ADD) {
+			if (index == getIDX_ADD()) {
 				IProject project = fCurrJProject.getProject();
 				if (project.exists() && hasFolders(project)) {
 					List existingElements = fFoldersList.getElements();
@@ -339,7 +355,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 							wizard);
 					action.run();
 				}
-			} else if (index == IDX_ADD_LINK) {
+			} else if (index == getIDX_ADD_LINK()) {
 				BPListElement newElement = new BPListElement(fCurrJProject,
 						IBuildpathEntry.BPE_SOURCE, false);
 				AddSourceFolderWizard wizard = newLinkedSourceFolderWizard(
@@ -347,9 +363,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				OpenBuildPathWizardAction action = new OpenBuildPathWizardAction(
 						wizard);
 				action.run();
-			} else if (index == IDX_EDIT) {
+			} else if (index == getIDX_EDIT()) {
 				editEntry();
-			} else if (index == IDX_REMOVE) {
+			} else if (index == getIDX_REMOVE()) {
 				removeEntry();
 			}
 		}
@@ -438,10 +454,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 	protected void sourcePageSelectionChanged(DialogField field) {
 		List selected = fFoldersList.getSelectedElements();
-		fFoldersList.enableButton(IDX_EDIT, canEdit(selected));
-		fFoldersList.enableButton(IDX_REMOVE, canRemove(selected));
+		fFoldersList.enableButton(getIDX_EDIT(), canEdit(selected));
+		fFoldersList.enableButton(getIDX_REMOVE(), canRemove(selected));
 		boolean noAttributes = containsOnlyTopLevelEntries(selected);
-		fFoldersList.enableButton(IDX_ADD, noAttributes);
+		fFoldersList.enableButton(getIDX_ADD(), noAttributes);
 	}
 
 	private void removeEntry() {
