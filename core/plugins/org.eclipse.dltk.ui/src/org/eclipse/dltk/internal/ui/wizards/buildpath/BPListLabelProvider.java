@@ -321,7 +321,7 @@ public class BPListLabelProvider extends LabelProvider {
 		}
 	}
 
-	private ImageDescriptor getCPListElementBaseImage(BPListElement cpentry) {
+	protected ImageDescriptor getCPListElementBaseImage(BPListElement cpentry) {
 
 		switch (cpentry.getEntryKind()) {
 		case IBuildpathEntry.BPE_SOURCE:
