@@ -302,6 +302,11 @@ public class DLTKSearchScopeFactory {
 						.getAdapter(IResource.class);
 				if (resource != null)
 					addModelElements(result, resource);
+
+				IModelElement modelElement = (IModelElement) ((IAdaptable) selectedElement)
+						.getAdapter(IModelElement.class);
+				if (modelElement != null)
+					addModelElements(result, modelElement);
 			}
 
 		}
