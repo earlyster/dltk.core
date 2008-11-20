@@ -14,10 +14,12 @@ import org.eclipse.osgi.util.NLS;
 // TODO: move to internal package
 public class LaunchingMessages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.launching.LaunchingMessages";//$NON-NLS-1$
-	
+
 	public static String AbstractInterpreterInstallType_correctingLocations;
 
 	public static String AbstractInterpreterInstallType_errorResolvingDefaultLibraries;
+
+	public static String AbstractInterpreterInstallType_failedToDeployLibraryLocationsScript;
 
 	public static String AbstractInterpreterInstallType_failedToReadFromDiscoverScriptOutputStream;
 
@@ -88,17 +90,15 @@ public class LaunchingMessages extends NLS {
 	public static String ScriptRuntime_28;
 	public static String ScriptRuntime_31;
 	public static String ScriptRuntime_32;
-	
+
 	public static String LaunchingPlugin_32;
 	public static String LaunchingPlugin_33;
 	public static String LaunchingPlugin_34;
 	public static String LaunchingPlugin_0;
 	public static String LaunchingPlugin_1;
 
-	
 	public static String InterpreterInstallType_duplicateInterpreter;
 
-	
 	public static String RuntimeBuildpathEntry_An_exception_occurred_generating_runtime_classpath_memento_8;
 	public static String RuntimeBuildpathEntry_Unable_to_recover_runtime_class_path_entry_type_2;
 	public static String RuntimeBuildpathEntry_Unable_to_recover_runtime_class_path_entry_location_3;
@@ -114,36 +114,34 @@ public class LaunchingMessages extends NLS {
 	public static String InterpreterEnvironmentContainerInitializer_Buildpath_entry__0__does_not_refer_to_a_library__3;
 	public static String InterpreterEnvironmentContainerInitializer_Default_System_Library_1;
 
-	
 	public static String AbstractInterpreterRunner_0;
 	public static String AbstractScriptLaunchConfigurationDelegate_20;
 
-	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, LaunchingMessages.class);
 	}
 
 	public static String StandardInterpreterRunner;
 	public static String StandardInterpreterRunner_Unable_to_locate_executable_for;
-	
+
 	public static String NoDefaultInterpreterStatusHandler_title;
 	public static String NoDefaultInterpreterStatusHandler_message;
-	
+
 	public static String ScriptRuntime_notDefaultInterpreter;
-	
+
 	public static String ScriptLaunchShortcut_0;
 	public static String ScriptLaunchShortcut_1;
-	public static String ScriptLaunchShortcut_3;	
+	public static String ScriptLaunchShortcut_3;
 	public static String ScriptLaunchShortcut_Choose_a_main_script_to_launch;
 
 	public static String LaunchShortcut_selectScriptToLaunch;
 	public static String LaunchShortcut_selectionContainsNoScript;
-	public static String LaunchShortcut_searchingForScripts;	
-	
+	public static String LaunchShortcut_searchingForScripts;
+
 	public static String ScriptProjectSourceContainerTypeDelegate_5;
 	public static String ScriptProjectSourceContainerTypeDelegate_6;
 	public static String ScriptProjectSourceContainerTypeDelegate_7;
 
 	public static String ScriptRuntime_Buildpath_references_non_existant_project___0__3;
-	
+
 }

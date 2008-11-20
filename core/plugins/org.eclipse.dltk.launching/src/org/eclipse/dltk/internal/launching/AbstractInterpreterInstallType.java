@@ -660,6 +660,14 @@ public abstract class AbstractInterpreterInstallType implements
 					if (exeEnv == null)
 						return;
 					IDeployment deployment = exeEnv.createDeployment();
+
+					// handle case where rse is missing required plugins
+					if (deployment == null) {
+						DLTKLaunchingPlugin
+								.logWarning(LaunchingMessages.AbstractInterpreterInstallType_failedToDeployLibraryLocationsScript);
+						return;
+					}
+
 					try {
 						IPath deploymentPath = createPathFile(deployment);
 						IFileHandle locator = deployment
