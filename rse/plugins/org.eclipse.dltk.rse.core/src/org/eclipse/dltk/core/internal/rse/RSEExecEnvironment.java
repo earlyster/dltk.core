@@ -44,14 +44,18 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 					.inc(RSEPerfomanceStatistics.DEPLOYMENTS_CREATED);
 		}
 		try {
-			String rootPath = getTempDir() + environment.getSeparator()
-					+ getTempName("dltk", ".tmp");
-			URI rootUri = createRemoteURI(environment.getHost(), rootPath);
-			return new EFSDeployment(environment, rootUri);
+			String tmpDir = getTempDir();
+			if (tmpDir != null) {
+				String rootPath = tmpDir + environment.getSeparator()
+						+ getTempName("dltk", ".tmp");
+				URI rootUri = createRemoteURI(environment.getHost(), rootPath);
+				return new EFSDeployment(environment, rootUri);
+			}
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG)
 				e.printStackTrace();
 		}
+
 		return null;
 	}
 
@@ -77,20 +81,32 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 	}
 
 	private String getTempDir() {
-		IShellServiceSubSystem system = getShellServiceSubSystem(environment
-				.getHost());
+		IHost host = environment.getHost();
+		IShellServiceSubSystem system = getShellServiceSubSystem(host);
+
+		if (system == null) {
+			DLTKRSEPlugin
+					.logWarning("unable to find IShellServiceSubSystem host ["
+							+ host.getName() + "]");
+			return null;
+		}
+
+		String tmpDir = null;
 		try {
 			system.connect(new NullProgressMonitor(), false);
+
+			tmpDir = system.getConnectorService().getTempDirectory();
+			if (tmpDir.length() == 0) {
+				tmpDir = "/tmp";
+			}
+
 		} catch (Exception e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
 		}
-		String temp = system.getConnectorService().getTempDirectory();
-		if (temp.length() == 0) {
-			temp = "/tmp";
-		}
-		return temp;
+
+		return tmpDir;
 	}
 
 	public Process exec(String[] cmdLine, IPath workingDir, String[] environment)
