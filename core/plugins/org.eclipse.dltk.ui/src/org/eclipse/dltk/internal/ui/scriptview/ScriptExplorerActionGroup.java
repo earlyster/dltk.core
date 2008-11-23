@@ -67,7 +67,7 @@ import org.eclipse.ui.views.framelist.TreeFrame;
 import org.eclipse.ui.views.framelist.UpAction;
 
 
-class ScriptExplorerActionGroup extends CompositeActionGroup {
+public class ScriptExplorerActionGroup extends CompositeActionGroup {
 
 	private ScriptExplorerPart fPart;
 
@@ -378,5 +378,13 @@ class ScriptExplorerActionGroup extends CompositeActionGroup {
 	
 	public FrameList getFrameList() {
 		return fFrameList;
+	}
+	
+
+	/**
+	 * @return the fPart
+	 */
+	protected ScriptExplorerPart getPart() {
+		return fPart;
 	}
 }

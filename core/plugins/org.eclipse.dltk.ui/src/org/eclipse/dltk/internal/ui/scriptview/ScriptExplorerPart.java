@@ -976,13 +976,20 @@ public class ScriptExplorerPart extends ViewPart implements
 				ScriptExplorerPart.PERF_MAKE_ACTIONS, this);
 		stats.startRun();
 
-		fActionSet = new ScriptExplorerActionGroup(this);
+		fActionSet = getActionGroup();
 		if (fWorkingSetModel != null) {
 			fActionSet.getWorkingSetActionGroup().setWorkingSetModel(
 					fWorkingSetModel);
 		}
 
 		stats.endRun();
+	}
+
+	/**
+	 * To allow inheritance and manipulating lang. specific explorers actions
+	 */
+	protected ScriptExplorerActionGroup getActionGroup() {
+		return new ScriptExplorerActionGroup(this);
 	}
 
 	// ---- Event handling
