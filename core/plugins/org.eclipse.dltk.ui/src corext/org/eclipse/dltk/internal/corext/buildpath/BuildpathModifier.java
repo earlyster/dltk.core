@@ -1049,7 +1049,7 @@ public class BuildpathModifier {
 		if (root == null)
 			return false;
 		String fragmentName = getName(resource.getFullPath(), root.getPath());
-		fragmentName = completeName(fragmentName);
+		fragmentName = completeName(project, fragmentName);
 		IBuildpathEntry entry = root.getRawBuildpathEntry();
 		return entry != null
 				&& contains(new Path(fragmentName), entry
@@ -1457,7 +1457,7 @@ public class BuildpathModifier {
 			IPath[] includedPath = (IPath[]) entry
 					.getAttribute(BPListElement.INCLUSION);
 			IPath[] newIncludedPath = new IPath[includedPath.length + 1];
-			String completedName = completeName(name);
+			String completedName = completeName(project, name);
 			IPath relPath = new Path(completedName);
 			if (!contains(relPath, includedPath, new SubProgressMonitor(
 					monitor, 2))) {
@@ -1503,7 +1503,7 @@ public class BuildpathModifier {
 			IPath[] excludedPath = (IPath[]) entry
 					.getAttribute(BPListElement.EXCLUSION);
 			IPath[] newExcludedPath = new IPath[excludedPath.length + 1];
-			name = completeName(name);
+			name = completeName(project, name);
 			IPath path = new Path(name);
 			if (!contains(path, excludedPath,
 					new SubProgressMonitor(monitor, 2))) {
@@ -1649,7 +1649,7 @@ public class BuildpathModifier {
 
 			IPath[] includedPath = (IPath[]) entry
 					.getAttribute(BPListElement.INCLUSION);
-			IPath relPath = new Path(completeName(name));
+			IPath relPath = new Path(completeName(project, name));
 			IPath[] newIncludedPath = remove(relPath, includedPath,
 					new SubProgressMonitor(monitor, 3));
 			entry.setAttribute(BPListElement.INCLUSION, newIncludedPath);
@@ -1692,8 +1692,8 @@ public class BuildpathModifier {
 			String name = getName(resource.getFullPath(), entry.getPath());
 			IPath[] excludedPath = (IPath[]) entry
 					.getAttribute(BPListElement.EXCLUSION);
-			IPath[] newExcludedPath = remove(new Path(completeName(name)),
-					excludedPath, new SubProgressMonitor(monitor, 3));
+			IPath[] newExcludedPath = remove(new Path(completeName(project,
+					name)), excludedPath, new SubProgressMonitor(monitor, 3));
 			entry.setAttribute(BPListElement.EXCLUSION, newExcludedPath);
 		} finally {
 			monitor.done();
@@ -1944,6 +1944,27 @@ public class BuildpathModifier {
 		// name= name.replace('.', '/');
 		// return name;
 		// }
+		return name;
+	}
+
+	/**
+	 * Add a '/' at the end of the name if it does not end with extension.
+	 * 
+	 * @param project
+	 *            - the project containing the resource
+	 * @param name
+	 *            - name of the resource append '/' at the end if necessary
+	 * @return modified string
+	 */
+	private static String completeName(IScriptProject project, String name) {
+		// Try to locate the resource in the workspace
+		IResource resource = ResourcesPlugin.getWorkspace().getRoot()
+				.findMember(project.getElementName() + "/" + name); //$NON-NLS-1$
+		// If the resource is a folder and does not end with "/" add it
+		if (resource != null && resource.getType() == IResource.FOLDER
+				&& !name.endsWith("/")) { //$NON-NLS-1$
+			name = name + "/"; //$NON-NLS-1$
+		}
 		return name;
 	}
 
