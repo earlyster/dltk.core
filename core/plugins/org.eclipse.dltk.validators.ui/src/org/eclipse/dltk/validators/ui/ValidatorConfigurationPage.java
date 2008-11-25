@@ -50,8 +50,9 @@ public abstract class ValidatorConfigurationPage {
 	public void setStatusHandler(IStatusHandler handler) {
 		this.statusHandler = handler;
 	}
+
 	public void updateStatus() {
-		if( this.statusHandler != null ) {
+		if (this.statusHandler != null) {
 			this.statusHandler.updateStatus();
 		}
 	}
