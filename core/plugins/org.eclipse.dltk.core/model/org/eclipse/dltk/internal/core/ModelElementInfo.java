@@ -29,7 +29,7 @@ import org.eclipse.dltk.core.IModelElement;
 	/**
 	 * Shared empty collection used for efficiency.
 	 */
-	static Object[] NO_NON_SCRIPT_RESOURCES = new Object[] {};
+	static final Object[] NO_NON_SCRIPT_RESOURCES = new Object[0];
 
 	protected ModelElementInfo() {
 	}
