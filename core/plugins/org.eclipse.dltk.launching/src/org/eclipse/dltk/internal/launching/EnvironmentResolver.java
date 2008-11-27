@@ -13,7 +13,7 @@ import org.eclipse.dltk.launching.EnvironmentVariable;
 public final class EnvironmentResolver {
 	private static class REnvironmentVariable {
 		EnvironmentVariable var;
-		Set dependencies = new HashSet();
+		final Set dependencies = new HashSet();
 
 		public REnvironmentVariable(EnvironmentVariable var) {
 			this.var = var;
@@ -57,11 +57,13 @@ public final class EnvironmentResolver {
 		int maxCycles = 1000;
 		while (unresolved.size() > 0) {
 			maxCycles--;
-			if( maxCycles < 0 ) {
+			if (maxCycles < 0) {
 				break;
 			}
 			for (Iterator iterator = unresolved.iterator(); iterator.hasNext();) {
-				REnvironmentVariable var = (REnvironmentVariable) iterator.next();;
+				REnvironmentVariable var = (REnvironmentVariable) iterator
+						.next();
+				;
 				if (isResolved(var.var)) {
 					result.add(var.var);
 					resolved.put(var.var.getName(), var.var.getValue());
@@ -69,7 +71,7 @@ public final class EnvironmentResolver {
 				} else {
 					if (isCyclick(var, unresolved)) {
 						// Resolve self cycles to environment
-						if (isSelfCyclick(var)) {
+						if (isRecursiveDependency(var)) {
 							resolveVariable(var, env);
 							resolveVariable(var, selfDep);
 							if (isResolved(var.var)) {
@@ -95,8 +97,8 @@ public final class EnvironmentResolver {
 				.toArray(new EnvironmentVariable[result.size()]);
 	}
 
-	private static boolean isSelfCyclick(REnvironmentVariable var) {
-		if (var.dependencies.size() == 0) {
+	private static boolean isRecursiveDependency(REnvironmentVariable var) {
+		if (var.dependencies.isEmpty()) {
 			return false;
 		}
 		if (var.dependencies.contains(var.var.getName())) {
@@ -150,7 +152,7 @@ public final class EnvironmentResolver {
 		while (pos != -1) {
 			result = result.substring(0, pos) + value
 					+ result.substring(pos + pattern.length());
-			pos = result.indexOf(pattern);
+			pos = result.indexOf(pattern, pos);
 		}
 		return new EnvironmentVariable(var.getName(), result);
 	}
@@ -196,8 +198,12 @@ public final class EnvironmentResolver {
 		if (var == null) {
 			throw new IllegalArgumentException();
 		}
-		String name = var.getValue();
-		if (name.indexOf("$" + vName) != -1) { //$NON-NLS-1$
+		final String value = var.getValue();
+		final String ref = "$" + vName; //$NON-NLS-1$
+		final int pos = value.indexOf(ref);
+		if (pos != -1
+				&& (pos + ref.length() >= value.length() || !Character
+						.isLetterOrDigit(value.charAt(pos + ref.length())))) {
 			return true;
 		}
 		return false;
