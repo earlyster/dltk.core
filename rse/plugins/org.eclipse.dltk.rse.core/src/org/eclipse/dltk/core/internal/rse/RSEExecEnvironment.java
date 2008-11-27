@@ -212,7 +212,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		}
 		final Map result = new HashMap();
 		try {
-			Process process = this.exec(new String[] { "set" }, new Path(""),
+			Process process = this.exec(new String[] { "set" }, Path.EMPTY,
 					null);
 			if (process != null) {
 				final BufferedReader input = new BufferedReader(
