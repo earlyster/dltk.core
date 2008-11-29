@@ -33,6 +33,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKFeatures;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
@@ -316,7 +319,7 @@ public final class ScriptDeleteProcessor extends DeleteProcessor implements ICom
 		removeUnconfirmedFoldersThatContainSourceFolders(); /* a selected folder may be a parent of a source folder
 															 * we must inform the user about it and ask if ok to delete the folder*/
 		removeUnconfirmedReferencedArchives();
-		addEmptyCusToDelete();
+		addEmptySourceModulesToDelete();
 		removeScriptElementsChildrenOfScriptElements();/*because adding cus may create elements (types in cus)
 												    *whose parents are in selection*/
 		confirmDeletingReadOnly();   /*after empty cus - you want to ask for all cus that are to be deleted*/
@@ -615,19 +618,28 @@ public final class ScriptDeleteProcessor extends DeleteProcessor implements ICom
 			throw new OperationCanceledException(); //saying 'no' to this one is like cancelling the whole operation
 	}
 
-	//----------- empty CUs related method
-	private void addEmptyCusToDelete() throws ModelException {
-		Set cusToEmpty= getCusToEmpty();
-		addToSetToDelete((ISourceModule[]) cusToEmpty.toArray(new ISourceModule[cusToEmpty.size()]));
+	//----------- empty source modules related method
+	private void addEmptySourceModulesToDelete() throws ModelException {
+		Set modulesToEmpty = getCusToEmpty();
+		addToSetToDelete((ISourceModule[]) modulesToEmpty
+				.toArray(new ISourceModule[modulesToEmpty.size()]));
 	}
 
 	private Set getCusToEmpty() throws ModelException {
-		Set result= new HashSet();
-		for (int i= 0; i < fScriptElements.length; i++) {
-			IModelElement element= fScriptElements[i];	
-			ISourceModule cu= ReorgUtils.getSourceModule(element);
-			if (cu != null && ! result.contains(cu) && willHaveAllTopLevelTypesDeleted(cu))
-				result.add(cu);
+		Set result = new HashSet();
+		for (int i = 0; i < fScriptElements.length; i++) {
+			IModelElement element = fScriptElements[i];
+			ISourceModule module = ReorgUtils.getSourceModule(element);
+			if (module != null && !result.contains(module)) {
+				IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+						.getLanguageToolkit(module);
+				if (toolkit != null
+						&& toolkit
+								.get(DLTKFeatures.DELETE_MODULE_WITHOUT_TOP_LEVEL_TYPES)
+						&& willHaveAllTopLevelTypesDeleted(module)) {
+					result.add(module);
+				}
+			}
 		}
 		return result;
 	}
