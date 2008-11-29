@@ -7,6 +7,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dltk.core.DLTKFeatures.BooleanFeature;
+import org.eclipse.dltk.core.DLTKFeatures.IntegerFeature;
+import org.eclipse.dltk.core.DLTKFeatures.StringFeature;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -54,6 +57,18 @@ public abstract class AbstractLanguageToolkit implements IDLTKLanguageToolkit {
 
 	public String getPreferenceQualifier() {
 		return null;
+	}
+
+	public boolean get(BooleanFeature feature) {
+		return feature.getDefaultValue();
+	}
+
+	public int get(IntegerFeature feature) {
+		return feature.getDefaultValue();
+	}
+
+	public String get(StringFeature feature) {
+		return feature.getDefaultValue();
 	}
 
 }

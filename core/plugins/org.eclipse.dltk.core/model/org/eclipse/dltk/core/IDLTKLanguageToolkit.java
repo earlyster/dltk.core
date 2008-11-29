@@ -13,6 +13,9 @@ import java.io.File;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.dltk.core.DLTKFeatures.BooleanFeature;
+import org.eclipse.dltk.core.DLTKFeatures.IntegerFeature;
+import org.eclipse.dltk.core.DLTKFeatures.StringFeature;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
@@ -76,4 +79,11 @@ public interface IDLTKLanguageToolkit {
 	 * @return
 	 */
 	String getPreferenceQualifier();
+
+	boolean get(BooleanFeature feature);
+
+	int get(IntegerFeature feature);
+
+	String get(StringFeature feature);
+
 }
