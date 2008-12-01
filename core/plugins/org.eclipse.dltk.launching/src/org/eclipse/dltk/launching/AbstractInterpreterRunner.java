@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -63,11 +64,13 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 	 * @return
 	 */
 	private static String renderCommandLineLabel(String[] commandLine) {
-		if (commandLine.length < 1)
-			return ""; //$NON-NLS-1$
+		if (commandLine.length == 0)
+			return Util.EMPTY_STRING;
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < commandLine.length; i++) {
-			buf.append(' ');
+			if (i != 0) {
+				buf.append(' ');
+			}
 			char[] characters = commandLine[i].toCharArray();
 			StringBuffer command = new StringBuffer();
 			boolean containsSpace = false;
