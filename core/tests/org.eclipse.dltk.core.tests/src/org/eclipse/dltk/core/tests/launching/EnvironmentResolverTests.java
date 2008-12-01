@@ -26,10 +26,21 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 		Map env = new HashMap();
 		EnvironmentVariable[] vars = new EnvironmentVariable[] { mk("A", "a"),
 				mk("B", "a$Ac") };
+		EnvironmentVariable[] resolve = EnvironmentResolver.resolve(env, vars,
+				true);
+		assertNotNull(resolve);
+		test(resolve, "A", "a");
+		test(resolve, "B", "a$Ac");
+	}
+
+	public void testEnvironmentResolve002a() {
+		Map env = new HashMap();
+		EnvironmentVariable[] vars = new EnvironmentVariable[] { mk("A", "a"),
+				mk("B", "a$A:c") };
 		EnvironmentVariable[] resolve = EnvironmentResolver.resolve(env, vars);
 		assertNotNull(resolve);
 		test(resolve, "A", "a");
-		test(resolve, "B", "aac");
+		test(resolve, "B", "aa:c");
 	}
 
 	public void testEnvironmentResolve003() {
@@ -68,6 +79,7 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 		test(resolve, "a3", "A3A2A1");
 		test(resolve, "a4", "A4A3A2A1");
 	}
+
 	public void testEnvironmentResolve006() {
 		Map env = new HashMap();
 		env.put("PATH", "/bin:/usr/bin");
@@ -79,6 +91,7 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 		EnvironmentVariable[] resolve = EnvironmentResolver.resolve(env, vars);
 		assertEquals(resolve.length, 0);
 	}
+
 	public void testEnvironmentResolve007() {
 		Map env = new HashMap();
 		env.put("PATH", "/bin:/usr/bin");
@@ -90,6 +103,7 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 		test(resolve, "a1", "a2");
 		test(resolve, "a2", "a2");
 	}
+
 	public void testEnvironmentResolve008() {
 		Map env = new HashMap();
 		env.put("PATH", "/bin:/usr/bin");
@@ -100,6 +114,18 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 		assertEquals(resolve.length, 2);
 		test(resolve, "PATH", "/sbii/bin/:/bin:/usr/bin");
 		test(resolve, "a2", "alla{/sbii/bin/:/bin:/usr/bin}");
+	}
+
+	public void testEnvironmentResolve008a() {
+		Map env = new HashMap();
+		EnvironmentVariable[] vars = new EnvironmentVariable[] {
+				new EnvironmentVariable("PATH", "/sbii/bin/:$PATH"),
+				new EnvironmentVariable("a2", "alla{$PATH}") };
+		EnvironmentVariable[] resolve = EnvironmentResolver.resolve(env, vars,
+				true);
+		assertEquals(resolve.length, 2);
+		test(resolve, "PATH", "/sbii/bin/:$PATH");
+		test(resolve, "a2", "alla{$PATH}");
 	}
 
 	private void test(EnvironmentVariable[] resolve, String b, String v) {
@@ -114,15 +140,13 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 			EnvironmentVariable environmentVariable) {
 		String name = environmentVariable.getName();
 		for (int i = 0; i < resolve.length; i++) {
-			if (resolve[i].equals(environmentVariable)) {
+			if (resolve[i].getName().equals(name)) {
+				assertEquals("Variable:" + name,
+						environmentVariable.getValue(), resolve[i].getValue());
 				return;
 			}
-			if (resolve[i].getName().equals(name)) {
-				assertTrue("Variable:" + name + "=>" + resolve[i].getValue()
-						+ "!=" + environmentVariable.getValue(), false);
-			}
 		}
-		assertTrue(false);
+		fail("Not found " + environmentVariable.toString());
 	}
 
 	public static Test suite() {
