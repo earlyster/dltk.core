@@ -60,11 +60,16 @@ public class EnvironmentVariable {
 		String name = getName();
 		String value = getValue();
 		if (name == null && value == null) {
-			return new Status(IStatus.ERROR, DLTKCore.PLUGIN_ID, 0,
-					Messages.EnvironmentVariable_variableNameAndValueMustNotBeEmpty, null);
+			return new Status(
+					IStatus.ERROR,
+					DLTKCore.PLUGIN_ID,
+					0,
+					Messages.EnvironmentVariable_variableNameAndValueMustNotBeEmpty,
+					null);
 		}
 		return Status.OK_STATUS;
 	}
+
 	public String toString() {
 		return this.name + "=" + this.value; //$NON-NLS-1$
 	}
