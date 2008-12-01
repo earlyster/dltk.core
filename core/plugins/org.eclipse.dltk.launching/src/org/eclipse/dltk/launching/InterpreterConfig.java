@@ -284,7 +284,7 @@ public class InterpreterConfig implements Cloneable {
 	public String[] getEnvironmentAsStringsIncluding(EnvironmentVariable[] vars) {
 
 		EnvironmentVariable[] variables = EnvironmentResolver.resolve(
-				getEnvVars(), vars);
+				getEnvVars(), vars, true);
 		Set pressentVars = new HashSet();
 		ArrayList list = new ArrayList();
 		if (variables != null) {

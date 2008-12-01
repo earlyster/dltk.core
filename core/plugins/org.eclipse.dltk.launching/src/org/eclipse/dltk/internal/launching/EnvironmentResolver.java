@@ -25,6 +25,14 @@ public final class EnvironmentResolver {
 	 */
 	public static EnvironmentVariable[] resolve(Map penv,
 			EnvironmentVariable[] variables) {
+		return resolve(penv, variables, false);
+	}
+
+	/*
+	 * Resolves specified set of environment variables with system environment
+	 */
+	public static EnvironmentVariable[] resolve(Map penv,
+			EnvironmentVariable[] variables, boolean keepUnresolved) {
 		if (variables == null) {
 			return null;
 		}
@@ -53,7 +61,7 @@ public final class EnvironmentResolver {
 			fillDependencies(var, variables);
 			unresolved.add(var);
 		}
-		// For be shure we exit from while
+		// To be sure we exit while loop
 		int maxCycles = 1000;
 		while (unresolved.size() > 0) {
 			maxCycles--;
@@ -63,20 +71,23 @@ public final class EnvironmentResolver {
 			for (Iterator iterator = unresolved.iterator(); iterator.hasNext();) {
 				REnvironmentVariable var = (REnvironmentVariable) iterator
 						.next();
-				;
 				if (isResolved(var.var)) {
 					result.add(var.var);
 					resolved.put(var.var.getName(), var.var.getValue());
 					iterator.remove();
 				} else {
-					if (isCyclick(var, unresolved)) {
+					if (isCyclic(var, unresolved)) {
 						// Resolve self cycles to environment
-						if (isRecursiveDependency(var)) {
+						if (isSelfCyclic(var)) {
 							resolveVariable(var, env);
 							resolveVariable(var, selfDep);
 							if (isResolved(var.var)) {
 								continue;
 							}
+						}
+
+						if (keepUnresolved) {
+							result.add(var.var);
 						}
 						iterator.remove();
 						continue;
@@ -87,6 +98,9 @@ public final class EnvironmentResolver {
 						continue;
 					}
 					if (isUnresolvable(var, unresolved)) {
+						if (keepUnresolved) {
+							result.add(var.var);
+						}
 						iterator.remove();
 					}
 				}
@@ -97,7 +111,7 @@ public final class EnvironmentResolver {
 				.toArray(new EnvironmentVariable[result.size()]);
 	}
 
-	private static boolean isRecursiveDependency(REnvironmentVariable var) {
+	private static boolean isSelfCyclic(REnvironmentVariable var) {
 		if (var.dependencies.isEmpty()) {
 			return false;
 		}
@@ -157,7 +171,7 @@ public final class EnvironmentResolver {
 		return new EnvironmentVariable(var.getName(), result);
 	}
 
-	private static boolean isCyclick(REnvironmentVariable var, List unresolved) {
+	private static boolean isCyclic(REnvironmentVariable var, List unresolved) {
 		// Detect direct cycles
 		if (var.dependencies.size() == 0) {
 			return false;
