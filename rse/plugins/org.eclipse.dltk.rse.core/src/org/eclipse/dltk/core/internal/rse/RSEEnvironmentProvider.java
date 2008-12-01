@@ -19,8 +19,11 @@ import org.eclipse.rse.subsystems.files.core.model.RemoteFileUtility;
 import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
 
 public class RSEEnvironmentProvider implements IEnvironmentProvider {
+
+	private static final String RSE_SCHEME = "rse"; //$NON-NLS-1$
+
 	public static final String RSE_ENVIRONMENT_PREFIX = DLTKRSEPlugin.PLUGIN_ID
-			+ ".rseEnvironment.";
+			+ ".rseEnvironment."; //$NON-NLS-1$
 
 	public RSEEnvironmentProvider() {
 	}
@@ -104,8 +107,7 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 				description = project.getDescription();
 				URI uri = description.getLocationURI();
 				if (uri != null) {
-					String scheme = uri.getScheme();
-					if (!"rse".equalsIgnoreCase(scheme)) {
+					if (!RSE_SCHEME.equalsIgnoreCase(uri.getScheme())) {
 						return null;
 					}
 					String uriHost = uri.getHost();

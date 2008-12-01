@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -18,6 +19,7 @@ import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.internal.rse.perfomance.RSEPerfomanceStatistics;
 import org.eclipse.dltk.internal.launching.execution.EFSDeployment;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.subsystems.ISubSystem;
 import org.eclipse.rse.internal.efs.RSEFileSystem;
@@ -27,12 +29,18 @@ import org.eclipse.rse.services.shells.IShellService;
 import org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem.IShellServiceSubSystem;
 
 public class RSEExecEnvironment implements IExecutionEnvironment {
+
+	private static final String SHELL_PATH = "/bin/sh"; //$NON-NLS-1$
+
+	private static final String CMD_SEPARATOR = " ;"; //$NON-NLS-1$
+	private static final String EXPORT_CMD = "export "; //$NON-NLS-1$
 	private final static String EXIT_CMD = "exit"; //$NON-NLS-1$
-	// private final static String CMD_DELIMITER = " ;"; //$NON-NLS-1$
-	private RSEEnvironment environment;
+	private static final String SET_CMD = "set"; //$NON-NLS-1$
+
+	private final RSEEnvironment environment;
 	private static int counter = -1;
 
-	private static Map hostToEnvironment = new HashMap();
+	private static final Map hostToEnvironment = new HashMap();
 
 	public RSEExecEnvironment(RSEEnvironment env) {
 		this.environment = env;
@@ -47,7 +55,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 			String tmpDir = getTempDir();
 			if (tmpDir != null) {
 				String rootPath = tmpDir + environment.getSeparator()
-						+ getTempName("dltk", ".tmp");
+						+ getTempName("dltk", ".tmp"); //$NON-NLS-1$ //$NON-NLS-2$
 				URI rootUri = createRemoteURI(environment.getHost(), rootPath);
 				return new EFSDeployment(environment, rootUri);
 			}
@@ -85,9 +93,8 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		IShellServiceSubSystem system = getShellServiceSubSystem(host);
 
 		if (system == null) {
-			DLTKRSEPlugin
-					.logWarning("unable to find IShellServiceSubSystem host ["
-							+ host.getName() + "]");
+			DLTKRSEPlugin.logWarning(NLS.bind(
+					Messages.RSEExecEnvironment_hostNotFound, host.getName()));
 			return null;
 		}
 
@@ -97,7 +104,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 
 			tmpDir = system.getConnectorService().getTempDirectory();
 			if (tmpDir.length() == 0) {
-				tmpDir = "/tmp";
+				tmpDir = "/tmp"; //$NON-NLS-1$
 			}
 
 		} catch (Exception e) {
@@ -136,10 +143,10 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		if (workingDir != null) {
 			workingDirectory = this.environment.convertPathToString(workingDir);
 		} else {
-			workingDirectory = "/";
+			workingDirectory = "/"; //$NON-NLS-1$
 		}
 		try {
-			hostShell = shellService.runCommand(workingDirectory, "bash",
+			hostShell = shellService.runCommand(workingDirectory, SHELL_PATH,
 					environment, new NullProgressMonitor());
 		} catch (SystemMessageException e1) {
 			DLTKRSEPlugin.log(e1);
@@ -150,19 +157,16 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		if (environment != null) {
 			// TODO: Skip environment variables what is already in shell.
 			for (int i = 0; i < environment.length; i++) {
-				hostShell.writeToShell("export "
+				hostShell.writeToShell(EXPORT_CMD
 						+ toShellArguments(environment[i]));
 			}
 		}
-		String pattern = "DLTK_INITIAL_PREFIX_EXECUTION_STRING:"
+		final String pattern = "DLTK_INITIAL_PREFIX_EXECUTION_STRING:" //$NON-NLS-1$
 				+ String.valueOf(System.currentTimeMillis());
-		String echoCommand = "echo \"" + pattern + "\"";
-		// hostShell.writeToShell(echoCommand);
-		String command = createCommand(cmdLine);
-		hostShell.writeToShell(echoCommand + " ;" + command + " ;"
-				+ echoCommand + " ;" + EXIT_CMD);
-		// hostShell.writeToShell(echoCommand);
-		// hostShell.writeToShell(EXIT_CMD);
+		final String echoPattern = "echo \"" + pattern + "\""; //$NON-NLS-1$ //$NON-NLS-2$
+		hostShell.writeToShell(echoPattern + CMD_SEPARATOR
+				+ buildCommand(cmdLine) + CMD_SEPARATOR + echoPattern
+				+ CMD_SEPARATOR + EXIT_CMD);
 		Process p = null;
 		try {
 			p = new MyHostShellProcessAdapter(hostShell, pattern);
@@ -170,10 +174,10 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 			if (p != null) {
 				p.destroy();
 			}
-			throw new RuntimeException("Failed to run remote command");
+			throw new RuntimeException("Failed to run remote command"); //$NON-NLS-1$
 		}
-		long end = System.currentTimeMillis();
 		if (RSEPerfomanceStatistics.PERFOMANCE_TRACING) {
+			final long end = System.currentTimeMillis();
 			RSEPerfomanceStatistics.inc(RSEPerfomanceStatistics.EXECUTION_TIME,
 					(end - start));
 		}
@@ -181,38 +185,42 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 	}
 
 	private String toShellArguments(String cmd) {
-		String replaceAll = cmd.replaceAll(" ", "\\\\ ");
+		String replaceAll = cmd.replaceAll(" ", "\\\\ "); //$NON-NLS-1$ //$NON-NLS-2$
 		return replaceAll;
 	}
 
-	private String createWorkingDir(IPath workingDir) {
-		if (workingDir == null)
-			return ".";
-		return workingDir.toPortableString();
-	}
+	// private String createWorkingDir(IPath workingDir) {
+	// if (workingDir == null)
+	//			return "."; //$NON-NLS-1$
+	// return workingDir.toPortableString();
+	// }
 
-	private String createCommand(String[] cmdLine) {
+	private String buildCommand(String[] cmdLine) {
 		StringBuffer cmd = new StringBuffer();
-		for (int i = 1; i < cmdLine.length; i++) {
-			cmd.append(cmdLine[i]);
-			if (i != cmdLine.length - 1) {
-				cmd.append(" ");
+		for (int i = 0; i < cmdLine.length; i++) {
+			if (i != 0) {
+				cmd.append(" "); //$NON-NLS-1$
 			}
+			cmd.append(cmdLine[i]);
 		}
-		return cmdLine[0] + " " + /* toShellArguments( */cmd.toString()/* ) */;
+		return cmd.toString();
 	}
 
 	public Map getEnvironmentVariables(boolean realyNeed) {
 		if (!realyNeed) {
 			return new HashMap();
 		}
-		long start = System.currentTimeMillis();
-		if (hostToEnvironment.containsKey(this.environment.getHost())) {
-			return (Map) hostToEnvironment.get(this.environment.getHost());
+		final long start = System.currentTimeMillis();
+		synchronized (hostToEnvironment) {
+			final Map result = (Map) hostToEnvironment.get(environment
+					.getHost());
+			if (result != null) {
+				return new HashMap(result);
+			}
 		}
 		final Map result = new HashMap();
 		try {
-			Process process = this.exec(new String[] { "set" }, Path.EMPTY,
+			Process process = this.exec(new String[] { SET_CMD }, Path.EMPTY,
 					null);
 			if (process != null) {
 				final BufferedReader input = new BufferedReader(
@@ -221,13 +229,12 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 					public void run() {
 						try {
 							while (true) {
-								String line;
-								line = input.readLine();
+								String line = input.readLine();
 								if (line == null) {
 									break;
 								}
 								line = line.trim();
-								int pos = line.indexOf("=");
+								int pos = line.indexOf("="); //$NON-NLS-1$
 								if (pos != -1) {
 									String varName = line.substring(0, pos);
 									String varValue = line.substring(pos + 1);
@@ -250,11 +257,14 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		} catch (CoreException e) {
 			DLTKRSEPlugin.log(e);
 		}
-		if (result.size() > 0) {
-			hostToEnvironment.put(this.environment.getHost(), result);
+		if (!result.isEmpty()) {
+			synchronized (hostToEnvironment) {
+				hostToEnvironment.put(this.environment.getHost(), Collections
+						.unmodifiableMap(result));
+			}
 		}
-		long end = System.currentTimeMillis();
 		if (RSEPerfomanceStatistics.PERFOMANCE_TRACING) {
+			final long end = System.currentTimeMillis();
 			RSEPerfomanceStatistics
 					.inc(RSEPerfomanceStatistics.ENVIRONMENT_RECEIVE_COUNT);
 			RSEPerfomanceStatistics.inc(

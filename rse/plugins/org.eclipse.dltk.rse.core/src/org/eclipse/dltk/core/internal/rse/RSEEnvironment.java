@@ -31,7 +31,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	public IFileHandle getFile(IPath path) {
 		if (Path.EMPTY.equals(path)) {
 			throw new RuntimeException(
-					"Passing empty filename to RSEEnvironment.getFile() method...");
+					Messages.RSEEnvironment_EmptyFileNameError);
 		}
 		URI uri = RSEFileSystem.getURIFor(host.getHostName(), path.toString());
 		return new RSEFileHandle(this, uri);
@@ -63,7 +63,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	}
 
 	public String getName() {
-		return host.getName() + " (RSE)";
+		return host.getName() + Messages.RSEEnvironment_EnvironmentNameSuffix;
 	}
 
 	public IHost getHost() {
