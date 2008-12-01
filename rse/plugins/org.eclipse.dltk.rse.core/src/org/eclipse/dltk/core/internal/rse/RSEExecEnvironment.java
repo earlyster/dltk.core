@@ -155,6 +155,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 
 		// Sometimes environment variables aren't set, so use export.
 		if (environment != null) {
+			hostShell.writeToShell(SHELL_PATH);
 			// TODO: Skip environment variables what is already in shell.
 			for (int i = 0; i < environment.length; i++) {
 				hostShell.writeToShell(EXPORT_CMD
