@@ -115,7 +115,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 	 * field is changed, regardless of whether the change originates from the
 	 * user or has been invoked programmatically.
 	 */
-	protected final class LocationGroup extends Observable implements Observer,
+	public class LocationGroup extends Observable implements Observer,
 			IStringButtonAdapter, IDialogFieldListener {
 		protected final SelectionButtonDialogField fWorkspaceRadio;
 		protected final SelectionButtonDialogField fExternalRadio;
