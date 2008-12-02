@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.display;
 
+import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.dltk.console.ScriptConsoleConstants;
 import org.eclipse.dltk.console.ui.ScriptConsole;
 import org.eclipse.dltk.console.ui.internal.ScriptConsolePage;
@@ -24,11 +27,14 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.TextConsoleViewer;
 import org.eclipse.ui.texteditor.IUpdate;
 
 public class DebugConsolePage extends ScriptConsolePage {
+
+	DebugEventListener debugEventListener = new DebugEventListener();
 
 	/**
 	 * @param console
@@ -63,7 +69,7 @@ public class DebugConsolePage extends ScriptConsolePage {
 	protected TextConsoleViewer createViewer(Composite parent) {
 		sash = new SashForm(parent, SWT.VERTICAL | SWT.SMOOTH);
 		inputField = new StyledText(sash, SWT.V_SCROLL | SWT.H_SCROLL);
-		inputField.setEditable(true);
+		inputField.setEditable(false);
 		final TextConsoleViewer viewer = super.createViewer(sash);
 		inputField.setFont(viewer.getControl().getFont());
 		inputField.addModifyListener(new ModifyListener() {
@@ -74,7 +80,16 @@ public class DebugConsolePage extends ScriptConsolePage {
 
 		});
 		sash.setMaximizedControl(viewer.getControl());
+		DebugPlugin.getDefault().addDebugEventListener(debugEventListener);
 		return viewer;
+	}
+
+	/**
+	 * @see org.eclipse.dltk.console.ui.internal.ScriptConsolePage#dispose()
+	 */
+	public void dispose() {
+		super.dispose();
+		DebugPlugin.getDefault().removeDebugEventListener(debugEventListener);
 	}
 
 	public boolean canExecuteInputField() {
@@ -107,4 +122,26 @@ public class DebugConsolePage extends ScriptConsolePage {
 		((ScriptConsole) getConsole()).executeCommand(input);
 	}
 
+	private final class DebugEventListener implements IDebugEventSetListener {
+		public void handleDebugEvents(DebugEvent[] events) {
+			for (int i = 0; i < events.length; i++) {
+				if (events[i].getKind() == DebugEvent.SUSPEND) {
+					Display.getDefault().asyncExec(new Runnable() {
+						public void run() {
+							inputField.setEditable(true);
+						}
+					});
+					break;
+				} else if (events[i].getKind() == DebugEvent.RESUME) {
+					Display.getDefault().asyncExec(new Runnable() {
+						public void run() {
+							inputField.setEditable(false);
+						}
+					});
+					break;
+				}
+			}
+
+		}
+	}
 }
