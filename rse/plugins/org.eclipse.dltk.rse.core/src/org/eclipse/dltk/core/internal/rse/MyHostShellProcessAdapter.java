@@ -45,6 +45,7 @@ public class MyHostShellProcessAdapter extends Process implements
 	private PipedOutputStream hostShellInput = null;
 	private PipedOutputStream hostShellError = null;
 	private String pattern1;
+	private boolean done = false;
 
 	/**
 	 * Constructor.
@@ -93,7 +94,7 @@ public class MyHostShellProcessAdapter extends Process implements
 	 * always returns 0.
 	 */
 	public synchronized int exitValue() {
-		if (hostShell.isActive())
+		if (!done && hostShell.isActive())
 			throw new IllegalThreadStateException();
 		// No way to tell what the exit value was.
 		// TODO it would be possible to get the exit value
@@ -138,7 +139,7 @@ public class MyHostShellProcessAdapter extends Process implements
 	 */
 	public synchronized int waitFor() throws InterruptedException {
 
-		while (hostShell.isActive()) {
+		while (!done && hostShell.isActive()) {
 			try {
 				wait(1000);
 			} catch (InterruptedException e) {
@@ -163,6 +164,11 @@ public class MyHostShellProcessAdapter extends Process implements
 			// Ignore
 		}
 		return 0;
+	}
+
+	private synchronized void endOfOutput() {
+		done = true;
+		notifyAll();
 	}
 
 	/**
@@ -198,9 +204,7 @@ public class MyHostShellProcessAdapter extends Process implements
 						}
 						prefixCounter++;
 						if (prefixCounter == 2) {
-							// System.out.println("CALL DESTROY");
-							hostShellError.close();
-							hostShellInput.close();
+							endOfOutput();
 							return;
 						}
 						continue;
