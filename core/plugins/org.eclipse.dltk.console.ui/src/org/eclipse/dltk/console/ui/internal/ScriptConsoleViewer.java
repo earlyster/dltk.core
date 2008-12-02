@@ -15,6 +15,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.dltk.console.IScriptConsoleInterpreter;
 import org.eclipse.dltk.console.IScriptExecResult;
 import org.eclipse.dltk.console.IScriptInterpreter;
@@ -44,6 +47,7 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.TextConsoleViewer;
 
 public class ScriptConsoleViewer extends TextConsoleViewer implements
@@ -453,6 +457,8 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 	private ScriptConsole console;
 
+	private IDebugEventSetListener debugEventListener = new DebugEventListener();
+
 	public int getCaretPosition() {
 		return getTextWidget().getCaretOffset();
 	}
@@ -511,10 +517,11 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 		this.history = console.getHistory();
 
 		console.getDocumentListener().addViewer(this);
+		DebugPlugin.getDefault().addDebugEventListener(debugEventListener);
 
 		final StyledText styledText = getTextWidget();
 
-		// styledText.setEditable(false);
+		styledText.setEditable(false);
 
 		// Correct keyboard actions
 		styledText.addFocusListener(new FocusListener() {
@@ -659,6 +666,31 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 	public void dispose() {
 		console.getDocumentListener().removeViewer(this);
+		DebugPlugin.getDefault().removeDebugEventListener(debugEventListener);
 	}
 
+	private final class DebugEventListener implements IDebugEventSetListener {
+		public void handleDebugEvents(DebugEvent[] events) {
+			for (int i = 0; i < events.length; i++) {
+				if (events[i].getKind() == DebugEvent.SUSPEND) {
+					Display.getDefault().asyncExec(new Runnable() {
+						public void run() {
+							final StyledText styledText = getTextWidget();
+							styledText.setEditable(true);
+						}
+					});
+					break;
+				} else if (events[i].getKind() == DebugEvent.RESUME) {
+					Display.getDefault().asyncExec(new Runnable() {
+						public void run() {
+							final StyledText styledText = getTextWidget();
+							styledText.setEditable(false);
+						}
+					});
+					break;
+				}
+			}
+
+		}
+	}
 }
