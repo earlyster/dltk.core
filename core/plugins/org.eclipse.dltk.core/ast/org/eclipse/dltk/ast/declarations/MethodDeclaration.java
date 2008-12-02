@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.eclipse.dltk.ast.ASTListNode;
 import org.eclipse.dltk.ast.ASTVisitor;
+import org.eclipse.dltk.ast.DLTKToken;
 import org.eclipse.dltk.ast.statements.Block;
 import org.eclipse.dltk.internal.compiler.lookup.MethodScope;
 import org.eclipse.dltk.utils.CorePrinter;
@@ -33,6 +34,12 @@ public class MethodDeclaration extends Declaration {
 	private List decorators;
 
 	private String declaringTypeName;
+
+	public MethodDeclaration(DLTKToken function_t, DLTKToken name) {
+
+		super(name, function_t.getColumn(), name.getColumn()
+				+ name.getText().length());
+	}
 
 	public MethodDeclaration(String name, int nameStart, int nameEnd,
 			int declStart, int declEnd) {
@@ -61,7 +68,7 @@ public class MethodDeclaration extends Declaration {
 	public void traverse(ASTVisitor visitor) throws Exception {
 
 		if (visitor.visit(this)) {
-			// Decorators
+			// Deocrators
 			if (this.decorators != null) {
 				Iterator it = this.decorators.iterator();
 				while (it.hasNext()) {
