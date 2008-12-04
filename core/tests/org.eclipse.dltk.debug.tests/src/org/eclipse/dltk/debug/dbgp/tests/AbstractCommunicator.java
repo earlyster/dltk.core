@@ -15,11 +15,16 @@ import org.eclipse.dltk.dbgp.DbgpRequest;
 import org.eclipse.dltk.dbgp.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.IDebugOptions;
+import org.eclipse.dltk.debug.core.model.DefaultDebugOptions;
 
 public abstract class AbstractCommunicator implements IDbgpCommunicator {
 
 	public void send(DbgpRequest request) throws DbgpException {
 		// empty
+	}
+
+	public IDebugOptions getDebugOptions() {
+		return DefaultDebugOptions.getDefaultInstance();
 	}
 
 	public void configure(IDebugOptions debugOptions) {
