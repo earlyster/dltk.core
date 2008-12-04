@@ -27,4 +27,11 @@ public class DebugOption {
 	public static final BooleanOption DBGP_BREAKPOINT_UPDATE_LINE_NUMBER = new BooleanOption(
 			"DBGP_BREAKPOINT_UPDATE_LINE_NUMBER", true); //$NON-NLS-1$
 
+	/**
+	 * Debugging engine supports different data types. Should be
+	 * <code>false</code> for TCL.
+	 */
+	public static final BooleanOption ENGINE_SUPPORT_DATATYPES = new BooleanOption(
+			"ENGINE_SUPPORT_DATATYPES", true); //$NON-NLS-1$
+
 }
