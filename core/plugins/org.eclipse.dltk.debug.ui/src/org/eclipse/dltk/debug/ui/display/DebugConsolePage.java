@@ -11,12 +11,20 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.display;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.dltk.console.ScriptConsoleConstants;
 import org.eclipse.dltk.console.ui.ScriptConsole;
 import org.eclipse.dltk.console.ui.internal.ScriptConsolePage;
+import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
+import org.eclipse.dltk.debug.core.model.IScriptThread;
+import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
+import org.eclipse.dltk.internal.debug.ui.ScriptEvaluationContextManager;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -27,14 +35,15 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.console.IConsoleView;
-import org.eclipse.ui.console.TextConsoleViewer;
+import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.texteditor.IUpdate;
 
 public class DebugConsolePage extends ScriptConsolePage {
 
-	DebugEventListener debugEventListener = new DebugEventListener();
+	private DebugEventListener debugEventListener = null;
 
 	/**
 	 * @param console
@@ -65,13 +74,31 @@ public class DebugConsolePage extends ScriptConsolePage {
 
 	private SashForm sash;
 	private StyledText inputField;
+	private boolean enabled = true;
 
-	protected TextConsoleViewer createViewer(Composite parent) {
+	/**
+	 * @param value
+	 */
+	private void setEnabled(final boolean value) {
+		if (value != this.enabled) {
+			this.enabled = value;
+			inputField.setEditable(value);
+			getViewer().setEditable(value);
+			final Control control = getViewer().getControl();
+			control.setBackground(value ? null : control.getDisplay()
+					.getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+		}
+	}
+
+	/*
+	 * @see TextConsolePage#createControl(Composite)
+	 */
+	public void createControl(Composite parent) {
 		sash = new SashForm(parent, SWT.VERTICAL | SWT.SMOOTH);
 		inputField = new StyledText(sash, SWT.V_SCROLL | SWT.H_SCROLL);
-		inputField.setEditable(false);
-		final TextConsoleViewer viewer = super.createViewer(sash);
-		inputField.setFont(viewer.getControl().getFont());
+		inputField.setEditable(true);
+		super.createControl(sash);
+		inputField.setFont(getViewer().getControl().getFont());
 		inputField.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
@@ -79,17 +106,48 @@ public class DebugConsolePage extends ScriptConsolePage {
 			}
 
 		});
-		sash.setMaximizedControl(viewer.getControl());
-		DebugPlugin.getDefault().addDebugEventListener(debugEventListener);
-		return viewer;
+		sash.setMaximizedControl(getViewer().getControl());
+		setEnabled(isDebuggerAvailable());
+		if (debugEventListener == null) {
+			debugEventListener = new DebugEventListener();
+			DebugPlugin.getDefault().addDebugEventListener(debugEventListener);
+		}
+	}
+
+	private boolean isDebuggerAvailable() {
+		final IPageSite site = getSite();
+		if (site == null) {
+			return false;
+		}
+		final IWorkbenchPage page = site.getPage();
+		if (page == null) {
+			return false;
+		}
+		final IWorkbenchPart part = page.getActivePart();
+		if (part == null) {
+			return false;
+		}
+		final IScriptStackFrame frame = ScriptEvaluationContextManager
+				.getEvaluationContext(part);
+		if (frame != null) {
+			final IScriptThread thread = frame.getScriptThread();
+			if (thread != null) {
+				return thread.isSuspended();
+			}
+		}
+		return false;
 	}
 
 	/**
 	 * @see org.eclipse.dltk.console.ui.internal.ScriptConsolePage#dispose()
 	 */
 	public void dispose() {
+		if (debugEventListener != null) {
+			DebugPlugin.getDefault().removeDebugEventListener(
+					debugEventListener);
+			debugEventListener = null;
+		}
 		super.dispose();
-		DebugPlugin.getDefault().removeDebugEventListener(debugEventListener);
 	}
 
 	public boolean canExecuteInputField() {
@@ -122,26 +180,22 @@ public class DebugConsolePage extends ScriptConsolePage {
 		((ScriptConsole) getConsole()).executeCommand(input);
 	}
 
+	private final Job enableUpdateJob = new Job("Enable update") { //$NON-NLS-1$
+
+		protected IStatus run(IProgressMonitor monitor) {
+			DLTKDebugUIPlugin.getStandardDisplay().asyncExec(new Runnable() {
+				public void run() {
+					setEnabled(isDebuggerAvailable());
+				}
+			});
+			return Status.OK_STATUS;
+		}
+
+	};
+
 	private final class DebugEventListener implements IDebugEventSetListener {
 		public void handleDebugEvents(DebugEvent[] events) {
-			for (int i = 0; i < events.length; i++) {
-				if (events[i].getKind() == DebugEvent.SUSPEND) {
-					Display.getDefault().asyncExec(new Runnable() {
-						public void run() {
-							inputField.setEditable(true);
-						}
-					});
-					break;
-				} else if (events[i].getKind() == DebugEvent.RESUME) {
-					Display.getDefault().asyncExec(new Runnable() {
-						public void run() {
-							inputField.setEditable(false);
-						}
-					});
-					break;
-				}
-			}
-
+			enableUpdateJob.schedule(50);
 		}
 	}
 }
