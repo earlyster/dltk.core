@@ -14,6 +14,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketTimeoutException;
 
+import org.eclipse.dltk.core.DLTKCore;
+
 public class ScriptConsoleIO implements IScriptConsoleIO {
 
 	private static final String INTERPRETER = "interpreter"; //$NON-NLS-1$
@@ -52,7 +54,9 @@ public class ScriptConsoleIO implements IScriptConsoleIO {
 				from += n;
 			}
 		} catch (SocketTimeoutException sxcn) {
-			sxcn.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				sxcn.printStackTrace();
+			}
 		}
 
 		return new String(buffer, 0, from, "UTF-8"); //$NON-NLS-1$
