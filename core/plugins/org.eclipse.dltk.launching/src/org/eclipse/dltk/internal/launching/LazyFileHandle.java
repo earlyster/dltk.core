@@ -13,6 +13,7 @@ package org.eclipse.dltk.internal.launching;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 
 import org.eclipse.core.runtime.IPath;
@@ -163,6 +164,15 @@ public class LazyFileHandle implements IFileHandle {
 		initialize();
 		if (handle != null) {
 			return this.handle.openInputStream(monitor);
+		}
+		return null;
+	}
+
+	public OutputStream openOutputStream(IProgressMonitor monitor)
+			throws IOException {
+		initialize();
+		if (handle != null) {
+			return this.handle.openOutputStream(monitor);
 		}
 		return null;
 	}
