@@ -13,6 +13,8 @@ package org.eclipse.dltk.debug.core;
 
 public interface IDebugConfigurable {
 
+	IDebugOptions getDebugOptions();
+
 	void configure(IDebugOptions debugOptions);
 
 }

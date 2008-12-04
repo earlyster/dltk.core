@@ -121,6 +121,10 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 
 	private static final boolean DEBUG = false;
 
+	public IDebugOptions getDebugOptions() {
+		return options;
+	}
+
 	public void configure(IDebugOptions debugOptions) {
 		this.options = debugOptions;
 	}

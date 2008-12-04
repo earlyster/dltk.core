@@ -208,6 +208,13 @@ public class DbgpSession extends DbgpTermination implements IDbgpSession,
 		return this.communicator;
 	}
 
+	/*
+	 * @see org.eclipse.dltk.debug.core.IDebugConfigurable#getDebugOptions()
+	 */
+	public IDebugOptions getDebugOptions() {
+		return communicator.getDebugOptions();
+	}
+
 	public void configure(IDebugOptions debugOptions) {
 		communicator.configure(debugOptions);
 	}
