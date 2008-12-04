@@ -21,6 +21,7 @@ import org.eclipse.dltk.console.IScriptConsoleIO;
 import org.eclipse.dltk.console.IScriptExecResult;
 import org.eclipse.dltk.console.IScriptInterpreter;
 import org.eclipse.dltk.console.ScriptExecResult;
+import org.eclipse.dltk.debug.core.DebugOption;
 import org.eclipse.dltk.debug.core.eval.IScriptEvaluationResult;
 import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
@@ -86,6 +87,17 @@ public class DebugScriptInterpreter implements IScriptInterpreter {
 						String output = value.getDetailsString();
 						if (output == null) {
 							output = Messages.DebugScriptInterpreter_null;
+						} else {
+							boolean datatypes = thread.getDbgpSession()
+									.getDebugOptions()
+									.get(DebugOption.ENGINE_SUPPORT_DATATYPES);
+							if (!datatypes
+									&& output.length() > 2
+									&& output.charAt(0) == '"'
+									&& output.charAt(output.length() - 1) == '"') {
+								output = output.substring(1,
+										output.length() - 1);
+							}
 						}
 						if (!output.endsWith("\n")) { //$NON-NLS-1$
 							output = output + "\n"; //$NON-NLS-1$
@@ -107,9 +119,8 @@ public class DebugScriptInterpreter implements IScriptInterpreter {
 				}
 			}
 		}
-		return new ScriptExecResult(
-				Messages.DebugScriptInterpreter_NoDebugger
-						+ Util.LINE_SEPARATOR, true);
+		return new ScriptExecResult(Messages.DebugScriptInterpreter_NoDebugger
+				+ Util.LINE_SEPARATOR, true);
 	}
 
 	public int getState() {
