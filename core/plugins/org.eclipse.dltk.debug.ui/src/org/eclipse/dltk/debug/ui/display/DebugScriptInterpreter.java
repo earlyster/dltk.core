@@ -74,6 +74,9 @@ public class DebugScriptInterpreter implements IScriptInterpreter {
 	}
 
 	public IScriptExecResult exec(String command) throws IOException {
+		if (command == null || command.length() == 0) {
+			return null;
+		}
 		final IScriptStackFrame frame = ScriptEvaluationContextManager
 				.getEvaluationContext(part);
 		if (frame != null) {
