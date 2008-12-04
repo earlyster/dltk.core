@@ -13,8 +13,10 @@ package org.eclipse.dltk.core.environment;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 
 import org.eclipse.core.filesystem.EFS;
@@ -121,6 +123,11 @@ public class FileAsFileHandle implements IFileHandle {
 	public InputStream openInputStream(IProgressMonitor monitor)
 			throws IOException {
 		return new FileInputStream(file);
+	}
+
+	public OutputStream openOutputStream(IProgressMonitor monitor)
+			throws IOException {
+		return new FileOutputStream(file);
 	}
 
 	public String toOSString() {

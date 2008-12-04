@@ -12,6 +12,7 @@ package org.eclipse.dltk.core.environment;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 
 import org.eclipse.core.runtime.IPath;
@@ -120,6 +121,18 @@ public interface IFileHandle {
 	 * @throws IOException
 	 */
 	InputStream openInputStream(IProgressMonitor monitor) throws IOException;
+
+	/**
+	 * Returns an open output stream on the contents of this file. The caller is
+	 * responsible for closing the provided stream when it is no longer needed.
+	 * This file need not exist in the underlying file system at the time this
+	 * method is called.
+	 * 
+	 * @param monitor
+	 * @return
+	 * @throws IOException
+	 */
+	OutputStream openOutputStream(IProgressMonitor monitor) throws IOException;
 
 	/**
 	 * Return true if this file is symbolic link

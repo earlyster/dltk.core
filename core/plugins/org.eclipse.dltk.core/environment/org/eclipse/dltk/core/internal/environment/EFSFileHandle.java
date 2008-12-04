@@ -12,6 +12,7 @@ package org.eclipse.dltk.core.internal.environment;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 
 import org.eclipse.core.filesystem.EFS;
@@ -110,6 +111,17 @@ public class EFSFileHandle implements IFileHandle {
 			throws IOException {
 		try {
 			return file.openInputStream(EFS.NONE, monitor);
+		} catch (CoreException e) {
+			if (DLTKCore.DEBUG)
+				e.printStackTrace();
+			throw new IOException(e.getLocalizedMessage());
+		}
+	}
+
+	public OutputStream openOutputStream(IProgressMonitor monitor)
+			throws IOException {
+		try {
+			return file.openOutputStream(EFS.NONE, monitor);
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG)
 				e.printStackTrace();
