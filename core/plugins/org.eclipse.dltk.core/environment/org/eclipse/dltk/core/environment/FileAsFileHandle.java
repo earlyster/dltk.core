@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 
 /**
  * {@link File} as {@link IFileHandle} wrapper
@@ -32,6 +33,10 @@ public class FileAsFileHandle implements IFileHandle {
 
 	private final IEnvironment environment;
 	private final File file;
+
+	public FileAsFileHandle(File file) {
+		this(LocalEnvironment.getInstance(), file);
+	}
 
 	public FileAsFileHandle(IEnvironment environment, File file) {
 		this.environment = environment;
