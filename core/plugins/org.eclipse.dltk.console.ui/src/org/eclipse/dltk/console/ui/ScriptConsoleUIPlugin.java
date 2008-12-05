@@ -40,7 +40,8 @@ public class ScriptConsoleUIPlugin extends AbstractUIPlugin {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
+	 * @see
+	 * org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
@@ -53,7 +54,8 @@ public class ScriptConsoleUIPlugin extends AbstractUIPlugin {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
+	 * @see
+	 * org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
@@ -78,7 +80,7 @@ public class ScriptConsoleUIPlugin extends AbstractUIPlugin {
 	private static final String[][] IMAGES = new String[][] {
 			{ "icons/elcl16/save.gif", //$NON-NLS-1$
 					ScriptConsoleUIConstants.SAVE_SESSION_ICON },
-			{ "icons/elcl16/terminate.gif", //$NON-NLS-1$
+			{ "icons/elcl16/terminate-red-square.gif", //$NON-NLS-1$
 					ScriptConsoleUIConstants.TERMINATE_ICON } };
 
 	protected void initializeImageRegistry(ImageRegistry registry) {
