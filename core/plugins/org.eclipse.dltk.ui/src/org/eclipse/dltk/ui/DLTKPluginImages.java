@@ -177,6 +177,9 @@ public class DLTKPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_NEWINT = createUnManaged(T_WIZBAN, "newint_wiz.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWENUM = createUnManaged(T_WIZBAN, "newenum_wiz.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWANNOT = createUnManaged(T_WIZBAN, "newannotation_wiz.png"); //$NON-NLS-1$
+	/**
+	 * @deprecated
+	 */
 	public static final ImageDescriptor DESC_WIZBAN_NEWPRJ = createUnManaged(T_WIZBAN, "newprj_wiz.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWSRCFOLDR = createUnManaged(T_WIZBAN, "newsrcfldr_wiz.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWMETH = createUnManaged(T_WIZBAN, "newmeth_wiz.png"); //$NON-NLS-1$
