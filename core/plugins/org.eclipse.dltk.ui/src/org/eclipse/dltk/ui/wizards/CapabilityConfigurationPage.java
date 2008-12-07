@@ -70,7 +70,7 @@ public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
         setDescription(NewWizardMessages.ScriptCapabilityConfigurationPage_description); 
 	}
     
-    private BuildpathsBlock getBuildPathsBlock() {
+    protected BuildpathsBlock getBuildPathsBlock() {
         if (fBuildPathsBlock == null) {
             IStatusChangeListener listener= new IStatusChangeListener() {
                 public void statusChanged(IStatus status) {
