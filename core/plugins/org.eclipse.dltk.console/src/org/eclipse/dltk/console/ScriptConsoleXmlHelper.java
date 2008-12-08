@@ -18,9 +18,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.dltk.core.DLTKCore;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -47,10 +47,6 @@ public final class ScriptConsoleXmlHelper {
 				&& node.getNodeName().equals(name);
 	}
 
-	protected static String getAttrib(NamedNodeMap attribs, String name) {
-		return attribs.getNamedItem(name).getNodeValue();
-	}
-
 	protected static Document parse(String xml) {
 		if ((xml == null) || (xml.length() == 0))
 			return null;
@@ -64,14 +60,17 @@ public final class ScriptConsoleXmlHelper {
 			source.setEncoding("UTF-8"); //$NON-NLS-1$
 			return builder.parse(source);
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 
 		return null;
@@ -172,7 +171,8 @@ public final class ScriptConsoleXmlHelper {
 		for (int i = 0; i < list.getLength(); ++i) {
 			Node n = list.item(i);
 			if (isElement(n, "interpreter")) { //$NON-NLS-1$
-				String state = getAttrib(n.getAttributes(), "state"); //$NON-NLS-1$
+				Element element = (Element) n;
+				String state = element.getAttribute("state"); //$NON-NLS-1$
 				String response = ""; //$NON-NLS-1$
 
 				// Check for empty response
@@ -180,7 +180,10 @@ public final class ScriptConsoleXmlHelper {
 					response = n.getFirstChild().getNodeValue();
 				}
 
-				return new InterpreterResponse(convertState(state), response);
+				final String stream = element.getAttribute("stream"); //$NON-NLS-1$
+				final boolean isError = "stderr".equals(stream); //$NON-NLS-1$
+				return new InterpreterResponse(convertState(state), isError,
+						response);
 			}
 		}
 

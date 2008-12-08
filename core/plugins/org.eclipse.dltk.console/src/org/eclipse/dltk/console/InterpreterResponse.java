@@ -12,14 +12,20 @@ package org.eclipse.dltk.console;
 public class InterpreterResponse {
 	private final int state;
 	private final String content;
+	private final boolean isError;
 
-	public InterpreterResponse(int state, String content) {
+	public InterpreterResponse(int state, boolean isError, String content) {
 		this.state = state;
+		this.isError = isError;
 		this.content = content;
 	}
 
 	public int getState() {
 		return state;
+	}
+
+	public boolean isError() {
+		return isError;
 	}
 
 	public String getContent() {
