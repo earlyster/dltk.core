@@ -149,7 +149,8 @@ public class EditorUtility {
 			if (input != null) {
 				if (inputElement instanceof IModelElement) {
 
-					String editorId = null;
+					// first try to get it from the system.
+					String editorId = getEditorID(input, inputElement);
 
 					if (editorId == null) { // Transitional code
 						if (input != null) {
@@ -164,7 +165,6 @@ public class EditorUtility {
 					if (editorId != null) {
 						return openInEditor(input, editorId, activate);
 					}
-
 				} else
 					return openInEditor(input,
 							getEditorID(input, inputElement), activate);
