@@ -562,12 +562,12 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 		}
 	}
 
-	public int beginLineOffset() throws BadLocationException {
-		IDocument doc = getDocument();
-		int offset = getCaretPosition();
-		int line = doc.getLineOfOffset(offset);
-		return offset - doc.getLineOffset(line);
-	}
+	// public int beginLineOffset() throws BadLocationException {
+	// IDocument doc = getDocument();
+	// int offset = getCaretPosition();
+	// int line = doc.getLineOfOffset(offset);
+	// return offset - doc.getLineOffset(line);
+	// }
 
 	protected boolean isCaretOnLastLine() {
 		try {
@@ -639,10 +639,10 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 							setSelectedRange(selStart, selLength);
 						}
 
-						if (beginLineOffset() < console.getDocumentListener()
+						if (getCaretPosition() < console.getDocumentListener()
 								.getCommandLineOffset()) {
-							// FIXME event.doit = false;
-							// return;
+							event.doit = false;
+							return;
 						}
 
 						if (event.character == SWT.CR) {
