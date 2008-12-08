@@ -30,7 +30,7 @@ import org.eclipse.rse.subsystems.shells.core.subsystems.servicesubsystem.IShell
 
 public class RSEExecEnvironment implements IExecutionEnvironment {
 
-	private static final String SHELL_PATH = "/bin/sh"; //$NON-NLS-1$
+	private static final String SHELL_PATH = "exec /bin/sh"; //$NON-NLS-1$
 
 	private static final String CMD_SEPARATOR = " ;"; //$NON-NLS-1$
 	private static final String EXPORT_CMD = "export "; //$NON-NLS-1$
