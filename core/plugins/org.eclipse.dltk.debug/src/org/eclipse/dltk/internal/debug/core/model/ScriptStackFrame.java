@@ -264,6 +264,22 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 		return level.getLineNumber();
 	}
 
+	public int getBeginLine() {
+		return level.getBeginLine();
+	}
+
+	public int getBeginColumn() {
+		return level.getBeginColumn();
+	}
+
+	public int getEndLine() {
+		return level.getEndLine();
+	}
+
+	public int getEndColumn() {
+		return level.getEndColumn();
+	}
+
 	public String getWhere() {
 		return level.getWhere().trim();
 	}

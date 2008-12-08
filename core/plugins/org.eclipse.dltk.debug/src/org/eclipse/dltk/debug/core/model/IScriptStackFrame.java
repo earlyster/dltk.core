@@ -23,6 +23,34 @@ public interface IScriptStackFrame extends IStackFrame {
 
 	String getSourceLine();
 
+	/**
+	 * Return line number of the command start or -1 if not available
+	 * 
+	 * @return
+	 */
+	int getBeginLine();
+
+	/**
+	 * Return column number of the command start or -1 if not available
+	 * 
+	 * @return
+	 */
+	int getBeginColumn();
+
+	/**
+	 * Return line number of the command end or -1 if not available
+	 * 
+	 * @return
+	 */
+	int getEndLine();
+
+	/**
+	 * Return column number of the command end or -1 if not available
+	 * 
+	 * @return
+	 */
+	int getEndColumn();
+
 	URI getSourceURI();
 
 	IScriptVariable findVariable(String varName) throws DebugException;

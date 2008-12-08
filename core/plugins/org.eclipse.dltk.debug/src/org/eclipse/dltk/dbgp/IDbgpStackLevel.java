@@ -16,9 +16,13 @@ public interface IDbgpStackLevel {
 
 	int getLineNumber();
 
-	int getLineBegin();
+	int getBeginLine();
 
-	int getLineEnd();
+	int getBeginColumn();
+
+	int getEndLine();
+
+	int getEndColumn();
 
 	URI getFileURI();
 

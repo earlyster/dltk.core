@@ -20,21 +20,30 @@ public class DbgpStackLevel implements IDbgpStackLevel {
 
 	private final int lineNumber;
 
-	private final int lineBegin;
+	private final int beginLine;
+	private final int beginColumn;
 
-	private final int lineEnd;
+	private final int endLine;
+	private final int endColumn;
 
 	private final URI fileUri;
 
 	private final String where;
 
 	public DbgpStackLevel(URI fileUri, String where, int level, int lineNumber,
-			int lineBegin, int lineEnd) {
+			int beginLine, int endLine) {
+		this(fileUri, where, level, lineNumber, beginLine, -1, endLine, -1);
+	}
+
+	public DbgpStackLevel(URI fileUri, String where, int level, int lineNumber,
+			int beginLine, int beginColumn, int endLine, int endColumn) {
 		this.fileUri = fileUri;
 		this.level = level;
 		this.lineNumber = lineNumber;
-		this.lineBegin = lineBegin;
-		this.lineEnd = lineEnd;
+		this.beginLine = beginLine;
+		this.beginColumn = beginColumn;
+		this.endLine = endLine;
+		this.endColumn = endColumn;
 		this.where = where;
 	}
 
@@ -50,12 +59,20 @@ public class DbgpStackLevel implements IDbgpStackLevel {
 		return lineNumber;
 	}
 
-	public int getLineBegin() {
-		return lineBegin;
+	public int getBeginLine() {
+		return beginLine;
 	}
 
-	public int getLineEnd() {
-		return lineEnd;
+	public int getBeginColumn() {
+		return beginColumn;
+	}
+
+	public int getEndLine() {
+		return endLine;
+	}
+
+	public int getEndColumn() {
+		return endColumn;
 	}
 
 	public URI getFileURI() {
@@ -64,7 +81,7 @@ public class DbgpStackLevel implements IDbgpStackLevel {
 
 	public String toString() {
 		return "DbgpStackLevel(level: " + level + ", line: " + lineNumber //$NON-NLS-1$ //$NON-NLS-2$
-				+ ", begin: " + lineBegin + ", end: " + lineEnd + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ ", begin: " + beginLine + ", end: " + endLine + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	public int hashCode() {
@@ -72,8 +89,8 @@ public class DbgpStackLevel implements IDbgpStackLevel {
 		int result = 1;
 		result = prime * result + ((fileUri == null) ? 0 : fileUri.hashCode());
 		result = prime * result + level;
-		result = prime * result + lineBegin;
-		result = prime * result + lineEnd;
+		result = prime * result + beginLine;
+		result = prime * result + endLine;
 		result = prime * result + lineNumber;
 		result = prime * result + ((where == null) ? 0 : where.hashCode());
 		return result;
@@ -104,10 +121,16 @@ public class DbgpStackLevel implements IDbgpStackLevel {
 		if (level != other.level) {
 			return false;
 		}
-		if (lineBegin != other.lineBegin) {
+		if (beginLine != other.beginLine) {
 			return false;
 		}
-		if (lineEnd != other.lineEnd) {
+		if (beginColumn != other.beginColumn) {
+			return false;
+		}
+		if (endLine != other.endLine) {
+			return false;
+		}
+		if (endColumn != other.endColumn) {
 			return false;
 		}
 		if (lineNumber != other.lineNumber) {

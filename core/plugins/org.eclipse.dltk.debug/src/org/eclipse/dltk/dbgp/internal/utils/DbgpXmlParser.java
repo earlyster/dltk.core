@@ -31,8 +31,20 @@ public class DbgpXmlParser {
 	protected DbgpXmlParser() {
 	}
 
-	protected static int getPosition(String s) {
-		return Integer.parseInt(s.substring(s.indexOf(':') + 1));
+	protected static int parseLine(String s) {
+		final int index = s.indexOf(':');
+		if (index < 0) {
+			return -1;
+		}
+		return Integer.parseInt(s.substring(0, index));
+	}
+
+	protected static int parseColumn(String s) {
+		final int index = s.indexOf(':');
+		if (index < 0) {
+			return -1;
+		}
+		return Integer.parseInt(s.substring(index + 1));
 	}
 
 	protected static boolean makeBoolean(String s) {

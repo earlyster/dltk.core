@@ -61,11 +61,15 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 		String cmdBegin = element.getAttribute(ATTR_CMDBEGIN);
 		String cmdEnd = element.getAttribute(ATTR_CMDEND);
 
-		int lineBegin = -1;
-		int lineEnd = -1;
-		if (!"".equals(cmdBegin) && !"".equals(cmdEnd)) { //$NON-NLS-1$ //$NON-NLS-2$
-			lineBegin = getPosition(cmdBegin);
-			lineEnd = getPosition(cmdEnd);
+		int beginLine = -1;
+		int beginColumn = -1;
+		int endLine = -1;
+		int endColumn = -1;
+		if (cmdBegin.length() != 0 && cmdEnd.length() != 0) {
+			beginLine = parseLine(cmdBegin);
+			beginColumn = parseColumn(cmdBegin);
+			endLine = parseLine(cmdEnd);
+			endColumn = parseColumn(cmdEnd);
 		}
 
 		int lineNumber = Integer.parseInt(element.getAttribute(ATTR_LINENO));
@@ -74,8 +78,8 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 
 		final String where = element.getAttribute(ATTR_WHERE);
 
-		return new DbgpStackLevel(fileUri, where, level, lineNumber, lineBegin,
-				lineEnd);
+		return new DbgpStackLevel(fileUri, where, level, lineNumber, beginLine,
+				beginColumn, endLine, endColumn);
 	}
 
 	private static final String FILE_SCHEME = "file:///"; //$NON-NLS-1$
