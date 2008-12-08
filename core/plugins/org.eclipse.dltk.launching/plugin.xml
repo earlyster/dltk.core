@@ -41,4 +41,10 @@
         </adapter>
      </factory>
   </extension>
+  <extension point="org.eclipse.debug.core.processFactories">
+     <processFactory
+           class="org.eclipse.dltk.launching.process.ScriptRuntimeProcessFactory"
+           id="org.eclipse.dltk.launching.scriptProcessFactory">
+     </processFactory>
+  </extension>
 </plugin>
