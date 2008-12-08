@@ -14,7 +14,7 @@ import java.text.MessageFormat;
 
 import org.eclipse.dltk.dbgp.DbgpRequest;
 import org.eclipse.dltk.dbgp.IDbgpStackLevel;
-import org.eclipse.dltk.dbgp.commands.IDbgpStatckCommands;
+import org.eclipse.dltk.dbgp.commands.IDbgpStackCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpStackCommands;
 import org.w3c.dom.Element;
@@ -47,7 +47,7 @@ public class DbgpStackCommandsTests extends DbgpProtocolTests {
 	public void testStackDepth() throws Exception {
 		final Element response = getStackDepthResponse(0, 3);
 
-		IDbgpStatckCommands commands = new DbgpStackCommands(
+		IDbgpStackCommands commands = new DbgpStackCommands(
 				new AbstractCommunicator() {
 					public Element communicate(DbgpRequest request)
 							throws DbgpException {
@@ -66,7 +66,7 @@ public class DbgpStackCommandsTests extends DbgpProtocolTests {
 	public void testGetStackLevel() throws Exception {
 		final Element response = getStackGetResponse(0);
 
-		IDbgpStatckCommands commands = new DbgpStackCommands(
+		IDbgpStackCommands commands = new DbgpStackCommands(
 				new AbstractCommunicator() {
 					public Element communicate(DbgpRequest request)
 							throws DbgpException {
