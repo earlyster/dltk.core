@@ -12,7 +12,7 @@ package org.eclipse.dltk.dbgp.commands;
 import org.eclipse.dltk.dbgp.IDbgpStackLevel;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 
-public interface IDbgpStatckCommands {
+public interface IDbgpStackCommands {
 	int getStackDepth() throws DbgpException;
 
 	IDbgpStackLevel[] getStackLevels() throws DbgpException;

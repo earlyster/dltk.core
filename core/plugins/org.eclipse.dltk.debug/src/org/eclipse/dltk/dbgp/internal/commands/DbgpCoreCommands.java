@@ -27,7 +27,7 @@ import org.eclipse.dltk.dbgp.commands.IDbgpDataTypeCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpFeatureCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpPropertyCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpSourceCommands;
-import org.eclipse.dltk.dbgp.commands.IDbgpStatckCommands;
+import org.eclipse.dltk.dbgp.commands.IDbgpStackCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpStatusCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpStreamCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
@@ -44,7 +44,7 @@ public class DbgpCoreCommands implements IDbgpCoreCommands {
 
 	private final IDbgpContextCommands contextCommands;
 
-	private final IDbgpStatckCommands stackCommands;
+	private final IDbgpStackCommands stackCommands;
 
 	private final IDbgpContinuationCommands continuationCommands;
 

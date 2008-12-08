@@ -16,7 +16,7 @@ import org.eclipse.dltk.dbgp.DbgpBaseCommands;
 import org.eclipse.dltk.dbgp.DbgpRequest;
 import org.eclipse.dltk.dbgp.IDbgpCommunicator;
 import org.eclipse.dltk.dbgp.IDbgpStackLevel;
-import org.eclipse.dltk.dbgp.commands.IDbgpStatckCommands;
+import org.eclipse.dltk.dbgp.commands.IDbgpStackCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpDebuggingEngineException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlEntityParser;
@@ -24,7 +24,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 public class DbgpStackCommands extends DbgpBaseCommands implements
-		IDbgpStatckCommands {
+		IDbgpStackCommands {
 	private static final String STACK_DEPTH_COMMAND = "stack_depth"; //$NON-NLS-1$
 
 	private static final String STACK_GET_COMMAND = "stack_get"; //$NON-NLS-1$
