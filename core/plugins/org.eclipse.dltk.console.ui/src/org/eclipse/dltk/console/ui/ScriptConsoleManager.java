@@ -23,10 +23,13 @@ import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchListener;
+import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.dltk.console.IScriptInterpreter;
 import org.eclipse.dltk.console.ScriptConsoleServer;
 import org.eclipse.dltk.console.ScriptInterpreterManager;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
+import org.eclipse.dltk.launching.process.IScriptProcess;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -36,7 +39,6 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
-
 
 public class ScriptConsoleManager implements ILaunchListener {
 	private static ScriptConsoleManager instance;
@@ -58,12 +60,14 @@ public class ScriptConsoleManager implements ILaunchListener {
 	public ScriptConsole[] getScriptConsoles(String consoleType) {
 		List consoles = new ArrayList();
 		IConsole[] consoles2 = manager.getConsoles();
-		for( int i  = 0; i < consoles2.length; ++i ) {
-			if( consoles2[i] instanceof ScriptConsole && consoles2[i].getType().equals(consoleType)) {
+		for (int i = 0; i < consoles2.length; ++i) {
+			if (consoles2[i] instanceof ScriptConsole
+					&& consoles2[i].getType().equals(consoleType)) {
 				consoles.add(consoles2[i]);
 			}
 		}
-		return (ScriptConsole[])consoles.toArray(new ScriptConsole[consoles.size()]);
+		return (ScriptConsole[]) consoles.toArray(new ScriptConsole[consoles
+				.size()]);
 	}
 
 	public ScriptConsole getActiveScriptConsole(String consoleType) {
@@ -147,62 +151,90 @@ public class ScriptConsoleManager implements ILaunchListener {
 
 	// ILaunchListener
 	public void launchAdded(final ILaunch launch) {
+		launchChanged(launch);
+	}
+
+	public void launchChanged(final ILaunch launch) {
 		try {
 			final ILaunchConfiguration configuration = launch
 					.getLaunchConfiguration();
-			
-			if (configuration == null){
+			if (configuration == null) {
 				return;
 			}
-			
-			final String natureId = configuration.getAttribute(ScriptLaunchConfigurationConstants.ATTR_SCRIPT_NATURE, (String)null);
-			
-			if (natureId == null){
-				return;
-			}
-			
-			boolean useDltk = configuration.getAttribute(ScriptLaunchConfigurationConstants.ATTR_USE_INTERACTIVE_CONSOLE, false);
-
+			boolean useDltk = configuration
+					.getAttribute(
+							ScriptLaunchConfigurationConstants.ATTR_USE_INTERACTIVE_CONSOLE,
+							false);
 			if (!useDltk) {
 				return;
 			}
-
-			final String consoleId = configuration.getAttribute(ScriptLaunchConfigurationConstants.ATTR_DLTK_CONSOLE_ID,
+			final ScriptConsole console = getConsole(launch);
+			if (console != null) {
+				IProcess[] processes = launch.getProcesses();
+				for (int i = 0; i < processes.length; ++i) {
+					final IProcess process = processes[i];
+					if (process instanceof IScriptProcess) {
+						console.connect((IScriptProcess) process);
+					}
+				}
+				return;
+			}
+			final String natureId = configuration.getAttribute(
+					ScriptLaunchConfigurationConstants.ATTR_SCRIPT_NATURE,
 					(String) null);
-
+			if (natureId == null) {
+				return;
+			}
+			final String consoleId = configuration.getAttribute(
+					ScriptLaunchConfigurationConstants.ATTR_DLTK_CONSOLE_ID,
+					(String) null);
 			final IScriptConsoleFactory factory = findScriptConsoleFactory(natureId);
-
 			if (factory == null) {
 				return;
 			}
-
-			ISafeRunnable runnable = new ISafeRunnable() {
+			SafeRunner.run(new ISafeRunnable() {
 				public void handleException(Throwable exception) {
 				}
 
 				public void run() throws Exception {
-					ScriptConsoleServer server = ScriptConsoleServer
-							.getInstance();
-
 					IScriptInterpreter interpreter = ScriptInterpreterManager
 							.getInstance().createInterpreter(natureId);
-
-					server.register(consoleId, interpreter);
-
-					factory.openConsole(interpreter, configuration.getName(), launch);
+					ScriptConsoleServer.getInstance().register(consoleId,
+							interpreter);
+					factory.openConsole(interpreter, configuration.getName(),
+							launch);
 				}
-			};
-
-			SafeRunner.run(runnable);
-
+			});
 		} catch (CoreException e) {
-			e.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 	}
 
-	public void launchChanged(ILaunch launch) {
+	private ScriptConsole getConsole(ILaunch launch) {
+		final IConsoleManager manager = ConsolePlugin.getDefault()
+				.getConsoleManager();
+		final IConsole[] consoles = manager.getConsoles();
+		for (int i = 0; i < consoles.length; i++) {
+			final IConsole console = consoles[i];
+			if (console instanceof ScriptConsole) {
+				final ScriptConsole sc = (ScriptConsole) console;
+				final ILaunch consoleLaunch = sc.getLaunch();
+				if (consoleLaunch != null && consoleLaunch.equals(launch)) {
+					return sc;
+				}
+			}
+		}
+		return null;
 	}
 
 	public void launchRemoved(ILaunch launch) {
+		final IConsole console = getConsole(launch);
+		if (console != null) {
+			IConsoleManager manager = ConsolePlugin.getDefault()
+					.getConsoleManager();
+			manager.removeConsoles(new IConsole[] { console });
+		}
 	}
 }

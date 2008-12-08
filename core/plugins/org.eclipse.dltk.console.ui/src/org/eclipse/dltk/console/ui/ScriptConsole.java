@@ -13,12 +13,22 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchesListener2;
+import org.eclipse.debug.core.IStreamListener;
+import org.eclipse.debug.core.model.IFlushableStreamMonitor;
+import org.eclipse.debug.core.model.IStreamMonitor;
+import org.eclipse.debug.core.model.IStreamsProxy;
+import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.dltk.compiler.util.Util;
+import org.eclipse.dltk.console.IScriptConsoleInterpreter;
 import org.eclipse.dltk.console.IScriptExecResult;
 import org.eclipse.dltk.console.IScriptInterpreter;
 import org.eclipse.dltk.console.ScriptConsoleHistory;
@@ -31,11 +41,11 @@ import org.eclipse.dltk.console.ui.internal.ScriptConsoleSession;
 import org.eclipse.dltk.console.ui.internal.ScriptConsoleViewer;
 import org.eclipse.dltk.console.ui.internal.ScriptConsoleViewer.ConsoleDocumentListener;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.launching.process.IScriptProcess;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.swt.widgets.Control;
@@ -61,11 +71,10 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 						public void run() {
 							if (consoleViewer != null) {
 								consoleViewer.disableProcessing();
-								appendInvitation(consoleViewer);
+								// TODO use different color
 								updateText(
 										consoleViewer,
-										Messages.ScriptConsole_processTerminated,
-										false);
+										Messages.ScriptConsole_processTerminated);
 								consoleViewer.setEditable(false);
 							}
 						}
@@ -110,16 +119,14 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 			}
 			final BufferedReader reader = new BufferedReader(
 					new InputStreamReader(stream));
-			Thread readerThread = new Thread(new Runnable() {
+			Thread readerThread = new Thread() {
 				public void run() {
-					boolean first = true;
 					while (!terminated) {
 						String readLine;
 						try {
 							readLine = reader.readLine();
 							if (readLine != null) {
-								updateText(viewer, readLine, first);
-								first = false;
+								updateText(viewer, readLine);
 							} else {
 								break;
 							}
@@ -130,42 +137,13 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 							break;
 						}
 					}
-					if (!first) {
-						/*
-						 * output invitation only if there was some output -
-						 * initially invitation is printed from the clear()
-						 * called from the ScriptConsoleViewer constructor
-						 */
-						appendInvitation(viewer);
-					}
 					enableEdit(viewer);
 				}
 
-			});
+			};
 			readerThread.start();
 		}
 
-	}
-
-	protected void appendInvitation(final ScriptConsoleViewer viewer) {
-		Control control = viewer.getControl();
-		if (control == null) {
-			return;
-		}
-		control.getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				try {
-					viewer.disableProcessing();
-					getDocumentListener().appendDelimeter();
-					getDocumentListener().appendInvitation();
-					viewer.enableProcessing();
-				} catch (BadLocationException e) {
-					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
 	}
 
 	protected void enableEdit(final ScriptConsoleViewer viewer) {
@@ -180,37 +158,17 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		});
 	}
 
-	private void updateText(final ScriptConsoleViewer viewer,
-			final String text, final boolean clean) {
+	private void updateText(final ScriptConsoleViewer viewer, final String text) {
 		Control control = viewer.getControl();
 		if (control == null) {
 			return;
 		}
 		control.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				viewer.disableProcessing();
 				IDocument document = getDocument();
-				try {
-					if (clean) {
-						document.replace(0, document.getLength(), text);
-						getDocumentListener().appendDelimeter();
-					} else {
-						document.replace(document.getLength(), 0, text);
-						getDocumentListener().appendDelimeter();
-					}
-					IDocumentPartitioner partitioner = viewer.getDocument()
-							.getDocumentPartitioner();
-					if (partitioner instanceof ScriptConsolePartitioner) {
-						ScriptConsolePartitioner scriptConsolePartitioner = (ScriptConsolePartitioner) partitioner;
-						scriptConsolePartitioner.clearRanges();
-						viewer.getTextWidget().redraw();
-					}
-				} catch (BadLocationException e) {
-					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
-					}
-				}
-				viewer.enableProcessing();
+				final String delim = TextUtilities
+						.getDefaultLineDelimiter(document);
+				getDocumentListener().write(text + delim, false);
 			}
 		});
 	}
@@ -349,7 +307,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 
 		IScriptExecResult output = interpreter.exec(userInput);
 
-		if (interpreter.getState() == IScriptInterpreter.WAIT_NEW_COMMAND) {
+		if (interpreter.getState() == IScriptConsoleInterpreter.WAIT_NEW_COMMAND) {
 			prompt.setMode(true);
 		} else {
 			prompt.setMode(false);
@@ -389,6 +347,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		if (listener != null) {
 			DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(
 					listener);
+			listener = null;
 		}
 
 		super.dispose();
@@ -400,6 +359,127 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 			this.listener = new ScriptConsoleLaunchListener();
 			DebugPlugin.getDefault().getLaunchManager().addLaunchListener(
 					listener);
+		}
+	}
+
+	/**
+	 * @return the launch
+	 */
+	public ILaunch getLaunch() {
+		return launch;
+	}
+
+	private Set connectedProcesses;
+
+	/**
+	 * @param process
+	 */
+	public synchronized void connect(IScriptProcess process) {
+		if (connectedProcesses == null) {
+			connectedProcesses = new HashSet();
+		}
+		if (connectedProcesses.add(process)) {
+			final IStreamsProxy proxy = process.getScriptStreamsProxy();
+			if (proxy == null) {
+				return;
+			}
+			connect(proxy);
+		}
+	}
+
+	public void connect(final IStreamsProxy proxy) {
+		IStreamMonitor streamMonitor = proxy.getErrorStreamMonitor();
+		if (streamMonitor != null) {
+			connect(streamMonitor, IDebugUIConstants.ID_STANDARD_ERROR_STREAM);
+		}
+		streamMonitor = proxy.getOutputStreamMonitor();
+		if (streamMonitor != null) {
+			connect(streamMonitor, IDebugUIConstants.ID_STANDARD_OUTPUT_STREAM);
+		}
+	}
+
+	private List fStreamListeners = new ArrayList();
+
+	/**
+	 * @param streamMonitor
+	 * @param idStandardErrorStream
+	 */
+	private void connect(IStreamMonitor streamMonitor, String streamIdentifier) {
+		synchronized (streamMonitor) {
+			StreamListener listener = new StreamListener(streamIdentifier,
+					streamMonitor);
+			fStreamListeners.add(listener);
+		}
+	}
+
+	/**
+	 * This class listens to a specified IO stream
+	 */
+	private class StreamListener implements IStreamListener {
+		private IStreamMonitor fStreamMonitor;
+		private String fStreamId;
+		private boolean fFlushed = false;
+		private boolean fListenerRemoved = false;
+
+		public StreamListener(String streamIdentifier, IStreamMonitor monitor) {
+			this.fStreamId = streamIdentifier;
+			this.fStreamMonitor = monitor;
+			fStreamMonitor.addListener(this);
+			// fix to bug 121454. Ensure that output to fast processes is
+			// processed.
+			streamAppended(null, monitor);
+		}
+
+		public void streamAppended(String text, IStreamMonitor monitor) {
+			if (fFlushed) {
+				getDocumentListener().write(
+						text,
+						IDebugUIConstants.ID_STANDARD_ERROR_STREAM
+								.equals(fStreamId));
+			} else {
+				String contents = null;
+				synchronized (fStreamMonitor) {
+					fFlushed = true;
+					contents = fStreamMonitor.getContents();
+					if (fStreamMonitor instanceof IFlushableStreamMonitor) {
+						IFlushableStreamMonitor m = (IFlushableStreamMonitor) fStreamMonitor;
+						m.flushContents();
+						m.setBuffered(false);
+					}
+				}
+				if (contents != null && contents.length() > 0) {
+					getDocumentListener().write(
+							contents,
+							IDebugUIConstants.ID_STANDARD_ERROR_STREAM
+									.equals(fStreamId));
+				}
+			}
+		}
+
+		public IStreamMonitor getStreamMonitor() {
+			return fStreamMonitor;
+		}
+
+		public void closeStream() {
+			if (fStreamMonitor == null) {
+				return;
+			}
+			synchronized (fStreamMonitor) {
+				fStreamMonitor.removeListener(this);
+				if (!fFlushed) {
+					String contents = fStreamMonitor.getContents();
+					streamAppended(contents, fStreamMonitor);
+				}
+				fListenerRemoved = true;
+			}
+		}
+
+		public void dispose() {
+			if (!fListenerRemoved) {
+				closeStream();
+			}
+			fStreamMonitor = null;
+			fStreamId = null;
 		}
 	}
 }
