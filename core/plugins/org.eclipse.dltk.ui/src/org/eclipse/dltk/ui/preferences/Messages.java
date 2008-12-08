@@ -8,11 +8,11 @@ public class Messages extends NLS {
 	public static String ScriptCorePreferenceBlock_coreOptions;
 	public static String ScriptCorePreferenceBlock_editOptions;
 	public static String ScriptCorePreferenceBlock_debugOptionsOperations;
-	public static String ScriptCorePreferenceBlock_emptyFileContentCheckingForNonLocalProjects;
 	public static String ScriptCorePreferenceBlock_fileCaching;
-	public static String ScriptCorePreferenceBlock_filesWithExtensionContentCheking;
 	public static String ScriptCorePreferencePage_manualReindex;
 	public static String ScriptCorePreferencePage_reindex;
+	public static String ScriptCorePreferenceBlock_UI_Options;
+	public static String EditorPreferencePage_ResourceShowError_InvalidResourceName;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

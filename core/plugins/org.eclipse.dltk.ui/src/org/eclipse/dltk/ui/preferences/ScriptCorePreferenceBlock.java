@@ -120,6 +120,17 @@ final class ScriptCorePreferenceBlock extends
 								PreferencesMessages.EditorPreferencePage_evaluateTemporaryProblems),
 				PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS);
 
+		Group uiGroup = SWTFactory.createGroup(composite,
+				Messages.ScriptCorePreferenceBlock_UI_Options, 1, 1,
+				GridData.FILL_HORIZONTAL);
+
+		bindControl(
+				SWTFactory
+						.createCheckButton(
+								uiGroup,
+								Messages.EditorPreferencePage_ResourceShowError_InvalidResourceName),
+				PreferenceConstants.RESOURCE_SHOW_ERROR_INVALID_RESOURCE_NAME);
+
 		createReIndex(composite);
 
 		return composite;
@@ -176,6 +187,9 @@ final class ScriptCorePreferenceBlock extends
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
 				OverlayPreferenceStore.BOOLEAN,
 				PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
+				OverlayPreferenceStore.BOOLEAN,
+				PreferenceConstants.RESOURCE_SHOW_ERROR_INVALID_RESOURCE_NAME));
 		return overlayKeys;
 	}
 

@@ -311,6 +311,11 @@ public class PreferenceConstants {
 	 */
 	public static final String CODEASSIST_SORTER = "content_assist_sorter"; //$NON-NLS-1$
 
+	/**
+	 * @see IResourceStatus#INVALID_RESOURCE_NAME
+	 */
+	public static final String RESOURCE_SHOW_ERROR_INVALID_RESOURCE_NAME = "resourceShowError_InvalidResourceName"; //$NON-NLS-1$
+
 	public static void initializeDefaultValues(IPreferenceStore store) {
 		initializeDefaultValues(store, false);
 	}
@@ -398,6 +403,7 @@ public class PreferenceConstants {
 					.setDefault(
 							PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS,
 							true);
+			store.setDefault(RESOURCE_SHOW_ERROR_INVALID_RESOURCE_NAME, false);
 		}
 		store
 				.setDefault(PreferenceConstants.EDITOR_CORRECTION_INDICATION,

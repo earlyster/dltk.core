@@ -12,12 +12,15 @@ package org.eclipse.dltk.ui.util;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.resources.IResourceStatus;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
 import org.eclipse.dltk.internal.ui.IDLTKStatusConstants;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -114,6 +117,11 @@ public class ExceptionHandler {
 
 	protected void perform(CoreException e, Shell shell, String title,
 			String message) {
+		if (!DLTKUIPlugin.getDefault().getPreferenceStore().getBoolean(
+				PreferenceConstants.RESOURCE_SHOW_ERROR_INVALID_RESOURCE_NAME)
+				&& isInvalidResouceName(e)) {
+			return;
+		}
 		DLTKUIPlugin.log(e);
 		IStatus status = e.getStatus();
 		if (status != null) {
@@ -121,6 +129,36 @@ public class ExceptionHandler {
 		} else {
 			displayMessageDialog(e, e.getMessage(), shell, title, message);
 		}
+	}
+
+	/**
+	 * @param e
+	 * @return
+	 */
+	private boolean isInvalidResouceName(CoreException e) {
+		IStatus status = e.getStatus();
+		if (status == null) {
+			return false;
+		}
+		if (!ResourcesPlugin.PI_RESOURCES.equals(status.getPlugin())) {
+			return false;
+		}
+		if (status.isMultiStatus()) {
+			final IStatus[] children = status.getChildren();
+			for (int i = 0; i < children.length; ++i) {
+				final IStatus child = children[i];
+				if (!(ResourcesPlugin.PI_RESOURCES.equals(status.getPlugin()) && child
+						.getCode() == IResourceStatus.INVALID_RESOURCE_NAME)) {
+					return false;
+				}
+			}
+			return true;
+		} else {
+			if (status.getCode() == IResourceStatus.INVALID_RESOURCE_NAME) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	protected void perform(InvocationTargetException e, Shell shell,
