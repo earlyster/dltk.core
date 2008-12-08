@@ -214,13 +214,8 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 
 					if (document != null) {
 						try {
-							final IRegion region = document
-									.getLineInformation(stackFrame
-											.getLineNumber() - 1);
-
-							sourceLine = document.get(region.getOffset(),
-									region.getLength()).trim();
-
+							sourceLine = retrieveStackFrameLine(stackFrame,
+									document);
 						} catch (BadLocationException e) {
 							DLTKDebugUIPlugin.log(e);
 						}
@@ -250,6 +245,26 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 		}
 
 		return stackFrame.toString();
+	}
+
+	private static String retrieveStackFrameLine(IScriptStackFrame frame,
+			final IDocument document) throws BadLocationException,
+			DebugException {
+		if (frame.getBeginLine() > 0 && frame.getEndLine() > 0) {
+			final IRegion region = document.getLineInformation(frame
+					.getBeginLine() - 1);
+			final int start = region.getOffset() + frame.getBeginColumn();
+			final int len;
+			if (frame.getBeginLine() == frame.getEndLine()) {
+				len = frame.getEndColumn() - frame.getBeginColumn() + 1;
+			} else {
+				len = region.getLength() - frame.getBeginColumn();
+			}
+			return document.get(start, len).trim();
+		}
+		final IRegion region = document.getLineInformation(frame
+				.getLineNumber() - 1);
+		return document.get(region.getOffset(), region.getLength()).trim();
 	}
 
 	/**
