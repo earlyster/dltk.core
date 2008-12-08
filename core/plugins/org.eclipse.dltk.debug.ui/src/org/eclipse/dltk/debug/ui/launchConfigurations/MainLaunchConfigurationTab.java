@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.dltk.core.DLTKCore;
@@ -31,6 +32,7 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.messages.DLTKLaunchConfigurationsMessages;
 import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
+import org.eclipse.dltk.launching.process.ScriptRuntimeProcessFactory;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.dltk.ui.preferences.FieldValidators;
 import org.eclipse.dltk.ui.preferences.FieldValidators.FilePathValidator;
@@ -317,10 +319,19 @@ public abstract class MainLaunchConfigurationTab extends
 	protected void performApplyInteractiveConsole(
 			ILaunchConfigurationWorkingCopy config) {
 		if (useInteractiveConsoleGroup) {
+			final boolean useInteractiveConsole = this.interactiveConsoleCheck
+					.getSelection();
 			config
 					.setAttribute(
 							ScriptLaunchConfigurationConstants.ATTR_USE_INTERACTIVE_CONSOLE,
-							this.interactiveConsoleCheck.getSelection());
+							useInteractiveConsole);
+			if (useInteractiveConsole) {
+				config.setAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID,
+						ScriptRuntimeProcessFactory.PROCESS_FACTORY_ID);
+			} else {
+				config.setAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID,
+						(String) null);
+			}
 			String old = null;
 			try {
 				old = config
