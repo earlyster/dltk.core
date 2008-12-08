@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.rse.services.shells.HostShellOutputStream;
 import org.eclipse.rse.services.shells.IHostOutput;
 import org.eclipse.rse.services.shells.IHostShell;
@@ -84,16 +85,39 @@ public class MyHostShellProcessAdapter extends Process implements
 	public synchronized void destroy() {
 		hostShell.exit();
 		notifyAll();
-		try {
-			hostShellInput.close();
-			hostShellError.close();
-			inputStream.close();
-			errorStream.close();
-			outputStream.close();
-		} catch (IOException e) {
-			// FIXME IOException when closing one of the streams will leave
-			// others open
-			// Ignore
+		closeStreams();
+	}
+
+	private void closeStreams() {
+		closeStreams(new Object[] { hostShellInput, hostShellError,
+				inputStream, errorStream, outputStream });
+	}
+
+	private void closeStreams(Object[] streams) {
+		for (int i = 0; i < streams.length; ++i) {
+			final Object stream = streams[i];
+			if (stream != null) {
+				if (stream instanceof InputStream) {
+					try {
+						((InputStream) stream).close();
+					} catch (IOException e) {
+						if (DLTKCore.DEBUG) {
+							e.printStackTrace();
+						}
+					}
+				} else if (stream instanceof OutputStream) {
+					try {
+						((OutputStream) stream).close();
+					} catch (IOException e) {
+						if (DLTKCore.DEBUG) {
+							e.printStackTrace();
+						}
+					}
+				} else {
+					DLTKRSEPlugin
+							.log("closeStream(" + stream.getClass().getName() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
 		}
 	}
 
@@ -163,11 +187,8 @@ public class MyHostShellProcessAdapter extends Process implements
 			if (inputStream.available() != 0 || errorStream.available() != 0)
 				throw new InterruptedException();
 
-			hostShellInput.close();
-			hostShellError.close();
-			inputStream.close();
-			errorStream.close();
-			outputStream.close();
+			hostShell.exit();
+	  		closeStreams();
 		} catch (IOException e) {
 			// Ignore
 		}
