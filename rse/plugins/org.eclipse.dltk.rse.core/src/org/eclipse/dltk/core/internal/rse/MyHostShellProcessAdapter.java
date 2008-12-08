@@ -26,6 +26,7 @@ import org.eclipse.rse.services.shells.IHostOutput;
 import org.eclipse.rse.services.shells.IHostShell;
 import org.eclipse.rse.services.shells.IHostShellChangeEvent;
 import org.eclipse.rse.services.shells.IHostShellOutputListener;
+import org.eclipse.rse.services.shells.IHostShellOutputReader;
 
 /**
  * This class represents a host shell process. It does not represent one process
@@ -64,8 +65,15 @@ public class MyHostShellProcessAdapter extends Process implements
 		inputStream = new PipedInputStream(hostShellInput);
 		errorStream = new PipedInputStream(hostShellError);
 		outputStream = new HostShellOutputStream(hostShell);
-		this.hostShell.getStandardOutputReader().addOutputListener(this);
-		this.hostShell.getStandardErrorReader().addOutputListener(this);
+		IHostShellOutputReader outputReader;
+		outputReader = this.hostShell.getStandardOutputReader();
+		if (outputReader != null) {
+			outputReader.addOutputListener(this);
+		}
+		outputReader = this.hostShell.getStandardErrorReader();
+		if (outputReader != null) {
+			outputReader.addOutputListener(this);
+		}
 	}
 
 	/**
