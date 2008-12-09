@@ -29,6 +29,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.debug.core.model.ISourceOffsetLookup;
 import org.eclipse.dltk.internal.debug.core.model.DbgpService;
 import org.eclipse.dltk.internal.debug.core.model.HotCodeReplaceManager;
 import org.eclipse.dltk.internal.debug.core.model.ScriptDebugTarget;
@@ -213,6 +214,16 @@ public class DLTKDebugPlugin extends Plugin {
 			}
 		}
 		return (String[]) addresses.toArray(new String[addresses.size()]);
+	}
+
+	private static ISourceOffsetLookup sourceOffsetLookup = null;
+
+	public static ISourceOffsetLookup getSourceOffsetLookup() {
+		return sourceOffsetLookup;
+	}
+
+	public static void setSourceOffsetRetriever(ISourceOffsetLookup offsetLookup) {
+		sourceOffsetLookup = offsetLookup;
 	}
 
 }

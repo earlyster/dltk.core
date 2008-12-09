@@ -38,6 +38,7 @@ import org.eclipse.dltk.debug.core.model.IScriptStack;
 import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptVariable;
+import org.eclipse.dltk.debug.core.model.ISourceOffsetLookup;
 
 public class ScriptStackFrame extends ScriptDebugElement implements
 		IScriptStackFrame {
@@ -253,10 +254,35 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 	}
 
 	public int getCharStart() throws DebugException {
+		final int beginLine = level.getBeginLine();
+		final int endLine = level.getEndLine();
+		if (beginLine > 0 && endLine > 0
+				&& (endLine == beginLine || endLine == beginLine + 1)) {
+			final ISourceOffsetLookup offsetLookup = DLTKDebugPlugin
+					.getSourceOffsetLookup();
+			if (offsetLookup != null) {
+				return offsetLookup.calculateOffset(this, beginLine, level
+						.getBeginColumn());
+			}
+		}
 		return -1;
 	}
 
 	public int getCharEnd() throws DebugException {
+		final int beginLine = level.getBeginLine();
+		final int endLine = level.getEndLine();
+		if (beginLine > 0 && endLine > 0
+				&& (endLine == beginLine || endLine == beginLine + 1)) {
+			final ISourceOffsetLookup offsetLookup = DLTKDebugPlugin
+					.getSourceOffsetLookup();
+			if (offsetLookup != null) {
+				final int offset = offsetLookup.calculateOffset(this, endLine,
+						level.getEndColumn());
+				if (offset >= 0) {
+					return offset + 1;
+				}
+			}
+		}
 		return -1;
 	}
 
