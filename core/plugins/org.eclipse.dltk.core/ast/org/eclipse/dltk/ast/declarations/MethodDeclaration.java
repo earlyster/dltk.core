@@ -68,30 +68,33 @@ public class MethodDeclaration extends Declaration {
 	public void traverse(ASTVisitor visitor) throws Exception {
 
 		if (visitor.visit(this)) {
-			// Deocrators
-			if (this.decorators != null) {
-				Iterator it = this.decorators.iterator();
-				while (it.hasNext()) {
-					Decorator dec = (Decorator) it.next();
-					dec.traverse(visitor);
-				}
-			}
-
-			// Arguments
-			if (this.arguments != null) {
-				Iterator it = this.arguments.iterator();
-				while (it.hasNext()) {
-					Argument arg = (Argument) it.next();
-					arg.traverse(visitor);
-				}
-			}
-
-			// Body
-			if (this.body != null) {
-				this.body.traverse(visitor);
-			}
-
+			traverseChildNodes(visitor);
 			visitor.endvisit(this);
+		}
+	}
+
+	protected void traverseChildNodes(ASTVisitor visitor) throws Exception {
+		// Decorators
+		if (this.decorators != null) {
+			Iterator it = this.decorators.iterator();
+			while (it.hasNext()) {
+				Decorator dec = (Decorator) it.next();
+				dec.traverse(visitor);
+			}
+		}
+
+		// Arguments
+		if (this.arguments != null) {
+			Iterator it = this.arguments.iterator();
+			while (it.hasNext()) {
+				Argument arg = (Argument) it.next();
+				arg.traverse(visitor);
+			}
+		}
+
+		// Body
+		if (this.body != null) {
+			this.body.traverse(visitor);
 		}
 	}
 
