@@ -255,31 +255,35 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 
 	public int getCharStart() throws DebugException {
 		final int beginLine = level.getBeginLine();
-		final int endLine = level.getEndLine();
-		if (beginLine > 0 && endLine > 0
-				&& (endLine == beginLine || endLine == beginLine + 1)) {
-			final ISourceOffsetLookup offsetLookup = DLTKDebugPlugin
-					.getSourceOffsetLookup();
-			if (offsetLookup != null) {
-				return offsetLookup.calculateOffset(this, beginLine, level
-						.getBeginColumn());
+		if (beginLine > 0) {
+			final int endLine = level.getEndLine();
+			if (endLine > 0
+					&& (endLine == beginLine || endLine == beginLine + 1)) {
+				final ISourceOffsetLookup offsetLookup = DLTKDebugPlugin
+						.getSourceOffsetLookup();
+				if (offsetLookup != null) {
+					return offsetLookup.calculateOffset(this, beginLine, level
+							.getBeginColumn());
+				}
 			}
 		}
 		return -1;
 	}
 
 	public int getCharEnd() throws DebugException {
-		final int beginLine = level.getBeginLine();
 		final int endLine = level.getEndLine();
-		if (beginLine > 0 && endLine > 0
-				&& (endLine == beginLine || endLine == beginLine + 1)) {
-			final ISourceOffsetLookup offsetLookup = DLTKDebugPlugin
-					.getSourceOffsetLookup();
-			if (offsetLookup != null) {
-				final int offset = offsetLookup.calculateOffset(this, endLine,
-						level.getEndColumn());
-				if (offset >= 0) {
-					return offset + 1;
+		if (endLine > 0) {
+			final int beginLine = level.getBeginLine();
+			if (beginLine > 0
+					&& (endLine == beginLine || endLine == beginLine + 1)) {
+				final ISourceOffsetLookup offsetLookup = DLTKDebugPlugin
+						.getSourceOffsetLookup();
+				if (offsetLookup != null) {
+					final int offset = offsetLookup.calculateOffset(this,
+							endLine, level.getEndColumn());
+					if (offset >= 0) {
+						return offset + 1;
+					}
 				}
 			}
 		}
