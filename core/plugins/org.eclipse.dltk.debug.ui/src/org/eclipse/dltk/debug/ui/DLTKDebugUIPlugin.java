@@ -24,8 +24,6 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.ISourceLocator;
-import org.eclipse.debug.internal.ui.DebugUIPlugin;
-import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
@@ -403,7 +401,7 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 	private static ScriptDebugModelPresentation loadDebugModelPresentation(
 			String modelId) {
 		IExtensionPoint point = Platform.getExtensionRegistry()
-				.getExtensionPoint(DebugUIPlugin.getUniqueIdentifier(),
+				.getExtensionPoint(IDebugUIConstants.PLUGIN_ID,
 						IDebugUIConstants.ID_DEBUG_MODEL_PRESENTATION);
 		if (point != null) {
 			IExtension[] extensions = point.getExtensions();
@@ -415,7 +413,6 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 					IConfigurationElement elt = configElements[j];
 					String id = elt.getAttribute("id"); //$NON-NLS-1$
 					if (id != null && id.equals(modelId)) {
-						IDebugModelPresentation lp;
 						try {
 							return (ScriptDebugModelPresentation) elt
 									.createExecutableExtension("class"); //$NON-NLS-1$
