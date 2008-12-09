@@ -12,6 +12,7 @@ package org.eclipse.dltk.debug.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -20,12 +21,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.ISourceLocator;
 import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
+import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
+import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptVariable;
+import org.eclipse.dltk.debug.core.model.ISourceOffsetLookup;
 import org.eclipse.dltk.internal.debug.core.model.HotCodeReplaceManager;
 import org.eclipse.dltk.internal.debug.ui.ScriptDebugOptionsManager;
 import org.eclipse.dltk.internal.debug.ui.ScriptHotCodeReplaceListener;
@@ -38,6 +44,8 @@ import org.eclipse.jface.preference.IPreferencePage;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferenceNode;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
@@ -46,7 +54,9 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsoleListener;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -143,10 +153,36 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 		fHCRListener = new ScriptHotCodeReplaceListener();
 		HotCodeReplaceManager.getDefault().addHotCodeReplaceListener(
 				fHCRListener);
+		DLTKDebugPlugin.setSourceOffsetRetriever(new ISourceOffsetLookup() {
+
+			public int calculateOffset(IScriptStackFrame frame, int lineNumber,
+					int column) {
+				final ILaunch launch = frame.getLaunch();
+				final ISourceLocator sourceLocator = launch.getSourceLocator();
+				final Object object = sourceLocator.getSourceElement(frame);
+				if (object instanceof IFile) {
+					final IDocumentProvider provider = DLTKUIPlugin
+							.getDocumentProvider();
+					final IDocument document = provider
+							.getDocument(new FileEditorInput((IFile) object));
+					if (document != null) {
+						try {
+							return document.getLineOffset(lineNumber - 1)
+									+ column;
+						} catch (BadLocationException e) {
+							// ignore
+						}
+					}
+				}
+				return -1;
+			}
+
+		});
 	}
 
 	public void stop(BundleContext context) throws Exception {
 		try {
+			DLTKDebugPlugin.setSourceOffsetRetriever(null);
 			HotCodeReplaceManager.getDefault().removeHotCodeReplaceListener(
 					fHCRListener);
 
@@ -282,15 +318,15 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 	 */
 	public static void log(Throwable e) {
 		log(new Status(IStatus.ERROR, getUniqueIdentifier(),
-				IDLTKDebugUIConstants.INTERNAL_ERROR, Messages.DLTKDebugUIPlugin_internalError, e));
+				IDLTKDebugUIConstants.INTERNAL_ERROR,
+				Messages.DLTKDebugUIPlugin_internalError, e));
 	}
 
 	public static void errorDialog(String message, IStatus status) {
 		log(status);
 		Shell shell = getActiveWorkbenchShell();
 		if (shell != null) {
-			ErrorDialog
-					.openError(shell,
+			ErrorDialog.openError(shell,
 					"DebugUIM0essages.JDIDebugUIPlugin_Error_1", //$NON-NLS-1$
 					message, status);
 		}
@@ -306,16 +342,15 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 			IStatus status = new Status(IStatus.ERROR, getUniqueIdentifier(),
 					IDLTKDebugUIConstants.INTERNAL_ERROR,
 					"Error logged from DLTK Debug UI: ", t); //$NON-NLS-1$	
-			ErrorDialog
-					.openError(shell,
+			ErrorDialog.openError(shell,
 					"DebugUIMessages.JDIDebugUIPlugin_Error_1", //$NON-NLS-1$
 					message, status);
 		}
 	}
 
 	/**
-	 * Return an object that implements <code>ILaunchConfigurationTab</code>
-	 * for the specified Interpreter install type ID.
+	 * Return an object that implements <code>ILaunchConfigurationTab</code> for
+	 * the specified Interpreter install type ID.
 	 */
 	public ILaunchConfigurationTab getInterpreterInstallTypePage(
 			String InterpreterInstallTypeID) {
