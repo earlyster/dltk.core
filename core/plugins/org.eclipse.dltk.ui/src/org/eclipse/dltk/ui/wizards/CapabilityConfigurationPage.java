@@ -163,8 +163,7 @@ public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 			System.err.println("Add help support here..."); //$NON-NLS-1$
 		}
 
-		// PlatformUI.getWorkbench().getHelpSystem().setHelp(composite,
-		// IDLTKHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
+		setHelpContext(composite);
 		setControl(composite);
 	}
 
@@ -273,5 +272,11 @@ public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 		} finally {
 			monitor.done();
 		}
+	}
+
+	protected void setHelpContext(Control control) {
+		// for example :
+		// PlatformUI.getWorkbench().getHelpSystem().setHelp(control,
+		// IHelpContextIds.HELP);
 	}
 }
