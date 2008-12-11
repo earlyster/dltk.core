@@ -35,6 +35,10 @@ public class SourceRange implements ISourceRange{
 		this(problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1);
 	}
 	
+	public SourceRange(ISourceRange range) {
+		this(range.getOffset(), range.getLength());
+	}
+
 	public int getLength() {
 		return fLength;
 	}
