@@ -11,10 +11,14 @@ package org.eclipse.dltk.console;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.eclipse.dltk.compiler.util.Util;
 
-public class ScriptConsoleHistory {
+public class ScriptConsoleHistory
+{
+
+	private static final String SCRIPT_CONSOLE_HISTORY = "SCRIPT_CONSOLE_HISTORY";
 
 	/**
 	 * History items. Items are added to the end. Always has at least one item,
@@ -23,22 +27,24 @@ public class ScriptConsoleHistory {
 	 */
 	private final List lines = new ArrayList();
 
-	public ScriptConsoleHistory() {
+	public ScriptConsoleHistory()
+	{
 		lines.add(Util.EMPTY_STRING);
 	}
 
 	/**
-	 * The index of the current item.
-	 * 
-	 * Invariant:
+	 * The index of the current item. Invariant:
 	 * <code>selection &gt;= 0 &gt;&gt; selection < lines.size()</code>
 	 */
 	private int selection = 0;
 
-	private void addToHistory(String line) {
+	private void addToHistory(String line)
+	{
 		final int index = lines.indexOf(line);
-		if (index >= 0) {
-			if (index != lines.size() - 1) {
+		if (index >= 0)
+		{
+			if (index != lines.size() - 1)
+			{
 				lines.remove(index);
 			}
 		}
@@ -50,8 +56,10 @@ public class ScriptConsoleHistory {
 	 * 
 	 * @param line
 	 */
-	public void add(String line) {
-		if (line != null && line.length() != 0) {
+	public void add(String line)
+	{
+		if (line != null && line.length() != 0)
+		{
 			addToHistory(line);
 			lines.add(Util.EMPTY_STRING);
 			selection = lines.size() - 1;
@@ -64,8 +72,10 @@ public class ScriptConsoleHistory {
 	 * 
 	 * @return
 	 */
-	public boolean prev() {
-		if (selection > 0) {
+	public boolean prev()
+	{
+		if (selection > 0)
+		{
 			--selection;
 			return true;
 		}
@@ -73,13 +83,15 @@ public class ScriptConsoleHistory {
 	}
 
 	/**
-	 * Moves the selection to the next item. Returns <code>true</code> on
-	 * success or <code>false</code> otherwise.
+	 * Moves the selection to the next item. Returns <code>true</code> on success
+	 * or <code>false</code> otherwise.
 	 * 
 	 * @return
 	 */
-	public boolean next() {
-		if (selection < lines.size() - 1) {
+	public boolean next()
+	{
+		if (selection < lines.size() - 1)
+		{
 			++selection;
 			return true;
 		}
@@ -91,7 +103,8 @@ public class ScriptConsoleHistory {
 	 * 
 	 * @return
 	 */
-	public String get() {
+	public String get()
+	{
 		return (String) lines.get(selection);
 	}
 
@@ -100,8 +113,10 @@ public class ScriptConsoleHistory {
 	 * 
 	 * @param line
 	 */
-	public void updateSelectedLine(String line) {
-		if (selection >= 0 && selection < lines.size()) {
+	public void updateSelectedLine(String line)
+	{
+		if (selection >= 0 && selection < lines.size())
+		{
 			/*
 			 * TODO probably it should a temporary change until a command is
 			 * executed, so the history will contain only commands which were
@@ -109,5 +124,32 @@ public class ScriptConsoleHistory {
 			 */
 			lines.set(selection, line);
 		}
+	}
+
+	public void restoreState()
+	{
+		String history = ScriptConsolePlugin.getDefault().getPluginPreferences().getString(SCRIPT_CONSOLE_HISTORY);
+		if (history != null && !"".equals(history))
+		{
+			StringTokenizer st = new StringTokenizer(history, "\n");
+			while (st.hasMoreTokens())
+			{
+				add(st.nextToken());
+			}
+		}
+
+	}
+
+	public void saveState()
+	{
+		int size = Math.min(lines.size(), 50);
+		StringBuffer sb = new StringBuffer(size * 10);
+		for (int i = 0; i < size; i++)
+		{
+			sb.append(lines.get(i));
+			sb.append("\n");
+		}
+		ScriptConsolePlugin.getDefault().getPluginPreferences().setValue(SCRIPT_CONSOLE_HISTORY, sb.toString());
+		ScriptConsolePlugin.getDefault().savePluginPreferences();
 	}
 }
