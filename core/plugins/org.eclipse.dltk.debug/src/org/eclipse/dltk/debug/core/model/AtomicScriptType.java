@@ -37,12 +37,11 @@ public class AtomicScriptType implements IScriptType {
 
 	protected void appendInstanceId(IScriptValue value, StringBuffer buffer) {
 		String id = value.getInstanceId();
-		if (id == null) {
-			id = "?"; //$NON-NLS-1$
+		if (id != null) {
+			buffer.append(" ("); //$NON-NLS-1$
+			buffer.append(ScriptModelMessages.variableInstanceId + "=" + id); //$NON-NLS-1$
+			buffer.append(")"); //$NON-NLS-1$
 		}
 
-		buffer.append(" ("); //$NON-NLS-1$
-		buffer.append(ScriptModelMessages.variableInstanceId + "=" + id); //$NON-NLS-1$
-		buffer.append(")"); //$NON-NLS-1$
 	}
 }
