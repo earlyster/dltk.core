@@ -165,8 +165,16 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 							.getDocument(new FileEditorInput((IFile) object));
 					if (document != null) {
 						try {
-							return document.getLineOffset(lineNumber - 1)
-									+ column;
+							if (column >= 0) {
+								return document.getLineOffset(lineNumber - 1)
+										+ column;
+							} else {
+								return document.getLineOffset(lineNumber) - 2; // -2
+																				// skips
+																				// also
+																				// the
+																				// \n
+							}
 						} catch (BadLocationException e) {
 							// ignore
 						}
