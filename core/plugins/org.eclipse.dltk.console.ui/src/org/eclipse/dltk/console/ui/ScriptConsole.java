@@ -208,6 +208,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		this.consoleListeners = new ListenerList(ListenerList.IDENTITY);
 		this.prompt = new ScriptConsolePrompt("=>", "->"); //$NON-NLS-1$ //$NON-NLS-2$
 		this.history = new ScriptConsoleHistory();
+		history.restoreState();
 
 		this.session = new ScriptConsoleSession();
 		addListener(this.session);
@@ -350,6 +351,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 			listener = null;
 		}
 
+		history.saveState();
 		super.dispose();
 	}
 
