@@ -10,6 +10,7 @@
 package org.eclipse.dltk.debug.ui;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -46,6 +47,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
@@ -72,6 +75,8 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 
 	// Map of InterpreterInstallTypeIDs to IConfigurationElements
 	protected Map fInterpreterInstallTypePageMap;
+
+	protected Map fColorTable = new HashMap(10);
 
 	/**
 	 * Whether this plugin is in the process of shutting down.
@@ -170,10 +175,10 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 										+ column;
 							} else {
 								return document.getLineOffset(lineNumber) - 2; // -2
-																				// skips
-																				// also
-																				// the
-																				// \n
+								// skips
+								// also
+								// the
+								// \n
 							}
 						} catch (BadLocationException e) {
 							// ignore
@@ -203,6 +208,11 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 					.getInstance());
 			launchManager.removeLaunchListener(ScriptDebugLogManager
 					.getInstance());
+
+			Iterator e = fColorTable.values().iterator();
+			while (e.hasNext())
+				((Color) e.next()).dispose();
+
 		} finally {
 			super.stop(context);
 		}
@@ -440,5 +450,14 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 			fPresentations.put(modelId, loadDebugModelPresentation(modelId));
 		}
 		return (ScriptDebugModelPresentation) fPresentations.get(modelId);
+	}
+
+	public Color getColor(RGB rgb) {
+		Color color = (Color) fColorTable.get(rgb);
+		if (color == null) {
+			color = new Color(Display.getCurrent(), rgb);
+			fColorTable.put(rgb, color);
+		}
+		return color;
 	}
 }
