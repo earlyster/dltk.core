@@ -444,7 +444,8 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 					return;
 
 				case ST.DELETE_PREVIOUS:
-					if (getCaretOffset() <= getCommandLineOffset()) {
+					if (getCaretOffset() <= getCommandLineOffset()
+							&& getSelectionText().equals("")) {
 						return;
 					}
 					break;
@@ -674,7 +675,8 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 		styledText.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {
-				if (e.keyCode == SWT.TAB) {
+				if (e.keyCode == SWT.TAB
+						|| (e.keyCode == ' ' && e.stateMask == SWT.CTRL)) {
 					contentHandler.contentAssistRequired();
 				}
 			}
