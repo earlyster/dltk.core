@@ -263,7 +263,7 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 						.getSourceOffsetLookup();
 				if (offsetLookup != null) {
 					return offsetLookup.calculateOffset(this, beginLine, level
-							.getBeginColumn());
+							.getBeginColumn(), false);
 				}
 			}
 		}
@@ -280,7 +280,7 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 						.getSourceOffsetLookup();
 				if (offsetLookup != null) {
 					final int offset = offsetLookup.calculateOffset(this,
-							endLine, level.getEndColumn());
+							endLine, level.getEndColumn(), true);
 					if (offset >= 0) {
 						return offset + 1;
 					}

@@ -13,6 +13,7 @@ package org.eclipse.dltk.debug.core.model;
 
 public interface ISourceOffsetLookup {
 
-	int calculateOffset(IScriptStackFrame frame, int lineNumber, int column);
+	int calculateOffset(IScriptStackFrame frame, int lineNumber, int column,
+			boolean isEndOffset);
 
 }
