@@ -45,6 +45,7 @@ import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.jface.preference.PreferenceNode;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.graphics.Color;
@@ -159,7 +160,7 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 		DLTKDebugPlugin.setSourceOffsetRetriever(new ISourceOffsetLookup() {
 
 			public int calculateOffset(IScriptStackFrame frame, int lineNumber,
-					int column) {
+					int column, boolean isEndOffset) {
 				final ILaunch launch = frame.getLaunch();
 				final ISourceLocator sourceLocator = launch.getSourceLocator();
 				final Object object = sourceLocator.getSourceElement(frame);
@@ -174,11 +175,15 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 								return document.getLineOffset(lineNumber - 1)
 										+ column;
 							} else {
-								return document.getLineOffset(lineNumber) - 2; // -2
-								// skips
-								// also
-								// the
-								// \n
+								if (!isEndOffset) {
+									return document
+											.getLineOffset(lineNumber - 1);
+								} else {
+									final IRegion region = document
+											.getLineInformation(lineNumber - 1);
+									return region.getOffset()
+											+ region.getLength();
+								}
 							}
 						} catch (BadLocationException e) {
 							// ignore
