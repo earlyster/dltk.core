@@ -195,7 +195,7 @@ public class DebugConsolePage extends ScriptConsolePage {
 
 	private final class DebugEventListener implements IDebugEventSetListener {
 		public void handleDebugEvents(DebugEvent[] events) {
-			enableUpdateJob.schedule(50);
+			enableUpdateJob.schedule(500);
 		}
 	}
 }
