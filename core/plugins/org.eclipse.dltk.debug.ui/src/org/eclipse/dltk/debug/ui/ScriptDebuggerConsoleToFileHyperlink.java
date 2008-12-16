@@ -25,11 +25,12 @@ import org.eclipse.ui.console.TextConsole;
  */
 public class ScriptDebuggerConsoleToFileHyperlink extends
 		ScriptDebugConsoleGenericHyperlink {
-	static final Pattern pattern = Pattern
-			.compile("\\t*#\\d+ +file:(.*) \\[(\\d+)\\]"); //$NON-NLS-1$
+	private final Pattern pattern;
 
-	public ScriptDebuggerConsoleToFileHyperlink(TextConsole console) {
+	public ScriptDebuggerConsoleToFileHyperlink(TextConsole console,
+			Pattern pattern) {
 		super(console);
+		this.pattern = pattern;
 	}
 
 	protected String getFileName(String linkText) throws CoreException {
@@ -39,12 +40,8 @@ public class ScriptDebuggerConsoleToFileHyperlink extends
 			String name = m.group(1);
 			return name;
 		}
-		IStatus status = new Status(
-				IStatus.ERROR,
-				DLTKDebugUIPlugin.PLUGIN_ID,
-				0,
-				Messages.ScriptDebuggerConsoleToFileHyperlink_error,
-				null);
+		IStatus status = new Status(IStatus.ERROR, DLTKDebugUIPlugin.PLUGIN_ID,
+				0, Messages.ScriptDebuggerConsoleToFileHyperlink_error, null);
 		throw new CoreException(status);
 	}
 
