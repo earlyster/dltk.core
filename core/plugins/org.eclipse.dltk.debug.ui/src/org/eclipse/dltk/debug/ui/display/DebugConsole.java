@@ -24,8 +24,10 @@ import org.eclipse.dltk.dbgp.IDbgpProperty;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
+import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.internal.debug.ui.ScriptEvaluationContextManager;
 import org.eclipse.dltk.utils.TextUtils;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -206,6 +208,19 @@ public class DebugConsole extends ScriptConsole {
 				return null;
 			}
 		});
+		getHistory().restoreState(getPreferences().getString(CONSOLE_HISTORY));
+	}
+
+	private static final String CONSOLE_HISTORY = "debug.console.history";
+
+	public void dispose() {
+		getPreferences().setValue(CONSOLE_HISTORY, getHistory().saveState());
+		DLTKDebugUIPlugin.getDefault().savePluginPreferences();
+		super.dispose();
+	}
+
+	private IPreferenceStore getPreferences() {
+		return DLTKDebugUIPlugin.getDefault().getPreferenceStore();
 	}
 
 	protected ScriptConsolePage createPage(IConsoleView view,
