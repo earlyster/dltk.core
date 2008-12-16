@@ -112,12 +112,8 @@ public class ScriptConsoleHistory {
 		}
 	}
 
-	private static final String SCRIPT_CONSOLE_HISTORY = "SCRIPT_CONSOLE_HISTORY";
-
-	public void restoreState() {
-		String history = ScriptConsolePlugin.getDefault()
-				.getPluginPreferences().getString(SCRIPT_CONSOLE_HISTORY);
-		if (history != null && !"".equals(history)) {
+	public void restoreState(String history) {
+		if (history != null && history.length() != 0) {
 			StringTokenizer st = new StringTokenizer(history, "\n");
 			while (st.hasMoreTokens()) {
 				add(st.nextToken());
@@ -125,15 +121,13 @@ public class ScriptConsoleHistory {
 		}
 	}
 
-	public void saveState() {
+	public String saveState() {
 		int size = Math.min(lines.size(), 50);
 		StringBuffer sb = new StringBuffer(size * 10);
 		for (int i = 0; i < size; i++) {
 			sb.append(lines.get(i));
 			sb.append("\n");
 		}
-		ScriptConsolePlugin.getDefault().getPluginPreferences().setValue(
-				SCRIPT_CONSOLE_HISTORY, sb.toString());
-		ScriptConsolePlugin.getDefault().savePluginPreferences();
+		return sb.toString();
 	}
 }
