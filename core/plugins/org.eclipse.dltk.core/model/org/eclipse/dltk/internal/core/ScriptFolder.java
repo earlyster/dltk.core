@@ -29,27 +29,35 @@ import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
 import org.eclipse.dltk.utils.CorePrinter;
 
-
 public class ScriptFolder extends Openable implements IScriptFolder {
-	
-	protected IPath path;	
+
+	protected IPath path;
+	private String elementName;
 
 	protected ScriptFolder(ProjectFragment parent, IPath path) {
 		super(parent);
 		this.path = path;
+
+		elementName = ""; //$NON-NLS-1$
+		if (this.path.segmentCount() > 0) {
+			elementName = this.path.segment(0);
+			for (int i = 1; i < this.path.segmentCount(); ++i) {
+				elementName += PACKAGE_DELIMITER + this.path.segment(i);
+			}
+		}
 	}
-	
+
 	/**
 	 * @see ModelElement
 	 */
 	protected Object createElementInfo() {
 		return new ScriptFolderInfo();
 	}
-	
+
 	public int getElementType() {
 		return SCRIPT_FOLDER;
 	}
-	
+
 	/**
 	 * @see IModelElement#getPath()
 	 */
@@ -61,7 +69,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 			return root.getPath().append(path);
 		}
 	}
-	
+
 	/**
 	 * @see IModelElement#getResource()
 	 */
@@ -70,10 +78,10 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		if (root.isArchive()) {
 			return root.getResource();
 		} else {
-			if(path.segmentCount() == 0)
+			if (path.segmentCount() == 0)
 				return root.getResource();
-			IContainer container = (IContainer)root.getResource();
-			if( container != null ) {
+			IContainer container = (IContainer) root.getResource();
+			if (container != null) {
 				return container.getFolder(path);
 			}
 			return null;
@@ -81,12 +89,13 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 	}
 
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof ScriptFolder)) return false;
-		
-		ScriptFolder other = (ScriptFolder) o;		
-		return this.path.equals(other.path) &&
-				this.parent.equals(other.parent);
+		if (this == o)
+			return true;
+		if (!(o instanceof ScriptFolder))
+			return false;
+
+		ScriptFolder other = (ScriptFolder) o;
+		return this.path.equals(other.path) && this.parent.equals(other.parent);
 	}
 
 	public int hashCode() {
@@ -96,28 +105,34 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 	public int getKind() throws ModelException {
 		return getProjectFragment().getKind();
 	}
-	
-	protected boolean buildStructure(OpenableElementInfo info, IProgressMonitor pm, Map newElements, IResource underlyingResource) throws ModelException {
+
+	protected boolean buildStructure(OpenableElementInfo info,
+			IProgressMonitor pm, Map newElements, IResource underlyingResource)
+			throws ModelException {
 		// check whether this folder can be opened
-		if (!underlyingResource.isAccessible()) throw newNotPresentException();
+		if (!underlyingResource.isAccessible())
+			throw newNotPresentException();
 
 		int kind = getKind();
-		
-		if (kind == IProjectFragment.K_SOURCE && Util.isExcluded(this)) 
+
+		if (kind == IProjectFragment.K_SOURCE && Util.isExcluded(this))
 			throw newNotPresentException();
-		
+
 		// add modules from resources
 		HashSet vChildren = new HashSet();
 		try {
 			ProjectFragment root = getProjectFragment();
 			char[][] inclusionPatterns = root.fullInclusionPatternChars();
-			char[][] exclusionPatterns = root.fullExclusionPatternChars();			
+			char[][] exclusionPatterns = root.fullExclusionPatternChars();
 			IResource[] members = ((IContainer) underlyingResource).members();
 			for (int i = 0, max = members.length; i < max; i++) {
 				IResource child = members[i];
-				if (child.getType() != IResource.FOLDER	&& !Util.isExcluded(child, inclusionPatterns, exclusionPatterns)) {
+				if (child.getType() != IResource.FOLDER
+						&& !Util.isExcluded(child, inclusionPatterns,
+								exclusionPatterns)) {
 					IModelElement childElement;
-					if (kind == IProjectFragment.K_SOURCE && Util.isValidSourceModule(this, child)) {
+					if (kind == IProjectFragment.K_SOURCE
+							&& Util.isValidSourceModule(this, child)) {
 						childElement = getSourceModule(child.getName());
 						vChildren.add(childElement);
 					}
@@ -126,8 +141,8 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		} catch (CoreException e) {
 			throw new ModelException(e);
 		}
-		
-		if (kind == IProjectFragment.K_SOURCE ) {
+
+		if (kind == IProjectFragment.K_SOURCE) {
 			// add primary source modules
 			ISourceModule[] primarySourceModules = getSourceModules(DefaultWorkingCopyOwner.PRIMARY);
 			for (int i = 0, length = primarySourceModules.length; i < length; i++) {
@@ -135,7 +150,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 				vChildren.add(primary);
 			}
 		}
-		
+
 		IModelElement[] children = new IModelElement[vChildren.size()];
 		vChildren.toArray(children);
 		info.setChildren(children);
@@ -143,8 +158,10 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 	}
 
 	public ISourceModule[] getSourceModules(WorkingCopyOwner owner) {
-		ISourceModule[] workingCopies = ModelManager.getModelManager().getWorkingCopies(owner, false/*don't add primary*/);
-		if (workingCopies == null) return ModelManager.NO_WORKING_COPY;
+		ISourceModule[] workingCopies = ModelManager.getModelManager()
+				.getWorkingCopies(owner, false/* don't add primary */);
+		if (workingCopies == null)
+			return ModelManager.NO_WORKING_COPY;
 		int length = workingCopies.length;
 		ISourceModule[] result = new ISourceModule[length];
 		int index = 0;
@@ -156,25 +173,28 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 				valid = Util.isValidSourceModule(this, res);
 			else
 				valid = Util.isValidSourceModule(this, wc.getPath());
-			if (equals(wc.getParent()) && !Util.isExcluded(wc) && valid) { 
+			if (equals(wc.getParent()) && !Util.isExcluded(wc) && valid) {
 				result[index++] = wc;
 			}
 		}
 		if (index != length) {
-			System.arraycopy(result, 0, result = new ISourceModule[index], 0, index);
+			System.arraycopy(result, 0, result = new ISourceModule[index], 0,
+					index);
 		}
 		return result;
 	}
-	
+
 	public ISourceModule getSourceModule(String name) {
 		return new SourceModule(this, name, DefaultWorkingCopyOwner.PRIMARY);
-	}	
-	
+	}
+
 	/**
 	 * @see IScriptFolder
 	 */
-	public ISourceModule createSourceModule(String cuName, String contents, boolean force, IProgressMonitor monitor) throws ModelException {
-		CreateSourceModuleOperation op= new CreateSourceModuleOperation(this, cuName, contents, force);
+	public ISourceModule createSourceModule(String cuName, String contents,
+			boolean force, IProgressMonitor monitor) throws ModelException {
+		CreateSourceModuleOperation op = new CreateSourceModuleOperation(this,
+				cuName, contents, force);
 		op.runOperation(monitor);
 		return new SourceModule(this, cuName, DefaultWorkingCopyOwner.PRIMARY);
 	}
@@ -184,73 +204,68 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 	}
 
 	/**
-	 *  Debugging purposes
+	 * Debugging purposes
 	 */
 	protected void toStringName(StringBuffer buffer) {
 		String elementName = getElementName();
-		if(elementName.length() == 0){
+		if (elementName.length() == 0) {
 			buffer.append("<default>"); //$NON-NLS-1$
-		}else{
+		} else {
 			buffer.append(elementName);
 		}
 	}
-	
+
 	public String getElementName() {
-		String name = ""; //$NON-NLS-1$
-		if( this.path.segmentCount() == 0 ) {
-			return ""; //$NON-NLS-1$
-		}
-		name = this.path.segment(0);
-		for( int i = 1; i < this.path.segmentCount(); ++i) {
-			name += PACKAGE_DELIMITER + this.path.segment(i);
-		}
-		return name;
+		return elementName;
 	}
 
 	public boolean isRootFolder() {
 		return path.segmentCount() == 0;
 	}
-	public void printNode(CorePrinter output) {		
+
+	public void printNode(CorePrinter output) {
 		output.formatPrint("DLTK Script folder:" + getElementName()); //$NON-NLS-1$
 		output.indent();
 		try {
 			IModelElement modelElements[] = this.getChildren();
-			for( int i = 0; i < modelElements.length; ++i ) {
+			for (int i = 0; i < modelElements.length; ++i) {
 				IModelElement element = modelElements[i];
-				if( element instanceof ModelElement ) {
-					((ModelElement)element).printNode(output);
-				}
-				else {
-					output.print("Unknown element:" + element ); //$NON-NLS-1$
+				if (element instanceof ModelElement) {
+					((ModelElement) element).printNode(output);
+				} else {
+					output.print("Unknown element:" + element); //$NON-NLS-1$
 				}
 			}
-		}
-		catch(ModelException ex ) {
+		} catch (ModelException ex) {
 			output.formatPrint(ex.getLocalizedMessage());
 		}
 		output.dedent();
 	}
-	public ISourceModule[] getSourceModules() throws ModelException {				
+
+	public ISourceModule[] getSourceModules() throws ModelException {
 		ArrayList list = getChildrenOfType(SOURCE_MODULE);
-		ISourceModule[] array= new ISourceModule[list.size()];
+		ISourceModule[] array = new ISourceModule[list.size()];
 		list.toArray(array);
 		return array;
 	}
+
 	public Object[] getForeignResources() throws ModelException {
-		if( this.isRootFolder()) {
+		if (this.isRootFolder()) {
 			return ModelElementInfo.NO_NON_SCRIPT_RESOURCES;
-		}
-		else {
-			return ((ScriptFolderInfo) getElementInfo()).getForeignResources(getResource(), getProjectFragment());		
+		} else {
+			return ((ScriptFolderInfo) getElementInfo()).getForeignResources(
+					getResource(), getProjectFragment());
 		}
 	}
 
 	public boolean hasSubfolders() throws ModelException {
-		IModelElement[] packages= ((IProjectFragment)getParent()).getChildren();
+		IModelElement[] packages = ((IProjectFragment) getParent())
+				.getChildren();
 		int namesLength = this.path.segmentCount();
-		nextPackage: for (int i= 0, length = packages.length; i < length; i++) {
+		nextPackage: for (int i = 0, length = packages.length; i < length; i++) {
 			IPath otherNames = ((ScriptFolder) packages[i]).path;
-			if (otherNames.segmentCount() <= namesLength) continue nextPackage;
+			if (otherNames.segmentCount() <= namesLength)
+				continue nextPackage;
 			for (int j = 0; j < namesLength; j++)
 				if (!this.path.segment(j).equals(otherNames.segment(j)))
 					continue nextPackage;
@@ -258,13 +273,16 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		}
 		return false;
 	}
-	public IModelElement getHandleFromMemento(String token, MementoTokenizer memento, WorkingCopyOwner owner) {
+
+	public IModelElement getHandleFromMemento(String token,
+			MementoTokenizer memento, WorkingCopyOwner owner) {
 		switch (token.charAt(0)) {
-			case JEM_SOURCEMODULE:
-				if (!memento.hasMoreTokens()) return this;
-				String classFileName = memento.nextToken();
-				ModelElement classFile = (ModelElement)getSourceModule(classFileName);
-				return classFile.getHandleFromMemento(memento, owner);			
+		case JEM_SOURCEMODULE:
+			if (!memento.hasMoreTokens())
+				return this;
+			String classFileName = memento.nextToken();
+			ModelElement classFile = (ModelElement) getSourceModule(classFileName);
+			return classFile.getHandleFromMemento(memento, owner);
 		}
 		return null;
 	}
@@ -272,65 +290,76 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 	protected char getHandleMementoDelimiter() {
 		return JEM_SCRIPTFOLDER;
 	}
-	
+
 	public boolean containsScriptResources() throws ModelException {
 		Object elementInfo = getElementInfo();
-		if(!(elementInfo instanceof ScriptFolderInfo)) return false; 
+		if (!(elementInfo instanceof ScriptFolderInfo))
+			return false;
 		ScriptFolderInfo scriptElementInfo = (ScriptFolderInfo) elementInfo;
 		return scriptElementInfo.containsScriptResources();
 	}
+
 	public boolean hasChildren() throws ModelException {
 		return getChildren().length > 0;
 	}
 
-	public void copy(IModelElement container, IModelElement sibling, String rename, boolean replace, IProgressMonitor monitor) throws ModelException {
+	public void copy(IModelElement container, IModelElement sibling,
+			String rename, boolean replace, IProgressMonitor monitor)
+			throws ModelException {
 		if (container == null) {
-			throw new IllegalArgumentException(Messages.operation_nullContainer); 
+			throw new IllegalArgumentException(Messages.operation_nullContainer);
 		}
-		IModelElement[] elements= new IModelElement[] {this};
-		IModelElement[] containers= new IModelElement[] {container};
-		IModelElement[] siblings= null;
+		IModelElement[] elements = new IModelElement[] { this };
+		IModelElement[] containers = new IModelElement[] { container };
+		IModelElement[] siblings = null;
 		if (sibling != null) {
-			siblings= new IModelElement[] {sibling};
+			siblings = new IModelElement[] { sibling };
 		}
-		String[] renamings= null;
+		String[] renamings = null;
 		if (rename != null) {
-			renamings= new String[] {rename};
+			renamings = new String[] { rename };
 		}
-		getModel().copy(elements, containers, siblings, renamings, replace, monitor);		
+		getModel().copy(elements, containers, siblings, renamings, replace,
+				monitor);
 	}
 
-	public void delete(boolean force, IProgressMonitor monitor) throws ModelException {
-		IModelElement[] elements = new IModelElement[] {this};
-		getModel().delete(elements, force, monitor);		
+	public void delete(boolean force, IProgressMonitor monitor)
+			throws ModelException {
+		IModelElement[] elements = new IModelElement[] { this };
+		getModel().delete(elements, force, monitor);
 	}
 
-	public void move(IModelElement container, IModelElement sibling, String rename, boolean replace, IProgressMonitor monitor) throws ModelException {
+	public void move(IModelElement container, IModelElement sibling,
+			String rename, boolean replace, IProgressMonitor monitor)
+			throws ModelException {
 		if (container == null) {
-			throw new IllegalArgumentException(Messages.operation_nullContainer); 
+			throw new IllegalArgumentException(Messages.operation_nullContainer);
 		}
-		IModelElement[] elements= new IModelElement[] {this};
-		IModelElement[] containers= new IModelElement[] {container};
-		IModelElement[] siblings= null;
+		IModelElement[] elements = new IModelElement[] { this };
+		IModelElement[] containers = new IModelElement[] { container };
+		IModelElement[] siblings = null;
 		if (sibling != null) {
-			siblings= new IModelElement[] {sibling};
+			siblings = new IModelElement[] { sibling };
 		}
-		String[] renamings= null;
+		String[] renamings = null;
 		if (rename != null) {
-			renamings= new String[] {rename};
+			renamings = new String[] { rename };
 		}
-		getModel().move(elements, containers, siblings, renamings, replace, monitor);
+		getModel().move(elements, containers, siblings, renamings, replace,
+				monitor);
 	}
 
-	public void rename(String newName, boolean force, IProgressMonitor monitor) throws ModelException {
+	public void rename(String newName, boolean force, IProgressMonitor monitor)
+			throws ModelException {
 		if (newName == null) {
-			throw new IllegalArgumentException(Messages.element_nullName); 
+			throw new IllegalArgumentException(Messages.element_nullName);
 		}
-		IModelElement[] elements= new IModelElement[] {this};
-		IModelElement[] dests= new IModelElement[] {this.getParent()};
-		String[] renamings= new String[] {newName};
-		getModel().rename(elements, dests, renamings, force, monitor);		
+		IModelElement[] elements = new IModelElement[] { this };
+		IModelElement[] dests = new IModelElement[] { this.getParent() };
+		String[] renamings = new String[] { newName };
+		getModel().rename(elements, dests, renamings, force, monitor);
 	}
+
 	public IPath getRelativePath() {
 		return this.path;
 	}
