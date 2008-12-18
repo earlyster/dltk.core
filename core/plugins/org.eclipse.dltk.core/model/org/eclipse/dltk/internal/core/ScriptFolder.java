@@ -31,19 +31,39 @@ import org.eclipse.dltk.utils.CorePrinter;
 
 public class ScriptFolder extends Openable implements IScriptFolder {
 
-	protected IPath path;
-	private String elementName;
+	protected final IPath path;
+	private final String elementName;
 
 	protected ScriptFolder(ProjectFragment parent, IPath path) {
 		super(parent);
 		this.path = path;
 
-		elementName = ""; //$NON-NLS-1$
-		if (this.path.segmentCount() > 0) {
-			elementName = this.path.segment(0);
-			for (int i = 1; i < this.path.segmentCount(); ++i) {
-				elementName += PACKAGE_DELIMITER + this.path.segment(i);
+		elementName = folderPathToString(path);
+	}
+
+	private static String folderPathToString(IPath path) {
+		final int segmentCount = path.segmentCount();
+		if (segmentCount == 0) {
+			return org.eclipse.dltk.compiler.util.Util.EMPTY_STRING;
+		} else if (segmentCount == 1) {
+			return path.segment(0);
+		} else {
+			int resultSize = (segmentCount - 1)
+			/* x PACKAGE_DELIMETER_STR.length() */;
+			for (int i = 0; i < segmentCount; ++i) {
+				resultSize += path.segment(i).length();
 			}
+			char[] result = new char[resultSize];
+			int index = 0;
+			for (int i = 0; i < segmentCount; ++i) {
+				if (i != 0) {
+					result[index++] = PACKAGE_DELIMITER;
+				}
+				final String segment = path.segment(i);
+				segment.getChars(0, segment.length(), result, index);
+				index += segment.length();
+			}
+			return new String(result);
 		}
 	}
 
