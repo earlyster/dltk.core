@@ -93,8 +93,6 @@ public class ExternalProjectFragment extends ProjectFragment {
 			ArrayList vChildren, ArrayList vForeign, Map newElements,
 			char[][] inclusionPatterns, char[][] exclusionPatterns,
 			Set realPaths) throws ModelException {
-		IPath lpath = EnvironmentPathUtils.getLocalPath(path
-				.removeFirstSegments(this.fPath.segmentCount()));
 		IEnvironment environment = EnvironmentPathUtils
 				.getPathEnvironment(path);
 		if (environment != null) {
@@ -105,6 +103,8 @@ public class ExternalProjectFragment extends ProjectFragment {
 				return;
 			}
 		}
+		IPath lpath = path.setDevice(null).removeFirstSegments(
+				this.fPath.segmentCount());
 
 		ExternalScriptFolder fldr = (ExternalScriptFolder) this
 				.getScriptFolder(lpath);
