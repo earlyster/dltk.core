@@ -138,10 +138,11 @@ public class HierarchyResolver {
 					hierarchyBuilder.hierarchy.progressMonitor);
 		}
 
-		computeSupertypesFor(focusType, hierarchyInfo, new HashSet());
+		computeSupertypesFor(focusType, new HashMap(), hierarchyInfo,
+				new HashSet());
 	}
 
-	protected void computeSupertypesFor(IType focusType,
+	protected void computeSupertypesFor(IType focusType, Map superTypesCache,
 			IFileHierarchyInfo hierarchyInfo, Set processedTypes)
 			throws CoreException {
 
@@ -150,7 +151,8 @@ public class HierarchyResolver {
 		// Build superclasses hieararchy:
 		String[] superClasses = focusType.getSuperClasses();
 		if (superClasses != null && superClasses.length > 0) {
-			IType[] searchTypes = searchTypes(superClasses, hierarchyInfo);
+			IType[] searchTypes = searchTypes(superClasses, superTypesCache,
+					hierarchyInfo);
 
 			for (int i = 0; i < searchTypes.length; i++) {
 				IType superclass = searchTypes[i];
@@ -161,8 +163,8 @@ public class HierarchyResolver {
 			for (int i = 0; i < searchTypes.length; i++) {
 				IType superclass = searchTypes[i];
 				if (!processedTypes.contains(superclass)) {
-					computeSupertypesFor(superclass, hierarchyInfo,
-							processedTypes);
+					computeSupertypesFor(superclass, superTypesCache,
+							hierarchyInfo, processedTypes);
 				}
 			}
 		} else {
@@ -170,11 +172,6 @@ public class HierarchyResolver {
 				hierarchyBuilder.hierarchy.addRootClass(focusType);
 			}
 		}
-	}
-
-	protected IType[] searchTypes(String[] types,
-			IFileHierarchyInfo hierarchyInfo) throws CoreException {
-		return searchTypes(types, null, hierarchyInfo);
 	}
 
 	protected IType[] searchTypes(String[] types, Map cache,
@@ -216,8 +213,8 @@ public class HierarchyResolver {
 		};
 		SearchPattern pattern = SearchPattern.createPattern(type,
 				IDLTKSearchConstants.TYPE, IDLTKSearchConstants.DECLARATIONS,
-				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE,
-				hierarchyBuilder.hierarchy.scope.getLanguageToolkit());
+				SearchPattern.R_EXACT_MATCH, hierarchyBuilder.hierarchy.scope
+						.getLanguageToolkit());
 		engine.search(pattern, new SearchParticipant[] { SearchEngine
 				.getDefaultSearchParticipant() },
 				hierarchyBuilder.hierarchy.scope, typesCollector,
