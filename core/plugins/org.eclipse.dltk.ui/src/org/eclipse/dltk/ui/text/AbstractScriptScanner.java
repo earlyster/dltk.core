@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,77 +28,75 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
-
-
 /**
  * Initialized with a color manager and a preference store, its subclasses are
- * only responsible for providing a list of preference keys for based on which tokens
- * are generated and to use this tokens to define the rules controlling this scanner.
+ * only responsible for providing a list of preference keys for based on which
+ * tokens are generated and to use this tokens to define the rules controlling
+ * this scanner.
  * <p>
- * This scanner stores the color defined by the color preference key into
- * the color manager under the same key.
+ * This scanner stores the color defined by the color preference key into the
+ * color manager under the same key.
  * </p>
  * <p>
- * Preference color key + {@link PreferenceConstants#EDITOR_BOLD_SUFFIX} are used
- * to retrieve whether the token is rendered in bold.
+ * Preference color key + {@link PreferenceConstants#EDITOR_BOLD_SUFFIX} are
+ * used to retrieve whether the token is rendered in bold.
  * </p>
  * <p>
- * Preference color key + {@link PreferenceConstants#EDITOR_ITALIC_SUFFIX} are used
- * to retrieve whether the token is rendered in italic.
+ * Preference color key + {@link PreferenceConstants#EDITOR_ITALIC_SUFFIX} are
+ * used to retrieve whether the token is rendered in italic.
  * </p>
  * <p>
- * Preference color key + {@link PreferenceConstants#EDITOR_STRIKETHROUGH_SUFFIX} are used
- * to retrieve whether the token is rendered in strikethrough.
+ * Preference color key +
+ * {@link PreferenceConstants#EDITOR_STRIKETHROUGH_SUFFIX} are used to retrieve
+ * whether the token is rendered in strikethrough.
  * </p>
  * <p>
- * Preference color key + {@link PreferenceConstants#EDITOR_UNDERLINE_SUFFIX} are used
- * to retrieve whether the token is rendered in underline.
+ * Preference color key + {@link PreferenceConstants#EDITOR_UNDERLINE_SUFFIX}
+ * are used to retrieve whether the token is rendered in underline.
  * </p>
  */
 public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 
-
 	private IColorManager fColorManager;
 	private IPreferenceStore fPreferenceStore;
 
-	private Map fTokenMap= new HashMap();
+	private Map fTokenMap = new HashMap();
 	private String[] fPropertyNamesColor;
 	/**
-	 * Preference keys for boolean preferences which are <code>true</code>,
-	 * iff the corresponding token should be rendered bold.
+	 * Preference keys for boolean preferences which are <code>true</code>, iff
+	 * the corresponding token should be rendered bold.
 	 */
 	private String[] fPropertyNamesBold;
 	/**
-	 * Preference keys for boolean preferences which are <code>true</code>,
-	 * iff the corresponding token should be rendered italic.
-	 *
-	 *
+	 * Preference keys for boolean preferences which are <code>true</code>, iff
+	 * the corresponding token should be rendered italic.
+	 * 
+	 * 
 	 */
 	private String[] fPropertyNamesItalic;
 	/**
-	 * Preference keys for boolean preferences which are <code>true</code>,
-	 * iff the corresponding token should be rendered strikethrough.
-	 *
-	 *
+	 * Preference keys for boolean preferences which are <code>true</code>, iff
+	 * the corresponding token should be rendered strikethrough.
+	 * 
+	 * 
 	 */
 	private String[] fPropertyNamesStrikethrough;
 	/**
-	 * Preference keys for boolean preferences which are <code>true</code>,
-	 * iff the corresponding token should be rendered underline.
-	 *
-	 *
+	 * Preference keys for boolean preferences which are <code>true</code>, iff
+	 * the corresponding token should be rendered underline.
+	 * 
+	 * 
 	 */
 	private String[] fPropertyNamesUnderline;
-
 
 	private boolean fNeedsLazyColorLoading;
 
 	/**
-	 * Returns an array of preference keys which define the tokens
-	 * used in the rules of this scanner.
+	 * Returns an array of preference keys which define the tokens used in the
+	 * rules of this scanner.
 	 * <p>
-	 * The preference key is used access the color in the preference
-	 * store and in the color manager.
+	 * The preference key is used access the color in the preference store and
+	 * in the color manager.
 	 * </p>
 	 * <p>
 	 * Preference key + {@link PreferenceConstants#EDITOR_BOLD_SUFFIX} is used
@@ -110,12 +107,12 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 	 * to retrieve whether the token is rendered in italic.
 	 * </p>
 	 * <p>
-	 * Preference key + {@link PreferenceConstants#EDITOR_UNDERLINE_SUFFIX} is used
-	 * to retrieve whether the token is rendered underlined.
+	 * Preference key + {@link PreferenceConstants#EDITOR_UNDERLINE_SUFFIX} is
+	 * used to retrieve whether the token is rendered underlined.
 	 * </p>
 	 * <p>
-	 * Preference key + {@link PreferenceConstants#EDITOR_STRIKETHROUGH_SUFFIX} is used
-	 * to retrieve whether the token is rendered stricken out.
+	 * Preference key + {@link PreferenceConstants#EDITOR_STRIKETHROUGH_SUFFIX}
+	 * is used to retrieve whether the token is rendered stricken out.
 	 * </p>
 	 */
 	abstract protected String[] getTokenProperties();
@@ -125,14 +122,13 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 	 */
 	abstract protected List createRules();
 
-
 	/**
 	 * Creates an abstract script scanner.
 	 */
 	public AbstractScriptScanner(IColorManager manager, IPreferenceStore store) {
 		super();
-		fColorManager= manager;
-		fPreferenceStore= store;
+		fColorManager = manager;
+		fPreferenceStore = store;
 	}
 
 	/**
@@ -140,31 +136,37 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 	 */
 	public final void initialize() {
 
-		fPropertyNamesColor= getTokenProperties();
-		int length= fPropertyNamesColor.length;
-		fPropertyNamesBold= new String[length];
-		fPropertyNamesItalic= new String[length];
-		fPropertyNamesStrikethrough= new String[length];
-		fPropertyNamesUnderline= new String[length];
+		fPropertyNamesColor = getTokenProperties();
+		int length = fPropertyNamesColor.length;
+		fPropertyNamesBold = new String[length];
+		fPropertyNamesItalic = new String[length];
+		fPropertyNamesStrikethrough = new String[length];
+		fPropertyNamesUnderline = new String[length];
 
-		for (int i= 0; i < length; i++) {
-			fPropertyNamesBold[i]= getBoldKey(fPropertyNamesColor[i]);
-			fPropertyNamesItalic[i]= getItalicKey(fPropertyNamesColor[i]);
-			fPropertyNamesStrikethrough[i]= getStrikethroughKey(fPropertyNamesColor[i]);
-			fPropertyNamesUnderline[i]= getUnderlineKey(fPropertyNamesColor[i]);
+		for (int i = 0; i < length; i++) {
+			fPropertyNamesBold[i] = getBoldKey(fPropertyNamesColor[i]);
+			fPropertyNamesItalic[i] = getItalicKey(fPropertyNamesColor[i]);
+			fPropertyNamesStrikethrough[i] = getStrikethroughKey(fPropertyNamesColor[i]);
+			fPropertyNamesUnderline[i] = getUnderlineKey(fPropertyNamesColor[i]);
 		}
-		
-		fNeedsLazyColorLoading= Display.getCurrent() == null;
-		for (int i= 0; i < length; i++) {
+
+		fNeedsLazyColorLoading = Display.getCurrent() == null;
+		for (int i = 0; i < length; i++) {
 			if (fNeedsLazyColorLoading)
-				addTokenWithProxyAttribute(fPropertyNamesColor[i], fPropertyNamesBold[i], fPropertyNamesItalic[i], fPropertyNamesStrikethrough[i], fPropertyNamesUnderline[i]);
+				addTokenWithProxyAttribute(fPropertyNamesColor[i],
+						fPropertyNamesBold[i], fPropertyNamesItalic[i],
+						fPropertyNamesStrikethrough[i],
+						fPropertyNamesUnderline[i]);
 			else
-				addToken(fPropertyNamesColor[i], fPropertyNamesBold[i], fPropertyNamesItalic[i], fPropertyNamesStrikethrough[i], fPropertyNamesUnderline[i]);
+				addToken(fPropertyNamesColor[i], fPropertyNamesBold[i],
+						fPropertyNamesItalic[i],
+						fPropertyNamesStrikethrough[i],
+						fPropertyNamesUnderline[i]);
 		}
 
 		initializeRules();
 	}
-	
+
 	protected String getBoldKey(String colorKey) {
 		return colorKey + PreferenceConstants.EDITOR_BOLD_SUFFIX;
 	}
@@ -172,15 +174,15 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 	protected String getItalicKey(String colorKey) {
 		return colorKey + PreferenceConstants.EDITOR_ITALIC_SUFFIX;
 	}
-	
+
 	protected String getStrikethroughKey(String colorKey) {
 		return colorKey + PreferenceConstants.EDITOR_STRIKETHROUGH_SUFFIX;
 	}
-	
+
 	protected String getUnderlineKey(String colorKey) {
 		return colorKey + PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
 	}
-	
+
 	public IToken nextToken() {
 		if (fNeedsLazyColorLoading)
 			resolveProxyAttributes();
@@ -189,53 +191,69 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 
 	private void resolveProxyAttributes() {
 		if (fNeedsLazyColorLoading && Display.getCurrent() != null) {
-			for (int i= 0; i < fPropertyNamesColor.length; i++) {
-				addToken(fPropertyNamesColor[i], fPropertyNamesBold[i], fPropertyNamesItalic[i], fPropertyNamesStrikethrough[i], fPropertyNamesUnderline[i]);
+			for (int i = 0; i < fPropertyNamesColor.length; i++) {
+				addToken(fPropertyNamesColor[i], fPropertyNamesBold[i],
+						fPropertyNamesItalic[i],
+						fPropertyNamesStrikethrough[i],
+						fPropertyNamesUnderline[i]);
 			}
-			fNeedsLazyColorLoading= false;
+			fNeedsLazyColorLoading = false;
 		}
 	}
 
-	private void addTokenWithProxyAttribute(String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey) {
-		fTokenMap.put(colorKey, new Token(createTextAttribute(null, boldKey, italicKey, strikethroughKey, underlineKey)));
+	private void addTokenWithProxyAttribute(String colorKey, String boldKey,
+			String italicKey, String strikethroughKey, String underlineKey) {
+		fTokenMap.put(colorKey, new Token(createTextAttribute(null, boldKey,
+				italicKey, strikethroughKey, underlineKey)));
 	}
 
-	private void addToken(String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey) {
-		if (fColorManager != null && colorKey != null && fColorManager.getColor(colorKey) == null) {
-			RGB rgb= PreferenceConverter.getColor(fPreferenceStore, colorKey);
+	private void addToken(String colorKey, String boldKey, String italicKey,
+			String strikethroughKey, String underlineKey) {
+		if (fColorManager != null && colorKey != null) {
+			RGB rgb = PreferenceConverter.getColor(fPreferenceStore, colorKey);
 			if (fColorManager instanceof IColorManagerExtension) {
-				IColorManagerExtension ext= (IColorManagerExtension) fColorManager;
+				IColorManagerExtension ext = (IColorManagerExtension) fColorManager;
 				ext.unbindColor(colorKey);
 				ext.bindColor(colorKey, rgb);
 			}
 		}
 
 		if (!fNeedsLazyColorLoading)
-			fTokenMap.put(colorKey, new Token(createTextAttribute(colorKey, boldKey, italicKey, strikethroughKey, underlineKey)));
+			fTokenMap.put(colorKey, new Token(createTextAttribute(colorKey,
+					boldKey, italicKey, strikethroughKey, underlineKey)));
 		else {
-			Token token= ((Token)fTokenMap.get(colorKey));
+			Token token = ((Token) fTokenMap.get(colorKey));
 			if (token != null)
-				token.setData(createTextAttribute(colorKey, boldKey, italicKey, strikethroughKey, underlineKey));
+				token.setData(createTextAttribute(colorKey, boldKey, italicKey,
+						strikethroughKey, underlineKey));
 		}
 	}
 
 	/**
-	 * Create a text attribute based on the given color, bold, italic, strikethrough and underline preference keys.
-	 *
-	 * @param colorKey the color preference key
-	 * @param boldKey the bold preference key
-	 * @param italicKey the italic preference key
-	 * @param strikethroughKey the strikethrough preference key
-	 * @param underlineKey the italic preference key
+	 * Create a text attribute based on the given color, bold, italic,
+	 * strikethrough and underline preference keys.
+	 * 
+	 * @param colorKey
+	 *            the color preference key
+	 * @param boldKey
+	 *            the bold preference key
+	 * @param italicKey
+	 *            the italic preference key
+	 * @param strikethroughKey
+	 *            the strikethrough preference key
+	 * @param underlineKey
+	 *            the italic preference key
 	 * @return the created text attribute
-	 *
+	 * 
 	 */
-	private TextAttribute createTextAttribute(String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey) {
-		Color color= null;
+	private TextAttribute createTextAttribute(String colorKey, String boldKey,
+			String italicKey, String strikethroughKey, String underlineKey) {
+		Color color = null;
 		if (colorKey != null)
-			color= fColorManager.getColor(colorKey);
+			color = fColorManager.getColor(colorKey);
 
-		int style= fPreferenceStore.getBoolean(boldKey) ? SWT.BOLD : SWT.NORMAL;
+		int style = fPreferenceStore.getBoolean(boldKey) ? SWT.BOLD
+				: SWT.NORMAL;
 		if (fPreferenceStore.getBoolean(italicKey))
 			style |= SWT.ITALIC;
 
@@ -255,9 +273,9 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 	}
 
 	private void initializeRules() {
-		List rules= createRules();
+		List rules = createRules();
 		if (rules != null) {
-			IRule[] result= new IRule[rules.size()];
+			IRule[] result = new IRule[rules.size()];
 			rules.toArray(result);
 			setRules(result);
 		}
@@ -265,9 +283,13 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 
 	private int indexOf(String property) {
 		if (property != null) {
-			int length= fPropertyNamesColor.length;
-			for (int i= 0; i < length; i++) {
-				if (property.equals(fPropertyNamesColor[i]) || property.equals(fPropertyNamesBold[i]) || property.equals(fPropertyNamesItalic[i]) || property.equals(fPropertyNamesStrikethrough[i]) || property.equals(fPropertyNamesUnderline[i]))
+			int length = fPropertyNamesColor.length;
+			for (int i = 0; i < length; i++) {
+				if (property.equals(fPropertyNamesColor[i])
+						|| property.equals(fPropertyNamesBold[i])
+						|| property.equals(fPropertyNamesItalic[i])
+						|| property.equals(fPropertyNamesStrikethrough[i])
+						|| property.equals(fPropertyNamesUnderline[i]))
 					return i;
 			}
 		}
@@ -279,9 +301,9 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 	}
 
 	public void adaptToPreferenceChange(PropertyChangeEvent event) {
-		String p= event.getProperty();
-		int index= indexOf(p);
-		Token token= getToken(fPropertyNamesColor[index]);
+		String p = event.getProperty();
+		int index = indexOf(p);
+		Token token = getToken(fPropertyNamesColor[index]);
 		if (fPropertyNamesColor[index].equals(p))
 			adaptToColorChange(token, event);
 		else if (fPropertyNamesBold[index].equals(p))
@@ -295,58 +317,66 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 	}
 
 	private void adaptToColorChange(Token token, PropertyChangeEvent event) {
-		RGB rgb= null;
+		RGB rgb = null;
 
-		Object value= event.getNewValue();
+		Object value = event.getNewValue();
 		if (value instanceof RGB)
-			rgb= (RGB) value;
+			rgb = (RGB) value;
 		else if (value instanceof String)
-			rgb= StringConverter.asRGB((String) value);
+			rgb = StringConverter.asRGB((String) value);
 
 		if (rgb != null) {
 
-			String property= event.getProperty();
-			Color color= fColorManager.getColor(property);
+			String property = event.getProperty();
+			Color color = fColorManager.getColor(property);
 
-			if ((color == null || !rgb.equals(color.getRGB())) && fColorManager instanceof IColorManagerExtension) {
-				IColorManagerExtension ext= (IColorManagerExtension) fColorManager;
+			if ((color == null || !rgb.equals(color.getRGB()))
+					&& fColorManager instanceof IColorManagerExtension) {
+				IColorManagerExtension ext = (IColorManagerExtension) fColorManager;
 
-			 	ext.unbindColor(property);
-			 	ext.bindColor(property, rgb);
+				ext.unbindColor(property);
+				ext.bindColor(property, rgb);
 
-				color= fColorManager.getColor(property);
+				color = fColorManager.getColor(property);
 			}
 
-			Object data= token.getData();
+			Object data = token.getData();
 			if (data instanceof TextAttribute) {
-				TextAttribute oldAttr= (TextAttribute) data;
-				token.setData(new TextAttribute(color, oldAttr.getBackground(), oldAttr.getStyle()));
+				TextAttribute oldAttr = (TextAttribute) data;
+				token.setData(new TextAttribute(color, oldAttr.getBackground(),
+						oldAttr.getStyle()));
 			}
 		}
 	}
 
-	private void adaptToStyleChange(Token token, PropertyChangeEvent event, int styleAttribute) {
-		boolean eventValue= false;
-		Object value= event.getNewValue();
+	private void adaptToStyleChange(Token token, PropertyChangeEvent event,
+			int styleAttribute) {
+		boolean eventValue = false;
+		Object value = event.getNewValue();
 		if (value instanceof Boolean)
-			eventValue= ((Boolean) value).booleanValue();
+			eventValue = ((Boolean) value).booleanValue();
 		else if (IPreferenceStore.TRUE.equals(value))
-			eventValue= true;
+			eventValue = true;
 
-		Object data= token.getData();
+		Object data = token.getData();
 		if (data instanceof TextAttribute) {
-			TextAttribute oldAttr= (TextAttribute) data;
-			boolean activeValue= (oldAttr.getStyle() & styleAttribute) == styleAttribute;
+			TextAttribute oldAttr = (TextAttribute) data;
+			boolean activeValue = (oldAttr.getStyle() & styleAttribute) == styleAttribute;
 			if (activeValue != eventValue)
-				token.setData(new TextAttribute(oldAttr.getForeground(), oldAttr.getBackground(), eventValue ? oldAttr.getStyle() | styleAttribute : oldAttr.getStyle() & ~styleAttribute));
+				token.setData(new TextAttribute(oldAttr.getForeground(),
+						oldAttr.getBackground(), eventValue ? oldAttr
+								.getStyle()
+								| styleAttribute : oldAttr.getStyle()
+								& ~styleAttribute));
 		}
 	}
+
 	/**
 	 * Returns the preference store.
-	 *
+	 * 
 	 * @return the preference store.
-	 *
-	 *
+	 * 
+	 * 
 	 */
 	protected IPreferenceStore getPreferenceStore() {
 		return fPreferenceStore;

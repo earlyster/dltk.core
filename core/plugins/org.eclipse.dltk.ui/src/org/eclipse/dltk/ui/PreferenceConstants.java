@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui;
 
+import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.dltk.ui.text.completion.ProposalSorterRegistry;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -242,6 +243,15 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public static final String EDITOR_COMMENTS_FOLDING_ENABLED = "editor_comments_folding_enabled"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether comments folding is default
+	 * applied the script editor.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String EDITOR_COMMENTS_DEFAULT_FOLDED = "editor_comments_default_folded"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls minimal number of lines in block to be
