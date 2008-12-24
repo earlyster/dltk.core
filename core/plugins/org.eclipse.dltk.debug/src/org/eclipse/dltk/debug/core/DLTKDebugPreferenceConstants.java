@@ -22,6 +22,8 @@ public class DLTKDebugPreferenceConstants {
 	public static final String PREF_DBGP_BIND_ADDRESS = "dbgp_bind_address"; //$NON-NLS-1$
 	public static final String PREF_DBGP_PORT = "dbgp_port"; //$NON-NLS-1$
 
+	public static final String PREF_DBGP_REMOTE_PORT = "remote_dbgp_port"; //$NON-NLS-1$
+
 	// Time to wait of connection debugging engine to the IDE
 	public static final String PREF_DBGP_CONNECTION_TIMEOUT = "dbgp_connection_timeout"; //$NON-NLS-1$
 
