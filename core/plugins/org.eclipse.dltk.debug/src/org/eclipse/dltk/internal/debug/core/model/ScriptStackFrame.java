@@ -101,6 +101,7 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 	protected ScriptVariableContainer readAllVariables() throws DbgpException {
 		final IDbgpContextCommands commands = thread.getDbgpSession()
 				.getCoreCommands();
+
 		final Map names = commands.getContextNames(getLevel());
 		final ScriptVariableContainer result = new ScriptVariableContainer();
 		if (thread.retrieveLocalVariables()
@@ -166,10 +167,6 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 			final IScriptVariable[] result = new IScriptVariable[size];
 			if (size != 0) {
 				int index = 0;
-				if (locals != null) {
-					System.arraycopy(locals, index, result, 0, locals.length);
-					index += locals.length;
-				}
 				if (globals != null) {
 					if (globalsWrapper == null) {
 						globalsWrapper = new ScriptVariableWrapper(target,
@@ -189,6 +186,10 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 						classesWrapper.refreshValue(classes);
 					}
 					result[index++] = classesWrapper;
+				}
+				if (locals != null) {
+					System.arraycopy(locals, 0, result, index, locals.length);
+					index += locals.length;
 				}
 			}
 			return result;
@@ -236,6 +237,7 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 	}
 
 	public ScriptStackFrame(IScriptStack stack, IDbgpStackLevel stackLevel) {
+
 		this.stack = stack;
 		this.thread = stack.getThread();
 		this.level = stackLevel;
@@ -347,6 +349,7 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 		try {
 			if (variables == null) {
 				variables = readAllVariables();
+
 				variables.sort(getDebugTarget());
 			} else if (needRefreshVariables) {
 				try {
