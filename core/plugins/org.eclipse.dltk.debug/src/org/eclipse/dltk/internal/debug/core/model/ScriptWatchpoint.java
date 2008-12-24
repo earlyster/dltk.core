@@ -27,12 +27,12 @@ import org.eclipse.dltk.debug.core.model.IScriptWatchpoint;
 public class ScriptWatchpoint extends ScriptLineBreakpoint implements
 		IScriptWatchpoint {
 
-	private static final String FIELD_NAME = DLTKDebugPlugin.PLUGIN_ID
+	public static final String FIELD_NAME = DLTKDebugPlugin.PLUGIN_ID
 			+ ".fieldName"; //$NON-NLS-1$
 
-	private static final String ACCESS = DLTKDebugPlugin.PLUGIN_ID + ".access"; //$NON-NLS-1$
+	public static final String ACCESS = DLTKDebugPlugin.PLUGIN_ID + ".access"; //$NON-NLS-1$
 
-	private static final String MODIFICATION = DLTKDebugPlugin.PLUGIN_ID
+	public static final String MODIFICATION = DLTKDebugPlugin.PLUGIN_ID
 			+ ".modification"; //$NON-NLS-1$
 
 	public ScriptWatchpoint(final String debugModelId,

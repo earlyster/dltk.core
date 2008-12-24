@@ -14,13 +14,13 @@ import org.eclipse.dltk.debug.core.model.IScriptMethodEntryBreakpoint;
 public class ScriptMethodEntryBreakpoint extends ScriptLineBreakpoint implements
 		IScriptMethodEntryBreakpoint {
 
-	private static final String METHOD_NAME = DLTKDebugPlugin.PLUGIN_ID
+	public static final String METHOD_NAME = DLTKDebugPlugin.PLUGIN_ID
 			+ ".methodName"; //$NON-NLS-1$
 
-	private static final String BREAK_ON_ENTRY = DLTKDebugPlugin.PLUGIN_ID
+	public static final String BREAK_ON_ENTRY = DLTKDebugPlugin.PLUGIN_ID
 			+ ".methodEntry"; //$NON-NLS-1$
 
-	private static final String BREAK_ON_EXIT = DLTKDebugPlugin.PLUGIN_ID
+	public static final String BREAK_ON_EXIT = DLTKDebugPlugin.PLUGIN_ID
 			+ ".methodExit"; //$NON-NLS-1$
 
 	private static final String ENTRY_ID = DLTKDebugPlugin.PLUGIN_ID
@@ -37,11 +37,12 @@ public class ScriptMethodEntryBreakpoint extends ScriptLineBreakpoint implements
 
 	}
 
-	public ScriptMethodEntryBreakpoint(String debugModelId, IResource resource, IPath path,
-			int lineNumber, int charStart, int charEnd, boolean register,
-			String methodName) throws DebugException {
+	public ScriptMethodEntryBreakpoint(String debugModelId, IResource resource,
+			IPath path, int lineNumber, int charStart, int charEnd,
+			boolean register, String methodName) throws DebugException {
 
-		super(debugModelId, resource, path, lineNumber, charStart, charEnd, register);
+		super(debugModelId, resource, path, lineNumber, charStart, charEnd,
+				register);
 
 		try {
 			ensureMarker().setAttribute(METHOD_NAME, methodName);
