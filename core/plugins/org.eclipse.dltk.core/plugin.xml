@@ -96,15 +96,6 @@
             nature="#">
       </projectIndexer>
 </extension>
-<extension 
-	point="org.eclipse.core.resources.builders" 
-	id="scriptbuilder"
-	name="%scriptBuilderName">
-	<builder>
-		<run class="org.eclipse.dltk.internal.core.builder.ScriptBuilder">
-		</run>
-	</builder>
-</extension>
 <extension
       point="org.eclipse.dltk.core.buildpathContainerInitializer">
    <buildpathContainerInitializer
