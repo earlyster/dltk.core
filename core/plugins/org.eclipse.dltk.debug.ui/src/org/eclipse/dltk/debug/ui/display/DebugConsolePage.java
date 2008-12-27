@@ -112,6 +112,7 @@ public class DebugConsolePage extends ScriptConsolePage {
 			debugEventListener = new DebugEventListener();
 			DebugPlugin.getDefault().addDebugEventListener(debugEventListener);
 		}
+		enableUpdateJob.schedule(500);
 	}
 
 	private boolean isDebuggerAvailable() {
