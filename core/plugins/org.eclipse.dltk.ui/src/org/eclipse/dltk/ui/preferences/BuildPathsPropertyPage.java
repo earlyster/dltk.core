@@ -72,7 +72,7 @@ public abstract class BuildPathsPropertyPage extends PropertyPage implements
 
 		IProject project = getProject();
 		Control result;
-		if (project == null || !isScriptProject(project)) {
+		if (project == null || !isValidProject(project)) {
 			result = createWithoutScript(parent);
 		} else if (!project.isOpen()) {
 			result = createForClosedProject(parent);
@@ -190,7 +190,7 @@ public abstract class BuildPathsPropertyPage extends PropertyPage implements
 		return label;
 	}
 
-	private IProject getProject() {
+	protected IProject getProject() {
 		IAdaptable adaptable = getElement();
 		if (adaptable != null) {
 			IModelElement elem = (IModelElement) adaptable
@@ -202,7 +202,7 @@ public abstract class BuildPathsPropertyPage extends PropertyPage implements
 		return null;
 	}
 
-	private boolean isScriptProject(IProject proj) {
+	protected boolean isValidProject(IProject proj) {
 		return DLTKLanguageManager.hasScriptNature(proj);
 	}
 
