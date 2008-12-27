@@ -445,7 +445,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 				case ST.DELETE_PREVIOUS:
 					if (getCaretOffset() <= getCommandLineOffset()
-							&& getSelectionText().equals("")) {
+							&& getSelectionCount() == 0) {
 						return;
 					}
 					break;
