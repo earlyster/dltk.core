@@ -511,7 +511,7 @@ public class ReorgPolicyFactory {
 			case IModelElement.SCRIPT_MODEL:
 			case IModelElement.SCRIPT_PROJECT:
 			case IModelElement.PROJECT_FRAGMENT:
-				return true;
+				return !modelElement.isReadOnly();
 			default:
 				return false;
 			}
@@ -524,7 +524,7 @@ public class ReorgPolicyFactory {
 		public boolean canElementBeDestination(IModelElement modelElement) {
 			switch (modelElement.getElementType()) {
 			case IModelElement.SCRIPT_FOLDER:
-				return true;
+				return !modelElement.isReadOnly();
 			default:
 				return false;
 			}
