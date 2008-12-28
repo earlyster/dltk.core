@@ -103,6 +103,12 @@ public class ReorgPolicyFactory {
 		IModelElement[] modelElements = selectionComputer
 				.getActualScriptElementsToReorg();
 
+		if (false) {
+			System.out.println("createReorgPolicy():"); //$NON-NLS-1$
+			System.out.println(" resources: " + Arrays.asList(resources)); //$NON-NLS-1$
+			System.out.println(" elements: " + Arrays.asList(modelElements)); //$NON-NLS-1$
+		}
+
 		if (isNothingToReorg(resources, modelElements)
 				|| containsNull(resources)
 				|| containsNull(modelElements)
@@ -2298,6 +2304,10 @@ public class ReorgPolicyFactory {
 						result.add(cu);
 					else if (!result.contains(type))
 						result.add(type);
+				} else if (element instanceof IScriptFolder
+						&& !element.isReadOnly()
+						&& element.getResource() != null) {
+					// skip
 				} else if (!result.contains(element)) {
 					result.add(element);
 				}
@@ -2317,6 +2327,19 @@ public class ReorgPolicyFactory {
 						|| !modelElementSet.contains(element))
 					if (!result.contains(fResources[i]))
 						result.add(fResources[i]);
+			}
+			for (int i = 0; i < fScriptElements.length; ++i) {
+				IModelElement element = fScriptElements[i];
+				if (element == null)
+					continue;
+				if (element.getElementType() == IModelElement.SCRIPT_FOLDER
+						&& !element.isReadOnly()) {
+					IResource resource = element.getResource();
+					if (resource != null) {
+						if (!result.contains(resource))
+							result.add(resource);
+					}
+				}
 			}
 			return (IResource[]) result.toArray(new IResource[result.size()]);
 
