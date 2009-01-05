@@ -516,7 +516,8 @@ public abstract class JobManager implements Runnable {
 					this.notifyAll(); // ensure its awake so it can be shutdown
 				}
 				// in case processing thread is handling a job
-				thread.join();
+				// XXX wait not more than 1 minute
+				thread.join(60000);
 			}
 			Job job = this.progressJob;
 			if (job != null) {
