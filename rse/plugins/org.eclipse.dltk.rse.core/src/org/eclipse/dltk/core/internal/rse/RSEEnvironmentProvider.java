@@ -1,11 +1,10 @@
 package org.eclipse.dltk.core.internal.rse;
 
 import java.net.URI;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IEnvironment;
@@ -28,8 +27,6 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	public RSEEnvironmentProvider() {
 	}
 
-	boolean fakeRSEInitialized = false;
-
 	public IEnvironment getEnvironment(String envId) {
 		if (envId.startsWith(RSE_ENVIRONMENT_PREFIX)) {
 			String name = envId.substring(RSE_ENVIRONMENT_PREFIX.length());
@@ -45,48 +42,101 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	}
 
 	private IHost getRSEConnection(String name) {
-		waitForRSEInitialization();
-		IHost[] connections = SystemStartHere.getConnections();
-		for (int i = 0; i < connections.length; i++) {
-			IHost connection = connections[i];
-			if (name.equals(connection.getAliasName())) {
-				return connection;
+		if (isInitialized()) {
+			IHost[] connections = SystemStartHere.getConnections();
+			for (int i = 0; i < connections.length; i++) {
+				IHost connection = connections[i];
+				if (name.equals(connection.getAliasName())) {
+					return connection;
+				}
 			}
 		}
 		return null;
 	}
 
-	private void waitForRSEInitialization() {
-		try {
-			RSECorePlugin.waitForInitCompletion();
-		} catch (InterruptedException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
+	private final Object lock = new Object();
+	private boolean initialized = false;
+	private InitThread initThread = null;
+
+	private static final boolean DEBUG = false;
+
+	private class InitThread extends Thread {
+
+		public void run() {
+			try {
+				RSECorePlugin.waitForInitCompletion();
+			} catch (InterruptedException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			} finally {
+				synchronized (lock) {
+					initialized = true;
+					initThread = null;
+					lock.notifyAll();
+				}
 			}
 		}
+
+	}
+
+	private boolean isInitialized() {
+		synchronized (lock) {
+			if (initialized) {
+				return true;
+			}
+			try {
+				if (initThread == null) {
+					initThread = new InitThread();
+					initThread.start();
+					if (DEBUG)
+						System.out.println("start & wait initThread");
+					lock.wait(250);
+				} else {
+					if (DEBUG)
+						System.out.println("wait initThread");
+					lock.wait(100);
+				}
+			} catch (InterruptedException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+			if (initialized) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isSupportedConnection(IHost connection) {
+		final IRSESystemType systemType = connection.getSystemType();
+		if (systemType == null || systemType.isWindows()
+				|| systemType.isLocal()) {
+			return false;
+		}
+		return true;
 	}
 
 	public IEnvironment[] getEnvironments() {
-		waitForRSEInitialization();
-		IHost[] connections = SystemStartHere.getConnections();
-		List environments = new LinkedList();
-		if (connections != null) {
-			for (int i = 0; i < connections.length; i++) {
-				IHost connection = connections[i];
-				IRSESystemType systemType = connection.getSystemType();
-				if (systemType == null || systemType.isWindows()
-						|| systemType.isLocal()) {
-					continue;
+		if (isInitialized()) {
+			final IHost[] connections = SystemStartHere.getConnections();
+			if (connections != null && connections.length != 0) {
+				final List environments = new ArrayList(connections.length);
+				for (int i = 0; i < connections.length; i++) {
+					final IHost connection = connections[i];
+					if (isSupportedConnection(connection)) {
+						final IRemoteFileSubSystem fs = RemoteFileUtility
+								.getFileSubSystem(connection);
+						if (fs != null)
+							environments.add(new RSEEnvironment(fs));
+					}
 				}
-
-				IRemoteFileSubSystem fs = RemoteFileUtility
-						.getFileSubSystem(connection);
-				if (fs != null)
-					environments.add(new RSEEnvironment(fs));
+				return (IEnvironment[]) environments
+						.toArray(new IEnvironment[environments.size()]);
 			}
 		}
-		return (IEnvironment[]) environments
-				.toArray(new IEnvironment[environments.size()]);
+		return new IEnvironment[0];
 	}
 
 	public void waitInitialized() {
@@ -97,39 +147,42 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 			RSEPerfomanceStatistics
 					.inc(RSEPerfomanceStatistics.HAS_PROJECT_EXECUTIONS);
 		}
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 		try {
-			if (!project.isAccessible()) {
-				return null;
-			}
-			IProjectDescription description;
-			try {
-				description = project.getDescription();
-				URI uri = description.getLocationURI();
-				if (uri != null) {
-					if (!RSE_SCHEME.equalsIgnoreCase(uri.getScheme())) {
-						return null;
-					}
-					String uriHost = uri.getHost();
-					IEnvironment[] rseEnvironments = getEnvironments();
-					for (int i = 0; i < rseEnvironments.length; i++) {
-						RSEEnvironment rseEnvironment = (RSEEnvironment) rseEnvironments[i];
-						if (rseEnvironment.getHost().getHostName()
-								.equalsIgnoreCase(uriHost)) {
-							return rseEnvironment;
+			if (project.isAccessible()) {
+				try {
+					final URI uri = project.getDescription().getLocationURI();
+					if (uri != null
+							&& RSE_SCHEME.equalsIgnoreCase(uri.getScheme())
+							&& isInitialized()) {
+						final IHost[] connections = SystemStartHere
+								.getConnections();
+						if (connections != null) {
+							final String projectHost = uri.getHost();
+							for (int i = 0; i < connections.length; i++) {
+								final IHost connection = connections[i];
+								if (isSupportedConnection(connection)
+										&& projectHost
+												.equalsIgnoreCase(connection
+														.getHostName())) {
+									final IRemoteFileSubSystem fs = RemoteFileUtility
+											.getFileSubSystem(connection);
+									if (fs != null)
+										return new RSEEnvironment(fs);
+								}
+							}
 						}
-
 					}
-				}
-			} catch (CoreException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
+				} catch (CoreException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
 				}
 			}
 			return null;
 		} finally {
-			long end = System.currentTimeMillis();
 			if (RSEPerfomanceStatistics.PERFOMANCE_TRACING) {
+				final long end = System.currentTimeMillis();
 				RSEPerfomanceStatistics.inc(
 						RSEPerfomanceStatistics.HAS_POJECT_EXECUTIONS_TIME,
 						(end - start));
