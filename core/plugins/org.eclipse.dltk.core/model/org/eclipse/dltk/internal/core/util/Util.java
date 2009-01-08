@@ -470,8 +470,8 @@ public class Util {
 	 */
 	public static char[] getResourceContentsAsCharArray(IFile file)
 			throws ModelException {
-		final char[] result = ModelManager.getModelManager()
-				.getFileCache().get(file);
+		final char[] result = ModelManager.getModelManager().getFileCache()
+				.get(file);
 		if (result != null) {
 			return result;
 		}
@@ -487,8 +487,8 @@ public class Util {
 
 	public static char[] getResourceContentsAsCharArray(IFileHandle file)
 			throws ModelException {
-		final char[] result = ModelManager.getModelManager()
-				.getFileCache().get(file);
+		final char[] result = ModelManager.getModelManager().getFileCache()
+				.get(file);
 		if (result != null) {
 			return result;
 		}
@@ -528,21 +528,19 @@ public class Util {
 			while (stream == null) {
 				try {
 					stream = file.getContents(true);
-				} catch (Exception e) {
+				} catch (CoreException e) {
+					// Some times for RSE we can get here if connection is not
+					// established yet, or if connection are lost.
+					if (--tryCount == 0) {
+						throw new ModelException(e,
+								IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
+					}
 					IStatus status = new Status(IStatus.ERROR,
 							DLTKCore.PLUGIN_ID, MessageFormat.format(
 									Messages.Util_errorReceivingFile,
 									new Object[] { file.getFullPath(),
 											String.valueOf(tryCount) }), e);
 					DLTKCore.getDefault().getLog().log(status);
-
-					// Some times for RSE we can get here if connection is not
-					// established yet, or if connection are lost.
-					if (tryCount == 0) {
-						throw new ModelException(e,
-								IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
-					}
-					tryCount--;
 				}
 			}
 			return org.eclipse.dltk.compiler.util.Util
