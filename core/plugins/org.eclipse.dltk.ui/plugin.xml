@@ -791,6 +791,12 @@
             contextId="org.eclipse.dltk.ui.scriptEditorScope"
             commandId="org.eclipse.dltk.ui.edit.text.script.open.type.hierarchy"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+            
+      <key sequence="M1+M3+H" 
+            commandId="org.eclipse.dltk.ui.edit.text.script.open.call.hierarchy"
+			contextId="org.eclipse.dltk.ui.scriptEditorScope" 
+			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" />
+            
       <key
             sequence="M1+O"
             contextId="org.eclipse.dltk.ui.scriptEditorScope"
