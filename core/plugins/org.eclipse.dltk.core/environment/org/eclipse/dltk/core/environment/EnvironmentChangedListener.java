@@ -1,21 +1,29 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2009 xored software, Inc.
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
 package org.eclipse.dltk.core.environment;
 
-public interface IEnvironmentChangedListener {
-	void environmentAdded(IEnvironment environment);
+public abstract class EnvironmentChangedListener implements
+		IEnvironmentChangedListener {
 
-	void environmentRemoved(IEnvironment environment);
+	public void environmentAdded(IEnvironment environment) {
+	}
 
-	void environmentChanged(IEnvironment environment);
+	public void environmentChanged(IEnvironment environment) {
+	}
 
-	void environmentsModified();
+	public void environmentRemoved(IEnvironment environment) {
+	}
+
+	public void environmentsModified() {
+	}
+
 }

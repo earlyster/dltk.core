@@ -106,6 +106,7 @@ public final class EnvironmentManager {
 			IEnvironmentChangedListener listener = (IEnvironmentChangedListener) environmentListeners[i];
 			listener.environmentAdded(environment);
 		}
+		fireEnvirontmentChange();
 	}
 
 	public static void environmentRemoved(IEnvironment environment) {
@@ -114,6 +115,7 @@ public final class EnvironmentManager {
 			IEnvironmentChangedListener listener = (IEnvironmentChangedListener) environmentListeners[i];
 			listener.environmentRemoved(environment);
 		}
+		fireEnvirontmentChange();
 	}
 
 	public static void environmentChanged(IEnvironment environment) {
@@ -121,6 +123,15 @@ public final class EnvironmentManager {
 		for (int i = 0; i < environmentListeners.length; i++) {
 			IEnvironmentChangedListener listener = (IEnvironmentChangedListener) environmentListeners[i];
 			listener.environmentChanged(environment);
+		}
+		fireEnvirontmentChange();
+	}
+
+	public static void fireEnvirontmentChange() {
+		Object[] environmentListeners = listeners.getListeners();
+		for (int i = 0; i < environmentListeners.length; i++) {
+			IEnvironmentChangedListener listener = (IEnvironmentChangedListener) environmentListeners[i];
+			listener.environmentsModified();
 		}
 	}
 
