@@ -35,7 +35,7 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 	private static IEnvironment instance = new LocalEnvironment();
 	private IFileSystem fs;
 
-	public LocalEnvironment() {
+	private LocalEnvironment() {
 		this.fs = EFS.getLocalFileSystem();
 	}
 
