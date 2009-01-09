@@ -19,7 +19,7 @@ import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
 
 public class RSEEnvironmentProvider implements IEnvironmentProvider {
 
-	private static final String RSE_SCHEME = "rse"; //$NON-NLS-1$
+	public static final String RSE_SCHEME = "rse"; //$NON-NLS-1$
 
 	public static final String RSE_ENVIRONMENT_PREFIX = DLTKRSEPlugin.PLUGIN_ID
 			+ ".rseEnvironment."; //$NON-NLS-1$
@@ -90,11 +90,11 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 					initThread = new InitThread();
 					initThread.start();
 					if (DEBUG)
-						System.out.println("start & wait initThread");
+						System.out.println("start & wait initThread"); //$NON-NLS-1$
 					lock.wait(250);
 				} else {
 					if (DEBUG)
-						System.out.println("wait initThread");
+						System.out.println("wait initThread"); //$NON-NLS-1$
 					lock.wait(100);
 				}
 			} catch (InterruptedException e) {
