@@ -22,4 +22,20 @@
             targetId="org.eclipse.dltk.ui.ScriptExplorer">
       </filter>
    </extension>
+	<extension point="org.eclipse.ui.decorators">
+		<decorator
+			adaptable="true"
+			label="%rse.project.decorator"
+			state="true"
+			lightweight="true"
+			class="org.eclipse.dltk.internal.ui.rse.RemoteProjectLabelDecorator"
+			id="org.eclipse.dltk.rse.decorators.projectdecorator">
+			<description>
+				Appends host name to the remote projects
+			</description>
+			<enablement>
+				<objectClass name="org.eclipse.core.resources.IProject"/>
+			</enablement>
+		</decorator>
+	</extension>
 </plugin>
