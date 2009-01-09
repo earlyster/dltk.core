@@ -10,12 +10,13 @@ public class SimpleDLTKExtensionManager {
 	private List extensions;
 
 	private String extensionPoint = null;
-	public SimpleDLTKExtensionManager( String extension ) {
+
+	public SimpleDLTKExtensionManager(String extension) {
 		this.extensionPoint = extension;
 	}
-	
+
 	public static class ElementInfo {
-		public IConfigurationElement config;
+		final IConfigurationElement config;
 		public Object object;
 
 		protected ElementInfo(IConfigurationElement config) {
@@ -56,8 +57,9 @@ public class SimpleDLTKExtensionManager {
 				return false;
 			return true;
 		}
-		
+
 	}
+
 	private void initialize() {
 		if (extensions != null) {
 			return;
@@ -69,15 +71,28 @@ public class SimpleDLTKExtensionManager {
 
 		for (int i = 0; i < cfg.length; i++) {
 			ElementInfo info = createInfo(cfg[i]);
-			if( !this.extensions.contains(info) ) {
+			if (!this.extensions.contains(info)) {
 				extensions.add(info);
 			}
 		}
 	}
+
 	public ElementInfo[] getElementInfos() {
 		initialize();
-		return (ElementInfo[]) extensions.toArray(new ElementInfo[extensions.size()]);
+		return (ElementInfo[]) extensions.toArray(new ElementInfo[extensions
+				.size()]);
 	}
+
+	/**
+	 * Returns list of the {@link ElementInfo} objects.
+	 * 
+	 * @return
+	 */
+	protected List getElementInfoList() {
+		initialize();
+		return extensions;
+	}
+
 	protected ElementInfo createInfo(IConfigurationElement config) {
 		return new ElementInfo(config);
 	}
