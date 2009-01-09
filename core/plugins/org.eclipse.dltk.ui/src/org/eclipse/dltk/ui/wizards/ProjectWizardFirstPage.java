@@ -27,7 +27,6 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
-import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.ComboDialogField;
@@ -237,10 +236,10 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 
 		public IEnvironment getEnvironment() {
 			if (fWorkspaceRadio.isSelected()) {
-				return EnvironmentManager
-						.getEnvironmentById(LocalEnvironment.ENVIRONMENT_ID);
+				return EnvironmentManager.getLocalEnvironment();
+			} else {
+				return environments[fEnvironment.getSelectionIndex()];
 			}
-			return environments[fEnvironment.getSelectionIndex()];
 		}
 
 		public void changeControlPressed(DialogField field) {
