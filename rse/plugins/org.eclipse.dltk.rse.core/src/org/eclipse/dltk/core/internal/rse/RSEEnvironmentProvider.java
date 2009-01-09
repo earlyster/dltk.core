@@ -7,6 +7,7 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IEnvironmentProvider;
 import org.eclipse.dltk.core.internal.rse.perfomance.RSEPerfomanceStatistics;
@@ -75,6 +76,7 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 					initThread = null;
 					lock.notifyAll();
 				}
+				EnvironmentManager.fireEnvirontmentChange();
 			}
 		}
 
