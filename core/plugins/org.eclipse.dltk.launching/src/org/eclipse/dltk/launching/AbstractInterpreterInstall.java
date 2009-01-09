@@ -99,6 +99,15 @@ public abstract class AbstractInterpreterInstall implements IInterpreterInstall 
 		return null;
 	}
 
+	/*
+	 * @see org.eclipse.dltk.launching.IInterpreterInstall#getEnvironmentId()
+	 */
+	public String getEnvironmentId() {
+		if (fInstallLocation != null)
+			return fInstallLocation.getEnvironmentId();
+		return null;
+	}
+
 	public IExecutionEnvironment getExecEnvironment() {
 		IEnvironment environment = getEnvironment();
 		if (environment != null) {
@@ -260,7 +269,7 @@ public abstract class AbstractInterpreterInstall implements IInterpreterInstall 
 	public String getBuiltinModuleContent(String name) {
 		return null;
 	}
-	
+
 	public long lastModified() {
 		return 0;
 	}

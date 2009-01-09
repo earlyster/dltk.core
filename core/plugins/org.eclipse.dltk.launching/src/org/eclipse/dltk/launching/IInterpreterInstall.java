@@ -30,12 +30,16 @@ public interface IInterpreterInstall extends IBuiltinModuleProvider {
 
 	// Also search for Platform location relative locations.
 	IFileHandle getInstallLocation();
+
 	//
 	IFileHandle getRawInstallLocation();
 
 	void setInstallLocation(IFileHandle installLocation);
 
 	IEnvironment getEnvironment();
+
+	String getEnvironmentId();
+
 	IExecutionEnvironment getExecEnvironment();
 
 	// Type
