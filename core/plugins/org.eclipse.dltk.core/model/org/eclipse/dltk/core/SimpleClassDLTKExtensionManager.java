@@ -1,6 +1,5 @@
 package org.eclipse.dltk.core;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -8,36 +7,40 @@ import org.eclipse.core.runtime.IConfigurationElement;
 
 public class SimpleClassDLTKExtensionManager extends SimpleDLTKExtensionManager {
 	private static final String CLASS_ATTR = "class"; //$NON-NLS-1$
-	
+
 	public SimpleClassDLTKExtensionManager(String extension) {
 		super(extension);
 	}
-	
+
 	public Object[] getObjects() {
-		ElementInfo[] infos = this.getElementInfos();
-		List objs = new ArrayList();
-		for (int i = 0; i < infos.length; i++) {
-			Object o = getInitObject(infos[i]);
-			if( o != null ) {
-				objs.add(o);
+		final List infos = getElementInfoList();
+		Object[] objs = new Object[infos.size()];
+		int index = 0;
+		for (int i = 0; i < infos.size(); i++) {
+			final Object o = getInitObject((ElementInfo) infos.get(i));
+			if (o != null) {
+				objs[index++] = o;
 			}
 		}
-		return objs.toArray(new Object[objs.size()]);
+		if (index != objs.length) {
+			final Object[] temp = new Object[index];
+			System.arraycopy(objs, 0, temp, 0, index);
+			objs = temp;
+		}
+		return objs;
 	}
+
 	public Object getInitObject(ElementInfo ext) {
 		try {
 			if (ext != null) {
 				if (ext.object != null) {
 					return ext.object;
 				}
-
-				IConfigurationElement cfg = (IConfigurationElement) ext.config;
-				Object object = createObject(cfg);
-				ext.object = object;
-				return object;
+				ext.object = createObject(ext.config);
+				return ext.object;
 			}
 		} catch (CoreException e) {
-			if( DLTKCore.DEBUG ) {
+			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
 		}
