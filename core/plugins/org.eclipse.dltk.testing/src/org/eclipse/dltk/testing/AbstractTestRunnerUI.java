@@ -94,6 +94,13 @@ public abstract class AbstractTestRunnerUI implements ITestRunnerUI {
 	}
 
 	/*
+	 * @see org.eclipse.dltk.testing.ITestRunnerUI#canRerunFailedTests()
+	 */
+	public boolean canRerunFailures() {
+		return false;
+	}
+
+	/*
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
 	public Object getAdapter(Class adapter) {

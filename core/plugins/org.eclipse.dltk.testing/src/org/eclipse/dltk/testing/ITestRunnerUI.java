@@ -113,4 +113,8 @@ public interface ITestRunnerUI extends IAdaptable {
 	 */
 	IScriptProject getProject();
 
+	/**
+	 * Tests that this testing engine can return failed tests.
+	 */
+	boolean canRerunFailures();
 }
