@@ -304,10 +304,6 @@ public abstract class TestElement implements ITestElement {
 		return fTestName;
 	}
 
-	public void setName(String name) {
-		fTestName = name;
-	}
-
 	public void setStatus(Status status) {
 		// TODO: notify about change?
 		// TODO: multiple errors/failures per test
