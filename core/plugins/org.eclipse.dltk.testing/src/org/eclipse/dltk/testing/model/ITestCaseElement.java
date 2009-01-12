@@ -27,4 +27,6 @@ public interface ITestCaseElement extends ITestElement {
 	 */
 	public String getTestName();
 
+	public String getTrace();
+
 }

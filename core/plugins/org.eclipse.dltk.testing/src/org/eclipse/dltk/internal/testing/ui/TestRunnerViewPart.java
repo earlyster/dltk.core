@@ -58,6 +58,7 @@ import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.testing.ITestRunnerUI;
 import org.eclipse.dltk.testing.ITestSession;
 import org.eclipse.dltk.testing.model.ITestElement;
+import org.eclipse.dltk.testing.model.ITestRunSession;
 import org.eclipse.dltk.testing.model.ITestElement.Result;
 import org.eclipse.dltk.ui.viewsupport.ViewHistory;
 import org.eclipse.jface.action.Action;
@@ -1226,12 +1227,13 @@ public class TestRunnerViewPart extends ViewPart {
 		try {
 			File file = File.createTempFile("testFailures", ".txt"); //$NON-NLS-1$ //$NON-NLS-2$
 			file.deleteOnExit();
-			TestElement[] failures = fTestRunSession.getAllFailedTestElements();
+			ITestElement[] failures = fTestRunSession
+					.getAllFailedTestElements();
 			BufferedWriter bw = null;
 			try {
 				bw = new BufferedWriter(new FileWriter(file));
 				for (int i = 0; i < failures.length; i++) {
-					TestElement testElement = failures[i];
+					TestElement testElement = (TestElement) failures[i];
 					bw.write(testElement.getTestName());
 					bw.newLine();
 				}
@@ -1989,7 +1991,7 @@ public class TestRunnerViewPart extends ViewPart {
 		fTestViewer.setShowFailuresOnly(failuresOnly, layoutMode);
 	}
 
-	TestElement[] getAllFailures() {
-		return fTestRunSession.getAllFailedTestElements();
+	public ITestRunSession getCurrentSession() {
+		return fTestRunSession;
 	}
 }

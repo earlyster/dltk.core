@@ -884,7 +884,7 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		testElement.setStatus(status);
 	}
 	
-	public TestElement[] getAllFailedTestElements() {
+	public ITestElement[] getAllFailedTestElements() {
 		ArrayList failures= new ArrayList();
 		addFailures(failures, getTestRoot());
 		return (TestElement[]) failures.toArray(new TestElement[failures.size()]);

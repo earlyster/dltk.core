@@ -32,5 +32,7 @@ public interface ITestRunSession extends ITestElementContainer {
 	public ITestingClient getTestRunnerClient();
 
 	public void setTotalCount(int id);
-		
+	
+	public ITestElement[] getAllFailedTestElements();
+
 }

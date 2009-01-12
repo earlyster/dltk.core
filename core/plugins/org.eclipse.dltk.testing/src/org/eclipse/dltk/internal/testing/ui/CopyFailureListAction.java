@@ -10,36 +10,35 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.testing.ui;
 
+import org.eclipse.dltk.internal.testing.model.TestElement;
+import org.eclipse.dltk.testing.DLTKTestingMessages;
+import org.eclipse.dltk.testing.model.ITestCaseElement;
+import org.eclipse.dltk.testing.model.ITestElement;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.MessageDialog;
-
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.dltk.internal.testing.model.TestElement;
-import org.eclipse.dltk.testing.DLTKTestingMessages;
-import org.eclipse.dltk.ui.DLTKUIPlugin;
-
-
-
 /**
- * Copies the names of the methods that failed and their traces to the clipboard.
+ * Copies the names of the methods that failed and their traces to the
+ * clipboard.
  */
 public class CopyFailureListAction extends Action {
-	
+
 	private final Clipboard fClipboard;
 	private final TestRunnerViewPart fRunner;
-		
+
 	public CopyFailureListAction(TestRunnerViewPart runner, Clipboard clipboard) {
 		super(DLTKTestingMessages.CopyFailureList_action_label);
-		fRunner= runner;  
-		fClipboard= clipboard;
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IDLTKTestingHelpContextIds.COPYFAILURELIST_ACTION);
+		fRunner = runner;
+		fClipboard = clipboard;
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this,
+				IDLTKTestingHelpContextIds.COPYFAILURELIST_ACTION);
 	}
 
 	/*
@@ -47,44 +46,46 @@ public class CopyFailureListAction extends Action {
 	 */
 	public void run() {
 		TextTransfer plainTextTransfer = TextTransfer.getInstance();
-					
+
 		try {
-			fClipboard.setContents(
-					new String[] { getAllFailureTraces() }, 
+			fClipboard.setContents(new String[] { getAllFailureTraces() },
 					new Transfer[] { plainTextTransfer });
-		} catch (SWTError e){
-			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) 
+		} catch (SWTError e) {
+			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
 				throw e;
-			if (MessageDialog.openQuestion(DLTKUIPlugin.getActiveWorkbenchShell(), DLTKTestingMessages.CopyFailureList_problem, DLTKTestingMessages.CopyFailureList_clipboard_busy))  
+			if (MessageDialog.openQuestion(DLTKUIPlugin
+					.getActiveWorkbenchShell(),
+					DLTKTestingMessages.CopyFailureList_problem,
+					DLTKTestingMessages.CopyFailureList_clipboard_busy))
 				run();
 		}
 	}
-	
+
 	public String getAllFailureTraces() {
-		StringBuffer buf= new StringBuffer();
-		TestElement[] failures= fRunner.getAllFailures();
-		
-		String lineDelim= System.getProperty("line.separator", "\n");  //$NON-NLS-1$//$NON-NLS-2$
-		for (int i= 0; i < failures.length; i++) {
-			TestElement failure= failures[i];
+		StringBuffer buf = new StringBuffer();
+		ITestElement[] failures = fRunner.getCurrentSession()
+				.getAllFailedTestElements();
+
+		String lineDelim = System.getProperty("line.separator", "\n"); //$NON-NLS-1$//$NON-NLS-2$
+		for (int i = 0; i < failures.length; i++) {
+			TestElement failure = (TestElement) failures[i];
 			buf.append(failure.getTestName()).append(lineDelim);
-			String failureTrace= failure.getTrace();
+			String failureTrace = failure.getTrace();
 			if (failureTrace != null) {
-				int start= 0;
+				int start = 0;
 				while (start < failureTrace.length()) {
-					int idx= failureTrace.indexOf('\n', start);
+					int idx = failureTrace.indexOf('\n', start);
 					if (idx != -1) {
-						String line= failureTrace.substring(start, idx);
+						String line = failureTrace.substring(start, idx);
 						buf.append(line).append(lineDelim);
-						start= idx + 1;
+						start = idx + 1;
 					} else {
-						start= Integer.MAX_VALUE;
+						start = Integer.MAX_VALUE;
 					}
 				}
 			}
 		}
 		return buf.toString();
 	}
-
 
 }
