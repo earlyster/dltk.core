@@ -45,6 +45,7 @@ import org.eclipse.dltk.testing.MessageIds;
 import org.eclipse.dltk.testing.TestCategoryDescriptor;
 import org.eclipse.dltk.testing.model.ITestElement;
 import org.eclipse.dltk.testing.model.ITestElementContainer;
+import org.eclipse.dltk.testing.model.ITestElementPredicate;
 import org.eclipse.dltk.testing.model.ITestRunSession;
 
 /**
@@ -884,25 +885,29 @@ public class TestRunSession implements ITestRunSession, ITestSession {
 		testElement.setStatus(status);
 	}
 	
-	public ITestElement[] getAllFailedTestElements() {
-		ArrayList failures= new ArrayList();
-		addFailures(failures, getTestRoot());
-		return (TestElement[]) failures.toArray(new TestElement[failures.size()]);
+	public ITestElement[] getFailedTestElements(ITestElementPredicate predicate) {
+		List failures = new ArrayList();
+		addFailures(failures, getTestRoot(), predicate);
+		return (TestElement[]) failures
+				.toArray(new TestElement[failures.size()]);
 	}
 
-	private void addFailures(ArrayList failures, ITestElement testElement) {
-		Result testResult= testElement.getTestResult(true);
-		if (testResult == Result.ERROR || testResult == Result.FAILURE) {
+	private void addFailures(List failures, ITestElement testElement,
+			ITestElementPredicate predicate) {
+		Result testResult = testElement.getTestResult(true);
+		if ((testResult == Result.ERROR || testResult == Result.FAILURE)
+				&& predicate.matches(testElement)) {
 			failures.add(testElement);
 		}
 		if (testElement instanceof TestSuiteElement) {
-			TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
-			ITestElement[] children= testSuiteElement.getChildren();
-			for (int i= 0; i < children.length; i++) {
-				addFailures(failures, children[i]);
+			TestSuiteElement testSuiteElement = (TestSuiteElement) testElement;
+			ITestElement[] children = testSuiteElement.getChildren();
+			for (int i = 0; i < children.length; i++) {
+				addFailures(failures, children[i], predicate);
 			}
 		}
 	}
+
 	public ITestingClient getTestRunnerClient() {
 		if (fTestRunnerClient instanceof ITestingClient) {
 			return (ITestingClient) fTestRunnerClient;

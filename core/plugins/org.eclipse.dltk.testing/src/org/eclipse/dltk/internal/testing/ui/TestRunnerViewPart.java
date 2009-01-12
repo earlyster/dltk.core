@@ -13,10 +13,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.testing.ui;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -1200,7 +1197,8 @@ public class TestRunnerViewPart extends ViewPart {
 					ILaunchConfigurationWorkingCopy tmp = launchConfiguration
 							.copy(configName);
 					tmp.setAttribute(DLTKTestingConstants.ATTR_FAILURES_NAMES,
-							createFailureNamesFile());
+							fTestRunSession.getTestRunnerUI().collectFailures(
+									fTestRunSession));
 					relaunch(tmp, launch.getLaunchMode());
 					return;
 				} catch (CoreException e) {
@@ -1221,32 +1219,6 @@ public class TestRunnerViewPart extends ViewPart {
 
 	private void relaunch(ILaunchConfiguration configuration, String launchMode) {
 		DebugUITools.launch(configuration, launchMode);
-	}
-
-	private String createFailureNamesFile() throws CoreException {
-		try {
-			File file = File.createTempFile("testFailures", ".txt"); //$NON-NLS-1$ //$NON-NLS-2$
-			file.deleteOnExit();
-			ITestElement[] failures = fTestRunSession
-					.getAllFailedTestElements();
-			BufferedWriter bw = null;
-			try {
-				bw = new BufferedWriter(new FileWriter(file));
-				for (int i = 0; i < failures.length; i++) {
-					TestElement testElement = (TestElement) failures[i];
-					bw.write(testElement.getTestName());
-					bw.newLine();
-				}
-			} finally {
-				if (bw != null) {
-					bw.close();
-				}
-			}
-			return file.getAbsolutePath();
-		} catch (IOException e) {
-			throw new CoreException(new Status(IStatus.ERROR,
-					DLTKTestingPlugin.PLUGIN_ID, IStatus.ERROR, "", e)); //$NON-NLS-1$
-		}
 	}
 
 	public void setAutoScroll(boolean scroll) {

@@ -21,9 +21,10 @@ import org.eclipse.dltk.testing.ITestingClient;
  * @since 3.3
  */
 public interface ITestRunSession extends ITestElementContainer {
-			
+
 	/**
-	 * Returns the name of the test run. The name is the name of the launch configuration use to run this test.
+	 * Returns the name of the test run. The name is the name of the launch
+	 * configuration use to run this test.
 	 * 
 	 * @return returns the test run name
 	 */
@@ -32,7 +33,7 @@ public interface ITestRunSession extends ITestElementContainer {
 	public ITestingClient getTestRunnerClient();
 
 	public void setTotalCount(int id);
-	
-	public ITestElement[] getAllFailedTestElements();
+
+	public ITestElement[] getFailedTestElements(ITestElementPredicate predicate);
 
 }

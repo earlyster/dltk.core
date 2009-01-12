@@ -11,8 +11,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.testing;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.testing.model.ITestCaseElement;
 import org.eclipse.dltk.testing.model.ITestElement;
+import org.eclipse.dltk.testing.model.ITestRunSession;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.osgi.util.NLS;
@@ -98,6 +100,14 @@ public abstract class AbstractTestRunnerUI implements ITestRunnerUI {
 	 */
 	public boolean canRerunFailures() {
 		return false;
+	}
+
+	/*
+	 * @see ITestRunnerUI#collectFailures(ITestRunSession)
+	 */
+	public String collectFailures(ITestRunSession testRunSession)
+			throws CoreException {
+		return null;
 	}
 
 	/*

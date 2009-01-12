@@ -12,8 +12,8 @@ package org.eclipse.dltk.internal.testing.ui;
 
 import org.eclipse.dltk.internal.testing.model.TestElement;
 import org.eclipse.dltk.testing.DLTKTestingMessages;
-import org.eclipse.dltk.testing.model.ITestCaseElement;
 import org.eclipse.dltk.testing.model.ITestElement;
+import org.eclipse.dltk.testing.model.ITestElementPredicate;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -64,7 +64,11 @@ public class CopyFailureListAction extends Action {
 	public String getAllFailureTraces() {
 		StringBuffer buf = new StringBuffer();
 		ITestElement[] failures = fRunner.getCurrentSession()
-				.getAllFailedTestElements();
+				.getFailedTestElements(new ITestElementPredicate() {
+					public boolean matches(ITestElement testElement) {
+						return true;
+					}
+				});
 
 		String lineDelim = System.getProperty("line.separator", "\n"); //$NON-NLS-1$//$NON-NLS-2$
 		for (int i = 0; i < failures.length; i++) {
