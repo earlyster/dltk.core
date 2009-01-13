@@ -13,6 +13,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.dltk.ui,
  org.eclipse.rse.ui,
  org.eclipse.rse.core,
+ org.eclipse.rse.services,
  org.eclipse.core.resources,
  org.eclipse.rse.files.ui,
  org.eclipse.rse.subsystems.files.core;bundle-version="3.0.0"
