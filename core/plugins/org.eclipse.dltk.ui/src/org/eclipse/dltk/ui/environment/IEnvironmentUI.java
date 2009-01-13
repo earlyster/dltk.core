@@ -14,6 +14,12 @@ public interface IEnvironmentUI {
 	String selectFolder(Shell shell);
 
 	/**
+	 * Open directory selection dialog. Dialog allow creation of new
+	 * directories.
+	 */
+	String selectFolder(Shell shell, String initialFolder);
+
+	/**
 	 * Open file selection dialog.
 	 */
 	String selectFile(Shell shell, int executable2);
