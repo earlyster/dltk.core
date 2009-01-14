@@ -21,7 +21,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Observable;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -56,7 +55,6 @@ import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.util.ExceptionHandler;
-import org.eclipse.dltk.ui.wizards.ProjectWizardFirstPage.AbstractInterpreterGroup;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
@@ -450,20 +448,12 @@ public abstract class ProjectWizardSecondPage extends
 			IInterpreterInstall projectInterpreter = this.fFirstPage
 					.getInterpreter();
 			if (projectInterpreter == null) {
-				Observable observable = fFirstPage
-						.getInterpreterGroupObservable();
-				String nature = null;
-				if (observable != null
-						&& observable instanceof AbstractInterpreterGroup) {
-					AbstractInterpreterGroup gr = (AbstractInterpreterGroup) observable;
-					nature = gr.getCurrentLanguageNature();
-				}
+				final String nature = getScriptNature();
 				if (nature != null) {
-					String environment = fFirstPage.getEnvironment().getId();
-					DefaultInterpreterEntry entry = new DefaultInterpreterEntry(
-							nature, environment);
+					String environmentId = fFirstPage.getEnvironment().getId();
 					projectInterpreter = ScriptRuntime
-							.getDefaultInterpreterInstall(entry);
+							.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
+									nature, environmentId));
 				}
 
 			}
