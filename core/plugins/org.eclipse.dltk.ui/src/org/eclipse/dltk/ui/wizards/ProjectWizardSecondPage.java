@@ -42,9 +42,6 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.internal.core.ModelManager;
-import org.eclipse.dltk.internal.core.builder.State;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.util.CoreUtility;
 import org.eclipse.dltk.internal.ui.wizards.BuildpathDetector;
@@ -450,44 +447,14 @@ public abstract class ProjectWizardSecondPage extends
 			if (projectInterpreter == null) {
 				final String nature = getScriptNature();
 				if (nature != null) {
-					String environmentId = fFirstPage.getEnvironment().getId();
 					projectInterpreter = ScriptRuntime
 							.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
-									nature, environmentId));
+									nature, fFirstPage.getEnvironment().getId()));
 				}
-
 			}
 			if (projectInterpreter != null) {
-				State lastState = (State) ModelManager.getModelManager()
-						.getLastBuiltState(fCurrProject, monitor);
-				if (lastState == null) {
-					lastState = new State(fCurrProject);
-				}
-				IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
-						.getProjects();
-				for (int i = 0; i < projects.length; i++) {
-					if (projects[i].isAccessible()
-							&& DLTKLanguageManager.hasScriptNature(projects[i])) {
-						IScriptProject scriptProject = DLTKCore
-								.create(projects[i]);
-
-						IInterpreterInstall install = ScriptRuntime
-								.getInterpreterInstall(scriptProject);
-						if (projectInterpreter.equals(install)) {
-							// We found project with same interpreter.
-							State state = (State) ModelManager
-									.getModelManager().getLastBuiltState(
-											projects[i], monitor);
-							if (state != null) {
-								lastState.getExternalFolders().addAll(
-										state.getExternalFolders());
-							}
-						}
-					}
-				}
-				lastState.setNoCleanExternalFolders();
-				ModelManager.getModelManager().setLastBuiltState(fCurrProject,
-						lastState);
+				ProjectWizardUtils.reuseInterpreterLibraries(fCurrProject,
+						projectInterpreter, monitor);
 			}
 			// Locate projects with same interpreter.
 		} finally {
