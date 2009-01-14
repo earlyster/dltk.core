@@ -9,12 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -22,8 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -32,24 +24,20 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.util.CoreUtility;
 import org.eclipse.dltk.internal.ui.wizards.BuildpathDetector;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
-import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.util.ExceptionHandler;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -74,8 +62,7 @@ public abstract class ProjectWizardSecondPage extends
 
 	private boolean fKeepContent;
 
-	private File fDotProjectBackup;
-	private File fDotBuildpathBackup;
+	private ProjectMetadataBackup projectFileBackup = null;
 	private Boolean fIsAutobuild;
 
 	/**
@@ -87,8 +74,6 @@ public abstract class ProjectWizardSecondPage extends
 		fCurrProject = null;
 		fKeepContent = false;
 
-		fDotProjectBackup = null;
-		fDotBuildpathBackup = null;
 		fIsAutobuild = null;
 	}
 
@@ -299,115 +284,15 @@ public abstract class ProjectWizardSecondPage extends
 
 	private void rememberExistingFiles(URI projectLocation)
 			throws CoreException {
-		fDotProjectBackup = null;
-		fDotBuildpathBackup = null;
-
-		IFileStore file = EFS.getStore(projectLocation);
-		if (file.fetchInfo().exists()) {
-			IFileStore projectFile = file.getChild(FILENAME_PROJECT);
-			if (projectFile.fetchInfo().exists()) {
-				fDotProjectBackup = createBackup(projectFile, "project-desc"); //$NON-NLS-1$ 
-			}
-			IFileStore buildpathFile = file.getChild(FILENAME_BUILDPATH);
-			if (buildpathFile.fetchInfo().exists()) {
-				fDotBuildpathBackup = createBackup(buildpathFile,
-						"buildpath-desc"); //$NON-NLS-1$ 
-			}
-		}
+		projectFileBackup = new ProjectMetadataBackup();
+		projectFileBackup.backup(projectLocation, new String[] {
+				FILENAME_PROJECT, FILENAME_BUILDPATH });
 	}
 
 	private void restoreExistingFiles(URI projectLocation,
 			IProgressMonitor monitor) throws CoreException {
-		int ticks = ((fDotProjectBackup != null ? 1 : 0) + (fDotBuildpathBackup != null ? 1
-				: 0)) * 2;
-		monitor.beginTask("", ticks); //$NON-NLS-1$
-		try {
-			if (fDotProjectBackup != null) {
-				IFileStore projectFile = EFS.getStore(projectLocation)
-						.getChild(FILENAME_PROJECT);
-				projectFile
-						.delete(EFS.NONE, new SubProgressMonitor(monitor, 1));
-				copyFile(fDotProjectBackup, projectFile,
-						new SubProgressMonitor(monitor, 1));
-			}
-		} catch (IOException e) {
-			IStatus status = new Status(
-					IStatus.ERROR,
-					DLTKUIPlugin.PLUGIN_ID,
-					IStatus.ERROR,
-					NewWizardMessages.ScriptProjectWizardSecondPage_problem_restore_project,
-					e);
-			throw new CoreException(status);
-		}
-		try {
-			if (fDotBuildpathBackup != null) {
-				IFileStore buildpathFile = EFS.getStore(projectLocation)
-						.getChild(FILENAME_BUILDPATH);
-				buildpathFile.delete(EFS.NONE, new SubProgressMonitor(monitor,
-						1));
-				copyFile(fDotBuildpathBackup, buildpathFile,
-						new SubProgressMonitor(monitor, 1));
-			}
-		} catch (IOException e) {
-			IStatus status = new Status(
-					IStatus.ERROR,
-					DLTKUIPlugin.PLUGIN_ID,
-					IStatus.ERROR,
-					NewWizardMessages.ScriptProjectWizardSecondPage_problem_restore_buildpath,
-					e);
-			throw new CoreException(status);
-		}
-	}
-
-	private File createBackup(IFileStore source, String name)
-			throws CoreException {
-		try {
-			File bak = File.createTempFile("eclipse-" + name, ".bak"); //$NON-NLS-1$//$NON-NLS-2$
-			copyFile(source, bak);
-			return bak;
-		} catch (IOException e) {
-			IStatus status = new Status(
-					IStatus.ERROR,
-					DLTKUIPlugin.PLUGIN_ID,
-					IStatus.ERROR,
-					Messages
-							.format(
-									NewWizardMessages.ScriptProjectWizardSecondPage_problem_backup,
-									name), e);
-			throw new CoreException(status);
-		}
-	}
-
-	private void copyFile(IFileStore source, File target) throws IOException,
-			CoreException {
-		InputStream is = source.openInputStream(EFS.NONE, null);
-		FileOutputStream os = new FileOutputStream(target);
-		copyFile(is, os);
-	}
-
-	private void copyFile(File source, IFileStore target,
-			IProgressMonitor monitor) throws IOException, CoreException {
-		FileInputStream is = new FileInputStream(source);
-		OutputStream os = target.openOutputStream(EFS.NONE, monitor);
-		copyFile(is, os);
-	}
-
-	private void copyFile(InputStream is, OutputStream os) throws IOException {
-		try {
-			byte[] buffer = new byte[8192];
-			while (true) {
-				int bytesRead = is.read(buffer);
-				if (bytesRead == -1)
-					break;
-
-				os.write(buffer, 0, bytesRead);
-			}
-		} finally {
-			try {
-				is.close();
-			} finally {
-				os.close();
-			}
+		if (projectFileBackup != null) {
+			projectFileBackup.restore(projectLocation, monitor);
 		}
 	}
 
