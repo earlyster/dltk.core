@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -91,7 +90,7 @@ public class ProjectWizardUtils {
 		}
 		if (defaultPath != null)
 			return Collections.singletonList(defaultPath);
-		return new ArrayList();
+		return Collections.EMPTY_LIST;
 	}
 
 }
