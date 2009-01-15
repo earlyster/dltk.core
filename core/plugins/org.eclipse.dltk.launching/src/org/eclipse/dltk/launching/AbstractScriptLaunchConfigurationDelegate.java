@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.CoreException;
@@ -437,8 +438,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		if (projectName != null) {
 			projectName = projectName.trim();
 			if (projectName.length() > 0) {
-				IProject project = ResourcesPlugin.getWorkspace().getRoot()
-						.getProject(projectName);
+				IProject project = getWorkspaceRoot().getProject(projectName);
 				IScriptProject scriptProject = DLTKCore.create(project);
 				if (scriptProject != null && scriptProject.exists()) {
 					return scriptProject;
@@ -446,6 +446,10 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 			}
 		}
 		return null;
+	}
+
+	private static IWorkspaceRoot getWorkspaceRoot() {
+		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
 	/**
@@ -642,8 +646,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 				// However variable paths start with a slash and thus are
 				// thought to
 				// be absolute
-				IResource res = ResourcesPlugin.getWorkspace().getRoot()
-						.findMember(path);
+				IResource res = getWorkspaceRoot().findMember(path);
 				if (res instanceof IContainer && res.exists()) {
 					return res.getLocation().toOSString();
 				}
@@ -655,8 +658,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 						null,
 						ScriptLaunchConfigurationConstants.ERR_WORKING_DIRECTORY_DOES_NOT_EXIST);
 			} else {
-				IResource res = ResourcesPlugin.getWorkspace().getRoot()
-						.findMember(path);
+				IResource res = getWorkspaceRoot().findMember(path);
 				if (res instanceof IContainer && res.exists()) {
 					return res.getLocation().toOSString();
 				}
@@ -1119,8 +1121,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 				.getScriptProjectName(configuration);
 		String mainScriptName = AbstractScriptLaunchConfigurationDelegate
 				.getMainScriptName(configuration);
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
-				projectName);
+		IProject project = getWorkspaceRoot().getProject(projectName);
 
 		IFile script = project.getFile(mainScriptName);
 
