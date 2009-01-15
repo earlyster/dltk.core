@@ -1136,13 +1136,13 @@ public final class ScriptRuntime {
 	 * The entry is resolved as follows:
 	 * <ol>
 	 * <li>If the <code>ATTR_CONTAINER_PATH</code> is present, it is used to
-	 * create a buildpath container referring to a interpreter.</li> <li>When
-	 * such attribute are not specified, a default entry is created which refers
-	 * to the interpreter referenced by the build path of the configuration's
-	 * associated script project. This could be a buildpath variable or
-	 * buildpath container.</li> <li>When there is no script project associated
-	 * with a configuration, the workspace default interpreter is used to create
-	 * a container path.</li>
+	 * create a buildpath container referring to a interpreter.</li>
+	 * <li>When such attribute are not specified, a default entry is created
+	 * which refers to the interpreter referenced by the build path of the
+	 * configuration's associated script project. This could be a buildpath
+	 * variable or buildpath container.</li>
+	 * <li>When there is no script project associated with a configuration, the
+	 * workspace default interpreter is used to create a container path.</li>
 	 * </ol>
 	 * </p>
 	 * 
