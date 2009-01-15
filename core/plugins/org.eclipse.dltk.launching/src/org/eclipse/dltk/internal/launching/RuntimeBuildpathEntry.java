@@ -31,6 +31,8 @@ import org.eclipse.dltk.core.BuildpathContainerInitializer;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.IRuntimeBuildpathEntry;
 import org.eclipse.dltk.launching.LaunchingMessages;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
@@ -418,6 +420,12 @@ public class RuntimeBuildpathEntry implements IRuntimeBuildpathEntry {
 			break;
 		case ARCHIVE:
 			path = getPath();
+			if (EnvironmentPathUtils.isFull(path)) {
+				IFileHandle file = EnvironmentPathUtils.getFile(path);
+				if (file != null) {
+					path = file.getPath();
+				}
+			}
 			break;
 		case SOURCE:
 			path = getPath();

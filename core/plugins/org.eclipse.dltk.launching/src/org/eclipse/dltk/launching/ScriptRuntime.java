@@ -2391,9 +2391,9 @@ public final class ScriptRuntime {
 										new String[] { entry.getPath()
 												.toString() }), null);
 			}
-			IFileHandle fileHandle = EnvironmentPathUtils.getFile(Path
-					.fromPortableString(location));
-			if (!fileHandle.exists()) {
+			IFileHandle fileHandle = EnvironmentPathUtils.getFile(entry
+					.getPath());
+			if (fileHandle == null || !fileHandle.exists()) {
 				abort(
 						MessageFormat
 								.format(
