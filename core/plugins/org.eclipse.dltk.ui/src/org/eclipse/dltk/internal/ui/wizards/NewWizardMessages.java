@@ -345,6 +345,7 @@ public final class NewWizardMessages extends NLS {
 	public static String ScriptProjectWizardFirstPage_LocationGroup_workspace_desc;
 	public static String ScriptProjectWizardFirstPage_LocationGroup_locationLabel_desc;
 	public static String ScriptProjectWizardFirstPage_LocationGroup_browseButton_desc;
+	public static String ScriptProjectWizardFirstPage_LocationGroup_linked_project;
 	public static String ScriptProjectWizardFirstPage_DetectGroup_message;
 	public static String ScriptProjectWizardFirstPage_Message_enterProjectName;
 	public static String ScriptProjectWizardFirstPage_Message_projectAlreadyExists;
