@@ -71,8 +71,6 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 public abstract class ProjectWizardFirstPage extends WizardPage implements
 		ILocationGroup {
 
-	public static final boolean ENABLED_LINKED_PROJECT = true;
-
 	/**
 	 * Request a project name. Fires an event whenever the text field is
 	 * changed, regardless of its content.
@@ -161,7 +159,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 					.setLabelText(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_external_desc);
 			fExternalRadio.doFillIntoGrid(group, numColumns);
 
-			if (ENABLED_LINKED_PROJECT) {
+			if (isEnableLinkedProject()) {
 				fExternalLinked = new SelectionButtonDialogField(SWT.RADIO);
 				fExternalLinked.setDialogFieldListener(this);
 				fExternalLinked
@@ -213,7 +211,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 
 			fWorkspaceRadio.setSelection(true);
 			fExternalRadio.setSelection(false);
-			if (ENABLED_LINKED_PROJECT) {
+			if (isEnableLinkedProject()) {
 				fExternalLinked.setSelection(false);
 			}
 		}
@@ -300,7 +298,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 
 		public boolean isExternalLinked() {
-			return ENABLED_LINKED_PROJECT && fExternalLinked.isSelected();
+			return isEnableLinkedProject() && fExternalLinked.isSelected();
 		}
 
 		public IEnvironment getEnvironment() {
@@ -998,5 +996,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	 */
 	protected GridData setButtonLayoutData(Button button) {
 		return super.setButtonLayoutData(button);
+	}
+
+	protected boolean isEnableLinkedProject() {
+		return false;
 	}
 }
