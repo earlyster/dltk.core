@@ -39,7 +39,6 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
-import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.compiler.env.AccessRule;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
@@ -574,10 +573,11 @@ public class BuildpathEntry implements IBuildpathEntry {
 			break;
 		case IBuildpathEntry.BPE_LIBRARY:
 			if (isExternal) {
-				IEnvironment environment = EnvironmentManager
-						.getEnvironment(project);
-				if (environment != null) {
-					path = EnvironmentPathUtils.getFullPath(environment, path);
+				String environmentId = EnvironmentManager
+						.getEnvironmentId(project.getProject());
+				if (environmentId != null) {
+					path = EnvironmentPathUtils
+							.getFullPath(environmentId, path);
 				}
 			}
 			entry = DLTKCore.newLibraryEntry(path, accessRules,

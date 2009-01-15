@@ -39,6 +39,22 @@ public class EnvironmentPathUtils {
 		return path.setDevice(env.getId() + SEPARATOR + device);
 	}
 
+	public static IPath getFullPath(String envId, IPath path) {
+		if (isFull(path)) {
+			throw new RuntimeException(MessageFormat.format(
+					Messages.EnvironmentPathUtils_invalidPath,
+					new Object[] { path }));
+		}
+		// if( path.segment(0).startsWith("#special#")) {
+		// return path;
+		// }
+		String device = path.getDevice();
+		if (device == null)
+			device = Character.toString(IPath.DEVICE_SEPARATOR);
+
+		return path.setDevice(envId + SEPARATOR + device);
+	}
+
 	public static boolean isFull(IPath path) {
 		String device = path.getDevice();
 		return device != null && device.indexOf(SEPARATOR) >= 0;

@@ -80,6 +80,29 @@ public final class EnvironmentManager {
 		return null;
 	}
 
+	public static String getEnvironmentId(IProject project) {
+		try {
+			final String environmentId = project
+					.getPersistentProperty(PROJECT_ENVIRONMENT);
+			if (environmentId != null) {
+				return environmentId;
+			}
+		} catch (CoreException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		Object[] objects = manager.getObjects();
+		for (int i = 0; i < objects.length; i++) {
+			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
+			IEnvironment environment = provider.getProjectEnvironment(project);
+			if (environment != null) {
+				return environment.getId();
+			}
+		}
+		return null;
+	}
+
 	public static IEnvironment[] getEnvironments() {
 		List envList = new LinkedList();
 		Object[] objects = manager.getObjects();
