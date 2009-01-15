@@ -15,7 +15,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
@@ -24,6 +26,9 @@ import org.eclipse.dltk.core.PriorityDLTKExtensionManager.ElementInfo;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 
 public final class EnvironmentManager {
+	public static final QualifiedName PROJECT_ENVIRONMENT = new QualifiedName(
+			DLTKCore.PLUGIN_ID, "environment"); //$NON-NLS-1$
+
 	private static final String ENVIRONMENT_EXTENSION = DLTKCore.PLUGIN_ID
 			+ ".environment"; //$NON-NLS-1$
 	private static SimplePriorityClassDLTKExtensionManager manager = new SimplePriorityClassDLTKExtensionManager(
@@ -50,6 +55,20 @@ public final class EnvironmentManager {
 	}
 
 	public static IEnvironment getEnvironment(IProject project) {
+		try {
+			final String environmentId = project
+					.getPersistentProperty(PROJECT_ENVIRONMENT);
+			if (environmentId != null) {
+				final IEnvironment environment = getEnvironmentById(environmentId);
+				if (environment != null) {
+					return environment;
+				}
+			}
+		} catch (CoreException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
 		Object[] objects = manager.getObjects();
 		for (int i = 0; i < objects.length; i++) {
 			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
