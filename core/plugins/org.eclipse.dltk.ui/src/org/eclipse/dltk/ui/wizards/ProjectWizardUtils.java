@@ -11,12 +11,18 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.builder.State;
@@ -56,6 +62,35 @@ public class ProjectWizardUtils {
 		lastState.setNoCleanExternalFolders();
 		ModelManager.getModelManager().setLastBuiltState(fCurrProject,
 				lastState);
+	}
+
+	static final String FILENAME_PROJECT = ".project"; //$NON-NLS-1$
+	static final String FILENAME_BUILDPATH = ".buildpath"; //$NON-NLS-1$
+
+	/**
+	 * Returns List of IBuildpathEntry or empty list.
+	 * 
+	 * @param firstPage
+	 * @return
+	 */
+	static List getDefaultBuildpathEntry(ILocationGroup firstPage) {
+		IBuildpathEntry defaultPath = ScriptRuntime
+				.getDefaultInterpreterContainerEntry();
+
+		IPath InterpreterEnvironmentContainerPath = new Path(
+				ScriptRuntime.INTERPRETER_CONTAINER);
+
+		IInterpreterInstall inst = firstPage.getSelectedInterpreter();
+		if (inst != null) {
+			IPath newPath = InterpreterEnvironmentContainerPath.append(
+					inst.getInterpreterInstallType().getId()).append(
+					inst.getName());
+			return Collections.singletonList(DLTKCore
+					.newContainerEntry(newPath));
+		}
+		if (defaultPath != null)
+			return Collections.singletonList(defaultPath);
+		return Collections.emptyList();
 	}
 
 }

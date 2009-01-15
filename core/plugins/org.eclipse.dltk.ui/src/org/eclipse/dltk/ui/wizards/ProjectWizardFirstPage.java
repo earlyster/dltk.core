@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.compiler.util.Util;
@@ -49,6 +50,7 @@ import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -66,9 +68,10 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 /**
  * The first page of the <code>SimpleProjectWizard</code>.
  */
-public abstract class ProjectWizardFirstPage extends WizardPage {
+public abstract class ProjectWizardFirstPage extends WizardPage implements
+		ILocationGroup {
 
-	private static final boolean ENABLED_LINKED_PROJECT = false;
+	public static final boolean ENABLED_LINKED_PROJECT = true;
 
 	/**
 	 * Request a project name. Fires an event whenever the text field is
@@ -133,6 +136,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		private String fPreviousExternalLocation;
 		private static final String DIALOGSTORE_LAST_EXTERNAL_LOC = DLTKUIPlugin.PLUGIN_ID
 				+ ".last.external.project"; //$NON-NLS-1$
+		private static final String DIALOGSTORE_LAST_EXTERNAL_ENVIRONMENT = DLTKUIPlugin.PLUGIN_ID
+				+ ".last.external.environment"; //$NON-NLS-1$
 
 		public LocationGroup(Composite composite) {
 			fPreviousExternalLocation = Util.EMPTY_STRING;
@@ -159,7 +164,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 			if (ENABLED_LINKED_PROJECT) {
 				fExternalLinked = new SelectionButtonDialogField(SWT.RADIO);
 				fExternalLinked.setDialogFieldListener(this);
-				fExternalLinked.setLabelText("Linked project");
+				fExternalLinked
+						.setLabelText(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_linked_project);
 				fExternalLinked.doFillIntoGrid(group, numColumns);
 			} else {
 				fExternalLinked = null;
@@ -311,17 +317,36 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		}
 
 		public void changeControlPressed(DialogField field) {
-			IEnvironment environment = getEnvironment();
-			IEnvironmentUI environmentUI = (IEnvironmentUI) environment
+			final IEnvironment environment = getEnvironment();
+			final IEnvironmentUI environmentUI = (IEnvironmentUI) environment
 					.getAdapter(IEnvironmentUI.class);
 			if (environmentUI != null) {
-				String selectedDirectory = environmentUI
-						.selectFolder(getShell());
+				String directoryName = fLocation.getText().trim();
+				if (directoryName.length() == 0) {
+					final IDialogSettings dSettings = DLTKUIPlugin.getDefault()
+							.getDialogSettings();
+					final String savedEnvId = dSettings
+							.get(DIALOGSTORE_LAST_EXTERNAL_ENVIRONMENT);
+					if (savedEnvId == null
+							|| savedEnvId.equals(environment.getId())) {
+						final String prevLocation = dSettings
+								.get(DIALOGSTORE_LAST_EXTERNAL_LOC);
+						if (prevLocation != null) {
+							directoryName = prevLocation;
+						}
+					}
+				}
+				final String selectedDirectory = environmentUI.selectFolder(
+						getShell(), directoryName);
 
 				if (selectedDirectory != null) {
+					final IDialogSettings dSettings = DLTKUIPlugin.getDefault()
+							.getDialogSettings();
 					fLocation.setText(selectedDirectory);
-					DLTKUIPlugin.getDefault().getDialogSettings().put(
-							DIALOGSTORE_LAST_EXTERNAL_LOC, selectedDirectory);
+					dSettings.put(DIALOGSTORE_LAST_EXTERNAL_LOC,
+							selectedDirectory);
+					dSettings.put(DIALOGSTORE_LAST_EXTERNAL_ENVIRONMENT,
+							environment.getId());
 				}
 			}
 		}
@@ -348,7 +373,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 				updateInterpreters();
 			}
 
-			if (field == fExternalRadio) {
+			if (field == fExternalRadio || field == fExternalLinked) {
 				updateInterpreters();
 			}
 
@@ -798,6 +823,10 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 
 	protected abstract IInterpreterInstall getInterpreter();
 
+	public IInterpreterInstall getSelectedInterpreter() {
+		return getInterpreter();
+	}
+
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		final Composite composite = new Composite(parent, SWT.NULL);
@@ -823,6 +852,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 		// fDetectGroup.addObserver(fInterpreterEnvironmentGroup);
 
 		fLocationGroup.addObserver(fDetectGroup);
+		fLocationGroup.addObserver(locationObservers);
 		// initialize all elements
 		fNameGroup.notifyObservers();
 		// create and connect validator
@@ -867,6 +897,29 @@ public abstract class ProjectWizardFirstPage extends WizardPage {
 
 	public IEnvironment getEnvironment() {
 		return fLocationGroup.getEnvironment();
+	}
+
+	public IPath getLocation() {
+		return fLocationGroup.getLocation();
+	}
+
+	private class LocationObservers implements Observer {
+		final ListenerList observers = new ListenerList();
+
+		public void update(Observable o, Object arg) {
+			final Object[] listeners = observers.getListeners();
+			for (int i = 0; i < listeners.length; ++i) {
+				((ILocationGroup.Listener) listeners[i]).update(
+						ProjectWizardFirstPage.this, arg);
+			}
+		}
+
+	}
+
+	private LocationObservers locationObservers = new LocationObservers();
+
+	public void addLocationListener(ILocationGroup.Listener listener) {
+		locationObservers.observers.add(listener);
 	}
 
 	/**

@@ -13,7 +13,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IFolder;
@@ -50,10 +49,7 @@ import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
  * external location was specified, offers to do a buildpath detection
  */
 public abstract class ProjectWizardSecondPage extends
-		CapabilityConfigurationPage {
-
-	private static final String FILENAME_PROJECT = ".project"; //$NON-NLS-1$
-	private static final String FILENAME_BUILDPATH = ".buildpath"; //$NON-NLS-1$
+		CapabilityConfigurationPage implements IProjectWizardLastPage {
 
 	private final ProjectWizardFirstPage fFirstPage;
 
@@ -172,7 +168,9 @@ public abstract class ProjectWizardSecondPage extends
 			IBuildpathEntry[] entries = null;
 
 			if (fFirstPage.getDetect()) {
-				if (!fCurrProject.getFile(FILENAME_BUILDPATH).exists()) {
+				if (!fCurrProject
+						.getFile(ProjectWizardUtils.FILENAME_BUILDPATH)
+						.exists()) {
 					IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 							.getLanguageToolkit(getScriptNature());
 					final BuildpathDetector detector = createBuildpathDetector(
@@ -209,10 +207,8 @@ public abstract class ProjectWizardSecondPage extends
 				List cpEntries = new ArrayList();
 				cpEntries.add(DLTKCore.newSourceEntry(projectPath
 						.append(srcPath)));
-				IBuildpathEntry[] entrys = getDefaultBuildpathEntry();
-				if (entrys != null) {
-					cpEntries.addAll(Arrays.asList(entrys));
-				}
+				cpEntries.addAll(ProjectWizardUtils
+						.getDefaultBuildpathEntry(fFirstPage));
 				entries = (IBuildpathEntry[]) cpEntries
 						.toArray(new IBuildpathEntry[cpEntries.size()]);
 
@@ -220,10 +216,8 @@ public abstract class ProjectWizardSecondPage extends
 				IPath projectPath = fCurrProject.getFullPath();
 				List cpEntries = new ArrayList();
 				cpEntries.add(DLTKCore.newSourceEntry(projectPath));
-				IBuildpathEntry[] entrys = getDefaultBuildpathEntry();
-				if (entrys != null) {
-					cpEntries.addAll(Arrays.asList(entrys));
-				}
+				cpEntries.addAll(ProjectWizardUtils
+						.getDefaultBuildpathEntry(fFirstPage));
 				entries = (IBuildpathEntry[]) cpEntries
 						.toArray(new IBuildpathEntry[cpEntries.size()]);
 
@@ -261,32 +255,12 @@ public abstract class ProjectWizardSecondPage extends
 		return fFirstPage.getLocationURI();
 	}
 
-	private IBuildpathEntry[] getDefaultBuildpathEntry() {
-		IBuildpathEntry defaultPath = ScriptRuntime
-				.getDefaultInterpreterContainerEntry();
-
-		IPath InterpreterEnvironmentContainerPath = new Path(
-				ScriptRuntime.INTERPRETER_CONTAINER);
-
-		IInterpreterInstall inst = fFirstPage.getInterpreter();
-		if (inst != null) {
-			IPath newPath = InterpreterEnvironmentContainerPath.append(
-					inst.getInterpreterInstallType().getId()).append(
-					inst.getName());
-			return new IBuildpathEntry[] { DLTKCore.newContainerEntry(newPath) };
-		}
-
-		if (defaultPath != null)
-			return new IBuildpathEntry[] { defaultPath };
-
-		return null;
-	}
-
 	private void rememberExistingFiles(URI projectLocation)
 			throws CoreException {
 		projectFileBackup = new ProjectMetadataBackup();
 		projectFileBackup.backup(projectLocation, new String[] {
-				FILENAME_PROJECT, FILENAME_BUILDPATH });
+				ProjectWizardUtils.FILENAME_PROJECT,
+				ProjectWizardUtils.FILENAME_BUILDPATH });
 	}
 
 	private void restoreExistingFiles(URI projectLocation,
