@@ -35,7 +35,7 @@ public class RSEEnvironmentUI implements IEnvironmentUI {
 				try {
 					final IRemoteFile remoteFile = fs.getRemoteFileObject(
 							initialFolder, new NullProgressMonitor());
-					if (remoteFile != null) {
+					if (remoteFile != null && remoteFile.exists()) {
 						dialog.setPreSelection(remoteFile);
 					}
 				} catch (SystemMessageException e) {
