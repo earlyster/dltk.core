@@ -76,24 +76,28 @@ public class ProjectMetadataBackup {
 	public void restore(URI projectLocation, IProgressMonitor monitor)
 			throws CoreException {
 		monitor.beginTask("", entries.size() * 2); //$NON-NLS-1$
-		for (int i = 0; i < entries.size(); ++i) {
-			final BackupEntry entry = (BackupEntry) entries.get(i);
-			try {
-				IFileStore projectFile = EFS.getStore(projectLocation)
-						.getChild(entry.filename);
-				projectFile
-						.delete(EFS.NONE, new SubProgressMonitor(monitor, 1));
-				copyFile(entry.backup, projectFile, new SubProgressMonitor(
-						monitor, 1));
-			} catch (IOException e) {
-				IStatus status = new Status(
-						IStatus.ERROR,
-						DLTKUIPlugin.PLUGIN_ID,
-						IStatus.ERROR,
-						NewWizardMessages.ScriptProjectWizardSecondPage_problem_restore_project,
-						e);
-				throw new CoreException(status);
+		try {
+			for (int i = 0; i < entries.size(); ++i) {
+				final BackupEntry entry = (BackupEntry) entries.get(i);
+				try {
+					IFileStore projectFile = EFS.getStore(projectLocation)
+							.getChild(entry.filename);
+					projectFile.delete(EFS.NONE, new SubProgressMonitor(
+							monitor, 1));
+					copyFile(entry.backup, projectFile, new SubProgressMonitor(
+							monitor, 1));
+				} catch (IOException e) {
+					IStatus status = new Status(
+							IStatus.ERROR,
+							DLTKUIPlugin.PLUGIN_ID,
+							IStatus.ERROR,
+							NewWizardMessages.ScriptProjectWizardSecondPage_problem_restore_project,
+							e);
+					throw new CoreException(status);
+				}
 			}
+		} finally {
+			entries.clear();
 		}
 	}
 
