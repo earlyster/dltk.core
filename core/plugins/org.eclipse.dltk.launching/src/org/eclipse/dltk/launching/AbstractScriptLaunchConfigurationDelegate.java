@@ -448,6 +448,21 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		return null;
 	}
 
+	public static IProject getProject(ILaunchConfiguration configuration)
+			throws CoreException {
+		String projectName = getScriptProjectName(configuration);
+		if (projectName != null) {
+			projectName = projectName.trim();
+			if (projectName.length() > 0) {
+				IProject project = getWorkspaceRoot().getProject(projectName);
+				if (project != null && project.exists()) {
+					return project;
+				}
+			}
+		}
+		return null;
+	}
+
 	private static IWorkspaceRoot getWorkspaceRoot() {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
@@ -700,18 +715,23 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	// Project path + script path
 	protected String getScriptLaunchPath(ILaunchConfiguration configuration,
 			IEnvironment scriptEnvironment) throws CoreException {
-		String mainScriptName = verifyMainScriptName(configuration);
-		if (mainScriptName.length() == 0) {
-			return null;
+		final String mainScriptName = verifyMainScriptName(configuration);
+		if (mainScriptName.length() != 0) {
+			final IProject project = getProject(configuration);
+			final IFile mainScript = project.getFile(new Path(mainScriptName));
+			final URI scriptURI = mainScript.getLocationURI();
+			if (scriptURI != null) {
+				final IEnvironment environment = EnvironmentManager
+						.getEnvironment(project);
+				if (environment != null) {
+					final IFileHandle file = environment.getFile(scriptURI);
+					if (file != null) {
+						return file.getPath().toOSString();
+					}
+				}
+			}
 		}
-		String loc = getProjectLocation(configuration);
-
-		IPath environmentLocation = new Path(loc).append(mainScriptName);
-		IFileHandle file = scriptEnvironment.getFile(environmentLocation);
-		if (file.exists()) {
-			return file.toOSString();
-		}
-		return environmentLocation.toOSString();
+		return null;
 	}
 
 	// Should be overriden in for any language
@@ -1071,22 +1091,33 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	protected IPath getDefaultWorkingDirectory(
 			ILaunchConfiguration configuration) throws CoreException {
 		// default working directory is the project if this config has a project
-		IScriptProject scriptProject = getScriptProject(configuration);
-		if (scriptProject != null) {
+		final IProject project = getProject(configuration);
+		if (project != null) {
 			IEnvironment environment = EnvironmentManager
-					.getEnvironment(scriptProject);
-			String mainScriptName = verifyMainScriptName(configuration);
-			if (mainScriptName.length() == 0) {
-				return new Path(getProjectLocation(configuration));
-			}
-			String loc = getProjectLocation(configuration);
-
-			IPath environmentLocation = new Path(loc).append(mainScriptName);
-			IFileHandle file = environment.getFile(environmentLocation);
-			if (file.exists()) {
-				return environmentLocation.removeLastSegments(1);
-			} else {
-				return new Path(loc);
+					.getEnvironment(project);
+			if (environment != null) {
+				final String mainScriptName = verifyMainScriptName(configuration);
+				if (mainScriptName.length() == 0) {
+					final URI projectURI = project.getLocationURI();
+					if (projectURI != null) {
+						final IFileHandle file = environment
+								.getFile(projectURI);
+						if (file != null) {
+							return file.getPath();
+						}
+					}
+				} else {
+					final Path scriptPath = new Path(mainScriptName);
+					final IFile mainScript = project.getFile(scriptPath);
+					final URI scriptURI = mainScript.getLocationURI();
+					if (scriptURI != null) {
+						final IFileHandle file = environment.getFile(scriptURI);
+						if (file != null) {
+							return file.getPath().removeLastSegments(
+									scriptPath.segmentCount());
+						}
+					}
+				}
 			}
 		}
 		return null;
