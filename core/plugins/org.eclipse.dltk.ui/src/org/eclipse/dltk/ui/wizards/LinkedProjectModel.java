@@ -36,7 +36,7 @@ public class LinkedProjectModel {
 			case KIND_RESOURCE:
 				return Messages.ProjectFolder_kind_folder;
 			case KIND_EXTERNAL:
-				return Messages.ProjectFolder_kind_externalFolder;
+				return Messages.ProjectFolder_kind_libraryFolder;
 			default:
 				return Messages.ProjectFolder_kind_other
 						+ Integer.toString(kind);

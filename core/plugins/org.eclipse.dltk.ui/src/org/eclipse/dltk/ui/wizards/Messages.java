@@ -21,7 +21,7 @@ public class Messages extends NLS {
 	public static String NewSourceModulePage_pathCannotBeEmpty;
 	public static String NewSourceModulePage_selectScriptFolder;
 	public static String NewSourceModuleWizard_errorInOpenInEditor;
-	public static String ProjectFolder_kind_externalFolder;
+	public static String ProjectFolder_kind_libraryFolder;
 	public static String ProjectFolder_kind_folder;
 	public static String ProjectFolder_kind_other;
 	public static String ProjectFolder_kind_sourceFolder;
