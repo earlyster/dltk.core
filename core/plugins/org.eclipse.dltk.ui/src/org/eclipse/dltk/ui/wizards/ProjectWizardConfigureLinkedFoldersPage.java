@@ -157,10 +157,14 @@ public class ProjectWizardConfigureLinkedFoldersPage extends WizardPage
 				final ProjectFolder folder = (ProjectFolder) element;
 				switch (columnIndex) {
 				case 0:
-					return folder.getPath().setDevice(null)
-							.removeFirstSegments(
-									locationGroup.getLocation().segmentCount())
-							.toString();
+					if (folder.getPath().equals(locationGroup.getLocation())) {
+						return Messages.ConfigureFolders_rootPath;
+					} else {
+						return folder.getPath().setDevice(null)
+								.removeFirstSegments(
+										locationGroup.getLocation()
+												.segmentCount()).toString();
+					}
 				case 1:
 					return ProjectFolder.describeKind(folder.getKind());
 				case 2:
@@ -280,6 +284,7 @@ public class ProjectWizardConfigureLinkedFoldersPage extends WizardPage
 	}
 
 	private TreeViewer folderViewer;
+	private Label projectNameValue;
 	private Label environmentValue;
 	private Label directoryValue;
 
@@ -290,6 +295,12 @@ public class ProjectWizardConfigureLinkedFoldersPage extends WizardPage
 		directoryComposite
 				.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		directoryComposite.setLayout(new GridLayout(2, false));
+
+		final Label projectNameLabel = new Label(directoryComposite, SWT.NONE);
+		projectNameLabel
+				.setText(NewWizardMessages.ScriptProjectWizardFirstPage_NameGroup_label_text);
+		projectNameValue = new Label(directoryComposite, SWT.BORDER);
+		projectNameValue.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		final Label environmentLabel = new Label(directoryComposite, SWT.NONE);
 		environmentLabel.setText(Messages.LinkedFolders_environment_label);

@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.ui.util.PixelConverter;
 import org.eclipse.dltk.ui.wizards.LinkedProjectModel.ProjectFolder;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -102,36 +103,20 @@ public class ProjectWizardSelectLinkedFoldersPage extends WizardPage implements
 		}
 
 		public Object[] getChildren(Object o) {
-			if (o instanceof FileElement) {
-				return ((FileElement) o).getFolders();
-			} else {
-				return EMPTY_LIST;
-			}
+			return getFolders();
 		}
 
 		public ImageDescriptor getImageDescriptor(Object object) {
-			if (object instanceof FileElement) {
-				return PlatformUI.getWorkbench().getEditorRegistry()
-						.getImageDescriptor(
-								((FileElement) object).fileHandle.getName());
-			}
-			return null;
+			return PlatformUI.getWorkbench().getEditorRegistry()
+					.getImageDescriptor(fileHandle.getName());
 		}
 
 		public String getLabel(Object o) {
-			if (o instanceof FileElement) {
-				return ((FileElement) o).fileHandle.getName();
-			} else {
-				return o.toString();
-			}
+			return fileHandle.getName();
 		}
 
 		public Object getParent(Object o) {
-			if (o instanceof FileElement) {
-				return ((FileElement) o).parent;
-			} else {
-				return null;
-			}
+			return parent;
 		}
 
 		public IPath getPath() {
@@ -215,10 +200,33 @@ public class ProjectWizardSelectLinkedFoldersPage extends WizardPage implements
 
 	}
 
+	private class ProjectRootElement extends PlatformObject implements
+			IAdaptable {
+
+		private final DirectoryElement directory;
+
+		public ProjectRootElement(DirectoryElement directory) {
+			this.directory = directory;
+		}
+
+		public Object getAdapter(Class adapter) {
+			if (adapter == IWorkbenchAdapter.class) {
+				return directory;
+			}
+			return super.getAdapter(adapter);
+		}
+
+	}
+
 	private class DirectoryContentProvider implements ITreeContentProvider {
 
 		public Object[] getElements(Object inputElement) {
-			return getChildren(inputElement);
+			if (inputElement instanceof DirectoryElement) {
+				return new ProjectRootElement[] { new ProjectRootElement(
+						(DirectoryElement) inputElement) };
+			} else {
+				return EMPTY_LIST;
+			}
 		}
 
 		public void dispose() {
@@ -230,6 +238,10 @@ public class ProjectWizardSelectLinkedFoldersPage extends WizardPage implements
 		}
 
 		public Object[] getChildren(Object parentElement) {
+			if (parentElement instanceof ProjectRootElement) {
+				return ((ProjectRootElement) parentElement).directory
+						.getFolders();
+			}
 			if (parentElement instanceof FileElement) {
 				return ((FileElement) parentElement).getFolders();
 			}
@@ -244,8 +256,13 @@ public class ProjectWizardSelectLinkedFoldersPage extends WizardPage implements
 		}
 
 		public boolean hasChildren(Object element) {
-			return element instanceof FileElement
-					&& ((FileElement) element).hasChildren();
+			if (element instanceof ProjectRootElement) {
+				return ((ProjectRootElement) element).directory.hasChildren();
+			} else if (element instanceof FileElement) {
+				return ((FileElement) element).hasChildren();
+			} else {
+				return false;
+			}
 		}
 
 	}
@@ -253,7 +270,9 @@ public class ProjectWizardSelectLinkedFoldersPage extends WizardPage implements
 	private class FileContentProvider implements IStructuredContentProvider {
 
 		public Object[] getElements(Object inputElement) {
-			if (inputElement instanceof FileElement) {
+			if (inputElement instanceof ProjectRootElement) {
+				return ((ProjectRootElement) inputElement).directory.getFiles();
+			} else if (inputElement instanceof FileElement) {
 				return ((FileElement) inputElement).getFiles();
 			}
 			return EMPTY_LIST;
@@ -280,6 +299,7 @@ public class ProjectWizardSelectLinkedFoldersPage extends WizardPage implements
 		setDescription(Messages.SelectFolders_description);
 	}
 
+	private Label projectNameValue;
 	private Label environmentValue;
 	private Label directoryValue;
 
@@ -294,6 +314,12 @@ public class ProjectWizardSelectLinkedFoldersPage extends WizardPage implements
 		directoryComposite
 				.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		directoryComposite.setLayout(new GridLayout(2, false));
+
+		final Label projectNameLabel = new Label(directoryComposite, SWT.NONE);
+		projectNameLabel
+				.setText(NewWizardMessages.ScriptProjectWizardFirstPage_NameGroup_label_text);
+		projectNameValue = new Label(directoryComposite, SWT.BORDER);
+		projectNameValue.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		final Label environmentLabel = new Label(directoryComposite, SWT.NONE);
 		environmentLabel.setText(Messages.LinkedFolders_environment_label);
@@ -361,6 +387,7 @@ public class ProjectWizardSelectLinkedFoldersPage extends WizardPage implements
 	}
 
 	private void updateListing() {
+		projectNameValue.setText(locationGroup.getProjectName());
 		final IEnvironment environment = locationGroup.getEnvironment();
 		environmentValue.setText(environment.getName());
 		final IPath location = locationGroup.getLocation();
@@ -382,6 +409,12 @@ public class ProjectWizardSelectLinkedFoldersPage extends WizardPage implements
 				directoryItemChecked(element, event.getChecked());
 			} else if (event.getCheckable() == fileViewer) {
 				fileItemChecked(element, event.getChecked());
+			}
+		} else if (event.getElement() instanceof ProjectRootElement) {
+			final FileElement element = ((ProjectRootElement) event
+					.getElement()).directory;
+			if (event.getCheckable() == directoryViewer) {
+				directoryItemChecked(element, event.getChecked());
 			}
 		}
 	}
@@ -440,7 +473,14 @@ public class ProjectWizardSelectLinkedFoldersPage extends WizardPage implements
 		final Object[] checkedFolders = directoryViewer.getCheckedElements();
 		final List folderEntries = new ArrayList();
 		for (int i = 0; i < checkedFolders.length; ++i) {
-			final DirectoryElement element = (DirectoryElement) checkedFolders[i];
+			final DirectoryElement element;
+			if (checkedFolders[i] instanceof ProjectRootElement) {
+				element = ((ProjectRootElement) checkedFolders[i]).directory;
+			} else if (checkedFolders[i] instanceof DirectoryElement) {
+				element = (DirectoryElement) checkedFolders[i];
+			} else {
+				continue;
+			}
 			folderEntries.add(new FolderEntry(element.getPath(), element));
 		}
 		Collections.sort(folderEntries, new FolderEntryComparator());
@@ -448,14 +488,14 @@ public class ProjectWizardSelectLinkedFoldersPage extends WizardPage implements
 		int i = 0;
 		while (i < folderEntries.size()) {
 			final FolderEntry entry = (FolderEntry) folderEntries.get(i);
-			final int startIndex = i;
+			// final int startIndex = i;
 			++i;
 			while (i < folderEntries.size()
 					&& entry.path.isPrefixOf(((FolderEntry) folderEntries
 							.get(i)).path)) {
 				++i;
 			}
-			final List children = folderEntries.subList(startIndex, i);
+			// final List children = folderEntries.subList(startIndex, i);
 			final ProjectFolder folder = new ProjectFolder();
 			folder.setPath(entry.path);
 			// TODO include/exclude patterns

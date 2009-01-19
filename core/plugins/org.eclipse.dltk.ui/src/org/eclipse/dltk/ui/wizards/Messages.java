@@ -9,6 +9,7 @@ public class Messages extends NLS {
 	public static String ConfigureFolders_pathColumn;
 	public static String ConfigureFolders_title;
 	public static String ConfigureFolders_typeColumn;
+	public static String ConfigureFolders_rootPath;
 	public static String GenericDLTKProjectWizard_createNewDltkProject;
 	public static String GenericDLTKProjectWizard_natureMustBeSpecified;
 	public static String GenericDLTKProjectWizard_newDltkProject;
