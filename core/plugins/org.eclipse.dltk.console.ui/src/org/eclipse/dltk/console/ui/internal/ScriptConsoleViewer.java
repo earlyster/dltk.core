@@ -614,36 +614,40 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 			}
 		});
 
+		styledText.setKeyBinding('X' | SWT.MOD1, ST.COPY);
 		styledText.addVerifyKeyListener(new VerifyKeyListener() {
 			public void verifyKey(VerifyEvent event) {
 				try {
 					if (event.character != '\0') {
-						// Printable character
-						// ssanders: Ensure selection is on last line
-						ConsoleDocumentListener listener = console
-								.getDocumentListener();
-						int selStart = getSelectedRange().x;
-						int selEnd = (getSelectedRange().x + getSelectedRange().y);
-						int clOffset = listener.getCommandLineOffset();
-						int clLength = listener.getCommandLineLength();
-						if (selStart < clOffset) {
-							int selLength;
+						if ((event.stateMask & SWT.MOD1) == 0) {
+							// Printable character
+							// ssanders: Ensure selection is on last line
+							ConsoleDocumentListener listener = console
+									.getDocumentListener();
+							int selStart = getSelectedRange().x;
+							int selEnd = (getSelectedRange().x + getSelectedRange().y);
+							int clOffset = listener.getCommandLineOffset();
+							int clLength = listener.getCommandLineLength();
+							if (selStart < clOffset) {
+								int selLength;
 
-							if (selEnd < clOffset) {
-								selStart = (clOffset + clLength);
-								selLength = 0;
-							} else {
-								selStart = clOffset;
-								selLength = (selEnd - selStart);
+								if (selEnd < clOffset) {
+									selStart = (clOffset + clLength);
+									selLength = 0;
+								} else {
+									selStart = clOffset;
+									selLength = (selEnd - selStart);
+								}
+
+								setSelectedRange(selStart, selLength);
 							}
 
-							setSelectedRange(selStart, selLength);
-						}
-
-						if (getCaretPosition() < console.getDocumentListener()
-								.getCommandLineOffset()) {
-							event.doit = false;
-							return;
+							if (getCaretPosition() < console
+									.getDocumentListener()
+									.getCommandLineOffset()) {
+								event.doit = false;
+								return;
+							}
 						}
 
 						if (event.character == SWT.CR) {
