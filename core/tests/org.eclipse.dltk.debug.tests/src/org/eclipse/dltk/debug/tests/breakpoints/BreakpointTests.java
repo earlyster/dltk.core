@@ -1,12 +1,16 @@
 package org.eclipse.dltk.debug.tests.breakpoints;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.URLEncoder;
 
 import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptLineBreakpoint;
 import org.eclipse.dltk.debug.tests.AbstractDebugTests;
@@ -43,18 +47,33 @@ public class BreakpointTests extends AbstractDebugTests {
 		return "debug";
 	}
 
+	private static IDbgpSession createDbgpSessionMock() {
+		final InvocationHandler handler = new InvocationHandler() {
+
+			public Object invoke(Object proxy, Method method, Object[] args)
+					throws Throwable {
+				throw new UnsupportedOperationException("Mock called "
+						+ method.getName());
+			}
+
+		};
+		return (IDbgpSession) Proxy.newProxyInstance(BreakpointTests.class
+				.getClassLoader(), new Class[] { IDbgpSession.class }, handler);
+	}
+
 	// Real tests
 	public void testSetGet() throws Exception {
+		final IDbgpSession sessionMock = createDbgpSessionMock();
 		// Id
 		final String id = "32145";
-		breakpoint.setIdentifier(id);
-		assertEquals(id, breakpoint.getIdentifier());
+		breakpoint.setId(sessionMock, id);
+		assertEquals(id, breakpoint.getId(sessionMock));
 
 		// HitCount
 		final int hitCount = 234;
-		assertEquals(-1, breakpoint.getHitCount());
-		breakpoint.setHitCount(hitCount);
-		assertEquals(hitCount, breakpoint.getHitCount());
+		assertEquals(-1, breakpoint.getHitCount(sessionMock));
+		breakpoint.setHitCount(sessionMock, hitCount);
+		assertEquals(hitCount, breakpoint.getHitCount(sessionMock));
 
 		// Expression state
 		assertEquals(false, breakpoint.getExpressionState());
