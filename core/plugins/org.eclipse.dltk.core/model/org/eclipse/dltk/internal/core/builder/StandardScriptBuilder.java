@@ -81,7 +81,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 					}
 				} catch (CoreException e) {
 					DLTKCore.error(NLS.bind(
-							"Error building external module {0}", module
+							Messages.StandardScriptBuilder_errorBuildingExternalModule, module
 									.getElementName()), e);
 				}
 				--remainingWork;
@@ -227,7 +227,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 			try {
 				participant.build(context);
 			} catch (CoreException e) {
-				DLTKCore.error("", e);
+				DLTKCore.error(Messages.StandardScriptBuilder_errorBuildingModule, e);
 			}
 		}
 	}

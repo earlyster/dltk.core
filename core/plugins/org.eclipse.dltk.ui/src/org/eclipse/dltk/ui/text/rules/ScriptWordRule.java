@@ -30,9 +30,9 @@ import org.eclipse.jface.text.rules.WordRule;
  * </p>
  * 
  * <p>
- * If an <code>IScriptWordDetector</code> implementation is used, the rule will
- * also check that character prior to the word start character is valid for the
- * start of the word to occur. For instance, this could be used to prevent
+ * If an <code>IScriptWordDetector</code> implementation is used, the rule
+ * will also check that character prior to the word start character is valid for
+ * the start of the word to occur. For instance, this could be used to prevent
  * method names that also match builtin keywords from being hightlighted as
  * such.
  * </p>
@@ -62,7 +62,7 @@ public class ScriptWordRule implements IRule {
 	private boolean fIgnoreCase = false;
 
 	private int fLastSeenEnd = 0;
-	private String fLastSeen = "";
+	private String fLastSeen = ""; //$NON-NLS-1$
 	private Map fNext = new HashMap();
 
 	/**

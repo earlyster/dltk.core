@@ -104,7 +104,7 @@ public class DbgpRawPacket implements IDbgpRawPacket {
 
 	public String getPacketAsString() {
 		try {
-			return new String(xml, "ASCII");
+			return new String(xml, "ASCII"); //$NON-NLS-1$
 		} catch (UnsupportedEncodingException e) {
 			return new String(xml);
 		}

@@ -59,19 +59,19 @@ public class ScriptLaunchConfigurationConstants {
 	 * specific to a particular interpreter install type, used when launching a
 	 * local script application. The map is passed to a
 	 * <code>InterpreterRunner</code> via a
-	 * <code>InterpreterRunnerConfiguration</code> when launching a interpreter.
-	 * The attributes in the map are implementation dependent and are limited to
-	 * String keys and values.
+	 * <code>InterpreterRunnerConfiguration</code> when launching a
+	 * interpreter. The attributes in the map are implementation dependent and
+	 * are limited to String keys and values.
 	 */
 	public static final String ATTR_INTERPRETER_INSTALL_TYPE_SPECIFIC_ATTRS_MAP = "interpreterTypeSpecificAttrs"; //$NON-NLS-1$
 
 	/**
 	 * Launch configuration attribute key. The value is a boolean specifying
 	 * whether a default buildpath should be used when launching a local sctipt
-	 * application. When <code>false</code>, a buildpath must be specified via
-	 * the <code>ATTR_BUILDPATH</code> attribute. When <code>true</code> or
-	 * unspecified, a buildpath is computed by the buildpath provider associated
-	 * with a launch configuration.
+	 * application. When <code>false</code>, a buildpath must be specified
+	 * via the <code>ATTR_BUILDPATH</code> attribute. When <code>true</code>
+	 * or unspecified, a buildpath is computed by the buildpath provider
+	 * associated with a launch configuration.
 	 */
 	public static final String ATTR_DEFAULT_BUILDPATH = "defaultBuildpath"; //$NON-NLS-1$
 
@@ -137,7 +137,7 @@ public class ScriptLaunchConfigurationConstants {
 	 * used. Default value is <code>true</code>.
 	 */
 	public static final String ATTR_DEBUG_CONSOLE = DLTKLaunchingPlugin.PLUGIN_ID
-			+ ".debugConsole";
+			+ ".debugConsole"; //$NON-NLS-1$
 
 	// Errors
 	public static final int ERR_INTERNAL_ERROR = 100;

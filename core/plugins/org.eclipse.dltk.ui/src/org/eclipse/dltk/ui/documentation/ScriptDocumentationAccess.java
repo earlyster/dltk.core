@@ -97,8 +97,8 @@ public class ScriptDocumentationAccess {
 	 *            documentation, look into parent types methods.
 	 * @param allowExternal
 	 *            Allows external documentation like man-pages.
-	 * @return Reader for a content, or <code>null</code> if no documentation is
-	 *         found.
+	 * @return Reader for a content, or <code>null</code> if no documentation
+	 *         is found.
 	 * @throws ModelException
 	 *             is thrown when the elements documentation can not be accessed
 	 */
@@ -131,7 +131,7 @@ public class ScriptDocumentationAccess {
 					}
 				}
 				if (prev && size > 0) {
-					buffer.append("<hr/>");
+					buffer.append("<hr/>"); //$NON-NLS-1$
 				}
 				if (size > 0) {
 					prev = true;
@@ -153,8 +153,8 @@ public class ScriptDocumentationAccess {
 	 * 
 	 * @param content
 	 *            The keyword to find.
-	 * @return Reader for a content, or <code>null</code> if no documentation is
-	 *         found.
+	 * @return Reader for a content, or <code>null</code> if no documentation
+	 *         is found.
 	 * @throws ModelException
 	 *             is thrown when the elements documentation can not be accessed
 	 */
@@ -188,7 +188,7 @@ public class ScriptDocumentationAccess {
 				}
 			}
 			if (prev && size > 0) {
-				buffer.append("<hr/>");
+				buffer.append("<hr/>"); //$NON-NLS-1$
 			}
 			if (size > 0) {
 				prev = true;

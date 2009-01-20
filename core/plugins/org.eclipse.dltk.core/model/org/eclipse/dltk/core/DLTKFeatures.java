@@ -73,6 +73,6 @@ public final class DLTKFeatures {
 	}
 
 	public static final BooleanFeature DELETE_MODULE_WITHOUT_TOP_LEVEL_TYPES = new BooleanFeature(
-			"DELETE_MODULE_WITHOUT_TOP_LEVEL_TYPES", false);
+			"DELETE_MODULE_WITHOUT_TOP_LEVEL_TYPES", false); //$NON-NLS-1$
 
 }

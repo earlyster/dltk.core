@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.builder;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,8 +62,9 @@ public abstract class AbstractBuildContext implements IBuildContext {
 			try {
 				contents = module.getSourceAsCharArray();
 			} catch (ModelException e) {
-				DLTKCore.error("Error retrieving contents of "
-						+ module.getElementName(), e);
+				DLTKCore.error(MessageFormat.format(
+						Messages.AbstractBuildContext_errorRetrievingContentsOf,
+						new Object[] { module.getElementName() }), e);
 				contents = CharOperation.NO_CHAR;
 			}
 		}

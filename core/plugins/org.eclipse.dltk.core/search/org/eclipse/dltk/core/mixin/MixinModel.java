@@ -211,9 +211,9 @@ public class MixinModel {
 		}
 		if (TRACE) {
 			long end = System.currentTimeMillis();
-			System.out.println("MixinModel::find.time:"
+			System.out.println("MixinModel::find.time:" //$NON-NLS-1$
 					+ String.valueOf(end - start));
-			System.out.println("MixinModel::find.parsetime:"
+			System.out.println("MixinModel::find.parsetime:" //$NON-NLS-1$
 					+ String.valueOf(parsee - parses));
 		}
 

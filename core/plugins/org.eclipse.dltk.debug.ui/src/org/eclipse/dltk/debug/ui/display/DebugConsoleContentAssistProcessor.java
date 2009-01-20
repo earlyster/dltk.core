@@ -74,18 +74,18 @@ class DebugConsoleContentAssistProcessor implements IContentAssistProcessor {
 		SortedMap hit = null;
 		String text = viewer.getDocument().get();
 		// FIXME use other way to get command line offset
-		int lastIndex = text.lastIndexOf("=>");
+		int lastIndex = text.lastIndexOf("=>"); //$NON-NLS-1$
 		if (lastIndex != -1)
 			text = text.substring(lastIndex + 2);
-		if (text.endsWith("."))
-			text += " ";
+		if (text.endsWith(".")) //$NON-NLS-1$
+			text += " "; //$NON-NLS-1$
 		String[] segments = TextUtils.split(text, '.');
 		int beginOffset = 0;
-		if (text.equals("") || segments.length == 0) {
+		if (text.equals("") || segments.length == 0) { //$NON-NLS-1$
 			hit = tree;
 		} else {
 			SortedMap map = tree;
-			String fullName = "";
+			String fullName = ""; //$NON-NLS-1$
 			int lastSegment = 0;
 			while (lastSegment != segments.length - 1) {
 				for (; lastSegment < segments.length - 1; lastSegment++) {
@@ -95,7 +95,7 @@ class DebugConsoleContentAssistProcessor implements IContentAssistProcessor {
 					if (segmentMap == null) {
 						break;
 					}
-					fullName += ".";
+					fullName += "."; //$NON-NLS-1$
 					map = segmentMap;
 				}
 				if (lastSegment < segments.length - 1) {
@@ -110,7 +110,7 @@ class DebugConsoleContentAssistProcessor implements IContentAssistProcessor {
 							if (segmentMap == null) {
 								break;
 							}
-							fullName += ".";
+							fullName += "."; //$NON-NLS-1$
 							map = segmentMap;
 							lastSegment++;
 						} else {
@@ -123,7 +123,7 @@ class DebugConsoleContentAssistProcessor implements IContentAssistProcessor {
 			}
 
 			String lastSegmentString = segments[lastSegment];
-			if (lastSegmentString.equals(" ")) {
+			if (lastSegmentString.equals(" ")) { //$NON-NLS-1$
 				hit = map;
 			} else {
 				hit = (SortedMap) map.get(lastSegmentString);

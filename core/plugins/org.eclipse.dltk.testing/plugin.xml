@@ -4,8 +4,8 @@
 
    <extension-point id="testingLaunchConfigs" name="%testingLaunchConfigs.name" schema="schema/testingLaunchConfigs.exsd"/>
    <extension-point id="memberResolver" name="%extension-point.name.memberResolver" schema="schema/memberResolver.exsd"/>
-   <extension-point id="engine" name="engine" schema="schema/testingEngine.exsd"/>
-   <extension-point id="categoryEngine" name="categoryEngine" schema="schema/testCategoryEngine.exsd"/>
+   <extension-point id="engine" name="%extension-point.name.engine" schema="schema/testingEngine.exsd"/>
+   <extension-point id="categoryEngine" name="%extension-point.name.categoryEngine" schema="schema/testCategoryEngine.exsd"/>
 
    <extension
          point="org.eclipse.ui.views">

@@ -157,10 +157,10 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 				InterpretersMessages.InterpreterLibraryBlock_6);
 		fRemoveButton.addSelectionListener(this);
 
-		fImportButton = createPushButton(pathButtonComp, "Import...");
+		fImportButton = createPushButton(pathButtonComp, InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_import);
 		fImportButton.addSelectionListener(this);
 
-		fExportButton = createPushButton(pathButtonComp, "Export...");
+		fExportButton = createPushButton(pathButtonComp, InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_export);
 		fExportButton.addSelectionListener(this);
 
 		return comp;
@@ -322,7 +322,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 
 	private void performExport() {
 		FileDialog dialog = new FileDialog(this.fDialog.getShell(), SWT.SAVE);
-		dialog.setText("Export environment variables to file");
+		dialog.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_exportEnvironmentVariablesToFile);
 		String file = dialog.open();
 		if (file != null) {
 			EnvironmentVariable[] variables = this.fEnvironmentVariablesContentProvider
@@ -331,7 +331,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 				EnvironmentVariablesFileUtils.save(variables, file);
 			} catch (Exception e) {
 				// String text = "Failed to save environment variables";
-				showErrorMessage("Environment export", e.getMessage());
+				showErrorMessage(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_environmentExport, e.getMessage());
 			}
 		}
 	}
@@ -346,20 +346,20 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 
 	private void performImport() {
 		FileDialog dialog = new FileDialog(this.fDialog.getShell(), SWT.OPEN);
-		dialog.setText("Export environment variables to file");
+		dialog.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_exportEnvironmentVariablesToFile);
 		String file = dialog.open();
 		if (file != null) {
 			File handle = new File(file);
 			if (!handle.exists()) {
-				String text = "Selected file not exists.";
-				showErrorMessage("Environment import", text);
+				String text = InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_selectedFileDoesntExist;
+				showErrorMessage(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_environmentImport, text);
 				return;
 			}
 			EnvironmentVariable[] vars = null;
 			try {
 				vars = EnvironmentVariablesFileUtils.load(file);
 			} catch (Exception e) {
-				showErrorMessage("Environment import", e.getMessage());
+				showErrorMessage(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_environmentImport, e.getMessage());
 			}
 			if (vars != null) {
 				EnvironmentVariable[] variables = this.fEnvironmentVariablesContentProvider

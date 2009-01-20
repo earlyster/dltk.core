@@ -4,6 +4,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.internal.core.builder.messages"; //$NON-NLS-1$
+	public static String AbstractBuildContext_errorRetrievingContentsOf;
+	public static String BuildProblemReporter_errorUpdatingMarkers;
 	public static String ScriptBuilder_building;
 	public static String ScriptBuilder_building_N_externalModules;
 	public static String ScriptBuilder_building_N_localModules;
@@ -17,6 +19,8 @@ public class Messages extends NLS {
 	public static String ScriptBuilder_scanningProject;
 	public static String ScriptBuilder_scanningProjectFolder;
 	public static String BuildParticipantManager_buildParticipantCreateError;
+	public static String StandardScriptBuilder_errorBuildingExternalModule;
+	public static String StandardScriptBuilder_errorBuildingModule;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

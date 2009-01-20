@@ -11,7 +11,7 @@ public class ScriptDebugConsoleTraceTracker extends ScriptDebugConsoleTracker {
 	private final String patternString;
 
 	public ScriptDebugConsoleTraceTracker() {
-		patternString = "\\t*#\\d+ +file:(.*) \\[(\\d+)\\]";
+		patternString = "\\t*#\\d+ +file:(.*) \\[(\\d+)\\]"; //$NON-NLS-1$
 	}
 
 	public ScriptDebugConsoleTraceTracker(String patternString) {

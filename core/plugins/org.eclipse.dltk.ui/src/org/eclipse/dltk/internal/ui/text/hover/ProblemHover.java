@@ -29,7 +29,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 
 	protected String postUpdateMessage(String message) {
 		return super.postUpdateMessage(TextUtils.replace(message, '\n',
-				"<br/>\n"));
+				"<br/>\n")); //$NON-NLS-1$
 	}
 
 	protected String getMessageFromAnnotation(Annotation a) {
@@ -49,7 +49,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 			String ar = arguments[i];
 			if (ar.startsWith(IProblem.DESCRIPTION_ARGUMENT_PREFIX)) {
 				return a.getText()
-						+ "\n"
+						+ "\n" //$NON-NLS-1$
 						+ ar.substring(IProblem.DESCRIPTION_ARGUMENT_PREFIX
 								.length());
 			}

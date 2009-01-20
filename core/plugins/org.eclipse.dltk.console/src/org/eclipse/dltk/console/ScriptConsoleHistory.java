@@ -114,7 +114,7 @@ public class ScriptConsoleHistory {
 
 	public void restoreState(String history) {
 		if (history != null && history.length() != 0) {
-			StringTokenizer st = new StringTokenizer(history, "\n");
+			StringTokenizer st = new StringTokenizer(history, "\n"); //$NON-NLS-1$
 			while (st.hasMoreTokens()) {
 				add(st.nextToken());
 			}
@@ -126,7 +126,7 @@ public class ScriptConsoleHistory {
 		StringBuffer sb = new StringBuffer(size * 10);
 		for (int i = 0; i < size; i++) {
 			sb.append(lines.get(i));
-			sb.append("\n");
+			sb.append("\n"); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}

@@ -18,73 +18,74 @@ package org.apache.commons.collections.iterators;
 
 import java.util.NoSuchElementException;
 
-/** 
+/**
  * Provides an implementation of an empty iterator.
- *
+ * 
  * @since Commons Collections 3.1
- * @version $Revision: 1.1 $ $Date: 2008/09/26 12:29:34 $
+ * @version $Revision: 1.2 $ $Date: 2009/01/20 23:39:19 $
  * 
  * @author Stephen Colebourne
  */
 abstract class AbstractEmptyIterator {
- 
-    /**
-     * Constructor.
-     */
-    protected AbstractEmptyIterator() {
-        super();
-    }
 
-    public boolean hasNext() {
-        return false;
-    }
+	/**
+	 * Constructor.
+	 */
+	protected AbstractEmptyIterator() {
+		super();
+	}
 
-    public Object next() {
-        throw new NoSuchElementException("Iterator contains no elements");
-    }
+	public boolean hasNext() {
+		return false;
+	}
 
-    public boolean hasPrevious() {
-        return false;
-    }
+	public Object next() {
+		throw new NoSuchElementException("Iterator contains no elements"); //$NON-NLS-1$
+	}
 
-    public Object previous() {
-        throw new NoSuchElementException("Iterator contains no elements");
-    }
+	public boolean hasPrevious() {
+		return false;
+	}
 
-    public int nextIndex() {
-        return 0;
-    }
+	public Object previous() {
+		throw new NoSuchElementException("Iterator contains no elements"); //$NON-NLS-1$
+	}
 
-    public int previousIndex() {
-        return -1;
-    }
+	public int nextIndex() {
+		return 0;
+	}
 
-    public void add(Object obj) {
-        throw new UnsupportedOperationException("add() not supported for empty Iterator");
-    }
+	public int previousIndex() {
+		return -1;
+	}
 
-    public void set(Object obj) {
-        throw new IllegalStateException("Iterator contains no elements");
-    }
+	public void add(Object obj) {
+		throw new UnsupportedOperationException(
+				"add() not supported for empty Iterator"); //$NON-NLS-1$
+	}
 
-    public void remove() {
-        throw new IllegalStateException("Iterator contains no elements");
-    }
+	public void set(Object obj) {
+		throw new IllegalStateException("Iterator contains no elements"); //$NON-NLS-1$
+	}
 
-    public Object getKey() {
-        throw new IllegalStateException("Iterator contains no elements");
-    }
+	public void remove() {
+		throw new IllegalStateException("Iterator contains no elements"); //$NON-NLS-1$
+	}
 
-    public Object getValue() {
-        throw new IllegalStateException("Iterator contains no elements");
-    }
+	public Object getKey() {
+		throw new IllegalStateException("Iterator contains no elements"); //$NON-NLS-1$
+	}
 
-    public Object setValue(Object value) {
-        throw new IllegalStateException("Iterator contains no elements");
-    }
+	public Object getValue() {
+		throw new IllegalStateException("Iterator contains no elements"); //$NON-NLS-1$
+	}
 
-    public void reset() {
-        // do nothing
-    }
+	public Object setValue(Object value) {
+		throw new IllegalStateException("Iterator contains no elements"); //$NON-NLS-1$
+	}
+
+	public void reset() {
+		// do nothing
+	}
 
 }

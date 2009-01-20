@@ -86,7 +86,7 @@ public class BuildProblemReporter extends ProblemCollector {
 			}
 			problems.clear();
 		} catch (CoreException e) {
-			DLTKCore.error("Error updating markers", e);
+			DLTKCore.error(Messages.BuildProblemReporter_errorUpdatingMarkers, e);
 		}
 	}
 

@@ -23,11 +23,11 @@ public class DLTKDebugLaunchConstants {
 	 * used. Default value is <code>true</code>.
 	 */
 	public static final String ATTR_DEBUG_CONSOLE = DLTKDebugPlugin.PLUGIN_ID
-			+ ".debugConsole";
+			+ ".debugConsole"; //$NON-NLS-1$
 
 	public static boolean isDebugConsole(ILaunch launch) {
 		final String value = launch.getAttribute(ATTR_DEBUG_CONSOLE);
-		return !"false".equals(value);
+		return !"false".equals(value); //$NON-NLS-1$
 	}
 
 }
