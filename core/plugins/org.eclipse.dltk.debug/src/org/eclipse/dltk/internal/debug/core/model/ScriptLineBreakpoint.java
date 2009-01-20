@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -89,7 +90,7 @@ public class ScriptLineBreakpoint extends AbstractScriptBreakpoint implements
 
 	public String getResourceName() throws CoreException {
 		IResource resource = ensureMarker().getResource();
-		if (!resource.equals(ResourcesPlugin.getWorkspace().getRoot()))
+		if (!resource.equals(getWorkspaceRoot()))
 			return resource.getName();
 
 		// else
@@ -107,7 +108,7 @@ public class ScriptLineBreakpoint extends AbstractScriptBreakpoint implements
 	public IResource getResource() {
 		try {
 			final IResource resource = ensureMarker().getResource();
-			if (!resource.equals(ResourcesPlugin.getWorkspace().getRoot())) {
+			if (!resource.equals(getWorkspaceRoot())) {
 				return resource;
 			}
 		} catch (CoreException e) {
@@ -116,10 +117,14 @@ public class ScriptLineBreakpoint extends AbstractScriptBreakpoint implements
 		return null;
 	}
 
+	private static IWorkspaceRoot getWorkspaceRoot() {
+		return ResourcesPlugin.getWorkspace().getRoot();
+	}
+
 	public IPath getResourcePath() {
 		try {
 			final IResource resource = ensureMarker().getResource();
-			if (!resource.equals(ResourcesPlugin.getWorkspace().getRoot()))
+			if (!resource.equals(getWorkspaceRoot()))
 				return ensureMarker().getResource().getFullPath();
 			final String path = (String) ensureMarker().getAttribute(
 					IMarker.LOCATION);
@@ -135,7 +140,7 @@ public class ScriptLineBreakpoint extends AbstractScriptBreakpoint implements
 	public URI getResourceURI() {
 		try {
 			IResource resource = ensureMarker().getResource();
-			if (!resource.equals(ResourcesPlugin.getWorkspace().getRoot()))
+			if (!resource.equals(getWorkspaceRoot()))
 				return makeUri(new Path(ensureMarker().getResource()
 						.getLocationURI().getPath()));
 
