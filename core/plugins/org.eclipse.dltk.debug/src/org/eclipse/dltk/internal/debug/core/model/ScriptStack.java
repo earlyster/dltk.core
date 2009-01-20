@@ -87,4 +87,13 @@ public class ScriptStack implements IScriptStack {
 			}
 		}
 	}
+
+	/**
+	 * @return
+	 */
+	public boolean isInitialized() {
+		synchronized (framesLock) {
+			return frames != NO_STACK_FRAMES;
+		}
+	}
 }

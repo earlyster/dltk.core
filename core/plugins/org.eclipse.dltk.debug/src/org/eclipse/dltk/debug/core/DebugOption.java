@@ -34,4 +34,10 @@ public class DebugOption {
 	public static final BooleanOption ENGINE_SUPPORT_DATATYPES = new BooleanOption(
 			"ENGINE_SUPPORT_DATATYPES", true); //$NON-NLS-1$
 
+	/**
+	 * Debugging engine initially stops before first line. Should be
+	 * <code>false</code> for TCL.
+	 */
+	public static final BooleanOption ENGINE_STOP_BEFORE_FIRST_LINE = new BooleanOption(
+			"ENGINE_STOP_BEFORE_FIRST_LINE", true); //$NON-NLS-1$
 }

@@ -14,6 +14,7 @@ import java.io.OutputStream;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
@@ -218,8 +219,12 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 		// });
 	}
 
-	public boolean hasStackFrames() throws DebugException {
+	public boolean hasStackFrames() {
 		return stack.hasFrames();
+	}
+
+	boolean isStackInitialized() {
+		return stack.isInitialized();
 	}
 
 	// IThread
@@ -235,11 +240,11 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 		return 0;
 	}
 
-	public IStackFrame getTopStackFrame() throws DebugException {
+	public IStackFrame getTopStackFrame() {
 		return stack.getTopFrame();
 	}
 
-	public String getName() throws DebugException {
+	public String getName() {
 		return session.getInfo().getThreadId();
 	}
 
@@ -274,6 +279,11 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 
 	public void resume() throws DebugException {
 		stateManager.resume();
+	}
+
+	public void initialStepInto() {
+		stateManager.setSuspended(false, DebugEvent.CLIENT_REQUEST);
+		stateManager.getEngine().stepInto();
 	}
 
 	// IStep
@@ -409,6 +419,10 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 	public void updateStackFrames() {
 		stack.updateFrames();
 		DebugEventHelper.fireChangeEvent(ScriptThread.this.getDebugTarget());
+	}
+
+	void updateStack() {
+		stack.update();
 	}
 
 }

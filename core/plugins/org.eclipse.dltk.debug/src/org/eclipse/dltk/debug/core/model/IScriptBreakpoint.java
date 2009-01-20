@@ -11,6 +11,7 @@ package org.eclipse.dltk.debug.core.model;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.dbgp.breakpoints.IDbgpBreakpoint;
 
 public interface IScriptBreakpoint extends IBreakpoint {
@@ -20,25 +21,62 @@ public interface IScriptBreakpoint extends IBreakpoint {
 
 	int HIT_CONDITION_MULTIPLE = IDbgpBreakpoint.HIT_CONDITION_MULTIPLE;
 
-	// Identifier
+	/**
+	 * @return
+	 * @throws CoreException
+	 * @deprecated
+	 */
 	String getIdentifier() throws CoreException;
 
+	/**
+	 * @param id
+	 * @throws CoreException
+	 * @deprecated
+	 */
 	void setIdentifier(String id) throws CoreException;
+
+	String[] getIdentifiers();
+
+	String getId(IDbgpSession session);
+
+	void setId(IDbgpSession session, String identifier);
+
+	String removeId(IDbgpSession session);
 
 	// Message
 	String getMessage() throws CoreException;
 
 	void setMessage(String message) throws CoreException;
 
-	// Hit count (returns effective hit count during debugging or -1 if not
-	// available)
+	/**
+	 * Returns actual hit count during debugging or -1 if not available.
+	 */
 	int getHitCount() throws CoreException;
 
+	/**
+	 * Sets actual hit count during debugging or -1 if not available.
+	 * 
+	 * @param value
+	 * @throws CoreException
+	 * @deprecated
+	 */
 	void setHitCount(int value) throws CoreException;
 
-	// Hit value
+	int getHitCount(IDbgpSession session) throws CoreException;
+
+	void setHitCount(IDbgpSession session, int value) throws CoreException;
+
+	/**
+	 * Returns the hit count condition
+	 **/
 	int getHitValue() throws CoreException;
 
+	/**
+	 * Sets the hit count condition
+	 * 
+	 * @param count
+	 * @throws CoreException
+	 */
 	void setHitValue(int count) throws CoreException;
 
 	// Hit condition
@@ -63,4 +101,7 @@ public interface IScriptBreakpoint extends IBreakpoint {
 	void setExpressionState(boolean state) throws CoreException;
 
 	String[] getUpdatableAttributes();
+
+	void clearSessionInfo();
+
 }

@@ -13,6 +13,7 @@ import java.net.URI;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.debug.core.IDebugOptions;
 import org.eclipse.dltk.internal.debug.core.model.IScriptStreamProxy;
 
@@ -71,4 +72,6 @@ public interface IScriptDebugTarget extends IDebugTarget {
 	String getConsoleEncoding();
 
 	IDebugOptions getOptions();
+
+	IDbgpSession[] getSessions();
 }

@@ -11,18 +11,26 @@ package org.eclipse.dltk.internal.debug.core.model;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
+import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.dbgp.IDbgpContinuationHandler;
 import org.eclipse.dltk.dbgp.IDbgpSession;
+import org.eclipse.dltk.dbgp.breakpoints.IDbgpBreakpoint;
+import org.eclipse.dltk.dbgp.breakpoints.IDbgpLineBreakpoint;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
+import org.eclipse.dltk.debug.core.DebugOption;
 import org.eclipse.dltk.debug.core.model.IScriptDebugThreadConfigurator;
+import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.internal.debug.core.model.operations.DbgpDebugger;
 
@@ -152,6 +160,56 @@ public class ScriptThreadManager implements IScriptThreadManager {
 		};
 	}
 
+	/**
+	 * Tests if the specified thread has breakpoint at the same line
+	 * 
+	 * @param thread
+	 * @return
+	 */
+	private boolean hasBreakpointAtCurrentPosition(ScriptThread thread) {
+		try {
+			thread.updateStack();
+			if (thread.hasStackFrames()) {
+				final IStackFrame top = thread.getTopStackFrame();
+				if (top instanceof IScriptStackFrame && top.getLineNumber() > 0) {
+					final IScriptStackFrame frame = (IScriptStackFrame) top;
+					if (frame.getSourceURI() != null) {
+						final String location = frame.getSourceURI().getPath();
+						final IDbgpBreakpoint[] breakpoints = thread
+								.getDbgpSession().getCoreCommands()
+								.getBreakpoints();
+						for (int i = 0; i < breakpoints.length; ++i) {
+							if (breakpoints[i] instanceof IDbgpLineBreakpoint) {
+								final IDbgpLineBreakpoint bp = (IDbgpLineBreakpoint) breakpoints[i];
+								if (frame.getLineNumber() == bp.getLineNumber()) {
+									try {
+										if (new URI(bp.getFilename()).getPath()
+												.equals(location)) {
+											return true;
+										}
+									} catch (URISyntaxException e) {
+										if (DLTKCore.DEBUG) {
+											e.printStackTrace();
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (DebugException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		} catch (DbgpException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+
 	// IDbgpThreadAcceptor
 	public void acceptDbgpThread(IDbgpSession session) {
 		try {
@@ -165,15 +223,38 @@ public class ScriptThreadManager implements IScriptThreadManager {
 			ScriptThread thread = new ScriptThread(target, session, this);
 			addThread(thread);
 
-			boolean isFirstThread = waitingForThreads;
+			final boolean isFirstThread = waitingForThreads;
 			waitingForThreads = false;
 
 			fireThreadAccepted(thread, isFirstThread);
 
 			DebugEventHelper.fireCreateEvent(thread);
 
-			// Auto start
-			thread.resume();
+			final boolean stopBeforeFirstLine = thread.getDbgpSession()
+					.getDebugOptions().get(
+							DebugOption.ENGINE_STOP_BEFORE_FIRST_LINE);
+			final boolean breakOnFirstLine = target.breakOnFirstLineEnabled();
+			boolean executed = false;
+			if (!breakOnFirstLine) {
+				if (stopBeforeFirstLine
+						|| !hasBreakpointAtCurrentPosition(thread)) {
+					thread.resume();
+					executed = true;
+				}
+			} else {
+				if (stopBeforeFirstLine) {
+					thread.initialStepInto();
+					executed = true;
+				}
+			}
+			if (!executed) {
+				if (!thread.isStackInitialized()) {
+					thread.updateStack();
+				}
+				DebugEventHelper.fireChangeEvent(thread);
+				DebugEventHelper.fireSuspendEvent(thread,
+						DebugEvent.CLIENT_REQUEST);
+			}
 		} catch (Exception e) {
 			try {
 				target.terminate();
@@ -204,6 +285,7 @@ public class ScriptThreadManager implements IScriptThreadManager {
 			if (!hasThreads()) {
 				fireAllThreadsTerminated();
 			}
+			target.breakpointManager.removeSession(thread.getDbgpSession());
 		}
 	}
 

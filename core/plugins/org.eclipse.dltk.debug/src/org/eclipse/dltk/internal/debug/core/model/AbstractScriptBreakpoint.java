@@ -11,6 +11,8 @@ package org.eclipse.dltk.internal.debug.core.model;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.resources.IMarker;
@@ -22,6 +24,7 @@ import org.eclipse.debug.core.model.Breakpoint;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
 
@@ -31,6 +34,8 @@ public abstract class AbstractScriptBreakpoint extends Breakpoint implements
 	/**
 	 * Debugging engine breakpoint identifier (available only during debug
 	 * session)
+	 * 
+	 * @deprecated
 	 */
 	public static final String ENGINE_IDENTIFIER = DLTKDebugPlugin.PLUGIN_ID
 			+ ".id"; //$NON-NLS-1$
@@ -38,6 +43,8 @@ public abstract class AbstractScriptBreakpoint extends Breakpoint implements
 	/**
 	 * The number of breakpoint hits during debug session (available only during
 	 * debug session)
+	 * 
+	 * @deprecated
 	 */
 	public static final String HIT_COUNT = DLTKDebugPlugin.PLUGIN_ID
 			+ ".hit_count"; //$NON-NLS-1$
@@ -100,13 +107,120 @@ public abstract class AbstractScriptBreakpoint extends Breakpoint implements
 		}
 	}
 
+	private static class PerSessionInfo {
+		String identifier;
+		int hitCount;
+	}
+
+	private final Map sessions = new IdentityHashMap(1);
+
+	/*
+	 * @see IScriptBreakpoint#getId(IDbgpSession)
+	 */
+	public String getId(IDbgpSession session) {
+		final PerSessionInfo info;
+		synchronized (sessions) {
+			info = (PerSessionInfo) sessions.get(session);
+		}
+		return info != null ? info.identifier : null;
+	}
+
+	/*
+	 * @see IScriptBreakpoint#setId(IDbgpSession, java.lang.String)
+	 */
+	public void setId(IDbgpSession session, String identifier) {
+		synchronized (sessions) {
+			PerSessionInfo info = (PerSessionInfo) sessions.get(session);
+			if (info == null) {
+				info = new PerSessionInfo();
+				sessions.put(session, info);
+			}
+			info.identifier = identifier;
+		}
+	}
+
+	/*
+	 * @see IScriptBreakpoint#removeId(IDbgpSession)
+	 */
+	public String removeId(IDbgpSession session) {
+		final PerSessionInfo info;
+		synchronized (sessions) {
+			info = (PerSessionInfo) sessions.remove(session);
+		}
+		return info != null ? info.identifier : null;
+	}
+
+	/*
+	 * @see IScriptBreakpoint#clearSessionInfo()
+	 */
+	public void clearSessionInfo() {
+		synchronized (sessions) {
+			sessions.clear();
+		}
+	}
+
+	/*
+	 * @see IScriptBreakpoint#getIdentifiers()
+	 */
+	public String[] getIdentifiers() {
+		final PerSessionInfo[] infos;
+		synchronized (sessions) {
+			infos = (PerSessionInfo[]) sessions.values().toArray(
+					new PerSessionInfo[sessions.size()]);
+		}
+		int count = 0;
+		for (int i = 0; i < infos.length; ++i) {
+			if (infos[i] != null && infos[i].identifier != null) {
+				++count;
+			}
+		}
+		if (count > 0) {
+			final String[] result = new String[count];
+			int index = 0;
+			for (int i = 0; i < infos.length; ++i) {
+				if (infos[i] != null && infos[i].identifier != null) {
+					result[index++] = infos[i].identifier;
+				}
+			}
+			return result;
+		} else {
+			return null;
+		}
+	}
+
+	/*
+	 * @see IScriptBreakpoint#setHitCount(IDbgpSession, int)
+	 */
+	public void setHitCount(IDbgpSession session, int value)
+			throws CoreException {
+		synchronized (sessions) {
+			PerSessionInfo info = (PerSessionInfo) sessions.get(session);
+			if (info == null) {
+				info = new PerSessionInfo();
+				sessions.put(session, info);
+			}
+			info.hitCount = value;
+		}
+	}
+
+	/*
+	 * @see IScriptBreakpoint#getHitCount(IDbgpSession)
+	 */
+	public int getHitCount(IDbgpSession session) throws CoreException {
+		final PerSessionInfo info;
+		synchronized (sessions) {
+			info = (PerSessionInfo) sessions.get(session);
+		}
+		return info != null ? info.hitCount : -1;
+	}
+
 	// Identifier
 	public String getIdentifier() throws CoreException {
-		return ensureMarker().getAttribute(ENGINE_IDENTIFIER, null);
+		return null;
 	}
 
 	public void setIdentifier(String id) throws CoreException {
-		setAttribute(ENGINE_IDENTIFIER, id);
+		//
 	}
 
 	// Message
@@ -120,11 +234,23 @@ public abstract class AbstractScriptBreakpoint extends Breakpoint implements
 
 	// Hit count
 	public int getHitCount() throws CoreException {
-		return ensureMarker().getAttribute(HIT_COUNT, -1);
+		synchronized (sessions) {
+			if (sessions.isEmpty()) {
+				return -1;
+			}
+			int result = 0;
+			for (Iterator i = sessions.values().iterator(); i.hasNext();) {
+				PerSessionInfo info = (PerSessionInfo) i.next();
+				if (info.hitCount > 0) {
+					result += info.hitCount;
+				}
+			}
+			return result > 0 ? result : -1;
+		}
 	}
 
 	public void setHitCount(int value) throws CoreException {
-		setAttribute(HIT_COUNT, value);
+		//
 	}
 
 	// Hit value
