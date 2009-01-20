@@ -109,7 +109,7 @@ public abstract class AbstractScriptBreakpoint extends Breakpoint implements
 
 	private static class PerSessionInfo {
 		String identifier;
-		int hitCount;
+		int hitCount = -1;
 	}
 
 	private final Map sessions = new IdentityHashMap(1);
