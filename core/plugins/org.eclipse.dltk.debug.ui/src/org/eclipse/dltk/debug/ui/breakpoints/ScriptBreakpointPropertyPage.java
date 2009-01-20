@@ -20,6 +20,7 @@ import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.dltk.ui.util.SWTFactory;
+import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.SWT;
@@ -124,9 +125,9 @@ public class ScriptBreakpointPropertyPage extends PropertyPage {
 		SWTFactory.createLabel(labelComposite,
 				BreakpointMessages.InternalIdLabel, 1);
 
-		String engineId = breakpoint.getIdentifier();
-		String engineIdText = (engineId == null || engineId.length() == 0) ? BreakpointMessages.InternalIdNotAvailableMessage
-				: engineId;
+		String[] engineIds = breakpoint.getIdentifiers();
+		String engineIdText = (engineIds == null || engineIds.length == 0) ? BreakpointMessages.InternalIdNotAvailableMessage
+				: TextUtils.join(engineIds, ',');
 		SWTFactory.createLabel(labelComposite, engineIdText, 1);
 
 		// Hit count

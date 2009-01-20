@@ -114,13 +114,14 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 				} else if (breakpoint instanceof IScriptSpawnpoint) {
 					// NOP
 				} else {
-					String id = breakpoint.getIdentifier();
+					String id = breakpoint.getId(thread.getDbgpSession());
 					if (id != null && id.length() != 0) {
 						br = thread.getDbgpBreakpoint(id);
 					}
 				}
 				if (br != null) {
-					breakpoint.setHitCount(br.getHitCount());
+					breakpoint.setHitCount(thread.getDbgpSession(), br
+							.getHitCount());
 				}
 			}
 		});
@@ -130,8 +131,7 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 		updateBreakpoints(breakpoints, new IBreakpointUpdater() {
 			public void update(IScriptBreakpoint breakpoint)
 					throws CoreException {
-				breakpoint.setIdentifier(""); //$NON-NLS-1$
-				breakpoint.setHitCount(-1);
+				breakpoint.clearSessionInfo();
 			}
 		});
 	}
