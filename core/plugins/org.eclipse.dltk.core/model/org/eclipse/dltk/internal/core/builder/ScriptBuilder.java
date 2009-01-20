@@ -187,7 +187,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	 * iteration. This hook is invoked during POST_AUTO_BUILD notification
 	 */
 	public static void buildFinished() {
-		if (DLTKCore.DEBUG)
+		if (TRACE)
 			System.out.println("build finished"); //$NON-NLS-1$
 	}
 
