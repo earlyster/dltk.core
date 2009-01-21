@@ -28,6 +28,7 @@ import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptUtils;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.text.HTMLPrinter;
@@ -591,6 +592,10 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	protected boolean isValidWorkbenchPart(IWorkbenchPart part) {
 		if (part instanceof IEditorPart) {
 			final IEditorPart editor = (IEditorPart) part;
+			final String editorNature = ScriptUtils.getNatureId(editor);
+			if (editorNature != null) {
+				return editorNature.equals(getNature());
+			}
 			ISourceModule sourceModule = EditorUtility
 					.getEditorInputModelElement(editor, false);
 			return (sourceModule != null && sourceModule.getScriptProject()
