@@ -223,7 +223,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 				doPropertyChange(event);
 			}
 		};
-		//getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener
+		// getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener
 		// );
 
 		fIsEnableMemberFilter = false;
@@ -531,7 +531,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 			try {
 				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement,
 						DLTKUIPlugin.getActiveWorkbenchWindow());
-				//fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement,
+				// fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement,
 				// getSite().getWorkbenchWindow());
 			} catch (InvocationTargetException e) {
 				ExceptionHandler
@@ -855,7 +855,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 		try {
 			fOrientation = fDialogSettings.getInt(DIALOGSTORE_VIEWORIENTATION);
 			if (fOrientation < 0 || fOrientation > 3) {
-				fOrientation = VIEW_ORIENTATION_VERTICAL;
+				fOrientation = VIEW_ORIENTATION_AUTOMATIC;
 			}
 		} catch (NumberFormatException e) {
 			fOrientation = VIEW_ORIENTATION_AUTOMATIC;
@@ -937,9 +937,10 @@ public class TypeHierarchyViewPart extends ViewPart implements
 				new CCPActionGroup(this),
 				// new GenerateActionGroup(this),
 				new RefactorActionGroup(this) /*
-											 * , new DLTKSearchActionGroup(this,
-											 * getLanguageToolkit())
-											 */
+												 * , new
+												 * DLTKSearchActionGroup(this,
+												 * getLanguageToolkit())
+												 */
 		});
 
 		fActionGroups.fillActionBars(actionBars);
@@ -1139,9 +1140,8 @@ public class TypeHierarchyViewPart extends ViewPart implements
 	}
 
 	/*
-	 * When the input changed or the hierarchy pane becomes visible,
-	 * <code>updateHierarchyViewer<code> brings up the correct view and
-	 * refreshes the current tree
+	 * When the input changed or the hierarchy pane becomes visible, <code>updateHierarchyViewer<code>
+	 * brings up the correct view and refreshes the current tree
 	 */
 	private void updateHierarchyViewer(final boolean doExpand) {
 		if (fInputElement == null) {
