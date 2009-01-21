@@ -38,6 +38,9 @@ import org.eclipse.swt.custom.ST;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
@@ -55,6 +58,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 		private boolean bEnabled = true;
 		private ICommandHandler handler;
+		private boolean handleSynchronously;
 
 		private ScriptConsolePrompt prompt;
 
@@ -104,9 +108,10 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 					((ScriptConsoleViewer) iter.next()).setCaretPosition(doc
 							.getLength());
 				}
-				connectListener();
 			} catch (BadLocationException e) {
 				e.printStackTrace();
+			} finally {
+				connectListener();
 			}
 		}
 
@@ -135,7 +140,15 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 		}
 
 		protected void handleCommandLine(final String command)
-				throws BadLocationException {
+				throws BadLocationException, IOException {
+			if (handleSynchronously) {
+				IScriptExecResult result = handler.handleCommand(command);
+				if (((ScriptConsole) handler).getState() != IScriptConsoleInterpreter.WAIT_USER_INPUT) {
+					processResult(result);
+				}
+				return;
+			}
+
 			Thread handlerThread = new Thread(
 					Messages.ScriptConsoleViewer_scriptConsoleCommandHandler) {
 
@@ -150,13 +163,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 											new Runnable() {
 
 												public void run() {
-													try {
-														disconnectListener();
-														processResult(result);
-														connectListener();
-													} catch (BadLocationException bxcn) {
-														bxcn.printStackTrace();
-													}
+													processResult(result);
 												}
 
 											});
@@ -216,17 +223,23 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 					});
 		}
 
-		protected void processResult(final IScriptExecResult result)
-				throws BadLocationException {
-			if (result != null) {
-				final String output = result.getOutput();
-				if (output != null && output.length() != 0) {
-					ansiHelper.reset();
-					processText(-1, output, false, result.isError(), false,
-							true);
+		protected void processResult(final IScriptExecResult result) {
+			disconnectListener();
+			try {
+				if (result != null) {
+					final String output = result.getOutput();
+					if (output != null && output.length() != 0) {
+						ansiHelper.reset();
+						processText(-1, output, false, result.isError(), false,
+								true);
+					}
 				}
+				appendInvitation();
+			} catch (BadLocationException bxcn) {
+				bxcn.printStackTrace();
+			} finally {
+				connectListener();
 			}
-			appendInvitation();
 		}
 
 		private void addToPartitioner(ScriptConsoleViewer viewer,
@@ -299,6 +312,10 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
+			} catch (IOException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
 			}
 		}
 
@@ -307,8 +324,11 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 				public void run() {
 					disconnectListener();
-					processAddition(event.getOffset(), event.getText());
-					connectListener();
+					try {
+						processAddition(event.getOffset(), event.getText());
+					} finally {
+						connectListener();
+					}
 				}
 
 			});
@@ -377,6 +397,10 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 				inviteStart = inviteEnd = doc.getLength();
 				handleCommandLine(command);
 			} catch (BadLocationException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			} catch (IOException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
@@ -473,13 +497,13 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 						}
 						return;
 					}
-
+					break;
 				case ST.LINE_START:
 					if (isCaretOnLastLine()) {
 						setCaretOffset(getCommandLineOffset());
 						return;
 					}
-
+					break;
 				case ST.COLUMN_PREVIOUS:
 				case ST.SELECT_COLUMN_PREVIOUS:
 					if (isCaretOnLastLine()
@@ -515,17 +539,37 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 			getDisplay().beep();
 		}
 
-		public void superPaste() {
-			super.paste();
-		}
-
 		public void paste() {
 			if (isCaretOnLastLine()) {
 				console.getDocumentListener().ansiHelper
 						.disableWhile(new Runnable() {
 
 							public void run() {
-								superPaste();
+								// ssanders: Process the lines one-by-one in
+								// order to have the proper prompting
+								console.getDocumentListener().handleSynchronously = true;
+								try {
+									checkWidget();
+									Clipboard clipboard = new Clipboard(
+											getDisplay());
+									TextTransfer plainTextTransfer = TextTransfer
+											.getInstance();
+									String text = (String) clipboard
+											.getContents(plainTextTransfer,
+													DND.CLIPBOARD);
+									clipboard.dispose();
+									if (text != null && text.length() > 0) {
+										StringTokenizer tokenizer = new StringTokenizer(
+												text, "\n\r"); //$NON-NLS-1$
+										while (tokenizer.hasMoreTokens() == true) {
+											final String finText = tokenizer
+													.nextToken();
+											insertText(finText + "\n"); //$NON-NLS-1$
+										}
+									}
+								} finally {
+									console.getDocumentListener().handleSynchronously = false;
+								}
 							}
 
 						});
