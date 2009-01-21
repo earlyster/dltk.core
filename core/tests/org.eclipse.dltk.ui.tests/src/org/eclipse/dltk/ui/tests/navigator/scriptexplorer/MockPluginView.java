@@ -91,6 +91,11 @@ public class MockPluginView extends ScriptExplorerPart {
 	public void setFocus() {
 	}
 	
+	public TreeViewer getTreeViewer(){
+		return fViewer;
+	}
+	
+
 	protected IModelElement findElementToSelect(IModelElement je) {
 		return null;
 	}
