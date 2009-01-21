@@ -80,8 +80,8 @@ import com.ibm.icu.text.MessageFormat;
 /**
  * The central access point for launching support. This class manages the
  * registered interpreters types contributed through the
- * <code>"org.eclipse.dltk.launching.interpreterType"</code> extension point. As
- * well, this class provides interpreter install change notification, and
+ * <code>"org.eclipse.dltk.launching.interpreterType"</code> extension point.
+ * As well, this class provides interpreter install change notification, and
  * computes buildpaths and source lookup paths for launch configurations.
  * <p>
  * This class provides static methods only; it is not intended to be
@@ -92,10 +92,10 @@ public final class ScriptRuntime {
 
 	/**
 	 * Classpath container used for a project's InterpreterEnvironment (value
-	 * <code>"org.eclipse.dltk.launching.InterpreterEnvironment_CONTAINER"</code>
-	 * ). A container is resolved in the context of a specific Script project,
-	 * to one or more system libraries contained in a InterpreterEnvironment.
-	 * The container can have zero or two path segments following the container
+	 * <code>"org.eclipse.dltk.launching.InterpreterEnvironment_CONTAINER"</code> ).
+	 * A container is resolved in the context of a specific Script project, to
+	 * one or more system libraries contained in a InterpreterEnvironment. The
+	 * container can have zero or two path segments following the container
 	 * name. When no segments follow the container name, the workspace default
 	 * InterpreterEnvironment is used to build a project. Otherwise the segments
 	 * identify a specific InterpreterEnvironment used to build a project:
@@ -103,8 +103,8 @@ public final class ScriptRuntime {
 	 * <li>Interpreter Install Type Identifier - identifies the type of
 	 * InterpreterEnvironment used to build the project. For example, the
 	 * standard Interpreter.</li>
-	 * <li>Interpreter Install Name - a user defined name that identifies that a
-	 * specific Interpreter of the above kind. For example,
+	 * <li>Interpreter Install Name - a user defined name that identifies that
+	 * a specific Interpreter of the above kind. For example,
 	 * <code>IBM 1.3.1</code>. This information is shared in a projects
 	 * buildpath file, so teams must agree on InterpreterEnvironment naming
 	 * conventions.</li>
@@ -125,24 +125,24 @@ public final class ScriptRuntime {
 
 	/**
 	 * Simple identifier constant (value
-	 * <code>"runtimeBuildpathEntryResolvers"</code>) for the runtime buildpath
-	 * entry resolvers extension point.
+	 * <code>"runtimeBuildpathEntryResolvers"</code>) for the runtime
+	 * buildpath entry resolvers extension point.
 	 * 
 	 * 
 	 */
 	public static final String EXTENSION_POINT_RUNTIME_BUILDPATH_ENTRY_RESOLVERS = "runtimeBuildpathEntryResolvers"; //$NON-NLS-1$	
 
 	/**
-	 * Simple identifier constant (value <code>"buildpathProviders"</code>) for
-	 * the runtime buildpath providers extension point.
+	 * Simple identifier constant (value <code>"buildpathProviders"</code>)
+	 * for the runtime buildpath providers extension point.
 	 * 
 	 * 
 	 */
 	public static final String EXTENSION_POINT_RUNTIME_BUILDPATH_PROVIDERS = "buildpathProviders"; //$NON-NLS-1$		
 
 	/**
-	 * Simple identifier constant (value <code>"interpreterInstalls"</code>) for
-	 * the interpreters installs extension point.
+	 * Simple identifier constant (value <code>"interpreterInstalls"</code>)
+	 * for the interpreters installs extension point.
 	 * 
 	 * 
 	 */
@@ -200,13 +200,13 @@ public final class ScriptRuntime {
 	 * encode and decode the attribute value.
 	 * </p>
 	 * <p>
-	 * Each string is used to create an <code>IPath</code> using the constructor
-	 * <code>Path(String)</code>, and may contain <code>IStringVariable</code>
-	 * 's. Variable substitution is performed on the string prior to
-	 * constructing a path from the string. If the resulting <code>IPath</code>
-	 * is a relative path, it is interpreted as relative to the workspace
-	 * location. If the path is absolute, it is interpreted as an absolute path
-	 * in the local file system.
+	 * Each string is used to create an <code>IPath</code> using the
+	 * constructor <code>Path(String)</code>, and may contain
+	 * <code>IStringVariable</code> 's. Variable substitution is performed on
+	 * the string prior to constructing a path from the string. If the resulting
+	 * <code>IPath</code> is a relative path, it is interpreted as relative to
+	 * the workspace location. If the path is absolute, it is interpreted as an
+	 * absolute path in the local file system.
 	 * </p>
 	 * 
 	 */
@@ -477,8 +477,8 @@ public final class ScriptRuntime {
 	 * @param monitor
 	 *            progress monitor or <code>null</code>
 	 * @param savePreference
-	 *            If <code>true</code>, update workbench preferences to reflect
-	 *            the new default Interpreter.
+	 *            If <code>true</code>, update workbench preferences to
+	 *            reflect the new default Interpreter.
 	 * 
 	 */
 	public static void setDefaultInterpreterInstall(
@@ -790,7 +790,7 @@ public final class ScriptRuntime {
 	 * @param exception
 	 *            lower level exception associated with the
 	 * 
-	 *            error, or <code>null</code> if none
+	 * error, or <code>null</code> if none
 	 */
 	private static void abort(String message, int code, Throwable exception)
 			throws CoreException {
@@ -1064,16 +1064,16 @@ public final class ScriptRuntime {
 	}
 
 	/**
-	 * Returns the <code>IInterpreterInstall</code> represented by the specified
-	 * <code>compositeId</code>.
+	 * Returns the <code>IInterpreterInstall</code> represented by the
+	 * specified <code>compositeId</code>.
 	 * 
 	 * <p>
-	 * If an interpreter can not be found for the given <code>compositeId</code>
-	 * , the default interpreter for the specified <code>natureId</code> will be
+	 * If an interpreter can not be found for the given <code>compositeId</code> ,
+	 * the default interpreter for the specified <code>natureId</code> will be
 	 * returned.
 	 * 
-	 * If no default interpreter has been configured, <code>null</code> will be
-	 * returned.
+	 * If no default interpreter has been configured, <code>null</code> will
+	 * be returned.
 	 * </p>
 	 * 
 	 * @param compositeId
@@ -1082,8 +1082,8 @@ public final class ScriptRuntime {
 	 * @param natureId
 	 *            nature id
 	 * 
-	 * @return IInterpreterInstall instance or <code>null</code> if one can not
-	 *         be found.
+	 * @return IInterpreterInstall instance or <code>null</code> if one can
+	 *         not be found.
 	 */
 	public static IInterpreterInstall getInterpreterInstall(String compositeId,
 			String natureId) {
@@ -1114,8 +1114,8 @@ public final class ScriptRuntime {
 
 	/**
 	 * Returns the name of the Interpreter install referenced by the given
-	 * InterpreterEnvironment buildpath container path, or <code>null</code> if
-	 * none.
+	 * InterpreterEnvironment buildpath container path, or <code>null</code>
+	 * if none.
 	 * 
 	 * @param InterpreterEnvironmentContainerPath
 	 * @return Interpreter name or <code>null</code>
@@ -1129,8 +1129,8 @@ public final class ScriptRuntime {
 
 	/**
 	 * Returns a runtime buildpath entry identifying the InterpreterEnvironment
-	 * to use when launching the specified configuration or <code>null</code> if
-	 * none is specified. The entry returned represents a either abuildpath
+	 * to use when launching the specified configuration or <code>null</code>
+	 * if none is specified. The entry returned represents a either abuildpath
 	 * container that resolves to a interpreter.
 	 * <p>
 	 * The entry is resolved as follows:
@@ -1453,7 +1453,8 @@ public final class ScriptRuntime {
 	 * an absolute path in the local file system.
 	 * 
 	 * @param project
-	 *            the project to compute the <code>java.library.path</code> for
+	 *            the project to compute the <code>java.library.path</code>
+	 *            for
 	 * @param requiredProjects
 	 *            whether to consider entries in required projects
 	 * @return a collection of paths representing entries that should be
@@ -1614,8 +1615,8 @@ public final class ScriptRuntime {
 	 * 
 	 * @param paths
 	 *            an array of strings representing paths of shared libraries.
-	 *            Each string is used to create an <code>IPath</code> using the
-	 *            constructor <code>Path(String)</code>, and may contain
+	 *            Each string is used to create an <code>IPath</code> using
+	 *            the constructor <code>Path(String)</code>, and may contain
 	 *            <code>IStringVariable</code>'s. Variable substitution is
 	 *            performed on each string before a path is constructed from a
 	 *            string.
@@ -1638,12 +1639,13 @@ public final class ScriptRuntime {
 
 	/**
 	 * Returns an array of strings referencing shared libraries that should
-	 * appear on the <code>-Djava.library.path</code> system property at runtime
-	 * for an associated {@link IBuildpathEntry}, or <code>null</code> if the
-	 * given attribute is not a <code>CLASSPATH_ATTR_LIBRARY_PATH_ENTRY</code>.
-	 * Each string is used to create an <code>IPath</code> using the constructor
-	 * <code>Path(String)</code>, and may contain <code>IStringVariable</code> 
-	 * 's.
+	 * appear on the <code>-Djava.library.path</code> system property at
+	 * runtime for an associated {@link IBuildpathEntry}, or <code>null</code>
+	 * if the given attribute is not a
+	 * <code>CLASSPATH_ATTR_LIBRARY_PATH_ENTRY</code>. Each string is used to
+	 * create an <code>IPath</code> using the constructor
+	 * <code>Path(String)</code>, and may contain
+	 * <code>IStringVariable</code> 's.
 	 * <p>
 	 * The factory methods <code>newLibraryPathsAttribute(String[])</code> and
 	 * <code>getLibraryPaths(IBuildpathAttribute)</code> should be used to
@@ -1654,8 +1656,8 @@ public final class ScriptRuntime {
 	 *            a <code>CLASSPATH_ATTR_LIBRARY_PATH_ENTRY</code> buildpath
 	 *            attribute
 	 * @return an array of strings referencing shared libraries that should
-	 *         appear on the <code>-Djava.library.path</code> system property at
-	 *         runtime for an associated {@link IBuildpathEntry}, or
+	 *         appear on the <code>-Djava.library.path</code> system property
+	 *         at runtime for an associated {@link IBuildpathEntry}, or
 	 *         <code>null</code> if the given attribute is not a
 	 *         <code>CLASSPATH_ATTR_LIBRARY_PATH_ENTRY</code>. Each string is
 	 *         used to create an <code>IPath</code> using the constructor
@@ -2113,8 +2115,8 @@ public final class ScriptRuntime {
 
 	/**
 	 * Returns a runtime buildpath entry that corresponds to the given buildpath
-	 * entry. The buildpath entry may not be of type <code>CPE_SOURCE</code> or
-	 * <code>BPE_CONTAINER</code>.
+	 * entry. The buildpath entry may not be of type <code>CPE_SOURCE</code>
+	 * or <code>BPE_CONTAINER</code>.
 	 * 
 	 * @param entry
 	 *            a buildpath entry
@@ -2391,8 +2393,12 @@ public final class ScriptRuntime {
 										new String[] { entry.getPath()
 												.toString() }), null);
 			}
-			IFileHandle fileHandle = EnvironmentPathUtils.getFile(entry
-					.getPath());
+			IFileHandle fileHandle;
+			IPath path = Path.fromPortableString(location);
+			if (EnvironmentPathUtils.isFull(path))
+				fileHandle = EnvironmentPathUtils.getFile(path);
+			else
+				fileHandle = LocalEnvironment.getInstance().getFile(path);
 			if (fileHandle == null || !fileHandle.exists()) {
 				abort(
 						MessageFormat
@@ -2414,8 +2420,8 @@ public final class ScriptRuntime {
 
 	/**
 	 * Returns resolved entries for the given entry in the context of the given
-	 * script project. If the entry is of kind <code>CONTAINER</code>, container
-	 * resolvers are consulted.
+	 * script project. If the entry is of kind <code>CONTAINER</code>,
+	 * container resolvers are consulted.
 	 * <p>
 	 * If the given entry is a container, and a resolver is not registered,
 	 * resolved runtime classpath entries are calculated from the associated
