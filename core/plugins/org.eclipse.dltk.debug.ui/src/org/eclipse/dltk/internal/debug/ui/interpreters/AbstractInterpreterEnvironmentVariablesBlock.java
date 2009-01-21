@@ -319,6 +319,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 
 	private void performExport() {
 		FileDialog dialog = new FileDialog(this.fDialog.getShell(), SWT.SAVE);
+		dialog.setOverwrite(true);
 		dialog.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_exportEnvironmentVariablesToFile);
 		String file = dialog.open();
 		if (file != null) {
