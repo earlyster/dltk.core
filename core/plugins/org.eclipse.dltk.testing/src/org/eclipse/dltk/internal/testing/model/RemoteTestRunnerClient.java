@@ -513,7 +513,7 @@ public class RemoteTestRunnerClient implements ITestingClient, ITestRunnerClient
 			addOperation(new Runnable() {
 				public void run() {
 					fCurrentState= fDefaultState;
-					notifyTestTreeEntry(Integer.toString(testId) + "," + testName + "," + Boolean.toString(issuite) + "," + Integer.toString(testCound));
+					notifyTestTreeEntry(Integer.toString(testId) + "," + testName + "," + Boolean.toString(issuite) + "," + Integer.toString(testCound)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 			});
 		}
@@ -541,7 +541,7 @@ public class RemoteTestRunnerClient implements ITestingClient, ITestRunnerClient
 			addOperation(new Runnable() {
 				public void run() {
 					fCurrentState= fDefaultState;
-					notifyTestStarted(Integer.toString(id) + "," + name);
+					notifyTestStarted(Integer.toString(id) + "," + name); //$NON-NLS-1$
 				}
 			});
 		}
@@ -555,7 +555,7 @@ public class RemoteTestRunnerClient implements ITestingClient, ITestRunnerClient
 			addOperation(new Runnable() {
 				public void run() {
 					fCurrentState= fDefaultState;
-					notifyTestEnded(Integer.toString(id) + "," + name);
+					notifyTestEnded(Integer.toString(id) + "," + name); //$NON-NLS-1$
 				}
 			});
 		}
@@ -567,7 +567,7 @@ public class RemoteTestRunnerClient implements ITestingClient, ITestRunnerClient
 				public void run() {
 					fCurrentState= fDefaultState;
 //					notifyTestFailed();(Integer.toString(id) + "," + name);
-					extractFailure(Integer.toString(id) + "," + name, ITestRunListener2.STATUS_FAILURE, -1);
+					extractFailure(Integer.toString(id) + "," + name, ITestRunListener2.STATUS_FAILURE, -1); //$NON-NLS-1$
 				}
 			});
 		}
@@ -578,7 +578,7 @@ public class RemoteTestRunnerClient implements ITestingClient, ITestRunnerClient
 				public void run() {
 					fCurrentState= fDefaultState;
 //					notifyTestFailed();(Integer.toString(id) + "," + name);
-					extractFailure(Integer.toString(id) + "," + name, code, ITestRunListener2.STATUS_FAILURE);
+					extractFailure(Integer.toString(id) + "," + name, code, ITestRunListener2.STATUS_FAILURE); //$NON-NLS-1$
 				}
 			});
 		}
@@ -610,7 +610,7 @@ public class RemoteTestRunnerClient implements ITestingClient, ITestRunnerClient
 				public void run() {
 					fCurrentState= fDefaultState;
 //					notifyTestFailed();(Integer.toString(id) + "," + name);
-					extractFailure(Integer.toString(id) + "," + name, ITestRunListener2.STATUS_ERROR);
+					extractFailure(Integer.toString(id) + "," + name, ITestRunListener2.STATUS_ERROR); //$NON-NLS-1$
 				}
 			});
 		}
