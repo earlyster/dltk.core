@@ -393,6 +393,10 @@
 		</perspectiveExtension>
 		<perspectiveExtension
 			targetID="org.eclipse.debug.ui.DebugPerspective">
+			<view relative="org.eclipse.debug.ui.VariableView"
+                visible="true" relationship="stack"
+                id="org.eclipse.debug.ui.ExpressionView">
+			</view>
 			<view relative="org.eclipse.debug.ui.DebugView"
 				visible="false" relationship="stack"
 				id="org.eclipse.dltk.ui.ScriptExplorer">
