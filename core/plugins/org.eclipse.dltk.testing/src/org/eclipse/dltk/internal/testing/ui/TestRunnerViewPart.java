@@ -192,13 +192,13 @@ public class TestRunnerViewPart extends ViewPart {
 	final Image fStackViewIcon = TestRunnerViewPart
 			.createImage("eview16/stackframe.gif");//$NON-NLS-1$
 	final Image fTestRunOKIcon = TestRunnerViewPart
-			.createImage("eview16/testsucc.gif"); //$NON-NLS-1$
+			.createImage("eview16/testingsucc.gif"); //$NON-NLS-1$
 	final Image fTestRunFailIcon = TestRunnerViewPart
-			.createImage("eview16/testerr.gif"); //$NON-NLS-1$
+			.createImage("eview16/testingerr.gif"); //$NON-NLS-1$
 	final Image fTestRunOKDirtyIcon = TestRunnerViewPart
-			.createImage("eview16/testsuccq.gif"); //$NON-NLS-1$
+			.createImage("eview16/testingsuccq.gif"); //$NON-NLS-1$
 	final Image fTestRunFailDirtyIcon = TestRunnerViewPart
-			.createImage("eview16/testerrq.gif"); //$NON-NLS-1$
+			.createImage("eview16/testingerrq.gif"); //$NON-NLS-1$
 
 	final Image fTestIcon = TestRunnerViewPart.createImage("obj16/test.gif"); //$NON-NLS-1$
 	final Image fTestOkIcon = TestRunnerViewPart
@@ -1276,14 +1276,14 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private void updateViewIcon() {
-		// if (fTestRunSession == null || fTestRunSession.isStopped() ||
-		// fTestRunSession.isRunning() || fTestRunSession.getStartedCount() ==
-		// 0)
-		// fViewImage= fOriginalViewImage;
-		// else if (hasErrorsOrFailures())
-		// fViewImage= fTestRunFailIcon;
-		// else
-		// fViewImage= fTestRunOKIcon;
+		if (fTestRunSession == null || fTestRunSession.isStopped()
+				|| fTestRunSession.isRunning()
+				|| fTestRunSession.getStartedCount() == 0)
+			fViewImage = fOriginalViewImage;
+		else if (hasErrorsOrFailures())
+			fViewImage = fTestRunFailIcon;
+		else
+			fViewImage = fTestRunOKIcon;
 		firePropertyChange(IWorkbenchPart.PROP_TITLE);
 	}
 
