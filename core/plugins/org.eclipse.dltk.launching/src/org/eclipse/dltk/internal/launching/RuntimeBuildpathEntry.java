@@ -442,6 +442,10 @@ public class RuntimeBuildpathEntry implements IRuntimeBuildpathEntry {
 	protected IPath resolvePath(IPath path) {
 		if (path != null) {
 			IResource res = null;
+			if (EnvironmentPathUtils.isFull(path) == true
+					&& EnvironmentPathUtils.getPathEnvironment(path).isLocal()) {
+				path = EnvironmentPathUtils.getFile(path).getPath();
+			}
 			if (path.getDevice() == null) {
 				// if there is no device specified, find the resource
 				res = getResource(path);
