@@ -45,7 +45,7 @@ public class ModelElementSorter extends ViewerSorter {
 
 	private static final int PROJECTS = 1;
 	private static final int PROJECTFRAGMENT = 2;
-	
+
 	private static final int SCRIPTFOLDER = 4;
 
 	private static final int SOURCEMODULES = 5;
@@ -65,13 +65,14 @@ public class ModelElementSorter extends ViewerSorter {
 
 	private static final int SCRIPT_ELEMENTS = 50;
 	private static final int OTHERS = 51;
-	
+
 	private static final int CONTAINER = 60;
 
 	private MembersOrderPreferenceCache fMemberOrderCache;
 	private Collator fNewCollator; // collator from ICU
 
 	private boolean innerElements = true;
+
 	/**
 	 * Constructor.
 	 */
@@ -81,17 +82,14 @@ public class ModelElementSorter extends ViewerSorter {
 				.getMemberOrderPreferenceCache();
 		fNewCollator = null;
 	}
-	
 
 	public boolean isInnerElements() {
 		return innerElements;
 	}
 
-
 	public void setInnerElements(boolean innerElements) {
 		this.innerElements = innerElements;
 	}
-
 
 	/*
 	 * @see ViewerSorter#category
@@ -209,15 +207,16 @@ public class ModelElementSorter extends ViewerSorter {
 
 		String name1 = getElementName(e1);
 		String name2 = getElementName(e2);
-		
-		//If 
-		if( !this.isInnerElements() && e1 instanceof IModelElement ) {
+
+		// If
+		if (!this.isInnerElements() && e1 instanceof IModelElement) {
 			IModelElement me = (IModelElement) e1;
-			if( me.getElementType() > IModelElement.BINARY_MODULE ) {
+			if (me.getElementType() > IModelElement.BINARY_MODULE) {
 				return 0;
 			}
 		}
-		if (e1 instanceof IType) { // handle anonymous types
+		if (e1 instanceof IType && e2 instanceof IType) { // handle anonymous
+															// types
 			if (name1.length() == 0) {
 				if (name2.length() == 0) {
 					try {
@@ -244,7 +243,7 @@ public class ModelElementSorter extends ViewerSorter {
 			return cmp;
 		}
 
-		if (e1 instanceof IMethod) {
+		if (e1 instanceof IMethod && e2 instanceof IMethod) {
 			String[] params1 = null;
 			try {
 				params1 = ((IMethod) e1).getParameters();
@@ -256,7 +255,7 @@ public class ModelElementSorter extends ViewerSorter {
 			try {
 				params2 = ((IMethod) e2).getParameters();
 			} catch (ModelException e) {
-				if( DLTKCore.DEBUG ) {
+				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
 			}
@@ -333,7 +332,8 @@ public class ModelElementSorter extends ViewerSorter {
 
 	private boolean needsBuildpathComparision(Object e1, int cat1, Object e2,
 			int cat2) {
-		if ((cat1 == PROJECTFRAGMENT && cat2 == PROJECTFRAGMENT)||(cat1 == CONTAINER && cat2 == CONTAINER)
+		if ((cat1 == PROJECTFRAGMENT && cat2 == PROJECTFRAGMENT)
+				|| (cat1 == CONTAINER && cat2 == CONTAINER)
 				|| (cat1 == SCRIPTFOLDER
 						&& ((IScriptFolder) e1).getParent().getResource() instanceof IProject && cat2 == PROJECTFRAGMENT)
 				|| (cat1 == PROJECTFRAGMENT && cat2 == SCRIPTFOLDER && ((IScriptFolder) e2)
