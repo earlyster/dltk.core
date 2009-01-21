@@ -123,8 +123,10 @@ public class NatureExtensionManager {
 		if (nature != null) {
 			if (all != null) {
 				final Object[] result = createArray(all.length + nature.length);
-				System.arraycopy(nature, 0, result, 0, nature.length);
-				System.arraycopy(all, 0, result, nature.length, all.length);
+				// ssanders: Ensure that global items are included first,
+				// because nature items may depend on them running first
+				System.arraycopy(all, 0, result, 0, all.length);
+				System.arraycopy(nature, 0, result, all.length, nature.length);
 				return result;
 			} else {
 				return nature;
