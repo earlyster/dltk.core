@@ -39,13 +39,18 @@ import org.eclipse.dltk.ui.actions.SearchActionGroup;
 import org.eclipse.dltk.ui.browsing.ScriptElementTypeComparator;
 import org.eclipse.dltk.ui.infoviews.AbstractInfoView;
 import org.eclipse.dltk.ui.viewsupport.IViewPartInputProvider;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IOpenListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -77,7 +82,11 @@ public class ExtendedClassesView extends ViewPart implements
 			IModelElementDelta delta = event.getDelta();
 			if (browsingPane != null && !browsingPane.isDisposed()
 					&& typesChanged(delta)) {
-				browsingPane.refresh();
+				browsingPane.getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						browsingPane.refresh();
+					}
+				});
 			}
 			// }
 		}
@@ -109,6 +118,7 @@ public class ExtendedClassesView extends ViewPart implements
 	// private CustomFiltersActionGroup fCustomFiltersActionGroup;
 
 	private MultiSelectionListViewer browsingPane;
+	private ISelection fLastOpenSelection;
 
 	public ExtendedClassesView() {
 		elementChangedListenerImplementation = new IElementChangedListenerImplementation();
@@ -167,13 +177,36 @@ public class ExtendedClassesView extends ViewPart implements
 
 				});
 
+				viewer.addDoubleClickListener(new IDoubleClickListener() {
+					public void doubleClick(DoubleClickEvent event) {
+						IAction openAction = fOpenEditorGroup.getOpenAction();
+						if (openAction != null && openAction.isEnabled()) {
+							openAction.run();
+							return;
+						}
+						fLastOpenSelection = event.getSelection();
+					}
+				});
+
+				viewer.addOpenListener(new IOpenListener() {
+					public void open(OpenEvent event) {
+						IAction openAction = fOpenEditorGroup.getOpenAction();
+						if (openAction != null && openAction.isEnabled()) {
+							openAction.run();
+							return;
+						}
+						fLastOpenSelection = event.getSelection();
+					}
+				});
+
 				// Initialize menu
 				createContextMenu(viewer.getControl());
 			}
 
 		};
 		browsingPane.setContentProvider(new ExtendedClasesContentProvider(this,
-				SearchEngine.createWorkspaceScope(this.fToolkit), parent, this.fToolkit));
+				SearchEngine.createWorkspaceScope(this.fToolkit), parent,
+				this.fToolkit));
 
 		browsingPane.setLabelProvider(new ExtendedClasesLabelProvider(
 				DLTKUILanguageManager.createLabelProvider(this.fToolkit
@@ -354,6 +387,8 @@ public class ExtendedClassesView extends ViewPart implements
 				&& (selectedElement instanceof IScriptProject || selectedElement instanceof IProjectFragment)) {
 			browsingPane.setInput(selectedElement);
 		}
+
+		fLastOpenSelection = null;
 	}
 
 	private boolean checkElementNature(Object selectedElement) {
