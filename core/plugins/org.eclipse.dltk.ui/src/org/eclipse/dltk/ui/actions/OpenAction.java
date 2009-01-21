@@ -171,8 +171,10 @@ public class OpenAction extends SelectionDispatchAction {
 	public void selectAndOpen(IModelElement[] elements) {
 		elements = filterElements(elements);
 		if (elements == null || elements.length == 0) {
-			IEditorStatusLine statusLine = (IEditorStatusLine) fEditor
-					.getAdapter(IEditorStatusLine.class);
+			IEditorStatusLine statusLine = null;
+			if (fEditor != null)
+				statusLine = (IEditorStatusLine) fEditor
+						.getAdapter(IEditorStatusLine.class);
 			if (statusLine != null)
 				statusLine.setMessage(true,
 						ActionMessages.OpenAction_error_messageBadSelection,
