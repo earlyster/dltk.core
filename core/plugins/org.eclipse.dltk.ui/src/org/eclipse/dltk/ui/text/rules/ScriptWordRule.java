@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
@@ -62,7 +63,7 @@ public class ScriptWordRule implements IRule {
 	private boolean fIgnoreCase = false;
 
 	private int fLastSeenEnd = 0;
-	private String fLastSeen = ""; //$NON-NLS-1$
+	private String fLastSeen = Util.EMPTY_STRING;
 	private Map fNext = new HashMap();
 
 	/**
