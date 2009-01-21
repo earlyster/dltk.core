@@ -28,6 +28,7 @@ import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.text.HTMLPrinter;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
@@ -62,6 +63,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
@@ -587,10 +589,12 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	 * @see org.eclipse.dltk.ui.infoviews.AbstractInfoView#isValidWorkbenchPart(org.eclipse.ui.IWorkbenchPart)
 	 */
 	protected boolean isValidWorkbenchPart(IWorkbenchPart part) {
-		if (part instanceof ScriptEditor) {
-			final ScriptEditor editor = (ScriptEditor) part;
-			return editor.getLanguageToolkit().getNatureId()
-					.equals(getNature());
+		if (part instanceof IEditorPart) {
+			final IEditorPart editor = (IEditorPart) part;
+			ISourceModule sourceModule = EditorUtility
+					.getEditorInputModelElement(editor, false);
+			return (sourceModule != null && sourceModule.getScriptProject()
+					.getLanguageToolkit().getNatureId().equals(getNature()));
 		}
 		return false;
 	}
