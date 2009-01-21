@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter;
 
+import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -24,6 +25,8 @@ import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.WorkbenchWindow;
 
 /**
  * Formatting strategy for java source code.
@@ -66,8 +69,7 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 	}
 
 	/*
-	 * @see
-	 * org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy#format()
+	 * @see org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy#format()
 	 */
 	public void format() {
 		super.format();
@@ -100,7 +102,19 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 					}
 				}
 			} catch (FormatterSyntaxProblemException e) {
-				// TODO show error in status line
+				WorkbenchWindow window = (WorkbenchWindow) PlatformUI
+						.getWorkbench().getActiveWorkbenchWindow();
+				if (window != null && window.getStatusLineManager() != null) {
+					window
+							.getStatusLineManager()
+							.setErrorMessage(
+									MessageFormat
+											.format(
+													FormatterMessages.ScriptFormattingStrategy_unableToFormatSourceContainingSyntaxError,
+													new Object[] { e
+															.getMessage() }));
+				}
+				PlatformUI.getWorkbench().getDisplay().beep();
 			} catch (MalformedTreeException e) {
 				DLTKUIPlugin
 						.warn(
