@@ -170,11 +170,8 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	 * The "default" button has been toggled
 	 */
 	public void restoreDefaultVariables() {
-		final EnvironmentVariable[][] libs = new EnvironmentVariable[][] { null };
-
-		libs[0] = new EnvironmentVariable[0];
-		if (libs != null)
-			fEnvironmentVariablesContentProvider.setVariables(libs[0]);
+		fEnvironmentVariablesContentProvider
+				.setVariables(new EnvironmentVariable[0]);
 		update();
 	}
 
@@ -346,7 +343,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 
 	private void performImport() {
 		FileDialog dialog = new FileDialog(this.fDialog.getShell(), SWT.OPEN);
-		dialog.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_exportEnvironmentVariablesToFile);
+		dialog.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_importEnvironmentVariablesFromFile);
 		String file = dialog.open();
 		if (file != null) {
 			File handle = new File(file);
@@ -375,8 +372,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	}
 
 	private void edit(IStructuredSelection selection) {
-		IStructuredSelection sel = (IStructuredSelection) selection;
-		EnvironmentVariable var = (EnvironmentVariable) sel.getFirstElement();
+		EnvironmentVariable var = (EnvironmentVariable) selection.getFirstElement();
 		if (var == null) {
 			return;
 		}
@@ -559,7 +555,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		EnvironmentVariable[] items = fEnvironmentVariablesContentProvider
 				.getVariables();
 		for (int i = 0; i < items.length; i++) {
-			EnvironmentVariable var = (EnvironmentVariable) items[i];
+			EnvironmentVariable var = items[i];
 			envVariables.remove(var.getName());
 		}
 
