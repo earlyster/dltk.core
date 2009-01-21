@@ -74,9 +74,8 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see
-	 * org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse
-	 * .swt.widgets.Composite)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse
+	 *      .swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
 		Composite comp = new Composite(parent, SWT.NONE);
@@ -138,9 +137,8 @@ public abstract class ScriptLaunchConfigurationTab extends
 	private boolean initializing = false;
 
 	/*
-	 * @see
-	 * org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse
-	 * .debug.core.ILaunchConfiguration)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse
+	 *      .debug.core.ILaunchConfiguration)
 	 */
 	public final void initializeFrom(ILaunchConfiguration config) {
 		initializing = true;
@@ -153,9 +151,8 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see
-	 * org.eclipse.debug.ui.AbstractLaunchConfigurationTab#isValid(org.eclipse
-	 * .debug.core.ILaunchConfiguration)
+	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#isValid(org.eclipse
+	 *      .debug.core.ILaunchConfiguration)
 	 */
 	public boolean isValid(ILaunchConfiguration launchConfig) {
 		validatePage(false);
@@ -194,9 +191,8 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see
-	 * org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse
-	 * .debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse
+	 *      .debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public final void performApply(ILaunchConfigurationWorkingCopy config) {
 		String project = fProjText.getText().trim();
@@ -266,13 +262,26 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see
-	 * org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(org.eclipse.
-	 * debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(org.eclipse.
+	 *      debug.core.ILaunchConfigurationWorkingCopy)
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
 		IModelElement element = getContextModelElement();
 		setDefaults(configuration, element);
+	}
+
+	protected IModelElement ensureValid(IModelElement element) {
+		if (element == null || !validateProject(element.getScriptProject())) {
+			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
+					.getProjects();
+			for (int cnt = 0, max = projects.length; cnt < max; cnt++) {
+				IScriptProject scriptProject = DLTKCore.create(projects[cnt]);
+				if (validateProject(scriptProject)) {
+					return scriptProject;
+				}
+			}
+		}
+		return element;
 	}
 
 	/**
@@ -281,6 +290,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 */
 	protected void setDefaults(ILaunchConfigurationWorkingCopy configuration,
 			IModelElement element) {
+		element = ensureValid(element);
 		if (element != null) {
 			configuration.setAttribute(
 					ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME,
