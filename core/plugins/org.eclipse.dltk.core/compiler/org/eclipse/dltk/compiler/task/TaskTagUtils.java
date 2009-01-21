@@ -49,8 +49,9 @@ public abstract class TaskTagUtils {
 
 	public static List getDefaultTags() {
 		final List defaultTags = new ArrayList();
+		defaultTags.add(new TodoTask("FIXME", TodoTask.PRIORITY_HIGH)); //$NON-NLS-1$
+		defaultTags.add(new TodoTask("OPTIMIZE", TodoTask.PRIORITY_NORMAL)); //$NON-NLS-1$
 		defaultTags.add(new TodoTask("TODO", TodoTask.PRIORITY_NORMAL)); //$NON-NLS-1$
-		defaultTags.add(new TodoTask("FIXME", TodoTask.PRIORITY_HIGH)); //$NON-NLS-1$ 
 		defaultTags.add(new TodoTask("XXX", TodoTask.PRIORITY_NORMAL)); //$NON-NLS-1$
 		return defaultTags;
 	}
