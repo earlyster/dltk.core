@@ -12,11 +12,9 @@ package org.eclipse.dltk.launching;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -49,6 +47,7 @@ import org.eclipse.dltk.core.IScriptModelMarker;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -215,10 +214,19 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		entries = ScriptRuntime.resolveRuntimeBuildpath(entries, configuration);
 
 		// Get USER_ENTRY
-		Set userEntries = new HashSet();
+		List userEntries = new ArrayList();
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i].getBuildpathProperty() == IRuntimeBuildpathEntry.USER_ENTRY) {
-				userEntries.add(entries[i].getLocation());
+				IPath path = entries[i].getPath();
+				String userPath;
+				if (EnvironmentPathUtils.isFull(path) == true) {
+					path = EnvironmentPathUtils.getFile(path).getPath();
+					userPath = path.toOSString();
+				} else {
+					userPath = entries[i].getLocation();
+				}
+				if (!userEntries.contains(userPath))
+					userEntries.add(userPath);
 			}
 		}
 		return (String[]) userEntries.toArray(new String[userEntries.size()]);
@@ -227,9 +235,9 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	/**
 	 * Returns entries that should appear on the bootstrap portion of the
 	 * buildpath as specified by the given launch configuration, as an array of
-	 * resolved strings. The returned array is <code>null</code> if all entries
-	 * are standard (i.e. appear by default), or empty to represent an empty
-	 * bootpath.
+	 * resolved strings. The returned array is <code>null</code> if all
+	 * entries are standard (i.e. appear by default), or empty to represent an
+	 * empty bootpath.
 	 * 
 	 * @param configuration
 	 *            launch configuration
