@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -157,10 +158,14 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 				InterpretersMessages.InterpreterLibraryBlock_6);
 		fRemoveButton.addSelectionListener(this);
 
-		fImportButton = createPushButton(pathButtonComp, InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_import);
+		fImportButton = createPushButton(
+				pathButtonComp,
+				InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_import);
 		fImportButton.addSelectionListener(this);
 
-		fExportButton = createPushButton(pathButtonComp, InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_export);
+		fExportButton = createPushButton(
+				pathButtonComp,
+				InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_export);
 		fExportButton.addSelectionListener(this);
 
 		return comp;
@@ -319,8 +324,16 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 
 	private void performExport() {
 		FileDialog dialog = new FileDialog(this.fDialog.getShell(), SWT.SAVE);
-		dialog.setOverwrite(true);
-		dialog.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_exportEnvironmentVariablesToFile);
+		// XXX 3.3 compatibility: dialog.setOverwrite(true)
+		try {
+			final Method setOverwriteMethod = dialog.getClass().getMethod(
+					"setOverwrite", new Class[] { Boolean.TYPE }); //$NON-NLS-1$
+			setOverwriteMethod.invoke(dialog, new Object[] { Boolean.TRUE });
+		} catch (Exception e) {
+			// ignore
+		}
+		dialog
+				.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_exportEnvironmentVariablesToFile);
 		String file = dialog.open();
 		if (file != null) {
 			EnvironmentVariable[] variables = this.fEnvironmentVariablesContentProvider
@@ -329,7 +342,9 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 				EnvironmentVariablesFileUtils.save(variables, file);
 			} catch (Exception e) {
 				// String text = "Failed to save environment variables";
-				showErrorMessage(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_environmentExport, e.getMessage());
+				showErrorMessage(
+						InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_environmentExport,
+						e.getMessage());
 			}
 		}
 	}
@@ -344,20 +359,25 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 
 	private void performImport() {
 		FileDialog dialog = new FileDialog(this.fDialog.getShell(), SWT.OPEN);
-		dialog.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_importEnvironmentVariablesFromFile);
+		dialog
+				.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_importEnvironmentVariablesFromFile);
 		String file = dialog.open();
 		if (file != null) {
 			File handle = new File(file);
 			if (!handle.exists()) {
 				String text = InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_selectedFileDoesntExist;
-				showErrorMessage(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_environmentImport, text);
+				showErrorMessage(
+						InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_environmentImport,
+						text);
 				return;
 			}
 			EnvironmentVariable[] vars = null;
 			try {
 				vars = EnvironmentVariablesFileUtils.load(file);
 			} catch (Exception e) {
-				showErrorMessage(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_environmentImport, e.getMessage());
+				showErrorMessage(
+						InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_environmentImport,
+						e.getMessage());
 			}
 			if (vars != null) {
 				EnvironmentVariable[] variables = this.fEnvironmentVariablesContentProvider
@@ -373,7 +393,8 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	}
 
 	private void edit(IStructuredSelection selection) {
-		EnvironmentVariable var = (EnvironmentVariable) selection.getFirstElement();
+		EnvironmentVariable var = (EnvironmentVariable) selection
+				.getFirstElement();
 		if (var == null) {
 			return;
 		}
