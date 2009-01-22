@@ -11,8 +11,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.display;
 
+import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
@@ -35,12 +37,32 @@ public class ScriptDisplayView extends ViewPart implements IConsoleView {
 		super.init(site);
 		console = new DebugConsole(Messages.ScriptDisplayView_consoleName,
 				DebugConsole.class.getName(), new DebugScriptInterpreter(this));
+		final IPreferenceStore preferences = getPreferences();
+		console.getHistory().restoreState(
+				preferences.getString(CONSOLE_HISTORY));
 		page = console.createPage(this);
 		pageSite = new PageSite(getViewSite());
 		page.init(pageSite);
+		((DebugConsolePage) page).setResetOnLaunch(!preferences
+				.getBoolean(KEEP_ON_LAUNCH));
 	}
 
+	private static final String CONSOLE_HISTORY = "debug.console.history"; //$NON-NLS-1$
+	private static final String KEEP_ON_LAUNCH = "debug.console.keep_on_launch"; //$NON-NLS-1$
+
 	public void dispose() {
+		if (page != null || console != null) {
+			final IPreferenceStore preferences = getPreferences();
+			if (console != null) {
+				preferences.setValue(CONSOLE_HISTORY, console.getHistory()
+						.saveState());
+			}
+			if (page != null) {
+				preferences.setValue(KEEP_ON_LAUNCH, !((DebugConsolePage) page)
+						.isResetOnLaunch());
+			}
+			DLTKDebugUIPlugin.getDefault().savePluginPreferences();
+		}
 		if (page != null) {
 			page.dispose();
 			page = null;
@@ -50,6 +72,10 @@ public class ScriptDisplayView extends ViewPart implements IConsoleView {
 			console = null;
 		}
 		super.dispose();
+	}
+
+	private IPreferenceStore getPreferences() {
+		return DLTKDebugUIPlugin.getDefault().getPreferenceStore();
 	}
 
 	public void createPartControl(Composite parent) {

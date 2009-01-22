@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
+import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.dltk.console.ScriptConsoleConstants;
 import org.eclipse.dltk.console.ui.ScriptConsole;
 import org.eclipse.dltk.console.ui.internal.ScriptConsolePage;
@@ -35,6 +36,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.console.IConsoleView;
@@ -60,15 +62,21 @@ public class DebugConsolePage extends ScriptConsolePage {
 	}
 
 	private IAction runAction;
+	private IAction resetOnLaunchAction;
+
+	private boolean resetOnLaunch;
 
 	protected void createActions() {
 		super.createActions();
-		final IToolBarManager tbManager = getSite().getActionBars()
-				.getToolBarManager();
+		final IActionBars actionBars = getSite().getActionBars();
+		final IToolBarManager tbManager = actionBars.getToolBarManager();
 		tbManager.appendToGroup(ScriptConsoleConstants.SCRIPT_GROUP,
 				new OpenInputFieldAction(this));
 		runAction = new RunInputFieldAction(this);
 		tbManager.appendToGroup(ScriptConsoleConstants.SCRIPT_GROUP, runAction);
+		resetOnLaunchAction = new ResetOnLaunchAction(this);
+		resetOnLaunchAction.setChecked(resetOnLaunch);
+		actionBars.getMenuManager().add(resetOnLaunchAction);
 		updateActions();
 	}
 
@@ -197,6 +205,40 @@ public class DebugConsolePage extends ScriptConsolePage {
 	private final class DebugEventListener implements IDebugEventSetListener {
 		public void handleDebugEvents(DebugEvent[] events) {
 			enableUpdateJob.schedule(500);
+			if (resetOnLaunch && isTargetCreate(events)) {
+				DLTKDebugUIPlugin.getStandardDisplay().asyncExec(
+						new Runnable() {
+							public void run() {
+								((DebugConsole) getConsole()).clearConsole();
+							}
+						});
+			}
 		}
+	}
+
+	private static boolean isTargetCreate(DebugEvent[] events) {
+		for (int i = 0; i < events.length; ++i) {
+			final DebugEvent event = events[i];
+			if (event.getKind() == DebugEvent.CREATE
+					&& event.getSource() instanceof IDebugTarget) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @return the resetOnLaunch
+	 */
+	public boolean isResetOnLaunch() {
+		return resetOnLaunch;
+	}
+
+	/**
+	 * @param resetOnLaunch
+	 *            the resetOnLaunch to set
+	 */
+	public void setResetOnLaunch(boolean resetOnLaunch) {
+		this.resetOnLaunch = resetOnLaunch;
 	}
 }

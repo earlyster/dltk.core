@@ -18,6 +18,7 @@ public class Messages extends NLS {
 	public static String DebugScriptInterpreter_NoDebugger;
 	public static String DebugScriptInterpreter_null;
 	public static String DebugScriptInterpreter_unknownEvaluationError;
+	public static String ResetOnLaunchAction_text;
 	public static String OpenInputFieldAction_openCodeField;
 	public static String RunInputFieldAction_runCode;
 	public static String ScriptDisplayView_consoleName;
