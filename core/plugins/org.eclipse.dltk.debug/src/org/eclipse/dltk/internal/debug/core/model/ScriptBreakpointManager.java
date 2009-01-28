@@ -554,13 +554,19 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 	}
 
 	public void breakpointChanged(IBreakpoint breakpoint, IMarkerDelta delta) {
-		if (!supportsBreakpoint(breakpoint) || delta == null) {
+		if (!supportsBreakpoint(breakpoint)) {
 			return;
 		}
 		try {
 			if (breakpoint instanceof IScriptSpawnpoint) {
-				final int changes = hasSpawnpointChanges(delta,
-						(IScriptSpawnpoint) breakpoint);
+				// if no delta then see it as a major change.
+				// this was a call to
+				// BreakPointManager.fireBreakpointChanged(IBreakpoint
+				// breakpoint)
+				int changes = MAJOR_CHANGE;
+				if (delta != null)
+					changes = hasSpawnpointChanges(delta,
+							(IScriptSpawnpoint) breakpoint);
 				if (changes != NO_CHANGES) {
 					final IDbgpSession[] sessions = getSessions();
 					if (changes == MAJOR_CHANGE) {
@@ -579,7 +585,13 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 				}
 			} else {
 				final IScriptBreakpoint sbp = (IScriptBreakpoint) breakpoint;
-				final int changes = hasBreakpointChanges(delta, sbp);
+				// if no delta then see it as a major change.
+				// this was a call to
+				// BreakPointManager.fireBreakpointChanged(IBreakpoint
+				// breakpoint)
+				int changes = MAJOR_CHANGE;
+				if (delta != null)
+					changes = hasBreakpointChanges(delta, sbp);
 				if (changes != NO_CHANGES) {
 					final IDbgpSession[] sessions = getSessions();
 					if (changes == MAJOR_CHANGE) {
