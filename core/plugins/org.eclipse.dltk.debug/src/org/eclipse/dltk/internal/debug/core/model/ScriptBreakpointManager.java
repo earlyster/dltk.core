@@ -553,20 +553,22 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		}
 	}
 
+	/**
+	 * @see IBreakpointListener#breakpointChanged(IBreakpoint, IMarkerDelta)
+	 * @param breakpoint
+	 * @param delta
+	 *            if delta is <code>null</code> then there was a call to
+	 *            BreakPointManager.fireBreakpointChanged(IBreakpoint
+	 *            breakpoint), so see it as a major change.
+	 */
 	public void breakpointChanged(IBreakpoint breakpoint, IMarkerDelta delta) {
 		if (!supportsBreakpoint(breakpoint)) {
 			return;
 		}
 		try {
 			if (breakpoint instanceof IScriptSpawnpoint) {
-				// if no delta then see it as a major change.
-				// this was a call to
-				// BreakPointManager.fireBreakpointChanged(IBreakpoint
-				// breakpoint)
-				int changes = MAJOR_CHANGE;
-				if (delta != null)
-					changes = hasSpawnpointChanges(delta,
-							(IScriptSpawnpoint) breakpoint);
+				final int changes = delta != null ? hasSpawnpointChanges(delta,
+						(IScriptSpawnpoint) breakpoint) : MAJOR_CHANGE;
 				if (changes != NO_CHANGES) {
 					final IDbgpSession[] sessions = getSessions();
 					if (changes == MAJOR_CHANGE) {
@@ -585,13 +587,8 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 				}
 			} else {
 				final IScriptBreakpoint sbp = (IScriptBreakpoint) breakpoint;
-				// if no delta then see it as a major change.
-				// this was a call to
-				// BreakPointManager.fireBreakpointChanged(IBreakpoint
-				// breakpoint)
-				int changes = MAJOR_CHANGE;
-				if (delta != null)
-					changes = hasBreakpointChanges(delta, sbp);
+				final int changes = delta != null ? hasBreakpointChanges(delta,
+						sbp) : MAJOR_CHANGE;
 				if (changes != NO_CHANGES) {
 					final IDbgpSession[] sessions = getSessions();
 					if (changes == MAJOR_CHANGE) {
