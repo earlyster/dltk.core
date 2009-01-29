@@ -87,7 +87,6 @@ public class ConsoleValidatorOutput implements IValidatorOutput {
 		console.close();
 	}
 
-	@Override
 	public void setAttribute(String name, Object value) {
 		console.setAttribute(name, value);
 	}
