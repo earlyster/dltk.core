@@ -85,6 +85,12 @@ public class CommandLine {
 		return (String[]) args.toArray(new String[args.size()]);
 	}
 
+	/**
+	 * Returns the string representation of this command line. All parts are
+	 * joined together with spaces between them.
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
 	public String toString() {
 		final StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < args.size(); ++i) {
