@@ -249,7 +249,6 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 			if (partitioner instanceof ScriptConsolePartitioner) {
 				ScriptConsolePartitioner scriptConsolePartitioner = (ScriptConsolePartitioner) partitioner;
 				scriptConsolePartitioner.addRange(style);
-				viewer.getTextWidget().redraw();
 			}
 		}
 
@@ -279,6 +278,11 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 
 				tokenStart += token.length();
 			}
+			for (Iterator iter = viewerList.iterator(); iter.hasNext();) {
+				viewer = (ScriptConsoleViewer) iter.next();
+				viewer.getTextWidget().redraw();
+			}
+
 		}
 
 		protected void processAddition(int offset, String text) {
