@@ -42,6 +42,10 @@ public class ValidatorConsole extends IOConsole {
 		DLTKUIPlugin.getStandardDisplay().asyncExec(r);
 	}
 
+	public String getInitialName() {
+		return initialName;
+	}
+
 	/**
 	 * @return the closed
 	 */

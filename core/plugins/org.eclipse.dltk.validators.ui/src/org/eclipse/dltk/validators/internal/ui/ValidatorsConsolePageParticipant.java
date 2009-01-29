@@ -38,6 +38,9 @@ public class ValidatorsConsolePageParticipant implements
 				new CloseValidatorsConsoleAction((ValidatorConsole) console));
 		toolbarManager.appendToGroup(IConsoleConstants.LAUNCH_GROUP,
 				new RemoveAllValidatorConsolesAction());
+		bars.getMenuManager().add(
+				new ShowCommandLineValidatorsConsoleAction(page,
+						(ValidatorConsole) console));
 	}
 
 	public Object getAdapter(Class adapter) {
