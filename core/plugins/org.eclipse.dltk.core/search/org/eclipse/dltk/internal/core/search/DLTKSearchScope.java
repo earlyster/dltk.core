@@ -356,12 +356,12 @@ public class DLTKSearchScope extends AbstractSearchScope {
 	}
 
 	private boolean natureFilter(IModelElement element) {
+		// For all projects scope
 		if (toolkit == null) {
 			return true;
 		}
 		IDLTKLanguageToolkit elementToolkit = DLTKLanguageManager
 				.getLanguageToolkit(element);
-		// For all projects scope
 		if (elementToolkit != null
 				&& elementToolkit.getNatureId().equals(toolkit.getNatureId())) {
 			// Filter by nature.
