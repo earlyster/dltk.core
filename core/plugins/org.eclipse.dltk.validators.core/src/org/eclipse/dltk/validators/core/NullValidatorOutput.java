@@ -55,7 +55,6 @@ public class NullValidatorOutput extends OutputStream implements
 
 	private Map attributes = null;
 
-	@Override
 	public void setAttribute(String name, Object value) {
 		if (attributes == null) {
 			attributes = new HashMap();
