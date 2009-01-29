@@ -12,6 +12,8 @@
 package org.eclipse.dltk.validators.core;
 
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implementation of the {@link IValidatorOutput} doing nothing.
@@ -49,6 +51,16 @@ public class NullValidatorOutput extends OutputStream implements
 
 	public void close() {
 		// empty
+	}
+
+	private Map attributes = null;
+
+	@Override
+	public void setAttribute(String name, Object value) {
+		if (attributes == null) {
+			attributes = new HashMap();
+		}
+		attributes.put(name, value);
 	}
 
 }

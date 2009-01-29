@@ -18,6 +18,8 @@ import java.io.OutputStream;
  */
 public interface IValidatorOutput {
 
+	static String COMMAND_LINE = "org.eclipse.dltk.validators.core.IValidatorOutput#commandLine";
+
 	/**
 	 * Checks if output is enabled.
 	 * 
@@ -52,5 +54,7 @@ public interface IValidatorOutput {
 	 * Closes this instance.
 	 */
 	void close();
+
+	void setAttribute(String name, Object value);
 
 }
