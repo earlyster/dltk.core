@@ -230,7 +230,13 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 	// IThread
 	public IStackFrame[] getStackFrames() throws DebugException {
 		if (!isSuspended()) {
-			return ScriptStack.NO_STACK_FRAMES;
+			try {
+				Thread.sleep(100);
+			} catch (Exception e) {
+			}
+			if (!isSuspended()) {
+				return ScriptStack.NO_STACK_FRAMES;
+			}
 		}
 
 		return stack.getFrames();

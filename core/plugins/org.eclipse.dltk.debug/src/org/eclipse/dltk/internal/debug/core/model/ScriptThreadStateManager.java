@@ -22,19 +22,19 @@ public class ScriptThreadStateManager implements IDbgpDebuggerFeedback {
 	private final DbgpDebugger engine;
 
 	// Abilities of debugging engine
-	private boolean canSuspend;
+	private volatile boolean canSuspend;
 
 	// Number of suspends
-	private int modificationsCount;
+	private volatile int modificationsCount;
 
 	// States
-	private boolean stepping;
+	private volatile boolean stepping;
 
-	private boolean suspended;
+	private volatile boolean suspended;
 
-	private boolean terminated;
+	private volatile boolean terminated;
 
-	private boolean stepIntoState;
+	private volatile boolean stepIntoState;
 
 	private final Object stepIntoLock = new Object();
 
