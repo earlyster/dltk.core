@@ -116,8 +116,7 @@ public abstract class ScriptConsoleCompletionProcessor implements
 
 	public IContextInformation[] computeContextInformation(ITextViewer viewer,
 			int offset) {
-		return computeContextInformationImpl((IScriptConsoleViewer) viewer,
-				offset);
+		return computeContextInformationImpl(viewer, offset);
 	}
 
 	public char[] getContextInformationAutoActivationCharacters() {
