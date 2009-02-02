@@ -11,10 +11,10 @@ package org.eclipse.dltk.debug.ui.breakpoints;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.ILineBreakpoint;
@@ -34,6 +34,7 @@ import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 public class BreakpointUtils {
@@ -100,11 +101,19 @@ public class BreakpointUtils {
 	}
 
 	public static IResource getBreakpointResource(ITextEditor textEditor) {
-		IResource resource = (IResource) textEditor.getEditorInput()
+		return getBreakpointResource(textEditor.getEditorInput());
+	}
+
+	public static IResource getBreakpointResource(final IEditorInput editorInput) {
+		IResource resource = (IResource) editorInput
 				.getAdapter(IResource.class);
 		if (resource == null)
-			resource = ResourcesPlugin.getWorkspace().getRoot();
+			resource = getWorkspaceRoot();
 		return resource;
+	}
+
+	private static IWorkspaceRoot getWorkspaceRoot() {
+		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
 	private static interface IBreakpointLocationTester {
@@ -112,30 +121,26 @@ public class BreakpointUtils {
 		/**
 		 * @param bpLocation
 		 * @return
+		 * @throws CoreException
 		 */
-		boolean evaluate(String bpLocation);
+		boolean evaluate(IBreakpoint breakpoint) throws CoreException;
 	}
 
 	private static class ResourceBreakpointLocationTester implements
 			IBreakpointLocationTester {
 
-		private final String workspacePath;
-		private final String filesystemPath;
+		private final IResource resource;
 
 		/**
 		 * @param resource
 		 */
 		public ResourceBreakpointLocationTester(IResource resource) {
-			this.workspacePath = resource.getFullPath().toPortableString();
-			this.filesystemPath = new Path(resource.getLocationURI().getPath())
-					.toPortableString();
+			this.resource = resource;
 		}
 
-		public boolean evaluate(String bpLocation) {
-			return workspacePath.equals(bpLocation)
-					|| filesystemPath.equals(bpLocation);
+		public boolean evaluate(IBreakpoint breakpoint) {
+			return resource.equals(breakpoint.getMarker().getResource());
 		}
-
 	}
 
 	private static class SimpleBreakpointLocationTester implements
@@ -150,22 +155,27 @@ public class BreakpointUtils {
 			this.path = path.toPortableString();
 		}
 
-		public boolean evaluate(String bpLocation) {
-			return path.equals(bpLocation);
+		public boolean evaluate(IBreakpoint breakpoint) throws CoreException {
+			final IResource bpResource = breakpoint.getMarker().getResource();
+			if (bpResource.equals(getWorkspaceRoot())) {
+				final String bpLocation = (String) breakpoint.getMarker()
+						.getAttribute(IMarker.LOCATION);
+				return path.equals(bpLocation);
+			}
+			return false;
 		}
-
 	}
 
-	public static IBreakpointLocationTester getBreakpointLocationTester(
-			ITextEditor textEditor) throws CoreException {
-		IResource resource = (IResource) textEditor.getEditorInput()
+	private static IBreakpointLocationTester getBreakpointLocationTester(
+			IEditorInput editorInput) throws CoreException {
+		IResource resource = (IResource) editorInput
 				.getAdapter(IResource.class);
-		if (resource != null) {
+		if (resource != null && !resource.equals(getWorkspaceRoot())) {
 			return new ResourceBreakpointLocationTester(resource);
 		}
 
 		// else
-		IModelElement element = (IModelElement) textEditor.getEditorInput()
+		IModelElement element = (IModelElement) editorInput
 				.getAdapter(IModelElement.class);
 		if (element != null) {
 			return new SimpleBreakpointLocationTester(element.getPath());
@@ -214,30 +224,26 @@ public class BreakpointUtils {
 
 	public static ILineBreakpoint findLineBreakpoint(ITextEditor editor,
 			int lineNumber) throws CoreException {
-		IResource resource = getBreakpointResource(editor);
-		String debugModelId = getDebugModelId(editor, resource);
-		IBreakpoint[] breakpoints = DebugPlugin.getDefault()
-				.getBreakpointManager().getBreakpoints(debugModelId);
-		IBreakpointLocationTester tester = getBreakpointLocationTester(editor);
+		final IEditorInput editorInput = editor.getEditorInput();
+		final IBreakpointLocationTester tester = getBreakpointLocationTester(editorInput);
 		if (tester == null) {
 			return null;
 		}
+		final IResource resource = getBreakpointResource(editorInput);
+		final String debugModelId = getDebugModelId(editor, resource);
+		final IBreakpoint[] breakpoints = DebugPlugin.getDefault()
+				.getBreakpointManager().getBreakpoints(debugModelId);
 
 		for (int i = 0; i < breakpoints.length; i++) {
-			IBreakpoint breakpoint = breakpoints[i];
-			IResource bpResource = breakpoint.getMarker().getResource();
-			String bpLocation = (String) breakpoint.getMarker().getAttribute(
-					IMarker.LOCATION);
-
-			if (resource.equals(bpResource) && tester.evaluate(bpLocation)) {
-				ILineBreakpoint lineBreakpoint = (ILineBreakpoint) breakpoint;
-				try {
+			try {
+				if (tester.evaluate(breakpoints[i])) {
+					final ILineBreakpoint lineBreakpoint = (ILineBreakpoint) breakpoints[i];
 					if (lineBreakpoint.getLineNumber() == lineNumber) {
 						return lineBreakpoint;
 					}
-				} catch (CoreException e) {
-					DLTKDebugUIPlugin.log(e);
 				}
+			} catch (CoreException e) {
+				DLTKDebugUIPlugin.log(e);
 			}
 		}
 
@@ -300,7 +306,7 @@ public class BreakpointUtils {
 		// can be calculated from it
 		IResource resource = type.getResource();
 		if (resource == null || !resource.getProject().exists()) {
-			resource = ResourcesPlugin.getWorkspace().getRoot();
+			resource = getWorkspaceRoot();
 		}
 		if (resource != null) {
 			ScriptDebugModel.createExceptionBreakpoint(debugModelId, resource,
