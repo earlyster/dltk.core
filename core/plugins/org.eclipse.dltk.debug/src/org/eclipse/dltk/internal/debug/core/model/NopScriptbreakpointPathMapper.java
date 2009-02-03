@@ -13,12 +13,10 @@ package org.eclipse.dltk.internal.debug.core.model;
 
 import java.net.URI;
 
+import org.eclipse.dltk.debug.core.model.IScriptBreakpointPathMapper;
+
 public class NopScriptbreakpointPathMapper implements
 		IScriptBreakpointPathMapper {
-
-	public void clearCache() {
-		// empty
-	}
 
 	public URI map(URI uri) {
 		return uri;

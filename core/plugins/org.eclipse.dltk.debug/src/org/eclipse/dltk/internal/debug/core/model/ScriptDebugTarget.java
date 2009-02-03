@@ -43,6 +43,7 @@ import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
 import org.eclipse.dltk.debug.core.IDbgpService;
 import org.eclipse.dltk.debug.core.IDebugOptions;
 import org.eclipse.dltk.debug.core.model.DefaultDebugOptions;
+import org.eclipse.dltk.debug.core.model.IScriptBreakpointPathMapper;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTargetListener;
 import org.eclipse.dltk.debug.core.model.IScriptDebugThreadConfigurator;
@@ -346,9 +347,9 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 					ExtendedDebugEventDetails.BEFORE_CODE_LOADED);
 		}
 
-		breakpointManager.initializeSession(thread.getDbgpSession());
-
-		if (first || isSupportsThreads(thread)) {
+		if (first || !isSupportsThreads(thread)) {
+			breakpointManager.initializeSession(thread.getDbgpSession());
+			threadManager.initializeBreakpoints(thread);
 			/*
 			 * tell the manager the thread was accepted after creating the path
 			 * mapper and setting the deferred breakpoints
@@ -539,5 +540,9 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	 */
 	public IDbgpSession[] getSessions() {
 		return breakpointManager.getSessions();
+	}
+
+	public IScriptBreakpointPathMapper getPathMapper() {
+		return breakpointManager.bpPathMapper;
 	}
 }

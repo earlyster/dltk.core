@@ -399,4 +399,11 @@ public class ScriptThreadManager implements IScriptThreadManager {
 			configurator.configureThread(engine, scriptThread);
 		}
 	}
+
+	public void initializeBreakpoints(IScriptThread thread) {
+		if (configurator != null) {
+			configurator.initializeBreakpoints(thread);
+		}
+	}
+
 }

@@ -36,4 +36,6 @@ public interface IScriptThreadManager extends IDbgpThreadAcceptor, ITerminate,
 
 	public void setScriptThreadConfigurator(
 			IScriptDebugThreadConfigurator configurator);
+
+	void initializeBreakpoints(IScriptThread thread);
 }

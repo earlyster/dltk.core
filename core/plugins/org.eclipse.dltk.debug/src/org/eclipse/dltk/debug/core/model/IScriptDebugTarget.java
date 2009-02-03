@@ -74,4 +74,6 @@ public interface IScriptDebugTarget extends IDebugTarget {
 	IDebugOptions getOptions();
 
 	IDbgpSession[] getSessions();
+
+	IScriptBreakpointPathMapper getPathMapper();
 }

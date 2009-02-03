@@ -6,6 +6,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.IDbgpService;
 import org.eclipse.dltk.debug.core.IDebugOptions;
+import org.eclipse.dltk.debug.core.model.IScriptBreakpointPathMapper;
 
 public class RemoteScriptDebugTarget extends ScriptDebugTarget {
 

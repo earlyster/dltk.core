@@ -21,7 +21,7 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 
-public class ScriptBreakpointPathMapper implements IScriptBreakpointPathMapper {
+public class ScriptBreakpointPathMapper implements IScriptBreakpointPathMapperExtension {
 	private HashMap cache;
 	private String mapTo;
 	private IScriptProject scriptProject;

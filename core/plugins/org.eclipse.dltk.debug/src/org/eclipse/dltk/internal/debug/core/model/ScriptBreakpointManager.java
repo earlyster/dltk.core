@@ -34,6 +34,7 @@ import org.eclipse.dltk.debug.core.DebugOption;
 import org.eclipse.dltk.debug.core.IDLTKDebugToolkit;
 import org.eclipse.dltk.debug.core.ScriptDebugManager;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
+import org.eclipse.dltk.debug.core.model.IScriptBreakpointPathMapper;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
 import org.eclipse.dltk.debug.core.model.IScriptExceptionBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptLineBreakpoint;
@@ -45,7 +46,7 @@ import org.eclipse.osgi.util.NLS;
 public class ScriptBreakpointManager implements IBreakpointListener,
 		IBreakpointManagerListener {
 
-	private final IScriptBreakpointPathMapper bpPathMapper;
+	final IScriptBreakpointPathMapper bpPathMapper;
 
 	private static final IDbgpSession[] NO_SESSIONS = new IDbgpSession[0];
 
@@ -402,7 +403,9 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		manager.removeBreakpointListener(target);
 		manager.removeBreakpointManagerListener(this);
 
-		bpPathMapper.clearCache();
+		if (bpPathMapper instanceof IScriptBreakpointPathMapperExtension) {
+			((IScriptBreakpointPathMapperExtension) bpPathMapper).clearCache();
+		}
 	}
 
 	synchronized IDbgpSession[] getSessions() {
