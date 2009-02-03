@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.core.model;
 
+/**
+ * @deprecated
+ */
 public interface IScriptSpawnpoint extends IScriptLineBreakpoint {
 
 }
