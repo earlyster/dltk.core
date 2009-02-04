@@ -10,13 +10,13 @@
 package org.eclipse.dltk.debug.dbgp.tests;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 
 import org.eclipse.dltk.dbgp.DbgpRequest;
 import org.eclipse.dltk.dbgp.IDbgpStackLevel;
 import org.eclipse.dltk.dbgp.commands.IDbgpStackCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpStackCommands;
+import org.eclipse.osgi.util.NLS;
 import org.w3c.dom.Element;
 
 public class DbgpStackCommandsTests extends DbgpProtocolTests {
@@ -24,7 +24,7 @@ public class DbgpStackCommandsTests extends DbgpProtocolTests {
 			throws IOException {
 		String xml = getResourceAsString("get_stack_depth.xml");
 
-		xml = MessageFormat.format(xml, new Object[] {
+		xml = NLS.bind(xml, new Object[] {
 				Integer.toString(transaction_id), Integer.toString(depth) });
 
 		return parseResponse(xml);
@@ -34,7 +34,7 @@ public class DbgpStackCommandsTests extends DbgpProtocolTests {
 			throws IOException {
 		String xml = getResourceAsString("stack_get.xml");
 
-		xml = MessageFormat.format(xml, new Object[] { Integer
+		xml = NLS.bind(xml, new Object[] { Integer
 				.toString(transaction_id) });
 
 		return parseResponse(xml);

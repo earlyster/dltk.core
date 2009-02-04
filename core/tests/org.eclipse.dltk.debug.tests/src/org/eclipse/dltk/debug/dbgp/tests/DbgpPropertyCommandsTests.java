@@ -10,13 +10,13 @@
 package org.eclipse.dltk.debug.dbgp.tests;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 
 import org.eclipse.dltk.dbgp.DbgpRequest;
 import org.eclipse.dltk.dbgp.commands.IDbgpPropertyCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpProtocolException;
 import org.eclipse.dltk.dbgp.internal.commands.DbgpPropertyCommands;
+import org.eclipse.osgi.util.NLS;
 import org.w3c.dom.Element;
 
 public class DbgpPropertyCommandsTests extends DbgpProtocolTests {
@@ -28,7 +28,7 @@ public class DbgpPropertyCommandsTests extends DbgpProtocolTests {
 	protected Element makePropertyGetResponse(String name, String fullName,
 			String type) throws IOException, DbgpProtocolException {
 		String xml = getResourceAsString(GET_PROPERTY_RESPONSE);
-		xml = MessageFormat.format(xml, new Object[] { name, fullName, type,
+		xml = NLS.bind(xml, new Object[] { name, fullName, type,
 				"_size", "_children" });
 		return parseResponse(xml);
 	}
@@ -36,7 +36,7 @@ public class DbgpPropertyCommandsTests extends DbgpProtocolTests {
 	protected Element makePropertySetResponse(int transaction_id,
 			boolean success) throws IOException, DbgpProtocolException {
 		String xml = getResourceAsString(SET_PROPERTY_RESPONSE);
-		xml = MessageFormat.format(xml, new Object[] { success ? "1" : "0",
+		xml = NLS.bind(xml, new Object[] { success ? "1" : "0",
 				Integer.toString(transaction_id) });
 		return parseResponse(xml);
 	}
