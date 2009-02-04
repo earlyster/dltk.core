@@ -9,7 +9,7 @@ import org.eclipse.core.runtime.Platform;
 public class SimpleDLTKExtensionManager {
 	private List extensions;
 
-	private String extensionPoint = null;
+	private final String extensionPoint;
 
 	public SimpleDLTKExtensionManager(String extension) {
 		this.extensionPoint = extension;
