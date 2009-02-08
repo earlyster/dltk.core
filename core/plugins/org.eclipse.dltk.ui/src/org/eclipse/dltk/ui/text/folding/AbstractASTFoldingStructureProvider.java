@@ -1171,9 +1171,6 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	 * @return
 	 * @deprecated will be removed
 	 * @see #initiallyCollapseComments(IRegion,
-	 *     
-	 *     
-	 *     
 	 *      org.eclipse.dltk.ui.text.folding.AbstractASTFoldingStructureProvider.FoldingStructureComputationContext)
 	 */
 	protected boolean initiallyCollapseComments(
@@ -1271,11 +1268,10 @@ public abstract class AbstractASTFoldingStructureProvider implements
 			Document d = new Document(contents);
 			installDocumentStuff(d);
 			List docRegionList = new ArrayList();
-			ITypedRegion region = null;
 			int offset = 0;
 			while (true) {
 				try {
-					region = getRegion(d, offset);
+					ITypedRegion region = getRegion(d, offset);
 					docRegionList.add(region);
 					offset = region.getLength() + region.getOffset() + 1;
 				} catch (BadLocationException e1) {
@@ -1284,10 +1280,9 @@ public abstract class AbstractASTFoldingStructureProvider implements
 			}
 			ITypedRegion docRegions[] = new ITypedRegion[docRegionList.size()];
 			docRegionList.toArray(docRegions);
-			IRegion fullRegion = null;
 			int start = -1;
 			for (int i = 0; i < docRegions.length; i++) {
-				region = docRegions[i];
+				ITypedRegion region = docRegions[i];
 				boolean multiline = isMultilineRegion(d, region);
 				boolean badStart = false;
 				if (d.getLineOffset(d.getLineOfOffset(region.getOffset())) != region
@@ -1314,7 +1309,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 						String testForTrim = contents.substring(offset0,
 								offset0 + length0).trim();
 						length0 = testForTrim.length();
-						fullRegion = new Region(offset0, length0);
+						IRegion fullRegion = new Region(offset0, length0);
 						if (isMultilineRegion(d, fullRegion)) {
 							regions.add(fullRegion);
 						}
@@ -1327,7 +1322,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 				int length0 = docRegions[docRegions.length - 1].getOffset()
 						- offset0
 						+ docRegions[docRegions.length - 1].getLength() - 1;
-				fullRegion = new Region(offset0, length0);
+				IRegion fullRegion = new Region(offset0, length0);
 				if (isMultilineRegion(d, fullRegion)) {
 					regions.add(fullRegion);
 				}
