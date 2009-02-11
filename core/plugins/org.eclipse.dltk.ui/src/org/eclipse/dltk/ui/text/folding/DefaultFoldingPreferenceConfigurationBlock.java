@@ -3,7 +3,7 @@ package org.eclipse.dltk.ui.text.folding;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.dltk.ui.Messages;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.preferences.ImprovedAbstractConfigurationBlock;
 import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore;
@@ -12,8 +12,10 @@ import org.eclipse.dltk.ui.preferences.FieldValidators.MinimumNumberValidator;
 import org.eclipse.dltk.ui.util.PixelConverter;
 import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -121,25 +123,23 @@ public class DefaultFoldingPreferenceConfigurationBlock extends
 	private Text createMinLines(Composite parent) {
 		Composite composite = SWTFactory.createComposite(parent, parent
 				.getFont(), 2, 1, GridData.FILL);
-		PixelConverter converter = new PixelConverter(composite);
+		((GridLayout) composite.getLayout()).marginWidth = 0;
 
 		int minLines = defaultMinLines();
 
 		SWTFactory
 				.createLabel(
 						composite,
-						Messages
-								.format(
+						NLS
+								.bind(
 										PreferencesMessages.FoldingConfigurationBlock_minLinesToEnableFolding,
-										new Integer(minLines)), 15, 1);
+										new Integer(minLines)), 0, 1);
 
-		Text textBox = SWTFactory.createText(composite, SWT.NONE, 1, "");
+		Text textBox = SWTFactory.createText(composite, SWT.BORDER, 1,
+				Util.EMPTY_STRING);
 		textBox.setTextLimit(4);
-
-		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		data.widthHint = converter.convertWidthInCharsToPixels(4 + 1);
-		data.horizontalSpan = 1;
-		textBox.setLayoutData(data);
+		((GridData) textBox.getLayoutData()).widthHint = new PixelConverter(
+				composite).convertWidthInCharsToPixels(4 + 1);
 
 		bindControl(textBox, PreferenceConstants.EDITOR_FOLDING_LINES_LIMIT,
 				new MinimumNumberValidator(minLines));
