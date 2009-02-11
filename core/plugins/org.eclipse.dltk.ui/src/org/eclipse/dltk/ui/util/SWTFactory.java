@@ -152,15 +152,12 @@ public class SWTFactory {
 	 * @return a new check box button
 	 */
 	public static Button createCheckButton(Composite parent, String label) {
-		Button button = new Button(parent, SWT.CHECK);
-		button.setFont(parent.getFont());
-		if (label != null) {
-			button.setText(label);
-		}
-		GridData gd = new GridData();
-		button.setLayoutData(gd);
-		setButtonDimensionHint(button);
-		return button;
+		return createCheckButton(parent, label, 1);
+	}
+
+	public static Button createCheckButton(Composite parent, String label,
+			int hspan) {
+		return createCheckButton(parent, label, null, false, hspan);
 	}
 
 	/**
@@ -243,7 +240,7 @@ public class SWTFactory {
 	 * @return the new label
 	 */
 	public static Label createLabel(Composite parent, String text, int hspan) {
-		return createLabel(parent, text, 0, parent.getFont(), hspan);
+		return createLabel(parent, text, 0, hspan);
 	}
 
 	/**
@@ -301,12 +298,17 @@ public class SWTFactory {
 	 */
 	public static Text createText(Composite parent, int style, int hspan,
 			String text) {
+		return createText(parent, style, hspan, text, GridData.FILL_HORIZONTAL);
+	}
+
+	public static Text createText(Composite parent, int style, int hspan,
+			String text, int fill) {
 		Text t = new Text(parent, style);
 		t.setFont(parent.getFont());
 
 		makeScrollableCompositeAware(parent);
 
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		GridData gd = new GridData(fill);
 		gd.horizontalSpan = hspan;
 
 		t.setLayoutData(gd);
@@ -552,6 +554,19 @@ public class SWTFactory {
 		gd.horizontalSpan = hspan;
 		ex.setLayoutData(gd);
 		return ex;
+	}
+
+	public static void setUseSelectionInverse(Button button) {
+		button.setData("__use_selection_inverse", Boolean.TRUE);
+	}
+
+	public static boolean useSelectionInverse(Button button) {
+		Object inverse = button.getData("__use_selection_inverse");
+		if (inverse != null && ((Boolean) inverse).booleanValue()) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private static ScrolledPageContent getParentScrolledComposite(

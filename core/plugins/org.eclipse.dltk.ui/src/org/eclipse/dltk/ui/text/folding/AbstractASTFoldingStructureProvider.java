@@ -69,11 +69,12 @@ import org.eclipse.ui.texteditor.ITextEditor;
  */
 public abstract class AbstractASTFoldingStructureProvider implements
 		IFoldingStructureProvider, IFoldingStructureProviderExtension {
+
 	/**
 	 * A context that contains the information needed to compute the folding
 	 * structure of an {@link ISourceModule}. Computed folding regions are
 	 * collected via
-	 * {@linkplain #addProjectionRange(DefaultScriptFoldingStructureProvider.ScriptProjectionAnnotation, Position)
+	 * {@link #addProjectionRange(AbstractASTFoldingStructureProvider.ScriptProjectionAnnotation, Position)
 	 * addProjectionRange}.
 	 */
 	public static final class FoldingStructureComputationContext {
@@ -218,7 +219,6 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		 * @param isComment
 		 *            <code>true</code> for a foldable comment,
 		 *            <code>false</code> for a foldable code element
-		 * @param position
 		 */
 		public ScriptProjectionAnnotation(boolean isCollapsed,
 				boolean isComment, SourceRangeStamp codeStamp,
@@ -447,8 +447,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		 * @seeorg.eclipse.jface.text.source.projection.IProjectionPosition#
 		 * computeCaptionOffset(org.eclipse.jface.text.IDocument)
 		 */
-		public int computeCaptionOffset(IDocument document)
-				throws BadLocationException {
+		public int computeCaptionOffset(IDocument document) {
 			return 0;
 		}
 	}
@@ -541,20 +540,32 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	/** Comment filter, matches comments. */
 	private final Filter fCommentFilter = new CommentFilter();
 	private IPreferenceStore fStore;
+
 	private int fBlockLinesMin;
+
+	protected boolean fDocsFolding;
 	protected boolean fCommentsFolding;
-	protected boolean fFoldNewLines = true;
+	protected boolean fFoldNewLines;
+
+	protected boolean fInitCollapseComments;
+	protected boolean fInitCollapseHeaderComments;
+	protected boolean fInitCollapseClasses;
+	protected boolean fInitCollapseMethods;
+
+	private IElementCommentResolver fElementCommentResolver;
+	private boolean fInitCollapseDocs;
 
 	/**
 	 * Creates a new folding provider. It must be
-	 * {@link #install(ITextEditor, ProjectionViewer) installed} on an
-	 * editor/viewer pair before it can be used, and {@link #uninstall()
-	 * uninstalled} when not used any longer.
+	 * {@link #install(ITextEditor, ProjectionViewer, IPreferenceStore)
+	 * installed} on an editor/viewer pair before it can be used, and
+	 * {@link #uninstall() uninstalled} when not used any longer.
 	 * <p>
 	 * The projection state may be reset by calling {@link #initialize()}.
 	 * </p>
 	 */
 	public AbstractASTFoldingStructureProvider() {
+		// empty constructor
 	}
 
 	/**
@@ -647,21 +658,27 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		}
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.dltk.ui.text.folding.IScriptFoldingStructureProvider#initialize
-	 * ()
-	 */
 	public final void initialize() {
-		update(createInitialContext());
+		initialize(false);
 	}
 
-	protected FoldingStructureComputationContext createInitialContext() {
+	public final void initialize(boolean isReinit) {
+		update(createInitialContext(isReinit));
+	}
+
+	protected FoldingStructureComputationContext createInitialContext(
+			boolean isReinit) {
 		initializePreferences(fStore);
 		fInput = getInputElement();
 		if (fInput == null)
 			return null;
-		return createContext(true);
+
+		// don't auto collapse if reinitializing
+		return createContext((isReinit) ? false : true);
+	}
+
+	protected FoldingStructureComputationContext createInitialContext() {
+		return createInitialContext(true);
 	}
 
 	protected FoldingStructureComputationContext createContext(
@@ -769,34 +786,17 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		if (blockRegions == null) {
 			return false;
 		}
+
 		if (fCommentsFolding) {
-			// 1. Compute regions for comments
 			IRegion[] commentRegions = computeCommentsRanges(contents);
-			// comments
-			for (int i = 0; i < commentRegions.length; i++) {
-				IRegion normalized = alignRegion(commentRegions[i], ctx);
-				if (normalized != null) {
-					Position position = createCommentPosition(normalized);
-					if (position != null) {
-						int hash = contents
-								.substring(
-										normalized.getOffset(),
-										normalized.getOffset()
-												+ normalized.getLength())
-								.hashCode();
-						IModelElement element = null;
-						IElementCommentResolver res = getElementCommentResolver();
-						if (res != null && fInput != null) {
-							element = res.getElementByCommentPosition(
-									(ISourceModule) fInput, position.offset, 0);
-						}
-						ctx.addProjectionRange(new ScriptProjectionAnnotation(
-								initiallyCollapseComments(normalized, ctx),
-								true, new SourceRangeStamp(hash, normalized
-										.getLength()), element), position);
-					}
-				}
-			}
+			addDocAnnotations(contents, ctx, commentRegions, false);
+		}
+
+		String docPartition = getDocPartition();
+		if (fDocsFolding && docPartition != null) {
+			IRegion[] commentRegions = computeCommentsRanges(contents,
+					docPartition);
+			addDocAnnotations(contents, ctx, commentRegions, true);
 		}
 
 		// 2. Compute blocks regions
@@ -863,6 +863,38 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		return true;
 	}
 
+	private void addDocAnnotations(String contents,
+			FoldingStructureComputationContext ctx, IRegion[] commentRegions,
+			boolean isDoc) {
+		for (int i = 0; i < commentRegions.length; i++) {
+			IRegion normalized = alignRegion(commentRegions[i], ctx);
+			if (normalized == null) {
+				continue;
+			}
+
+			Position position = createCommentPosition(normalized);
+			if (position == null) {
+				continue;
+			}
+
+			int hash = contents.substring(normalized.getOffset(),
+					normalized.getOffset() + normalized.getLength()).hashCode();
+			IModelElement element = null;
+			IElementCommentResolver res = getElementCommentResolver();
+			if (res != null && fInput != null) {
+				element = res.getElementByCommentPosition(
+						(ISourceModule) fInput, position.offset, 0);
+			}
+
+			boolean initCollapse = (isDoc) ? initiallyCollapseDocs(normalized,
+					ctx) : initiallyCollapseComments(normalized, ctx);
+
+			ctx.addProjectionRange(new ScriptProjectionAnnotation(initCollapse,
+					true, new SourceRangeStamp(hash, normalized.getLength()),
+					element), position);
+		}
+	}
+
 	protected static class CodeBlock {
 		public ASTNode statement;
 		public IRegion region;
@@ -888,8 +920,53 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	protected void initializePreferences(IPreferenceStore store) {
 		fBlockLinesMin = store
 				.getInt(PreferenceConstants.EDITOR_FOLDING_LINES_LIMIT);
+
+		fDocsFolding = store
+				.getBoolean(PreferenceConstants.EDITOR_DOCS_FOLDING_ENABLED);
+
 		fCommentsFolding = store
 				.getBoolean(PreferenceConstants.EDITOR_COMMENTS_FOLDING_ENABLED);
+
+		fFoldNewLines = store
+				.getBoolean(PreferenceConstants.EDITOR_COMMENT_FOLDING_JOIN_NEWLINES);
+
+		fInitCollapseComments = store
+				.getBoolean(PreferenceConstants.EDITOR_FOLDING_INIT_COMMENTS);
+
+		fInitCollapseHeaderComments = store
+				.getBoolean(PreferenceConstants.EDITOR_FOLDING_INIT_HEADER_COMMENTS);
+
+		fInitCollapseDocs = store
+				.getBoolean(PreferenceConstants.EDITOR_FOLDING_INIT_DOCS);
+
+		fInitCollapseClasses = store.getBoolean(getInitiallyFoldClassesKey());
+		fInitCollapseMethods = store.getBoolean(getInitiallyFoldMethodsKey());
+	}
+
+	/**
+	 * Returns the preference key used to indicate if classes should be
+	 * 'initially' folded.
+	 * 
+	 * <p>
+	 * Sub-classes may override this method to provide an alternative preference
+	 * key if they are not using the one in {@link PreferenceConstants}.
+	 * </p>
+	 */
+	protected String getInitiallyFoldClassesKey() {
+		return PreferenceConstants.EDITOR_FOLDING_INIT_CLASSES;
+	}
+
+	/**
+	 * Returns the preference key used to indicate if methods should be
+	 * 'initially' folded.
+	 * 
+	 * <p>
+	 * Sub-classes may override this method to provide an alternative preference
+	 * key if they are not using the one in {@link PreferenceConstants}.
+	 * </p>
+	 */
+	protected String getInitiallyFoldMethodsKey() {
+		return PreferenceConstants.EDITOR_FOLDING_INIT_METHODS;
 	}
 
 	protected boolean isEmptyRegion(IDocument d, ITypedRegion r)
@@ -906,15 +983,16 @@ public abstract class AbstractASTFoldingStructureProvider implements
 			throws BadLocationException {
 		int line1 = d.getLineOfOffset(region.getOffset());
 		int line2 = d.getLineOfOffset(region.getOffset() + region.getLength());
-		if (getMinimalFoldableLinesCount() > 0)
+		if (getMinimalFoldableLinesCount() > 0) {
 			return (line2 - line1 + 1 >= getMinimalFoldableLinesCount());
-		else
-			return (line1 != line2);
+		}
+
+		return (line1 != line2);
 	}
 
 	/**
 	 * Creates a comment folding position from an
-	 * {@link #alignRegion(IRegion, DefaultScriptFoldingStructureProvider.FoldingStructureComputationContext)
+	 * {@link #alignRegion(IRegion, AbstractASTFoldingStructureProvider.FoldingStructureComputationContext)
 	 * aligned} region.
 	 * 
 	 * @param aligned
@@ -927,13 +1005,12 @@ public abstract class AbstractASTFoldingStructureProvider implements
 
 	/**
 	 * Creates a folding position that remembers its member from an
-	 * {@link #alignRegion(IRegion, DefaultScriptFoldingStructureProvider.FoldingStructureComputationContext)
+	 * {@link #alignRegion(IRegion, AbstractASTFoldingStructureProvider.FoldingStructureComputationContext)
 	 * aligned} region.
 	 * 
 	 * @param aligned
 	 *            an aligned region
-	 * @param member
-	 *            the member to remember
+	 * 
 	 * @return a folding position corresponding to <code>aligned</code>
 	 */
 	protected final Position createMemberPosition(IRegion aligned) {
@@ -1075,6 +1152,10 @@ public abstract class AbstractASTFoldingStructureProvider implements
 
 	protected abstract String getCommentPartition();
 
+	protected String getDocPartition() {
+		return null;
+	}
+
 	protected abstract IPartitionTokenScanner getPartitionScanner();
 
 	protected abstract String getNatureId();
@@ -1125,9 +1206,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	 * Should locate all statements and return
 	 * 
 	 * @param code
-	 * @return
 	 */
-
 	protected CodeBlock[] getCodeBlocks(String code) {
 		return getCodeBlocks(code, 0);
 	}
@@ -1158,29 +1237,59 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	 * 
 	 * @param s
 	 * @param ctx
-	 * @return
 	 */
-	protected abstract boolean mayCollapse(ASTNode s,
-			FoldingStructureComputationContext ctx);
-
-	protected abstract boolean initiallyCollapse(ASTNode s,
-			FoldingStructureComputationContext ctx);
-
-	/**
-	 * @param ctx
-	 * @return
-	 * @deprecated will be removed
-	 * @see #initiallyCollapseComments(IRegion,
-	 *      org.eclipse.dltk.ui.text.folding.AbstractASTFoldingStructureProvider.FoldingStructureComputationContext)
-	 */
-	protected boolean initiallyCollapseComments(
+	protected boolean mayCollapse(ASTNode s,
 			FoldingStructureComputationContext ctx) {
+		if (s instanceof TypeDeclaration) {
+			return true;
+		}
+
+		if (s instanceof MethodDeclaration) {
+			return true;
+		}
+
+		return false;
+	}
+
+	protected boolean initiallyCollapse(ASTNode s,
+			FoldingStructureComputationContext ctx) {
+		if (ctx.allowCollapsing()) {
+			return initiallyCollapse(s);
+		}
+
+		return false;
+	}
+
+	protected boolean initiallyCollapse(ASTNode s) {
+		// classes, modules, etc
+		if (s instanceof TypeDeclaration && fInitCollapseClasses) {
+			return true;
+		}
+
+		// methods, subroutines, etc
+		if (s instanceof MethodDeclaration && fInitCollapseMethods) {
+			return true;
+		}
+
 		return false;
 	}
 
 	protected boolean initiallyCollapseComments(IRegion commentRegion,
 			FoldingStructureComputationContext ctx) {
-		return initiallyCollapseComments(ctx);
+		if (ctx.allowCollapsing()) {
+			return isHeaderRegion(commentRegion, ctx) ? fInitCollapseHeaderComments
+					: fInitCollapseComments;
+		}
+		return false;
+	}
+
+	protected boolean initiallyCollapseDocs(IRegion commentRegion,
+			FoldingStructureComputationContext ctx) {
+		if (ctx.allowCollapsing()) {
+			return fInitCollapseDocs;
+		}
+
+		return false;
 	}
 
 	/**
@@ -1189,7 +1298,6 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	 * 
 	 * @param region
 	 * @param ctx
-	 * @return
 	 */
 	protected boolean isHeaderRegion(IRegion region,
 			FoldingStructureComputationContext ctx) {
@@ -1252,7 +1360,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	}
 
 	public void collapseElements(IModelElement[] modelElements) {
-
+		// empty implementation
 	}
 
 	private ITypedRegion getRegion(IDocument d, int offset)
@@ -1261,6 +1369,11 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	}
 
 	protected IRegion[] computeCommentsRanges(String contents) {
+		// for backwards compatibility incase anyone has overridden this..
+		return computeCommentsRanges(contents, getCommentPartition());
+	}
+
+	protected IRegion[] computeCommentsRanges(String contents, String partition) {
 		try {
 			if (contents == null)
 				return new IRegion[0];
@@ -1295,7 +1408,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 						badStart = true;
 				}
 				if (!badStart
-						&& (region.getType().equals(getCommentPartition())
+						&& (region.getType().equals(partition)
 								|| (start != -1 && isEmptyRegion(d, region)
 										&& multiline && collapseEmptyLines()) || (start != -1
 								&& isEmptyRegion(d, region) && !multiline))) {
@@ -1342,13 +1455,18 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	}
 
 	public IElementCommentResolver getElementCommentResolver() {
-		return null;
+		if (fElementCommentResolver == null) {
+			fElementCommentResolver = new DefaultElementCommentResolver();
+		}
+
+		return fElementCommentResolver;
 	}
 
 	public static class MethodCollector implements IModelElementVisitor {
 		private final Map methodByNameRange = new HashMap();
 
 		public boolean visit(IModelElement element) {
+
 			if (element instanceof SourceMethod) {
 				try {
 					final ISourceRange nameRange = ((SourceMethod) element)
@@ -1364,7 +1482,6 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		/**
 		 * @param offset
 		 * @param length
-		 * @return
 		 */
 		public IModelElement get(int offset, int length) {
 			return (IModelElement) methodByNameRange.get(new SourceRange(

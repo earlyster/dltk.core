@@ -174,9 +174,23 @@ public final class PreferencesMessages extends NLS {
 	public static String UserLibraryPreferencePage_LoadSaveDialog_list_error_load_nothingselected;
 	public static String UserLibraryPreferencePage_LoadSaveDialog_load_badformat;
 	public static String UserLibraryPreferencePage_LoadSaveDialog_load_replace_title;
+
+	public static String FoldingConfigurationBlock_docTabName;
+	public static String FoldingConfigurationBlock_srcTabName;
+
 	public static String FoldingConfigurationBlock_enable;
 	public static String FoldingConfigurationBlock_commentsEnable;
+	public static String FoldingConfigurationBlock_joinComments;
+	public static String FoldingConfigurationBlock_initiallyFold;
+	public static String FoldingConfigurationBlock_initiallyFoldDocs;
+	public static String FoldingConfigurationBlock_initiallyFoldComments;
+	public static String FoldingConfigurationBlock_initiallyFoldHeaderComments;
+	public static String FoldingConfigurationBlock_minLinesToEnableFolding;
+	public static String FoldingConfigurationBlock_initiallyFoldClasses;
+	public static String FoldingConfigurationBlock_initiallyFoldMethods;
+
 	public static String FoldingConfigurationBlock_info_no_preferences;
+
 	public static String SmartTypingConfigurationBlock_autoclose_title;
 	public static String SmartTypingConfigurationBlock_tabs_title;
 	public static String SmartTypingConfigurationBlock_tabs_message_tab_text;

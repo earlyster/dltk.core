@@ -12,6 +12,7 @@ import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
+import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -21,24 +22,29 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
+/**
+ */
 public class ControlBindingManager {
+	private IStatusChangeListener changeListener;
+
+	private Map checkBoxControls;
+	private Map comboControls;
+
+	private DependencyManager dependencyManager;
+
+	private IPreferenceDelegate preferenceDelegate;
+	private Map radioControls;
 
 	private Map textControls;
 	private final Map textTransformers = new HashMap();
-	private Map comboControls;
-	private Map buttonControls;
-
-	private IPreferenceDelegate preferenceDelegate;
-	private IStatusChangeListener changeListener;
-
-	private DependencyManager dependencyManager;
 	private ValidatorManager validatorManager;
 
 	public ControlBindingManager(IPreferenceDelegate delegate,
 			IStatusChangeListener listener) {
-		this.buttonControls = new HashMap();
+		this.checkBoxControls = new HashMap();
 		this.comboControls = new HashMap();
 		this.textControls = new HashMap();
+		this.radioControls = new HashMap();
 
 		this.validatorManager = new ValidatorManager();
 		this.dependencyManager = new DependencyManager();
@@ -47,58 +53,32 @@ public class ControlBindingManager {
 		this.preferenceDelegate = delegate;
 	}
 
-	public void initialize() {
-		Iterator it = textControls.keySet().iterator();
-		while (it.hasNext()) {
-			final Text text = (Text) it.next();
-			final Object key = textControls.get(text);
-			String value = preferenceDelegate.getString(key);
-			final ITextConverter textTransformer = (ITextConverter) textTransformers
-					.get(text);
-			if (textTransformer != null) {
-				value = textTransformer.convertPreference(value);
-			}
-			text.setText(value);
+	public void bindControl(final Combo combo, final Object key) {
+		if (key != null) {
+			comboControls.put(combo, key);
 		}
 
-		it = buttonControls.keySet().iterator();
-		while (it.hasNext()) {
-			final Button button = (Button) it.next();
-			final Object key = buttonControls.get(button);
-			button.setSelection(preferenceDelegate.getBoolean(key));
-		}
-
-		it = comboControls.keySet().iterator();
-		while (it.hasNext()) {
-			final Combo combo = (Combo) it.next();
-			final Object key = comboControls.get(combo);
-			String value = preferenceDelegate.getString(key);
-			String[] items = combo.getItems();
-			boolean selected = false;
-			for (int i = 0; i < items.length; i++) {
-				if (items[i].equals(value)) {
-					combo.select(i);
-					selected = true;
-					break;
-				}
+		combo.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
 			}
-			if (!selected) {
-				combo.select(0);
-			}
-		}
 
-		dependencyManager.initialize();
+			public void widgetSelected(SelectionEvent e) {
+				int index = combo.getSelectionIndex();
+				preferenceDelegate.setString(key, combo.getItem(index));
+
+				changeListener.statusChanged(StatusInfo.OK_STATUS);
+			}
+		});
 	}
 
 	public void bindControl(final Button button, final Object key,
 			Control[] slaves) {
 		if (key != null) {
-			buttonControls.put(button, key);
+			checkBoxControls.put(button, key);
 		}
 
-		if (slaves != null) {
-			dependencyManager.createDependency(button, slaves);
-		}
+		createDependency(button, slaves);
 
 		button.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -124,12 +104,13 @@ public class ControlBindingManager {
 		if (key != null) {
 			if (textControls.containsKey(key)) {
 				final RuntimeException error = new IllegalArgumentException(
-						"Duplicate control " + key); //$NON-NLS-1$ 
+						"Duplicate control " + key); // $NON-NLS-1$
 				DLTKUIPlugin.log(error);
 				if (DLTKCore.DEBUG) {
 					throw error;
 				}
 			}
+
 			textControls.put(text, key);
 			if (transformer != null) {
 				textTransformers.put(text, transformer);
@@ -150,6 +131,7 @@ public class ControlBindingManager {
 						if (transformer != null) {
 							value = transformer.convertInput(value);
 						}
+
 						preferenceDelegate.setString(key, value);
 					}
 				}
@@ -159,30 +141,30 @@ public class ControlBindingManager {
 		});
 	}
 
-	public void bindControl(final Combo combo, final Object key) {
+	public void bindRadioControl(final Button button, final String key,
+			final Object enable, Control[] dependencies) {
 		if (key != null) {
-			comboControls.put(combo, key);
+			radioControls.put(button, key);
 		}
-		combo.addSelectionListener(new SelectionListener() {
+
+		createDependency(button, dependencies);
+
+		button.setData(String.valueOf(enable));
+		button.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
 
 			public void widgetSelected(SelectionEvent e) {
-				int index = combo.getSelectionIndex();
-				preferenceDelegate.setString(key, combo.getItem(index));
-
-				changeListener.statusChanged(StatusInfo.OK_STATUS);
+				String value = String.valueOf(enable);
+				preferenceDelegate.setString(key, value);
 			}
 		});
 	}
 
-	private IStatus validateText(Text text) {
-		IFieldValidator validator = validatorManager.getValidator(text);
-		if ((validator != null) && text.isEnabled()) {
-			return validator.validate(text.getText());
-		} else {
-			return StatusInfo.OK_STATUS;
+	public void createDependency(final Button button, Control[] dependencies) {
+		if (dependencies != null) {
+			dependencyManager.createDependency(button, dependencies);
 		}
 	}
 
@@ -193,7 +175,17 @@ public class ControlBindingManager {
 			IStatus s = validateText((Text) iter.next());
 			status = StatusUtil.getMoreSevere(s, status);
 		}
+
 		return status;
+	}
+
+	public void initialize() {
+		initTextControls();
+		initCheckBoxes();
+		initRadioControls();
+		initCombos();
+
+		dependencyManager.initialize();
 	}
 
 	protected void updateStatus(IStatus status) {
@@ -208,23 +200,95 @@ public class ControlBindingManager {
 		changeListener.statusChanged(status);
 	}
 
-	class DependencyManager {
-		private List masterSlaveListeners = new ArrayList();
+	private void initCheckBoxes() {
+		Iterator it = checkBoxControls.keySet().iterator();
+		while (it.hasNext()) {
+			final Button button = (Button) it.next();
+			final Object key = checkBoxControls.get(button);
+			button.setSelection(preferenceDelegate.getBoolean(key));
+		}
+	}
 
-		public void initialize() {
-			Iterator it = masterSlaveListeners.iterator();
-			while (it.hasNext()) {
-				((SelectionListener) it.next()).widgetSelected(null);
+	private void initCombos() {
+		Iterator it = comboControls.keySet().iterator();
+		while (it.hasNext()) {
+			final Combo combo = (Combo) it.next();
+			final Object key = comboControls.get(combo);
+			String value = preferenceDelegate.getString(key);
+			String[] items = combo.getItems();
+			boolean selected = false;
+			for (int i = 0; i < items.length; i++) {
+				if (items[i].equals(value)) {
+					combo.select(i);
+					selected = true;
+					break;
+				}
+			}
+
+			if (!selected) {
+				combo.select(0);
 			}
 		}
+	}
+
+	private void initRadioControls() {
+		Iterator it = radioControls.keySet().iterator();
+		while (it.hasNext()) {
+			Button button = (Button) it.next();
+			Object key = radioControls.get(button);
+
+			String enable = (String) button.getData();
+			String value = preferenceDelegate.getString(key);
+
+			if (enable != null && enable.equals(value)) {
+				button.setSelection(true);
+			} else {
+				button.setSelection(false);
+			}
+		}
+	}
+
+	private void initTextControls() {
+		Iterator it = textControls.keySet().iterator();
+		while (it.hasNext()) {
+			final Text text = (Text) it.next();
+			final Object key = textControls.get(text);
+			String value = preferenceDelegate.getString(key);
+			final ITextConverter textTransformer = (ITextConverter) textTransformers
+					.get(text);
+			if (textTransformer != null) {
+				value = textTransformer.convertPreference(value);
+			}
+
+			text.setText(value);
+		}
+	}
+
+	private IStatus validateText(Text text) {
+		IFieldValidator validator = validatorManager.getValidator(text);
+		if ((validator != null) && text.isEnabled()) {
+			return validator.validate(text.getText());
+		}
+
+		return StatusInfo.OK_STATUS;
+	}
+
+	/**
+     */
+	class DependencyManager {
+		private List masterSlaveListeners = new ArrayList();
 
 		public void createDependency(final Button master, final Control[] slaves) {
 			SelectionListener listener = new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
 					boolean state = master.getSelection();
+					// set enablement to the opposite of the selection value
+					if (SWTFactory.useSelectionInverse(master)) {
+						state = !state;
+					}
+
 					for (int i = 0; i < slaves.length; i++) {
 						slaves[i].setEnabled(state);
-
 					}
 
 					changeListener.statusChanged(StatusInfo.OK_STATUS);
@@ -238,8 +302,17 @@ public class ControlBindingManager {
 			master.addSelectionListener(listener);
 			masterSlaveListeners.add(listener);
 		}
+
+		public void initialize() {
+			Iterator it = masterSlaveListeners.iterator();
+			while (it.hasNext()) {
+				((SelectionListener) it.next()).widgetSelected(null);
+			}
+		}
 	}
 
+	/**
+     */
 	class ValidatorManager {
 
 		private Map map = new HashMap();

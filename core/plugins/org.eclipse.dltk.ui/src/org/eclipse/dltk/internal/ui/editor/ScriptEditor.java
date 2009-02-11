@@ -198,6 +198,12 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 	private ScriptEditorErrorTickUpdater fScriptEditorErrorTickUpdater;
 
+	private static String[] GLOBAL_FOLDING_PROPERTIES = {
+			PreferenceConstants.EDITOR_FOLDING_ENABLED,
+			PreferenceConstants.EDITOR_COMMENTS_FOLDING_ENABLED,
+			PreferenceConstants.EDITOR_FOLDING_LINES_LIMIT,
+			PreferenceConstants.EDITOR_COMMENT_FOLDING_JOIN_NEWLINES };
+
 	public ISourceViewer getScriptSourceViewer() {
 		return super.getSourceViewer();
 	}
@@ -2422,19 +2428,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				return;
 			}
 
-			if (PreferenceConstants.EDITOR_FOLDING_ENABLED.equals(property)) {
-				if (sourceViewer instanceof ProjectionViewer) {
-					new ToggleFoldingRunner().runWhenNextVisible();
-				}
-				return;
-			}
-
-			if (PreferenceConstants.EDITOR_COMMENTS_FOLDING_ENABLED
-					.equals(property)) {
-				if (sourceViewer instanceof ProjectionViewer) {
-					fProjectionModelUpdater.initialize();
-				}
-				return;
+			if (isFoldingPropertyEvent(property)
+					&& sourceViewer instanceof ProjectionViewer) {
+				handleFoldingPropertyEvent(property);
 			}
 
 			final ScriptSourceViewerConfiguration ssvc = (ScriptSourceViewerConfiguration) getSourceViewerConfiguration();
@@ -2468,6 +2464,42 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		return ((ScriptSourceViewerConfiguration) getSourceViewerConfiguration())
 				.affectsTextPresentation(event)
 				|| super.affectsTextPresentation(event);
+	}
+
+	protected void handleFoldingPropertyEvent(String property) {
+		// NOTE: 'initially fold' preferences do not require handling
+		if (PreferenceConstants.EDITOR_FOLDING_ENABLED.equals(property)) {
+			ToggleFoldingRunner runner = new ToggleFoldingRunner();
+			runner.runWhenNextVisible();
+		} else {
+			fProjectionModelUpdater.initialize(false);
+		}
+	}
+
+	protected final boolean isFoldingPropertyEvent(String property) {
+		if (isHandledPropertyEvent(property, GLOBAL_FOLDING_PROPERTIES)) {
+			return true;
+		}
+
+		if (isHandledPropertyEvent(property, getFoldingEventPreferenceKeys())) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns a string array containing the language specific folding
+	 * preference keys that should be handed when a property change event is
+	 * fired.
+	 * 
+	 * <p>
+	 * Default implementation returns an empty array. Subclasses should override
+	 * this method to return folding keys that are language specific.
+	 * </p>
+	 */
+	protected String[] getFoldingEventPreferenceKeys() {
+		return new String[0];
 	}
 
 	/**
@@ -3294,5 +3326,15 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		return getPreferenceStore() != null
 				&& CodeFormatterConstants.SPACE.equals(getPreferenceStore()
 						.getString(CodeFormatterConstants.FORMATTER_TAB_CHAR));
+	}
+
+	private boolean isHandledPropertyEvent(String property, String[] handled) {
+		for (int i = 0; i < handled.length; i++) {
+			if (handled[i].equals(property)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

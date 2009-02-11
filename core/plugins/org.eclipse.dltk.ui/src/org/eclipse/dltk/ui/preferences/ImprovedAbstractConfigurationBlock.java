@@ -44,30 +44,18 @@ public abstract class ImprovedAbstractConfigurationBlock implements
 		addOverlayKeys();
 	}
 
-	/*
-	 * @see org.eclipse.dltk.ui.preferences.IPreferenceConfigurationBlock#initialize()
-	 */
 	public void initialize() {
 		initializeFields();
 	}
 
-	/*
-	 * @see org.eclipse.dltk.ui.preferences.IPreferenceConfigurationBlock#performOk()
-	 */
 	public void performOk() {
 		// do nothing
 	}
 
-	/*
-	 * @see org.eclipse.dltk.ui.preferences.IPreferenceConfigurationBlock#performDefaults()
-	 */
 	public void performDefaults() {
 		initializeFields();
 	}
 
-	/*
-	 * @see org.eclipse.dltk.ui.preferences.IPreferenceConfigurationBlock#dispose()
-	 */
 	public void dispose() {
 		// do nothing
 	}
@@ -100,6 +88,17 @@ public abstract class ImprovedAbstractConfigurationBlock implements
 	protected abstract List createOverlayKeys();
 
 	// Binding
+
+	protected void bindControl(final Button button, final String key,
+			Object enable) {
+		bindControl(button, key, enable, null);
+	}
+
+	protected void bindControl(final Button button, final String key,
+			Object enable, Control[] dependencies) {
+		bindManager.bindRadioControl(button, key, enable, dependencies);
+	}
+
 	protected void bindControl(final Button button, final String key,
 			final Control[] dependencies) {
 		bindManager.bindControl(button, key, dependencies);
@@ -131,12 +130,20 @@ public abstract class ImprovedAbstractConfigurationBlock implements
 		bindManager.bindControl(combo, key);
 	}
 
+	protected void createDependency(Button master, Control[] slaves) {
+		bindManager.createDependency(master, slaves);
+	}
+
 	protected void initializeFields() {
 		bindManager.initialize();
 	}
 
 	protected IPreferenceStore getPreferenceStore() {
 		return store;
+	}
+
+	protected PreferencePage getPreferencePage() {
+		return page;
 	}
 
 	private IStatusChangeListener getStatusListener() {

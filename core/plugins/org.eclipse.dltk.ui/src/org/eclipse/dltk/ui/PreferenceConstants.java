@@ -236,7 +236,7 @@ public class PreferenceConstants {
 	public static final String EDITOR_FOLDING_ENABLED = "editor_folding_enabled"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether comments folding is enabled in
+	 * A named preference that controls whether comment folding is enabled in
 	 * the script editor.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -245,21 +245,80 @@ public class PreferenceConstants {
 	public static final String EDITOR_COMMENTS_FOLDING_ENABLED = "editor_comments_folding_enabled"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether comments folding is default
-	 * applied the script editor.
+	 * A named preference that controls whether doc folding is enabled in the
+	 * script editor.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String EDITOR_COMMENTS_DEFAULT_FOLDED = "editor_comments_default_folded"; //$NON-NLS-1$
+	public static final String EDITOR_DOCS_FOLDING_ENABLED = "editor_docs_folding_enabled"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether comments are initially folded
+	 * when the editor is opened.
+	 * 
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String EDITOR_FOLDING_INIT_COMMENTS = "editor_folding_init_comments"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether docs are initially folded when
+	 * the editor is opened.
+	 * 
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String EDITOR_FOLDING_INIT_DOCS = "editor_folding_init_docs"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether header comments are initially
+	 * folded when the editor is opened.
+	 * 
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String EDITOR_FOLDING_INIT_HEADER_COMMENTS = "editor_folding_init_header_comments"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether classes (packages, modules, etc)
+	 * are initially folded when the editor is opened.
+	 * 
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String EDITOR_FOLDING_INIT_CLASSES = "editor_folding_init_classes"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether methods are initially folded
+	 * when the editor is opened.
+	 * 
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String EDITOR_FOLDING_INIT_METHODS = "editor_folding_init_methods"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether comments separated by newlines
+	 * are joined together to form a single comment folding block.
+	 * 
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String EDITOR_COMMENT_FOLDING_JOIN_NEWLINES = "editor_comments_folding_join_newlines";
 
 	/**
 	 * A named preference that controls minimal number of lines in block to be
 	 * folded.
 	 * <p>
-	 * Value is of type <code>Boolean</code>.
+	 * Value is of type <code>Integer</code>.
 	 * </p>
-	 * 
 	 */
 	public static final String EDITOR_FOLDING_LINES_LIMIT = "editor_folding_lines_limit"; //$NON-NLS-1$
 

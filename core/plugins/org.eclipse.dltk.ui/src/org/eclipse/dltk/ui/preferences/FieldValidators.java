@@ -15,10 +15,12 @@ public final class FieldValidators {
 		public IStatus validate(String text) {
 			return validate(text, EnvironmentManager.getLocalEnvironment());
 		}
+
 		public IStatus validate(String text, IEnvironment environment) {
 			StatusInfo status = new StatusInfo();
-			if( environment == null ) {
-				status.setError(org.eclipse.dltk.ui.preferences.Messages.FieldValidators_0);
+			if (environment == null) {
+				status
+						.setError(org.eclipse.dltk.ui.preferences.Messages.FieldValidators_0);
 				return status;
 			}
 
@@ -60,6 +62,31 @@ public final class FieldValidators {
 					status.setError(Messages.format(
 							ValidatorMessages.PositiveNumberIsInvalid, text));
 				}
+			}
+
+			return status;
+		}
+	}
+
+	public static class MinimumNumberValidator extends PositiveNumberValidator {
+		private int minValue;
+
+		public MinimumNumberValidator(int minValue) {
+			this.minValue = minValue;
+		}
+
+		public IStatus validate(String text) {
+			StatusInfo status = (StatusInfo) super.validate(text);
+
+			if (!status.isOK()) {
+				return status;
+			}
+
+			int value = Integer.parseInt(text);
+			if (value < minValue) {
+				status.setError(Messages.format(
+						ValidatorMessages.MinValueInvalid, String
+								.valueOf(minValue)));
 			}
 
 			return status;
