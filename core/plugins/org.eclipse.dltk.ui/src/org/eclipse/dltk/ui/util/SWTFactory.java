@@ -52,6 +52,10 @@ public class SWTFactory {
 		}
 	}
 
+	public static Button createPushButton(Composite parent, String label) {
+		return createPushButton(parent, label, null);
+	}
+
 	/**
 	 * Creates and returns a new push button with the given label and/or image.
 	 * 
