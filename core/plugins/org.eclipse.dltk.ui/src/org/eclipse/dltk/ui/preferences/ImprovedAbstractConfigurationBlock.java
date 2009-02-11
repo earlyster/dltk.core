@@ -13,7 +13,7 @@ package org.eclipse.dltk.ui.preferences;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore.OverlayKey;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
@@ -131,7 +131,12 @@ public abstract class ImprovedAbstractConfigurationBlock implements
 	}
 
 	protected void createDependency(Button master, Control[] slaves) {
-		bindManager.createDependency(master, slaves);
+		createDependency(master, slaves, null);
+	}
+
+	protected void createDependency(Button master, Control[] slaves,
+			ControlBindingManager.DependencyMode mode) {
+		bindManager.createDependency(master, slaves, mode);
 	}
 
 	protected void initializeFields() {

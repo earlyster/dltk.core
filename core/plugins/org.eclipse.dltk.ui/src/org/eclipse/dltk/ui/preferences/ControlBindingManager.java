@@ -8,11 +8,10 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
-import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -38,6 +37,11 @@ public class ControlBindingManager {
 	private Map textControls;
 	private final Map textTransformers = new HashMap();
 	private ValidatorManager validatorManager;
+
+	public static class DependencyMode {
+	}
+
+	public static final DependencyMode DEPENDENCY_INVERSE_SELECTION = new DependencyMode();
 
 	public ControlBindingManager(IPreferenceDelegate delegate,
 			IStatusChangeListener listener) {
@@ -163,8 +167,13 @@ public class ControlBindingManager {
 	}
 
 	public void createDependency(final Button button, Control[] dependencies) {
+		createDependency(button, dependencies, null);
+	}
+
+	public void createDependency(final Button button, Control[] dependencies,
+			DependencyMode mode) {
 		if (dependencies != null) {
-			dependencyManager.createDependency(button, dependencies);
+			dependencyManager.createDependency(button, dependencies, mode);
 		}
 	}
 
@@ -278,12 +287,13 @@ public class ControlBindingManager {
 	class DependencyManager {
 		private List masterSlaveListeners = new ArrayList();
 
-		public void createDependency(final Button master, final Control[] slaves) {
+		public void createDependency(final Button master,
+				final Control[] slaves, final DependencyMode mode) {
 			SelectionListener listener = new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
 					boolean state = master.getSelection();
 					// set enablement to the opposite of the selection value
-					if (SWTFactory.useSelectionInverse(master)) {
+					if (mode == DEPENDENCY_INVERSE_SELECTION) {
 						state = !state;
 					}
 

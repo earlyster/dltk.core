@@ -570,19 +570,6 @@ public class SWTFactory {
 		return ex;
 	}
 
-	public static void setUseSelectionInverse(Button button) {
-		button.setData("__use_selection_inverse", Boolean.TRUE);
-	}
-
-	public static boolean useSelectionInverse(Button button) {
-		Object inverse = button.getData("__use_selection_inverse");
-		if (inverse != null && ((Boolean) inverse).booleanValue()) {
-			return true;
-		}
-
-		return false;
-	}
-
 	private static ScrolledPageContent getParentScrolledComposite(
 			Control control) {
 		Control parent = control.getParent();
