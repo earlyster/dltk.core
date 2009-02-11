@@ -338,11 +338,25 @@ public class SWTFactory {
 			int hspan, int fill) {
 		GridData gd = new GridData(fill);
 		gd.horizontalSpan = hspan;
-		return createGroup(parent, text, columns, hspan, gd);
+		return createGroup(parent, text, columns, gd);
+	}
+
+	/**
+	 * @param parent
+	 * @param text
+	 * @param columns
+	 * @param hspan
+	 * @param data
+	 * @return
+	 * @deprecated
+	 */
+	public static Group createGroup(Composite parent, String text, int columns,
+			int hspan, GridData data) {
+		return createGroup(parent, text, columns, data);
 	}
 
 	public static Group createGroup(Composite parent, String text, int columns,
-			int hspan, GridData data) {
+			GridData data) {
 		Group g = new Group(parent, SWT.NONE);
 		g.setLayout(new GridLayout(columns, false));
 		g.setText(text);
