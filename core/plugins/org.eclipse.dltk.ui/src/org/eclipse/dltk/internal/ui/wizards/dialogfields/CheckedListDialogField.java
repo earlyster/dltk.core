@@ -166,6 +166,14 @@ public class CheckedListDialogField extends ListDialogField {
 		checkStateChanged();
 	}
 
+	public void setGrayedElements(Collection list) {
+		fGrayedElements = new ArrayList(list);
+		if (isOkToUse(fTableControl)) {
+			((CheckboxTableViewer) fTable).setGrayedElements(list.toArray());
+		}
+		checkStateChanged();
+	}
+
 	/**
 	 * Sets the checked state of an element.
 	 */		
