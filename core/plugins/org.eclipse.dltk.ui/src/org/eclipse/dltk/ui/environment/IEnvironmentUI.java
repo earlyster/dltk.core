@@ -22,6 +22,6 @@ public interface IEnvironmentUI {
 	/**
 	 * Open file selection dialog.
 	 */
-	String selectFile(Shell shell, int executable2);
+	String selectFile(Shell shell, int fileType);
 
 }
