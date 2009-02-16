@@ -6,7 +6,7 @@ import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.corext.util.Messages;
-import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.utils.PlatformFileUtils;
 
 public final class FieldValidators {
