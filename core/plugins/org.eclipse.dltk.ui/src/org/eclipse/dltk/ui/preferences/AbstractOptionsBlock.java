@@ -10,6 +10,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.PreferenceLinkArea;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
@@ -189,4 +190,23 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 		area.getControl().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, false, false));
 	}
+
+	/*
+	 * Override getShell() method as public API.
+	 * 
+	 * @see OptionsConfigurationBlock#getShell()
+	 */
+	protected Shell getShell() {
+		return super.getShell();
+	}
+
+	/*
+	 * Override dispose() method as public API.
+	 * 
+	 * @see OptionsConfigurationBlock#dispose()
+	 */
+	public void dispose() {
+		super.dispose();
+	}
+
 }
