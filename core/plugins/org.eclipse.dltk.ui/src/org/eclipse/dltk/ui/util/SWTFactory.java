@@ -52,6 +52,16 @@ public class SWTFactory {
 		}
 	}
 
+	public static Button createPushButtonNoLayoutData(Composite parent,
+			String label) {
+		Button button = new Button(parent, SWT.PUSH);
+		button.setFont(parent.getFont());
+		if (label != null) {
+			button.setText(label);
+		}
+		return button;
+	}
+
 	public static Button createPushButton(Composite parent, String label) {
 		return createPushButton(parent, label, null);
 	}
@@ -478,12 +488,12 @@ public class SWTFactory {
 	 * creates a horizontal spacer for separating components
 	 * 
 	 * @param comp
-	 * @param numlines
+	 * @param hspan
 	 */
-	public static void createHorizontalSpacer(Composite comp, int numlines) {
+	public static void createHorizontalSpacer(Composite comp, int hspan) {
 		Label lbl = new Label(comp, SWT.NONE);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = numlines;
+		gd.horizontalSpan = hspan;
 		lbl.setLayoutData(gd);
 	}
 
