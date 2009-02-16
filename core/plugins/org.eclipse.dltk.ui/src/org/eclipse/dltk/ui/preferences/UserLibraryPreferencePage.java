@@ -62,7 +62,7 @@ import org.eclipse.dltk.internal.core.UserLibraryBuildpathContainerInitializer;
 import org.eclipse.dltk.internal.core.UserLibraryManager;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.IUIConstants;
-import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.wizards.BuildpathAttributeConfiguration;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.AccessRulesDialog;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.BPListElement;
@@ -1596,7 +1596,7 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 			IPath path = filterPath.append(fileNames[i]).makeAbsolute();
 
 			IFile file = root.getFileForLocation(path);
-			// support internal	JARs: bug 133191
+			// support internal JARs: bug 133191
 			if (file != null) {
 				path = file.getFullPath();
 			}
@@ -1644,7 +1644,7 @@ public abstract class UserLibraryPreferencePage extends PreferencePage
 			return null;
 		}
 
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		// IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 
 		// IPath filterPath = Path.fromOSString(dialog.getFilterPath());
 		BPListElement[] elems = new BPListElement[1];
