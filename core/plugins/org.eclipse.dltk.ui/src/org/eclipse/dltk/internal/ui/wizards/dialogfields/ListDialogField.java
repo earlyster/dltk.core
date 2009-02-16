@@ -111,7 +111,8 @@ public class ListDialogField extends DialogField {
 	private Object fParentElement;
 	
 	private ColumnsDescription fTableColumns;
-	
+	private boolean useLabel = true;
+	private boolean listGrabExcessHorizontalSpace = false;
 
 	/**
 	 * Creates the <code>ListDialogField</code>.
@@ -229,44 +230,67 @@ public class ListDialogField extends DialogField {
 	 * @see DialogField#doFillIntoGrid
 	 */
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
-		PixelConverter converter= new PixelConverter(parent);
-		
-		assertEnoughColumns(nColumns);
-		
-		Label label= getLabelControl(parent);
-		GridData gd= gridDataForLabel(1);
-		gd.verticalAlignment= GridData.BEGINNING;
-		label.setLayoutData(gd);
-		
-		Control list= getListControl(parent);
-		gd= new GridData();
-		gd.horizontalAlignment= GridData.FILL;
-		gd.grabExcessHorizontalSpace= false;
-		gd.verticalAlignment= GridData.FILL;
-		gd.grabExcessVerticalSpace= true;
-		gd.horizontalSpan= nColumns - 2;
-		gd.widthHint= converter.convertWidthInCharsToPixels(50);
-		gd.heightHint= converter.convertHeightInCharsToPixels(6);
+		PixelConverter converter = new PixelConverter(parent);
 
+		assertEnoughColumns(nColumns);
+
+		Control[] result = new Control[getNumberOfControls()];
+		int resultIndex = 0;
+		final boolean useLabel = isUseLabel();
+		if (useLabel) {
+			Label label = getLabelControl(parent);
+			GridData gd = gridDataForLabel(1);
+			gd.verticalAlignment = GridData.BEGINNING;
+			label.setLayoutData(gd);
+			result[resultIndex++] = label;
+		}
+
+		Control list = getListControl(parent);
+		GridData gd = new GridData();
+		gd.horizontalAlignment = GridData.FILL;
+		gd.grabExcessHorizontalSpace = isListGrabExcessHorizontalSpace();
+		gd.verticalAlignment = GridData.FILL;
+		gd.grabExcessVerticalSpace = true;
+		gd.horizontalSpan = nColumns - (useLabel ? 2 : 1);
+		gd.widthHint = converter.convertWidthInCharsToPixels(50);
+		gd.heightHint = converter.convertHeightInCharsToPixels(6);
 		list.setLayoutData(gd);
-		
-		Composite buttons= getButtonBox(parent);
-		gd= new GridData();
-		gd.horizontalAlignment= GridData.FILL;
-		gd.grabExcessHorizontalSpace= false;
-		gd.verticalAlignment= GridData.FILL;
-		gd.grabExcessVerticalSpace= true;
-		gd.horizontalSpan= 1;
+		result[resultIndex++] = list;
+
+		Composite buttons = getButtonBox(parent);
+		gd = new GridData();
+		gd.horizontalAlignment = GridData.FILL;
+		gd.grabExcessHorizontalSpace = false;
+		gd.verticalAlignment = GridData.FILL;
+		gd.grabExcessVerticalSpace = true;
+		gd.horizontalSpan = 1;
 		buttons.setLayoutData(gd);
-		
-		return new Control[] { label, list, buttons };
+		result[resultIndex++] = buttons;
+
+		return result;
 	}
 
+	public boolean isUseLabel() {
+		return useLabel;
+	}
+
+	public void setUseLabel(boolean value) {
+		this.useLabel = value;
+	}
+
+	public boolean isListGrabExcessHorizontalSpace() {
+		return listGrabExcessHorizontalSpace;
+	}
+
+	public void setListGrabExcessHorizontalSpace(boolean value) {
+		this.listGrabExcessHorizontalSpace = value;
+	}
+	
 	/*
 	 * @see DialogField#getNumberOfControls
 	 */	
 	public int getNumberOfControls() {
-		return 3;	
+		return isUseLabel() ? 3 : 2;
 	}
 
 	/**
