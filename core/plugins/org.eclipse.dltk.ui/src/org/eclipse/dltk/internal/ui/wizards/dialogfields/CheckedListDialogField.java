@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
@@ -226,6 +227,11 @@ public class CheckedListDialogField extends ListDialogField {
 		checkStateChanged();
 	}
 	
+	private final ListenerList checkStateListeners = new ListenerList();
+
+	public void addCheckStateListener(ICheckStateListener listener) {
+		checkStateListeners.add(listener);
+	}
 			
 	private void doCheckStateChanged(CheckStateChangedEvent e) {
 		if (e.getChecked()) {
@@ -233,6 +239,10 @@ public class CheckedListDialogField extends ListDialogField {
 		} else {
 			fCheckedElements.remove(e.getElement());
 		}		
+		final Object[] listeners = checkStateListeners.getListeners();
+		for (int i = 0; i < listeners.length; ++i) {
+			((ICheckStateListener) listeners[i]).checkStateChanged(e);
+		}
 		checkStateChanged();
 	}
 		
