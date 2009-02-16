@@ -108,7 +108,7 @@ public class ControlBindingManager {
 		if (key != null) {
 			if (textControls.containsKey(key)) {
 				final RuntimeException error = new IllegalArgumentException(
-						"Duplicate control " + key); // $NON-NLS-1$
+						"Duplicate control " + key); //$NON-NLS-1$
 				DLTKUIPlugin.log(error);
 				if (DLTKCore.DEBUG) {
 					throw error;
