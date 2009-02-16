@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.internal.corext.util.Messages;
-import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.internal.ui.text.hover.EditorTextHoverDescriptor;
 import org.eclipse.dltk.internal.ui.util.SWTUtil;
