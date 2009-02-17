@@ -36,6 +36,10 @@ public class PreferencesLookupDelegate implements IPreferencesLookupDelegate {
 	private IPreferencesService service;
 	private IScopeContext[] contexts;
 
+	protected IScopeContext getTopScopeContext() {
+		return contexts[0];
+	}
+
 	/**
 	 * Creates a new delegate instance
 	 * 
