@@ -74,7 +74,7 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 * 
 	 * <p>
 	 * Default implementation returns null. Clients should override to return
-	 * context approprite title. Clients must also override
+	 * context appropriate title. Clients must also override
 	 * <code>getFullBuildDialogMessage()</code> and
 	 * <code>getProjectBuildDialogMessage()</code> in order to trigger the popup
 	 * box.
@@ -90,7 +90,7 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 * 
 	 * <p>
 	 * Default implementation returns null. Clients should override to return
-	 * context approprite message. Clients must also override
+	 * context appropriate message. Clients must also override
 	 * <code>getBuildDialogTitle()</code> and
 	 * <code>getProjectBuildDialogMessage()</code> in order to trigger the popup
 	 * box.
@@ -106,7 +106,7 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 * 
 	 * <p>
 	 * Default implementation returns null. Clients should override to return
-	 * context approprite message. Clients must also override
+	 * context appropriate message. Clients must also override
 	 * <code>getBuildDialogTitle()</code> and
 	 * <code>getFullBuildDialogMessage()</code> in order to trigger the popup
 	 * box.
