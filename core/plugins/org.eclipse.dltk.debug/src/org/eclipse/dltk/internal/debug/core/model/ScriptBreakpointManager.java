@@ -464,9 +464,9 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 					addBreakpoint(session, (IScriptBreakpoint) breakpoint);
 				}
 			} catch (Exception e) {
-				DLTKDebugPlugin.logError(NLS.bind(
-						Messages.ErrorSetupDeferredBreakpoints, e.toString()),
-						e);
+				DLTKDebugPlugin.logWarning(
+						NLS.bind(Messages.ErrorSetupDeferredBreakpoints, e
+								.getMessage()), e);
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
