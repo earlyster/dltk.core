@@ -79,6 +79,10 @@ public abstract class AbstractValidator implements IValidator, Cloneable {
 		return automatic;
 	}
 
+	public boolean isAutomatic(IScriptProject project) {
+		return isAutomatic();
+	}
+
 	public void setAutomatic(boolean value) {
 		this.automatic = value;
 		fireChanged();

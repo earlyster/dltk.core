@@ -24,6 +24,7 @@ import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidator;
 import org.eclipse.dltk.validators.core.NullValidatorOutput;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
+import org.eclipse.dltk.validators.core.ValidatorRuntime.AutomaticValidatorPredicate;
 
 public class ValidatorBuilder implements IScriptBuilder {
 	private static final boolean DEBUG = false;
@@ -34,7 +35,7 @@ public class ValidatorBuilder implements IScriptBuilder {
 			IProgressMonitor monitor, int buildType) {
 		final IValidator[] validators = ValidatorRuntime.getProjectValidators(
 				project, ISourceModuleValidator.class,
-				ValidatorRuntime.AUTOMATIC);
+				new AutomaticValidatorPredicate(project));
 		final int validatorWork = validators.length * WORK_EXTERNAL;
 		monitor.beginTask("", validatorWork); //$NON-NLS-1$
 		try {

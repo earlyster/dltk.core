@@ -325,10 +325,28 @@ public final class ValidatorRuntime {
 		executeCleanAllValidatorsWithConsole(elements, resources);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public static final IValidatorPredicate AUTOMATIC = new IValidatorPredicate() {
 
 		public boolean evaluate(IValidator validator) {
 			return validator.isAutomatic();
+		}
+
+	};
+
+	public static class AutomaticValidatorPredicate implements
+			IValidatorPredicate {
+
+		private final IScriptProject project;
+
+		public AutomaticValidatorPredicate(IScriptProject project) {
+			this.project = project;
+		}
+
+		public boolean evaluate(IValidator validator) {
+			return validator.isAutomatic(project);
 		}
 
 	};
@@ -433,8 +451,8 @@ public final class ValidatorRuntime {
 	public static IStatus executeAutomaticResourceValidators(
 			IScriptProject project, List resources, IValidatorOutput output,
 			IProgressMonitor monitor) {
-		return executeResourceValidators(project, resources, output, AUTOMATIC,
-				monitor);
+		return executeResourceValidators(project, resources, output,
+				new AutomaticValidatorPredicate(project), monitor);
 	}
 
 	public static IStatus executeResourceValidators(IScriptProject project,

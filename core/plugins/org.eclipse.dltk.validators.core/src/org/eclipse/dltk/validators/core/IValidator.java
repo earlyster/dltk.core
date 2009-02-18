@@ -30,6 +30,8 @@ public interface IValidator {
 
 	boolean isAutomatic();
 
+	boolean isAutomatic(IScriptProject project);
+
 	IValidatorType getValidatorType();
 
 	boolean isValidatorValid(IScriptProject project);
