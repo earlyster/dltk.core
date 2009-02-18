@@ -1,7 +1,6 @@
 package org.eclipse.dltk.launching.sourcelookup;
 
 import java.net.URI;
-import java.text.MessageFormat;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -12,6 +11,7 @@ import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.debug.core.model.ScriptStackFrame;
 import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * This class used to get source from DBGP remote debuger, if path starts with
@@ -31,7 +31,8 @@ public class DBGPSourceLookupParticipant extends
 
 		URI uri = frame.getFileName();
 		if ("dbgp".equals(uri.getScheme())) { //$NON-NLS-1$
-			return MessageFormat.format(Messages.DBGPSourceLookupParticipant_debugResource, new Object[] { uri.getPath() });
+			return NLS.bind(Messages.DBGPSourceLookupParticipant_debugResource,
+					uri.getPath());
 		}
 		return uri.toString();
 	}
@@ -48,7 +49,7 @@ public class DBGPSourceLookupParticipant extends
 					.create(project);
 
 			URI uri = frame.getFileName();
-			
+
 			if (!("dbgp".equals(uri.getScheme()))) { //$NON-NLS-1$
 				return null;
 			}
