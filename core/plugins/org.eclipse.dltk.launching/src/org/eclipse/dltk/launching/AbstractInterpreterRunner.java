@@ -29,9 +29,9 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.core.DLTKDebugLaunchConstants;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.InterpreterMessages;
+import org.eclipse.osgi.util.NLS;
 
 import com.ibm.icu.text.DateFormat;
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Abstract implementation of a interpreter runner.
@@ -53,8 +53,7 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 		String format = LaunchingMessages.StandardInterpreterRunner;
 		String timestamp = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
 				DateFormat.MEDIUM).format(new Date(System.currentTimeMillis()));
-		return MessageFormat.format(format, new String[] { commandLine[0],
-				timestamp });
+		return NLS.bind(format, commandLine[0], timestamp);
 	}
 
 	/**
@@ -140,21 +139,24 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 		IFileHandle dir = environment.getFile(workingDirectoryPath);
 		if (!dir.exists()) {
 			abort(
-					MessageFormat
-							.format(
+					NLS
+							.bind(
 									InterpreterMessages.errDebuggingEngineWorkingDirectoryDoesntExist,
-									new Object[] { dir.toString() }), null);
+									dir.toString()), null);
 		}
 		if (config.getScriptFilePath() == null) {
 			return;
 		}
-		IFileHandle script = environment.getFile(config.getScriptFilePath());
-		if (!config.isNoFile() && !script.exists()) {
-			abort(
-					MessageFormat
-							.format(
-									InterpreterMessages.errDebuggingEngineScriptFileDoesntExist,
-									new Object[] { script.toString() }), null);
+		if (!config.isNoFile()) {
+			final IFileHandle script = environment.getFile(config
+					.getScriptFilePath());
+			if (!script.exists()) {
+				abort(
+						NLS
+								.bind(
+										InterpreterMessages.errDebuggingEngineScriptFileDoesntExist,
+										script.toString()), null);
+			}
 		}
 	}
 
