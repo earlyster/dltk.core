@@ -90,12 +90,12 @@ public abstract class AbstractConfigurationBlockPropertyAndPreferencePage
 	}
 
 	/**
-	 * Creates the specific set of preferernce control widgets for the given
+	 * Creates the specific set of preference control widgets for the given
 	 * property page.
 	 * 
 	 * <p>
 	 * Sub-classes should use an existing <code>AbstractOptionsBlock</code>
-	 * implemenation if one is available for the type of preference page they
+	 * Implementation if one is available for the type of preference page they
 	 * wish to implement. See the individual implementations for details on what
 	 * type of preference/property page they may be used to create.
 	 * </p>
