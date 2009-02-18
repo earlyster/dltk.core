@@ -200,24 +200,26 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 			// Check if source line is empty
 			if (sourceLine == null || sourceLine.length() == 0) {
 
-				ILaunch launch = stackFrame.getLaunch();
-				ISourceLocator sourceLocator = launch.getSourceLocator();
-				final Object object = sourceLocator
-						.getSourceElement(stackFrame);
+				final ILaunch launch = stackFrame.getLaunch();
+				final ISourceLocator sourceLocator = launch.getSourceLocator();
+				if (sourceLocator != null) {
+					final Object object = sourceLocator
+							.getSourceElement(stackFrame);
 
-				if (object instanceof IFile) {
-					final IDocumentProvider provider = DLTKUIPlugin
-							.getDocumentProvider();
+					if (object instanceof IFile) {
+						final IDocumentProvider provider = DLTKUIPlugin
+								.getDocumentProvider();
 
-					final IDocument document = provider
-							.getDocument(new FileEditorInput((IFile) object));
+						final IDocument document = provider
+								.getDocument(new FileEditorInput((IFile) object));
 
-					if (document != null) {
-						try {
-							sourceLine = retrieveStackFrameLine(stackFrame,
-									document);
-						} catch (BadLocationException e) {
-							DLTKDebugUIPlugin.log(e);
+						if (document != null) {
+							try {
+								sourceLine = retrieveStackFrameLine(stackFrame,
+										document);
+							} catch (BadLocationException e) {
+								DLTKDebugUIPlugin.log(e);
+							}
 						}
 					}
 				}
