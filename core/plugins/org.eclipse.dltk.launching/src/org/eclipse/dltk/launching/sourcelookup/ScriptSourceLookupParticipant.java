@@ -139,7 +139,7 @@ public class ScriptSourceLookupParticipant extends
 			}
 			final IFile[] workspaceFiles = getWorkspaceRoot()
 					.findFilesForLocationURI(file.toURI());
-			if (workspaceFiles.length != 0) {
+			if (workspaceFiles.length != 0 && workspaceFiles[0].exists()) {
 				return workspaceFiles;
 			}
 		}
