@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.internal.corext.util.Messages;
-import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.internal.ui.preferences.ScrolledPageContent;
 import org.eclipse.dltk.ui.util.PixelConverter;
@@ -325,7 +325,7 @@ public abstract class AbstractConfigurationBlock implements
 	 */
 	private ArrayList fMasterSlaveListeners = new ArrayList();
 
-	private org.eclipse.dltk.internal.ui.dialogs.StatusInfo fStatus;
+	private org.eclipse.dltk.ui.dialogs.StatusInfo fStatus;
 
 	private final PreferencePage fMainPage;
 	
