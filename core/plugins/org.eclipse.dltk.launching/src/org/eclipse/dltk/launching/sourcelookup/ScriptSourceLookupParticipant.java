@@ -2,6 +2,7 @@ package org.eclipse.dltk.launching.sourcelookup;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -27,6 +28,46 @@ import org.eclipse.dltk.internal.launching.PathEqualityUtils;
 public class ScriptSourceLookupParticipant extends
 		AbstractSourceLookupParticipant {
 
+	private final class ExternalSourceModuleFinder implements
+			IModelElementVisitor {
+
+		private final IPath fileFullPath;
+
+		private ExternalSourceModuleFinder(IPath fileFullPath) {
+			this.fileFullPath = fileFullPath;
+		}
+
+		private final IPathEquality pathEquality = PathEqualityUtils
+				.getInstance();
+
+		private final ISourceModule[] result = new ISourceModule[1];
+
+		public boolean visit(IModelElement element) {
+			if (element.getElementType() == IModelElement.PROJECT_FRAGMENT) {
+				IProjectFragment fragment = (IProjectFragment) element;
+				if (!fragment.isExternal()) {
+					return false;
+				}
+			}
+			if (element.getElementType() == IModelElement.SOURCE_MODULE) {
+				ISourceModule module = (ISourceModule) element;
+				if (pathEquality.equals(fileFullPath, module.getPath())) {
+					result[0] = module;
+				}
+				return false;
+			}
+			return true;
+		}
+
+		public boolean isFound() {
+			return result[0] != null;
+		}
+
+		public Object[] getResult() {
+			return result;
+		}
+	}
+
 	public String getSourceName(Object object) throws CoreException {
 		ScriptStackFrame frame = (ScriptStackFrame) object;
 
@@ -45,8 +86,7 @@ public class ScriptSourceLookupParticipant extends
 			return path.substring(root.length() + 1);
 		}
 
-		IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
-				.findFilesForLocation(new Path(path));
+		IFile[] files = getWorkspaceRoot().findFilesForLocation(new Path(path));
 
 		IProject project = LaunchConfigurationUtils.getProject(getDirector()
 				.getLaunchConfiguration());
@@ -89,40 +129,26 @@ public class ScriptSourceLookupParticipant extends
 		ScriptStackFrame frame = (ScriptStackFrame) object;
 		final String path = frame.getFileName().getPath();
 		final IFileHandle file = getEnvironment().getFile(new Path(path));
-		final ISourceModule[] result = new ISourceModule[] { null };
 		if (file.exists()) {
 			// Try to open external source module.
-			scriptProject.accept(new IModelElementVisitor() {
-				final IPathEquality pathEquality = PathEqualityUtils
-						.getInstance();
-
-				public boolean visit(IModelElement element) {
-					if (element.getElementType() == IModelElement.PROJECT_FRAGMENT) {
-						IProjectFragment fragment = (IProjectFragment) element;
-						if (!fragment.isExternal()) {
-							return false;
-						}
-					}
-
-					if (element.getElementType() == IModelElement.SOURCE_MODULE) {
-						ISourceModule module = (ISourceModule) element;
-						IPath modulePath = module.getPath();
-						if (pathEquality.equals(file.getFullPath(), modulePath)) {
-							result[0] = module;
-						}
-
-						return false;
-					}
-					return true;
-				}
-			});
-		}
-		if (result[0] != null) {
-			return result;
+			final ExternalSourceModuleFinder finder = new ExternalSourceModuleFinder(
+					file.getFullPath());
+			scriptProject.accept(finder);
+			if (finder.isFound()) {
+				return finder.getResult();
+			}
+			final IFile[] workspaceFiles = getWorkspaceRoot()
+					.findFilesForLocationURI(file.toURI());
+			if (workspaceFiles.length != 0) {
+				return workspaceFiles;
+			}
 		}
 		return new Object[] { new DBGPSourceModule(scriptProject, frame
 				.getFileName().getPath(), DefaultWorkingCopyOwner.PRIMARY,
 				frame) };
-		// return elements;
+	}
+
+	private static IWorkspaceRoot getWorkspaceRoot() {
+		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 }
