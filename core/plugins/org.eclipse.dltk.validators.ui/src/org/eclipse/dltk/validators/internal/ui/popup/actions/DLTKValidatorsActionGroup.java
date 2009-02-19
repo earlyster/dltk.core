@@ -15,6 +15,7 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidator;
@@ -67,7 +68,9 @@ public class DLTKValidatorsActionGroup extends ActionGroup {
 				System.out.println("validatorType " + type.getName()); //$NON-NLS-1$
 			}
 			if (type.supports(ISourceModuleValidator.class)) {
-				final IValidator[] validators = type.getValidators();
+				final IValidator[] validators = type
+						.getAllValidators(EnvironmentManager
+								.getEnvironment(project.getProject()));
 				if (validators != null && validators.length != 0) {
 					for (int j = 0; j < validators.length; ++j) {
 						final IValidator validator = validators[j];
