@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.core;
 
+import org.eclipse.dltk.core.environment.IEnvironment;
+
 /**
  * Validator class
  * 
@@ -93,6 +95,15 @@ public interface IValidatorType {
 	 * @return
 	 */
 	IValidator[] getValidators();
+
+	/**
+	 * Return all validator with all flavors
+	 * 
+	 * @param project
+	 * 
+	 * @return
+	 */
+	IValidator[] getAllValidators(IEnvironment environment);
 
 	/**
 	 * Removes the validator from the list of the validators maintained by this

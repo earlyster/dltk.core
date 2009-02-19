@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.dltk.core.environment.IEnvironment;
 
 public abstract class AbstractValidatorType implements IValidatorType {
 	protected final Map validators = new HashMap();
@@ -45,6 +46,13 @@ public abstract class AbstractValidatorType implements IValidatorType {
 
 	public boolean isConfigurable() {
 		return true;
+	}
+
+	/*
+	 * @see org.eclipse.dltk.validators.core.IValidatorType#getAllValidators()
+	 */
+	public IValidator[] getAllValidators(IEnvironment environment) {
+		return getValidators();
 	}
 
 }
