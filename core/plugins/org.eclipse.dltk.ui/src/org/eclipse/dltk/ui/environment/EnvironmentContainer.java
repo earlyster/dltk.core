@@ -11,7 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.environment;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +39,7 @@ public class EnvironmentContainer {
 
 	private boolean initialized = false;
 	private final Map environments = new HashMap();
+	private List environmentList = Collections.EMPTY_LIST;
 
 	private IEnvironmentChangedListener listener = null;
 
@@ -54,9 +57,24 @@ public class EnvironmentContainer {
 		}
 	}
 
+	private static class EnvironmentComparator implements Comparator {
+
+		public int compare(Object arg0, Object arg1) {
+			final IEnvironment e1 = (IEnvironment) arg0;
+			final IEnvironment e2 = (IEnvironment) arg1;
+			if (e1.isLocal() != e2.isLocal()) {
+				return e1.isLocal() ? -1 : +1;
+			}
+			return e1.getName().compareToIgnoreCase(e2.getName());
+		}
+
+	}
+
 	private void initEnvironments() {
 		environments.clear();
 		final IEnvironment[] envs = EnvironmentManager.getEnvironments();
+		Arrays.sort(envs, new EnvironmentComparator());
+		environmentList = Arrays.asList(envs);
 		for (int i = 0; i < envs.length; ++i) {
 			final IEnvironment environment = envs[i];
 			environments.put(environment.getId(), environment);
@@ -96,7 +114,7 @@ public class EnvironmentContainer {
 	 * @return
 	 */
 	public List getEnvironments() {
-		return new ArrayList(environments.values());
+		return environmentList;
 	}
 
 	/**
@@ -105,10 +123,12 @@ public class EnvironmentContainer {
 	 * @return
 	 */
 	public String[] getEnvironmentIds() {
-		synchronized (environments) {
-			return (String[]) environments.keySet().toArray(
-					new String[environments.size()]);
+		final List list = environmentList;
+		final String[] ids = new String[list.size()];
+		for (int i = 0; i < ids.length; ++i) {
+			ids[i] = ((IEnvironment) list.get(i)).getId();
 		}
+		return ids;
 	}
 
 	/**
@@ -142,6 +162,7 @@ public class EnvironmentContainer {
 		uninstallChangeListener();
 		changeListeners.clear();
 		environments.clear();
+		environmentList = null;
 		initialized = false;
 	}
 
