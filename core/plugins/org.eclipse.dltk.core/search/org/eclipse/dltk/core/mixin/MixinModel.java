@@ -140,9 +140,8 @@ public class MixinModel {
 		}
 		notExistKeysCache.add(key);
 		synchronized (this.cache) {
-			this.cache.remove(element);
+			cache.remove(element.key);
 			cache.resetSpaceLimit(ModelCache.DEFAULT_ROOT_SIZE, element);
-			this.cache.removeKey(element.key);
 		}
 		return null;
 	}
@@ -310,9 +309,8 @@ public class MixinModel {
 		ISourceModule[] containedModules = findModules(element.getKey());
 		if (containedModules.length == 0) {
 			synchronized (cache) {
-				cache.remove(element);
+				cache.remove(element.key);
 				cache.resetSpaceLimit(ModelCache.DEFAULT_ROOT_SIZE, element);
-				cache.removeKey(element.key);
 			}
 			return;
 		}
@@ -552,9 +550,8 @@ public class MixinModel {
 						}
 					}
 					// Remove from cache
-					cache.remove(mixin);
+					cache.remove(mixin.key);
 					cache.resetSpaceLimit(ModelCache.DEFAULT_ROOT_SIZE, mixin);
-					cache.removeKey(mixin.key);
 				}
 			}
 			this.elementToMixinCache.remove(element);
