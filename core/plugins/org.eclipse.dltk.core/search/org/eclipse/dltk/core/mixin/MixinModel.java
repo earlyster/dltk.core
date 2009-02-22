@@ -57,6 +57,8 @@ public class MixinModel {
 	public static final String SEPARATOR = String
 			.valueOf(IIndexConstants.SEPARATOR);
 
+	private static final int CACHE_LIMIT = ModelCache.DEFAULT_ROOT_SIZE * 50000;
+
 	private final MixinCache cache;
 
 	/**
@@ -77,7 +79,6 @@ public class MixinModel {
 	 */
 	private Set modulesToReparse = new HashSet();
 	public long removes = 1;
-	private final double ratio = 50000;
 
 	/**
 	 * Creates workspace instance
@@ -100,8 +101,7 @@ public class MixinModel {
 
 		// long maxMemory = Runtime.getRuntime().freeMemory();
 
-		this.cache = new MixinCache(
-				(int) (ModelCache.DEFAULT_ROOT_SIZE * ratio));
+		this.cache = new MixinCache(CACHE_LIMIT);
 		DLTKCore.addElementChangedListener(changedListener,
 				ElementChangedEvent.POST_CHANGE);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(
@@ -141,7 +141,7 @@ public class MixinModel {
 		notExistKeysCache.add(key);
 		synchronized (this.cache) {
 			cache.remove(element.key);
-			cache.resetSpaceLimit(ModelCache.DEFAULT_ROOT_SIZE, element);
+			cache.resetSpaceLimit(CACHE_LIMIT, element);
 		}
 		return null;
 	}
@@ -310,7 +310,7 @@ public class MixinModel {
 		if (containedModules.length == 0) {
 			synchronized (cache) {
 				cache.remove(element.key);
-				cache.resetSpaceLimit(ModelCache.DEFAULT_ROOT_SIZE, element);
+				cache.resetSpaceLimit(CACHE_LIMIT, element);
 			}
 			return;
 		}
@@ -551,7 +551,7 @@ public class MixinModel {
 					}
 					// Remove from cache
 					cache.remove(mixin.key);
-					cache.resetSpaceLimit(ModelCache.DEFAULT_ROOT_SIZE, mixin);
+					cache.resetSpaceLimit(CACHE_LIMIT, mixin);
 				}
 			}
 			this.elementToMixinCache.remove(element);
