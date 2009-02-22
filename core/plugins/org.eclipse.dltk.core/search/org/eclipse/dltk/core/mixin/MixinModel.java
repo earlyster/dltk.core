@@ -43,7 +43,6 @@ import org.eclipse.dltk.core.mixin.IMixinRequestor.ElementInfo;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
-import org.eclipse.dltk.internal.core.ModelCache;
 import org.eclipse.dltk.internal.core.OverflowingLRUCache;
 import org.eclipse.dltk.internal.core.mixin.IInternalMixinElement;
 import org.eclipse.dltk.internal.core.mixin.MixinCache;
@@ -57,7 +56,7 @@ public class MixinModel {
 	public static final String SEPARATOR = String
 			.valueOf(IIndexConstants.SEPARATOR);
 
-	private static final int CACHE_LIMIT = ModelCache.DEFAULT_ROOT_SIZE * 50000;
+	private static final int CACHE_LIMIT = 250000;
 
 	private final MixinCache cache;
 
