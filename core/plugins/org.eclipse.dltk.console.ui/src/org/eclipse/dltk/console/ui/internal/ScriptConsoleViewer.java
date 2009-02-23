@@ -563,12 +563,19 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 													DND.CLIPBOARD);
 									clipboard.dispose();
 									if (text != null && text.length() > 0) {
-										StringTokenizer tokenizer = new StringTokenizer(
-												text, "\n\r"); //$NON-NLS-1$
-										while (tokenizer.hasMoreTokens() == true) {
-											final String finText = tokenizer
-													.nextToken();
-											insertText(finText + "\n"); //$NON-NLS-1$
+										if (text.indexOf("\n") == -1) {
+											int cp = getCaretPosition();
+											insertText(text);
+											setCaretOffset(cp + text.length());
+
+										} else {
+											StringTokenizer tokenizer = new StringTokenizer(
+													text, "\n\r"); //$NON-NLS-1$
+											while (tokenizer.hasMoreTokens() == true) {
+												final String finText = tokenizer
+														.nextToken();
+												insertText(finText + "\n"); //$NON-NLS-1$
+											}
 										}
 									}
 								} finally {
