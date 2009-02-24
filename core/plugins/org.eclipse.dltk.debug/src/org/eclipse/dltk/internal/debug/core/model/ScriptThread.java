@@ -220,7 +220,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 	}
 
 	public boolean hasStackFrames() {
-		return stack.hasFrames();
+		return isSuspended() && stack.hasFrames();
 	}
 
 	boolean isStackInitialized() {
