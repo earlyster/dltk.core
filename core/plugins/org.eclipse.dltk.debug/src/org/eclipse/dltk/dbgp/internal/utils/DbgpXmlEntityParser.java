@@ -92,16 +92,14 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 		 * ActiveState python debugger on windows sends URI as
 		 * "file:///C|/path/to/file.py" we need to convert it.
 		 */
-		if (type == null || DLTKDebugConstants.FILE_SCHEME.equals(type)) {
-			if (fileName.startsWith(FILE_SCHEME_PREFIX)) {
-				final int pos = FILE_SCHEME_PREFIX.length();
-				if (fileName.length() > pos + 3) {
-					if (Character.isLetter(fileName.charAt(pos))
-							&& fileName.charAt(pos + 1) == '|'
-							&& fileName.charAt(pos + 2) == '/') {
-						fileName = fileName.substring(0, pos + 1) + ':'
-								+ fileName.substring(pos + 2);
-					}
+		if (fileName.startsWith(FILE_SCHEME_PREFIX)) {
+			final int pos = FILE_SCHEME_PREFIX.length();
+			if (fileName.length() > pos + 3) {
+				if (Character.isLetter(fileName.charAt(pos))
+						&& fileName.charAt(pos + 1) == '|'
+						&& fileName.charAt(pos + 2) == '/') {
+					fileName = fileName.substring(0, pos + 1) + ':'
+							+ fileName.substring(pos + 2);
 				}
 			}
 		}
