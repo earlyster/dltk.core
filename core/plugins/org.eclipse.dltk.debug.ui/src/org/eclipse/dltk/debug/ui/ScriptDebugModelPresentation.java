@@ -10,7 +10,6 @@
 package org.eclipse.dltk.debug.ui;
 
 import java.net.URI;
-import java.text.MessageFormat;
 import java.util.HashMap;
 
 import org.eclipse.core.resources.IFile;
@@ -40,6 +39,7 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
+import org.eclipse.dltk.debug.core.DLTKDebugConstants;
 import org.eclipse.dltk.debug.core.ScriptDebugManager;
 import org.eclipse.dltk.debug.core.model.IScriptBreakpoint;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
@@ -71,6 +71,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -146,9 +147,9 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 		IDebuggingEngine engine = getDebuggingEngine(target);
 
 		if (engine != null) {
-			return MessageFormat.format(
+			return NLS.bind(
 					Messages.ScriptDebugModelPresentation_debugTargetText,
-					new Object[] { engine.getName(), target.getSessionId() });
+					engine.getName(), target.getSessionId());
 		}
 
 		return target.toString();
@@ -157,12 +158,9 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 	// Text
 	protected String getThreadText(IScriptThread thread) {
 		try {
-			return MessageFormat.format(
-					Messages.ScriptDebugModelPresentation_threadText,
-					new Object[] {
-							thread.getName(),
-							thread.isSuspended() ? SUSPENDED_LABEL
-									: RUNNING_LABEL });
+			return NLS.bind(Messages.ScriptDebugModelPresentation_threadText,
+					thread.getName(), thread.isSuspended() ? SUSPENDED_LABEL
+							: RUNNING_LABEL);
 
 		} catch (DebugException e) {
 			DLTKDebugUIPlugin.log(e);
@@ -179,23 +177,24 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 		final IPath projectPath = new Path(project.getLocationURI().getPath());
 		final IPath realPath = new Path(uri.getPath());
 
-		IPath path = realPath;
 		if (projectPath.isPrefixOf(realPath)) {
-			path = new Path(""); //$NON-NLS-1$
+			IPath path = Path.EMPTY;
 			int index = projectPath.segmentCount();
 			while (index < realPath.segmentCount()) {
 				path = path.append(realPath.segment(index));
 				++index;
 			}
+			return path;
+		} else {
+			return realPath;
 		}
-
-		return path;
 	}
 
 	protected String getStackFrameText(IScriptStackFrame stackFrame) {
 		// TODO: improve later
 		try {
 			String sourceLine = stackFrame.getSourceLine();
+			final URI sourceURI = stackFrame.getSourceURI();
 
 			// Check if source line is empty
 			if (sourceLine == null || sourceLine.length() == 0) {
@@ -221,6 +220,8 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 								DLTKDebugUIPlugin.log(e);
 							}
 						}
+					} else {
+						sourceLine = toString(sourceURI);
 					}
 				}
 			}
@@ -229,24 +230,78 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 			if (sourceLine == null || sourceLine.length() == 0) {
 				final int level = stackFrame.getStack().size()
 						- stackFrame.getLevel() - 1;
-				sourceLine = MessageFormat.format(
+				sourceLine = NLS.bind(
 						Messages.ScriptDebugModelPresentation_stackFrameText,
-						new Object[] { new Integer(level) });
+						new Integer(level));
 			}
 
-			// Compute stack frame relative path
-			final IPath path = getStackFrameRelativePath(stackFrame);
-
 			// TODO: may be make external option for file:line
-			return MessageFormat.format(
-					Messages.ScriptDebugModelPresentation_stackFrameText2,
-					new Object[] { sourceLine, path.toPortableString(),
-							new Integer(stackFrame.getLineNumber()) });
+			if (DLTKDebugConstants.FILE_SCHEME.equals(sourceURI.getScheme())
+					|| DLTKDebugConstants.DBGP_SCHEME.equals(sourceURI
+							.getScheme())) {
+				// Compute stack frame relative path
+				final IPath path = getStackFrameRelativePath(stackFrame);
+				return NLS.bind(
+						Messages.ScriptDebugModelPresentation_stackFrameText2,
+						new Object[] { sourceLine, path.toString(),
+								new Integer(stackFrame.getLineNumber()) });
+			} else {
+				return sourceLine;
+			}
 		} catch (CoreException e) {
 			DLTKDebugUIPlugin.log(e);
 		}
 
 		return stackFrame.toString();
+	}
+
+	/**
+	 * @param uri
+	 * @return
+	 */
+	private static String toString(URI uri) {
+		StringBuffer sb = new StringBuffer();
+		if (uri.getScheme() != null) {
+			sb.append(uri.getScheme());
+			sb.append(':');
+		}
+		if (uri.isOpaque()) {
+			sb.append(uri.getSchemeSpecificPart());
+		} else {
+			final String host = uri.getHost();
+			if (host != null) {
+				sb.append("//"); //$NON-NLS-1$
+				if (uri.getUserInfo() != null) {
+					sb.append(uri.getUserInfo());
+					sb.append('@');
+				}
+				boolean needBrackets = (host.indexOf(':') >= 0)
+						&& !host.startsWith("[") && !host.endsWith("]"); //$NON-NLS-1$ //$NON-NLS-2$
+				if (needBrackets)
+					sb.append('[');
+				sb.append(host);
+				if (needBrackets)
+					sb.append(']');
+				if (uri.getPort() != -1) {
+					sb.append(':');
+					sb.append(uri.getPort());
+				}
+			} else if (uri.getAuthority() != null) {
+				sb.append("//"); //$NON-NLS-1$
+				sb.append(uri.getAuthority());
+			}
+			if (uri.getPath() != null)
+				sb.append(uri.getPath());
+			if (uri.getQuery() != null) {
+				sb.append('?');
+				sb.append(uri.getQuery());
+			}
+		}
+		if (uri.getFragment() != null) {
+			sb.append('#');
+			sb.append(uri.getFragment());
+		}
+		return sb.toString();
 	}
 
 	private static String retrieveStackFrameLine(IScriptStackFrame frame,
@@ -411,18 +466,18 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 				final String fieldName = w.getFieldName();
 				if (lineNumber >= 0 && file != null) {
 					sb
-							.append(MessageFormat
-									.format(
+							.append(NLS
+									.bind(
 											Messages.ScriptDebugModelPresentation_breakpointText,
 											new Object[] { language, file,
 													new Integer(lineNumber),
 													fieldName }));
 				} else {
 					sb
-							.append(MessageFormat
-									.format(
+							.append(NLS
+									.bind(
 											Messages.ScriptDebugModelPresentation_breakpointNoResourceText,
-											new Object[] { language, fieldName }));
+											language, fieldName));
 				}
 			} else if (breakpoint instanceof IScriptLineBreakpoint) { // IScriptLineBreakpoint
 				IScriptLineBreakpoint b = (IScriptLineBreakpoint) breakpoint;
@@ -431,8 +486,8 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 				final int lineNumber = b.getLineNumber();
 
 				sb
-						.append(MessageFormat
-								.format(
+						.append(NLS
+								.bind(
 										Messages.ScriptDebugModelPresentation_breakpointText2,
 										new Object[] { language, file,
 												new Integer(lineNumber) }));
@@ -443,9 +498,9 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 					typeName += Messages.ScriptDebugModelPresentation_breakpointText3;
 				}
 
-				sb.append(MessageFormat.format(
+				sb.append(NLS.bind(
 						Messages.ScriptDebugModelPresentation_breakpointText4,
-						new Object[] { language, typeName }));
+						language, typeName));
 
 				/*
 				 * TODO: Uncomment this comment when add support for caught and
@@ -461,9 +516,9 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 			}
 
 			if (hitCount != -1) {
-				sb.append(MessageFormat.format(
+				sb.append(NLS.bind(
 						Messages.ScriptDebugModelPresentation_breakpointText5,
-						new Object[] { new Integer(hitCount) }));
+						new Integer(hitCount)));
 			}
 
 			return sb.toString();
@@ -494,9 +549,9 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 				}
 			}
 
-			return MessageFormat.format(
+			return NLS.bind(
 					Messages.ScriptDebugModelPresentation_expressionText,
-					new Object[] { expressionText, getValueText(value) });
+					expressionText, getValueText(value));
 		}
 
 		return expressionText;
