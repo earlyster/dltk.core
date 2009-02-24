@@ -7,6 +7,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.sourcelookup.AbstractSourceLookupParticipant;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.debug.core.DLTKDebugConstants;
 import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.debug.core.model.ScriptStackFrame;
@@ -30,7 +31,7 @@ public class DBGPSourceLookupParticipant extends
 		ScriptStackFrame frame = (ScriptStackFrame) object;
 
 		URI uri = frame.getFileName();
-		if ("dbgp".equals(uri.getScheme())) { //$NON-NLS-1$
+		if (DLTKDebugConstants.DBGP_SCHEME.equals(uri.getScheme())) {
 			return NLS.bind(Messages.DBGPSourceLookupParticipant_debugResource,
 					uri.getPath());
 		}
@@ -50,7 +51,7 @@ public class DBGPSourceLookupParticipant extends
 
 			URI uri = frame.getFileName();
 
-			if (!("dbgp".equals(uri.getScheme()))) { //$NON-NLS-1$
+			if (!DLTKDebugConstants.DBGP_SCHEME.equals(uri.getScheme())) {
 				return null;
 			}
 			return new Object[] { new DBGPSourceModule(scriptProject, frame
