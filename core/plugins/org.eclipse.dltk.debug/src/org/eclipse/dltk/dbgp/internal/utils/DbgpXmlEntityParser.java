@@ -10,8 +10,10 @@
 package org.eclipse.dltk.dbgp.internal.utils;
 
 import java.net.URI;
-import java.text.MessageFormat;
+import java.net.URISyntaxException;
 
+import org.eclipse.dltk.compiler.util.Util;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.dbgp.IDbgpProperty;
 import org.eclipse.dltk.dbgp.IDbgpSessionInfo;
 import org.eclipse.dltk.dbgp.IDbgpStatus;
@@ -29,6 +31,8 @@ import org.eclipse.dltk.dbgp.internal.breakpoints.DbgpExceptionBreakpoint;
 import org.eclipse.dltk.dbgp.internal.breakpoints.DbgpLineBreakpoint;
 import org.eclipse.dltk.dbgp.internal.breakpoints.DbgpReturnBreakpoint;
 import org.eclipse.dltk.dbgp.internal.breakpoints.DbgpWatchBreakpoint;
+import org.eclipse.dltk.debug.core.DLTKDebugConstants;
+import org.eclipse.osgi.util.NLS;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -55,9 +59,6 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 			throws DbgpException {
 		int level = Integer.parseInt(element.getAttribute(ATTR_LEVEL));
 
-		// TODO: understand type attribute
-		// String type = element.getAttribute(ATTR_TYPE);
-
 		String cmdBegin = element.getAttribute(ATTR_CMDBEGIN);
 		String cmdEnd = element.getAttribute(ATTR_CMDEND);
 
@@ -74,7 +75,8 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 
 		int lineNumber = Integer.parseInt(element.getAttribute(ATTR_LINENO));
 
-		final URI fileUri = parseURI(element.getAttribute(ATTR_FILENAME));
+		final URI fileUri = parseURI(element.getAttribute(ATTR_FILENAME),
+				element.getAttribute(ATTR_TYPE));
 
 		final String where = element.getAttribute(ATTR_WHERE);
 
@@ -82,25 +84,42 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 				beginColumn, endLine, endColumn);
 	}
 
-	private static final String FILE_SCHEME = "file:///"; //$NON-NLS-1$
+	private static final String FILE_SCHEME_PREFIX = DLTKDebugConstants.FILE_SCHEME
+			+ ":///"; //$NON-NLS-1$
 
-	private static URI parseURI(String fileName) {
+	private static URI parseURI(String fileName, String type) {
 		/*
 		 * ActiveState python debugger on windows sends URI as
 		 * "file:///C|/path/to/file.py" we need to convert it.
 		 */
-		if (fileName.startsWith(FILE_SCHEME)) {
-			final int pos = FILE_SCHEME.length();
-			if (fileName.length() > pos + 3) {
-				if (Character.isLetter(fileName.charAt(pos))
-						&& fileName.charAt(pos + 1) == '|'
-						&& fileName.charAt(pos + 2) == '/') {
-					fileName = fileName.substring(0, pos + 1) + ':'
-							+ fileName.substring(pos + 2);
+		if (type == null || DLTKDebugConstants.FILE_SCHEME.equals(type)) {
+			if (fileName.startsWith(FILE_SCHEME_PREFIX)) {
+				final int pos = FILE_SCHEME_PREFIX.length();
+				if (fileName.length() > pos + 3) {
+					if (Character.isLetter(fileName.charAt(pos))
+							&& fileName.charAt(pos + 1) == '|'
+							&& fileName.charAt(pos + 2) == '/') {
+						fileName = fileName.substring(0, pos + 1) + ':'
+								+ fileName.substring(pos + 2);
+					}
 				}
 			}
 		}
-		return URI.create(fileName);
+		try {
+			return URI.create(fileName);
+		} catch (IllegalArgumentException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		try {
+			return new URI(type, Util.EMPTY_STRING, Util.EMPTY_STRING, fileName);
+		} catch (URISyntaxException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		return URI.create(FILE_SCHEME_PREFIX + "unknown"); //$NON-NLS-1$
 	}
 
 	private static final String ATTR_FEATURE_NAME = "feature_name"; //$NON-NLS-1$
@@ -355,9 +374,8 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 			return parseBase64Content(element);
 		}
 
-		throw new AssertionError(MessageFormat.format(
-				Messages.DbgpXmlEntityParser_invalidEncoding,
-				new Object[] { encoding }));
+		throw new AssertionError(NLS.bind(
+				Messages.DbgpXmlEntityParser_invalidEncoding, encoding));
 	}
 
 }
