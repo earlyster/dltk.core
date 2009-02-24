@@ -2392,7 +2392,7 @@ public final class ScriptRuntime {
 												.toString() }), null);
 			}
 			IFileHandle fileHandle;
-			IPath path = Path.fromPortableString(location);
+			IPath path = entry.getPath();
 			if (EnvironmentPathUtils.isFull(path))
 				fileHandle = EnvironmentPathUtils.getFile(path);
 			else
