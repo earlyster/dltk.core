@@ -543,14 +543,8 @@ public class SWTFactory {
 	 */
 	public static Combo createCombo(Composite parent, int style, int hspan,
 			String[] items) {
-		Combo c = new Combo(parent, style);
-		c.setFont(parent.getFont());
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = hspan;
-		c.setLayoutData(gd);
-		c.setItems(items);
-		c.select(0);
-		return c;
+		return createCombo(parent, style, hspan, GridData.FILL_HORIZONTAL,
+				items);
 	}
 
 	/**
