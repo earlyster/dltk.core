@@ -68,6 +68,7 @@ public abstract class DbgpOperation {
 					if (DLTKCore.DEBUG) {
 						e.printStackTrace();
 					}
+					resultHandler.finish(null, e);
 				} catch (DbgpException e) {
 					if (DLTKCore.DEBUG) {
 						System.out.println("Exception: " + e.getMessage()); //$NON-NLS-1$
