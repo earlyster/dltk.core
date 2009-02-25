@@ -69,12 +69,7 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 				packet = receiveResponse(requestId);
 			} else {
 				final long startTime = DEBUG ? System.currentTimeMillis() : 0;
-				synchronized (activeRequests) {
-					while (!activeRequests.isEmpty()) {
-						activeRequests.wait();
-					}
-					activeRequests.put(request, request);
-				}
+				beginSyncRequest(request);
 				if (DEBUG) {
 					final long waited = System.currentTimeMillis() - startTime;
 					if (waited > 0) {
@@ -85,10 +80,7 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 					sendRequest(request);
 					packet = receiveResponse(requestId);
 				} finally {
-					synchronized (activeRequests) {
-						activeRequests.remove(request);
-						activeRequests.notifyAll();
-					}
+					endSyncRequest(request);
 				}
 			}
 
@@ -108,6 +100,23 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 			throw new DbgpOpertionCanceledException();
 		} catch (IOException e) {
 			throw new DbgpIOException(e);
+		}
+	}
+
+	private void endSyncRequest(DbgpRequest request) {
+		synchronized (activeRequests) {
+			activeRequests.remove(request);
+			activeRequests.notifyAll();
+		}
+	}
+
+	private void beginSyncRequest(DbgpRequest request)
+			throws InterruptedException {
+		synchronized (activeRequests) {
+			while (!activeRequests.isEmpty()) {
+				activeRequests.wait();
+			}
+			activeRequests.put(request, request);
 		}
 	}
 
