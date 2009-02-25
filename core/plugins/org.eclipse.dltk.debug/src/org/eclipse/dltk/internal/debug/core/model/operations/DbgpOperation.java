@@ -65,8 +65,9 @@ public abstract class DbgpOperation {
 				} catch (DbgpOpertionCanceledException e) {
 					// Operation was canceled cause debugger is shutting down
 				} catch (DbgpTimeoutException e) {
-					System.err.println("Timeout exception!!!"); //$NON-NLS-1$
-					e.printStackTrace();
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
 				} catch (DbgpException e) {
 					if (DLTKCore.DEBUG) {
 						System.out.println("Exception: " + e.getMessage()); //$NON-NLS-1$
