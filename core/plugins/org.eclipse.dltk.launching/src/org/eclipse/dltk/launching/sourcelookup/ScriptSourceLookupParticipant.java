@@ -128,6 +128,9 @@ public class ScriptSourceLookupParticipant extends
 
 		ScriptStackFrame frame = (ScriptStackFrame) object;
 		final String path = frame.getFileName().getPath();
+		if (path == null || path.isEmpty()) {
+			return new Object[0];
+		}
 		final IFileHandle file = getEnvironment().getFile(new Path(path));
 		if (file.exists()) {
 			// Try to open external source module.
