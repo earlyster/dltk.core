@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.dltk.internal.ui.util.SWTUtil;
 import org.eclipse.dltk.internal.ui.util.TableLayoutComposite;
 import org.eclipse.dltk.ui.util.PixelConverter;
+import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.dltk.validators.internal.externalchecker.core.CustomWildcard;
 import org.eclipse.dltk.validators.internal.externalchecker.core.ExternalCheckerWildcardManager;
 import org.eclipse.jface.viewers.CellEditor;
@@ -144,14 +144,14 @@ public class ExternalCheckerRulesBlock  {
 		buttons.setLayout(layout);
 		buttons.setFont(font);
 
-		addWCard = SWTUtil.createPushButton(buttons, Messages.ExternalCheckerRulesBlock_add, null);
+		addWCard = SWTFactory.createPushButton(buttons, Messages.ExternalCheckerRulesBlock_add, null);
 		addWCard.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent ev) {
 				getWlist().addWcard();
 			}
 		});
 
-		removeWCard = SWTUtil.createPushButton(buttons, Messages.ExternalCheckerRulesBlock_remove, null);
+		removeWCard = SWTFactory.createPushButton(buttons, Messages.ExternalCheckerRulesBlock_remove, null);
 		removeWCard.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent ev) {
 				CustomWildcard rule = (CustomWildcard) ((IStructuredSelection) tViewer
