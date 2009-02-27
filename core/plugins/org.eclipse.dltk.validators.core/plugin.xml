@@ -9,4 +9,10 @@
             nature="#">
       </builder>
    </extension>
+	<extension point="org.eclipse.emf.ecore.generated_package">
+		<package
+            uri="http://www.eclipse.org/dltk/validators"
+            class="org.eclipse.dltk.validators.configs.ValidatorsPackage"
+            genModel="models/validators.genmodel"/>
+	</extension>
 </plugin>
