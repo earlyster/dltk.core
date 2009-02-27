@@ -130,6 +130,24 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	}
 
 	/*
+	 * Override performOk() as public API.
+	 * 
+	 * @see OptionsConfigurationBlock#performOk()
+	 */
+	public boolean performOk() {
+		return super.performOk();
+	}
+
+	/*
+	 * Override performApply() as public API.
+	 * 
+	 * @see OptionsConfigurationBlock#performApply()
+	 */
+	public boolean performApply() {
+		return super.performApply();
+	}
+
+	/*
 	 * @see
 	 * org.eclipse.dltk.ui.preferences.IPreferenceDelegate#getBoolean(java.lang
 	 * .Object)
@@ -207,6 +225,15 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 */
 	public void dispose() {
 		super.dispose();
+	}
+
+	/*
+	 * Override statusChanged() as public API.
+	 * 
+	 * @see OptionsConfigurationBlock#statusChanged(IStatus)
+	 */
+	protected void statusChanged(IStatus status) {
+		super.statusChanged(status);
 	}
 
 }
