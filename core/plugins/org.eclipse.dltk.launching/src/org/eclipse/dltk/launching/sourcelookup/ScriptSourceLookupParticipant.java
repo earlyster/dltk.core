@@ -128,7 +128,7 @@ public class ScriptSourceLookupParticipant extends
 
 		ScriptStackFrame frame = (ScriptStackFrame) object;
 		final String path = frame.getFileName().getPath();
-		if (path == null || path.isEmpty()) {
+		if (path == null || path.length() == 0) {
 			return new Object[0];
 		}
 		final IFileHandle file = getEnvironment().getFile(new Path(path));
