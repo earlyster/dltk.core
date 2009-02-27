@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -35,7 +36,7 @@ public abstract class OptionsConfigurationBlock {
 
 	private static final String REBUILD_COUNT_KEY = "preferences_build_requested"; //$NON-NLS-1$
 
-	protected IStatusChangeListener fContext;
+	private final IStatusChangeListener fContext;
 	protected final IProject fProject; // project or null
 	protected final PreferenceKey[] fAllKeys;
 
@@ -317,5 +318,9 @@ public abstract class OptionsConfigurationBlock {
 			boolean workspaceSettings);
 
 	public void dispose() {
+	}
+
+	protected void statusChanged(IStatus status) {
+		fContext.statusChanged(status);
 	}
 }
