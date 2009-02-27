@@ -12,8 +12,8 @@ package org.eclipse.dltk.validators.core;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.dltk.core.environment.IEnvironment;
 
 public abstract class AbstractValidatorType implements IValidatorType {
 	protected final Map validators = new HashMap();
@@ -51,7 +51,7 @@ public abstract class AbstractValidatorType implements IValidatorType {
 	/*
 	 * @see org.eclipse.dltk.validators.core.IValidatorType#getAllValidators()
 	 */
-	public IValidator[] getAllValidators(IEnvironment environment) {
+	public IValidator[] getAllValidators(IProject project) {
 		return getValidators();
 	}
 

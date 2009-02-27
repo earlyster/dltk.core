@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.validators.core;
 
-import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.core.resources.IProject;
 
 /**
  * Validator class
@@ -103,7 +103,7 @@ public interface IValidatorType {
 	 * 
 	 * @return
 	 */
-	IValidator[] getAllValidators(IEnvironment environment);
+	IValidator[] getAllValidators(IProject project);
 
 	/**
 	 * Removes the validator from the list of the validators maintained by this
