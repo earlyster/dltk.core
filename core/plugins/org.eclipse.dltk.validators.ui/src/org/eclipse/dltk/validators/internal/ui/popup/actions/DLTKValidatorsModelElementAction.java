@@ -57,7 +57,8 @@ public class DLTKValidatorsModelElementAction extends
 			if (!isSupported(type)) {
 				continue;
 			}
-			final IValidator[] validators = type.getAllValidators(environment);
+			final IValidator[] validators = type.getAllValidators(element
+					.getScriptProject().getProject());
 			if (validators != null && validators.length != 0) {
 				for (int j = 0; j < validators.length; ++j) {
 					final IValidator validator = validators[j];

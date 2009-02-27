@@ -68,9 +68,8 @@ public class DLTKValidatorsActionGroup extends ActionGroup {
 				System.out.println("validatorType " + type.getName()); //$NON-NLS-1$
 			}
 			if (type.supports(ISourceModuleValidator.class)) {
-				final IValidator[] validators = type
-						.getAllValidators(EnvironmentManager
-								.getEnvironment(project.getProject()));
+				final IValidator[] validators = type.getAllValidators(project
+						.getProject());
 				if (validators != null && validators.length != 0) {
 					for (int j = 0; j < validators.length; ++j) {
 						final IValidator validator = validators[j];
