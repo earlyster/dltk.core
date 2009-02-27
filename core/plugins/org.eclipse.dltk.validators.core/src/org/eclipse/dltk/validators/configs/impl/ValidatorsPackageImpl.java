@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: ValidatorsPackageImpl.java,v 1.1 2009/02/27 09:14:25 apanchenk Exp $
+ * $Id: ValidatorsPackageImpl.java,v 1.2 2009/02/27 15:44:46 apanchenk Exp $
  */
 package org.eclipse.dltk.validators.configs.impl;
 
@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
 
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.impl.EPackageImpl;
 
 /**
@@ -236,6 +237,15 @@ public class ValidatorsPackageImpl extends EPackageImpl implements ValidatorsPac
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public EReference getValidatorInstance_ValidatorFavoriteConfig() {
+		return (EReference)validatorInstanceEClass.getEStructuralFeatures().get(4);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	public ValidatorsFactory getValidatorsFactory() {
 		return (ValidatorsFactory)getEFactoryInstance();
 	}
@@ -274,6 +284,7 @@ public class ValidatorsPackageImpl extends EPackageImpl implements ValidatorsPac
 		createEAttribute(validatorInstanceEClass, VALIDATOR_INSTANCE__AUTOMATIC);
 		createEAttribute(validatorInstanceEClass, VALIDATOR_INSTANCE__VALIDATOR_TYPE);
 		createEAttribute(validatorInstanceEClass, VALIDATOR_INSTANCE__VALIDATOR_NATURE);
+		createEReference(validatorInstanceEClass, VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG);
 	}
 
 	/**
@@ -316,11 +327,14 @@ public class ValidatorsPackageImpl extends EPackageImpl implements ValidatorsPac
 		initEAttribute(getValidatorEnvironmentInstance_ExecutablePath(), ecorePackage.getEString(), "executablePath", null, 0, 1, ValidatorEnvironmentInstance.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
 		initEAttribute(getValidatorEnvironmentInstance_Automatic(), ecorePackage.getEBoolean(), "automatic", null, 0, 1, ValidatorEnvironmentInstance.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
 
+		addEOperation(validatorEnvironmentInstanceEClass, this.getValidatorInstance(), "getValidatorInstance", 0, 1, IS_UNIQUE, IS_ORDERED); //$NON-NLS-1$
+
 		initEClass(validatorInstanceEClass, ValidatorInstance.class, "ValidatorInstance", IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS); //$NON-NLS-1$
 		initEAttribute(getValidatorInstance_Name(), ecorePackage.getEString(), "name", null, 0, 1, ValidatorInstance.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
 		initEAttribute(getValidatorInstance_Automatic(), ecorePackage.getEBoolean(), "automatic", null, 0, 1, ValidatorInstance.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
 		initEAttribute(getValidatorInstance_ValidatorType(), ecorePackage.getEString(), "validatorType", null, 0, 1, ValidatorInstance.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
 		initEAttribute(getValidatorInstance_ValidatorNature(), ecorePackage.getEString(), "validatorNature", null, 0, 1, ValidatorInstance.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
+		initEReference(getValidatorInstance_ValidatorFavoriteConfig(), this.getValidatorConfig(), null, "validatorFavoriteConfig", null, 0, 1, ValidatorInstance.class, IS_TRANSIENT, IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
 
 		addEOperation(validatorInstanceEClass, this.getValidatorConfig(), "getValidatorConfigs", 0, -1, IS_UNIQUE, IS_ORDERED); //$NON-NLS-1$
 

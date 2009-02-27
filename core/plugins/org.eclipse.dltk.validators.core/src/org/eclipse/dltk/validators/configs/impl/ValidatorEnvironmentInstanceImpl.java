@@ -2,11 +2,12 @@
  * <copyright>
  * </copyright>
  *
- * $Id: ValidatorEnvironmentInstanceImpl.java,v 1.1 2009/02/27 09:14:25 apanchenk Exp $
+ * $Id: ValidatorEnvironmentInstanceImpl.java,v 1.2 2009/02/27 15:44:46 apanchenk Exp $
  */
 package org.eclipse.dltk.validators.configs.impl;
 
 import org.eclipse.dltk.validators.configs.ValidatorEnvironmentInstance;
+import org.eclipse.dltk.validators.configs.ValidatorInstance;
 import org.eclipse.dltk.validators.configs.ValidatorsPackage;
 
 import org.eclipse.emf.common.notify.Notification;
@@ -173,6 +174,13 @@ public abstract class ValidatorEnvironmentInstanceImpl extends EObjectImpl imple
 		if (eNotificationRequired())
 			eNotify(new ENotificationImpl(this, Notification.SET, ValidatorsPackage.VALIDATOR_ENVIRONMENT_INSTANCE__AUTOMATIC, oldAutomatic, automatic));
 	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated NOT
+	 */
+	public abstract ValidatorInstance getValidatorInstance();
 
 	/**
 	 * <!-- begin-user-doc -->

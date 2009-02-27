@@ -42,8 +42,14 @@ public final class ValidatorRuntime {
 	public static final String PREF_VALIDATOR_XML = ValidatorsCore.PLUGIN_ID
 			+ ".PREF_VALIDATOR_XML"; //$NON-NLS-1$
 
-	public static final String MARKER_VALIDATOR = ValidatorsCore.PLUGIN_ID
-			+ ".marker_validator_id"; //$NON-NLS-1$
+	/**
+	 * EMF validators configuration
+	 */
+	public static final String PREF_CONFIGURATION = ValidatorsCore.PLUGIN_ID
+			+ ".configuration"; //$NON-NLS-1$
+
+	// public static final String MARKER_VALIDATOR = ValidatorsCore.PLUGIN_ID
+	//			+ ".marker_validator_id"; //$NON-NLS-1$
 
 	// lock for interpreter initialization
 	private static final Object fgValidatorLock = new Object();

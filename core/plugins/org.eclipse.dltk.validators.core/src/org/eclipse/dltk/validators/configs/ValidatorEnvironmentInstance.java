@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: ValidatorEnvironmentInstance.java,v 1.1 2009/02/27 09:14:24 apanchenk Exp $
+ * $Id: ValidatorEnvironmentInstance.java,v 1.2 2009/02/27 15:44:46 apanchenk Exp $
  */
 package org.eclipse.dltk.validators.configs;
 
@@ -104,5 +104,13 @@ public interface ValidatorEnvironmentInstance extends EObject {
 	 * @generated
 	 */
 	void setAutomatic(boolean value);
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @model kind="operation"
+	 * @generated
+	 */
+	ValidatorInstance getValidatorInstance();
 
 } // ValidatorEnvironmentInstance

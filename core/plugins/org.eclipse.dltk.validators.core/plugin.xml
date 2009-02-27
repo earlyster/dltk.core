@@ -15,4 +15,8 @@
             class="org.eclipse.dltk.validators.configs.ValidatorsPackage"
             genModel="models/validators.genmodel"/>
 	</extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer class="org.eclipse.dltk.validators.core.ValidatorsPreferenceInitializer"/>
+   </extension>
 </plugin>

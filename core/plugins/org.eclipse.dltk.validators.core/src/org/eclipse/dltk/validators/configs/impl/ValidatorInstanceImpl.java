@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: ValidatorInstanceImpl.java,v 1.1 2009/02/27 09:14:25 apanchenk Exp $
+ * $Id: ValidatorInstanceImpl.java,v 1.2 2009/02/27 15:44:46 apanchenk Exp $
  */
 package org.eclipse.dltk.validators.configs.impl;
 
@@ -10,13 +10,9 @@ import org.eclipse.dltk.validators.configs.ValidatorConfig;
 import org.eclipse.dltk.validators.configs.ValidatorEnvironmentInstance;
 import org.eclipse.dltk.validators.configs.ValidatorInstance;
 import org.eclipse.dltk.validators.configs.ValidatorsPackage;
-
 import org.eclipse.emf.common.notify.Notification;
-
 import org.eclipse.emf.common.util.EList;
-
 import org.eclipse.emf.ecore.EClass;
-
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.impl.EObjectImpl;
 
@@ -31,6 +27,7 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  *   <li>{@link org.eclipse.dltk.validators.configs.impl.ValidatorInstanceImpl#isAutomatic <em>Automatic</em>}</li>
  *   <li>{@link org.eclipse.dltk.validators.configs.impl.ValidatorInstanceImpl#getValidatorType <em>Validator Type</em>}</li>
  *   <li>{@link org.eclipse.dltk.validators.configs.impl.ValidatorInstanceImpl#getValidatorNature <em>Validator Nature</em>}</li>
+ *   <li>{@link org.eclipse.dltk.validators.configs.impl.ValidatorInstanceImpl#getValidatorFavoriteConfig <em>Validator Favorite Config</em>}</li>
  * </ul>
  * </p>
  *
@@ -225,6 +222,20 @@ public abstract class ValidatorInstanceImpl extends EObjectImpl implements Valid
 	 * <!-- end-user-doc -->
 	 * @generated NOT
 	 */
+	public abstract ValidatorConfig getValidatorFavoriteConfig();
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated NOT
+	 */
+	public abstract void setValidatorFavoriteConfig(ValidatorConfig newValidatorFavoriteConfig);
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated NOT
+	 */
 	public abstract EList<ValidatorConfig> getValidatorConfigs();
 
 	/**
@@ -250,6 +261,8 @@ public abstract class ValidatorInstanceImpl extends EObjectImpl implements Valid
 				return getValidatorType();
 			case ValidatorsPackage.VALIDATOR_INSTANCE__VALIDATOR_NATURE:
 				return getValidatorNature();
+			case ValidatorsPackage.VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG:
+				return getValidatorFavoriteConfig();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -273,6 +286,9 @@ public abstract class ValidatorInstanceImpl extends EObjectImpl implements Valid
 				return;
 			case ValidatorsPackage.VALIDATOR_INSTANCE__VALIDATOR_NATURE:
 				setValidatorNature((String)newValue);
+				return;
+			case ValidatorsPackage.VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG:
+				setValidatorFavoriteConfig((ValidatorConfig)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -298,6 +314,9 @@ public abstract class ValidatorInstanceImpl extends EObjectImpl implements Valid
 			case ValidatorsPackage.VALIDATOR_INSTANCE__VALIDATOR_NATURE:
 				setValidatorNature(VALIDATOR_NATURE_EDEFAULT);
 				return;
+			case ValidatorsPackage.VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG:
+				setValidatorFavoriteConfig((ValidatorConfig)null);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -318,6 +337,8 @@ public abstract class ValidatorInstanceImpl extends EObjectImpl implements Valid
 				return VALIDATOR_TYPE_EDEFAULT == null ? validatorType != null : !VALIDATOR_TYPE_EDEFAULT.equals(validatorType);
 			case ValidatorsPackage.VALIDATOR_INSTANCE__VALIDATOR_NATURE:
 				return VALIDATOR_NATURE_EDEFAULT == null ? validatorNature != null : !VALIDATOR_NATURE_EDEFAULT.equals(validatorNature);
+			case ValidatorsPackage.VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG:
+				return getValidatorFavoriteConfig() != null;
 		}
 		return super.eIsSet(featureID);
 	}

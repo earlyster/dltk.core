@@ -2,13 +2,14 @@
  * <copyright>
  * </copyright>
  *
- * $Id: ValidatorsPackage.java,v 1.1 2009/02/27 09:14:24 apanchenk Exp $
+ * $Id: ValidatorsPackage.java,v 1.2 2009/02/27 15:44:46 apanchenk Exp $
  */
 package org.eclipse.dltk.validators.configs;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EReference;
 
 /**
  * <!-- begin-user-doc -->
@@ -197,13 +198,22 @@ public interface ValidatorsPackage extends EPackage {
 	int VALIDATOR_INSTANCE__VALIDATOR_NATURE = 3;
 
 	/**
+	 * The feature id for the '<em><b>Validator Favorite Config</b></em>' reference.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG = 4;
+
+	/**
 	 * The number of structural features of the '<em>Validator Instance</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int VALIDATOR_INSTANCE_FEATURE_COUNT = 4;
+	int VALIDATOR_INSTANCE_FEATURE_COUNT = 5;
 
 
 	/**
@@ -347,6 +357,17 @@ public interface ValidatorsPackage extends EPackage {
 	EAttribute getValidatorInstance_ValidatorNature();
 
 	/**
+	 * Returns the meta object for the reference '{@link org.eclipse.dltk.validators.configs.ValidatorInstance#getValidatorFavoriteConfig <em>Validator Favorite Config</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the reference '<em>Validator Favorite Config</em>'.
+	 * @see org.eclipse.dltk.validators.configs.ValidatorInstance#getValidatorFavoriteConfig()
+	 * @see #getValidatorInstance()
+	 * @generated
+	 */
+	EReference getValidatorInstance_ValidatorFavoriteConfig();
+
+	/**
 	 * Returns the factory that creates the instances of the model.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -477,6 +498,14 @@ public interface ValidatorsPackage extends EPackage {
 		 * @generated
 		 */
 		EAttribute VALIDATOR_INSTANCE__VALIDATOR_NATURE = eINSTANCE.getValidatorInstance_ValidatorNature();
+
+		/**
+		 * The meta object literal for the '<em><b>Validator Favorite Config</b></em>' reference feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EReference VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG = eINSTANCE.getValidatorInstance_ValidatorFavoriteConfig();
 
 	}
 
