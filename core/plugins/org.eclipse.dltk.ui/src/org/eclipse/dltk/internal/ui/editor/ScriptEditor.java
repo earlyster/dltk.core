@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IMember;
@@ -2499,7 +2500,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	 * </p>
 	 */
 	protected String[] getFoldingEventPreferenceKeys() {
-		return new String[0];
+		return CharOperation.NO_STRINGS;
 	}
 
 	/**
