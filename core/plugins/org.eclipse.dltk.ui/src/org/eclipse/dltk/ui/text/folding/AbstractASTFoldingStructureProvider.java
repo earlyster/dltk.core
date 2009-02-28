@@ -1196,6 +1196,11 @@ public abstract class AbstractASTFoldingStructureProvider implements
 
 			result.add(new CodeBlock(s, new Region(start, end)));
 		}
+
+		protected void add(CodeBlock block) {
+			result.add(block);
+		}
+
 	}
 
 	protected final ISourceParser getSourceParser() {
