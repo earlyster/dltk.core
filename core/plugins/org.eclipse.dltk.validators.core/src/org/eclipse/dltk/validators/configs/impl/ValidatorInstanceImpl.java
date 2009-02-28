@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: ValidatorInstanceImpl.java,v 1.2 2009/02/27 15:44:46 apanchenk Exp $
+ * $Id: ValidatorInstanceImpl.java,v 1.3 2009/02/28 03:24:29 apanchenk Exp $
  */
 package org.eclipse.dltk.validators.configs.impl;
 
@@ -28,6 +28,7 @@ import org.eclipse.emf.ecore.impl.EObjectImpl;
  *   <li>{@link org.eclipse.dltk.validators.configs.impl.ValidatorInstanceImpl#getValidatorType <em>Validator Type</em>}</li>
  *   <li>{@link org.eclipse.dltk.validators.configs.impl.ValidatorInstanceImpl#getValidatorNature <em>Validator Nature</em>}</li>
  *   <li>{@link org.eclipse.dltk.validators.configs.impl.ValidatorInstanceImpl#getValidatorFavoriteConfig <em>Validator Favorite Config</em>}</li>
+ *   <li>{@link org.eclipse.dltk.validators.configs.impl.ValidatorInstanceImpl#getId <em>Id</em>}</li>
  * </ul>
  * </p>
  *
@@ -113,6 +114,26 @@ public abstract class ValidatorInstanceImpl extends EObjectImpl implements Valid
 	 * @ordered
 	 */
 	protected String validatorNature = VALIDATOR_NATURE_EDEFAULT;
+
+	/**
+	 * The default value of the '{@link #getId() <em>Id</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getId()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final String ID_EDEFAULT = ""; //$NON-NLS-1$
+
+	/**
+	 * The cached value of the '{@link #getId() <em>Id</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getId()
+	 * @generated
+	 * @ordered
+	 */
+	protected String id = ID_EDEFAULT;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -234,6 +255,27 @@ public abstract class ValidatorInstanceImpl extends EObjectImpl implements Valid
 	/**
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setId(String newId) {
+		String oldId = id;
+		id = newId;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, ValidatorsPackage.VALIDATOR_INSTANCE__ID, oldId, id));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
 	 * @generated NOT
 	 */
 	public abstract EList<ValidatorConfig> getValidatorConfigs();
@@ -263,6 +305,8 @@ public abstract class ValidatorInstanceImpl extends EObjectImpl implements Valid
 				return getValidatorNature();
 			case ValidatorsPackage.VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG:
 				return getValidatorFavoriteConfig();
+			case ValidatorsPackage.VALIDATOR_INSTANCE__ID:
+				return getId();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -289,6 +333,9 @@ public abstract class ValidatorInstanceImpl extends EObjectImpl implements Valid
 				return;
 			case ValidatorsPackage.VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG:
 				setValidatorFavoriteConfig((ValidatorConfig)newValue);
+				return;
+			case ValidatorsPackage.VALIDATOR_INSTANCE__ID:
+				setId((String)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -317,6 +364,9 @@ public abstract class ValidatorInstanceImpl extends EObjectImpl implements Valid
 			case ValidatorsPackage.VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG:
 				setValidatorFavoriteConfig((ValidatorConfig)null);
 				return;
+			case ValidatorsPackage.VALIDATOR_INSTANCE__ID:
+				setId(ID_EDEFAULT);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -339,6 +389,8 @@ public abstract class ValidatorInstanceImpl extends EObjectImpl implements Valid
 				return VALIDATOR_NATURE_EDEFAULT == null ? validatorNature != null : !VALIDATOR_NATURE_EDEFAULT.equals(validatorNature);
 			case ValidatorsPackage.VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG:
 				return getValidatorFavoriteConfig() != null;
+			case ValidatorsPackage.VALIDATOR_INSTANCE__ID:
+				return ID_EDEFAULT == null ? id != null : !ID_EDEFAULT.equals(id);
 		}
 		return super.eIsSet(featureID);
 	}
@@ -361,6 +413,8 @@ public abstract class ValidatorInstanceImpl extends EObjectImpl implements Valid
 		result.append(validatorType);
 		result.append(", validatorNature: "); //$NON-NLS-1$
 		result.append(validatorNature);
+		result.append(", id: "); //$NON-NLS-1$
+		result.append(id);
 		result.append(')');
 		return result.toString();
 	}

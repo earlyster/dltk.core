@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: ValidatorsPackageImpl.java,v 1.2 2009/02/27 15:44:46 apanchenk Exp $
+ * $Id: ValidatorsPackageImpl.java,v 1.3 2009/02/28 03:24:29 apanchenk Exp $
  */
 package org.eclipse.dltk.validators.configs.impl;
 
@@ -246,6 +246,15 @@ public class ValidatorsPackageImpl extends EPackageImpl implements ValidatorsPac
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public EAttribute getValidatorInstance_Id() {
+		return (EAttribute)validatorInstanceEClass.getEStructuralFeatures().get(5);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	public ValidatorsFactory getValidatorsFactory() {
 		return (ValidatorsFactory)getEFactoryInstance();
 	}
@@ -285,6 +294,7 @@ public class ValidatorsPackageImpl extends EPackageImpl implements ValidatorsPac
 		createEAttribute(validatorInstanceEClass, VALIDATOR_INSTANCE__VALIDATOR_TYPE);
 		createEAttribute(validatorInstanceEClass, VALIDATOR_INSTANCE__VALIDATOR_NATURE);
 		createEReference(validatorInstanceEClass, VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG);
+		createEAttribute(validatorInstanceEClass, VALIDATOR_INSTANCE__ID);
 	}
 
 	/**
@@ -335,6 +345,7 @@ public class ValidatorsPackageImpl extends EPackageImpl implements ValidatorsPac
 		initEAttribute(getValidatorInstance_ValidatorType(), ecorePackage.getEString(), "validatorType", null, 0, 1, ValidatorInstance.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
 		initEAttribute(getValidatorInstance_ValidatorNature(), ecorePackage.getEString(), "validatorNature", null, 0, 1, ValidatorInstance.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
 		initEReference(getValidatorInstance_ValidatorFavoriteConfig(), this.getValidatorConfig(), null, "validatorFavoriteConfig", null, 0, 1, ValidatorInstance.class, IS_TRANSIENT, IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
+		initEAttribute(getValidatorInstance_Id(), ecorePackage.getEString(), "id", "", 0, 1, ValidatorInstance.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED); //$NON-NLS-1$ //$NON-NLS-2$
 
 		addEOperation(validatorInstanceEClass, this.getValidatorConfig(), "getValidatorConfigs", 0, -1, IS_UNIQUE, IS_ORDERED); //$NON-NLS-1$
 

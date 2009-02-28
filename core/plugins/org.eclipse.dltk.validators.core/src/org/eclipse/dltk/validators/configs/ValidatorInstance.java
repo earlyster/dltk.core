@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: ValidatorInstance.java,v 1.2 2009/02/27 15:44:46 apanchenk Exp $
+ * $Id: ValidatorInstance.java,v 1.3 2009/02/28 03:24:29 apanchenk Exp $
  */
 package org.eclipse.dltk.validators.configs;
 
@@ -23,6 +23,7 @@ import org.eclipse.emf.ecore.EObject;
  *   <li>{@link org.eclipse.dltk.validators.configs.ValidatorInstance#getValidatorType <em>Validator Type</em>}</li>
  *   <li>{@link org.eclipse.dltk.validators.configs.ValidatorInstance#getValidatorNature <em>Validator Nature</em>}</li>
  *   <li>{@link org.eclipse.dltk.validators.configs.ValidatorInstance#getValidatorFavoriteConfig <em>Validator Favorite Config</em>}</li>
+ *   <li>{@link org.eclipse.dltk.validators.configs.ValidatorInstance#getId <em>Id</em>}</li>
  * </ul>
  * </p>
  *
@@ -160,6 +161,33 @@ public interface ValidatorInstance extends EObject {
 	 * @generated
 	 */
 	void setValidatorFavoriteConfig(ValidatorConfig value);
+
+	/**
+	 * Returns the value of the '<em><b>Id</b></em>' attribute.
+	 * The default value is <code>""</code>.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of the '<em>Id</em>' attribute isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Id</em>' attribute.
+	 * @see #setId(String)
+	 * @see org.eclipse.dltk.validators.configs.ValidatorsPackage#getValidatorInstance_Id()
+	 * @model default=""
+	 * @generated
+	 */
+	String getId();
+
+	/**
+	 * Sets the value of the '{@link org.eclipse.dltk.validators.configs.ValidatorInstance#getId <em>Id</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Id</em>' attribute.
+	 * @see #getId()
+	 * @generated
+	 */
+	void setId(String value);
 
 	/**
 	 * <!-- begin-user-doc -->

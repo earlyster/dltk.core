@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: ValidatorsPackage.java,v 1.2 2009/02/27 15:44:46 apanchenk Exp $
+ * $Id: ValidatorsPackage.java,v 1.3 2009/02/28 03:24:29 apanchenk Exp $
  */
 package org.eclipse.dltk.validators.configs;
 
@@ -207,13 +207,22 @@ public interface ValidatorsPackage extends EPackage {
 	int VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG = 4;
 
 	/**
+	 * The feature id for the '<em><b>Id</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int VALIDATOR_INSTANCE__ID = 5;
+
+	/**
 	 * The number of structural features of the '<em>Validator Instance</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int VALIDATOR_INSTANCE_FEATURE_COUNT = 5;
+	int VALIDATOR_INSTANCE_FEATURE_COUNT = 6;
 
 
 	/**
@@ -368,6 +377,17 @@ public interface ValidatorsPackage extends EPackage {
 	EReference getValidatorInstance_ValidatorFavoriteConfig();
 
 	/**
+	 * Returns the meta object for the attribute '{@link org.eclipse.dltk.validators.configs.ValidatorInstance#getId <em>Id</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Id</em>'.
+	 * @see org.eclipse.dltk.validators.configs.ValidatorInstance#getId()
+	 * @see #getValidatorInstance()
+	 * @generated
+	 */
+	EAttribute getValidatorInstance_Id();
+
+	/**
 	 * Returns the factory that creates the instances of the model.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -506,6 +526,14 @@ public interface ValidatorsPackage extends EPackage {
 		 * @generated
 		 */
 		EReference VALIDATOR_INSTANCE__VALIDATOR_FAVORITE_CONFIG = eINSTANCE.getValidatorInstance_ValidatorFavoriteConfig();
+
+		/**
+		 * The meta object literal for the '<em><b>Id</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute VALIDATOR_INSTANCE__ID = eINSTANCE.getValidatorInstance_Id();
 
 	}
 
