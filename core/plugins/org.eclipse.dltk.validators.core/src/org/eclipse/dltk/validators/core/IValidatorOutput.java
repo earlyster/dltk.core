@@ -18,7 +18,10 @@ import java.io.OutputStream;
  */
 public interface IValidatorOutput {
 
-	static String COMMAND_LINE = "org.eclipse.dltk.validators.core.IValidatorOutput#commandLine";
+	/**
+	 * The name of the attribute to store command line.
+	 */
+	static String COMMAND_LINE = "org.eclipse.dltk.validators.core.IValidatorOutput#commandLine"; //$NON-NLS-1$
 
 	/**
 	 * Checks if output is enabled.
@@ -55,6 +58,20 @@ public interface IValidatorOutput {
 	 */
 	void close();
 
+	/**
+	 * Returns the value of the attribute with the specified name
+	 * 
+	 * @param name
+	 * @return
+	 */
+	Object getAttribute(String name);
+
+	/**
+	 * Sets the value of the attribute with the specified name
+	 * 
+	 * @param name
+	 * @param value
+	 */
 	void setAttribute(String name, Object value);
 
 }
