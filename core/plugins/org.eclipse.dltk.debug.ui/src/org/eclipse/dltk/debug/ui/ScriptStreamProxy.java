@@ -17,8 +17,8 @@ import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.internal.ui.preferences.IDebugPreferenceConstants;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.internal.debug.core.model.IScriptStreamProxy;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IOConsole;
@@ -38,34 +38,24 @@ public class ScriptStreamProxy implements IScriptStreamProxy {
 		stdErr = console.newOutputStream();
 
 		// TODO is there a better way to access these internal preferences??
-		boolean activeOnStderr = DebugUIPlugin.getDefault()
-				.getPreferenceStore().getBoolean(
-						IDebugPreferenceConstants.CONSOLE_OPEN_ON_ERR);
-		boolean activeOnStdou = DebugUIPlugin.getDefault().getPreferenceStore()
-				.getBoolean(IDebugPreferenceConstants.CONSOLE_OPEN_ON_OUT);
-		stdErr.setActivateOnWrite(activeOnStderr);
-		stdOut.setActivateOnWrite(activeOnStdou);
+		final IPreferenceStore debugUIStore = DebugUIPlugin.getDefault()
+				.getPreferenceStore();
+		stdOut.setActivateOnWrite(debugUIStore
+				.getBoolean(IDebugPreferenceConstants.CONSOLE_OPEN_ON_OUT));
+		stdErr.setActivateOnWrite(debugUIStore
+				.getBoolean(IDebugPreferenceConstants.CONSOLE_OPEN_ON_ERR));
 
-		final Display display = getDisplay();
-		display.asyncExec(new Runnable() {
+		getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				RGB errRGB = PreferenceConverter.getColor(DebugUIPlugin
-						.getDefault().getPreferenceStore(),
-						IDebugPreferenceConstants.CONSOLE_SYS_ERR_COLOR);
-				RGB outRGB = PreferenceConverter.getColor(DebugUIPlugin
-						.getDefault().getPreferenceStore(),
-						IDebugPreferenceConstants.CONSOLE_SYS_OUT_COLOR);
-
-				stdErr
-						.setColor(DLTKDebugUIPlugin.getDefault().getColor(
-								errRGB));
-				stdOut
-						.setColor(DLTKDebugUIPlugin.getDefault().getColor(
-								outRGB));
+				final DLTKDebugUIPlugin colors = DLTKDebugUIPlugin.getDefault();
+				stdOut.setColor(colors.getColor(PreferenceConverter.getColor(
+						debugUIStore,
+						IDebugPreferenceConstants.CONSOLE_SYS_OUT_COLOR)));
+				stdErr.setColor(colors.getColor(PreferenceConverter.getColor(
+						debugUIStore,
+						IDebugPreferenceConstants.CONSOLE_SYS_ERR_COLOR)));
 			}
-
 		});
-
 	}
 
 	private Display getDisplay() {
