@@ -21,6 +21,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchEncoding;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleInputStream;
 import org.eclipse.ui.console.IOConsoleOutputStream;
@@ -97,4 +98,43 @@ public class ScriptStreamProxy implements IScriptStreamProxy {
 			}
 		}
 	}
+
+	private boolean needsEncoding = false;
+	private String encoding = null;
+
+	public String getEncoding() {
+		return encoding;
+	}
+
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+		needsEncoding = encoding != null
+				&& !encoding.equals(WorkbenchEncoding
+						.getWorkbenchDefaultEncoding());
+	}
+
+	public void writeStdout(String value) {
+		write(stdOut, value);
+	}
+
+	public void writeStderr(String value) {
+		write(stdErr, value);
+	}
+
+	private void write(IOConsoleOutputStream stream, String value) {
+		try {
+			if (needsEncoding) {
+				stream.write(value.getBytes(encoding));
+			} else {
+				stream.write(value);
+			}
+			stream.flush();
+		} catch (IOException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+			DLTKDebugUIPlugin.log(e);
+		}
+	}
+
 }

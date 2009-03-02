@@ -102,14 +102,12 @@ public class DebugConsoleManager implements ILaunchListener {
 			IScriptDebugTarget target = (IScriptDebugTarget) launch
 					.getDebugTarget();
 
-			if (target != null) {
+			if (target != null && target.getStreamProxy() == null) {
 				ScriptDebugConsole console = (ScriptDebugConsole) launchToConsoleMap
 						.get(launch);
 				if (console != null) {
-					if (target.getStreamProxy() == null) {
-						ScriptStreamProxy proxy = new ScriptStreamProxy(console);
-						target.setStreamProxy(proxy);
-					}
+					ScriptStreamProxy proxy = new ScriptStreamProxy(console);
+					target.setStreamProxy(proxy);
 				}
 			}
 		}
