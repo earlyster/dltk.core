@@ -11,23 +11,22 @@ package org.eclipse.dltk.debug.dbgp.tests;
 
 import junit.framework.TestCase;
 
-import org.eclipse.dltk.dbgp.IDbgpContinuationHandler;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 
-public class DbgpContinuationCommandsTests  extends TestCase  {
+public class DbgpContinuationCommandsTests extends TestCase {
 	public void testRun() throws Exception {
 
 	}
 
-	public void testStepInto(IDbgpContinuationHandler handler) throws Exception {
+	public void testStepInto() throws Exception {
 
 	}
 
-	public void testStepOver(IDbgpContinuationHandler handler) throws Exception {
+	public void testStepOver() throws Exception {
 
 	}
 
-	public void testStepOut(IDbgpContinuationHandler handler) throws Exception {
+	public void testStepOut() throws Exception {
 
 	}
 
