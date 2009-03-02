@@ -87,6 +87,10 @@ public class ConsoleValidatorOutput implements IValidatorOutput {
 		console.close();
 	}
 
+	public Object getAttribute(String name) {
+		return console.getAttribute(name);
+	}
+
 	public void setAttribute(String name, Object value) {
 		console.setAttribute(name, value);
 	}
