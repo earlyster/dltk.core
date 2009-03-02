@@ -7,25 +7,10 @@
  *
  
  *******************************************************************************/
-package org.eclipse.dltk.internal.debug.core.model;
+package org.eclipse.dltk.dbgp;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+public interface IDbgpStreamListener {
+	void stdoutReceived(String data);
 
-public interface IScriptStreamProxy {
-	InputStream getStdin();
-
-	OutputStream getStdout();
-
-	OutputStream getStderr();
-
-	void close();
-
-	void writeStdout(String value);
-
-	void writeStderr(String value);
-
-	String getEncoding();
-
-	void setEncoding(String encoding);
+	void stderrReceived(String data);
 }

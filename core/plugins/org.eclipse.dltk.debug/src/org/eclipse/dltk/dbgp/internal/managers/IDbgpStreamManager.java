@@ -9,10 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal.managers;
 
-import org.eclipse.dltk.dbgp.IDbgpContinuationHandler;
+import org.eclipse.dltk.dbgp.IDbgpStreamListener;
 
 public interface IDbgpStreamManager {
-	void addListener(IDbgpContinuationHandler listener);
+	void addListener(IDbgpStreamListener listener);
 
-	void removeListener(IDbgpContinuationHandler listener);
+	void removeListener(IDbgpStreamListener listener);
 }

@@ -9,9 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.core.model;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugEvent;
@@ -118,27 +115,19 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 	public void handleTermination(DbgpException e) {
 		if (e != null) {
 			DLTKDebugPlugin.log(e);
-			IScriptDebugTarget scriptDebugTarget = this.getScriptDebugTarget();
-			IScriptStreamProxy proxy = scriptDebugTarget.getStreamProxy();
+			IScriptStreamProxy proxy = getScriptDebugTarget().getStreamProxy();
 			if (proxy != null) {
-				OutputStream stdout = proxy.getStderr();
+				proxy.writeStderr("\n" + e.getMessage() + "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				stack.update();
+				IStackFrame[] frames = stack.getFrames();
+				proxy.writeStderr("\nStack trace:\n"); //$NON-NLS-1$
 				try {
-					String encoding = target.getConsoleEncoding();
-					String message = "\n" + e.getMessage() + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
-					stdout.write(message.getBytes(encoding));
-					stack.update();
-					IStackFrame[] frames = stack.getFrames();
-					stdout.write("\nStack trace:\n".getBytes(encoding)); //$NON-NLS-1$
 					for (int i = 0; i < frames.length; i++) {
 						IScriptStackFrame frame = (IScriptStackFrame) frames[i];
 						String line = "\t#" + frame.getLevel() + " file:" //$NON-NLS-1$ //$NON-NLS-2$
 								+ frame.getSourceURI().getPath() + " [" //$NON-NLS-1$
 								+ frame.getLineNumber() + "]\n"; //$NON-NLS-1$
-						stdout.write(line.getBytes(encoding));
-					}
-				} catch (IOException e1) {
-					if (DLTKCore.DEBUG) {
-						e1.printStackTrace();
+						proxy.writeStderr(line);
 					}
 				} catch (DebugException e2) {
 					if (DLTKCore.DEBUG) {

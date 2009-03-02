@@ -10,7 +10,7 @@
 package org.eclipse.dltk.dbgp.internal.managers;
 
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.dltk.dbgp.IDbgpContinuationHandler;
+import org.eclipse.dltk.dbgp.IDbgpStreamListener;
 import org.eclipse.dltk.dbgp.internal.DbgpWorkingThread;
 import org.eclipse.dltk.dbgp.internal.IDbgpDebugingEngine;
 import org.eclipse.dltk.dbgp.internal.packets.DbgpStreamPacket;
@@ -26,7 +26,7 @@ public class DbgpStreamManager extends DbgpWorkingThread implements
 			return;
 		Object[] list = listeners.getListeners();
 		for (int i = 0; i < list.length; ++i) {
-			((IDbgpContinuationHandler) list[i]).stderrReceived(data);
+			((IDbgpStreamListener) list[i]).stderrReceived(data);
 		}
 	}
 
@@ -35,7 +35,7 @@ public class DbgpStreamManager extends DbgpWorkingThread implements
 			return;
 		Object[] list = listeners.getListeners();
 		for (int i = 0; i < list.length; ++i) {
-			((IDbgpContinuationHandler) list[i]).stdoutReceived(data);
+			((IDbgpStreamListener) list[i]).stdoutReceived(data);
 		}
 	}
 
@@ -65,11 +65,12 @@ public class DbgpStreamManager extends DbgpWorkingThread implements
 		this.engine = engine;
 	}
 
-	public void addListener(IDbgpContinuationHandler listener) {
+	public void addListener(IDbgpStreamListener listener) {
 		listeners.add(listener);
 	}
 
-	public void removeListener(IDbgpContinuationHandler listener) {
+	public void removeListener(IDbgpStreamListener listener) {
 		listeners.remove(listener);
 	}
+
 }

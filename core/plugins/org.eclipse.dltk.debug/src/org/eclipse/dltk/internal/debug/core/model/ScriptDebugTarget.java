@@ -36,6 +36,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.dbgp.IDbgpFeature;
 import org.eclipse.dltk.dbgp.IDbgpSession;
+import org.eclipse.dltk.dbgp.IDbgpStreamFilter;
 import org.eclipse.dltk.dbgp.commands.IDbgpFeatureCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
@@ -323,6 +324,9 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 
 	public void setStreamProxy(IScriptStreamProxy proxy) {
 		this.streamProxy = proxy;
+		if (proxy != null) {
+			proxy.setEncoding(getConsoleEncoding());
+		}
 	}
 
 	private boolean isSupportsThreads(IScriptThread thread) {
@@ -544,5 +548,12 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 
 	public IScriptBreakpointPathMapper getPathMapper() {
 		return breakpointManager.bpPathMapper;
+	}
+
+	/**
+	 * @param streamFilters
+	 */
+	public void setStreamFilters(IDbgpStreamFilter[] streamFilters) {
+		((ScriptThreadManager) threadManager).setStreamFilters(streamFilters);
 	}
 }
