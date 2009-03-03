@@ -240,7 +240,7 @@ public class ScriptThreadManager implements IScriptThreadManager,
 
 			final boolean stopBeforeFirstLine = thread.getDbgpSession()
 					.getDebugOptions().get(
-							DebugOption.ENGINE_STOP_BEFORE_FIRST_LINE);
+							DebugOption.ENGINE_STOP_BEFORE_CODE);
 			final boolean breakOnFirstLine = target.breakOnFirstLineEnabled();
 			boolean executed = false;
 			if (!breakOnFirstLine) {

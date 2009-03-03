@@ -38,6 +38,6 @@ public class DebugOption {
 	 * Debugging engine initially stops before first line. Should be
 	 * <code>false</code> for TCL.
 	 */
-	public static final BooleanOption ENGINE_STOP_BEFORE_FIRST_LINE = new BooleanOption(
-			"ENGINE_STOP_BEFORE_FIRST_LINE", true); //$NON-NLS-1$
+	public static final BooleanOption ENGINE_STOP_BEFORE_CODE = new BooleanOption(
+			"ENGINE_STOP_BEFORE_CODE", true); //$NON-NLS-1$
 }
