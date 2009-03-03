@@ -10,7 +10,6 @@
 package org.eclipse.dltk.internal.debug.core.model;
 
 import java.net.URI;
-import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -39,11 +38,10 @@ import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 import org.eclipse.dltk.debug.core.model.IScriptVariable;
 import org.eclipse.dltk.debug.core.model.ISourceOffsetLookup;
+import org.eclipse.osgi.util.NLS;
 
 public class ScriptStackFrame extends ScriptDebugElement implements
 		IScriptStackFrame {
-
-	private static final String STACK_FRAME_LABEL = Messages.ScriptStackFrame_stackFrame;
 
 	private final IScriptThread thread;
 	private IDbgpStackLevel level;
@@ -491,8 +489,8 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 	}
 
 	public String toString() {
-		return MessageFormat.format(STACK_FRAME_LABEL,
-				new Object[] { new Integer(level.getLevel()) });
+		return NLS.bind(Messages.ScriptStackFrame_stackFrame, new Integer(level
+				.getLevel()));
 	}
 
 	public String getSourceLine() {
