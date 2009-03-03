@@ -89,7 +89,7 @@ public class DbgpXmlParser {
 			Node e = list.item(i);
 			int type = e.getNodeType();
 
-			if (type == Element.TEXT_NODE || type == Element.CDATA_SECTION_NODE) {
+			if (type == Node.TEXT_NODE || type == Node.CDATA_SECTION_NODE) {
 				return e.getNodeValue();
 			}
 		}
