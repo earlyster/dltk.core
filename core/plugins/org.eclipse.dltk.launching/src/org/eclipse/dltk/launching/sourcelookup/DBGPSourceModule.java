@@ -108,11 +108,7 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 	 * @see org.eclipse.core.resources.IStorage#getName()
 	 */
 	public String getName() {
-		Path path = new Path(frame.getFileName().getPath());
-		if (path.lastSegment() == null) {
-			return frame.toString();
-		}
-		return "DBGP: " + path.lastSegment(); //$NON-NLS-1$
+		return "DBGP: " + getElementName(); //$NON-NLS-1$
 	}
 
 	/*
@@ -126,6 +122,9 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 		}
 	}
 
+	/**
+	 * FIXME implement caching in the ScriptDebugTarget
+	 */
 	private String cachedSource = null;
 
 	private String lookupSource() throws DbgpException {
@@ -134,7 +133,7 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 			 * XXX: this has problems if the encodings on both hosts don't match
 			 * - see getBufferContents/getContents
 			 */
-			URI uri = frame.getFileName();
+			URI uri = frame.getSourceURI();
 			cachedSource = frame.getScriptThread().getDbgpSession()
 					.getCoreCommands().getSource(uri);
 		}

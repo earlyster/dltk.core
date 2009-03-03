@@ -1,5 +1,7 @@
 package org.eclipse.dltk.launching.sourcelookup;
 
+import java.net.URI;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -18,6 +20,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.debug.core.DLTKDebugConstants;
 import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.debug.core.model.ScriptStackFrame;
@@ -69,36 +72,45 @@ public class ScriptSourceLookupParticipant extends
 	}
 
 	public String getSourceName(Object object) throws CoreException {
-		ScriptStackFrame frame = (ScriptStackFrame) object;
+		if (object instanceof ScriptStackFrame) {
+			final ScriptStackFrame frame = (ScriptStackFrame) object;
+			final URI uri = frame.getSourceURI();
+			if (DLTKDebugConstants.UNKNOWN_SCHEME.equalsIgnoreCase(uri
+					.getScheme())) {
+				return null;
+			}
 
-		String path = frame.getFileName().getPath();
-		if (path.length() == 0) {
-			return null;
-		}
-		// if (Platform.getOS().equals(Platform.OS_WIN32)) {
-		// path = path.substring(1);
-		// }
+			String path = uri.getPath();
+			if (path.length() == 0) {
+				return null;
+			}
+			// if (Platform.getOS().equals(Platform.OS_WIN32)) {
+			// path = path.substring(1);
+			// }
 
-		String root = getProjectRoot();
+			String root = getProjectRoot();
 
-		// strip off the project root
-		if (path.indexOf(root) != -1) {
-			return path.substring(root.length() + 1);
-		}
+			// strip off the project root
+			if (path.startsWith(root) && path.charAt(root.length()) == '/') {
+				return path.substring(root.length() + 1);
+			}
 
-		IFile[] files = getWorkspaceRoot().findFilesForLocation(new Path(path));
+			IFile[] files = getWorkspaceRoot().findFilesForLocation(
+					new Path(path));
 
-		IProject project = LaunchConfigurationUtils.getProject(getDirector()
-				.getLaunchConfiguration());
-		for (int i = 0; i < files.length; i++) {
-			IFile file = files[i];
-			if (file.exists()) {
-				if (file.getProject().equals(project)) {
-					return file.getProjectRelativePath().toString();
+			IProject project = LaunchConfigurationUtils
+					.getProject(getDirector().getLaunchConfiguration());
+			for (int i = 0; i < files.length; i++) {
+				IFile file = files[i];
+				if (file.exists()) {
+					if (file.getProject().equals(project)) {
+						return file.getProjectRelativePath().toString();
+					}
 				}
 			}
+			return path;
 		}
-		return path;
+		return null;
 	}
 
 	private IEnvironment getEnvironment() {
@@ -115,40 +127,52 @@ public class ScriptSourceLookupParticipant extends
 	}
 
 	public Object[] findSourceElements(Object object) throws CoreException {
-		Object[] elements = super.findSourceElements(object);
-		if (elements.length > 0) {
+		final Object[] elements = super.findSourceElements(object);
+		if (elements != null && elements.length > 0) {
 			return elements;
 		}
-		ILaunchConfiguration launchConfiguration = this.getDirector()
-				.getLaunchConfiguration();
-
-		IProject project = LaunchConfigurationUtils
-				.getProject(launchConfiguration);
-		ScriptProject scriptProject = (ScriptProject) DLTKCore.create(project);
-
-		ScriptStackFrame frame = (ScriptStackFrame) object;
-		final String path = frame.getFileName().getPath();
-		if (path == null || path.length() == 0) {
-			return new Object[0];
-		}
-		final IFileHandle file = getEnvironment().getFile(new Path(path));
-		if (file.exists()) {
-			// Try to open external source module.
-			final ExternalSourceModuleFinder finder = new ExternalSourceModuleFinder(
-					file.getFullPath());
-			scriptProject.accept(finder);
-			if (finder.isFound()) {
-				return finder.getResult();
+		if (object instanceof ScriptStackFrame) {
+			ScriptStackFrame frame = (ScriptStackFrame) object;
+			final URI uri = frame.getSourceURI();
+			if (DLTKDebugConstants.UNKNOWN_SCHEME.equalsIgnoreCase(uri
+					.getScheme())) {
+				return null;
 			}
-			final IFile[] workspaceFiles = getWorkspaceRoot()
-					.findFilesForLocationURI(file.toURI());
-			if (workspaceFiles.length != 0 && workspaceFiles[0].exists()) {
-				return workspaceFiles;
+			final String path = uri.getPath();
+			if (path == null || path.length() == 0) {
+				return null;
 			}
+			final Path pathObj = new Path(path);
+			if (pathObj.isEmpty()) {
+				return null;
+			}
+			ILaunchConfiguration launchConfiguration = this.getDirector()
+					.getLaunchConfiguration();
+
+			IProject project = LaunchConfigurationUtils
+					.getProject(launchConfiguration);
+			ScriptProject scriptProject = (ScriptProject) DLTKCore
+					.create(project);
+
+			final IFileHandle file = getEnvironment().getFile(pathObj);
+			if (file.exists()) {
+				// Try to open external source module.
+				final ExternalSourceModuleFinder finder = new ExternalSourceModuleFinder(
+						file.getFullPath());
+				scriptProject.accept(finder);
+				if (finder.isFound()) {
+					return finder.getResult();
+				}
+				final IFile[] workspaceFiles = getWorkspaceRoot()
+						.findFilesForLocationURI(file.toURI());
+				if (workspaceFiles.length != 0 && workspaceFiles[0].exists()) {
+					return workspaceFiles;
+				}
+			}
+			return new Object[] { new DBGPSourceModule(scriptProject, path,
+					DefaultWorkingCopyOwner.PRIMARY, frame) };
 		}
-		return new Object[] { new DBGPSourceModule(scriptProject, frame
-				.getFileName().getPath(), DefaultWorkingCopyOwner.PRIMARY,
-				frame) };
+		return null;
 	}
 
 	private static IWorkspaceRoot getWorkspaceRoot() {

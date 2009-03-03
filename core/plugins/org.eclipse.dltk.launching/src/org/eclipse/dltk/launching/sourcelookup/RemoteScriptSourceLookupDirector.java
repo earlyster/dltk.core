@@ -28,7 +28,7 @@ public class RemoteScriptSourceLookupDirector extends
 		// time to ask for it remotely
 		ScriptStackFrame frame = (ScriptStackFrame) element;
 
-		URI uri = frame.getFileName();
+		URI uri = frame.getSourceURI();
 		String path = uri.getPath();
 
 		IProject project = LaunchConfigurationUtils

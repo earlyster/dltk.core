@@ -12,52 +12,44 @@ import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.debug.core.model.ScriptStackFrame;
 import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
-import org.eclipse.osgi.util.NLS;
 
 /**
- * This class used to get source from DBGP remote debuger, if path starts with
- * dbgp scheme.
+ * This class is used to get source from DBGP remote debugger, if path starts
+ * with DBGP scheme.
  * 
  * @author haiodo
- * 
  */
 public class DBGPSourceLookupParticipant extends
 		AbstractSourceLookupParticipant {
 
 	public String getSourceName(Object object) throws CoreException {
-		if (!(object instanceof ScriptStackFrame)) {
-			return null;
+		if (object instanceof ScriptStackFrame) {
+			final ScriptStackFrame frame = (ScriptStackFrame) object;
+			final URI uri = frame.getSourceURI();
+			if (DLTKDebugConstants.DBGP_SCHEME
+					.equalsIgnoreCase(uri.getScheme())) {
+				return uri.getPath();
+			}
 		}
-		ScriptStackFrame frame = (ScriptStackFrame) object;
-
-		URI uri = frame.getFileName();
-		if (DLTKDebugConstants.DBGP_SCHEME.equals(uri.getScheme())) {
-			return NLS.bind(Messages.DBGPSourceLookupParticipant_debugResource,
-					uri.getPath());
-		}
-		return uri.toString();
+		return null;
 	}
 
 	public Object[] findSourceElements(Object object) throws CoreException {
 		if (object instanceof ScriptStackFrame) {
-			ScriptStackFrame frame = (ScriptStackFrame) object;
-			ILaunchConfiguration launchConfiguration = this.getDirector()
-					.getLaunchConfiguration();
-
-			IProject project = LaunchConfigurationUtils
-					.getProject(launchConfiguration);
-			ScriptProject scriptProject = (ScriptProject) DLTKCore
-					.create(project);
-
-			URI uri = frame.getFileName();
-
-			if (!DLTKDebugConstants.DBGP_SCHEME.equals(uri.getScheme())) {
-				return null;
+			final ScriptStackFrame frame = (ScriptStackFrame) object;
+			final URI uri = frame.getSourceURI();
+			if (DLTKDebugConstants.DBGP_SCHEME
+					.equalsIgnoreCase(uri.getScheme())) {
+				final ILaunchConfiguration launchConfiguration = this
+						.getDirector().getLaunchConfiguration();
+				final IProject project = LaunchConfigurationUtils
+						.getProject(launchConfiguration);
+				final ScriptProject scriptProject = (ScriptProject) DLTKCore
+						.create(project);
+				return new Object[] { new DBGPSourceModule(scriptProject, uri
+						.getPath(), DefaultWorkingCopyOwner.PRIMARY, frame) };
 			}
-			return new Object[] { new DBGPSourceModule(scriptProject, frame
-					.getFileName().getPath(), DefaultWorkingCopyOwner.PRIMARY,
-					frame) };
 		}
-		return new Object[0];
+		return null;
 	}
 }
