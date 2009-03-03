@@ -249,6 +249,10 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 		return stack;
 	}
 
+	/**
+	 * @return
+	 * @deprecated use #getSourceURI()
+	 */
 	public URI getFileName() {
 		return level.getFileURI();
 	}

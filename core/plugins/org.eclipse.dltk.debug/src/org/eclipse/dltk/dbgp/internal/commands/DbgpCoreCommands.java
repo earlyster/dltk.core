@@ -31,6 +31,7 @@ import org.eclipse.dltk.dbgp.commands.IDbgpStackCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpStatusCommands;
 import org.eclipse.dltk.dbgp.commands.IDbgpStreamCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
+import org.eclipse.dltk.debug.core.IDebugOptions;
 
 public class DbgpCoreCommands implements IDbgpCoreCommands {
 
@@ -54,13 +55,17 @@ public class DbgpCoreCommands implements IDbgpCoreCommands {
 
 	private final IDbgpPropertyCommands propertyCommands;
 
-	public DbgpCoreCommands(IDbgpCommunicator communicator) {
+	private IDebugOptions debugOptions;
+
+	public DbgpCoreCommands(IDbgpCommunicator communicator,
+			IDebugOptions debugOptions) {
+		this.debugOptions = debugOptions;
 		this.featureCommands = new DbgpFeatureCommands(communicator);
 		this.statusCommands = new DbgpStatusCommands(communicator);
 		this.breakpointCommands = new DbgpBreakpointCommands(communicator);
 		this.sourceCommands = new DbgpSourceCommands(communicator);
 		this.contextCommands = new DbgpContextCommands(communicator);
-		this.stackCommands = new DbgpStackCommands(communicator);
+		this.stackCommands = new DbgpStackCommands(communicator, debugOptions);
 		this.continuationCommands = new DbgpContinuationCommands(communicator);
 		this.streamCommands = new DbgpStreamCommands(communicator);
 		this.propertyCommands = new DbgpPropertyCommands(communicator);
@@ -239,5 +244,14 @@ public class DbgpCoreCommands implements IDbgpCoreCommands {
 	public IDbgpProperty getProperty(int page, String name, int stackDepth)
 			throws DbgpException {
 		return propertyCommands.getProperty(page, name, stackDepth);
+	}
+
+	public IDebugOptions getDebugOptions() {
+		return debugOptions;
+	}
+
+	public void configure(IDebugOptions debugOptions) {
+		this.debugOptions = debugOptions;
+		stackCommands.configure(debugOptions);
 	}
 }

@@ -11,8 +11,9 @@ package org.eclipse.dltk.dbgp.commands;
 
 import org.eclipse.dltk.dbgp.IDbgpStackLevel;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
+import org.eclipse.dltk.debug.core.IDebugConfigurable;
 
-public interface IDbgpStackCommands {
+public interface IDbgpStackCommands extends IDebugConfigurable {
 	int getStackDepth() throws DbgpException;
 
 	IDbgpStackLevel[] getStackLevels() throws DbgpException;

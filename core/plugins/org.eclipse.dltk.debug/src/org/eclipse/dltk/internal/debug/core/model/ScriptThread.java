@@ -65,7 +65,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 		DebugEventHelper.fireExtendedEvent(this,
 				ExtendedDebugEventDetails.BEFORE_SUSPEND);
 
-		stack.update();
+		stack.update(true);
 
 		if (handleSmartStepInto()) {
 			return;
@@ -118,7 +118,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 			IScriptStreamProxy proxy = getScriptDebugTarget().getStreamProxy();
 			if (proxy != null) {
 				proxy.writeStderr("\n" + e.getMessage() + "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-				stack.update();
+				stack.update(false);
 				IStackFrame[] frames = stack.getFrames();
 				proxy.writeStderr("\nStack trace:\n"); //$NON-NLS-1$
 				try {
@@ -417,7 +417,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 	}
 
 	void updateStack() {
-		stack.update();
+		stack.update(true);
 	}
 
 }

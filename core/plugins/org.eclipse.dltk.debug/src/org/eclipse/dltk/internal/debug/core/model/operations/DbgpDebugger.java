@@ -39,6 +39,10 @@ public class DbgpDebugger {
 
 		this.session = thread.getDbgpSession();
 
+		/*
+		 * FIXME should use single command queue here to guarantee we handle
+		 * responses in the same sequences as we send requests
+		 */
 		stepIntoOperation = new DbgpStepIntoOperation(thread,
 				new DbgpOperation.IResultHandler() {
 					public void finish(IDbgpStatus status, DbgpException e) {
@@ -60,17 +64,12 @@ public class DbgpDebugger {
 					}
 				});
 
-		try {
-			suspendOperation = new DbgpSuspendOperation(thread,
-					new DbgpOperation.IResultHandler() {
-						public void finish(IDbgpStatus status, DbgpException e) {
-							end.endSuspend(e, status);
-						}
-					});
-		} catch (DbgpException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		suspendOperation = new DbgpSuspendOperation(thread,
+				new DbgpOperation.IResultHandler() {
+					public void finish(IDbgpStatus status, DbgpException e) {
+						end.endSuspend(e, status);
+					}
+				});
 
 		resumeOperation = new DbgpResumeOperation(thread,
 				new DbgpOperation.IResultHandler() {

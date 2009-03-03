@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.core;
 
+import org.eclipse.dltk.dbgp.IDbgpStackLevel;
+
 public interface IDebugOptions {
 
 	abstract class Option {
@@ -73,5 +75,11 @@ public interface IDebugOptions {
 	int get(IntegerOption option);
 
 	String get(StringOption option);
+
+	/**
+	 * @param levels
+	 * @return
+	 */
+	IDbgpStackLevel[] filterStackLevels(IDbgpStackLevel[] levels);
 
 }

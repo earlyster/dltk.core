@@ -75,8 +75,14 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 
 		int lineNumber = Integer.parseInt(element.getAttribute(ATTR_LINENO));
 
-		final URI fileUri = parseURI(element.getAttribute(ATTR_FILENAME),
-				element.getAttribute(ATTR_TYPE));
+		/**
+		 * TODO Check ATTR_TYPE who knows when.
+		 * 
+		 * According to the http://xdebug.org/docs-dbgp.php#stack-get
+		 * <code>Valid values are "file" or "eval"</code>, but Tcl debugger also
+		 * sends "source" and "console".
+		 */
+		final URI fileUri = parseURI(element.getAttribute(ATTR_FILENAME));
 
 		final String where = element.getAttribute(ATTR_WHERE);
 
@@ -87,7 +93,7 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 	private static final String FILE_SCHEME_PREFIX = DLTKDebugConstants.FILE_SCHEME
 			+ ":///"; //$NON-NLS-1$
 
-	private static URI parseURI(String fileName, String type) {
+	private static URI parseURI(String fileName) {
 		/*
 		 * ActiveState python debugger on windows sends URI as
 		 * "file:///C|/path/to/file.py" we need to convert it.
@@ -111,13 +117,19 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 			}
 		}
 		try {
-			return new URI(type, Util.EMPTY_STRING, Util.EMPTY_STRING, fileName);
+			return new URI(DLTKDebugConstants.UNKNOWN_SCHEME,
+					Util.EMPTY_STRING, Util.EMPTY_STRING, fileName);
 		} catch (URISyntaxException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
 		}
-		return URI.create(FILE_SCHEME_PREFIX + "unknown"); //$NON-NLS-1$
+		try {
+			return new URI(DLTKDebugConstants.UNKNOWN_SCHEME,
+					Util.EMPTY_STRING, Util.EMPTY_STRING, "unknown");//$NON-NLS-1$
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	private static final String ATTR_FEATURE_NAME = "feature_name"; //$NON-NLS-1$

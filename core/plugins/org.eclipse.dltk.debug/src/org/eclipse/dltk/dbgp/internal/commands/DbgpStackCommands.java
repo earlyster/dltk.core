@@ -20,6 +20,8 @@ import org.eclipse.dltk.dbgp.commands.IDbgpStackCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpDebuggingEngineException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.dbgp.internal.utils.DbgpXmlEntityParser;
+import org.eclipse.dltk.debug.core.IDebugOptions;
+import org.eclipse.dltk.debug.core.model.DefaultDebugOptions;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -60,8 +62,24 @@ public class DbgpStackCommands extends DbgpBaseCommands implements
 
 	};
 
+	private IDebugOptions debugOptions;
+
 	public DbgpStackCommands(IDbgpCommunicator communicator) {
+		this(communicator, DefaultDebugOptions.getDefaultInstance());
+	}
+
+	public DbgpStackCommands(IDbgpCommunicator communicator,
+			IDebugOptions debugOptions) {
 		super(communicator);
+		this.debugOptions = debugOptions;
+	}
+
+	public IDebugOptions getDebugOptions() {
+		return debugOptions;
+	}
+
+	public void configure(IDebugOptions debugOptions) {
+		this.debugOptions = debugOptions;
 	}
 
 	public int getStackDepth() throws DbgpException {
@@ -72,15 +90,11 @@ public class DbgpStackCommands extends DbgpBaseCommands implements
 		DbgpRequest request = createRequest(STACK_GET_COMMAND);
 		request.addOption("-d", stackDepth); //$NON-NLS-1$
 		IDbgpStackLevel[] levels = parseStackLevels(communicate(request));
-
-		if (levels.length < 1) {
-			return null;
-		}
-
-		return levels[0];
+		return levels.length == 1 ? levels[0] : null;
 	}
 
 	public IDbgpStackLevel[] getStackLevels() throws DbgpException {
-		return parseStackLevels(communicate(createRequest(STACK_GET_COMMAND)));
+		final IDbgpStackLevel[] levels = parseStackLevels(communicate(createRequest(STACK_GET_COMMAND)));
+		return debugOptions.filterStackLevels(levels);
 	}
 }

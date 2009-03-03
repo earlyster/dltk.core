@@ -79,8 +79,10 @@ public class ScriptThreadStateManager implements IDbgpDebuggerFeedback {
 	}
 
 	private void setTerminated(DbgpException e) {
-		terminated = true;
-		handler.handleTermination(e);
+		if (!terminated) {
+			terminated = true;
+			handler.handleTermination(e);
+		}
 	}
 
 	private boolean canStep() {

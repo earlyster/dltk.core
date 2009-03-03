@@ -19,11 +19,13 @@ public class ScriptStack implements IScriptStack {
 		this.frames = NO_STACK_FRAMES;
 	}
 
-	public void update() {
+	public void update(boolean logErrors) {
 		try {
 			readFrames();
 		} catch (DbgpException e) {
-			DLTKDebugPlugin.log(e);
+			if (logErrors) {
+				DLTKDebugPlugin.log(e);
+			}
 		}
 	}
 

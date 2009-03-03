@@ -15,5 +15,6 @@ public class DLTKDebugConstants {
 
 	public static final String FILE_SCHEME = "file"; //$NON-NLS-1$
 	public static final String DBGP_SCHEME = "dbgp"; //$NON-NLS-1$
+	public static final String UNKNOWN_SCHEME = "unknown"; //$NON-NLS-1$
 
 }

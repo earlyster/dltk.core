@@ -285,15 +285,13 @@ public class ScriptThreadManager implements IScriptThreadManager,
 	public void terminateThread(IScriptThread thread) {
 		synchronized (threads) {
 			threads.remove(thread);
-			DebugEventHelper.fireTerminateEvent(thread);
-
-			IDbgpSession session = ((ScriptThread) thread).getDbgpSession();
-			session.getStreamManager().removeListener(this);
-
-			if (!hasThreads()) {
-				fireAllThreadsTerminated();
-			}
-			target.breakpointManager.removeSession(thread.getDbgpSession());
+		}
+		DebugEventHelper.fireTerminateEvent(thread);
+		final IDbgpSession session = ((ScriptThread) thread).getDbgpSession();
+		session.getStreamManager().removeListener(this);
+		target.breakpointManager.removeSession(thread.getDbgpSession());
+		if (!hasThreads()) {
+			fireAllThreadsTerminated();
 		}
 	}
 
