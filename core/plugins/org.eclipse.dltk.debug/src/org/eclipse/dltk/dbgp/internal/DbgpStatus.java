@@ -35,9 +35,11 @@ public class DbgpStatus implements IDbgpStatus {
 
 	public static final Integer STATUS_BREAK = new Integer(4);
 
-	public static Map statusParser = new TreeMap(String.CASE_INSENSITIVE_ORDER);
+	private static final Map statusParser = new TreeMap(
+			String.CASE_INSENSITIVE_ORDER);
 
-	public static Map reasonParser = new TreeMap(String.CASE_INSENSITIVE_ORDER);
+	private static final Map reasonParser = new TreeMap(
+			String.CASE_INSENSITIVE_ORDER);
 
 	static {
 		statusParser.put("starting", STATUS_STARTING); //$NON-NLS-1$
@@ -113,9 +115,8 @@ public class DbgpStatus implements IDbgpStatus {
 	public boolean equals(Object obj) {
 		if (obj instanceof DbgpStatus) {
 			DbgpStatus s = (DbgpStatus) obj;
-			return this.status == s.status || this.reason == s.reason;
+			return this.status == s.status && this.reason == s.reason;
 		}
-
 		return false;
 	}
 
