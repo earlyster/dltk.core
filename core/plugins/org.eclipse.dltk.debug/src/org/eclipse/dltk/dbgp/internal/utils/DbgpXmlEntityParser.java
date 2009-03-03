@@ -128,7 +128,7 @@ public class DbgpXmlEntityParser extends DbgpXmlParser {
 			return new URI(DLTKDebugConstants.UNKNOWN_SCHEME,
 					Util.EMPTY_STRING, Util.EMPTY_STRING, "unknown");//$NON-NLS-1$
 		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException(e);
+			throw new IllegalArgumentException(e.getMessage());
 		}
 	}
 
