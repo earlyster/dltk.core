@@ -220,6 +220,9 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 								DLTKDebugUIPlugin.log(e);
 							}
 						}
+					} else if (DLTKDebugConstants.UNKNOWN_SCHEME
+							.equalsIgnoreCase(sourceURI.getScheme())) {
+						sourceLine = sourceURI.getFragment();
 					} else {
 						sourceLine = toString(sourceURI);
 					}
@@ -236,15 +239,25 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 			}
 
 			// TODO: may be make external option for file:line
-			if (DLTKDebugConstants.FILE_SCHEME.equals(sourceURI.getScheme())
-					|| DLTKDebugConstants.DBGP_SCHEME.equals(sourceURI
-							.getScheme())) {
-				// Compute stack frame relative path
-				final IPath path = getStackFrameRelativePath(stackFrame);
-				return NLS.bind(
-						Messages.ScriptDebugModelPresentation_stackFrameText2,
-						new Object[] { sourceLine, path.toString(),
-								new Integer(stackFrame.getLineNumber()) });
+			if (stackFrame.getLineNumber() > 0) {
+				if (DLTKDebugConstants.FILE_SCHEME.equalsIgnoreCase(sourceURI
+						.getScheme())) {
+					final IPath path = getStackFrameRelativePath(stackFrame);
+					return NLS
+							.bind(
+									Messages.ScriptDebugModelPresentation_stackFrameText2,
+									new Object[] {
+											sourceLine,
+											path.toString(),
+											new Integer(stackFrame
+													.getLineNumber()) });
+				} else {
+					return NLS
+							.bind(
+									Messages.ScriptDebugModelPresentation_stackFrameText3,
+									sourceLine, new Integer(stackFrame
+											.getLineNumber()));
+				}
 			} else {
 				return sourceLine;
 			}

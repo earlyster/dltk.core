@@ -17,6 +17,7 @@ public class Messages extends NLS {
 	public static String ScriptDebugModelPresentation_expressionText;
 	public static String ScriptDebugModelPresentation_stackFrameText;
 	public static String ScriptDebugModelPresentation_stackFrameText2;
+	public static String ScriptDebugModelPresentation_stackFrameText3;
 	public static String ScriptDebugModelPresentation_threadText;
 	static {
 		// initialize resource bundle
