@@ -40,4 +40,11 @@ public class DebugOption {
 	 */
 	public static final BooleanOption ENGINE_STOP_BEFORE_CODE = new BooleanOption(
 			"ENGINE_STOP_BEFORE_CODE", true); //$NON-NLS-1$
+
+	/**
+	 * Should test if thread has valid current stack on initial connect. Should
+	 * be <code>true</code> for TCL.
+	 */
+	public static final BooleanOption ENGINE_VALIDATE_STACK = new BooleanOption(
+			"ENGINE_VALIDATE_STACK", false); //$NON-NLS-1$
 }

@@ -72,7 +72,7 @@ public class ScriptStack implements IScriptStack {
 
 	public IScriptStackFrame[] getFrames() {
 		synchronized (framesLock) {
-			return (IScriptStackFrame[]) frames.clone();
+			return frames;
 		}
 	}
 

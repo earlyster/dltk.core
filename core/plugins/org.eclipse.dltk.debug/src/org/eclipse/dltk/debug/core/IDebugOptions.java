@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.core;
 
-import org.eclipse.dltk.dbgp.IDbgpStackLevel;
+import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 
 public interface IDebugOptions {
 
@@ -77,9 +77,19 @@ public interface IDebugOptions {
 	String get(StringOption option);
 
 	/**
-	 * @param levels
+	 * Filter the specified stack frames before they are returned to the client.
+	 * Implementation should return copy of the array even if there are no
+	 * modifications.
+	 * 
+	 * @param frames
 	 * @return
 	 */
-	IDbgpStackLevel[] filterStackLevels(IDbgpStackLevel[] levels);
+	IScriptStackFrame[] filterStackLevels(IScriptStackFrame[] frames);
+
+	/**
+	 * @param stackFrames
+	 * @return
+	 */
+	boolean isValidStack(IScriptStackFrame[] frames);
 
 }

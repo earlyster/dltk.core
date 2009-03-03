@@ -228,7 +228,7 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 			}
 		}
 
-		return stack.getFrames();
+		return session.getDebugOptions().filterStackLevels(stack.getFrames());
 	}
 
 	public int getPriority() throws DebugException {
@@ -418,6 +418,10 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 
 	void updateStack() {
 		stack.update(true);
+	}
+
+	boolean isValidStack() {
+		return session.getDebugOptions().isValidStack(stack.getFrames());
 	}
 
 }

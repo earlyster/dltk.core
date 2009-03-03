@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.core.model;
 
-import org.eclipse.dltk.dbgp.IDbgpStackLevel;
 import org.eclipse.dltk.debug.core.IDebugOptions;
 
 public class DefaultDebugOptions implements IDebugOptions {
@@ -41,8 +40,12 @@ public class DefaultDebugOptions implements IDebugOptions {
 		return option.getDefaultValue();
 	}
 
-	public IDbgpStackLevel[] filterStackLevels(IDbgpStackLevel[] levels) {
-		return levels;
+	public IScriptStackFrame[] filterStackLevels(IScriptStackFrame[] frames) {
+		return (IScriptStackFrame[]) frames.clone();
+	}
+
+	public boolean isValidStack(IScriptStackFrame[] frames) {
+		return true;
 	}
 
 }

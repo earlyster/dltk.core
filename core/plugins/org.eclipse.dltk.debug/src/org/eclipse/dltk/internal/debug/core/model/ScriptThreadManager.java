@@ -28,6 +28,7 @@ import org.eclipse.dltk.dbgp.breakpoints.IDbgpLineBreakpoint;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.DebugOption;
+import org.eclipse.dltk.debug.core.IDebugOptions;
 import org.eclipse.dltk.debug.core.model.IScriptDebugThreadConfigurator;
 import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
@@ -174,7 +175,7 @@ public class ScriptThreadManager implements IScriptThreadManager,
 	 * @param thread
 	 * @return
 	 */
-	private boolean hasBreakpointAtCurrentPosition(ScriptThread thread) {
+	private static boolean hasBreakpointAtCurrentPosition(ScriptThread thread) {
 		try {
 			thread.updateStack();
 			if (thread.hasStackFrames()) {
@@ -218,6 +219,25 @@ public class ScriptThreadManager implements IScriptThreadManager,
 		return false;
 	}
 
+	/**
+	 * Tests if the specified thread has valid current stack. In some cases it
+	 * is better to skip first internal location.
+	 * 
+	 * @param thread
+	 * @return
+	 */
+	private static boolean isValidStack(ScriptThread thread) {
+		final IDebugOptions debugOptions = thread.getDbgpSession()
+				.getDebugOptions();
+		if (debugOptions.get(DebugOption.ENGINE_VALIDATE_STACK)) {
+			thread.updateStack();
+			if (thread.hasStackFrames()) {
+				return thread.isValidStack();
+			}
+		}
+		return true;
+	}
+
 	// IDbgpThreadAcceptor
 	public void acceptDbgpThread(IDbgpSession session) {
 		try {
@@ -238,19 +258,17 @@ public class ScriptThreadManager implements IScriptThreadManager,
 
 			DebugEventHelper.fireCreateEvent(thread);
 
-			final boolean stopBeforeFirstLine = thread.getDbgpSession()
-					.getDebugOptions().get(
-							DebugOption.ENGINE_STOP_BEFORE_CODE);
+			final boolean stopBeforeCode = thread.getDbgpSession()
+					.getDebugOptions().get(DebugOption.ENGINE_STOP_BEFORE_CODE);
 			final boolean breakOnFirstLine = target.breakOnFirstLineEnabled();
 			boolean executed = false;
 			if (!breakOnFirstLine) {
-				if (stopBeforeFirstLine
-						|| !hasBreakpointAtCurrentPosition(thread)) {
+				if (stopBeforeCode || !hasBreakpointAtCurrentPosition(thread)) {
 					thread.resume();
 					executed = true;
 				}
 			} else {
-				if (stopBeforeFirstLine) {
+				if (stopBeforeCode || !isValidStack(thread)) {
 					thread.initialStepInto();
 					executed = true;
 				}

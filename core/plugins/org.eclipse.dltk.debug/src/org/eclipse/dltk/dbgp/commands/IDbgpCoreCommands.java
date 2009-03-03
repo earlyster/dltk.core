@@ -9,11 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.commands;
 
-import org.eclipse.dltk.debug.core.IDebugConfigurable;
-
 public interface IDbgpCoreCommands extends IDbgpFeatureCommands,
 		IDbgpBreakpointCommands, IDbgpContextCommands,
 		IDbgpContinuationCommands, IDbgpDataTypeCommands, IDbgpSourceCommands,
 		IDbgpStatusCommands, IDbgpStackCommands, IDbgpStreamCommands,
-		IDbgpPropertyCommands, IDebugConfigurable {
+		IDbgpPropertyCommands {
 }
