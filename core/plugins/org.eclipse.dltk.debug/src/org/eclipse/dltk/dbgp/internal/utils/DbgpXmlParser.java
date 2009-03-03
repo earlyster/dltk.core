@@ -18,6 +18,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.dbgp.exceptions.DbgpDebuggingEngineException;
 import org.eclipse.dltk.dbgp.exceptions.DbgpProtocolException;
 import org.w3c.dom.Document;
@@ -94,7 +95,7 @@ public class DbgpXmlParser {
 			}
 		}
 
-		return ""; //$NON-NLS-1$
+		return Util.EMPTY_STRING;
 	}
 
 	public static String parseBase64Content(Element element) {
