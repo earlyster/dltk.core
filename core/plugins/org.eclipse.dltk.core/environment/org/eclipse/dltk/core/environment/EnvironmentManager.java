@@ -24,6 +24,7 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.SimplePriorityClassDLTKExtensionManager;
 import org.eclipse.dltk.core.PriorityDLTKExtensionManager.ElementInfo;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
+import org.eclipse.dltk.internal.core.ExternalScriptProject;
 
 public final class EnvironmentManager {
 	public static final QualifiedName PROJECT_ENVIRONMENT = new QualifiedName(
@@ -55,18 +56,21 @@ public final class EnvironmentManager {
 	}
 
 	public static IEnvironment getEnvironment(IProject project) {
-		try {
-			final String environmentId = project
-					.getPersistentProperty(PROJECT_ENVIRONMENT);
-			if (environmentId != null) {
-				final IEnvironment environment = getEnvironmentById(environmentId);
-				if (environment != null) {
-					return environment;
+		if (!ExternalScriptProject.EXTERNAL_PROJECT_NAME.equals(project
+				.getName())) {
+			try {
+				final String environmentId = project
+						.getPersistentProperty(PROJECT_ENVIRONMENT);
+				if (environmentId != null) {
+					final IEnvironment environment = getEnvironmentById(environmentId);
+					if (environment != null) {
+						return environment;
+					}
 				}
-			}
-		} catch (CoreException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
+			} catch (CoreException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
 			}
 		}
 		Object[] objects = manager.getObjects();
