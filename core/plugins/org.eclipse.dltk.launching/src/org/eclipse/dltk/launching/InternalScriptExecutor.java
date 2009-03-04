@@ -31,15 +31,19 @@ public class InternalScriptExecutor {
 
 	public InternalScriptExecutor(IInterpreterInstall install,
 			IScriptProcessHandler handler) {
-		Assert.isNotNull(install, Messages.InternalScriptExecutor_iInterpreterInstallMustNotBeNull);
-		Assert.isNotNull(handler, Messages.InternalScriptExecutor_iProcessHandlerMustNotBeNull);
+		Assert
+				.isNotNull(
+						install,
+						Messages.InternalScriptExecutor_iInterpreterInstallMustNotBeNull);
+		Assert.isNotNull(handler,
+				Messages.InternalScriptExecutor_iProcessHandlerMustNotBeNull);
 
 		this.install = install;
 		this.handler = handler;
 	}
 
 	/**
-	 * Execute a script or interpreter action
+	 * Execute a script.
 	 * 
 	 * @param deployer
 	 *            implementation of <code>IInternalScriptDeployer</code> to
@@ -84,6 +88,32 @@ public class InternalScriptExecutor {
 		}
 	}
 
+	/**
+	 * Execute an interpreter action.
+	 * 
+	 * @param interpreterArgs
+	 *            command line arguments for the interpreter, may be
+	 *            <code>null</code>
+	 * @param stdin
+	 *            stdin to pass to script, may be <code>null</code>
+	 * 
+	 * @throws CoreException
+	 *             if there was an error handling the process
+	 * 
+	 * @throws CoreException
+	 */
+	public ScriptResult execute(String[] interpreterArgs, char[] stdin)
+			throws CoreException {
+		IExecutionEnvironment execEnv = install.getExecEnvironment();
+		IFileHandle interpreter = install.getInstallLocation();
+
+		String[] cmdLine = buildCommandLine(interpreter, interpreterArgs, null,
+				null);
+
+		Process process = execEnv.exec(cmdLine, null, null);
+		return handler.handle(process, stdin);
+	}
+
 	private void addArgs(ArrayList list, String[] args) {
 		if (args != null) {
 			for (int i = 0; i < args.length; i++) {
@@ -99,7 +129,10 @@ public class InternalScriptExecutor {
 		cmdLine.add(interpreter.getCanonicalPath());
 		addArgs(cmdLine, interpreterArgs);
 
-		cmdLine.add(script.getCanonicalPath());
+		if (script != null) {
+			cmdLine.add(script.getCanonicalPath());
+		}
+
 		addArgs(cmdLine, scriptArgs);
 
 		return (String[]) cmdLine.toArray(new String[cmdLine.size()]);
