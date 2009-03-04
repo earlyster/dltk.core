@@ -39,6 +39,7 @@ import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.dbgp.IDbgpStreamFilter;
 import org.eclipse.dltk.dbgp.commands.IDbgpFeatureCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
+import org.eclipse.dltk.debug.core.DLTKDebugLaunchConstants;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
 import org.eclipse.dltk.debug.core.IDbgpService;
@@ -54,8 +55,11 @@ import org.eclipse.dltk.debug.core.model.IScriptVariable;
 public class ScriptDebugTarget extends ScriptDebugElement implements
 		IScriptDebugTarget, IScriptThreadManagerListener, IStepFilters {
 
+	/**
+	 * @deprecated
+	 * @see #getScriptProject()
+	 */
 	private static final String LAUNCH_CONFIGURATION_ATTR_PROJECT = "project"; //$NON-NLS-1$
-	private static final String LAUNCH_CONFIGURATION_ATTR_BREAK_ON_FIRST_LINE = "enableBreakOnFirstLine"; //$NON-NLS-1$
 
 	private static final int THREAD_TERMINATION_TIMEOUT = 5000; // 5 seconds
 
@@ -444,6 +448,12 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		return null;
 	}
 
+	/**
+	 * @deprecated project should not be used to detect nature, since the nature
+	 *             is already known before launch. Also, at some point we will
+	 *             have multiple natures in the same project, so it will not
+	 *             work correctly either.
+	 */
 	protected IScriptProject getScriptProject() {
 		final ILaunchConfiguration configuration = launch
 				.getLaunchConfiguration();
@@ -469,15 +479,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	}
 
 	public boolean breakOnFirstLineEnabled() {
-		try {
-			return launch.getLaunchConfiguration().getAttribute(
-					LAUNCH_CONFIGURATION_ATTR_BREAK_ON_FIRST_LINE, false);
-		} catch (CoreException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
-			return false;
-		}
+		return DLTKDebugLaunchConstants.isBreakOnFirstLine(launch);
 	}
 
 	public void toggleGlobalVariables(boolean enabled) {
