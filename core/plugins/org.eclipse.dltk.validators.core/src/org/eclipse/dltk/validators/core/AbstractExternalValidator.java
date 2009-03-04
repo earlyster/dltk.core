@@ -22,6 +22,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.validators.internal.core.ValidatorsCore;
 
+/**
+ * @deprecated use ResourceValidatorWorker and/or SourceModuleValidatorWorker
+ */
 public abstract class AbstractExternalValidator {
 
 	protected abstract String getMarkerType();
