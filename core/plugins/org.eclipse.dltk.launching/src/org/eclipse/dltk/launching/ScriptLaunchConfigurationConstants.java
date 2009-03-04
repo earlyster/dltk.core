@@ -115,6 +115,11 @@ public class ScriptLaunchConfigurationConstants {
 
 	public static final String ATTR_DEBUG_CONNECTOR = "debugConnector"; //$NON-NLS-1$
 
+	/**
+	 * TODO We should remove this attribute, associate nature with each
+	 * {@link org.eclipse.debug.core.ILaunchConfigurationType} and use it to get
+	 * the nature of the {@link org.eclipse.debug.core.ILaunchConfiguration}
+	 */
 	public static final String ATTR_SCRIPT_NATURE = "nature"; //$NON-NLS-1$
 
 	public static final String ATTR_INTERPRETER_ARGUMENTS = "interpreterArguments"; //$NON-NLS-1$
