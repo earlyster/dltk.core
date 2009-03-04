@@ -129,6 +129,10 @@ public class ScriptLaunchConfigurationConstants {
 
 	public static final String ID_SCRIPT_PROCESS_TYPE = "script"; //$NON-NLS-1$
 
+	/**
+	 * Boolean launch configuration attribute to specify if debugger should stop
+	 * on the first line of code. Default value is <code>false</code>.
+	 */
 	public static final String ENABLE_BREAK_ON_FIRST_LINE = "enableBreakOnFirstLine"; //$NON-NLS-1$
 	public static final String ENABLE_DBGP_LOGGING = "enableDbgpLogging"; //$NON-NLS-1$
 

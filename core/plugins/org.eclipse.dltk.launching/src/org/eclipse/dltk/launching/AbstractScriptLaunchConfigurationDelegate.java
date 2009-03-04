@@ -235,9 +235,9 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	/**
 	 * Returns entries that should appear on the bootstrap portion of the
 	 * buildpath as specified by the given launch configuration, as an array of
-	 * resolved strings. The returned array is <code>null</code> if all
-	 * entries are standard (i.e. appear by default), or empty to represent an
-	 * empty bootpath.
+	 * resolved strings. The returned array is <code>null</code> if all entries
+	 * are standard (i.e. appear by default), or empty to represent an empty
+	 * bootpath.
 	 * 
 	 * @param configuration
 	 *            launch configuration
@@ -834,17 +834,26 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 
 	public ILaunch getLaunch(ILaunchConfiguration configuration, String mode)
 			throws CoreException {
-		if (ILaunchManager.DEBUG_MODE.equals(mode)
-				&& !configuration.getAttribute(
-						ScriptLaunchConfigurationConstants.ATTR_DEBUG_CONSOLE,
-						true)) {
-			final Launch launch = new Launch(configuration, mode, null);
-			launch.setAttribute(DLTKDebugLaunchConstants.ATTR_DEBUG_CONSOLE,
-					Boolean.FALSE.toString());
-			return launch;
-		} else {
-			return super.getLaunch(configuration, mode);
+		final Launch launch = new Launch(configuration, mode, null);
+		if (ILaunchManager.DEBUG_MODE.equals(mode)) {
+			if (!configuration
+					.getAttribute(
+							ScriptLaunchConfigurationConstants.ATTR_DEBUG_CONSOLE,
+							true)) {
+				launch.setAttribute(
+						DLTKDebugLaunchConstants.ATTR_DEBUG_CONSOLE,
+						DLTKDebugLaunchConstants.FALSE);
+			}
+			if (configuration
+					.getAttribute(
+							ScriptLaunchConfigurationConstants.ENABLE_BREAK_ON_FIRST_LINE,
+							false)) {
+				launch.setAttribute(
+						DLTKDebugLaunchConstants.ATTR_BREAK_ON_FIRST_LINE,
+						DLTKDebugLaunchConstants.TRUE);
+			}
 		}
+		return launch;
 	}
 
 	public void launch(ILaunchConfiguration configuration, String mode,
