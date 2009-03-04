@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.dltk.validators.core.IValidatorProblem;
+import org.eclipse.dltk.validators.core.ValidatorProblem;
+
 public class WildcardMatcher {
 
 	private List tokenList = new ArrayList();
@@ -14,7 +17,7 @@ public class WildcardMatcher {
 		this.wcards = wcards;
 	}
 
-	public ExternalCheckerProblem match(Rule pattern, String input)
+	public IValidatorProblem match(Rule pattern, String input)
 			throws WildcardException {
 		tokenList = parseWildcard(pattern.getDescription());
 		String bigpattern = makeBigPattern(pattern.getDescription(), wcards);
@@ -55,9 +58,9 @@ public class WildcardMatcher {
 			if (message == null) {
 				message = input;
 			}
-			ExternalCheckerProblem problem = new ExternalCheckerProblem(pattern
-					.getType(), message, lineNumber, fileName);
-			return problem;
+
+			return new ValidatorProblem(fileName, message, lineNumber, pattern
+					.getProblemType());
 		}
 		return null;
 	}

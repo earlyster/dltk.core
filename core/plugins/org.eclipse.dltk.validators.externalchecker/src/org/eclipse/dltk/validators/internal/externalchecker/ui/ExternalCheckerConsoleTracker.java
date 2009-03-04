@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.dltk.validators.core.IValidator;
+import org.eclipse.dltk.validators.core.IValidatorProblem;
 import org.eclipse.dltk.validators.core.ValidatorRuntime;
 import org.eclipse.dltk.validators.internal.externalchecker.core.ExternalChecker;
-import org.eclipse.dltk.validators.internal.externalchecker.core.ExternalCheckerProblem;
 import org.eclipse.dltk.validators.internal.externalchecker.core.ExternalCheckerWildcardManager;
 import org.eclipse.dltk.validators.internal.externalchecker.core.Rule;
 import org.eclipse.dltk.validators.internal.externalchecker.core.WildcardException;
@@ -75,7 +75,7 @@ public class ExternalCheckerConsoleTracker implements IPatternMatchListener {
 			for (int i = 0; i < rules.size(); i++) {
 				Rule rule = (Rule) rules.get(i);
 				try {
-					ExternalCheckerProblem problem = wmatcher.match(rule, text);
+					IValidatorProblem problem = wmatcher.match(rule, text);
 					if (problem != null) {
 						IHyperlink link = new ExternalCheckerSyntaxHyperlink(
 								console, problem);

@@ -13,6 +13,8 @@ import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.validators.core.AbstractValidator;
+import org.eclipse.dltk.validators.core.IResourceValidator;
+import org.eclipse.dltk.validators.core.ISourceModuleValidator;
 import org.eclipse.dltk.validators.core.IValidatorType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -173,7 +175,16 @@ public class ExternalChecker extends AbstractValidator {
 	}
 
 	public Object getValidator(IScriptProject project, Class validatorType) {
-		return new ExternalCheckerWorker(getEnvrironment(project), this);
+		if (validatorType == IResourceValidator.class) {
+			return new ExternalResourceWorker(getEnvrironment(project), this);
+		}
+		
+		if (validatorType == ISourceModuleValidator.class) {		
+			return new ExternalSourceModuleWorker(getEnvrironment(project), this);
+		}
+		
+		// safety incase new validator types are introduced
+		return null;
 	}
 
 	protected Object clone() {

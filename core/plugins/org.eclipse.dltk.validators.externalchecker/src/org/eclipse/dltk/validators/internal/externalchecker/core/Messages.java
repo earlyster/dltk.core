@@ -12,6 +12,8 @@ public class Messages extends NLS {
 	public static String ExternalCheckerWildcardManager_fileName;
 	public static String ExternalCheckerWildcardManager_lineNumber;
 	public static String ExternalCheckerWildcardManager_message;
+	public static String ExternalChecker_resourceIsNull;
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
