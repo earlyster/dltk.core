@@ -9,18 +9,18 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.core.model.operations;
 
-import org.eclipse.dltk.dbgp.IDbgpStatus;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 
-public class DbgpStepReturnOperation extends DbgpStepOperation {
+public class DbgpStepReturnOperation extends DbgpOperation {
 	private static final String JOB_NAME = Messages.DbgpStepReturnOperation_stepReturnOperation;
 
 	public DbgpStepReturnOperation(IScriptThread thread, IResultHandler finish) {
 		super(thread, JOB_NAME, finish);
 	}
 
-	protected IDbgpStatus step() throws DbgpException {
-		return getCore().stepOut();
+	protected void process() throws DbgpException {
+		callFinish(getCore().stepOut());
 	}
+
 }

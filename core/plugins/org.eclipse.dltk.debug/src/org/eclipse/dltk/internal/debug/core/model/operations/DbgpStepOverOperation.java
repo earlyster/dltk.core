@@ -9,18 +9,18 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.core.model.operations;
 
-import org.eclipse.dltk.dbgp.IDbgpStatus;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.model.IScriptThread;
 
-public class DbgpStepOverOperation extends DbgpStepOperation {
+public class DbgpStepOverOperation extends DbgpOperation {
 	private static final String JOB_NAME = Messages.DbgpStepOverOperation_stepOverOperation;
 
 	public DbgpStepOverOperation(IScriptThread thread, IResultHandler finish) {
 		super(thread, JOB_NAME, finish);
 	}
 
-	protected IDbgpStatus step() throws DbgpException {
-		return getCore().stepOver();
+	protected void process() throws DbgpException {
+		callFinish(getCore().stepOver());
 	}
+
 }
