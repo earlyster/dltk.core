@@ -286,6 +286,10 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 		return stateManager.isStepping();
 	}
 
+	boolean isStepInto() {
+		return stateManager.isStepInto();
+	}
+
 	// Step into
 	public boolean canStepInto() {
 		return stateManager.canStepInto();

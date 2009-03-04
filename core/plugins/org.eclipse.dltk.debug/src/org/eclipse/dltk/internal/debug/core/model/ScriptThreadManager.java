@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.debug.core.model;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.ListenerList;
@@ -246,21 +247,22 @@ public class ScriptThreadManager implements IScriptThreadManager,
 				throw error;
 			}
 			session.configure(target.getOptions());
-
 			session.getStreamManager().addListener(this);
+			
+			final boolean breakOnFirstLine = target.breakOnFirstLineEnabled()
+					|| isAnyThreadInStepInto();
 			ScriptThread thread = new ScriptThread(target, session, this);
 			addThread(thread);
 
 			final boolean isFirstThread = waitingForThreads;
-			waitingForThreads = false;
-
+			if (isFirstThread) {
+				waitingForThreads = false;
+			}
 			fireThreadAccepted(thread, isFirstThread);
-
 			DebugEventHelper.fireCreateEvent(thread);
 
 			final boolean stopBeforeCode = thread.getDbgpSession()
 					.getDebugOptions().get(DebugOption.ENGINE_STOP_BEFORE_CODE);
-			final boolean breakOnFirstLine = target.breakOnFirstLineEnabled();
 			boolean executed = false;
 			if (!breakOnFirstLine) {
 				if (stopBeforeCode || !hasBreakpointAtCurrentPosition(thread)) {
@@ -288,6 +290,18 @@ public class ScriptThreadManager implements IScriptThreadManager,
 			}
 			DLTKDebugPlugin.log(e);
 		}
+	}
+
+	private boolean isAnyThreadInStepInto() {
+		synchronized (threads) {
+			for (Iterator i = threads.iterator(); i.hasNext();) {
+				ScriptThread thread = (ScriptThread) i.next();
+				if (thread.isStepInto()) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private void addThread(ScriptThread thread) {
