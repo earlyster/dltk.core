@@ -1,6 +1,7 @@
 package org.eclipse.dltk.internal.ui.preferences;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.internal.ui.util.CoreUtility;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.preferences.IPreferenceChangeRebuildPrompt;
 import org.eclipse.dltk.ui.preferences.PreferenceKey;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -267,11 +269,13 @@ public abstract class OptionsConfigurationBlock {
 
 		boolean doBuild = false;
 		if (needsBuild) {
-			String[] strings = getFullBuildDialogStrings(fProject == null);
-			if (strings != null) {
-				MessageDialog dialog = new MessageDialog(getShell(),
-						strings[0], null, strings[1], MessageDialog.QUESTION,
-						new String[] { IDialogConstants.YES_LABEL,
+			IPreferenceChangeRebuildPrompt prompt = getPreferenceChangeRebuildPrompt(
+					fProject == null, changedOptions);
+			if (prompt != null) {
+				MessageDialog dialog = new MessageDialog(getShell(), prompt
+						.getTitle(), null, prompt.getMessage(),
+						MessageDialog.QUESTION, new String[] {
+								IDialogConstants.YES_LABEL,
 								IDialogConstants.NO_LABEL,
 								IDialogConstants.CANCEL_LABEL }, 2);
 				int res = dialog.open();
@@ -314,8 +318,35 @@ public abstract class OptionsConfigurationBlock {
 		}
 	}
 
-	protected abstract String[] getFullBuildDialogStrings(
-			boolean workspaceSettings);
+	/**
+	 * Returns the prompt that should be used in the popup box that indicates a
+	 * project build needs to occur.
+	 * 
+	 * <p>
+	 * Default implementation returns <code>null</code>. Clients should override
+	 * to return context appropriate message.
+	 * </p>
+	 * 
+	 * @param workspaceSettings
+	 *            <code>true</code> if workspace settings were changed,
+	 *            <code>false</code> if project settings were changed
+	 * @param changedOptions
+	 *            options that were actually changed. Could be used to test if
+	 *            particular option was changed.
+	 * @return
+	 */
+	protected IPreferenceChangeRebuildPrompt getPreferenceChangeRebuildPrompt(
+			boolean workspaceSettings, Collection changedOptions) {
+		return null;
+	}
+
+	/**
+	 * @deprecated
+	 * @see #getPreferenceChangeRebuildPrompt(boolean, Collection)
+	 */
+	protected final String[] getFullBuildDialogStrings(boolean workspaceSettings) {
+		return null;
+	}
 
 	public void dispose() {
 	}

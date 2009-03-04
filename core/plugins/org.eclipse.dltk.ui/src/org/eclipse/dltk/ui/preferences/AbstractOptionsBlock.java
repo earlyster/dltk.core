@@ -1,5 +1,7 @@
 package org.eclipse.dltk.ui.preferences;
 
+import java.util.Collection;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.internal.ui.preferences.OptionsConfigurationBlock;
@@ -52,22 +54,6 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 		bindManager.bindControl(textBox, key, validator);
 	}
 
-	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
-		String title = getBuildDialogTitle();
-		String message;
-		if (workspaceSettings) {
-			message = getFullBuildDialogMessage();
-		} else {
-			message = getProjectBuildDialogMessage();
-		}
-
-		if (title == null || message == null) {
-			return null;
-		}
-
-		return new String[] { title, message };
-	}
-
 	/**
 	 * Returns the string that should be used as the title in the popup box that
 	 * indicates a build needs to occur.
@@ -79,8 +65,11 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 * <code>getProjectBuildDialogMessage()</code> in order to trigger the popup
 	 * box.
 	 * </p>
+	 * 
+	 * @deprecated
+	 * @see #getPreferenceChangeRebuildPrompt(boolean, Collection)
 	 */
-	protected String getBuildDialogTitle() {
+	protected final String getBuildDialogTitle() {
 		return null;
 	}
 
@@ -95,8 +84,11 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 * <code>getProjectBuildDialogMessage()</code> in order to trigger the popup
 	 * box.
 	 * </p>
+	 * 
+	 * @deprecated
+	 * @see #getPreferenceChangeRebuildPrompt(boolean, Collection)
 	 */
-	protected String getFullBuildDialogMessage() {
+	protected final String getFullBuildDialogMessage() {
 		return null;
 	}
 
@@ -111,8 +103,11 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 * <code>getFullBuildDialogMessage()</code> in order to trigger the popup
 	 * box.
 	 * </p>
+	 * 
+	 * @deprecated
+	 * @see #getPreferenceChangeRebuildPrompt(boolean, Collection)
 	 */
-	protected String getProjectBuildDialogMessage() {
+	protected final String getProjectBuildDialogMessage() {
 		return null;
 	}
 
@@ -234,6 +229,18 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 */
 	protected void statusChanged(IStatus status) {
 		super.statusChanged(status);
+	}
+
+	/*
+	 * Override getPreferenceChangeRebuildPrompt() as public API
+	 * 
+	 * @see OptionsConfigurationBlock#getPreferenceChangeRebuildPrompt(boolean,
+	 * java.util.Collection)
+	 */
+	protected IPreferenceChangeRebuildPrompt getPreferenceChangeRebuildPrompt(
+			boolean workspaceSettings, Collection changedOptions) {
+		return super.getPreferenceChangeRebuildPrompt(workspaceSettings,
+				changedOptions);
 	}
 
 }

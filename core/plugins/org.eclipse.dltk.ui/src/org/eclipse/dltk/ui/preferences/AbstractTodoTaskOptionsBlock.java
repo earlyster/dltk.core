@@ -1,5 +1,6 @@
 package org.eclipse.dltk.ui.preferences;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -269,16 +270,13 @@ public abstract class AbstractTodoTaskOptionsBlock extends AbstractOptionsBlock 
 				.getElements()));
 	}
 
-	protected String getFullBuildDialogMessage() {
-		return PreferencesMessages.TodoTaskConfigurationBlock_needsfullbuild_message;
-	}
-
-	protected String getProjectBuildDialogMessage() {
-		return PreferencesMessages.TodoTaskConfigurationBlock_needsprojectbuild_message;
-	}
-
-	protected String getBuildDialogTitle() {
-		return PreferencesMessages.TodoTaskConfigurationBlock_needsbuild_title;
+	protected IPreferenceChangeRebuildPrompt getPreferenceChangeRebuildPrompt(
+			boolean workspaceSettings, Collection changedOptions) {
+		return PreferenceChangeRebuildPrompt
+				.create(
+						workspaceSettings,
+						PreferencesMessages.TodoTaskConfigurationBlock_needsbuild_title,
+						PreferencesMessages.TodoTaskConfigurationBlock_needsbuild_message);
 	}
 
 	private void doTodoButtonPressed(int index) {

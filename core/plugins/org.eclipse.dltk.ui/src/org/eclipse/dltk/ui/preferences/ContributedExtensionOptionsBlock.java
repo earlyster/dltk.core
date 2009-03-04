@@ -164,11 +164,6 @@ public abstract class ContributedExtensionOptionsBlock extends
 				groupColumns, 1, GridData.FILL_HORIZONTAL);
 	}
 
-	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	/**
 	 * Returns the label that will be used for the selector group.
 	 */
