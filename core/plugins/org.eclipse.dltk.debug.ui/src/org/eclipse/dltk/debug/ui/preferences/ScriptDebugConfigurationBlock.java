@@ -31,6 +31,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -128,6 +129,9 @@ public class ScriptDebugConfigurationBlock extends
 
 		Composite portCompsite = SWTFactory.createComposite(group, group
 				.getFont(), 2, 0, GridData.FILL_HORIZONTAL);
+		GridLayout portCompsiteLayout = (GridLayout) portCompsite.getLayout();
+		portCompsiteLayout.marginWidth = 0;
+		portCompsiteLayout.marginHeight = 0;
 
 		portCombo = SWTFactory.createCombo(portCompsite, SWT.READ_ONLY
 				| SWT.BORDER, 0, new String[] {});
