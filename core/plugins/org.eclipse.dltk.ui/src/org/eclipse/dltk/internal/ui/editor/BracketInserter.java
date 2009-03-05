@@ -15,7 +15,6 @@ package org.eclipse.dltk.internal.ui.editor;
 import java.util.Stack;
 
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor.BracketLevel;
-import org.eclipse.dltk.internal.ui.editor.ScriptEditor.ExitPolicy;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
