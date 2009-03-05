@@ -15,6 +15,7 @@ package org.eclipse.dltk.internal.ui.editor;
 import java.util.Stack;
 
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor.BracketLevel;
+import org.eclipse.dltk.internal.ui.editor.ScriptEditor.ExitPolicy;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
@@ -22,11 +23,17 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IPositionUpdater;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.link.LinkedModeUI;
+import org.eclipse.jface.text.link.LinkedPosition;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 public abstract class BracketInserter implements VerifyKeyListener,
 		ILinkedModeListener {
@@ -156,5 +163,52 @@ public abstract class BracketInserter implements VerifyKeyListener,
 	}
 
 	public void resume(LinkedModeModel environment, int flags) {
+	}
+
+	protected void insertBrackets(final IDocument document, final int offset,
+			final int length, final char character, final char closingCharacter)
+			throws BadLocationException, BadPositionCategoryException {
+		document.replace(offset, length, new String(new char[] { character,
+				closingCharacter }));
+
+		BracketLevel level = new ScriptEditor.BracketLevel();
+		fBracketLevelStack.push(level);
+
+		LinkedPositionGroup group = new LinkedPositionGroup();
+		group.addPosition(new LinkedPosition(document, offset + 1, 0,
+				LinkedPositionGroup.NO_STOP));
+
+		LinkedModeModel model = new LinkedModeModel();
+		model.addLinkingListener(this);
+		model.addGroup(group);
+		model.forceInstall();
+
+		level.fOffset = offset;
+		level.fLength = 2;
+
+		// set up position tracking for our magic peers
+		if (fBracketLevelStack.size() == 1) {
+			document.addPositionCategory(CATEGORY);
+			document.addPositionUpdater(fUpdater);
+		}
+
+		level.fFirstPosition = new Position(offset, 1);
+		level.fSecondPosition = new Position(offset + 1, 1);
+		document.addPosition(CATEGORY, level.fFirstPosition);
+		document.addPosition(CATEGORY, level.fSecondPosition);
+
+		final ISourceViewer sourceViewer = this.editor.getScriptSourceViewer();
+		level.fUI = new EditorLinkedModeUI(model, sourceViewer);
+		level.fUI.setSimpleMode(true);
+		level.fUI.setExitPolicy(this.editor.new ExitPolicy(closingCharacter,
+				getEscapeCharacter(closingCharacter), fBracketLevelStack));
+		level.fUI.setExitPosition(sourceViewer, offset + 2, 0,
+				Integer.MAX_VALUE);
+		level.fUI.setCyclingMode(LinkedModeUI.CYCLE_NEVER);
+		level.fUI.enter();
+
+		IRegion newSelection = level.fUI.getSelectedRegion();
+		sourceViewer.setSelectedRange(newSelection.getOffset(), newSelection
+				.getLength());
 	}
 }
