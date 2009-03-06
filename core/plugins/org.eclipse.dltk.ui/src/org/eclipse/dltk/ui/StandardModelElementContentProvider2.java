@@ -33,6 +33,9 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 /**
+ * This is more extensible copy of
+ * org.eclipse.dltk.internal.ui.StandardModelElementContentProvider
+ * 
  * A base content provider for Java elements. It provides access to the Java
  * element hierarchy without listening to changes in the Java model. If updating
  * the presentation on Java model change is required than clients have to
@@ -83,20 +86,19 @@ import org.eclipse.jface.viewers.Viewer;
  * between the Java project and the package fragments is automatically filtered
  * out.
  * </p>
- * 
  */
-public class StandardModelElementContentProvider implements
+public class StandardModelElementContentProvider2 implements
 		ITreeContentProvider, IWorkingCopyProvider {
 
 	protected static final Object[] NO_CHILDREN = new Object[0];
 	protected boolean fProvideMembers;
-	protected boolean fProvideWorkingCopy;
+	protected boolean fForeignResources;
 
 	/**
 	 * Creates a new content provider. The content provider does not provide
 	 * members of compilation units or class files.
 	 */
-	public StandardModelElementContentProvider() {
+	public StandardModelElementContentProvider2() {
 		this(false);
 	}
 
@@ -107,9 +109,22 @@ public class StandardModelElementContentProvider implements
 	 *            if <code>true</code> members below compilation units and class
 	 *            files are provided.
 	 */
-	public StandardModelElementContentProvider(boolean provideMembers) {
+	public StandardModelElementContentProvider2(boolean provideMembers) {
+		this(provideMembers, true);
 		fProvideMembers = provideMembers;
-		fProvideWorkingCopy = provideMembers;
+	}
+
+	/**
+	 * Creates a new <code>StandardJavaElementContentProvider</code>.
+	 * 
+	 * @param provideMembers
+	 *            if <code>true</code> members below compilation units and class
+	 *            files are provided.
+	 */
+	public StandardModelElementContentProvider2(boolean provideMembers,
+			boolean provideForeignResources) {
+		fProvideMembers = provideMembers;
+		fForeignResources = provideForeignResources;
 	}
 
 	/**
@@ -137,31 +152,13 @@ public class StandardModelElementContentProvider implements
 		fProvideMembers = b;
 	}
 
-	/**
-	 * @deprecated Since 3.0 compilation unit children are always provided as
-	 *             working copies. The Java model does not support the
-	 *             'original' mode anymore.
-	 */
-	public boolean getProvideWorkingCopy() {
-		return fProvideWorkingCopy;
-	}
-
-	/**
-	 * @deprecated Since 3.0 compilation unit children are always provided from
-	 *             the working copy. The Java model offers a unified world and
-	 *             does not support the 'original' mode anymore.
-	 */
-	public void setProvideWorkingCopy(boolean b) {
-		fProvideWorkingCopy = b;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see IWorkingCopyProvider#providesWorkingCopies()
 	 */
 	public boolean providesWorkingCopies() {
-		return getProvideWorkingCopy();
+		return true;
 	}
 
 	/*
@@ -304,10 +301,12 @@ public class StandardModelElementContentProvider implements
 		if (isProjectProjectFragment(root)) {
 			return fragments;
 		}
-		Object[] nonJavaResources = root.getForeignResources();
-		if (nonJavaResources == null)
-			return fragments;
-		return concatenate(fragments, nonJavaResources);
+		if (fForeignResources) {
+			Object[] nonJavaResources = root.getForeignResources();
+			if (nonJavaResources != null && nonJavaResources.length != 0)
+				return concatenate(fragments, nonJavaResources);
+		}
+		return fragments;
 	}
 
 	/**
@@ -333,20 +332,32 @@ public class StandardModelElementContentProvider implements
 		// replace them with the package fragments directly
 		for (int i = 0; i < roots.length; i++) {
 			IProjectFragment root = roots[i];
-			if (isProjectProjectFragment(root)) {
-				Object[] fragments = getProjectFragmentContent(root);
-				for (int j = 0; j < fragments.length; j++) {
-					list.add(fragments[j]);
+			if (isValidProjectFragment(root)) {
+				if (isProjectProjectFragment(root)) {
+					Object[] fragments = getProjectFragmentContent(root);
+					for (int j = 0; j < fragments.length; j++) {
+						list.add(fragments[j]);
+					}
+				} else {
+					list.add(root);
 				}
-			} else {
-				list.add(root);
 			}
 		}
-		Object[] resources = project.getForeignResources();
-		for (int i = 0; i < resources.length; i++) {
-			list.add(resources[i]);
+		if (fForeignResources) {
+			Object[] resources = project.getForeignResources();
+			for (int i = 0; i < resources.length; i++) {
+				list.add(resources[i]);
+			}
 		}
 		return list.toArray();
+	}
+
+	/**
+	 * @param root
+	 * @return
+	 */
+	protected boolean isValidProjectFragment(IProjectFragment root) {
+		return true;
 	}
 
 	/**
@@ -373,8 +384,14 @@ public class StandardModelElementContentProvider implements
 	protected Object[] getScriptFolderContent(IScriptFolder fragment)
 			throws ModelException {
 		// if (fragment.getKind() == IProjectFragment.K_SOURCE) {
-		return concatenate(fragment.getSourceModules(), fragment
-				.getForeignResources());
+		final ISourceModule[] sourceModules = fragment.getSourceModules();
+		if (fForeignResources) {
+			final Object[] foreignResources = fragment.getForeignResources();
+			if (foreignResources != null && foreignResources.length != 0) {
+				return concatenate(sourceModules, foreignResources);
+			}
+		}
+		return sourceModules;
 		// }
 		// return concatenate(fragment.getClassFiles(),
 		// fragment.getForeignResources());
@@ -451,8 +468,8 @@ public class StandardModelElementContentProvider implements
 		if (element instanceof IScriptFolder) {
 			IScriptFolder fragment = (IScriptFolder) element;
 			if (fragment.exists()
-					&& !(fragment.hasChildren() || fragment
-							.getForeignResources().length > 0)
+					&& !(fragment.hasChildren() || (fForeignResources && fragment
+							.getForeignResources().length > 0))
 					&& fragment.hasSubfolders())
 				return true;
 		}
@@ -491,7 +508,6 @@ public class StandardModelElementContentProvider implements
 	 * method.
 	 */
 	protected Object internalGetParent(Object element) {
-
 		// try to map resources to the containing package fragment
 		if (element instanceof IResource) {
 			IResource parent = ((IResource) element).getParent();
@@ -502,23 +518,26 @@ public class StandardModelElementContentProvider implements
 			return parent;
 		} else if (element instanceof IModelElement) {
 			IModelElement parent = ((IModelElement) element).getParent();
-			// for package fragments that are contained in a project package
-			// fragment
-			// we have to skip the package fragment root as the parent.
-			if (element instanceof IScriptFolder) {
-				return skipProjectProjectFragment((IProjectFragment) parent);
-			}
-			// for ISourceModule in <default> IScriptFolders, tree parent is
-			// actually IProjectFragment
 			if (parent instanceof IScriptFolder
-					&& parent.getPath().equals(parent.getParent().getPath())
-					// unless source path is root of project path
-					&& !parent.getPath().equals(
-							parent.getScriptProject().getPath())) {
+					&& ((IScriptFolder) parent).isRootFolder()) {
+				/*
+				 * for ISourceModule in <default> IScriptFolders, tree parent is
+				 * actually IProjectFragment
+				 */
+				parent = parent.getParent();
+			}
+			if (parent instanceof IProjectFragment
+					&& isProjectProjectFragment((IProjectFragment) parent)) {
+				/*
+				 * for package fragments that are contained in a project package
+				 * fragment we have to skip the package fragment root as the
+				 * parent.
+				 */
 				return parent.getParent();
 			}
 			return parent;
-		} /*
+		}
+		/*
 		 * else if (element instanceof IJarEntryResource) { return
 		 * ((IJarEntryResource) element).getParent(); }
 		 */
