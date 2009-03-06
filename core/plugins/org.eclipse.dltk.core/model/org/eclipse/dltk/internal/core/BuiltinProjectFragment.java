@@ -181,6 +181,13 @@ public class BuiltinProjectFragment extends ProjectFragment {
 	public boolean isExternal() {
 		return true;
 	}
+	
+	/*
+	 * @see org.eclipse.dltk.internal.core.ProjectFragment#isBuiltin()
+	 */
+	public boolean isBuiltin() {
+		return true;
+	}
 
 	public IResource getUnderlyingResource() throws ModelException {
 		return null;

@@ -267,6 +267,13 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 	public boolean isExternal() {
 		return false;
 	}
+	
+	/*
+	 * @see org.eclipse.dltk.core.IProjectFragment#isBuiltin()
+	 */
+	public boolean isBuiltin() {
+		return false;
+	}
 
 	public IResource getUnderlyingResource() throws ModelException {
 		if (!this.exists()) {

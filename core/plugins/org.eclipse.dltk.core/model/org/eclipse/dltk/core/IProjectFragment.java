@@ -129,6 +129,17 @@ public interface IProjectFragment extends IParent, IModelElement, IOpenable {
 	boolean isExternal();
 	
 	/**
+	 * Tests whether this package fragment is built-in in the interpreter and
+	 * has no underlying resource.
+	 * <p>
+	 * This is a handle-only method.
+	 * </p>
+	 * 
+	 * @return true if this package fragment root is built-in in the interpreter
+	 */
+	boolean isBuiltin();
+	
+	/**
 	 * Creates and returns a package fragment in this root with the 
 	 * given dot-separated package name.  An empty string specifies the default package. 
 	 * This has the side effect of creating all package
