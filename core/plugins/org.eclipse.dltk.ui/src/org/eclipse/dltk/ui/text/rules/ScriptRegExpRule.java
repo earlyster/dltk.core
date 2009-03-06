@@ -10,7 +10,7 @@ import org.eclipse.jface.text.rules.PatternRule;
 public abstract class ScriptRegExpRule extends PatternRule {
 
 	public ScriptRegExpRule(String start, String end, IToken token) {
-		super(start, end, token, '\\', true, false); //$NON-NLS-1$ //$NON-NLS-2$
+		super(start, end, token, '\\', true, false);
 	}
 
 	public IToken evaluate(ICharacterScanner scanner, boolean resume) {
