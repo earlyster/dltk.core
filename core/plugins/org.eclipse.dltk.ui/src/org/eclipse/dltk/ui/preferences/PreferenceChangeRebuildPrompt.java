@@ -94,4 +94,26 @@ public class PreferenceChangeRebuildPrompt implements
 		return prompt;
 	}
 
+	/**
+	 * Factory method to create the instance with the specified parameters
+	 * 
+	 * @param title
+	 * @param message
+	 * @return
+	 */
+	public static IPreferenceChangeRebuildPrompt create(final String title,
+			final String message) {
+		return new IPreferenceChangeRebuildPrompt() {
+
+			public String getMessage() {
+				return message;
+			}
+
+			public String getTitle() {
+				return title;
+			}
+
+		};
+	}
+
 }
