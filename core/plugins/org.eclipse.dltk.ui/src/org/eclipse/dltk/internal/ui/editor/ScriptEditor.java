@@ -3259,17 +3259,12 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 	public void addReconcileListener(
 			IScriptReconcilingListener semanticHighlightingReconciler) {
-
-		synchronized (fReconcilingListeners) {
-			fReconcilingListeners.add(semanticHighlightingReconciler);
-		}
+		fReconcilingListeners.add(semanticHighlightingReconciler);
 	}
 
 	public void removeReconcileListener(
 			IScriptReconcilingListener semanticHighlightingReconciler) {
-		synchronized (fReconcilingListeners) {
-			fReconcilingListeners.remove(semanticHighlightingReconciler);
-		}
+		fReconcilingListeners.remove(semanticHighlightingReconciler);
 	}
 
 	protected SemanticHighlightingManager fSemanticManager;
