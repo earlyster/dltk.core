@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.editor;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,6 +20,8 @@ import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourceAttributes;
@@ -175,7 +178,16 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		try {
 			manager.connect(fPath, LocationKind.NORMALIZE, new NullProgressMonitor());
-			fTextFileBuffer= manager.getTextFileBuffer(fPath, LocationKind.NORMALIZE);
+			if (fFile == null) {
+				URI uri = fPath.toFile().toURI();
+				IFileStore fileStore = EFS.getStore(uri);
+				manager.connectFileStore(fileStore, new NullProgressMonitor());
+				fTextFileBuffer = manager.getFileStoreTextFileBuffer(fileStore);
+			} else {
+				manager.connect(fPath, LocationKind.NORMALIZE,
+						new NullProgressMonitor());
+				fTextFileBuffer= manager.getTextFileBuffer(fPath, LocationKind.NORMALIZE);
+			}
 			fDocument= fTextFileBuffer.getDocument();
 		} catch (CoreException x) {
 			fStatus= x.getStatus();
