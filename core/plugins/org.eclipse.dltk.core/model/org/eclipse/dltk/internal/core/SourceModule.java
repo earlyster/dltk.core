@@ -53,12 +53,12 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	public void becomeWorkingCopy(IProblemRequestor problemRequestor,
 			IProgressMonitor monitor) throws ModelException {
 		ModelManager manager = ModelManager.getModelManager();
+
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=267008
+		// not null project requester passed here.
 		ModelManager.PerWorkingCopyInfo perWorkingCopyInfo = manager
 				.getPerWorkingCopyInfo(this, false /* don't create */,
-						true /* record usage */, null /*
-														 * no problem requestor
-														 * needed
-														 */);
+						true /* record usage */, problemRequestor);
 		if (perWorkingCopyInfo == null) {
 			// close cu and its children
 			close();

@@ -447,8 +447,20 @@ public abstract class AbstractSourceModule extends Openable implements
 		final PerWorkingCopyInfo perWorkingCopyInfo = getPerWorkingCopyInfo();
 		if (perWorkingCopyInfo != null && perWorkingCopyInfo.isActive()) {
 			final IScriptProject project = getScriptProject();
+
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=267008
+			// Script nature check is not enough. It's possible that the
+			// external project created
+			// has a name of ExternalScriptProject.EXTERNAL_PROJECT_NAME, but no
+			// script nature.
+			// If script nature added during
+			// WorkingCopyOwner.newWorkingCopy(...), this fix is not relevant.
+			// Does script nature should be added in
+			// WorkingCopyOwner.newWorkingCopy, or just script name checked?
 			if (project != null
-					&& ScriptProject.hasScriptNature(project.getProject())) {
+					&& (ExternalScriptProject.EXTERNAL_PROJECT_NAME
+							.equals(project.getProject().getName()) || ScriptProject
+							.hasScriptNature(project.getProject()))) {
 				return new AccumulatingProblemReporter(perWorkingCopyInfo);
 			}
 		}
@@ -619,7 +631,7 @@ public abstract class AbstractSourceModule extends Openable implements
 						// }
 						// else
 						// {
-						//buffer.setContents(Util.getResourceContentsAsCharArray
+						// buffer.setContents(Util.getResourceContentsAsCharArray
 						// (file));
 						// }
 						char[] content = getBufferContent();
