@@ -177,7 +177,6 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	private void initialize() {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		try {
-			manager.connect(fPath, LocationKind.NORMALIZE, new NullProgressMonitor());
 			if (fFile == null) {
 				URI uri = fPath.toFile().toURI();
 				IFileStore fileStore = EFS.getStore(uri);

@@ -59,6 +59,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.BufferManager;
+import org.eclipse.dltk.internal.core.ExternalScriptProject;
 import org.eclipse.dltk.internal.ui.text.IProblemRequestorExtension;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.ui.DLTKPluginImages;
@@ -369,7 +370,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getOverlay()
+		 * @see
+		 * org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getOverlay()
 		 */
 		public IScriptAnnotation getOverlay() {
 			return null;
@@ -405,7 +407,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getCompilationUnit ()
+		 * @see
+		 * org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getCompilationUnit
+		 * ()
 		 */
 		public ISourceModule getSourceModule() {
 			return fSourceModule;
@@ -416,7 +420,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getMarkerType ()
+		 * @see
+		 * org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getMarkerType
+		 * ()
 		 */
 		public String getMarkerType() {
 			if (fProblem instanceof CategorizedProblem)
@@ -446,7 +452,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#isQuickFixable ()
+		 * @see
+		 * org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#isQuickFixable
+		 * ()
 		 * 
 		 * @since 3.2
 		 */
@@ -540,7 +548,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	 * problems. Also acts as problem requester for its compilation unit.
 	 * Initially inactive. Must explicitly be activated.
 	 */
-	protected static class SourceModuleAnnotationModel extends
+	public static class SourceModuleAnnotationModel extends
 			ResourceMarkerAnnotationModel implements IProblemRequestor,
 			IProblemRequestorExtension {
 
@@ -580,7 +588,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.source.AnnotationModel#createAnnotationModelEvent ()
+		 * @see
+		 * org.eclipse.jface.text.source.AnnotationModel#createAnnotationModelEvent
+		 * ()
 		 */
 		protected AnnotationModelEvent createAnnotationModelEvent() {
 			return new SourceModuleAnnotationModelEvent(this, getResource());
@@ -612,8 +622,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#
-		 *      beginReportingSequence()
+		 * @see
+		 * org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#
+		 * beginReportingSequence()
 		 */
 		public void beginReportingSequence() {
 			ProblemRequestorState state = (ProblemRequestorState) fProblemRequestorState
@@ -630,9 +641,17 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		 *            inside a reporting sequence
 		 */
 		private void internalBeginReporting(boolean insideReportingSequence) {
+
+			// the same behavior as in
+			// AbstractSourceModule.getAccumulatingProblemReporter
+			// It's possible that there is no script nature set, but the project
+			// is ExtenalScriptProject,
+			// that determined by it's name
 			if (fSourceModule != null
-					&& fSourceModule.getScriptProject().isOnBuildpath(
-							fSourceModule)) {
+					&& (ExternalScriptProject.EXTERNAL_PROJECT_NAME
+							.equals(fSourceModule.getScriptProject()
+									.getElementName()) || fSourceModule
+							.getScriptProject().isOnBuildpath(fSourceModule))) {
 				ProblemRequestorState state = new ProblemRequestorState();
 				state.fInsideReportingSequence = insideReportingSequence;
 				state.fReportedProblems = new ArrayList();
@@ -670,8 +689,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#
-		 *      endReportingSequence()
+		 * @see
+		 * org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension#
+		 * endReportingSequence()
 		 */
 		public void endReportingSequence() {
 			ProblemRequestorState state = (ProblemRequestorState) fProblemRequestorState
@@ -834,7 +854,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 
 		/*
-		 * @see IProblemRequestorExtension#setIsHandlingTemporaryProblems(boolean)
+		 * @see
+		 * IProblemRequestorExtension#setIsHandlingTemporaryProblems(boolean)
 		 * 
 		 * @since 3.1
 		 */
@@ -1124,9 +1145,10 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider
-	 *      #addGlobalAnnotationModelListener
-	 *      (org.eclipse.jface.text.source.IAnnotationModelListener)
+	 * @see
+	 * org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider
+	 * #addGlobalAnnotationModelListener
+	 * (org.eclipse.jface.text.source.IAnnotationModelListener)
 	 */
 	public void addGlobalAnnotationModelListener(
 			IAnnotationModelListener listener) {
@@ -1134,9 +1156,10 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider
-	 *      #removeGlobalAnnotationModelListener
-	 *      (org.eclipse.jface.text.source.IAnnotationModelListener)
+	 * @see
+	 * org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider
+	 * #removeGlobalAnnotationModelListener
+	 * (org.eclipse.jface.text.source.IAnnotationModelListener)
 	 */
 	public void removeGlobalAnnotationModelListener(
 			IAnnotationModelListener listener) {
@@ -1159,7 +1182,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createEmptyFileInfo ()
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#createEmptyFileInfo
+	 * ()
 	 */
 	protected FileInfo createEmptyFileInfo() {
 
@@ -1179,16 +1204,18 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createAnnotationModel
-	 *      (org.eclipse.core.resources.IFile)
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#createAnnotationModel
+	 * (org.eclipse.core.resources.IFile)
 	 */
 	protected IAnnotationModel createAnnotationModel(IFile file) {
 		return new SourceModuleAnnotationModel(file);
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createFileInfo(java
-	 *      .lang.Object)
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#createFileInfo(java
+	 * .lang.Object)
 	 */
 	protected FileInfo createFileInfo(Object element) throws CoreException {
 
@@ -1205,16 +1232,17 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				original = (ISourceModule) modelE;
 			}
 		}
-		if (original == null)
-			return null;
 
 		FileInfo info = super.createFileInfo(element);
 
 		if (!(info instanceof SourceModuleInfo))
 			return null;
 
-		if (original == null)
+		boolean isFake = false;
+		if (original == null) {
 			original = createFakeSourceModule(element, false);
+			isFake = true;
+		}
 		if (original == null)
 			return null;
 
@@ -1238,7 +1266,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 					.setIsHandlingTemporaryProblems(isHandlingTemporaryProblems());
 		}
 
-		if (ScriptModelUtil.isPrimary(original))
+		if (ScriptModelUtil.isPrimary(original) || isFake)
 			original.becomeWorkingCopy(requestor, getProgressMonitor());
 		cuInfo.fCopy = original;
 
@@ -1256,9 +1284,10 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#disposeFileInfo(
-	 *      java.lang.Object,
-	 *      org.eclipse.ui.editors.text.TextFileDocumentProvider.FileInfo)
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#disposeFileInfo(
+	 * java.lang.Object,
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider.FileInfo)
 	 */
 	protected void disposeFileInfo(Object element, FileInfo info) {
 
@@ -1299,8 +1328,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createSaveOperation
-	 *      (java.lang.Object, org.eclipse.jface.text.IDocument, boolean)
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#createSaveOperation
+	 * (java.lang.Object, org.eclipse.jface.text.IDocument, boolean)
 	 */
 	protected DocumentProviderOperation createSaveOperation(
 			final Object element, final IDocument document,
@@ -1334,8 +1364,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			return new DocumentProviderOperation() {
 				/*
 				 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider.
-				 *      DocumentProviderOperation
-				 *      #execute(org.eclipse.core.runtime.IProgressMonitor)
+				 * DocumentProviderOperation
+				 * #execute(org.eclipse.core.runtime.IProgressMonitor)
 				 */
 				protected void execute(IProgressMonitor monitor)
 						throws CoreException {
@@ -1346,7 +1376,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 
 				/*
 				 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider.
-				 *      DocumentProviderOperation#getSchedulingRule()
+				 * DocumentProviderOperation#getSchedulingRule()
 				 */
 				public ISchedulingRule getSchedulingRule() {
 
@@ -1478,8 +1508,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#connect(java.lang
-	 *      .Object)
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#connect(java.lang
+	 * .Object)
 	 */
 	public void connect(Object element) throws CoreException {
 		super.connect(element);
@@ -1526,8 +1557,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#getAnnotationModel
-	 *      (java.lang.Object)
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#getAnnotationModel
+	 * (java.lang.Object)
 	 */
 	public IAnnotationModel getAnnotationModel(Object element) {
 		IAnnotationModel model = super.getAnnotationModel(element);
@@ -1546,8 +1578,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 	}
 
 	/*
-	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#disconnect(java.
-	 *      lang.Object)
+	 * @see
+	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#disconnect(java.
+	 * lang.Object)
 	 */
 	public void disconnect(Object element) {
 		SourceModuleInfo info = (SourceModuleInfo) fFakeCUMapForMissingInfo
@@ -1598,8 +1631,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 
 			WorkingCopyOwner woc = new WorkingCopyOwner() {
 				/*
-				 * @see org.eclipse.jdt.core.WorkingCopyOwner#createBuffer(org.eclipse
-				 *      .jdt.core.ICompilationUnit)
+				 * @see
+				 * org.eclipse.jdt.core.WorkingCopyOwner#createBuffer(org.eclipse
+				 * .jdt.core.ICompilationUnit)
 				 * 
 				 * @since 3.2
 				 */
