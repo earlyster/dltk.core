@@ -22,10 +22,10 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.core.util.Messages;
 
@@ -290,7 +290,7 @@ public class CopyProjectFragmentOperation extends ModelOperation {
 					if (this.sibling != null && !foundSibling) {
 						return new ModelStatus(
 								IModelStatusConstants.INVALID_SIBLING,
-								this.sibling.toString()); //$NON-NLS-1$
+								this.sibling.toString());
 					}
 					if (foundExistingEntry
 							&& (this.updateModelFlags & IProjectFragment.REPLACE) == 0) {
