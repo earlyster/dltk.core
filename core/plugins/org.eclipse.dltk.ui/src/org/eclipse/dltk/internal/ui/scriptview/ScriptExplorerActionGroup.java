@@ -167,7 +167,7 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 		fillViewMenu(actionBars.getMenuManager());		
 	}
 
-	/* package  */ void updateActionBars(IActionBars actionBars) {
+	protected void updateActionBars(IActionBars actionBars) {
 		actionBars.getToolBarManager().removeAll();
 		actionBars.getMenuManager().removeAll();
 		fillActionBars(actionBars);
@@ -175,7 +175,7 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 		fZoomInAction.setEnabled(true);
 	}
 
-	private void setGlobalActionHandlers(IActionBars actionBars) {
+	protected void setGlobalActionHandlers(IActionBars actionBars) {
 		// Navigate Go Into and Go To actions.
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.GO_INTO, fZoomInAction);
 		actionBars.setGlobalActionHandler(ActionFactory.BACK.getId(), fBackAction);
@@ -188,7 +188,7 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 		fRefactorActionGroup.retargetFileMenuActions(actionBars);
 	}
 
-	/* package */ void fillToolBar(IToolBarManager toolBar) {
+	protected void fillToolBar(IToolBarManager toolBar) {
 		toolBar.add(fBackAction);
 		toolBar.add(fForwardAction);
 		toolBar.add(fUpAction); 
@@ -196,10 +196,9 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 		toolBar.add(new Separator());
 		toolBar.add(fCollapseAllAction);
 		toolBar.add(fToggleLinkingAction);
-
 	}
 	
-	/* package */ void fillViewMenu(IMenuManager menu) {
+	protected void fillViewMenu(IMenuManager menu) {
 		menu.add(new Separator());
 		menu.add(fToggleLinkingAction);
 
@@ -224,14 +223,14 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 		super.fillContextMenu(menu);
 	}
 	
-	 private void addGotoMenu(IMenuManager menu, Object element, int size) {
+	 protected void addGotoMenu(IMenuManager menu, Object element, int size) {
 		boolean enabled= size == 1 && fPart.getTreeViewer().isExpandable(element) && (isGoIntoTarget(element) || element instanceof IContainer);
 		fZoomInAction.setEnabled(enabled);
 		if (enabled)
 			menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, fZoomInAction);
 	}
 	
-	private boolean isGoIntoTarget(Object element) {
+	protected boolean isGoIntoTarget(Object element) {
 		if (element == null)
 			return false;
 		if (element instanceof IModelElement) {
@@ -246,7 +245,7 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 		return false;
 	}
 
-	private void addOpenNewWindowAction(IMenuManager menu, Object element) {
+	protected void addOpenNewWindowAction(IMenuManager menu, Object element) {
 		if (element instanceof IModelElement) {
 			element= ((IModelElement)element).getResource();
 			
@@ -264,7 +263,7 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 
 	//---- Key board and mouse handling ------------------------------------------------------------
 
-	/* package*/ void handleDoubleClick(DoubleClickEvent event) {
+	protected void handleDoubleClick(DoubleClickEvent event) {
 		TreeViewer viewer= fPart.getTreeViewer();
 		IStructuredSelection selection= (IStructuredSelection)event.getSelection();
 		Object element= selection.getFirstElement();
@@ -292,7 +291,7 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 		}
 	}
 	
-	/* package */ void handleOpen(OpenEvent event) {
+	protected void handleOpen(OpenEvent event) {
 		IAction openAction= fNavigateActionGroup.getOpenAction();
 		if (openAction != null && openAction.isEnabled()) {
 			openAction.run();
@@ -300,7 +299,7 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 		}
 	}
 	
-	/* package */ void handleKeyEvent(KeyEvent event) {
+	protected void handleKeyEvent(KeyEvent event) {
 		if (event.stateMask != 0) 
 			return;		
 		
@@ -379,7 +378,6 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 	public FrameList getFrameList() {
 		return fFrameList;
 	}
-	
 
 	/**
 	 * @return the fPart
