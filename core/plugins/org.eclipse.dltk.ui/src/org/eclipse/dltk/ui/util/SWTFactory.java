@@ -157,6 +157,26 @@ public class SWTFactory {
 	}
 
 	/**
+	 * Creates and returns a new radio button with the given label.
+	 * 
+	 * @param parent
+	 *            parent control
+	 * @param label
+	 *            button label or <code>null</code>
+	 * 
+	 * @return a new radio button
+	 */
+	public static Button createRadioButtonNoLayoutData(Composite parent,
+			String label) {
+		Button button = new Button(parent, SWT.RADIO);
+		button.setFont(parent.getFont());
+		if (label != null) {
+			button.setText(label);
+		}
+		return button;
+	}
+
+	/**
 	 * Creates a check box button using the parents' font
 	 * 
 	 * @param parent
