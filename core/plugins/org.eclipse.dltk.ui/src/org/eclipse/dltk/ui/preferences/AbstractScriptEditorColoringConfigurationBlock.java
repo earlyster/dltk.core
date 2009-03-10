@@ -44,6 +44,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -84,7 +85,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 	/**
 	 * Item in the highlighting color list.
 	 */
-	private static class HighlightingColorListItem {
+	protected static class HighlightingColorListItem {
 		/** Display name */
 		private String fDisplayName;
 
@@ -250,7 +251,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 				sCommentsCategory };
 	}
 
-	private class ColorListContentProvider implements ITreeContentProvider {
+	protected class ColorListContentProvider implements ITreeContentProvider {
 
 		public Object[] getElements(Object inputElement) {
 			List categorys = new ArrayList();
@@ -345,7 +346,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 	/**
 	 * Highlighting color list
 	 */
-	private final java.util.List fListModel = new ArrayList();
+	protected final java.util.List fListModel = new ArrayList();
 
 	/**
 	 * Highlighting color list viewer
@@ -594,7 +595,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 
 		fListViewer = new TreeViewer(editorComposite, SWT.SINGLE | SWT.BORDER);
 		fListViewer.setLabelProvider(new ColorListLabelProvider());
-		fListViewer.setContentProvider(new ColorListContentProvider());
+		fListViewer.setContentProvider(getColorListContentProvider());
 		fListViewer.setSorter(new ViewerSorter() {
 			public int category(Object element) {
 				// don't sort the top level categories
@@ -797,6 +798,13 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		colorComposite.layout(false);
 
 		return colorComposite;
+	}
+
+	/**
+	 * @return
+	 */
+	protected IContentProvider getColorListContentProvider() {
+		return new ColorListContentProvider();
 	}
 
 	private void addFiller(Composite composite, int horizontalSpan) {
