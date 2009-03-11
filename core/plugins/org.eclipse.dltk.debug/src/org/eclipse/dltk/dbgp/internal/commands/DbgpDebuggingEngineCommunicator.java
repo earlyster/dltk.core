@@ -97,7 +97,7 @@ public class DbgpDebuggingEngineCommunicator implements IDbgpCommunicator {
 
 			return response;
 		} catch (InterruptedException e) {
-			throw new DbgpOpertionCanceledException();
+			throw new DbgpOpertionCanceledException(e);
 		} catch (IOException e) {
 			throw new DbgpIOException(e);
 		}
