@@ -103,6 +103,7 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.ide.IDE.SharedImages;
+import org.eclipse.ui.internal.editors.text.NonExistingFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
@@ -1617,7 +1618,54 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 					setContents);
 		else if (element instanceof IURIEditorInput)
 			return createFakeSourceModule((IURIEditorInput) element);
+		else if (element instanceof NonExistingFileEditorInput)
+			return createFakeSourceModule((NonExistingFileEditorInput) element);
 		return null;
+	}
+
+	private ISourceModule createFakeSourceModule(
+			NonExistingFileEditorInput editorInput) {
+		try {
+			final IPath path = editorInput.getPath(editorInput);
+			URI uri = URIUtil.toURI(path);
+			final IFileStore fileStore = EFS.getStore(uri);
+
+			if (fileStore.getName() == null || path == null)
+				return null;
+
+			WorkingCopyOwner woc = new WorkingCopyOwner() {
+				/*
+				 * @see
+				 * org.eclipse.jdt.core.WorkingCopyOwner#createBuffer(org.eclipse
+				 * .jdt.core.ICompilationUnit)
+				 * 
+				 * @since 3.2
+				 */
+				public IBuffer createBuffer(ISourceModule workingCopy) {
+					return new DocumentAdapter(workingCopy, path);
+					// return BufferManager.createBuffer(workingCopy);
+				}
+			};
+
+			IBuildpathEntry[] cpEntries = null;
+			IScriptProject jp = findScriptProject(path);
+			if (jp != null)
+				cpEntries = jp.getResolvedBuildpath(true);
+
+			if (cpEntries == null || cpEntries.length == 0)
+				cpEntries = new IBuildpathEntry[] { ScriptRuntime
+						.getDefaultInterpreterContainerEntry() };
+
+			final ISourceModule cu = woc.newWorkingCopy(fileStore.getName(),
+					cpEntries, null, getProgressMonitor());
+
+			if (!isModifiable(editorInput))
+				ScriptModelUtil.reconcile(cu);
+
+			return cu;
+		} catch (CoreException ex) {
+			return null;
+		}
 	}
 
 	private ISourceModule createFakeSourceModule(
