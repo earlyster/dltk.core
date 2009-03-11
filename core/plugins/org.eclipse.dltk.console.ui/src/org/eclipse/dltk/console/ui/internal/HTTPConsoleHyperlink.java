@@ -11,14 +11,12 @@ package org.eclipse.dltk.console.ui.internal;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.MessageFormat;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
+import org.eclipse.dltk.console.ui.ScriptConsoleUIPlugin;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.browser.IWebBrowser;
@@ -51,15 +49,14 @@ public class HTTPConsoleHyperlink implements IHyperlink {
 			browser = browserSupport.createBrowser(null);
 			browser.openURL(new URL(uri));
 		} catch (PartInitException e) {
-			IStatus status = new Status(IStatus.ERROR,
-					DLTKLaunchingPlugin.PLUGIN_ID,
-					MessageFormat.format(Messages.HTTPConsoleHyperlink_failedToInitializeBrowserFor, new Object[] { uri }), e);
-			DLTKLaunchingPlugin.getDefault().getLog().log(status);
+			final String msg = NLS.bind(
+					Messages.HTTPConsoleHyperlink_failedToInitializeBrowserFor,
+					uri);
+			ScriptConsoleUIPlugin.error(msg, e);
 		} catch (MalformedURLException e) {
-			IStatus status = new Status(IStatus.ERROR,
-					DLTKLaunchingPlugin.PLUGIN_ID,
-					MessageFormat.format(Messages.HTTPConsoleHyperlink_failedToOpenInvalidUri, new Object[] { uri }), e);
-			DLTKLaunchingPlugin.getDefault().getLog().log(status);
+			final String msg = NLS.bind(
+					Messages.HTTPConsoleHyperlink_failedToOpenInvalidUri, uri);
+			ScriptConsoleUIPlugin.error(msg, e);
 		}
 	}
 

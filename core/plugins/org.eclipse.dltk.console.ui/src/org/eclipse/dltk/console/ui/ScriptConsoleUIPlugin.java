@@ -11,6 +11,8 @@ package org.eclipse.dltk.console.ui;
 
 import java.net.URL;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -96,5 +98,9 @@ public class ScriptConsoleUIPlugin extends AbstractUIPlugin {
 
 	public Image getImage(String key) {
 		return getImageRegistry().get(key);
+	}
+
+	public static void error(String msg, Throwable e) {
+		getDefault().getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, msg, e));
 	}
 }
