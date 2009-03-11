@@ -184,7 +184,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		public boolean equals(Object obj) {
 			if (obj instanceof SourceRangeStamp) {
 				SourceRangeStamp s = (SourceRangeStamp) obj;
-				return (s.hash == hash && s.length == length);
+				return (s.hash == hash); // && s.length == length);
 			}
 			return super.equals(obj);
 		}
@@ -842,6 +842,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 
 							if (codeBlock.statement instanceof MethodDeclaration) {
 								MethodDeclaration meth = (MethodDeclaration) codeBlock.statement;
+								hash = meth.getName().hashCode();
 								element = methodCollector.get(meth
 										.getNameStart(), meth.getNameEnd()
 										- meth.getNameStart());
