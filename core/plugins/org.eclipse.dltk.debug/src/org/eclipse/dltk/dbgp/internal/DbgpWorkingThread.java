@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal;
 
+import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
+
 public abstract class DbgpWorkingThread extends DbgpTermination {
 	private Thread thread;
 	private final String name;
@@ -24,6 +26,10 @@ public abstract class DbgpWorkingThread extends DbgpTermination {
 					try {
 						workingCycle();
 					} catch (Exception e) {
+						DLTKDebugPlugin
+								.logError(
+										"Error in a Working thread, termination the thread",
+										e);
 						fireObjectTerminated(e);
 						return;
 					}
@@ -34,7 +40,8 @@ public abstract class DbgpWorkingThread extends DbgpTermination {
 
 			thread.start();
 		} else {
-			throw new IllegalStateException(Messages.DbgpWorkingThread_threadAlreadyStarted);
+			throw new IllegalStateException(
+					Messages.DbgpWorkingThread_threadAlreadyStarted);
 		}
 	}
 
