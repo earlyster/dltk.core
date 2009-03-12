@@ -1,6 +1,5 @@
 package org.eclipse.dltk.internal.debug.core.model;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IResource;
@@ -27,6 +26,7 @@ import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.IHotCodeReplaceListener;
 import org.eclipse.dltk.debug.core.IHotCodeReplaceProvider;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
+import org.eclipse.osgi.util.NLS;
 
 public class HotCodeReplaceManager implements IResourceChangeListener,
 		ILaunchListener, IDebugEventSetListener {
@@ -247,10 +247,10 @@ public class HotCodeReplaceManager implements IResourceChangeListener,
 					provider.performCodeReplace(target, resources);
 					fireHCRSucceeded(target);
 				} else {
-					fail(MessageFormat
-							.format(
+					fail(NLS
+							.bind(
 									Messages.HotCodeReplaceManager_hotCodeReplaceProviderForNotFound,
-									new Object[] { natureId }));
+									natureId));
 				}
 			} catch (DebugException e) {
 				fireHCRFailed(target, e);

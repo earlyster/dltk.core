@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.core.model;
 
-import java.text.MessageFormat;
 import java.util.Arrays;
 
 import org.eclipse.core.runtime.Assert;
@@ -209,10 +208,10 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 		}
 		DLTKDebugPlugin
 				.logWarning(
-						MessageFormat
-								.format(
+						NLS
+								.bind(
 										Messages.ScriptValue_detailFormatterRequiredToContainIdentifier,
-										new Object[] { pattern }), null);
+										pattern), null);
 		return new ScriptEvaluationCommand(engine, evalName, frame);
 	}
 
@@ -242,9 +241,8 @@ public class ScriptValue extends ScriptDebugElement implements IScriptValue,
 			}
 			return variables[offset];
 		} catch (DbgpException e) {
-			throw wrapDbgpException(MessageFormat.format(
-					Messages.ScriptValue_unableToLoadChildrenOf,
-					new Object[] { name }), e);
+			throw wrapDbgpException(NLS.bind(
+					Messages.ScriptValue_unableToLoadChildrenOf, name), e);
 		}
 	}
 
