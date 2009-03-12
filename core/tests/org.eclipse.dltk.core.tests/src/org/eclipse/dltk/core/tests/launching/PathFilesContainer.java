@@ -1,6 +1,5 @@
 package org.eclipse.dltk.core.tests.launching;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +13,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.osgi.util.NLS;
 
 public class PathFilesContainer {
 	private static final String PATH = "path";
@@ -118,13 +118,11 @@ public class PathFilesContainer {
 
 			final IFileHandle file = childFiles[i];
 
-			monitor.subTask(MessageFormat.format("Searching {0}",
-					new String[] { file.getCanonicalPath() }));
+			monitor.subTask(NLS.bind("Searching {0}", file.getCanonicalPath()));
 
 			// Check if file is a symlink
 			if (file.isDirectory()
-					&& (!file.getCanonicalPath().equals(
-							file.toOSString()))) {
+					&& (!file.getCanonicalPath().equals(file.toOSString()))) {
 				continue;
 			}
 
