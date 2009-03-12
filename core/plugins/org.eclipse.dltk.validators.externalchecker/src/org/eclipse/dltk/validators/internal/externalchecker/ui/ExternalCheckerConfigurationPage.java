@@ -1,6 +1,5 @@
 package org.eclipse.dltk.validators.internal.externalchecker.ui;
 
-import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +25,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -77,8 +77,7 @@ public class ExternalCheckerConfigurationPage extends
 
 	private void setMessage(IEnvironment env, String message, int type) {
 		String pattern = Messages.ValidatorMessages_path_msgPattern;
-		message = MessageFormat.format(pattern, new String[] { env.getName(),
-				message });
+		message = NLS.bind(pattern, new String[] { env.getName(), message });
 		setMessage(message, type);
 	}
 
