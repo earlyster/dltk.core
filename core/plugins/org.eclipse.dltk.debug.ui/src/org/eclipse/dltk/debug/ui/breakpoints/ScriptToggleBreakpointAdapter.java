@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.breakpoints;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -40,6 +39,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -269,8 +269,8 @@ public abstract class ScriptToggleBreakpointAdapter implements
 											lineNumber);
 								} else {
 									report(
-											MessageFormat
-													.format(
+											NLS
+													.bind(
 															Messages.ScriptToggleBreakpointAdapter_breakpointAlreadySetAtLine,
 															new Object[] { new Integer(
 																	lineNumber) }),

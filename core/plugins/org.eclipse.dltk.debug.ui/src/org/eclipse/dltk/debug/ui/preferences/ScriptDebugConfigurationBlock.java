@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.preferences;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +26,7 @@ import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore;
 import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -236,8 +236,8 @@ public class ScriptDebugConfigurationBlock extends
 				 * meh, is there a better way to allow this string to be
 				 * externalized and still support the preference link?
 				 */
-				String message = MessageFormat
-						.format(
+				String message = NLS
+						.bind(
 								ScriptDebugPreferencesMessages.LinkToLanguageDebugOptions,
 								new Object[] { "{0}", languageName }); //$NON-NLS-1$
 

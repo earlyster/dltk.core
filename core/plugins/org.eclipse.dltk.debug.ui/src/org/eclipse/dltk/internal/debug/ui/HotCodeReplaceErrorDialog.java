@@ -1,7 +1,5 @@
 package org.eclipse.dltk.internal.debug.ui;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.ILaunch;
@@ -11,6 +9,7 @@ import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -92,7 +91,9 @@ public class HotCodeReplaceErrorDialog extends ErrorDialogWithToggle {
 			};
 			BusyIndicator.showWhile(getShell().getDisplay(), r);
 			if (ex[0] != null) {
-				DLTKDebugUIPlugin.errorDialog(MessageFormat.format(Messages.HotCodeReplaceErrorDialog_failed, operation), ex[0].getStatus()); 
+				DLTKDebugUIPlugin.errorDialog(NLS.bind(
+						Messages.HotCodeReplaceErrorDialog_failed, operation),
+						ex[0].getStatus()); 
 			}
 			okPressed();
 		} else {

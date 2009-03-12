@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.launchConfigurations;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -55,6 +54,7 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
@@ -677,9 +677,8 @@ public class ScriptCommonTab extends AbstractLaunchConfigurationTab {
 		} catch (CoreException e) {
 		}
 		String defaultEncoding = getDefaultEncoding(configuration);
-		fDefaultEncodingButton.setText(MessageFormat.format(
-				LaunchConfigurationsMessages.CommonTab_2,
-				new String[] { defaultEncoding }));
+		fDefaultEncodingButton.setText(NLS.bind(
+				LaunchConfigurationsMessages.CommonTab_2, defaultEncoding));
 		fDefaultEncodingButton.pack();
 		if (encoding != null) {
 			fAltEncodingButton.setSelection(true);

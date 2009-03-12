@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.launchConfigurations;
 
-import java.text.MessageFormat;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
@@ -37,6 +36,7 @@ import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.dltk.ui.DLTKPluginImages;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
@@ -470,9 +470,8 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 					if (interpreter != null) {
 						name = interpreter.getName();
 					}
-					return MessageFormat.format(
-							ScriptLaunchMessages.InterpreterTab_8,
-							new String[] { name });
+					return NLS
+							.bind(ScriptLaunchMessages.InterpreterTab_8, name);
 				}
 				try {
 					IInterpreterInstall interpreter = ScriptRuntime
@@ -482,9 +481,7 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 					}
 				} catch (CoreException e) {
 				}
-				return MessageFormat.format(
-						ScriptLaunchMessages.InterpreterTab_9,
-						new String[] { name });
+				return NLS.bind(ScriptLaunchMessages.InterpreterTab_9, name);
 			}
 		};
 	}

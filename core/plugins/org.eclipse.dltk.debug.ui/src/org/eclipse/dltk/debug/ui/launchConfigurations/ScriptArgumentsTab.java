@@ -9,8 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.launchConfigurations;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -23,6 +21,7 @@ import org.eclipse.dltk.internal.debug.ui.launcher.InterpreterArgumentsBlock;
 import org.eclipse.dltk.internal.debug.ui.launcher.WorkingDirectoryBlock;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -154,8 +153,7 @@ public class ScriptArgumentsTab extends CommonScriptLaunchTab {
 	}
 
 	/**
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#isValid(
-	 * 	ILaunchConfiguration)
+	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#isValid(ILaunchConfiguration)
 	 */
 	public boolean isValid(ILaunchConfiguration config) {
 		return fWorkingDirectoryBlock.isValid(config);
@@ -185,10 +183,10 @@ public class ScriptArgumentsTab extends CommonScriptLaunchTab {
 				fInterpreterArgumentsBlock.initializeFrom(configuration);
 			fWorkingDirectoryBlock.initializeFrom(configuration);
 		} catch (CoreException e) {
-			setErrorMessage(MessageFormat
-					.format(
+			setErrorMessage(NLS
+					.bind(
 							ScriptLaunchMessages.ArgumentsTab_Exception_occurred_reading_configuration___15,
-							new Object[] { e.getStatus().getMessage() }));
+							e.getStatus().getMessage()));
 			DLTKLaunchingPlugin.log(e);
 		}
 	}
