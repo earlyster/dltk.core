@@ -9,8 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.util;
 
-import java.text.MessageFormat;
-
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
@@ -205,6 +203,6 @@ public class Messages extends NLS {
 	 * @return the manipulated String
 	 */
 	public static String bind(String message, Object[] bindings) {
-		return MessageFormat.format(message, bindings);
+		return NLS.bind(message, bindings);
 	}
 }

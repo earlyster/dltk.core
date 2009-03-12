@@ -12,7 +12,6 @@ package org.eclipse.dltk.internal.core.builder;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -343,9 +342,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			return;
 
 		try {
-			monitor.beginTask(MessageFormat.format(
-					Messages.ScriptBuilder_cleaningScriptsIn,
-					new Object[] { currentProject.getName() }), 66);
+			monitor.beginTask(NLS.bind(
+					Messages.ScriptBuilder_cleaningScriptsIn, currentProject
+							.getName()), 66);
 			if (monitor.isCanceled()) {
 				return;
 			}

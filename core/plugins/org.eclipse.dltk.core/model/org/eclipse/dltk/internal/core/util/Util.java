@@ -21,7 +21,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UTFDataFormatException;
 import java.net.URI;
-import java.text.MessageFormat;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.filesystem.EFS;
@@ -53,6 +52,7 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ProjectFragment;
+import org.eclipse.osgi.util.NLS;
 
 public class Util {
 	public interface Displayable {
@@ -536,10 +536,10 @@ public class Util {
 								IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
 					}
 					IStatus status = new Status(IStatus.ERROR,
-							DLTKCore.PLUGIN_ID, MessageFormat.format(
-									Messages.Util_errorReceivingFile,
-									new Object[] { file.getFullPath(),
-											String.valueOf(tryCount) }), e);
+							DLTKCore.PLUGIN_ID, NLS.bind(
+									Messages.Util_errorReceivingFile, file
+											.getFullPath(), String
+											.valueOf(tryCount)), e);
 					DLTKCore.getDefault().getLog().log(status);
 				}
 			}

@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.builder;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +22,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.ISourceLineTracker;
 import org.eclipse.dltk.utils.TextUtils;
+import org.eclipse.osgi.util.NLS;
 
 public abstract class AbstractBuildContext implements IBuildContext {
 
@@ -62,9 +62,12 @@ public abstract class AbstractBuildContext implements IBuildContext {
 			try {
 				contents = module.getSourceAsCharArray();
 			} catch (ModelException e) {
-				DLTKCore.error(MessageFormat.format(
-						Messages.AbstractBuildContext_errorRetrievingContentsOf,
-						new Object[] { module.getElementName() }), e);
+				DLTKCore
+						.error(
+								NLS
+										.bind(
+												Messages.AbstractBuildContext_errorRetrievingContentsOf,
+												module.getElementName()), e);
 				contents = CharOperation.NO_CHAR;
 			}
 		}

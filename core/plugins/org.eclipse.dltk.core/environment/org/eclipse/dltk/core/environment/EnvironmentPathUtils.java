@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.environment;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,6 +17,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.osgi.util.NLS;
 
 public class EnvironmentPathUtils {
 	public static final String PATH_DELIMITER = ";"; //$NON-NLS-1$
@@ -25,9 +25,8 @@ public class EnvironmentPathUtils {
 
 	public static IPath getFullPath(IEnvironment env, IPath path) {
 		if (isFull(path)) {
-			throw new RuntimeException(MessageFormat.format(
-					Messages.EnvironmentPathUtils_invalidPath,
-					new Object[] { path }));
+			throw new RuntimeException(NLS.bind(
+					Messages.EnvironmentPathUtils_invalidPath, path));
 		}
 		// if( path.segment(0).startsWith("#special#")) {
 		// return path;
@@ -41,9 +40,8 @@ public class EnvironmentPathUtils {
 
 	public static IPath getFullPath(String envId, IPath path) {
 		if (isFull(path)) {
-			throw new RuntimeException(MessageFormat.format(
-					Messages.EnvironmentPathUtils_invalidPath,
-					new Object[] { path }));
+			throw new RuntimeException(NLS.bind(
+					Messages.EnvironmentPathUtils_invalidPath, path));
 		}
 		// if( path.segment(0).startsWith("#special#")) {
 		// return path;

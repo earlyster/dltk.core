@@ -13,12 +13,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+
+import org.eclipse.osgi.util.NLS;
 
 public final class Messages {
 	private static class MessagesProperties extends Properties {
@@ -155,7 +156,7 @@ public final class Messages {
 	 * @return the manipulated String
 	 */
 	public static String bind(String message, Object[] bindings) {
-		return MessageFormat.format(message, bindings);
+		return NLS.bind(message, bindings);
 	}
 	
 	/*

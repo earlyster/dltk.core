@@ -14,7 +14,6 @@
 package org.eclipse.dltk.ast;
 
 import java.io.StringWriter;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +21,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.internal.core.SourceRange;
 import org.eclipse.dltk.utils.CorePrinter;
+import org.eclipse.osgi.util.NLS;
 
 public abstract class ASTNode {
 
@@ -207,7 +207,7 @@ public abstract class ASTNode {
 	public abstract void traverse(ASTVisitor visitor) throws Exception;
 
 	public void printNode(CorePrinter output) {
-		output.println(MessageFormat.format(
+		output.println(NLS.bind(
 				Messages.ASTNode_nodeDoesntSupportDebugPrinting,
 				new Object[] { this.getClass() }));
 	}
