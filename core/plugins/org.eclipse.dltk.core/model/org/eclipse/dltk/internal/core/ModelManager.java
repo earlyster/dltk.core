@@ -18,7 +18,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -94,6 +93,7 @@ import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
 import org.eclipse.dltk.internal.core.util.WeakHashSet;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.service.prefs.BackingStoreException;
 
 public class ModelManager implements ISaveParticipant {
@@ -793,7 +793,7 @@ public class ModelManager implements ISaveParticipant {
 				info = new PerWorkingCopyInfo(workingCopy, problemRequestor);
 				workingCopyToInfos.put(workingCopy, info);
 			}
-			
+
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=267008
 			// problem requester added to PerWorkingCopyInfo after it already
 			// created and exists.
@@ -2244,8 +2244,8 @@ public class ModelManager implements ISaveParticipant {
 		Long delta = new Long(System.currentTimeMillis() - start);
 		Long length = new Long(getContainersFile().length());
 		String pattern = "{0} {1} bytes in containers.dat in {2}ms"; //$NON-NLS-1$
-		String message = MessageFormat.format(pattern, new Object[] { action,
-				length, delta });
+		String message = NLS.bind(pattern,
+				new Object[] { action, length, delta });
 		System.out.println(message);
 	}
 
@@ -2416,7 +2416,7 @@ public class ModelManager implements ISaveParticipant {
 							// container has not been initialized yet, use
 							// previous session value
 							// (see
-							//https://bugs.eclipse.org/bugs/show_bug.cgi?id=73969
+							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=73969
 							// )
 							container = getPreviousSessionContainer(
 									containerPath, project);
