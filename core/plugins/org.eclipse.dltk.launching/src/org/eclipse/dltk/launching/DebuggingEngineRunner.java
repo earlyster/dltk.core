@@ -80,8 +80,8 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 
 		// Disable the output of the debugging engine process
 		if (DLTKDebugLaunchConstants.isDebugConsole(launch)) {
-			launch.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, Boolean.FALSE
-					.toString());
+			launch.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT,
+					DLTKDebugLaunchConstants.FALSE);
 		}
 
 		// Debugging engine id
