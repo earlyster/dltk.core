@@ -365,6 +365,8 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 			breakpointManager.threadAccepted();
 
 			// DebugEventHelper.fireCreateEvent(this);
+		}
+		if (first) {
 			initialized = true;
 			fireTargetInitialized();
 		}
