@@ -5,10 +5,12 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.PreferencesLookupDelegate;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
@@ -21,6 +23,7 @@ import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
 import org.eclipse.dltk.debug.core.IDbgpService;
 import org.eclipse.dltk.debug.core.ScriptDebugManager;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
+import org.eclipse.dltk.debug.core.model.IScriptDebugTargetListener;
 import org.eclipse.dltk.debug.core.model.IScriptDebugThreadConfigurator;
 import org.eclipse.dltk.internal.debug.core.model.DebugEventHelper;
 import org.eclipse.dltk.internal.debug.core.model.ScriptDebugTarget;
@@ -184,6 +187,53 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 		return createThreadConfigurator();
 	}
 
+	private static class Waiter implements IScriptDebugTargetListener {
+
+		/*
+		 * @see IScriptDebugTargetListener#targetInitialized()
+		 */
+		public synchronized void targetInitialized() {
+			notify();
+		}
+
+		private synchronized void waitChunk() throws InterruptedException {
+			wait(WAIT_CHUNK);
+		}
+
+		static final int WAIT_CHUNK = 1000;
+
+		public boolean execute(ScriptDebugTarget target, final int timeout,
+				IProgressMonitor monitor) {
+			target.addListener(this);
+			try {
+				final long start = System.currentTimeMillis();
+				try {
+					long waitStart = System.currentTimeMillis();
+					for (;;) {
+						if (target.isInitialized()) {
+							return true;
+						} else if (target.isTerminated()
+								|| monitor.isCanceled()) {
+							break;
+						}
+						waitChunk();
+						final long now = System.currentTimeMillis();
+						if (timeout != 0 && (now - start) > timeout) {
+							break;
+						}
+						monitor.worked((int) ((now - waitStart) / WAIT_CHUNK));
+						waitStart = now;
+					}
+				} catch (InterruptedException e) {
+					Thread.interrupted();
+				}
+				return false;
+			} finally {
+				target.removeListener(this);
+			}
+		}
+	}
+
 	/**
 	 * Waiting debugging process to connect to current launch
 	 * 
@@ -200,7 +250,6 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	 */
 	protected void waitDebuggerConnected(IProcess debuggingProcess,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
-		final int WAIT_CHUNK = 100;
 
 		ILaunchConfiguration configuration = launch.getLaunchConfiguration();
 		int timeout = LaunchConfigurationUtils.getConnectionTimeout(
@@ -212,29 +261,18 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 			target.setScriptDebugThreadConfigurator(configurator);
 		}
 		target.setProcess(debuggingProcess);
-
+		final Waiter waiter = new Waiter();
+		final SubProgressMonitor sub = new SubProgressMonitor(monitor, 2);
+		sub.beginTask(Util.EMPTY_STRING, timeout / Waiter.WAIT_CHUNK);
 		try {
-			int all = 0;
-			while (timeout == 0 || all < timeout) {
-				if (target.isInitialized()
-						|| target.isTerminated()
-						|| monitor.isCanceled()
-						|| (debuggingProcess != null && debuggingProcess
-								.isTerminated()))
-					break;
-
-				Thread.sleep(WAIT_CHUNK);
-				all += WAIT_CHUNK;
+			if (!waiter.execute(target, timeout * 100, sub)) {
+				if (debuggingProcess != null && debuggingProcess.canTerminate()) {
+					debuggingProcess.terminate();
+				}
+				abort(InterpreterMessages.errDebuggingEngineNotConnected, null);
 			}
-		} catch (InterruptedException e) {
-			Thread.interrupted();
-		}
-
-		if (!target.isInitialized()) {
-			if (debuggingProcess != null && debuggingProcess.canTerminate()) {
-				debuggingProcess.terminate();
-			}
-			abort(InterpreterMessages.errDebuggingEngineNotConnected, null);
+		} finally {
+			sub.done();
 		}
 	}
 
