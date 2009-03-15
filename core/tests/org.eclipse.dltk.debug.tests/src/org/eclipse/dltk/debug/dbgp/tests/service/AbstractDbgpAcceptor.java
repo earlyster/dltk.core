@@ -15,8 +15,4 @@ import org.eclipse.dltk.dbgp.IDbgpThreadAcceptor;
 
 abstract class AbstractDbgpAcceptor implements IDbgpThreadAcceptor {
 
-	public void acceptDbgpThreadNotUnavailable() {
-		// ignore
-	}
-
 }

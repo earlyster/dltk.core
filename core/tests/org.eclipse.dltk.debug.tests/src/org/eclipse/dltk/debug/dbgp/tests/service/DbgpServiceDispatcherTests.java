@@ -13,6 +13,7 @@ package org.eclipse.dltk.debug.dbgp.tests.service;
 
 import java.io.IOException;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.internal.debug.core.model.DbgpService;
 
@@ -41,21 +42,24 @@ public class DbgpServiceDispatcherTests extends AbstractDbgpServiceTests {
 		final DbgpService service = createService(ANY_PORT);
 		try {
 			service.registerAcceptor(IDE1, new AbstractDbgpAcceptor() {
-				public void acceptDbgpThread(IDbgpSession session) {
+				public void acceptDbgpThread(IDbgpSession session,
+						IProgressMonitor monitor) {
 					synchronized (DbgpServiceDispatcherTests.this) {
 						++count1;
 					}
 				}
 			});
 			service.registerAcceptor(IDE2, new AbstractDbgpAcceptor() {
-				public void acceptDbgpThread(IDbgpSession session) {
+				public void acceptDbgpThread(IDbgpSession session,
+						IProgressMonitor monitor) {
 					synchronized (DbgpServiceDispatcherTests.this) {
 						++count2;
 					}
 				}
 			});
 			service.registerAcceptor(IDE3, new AbstractDbgpAcceptor() {
-				public void acceptDbgpThread(IDbgpSession session) {
+				public void acceptDbgpThread(IDbgpSession session,
+						IProgressMonitor monitor) {
 					synchronized (DbgpServiceDispatcherTests.this) {
 						++count3;
 					}
