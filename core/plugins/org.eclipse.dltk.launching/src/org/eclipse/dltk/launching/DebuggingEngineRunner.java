@@ -29,7 +29,7 @@ import org.eclipse.dltk.internal.debug.core.model.DebugEventHelper;
 import org.eclipse.dltk.internal.debug.core.model.ScriptDebugTarget;
 import org.eclipse.dltk.internal.launching.InterpreterMessages;
 import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
-import org.eclipse.dltk.launching.debug.DbgpInterpreterConfig;
+import org.eclipse.dltk.launching.debug.DbgpConnectionConfig;
 import org.eclipse.dltk.launching.debug.DebuggingEngineManager;
 import org.eclipse.dltk.launching.debug.IDebuggingEngine;
 
@@ -92,12 +92,8 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 				getDebuggingEngineId());
 
 		// Configuration
-		final DbgpInterpreterConfig dbgpConfig = new DbgpInterpreterConfig(
-				config);
-
-		dbgpConfig.setSessionId(target.getSessionId());
-		dbgpConfig.setPort(service.getPort());
-		dbgpConfig.setHost(getBindAddress());
+		DbgpConnectionConfig.save(config, getBindAddress(), service.getPort(),
+				target.getSessionId());
 	}
 
 	private String getBindAddress() {
