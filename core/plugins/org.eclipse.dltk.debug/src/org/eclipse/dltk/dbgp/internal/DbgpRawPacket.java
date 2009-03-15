@@ -53,9 +53,9 @@ public class DbgpRawPacket implements IDbgpRawPacket {
 		byte[] bytes = new byte[size];
 
 		int offset = 0;
-		int n = -1;
-		while ((n = input.read(bytes, offset, size - offset)) != -1
-				&& (offset < size)) {
+		int n;
+		while ((offset < size)
+				&& (n = input.read(bytes, offset, size - offset)) != -1) {
 			offset += n;
 		}
 
