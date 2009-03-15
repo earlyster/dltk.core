@@ -4,6 +4,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.launching.messages"; //$NON-NLS-1$
+	public static String DebugSessionAcceptor_waitConnection;
+	public static String DebugSessionAcceptor_waitInitialization;
 	public static String EnvironmentVariable_variableNameAndValueMustNotBeEmpty;
 	public static String InternalScriptExecutor_iInterpreterInstallMustNotBeNull;
 	public static String InternalScriptExecutor_iProcessHandlerMustNotBeNull;

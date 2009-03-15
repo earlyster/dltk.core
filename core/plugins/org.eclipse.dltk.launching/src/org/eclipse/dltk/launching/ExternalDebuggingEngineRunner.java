@@ -17,16 +17,6 @@ public abstract class ExternalDebuggingEngineRunner extends
 		super(install);
 	}
 
-	/**
-	 * @deprecated Use
-	 *             {@link #addEngineConfig(InterpreterConfig,PreferencesLookupDelegate,ILaunch)}
-	 *             instead
-	 */
-	protected final InterpreterConfig addEngineConfig(InterpreterConfig config,
-			PreferencesLookupDelegate delegate) throws CoreException {
-		return addEngineConfig(config, delegate, null);
-	}
-
 	protected final InterpreterConfig addEngineConfig(InterpreterConfig config,
 			PreferencesLookupDelegate delegate, ILaunch launch)
 			throws CoreException {

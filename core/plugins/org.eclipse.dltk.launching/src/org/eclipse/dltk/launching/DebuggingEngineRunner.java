@@ -5,12 +5,10 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.PreferencesLookupDelegate;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
@@ -23,7 +21,6 @@ import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
 import org.eclipse.dltk.debug.core.IDbgpService;
 import org.eclipse.dltk.debug.core.ScriptDebugManager;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
-import org.eclipse.dltk.debug.core.model.IScriptDebugTargetListener;
 import org.eclipse.dltk.debug.core.model.IScriptDebugThreadConfigurator;
 import org.eclipse.dltk.internal.debug.core.model.DebugEventHelper;
 import org.eclipse.dltk.internal.debug.core.model.ScriptDebugTarget;
@@ -44,11 +41,12 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 		return DbgpSessionIdGenerator.generate();
 	}
 
-	protected IScriptDebugTarget addDebugTarget(ILaunch launch,
+	/**
+	 * @deprecated
+	 */
+	protected final IScriptDebugTarget addDebugTarget(ILaunch launch,
 			IDbgpService dbgpService) throws CoreException {
-		final IScriptDebugTarget target = createDebugTarget(launch, dbgpService);
-		launch.addDebugTarget(target);
-		return target;
+		return null;
 	}
 
 	protected IScriptDebugTarget createDebugTarget(ILaunch launch,
@@ -69,8 +67,14 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 		if (!service.available()) {
 			abort(InterpreterMessages.errDbgpServiceNotAvailable, null);
 		}
-
-		final IScriptDebugTarget target = addDebugTarget(launch, service);
+		final IScriptDebugTarget target = createDebugTarget(launch, service);
+		launch.addDebugTarget(target);
+		IScriptDebugThreadConfigurator configurator = createThreadConfigurator(launch
+				.getLaunchConfiguration());
+		if (configurator != null) {
+			((ScriptDebugTarget) target)
+					.setScriptDebugThreadConfigurator(configurator);
+		}
 
 		String qualifier = getDebugPreferenceQualifier();
 
@@ -101,6 +105,15 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	}
 
 	/**
+	 * @deprecated
+	 * @see #addEngineConfig(InterpreterConfig,PreferencesLookupDelegate,ILaunch)
+	 */
+	protected final InterpreterConfig addEngineConfig(InterpreterConfig config,
+			PreferencesLookupDelegate delegate) {
+		return null;
+	}
+
+	/**
 	 * Add the debugging engine configuration.
 	 * 
 	 * @param launch
@@ -116,7 +129,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 		}
 
 		monitor.beginTask(InterpreterMessages.DebuggingEngineRunner_launching,
-				5);
+				4);
 		if (monitor.isCanceled()) {
 			return;
 		}
@@ -124,11 +137,16 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 			PreferencesLookupDelegate delegate = createPreferencesLookupDelegate(launch);
 
 			initializeLaunch(launch, config, delegate);
-			IProcess process = startProcess(config, launch, monitor, delegate);
-			monitor.worked(4);
+			final ScriptDebugTarget target = (ScriptDebugTarget) launch
+					.getDebugTarget();
+			DebugSessionAcceptor acceptor = new DebugSessionAcceptor(target,
+					monitor);
+			monitor.worked(1);
+			target.setProcess(startProcess(config, launch, monitor, delegate));
+			monitor.worked(1);
 
-			// Waiting for debugging engine connect
-			waitDebuggerConnected(process, launch, monitor);
+			// Waiting for debugging engine to connect
+			waitDebuggerConnected(launch, acceptor);
 		} catch (CoreException e) {
 			launch.terminate();
 			throw e;
@@ -187,92 +205,44 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 		return createThreadConfigurator();
 	}
 
-	private static class Waiter implements IScriptDebugTargetListener {
-
-		/*
-		 * @see IScriptDebugTargetListener#targetInitialized()
-		 */
-		public synchronized void targetInitialized() {
-			notify();
-		}
-
-		private synchronized void waitChunk() throws InterruptedException {
-			wait(WAIT_CHUNK);
-		}
-
-		static final int WAIT_CHUNK = 1000;
-
-		public boolean execute(ScriptDebugTarget target, final int timeout,
-				IProgressMonitor monitor) {
-			target.addListener(this);
-			try {
-				final long start = System.currentTimeMillis();
-				try {
-					long waitStart = start;
-					for (;;) {
-						if (target.isInitialized()) {
-							return true;
-						} else if (target.isTerminated()
-								|| monitor.isCanceled()) {
-							break;
-						}
-						waitChunk();
-						final long now = System.currentTimeMillis();
-						if (timeout != 0 && (now - start) > timeout) {
-							break;
-						}
-						monitor.worked((int) ((now - waitStart) / WAIT_CHUNK));
-						waitStart = now;
-					}
-				} catch (InterruptedException e) {
-					Thread.interrupted();
-				}
-				return false;
-			} finally {
-				target.removeListener(this);
-			}
-		}
+	/**
+	 * @param process
+	 * @param launch
+	 * @param monitor
+	 * @throws CoreException
+	 * @deprecated
+	 */
+	protected void waitDebuggerConnected(IProcess process, ILaunch launch,
+			IProgressMonitor monitor) throws CoreException {
+		ScriptDebugTarget target = (ScriptDebugTarget) launch.getDebugTarget();
+		waitDebuggerConnected(launch, new DebugSessionAcceptor(target, monitor));
 	}
 
 	/**
 	 * Waiting debugging process to connect to current launch
 	 * 
-	 * @param debuggingProcess
-	 *            process that will connect to current launch or null if handle
-	 *            to process is not available (remote debugging)
 	 * @param launch
 	 *            launch to connect to
+	 * @param acceptor
 	 * @param monitor
 	 *            progress monitor
 	 * @throws CoreException
 	 *             if debuggingProcess terminated, monitor is canceled or // *
 	 *             timeout
 	 */
-	protected void waitDebuggerConnected(IProcess debuggingProcess,
-			ILaunch launch, IProgressMonitor monitor) throws CoreException {
+	protected void waitDebuggerConnected(ILaunch launch,
+			DebugSessionAcceptor acceptor) throws CoreException {
 
 		ILaunchConfiguration configuration = launch.getLaunchConfiguration();
 		int timeout = LaunchConfigurationUtils.getConnectionTimeout(
 				configuration, DLTKDebugPlugin.getConnectionTimeout());
-
-		ScriptDebugTarget target = (ScriptDebugTarget) launch.getDebugTarget();
-		IScriptDebugThreadConfigurator configurator = createThreadConfigurator(configuration);
-		if (configurator != null) {
-			target.setScriptDebugThreadConfigurator(configurator);
+		if (!acceptor.waitConnection(timeout)) {
+			launch.terminate();
+			abort(InterpreterMessages.errDebuggingEngineNotConnected, null);
 		}
-		target.setProcess(debuggingProcess);
-		final Waiter waiter = new Waiter();
-		final SubProgressMonitor sub = new SubProgressMonitor(monitor, 2);
-		sub.beginTask(Util.EMPTY_STRING, timeout / Waiter.WAIT_CHUNK);
-		try {
-			if (!waiter.execute(target, timeout * 100, sub)) {
-				if (debuggingProcess != null && debuggingProcess.canTerminate()) {
-					debuggingProcess.terminate();
-				}
-				abort(InterpreterMessages.errDebuggingEngineNotConnected, null);
-			}
-		} finally {
-			sub.done();
+		if (!acceptor.waitInitialized(60 * 60 * 1000)) {
+			launch.terminate();
+			abort(InterpreterMessages.errDebuggingEngineNotInitialized, null);
 		}
 	}
 

@@ -27,10 +27,10 @@ public class InterpreterMessages extends NLS {
 	public static String errNoInterpreterExecutablesFound;
 	public static String statusFetchingLibs;
 
-	
 	public static String errDbgpServiceNotAvailable;
 	public static String errDebuggingEngineNotStarted;
 	public static String errDebuggingEngineNotConnected;
+	public static String errDebuggingEngineNotInitialized;
 	public static String errDebuggingEnginePathNotSpecified;
 	public static String errDebuggingEnginePathInvalid;
 	public static String errDebuggingEngineWorkingDirectoryDoesntExist;
