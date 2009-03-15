@@ -2,6 +2,11 @@ package org.eclipse.dltk.launching.debug;
 
 import org.eclipse.dltk.launching.InterpreterConfig;
 
+/**
+ * use {@link DbgpConnectionConfig}
+ * 
+ * @deprecated
+ */
 public class DbgpInterpreterConfig {
 	private InterpreterConfig config;
 
