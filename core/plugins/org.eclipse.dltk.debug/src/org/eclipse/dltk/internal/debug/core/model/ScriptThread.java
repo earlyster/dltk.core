@@ -11,12 +11,14 @@ package org.eclipse.dltk.internal.debug.core.model;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IStackFrame;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.dbgp.IDbgpSession;
@@ -159,35 +161,45 @@ public class ScriptThread extends ScriptDebugElement implements IScriptThread,
 		this.stateManager = new ScriptThreadStateManager(this);
 
 		this.stack = new ScriptStack(this);
+	}
 
-		final DbgpDebugger engine = this.stateManager.getEngine();
+	public void initialize(IProgressMonitor monitor) throws DbgpException {
+		monitor.beginTask(Util.EMPTY_STRING, 10);
+		try {
 
-		if (DLTKCore.DEBUG) {
-			DbgpDebugger.printEngineInfo(engine);
+			final DbgpDebugger engine = this.stateManager.getEngine();
+
+			if (DLTKCore.DEBUG) {
+				DbgpDebugger.printEngineInfo(engine);
+			}
+
+			engine.setMaxChildren(propertyPageSize);
+			engine.setMaxDepth(2);
+			engine.setMaxData(8192);
+			monitor.worked(2);
+
+			manager.configureThread(engine, this);
+			monitor.worked(6);
+
+			final boolean isDebugConsole = DLTKDebugLaunchConstants
+					.isDebugConsole(target.getLaunch());
+
+			if (isDebugConsole
+					&& engine
+							.isFeatureSupported(IDbgpExtendedCommands.STDIN_COMMAND)) {
+				engine.redirectStdin();
+			}
+			engine.setNotifyOk(true);
+			if (isDebugConsole) {
+				engine.redirectStdout();
+				engine.redirectStderr();
+			}
+			monitor.worked(2);
+
+			HotCodeReplaceManager.getDefault().addHotCodeReplaceListener(this);
+		} finally {
+			monitor.done();
 		}
-
-		engine.setMaxChildren(propertyPageSize);
-		engine.setMaxDepth(2);
-		engine.setMaxData(8192);
-
-		manager.configureThread(engine, this);
-
-		final boolean isDebugConsole = DLTKDebugLaunchConstants
-				.isDebugConsole(target.getLaunch());
-
-		if (isDebugConsole
-				&& engine
-						.isFeatureSupported(IDbgpExtendedCommands.STDIN_COMMAND)) {
-			engine.redirectStdin();
-		}
-
-		engine.setNotifyOk(true);
-		if (isDebugConsole) {
-			engine.redirectStdout();
-			engine.redirectStderr();
-		}
-
-		HotCodeReplaceManager.getDefault().addHotCodeReplaceListener(this);
 		// final IDbgpExtendedCommands extended = session.getExtendedCommands();
 		// session.getNotificationManager().addNotificationListener(
 		// new IDbgpNotificationListener() {

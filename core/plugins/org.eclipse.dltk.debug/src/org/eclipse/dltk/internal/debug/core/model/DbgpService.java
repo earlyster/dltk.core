@@ -18,13 +18,14 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.dbgp.DbgpServer;
 import org.eclipse.dltk.dbgp.IDbgpServerListener;
 import org.eclipse.dltk.dbgp.IDbgpSession;
-import org.eclipse.dltk.dbgp.IDbgpSessionInfo;
 import org.eclipse.dltk.dbgp.IDbgpThreadAcceptor;
+import org.eclipse.dltk.dbgp.IDbgpSessionInfo;
 import org.eclipse.dltk.dbgp.internal.IDbgpTerminationListener;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
@@ -157,7 +158,7 @@ public class DbgpService implements IDbgpService, IDbgpTerminationListener,
 			final IDbgpThreadAcceptor acceptor = (IDbgpThreadAcceptor) acceptors
 					.get(info.getIdeKey());
 			if (acceptor != null) {
-				acceptor.acceptDbgpThread(session);
+				acceptor.acceptDbgpThread(session, new NullProgressMonitor());
 			} else {
 				session.requestTermination();
 			}

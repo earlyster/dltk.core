@@ -3,6 +3,7 @@ package org.eclipse.dltk.internal.debug.core.model;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.IDbgpService;
 import org.eclipse.dltk.debug.core.IDebugOptions;
@@ -46,7 +47,7 @@ public class RemoteScriptDebugTarget extends ScriptDebugTarget {
 		try {
 			remoteWorkingDir = getLaunch().getLaunchConfiguration()
 					.getAttribute(LAUNCH_CONFIGURATION_ATTR_REMOTE_WORKING_DIR,
-							""); //$NON-NLS-1$
+							Util.EMPTY_STRING);
 		} catch (CoreException e) {
 			DLTKDebugPlugin.log(e);
 		}

@@ -14,6 +14,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IBreakpointListener;
@@ -21,6 +22,7 @@ import org.eclipse.debug.core.IBreakpointManager;
 import org.eclipse.debug.core.IBreakpointManagerListener;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.dbgp.IDbgpSpawnpoint;
@@ -390,7 +392,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		return false;
 	}
 
-	public void threadAccepted() {
+	private void threadAccepted() {
 		IBreakpointManager manager = getBreakpointManager();
 
 		manager.addBreakpointListener(target);
@@ -448,12 +450,13 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 		return false;
 	}
 
-	public void initializeSession(IDbgpSession session) {
+	public void initializeSession(IDbgpSession session, IProgressMonitor monitor) {
 		if (!addSession(session)) {
 			return;
 		}
 		IBreakpoint[] breakpoints = getBreakpointManager().getBreakpoints(
 				target.getModelIdentifier());
+		monitor.beginTask(Util.EMPTY_STRING, breakpoints.length);
 
 		for (int i = 0; i < breakpoints.length; i++) {
 			try {
@@ -471,7 +474,10 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 					e.printStackTrace();
 				}
 			}
+			monitor.worked(1);
 		}
+		threadAccepted();
+		monitor.done();
 	}
 
 	private static class TemporaryBreakpoint implements IDebugEventSetListener {

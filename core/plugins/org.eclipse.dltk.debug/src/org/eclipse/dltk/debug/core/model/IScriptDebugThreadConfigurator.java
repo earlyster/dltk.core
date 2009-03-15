@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.core.model;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.internal.debug.core.model.ScriptThread;
 import org.eclipse.dltk.internal.debug.core.model.operations.DbgpDebugger;
 
@@ -22,5 +23,5 @@ import org.eclipse.dltk.internal.debug.core.model.operations.DbgpDebugger;
 public interface IScriptDebugThreadConfigurator {
 	void configureThread(DbgpDebugger engine, ScriptThread scriptThread);
 
-	void initializeBreakpoints(IScriptThread thread);
+	void initializeBreakpoints(IScriptThread thread, IProgressMonitor monitor);
 }

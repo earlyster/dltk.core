@@ -15,17 +15,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.dbgp.IDbgpFeature;
 import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.dbgp.IDbgpStreamFilter;
 import org.eclipse.dltk.dbgp.IDbgpStreamListener;
 import org.eclipse.dltk.dbgp.breakpoints.IDbgpBreakpoint;
 import org.eclipse.dltk.dbgp.breakpoints.IDbgpLineBreakpoint;
+import org.eclipse.dltk.dbgp.commands.IDbgpFeatureCommands;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.DebugOption;
@@ -240,7 +244,8 @@ public class ScriptThreadManager implements IScriptThreadManager,
 	}
 
 	// IDbgpThreadAcceptor
-	public void acceptDbgpThread(IDbgpSession session) {
+	public void acceptDbgpThread(IDbgpSession session, IProgressMonitor monitor) {
+		SubMonitor sub = SubMonitor.convert(monitor, 100);
 		try {
 			DbgpException error = session.getInfo().getError();
 			if (error != null) {
@@ -248,17 +253,27 @@ public class ScriptThreadManager implements IScriptThreadManager,
 			}
 			session.configure(target.getOptions());
 			session.getStreamManager().addListener(this);
-			
+
 			final boolean breakOnFirstLine = target.breakOnFirstLineEnabled()
 					|| isAnyThreadInStepInto();
 			ScriptThread thread = new ScriptThread(target, session, this);
+			thread.initialize(sub.newChild(25));
 			addThread(thread);
 
 			final boolean isFirstThread = waitingForThreads;
 			if (isFirstThread) {
 				waitingForThreads = false;
 			}
-			fireThreadAccepted(thread, isFirstThread);
+			if (isFirstThread || !isSupportsThreads(thread)) {
+				SubMonitor child = sub.newChild(25);
+				target.breakpointManager.initializeSession(thread
+						.getDbgpSession(), child);
+				child = sub.newChild(25);
+				if (configurator != null) {
+					configurator.initializeBreakpoints(thread, child);
+				}
+			}
+
 			DebugEventHelper.fireCreateEvent(thread);
 
 			final boolean stopBeforeCode = thread.getDbgpSession()
@@ -283,12 +298,31 @@ public class ScriptThreadManager implements IScriptThreadManager,
 				DebugEventHelper.fireSuspendEvent(thread,
 						DebugEvent.CLIENT_REQUEST);
 			}
+			sub.worked(25);
+			fireThreadAccepted(thread, isFirstThread);
 		} catch (Exception e) {
 			try {
 				target.terminate();
 			} catch (DebugException e1) {
 			}
 			DLTKDebugPlugin.log(e);
+		} finally {
+			sub.done();
+		}
+	}
+
+	private static boolean isSupportsThreads(IScriptThread thread) {
+		try {
+			final IDbgpFeature feature = thread.getDbgpSession()
+					.getCoreCommands().getFeature(
+							IDbgpFeatureCommands.LANGUAGE_SUPPORTS_THREADS);
+			return feature != null
+					&& IDbgpFeature.ONE_VALUE.equals(feature.getValue());
+		} catch (DbgpException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+			return false;
 		}
 	}
 
@@ -308,10 +342,6 @@ public class ScriptThreadManager implements IScriptThreadManager,
 		synchronized (threads) {
 			threads.add(thread);
 		}
-	}
-
-	public void acceptDbgpThreadNotUnavailable() {
-
 	}
 
 	public void terminateThread(IScriptThread thread) {
@@ -435,12 +465,6 @@ public class ScriptThreadManager implements IScriptThreadManager,
 	public void configureThread(DbgpDebugger engine, ScriptThread scriptThread) {
 		if (configurator != null) {
 			configurator.configureThread(engine, scriptThread);
-		}
-	}
-
-	public void initializeBreakpoints(IScriptThread thread) {
-		if (configurator != null) {
-			configurator.initializeBreakpoints(thread);
 		}
 	}
 

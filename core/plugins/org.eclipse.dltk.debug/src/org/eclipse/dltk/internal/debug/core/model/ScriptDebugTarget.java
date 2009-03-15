@@ -34,11 +34,9 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.dbgp.IDbgpFeature;
 import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.dbgp.IDbgpStreamFilter;
-import org.eclipse.dltk.dbgp.commands.IDbgpFeatureCommands;
-import org.eclipse.dltk.dbgp.exceptions.DbgpException;
+import org.eclipse.dltk.dbgp.IDbgpThreadAcceptor;
 import org.eclipse.dltk.debug.core.DLTKDebugLaunchConstants;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
@@ -124,16 +122,14 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		this.options = options;
 
 		this.threadManager = new /* New */ScriptThreadManager(this);
+		this.threadManager.addListener(this);
 		this.sessionId = sessionId;
 		this.dbgpService = dbgpService;
-		this.dbgpService.registerAcceptor(this.sessionId, this.threadManager);
 
 		this.disconnected = false;
 
 		this.breakpointManager = new ScriptBreakpointManager(this,
 				createPathMapper());
-
-		this.threadManager.addListener(this);
 
 		DebugEventHelper.fireCreateEvent(this);
 		synchronized (targets) {
@@ -205,7 +201,7 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		}
 	}
 
-	protected static boolean waitTermianted(ITerminate terminate, int chunk,
+	protected static boolean waitTerminated(ITerminate terminate, int chunk,
 			long timeout) {
 		final long start = System.currentTimeMillis();
 		while (!terminate.isTerminated()) {
@@ -226,14 +222,14 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	}
 
 	protected void terminate(boolean waitTermination) throws DebugException {
-		dbgpService.unregisterAcceptor(sessionId);
+		fireTargetTerminating();
 
 		threadManager.sendTerminationRequest();
 		if (waitTermination) {
 			final IProcess p = getProcess();
 			final int CHUNK = 500;
-			if (!(waitTermianted(threadManager, CHUNK,
-					THREAD_TERMINATION_TIMEOUT) && (p == null || waitTermianted(
+			if (!(waitTerminated(threadManager, CHUNK,
+					THREAD_TERMINATION_TIMEOUT) && (p == null || waitTerminated(
 					p, CHUNK, THREAD_TERMINATION_TIMEOUT)))) {
 				// Debugging process is not answering, so terminating it
 				if (p != null && p.canTerminate()) {
@@ -333,40 +329,11 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		}
 	}
 
-	private boolean isSupportsThreads(IScriptThread thread) {
-		try {
-			final IDbgpFeature feature = thread.getDbgpSession()
-					.getCoreCommands().getFeature(
-							IDbgpFeatureCommands.LANGUAGE_SUPPORTS_THREADS);
-			return feature != null
-					&& IDbgpFeature.ONE_VALUE.equals(feature.getValue());
-		} catch (DbgpException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
-			return false;
-		}
-	}
-
 	// IDbgpThreadManagerListener
 	public void threadAccepted(IScriptThread thread, boolean first) {
 		if (first) {
 			DebugEventHelper.fireExtendedEvent(this,
 					ExtendedDebugEventDetails.BEFORE_CODE_LOADED);
-		}
-
-		if (first || !isSupportsThreads(thread)) {
-			breakpointManager.initializeSession(thread.getDbgpSession());
-			threadManager.initializeBreakpoints(thread);
-			/*
-			 * tell the manager the thread was accepted after creating the path
-			 * mapper and setting the deferred breakpoints
-			 */
-			breakpointManager.threadAccepted();
-
-			// DebugEventHelper.fireCreateEvent(this);
-		}
-		if (first) {
 			initialized = true;
 			fireTargetInitialized();
 		}
@@ -405,6 +372,13 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		Object[] list = listeners.getListeners();
 		for (int i = 0; i < list.length; ++i) {
 			((IScriptDebugTargetListener) list[i]).targetInitialized();
+		}
+	}
+
+	protected void fireTargetTerminating() {
+		Object[] list = listeners.getListeners();
+		for (int i = 0; i < list.length; ++i) {
+			((IScriptDebugTargetListener) list[i]).targetTerminating();
 		}
 	}
 
@@ -560,4 +534,13 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 	public void setStreamFilters(IDbgpStreamFilter[] streamFilters) {
 		((ScriptThreadManager) threadManager).setStreamFilters(streamFilters);
 	}
+
+	public IDbgpService getDbgpService() {
+		return dbgpService;
+	}
+
+	public IDbgpThreadAcceptor getDbgpThreadAcceptor() {
+		return threadManager;
+	}
+
 }

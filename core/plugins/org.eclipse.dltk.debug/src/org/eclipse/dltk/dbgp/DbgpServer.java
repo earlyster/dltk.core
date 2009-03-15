@@ -102,29 +102,38 @@ public class DbgpServer extends DbgpWorkingThread {
 		}
 	}
 
-	private void createSession(final Socket client) {
-		Job job = new Job(
-				Messages.DbgpServer_acceptingDebuggingEngineConnection) {
-			protected IStatus run(IProgressMonitor monitor) {
-				// copy to local variable to prevent NPE
-				final IDbgpServerListener savedListener = listener;
-				if (savedListener != null) {
-					DbgpDebugingEngine dbgpDebugingEngine = null;
-					DbgpSession session = null;
+	private static final class DbgpSessionJob extends Job {
+		private final Socket client;
+		private final IDbgpServerListener listener;
 
-					try {
-						dbgpDebugingEngine = new DbgpDebugingEngine(client);
-						session = new DbgpSession(dbgpDebugingEngine);
-						savedListener.clientConnected(session);
-					} catch (Exception e) {
-						DLTKDebugPlugin.log(e);
-						if (dbgpDebugingEngine != null)
-							dbgpDebugingEngine.requestTermination();
-					}
-				}
-				return Status.OK_STATUS;
+		private DbgpSessionJob(Socket client, IDbgpServerListener listener) {
+			super(Messages.DbgpServer_acceptingDebuggingEngineConnection);
+			this.client = client;
+			this.listener = listener;
+			setSystem(true);
+		}
+
+		public boolean shouldSchedule() {
+			return listener != null;
+		}
+
+		protected IStatus run(IProgressMonitor monitor) {
+			DbgpDebugingEngine engine = null;
+			try {
+				engine = new DbgpDebugingEngine(client);
+				DbgpSession session = new DbgpSession(engine);
+				listener.clientConnected(session);
+			} catch (Exception e) {
+				DLTKDebugPlugin.log(e);
+				if (engine != null)
+					engine.requestTermination();
 			}
-		};
+			return Status.OK_STATUS;
+		}
+	}
+
+	private void createSession(final Socket client) {
+		Job job = new DbgpSessionJob(client, listener);
 		job.schedule();
 	}
 
