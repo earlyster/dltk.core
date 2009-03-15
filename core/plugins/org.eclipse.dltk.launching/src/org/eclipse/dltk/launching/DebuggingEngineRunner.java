@@ -104,7 +104,6 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	 * Add the debugging engine configuration.
 	 * 
 	 * @param launch
-	 *            TODO
 	 */
 	protected abstract InterpreterConfig addEngineConfig(
 			InterpreterConfig config, PreferencesLookupDelegate delegate,
@@ -122,25 +121,10 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 			return;
 		}
 		try {
-			PreferencesLookupDelegate prefDelegate = createPreferencesLookupDelegate(launch);
+			PreferencesLookupDelegate delegate = createPreferencesLookupDelegate(launch);
 
-			initializeLaunch(launch, config, prefDelegate);
-			InterpreterConfig newConfig = addEngineConfig(config, prefDelegate,
-					launch);
-
-			// Starting debugging engine
-			IProcess process = null;
-			try {
-				DebugEventHelper.fireExtendedEvent(newConfig,
-						ExtendedDebugEventDetails.BEFORE_VM_STARTED);
-
-				// Running
-				monitor
-						.subTask(InterpreterMessages.DebuggingEngineRunner_running);
-				process = rawRun(launch, newConfig);
-			} catch (CoreException e) {
-				abort(InterpreterMessages.errDebuggingEngineNotStarted, e);
-			}
+			initializeLaunch(launch, config, delegate);
+			IProcess process = startProcess(config, launch, monitor, delegate);
 			monitor.worked(4);
 
 			// Waiting for debugging engine connect
@@ -152,6 +136,26 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 			monitor.done();
 		}
 		// Happy debugging :)
+	}
+
+	protected IProcess startProcess(InterpreterConfig config, ILaunch launch,
+			IProgressMonitor monitor, PreferencesLookupDelegate delegate)
+			throws CoreException {
+		InterpreterConfig newConfig = addEngineConfig(config, delegate, launch);
+
+		// Starting debugging engine
+		IProcess process = null;
+		try {
+			DebugEventHelper.fireExtendedEvent(newConfig,
+					ExtendedDebugEventDetails.BEFORE_VM_STARTED);
+
+			// Running
+			monitor.subTask(InterpreterMessages.DebuggingEngineRunner_running);
+			process = rawRun(launch, newConfig);
+		} catch (CoreException e) {
+			abort(InterpreterMessages.errDebuggingEngineNotStarted, e);
+		}
+		return process;
 	}
 
 	protected String[] renderCommandLine(InterpreterConfig config) {
@@ -204,7 +208,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 			try {
 				final long start = System.currentTimeMillis();
 				try {
-					long waitStart = System.currentTimeMillis();
+					long waitStart = start;
 					for (;;) {
 						if (target.isInitialized()) {
 							return true;
