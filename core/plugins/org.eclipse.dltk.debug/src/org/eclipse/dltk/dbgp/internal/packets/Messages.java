@@ -4,6 +4,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.dbgp.internal.packets.messages"; //$NON-NLS-1$
+	public static String DbgpPacketReceiver_packetWaiterTerminated;
+	public static String DbgpPacketReceiver_responsePacketWaiterTerminated;
 	public static String DbgpStreamPacket_contentCannotBeNull;
 	public static String DbgpStreamPacket_invalidTypeValue;
 	static {

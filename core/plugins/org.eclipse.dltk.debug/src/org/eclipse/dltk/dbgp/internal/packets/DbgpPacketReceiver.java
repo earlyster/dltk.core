@@ -60,7 +60,7 @@ public class DbgpPacketReceiver extends DbgpWorkingThread {
 
 			if (terminated) {
 				throw new InterruptedException(
-						"ResponsePacketWaiter already terminated");
+						Messages.DbgpPacketReceiver_responsePacketWaiterTerminated);
 			}
 
 			return null;
@@ -93,7 +93,7 @@ public class DbgpPacketReceiver extends DbgpWorkingThread {
 
 			if (terminated) {
 				throw new InterruptedException(
-						"PacketWaiter already terminated");
+						Messages.DbgpPacketReceiver_packetWaiterTerminated);
 			}
 
 			return (DbgpPacket) queue.removeFirst();
