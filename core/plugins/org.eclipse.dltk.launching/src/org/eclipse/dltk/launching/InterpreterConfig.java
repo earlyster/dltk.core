@@ -11,7 +11,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -372,9 +371,7 @@ public class InterpreterConfig implements Cloneable {
 		IFileHandle interpreterPath = PlatformFileUtils
 				.findAbsoluteOrEclipseRelativeFile(environment, new Path(
 						interpreter));
-		IPath localPath = EnvironmentPathUtils.getLocalPath(interpreterPath
-				.getFullPath());
-		return renderCommandLine(environment, localPath);
+		return renderCommandLine(environment, interpreterPath.getPath());
 	}
 
 	// TODO: make more real implementation
