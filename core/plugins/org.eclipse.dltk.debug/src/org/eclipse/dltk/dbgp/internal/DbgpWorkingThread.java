@@ -28,7 +28,7 @@ public abstract class DbgpWorkingThread extends DbgpTermination {
 					} catch (Exception e) {
 						DLTKDebugPlugin
 								.logError(
-										"Error in a Working thread, termination the thread",
+										Messages.DbgpWorkingThread_workingCycleError,
 										e);
 						fireObjectTerminated(e);
 						return;
