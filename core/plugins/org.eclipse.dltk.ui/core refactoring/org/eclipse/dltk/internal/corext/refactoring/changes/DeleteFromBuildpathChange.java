@@ -9,20 +9,19 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.corext.refactoring.changes;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.dltk.internal.corext.refactoring.base.DLTKChange;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.osgi.util.NLS;
 
 
 public class DeleteFromBuildpathChange extends DLTKChange {
@@ -95,7 +94,9 @@ public class DeleteFromBuildpathChange extends DLTKChange {
 	}
 	
 	public String getName() {
-		return MessageFormat.format(RefactoringCoreMessages.DeleteFromClassPathChange_remove, new Object[] { getScriptProject().getElementName() }); 
+		return NLS.bind(
+				RefactoringCoreMessages.DeleteFromClassPathChange_remove,
+				getScriptProject().getElementName());
 	}
 
 	public Object getModifiedElement() {
