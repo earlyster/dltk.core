@@ -9,8 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IModelElement;
@@ -18,6 +16,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 
@@ -61,8 +60,8 @@ public abstract class NewSourceModuleWizard extends NewElementWizard {
 					} catch (PartInitException e) {
 						DLTKUIPlugin
 								.logErrorMessage(
-										MessageFormat
-												.format(
+										NLS
+												.bind(
 														Messages.NewSourceModuleWizard_errorInOpenInEditor,
 														new Object[] { module
 																.getElementName() }),
@@ -70,8 +69,8 @@ public abstract class NewSourceModuleWizard extends NewElementWizard {
 					} catch (ModelException e) {
 						DLTKUIPlugin
 								.logErrorMessage(
-										MessageFormat
-												.format(
+										NLS
+												.bind(
 														Messages.NewSourceModuleWizard_errorInOpenInEditor,
 														new Object[] { module
 																.getElementName() }),
