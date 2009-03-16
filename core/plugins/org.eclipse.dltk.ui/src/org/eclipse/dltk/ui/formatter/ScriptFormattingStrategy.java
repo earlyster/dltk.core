@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter;
 
-import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -69,7 +68,8 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy#format()
+	 * @see
+	 * org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy#format()
 	 */
 	public void format() {
 		super.format();
@@ -108,11 +108,10 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 					window
 							.getStatusLineManager()
 							.setErrorMessage(
-									MessageFormat
-											.format(
+									NLS
+											.bind(
 													FormatterMessages.ScriptFormattingStrategy_unableToFormatSourceContainingSyntaxError,
-													new Object[] { e
-															.getMessage() }));
+													e.getMessage()));
 				}
 				PlatformUI.getWorkbench().getDisplay().beep();
 			} catch (MalformedTreeException e) {
