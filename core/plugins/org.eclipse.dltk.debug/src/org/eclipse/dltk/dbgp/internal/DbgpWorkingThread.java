@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.dbgp.internal;
 
+import java.io.IOException;
+
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 
 public abstract class DbgpWorkingThread extends DbgpTermination {
@@ -26,10 +28,12 @@ public abstract class DbgpWorkingThread extends DbgpTermination {
 					try {
 						workingCycle();
 					} catch (Exception e) {
-						DLTKDebugPlugin
-								.logError(
-										Messages.DbgpWorkingThread_workingCycleError,
-										e);
+						if (isLoggable(e)) {
+							DLTKDebugPlugin
+									.logError(
+											Messages.DbgpWorkingThread_workingCycleError,
+											e);
+						}
 						fireObjectTerminated(e);
 						return;
 					}
@@ -54,6 +58,18 @@ public abstract class DbgpWorkingThread extends DbgpTermination {
 	public void waitTerminated() throws InterruptedException {
 		if (thread != null)
 			thread.join();
+	}
+
+	/**
+	 * Tests if this exception should be logged. The rationale here is
+	 * IOExceptions/SocketExceptions occurs always after socket is closed, so
+	 * there is no point to log it.
+	 * 
+	 * @param e
+	 * @return
+	 */
+	protected boolean isLoggable(Exception e) {
+		return !(e instanceof IOException);
 	}
 
 	// Working cycle
