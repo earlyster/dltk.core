@@ -987,18 +987,6 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		return (IPath[]) paths.toArray(new IPath[paths.size()]);
 	}
 
-	protected String createNativeBuildPath(IPath[] paths) {
-		// TODO: refactor this
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < paths.length; ++i) {
-			sb.append(paths[i].toOSString());
-			if (i < paths.length - 1) {
-				sb.append(Path.DEVICE_SEPARATOR);
-			}
-		}
-		return sb.toString();
-	}
-
 	protected IProject[] getBuildOrder(ILaunchConfiguration configuration,
 			String mode) throws CoreException {
 		return fOrderedProjects;
