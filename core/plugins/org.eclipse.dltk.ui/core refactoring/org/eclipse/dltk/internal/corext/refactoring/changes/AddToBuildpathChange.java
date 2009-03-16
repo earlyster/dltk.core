@@ -9,12 +9,15 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.corext.refactoring.changes;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
@@ -25,6 +28,7 @@ import org.eclipse.dltk.internal.corext.refactoring.base.DLTKChange;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.osgi.util.NLS;
 
 public class AddToBuildpathChange extends DLTKChange {
 
@@ -117,9 +121,8 @@ public class AddToBuildpathChange extends DLTKChange {
 	}
 
 	public String getName() {
-		return MessageFormat.format(
-				RefactoringCoreMessages.AddToClasspathChange_add,
-				new Object[] { getScriptProject().getElementName() });
+		return NLS.bind(RefactoringCoreMessages.AddToClasspathChange_add,
+				getScriptProject().getElementName());
 
 	}
 
