@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.ui.actions;
 
 import org.eclipse.dltk.ui.IContextMenuConstants;
+import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.ui.IViewPart;
@@ -17,6 +18,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.ExportResourcesAction;
 import org.eclipse.ui.actions.ImportResourcesAction;
+import org.eclipse.ui.navigator.ICommonMenuConstants;
 
 
 /**
@@ -54,6 +56,7 @@ public class ImportActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new Separator(GROUP_IMPORT));
+		menu.appendToGroup(GROUP_IMPORT, new GroupMarker(ICommonMenuConstants.GROUP_PORT));
 		menu.appendToGroup(GROUP_IMPORT, fImportAction);
 		menu.appendToGroup(GROUP_IMPORT, fExportAction);
 		super.fillContextMenu(menu);
