@@ -21,6 +21,7 @@ public class Messages extends NLS {
 	public static String BuildParticipantManager_buildParticipantCreateError;
 	public static String StandardScriptBuilder_errorBuildingExternalModule;
 	public static String StandardScriptBuilder_errorBuildingModule;
+	public static String StandardScriptBuilder_errorCleaning;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

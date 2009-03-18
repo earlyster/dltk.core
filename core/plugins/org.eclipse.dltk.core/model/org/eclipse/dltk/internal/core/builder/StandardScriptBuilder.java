@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -260,7 +261,17 @@ public class StandardScriptBuilder implements IScriptBuilder,
 	}
 
 	public void clean(IScriptProject project, IProgressMonitor monitor) {
-		//
+		final IProject p = project.getProject();
+		try {
+			p.deleteMarkers(DefaultProblem.MARKER_TYPE_PROBLEM, true,
+					IResource.DEPTH_INFINITE);
+			p.deleteMarkers(DefaultProblem.MARKER_TYPE_TASK, true,
+					IResource.DEPTH_INFINITE);
+		} catch (CoreException e) {
+			DLTKCore.error(NLS.bind(
+					Messages.StandardScriptBuilder_errorCleaning, p.getName()),
+					e);
+		}
 	}
 
 	public DependencyResponse getDependencies(IScriptProject project,
