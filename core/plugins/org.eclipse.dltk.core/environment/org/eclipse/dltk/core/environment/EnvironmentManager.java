@@ -27,7 +27,7 @@ import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.internal.core.ExternalScriptProject;
 
 public final class EnvironmentManager {
-	public static final QualifiedName PROJECT_ENVIRONMENT = new QualifiedName(
+	private static final QualifiedName PROJECT_ENVIRONMENT = new QualifiedName(
 			DLTKCore.PLUGIN_ID, "environment"); //$NON-NLS-1$
 
 	private static final String ENVIRONMENT_EXTENSION = DLTKCore.PLUGIN_ID
@@ -85,6 +85,11 @@ public final class EnvironmentManager {
 	}
 
 	public static String getEnvironmentId(IProject project) {
+		return getEnvironmentId(project, true);
+	}
+
+	public static String getEnvironmentId(IProject project,
+			boolean detectAutomatically) {
 		try {
 			final String environmentId = project
 					.getPersistentProperty(PROJECT_ENVIRONMENT);
@@ -96,15 +101,29 @@ public final class EnvironmentManager {
 				e.printStackTrace();
 			}
 		}
-		Object[] objects = manager.getObjects();
-		for (int i = 0; i < objects.length; i++) {
-			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
-			IEnvironment environment = provider.getProjectEnvironment(project);
-			if (environment != null) {
-				return environment.getId();
+		if (detectAutomatically) {
+			Object[] objects = manager.getObjects();
+			for (int i = 0; i < objects.length; i++) {
+				IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
+				IEnvironment environment = provider
+						.getProjectEnvironment(project);
+				if (environment != null) {
+					return environment.getId();
+				}
 			}
 		}
 		return null;
+	}
+
+	public static void setEnvironmentId(IProject project, String environmentId)
+			throws CoreException {
+		// TODO check project.getDescription.getLocationURI() scheme ?
+		project.setPersistentProperty(PROJECT_ENVIRONMENT, environmentId);
+	}
+
+	public static void setEnvironment(IProject project, IEnvironment environment)
+			throws CoreException {
+		setEnvironmentId(project, environment.getId());
 	}
 
 	public static IEnvironment[] getEnvironments() {
