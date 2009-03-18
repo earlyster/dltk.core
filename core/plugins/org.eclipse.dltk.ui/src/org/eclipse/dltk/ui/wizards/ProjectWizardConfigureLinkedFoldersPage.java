@@ -444,10 +444,7 @@ public class ProjectWizardConfigureLinkedFoldersPage extends WizardPage
 			BuildpathsBlock.createProject(fProject, null,
 					new SubProgressMonitor(monitor, 20));
 			final IEnvironment environment = model.getEnvironment();
-			fProject
-					.setPersistentProperty(
-							EnvironmentManager.PROJECT_ENVIRONMENT, environment
-									.getId());
+			EnvironmentManager.setEnvironment(fProject, environment);
 			final ProjectFolder[] folders = model.getFolders();
 			createLinkedFolders(fProject, environment, folders,
 					new SubProgressMonitor(monitor, 20));
