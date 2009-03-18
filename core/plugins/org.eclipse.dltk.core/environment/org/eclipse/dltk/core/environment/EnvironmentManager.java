@@ -123,7 +123,8 @@ public final class EnvironmentManager {
 
 	public static void setEnvironment(IProject project, IEnvironment environment)
 			throws CoreException {
-		setEnvironmentId(project, environment.getId());
+		setEnvironmentId(project, environment != null ? environment.getId()
+				: null);
 	}
 
 	public static IEnvironment[] getEnvironments() {
