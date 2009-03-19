@@ -119,6 +119,10 @@ public final class EnvironmentManager {
 			throws CoreException {
 		// TODO check project.getDescription.getLocationURI() scheme ?
 		project.setPersistentProperty(PROJECT_ENVIRONMENT, environmentId);
+		final IScriptProject scriptProject = DLTKCore.create(project);
+		if (scriptProject != null) {
+			DLTKCore.refreshBuildpathContainers(scriptProject);
+		}
 	}
 
 	public static void setEnvironment(IProject project, IEnvironment environment)

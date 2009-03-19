@@ -1535,11 +1535,12 @@ public class DLTKCore extends Plugin {
 	 * resolving the variable reference in the first segment. Returns
 	 * <code>null</code> if unable to resolve using the following algorithm:
 	 * <ul>
-	 * <li> if variable segment cannot be resolved, returns <code>null</code>
-	 * </li> <li> finds a project, JAR or binary folder in the workspace at the
-	 * resolved path location</li> <li> if none finds an external JAR file or
-	 * folder outside the workspace at the resolved path location </li> <li> if
-	 * none returns <code>null</code></li>
+	 * <li>if variable segment cannot be resolved, returns <code>null</code></li>
+	 * <li>finds a project, JAR or binary folder in the workspace at the
+	 * resolved path location</li>
+	 * <li>if none finds an external JAR file or folder outside the workspace at
+	 * the resolved path location</li>
+	 * <li>if none returns <code>null</code></li>
 	 * </ul>
 	 * <p>
 	 * Variable source attachment path and root path are also resolved and
@@ -2079,6 +2080,23 @@ public class DLTKCore extends Plugin {
 					manager.containerPut(affectedProjects[i], containerPath,
 							null); // reset init in progress marker
 				}
+			}
+		}
+	}
+
+	public static void refreshBuildpathContainers(IScriptProject project)
+			throws CoreException {
+		// re-bind all container entries
+		final IBuildpathEntry[] entries = project.getRawBuildpath();
+		for (int j = 0; j < entries.length; j++) {
+			final IBuildpathEntry entry = entries[j];
+			switch (entry.getEntryKind()) {
+			case IBuildpathEntry.BPE_CONTAINER:
+				final IPath reference = entry.getPath();
+				final BuildpathContainerInitializer initializer = getBuildpathContainerInitializer(reference
+						.segment(0));
+				initializer.initialize(reference, project);
+				break;
 			}
 		}
 	}
