@@ -393,7 +393,7 @@ public class ScriptElementLabels {
 		return '.';
 	}
 
-	private static final boolean getFlag(long flags, long flag) {
+	protected static final boolean getFlag(long flags, long flag) {
 
 		return (flags & flag) != 0;
 	}
@@ -411,9 +411,9 @@ public class ScriptElementLabels {
 	private static int fgPkgNameLength = -1;
 
 	/**
-	 * Returns the label of the given object. The object must be of type {@link
-	 * IScriptElement} or adapt to {@link IWorkbenchAdapter}. The empty string
-	 * is returned if the element type is not known.
+	 * Returns the label of the given object. The object must be of type
+	 * {@link IScriptElement} or adapt to {@link IWorkbenchAdapter}. The empty
+	 * string is returned if the element type is not known.
 	 * 
 	 * @param obj
 	 *            Object to get the label from.
@@ -541,7 +541,7 @@ public class ScriptElementLabels {
 		}
 	}
 
-	private IProjectFragment findProjectFragment(IModelElement element) {
+	protected IProjectFragment findProjectFragment(IModelElement element) {
 		while (element != null
 				&& element.getElementType() != IModelElement.PROJECT_FRAGMENT) {
 			element = element.getParent();
@@ -551,12 +551,12 @@ public class ScriptElementLabels {
 
 	protected void getScriptFolderLabel(IScriptFolder folder, StringBuffer buf) {
 		buf.append(folder.getElementName()/*
-											 * .replace(IScriptFolder.PACKAGE_DELIMITER ,
-											 * '.')
-											 */);
+										 * .replace(IScriptFolder.PACKAGE_DELIMITER
+										 * , '.')
+										 */);
 	}
 
-	private void getScriptFolderLabel(IScriptFolder folder, long flags,
+	protected void getScriptFolderLabel(IScriptFolder folder, long flags,
 			StringBuffer buf) {
 		if (getFlag(flags, P_QUALIFIED)) {
 			getProjectFragmentLabel((IProjectFragment) folder.getParent(),
@@ -593,7 +593,7 @@ public class ScriptElementLabels {
 		}
 	}
 
-	private void getSourceModel(ISourceModule module, long flags,
+	protected void getSourceModel(ISourceModule module, long flags,
 			StringBuffer buf) {
 		if (getFlag(flags, CU_QUALIFIED)) {
 			IScriptFolder pack = (IScriptFolder) module.getParent();
@@ -708,13 +708,13 @@ public class ScriptElementLabels {
 		}
 	}
 
-	private void getFieldLabel(IField field, long flags, StringBuffer buf) {
+	protected void getFieldLabel(IField field, long flags, StringBuffer buf) {
 
 		buf.append(field.getElementName());
 		// TODO: Add type detection here.
 	}
 
-	private void getMethodLabel(IMethod method, long flags, StringBuffer buf) {
+	protected void getMethodLabel(IMethod method, long flags, StringBuffer buf) {
 
 		try {
 			// qualification
@@ -803,7 +803,7 @@ public class ScriptElementLabels {
 
 	}
 
-	private void getArchiveLabel(IProjectFragment root, long flags,
+	protected void getArchiveLabel(IProjectFragment root, long flags,
 			StringBuffer buf) {
 		// Handle variables different
 		boolean external = root.isExternal();
@@ -813,7 +813,7 @@ public class ScriptElementLabels {
 			getInternalArchiveLabel(root, flags, buf);
 	}
 
-	private void getExternalArchiveLabel(IProjectFragment root, long flags,
+	protected void getExternalArchiveLabel(IProjectFragment root, long flags,
 			StringBuffer buf) {
 		IPath path = root.getPath();
 		path = EnvironmentPathUtils.getLocalPath(path);
@@ -843,7 +843,7 @@ public class ScriptElementLabels {
 	 * 
 	 * 
 	 */
-	private boolean isReferenced(IProjectFragment root) {
+	protected boolean isReferenced(IProjectFragment root) {
 		IResource resource = root.getResource();
 		if (resource != null) {
 			IProject archiveProject = resource.getProject();
@@ -853,7 +853,7 @@ public class ScriptElementLabels {
 		return false;
 	}
 
-	private void getInternalArchiveLabel(IProjectFragment root, long flags,
+	protected void getInternalArchiveLabel(IProjectFragment root, long flags,
 			StringBuffer buf) {
 		IResource resource = root.getResource();
 		boolean rootQualified = getFlag(flags, ROOT_QUALIFIED);
@@ -877,7 +877,7 @@ public class ScriptElementLabels {
 		}
 	}
 
-	private void getFolderLabel(IProjectFragment root, long flags,
+	protected void getFolderLabel(IProjectFragment root, long flags,
 			StringBuffer buf) {
 
 		IResource resource = root.getResource();
@@ -903,7 +903,7 @@ public class ScriptElementLabels {
 		}
 	}
 
-	private void getExternalFolderLabel(IProjectFragment root, long flags,
+	protected void getExternalFolderLabel(IProjectFragment root, long flags,
 			StringBuffer buf) {
 
 		boolean rootQualified = getFlag(flags, ROOT_QUALIFIED);
