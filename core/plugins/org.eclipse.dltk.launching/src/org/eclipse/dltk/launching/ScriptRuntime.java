@@ -92,10 +92,10 @@ public final class ScriptRuntime {
 
 	/**
 	 * Classpath container used for a project's InterpreterEnvironment (value
-	 * <code>"org.eclipse.dltk.launching.InterpreterEnvironment_CONTAINER"</code>
-	 * ). A container is resolved in the context of a specific Script project,
-	 * to one or more system libraries contained in a InterpreterEnvironment.
-	 * The container can have zero or two path segments following the container
+	 * <code>"org.eclipse.dltk.launching.INTERPRETER_CONTAINER"</code> ). A
+	 * container is resolved in the context of a specific Script project, to one
+	 * or more system libraries contained in a InterpreterEnvironment. The
+	 * container can have zero or two path segments following the container
 	 * name. When no segments follow the container name, the workspace default
 	 * InterpreterEnvironment is used to build a project. Otherwise the segments
 	 * identify a specific InterpreterEnvironment used to build a project:
