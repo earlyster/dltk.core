@@ -241,7 +241,7 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 		this.level = stackLevel;
 	}
 
-	public void updateVariables() {
+	public synchronized void updateVariables() {
 		this.variables = null;
 	}
 
@@ -342,7 +342,7 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 		return thread;
 	}
 
-	public boolean hasVariables() throws DebugException {
+	public synchronized boolean hasVariables() throws DebugException {
 		checkVariablesAvailable();
 		return variables.hasVariables();
 	}
@@ -410,7 +410,7 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 		return newVars;
 	}
 
-	public IVariable[] getVariables() throws DebugException {
+	public synchronized IVariable[] getVariables() throws DebugException {
 		checkVariablesAvailable();
 		return variables.toArray(getDebugTarget());
 	}
@@ -483,7 +483,8 @@ public class ScriptStackFrame extends ScriptDebugElement implements
 		return thread.getDebugTarget();
 	}
 
-	public IScriptVariable findVariable(String varName) throws DebugException {
+	public synchronized IScriptVariable findVariable(String varName)
+			throws DebugException {
 		checkVariablesAvailable();
 		return (IScriptVariable) variables.findVariable(varName);
 	}
