@@ -149,15 +149,11 @@ public class ScriptVariable extends ScriptDebugElement implements
 					 */
 					ScriptStackFrame.refreshVariables(v.getValue()
 							.getVariables(), ((ScriptValue) value).variables);
-				} else {
-					property = v.property;
-					value = v.value;
 				}
-			} else {
-				isValueChanged = !equals(property, v.property);
-				value = v.value;
-				property = v.property;
 			}
+			isValueChanged = !equals(property, v.property);
+			value = v.value;
+			property = v.property;
 			return this;
 		} else {
 			return newVariable;
