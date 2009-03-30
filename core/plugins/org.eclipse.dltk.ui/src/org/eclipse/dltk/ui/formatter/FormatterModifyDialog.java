@@ -28,6 +28,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
@@ -147,6 +148,10 @@ public abstract class FormatterModifyDialog extends StatusDialog implements
 
 	public void setPreferences(Map prefs) {
 		preferences.set(prefs);
+		final Shell shell = getShell();
+		if (shell != null && !shell.isDisposed()) {
+			controlManager.initialize();
+		}
 	}
 
 	public Map getPreferences() {
