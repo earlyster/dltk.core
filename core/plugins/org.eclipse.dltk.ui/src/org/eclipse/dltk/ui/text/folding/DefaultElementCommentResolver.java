@@ -4,8 +4,8 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
+import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.internal.core.SourceRefElement;
 import org.eclipse.dltk.internal.core.SourceType;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -144,17 +144,15 @@ public class DefaultElementCommentResolver implements IElementCommentResolver {
 			this.length = length;
 		}
 
-		public boolean visit(IModelElement el) {
-			if (el instanceof SourceRefElement) {
-				SourceRefElement element = (SourceRefElement) el;
-
-				// The comment is entirely inside the element
-				ISourceRange range;
+		public boolean visit(IModelElement element) {
+			if (element instanceof ISourceReference) {
+				final ISourceRange range;
 				try {
-					range = element.getSourceRange();
+					range = ((ISourceReference) element).getSourceRange();
 				} catch (ModelException e) {
 					return true;
 				}
+				// The comment is entirely inside the element
 				if (offset >= range.getOffset()
 						&& offset + length <= range.getOffset()
 								+ range.getLength()) {
