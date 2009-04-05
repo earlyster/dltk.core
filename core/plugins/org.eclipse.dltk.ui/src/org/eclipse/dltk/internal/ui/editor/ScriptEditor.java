@@ -626,7 +626,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	/**
 	 * This editor's projection model updater
 	 */
-	protected IFoldingStructureProvider fProjectionModelUpdater;
+	private IFoldingStructureProvider fProjectionModelUpdater;
 
 	/**
 	 * The action group for folding.
@@ -1009,6 +1009,11 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	}
 
 	public void dispose() {
+
+		if (fProjectionModelUpdater != null) {
+			fProjectionModelUpdater.uninstall();
+			fProjectionModelUpdater = null;
+		}
 
 		// ISourceViewer sourceViewer= getSourceViewer();
 		// if (sourceViewer instanceof ITextViewerExtension)
