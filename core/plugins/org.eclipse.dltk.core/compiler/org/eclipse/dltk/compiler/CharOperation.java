@@ -3293,6 +3293,49 @@ public final class CharOperation {
 	}
 
 	/**
+	 * Return a new array which is the split of the given array using the given divider.
+	 * 
+	 * @param divider the given divider
+	 * @param array the given array
+	 * @return a new array which is the split of the given array using the given divider
+	 */
+	public static final char[][] splitOn(char[] divider, char[] array) {
+		int length = array == null ? 0 : array.length;
+		if (length == 0)
+			return NO_CHAR_CHAR;
+
+		int wordCount = 1;
+		{
+			int i = 0;
+			while (i + divider.length <= length) {
+				i = indexOf(divider, array, false, i);
+				if (i == -1) {
+					break;
+				}
+				++wordCount;
+				i += divider.length;
+			}
+		}
+		char[][] split = new char[wordCount][];
+		int last = 0, currentWord = 0;
+		int i = 0;
+		while (i + divider.length <= length) {
+			i = indexOf(divider, array, false, i);
+			if (i == -1) {
+				break;
+			}
+			split[currentWord] = new char[i - last];
+			System.arraycopy(array, last, split[currentWord++], 0, i - last);
+			i += divider.length;
+			last = i;
+		}
+		split[currentWord] = new char[length - last];
+		System.arraycopy(array, last, split[currentWord], 0, length - last);
+		return split;
+	}
+	
+	
+	/**
 	 * Return a new array which is the split of the given array using the given
 	 * divider. The given end is exclusive and the given start is inclusive.
 	 * <br>
