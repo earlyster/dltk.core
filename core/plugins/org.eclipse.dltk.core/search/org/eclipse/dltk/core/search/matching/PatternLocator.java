@@ -37,6 +37,8 @@ import org.eclipse.dltk.internal.core.search.matching.FieldLocator;
 import org.eclipse.dltk.internal.core.search.matching.FieldPattern;
 import org.eclipse.dltk.internal.core.search.matching.InternalSearchPattern;
 import org.eclipse.dltk.internal.core.search.matching.MatchingNodeSet;
+import org.eclipse.dltk.internal.core.search.matching.MethodDeclarationLocator;
+import org.eclipse.dltk.internal.core.search.matching.MethodDeclarationPattern;
 import org.eclipse.dltk.internal.core.search.matching.MethodLocator;
 import org.eclipse.dltk.internal.core.search.matching.MethodPattern;
 import org.eclipse.dltk.internal.core.search.matching.OrLocator;
@@ -103,6 +105,9 @@ public abstract class PatternLocator implements IIndexConstants {
 			return new TypeReferenceLocator((TypeReferencePattern) pattern);
 		case IIndexConstants.TYPE_DECL_PATTERN:
 			return new TypeDeclarationLocator((TypeDeclarationPattern) pattern);
+		case IIndexConstants.METHOD_DECL_PATTERN:
+			return new MethodDeclarationLocator(
+					(MethodDeclarationPattern) pattern);
 			// case IIndexConstants.SUPER_REF_PATTERN:
 			// return new
 			// SuperTypeReferenceLocator((SuperTypeReferencePattern)

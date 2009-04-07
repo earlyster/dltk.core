@@ -27,6 +27,7 @@ import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.internal.core.search.matching.FieldPattern;
 import org.eclipse.dltk.internal.core.search.matching.InternalSearchPattern;
+import org.eclipse.dltk.internal.core.search.matching.MethodDeclarationPattern;
 import org.eclipse.dltk.internal.core.search.matching.MethodPattern;
 import org.eclipse.dltk.internal.core.search.matching.OrPattern;
 import org.eclipse.dltk.internal.core.search.matching.QualifiedTypeDeclarationPattern;
@@ -622,10 +623,38 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			// parameterTypeSimpleNames, parameterTypeSignatures, typeArguments,
 			// matchRule);
 		} else {
+			if (findDeclarations) {
+				final char[][] packageNames;
+				if (declaringTypeQualification != null) {
+					packageNames = CharOperation.splitOn(processor
+							.getDelimiterReplacementString().toCharArray(),
+							declaringTypeQualification);
+				} else {
+					packageNames = CharOperation.NO_CHAR_CHAR;
+				}
+				int enclosingTypeCount = packageNames.length;
+				if (declaringTypeSimpleName != null) {
+					++enclosingTypeCount;
+				}
+				final char[][] enclosingTypes;
+				if (enclosingTypeCount != 0) {
+					enclosingTypes = new char[enclosingTypeCount][];
+					System.arraycopy(packageNames, 0, enclosingTypes, 0,
+							packageNames.length);
+					if (declaringTypeSimpleName != null) {
+						enclosingTypes[enclosingTypeCount - 1] = declaringTypeSimpleName;
+					}
+				} else {
+					enclosingTypes = null;
+				}
+				return new MethodDeclarationPattern(enclosingTypes,
+						selectorChars, matchRule, toolkit);
+			}
 			return new MethodPattern(findDeclarations, findReferences,
 					selectorChars, declaringTypeQualification,
 					declaringTypeSimpleName, declaringTypeSignature, null,
 					matchRule, toolkit);
+
 		}
 		return null;
 	}
@@ -968,6 +997,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		}
 		char[] declaringSimpleName = null;
 		char[] declaringQualification = null;
+		char[][] enclosingNames = null;
 		switch (element.getElementType()) {
 		case IModelElement.METHOD:
 			IMethod method = (IMethod) element;
@@ -979,9 +1009,11 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			}
 			IType declaringClass = method.getDeclaringType();
 			if (ignoreDeclaringType) {
-				if (isConstructor)
+				if (isConstructor) {
 					declaringSimpleName = declaringClass.getElementName()
 							.toCharArray();
+					enclosingNames = new char[][] { declaringSimpleName };
+				}
 			} else {
 				if (declaringClass != null) {
 					declaringSimpleName = declaringClass.getElementName()
@@ -991,9 +1023,9 @@ public abstract class SearchPattern extends InternalSearchPattern {
 					// declaringQualification =
 					// ((IType)parent).getTypeQualifiedName().toCharArray();
 					// }
-					char[][] enclosingNames = enclosingTypeNames(declaringClass);
+					enclosingNames = enclosingTypeNames(element);
 					if (enclosingNames.length > 0) {
-						declaringQualification = CharOperation.concat(
+						declaringSimpleName = CharOperation.concat(
 								declaringQualification, CharOperation
 										.concatWith(enclosingNames, '$'), '$');
 					}
@@ -1014,9 +1046,14 @@ public abstract class SearchPattern extends InternalSearchPattern {
 				break;
 			}
 
-			searchPattern = new MethodPattern(findMethodDeclarations,
-					findMethodReferences, selector, declaringQualification,
-					declaringSimpleName, method, matchRule, toolkit);
+			if (findMethodDeclarations) {
+				searchPattern = new MethodDeclarationPattern(enclosingNames,
+						selector, matchRule, toolkit);
+			} else {
+				searchPattern = new MethodPattern(findMethodDeclarations,
+						findMethodReferences, selector, declaringQualification,
+						declaringSimpleName, method, matchRule, toolkit);
+			}
 			break;
 		case IModelElement.TYPE:
 			IType type = (IType) element;
@@ -1153,10 +1190,10 @@ public abstract class SearchPattern extends InternalSearchPattern {
 	}
 
 	/**
-	 * Returns the enclosing type names of the given type.
+	 * Returns the enclosing type names of the given element.
 	 */
-	private static char[][] enclosingTypeNames(IType type) {
-		IModelElement parent = type.getParent();
+	private static char[][] enclosingTypeNames(IModelElement element) {
+		IModelElement parent = element.getParent();
 		switch (parent.getElementType()) {
 		case IModelElement.SOURCE_MODULE:
 			return CharOperation.NO_CHAR_CHAR;
@@ -1329,38 +1366,40 @@ public abstract class SearchPattern extends InternalSearchPattern {
 				return CharOperation.match(pattern, name, isCaseSensitive);
 			case R_REGEXP_MATCH:
 				if (regexpCompiledPattern == null) {
-					regexpCompiledPattern = Pattern.compile(new String(pattern),
-							isCaseSensitive ? 0 : Pattern.CASE_INSENSITIVE);
+					regexpCompiledPattern = Pattern.compile(
+							new String(pattern), isCaseSensitive ? 0
+									: Pattern.CASE_INSENSITIVE);
 				}
-				return regexpCompiledPattern.matcher(new String(name)).matches();
+				return regexpCompiledPattern.matcher(new String(name))
+						.matches();
 			}
 		}
 		return false;
 	}
 
-/**
+	/**
 	 * Validate compatibility between given string pattern and match rule. <br>
 	 * Optimized (ie. returned match rule is modified) combinations are:
 	 * <ul>
 	 * <li>{@link #R_PATTERN_MATCH} without any '*' or '?' in string pattern:
-	 * pattern match bit is unset, </li>
+	 * pattern match bit is unset,</li>
 	 * <li>{@link #R_PATTERN_MATCH} and {@link #R_PREFIX_MATCH} bits
-	 * simultaneously set: prefix match bit is unset, </li>
+	 * simultaneously set: prefix match bit is unset,</li>
 	 * <li>{@link #R_PATTERN_MATCH} and {@link #R_CAMELCASE_MATCH} bits
-	 * simultaneously set: camel case match bit is unset, </li>
+	 * simultaneously set: camel case match bit is unset,</li>
 	 * <li>{@link #R_CAMELCASE_MATCH} with invalid combination of uppercase and
 	 * lowercase characters: camel case match bit is unset and replaced with
-	 * prefix match pattern, </li>
+	 * prefix match pattern,</li>
 	 * <li>{@link #R_CAMELCASE_MATCH} combined with {@link #R_PREFIX_MATCH} and
 	 * {@link #R_CASE_SENSITIVE} bits is reduced to only
 	 * {@link #R_CAMELCASE_MATCH} as Camel Case search is already prefix and
-	 * case sensitive, </li>
+	 * case sensitive,</li>
 	 * </ul>
 	 * <br>
 	 * Rejected (ie. returned match rule -1) combinations are:
 	 * <ul>
-	 * <li>{@link #R_REGEXP_MATCH} with any other match mode bit set, </li>
-	 * <li>{@link #R_REGEXP_MATCH} with wrong regular expression pattern given, </li>
+	 * <li>{@link #R_REGEXP_MATCH} with any other match mode bit set,</li>
+	 * <li>{@link #R_REGEXP_MATCH} with wrong regular expression pattern given,</li>
 	 * </ul>
 	 * 
 	 * @param stringPattern

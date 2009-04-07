@@ -12,7 +12,6 @@ package org.eclipse.dltk.internal.core.search;
 import org.eclipse.dltk.core.search.BasicSearchEngine;
 import org.eclipse.dltk.core.search.MethodNameRequestor;
 import org.eclipse.dltk.core.search.TypeNameRequestor;
-import org.eclipse.dltk.internal.compiler.env.AccessRestriction;
 
 /**
  * Wrapper used to link {@link IRestrictedAccessTypeRequestor} with
@@ -24,17 +23,17 @@ import org.eclipse.dltk.internal.compiler.env.AccessRestriction;
  * .
  */
 public class MethodNameRequestorWrapper implements
-		IRestrictedAccessTypeRequestor {
+		IRestrictedAccessMethodRequestor {
 	MethodNameRequestor requestor;
 
 	public MethodNameRequestorWrapper(MethodNameRequestor requestor) {
 		this.requestor = requestor;
 	}
 
-	public void acceptType(int modifiers, char[] packageName,
-			char[] simpleTypeName, char[][] enclosingTypeNames, String path,
-			AccessRestriction access) {
-		this.requestor.acceptMethod(modifiers, packageName, simpleTypeName,
-				path);
+	public void acceptMethod(int modifiers, char[] packageName,
+			char[] simpleMethodName, char[][] enclosingTypeNames,
+			char[][] parameterNames, String path) {
+		this.requestor.acceptMethod(modifiers, packageName, simpleMethodName,
+				enclosingTypeNames, parameterNames, path);
 	}
 }

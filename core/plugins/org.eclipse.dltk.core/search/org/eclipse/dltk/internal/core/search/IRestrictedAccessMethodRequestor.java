@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.search;
 
+
 /**
  * A <code>IRestrictedAccessTypeRequestor</code> collects search results from a
  * <code>searchAllTypeNames</code> query to a <code>SearchBasicEngine</code>
@@ -16,6 +17,8 @@ package org.eclipse.dltk.internal.core.search;
  */
 public interface IRestrictedAccessMethodRequestor {
 
-	public void acceptMethod(char[] simpleMethodName, String path);
+	public void acceptMethod(int modifiers, char[] packageName,
+			char[] simpleMethodName, char[][] enclosingTypeNames,
+			char[][] parameterNames, String path);
 
 }

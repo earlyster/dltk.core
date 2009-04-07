@@ -188,7 +188,8 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	 * @see ISourceElementRequestor#enterMethod(MethodInfo)
 	 */
 	public void enterMethod(MethodInfo methodInfo) {
-		this.indexer.addMethodDeclaration(methodInfo.name,
+		this.indexer.addMethodDeclaration(methodInfo.modifiers, this.pkgName,
+				this.enclosingTypeNames(), methodInfo.name,
 				methodInfo.parameterNames, methodInfo.exceptionTypes);
 		this.methodDepth++;
 	}

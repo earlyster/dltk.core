@@ -21,19 +21,39 @@ import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 public class MethodDeclarationPattern extends DLTKSearchPattern implements
 		IIndexConstants {
 	public char[] simpleName;
+	public char[] pkg;
+	public char[][] enclosingTypeNames;
+	// set to CLASS_SUFFIX for only matching classes
+	// set to INTERFACE_SUFFIX for only matching interfaces
+	// set to ENUM_SUFFIX for only matching enums
+	// set to ANNOTATION_TYPE_SUFFIX for only matching annotation types
+	// set to TYPE_SUFFIX for matching both classes and interfaces
+	public char typeSuffix;
+	public int modifiers;
+	public boolean secondary = false;
+	public char[][] parameterNames;
 	protected static char[][] CATEGORIES = { METHOD_DECL };
 
 	/*
-	 * Create index key for type declaration pattern: key = typeName /
+	 * Create index key for method declaration pattern: key = methodName /
 	 * packageName / enclosingTypeName / modifiers or for secondary types key =
 	 * typeName / packageName / enclosingTypeName / modifiers / 'S'
 	 */
-	public static char[] createIndexKey(int modifiers, char[] typeName,
-			char[] packageName, char[][] enclosingTypeNames) { // ,
-		// char
-		// typeSuffix)
-		// {
-		int typeNameLength = typeName == null ? 0 : typeName.length;
+	public static char[] createIndexKey(int modifiers, char[] methodName,
+			String[] parameterNames, char[] packageName,
+			char[][] enclosingTypeNames) {
+
+		int typeNameLength = methodName == null ? 0 : methodName.length;
+
+		int parameterNamesLength = 0;
+		if (parameterNames != null) {
+			for (int i = 0, length = parameterNames.length; i < length;) {
+				parameterNamesLength += parameterNames[i].length();
+				if (++i < length)
+					parameterNamesLength++; // for the '.' separator
+			}
+		}
+
 		int packageLength = packageName == null ? 0 : packageName.length;
 		int enclosingNamesLength = 0;
 		if (enclosingTypeNames != null) {
@@ -43,14 +63,25 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 					enclosingNamesLength++; // for the '.' separator
 			}
 		}
-		int resultLength = typeNameLength + packageLength
-				+ enclosingNamesLength + 5;
+		int resultLength = typeNameLength + parameterNamesLength
+				+ packageLength + enclosingNamesLength + 6;
 
 		char[] result = new char[resultLength];
 		int pos = 0;
 		if (typeNameLength > 0) {
-			System.arraycopy(typeName, 0, result, pos, typeNameLength);
+			System.arraycopy(methodName, 0, result, pos, typeNameLength);
 			pos += typeNameLength;
+		}
+		result[pos++] = SEPARATOR;
+		if (parameterNames != null && parameterNamesLength > 0) {
+			for (int i = 0, length = parameterNames.length; i < length;) {
+				char[] parameterName = parameterNames[i].toCharArray();
+				int itsLength = parameterName.length;
+				System.arraycopy(parameterName, 0, result, pos, itsLength);
+				pos += itsLength;
+				if (++i < length)
+					result[pos++] = ',';
+			}
 		}
 		result[pos++] = SEPARATOR;
 		if (packageLength > 0) {
@@ -81,21 +112,72 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 				: CharOperation.toLowerCase(simpleName);
 	}
 
+	public MethodDeclarationPattern(char[][] enclosingTypeNames,
+			char[] simpleName, int matchRule, IDLTKLanguageToolkit toolkit) {
+		this(simpleName, matchRule, toolkit);
+		this.enclosingTypeNames = enclosingTypeNames;
+	}
+
 	MethodDeclarationPattern(int matchRule, IDLTKLanguageToolkit toolkit) {
-		super(TYPE_DECL_PATTERN, matchRule, toolkit);
+		super(METHOD_DECL_PATTERN, matchRule, toolkit);
 	}
 
 	/*
-	 * Type entries are encoded as: simpleTypeName / packageName /
+	 * Method entries are encoded as: simlpleMethodName / packageName /
 	 * enclosingTypeName / modifiers e.g. Object/java.lang//0 e.g.
 	 * Cloneable/java.lang//512 e.g. LazyValue/javax.swing/UIDefaults/0 or for
-	 * secondary types as: simpleTypeName / packageName / enclosingTypeName /
+	 * secondary types as: simlpleMethodName / packageName / enclosingTypeName /
 	 * modifiers / S
 	 */
 	public void decodeIndexKey(char[] key) {
 		int slash = CharOperation.indexOf(SEPARATOR, key, 0);
 		this.simpleName = CharOperation.subarray(key, 0, slash);
-		//int start = ++slash;
+		int start = ++slash;
+
+		// read parameter names:
+		if (key[start] == SEPARATOR) {
+			this.parameterNames = CharOperation.NO_CHAR_CHAR;
+		} else {
+			slash = CharOperation.indexOf(SEPARATOR, key, start);
+			this.parameterNames = CharOperation.splitOn(',', key, start, slash);
+		}
+		start = ++slash;
+
+		if (key[start] == SEPARATOR) {
+			this.pkg = CharOperation.NO_CHAR;
+		} else {
+			slash = CharOperation.indexOf(SEPARATOR, key, start);
+			this.pkg = internedPackageNames.add(CharOperation.subarray(key,
+					start, slash));
+		}
+		// Continue key read by the end to decode modifiers
+		int last = key.length - 1;
+		this.secondary = key[last] == 'S';
+		if (this.secondary) {
+			last -= 2;
+		}
+		if (last > 0)
+			this.modifiers = key[last - 1] + (key[last] << 16);
+		else
+			this.modifiers = 0;
+		decodeModifiers();
+		// Retrieve enclosing type names
+		start = slash + 1;
+		last -= 2; // position of ending slash
+		if (start == last) {
+			this.enclosingTypeNames = CharOperation.NO_CHAR_CHAR;
+		} else {
+			if (last == (start + 1) && key[start] == ZERO_CHAR) {
+				this.enclosingTypeNames = ONE_ZERO_CHAR;
+			} else {
+				this.enclosingTypeNames = CharOperation.splitOn('$', key,
+						start, last);
+			}
+		}
+	}
+
+	protected void decodeModifiers() {
+		this.typeSuffix = TYPE_SUFFIX;
 	}
 
 	public SearchPattern getBlankPattern() {
@@ -111,6 +193,16 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 		MethodDeclarationPattern pattern = (MethodDeclarationPattern) decodedPattern;
 		if (!matchesName(this.simpleName, pattern.simpleName))
 			return false;
+
+		if (enclosingTypeNames != null) {
+			if (pattern.enclosingTypeNames == null
+					|| pattern.enclosingTypeNames.length == 0
+					|| !matchesName(
+							enclosingTypeNames[enclosingTypeNames.length - 1],
+							pattern.enclosingTypeNames[pattern.enclosingTypeNames.length - 1])) {
+				return false;
+			}
+		}
 		return true;
 	}
 
@@ -130,15 +222,15 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 			break;
 		case R_PATTERN_MATCH:
 			if (this.simpleName[this.simpleName.length - 1] != '*') {
-				key = CharOperation.concat(this.simpleName, ONE_STAR,
-						SEPARATOR);
+				key = CharOperation
+						.concat(this.simpleName, ONE_STAR, SEPARATOR);
 			}
 			break;
 		case R_REGEXP_MATCH:
 			// TODO (frederic) implement regular expression match
 			break;
 		}
-		return index.query(getIndexCategories(), key, matchRule); 
+		return index.query(getIndexCategories(), key, matchRule);
 		// match rule is irrelevant when the key is null
 	}
 

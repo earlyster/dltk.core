@@ -16,9 +16,8 @@ import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.SearchPattern;
 
-
 public class DLTKSearchPattern extends SearchPattern {
-	
+
 	/*
 	 * Whether this pattern is case sensitive.
 	 */
@@ -32,39 +31,95 @@ public class DLTKSearchPattern extends SearchPattern {
 	/**
 	 * One of following pattern value:
 	 * <ul>
-	 * 	<li>{@link #R_EXACT_MATCH}</li>
-	 *		<li>{@link #R_PREFIX_MATCH}</li>
-	 *		<li>{@link #R_PATTERN_MATCH}</li>
-	 *		<li>{@link #R_REGEXP_MATCH}</li>
-	 *		<li>{@link #R_CAMELCASE_MATCH}</li>
+	 * <li>{@link #R_EXACT_MATCH}</li>
+	 * <li>{@link #R_PREFIX_MATCH}</li>
+	 * <li>{@link #R_PATTERN_MATCH}</li>
+	 * <li>{@link #R_REGEXP_MATCH}</li>
+	 * <li>{@link #R_CAMELCASE_MATCH}</li>
 	 * </ul>
 	 */
 	int matchMode;
 
 	/**
-	 * One of {@link #R_ERASURE_MATCH}, {@link #R_EQUIVALENT_MATCH}, {@link #R_FULL_MATCH}.
+	 * One of {@link #R_ERASURE_MATCH}, {@link #R_EQUIVALENT_MATCH},
+	 * {@link #R_FULL_MATCH}.
 	 */
 	int matchCompatibility;
 
 	/**
 	 * Mask used on match rule for match mode.
 	 */
-	public static final int MATCH_MODE_MASK = R_EXACT_MATCH | R_PREFIX_MATCH | R_PATTERN_MATCH | R_REGEXP_MATCH;
+	public static final int MATCH_MODE_MASK = R_EXACT_MATCH | R_PREFIX_MATCH
+			| R_PATTERN_MATCH | R_REGEXP_MATCH;
 
 	/**
 	 * Mask used on match rule for generic relevance.
 	 */
-	public static final int MATCH_COMPATIBILITY_MASK = R_ERASURE_MATCH | R_EQUIVALENT_MATCH | R_FULL_MATCH;
-
+	public static final int MATCH_COMPATIBILITY_MASK = R_ERASURE_MATCH
+			| R_EQUIVALENT_MATCH | R_FULL_MATCH;
 
 	private char[][][] typeArguments;
 	private int flags = 0;
 	static final int HAS_TYPE_ARGUMENTS = 1;
 
-	protected DLTKSearchPattern(int patternKind, int matchRule, IDLTKLanguageToolkit toolkit) {
+	// want to save space by interning the package names for each match
+	static PackageNameSet internedPackageNames = new PackageNameSet(1001);
+
+	static class PackageNameSet {
+		public char[][] names;
+		public int elementSize; // number of elements in the table
+		public int threshold;
+
+		PackageNameSet(int size) {
+			this.elementSize = 0;
+			this.threshold = size; // size represents the expected number of
+			// elements
+			int extraRoom = (int) (size * 1.5f);
+			if (this.threshold == extraRoom)
+				extraRoom++;
+			this.names = new char[extraRoom][];
+		}
+
+		char[] add(char[] name) {
+			int length = names.length;
+			int index = CharOperation.hashCode(name) % length;
+			char[] current;
+			while ((current = names[index]) != null) {
+				if (CharOperation.equals(current, name))
+					return current;
+				if (++index == length)
+					index = 0;
+			}
+			names[index] = name;
+			// assumes the threshold is never equal to the size of the table
+			if (++elementSize > threshold)
+				rehash();
+			return name;
+		}
+
+		void rehash() {
+			PackageNameSet newSet = new PackageNameSet(elementSize * 2); // double
+			// the
+			// number
+			// of
+			// expected
+			// elements
+			char[] current;
+			for (int i = names.length; --i >= 0;)
+				if ((current = names[i]) != null)
+					newSet.add(current);
+			this.names = newSet.names;
+			this.elementSize = newSet.elementSize;
+			this.threshold = newSet.threshold;
+		}
+	}
+
+	protected DLTKSearchPattern(int patternKind, int matchRule,
+			IDLTKLanguageToolkit toolkit) {
 		super(matchRule, toolkit);
-		((InternalSearchPattern)this).kind = patternKind;
-		// Use getMatchRule() instead of matchRule as super constructor may modify its value
+		((InternalSearchPattern) this).kind = patternKind;
+		// Use getMatchRule() instead of matchRule as super constructor may
+		// modify its value
 		// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=81377
 		int rule = getMatchRule();
 		this.isCaseSensitive = (rule & R_CASE_SENSITIVE) != 0;
@@ -72,7 +127,7 @@ public class DLTKSearchPattern extends SearchPattern {
 		this.matchCompatibility = rule & MATCH_COMPATIBILITY_MASK;
 		this.matchMode = rule & MATCH_MODE_MASK;
 	}
-	
+
 	public SearchPattern getBlankPattern() {
 		return null;
 	}
@@ -85,7 +140,7 @@ public class DLTKSearchPattern extends SearchPattern {
 		return this.isCamelCase;
 	}
 
-	boolean isCaseSensitive () {
+	boolean isCaseSensitive() {
 		return this.isCaseSensitive;
 	}
 
@@ -98,15 +153,17 @@ public class DLTKSearchPattern extends SearchPattern {
 	}
 
 	/*
-	 * Extract method arguments using unique key for parameterized methods
-	 * and type parameters for non-generic ones.
+	 * Extract method arguments using unique key for parameterized methods and
+	 * type parameters for non-generic ones.
 	 */
 	char[][] extractMethodArguments(IMethod method) {
-		if (method == null) return null;
+		if (method == null)
+			return null;
 		if (DLTKCore.DEBUG) {
-			System.err.println("TODO: Search: Add correct code here if needed."); //$NON-NLS-1$
+			System.err
+					.println("TODO: Search: Add correct code here if needed."); //$NON-NLS-1$
 		}
-		String[] argumentsSignatures = null;		
+		String[] argumentsSignatures = null;
 		try {
 			argumentsSignatures = method.getParameters();
 		} catch (ModelException e) {
@@ -119,9 +176,10 @@ public class DLTKSearchPattern extends SearchPattern {
 			int length = argumentsSignatures.length;
 			if (length > 0) {
 				char[][] methodArguments = new char[length][];
-				for (int i=0; i<length; i++) {
+				for (int i = 0; i < length; i++) {
 					methodArguments[i] = argumentsSignatures[i].toCharArray();
-					CharOperation.replace(methodArguments[i], new char[] { '$', '/' }, '.');
+					CharOperation.replace(methodArguments[i], new char[] { '$',
+							'/' }, '.');
 				}
 				return methodArguments;
 			}
@@ -130,10 +188,12 @@ public class DLTKSearchPattern extends SearchPattern {
 	}
 
 	/**
-	 * Returns whether the pattern has signatures or not.
-	 * If pattern {@link #typeArguments} field, this field shows that it was built
-	 * on a generic source type.
-	 * @return true if {@link #typeSignatures} field is not null and has a length greater than 0.
+	 * Returns whether the pattern has signatures or not. If pattern
+	 * {@link #typeArguments} field, this field shows that it was built on a
+	 * generic source type.
+	 * 
+	 * @return true if {@link #typeSignatures} field is not null and has a
+	 *         length greater than 0.
 	 */
 	public final boolean hasSignatures() {
 		return false;
@@ -141,6 +201,7 @@ public class DLTKSearchPattern extends SearchPattern {
 
 	/**
 	 * Returns whether the pattern includes type arguments information or not.
+	 * 
 	 * @return default is false
 	 */
 	public final boolean hasTypeArguments() {
@@ -149,32 +210,33 @@ public class DLTKSearchPattern extends SearchPattern {
 
 	/**
 	 * Returns whether the pattern includes type parameters information or not.
+	 * 
 	 * @return true if {@link #typeArguments} contains type parameters instead
-	 * 	type arguments signatures.
+	 *         type arguments signatures.
 	 */
 	public final boolean hasTypeParameters() {
 		return !hasSignatures() && hasTypeArguments();
 	}
-	
+
 	protected StringBuffer print(StringBuffer output) {
 		output.append(", "); //$NON-NLS-1$
-		
+
 		if (this.isCamelCase) {
 			output.append("camel case + "); //$NON-NLS-1$
 		}
-		switch(getMatchMode()) {
-			case R_EXACT_MATCH : 
-				output.append("exact match,"); //$NON-NLS-1$
-				break;
-			case R_PREFIX_MATCH :
-				output.append("prefix match,"); //$NON-NLS-1$
-				break;
-			case R_PATTERN_MATCH :
-				output.append("pattern match,"); //$NON-NLS-1$
-				break;
-			case R_REGEXP_MATCH :
-				output.append("regexp match, "); //$NON-NLS-1$
-				break;
+		switch (getMatchMode()) {
+		case R_EXACT_MATCH:
+			output.append("exact match,"); //$NON-NLS-1$
+			break;
+		case R_PREFIX_MATCH:
+			output.append("prefix match,"); //$NON-NLS-1$
+			break;
+		case R_PATTERN_MATCH:
+			output.append("pattern match,"); //$NON-NLS-1$
+			break;
+		case R_REGEXP_MATCH:
+			output.append("regexp match, "); //$NON-NLS-1$
+			break;
 		}
 		if (isCaseSensitive())
 			output.append(" case sensitive"); //$NON-NLS-1$
@@ -189,17 +251,16 @@ public class DLTKSearchPattern extends SearchPattern {
 		return output;
 	}
 
-
 	/*
-	 * Extract and store type signatures and arguments using unique key for parameterized types
-	 * and type parameters for non-generic ones
+	 * Extract and store type signatures and arguments using unique key for
+	 * parameterized types and type parameters for non-generic ones
 	 */
-//	void storeTypeSignaturesAndArguments(IType type) {	
-//		if (DLTKCore.DEBUG) {
-//			System.err.println("TODO: Add DLTKSearchPatter implementation of storeTypeSignatureAndArguments.");
-//		}
-//		//setTypeArguments(Util.getAllTypeArguments(this.typeSignatures));
-//	}
+	// void storeTypeSignaturesAndArguments(IType type) {
+	// if (DLTKCore.DEBUG) {
+	// System.err.println("TODO: Add DLTKSearchPatter implementation of storeTypeSignatureAndArguments.");
+	// }
+	// //setTypeArguments(Util.getAllTypeArguments(this.typeSignatures));
+	// }
 	public final String toString() {
 		return print(new StringBuffer(30)).toString();
 	}

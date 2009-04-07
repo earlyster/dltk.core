@@ -12,7 +12,14 @@ package org.eclipse.dltk.internal.core.search;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.core.*;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IMethod;
+import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.BasicSearchEngine;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.MethodNameMatchRequestor;
@@ -61,14 +68,10 @@ public class MethodNameMatchRequestorWrapper implements
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.eclipse.jdt.internal.core.search.IRestrictedAccessTypeRequestor#
-	 * acceptType(int, char[], char[], char[][], java.lang.String,
-	 * org.eclipse.jdt.internal.compiler.env.AccessRestriction)
-	 */
-	public void acceptMethod(char[] simpleMethodName, String path) {
+	public void acceptMethod(int modifiers, char[] packageName,
+			char[] simpleMethodName, char[][] enclosingTypeNames,
+			char[][] parameterNames, String path) {
+
 		try {
 			IMethod method = null;
 			if (this.handleFactory != null) {

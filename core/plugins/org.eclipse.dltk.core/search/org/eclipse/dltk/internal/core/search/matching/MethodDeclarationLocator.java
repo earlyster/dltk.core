@@ -9,10 +9,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.search.matching;
 
+import java.util.List;
+
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.ast.expressions.CallExpression;
-import org.eclipse.dltk.ast.expressions.MethodCallExpression;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -23,14 +24,12 @@ import org.eclipse.dltk.core.search.SearchMatch;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.core.search.matching.PatternLocator;
 
-public class MethodLocator extends PatternLocator {
-	protected MethodPattern pattern;
-	protected boolean isDeclarationOfReferencedMethodsPattern;
+public class MethodDeclarationLocator extends PatternLocator {
+	protected MethodDeclarationPattern pattern;
 
-	public MethodLocator(MethodPattern pattern) {
+	public MethodDeclarationLocator(MethodDeclarationPattern pattern) {
 		super(pattern);
 		this.pattern = pattern;
-		this.isDeclarationOfReferencedMethodsPattern = this.pattern instanceof DeclarationOfReferencedMethodsPattern;
 	}
 
 	/*
@@ -43,18 +42,32 @@ public class MethodLocator extends PatternLocator {
 	}
 
 	public int match(MethodDeclaration node, MatchingNodeSet nodeSet) {
-		// this locator matches only references
-		return IMPOSSIBLE_MATCH;
+		// Verify method name
+		if (!matchesName(this.pattern.simpleName, node.getName().toCharArray()))
+			return IMPOSSIBLE_MATCH;
+
+		// Verify parameters types
+		List arguments = node.getArguments();
+		if (this.pattern.parameterNames != null) {
+			int length = this.pattern.parameterNames.length;
+			int argsLength = arguments == null ? 0 : arguments.size();
+			if (length != argsLength)
+				return IMPOSSIBLE_MATCH;
+		}
+
+		// check type names
+		String declaringType = node.getDeclaringTypeName();
+		if (checkTypeName(declaringType)) {
+			return INACCURATE_MATCH;
+		}
+
+		// Method declaration may match pattern
+		return nodeSet.addMatch(node, ACCURATE_MATCH);
 	}
 
 	// public int match(TypeDeclaration node, MatchingNodeSet nodeSet) - SKIP IT
 	// public int match(TypeReference node, MatchingNodeSet nodeSet) - SKIP IT
 	public int matchContainer() {
-		if (this.pattern.findReferences) {
-			// need to look almost everywhere to find in javadocs and static
-			// import
-			return ALL_CONTAINER;
-		}
 		return COMPILATION_UNIT_CONTAINER | CLASS_CONTAINER | METHOD_CONTAINER;
 	}
 
@@ -72,24 +85,7 @@ public class MethodLocator extends PatternLocator {
 	}
 
 	public int match(CallExpression node, MatchingNodeSet nodeSet) {
-		if (!this.pattern.findReferences)
-			return IMPOSSIBLE_MATCH;
-
-		if (this.pattern.selector == null)
-			return nodeSet.addMatch(node, POSSIBLE_MATCH);
-
-		if (this.pattern.declaringSimpleName != null
-				&& node instanceof MethodCallExpression) {
-			MethodCallExpression mce = (MethodCallExpression) node;
-			String declaringType = mce.getDeclaringTypeName();
-			if (checkTypeName(declaringType)) {
-				return INACCURATE_MATCH;
-			}
-		}
-
-		if (matchesName(this.pattern.selector, node.getName().toCharArray()))
-			return nodeSet.addMatch(node, ACCURATE_MATCH);
-
+		// this locator matches only declarations
 		return IMPOSSIBLE_MATCH;
 	}
 
@@ -100,14 +96,20 @@ public class MethodLocator extends PatternLocator {
 		ISearchPatternProcessor processor = factory
 				.createSearchPatternProcessor();
 		if (processor != null) {
-			if (this.pattern.declaringSimpleName != null) {
+			if (this.pattern.enclosingTypeNames != null
+					&& this.pattern.enclosingTypeNames.length > 0) {
 				char[] delimeter = processor.getDelimiterReplacementString()
 						.toCharArray();
-				char[] typeName = CharOperation.concatWithSeparator(
-						this.pattern.declaringQualificationName,
-						this.pattern.declaringSimpleName, delimeter);
-				typeName = CharOperation.replace(typeName, new char[] { '$' },
-						delimeter);
+
+				char[] typeName = this.pattern.enclosingTypeNames[0];
+				if (typeName == null) {
+					return false;
+				}
+				for (int i = 1; i < this.pattern.enclosingTypeNames.length; ++i) {
+					typeName = CharOperation.concatWithSeparator(typeName,
+							this.pattern.enclosingTypeNames[i], delimeter);
+				}
+
 				if (declaringType != null) {
 					char[] declaringTypeName = declaringType.toCharArray();
 					if (!matchesName(typeName, declaringTypeName)) {

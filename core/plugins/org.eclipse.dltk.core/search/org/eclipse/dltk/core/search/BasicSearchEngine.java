@@ -1045,7 +1045,9 @@ public class BasicSearchEngine {
 								typeMatchRule, kind, /* packageDeclaration, */
 								simpleName)) {
 							nameRequestor.acceptType(type.getFlags(),
-									CharOperation.NO_CHAR, /* packageDeclaration, */
+									CharOperation.NO_CHAR, /*
+															 * packageDeclaration,
+															 */
 									simpleName, enclosingTypeNames, path, null);
 						}
 					}
@@ -1629,7 +1631,9 @@ public class BasicSearchEngine {
 					break;
 				}
 
-				nameRequestor.acceptMethod(record.simpleName, documentPath);
+				nameRequestor.acceptMethod(record.modifiers, record.pkg,
+						record.simpleName, record.enclosingTypeNames,
+						record.parameterNames, documentPath);
 				return true;
 			}
 		};

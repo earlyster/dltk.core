@@ -13,6 +13,7 @@ import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.internal.core.search.matching.FieldPattern;
+import org.eclipse.dltk.internal.core.search.matching.MethodDeclarationPattern;
 import org.eclipse.dltk.internal.core.search.matching.MethodPattern;
 import org.eclipse.dltk.internal.core.search.matching.SuperTypeReferencePattern;
 import org.eclipse.dltk.internal.core.search.matching.TypeDeclarationPattern;
@@ -98,11 +99,13 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		this.document.addIndexEntry(category, key);
 	}
 
-	public void addMethodDeclaration(String methodName,
+	public void addMethodDeclaration(int modifiers, char[] packageName,
+			char[][] enclosingTypeNames, String methodName,
 			String[] parameterNames, String[] exceptionTypes) {
-		int argCount = parameterNames == null ? 0 : parameterNames.length;
-		addIndexEntry(METHOD_DECL, MethodPattern.createIndexKey(methodName
-				.toCharArray(), argCount));
+
+		addIndexEntry(METHOD_DECL, MethodDeclarationPattern.createIndexKey(
+				modifiers, methodName.toCharArray(), parameterNames,
+				packageName, enclosingTypeNames));
 
 		// if (parameterNames != null) {
 		// for (int i = 0; i < argCount; i++)

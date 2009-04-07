@@ -32,57 +32,6 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 	public int modifiers;
 	public boolean secondary = false;
 	protected static char[][] CATEGORIES = { TYPE_DECL };
-	// want to save space by interning the package names for each match
-	static PackageNameSet internedPackageNames = new PackageNameSet(1001);
-
-	static class PackageNameSet {
-		public char[][] names;
-		public int elementSize; // number of elements in the table
-		public int threshold;
-
-		PackageNameSet(int size) {
-			this.elementSize = 0;
-			this.threshold = size; // size represents the expected number of
-			// elements
-			int extraRoom = (int) (size * 1.5f);
-			if (this.threshold == extraRoom)
-				extraRoom++;
-			this.names = new char[extraRoom][];
-		}
-
-		char[] add(char[] name) {
-			int length = names.length;
-			int index = CharOperation.hashCode(name) % length;
-			char[] current;
-			while ((current = names[index]) != null) {
-				if (CharOperation.equals(current, name))
-					return current;
-				if (++index == length)
-					index = 0;
-			}
-			names[index] = name;
-			// assumes the threshold is never equal to the size of the table
-			if (++elementSize > threshold)
-				rehash();
-			return name;
-		}
-
-		void rehash() {
-			PackageNameSet newSet = new PackageNameSet(elementSize * 2); // double
-			// the
-			// number
-			// of
-			// expected
-			// elements
-			char[] current;
-			for (int i = names.length; --i >= 0;)
-				if ((current = names[i]) != null)
-					newSet.add(current);
-			this.names = newSet.names;
-			this.elementSize = newSet.elementSize;
-			this.threshold = newSet.threshold;
-		}
-	}
 
 	/*
 	 * Create index key for type declaration pattern: key = typeName /
@@ -136,7 +85,8 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 	}
 
 	public TypeDeclarationPattern(char[] pkg, char[][] enclosingTypeNames,
-			char[] simpleName, char typeSuffix, int matchRule, IDLTKLanguageToolkit toolkit) {
+			char[] simpleName, char typeSuffix, int matchRule,
+			IDLTKLanguageToolkit toolkit) {
 		this(matchRule, toolkit);
 		this.pkg = isCaseSensitive() ? pkg : CharOperation.toLowerCase(pkg);
 		if (isCaseSensitive() || enclosingTypeNames == null) {
@@ -206,7 +156,8 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 	}
 
 	public SearchPattern getBlankPattern() {
-		return new TypeDeclarationPattern(R_EXACT_MATCH | R_CASE_SENSITIVE, getToolkit());
+		return new TypeDeclarationPattern(R_EXACT_MATCH | R_CASE_SENSITIVE,
+				getToolkit());
 	}
 
 	public char[][] getIndexCategories() {

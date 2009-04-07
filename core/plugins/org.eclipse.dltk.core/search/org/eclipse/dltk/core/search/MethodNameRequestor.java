@@ -46,6 +46,8 @@ public abstract class MethodNameRequestor {
 	 *            the type (for example, if the class is x.y.A$B$C then the
 	 *            enclosing types are [A, B]. This is an empty array if the type
 	 *            is a top-level type.
+	 * @param parameterNames
+	 *            Method parameter names.
 	 * @param path
 	 *            the full path to the resource containing the type. If the
 	 *            resource is a .class file or a source file, this is the full
@@ -60,7 +62,8 @@ public abstract class MethodNameRequestor {
 	 *            the archive.
 	 */
 	public void acceptMethod(int modifiers, char[] packageName,
-			char[] simpleMethodName, String path) {
+			char[] simpleMethodName, char[][] enclosingTypeNames,
+			char[][] parameterNames, String path) {
 		// do nothing
 	}
 }
