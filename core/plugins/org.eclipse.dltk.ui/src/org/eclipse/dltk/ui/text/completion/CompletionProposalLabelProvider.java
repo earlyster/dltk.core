@@ -184,12 +184,12 @@ public class CompletionProposalLabelProvider {
 		return createTypeProposalLabel(fullName);
 	}
 
-	String createScriptdocSimpleProposalLabel(CompletionProposal proposal) {
+	protected String createScriptdocSimpleProposalLabel(CompletionProposal proposal) {
 		// TODO get rid of this
 		return createSimpleLabel(proposal);
 	}
 
-	String createTypeProposalLabel(char[] fullName) {
+	protected String createTypeProposalLabel(char[] fullName) {
 		int qIndex = findSimpleNameStart(fullName);
 
 		StringBuffer buf = new StringBuffer();
@@ -214,11 +214,11 @@ public class CompletionProposalLabelProvider {
 		return lastDot;
 	}
 
-	String createSimpleLabelWithType(CompletionProposal proposal) {
+	protected String createSimpleLabelWithType(CompletionProposal proposal) {
 		return new String(proposal.getName());
 	}
 
-	String createLabelWithTypeAndDeclaration(CompletionProposal proposal) {
+	protected String createLabelWithTypeAndDeclaration(CompletionProposal proposal) {
 		return new String(proposal.getName());
 	}
 
