@@ -75,6 +75,8 @@ import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
 import org.eclipse.dltk.ui.formatter.ScriptFormattingContextProperties;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
+import org.eclipse.dltk.ui.text.folding.AbstractASTFoldingStructureProvider;
+import org.eclipse.dltk.ui.text.folding.IElementCommentResolver;
 import org.eclipse.dltk.ui.text.folding.IFoldingStructureProvider;
 import org.eclipse.dltk.ui.text.folding.IFoldingStructureProviderExtension;
 import org.eclipse.jface.action.Action;
@@ -1686,6 +1688,15 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			return fProjectionModelUpdater;
 		if (required == IFoldingStructureProviderExtension.class)
 			return fProjectionModelUpdater;
+		if (required == IElementCommentResolver.class) {
+			// used by dltk.mylyn integration
+			// FIXME do not reference AbstractASTFoldingStructureProvider
+			if (fProjectionModelUpdater instanceof AbstractASTFoldingStructureProvider) {
+				return ((AbstractASTFoldingStructureProvider) fProjectionModelUpdater)
+						.getElementCommentResolver();
+			}
+			return null;
+		}
 
 		if (fProjectionSupport != null) {
 			Object adapter = fProjectionSupport.getAdapter(getSourceViewer(),
