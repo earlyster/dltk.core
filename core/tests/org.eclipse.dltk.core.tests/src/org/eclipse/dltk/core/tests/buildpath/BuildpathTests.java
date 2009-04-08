@@ -203,7 +203,7 @@ public class BuildpathTests extends ModifyingResourceTests {
 		IProjectFragment fr1 = (IProjectFragment) children[1];
 
 		children = fr0.getChildren();
-		assertEquals(1, children.length);
+		assertEquals(2, children.length);
 		assertTrue(children[0] instanceof IScriptFolder);
 		IModelElement[] folderChildren = ((IScriptFolder) children[0])
 				.getChildren();
@@ -216,7 +216,7 @@ public class BuildpathTests extends ModifyingResourceTests {
 		assertTrue(folderChildren[1] instanceof ISourceModule);
 
 		children = fr1.getChildren();
-		assertEquals(1, children.length);
+		assertEquals(2, children.length);
 		assertTrue(children[0] instanceof IScriptFolder);
 		folderChildren = ((IScriptFolder) children[0]).getChildren();
 		assertEquals(1, folderChildren.length);
