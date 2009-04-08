@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
@@ -21,8 +22,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IModelProvider;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
@@ -174,9 +179,22 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 						rootFolder, inclusionPatterns, exclusionPatterns),
 						Path.EMPTY, vChildren, inclusionPatterns,
 						exclusionPatterns);
-				IModelElement[] children = new IModelElement[vChildren.size()];
-				vChildren.toArray(children);
-				info.setChildren(children);
+				// IModelElement[] children = new
+				// IModelElement[vChildren.size()];
+				// vChildren.toArray(children);
+				List childrenSet = vChildren;
+				// Call for extra model providers
+				IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+						.getLanguageToolkit(this);
+				IModelProvider[] providers = ModelProviderManager
+						.getProviders(toolkit.getNatureId());
+				if (providers != null) {
+					for (int i = 0; i < providers.length; i++) {
+						providers[i].buildStructure(this, childrenSet);
+					}
+				}
+				info.setChildren((IModelElement[]) childrenSet
+						.toArray(new IModelElement[childrenSet.size()]));
 			}
 		} catch (ModelException e) {
 			// problem resolving children; structure remains unknown
@@ -250,6 +268,41 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 	}
 
 	public IScriptFolder getScriptFolder(IPath path) {
+		// We need to check for element providers and if provider are declared
+		// we need to build structure to return correct handle here.
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(this);
+		if (toolkit != null) {
+			IModelProvider[] providers = ModelProviderManager
+					.getProviders(toolkit.getNatureId());
+			if (providers != null) {
+				boolean provides = false;
+				for (int i = 0; i < providers.length; i++) {
+					if (providers[i].providesFor(this, path)) {
+						provides = true;
+						break;
+					}
+				}
+				if (provides) {
+					try {
+						IModelElement[] children = getChildren();
+						IPath fullPath = getPath().append(path);
+						for (int i = 0; i < children.length; i++) {
+							IModelElement child = children[i];
+							if (child instanceof IScriptFolder) {
+								IPath childPath = child.getPath();
+								if (fullPath.equals(childPath)) {
+									return (IScriptFolder) child;
+								}
+							}
+						}
+					} catch (ModelException e) {
+						DLTKCore.error(
+								"Could not obtain model element childrens.", e);
+					}
+				}
+			}
+		}
 		return new ScriptFolder(this, path);
 	}
 
@@ -267,7 +320,7 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 	public boolean isExternal() {
 		return false;
 	}
-	
+
 	/*
 	 * @see org.eclipse.dltk.core.IProjectFragment#isBuiltin()
 	 */
@@ -435,6 +488,9 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 			} else {
 				return pkg.getHandleFromMemento(token, memento, owner);
 			}
+		case JEM_USER_ELEMENT:
+			return MementoModelElementUtil.getHandleFromMememento(memento,
+					this, owner);
 		}
 		return null;
 	}

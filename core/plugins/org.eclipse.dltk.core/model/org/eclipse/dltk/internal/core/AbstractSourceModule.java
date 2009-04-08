@@ -1,7 +1,9 @@
 package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -19,6 +21,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IModelProvider;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IPackageDeclaration;
@@ -238,6 +241,9 @@ public abstract class AbstractSourceModule extends Openable implements
 			ModelElement fieldE = (ModelElement) getField(field);
 			return fieldE.getHandleFromMemento(memento, workingCopyOwner);
 		}
+		case JEM_USER_ELEMENT:
+			return MementoModelElementUtil.getHandleFromMememento(memento,
+					this, owner);
 		}
 
 		return null;
@@ -546,6 +552,20 @@ public abstract class AbstractSourceModule extends Openable implements
 				moduleInfo.timestamp = ((IFile) underlyingResource)
 						.getModificationStamp();
 			}
+			// We need to update children contents using model providers
+			List childrenSet = Arrays.asList(moduleInfo.getChildren());
+			// Call for extra model providers
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit(this);
+			IModelProvider[] providers = ModelProviderManager
+					.getProviders(toolkit.getNatureId());
+			if (providers != null) {
+				for (int i = 0; i < providers.length; i++) {
+					providers[i].buildStructure(this, childrenSet);
+				}
+			}
+			moduleInfo.setChildren((IModelElement[]) childrenSet
+					.toArray(new IModelElement[childrenSet.size()]));
 
 			return moduleInfo.isStructureKnown();
 		} catch (CoreException e) {

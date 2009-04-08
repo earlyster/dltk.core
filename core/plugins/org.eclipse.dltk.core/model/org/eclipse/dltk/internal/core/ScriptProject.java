@@ -19,10 +19,12 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -52,7 +54,9 @@ import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IModelElementMemento;
 import org.eclipse.dltk.core.IModelMarker;
+import org.eclipse.dltk.core.IModelProvider;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
@@ -639,9 +643,21 @@ public class ScriptProject extends Openable implements IScriptProject {
 		// since can create deadlocks (see bug 37274)
 		IBuildpathEntry[] resolvedBuildpath = getResolvedBuildpath();
 		// compute the project fragements
-		info
-				.setChildren(computeProjectFragments(resolvedBuildpath, false,
-						null));
+		IModelElement[] children = computeProjectFragments(resolvedBuildpath,
+				false, null);
+		List childrenSet = Arrays.asList(children);
+		// Call for extra model providers
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(this);
+		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
+				.getNatureId());
+		if (providers != null) {
+			for (int i = 0; i < providers.length; i++) {
+				providers[i].buildStructure(this, childrenSet);
+			}
+		}
+		info.setChildren((IModelElement[]) childrenSet
+				.toArray(new IModelElement[childrenSet.size()]));
 		// remember the timestamps of external libraries the first time they are
 		// looked up
 		getPerProjectInfo().rememberExternalLibTimestamps();
@@ -2756,7 +2772,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 			while (memento.hasMoreTokens()) {
 				token = memento.nextToken();
 				char firstChar = token.charAt(0);
-				if (firstChar != JEM_SCRIPTFOLDER && firstChar != JEM_COUNT) {
+				if (firstChar != JEM_SCRIPTFOLDER && firstChar != JEM_COUNT
+						&& firstChar != JEM_USER_ELEMENT) {
 					rootPath += token;
 				} else {
 					break;
@@ -2770,8 +2787,38 @@ public class ScriptProject extends Openable implements IScriptProject {
 			}
 			if (token != null && token.charAt(0) == JEM_SCRIPTFOLDER) {
 				return root.getHandleFromMemento(token, memento, owner);
+			} else if (token != null && token.charAt(0) == JEM_USER_ELEMENT) {
+				return root.getHandleFromMemento(token, memento, owner);
 			} else {
 				return root.getHandleFromMemento(memento, owner);
+			}
+		case JEM_USER_ELEMENT:
+			// We need to construct project children and return appropriate
+			// element from it.
+			token = null;
+			String name = "";
+			while (memento.hasMoreTokens()) {
+				token = memento.nextToken();
+				char firstChar = token.charAt(0);
+				if (ModelElement.JEM_USER_ELEMENT_ENDING.indexOf(firstChar) == -1
+						&& firstChar != JEM_COUNT) {
+					name += token;
+				} else {
+					break;
+				}
+			}
+			try {
+				IModelElement[] children = getChildren();
+				for (int i = 0; i < children.length; i++) {
+					if (name.equals(children[i].getElementName())
+							&& children[i] instanceof IModelElementMemento) {
+						IModelElementMemento childMemento = (IModelElementMemento) children[i];
+						return childMemento
+								.getHandleFromMemento(memento, owner);
+					}
+				}
+			} catch (ModelException e) {
+				DLTKCore.error("Incorrect handle resolving", e);
 			}
 		}
 		return null;

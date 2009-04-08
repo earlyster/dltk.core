@@ -46,8 +46,8 @@ public class Model extends Openable implements IScriptModel {
 	public static HashSet existingExternalFiles = new HashSet();
 
 	/**
-	 * A set of external files ({@link #existingExternalFiles}) which have
-	 * been confirmed as file (ie. which returns true to
+	 * A set of external files ({@link #existingExternalFiles}) which have been
+	 * confirmed as file (ie. which returns true to
 	 * {@link java.io.File#isFile()}. Note this cache is kept for the whole
 	 * session.
 	 */
@@ -82,7 +82,6 @@ public class Model extends Openable implements IScriptModel {
 		newElements.put(this, info);
 		return true;
 	}
-
 
 	/**
 	 * Helper method - returns the targeted item (IResource if internal or
@@ -130,7 +129,7 @@ public class Model extends Openable implements IScriptModel {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Returns the active script project associated with the specified resource,
 	 * or <code>null</code> if no script project yet exists for the resource.
@@ -350,6 +349,9 @@ public class Model extends Openable implements IScriptModel {
 			String projectName = memento.nextToken();
 			ModelElement project = (ModelElement) getScriptProject(projectName);
 			return project.getHandleFromMemento(memento, owner);
+		case JEM_USER_ELEMENT:
+			return MementoModelElementUtil.getHandleFromMememento(memento,
+					this, owner);
 		}
 		return null;
 	}

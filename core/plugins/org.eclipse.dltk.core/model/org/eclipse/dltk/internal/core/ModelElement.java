@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IModelElementMemento;
 import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
@@ -42,7 +43,7 @@ import org.eclipse.dltk.utils.CorePrinter;
  */
 
 public abstract class ModelElement extends PlatformObject implements
-		IModelElement {
+		IModelElement, IModelElementMemento {
 
 	public static final char JEM_ESCAPE = '\\';
 	public static final char JEM_SCRIPTPROJECT = '=';
@@ -57,6 +58,13 @@ public abstract class ModelElement extends PlatformObject implements
 	public static final char JEM_LOCALVARIABLE = '@';
 	public static final char JEM_TYPE_PARAMETER = ']';
 	public static final char JEM_PACKAGEDECLARATION = '%';
+
+	/**
+	 * This Item is for direct user element handle. Resolving of elements with
+	 * such delimiter requires building of the model.
+	 */
+	public static final char JEM_USER_ELEMENT = '}';
+	public static final String JEM_USER_ELEMENT_ENDING = "=/<^~{[#!@]%}";
 
 	// Used to replace path / or \\ symbols in external package names and
 	// archives.
@@ -453,8 +461,8 @@ public abstract class ModelElement extends PlatformObject implements
 		if (parentElement != null && parentElement.getParent() != null) {
 			buffer.append(" [in "); //$NON-NLS-1$
 			parentElement.toStringInfo(0, buffer, NO_INFO, false); // don't show
-																	// resolved
-																	// info
+			// resolved
+			// info
 			parentElement.toStringAncestors(buffer);
 			buffer.append("]"); //$NON-NLS-1$
 		}
@@ -560,7 +568,7 @@ public abstract class ModelElement extends PlatformObject implements
 					if (start <= position && position <= end) {
 						if (child instanceof IField) {
 							// check muti-declaration case (see
-							//https://bugs.eclipse.org/bugs/show_bug.cgi?id=39943
+							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=39943
 							// )
 							int declarationStart = start;
 							SourceRefElement candidate = null;
@@ -666,6 +674,7 @@ public abstract class ModelElement extends PlatformObject implements
 			case JEM_IMPORTDECLARATION:
 			case JEM_LOCALVARIABLE:
 			case JEM_TYPE_PARAMETER:
+			case JEM_USER_ELEMENT:
 				buffer.append(JEM_ESCAPE);
 			}
 			buffer.append(character);

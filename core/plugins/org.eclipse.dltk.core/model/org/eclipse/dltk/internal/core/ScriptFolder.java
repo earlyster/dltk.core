@@ -11,6 +11,7 @@ package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
@@ -18,7 +19,10 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IModelProvider;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
@@ -171,9 +175,21 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 			}
 		}
 
-		IModelElement[] children = new IModelElement[vChildren.size()];
-		vChildren.toArray(children);
-		info.setChildren(children);
+		// IModelElement[] children = new IModelElement[vChildren.size()];
+		// vChildren.toArray(children);
+		List childrenSet = new ArrayList(vChildren);
+		// Call for extra model providers
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(this);
+		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
+				.getNatureId());
+		if (providers != null) {
+			for (int i = 0; i < providers.length; i++) {
+				providers[i].buildStructure(this, childrenSet);
+			}
+		}
+		info.setChildren((IModelElement[]) childrenSet
+				.toArray(new IModelElement[childrenSet.size()]));
 		return true;
 	}
 
@@ -303,6 +319,9 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 			String classFileName = memento.nextToken();
 			ModelElement classFile = (ModelElement) getSourceModule(classFileName);
 			return classFile.getHandleFromMemento(memento, owner);
+		case JEM_USER_ELEMENT:
+			return MementoModelElementUtil.getHandleFromMememento(memento,
+					this, owner);
 		}
 		return null;
 	}

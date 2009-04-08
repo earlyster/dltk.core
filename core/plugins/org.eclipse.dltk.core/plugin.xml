@@ -21,6 +21,7 @@
    <extension-point id="scriptFileConfigurator" name="%extension-point.name.scriptFileConfigurator" schema="schema/scriptFileConfigurator.exsd"/>
    <extension-point id="buildParticipant" name="%extension-point.name.buildParticipant" schema="schema/buildParticipant.exsd"/>
    <extension-point id="fileCache" name="%extension-point.name.fileCache" schema="schema/fileCache.exsd"/>
+   <extension-point id="model" name="model" schema="schema/model.exsd"/>
    
 <!-- =================================================================================== -->
 <!-- Extension: DLTK Problem                                                             -->
