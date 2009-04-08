@@ -14,11 +14,15 @@ package org.eclipse.mylyn.internal.dltk.ui;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IPackageDeclaration;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.dltk.internal.ui.actions.SelectionConverter;
+import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
-import org.eclipse.jface.text.TextSelection;
+import org.eclipse.dltk.ui.text.folding.IElementCommentResolver;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.mylyn.internal.dltk.MylynStatusHandler;
@@ -26,7 +30,6 @@ import org.eclipse.mylyn.internal.dltk.search.DLTKImplementorsProvider;
 import org.eclipse.mylyn.internal.dltk.search.DLTKReferencesProvider;
 import org.eclipse.mylyn.monitor.ui.AbstractUserInteractionMonitor;
 import org.eclipse.ui.IWorkbenchPart;
-
 
 public class DLTKEditingMonitor extends AbstractUserInteractionMonitor {
 
@@ -45,7 +48,8 @@ public class DLTKEditingMonitor extends AbstractUserInteractionMonitor {
 	/**
 	 * Only public for testing
 	 */
-	public void handleWorkbenchPartSelection(IWorkbenchPart part, ISelection selection, boolean contributeToContext) {
+	public void handleWorkbenchPartSelection(IWorkbenchPart part,
+			ISelection selection, boolean contributeToContext) {
 		try {
 			IModelElement selectedElement = null;
 			if (selection instanceof StructuredSelection) {
@@ -65,16 +69,28 @@ public class DLTKEditingMonitor extends AbstractUserInteractionMonitor {
 					}
 				}
 				if (selectedElement != null)
-					super.handleElementSelection(part, selectedElement, contributeToContext);
+					super.handleElementSelection(part, selectedElement,
+							contributeToContext);
 			} else {
-				if (selection instanceof TextSelection && part instanceof ScriptEditor) {
+				if (selection instanceof ITextSelection
+						&& part instanceof ScriptEditor) {
 					currentEditor = (ScriptEditor) part;
-					TextSelection textSelection = (TextSelection) selection;
+					ITextSelection textSelection = (ITextSelection) selection;
 
 					// first try to resolve if the user has clicked on a comment
-					selectedElement = currentEditor
-							.getElementByCommentPosition(textSelection
-									.getOffset(), textSelection.getLength());
+					final ISourceModule module = EditorUtility
+							.getEditorInputModelElement(currentEditor, false);
+					if (module == null) {
+						return;
+					}
+					final IElementCommentResolver resolver = (IElementCommentResolver) currentEditor
+							.getAdapter(IElementCommentResolver.class);
+					if (resolver == null) {
+						return;
+					}
+					selectedElement = resolver.getElementByCommentPosition(
+							module, textSelection.getOffset(), textSelection
+									.getLength());
 
 					// if user has clicked outside the comment, resolve the
 					// desired element
@@ -82,43 +98,65 @@ public class DLTKEditingMonitor extends AbstractUserInteractionMonitor {
 						selectedElement = SelectionConverter
 								.resolveEnclosingElement(currentEditor,
 										textSelection);
-					
+
 					if (selectedElement instanceof IPackageDeclaration)
 						return; // HACK: ignoring these selections
-					IModelElement[] resolved = SelectionConverter.codeResolve(currentEditor);
-					if (resolved != null && resolved.length == 1 && !resolved[0].equals(selectedElement)) {
+					IModelElement[] resolved = SelectionConverter
+							.codeResolve(currentEditor);
+					if (resolved != null && resolved.length == 1
+							&& !resolved[0].equals(selectedElement)) {
 						lastResolvedElement = resolved[0];
 					}
 
 					boolean selectionResolved = false;
-					if (selectedElement instanceof IMethod && lastSelectedElement instanceof IMethod) {
-						if (lastResolvedElement != null && lastSelectedElement != null
+					if (selectedElement instanceof IMethod
+							&& lastSelectedElement instanceof IMethod) {
+						if (lastResolvedElement != null
+								&& lastSelectedElement != null
 								&& lastResolvedElement.equals(selectedElement)
-								&& !lastSelectedElement.equals(lastResolvedElement)) {
-							super.handleNavigation(part, selectedElement, DLTKReferencesProvider.ID, contributeToContext);
+								&& !lastSelectedElement
+										.equals(lastResolvedElement)) {
+							super.handleNavigation(part, selectedElement,
+									DLTKReferencesProvider.ID,
+									contributeToContext);
 							selectionResolved = true;
-						} else if (lastSelectedElement != null && lastSelectedElement.equals(lastResolvedElement)
+						} else if (lastSelectedElement != null
+								&& lastSelectedElement
+										.equals(lastResolvedElement)
 								&& !lastSelectedElement.equals(selectedElement)) {
-							super.handleNavigation(part, selectedElement, DLTKReferencesProvider.ID, contributeToContext);
+							super.handleNavigation(part, selectedElement,
+									DLTKReferencesProvider.ID,
+									contributeToContext);
 							selectionResolved = true;
 						}
-					} else if (selectedElement != null && lastSelectedElement != null
+					} else if (selectedElement != null
+							&& lastSelectedElement != null
 							&& !lastSelectedElement.equals(selectedElement)) {
-						if (lastSelectedElement.getElementName().equals(selectedElement.getElementName())) {
-							if (selectedElement instanceof IMethod && lastSelectedElement instanceof IMethod) {
-								super.handleNavigation(part, selectedElement, DLTKImplementorsProvider.ID, contributeToContext);
+						if (lastSelectedElement.getElementName().equals(
+								selectedElement.getElementName())) {
+							if (selectedElement instanceof IMethod
+									&& lastSelectedElement instanceof IMethod) {
+								super.handleNavigation(part, selectedElement,
+										DLTKImplementorsProvider.ID,
+										contributeToContext);
 								selectionResolved = true;
-							} else if (selectedElement instanceof IType && lastSelectedElement instanceof IType) {
-								super.handleNavigation(part, selectedElement, DLTKImplementorsProvider.ID, contributeToContext);
+							} else if (selectedElement instanceof IType
+									&& lastSelectedElement instanceof IType) {
+								super.handleNavigation(part, selectedElement,
+										DLTKImplementorsProvider.ID,
+										contributeToContext);
 								selectionResolved = true;
 							}
 						}
 					}
 					if (selectedElement != null) {
-						if (!selectionResolved && selectedElement.equals(lastSelectedElement)) {
-							super.handleElementEdit(part, selectedElement, contributeToContext);
+						if (!selectionResolved
+								&& selectedElement.equals(lastSelectedElement)) {
+							super.handleElementEdit(part, selectedElement,
+									contributeToContext);
 						} else if (!selectedElement.equals(lastSelectedElement)) {
-							super.handleElementSelection(part, selectedElement, contributeToContext);
+							super.handleElementSelection(part, selectedElement,
+									contributeToContext);
 						}
 					}
 
@@ -133,23 +171,26 @@ public class DLTKEditingMonitor extends AbstractUserInteractionMonitor {
 			if (selectedElement != null)
 				lastSelectedElement = selectedElement;
 		} catch (ModelException e) {
-			// ignore, fine to fail to resolve an element if the model is not up-to-date
+			// ignore, fine to fail to resolve an element if the model is not
+			// up-to-date
 		} catch (Throwable t) {
-			MylynStatusHandler.log(t, "Failed to update model based on selection.");
+			MylynStatusHandler.log(t,
+					"Failed to update model based on selection.");
 		}
 	}
 
 	/**
 	 * @return null for elements that aren't modeled
 	 */
-	protected IModelElement checkIfAcceptedAndPromoteIfNecessary(IModelElement element) {
+	protected IModelElement checkIfAcceptedAndPromoteIfNecessary(
+			IModelElement element) {
 		// if (element instanceof IPackageDeclaration) return null;
-//		if (element instanceof IImportContainer) {
-//			return element.getParent();
-//		} else if (element instanceof IImportDeclaration) {
-//			return element.getParent().getParent();
-//		} else {
-			return element;
-		//}
+		// if (element instanceof IImportContainer) {
+		// return element.getParent();
+		// } else if (element instanceof IImportDeclaration) {
+		// return element.getParent().getParent();
+		// } else {
+		return element;
+		// }
 	}
 }
