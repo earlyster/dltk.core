@@ -21,7 +21,7 @@
    <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
-            adaptable="false"
+            adaptable="true"
             id="org.eclipse.dltk.validators.ui.contribution"
             nameFilter="*"
             objectClass="org.eclipse.dltk.core.IModelElement">
