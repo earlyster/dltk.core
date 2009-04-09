@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.ASTVisitor;
 import org.eclipse.dltk.ast.declarations.MethodDeclaration;
@@ -43,6 +45,7 @@ import org.eclipse.dltk.internal.core.SourceMethod;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.text.DocumentCharacterIterator;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
@@ -1219,7 +1222,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	}
 
 	protected CodeBlock[] getCodeBlocks(String code, int offset) {
-		ModuleDeclaration decl = getModuleDeclaration();
+		ModuleDeclaration decl = parse(code, offset);
 		return buildCodeBlocks(decl, offset);
 	}
 
@@ -1227,9 +1230,21 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		return fInput;
 	}
 
-	protected final ModuleDeclaration getModuleDeclaration() {
-		// use the cache luke! ;)
-		return SourceParserUtil.getModuleDeclaration((ISourceModule) fInput);
+	protected final ModuleDeclaration parse(String code, int offset) {
+		if (offset == 0 && fInput instanceof ISourceModule) {
+			final ISourceModule module = (ISourceModule) fInput;
+			try {
+				if (code.equals(module.getSource())) {
+					// use the cache luke! ;)
+					return SourceParserUtil.getModuleDeclaration(module);
+				}
+			} catch (ModelException e) {
+				getLog().log(
+						new Status(IStatus.WARNING, DLTKUIPlugin.PLUGIN_ID, e
+								.getMessage(), e));
+			}
+		}
+		return getSourceParser().parse(null, code.toCharArray(), null);
 	}
 
 	protected CodeBlock[] buildCodeBlocks(ModuleDeclaration decl, int offset) {
