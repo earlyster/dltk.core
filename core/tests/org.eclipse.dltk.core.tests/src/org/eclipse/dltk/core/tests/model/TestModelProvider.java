@@ -18,6 +18,8 @@ import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelProvider;
+import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.core.ProjectFragment;
 
 public class TestModelProvider implements IModelProvider {
@@ -26,6 +28,10 @@ public class TestModelProvider implements IModelProvider {
 	}
 
 	public void buildStructure(IModelElement parentElement, List children) {
+		IScriptProject project = parentElement.getScriptProject();
+		if (!"ModelMembersq".equals(project.getElementName())) {
+			return;
+		}
 		switch (parentElement.getElementType()) {
 		case IModelElement.PROJECT_FRAGMENT:
 			List addon = new ArrayList();
@@ -45,9 +51,19 @@ public class TestModelProvider implements IModelProvider {
 	}
 
 	public boolean providesFor(IModelElement modelElement, IPath path) {
-		if( modelElement.getElementType() == IModelElement.PROJECT_FRAGMENT) {
+		IScriptProject project = modelElement.getScriptProject();
+		if (!"ModelMembersq".equals(project.getElementName())) {
+			return false;
+		}
+		if (modelElement.getElementType() == IModelElement.PROJECT_FRAGMENT) {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public IProjectFragment getProjectFragment(IPath entryPath,
+			IScriptProject project) {
+		return null;
 	}
 }

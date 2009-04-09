@@ -11,14 +11,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.tests.model;
 
-import java.util.Map;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.internal.core.OpenableElementInfo;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.internal.core.ProjectFragment;
 import org.eclipse.dltk.internal.core.ScriptFolder;
 
@@ -37,7 +33,7 @@ public class TestFolder extends ScriptFolder {
 
 	@Override
 	public IResource getResource() {
-		ProjectFragment root = this.getProjectFragment();
+		IProjectFragment root = this.getProjectFragment();
 		if (root.isArchive()) {
 			return root.getResource();
 		} else {
