@@ -22,6 +22,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.IExecutionLogger;
 import org.eclipse.rse.services.shells.HostShellOutputStream;
 import org.eclipse.rse.services.shells.IHostOutput;
 import org.eclipse.rse.services.shells.IHostShell;
@@ -38,7 +39,7 @@ import org.eclipse.rse.services.shells.IHostShellOutputReader;
  */
 public class MyHostShellProcessAdapter extends Process implements
 		IHostShellOutputListener {
-
+	private final IExecutionLogger logger;
 	private IHostShell hostShell;
 	private PipedInputStream inputStream = null;
 	private PipedInputStream errorStream = null;
@@ -54,11 +55,13 @@ public class MyHostShellProcessAdapter extends Process implements
 	 * 
 	 * @param hostShell
 	 *            An instance of the IHostShell class.
+	 * @param logger
 	 * @param postfix
 	 * @throws java.io.IOException
 	 */
-	public MyHostShellProcessAdapter(IHostShell hostShell, String pattern1)
-			throws java.io.IOException {
+	public MyHostShellProcessAdapter(IHostShell hostShell, String pattern1,
+			IExecutionLogger logger) throws java.io.IOException {
+		this.logger = logger;
 		this.hostShell = hostShell;
 		this.pattern1 = pattern1;
 		hostShellInput = new PipedOutputStream();
@@ -188,7 +191,7 @@ public class MyHostShellProcessAdapter extends Process implements
 				throw new InterruptedException();
 
 			hostShell.exit();
-	  		closeStreams();
+			closeStreams();
 		} catch (IOException e) {
 			// Ignore
 		}
@@ -217,6 +220,9 @@ public class MyHostShellProcessAdapter extends Process implements
 		try {
 			for (int i = 0; i < input.length; i++) {
 				String line = input[i].getString();
+				if (logger != null) {
+					logger.logLine(line);
+				}
 				if (line == null) {
 					continue;
 				}

@@ -17,6 +17,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IDeployment;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
+import org.eclipse.dltk.core.environment.IExecutionLogger;
 import org.eclipse.dltk.core.internal.rse.perfomance.RSEPerfomanceStatistics;
 import org.eclipse.dltk.internal.launching.execution.EFSDeployment;
 import org.eclipse.osgi.util.NLS;
@@ -118,6 +119,11 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 
 	public Process exec(String[] cmdLine, IPath workingDir, String[] environment)
 			throws CoreException {
+		return exec(cmdLine, workingDir, environment, null);
+	}
+
+	public Process exec(String[] cmdLine, IPath workingDir,
+			String[] environment, IExecutionLogger logger) throws CoreException {
 		if (RSEPerfomanceStatistics.PERFOMANCE_TRACING) {
 			RSEPerfomanceStatistics
 					.inc(RSEPerfomanceStatistics.EXECUTION_COUNT);
@@ -170,7 +176,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 				+ CMD_SEPARATOR + EXIT_CMD);
 		Process p = null;
 		try {
-			p = new MyHostShellProcessAdapter(hostShell, pattern);
+			p = new MyHostShellProcessAdapter(hostShell, pattern, logger);
 		} catch (Exception e) {
 			if (p != null) {
 				p.destroy();
