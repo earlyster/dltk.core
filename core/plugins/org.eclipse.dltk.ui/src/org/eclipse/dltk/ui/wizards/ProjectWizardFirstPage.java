@@ -814,7 +814,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	 * 
 	 * @return true if interpreters are available for selection
 	 */
-	public boolean isInterpretersPressent() {
+	public boolean isInterpretersPresent() {
 		return interpretersPresent;
 	}
 
