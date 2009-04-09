@@ -31,6 +31,9 @@ public interface IExecutionEnvironment {
 	Process exec(String[] cmdLine, IPath workingDir, String[] environment)
 			throws CoreException;
 
+	Process exec(String[] cmdLine, IPath workingDir, String[] environment,
+			IExecutionLogger logger) throws CoreException;
+
 	IEnvironment getEnvironment();
 
 	boolean isValidExecutableAndEquals(String name, IPath fName);
