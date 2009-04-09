@@ -16,6 +16,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IDeployment;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
+import org.eclipse.dltk.core.environment.IExecutionLogger;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 
 public class LocalExecEnvironment implements IExecutionEnvironment {
@@ -55,7 +56,8 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 				tempFile.delete();
 				temp = new Path(tempFile.getParent());
 			} catch (IOException e) {
-				throw new RuntimeException(Messages.LocalExecEnvironment_failedToLocateTempFolder);
+				throw new RuntimeException(
+						Messages.LocalExecEnvironment_failedToLocateTempFolder);
 			}
 		}
 		return temp;
@@ -68,6 +70,11 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 			workingDirFile = workingDir.toFile();
 		}
 		return DebugPlugin.exec(cmdLine, workingDirFile, environment);
+	}
+
+	public Process exec(String[] cmdLine, IPath workingDir,
+			String[] environment, IExecutionLogger logger) throws CoreException {
+		return exec(cmdLine, workingDir, environment);
 	}
 
 	public Map getEnvironmentVariables(boolean value) {
