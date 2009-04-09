@@ -31,6 +31,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IOpenable;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 
@@ -128,7 +129,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 			return true;
 		if (!parentExists())
 			return false;
-		ProjectFragment root = getProjectFragment();
+		IProjectFragment root = getProjectFragment();
 		if (root != null && (root == this || !root.isArchive())) {
 			return resourceExists();
 		}
@@ -435,8 +436,8 @@ public abstract class Openable extends ModelElement implements IOpenable,
 	/**
 	 * Find enclosing project fragment if any
 	 */
-	public ProjectFragment getProjectFragment() {
-		return (ProjectFragment) getAncestor(IModelElement.PROJECT_FRAGMENT);
+	public IProjectFragment getProjectFragment() {
+		return (IProjectFragment) getAncestor(IModelElement.PROJECT_FRAGMENT);
 	}
 
 	/** Code Completion */

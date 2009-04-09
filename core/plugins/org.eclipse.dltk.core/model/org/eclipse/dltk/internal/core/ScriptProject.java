@@ -645,7 +645,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 		// compute the project fragements
 		IModelElement[] children = computeProjectFragments(resolvedBuildpath,
 				false, null);
-		List childrenSet = Arrays.asList(children);
+		List childrenSet = new ArrayList();
+		childrenSet.addAll(Arrays.asList(children));
 		// Call for extra model providers
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(this);
@@ -792,6 +793,26 @@ public class ScriptProject extends Openable implements IScriptProject {
 						&& BuiltinProjectFragment.isSupported(this)) {
 					root = new BuiltinProjectFragment(entryPath, this);
 					break;
+				}
+				if (entryPath.toString().startsWith(
+						IBuildpathEntry.BUILDPATH_SPECIAL)) {
+					// Special resolving case
+					IDLTKLanguageToolkit tk = DLTKLanguageManager
+							.getLanguageToolkit(this);
+					IModelProvider[] providers = ModelProviderManager
+							.getProviders(tk.getNatureId());
+					if (providers != null) {
+						for (int i = 0; i < providers.length; i++) {
+							root = providers[i].getProjectFragment(entryPath,
+									this);
+							if (root != null) {
+								break;
+							}
+						}
+					}
+					if (root != null) {
+						break;
+					}
 				}
 				Object target = Model.getTarget(workspaceRoot, entryPath,
 						checkExistency);
@@ -1410,7 +1431,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 			byte[] bytes = Util.getResourceContentsAsByteArray(rscFile);
 			try {
 				property = new String(bytes,
-						org.eclipse.dltk.compiler.util.Util.UTF_8); //.buildpath
+						org.eclipse.dltk.compiler.util.Util.UTF_8); // .buildpath
 				// always
 				// encoded
 				// with
@@ -2327,7 +2348,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 
 			String extension = path.getFileExtension();
 			if (extension == null) {
-				String packageName = path.toString();//.replace(IPath.SEPARATOR,
+				String packageName = path.toString();// .replace(IPath.SEPARATOR,
 				// '.');
 
 				NameLookup lookup = newNameLookup((WorkingCopyOwner) null/*
@@ -2474,6 +2495,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 							null); /* no reverse map */
 				}
 			}
+			// We need to ask model providers for projects fragments for entry.
 		} catch (ModelException e) {
 			// project doesn't exist: return an empty array
 		}

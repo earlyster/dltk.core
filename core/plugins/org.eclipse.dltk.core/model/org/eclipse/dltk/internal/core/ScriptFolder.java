@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
@@ -86,7 +87,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 	 * @see IModelElement#getPath()
 	 */
 	public IPath getPath() {
-		ProjectFragment root = this.getProjectFragment();
+		IProjectFragment root = this.getProjectFragment();
 		if (root.isArchive()) {
 			return root.getPath();
 		} else {
@@ -98,7 +99,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 	 * @see IModelElement#getResource()
 	 */
 	public IResource getResource() {
-		ProjectFragment root = this.getProjectFragment();
+		IProjectFragment root = this.getProjectFragment();
 		if (root.isArchive()) {
 			return root.getResource();
 		} else {
@@ -145,9 +146,17 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		// add modules from resources
 		HashSet vChildren = new HashSet();
 		try {
-			ProjectFragment root = getProjectFragment();
-			char[][] inclusionPatterns = root.fullInclusionPatternChars();
-			char[][] exclusionPatterns = root.fullExclusionPatternChars();
+			IProjectFragment root = getProjectFragment();
+			char[][] inclusionPatterns = null;
+			if (root instanceof ProjectFragment) {
+				inclusionPatterns = ((ProjectFragment) root)
+						.fullInclusionPatternChars();
+			}
+			char[][] exclusionPatterns = null;
+			if (root instanceof ProjectFragment) {
+				exclusionPatterns = ((ProjectFragment) root)
+						.fullExclusionPatternChars();
+			}
 			IResource[] members = ((IContainer) underlyingResource).members();
 			for (int i = 0, max = members.length; i < max; i++) {
 				IResource child = members[i];
@@ -221,6 +230,41 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 	}
 
 	public ISourceModule getSourceModule(String name) {
+		// We need to check for element providers and if provider are declared
+		// we need to build structure to return correct handle here.
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(this);
+		if (toolkit != null) {
+			IModelProvider[] providers = ModelProviderManager
+					.getProviders(toolkit.getNatureId());
+			if (providers != null) {
+				boolean provides = false;
+				for (int i = 0; i < providers.length; i++) {
+					if (providers[i].providesFor(this, path)) {
+						provides = true;
+						break;
+					}
+				}
+				if (provides) {
+					try {
+						IModelElement[] children = getChildren();
+						IPath fullPath = getPath().append(path);
+						for (int i = 0; i < children.length; i++) {
+							IModelElement child = children[i];
+							if (child instanceof IScriptFolder) {
+								IPath childPath = child.getPath();
+								if (fullPath.equals(childPath)) {
+									return (ISourceModule) child;
+								}
+							}
+						}
+					} catch (ModelException e) {
+						DLTKCore.error(
+								"Could not obtain model element childrens.", e);
+					}
+				}
+			}
+		}
 		return new SourceModule(this, name, DefaultWorkingCopyOwner.PRIMARY);
 	}
 
@@ -235,8 +279,8 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		return new SourceModule(this, cuName, DefaultWorkingCopyOwner.PRIMARY);
 	}
 
-	public final ProjectFragment getProjectFragment() {
-		return (ProjectFragment) getParent();
+	public final IProjectFragment getProjectFragment() {
+		return (IProjectFragment) getParent();
 	}
 
 	/**
@@ -289,8 +333,12 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		if (this.isRootFolder()) {
 			return ModelElementInfo.NO_NON_SCRIPT_RESOURCES;
 		} else {
-			return ((ScriptFolderInfo) getElementInfo()).getForeignResources(
-					getResource(), getProjectFragment());
+			if (getProjectFragment() instanceof ProjectFragment) {
+				return ((ScriptFolderInfo) getElementInfo())
+						.getForeignResources(getResource(),
+								(ProjectFragment) getProjectFragment());
+			}
+			return ModelElementInfo.NO_NON_SCRIPT_RESOURCES;
 		}
 	}
 

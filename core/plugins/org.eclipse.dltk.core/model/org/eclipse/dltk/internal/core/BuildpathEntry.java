@@ -161,8 +161,8 @@ public class BuildpathEntry implements IBuildpathEntry {
 		// if this is external entry, path should be full
 		Assert.isLegal(!externalLib
 				|| EnvironmentPathUtils.isFull(path)
-				|| path.segment(0).equals(
-						IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR));
+				|| path.segment(0)
+						.startsWith(IBuildpathEntry.BUILDPATH_SPECIAL));
 
 		this.contentKind = contentKind;
 		this.entryKind = entryKind;

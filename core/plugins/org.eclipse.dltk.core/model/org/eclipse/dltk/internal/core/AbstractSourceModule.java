@@ -283,7 +283,7 @@ public abstract class AbstractSourceModule extends Openable implements
 	}
 
 	public IPath getPath() {
-		ProjectFragment root = this.getProjectFragment();
+		IProjectFragment root = this.getProjectFragment();
 		// allow the root to be null for remote source
 		if (root != null && root.isArchive()) {
 			return root.getPath();

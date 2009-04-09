@@ -271,6 +271,9 @@ public abstract class ModelElement extends PlatformObject implements
 		if (this.parent == null) {
 			return super.equals(o);
 		}
+		if (o == null) {
+			return false;
+		}
 		// assume instanceof check is done in subclass
 		final ModelElement other = (ModelElement) o;
 		return getElementName().equals(other.getElementName())

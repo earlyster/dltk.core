@@ -2361,12 +2361,27 @@ public class DLTKCore extends Plugin {
 
 		if (path == null)
 			Assert.isTrue(false, "Library path cannot be null"); //$NON-NLS-1$
-		return new BuildpathEntry(IProjectFragment.K_BINARY,
+		return new BuildpathEntry(IProjectFragment.K_SOURCE,
 				IBuildpathEntry.BPE_LIBRARY, path, isExported, include, // inclusion
 				// patterns
 				exclude, // exclusion patterns
 				accessRules, false, // no access rules to combine
 				extraAttributes, externalLib);
+	}
+
+	public static IBuildpathEntry newSpecialEntry(IPath path,
+			boolean isExported, boolean externalLib) {
+
+		if (path == null)
+			Assert.isTrue(false, "Library path cannot be null"); //$NON-NLS-1$
+		return new BuildpathEntry(IProjectFragment.K_SOURCE,
+				IBuildpathEntry.BPE_LIBRARY, path, isExported,
+				BuildpathEntry.INCLUDE_ALL, // inclusion
+				// patterns
+				BuildpathEntry.EXCLUDE_NONE, // exclusion patterns
+				BuildpathEntry.NO_ACCESS_RULES, false, // no access rules to
+				// combine
+				BuildpathEntry.NO_EXTRA_ATTRIBUTES, externalLib);
 	}
 
 	/**

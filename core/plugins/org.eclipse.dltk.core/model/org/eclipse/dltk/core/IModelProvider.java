@@ -35,4 +35,6 @@ public interface IModelProvider {
 	 * Should return true if provider provides some elements at selected level.
 	 */
 	boolean providesFor(IModelElement modelElement, IPath path);
+
+	IProjectFragment getProjectFragment(IPath entryPath, IScriptProject project);
 }

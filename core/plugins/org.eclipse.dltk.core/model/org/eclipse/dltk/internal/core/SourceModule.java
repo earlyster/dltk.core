@@ -22,6 +22,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProblemRequestor;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceModuleInfoCache;
 import org.eclipse.dltk.core.ModelException;
@@ -47,8 +48,9 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	// ~ Methods
 
 	/*
-	 * @see org.eclipse.dltk.core.ISourceModule#becomeWorkingCopy(org.eclipse.dltk.core.IProblemRequestor,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * @see
+	 * org.eclipse.dltk.core.ISourceModule#becomeWorkingCopy(org.eclipse.dltk
+	 * .core.IProblemRequestor, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void becomeWorkingCopy(IProblemRequestor problemRequestor,
 			IProgressMonitor monitor) throws ModelException {
@@ -81,7 +83,9 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.Openable#canBufferBeRemovedFromCache(org.eclipse.dltk.core.IBuffer)
+	 * @see
+	 * org.eclipse.dltk.internal.core.Openable#canBufferBeRemovedFromCache(org
+	 * .eclipse.dltk.core.IBuffer)
 	 */
 	public boolean canBufferBeRemovedFromCache(IBuffer buffer) {
 		if (getPerWorkingCopyInfo() != null) {
@@ -104,7 +108,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 
 	/*
 	 * @see org.eclipse.dltk.core.ICodeAssist#codeComplete(int,
-	 *      org.eclipse.dltk.core.CompletionRequestor)
+	 * org.eclipse.dltk.core.CompletionRequestor)
 	 */
 	public void codeComplete(int offset, CompletionRequestor requestor)
 			throws ModelException {
@@ -113,8 +117,8 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 
 	/*
 	 * @see org.eclipse.dltk.core.ICodeAssist#codeComplete(int,
-	 *      org.eclipse.dltk.core.CompletionRequestor,
-	 *      org.eclipse.dltk.core.WorkingCopyOwner)
+	 * org.eclipse.dltk.core.CompletionRequestor,
+	 * org.eclipse.dltk.core.WorkingCopyOwner)
 	 */
 	public void codeComplete(int offset, CompletionRequestor requestor,
 			WorkingCopyOwner owner) throws ModelException {
@@ -123,7 +127,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 
 	/*
 	 * @see org.eclipse.dltk.core.ISourceModule#commitWorkingCopy(boolean,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void commitWorkingCopy(boolean force, IProgressMonitor monitor)
 			throws ModelException {
@@ -134,7 +138,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 
 	/*
 	 * @see org.eclipse.dltk.core.ISourceManipulation#delete(boolean,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void delete(boolean force, IProgressMonitor monitor)
 			throws ModelException {
@@ -152,7 +156,9 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#equals(java.lang.Object)
+	 * @see
+	 * org.eclipse.dltk.internal.core.AbstractSourceModule#equals(java.lang.
+	 * Object)
 	 */
 	public boolean equals(Object obj) {
 		if (!(obj instanceof SourceModule)) {
@@ -198,7 +204,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	 * @see org.eclipse.dltk.core.IModelElement#getResource()
 	 */
 	public IResource getResource() {
-		ProjectFragment root = this.getProjectFragment();
+		IProjectFragment root = this.getProjectFragment();
 		if (root.isArchive()) {
 			return root.getResource();
 		}
@@ -208,9 +214,10 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	}
 
 	/*
-	 * @see org.eclipse.dltk.core.ISourceModule#getWorkingCopy(org.eclipse.dltk.core.WorkingCopyOwner,
-	 *      org.eclipse.dltk.core.IProblemRequestor,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * @see
+	 * org.eclipse.dltk.core.ISourceModule#getWorkingCopy(org.eclipse.dltk.core
+	 * .WorkingCopyOwner, org.eclipse.dltk.core.IProblemRequestor,
+	 * org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public ISourceModule getWorkingCopy(WorkingCopyOwner workingCopyOwner,
 			IProblemRequestor problemRequestor, IProgressMonitor monitor)
@@ -226,9 +233,9 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		ModelManager.PerWorkingCopyInfo perWorkingCopyInfo = manager
 				.getPerWorkingCopyInfo(workingCopy, false /* don't create */,
 						true /* record usage */, null /*
-														 * not used since don't
-														 * create
-														 */);
+													 * not used since don't
+													 * create
+													 */);
 		if (perWorkingCopyInfo != null) {
 			return perWorkingCopyInfo.getWorkingCopy(); // return existing
 			// handle instead of the
@@ -272,7 +279,9 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.Openable#makeConsistent(org.eclipse.core.runtime.IProgressMonitor)
+	 * @see
+	 * org.eclipse.dltk.internal.core.Openable#makeConsistent(org.eclipse.core
+	 * .runtime.IProgressMonitor)
 	 */
 	public void makeConsistent(IProgressMonitor monitor) throws ModelException {
 		if (isConsistent())
@@ -287,9 +296,10 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	}
 
 	/*
-	 * @see org.eclipse.dltk.core.ISourceManipulation#move(org.eclipse.dltk.core.IModelElement,
-	 *      org.eclipse.dltk.core.IModelElement, java.lang.String, boolean,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * @see
+	 * org.eclipse.dltk.core.ISourceManipulation#move(org.eclipse.dltk.core.
+	 * IModelElement, org.eclipse.dltk.core.IModelElement, java.lang.String,
+	 * boolean, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void move(IModelElement container, IModelElement sibling,
 			String rename, boolean replace, IProgressMonitor monitor)
@@ -312,8 +322,8 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 
 	/*
 	 * @see org.eclipse.dltk.core.ISourceModule#reconcile(boolean,
-	 *      org.eclipse.dltk.core.WorkingCopyOwner,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * org.eclipse.dltk.core.WorkingCopyOwner,
+	 * org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void reconcile(boolean forceProblemDetection,
 			WorkingCopyOwner workingCopyOwner, IProgressMonitor monitor)
@@ -342,7 +352,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 
 	/*
 	 * @see org.eclipse.dltk.core.ISourceManipulation#rename(java.lang.String,
-	 *      boolean, org.eclipse.core.runtime.IProgressMonitor)
+	 * boolean, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void rename(String newName, boolean replace, IProgressMonitor monitor)
 			throws ModelException {
@@ -357,8 +367,9 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.Openable#save(org.eclipse.core.runtime.IProgressMonitor,
-	 *      boolean)
+	 * @see
+	 * org.eclipse.dltk.internal.core.Openable#save(org.eclipse.core.runtime
+	 * .IProgressMonitor, boolean)
 	 */
 	public void save(IProgressMonitor pm, boolean force) throws ModelException {
 		if (isWorkingCopy()) {
@@ -408,7 +419,8 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getBufferContent()
+	 * @see
+	 * org.eclipse.dltk.internal.core.AbstractSourceModule#getBufferContent()
 	 */
 	protected char[] getBufferContent() throws ModelException {
 		IFile file = (IFile) this.getResource();
@@ -429,7 +441,9 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getOriginalSourceModule()
+	 * @see
+	 * org.eclipse.dltk.internal.core.AbstractSourceModule#getOriginalSourceModule
+	 * ()
 	 */
 	protected ISourceModule getOriginalSourceModule() {
 		return new SourceModule((ScriptFolder) getParent(), getElementName(),
