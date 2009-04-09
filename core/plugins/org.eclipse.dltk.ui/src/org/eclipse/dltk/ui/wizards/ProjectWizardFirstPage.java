@@ -809,6 +809,15 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 	}
 
+	/**
+	 * Return true if some interpreters are available for selection.
+	 * 
+	 * @return true if interpreters are available for selection
+	 */
+	public boolean isInterpretersPressent() {
+		return interpretersPresent;
+	}
+
 	protected abstract boolean interpeterRequired();
 
 	protected abstract boolean supportInterpreter();
