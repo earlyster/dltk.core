@@ -37,6 +37,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.SourceParserUtil;
 import org.eclipse.dltk.corext.SourceRange;
 import org.eclipse.dltk.internal.core.SourceMethod;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
@@ -1218,9 +1219,17 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	}
 
 	protected CodeBlock[] getCodeBlocks(String code, int offset) {
-		ISourceParser parser = getSourceParser();
-		ModuleDeclaration decl = parser.parse(null, code.toCharArray(), null);
+		ModuleDeclaration decl = getModuleDeclaration();
 		return buildCodeBlocks(decl, offset);
+	}
+
+	protected final IModelElement getModuleElement() {
+		return fInput;
+	}
+
+	protected final ModuleDeclaration getModuleDeclaration() {
+		// use the cache luke! ;)
+		return SourceParserUtil.getModuleDeclaration((ISourceModule) fInput);
 	}
 
 	protected CodeBlock[] buildCodeBlocks(ModuleDeclaration decl, int offset) {
