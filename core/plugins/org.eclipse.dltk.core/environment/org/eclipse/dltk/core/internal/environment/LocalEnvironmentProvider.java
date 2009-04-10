@@ -33,6 +33,10 @@ public class LocalEnvironmentProvider implements IEnvironmentProvider {
 		return new IEnvironment[] { LocalEnvironment.getInstance() };
 	}
 
+	public boolean isInitialized() {
+		return true;
+	}
+
 	public void waitInitialized() {
 	}
 

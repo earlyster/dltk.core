@@ -18,7 +18,14 @@ public interface IEnvironmentProvider {
 	public IEnvironment getEnvironment(String envId);
 
 	/**
-	 * Wait until provider are initialzed
+	 * Tests if this provider is initialized
+	 * 
+	 * @return
+	 */
+	public boolean isInitialized();
+
+	/**
+	 * Waits until this provider is initialized
 	 */
 	public void waitInitialized();
 
