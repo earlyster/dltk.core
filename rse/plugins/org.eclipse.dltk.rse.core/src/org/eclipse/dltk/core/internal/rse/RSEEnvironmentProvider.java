@@ -43,7 +43,7 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	}
 
 	private IHost getRSEConnection(String name) {
-		if (isInitialized()) {
+		if (isReady()) {
 			IHost[] connections = SystemStartHere.getConnections();
 			for (int i = 0; i < connections.length; i++) {
 				IHost connection = connections[i];
@@ -83,29 +83,39 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	}
 
 	public boolean isInitialized() {
+		return isReady(false);
+	}
+
+	private boolean isReady() {
+		return isReady(true);
+	}
+
+	private boolean isReady(boolean allowWait) {
 		synchronized (lock) {
 			if (initialized) {
 				return true;
 			}
-			try {
-				if (initThread == null) {
-					initThread = new InitThread();
-					initThread.start();
-					if (DEBUG)
-						System.out.println("start & wait initThread"); //$NON-NLS-1$
-					lock.wait(250);
-				} else {
-					if (DEBUG)
-						System.out.println("wait initThread"); //$NON-NLS-1$
-					lock.wait(100);
-				}
-			} catch (InterruptedException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
-				}
+			boolean newThread = false;
+			if (initThread == null) {
+				newThread = true;
+				initThread = new InitThread();
+				initThread.start();
+				if (DEBUG)
+					System.out.println("start initThread"); //$NON-NLS-1$
 			}
-			if (initialized) {
-				return true;
+			if (allowWait) {
+				if (DEBUG)
+					System.out.println("wait initThread"); //$NON-NLS-1$
+				try {
+					lock.wait(newThread ? 250 : 100);
+				} catch (InterruptedException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
+				if (initialized) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -121,7 +131,7 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	}
 
 	public IEnvironment[] getEnvironments() {
-		if (isInitialized()) {
+		if (isReady()) {
 			final IHost[] connections = SystemStartHere.getConnections();
 			if (connections != null && connections.length != 0) {
 				final List environments = new ArrayList(connections.length);
@@ -167,7 +177,7 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 					final URI uri = project.getDescription().getLocationURI();
 					if (uri != null
 							&& RSE_SCHEME.equalsIgnoreCase(uri.getScheme())
-							&& isInitialized()) {
+							&& isReady()) {
 						final IHost[] connections = SystemStartHere
 								.getConnections();
 						if (connections != null) {
