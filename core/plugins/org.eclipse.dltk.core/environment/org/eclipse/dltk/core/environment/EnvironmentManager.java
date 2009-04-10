@@ -210,6 +210,20 @@ public final class EnvironmentManager {
 	}
 
 	/**
+	 * Tests if all providers are initialized.
+	 */
+	public static boolean isInitialized() {
+		Object[] objects = manager.getObjects();
+		for (int i = 0; i < objects.length; i++) {
+			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
+			if (!provider.isInitialized()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Waits until all structures are initialized.
 	 */
 	public static void waitInitialized() {
