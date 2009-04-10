@@ -213,5 +213,10 @@ public final class EnvironmentManager {
 	 * Waits until all structures are initialized.
 	 */
 	public static void waitInitialized() {
+		Object[] objects = manager.getObjects();
+		for (int i = 0; i < objects.length; i++) {
+			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
+			provider.waitInitialized();
+		}
 	}
 }
