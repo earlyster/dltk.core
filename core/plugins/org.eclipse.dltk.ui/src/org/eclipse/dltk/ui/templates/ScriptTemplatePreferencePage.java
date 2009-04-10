@@ -59,7 +59,7 @@ public abstract class ScriptTemplatePreferencePage extends
 			SourceViewerConfiguration configuration = new CodeTemplateSourceViewerConfigurationAdapter(
 					origConfig, getTemplateProcessor());
 			IDocument document = new Document();
-			setDocumentParticioner(document);
+			setDocumentPartitioner(document);
 
 			viewer.configure(configuration);
 			if (origConfig instanceof ScriptSourceViewerConfiguration) {
@@ -71,17 +71,15 @@ public abstract class ScriptTemplatePreferencePage extends
 			return viewer;
 		}
 	}
-	
-	public ScriptTemplatePreferencePage()
-	{
+
+	public ScriptTemplatePreferencePage() {
 		setPreferenceStore();
-		
+
 		ScriptTemplateAccess tplAccess = getTemplateAccess();
 		setTemplateStore(tplAccess.getTemplateStore());
 		setContextTypeRegistry(tplAccess.getContextTypeRegistry());
 	}
-	
-	
+
 	protected Template editTemplate(Template template, boolean edit,
 			boolean isNameModifiable) {
 		EditTemplateDialog dialog = new ScriptEditTemplateDialog(getShell(),
@@ -97,7 +95,7 @@ public abstract class ScriptTemplatePreferencePage extends
 		ScriptSourceViewerConfiguration configuration = createSourceViewerConfiguration();
 
 		IDocument document = new Document();
-		setDocumentParticioner(document);
+		setDocumentPartitioner(document);
 
 		SourceViewer viewer = new ScriptSourceViewer(parent, null, null, false,
 				SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL, store);
@@ -155,8 +153,16 @@ public abstract class ScriptTemplatePreferencePage extends
 	protected abstract ScriptSourceViewerConfiguration createSourceViewerConfiguration();
 
 	protected abstract ScriptTemplateAccess getTemplateAccess();
-	
-	protected abstract void setDocumentParticioner(IDocument document);
+
+	protected void setDocumentPartitioner(IDocument document) {
+		setDocumentParticioner(document);
+	}
+
+	/**
+	 * @deprecated typo in method name
+	 */
+	protected void setDocumentParticioner(IDocument document) {
+	}
 
 	protected abstract void setPreferenceStore();
 }
