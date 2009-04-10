@@ -210,7 +210,7 @@ public final class EnvironmentManager {
 	}
 
 	/**
-	 * Wait white all structures are initialized.
+	 * Waits until all structures are initialized.
 	 */
 	public static void waitInitialized() {
 	}
