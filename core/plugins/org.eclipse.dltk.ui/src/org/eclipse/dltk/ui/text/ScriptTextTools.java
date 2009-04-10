@@ -94,8 +94,7 @@ public abstract class ScriptTextTools {
 	 *            the document to be set up
 	 */
 	public void setupDocumentPartitioner(IDocument document) {
-		setupDocumentPartitioner(document,
-				IDocumentExtension3.DEFAULT_PARTITIONING);
+		setupDocumentPartitioner(document, fDefaultPartitioning);
 	}
 
 	/**
