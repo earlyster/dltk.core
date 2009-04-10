@@ -153,8 +153,8 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 
 	public void waitInitialized() {
 		try {
-			synchronized (lock) {
-				while (!initialized) {
+			while (!isReady()) {
+				synchronized (lock) {
 					lock.wait(1000);
 				}
 			}
