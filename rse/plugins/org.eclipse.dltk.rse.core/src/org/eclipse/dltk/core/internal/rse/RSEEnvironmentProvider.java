@@ -82,7 +82,7 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 
 	}
 
-	private boolean isInitialized() {
+	public boolean isInitialized() {
 		synchronized (lock) {
 			if (initialized) {
 				return true;
@@ -142,6 +142,17 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	}
 
 	public void waitInitialized() {
+		try {
+			synchronized (lock) {
+				while (!initialized) {
+					lock.wait(1000);
+				}
+			}
+		} catch (InterruptedException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public IEnvironment getProjectEnvironment(IProject project) {
