@@ -69,7 +69,6 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -647,6 +646,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 				false, null);
 		List childrenSet = new ArrayList();
 		childrenSet.addAll(Arrays.asList(children));
+
 		// Call for extra model providers
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(this);
@@ -788,13 +788,13 @@ public class ScriptProject extends Openable implements IScriptProject {
 			if (referringEntry != null && !resolvedEntry.isExported())
 				return;
 			if (checkExistency) {
-				if (entryPath.toString().startsWith(
+				if (entryPath.segment(0).startsWith(
 						IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)
 						&& BuiltinProjectFragment.isSupported(this)) {
 					root = new BuiltinProjectFragment(entryPath, this);
 					break;
 				}
-				if (entryPath.toString().startsWith(
+				if (entryPath.segment(0).startsWith(
 						IBuildpathEntry.BUILDPATH_SPECIAL)) {
 					// Special resolving case
 					IDLTKLanguageToolkit tk = DLTKLanguageManager
@@ -961,42 +961,6 @@ public class ScriptProject extends Openable implements IScriptProject {
 		}
 		// TODO Check this
 		return externalPath;
-		//		
-		// IPath canonicalPath = null;
-		// try {
-		// canonicalPath = new Path(new File(externalPath.toOSString())
-		// .getCanonicalPath());
-		// } catch (IOException e) {
-		// // default to original path
-		// return externalPath;
-		// }
-		// IPath result;
-		// int canonicalLength = canonicalPath.segmentCount();
-		// if (canonicalLength == 0) {
-		// // the java.io.File canonicalization failed
-		// return externalPath;
-		// } else if (externalPath.isAbsolute()) {
-		// result = canonicalPath;
-		// } else {
-		// // if path is relative, remove the first segments that were added by
-		// // the java.io.File canonicalization
-		// // e.g. 'lib/classes.zip' was converted to
-		// // 'd:/myfolder/lib/classes.zip'
-		// int externalLength = externalPath.segmentCount();
-		// if (canonicalLength >= externalLength) {
-		// result = canonicalPath.removeFirstSegments(canonicalLength
-		// - externalLength);
-		// } else {
-		// return externalPath;
-		// }
-		// }
-		// // keep device only if it was specified (this is because
-		// // File.getCanonicalPath() converts '/lib/classed.zip' to
-		// // 'd:/lib/classes/zip')
-		// if (externalPath.getDevice() == null) {
-		// result = result.setDevice(null);
-		// }
-		// return result;
 	}
 
 	/**
@@ -2462,7 +2426,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 		IProjectFragment[] allRoots = this.getAllProjectFragments();
 		if (!path.isAbsolute()) {
 			if (path.segmentCount() == 0
-					|| !path.segment(0).equals(IndexManager.SPECIAL_BUILTIN)) {
+					|| !path.segment(0).startsWith(
+							IBuildpathEntry.BUILDPATH_SPECIAL)) {
 				throw new IllegalArgumentException(Messages.path_mustBeAbsolute);
 			}
 		}

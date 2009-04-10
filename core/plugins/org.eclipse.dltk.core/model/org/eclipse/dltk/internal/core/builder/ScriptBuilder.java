@@ -52,9 +52,7 @@ import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
-import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
 import org.eclipse.dltk.internal.core.BuiltinSourceModule;
-import org.eclipse.dltk.internal.core.ExternalProjectFragment;
 import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ScriptProject;
@@ -139,8 +137,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				return false;
 			}
 			if (element.getElementType() == IModelElement.PROJECT_FRAGMENT) {
-				if (!(element instanceof ExternalProjectFragment)
-						&& !(element instanceof BuiltinProjectFragment)) {
+				if (!(element instanceof IProjectFragment && ((IProjectFragment) element)
+						.isExternal())) {
 					return false;
 				}
 				IProjectFragment fragment = (IProjectFragment) element;
@@ -170,7 +168,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			}
 			return true;
 		}
-
 	}
 
 	/**
@@ -565,8 +562,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		final List fragmentPaths = new ArrayList(fragments.length);
 		for (int i = 0; i < fragments.length; i++) {
 			final IProjectFragment fragment = fragments[i];
-			if (fragment instanceof ExternalProjectFragment
-					|| fragment instanceof BuiltinProjectFragment) {
+			if (fragment.isExternal()) {
 				final IPath path = fragment.getPath();
 				if (!updateState
 						|| !this.lastState.externalFolderLocations

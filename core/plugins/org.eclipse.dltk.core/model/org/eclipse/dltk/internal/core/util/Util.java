@@ -44,6 +44,7 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatusConstants;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
@@ -1458,5 +1459,18 @@ public class Util {
 				return p - 1;
 			}
 		}
+	}
+
+	public static boolean isExcluded(IPath path, IProjectFragment root,
+			boolean isFolderPath) {
+		char[][] inclusion = null;
+		char[][] exclusion = null;
+		if (root instanceof ProjectFragment) {
+			ProjectFragment projectFragment = (ProjectFragment) root;
+			inclusion = projectFragment.fullInclusionPatternChars();
+			exclusion = projectFragment.fullExclusionPatternChars();
+		}
+
+		return isExcluded(path, inclusion, exclusion, isFolderPath);
 	}
 }

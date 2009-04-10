@@ -36,5 +36,11 @@ public interface IModelProvider {
 	 */
 	boolean providesFor(IModelElement modelElement, IPath path);
 
+	/**
+	 * This method is called for unknown buildpath entries starning with
+	 * "#special#" prefix. @see IBuildpathEntry element. This functionality
+	 * could be used for example to add some elements into interpreter
+	 * container.
+	 */
 	IProjectFragment getProjectFragment(IPath entryPath, IScriptProject project);
 }

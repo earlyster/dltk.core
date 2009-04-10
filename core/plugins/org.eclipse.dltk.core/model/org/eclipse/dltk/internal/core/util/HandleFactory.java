@@ -331,11 +331,9 @@ public class HandleFactory {
 						.getScriptProject(project);
 				IProjectFragment[] roots = scriptProject.getProjectFragments();
 				for (int j = 0, rootCount = roots.length; j < rootCount; j++) {
-					ProjectFragment root = (ProjectFragment) roots[j];
+					IProjectFragment root = (IProjectFragment) roots[j];
 					if (root.getPath().isPrefixOf(path)
-							&& !Util.isExcluded(path, root
-									.fullInclusionPatternChars(), root
-									.fullExclusionPatternChars(), false)) {
+							&& !Util.isExcluded(path, root, false)) {
 						return root;
 					}
 				}
