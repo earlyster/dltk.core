@@ -41,7 +41,6 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
-import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.internal.core.BufferManager;
 import org.eclipse.dltk.internal.core.BuiltinSourceModule;
 import org.eclipse.dltk.internal.core.ExternalProjectFragment;
@@ -202,13 +201,9 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 												.getInputModelElement();
 										IEnvironment environment = EnvironmentManager
 												.getEnvironment(modelElement);
-										if (environment != null) {
-											if (!environment
-													.getId()
-													.equals(
-															LocalEnvironment.ENVIRONMENT_ID)) {
-												scriptEditor.close(false);
-											}
+										if (environment != null
+												&& !environment.isLocal()) {
+											scriptEditor.close(false);
 										}
 									}
 								}
