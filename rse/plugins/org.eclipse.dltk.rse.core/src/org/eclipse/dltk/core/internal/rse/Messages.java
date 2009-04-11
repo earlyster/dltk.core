@@ -17,6 +17,7 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.core.internal.rse.messages"; //$NON-NLS-1$
 	public static String RSEEnvironment_EmptyFileNameError;
 	public static String RSEEnvironment_EnvironmentNameSuffix;
+	public static String RSEEnvironmentProvider_providerName;
 	public static String RSEExecEnvironment_hostNotFound;
 	static {
 		// initialize resource bundle

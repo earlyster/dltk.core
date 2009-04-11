@@ -28,6 +28,11 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	public RSEEnvironmentProvider() {
 	}
 
+	@Override
+	public String getProviderName() {
+		return Messages.RSEEnvironmentProvider_providerName;
+	}
+
 	public IEnvironment getEnvironment(String envId) {
 		if (envId.startsWith(RSE_ENVIRONMENT_PREFIX)) {
 			String name = envId.substring(RSE_ENVIRONMENT_PREFIX.length());
