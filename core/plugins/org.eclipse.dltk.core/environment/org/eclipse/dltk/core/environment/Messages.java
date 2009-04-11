@@ -14,6 +14,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.core.environment.messages"; //$NON-NLS-1$
+	public static String EnvironmentManager_initializingOperationName;
+	public static String EnvironmentManager_initializingTaskName;
 	public static String EnvironmentPathUtils_invalidPath;
 	static {
 		// initialize resource bundle

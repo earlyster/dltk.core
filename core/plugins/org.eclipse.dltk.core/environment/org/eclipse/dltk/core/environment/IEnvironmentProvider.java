@@ -13,6 +13,9 @@ package org.eclipse.dltk.core.environment;
 import org.eclipse.core.resources.IProject;
 
 public interface IEnvironmentProvider {
+
+	public String getProviderName();
+
 	public IEnvironment[] getEnvironments();
 
 	public IEnvironment getEnvironment(String envId);
