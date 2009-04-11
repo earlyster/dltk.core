@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ui;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,9 +22,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
@@ -59,10 +62,15 @@ import org.eclipse.dltk.launching.sourcelookup.DBGPSourceModule;
 import org.eclipse.dltk.ui.text.completion.ContentAssistHistory;
 import org.eclipse.dltk.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.dltk.ui.viewsupport.ProblemMarkerManager;
+import org.eclipse.dltk.utils.ExecutionContexts;
+import org.eclipse.dltk.utils.IExecutableOperation;
+import org.eclipse.dltk.utils.IExecutionContextManager;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Display;
@@ -172,6 +180,8 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		// Close all open editors which has remote environment files open
 		PlatformUI.getWorkbench().addWorkbenchListener(
 				new ShutdownCloseRemoteEditorsListener());
+
+		ExecutionContexts.setManager(new UIExecutionContextManager());
 	}
 
 	private static class ShutdownCloseRemoteEditorsListener implements
@@ -210,6 +220,40 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		}
 	}
 
+	private static class UIExecutionContextManager implements
+			IExecutionContextManager {
+
+		public void executeInBackground(final IExecutableOperation operation) {
+			if (!isRunningInUIThread()) {
+				operation.execute(new NullProgressMonitor());
+			} else {
+				final ProgressMonitorDialog dialog = new ProgressMonitorDialog(
+						null) {
+					protected void configureShell(Shell shell) {
+						super.configureShell(shell);
+						shell.setText(operation.getOperationName());
+					}
+				};
+				try {
+					dialog.run(true, false, new IRunnableWithProgress() {
+						public void run(IProgressMonitor monitor) {
+							operation.execute(monitor);
+						}
+					});
+				} catch (InvocationTargetException e) {
+					DLTKCore.error(e.getMessage(), e);
+				} catch (InterruptedException e) {
+					DLTKCore.error(e.getMessage(), e);
+				}
+			}
+		}
+
+		public boolean isRunningInUIThread() {
+			return Display.getCurrent() != null;
+		}
+
+	}
+
 	private final ListenerList shutdownListeners = new ListenerList();
 
 	public void addShutdownListener(IShutdownListener listener) {
@@ -221,6 +265,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 
+		ExecutionContexts.setManager(null);
 		if (fMembersOrderPreferenceCache != null) {
 			fMembersOrderPreferenceCache.dispose();
 			fMembersOrderPreferenceCache = null;
