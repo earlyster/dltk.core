@@ -51,7 +51,6 @@ import org.eclipse.dltk.internal.ui.IDLTKStatusConstants;
 import org.eclipse.dltk.internal.ui.editor.DocumentAdapter;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.editor.ISourceModuleDocumentProvider;
-import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.editor.SourceModuleDocumentProvider;
 import org.eclipse.dltk.internal.ui.editor.WorkingCopyManager;
 import org.eclipse.dltk.internal.ui.text.hover.EditorTextHoverDescriptor;
@@ -71,7 +70,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.IWorkbenchPage;
@@ -105,7 +103,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 
 	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
 
-	private static ISharedImages fgSharedImages = null;
+	// private static ISharedImages fgSharedImages = null;
 
 	/**
 	 * Content assist history.
@@ -171,47 +169,45 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		// to initialize launching
 		DLTKLaunchingPlugin.getDefault();
 
-		/**
-		 * Close all open editors which has not local Environment files open
-		 */
-
+		// Close all open editors which has remote environment files open
 		PlatformUI.getWorkbench().addWorkbenchListener(
-				new IWorkbenchListener() {
-					public void postShutdown(IWorkbench workbench) {
-						// TODO Auto-generated method stub
+				new ShutdownCloseRemoteEditorsListener());
+	}
 
-					}
+	private static class ShutdownCloseRemoteEditorsListener implements
+			IWorkbenchListener {
+		public void postShutdown(IWorkbench workbench) {
+			// empty
+		}
 
-					public boolean preShutdown(IWorkbench workbench,
-							boolean forced) {
-						IWorkbenchWindow window = PlatformUI.getWorkbench()
-								.getActiveWorkbenchWindow();
-						if (window != null) {
-							IWorkbenchPage activePage = window.getActivePage();
-							if (activePage != null) {
-								IEditorReference[] references = activePage
-										.getEditorReferences();
-								for (int i = 0; i < references.length; i++) {
-									IEditorPart editor = references[i]
-											.getEditor(false);
-									if (editor != null
-											&& editor instanceof ScriptEditor) {
-										ScriptEditor scriptEditor = (ScriptEditor) editor;
-										IModelElement modelElement = scriptEditor
-												.getInputModelElement();
-										IEnvironment environment = EnvironmentManager
-												.getEnvironment(modelElement);
-										if (environment != null
-												&& !environment.isLocal()) {
-											scriptEditor.close(false);
-										}
-									}
-								}
-							}
+		public boolean preShutdown(IWorkbench workbench, boolean forced) {
+			IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
+			if (window != null) {
+				IWorkbenchPage page = window.getActivePage();
+				if (page != null) {
+					IEditorReference[] references = page.getEditorReferences();
+					for (int i = 0; i < references.length; i++) {
+						IEditorPart editor = references[i].getEditor(false);
+						if (editor != null) {
+							closeEditor(page, editor);
 						}
-						return true;
 					}
-				});
+				}
+			}
+			return true;
+		}
+
+		private void closeEditor(IWorkbenchPage page, IEditorPart editor) {
+			IModelElement modelElement = EditorUtility
+					.getEditorInputModelElement(editor, false);
+			if (modelElement != null) {
+				IEnvironment environment = EnvironmentManager
+						.getEnvironment(modelElement);
+				if (environment != null && !environment.isLocal()) {
+					page.closeEditor(editor, false);
+				}
+			}
+		}
 	}
 
 	private final ListenerList shutdownListeners = new ListenerList();
