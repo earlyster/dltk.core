@@ -88,7 +88,19 @@ public abstract class ScriptTextTools {
 
 	/**
 	 * Sets up the script document partitioner for the given document for the
-	 * default partitioning.
+	 * {@link IDocumentExtension3.DEFAULT_PARTITIONING} default partitioning.
+	 * 
+	 * @param document
+	 *            the document to be set up
+	 */
+	public void setupDefaultDocumentPartitioner(IDocument document) {
+		setupDocumentPartitioner(document,
+				IDocumentExtension3.DEFAULT_PARTITIONING);
+	}
+
+	/**
+	 * Sets up the script document partitioner for the given document for the
+	 * default partitioning of this object.
 	 * 
 	 * @param document
 	 *            the document to be set up
