@@ -28,8 +28,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.DefaultScope;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
@@ -59,6 +57,7 @@ import org.eclipse.dltk.internal.ui.text.hover.SourceViewerInformationControl;
 import org.eclipse.dltk.ui.CodeFormatterConstants;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.EclipsePreferencesAdapter;
 import org.eclipse.dltk.ui.IContextMenuConstants;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.IWorkingCopyManager;
@@ -137,7 +136,6 @@ import org.eclipse.jface.text.source.IVerticalRulerColumn;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
-import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -154,7 +152,6 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPartListener2;
@@ -182,7 +179,6 @@ import org.eclipse.ui.texteditor.TextNavigationAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
-import org.osgi.service.prefs.BackingStoreException;
 
 import com.ibm.icu.text.BreakIterator;
 
@@ -643,321 +639,6 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	protected CompositeActionGroup fActionGroups;
 
 	private AbstractSelectionChangedListener fOutlineSelectionChangedListener = new OutlineSelectionChangedListener();
-
-	/**
-	 * Adapts an options {@link IEclipsePreferences} to
-	 * {@link org.eclipse.jface.preference.IPreferenceStore}.
-	 * <p>
-	 * This preference store is read-only i.e. write access throws an
-	 * {@link java.lang.UnsupportedOperationException}.
-	 * </p>
-	 * 
-	 * 
-	 */
-	/**
-	 * Adapts an options {@link IEclipsePreferences} to
-	 * {@link org.eclipse.jface.preference.IPreferenceStore}.
-	 * <p>
-	 * This preference store is read-only i.e. write access throws an
-	 * {@link java.lang.UnsupportedOperationException}.
-	 * </p>
-	 * 
-	 * 
-	 */
-	protected static class EclipsePreferencesAdapter implements
-			IPreferenceStore {
-		/**
-		 * Preference change listener. Listens for events preferences fires a
-		 * {@link org.eclipse.jface.util.PropertyChangeEvent} on this adapter
-		 * with arguments from the received event.
-		 */
-		private class PreferenceChangeListener implements
-				IEclipsePreferences.IPreferenceChangeListener {
-			/**
-			 * {@inheritDoc}
-			 */
-			public void preferenceChange(
-					final IEclipsePreferences.PreferenceChangeEvent event) {
-				if (Display.getCurrent() == null) {
-					Display.getDefault().asyncExec(new Runnable() {
-						public void run() {
-							firePropertyChangeEvent(event.getKey(), event
-									.getOldValue(), event.getNewValue());
-						}
-					});
-				} else {
-					firePropertyChangeEvent(event.getKey(),
-							event.getOldValue(), event.getNewValue());
-				}
-			}
-		}
-
-		/** Listeners on on this adapter */
-		private ListenerList fListeners = new ListenerList();
-
-		/** Listener on the node */
-		private IEclipsePreferences.IPreferenceChangeListener fListener = new PreferenceChangeListener();
-
-		/** wrapped node */
-		private final IScopeContext fContext;
-
-		private final String fQualifier;
-
-		/**
-		 * Initialize with the node to wrap
-		 * 
-		 * @param context
-		 *            The context to access
-		 */
-		public EclipsePreferencesAdapter(IScopeContext context, String qualifier) {
-			fContext = context;
-			fQualifier = qualifier;
-		}
-
-		private IEclipsePreferences getNode() {
-			return fContext.getNode(fQualifier);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void addPropertyChangeListener(IPropertyChangeListener listener) {
-			if (fListeners.size() == 0)
-				getNode().addPreferenceChangeListener(fListener);
-			fListeners.add(listener);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void removePropertyChangeListener(
-				IPropertyChangeListener listener) {
-			fListeners.remove(listener);
-			if (fListeners.size() == 0) {
-				getNode().removePreferenceChangeListener(fListener);
-			}
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean contains(String name) {
-			return getNode().get(name, null) != null;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void firePropertyChangeEvent(String name, Object oldValue,
-				Object newValue) {
-			PropertyChangeEvent event = new PropertyChangeEvent(this, name,
-					oldValue, newValue);
-			Object[] listeners = fListeners.getListeners();
-			for (int i = 0; i < listeners.length; i++)
-				((IPropertyChangeListener) listeners[i]).propertyChange(event);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean getBoolean(String name) {
-			return getNode().getBoolean(name, BOOLEAN_DEFAULT_DEFAULT);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean getDefaultBoolean(String name) {
-			return BOOLEAN_DEFAULT_DEFAULT;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public double getDefaultDouble(String name) {
-			return DOUBLE_DEFAULT_DEFAULT;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public float getDefaultFloat(String name) {
-			return FLOAT_DEFAULT_DEFAULT;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public int getDefaultInt(String name) {
-			return INT_DEFAULT_DEFAULT;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public long getDefaultLong(String name) {
-			return LONG_DEFAULT_DEFAULT;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public String getDefaultString(String name) {
-			return STRING_DEFAULT_DEFAULT;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public double getDouble(String name) {
-			return getNode().getDouble(name, DOUBLE_DEFAULT_DEFAULT);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public float getFloat(String name) {
-			return getNode().getFloat(name, FLOAT_DEFAULT_DEFAULT);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public int getInt(String name) {
-			return getNode().getInt(name, INT_DEFAULT_DEFAULT);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public long getLong(String name) {
-			return getNode().getLong(name, LONG_DEFAULT_DEFAULT);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public String getString(String name) {
-			return getNode().get(name, STRING_DEFAULT_DEFAULT);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean isDefault(String name) {
-			return false;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public boolean needsSaving() {
-			try {
-				return getNode().keys().length > 0;
-			} catch (BackingStoreException e) {
-				// ignore
-			}
-			return true;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void putValue(String name, String value) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setDefault(String name, double value) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setDefault(String name, float value) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setDefault(String name, int value) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setDefault(String name, long value) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setDefault(String name, String defaultObject) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setDefault(String name, boolean value) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setToDefault(String name) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setValue(String name, double value) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setValue(String name, float value) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setValue(String name, int value) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setValue(String name, long value) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setValue(String name, String value) {
-			throw new UnsupportedOperationException();
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void setValue(String name, boolean value) {
-			throw new UnsupportedOperationException();
-		}
-	}
 
 	/**
 	 * Updates the script outline page selection and this editor's range
