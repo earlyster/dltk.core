@@ -4,6 +4,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlighter;
@@ -16,7 +19,8 @@ import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 public abstract class AbstractDLTKUILanguageToolkit implements
@@ -35,8 +39,30 @@ public abstract class AbstractDLTKUILanguageToolkit implements
 		return null;
 	}
 
-	public IPreferenceStore getPreferenceStore() {
-		return getUIPLugin().getPreferenceStore();
+	/**
+	 * The combined preference store.
+	 */
+	private IPreferenceStore fCombinedPreferenceStore;
+
+	/**
+	 * Returns a combined preference store, this store is read-only.
+	 * 
+	 * @return the combined preference store
+	 */
+	public IPreferenceStore getCombinedPreferenceStore() {
+		if (fCombinedPreferenceStore == null) {
+			final InstanceScope instanceScope = new InstanceScope();
+			fCombinedPreferenceStore = new ChainedPreferenceStore(
+					new IPreferenceStore[] {
+							getPreferenceStore(),
+							new EclipsePreferencesAdapter(instanceScope,
+									getCoreToolkit().getPreferenceQualifier()),
+							DLTKUIPlugin.getDefault().getPreferenceStore(),
+							new EclipsePreferencesAdapter(instanceScope,
+									DLTKCore.PLUGIN_ID),
+							EditorsUI.getPreferenceStore() });
+		}
+		return fCombinedPreferenceStore;
 	}
 
 	public boolean getProvideMembers(ISourceModule element) {
@@ -47,7 +73,12 @@ public abstract class AbstractDLTKUILanguageToolkit implements
 		return new ScriptElementLabels();
 	}
 
-	protected abstract AbstractUIPlugin getUIPLugin();
+	/**
+	 * @deprecated
+	 */
+	protected final Object getUIPLugin() {
+		return null;
+	}
 
 	public String getEditorId(Object inputElement) {
 		IDLTKLanguageToolkit toolkit = this.getCoreToolkit();
@@ -68,13 +99,13 @@ public abstract class AbstractDLTKUILanguageToolkit implements
 		String fileName = null;
 		if (inputElement instanceof ISourceModule) {
 			fileName = ((ISourceModule) inputElement).getPath().toString();
-		}
-		else if( inputElement instanceof IResource ) { 
-			fileName = ((IResource) inputElement).getFullPath().toString();	
+		} else if (inputElement instanceof IResource) {
+			fileName = ((IResource) inputElement).getFullPath().toString();
 		}
 
-		IEditorDescriptor editor = editorRegistry.getDefaultEditor(fileName, contentType);
-		if( editor != null ) {
+		IEditorDescriptor editor = editorRegistry.getDefaultEditor(fileName,
+				contentType);
+		if (editor != null) {
 			return editor.getId();
 		}
 		return null;
@@ -93,7 +124,8 @@ public abstract class AbstractDLTKUILanguageToolkit implements
 	}
 
 	public ScriptTextTools getTextTools() {
-		return new ScriptTextTools(getPartitioningId(), new String[0], true) {
+		return new ScriptTextTools(getPartitioningId(),
+				CharOperation.NO_STRINGS, true) {
 			public ScriptSourceViewerConfiguration createSourceViewerConfiguraton(
 					IPreferenceStore preferenceStore, ITextEditor editor,
 					String partitioning) {

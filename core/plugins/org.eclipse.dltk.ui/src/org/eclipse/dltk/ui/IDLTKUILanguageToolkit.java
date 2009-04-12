@@ -20,27 +20,29 @@ public interface IDLTKUILanguageToolkit {
 	ScriptElementLabels getScriptElementLabels();
 
 	ScriptUILabelProvider createScriptUILabelProvider();
-	
+
 	IDLTKLanguageToolkit getCoreToolkit();
 
 	IPreferenceStore getPreferenceStore();
+
+	IPreferenceStore getCombinedPreferenceStore();
 
 	String getPartitioningId();
 
 	String getEditorId(Object inputElement);
 
 	String getInterpreterContainerId();
-	
+
 	ScriptTextTools getTextTools();
-	
+
 	ScriptSourceViewerConfiguration createSourceViewerConfiguration();
-	
+
 	// Per module script explorer show children way.
 	boolean getProvideMembers(ISourceModule element);
-	
+
 	String getInterpreterPreferencePage();
-	
+
 	String getDebugPreferencePage();
-	
+
 	String[] getEditorPreferencePages();
 }
