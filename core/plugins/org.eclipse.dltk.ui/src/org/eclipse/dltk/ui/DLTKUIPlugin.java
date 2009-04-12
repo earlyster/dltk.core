@@ -84,9 +84,11 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ConfigurationElementSorter;
 import org.osgi.framework.BundleContext;
 
@@ -756,6 +758,15 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		if (display == null)
 			display = Display.getDefault();
 		return display;
+	}
+
+	public static String getAdditionalInfoAffordanceString() {
+		if (!EditorsUI
+				.getPreferenceStore()
+				.getBoolean(
+						AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE))
+			return null;
+		return Messages.DLTKUIPlugin_additionalInfo_affordance;
 	}
 
 }
