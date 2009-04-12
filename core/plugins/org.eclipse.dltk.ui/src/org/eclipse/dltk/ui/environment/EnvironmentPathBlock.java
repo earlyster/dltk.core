@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.ui.util.PixelConverter;
@@ -36,8 +37,6 @@ import org.eclipse.swt.widgets.Table;
 
 public class EnvironmentPathBlock {
 
-	private static final String EMPTY = ""; //$NON-NLS-1$
-
 	private Table pathTable;
 	private TableViewer pathViewer;
 
@@ -57,8 +56,14 @@ public class EnvironmentPathBlock {
 		this.useFolders = useFolders;
 	}
 
-	private class PathLabelProvider extends LabelProvider implements
+	protected class PathLabelProvider extends LabelProvider implements
 			ITableLabelProvider {
+
+		private final int pathColumn;
+
+		public PathLabelProvider(int pathColumn) {
+			this.pathColumn = pathColumn;
+		}
 
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
@@ -66,20 +71,16 @@ public class EnvironmentPathBlock {
 
 		public String getColumnText(Object element, int columnIndex) {
 			if (element instanceof IEnvironment) {
-				switch (columnIndex) {
-				case 0:
+				if (columnIndex == 0) {
 					return ((IEnvironment) element).getName();
-				case 1:
+				} else if (columnIndex == pathColumn) {
 					Object path = paths.get(element);
 					if (path != null) {
 						return (String) path;
 					}
-					return EMPTY;
-				default:
-					break;
 				}
 			}
-			return null;
+			return Util.EMPTY_STRING;
 		}
 	}
 
@@ -113,12 +114,50 @@ public class EnvironmentPathBlock {
 
 		pathViewer = new TableViewer(pathTable);
 
+		initColumns(pathViewer, conv);
+
+		pathViewer.setLabelProvider(createPathLabelProvider());
+		pathViewer.setContentProvider(new IStructuredContentProvider() {
+			public Object[] getElements(Object inputElement) {
+				if (inputElement instanceof IEnvironment[]) {
+					return (Object[]) inputElement;
+				}
+				return new Object[0];
+			}
+
+			public void dispose() {
+			}
+
+			public void inputChanged(Viewer viewer, Object oldInput,
+					Object newInput) {
+			}
+		});
+		pathViewer.setInput(environments != null ? environments
+				: EnvironmentManager.getEnvironments());
+		if (pathTable.getItemCount() > 0) {
+			pathTable.select(0);
+		}
+	}
+
+	protected PathLabelProvider createPathLabelProvider() {
+		return new PathLabelProvider(1);
+	}
+
+	protected void initColumns(TableViewer viewer, PixelConverter conv) {
+		initEnvironmentColumn(viewer, conv);
+		initPathColumn(viewer, conv);
+	}
+
+	protected void initEnvironmentColumn(TableViewer viewer, PixelConverter conv) {
 		TableViewerColumn environmentsColumn = new TableViewerColumn(
 				pathViewer, SWT.NULL);
 		environmentsColumn.getColumn().setText(
 				Messages.EnvironmentPathBlock_environment);
 		environmentsColumn.getColumn().setWidth(
 				conv.convertWidthInCharsToPixels(30));
+	}
+
+	protected void initPathColumn(TableViewer viewer, PixelConverter conv) {
 		TableViewerColumn pathColumn = new TableViewerColumn(pathViewer,
 				SWT.NULL);
 		pathColumn.getColumn().setText(Messages.EnvironmentPathBlock_path);
@@ -187,11 +226,11 @@ public class EnvironmentPathBlock {
 
 			protected Object getValue(Object element) {
 				Object value = paths.get(element);
-				return value != null ? value : EMPTY;
+				return value != null ? value : Util.EMPTY_STRING;
 			}
 
 			protected void setValue(Object element, Object value) {
-				if (value == null || EMPTY.equals(value)) {
+				if (value == null || Util.EMPTY_STRING.equals(value)) {
 					paths.remove(element);
 				} else {
 					paths.put(element, value);
@@ -200,28 +239,10 @@ public class EnvironmentPathBlock {
 				fireValueChanged();
 			}
 		});
+	}
 
-		pathViewer.setLabelProvider(new PathLabelProvider());
-		pathViewer.setContentProvider(new IStructuredContentProvider() {
-			public Object[] getElements(Object inputElement) {
-				if (inputElement instanceof IEnvironment[]) {
-					return (Object[]) inputElement;
-				}
-				return new Object[0];
-			}
-
-			public void dispose() {
-			}
-
-			public void inputChanged(Viewer viewer, Object oldInput,
-					Object newInput) {
-			}
-		});
-		pathViewer.setInput(environments != null ? environments
-				: EnvironmentManager.getEnvironments());
-		if (pathTable.getItemCount() > 0) {
-			pathTable.select(0);
-		}
+	protected TableViewer getViewer() {
+		return pathViewer;
 	}
 
 	public void addSelectionListener(ISelectionChangedListener listener) {
