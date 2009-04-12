@@ -131,21 +131,26 @@ public abstract class DebuggingEngineConfigOptionsBlock extends
 	 * @return
 	 */
 	protected IEnvironment[] getRelevantEnvironments() {
-		if (fProject != null) {
+		final IProject project = getProject();
+		if (project != null) {
 			return new IEnvironment[] { EnvironmentManager
-					.getEnvironment(fProject) };
+					.getEnvironment(project) };
 		} else {
 			return EnvironmentManager.getEnvironments();
 		}
 	}
 
 	protected boolean processChanges(IWorkbenchPreferenceContainer container) {
+		saveLoggingOptions();
+		return super.processChanges(container);
+	}
+
+	protected void saveLoggingOptions() {
 		if (logFilePaths != null) {
 			String loggingPaths = EnvironmentPathUtils.encodePaths(logFilePaths
 					.getPaths());
 			setString(getLogFileNamePreferenceKey(), loggingPaths);
 		}
-		return super.processChanges(container);
 	}
 
 	/**
