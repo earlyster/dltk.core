@@ -4,12 +4,12 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.tests.model.TestLanguageToolkit;
 import org.eclipse.dltk.ui.AbstractDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.tests.DLTKUITestsPlugin;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 public class DLTKUITestLanguageToolkit extends AbstractDLTKUILanguageToolkit {
 
-	protected AbstractUIPlugin getUIPLugin() {
-		return DLTKUITestsPlugin.getDefault();
+	public IPreferenceStore getPreferenceStore() {
+		return DLTKUITestsPlugin.getDefault().getPreferenceStore();
 	}
 
 	public IDLTKLanguageToolkit getCoreToolkit() {
