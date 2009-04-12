@@ -41,6 +41,14 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 public class SWTUtil {
 
 	/**
+	 * The default visible item count for {@link Combo}s. Workaround for
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=245569 .
+	 * 
+	 * @see Combo#setVisibleItemCount(int)
+	 */
+	public static final int COMBO_VISIBLE_ITEM_COUNT = 20;
+
+	/**
 	 * Returns the standard display to be used. The method first checks, if the
 	 * thread calling this method has an associated disaply. If so, this display
 	 * is returned. Otherwise the method returns the default display.
@@ -75,7 +83,7 @@ public class SWTUtil {
 
 		return null;
 	}
-	
+
 	public static int getTableHeightHint(Table table, int rows) {
 		if (table.getFont().equals(JFaceResources.getDefaultFont()))
 			table.setFont(JFaceResources.getDialogFont());
@@ -98,8 +106,8 @@ public class SWTUtil {
 	}
 
 	/**
-	 * Sets width and height hint for the button control. <b>Note:</b> This is
-	 * a NOP if the button's layout data is not an instance of
+	 * Sets width and height hint for the button control. <b>Note:</b> This is a
+	 * NOP if the button's layout data is not an instance of
 	 * <code>GridData</code>.
 	 * 
 	 * @param the
@@ -572,5 +580,19 @@ public class SWTUtil {
 		gd.horizontalSpan = hspan;
 		ex.setLayoutData(gd);
 		return ex;
+	}
+
+	/**
+	 * Sets the default visible item count for {@link Combo}s. Workaround for
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=7845 .
+	 * 
+	 * @param combo
+	 *            the combo
+	 * 
+	 * @see Combo#setVisibleItemCount(int)
+	 * @see #COMBO_VISIBLE_ITEM_COUNT
+	 */
+	public static void setDefaultVisibleItemCount(Combo combo) {
+		combo.setVisibleItemCount(COMBO_VISIBLE_ITEM_COUNT);
 	}
 }
