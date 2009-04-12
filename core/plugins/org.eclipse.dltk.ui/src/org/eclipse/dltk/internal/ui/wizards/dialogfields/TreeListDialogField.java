@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -54,7 +55,7 @@ public class TreeListDialogField extends DialogField {
 	protected ILabelProvider fLabelProvider;
 	protected TreeViewerAdapter fTreeViewerAdapter;
 	protected List fElements;
-	protected ViewerSorter fViewerSorter;
+	protected ViewerComparator fViewerSorter;
 
 	protected String[] fButtonLabels;
 	private Button[] fButtonControls;
@@ -147,6 +148,10 @@ public class TreeListDialogField extends DialogField {
 		fViewerSorter= viewerSorter;
 	}
 	
+	public void setViewerComparator(ViewerComparator viewerComparator) {
+		fViewerSorter = viewerComparator;
+	}
+
 	public void setTreeExpansionLevel(int level) {
 		fTreeExpandLevel= level;
 		if (isOkToUse(fTreeControl) && fTreeExpandLevel > 0) {
@@ -263,7 +268,7 @@ public class TreeListDialogField extends DialogField {
 			fTree.expandToLevel(fTreeExpandLevel);
 
 			if (fViewerSorter != null) {
-				fTree.setSorter(fViewerSorter);
+				fTree.setComparator(fViewerSorter);
 			}
 
 			fTreeControl.setEnabled(isEnabled());
