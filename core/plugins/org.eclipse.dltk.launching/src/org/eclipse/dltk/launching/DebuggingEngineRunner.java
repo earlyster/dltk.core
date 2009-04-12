@@ -9,6 +9,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.dltk.core.IPreferencesLookupDelegate;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.PreferencesLookupDelegate;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
@@ -290,39 +291,25 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	protected abstract String getDebuggingEnginePreferenceQualifier();
 
 	/**
-	 * Returns the preference key used to store the enable logging setting.
+	 * Tests if logging is enabled for this engine.
 	 * 
 	 * <p>
-	 * Note: this preference controls logging for the actual debugging engine,
-	 * and not the DBGP protocol output.
+	 * Note: this method controls logging for the actual debugging engine, and
+	 * not the DBGP protocol output.
 	 * </p>
 	 */
-	// protected abstract String getLoggingEnabledPreferenceKey();
-	/**
-	 * Returns the preference key used to store the log file path
-	 */
-	// protected abstract String getLogFilePathPreferenceKey();
+	protected boolean isLoggingEnabled(IPreferencesLookupDelegate delegate) {
+		return true;
+	}
+
 	/**
 	 * Returns the preference key usd to store the log file name
 	 */
 	protected abstract String getLogFileNamePreferenceKey();
 
 	/**
-	 * Returns true if debugging engine logging is enabled.
-	 * 
-	 * <p>
-	 * Subclasses should use this method to determine of logging is enabled for
-	 * the given debugging engine.
-	 * </p>
-	 */
-	// protected boolean isLoggingEnabled(PreferencesLookupDelegate delegate) {
-	// String key = getLoggingEnabledPreferenceKey();
-	// String qualifier = getDebuggingEnginePreferenceQualifier();
-	//
-	// return delegate.getBoolean(qualifier, key);
-	// }
-	/**
-	 * Returns a fully qualifed path to a log file name.
+	 * Returns a fully qualified path to a log file name or <code>null</code> if
+	 * logging is not enabled.
 	 * 
 	 * <p>
 	 * If the user chose to use '{0}' in their file name, it will be replaced
@@ -331,6 +318,9 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	 */
 	protected String getLogFileName(PreferencesLookupDelegate delegate,
 			String sessionId) {
+		if (!isLoggingEnabled(delegate)) {
+			return null;
+		}
 		String qualifier = getDebuggingEnginePreferenceQualifier();
 		String keyValue = delegate.getString(qualifier,
 				getLogFileNamePreferenceKey());
