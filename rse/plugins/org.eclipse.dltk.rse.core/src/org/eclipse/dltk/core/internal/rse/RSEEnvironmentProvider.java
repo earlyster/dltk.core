@@ -28,7 +28,6 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	public RSEEnvironmentProvider() {
 	}
 
-	@Override
 	public String getProviderName() {
 		return Messages.RSEEnvironmentProvider_providerName;
 	}
