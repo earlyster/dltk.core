@@ -12,12 +12,14 @@ package org.eclipse.dltk.ui.text;
 import org.eclipse.dltk.internal.ui.text.DLTKColorManager;
 import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlighter;
 import org.eclipse.dltk.ui.editor.highlighting.SemanticHighlighting;
+import org.eclipse.dltk.ui.text.templates.TemplateVariableProcessor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 public abstract class ScriptTextTools {
@@ -67,6 +69,21 @@ public abstract class ScriptTextTools {
 	public abstract ScriptSourceViewerConfiguration createSourceViewerConfiguraton(
 			IPreferenceStore preferenceStore, ITextEditor editor,
 			String partitioning);
+
+	/**
+	 * Creates {@link SourceViewerConfiguration} to use in code template editor.
+	 * Should be overridden in ancestors.
+	 * 
+	 * @param preferenceStore
+	 * @param variableProcessor
+	 * @return
+	 */
+	public ScriptSourceViewerConfiguration createSourceViewerConfiguraton(
+			IPreferenceStore preferenceStore, ITextEditor editor,
+			TemplateVariableProcessor variableProcessor) {
+		return createSourceViewerConfiguraton(preferenceStore, editor,
+				fDefaultPartitioning);
+	}
 
 	public IPartitionTokenScanner getPartitionScanner() {
 		return null;

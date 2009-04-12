@@ -40,6 +40,56 @@ public final class PreferencesMessages extends NLS {
 	public static String BuildPathsPropertyPage_unsavedchanges_button_discard;
 	public static String BuildPathsPropertyPage_unsavedchanges_button_ignore;
 
+	public static String CodeTemplatesPreferencePage_title;
+	public static String CodeTemplateBlock_preview;
+
+	public static String CodeTemplateBlock_templates_new_button;
+	public static String CodeTemplateBlock_templates_edit_button;
+	public static String CodeTemplateBlock_templates_remove_button;
+	public static String CodeTemplateBlock_templates_import_button;
+	public static String CodeTemplateBlock_templates_export_button;
+	public static String CodeTemplateBlock_templates_exportall_button;
+
+	public static String CodeTemplateBlock_templates_label;
+
+	public static String CodeTemplateBlock_import_title;
+	public static String CodeTemplateBlock_import_extension;
+
+	public static String CodeTemplateBlock_export_title;
+	public static String CodeTemplateBlock_export_filename;
+	public static String CodeTemplateBlock_export_extension;
+	public static String CodeTemplateBlock_export_exists_title;
+	public static String CodeTemplateBlock_export_exists_message;
+
+	public static String CodeTemplateBlock_error_read_title;
+	public static String CodeTemplateBlock_error_read_message;
+	public static String CodeTemplateBlock_error_parse_message;
+	public static String CodeTemplateBlock_error_write_title;
+	public static String CodeTemplateBlock_error_write_message;
+	public static String CodeTemplateBlock_export_error_title;
+	public static String CodeTemplateBlock_export_error_hidden;
+	public static String CodeTemplateBlock_export_error_canNotWrite;
+
+	public static String EditTemplateDialog_error_noname;
+	public static String EditTemplateDialog_error_invalidName;
+	public static String EditTemplateDialog_title_new;
+	public static String EditTemplateDialog_title_edit;
+	public static String EditTemplateDialog_name;
+	public static String EditTemplateDialog_description;
+	public static String EditTemplateDialog_context;
+	public static String EditTemplateDialog_pattern;
+	public static String EditTemplateDialog_insert_variable;
+	public static String EditTemplateDialog_undo;
+	public static String EditTemplateDialog_redo;
+	public static String EditTemplateDialog_cut;
+	public static String EditTemplateDialog_copy;
+	public static String EditTemplateDialog_paste;
+	public static String EditTemplateDialog_select_all;
+	public static String EditTemplateDialog_content_assist;
+	public static String EditTemplateDialog_autoinsert;
+
+	public static String TemplateVariableProposal_error_title;
+
 	public static String DLTKEditorPreferencePage_default;
 	public static String DLTKEditorPreferencePage_singleLineComment;
 	public static String DLTKEditorPreferencePage_returnKeyword;
