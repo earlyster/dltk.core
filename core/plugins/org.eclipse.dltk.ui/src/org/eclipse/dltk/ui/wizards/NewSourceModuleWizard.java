@@ -46,39 +46,33 @@ public abstract class NewSourceModuleWizard extends NewElementWizard {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see org.eclipse.dltk.ui.wizards.NewElementWizard#performFinish()
 	 */
 	public boolean performFinish() {
 		final boolean result = super.performFinish();
 		if (result && module != null) {
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					try {
-						EditorUtility.openInEditor(module);
-					} catch (PartInitException e) {
-						DLTKUIPlugin
-								.logErrorMessage(
-										NLS
-												.bind(
-														Messages.NewSourceModuleWizard_errorInOpenInEditor,
-														new Object[] { module
-																.getElementName() }),
-										e);
-					} catch (ModelException e) {
-						DLTKUIPlugin
-								.logErrorMessage(
-										NLS
-												.bind(
-														Messages.NewSourceModuleWizard_errorInOpenInEditor,
-														new Object[] { module
-																.getElementName() }),
-										e);
-					}
-				}
-			});
+			openSourceModule(module);
 		}
 		return result;
+	}
+
+	protected void openSourceModule(final ISourceModule module) {
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				try {
+					EditorUtility.openInEditor(module);
+				} catch (PartInitException e) {
+					final String msg = NLS.bind(
+							Messages.NewSourceModuleWizard_errorInOpenInEditor,
+							module.getElementName());
+					DLTKUIPlugin.logErrorMessage(msg, e);
+				} catch (ModelException e) {
+					final String msg = NLS.bind(
+							Messages.NewSourceModuleWizard_errorInOpenInEditor,
+							module.getElementName());
+					DLTKUIPlugin.logErrorMessage(msg, e);
+				}
+			}
+		});
 	}
 }
