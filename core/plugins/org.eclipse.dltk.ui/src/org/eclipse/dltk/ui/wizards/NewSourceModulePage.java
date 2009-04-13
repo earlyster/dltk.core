@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -24,13 +25,12 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
-import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.dltk.ui.ModelElementLabelProvider;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -38,9 +38,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 public abstract class NewSourceModulePage extends NewContainerWizardPage {
@@ -63,7 +61,8 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 				ISourceModule module = currentScriptFolder
 						.getSourceModule(getFileName());
 				if (module.exists()) {
-					status.setError(Messages.NewSourceModulePage_fileAlreadyExists);
+					status
+							.setError(Messages.NewSourceModulePage_fileAlreadyExists);
 				}
 			}
 		}
@@ -188,11 +187,10 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		IContentTypeManager manager = Platform.getContentTypeManager();
 		IContentType type = manager.getContentType(contentType);
 		if (type != null) {
-			String[] extensions = type.getFileSpecs(IContentType.FILE_EXTENSION_SPEC);
-			return extensions;
+			return type.getFileSpecs(IContentType.FILE_EXTENSION_SPEC);
 		}
 
-		return new String[] { "" }; //$NON-NLS-1$
+		return new String[] { Util.EMPTY_STRING };
 	}
 
 	protected IScriptFolder chooseScriptFolder() {
@@ -205,7 +203,8 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		dialog.setIgnoreCase(false);
 		dialog.setTitle(Messages.NewSourceModulePage_selectScriptFolder);
 		dialog.setMessage(Messages.NewSourceModulePage_selectScriptFolder);
-		dialog.setEmptyListMessage(Messages.NewSourceModulePage_noFoldersAvailable);
+		dialog
+				.setEmptyListMessage(Messages.NewSourceModulePage_noFoldersAvailable);
 
 		IProjectFragment projectFragment = getProjectFragment();
 		if (projectFragment != null) {
