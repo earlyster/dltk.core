@@ -42,7 +42,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
-
 public abstract class NewElementWizard extends Wizard implements INewWizard {
 
 	private IWorkbench fWorkbench;
@@ -54,13 +53,13 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	}
 
 	protected void openResource(final IFile resource) {
-		final IWorkbenchPage activePage = DLTKUIPlugin.getActivePage();		
+		final IWorkbenchPage activePage = DLTKUIPlugin.getActivePage();
 		if (activePage != null) {
 			final Display display = getShell().getDisplay();
 			if (display != null) {
 				display.asyncExec(new Runnable() {
 					public void run() {
-						try {							
+						try {
 							IDE.openEditor(activePage, resource, true);
 						} catch (PartInitException e) {
 							DLTKUIPlugin.log(e);
@@ -86,8 +85,8 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	 * Returns the scheduling rule for creating the element.
 	 */
 	protected ISchedulingRule getSchedulingRule() {
-		return ResourcesPlugin.getWorkspace().getRoot(); // look all by
-															// default
+		return ResourcesPlugin.getWorkspace().getRoot();
+		// look all by default
 	}
 
 	protected boolean canRunForked() {
@@ -161,10 +160,7 @@ public abstract class NewElementWizard extends Wizard implements INewWizard {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench,
-	 *      org.eclipse.jface.viewers.IStructuredSelection)
+	 * @see IWorkbenchWizard#init(IWorkbench,IStructuredSelection)
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection currentSelection) {
 		fWorkbench = workbench;
