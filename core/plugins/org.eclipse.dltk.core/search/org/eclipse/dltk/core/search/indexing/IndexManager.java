@@ -70,6 +70,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	public static final Integer UNKNOWN_STATE = new Integer(2);
 	public static final Integer REBUILDING_STATE = new Integer(3);
 
+	public static final String SPECIAL = "#special#"; //$NON-NLS-1$
 	public static final String SPECIAL_MIXIN = "#special#mixin#"; //$NON-NLS-1$
 	public static final String SPECIAL_BUILTIN = "#special#builtin#"; //$NON-NLS-1$
 

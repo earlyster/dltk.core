@@ -145,8 +145,9 @@ public class HandleFactory {
 			IScriptFolder pkgFragment = (IScriptFolder) this.packageHandles
 					.get(pkgName);
 			if (pkgFragment == null) {
-				pkgFragment = ((IProjectFragment) this.lastPkgFragmentRoot)
-						.getScriptFolder(toPath(pkgName));
+				IPath ppath = toPath(pkgName);
+				IProjectFragment root = (IProjectFragment) this.lastPkgFragmentRoot;
+				pkgFragment = root.getScriptFolder(ppath);
 				this.packageHandles.put(pkgName, pkgFragment);
 			}
 			String simpleName = simpleNames[length];
