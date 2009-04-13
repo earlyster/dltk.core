@@ -9,7 +9,7 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.mixin;
+package org.eclipse.dltk.core.search.indexing.core;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -21,17 +21,18 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.search.indexing.IndexManager;
+import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
 import org.eclipse.dltk.internal.core.ExternalProjectFragment;
-import org.eclipse.dltk.internal.core.ModelManager;
 
-class MixinProjectRequest extends MixinIndexRequest {
+class ProjectRequest extends IndexRequest {
 
 	private final IScriptProject project;
 	private final boolean indexExternal;
 
-	public MixinProjectRequest(IScriptProject project, boolean indexExternal) {
+	public ProjectRequest(IProjectIndexer indexer, IScriptProject project,
+			boolean indexExternal) {
+		super(indexer);
 		this.project = project;
 		this.indexExternal = indexExternal;
 	}
@@ -56,8 +57,7 @@ class MixinProjectRequest extends MixinIndexRequest {
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(project);
 		final IProjectFragment[] fragments = project.getProjectFragments();
-		final IndexManager manager = ModelManager.getModelManager()
-				.getIndexManager();
+		IProjectIndexer indexer = getIndexer();
 		final SourceModuleCollector moduleCollector = new SourceModuleCollector();
 		for (int i = 0; i < fragments.length; ++i) {
 			if (isCancelled) {
@@ -69,22 +69,22 @@ class MixinProjectRequest extends MixinIndexRequest {
 			}
 			if (fragment instanceof BuiltinProjectFragment) {
 				if (indexExternal) {
-					manager
-							.request(new MixinBuiltinProjectFragmentRequest(
+					indexer
+							.request(new BuiltinProjectFragmentRequest(indexer,
 									fragment, toolkit,
 									((BuiltinProjectFragment) fragment)
 											.lastModified()));
 				}
 			} else if (fragment instanceof ExternalProjectFragment) {
 				if (indexExternal) {
-					manager.request(new MixinExternalProjectFragmentRequest(
+					indexer.request(new ExternalProjectFragmentRequest(indexer,
 							fragment, toolkit));
 				}
 			} else {
 				fragment.accept(moduleCollector);
 			}
 		}
-		manager.request(new MixinSourceModulesRequest(project, toolkit,
+		indexer.request(new SourceModulesRequest(indexer, project, toolkit,
 				moduleCollector.modules));
 	}
 
@@ -106,7 +106,7 @@ class MixinProjectRequest extends MixinIndexRequest {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MixinProjectRequest other = (MixinProjectRequest) obj;
+		ProjectRequest other = (ProjectRequest) obj;
 		if (project == null) {
 			if (other.project != null)
 				return false;

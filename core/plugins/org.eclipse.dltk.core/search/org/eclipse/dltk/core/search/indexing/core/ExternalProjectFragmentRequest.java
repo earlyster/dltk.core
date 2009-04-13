@@ -9,7 +9,7 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.mixin;
+package org.eclipse.dltk.core.search.indexing.core;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -29,17 +29,19 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.search.index.Index;
+import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 import org.eclipse.dltk.internal.core.BuiltinSourceModule;
 import org.eclipse.dltk.internal.core.ExternalSourceModule;
 
-public class MixinExternalProjectFragmentRequest extends MixinIndexRequest {
+public class ExternalProjectFragmentRequest extends IndexRequest {
 
 	protected final IProjectFragment fragment;
 	protected final IDLTKLanguageToolkit toolkit;
 
-	public MixinExternalProjectFragmentRequest(IProjectFragment fragment,
-			IDLTKLanguageToolkit toolkit) {
+	public ExternalProjectFragmentRequest(IProjectIndexer indexer,
+			IProjectFragment fragment, IDLTKLanguageToolkit toolkit) {
+		super(indexer);
 		this.fragment = fragment;
 		this.toolkit = toolkit;
 	}
@@ -50,7 +52,7 @@ public class MixinExternalProjectFragmentRequest extends MixinIndexRequest {
 
 	protected void run() throws CoreException, IOException {
 		final Set modules = getExternalSourceModules();
-		final Index index = getProjectFragmentIndex(fragment);
+		final Index index = getIndexer().getProjectFragmentIndex(fragment);
 		final IPath containerPath = fragment.getPath();
 		final List changes = checkChanges(index, modules, containerPath,
 				getEnvironment());
@@ -68,10 +70,13 @@ public class MixinExternalProjectFragmentRequest extends MixinIndexRequest {
 				if (change instanceof String) {
 					index.remove((String) change);
 				} else {
-					indexSourceModule(index, toolkit, (ISourceModule) change,
-							containerPath);
+					getIndexer().indexSourceModule(index, toolkit,
+							(ISourceModule) change, containerPath);
 				}
 			}
+
+		} catch (Throwable e) {
+			e.printStackTrace();
 		} finally {
 			try {
 				index.save();
@@ -123,7 +128,7 @@ public class MixinExternalProjectFragmentRequest extends MixinIndexRequest {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MixinExternalProjectFragmentRequest other = (MixinExternalProjectFragmentRequest) obj;
+		ExternalProjectFragmentRequest other = (ExternalProjectFragmentRequest) obj;
 		if (fragment == null) {
 			if (other.fragment != null)
 				return false;

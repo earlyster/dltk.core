@@ -9,7 +9,7 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.mixin;
+package org.eclipse.dltk.core.search.indexing;
 
 import java.io.IOException;
 
@@ -21,7 +21,7 @@ import org.eclipse.dltk.internal.core.util.Util;
 
 public abstract class AbstractJob implements IJob {
 
-	protected static final boolean DEBUG = false;
+	public static final boolean DEBUG = false;
 
 	protected boolean isCancelled = false;
 

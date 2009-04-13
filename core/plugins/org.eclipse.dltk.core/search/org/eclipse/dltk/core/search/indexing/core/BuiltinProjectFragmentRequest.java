@@ -9,7 +9,7 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.mixin;
+package org.eclipse.dltk.core.search.indexing.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,9 +22,9 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.search.index.Index;
+import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 
-class MixinBuiltinProjectFragmentRequest extends
-		MixinExternalProjectFragmentRequest {
+class BuiltinProjectFragmentRequest extends ExternalProjectFragmentRequest {
 
 	private final long lastModified;
 
@@ -32,9 +32,10 @@ class MixinBuiltinProjectFragmentRequest extends
 	 * @param fragment
 	 * @param toolkit
 	 */
-	public MixinBuiltinProjectFragmentRequest(IProjectFragment fragment,
-			IDLTKLanguageToolkit toolkit, long lastModified) {
-		super(fragment, toolkit);
+	public BuiltinProjectFragmentRequest(IProjectIndexer indexer,
+			IProjectFragment fragment, IDLTKLanguageToolkit toolkit,
+			long lastModified) {
+		super(indexer, fragment, toolkit);
 		this.lastModified = lastModified;
 	}
 
@@ -61,7 +62,7 @@ class MixinBuiltinProjectFragmentRequest extends
 	}
 
 	public boolean equals(Object obj) {
-		return obj instanceof MixinBuiltinProjectFragmentRequest
+		return obj instanceof BuiltinProjectFragmentRequest
 				&& super.equals(obj);
 	}
 

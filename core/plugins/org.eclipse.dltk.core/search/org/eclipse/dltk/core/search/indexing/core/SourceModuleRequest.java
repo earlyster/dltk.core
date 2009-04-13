@@ -9,7 +9,7 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.mixin;
+package org.eclipse.dltk.core.search.indexing.core;
 
 import java.io.IOException;
 
@@ -18,15 +18,17 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.search.index.Index;
+import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 
-public class MixinSourceModuleRequest extends MixinIndexRequest {
+public class SourceModuleRequest extends IndexRequest {
 
 	protected final ISourceModule module;
 	protected final IDLTKLanguageToolkit toolkit;
 
-	public MixinSourceModuleRequest(ISourceModule module,
+	public SourceModuleRequest(IProjectIndexer indexer, ISourceModule module,
 			IDLTKLanguageToolkit toolkit) {
+		super(indexer);
 		this.module = module;
 		this.toolkit = toolkit;
 	}
@@ -37,11 +39,12 @@ public class MixinSourceModuleRequest extends MixinIndexRequest {
 
 	protected void run() throws CoreException, IOException {
 		final IScriptProject project = module.getScriptProject();
-		final Index index = getProjectMixinIndex(project);
+		final Index index = getIndexer().getProjectIndex(project);
 		final ReadWriteMonitor imon = index.monitor;
 		imon.enterWrite();
 		try {
-			indexSourceModule(index, toolkit, module, project.getPath());
+			getIndexer().indexSourceModule(index, toolkit, module,
+					project.getPath());
 		} finally {
 			imon.exitWrite();
 		}
@@ -61,7 +64,7 @@ public class MixinSourceModuleRequest extends MixinIndexRequest {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MixinSourceModuleRequest other = (MixinSourceModuleRequest) obj;
+		SourceModuleRequest other = (SourceModuleRequest) obj;
 		if (module == null) {
 			if (other.module != null)
 				return false;

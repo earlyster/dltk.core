@@ -9,16 +9,17 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.mixin;
+package org.eclipse.dltk.core.search.indexing.core;
 
 import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.search.index.Index;
+import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 
-public class MixinSourceModuleRemoveRequest extends MixinIndexRequest {
+public class SourceModuleRemoveRequest extends IndexRequest {
 
 	private final IScriptProject project;
 	private final String path;
@@ -28,7 +29,9 @@ public class MixinSourceModuleRemoveRequest extends MixinIndexRequest {
 	 * @param path
 	 * @param name
 	 */
-	public MixinSourceModuleRemoveRequest(IScriptProject project, String path) {
+	public SourceModuleRemoveRequest(IProjectIndexer indexer,
+			IScriptProject project, String path) {
+		super(indexer);
 		this.project = project;
 		this.path = path;
 	}
@@ -38,7 +41,7 @@ public class MixinSourceModuleRemoveRequest extends MixinIndexRequest {
 	}
 
 	protected void run() throws CoreException, IOException {
-		final Index index = getProjectMixinIndex(project);
+		final Index index = getIndexer().getProjectIndex(project);
 		final ReadWriteMonitor imon = index.monitor;
 		imon.enterWrite();
 		try {

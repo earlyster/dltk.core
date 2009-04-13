@@ -22,6 +22,10 @@ public class LocalEnvironmentProvider implements IEnvironmentProvider {
 	public LocalEnvironmentProvider() {
 	}
 
+	public String getProviderName() {
+		return LocalEnvironment.getInstance().getName();
+	}
+
 	public IEnvironment getEnvironment(String envId) {
 		if (LocalEnvironment.ENVIRONMENT_ID.equals(envId)) {
 			return LocalEnvironment.getInstance();
@@ -31,6 +35,10 @@ public class LocalEnvironmentProvider implements IEnvironmentProvider {
 
 	public IEnvironment[] getEnvironments() {
 		return new IEnvironment[] { LocalEnvironment.getInstance() };
+	}
+
+	public boolean isInitialized() {
+		return true;
 	}
 
 	public void waitInitialized() {

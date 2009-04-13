@@ -10,17 +10,12 @@
 package org.eclipse.dltk.core.search;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
-import org.eclipse.dltk.internal.core.Model;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 /**
@@ -222,47 +217,6 @@ public abstract class SearchParticipant {
 	public void removeIndex(IPath indexLocation) {
 		IndexManager manager = ModelManager.getModelManager().getIndexManager();
 		manager.removeIndexPath(indexLocation);
-	}
-
-	/**
-	 * Schedules the indexing of the given document. Once the document is ready
-	 * to be indexed, {@link #indexDocument(SearchDocument, IPath)
-	 * indexDocument(document, indexPath)} will be called in a different thread
-	 * than the caller's thread.
-	 * <p>
-	 * The given index location must represent a path in the file system to a
-	 * file that either already exists or is going to be created. If it exists,
-	 * it must be an index file, otherwise its data might be overwritten.
-	 * </p>
-	 * <p>
-	 * When the index is no longer needed, clients should use
-	 * {@link #removeIndex(IPath) } to discard it.
-	 * </p>
-	 * 
-	 * @param document
-	 *            the document to index
-	 * @param indexLocation
-	 *            the location on the file system of the index
-	 */
-	public final void scheduleDocumentIndexing(SearchDocument document,
-			IPath indexLocation) {
-		IPath documentPath = new Path(document.getPath());
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		Object file = Model.getTarget(root, documentPath, true);
-		IPath containerPath = documentPath;
-		if (file instanceof IResource) {
-			containerPath = ((IResource) file).getProject().getFullPath();
-		} else if (file == null) {
-			containerPath = documentPath.removeLastSegments(documentPath
-					.segmentCount() - 1);
-		}
-		IndexManager manager = ModelManager.getModelManager().getIndexManager();
-		String osIndexLocation = indexLocation.toOSString();
-		// TODO (frederic) should not have to create index manually, should
-		// expose API that recreates index instead
-		manager.ensureIndexExists(osIndexLocation, containerPath);
-		manager.scheduleDocumentIndexing(document, containerPath,
-				osIndexLocation, this);
 	}
 
 	/**

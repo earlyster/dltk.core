@@ -10,14 +10,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.environment;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
@@ -25,6 +27,9 @@ import org.eclipse.dltk.core.SimplePriorityClassDLTKExtensionManager;
 import org.eclipse.dltk.core.PriorityDLTKExtensionManager.ElementInfo;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.internal.core.ExternalScriptProject;
+import org.eclipse.dltk.utils.ExecutableOperation;
+import org.eclipse.dltk.utils.ExecutionContexts;
+import org.eclipse.osgi.util.NLS;
 
 public final class EnvironmentManager {
 	private static final QualifiedName PROJECT_ENVIRONMENT = new QualifiedName(
@@ -132,7 +137,14 @@ public final class EnvironmentManager {
 	}
 
 	public static IEnvironment[] getEnvironments() {
-		List envList = new LinkedList();
+		return getEnvironments(true);
+	}
+
+	public static IEnvironment[] getEnvironments(boolean allowWait) {
+		if (allowWait) {
+			checkInitialized();
+		}
+		List envList = new ArrayList();
 		Object[] objects = manager.getObjects();
 		for (int i = 0; i < objects.length; i++) {
 			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
@@ -209,9 +221,63 @@ public final class EnvironmentManager {
 		return getEnvironmentById(LocalEnvironment.ENVIRONMENT_ID);
 	}
 
+	private static void checkInitialized() {
+		if (!isInitialized()) {
+			ExecutionContexts
+					.getManager()
+					.executeInBackground(
+							new ExecutableOperation(
+									Messages.EnvironmentManager_initializingOperationName) {
+
+								public void execute(IProgressMonitor monitor) {
+									waitInitialized(monitor);
+								}
+
+							});
+		}
+	}
+
 	/**
-	 * Wait white all structures are initialized.
+	 * Tests if all providers are initialized.
+	 */
+	public static boolean isInitialized() {
+		Object[] objects = manager.getObjects();
+		for (int i = 0; i < objects.length; i++) {
+			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
+			if (!provider.isInitialized()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Waits until all structures are initialized.
 	 */
 	public static void waitInitialized() {
+		waitInitialized(null);
 	}
+
+	public static void waitInitialized(IProgressMonitor monitor) {
+		Object[] objects = manager.getObjects();
+		if (monitor != null) {
+			monitor.beginTask(Util.EMPTY_STRING, objects.length);
+		}
+		for (int i = 0; i < objects.length; i++) {
+			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
+			if (monitor != null) {
+				monitor.setTaskName(NLS.bind(
+						Messages.EnvironmentManager_initializingTaskName,
+						provider.getProviderName()));
+			}
+			provider.waitInitialized();
+			if (monitor != null) {
+				monitor.worked(1);
+			}
+		}
+		if (monitor != null) {
+			monitor.done();
+		}
+	}
+
 }

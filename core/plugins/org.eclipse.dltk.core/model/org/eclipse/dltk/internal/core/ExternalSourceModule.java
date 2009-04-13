@@ -100,7 +100,8 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	 * org.eclipse.dltk.internal.core.AbstractSourceModule#getBufferContent()
 	 */
 	protected char[] getBufferContent() throws ModelException {
-		IFileHandle file = EnvironmentPathUtils.getFile(getPath());
+		IPath path = getBufferPath();
+		IFileHandle file = EnvironmentPathUtils.getFile(path);
 		InputStream stream = null;
 
 		try {
@@ -148,6 +149,13 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 			}
 		}
 
+	}
+
+	/**
+	 * Return buffer path in full mode
+	 */
+	protected IPath getBufferPath() {
+		return getPath();
 	}
 
 	/*

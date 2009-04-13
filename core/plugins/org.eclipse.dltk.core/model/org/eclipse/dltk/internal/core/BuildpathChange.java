@@ -262,7 +262,7 @@ public class BuildpathChange {
 					ProjectFragment oldRoot = (ProjectFragment) removedRoots
 							.get(this.oldResolvedBuildpath[i].getPath());
 					if (oldRoot != null) { // use old root if any (could be
-											// none
+						// none
 						// if entry wasn't bound)
 						pkgFragmentRoots = new ProjectFragment[] { oldRoot };
 					}
@@ -408,7 +408,7 @@ public class BuildpathChange {
 					break;
 				case IBuildpathEntry.BPE_LIBRARY:
 					if (state.otherRoots.get(path) == null) { // if root was
-																// not
+						// not
 						// shared
 						indexManager.discardJobs(path.toString());
 						indexManager.removeIndex(path);
@@ -447,9 +447,6 @@ public class BuildpathChange {
 								.fullInclusionPatternChars();
 						char[][] exclusionPatterns = ((BuildpathEntry) entry)
 								.fullExclusionPatternChars();
-						indexManager.indexLibrary(newPath, this.project
-								.getProject(), inclusionPatterns,
-								exclusionPatterns);
 						ProjectIndexerManager.indexLibrary(project, newPath);
 					}
 					break;
@@ -460,8 +457,6 @@ public class BuildpathChange {
 							.fullInclusionPatternChars();
 					char[][] exclusionPatterns = ((BuildpathEntry) entry)
 							.fullExclusionPatternChars();
-					indexManager.indexSourceFolder(this.project, path,
-							inclusionPatterns, exclusionPatterns);
 					ProjectIndexerManager.indexProjectFragment(project, path);
 					break;
 				}

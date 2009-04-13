@@ -13,12 +13,22 @@ package org.eclipse.dltk.core.environment;
 import org.eclipse.core.resources.IProject;
 
 public interface IEnvironmentProvider {
+
+	public String getProviderName();
+
 	public IEnvironment[] getEnvironments();
 
 	public IEnvironment getEnvironment(String envId);
 
 	/**
-	 * Wait until provider are initialzed
+	 * Tests if this provider is initialized
+	 * 
+	 * @return
+	 */
+	public boolean isInitialized();
+
+	/**
+	 * Waits until this provider is initialized
 	 */
 	public void waitInitialized();
 

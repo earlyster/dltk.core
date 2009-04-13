@@ -946,14 +946,6 @@ public class DeltaProcessor {
 									this.manager.indexManager
 											.removeIndex(entryPath);
 									// then index the jar
-									this.manager.indexManager
-											.indexLibrary(
-													entryPath,
-													project.getProject(),
-													bpEntry
-															.fullInclusionPatternChars(),
-													bpEntry
-															.fullExclusionPatternChars());
 									ProjectIndexerManager.indexLibrary(
 											scriptProject, entryPath);
 								} else {
@@ -971,14 +963,8 @@ public class DeltaProcessor {
 									this.state.getExternalLibTimeStamps().put(
 											entryPath, new Long(newTimeStamp));
 									// index the new jar
-									this.manager.indexManager
-											.indexLibrary(
-													entryPath,
-													project.getProject(),
-													bpEntry
-															.fullInclusionPatternChars(),
-													bpEntry
-															.fullExclusionPatternChars());
+									ProjectIndexerManager.indexLibrary(
+											scriptProject, entryPath);
 								}
 							}
 						} else { // internal ZIP
@@ -2492,7 +2478,6 @@ public class DeltaProcessor {
 							// project (and its dependents)
 							this.rootsToRefresh.add(element);
 							this.projectCachesToReset.add(element);
-							this.manager.indexManager.indexAll(res);
 							this.postActions.add(new Runnable() {
 								public void run() {
 									ProjectIndexerManager.indexProject(res);
@@ -2534,7 +2519,6 @@ public class DeltaProcessor {
 						// projects
 						if (isDylanProject) {
 							this.elementAdded(element, delta, rootInfo);
-							this.manager.indexManager.indexAll(res);
 							ProjectIndexerManager.indexProject(res);
 						} else {
 							this.elementRemoved(element, delta, rootInfo);
@@ -2574,7 +2558,6 @@ public class DeltaProcessor {
 			switch (delta.getKind()) {
 			case IResourceDelta.ADDED:
 				final IScriptProject scriptProject = element.getScriptProject();
-				indexManager.indexAll(scriptProject.getProject());
 				this.postActions.add(new Runnable() {
 					public void run() {
 						ProjectIndexerManager.indexProject(scriptProject);
@@ -2622,9 +2605,6 @@ public class DeltaProcessor {
 				switch (delta.getKind()) {
 				case IResourceDelta.ADDED:
 					// index the new jar
-					indexManager.indexLibrary(jarPath, scriptProject
-							.getProject(), fullInclusionPatternChars,
-							fullExclusionPatternChars);
 					ProjectIndexerManager.indexLibrary(scriptProject, jarPath);
 					break;
 				case IResourceDelta.CHANGED:
@@ -2632,9 +2612,6 @@ public class DeltaProcessor {
 					// re-indexed
 					indexManager.removeIndex(jarPath);
 					// then index the jar
-					indexManager.indexLibrary(jarPath, scriptProject
-							.getProject(), fullInclusionPatternChars,
-							fullExclusionPatternChars);
 					ProjectIndexerManager.indexLibrary(scriptProject, jarPath);
 					break;
 				case IResourceDelta.REMOVED:
@@ -2726,9 +2703,6 @@ public class DeltaProcessor {
 			case IResourceDelta.ADDED:
 				IDLTKLanguageToolkit toolkit = null;
 				toolkit = DLTKLanguageManager.getLanguageToolkit(element);
-				indexManager.addSource(file, file.getProject().getFullPath(),
-						this.getSourceElementParser(element), this
-								.getSourceRequestor(element), toolkit);
 				ProjectIndexerManager.indexSourceModule(
 						(ISourceModule) element, toolkit);
 				if (DLTKCore.DEBUG) {

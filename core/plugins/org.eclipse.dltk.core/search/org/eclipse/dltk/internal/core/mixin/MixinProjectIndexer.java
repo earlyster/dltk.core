@@ -11,112 +11,43 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.mixin;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
+import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
-import org.eclipse.dltk.internal.core.ModelManager;
-import org.eclipse.dltk.internal.core.search.processing.IJob;
-import org.eclipse.osgi.util.NLS;
+import org.eclipse.dltk.core.search.indexing.core.AbstractProjectIndexer;
+import org.eclipse.dltk.core.search.indexing.core.RemoveIndexRequest;
+import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 
-public class MixinProjectIndexer implements IProjectIndexer {
+public class MixinProjectIndexer extends AbstractProjectIndexer {
 
-	private final IndexManager manager = ModelManager.getModelManager()
-			.getIndexManager();
-
-	private void request(IJob job) {
-		manager.request(job);
+	public void doIndexing(DLTKSearchDocument document, ISourceModule module) {
+		new MixinIndexer(document, module).indexDocument();
 	}
 
-	private void requestIfNotWaiting(IJob job) {
-		if (!manager.isJobWaiting(job)) {
-			manager.request(job);
-		}
+	public Index getProjectIndex(IPath path) {
+		final String containerPath = path.getDevice() == null ? path.toString()
+				: path.toOSString();
+		return getIndexManager().getSpecialIndex(IndexManager.SPECIAL_MIXIN,
+				path.toString(), containerPath);
 	}
 
-	public void indexProject(IScriptProject project) {
-		final MixinProjectRequest request = new MixinProjectRequest(project,
-				true);
-		requestIfNotWaiting(request);
-	}
-
-	public void indexLibrary(IScriptProject project, IPath path) {
-		try {
-			final IProjectFragment fragment = project.findProjectFragment(path);
-			if (fragment != null) {
-				if (!path.segment(0).equals(IndexManager.SPECIAL_BUILTIN)) {
-					final MixinIndexRequest request = new MixinExternalProjectFragmentRequest(
-							fragment, DLTKLanguageManager
-									.getLanguageToolkit(fragment));
-					requestIfNotWaiting(request);
-				}
-			} else {
-				DLTKCore.warn(NLS.bind(
-						Messages.MixinIndexer_unknownProjectFragment, path));
-			}
-		} catch (Exception e) {
-			DLTKCore.error(NLS.bind(Messages.MixinIndexer_indexLibraryError,
-					path), e);
-		}
-	}
-
-	public void indexProjectFragment(IScriptProject project, IPath path) {
-		// TODO optimize
-		requestIfNotWaiting(new MixinProjectRequest(project, false));
-	}
-
-	public void indexSourceModule(ISourceModule module,
-			IDLTKLanguageToolkit toolkit) {
-		request(new MixinSourceModuleRequest(module, toolkit));
-	}
-
-	public void reconciled(ISourceModule workingCopy,
-			IDLTKLanguageToolkit toolkit) {
-		request(new MixinReconcileSourceModuleRequest(workingCopy, toolkit));
-	}
-
-	public void removeProjectFragment(IScriptProject project, IPath sourceFolder) {
-		// TODO optimize
-		requestIfNotWaiting(new MixinProjectRequest(project, false));
-	}
-
-	public void removeSourceModule(IScriptProject project, String path) {
-		request(new MixinSourceModuleRemoveRequest(project, path));
+	public Index getProjectFragmentIndex(IProjectFragment fragment) {
+		final String path = fragment.getPath().toString();
+		return getIndexManager().getSpecialIndex(IndexManager.SPECIAL_MIXIN,
+				path, path);
 	}
 
 	public void removeProject(IPath projectPath) {
-		requestIfNotWaiting(new RemoveIndexRequest(new Path(
+		requestIfNotWaiting(new RemoveIndexRequest(this, new Path(
 				IndexManager.SPECIAL_MIXIN + projectPath.toString())));
 	}
 
 	public void removeLibrary(IScriptProject project, IPath path) {
-		requestIfNotWaiting(new RemoveIndexRequest(new Path(
+		requestIfNotWaiting(new RemoveIndexRequest(this, new Path(
 				IndexManager.SPECIAL_MIXIN + path.toString())));
 	}
-
-	public void startIndexing() {
-		final IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		try {
-			IScriptProject[] projects = DLTKCore.create(workspace.getRoot())
-					.getScriptProjects();
-			for (int i = 0; i < projects.length; ++i) {
-				requestIfNotWaiting(new MixinProjectRequest(projects[i], false));
-			}
-		} catch (Exception e) {
-			DLTKCore.error(Messages.MixinIndexer_startIndexingError, e);
-
-			if (AbstractJob.DEBUG) {
-				e.printStackTrace();
-			}
-		}
-	}
-
 }

@@ -1,4 +1,4 @@
-package org.eclipse.dltk.internal.core.mixin;
+package org.eclipse.dltk.core.search.indexing.core;
 
 import org.eclipse.osgi.util.NLS;
 

@@ -40,7 +40,7 @@ import org.eclipse.dltk.internal.core.util.Util;
 
 /**
  * This operation sets an <code>IScriptProject</code>'s buildpath.
- *
+ * 
  * @see IScriptProject
  */
 public class SetBuildpathOperation extends ModelOperation {
@@ -538,11 +538,6 @@ public class SetBuildpathOperation extends ModelOperation {
 								}
 
 								public void run() /* throws ModelException */{
-									indexManager.indexLibrary(newPath,
-											SetBuildpathOperation.this.project
-													.getProject(),
-											entry.fullInclusionPatternChars(),
-											entry.fullExclusionPatternChars());
 									ProjectIndexerManager.indexLibrary(project,
 											newPath);
 								}
@@ -561,10 +556,6 @@ public class SetBuildpathOperation extends ModelOperation {
 							}
 
 							public void run() /* throws ModelException */{
-								indexManager.indexSourceFolder(
-										SetBuildpathOperation.this.project,
-										path, inclusionPatterns,
-										exclusionPatterns);
 								ProjectIndexerManager.indexProjectFragment(
 										project, path);
 							}

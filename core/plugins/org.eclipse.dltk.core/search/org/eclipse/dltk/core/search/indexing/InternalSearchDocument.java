@@ -24,6 +24,10 @@ public class InternalSearchDocument {
 	public SourceIndexerRequestor requestor;
 	public IDLTKLanguageToolkit toolkit;
 
+	public ISourceElementParser getParser() {
+		return parser;
+	}
+
 	/*
 	 * Hidden by API SearchDocument subclass
 	 */

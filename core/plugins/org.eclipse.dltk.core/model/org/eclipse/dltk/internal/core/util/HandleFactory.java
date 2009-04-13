@@ -145,7 +145,7 @@ public class HandleFactory {
 			IScriptFolder pkgFragment = (IScriptFolder) this.packageHandles
 					.get(pkgName);
 			if (pkgFragment == null) {
-				pkgFragment = ((ProjectFragment) this.lastPkgFragmentRoot)
+				pkgFragment = ((IProjectFragment) this.lastPkgFragmentRoot)
 						.getScriptFolder(toPath(pkgName));
 				this.packageHandles.put(pkgName, pkgFragment);
 			}
