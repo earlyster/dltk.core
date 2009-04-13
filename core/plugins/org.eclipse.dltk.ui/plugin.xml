@@ -1395,4 +1395,7 @@
 			properties="markerType"
 			type="org.eclipse.core.resources.IMarker"/>
 	</extension>
+	<extension point="org.eclipse.ui.startup">
+    	<startup class="org.eclipse.dltk.internal.ui.DLTKUI"/>
+	</extension>
 </plugin>

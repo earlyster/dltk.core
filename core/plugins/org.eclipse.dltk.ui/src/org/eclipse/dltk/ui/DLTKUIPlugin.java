@@ -49,6 +49,7 @@ import org.eclipse.dltk.internal.core.BuiltinSourceModule;
 import org.eclipse.dltk.internal.core.ExternalProjectFragment;
 import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
+import org.eclipse.dltk.internal.ui.DLTKUI;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
 import org.eclipse.dltk.internal.ui.IDLTKStatusConstants;
 import org.eclipse.dltk.internal.ui.editor.DocumentAdapter;
@@ -228,7 +229,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		public void executeInBackground(final IExecutableOperation operation) {
 			if (!isRunningInUIThread()) {
 				operation.execute(new NullProgressMonitor());
-			} else {
+			} else if (DLTKUI.isStarted()) {
 				final ProgressMonitorDialog dialog = new ProgressMonitorDialog(
 						null) {
 					protected void configureShell(Shell shell) {
@@ -239,7 +240,9 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 				try {
 					dialog.run(true, false, new IRunnableWithProgress() {
 						public void run(IProgressMonitor monitor) {
-							operation.execute(monitor);
+							if (!isRunningInUIThread()) {
+								operation.execute(monitor);
+							}
 						}
 					});
 				} catch (InvocationTargetException e) {
