@@ -2724,13 +2724,16 @@ public class DeltaProcessor {
 					break;
 				}
 			case IResourceDelta.ADDED:
-				IDLTKLanguageToolkit toolkit = null;
-				toolkit = DLTKLanguageManager.getLanguageToolkit(element);
-				indexManager.addSource(file, file.getProject().getFullPath(),
-						this.getSourceElementParser(element), this
-								.getSourceRequestor(element), toolkit);
-				ProjectIndexerManager.indexSourceModule(
-						(ISourceModule) element, toolkit);
+				if (ProjectIndexerManager.isIndexerEnabled(file.getProject())) {
+					IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+							.getLanguageToolkit(element);
+					indexManager.addSource(file, file.getProject()
+							.getFullPath(), this
+							.getSourceElementParser(element), this
+							.getSourceRequestor(element), toolkit);
+					ProjectIndexerManager.indexSourceModule(
+							(ISourceModule) element, toolkit);
+				}
 				if (DLTKCore.DEBUG) {
 					System.err
 							.println("update index: some actions are required to perform here...."); //$NON-NLS-1$

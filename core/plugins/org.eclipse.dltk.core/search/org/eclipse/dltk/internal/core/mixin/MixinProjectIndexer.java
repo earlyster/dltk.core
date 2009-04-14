@@ -24,6 +24,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.ModelManager;
+import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.dltk.internal.core.search.processing.IJob;
 import org.eclipse.osgi.util.NLS;
 
@@ -108,7 +109,11 @@ public class MixinProjectIndexer implements IProjectIndexer {
 			IScriptProject[] projects = DLTKCore.create(workspace.getRoot())
 					.getScriptProjects();
 			for (int i = 0; i < projects.length; ++i) {
-				requestIfNotWaiting(new MixinProjectRequest(projects[i], false));
+				final IScriptProject project = projects[i];
+				if (ProjectIndexerManager
+						.isIndexerEnabled(project.getProject())) {
+					requestIfNotWaiting(new MixinProjectRequest(project, false));
+				}
 			}
 		} catch (Exception e) {
 			DLTKCore.error(Messages.MixinIndexer_startIndexingError, e);

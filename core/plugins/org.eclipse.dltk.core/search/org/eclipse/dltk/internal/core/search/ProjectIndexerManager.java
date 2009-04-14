@@ -145,8 +145,7 @@ public class ProjectIndexerManager {
 	}
 
 	private static IProjectIndexer[] getIndexers(IScriptProject project) {
-		if (!new ProjectScope(project.getProject()).getNode(DLTKCore.PLUGIN_ID)
-				.getBoolean(DLTKCore.INDEXER_ENABLED, true)) {
+		if (!isIndexerEnabled(project.getProject())) {
 			return null;
 		}
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
@@ -155,6 +154,11 @@ public class ProjectIndexerManager {
 			return null;
 		}
 		return getIndexers(toolkit.getNatureId());
+	}
+
+	public static boolean isIndexerEnabled(final IProject project) {
+		return new ProjectScope(project).getNode(DLTKCore.PLUGIN_ID)
+				.getBoolean(DLTKCore.INDEXER_ENABLED, true);
 	}
 
 	/**
@@ -277,6 +281,9 @@ public class ProjectIndexerManager {
 	public static void reconciled(ISourceModule workingCopy) {
 		final IScriptProject project = workingCopy.getScriptProject();
 		if (project == null) {
+			return;
+		}
+		if (!isIndexerEnabled(project.getProject())) {
 			return;
 		}
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
