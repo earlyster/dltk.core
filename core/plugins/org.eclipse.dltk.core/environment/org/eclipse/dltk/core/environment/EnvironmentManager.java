@@ -120,11 +120,18 @@ public final class EnvironmentManager {
 
 	public static void setEnvironmentId(IProject project, String environmentId)
 			throws CoreException {
+		setEnvironmentId(project, environmentId, true);
+	}
+
+	public static void setEnvironmentId(IProject project, String environmentId,
+			boolean refresh) throws CoreException {
 		// TODO check project.getDescription.getLocationURI() scheme ?
 		project.setPersistentProperty(PROJECT_ENVIRONMENT, environmentId);
-		final IScriptProject scriptProject = DLTKCore.create(project);
-		if (scriptProject != null) {
-			DLTKCore.refreshBuildpathContainers(scriptProject);
+		if (refresh) {
+			final IScriptProject scriptProject = DLTKCore.create(project);
+			if (scriptProject != null) {
+				DLTKCore.refreshBuildpathContainers(scriptProject);
+			}
 		}
 	}
 
