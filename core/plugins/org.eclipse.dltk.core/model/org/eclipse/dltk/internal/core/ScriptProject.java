@@ -19,7 +19,6 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -232,8 +231,28 @@ public class ScriptProject extends Openable implements IScriptProject {
 						.getProject(path.lastSegment()));
 			} else {
 				// lib being a folder
-				return getProjectFragment(this.project.getWorkspace().getRoot()
-						.getFolder(path));
+				IFolder folder = this.project.getWorkspace().getRoot()
+						.getFolder(path);
+				if (folder != null) {
+					IProjectFragment projectFragment = getProjectFragment(folder);
+					return projectFragment;
+				}
+				// No folders with such path exist in workspace, lets
+				// getAllFragments and check.
+				IProjectFragment[] fragments;
+				try {
+					fragments = getProjectFragments();
+					for (int i = 0; i < fragments.length; i++) {
+						if (fragments[i].getPath().equals(path)) {
+							return fragments[i];
+						}
+					}
+				} catch (ModelException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
+				return null;
 			}
 		}
 	}
@@ -369,7 +388,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 		}
 
 		int length = buildpathEntries.length;
-		ArrayList resolvedEntries = new ArrayList();
+		List resolvedEntries = new ArrayList();
 
 		for (int i = 0; i < length; i++) {
 
@@ -440,9 +459,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 
 			}
 		}
-
 		IBuildpathEntry[] resolvedPath = new IBuildpathEntry[resolvedEntries
 				.size()];
+
 		resolvedEntries.toArray(resolvedPath);
 
 		if (generateMarkerOnError) {
@@ -644,21 +663,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 		// compute the project fragements
 		IModelElement[] children = computeProjectFragments(resolvedBuildpath,
 				false, null);
-		List childrenSet = new ArrayList();
-		childrenSet.addAll(Arrays.asList(children));
+		info.setChildren(children);
 
-		// Call for extra model providers
-		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-				.getLanguageToolkit(this);
-		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
-				.getNatureId());
-		if (providers != null) {
-			for (int i = 0; i < providers.length; i++) {
-				providers[i].buildStructure(this, childrenSet);
-			}
-		}
-		info.setChildren((IModelElement[]) childrenSet
-				.toArray(new IModelElement[childrenSet.size()]));
 		// remember the timestamps of external libraries the first time they are
 		// looked up
 		getPerProjectInfo().rememberExternalLibTimestamps();
@@ -693,9 +699,20 @@ public class ScriptProject extends Openable implements IScriptProject {
 				null, // inside original project
 				true, // check existency
 				retrieveExportedRoots, rootToResolvedEntries);
-		IProjectFragment[] rootArray = new IProjectFragment[accumulatedRoots
-				.size()];
-		accumulatedRoots.copyInto(rootArray);
+
+		List fragments = accumulatedRoots.asList();
+		// Call for extra model providers
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(this);
+		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
+				.getNatureId());
+		if (providers != null) {
+			for (int i = 0; i < providers.length; i++) {
+				providers[i].provideModelChanges(this, fragments);
+			}
+		}
+		IProjectFragment[] rootArray = new IProjectFragment[fragments.size()];
+		fragments.toArray(rootArray);
 		return rootArray;
 	}
 
@@ -732,6 +749,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 					rootIDs, referringEntry, checkExistency,
 					retrieveExportedRoots, rootToResolvedEntries);
 		}
+
 	}
 
 	/**
@@ -793,26 +811,6 @@ public class ScriptProject extends Openable implements IScriptProject {
 						&& BuiltinProjectFragment.isSupported(this)) {
 					root = new BuiltinProjectFragment(entryPath, this);
 					break;
-				}
-				if (entryPath.segment(0).startsWith(
-						IBuildpathEntry.BUILDPATH_SPECIAL)) {
-					// Special resolving case
-					IDLTKLanguageToolkit tk = DLTKLanguageManager
-							.getLanguageToolkit(this);
-					IModelProvider[] providers = ModelProviderManager
-							.getProviders(tk.getNatureId());
-					if (providers != null) {
-						for (int i = 0; i < providers.length; i++) {
-							root = providers[i].getProjectFragment(entryPath,
-									this);
-							if (root != null) {
-								break;
-							}
-						}
-					}
-					if (root != null) {
-						break;
-					}
 				}
 				Object target = Model.getTarget(workspaceRoot, entryPath,
 						checkExistency);

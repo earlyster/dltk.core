@@ -13,8 +13,6 @@ package org.eclipse.dltk.core;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.IPath;
-
 /**
  * This interface could be used to extend generic structure model building.
  */
@@ -27,20 +25,12 @@ public interface IModelProvider {
 	 * Any new elements need to implement @see:IModelElementMemento to handle
 	 * inner element references.
 	 */
-	void buildStructure(IModelElement parentElement, List children);
+	void provideModelChanges(IModelElement parentElement, List children);
 
 	/**
 	 * Used for performance reasons.
 	 * 
 	 * Should return true if provider provides some elements at selected level.
 	 */
-	boolean providesFor(IModelElement modelElement, IPath path);
-
-	/**
-	 * This method is called for unknown buildpath entries starning with
-	 * "#special#" prefix. @see IBuildpathEntry element. This functionality
-	 * could be used for example to add some elements into interpreter
-	 * container.
-	 */
-	IProjectFragment getProjectFragment(IPath entryPath, IScriptProject project);
+	boolean isModelChangesProvidedFor(IModelElement modelElement, String name);
 }

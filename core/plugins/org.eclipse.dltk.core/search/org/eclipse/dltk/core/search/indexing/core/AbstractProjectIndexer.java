@@ -80,7 +80,7 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer {
 
 	public void indexProjectFragment(IScriptProject project, IPath path) {
 		// TODO optimize
-		requestIfNotWaiting(new ProjectRequest(this, project, false));
+		requestIfNotWaiting(new ProjectRequest(this, project, true));
 	}
 
 	public void indexSourceModule(ISourceModule module,

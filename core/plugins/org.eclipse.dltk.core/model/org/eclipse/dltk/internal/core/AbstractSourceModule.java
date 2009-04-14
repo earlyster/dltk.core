@@ -561,7 +561,7 @@ public abstract class AbstractSourceModule extends Openable implements
 					.getProviders(toolkit.getNatureId());
 			if (providers != null) {
 				for (int i = 0; i < providers.length; i++) {
-					providers[i].buildStructure(this, childrenSet);
+					providers[i].provideModelChanges(this, childrenSet);
 				}
 			}
 			moduleInfo.setChildren((IModelElement[]) childrenSet

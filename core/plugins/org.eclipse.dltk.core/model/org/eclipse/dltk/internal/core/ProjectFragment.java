@@ -190,7 +190,7 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 						.getProviders(toolkit.getNatureId());
 				if (providers != null) {
 					for (int i = 0; i < providers.length; i++) {
-						providers[i].buildStructure(this, childrenSet);
+						providers[i].provideModelChanges(this, childrenSet);
 					}
 				}
 				info.setChildren((IModelElement[]) childrenSet
@@ -278,7 +278,7 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 			if (providers != null) {
 				boolean provides = false;
 				for (int i = 0; i < providers.length; i++) {
-					if (providers[i].providesFor(this, path)) {
+					if (providers[i].isModelChangesProvidedFor(this, path.segment(0))) {
 						provides = true;
 						break;
 					}

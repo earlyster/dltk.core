@@ -194,7 +194,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 				.getNatureId());
 		if (providers != null) {
 			for (int i = 0; i < providers.length; i++) {
-				providers[i].buildStructure(this, childrenSet);
+				providers[i].provideModelChanges(this, childrenSet);
 			}
 		}
 		info.setChildren((IModelElement[]) childrenSet
@@ -240,7 +240,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 			if (providers != null) {
 				boolean provides = false;
 				for (int i = 0; i < providers.length; i++) {
-					if (providers[i].providesFor(this, path)) {
+					if (providers[i].isModelChangesProvidedFor(this, name)) {
 						provides = true;
 						break;
 					}
@@ -248,7 +248,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 				if (provides) {
 					try {
 						IModelElement[] children = getChildren();
-						IPath fullPath = getPath().append(path);
+						IPath fullPath = getPath().append(name);
 						for (int i = 0; i < children.length; i++) {
 							IModelElement child = children[i];
 							if (child instanceof IScriptFolder) {

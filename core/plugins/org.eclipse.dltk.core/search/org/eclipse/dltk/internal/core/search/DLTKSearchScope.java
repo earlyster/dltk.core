@@ -142,6 +142,14 @@ public class DLTKSearchScope extends AbstractSearchScope {
 		String projectPathString = projectPath.toString();
 		this.addEnclosingProjectOrArchive(projectPath);
 
+		// Iterate via project fragments without buildpath entries
+		IProjectFragment[] fragments = scriptProject.getProjectFragments();
+		for (int i = 0; i < fragments.length; i++) {
+			if (fragments[i].getRawBuildpathEntry() == null) {
+				add(fragments[i]);
+			}
+		}
+
 		IBuildpathEntry[] entries = scriptProject.getResolvedBuildpath();
 		IScriptModel model = scriptProject.getModel();
 		ModelManager.PerProjectInfo perProjectInfo = scriptProject
@@ -169,8 +177,9 @@ public class DLTKSearchScope extends AbstractSearchScope {
 					rawEntry = (IBuildpathEntry) resolvedPathToRawEntries
 							.get(entry.getPath());
 				}
-				if (rawEntry == null)
+				if (rawEntry == null) {
 					break;
+				}
 				switch (rawEntry.getEntryKind()) {
 				case IBuildpathEntry.BPE_LIBRARY:
 					if ((includeMask & APPLICATION_LIBRARIES) != 0) {
