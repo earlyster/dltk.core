@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
@@ -144,6 +145,10 @@ public class ProjectIndexerManager {
 	}
 
 	private static IProjectIndexer[] getIndexers(IScriptProject project) {
+		if (!new ProjectScope(project.getProject()).getNode(DLTKCore.PLUGIN_ID)
+				.getBoolean(DLTKCore.INDEXER_ENABLED, true)) {
+			return null;
+		}
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(project);
 		if (toolkit == null) {
