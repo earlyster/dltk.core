@@ -15,10 +15,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelProvider;
-import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.core.ProjectFragment;
 
@@ -27,7 +25,7 @@ public class TestModelProvider implements IModelProvider {
 	public TestModelProvider() {
 	}
 
-	public void buildStructure(IModelElement parentElement, List children) {
+	public void provideModelChanges(IModelElement parentElement, List children) {
 		IScriptProject project = parentElement.getScriptProject();
 		if (!"ModelMembersq".equals(project.getElementName())) {
 			return;
@@ -50,7 +48,8 @@ public class TestModelProvider implements IModelProvider {
 		}
 	}
 
-	public boolean providesFor(IModelElement modelElement, IPath path) {
+	public boolean isModelChangesProvidedFor(IModelElement modelElement,
+			String name) {
 		IScriptProject project = modelElement.getScriptProject();
 		if (!"ModelMembersq".equals(project.getElementName())) {
 			return false;
@@ -59,11 +58,5 @@ public class TestModelProvider implements IModelProvider {
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	public IProjectFragment getProjectFragment(IPath entryPath,
-			IScriptProject project) {
-		return null;
 	}
 }
