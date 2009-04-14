@@ -325,12 +325,13 @@ public abstract class ProjectWizardSecondPage extends
 					EnvironmentManager.setEnvironmentId(fCurrProject, null,
 							false);
 				}
+				// Locate projects with same interpreter.
 				ProjectWizardUtils.reuseInterpreterLibraries(fCurrProject,
 						projectInterpreter, monitor);
 			} else {
 				EnvironmentManager.setEnvironmentId(fCurrProject, null, false);
 			}
-			// Locate projects with same interpreter.
+			postConfigureProject();
 		} finally {
 			monitor.done();
 			fCurrProject = null;
@@ -339,6 +340,10 @@ public abstract class ProjectWizardSecondPage extends
 				fIsAutobuild = null;
 			}
 		}
+	}
+
+	protected void postConfigureProject() throws CoreException {
+		// empty override in descendants
 	}
 
 	private void removeProject() {
