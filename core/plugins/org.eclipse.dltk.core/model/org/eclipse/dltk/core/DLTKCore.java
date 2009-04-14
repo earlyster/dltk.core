@@ -322,7 +322,11 @@ public class DLTKCore extends Plugin {
 	 * implementation contributed to the org.eclipse.dltk.core.fileCache
 	 * extension point.
 	 */
-	public static final String FILE_CACHE = PLUGIN_ID + ".contentCache"; //$NON-NLS-1$					
+	public static final String FILE_CACHE = PLUGIN_ID + ".contentCache"; //$NON-NLS-1$
+
+	public static final String BUILDER_ENABLED = PLUGIN_ID + ".builder.enabled"; //$NON-NLS-1$					
+
+	public static final String INDEXER_ENABLED = PLUGIN_ID + ".indexer.enabled"; //$NON-NLS-1$					
 
 	/**
 	 * The constructor.

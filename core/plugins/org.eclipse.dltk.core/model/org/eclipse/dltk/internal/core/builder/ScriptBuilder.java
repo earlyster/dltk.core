@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -207,6 +208,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		if (!DLTKLanguageManager.hasScriptNature(this.currentProject)) {
 			return null;
 		}
+		if (!isBuilderEnabled()) {
+			return null;
+		}
 		long startTime = 0;
 		if (DEBUG || TRACE) {
 			startTime = System.currentTimeMillis();
@@ -284,6 +288,14 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 		monitor.done();
 		return requiredProjects;
+	}
+
+	/**
+	 * @return
+	 */
+	private boolean isBuilderEnabled() {
+		return new ProjectScope(currentProject).getNode(DLTKCore.PLUGIN_ID)
+				.getBoolean(DLTKCore.BUILDER_ENABLED, true);
 	}
 
 	/**
