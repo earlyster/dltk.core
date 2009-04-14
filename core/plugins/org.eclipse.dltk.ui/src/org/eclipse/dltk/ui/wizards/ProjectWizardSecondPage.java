@@ -31,6 +31,8 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.ui.util.CoreUtility;
 import org.eclipse.dltk.internal.ui.wizards.BuildpathDetector;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
@@ -308,12 +310,25 @@ public abstract class ProjectWizardSecondPage extends
 				if (nature != null) {
 					projectInterpreter = ScriptRuntime
 							.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
-									nature, fFirstPage.getEnvironment().getId()));
+									nature, fFirstPage
+											.getInterpreterEnvironment()
+											.getId()));
 				}
 			}
 			if (projectInterpreter != null) {
+				final IEnvironment interpreterEnv = projectInterpreter
+						.getEnvironment();
+				if (!fFirstPage.getEnvironment().equals(interpreterEnv)) {
+					EnvironmentManager.setEnvironmentId(fCurrProject,
+							interpreterEnv.getId(), false);
+				} else {
+					EnvironmentManager.setEnvironmentId(fCurrProject, null,
+							false);
+				}
 				ProjectWizardUtils.reuseInterpreterLibraries(fCurrProject,
 						projectInterpreter, monitor);
+			} else {
+				EnvironmentManager.setEnvironmentId(fCurrProject, null, false);
 			}
 			// Locate projects with same interpreter.
 		} finally {

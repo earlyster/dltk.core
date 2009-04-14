@@ -1,7 +1,6 @@
 package org.eclipse.dltk.ui.wizards;
 
 import java.util.Map;
-import java.util.Observable;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -11,7 +10,6 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
@@ -31,30 +29,32 @@ public class GenericDLTKProjectWizard extends NewElementWizard implements
 	private IConfigurationElement fConfigElement;
 	private String nature;
 	private String preferencePageId;
-	
+
 	public GenericDLTKProjectWizard() {
 		setDialogSettings(DLTKUIPlugin.getDefault().getDialogSettings());
 		setWindowTitle(Messages.GenericDLTKProjectWizard_newDltkProject);
 	}
-	
+
 	public String getNature() {
 		return nature;
 	}
-	
+
 	protected IPreferenceStore getPreferenceStoreFromNature() {
-		IDLTKUILanguageToolkit languageToolkit = DLTKUILanguageManager.getLanguageToolkit(nature);
-		if( languageToolkit != null ) {
+		IDLTKUILanguageToolkit languageToolkit = DLTKUILanguageManager
+				.getLanguageToolkit(nature);
+		if (languageToolkit != null) {
 			return languageToolkit.getPreferenceStore();
 		}
 		return null;
 	}
-	
+
 	private class GenericDLTKBuildpathBlock extends BuildpathsBlock {
 
 		public GenericDLTKBuildpathBlock(IRunnableContext runnableContext,
 				IStatusChangeListener context, int pageToShow,
 				boolean useNewPage, IWorkbenchPreferenceContainer pageContainer) {
-			super(runnableContext, context, pageToShow, useNewPage, pageContainer);
+			super(runnableContext, context, pageToShow, useNewPage,
+					pageContainer);
 		}
 
 		protected IPreferenceStore getPreferenceStore() {
@@ -64,20 +64,19 @@ public class GenericDLTKProjectWizard extends NewElementWizard implements
 		protected boolean supportZips() {
 			IDLTKLanguageToolkit languageToolkit = null;
 			languageToolkit = DLTKLanguageManager.getLanguageToolkit(nature);
-			if( languageToolkit != null ) {
+			if (languageToolkit != null) {
 				return languageToolkit.languageSupportZIPBuildpath();
 			}
 			return false;
-		}		
+		}
 	}
+
 	public void addPages() {
 		super.addPages();
 		final String curNature = this.nature;
 		final String curPreferencePageId = this.preferencePageId;
 		fFirstPage = new ProjectWizardFirstPage() {
 
-			GenericDLTKInterpreterGroup fInterpreterGroup;
-			
 			class GenericDLTKInterpreterGroup extends AbstractInterpreterGroup {
 				public GenericDLTKInterpreterGroup(Composite composite) {
 					super(composite);
@@ -92,24 +91,8 @@ public class GenericDLTKProjectWizard extends NewElementWizard implements
 				}
 			};
 
-			protected void createInterpreterGroup(Composite parent) {
-				fInterpreterGroup = new GenericDLTKInterpreterGroup(parent);
-			}
-
-			protected Observable getInterpreterGroupObservable() {
-				return fInterpreterGroup;
-			}
-
-			protected boolean supportInterpreter() {
-				return true;
-			}
-
-			protected IInterpreterInstall getInterpreter() {
-				return fInterpreterGroup.getSelectedInterpreter();
-			}
-
-			protected void handlePossibleInterpreterChange() {
-				fInterpreterGroup.handlePossibleInterpreterChange();
+			protected IInterpreterGroup createInterpreterGroup(Composite parent) {
+				return new GenericDLTKInterpreterGroup(parent);
 			}
 
 			protected boolean interpeterRequired() {
@@ -164,14 +147,14 @@ public class GenericDLTKProjectWizard extends NewElementWizard implements
 	public void setInitializationData(IConfigurationElement cfig,
 			String propertyName, Object data) {
 		fConfigElement = cfig;
-		if( data instanceof String ) {
-			this.nature = (String)data;
+		if (data instanceof String) {
+			this.nature = (String) data;
+		} else if (data instanceof Map) {
+			this.nature = (String) ((Map) data).get("nature"); //$NON-NLS-1$
 		}
-		else if( data instanceof Map ) {
-			this.nature = (String) ((Map)data).get("nature"); //$NON-NLS-1$
-		}
-		if( this.nature == null || this.nature.length() == 0 ) {
-			throw new RuntimeException(Messages.GenericDLTKProjectWizard_natureMustBeSpecified);
+		if (this.nature == null || this.nature.length() == 0) {
+			throw new RuntimeException(
+					Messages.GenericDLTKProjectWizard_natureMustBeSpecified);
 		}
 	}
 

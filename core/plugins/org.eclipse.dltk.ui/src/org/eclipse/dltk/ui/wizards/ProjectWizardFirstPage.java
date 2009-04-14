@@ -11,6 +11,7 @@ package org.eclipse.dltk.ui.wizards;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -126,7 +127,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			IStringButtonAdapter, IDialogFieldListener {
 		protected final SelectionButtonDialogField fWorkspaceRadio;
 		protected final SelectionButtonDialogField fExternalRadio;
-		protected final SelectionButtonDialogField fExternalLinked;
 		protected final StringButtonDialogField fLocation;
 		protected final ComboDialogField fEnvironment;
 		private IEnvironment[] environments;
@@ -158,16 +158,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			fExternalRadio
 					.setLabelText(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_external_desc);
 			fExternalRadio.doFillIntoGrid(group, numColumns);
-
-			if (isEnableLinkedProject()) {
-				fExternalLinked = new SelectionButtonDialogField(SWT.RADIO);
-				fExternalLinked.setDialogFieldListener(this);
-				fExternalLinked
-						.setLabelText(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_linked_project);
-				fExternalLinked.doFillIntoGrid(group, numColumns);
-			} else {
-				fExternalLinked = null;
-			}
 
 			fLocation = new StringButtonDialogField(this);
 			fLocation.setDialogFieldListener(this);
@@ -211,9 +201,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 
 			fWorkspaceRadio.setSelection(true);
 			fExternalRadio.setSelection(false);
-			if (isEnableLinkedProject()) {
-				fExternalLinked.setSelection(false);
-			}
 		}
 
 		private IEnvironmentChangedListener environmentChangedListener = null;
@@ -230,7 +217,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			} else {
 				selection = null;
 			}
-			environments = EnvironmentManager.getEnvironments();
+			environments = EnvironmentManager.getEnvironments(false);
 			final String[] items = new String[environments.length];
 			int selectionIndex = 0;
 			for (int i = 0; i < items.length; i++) {
@@ -297,12 +284,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			return fExternalRadio.isSelected();
 		}
 
-		public boolean isExternalLinked() {
-			return isEnableLinkedProject() && fExternalLinked.isSelected();
-		}
-
 		public IEnvironment getEnvironment() {
-			if (fWorkspaceRadio.isSelected()) {
+			if (isInWorkspace()) {
 				return EnvironmentManager.getLocalEnvironment();
 			} else {
 				final int index = fEnvironment.getSelectionIndex();
@@ -350,8 +333,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 
 		public void dialogFieldChanged(DialogField field) {
-			if (field == fWorkspaceRadio || field == fExternalRadio
-					|| field == fExternalLinked) {
+			if (field == fWorkspaceRadio || field == fExternalRadio) {
 				fLocation.setEnabled(!fWorkspaceRadio.isSelected());
 				fEnvironment.setEnabled(!fWorkspaceRadio.isSelected());
 			}
@@ -371,7 +353,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 				updateInterpreters();
 			}
 
-			if (field == fExternalRadio || field == fExternalLinked) {
+			if (field == fExternalRadio) {
 				updateInterpreters();
 			}
 
@@ -387,12 +369,33 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 	}
 
-	protected abstract class AbstractInterpreterGroup extends Observable
-			implements Observer, SelectionListener, IDialogFieldListener {
+	protected interface IInterpreterGroup {
 
-		protected final SelectionButtonDialogField fUseDefaultInterpreterEnvironment,
-				fUseProjectInterpreterEnvironment;
-		protected final ComboDialogField fInterpreterEnvironmentCombo;
+		/**
+		 * @return
+		 */
+		IEnvironment getEnvironment();
+
+		/**
+		 * @return
+		 */
+		IInterpreterInstall getSelectedInterpreter();
+
+		/**
+		 * 
+		 */
+		void handlePossibleInterpreterChange();
+
+	}
+
+	protected abstract class AbstractInterpreterGroup extends Observable
+			implements Observer, SelectionListener, IDialogFieldListener,
+			IInterpreterGroup {
+
+		protected final ComboDialogField fInterpreterEnvironment;
+		protected final SelectionButtonDialogField fUseDefaultInterpreter;
+		protected final SelectionButtonDialogField fUseProjectInterpreter;
+		protected final ComboDialogField fInterpreterCombo;
 		private final Group fGroup;
 		private String[] fComplianceLabels;
 		private final Link fPreferenceLink;
@@ -402,15 +405,39 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			fGroup = new Group(composite, SWT.NONE);
 			fGroup.setFont(composite.getFont());
 			fGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fGroup.setLayout(initGridLayout(new GridLayout(3, false), true));
+			final GridLayout groupLayout = initGridLayout(new GridLayout(3,
+					false), true);
+			groupLayout.marginHeight /= 2;
+			fGroup.setLayout(groupLayout);
 			fGroup
 					.setText(NewWizardMessages.ScriptProjectWizardFirstPage_InterpreterEnvironmentGroup_title);
 
-			fUseDefaultInterpreterEnvironment = new SelectionButtonDialogField(
-					SWT.RADIO);
-			fUseDefaultInterpreterEnvironment
-					.setLabelText(getDefaultInterpreterLabel());
-			fUseDefaultInterpreterEnvironment.doFillIntoGrid(fGroup, 2);
+			if (isTargetEnvironmentAllowed()) {
+				final Composite interpreterEnvironmentComposite = new Composite(
+						fGroup, SWT.NONE);
+				interpreterEnvironmentComposite.setLayout(initGridLayout(
+						new GridLayout(2, false), false));
+				final GridData interpreterEnvironmentData = new GridData(
+						GridData.FILL_HORIZONTAL);
+				interpreterEnvironmentData.horizontalSpan = 3;
+				interpreterEnvironmentComposite
+						.setLayoutData(interpreterEnvironmentData);
+				fInterpreterEnvironment = new ComboDialogField(SWT.READ_ONLY
+						| SWT.BORDER);
+				fInterpreterEnvironment
+						.setLabelText(NewWizardMessages.ProjectWizardFirstPage_InterpreterTargetEnvironment);
+				fInterpreterEnvironment.doFillIntoGrid(
+						interpreterEnvironmentComposite, 2);
+				LayoutUtil.setHorizontalGrabbing(fInterpreterEnvironment
+						.getComboControl(null));
+				fInterpreterEnvironment.setDialogFieldListener(this);
+			} else {
+				fInterpreterEnvironment = null;
+			}
+
+			fUseDefaultInterpreter = new SelectionButtonDialogField(SWT.RADIO);
+			fUseDefaultInterpreter.setLabelText(getDefaultInterpreterLabel());
+			fUseDefaultInterpreter.doFillIntoGrid(fGroup, 2);
 
 			fPreferenceLink = new Link(fGroup, SWT.NONE);
 			fPreferenceLink.setFont(fGroup.getFont());
@@ -420,19 +447,17 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 					GridData.CENTER, false, false));
 			fPreferenceLink.addSelectionListener(this);
 
-			fUseProjectInterpreterEnvironment = new SelectionButtonDialogField(
-					SWT.RADIO);
-			fUseProjectInterpreterEnvironment
+			fUseProjectInterpreter = new SelectionButtonDialogField(SWT.RADIO);
+			fUseProjectInterpreter
 					.setLabelText(NewWizardMessages.ScriptProjectWizardFirstPage_InterpreterEnvironmentGroup_specific_compliance);
-			fUseProjectInterpreterEnvironment.doFillIntoGrid(fGroup, 1);
-			fUseProjectInterpreterEnvironment.setDialogFieldListener(this);
+			fUseProjectInterpreter.doFillIntoGrid(fGroup, 1);
+			fUseProjectInterpreter.setDialogFieldListener(this);
 
-			fInterpreterEnvironmentCombo = new ComboDialogField(SWT.READ_ONLY);
-			fillInstalledInterpreterEnvironments(fInterpreterEnvironmentCombo);
-			fInterpreterEnvironmentCombo.setDialogFieldListener(this);
+			fInterpreterCombo = new ComboDialogField(SWT.READ_ONLY);
+			fillInstalledInterpreters(fInterpreterCombo);
+			fInterpreterCombo.setDialogFieldListener(this);
 
-			Combo comboControl = fInterpreterEnvironmentCombo
-					.getComboControl(fGroup);
+			Combo comboControl = fInterpreterCombo.getComboControl(fGroup);
 			GridData gridData = new GridData(GridData.BEGINNING,
 					GridData.CENTER, true, false);
 			gridData.minimumWidth = 100;
@@ -442,16 +467,25 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 
 			// DialogField.createEmptySpace(fGroup);
 
-			fUseDefaultInterpreterEnvironment.setSelection(true);
-			fInterpreterEnvironmentCombo
-					.setEnabled(fUseProjectInterpreterEnvironment.isSelected());
+			fUseDefaultInterpreter.setSelection(true);
+			fInterpreterCombo.setEnabled(fUseProjectInterpreter.isSelected());
 		}
 
-		private void fillInstalledInterpreterEnvironments(
-				ComboDialogField comboField) {
+		public IEnvironment getEnvironment() {
+			if (isTargetEnvironmentAllowed() && fLocationGroup.isInWorkspace()
+					&& fEnvironments != null) {
+				final int index = fInterpreterEnvironment.getSelectionIndex();
+				if (index >= 0 && index < fEnvironments.length) {
+					return fEnvironments[index];
+				}
+			}
+			return fLocationGroup.getEnvironment();
+		}
+
+		private void fillInstalledInterpreters(ComboDialogField comboField) {
 			String selectedItem = null;
 			int selectionIndex = -1;
-			if (fUseProjectInterpreterEnvironment.isSelected()) {
+			if (fUseProjectInterpreter.isSelected()) {
 				selectionIndex = comboField.getSelectionIndex();
 				if (selectionIndex != -1) {// paranoia
 					selectedItem = comboField.getItems()[selectionIndex];
@@ -471,10 +505,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			}
 			comboField.setItems(fComplianceLabels);
 			if (selectionIndex == -1) {
-				fInterpreterEnvironmentCombo
-						.selectItem(getDefaultInterpreterName());
+				fInterpreterCombo.selectItem(getDefaultInterpreterName());
 			} else {
-				fInterpreterEnvironmentCombo.selectItem(selectedItem);
+				fInterpreterCombo.selectItem(selectedItem);
 			}
 			interpretersPresent = (fInstalledInterpreters.length > 0);
 		}
@@ -483,7 +516,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			List standins = new ArrayList();
 			IInterpreterInstallType[] types = ScriptRuntime
 					.getInterpreterInstallTypes(getCurrentLanguageNature());
-			IEnvironment environment = fLocationGroup.getEnvironment();
+			IEnvironment environment = getEnvironment();
 			for (int i = 0; i < types.length; i++) {
 				IInterpreterInstallType type = types[i];
 				IInterpreterInstall[] installs = type.getInterpreterInstalls();
@@ -526,10 +559,10 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 				return;
 			final boolean detect = fDetectGroup.mustDetect()
 					&& interpretersPresent;
-			fUseDefaultInterpreterEnvironment.setEnabled(!detect);
-			fUseProjectInterpreterEnvironment.setEnabled(!detect);
-			fInterpreterEnvironmentCombo.setEnabled(!detect
-					&& fUseProjectInterpreterEnvironment.isSelected());
+			fUseDefaultInterpreter.setEnabled(!detect);
+			fUseProjectInterpreter.setEnabled(!detect);
+			fInterpreterCombo.setEnabled(!detect
+					&& fUseProjectInterpreter.isSelected());
 			fPreferenceLink.setEnabled(!detect);
 			fGroup.setEnabled(!detect);
 		}
@@ -560,6 +593,10 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 
 		protected abstract String getCurrentLanguageNature();
 
+		protected boolean isTargetEnvironmentAllowed() {
+			return true;
+		}
+
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -574,26 +611,74 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			// fDetectGroup.handlePossibleJInterpreterChange();
 		}
 
+		private IEnvironment[] fEnvironments = null;
+
 		public void handlePossibleInterpreterChange() {
-			fUseDefaultInterpreterEnvironment
-					.setLabelText(getDefaultInterpreterLabel());
-			fillInstalledInterpreterEnvironments(fInterpreterEnvironmentCombo);
+			if (isTargetEnvironmentAllowed()) {
+				refreshEnvironments();
+			}
+			refreshInterpreters();
+		}
+
+		private void refreshInterpreters() {
+			fUseDefaultInterpreter.setLabelText(getDefaultInterpreterLabel());
+			fillInstalledInterpreters(fInterpreterCombo);
 			setChanged();
 			notifyObservers();
 		}
 
+		private void refreshEnvironments() {
+			final IEnvironment selection;
+			if (fLocationGroup.isExternalProject()) {
+				selection = fLocationGroup.getEnvironment();
+			} else {
+				final int index = fInterpreterEnvironment.getSelectionIndex();
+				if (index >= 0 && index < fEnvironments.length) {
+					selection = fEnvironments[index];
+				} else {
+					selection = fLocationGroup.getEnvironment();
+				}
+			}
+			final IEnvironment[] environments = fLocationGroup.environments;
+			if (!Arrays.equals(environments, fEnvironments)) {
+				fEnvironments = environments;
+				final String[] items = new String[environments.length];
+				int selectionIndex = -1;
+				for (int i = 0; i < items.length; i++) {
+					final IEnvironment env = environments[i];
+					items[i] = env.getName();
+					if (selection != null && selection.equals(env)) {
+						selectionIndex = i;
+					}
+				}
+				fInterpreterEnvironment.setItems(items);
+				fInterpreterEnvironment.selectItem(selectionIndex);
+			} else if (selection != null) {
+				for (int i = 0; i < environments.length; i++) {
+					if (selection.equals(environments[i])) {
+						fInterpreterEnvironment.selectItem(i);
+					}
+				}
+			}
+			fInterpreterEnvironment.setEnabled(fLocationGroup.isInWorkspace());
+		}
+
 		public void dialogFieldChanged(DialogField field) {
+			if (field == fInterpreterEnvironment
+					&& isTargetEnvironmentAllowed()) {
+				refreshInterpreters();
+			}
 			updateEnableState();
 			// fDetectGroup.handlePossibleInterpreterChange();
 		}
 
 		public boolean isUseSpecific() {
-			return fUseProjectInterpreterEnvironment.isSelected();
+			return fUseProjectInterpreter.isSelected();
 		}
 
 		public IInterpreterInstall getSelectedInterpreter() {
-			if (fUseProjectInterpreterEnvironment.isSelected()) {
-				int index = fInterpreterEnvironmentCombo.getSelectionIndex();
+			if (fUseProjectInterpreter.isSelected()) {
+				int index = fInterpreterCombo.getSelectionIndex();
 				if (index >= 0 && index < fComplianceLabels.length) { // paranoia
 					return fInstalledInterpreters[index];
 				}
@@ -820,19 +905,44 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 
 	protected abstract boolean interpeterRequired();
 
-	protected abstract boolean supportInterpreter();
+	protected boolean supportInterpreter() {
+		return true;
+	}
 
-	protected abstract void createInterpreterGroup(Composite parent);
+	protected abstract IInterpreterGroup createInterpreterGroup(Composite parent);
 
-	protected abstract void handlePossibleInterpreterChange();
+	protected IInterpreterGroup getInterpreterGroup() {
+		return fInterpreterGroup;
+	}
 
-	protected abstract Observable getInterpreterGroupObservable();
+	protected void handlePossibleInterpreterChange() {
+		if (fInterpreterGroup != null) {
+			fInterpreterGroup.handlePossibleInterpreterChange();
+		}
+	}
 
-	protected abstract IInterpreterInstall getInterpreter();
+	protected Observable getInterpreterGroupObservable() {
+		if (fInterpreterGroup instanceof Observable) {
+			return (Observable) fInterpreterGroup;
+		} else {
+			return null;
+		}
+	}
+
+	protected IInterpreterInstall getInterpreter() {
+		return fInterpreterGroup != null ? fInterpreterGroup
+				.getSelectedInterpreter() : null;
+	}
+
+	protected IEnvironment getInterpreterEnvironment() {
+		return fInterpreterGroup.getEnvironment();
+	}
 
 	public IInterpreterInstall getSelectedInterpreter() {
 		return getInterpreter();
 	}
+
+	private IInterpreterGroup fInterpreterGroup;
 
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
@@ -848,7 +958,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		// InterpreterEnvironmentGroup(composite);
 		// ProjectWizardFirstPage.AbstractInterpreterGroup interpGroup = null;
 		if (supportInterpreter()) {
-			createInterpreterGroup(composite);
+			fInterpreterGroup = createInterpreterGroup(composite);
+		} else {
+			fInterpreterGroup = null;
 		}
 		createCustomGroups(composite);
 		// fLayoutGroup= new LayoutGroup(composite);
@@ -949,10 +1061,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		return fLocationGroup.isInWorkspace();
 	}
 
-	public boolean isExternalLinked() {
-		return fLocationGroup.isExternalLinked();
-	}
-
 	public String getProjectName() {
 		return fNameGroup.getName();
 	}
@@ -1007,7 +1115,4 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		return super.setButtonLayoutData(button);
 	}
 
-	protected boolean isEnableLinkedProject() {
-		return false;
-	}
 }
