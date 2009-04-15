@@ -47,6 +47,21 @@ public class FormatterIndentDetector implements IFormatterWriter {
 		}
 	}
 
+	/*
+	 * @see IFormatterWriter#writeText(IFormatterContext, String)
+	 */
+	public void writeText(IFormatterContext context, String text)
+			throws Exception {
+		// empty
+	}
+
+	/*
+	 * @see IFormatterWriter#writeLineBreak(IFormatterContext)
+	 */
+	public void writeLineBreak(IFormatterContext context) throws Exception {
+		// empty
+	}
+
 	/**
 	 * @return the level
 	 */

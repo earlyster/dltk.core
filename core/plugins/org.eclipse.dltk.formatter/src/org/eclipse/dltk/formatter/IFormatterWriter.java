@@ -20,6 +20,23 @@ public interface IFormatterWriter {
 	void write(IFormatterContext context, int startOffset, int endOffset)
 			throws Exception;
 
+	/**
+	 * Writes specified text at the current position. Ideally text should not
+	 * contain line breaks characters.
+	 * 
+	 * @param text
+	 * @throws Exception
+	 */
+	void writeText(IFormatterContext context, String text) throws Exception;
+
+	/**
+	 * Writes line break at the current position.
+	 * 
+	 * @param context
+	 * @throws Exception
+	 */
+	void writeLineBreak(IFormatterContext context) throws Exception;
+
 	void excludeRegion(IRegion region);
 
 	void addNewLineCallback(IFormatterCallback callback);

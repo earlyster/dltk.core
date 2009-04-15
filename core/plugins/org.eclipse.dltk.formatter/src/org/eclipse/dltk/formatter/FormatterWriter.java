@@ -68,6 +68,21 @@ public class FormatterWriter implements IFormatterWriter {
 		}
 	}
 
+	/*
+	 * @see IFormatterWriter#writeText(IFormatterContext, String)
+	 */
+	public void writeText(IFormatterContext context, String text)
+			throws Exception {
+		write(context, text);
+	}
+
+	/*
+	 * @see IFormatterWriter#writeLineBreak(IFormatterContext)
+	 */
+	public void writeLineBreak(IFormatterContext context) throws Exception {
+		write(context, lineDelimiter);
+	}
+
 	protected void write(IFormatterContext context, String text)
 			throws IOException {
 		if (!context.isWrapping()) {
