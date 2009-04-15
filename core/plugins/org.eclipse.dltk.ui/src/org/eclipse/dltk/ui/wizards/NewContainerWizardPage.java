@@ -29,7 +29,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.core.ExternalScriptFolder;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.StandardModelElementContentProvider;
-import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
