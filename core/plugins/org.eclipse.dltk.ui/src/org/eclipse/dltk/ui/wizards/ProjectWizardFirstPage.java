@@ -237,12 +237,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 
 		private void updateInterpreters() {
-			Observable observable = ProjectWizardFirstPage.this
-					.getInterpreterGroupObservable();
-			if (observable != null
-					&& observable instanceof AbstractInterpreterGroup) {
-				((AbstractInterpreterGroup) observable)
-						.handlePossibleInterpreterChange();
+			if (fInterpreterGroup != null) {
+				fInterpreterGroup.handlePossibleInterpreterChange();
 			}
 		}
 
