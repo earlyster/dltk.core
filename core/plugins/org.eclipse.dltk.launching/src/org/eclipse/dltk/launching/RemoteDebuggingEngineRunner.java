@@ -9,6 +9,7 @@ import org.eclipse.dltk.core.PreferencesLookupDelegate;
 import org.eclipse.dltk.debug.core.IDbgpService;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
 import org.eclipse.dltk.internal.debug.core.model.RemoteScriptDebugTarget;
+import org.eclipse.dltk.internal.debug.core.model.ScriptDebugTarget;
 
 public abstract class RemoteDebuggingEngineRunner extends DebuggingEngineRunner {
 
@@ -50,7 +51,10 @@ public abstract class RemoteDebuggingEngineRunner extends DebuggingEngineRunner 
 		try {
 			initializeLaunch(launch, config,
 					createPreferencesLookupDelegate(launch));
-			waitDebuggerConnected(null, launch, monitor);
+			final ScriptDebugTarget target = (ScriptDebugTarget) launch
+					.getDebugTarget();
+			waitDebuggerConnected(launch, new DebugSessionAcceptor(target,
+					monitor));
 		} catch (CoreException e) {
 			launch.terminate();
 			throw e;
