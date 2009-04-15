@@ -11,22 +11,43 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.dbgp.IDbgpThreadAcceptor;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTargetListener;
 import org.eclipse.dltk.internal.debug.core.model.ScriptDebugTarget;
+import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 
 public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 		IScriptDebugTargetListener {
+
+	private static class NopLaunchStatusHandler implements ILaunchStatusHandler {
+
+		public void initialize(IDebugTarget target, IProgressMonitor monitor) {
+			// empty
+		}
+
+		public void updateElapsedTime(long elapsedTime) {
+			// empty
+		}
+
+		public void dispose() {
+			// empty
+		}
+
+	}
 
 	private final ScriptDebugTarget target;
 	private IProgressMonitor parentMonitor;
 	private boolean initialized = false;
 	private boolean connected = false;
+	private ILaunchStatusHandler statusHandler = null;
 
 	public DebugSessionAcceptor(ScriptDebugTarget target,
 			IProgressMonitor monitor) {
@@ -48,6 +69,14 @@ public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 
 	public void targetTerminating() {
 		target.getDbgpService().unregisterAcceptor(target.getSessionId());
+		disposeStatusHandler();
+	}
+
+	public void disposeStatusHandler() {
+		if (statusHandler != null) {
+			statusHandler.dispose();
+			statusHandler = null;
+		}
 	}
 
 	private static final int WAIT_CHUNK = 1000;
@@ -74,18 +103,43 @@ public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 					}
 					final long now = System.currentTimeMillis();
 					if (timeout != 0 && (now - start) > timeout) {
-						break;
+						if (statusHandler == null) {
+							statusHandler = createStatusHandler();
+						}
+						statusHandler.updateElapsedTime(now - start);
 					}
 					sub.worked((int) ((now - waitStart) / WAIT_CHUNK));
 					waitStart = now;
 				}
 			} catch (InterruptedException e) {
-				Thread.interrupted();
+				Thread.currentThread().interrupt();
 			}
 			return false;
 		} finally {
 			sub.done();
 		}
+	}
+
+	/**
+	 * @return
+	 */
+	private ILaunchStatusHandler createStatusHandler() {
+		final String extensionPointId = DLTKLaunchingPlugin.PLUGIN_ID
+				+ ".launchStatusHandler"; //$NON-NLS-1$
+		final IConfigurationElement[] elements = Platform
+				.getExtensionRegistry().getConfigurationElementsFor(
+						extensionPointId);
+		for (int i = 0; i < elements.length; ++i) {
+			try {
+				final ILaunchStatusHandler handler = (ILaunchStatusHandler) elements[i]
+						.createExecutableExtension("class"); //$NON-NLS-1$
+				handler.initialize(target, parentMonitor);
+				return handler;
+			} catch (Exception e) {
+				DLTKLaunchingPlugin.logWarning(e);
+			}
+		}
+		return new NopLaunchStatusHandler();
 	}
 
 	public void acceptDbgpThread(IDbgpSession session, IProgressMonitor monitor) {

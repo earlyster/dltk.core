@@ -140,14 +140,19 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 			initializeLaunch(launch, config, delegate);
 			final ScriptDebugTarget target = (ScriptDebugTarget) launch
 					.getDebugTarget();
-			DebugSessionAcceptor acceptor = new DebugSessionAcceptor(target,
-					monitor);
-			monitor.worked(1);
-			target.setProcess(startProcess(config, launch, monitor, delegate));
-			monitor.worked(1);
+			final DebugSessionAcceptor acceptor = new DebugSessionAcceptor(
+					target, monitor);
+			try {
+				monitor.worked(1);
+				target.setProcess(startProcess(config, launch, monitor,
+						delegate));
+				monitor.worked(1);
 
-			// Waiting for debugging engine to connect
-			waitDebuggerConnected(launch, acceptor);
+				// Waiting for debugging engine to connect
+				waitDebuggerConnected(launch, acceptor);
+			} finally {
+				acceptor.disposeStatusHandler();
+			}
 		} catch (CoreException e) {
 			launch.terminate();
 			throw e;
@@ -239,7 +244,8 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 				configuration, DLTKDebugPlugin.getConnectionTimeout());
 		if (!acceptor.waitConnection(timeout)) {
 			launch.terminate();
-			abort(InterpreterMessages.errDebuggingEngineNotConnected, null);
+			return;
+			// abort(InterpreterMessages.errDebuggingEngineNotConnected, null);
 		}
 		if (!acceptor.waitInitialized(60 * 60 * 1000)) {
 			launch.terminate();
