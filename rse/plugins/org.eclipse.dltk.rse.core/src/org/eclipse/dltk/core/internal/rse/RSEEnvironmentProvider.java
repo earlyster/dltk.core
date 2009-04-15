@@ -80,6 +80,7 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 					initThread = null;
 					lock.notifyAll();
 				}
+				EnvironmentManager.refreshBuildpathContainersForMixedProjects();
 				EnvironmentManager.fireEnvirontmentChange();
 			}
 		}
