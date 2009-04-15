@@ -9,6 +9,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -25,21 +30,37 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.ui.util.SWTUtil;
+import org.eclipse.dltk.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.dltk.ui.ModelElementLabelProvider;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
+import org.eclipse.dltk.ui.preferences.CodeTemplatesPreferencePage;
+import org.eclipse.dltk.ui.text.templates.ICodeTemplateArea;
+import org.eclipse.dltk.ui.text.templates.SourceModuleTemplateContext;
+import org.eclipse.dltk.ui.util.CodeGeneration;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 public abstract class NewSourceModulePage extends NewContainerWizardPage {
 
@@ -79,9 +100,14 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 	 *            used to initialize the fields
 	 */
 	public void init(IStructuredSelection selection) {
+		if (getTemplateArea() != null) {
+			createTemplateField();
+		}
+
 		IModelElement element = getInitialScriptElement(selection);
 
 		initContainerPage(element);
+		updateTemplates();
 
 		updateStatus(new IStatus[] { containerStatus, fileChanged() });
 	}
@@ -92,6 +118,120 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
 		LayoutUtil.setHorizontalGrabbing(text);
 		DialogField.createEmptySpace(parent);
+	}
+
+	private static final String NO_TEMPLATE = Util.EMPTY_STRING;
+	private Template[] fTemplates;
+	private ComboDialogField fTemplateDialogField = null;
+
+	protected void createTemplateControls(Composite parent, int nColumns) {
+		fTemplateDialogField.doFillIntoGrid(parent, nColumns - 1);
+		LayoutUtil.setWidthHint(fTemplateDialogField.getComboControl(null),
+				getMaxFieldWidth());
+		final Button configureTemplates = new Button(parent, SWT.PUSH);
+		GridData configureData = new GridData(SWT.FILL, SWT.NONE, false, false);
+		configureData.widthHint = SWTUtil
+				.getButtonWidthHint(configureTemplates);
+		configureTemplates.setLayoutData(configureData);
+		configureTemplates
+				.setText(Messages.NewSourceModulePage_ConfigureTemplates);
+		configureTemplates.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String templateName = null;
+				final Template template = getSelectedTemplate();
+				if (template != null) {
+					templateName = template.getName();
+				}
+				Map data = null;
+				if (templateName != null) {
+					data = new HashMap();
+					data.put(CodeTemplatesPreferencePage.DATA_SELECT_TEMPLATE,
+							templateName);
+				}
+				// TODO handle project specific preferences if any?
+				final String prefPageId = getTemplateArea()
+						.getTemplatePreferencePageId();
+				final PreferenceDialog dialog = PreferencesUtil
+						.createPreferenceDialogOn(getShell(), prefPageId,
+								new String[] { prefPageId }, data);
+				if (dialog.open() == Window.OK) {
+					updateTemplates();
+				}
+			}
+		});
+	}
+
+	protected void updateTemplates() {
+		if (fTemplateDialogField != null) {
+			Template selected = getSelectedTemplate();
+			String name = selected != null ? selected.getName()
+					: getLastUsedTemplateName();
+			fTemplates = getApplicableTemplates();
+			int idx = NO_TEMPLATE.equals(name) ? 0 : 1;
+			String[] names = new String[fTemplates.length + 1];
+			for (int i = 0; i < fTemplates.length; i++) {
+				names[i + 1] = fTemplates[i].getName();
+				if (name != null && name.equals(names[i + 1])) {
+					idx = i + 1;
+				}
+			}
+			names[0] = Messages.NewSourceModulePage_noTemplate;
+			fTemplateDialogField.setItems(names);
+			fTemplateDialogField.selectItem(idx);
+		}
+	}
+
+	protected Template[] getApplicableTemplates() {
+		final List result = new ArrayList();
+		final ICodeTemplateArea templateArea = getTemplateArea();
+		if (templateArea != null) {
+			final TemplateStore store = templateArea.getTemplateAccess()
+					.getTemplateStore();
+			final String[] contextTypeIds = getCodeTemplateContextTypeIds();
+			for (int i = 0; i < contextTypeIds.length; ++i) {
+				Template[] templates = store.getTemplates(contextTypeIds[i]);
+				for (int j = 0; j < templates.length; ++j) {
+					result.add(templates[j]);
+				}
+			}
+		}
+		return (Template[]) result.toArray(new Template[result.size()]);
+	}
+
+	protected String getLastUsedTemplateKey() {
+		return getClass().getName() + "_LAST_USED_TEMPLATE"; //$NON-NLS-1$
+	}
+
+	/**
+	 * @return the name of the template used in the previous dialog invocation.
+	 */
+	protected String getLastUsedTemplateName() {
+		final IDialogSettings dialogSettings = getDialogSettings();
+		return dialogSettings != null ? dialogSettings
+				.get(getLastUsedTemplateKey()) : null;
+	}
+
+	/**
+	 * Saves the name of the last used template.
+	 * 
+	 * @param name
+	 *            the name of a template, or an empty string for no template.
+	 */
+	protected void saveLastUsedTemplateName(String name) {
+		final IDialogSettings dialogSettings = getDialogSettings();
+		if (dialogSettings != null) {
+			dialogSettings.put(getLastUsedTemplateKey(), name);
+		}
+	}
+
+	protected Template getSelectedTemplate() {
+		if (fTemplateDialogField != null) {
+			int index = fTemplateDialogField.getSelectionIndex() - 1;
+			if (index >= 0 && index < fTemplates.length) {
+				return fTemplates[index];
+			}
+		}
+		return null;
 	}
 
 	public NewSourceModulePage() {
@@ -110,6 +250,12 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 				handleFieldChanged(FILE);
 			}
 		});
+	}
+
+	protected void createTemplateField() {
+		fTemplateDialogField = new ComboDialogField(SWT.READ_ONLY);
+		fTemplateDialogField
+				.setLabelText(Messages.NewSourceModulePage_Template);
 	}
 
 	protected void handleFieldChanged(String fieldName) {
@@ -134,8 +280,10 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 
 		String fileName = getFileName();
 
-		final ISourceModule module = currentScriptFolder.createSourceModule(
-				fileName, getFileContent(), true, monitor);
+		final ISourceModule module = currentScriptFolder
+				.getSourceModule(fileName);
+		currentScriptFolder.createSourceModule(fileName,
+				getFileContent(module), true, monitor);
 
 		return module;
 	}
@@ -155,6 +303,9 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		createContainerControls(composite, nColumns);
 		// createPackageControls(composite, nColumns);
 		createFileControls(composite, nColumns);
+		if (fTemplateDialogField != null) {
+			createTemplateControls(composite, nColumns);
+		}
 
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
@@ -248,7 +399,53 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 
 	protected abstract String getPageDescription();
 
-	protected String getFileContent() {
-		return ""; //$NON-NLS-1$
+	protected ICodeTemplateArea getTemplateArea() {
+		return null;
 	}
+
+	protected String[] getCodeTemplateContextTypeIds() {
+		return null;
+	}
+
+	protected String getDefaultCodeTemplateId() {
+		return null;
+	}
+
+	protected String getFileContent(ISourceModule module) throws CoreException {
+		final ICodeTemplateArea templateArea = getTemplateArea();
+		if (templateArea != null) {
+			final Template template = getSelectedTemplate();
+			saveLastUsedTemplateName(template != null ? template.getName()
+					: NO_TEMPLATE);
+			if (template != null) {
+				final TemplateContextType contextType = templateArea
+						.getTemplateAccess().getContextTypeRegistry()
+						.getContextType(template.getContextTypeId());
+				// TODO introduce a way to create context by contextType
+				final SourceModuleTemplateContext context = new SourceModuleTemplateContext(
+						contextType, CodeGeneration
+								.getLineDelimiterUsed(module));
+				// String fileComment = getFileComment(file, lineDelimiter);
+				// context.setVariable(CodeTemplateContextType.FILE_COMMENT,
+				//					fileComment != null ? fileComment : ""); //$NON-NLS-1$
+				// ICProject cproject = CoreModel.getDefault().create(
+				// file.getProject());
+				// String includeGuardSymbol = generateIncludeGuardSymbol(file
+				// .getName(), cproject);
+				// context.setVariable(CodeTemplateContextType.INCLUDE_GUARD_SYMBOL,
+				//					includeGuardSymbol != null ? includeGuardSymbol : ""); //$NON-NLS-1$
+				context.setSourceModuleVariables(module);
+				final String[] fullLine = {};
+				final String result = CodeGeneration.evaluateTemplate(context,
+						template, fullLine);
+				return result != null ? result : Util.EMPTY_STRING;
+			}
+		}
+		return getFileContent();
+	}
+
+	protected String getFileContent() {
+		return Util.EMPTY_STRING;
+	}
+
 }

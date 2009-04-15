@@ -11,10 +11,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text.templates;
 
-public interface ICodeTemplateAccess extends ITemplateAccess {
+public class SourceModuleTemplateContextType extends FileTemplateContextType {
 
-	ICodeTemplateCategory[] getCategories();
-
-	ICodeTemplateCategory getCategoryOfContextType(String contextTypeId);
+	public SourceModuleTemplateContextType() {
+		super();
+		// TODO add interpreter variables
+	}
 
 }

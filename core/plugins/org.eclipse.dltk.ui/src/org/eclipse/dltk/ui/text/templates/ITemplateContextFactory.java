@@ -11,10 +11,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text.templates;
 
-public interface ICodeTemplateAccess extends ITemplateAccess {
+import org.eclipse.jface.text.templates.TemplateContext;
 
-	ICodeTemplateCategory[] getCategories();
+public interface ITemplateContextFactory {
 
-	ICodeTemplateCategory getCategoryOfContextType(String contextTypeId);
+	TemplateContext createContext(Object input);
 
 }

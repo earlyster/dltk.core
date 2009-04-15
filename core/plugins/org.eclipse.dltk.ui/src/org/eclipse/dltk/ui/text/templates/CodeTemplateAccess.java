@@ -20,7 +20,7 @@ import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 
 public abstract class CodeTemplateAccess implements ICodeTemplateAccess,
-		ICodeTemplateAccess.ICodeTemplateAccessInternal {
+		ITemplateAccess.ITemplateAccessInternal {
 
 	private final String preferenceQualifier;
 	private final String preferenceKey;
@@ -49,11 +49,10 @@ public abstract class CodeTemplateAccess implements ICodeTemplateAccess,
 	/*
 	 * @see ICodeTemplateAccess#getInstanceStore()
 	 */
-	public TemplateStore getCodeTemplateStore() {
+	public TemplateStore getTemplateStore() {
 		if (fCodeTemplateStore == null) {
 			fCodeTemplateStore = new ContributionTemplateStore(
-					getCodeTemplateContextRegistry(), preferenceStore,
-					preferenceKey);
+					getContextTypeRegistry(), preferenceStore, preferenceKey);
 			try {
 				fCodeTemplateStore.load();
 			} catch (IOException e) {
@@ -85,7 +84,7 @@ public abstract class CodeTemplateAccess implements ICodeTemplateAccess,
 	 * @return the template context type registry for the code generation
 	 *         templates
 	 */
-	public ContextTypeRegistry getCodeTemplateContextRegistry() {
+	public ContextTypeRegistry getContextTypeRegistry() {
 		if (fCodeTemplateContextTypeRegistry == null) {
 			fCodeTemplateContextTypeRegistry = createContextTypeRegistry();
 		}

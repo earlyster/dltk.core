@@ -30,22 +30,21 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 public class ProjectTemplateStore {
 
-	private final ICodeTemplateAccess fCodeTemplateAccess;
+	private final ITemplateAccess fTemplateAccess;
 	private final TemplateStore fInstanceStore;
 	private final TemplateStore fProjectStore;
 
-	public ProjectTemplateStore(ICodeTemplateAccess codeTemplateAccess,
-			IProject project) {
-		this.fCodeTemplateAccess = codeTemplateAccess;
-		this.fInstanceStore = codeTemplateAccess.getCodeTemplateStore();
+	public ProjectTemplateStore(ITemplateAccess templateAccess, IProject project) {
+		this.fTemplateAccess = templateAccess;
+		this.fInstanceStore = templateAccess.getTemplateStore();
 		if (project == null) {
 			fProjectStore = null;
 		} else {
 			final ScopedPreferenceStore projectSettings = new ScopedPreferenceStore(
-					new ProjectScope(project), codeTemplateAccess
+					new ProjectScope(project), templateAccess
 							.getPreferenceQualifier());
-			fProjectStore = new TemplateStore(projectSettings,
-					codeTemplateAccess.getPreferenceKey()) {
+			fProjectStore = new TemplateStore(projectSettings, templateAccess
+					.getPreferenceKey()) {
 				/*
 				 * Make sure we keep the id of added code templates - add
 				 * removes it in the usual add() method
@@ -64,7 +63,7 @@ public class ProjectTemplateStore {
 							TemplateReaderWriter writer = new TemplateReaderWriter();
 							writer.save(getTemplateData(false), output);
 
-							projectSettings.setValue(fCodeTemplateAccess
+							projectSettings.setValue(fTemplateAccess
 									.getPreferenceKey(), output.toString());
 							projectSettings.save();
 
@@ -72,7 +71,7 @@ public class ProjectTemplateStore {
 						}
 					}
 
-					projectSettings.setToDefault(fCodeTemplateAccess
+					projectSettings.setToDefault(fTemplateAccess
 							.getPreferenceKey());
 					projectSettings.save();
 				}
@@ -82,8 +81,8 @@ public class ProjectTemplateStore {
 
 	public boolean hasProjectSpecificTempates(IProject project) {
 		String pref = new ProjectScope(project).getNode(
-				fCodeTemplateAccess.getPreferenceQualifier()).get(
-				fCodeTemplateAccess.getPreferenceKey(), null);
+				fTemplateAccess.getPreferenceQualifier()).get(
+				fTemplateAccess.getPreferenceKey(), null);
 		if (pref != null && pref.trim().length() > 0) {
 			Reader input = new StringReader(pref);
 			TemplateReaderWriter reader = new TemplateReaderWriter();

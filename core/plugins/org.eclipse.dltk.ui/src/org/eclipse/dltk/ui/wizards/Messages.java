@@ -16,11 +16,14 @@ public class Messages extends NLS {
 	public static String LinkedFolders_directory_label;
 	public static String LinkedFolders_environment_label;
 	public static String LinkedFolders_initializingFolders_taskName;
+	public static String NewSourceModulePage_ConfigureTemplates;
 	public static String NewSourceModulePage_file;
 	public static String NewSourceModulePage_fileAlreadyExists;
 	public static String NewSourceModulePage_noFoldersAvailable;
+	public static String NewSourceModulePage_noTemplate;
 	public static String NewSourceModulePage_pathCannotBeEmpty;
 	public static String NewSourceModulePage_selectScriptFolder;
+	public static String NewSourceModulePage_Template;
 	public static String NewSourceModuleWizard_errorInOpenInEditor;
 	public static String ProjectFolder_kind_libraryFolder;
 	public static String ProjectFolder_kind_folder;

@@ -128,7 +128,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 					return null;
 				}
 				if (category.isGroup()) {
-					return codeTemplateAccess.getCodeTemplateContextRegistry()
+					return codeTemplateAccess.getContextTypeRegistry()
 							.getContextType(contextTypeId);
 				} else {
 					return category;
@@ -460,7 +460,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 					.get(0);
 			Template template = data.getTemplate();
 			TemplateContextType type = codeTemplateAccess
-					.getCodeTemplateContextRegistry().getContextType(
+					.getContextTypeRegistry().getContextType(
 							template.getContextTypeId());
 			fTemplateProcessor.setContextType(type);
 			fPatternViewer.getDocument().set(template.getPattern());
@@ -542,8 +542,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 				contextTypeRegistry.addContextType(contextTypes[i]);
 			}
 		} else {
-			contextTypeRegistry = codeTemplateAccess
-					.getCodeTemplateContextRegistry();
+			contextTypeRegistry = codeTemplateAccess.getContextTypeRegistry();
 		}
 		EditTemplateDialog dialog = new EditTemplateDialog(toolkit, getShell(),
 				newTemplate, !isNew, data.isUserAdded(), category.isGroup(),

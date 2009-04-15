@@ -11,10 +11,12 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text.templates;
 
-public interface ICodeTemplateAccess extends ITemplateAccess {
+public interface ICodeTemplateArea {
 
-	ICodeTemplateCategory[] getCategories();
+	ICodeTemplateAccess getTemplateAccess();
 
-	ICodeTemplateCategory getCategoryOfContextType(String contextTypeId);
+	String getTemplatePreferencePageId();
+
+	String getTemplatePropertyPageId();
 
 }

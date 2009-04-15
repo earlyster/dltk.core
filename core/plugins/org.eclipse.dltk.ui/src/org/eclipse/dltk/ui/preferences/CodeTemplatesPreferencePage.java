@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.internal.ui.preferences.PropertyAndPreferencePage;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
-import org.eclipse.dltk.ui.text.templates.ICodeTemplateAccess;
+import org.eclipse.dltk.ui.text.templates.ICodeTemplateArea;
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -35,14 +35,14 @@ public abstract class CodeTemplatesPreferencePage extends
 	public static final String DATA_SELECT_TEMPLATE = "CodeTemplatePreferencePage.select_template"; //$NON-NLS-1$
 
 	private final IDLTKUILanguageToolkit toolkit;
-	private final ICodeTemplateAccess codeTemplateAccess;
+	private final ICodeTemplateArea codeTemplateArea;
 
 	private CodeTemplateBlock fCodeTemplateConfigurationBlock;
 
 	protected CodeTemplatesPreferencePage(IDLTKUILanguageToolkit toolkit,
-			ICodeTemplateAccess codeTemplateAccess) {
+			ICodeTemplateArea codeTemplateArea) {
 		this.toolkit = toolkit;
-		this.codeTemplateAccess = codeTemplateAccess;
+		this.codeTemplateArea = codeTemplateArea;
 		setTitle(PreferencesMessages.CodeTemplatesPreferencePage_title);
 	}
 
@@ -53,7 +53,7 @@ public abstract class CodeTemplatesPreferencePage extends
 		IWorkbenchPreferenceContainer container = (IWorkbenchPreferenceContainer) getContainer();
 		fCodeTemplateConfigurationBlock = new CodeTemplateBlock(
 				getNewStatusChangedListener(), getProject(), container,
-				toolkit, codeTemplateAccess);
+				toolkit, codeTemplateArea.getTemplateAccess());
 
 		super.createControl(parent);
 		// TODO PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(),
@@ -147,10 +147,10 @@ public abstract class CodeTemplatesPreferencePage extends
 			if (id instanceof String) {
 				final TemplatePersistenceData[] templates = fCodeTemplateConfigurationBlock.fTemplateStore
 						.getTemplateData();
-				TemplatePersistenceData template = null;
 				for (int index = 0; index < templates.length; index++) {
-					template = templates[index];
-					if (template.getId().equals(id)) {
+					TemplatePersistenceData template = templates[index];
+					if (id.equals(template.getId())
+							|| id.equals(template.getTemplate().getName())) {
 						fCodeTemplateConfigurationBlock
 								.postSetSelection(template);
 						break;
@@ -160,4 +160,19 @@ public abstract class CodeTemplatesPreferencePage extends
 		}
 		super.applyData(data);
 	}
+
+	/*
+	 * @see PropertyAndPreferencePage#getPreferencePageId()
+	 */
+	protected String getPreferencePageId() {
+		return codeTemplateArea.getTemplatePreferencePageId();
+	}
+
+	/*
+	 * @see PropertyAndPreferencePage#getPropertyPageId()
+	 */
+	protected String getPropertyPageId() {
+		return codeTemplateArea.getTemplatePropertyPageId();
+	}
+
 }
