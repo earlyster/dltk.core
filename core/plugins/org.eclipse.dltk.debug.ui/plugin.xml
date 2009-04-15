@@ -523,4 +523,8 @@
       </fontDefinition>
   </extension>
 
+  <extension point="org.eclipse.dltk.launching.launchStatusHandler">
+     <handler class="org.eclipse.dltk.debug.ui.handlers.LaunchStatusHandler"/>
+  </extension>
+
 </plugin>
