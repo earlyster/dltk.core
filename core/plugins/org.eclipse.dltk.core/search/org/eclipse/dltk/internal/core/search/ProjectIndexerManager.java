@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
@@ -152,7 +151,7 @@ public class ProjectIndexerManager {
 
 	private static IProjectIndexer[] getIndexers(IScriptProject project,
 			boolean checkEnable) {
-		if (checkEnable && !isIndexerEnabled(project.getProject())) {
+		if (checkEnable && !isIndexerEnabled(project)) {
 			return null;
 		}
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
@@ -163,9 +162,9 @@ public class ProjectIndexerManager {
 		return getIndexers(toolkit.getNatureId());
 	}
 
-	public static boolean isIndexerEnabled(final IProject project) {
-		return new ProjectScope(project).getNode(DLTKCore.PLUGIN_ID)
-				.getBoolean(DLTKCore.INDEXER_ENABLED, true);
+	public static boolean isIndexerEnabled(final IScriptProject project) {
+		return !DLTKCore.DISABLED.equals(project.getOption(
+				DLTKCore.INDEXER_ENABLED, false));
 	}
 
 	/**
@@ -240,15 +239,15 @@ public class ProjectIndexerManager {
 	 * @param res
 	 */
 	public static void indexProject(IProject project) {
-		if (isIndexerEnabled(project)) {
-			indexProject(project, DLTKCore.create(project));
+		final IScriptProject scriptProject = DLTKCore.create(project);
+		if (isIndexerEnabled(scriptProject)) {
+			indexProject(project, scriptProject);
 		}
 	}
 
 	public static void indexProject(IScriptProject scriptProject) {
-		final IProject project = scriptProject.getProject();
-		if (isIndexerEnabled(project)) {
-			indexProject(project, scriptProject);
+		if (isIndexerEnabled(scriptProject)) {
+			indexProject(scriptProject.getProject(), scriptProject);
 		}
 	}
 
@@ -305,7 +304,7 @@ public class ProjectIndexerManager {
 		if (project == null) {
 			return;
 		}
-		if (!isIndexerEnabled(project.getProject())) {
+		if (!isIndexerEnabled(project)) {
 			return;
 		}
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager

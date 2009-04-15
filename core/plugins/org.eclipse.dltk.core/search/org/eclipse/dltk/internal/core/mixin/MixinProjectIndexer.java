@@ -110,8 +110,7 @@ public class MixinProjectIndexer implements IProjectIndexer {
 					.getScriptProjects();
 			for (int i = 0; i < projects.length; ++i) {
 				final IScriptProject project = projects[i];
-				if (ProjectIndexerManager
-						.isIndexerEnabled(project.getProject())) {
+				if (ProjectIndexerManager.isIndexerEnabled(project)) {
 					requestIfNotWaiting(new MixinProjectRequest(project, false));
 				}
 			}

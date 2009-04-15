@@ -571,9 +571,6 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		if (DLTKCore.getPlugin() == null) {
 			return;
 		}
-		if (!ProjectIndexerManager.isIndexerEnabled(project)) {
-			return;
-		}
 		// Also request indexing of binaries on the buildpath
 		// determine the new children
 		try {
@@ -621,7 +618,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		if (DLTKCore.getPlugin() == null) {
 			return;
 		}
-		if (!ProjectIndexerManager.isIndexerEnabled(requestingProject)) {
+		if (!ProjectIndexerManager.isIndexerEnabled(DLTKCore
+				.create(requestingProject))) {
 			return;
 		}
 		Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
@@ -662,10 +660,10 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	public void indexSourceFolder(ScriptProject scriptProject,
 			IPath sourceFolder, char[][] inclusionPatterns,
 			char[][] exclusionPatterns) {
-		IProject project = scriptProject.getProject();
-		if (!ProjectIndexerManager.isIndexerEnabled(project)) {
+		if (!ProjectIndexerManager.isIndexerEnabled(scriptProject)) {
 			return;
 		}
+		final IProject project = scriptProject.getProject();
 		if (this.jobEnd > this.jobStart) {
 			// skip it if a job to index the project is already in the queue
 			IndexRequest request = new IndexAllProject(project, this);

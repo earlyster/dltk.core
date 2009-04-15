@@ -2721,7 +2721,8 @@ public class DeltaProcessor {
 					break;
 				}
 			case IResourceDelta.ADDED:
-				if (ProjectIndexerManager.isIndexerEnabled(file.getProject())) {
+				if (ProjectIndexerManager.isIndexerEnabled(element
+						.getScriptProject())) {
 					IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 							.getLanguageToolkit(element);
 					indexManager.addSource(file, file.getProject()
