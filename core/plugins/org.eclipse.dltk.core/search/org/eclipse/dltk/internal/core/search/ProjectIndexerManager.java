@@ -24,6 +24,7 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ScriptProjectUtil;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.ModelManager;
@@ -163,8 +164,7 @@ public class ProjectIndexerManager {
 	}
 
 	public static boolean isIndexerEnabled(final IScriptProject project) {
-		return !DLTKCore.DISABLED.equals(project.getOption(
-				DLTKCore.INDEXER_ENABLED, false));
+		return ScriptProjectUtil.isIndexerEnabled(project);
 	}
 
 	/**

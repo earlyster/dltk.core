@@ -48,6 +48,7 @@ import org.eclipse.dltk.core.IModelMarker;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptProjectUtil;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
@@ -214,7 +215,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					+ " @ " + new Date(startTime)); //$NON-NLS-1$
 		}
 		this.scriptProject = (ScriptProject) DLTKCore.create(currentProject);
-		if (!isBuilderEnabled()) {
+		if (!ScriptProjectUtil.isBuilderEnabled(scriptProject)) {
 			return null;
 		}
 		final String version = currentProject
@@ -287,14 +288,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 		monitor.done();
 		return requiredProjects;
-	}
-
-	/**
-	 * @return
-	 */
-	private boolean isBuilderEnabled() {
-		return !DLTKCore.DISABLED.equals(scriptProject.getOption(
-				DLTKCore.BUILDER_ENABLED, false));
 	}
 
 	/**
