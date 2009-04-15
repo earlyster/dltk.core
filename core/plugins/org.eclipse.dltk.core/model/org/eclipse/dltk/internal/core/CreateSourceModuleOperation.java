@@ -183,6 +183,6 @@ public class CreateSourceModuleOperation extends ModelOperation {
 		if (fSource == null) {
 			return new ModelStatus(IModelStatusConstants.INVALID_CONTENTS);
 		}
-		return ModelStatus.VERIFIED_OK;
+		return IModelStatus.VERIFIED_OK;
 	}
 }
