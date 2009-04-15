@@ -2701,13 +2701,15 @@ public class DeltaProcessor {
 					break;
 				}
 			case IResourceDelta.ADDED:
-				IDLTKLanguageToolkit toolkit = null;
-				toolkit = DLTKLanguageManager.getLanguageToolkit(element);
-				ProjectIndexerManager.indexSourceModule(
-						(ISourceModule) element, toolkit);
-				if (DLTKCore.DEBUG) {
-					System.err
-							.println("update index: some actions are required to perform here...."); //$NON-NLS-1$
+				if (ProjectIndexerManager.isIndexerEnabled(file.getProject())) {
+					IDLTKLanguageToolkit toolkit = null;
+					toolkit = DLTKLanguageManager.getLanguageToolkit(element);
+					ProjectIndexerManager.indexSourceModule(
+							(ISourceModule) element, toolkit);
+					if (DLTKCore.DEBUG) {
+						System.err
+								.println("update index: some actions are required to perform here...."); //$NON-NLS-1$
+					}
 				}
 				// Clean file from secondary types cache but do not
 				// update

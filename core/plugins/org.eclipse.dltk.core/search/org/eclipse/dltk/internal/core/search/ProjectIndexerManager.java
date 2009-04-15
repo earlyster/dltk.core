@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
@@ -144,12 +145,25 @@ public class ProjectIndexerManager {
 	}
 
 	private static IProjectIndexer[] getIndexers(IScriptProject project) {
+		return getIndexers(project, true);
+	}
+
+	private static IProjectIndexer[] getIndexers(IScriptProject project,
+			boolean checkEnable) {
+		if (checkEnable && !isIndexerEnabled(project.getProject())) {
+			return null;
+		}
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(project);
 		if (toolkit == null) {
 			return null;
 		}
 		return getIndexers(toolkit.getNatureId());
+	}
+
+	public static boolean isIndexerEnabled(final IProject project) {
+		return new ProjectScope(project).getNode(DLTKCore.PLUGIN_ID)
+				.getBoolean(DLTKCore.INDEXER_ENABLED, true);
 	}
 
 	/**
@@ -224,17 +238,27 @@ public class ProjectIndexerManager {
 	 * @param res
 	 */
 	public static void indexProject(IProject project) {
-		indexProject(DLTKCore.create(project));
+		if (isIndexerEnabled(project)) {
+			indexProject(project, DLTKCore.create(project));
+		}
+	}
+
+	public static void indexProject(IScriptProject scriptProject) {
+		final IProject project = scriptProject.getProject();
+		if (isIndexerEnabled(project)) {
+			indexProject(project, scriptProject);
+		}
 	}
 
 	/**
 	 * @param scriptProject
 	 */
-	public static void indexProject(IScriptProject project) {
-		final IProjectIndexer[] indexers = getIndexers(project);
+	private static void indexProject(IProject project,
+			IScriptProject scriptProject) {
+		final IProjectIndexer[] indexers = getIndexers(scriptProject, false);
 		if (indexers != null) {
 			for (int i = 0; i < indexers.length; ++i) {
-				indexers[i].indexProject(project);
+				indexers[i].indexProject(scriptProject);
 			}
 		}
 	}
@@ -272,6 +296,9 @@ public class ProjectIndexerManager {
 	public static void reconciled(ISourceModule workingCopy) {
 		final IScriptProject project = workingCopy.getScriptProject();
 		if (project == null) {
+			return;
+		}
+		if (!isIndexerEnabled(project.getProject())) {
 			return;
 		}
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager

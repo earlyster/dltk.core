@@ -78,6 +78,11 @@ public final class EnvironmentManager {
 				}
 			}
 		}
+		return detectEnvironment(project);
+	}
+
+	private static IEnvironment detectEnvironment(IProject project) {
+		checkInitialized();
 		Object[] objects = manager.getObjects();
 		for (int i = 0; i < objects.length; i++) {
 			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
@@ -107,26 +112,26 @@ public final class EnvironmentManager {
 			}
 		}
 		if (detectAutomatically) {
-			Object[] objects = manager.getObjects();
-			for (int i = 0; i < objects.length; i++) {
-				IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
-				IEnvironment environment = provider
-						.getProjectEnvironment(project);
-				if (environment != null) {
-					return environment.getId();
-				}
-			}
+			final IEnvironment environment = detectEnvironment(project);
+			return environment != null ? environment.getId() : null;
 		}
 		return null;
 	}
 
 	public static void setEnvironmentId(IProject project, String environmentId)
 			throws CoreException {
+		setEnvironmentId(project, environmentId, true);
+	}
+
+	public static void setEnvironmentId(IProject project, String environmentId,
+			boolean refresh) throws CoreException {
 		// TODO check project.getDescription.getLocationURI() scheme ?
 		project.setPersistentProperty(PROJECT_ENVIRONMENT, environmentId);
-		final IScriptProject scriptProject = DLTKCore.create(project);
-		if (scriptProject != null) {
-			DLTKCore.refreshBuildpathContainers(scriptProject);
+		if (refresh) {
+			final IScriptProject scriptProject = DLTKCore.create(project);
+			if (scriptProject != null) {
+				DLTKCore.refreshBuildpathContainers(scriptProject);
+			}
 		}
 	}
 
@@ -160,6 +165,7 @@ public final class EnvironmentManager {
 	}
 
 	public static IEnvironment getEnvironmentById(String envId) {
+		checkInitialized();
 		ElementInfo[] elementInfos = manager.getElementInfos();
 		for (int i = 0; i < elementInfos.length; i++) {
 			IEnvironmentProvider provider = (IEnvironmentProvider) manager

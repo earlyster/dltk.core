@@ -19,6 +19,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -663,12 +664,31 @@ public class ScriptProject extends Openable implements IScriptProject {
 		// compute the project fragements
 		IModelElement[] children = computeProjectFragments(resolvedBuildpath,
 				false, null);
-		info.setChildren(children);
+		setProjectInfoChildren(info, children);
 
 		// remember the timestamps of external libraries the first time they are
 		// looked up
 		getPerProjectInfo().rememberExternalLibTimestamps();
 		return true;
+	}
+
+	private void setProjectInfoChildren(OpenableElementInfo info,
+			IModelElement[] children) {
+		List fragments = new ArrayList();
+		fragments.addAll(Arrays.asList(children));
+		// Call for extra model providers
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(this);
+		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
+				.getNatureId());
+		if (providers != null) {
+			for (int i = 0; i < providers.length; i++) {
+				providers[i].provideModelChanges(this, fragments);
+			}
+		}
+
+		info.setChildren((IModelElement[]) fragments
+				.toArray(new IModelElement[fragments.size()]));
 	}
 
 	public ModelManager.PerProjectInfo getPerProjectInfo()
@@ -701,16 +721,6 @@ public class ScriptProject extends Openable implements IScriptProject {
 				retrieveExportedRoots, rootToResolvedEntries);
 
 		List fragments = accumulatedRoots.asList();
-		// Call for extra model providers
-		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-				.getLanguageToolkit(this);
-		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
-				.getNatureId());
-		if (providers != null) {
-			for (int i = 0; i < providers.length; i++) {
-				providers[i].provideModelChanges(this, fragments);
-			}
-		}
 		IProjectFragment[] rootArray = new IProjectFragment[fragments.size()];
 		fragments.toArray(rootArray);
 		return rootArray;
@@ -1029,11 +1039,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 			}
 		}
 		info.setForeignResources(null);
-		info.setChildren(computeProjectFragments(buildpath, false, null /*
-																		 * no
-																		 * reverse
-																		 * map
-																		 */));
+		IProjectFragment[] fragments = computeProjectFragments(buildpath,
+				false, null);
+		setProjectInfoChildren(info, fragments);
 	}
 
 	public IBuildpathEntry[] getRawBuildpath() throws ModelException {

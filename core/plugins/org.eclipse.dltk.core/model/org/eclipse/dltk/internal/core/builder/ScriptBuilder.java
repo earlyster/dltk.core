@@ -211,6 +211,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					+ " @ " + new Date(startTime)); //$NON-NLS-1$
 		}
 		this.scriptProject = (ScriptProject) DLTKCore.create(currentProject);
+		if (!isBuilderEnabled()) {
+			return null;
+		}
 		final String version = currentProject
 				.getPersistentProperty(PROPERTY_BUILDER_VERSION);
 		if (version == null) {
@@ -283,6 +286,13 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		return requiredProjects;
 	}
 
+	/**
+	 * @return
+	 */
+	private boolean isBuilderEnabled() {
+		return !DLTKCore.DISABLED.equals(scriptProject.getOption(
+				DLTKCore.BUILDER_ENABLED, false));
+	}
 	/**
 	 * Remove incorrect task markers.
 	 * 
