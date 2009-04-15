@@ -237,9 +237,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 
 		private void updateInterpreters() {
-			if (fInterpreterGroup != null) {
-				fInterpreterGroup.handlePossibleInterpreterChange();
-			}
+			handlePossibleInterpreterChange();
 		}
 
 		protected String getDefaultPath(String name) {
