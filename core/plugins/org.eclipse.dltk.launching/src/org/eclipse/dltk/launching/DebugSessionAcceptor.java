@@ -12,6 +12,7 @@
 package org.eclipse.dltk.launching;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.dbgp.IDbgpSession;
@@ -105,7 +106,7 @@ public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 			}
 		} else {
 			target.getDbgpThreadAcceptor().acceptDbgpThread(session,
-					this.parentMonitor);
+					new NullProgressMonitor());
 		}
 	}
 
