@@ -23,10 +23,12 @@ import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.SimplePriorityClassDLTKExtensionManager;
 import org.eclipse.dltk.core.PriorityDLTKExtensionManager.ElementInfo;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.internal.core.ExternalScriptProject;
+import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.utils.ExecutableOperation;
 import org.eclipse.dltk.utils.ExecutionContexts;
 import org.eclipse.osgi.util.NLS;
@@ -131,6 +133,30 @@ public final class EnvironmentManager {
 			final IScriptProject scriptProject = DLTKCore.create(project);
 			if (scriptProject != null) {
 				DLTKCore.refreshBuildpathContainers(scriptProject);
+			}
+		}
+	}
+
+	public static void refreshBuildpathContainersForMixedProjects() {
+		try {
+			IScriptProject[] projects = ModelManager.getModelManager()
+					.getModel().getScriptProjects();
+			for (int i = 0; i < projects.length; i++) {
+				IProject project = projects[i].getProject();
+				String property = project
+						.getPersistentProperty(PROJECT_ENVIRONMENT);
+				if (property != null) {
+					DLTKCore.refreshBuildpathContainers(projects[i]);
+				}
+
+			}
+		} catch (ModelException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		} catch (CoreException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
 			}
 		}
 	}
