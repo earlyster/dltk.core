@@ -2492,7 +2492,6 @@ public class DeltaProcessor {
 							// project (and its dependents)
 							this.rootsToRefresh.add(element);
 							this.projectCachesToReset.add(element);
-							this.manager.indexManager.indexAll(res);
 							this.postActions.add(new Runnable() {
 								public void run() {
 									ProjectIndexerManager.indexProject(res);
@@ -2534,7 +2533,6 @@ public class DeltaProcessor {
 						// projects
 						if (isDylanProject) {
 							this.elementAdded(element, delta, rootInfo);
-							this.manager.indexManager.indexAll(res);
 							ProjectIndexerManager.indexProject(res);
 						} else {
 							this.elementRemoved(element, delta, rootInfo);
@@ -2574,7 +2572,6 @@ public class DeltaProcessor {
 			switch (delta.getKind()) {
 			case IResourceDelta.ADDED:
 				final IScriptProject scriptProject = element.getScriptProject();
-				indexManager.indexAll(scriptProject.getProject());
 				this.postActions.add(new Runnable() {
 					public void run() {
 						ProjectIndexerManager.indexProject(scriptProject);

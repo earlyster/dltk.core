@@ -26,6 +26,8 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
+import org.eclipse.dltk.core.search.indexing.IndexManager;
+import org.eclipse.dltk.internal.core.ModelManager;
 
 public class ProjectIndexerManager {
 
@@ -145,7 +147,12 @@ public class ProjectIndexerManager {
 	}
 
 	private static IProjectIndexer[] getIndexers(IScriptProject project) {
-		if (!isIndexerEnabled(project.getProject())) {
+		return getIndexers(project, true);
+	}
+
+	private static IProjectIndexer[] getIndexers(IScriptProject project,
+			boolean checkEnable) {
+		if (checkEnable && !isIndexerEnabled(project.getProject())) {
 			return null;
 		}
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
@@ -233,17 +240,32 @@ public class ProjectIndexerManager {
 	 * @param res
 	 */
 	public static void indexProject(IProject project) {
-		indexProject(DLTKCore.create(project));
+		if (isIndexerEnabled(project)) {
+			indexProject(project, DLTKCore.create(project));
+		}
+	}
+
+	public static void indexProject(IScriptProject scriptProject) {
+		final IProject project = scriptProject.getProject();
+		if (isIndexerEnabled(project)) {
+			indexProject(project, scriptProject);
+		}
 	}
 
 	/**
 	 * @param scriptProject
 	 */
-	public static void indexProject(IScriptProject project) {
-		final IProjectIndexer[] indexers = getIndexers(project);
+	private static void indexProject(IProject project,
+			IScriptProject scriptProject) {
+		final IndexManager indexManager = ModelManager.getModelManager()
+				.getIndexManager();
+		if (indexManager != null) {
+			indexManager.indexAll(project);
+		}
+		final IProjectIndexer[] indexers = getIndexers(scriptProject, false);
 		if (indexers != null) {
 			for (int i = 0; i < indexers.length; ++i) {
-				indexers[i].indexProject(project);
+				indexers[i].indexProject(scriptProject);
 			}
 		}
 	}

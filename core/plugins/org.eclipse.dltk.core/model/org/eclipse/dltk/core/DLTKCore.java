@@ -324,9 +324,17 @@ public class DLTKCore extends Plugin {
 	 */
 	public static final String FILE_CACHE = PLUGIN_ID + ".contentCache"; //$NON-NLS-1$
 
-	public static final String BUILDER_ENABLED = PLUGIN_ID + ".builder.enabled"; //$NON-NLS-1$					
+	/**
+	 * Possible configurable option ID. Value should be {@link #ENABLED} or
+	 * {@link #DISABLED}.
+	 */
+	public static final String BUILDER_ENABLED = PLUGIN_ID + ".builder"; //$NON-NLS-1$					
 
-	public static final String INDEXER_ENABLED = PLUGIN_ID + ".indexer.enabled"; //$NON-NLS-1$					
+	/**
+	 * Possible configurable option ID. Value should be {@link #ENABLED} or
+	 * {@link #DISABLED}.
+	 */
+	public static final String INDEXER_ENABLED = PLUGIN_ID + ".indexer"; //$NON-NLS-1$					
 
 	/**
 	 * The constructor.

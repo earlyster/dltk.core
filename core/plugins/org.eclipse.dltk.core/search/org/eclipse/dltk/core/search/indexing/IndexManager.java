@@ -1176,9 +1176,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		IProject[] projects = root.getProjects();
 		for (int i = 0; i < projects.length; i++) {
 			final IProject project = projects[i];
-			if (DLTKLanguageManager.hasScriptNature(project)
-					&& ProjectIndexerManager.isIndexerEnabled(project)) {
-				this.indexAll(project);
+			if (DLTKLanguageManager.hasScriptNature(project)) {
 				ProjectIndexerManager.indexProject(project);
 			}
 		}
