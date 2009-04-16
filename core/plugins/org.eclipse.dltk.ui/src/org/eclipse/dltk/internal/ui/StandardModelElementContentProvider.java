@@ -185,8 +185,8 @@ public class StandardModelElementContentProvider implements
 	}
 
 	public Object[] getExtendedChildren(Object element, Object[] children) {
-		IModelContentProvider[] providers = ModelContentProviderManager
-				.getProviders();
+		IModelContentProvider[] providers = UIModelProviderManager
+				.getContentProviders();
 		if (providers.length > 0) {
 			List elements = new ArrayList();
 			elements.addAll(Arrays.asList(children));
@@ -201,8 +201,8 @@ public class StandardModelElementContentProvider implements
 	}
 
 	public Object getExtendedParent(Object element) {
-		IModelContentProvider[] providers = ModelContentProviderManager
-				.getProviders();
+		IModelContentProvider[] providers = UIModelProviderManager
+				.getContentProviders();
 		if (providers.length > 0) {
 			for (int i = 0; i < providers.length; i++) {
 				Object parent = providers[i].getParentElement(element,

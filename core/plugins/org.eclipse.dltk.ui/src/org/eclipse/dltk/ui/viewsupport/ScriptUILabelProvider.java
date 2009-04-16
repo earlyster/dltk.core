@@ -14,7 +14,11 @@ import java.util.ArrayList;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.internal.ui.UIModelProviderManager;
 import org.eclipse.dltk.ui.ScriptElementImageProvider;
 import org.eclipse.dltk.ui.ScriptElementLabels;
 import org.eclipse.jface.util.SafeRunnable;
@@ -26,10 +30,6 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 
-/*
- * TODO: Need to implement storage label provider usage here. 
- * TODO: Need to implements image provider usage here.
- */
 public class ScriptUILabelProvider implements ILabelProvider, IColorProvider {
 
 	protected ListenerList fListeners = new ListenerList(1);
@@ -106,26 +106,62 @@ public class ScriptUILabelProvider implements ILabelProvider, IColorProvider {
 	}
 
 	public Image getImage(Object element) {
-		Image result = fImageLabelProvider.getImageLabel(element,
+		ILabelProvider[] providers = getProviders(element);
+		Image result = null;
+		if (providers != null) {
+			for (int i = 0; i < providers.length; i++) {
+				Image image = providers[i].getImage(element);
+				if (image != null) {
+					result = image;
+					break;
+				}
+			}
+		}
+		result = fImageLabelProvider.getImageLabel(element,
 				evaluateImageFlags(element));
-
 		if (result == null
 				&& (element instanceof IStorage || element instanceof ISourceModule)) {
 			result = fStorageLabelProvider.getImage(element);
 		}
-
 		return decorateImage(result, element);
 	}
 
 	public String getText(Object element) {
-		String result = ScriptElementLabels.getDefault().getTextLabel(element,
-				evaluateTextFlags(element));
+		ILabelProvider[] providers = getProviders(element);
+		String result = null;
+		if (providers != null) {
+			for (int i = 0; i < providers.length; i++) {
+				String text = providers[i].getText(element);
+				if (text != null) {
+					result = text;
+					break;
+				}
+			}
+		}
+		if (result == null) {
+			result = ScriptElementLabels.getDefault().getTextLabel(element,
+					evaluateTextFlags(element));
+		}
 
 		if (result.length() == 0 && (element instanceof IStorage)) {
 			result = fStorageLabelProvider.getText(element);
 		}
 
 		return decorateText(result, element);
+	}
+
+	private ILabelProvider[] getProviders(Object element) {
+		String idtoolkit = null;
+		if (element instanceof IModelElement) {
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit((IModelElement) element);
+			if (toolkit != null) {
+				idtoolkit = toolkit.getNatureId();
+			}
+		}
+		ILabelProvider[] providers = UIModelProviderManager
+				.getLabelProviders(idtoolkit);
+		return providers;
 	}
 
 	public void addListener(ILabelProviderListener listener) {
