@@ -11,7 +11,8 @@
    <extension-point id="actionFilterTester" name="%extension-point.name.actionFilterTester" schema="schema/actionFilterTester.exsd"/>  
    <extension-point id="editorContextActionGroup" name="%extension-point.name.editorContextActionGroup" schema="schema/editorContextActionGroup.exsd"/>  
    <extension-point id="formatterFactory" name="%extension-point.name.formatterFactory" schema="schema/formatterFactory.exsd"/>  
-   <extension-point id="correctionProcessor" name="%extension-point.name.correctionProcessor" schema="schema/correctionProcessor.exsd"/>  
+   <extension-point id="correctionProcessor" name="%extension-point.name.correctionProcessor" schema="schema/correctionProcessor.exsd"/>
+   <extension-point id="modelContentProvider" name="modelContentProvider" schema="schema/modelContentProvider.exsd"/>  
    <extension
     	id="DLTKSearchResultPage"
         point="org.eclipse.search.searchResultViewPages">
@@ -1394,5 +1395,8 @@
 			namespace="org.eclipse.dltk"
 			properties="markerType"
 			type="org.eclipse.core.resources.IMarker"/>
+	</extension>
+	<extension point="org.eclipse.ui.startup">
+    	<startup class="org.eclipse.dltk.internal.ui.DLTKUI"/>
 	</extension>
 </plugin>

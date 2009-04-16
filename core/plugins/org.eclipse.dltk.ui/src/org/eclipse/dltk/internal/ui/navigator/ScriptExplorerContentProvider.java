@@ -217,7 +217,8 @@ public class ScriptExplorerContentProvider extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getPackageFragmentRootContent(org.eclipse.jdt.core.IPackageFragmentRoot)
+	 * @seeorg.eclipse.jdt.ui.StandardJavaElementContentProvider#
+	 * getPackageFragmentRootContent(org.eclipse.jdt.core.IPackageFragmentRoot)
 	 */
 	protected Object[] getProjectFragmentContent(final IProjectFragment root)
 			throws ModelException {
@@ -240,7 +241,9 @@ public class ScriptExplorerContentProvider extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getPackageContent(org.eclipse.jdt.core.IPackageFragment)
+	 * @see
+	 * org.eclipse.jdt.ui.StandardJavaElementContentProvider#getPackageContent
+	 * (org.eclipse.jdt.core.IPackageFragment)
 	 */
 	protected Object[] getScriptFolderContent(final IScriptFolder fragment)
 			throws ModelException {
@@ -266,7 +269,9 @@ public class ScriptExplorerContentProvider extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getFolderContent(org.eclipse.core.resources.IFolder)
+	 * @see
+	 * org.eclipse.jdt.ui.StandardJavaElementContentProvider#getFolderContent
+	 * (org.eclipse.core.resources.IFolder)
 	 */
 	protected Object[] getFolderContent(final IFolder folder)
 			throws CoreException {
@@ -291,29 +296,38 @@ public class ScriptExplorerContentProvider extends
 	public Object[] getChildren(final Object parentElement) {
 		try {
 			if (parentElement instanceof IScriptModel) {
-				return StandardModelElementContentProvider.concatenate(
-						getScriptProjects((IScriptModel) parentElement),
-						getNonJavaProjects((IScriptModel) parentElement));
+				return getExtendedChildren(
+						parentElement,
+						StandardModelElementContentProvider
+								.concatenate(
+										getScriptProjects((IScriptModel) parentElement),
+										getNonJavaProjects((IScriptModel) parentElement)));
 			}
 
 			if (parentElement instanceof ProjectFragmentContainer) {
-				return getContainerProjectFragments((ProjectFragmentContainer) parentElement);
+				return getExtendedChildren(
+						parentElement,
+						getContainerProjectFragments((ProjectFragmentContainer) parentElement));
 			}
 
 			if (parentElement instanceof IProject) {
-				return ((IProject) parentElement).members();
+				return getExtendedChildren(parentElement,
+						((IProject) parentElement).members());
 			}
 
 			return super.getChildren(parentElement);
 		} catch (CoreException e) {
-			return StandardModelElementContentProvider.NO_CHILDREN;
+			return getExtendedChildren(parentElement,
+					StandardModelElementContentProvider.NO_CHILDREN);
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getPackageFragmentRoots(org.eclipse.jdt.core.IJavaProject)
+	 * @see
+	 * org.eclipse.jdt.ui.StandardJavaElementContentProvider#getPackageFragmentRoots
+	 * (org.eclipse.jdt.core.IJavaProject)
 	 */
 	protected Object[] getProjectFragments(final IScriptProject project)
 			throws ModelException {
@@ -337,10 +351,11 @@ public class ScriptExplorerContentProvider extends
 				// all ClassPathContainers are added later
 			} else if (fShowLibrariesNode
 					&& (entryKind == IBuildpathEntry.BPE_LIBRARY /*
-																	 * ||
-																	 * entryKind ==
-																	 * IBuildpathEntry.BPE_VARIABLE
-																	 */)) {
+																 * || entryKind
+																 * ==
+																 * IBuildpathEntry
+																 * .BPE_VARIABLE
+																 */)) {
 				addZIPContainer = true;
 			} else {
 				if (isProjectProjectFragment(root)) {
@@ -404,10 +419,13 @@ public class ScriptExplorerContentProvider extends
 								entry);
 					} else if (fShowLibrariesNode
 							&& (entryKind == IBuildpathEntry.BPE_LIBRARY /*
-																			 * ||
-																			 * entryKind ==
-																			 * IBuildpathEntry.BPE_VARIABLE
-																			 */)) {
+																		 * ||
+																		 * entryKind
+																		 * ==
+																		 * IBuildpathEntry
+																		 * .
+																		 * BPE_VARIABLE
+																		 */)) {
 						return new LibraryContainer(root.getScriptProject());
 					}
 				}
@@ -489,9 +507,9 @@ public class ScriptExplorerContentProvider extends
 					}
 					result.add(curr);
 				} /*
-					 * else if (fragment == null && curr.isRootFolder()) {
-					 * result.add(curr); }
-					 */
+				 * else if (fragment == null && curr.isRootFolder()) {
+				 * result.add(curr); }
+				 */
 			} else {
 				result.add(children[i]);
 			}
@@ -613,7 +631,8 @@ public class ScriptExplorerContentProvider extends
 	 * @param delta
 	 *            the delta to process
 	 * @param runnables
-	 *            the resulting view changes as runnables (type {@link Runnable})
+	 *            the resulting view changes as runnables (type {@link Runnable}
+	 *            )
 	 * @return true is returned if the conclusion is to refresh a parent of an
 	 *         element. In that case no siblings need to be processed
 	 * @throws JavaModelException
@@ -904,7 +923,8 @@ public class ScriptExplorerContentProvider extends
 	 * @param delta
 	 *            the delta to process
 	 * @param runnables
-	 *            the resulting view changes as runnables (type {@link Runnable})
+	 *            the resulting view changes as runnables (type {@link Runnable}
+	 *            )
 	 */
 	private void updateSelection(final IModelElementDelta delta,
 			final Collection runnables) {
@@ -943,7 +963,8 @@ public class ScriptExplorerContentProvider extends
 	 * @param element
 	 *            the element to update
 	 * @param runnables
-	 *            the resulting view changes as runnables (type {@link Runnable})
+	 *            the resulting view changes as runnables (type {@link Runnable}
+	 *            )
 	 */
 	private void postUpdateIcon(final IModelElement element,
 			final Collection runnables) {
@@ -964,7 +985,8 @@ public class ScriptExplorerContentProvider extends
 	 * @param parent
 	 *            the parent
 	 * @param runnables
-	 *            the resulting view changes as runnables (type {@link Runnable})
+	 *            the resulting view changes as runnables (type {@link Runnable}
+	 *            )
 	 * @return true if the parent got refreshed
 	 */
 	private boolean processResourceDelta(final IResourceDelta delta,
@@ -1124,7 +1146,9 @@ public class ScriptExplorerContentProvider extends
 	}
 
 	/*
-	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+	 * @see
+	 * org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse
+	 * .jface.util.PropertyChangeEvent)
 	 */
 	public void propertyChange(final PropertyChangeEvent event) {
 		if (arePackagesFoldedInHierarchicalLayout() != fFoldPackages) {

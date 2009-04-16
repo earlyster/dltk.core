@@ -34,23 +34,25 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 
-
-public abstract class WorkingSetAwareContentProvider extends ScriptExplorerContentProvider implements IMultiElementTreeContentProvider {
+public abstract class WorkingSetAwareContentProvider extends
+		ScriptExplorerContentProvider implements
+		IMultiElementTreeContentProvider {
 
 	private WorkingSetModel fWorkingSetModel;
 	private IPropertyChangeListener fListener;
-	
-	public WorkingSetAwareContentProvider(boolean provideMembers, WorkingSetModel model) {
+
+	public WorkingSetAwareContentProvider(boolean provideMembers,
+			WorkingSetModel model) {
 		super(provideMembers);
-		fWorkingSetModel= model;
-		fListener= new IPropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent event) {
-						workingSetModelChanged(event);
-					}
-				};
+		fWorkingSetModel = model;
+		fListener = new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				workingSetModelChanged(event);
+			}
+		};
 		fWorkingSetModel.addPropertyChangeListener(fListener);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -67,7 +69,7 @@ public abstract class WorkingSetAwareContentProvider extends ScriptExplorerConte
 			return true;
 		return super.hasChildren(element);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -77,38 +79,39 @@ public abstract class WorkingSetAwareContentProvider extends ScriptExplorerConte
 			Assert.isTrue(fWorkingSetModel == element);
 			return fWorkingSetModel.getActiveWorkingSets();
 		} else if (element instanceof IWorkingSet) {
-			children= getWorkingSetChildren((IWorkingSet)element);
+			children = getWorkingSetChildren((IWorkingSet) element);
 		} else {
-			children= super.getChildren(element);
+			children = super.getChildren(element);
 		}
 		return children;
 	}
 
 	private Object[] getWorkingSetChildren(IWorkingSet set) {
-		IAdaptable[] elements= fWorkingSetModel.getChildren(set);
-		boolean isKnownWorkingSet= isKnownWorkingSet(set);
-		List result= new ArrayList(elements.length);
-		for (int i= 0; i < elements.length; i++) {
-			IAdaptable element= elements[i];
-			boolean add= false;
+		IAdaptable[] elements = fWorkingSetModel.getChildren(set);
+		boolean isKnownWorkingSet = isKnownWorkingSet(set);
+		List result = new ArrayList(elements.length);
+		for (int i = 0; i < elements.length; i++) {
+			IAdaptable element = elements[i];
+			boolean add = false;
 			if (element instanceof IProject) {
-				add= true;
+				add = true;
 			} else if (element instanceof IResource) {
-				IProject project= ((IResource)element).getProject();
-				add= project == null || project.isOpen();
+				IProject project = ((IResource) element).getProject();
+				add = project == null || project.isOpen();
 			} else if (element instanceof IScriptProject) {
-				add= true;
+				add = true;
 			} else if (element instanceof IModelElement) {
-				IProject project= getProject((IModelElement)element);
-				add= project == null || project.isOpen();
+				IProject project = getProject((IModelElement) element);
+				add = project == null || project.isOpen();
 			}
 			if (add) {
 				if (isKnownWorkingSet) {
 					result.add(element);
 				} else {
-					IProject project= (IProject)element.getAdapter(IProject.class);
+					IProject project = (IProject) element
+							.getAdapter(IProject.class);
 					if (project != null && project.exists()) {
-						IScriptProject jp= DLTKCore.create(project);
+						IScriptProject jp = DLTKCore.create(project);
 						if (jp != null && jp.exists()) {
 							result.add(jp);
 						} else {
@@ -120,132 +123,144 @@ public abstract class WorkingSetAwareContentProvider extends ScriptExplorerConte
 		}
 		return result.toArray();
 	}
-	
+
 	private boolean isKnownWorkingSet(IWorkingSet set) {
-		String id= set.getId();
-		return OthersWorkingSetUpdater.ID.equals(id) ||
-			ScriptWorkingSetUpdater.ID.equals(id);
+		String id = set.getId();
+		return OthersWorkingSetUpdater.ID.equals(id)
+				|| ScriptWorkingSetUpdater.ID.equals(id);
 	}
-	
+
 	private IProject getProject(IModelElement element) {
 		if (element == null)
 			return null;
-		IScriptProject project= element.getScriptProject();
+		IScriptProject project = element.getScriptProject();
 		if (project == null)
 			return null;
 		return project.getProject();
 	}
- 
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public TreePath[] getTreePaths(Object element) {
 		if (element instanceof IWorkingSet) {
-			TreePath path= new TreePath(new Object[] {element});
-			return new TreePath[] {path};
+			TreePath path = new TreePath(new Object[] { element });
+			return new TreePath[] { path };
 		}
-		List modelParents= getModelPath(element);
-		List result= new ArrayList();
-		for (int i= 0; i < modelParents.size(); i++) {
+		List modelParents = getModelPath(element);
+		List result = new ArrayList();
+		for (int i = 0; i < modelParents.size(); i++) {
 			result.addAll(getTreePaths(modelParents, i));
 		}
-		return (TreePath[])result.toArray(new TreePath[result.size()]);
+		return (TreePath[]) result.toArray(new TreePath[result.size()]);
 	}
-	
+
 	private List getModelPath(Object element) {
-		List result= new ArrayList();
+		List result = new ArrayList();
 		result.add(element);
-		Object parent= super.getParent(element);
-		Object input= getViewerInput();
+		Object parent = super.getParent(element);
+		Object input = getViewerInput();
 		// stop at input or on ScriptModel. We never visualize it anyway.
-		while (parent != null && !parent.equals(input) && !(parent instanceof IScriptModel)) {
+		while (parent != null && !parent.equals(input)
+				&& !(parent instanceof IScriptModel)) {
 			result.add(parent);
-			parent= super.getParent(parent);
+			parent = super.getParent(parent);
 		}
 		Collections.reverse(result);
 		return result;
 	}
-	
-	private List/*<TreePath>*/ getTreePaths(List modelParents, int index) {
-		List result= new ArrayList();
-		Object input= getViewerInput();
-		Object element= modelParents.get(index);
-		Object[] parents= fWorkingSetModel.getAllParents(element);
-		for (int i= 0; i < parents.length; i++) {
-			List chain= new ArrayList();
+
+	private List/* <TreePath> */getTreePaths(List modelParents, int index) {
+		List result = new ArrayList();
+		Object input = getViewerInput();
+		Object element = modelParents.get(index);
+		Object[] parents = fWorkingSetModel.getAllParents(element);
+		for (int i = 0; i < parents.length; i++) {
+			List chain = new ArrayList();
 			if (!parents[i].equals(input))
 				chain.add(parents[i]);
-			for (int m= index; m < modelParents.size(); m++) {
+			for (int m = index; m < modelParents.size(); m++) {
 				chain.add(modelParents.get(m));
 			}
 			result.add(new TreePath(chain.toArray()));
 		}
 		return result;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	public Object getParent(Object child) {
-		Object[] parents= fWorkingSetModel.getAllParents(child);
-		if(parents.length == 0)
+		Object parent = getExtendedParent(child);
+		if (parent != null) {
+			return parent;
+		}
+		Object[] parents = fWorkingSetModel.getAllParents(child);
+		if (parents.length == 0)
 			return super.getParent(child);
-		Object first= parents[0];
+		Object first = parents[0];
 		return first;
 	}
-	
-	protected void augmentElementToRefresh(List toRefresh, int relation, Object affectedElement) {
+
+	protected void augmentElementToRefresh(List toRefresh, int relation,
+			Object affectedElement) {
 		// we are refreshing the ScriptModel and are in working set mode.
-		if (DLTKCore.create(ResourcesPlugin.getWorkspace().getRoot()).equals(affectedElement)) {
+		if (DLTKCore.create(ResourcesPlugin.getWorkspace().getRoot()).equals(
+				affectedElement)) {
 			toRefresh.remove(affectedElement);
 			toRefresh.add(fWorkingSetModel);
 		} else if (relation == GRANT_PARENT) {
-			Object parent= internalGetParent(affectedElement);
+			Object parent = internalGetParent(affectedElement);
 			if (parent != null) {
-				toRefresh.addAll(Arrays.asList(fWorkingSetModel.getAllParents(parent)));
+				toRefresh.addAll(Arrays.asList(fWorkingSetModel
+						.getAllParents(parent)));
 			}
 		}
-		List nonProjetTopLevelElemens= fWorkingSetModel.getNonProjectTopLevelElements();
+		List nonProjetTopLevelElemens = fWorkingSetModel
+				.getNonProjectTopLevelElements();
 		if (nonProjetTopLevelElemens.isEmpty())
 			return;
-		List toAdd= new ArrayList();
-		for (Iterator iter= nonProjetTopLevelElemens.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		List toAdd = new ArrayList();
+		for (Iterator iter = nonProjetTopLevelElemens.iterator(); iter
+				.hasNext();) {
+			Object element = iter.next();
 			if (isChildOf(element, toRefresh))
 				toAdd.add(element);
 		}
 		toRefresh.addAll(toAdd);
 	}
-	
+
 	private void workingSetModelChanged(PropertyChangeEvent event) {
-		String property= event.getProperty();
-		Object newValue= event.getNewValue();
-		List toRefresh= new ArrayList(1);
+		String property = event.getProperty();
+		Object newValue = event.getNewValue();
+		List toRefresh = new ArrayList(1);
 		if (WorkingSetModel.CHANGE_WORKING_SET_MODEL_CONTENT.equals(property)) {
 			toRefresh.add(fWorkingSetModel);
-		} else if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
+		} else if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE
+				.equals(property)) {
 			toRefresh.add(newValue);
-		} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
+		} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE
+				.equals(property)) {
 			toRefresh.add(newValue);
 		}
-		ArrayList runnables= new ArrayList();
+		ArrayList runnables = new ArrayList();
 		postRefresh(toRefresh, true, runnables);
 		executeRunnables(runnables);
 	}
-	
+
 	private boolean isChildOf(Object element, List potentialParents) {
 		// Calling super get parent to bypass working set mapping
-		Object parent= super.getParent(element);
+		Object parent = super.getParent(element);
 		if (parent == null)
 			return false;
-		for (Iterator iter= potentialParents.iterator(); iter.hasNext();) {
-			Object potentialParent= iter.next();
-			while(parent != null) {
+		for (Iterator iter = potentialParents.iterator(); iter.hasNext();) {
+			Object potentialParent = iter.next();
+			while (parent != null) {
 				if (parent.equals(potentialParent))
 					return true;
-				parent= super.getParent(parent);
+				parent = super.getParent(parent);
 			}
-			
+
 		}
 		return false;
 	}
