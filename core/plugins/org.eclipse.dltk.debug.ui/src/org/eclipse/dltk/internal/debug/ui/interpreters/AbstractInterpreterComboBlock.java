@@ -177,14 +177,13 @@ public abstract class AbstractInterpreterComboBlock {
 	public void createControl(Composite ancestor) {
 		Font font = ancestor.getFont();
 		Composite comp = new Composite(ancestor, SWT.NONE);
-		GridLayout layout = new GridLayout();
 		comp.setLayout(new GridLayout());
 		comp.setLayoutData(new GridData(GridData.FILL_BOTH));
 		fControl = comp;
 		comp.setFont(font);
 
 		Group group = new Group(comp, SWT.NULL);
-		layout = new GridLayout();
+		GridLayout layout = new GridLayout();
 		layout.numColumns = 3;
 		group.setLayout(layout);
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
