@@ -494,7 +494,7 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 	 * Returns the Script project associated with the current config being
 	 * edited, or <code>null</code> if none.
 	 * 
-	 * @returnscriptproject or <code>null</code>
+	 * @return scriptproject or <code>null</code>
 	 */
 	protected IScriptProject getScriptProject() {
 		if (getLaunchConfiguration() != null) {
