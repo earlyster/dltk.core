@@ -340,10 +340,9 @@ public abstract class AbstractInterpreterComboBlock {
 	 * @param Interpreters
 	 *            InterpreterEnvironments to be displayed
 	 */
-	protected void setInterpreters(List interpreterEnvironments) {
+	protected void setInterpreters(List interpreters) {
 		fInterpreters.clear();
-		for (Iterator iterator = interpreterEnvironments.iterator(); iterator
-				.hasNext();) {
+		for (Iterator iterator = interpreters.iterator(); iterator.hasNext();) {
 			IInterpreterInstall install = (IInterpreterInstall) iterator.next();
 			if (environment != null
 					&& environment.equals(install.getEnvironment())) {
@@ -356,10 +355,6 @@ public abstract class AbstractInterpreterComboBlock {
 				IInterpreterInstall left = (IInterpreterInstall) o1;
 				IInterpreterInstall right = (IInterpreterInstall) o2;
 				return left.getName().compareToIgnoreCase(right.getName());
-			}
-
-			public boolean equals(Object obj) {
-				return obj == this;
 			}
 		});
 		// now make an array of names
@@ -502,7 +497,7 @@ public abstract class AbstractInterpreterComboBlock {
 	}
 
 	public void refreshInterpreters() {
-		IInterpreterInstall prevInterpreterEnvironment = getInterpreter();
+		IInterpreterInstall prevInterpreter = getInterpreter();
 		fillWithWorkspaceInterpreters();
 		if (fInterpreters.isEmpty()) {
 			setStatus(new Status(
@@ -513,7 +508,7 @@ public abstract class AbstractInterpreterComboBlock {
 		} else {
 			setStatus(OK_STATUS);
 		}
-		restoreCombo(fInterpreters, prevInterpreterEnvironment, fCombo);
+		restoreCombo(fInterpreters, prevInterpreter, fCombo);
 
 		// update text
 		setDefaultInterpreterDescriptor(fDefaultDescriptor);
@@ -623,14 +618,9 @@ public abstract class AbstractInterpreterComboBlock {
 		// fill with interpreters
 		List standins = new ArrayList();
 		IInterpreterInstallType[] types = ScriptRuntime
-				.getInterpreterInstallTypes();
+				.getInterpreterInstallTypes(getCurrentLanguageNature());
 		for (int i = 0; i < types.length; i++) {
 			IInterpreterInstallType type = types[i];
-
-			// filter
-			if (type.getNatureId() != getCurrentLanguageNature())
-				continue;
-
 			IInterpreterInstall[] installs = type.getInterpreterInstalls();
 			for (int j = 0; j < installs.length; j++) {
 				IInterpreterInstall install = installs[j];
