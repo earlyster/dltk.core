@@ -12,9 +12,11 @@ package org.eclipse.dltk.internal.ui.typehierarchy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.IMember;
@@ -48,8 +50,6 @@ public abstract class TypeHierarchyContentProvider implements
 	private ViewerFilter fWorkingSetFilter;
 	private MethodOverrideTester fMethodOverrideTester;
 	private ITypeHierarchyLifeCycleListener fTypeHierarchyLifeCycleListener;
-
-	// private Set alreadyAddedElements = new HashSet();
 
 	public TypeHierarchyContentProvider(TypeHierarchyLifeCycle lifecycle) {
 		fTypeHierarchy = lifecycle;
@@ -339,13 +339,14 @@ public abstract class TypeHierarchyContentProvider implements
 		ArrayList types = new ArrayList();
 		getTypesInHierarchy(type, types);
 		int len = types.size();
+		Set alreadyAddedElements = new HashSet();
 		for (int i = 0; i < len; i++) {
 			IType curr = (IType) types.get(i);
-			// if (alreadyAddedElements.add(curr)) {
-			if (isInTree(curr)) {
-				children.add(curr);
+			if (alreadyAddedElements.add(curr)) {
+				if (isInTree(curr)) {
+					children.add(curr);
+				}
 			}
-			// }
 		}
 	}
 
@@ -393,11 +394,9 @@ public abstract class TypeHierarchyContentProvider implements
 	public void inputChanged(Viewer part, Object oldInput, Object newInput) {
 		Assert.isTrue(part instanceof TreeViewer);
 		fViewer = (TreeViewer) part;
-		// this.alreadyAddedElements.clear();
 	}
 
 	public void resetState() {
-		// this.alreadyAddedElements.clear();
 	}
 
 	/*
