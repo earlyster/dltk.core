@@ -453,31 +453,54 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 		return new InterpreterDescriptor() {
 
 			public String getDescription() {
-				IScriptProject project = getScriptProject();
+				final IScriptProject project = getScriptProject();
 				String name = ScriptLaunchMessages.InterpreterTab_7;
-				if (project == null || !project.getProject().isAccessible()) {
-					final IEnvironment environment = EnvironmentManager
-							.getEnvironment(project);
-					final String id = environment != null ? environment.getId()
-							: EnvironmentManager.getLocalEnvironment().getId();
-					final IInterpreterInstall interpreter = ScriptRuntime
-							.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
-									getNature(), id));
+				if (!isValid(project)) {
+					final IInterpreterInstall interpreter = getWorkspaceInterpreter(project);
 					if (interpreter != null) {
 						name = interpreter.getName();
 					}
 					return NLS
 							.bind(ScriptLaunchMessages.InterpreterTab_8, name);
 				}
-				try {
-					IInterpreterInstall interpreter = ScriptRuntime
-							.getInterpreterInstall(project);
-					if (interpreter != null) {
-						name = interpreter.getName();
-					}
-				} catch (CoreException e) {
+				IInterpreterInstall interpreter = getProjectInterpreter(project);
+				if (interpreter != null) {
+					name = interpreter.getName();
 				}
 				return NLS.bind(ScriptLaunchMessages.InterpreterTab_9, name);
+			}
+
+			private boolean isValid(final IScriptProject project) {
+				return project != null && project.getProject().isAccessible();
+			}
+
+			private IInterpreterInstall getProjectInterpreter(
+					IScriptProject project) {
+				try {
+					return ScriptRuntime.getInterpreterInstall(project);
+				} catch (CoreException e) {
+					return null;
+				}
+			}
+
+			private IInterpreterInstall getWorkspaceInterpreter(
+					IScriptProject project) {
+				final IEnvironment environment = EnvironmentManager
+						.getEnvironment(project);
+				final String id = environment != null ? environment.getId()
+						: EnvironmentManager.getLocalEnvironment().getId();
+				return ScriptRuntime
+						.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
+								getNature(), id));
+			}
+
+			public IInterpreterInstall getInterpreter() {
+				final IScriptProject project = getScriptProject();
+				if (!isValid(project)) {
+					return getWorkspaceInterpreter(project);
+				} else {
+					return getProjectInterpreter(project);
+				}
 			}
 		};
 	}

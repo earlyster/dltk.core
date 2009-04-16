@@ -9,34 +9,40 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
-import java.text.MessageFormat;
-
 import org.eclipse.dltk.debug.ui.messages.ScriptLaunchMessages;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * Interpreter Descriptor used for the Interpreter container wizard page.
  */
 public class BuildInterpreterDescriptor extends InterpreterDescriptor {
-	
+
 	private String fNature;
 	private String fEnvironment;
-	
+
 	public BuildInterpreterDescriptor(String nature, String environment) {
 		fNature = nature;
 		this.fEnvironment = environment;
 	}
-		
+
 	public String getDescription() {
 		String name = ScriptLaunchMessages.InterpreterTab_7;
-		IInterpreterInstall Interpreter = ScriptRuntime.getDefaultInterpreterInstall(new DefaultInterpreterEntry( fNature, fEnvironment));
-		if (Interpreter != null) {
-			name = Interpreter.getName();
+		IInterpreterInstall interpreter = getInterpreter();
+		if (interpreter != null) {
+			name = interpreter.getName();
 		}
-		return MessageFormat.format(ScriptLaunchMessages.InterpreterTab_8, new String[] {
-			name
-		});
+		return NLS.bind(ScriptLaunchMessages.InterpreterTab_8, name);
+	}
+
+	/*
+	 * @see InterpreterDescriptor#getInterpreter()
+	 */
+	public IInterpreterInstall getInterpreter() {
+		return ScriptRuntime
+				.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
+						fNature, fEnvironment));
 	}
 }

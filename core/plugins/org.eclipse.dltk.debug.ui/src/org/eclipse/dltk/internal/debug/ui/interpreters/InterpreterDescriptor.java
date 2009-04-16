@@ -9,18 +9,26 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
+import org.eclipse.dltk.launching.IInterpreterInstall;
 
 /**
- * Used to provide a description for interpreter selections in the 
- * installed interpreters block.
+ * Used to provide a description for interpreter selections in the installed
+ * interpreters block.
  */
 public abstract class InterpreterDescriptor {
 
 	/**
 	 * Returns a description of the interpreter setting.
 	 * 
-	 * @return description of the interpeter setting
+	 * @return description of the interpreter setting
 	 */
 	public abstract String getDescription();
-	
+
+	/**
+	 * Returns the interpreter setting.
+	 * 
+	 * @return interpreter setting
+	 */
+	public abstract IInterpreterInstall getInterpreter();
+
 }

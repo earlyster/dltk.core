@@ -37,7 +37,6 @@ import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterStandin;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.launching.ScriptRuntime;
-import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
@@ -402,12 +401,7 @@ public abstract class AbstractInterpreterComboBlock {
 	 */
 	public IInterpreterInstall getInterpreter() {
 		if (this.isDefaultInterpreter()) {
-			if (this.environment != null) {
-				return ScriptRuntime
-						.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
-								getCurrentLanguageNature(), this.environment
-										.getId()));
-			}
+			return fDefaultDescriptor.getInterpreter();
 		}
 		int index = fCombo.getSelectionIndex();
 		if (index >= 0) {
