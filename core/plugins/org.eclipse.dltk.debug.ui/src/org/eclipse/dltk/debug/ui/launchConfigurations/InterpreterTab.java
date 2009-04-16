@@ -24,7 +24,6 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
-import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.messages.ScriptLaunchMessages;
 import org.eclipse.dltk.internal.debug.ui.interpreters.AbstractInterpreterComboBlock;
@@ -456,15 +455,12 @@ public abstract class InterpreterTab extends CommonScriptLaunchTab {
 			public String getDescription() {
 				IScriptProject project = getScriptProject();
 				String name = ScriptLaunchMessages.InterpreterTab_7;
-				if (project == null || project.getProject().isAccessible()) {
-					IEnvironment environment = EnvironmentManager
+				if (project == null || !project.getProject().isAccessible()) {
+					final IEnvironment environment = EnvironmentManager
 							.getEnvironment(project);
-					String id = LocalEnvironment.ENVIRONMENT_ID;
-					if (environment != null) {
-						id = environment.getId();
-					}
-					IInterpreterInstall interpreter = null;
-					interpreter = ScriptRuntime
+					final String id = environment != null ? environment.getId()
+							: EnvironmentManager.getLocalEnvironment().getId();
+					final IInterpreterInstall interpreter = ScriptRuntime
 							.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
 									getNature(), id));
 					if (interpreter != null) {
