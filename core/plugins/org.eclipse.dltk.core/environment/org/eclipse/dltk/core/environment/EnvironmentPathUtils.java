@@ -94,7 +94,10 @@ public class EnvironmentPathUtils {
 	public static String getLocalPathString(IPath path) {
 		IEnvironment env = getPathEnvironment(path);
 		IPath localPath = getLocalPath(path);
-		return env.convertPathToString(localPath);
+		if (env != null) {
+			return env.convertPathToString(localPath);
+		}
+		return localPath.toOSString();
 	}
 
 	public static IFileHandle getFile(IPath fullPath) {
