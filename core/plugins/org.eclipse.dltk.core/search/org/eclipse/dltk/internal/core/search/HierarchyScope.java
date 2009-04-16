@@ -35,6 +35,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.ArchiveProjectFragment;
+import org.eclipse.dltk.internal.core.ExternalProjectFragment;
 import org.eclipse.dltk.internal.core.Model;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelManager;
@@ -121,6 +122,11 @@ public class HierarchyScope extends DLTKSearchScope {
 
 		this.needsRefresh = true;
 
+		add((ScriptProject) type.getScriptProject(),
+				DLTKSearchScope.APPLICATION_LIBRARIES | DLTKSearchScope.SOURCES
+						| DLTKSearchScope.SYSTEM_LIBRARIES
+						| DLTKSearchScope.REFERENCED_PROJECTS, new HashSet());
+
 		// disabled for now as this could be expensive
 		// JavaModelManager.getJavaModelManager().rememberScope(this);
 	}
@@ -162,6 +168,8 @@ public class HierarchyScope extends DLTKSearchScope {
 
 				this.resourcePaths.add(resourcePath);
 				paths.put(jarPath, type);
+			} else if (root instanceof ExternalProjectFragment) {
+				paths.put(root.getPath(), type);
 			} else {
 				// type is a project
 				paths.put(type.getScriptProject().getProject().getFullPath(),
