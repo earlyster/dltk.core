@@ -107,9 +107,7 @@ public abstract class AbstractInterpreterContainerWizardPage extends WizardPage
 	protected abstract AbstractInterpreterComboBlock getInterpreterBlock();
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -130,8 +128,8 @@ public abstract class AbstractInterpreterContainerWizardPage extends WizardPage
 		fInterpreterEnvironmentBlock
 				.setTitle(InterpretersMessages.InterpreterContainerWizardPage_3);
 		fInterpreterEnvironmentBlock.createControl(composite);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		fInterpreterEnvironmentBlock.getControl().setLayoutData(gd);
+		// gd = new GridData(GridData.FILL_HORIZONTAL);
+		// fInterpreterEnvironmentBlock.getControl().setLayoutData(gd);
 		setControl(composite);
 		fInterpreterEnvironmentBlock
 				.addPropertyChangeListener(new IPropertyChangeListener() {
