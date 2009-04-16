@@ -19,6 +19,8 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IParent;
@@ -185,8 +187,9 @@ public class StandardModelElementContentProvider implements
 	}
 
 	public Object[] getExtendedChildren(Object element, Object[] children) {
+		String toolkitId = getToolkitID(element);
 		IModelContentProvider[] providers = UIModelProviderManager
-				.getContentProviders();
+				.getContentProviders(toolkitId);
 		if (providers.length > 0) {
 			List elements = new ArrayList();
 			elements.addAll(Arrays.asList(children));
@@ -200,9 +203,20 @@ public class StandardModelElementContentProvider implements
 		}
 	}
 
+	private String getToolkitID(Object element) {
+		if (element instanceof IModelElement) {
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit((IModelElement) element);
+			if (toolkit != null) {
+				return toolkit.getNatureId();
+			}
+		}
+		return null;
+	}
+
 	public Object getExtendedParent(Object element) {
 		IModelContentProvider[] providers = UIModelProviderManager
-				.getContentProviders();
+				.getContentProviders(getToolkitID(element));
 		if (providers.length > 0) {
 			for (int i = 0; i < providers.length; i++) {
 				Object parent = providers[i].getParentElement(element,

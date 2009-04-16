@@ -12,6 +12,7 @@
 package org.eclipse.dltk.internal.ui;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,18 +39,75 @@ public class UIModelProviderManager {
 	private static SimpleClassDLTKExtensionManager labelProviderManager = new SimpleClassDLTKExtensionManager(
 			DLTKUIPlugin.PLUGIN_ID + ".modelLabelProvider");
 
-	private static IModelContentProvider[] contentProviders = null;
+	private static Map contentProviders = null;
 	private static Map labelProviders = null;
 
-	public static IModelContentProvider[] getContentProviders() {
+	public static IModelContentProvider[] getContentProviders(String lang) {
 		if (contentProviders == null) {
-			List elements = new ArrayList();
-
-			ElementInfo[] infos = contentProviderManager.getElementInfos();
-			// Fill element names and sort elements by language
-			for (int i = 0; i < infos.length; i++) {
-				elements.add(infos[i]);
+			contentProviders = initializeProviders(contentProviderManager);
+		}
+		if (lang == null) {
+			List providers = new ArrayList();
+			Collection values = contentProviders.values();
+			for (Iterator iterator = values.iterator(); iterator.hasNext();) {
+				List elements = (List) iterator.next();
+				providers.addAll(elements);
 			}
+			return (IModelContentProvider[]) providers
+					.toArray(new IModelContentProvider[providers.size()]);
+		}
+		List result = (List) contentProviders.get(lang);
+		if (result != null) {
+			return (IModelContentProvider[]) result
+					.toArray(new IModelContentProvider[result.size()]);
+		}
+		return new IModelContentProvider[0];
+	}
+
+	public static ILabelProvider[] getLabelProviders(String lang) {
+		if (labelProviders == null) {
+			labelProviders = initializeProviders(labelProviderManager);
+		}
+		if (lang == null) {
+			List providers = new ArrayList();
+			Collection values = labelProviders.values();
+			for (Iterator iterator = values.iterator(); iterator.hasNext();) {
+				List elements = (List) iterator.next();
+				providers.addAll(elements);
+			}
+			return (ILabelProvider[]) providers
+					.toArray(new ILabelProvider[providers.size()]);
+		}
+		List result = (List) labelProviders.get(lang);
+		if (result != null) {
+			return (ILabelProvider[]) result.toArray(new ILabelProvider[result
+					.size()]);
+		}
+		return new ILabelProvider[0];
+	}
+
+	private static Map initializeProviders(
+			SimpleClassDLTKExtensionManager manager) {
+		Map providers = new HashMap();
+		ElementInfo[] infos = manager.getElementInfos();
+		Map langToElementList = new HashMap();
+		// Fill element names and sort elements by language
+		for (int i = 0; i < infos.length; i++) {
+			String langauge = infos[i].getConfig().getAttribute(LANGUAGE);
+			if (langToElementList.containsKey(langauge)) {
+				List elements = (List) langToElementList.get(langauge);
+				elements.add(infos[i]);
+			} else {
+				List elements = new ArrayList();
+				elements.add(infos[i]);
+				langToElementList.put(langauge, elements);
+			}
+		}
+		for (Iterator iterator = langToElementList.entrySet().iterator(); iterator
+				.hasNext();) {
+			Map.Entry entry = (Map.Entry) iterator.next();
+			String language = (String) entry.getKey();
+			List elements = (List) entry.getValue();
 
 			Map names = new HashMap(); // Contains map for all ids
 			for (int i = 0; i < elements.size(); i++) {
@@ -66,7 +124,7 @@ public class UIModelProviderManager {
 				ElementInfo info = (ElementInfo) toProcess.remove(0);
 				String requires = info.getConfig().getAttribute(REQUIRES);
 				if (requires == null) {
-					result.add(contentProviderManager.getInitObject(info));
+					result.add(manager.getInitObject(info));
 				} else {
 					String req = requires.trim();
 					if (added.contains(req)) { // Dependency
@@ -80,73 +138,8 @@ public class UIModelProviderManager {
 					}
 				}
 			}
-			contentProviders = (IModelContentProvider[]) result
-					.toArray(new IModelContentProvider[result.size()]);
+			providers.put(language, result);
 		}
-		return contentProviders;
-	}
-
-	public static ILabelProvider[] getLabelProviders(String lang) {
-		if (labelProviders == null) {
-			labelProviders = new HashMap();
-
-			ElementInfo[] infos = labelProviderManager.getElementInfos();
-			Map langToElementList = new HashMap();
-			// Fill element names and sort elements by language
-			for (int i = 0; i < infos.length; i++) {
-				String langauge = infos[i].getConfig().getAttribute(LANGUAGE);
-				if (langToElementList.containsKey(langauge)) {
-					List elements = (List) langToElementList.get(langauge);
-					elements.add(infos[i]);
-				} else {
-					List elements = new ArrayList();
-					elements.add(infos[i]);
-					langToElementList.put(langauge, elements);
-				}
-			}
-			for (Iterator iterator = langToElementList.entrySet().iterator(); iterator
-					.hasNext();) {
-				Map.Entry entry = (Map.Entry) iterator.next();
-				String language = (String) entry.getKey();
-				List elements = (List) entry.getValue();
-
-				Map names = new HashMap(); // Contains map for all ids
-				for (int i = 0; i < elements.size(); i++) {
-					ElementInfo info = (ElementInfo) elements.get(i);
-					String name = info.getConfig().getAttribute(ID);
-					names.put(name, info);
-				}
-				List result = new ArrayList(); // Final IModelProvider elements
-				Set added = new HashSet(); // Contain names for added elements
-				// Process elements and keep dependencies
-				List toProcess = new ArrayList();
-				toProcess.addAll(elements);
-				while (!toProcess.isEmpty()) {
-					ElementInfo info = (ElementInfo) toProcess.remove(0);
-					String requires = info.getConfig().getAttribute(REQUIRES);
-					if (requires == null) {
-						result.add(labelProviderManager.getInitObject(info));
-					} else {
-						String req = requires.trim();
-						if (added.contains(req)) { // Dependency
-							// present
-							result.add(info.object);
-						} else {
-							if (names.containsKey(req)) { // Dependency exist
-								// Add element to end of process
-								toProcess.add(info);
-							}
-						}
-					}
-				}
-				labelProviders.put(language, result
-						.toArray(new ILabelProvider[result.size()]));
-			}
-		}
-		if (lang == null) {
-			List providers = new ArrayList();
-			providers.addAll(UIModelProviderManager.labelProviders.values());
-		}
-		return (ILabelProvider[]) labelProviders.get(lang);
+		return providers;
 	}
 }
