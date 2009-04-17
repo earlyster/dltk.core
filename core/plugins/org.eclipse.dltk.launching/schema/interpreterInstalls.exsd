@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.dltk.launching">
+<schema targetNamespace="org.eclipse.dltk.launching" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
          <meta.schema plugin="org.eclipse.dltk.launching" id="interpreterInstalls" name="Script VM Installs"/>
@@ -11,6 +11,11 @@
    </annotation>
 
    <element name="extension">
+      <annotation>
+         <appInfo>
+            <meta.element />
+         </appInfo>
+      </annotation>
       <complexType>
          <sequence>
             <element ref="interpreterInstall" minOccurs="1" maxOccurs="unbounded"/>
@@ -71,7 +76,7 @@
          <attribute name="home" type="string" use="required">
             <annotation>
                <documentation>
-                  Path to the home installation directory for this interpreter install. Paths must be absolute and may use string substitution variables such as ${eclipse_home}.
+                  Path to the executable file for this interpreter install. Paths must be absolute and may use string substitution variables such as ${eclipse_home}.
                </documentation>
             </annotation>
          </attribute>
@@ -114,7 +119,7 @@
                   Path within the source archive where package names begin. For example, if the source for java.lang.Object is located at &quot;src\java\lang\Object&quot; the package root path would be &quot;src&quot;. When unspecified the package root path is automatically detected.
                </documentation>
             </annotation>
-         </attribute>        
+         </attribute>
       </complexType>
    </element>
 
@@ -127,14 +132,7 @@
       </documentation>
    </annotation>
 
-   <annotation>
-      <appInfo>
-         <meta.section type="examples"/>
-      </appInfo>
-      <documentation>
 
-      </documentation>
-   </annotation>
 
    <annotation>
       <appInfo>
@@ -145,13 +143,5 @@
       </documentation>
    </annotation>
 
-   <annotation>
-      <appInfo>
-         <meta.section type="copyright"/>
-      </appInfo>
-      <documentation>
-         
-      </documentation>
-   </annotation>
 
 </schema>
