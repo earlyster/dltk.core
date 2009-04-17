@@ -9,7 +9,6 @@ import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.ui.ModelElementComparator;
 import org.eclipse.dltk.internal.ui.StandardModelElementContentProvider;
-import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.ModelElementLabelProvider;
 import org.eclipse.dltk.ui.preferences.PreferencesMessages;
@@ -42,10 +41,10 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 	private final String natureId;
 
 	// sizing constants
-	private final static int SIZING_SELECTION_WIDGET_HEIGHT= 250;
-	private final static int SIZING_SELECTION_WIDGET_WIDTH= 300;
-	
-	private final static String DIALOG_SETTINGS_SHOW_ALL= "ProjectSelectionDialog.show_all"; //$NON-NLS-1$
+	private final static int SIZING_SELECTION_WIDGET_HEIGHT = 250;
+	private final static int SIZING_SELECTION_WIDGET_WIDTH = 300;
+
+	private final static String DIALOG_SETTINGS_SHOW_ALL = "ProjectSelectionDialog.show_all"; //$NON-NLS-1$
 
 	private ViewerFilter fFilter;
 
@@ -57,48 +56,52 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 			String natureId) {
 		super(parentShell);
 		this.natureId = natureId;
-		setTitle(PreferencesMessages.ProjectSelectionDialog_title);  
-		setMessage(PreferencesMessages.ProjectSelectionDialog_desciption); 
-		fProjectsWithSpecifics= projectsWithSpecifics;
-		
-		fFilter= new ViewerFilter() {
-			public boolean select(Viewer viewer, Object parentElement, Object element) {
+		setTitle(PreferencesMessages.ProjectSelectionDialog_title);
+		setMessage(PreferencesMessages.ProjectSelectionDialog_desciption);
+		fProjectsWithSpecifics = projectsWithSpecifics;
+
+		fFilter = new ViewerFilter() {
+			public boolean select(Viewer viewer, Object parentElement,
+					Object element) {
 				return fProjectsWithSpecifics.contains(element);
 			}
 		};
 	}
-	
 
-	/* (non-Javadoc)
+	/*
 	 * Method declared on Dialog.
 	 */
 	protected Control createDialogArea(Composite parent) {
 		// page group
-		Composite composite= (Composite) super.createDialogArea(parent);
+		Composite composite = (Composite) super.createDialogArea(parent);
 
-		Font font= parent.getFont();
+		Font font = parent.getFont();
 		composite.setFont(font);
 
 		createMessageArea(composite);
 
-		fTableViewer= new TableViewer(composite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				doSelectionChanged(((IStructuredSelection) event.getSelection()).toArray());
-			}
-		});
+		fTableViewer = new TableViewer(composite, SWT.H_SCROLL | SWT.V_SCROLL
+				| SWT.BORDER);
+		fTableViewer
+				.addSelectionChangedListener(new ISelectionChangedListener() {
+					public void selectionChanged(SelectionChangedEvent event) {
+						doSelectionChanged(((IStructuredSelection) event
+								.getSelection()).toArray());
+					}
+				});
 		fTableViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
-                okPressed();
+				okPressed();
 			}
 		});
-		GridData data= new GridData(SWT.FILL, SWT.FILL, true, true);
-		data.heightHint= SIZING_SELECTION_WIDGET_HEIGHT;
-		data.widthHint= SIZING_SELECTION_WIDGET_WIDTH;
+		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
+		data.heightHint = SIZING_SELECTION_WIDGET_HEIGHT;
+		data.widthHint = SIZING_SELECTION_WIDGET_WIDTH;
 		fTableViewer.getTable().setLayoutData(data);
 
 		fTableViewer.setLabelProvider(new ModelElementLabelProvider());
-		fTableViewer.setContentProvider(new StandardModelElementContentProvider());
+		fTableViewer
+				.setContentProvider(new StandardModelElementContentProvider());
 		fTableViewer.setComparator(new ModelElementComparator());
 		fTableViewer.getControl().setFont(font);
 		if (natureId != null) {
@@ -115,37 +118,43 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 			});
 		}
 
-		Button checkbox= new Button(composite, SWT.CHECK);
-		checkbox.setText(PreferencesMessages.ProjectSelectionDialog_filter); 
-		checkbox.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, true, false));
+		Button checkbox = new Button(composite, SWT.CHECK);
+		checkbox.setText(PreferencesMessages.ProjectSelectionDialog_filter);
+		checkbox.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, true,
+				false));
 		checkbox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				updateFilter(((Button) e.widget).getSelection());
 			}
+
 			public void widgetDefaultSelected(SelectionEvent e) {
 				updateFilter(((Button) e.widget).getSelection());
 			}
 		});
-		IDialogSettings dialogSettings= DLTKUIPlugin.getDefault().getDialogSettings();
-		boolean doFilter= !dialogSettings.getBoolean(DIALOG_SETTINGS_SHOW_ALL) && !fProjectsWithSpecifics.isEmpty();
+		IDialogSettings dialogSettings = DLTKUIPlugin.getDefault()
+				.getDialogSettings();
+		boolean doFilter = !dialogSettings.getBoolean(DIALOG_SETTINGS_SHOW_ALL)
+				&& !fProjectsWithSpecifics.isEmpty();
 		checkbox.setSelection(doFilter);
 		updateFilter(doFilter);
-		
-		IScriptModel input= DLTKCore.create(ResourcesPlugin.getWorkspace().getRoot());
+
+		IScriptModel input = DLTKCore.create(ResourcesPlugin.getWorkspace()
+				.getRoot());
 		fTableViewer.setInput(input);
-		
+
 		doSelectionChanged(new Object[0]);
 		Dialog.applyDialogFont(composite);
 		return composite;
 	}
-	
+
 	protected void updateFilter(boolean selected) {
 		if (selected) {
 			fTableViewer.addFilter(fFilter);
 		} else {
 			fTableViewer.removeFilter(fFilter);
 		}
-		DLTKUIPlugin.getDefault().getDialogSettings().put(DIALOG_SETTINGS_SHOW_ALL, !selected);
+		DLTKUIPlugin.getDefault().getDialogSettings().put(
+				DIALOG_SETTINGS_SHOW_ALL, !selected);
 	}
 
 	private void doSelectionChanged(Object[] objects) {
@@ -153,12 +162,12 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 			updateStatus(new StatusInfo(IStatus.ERROR, "")); //$NON-NLS-1$
 			setSelectionResult(null);
 		} else {
-			updateStatus(new StatusInfo()); 
+			updateStatus(new StatusInfo());
 			setSelectionResult(objects);
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#computeResult()
 	 */
 	protected void computeResult() {
