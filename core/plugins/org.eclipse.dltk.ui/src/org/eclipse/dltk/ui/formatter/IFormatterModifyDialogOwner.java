@@ -24,4 +24,6 @@ public interface IFormatterModifyDialogOwner {
 
 	IDialogSettings getDialogSettings();
 
+	IProfileManager getProfileManager();
+
 }

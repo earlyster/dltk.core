@@ -12,6 +12,7 @@
 package org.eclipse.dltk.ui.formatter;
 
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.dltk.core.IDLTKContributedExtension;
@@ -34,6 +35,10 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 
 	PreferenceKey[] getPreferenceKeys();
 
+	PreferenceKey getProfilesKey();
+
+	PreferenceKey getActiveProfileKey();
+
 	void savePreferences(Map preferences, IPreferencesSaveDelegate delegate);
 
 	/**
@@ -45,6 +50,10 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 	 *            the formatting options
 	 */
 	IScriptFormatter createFormatter(String lineDelimiter, Map preferences);
+
+	List getBuiltInProfiles();
+
+	IProfileVersioner getProfileVersioner();
 
 	/**
 	 * Validates that this formatter factory is correctly installed.
