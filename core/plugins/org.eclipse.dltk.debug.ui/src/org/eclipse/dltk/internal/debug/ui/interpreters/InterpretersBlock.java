@@ -82,6 +82,7 @@ import org.eclipse.swt.widgets.TableColumn;
  * when the checked InterpreterEnvironment in the table changes, or when the
  * "use default" button check state changes.
  * </p>
+ * @
  */
 public abstract class InterpretersBlock implements
 		IAddInterpreterDialogRequestor, ISelectionProvider {
@@ -1001,8 +1002,17 @@ public abstract class InterpretersBlock implements
 
 	abstract protected String getCurrentNature();
 
+	/**
+	 * Creates the {@link IInterpreterInstall} add/edit dialog. Should be
+	 * overridden.
+	 * 
+	 * @param environment
+	 * @param standin
+	 * @return @
+	 */
 	protected IScriptInterpreterDialog createInterpreterDialog(
 			IEnvironment environment, IInterpreterInstall standin) {
+		// backwards compatible implementation
 		final AddScriptInterpreterDialog dialog = createInterpreterDialog(standin);
 		if (dialog != null) {
 			dialog.setEnvironment(environment);
