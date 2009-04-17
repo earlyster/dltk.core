@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.debug.ui.interpreters;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
@@ -53,7 +54,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 
 	private ComboDialogField fInterpreterTypeCombo;
 
-	private IInterpreterInstall fEditedInterpreter;
+	private final IInterpreterInstall fEditedInterpreter;
 
 	private AbstractInterpreterLibraryBlock fLibraryBlock;
 	private AbstractInterpreterEnvironmentVariablesBlock fEnvironmentVariablesBlock;
@@ -156,6 +157,10 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 
 	protected String getInterpreterName() {
 		return fInterpreterName.getText();
+	}
+
+	protected void setInterpreterName(String value) {
+		fInterpreterName.setText(value);
 	}
 
 	// protected File getInstallLocation() {
@@ -272,15 +277,15 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	private void initializeFields() {
 		fInterpreterTypeCombo.setItems(getInterpreterTypeNames());
 		if (fEditedInterpreter == null) {
-			fInterpreterName.setText(""); //$NON-NLS-1$
-			fInterpreterPath.setText(""); //$NON-NLS-1$
+			fInterpreterName.setText(Util.EMPTY_STRING);
+			fInterpreterPath.setText(Util.EMPTY_STRING);
 			fLibraryBlock.initializeFrom(null, fSelectedInterpreterType);
 			if (fEnvironmentVariablesBlock != null) {
 				fEnvironmentVariablesBlock.initializeFrom(null,
 						fSelectedInterpreterType);
 			}
 			if (this.useInterpreterArgs()) {
-				fInterpreterArgs.setText(""); //$NON-NLS-1$
+				fInterpreterArgs.setText(Util.EMPTY_STRING);
 			}
 		} else {
 			fInterpreterTypeCombo.setEnabled(false);
@@ -306,12 +311,13 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		return fSelectedInterpreterType;
 	}
 
-	IStatus validateInterpreterLocation() {
+	protected IStatus validateInterpreterLocation() {
 		IEnvironment selectedEnv = getEnvironment();
 		String locationName = fInterpreterPath.getText();
 		IStatus s = null;
-		IFileHandle file = null;
+		final IFileHandle file;
 		if (locationName.length() == 0) {
+			file = null;
 			s = new StatusInfo(IStatus.INFO,
 					InterpretersMessages.addInterpreterDialog_enterLocation);
 		} else {
@@ -323,17 +329,13 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 						InterpretersMessages.addInterpreterDialog_locationNotExists);
 			} else {
 				final IStatus[] temp = new IStatus[1];
-				final IFileHandle tempFile = file;
-				Runnable r = new Runnable() {
-					/**
-					 * @see java.lang.Runnable#run()
-					 */
-					public void run() {
-						temp[0] = getInterpreterType().validateInstallLocation(
-								tempFile);
-					}
-				};
-				BusyIndicator.showWhile(getShell().getDisplay(), r);
+				BusyIndicator.showWhile(getShell().getDisplay(),
+						new Runnable() {
+							public void run() {
+								temp[0] = getInterpreterType()
+										.validateInstallLocation(file);
+							}
+						});
 				s = temp[0];
 			}
 		}
@@ -343,35 +345,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 			String name = fInterpreterName.getText();
 			if ((name == null || name.trim().length() == 0) && file != null) {
 				// auto-generate interpreter name
-				String genName = null;
-				IPath path = new Path(file.getCanonicalPath());
-				int segs = path.segmentCount();
-				if (segs == 1) {
-					genName = path.segment(0);
-				} else if (segs >= 2) {
-					String last = path.lastSegment();
-					genName = last;
-				}
-				// Add number if interpreter with such name already exists.
-				String pName = genName;
-				int index = 0;
-				while (true) {
-					boolean found = false;
-					for (int i = 0; i < this.fInterpreterTypes.length; i++) {
-						IInterpreterInstallType type = this.fInterpreterTypes[i];
-						IInterpreterInstall inst = type
-								.findInterpreterInstallByName(pName);
-						if (inst != null) {
-							pName = genName + "(" + String.valueOf(++index) //$NON-NLS-1$
-									+ ")"; //$NON-NLS-1$
-							found = true;
-							break;
-						}
-					}
-					if (!found) {
-						break;
-					}
-				}
+				String pName = generateInterpreterName(file);
 				if (pName != null) {
 					fInterpreterName.setText(pName);
 				}
@@ -384,6 +358,52 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		// fEnvironmentVariablesBlock.restoreDefaultVariables();
 		// }
 		return s;
+	}
+
+	/**
+	 * Generates unique interpreter name based on the file selected
+	 * 
+	 * @param file
+	 * @return generated name or <code>null</code> if it was not possible to
+	 *         generate the suitable name
+	 */
+	protected String generateInterpreterName(IFileHandle file) {
+		final String genName;
+		final IPath path = new Path(file.getCanonicalPath());
+		if (path.segmentCount() > 0) {
+			genName = path.lastSegment();
+		} else {
+			genName = null;
+		}
+		// Add number if interpreter with such name already exists.
+		String pName = genName;
+		if (pName != null) {
+			int index = 0;
+			while (!validateGeneratedName(pName)) {
+				pName = genName + "(" + String.valueOf(++index) //$NON-NLS-1$
+						+ ")"; //$NON-NLS-1$
+			}
+		}
+		return pName;
+	}
+
+	/**
+	 * Validates the automatically generated interpreter name
+	 * 
+	 * @param name
+	 * @return <code>true</code> if specified name is unique and
+	 *         <code>false</code> otherwise
+	 */
+	protected boolean validateGeneratedName(String name) {
+		for (int i = 0; i < this.fInterpreterTypes.length; i++) {
+			IInterpreterInstallType type = this.fInterpreterTypes[i];
+			IInterpreterInstall inst = type.findInterpreterInstallByName(name);
+			if (inst != null) {
+				// it is allowed to find interpreter being edited.
+				return inst == fEditedInterpreter;
+			}
+		}
+		return true;
 	}
 
 	public IEnvironment getEnvironment() {
