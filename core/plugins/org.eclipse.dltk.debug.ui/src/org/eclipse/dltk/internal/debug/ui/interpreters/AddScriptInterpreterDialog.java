@@ -33,6 +33,7 @@ import org.eclipse.dltk.utils.PlatformFileUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.layout.GridData;
@@ -44,7 +45,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-public abstract class AddScriptInterpreterDialog extends StatusDialog {
+public abstract class AddScriptInterpreterDialog extends StatusDialog implements
+		IScriptInterpreterDialog {
 
 	private IAddInterpreterDialogRequestor fRequestor;
 
@@ -170,6 +172,20 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	protected abstract AbstractInterpreterLibraryBlock createLibraryBlock(
 			AddScriptInterpreterDialog dialog);
 
+	/**
+	 * @param dialog
+	 * @return
+	 */
+	protected AbstractInterpreterEnvironmentVariablesBlock createEnvironmentVariablesBlock() {
+		return createEnvironmentVariablesBlock(this);
+	}
+
+	/**
+	 * @param dialog
+	 * @return
+	 * @deprecated createEnvironmentVariablesBlock() without parameters should
+	 *             be overridden when needed
+	 */
 	protected AbstractInterpreterEnvironmentVariablesBlock createEnvironmentVariablesBlock(
 			AddScriptInterpreterDialog dialog) {
 		return null;
@@ -205,20 +221,19 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 		gd.horizontalSpan = 3;
 		block.setLayoutData(gd);
 
-		l = new Label(parent, SWT.NONE);
-		l
-				.setText(InterpretersMessages.AddScriptInterpreterDialog_interpreterEnvironmentVariables);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 3;
-		l.setLayoutData(gd);
-		fEnvironmentVariablesBlock = createEnvironmentVariablesBlock(this);
+		fEnvironmentVariablesBlock = createEnvironmentVariablesBlock();
 		if (fEnvironmentVariablesBlock != null) {
+			l = new Label(parent, SWT.NONE);
+			l
+					.setText(InterpretersMessages.AddScriptInterpreterDialog_interpreterEnvironmentVariables);
+			gd = new GridData(GridData.FILL_HORIZONTAL);
+			gd.horizontalSpan = 3;
+			l.setLayoutData(gd);
+
 			block = fEnvironmentVariablesBlock.createControl(parent);
 			gd = new GridData(GridData.FILL_BOTH);
 			gd.horizontalSpan = 3;
 			block.setLayoutData(gd);
-		} else {
-			l.dispose();
 		}
 
 		Text t = fInterpreterPath.getTextControl(parent);
@@ -610,5 +625,9 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog {
 	 */
 	protected IInterpreterInstall getLastInterpreterInstall() {
 		return this.lastInstall;
+	}
+
+	public boolean execute() {
+		return open() == Window.OK;
 	}
 }

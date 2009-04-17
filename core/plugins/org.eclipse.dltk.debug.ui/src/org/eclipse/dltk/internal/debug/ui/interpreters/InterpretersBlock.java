@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
-import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.internal.ui.util.SWTUtil;
 import org.eclipse.dltk.internal.ui.util.TableLayoutComposite;
@@ -55,7 +54,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -289,7 +287,7 @@ public abstract class InterpretersBlock implements
 		int local = 0;
 		for (int i = 0; i < items.length; i++) {
 			items[i] = environments[i].getName();
-			if (environments[i].getId().equals(LocalEnvironment.ENVIRONMENT_ID)) {
+			if (environments[i].isLocal()) {
 				local = i;
 			}
 		}
@@ -1003,8 +1001,26 @@ public abstract class InterpretersBlock implements
 
 	abstract protected String getCurrentNature();
 
-	protected abstract AddScriptInterpreterDialog createInterpreterDialog(
-			IInterpreterInstall standin);
+	protected IScriptInterpreterDialog createInterpreterDialog(
+			IEnvironment environment, IInterpreterInstall standin) {
+		final AddScriptInterpreterDialog dialog = createInterpreterDialog(standin);
+		if (dialog != null) {
+			dialog.setEnvironment(environment);
+		}
+		return dialog;
+	}
+
+	/**
+	 * @param standin
+	 * @return
+	 * @deprecated createInterpreterDialog(IEnvironment,IInterpreterInstall)
+	 *             method above should be overridden. This one is kept for
+	 *             compatibility purposes only.
+	 */
+	protected AddScriptInterpreterDialog createInterpreterDialog(
+			IInterpreterInstall standin) {
+		return null;
+	}
 
 	protected void copyInterpreter() {
 		IStructuredSelection selection = (IStructuredSelection) fInterpreterList
@@ -1021,10 +1037,12 @@ public abstract class InterpretersBlock implements
 					selectedInterpreter, createUniqueId(selectedInterpreter
 							.getInterpreterInstallType()));
 			standin.setName(generateName(selectedInterpreter.getName()));
-			AddScriptInterpreterDialog dialog = createInterpreterDialog(standin);
-			dialog.setEnvironment(getCurrentEnvironment());
+			IScriptInterpreterDialog dialog = createInterpreterDialog(
+					getCurrentEnvironment(), standin);
+			if (dialog == null)
+				return;
 			dialog.setTitle(InterpretersMessages.InstalledInterpretersBlock_18);
-			if (dialog.open() != Window.OK) {
+			if (!dialog.execute()) {
 				return;
 			}
 			newEntries.add(standin);
@@ -1039,10 +1057,12 @@ public abstract class InterpretersBlock implements
 	 * Bring up a dialog that lets the user create a new Interpreter definition.
 	 */
 	protected void addInterpreter() {
-		AddScriptInterpreterDialog dialog = createInterpreterDialog(null);
-		dialog.setEnvironment(getCurrentEnvironment());
+		IScriptInterpreterDialog dialog = createInterpreterDialog(
+				getCurrentEnvironment(), null);
+		if (dialog == null)
+			return;
 		dialog.setTitle(InterpretersMessages.InstalledInterpretersBlock_7);
-		if (dialog.open() != Window.OK) {
+		if (!dialog.execute()) {
 			return;
 		}
 		fInterpreterList.refresh();
@@ -1058,10 +1078,12 @@ public abstract class InterpretersBlock implements
 			return;
 		}
 
-		AddScriptInterpreterDialog dialog = createInterpreterDialog(install);
-		dialog.setEnvironment(getCurrentEnvironment());
+		IScriptInterpreterDialog dialog = createInterpreterDialog(
+				getCurrentEnvironment(), install);
+		if (dialog == null)
+			return;
 		dialog.setTitle(InterpretersMessages.InstalledInterpretersBlock_8);
-		if (dialog.open() != Window.OK) {
+		if (!dialog.execute()) {
 			return;
 		}
 		fInterpreterList.refresh(install);
@@ -1069,8 +1091,7 @@ public abstract class InterpretersBlock implements
 
 	public IEnvironment getCurrentEnvironment() {
 		if (fEnvironments == null) {
-			return EnvironmentManager
-					.getEnvironmentById(LocalEnvironment.ENVIRONMENT_ID);
+			return EnvironmentManager.getLocalEnvironment();
 		}
 		return environments[fEnvironments.getSelectionIndex()];
 	}
