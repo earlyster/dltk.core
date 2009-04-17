@@ -1739,7 +1739,7 @@ public final class ScriptRuntime {
 																	.getName() }),
 									null);
 						}
-						String home = element.getAttribute("home"); //$NON-NLS-1$
+						final String home = element.getAttribute("home"); //$NON-NLS-1$
 						if (home == null) {
 							abort(
 									MessageFormat
@@ -1757,21 +1757,21 @@ public final class ScriptRuntime {
 						InterpreterStandin standin = new InterpreterStandin(
 								installType, id);
 						standin.setName(name);
-						home = substitute(home);
 
 						// Only local installs can be contributed, so
 						// use local environment
-						IEnvironment localEnv = EnvironmentManager
+						final IEnvironment localEnv = EnvironmentManager
 								.getLocalEnvironment();
 
-						IFileHandle homeDir = localEnv.getFile(new Path(home));
-						if (homeDir.exists()) {
+						IFileHandle homeFile = localEnv.getFile(new Path(
+								substitute(home)));
+						if (homeFile.exists()) {
 							// adjust for relative path names
-							home = homeDir.getCanonicalPath();
-							homeDir = localEnv.getFile(new Path(home));
+							homeFile = localEnv.getFile(new Path(homeFile
+									.getCanonicalPath()));
 						}
 						IStatus status = installType
-								.validateInstallLocation(homeDir);
+								.validateInstallLocation(homeFile);
 						if (!status.isOK()) {
 							abort(
 									MessageFormat
@@ -1786,7 +1786,7 @@ public final class ScriptRuntime {
 															status.getMessage() }),
 									null);
 						}
-						standin.setInstallLocation(homeDir);
+						standin.setInstallLocation(homeFile);
 
 						if (InterpreterArgs != null) {
 							standin.setInterpreterArgs(InterpreterArgs);
@@ -1813,11 +1813,9 @@ public final class ScriptRuntime {
 											null);
 								}
 
-								IPath homePath = new Path(home);
-								IPath libPath = homePath
-										.append(substitute(libPathStr));
-
-								locations[j] = new LibraryLocation(libPath);
+								locations[j] = new LibraryLocation(homeFile
+										.getFullPath().append(
+												substitute(libPathStr)));
 							}
 						}
 						standin.setLibraryLocations(locations);
