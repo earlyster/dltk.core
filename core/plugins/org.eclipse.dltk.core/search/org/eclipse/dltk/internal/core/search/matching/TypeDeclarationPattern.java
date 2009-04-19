@@ -23,6 +23,7 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 	public char[] simpleName;
 	public char[] pkg;
 	public char[][] enclosingTypeNames;
+	public char[][] superTypes;
 	// set to CLASS_SUFFIX for only matching classes
 	// set to INTERFACE_SUFFIX for only matching interfaces
 	// set to ENUM_SUFFIX for only matching enums
@@ -39,7 +40,7 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 	 * typeName / packageName / enclosingTypeName / modifiers / 'S'
 	 */
 	public static char[] createIndexKey(int modifiers, char[] typeName,
-			char[] packageName, char[][] enclosingTypeNames) { // ,
+			char[] packageName, char[][] enclosingTypeNames, char[][] superTypes) { // ,
 		// char
 		// typeSuffix)
 		// {
@@ -53,8 +54,16 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 					enclosingNamesLength++; // for the '.' separator
 			}
 		}
+		int superTypesLength = 0;
+		if (superTypes != null) {
+			for (int i = 0, length = superTypes.length; i < length;) {
+				superTypesLength += superTypes[i].length;
+				if (++i < length)
+					superTypesLength++; // for the '.' separator
+			}
+		}
 		int resultLength = typeNameLength + packageLength
-				+ enclosingNamesLength + 5;
+				+ enclosingNamesLength + superTypesLength + 6;
 
 		char[] result = new char[resultLength];
 		int pos = 0;
@@ -79,14 +88,25 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 			}
 		}
 		result[pos++] = SEPARATOR;
+		if (superTypes != null && superTypesLength > 0) {
+			for (int i = 0, length = superTypes.length; i < length;) {
+				char[] superType = superTypes[i];
+				int itsLength = superType.length;
+				System.arraycopy(superType, 0, result, pos, itsLength);
+				pos += itsLength;
+				if (++i < length)
+					result[pos++] = ',';
+			}
+		}
+		result[pos++] = SEPARATOR;
 		result[pos++] = (char) modifiers;
 		result[pos] = (char) (modifiers >> 16);
 		return result;
 	}
 
 	public TypeDeclarationPattern(char[] pkg, char[][] enclosingTypeNames,
-			char[] simpleName, char typeSuffix, int matchRule,
-			IDLTKLanguageToolkit toolkit) {
+			char[][] superTypes, char[] simpleName, char typeSuffix,
+			int matchRule, IDLTKLanguageToolkit toolkit) {
 		this(matchRule, toolkit);
 		this.pkg = isCaseSensitive() ? pkg : CharOperation.toLowerCase(pkg);
 		if (isCaseSensitive() || enclosingTypeNames == null) {
@@ -101,6 +121,7 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 		this.simpleName = (isCaseSensitive() || isCamelCase()) ? simpleName
 				: CharOperation.toLowerCase(simpleName);
 		this.typeSuffix = typeSuffix;
+		this.superTypes = superTypes;
 	}
 
 	TypeDeclarationPattern(int matchRule, IDLTKLanguageToolkit toolkit) {
@@ -125,6 +146,7 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 			this.pkg = internedPackageNames.add(CharOperation.subarray(key,
 					start, slash));
 		}
+
 		// Continue key read by the end to decode modifiers
 		int last = key.length - 1;
 		this.secondary = key[last] == 'S';
@@ -136,17 +158,31 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 		else
 			this.modifiers = 0;
 		decodeModifiers();
+
 		// Retrieve enclosing type names
-		start = slash + 1;
+		start = ++slash;
 		last -= 2; // position of ending slash
 		if (start == last) {
 			this.enclosingTypeNames = CharOperation.NO_CHAR_CHAR;
 		} else {
-			if (last == (start + 1) && key[start] == ZERO_CHAR) {
-				this.enclosingTypeNames = ONE_ZERO_CHAR;
+			slash = CharOperation.indexOf(SEPARATOR, key, start);
+			if (start == slash) {
+				this.enclosingTypeNames = CharOperation.NO_CHAR_CHAR;
 			} else {
 				this.enclosingTypeNames = CharOperation.splitOn('$', key,
-						start, last);
+						start, slash);
+			}
+		}
+
+		// retrieve super types:
+		start = ++slash;
+		if (start == last) {
+			this.superTypes = CharOperation.NO_CHAR_CHAR;
+		} else {
+			if (last == (start + 1) && key[start] == ZERO_CHAR) {
+				this.superTypes = ONE_ZERO_CHAR;
+			} else {
+				this.superTypes = CharOperation.splitOn(',', key, start, last);
 			}
 		}
 	}

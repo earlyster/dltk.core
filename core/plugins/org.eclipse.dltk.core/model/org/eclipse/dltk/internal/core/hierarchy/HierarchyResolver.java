@@ -1,12 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.hierarchy;
 
@@ -24,21 +21,19 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IFileHierarchyInfo;
 import org.eclipse.dltk.core.IFileHierarchyResolver;
+import org.eclipse.dltk.core.ISearchFactory;
+import org.eclipse.dltk.core.ISearchPatternProcessor;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.SearchEngine;
-import org.eclipse.dltk.core.search.SearchMatch;
-import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.SearchPattern;
-import org.eclipse.dltk.core.search.SearchRequestor;
+import org.eclipse.dltk.core.search.TypeNameRequestor;
+import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.Openable;
+import org.eclipse.dltk.internal.core.util.HandleFactory;
 
 public class HierarchyResolver {
-
-	/**
-	 * FIXME use language specific separator
-	 */
-	private static final String TWO_COLONS = "::"; //$NON-NLS-1$
 
 	private HierarchyBuilder hierarchyBuilder;
 	private SearchEngine engine;
@@ -65,33 +60,48 @@ public class HierarchyResolver {
 
 		// Collect all inheritance information:
 		final Map superTypeToExtender = new HashMap();
-		SearchRequestor typesCollector = new SearchRequestor() {
-			public void acceptSearchMatch(SearchMatch match)
-					throws CoreException {
-				IType element = (IType) match.getElement();
-				String[] superClasses = element.getSuperClasses();
-				if (superClasses != null) {
-					for (int i = 0; i < superClasses.length; i++) {
-						final String s = superClasses[i];
+		final HandleFactory handleFactory = new HandleFactory();
+		final String delimiter = getDelimiterReplacementString(focusType);
+
+		TypeNameRequestor typesCollector = new TypeNameRequestor() {
+			public void acceptType(int modifiers, char[] packageName,
+					char[] simpleTypeName, char[][] enclosingTypeNames,
+					char[][] superTypes, String path) {
+
+				if (superTypes != null) {
+					for (int i = 0; i < superTypes.length; i++) {
+						final String s = new String(superTypes[i]);
 						List extenders = (List) superTypeToExtender.get(s);
 						if (extenders == null) {
 							extenders = new LinkedList();
 							superTypeToExtender.put(s, extenders);
 						}
-						extenders.add(element.getTypeQualifiedName(TWO_COLONS));
+
+						Openable openable = handleFactory.createOpenable(path,
+								hierarchyBuilder.hierarchy.scope);
+						ModelElement parent = openable;
+						if (enclosingTypeNames != null) {
+							for (int j = 0; j < enclosingTypeNames.length; ++j) {
+								parent = new FakeType(parent, new String(
+										enclosingTypeNames[j]));
+							}
+						}
+						FakeType type = new FakeType(parent, new String(
+								simpleTypeName), modifiers);
+						extenders.add(new String(type
+								.getTypeQualifiedName(delimiter)));
 					}
 				}
 			}
 		};
-		SearchPattern pattern = SearchPattern.createPattern(
-				"*", //$NON-NLS-1$
-				IDLTKSearchConstants.TYPE, IDLTKSearchConstants.DECLARATIONS,
-				SearchPattern.R_PATTERN_MATCH, hierarchyBuilder.hierarchy.scope
-						.getLanguageToolkit());
-		engine.search(pattern, new SearchParticipant[] { SearchEngine
-				.getDefaultSearchParticipant() },
+
+		engine.searchAllTypeNames(null, 0, "*".toCharArray(),
+				SearchPattern.R_PATTERN_MATCH,
+				IDLTKSearchConstants.DECLARATIONS,
 				hierarchyBuilder.hierarchy.scope, typesCollector,
+				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 				hierarchyBuilder.hierarchy.progressMonitor);
+
 		IFileHierarchyResolver fileHierarchyResolver = createFileHierarchyResolver(focusType);
 		IFileHierarchyInfo hierarchyInfo = null;
 		if (fileHierarchyResolver != null) {
@@ -101,15 +111,15 @@ public class HierarchyResolver {
 		}
 
 		computeSubtypesFor(focusType, superTypeToExtender, new HashMap(),
-				hierarchyInfo, new HashSet());
+				hierarchyInfo, new HashSet(), delimiter);
 	}
 
 	protected void computeSubtypesFor(IType focusType, Map superTypeToExtender,
 			Map subTypesCache, IFileHierarchyInfo hierarchyInfo,
-			Set processedTypes) throws CoreException {
+			Set processedTypes, String delimiter) throws CoreException {
 
 		List extenders = (List) superTypeToExtender.get(focusType
-				.getTypeQualifiedName(TWO_COLONS));
+				.getTypeQualifiedName(delimiter));
 		if (extenders != null) {
 			IType[] subTypes = searchTypes((String[]) extenders
 					.toArray(new String[extenders.size()]), subTypesCache,
@@ -123,7 +133,8 @@ public class HierarchyResolver {
 				IType subType = subTypes[i];
 				if (processedTypes.add(subType)) {
 					computeSubtypesFor(subType, superTypeToExtender,
-							subTypesCache, hierarchyInfo, processedTypes);
+							subTypesCache, hierarchyInfo, processedTypes,
+							delimiter);
 				}
 			}
 		}
@@ -174,13 +185,13 @@ public class HierarchyResolver {
 		}
 	}
 
-	protected IType[] searchTypes(String[] types, Map cache,
+	protected IType[] searchTypes(String[] typeNames, Map cache,
 			IFileHierarchyInfo hierarchyInfo) throws CoreException {
 		List result = new LinkedList();
-		for (int i = 0; i < types.length; i++) {
-			String type = types[i];
-			result.addAll(Arrays
-					.asList(searchTypes(type, cache, hierarchyInfo)));
+		for (int i = 0; i < typeNames.length; i++) {
+			String typeName = typeNames[i];
+			result.addAll(Arrays.asList(searchTypes(typeName, cache,
+					hierarchyInfo)));
 		}
 		return (IType[]) result.toArray(new IType[result.size()]);
 	}
@@ -190,34 +201,56 @@ public class HierarchyResolver {
 		return searchTypes(type, null, hierarchyInfo);
 	}
 
-	protected IType[] searchTypes(String type, Map cache,
+	protected IType[] searchTypes(final String typeName, Map cache,
 			final IFileHierarchyInfo hierarchyInfo) throws CoreException {
-		if (cache != null && cache.containsKey(type)) {
-			return (IType[]) cache.get(type);
+		if (cache != null && cache.containsKey(typeName)) {
+			return (IType[]) cache.get(typeName);
 		}
 
 		final List result = new LinkedList();
 		final List filteredTypes = new LinkedList();
+		final HandleFactory handleFactory = new HandleFactory();
 
-		SearchRequestor typesCollector = new SearchRequestor() {
-			public void acceptSearchMatch(SearchMatch match)
-					throws CoreException {
-				IType type = (IType) match.getElement();
+		TypeNameRequestor typesCollector = new TypeNameRequestor() {
+
+			public void acceptType(int modifiers, char[] packageName,
+					char[] simpleTypeName, char[][] enclosingTypeNames,
+					char[][] superTypes, String path) {
+
+				Openable openable = handleFactory.createOpenable(path,
+						hierarchyBuilder.hierarchy.scope);
+				ModelElement parent = openable;
+				ISourceModule sourceModule = (ISourceModule) openable;
+
+				if (enclosingTypeNames != null) {
+					for (int j = 0; j < enclosingTypeNames.length; ++j) {
+						parent = new FakeType(parent, new String(
+								enclosingTypeNames[j]));
+					}
+				}
+				FakeType type = new FakeType(parent,
+						new String(simpleTypeName), modifiers);
+
+				String delimiter = getDelimiterReplacementString(type);
+				String qualifiedName = type.getTypeQualifiedName(delimiter);
+				if (!typeName.equalsIgnoreCase(qualifiedName)) {
+					return;
+				}
+
 				if (hierarchyInfo != null
-						&& !hierarchyInfo.exists(type.getSourceModule())) {
+						&& !hierarchyInfo.exists(sourceModule)) {
 					filteredTypes.add(type);
 					return;
 				}
 				result.add(type);
 			}
 		};
-		SearchPattern pattern = SearchPattern.createPattern(type,
-				IDLTKSearchConstants.TYPE, IDLTKSearchConstants.DECLARATIONS,
-				SearchPattern.R_EXACT_MATCH, hierarchyBuilder.hierarchy.scope
-						.getLanguageToolkit());
-		engine.search(pattern, new SearchParticipant[] { SearchEngine
-				.getDefaultSearchParticipant() },
+
+		engine.searchAllTypeNames(null, 0, typeName.toCharArray(),
+				SearchPattern.R_PATTERN_MATCH,
+				IDLTKSearchConstants.DECLARATIONS,
 				hierarchyBuilder.hierarchy.scope, typesCollector,
+				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 				hierarchyBuilder.hierarchy.progressMonitor);
 
 		// If all results where filtered that means we could find a path to any
@@ -229,7 +262,7 @@ public class HierarchyResolver {
 
 		IType[] types = (IType[]) result.toArray(new IType[result.size()]);
 		if (cache != null) {
-			cache.put(type, types);
+			cache.put(typeName, types);
 		}
 		return types;
 	}
@@ -254,5 +287,26 @@ public class HierarchyResolver {
 					.getFileHierarchyResolver(toolkit.getNatureId());
 		}
 		return fileHierarchyResolver;
+	}
+
+	private static ISearchPatternProcessor getSearchPatternProcessor(IType type) {
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(type);
+		if (toolkit != null) {
+			ISearchFactory factory = DLTKLanguageManager
+					.getSearchFactory(toolkit.getNatureId());
+			if (factory != null) {
+				return factory.createSearchPatternProcessor();
+			}
+		}
+		return null;
+	}
+
+	protected String getDelimiterReplacementString(IType type) {
+		ISearchPatternProcessor searchPatternProcessor = getSearchPatternProcessor(type);
+		if (searchPatternProcessor != null) {
+			return searchPatternProcessor.getDelimiterReplacementString();
+		}
+		return "::"; //$NON-NLS-N$
 	}
 }

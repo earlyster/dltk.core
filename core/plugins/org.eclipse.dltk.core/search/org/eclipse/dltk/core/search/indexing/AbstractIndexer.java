@@ -28,8 +28,10 @@ public abstract class AbstractIndexer implements IIndexConstants {
 
 	public void addTypeDeclaration(int modifiers, char[] packageName,
 			String name, char[][] enclosingTypeNames, String[] superclasss) {
+
 		char[] indexKey = TypeDeclarationPattern.createIndexKey(modifiers, name
-				.toCharArray(), packageName, enclosingTypeNames);
+				.toCharArray(), packageName, enclosingTypeNames, CharOperation
+				.stringArrayToCharCharArray(superclasss));
 		addIndexEntry(TYPE_DECL, indexKey);
 		//
 		if (superclasss != null) {

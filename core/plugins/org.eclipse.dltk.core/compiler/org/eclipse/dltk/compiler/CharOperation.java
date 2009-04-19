@@ -14,7 +14,7 @@ import org.eclipse.dltk.compiler.util.ScannerHelper;
 /**
  * This class is a collection of helper methods to manipulate char arrays.
  * 
-	 *
+ * 
  */
 public final class CharOperation {
 
@@ -31,7 +31,7 @@ public final class CharOperation {
 	/**
 	 * Constant for an empty String array.
 	 * 
-	 *
+	 * 
 	 */
 	public static final String[] NO_STRINGS = new String[0];
 
@@ -154,8 +154,7 @@ public final class CharOperation {
 	/**
 	 * Answers the concatenation of the two arrays. It answers null if the two
 	 * arrays are null. If the first array is null, then the second array is
-	 * returned. If the second array is null, then the first array is returned.
-	 * <br>
+	 * returned. If the second array is null, then the first array is returned. <br>
 	 * <br>
 	 * For example:
 	 * <ol>
@@ -225,7 +224,7 @@ public final class CharOperation {
 	 *            the char array to convert
 	 * @return the char arrays as an array of Strings or null if the given char
 	 *         arrays is null.
-	 *
+	 * 
 	 */
 	public static String[] charArrayToStringArray(char[][] charArrays) {
 		if (charArrays == null)
@@ -246,7 +245,7 @@ public final class CharOperation {
 	 *            the char array to convert
 	 * @return the char array as a String or null if the given char array is
 	 *         null.
-	 *
+	 * 
 	 */
 	public static String charToString(char[] charArray) {
 		if (charArray == null)
@@ -314,8 +313,7 @@ public final class CharOperation {
 	 * Compares the contents of the two arrays array and prefix. Returns
 	 * <ul>
 	 * <li>zero if the array starts with the prefix contents</li>
-	 * <li>the difference between the first two characters that are not equal
-	 * </li>
+	 * <li>the difference between the first two characters that are not equal</li>
 	 * <li>one if array length is lower than the prefix length and that the
 	 * prefix starts with the array contents.</li>
 	 * </ul>
@@ -401,14 +399,13 @@ public final class CharOperation {
 		if (prefixLength == i)
 			return 0;
 		return -1; // array is shorter than prefix (e.g. array:'ab' <
-					// prefix:'abc').
+		// prefix:'abc').
 	}
 
 	/**
 	 * Answers the concatenation of the two arrays. It answers null if the two
 	 * arrays are null. If the first array is null, then the second array is
-	 * returned. If the second array is null, then the first array is returned.
-	 * <br>
+	 * returned. If the second array is null, then the first array is returned. <br>
 	 * <br>
 	 * For example:
 	 * <ol>
@@ -621,6 +618,7 @@ public final class CharOperation {
 		System.arraycopy(second, 0, result, length1 + 1, length2);
 		return result;
 	}
+
 	public static final char[] concatWithSeparator(char[] first, char[] second,
 			char[] separator) {
 		if (first == null)
@@ -1132,7 +1130,7 @@ public final class CharOperation {
 	 *         characters, false otherwise.
 	 * @throws NullPointerException
 	 *             if array is null.
-	 *
+	 * 
 	 */
 	public static final boolean contains(char[] characters, char[] array) {
 		for (int i = array.length; --i >= 0;)
@@ -1302,13 +1300,13 @@ public final class CharOperation {
 			return false;
 
 		for (int i = first.length; --i >= 0;) {
-			if( first[i] == null && second[i] != null ) {
+			if (first[i] == null && second[i] != null) {
 				return false;
 			}
-			if( first[i] != null && second[i] == null ) {
+			if (first[i] != null && second[i] == null) {
 				return false;
 			}
-			if (first[i] !=null && !first[i].equals(second[i]))
+			if (first[i] != null && !first[i].equals(second[i]))
 				return false;
 		}
 		return true;
@@ -1522,7 +1520,7 @@ public final class CharOperation {
 	 * @return true if the first array is identical character by character to
 	 *         fragment of second array ranging from secondStart to secondEnd-1,
 	 *         otherwise false
-	 *
+	 * 
 	 */
 	public static final boolean equals(char[] first, char[] second,
 			int secondStart, int secondEnd) {
@@ -1850,7 +1848,7 @@ public final class CharOperation {
 	 *         matching subarray following the case rule, -1 otherwise
 	 * @throws NullPointerException
 	 *             if array is null or toBeFound is null
-	 *
+	 * 
 	 */
 	public static final int indexOf(char[] toBeFound, char[] array,
 			boolean isCaseSensitive) {
@@ -1897,7 +1895,7 @@ public final class CharOperation {
 	 *         start, -1 otherwise
 	 * @throws NullPointerException
 	 *             if array is null or toBeFound is null
-	 *
+	 * 
 	 */
 	public static final int indexOf(final char[] toBeFound, final char[] array,
 			final boolean isCaseSensitive, final int start) {
@@ -1946,7 +1944,7 @@ public final class CharOperation {
 	 *         start, -1 otherwise
 	 * @throws NullPointerException
 	 *             if array is null or toBeFound is null
-	 *
+	 * 
 	 */
 	public static final int indexOf(final char[] toBeFound, final char[] array,
 			final boolean isCaseSensitive, final int start, final int end) {
@@ -2113,7 +2111,7 @@ public final class CharOperation {
 	 *             if array is null
 	 * @throws ArrayIndexOutOfBoundsException
 	 *             if start is lower than 0 or ending greater than array length
-	 *
+	 * 
 	 */
 	public static final int indexOf(char toBeFound, char[] array, int start,
 			int end) {
@@ -2482,7 +2480,7 @@ public final class CharOperation {
 		checkSegment: while (iName < nameEnd) {
 			if (iPattern == patternEnd) {
 				iPattern = segmentStart; // mismatch - restart current
-											// segment
+				// segment
 				iName = ++prefixStart;
 				continue checkSegment;
 			}
@@ -2500,7 +2498,7 @@ public final class CharOperation {
 					.toLowerCase(name[iName])) != patternChar
 					&& patternChar != '?') {
 				iPattern = segmentStart; // mismatch - restart current
-											// segment
+				// segment
 				iName = ++prefixStart;
 				continue checkSegment;
 			}
@@ -2612,7 +2610,7 @@ public final class CharOperation {
 		} else {
 			if (pSegmentStart >= pLength)
 				return fSegmentStart >= fLength; // true if filepath is done
-													// too.
+			// too.
 			pSegmentRestart = 0; // force fSegmentStart check
 		}
 		int fSegmentRestart = fSegmentStart;
@@ -2980,7 +2978,7 @@ public final class CharOperation {
 	 *            the replacement character
 	 * @throws NullPointerException
 	 *             if arrays are null.
-	 *
+	 * 
 	 */
 	public static final void replace(char[] array, char[] toBeReplaced,
 			char replacementChar) {
@@ -3114,7 +3112,7 @@ public final class CharOperation {
 	 *            the replacement character
 	 * @throws NullPointerException
 	 *             if the given array is null
-	 *
+	 * 
 	 */
 	public static final char[] replaceOnCopy(char[] array, char toBeReplaced,
 			char replacementChar) {
@@ -3139,8 +3137,7 @@ public final class CharOperation {
 
 	/**
 	 * Return a new array which is the split of the given array using the given
-	 * divider and triming each subarray to remove whitespaces equals to ' '.
-	 * <br>
+	 * divider and triming each subarray to remove whitespaces equals to ' '. <br>
 	 * <br>
 	 * For example:
 	 * <ol>
@@ -3187,7 +3184,8 @@ public final class CharOperation {
 	 * @param array
 	 *            the given array
 	 * @return a new array which is the split of the given array using the given
-	 *         divider and triming each subarray to remove whitespaces equals to ' '
+	 *         divider and triming each subarray to remove whitespaces equals to
+	 *         ' '
 	 */
 	public static final char[][] splitAndTrimOn(char divider, char[] array) {
 		int length = array == null ? 0 : array.length;
@@ -3293,11 +3291,15 @@ public final class CharOperation {
 	}
 
 	/**
-	 * Return a new array which is the split of the given array using the given divider.
+	 * Return a new array which is the split of the given array using the given
+	 * divider.
 	 * 
-	 * @param divider the given divider
-	 * @param array the given array
-	 * @return a new array which is the split of the given array using the given divider
+	 * @param divider
+	 *            the given divider
+	 * @param array
+	 *            the given array
+	 * @return a new array which is the split of the given array using the given
+	 *         divider
 	 */
 	public static final char[][] splitOn(char[] divider, char[] array) {
 		int length = array == null ? 0 : array.length;
@@ -3333,12 +3335,10 @@ public final class CharOperation {
 		System.arraycopy(array, last, split[currentWord], 0, length - last);
 		return split;
 	}
-	
-	
+
 	/**
 	 * Return a new array which is the split of the given array using the given
-	 * divider. The given end is exclusive and the given start is inclusive.
-	 * <br>
+	 * divider. The given end is exclusive and the given start is inclusive. <br>
 	 * <br>
 	 * For example:
 	 * <ol>
@@ -3512,8 +3512,7 @@ public final class CharOperation {
 	/**
 	 * Answers the result of a char[] conversion to lowercase. Answers null if
 	 * the given chars array is null. <br>
-	 * NOTE: If no conversion was necessary, then answers back the argument one.
-	 * <br>
+	 * NOTE: If no conversion was necessary, then answers back the argument one. <br>
 	 * <br>
 	 * For example:
 	 * <ol>
@@ -3644,7 +3643,7 @@ public final class CharOperation {
 	 * @param array
 	 *            the given array
 	 * @return an array of strings
-	 *
+	 * 
 	 */
 	final static public String[] toStrings(char[][] array) {
 		if (array == null)
@@ -3657,59 +3656,81 @@ public final class CharOperation {
 			result[i] = new String(array[i]);
 		return result;
 	}
+
 	/**
-	 * Answers true if the pattern matches the given name using CamelCase rules, or false otherwise. 
-	 * char[] CamelCase matching does NOT accept explicit wild-cards '*' and '?' and is inherently case sensitive.
+	 * Answers true if the pattern matches the given name using CamelCase rules,
+	 * or false otherwise. char[] CamelCase matching does NOT accept explicit
+	 * wild-cards '*' and '?' and is inherently case sensitive. <br>
+	 * CamelCase denotes the convention of writing compound names without
+	 * spaces, and capitalizing every term. This function recognizes both upper
+	 * and lower CamelCase, depending whether the leading character is
+	 * capitalized or not. The leading part of an upper CamelCase pattern is
+	 * assumed to contain a sequence of capitals which are appearing in the
+	 * matching name; e.g. 'NPE' will match 'NullPointerException', but not
+	 * 'NewPerfData'. A lower CamelCase pattern uses a lowercase first
+	 * character. In Script, type names follow the upper CamelCase convention,
+	 * whereas method or field names follow the lower CamelCase convention. <br>
+	 * The pattern may contain lowercase characters, which will be match in a
+	 * case sensitive way. These characters must appear in sequence in the name.
+	 * For instance, 'NPExcep' will match 'NullPointerException', but not
+	 * 'NullPointerExCEPTION' or 'NuPoEx' will match 'NullPointerException', but
+	 * not 'NoPointerException'. <br>
 	 * <br>
-	 * CamelCase denotes the convention of writing compound names without spaces, and capitalizing every term.
-	 * This function recognizes both upper and lower CamelCase, depending whether the leading character is capitalized
-	 * or not. The leading part of an upper CamelCase pattern is assumed to contain a sequence of capitals which are appearing
-	 * in the matching name; e.g. 'NPE' will match 'NullPointerException', but not 'NewPerfData'. A lower CamelCase pattern
-	 * uses a lowercase first character. In Script, type names follow the upper CamelCase convention, whereas method or field
-	 * names follow the lower CamelCase convention.
-	 * <br>
-	 * The pattern may contain lowercase characters, which will be match in a case sensitive way. These characters must
-	 * appear in sequence in the name. For instance, 'NPExcep' will match 'NullPointerException', but not 'NullPointerExCEPTION'
-	 * or 'NuPoEx' will match 'NullPointerException', but not 'NoPointerException'.
-	 * <br><br>
 	 * Examples:
 	 * <ol>
-	 * <li><pre>
+	 * <li>
+	 * 
+	 * <pre>
 	 *    pattern = { 'N', 'P', 'E' }
 	 *    name = { 'N', 'u','l', 'l', 'P', 'o', 'i', 'n', 't', 'e', 'r', 'E', 'x', 'c', 'e', 'p', 't', 'i', 'o', 'n' }
-	 *    result => true
+	 *    result =&gt; true
 	 * </pre>
+	 * 
 	 * </li>
-	 * <li><pre>
+	 * <li>
+	 * 
+	 * <pre>
 	 *    pattern = { 'N', 'P', 'E' }
 	 *    name = { 'N', 'o', 'P', 'e', 'r', 'm', 'i', 's', 's', 'i', 'o', 'n', 'E', 'x', 'c', 'e', 'p', 't', 'i', 'o', 'n' }
-	 *    result => true
+	 *    result =&gt; true
 	 * </pre>
+	 * 
 	 * </li>
-	 * <li><pre>
+	 * <li>
+	 * 
+	 * <pre>
 	 *    pattern = { 'N', 'u', 'P', 'o', 'E', 'x' }
 	 *    name = { 'N', 'u','l', 'l', 'P', 'o', 'i', 'n', 't', 'e', 'r', 'E', 'x', 'c', 'e', 'p', 't', 'i', 'o', 'n' }
-	 *    result => true
+	 *    result =&gt; true
 	 * </pre>
+	 * 
 	 * </li>
-	 * <li><pre>
+	 * <li>
+	 * 
+	 * <pre>
 	 *    pattern = { 'N', 'u', 'P', 'o', 'E', 'x' }
 	 *    name = { 'N', 'o', 'P', 'e', 'r', 'm', 'i', 's', 's', 'i', 'o', 'n', 'E', 'x', 'c', 'e', 'p', 't', 'i', 'o', 'n' }
-	 *    result => false
+	 *    result =&gt; false
 	 * </pre>
+	 * 
 	 * </li>
-	 * <li><pre>
+	 * <li>
+	 * 
+	 * <pre>
 	 *    pattern = { 'n', p', 'e' }
 	 *    name = { 'N', 'u','l', 'l', 'P', 'o', 'i', 'n', 't', 'e', 'r', 'E', 'x', 'c', 'e', 'p', 't', 'i', 'o', 'n' }
-	 *    result => false
+	 *    result =&gt; false
 	 * </pre>
+	 * 
 	 * </li>
 	 * </ol>
 	 * 
-	 * @param pattern the given pattern
-	 * @param name the given name
+	 * @param pattern
+	 *            the given pattern
+	 * @param name
+	 *            the given name
 	 * @return true if the pattern matches the given name, false otherwise
-	 *
+	 * 
 	 */
 	public static final boolean camelCaseMatch(char[] pattern, char[] name) {
 		if (pattern == null)
@@ -3721,95 +3742,128 @@ public final class CharOperation {
 	}
 
 	/**
-	 * Answers true if a sub-pattern matches the subpart of the given name using CamelCase rules, or false otherwise.  
-	 * char[] CamelCase matching does NOT accept explicit wild-cards '*' and '?' and is inherently case sensitive. 
-	 * Can match only subset of name/pattern, considering end positions as non-inclusive.
-	 * The subpattern is defined by the patternStart and patternEnd positions.
+	 * Answers true if a sub-pattern matches the subpart of the given name using
+	 * CamelCase rules, or false otherwise. char[] CamelCase matching does NOT
+	 * accept explicit wild-cards '*' and '?' and is inherently case sensitive.
+	 * Can match only subset of name/pattern, considering end positions as
+	 * non-inclusive. The subpattern is defined by the patternStart and
+	 * patternEnd positions. <br>
+	 * CamelCase denotes the convention of writing compound names without
+	 * spaces, and capitalizing every term. This function recognizes both upper
+	 * and lower CamelCase, depending whether the leading character is
+	 * capitalized or not. The leading part of an upper CamelCase pattern is
+	 * assumed to contain a sequence of capitals which are appearing in the
+	 * matching name; e.g. 'NPE' will match 'NullPointerException', but not
+	 * 'NewPerfData'. A lower CamelCase pattern uses a lowercase first
+	 * character. In Script, type names follow the upper CamelCase convention,
+	 * whereas method or field names follow the lower CamelCase convention. <br>
+	 * The pattern may contain lowercase characters, which will be match in a
+	 * case sensitive way. These characters must appear in sequence in the name.
+	 * For instance, 'NPExcep' will match 'NullPointerException', but not
+	 * 'NullPointerExCEPTION' or 'NuPoEx' will match 'NullPointerException', but
+	 * not 'NoPointerException'. <br>
 	 * <br>
-	 * CamelCase denotes the convention of writing compound names without spaces, and capitalizing every term.
-	 * This function recognizes both upper and lower CamelCase, depending whether the leading character is capitalized
-	 * or not. The leading part of an upper CamelCase pattern is assumed to contain a sequence of capitals which are appearing
-	 * in the matching name; e.g. 'NPE' will match 'NullPointerException', but not 'NewPerfData'. A lower CamelCase pattern
-	 * uses a lowercase first character. In Script, type names follow the upper CamelCase convention, whereas method or field
-	 * names follow the lower CamelCase convention.
-	 * <br>
-	 * The pattern may contain lowercase characters, which will be match in a case sensitive way. These characters must
-	 * appear in sequence in the name. For instance, 'NPExcep' will match 'NullPointerException', but not 'NullPointerExCEPTION'
-	 * or 'NuPoEx' will match 'NullPointerException', but not 'NoPointerException'.
-	 * <br><br>
 	 * Examples:
 	 * <ol>
-	 * <li><pre>
+	 * <li>
+	 * 
+	 * <pre>
 	 *    pattern = { 'N', 'P', 'E' }
 	 *    patternStart = 0
 	 *    patternEnd = 3
 	 *    name = { 'N', 'u','l', 'l', 'P', 'o', 'i', 'n', 't', 'e', 'r', 'E', 'x', 'c', 'e', 'p', 't', 'i', 'o', 'n' }
 	 *    nameStart = 0
 	 *    nameEnd = 20
-	 *    result => true
+	 *    result =&gt; true
 	 * </pre>
+	 * 
 	 * </li>
-	 * <li><pre>
+	 * <li>
+	 * 
+	 * <pre>
 	 *    pattern = { 'N', 'P', 'E' }
 	 *    patternStart = 0
 	 *    patternEnd = 3
 	 *    name = { 'N', 'o', 'P', 'e', 'r', 'm', 'i', 's', 's', 'i', 'o', 'n', 'E', 'x', 'c', 'e', 'p', 't', 'i', 'o', 'n' }
 	 *    nameStart = 0
 	 *    nameEnd = 21
-	 *    result => true
+	 *    result =&gt; true
 	 * </pre>
+	 * 
 	 * </li>
-	 * <li><pre>
+	 * <li>
+	 * 
+	 * <pre>
 	 *    pattern = { 'N', 'u', 'P', 'o', 'E', 'x' }
 	 *    patternStart = 0
 	 *    patternEnd = 6
 	 *    name = { 'N', 'u','l', 'l', 'P', 'o', 'i', 'n', 't', 'e', 'r', 'E', 'x', 'c', 'e', 'p', 't', 'i', 'o', 'n' }
 	 *    nameStart = 0
 	 *    nameEnd = 20
-	 *    result => true
+	 *    result =&gt; true
 	 * </pre>
+	 * 
 	 * </li>
-	 * <li><pre>
+	 * <li>
+	 * 
+	 * <pre>
 	 *    pattern = { 'N', 'u', 'P', 'o', 'E', 'x' }
 	 *    patternStart = 0
 	 *    patternEnd = 6
 	 *    name = { 'N', 'o', 'P', 'e', 'r', 'm', 'i', 's', 's', 'i', 'o', 'n', 'E', 'x', 'c', 'e', 'p', 't', 'i', 'o', 'n' }
 	 *    nameStart = 0
 	 *    nameEnd = 21
-	 *    result => false
+	 *    result =&gt; false
 	 * </pre>
+	 * 
 	 * </li>
-	 * <li><pre>
+	 * <li>
+	 * 
+	 * <pre>
 	 *    pattern = { 'n', p', 'e' }
 	 *    patternStart = 0
 	 *    patternEnd = 3
 	 *    name = { 'N', 'u','l', 'l', 'P', 'o', 'i', 'n', 't', 'e', 'r', 'E', 'x', 'c', 'e', 'p', 't', 'i', 'o', 'n' }
 	 *    nameStart = 0
 	 *    nameEnd = 20
-	 *    result => false
+	 *    result =&gt; false
 	 * </pre>
+	 * 
 	 * </li>
 	 * </ol>
 	 * 
-	 * @param pattern the given pattern
-	 * @param patternStart the start index of the pattern, inclusive
-	 * @param patternEnd the end index of the pattern, exclusive
-	 * @param name the given name
-	 * @param nameStart the start index of the name, inclusive
-	 * @param nameEnd the end index of the name, exclusive
-	 * @return true if a sub-pattern matches the subpart of the given name, false otherwise
-	 *
+	 * @param pattern
+	 *            the given pattern
+	 * @param patternStart
+	 *            the start index of the pattern, inclusive
+	 * @param patternEnd
+	 *            the end index of the pattern, exclusive
+	 * @param name
+	 *            the given name
+	 * @param nameStart
+	 *            the start index of the name, inclusive
+	 * @param nameEnd
+	 *            the end index of the name, exclusive
+	 * @return true if a sub-pattern matches the subpart of the given name,
+	 *         false otherwise
+	 * 
 	 */
-	public static final boolean camelCaseMatch(char[] pattern, int patternStart, int patternEnd, char[] name, int nameStart, int nameEnd) {
+	public static final boolean camelCaseMatch(char[] pattern,
+			int patternStart, int patternEnd, char[] name, int nameStart,
+			int nameEnd) {
 		if (name == null)
 			return false; // null name cannot match
 		if (pattern == null)
 			return true; // null pattern is equivalent to '*'
-		if (patternEnd < 0) 	patternEnd = pattern.length;
-		if (nameEnd < 0) nameEnd = name.length;
+		if (patternEnd < 0)
+			patternEnd = pattern.length;
+		if (nameEnd < 0)
+			nameEnd = name.length;
 
-		if (patternEnd <= patternStart) return nameEnd <= nameStart;
-		if (nameEnd <= nameStart) return false;
+		if (patternEnd <= patternStart)
+			return nameEnd <= nameStart;
+		if (nameEnd <= nameStart)
+			return false;
 		// check first pattern char
 		if (name[nameStart] != pattern[patternStart]) {
 			// first char must strictly match (upper/lower)
@@ -3831,95 +3885,111 @@ public final class CharOperation {
 				return true;
 			}
 
-			if (iName == nameEnd){
-				// We have exhausted name (and not pattern), so it's not a match 
+			if (iName == nameEnd) {
+				// We have exhausted name (and not pattern), so it's not a match
 				return false;
 			}
 
-			// For as long as we're exactly matching, bring it on (even if it's a lower case character)
+			// For as long as we're exactly matching, bring it on (even if it's
+			// a lower case character)
 			if ((patternChar = pattern[iPattern]) == name[iName]) {
 				continue;
 			}
 
-			// If characters are not equals, then it's not a match if patternChar is lowercase
+			// If characters are not equals, then it's not a match if
+			// patternChar is lowercase
 			if (patternChar < MAX_OBVIOUS) {
 				if ((ScannerHelper.OBVIOUS_IDENT_CHAR_NATURES[patternChar] & ScannerHelper.C_UPPER_LETTER) == 0) {
 					return false;
 				}
-			}
-			else 
-				if (Character.isJavaIdentifierPart(patternChar) && !Character.isUpperCase(patternChar)) {
+			} else if (Character.isJavaIdentifierPart(patternChar)
+					&& !Character.isUpperCase(patternChar)) {
 				return false;
 			}
 
-			// patternChar is uppercase, so let's find the next uppercase in name
+			// patternChar is uppercase, so let's find the next uppercase in
+			// name
 			while (true) {
-				if (iName == nameEnd){
-		            //	We have exhausted name (and not pattern), so it's not a match
+				if (iName == nameEnd) {
+					// We have exhausted name (and not pattern), so it's not a
+					// match
 					return false;
 				}
 
 				nameChar = name[iName];
 				if (nameChar < MAX_OBVIOUS) {
-					if ((ScannerHelper.OBVIOUS_IDENT_CHAR_NATURES[nameChar] & (ScannerHelper.C_LOWER_LETTER | ScannerHelper.C_SPECIAL | ScannerHelper.C_DIGIT)) != 0) {
-						// nameChar is lowercase    
+					if ((ScannerHelper.OBVIOUS_IDENT_CHAR_NATURES[nameChar] & (ScannerHelper.C_LOWER_LETTER
+							| ScannerHelper.C_SPECIAL | ScannerHelper.C_DIGIT)) != 0) {
+						// nameChar is lowercase
 						iName++;
-					// nameChar is uppercase...
-					} else  if (patternChar != nameChar) {
-						//.. and it does not match patternChar, so it's not a match
+						// nameChar is uppercase...
+					} else if (patternChar != nameChar) {
+						// .. and it does not match patternChar, so it's not a
+						// match
 						return false;
 					} else {
-						//.. and it matched patternChar. Back to the big loop
+						// .. and it matched patternChar. Back to the big loop
 						break;
 					}
-				}
-				else if (Character.isJavaIdentifierPart(nameChar) && !Character.isUpperCase(nameChar)) {
-					// nameChar is lowercase    
+				} else if (Character.isJavaIdentifierPart(nameChar)
+						&& !Character.isUpperCase(nameChar)) {
+					// nameChar is lowercase
 					iName++;
-				// nameChar is uppercase...
-				} else  if (patternChar != nameChar) {
-					//.. and it does not match patternChar, so it's not a match
+					// nameChar is uppercase...
+				} else if (patternChar != nameChar) {
+					// .. and it does not match patternChar, so it's not a match
 					return false;
 				} else {
-					//.. and it matched patternChar. Back to the big loop
+					// .. and it matched patternChar. Back to the big loop
 					break;
 				}
 			}
-			// At this point, either name has been exhausted, or it is at an uppercase letter.
+			// At this point, either name has been exhausted, or it is at an
+			// uppercase letter.
 			// Since pattern is also at an uppercase letter
 		}
 	}
+
 	/**
-	 * Answers a new array removing a given character. Answers the given array if there is
-	 * no occurence of the character to remove.
-	 * <br>
+	 * Answers a new array removing a given character. Answers the given array
+	 * if there is no occurence of the character to remove. <br>
 	 * <br>
 	 * For example:
 	 * <ol>
-	 * <li><pre>
+	 * <li>
+	 * 
+	 * <pre>
 	 *    array = { 'a' , 'b', 'b', 'c', 'b', 'a' }
 	 *    toBeRemoved = 'b'
 	 *    return { 'a' , 'c', 'a' }
 	 * </pre>
+	 * 
 	 * </li>
-	 * <li><pre>
+	 * <li>
+	 * 
+	 * <pre>
 	 *    array = { 'a' , 'b', 'b', 'a', 'b', 'a' }
 	 *    toBeRemoved = 'c'
 	 *    return array
 	 * </pre>
+	 * 
 	 * </li>
 	 * </ol>
 	 * 
-	 * @param array the given array
-	 * @param toBeRemoved the character to be removed
+	 * @param array
+	 *            the given array
+	 * @param toBeRemoved
+	 *            the character to be removed
 	 * @return a new array removing given character
-	 *
+	 * 
 	 */
 	public static final char[] remove(char[] array, char toBeRemoved) {
 
-		if (array == null) return null;
+		if (array == null)
+			return null;
 		int length = array.length;
-		if (length == 0) return array;
+		if (length == 0)
+			return array;
 		char[] result = null;
 		int count = 0;
 		for (int i = 0; i < length; i++) {
@@ -3934,8 +4004,39 @@ public final class CharOperation {
 				result[count++] = c;
 			}
 		}
-		if (result == null) return array;
+		if (result == null)
+			return array;
 		System.arraycopy(result, 0, result = new char[count], 0, count);
+		return result;
+	}
+
+	/**
+	 * Converts string array to char[][] array <br>
+	 * <br>
+	 * For example:
+	 * <ul>
+	 * <li>
+	 * 
+	 * <pre>
+	 *    array = { &quot;abc&quot;, &quot;de&quot; }
+	 *    return { {'a' , 'b', 'c'}, {'d' , 'e'} }
+	 * </pre>
+	 * 
+	 * </li>
+	 * </ul>
+	 * 
+	 * @param array
+	 *            string array
+	 * @return char[][] array
+	 */
+	public static final char[][] stringArrayToCharCharArray(String[] array) {
+		if (array == null) {
+			return null;
+		}
+		char[][] result = new char[array.length][];
+		for (int i = 0; i < array.length; ++i) {
+			result[i] = array[i].toCharArray();
+		}
 		return result;
 	}
 }

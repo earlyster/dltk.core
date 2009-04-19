@@ -1057,11 +1057,19 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			break;
 		case IModelElement.TYPE:
 			IType type = (IType) element;
+			char[][] superTypes = null;
+			try {
+				superTypes = CharOperation.stringArrayToCharCharArray(type
+						.getSuperClasses());
+			} catch (ModelException e) {
+				return null;
+			}
+
 			searchPattern = createTypePattern(type.getElementName()
 					.toCharArray(), type.getScriptFolder().getElementName()
 					.toCharArray(), ignoreDeclaringType ? null
-					: enclosingTypeNames(type), null, type, maskedLimitTo,
-					matchRule);
+					: enclosingTypeNames(type), superTypes, null, type,
+					maskedLimitTo, matchRule);
 			break;
 		case IModelElement.SCRIPT_FOLDER:
 			searchPattern = createScriptFolderPattern(element.getElementName(),
@@ -1079,13 +1087,15 @@ public abstract class SearchPattern extends InternalSearchPattern {
 
 	private static SearchPattern createTypePattern(char[] simpleName,
 			char[] packageName, char[][] enclosingTypeNames,
-			String typeSignature, IType type, int limitTo, int matchRule) {
+			char[][] superTypes, String typeSignature, IType type, int limitTo,
+			int matchRule) {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(type);
 		switch (limitTo) {
 		case IDLTKSearchConstants.DECLARATIONS:
 			return new TypeDeclarationPattern(packageName, enclosingTypeNames,
-					simpleName, IIndexConstants.TYPE_SUFFIX, matchRule, toolkit);
+					superTypes, simpleName, IIndexConstants.TYPE_SUFFIX,
+					matchRule, toolkit);
 		case IDLTKSearchConstants.REFERENCES:
 			if (type != null) {
 				return new TypeReferencePattern(CharOperation.concatWith(
@@ -1104,7 +1114,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			// matchRule);
 		case IDLTKSearchConstants.ALL_OCCURRENCES:
 			return new OrPattern(new TypeDeclarationPattern(packageName,
-					enclosingTypeNames, simpleName,
+					enclosingTypeNames, superTypes, simpleName,
 					IIndexConstants.TYPE_SUFFIX, matchRule, toolkit),
 					(type != null) ? new TypeReferencePattern(CharOperation
 							.concatWith(packageName, enclosingTypeNames, '$'),

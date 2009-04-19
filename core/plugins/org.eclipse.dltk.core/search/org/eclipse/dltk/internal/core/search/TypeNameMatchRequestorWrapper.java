@@ -31,22 +31,18 @@ import org.eclipse.dltk.internal.core.util.HashtableOfArrayToObject;
 
 /**
  * Wrapper used to link {@link IRestrictedAccessTypeRequestor} with
- * {@link TypeNameRequestor}. This wrapper specifically allows usage of
- * internal method {@link BasicSearchEngine#searchAllTypeNames( char[]
- * packageName, int packageMatchRule, char[] typeName, int typeMatchRule, int
- * searchFor, org.eclipse.jdt.core.search.IJavaSearchScope scope,
- * IRestrictedAccessTypeRequestor nameRequestor, int waitingPolicy,
- * org.eclipse.core.runtime.IProgressMonitor monitor) }. from API method
- * {@link org.eclipse.jdt.core.search.SearchEngine#searchAllTypeNames( char[]
- * packageName, int packageMatchRule, char[] typeName, int matchRule, int
- * searchFor, org.eclipse.jdt.core.search.IJavaSearchScope scope,
- * TypeNameRequestor nameRequestor, int waitingPolicy,
- * org.eclipse.core.runtime.IProgressMonitor monitor) }.
+ * {@link TypeNameRequestor}. This wrapper specifically allows usage of internal
+ * method
+ * {@link BasicSearchEngine#searchAllTypeNames(char[] packageName, int packageMatchRule, char[] typeName, int typeMatchRule, int searchFor, org.eclipse.jdt.core.search.IJavaSearchScope scope, IRestrictedAccessTypeRequestor nameRequestor, int waitingPolicy, org.eclipse.core.runtime.IProgressMonitor monitor) }
+ * . from API method
+ * {@link org.eclipse.jdt.core.search.SearchEngine#searchAllTypeNames(char[] packageName, int packageMatchRule, char[] typeName, int matchRule, int searchFor, org.eclipse.jdt.core.search.IJavaSearchScope scope, TypeNameRequestor nameRequestor, int waitingPolicy, org.eclipse.core.runtime.IProgressMonitor monitor) }
+ * .
  */
 public class TypeNameMatchRequestorWrapper implements
 		IRestrictedAccessTypeRequestor {
 	TypeNameMatchRequestor requestor;
-	private final IDLTKSearchScope scope; // scope is needed to retrieve project path
+	private final IDLTKSearchScope scope; // scope is needed to retrieve project
+											// path
 	// for external resource
 	private HandleFactory handleFactory; // in case of IJavaSearchScope
 	// defined by clients, use an
@@ -75,13 +71,13 @@ public class TypeNameMatchRequestorWrapper implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jdt.internal.core.search.IRestrictedAccessTypeRequestor#acceptType(int,
-	 *      char[], char[], char[][], java.lang.String,
-	 *      org.eclipse.jdt.internal.compiler.env.AccessRestriction)
+	 * @seeorg.eclipse.jdt.internal.core.search.IRestrictedAccessTypeRequestor#
+	 * acceptType(int, char[], char[], char[][], java.lang.String,
+	 * org.eclipse.jdt.internal.compiler.env.AccessRestriction)
 	 */
 	public void acceptType(int modifiers, char[] packageName,
-			char[] simpleTypeName, char[][] enclosingTypeNames, String path,
-			AccessRestriction access) {
+			char[] simpleTypeName, char[][] enclosingTypeNames,
+			char[][] superTypes, String path, AccessRestriction access) {
 		try {
 			IType type = null;
 			if (this.handleFactory != null) {
@@ -109,9 +105,12 @@ public class TypeNameMatchRequestorWrapper implements
 						.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR);
 				type = separatorIndex == -1 ? createTypeFromPath(path,
 						new String(simpleTypeName), enclosingTypeNames) : null/*
-																				 * createTypeFrom(path,
-																				 * separatorIndex)
-																				 */;
+																			 * createTypeFrom(
+																			 * path
+																			 * ,
+																			 * separatorIndex
+																			 * )
+																			 */;
 				if (DLTKCore.DEBUG) {
 					System.err.println("TODO: Add types from zips..."); //$NON-NLS-1$
 				}
@@ -146,7 +145,7 @@ public class TypeNameMatchRequestorWrapper implements
 			this.packageHandles = new HashtableOfArrayToObject(5);
 		}
 		IPath resourcePath2 = new Path(resourcePath);
-		if( !resourcePath2.toString().startsWith(this.lastPkgFragmentRootPath)) {
+		if (!resourcePath2.toString().startsWith(this.lastPkgFragmentRootPath)) {
 			return null;
 		}
 		// create handle
@@ -172,50 +171,52 @@ public class TypeNameMatchRequestorWrapper implements
 		ISourceModule unit = pkgFragment.getSourceModule(simpleName);
 		int etnLength = enclosingTypeNames == null ? 0
 				: enclosingTypeNames.length;
-	    String containerTypeName = (etnLength == 0) ? simpleTypeName : new String(enclosingTypeNames[0]);
-	    IType type = null;
-	    IType[] containerTypes = unit.getTypes();
-	    for (int cnt = 0, max = containerTypes.length; cnt < max; cnt++) {
-	      if (containerTypeName.equals(containerTypes[cnt].getElementName())) {
-	        if (etnLength > 1) {
-	          type = resolveType(containerTypes[cnt], enclosingTypeNames, 1);
-	          if (type != null) {
-	            type = type.getType(simpleTypeName);
-	          }
-	        }
-	        else if (etnLength == 1) {
-	          type = containerTypes[cnt].getType(simpleTypeName);
-	        }
-	        else {
-	          type = containerTypes[cnt];
-	        }
+		String containerTypeName = (etnLength == 0) ? simpleTypeName
+				: new String(enclosingTypeNames[0]);
+		IType type = null;
+		IType[] containerTypes = unit.getTypes();
+		for (int cnt = 0, max = containerTypes.length; cnt < max; cnt++) {
+			if (containerTypeName.equals(containerTypes[cnt].getElementName())) {
+				if (etnLength > 1) {
+					type = resolveType(containerTypes[cnt], enclosingTypeNames,
+							1);
+					if (type != null) {
+						type = type.getType(simpleTypeName);
+					}
+				} else if (etnLength == 1) {
+					type = containerTypes[cnt].getType(simpleTypeName);
+				} else {
+					type = containerTypes[cnt];
+				}
 
-            if (type != null && type.exists()) {
-              break;
-            }
-	      }
-	    }
+				if (type != null && type.exists()) {
+					break;
+				}
+			}
+		}
 		return type;
 	}
 
-	private IType resolveType(IType parentType, char[][] enclosingTypeNames, int index) throws ModelException {
-	  IType resolvedType = null;
+	private IType resolveType(IType parentType, char[][] enclosingTypeNames,
+			int index) throws ModelException {
+		IType resolvedType = null;
 
-	  IType[] childTypes = parentType.getTypes();
-	  for (int cnt = 0, max = childTypes.length; cnt < max; cnt++) {
-	    if (childTypes[cnt].getElementName().equals(new String(enclosingTypeNames[index]))) {
-	      if (index != (enclosingTypeNames.length - 1)) {
-	        resolvedType = resolveType(childTypes[cnt], enclosingTypeNames, (index + 1));
-	      }
-	      else if (childTypes[cnt].exists()) {
-	        resolvedType = childTypes[cnt];
+		IType[] childTypes = parentType.getTypes();
+		for (int cnt = 0, max = childTypes.length; cnt < max; cnt++) {
+			if (childTypes[cnt].getElementName().equals(
+					new String(enclosingTypeNames[index]))) {
+				if (index != (enclosingTypeNames.length - 1)) {
+					resolvedType = resolveType(childTypes[cnt],
+							enclosingTypeNames, (index + 1));
+				} else if (childTypes[cnt].exists()) {
+					resolvedType = childTypes[cnt];
 
-	        break;
-	      }
-	    }
-	  }
+					break;
+				}
+			}
+		}
 
-	  return resolvedType;
+		return resolvedType;
 	}
 
 }
