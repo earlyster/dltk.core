@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.ui.typehierarchy;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -96,7 +97,7 @@ public abstract class TypeHierarchyContentProvider implements
 	}
 
 	private void addCompatibleMethods(IMethod filterMethod, IType typeToFindIn,
-			List children) throws ModelException {
+			Collection children) throws ModelException {
 		boolean filterMethodOverrides = initializeMethodOverrideTester(
 				filterMethod, typeToFindIn);
 		IMethod[] methods = typeToFindIn.getMethods();
@@ -179,7 +180,7 @@ public abstract class TypeHierarchyContentProvider implements
 		return types.toArray();
 	}
 
-	protected void compactTypes(List types) {
+	protected void compactTypes(Collection types) {
 		final Map map = new HashMap();
 		for (Iterator i = types.iterator(); i.hasNext();) {
 			final Object item = i.next();
@@ -270,7 +271,7 @@ public abstract class TypeHierarchyContentProvider implements
 			try {
 				IType type = (IType) element;
 
-				List children = new ArrayList();
+				Set children = new HashSet();
 				if (fMemberFilter != null) {
 					addFilteredMemberChildren(type, children);
 				}
@@ -285,7 +286,7 @@ public abstract class TypeHierarchyContentProvider implements
 			try {
 				final CumulativeType cType = (CumulativeType) element;
 				final IType[] types = cType.getTypes();
-				final List children = new ArrayList();
+				final Set children = new HashSet();
 				for (int i = 0; i < types.length; ++i) {
 					if (fMemberFilter != null) {
 						addFilteredMemberChildren(types[i], children);
@@ -293,8 +294,11 @@ public abstract class TypeHierarchyContentProvider implements
 					addTypeChildren(types[i], children);
 				}
 				compactTypes(children);
-				cType.insertTo(children, 0);
-				return children.toArray();
+
+				List result = new ArrayList(children.size());
+				result.addAll(children);
+				cType.insertTo(result, 0);
+				return result.toArray();
 			} catch (ModelException e) {
 				// ignore
 			}
@@ -320,7 +324,7 @@ public abstract class TypeHierarchyContentProvider implements
 		return false;
 	}
 
-	private void addFilteredMemberChildren(IType parent, List children)
+	private void addFilteredMemberChildren(IType parent, Collection children)
 			throws ModelException {
 		for (int i = 0; i < fMemberFilter.length; i++) {
 			IMember member = fMemberFilter[i];
@@ -334,18 +338,15 @@ public abstract class TypeHierarchyContentProvider implements
 		}
 	}
 
-	private void addTypeChildren(IType type, List children)
+	private void addTypeChildren(IType type, Collection children)
 			throws ModelException {
 		ArrayList types = new ArrayList();
 		getTypesInHierarchy(type, types);
 		int len = types.size();
-		Set alreadyAddedElements = new HashSet();
 		for (int i = 0; i < len; i++) {
 			IType curr = (IType) types.get(i);
-			if (alreadyAddedElements.add(curr)) {
-				if (isInTree(curr)) {
-					children.add(curr);
-				}
+			if (isInTree(curr)) {
+				children.add(curr);
 			}
 		}
 	}

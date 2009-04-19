@@ -34,11 +34,11 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
+import org.eclipse.dltk.core.search.NopTypeNameRequestor;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.TypeNameMatch;
 import org.eclipse.dltk.core.search.TypeNameMatchRequestor;
-import org.eclipse.dltk.core.search.TypeNameRequestor;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.corext.util.OpenTypeHistory;
 import org.eclipse.dltk.internal.corext.util.Strings;
@@ -126,7 +126,9 @@ public class TypeInfoViewer {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jdt.core.search.TypeNameMatchRequestor#acceptTypeNameMatch(org.eclipse.jdt.core.search.TypeNameMatch)
+		 * @see
+		 * org.eclipse.jdt.core.search.TypeNameMatchRequestor#acceptTypeNameMatch
+		 * (org.eclipse.jdt.core.search.TypeNameMatch)
 		 */
 		public void acceptTypeNameMatch(TypeNameMatch match) {
 			if (fStop)
@@ -251,7 +253,6 @@ public class TypeInfoViewer {
 		private Map fLib2Name = new HashMap();
 		private String[] fInstallLocations;
 		private String[] fVMNames;
-
 
 		public TypeInfoLabelProvider(ITypeInfoImageProvider extension) {
 			fProviderExtension = extension;
@@ -854,8 +855,8 @@ public class TypeInfoViewer {
 								| SearchPattern.R_CASE_SENSITIVE,
 						IDLTKSearchConstants.TYPE, SearchEngine
 								.createWorkspaceScope(fToolkit),
-						new TypeNameRequestor() {
-						}, IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+						new NopTypeNameRequestor(),
+						IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 						monitor);
 			} catch (ModelException e) {
 				DLTKUIPlugin.log(e);
@@ -1218,7 +1219,6 @@ public class TypeInfoViewer {
 			scheduleSearchJob(isSyncJobRunning() ? HISTORY : FULL);
 		}
 	}
-
 
 	public void reset() {
 		fLastSelection = null;
