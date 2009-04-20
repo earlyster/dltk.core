@@ -168,7 +168,8 @@ public class ScriptedTest extends AbstractFormatterTest {
 		test.input = input;
 		test.expected = expected;
 		test.context = context;
-		test.preferences = preferences;
+		test.preferences = preferences != null ? new HashMap(preferences)
+				: preferences;
 		return test;
 	}
 
