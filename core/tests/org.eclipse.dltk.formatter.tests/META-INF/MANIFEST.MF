@@ -5,6 +5,10 @@ Bundle-SymbolicName: org.eclipse.dltk.formatter.tests
 Bundle-Version: 1.0.0
 Bundle-Vendor: %pluginProvider
 Bundle-Localization: plugin
-Fragment-Host: org.eclipse.dltk.formatter
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
-Require-Bundle: org.junit
+Require-Bundle: org.junit,
+ org.eclipse.jface.text,
+ org.eclipse.dltk.core,
+ org.eclipse.dltk.ui,
+ org.eclipse.dltk.formatter
+Export-Package: org.eclipse.dltk.formatter.tests
