@@ -38,6 +38,8 @@ public interface IFormatterDocument {
 	 */
 	boolean getBoolean(String key);
 
+	String getString(String key);
+
 	int getInt(String key);
 
 	char charAt(int start);

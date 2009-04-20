@@ -20,6 +20,7 @@ public class FormatterDocument implements IFormatterDocument {
 
 	private final String text;
 	private final Map booleans = new HashMap();
+	private final Map strings = new HashMap();
 	private final Map ints = new HashMap();
 
 	/**
@@ -58,6 +59,14 @@ public class FormatterDocument implements IFormatterDocument {
 	public boolean getBoolean(String key) {
 		final Boolean value = (Boolean) booleans.get(key);
 		return value != null && value.booleanValue();
+	}
+
+	public void setString(String key, String value) {
+		strings.put(key, value);
+	}
+
+	public String getString(String key) {
+		return (String) strings.get(key);
 	}
 
 	public void setInt(String key, int value) {
