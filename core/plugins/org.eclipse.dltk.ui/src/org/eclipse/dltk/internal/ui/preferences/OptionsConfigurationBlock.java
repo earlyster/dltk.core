@@ -2,7 +2,7 @@ package org.eclipse.dltk.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -80,7 +80,7 @@ public abstract class OptionsConfigurationBlock {
 		if (fProject == null || hasProjectSpecificOptions(fProject)) {
 			fDisabledProjectSettings = null;
 		} else {
-			fDisabledProjectSettings = new IdentityHashMap();
+			fDisabledProjectSettings = new HashMap();
 			for (int i = 0; i < allKeys.length; i++) {
 				PreferenceKey curr = allKeys[i];
 				fDisabledProjectSettings.put(curr, curr.getStoredValue(
@@ -225,7 +225,7 @@ public abstract class OptionsConfigurationBlock {
 				}
 				fDisabledProjectSettings = null;
 			} else {
-				fDisabledProjectSettings = new IdentityHashMap();
+				fDisabledProjectSettings = new HashMap();
 				for (int i = 0; i < fAllKeys.length; i++) {
 					PreferenceKey curr = fAllKeys[i];
 					String oldSetting = curr.getStoredValue(fLookupOrder,

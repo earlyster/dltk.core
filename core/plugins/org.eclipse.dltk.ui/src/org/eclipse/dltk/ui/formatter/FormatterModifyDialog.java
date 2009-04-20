@@ -11,23 +11,44 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.content.IContentType;
+import org.eclipse.dltk.internal.ui.formatter.profiles.CustomProfile;
+import org.eclipse.dltk.internal.ui.formatter.profiles.Profile;
+import org.eclipse.dltk.internal.ui.formatter.profiles.ProfileStore;
+import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.formatter.internal.FormatterControlManager;
 import org.eclipse.dltk.ui.formatter.internal.FormatterDialogPreferences;
+import org.eclipse.dltk.ui.util.ExceptionHandler;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.StatusDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -40,9 +61,18 @@ public abstract class FormatterModifyDialog extends StatusDialog implements
 	private final FormatterControlManager controlManager = new FormatterControlManager(
 			preferences, this);
 
+	private static final int SAVE_BUTTON_ID = IDialogConstants.CLIENT_ID + 1;
+
 	private final IFormatterModifyDialogOwner dialogOwner;
 	private final IScriptFormatterFactory formatterFactory;
 	final IDialogSettings fDialogSettings;
+	private final IProfileManager manager;
+	private Button fSaveButton;
+	private StringDialogField fProfileNameField;
+
+	protected IProfile profile;
+	private ProfileStore profileStore;
+	private IStatus tabStatus = Status.OK_STATUS;
 
 	/**
 	 * @param parent
@@ -54,8 +84,20 @@ public abstract class FormatterModifyDialog extends StatusDialog implements
 		this.formatterFactory = formatterFactory;
 		this.fDialogSettings = getDialogSettingsSection(dialogOwner
 				.getDialogSettings(), formatterFactory.getId());
+		this.manager = dialogOwner.getProfileManager();
+		profile = manager.getSelected();
+		setTitle(NLS.bind(FormatterMessages.FormatterModifyDialog_dialogTitle,
+				profile.getName()));
 		setStatusLineAboveButtons(false);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
+	}
+
+	protected ProfileStore getProfileStore() {
+		if (profileStore == null) {
+			profileStore = new ProfileStore(formatterFactory
+					.getProfileVersioner());
+		}
+		return profileStore;
 	}
 
 	private static IDialogSettings getDialogSettingsSection(
@@ -110,12 +152,43 @@ public abstract class FormatterModifyDialog extends StatusDialog implements
 
 	protected Control createDialogArea(Composite parent) {
 		final Composite composite = (Composite) super.createDialogArea(parent);
+
+		Composite nameComposite = new Composite(composite, SWT.NONE);
+		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
+				false));
+		nameComposite.setLayout(new GridLayout(3, false));
+
+		fProfileNameField = new StringDialogField();
+		fProfileNameField
+				.setLabelText(FormatterMessages.FormatterModifyDialog_profileName);
+		fProfileNameField.setText(profile.getName());
+		fProfileNameField.getLabelControl(nameComposite).setLayoutData(
+				new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		fProfileNameField.getTextControl(nameComposite).setLayoutData(
+				new GridData(SWT.FILL, SWT.CENTER, true, false));
+		fProfileNameField.setDialogFieldListener(new IDialogFieldListener() {
+			public void dialogFieldChanged(DialogField field) {
+				validate();
+			}
+		});
+
+		fSaveButton = createButton(nameComposite, SAVE_BUTTON_ID,
+				FormatterMessages.FormatterModifyDialog_export, false);
+
 		fTabFolder = new TabFolder(composite, SWT.NONE);
 		fTabFolder.setFont(composite.getFont());
 		fTabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		addPages();
 		controlManager.initialize();
 		return composite;
+	}
+
+	protected void buttonPressed(int buttonId) {
+		if (buttonId == SAVE_BUTTON_ID) {
+			saveButtonPressed();
+		} else {
+			super.buttonPressed(buttonId);
+		}
 	}
 
 	protected abstract void addPages();
@@ -129,8 +202,9 @@ public abstract class FormatterModifyDialog extends StatusDialog implements
 		fTabPages.add(tabPage);
 	}
 
-	public void statusChanged(IStatus status) {
-		updateStatus(status);
+	public final void statusChanged(IStatus status) {
+		tabStatus = status;
+		validate();
 		for (Iterator i = fTabPages.iterator(); i.hasNext();) {
 			IFormatterModifiyTabPage tabPage = (IFormatterModifiyTabPage) i
 					.next();
@@ -144,6 +218,125 @@ public abstract class FormatterModifyDialog extends StatusDialog implements
 
 	public IScriptFormatterFactory getFormatterFactory() {
 		return formatterFactory;
+	}
+
+	protected void updateButtonsEnableState(IStatus status) {
+		super.updateButtonsEnableState(status);
+		if (fSaveButton != null && !fSaveButton.isDisposed()) {
+			fSaveButton.setEnabled(!validateProfileName()
+					.matches(IStatus.ERROR));
+		}
+	}
+
+	protected void validate() {
+		updateStatus(getValidationStatus());
+	}
+
+	protected IStatus getValidationStatus() {
+		IStatus status = doValidate();
+		int diff = ((IStatus) tabStatus).getSeverity()
+				- ((IStatus) status).getSeverity();
+		if (diff < 0)
+			return status;
+		return tabStatus;
+	}
+
+	protected IStatus doValidate() {
+		Map values = getPreferences();
+		String name = fProfileNameField.getText().trim();
+		if (name.equals(profile.getName()) && profile.equalsTo(values)) {
+			return StatusInfo.OK_STATUS;
+		}
+
+		IStatus status = validateProfileName();
+		if (status.matches(IStatus.ERROR)) {
+			return status;
+		}
+
+		if (!name.equals(profile.getName()) && manager.containsName(name)) {
+			return new Status(IStatus.ERROR, DLTKUIPlugin.PLUGIN_ID,
+					FormatterMessages.FormatterModifyDialog_nameExists);
+		}
+
+		if (profile.isBuiltInProfile()) {
+			return new Status(IStatus.INFO, DLTKUIPlugin.PLUGIN_ID,
+					FormatterMessages.FormatterModifyDialog_createNewProfile);
+		}
+
+		return StatusInfo.OK_STATUS;
+	}
+
+	private IStatus validateProfileName() {
+		final String name = fProfileNameField.getText().trim();
+
+		if (profile.isBuiltInProfile()) {
+			if (profile.getName().equals(name)) {
+				return new Status(
+						IStatus.ERROR,
+						DLTKUIPlugin.PLUGIN_ID,
+						FormatterMessages.FormatterModifyDialog_changeBuiltInProfileName);
+			}
+		}
+
+		if (name.length() == 0) {
+			return new Status(IStatus.ERROR, DLTKUIPlugin.PLUGIN_ID,
+					FormatterMessages.FormatterModifyDialog_nameEmpty);
+		}
+
+		return StatusInfo.OK_STATUS;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
+	 */
+	protected void okPressed() {
+		super.okPressed();
+		if (!profile.getName().equals(fProfileNameField.getText())) {
+			profile = manager.rename(profile, fProfileNameField.getText());
+			manager.setSelected(profile);
+		}
+	}
+
+	private void saveButtonPressed() {
+		ProfileStore store = getProfileStore();
+		Profile selected = new CustomProfile(fProfileNameField.getText(),
+				getPreferences(), profile.getFormatterId(), profile
+						.getVersion());
+
+		final FileDialog dialog = new FileDialog(getShell(), SWT.SAVE);
+		dialog.setText(FormatterMessages.FormatterModifyDialog_exportProfile);
+		dialog.setFilterExtensions(new String[] { "*.xml" }); //$NON-NLS-1$
+
+		final String path = dialog.open();
+		if (path == null)
+			return;
+
+		final File file = new File(path);
+		String message = NLS.bind(
+				FormatterMessages.FormatterModifyDialog_replaceFileQuestion,
+				file.getAbsolutePath());
+		if (file.exists()
+				&& !MessageDialog.openQuestion(getShell(),
+						FormatterMessages.FormatterModifyDialog_exportProfile,
+						message)) {
+			return;
+		}
+		String encoding = ProfileStore.ENCODING;
+		final IContentType type = Platform.getContentTypeManager()
+				.getContentType("org.eclipse.core.runtime.xml"); //$NON-NLS-1$
+		if (type != null)
+			encoding = type.getDefaultCharset();
+		final Collection profiles = new ArrayList();
+		profiles.add(selected);
+		try {
+			store.writeProfilesToFile(profiles, file, encoding);
+		} catch (CoreException e) {
+			final String title = FormatterMessages.FormatterModifyDialog_exportProfile;
+			message = FormatterMessages.FormatterModifyDialog_exportProblem;
+			ExceptionHandler.handle(e, getShell(), title, message);
+		}
 	}
 
 	public void setPreferences(Map prefs) {

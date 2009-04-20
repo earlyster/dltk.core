@@ -15,15 +15,40 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dltk.core.*;
-import org.eclipse.dltk.core.search.*;
-import org.eclipse.dltk.internal.corext.util.*;
+import org.eclipse.dltk.core.Flags;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.search.IDLTKSearchConstants;
+import org.eclipse.dltk.core.search.IDLTKSearchScope;
+import org.eclipse.dltk.core.search.NopTypeNameRequestor;
+import org.eclipse.dltk.core.search.SearchEngine;
+import org.eclipse.dltk.core.search.TypeNameMatch;
+import org.eclipse.dltk.core.search.TypeNameMatchRequestor;
 import org.eclipse.dltk.internal.corext.util.Messages;
+import org.eclipse.dltk.internal.corext.util.OpenTypeHistory;
+import org.eclipse.dltk.internal.corext.util.Strings;
+import org.eclipse.dltk.internal.corext.util.TypeFilter;
+import org.eclipse.dltk.internal.corext.util.TypeInfoRequestorAdapter;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
 import org.eclipse.dltk.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.dltk.internal.ui.search.DLTKSearchScopeFactory;
@@ -33,7 +58,11 @@ import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.LibraryLocation;
 import org.eclipse.dltk.launching.ScriptRuntime;
-import org.eclipse.dltk.ui.*;
+import org.eclipse.dltk.ui.DLTKUILanguageManager;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
+import org.eclipse.dltk.ui.ScriptElementImageProvider;
+import org.eclipse.dltk.ui.ScriptElementLabels;
 import org.eclipse.dltk.ui.util.ExceptionHandler;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -54,7 +83,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.*;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SearchPattern;
@@ -710,8 +743,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog
 								| SearchPattern.RULE_CASE_SENSITIVE,
 						IDLTKSearchConstants.TYPE, SearchEngine
 								.createWorkspaceScope(tookit.getCoreToolkit()),
-						new TypeNameRequestor() {
-						}, IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+						new NopTypeNameRequestor(),
+						IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 						monitor);
 			} catch (ModelException e) {
 				throw new InvocationTargetException(e);

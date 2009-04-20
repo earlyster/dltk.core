@@ -25,10 +25,10 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
+import org.eclipse.dltk.core.search.NopTypeNameRequestor;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.TypeNameMatch;
-import org.eclipse.dltk.core.search.TypeNameRequestor;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.corext.util.OpenTypeHistory;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
@@ -230,9 +230,9 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 					if (text != null) {
 						text = text.trim();
 						if (text.length() > 0 /*
-												 * TODO: Add validate source
-												 * type call
-												 */) {
+											 * TODO: Add validate source type
+											 * call
+											 */) {
 							fInitialFilter = text;
 							fSelectionMode = FULL_SELECTION;
 						}
@@ -358,8 +358,8 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 							IDLTKSearchConstants.FIELD, SearchEngine
 									.createWorkspaceScope(fToolkit
 											.getCoreToolkit()),
-							new TypeNameRequestor() {
-							}, IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+							new NopTypeNameRequestor(),
+							IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 							monitor);
 				} catch (ModelException e) {
 					throw new InvocationTargetException(e);
