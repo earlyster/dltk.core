@@ -6,7 +6,8 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
 Bundle-Vendor: %pluginProvider
 Bundle-Localization: plugin
-Export-Package: org.eclipse.dltk.formatter
+Export-Package: org.eclipse.dltk.formatter,
+ org.eclipse.dltk.formatter.internal;x-friends:="org.eclipse.dltk.formatter.tests"
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface.text,
  org.eclipse.dltk.core,
