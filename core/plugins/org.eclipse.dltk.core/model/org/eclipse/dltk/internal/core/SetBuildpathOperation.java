@@ -393,7 +393,7 @@ public class SetBuildpathOperation extends ModelOperation {
 				needToUpdateDependents |= (changeKind == IBuildpathEntry.BPE_SOURCE)
 						|| this.oldResolvedPath[i].isExported();
 
-				// Remove the .java files from the index for a source folder
+				// Remove the old files from the index for a source folder
 				// For a lib folder or a archive file, remove the corresponding
 				// index if not shared.
 				if (indexManager != null) {

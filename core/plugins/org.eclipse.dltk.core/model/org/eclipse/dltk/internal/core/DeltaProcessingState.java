@@ -111,6 +111,9 @@ public class DeltaProcessingState implements IResourceChangeListener {
 	/* A table from file system absoulte path (String) to timestamp (Long) */
 	public Hashtable externalTimeStamps;
 
+	/* A table from path (String) to timestamp (Long) */
+	public Hashtable customTimeStamps;
+
 	/* A table from ScriptProject to BuildpathValidation */
 	private HashMap buildpathValidations = new HashMap();
 
@@ -573,34 +576,48 @@ public class DeltaProcessingState implements IResourceChangeListener {
 
 	public Hashtable getExternalLibTimeStamps() {
 		if (this.externalTimeStamps == null) {
-			Hashtable timeStamps = new Hashtable();
 			File timestampsFile = getTimeStampsFile();
-			DataInputStream in = null;
-			try {
-				in = new DataInputStream(new BufferedInputStream(
-						new FileInputStream(timestampsFile)));
-				int size = in.readInt();
-				while (size-- > 0) {
-					String key = in.readUTF();
-					long timestamp = in.readLong();
-					timeStamps.put(Path.fromPortableString(key), new Long(
-							timestamp));
-				}
-			} catch (IOException e) {
-				if (timestampsFile.exists())
-					Util.log(e, "Unable to read external time stamps"); //$NON-NLS-1$
-			} finally {
-				if (in != null) {
-					try {
-						in.close();
-					} catch (IOException e) {
-						// nothing we can do: ignore
-					}
-				}
-			}
+			Hashtable timeStamps = readTimeStamps(timestampsFile);
 			this.externalTimeStamps = timeStamps;
 		}
 		return this.externalTimeStamps;
+	}
+
+	private Hashtable readTimeStamps(File timestampsFile) {
+		Hashtable timeStamps = new Hashtable();
+		DataInputStream in = null;
+		try {
+			in = new DataInputStream(new BufferedInputStream(
+					new FileInputStream(timestampsFile)));
+			int size = in.readInt();
+			while (size-- > 0) {
+				String key = in.readUTF();
+				long timestamp = in.readLong();
+				timeStamps.put(Path.fromPortableString(key),
+						new Long(timestamp));
+			}
+		} catch (IOException e) {
+			if (timestampsFile.exists())
+				Util.log(e, "Unable to read external time stamps"); //$NON-NLS-1$
+		} finally {
+			if (in != null) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					// nothing we can do: ignore
+				}
+			}
+		}
+		return timeStamps;
+	}
+
+	public Hashtable getCustomTimeStamps() {
+		if (this.customTimeStamps == null) {
+			File timestampsFile = getCustomTimeStampsFile();
+			Hashtable timeStamps = readTimeStamps(timestampsFile);
+			this.customTimeStamps = timeStamps;
+		}
+		return this.customTimeStamps;
 	}
 
 	public IScriptProject findProject(String name) {
@@ -642,20 +659,30 @@ public class DeltaProcessingState implements IResourceChangeListener {
 				"externalLibsTimeStamps").toFile(); //$NON-NLS-1$
 	}
 
+	private File getCustomTimeStampsFile() {
+		return DLTKCore.getDefault().getStateLocation().append(
+				"customTimeStamps").toFile(); //$NON-NLS-1$
+	}
+
 	public void saveExternalLibTimeStamps() throws CoreException {
-		if (this.externalTimeStamps == null)
+		saveTimeStamps(this.externalTimeStamps, getTimeStampsFile());
+		saveTimeStamps(this.customTimeStamps, getCustomTimeStampsFile());
+	}
+
+	private void saveTimeStamps(Hashtable stamps, File timestamps)
+			throws CoreException {
+		if (stamps == null)
 			return;
-		File timestamps = getTimeStampsFile();
 		DataOutputStream out = null;
 		try {
 			out = new DataOutputStream(new BufferedOutputStream(
 					new FileOutputStream(timestamps)));
-			out.writeInt(this.externalTimeStamps.size());
-			Iterator keys = this.externalTimeStamps.keySet().iterator();
+			out.writeInt(stamps.size());
+			Iterator keys = stamps.keySet().iterator();
 			while (keys.hasNext()) {
 				IPath key = (IPath) keys.next();
 				out.writeUTF(key.toPortableString());
-				Long timestamp = (Long) this.externalTimeStamps.get(key);
+				Long timestamp = (Long) stamps.get(key);
 				out.writeLong(timestamp.longValue());
 			}
 		} catch (IOException e) {

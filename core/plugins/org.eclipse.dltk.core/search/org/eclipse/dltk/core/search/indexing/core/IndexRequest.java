@@ -126,4 +126,26 @@ abstract class IndexRequest extends AbstractJob {
 		}
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((indexer == null) ? 0 : indexer.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		IndexRequest other = (IndexRequest) obj;
+		if (indexer == null) {
+			if (other.indexer != null)
+				return false;
+		} else if (!indexer.equals(other.indexer))
+			return false;
+		return true;
+	}
 }

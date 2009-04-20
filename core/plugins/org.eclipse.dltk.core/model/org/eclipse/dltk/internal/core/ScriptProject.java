@@ -3098,15 +3098,30 @@ public class ScriptProject extends Openable implements IScriptProject {
 
 	public IProjectFragment[] getAllProjectFragments(Map rootToResolvedEntries)
 			throws ModelException {
-		return computeProjectFragments(getResolvedBuildpath(
-				true/* ignoreUnresolvedEntry */, false/*
-													 * don't
-													 * generateMarkerOnError
-													 */, false/*
-															 * don't
-															 * returnResolutionInProgress
-															 */),
-				true/* retrieveExportedRoots */, rootToResolvedEntries);
+		IProjectFragment[] computed = computeProjectFragments(
+				getResolvedBuildpath(true/* ignoreUnresolvedEntry */, false/*
+																		 * don't
+																		 * generateMarkerOnError
+																		 */,
+						false/*
+							 * don't returnResolutionInProgress
+							 */), true/* retrieveExportedRoots */,
+				rootToResolvedEntries);
+		// Add all user project fragments
+		List fragments = new ArrayList();
+		fragments.addAll(Arrays.asList(computed));
+		// Call for extra model providers
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(this);
+		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
+				.getNatureId());
+		if (providers != null) {
+			for (int i = 0; i < providers.length; i++) {
+				providers[i].provideModelChanges(this, fragments);
+			}
+		}
+		return (IProjectFragment[]) fragments
+				.toArray(new IProjectFragment[fragments.size()]);
 	}
 
 	public static boolean hasScriptNature(IProject p) {

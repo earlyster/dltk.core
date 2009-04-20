@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -24,7 +25,6 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -42,6 +42,7 @@ import org.eclipse.dltk.core.IElementChangedListener;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IProjectFragmentTimestamp;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
@@ -245,10 +246,11 @@ public class DeltaProcessor {
 	 * is.
 	 */
 	public int overridenEventType = -1;
-	/*
-	 * Map from IProject to BuildpathChange
-	 */
-	public HashMap buildpathChanges = new HashMap();
+
+	// /*
+	// * Map from IProject to BuildpathChange
+	// */
+	// public HashMap buildpathChanges = new HashMap();
 
 	public DeltaProcessor(DeltaProcessingState state, ModelManager manager) {
 		this.state = state;
@@ -312,72 +314,6 @@ public class DeltaProcessor {
 		this.rootsToRefresh.add(scriptProject);
 		this.addDependentProjects(scriptProject,
 				this.state.projectDependencies, this.rootsToRefresh);
-	}
-
-	/*
-	 * Check all external archive (referenced by given roots, projects or model)
-	 * status and issue a corresponding root delta. Also triggers index updates
-	 */
-	public void checkExternalArchiveChanges(IModelElement[] elementsToRefresh,
-			IProgressMonitor monitor) throws ModelException {
-		try {
-			for (int i = 0, length = elementsToRefresh.length; i < length; i++) {
-				this.addForRefresh(elementsToRefresh[i]);
-			}
-			boolean hasDelta = this.createExternalArchiveDelta(monitor);
-			if (monitor != null && monitor.isCanceled()) {
-				return;
-			}
-			if (hasDelta) {
-				// force buildpath marker refresh of affected projects
-				Model.flushExternalFileCache();
-				// flush zip type cache
-				ModelManager.getModelManager().resetZIPTypeCache();
-				IModelElementDelta[] projectDeltas = this.currentDelta
-						.getAffectedChildren();
-				final int length = projectDeltas.length;
-				final IProject[] projectsToTouch = new IProject[length];
-				for (int i = 0; i < length; i++) {
-					IModelElementDelta delta = projectDeltas[i];
-					ScriptProject scriptProject = (ScriptProject) delta
-							.getElement();
-					projectsToTouch[i] = scriptProject.getProject();
-				}
-				// touch the projects to force them to be recompiled while
-				// taking the workspace lock
-				// so that there is no concurrency with the builder
-				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96575
-				IWorkspaceRunnable runnable = new IWorkspaceRunnable() {
-					public void run(IProgressMonitor progressMonitor)
-							throws CoreException {
-						for (int i = 0; i < length; i++) {
-							IProject project = projectsToTouch[i];
-							// touch to force a build of this project
-							if (DLTKCore.DEBUG) {
-								System.out
-										.println("Touching project " + project.getName() + " due to external jar file change"); //$NON-NLS-1$ //$NON-NLS-2$
-							}
-							project.touch(progressMonitor);
-						}
-					}
-				};
-				try {
-					ResourcesPlugin.getWorkspace().run(runnable, monitor);
-				} catch (CoreException e) {
-					throw new ModelException(e);
-				}
-				if (this.currentDelta != null) { // if delta has not been
-					// fired while creating
-					// markers
-					this.fire(this.currentDelta, DEFAULT_CHANGE_EVENT);
-				}
-			}
-		} finally {
-			this.currentDelta = null;
-			if (monitor != null) {
-				monitor.done();
-			}
-		}
 	}
 
 	/*
@@ -801,16 +737,16 @@ public class DeltaProcessor {
 	 * Check if external archives have changed and create the corresponding
 	 * deltas. Returns whether at least on delta was created.
 	 */
-	private boolean createExternalArchiveDelta(IProgressMonitor monitor) {
-		if (this.refreshedElements == null) {
+	private boolean createExternalArchiveDelta(IProgressMonitor monitor,
+			Set refreshedElements) {
+		if (refreshedElements == null) {
 			return false;
 		}
 		HashMap externalArchivesStatus = new HashMap();
 		boolean hasDelta = false;
 		// find JARs to refresh
 		HashSet archivePathsToRefresh = new HashSet();
-		Iterator iterator = this.refreshedElements.iterator();
-		this.refreshedElements = null; // null out early to avoid concurrent
+		Iterator iterator = refreshedElements.iterator();
 		// modification exception (see
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=63534)
 		while (iterator.hasNext()) {
@@ -1011,6 +947,7 @@ public class DeltaProcessor {
 				}
 			}
 		}
+		// Check for external project fragment changes via timestamps.
 		return hasDelta;
 	}
 
@@ -1930,37 +1867,19 @@ public class DeltaProcessor {
 					try {
 						this.stopDeltas();
 						this.checkProjectsBeingAddedOrRemoved(delta);
-						// generate classpath change deltas
-						// if (this.buildpathChanges.size() > 0) {
-						// boolean hasDelta = this.currentDelta != null;
-						// ModelElementDelta javaDelta = currentDelta();
-						// Iterator changes = this.buildpathChanges.values()
-						// .iterator();
-						// while (changes.hasNext()) {
-						// BuildpathChange change = (BuildpathChange) changes
-						// .next();
-						// int result = change.generateDelta(javaDelta);
-						// if ((result & BuildpathChange.HAS_DELTA) != 0) {
-						// hasDelta = true;
-						// change.requestIndexing();
-						// this.state
-						// .addClasspathValidation(change.project);
-						// }
-						// if ((result & BuildpathChange.HAS_PROJECT_CHANGE) !=
-						// 0) {
-						// this.state.addProjectReferenceChange(
-						// change.project,
-						// change.oldResolvedClasspath);
-						// }
-						// }
-						// this.buildpathChanges.clear();
-						// if (!hasDelta)
-						// this.currentDelta = null;
-						// }
-
 						// generate external archive change deltas
 						if (this.refreshedElements != null) {
-							this.createExternalArchiveDelta(null);
+							Set refreshedElementsCopy = null;
+							if (refreshedElements != null) {
+								refreshedElementsCopy = new HashSet();
+								refreshedElementsCopy.addAll(refreshedElements);
+								// To avoid concurrent modifications
+								this.refreshedElements = null;
+							}
+							this.createExternalArchiveDelta(null,
+									refreshedElementsCopy);
+							this.createCustomElementDelta(null,
+									refreshedElementsCopy);
 						}
 						IModelElementDelta translatedDelta = this
 								.processResourceDelta(delta);
@@ -2039,6 +1958,172 @@ public class DeltaProcessor {
 			ScriptBuilder.buildFinished();
 			return;
 		}
+	}
+
+	/**
+	 * Create delta for custom user project fragments.
+	 * 
+	 * @param refreshedElementsCopy
+	 */
+	private boolean createCustomElementDelta(IProgressMonitor monitor,
+			Set refreshedElements) {
+		if (refreshedElements == null) {
+			return false;
+		}
+		boolean hasDelta = false;
+
+		HashSet fragmentsToRefresh = new HashSet();
+		Iterator iterator = refreshedElements.iterator();
+		while (iterator.hasNext()) {
+			IModelElement element = (IModelElement) iterator.next();
+			switch (element.getElementType()) {
+			case IModelElement.PROJECT_FRAGMENT:
+				IProjectFragment fragment = (IProjectFragment) element;
+				try {
+					if (fragment.isExternal()
+							&& fragment.getRawBuildpathEntry() == null) {
+						fragmentsToRefresh.add(element);
+					}
+				} catch (ModelException e1) {
+					if (DLTKCore.DEBUG) {
+						e1.printStackTrace();
+					}
+				}
+				break;
+			case IModelElement.SCRIPT_PROJECT:
+				ScriptProject scriptProject = (ScriptProject) element;
+				if (!DLTKLanguageManager.hasScriptNature(scriptProject
+						.getProject())) {
+					// project is not accessible or has lost its script
+					// nature
+					break;
+				}
+				try {
+					IProjectFragment[] fragments = scriptProject
+							.getProjectFragments();
+					for (int i = 0; i < fragments.length; i++) {
+						if (fragments[i].isExternal()
+								&& fragments[i].getRawBuildpathEntry() == null) {
+							fragmentsToRefresh.add(fragments[i]);
+						}
+					}
+				} catch (ModelException e1) {
+					if (DLTKCore.DEBUG) {
+						e1.printStackTrace();
+					}
+				}
+				break;
+			case IModelElement.SCRIPT_MODEL:
+				Iterator projectNames = this.state.getOldScriptProjectNames()
+						.iterator();
+				while (projectNames.hasNext()) {
+					String projectName = (String) projectNames.next();
+					IProject project = ResourcesPlugin.getWorkspace().getRoot()
+							.getProject(projectName);
+					if (!DLTKLanguageManager.hasScriptNature(project)) {
+						// project is not accessible or has lost its Script
+						// nature
+						continue;
+					}
+					scriptProject = (ScriptProject) DLTKCore.create(project);
+					try {
+						IProjectFragment[] fragments = scriptProject
+								.getProjectFragments();
+						for (int i = 0; i < fragments.length; i++) {
+							if (fragments[i].isExternal()
+									&& fragments[i].getRawBuildpathEntry() == null) {
+								fragmentsToRefresh.add(fragments[i]);
+							}
+						}
+					} catch (ModelException e1) {
+						if (DLTKCore.DEBUG) {
+							e1.printStackTrace();
+						}
+					}
+				}
+				break;
+			}
+		}
+		// perform refresh
+		Iterator projectNames = this.state.getOldScriptProjectNames()
+				.iterator();
+		IWorkspaceRoot wksRoot = ResourcesPlugin.getWorkspace().getRoot();
+		while (projectNames.hasNext()) {
+			if (monitor != null && monitor.isCanceled()) {
+				break;
+			}
+			String projectName = (String) projectNames.next();
+			IProject project = wksRoot.getProject(projectName);
+			if (!DLTKLanguageManager.hasScriptNature(project)) {
+				// project is not accessible or has lost its Script nature
+				continue;
+			}
+			ScriptProject scriptProject = (ScriptProject) DLTKCore
+					.create(project);
+			IProjectFragment[] fragments;
+			try {
+				fragments = scriptProject.getProjectFragments();
+				for (int i = 0; i < fragments.length; i++) {
+					if (!fragmentsToRefresh.contains(fragments[i])) {
+						continue;
+					}
+					IProjectFragment fragment = fragments[i];
+					if (fragment instanceof IProjectFragmentTimestamp) {
+						Long oldTimestamp = (Long) this.state
+								.getCustomTimeStamps().get(fragment.getPath());
+						long newTimeStamp = ((IProjectFragmentTimestamp) fragment)
+								.getTimeStamp();
+						if (oldTimestamp == null) {
+							if (newTimeStamp != 0) {
+								/**
+								 * This is new element
+								 **/
+								this.state.getCustomTimeStamps().put(
+										fragment.getPath(),
+										new Long(newTimeStamp));
+								// index new library
+								ProjectIndexerManager.indexLibrary(
+										scriptProject, fragment.getPath());
+								if (fragment instanceof Openable) {
+									this.elementAdded((Openable) fragment,
+											null, null);
+								}
+								hasDelta = true;
+							}
+						} else {
+							if (oldTimestamp.longValue() != newTimeStamp) {
+								this.state.getCustomTimeStamps().put(
+										fragment.getPath(),
+										new Long(newTimeStamp));
+								// index new library
+								ProjectIndexerManager.indexLibrary(
+										scriptProject, fragment.getPath());
+								if (fragment instanceof Openable) {
+									this.contentChanged((Openable) fragment);
+								}
+								hasDelta = true;
+							} else if (newTimeStamp == 0) {
+								this.state.getCustomTimeStamps().remove(
+										fragment.getPath());
+								// index new library
+								ProjectIndexerManager.removeLibrary(
+										scriptProject, fragment.getPath());
+								if (fragment instanceof Openable) {
+									this.elementRemoved((Openable) fragment,
+											null, null);
+								}
+								hasDelta = true;
+							}
+						}
+					}
+				}
+			} catch (ModelException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return hasDelta;
 	}
 
 	/*

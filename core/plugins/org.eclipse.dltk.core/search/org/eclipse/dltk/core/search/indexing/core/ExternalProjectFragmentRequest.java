@@ -126,6 +126,8 @@ public class ExternalProjectFragmentRequest extends IndexRequest {
 			return true;
 		if (obj == null)
 			return false;
+		if (!super.equals(obj))
+			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		ExternalProjectFragmentRequest other = (ExternalProjectFragmentRequest) obj;
