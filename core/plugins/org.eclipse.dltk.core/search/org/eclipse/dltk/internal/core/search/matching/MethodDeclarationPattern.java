@@ -139,7 +139,12 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 			this.parameterNames = CharOperation.NO_CHAR_CHAR;
 		} else {
 			slash = CharOperation.indexOf(SEPARATOR, key, start);
-			this.parameterNames = CharOperation.splitOn(',', key, start, slash);
+			if (start == slash) {
+				this.parameterNames = CharOperation.NO_CHAR_CHAR;
+			} else {
+				this.parameterNames = CharOperation.splitOn(',', key, start,
+						slash);
+			}
 		}
 		start = ++slash;
 

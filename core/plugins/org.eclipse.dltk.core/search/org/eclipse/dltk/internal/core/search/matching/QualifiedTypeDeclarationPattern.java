@@ -17,6 +17,7 @@ import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern
 		implements IIndexConstants {
 	public char[] qualification;
+
 	// PackageDeclarationPattern packagePattern;
 	// public int packageIndex = -1;
 
@@ -61,24 +62,37 @@ public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern
 		}
 		this.modifiers = key[last - 1] + (key[last] << 16);
 		decodeModifiers();
+
 		// Retrieve enclosing type names
-		start = slash + 1;
+		start = ++slash;
 		last -= 2; // position of ending slash
 		if (start == last) {
 			this.enclosingTypeNames = CharOperation.NO_CHAR_CHAR;
 		} else {
+			slash = CharOperation.indexOf(SEPARATOR, key, start);
 			int length = 0;
-			int size = last - start;
+			int size = slash - start;
 			System.arraycopy(this.qualification, 0,
 					this.qualification = new char[length + size], 0, length);
 			// this.qualification[length] = '$';
-			if (last == (start + 1) && key[start] == ZERO_CHAR) {
-				this.enclosingTypeNames = ONE_ZERO_CHAR;
-				this.qualification[length] = ZERO_CHAR;
+			if (size == 0) {
+				this.enclosingTypeNames = CharOperation.NO_CHAR_CHAR;
 			} else {
 				this.enclosingTypeNames = CharOperation.splitOn('$', key,
 						start, last);
 				System.arraycopy(key, start, this.qualification, 0, size);
+			}
+		}
+
+		// retrieve super types:
+		start = ++slash;
+		if (start == last) {
+			this.superTypes = CharOperation.NO_CHAR_CHAR;
+		} else {
+			if (last == (start + 1) && key[start] == ZERO_CHAR) {
+				this.superTypes = ONE_ZERO_CHAR;
+			} else {
+				this.superTypes = CharOperation.splitOn(',', key, start, last);
 			}
 		}
 	}

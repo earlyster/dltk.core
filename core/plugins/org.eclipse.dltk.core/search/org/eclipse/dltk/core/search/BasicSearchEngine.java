@@ -911,8 +911,8 @@ public class BasicSearchEngine {
 			break;
 		}
 		final TypeDeclarationPattern pattern = packageMatchRule == SearchPattern.R_EXACT_MATCH ? new TypeDeclarationPattern(
-				packageName, null, typeName, typeSuffix, typeMatchRule, scope
-						.getLanguageToolkit())
+				packageName, null, null, typeName, typeSuffix, typeMatchRule,
+				scope.getLanguageToolkit())
 				: new QualifiedTypeDeclarationPattern(packageName,
 						packageMatchRule, typeName, typeSuffix, typeMatchRule,
 						scope.getLanguageToolkit());
@@ -995,7 +995,7 @@ public class BasicSearchEngine {
 				if (match(record.typeSuffix, record.modifiers)) {
 					nameRequestor.acceptType(record.modifiers, record.pkg,
 							record.simpleName, record.enclosingTypeNames,
-							documentPath, accessRestriction);
+							record.superTypes, documentPath, accessRestriction);
 				}
 				return true;
 			}
@@ -1048,7 +1048,11 @@ public class BasicSearchEngine {
 									CharOperation.NO_CHAR, /*
 															 * packageDeclaration,
 															 */
-									simpleName, enclosingTypeNames, path, null);
+									simpleName, enclosingTypeNames,
+									CharOperation
+											.stringArrayToCharCharArray(type
+													.getSuperClasses()), path,
+									null);
 						}
 					}
 					// }
@@ -1333,7 +1337,7 @@ public class BasicSearchEngine {
 		// SearchPattern decodedPattern =
 		// new QualifiedTypeDeclarationPattern(qualification,
 		// memberTypeDeclaration.name,
-		//convertTypeKind(TypeDeclaration.kind(memberTypeDeclaration.modifiers))
+		// convertTypeKind(TypeDeclaration.kind(memberTypeDeclaration.modifiers))
 		// ,
 		// matchRule);
 		// if (pattern.matchesDecodedKey(decodedPattern)) {
@@ -1368,7 +1372,7 @@ public class BasicSearchEngine {
 		// SearchPattern decodedPattern =
 		// new QualifiedTypeDeclarationPattern(qualification,
 		// memberTypeDeclaration.name,
-		//convertTypeKind(TypeDeclaration.kind(memberTypeDeclaration.modifiers))
+		// convertTypeKind(TypeDeclaration.kind(memberTypeDeclaration.modifiers))
 		// ,
 		// matchRule);
 		// if (pattern.matchesDecodedKey(decodedPattern)) {

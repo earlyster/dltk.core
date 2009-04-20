@@ -5,21 +5,19 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- 
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.search;
-
-import org.eclipse.dltk.internal.compiler.env.AccessRestriction;
+package org.eclipse.dltk.core.search;
 
 /**
- * A <code>IRestrictedAccessTypeRequestor</code> collects search results from a
- * <code>searchAllTypeNames</code> query to a <code>SearchBasicEngine</code>
- * providing restricted access information when a type is accepted.
+ * This class is a default implementation of type name requestor. It's useful
+ * when we don't need to do anything with search results, like when warming up
+ * the search engine.
  */
-public interface IRestrictedAccessTypeRequestor {
+public final class NopTypeNameRequestor extends TypeNameRequestor {
 
 	public void acceptType(int modifiers, char[] packageName,
 			char[] simpleTypeName, char[][] enclosingTypeNames,
-			char[][] superTypes, String path, AccessRestriction access);
+			char[][] superTypes, String path) {
+	}
 
 }
