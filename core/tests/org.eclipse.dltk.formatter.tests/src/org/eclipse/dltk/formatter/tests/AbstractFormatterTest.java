@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.util.Collection;
+import java.util.Map;
 
 import junit.framework.Assert;
 import junit.framework.ComparisonFailure;
@@ -49,7 +50,33 @@ public abstract class AbstractFormatterTest extends TestCase {
 		return document.get();
 	}
 
-	protected abstract IScriptFormatter createFormatter();
+	/**
+	 * Returns default preferences to be passed from {@link #createFormatter()}
+	 * to {@link #createFormatter(Map)}
+	 * 
+	 * @return
+	 */
+	protected Map getDefaultPreferences() {
+		return null;
+	}
+
+	/**
+	 * Creates formatter with default preferences.
+	 * 
+	 * @return
+	 */
+	protected final IScriptFormatter createFormatter() {
+		return createFormatter(getDefaultPreferences());
+	}
+
+	/**
+	 * Creates formatter with the specified preferences.
+	 * 
+	 * @param preferences
+	 *            or <code>null</code> to use default preferences.
+	 * @return
+	 */
+	protected abstract IScriptFormatter createFormatter(Map preferences);
 
 	protected static String joinLines(Collection lines) {
 		return joinLines((String[]) lines.toArray(new String[lines.size()]));
