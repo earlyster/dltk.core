@@ -261,8 +261,15 @@ public class ExternalProjectFragment extends ProjectFragment implements
 
 	public String getElementName() {
 		IEnvironment env = EnvironmentManager.getEnvironment(this);
+		if (env == null) {
+			env = EnvironmentPathUtils.getPathEnvironment(fPath);
+		}
 		String pathString = EnvironmentPathUtils.getLocalPathString(fPath);
-		return pathString.replace(env.getSeparatorChar(), JEM_SKIP_DELIMETER);
+		if (env != null && pathString != null) {
+			return pathString.replace(env.getSeparatorChar(),
+					JEM_SKIP_DELIMETER);
+		}
+		return fPath.lastSegment();
 	}
 
 	public IModelElement getHandleFromMemento(String token,

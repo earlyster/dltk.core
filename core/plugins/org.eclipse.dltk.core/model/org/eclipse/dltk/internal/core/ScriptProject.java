@@ -2778,13 +2778,16 @@ public class ScriptProject extends Openable implements IScriptProject {
 			} else {
 				root = (ModelElement) getProjectFragment(new Path(rootPath));
 			}
-			if (token != null && token.charAt(0) == JEM_SCRIPTFOLDER) {
+			if (token != null && token.charAt(0) == JEM_SCRIPTFOLDER
+					&& root != null) {
 				return root.getHandleFromMemento(token, memento, owner);
-			} else if (token != null && token.charAt(0) == JEM_USER_ELEMENT) {
+			} else if (token != null && token.charAt(0) == JEM_USER_ELEMENT
+					&& root != null) {
 				return root.getHandleFromMemento(token, memento, owner);
-			} else {
+			} else if (root != null) {
 				return root.getHandleFromMemento(memento, owner);
 			}
+			return null;
 		case JEM_USER_ELEMENT:
 			// We need to construct project children and return appropriate
 			// element from it.
