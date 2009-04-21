@@ -10,12 +10,9 @@
 package org.eclipse.dltk.internal.core;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,10 +32,8 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SafeRunner;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
@@ -109,10 +104,10 @@ public class DeltaProcessingState implements IResourceChangeListener {
 			.synchronizedSet(new HashSet());
 
 	/* A table from file system absoulte path (String) to timestamp (Long) */
-	public Hashtable externalTimeStamps;
+	public PersistentTimeStampMap externalTimeStamps;
 
 	/* A table from path (String) to timestamp (Long) */
-	public Hashtable customTimeStamps;
+	public PersistentTimeStampMap customTimeStamps;
 
 	/* A table from ScriptProject to BuildpathValidation */
 	private HashMap buildpathValidations = new HashMap();
@@ -576,11 +571,10 @@ public class DeltaProcessingState implements IResourceChangeListener {
 
 	public Hashtable getExternalLibTimeStamps() {
 		if (this.externalTimeStamps == null) {
-			File timestampsFile = getTimeStampsFile();
-			Hashtable timeStamps = readTimeStamps(timestampsFile);
-			this.externalTimeStamps = timeStamps;
+			this.externalTimeStamps = new PersistentTimeStampMap(
+					getTimeStampsFile());
 		}
-		return this.externalTimeStamps;
+		return this.externalTimeStamps.getTimestamps();
 	}
 
 	private Hashtable readTimeStamps(File timestampsFile) {
@@ -613,11 +607,10 @@ public class DeltaProcessingState implements IResourceChangeListener {
 
 	public Hashtable getCustomTimeStamps() {
 		if (this.customTimeStamps == null) {
-			File timestampsFile = getCustomTimeStampsFile();
-			Hashtable timeStamps = readTimeStamps(timestampsFile);
-			this.customTimeStamps = timeStamps;
+			this.customTimeStamps = new PersistentTimeStampMap(
+					getCustomTimeStampsFile());
 		}
-		return this.customTimeStamps;
+		return this.customTimeStamps.getTimestamps();
 	}
 
 	public IScriptProject findProject(String name) {
@@ -665,39 +658,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
 	}
 
 	public void saveExternalLibTimeStamps() throws CoreException {
-		saveTimeStamps(this.externalTimeStamps, getTimeStampsFile());
-		saveTimeStamps(this.customTimeStamps, getCustomTimeStampsFile());
-	}
-
-	private void saveTimeStamps(Hashtable stamps, File timestamps)
-			throws CoreException {
-		if (stamps == null)
-			return;
-		DataOutputStream out = null;
-		try {
-			out = new DataOutputStream(new BufferedOutputStream(
-					new FileOutputStream(timestamps)));
-			out.writeInt(stamps.size());
-			Iterator keys = stamps.keySet().iterator();
-			while (keys.hasNext()) {
-				IPath key = (IPath) keys.next();
-				out.writeUTF(key.toPortableString());
-				Long timestamp = (Long) stamps.get(key);
-				out.writeLong(timestamp.longValue());
-			}
-		} catch (IOException e) {
-			IStatus status = new Status(IStatus.ERROR, DLTKCore.PLUGIN_ID,
-					IStatus.ERROR, "Problems while saving timestamps", e); //$NON-NLS-1$
-			throw new CoreException(status);
-		} finally {
-			if (out != null) {
-				try {
-					out.close();
-				} catch (IOException e) {
-					// nothing we can do: ignore
-				}
-			}
-		}
+		this.externalTimeStamps.save();
+		this.customTimeStamps.save();
 	}
 
 	/*

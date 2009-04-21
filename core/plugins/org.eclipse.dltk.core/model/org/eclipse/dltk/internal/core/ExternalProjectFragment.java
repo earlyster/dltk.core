@@ -25,6 +25,7 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IProjectFragmentTimestamp;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
@@ -41,7 +42,8 @@ import org.eclipse.dltk.internal.core.util.Util;
  * @author haiodo
  * 
  */
-public class ExternalProjectFragment extends ProjectFragment {
+public class ExternalProjectFragment extends ProjectFragment implements
+		IProjectFragmentTimestamp {
 	public final static ArrayList EMPTY_LIST = new ArrayList();
 	/**
 	 * The path to the zip file (a workspace relative path if the archive is
@@ -312,5 +314,35 @@ public class ExternalProjectFragment extends ProjectFragment {
 		}
 
 		return rawEntry;
+	}
+
+	public long getTimeStamp() {
+		// All files inside timestamps hash.
+		IEnvironment environment = EnvironmentManager.getEnvironment(this);
+		try {
+			long stamp = 0;
+			IFileHandle file = environment.getFile(this.getPath());
+			if (file != null && file.exists()) {
+				stamp = file.lastModified();
+			} else {
+				return 0;
+			}
+			IModelElement[] children = getChildren();
+			for (int i = 0; i < children.length; i++) {
+				if (children[i].getElementType() == IModelElement.SCRIPT_FOLDER) {
+					IScriptFolder folder = (IScriptFolder) children[i];
+					IPath path = folder.getPath();
+					file = environment.getFile(path);
+					if (file != null && file.exists()) {
+						stamp = stamp * 13 + file.lastModified();
+					}
+				}
+			}
+		} catch (ModelException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		return 0;
 	}
 }

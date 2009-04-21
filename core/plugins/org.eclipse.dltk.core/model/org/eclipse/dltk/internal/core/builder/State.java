@@ -13,8 +13,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
@@ -38,6 +40,7 @@ public class State {
 	public static final byte VERSION = 0x0016;
 
 	Set externalFolderLocations = new HashSet();
+	Map externalFolderTimestamps = new HashMap();
 
 	boolean noCleanExternalFolders = false;
 
