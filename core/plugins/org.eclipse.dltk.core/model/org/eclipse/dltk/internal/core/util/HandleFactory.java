@@ -145,8 +145,9 @@ public class HandleFactory {
 			IScriptFolder pkgFragment = (IScriptFolder) this.packageHandles
 					.get(pkgName);
 			if (pkgFragment == null) {
-				pkgFragment = ((ProjectFragment) this.lastPkgFragmentRoot)
-						.getScriptFolder(toPath(pkgName));
+				IPath ppath = toPath(pkgName);
+				IProjectFragment root = (IProjectFragment) this.lastPkgFragmentRoot;
+				pkgFragment = root.getScriptFolder(ppath);
 				this.packageHandles.put(pkgName, pkgFragment);
 			}
 			String simpleName = simpleNames[length];
@@ -331,11 +332,9 @@ public class HandleFactory {
 						.getScriptProject(project);
 				IProjectFragment[] roots = scriptProject.getProjectFragments();
 				for (int j = 0, rootCount = roots.length; j < rootCount; j++) {
-					ProjectFragment root = (ProjectFragment) roots[j];
+					IProjectFragment root = (IProjectFragment) roots[j];
 					if (root.getPath().isPrefixOf(path)
-							&& !Util.isExcluded(path, root
-									.fullInclusionPatternChars(), root
-									.fullExclusionPatternChars(), false)) {
+							&& !Util.isExcluded(path, root, false)) {
 						return root;
 					}
 				}
