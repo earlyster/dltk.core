@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelStatusConstants;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
@@ -42,8 +43,9 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#equals(java.lang.
-	 *      Object)
+	 * @see
+	 * org.eclipse.dltk.internal.core.AbstractSourceModule#equals(java.lang.
+	 * Object)
 	 */
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ExternalSourceModule)) {
@@ -90,7 +92,8 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getBufferContent()
+	 * @see
+	 * org.eclipse.dltk.internal.core.AbstractSourceModule#getBufferContent()
 	 */
 	protected char[] getBufferContent() throws ModelException {
 		IFileHandle file = EnvironmentPathUtils.getFile(getPath());
@@ -103,7 +106,8 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 				} else {
 					// This is an archive entry
 					boolean inProjectArchive = false;
-					ProjectFragment projectFragment = this.getProjectFragment();
+					IProjectFragment projectFragment = this
+							.getProjectFragment();
 					if (projectFragment.isArchive()) {
 						if (projectFragment.getResource() != null) {
 							inProjectArchive = projectFragment.getResource()
@@ -143,7 +147,9 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractExternalSourceModule#getModuleType ()
+	 * @see
+	 * org.eclipse.dltk.internal.core.AbstractExternalSourceModule#getModuleType
+	 * ()
 	 */
 	protected String getModuleType() {
 		return "DLTK External Source Moule: "; //$NON-NLS-1$
@@ -159,7 +165,9 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getOriginalSourceModule ()
+	 * @see
+	 * org.eclipse.dltk.internal.core.AbstractSourceModule#getOriginalSourceModule
+	 * ()
 	 */
 	protected ISourceModule getOriginalSourceModule() {
 		return new ExternalSourceModule((ScriptFolder) getParent(),
