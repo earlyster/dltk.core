@@ -2102,17 +2102,6 @@ public class DeltaProcessor {
 									this.contentChanged((Openable) fragment);
 								}
 								hasDelta = true;
-							} else if (newTimeStamp == 0) {
-								this.state.getCustomTimeStamps().remove(
-										fragment.getPath());
-								// index new library
-								ProjectIndexerManager.removeLibrary(
-										scriptProject, fragment.getPath());
-								if (fragment instanceof Openable) {
-									this.elementRemoved((Openable) fragment,
-											null, null);
-								}
-								hasDelta = true;
 							}
 						}
 					}
