@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -65,7 +66,6 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -366,7 +366,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 		}
 
 		int length = buildpathEntries.length;
-		ArrayList resolvedEntries = new ArrayList();
+		List resolvedEntries = new ArrayList();
 
 		for (int i = 0; i < length; i++) {
 
@@ -437,9 +437,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 
 			}
 		}
-
 		IBuildpathEntry[] resolvedPath = new IBuildpathEntry[resolvedEntries
 				.size()];
+
 		resolvedEntries.toArray(resolvedPath);
 
 		if (generateMarkerOnError) {
@@ -715,6 +715,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 					rootIDs, referringEntry, checkExistency,
 					retrieveExportedRoots, rootToResolvedEntries);
 		}
+
 	}
 
 	/**
@@ -771,7 +772,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 			if (referringEntry != null && !resolvedEntry.isExported())
 				return;
 			if (checkExistency) {
-				if (entryPath.toString().startsWith(
+				if (entryPath.segment(0).startsWith(
 						IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)
 						&& BuiltinProjectFragment.isSupported(this)) {
 					root = new BuiltinProjectFragment(entryPath, this);
@@ -924,42 +925,6 @@ public class ScriptProject extends Openable implements IScriptProject {
 		}
 		// TODO Check this
 		return externalPath;
-		//		
-		// IPath canonicalPath = null;
-		// try {
-		// canonicalPath = new Path(new File(externalPath.toOSString())
-		// .getCanonicalPath());
-		// } catch (IOException e) {
-		// // default to original path
-		// return externalPath;
-		// }
-		// IPath result;
-		// int canonicalLength = canonicalPath.segmentCount();
-		// if (canonicalLength == 0) {
-		// // the java.io.File canonicalization failed
-		// return externalPath;
-		// } else if (externalPath.isAbsolute()) {
-		// result = canonicalPath;
-		// } else {
-		// // if path is relative, remove the first segments that were added by
-		// // the java.io.File canonicalization
-		// // e.g. 'lib/classes.zip' was converted to
-		// // 'd:/myfolder/lib/classes.zip'
-		// int externalLength = externalPath.segmentCount();
-		// if (canonicalLength >= externalLength) {
-		// result = canonicalPath.removeFirstSegments(canonicalLength
-		// - externalLength);
-		// } else {
-		// return externalPath;
-		// }
-		// }
-		// // keep device only if it was specified (this is because
-		// // File.getCanonicalPath() converts '/lib/classed.zip' to
-		// // 'd:/lib/classes/zip')
-		// if (externalPath.getDevice() == null) {
-		// result = result.setDevice(null);
-		// }
-		// return result;
 	}
 
 	/**
@@ -1394,7 +1359,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 			byte[] bytes = Util.getResourceContentsAsByteArray(rscFile);
 			try {
 				property = new String(bytes,
-						org.eclipse.dltk.compiler.util.Util.UTF_8); //.buildpath
+						org.eclipse.dltk.compiler.util.Util.UTF_8); // .buildpath
 				// always
 				// encoded
 				// with
@@ -2311,7 +2276,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 
 			String extension = path.getFileExtension();
 			if (extension == null) {
-				String packageName = path.toString();//.replace(IPath.SEPARATOR,
+				String packageName = path.toString();// .replace(IPath.SEPARATOR,
 				// '.');
 
 				NameLookup lookup = newNameLookup((WorkingCopyOwner) null/*
@@ -2425,7 +2390,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 		IProjectFragment[] allRoots = this.getAllProjectFragments();
 		if (!path.isAbsolute()) {
 			if (path.segmentCount() == 0
-					|| !path.segment(0).equals(IndexManager.SPECIAL_BUILTIN)) {
+					|| !path.segment(0).startsWith(
+							IBuildpathEntry.BUILDPATH_SPECIAL)) {
 				throw new IllegalArgumentException(Messages.path_mustBeAbsolute);
 			}
 		}
@@ -2770,7 +2736,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 			}
 			if (token != null && token.charAt(0) == JEM_SCRIPTFOLDER) {
 				return root.getHandleFromMemento(token, memento, owner);
-			} else {
+				} else {
 				return root.getHandleFromMemento(memento, owner);
 			}
 		}
@@ -3060,8 +3026,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 			throws ModelException {
 		return computeProjectFragments(getResolvedBuildpath(
 				true/* ignoreUnresolvedEntry */, false/*
-													 * don't
-													 * generateMarkerOnError
+																		 * don't
+																		 * generateMarkerOnError
 													 */, false/*
 															 * don't
 															 * returnResolutionInProgress
