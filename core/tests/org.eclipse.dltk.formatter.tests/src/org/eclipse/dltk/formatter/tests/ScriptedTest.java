@@ -34,6 +34,10 @@ public class ScriptedTest extends AbstractFormatterTest {
 		String getCharset();
 
 		IScriptFormatter createFormatter(Map preferences);
+
+		String validateOptionName(String name);
+
+		String validateOptionValue(String name, String value);
 	}
 
 	private String input;
@@ -120,8 +124,18 @@ public class ScriptedTest extends AbstractFormatterTest {
 							if (preferences == null) {
 								preferences = new HashMap();
 							}
-							// TODO validate preference name and value
-							preferences.put(matcher.group(1), matcher.group(2));
+							final String optionName = context
+									.validateOptionName(matcher.group(1));
+							if (optionName == null)
+								throw new IllegalArgumentException(
+										"Invalid option name: " + line);
+							final String optionValue = context
+									.validateOptionValue(optionName, matcher
+											.group(2));
+							if (optionValue == null)
+								throw new IllegalArgumentException(
+										"Invalid option value: " + line);
+							preferences.put(optionName, optionValue);
 						} else {
 							// TODO log error
 						}
