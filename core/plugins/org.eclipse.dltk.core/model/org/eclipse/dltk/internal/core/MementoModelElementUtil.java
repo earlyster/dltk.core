@@ -20,7 +20,7 @@ import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 
 public class MementoModelElementUtil {
-	public static IModelElement getHandleFromMememento(
+	public static IModelElement getHandleFromMemento(
 			MementoTokenizer memento, IParent parent, WorkingCopyOwner owner) {
 		String token = null;
 		String name = "";

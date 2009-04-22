@@ -489,7 +489,7 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 				return pkg.getHandleFromMemento(token, memento, owner);
 			}
 		case JEM_USER_ELEMENT:
-			return MementoModelElementUtil.getHandleFromMememento(memento,
+			return MementoModelElementUtil.getHandleFromMemento(memento,
 					this, owner);
 		}
 		return null;

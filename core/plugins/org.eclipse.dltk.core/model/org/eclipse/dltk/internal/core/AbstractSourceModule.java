@@ -242,7 +242,7 @@ public abstract class AbstractSourceModule extends Openable implements
 			return fieldE.getHandleFromMemento(memento, workingCopyOwner);
 		}
 		case JEM_USER_ELEMENT:
-			return MementoModelElementUtil.getHandleFromMememento(memento,
+			return MementoModelElementUtil.getHandleFromMemento(memento,
 					this, owner);
 		}
 
