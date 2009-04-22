@@ -9,7 +9,7 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.mixin;
+package org.eclipse.dltk.core.search.indexing.core;
 
 import java.io.IOException;
 
@@ -17,16 +17,17 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.mixin.MixinModelRegistry;
+import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 
-public class MixinReconcileSourceModuleRequest extends MixinSourceModuleRequest {
+public class ReconcileSourceModuleRequest extends SourceModuleRequest {
 
 	/**
 	 * @param module
 	 * @param toolkit
 	 */
-	public MixinReconcileSourceModuleRequest(ISourceModule module,
-			IDLTKLanguageToolkit toolkit) {
-		super(module, toolkit);
+	public ReconcileSourceModuleRequest(IProjectIndexer indexer,
+			ISourceModule module, IDLTKLanguageToolkit toolkit) {
+		super(indexer, module, toolkit);
 	}
 
 	/*
@@ -38,7 +39,7 @@ public class MixinReconcileSourceModuleRequest extends MixinSourceModuleRequest 
 	}
 
 	public boolean equals(Object obj) {
-		if (obj instanceof MixinReconcileSourceModuleRequest) {
+		if (obj instanceof ReconcileSourceModuleRequest) {
 			return super.equals(obj);
 		}
 		return false;

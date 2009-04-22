@@ -24,7 +24,6 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.index.MixinIndex;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
-import org.eclipse.dltk.core.search.indexing.SourceIndexer;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.internal.core.Model;
 import org.eclipse.dltk.internal.core.search.IndexSelector;
@@ -80,8 +79,6 @@ public class DLTKSearchParticipant extends SearchParticipant {
 		// not called from scheduleDocumentIndexing
 		document.removeAllIndexEntries(); // in case the document was already
 		// indexed
-		new SourceIndexer(document).indexDocument();
-
 	}
 
 	/*

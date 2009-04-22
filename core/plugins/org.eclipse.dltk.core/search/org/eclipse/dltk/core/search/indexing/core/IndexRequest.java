@@ -9,7 +9,7 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.mixin;
+package org.eclipse.dltk.core.search.indexing.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,46 +20,25 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
-import org.eclipse.dltk.core.search.SearchEngine;
-import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.index.Index;
-import org.eclipse.dltk.core.search.indexing.IndexManager;
+import org.eclipse.dltk.core.search.indexing.AbstractJob;
+import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
-import org.eclipse.dltk.internal.core.BuiltinSourceModule;
-import org.eclipse.dltk.internal.core.ExternalSourceModule;
-import org.eclipse.dltk.internal.core.ModelManager;
-import org.eclipse.dltk.internal.core.SourceModule;
-import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 
-abstract class MixinIndexRequest extends AbstractJob {
+abstract class IndexRequest extends AbstractJob {
+	private IProjectIndexer indexer;
 
-	protected final IndexManager getIndexManager() {
-		return ModelManager.getModelManager().getIndexManager();
+	public IndexRequest(IProjectIndexer indexer) {
+		this.indexer = indexer;
 	}
 
-	protected Index getProjectMixinIndex(IScriptProject project) {
-		return getProjectMixinIndex(project.getProject().getFullPath());
-	}
-
-	protected Index getProjectMixinIndex(IPath path) {
-		final String containerPath = path.getDevice() == null ? path.toString()
-				: path.toOSString();
-		return getIndexManager().getSpecialIndex(IndexManager.SPECIAL_MIXIN,
-				path.toString(), containerPath);
-	}
-
-	protected Index getProjectFragmentIndex(IProjectFragment fragment) {
-		final String path = fragment.getPath().toString();
-		return getIndexManager().getSpecialIndex(IndexManager.SPECIAL_MIXIN,
-				path, path);
+	public IProjectIndexer getIndexer() {
+		return indexer;
 	}
 
 	/**
@@ -81,56 +60,15 @@ abstract class MixinIndexRequest extends AbstractJob {
 		}
 	}
 
-	protected void indexSourceModule(Index index, IDLTKLanguageToolkit toolkit,
-			ISourceModule module, IPath containerPath) {
-		final SearchParticipant participant = SearchEngine
-				.getDefaultSearchParticipant();
-		final IPath path = module.getPath();
-		final DLTKSearchDocument document = new DLTKSearchDocument(path
-				.toString(), containerPath, null, participant,
-				module instanceof ExternalSourceModule, module
-						.getScriptProject().getProject());
-		document.toolkit = toolkit;
-		final String relativePath = containerRelativePath(containerPath,
-				module, path);
-		document.setContainerRelativePath(relativePath);
-		if (DEBUG) {
-			log("indexing " + relativePath); //$NON-NLS-1$
-		}
-		index.remove(relativePath);
-		document.setIndex(index);
-		new MixinIndexer(document, module).indexDocument();
-	}
-
 	protected Map collectSourceModulePaths(Collection modules,
 			IPath containerPath) {
 		final Map paths = new HashMap();
 		for (Iterator i = modules.iterator(); i.hasNext();) {
 			final ISourceModule module = (ISourceModule) i.next();
-			paths.put(containerRelativePath(containerPath, module), module);
+			paths.put(SourceIndexUtil.containerRelativePath(containerPath,
+					module), module);
 		}
 		return paths;
-	}
-
-	protected String containerRelativePath(IPath containerPath,
-			ISourceModule module) {
-		return containerRelativePath(containerPath, module, module.getPath());
-	}
-
-	protected String containerRelativePath(IPath containerPath,
-			ISourceModule module, final IPath path) {
-		if (module instanceof ExternalSourceModule
-				|| module instanceof BuiltinSourceModule) {
-			return path.removeFirstSegments(containerPath.segmentCount())
-					.setDevice(null).toString();
-		} else if (module instanceof SourceModule) {
-			return path.removeFirstSegments(1).toString();
-		} else {
-			if (DEBUG) {
-				log("Skip unknown module class " + module.getClass().getName()); //$NON-NLS-1$
-			}
-			return path.toString();
-		}
 	}
 
 	/**
@@ -188,4 +126,26 @@ abstract class MixinIndexRequest extends AbstractJob {
 		}
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((indexer == null) ? 0 : indexer.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		IndexRequest other = (IndexRequest) obj;
+		if (indexer == null) {
+			if (other.indexer != null)
+				return false;
+		} else if (!indexer.equals(other.indexer))
+			return false;
+		return true;
+	}
 }

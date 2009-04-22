@@ -13,8 +13,11 @@ package org.eclipse.dltk.core.search.indexing;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.search.index.Index;
+import org.eclipse.dltk.internal.core.search.processing.IJob;
 
 public interface IProjectIndexer {
 
@@ -70,5 +73,16 @@ public interface IProjectIndexer {
 	 * Is called just after initialization to verify the indexes
 	 */
 	void startIndexing();
+
+	void request(IJob request);
+
+	void indexSourceModule(Index index, IDLTKLanguageToolkit toolkit,
+			ISourceModule change, IPath containerPath);
+
+	Index getProjectFragmentIndex(IProjectFragment fragment);
+
+	Index getProjectIndex(IScriptProject project);
+
+	IndexManager getIndexManager();
 
 }

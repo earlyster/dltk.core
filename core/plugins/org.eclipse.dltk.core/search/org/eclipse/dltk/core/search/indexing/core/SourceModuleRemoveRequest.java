@@ -9,16 +9,17 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.mixin;
+package org.eclipse.dltk.core.search.indexing.core;
 
 import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.search.index.Index;
+import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 
-public class MixinSourceModuleRemoveRequest extends MixinIndexRequest {
+public class SourceModuleRemoveRequest extends IndexRequest {
 
 	private final IScriptProject project;
 	private final String path;
@@ -28,7 +29,9 @@ public class MixinSourceModuleRemoveRequest extends MixinIndexRequest {
 	 * @param path
 	 * @param name
 	 */
-	public MixinSourceModuleRemoveRequest(IScriptProject project, String path) {
+	public SourceModuleRemoveRequest(IProjectIndexer indexer,
+			IScriptProject project, String path) {
+		super(indexer);
 		this.project = project;
 		this.path = path;
 	}
@@ -38,7 +41,7 @@ public class MixinSourceModuleRemoveRequest extends MixinIndexRequest {
 	}
 
 	protected void run() throws CoreException, IOException {
-		final Index index = getProjectMixinIndex(project);
+		final Index index = getIndexer().getProjectIndex(project);
 		final ReadWriteMonitor imon = index.monitor;
 		imon.enterWrite();
 		try {
@@ -46,6 +49,35 @@ public class MixinSourceModuleRemoveRequest extends MixinIndexRequest {
 		} finally {
 			imon.exitWrite();
 		}
+	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((path == null) ? 0 : path.hashCode());
+		result = prime * result + ((project == null) ? 0 : project.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SourceModuleRemoveRequest other = (SourceModuleRemoveRequest) obj;
+		if (path == null) {
+			if (other.path != null)
+				return false;
+		} else if (!path.equals(other.path))
+			return false;
+		if (project == null) {
+			if (other.project != null)
+				return false;
+		} else if (!project.equals(other.project))
+			return false;
+		return true;
 	}
 
 }

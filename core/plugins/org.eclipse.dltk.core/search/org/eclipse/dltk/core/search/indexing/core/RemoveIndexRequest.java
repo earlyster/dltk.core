@@ -9,18 +9,20 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.mixin;
+package org.eclipse.dltk.core.search.indexing.core;
 
 import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 
-public class RemoveIndexRequest extends MixinIndexRequest {
+public class RemoveIndexRequest extends IndexRequest {
 
 	private final IPath path;
 
-	public RemoveIndexRequest(IPath path) {
+	public RemoveIndexRequest(IProjectIndexer indexer, IPath path) {
+		super(indexer);
 		this.path = path;
 	}
 
@@ -29,13 +31,15 @@ public class RemoveIndexRequest extends MixinIndexRequest {
 	}
 
 	protected void run() throws CoreException, IOException {
-		getIndexManager().removeIndex(path);
+		getIndexer().getIndexManager().removeIndex(path);
 	}
 
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
+			return false;
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;

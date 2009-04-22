@@ -67,7 +67,6 @@ public class MixinModel {
 	private final IDLTKLanguageToolkit toolkit;
 
 	private final IScriptProject project;
-	private IDLTKSearchScope projectScope = null;
 
 	private MixinRequestor mixinRequestor = new MixinRequestor();
 
@@ -147,10 +146,7 @@ public class MixinModel {
 
 	private IDLTKSearchScope createSearchScope() {
 		if (project != null) {
-			if (projectScope == null) {
-				projectScope = SearchEngine.createSearchScope(project);
-			}
-			return projectScope;
+			return SearchEngine.createSearchScope(project);
 		} else {
 			return SearchEngine.createWorkspaceScope(toolkit);
 		}
@@ -907,7 +903,6 @@ public class MixinModel {
 	}
 
 	protected void clear() {
-		projectScope = null;
 		cache.flush();
 		elementToMixinCache.clear();
 		existKeysCache.clear();

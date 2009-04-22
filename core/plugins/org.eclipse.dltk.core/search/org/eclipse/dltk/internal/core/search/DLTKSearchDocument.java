@@ -37,6 +37,10 @@ public class DLTKSearchDocument extends SearchDocument {
 		this.external = external;
 	}
 
+	public void setCharContents(char[] charContents) {
+		this.charContents = charContents;
+	}
+
 	public String getContents() {
 		return new String(charContents);
 	}

@@ -22,7 +22,7 @@ import org.eclipse.dltk.core.ISearchPatternProcessor;
  */
 public class SourceIndexerRequestor implements ISourceElementRequestor,
 		IIndexConstants {
-	protected SourceIndexer indexer;
+	protected AbstractIndexer indexer;
 	// char[] packageName = CharOperation.NO_CHAR;
 	protected char[][] enclosingTypeNames = new char[5][];
 	protected int depth = 0;
@@ -32,17 +32,17 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	protected ISearchFactory searchFactory;
 	protected ISearchPatternProcessor searchPatternProcessor;
 
-	public SourceIndexerRequestor(SourceIndexer indexer) {
+	public SourceIndexerRequestor(AbstractIndexer indexer) {
 		this.indexer = indexer;
 	}
 
 	public SourceIndexerRequestor() {
 	}
 
-	public void setIndexer(SourceIndexer indexer) {
+	public void setIndexer(AbstractIndexer indexer) {
 		this.indexer = indexer;
 	}
-	
+
 	public void setSearchFactory(ISearchFactory searchFactory) {
 		this.searchFactory = searchFactory;
 		if (searchFactory != null) {
@@ -141,7 +141,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 		char[][] qualification = new char[this.depth][];
 		System.arraycopy(this.enclosingTypeNames, 0, qualification, 0,
 				this.depth);
-		
+
 		return qualification;
 	}
 
@@ -214,17 +214,18 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 
 	public void popTypeName() {
 		if (depth > 0) {
-//			System.out.println("POPNAME:" + new String( enclosingTypeNames[depth-1]));
+			// System.out.println("POPNAME:" + new String(
+			// enclosingTypeNames[depth-1]));
 			enclosingTypeNames[--depth] = null;
-		} 
-//		else if (JobManager.VERBOSE) {
-//			// dump a trace so it can be tracked down
-//			try {
-//				enclosingTypeNames[-1] = null;
-//			} catch (ArrayIndexOutOfBoundsException e) {
-//				e.printStackTrace();
-//			}
-//		}
+		}
+		// else if (JobManager.VERBOSE) {
+		// // dump a trace so it can be tracked down
+		// try {
+		// enclosingTypeNames[-1] = null;
+		// } catch (ArrayIndexOutOfBoundsException e) {
+		// e.printStackTrace();
+		// }
+		// }
 	}
 
 	public void pushTypeName(char[] typeName) {
@@ -271,7 +272,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	public boolean enterMethodWithParentType(MethodInfo info,
 			String parentName, String delimiter) {
 		this.enterMethod(info);
-//		this.methodDepth++;
+		// this.methodDepth++;
 		return true;
 	}
 

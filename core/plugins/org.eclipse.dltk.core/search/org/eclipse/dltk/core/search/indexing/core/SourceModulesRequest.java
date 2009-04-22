@@ -9,7 +9,7 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.mixin;
+package org.eclipse.dltk.core.search.indexing.core;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -24,9 +24,10 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.search.index.Index;
+import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 
-class MixinSourceModulesRequest extends MixinIndexRequest {
+class SourceModulesRequest extends IndexRequest {
 
 	private final IScriptProject project;
 	private final IDLTKLanguageToolkit toolkit;
@@ -36,8 +37,9 @@ class MixinSourceModulesRequest extends MixinIndexRequest {
 	 * @param project
 	 * @param modules
 	 */
-	public MixinSourceModulesRequest(IScriptProject project,
-			IDLTKLanguageToolkit toolkit, Set modules) {
+	public SourceModulesRequest(IProjectIndexer indexer,
+			IScriptProject project, IDLTKLanguageToolkit toolkit, Set modules) {
+		super(indexer);
 		this.project = project;
 		this.toolkit = toolkit;
 		this.modules = modules;
@@ -48,7 +50,7 @@ class MixinSourceModulesRequest extends MixinIndexRequest {
 	}
 
 	protected void run() throws CoreException, IOException {
-		final Index index = getProjectMixinIndex(project);
+		final Index index = getIndexer().getProjectIndex(project);
 		final IPath containerPath = project.getPath();
 		final List changes = checkChanges(index, modules, containerPath,
 				EnvironmentManager.getEnvironment(project));
@@ -66,8 +68,8 @@ class MixinSourceModulesRequest extends MixinIndexRequest {
 				if (change instanceof String) {
 					index.remove((String) change);
 				} else {
-					indexSourceModule(index, toolkit, (ISourceModule) change,
-							containerPath);
+					getIndexer().indexSourceModule(index, toolkit,
+							(ISourceModule) change, containerPath);
 				}
 			}
 		} finally {
@@ -85,4 +87,32 @@ class MixinSourceModulesRequest extends MixinIndexRequest {
 		return jobFamily.equals(project.getProject().getName());
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((modules == null) ? 0 : modules.hashCode());
+		result = prime * result + ((project == null) ? 0 : project.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SourceModulesRequest other = (SourceModulesRequest) obj;
+		if (modules == null) {
+			if (other.modules != null)
+				return false;
+		} else if (!modules.equals(other.modules))
+			return false;
+		if (project == null) {
+			if (other.project != null)
+				return false;
+		} else if (!project.equals(other.project))
+			return false;
+		return true;
+	}
 }

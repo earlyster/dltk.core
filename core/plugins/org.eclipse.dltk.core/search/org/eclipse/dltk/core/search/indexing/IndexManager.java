@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.CRC32;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -28,29 +27,21 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.compiler.util.SimpleLookupTable;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
-import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
-import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.BasicSearchEngine;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
-import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.core.search.SearchEngine;
-import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.index.MixinIndex;
-import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.core.Model;
-import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.search.PatternSearchJob;
 import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
@@ -79,6 +70,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	public static final Integer UNKNOWN_STATE = new Integer(2);
 	public static final Integer REBUILDING_STATE = new Integer(3);
 
+	public static final String SPECIAL = "#special#"; //$NON-NLS-1$
 	public static final String SPECIAL_MIXIN = "#special#mixin#"; //$NON-NLS-1$
 	public static final String SPECIAL_BUILTIN = "#special#builtin#"; //$NON-NLS-1$
 
@@ -103,63 +95,6 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			// if already cached index then there is nothing more to do
 			this.rebuildIndex(indexLocation, containerPath);
 		}
-	}
-
-	// /**
-	// * Trigger addition of a resource to an index Note: the actual operation
-	// is
-	// * performed in background
-	// */
-	// public void addExternal(IFile resource, IPath containerPath) {
-	// if (DLTKCore.getPlugin() == null)
-	// return;
-	// SearchParticipant participant =
-	// SearchEngine.getDefaultSearchParticipant();
-	// SearchDocument document =
-	// participant.getDocument(resource.getFullPath().toString());
-	// String indexLocation = computeIndexLocation(containerPath);
-	// scheduleDocumentIndexing(document, containerPath, indexLocation,
-	// participant);
-	// }
-
-	/**
-	 * Trigger addition of a resource to an index Note: the actual operation is
-	 * performed in background
-	 */
-	public void addSource(IFile resource, IPath containerPath,
-			ISourceElementParser parser, SourceIndexerRequestor requestor,
-			IDLTKLanguageToolkit toolkit) {
-		if (DLTKCore.getPlugin() == null) {
-			return;
-		}
-		SearchParticipant participant = SearchEngine
-				.getDefaultSearchParticipant();
-		SearchDocument document = participant.getDocument(resource
-				.getFullPath().toString(), resource.getProject());
-		((InternalSearchDocument) document).parser = parser;
-		((InternalSearchDocument) document).requestor = requestor;
-		((InternalSearchDocument) document).toolkit = toolkit;
-		document.fullPath = resource.getFullPath();
-		String indexLocation = this.computeIndexLocation(containerPath);
-		this.scheduleDocumentIndexing(document, containerPath, indexLocation,
-				participant);
-	}
-
-	/**
-	 * Trigger addition of a resource to an index Note: the actual operation is
-	 * performed in background
-	 */
-	public void addBinary(IFile resource, IPath containerPath) {
-		if (DLTKCore.getPlugin() == null) {
-			return;
-		}
-		SearchParticipant participant = SearchEngine
-				.getDefaultSearchParticipant();
-		SearchDocument document = participant.getDocument(resource
-				.getFullPath().toString(), resource.getProject());
-		String indexLocation = this.computeIndexLocation(containerPath);
-		this.scheduleDocumentIndexing(document, containerPath, indexLocation,
-				participant);
 	}
 
 	/*
@@ -253,18 +188,6 @@ public class IndexManager extends JobManager implements IIndexConstants {
 					.getNatureId());
 		}
 		return null;
-	}
-
-	/**
-	 * @deprecated
-	 */
-	public ISourceElementParser getSourceElementParser(IScriptProject project,
-			ISourceElementRequestor requestor) {
-		final ISourceElementParser parser = getSourceElementParser(project);
-		if (parser != null) {
-			parser.setRequestor(requestor);
-		}
-		return parser;
 	}
 
 	/**
@@ -396,9 +319,9 @@ public class IndexManager extends JobManager implements IIndexConstants {
 				// IF you put an index in the cache, then AddArchiveFileToIndex
 				// fails because it thinks there is nothing to do
 				this.rebuildIndex(indexLocation, containerPath);
-				if (!mixin) {
-					return null;
-				}
+				// if (!mixin) {
+				// return null;
+				// }
 			}
 			// index isn't cached, consider reusing an existing index file
 			String containerPathString = containerPath.toString();
@@ -552,129 +475,6 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		return this.scriptPluginLocation = stateLocation;
 	}
 
-	public void indexDocument(SearchDocument searchDocument,
-			SearchParticipant searchParticipant, Index index,
-			IPath indexLocation) {
-		try {
-			((InternalSearchDocument) searchDocument).index = index;
-			searchParticipant.indexDocument(searchDocument, indexLocation);
-		} finally {
-			((InternalSearchDocument) searchDocument).index = null;
-		}
-	}
-
-	/**
-	 * Trigger addition of the entire content of a project Note: the actual
-	 * operation is performed in background
-	 */
-	public void indexAll(IProject project) {
-		if (DLTKCore.getPlugin() == null) {
-			return;
-		}
-		// Also request indexing of binaries on the buildpath
-		// determine the new children
-		try {
-			Model model = ModelManager.getModelManager().getModel();
-			ScriptProject scriptProject = (ScriptProject) model
-					.getScriptProject(project);
-			// only consider immediate libraries - each project will do the same
-			// NOTE: force to resolve CP variables before calling indexer -
-			// 19303, so that initializers
-			// will be run in the current thread.
-			IBuildpathEntry[] entries = scriptProject.getResolvedBuildpath(
-					true, false, false);
-			/* ignoreUnresolvedEntry */
-			/* don't generateMarkerOnError */
-			/* don't returnResolutionInProgress */
-			for (int i = 0; i < entries.length; i++) {
-				IBuildpathEntry entry = entries[i];
-				if (entry.getEntryKind() == IBuildpathEntry.BPE_LIBRARY) {
-					final BuildpathEntry bpEntry = (BuildpathEntry) entry;
-					this.indexLibrary(entry.getPath(), project, bpEntry
-							.fullInclusionPatternChars(), bpEntry
-							.fullExclusionPatternChars());
-				}
-			}
-		} catch (ModelException e) { // cannot retrieve buildpath info
-		}
-		// check if the same request is not already in the queue
-		IndexRequest request = new IndexAllProject(project, this);
-		if (!this.isJobWaiting(request)) {
-			this.request(request);
-		}
-	}
-
-	/**
-	 * Trigger addition of a library to an index Note: the actual operation is
-	 * performed in background
-	 * 
-	 * @param exclusionPatterns
-	 * @param inclusionPatterns
-	 */
-	public void indexLibrary(IPath path, IProject requestingProject,
-			char[][] inclusionPatterns, char[][] exclusionPatterns) {
-		// requestingProject is no longer used to cancel jobs but leave it here
-		// just in case
-		if (DLTKCore.getPlugin() == null) {
-			return;
-		}
-		if (!ProjectIndexerManager.isIndexerEnabled(DLTKCore
-				.create(requestingProject))) {
-			return;
-		}
-		Object target = Model.getTarget(ResourcesPlugin.getWorkspace()
-				.getRoot(), path, true);
-		IndexRequest request = null;
-		if (target instanceof IFile) {
-			// request = new AddArchiveFileToIndex((IFile) target, this);
-			return;
-		} else if (target instanceof IFileHandle) {
-			if (((IFileHandle) target).isFile()) {
-				// request = new AddArchiveFileToIndex(path, this);
-				return;
-			} else {
-				request = new AddExternalFolderToIndex(path, requestingProject,
-						inclusionPatterns, exclusionPatterns, this);
-			}
-		} else if (target instanceof IContainer) {
-			// request = new IndexContainerFolder((IContainer) target, this,
-			// requestingProject);
-			return;
-		} else if (target == null
-				&& path.toString().startsWith(
-						IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)) {
-			request = new AddBuiltinFolderToIndex(path, requestingProject, this);
-		}
-		// check if the same request is not already in the queue
-		// TODO: Uncheck this. After adding some library indexing.
-		if (request != null) {
-			if (!this.isJobWaiting(request)) {
-				this.request(request);
-			}
-		}
-	}
-
-	/**
-	 * Index the content of the given source folder.
-	 */
-	public void indexSourceFolder(ScriptProject scriptProject,
-			IPath sourceFolder, char[][] inclusionPatterns,
-			char[][] exclusionPatterns) {
-		if (!ProjectIndexerManager.isIndexerEnabled(scriptProject)) {
-			return;
-		}
-		final IProject project = scriptProject.getProject();
-		if (this.jobEnd > this.jobStart) {
-			// skip it if a job to index the project is already in the queue
-			IndexRequest request = new IndexAllProject(project, this);
-			if (this.isJobWaiting(request)) {
-				return;
-			}
-		}
-		this.request(new AddFolderToIndex(sourceFolder, project,
-				inclusionPatterns, exclusionPatterns, this));
-	}
-
 	public void jobWasCancelled(IPath containerPath) {
 		String indexLocation = this.computeIndexLocation(containerPath);
 		Object o = this.indexes.get(indexLocation);
@@ -734,7 +534,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		if (target instanceof IProject) {
 			IProject p = (IProject) target;
 			if (ScriptProject.hasScriptNature(p)) {
-				request = new IndexAllProject(p, this);
+				// request = new IndexAllProject(p, this);
+				ProjectIndexerManager.indexProject(p);
 			}
 		} else if (target instanceof IFolder) {
 			// request = new IndexBinaryFolder((IFolder) target, this);
@@ -899,10 +700,11 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		IProject project = scriptProject.getProject();
 		if (this.jobEnd > this.jobStart) {
 			// skip it if a job to index the project is already in the queue
-			IndexRequest request = new IndexAllProject(project, this);
-			if (this.isJobWaiting(request)) {
-				return;
-			}
+			// IndexRequest request = new IndexAllProject(project, this);
+			// ProjectIndexerManager.indexProject(project);
+			// if (this.isJobWaiting(request)) {
+			// return;
+			// }
 		}
 		this.request(new RemoveFolderFromIndex(sourceFolder, inclusionPatterns,
 				exclusionPatterns, project, this));
@@ -1010,43 +812,6 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			}
 		}
 		this.needToSave = !allSaved;
-	}
-
-	public void scheduleDocumentIndexing(final SearchDocument searchDocument,
-			IPath container, final String indexLocation,
-			final SearchParticipant searchParticipant) {
-		this.request(new IndexRequest(container, this) {
-			public boolean execute(IProgressMonitor progressMonitor) {
-				if (this.isCancelled || progressMonitor != null
-						&& progressMonitor.isCanceled()) {
-					return true;
-				}
-				/* ensure no concurrent write access to index */
-				Index index = IndexManager.this.getIndex(this.containerPath,
-						indexLocation, true, true);
-				/* reuse index file */
-				/* create if none */
-				if (index == null) {
-					return true;
-				}
-				ReadWriteMonitor monitor = index.monitor;
-				if (monitor == null) {
-					return true; // index got deleted since acquired
-				}
-				try {
-					monitor.enterWrite(); // ask permission to write
-					IndexManager.this.indexDocument(searchDocument,
-							searchParticipant, index, new Path(indexLocation));
-				} finally {
-					monitor.exitWrite(); // free write lock
-				}
-				return true;
-			}
-
-			public String toString() {
-				return "indexing " + searchDocument.getPath(); //$NON-NLS-1$
-			}
-		});
 	}
 
 	public String toString() {
@@ -1173,11 +938,10 @@ public class IndexManager extends JobManager implements IIndexConstants {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject[] projects = root.getProjects();
 		for (int i = 0; i < projects.length; i++) {
-			final IProject project = projects[i];
-			if (DLTKLanguageManager.hasScriptNature(project)) {
-				ProjectIndexerManager.indexProject(project);
+			if (DLTKLanguageManager.hasScriptNature(projects[i])) {
+				// this.indexAll(projects[i]);
+				ProjectIndexerManager.indexProject(projects[i]);
 			}
 		}
 	}
-
 }

@@ -20,6 +20,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.core.util.HashtableOfArrayToObject;
@@ -262,8 +263,10 @@ class ProjectElementInfo extends OpenableElementInfo {
 					continue;
 				}
 				for (int j = 0, length2 = frags.length; j < length2; j++) {
-					ScriptFolder fragment = (ScriptFolder) frags[j];
-					String[] pkgName = fragment.path.segments();
+					IScriptFolder fragment = (IScriptFolder) frags[j];
+					IPath parentPath = fragment.getParent().getPath();
+					String[] pkgName = fragment.getPath().removeFirstSegments(
+							parentPath.segmentCount()).segments();
 					Object existing = fragmentsCache.get(pkgName);
 					if (existing == null) {
 						fragmentsCache.put(pkgName, root);

@@ -13,17 +13,17 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.util.SimpleSet;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptModel;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.internal.core.ArchiveProjectFragment;
-import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.ModelManager;
+import org.eclipse.dltk.internal.core.ScriptProject;
 
 /**
  * Selects the indexes that correspond to projects in a given search scope and
@@ -33,7 +33,8 @@ public class IndexSelector {
 	IDLTKSearchScope searchScope;
 	SearchPattern pattern;
 	IPath[] indexLocations; // cache of the keys for looking index up
-//	public boolean mixin = false; // Set to true then mixin search are used.
+
+	// public boolean mixin = false; // Set to true then mixin search are used.
 
 	// Filter some builtin elements.
 
@@ -59,7 +60,8 @@ public class IndexSelector {
 				focusEntries = focusProject.getExpandedBuildpath(true);
 			}
 			IScriptModel model = focus.getModel();
-			IScriptProject project = getScriptProject(projectOrArchivePath, model);
+			IScriptProject project = getScriptProject(projectOrArchivePath,
+					model);
 			if (project != null)
 				return canSeeFocus(focus, (ScriptProject) project, focusEntries);
 			// projectOrJarPath is a jar
@@ -71,11 +73,13 @@ public class IndexSelector {
 			for (int i = 0, length = allProjects.length; i < length; i++) {
 				ScriptProject otherProject = (ScriptProject) allProjects[i];
 				IBuildpathEntry[] entries = otherProject.getResolvedBuildpath(
-						true/* ignoreUnresolvedEntry */,
-						false/* don't generateMarkerOnError */, false/*
-																		 * don't
-																		 * returnResolutionInProgress
-																		 */);
+						true/* ignoreUnresolvedEntry */, false/*
+															 * don't
+															 * generateMarkerOnError
+															 */, false/*
+																	 * don't
+																	 * returnResolutionInProgress
+																	 */);
 				for (int j = 0, length2 = entries.length; j < length2; j++) {
 					IBuildpathEntry entry = entries[j];
 					if (entry.getEntryKind() == IBuildpathEntry.BPE_LIBRARY
@@ -120,7 +124,8 @@ public class IndexSelector {
 				return false;
 			}
 			// look for dependent projects
-			IPath focusPath = ((ScriptProject) focus).getProject().getFullPath();
+			IPath focusPath = ((ScriptProject) focus).getProject()
+					.getFullPath();
 			IBuildpathEntry[] entries = scriptProject
 					.getExpandedBuildpath(true);
 			for (int i = 0, length = entries.length; i < length; i++) {
@@ -141,40 +146,21 @@ public class IndexSelector {
 	private void initializeIndexLocations() {
 		IPath[] projectsAndArchives = this.searchScope
 				.enclosingProjectsAndZips();
-//		System.out.println("********************IndexSelector************************");
-//		for (int i = 0; i < projectsAndArchives.length; i++) {
-//			System.out.println("Root:" + projectsAndArchives[i].toString());
-//		}
-//		System.out.println("********************IndexSelector************************");
 		IndexManager manager = ModelManager.getModelManager().getIndexManager();
 		SimpleSet locations = new SimpleSet();
 		IModelElement focus = MatchLocator.projectOrArchiveFocus(this.pattern);
-		// Add all special indexes for selected project.
-		/*
-		 * if( focus != null && focus.getElementType() ==
-		 * IModelElement.SCRIPT_PROJECT ) { String prjPath = "#special#mixin:" +
-		 * ((IScriptProject)focus).getProject().getFullPath().toString();
-		 * checkSpecialCase(manager, locations, prjPath); // builtin index file
-		 * prjPath = "#special#builtin:" +
-		 * ((IScriptProject)focus).getProject().getFullPath().toString();
-		 * checkSpecialCase(manager, locations, prjPath); }
-		 */
-		
-		boolean mix = false;//this.pattern instanceof MixinPattern;
-		
+
+		boolean mix = false;// this.pattern instanceof MixinPattern;
+
 		IScriptModel model = ModelManager.getModelManager().getModel();
 		if (focus == null) {
 			for (int i = 0; i < projectsAndArchives.length; i++) {
-//				if (!mixin) {
-				
-				if (!mix) {				
+				if (!mix) {
 					locations.add(manager
 							.computeIndexLocation(projectsAndArchives[i]));
-				} 
-//				}
+				}
+				checkSpecial(projectsAndArchives[i], manager, locations, model);
 
-					checkSpecial(projectsAndArchives[i], manager, locations, model);
-				
 			}
 		} else {
 			try {
@@ -197,19 +183,19 @@ public class IndexSelector {
 
 				for (int i = 0; i < length; i++) {
 					IPath path = projectsAndArchives[i];
-					ScriptProject project = (ScriptProject) getScriptProject(path,
-							model);
+					ScriptProject project = (ScriptProject) getScriptProject(
+							path, model);
 					if (project != null) {
 						visitedProjects.add(project);
 						if (canSeeFocus(focus, project, focusEntries)) {
-//							if (!mixin) {
+							// if (!mixin) {
 							if (!mix) {
 								locations.add(manager
 										.computeIndexLocation(path));
-							} 
-//							}
-								checkSpecial(path, manager, locations, model);
-							
+							}
+							// }
+							checkSpecial(path, manager, locations, model);
+
 							projectsCanSeeFocus[projectIndex++] = project;
 						}
 					} else {
@@ -220,21 +206,23 @@ public class IndexSelector {
 						&& archivesToCheck.elementSize > 0; i++) {
 					IBuildpathEntry[] entries = projectsCanSeeFocus[i]
 							.getResolvedBuildpath(
-									true/* ignoreUnresolvedEntry */,
-									false/* don't generateMarkerOnError */,
+									true/* ignoreUnresolvedEntry */, false/*
+																		 * don't
+																		 * generateMarkerOnError
+																		 */,
 									false/* don't returnResolutionInProgress */);
 					for (int j = entries.length; --j >= 0;) {
 						IBuildpathEntry entry = entries[j];
 						if (entry.getEntryKind() == IBuildpathEntry.BPE_LIBRARY) {
 							IPath path = entry.getPath();
 							if (archivesToCheck.includes(path)) {
-//								if (!mixin) {
+								// if (!mixin) {
 								if (!mix) {
 									locations.add(manager
 											.computeIndexLocation(entry
 													.getPath()));
 								}
-//								}
+								// }
 								archivesToCheck.remove(path);
 							}
 						}
@@ -256,13 +244,13 @@ public class IndexSelector {
 								if (entry.getEntryKind() == IBuildpathEntry.BPE_LIBRARY) {
 									IPath path = entry.getPath();
 									if (archivesToCheck.includes(path)) {
-//										if (!mixin) {
+										// if (!mixin) {
 										if (!mix) {
 											locations.add(manager
 													.computeIndexLocation(entry
 															.getPath()));
 										}
-//										}
+										// }
 										archivesToCheck.remove(path);
 									}
 								}
@@ -285,47 +273,50 @@ public class IndexSelector {
 	private void checkSpecial(IPath projectsAndArchives, IndexManager manager,
 			SimpleSet locations, IScriptModel model) {
 		// check for special cases
-		String prjPath = IndexManager.SPECIAL_MIXIN + projectsAndArchives.toString();
+		String prjPath = IndexManager.SPECIAL_MIXIN
+				+ projectsAndArchives.toString();
 		// checkSpecialCase(manager, locations, prjPath);
 		locations.add(manager.computeIndexLocation(new Path(prjPath)));
 		// add builtin indexes
-//		IPath path = projectsAndArchives;
-////		if (!mixin) {
-//			if (!path.toString().startsWith(IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)) {
-//				ScriptProject project = (ScriptProject) getScriptProject(path,
-//						model);
-//				if (project != null) {
-//					IPath p = new Path("#special#builtin#")
-//							.append(projectsAndArchives);
-//					locations.add(manager.computeIndexLocation(p));
-//				}
-//			}
-//			else {
-//				path = path.removeFirstSegments(1);
-//				ScriptProject project = (ScriptProject) getScriptProject(path,
-//						model);
-//				if (project != null) {
-//					IPath p = new Path("#special#builtin#")
-//							.append(projectsAndArchives);
-//					locations.add(manager.computeIndexLocation(p));
-//				}
-//			}
-////		}
+		// IPath path = projectsAndArchives;
+		// // if (!mixin) {
+		// if
+		// (!path.toString().startsWith(IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR))
+		// {
+		// ScriptProject project = (ScriptProject) getScriptProject(path,
+		// model);
+		// if (project != null) {
+		// IPath p = new Path("#special#builtin#")
+		// .append(projectsAndArchives);
+		// locations.add(manager.computeIndexLocation(p));
+		// }
+		// }
+		// else {
+		// path = path.removeFirstSegments(1);
+		// ScriptProject project = (ScriptProject) getScriptProject(path,
+		// model);
+		// if (project != null) {
+		// IPath p = new Path("#special#builtin#")
+		// .append(projectsAndArchives);
+		// locations.add(manager.computeIndexLocation(p));
+		// }
+		// }
+		// // }
 	}
 
-//	private void checkSpecialCase(IndexManager manager, SimpleSet locations,
-//			String prjPath) {
-//		Object[] keyTable = manager.indexLocations.keyTable;
-//		for (int i = 0; i < keyTable.length; ++i) {
-//			IPath path = (IPath) keyTable[i];
-//			if (path != null) {
-//				String sPath = path.toString();
-//				if (sPath.startsWith(prjPath)) {
-//					locations.add(manager.indexLocations.get(path));
-//				}
-//			}
-//		}
-//	}
+	// private void checkSpecialCase(IndexManager manager, SimpleSet locations,
+	// String prjPath) {
+	// Object[] keyTable = manager.indexLocations.keyTable;
+	// for (int i = 0; i < keyTable.length; ++i) {
+	// IPath path = (IPath) keyTable[i];
+	// if (path != null) {
+	// String sPath = path.toString();
+	// if (sPath.startsWith(prjPath)) {
+	// locations.add(manager.indexLocations.get(path));
+	// }
+	// }
+	// }
+	// }
 
 	public IPath[] getIndexLocations() {
 		if (this.indexLocations == null) {
@@ -338,7 +329,8 @@ public class IndexSelector {
 	 * Returns thescriptproject that corresponds to the given path. Returns null
 	 * if the path doesn't correspond to a project.
 	 */
-	private static IScriptProject getScriptProject(IPath path, IScriptModel model) {
+	private static IScriptProject getScriptProject(IPath path,
+			IScriptModel model) {
 		IScriptProject project = model.getScriptProject(path.lastSegment());
 		if (project.exists()) {
 			return project;

@@ -130,4 +130,11 @@
         id="org.eclipse.dltk.core.fileCache.default">
       </fileCache>
    </extension>
+   <extension
+         point="org.eclipse.dltk.core.projectIndexer">
+      <projectIndexer
+            class="org.eclipse.dltk.internal.core.structure.StructureProjectIndexer"
+            nature="#">
+      </projectIndexer>
+   </extension>
 </plugin>
