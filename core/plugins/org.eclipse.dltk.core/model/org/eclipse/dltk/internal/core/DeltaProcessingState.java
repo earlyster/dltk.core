@@ -658,8 +658,12 @@ public class DeltaProcessingState implements IResourceChangeListener {
 	}
 
 	public void saveExternalLibTimeStamps() throws CoreException {
-		this.externalTimeStamps.save();
-		this.customTimeStamps.save();
+		if (this.externalTimeStamps != null) {
+			this.externalTimeStamps.save();
+		}
+		if (this.customTimeStamps != null) {
+			this.customTimeStamps.save();
+		}
 	}
 
 	/*
