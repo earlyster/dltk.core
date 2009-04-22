@@ -748,12 +748,12 @@ public class DLTKSearchScope extends AbstractSearchScope {
 						IProjectFragment[] fragments = project
 								.getProjectFragments();
 						IFileHandle t = (IFileHandle) target;
-						String absPath = t.getFullPath().toString();
+						IPath absPath = t.getFullPath();
 						for (int i = 0; i < fragments.length; ++i) {
 							IProjectFragment f = fragments[i];
 							if (f instanceof ExternalProjectFragment) {
 								ExternalProjectFragment ep = (ExternalProjectFragment) f;
-								String pPath = ep.getPath().toString();
+								IPath pPath = ep.getPath();
 								if (absPath.equals(pPath)) {
 									return f;
 								}
