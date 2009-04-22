@@ -66,16 +66,19 @@ public abstract class AbstractScriptFormatterFactory extends
 	}
 
 	public Map loadDefaultSettings() {
-		DefaultScope scope = new DefaultScope();
 		Map settings = new HashMap();
 		PreferenceKey[] keys = getPreferenceKeys();
-		for (int i = 0; i < keys.length; i++) {
-			PreferenceKey key = keys[i];
-			String name = key.getName();
-			IEclipsePreferences preferences = scope.getNode(key.getQualifier());
-			String value = preferences.get(name, null);
-			if (value != null)
-				settings.put(name, value);
+		if (keys != null) {
+			DefaultScope scope = new DefaultScope();
+			for (int i = 0; i < keys.length; i++) {
+				PreferenceKey key = keys[i];
+				String name = key.getName();
+				IEclipsePreferences preferences = scope.getNode(key
+						.getQualifier());
+				String value = preferences.get(name, null);
+				if (value != null)
+					settings.put(name, value);
+			}
 		}
 		return settings;
 	}

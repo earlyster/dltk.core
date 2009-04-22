@@ -15,6 +15,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class FormatterMessages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.ui.formatter.FormatterMessages"; //$NON-NLS-1$
+	public static String AbstractFormatterSelectionBlock_activeProfileName;
 	public static String AbstractScriptFormatterFactory_defaultProfileName;
 	public static String AbstractFormatterSelectionBlock_activeProfile;
 	public static String AbstractFormatterSelectionBlock_confirmRemoveLabel;
@@ -30,6 +31,8 @@ public class FormatterMessages extends NLS {
 	public static String AbstractFormatterSelectionBlock_notValidProfile;
 	public static String AbstractFormatterSelectionBlock_preview;
 	public static String AbstractFormatterSelectionBlock_removeProfile;
+	public static String AbstractFormatterSelectionBlock_formatterLabel;
+	public static String AbstractFormatterSelectionBlock_profilesGroup;
 	public static String AlreadyExistsDialog_loadProfile;
 	public static String AlreadyExistsDialog_nameEmpty;
 	public static String AlreadyExistsDialog_nameExists;
