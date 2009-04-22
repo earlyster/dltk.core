@@ -11,6 +11,7 @@
 package org.eclipse.dltk.internal.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -18,6 +19,8 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IParent;
@@ -28,6 +31,7 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.ui.IModelContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -44,34 +48,34 @@ import org.eclipse.jface.viewers.Viewer;
  * 
  * <pre>
  *  Java model (
- * <code>
+ * &lt;code&gt;
  * IJavaModel
- * </code>
+ * &lt;/code&gt;
  * )
  *  Java project (
- * <code>
+ * &lt;code&gt;
  * IJavaProject
- * </code>
+ * &lt;/code&gt;
  * )
  *  package fragment root (
- * <code>
+ * &lt;code&gt;
  * IPackageFragmentRoot
- * </code>
+ * &lt;/code&gt;
  * )
  *  package fragment (
- * <code>
+ * &lt;code&gt;
  * IPackageFragment
- * </code>
+ * &lt;/code&gt;
  * )
  *  compilation unit (
- * <code>
+ * &lt;code&gt;
  * ICompilationUnit
- * </code>
+ * &lt;/code&gt;
  * )
  *  binary class file (
- * <code>
+ * &lt;code&gt;
  * IClassFile
- * </code>
+ * &lt;/code&gt;
  * )
  * </pre>
  * 
@@ -103,8 +107,8 @@ public class StandardModelElementContentProvider implements
 	 * Creates a new <code>StandardJavaElementContentProvider</code>.
 	 * 
 	 * @param provideMembers
-	 *            if <code>true</code> members below compilation units and
-	 *            class files are provided.
+	 *            if <code>true</code> members below compilation units and class
+	 *            files are provided.
 	 */
 	public StandardModelElementContentProvider(boolean provideMembers) {
 		fProvideMembers = provideMembers;
@@ -182,28 +186,76 @@ public class StandardModelElementContentProvider implements
 	public void dispose() {
 	}
 
+	public Object[] getExtendedChildren(Object element, Object[] children) {
+		String toolkitId = getToolkitID(element);
+		IModelContentProvider[] providers = UIModelProviderManager
+				.getContentProviders(toolkitId);
+		if (providers.length > 0) {
+			List elements = new ArrayList();
+			elements.addAll(Arrays.asList(children));
+			for (int i = 0; i < providers.length; i++) {
+				providers[i].provideModelChanges(element, elements,
+						(ITreeContentProvider) this);
+			}
+			return elements.toArray();
+		} else {
+			return children;
+		}
+	}
+
+	private String getToolkitID(Object element) {
+		if (element instanceof IModelElement) {
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit((IModelElement) element);
+			if (toolkit != null) {
+				return toolkit.getNatureId();
+			}
+		}
+		return null;
+	}
+
+	public Object getExtendedParent(Object element) {
+		IModelContentProvider[] providers = UIModelProviderManager
+				.getContentProviders(getToolkitID(element));
+		if (providers.length > 0) {
+			for (int i = 0; i < providers.length; i++) {
+				Object parent = providers[i].getParentElement(element,
+						(ITreeContentProvider) this);
+				if (parent != null) {
+					return parent;
+				}
+			}
+		}
+		return null;
+	}
+
 	/*
 	 * (non-Javadoc) Method declared on ITreeContentProvider.
 	 */
 	public Object[] getChildren(Object element) {
 		if (!exists(element))
-			return NO_CHILDREN;
+			return getExtendedChildren(element, NO_CHILDREN);
 
 		try {
 			if (element instanceof IScriptModel)
-				return getScriptProjects((IScriptModel) element);
+				return getExtendedChildren(element,
+						getScriptProjects((IScriptModel) element));
 
 			if (element instanceof IScriptProject)
-				return getProjectFragments((IScriptProject) element);
+				return getExtendedChildren(element,
+						getProjectFragments((IScriptProject) element));
 
 			if (element instanceof IProjectFragment)
-				return getProjectFragmentContent((IProjectFragment) element);
+				return getExtendedChildren(element,
+						getProjectFragmentContent((IProjectFragment) element));
 
 			if (element instanceof IScriptFolder)
-				return getScriptFolderContent((IScriptFolder) element);
+				return getExtendedChildren(element,
+						getScriptFolderContent((IScriptFolder) element));
 
 			if (element instanceof IFolder)
-				return getFolderContent((IFolder) element);
+				return getExtendedChildren(element,
+						getFolderContent((IFolder) element));
 			//			
 			// if (element instanceof IJarEntryResource) {
 			// return ((IJarEntryResource) element).getChildren();
@@ -211,12 +263,13 @@ public class StandardModelElementContentProvider implements
 			//			
 			if (getProvideMembers() && element instanceof ISourceReference
 					&& element instanceof IParent) {
-				return ((IParent) element).getChildren();
+				return getExtendedChildren(element, ((IParent) element)
+						.getChildren());
 			}
 		} catch (CoreException e) {
 			return NO_CHILDREN;
 		}
-		return NO_CHILDREN;
+		return getExtendedChildren(element, NO_CHILDREN);
 	}
 
 	/*
@@ -262,7 +315,11 @@ public class StandardModelElementContentProvider implements
 	 */
 	public Object getParent(Object element) {
 		if (!exists(element))
-			return null;
+			return getExtendedParent(element);
+		Object parent = getExtendedParent(element);
+		if (parent != null) {
+			return parent;
+		}
 		return internalGetParent(element);
 	}
 
@@ -518,9 +575,9 @@ public class StandardModelElementContentProvider implements
 			}
 			return parent;
 		} /*
-			 * else if (element instanceof IJarEntryResource) { return
-			 * ((IJarEntryResource) element).getParent(); }
-			 */
+		 * else if (element instanceof IJarEntryResource) { return
+		 * ((IJarEntryResource) element).getParent(); }
+		 */
 		return null;
 	}
 

@@ -11,7 +11,9 @@
    <extension-point id="actionFilterTester" name="%extension-point.name.actionFilterTester" schema="schema/actionFilterTester.exsd"/>  
    <extension-point id="editorContextActionGroup" name="%extension-point.name.editorContextActionGroup" schema="schema/editorContextActionGroup.exsd"/>  
    <extension-point id="formatterFactory" name="%extension-point.name.formatterFactory" schema="schema/formatterFactory.exsd"/>  
-   <extension-point id="correctionProcessor" name="%extension-point.name.correctionProcessor" schema="schema/correctionProcessor.exsd"/>  
+   <extension-point id="correctionProcessor" name="%extension-point.name.correctionProcessor" schema="schema/correctionProcessor.exsd"/>
+   <extension-point id="modelContentProvider" name="modelContentProvider" schema="schema/modelContentProvider.exsd"/>
+   <extension-point id="modelLabelProvider" name="modelLabelProvider" schema="schema/modelLabelProvider.exsd"/>  
    <extension
     	id="DLTKSearchResultPage"
         point="org.eclipse.search.searchResultViewPages">

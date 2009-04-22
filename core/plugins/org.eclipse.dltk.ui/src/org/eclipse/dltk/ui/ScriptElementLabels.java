@@ -16,8 +16,10 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.BuildpathContainerInitializer;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
@@ -32,6 +34,8 @@ import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
 import org.eclipse.dltk.internal.core.ExternalProjectFragment;
+import org.eclipse.dltk.internal.ui.UIModelProviderManager;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 /**
@@ -447,6 +451,20 @@ public class ScriptElementLabels {
 		return ""; //$NON-NLS-1$
 	}
 
+	private ILabelProvider[] getProviders(Object element) {
+		String idtoolkit = null;
+		if (element instanceof IModelElement) {
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit((IModelElement) element);
+			if (toolkit != null) {
+				idtoolkit = toolkit.getNatureId();
+			}
+		}
+		ILabelProvider[] providers = UIModelProviderManager
+				.getLabelProviders(idtoolkit);
+		return providers;
+	}
+
 	/**
 	 * Returns the label for a model element with the flags as defined by this
 	 * class.
@@ -458,6 +476,15 @@ public class ScriptElementLabels {
 	 * @return the label of the model element
 	 */
 	public String getElementLabel(IModelElement element, long flags) {
+		ILabelProvider[] providers = getProviders(element);
+		if (providers != null) {
+			for (int i = 0; i < providers.length; i++) {
+				String text = providers[i].getText(element);
+				if (text != null) {
+					return text;
+				}
+			}
+		}
 		StringBuffer buf = new StringBuffer(61);
 		getElementLabel(element, flags, buf);
 		return buf.toString();
