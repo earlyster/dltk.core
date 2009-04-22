@@ -82,7 +82,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 	 * @see IModelElement#getPath()
 	 */
 	public IPath getPath() {
-		ProjectFragment root = this.getProjectFragment();
+		IProjectFragment root = this.getProjectFragment();
 		if (root.isArchive()) {
 			return root.getPath();
 		} else {
@@ -94,7 +94,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 	 * @see IModelElement#getResource()
 	 */
 	public IResource getResource() {
-		ProjectFragment root = this.getProjectFragment();
+		IProjectFragment root = this.getProjectFragment();
 		if (root.isArchive()) {
 			return root.getResource();
 		} else {
@@ -141,9 +141,17 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		// add modules from resources
 		HashSet vChildren = new HashSet();
 		try {
-			ProjectFragment root = getProjectFragment();
-			char[][] inclusionPatterns = root.fullInclusionPatternChars();
-			char[][] exclusionPatterns = root.fullExclusionPatternChars();
+			IProjectFragment root = getProjectFragment();
+			char[][] inclusionPatterns = null;
+			if (root instanceof ProjectFragment) {
+				inclusionPatterns = ((ProjectFragment) root)
+						.fullInclusionPatternChars();
+			}
+			char[][] exclusionPatterns = null;
+			if (root instanceof ProjectFragment) {
+				exclusionPatterns = ((ProjectFragment) root)
+						.fullExclusionPatternChars();
+			}
 			IResource[] members = ((IContainer) underlyingResource).members();
 			for (int i = 0, max = members.length; i < max; i++) {
 				IResource child = members[i];
@@ -219,8 +227,8 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		return new SourceModule(this, cuName, DefaultWorkingCopyOwner.PRIMARY);
 	}
 
-	public final ProjectFragment getProjectFragment() {
-		return (ProjectFragment) getParent();
+	public final IProjectFragment getProjectFragment() {
+		return (IProjectFragment) getParent();
 	}
 
 	/**
@@ -274,7 +282,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 			return ModelElementInfo.NO_NON_SCRIPT_RESOURCES;
 		} else {
 			return ((ScriptFolderInfo) getElementInfo()).getForeignResources(
-					getResource(), getProjectFragment());
+					getResource(), (ProjectFragment) getProjectFragment());
 		}
 	}
 
