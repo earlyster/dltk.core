@@ -722,7 +722,7 @@ public class DeltaProcessor {
 					element = DLTKCore.create(resource);
 				} else {
 					// find the root
-					ProjectFragment root = this.currentElement
+					IProjectFragment root = this.currentElement
 							.getProjectFragment();
 					if (root == null) {
 						element = DLTKCore.create(resource);
