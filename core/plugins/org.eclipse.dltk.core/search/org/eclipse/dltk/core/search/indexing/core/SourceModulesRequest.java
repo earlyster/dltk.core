@@ -51,6 +51,10 @@ class SourceModulesRequest extends IndexRequest {
 
 	protected void run() throws CoreException, IOException {
 		final Index index = getIndexer().getProjectIndex(project);
+		if (index == null) {
+			DLTKCore.error("Index are null for:" + this.modules);
+			return;
+		}
 		final IPath containerPath = project.getPath();
 		final List changes = checkChanges(index, modules, containerPath,
 				EnvironmentManager.getEnvironment(project));
