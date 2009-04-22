@@ -11,6 +11,7 @@ package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
@@ -18,7 +19,11 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IModelProvider;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
@@ -179,9 +184,21 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 			}
 		}
 
-		IModelElement[] children = new IModelElement[vChildren.size()];
-		vChildren.toArray(children);
-		info.setChildren(children);
+		// IModelElement[] children = new IModelElement[vChildren.size()];
+		// vChildren.toArray(children);
+		List childrenSet = new ArrayList(vChildren);
+		// Call for extra model providers
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(this);
+		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
+				.getNatureId());
+		if (providers != null) {
+			for (int i = 0; i < providers.length; i++) {
+				providers[i].provideModelChanges(this, childrenSet);
+			}
+		}
+		info.setChildren((IModelElement[]) childrenSet
+				.toArray(new IModelElement[childrenSet.size()]));
 		return true;
 	}
 
@@ -213,6 +230,41 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 	}
 
 	public ISourceModule getSourceModule(String name) {
+		// We need to check for element providers and if provider are declared
+		// we need to build structure to return correct handle here.
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(this);
+		if (toolkit != null) {
+			IModelProvider[] providers = ModelProviderManager
+					.getProviders(toolkit.getNatureId());
+			if (providers != null) {
+				boolean provides = false;
+				for (int i = 0; i < providers.length; i++) {
+					if (providers[i].isModelChangesProvidedFor(this, name)) {
+						provides = true;
+						break;
+					}
+				}
+				if (provides) {
+					try {
+						IModelElement[] children = getChildren();
+						IPath fullPath = getPath().append(name);
+						for (int i = 0; i < children.length; i++) {
+							IModelElement child = children[i];
+							if (child instanceof IScriptFolder) {
+								IPath childPath = child.getPath();
+								if (fullPath.equals(childPath)) {
+									return (ISourceModule) child;
+								}
+							}
+						}
+					} catch (ModelException e) {
+						DLTKCore.error(
+								"Could not obtain model element childrens.", e);
+					}
+				}
+			}
+		}
 		return new SourceModule(this, name, DefaultWorkingCopyOwner.PRIMARY);
 	}
 
@@ -281,8 +333,12 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		if (this.isRootFolder()) {
 			return ModelElementInfo.NO_NON_SCRIPT_RESOURCES;
 		} else {
-			return ((ScriptFolderInfo) getElementInfo()).getForeignResources(
-					getResource(), (ProjectFragment) getProjectFragment());
+			if (getProjectFragment() instanceof ProjectFragment) {
+				return ((ScriptFolderInfo) getElementInfo())
+						.getForeignResources(getResource(),
+								(ProjectFragment) getProjectFragment());
+			}
+			return ModelElementInfo.NO_NON_SCRIPT_RESOURCES;
 		}
 	}
 
@@ -311,6 +367,9 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 			String classFileName = memento.nextToken();
 			ModelElement classFile = (ModelElement) getSourceModule(classFileName);
 			return classFile.getHandleFromMemento(memento, owner);
+		case JEM_USER_ELEMENT:
+			return MementoModelElementUtil.getHandleFromMememento(memento,
+					this, owner);
 		}
 		return null;
 	}

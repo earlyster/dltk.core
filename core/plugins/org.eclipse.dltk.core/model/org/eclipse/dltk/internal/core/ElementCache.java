@@ -73,7 +73,7 @@ public class ElementCache extends OverflowingLRUCache {
 	 * children. If the space limit must be increased, record the parent that
 	 * needed this space limit.
 	 */
-	protected void ensureSpaceLimit(int childrenSize, IModelElement parent) {
+	public void ensureSpaceLimit(int childrenSize, IModelElement parent) {
 		// ensure the children can be put without closing other elements
 		int spaceNeeded = 1 + (int) ((1 + fLoadFactor) * (childrenSize + fOverflow));
 		if (fSpaceLimit < spaceNeeded) {
@@ -95,7 +95,7 @@ public class ElementCache extends OverflowingLRUCache {
 	 * If the given parent was the one that increased the space limit, reset the
 	 * space limit to the given default value.
 	 */
-	protected void resetSpaceLimit(int defaultLimit, IModelElement parent) {
+	public void resetSpaceLimit(int defaultLimit, IModelElement parent) {
 		if (parent.equals(this.spaceLimitParent)) {
 			setSpaceLimit(defaultLimit);
 			this.spaceLimitParent = null;

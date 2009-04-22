@@ -36,8 +36,9 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 	}
 
 	/*
-	 * @see org.eclipse.dltk.core.ISourceModule#becomeWorkingCopy(org.eclipse.dltk.core.IProblemRequestor,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * @see
+	 * org.eclipse.dltk.core.ISourceModule#becomeWorkingCopy(org.eclipse.dltk
+	 * .core.IProblemRequestor, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void becomeWorkingCopy(IProblemRequestor problemRequestor,
 			IProgressMonitor monitor) {
@@ -46,7 +47,7 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 
 	/*
 	 * @see org.eclipse.dltk.core.ICodeAssist#codeComplete(int,
-	 *      org.eclipse.dltk.core.CompletionRequestor)
+	 * org.eclipse.dltk.core.CompletionRequestor)
 	 */
 	public void codeComplete(int offset, CompletionRequestor requestor) {
 		// external, do nothing
@@ -54,8 +55,8 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 
 	/*
 	 * @see org.eclipse.dltk.core.ICodeAssist#codeComplete(int,
-	 *      org.eclipse.dltk.core.CompletionRequestor,
-	 *      org.eclipse.dltk.core.WorkingCopyOwner)
+	 * org.eclipse.dltk.core.CompletionRequestor,
+	 * org.eclipse.dltk.core.WorkingCopyOwner)
 	 */
 	public void codeComplete(int offset, CompletionRequestor requestor,
 			WorkingCopyOwner owner) {
@@ -64,7 +65,7 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 
 	/*
 	 * @see org.eclipse.dltk.core.ISourceModule#commitWorkingCopy(boolean,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void commitWorkingCopy(boolean force, IProgressMonitor monitor)
 			throws ModelException {
@@ -74,7 +75,7 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 
 	/*
 	 * @see org.eclipse.dltk.core.ISourceManipulation#delete(boolean,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void delete(boolean force, IProgressMonitor monitor) {
 		// external, do nothing
@@ -106,9 +107,10 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 	}
 
 	/*
-	 * @see org.eclipse.dltk.core.ISourceModule#getWorkingCopy(org.eclipse.dltk.core.WorkingCopyOwner,
-	 *      org.eclipse.dltk.core.IProblemRequestor,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * @see
+	 * org.eclipse.dltk.core.ISourceModule#getWorkingCopy(org.eclipse.dltk.core
+	 * .WorkingCopyOwner, org.eclipse.dltk.core.IProblemRequestor,
+	 * org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public ISourceModule getWorkingCopy(WorkingCopyOwner workingCopyOwner,
 			IProblemRequestor problemRequestor, IProgressMonitor monitor) {
@@ -122,7 +124,9 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 		return true;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#hasBuffer()
 	 */
 	protected boolean hasBuffer() {
@@ -130,7 +134,9 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.Openable#makeConsistent(org.eclipse.core.runtime.IProgressMonitor)
+	 * @see
+	 * org.eclipse.dltk.internal.core.Openable#makeConsistent(org.eclipse.core
+	 * .runtime.IProgressMonitor)
 	 */
 	public void makeConsistent(IProgressMonitor monitor) throws ModelException {
 		// makeConsistent(false/*don't create AST*/, 0, monitor);
@@ -138,9 +144,10 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 	}
 
 	/*
-	 * @see org.eclipse.dltk.core.ISourceManipulation#move(org.eclipse.dltk.core.IModelElement,
-	 *      org.eclipse.dltk.core.IModelElement, java.lang.String, boolean,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * @see
+	 * org.eclipse.dltk.core.ISourceManipulation#move(org.eclipse.dltk.core.
+	 * IModelElement, org.eclipse.dltk.core.IModelElement, java.lang.String,
+	 * boolean, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void move(IModelElement container, IModelElement sibling,
 			String rename, boolean replace, IProgressMonitor monitor)
@@ -151,8 +158,8 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 
 	/*
 	 * @see org.eclipse.dltk.core.ISourceModule#reconcile(boolean,
-	 *      org.eclipse.dltk.core.WorkingCopyOwner,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * org.eclipse.dltk.core.WorkingCopyOwner,
+	 * org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void reconcile(boolean forceProblemDetection,
 			WorkingCopyOwner workingCopyOwner, IProgressMonitor monitor) {
@@ -161,7 +168,7 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 
 	/*
 	 * @see org.eclipse.dltk.core.ISourceManipulation#rename(java.lang.String,
-	 *      boolean, org.eclipse.core.runtime.IProgressMonitor)
+	 * boolean, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void rename(String name, boolean replace, IProgressMonitor monitor) {
 		// external, do nothing
@@ -175,7 +182,9 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getProblemReporter(java.lang.String)
+	 * @see
+	 * org.eclipse.dltk.internal.core.AbstractSourceModule#getProblemReporter
+	 * (java.lang.String)
 	 */
 	protected IProblemReporter getProblemReporter(String natureId) {
 		// external, no reporter required
@@ -183,8 +192,10 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#validateSorceModule(org.eclipse.dltk.core.IDLTKLanguageToolkit,
-	 *      org.eclipse.core.resources.IResource)
+	 * @see
+	 * org.eclipse.dltk.internal.core.AbstractSourceModule#validateSorceModule
+	 * (org.eclipse.dltk.core.IDLTKLanguageToolkit,
+	 * org.eclipse.core.resources.IResource)
 	 */
 	protected IStatus validateSorceModule(IDLTKLanguageToolkit toolkit,
 			IResource resource) {

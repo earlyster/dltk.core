@@ -78,6 +78,7 @@ import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IParent;
 import org.eclipse.dltk.core.IProblemRequestor;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IProjectFragmentTimestamp;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
@@ -88,6 +89,7 @@ import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.builder.ScriptBuilder;
+import org.eclipse.dltk.internal.core.caching.SourceModuleInfoCache;
 import org.eclipse.dltk.internal.core.search.DLTKWorkspaceScope;
 import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.dltk.internal.core.util.Messages;
@@ -203,6 +205,27 @@ public class ModelManager implements ISaveParticipant {
 							externalTimeStamps.put(path, new Long(timestamp));
 						}
 					}
+				}
+			}
+			Map customTimeStamps = ModelManager.getModelManager().deltaState
+					.getCustomTimeStamps();
+			// Save custom project fragments timestamps.
+			try {
+				ScriptProject scriptProject = (ScriptProject) DLTKCore
+						.create(project);
+				IProjectFragment[] fragments = scriptProject
+						.getAllProjectFragments();
+				for (int i = 0; i < fragments.length; i++) {
+					if (fragments[i] instanceof IProjectFragmentTimestamp) {
+						IProjectFragmentTimestamp stamp = (IProjectFragmentTimestamp) fragments[i];
+						long timeStamp = stamp.getTimeStamp();
+						customTimeStamps.put(fragments[i].getPath(), new Long(
+								timeStamp));
+					}
+				}
+			} catch (ModelException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
 				}
 			}
 		}

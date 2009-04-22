@@ -50,7 +50,7 @@ public class ScriptFolderInfo extends OpenableElementInfo {
 		return this.foreignResources;
 	}
 
-	boolean containsScriptResources() {
+	public boolean containsScriptResources() {
 		return size() != 0;
 	}
 }

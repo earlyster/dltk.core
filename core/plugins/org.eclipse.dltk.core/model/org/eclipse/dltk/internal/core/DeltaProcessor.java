@@ -42,6 +42,7 @@ import org.eclipse.dltk.core.IElementChangedListener;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IProjectFragmentTimestamp;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
@@ -1877,6 +1878,8 @@ public class DeltaProcessor {
 							}
 							this.createExternalArchiveDelta(null,
 									refreshedElementsCopy);
+							this.createCustomElementDelta(null,
+									refreshedElementsCopy);
 						}
 						IModelElementDelta translatedDelta = this
 								.processResourceDelta(delta);
@@ -1955,6 +1958,161 @@ public class DeltaProcessor {
 			ScriptBuilder.buildFinished();
 			return;
 		}
+	}
+
+	/**
+	 * Create delta for custom user project fragments.
+	 * 
+	 * @param refreshedElementsCopy
+	 */
+	private boolean createCustomElementDelta(IProgressMonitor monitor,
+			Set refreshedElements) {
+		if (refreshedElements == null) {
+			return false;
+		}
+		boolean hasDelta = false;
+
+		HashSet fragmentsToRefresh = new HashSet();
+		Iterator iterator = refreshedElements.iterator();
+		while (iterator.hasNext()) {
+			IModelElement element = (IModelElement) iterator.next();
+			switch (element.getElementType()) {
+			case IModelElement.PROJECT_FRAGMENT:
+				IProjectFragment fragment = (IProjectFragment) element;
+				try {
+					if (fragment.isExternal()
+							&& fragment.getRawBuildpathEntry() == null) {
+						fragmentsToRefresh.add(element);
+					}
+				} catch (ModelException e1) {
+					if (DLTKCore.DEBUG) {
+						e1.printStackTrace();
+					}
+				}
+				break;
+			case IModelElement.SCRIPT_PROJECT:
+				ScriptProject scriptProject = (ScriptProject) element;
+				if (!DLTKLanguageManager.hasScriptNature(scriptProject
+						.getProject())) {
+					// project is not accessible or has lost its script
+					// nature
+					break;
+				}
+				try {
+					IProjectFragment[] fragments = scriptProject
+							.getProjectFragments();
+					for (int i = 0; i < fragments.length; i++) {
+						if (fragments[i].isExternal()
+								&& fragments[i].getRawBuildpathEntry() == null) {
+							fragmentsToRefresh.add(fragments[i]);
+						}
+					}
+				} catch (ModelException e1) {
+					if (DLTKCore.DEBUG) {
+						e1.printStackTrace();
+					}
+				}
+				break;
+			case IModelElement.SCRIPT_MODEL:
+				Iterator projectNames = this.state.getOldScriptProjectNames()
+						.iterator();
+				while (projectNames.hasNext()) {
+					String projectName = (String) projectNames.next();
+					IProject project = ResourcesPlugin.getWorkspace().getRoot()
+							.getProject(projectName);
+					if (!DLTKLanguageManager.hasScriptNature(project)) {
+						// project is not accessible or has lost its Script
+						// nature
+						continue;
+					}
+					scriptProject = (ScriptProject) DLTKCore.create(project);
+					try {
+						IProjectFragment[] fragments = scriptProject
+								.getProjectFragments();
+						for (int i = 0; i < fragments.length; i++) {
+							if (fragments[i].isExternal()
+									&& fragments[i].getRawBuildpathEntry() == null) {
+								fragmentsToRefresh.add(fragments[i]);
+							}
+						}
+					} catch (ModelException e1) {
+						if (DLTKCore.DEBUG) {
+							e1.printStackTrace();
+						}
+					}
+				}
+				break;
+			}
+		}
+		// perform refresh
+		Iterator projectNames = this.state.getOldScriptProjectNames()
+				.iterator();
+		IWorkspaceRoot wksRoot = ResourcesPlugin.getWorkspace().getRoot();
+		while (projectNames.hasNext()) {
+			if (monitor != null && monitor.isCanceled()) {
+				break;
+			}
+			String projectName = (String) projectNames.next();
+			IProject project = wksRoot.getProject(projectName);
+			if (!DLTKLanguageManager.hasScriptNature(project)) {
+				// project is not accessible or has lost its Script nature
+				continue;
+			}
+			ScriptProject scriptProject = (ScriptProject) DLTKCore
+					.create(project);
+			IProjectFragment[] fragments;
+			try {
+				fragments = scriptProject.getProjectFragments();
+				for (int i = 0; i < fragments.length; i++) {
+					if (!fragmentsToRefresh.contains(fragments[i])) {
+						continue;
+					}
+					IProjectFragment fragment = fragments[i];
+					if (fragment instanceof IProjectFragmentTimestamp) {
+						Long oldTimestamp = (Long) this.state
+								.getCustomTimeStamps().get(fragment.getPath());
+						long newTimeStamp = ((IProjectFragmentTimestamp) fragment)
+								.getTimeStamp();
+						if (oldTimestamp == null) {
+							if (newTimeStamp != 0) {
+								/**
+								 * This is new element
+								 **/
+								this.state.getCustomTimeStamps().put(
+										fragment.getPath(),
+										new Long(newTimeStamp));
+								// index new library
+								ProjectIndexerManager.indexLibrary(
+										scriptProject, fragment.getPath());
+								if (fragment instanceof Openable) {
+									this.elementAdded((Openable) fragment,
+											null, null);
+								}
+								hasDelta = true;
+							}
+						} else {
+							if (oldTimestamp.longValue() != newTimeStamp) {
+								this.state.getCustomTimeStamps().put(
+										fragment.getPath(),
+										new Long(newTimeStamp));
+								// index new library
+								ProjectIndexerManager.indexLibrary(
+										scriptProject, fragment.getPath());
+								if (fragment instanceof Openable) {
+									this.contentChanged((Openable) fragment);
+								}
+								hasDelta = true;
+							}
+						}
+					}
+				}
+			} catch (ModelException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return hasDelta;
 	}
 
 	/*

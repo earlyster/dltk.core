@@ -19,6 +19,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -53,7 +54,9 @@ import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IModelElementMemento;
 import org.eclipse.dltk.core.IModelMarker;
+import org.eclipse.dltk.core.IModelProvider;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
@@ -229,8 +232,28 @@ public class ScriptProject extends Openable implements IScriptProject {
 						.getProject(path.lastSegment()));
 			} else {
 				// lib being a folder
-				return getProjectFragment(this.project.getWorkspace().getRoot()
-						.getFolder(path));
+				IFolder folder = this.project.getWorkspace().getRoot()
+						.getFolder(path);
+				if (folder != null) {
+					IProjectFragment projectFragment = getProjectFragment(folder);
+					return projectFragment;
+				}
+				// No folders with such path exist in workspace, lets
+				// getAllFragments and check.
+				IProjectFragment[] fragments;
+				try {
+					fragments = getProjectFragments();
+					for (int i = 0; i < fragments.length; i++) {
+						if (fragments[i].getPath().equals(path)) {
+							return fragments[i];
+						}
+					}
+				} catch (ModelException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
+				return null;
 			}
 		}
 	}
@@ -639,13 +662,33 @@ public class ScriptProject extends Openable implements IScriptProject {
 		// since can create deadlocks (see bug 37274)
 		IBuildpathEntry[] resolvedBuildpath = getResolvedBuildpath();
 		// compute the project fragements
-		info
-				.setChildren(computeProjectFragments(resolvedBuildpath, false,
-						null));
+		IModelElement[] children = computeProjectFragments(resolvedBuildpath,
+				false, null);
+		setProjectInfoChildren(info, children);
+
 		// remember the timestamps of external libraries the first time they are
 		// looked up
 		getPerProjectInfo().rememberExternalLibTimestamps();
 		return true;
+	}
+
+	private void setProjectInfoChildren(OpenableElementInfo info,
+			IModelElement[] children) {
+		List fragments = new ArrayList();
+		fragments.addAll(Arrays.asList(children));
+		// Call for extra model providers
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(this);
+		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
+				.getNatureId());
+		if (providers != null) {
+			for (int i = 0; i < providers.length; i++) {
+				providers[i].provideModelChanges(this, fragments);
+			}
+		}
+
+		info.setChildren((IModelElement[]) fragments
+				.toArray(new IModelElement[fragments.size()]));
 	}
 
 	public ModelManager.PerProjectInfo getPerProjectInfo()
@@ -676,9 +719,10 @@ public class ScriptProject extends Openable implements IScriptProject {
 				null, // inside original project
 				true, // check existency
 				retrieveExportedRoots, rootToResolvedEntries);
-		IProjectFragment[] rootArray = new IProjectFragment[accumulatedRoots
-				.size()];
-		accumulatedRoots.copyInto(rootArray);
+
+		List fragments = accumulatedRoots.asList();
+		IProjectFragment[] rootArray = new IProjectFragment[fragments.size()];
+		fragments.toArray(rootArray);
 		return rootArray;
 	}
 
@@ -995,11 +1039,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 			}
 		}
 		info.setForeignResources(null);
-		info.setChildren(computeProjectFragments(buildpath, false, null /*
-																		 * no
-																		 * reverse
-																		 * map
-																		 */));
+		IProjectFragment[] fragments = computeProjectFragments(buildpath,
+				false, null);
+		setProjectInfoChildren(info, fragments);
 	}
 
 	public IBuildpathEntry[] getRawBuildpath() throws ModelException {
@@ -2722,7 +2764,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 			while (memento.hasMoreTokens()) {
 				token = memento.nextToken();
 				char firstChar = token.charAt(0);
-				if (firstChar != JEM_SCRIPTFOLDER && firstChar != JEM_COUNT) {
+				if (firstChar != JEM_SCRIPTFOLDER && firstChar != JEM_COUNT
+						&& firstChar != JEM_USER_ELEMENT) {
 					rootPath += token;
 				} else {
 					break;
@@ -2734,10 +2777,43 @@ public class ScriptProject extends Openable implements IScriptProject {
 			} else {
 				root = (ModelElement) getProjectFragment(new Path(rootPath));
 			}
-			if (token != null && token.charAt(0) == JEM_SCRIPTFOLDER) {
+			if (token != null && token.charAt(0) == JEM_SCRIPTFOLDER
+					&& root != null) {
 				return root.getHandleFromMemento(token, memento, owner);
-				} else {
+			} else if (token != null && token.charAt(0) == JEM_USER_ELEMENT
+					&& root != null) {
+				return root.getHandleFromMemento(token, memento, owner);
+			} else if (root != null) {
 				return root.getHandleFromMemento(memento, owner);
+			}
+			return null;
+		case JEM_USER_ELEMENT:
+			// We need to construct project children and return appropriate
+			// element from it.
+			token = null;
+			String name = "";
+			while (memento.hasMoreTokens()) {
+				token = memento.nextToken();
+				char firstChar = token.charAt(0);
+				if (ModelElement.JEM_USER_ELEMENT_ENDING.indexOf(firstChar) == -1
+						&& firstChar != JEM_COUNT) {
+					name += token;
+				} else {
+					break;
+				}
+			}
+			try {
+				IModelElement[] children = getChildren();
+				for (int i = 0; i < children.length; i++) {
+					if (name.equals(children[i].getElementName())
+							&& children[i] instanceof IModelElementMemento) {
+						IModelElementMemento childMemento = (IModelElementMemento) children[i];
+						return childMemento
+								.getHandleFromMemento(memento, owner);
+					}
+				}
+			} catch (ModelException e) {
+				DLTKCore.error("Incorrect handle resolving", e);
 			}
 		}
 		return null;
@@ -3024,15 +3100,30 @@ public class ScriptProject extends Openable implements IScriptProject {
 
 	public IProjectFragment[] getAllProjectFragments(Map rootToResolvedEntries)
 			throws ModelException {
-		return computeProjectFragments(getResolvedBuildpath(
-				true/* ignoreUnresolvedEntry */, false/*
+		IProjectFragment[] computed = computeProjectFragments(
+				getResolvedBuildpath(true/* ignoreUnresolvedEntry */, false/*
 																		 * don't
 																		 * generateMarkerOnError
-													 */, false/*
-															 * don't
-															 * returnResolutionInProgress
-															 */),
-				true/* retrieveExportedRoots */, rootToResolvedEntries);
+																		 */,
+						false/*
+							 * don't returnResolutionInProgress
+							 */), true/* retrieveExportedRoots */,
+				rootToResolvedEntries);
+		// Add all user project fragments
+		List fragments = new ArrayList();
+		fragments.addAll(Arrays.asList(computed));
+		// Call for extra model providers
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(this);
+		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
+				.getNatureId());
+		if (providers != null) {
+			for (int i = 0; i < providers.length; i++) {
+				providers[i].provideModelChanges(this, fragments);
+			}
+		}
+		return (IProjectFragment[]) fragments
+				.toArray(new IProjectFragment[fragments.size()]);
 	}
 
 	public static boolean hasScriptNature(IProject p) {

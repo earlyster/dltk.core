@@ -31,12 +31,16 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 
 	private IStorage storage;
 
-	public ExternalSourceModule(ScriptFolder parent, String name,
+	public ExternalSourceModule(ModelElement parent, String name,
 			WorkingCopyOwner owner, IStorage storage) {
 		this(parent, name, owner, true, storage);
 	}
 
-	public ExternalSourceModule(ScriptFolder parent, String name,
+	public IStorage getStorage() {
+		return storage;
+	}
+
+	public ExternalSourceModule(ModelElement parent, String name,
 			WorkingCopyOwner owner, boolean readOnly, IStorage storage) {
 		super(parent, name, owner, readOnly);
 		this.storage = storage;
@@ -96,7 +100,8 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	 * org.eclipse.dltk.internal.core.AbstractSourceModule#getBufferContent()
 	 */
 	protected char[] getBufferContent() throws ModelException {
-		IFileHandle file = EnvironmentPathUtils.getFile(getPath());
+		IPath path = getBufferPath();
+		IFileHandle file = EnvironmentPathUtils.getFile(path);
 		InputStream stream = null;
 
 		try {
@@ -146,6 +151,13 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 
 	}
 
+	/**
+	 * Return buffer path in full mode
+	 */
+	protected IPath getBufferPath() {
+		return getPath();
+	}
+
 	/*
 	 * @see
 	 * org.eclipse.dltk.internal.core.AbstractExternalSourceModule#getModuleType
@@ -170,7 +182,7 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	 * ()
 	 */
 	protected ISourceModule getOriginalSourceModule() {
-		return new ExternalSourceModule((ScriptFolder) getParent(),
+		return new ExternalSourceModule((ModelElement) getParent(),
 				getElementName(), DefaultWorkingCopyOwner.PRIMARY, storage);
 	}
 }

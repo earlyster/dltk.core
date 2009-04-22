@@ -18,7 +18,7 @@ import org.eclipse.dltk.core.IModelElement;
  * Holds cached structure and properties for a model element. Subclassed to
  * carry properties for specific kinds of elements.
  */
-/* package */class ModelElementInfo {
+public class ModelElementInfo {
 
 	/**
 	 * Collection of handles of immediate children of this object. This is an
@@ -29,7 +29,7 @@ import org.eclipse.dltk.core.IModelElement;
 	/**
 	 * Shared empty collection used for efficiency.
 	 */
-	static final Object[] NO_NON_SCRIPT_RESOURCES = new Object[0];
+	public static final Object[] NO_NON_SCRIPT_RESOURCES = new Object[0];
 
 	protected ModelElementInfo() {
 	}

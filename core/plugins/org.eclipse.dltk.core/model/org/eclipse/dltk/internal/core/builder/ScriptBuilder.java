@@ -138,7 +138,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				return false;
 			}
 			if (element.getElementType() == IModelElement.PROJECT_FRAGMENT) {
-				if (!(((IProjectFragment) element).isExternal())) {
+				if (!(element instanceof IProjectFragment && ((IProjectFragment) element)
+						.isExternal())) {
 					return false;
 				}
 				IProjectFragment fragment = (IProjectFragment) element;
