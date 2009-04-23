@@ -1000,11 +1000,11 @@ public class ScriptExplorerPart extends ViewPart implements
 		initDrop();
 	}
 
-	private void initDrag() {
+	protected void initDrag() {
 		new DLTKViewerDragSupport(fViewer).start();
 	}
 
-	private void initDrop() {
+	protected void initDrop() {
 		DLTKViewerDropSupport dropSupport = new DLTKViewerDropSupport(fViewer);
 		dropSupport.addDropTargetListener(new WorkingSetDropAdapter(this));
 		dropSupport.start();
