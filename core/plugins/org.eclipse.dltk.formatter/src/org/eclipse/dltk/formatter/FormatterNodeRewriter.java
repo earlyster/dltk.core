@@ -15,8 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-
-public class FormatterNodeRewriter {
+public abstract class FormatterNodeRewriter {
 
 	protected void mergeTextNodes(IFormatterContainerNode root) {
 		final List body = root.getBody();
@@ -69,5 +68,94 @@ public class FormatterNodeRewriter {
 	protected boolean isPlainTextNode(final IFormatterNode node) {
 		return node.getClass() == FormatterTextNode.class;
 	}
+
+	private static class CommentInfo {
+		final int startOffset;
+		final int endOffset;
+		final Object object;
+
+		public CommentInfo(int startOffset, int endOffset, Object object) {
+			this.startOffset = startOffset;
+			this.endOffset = endOffset;
+			this.object = object;
+		}
+
+	}
+
+	private final List comments = new ArrayList();
+
+	protected void addComment(int startOffset, int endOffset, Object object) {
+		comments.add(new CommentInfo(startOffset, endOffset, object));
+	}
+
+	protected void insertComments(IFormatterContainerNode root) {
+		final List body = root.getBody();
+		final List newBody = new ArrayList();
+		boolean changes = false;
+		for (Iterator i = body.iterator(); i.hasNext();) {
+			final IFormatterNode node = (IFormatterNode) i.next();
+			if (isPlainTextNode(node)) {
+				if (hasComments(node.getStartOffset(), node.getEndOffset())) {
+					selectValidRanges(root.getDocument(),
+							node.getStartOffset(), node.getEndOffset(), newBody);
+					changes = true;
+				} else {
+					newBody.add(node);
+				}
+			} else {
+				newBody.add(node);
+			}
+		}
+		if (changes) {
+			body.clear();
+			body.addAll(newBody);
+		}
+		for (Iterator i = body.iterator(); i.hasNext();) {
+			final IFormatterNode node = (IFormatterNode) i.next();
+			if (node instanceof IFormatterContainerNode) {
+				insertComments((IFormatterContainerNode) node);
+			}
+		}
+	}
+
+	private boolean hasComments(int startOffset, int endOffset) {
+		for (Iterator i = comments.iterator(); i.hasNext();) {
+			final CommentInfo commentNode = (CommentInfo) i.next();
+			if (commentNode.startOffset < endOffset
+					&& startOffset < commentNode.endOffset) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void selectValidRanges(IFormatterDocument document, int start,
+			int end, List result) {
+		for (Iterator i = comments.iterator(); i.hasNext();) {
+			final CommentInfo comment = (CommentInfo) i.next();
+			if (start <= comment.endOffset && comment.startOffset <= end) {
+				if (start < comment.startOffset) {
+					int validEnd = Math.min(end, comment.startOffset);
+					result
+							.add(new FormatterTextNode(document, start,
+									validEnd));
+					start = comment.startOffset;
+				}
+				result.add(createCommentNode(document, start, Math.min(
+						comment.endOffset, end), comment.object));
+				start = comment.endOffset;
+				if (start > end) {
+					break;
+				}
+			}
+		}
+		if (start < end) {
+			result.add(new FormatterTextNode(document, start, end));
+		}
+	}
+
+	protected abstract IFormatterNode createCommentNode(
+			IFormatterDocument document, int startOffset, int endOffset,
+			Object object);
 
 }
