@@ -62,6 +62,11 @@ public class FormatterIndentDetector implements IFormatterWriter {
 		// empty
 	}
 
+	public void appendToPreviousLine(IFormatterContext context, String text)
+			throws Exception {
+		// empty
+	}
+
 	/**
 	 * @return the level
 	 */

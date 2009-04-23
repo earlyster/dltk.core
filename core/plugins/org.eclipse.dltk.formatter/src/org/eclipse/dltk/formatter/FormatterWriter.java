@@ -101,6 +101,28 @@ public class FormatterWriter implements IFormatterWriter {
 		skipNextNewLine = true;
 	}
 
+	public void appendToPreviousLine(IFormatterContext context, String text)
+			throws Exception {
+		if (!lineStarted) {
+			skipNextNewLine = false;
+			emptyLines.setLength(0);
+			indent.setLength(0);
+			int len = writer.length();
+			if (len > 0) {
+				if (writer.charAt(len - 1) == '\n') {
+					--len;
+					if (len > 0 && writer.charAt(len - 1) == '\r') {
+						--len;
+					}
+				} else if (writer.charAt(len - 1) == '\r') {
+					--len;
+				}
+				writer.setLength(len);
+				writer.append(text);
+			}
+		}
+	}
+
 	protected void write(IFormatterContext context, String text)
 			throws IOException {
 		if (!context.isWrapping()) {
