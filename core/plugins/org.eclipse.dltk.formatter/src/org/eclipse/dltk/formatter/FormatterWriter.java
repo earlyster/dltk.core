@@ -76,12 +76,16 @@ public class FormatterWriter implements IFormatterWriter {
 	public void writeText(IFormatterContext context, String text)
 			throws Exception {
 		if (lineStarted) {
-			while (writer.length() > 0
-					&& writer.charAt(writer.length() - 1) == ' ') {
-				writer.setLength(writer.length() - 1);
-			}
+			trimTrailingSpaces();
 		}
 		write(context, text);
+	}
+
+	private void trimTrailingSpaces() {
+		while (writer.length() > 0
+				&& FormatterUtils.isSpace(writer.charAt(writer.length() - 1))) {
+			writer.setLength(writer.length() - 1);
+		}
 	}
 
 	/*
@@ -190,6 +194,7 @@ public class FormatterWriter implements IFormatterWriter {
 	protected void write(IFormatterContext context, char ch) throws IOException {
 		if (ch == '\n' || ch == '\r') {
 			if (lineStarted) {
+				trimTrailingSpaces();
 				writer.append(ch);
 				lineStarted = false;
 				if (!newLineCallbacks.isEmpty()) {
