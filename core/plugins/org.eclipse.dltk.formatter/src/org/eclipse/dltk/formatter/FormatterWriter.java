@@ -38,6 +38,8 @@ public class FormatterWriter implements IFormatterWriter {
 	private final IFormatterIndentGenerator indentGenerator;
 	private int linesPreserve = -1;
 	private int wrapLength = -1;
+	private boolean preserveSpaces = true;
+	private boolean skipNextNewLine = false;
 
 	/**
 	 * @param lineDelimiter
@@ -73,6 +75,12 @@ public class FormatterWriter implements IFormatterWriter {
 	 */
 	public void writeText(IFormatterContext context, String text)
 			throws Exception {
+		if (lineStarted) {
+			while (writer.length() > 0
+					&& writer.charAt(writer.length() - 1) == ' ') {
+				writer.setLength(writer.length() - 1);
+			}
+		}
 		write(context, text);
 	}
 
@@ -80,7 +88,11 @@ public class FormatterWriter implements IFormatterWriter {
 	 * @see IFormatterWriter#writeLineBreak(IFormatterContext)
 	 */
 	public void writeLineBreak(IFormatterContext context) throws Exception {
-		write(context, lineDelimiter);
+		if (lineStarted) {
+			write(context, lineDelimiter);
+			assert (!lineStarted);
+		}
+		skipNextNewLine = true;
 	}
 
 	protected void write(IFormatterContext context, String text)
@@ -202,7 +214,12 @@ public class FormatterWriter implements IFormatterWriter {
 				writer.append(ch);
 			}
 		} else {
-			writer.append(ch);
+			if (preserveSpaces
+					|| ch != ' '
+					|| (context.isIndenting() && writer
+							.charAt(writer.length() - 1) != ' ')) {
+				writer.append(ch);
+			}
 		}
 		lastChar = ch;
 	}
@@ -242,6 +259,7 @@ public class FormatterWriter implements IFormatterWriter {
 		} else if (emptyLines.length() != 0) {
 			writeEmptyLines();
 		}
+		skipNextNewLine = false;
 		emptyLines.setLength(0);
 		if (context.isIndenting()) {
 			writeIndent(context);
@@ -254,6 +272,20 @@ public class FormatterWriter implements IFormatterWriter {
 	}
 
 	private void writeEmptyLines() {
+		if (skipNextNewLine) {
+			int i = 0;
+			if (emptyLines.charAt(i) == '\r') {
+				++i;
+				if (i < emptyLines.length() && emptyLines.charAt(i) == '\n') {
+					++i;
+				}
+			} else if (emptyLines.charAt(i) == '\n') {
+				++i;
+			}
+			if (i > 0) {
+				emptyLines.delete(0, i);
+			}
+		}
 		if (linesPreserve >= 0 && linesPreserve < Integer.MAX_VALUE
 				&& TextUtils.countLines(emptyLines) > linesPreserve) {
 			writer.append(TextUtils.selectHeadLines(emptyLines, linesPreserve));
@@ -326,6 +358,14 @@ public class FormatterWriter implements IFormatterWriter {
 	 */
 	public void setWrapLength(int wrapLength) {
 		this.wrapLength = wrapLength;
+	}
+
+	public boolean isPreserveSpaces() {
+		return preserveSpaces;
+	}
+
+	public void setPreserveSpaces(boolean preserveSpaces) {
+		this.preserveSpaces = preserveSpaces;
 	}
 
 }
