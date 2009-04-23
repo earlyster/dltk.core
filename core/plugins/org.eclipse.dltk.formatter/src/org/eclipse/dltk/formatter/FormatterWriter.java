@@ -75,6 +75,8 @@ public class FormatterWriter implements IFormatterWriter {
 	 */
 	public void writeText(IFormatterContext context, String text)
 			throws Exception {
+		skipNextNewLine = false;
+		emptyLines.setLength(0);
 		if (lineStarted) {
 			trimTrailingSpaces();
 		}
@@ -219,10 +221,8 @@ public class FormatterWriter implements IFormatterWriter {
 				writer.append(ch);
 			}
 		} else {
-			if (preserveSpaces
-					|| ch != ' '
-					|| (context.isIndenting() && writer
-							.charAt(writer.length() - 1) != ' ')) {
+			if (preserveSpaces || !context.isIndenting() || ch != ' '
+					|| writer.charAt(writer.length() - 1) != ' ') {
 				writer.append(ch);
 			}
 		}
