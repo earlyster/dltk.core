@@ -67,6 +67,10 @@ public class FormatterIndentDetector implements IFormatterWriter {
 		// empty
 	}
 
+	public void disableAppendToPreviousLine() {
+		// empty
+	}
+
 	/**
 	 * @return the level
 	 */

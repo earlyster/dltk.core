@@ -40,6 +40,8 @@ public interface IFormatterWriter {
 	void appendToPreviousLine(IFormatterContext context, String text)
 			throws Exception;
 
+	void disableAppendToPreviousLine();
+
 	void excludeRegion(IRegion region);
 
 	void addNewLineCallback(IFormatterCallback callback);

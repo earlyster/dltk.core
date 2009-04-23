@@ -40,6 +40,7 @@ public class FormatterWriter implements IFormatterWriter {
 	private int wrapLength = -1;
 	private boolean preserveSpaces = true;
 	private boolean skipNextNewLine = false;
+	private boolean canAppendToPreviousLine = false;
 
 	/**
 	 * @param lineDelimiter
@@ -103,7 +104,7 @@ public class FormatterWriter implements IFormatterWriter {
 
 	public void appendToPreviousLine(IFormatterContext context, String text)
 			throws Exception {
-		if (!lineStarted) {
+		if (!lineStarted && canAppendToPreviousLine) {
 			skipNextNewLine = false;
 			emptyLines.setLength(0);
 			indent.setLength(0);
@@ -121,6 +122,10 @@ public class FormatterWriter implements IFormatterWriter {
 				writer.append(text);
 			}
 		}
+	}
+
+	public void disableAppendToPreviousLine() {
+		canAppendToPreviousLine = false;
 	}
 
 	protected void write(IFormatterContext context, String text)
@@ -296,6 +301,7 @@ public class FormatterWriter implements IFormatterWriter {
 		indent.setLength(0);
 		lineStarted = true;
 		++lineNumber;
+		canAppendToPreviousLine = true;
 	}
 
 	private void writeEmptyLines() {
