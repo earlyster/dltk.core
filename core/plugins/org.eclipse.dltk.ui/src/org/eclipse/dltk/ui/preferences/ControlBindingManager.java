@@ -43,6 +43,10 @@ public class ControlBindingManager {
 
 	public static final DependencyMode DEPENDENCY_INVERSE_SELECTION = new DependencyMode();
 
+	public interface IComboSelectedValueProvider {
+		String getValueAt(int index);
+	}
+
 	public ControlBindingManager(IPreferenceDelegate delegate,
 			IStatusChangeListener listener) {
 		this.checkBoxControls = new HashMap();
@@ -58,6 +62,23 @@ public class ControlBindingManager {
 	}
 
 	public void bindControl(final Combo combo, final Object key) {
+		bindControl(combo, key, new IComboSelectedValueProvider() {
+			public String getValueAt(int index) {
+				return combo.getItem(index);
+			}
+		});
+	}
+
+	public void bindControl(Combo combo, Object key, final String[] itemValues) {
+		bindControl(combo, key, new IComboSelectedValueProvider() {
+			public String getValueAt(int index) {
+				return itemValues[index];
+			}
+		});
+	}
+
+	public void bindControl(final Combo combo, final Object key,
+			final IComboSelectedValueProvider itemValueProvider) {
 		if (key != null) {
 			comboControls.put(combo, key);
 		}
@@ -69,7 +90,8 @@ public class ControlBindingManager {
 
 			public void widgetSelected(SelectionEvent e) {
 				int index = combo.getSelectionIndex();
-				preferenceDelegate.setString(key, combo.getItem(index));
+				preferenceDelegate.setString(key, itemValueProvider
+						.getValueAt(index));
 
 				changeListener.statusChanged(StatusInfo.OK_STATUS);
 			}

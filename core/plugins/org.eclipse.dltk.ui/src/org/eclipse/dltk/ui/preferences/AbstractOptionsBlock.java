@@ -10,6 +10,7 @@ import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -52,6 +53,11 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	protected final void bindControl(Text textBox, PreferenceKey key,
 			IFieldValidator validator) {
 		bindManager.bindControl(textBox, key, validator);
+	}
+
+	protected final void bindControl(Combo combo, PreferenceKey key,
+			String[] itemValues) {
+		bindManager.bindControl(combo, key, itemValues);
 	}
 
 	/**

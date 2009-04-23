@@ -67,6 +67,16 @@ public class FormatterControlManager implements IFormatterControlManager,
 		return combo;
 	}
 
+	public Combo createCombo(Composite parent, Object key, String label,
+			String[] itemValues, String[] itemLabels) {
+		final Label labelControl = SWTFactory.createLabel(parent, label, 1);
+		Combo combo = SWTFactory.createCombo(parent,
+				SWT.READ_ONLY | SWT.BORDER, 1, itemLabels);
+		bindingManager.bindControl(combo, key, itemValues);
+		registerAssociatedLabel(combo, labelControl);
+		return combo;
+	}
+
 	public Text createNumber(Composite parent, Object key, String label) {
 		final Label labelControl = SWTFactory.createLabel(parent, label, 1);
 		Text text = SWTFactory.createText(parent, SWT.BORDER, 1,

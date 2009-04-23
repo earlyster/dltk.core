@@ -32,7 +32,18 @@ public interface IFormatterControlManager extends IPreferenceDelegate {
 
 	Button createCheckbox(Composite parent, Object key, String text, int hspan);
 
+	/**
+	 * @param parent
+	 * @param key
+	 * @param label
+	 * @param items
+	 * @return
+	 * @deprecated
+	 */
 	Combo createCombo(Composite parent, Object key, String label, String[] items);
+
+	Combo createCombo(Composite parent, Object key, String label,
+			String[] itemValues, String[] itemLabels);
 
 	Text createNumber(Composite parent, Object key, String label);
 
