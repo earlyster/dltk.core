@@ -2803,13 +2803,13 @@ public class ScriptProject extends Openable implements IScriptProject {
 				}
 			}
 			try {
-				IModelElement[] children = getChildren();
+				IModelElement[] children = getProjectFragments();
 				for (int i = 0; i < children.length; i++) {
 					if (name.equals(children[i].getElementName())
 							&& children[i] instanceof IModelElementMemento) {
 						IModelElementMemento childMemento = (IModelElementMemento) children[i];
-						return childMemento
-								.getHandleFromMemento(memento, owner);
+						return childMemento.getHandleFromMemento(token,
+								memento, owner);
 					}
 				}
 			} catch (ModelException e) {
