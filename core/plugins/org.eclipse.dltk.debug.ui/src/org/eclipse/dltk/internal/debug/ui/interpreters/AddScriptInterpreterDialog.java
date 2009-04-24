@@ -322,7 +322,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		updateStatusLine();
 	}
 
-	private IInterpreterInstallType getInterpreterType() {
+	protected IInterpreterInstallType getInterpreterType() {
 		return fSelectedInterpreterType;
 	}
 
