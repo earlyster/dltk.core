@@ -17,6 +17,7 @@ import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern
 		implements IIndexConstants {
 	public char[] qualification;
+	private PackageDeclarationPattern packagePattern;
 
 	// PackageDeclarationPattern packagePattern;
 	// public int packageIndex = -1;
@@ -36,6 +37,8 @@ public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern
 			int qualificationMatchRule, char[] simpleName, char typeSuffix,
 			int matchRule, IDLTKLanguageToolkit toolkit) {
 		this(qualification, simpleName, typeSuffix, matchRule, toolkit);
+		this.packagePattern = new PackageDeclarationPattern(qualification,
+				qualificationMatchRule, toolkit);
 	}
 
 	QualifiedTypeDeclarationPattern(int matchRule, IDLTKLanguageToolkit toolkit) {
@@ -79,7 +82,7 @@ public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern
 				this.enclosingTypeNames = CharOperation.NO_CHAR_CHAR;
 			} else {
 				this.enclosingTypeNames = CharOperation.splitOn('$', key,
-						start, last);
+						start, slash);
 				System.arraycopy(key, start, this.qualification, 0, size);
 			}
 		}
@@ -118,9 +121,20 @@ public class QualifiedTypeDeclarationPattern extends TypeDeclarationPattern
 				return false;
 			break;
 		}
-		return matchesName(this.simpleName, pattern.simpleName)
-				&& (this.qualification == null || pattern.matchesName(
-						this.qualification, pattern.qualification));
+
+		boolean matchesName = matchesName(this.simpleName, pattern.simpleName);
+		if (matchesName) {
+			if (this.qualification != null) {
+				if (this.packagePattern != null) {
+					return this.packagePattern.matchesName(this.qualification,
+							pattern.qualification);
+				}
+				return pattern.matchesName(this.qualification,
+						pattern.qualification);
+			}
+			return true;
+		}
+		return false;
 	}
 
 	protected StringBuffer print(StringBuffer output) {

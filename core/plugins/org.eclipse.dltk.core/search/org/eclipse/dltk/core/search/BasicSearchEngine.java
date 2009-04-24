@@ -32,6 +32,8 @@ import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.ISearchFactory;
+import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
@@ -863,7 +865,7 @@ public class BasicSearchEngine {
 	 *      detailed comment
 	 */
 	public void searchAllTypeNames(final char[] packageName,
-			final int packageMatchRule, final char[] typeName,
+			final int packageMatchRule, char[] typeName,
 			final int typeMatchRule, int searchFor, IDLTKSearchScope scope,
 			final IRestrictedAccessTypeRequestor nameRequestor,
 			int waitingPolicy, IProgressMonitor progressMonitor)
@@ -910,9 +912,23 @@ public class BasicSearchEngine {
 			typeSuffix = IIndexConstants.TYPE_SUFFIX;
 			break;
 		}
+
+		char[][] enclosingTypeNames = null;
+		ISearchPatternProcessor processor = getSearchPatternProcessor(scope
+				.getLanguageToolkit());
+		String patternString = new String(typeName);
+		if (processor != null) {
+			char[] qualificationChars = processor
+					.extractTypeQualification(patternString);
+			enclosingTypeNames = CharOperation.splitOn(processor
+					.getDelimiterReplacementString().toCharArray(),
+					qualificationChars);
+			typeName = processor.extractTypeChars(patternString).toCharArray();
+		}
+
 		final TypeDeclarationPattern pattern = packageMatchRule == SearchPattern.R_EXACT_MATCH ? new TypeDeclarationPattern(
-				packageName, null, null, typeName, typeSuffix, typeMatchRule,
-				scope.getLanguageToolkit())
+				packageName, enclosingTypeNames, null, typeName, typeSuffix,
+				typeMatchRule, scope.getLanguageToolkit())
 				: new QualifiedTypeDeclarationPattern(packageName,
 						packageMatchRule, typeName, typeSuffix, typeMatchRule,
 						scope.getLanguageToolkit());
@@ -1030,7 +1046,6 @@ public class BasicSearchEngine {
 					for (int j = 0; j < allTypes.length; j++) {
 						IType type = allTypes[i];
 						IModelElement parent = type.getParent();
-						char[][] enclosingTypeNames;
 						if (parent instanceof IType) {
 							char[] parentQualifiedName = ((IType) parent)
 									.getTypeQualifiedName().toCharArray();
@@ -1700,4 +1715,15 @@ public class BasicSearchEngine {
 
 	}
 
+	private static ISearchPatternProcessor getSearchPatternProcessor(
+			IDLTKLanguageToolkit toolkit) {
+		if (toolkit != null) {
+			ISearchFactory factory = DLTKLanguageManager
+					.getSearchFactory(toolkit.getNatureId());
+			if (factory != null) {
+				return factory.createSearchPatternProcessor();
+			}
+		}
+		return null;
+	}
 }
