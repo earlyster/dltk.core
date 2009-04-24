@@ -55,6 +55,18 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 		bindManager.bindControl(textBox, key, validator);
 	}
 
+	/**
+	 * Binds the specified combobox. The result of {@link Combo#getItem(int)}
+	 * will be used as value.
+	 */
+	protected final void bindControl(Combo combo, PreferenceKey key) {
+		bindManager.bindControl(combo, key);
+	}
+
+	/**
+	 * Binds the specified combobox. Values are specified via the
+	 * <code>itemValues</code> array.
+	 */
 	protected final void bindControl(Combo combo, PreferenceKey key,
 			String[] itemValues) {
 		bindManager.bindControl(combo, key, itemValues);

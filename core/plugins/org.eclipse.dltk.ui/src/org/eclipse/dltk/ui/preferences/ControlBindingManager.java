@@ -2,6 +2,7 @@ package org.eclipse.dltk.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ public class ControlBindingManager {
 
 	private Map checkBoxControls;
 	private Map comboControls;
+	private final Map comboValueProviders = new IdentityHashMap();
 
 	private DependencyManager dependencyManager;
 
@@ -45,6 +47,8 @@ public class ControlBindingManager {
 
 	public interface IComboSelectedValueProvider {
 		String getValueAt(int index);
+
+		int indexOf(String value);
 	}
 
 	public ControlBindingManager(IPreferenceDelegate delegate,
@@ -63,8 +67,20 @@ public class ControlBindingManager {
 
 	public void bindControl(final Combo combo, final Object key) {
 		bindControl(combo, key, new IComboSelectedValueProvider() {
+
 			public String getValueAt(int index) {
-				return combo.getItem(index);
+				return index >= 0 && index < combo.getItemCount() ? combo
+						.getItem(index) : null;
+			}
+
+			public int indexOf(String value) {
+				final String[] items = combo.getItems();
+				for (int i = 0; i < items.length; i++) {
+					if (items[i].equals(value)) {
+						return i;
+					}
+				}
+				return -1;
 			}
 		});
 	}
@@ -74,6 +90,15 @@ public class ControlBindingManager {
 			public String getValueAt(int index) {
 				return itemValues[index];
 			}
+
+			public int indexOf(String value) {
+				for (int i = 0; i < itemValues.length; i++) {
+					if (itemValues[i].equals(value)) {
+						return i;
+					}
+				}
+				return -1;
+			}
 		});
 	}
 
@@ -82,6 +107,7 @@ public class ControlBindingManager {
 		if (key != null) {
 			comboControls.put(combo, key);
 		}
+		comboValueProviders.put(combo, itemValueProvider);
 
 		combo.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -241,23 +267,20 @@ public class ControlBindingManager {
 	}
 
 	private void initCombos() {
-		Iterator it = comboControls.keySet().iterator();
-		while (it.hasNext()) {
-			final Combo combo = (Combo) it.next();
-			final Object key = comboControls.get(combo);
-			String value = preferenceDelegate.getString(key);
-			String[] items = combo.getItems();
-			boolean selected = false;
-			for (int i = 0; i < items.length; i++) {
-				if (items[i].equals(value)) {
-					combo.select(i);
-					selected = true;
-					break;
+		for (Iterator it = comboControls.entrySet().iterator(); it.hasNext();) {
+			final Map.Entry entry = (Map.Entry) it.next();
+			final Combo combo = (Combo) entry.getKey();
+			final Object key = entry.getValue();
+			final String value = preferenceDelegate.getString(key);
+			final IComboSelectedValueProvider valueProvider = (IComboSelectedValueProvider) comboValueProviders
+					.get(combo);
+			if (valueProvider != null) {
+				int index = valueProvider.indexOf(value);
+				if (index >= 0) {
+					combo.select(index);
+				} else {
+					combo.select(0);
 				}
-			}
-
-			if (!selected) {
-				combo.select(0);
 			}
 		}
 	}
