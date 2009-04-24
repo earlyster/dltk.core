@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: ValidatorsPackage.java,v 1.3 2009/02/28 03:24:29 apanchenk Exp $
+ * $Id: ValidatorsPackage.java,v 1.3.2.1 2009/04/24 14:47:33 apanchenk Exp $
  */
 package org.eclipse.dltk.validators.configs;
 
@@ -97,13 +97,22 @@ public interface ValidatorsPackage extends EPackage {
 	int VALIDATOR_CONFIG__COMMAND_LINE_OPTIONS = 2;
 
 	/**
+	 * The feature id for the '<em><b>Priority</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int VALIDATOR_CONFIG__PRIORITY = 3;
+
+	/**
 	 * The number of structural features of the '<em>Validator Config</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int VALIDATOR_CONFIG_FEATURE_COUNT = 3;
+	int VALIDATOR_CONFIG_FEATURE_COUNT = 4;
 
 	/**
 	 * The meta object id for the '{@link org.eclipse.dltk.validators.configs.impl.ValidatorEnvironmentInstanceImpl <em>Validator Environment Instance</em>}' class.
@@ -267,6 +276,17 @@ public interface ValidatorsPackage extends EPackage {
 	 * @generated
 	 */
 	EAttribute getValidatorConfig_CommandLineOptions();
+
+	/**
+	 * Returns the meta object for the attribute '{@link org.eclipse.dltk.validators.configs.ValidatorConfig#getPriority <em>Priority</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Priority</em>'.
+	 * @see org.eclipse.dltk.validators.configs.ValidatorConfig#getPriority()
+	 * @see #getValidatorConfig()
+	 * @generated
+	 */
+	EAttribute getValidatorConfig_Priority();
 
 	/**
 	 * Returns the meta object for class '{@link org.eclipse.dltk.validators.configs.ValidatorEnvironmentInstance <em>Validator Environment Instance</em>}'.
@@ -442,6 +462,14 @@ public interface ValidatorsPackage extends EPackage {
 		 * @generated
 		 */
 		EAttribute VALIDATOR_CONFIG__COMMAND_LINE_OPTIONS = eINSTANCE.getValidatorConfig_CommandLineOptions();
+
+		/**
+		 * The meta object literal for the '<em><b>Priority</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute VALIDATOR_CONFIG__PRIORITY = eINSTANCE.getValidatorConfig_Priority();
 
 		/**
 		 * The meta object literal for the '{@link org.eclipse.dltk.validators.configs.impl.ValidatorEnvironmentInstanceImpl <em>Validator Environment Instance</em>}' class.
