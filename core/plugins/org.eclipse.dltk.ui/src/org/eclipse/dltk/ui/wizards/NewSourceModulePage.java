@@ -10,6 +10,8 @@
 package org.eclipse.dltk.ui.wizards;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -167,7 +169,7 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 			String name = selected != null ? selected.getName()
 					: getLastUsedTemplateName();
 			fTemplates = getApplicableTemplates();
-			int idx = NO_TEMPLATE.equals(name) ? 0 : 1;
+			int idx = 0;
 			String[] names = new String[fTemplates.length + 1];
 			for (int i = 0; i < fTemplates.length; i++) {
 				names[i + 1] = fTemplates[i].getName();
@@ -175,10 +177,34 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 					idx = i + 1;
 				}
 			}
+			if (idx == 0) {
+				final Template template = getDefaultTemplate();
+				if (template != null) {
+					for (int i = 0; i < fTemplates.length; ++i) {
+						if (template == fTemplates[i]) {
+							idx = i + 1;
+							break;
+						}
+					}
+				}
+			}
 			names[0] = Messages.NewSourceModulePage_noTemplate;
 			fTemplateDialogField.setItems(names);
 			fTemplateDialogField.selectItem(idx);
 		}
+	}
+
+	protected Template getDefaultTemplate() {
+		final String defaultTemplateId = getDefaultCodeTemplateId();
+		if (defaultTemplateId != null) {
+			final ICodeTemplateArea templateArea = getTemplateArea();
+			if (templateArea != null) {
+				final TemplateStore store = templateArea.getTemplateAccess()
+						.getTemplateStore();
+				return store.findTemplateById(defaultTemplateId);
+			}
+		}
+		return null;
 	}
 
 	protected Template[] getApplicableTemplates() {
@@ -190,6 +216,13 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 			final String[] contextTypeIds = getCodeTemplateContextTypeIds();
 			for (int i = 0; i < contextTypeIds.length; ++i) {
 				Template[] templates = store.getTemplates(contextTypeIds[i]);
+				Arrays.sort(templates, new Comparator() {
+					public int compare(Object arg0, Object arg1) {
+						final Template t0 = ((Template) arg0);
+						final Template t1 = ((Template) arg1);
+						return t0.getName().compareToIgnoreCase(t1.getName());
+					}
+				});
 				for (int j = 0; j < templates.length; ++j) {
 					result.add(templates[j]);
 				}
