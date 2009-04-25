@@ -61,7 +61,9 @@ public class FormatterWriter implements IFormatterWriter {
 	public void write(IFormatterContext context, int startOffset, int endOffset)
 			throws Exception {
 		if (!excludes.isExcluded(startOffset, endOffset)) {
-			write(context, document.get(startOffset, endOffset));
+			if (endOffset > startOffset) {
+				write(context, document.get(startOffset, endOffset));
+			}
 		} else {
 			final IRegion[] regions = excludes.selectValidRanges(startOffset,
 					endOffset);
@@ -77,7 +79,6 @@ public class FormatterWriter implements IFormatterWriter {
 	public void writeText(IFormatterContext context, String text)
 			throws Exception {
 		skipNextNewLine = false;
-		emptyLines.setLength(0);
 		if (lineStarted) {
 			trimTrailingSpaces();
 		}
