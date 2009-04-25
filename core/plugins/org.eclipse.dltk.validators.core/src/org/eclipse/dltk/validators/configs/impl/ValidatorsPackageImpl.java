@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: ValidatorsPackageImpl.java,v 1.3 2009/02/28 03:24:29 apanchenk Exp $
+ * $Id: ValidatorsPackageImpl.java,v 1.4 2009/04/25 04:29:42 apanchenk Exp $
  */
 package org.eclipse.dltk.validators.configs.impl;
 
@@ -156,6 +156,15 @@ public class ValidatorsPackageImpl extends EPackageImpl implements ValidatorsPac
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public EAttribute getValidatorConfig_Priority() {
+		return (EAttribute)validatorConfigEClass.getEStructuralFeatures().get(3);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	public EClass getValidatorEnvironmentInstance() {
 		return validatorEnvironmentInstanceEClass;
 	}
@@ -282,6 +291,7 @@ public class ValidatorsPackageImpl extends EPackageImpl implements ValidatorsPac
 		createEAttribute(validatorConfigEClass, VALIDATOR_CONFIG__NAME);
 		createEAttribute(validatorConfigEClass, VALIDATOR_CONFIG__READ_ONLY);
 		createEAttribute(validatorConfigEClass, VALIDATOR_CONFIG__COMMAND_LINE_OPTIONS);
+		createEAttribute(validatorConfigEClass, VALIDATOR_CONFIG__PRIORITY);
 
 		validatorEnvironmentInstanceEClass = createEClass(VALIDATOR_ENVIRONMENT_INSTANCE);
 		createEAttribute(validatorEnvironmentInstanceEClass, VALIDATOR_ENVIRONMENT_INSTANCE__ENVIRONMENT_ID);
@@ -331,6 +341,7 @@ public class ValidatorsPackageImpl extends EPackageImpl implements ValidatorsPac
 		initEAttribute(getValidatorConfig_Name(), ecorePackage.getEString(), "name", null, 0, 1, ValidatorConfig.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
 		initEAttribute(getValidatorConfig_ReadOnly(), ecorePackage.getEBoolean(), "readOnly", null, 0, 1, ValidatorConfig.class, IS_TRANSIENT, IS_VOLATILE, !IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
 		initEAttribute(getValidatorConfig_CommandLineOptions(), ecorePackage.getEString(), "commandLineOptions", null, 0, 1, ValidatorConfig.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
+		initEAttribute(getValidatorConfig_Priority(), ecorePackage.getEInt(), "priority", null, 0, 1, ValidatorConfig.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED); //$NON-NLS-1$
 
 		initEClass(validatorEnvironmentInstanceEClass, ValidatorEnvironmentInstance.class, "ValidatorEnvironmentInstance", IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS); //$NON-NLS-1$
 		initEAttribute(getValidatorEnvironmentInstance_EnvironmentId(), ecorePackage.getEString(), "environmentId", null, 0, 1, ValidatorEnvironmentInstance.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED); //$NON-NLS-1$

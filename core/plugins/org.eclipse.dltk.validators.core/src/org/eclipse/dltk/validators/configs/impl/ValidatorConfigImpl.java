@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: ValidatorConfigImpl.java,v 1.1 2009/02/27 09:14:25 apanchenk Exp $
+ * $Id: ValidatorConfigImpl.java,v 1.2 2009/04/25 04:29:42 apanchenk Exp $
  */
 package org.eclipse.dltk.validators.configs.impl;
 
@@ -28,6 +28,7 @@ import org.eclipse.emf.ecore.resource.Resource;
  *   <li>{@link org.eclipse.dltk.validators.configs.impl.ValidatorConfigImpl#getName <em>Name</em>}</li>
  *   <li>{@link org.eclipse.dltk.validators.configs.impl.ValidatorConfigImpl#isReadOnly <em>Read Only</em>}</li>
  *   <li>{@link org.eclipse.dltk.validators.configs.impl.ValidatorConfigImpl#getCommandLineOptions <em>Command Line Options</em>}</li>
+ *   <li>{@link org.eclipse.dltk.validators.configs.impl.ValidatorConfigImpl#getPriority <em>Priority</em>}</li>
  * </ul>
  * </p>
  *
@@ -83,6 +84,26 @@ public abstract class ValidatorConfigImpl extends EObjectImpl implements Validat
 	 * @ordered
 	 */
 	protected String commandLineOptions = COMMAND_LINE_OPTIONS_EDEFAULT;
+
+	/**
+	 * The default value of the '{@link #getPriority() <em>Priority</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getPriority()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final int PRIORITY_EDEFAULT = 0;
+
+	/**
+	 * The cached value of the '{@link #getPriority() <em>Priority</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getPriority()
+	 * @generated
+	 * @ordered
+	 */
+	protected int priority = PRIORITY_EDEFAULT;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -166,6 +187,27 @@ public abstract class ValidatorConfigImpl extends EObjectImpl implements Validat
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public int getPriority() {
+		return priority;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setPriority(int newPriority) {
+		int oldPriority = priority;
+		priority = newPriority;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, ValidatorsPackage.VALIDATOR_CONFIG__PRIORITY, oldPriority, priority));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
@@ -175,6 +217,8 @@ public abstract class ValidatorConfigImpl extends EObjectImpl implements Validat
 				return isReadOnly() ? Boolean.TRUE : Boolean.FALSE;
 			case ValidatorsPackage.VALIDATOR_CONFIG__COMMAND_LINE_OPTIONS:
 				return getCommandLineOptions();
+			case ValidatorsPackage.VALIDATOR_CONFIG__PRIORITY:
+				return getPriority();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -192,6 +236,9 @@ public abstract class ValidatorConfigImpl extends EObjectImpl implements Validat
 				return;
 			case ValidatorsPackage.VALIDATOR_CONFIG__COMMAND_LINE_OPTIONS:
 				setCommandLineOptions((String)newValue);
+				return;
+			case ValidatorsPackage.VALIDATOR_CONFIG__PRIORITY:
+				setPriority((Integer)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -211,6 +258,9 @@ public abstract class ValidatorConfigImpl extends EObjectImpl implements Validat
 			case ValidatorsPackage.VALIDATOR_CONFIG__COMMAND_LINE_OPTIONS:
 				setCommandLineOptions(COMMAND_LINE_OPTIONS_EDEFAULT);
 				return;
+			case ValidatorsPackage.VALIDATOR_CONFIG__PRIORITY:
+				setPriority(PRIORITY_EDEFAULT);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -229,6 +279,8 @@ public abstract class ValidatorConfigImpl extends EObjectImpl implements Validat
 				return isReadOnly() != READ_ONLY_EDEFAULT;
 			case ValidatorsPackage.VALIDATOR_CONFIG__COMMAND_LINE_OPTIONS:
 				return COMMAND_LINE_OPTIONS_EDEFAULT == null ? commandLineOptions != null : !COMMAND_LINE_OPTIONS_EDEFAULT.equals(commandLineOptions);
+			case ValidatorsPackage.VALIDATOR_CONFIG__PRIORITY:
+				return priority != PRIORITY_EDEFAULT;
 		}
 		return super.eIsSet(featureID);
 	}
@@ -247,6 +299,8 @@ public abstract class ValidatorConfigImpl extends EObjectImpl implements Validat
 		result.append(name);
 		result.append(", commandLineOptions: "); //$NON-NLS-1$
 		result.append(commandLineOptions);
+		result.append(", priority: "); //$NON-NLS-1$
+		result.append(priority);
 		result.append(')');
 		return result.toString();
 	}

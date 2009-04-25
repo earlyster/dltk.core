@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: ValidatorConfig.java,v 1.1 2009/02/27 09:14:24 apanchenk Exp $
+ * $Id: ValidatorConfig.java,v 1.2 2009/04/25 04:29:42 apanchenk Exp $
  */
 package org.eclipse.dltk.validators.configs;
 
@@ -19,6 +19,7 @@ import org.eclipse.emf.ecore.EObject;
  *   <li>{@link org.eclipse.dltk.validators.configs.ValidatorConfig#getName <em>Name</em>}</li>
  *   <li>{@link org.eclipse.dltk.validators.configs.ValidatorConfig#isReadOnly <em>Read Only</em>}</li>
  *   <li>{@link org.eclipse.dltk.validators.configs.ValidatorConfig#getCommandLineOptions <em>Command Line Options</em>}</li>
+ *   <li>{@link org.eclipse.dltk.validators.configs.ValidatorConfig#getPriority <em>Priority</em>}</li>
  * </ul>
  * </p>
  *
@@ -93,5 +94,31 @@ public interface ValidatorConfig extends EObject {
 	 * @generated
 	 */
 	void setCommandLineOptions(String value);
+
+	/**
+	 * Returns the value of the '<em><b>Priority</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of the '<em>Priority</em>' attribute isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Priority</em>' attribute.
+	 * @see #setPriority(int)
+	 * @see org.eclipse.dltk.validators.configs.ValidatorsPackage#getValidatorConfig_Priority()
+	 * @model
+	 * @generated
+	 */
+	int getPriority();
+
+	/**
+	 * Sets the value of the '{@link org.eclipse.dltk.validators.configs.ValidatorConfig#getPriority <em>Priority</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Priority</em>' attribute.
+	 * @see #getPriority()
+	 * @generated
+	 */
+	void setPriority(int value);
 
 } // ValidatorConfig
