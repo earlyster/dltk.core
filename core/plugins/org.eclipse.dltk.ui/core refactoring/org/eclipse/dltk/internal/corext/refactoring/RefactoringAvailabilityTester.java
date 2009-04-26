@@ -15,22 +15,21 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.dltk.core.ScriptModelUtil;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptModel;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.dltk.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.dltk.internal.ui.editor.ModelTextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-
 
 /**
  * Helper class to detect whether a certain refactoring can be enabled on a
@@ -41,7 +40,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
  * initialization.
  * </p>
  * 
-	 *
+ * 
  */
 public final class RefactoringAvailabilityTester {
 
@@ -49,26 +48,51 @@ public final class RefactoringAvailabilityTester {
 		if (element == null)
 			return null;
 		if (!(element instanceof IType))
-			element= element.getAncestor(IModelElement.TYPE);
+			element = element.getAncestor(IModelElement.TYPE);
 		return (IType) element;
 	}
 
 	public static IModelElement[] getScriptElements(final Object[] elements) {
-		List result= new ArrayList();
-		for (int index= 0; index < elements.length; index++) {
+		List result = new ArrayList();
+		for (int index = 0; index < elements.length; index++) {
 			if (elements[index] instanceof IModelElement)
 				result.add(elements[index]);
 		}
-		return (IModelElement[]) result.toArray(new IModelElement[result.size()]);
+		return (IModelElement[]) result
+				.toArray(new IModelElement[result.size()]);
 	}
 
 	public static IResource[] getResources(final Object[] elements) {
-		List result= new ArrayList();
-		for (int index= 0; index < elements.length; index++) {
+		List result = new ArrayList();
+		for (int index = 0; index < elements.length; index++) {
 			if (elements[index] instanceof IResource)
 				result.add(elements[index]);
 		}
 		return (IResource[]) result.toArray(new IResource[result.size()]);
+	}
+
+	public static boolean isRenameElementAvailable(IModelElement element)
+			throws CoreException {
+		switch (element.getElementType()) {
+		case IModelElement.SCRIPT_PROJECT:
+			return isRenameAvailable((IScriptProject) element);
+		case IModelElement.PROJECT_FRAGMENT:
+			return isRenameAvailable((IProjectFragment) element);
+		case IModelElement.SOURCE_MODULE:
+			return isRenameAvailable((ISourceModule) element);
+		case IModelElement.TYPE:
+			return isRenameAvailable((IType) element);
+		case IModelElement.METHOD:
+			final IMethod method = (IMethod) element;
+			if (method.isConstructor())
+				return isRenameAvailable(method.getDeclaringType());
+			else
+				return isRenameAvailable(method);
+		case IModelElement.FIELD:
+			final IField field = (IField) element;
+			return isRenameFieldAvailable(field);
+		}
+		return false;
 	}
 
 	public static boolean isRenameAvailable(final ISourceModule unit) {
@@ -83,7 +107,8 @@ public final class RefactoringAvailabilityTester {
 		return true;
 	}
 
-	public static boolean isRenameAvailable(final IScriptProject project) throws ModelException {
+	public static boolean isRenameAvailable(final IScriptProject project)
+			throws ModelException {
 		if (project == null)
 			return false;
 		if (!Checks.isAvailable(project))
@@ -93,17 +118,19 @@ public final class RefactoringAvailabilityTester {
 		return true;
 	}
 
-	public static boolean isRenameAvailable(final IMethod method) throws CoreException {
+	public static boolean isRenameAvailable(final IMethod method)
+			throws CoreException {
 		if (method == null)
 			return false;
 		if (!Checks.isAvailable(method))
 			return false;
 		if (method.isConstructor())
-			return false;		
+			return false;
 		return true;
 	}
 
-	public static boolean isRenameAvailable(final IScriptFolder fragment) throws ModelException {
+	public static boolean isRenameAvailable(final IScriptFolder fragment)
+			throws ModelException {
 		if (fragment == null)
 			return false;
 		if (!Checks.isAvailable(fragment))
@@ -113,7 +140,8 @@ public final class RefactoringAvailabilityTester {
 		return true;
 	}
 
-	public static boolean isRenameAvailable(final IProjectFragment root) throws ModelException {
+	public static boolean isRenameAvailable(final IProjectFragment root)
+			throws ModelException {
 		if (root == null)
 			return false;
 		if (!Checks.isAvailable(root))
@@ -139,18 +167,22 @@ public final class RefactoringAvailabilityTester {
 		return true;
 	}
 
-	public static boolean isRenameAvailable(final IType type) throws ModelException {
+	public static boolean isRenameAvailable(final IType type)
+			throws ModelException {
 		if (type == null)
-			return false;		
+			return false;
 		if (!Checks.isAvailable(type))
 			return false;
 		return true;
 	}
 
-	public static boolean isRenameFieldAvailable(final IField field) throws ModelException {
+	public static boolean isRenameFieldAvailable(final IField field)
+			throws ModelException {
 		return Checks.isAvailable(field);
 	}
-	public static boolean isReplaceInvocationsAvailable(IMethod method) throws ModelException {
+
+	public static boolean isReplaceInvocationsAvailable(IMethod method)
+			throws ModelException {
 		if (method == null)
 			return false;
 		if (!method.exists())
@@ -159,24 +191,28 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		return true;
 	}
-	public static boolean isDeleteAvailable(final IModelElement element) throws ModelException {
+
+	public static boolean isDeleteAvailable(final IModelElement element)
+			throws ModelException {
 		if (!element.exists())
 			return false;
-		if (element instanceof IScriptModel || element instanceof IScriptProject)
+		if (element instanceof IScriptModel
+				|| element instanceof IScriptProject)
 			return false;
 		if (element.getParent() != null && element.getParent().isReadOnly())
 			return false;
 		if (element instanceof IProjectFragment) {
-			IProjectFragment root= (IProjectFragment) element;
+			IProjectFragment root = (IProjectFragment) element;
 			if (root.isExternal() || Checks.isBuildpathDelete(root)) // TODO
 				// rename
 				// isClasspathDelete
 				return false;
 		}
-		if (element.getResource() == null && !RefactoringAvailabilityTester.isWorkingCopyElement(element))
+		if (element.getResource() == null
+				&& !RefactoringAvailabilityTester.isWorkingCopyElement(element))
 			return false;
-//		if (element instanceof IMember && ((IMember) element).isBinary())
-//			return false;
+		// if (element instanceof IMember && ((IMember) element).isBinary())
+		// return false;
 		if (ReorgUtils.isDeletedFromEditor(element))
 			return false;
 		return true;
@@ -185,28 +221,33 @@ public final class RefactoringAvailabilityTester {
 	public static boolean isDeleteAvailable(final IResource resource) {
 		if (!resource.exists() || resource.isPhantom())
 			return false;
-		if (resource.getType() == IResource.ROOT || resource.getType() == IResource.PROJECT)
+		if (resource.getType() == IResource.ROOT
+				|| resource.getType() == IResource.PROJECT)
 			return false;
 		return true;
 	}
 
-	public static boolean isDeleteAvailable(final IStructuredSelection selection) throws ModelException {
+	public static boolean isDeleteAvailable(final IStructuredSelection selection)
+			throws ModelException {
 		if (!selection.isEmpty())
 			return isDeleteAvailable(selection.toArray());
 		return false;
 	}
 
-	public static boolean isDeleteAvailable(final Object[] objects) throws ModelException {
+	public static boolean isDeleteAvailable(final Object[] objects)
+			throws ModelException {
 		if (objects.length != 0) {
-			final IResource[] resources= RefactoringAvailabilityTester.getResources(objects);
-			final IModelElement[] elements= RefactoringAvailabilityTester.getScriptElements(objects);
+			final IResource[] resources = RefactoringAvailabilityTester
+					.getResources(objects);
+			final IModelElement[] elements = RefactoringAvailabilityTester
+					.getScriptElements(objects);
 			if (objects.length != resources.length + elements.length)
 				return false;
-			for (int index= 0; index < resources.length; index++) {
+			for (int index = 0; index < resources.length; index++) {
 				if (!isDeleteAvailable(resources[index]))
 					return false;
 			}
-			for (int index= 0; index < elements.length; index++) {
+			for (int index = 0; index < elements.length; index++) {
 				if (!isDeleteAvailable(elements[index]))
 					return false;
 			}
@@ -214,7 +255,7 @@ public final class RefactoringAvailabilityTester {
 		}
 		return false;
 	}
-	
+
 	public static boolean isWorkingCopyElement(final IModelElement element) {
 		if (element instanceof ISourceModule)
 			return ((ISourceModule) element).isWorkingCopy();
@@ -226,27 +267,33 @@ public final class RefactoringAvailabilityTester {
 	private RefactoringAvailabilityTester() {
 		// Not for instantiation
 	}
-	public static boolean isMoveAvailable(final IResource[] resources, final IModelElement[] elements) throws ModelException {
+
+	public static boolean isMoveAvailable(final IResource[] resources,
+			final IModelElement[] elements) throws ModelException {
 		if (elements != null) {
-			for (int index= 0; index < elements.length; index++) {
-				IModelElement element= elements[index];
-				if ((element instanceof IType) ) {
+			for (int index = 0; index < elements.length; index++) {
+				IModelElement element = elements[index];
+				if ((element instanceof IType)) {
 					return false;
 				}
-//				if ((element instanceof IPackageDeclaration))
-//					return false;
-				if (element instanceof IField ) {//&& DLTKFlags.isEnum((IMember) element))
+				// if ((element instanceof IPackageDeclaration))
+				// return false;
+				if (element instanceof IField) {// && DLTKFlags.isEnum((IMember)
+					// element))
 					return false;
 				}
 			}
 		}
-		return ReorgPolicyFactory.createMovePolicy(resources, elements).canEnable();
+		return ReorgPolicyFactory.createMovePolicy(resources, elements)
+				.canEnable();
 	}
 
-	public static boolean isMoveAvailable(final ModelTextSelection selection) throws ModelException {
-		final IModelElement element= selection.resolveEnclosingElement();
+	public static boolean isMoveAvailable(final ModelTextSelection selection)
+			throws ModelException {
+		final IModelElement element = selection.resolveEnclosingElement();
 		if (element == null)
 			return false;
-		return isMoveAvailable(new IResource[0], new IModelElement[] { element});
+		return isMoveAvailable(new IResource[0],
+				new IModelElement[] { element });
 	}
 }
