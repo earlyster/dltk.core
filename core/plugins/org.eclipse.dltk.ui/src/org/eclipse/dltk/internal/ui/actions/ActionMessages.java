@@ -13,7 +13,7 @@ import org.eclipse.osgi.util.NLS;
 
 public final class ActionMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.dltk.internal.ui.actions.ActionMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.dltk.internal.ui.actions.ActionMessages";//$NON-NLS-1$
 
 	public static String DefaultEditorDescription_name;
 
@@ -34,7 +34,7 @@ public final class ActionMessages extends NLS {
 	public static String OpenAction_error_messageArgs;
 	public static String OpenAction_error_messageProblems;
 	public static String OpenAction_error_messageBadSelection;
-	
+
 	public static String NewWizardsActionGroup_new;
 	public static String OpenProjectAction_dialog_title;
 	public static String OpenProjectAction_dialog_message;
@@ -57,9 +57,12 @@ public final class ActionMessages extends NLS {
 	public static String ActionUtil_notOnBuildPath_resource_message;
 	public static String ActionUtil_not_possible;
 	public static String ActionUtil_no_linked;
+	public static String ActionUtil_warning_derived_dontShowAgain;
+	public static String ActionUtil_warning_derived_message;
+	public static String ActionUtil_warning_derived_title;
 	public static String SelectAllAction_label;
 	public static String SelectAllAction_tooltip;
-	
+
 	public static String ToggleLinkingAction_label;
 	public static String ToggleLinkingAction_tooltip;
 	public static String ToggleLinkingAction_description;
