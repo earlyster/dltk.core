@@ -37,6 +37,8 @@ public interface IFormatterWriter {
 	 */
 	void writeLineBreak(IFormatterContext context) throws Exception;
 
+	void skipNextLineBreaks(IFormatterContext context) throws Exception;
+
 	void appendToPreviousLine(IFormatterContext context, String text)
 			throws Exception;
 

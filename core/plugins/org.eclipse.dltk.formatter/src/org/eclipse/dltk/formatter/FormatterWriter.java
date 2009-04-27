@@ -39,7 +39,7 @@ public class FormatterWriter implements IFormatterWriter {
 	private int linesPreserve = -1;
 	private int wrapLength = -1;
 	private boolean preserveSpaces = true;
-	private boolean skipNextNewLine = false;
+	private int skipNextNewLines = 0;
 	private boolean canAppendToPreviousLine = false;
 
 	/**
@@ -78,7 +78,7 @@ public class FormatterWriter implements IFormatterWriter {
 	 */
 	public void writeText(IFormatterContext context, String text)
 			throws Exception {
-		skipNextNewLine = false;
+		skipNextNewLines = 0;
 		if (lineStarted) {
 			trimTrailingSpaces();
 		}
@@ -100,13 +100,20 @@ public class FormatterWriter implements IFormatterWriter {
 			write(context, lineDelimiter);
 			assert (!lineStarted);
 		}
-		skipNextNewLine = true;
+		skipNextNewLines = 1;
+	}
+
+	/*
+	 * @see IFormatterWriter#skipNextLineBreaks(IFormatterContext)
+	 */
+	public void skipNextLineBreaks(IFormatterContext context) throws Exception {
+		skipNextNewLines = -1;
 	}
 
 	public void appendToPreviousLine(IFormatterContext context, String text)
 			throws Exception {
 		if (!lineStarted && canAppendToPreviousLine) {
-			skipNextNewLine = false;
+			skipNextNewLines = 0;
 			emptyLines.setLength(0);
 			indent.setLength(0);
 			int len = writer.length();
@@ -292,7 +299,7 @@ public class FormatterWriter implements IFormatterWriter {
 		} else if (emptyLines.length() != 0) {
 			writeEmptyLines();
 		}
-		skipNextNewLine = false;
+		skipNextNewLines = 0;
 		emptyLines.setLength(0);
 		if (context.isIndenting()) {
 			writeIndent(context);
@@ -306,7 +313,11 @@ public class FormatterWriter implements IFormatterWriter {
 	}
 
 	private void writeEmptyLines() {
-		if (skipNextNewLine) {
+		if (skipNextNewLines != 0) {
+			if (skipNextNewLines < 0) {
+				return;
+			}
+			// FIXME skip specified number of newlines
 			int i = 0;
 			if (emptyLines.charAt(i) == '\r') {
 				++i;
