@@ -409,6 +409,11 @@ public abstract class AbstractFormatterSelectionBlock extends
 						.getVersioner());
 				if (p.open() != Window.OK)
 					return;
+
+				profilesChanged = true;
+				activeProfileChanged = true;
+				applyPreferences();
+
 				updateComboFromProfiles();
 				if (!p.openEditDialog())
 					return;
