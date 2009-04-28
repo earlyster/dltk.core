@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -314,6 +315,88 @@ public class DeltaProcessor {
 		this.rootsToRefresh.add(scriptProject);
 		this.addDependentProjects(scriptProject,
 				this.state.projectDependencies, this.rootsToRefresh);
+	}
+
+	/*
+	 * Check all external archive (referenced by given roots, projects or model)
+	 * status and issue a corresponding root delta. Also triggers index updates
+	 */
+	public void checkExternalChanges(IModelElement[] elementsToRefresh,
+			IProgressMonitor monitor) throws ModelException {
+		try {
+			for (int i = 0, length = elementsToRefresh.length; i < length; i++) {
+				this.addForRefresh(elementsToRefresh[i]);
+			}
+			boolean hasDelta = false;
+			if (this.refreshedElements != null) {
+				Set refreshedElementsCopy = null;
+				if (refreshedElements != null) {
+					refreshedElementsCopy = new HashSet();
+					refreshedElementsCopy.addAll(refreshedElements);
+					// To avoid concurrent modifications
+					this.refreshedElements = null;
+				}
+				hasDelta = this.createExternalArchiveDelta(null,
+						refreshedElementsCopy);
+				hasDelta |= this.createCustomElementDelta(null,
+						refreshedElementsCopy);
+			} else {
+				return;
+			}
+
+			if (monitor != null && monitor.isCanceled()) {
+				return;
+			}
+			if (hasDelta) {
+				// force buildpath marker refresh of affected projects
+				Model.flushExternalFileCache();
+				// flush zip type cache
+				ModelManager.getModelManager().resetZIPTypeCache();
+				IModelElementDelta[] projectDeltas = this.currentDelta
+						.getAffectedChildren();
+				final int length = projectDeltas.length;
+				final IProject[] projectsToTouch = new IProject[length];
+				for (int i = 0; i < length; i++) {
+					IModelElementDelta delta = projectDeltas[i];
+					ScriptProject scriptProject = (ScriptProject) delta
+							.getElement();
+					projectsToTouch[i] = scriptProject.getProject();
+				}
+				// touch the projects to force them to be recompiled while
+				// taking the workspace lock
+				// so that there is no concurrency with the builder
+				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96575
+				IWorkspaceRunnable runnable = new IWorkspaceRunnable() {
+					public void run(IProgressMonitor progressMonitor)
+							throws CoreException {
+						for (int i = 0; i < length; i++) {
+							IProject project = projectsToTouch[i];
+							// touch to force a build of this project
+							if (DLTKCore.DEBUG) {
+								System.out
+										.println("Touching project " + project.getName() + " due to external jar file change"); //$NON-NLS-1$ //$NON-NLS-2$
+							}
+							project.touch(progressMonitor);
+						}
+					}
+				};
+				try {
+					ResourcesPlugin.getWorkspace().run(runnable, monitor);
+				} catch (CoreException e) {
+					throw new ModelException(e);
+				}
+				if (this.currentDelta != null) { // if delta has not been
+					// fired while creating
+					// markers
+					this.fire(this.currentDelta, DEFAULT_CHANGE_EVENT);
+				}
+			}
+		} finally {
+			this.currentDelta = null;
+			if (monitor != null) {
+				monitor.done();
+			}
+		}
 	}
 
 	/*
