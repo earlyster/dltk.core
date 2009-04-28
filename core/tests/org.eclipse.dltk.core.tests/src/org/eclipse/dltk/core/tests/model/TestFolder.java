@@ -31,7 +31,6 @@ public class TestFolder extends ScriptFolder {
 		return false;
 	}
 
-	@Override
 	public IResource getResource() {
 		IProjectFragment root = this.getProjectFragment();
 		if (root.isArchive()) {
@@ -51,7 +50,6 @@ public class TestFolder extends ScriptFolder {
 		return super.getPath().append("Goo");
 	}
 
-	@Override
 	protected char getHandleMementoDelimiter() {
 		return JEM_USER_ELEMENT;
 	}
