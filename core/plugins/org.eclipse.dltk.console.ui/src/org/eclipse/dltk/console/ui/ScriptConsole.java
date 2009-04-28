@@ -297,7 +297,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 	}
 
 	public IScriptExecResult handleCommand(String userInput) throws IOException {
-		if (this.interpreter == null && this.interpreter.isValid()) {
+		if (this.interpreter == null || !this.interpreter.isValid()) {
 			return new ScriptExecResult(Util.EMPTY_STRING);
 		}
 		Object[] listeners = consoleListeners.getListeners();
