@@ -117,8 +117,10 @@ public class ScriptUILabelProvider implements ILabelProvider, IColorProvider {
 				}
 			}
 		}
-		result = fImageLabelProvider.getImageLabel(element,
-				evaluateImageFlags(element));
+		if (result == null) {
+			result = fImageLabelProvider.getImageLabel(element,
+					evaluateImageFlags(element));
+		}
 		if (result == null
 				&& (element instanceof IStorage || element instanceof ISourceModule)) {
 			result = fStorageLabelProvider.getImage(element);
