@@ -127,7 +127,7 @@ public class InterpreterContainerInitializer extends
 		return false;
 	}
 
-	private String getNatureFromProject(IScriptProject project) {
+	public static String getNatureFromProject(IScriptProject project) {
 		IDLTKLanguageToolkit languageToolkit = DLTKLanguageManager
 				.getLanguageToolkit(project);
 		if (languageToolkit != null) {
@@ -136,7 +136,7 @@ public class InterpreterContainerInitializer extends
 		return null;
 	}
 
-	private String getEnvironmentFromProject(IScriptProject project) {
+	public static String getEnvironmentFromProject(IScriptProject project) {
 		IEnvironment environment = EnvironmentManager.getEnvironment(project);
 		if (environment != null) {
 			return environment.getId();
