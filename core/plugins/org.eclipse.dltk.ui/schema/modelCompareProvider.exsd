@@ -3,7 +3,7 @@
 <schema targetNamespace="org.eclipse.dltk.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.dltk.ui" id="modelLabelProvider" name="modelLabelProvider"/>
+         <meta.schema plugin="org.eclipse.dltk.ui" id="modelCompareProvider" name="modelCompareProvider"/>
       </appInfo>
       <documentation>
          Extension point for text/label extensions to script ui label providers.
@@ -18,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence>
-            <element ref="modelLabelProvider" minOccurs="1" maxOccurs="unbounded"/>
+            <element ref="modelCompareProvider" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,7 +47,7 @@
       </complexType>
    </element>
 
-   <element name="modelLabelProvider">
+   <element name="modelCompareProvider">
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>
@@ -69,7 +69,7 @@
                   Class implementing IModelProvider to build structure
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.jface.viewers.ILabelProvider"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.ui.IModelCompareProvider"/>
                </appInfo>
             </annotation>
          </attribute>

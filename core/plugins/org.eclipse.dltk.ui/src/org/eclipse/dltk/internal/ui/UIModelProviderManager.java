@@ -23,6 +23,7 @@ import java.util.Set;
 import org.eclipse.dltk.core.SimpleClassDLTKExtensionManager;
 import org.eclipse.dltk.core.SimpleDLTKExtensionManager.ElementInfo;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.IModelCompareProvider;
 import org.eclipse.dltk.ui.IModelContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 
@@ -30,6 +31,9 @@ import org.eclipse.jface.viewers.ILabelProvider;
  * Used to provide or replace some model elements in structure model.
  */
 public class UIModelProviderManager {
+	private static final IModelCompareProvider[] NONE_MODEL_COMPARE_PROVIDERS = new IModelCompareProvider[0];
+	private static final ILabelProvider[] NONE_LABEL_PROVIDERS = new ILabelProvider[0];
+	private static final IModelContentProvider[] NONE_MODEL_CONTENT_PROVIDERS = new IModelContentProvider[0];
 	private static final String REQUIRES = "requires";
 	private static final String ID = "id";
 	private static final String LANGUAGE = "language";
@@ -39,8 +43,12 @@ public class UIModelProviderManager {
 	private static SimpleClassDLTKExtensionManager labelProviderManager = new SimpleClassDLTKExtensionManager(
 			DLTKUIPlugin.PLUGIN_ID + ".modelLabelProvider");
 
+	private static SimpleClassDLTKExtensionManager compareProviderManager = new SimpleClassDLTKExtensionManager(
+			DLTKUIPlugin.PLUGIN_ID + ".modelCompareProvider");
+
 	private static Map contentProviders = null;
 	private static Map labelProviders = null;
+	private static Map compareProviders = null;
 
 	public static IModelContentProvider[] getContentProviders(String lang) {
 		if (contentProviders == null) {
@@ -61,7 +69,7 @@ public class UIModelProviderManager {
 			return (IModelContentProvider[]) result
 					.toArray(new IModelContentProvider[result.size()]);
 		}
-		return new IModelContentProvider[0];
+		return NONE_MODEL_CONTENT_PROVIDERS;
 	}
 
 	public static ILabelProvider[] getLabelProviders(String lang) {
@@ -83,7 +91,29 @@ public class UIModelProviderManager {
 			return (ILabelProvider[]) result.toArray(new ILabelProvider[result
 					.size()]);
 		}
-		return new ILabelProvider[0];
+		return NONE_LABEL_PROVIDERS;
+	}
+
+	public static IModelCompareProvider[] getCompareProviders(String lang) {
+		if (compareProviders == null) {
+			compareProviders = initializeProviders(compareProviderManager);
+		}
+		if (lang == null) {
+			List providers = new ArrayList();
+			Collection values = compareProviders.values();
+			for (Iterator iterator = values.iterator(); iterator.hasNext();) {
+				List elements = (List) iterator.next();
+				providers.addAll(elements);
+			}
+			return (IModelCompareProvider[]) providers
+					.toArray(new IModelCompareProvider[providers.size()]);
+		}
+		List result = (List) compareProviders.get(lang);
+		if (result != null) {
+			return (IModelCompareProvider[]) result
+					.toArray(new IModelCompareProvider[result.size()]);
+		}
+		return NONE_MODEL_COMPARE_PROVIDERS;
 	}
 
 	private static Map initializeProviders(

@@ -9,7 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui;
 
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -18,6 +21,8 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
@@ -26,7 +31,9 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptModelUtil;
+import org.eclipse.dltk.internal.ui.UIModelProviderManager;
 import org.eclipse.dltk.internal.ui.scriptview.BuildPathContainer;
+import org.eclipse.dltk.ui.IModelCompareProvider.CompareResult;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -41,38 +48,15 @@ import com.ibm.icu.text.Collator;
  * name. Package fragment roots are sorted as ordered on the buildpath.
  * 
  */
-public class ModelElementSorter extends ViewerSorter {
-
-	private static final int PROJECTS = 1;
-	private static final int PROJECTFRAGMENT = 2;
-
-	private static final int SCRIPTFOLDER = 4;
-
-	private static final int SOURCEMODULES = 5;
-	// private static final int CLASSFILES = 5;
-
-	private static final int RESOURCEFOLDERS = 6;
-	private static final int RESOURCES = 7;
-	private static final int STORAGE = 8;
-
-	private static final int PACKAGE_DECL = 9;
-	// private static final int IMPORT_CONTAINER = 11;
-	// private static final int IMPORT_DECLARATION = 12;
-
-	// Includes all categories ordered using the OutlineSortOrderPage:
-	// types, initializers, methods & fields
-	private static final int MEMBERSOFFSET = 10;
-
-	private static final int SCRIPT_ELEMENTS = 50;
-	private static final int OTHERS = 51;
-
-	private static final int CONTAINER = 60;
+public class ModelElementSorter extends ViewerSorter implements
+		IModelCompareCategories {
 
 	private MembersOrderPreferenceCache fMemberOrderCache;
 	private Collator fNewCollator; // collator from ICU
 
 	private boolean innerElements = true;
 
+	// Some category definition interfaces
 	/**
 	 * Constructor.
 	 */
@@ -95,6 +79,15 @@ public class ModelElementSorter extends ViewerSorter {
 	 * @see ViewerSorter#category
 	 */
 	public int category(Object element) {
+
+		IModelCompareProvider[] providers = getCompareProviders(element);
+		for (int i = 0; i < providers.length; i++) {
+			CompareResult category = providers[i].category(element);
+			if (category != null) {
+				return category.result;
+			}
+		}
+
 		if (element instanceof IModelElement) {
 			try {
 				IModelElement je = (IModelElement) element;
@@ -157,6 +150,56 @@ public class ModelElementSorter extends ViewerSorter {
 		return OTHERS;
 	}
 
+	private IModelCompareProvider[] getCompareProviders(Object element) {
+		String toolkit = null;
+		if (element instanceof IModelElement) {
+			IDLTKLanguageToolkit tk = DLTKLanguageManager
+					.getLanguageToolkit((IModelElement) element);
+			if (tk != null) {
+				toolkit = tk.getNatureId();
+			}
+		}
+		IModelCompareProvider[] providers = UIModelProviderManager
+				.getCompareProviders(toolkit);
+		return providers;
+	}
+
+	private IModelCompareProvider[] getCompareProviders(Object element,
+			Object element2) {
+		String toolkit1 = null;
+		String toolkit2 = null;
+		if (element instanceof IModelElement) {
+			IDLTKLanguageToolkit tk = DLTKLanguageManager
+					.getLanguageToolkit((IModelElement) element);
+			if (tk != null) {
+				toolkit1 = tk.getNatureId();
+			}
+		}
+		if (element2 instanceof IModelElement) {
+			IDLTKLanguageToolkit tk = DLTKLanguageManager
+					.getLanguageToolkit((IModelElement) element2);
+			if (tk != null) {
+				toolkit2 = tk.getNatureId();
+			}
+		}
+		if (toolkit1 == null || toolkit2 == null) {
+			return UIModelProviderManager.getCompareProviders(null);
+		}
+		if (toolkit1 != toolkit2) {
+			IModelCompareProvider[] tk1 = UIModelProviderManager
+					.getCompareProviders(toolkit1);
+			IModelCompareProvider[] tk2 = UIModelProviderManager
+					.getCompareProviders(toolkit1);
+			Set result = new HashSet();
+			result.addAll(Arrays.asList(tk1));
+			result.addAll(Arrays.asList(tk2));
+			return (IModelCompareProvider[]) result
+					.toArray(new IModelCompareProvider[result.size()]);
+		} else {
+			return UIModelProviderManager.getCompareProviders(toolkit1);
+		}
+	}
+
 	private int getMemberCategory(int kind) {
 		int offset = fMemberOrderCache.getCategoryIndex(kind);
 		return offset + MEMBERSOFFSET;
@@ -168,6 +211,14 @@ public class ModelElementSorter extends ViewerSorter {
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		int cat1 = category(e1);
 		int cat2 = category(e2);
+
+		IModelCompareProvider[] providers = getCompareProviders(e1);
+		for (int i = 0; i < providers.length; i++) {
+			CompareResult category = providers[i].compare(e1, e2, cat1, cat2);
+			if (category != null) {
+				return category.result;
+			}
+		}
 
 		if (needsBuildpathComparision(e1, cat1, e2, cat2)) {
 			IProjectFragment root1 = getProjectFragment(e1);
@@ -216,7 +267,7 @@ public class ModelElementSorter extends ViewerSorter {
 			}
 		}
 		if (e1 instanceof IType && e2 instanceof IType) { // handle anonymous
-															// types
+			// types
 			if (name1.length() == 0) {
 				if (name2.length() == 0) {
 					try {

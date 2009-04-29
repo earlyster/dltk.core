@@ -13,7 +13,8 @@
    <extension-point id="formatterFactory" name="%extension-point.name.formatterFactory" schema="schema/formatterFactory.exsd"/>  
    <extension-point id="correctionProcessor" name="%extension-point.name.correctionProcessor" schema="schema/correctionProcessor.exsd"/>
    <extension-point id="modelContentProvider" name="modelContentProvider" schema="schema/modelContentProvider.exsd"/>
-   <extension-point id="modelLabelProvider" name="modelLabelProvider" schema="schema/modelLabelProvider.exsd"/>  
+   <extension-point id="modelLabelProvider" name="modelLabelProvider" schema="schema/modelLabelProvider.exsd"/>
+   <extension-point id="modelCompareProvider" name="modelCompareProvider" schema="schema/modelCompareProvider.exsd"/>  
    <extension
     	id="DLTKSearchResultPage"
         point="org.eclipse.search.searchResultViewPages">

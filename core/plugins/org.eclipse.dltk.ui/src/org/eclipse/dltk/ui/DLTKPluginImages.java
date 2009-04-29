@@ -52,7 +52,8 @@ public class DLTKPluginImages {
 	public static final String IMG_OBJS_TEST = NAME_PREFIX + "test_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_TESTCASE = NAME_PREFIX + "testcase_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_MODULE = NAME_PREFIX + "module_obj.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_LIBRARY = NAME_PREFIX + "library_obj.gif"; //$NON-NLS-1$	
+	public static final String IMG_OBJS_LIBRARY = NAME_PREFIX + "library_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_LIBRARY_SRC = NAME_PREFIX + "library_src_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_ACCESSRULES_ATTRIB = NAME_PREFIX + "access_restriction_attrib.gif"; //$NON-NLS-1$
 	
 	public static final String IMG_CORRECTION_CHANGE= NAME_PREFIX + "correction_change.gif"; //$NON-NLS-1$
@@ -279,6 +280,7 @@ public class DLTKPluginImages {
     public static final ImageDescriptor DESC_ELCL_EXCLUSION= createUnManaged(T_ELCL, "exclusion_filter_attrib.gif"); //$NON-NLS-1$
     
     public static final ImageDescriptor DESC_OBJS_LIBRARY= createManagedFromKey(T_OBJ, IMG_OBJS_LIBRARY);
+    public static final ImageDescriptor DESC_OBJS_LIBRARY_SRC= createManagedFromKey(T_OBJ, IMG_OBJS_LIBRARY_SRC);
     
     public static final ImageDescriptor DESC_TOOL_OPENMETHOD= createUnManaged(T_ETOOL, "opentype.gif"); 					//$NON-NLS-1$
     public static final ImageDescriptor DESC_TOOL_OPENTYPE= createUnManaged(T_ETOOL, "opentype.gif"); 					//$NON-NLS-1$
