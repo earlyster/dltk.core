@@ -53,6 +53,9 @@ public class ExternalProjectFragmentRequest extends IndexRequest {
 	protected void run() throws CoreException, IOException {
 		final Set modules = getExternalSourceModules();
 		final Index index = getIndexer().getProjectFragmentIndex(fragment);
+		if (index == null) {
+			return;
+		}
 		final IPath containerPath = fragment.getPath();
 		final List changes = checkChanges(index, modules, containerPath,
 				getEnvironment());

@@ -355,7 +355,6 @@ public class IndexManager extends JobManager implements IIndexConstants {
 										.verbose("-> cannot reuse existing index: " + indexLocation + " path: " + containerPathString); //$NON-NLS-1$ //$NON-NLS-2$
 							}
 							this.rebuildIndex(indexLocation, containerPath);
-							return null;
 						}
 						/* index = null; */// will fall thru to createIfMissing
 						// & create a empty index for the
@@ -366,7 +365,6 @@ public class IndexManager extends JobManager implements IIndexConstants {
 					// existing file is
 					// missing
 					this.rebuildIndex(indexLocation, containerPath);
-					return null;
 				}
 			}
 			// index wasn't found on disk, consider creating an empty new one
