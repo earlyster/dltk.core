@@ -17,6 +17,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
+import org.eclipse.dltk.console.ui.IScriptConsoleViewer;
 import org.eclipse.dltk.dbgp.IDbgpProperty;
 import org.eclipse.dltk.dbgp.exceptions.DbgpException;
 import org.eclipse.dltk.debug.core.model.IScriptStackFrame;
@@ -58,6 +59,9 @@ class DebugConsoleContentAssistProcessor implements IContentAssistProcessor {
 
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer,
 			int offset) {
+		if (!(viewer instanceof IScriptConsoleViewer)) {
+			return null;
+		}
 		IScriptThread thread = getScriptThread();
 		if (thread == null)
 			return null;
@@ -72,11 +76,7 @@ class DebugConsoleContentAssistProcessor implements IContentAssistProcessor {
 		}
 
 		SortedMap hit = null;
-		String text = viewer.getDocument().get();
-		// FIXME use other way to get command line offset
-		int lastIndex = text.lastIndexOf("=>"); //$NON-NLS-1$
-		if (lastIndex != -1)
-			text = text.substring(lastIndex + 2);
+		String text = ((IScriptConsoleViewer) viewer).getCommandLine();
 		if (text.endsWith(".")) //$NON-NLS-1$
 			text += " "; //$NON-NLS-1$
 		String[] segments = TextUtils.split(text, '.');
