@@ -9,18 +9,29 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.dltk.compiler.util.Util;
@@ -32,14 +43,21 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.ui.util.SWTUtil;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.dltk.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.ModelElementLabelProvider;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
+import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.dltk.ui.preferences.CodeTemplatesPreferencePage;
 import org.eclipse.dltk.ui.text.templates.ICodeTemplateArea;
 import org.eclipse.dltk.ui.text.templates.SourceModuleTemplateContext;
@@ -66,13 +84,16 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 
 public abstract class NewSourceModulePage extends NewContainerWizardPage {
 
+	private static final String REMOTE_FOLDER = "NewSourceModulePage.remoteFolder"; //$NON-NLS-1$
 	private static final String FILE = "NewSourceModulePage.file"; //$NON-NLS-1$
 
 	private IStatus sourceMoudleStatus;
+	private IStatus remoteFolderStatus = null;
 
 	private IScriptFolder currentScriptFolder;
 
 	private StringDialogField fileDialogField;
+	private StringButtonDialogField remoteFolderDialogField;
 
 	private IStatus fileChanged() {
 		StatusInfo status = new StatusInfo();
@@ -80,6 +101,9 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		if (getFileText().length() == 0) {
 			status.setError(Messages.NewSourceModulePage_pathCannotBeEmpty);
 		} else {
+			if (!Path.EMPTY.isValidSegment(getFileText())) {
+				status.setError(Messages.NewSourceModulePage_InvalidFileName);
+			}
 			if (currentScriptFolder != null) {
 				ISourceModule module = currentScriptFolder
 						.getSourceModule(getFileName());
@@ -93,6 +117,28 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		return status;
 	}
 
+	private IStatus remoteFolderChanged() {
+		StatusInfo status = new StatusInfo();
+		if (remoteFolderDialogField != null && isLinkingEnabled()) {
+			String remoteFolder = remoteFolderDialogField.getText();
+			if (remoteFolder.length() == 0) {
+				status
+						.setError(Messages.NewSourceModulePage_remoteFolderCannotBeEmpty);
+			} else {
+				final IEnvironment environment = getLinkedEnvironment();
+				if (environment != null) {
+					final IFileHandle file = environment.getFile(new Path(
+							remoteFolder));
+					if (file == null || !file.isDirectory()) {
+						status
+								.setError(Messages.NewSourceModulePage_remoteFolderNotExist);
+					}
+				}
+			}
+		}
+		return status;
+	}
+
 	/**
 	 * The wizard owning this page is responsible for calling this method with
 	 * the current selection. The selection is used to initialize the fields of
@@ -102,6 +148,9 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 	 *            used to initialize the fields
 	 */
 	public void init(IStructuredSelection selection) {
+		if (isLinkingSupported() && remoteFolderDialogField == null) {
+			createRemoteFolderField();
+		}
 		if (getTemplateArea() != null) {
 			createTemplateField();
 		}
@@ -111,7 +160,12 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		initContainerPage(element);
 		updateTemplates();
 
-		updateStatus(new IStatus[] { containerStatus, fileChanged() });
+		updateStatus(new IStatus[] { containerStatus,
+				remoteFolderStatus = remoteFolderChanged(), fileChanged() });
+	}
+
+	protected void createRemoteFolderControls(Composite parent, int nColumns) {
+		remoteFolderDialogField.doFillIntoGrid(parent, nColumns);
 	}
 
 	protected void createFileControls(Composite parent, int nColumns) {
@@ -285,6 +339,35 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		});
 	}
 
+	protected void createRemoteFolderField() {
+		remoteFolderDialogField = new StringButtonDialogField(
+				new IStringButtonAdapter() {
+					public void changeControlPressed(DialogField field) {
+						final IEnvironment environment = getLinkedEnvironment();
+						if (environment != null) {
+							final IEnvironmentUI ui = (IEnvironmentUI) environment
+									.getAdapter(IEnvironmentUI.class);
+							final String folder = ui.selectFolder(getShell(),
+									remoteFolderDialogField.getText());
+							if (folder != null) {
+								remoteFolderDialogField.setText(folder);
+							}
+						}
+					}
+				});
+		remoteFolderDialogField
+				.setDialogFieldListener(new IDialogFieldListener() {
+					public void dialogFieldChanged(DialogField field) {
+						remoteFolderStatus = remoteFolderChanged();
+						handleFieldChanged(REMOTE_FOLDER);
+					}
+				});
+		remoteFolderDialogField
+				.setButtonLabel(Messages.NewSourceModulePage_remoteFolder_BrowseButton);
+		remoteFolderDialogField
+				.setLabelText(Messages.NewSourceModulePage_remoteFolder_label);
+	}
+
 	protected void createTemplateField() {
 		fTemplateDialogField = new ComboDialogField(SWT.READ_ONLY);
 		fTemplateDialogField
@@ -300,9 +383,11 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 			else
 				currentScriptFolder = null;
 			sourceMoudleStatus = fileChanged();
+			remoteFolderStatus = remoteFolderChanged();
 		}
 
-		updateStatus(new IStatus[] { containerStatus, sourceMoudleStatus });
+		updateStatus(new IStatus[] { containerStatus, remoteFolderStatus,
+				sourceMoudleStatus });
 	}
 
 	public ISourceModule createFile(IProgressMonitor monitor)
@@ -311,10 +396,37 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 			monitor = new NullProgressMonitor();
 		}
 
-		String fileName = getFileName();
-
+		final String fileName = getFileName();
 		final ISourceModule module = currentScriptFolder
 				.getSourceModule(fileName);
+		if (isLinkingSupported() && isLinkingEnabled()) {
+			final IResource resource = currentScriptFolder.getResource();
+			if (resource != null
+					&& (resource.getType() & (IResource.FOLDER | IResource.PROJECT)) != 0) {
+				final IEnvironment environment = getLinkedEnvironment();
+				if (environment != null) {
+					final IFileHandle folder = environment.getFile(new Path(
+							remoteFolderDialogField.getText()));
+					final IFileHandle handle = folder.getChild(fileName);
+					final boolean fileExists = handle.exists();
+					if (!fileExists) {
+						try {
+							handle.openOutputStream(monitor).close();
+						} catch (IOException e) {
+							throw new CoreException(new Status(IStatus.ERROR,
+									DLTKUIPlugin.PLUGIN_ID, e.getMessage(), e));
+						}
+					}
+					final IFile file = ((IContainer) resource)
+							.getFile(new Path(fileName));
+					file.createLink(handle.toURI(), 0, monitor);
+					if (fileExists) {
+						return module;
+					}
+				}
+			}
+		}
+
 		currentScriptFolder.createSourceModule(fileName,
 				getFileContent(module), true, monitor);
 
@@ -334,6 +446,9 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		composite.setLayout(layout);
 
 		createContainerControls(composite, nColumns);
+		if (remoteFolderDialogField != null) {
+			createRemoteFolderControls(composite, nColumns);
+		}
 		// createPackageControls(composite, nColumns);
 		createFileControls(composite, nColumns);
 		if (fTemplateDialogField != null) {
@@ -481,4 +596,93 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		return Util.EMPTY_STRING;
 	}
 
+	protected boolean isLinkingSupported() {
+		return false;
+	}
+
+	protected boolean isLinkingEnabled() {
+		return getLinkedEnvironment() != null;
+	}
+
+	public void setScriptFolder(IScriptFolder root, boolean canBeModified) {
+		super.setScriptFolder(root, canBeModified);
+		if (remoteFolderDialogField != null) {
+			final boolean linkingEnabled = isLinkingEnabled();
+			remoteFolderDialogField.setEnabled(linkingEnabled);
+			if (linkingEnabled
+					&& remoteFolderDialogField.getText().length() == 0) {
+				final IProjectFragment fragment = getProjectFragment();
+				if (fragment != null) {
+					final List remotePaths = collectLinkedPaths(fragment
+							.getScriptProject().getProject());
+					if (remotePaths != null) {
+						IPath base = null;
+						for (Iterator i = remotePaths.iterator(); i.hasNext();) {
+							IPath path = (IPath) i.next();
+							if (base == null || path.isPrefixOf(base)) {
+								base = path;
+							} else {
+								int segments = path.matchingFirstSegments(base);
+								if (segments >= 2) {
+									base = base.uptoSegment(segments);
+								}
+							}
+						}
+						if (base != null && base.segmentCount() >= 2) {
+							remoteFolderDialogField.setText(base.toString());
+						}
+					}
+				}
+			}
+		}
+	}
+
+	protected IEnvironment getLinkedEnvironment() {
+		final IProjectFragment fragment = getProjectFragment();
+		if (fragment != null) {
+			return getLinkedEnvironment(fragment.getScriptProject()
+					.getProject());
+		}
+		return null;
+	}
+
+	protected IEnvironment getLinkedEnvironment(IProject project) {
+		if (project != null) {
+			final String envId = EnvironmentManager.getEnvironmentId(project,
+					false);
+			if (envId != null) {
+				return EnvironmentManager.getEnvironmentById(envId);
+			}
+		}
+		return null;
+	}
+
+	protected List collectLinkedPaths(IProject project) {
+		try {
+			final IEnvironment environment = getLinkedEnvironment(project);
+			if (environment == null) {
+				return null;
+			}
+			final Set result = new HashSet();
+			final IResource[] children = project.members();
+			for (int i = 0; i < children.length; i++) {
+				final IResource child = children[i];
+				if (child.isLinked()) {
+					final IFileHandle file = environment.getFile(child
+							.getLocationURI());
+					if (file != null
+							&& environment.equals(file.getEnvironment())) {
+						final IPath path = file.getPath();
+						result.add(file.isFile() ? path.removeLastSegments(1)
+								: path);
+					}
+				}
+			}
+			return !result.isEmpty() ? new ArrayList(result) : null;
+		} catch (CoreException e) {
+			// not possible for project to be inaccessible
+			DLTKUIPlugin.log(e);
+			return null;
+		}
+	}
 }
