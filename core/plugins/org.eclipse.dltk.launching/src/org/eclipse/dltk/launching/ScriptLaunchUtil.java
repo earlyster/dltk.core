@@ -205,6 +205,10 @@ public class ScriptLaunchUtil {
 			IExecutionEnvironment exeEnv, String scriptPath, Bundle bundle,
 			IFileHandle installLocations, final IProgressMonitor monitor) {
 		IDeployment deployment = exeEnv.createDeployment();
+		if (deployment == null) {
+			// happens if RSE is not initialized yet
+			return null;
+		}
 		try {
 			final StringBuffer source = new StringBuffer();
 
