@@ -19,9 +19,14 @@ public class Messages extends NLS {
 	public static String NewSourceModulePage_ConfigureTemplates;
 	public static String NewSourceModulePage_file;
 	public static String NewSourceModulePage_fileAlreadyExists;
+	public static String NewSourceModulePage_InvalidFileName;
 	public static String NewSourceModulePage_noFoldersAvailable;
 	public static String NewSourceModulePage_noTemplate;
 	public static String NewSourceModulePage_pathCannotBeEmpty;
+	public static String NewSourceModulePage_remoteFolder_BrowseButton;
+	public static String NewSourceModulePage_remoteFolder_label;
+	public static String NewSourceModulePage_remoteFolderCannotBeEmpty;
+	public static String NewSourceModulePage_remoteFolderNotExist;
 	public static String NewSourceModulePage_selectScriptFolder;
 	public static String NewSourceModulePage_Template;
 	public static String NewSourceModuleWizard_errorInOpenInEditor;
