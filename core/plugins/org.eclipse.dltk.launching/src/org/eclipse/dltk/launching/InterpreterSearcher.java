@@ -1,6 +1,5 @@
 package org.eclipse.dltk.launching;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -17,6 +16,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.osgi.util.NLS;
 
 public class InterpreterSearcher {
 	private Set searchedFiles;
@@ -113,10 +113,9 @@ public class InterpreterSearcher {
 
 			final IFileHandle file = files[i];
 
-			monitor.subTask(MessageFormat.format(
-					Messages.InterpreterSearcher_foundSearching, new String[] {
-							Integer.toString(found.size()),
-							file.getCanonicalPath() }));
+			monitor.subTask(NLS.bind(
+					Messages.InterpreterSearcher_foundSearching, Integer
+							.toString(found.size()), file.getCanonicalPath()));
 
 			// Check if file is a symlink
 			if (file.isDirectory() && file.isSymlink()) {
