@@ -11,7 +11,6 @@ package org.eclipse.dltk.internal.debug.ui.interpreters;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -43,6 +42,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -562,11 +562,10 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		if (envVariables.size() == 0) {
 			MessageBox box = new MessageBox(fDialog.getShell(), SWT.ICON_ERROR);
 			box
-					.setMessage(MessageFormat
-							.format(
+					.setMessage(NLS
+							.bind(
 									InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_couldNotRetrieveEnvironmentVariablesFrom,
-									new Object[] { fDialog.getEnvironment()
-											.getName() }));
+									fDialog.getEnvironment().getName()));
 			box
 					.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_failedToRetrieveEnvironment);
 			box.open();
@@ -609,9 +608,8 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 
 			public String getText(Object element) {
 				EnvironmentVariable var = (EnvironmentVariable) element;
-				return MessageFormat.format(
-						LaunchConfigurationsMessages.EnvironmentTab_7,
-						new String[] { var.getName(), var.getValue() });
+				return NLS.bind(LaunchConfigurationsMessages.EnvironmentTab_7,
+						var.getName(), var.getValue());
 			}
 
 			public void addListener(ILabelProviderListener listener) {

@@ -9,8 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -19,8 +17,7 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.IDLTKDebugUIConstants;
 import org.eclipse.dltk.launching.LibraryLocation;
-
-
+import org.eclipse.osgi.util.NLS;
 
 /**
  * Wrapper for an original library location, to support editing.
@@ -28,17 +25,18 @@ import org.eclipse.dltk.launching.LibraryLocation;
  */
 public final class LibraryStandin {
 	private IPath fLibraryLocation;
-		
+
 	/**
 	 * Creates a new library standin on the given library location.
-	 */	
+	 */
 	public LibraryStandin(LibraryLocation libraryLocation) {
-		fLibraryLocation= libraryLocation.getLibraryPath();
-	}	
+		fLibraryLocation = libraryLocation.getLibraryPath();
+	}
+
 	public LibraryStandin(IPath path) {
-		fLibraryLocation= path;
-	}	
-		
+		fLibraryLocation = path;
+	}
+
 	/**
 	 * Returns the InterpreterEnvironment library archive location.
 	 * 
@@ -47,43 +45,54 @@ public final class LibraryStandin {
 	public String getLibraryPathString() {
 		return EnvironmentPathUtils.getLocalPathString(fLibraryLocation);
 	}
-	
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object obj) {
 		if (obj instanceof LibraryStandin) {
-			LibraryStandin lib = (LibraryStandin)obj;
+			LibraryStandin lib = (LibraryStandin) obj;
 			return fLibraryLocation.equals(lib.fLibraryLocation);
-		} 
+		}
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
 		return fLibraryLocation.hashCode();
 	}
-	
+
 	/**
-	 * Returns whether the given paths are equal - either may be <code>null</code>.
-	 * @param path1 path to be compared
-	 * @param path2 path to be compared
+	 * Returns whether the given paths are equal - either may be
+	 * <code>null</code>.
+	 * 
+	 * @param path1
+	 *            path to be compared
+	 * @param path2
+	 *            path to be compared
 	 * @return whether the given paths are equal
 	 */
 	protected boolean equals(IPath path1, IPath path2) {
 		return equalsOrNull(path1, path2);
 	}
-	
+
 	/**
-	 * Returns whether the given objects are equal - either may be <code>null</code>.
-	 * @param o1 object to be compared
-	 * @param o2 object to be compared
+	 * Returns whether the given objects are equal - either may be
+	 * <code>null</code>.
+	 * 
+	 * @param o1
+	 *            object to be compared
+	 * @param o2
+	 *            object to be compared
 	 * @return whether the given objects are equal or both null
-	 *
-	 */	
+	 * 
+	 */
 	private boolean equalsOrNull(Object o1, Object o2) {
 		if (o1 == null) {
 			return o2 == null;
@@ -94,7 +103,6 @@ public final class LibraryStandin {
 		return o1.equals(o2);
 	}
 
-	
 	/**
 	 * Returns an equivalent library location.
 	 * 
@@ -103,20 +111,23 @@ public final class LibraryStandin {
 	public LibraryLocation toLibraryLocation() {
 		return new LibraryLocation(fLibraryLocation);
 	}
-	
+
 	/**
 	 * Returns a status for this library describing any error states
-	 * @param environment 
+	 * 
+	 * @param environment
 	 * 
 	 * @return
 	 */
 	public IStatus validate() {
 		IFileHandle f = EnvironmentPathUtils.getFile(fLibraryLocation);
 		if (!f.exists()) {
-			return new Status(IStatus.ERROR, DLTKDebugUIPlugin.PLUGIN_ID, IDLTKDebugUIConstants.INTERNAL_ERROR, 
-					MessageFormat.format(InterpretersMessages.LibraryStandin_0, new String[]{f.toString()}), null);
-		}	
+			return new Status(IStatus.ERROR, DLTKDebugUIPlugin.PLUGIN_ID,
+					IDLTKDebugUIConstants.INTERNAL_ERROR, NLS
+							.bind(InterpretersMessages.LibraryStandin_0, f
+									.toString()), null);
+		}
 		return Status.OK_STATUS;
 	}
-	
+
 }
