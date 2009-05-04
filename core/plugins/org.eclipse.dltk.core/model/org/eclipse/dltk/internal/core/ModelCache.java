@@ -199,6 +199,7 @@ public class ModelCache {
 	}
 
 	public String toStringFillingRation(String prefix) {
+		final NumberFormat nf = NumberFormat.getInstance();
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(prefix);
 		buffer.append("Project cache: "); //$NON-NLS-1$
@@ -208,22 +209,19 @@ public class ModelCache {
 		buffer.append("Root cache["); //$NON-NLS-1$
 		buffer.append(this.rootCache.getSpaceLimit());
 		buffer.append("]: "); //$NON-NLS-1$
-		buffer.append(NumberFormat.getInstance().format(
-				this.rootCache.fillingRatio()));
+		buffer.append(nf.format(this.rootCache.fillingRatio()));
 		buffer.append("%\n"); //$NON-NLS-1$
 		buffer.append(prefix);
 		buffer.append("Folder cache["); //$NON-NLS-1$
 		buffer.append(this.pkgCache.getSpaceLimit());
 		buffer.append("]: "); //$NON-NLS-1$
-		buffer.append(NumberFormat.getInstance().format(
-				this.pkgCache.fillingRatio()));
+		buffer.append(nf.format(this.pkgCache.fillingRatio()));
 		buffer.append("%\n"); //$NON-NLS-1$
 		buffer.append(prefix);
 		buffer.append("Openable cache["); //$NON-NLS-1$
 		buffer.append(this.openableCache.getSpaceLimit());
 		buffer.append("]: "); //$NON-NLS-1$
-		buffer.append(NumberFormat.getInstance().format(
-				this.openableCache.fillingRatio()));
+		buffer.append(nf.format(this.openableCache.fillingRatio()));
 		buffer.append("%\n"); //$NON-NLS-1$
 		return buffer.toString();
 	}
