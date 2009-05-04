@@ -1,7 +1,5 @@
 package org.eclipse.dltk.internal.debug.ui;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugException;
@@ -9,6 +7,7 @@ import org.eclipse.dltk.debug.core.IHotCodeReplaceListener;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.IDLTKDebugUIPreferenceConstants;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -48,9 +47,12 @@ public class ScriptHotCodeReplaceListener implements IHotCodeReplaceListener {
 		final String launchName = target.getLaunch().getLaunchConfiguration()
 				.getName();
 		if (exception == null) {
-			status = new Status(IStatus.WARNING, DLTKDebugUIPlugin
-					.getUniqueIdentifier(), IStatus.WARNING,
-					Messages.ScriptHotCodeReplaceListener_theTargetDoesntSupportHotCodeReplace, null);
+			status = new Status(
+					IStatus.WARNING,
+					DLTKDebugUIPlugin.getUniqueIdentifier(),
+					IStatus.WARNING,
+					Messages.ScriptHotCodeReplaceListener_theTargetDoesntSupportHotCodeReplace,
+					null);
 			preference = IDLTKDebugUIPreferenceConstants.PREF_ALERT_HCR_NOT_SUPPORTED;
 			alertMessage = Messages.ScriptHotCodeReplaceListener_doNotShowErrorWhenHotCodeReplaceIsNotSupported;
 		} else {
@@ -61,8 +63,10 @@ public class ScriptHotCodeReplaceListener implements IHotCodeReplaceListener {
 			alertMessage = Messages.ScriptHotCodeReplaceListener_doNotShowErrorWhenHotCodeReplaceFails;
 		}
 		final String title = Messages.ScriptHotCodeReplaceListener_hotCodeReplaceFailed;
-		final String message = MessageFormat.format(Messages.ScriptHotCodeReplaceListener_someCodeChangesCannotBeHotSwappedIntoARunningInterpreter,
-						new Object[] { launchName });
+		final String message = NLS
+				.bind(
+						Messages.ScriptHotCodeReplaceListener_someCodeChangesCannotBeHotSwappedIntoARunningInterpreter,
+						launchName);
 		display.asyncExec(new Runnable() {
 			public void run() {
 				if (display.isDisposed()) {

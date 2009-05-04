@@ -11,7 +11,6 @@
 package org.eclipse.dltk.internal.debug.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
 import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
@@ -43,6 +42,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
@@ -411,7 +411,8 @@ public class ScriptEvaluationAction implements IWorkbenchWindowActionDelegate,
 					engine.asyncEvaluate(expression, stackFrame,
 							ScriptEvaluationAction.this);
 				} else {
-					throw new InvocationTargetException(null,
+					throw new InvocationTargetException(
+							null,
 							Messages.ScriptEvaluationAction_threadIsNotSuspended);
 				}
 			}
@@ -450,11 +451,13 @@ public class ScriptEvaluationAction implements IWorkbenchWindowActionDelegate,
 			}
 			return ce.getStatus().getMessage();
 		}
-		String message = MessageFormat.format(Messages.ScriptEvaluationAction_anExceptionOccurred,
-				new Object[] { exception.getClass() });
+		String message = NLS.bind(
+				Messages.ScriptEvaluationAction_anExceptionOccurred, exception
+						.getClass());
 		if (exception.getMessage() != null) {
-			message = MessageFormat.format(Messages.ScriptEvaluationAction_anExceptionOccurred2, new Object[] { message,
-					exception.getMessage() });
+			message = NLS.bind(
+					Messages.ScriptEvaluationAction_anExceptionOccurred2,
+					message, exception.getMessage());
 		}
 		return message;
 	}
@@ -474,8 +477,9 @@ public class ScriptEvaluationAction implements IWorkbenchWindowActionDelegate,
 			if (i == 0) {
 				message = msg;
 			} else {
-				message = MessageFormat.format(Messages.ScriptEvaluationAction_errorMessage, new Object[] {
-						message, msg });
+				message = NLS.bind(
+						Messages.ScriptEvaluationAction_errorMessage, message,
+						msg);
 			}
 		}
 		return message;
@@ -489,7 +493,8 @@ public class ScriptEvaluationAction implements IWorkbenchWindowActionDelegate,
 	protected void reportError(String message) {
 		Status status = new Status(IStatus.ERROR, DLTKDebugUIPlugin
 				.getUniqueIdentifier(), IStatus.ERROR, message, null);
-		ErrorDialog.openError(getShell(), Messages.ScriptEvaluationAction_errorEvaluating, null, status);
+		ErrorDialog.openError(getShell(),
+				Messages.ScriptEvaluationAction_errorEvaluating, null, status);
 	}
 
 	// IScriptEvaluationListener
