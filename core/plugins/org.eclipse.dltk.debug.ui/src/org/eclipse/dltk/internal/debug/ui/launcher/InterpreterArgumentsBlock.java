@@ -9,9 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.launcher;
 
-
-import java.text.MessageFormat;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -21,6 +18,7 @@ import org.eclipse.dltk.debug.ui.actions.ControlAccessibleListener;
 import org.eclipse.dltk.debug.ui.launchConfigurations.CommonScriptLaunchTab;
 import org.eclipse.dltk.debug.ui.messages.ScriptLaunchMessages;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -34,7 +32,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 
-
 /**
  * Editor for Interpreter arguments of a Script launch configuration.
  */
@@ -43,7 +40,7 @@ public class InterpreterArgumentsBlock extends CommonScriptLaunchTab {
 	// Interpreter arguments widgets
 	protected Text fInterpreterArgumentsText;
 	private Button fPgrmArgVariableButton;
-	
+
 	/**
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(Composite)
 	 */
@@ -53,13 +50,15 @@ public class InterpreterArgumentsBlock extends CommonScriptLaunchTab {
 		Group group = new Group(parent, SWT.NONE);
 		setControl(group);
 		GridLayout topLayout = new GridLayout();
-		group.setLayout(topLayout);	
+		group.setLayout(topLayout);
 		GridData gd = new GridData(GridData.FILL_BOTH);
 		group.setLayoutData(gd);
 		group.setFont(font);
-		group.setText(ScriptLaunchMessages.InterpreterArgumentsTab_Interpreter_ar_guments); 
-		
-		fInterpreterArgumentsText = new Text(group, SWT.MULTI | SWT.WRAP| SWT.BORDER | SWT.V_SCROLL);
+		group
+				.setText(ScriptLaunchMessages.InterpreterArgumentsTab_Interpreter_ar_guments);
+
+		fInterpreterArgumentsText = new Text(group, SWT.MULTI | SWT.WRAP
+				| SWT.BORDER | SWT.V_SCROLL);
 		gd = new GridData(GridData.FILL_BOTH);
 		gd.heightHint = 40;
 		gd.widthHint = 100;
@@ -69,24 +68,29 @@ public class InterpreterArgumentsBlock extends CommonScriptLaunchTab {
 			public void modifyText(ModifyEvent evt) {
 				updateLaunchConfigurationDialog();
 			}
-		});	
-		ControlAccessibleListener.addListener(fInterpreterArgumentsText, group.getText());
-				
-		fPgrmArgVariableButton = createPushButton(group, ScriptLaunchMessages.InterpreterArgumentsBlock, null);
+		});
+		ControlAccessibleListener.addListener(fInterpreterArgumentsText, group
+				.getText());
+
+		fPgrmArgVariableButton = createPushButton(group,
+				ScriptLaunchMessages.InterpreterArgumentsBlock, null);
 		fPgrmArgVariableButton.setFont(font);
-		fPgrmArgVariableButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		fPgrmArgVariableButton.setLayoutData(new GridData(
+				GridData.HORIZONTAL_ALIGN_END));
 		fPgrmArgVariableButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				StringVariableSelectionDialog dialog = new StringVariableSelectionDialog(getShell());
+				StringVariableSelectionDialog dialog = new StringVariableSelectionDialog(
+						getShell());
 				dialog.open();
 				String variable = dialog.getVariableExpression();
 				if (variable != null) {
 					fInterpreterArgumentsText.insert(variable);
 				}
 			}
+
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
-			
+
 		});
 	}
 
@@ -94,7 +98,9 @@ public class InterpreterArgumentsBlock extends CommonScriptLaunchTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(ILaunchConfigurationWorkingCopy)
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(ScriptLaunchConfigurationConstants.ATTR_INTERPRETER_ARGUMENTS, (String)null);		
+		configuration.setAttribute(
+				ScriptLaunchConfigurationConstants.ATTR_INTERPRETER_ARGUMENTS,
+				(String) null);
 	}
 
 	/**
@@ -102,10 +108,17 @@ public class InterpreterArgumentsBlock extends CommonScriptLaunchTab {
 	 */
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
-			fInterpreterArgumentsText.setText(configuration.getAttribute(ScriptLaunchConfigurationConstants.ATTR_INTERPRETER_ARGUMENTS, "")); //$NON-NLS-1$
+			fInterpreterArgumentsText
+					.setText(configuration
+							.getAttribute(
+									ScriptLaunchConfigurationConstants.ATTR_INTERPRETER_ARGUMENTS,
+									"")); //$NON-NLS-1$
 		} catch (CoreException e) {
-			setErrorMessage(MessageFormat.format(ScriptLaunchMessages.InterpreterArgumentsTab_Exception_occurred_reading_configuration, new Object[] { e.getStatus().getMessage() })); 
-			DLTKDebugUIPlugin.log(e);			
+			setErrorMessage(NLS
+					.bind(
+							ScriptLaunchMessages.InterpreterArgumentsTab_Exception_occurred_reading_configuration,
+							e.getStatus().getMessage()));
+			DLTKDebugUIPlugin.log(e);
 		}
 	}
 
@@ -113,16 +126,18 @@ public class InterpreterArgumentsBlock extends CommonScriptLaunchTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(ILaunchConfigurationWorkingCopy)
 	 */
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(ScriptLaunchConfigurationConstants.ATTR_INTERPRETER_ARGUMENTS, getAttributeValueFrom(fInterpreterArgumentsText));
+		configuration.setAttribute(
+				ScriptLaunchConfigurationConstants.ATTR_INTERPRETER_ARGUMENTS,
+				getAttributeValueFrom(fInterpreterArgumentsText));
 	}
 
 	/**
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getName()
 	 */
 	public String getName() {
-		return ScriptLaunchMessages.InterpreterArgumentsBlock_Interpreter_Arguments; 
+		return ScriptLaunchMessages.InterpreterArgumentsBlock_Interpreter_Arguments;
 	}
-	
+
 	/**
 	 * Retuns the string in the text widget, or <code>null</code> if empty.
 	 * 
@@ -134,8 +149,8 @@ public class InterpreterArgumentsBlock extends CommonScriptLaunchTab {
 			return content;
 		}
 		return null;
-	}	
-	
+	}
+
 	public void setEnabled(boolean enabled) {
 		fInterpreterArgumentsText.setEnabled(enabled);
 		fPgrmArgVariableButton.setEnabled(enabled);
