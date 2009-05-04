@@ -1,11 +1,12 @@
 package org.eclipse.dltk.validators.ui;
 
-import java.text.DateFormat;
 import java.util.Date;
 
 import org.eclipse.dltk.validators.core.AbstractValidateJob;
 import org.eclipse.dltk.validators.core.IValidatorOutput;
 import org.eclipse.osgi.util.NLS;
+
+import com.ibm.icu.text.DateFormat;
 
 public abstract class AbstractConsoleValidateJob extends AbstractValidateJob {
 
