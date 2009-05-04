@@ -1,6 +1,5 @@
 package org.eclipse.dltk.ui.dialogs;
 
-import java.text.MessageFormat;
 import java.util.Iterator;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -33,8 +32,7 @@ public class PropertyLinkArea {
 		if (node == null) {
 			text = NLS.bind(WorkbenchMessages.PreferenceNode_NotFound, pageId);
 		} else {
-			text = MessageFormat.format(message, new String[] { node
-                    .getLabelText() });
+			text = NLS.bind(message, node.getLabelText());
 		}
 
 		pageLink.addSelectionListener(new SelectionAdapter() {

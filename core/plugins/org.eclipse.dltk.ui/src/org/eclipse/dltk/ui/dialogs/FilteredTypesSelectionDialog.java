@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -77,6 +76,7 @@ import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -1562,10 +1562,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog
 		}
 
 		private String getFormattedLabel(String name) {
-			return MessageFormat
-					.format(
+			return NLS
+					.bind(
 							DLTKUIMessages.FilteredTypesSelectionDialog_library_name_format,
-							new Object[] { name });
+							name);
 		}
 
 		/*
