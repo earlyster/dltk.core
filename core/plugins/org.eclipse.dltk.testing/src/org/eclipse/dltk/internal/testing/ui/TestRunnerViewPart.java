@@ -14,10 +14,6 @@
 package org.eclipse.dltk.internal.testing.ui;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.MessageFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -70,6 +66,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
@@ -108,6 +105,10 @@ import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
+
+import com.ibm.icu.text.DateFormat;
+import com.ibm.icu.text.NumberFormat;
+import com.ibm.icu.text.SimpleDateFormat;
 
 /**
  * A ViewPart that shows the results of a test run.
@@ -1393,10 +1394,9 @@ public class TestRunnerViewPart extends ViewPart {
 				.getDisplayName();
 
 		if (testKindDisplayStr != null)
-			setTitleToolTip(MessageFormat.format(
+			setTitleToolTip(NLS.bind(
 					DLTKTestingMessages.TestRunnerViewPart_titleToolTip,
-					new String[] { fTestRunSession.getTestRunName(),
-							testKindDisplayStr }));
+					fTestRunSession.getTestRunName(), testKindDisplayStr));
 		else
 			setTitleToolTip(fTestRunSession.getTestRunName());
 	}
