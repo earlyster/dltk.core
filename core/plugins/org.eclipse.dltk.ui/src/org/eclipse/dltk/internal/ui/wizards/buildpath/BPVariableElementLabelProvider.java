@@ -15,9 +15,9 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.ui.DLTKPluginImages;
-import org.eclipse.dltk.ui.Messages;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.osgi.util.TextProcessor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -91,13 +91,13 @@ public class BPVariableElementLabelProvider extends LabelProvider implements
 			// .add(NewWizardMessages.BPVariableElementLabelProvider_deprecated);
 			// }
 			if (restrictions.size() == 1) {
-				result = Messages
-						.format(
+				result = NLS
+						.bind(
 								NewWizardMessages.BPVariableElementLabelProvider_one_restriction,
 								new Object[] { result, restrictions.get(0) });
 			} else if (restrictions.size() == 2) {
-				result = Messages
-						.format(
+				result = NLS
+						.bind(
 								NewWizardMessages.BPVariableElementLabelProvider_two_restrictions,
 								new Object[] { result, restrictions.get(0),
 										restrictions.get(1) });
@@ -114,8 +114,8 @@ public class BPVariableElementLabelProvider extends LabelProvider implements
 				} else {
 					appendix = NewWizardMessages.BPVariableElementLabelProvider_empty;
 				}
-				result = Messages
-						.format(
+				result = NLS
+						.bind(
 								NewWizardMessages.BPVariableElementLabelProvider_appendix,
 								new Object[] { result, appendix });
 			}
@@ -129,7 +129,8 @@ public class BPVariableElementLabelProvider extends LabelProvider implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
+	 * @see
+	 * org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 	 */
 	public Color getForeground(Object element) {
 		return null;
@@ -138,7 +139,8 @@ public class BPVariableElementLabelProvider extends LabelProvider implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
+	 * @see
+	 * org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
 	 */
 	public Color getBackground(Object element) {
 		if (element instanceof BPVariableElement) {
