@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.log;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.eclipse.dltk.internal.ui.text.DLTKColorManager;
@@ -22,6 +21,8 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
+
+import com.ibm.icu.text.SimpleDateFormat;
 
 public class ScriptDebugLogLabelProvider implements ITableLabelProvider,
 		IColorProvider {
