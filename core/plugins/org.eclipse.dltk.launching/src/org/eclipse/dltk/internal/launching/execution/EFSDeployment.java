@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.Enumeration;
 
 import org.eclipse.core.filesystem.EFS;
@@ -19,6 +18,7 @@ import org.eclipse.dltk.core.environment.IDeployment;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.internal.environment.EFSFileHandle;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 
 public class EFSDeployment implements IDeployment {
@@ -52,9 +52,9 @@ public class EFSDeployment implements IDeployment {
 			} else {
 				final URL url = bundle.getEntry(bundlePath);
 				if (url == null)
-					throw new IOException(MessageFormat.format(
+					throw new IOException(NLS.bind(
 							Messages.EFSDeployment_failedToLocateEntryForPath,
-							new Object[] { bundlePath }));
+							bundlePath));
 
 				IFileStore parent = dest.getParent();
 				if (parent != null) {
@@ -139,9 +139,9 @@ public class EFSDeployment implements IDeployment {
 		try {
 			copy(input, dest);
 		} catch (CoreException e) {
-			throw new IOException(MessageFormat.format(
-					Messages.EFSDeployment_failedToDeployStream,
-					new Object[] { e.getMessage() }));
+			throw new IOException(NLS
+					.bind(Messages.EFSDeployment_failedToDeployStream, e
+							.getMessage()));
 		}
 		return new Path(filename);
 	}

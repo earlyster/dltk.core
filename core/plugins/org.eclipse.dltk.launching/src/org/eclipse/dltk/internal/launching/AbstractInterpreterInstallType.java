@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,6 +48,7 @@ import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.LaunchingMessages;
 import org.eclipse.dltk.launching.LibraryLocation;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * Abstract implementation of a interpreter install type. Subclasses should
@@ -121,8 +121,7 @@ public abstract class AbstractInterpreterInstallType implements
 			throws IllegalArgumentException {
 		if (findInterpreterInstall(id) != null) {
 			String format = LaunchingMessages.InterpreterInstallType_duplicateInterpreter;
-			throw new IllegalArgumentException(MessageFormat.format(format,
-					new String[] { id }));
+			throw new IllegalArgumentException(NLS.bind(format, id));
 		}
 
 		IInterpreterInstall install = doCreateInterpreterInstall(id);
@@ -307,11 +306,10 @@ public abstract class AbstractInterpreterInstallType implements
 									IStatus.INFO,
 									DLTKLaunchingPlugin.PLUGIN_ID,
 									IStatus.INFO,
-									MessageFormat
-											.format(
+									NLS
+											.bind(
 													LaunchingMessages.AbstractInterpreterInstallType_failedToReadFromDiscoverScriptOutputStream,
-													new Object[] { e
-															.getMessage() }), e));
+													e.getMessage()), e));
 				} finally {
 					if (monitor != null) {
 						if (!workReceived) {
@@ -674,12 +672,11 @@ public abstract class AbstractInterpreterInstallType implements
 								.getFile(deploymentPath);
 						String result = retrivePaths(exeEnv, installLocation,
 								locations, monitor, locator, variables);
-						String message = MessageFormat
-								.format(
+						String message = NLS
+								.bind(
 										LaunchingMessages.AbstractInterpreterInstallType_failedToResolveLibraryLocationsForWith,
-										new Object[] {
-												installLocation.getName(),
-												locator.toOSString() });
+										installLocation.getName(), locator
+												.toOSString());
 						if (locations.size() == 0) {
 							if (result == null) {
 								DLTKLaunchingPlugin.log(message);
@@ -688,10 +685,10 @@ public abstract class AbstractInterpreterInstallType implements
 										.logWarning(
 												message,
 												new Exception(
-														MessageFormat
-																.format(
+														NLS
+																.bind(
 																		LaunchingMessages.AbstractInterpreterInstallType_output,
-																		new Object[] { result })));
+																		result)));
 							}
 						}
 					} finally {
@@ -728,11 +725,10 @@ public abstract class AbstractInterpreterInstallType implements
 		if (monitor != null) {
 			monitor
 					.beginTask(
-							MessageFormat
-									.format(
+							NLS
+									.bind(
 											LaunchingMessages.AbstractInterpreterInstallType_resolvingLibraryPaths,
-											new Object[] { this.getName() }),
-							100);
+											this.getName()), 100);
 		}
 		Object cacheKey = makeKey(installLocation, variables);
 		if (fCachedLocations.containsKey(cacheKey)) {
