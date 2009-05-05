@@ -83,7 +83,7 @@ public class ValidatorBuilder implements IScriptBuilder {
 		// NOP
 	}
 
-	public void reset(IScriptProject project) {
+	public void endBuild(IScriptProject project, IProgressMonitor monitor) {
 		// NOP
 	}
 
