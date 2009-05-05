@@ -51,7 +51,6 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptProjectUtil;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
-import org.eclipse.dltk.core.builder.IScriptBuilderExtension2;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.core.BuiltinSourceModule;
@@ -363,7 +362,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					}
 				}
 			}
-			resetBuilders(builders);
+			resetBuilders(builders, monitor);
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
@@ -519,7 +518,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				e.printStackTrace();
 			}
 		} finally {
-			resetBuilders(builders);
+			resetBuilders(builders, monitor);
 
 			monitor.done();
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
@@ -527,10 +526,11 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	private void resetBuilders(IScriptBuilder[] builders) {
+	private void resetBuilders(IScriptBuilder[] builders,
+			IProgressMonitor monitor) {
 		if (builders != null) {
 			for (int k = 0; k < builders.length; k++) {
-				builders[k].reset(scriptProject);
+				builders[k].endBuild(scriptProject, monitor);
 			}
 		}
 	}
@@ -674,7 +674,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 			lastBuildResources = resources.size() + externalElements.size();
 		} finally {
-			resetBuilders(builders);
+			resetBuilders(builders, monitor);
 
 			monitor.done();
 			ModelManager.getModelManager().setLastBuiltState(currentProject,
@@ -801,7 +801,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			final IScriptBuilder builder = builders[k];
 			int builderWork = workEstimations[k] * ticks / total;
 			final List buildExternalElements = builderExternalElements[k];
-			int buildersCalled = 0;
 			if (buildExternalElements != null
 					&& buildExternalElements.size() > 0
 					&& builder instanceof IScriptBuilderExtension) {
@@ -813,7 +812,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				((IScriptBuilderExtension) builder).buildExternalElements(
 						scriptProject, buildExternalElements,
 						new SubProgressMonitor(monitor, step), buildTypes[k]);
-				buildersCalled++;
 			}
 			final List buildElementsList = builderToElements[k];
 			if (buildElementsList.size() > 0) {
@@ -824,11 +822,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 								.toString(buildElementsList.size())));
 				builder.buildModelElements(scriptProject, buildElementsList,
 						new SubProgressMonitor(monitor, step), buildTypes[k]);
-				buildersCalled++;
-			}
-			if (buildersCalled > 0
-					&& builder instanceof IScriptBuilderExtension2) {
-				((IScriptBuilderExtension2) builder).endBuild(monitor);
 			}
 			if (builderWork > 0) {
 				monitor.worked(builderWork);

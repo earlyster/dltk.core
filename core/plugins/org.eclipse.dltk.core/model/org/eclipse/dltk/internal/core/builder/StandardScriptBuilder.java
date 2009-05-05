@@ -34,12 +34,11 @@ import org.eclipse.dltk.core.builder.IBuildParticipantExtension;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension2;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
-import org.eclipse.dltk.core.builder.IScriptBuilderExtension2;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.osgi.util.NLS;
 
 public class StandardScriptBuilder implements IScriptBuilder,
-		IScriptBuilderExtension, IScriptBuilderExtension2 {
+		IScriptBuilderExtension {
 	private static final boolean DEBUG = false;
 
 	private static final int WORK_BUILD = 100;
@@ -138,7 +137,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		}
 	}
 
-	private List reporters = new ArrayList();
+	private List reporters = null;
 
 	private void buildNatureModules(IScriptProject project, int buildType,
 			final List modules, IProgressMonitor monitor) {
@@ -147,6 +146,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 			return;
 		}
 		int counter = 0;
+		reporters = new ArrayList(modules.size());
 		for (Iterator j = modules.iterator(); j.hasNext();) {
 			if (monitor.isCanceled())
 				return;
@@ -178,7 +178,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 	 * @param monitor
 	 * @return
 	 */
-	private boolean beginBuild(int buildType, IProgressMonitor monitor) {
+	private void beginBuild(int buildType, IProgressMonitor monitor) {
 		if (!beginBuildDone) {
 			monitor.subTask(Messages.ValidatorBuilder_InitializeBuilders);
 			endBuildNeeded = false;
@@ -204,7 +204,6 @@ public class StandardScriptBuilder implements IScriptBuilder,
 					count);
 			beginBuildDone = true;
 		}
-		return endBuildNeeded;
 	}
 
 	private void buildModule(IBuildContext context) {
@@ -327,26 +326,19 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		endBuildNeeded = false;
 	}
 
-	public void reset(IScriptProject project) {
-		participants = null;
-		toolkit = null;
-		beginBuildDone = false;
-		endBuildNeeded = false;
-	}
-
-	public void endBuild(IProgressMonitor monitor) {
-		if (!endBuildNeeded) {
-			return;
-		}
-		monitor.subTask(Messages.ValidatorBuilder_finalizeBuild);
-		final IProgressMonitor finalizeMonitor = new SubTaskProgressMonitor(
-				monitor, Messages.ValidatorBuilder_finalizeBuild);
-		for (int j = 0; j < participants.length; ++j) {
-			final IBuildParticipant participant = participants[j];
-			if (participant instanceof IBuildParticipantExtension) {
-				((IBuildParticipantExtension) participant)
-						.endBuild(finalizeMonitor);
+	public void endBuild(IScriptProject project, IProgressMonitor monitor) {
+		if (endBuildNeeded) {
+			monitor.subTask(Messages.ValidatorBuilder_finalizeBuild);
+			final IProgressMonitor finalizeMonitor = new SubTaskProgressMonitor(
+					monitor, Messages.ValidatorBuilder_finalizeBuild);
+			for (int j = 0; j < participants.length; ++j) {
+				final IBuildParticipant participant = participants[j];
+				if (participant instanceof IBuildParticipantExtension) {
+					((IBuildParticipantExtension) participant)
+							.endBuild(finalizeMonitor);
+				}
 			}
+			endBuildNeeded = false;
 		}
 		if (reporters != null) {
 			for (Iterator j = reporters.iterator(); j.hasNext();) {
@@ -354,8 +346,11 @@ public class StandardScriptBuilder implements IScriptBuilder,
 						.next();
 				reporter.flush();
 			}
-			reporters.clear();
+			reporters = null;
 		}
+		participants = null;
+		toolkit = null;
+		beginBuildDone = false;
 	}
 
 }

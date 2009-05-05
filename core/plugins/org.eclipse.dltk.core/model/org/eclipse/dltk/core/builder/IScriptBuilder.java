@@ -156,5 +156,5 @@ public interface IScriptBuilder {
 	 * 
 	 * @param project
 	 */
-	void reset(IScriptProject project);
+	void endBuild(IScriptProject project, IProgressMonitor monitor);
 }
