@@ -34,11 +34,12 @@ import org.eclipse.dltk.core.builder.IBuildParticipantExtension;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension2;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
+import org.eclipse.dltk.core.builder.IScriptBuilderExtension2;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.osgi.util.NLS;
 
 public class StandardScriptBuilder implements IScriptBuilder,
-		IScriptBuilderExtension {
+		IScriptBuilderExtension, IScriptBuilderExtension2 {
 	private static final boolean DEBUG = false;
 
 	private static final int WORK_BUILD = 100;
@@ -59,6 +60,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 			List externalElements, IProgressMonitor monitor, int buildType) {
 		beginBuild(buildType, monitor);
 		final IBuildParticipantExtension2[] extensions = selectExtension2();
+
 		if (extensions != null) {
 			int remainingWork = externalElements.size();
 			for (Iterator j = externalElements.iterator(); j.hasNext();) {
@@ -81,9 +83,12 @@ public class StandardScriptBuilder implements IScriptBuilder,
 						extensions[i].buildExternalModule(context);
 					}
 				} catch (CoreException e) {
-					DLTKCore.error(NLS.bind(
-							Messages.StandardScriptBuilder_errorBuildingExternalModule, module
-									.getElementName()), e);
+					DLTKCore
+							.error(
+									NLS
+											.bind(
+													Messages.StandardScriptBuilder_errorBuildingExternalModule,
+													module.getElementName()), e);
 				}
 				--remainingWork;
 			}
@@ -133,13 +138,14 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		}
 	}
 
+	private List reporters = new ArrayList();
+
 	private void buildNatureModules(IScriptProject project, int buildType,
 			final List modules, IProgressMonitor monitor) {
-		final boolean secondPass = beginBuild(buildType, monitor);
+		beginBuild(buildType, monitor);
 		if (participants.length == 0) {
 			return;
 		}
-		final List reporters = secondPass ? new ArrayList() : null;
 		int counter = 0;
 		for (Iterator j = modules.iterator(); j.hasNext();) {
 			if (monitor.isCanceled())
@@ -153,31 +159,10 @@ public class StandardScriptBuilder implements IScriptBuilder,
 					module, buildType);
 			if (context.reporter != null) {
 				buildModule(context);
-				if (reporters != null) {
-					reporters.add(context.reporter);
-				} else {
-					context.reporter.flush();
-				}
+				reporters.add(context.reporter);
 			}
 			monitor.worked(1);
 			++counter;
-		}
-		if (reporters != null) {
-			monitor.subTask(Messages.ValidatorBuilder_finalizeBuild);
-			final IProgressMonitor finalizeMonitor = new SubTaskProgressMonitor(
-					monitor, Messages.ValidatorBuilder_finalizeBuild);
-			for (int j = 0; j < participants.length; ++j) {
-				final IBuildParticipant participant = participants[j];
-				if (participant instanceof IBuildParticipantExtension) {
-					((IBuildParticipantExtension) participant)
-							.endBuild(finalizeMonitor);
-				}
-			}
-			for (Iterator j = reporters.iterator(); j.hasNext();) {
-				final BuildProblemReporter reporter = (BuildProblemReporter) j
-						.next();
-				reporter.flush();
-			}
 		}
 	}
 
@@ -228,7 +213,8 @@ public class StandardScriptBuilder implements IScriptBuilder,
 			try {
 				participant.build(context);
 			} catch (CoreException e) {
-				DLTKCore.error(Messages.StandardScriptBuilder_errorBuildingModule, e);
+				DLTKCore.error(
+						Messages.StandardScriptBuilder_errorBuildingModule, e);
 			}
 		}
 	}
@@ -346,6 +332,30 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		toolkit = null;
 		beginBuildDone = false;
 		endBuildNeeded = false;
+	}
+
+	public void endBuild(IProgressMonitor monitor) {
+		if (!endBuildNeeded) {
+			return;
+		}
+		monitor.subTask(Messages.ValidatorBuilder_finalizeBuild);
+		final IProgressMonitor finalizeMonitor = new SubTaskProgressMonitor(
+				monitor, Messages.ValidatorBuilder_finalizeBuild);
+		for (int j = 0; j < participants.length; ++j) {
+			final IBuildParticipant participant = participants[j];
+			if (participant instanceof IBuildParticipantExtension) {
+				((IBuildParticipantExtension) participant)
+						.endBuild(finalizeMonitor);
+			}
+		}
+		if (reporters != null) {
+			for (Iterator j = reporters.iterator(); j.hasNext();) {
+				final BuildProblemReporter reporter = (BuildProblemReporter) j
+						.next();
+				reporter.flush();
+			}
+			reporters.clear();
+		}
 	}
 
 }

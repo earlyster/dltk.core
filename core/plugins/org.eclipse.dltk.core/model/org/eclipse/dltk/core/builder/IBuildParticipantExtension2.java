@@ -16,7 +16,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.builder.IScriptBuilder.DependencyResponse;
 
-public interface IBuildParticipantExtension2 {
+public interface IBuildParticipantExtension2 extends IBuildParticipantExtension {
 
 	/**
 	 * @param buildType
