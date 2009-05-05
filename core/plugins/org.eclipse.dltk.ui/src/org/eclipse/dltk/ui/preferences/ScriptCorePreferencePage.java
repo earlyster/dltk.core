@@ -24,7 +24,7 @@ public class ScriptCorePreferencePage extends
 	}
 
 	protected void setDescription() {
-		setDescription("Global DLTK Settings"); //$NON-NLS-1$
+		setDescription(Messages.ScriptCorePreferenceBlock_globalDLTKSettings);
 	}
 
 	protected void setPreferenceStore() {
