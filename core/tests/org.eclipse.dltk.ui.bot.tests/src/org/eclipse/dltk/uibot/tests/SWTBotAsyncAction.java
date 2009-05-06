@@ -1,7 +1,7 @@
 package org.eclipse.dltk.uibot.tests;
 
-import net.sf.swtbot.SWTBot;
-import net.sf.swtbot.widgets.TimeoutException;
+import org.eclipse.swtbot.swt.finder.SWTBot;
+import org.eclipse.swtbot.swt.finder.widgets.TimeoutException;
 
 public abstract class SWTBotAsyncAction {
 	private final long fTimeout;

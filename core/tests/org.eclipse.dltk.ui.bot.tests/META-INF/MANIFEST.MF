@@ -7,10 +7,10 @@ Bundle-Activator: org.eclipse.dltk.uibot.tests.Activator
 Export-Package: org.eclipse.dltk.uibot.tests
 Bundle-Localization: plugin
 Require-Bundle: org.junit,
- net.sf.swtbot.eclipse.finder,
- net.sf.swtbot.eclipse.spy,
- net.sf.swtbot.eclipse.ui,
- net.sf.swtbot.finder,
+ org.eclipse.swtbot.eclipse.finder,
+ org.eclipse.swtbot.eclipse.spy,
+ org.eclipse.swtbot.eclipse.ui,
+ org.eclipse.swtbot.swt.finder,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.ui,

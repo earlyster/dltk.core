@@ -1,8 +1,5 @@
 package org.eclipse.dltk.uibot.tests;
 
-import net.sf.swtbot.eclipse.finder.SWTEclipseBot;
-import net.sf.swtbot.widgets.SWTBotShell;
-
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -10,6 +7,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.tests.model.AbstractModelTests;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
+import org.eclipse.swtbot.eclipse.finder.SWTEclipseBot;
+import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
