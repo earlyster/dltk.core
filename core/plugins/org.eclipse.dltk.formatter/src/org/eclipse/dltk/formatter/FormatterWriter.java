@@ -128,6 +128,7 @@ public class FormatterWriter implements IFormatterWriter {
 				}
 				writer.setLength(len);
 				writer.append(text);
+				lineStarted = true;
 			}
 		}
 	}
