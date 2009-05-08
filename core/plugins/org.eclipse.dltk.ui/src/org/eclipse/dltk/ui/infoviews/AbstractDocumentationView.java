@@ -34,12 +34,14 @@ import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.text.HTMLPrinter;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.ScriptElementLabels;
 import org.eclipse.dltk.ui.documentation.ScriptDocumentationAccess;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -60,6 +62,7 @@ import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
@@ -310,7 +313,10 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 				buffer.append('\n');
 				line = reader.readLine();
 			}
-			fgStyleSheet = buffer.toString();
+			FontData fontData = JFaceResources.getFontRegistry().getFontData(
+					PreferenceConstants.APPEARANCE_DOCUMENTATION_FONT)[0];
+			fgStyleSheet = org.eclipse.dltk.ui.text.completion.HTMLPrinter
+					.convertTopLevelFont(buffer.toString(), fontData);
 		} catch (IOException ex) {
 			DLTKUIPlugin.log(ex);
 		}
