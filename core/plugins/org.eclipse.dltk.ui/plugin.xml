@@ -1351,6 +1351,15 @@
      <themeElementCategory 
        id="org.eclipse.dltk.ui.presentation"
        label="%dltkPresentation.label" />
+     <fontDefinition
+       label="%dltkDisplayFontDefiniton.label"
+       defaultsTo="org.eclipse.jface.dialogfont"
+       categoryId="org.eclipse.dltk.ui.presentation"
+       id="org.eclipse.dltk.ui.documentationFont">
+       <description>
+         %dltkDisplayFontDefiniton.description
+       </description>
+     </fontDefinition>
    </extension>
    
    <extension
