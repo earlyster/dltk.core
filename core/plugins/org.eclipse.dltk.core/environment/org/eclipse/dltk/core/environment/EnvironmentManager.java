@@ -12,10 +12,14 @@ package org.eclipse.dltk.core.environment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.QualifiedName;
@@ -24,8 +28,6 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.SimplePriorityClassDLTKExtensionManager;
-import org.eclipse.dltk.core.PriorityDLTKExtensionManager.ElementInfo;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
 import org.eclipse.dltk.internal.core.BuildpathValidation;
 import org.eclipse.dltk.internal.core.ExternalScriptProject;
@@ -33,6 +35,7 @@ import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.utils.ExecutableOperation;
 import org.eclipse.dltk.utils.ExecutionContexts;
+import org.eclipse.dltk.utils.LazyExtensionManager;
 import org.eclipse.osgi.util.NLS;
 
 public final class EnvironmentManager {
@@ -41,8 +44,52 @@ public final class EnvironmentManager {
 
 	private static final String ENVIRONMENT_EXTENSION = DLTKCore.PLUGIN_ID
 			+ ".environment"; //$NON-NLS-1$
-	private static SimplePriorityClassDLTKExtensionManager manager = new SimplePriorityClassDLTKExtensionManager(
-			ENVIRONMENT_EXTENSION, "id"); //$NON-NLS-1$
+
+	private static class EnvironmentManagerExtensionManager extends
+			LazyExtensionManager {
+
+		private class EnvironmentProviderDesc extends Descriptor {
+
+			private int priority;
+
+			public EnvironmentProviderDesc(
+					IConfigurationElement configurationElement) {
+				super(configurationElement);
+				this.priority = parseInt(configurationElement
+						.getAttribute("priority"));
+			}
+
+			private int parseInt(String value) {
+				try {
+					return Integer.parseInt(value);
+				} catch (NumberFormatException e) {
+					return 0;
+				}
+			}
+
+		}
+
+		public EnvironmentManagerExtensionManager() {
+			super(ENVIRONMENT_EXTENSION);
+		}
+
+		protected Descriptor createDescriptor(IConfigurationElement confElement) {
+			return new EnvironmentProviderDesc(confElement);
+		}
+
+		protected void initializeDescriptors(List descriptors) {
+			Collections.sort(descriptors, new Comparator() {
+				public int compare(Object arg0, Object arg1) {
+					EnvironmentProviderDesc d1 = (EnvironmentProviderDesc) arg0;
+					EnvironmentProviderDesc d2 = (EnvironmentProviderDesc) arg1;
+					return d1.priority - d2.priority;
+				}
+			});
+		}
+
+	}
+
+	private static final EnvironmentManagerExtensionManager manager = new EnvironmentManagerExtensionManager();
 
 	private static ListenerList listeners = new ListenerList();
 
@@ -86,10 +133,9 @@ public final class EnvironmentManager {
 	}
 
 	private static IEnvironment detectEnvironment(IProject project) {
-		checkInitialized();
-		Object[] objects = manager.getObjects();
-		for (int i = 0; i < objects.length; i++) {
-			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
+		for (Iterator i = manager.iterator(); i.hasNext();) {
+			IEnvironmentProvider provider = (IEnvironmentProvider) i.next();
+			waitInitialized(provider);
 			IEnvironment environment = provider.getProjectEnvironment(project);
 			if (environment != null) {
 				return environment;
@@ -178,13 +224,12 @@ public final class EnvironmentManager {
 	}
 
 	public static IEnvironment[] getEnvironments(boolean allowWait) {
-		if (allowWait) {
-			checkInitialized();
-		}
 		List envList = new ArrayList();
-		Object[] objects = manager.getObjects();
-		for (int i = 0; i < objects.length; i++) {
-			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
+		for (Iterator i = manager.iterator(); i.hasNext();) {
+			IEnvironmentProvider provider = (IEnvironmentProvider) i.next();
+			if (allowWait) {
+				waitInitialized(provider);
+			}
 			envList.addAll(Arrays.asList(provider.getEnvironments()));
 		}
 		IEnvironment[] environments = new IEnvironment[envList.size()];
@@ -197,11 +242,9 @@ public final class EnvironmentManager {
 	}
 
 	public static IEnvironment getEnvironmentById(String envId) {
-		checkInitialized();
-		ElementInfo[] elementInfos = manager.getElementInfos();
-		for (int i = 0; i < elementInfos.length; i++) {
-			IEnvironmentProvider provider = (IEnvironmentProvider) manager
-					.getInitObject(elementInfos[i]);
+		for (Iterator i = manager.iterator(); i.hasNext();) {
+			IEnvironmentProvider provider = (IEnvironmentProvider) i.next();
+			waitInitialized(provider);
 			IEnvironment env = provider.getEnvironment(envId);
 			if (env != null) {
 				return env;
@@ -259,29 +302,12 @@ public final class EnvironmentManager {
 		return getEnvironmentById(LocalEnvironment.ENVIRONMENT_ID);
 	}
 
-	private static void checkInitialized() {
-		if (!isInitialized()) {
-			ExecutionContexts
-					.getManager()
-					.executeInBackground(
-							new ExecutableOperation(
-									Messages.EnvironmentManager_initializingOperationName) {
-
-								public void execute(IProgressMonitor monitor) {
-									waitInitialized(monitor);
-								}
-
-							});
-		}
-	}
-
 	/**
 	 * Tests if all providers are initialized.
 	 */
 	public static boolean isInitialized() {
-		Object[] objects = manager.getObjects();
-		for (int i = 0; i < objects.length; i++) {
-			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
+		for (Iterator i = manager.iterator(); i.hasNext();) {
+			IEnvironmentProvider provider = (IEnvironmentProvider) i.next();
 			if (!provider.isInitialized()) {
 				return false;
 			}
@@ -289,20 +315,41 @@ public final class EnvironmentManager {
 		return true;
 	}
 
+	private static void waitInitialized(final IEnvironmentProvider provider) {
+		if (provider.isInitialized()) {
+			return;
+		}
+		ExecutionContexts.getManager().executeInBackground(
+				new ExecutableOperation(
+						Messages.EnvironmentManager_initializingOperationName) {
+					public void execute(IProgressMonitor monitor) {
+						monitor.beginTask(Util.EMPTY_STRING, 1);
+						monitor
+								.setTaskName(NLS
+										.bind(
+												Messages.EnvironmentManager_initializingTaskName,
+												provider.getProviderName()));
+						provider.waitInitialized();
+						monitor.worked(1);
+						monitor.done();
+					}
+				});
+	}
+
 	/**
 	 * Waits until all structures are initialized.
 	 */
 	public static void waitInitialized() {
-		waitInitialized(null);
+		waitInitialized((IProgressMonitor) null);
 	}
 
 	public static void waitInitialized(IProgressMonitor monitor) {
-		Object[] objects = manager.getObjects();
 		if (monitor != null) {
-			monitor.beginTask(Util.EMPTY_STRING, objects.length);
+			monitor.beginTask(Util.EMPTY_STRING,
+					manager.getDescriptors().length);
 		}
-		for (int i = 0; i < objects.length; i++) {
-			IEnvironmentProvider provider = (IEnvironmentProvider) objects[i];
+		for (Iterator i = manager.iterator(); i.hasNext();) {
+			IEnvironmentProvider provider = (IEnvironmentProvider) i.next();
 			if (monitor != null) {
 				monitor.setTaskName(NLS.bind(
 						Messages.EnvironmentManager_initializingTaskName,
