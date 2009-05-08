@@ -121,6 +121,17 @@ public class ProjectActionGroup extends ActionGroup {
 		}
 		return true;
 	}
+	
+	/**
+	 * Returns the open project action contained in this project action group.
+	 *
+	 * @return returns the open project action
+	 *
+	 * @since 3.3
+	 */
+	public OpenProjectAction getOpenProjectAction() {
+		return fOpenAction;
+	}
 
 	/*
 	 * @see ActionGroup#dispose()

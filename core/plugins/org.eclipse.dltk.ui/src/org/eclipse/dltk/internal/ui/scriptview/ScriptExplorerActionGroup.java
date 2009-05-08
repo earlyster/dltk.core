@@ -23,6 +23,7 @@ import org.eclipse.dltk.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.dltk.internal.ui.actions.ImportActionGroup;
 import org.eclipse.dltk.internal.ui.actions.NavigateActionGroup;
 import org.eclipse.dltk.internal.ui.actions.NewWizardsActionGroup;
+import org.eclipse.dltk.internal.ui.actions.OpenProjectAction;
 import org.eclipse.dltk.internal.ui.actions.ProjectActionGroup;
 import org.eclipse.dltk.internal.ui.actions.refactoring.RefactorActionGroup;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.newsourcepage.GenerateBuildPathActionGroup;
@@ -90,7 +91,8 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 	
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 
-	private IAction fGotoRequiredProjectAction;	
+	private IAction fGotoRequiredProjectAction;
+	private ProjectActionGroup fProjectActionGroup;
  	
 	public ScriptExplorerActionGroup(ScriptExplorerPart part) {
 		super();
@@ -114,7 +116,7 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 			new ImportActionGroup(fPart),
 			new BuildActionGroup(fPart),
 			//new ScriptSearchActionGroup(fPart),
-			new ProjectActionGroup(fPart), 
+			fProjectActionGroup = new ProjectActionGroup(fPart), 
 			fViewActionGroup= new ViewActionGroup(fPart.getRootMode(), workingSetListener, site),
 			fCustomFiltersActionGroup= new CustomFiltersActionGroup(fPart, viewer),
 			new LayoutActionGroup(fPart),
@@ -287,6 +289,11 @@ public class ScriptExplorerActionGroup extends CompositeActionGroup {
 				} else {
 					viewer.setExpandedState(element, !viewer.getExpandedState(element));
 				}
+			}
+		} else if (element instanceof IProject && !((IProject) element).isOpen()) {
+			OpenProjectAction openProjectAction= fProjectActionGroup.getOpenProjectAction();
+			if (openProjectAction.isEnabled()) {
+				openProjectAction.run();
 			}
 		}
 	}
