@@ -6,7 +6,7 @@
       <environment
             class="org.eclipse.dltk.core.internal.rse.RSEEnvironmentProvider"
             id="org.eclipse.dltk.rse.RSEEnvironmentProvider"
-            priority="0">
+            priority="10">
       </environment>
    </extension>
   <extension
