@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,13 +23,14 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.internal.compiler.env.AccessRestriction;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
 import org.eclipse.dltk.internal.core.util.HashtableOfArrayToObject;
@@ -339,7 +339,11 @@ public class NameLookup {
 		}
 		return null;
 }
-	
+
+	private static boolean equals(String s1, String s2) {
+		return s1 == null ? s2 == null : s1.equals(s2);
+	}
+
 	/**
 	 * Returns the package fragment whose path matches the given
 	 * (absolute) path, or <code>null</code> if none exist. The domain of
@@ -362,16 +366,16 @@ public class NameLookup {
 			//external jar
 			for (int i = 0; i < this.projectFragments.length; i++) {
 				IProjectFragment root = this.projectFragments[i];
-				if (!root.isExternal()) {
+				if (!root.isExternal() || root.isBuiltin()) {
 					continue;
 				}
-				IPath rootPath = root.getPath();
+				IPath rootPath = EnvironmentPathUtils.getLocalPath(root
+						.getPath());
 				int matchingCount = rootPath.matchingFirstSegments(path);
-				if (matchingCount != 0) {
-					String name = path.toOSString();
-					// + 1 is for the File.separatorChar
-					name = name.substring(rootPath.toOSString().length() + 1, name.length());
-					name = name.replace(File.separatorChar, '.');
+				if (matchingCount != 0
+						&& equals(rootPath.getDevice(), path.getDevice())) {
+					final String name = path.removeFirstSegments(matchingCount)
+							.setDevice(null).makeRelative().toString();
 					IModelElement[] list = null;
 					try {
 						list = root.getChildren();

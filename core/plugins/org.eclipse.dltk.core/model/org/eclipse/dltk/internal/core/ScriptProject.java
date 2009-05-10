@@ -2410,10 +2410,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 	 * non path canonicalizing version
 	 */
 	private IScriptFolder findScriptFolder0(IPath path) throws ModelException {
-		if (DLTKCore.DEBUG) {
-			System.err.println("Search Need to be implemented"); //$NON-NLS-1$
-		}
-		return null;
+		/* no need to look at working copies for pkgs */
+		NameLookup lookup = newNameLookup((WorkingCopyOwner) null);
+		return lookup.findScriptFolder(path);
 	}
 
 	/**
