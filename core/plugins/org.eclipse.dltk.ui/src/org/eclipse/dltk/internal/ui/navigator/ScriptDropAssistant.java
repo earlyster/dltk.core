@@ -26,6 +26,7 @@ import org.eclipse.dltk.internal.corext.refactoring.reorg.IReorgPolicy.IMovePoli
 import org.eclipse.dltk.internal.ui.refactoring.reorg.ReorgCopyStarter;
 import org.eclipse.dltk.internal.ui.refactoring.reorg.ScriptCopyProcessor;
 import org.eclipse.dltk.internal.ui.refactoring.reorg.ScriptMoveProcessor;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.dnd.DND;
@@ -35,7 +36,6 @@ import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.ui.actions.CopyFilesAndFoldersOperation;
 import org.eclipse.ui.navigator.CommonDropAdapter;
 import org.eclipse.ui.navigator.CommonDropAdapterAssistant;
-import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 public class ScriptDropAssistant  extends CommonDropAdapterAssistant {
 	private List fElements;
@@ -45,7 +45,8 @@ public class ScriptDropAssistant  extends CommonDropAdapterAssistant {
 	private int fCanCopyElements; 
 
 	public IStatus handleDrop(CommonDropAdapter dropAdapter, DropTargetEvent dropTargetEvent, Object target) { 
-		if (LocalSelectionTransfer.getInstance().isSupportedType(dropAdapter.getCurrentTransfer())) {
+		if (LocalSelectionTransfer.getTransfer().isSupportedType(
+				dropAdapter.getCurrentTransfer())) {
 			try {
 
 				switch (dropAdapter.getCurrentOperation()) {
@@ -100,7 +101,7 @@ public class ScriptDropAssistant  extends CommonDropAdapterAssistant {
 
 	public IStatus validateDrop(Object target, int operation, TransferData transferType) { 
 		IStatus result = Status.OK_STATUS;
-		if (LocalSelectionTransfer.getInstance().isSupportedType(transferType)) {
+		if (LocalSelectionTransfer.getTransfer().isSupportedType(transferType)) {
 			initializeSelection();
 			try {
 				switch (operation) {
@@ -151,7 +152,7 @@ public class ScriptDropAssistant  extends CommonDropAdapterAssistant {
 	protected void initializeSelection() {
 		if (fElements != null)
 			return;
-		ISelection s = LocalSelectionTransfer.getInstance().getSelection();
+		ISelection s = LocalSelectionTransfer.getTransfer().getSelection();
 		if (!(s instanceof IStructuredSelection))
 			return;
 		fElements = ((IStructuredSelection) s).toList();
