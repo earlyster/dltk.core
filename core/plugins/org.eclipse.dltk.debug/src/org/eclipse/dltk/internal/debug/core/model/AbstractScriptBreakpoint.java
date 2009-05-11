@@ -18,9 +18,11 @@ import java.util.Map;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.Breakpoint;
 import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.dbgp.IDbgpSession;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
@@ -98,6 +100,17 @@ public abstract class AbstractScriptBreakpoint extends Breakpoint implements
 	}
 
 	public String getModelIdentifier() {
+		if (debugModelId == null) {
+			try {
+				debugModelId = ensureMarker()
+						.getAttribute(IBreakpoint.ID, null);
+			} catch (DebugException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+				return null;
+			}
+		}
 		return debugModelId;
 	}
 
