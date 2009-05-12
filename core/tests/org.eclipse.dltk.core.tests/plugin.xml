@@ -79,5 +79,11 @@
            language="org.eclipse.dltk.core.tests.testnature">
      </model>
   </extension>
+  <extension
+        point="org.eclipse.dltk.core.contentCacheProvider">
+     <contentCacheProvider
+           class="org.eclipse.dltk.core.tests.cache.TestContentCacheProvider">
+     </contentCacheProvider>
+  </extension>
 
 </plugin>
