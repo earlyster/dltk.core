@@ -34,7 +34,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 	private static final String SHELL_PATH = "exec /bin/sh"; //$NON-NLS-1$
 
 	private static final String CMD_SEPARATOR = " ;"; //$NON-NLS-1$
-	private static final String EXPORT_CMD = "export "; //$NON-NLS-1$
+	private static final String EXPORT_CMD = ";export "; //$NON-NLS-1$
 	private final static String EXIT_CMD = "exit"; //$NON-NLS-1$
 	private static final String SET_CMD = "set"; //$NON-NLS-1$
 
@@ -164,8 +164,8 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 			hostShell.writeToShell(SHELL_PATH);
 			// TODO: Skip environment variables what is already in shell.
 			for (int i = 0; i < environment.length; i++) {
-				hostShell.writeToShell(EXPORT_CMD
-						+ toShellArguments(environment[i]));
+				hostShell.writeToShell(toShellArguments(environment[i])
+						+ EXPORT_CMD + extractName(environment[i]));
 			}
 		}
 		final String pattern = "DLTK_INITIAL_PREFIX_EXECUTION_STRING:" //$NON-NLS-1$
@@ -189,6 +189,15 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 					(end - start));
 		}
 		return p;
+	}
+
+	/**
+	 * @param environmentEntry
+	 * @return
+	 */
+	private String extractName(String environmentEntry) {
+		final int pos = environmentEntry.indexOf('=');
+		return pos > 0 ? environmentEntry.substring(0, pos) : environmentEntry;
 	}
 
 	private String toShellArguments(String cmd) {
