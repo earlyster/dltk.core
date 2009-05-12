@@ -14,9 +14,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.osgi.util.NLS;
 
 public class EnvironmentPathUtils {
@@ -150,5 +152,37 @@ public class EnvironmentPathUtils {
 			return getFile(path);
 		}
 		return environment.getFile(path);
+	}
+
+	public static IFileHandle getFile(IResource resource) {
+		IEnvironment environment = EnvironmentManager.getEnvironment(resource
+				.getProject());
+		if (environment == null) {
+			return null;
+		}
+		if (environment.isLocal()) {
+			return environment.getFile(resource.getLocation());
+		} else {
+			return environment.getFile(resource.getLocationURI());
+		}
+	}
+
+	public static IFileHandle getFile(IModelElement element) {
+		IEnvironment environment = EnvironmentManager.getEnvironment(element);
+		if (environment == null) {
+			return null;
+		}
+		if (environment.isLocal()) {
+			if (element.getResource() != null) {
+				return environment.getFile(element.getResource().getLocation());
+			}
+			return environment.getFile(element.getPath());
+		} else {
+			if (element.getResource() != null) {
+				return environment.getFile(element.getResource()
+						.getLocationURI());
+			}
+			return environment.getFile(element.getPath());
+		}
 	}
 }

@@ -12,9 +12,11 @@ package org.eclipse.dltk.compiler.util;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 import org.eclipse.dltk.compiler.CharOperation;
@@ -299,6 +301,21 @@ public class Util {
 					// ignore
 				}
 			}
+		}
+	}
+
+	public static void copy(File file, InputStream input) throws IOException {
+		FileOutputStream fos = new FileOutputStream(file);
+		copy(input, fos);
+		fos.close();
+	}
+
+	public static void copy(InputStream input, OutputStream fos)
+			throws IOException {
+		byte[] buf = new byte[8192];
+		int n = 0;
+		while ((n = input.read(buf)) >= 0) {
+			fos.write(buf, 0, n);
 		}
 	}
 }

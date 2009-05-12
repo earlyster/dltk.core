@@ -76,7 +76,7 @@ public class ModuleDeclaration extends ASTNode {
 		this.body = new Block(this.sourceStart(), this.sourceEnd(), statements);
 	}
 
-	public void addStatement(Statement statement) {
+	public void addStatement(ASTNode statement) {
 		this.body.addStatement(statement);
 	}
 

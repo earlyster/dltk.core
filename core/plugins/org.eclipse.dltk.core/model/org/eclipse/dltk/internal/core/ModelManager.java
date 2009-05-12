@@ -86,9 +86,11 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceModuleInfoCache;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.caching.IContentCache;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.builder.ScriptBuilder;
+import org.eclipse.dltk.internal.core.caching.DLTKCoreCache;
 import org.eclipse.dltk.internal.core.search.DLTKWorkspaceScope;
 import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.dltk.internal.core.util.Messages;
@@ -396,6 +398,14 @@ public class ModelManager implements ISaveParticipant {
 			+ "/perf/deltalistener"; //$NON-NLS-1$
 
 	private ExternalFoldersManager externalFoldersManager = new ExternalFoldersManager();
+	private DLTKCoreCache coreCache = null;
+
+	public IContentCache getCoreCache() {
+		if (coreCache == null) {
+			coreCache = new DLTKCoreCache();
+		}
+		return coreCache;
+	}
 
 	/**
 	 * Constructs a new ModelManager
@@ -1449,6 +1459,9 @@ public class ModelManager implements ISaveParticipant {
 	}
 
 	public void shutdown() {
+		if (coreCache != null) {
+			coreCache.stop();
+		}
 		DLTKCore.getDefault().savePluginPreferences();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(this.deltaState);

@@ -100,4 +100,8 @@ public interface ISourceLineTracker {
 	 */
 	ISourceRange getLineInformation(int line);
 
+	int[] getLineOffsets();
+
+	String[] getDelimeters();
+
 }

@@ -8,7 +8,9 @@ Bundle-Vendor: %pluginProvider
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
- org.eclipse.core.filesystem
+ org.eclipse.core.filesystem,
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.ecore.xmi
 Eclipse-LazyStart: true
 Export-Package: org.eclipse.dltk.ast,
  org.eclipse.dltk.ast.declarations,
@@ -27,6 +29,7 @@ Export-Package: org.eclipse.dltk.ast,
  org.eclipse.dltk.compiler.util,
  org.eclipse.dltk.core,
  org.eclipse.dltk.core.builder,
+ org.eclipse.dltk.core.caching,
  org.eclipse.dltk.core.environment,
  org.eclipse.dltk.core.internal.environment,
  org.eclipse.dltk.core.mixin,
@@ -62,4 +65,4 @@ Export-Package: org.eclipse.dltk.ast,
  org.eclipse.dltk.ti.types,
  org.eclipse.dltk.utils
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: J2SE-1.4
+Bundle-RequiredExecutionEnvironment: J2SE-1.5

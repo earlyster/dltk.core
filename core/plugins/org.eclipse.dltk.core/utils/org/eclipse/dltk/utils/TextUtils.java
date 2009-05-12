@@ -248,13 +248,13 @@ public abstract class TextUtils {
 
 	}
 
-	private static class DefaultSourceLineTracker implements ISourceLineTracker {
+	public static class DefaultSourceLineTracker implements ISourceLineTracker {
 
 		private final int contentLength;
 		private final int[] lineOffsets;
 		private final String[] delimiters;
 
-		private DefaultSourceLineTracker(int contentLength, int[] lineOffsets,
+		public DefaultSourceLineTracker(int contentLength, int[] lineOffsets,
 				String[] delimiters) {
 			this.contentLength = contentLength;
 			this.lineOffsets = lineOffsets;
@@ -334,6 +334,13 @@ public abstract class TextUtils {
 			return lineOffsets.length;
 		}
 
+		public String[] getDelimeters() {
+			return delimiters;
+		}
+
+		public int[] getLineOffsets() {
+			return lineOffsets;
+		}
 	}
 
 	public static String replace(String text, char c, String s) {

@@ -48,8 +48,6 @@ public abstract class Statement extends ASTNode implements StatementConstants {
 	}
 
 	public void traverse(ASTVisitor visitor) throws Exception {
-		// TODO Auto-generated method stub
-
 	}
 
 	public int hashCode() {
