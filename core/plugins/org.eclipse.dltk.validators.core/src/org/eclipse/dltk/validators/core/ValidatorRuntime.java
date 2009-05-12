@@ -56,7 +56,7 @@ public final class ValidatorRuntime {
 	private static boolean fgInitializingValidators = false;
 	private static boolean isInitialized = false;
 	//
-	private static final ListenerList fgValidatorListeners = new ListenerList(5);
+	private static final ListenerList fgValidatorListeners = new ListenerList(ListenerList.IDENTITY);
 
 	public static final String ANY_NATURE = "#"; //$NON-NLS-1$
 
