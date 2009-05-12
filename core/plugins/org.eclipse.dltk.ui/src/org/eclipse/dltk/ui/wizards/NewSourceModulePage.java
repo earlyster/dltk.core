@@ -445,6 +445,19 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		layout.numColumns = nColumns;
 		composite.setLayout(layout);
 
+		createContentControls(composite, nColumns);
+
+		setControl(composite);
+		Dialog.applyDialogFont(composite);
+	}
+
+	/**
+	 * Creates content controls on the specified composite.
+	 * 
+	 * @param composite
+	 * @param nColumns
+	 */
+	protected void createContentControls(Composite composite, final int nColumns) {
 		createContainerControls(composite, nColumns);
 		if (remoteFolderDialogField != null) {
 			createRemoteFolderControls(composite, nColumns);
@@ -454,9 +467,6 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		if (fTemplateDialogField != null) {
 			createTemplateControls(composite, nColumns);
 		}
-
-		setControl(composite);
-		Dialog.applyDialogFont(composite);
 	}
 
 	protected String getFileText() {
