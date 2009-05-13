@@ -33,10 +33,11 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 
 	private static final String SHELL_PATH = "exec /bin/sh"; //$NON-NLS-1$
 
-	private static final String CMD_SEPARATOR = " ;"; //$NON-NLS-1$
+	private static final String CMD_SEPARATOR = ";"; //$NON-NLS-1$
 	private static final String EXPORT_CMD = ";export "; //$NON-NLS-1$
 	private final static String EXIT_CMD = "exit"; //$NON-NLS-1$
 	private static final String SET_CMD = "set"; //$NON-NLS-1$
+	private static final String BACKSLASH = " \\"; //$NON-NLS-1$
 
 	private final RSEEnvironment environment;
 	private static int counter = -1;
@@ -171,9 +172,10 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		final String pattern = "DLTK_INITIAL_PREFIX_EXECUTION_STRING:" //$NON-NLS-1$
 				+ String.valueOf(System.currentTimeMillis());
 		final String echoPattern = "echo \"" + pattern + "\""; //$NON-NLS-1$ //$NON-NLS-2$
-		hostShell.writeToShell(echoPattern + CMD_SEPARATOR
-				+ buildCommand(cmdLine) + CMD_SEPARATOR + echoPattern
-				+ CMD_SEPARATOR + EXIT_CMD);
+		hostShell.writeToShell(echoPattern + CMD_SEPARATOR + BACKSLASH);
+		hostShell.writeToShell(buildCommand(cmdLine) + CMD_SEPARATOR
+				+ BACKSLASH);
+		hostShell.writeToShell(echoPattern + CMD_SEPARATOR + EXIT_CMD);
 		Process p = null;
 		try {
 			p = new MyHostShellProcessAdapter(hostShell, pattern, logger);
