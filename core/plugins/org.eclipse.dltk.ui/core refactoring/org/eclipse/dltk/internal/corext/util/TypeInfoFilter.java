@@ -9,7 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.corext.util;
 
-import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.ISearchFactory;
+import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -20,6 +23,8 @@ import org.eclipse.dltk.ui.dialogs.ITypeInfoFilterExtension;
 
 public class TypeInfoFilter {
 	
+	private static final String PACKAGE_DELIM = ".";
+
 	private static class PatternMatcher {
 		
 		private String fPattern;
@@ -132,48 +137,53 @@ public class TypeInfoFilter {
 	public TypeInfoFilter(String text, IDLTKSearchScope scope, int elementKind, ITypeInfoFilterExtension extension) {
 		fText= text;
 		fSearchScope= scope;
-		fIsWorkspaceScope= fSearchScope.equals(SearchEngine.createWorkspaceScope(scope.getLanguageToolkit()));
+		IDLTKLanguageToolkit toolkit = scope.getLanguageToolkit();
+		fIsWorkspaceScope = fSearchScope.equals(SearchEngine
+				.createWorkspaceScope(toolkit));
 		fElementKind= elementKind;
 		fFilterExtension= extension;
 		
-//		int index= text.lastIndexOf("."); //$NON-NLS-1$
-//		if (index == -1) {\
-		if(DLTKCore.DEBUG ) {
-			System.err.println("TODO: Add check here..."); //$NON-NLS-1$
+		String packageDelimiter = getPackageDelimiter(toolkit);
+		int index = text.lastIndexOf(packageDelimiter); //$NON-NLS-1$
+		if (index == -1) {
+			fNameMatcher = new PatternMatcher(text, true);
+		} else {
+			fPackageMatcher = new PatternMatcher(evaluatePackagePattern(text
+					.substring(0, index), packageDelimiter), true);
+			String name = text.substring(index + 1);
+			if (name.length() == 0)
+				name = "*"; //$NON-NLS-1$
+			fNameMatcher = new PatternMatcher(name, true);
 		}
-			fNameMatcher= new PatternMatcher(text, true);
-//		} else {
-//			fPackageMatcher= new PatternMatcher(evaluatePackagePattern(text.substring(0, index)), true);
-//			String name= text.substring(index + 1);
-//			if (name.length() == 0)
-//				name= "*"; //$NON-NLS-1$
-//			fNameMatcher= new PatternMatcher(name, true);
-//		}
 	}
 	
-//	/*
-//	 * Transforms o.e.j  to o*.e*.j*
-//	 */
-//	private String evaluatePackagePattern(String s) {
-//		StringBuffer buf= new StringBuffer();
-//		boolean hasWildCard= false;
-//		for (int i= 0; i < s.length(); i++) {
-//			char ch= s.charAt(i);
-//			if (ch == '.') {
-//				if (!hasWildCard) {
-//					buf.append('*');
-//				}
-//				hasWildCard= false;
-//			} else if (ch == '*' || ch =='?') {
-//				hasWildCard= true;
-//			}
-//			buf.append(ch);
-//		}
-//		if (!hasWildCard) {
-//			buf.append('*');
-//		}
-//		return buf.toString();
-//	}
+	/*
+	 * Transforms o.e.j to o*.e*.j*
+	 */
+	private String evaluatePackagePattern(String s, String packageDelimiter) {
+		StringBuffer buf = new StringBuffer();
+		boolean hasWildCard = false;
+		for (int i = 0; i < s.length(); i++) {
+			if (s.substring(i).startsWith(packageDelimiter)) {
+				if (!hasWildCard) {
+					buf.append('*');
+				}
+				hasWildCard = false;
+				i += packageDelimiter.length();
+				buf.append(packageDelimiter);
+			} else {
+				char ch = s.charAt(i);
+				if (ch == '*' || ch == '?') {
+					hasWildCard = true;
+				}
+				buf.append(ch);
+			}
+		}
+		if (!hasWildCard) {
+			buf.append('*');
+		}
+		return buf.toString();
+	}
 
 	public String getText() {
 		return fText;
@@ -260,5 +270,25 @@ public class TypeInfoFilter {
 				return modifiers == 0;
 		}
 		return false;
+	}
+
+	private static String getPackageDelimiter(IDLTKLanguageToolkit toolkit) {
+		ISearchPatternProcessor processor = getSearchPatternProcessor(toolkit);
+		if (processor != null) {
+			return processor.getDelimiterReplacementString();
+		}
+		return PACKAGE_DELIM;
+	}
+
+	private static ISearchPatternProcessor getSearchPatternProcessor(
+			IDLTKLanguageToolkit toolkit) {
+		if (toolkit != null) {
+			ISearchFactory factory = DLTKLanguageManager
+					.getSearchFactory(toolkit.getNatureId());
+			if (factory != null) {
+				return factory.createSearchPatternProcessor();
+			}
+		}
+		return null;
 	}
 }

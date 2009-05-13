@@ -26,6 +26,8 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ISearchFactory;
+import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
@@ -393,8 +395,17 @@ public class ScriptElementLabels {
 
 	}
 
-	protected char getTypeDelimiter() {
-		return '.';
+	protected String getTypeDelimiter(IModelElement modelElement) {
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(modelElement);
+		ISearchFactory factory = DLTKLanguageManager.getSearchFactory(toolkit
+				.getNatureId());
+		if (factory != null) {
+			ISearchPatternProcessor processor = factory
+					.createSearchPatternProcessor();
+			return processor.getDelimiterReplacementString();
+		}
+		return ".";
 	}
 
 	protected static final boolean getFlag(long flags, long flag) {
@@ -626,7 +637,7 @@ public class ScriptElementLabels {
 			IScriptFolder pack = (IScriptFolder) module.getParent();
 
 			getScriptFolderLabel(pack, (flags & QUALIFIER_FLAGS), buf);
-			buf.append(getTypeDelimiter());
+			buf.append(getTypeDelimiter(module));
 		}
 		buf.append(module.getElementName());
 
@@ -661,7 +672,7 @@ public class ScriptElementLabels {
 			if (declaringType != null) {
 				getTypeLabel(declaringType, T_CONTAINER_QUALIFIED
 						| (flags & QUALIFIER_FLAGS), buf);
-				buf.append(getTypeDelimiter());
+				buf.append(getTypeDelimiter(elem));
 			}
 			int parentType = type.getParent().getElementType();
 			if (parentType == IModelElement.METHOD
@@ -672,7 +683,7 @@ public class ScriptElementLabels {
 						(parentType == IModelElement.METHOD ? M_FULLY_QUALIFIED
 								: F_FULLY_QUALIFIED)
 								| (flags & QUALIFIER_FLAGS), buf);
-				buf.append(getTypeDelimiter());
+				buf.append(getTypeDelimiter(elem));
 			}
 		}
 
@@ -717,7 +728,7 @@ public class ScriptElementLabels {
 						|| parentType == IModelElement.FIELD) { // anonymous
 					// or
 					// local
-					buf.append(getTypeDelimiter());
+					buf.append(getTypeDelimiter(elem));
 					getElementLabel(type.getParent(), 0, buf);
 				}
 			}
@@ -750,7 +761,7 @@ public class ScriptElementLabels {
 				if (type != null) {
 					getTypeLabel(type, T_FULLY_QUALIFIED
 							| (flags & QUALIFIER_FLAGS), buf);
-					buf.append(getTypeDelimiter());
+					buf.append(getTypeDelimiter(type));
 				}
 			}
 
