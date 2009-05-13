@@ -25,8 +25,11 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
+import org.eclipse.dltk.core.environment.IExecutionLogger;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.core.DLTKDebugLaunchConstants;
+import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
+import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.InterpreterMessages;
 import org.eclipse.osgi.util.NLS;
@@ -210,7 +213,13 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 		}
 
 		IExecutionEnvironment exeEnv = interpreterInstall.getExecEnvironment();
-		Process p = exeEnv.exec(cmdLine, workingDirectory, environment);
+		IExecutionLogger logger = DLTKDebugPlugin
+				.getDefault()
+				.getPluginPreferences()
+				.getBoolean(
+						DLTKDebugPreferenceConstants.PREF_LAUNCH_CATCH_OUTPUT) ? new LaunchLogger()
+				: null;
+		Process p = exeEnv.exec(cmdLine, workingDirectory, environment, logger);
 		if (p == null) {
 			abort(
 					LaunchingMessages.AbstractInterpreterRunner_executionWasCancelled,
