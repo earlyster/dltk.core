@@ -254,8 +254,12 @@ public class FormatterWriter implements IFormatterWriter {
 				writer.append(ch);
 			}
 		} else {
-			if (preserveSpaces || !context.isIndenting() || ch != ' '
-					|| writer.charAt(writer.length() - 1) != ' ') {
+			if (!preserveSpaces && context.isIndenting()
+					&& !context.isComment() && FormatterUtils.isSpace(ch)) {
+				if (writer.charAt(writer.length() - 1) != ' ') {
+					writer.append(' ');
+				}
+			} else {
 				writer.append(ch);
 			}
 		}

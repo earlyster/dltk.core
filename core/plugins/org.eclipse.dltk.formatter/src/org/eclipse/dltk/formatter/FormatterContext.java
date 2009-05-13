@@ -33,6 +33,7 @@ public class FormatterContext implements IFormatterContext, Cloneable {
 
 	private int indent;
 	private boolean indenting = true;
+	private boolean comment = false;
 	private boolean wrapping = false;
 	private int blankLines = 0;
 	private final List path = new ArrayList();
@@ -88,6 +89,14 @@ public class FormatterContext implements IFormatterContext, Cloneable {
 
 	public void setIndenting(boolean value) {
 		this.indenting = value;
+	}
+
+	public boolean isComment() {
+		return comment;
+	}
+
+	public void setComment(boolean value) {
+		this.comment = value;
 	}
 
 	public int getBlankLines() {

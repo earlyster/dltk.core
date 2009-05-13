@@ -25,7 +25,11 @@ public interface IFormatterContext {
 
 	boolean isIndenting();
 
-	void setIndenting(boolean valud);
+	void setIndenting(boolean value);
+
+	boolean isComment();
+
+	void setComment(boolean value);
 
 	int getBlankLines();
 
