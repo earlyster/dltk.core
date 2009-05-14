@@ -9,13 +9,18 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.tests.util;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import org.eclipse.dltk.core.DLTKContentTypeManager;
+import org.eclipse.dltk.core.DLTKCore;
 
 public class Util {
 
@@ -243,4 +248,36 @@ public class Util {
 		}
 	}
 
+	public static void copyFiles(String from, String to) {
+		File file = new File(from);
+		File toFolder = new File(to);
+		if (!file.exists() || !file.isDirectory()) {
+			return;
+		}
+		File[] files = file.listFiles();
+		for (int i = 0; i < files.length; i++) {
+			File child = new File(toFolder, files[i].getName());
+			if (files[i].isDirectory()) {
+				child.mkdir();
+				copyFiles(files[i].getAbsolutePath(), child.getAbsolutePath());
+			} else if (files[i].isFile()) {
+				BufferedInputStream input;
+				try {
+					input = new BufferedInputStream(new FileInputStream(
+							files[i]), 4096);
+					org.eclipse.dltk.compiler.util.Util.copy(child, input);
+					input.close();
+				} catch (FileNotFoundException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				} catch (IOException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
+			}
+			child.setLastModified(files[i].lastModified());
+		}
+	}
 }
