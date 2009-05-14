@@ -176,7 +176,8 @@ public abstract class TextUtils {
 
 		protected final int findEndOfLine() {
 			while (contentPos < contentEnd) {
-				if (content.charAt(contentPos) == '\r') {
+				char charAt1 = content.charAt(contentPos);
+				if (charAt1 == '\r') {
 					final int endLine = contentPos;
 					++contentPos;
 					if (contentPos < contentEnd
@@ -187,7 +188,7 @@ public abstract class TextUtils {
 						lastLineDelimiter = DELIMITER_MAC;
 					}
 					return endLine;
-				} else if (content.charAt(contentPos) == '\n') {
+				} else if (charAt1 == '\n') {
 					final int endLine = contentPos;
 					++contentPos;
 					lastLineDelimiter = DELIMITER_UNIX;

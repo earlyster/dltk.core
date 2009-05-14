@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.osgi.util.NLS;
 
 public class EnvironmentPathUtils {
@@ -172,17 +173,29 @@ public class EnvironmentPathUtils {
 		if (environment == null) {
 			return null;
 		}
+		IPath path = element.getPath();
+		if (element instanceof ExternalSourceModule) {
+			path = ((ExternalSourceModule) element).getFullPath();
+		}
 		if (environment.isLocal()) {
 			if (element.getResource() != null) {
 				return environment.getFile(element.getResource().getLocation());
 			}
-			return environment.getFile(element.getPath());
+			IFileHandle file = environment.getFile(path);
+			if (file.exists()) {
+				return file;
+			}
+			return null;
 		} else {
 			if (element.getResource() != null) {
 				return environment.getFile(element.getResource()
 						.getLocationURI());
 			}
-			return environment.getFile(element.getPath());
+			IFileHandle file = environment.getFile(path);
+			if (file.exists()) {
+				return file;
+			}
+			return null;
 		}
 	}
 }

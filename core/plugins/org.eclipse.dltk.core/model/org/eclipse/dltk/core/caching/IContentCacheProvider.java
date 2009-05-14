@@ -1,5 +1,7 @@
 package org.eclipse.dltk.core.caching;
 
+import java.io.InputStream;
+
 import org.eclipse.dltk.core.environment.IFileHandle;
 
 /**
@@ -13,5 +15,7 @@ public interface IContentCacheProvider {
 	 * @param handle
 	 * @return true if cache entry are filled into cache.
 	 */
-	boolean updateCache(IFileHandle handle, IContentCache cache);
+	InputStream getAttributeAndUpdateCache(IFileHandle handle, String attribute);
+
+	void setCache(IContentCache cache);
 }

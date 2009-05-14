@@ -10,6 +10,7 @@
 package org.eclipse.dltk.compiler.util;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -305,7 +306,8 @@ public class Util {
 	}
 
 	public static void copy(File file, InputStream input) throws IOException {
-		FileOutputStream fos = new FileOutputStream(file);
+		OutputStream fos = new BufferedOutputStream(new FileOutputStream(file),
+				4096);
 		copy(input, fos);
 		fos.close();
 	}

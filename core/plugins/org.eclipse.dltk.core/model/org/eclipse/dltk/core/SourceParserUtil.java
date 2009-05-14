@@ -1,9 +1,12 @@
 package org.eclipse.dltk.core;
 
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
+import org.eclipse.dltk.ast.parser.ASTCacheManager;
+import org.eclipse.dltk.ast.parser.IASTCache;
 import org.eclipse.dltk.ast.parser.ISourceParser;
 import org.eclipse.dltk.ast.parser.ISourceParserConstants;
 import org.eclipse.dltk.ast.parser.ISourceParserExtension;
+import org.eclipse.dltk.ast.parser.IASTCache.ASTCacheEntry;
 import org.eclipse.dltk.compiler.env.CompilerSourceCode;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.compiler.problem.ProblemCollector;
@@ -15,6 +18,7 @@ public class SourceParserUtil {
 	private static final String ERRORS = "errors"; //$NON-NLS-1$
 
 	private static boolean useASTCaching = true;
+	private static boolean useASTPersistenceCaching = true;
 
 	public static ModuleDeclaration getModuleDeclaration(ISourceModule module) {
 		return getModuleDeclaration(module, null,
@@ -65,6 +69,32 @@ public class SourceParserUtil {
 					}
 				}
 			}
+			if (moduleDeclaration == null && useASTPersistenceCaching) {
+				// Try to retrieve information from persistence cache.
+				IASTCache[] providers = ASTCacheManager.getProviders(toolkit
+						.getNatureId());
+				if (providers != null) {
+					for (IASTCache provider : providers) {
+						ASTCacheEntry restored = provider.restoreModule(module);
+						if (restored != null) {
+							if (reporter != null) {
+								if (restored.problems != null) {
+									restored.problems.copyTo(reporter);
+								}
+							}
+							// Store to local cache.
+							mifo.put(astKey, restored.module);
+							if (restored.problems != null
+									&& !restored.problems.isEmpty()) {
+								mifo.put(errorKey, restored.problems);
+							} else {
+								mifo.remove(errorKey);
+							}
+							return restored.module;
+						}
+					}
+				}
+			}
 		} else {
 			errorKey = null;
 			astKey = null;
@@ -95,6 +125,17 @@ public class SourceParserUtil {
 				}
 				if (moduleDeclaration != null && mifo != null && useASTCaching) {
 					mifo.put(astKey, moduleDeclaration);
+					if (useASTPersistenceCaching) {
+						// Store to persistence cache
+						IASTCache[] providers = ASTCacheManager
+								.getProviders(toolkit.getNatureId());
+						if (providers != null) {
+							for (IASTCache provider : providers) {
+								provider.storeModule(module, moduleDeclaration,
+										collector);
+							}
+						}
+					}
 					if (collector != null && !collector.isEmpty()) {
 						mifo.put(errorKey, collector);
 					} else {

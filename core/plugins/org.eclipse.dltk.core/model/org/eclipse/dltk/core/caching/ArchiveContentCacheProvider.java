@@ -1,5 +1,8 @@
 package org.eclipse.dltk.core.caching;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +33,7 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 public class ArchiveContentCacheProvider implements IContentCacheProvider {
 
 	private File archiveTempFile;
+	private IContentCache cache;
 
 	public ArchiveContentCacheProvider() {
 		IPath stateLocation = DLTKCore.getDefault().getStateLocation();
@@ -38,26 +42,41 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 		if (!archiveTempFile.exists()) {
 			archiveTempFile.mkdir();
 		}
+		// zipProcessor.start();
 	}
 
-	public boolean updateCache(IFileHandle handle, IContentCache cache) {
+	public InputStream getAttributeAndUpdateCache(IFileHandle handle,
+			String attribute) {
 		IFileHandle parent = handle.getParent();
 		String DLTK_INDEX_FILE = ".dltk.index";
-		IFileHandle child = parent.getChild(DLTK_INDEX_FILE);
-		boolean found = false;
-		if (child != null && child.exists()) {
+		IFileHandle indexFile = parent.getChild(DLTK_INDEX_FILE);
+		if (indexFile != null && indexFile.exists()) {
+			String stamp = cache.getCacheEntryAttributeString(indexFile,
+					"timestamp");
+			String fStamp = Long.toString(indexFile.lastModified());
+			if (stamp != null) {
+				if (fStamp.equals(stamp)) {
+					return null;
+				}
+			} else {
+				cache.setCacheEntryAttribute(indexFile, "timestamp", fStamp);
+			}
 			// Copy zip file into metadata temporaty location
 			try {
-				File file = File.createTempFile("dltk_archive_cache", "d",
-						archiveTempFile);
-				Util.copy(file, child
-						.openInputStream(new NullProgressMonitor()));
-				ZipFile zipFile = new ZipFile(file);
+				File zipFileHandle = cache.getEntryAsFile(indexFile, "handle");
+
+				if (!zipFileHandle.exists()) {
+					Util.copy(zipFileHandle, new BufferedInputStream(indexFile
+							.openInputStream(new NullProgressMonitor()), 4096));
+				}
+				ZipFile zipFile = new ZipFile(zipFileHandle);
+
 				ZipEntry entry = zipFile.getEntry(".index");
 				Resource indexResource = new XMIResourceImpl(URI
 						.createURI("dltk_cache://zipIndex"));
 				indexResource.load(zipFile.getInputStream(entry), null);
 				EList<EObject> contents = indexResource.getContents();
+				InputStream resultStream = null;
 				for (EObject eObject : contents) {
 					CacheIndex cacheIndex = (CacheIndex) eObject;
 					EList<CacheEntry> entries = cacheIndex.getEntries();
@@ -67,35 +86,59 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 						if (entryHandle.exists()
 								&& entryHandle.lastModified() == cacheEntry
 										.getTimestamp()) {
-							if (handle.equals(entryHandle)) {
-								found = true;
-							}
 							EList<CacheEntryAttribute> attributes = cacheEntry
 									.getAttributes();
 							for (CacheEntryAttribute cacheEntryAttribute : attributes) {
-								OutputStream stream = cache
+								OutputStream stream = null;
+								ByteArrayOutputStream out = null;
+								stream = cache
 										.getCacheEntryAttributeOutputStream(
 												entryHandle,
 												cacheEntryAttribute.getName());
+								if (handle.equals(entryHandle)
+										&& cacheEntryAttribute.getName()
+												.equals(attribute)) {
+									out = new ByteArrayOutputStream();
+								}
 								String location = cacheEntryAttribute
 										.getLocation();
 								ZipEntry zipEntry = zipFile.getEntry(location);
-								InputStream inputStream = zipFile
-										.getInputStream(zipEntry);
-								Util.copy(inputStream, stream);
-								stream.close();
-								inputStream.close();
+								zipFile.getInputStream(zipEntry);
+								InputStream inputStream;
+								try {
+									inputStream = zipFile
+											.getInputStream(zipEntry);
+									if (out != null) {
+										Util.copy(inputStream, out);
+										byte[] bytes = out.toByteArray();
+										ByteArrayInputStream inp = new ByteArrayInputStream(
+												bytes);
+										resultStream = new ByteArrayInputStream(
+												bytes);
+										Util.copy(inp, stream);
+									} else {
+										Util.copy(inputStream, stream);
+									}
+									stream.close();
+									inputStream.close();
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
 							}
 						}
 					}
 				}
-				file.delete(); // Delete unused zip archive.
+				return resultStream;
 			} catch (IOException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
 			}
 		}
-		return found;
+		return null;
+	}
+
+	public void setCache(IContentCache cache) {
+		this.cache = cache;
 	}
 }

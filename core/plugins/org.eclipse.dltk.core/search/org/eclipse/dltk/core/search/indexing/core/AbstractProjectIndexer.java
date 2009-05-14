@@ -21,7 +21,6 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.index.Index;
@@ -138,14 +137,14 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer {
 				.toString(), containerPath, null, participant,
 				module instanceof ExternalSourceModule, module
 						.getScriptProject().getProject());
-		document.toolkit = toolkit;
-		try {
-			document.setCharContents(module.getSourceAsCharArray());
-		} catch (ModelException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
-		}
+		// document.toolkit = toolkit;
+		// try {
+		// document.setCharContents(module.getSourceAsCharArray());
+		// } catch (ModelException e) {
+		// if (DLTKCore.DEBUG) {
+		// e.printStackTrace();
+		// }
+		// }
 		final String relativePath = SourceIndexUtil.containerRelativePath(
 				containerPath, module, path);
 		document.setContainerRelativePath(relativePath);

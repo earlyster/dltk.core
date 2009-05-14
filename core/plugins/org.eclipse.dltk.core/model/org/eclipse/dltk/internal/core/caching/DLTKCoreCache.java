@@ -1,5 +1,6 @@
 package org.eclipse.dltk.internal.core.caching;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -56,9 +57,15 @@ public class DLTKCoreCache extends AbstractContentCache {
 				.getStateLocation().append("cache"));
 		DLTKCore.addElementChangedListener(listener);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(listener);
+		Object[] objects = extensions.getObjects();
+		for (int i = 0; i < objects.length; i++) {
+			IContentCacheProvider provider = (IContentCacheProvider) objects[i];
+			provider.setCache(metadataCache);
+		}
 	}
 
 	public void stop() {
+		metadataCache.save(false);
 		DLTKCore.removeElementChangedListener(listener);
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(listener);
 	}
@@ -76,9 +83,10 @@ public class DLTKCoreCache extends AbstractContentCache {
 			Object[] objects = extensions.getObjects();
 			for (int i = 0; i < objects.length; i++) {
 				IContentCacheProvider provider = (IContentCacheProvider) objects[i];
-				if (provider.updateCache(handle, metadataCache)) {
-					return metadataCache.getCacheEntryAttribute(handle,
-							attribute);
+				InputStream stream = provider.getAttributeAndUpdateCache(
+						handle, attribute);
+				if (stream != null) {
+					return stream;
 				}
 			}
 		}
@@ -93,5 +101,13 @@ public class DLTKCoreCache extends AbstractContentCache {
 
 	public void removeCacheEntryAttributes(IFileHandle handle, String attribute) {
 		metadataCache.removeCacheEntryAttributes(handle, attribute);
+	}
+
+	public void clear() {
+		metadataCache.clear();
+	}
+
+	public File getEntryAsFile(IFileHandle handle, String attribute) {
+		return metadataCache.getEntryAsFile(handle, attribute);
 	}
 }

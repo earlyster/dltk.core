@@ -1,5 +1,6 @@
 package org.eclipse.dltk.core.caching;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -24,4 +25,8 @@ public interface IContentCache {
 	public void removeCacheEntryAttributes(IFileHandle handle, String attribute);
 
 	public void clearCacheEntryAttributes(IFileHandle handle);
+
+	public File getEntryAsFile(IFileHandle handle, String attribute);
+
+	public void clear();
 }

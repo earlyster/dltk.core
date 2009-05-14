@@ -83,6 +83,10 @@ public abstract class AbstractBuildContext implements IBuildContext {
 		return lineTracker;
 	}
 
+	public void setLineTracker(ISourceLineTracker tracker) {
+		this.lineTracker = tracker;
+	}
+
 	public final ISourceModule getSourceModule() {
 		return module;
 	}

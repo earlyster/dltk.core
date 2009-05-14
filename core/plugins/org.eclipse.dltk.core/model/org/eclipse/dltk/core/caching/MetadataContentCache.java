@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.CRC32;
 
 import org.eclipse.core.runtime.IPath;
@@ -30,6 +32,7 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
  * This class is designed to store any kind of information into metadata cache.
  */
 public class MetadataContentCache extends AbstractContentCache {
+	private static final int SAVE_DELTA = 100;
 	private Resource indexResource = null;
 	private Map<String, CacheEntry> entryCache = new HashMap<String, CacheEntry>();
 	private IPath cacheLocation;
@@ -53,9 +56,10 @@ public class MetadataContentCache extends AbstractContentCache {
 			if (indexFileHandle.exists()) {
 				try {
 					indexResource.load(null);
-				} catch (IOException e) {
+				} catch (Exception e) {
+					save(false);
 					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
+						// e.printStackTrace();
 					}
 				}
 			}
@@ -107,6 +111,9 @@ public class MetadataContentCache extends AbstractContentCache {
 	}
 
 	private void removeCacheEntry(CacheEntry entry, String key) {
+		if (entry == null || key == null) {
+			return;
+		}
 		// We need to remove old files
 		EList<CacheEntryAttribute> attributes = entry.getAttributes();
 		for (CacheEntryAttribute attr : attributes) {
@@ -137,9 +144,21 @@ public class MetadataContentCache extends AbstractContentCache {
 				+ handle.getEnvironmentId();
 	}
 
-	private synchronized void save() {
+	long changeCount = 0;
+
+	public synchronized void save(boolean countSaves) {
+		if (countSaves) {
+			changeCount++;
+			if (changeCount > SAVE_DELTA) {
+				changeCount = 0;
+			} else {
+				return;
+			}
+		}
 		try {
-			indexResource.save(null);
+			Map options = new HashMap();
+			options.put(Resource.OPTION_SAVE_ONLY_IF_CHANGED, Boolean.TRUE);
+			indexResource.save(options);
 		} catch (IOException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
@@ -178,21 +197,26 @@ public class MetadataContentCache extends AbstractContentCache {
 
 	public synchronized OutputStream getCacheEntryAttributeOutputStream(
 			IFileHandle handle, String attribute) {
+		File file = getEntryAsFile(handle, attribute);
+		try {
+			return new BufferedOutputStream(new FileOutputStream(file), 4096);
+		} catch (FileNotFoundException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	public File getEntryAsFile(IFileHandle handle, String attribute) {
 		CacheEntry entry = getEntry(handle);
+		File file = null;
 		EList<CacheEntryAttribute> attributes = entry.getAttributes();
 		for (CacheEntryAttribute cacheEntryAttribute : attributes) {
 			if (cacheEntryAttribute.getName().equals(attribute)) {
-				File file = new File(cacheLocation.append(
+				file = new File(cacheLocation.append(
 						cacheEntryAttribute.getLocation()).toOSString());
-				try {
-					return new BufferedOutputStream(new FileOutputStream(file),
-							4096);
-				} catch (FileNotFoundException e) {
-					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
-					}
-					return null;
-				}
+				return file;
 			}
 		}
 
@@ -203,16 +227,9 @@ public class MetadataContentCache extends AbstractContentCache {
 		attrEntry.setLocation(location.toPortableString());
 		attrEntry.setName(attribute);
 		entry.getAttributes().add(attrEntry);
-		save();
-		try {
-			return new BufferedOutputStream(new FileOutputStream(cacheLocation
-					.append(location).toOSString()), 4096);
-		} catch (FileNotFoundException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
-		}
-		return null;
+		save(true);
+		file = new File(cacheLocation.append(location).toOSString());
+		return file;
 	}
 
 	private IPath generateNewLocation(IPath path, String environment) {
@@ -254,7 +271,7 @@ public class MetadataContentCache extends AbstractContentCache {
 			if (cacheEntryAttribute.getName().equals(attribute)) {
 				removeAttribute(cacheEntryAttribute);
 				attributes.remove(cacheEntryAttribute);
-				save();
+				save(true);
 				return;
 			}
 		}
@@ -265,7 +282,16 @@ public class MetadataContentCache extends AbstractContentCache {
 		if (entryCache.containsKey(key)) {
 			CacheEntry entry = (CacheEntry) entryCache.get(key);
 			removeCacheEntry(entry, key);
-			save();
+			save(true);
 		}
+	}
+
+	public synchronized void clear() {
+		initialize();
+		Set<String> keySet = new HashSet<String>(entryCache.keySet());
+		for (String k : keySet) {
+			removeCacheEntry(entryCache.get(k), k);
+		}
+		save(true);
 	}
 }

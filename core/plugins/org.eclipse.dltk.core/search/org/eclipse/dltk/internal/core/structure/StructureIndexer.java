@@ -19,6 +19,7 @@ import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceModuleInfoCache;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchDocument;
@@ -32,9 +33,11 @@ public class StructureIndexer extends AbstractIndexer {
 			org.eclipse.dltk.compiler.env.ISourceModule {
 
 		private final SearchDocument document;
+		private ISourceModule module;
 
-		public ParserInput(SearchDocument document) {
+		public ParserInput(SearchDocument document, ISourceModule module) {
 			this.document = document;
+			this.module = module;
 		}
 
 		public char[] getContentsAsCharArray() {
@@ -42,7 +45,7 @@ public class StructureIndexer extends AbstractIndexer {
 		}
 
 		public IModelElement getModelElement() {
-			return null;
+			return module;
 		}
 
 		public IPath getScriptFolder() {
@@ -50,6 +53,13 @@ public class StructureIndexer extends AbstractIndexer {
 		}
 
 		public String getSourceContents() {
+			if (module != null) {
+				try {
+					return module.getSource();
+				} catch (ModelException e) {
+					e.printStackTrace();
+				}
+			}
 			return document.getContents();
 		}
 
@@ -105,7 +115,7 @@ public class StructureIndexer extends AbstractIndexer {
 				.getSourceModuleInfoCache();
 		ISourceModuleInfo info = cache.get(sourceModule);
 		parser.setRequestor(requestor);
-		parser.parseSourceModule(new ParserInput(document), info);
+		parser.parseSourceModule(new ParserInput(document, sourceModule), info);
 		long ended = System.currentTimeMillis();
 
 		if (ended - started > maxWorkTime) {
