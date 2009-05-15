@@ -147,6 +147,9 @@ public class MetadataContentCache extends AbstractContentCache {
 	long changeCount = 0;
 
 	public synchronized void save(boolean countSaves) {
+		if (indexResource == null) {
+			return;
+		}
 		if (countSaves) {
 			changeCount++;
 			if (changeCount > SAVE_DELTA) {
