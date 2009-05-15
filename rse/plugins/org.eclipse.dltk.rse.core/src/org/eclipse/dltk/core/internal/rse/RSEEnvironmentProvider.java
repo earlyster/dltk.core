@@ -139,7 +139,8 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 		if (isReady()) {
 			final IHost[] connections = SystemStartHere.getConnections();
 			if (connections != null && connections.length != 0) {
-				final List environments = new ArrayList(connections.length);
+				final List<IEnvironment> environments = new ArrayList<IEnvironment>(
+						connections.length);
 				for (int i = 0; i < connections.length; i++) {
 					final IHost connection = connections[i];
 					if (isSupportedConnection(connection)) {
@@ -149,8 +150,8 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 							environments.add(new RSEEnvironment(fs));
 					}
 				}
-				return (IEnvironment[]) environments
-						.toArray(new IEnvironment[environments.size()]);
+				return environments.toArray(new IEnvironment[environments
+						.size()]);
 			}
 		}
 		return new IEnvironment[0];
