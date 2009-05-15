@@ -80,12 +80,23 @@ public class MyHostShellProcessAdapter extends Process implements
 		}
 	}
 
+	static final String CTRL_C = "\u0003"; //$NON-NLS-1$
+
 	/**
 	 * Exits the shell.
 	 * 
 	 * @see java.lang.Process#destroy()
 	 */
 	public synchronized void destroy() {
+		if (!done && hostShell.isActive()) {
+			hostShell.writeToShell(CTRL_C);
+			// let the shell time to terminate in standard way
+			try {
+				wait(1000);
+			} catch (InterruptedException e) {
+				// ignore
+			}
+		}
 		hostShell.exit();
 		notifyAll();
 		closeStreams();
