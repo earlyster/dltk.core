@@ -19,6 +19,13 @@ public class Messages extends NLS {
 	public static String RSEEnvironment_EnvironmentNameSuffix;
 	public static String RSEEnvironmentProvider_providerName;
 	public static String RSEExecEnvironment_hostNotFound;
+	public static String RSEExecEnvironment_ErrorConnecting;
+	public static String RSEExecEnvironment_ErrorRunningCommand;
+	public static String RSEExecEnvironment_ProcessCreateError;
+	public static String RSEExecEnvironment_LauncherUploadError;
+	public static String RSEExecEnvironment_NoFileServicerError;
+	public static String RSEExecEnvironment_NoShellService;
+	public static String RSEExecEnvironment_NotConnected;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
