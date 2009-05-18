@@ -121,24 +121,28 @@ public class StructureIndexer extends AbstractIndexer {
 			requestor.setPackageName(pkgName);
 		}
 
-		// Try to restore index from persistent cache
-		IContentCache coreCache = ModelManager.getModelManager().getCoreCache();
-		IFileHandle handle = EnvironmentPathUtils.getFile(sourceModule);
-		InputStream stream = coreCache.getCacheEntryAttribute(handle,
-				IContentCache.STRUCTURE_INDEX);
 		boolean performed = false;
-		if (stream != null) {
-			// Found cached structure index, try to restore
-			try {
-				StructureModelProcessor processor = new StructureModelProcessor(
-						stream, requestor);
-				processor.perform();
-				performed = true;
-				stream.close();
-			} catch (IOException e) {
-				performed = false;
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
+		// Try to restore index from persistent cache
+		IFileHandle handle = EnvironmentPathUtils.getFile(sourceModule);
+		if (handle != null) {
+			// handle is null for built-in modules.
+			IContentCache coreCache = ModelManager.getModelManager()
+					.getCoreCache();
+			InputStream stream = coreCache.getCacheEntryAttribute(handle,
+					IContentCache.STRUCTURE_INDEX);
+			if (stream != null) {
+				// Found cached structure index, try to restore
+				try {
+					StructureModelProcessor processor = new StructureModelProcessor(
+							stream, requestor);
+					processor.perform();
+					performed = true;
+					stream.close();
+				} catch (IOException e) {
+					performed = false;
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}

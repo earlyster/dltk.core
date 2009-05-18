@@ -47,29 +47,34 @@ public class MixinIndexer extends AbstractIndexer {
 		if (toolkit == null) {
 			return;
 		}
-		// Try to restore index from persistent index
-		IContentCache coreCache = ModelManager.getModelManager().getCoreCache();
-		IFileHandle handle = EnvironmentPathUtils.getFile(sourceModule);
-		InputStream stream = coreCache.getCacheEntryAttribute(handle,
-				IContentCache.MIXIN_INDEX);
 		boolean performed = false;
-		if (stream != null) {
-			// Found cached structure index, try to restore
-			try {
-				final MixinIndexRequestor requestor = new MixinIndexRequestor();
-				MixinModelProcessor processor = new MixinModelProcessor(stream,
-						requestor);
-				processor.process();
-				performed = true;
-				if (requestor.count == 0) {
-					((MixinIndex) document.getIndex()).addDocumentName(document
-							.getContainerRelativePath());
-				}
-				stream.close();
-			} catch (IOException e) {
-				performed = false;
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
+		// Try to restore index from persistent index
+		IFileHandle handle = EnvironmentPathUtils.getFile(sourceModule);
+		if (handle != null) {
+			// handle is null for built-in modules.
+			IContentCache coreCache = ModelManager.getModelManager()
+					.getCoreCache();
+			InputStream stream = coreCache.getCacheEntryAttribute(handle,
+					IContentCache.MIXIN_INDEX);
+			if (stream != null) {
+				// Found cached structure index, try to restore
+				try {
+					final MixinIndexRequestor requestor = new MixinIndexRequestor();
+					MixinModelProcessor processor = new MixinModelProcessor(
+							stream, requestor);
+					processor.process();
+					performed = true;
+					if (requestor.count == 0) {
+						((MixinIndex) document.getIndex())
+								.addDocumentName(document
+										.getContainerRelativePath());
+					}
+					stream.close();
+				} catch (IOException e) {
+					performed = false;
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
