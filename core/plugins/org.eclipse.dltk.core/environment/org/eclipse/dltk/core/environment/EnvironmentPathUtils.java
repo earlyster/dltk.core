@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.environment;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -169,6 +170,7 @@ public class EnvironmentPathUtils {
 	}
 
 	public static IFileHandle getFile(IModelElement element) {
+
 		IEnvironment environment = EnvironmentManager.getEnvironment(element);
 		if (environment == null) {
 			return null;
@@ -178,8 +180,16 @@ public class EnvironmentPathUtils {
 			path = ((ExternalSourceModule) element).getFullPath();
 		}
 		if (environment.isLocal()) {
-			if (element.getResource() != null) {
-				return environment.getFile(element.getResource().getLocation());
+			IResource res = element.getResource();
+			if (res != null) {
+				IPath loc = res.getLocation();
+				URI uri = res.getLocationURI();
+
+				if (loc != null) {
+					return environment.getFile(loc);
+				} else {
+					return environment.getFile(uri);
+				}
 			}
 			IFileHandle file = environment.getFile(path);
 			if (file.exists()) {
@@ -187,9 +197,9 @@ public class EnvironmentPathUtils {
 			}
 			return null;
 		} else {
-			if (element.getResource() != null) {
-				return environment.getFile(element.getResource()
-						.getLocationURI());
+			IResource res = element.getResource();
+			if (res != null) {
+				return environment.getFile(res.getLocationURI());
 			}
 			IFileHandle file = environment.getFile(path);
 			if (file.exists()) {

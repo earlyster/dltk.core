@@ -111,4 +111,6 @@ public interface IEnvironment extends IAdaptable {
 	 * @return canonical file path
 	 */
 	String getCanonicalPath(IPath path);
+
+	boolean containsURI(URI locationURI);
 }

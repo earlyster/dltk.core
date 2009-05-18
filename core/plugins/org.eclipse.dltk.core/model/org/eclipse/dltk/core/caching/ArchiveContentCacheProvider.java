@@ -1,8 +1,6 @@
 package org.eclipse.dltk.core.caching;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,59 +74,61 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 						.createURI("dltk_cache://zipIndex"));
 				indexResource.load(zipFile.getInputStream(entry), null);
 				EList<EObject> contents = indexResource.getContents();
-				InputStream resultStream = null;
+				// InputStream resultStream = null;
 				for (EObject eObject : contents) {
 					CacheIndex cacheIndex = (CacheIndex) eObject;
 					EList<CacheEntry> entries = cacheIndex.getEntries();
 					for (CacheEntry cacheEntry : entries) {
 						String path = cacheEntry.getPath();
-						IFileHandle entryHandle = parent.getChild(path);
-						if (entryHandle.exists()
-								&& entryHandle.lastModified() == cacheEntry
-										.getTimestamp()) {
-							EList<CacheEntryAttribute> attributes = cacheEntry
-									.getAttributes();
-							for (CacheEntryAttribute cacheEntryAttribute : attributes) {
-								OutputStream stream = null;
-								ByteArrayOutputStream out = null;
-								stream = cache
-										.getCacheEntryAttributeOutputStream(
-												entryHandle,
-												cacheEntryAttribute.getName());
-								if (handle.equals(entryHandle)
-										&& cacheEntryAttribute.getName()
-												.equals(attribute)) {
-									out = new ByteArrayOutputStream();
-								}
-								String location = cacheEntryAttribute
-										.getLocation();
-								ZipEntry zipEntry = zipFile.getEntry(location);
-								zipFile.getInputStream(zipEntry);
-								InputStream inputStream;
-								try {
-									inputStream = zipFile
-											.getInputStream(zipEntry);
-									if (out != null) {
-										Util.copy(inputStream, out);
-										byte[] bytes = out.toByteArray();
-										ByteArrayInputStream inp = new ByteArrayInputStream(
-												bytes);
-										resultStream = new ByteArrayInputStream(
-												bytes);
-										Util.copy(inp, stream);
-									} else {
-										Util.copy(inputStream, stream);
-									}
-									stream.close();
-									inputStream.close();
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
+						IFileHandle entryHandle = new WrapTimeStampHandle(
+								handle.getChild(path), cacheEntry
+										.getTimestamp());
+						// long lastModified = entryHandle.lastModified();
+						// if (entryHandle.exists()
+						// && lastModified == cacheEntry
+						// .getTimestamp()) {
+						EList<CacheEntryAttribute> attributes = cacheEntry
+								.getAttributes();
+						for (CacheEntryAttribute cacheEntryAttribute : attributes) {
+							OutputStream stream = null;
+							// ByteArrayOutputStream out = null;
+
+							stream = cache.getCacheEntryAttributeOutputStream(
+									entryHandle, cacheEntryAttribute.getName());
+							// if (handle.equals(entryHandle)
+							// && cacheEntryAttribute.getName().equals(
+							// attribute)) {
+							// out = new ByteArrayOutputStream();
+							// }
+							String location = cacheEntryAttribute.getLocation();
+							ZipEntry zipEntry = zipFile.getEntry(location);
+							zipFile.getInputStream(zipEntry);
+							InputStream inputStream;
+							try {
+								inputStream = zipFile.getInputStream(zipEntry);
+								// if (out != null) {
+								// Util.copy(inputStream, stream);
+								// // byte[] bytes = out.toByteArray();
+								// ByteArrayInputStream inp = new
+								// ByteArrayInputStream(
+								// bytes);
+								// // resultStream = new ByteArrayInputStream(
+								// // bytes);
+								// Util.copy(inp, stream);
+								// } else {
+								Util.copy(inputStream, stream);
+								// }
+								stream.close();
+								inputStream.close();
+							} catch (IOException e) {
+								e.printStackTrace();
 							}
 						}
+						// }
 					}
 				}
-				return resultStream;
+				return cache.getCacheEntryAttribute(handle, attribute);
+				// return resultStream;
 			} catch (IOException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();

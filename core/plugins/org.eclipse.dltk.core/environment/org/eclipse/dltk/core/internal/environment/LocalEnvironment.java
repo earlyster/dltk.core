@@ -119,4 +119,8 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 			return path.toOSString();
 		}
 	}
+
+	public boolean containsURI(URI locationURI) {
+		return false;
+	}
 }

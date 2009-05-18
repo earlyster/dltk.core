@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.environment;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,7 +51,6 @@ public final class EnvironmentManager {
 			LazyExtensionManager {
 
 		private class EnvironmentProviderDesc extends Descriptor {
-
 			private int priority;
 
 			public EnvironmentProviderDesc(
@@ -99,6 +100,19 @@ public final class EnvironmentManager {
 	public static IEnvironment getEnvironment(IModelElement element) {
 		if (element == null) {
 			return null;
+		}
+		IResource res = element.getResource();
+		if (res != null) {
+			URI locationURI = res.getLocationURI();
+			if (res != null && res.getLocation() == null && locationURI != null) {
+				IEnvironment[] environments = EnvironmentManager
+						.getEnvironments();
+				for (IEnvironment env : environments) {
+					if (env.containsURI(locationURI)) {
+						return env;
+					}
+				}
+			}
 		}
 		IScriptProject scriptProject = element.getScriptProject();
 		if (scriptProject == null) {
