@@ -41,7 +41,14 @@ public class StructureIndexer extends AbstractIndexer {
 		}
 
 		public char[] getContentsAsCharArray() {
-			return document.getCharContents();
+			try {
+				return module.getSourceAsCharArray();
+			} catch (ModelException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+			return null;
 		}
 
 		public IModelElement getModelElement() {

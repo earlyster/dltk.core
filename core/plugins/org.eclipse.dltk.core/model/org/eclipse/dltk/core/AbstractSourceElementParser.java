@@ -46,9 +46,16 @@ public abstract class AbstractSourceElementParser implements
 			moduleDeclaration = SourceParserUtil.getModuleDeclaration(
 					(ISourceModule) module, problemReporter, astCache);
 		} else {
-			moduleDeclaration = SourceParserUtil.getModuleDeclaration(module
-					.getFileName(), module.getContentsAsCharArray(),
-					getNatureId(), problemReporter, astCache);
+			IModelElement modelElement = module.getModelElement();
+			if (modelElement != null && modelElement instanceof ISourceModule) {
+				moduleDeclaration = SourceParserUtil
+						.getModuleDeclaration((ISourceModule) modelElement,
+								problemReporter, astCache);
+			} else {
+				moduleDeclaration = SourceParserUtil.getModuleDeclaration(
+						module.getFileName(), module.getContentsAsCharArray(),
+						getNatureId(), problemReporter, astCache);
+			}
 		}
 		return moduleDeclaration;
 	}
