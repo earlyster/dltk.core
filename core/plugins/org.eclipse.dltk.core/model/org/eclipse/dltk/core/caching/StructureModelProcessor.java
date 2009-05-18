@@ -19,6 +19,9 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 			ISourceElementRequestor requestor) throws IOException {
 		super(stream);
 		this.requestor = requestor;
+	}
+
+	public void perform() throws IOException {
 		readStrings();
 		readData();
 	}
@@ -243,6 +246,7 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 		boolean result = false;
 		try {
 			FieldInfo info = new FieldInfo();
+			readFieldInfo(info);
 			String parentName = readString();
 			String delimiter = readString();
 			in.readBoolean();

@@ -9,17 +9,25 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.mixin;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.caching.IContentCache;
+import org.eclipse.dltk.core.caching.MixinModelProcessor;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.mixin.IMixinParser;
 import org.eclipse.dltk.core.mixin.IMixinRequestor;
 import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.core.search.index.MixinIndex;
 import org.eclipse.dltk.core.search.indexing.AbstractIndexer;
+import org.eclipse.dltk.internal.core.ModelManager;
 
 public class MixinIndexer extends AbstractIndexer {
 
@@ -39,20 +47,50 @@ public class MixinIndexer extends AbstractIndexer {
 		if (toolkit == null) {
 			return;
 		}
-		try {
-			IMixinParser parser = MixinManager.getMixinParser(toolkit
-					.getNatureId());
-			if (parser != null) {
+		// Try to restore index from persistent index
+		IContentCache coreCache = ModelManager.getModelManager().getCoreCache();
+		IFileHandle handle = EnvironmentPathUtils.getFile(sourceModule);
+		InputStream stream = coreCache.getCacheEntryAttribute(handle,
+				IContentCache.MIXIN_INDEX);
+		boolean performed = false;
+		if (stream != null) {
+			// Found cached structure index, try to restore
+			try {
 				final MixinIndexRequestor requestor = new MixinIndexRequestor();
-				parser.setRequirestor(requestor);
-				parser.parserSourceModule(false, this.sourceModule);
+				MixinModelProcessor processor = new MixinModelProcessor(stream,
+						requestor);
+				processor.process();
+				performed = true;
 				if (requestor.count == 0) {
 					((MixinIndex) document.getIndex()).addDocumentName(document
 							.getContainerRelativePath());
 				}
+				stream.close();
+			} catch (IOException e) {
+				performed = false;
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
 			}
-		} catch (CoreException e) {
-			DLTKCore.error("Error in MixinIndexer", e); //$NON-NLS-1$
+		}
+
+		if (!performed) {
+			try {
+				IMixinParser parser = MixinManager.getMixinParser(toolkit
+						.getNatureId());
+				if (parser != null) {
+					final MixinIndexRequestor requestor = new MixinIndexRequestor();
+					parser.setRequirestor(requestor);
+					parser.parserSourceModule(false, this.sourceModule);
+					if (requestor.count == 0) {
+						((MixinIndex) document.getIndex())
+								.addDocumentName(document
+										.getContainerRelativePath());
+					}
+				}
+			} catch (CoreException e) {
+				DLTKCore.error("Error in MixinIndexer", e); //$NON-NLS-1$
+			}
 		}
 	}
 

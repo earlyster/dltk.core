@@ -137,7 +137,7 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer {
 				.toString(), containerPath, null, participant,
 				module instanceof ExternalSourceModule, module
 						.getScriptProject().getProject());
-		// document.toolkit = toolkit;
+		document.toolkit = toolkit;
 		// try {
 		// document.setCharContents(module.getSourceAsCharArray());
 		// } catch (ModelException e) {

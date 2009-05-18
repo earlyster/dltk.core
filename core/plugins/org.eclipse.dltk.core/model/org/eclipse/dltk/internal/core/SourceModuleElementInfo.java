@@ -11,7 +11,7 @@ package org.eclipse.dltk.internal.core;
 
 import org.eclipse.dltk.core.ISourceRange;
 
-class SourceModuleElementInfo extends OpenableElementInfo {
+public class SourceModuleElementInfo extends OpenableElementInfo {
 
 	/**
 	 * The length of this source module's source code <code>String</code>

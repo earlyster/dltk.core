@@ -7,6 +7,10 @@ import java.io.OutputStream;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
 public interface IContentCache {
+
+	String STRUCTURE_INDEX = "_sind";
+	String MIXIN_INDEX = "_smix";
+
 	/*
 	 * Methods to store content attributes
 	 */

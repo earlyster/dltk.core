@@ -9,6 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.structure;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
@@ -21,6 +24,10 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceModuleInfoCache;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
+import org.eclipse.dltk.core.caching.IContentCache;
+import org.eclipse.dltk.core.caching.StructureModelProcessor;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.core.search.indexing.AbstractIndexer;
@@ -113,16 +120,44 @@ public class StructureIndexer extends AbstractIndexer {
 					.removeLastSegments(1)).toString();
 			requestor.setPackageName(pkgName);
 		}
-		ISourceElementParser parser = ((InternalSearchDocument) this.document)
-				.getParser();
-		if (parser == null) {
-			parser = DLTKLanguageManager.getSourceElementParser(sourceModule);
+
+		// Try to restore index from persistent cache
+		IContentCache coreCache = ModelManager.getModelManager().getCoreCache();
+		IFileHandle handle = EnvironmentPathUtils.getFile(sourceModule);
+		InputStream stream = coreCache.getCacheEntryAttribute(handle,
+				IContentCache.STRUCTURE_INDEX);
+		boolean performed = false;
+		if (stream != null) {
+			// Found cached structure index, try to restore
+			try {
+				StructureModelProcessor processor = new StructureModelProcessor(
+						stream, requestor);
+				processor.perform();
+				performed = true;
+				stream.close();
+			} catch (IOException e) {
+				performed = false;
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
 		}
-		ISourceModuleInfoCache cache = ModelManager.getModelManager()
-				.getSourceModuleInfoCache();
-		ISourceModuleInfo info = cache.get(sourceModule);
-		parser.setRequestor(requestor);
-		parser.parseSourceModule(new ParserInput(document, sourceModule), info);
+
+		if (!performed) {
+			ISourceElementParser parser = ((InternalSearchDocument) this.document)
+					.getParser();
+			if (parser == null) {
+				parser = DLTKLanguageManager
+						.getSourceElementParser(sourceModule);
+			}
+			ISourceModuleInfoCache cache = ModelManager.getModelManager()
+					.getSourceModuleInfoCache();
+			ISourceModuleInfo info = cache.get(sourceModule);
+			parser.setRequestor(requestor);
+			parser.parseSourceModule(new ParserInput(document, sourceModule),
+					info);
+		}
+
 		long ended = System.currentTimeMillis();
 
 		if (ended - started > maxWorkTime) {

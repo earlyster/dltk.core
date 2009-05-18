@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
+import org.eclipse.dltk.core.DLTKCore;
 
 public class StructureModelCollector extends AbstractDataSaver implements
 		ISourceElementRequestor, IStructureConstants {
@@ -296,5 +297,17 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public byte[] getBytes() {
+		try {
+			stream.flush();
+			storeStringIndex();
+		} catch (IOException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		return ((ByteArrayOutputStream) stream).toByteArray();
 	}
 }
