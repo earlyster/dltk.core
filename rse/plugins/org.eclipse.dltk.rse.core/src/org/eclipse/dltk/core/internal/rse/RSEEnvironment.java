@@ -110,7 +110,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 		if (locationURI != null) {
 			String host2 = locationURI.getHost();
 			String scheme = locationURI.getScheme();
-			if ("rse".equals(scheme)) {
+			if (RSEEnvironmentProvider.RSE_SCHEME.equals(scheme)) {
 				if (host2.equals(host.getAliasName())) {
 					return true;
 				}
