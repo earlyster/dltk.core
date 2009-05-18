@@ -121,6 +121,6 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 	}
 
 	public boolean containsURI(URI locationURI) {
-		return false;
+		return "file".equals(locationURI.getScheme());
 	}
 }
