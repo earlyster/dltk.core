@@ -52,6 +52,8 @@ public interface IBuildContext {
 
 	ISourceLineTracker getLineTracker();
 
+	void setLineTracker(ISourceLineTracker tracker);
+
 	IProblemReporter getProblemReporter();
 
 	ITaskReporter getTaskReporter();

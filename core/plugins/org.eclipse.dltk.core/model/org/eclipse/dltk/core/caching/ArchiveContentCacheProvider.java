@@ -56,8 +56,6 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 				if (fStamp.equals(stamp)) {
 					return null;
 				}
-			} else {
-				cache.setCacheEntryAttribute(indexFile, "timestamp", fStamp);
 			}
 			// Copy zip file into metadata temporaty location
 			try {
@@ -127,6 +125,7 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 						// }
 					}
 				}
+				cache.setCacheEntryAttribute(indexFile, "timestamp", fStamp);
 				return cache.getCacheEntryAttribute(handle, attribute);
 				// return resultStream;
 			} catch (IOException e) {
