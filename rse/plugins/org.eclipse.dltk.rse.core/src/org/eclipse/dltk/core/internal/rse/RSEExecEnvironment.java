@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IDeployment;
 import org.eclipse.dltk.core.environment.IEnvironment;
@@ -256,8 +257,8 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		final String command = EXEC_BIN_SH + tmpLauncherPath;
 		final IHostShell hostShell;
 		try {
-			hostShell = shellService.runCommand(null, command, environment,
-					new NullProgressMonitor());
+			hostShell = shellService.runCommand(Util.EMPTY_STRING, command,
+					environment, new NullProgressMonitor());
 		} catch (SystemMessageException e) {
 			throw new CoreException(newStatus(
 					RSEStatusConstants.COMMAND_RUN_ERROR, NLS.bind(
