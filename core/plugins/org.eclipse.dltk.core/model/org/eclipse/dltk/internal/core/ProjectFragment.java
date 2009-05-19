@@ -32,6 +32,7 @@ import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
@@ -536,13 +537,6 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 	}
 
 	public IScriptFolder getScriptFolder(String[] pkgName) {
-		if (pkgName.length == 0) {
-			return this.getScriptFolder(Path.EMPTY);
-		}
-		IPath path = new Path(pkgName[0]);
-		for (int i = 1; i < pkgName.length; ++i) {
-			path = path.append(pkgName[i]);
-		}
-		return this.getScriptFolder(path);
+		return this.getScriptFolder(ScriptModelUtil.toPath(pkgName));
 	}
 }

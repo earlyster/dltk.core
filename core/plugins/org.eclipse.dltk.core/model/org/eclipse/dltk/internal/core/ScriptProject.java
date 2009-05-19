@@ -195,9 +195,10 @@ public class ScriptProject extends Openable implements IScriptProject {
 	 *         segment. The path may be relative or absolute.
 	 */
 	public IProjectFragment getProjectFragment(IPath path) {
-		boolean isBuiltin = path.toString().startsWith(
-				IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR);
-		if (!path.isAbsolute() && !isBuiltin) {
+		boolean isSpecial = !path.isEmpty()
+				&& path.segment(0)
+						.startsWith(IBuildpathEntry.BUILDPATH_SPECIAL);
+		if (!path.isAbsolute() && !isSpecial) {
 			path = getPath().append(path);
 		}
 		int segmentCount = path.segmentCount();
@@ -215,7 +216,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 			// still
 			// resolve to a source/lib folder
 			// thus will try to guess based on existing resource
-			if (isBuiltin) {
+			if (isSpecial
+					&& path.segment(0).startsWith(
+							IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)) {
 				return new BuiltinProjectFragment(path, this);
 			}
 			if (org.eclipse.dltk.compiler.util.Util.isArchiveFileName(path
@@ -232,8 +235,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 						.getProject(path.lastSegment()));
 			} else {
 				// lib being a folder
-				IFolder folder = this.project.getWorkspace().getRoot()
-						.getFolder(path);
+				IResource folder = this.project.getWorkspace().getRoot()
+						.findMember(path);
 				if (folder != null) {
 					IProjectFragment projectFragment = getProjectFragment(folder);
 					return projectFragment;

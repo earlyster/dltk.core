@@ -19,13 +19,13 @@ import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.search.BasicSearchEngine;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.TypeNameMatchRequestor;
 import org.eclipse.dltk.core.search.TypeNameRequestor;
 import org.eclipse.dltk.internal.compiler.env.AccessRestriction;
 import org.eclipse.dltk.internal.core.Openable;
-import org.eclipse.dltk.internal.core.ProjectFragment;
 import org.eclipse.dltk.internal.core.util.HandleFactory;
 import org.eclipse.dltk.internal.core.util.HashtableOfArrayToObject;
 
@@ -41,12 +41,11 @@ import org.eclipse.dltk.internal.core.util.HashtableOfArrayToObject;
 public class TypeNameMatchRequestorWrapper implements
 		IRestrictedAccessTypeRequestor {
 	TypeNameMatchRequestor requestor;
-	private final IDLTKSearchScope scope; // scope is needed to retrieve project
-											// path
-	// for external resource
-	private HandleFactory handleFactory; // in case of IJavaSearchScope
-	// defined by clients, use an
-	// HandleFactory instead
+	// scope is needed to retrieve project path for external resource
+	private final IDLTKSearchScope scope;
+	// in case of IJavaSearchScope defined by clients, use an HandleFactory
+	// instead
+	private HandleFactory handleFactory;
 
 	/**
 	 * Cache package fragment root information to optimize speed performance.
@@ -163,8 +162,8 @@ public class TypeNameMatchRequestorWrapper implements
 		IScriptFolder pkgFragment = (IScriptFolder) this.packageHandles
 				.get(pkgName);
 		if (pkgFragment == null) {
-			pkgFragment = ((ProjectFragment) this.lastProjectFragment)
-					.getScriptFolder(pkgName);
+			pkgFragment = ((IProjectFragment) this.lastProjectFragment)
+					.getScriptFolder(ScriptModelUtil.toPath(pkgName));
 			this.packageHandles.put(pkgName, pkgFragment);
 		}
 		String simpleName = simpleNames[length];

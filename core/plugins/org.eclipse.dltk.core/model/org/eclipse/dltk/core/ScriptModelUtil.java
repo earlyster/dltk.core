@@ -11,6 +11,7 @@ package org.eclipse.dltk.core;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
@@ -30,8 +31,10 @@ public class ScriptModelUtil {
 	 * @param unit
 	 */
 	public static void reconcile(ISourceModule unit) throws ModelException {
-		unit.reconcile(false /* don't force problem detection */,
-				null /* use primary owner */, null /* no progress monitor */);
+		/* don't force problem detection */
+		/* use primary owner */
+		/* no progress monitor */
+		unit.reconcile(false, null, null);
 	}
 
 	public static boolean isPrimary(ISourceModule unit) {
@@ -51,9 +54,9 @@ public class ScriptModelUtil {
 	}
 
 	/**
-	 * Returns the package fragment root of <code>IModelElement</code>. If
-	 * the given element is already a package fragment root, the element itself
-	 * is returned.
+	 * Returns the package fragment root of <code>IModelElement</code>. If the
+	 * given element is already a package fragment root, the element itself is
+	 * returned.
 	 */
 	public static IProjectFragment getProjectFragment(IModelElement element) {
 		return (IProjectFragment) element
@@ -216,6 +219,18 @@ public class ScriptModelUtil {
 			}
 		}
 		return false;
+	}
+
+	public static IPath toPath(String[] pkgName) {
+		if (pkgName.length == 0) {
+			return Path.EMPTY;
+		} else {
+			IPath path = new Path(pkgName[0]);
+			for (int i = 1; i < pkgName.length; ++i) {
+				path = path.append(pkgName[i]);
+			}
+			return path;
+		}
 	}
 
 }

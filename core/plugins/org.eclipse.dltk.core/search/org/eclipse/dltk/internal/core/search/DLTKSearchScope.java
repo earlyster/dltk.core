@@ -704,8 +704,8 @@ public class DLTKSearchScope extends AbstractSearchScope {
 		int index = -1;
 		int separatorIndex = resourcePathString.indexOf(FILE_ENTRY_SEPARATOR);
 		boolean isZIPFile = separatorIndex != -1;
-		boolean isBuiltin = resourcePathString
-				.startsWith(IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR);
+		boolean isSpecial = resourcePathString
+				.startsWith(IBuildpathEntry.BUILDPATH_SPECIAL);
 		if (isZIPFile) {
 			// internal or external jar (case 3, 4, or 5)
 			String zipPath = resourcePathString.substring(0, separatorIndex);
@@ -727,7 +727,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 					return project
 							.getProjectFragment(this.containerPaths[index]);
 				}
-				if (isBuiltin) {
+				if (isSpecial) {
 					return project
 							.getProjectFragment(this.containerPaths[index]);
 				}
