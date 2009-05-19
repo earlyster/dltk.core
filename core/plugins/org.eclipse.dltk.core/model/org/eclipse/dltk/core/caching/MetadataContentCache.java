@@ -225,6 +225,9 @@ public class MetadataContentCache extends AbstractContentCache {
 	}
 
 	public File getEntryAsFile(IFileHandle handle, String attribute) {
+		if (handle == null) {
+			return null;
+		}
 		CacheEntry entry = getEntry(handle);
 		File file = null;
 		EList<CacheEntryAttribute> attributes = entry.getAttributes();
@@ -281,6 +284,9 @@ public class MetadataContentCache extends AbstractContentCache {
 
 	public synchronized void removeCacheEntryAttributes(IFileHandle handle,
 			String attribute) {
+		if (handle == null) {
+			return;
+		}
 		CacheEntry entry = getEntry(handle);
 		EList<CacheEntryAttribute> attributes = entry.getAttributes();
 		for (CacheEntryAttribute cacheEntryAttribute : attributes) {
@@ -294,6 +300,9 @@ public class MetadataContentCache extends AbstractContentCache {
 	}
 
 	public synchronized void clearCacheEntryAttributes(IFileHandle handle) {
+		if (handle == null) {
+			return;
+		}
 		String key = makeKey(handle);
 		if (entryCache.containsKey(key)) {
 			CacheEntry entry = (CacheEntry) entryCache.get(key);
