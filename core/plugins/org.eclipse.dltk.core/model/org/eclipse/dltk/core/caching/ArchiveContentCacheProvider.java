@@ -81,7 +81,7 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 					for (CacheEntry cacheEntry : entries) {
 						String path = cacheEntry.getPath();
 						IFileHandle entryHandle = new WrapTimeStampHandle(
-								handle.getChild(path), cacheEntry
+								parent.getChild(path), cacheEntry
 										.getTimestamp());
 						// long lastModified = entryHandle.lastModified();
 						// if (entryHandle.exists()

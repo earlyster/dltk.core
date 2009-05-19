@@ -32,6 +32,7 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
  * This class is designed to store any kind of information into metadata cache.
  */
 public class MetadataContentCache extends AbstractContentCache {
+	private static final int DAY_IN_MILIS = 1000 * 60 * 60 * 24;
 	private static final int SAVE_DELTA = 100;
 	private Resource indexResource = null;
 	private Map<String, CacheEntry> entryCache = new HashMap<String, CacheEntry>();
@@ -80,10 +81,19 @@ public class MetadataContentCache extends AbstractContentCache {
 		String key = makeKey(handle);
 		if (entryCache.containsKey(key)) {
 			CacheEntry entry = (CacheEntry) entryCache.get(key);
-			if (entry.getTimestamp() == handle.lastModified()) {
-				return entry;
+			long accessTime = entry.getLastAccessTime();
+			long timeMillis = System.currentTimeMillis();
+			if (timeMillis - accessTime > DAY_IN_MILIS) {
+				if (entry.getTimestamp() == handle.lastModified()) {
+					entry.setLastAccessTime(timeMillis);
+					return entry;
+				} else {
+					entry.setLastAccessTime(timeMillis);
+					removeCacheEntry(entry, key);
+				}
 			} else {
-				removeCacheEntry(entry, key);
+				entry.setLastAccessTime(timeMillis);
+				return entry;
 			}
 		}
 		CacheIndex index = getCacheIndex(handle.getEnvironmentId());
@@ -171,6 +181,9 @@ public class MetadataContentCache extends AbstractContentCache {
 
 	public InputStream getCacheEntryAttribute(IFileHandle handle,
 			String attribute) {
+		if (handle == null) {
+			return null;
+		}
 		File file = null;
 		CacheEntry entry = null;
 		synchronized (this) {

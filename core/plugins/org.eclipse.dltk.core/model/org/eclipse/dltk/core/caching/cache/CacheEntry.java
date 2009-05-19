@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: CacheEntry.java,v 1.1 2009/05/12 09:42:44 asobolev Exp $
+ * $Id: CacheEntry.java,v 1.2 2009/05/19 09:04:45 asobolev Exp $
  */
 package org.eclipse.dltk.core.caching.cache;
 
@@ -21,6 +21,7 @@ import org.eclipse.emf.ecore.EObject;
  *   <li>{@link org.eclipse.dltk.core.caching.cache.CacheEntry#getPath <em>Path</em>}</li>
  *   <li>{@link org.eclipse.dltk.core.caching.cache.CacheEntry#getTimestamp <em>Timestamp</em>}</li>
  *   <li>{@link org.eclipse.dltk.core.caching.cache.CacheEntry#getAttributes <em>Attributes</em>}</li>
+ *   <li>{@link org.eclipse.dltk.core.caching.cache.CacheEntry#getLastAccessTime <em>Last Access Time</em>}</li>
  * </ul>
  * </p>
  *
@@ -96,5 +97,32 @@ public interface CacheEntry extends EObject {
 	 * @generated
 	 */
 	EList<CacheEntryAttribute> getAttributes();
+
+	/**
+	 * Returns the value of the '<em><b>Last Access Time</b></em>' attribute.
+	 * The default value is <code>"0"</code>.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of the '<em>Last Access Time</em>' attribute isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Last Access Time</em>' attribute.
+	 * @see #setLastAccessTime(long)
+	 * @see org.eclipse.dltk.core.caching.cache.CachePackage#getCacheEntry_LastAccessTime()
+	 * @model default="0"
+	 * @generated
+	 */
+	long getLastAccessTime();
+
+	/**
+	 * Sets the value of the '{@link org.eclipse.dltk.core.caching.cache.CacheEntry#getLastAccessTime <em>Last Access Time</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Last Access Time</em>' attribute.
+	 * @see #getLastAccessTime()
+	 * @generated
+	 */
+	void setLastAccessTime(long value);
 
 } // CacheEntry

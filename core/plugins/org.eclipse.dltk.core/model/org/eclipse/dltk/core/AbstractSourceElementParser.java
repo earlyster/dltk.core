@@ -26,7 +26,9 @@ public abstract class AbstractSourceElementParser implements
 			org.eclipse.dltk.compiler.env.ISourceModule module,
 			ISourceModuleInfo astCache) {
 		final ModuleDeclaration moduleDeclaration = parse(module, astCache);
-
+		if (moduleDeclaration == null) {
+			return;
+		}
 		SourceElementRequestVisitor requestor = createVisitor();
 
 		try {

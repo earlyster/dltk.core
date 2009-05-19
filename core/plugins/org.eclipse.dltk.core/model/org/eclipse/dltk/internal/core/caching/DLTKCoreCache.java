@@ -76,6 +76,9 @@ public class DLTKCoreCache extends AbstractContentCache {
 
 	public InputStream getCacheEntryAttribute(IFileHandle handle,
 			String attribute) {
+		if (handle == null) {
+			return null;
+		}
 		InputStream result = metadataCache.getCacheEntryAttribute(handle,
 				attribute);
 		if (result == null) {

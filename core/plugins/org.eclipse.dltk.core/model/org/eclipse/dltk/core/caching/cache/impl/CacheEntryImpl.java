@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: CacheEntryImpl.java,v 1.1 2009/05/12 09:42:46 asobolev Exp $
+ * $Id: CacheEntryImpl.java,v 1.2 2009/05/19 09:04:45 asobolev Exp $
  */
 package org.eclipse.dltk.core.caching.cache.impl;
 
@@ -36,6 +36,7 @@ import org.eclipse.emf.ecore.util.InternalEList;
  *   <li>{@link org.eclipse.dltk.core.caching.cache.impl.CacheEntryImpl#getPath <em>Path</em>}</li>
  *   <li>{@link org.eclipse.dltk.core.caching.cache.impl.CacheEntryImpl#getTimestamp <em>Timestamp</em>}</li>
  *   <li>{@link org.eclipse.dltk.core.caching.cache.impl.CacheEntryImpl#getAttributes <em>Attributes</em>}</li>
+ *   <li>{@link org.eclipse.dltk.core.caching.cache.impl.CacheEntryImpl#getLastAccessTime <em>Last Access Time</em>}</li>
  * </ul>
  * </p>
  *
@@ -91,6 +92,26 @@ public class CacheEntryImpl extends EObjectImpl implements CacheEntry {
 	 * @ordered
 	 */
 	protected EList<CacheEntryAttribute> attributes;
+
+	/**
+	 * The default value of the '{@link #getLastAccessTime() <em>Last Access Time</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getLastAccessTime()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final long LAST_ACCESS_TIME_EDEFAULT = 0L;
+
+	/**
+	 * The cached value of the '{@link #getLastAccessTime() <em>Last Access Time</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getLastAccessTime()
+	 * @generated
+	 * @ordered
+	 */
+	protected long lastAccessTime = LAST_ACCESS_TIME_EDEFAULT;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -170,6 +191,27 @@ public class CacheEntryImpl extends EObjectImpl implements CacheEntry {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public long getLastAccessTime() {
+		return lastAccessTime;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setLastAccessTime(long newLastAccessTime) {
+		long oldLastAccessTime = lastAccessTime;
+		lastAccessTime = newLastAccessTime;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, CachePackage.CACHE_ENTRY__LAST_ACCESS_TIME, oldLastAccessTime, lastAccessTime));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	@Override
 	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
 		switch (featureID) {
@@ -193,6 +235,8 @@ public class CacheEntryImpl extends EObjectImpl implements CacheEntry {
 				return new Long(getTimestamp());
 			case CachePackage.CACHE_ENTRY__ATTRIBUTES:
 				return getAttributes();
+			case CachePackage.CACHE_ENTRY__LAST_ACCESS_TIME:
+				return new Long(getLastAccessTime());
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -216,6 +260,9 @@ public class CacheEntryImpl extends EObjectImpl implements CacheEntry {
 				getAttributes().clear();
 				getAttributes().addAll((Collection<? extends CacheEntryAttribute>)newValue);
 				return;
+			case CachePackage.CACHE_ENTRY__LAST_ACCESS_TIME:
+				setLastAccessTime(((Long)newValue).longValue());
+				return;
 		}
 		super.eSet(featureID, newValue);
 	}
@@ -237,6 +284,9 @@ public class CacheEntryImpl extends EObjectImpl implements CacheEntry {
 			case CachePackage.CACHE_ENTRY__ATTRIBUTES:
 				getAttributes().clear();
 				return;
+			case CachePackage.CACHE_ENTRY__LAST_ACCESS_TIME:
+				setLastAccessTime(LAST_ACCESS_TIME_EDEFAULT);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -255,6 +305,8 @@ public class CacheEntryImpl extends EObjectImpl implements CacheEntry {
 				return timestamp != TIMESTAMP_EDEFAULT;
 			case CachePackage.CACHE_ENTRY__ATTRIBUTES:
 				return attributes != null && !attributes.isEmpty();
+			case CachePackage.CACHE_ENTRY__LAST_ACCESS_TIME:
+				return lastAccessTime != LAST_ACCESS_TIME_EDEFAULT;
 		}
 		return super.eIsSet(featureID);
 	}
@@ -273,6 +325,8 @@ public class CacheEntryImpl extends EObjectImpl implements CacheEntry {
 		result.append(path);
 		result.append(", timestamp: ");
 		result.append(timestamp);
+		result.append(", lastAccessTime: ");
+		result.append(lastAccessTime);
 		result.append(')');
 		return result.toString();
 	}

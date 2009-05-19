@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: CachePackage.java,v 1.1 2009/05/12 09:42:44 asobolev Exp $
+ * $Id: CachePackage.java,v 1.2 2009/05/19 09:04:45 asobolev Exp $
  */
 package org.eclipse.dltk.core.caching.cache;
 
@@ -97,13 +97,22 @@ public interface CachePackage extends EPackage {
 	int CACHE_ENTRY__ATTRIBUTES = 2;
 
 	/**
+	 * The feature id for the '<em><b>Last Access Time</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int CACHE_ENTRY__LAST_ACCESS_TIME = 3;
+
+	/**
 	 * The number of structural features of the '<em>Entry</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int CACHE_ENTRY_FEATURE_COUNT = 3;
+	int CACHE_ENTRY_FEATURE_COUNT = 4;
 
 	/**
 	 * The meta object id for the '{@link org.eclipse.dltk.core.caching.cache.impl.CacheEntryAttributeImpl <em>Entry Attribute</em>}' class.
@@ -231,6 +240,17 @@ public interface CachePackage extends EPackage {
 	 * @generated
 	 */
 	EReference getCacheEntry_Attributes();
+
+	/**
+	 * Returns the meta object for the attribute '{@link org.eclipse.dltk.core.caching.cache.CacheEntry#getLastAccessTime <em>Last Access Time</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Last Access Time</em>'.
+	 * @see org.eclipse.dltk.core.caching.cache.CacheEntry#getLastAccessTime()
+	 * @see #getCacheEntry()
+	 * @generated
+	 */
+	EAttribute getCacheEntry_LastAccessTime();
 
 	/**
 	 * Returns the meta object for class '{@link org.eclipse.dltk.core.caching.cache.CacheEntryAttribute <em>Entry Attribute</em>}'.
@@ -362,6 +382,14 @@ public interface CachePackage extends EPackage {
 		 * @generated
 		 */
 		EReference CACHE_ENTRY__ATTRIBUTES = eINSTANCE.getCacheEntry_Attributes();
+
+		/**
+		 * The meta object literal for the '<em><b>Last Access Time</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute CACHE_ENTRY__LAST_ACCESS_TIME = eINSTANCE.getCacheEntry_LastAccessTime();
 
 		/**
 		 * The meta object literal for the '{@link org.eclipse.dltk.core.caching.cache.impl.CacheEntryAttributeImpl <em>Entry Attribute</em>}' class.

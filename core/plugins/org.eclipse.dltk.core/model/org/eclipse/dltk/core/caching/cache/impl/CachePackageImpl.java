@@ -2,7 +2,7 @@
  * <copyright>
  * </copyright>
  *
- * $Id: CachePackageImpl.java,v 1.1 2009/05/12 09:42:45 asobolev Exp $
+ * $Id: CachePackageImpl.java,v 1.2 2009/05/19 09:04:45 asobolev Exp $
  */
 package org.eclipse.dltk.core.caching.cache.impl;
 
@@ -156,6 +156,15 @@ public class CachePackageImpl extends EPackageImpl implements CachePackage {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
+	public EAttribute getCacheEntry_LastAccessTime() {
+		return (EAttribute)cacheEntryEClass.getEStructuralFeatures().get(3);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
 	public EClass getCacheEntryAttribute() {
 		return cacheEntryAttributeEClass;
 	}
@@ -246,6 +255,7 @@ public class CachePackageImpl extends EPackageImpl implements CachePackage {
 		createEAttribute(cacheEntryEClass, CACHE_ENTRY__PATH);
 		createEAttribute(cacheEntryEClass, CACHE_ENTRY__TIMESTAMP);
 		createEReference(cacheEntryEClass, CACHE_ENTRY__ATTRIBUTES);
+		createEAttribute(cacheEntryEClass, CACHE_ENTRY__LAST_ACCESS_TIME);
 
 		cacheEntryAttributeEClass = createEClass(CACHE_ENTRY_ATTRIBUTE);
 		createEAttribute(cacheEntryAttributeEClass, CACHE_ENTRY_ATTRIBUTE__NAME);
@@ -291,6 +301,7 @@ public class CachePackageImpl extends EPackageImpl implements CachePackage {
 		initEAttribute(getCacheEntry_Path(), ecorePackage.getEString(), "path", null, 0, 1, CacheEntry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getCacheEntry_Timestamp(), ecorePackage.getELong(), "timestamp", null, 0, 1, CacheEntry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEReference(getCacheEntry_Attributes(), this.getCacheEntryAttribute(), null, "attributes", null, 0, -1, CacheEntry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getCacheEntry_LastAccessTime(), ecorePackage.getELong(), "lastAccessTime", "0", 0, 1, CacheEntry.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(cacheEntryAttributeEClass, CacheEntryAttribute.class, "CacheEntryAttribute", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 		initEAttribute(getCacheEntryAttribute_Name(), ecorePackage.getEString(), "name", null, 0, 1, CacheEntryAttribute.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
