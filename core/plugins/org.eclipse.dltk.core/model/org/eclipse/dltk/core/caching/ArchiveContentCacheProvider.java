@@ -62,8 +62,10 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 				File zipFileHandle = cache.getEntryAsFile(indexFile, "handle");
 
 				if (!zipFileHandle.exists()) {
-					Util.copy(zipFileHandle, new BufferedInputStream(indexFile
-							.openInputStream(new NullProgressMonitor()), 4096));
+					BufferedInputStream inp = new BufferedInputStream(indexFile
+							.openInputStream(new NullProgressMonitor()), 4096);
+					Util.copy(zipFileHandle, inp);
+					inp.close();
 				}
 				ZipFile zipFile = new ZipFile(zipFileHandle);
 
