@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.environment;
 
+import java.net.URI;
+
 import org.eclipse.core.resources.IProject;
 
 public interface IEnvironmentProvider {
@@ -33,4 +35,14 @@ public interface IEnvironmentProvider {
 	public void waitInitialized();
 
 	IEnvironment getProjectEnvironment(IProject project);
+
+	/**
+	 * Returns the environment this <code>locationURI</code> belongs to or
+	 * <code>null</code> if matching environment was not found.
+	 * 
+	 * @param locationURI
+	 * @return
+	 */
+	IEnvironment getEnvironment(URI locationURI);
+
 }

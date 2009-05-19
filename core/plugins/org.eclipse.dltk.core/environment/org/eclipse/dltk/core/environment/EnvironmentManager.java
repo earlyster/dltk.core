@@ -102,20 +102,16 @@ public final class EnvironmentManager {
 			return null;
 		}
 		IResource res = element.getResource();
-		if (res != null && res.getType() != IResource.PROJECT
-				&& res.getLocation() == null) {
+		if (res != null && res.getType() != IResource.PROJECT) {
 			URI locationURI = res.getLocationURI();
 			if (locationURI != null) {
 				for (Iterator i = manager.iterator(); i.hasNext();) {
 					IEnvironmentProvider provider = (IEnvironmentProvider) i
 							.next();
 					waitInitialized(provider);
-					IEnvironment[] environments = provider.getEnvironments();
-					for (int j = 0; j < environments.length; ++j) {
-						IEnvironment env = environments[j];
-						if (env.containsURI(locationURI)) {
-							return env;
-						}
+					IEnvironment env = provider.getEnvironment(locationURI);
+					if (env != null) {
+						return env;
 					}
 				}
 			}

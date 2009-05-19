@@ -23,7 +23,7 @@ public interface IEnvironment extends IAdaptable {
 	 * @return
 	 */
 	boolean isLocal();
-	
+
 	/**
 	 * Returns {@link IFileHandle} for the specified local path. The path should
 	 * be local to this environment. If you have full path (with the environment
@@ -112,5 +112,4 @@ public interface IEnvironment extends IAdaptable {
 	 */
 	String getCanonicalPath(IPath path);
 
-	boolean containsURI(URI locationURI);
 }

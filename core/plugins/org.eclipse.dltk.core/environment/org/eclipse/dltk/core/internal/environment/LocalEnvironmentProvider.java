@@ -11,6 +11,7 @@
 package org.eclipse.dltk.core.internal.environment;
 
 import java.io.File;
+import java.net.URI;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
@@ -55,5 +56,16 @@ public class LocalEnvironmentProvider implements IEnvironmentProvider {
 			}
 		}
 		return null;
+	}
+
+	/*
+	 * @see IEnvironmentProvider#getEnvironment(java.net.URI)
+	 */
+	public IEnvironment getEnvironment(URI locationURI) {
+		if ("file".equals(locationURI.getScheme())) {
+			return LocalEnvironment.getInstance();
+		} else {
+			return null;
+		}
 	}
 }
