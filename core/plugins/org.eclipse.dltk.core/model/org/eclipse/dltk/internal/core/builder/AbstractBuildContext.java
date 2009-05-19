@@ -20,11 +20,13 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.builder.IBuildContext;
+import org.eclipse.dltk.core.builder.IBuildContextExtension;
 import org.eclipse.dltk.core.builder.ISourceLineTracker;
 import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.osgi.util.NLS;
 
-public abstract class AbstractBuildContext implements IBuildContext {
+public abstract class AbstractBuildContext implements IBuildContext,
+		IBuildContextExtension {
 
 	private final Map attributes = new HashMap();
 
@@ -85,6 +87,13 @@ public abstract class AbstractBuildContext implements IBuildContext {
 
 	public void setLineTracker(ISourceLineTracker tracker) {
 		this.lineTracker = tracker;
+	}
+
+	/*
+	 * @see org.eclipse.dltk.core.builder.IBuildContext#isLineTrackerCreated()
+	 */
+	public boolean isLineTrackerCreated() {
+		return lineTracker != null;
 	}
 
 	public final ISourceModule getSourceModule() {
