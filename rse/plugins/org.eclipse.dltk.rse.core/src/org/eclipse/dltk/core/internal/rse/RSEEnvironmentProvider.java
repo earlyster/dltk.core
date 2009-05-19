@@ -161,7 +161,7 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 		try {
 			while (!isReady(false)) {
 				synchronized (lock) {
-					lock.wait(1000);
+					lock.wait(100);
 				}
 			}
 		} catch (InterruptedException e) {
