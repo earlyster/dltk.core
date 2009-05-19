@@ -219,4 +219,28 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 		}
 	}
 
+	/*
+	 * @see IEnvironmentProvider#getEnvironment(java.net.URI)
+	 */
+	public IEnvironment getEnvironment(URI locationURI) {
+		if (RSE_SCHEME.equalsIgnoreCase(locationURI.getScheme()) && isReady()) {
+			final IHost[] connections = SystemStartHere.getConnections();
+			if (connections != null) {
+				final String projectHost = locationURI.getHost();
+				for (int i = 0; i < connections.length; i++) {
+					final IHost connection = connections[i];
+					if (isSupportedConnection(connection)
+							&& projectHost.equalsIgnoreCase(connection
+									.getHostName())) {
+						final IRemoteFileSubSystem fs = RemoteFileUtility
+								.getFileSubSystem(connection);
+						if (fs != null)
+							return new RSEEnvironment(fs);
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 }

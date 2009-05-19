@@ -106,16 +106,4 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 		return RSEFileSystem.getURIFor(host.getHostName(), path);
 	}
 
-	public boolean containsURI(URI locationURI) {
-		if (locationURI != null) {
-			String host2 = locationURI.getHost();
-			String scheme = locationURI.getScheme();
-			if (RSEEnvironmentProvider.RSE_SCHEME.equals(scheme)) {
-				if (host2.equals(host.getAliasName())) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
 }
