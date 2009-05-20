@@ -53,6 +53,13 @@ public class AbstractDataLoader {
 			String base = stringIndex.get(basePos);
 			String str = base.substring(pos, pos + len);
 			return str;
+		} else if (b == 4) {
+			int count = in.readInt();
+			StringBuffer buffer = new StringBuffer();
+			for (int i = 0; i < count; i++) {
+				buffer.append(readString());
+			}
+			return buffer.toString();
 		}
 		return "";
 	}

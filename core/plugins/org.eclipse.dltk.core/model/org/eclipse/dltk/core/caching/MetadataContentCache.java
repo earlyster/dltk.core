@@ -21,6 +21,7 @@ import org.eclipse.dltk.core.caching.cache.CacheEntry;
 import org.eclipse.dltk.core.caching.cache.CacheEntryAttribute;
 import org.eclipse.dltk.core.caching.cache.CacheFactory;
 import org.eclipse.dltk.core.caching.cache.CacheIndex;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
@@ -84,7 +85,7 @@ public class MetadataContentCache extends AbstractContentCache {
 			long accessTime = entry.getLastAccessTime();
 			long timeMillis = System.currentTimeMillis();
 			if (timeMillis - accessTime > DAY_IN_MILIS) {
-				if (entry.getTimestamp() == handle.lastModified()) {
+				if (entry.getTimestamp() == getHandleLastModification(handle)) {
 					entry.setLastAccessTime(timeMillis);
 					return entry;
 				} else {
@@ -99,10 +100,29 @@ public class MetadataContentCache extends AbstractContentCache {
 		CacheIndex index = getCacheIndex(handle.getEnvironmentId());
 		CacheEntry entry = CacheFactory.eINSTANCE.createCacheEntry();
 		entry.setPath(handle.getPath().toPortableString());
-		entry.setTimestamp(handle.lastModified());
+		entry.setTimestamp(getHandleLastModification(handle));
 		index.getEntries().add(entry);
 		entryCache.put(key, entry);
 		return entry;
+	}
+
+	private long getHandleLastModification(IFileHandle handle) {
+		IEnvironment environment = handle.getEnvironment();
+		if (environment.isLocal()) {
+			try {
+				File file = new File(handle.getPath().toOSString());
+				File canonicalFile = file.getCanonicalFile();
+				if (!file.getAbsolutePath().equals(
+						canonicalFile.getAbsoluteFile())) {
+					return canonicalFile.lastModified();
+				}
+			} catch (IOException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return handle.lastModified();
 	}
 
 	private CacheIndex getCacheIndex(String environmentId) {

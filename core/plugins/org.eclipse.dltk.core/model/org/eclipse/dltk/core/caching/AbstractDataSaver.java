@@ -11,6 +11,7 @@ import java.util.List;
 import org.eclipse.dltk.internal.core.util.Util;
 
 public abstract class AbstractDataSaver {
+	private static final int MAX_STR = 65500;
 	protected OutputStream stream;
 	protected DataOutputStream out;
 	private List<String> stringIndex = new ArrayList<String>();
@@ -27,6 +28,29 @@ public abstract class AbstractDataSaver {
 			out.writeByte(0);
 			return;
 		}
+		if (value.length() > MAX_STR) {
+			// Split string to two strings
+			List<String> strs = new ArrayList<String>();
+			int len = value.length();
+			int pos = 0;
+			while (len > 0) {
+				if (len > MAX_STR) {
+					len -= MAX_STR;
+					strs.add(value.substring(pos, pos + MAX_STR));
+					pos += MAX_STR;
+				} else {
+					strs.add(value.substring(pos, pos + len));
+					len = 0;
+				}
+			}
+			out.writeByte(4);
+			out.writeInt(strs.size());
+			for (String part : strs) {
+				writeString(part);
+			}
+			return;
+		}
+
 		int indexOf = stringIndex.indexOf(value);
 		if (indexOf != -1) {
 			outNum(indexOf, 1, 2);
