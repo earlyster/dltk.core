@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
@@ -102,45 +103,34 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	protected char[] getBufferContent() throws ModelException {
 		IPath path = getBufferPath();
 		IFileHandle file = EnvironmentPathUtils.getFile(path);
-		InputStream stream = null;
 
-		try {
-			try {
-				if (file != null && file.exists()) {
-					stream = new BufferedInputStream(file.openInputStream(null));
-				} else {
-					// This is an archive entry
-					boolean inProjectArchive = false;
-					IProjectFragment projectFragment = this
-							.getProjectFragment();
-					if (projectFragment.isArchive()) {
-						if (projectFragment.getResource() != null) {
-							inProjectArchive = projectFragment.getResource()
-									.exists();
-						}
-					}
-					if (!inProjectArchive) {
-						throw newNotPresentException();
-					}
-					stream = new BufferedInputStream(storage.getContents());
+		if (file != null && file.exists()) {
+			return org.eclipse.dltk.internal.core.util.Util
+					.getResourceContentsAsCharArray(file);
+		} else {
+			// This is an archive entry
+			boolean inProjectArchive = false;
+			IProjectFragment projectFragment = this.getProjectFragment();
+			if (projectFragment.isArchive()) {
+				if (projectFragment.getResource() != null) {
+					inProjectArchive = projectFragment.getResource().exists();
 				}
-
-			} catch (IOException e) {
-				throw new ModelException(e,
-						IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
+			}
+			if (!inProjectArchive) {
+				throw newNotPresentException();
+			}
+			final InputStream stream;
+			try {
+				stream = new BufferedInputStream(storage.getContents());
 			} catch (CoreException e) {
 				throw new ModelException(e,
 						IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
 			}
-
-			char[] content;
-			content = org.eclipse.dltk.compiler.util.Util
-					.getInputStreamAsCharArray(stream, -1, "utf-8"); //$NON-NLS-1$
-			return content;
-		} catch (IOException e) {
-			throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
-		} finally {
-			if (stream != null) {
+			try {
+				return Util.getInputStreamAsCharArray(stream, -1, Util.UTF_8);
+			} catch (IOException e) {
+				throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
+			} finally {
 				try {
 					stream.close();
 				} catch (IOException e) {
@@ -148,7 +138,6 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 				}
 			}
 		}
-
 	}
 
 	/**
