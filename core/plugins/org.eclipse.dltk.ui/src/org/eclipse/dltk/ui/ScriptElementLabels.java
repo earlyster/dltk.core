@@ -403,13 +403,14 @@ public class ScriptElementLabels {
 		if (factory != null) {
 			ISearchPatternProcessor processor = factory
 					.createSearchPatternProcessor();
-			return processor.getDelimiterReplacementString();
+			if (processor != null) {
+				return processor.getDelimiterReplacementString();
+			}
 		}
 		return ".";
 	}
 
 	protected static final boolean getFlag(long flags, long flag) {
-
 		return (flags & flag) != 0;
 	}
 
