@@ -36,6 +36,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IElementChangedListener;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
@@ -402,6 +403,12 @@ public class MixinModel {
 							.getAncestor(IModelElement.SOURCE_MODULE);
 					MixinModel.this.remove(module);
 				}
+				if (element.getElementType() == IModelElement.PROJECT_FRAGMENT) {
+					MixinModel.this.removeFragment((IProjectFragment) element);
+				}
+				if (element.getElementType() == IModelElement.SCRIPT_FOLDER) {
+					MixinModel.this.removeFolder((IScriptFolder) element);
+				}
 				if (element.getElementType() == IModelElement.SOURCE_MODULE) {
 					MixinModel.this.remove((ISourceModule) element);
 				}
@@ -510,6 +517,21 @@ public class MixinModel {
 			return "[MixinModel|$" + toolkit.getLanguageName() + "$]"; //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
 			return "[MixinModel|" + project.getElementName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}
+
+	protected void removeFragment(IProjectFragment element) {
+		final IPath folderPath = element.getPath();
+		final List modulesToRemove = new ArrayList();
+		for (Iterator i = elementToMixinCache.keySet().iterator(); i.hasNext();) {
+			final ISourceModule module = (ISourceModule) i.next();
+			final IPath path = module.getPath();
+			if (folderPath.isPrefixOf(path)) {
+				modulesToRemove.add(module);
+			}
+		}
+		for (Iterator i = modulesToRemove.iterator(); i.hasNext();) {
+			remove((ISourceModule) i.next());
 		}
 	}
 

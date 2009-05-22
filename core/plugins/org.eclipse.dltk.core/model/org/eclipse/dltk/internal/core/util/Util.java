@@ -47,8 +47,11 @@ import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformenceNode;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelManager;
@@ -343,6 +346,7 @@ public class Util {
 	 */
 	public static byte[] getResourceContentsAsByteArray(IFile file)
 			throws ModelException {
+		PerformenceNode p = RuntimePerformanceMonitor.begin();
 		InputStream stream = null;
 		try {
 			stream = new BufferedInputStream(file.getContents(true));
@@ -350,8 +354,10 @@ public class Util {
 			throw new ModelException(e);
 		}
 		try {
-			return org.eclipse.dltk.compiler.util.Util
+			byte[] size = org.eclipse.dltk.compiler.util.Util
 					.getInputStreamAsByteArray(stream, -1);
+			p.done("#", RuntimePerformanceMonitor.IOREAD, size.length);
+			return size;
 		} catch (IOException e) {
 			throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
 		} finally {
@@ -366,6 +372,7 @@ public class Util {
 	public static byte[] getResourceContentsAsByteArray(File file)
 			throws ModelException {
 		InputStream stream = null;
+		PerformenceNode p = RuntimePerformanceMonitor.begin();
 		try {
 			stream = new BufferedInputStream(new FileInputStream(file));
 		} catch (FileNotFoundException e) {
@@ -374,8 +381,10 @@ public class Util {
 			// throw new ModelException("getResourceContentAsByteArray");
 		}
 		try {
-			return org.eclipse.dltk.compiler.util.Util
+			byte[] data = org.eclipse.dltk.compiler.util.Util
 					.getInputStreamAsByteArray(stream, -1);
+			p.done("#", RuntimePerformanceMonitor.IOREAD, data.length);
+			return data;
 		} catch (IOException e) {
 			throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
 		} finally {
@@ -500,6 +509,7 @@ public class Util {
 			throws ModelException {
 		// Get resource contents
 		InputStream stream = null;
+		PerformenceNode p = RuntimePerformanceMonitor.begin();
 		try {
 			stream = new BufferedInputStream(file.openInputStream(null));
 		} catch (Exception e) {
@@ -507,8 +517,10 @@ public class Util {
 					IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
 		}
 		try {
-			return org.eclipse.dltk.compiler.util.Util
+			char[] data = org.eclipse.dltk.compiler.util.Util
 					.getInputStreamAsCharArray(stream, -1, null);
+			p.done("#", RuntimePerformanceMonitor.IOREAD, data.length);
+			return data;
 		} catch (IOException e) {
 			throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
 		} finally {
@@ -523,6 +535,7 @@ public class Util {
 	public static char[] getResourceContentsAsCharArray(IFile file,
 			String encoding) throws ModelException {
 		// Get resource contents
+		PerformenceNode p = RuntimePerformanceMonitor.begin();
 		InputStream stream = null;
 		int tryCount = 10;
 		try {
@@ -544,8 +557,11 @@ public class Util {
 					DLTKCore.getDefault().getLog().log(status);
 				}
 			}
-			return org.eclipse.dltk.compiler.util.Util
+			char[] data = org.eclipse.dltk.compiler.util.Util
 					.getInputStreamAsCharArray(stream, -1, encoding);
+			IEnvironment env = EnvironmentManager.getEnvironment(file);
+			p.done("#", RuntimePerformanceMonitor.IOREAD, data.length, env);
+			return data;
 		} catch (IOException e) {
 			throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
 		} finally {

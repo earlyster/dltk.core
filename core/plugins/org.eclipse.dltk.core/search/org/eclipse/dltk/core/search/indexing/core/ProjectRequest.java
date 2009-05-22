@@ -23,6 +23,7 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
+import org.eclipse.dltk.internal.core.ScriptProject;
 
 class ProjectRequest extends IndexRequest {
 
@@ -56,7 +57,8 @@ class ProjectRequest extends IndexRequest {
 	protected void run() throws CoreException {
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(project);
-		final IProjectFragment[] fragments = project.getProjectFragments();
+		final IProjectFragment[] fragments = ((ScriptProject) project)
+				.getAllProjectFragments();
 		IProjectIndexer indexer = getIndexer();
 		final SourceModuleCollector moduleCollector = new SourceModuleCollector();
 		for (int i = 0; i < fragments.length; ++i) {

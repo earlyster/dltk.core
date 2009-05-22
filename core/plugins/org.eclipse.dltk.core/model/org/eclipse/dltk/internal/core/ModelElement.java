@@ -190,6 +190,9 @@ public abstract class ModelElement extends PlatformObject implements
 			}
 			if (!hadTemporaryCache) {
 				manager.putInfos(this, newElements);
+				if (this instanceof ScriptProject) {
+					System.out.println(newElements);
+				}
 			}
 		} finally {
 			if (!hadTemporaryCache) {

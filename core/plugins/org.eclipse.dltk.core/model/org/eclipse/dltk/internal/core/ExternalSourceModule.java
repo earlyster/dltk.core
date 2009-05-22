@@ -21,8 +21,11 @@ import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformenceNode;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
 /**
@@ -120,14 +123,19 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 				throw newNotPresentException();
 			}
 			final InputStream stream;
+			PerformenceNode p = RuntimePerformanceMonitor.begin();
 			try {
-				stream = new BufferedInputStream(storage.getContents());
+				stream = new BufferedInputStream(storage.getContents(), 4096);
 			} catch (CoreException e) {
 				throw new ModelException(e,
 						IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
 			}
 			try {
-				return Util.getInputStreamAsCharArray(stream, -1, Util.UTF_8);
+				char[] data = Util.getInputStreamAsCharArray(stream, -1,
+						Util.UTF_8);
+				IEnvironment env = file.getEnvironment();
+				p.done("#", RuntimePerformanceMonitor.IOREAD, data.length, env);
+				return data;
 			} catch (IOException e) {
 				throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
 			} finally {

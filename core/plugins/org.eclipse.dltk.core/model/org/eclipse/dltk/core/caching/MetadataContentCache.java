@@ -17,10 +17,13 @@ import java.util.zip.CRC32;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformenceNode;
 import org.eclipse.dltk.core.caching.cache.CacheEntry;
 import org.eclipse.dltk.core.caching.cache.CacheEntryAttribute;
 import org.eclipse.dltk.core.caching.cache.CacheFactory;
 import org.eclipse.dltk.core.caching.cache.CacheIndex;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.emf.common.util.EList;
@@ -219,7 +222,8 @@ public class MetadataContentCache extends AbstractContentCache {
 		}
 		if (file != null && file.exists()) {
 			try {
-				return new BufferedInputStream(new FileInputStream(file), 4096);
+				return new BufferedInputStream(
+						new MetadataFileInputStream(file), 4096);
 			} catch (FileNotFoundException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
@@ -231,11 +235,49 @@ public class MetadataContentCache extends AbstractContentCache {
 		return null;
 	}
 
+	public class MetadataFileOutputStream extends FileOutputStream {
+		File file;
+		private PerformenceNode node;
+
+		public MetadataFileOutputStream(File file) throws FileNotFoundException {
+			super(file);
+			node = RuntimePerformanceMonitor.begin();
+			this.file = file;
+		}
+
+		@Override
+		public void close() throws IOException {
+			super.close();
+			node.done("Metadata", RuntimePerformanceMonitor.IOWRITE, file
+					.length(),
+					EnvironmentManager.getLocalEnvironment());
+		}
+	}
+
+	public class MetadataFileInputStream extends FileInputStream {
+		File file;
+		private PerformenceNode node;
+
+		public MetadataFileInputStream(File file) throws FileNotFoundException {
+			super(file);
+			node = RuntimePerformanceMonitor.begin();
+			this.file = file;
+		}
+
+		@Override
+		public void close() throws IOException {
+			super.close();
+			node.done("Metadata", RuntimePerformanceMonitor.IOREAD, file
+					.length(), EnvironmentManager.getLocalEnvironment());
+		}
+	}
+
 	public synchronized OutputStream getCacheEntryAttributeOutputStream(
 			IFileHandle handle, String attribute) {
 		File file = getEntryAsFile(handle, attribute);
 		try {
-			return new BufferedOutputStream(new FileOutputStream(file), 4096);
+			return new BufferedOutputStream(new MetadataFileOutputStream(file),
+					4096);
 		} catch (FileNotFoundException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();

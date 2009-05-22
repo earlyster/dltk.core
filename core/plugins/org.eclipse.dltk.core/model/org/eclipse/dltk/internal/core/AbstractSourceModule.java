@@ -242,8 +242,8 @@ public abstract class AbstractSourceModule extends Openable implements
 			return fieldE.getHandleFromMemento(memento, workingCopyOwner);
 		}
 		case JEM_USER_ELEMENT:
-			return MementoModelElementUtil.getHandleFromMemento(memento,
-					this, owner);
+			return MementoModelElementUtil.getHandleFromMemento(memento, this,
+					owner);
 		}
 
 		return null;
@@ -643,17 +643,6 @@ public abstract class AbstractSourceModule extends Openable implements
 							&& (original = getOriginalSourceModule()).isOpen()) {
 						buffer.setContents(original.getSource());
 					} else {
-						// IFile file = (IFile) getResource();
-						// if ((file == null) || ! file.exists())
-						// {
-						// // initialize buffer with empty contents
-						// buffer.setContents(CharOperation.NO_CHAR);
-						// }
-						// else
-						// {
-						// buffer.setContents(Util.getResourceContentsAsCharArray
-						// (file));
-						// }
 						char[] content = getBufferContent();
 						buffer.setContents(content);
 					}

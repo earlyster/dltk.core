@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -996,7 +997,7 @@ public class DeltaProcessor {
 					if (status != null) {
 						if (status == EXTERNAL_ZIP_ADDED) {
 							ProjectFragment root = (ProjectFragment) scriptProject
-									.getProjectFragment(entryPath.toString());
+									.getProjectFragment(entryPath);
 							if (VERBOSE) {
 								System.out
 										.println("- External ZIP ADDED, affecting root: " + root.getElementName()); //$NON-NLS-1$
@@ -1005,7 +1006,7 @@ public class DeltaProcessor {
 							hasDelta = true;
 						} else if (status == EXTERNAL_ZIP_CHANGED) {
 							ProjectFragment root = (ProjectFragment) scriptProject
-									.getProjectFragment(entryPath.toString());
+									.getProjectFragment(entryPath);
 							if (VERBOSE) {
 								System.out
 										.println("- External ZIP CHANGED, affecting root: " + root.getElementName()); //$NON-NLS-1$
@@ -1014,7 +1015,7 @@ public class DeltaProcessor {
 							hasDelta = true;
 						} else if (status == EXTERNAL_ZIP_REMOVED) {
 							ProjectFragment root = (ProjectFragment) scriptProject
-									.getProjectFragment(entryPath.toString());
+									.getProjectFragment(entryPath);
 							if (VERBOSE) {
 								System.out
 										.println("- External ZIP REMOVED, affecting root: " + root.getElementName()); //$NON-NLS-1$
@@ -2090,6 +2091,13 @@ public class DeltaProcessor {
 							fragmentsToRefresh.add(fragments[i]);
 						}
 					}
+					fragments = scriptProject.getAllProjectFragments();
+					for (int i = 0; i < fragments.length; i++) {
+						if (fragments[i].isExternal()
+								&& fragments[i].getRawBuildpathEntry() == null) {
+							fragmentsToRefresh.add(fragments[i]);
+						}
+					}
 				} catch (ModelException e1) {
 					if (DLTKCore.DEBUG) {
 						e1.printStackTrace();
@@ -2144,8 +2152,17 @@ public class DeltaProcessor {
 			ScriptProject scriptProject = (ScriptProject) DLTKCore
 					.create(project);
 			IProjectFragment[] fragments;
+			Set fragmentsSet = new HashSet();
+			Set fragmentsSetOld = new HashSet();
+			;
 			try {
-				fragments = scriptProject.getProjectFragments();
+				fragmentsSetOld.addAll(Arrays.asList(scriptProject
+						.getProjectFragments()));
+				fragmentsSet.addAll(Arrays.asList(scriptProject
+						.getAllProjectFragments()));
+				fragmentsSet.addAll(fragmentsSetOld);
+				fragments = (IProjectFragment[]) fragmentsSet
+						.toArray(new IProjectFragment[fragmentsSet.size()]);
 				for (int i = 0; i < fragments.length; i++) {
 					if (!fragmentsToRefresh.contains(fragments[i])) {
 						continue;
@@ -2156,7 +2173,9 @@ public class DeltaProcessor {
 								.getCustomTimeStamps().get(fragment.getPath());
 						long newTimeStamp = ((IProjectFragmentTimestamp) fragment)
 								.getTimeStamp();
-						if (oldTimestamp == null) {
+						boolean old = fragmentsSetOld.contains(fragment);
+						if (oldTimestamp == null || oldTimestamp == 0
+								|| old == false) {
 							if (newTimeStamp != 0) {
 								/**
 								 * This is new element
@@ -2174,7 +2193,17 @@ public class DeltaProcessor {
 								hasDelta = true;
 							}
 						} else {
-							if (oldTimestamp.longValue() != newTimeStamp) {
+							if (newTimeStamp == 0) {
+								this.state.getCustomTimeStamps().remove(
+										fragment.getPath());
+								ProjectIndexerManager.removeLibrary(
+										scriptProject, fragment.getPath());
+								if (fragment instanceof Openable) {
+									this.elementRemoved((Openable) fragment,
+											null, null);
+								}
+								hasDelta = true;
+							} else if (oldTimestamp.longValue() != newTimeStamp) {
 								this.state.getCustomTimeStamps().put(
 										fragment.getPath(),
 										new Long(newTimeStamp));

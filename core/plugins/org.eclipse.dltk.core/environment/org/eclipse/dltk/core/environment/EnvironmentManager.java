@@ -127,6 +127,31 @@ public final class EnvironmentManager {
 		return getEnvironment(project);
 	}
 
+	public static IEnvironment getEnvironment(IResource element) {
+		if (element == null) {
+			return null;
+		}
+		if (element != null && element.getType() != IResource.PROJECT) {
+			URI locationURI = element.getLocationURI();
+			if (locationURI != null) {
+				for (Iterator i = manager.iterator(); i.hasNext();) {
+					IEnvironmentProvider provider = (IEnvironmentProvider) i
+							.next();
+					waitInitialized(provider);
+					IEnvironment env = provider.getEnvironment(locationURI);
+					if (env != null) {
+						return env;
+					}
+				}
+			}
+		}
+		IProject project = element.getProject();
+		if (project == null)
+			return null;
+
+		return getEnvironment(project);
+	}
+
 	public static IEnvironment getEnvironment(IProject project) {
 		if (!ExternalScriptProject.EXTERNAL_PROJECT_NAME.equals(project
 				.getName())) {

@@ -8,10 +8,11 @@ import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformenceNode;
 import org.eclipse.dltk.core.caching.cache.CacheEntry;
 import org.eclipse.dltk.core.caching.cache.CacheEntryAttribute;
 import org.eclipse.dltk.core.caching.cache.CacheIndex;
@@ -30,17 +31,9 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
  */
 public class ArchiveContentCacheProvider implements IContentCacheProvider {
 
-	private File archiveTempFile;
 	private IContentCache cache;
 
 	public ArchiveContentCacheProvider() {
-		IPath stateLocation = DLTKCore.getDefault().getStateLocation();
-		IPath arhiveTempLocation = stateLocation.append("archive_cache_temp");
-		archiveTempFile = new File(arhiveTempLocation.toOSString());
-		if (!archiveTempFile.exists()) {
-			archiveTempFile.mkdir();
-		}
-		// zipProcessor.start();
 	}
 
 	public InputStream getAttributeAndUpdateCache(IFileHandle handle,
@@ -64,8 +57,10 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 				if (!zipFileHandle.exists()) {
 					BufferedInputStream inp = new BufferedInputStream(indexFile
 							.openInputStream(new NullProgressMonitor()), 4096);
+					PerformenceNode p = RuntimePerformanceMonitor.begin();
 					Util.copy(zipFileHandle, inp);
 					inp.close();
+					p.done("#", "Indexes read", zipFileHandle.length());
 				}
 				ZipFile zipFile = new ZipFile(zipFileHandle);
 

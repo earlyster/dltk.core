@@ -63,13 +63,13 @@ public class MixinIndexer extends AbstractIndexer {
 					MixinModelProcessor processor = new MixinModelProcessor(
 							stream, requestor);
 					processor.process();
+					stream.close();
 					performed = true;
 					if (requestor.count == 0) {
 						((MixinIndex) document.getIndex())
 								.addDocumentName(document
 										.getContainerRelativePath());
 					}
-					stream.close();
 				} catch (IOException e) {
 					performed = false;
 					if (DLTKCore.DEBUG) {

@@ -11,6 +11,7 @@ import org.eclipse.dltk.compiler.env.CompilerSourceCode;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.compiler.problem.ProblemCollector;
 import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformenceNode;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 public class SourceParserUtil {
@@ -54,6 +55,8 @@ public class SourceParserUtil {
 			return null;
 		}
 		ModuleDeclaration moduleDeclaration = null;
+		PerformenceNode p1 = RuntimePerformanceMonitor.begin();
+
 		final String errorKey;
 		final String astKey;
 		if (mifo != null && useASTCaching) {
@@ -90,7 +93,8 @@ public class SourceParserUtil {
 							} else {
 								mifo.remove(errorKey);
 							}
-							return restored.module;
+							moduleDeclaration = restored.module;
+							break;
 						}
 					}
 				}
@@ -99,7 +103,9 @@ public class SourceParserUtil {
 			errorKey = null;
 			astKey = null;
 		}
+		p1.done(toolkit.getNatureId(), "Retrive AST from cache", 0);
 		if (moduleDeclaration == null) {
+			p1.renew();
 			ISourceParser sourceParser = null;
 			sourceParser = DLTKLanguageManager.getSourceParser(toolkit
 					.getNatureId());
@@ -123,6 +129,7 @@ public class SourceParserUtil {
 						DLTKCore.error(msg, e);
 					}
 				}
+				p1.done(toolkit.getNatureId(), "AST parse time", 0);
 				if (moduleDeclaration != null && mifo != null && useASTCaching) {
 					mifo.put(astKey, moduleDeclaration);
 					if (useASTPersistenceCaching) {
@@ -221,25 +228,30 @@ public class SourceParserUtil {
 
 	public static void parseSourceModule(final ISourceModule module,
 			ISourceElementParser parser) {
+		PerformenceNode p = RuntimePerformanceMonitor.begin();
 		ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
 				.getModelManager().getSourceModuleInfoCache();
 		ISourceModuleInfo mifo = sourceModuleInfoCache.get(module);
+		int len = 0;
 		if (module instanceof org.eclipse.dltk.compiler.env.ISourceModule) {
 			parser.parseSourceModule(
 					(org.eclipse.dltk.compiler.env.ISourceModule) module, mifo);
 		} else {
 			try {
-				parser.parseSourceModule(new CompilerSourceCode(module
-						.getSource()), mifo);
+				String source = module.getSource();
+				len = source.length();
+				parser.parseSourceModule(new CompilerSourceCode(source), mifo);
 			} catch (ModelException ex) {
 				final String msg = Messages.SourceParserUtil_errorRetrievingContent;
 				DLTKCore.error(msg, ex);
 			}
 		}
+		p.done(DLTKLanguageManager.getLanguageToolkit(module).getNatureId(),
+				"Source Element parser", len);
 	}
 
 	/**
-	 * Perfomance testing only
+	 * Performance testing only
 	 */
 	public static void disableCache() {
 		useASTCaching = false;
