@@ -871,6 +871,12 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	private void addDocAnnotations(String contents,
 			FoldingStructureComputationContext ctx, IRegion[] commentRegions,
 			boolean isDoc) {
+		if (commentRegions.length == 0) {
+			return;
+		}
+		final IElementCommentResolver commentResolver = fInput != null ? createElementCommentResolver(
+				fInput, contents)
+				: null;
 		for (int i = 0; i < commentRegions.length; i++) {
 			IRegion normalized = alignRegion(commentRegions[i], ctx);
 			if (normalized == null) {
@@ -884,11 +890,12 @@ public abstract class AbstractASTFoldingStructureProvider implements
 
 			int hash = contents.substring(normalized.getOffset(),
 					normalized.getOffset() + normalized.getLength()).hashCode();
-			IModelElement element = null;
-			IElementCommentResolver res = getElementCommentResolver();
-			if (res != null && fInput != null) {
-				element = res.getElementByCommentPosition(
-						(ISourceModule) fInput, position.offset, 0);
+			final IModelElement element;
+			if (commentResolver != null) {
+				element = commentResolver.getElementByCommentPosition(
+						position.offset, 0);
+			} else {
+				element = null;
 			}
 
 			boolean initCollapse = (isDoc) ? initiallyCollapseDocs(normalized,
@@ -898,6 +905,17 @@ public abstract class AbstractASTFoldingStructureProvider implements
 					true, new SourceRangeStamp(hash, normalized.getLength()),
 					element), position);
 		}
+	}
+
+	/**
+	 * @param modelElement
+	 * @param contents
+	 * @return
+	 */
+	public IElementCommentResolver createElementCommentResolver(
+			IModelElement modelElement, String contents) {
+		return new DefaultElementCommentResolver((ISourceModule) modelElement,
+				contents);
 	}
 
 	protected static class CodeBlock {
@@ -1484,12 +1502,11 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		return fFoldNewLines;
 	}
 
-	public IElementCommentResolver getElementCommentResolver() {
-		if (fElementCommentResolver == null) {
-			fElementCommentResolver = new DefaultElementCommentResolver();
-		}
-
-		return fElementCommentResolver;
+	/**
+	 * @deprecated
+	 */
+	protected final void getElementCommentResolver() {
+		// will be deleted
 	}
 
 	public static class MethodCollector implements IModelElementVisitor {

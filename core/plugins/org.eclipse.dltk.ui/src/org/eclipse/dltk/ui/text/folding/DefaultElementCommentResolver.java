@@ -12,6 +12,23 @@ import org.eclipse.jface.text.Document;
 
 public class DefaultElementCommentResolver implements IElementCommentResolver {
 
+	private final ISourceModule fModule;
+	private final String fContent;
+	private Document fDocument = null;
+
+	public DefaultElementCommentResolver(ISourceModule module) {
+		this(module, null);
+	}
+
+	/**
+	 * @param modelElement
+	 * @param contents
+	 */
+	public DefaultElementCommentResolver(ISourceModule module, String contents) {
+		this.fModule = module;
+		this.fContent = contents;
+	}
+
 	/**
 	 * Determines the element that contains the clicked comment
 	 * 
@@ -27,10 +44,9 @@ public class DefaultElementCommentResolver implements IElementCommentResolver {
 	/**
 	 * Returns the model element that the comment corresponds to
 	 */
-	public IModelElement getElementByCommentPosition(ISourceModule content,
-			int offset, int length) {
+	public IModelElement getElementByCommentPosition(int offset, int length) {
 		try {
-			return getElementByCommentPositionImpl(content, offset, length);
+			return getElementByCommentPositionImpl(offset, length);
 		} catch (BadLocationException e1) {
 			return null;
 		} catch (ModelException e) {
@@ -38,19 +54,20 @@ public class DefaultElementCommentResolver implements IElementCommentResolver {
 		}
 	}
 
-	protected IModelElement getElementByCommentPositionImpl(
-			ISourceModule content, int offset, int length)
-			throws BadLocationException, ModelException {
+	protected IModelElement getElementByCommentPositionImpl(int offset,
+			int length) throws BadLocationException, ModelException {
 
-		Document d = new Document(content.getSource());
+		if (fDocument == null) {
+			fDocument = new Document(getSource());
+		}
 
 		// Determine that the desired position is inside a comment
-		if (!checkIfPositionIsComment(d, offset))
+		if (!checkIfPositionIsComment(fDocument, offset))
 			return null;
 
 		// Determine the innermost element that contains the clicked comment
 		// (for example, class declaration)
-		IModelElement el = getContainingElement(content, offset, length);
+		IModelElement el = getContainingElement(fModule, offset, length);
 
 		// If the comment is inside a method, we do not need to process further
 		if (el != null && el.getElementType() == IModelElement.METHOD)
@@ -58,14 +75,22 @@ public class DefaultElementCommentResolver implements IElementCommentResolver {
 
 		// Determine the position after which the search will be stopped - for
 		// example, EOF or end of the class declaration
-		int sourceRangeEnd = getSourceRangeEnd(d, el);
+		int sourceRangeEnd = getSourceRangeEnd(fDocument, el);
 
 		// Search for first non-comment element after the clicked comment
-		IModelElement res = searchForNonCommentElement(d, content, offset
-				+ length, sourceRangeEnd);
+		IModelElement res = searchForNonCommentElement(fDocument, fModule,
+				offset + length, sourceRangeEnd);
 		if (res == null)
 			return el;
 		return res;
+	}
+
+	/**
+	 * @return
+	 * @throws ModelException
+	 */
+	protected String getSource() throws ModelException {
+		return fContent != null ? fContent : fModule.getSource();
 	}
 
 	protected int getSourceRangeEnd(Document d, IModelElement el)

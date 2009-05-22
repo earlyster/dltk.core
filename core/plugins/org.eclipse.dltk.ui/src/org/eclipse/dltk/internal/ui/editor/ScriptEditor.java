@@ -1374,7 +1374,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			// FIXME do not reference AbstractASTFoldingStructureProvider
 			if (fProjectionModelUpdater instanceof AbstractASTFoldingStructureProvider) {
 				return ((AbstractASTFoldingStructureProvider) fProjectionModelUpdater)
-						.getElementCommentResolver();
+						.createElementCommentResolver(
+								(ISourceModule) getInputModelElement(),
+								getSourceViewer().getDocument().get());
 			}
 			return null;
 		}
