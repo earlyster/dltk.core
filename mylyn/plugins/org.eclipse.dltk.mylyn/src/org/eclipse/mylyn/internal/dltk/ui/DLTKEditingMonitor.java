@@ -89,7 +89,7 @@ public class DLTKEditingMonitor extends AbstractUserInteractionMonitor {
 						return;
 					}
 					selectedElement = resolver.getElementByCommentPosition(
-							module, textSelection.getOffset(), textSelection
+							textSelection.getOffset(), textSelection
 									.getLength());
 
 					// if user has clicked outside the comment, resolve the
