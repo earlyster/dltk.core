@@ -30,7 +30,6 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
  * @author Andrei Sobolev
  */
 public class ArchiveContentCacheProvider implements IContentCacheProvider {
-
 	private IContentCache cache;
 
 	public ArchiveContentCacheProvider() {
@@ -40,17 +39,35 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 			String attribute) {
 		IFileHandle parent = handle.getParent();
 		String DLTK_INDEX_FILE = ".dltk.index";
-		IFileHandle indexFile = parent.getChild(DLTK_INDEX_FILE);
+		// Check for additional indexes
+		if (processIndexFile(handle, attribute, parent, parent
+				.getChild(DLTK_INDEX_FILE))) {
+			return cache.getCacheEntryAttribute(handle, attribute);
+		}
+		IFileHandle[] children = parent.getChildren();
+		for (IFileHandle fileHandle : children) {
+			String fileName = fileHandle.getName();
+			if (fileName.startsWith(DLTK_INDEX_FILE)
+					&& !fileName.equals(DLTK_INDEX_FILE)) {
+				if (processIndexFile(handle, attribute, parent, fileHandle)) {
+					return cache.getCacheEntryAttribute(handle, attribute);
+				}
+			}
+		}
+		return null;
+	}
+
+	private boolean processIndexFile(IFileHandle handle, String attribute,
+			IFileHandle parent, IFileHandle indexFile) {
 		if (indexFile != null && indexFile.exists()) {
 			String stamp = cache.getCacheEntryAttributeString(indexFile,
 					"timestamp");
 			String fStamp = Long.toString(indexFile.lastModified());
 			if (stamp != null) {
 				if (fStamp.equals(stamp)) {
-					return null;
+					return false;
 				}
 			}
-			// Copy zip file into metadata temporaty location
 			try {
 				File zipFileHandle = cache.getEntryAsFile(indexFile, "handle");
 
@@ -69,7 +86,7 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 						.createURI("dltk_cache://zipIndex"));
 				indexResource.load(zipFile.getInputStream(entry), null);
 				EList<EObject> contents = indexResource.getContents();
-				// InputStream resultStream = null;
+				boolean found = false;
 				for (EObject eObject : contents) {
 					CacheIndex cacheIndex = (CacheIndex) eObject;
 					EList<CacheEntry> entries = cacheIndex.getEntries();
@@ -78,60 +95,41 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 						IFileHandle entryHandle = new WrapTimeStampHandle(
 								parent.getChild(path), cacheEntry
 										.getTimestamp());
-						// long lastModified = entryHandle.lastModified();
-						// if (entryHandle.exists()
-						// && lastModified == cacheEntry
-						// .getTimestamp()) {
 						EList<CacheEntryAttribute> attributes = cacheEntry
 								.getAttributes();
 						for (CacheEntryAttribute cacheEntryAttribute : attributes) {
+							if (attribute.equals(cacheEntryAttribute.getName())
+									&& cacheEntry.getPath().equals(
+											handle.getName())) {
+								found = true;
+							}
 							OutputStream stream = null;
-							// ByteArrayOutputStream out = null;
-
 							stream = cache.getCacheEntryAttributeOutputStream(
 									entryHandle, cacheEntryAttribute.getName());
-							// if (handle.equals(entryHandle)
-							// && cacheEntryAttribute.getName().equals(
-							// attribute)) {
-							// out = new ByteArrayOutputStream();
-							// }
 							String location = cacheEntryAttribute.getLocation();
 							ZipEntry zipEntry = zipFile.getEntry(location);
 							zipFile.getInputStream(zipEntry);
 							InputStream inputStream;
 							try {
 								inputStream = zipFile.getInputStream(zipEntry);
-								// if (out != null) {
-								// Util.copy(inputStream, stream);
-								// // byte[] bytes = out.toByteArray();
-								// ByteArrayInputStream inp = new
-								// ByteArrayInputStream(
-								// bytes);
-								// // resultStream = new ByteArrayInputStream(
-								// // bytes);
-								// Util.copy(inp, stream);
-								// } else {
 								Util.copy(inputStream, stream);
-								// }
 								stream.close();
 								inputStream.close();
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
 						}
-						// }
 					}
 				}
 				cache.setCacheEntryAttribute(indexFile, "timestamp", fStamp);
-				return cache.getCacheEntryAttribute(handle, attribute);
-				// return resultStream;
+				return found;
 			} catch (IOException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
 			}
 		}
-		return null;
+		return false;
 	}
 
 	public void setCache(IContentCache cache) {

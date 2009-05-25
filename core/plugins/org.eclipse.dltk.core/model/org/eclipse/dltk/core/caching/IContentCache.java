@@ -10,6 +10,8 @@ public interface IContentCache {
 
 	String STRUCTURE_INDEX = "_sind";
 	String MIXIN_INDEX = "_smix";
+	String CONTENT_INDEX = "content";
+	String VALID_ATTRIBUTE = "valid";
 
 	/*
 	 * Methods to store content attributes
