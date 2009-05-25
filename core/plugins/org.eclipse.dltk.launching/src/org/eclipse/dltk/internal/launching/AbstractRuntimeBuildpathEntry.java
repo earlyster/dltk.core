@@ -18,84 +18,94 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.launching.IRuntimeBuildpathEntry;
 import org.eclipse.dltk.launching.IRuntimeBuildpathEntry2;
+import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
 
 /**
  * Common function for runtime buildpath entries.
  * <p>
- * Clients implementing runtime buildpath entries must subclass this
- * class.
+ * Clients implementing runtime buildpath entries must subclass this class.
  * </p>
-	 *
+ * 
  */
-public abstract class AbstractRuntimeBuildpathEntry extends PlatformObject implements IRuntimeBuildpathEntry2 {
-	
+public abstract class AbstractRuntimeBuildpathEntry extends PlatformObject
+		implements IRuntimeBuildpathEntry2 {
+
 	private int buildpathProperty = IRuntimeBuildpathEntry.USER_ENTRY;
 	/**
 	 * Associated Script project, or <code>null</code>
 	 */
 	private IScriptProject fProject;
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * Default implementation returns <code>null</code>.
-	 * Subclasses should override if required.
-	 * 
+	 * Default implementation returns <code>null</code>. Subclasses should
+	 * override if required.
 	 */
 	public String getContainerName() {
 		return null;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * Default implementation returns <code>false</code>.
-	 * Subclasses should override if required.
+	 * Default implementation returns <code>false</code>. Subclasses should
+	 * override if required.
 	 * 
-	 * @see org.eclipse.dltk.internal.launching.IRuntimeBuildpathEntry2#isComposite()
+	 * @see
+	 * org.eclipse.dltk.internal.launching.IRuntimeBuildpathEntry2#isComposite()
 	 */
 	public boolean isComposite() {
 		return false;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * Default implementation returns an empty collection.
-	 * Subclasses should override if required.
+	 * Default implementation returns an empty collection. Subclasses should
+	 * override if required.
 	 * 
-	 * @see org.eclipse.dltk.internal.launching.IRuntimeBuildpathEntry2#getRuntimeBuildpathEntries()
+	 * @seeorg.eclipse.dltk.internal.launching.IRuntimeBuildpathEntry2#
+	 * getRuntimeBuildpathEntries()
 	 */
-	public IRuntimeBuildpathEntry[] getRuntimeBuildpathEntries() throws CoreException {
+	public IRuntimeBuildpathEntry[] getRuntimeBuildpathEntries()
+			throws CoreException {
 		return new IRuntimeBuildpathEntry[0];
 	}
-	
+
 	/**
 	 * Throws an exception with the given message and underlying exception.
 	 * 
-	 * @param message error message
-	 * @param exception underlying exception or <code>null</code> if none
+	 * @param message
+	 *            error message
+	 * @param exception
+	 *            underlying exception or <code>null</code> if none
 	 * @throws CoreException
 	 */
-	protected void abort(String message, Throwable exception) throws CoreException {
-		IStatus status = new Status(IStatus.ERROR, DLTKLaunchingPlugin.getUniqueIdentifier(), ScriptLaunchConfigurationConstants.ERR_INTERNAL_ERROR, message, exception);
+	protected void abort(String message, Throwable exception)
+			throws CoreException {
+		IStatus status = new Status(IStatus.ERROR, DLTKLaunchingPlugin
+				.getUniqueIdentifier(),
+				ScriptLaunchConfigurationConstants.ERR_INTERNAL_ERROR, message,
+				exception);
 		throw new CoreException(status);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * Default implementation generates a string containing an XML
-	 * document. Subclasses should override <code>buildMemento</code>
-	 * to specify the contents of the required <code>memento</code>
-	 * node.
+	 * Default implementation generates a string containing an XML document.
+	 * Subclasses should override <code>buildMemento</code> to specify the
+	 * contents of the required <code>memento</code> node.
 	 * 
 	 * @see org.eclipse.dltk.launching.IRuntimeBuildpathEntry#getMemento()
 	 */
 	public String getMemento() throws CoreException {
-		Document doc= DebugPlugin.newDocument();
+		Document doc = DebugPlugin.newDocument();
 		Element root = doc.createElement("runtimeBuildpathEntry"); //$NON-NLS-1$
 		doc.appendChild(root);
 		root.setAttribute("id", getTypeId()); //$NON-NLS-1$
@@ -104,81 +114,100 @@ public abstract class AbstractRuntimeBuildpathEntry extends PlatformObject imple
 		buildMemento(doc, memento);
 		return DebugPlugin.serializeDocument(doc);
 	}
-	
+
 	/**
-	 * Constructs a memento for this buildpath entry in the given 
-	 * document and element. The memento element has already been
-	 * appended to the document.
+	 * Constructs a memento for this buildpath entry in the given document and
+	 * element. The memento element has already been appended to the document.
 	 * 
-	 * @param document XML document
-	 * @param memento element node for client specific attributes
-	 * @throws CoreException if unable to create a memento 
+	 * @param document
+	 *            XML document
+	 * @param memento
+	 *            element node for client specific attributes
+	 * @throws CoreException
+	 *             if unable to create a memento
 	 */
-	protected abstract void buildMemento(Document document, Element memento) throws CoreException;
-	
-	/* (non-Javadoc)
+	protected abstract void buildMemento(Document document, Element memento)
+			throws CoreException;
+
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * Default implementation returns <code>null</code>.
-	 * Subclasses should override if required.
+	 * Default implementation returns <code>null</code>. Subclasses should
+	 * override if required.
 	 * 
 	 * @see org.eclipse.dltk.launching.IRuntimeBuildpathEntry#getPath()
 	 */
 	public IPath getPath() {
 		return null;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * Default implementation returns <code>null</code>.
-	 * Subclasses should override if required.
+	 * Default implementation returns <code>null</code>. Subclasses should
+	 * override if required.
 	 * 
 	 * @see org.eclipse.dltk.launching.IRuntimeBuildpathEntry#getResource()
 	 */
 	public IResource getResource() {
 		return null;
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.dltk.launching.IRuntimeBuildpathEntry#getBuildpathProperty()
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.dltk.launching.IRuntimeBuildpathEntry#getBuildpathProperty()
 	 */
 	public int getBuildpathProperty() {
 		return buildpathProperty;
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.dltk.launching.IRuntimeBuildpathEntry#setBuildpathProperty(int)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.dltk.launching.IRuntimeBuildpathEntry#setBuildpathProperty
+	 * (int)
 	 */
 	public void setBuildpathProperty(int property) {
 		buildpathProperty = property;
 	}
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * Default implementation returns <code>null</code>.
-	 * Subclasses should override if required.
+	 * Default implementation returns <code>null</code>. Subclasses should
+	 * override if required.
 	 * 
 	 * @see org.eclipse.dltk.launching.IRuntimeBuildpathEntry#getLocation()
 	 */
 	public String getLocation() {
 		return null;
 	}
-	
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * Default implementation returns <code>null</code>.
-	 * Subclasses should override if required.
+	 * Default implementation returns <code>null</code>. Subclasses should
+	 * override if required.
 	 * 
-	 * @see org.eclipse.dltk.launching.IRuntimeBuildpathEntry#getBuildpathEntry()
+	 * @see
+	 * org.eclipse.dltk.launching.IRuntimeBuildpathEntry#getBuildpathEntry()
 	 */
 	public IBuildpathEntry getBuildpathEntry() {
 		return null;
 	}
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.dltk.launching.IRuntimeBuildpathEntry#getScriptProject()
 	 */
 	public IScriptProject getScriptProject() {
 		return fProject;
 	}
-	
+
 	/**
 	 * Sets the Script project associated with this entry.
 	 * 
