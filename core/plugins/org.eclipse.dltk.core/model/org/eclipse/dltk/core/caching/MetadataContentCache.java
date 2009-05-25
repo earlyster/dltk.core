@@ -18,7 +18,7 @@ import java.util.zip.CRC32;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
-import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformenceNode;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.core.caching.cache.CacheEntry;
 import org.eclipse.dltk.core.caching.cache.CacheEntryAttribute;
 import org.eclipse.dltk.core.caching.cache.CacheFactory;
@@ -192,7 +192,7 @@ public class MetadataContentCache extends AbstractContentCache {
 			}
 		}
 		try {
-			Map options = new HashMap();
+			Map<String, Object> options = new HashMap<String, Object>();
 			options.put(Resource.OPTION_SAVE_ONLY_IF_CHANGED, Boolean.TRUE);
 			indexResource.save(options);
 		} catch (IOException e) {
@@ -237,7 +237,7 @@ public class MetadataContentCache extends AbstractContentCache {
 
 	public class MetadataFileOutputStream extends FileOutputStream {
 		File file;
-		private PerformenceNode node;
+		private PerformanceNode node;
 
 		public MetadataFileOutputStream(File file) throws FileNotFoundException {
 			super(file);
@@ -249,14 +249,13 @@ public class MetadataContentCache extends AbstractContentCache {
 		public void close() throws IOException {
 			super.close();
 			node.done("Metadata", RuntimePerformanceMonitor.IOWRITE, file
-					.length(),
-					EnvironmentManager.getLocalEnvironment());
+					.length(), EnvironmentManager.getLocalEnvironment());
 		}
 	}
 
 	public class MetadataFileInputStream extends FileInputStream {
 		File file;
-		private PerformenceNode node;
+		private PerformanceNode node;
 
 		public MetadataFileInputStream(File file) throws FileNotFoundException {
 			super(file);

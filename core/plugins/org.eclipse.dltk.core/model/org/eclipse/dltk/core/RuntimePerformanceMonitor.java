@@ -81,7 +81,7 @@ public class RuntimePerformanceMonitor {
 	public static Map<String, Map<String, DataEntry>> getAllEntries() {
 		Set<String> keySet = null;
 		synchronized (RuntimePerformanceMonitor.class) {
-			keySet = new HashSet(entries.keySet());
+			keySet = new HashSet<String>(entries.keySet());
 		}
 		Map<String, Map<String, DataEntry>> result = new HashMap<String, Map<String, DataEntry>>();
 		for (String key : keySet) {
@@ -90,7 +90,7 @@ public class RuntimePerformanceMonitor {
 		return result;
 	}
 
-	public static class PerformenceNode {
+	public static class PerformanceNode {
 		private long start;
 		private long end;
 
@@ -119,8 +119,8 @@ public class RuntimePerformanceMonitor {
 		}
 	}
 
-	public static PerformenceNode begin() {
-		PerformenceNode node = new PerformenceNode();
+	public static PerformanceNode begin() {
+		PerformanceNode node = new PerformanceNode();
 		node.renew();
 		return node;
 	}

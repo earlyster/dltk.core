@@ -23,7 +23,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
 import org.eclipse.dltk.core.WorkingCopyOwner;
-import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformenceNode;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -123,7 +123,7 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 				throw newNotPresentException();
 			}
 			final InputStream stream;
-			PerformenceNode p = RuntimePerformanceMonitor.begin();
+			PerformanceNode p = RuntimePerformanceMonitor.begin();
 			try {
 				stream = new BufferedInputStream(storage.getContents(), 4096);
 			} catch (CoreException e) {

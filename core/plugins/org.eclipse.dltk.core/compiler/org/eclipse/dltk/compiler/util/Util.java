@@ -22,7 +22,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
-import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformenceNode;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 
 public class Util {
 
@@ -100,7 +100,7 @@ public class Util {
 	 */
 	public static byte[] getFileByteContent(File file) throws IOException {
 		InputStream stream = null;
-		PerformenceNode p = RuntimePerformanceMonitor.begin();
+		PerformanceNode p = RuntimePerformanceMonitor.begin();
 		try {
 			stream = new FileInputStream(file);
 			byte[] data = getInputStreamAsByteArray(stream, (int) file.length());
@@ -295,7 +295,7 @@ public class Util {
 	public static char[] getFileCharContent(File file, String encoding)
 			throws IOException {
 		InputStream stream = null;
-		PerformenceNode p = RuntimePerformanceMonitor.begin();
+		PerformanceNode p = RuntimePerformanceMonitor.begin();
 		try {
 			stream = new FileInputStream(file);
 			char[] data = getInputStreamAsCharArray(stream,
@@ -314,7 +314,7 @@ public class Util {
 	}
 
 	public static void copy(File file, InputStream input) throws IOException {
-		PerformenceNode p = RuntimePerformanceMonitor.begin();
+		PerformanceNode p = RuntimePerformanceMonitor.begin();
 		OutputStream fos = new BufferedOutputStream(new FileOutputStream(file),
 				4096);
 		copy(input, fos);

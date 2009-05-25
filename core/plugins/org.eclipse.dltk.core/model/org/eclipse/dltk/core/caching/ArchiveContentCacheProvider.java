@@ -12,7 +12,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
-import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformenceNode;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.core.caching.cache.CacheEntry;
 import org.eclipse.dltk.core.caching.cache.CacheEntryAttribute;
 import org.eclipse.dltk.core.caching.cache.CacheIndex;
@@ -57,7 +57,7 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 				if (!zipFileHandle.exists()) {
 					BufferedInputStream inp = new BufferedInputStream(indexFile
 							.openInputStream(new NullProgressMonitor()), 4096);
-					PerformenceNode p = RuntimePerformanceMonitor.begin();
+					PerformanceNode p = RuntimePerformanceMonitor.begin();
 					Util.copy(zipFileHandle, inp);
 					inp.close();
 					p.done("#", "Indexes read", zipFileHandle.length());

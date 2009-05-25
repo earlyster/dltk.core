@@ -11,7 +11,7 @@ import org.eclipse.dltk.compiler.env.CompilerSourceCode;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.compiler.problem.ProblemCollector;
 import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
-import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformenceNode;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 public class SourceParserUtil {
@@ -55,7 +55,7 @@ public class SourceParserUtil {
 			return null;
 		}
 		ModuleDeclaration moduleDeclaration = null;
-		PerformenceNode p1 = RuntimePerformanceMonitor.begin();
+		PerformanceNode p1 = RuntimePerformanceMonitor.begin();
 
 		final String errorKey;
 		final String astKey;
@@ -228,7 +228,7 @@ public class SourceParserUtil {
 
 	public static void parseSourceModule(final ISourceModule module,
 			ISourceElementParser parser) {
-		PerformenceNode p = RuntimePerformanceMonitor.begin();
+		PerformanceNode p = RuntimePerformanceMonitor.begin();
 		ISourceModuleInfoCache sourceModuleInfoCache = ModelManager
 				.getModelManager().getSourceModuleInfoCache();
 		ISourceModuleInfo mifo = sourceModuleInfoCache.get(module);
