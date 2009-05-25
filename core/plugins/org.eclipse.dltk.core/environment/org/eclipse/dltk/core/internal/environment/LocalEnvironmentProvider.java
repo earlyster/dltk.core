@@ -20,6 +20,8 @@ import org.eclipse.dltk.core.environment.IEnvironmentProvider;
 
 public class LocalEnvironmentProvider implements IEnvironmentProvider {
 
+	static final String FILE_SCHEME = "file";
+
 	public LocalEnvironmentProvider() {
 	}
 
@@ -62,7 +64,7 @@ public class LocalEnvironmentProvider implements IEnvironmentProvider {
 	 * @see IEnvironmentProvider#getEnvironment(java.net.URI)
 	 */
 	public IEnvironment getEnvironment(URI locationURI) {
-		if ("file".equals(locationURI.getScheme())) {
+		if (FILE_SCHEME.equals(locationURI.getScheme())) {
 			return LocalEnvironment.getInstance();
 		} else {
 			return null;

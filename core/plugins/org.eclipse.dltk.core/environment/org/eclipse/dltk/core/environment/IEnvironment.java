@@ -96,7 +96,7 @@ public interface IEnvironment extends IAdaptable {
 	URI getURI(IPath location);
 
 	/**
-	 * Return file handle from URI.
+	 * Return file handle from URI or <code>null</code>.
 	 * 
 	 * @param locationURI
 	 * @return
