@@ -436,6 +436,45 @@ public class RuntimeBuildpathEntry implements IRuntimeBuildpathEntry {
 		return resolvePath(path).toPortableString();
 	}
 
+	public URI getLocationURI() {
+		switch (getType()) {
+		case PROJECT:
+			IResource pro = getResource();
+			if (pro != null) {
+				return pro.getLocationURI();
+			}
+			break;
+		case ARCHIVE: {
+			IPath path = getPath();
+			if (EnvironmentPathUtils.isFull(path)) {
+				IFileHandle file = EnvironmentPathUtils.getFile(path);
+				if (file != null) {
+					return file.toURI();
+				}
+			}
+		}
+			break;
+		case SOURCE: {
+			IPath path = getPath();
+			if (EnvironmentPathUtils.isFull(path)) {
+				IFileHandle file = EnvironmentPathUtils.getFile(path);
+				if (file != null) {
+					return file.toURI();
+				}
+			} else {
+				IResource resource = getResource(path);
+				if (resource != null) {
+					return resource.getLocationURI();
+				}
+			}
+		}
+			break;
+		case CONTAINER:
+			break;
+		}
+		return null;
+	}
+
 	/**
 	 * Returns the OS path for the given absolute or workspace relative path
 	 */

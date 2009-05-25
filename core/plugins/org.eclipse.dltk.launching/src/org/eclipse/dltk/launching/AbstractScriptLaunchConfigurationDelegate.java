@@ -192,6 +192,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 				(String) null);
 	}
 
+	public String[] getBuildpath(ILaunchConfiguration configuration)
+			throws CoreException {
+		return getBuildpath(configuration, getScriptEnvironment(configuration));
+	}
+
 	/**
 	 * Returns the entries that should appear on the user portion of the
 	 * buildpath as specified by the given launch configuration, as an array of
@@ -205,8 +210,8 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 	 * @exception CoreException
 	 *                if unable to retrieve the attribute
 	 */
-	public String[] getBuildpath(ILaunchConfiguration configuration)
-			throws CoreException {
+	public String[] getBuildpath(ILaunchConfiguration configuration,
+			IEnvironment environment) throws CoreException {
 
 		// Get entries
 		IRuntimeBuildpathEntry[] entries = ScriptRuntime
@@ -217,15 +222,24 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		List userEntries = new ArrayList();
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i].getBuildpathProperty() == IRuntimeBuildpathEntry.USER_ENTRY) {
-				IPath path = entries[i].getPath();
-				String userPath;
-				if (EnvironmentPathUtils.isFull(path) == true) {
-					path = EnvironmentPathUtils.getFile(path).getPath();
-					userPath = path.toOSString();
+				final IPath path = entries[i].getPath();
+				final String userPath;
+				if (EnvironmentPathUtils.isFull(path)) {
+					userPath = EnvironmentPathUtils.getFile(path).toOSString();
 				} else {
-					userPath = entries[i].getLocation();
+					URI uri = entries[i].getLocationURI();
+					if (uri != null) {
+						final IFileHandle handle = environment.getFile(uri);
+						if (handle != null) {
+							userPath = handle.toOSString();
+						} else {
+							userPath = null;
+						}
+					} else {
+						userPath = null;
+					}
 				}
-				if (!userEntries.contains(userPath))
+				if (userPath != null && !userEntries.contains(userPath))
 					userEntries.add(userPath);
 			}
 		}
@@ -967,10 +981,16 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 
 	protected IPath[] createBuildPath(ILaunchConfiguration configuration)
 			throws CoreException {
+		return createBuildPath(configuration,
+				getScriptEnvironment(configuration));
+	}
+
+	protected IPath[] createBuildPath(ILaunchConfiguration configuration,
+			IEnvironment environment) throws CoreException {
 		List paths = new ArrayList();
 
 		// Buildpath
-		String[] buildpath = getBuildpath(configuration);
+		String[] buildpath = getBuildpath(configuration, environment);
 		for (int i = 0; i < buildpath.length; i++) {
 			paths.add(new Path(buildpath[i]));
 		}

@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
+import java.net.URI;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -219,6 +221,8 @@ public interface IRuntimeBuildpathEntry {
 	 *         <code>null</code> if none
 	 */
 	public String getLocation();
+
+	public URI getLocationURI();
 
 	/**
 	 * Returns a buildpath entry equivalent to this runtime buildpath entry, or

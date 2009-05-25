@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.launching;
 
+import java.net.URI;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -183,6 +185,13 @@ public abstract class AbstractRuntimeBuildpathEntry extends PlatformObject
 	 * @see org.eclipse.dltk.launching.IRuntimeBuildpathEntry#getLocation()
 	 */
 	public String getLocation() {
+		return null;
+	}
+
+	/*
+	 * @see org.eclipse.dltk.launching.IRuntimeBuildpathEntry#getLocationURI()
+	 */
+	public URI getLocationURI() {
 		return null;
 	}
 

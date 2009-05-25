@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.launching;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -100,6 +101,10 @@ public class DefaultProjectBuildpathEntry extends AbstractRuntimeBuildpathEntry 
 		return getProject().getLocation().toOSString();
 	}
 
+	public URI getLocationURI() {
+		return getProject().getLocationURI();
+	}
+
 	public IPath getPath() {
 		return getProject().getFullPath();
 	}
@@ -179,9 +184,9 @@ public class DefaultProjectBuildpathEntry extends AbstractRuntimeBuildpathEntry 
 		for (int i = 0; i < buildPath.length; i++) {
 			IBuildpathEntry buildpathEntry = buildPath[i];
 			if (buildpathEntry.getEntryKind() == IBuildpathEntry.BPE_SOURCE) { // sources
-																				// are
-																				// always
-																				// added
+				// are
+				// always
+				// added
 				unexpandedPath.add(buildpathEntry);
 			} else {
 				// add exported entires, as configured
