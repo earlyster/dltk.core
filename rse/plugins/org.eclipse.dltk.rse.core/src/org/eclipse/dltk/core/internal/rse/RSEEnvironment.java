@@ -87,7 +87,13 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	}
 
 	public IFileHandle getFile(URI locationURI) {
-		return new RSEFileHandle(this, locationURI);
+		if (RSEEnvironmentProvider.RSE_SCHEME.equalsIgnoreCase(locationURI
+				.getScheme())
+				&& locationURI.getHost().equals(host.getHostName())) {
+			return new RSEFileHandle(this, locationURI);
+		} else {
+			return null;
+		}
 	}
 
 	public String getPathsSeparator() {
