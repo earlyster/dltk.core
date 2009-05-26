@@ -20,11 +20,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 
-public class LazyExtensionManager {
+public class LazyExtensionManager<E> implements Iterable<E> {
 
 	public class Descriptor {
 		private final IConfigurationElement configurationElement;
-		private Object instance;
+		private E instance;
 		private boolean valid;
 
 		public Descriptor(IConfigurationElement configurationElement) {
@@ -32,35 +32,36 @@ public class LazyExtensionManager {
 			this.valid = true;
 		}
 
-		public synchronized Object get() {
+		@SuppressWarnings("unchecked")
+		public synchronized E get() {
 			if (instance != null) {
 				return instance;
 			} else if (!valid) {
 				return null;
 			}
 			try {
-				instance = configurationElement
+				instance = (E) configurationElement
 						.createExecutableExtension(classAttr);
 				return instance;
 			} catch (CoreException e) {
 				valid = false;
-				remove(this);
+				LazyExtensionManager.this.remove(this);
 				return null;
 			}
 		}
 	}
 
-	private static class InstanceIterator implements Iterator {
+	private static class InstanceIterator<E> implements Iterator<E> {
 
-		private final Descriptor[] descriptors;
+		private final LazyExtensionManager<E>.Descriptor[] descriptors;
 
-		public InstanceIterator(Descriptor[] descriptors) {
+		public InstanceIterator(LazyExtensionManager<E>.Descriptor[] descriptors) {
 			this.descriptors = descriptors;
 		}
 
 		private int index = 0;
 		private boolean nextEvaluated = false;
-		private Object next = null;
+		private E next = null;
 
 		public boolean hasNext() {
 			if (!nextEvaluated) {
@@ -79,11 +80,11 @@ public class LazyExtensionManager {
 			}
 		}
 
-		public Object next() {
+		public E next() {
 			if (!hasNext()) {
 				throw new NoSuchElementException();
 			}
-			final Object result = next;
+			final E result = next;
 			next = null;
 			nextEvaluated = false;
 			return result;
@@ -107,7 +108,7 @@ public class LazyExtensionManager {
 	}
 
 	// Contains list of descriptors.
-	private List extensions;
+	private List<Descriptor> extensions;
 
 	/**
 	 * Return array of descriptors. If there are no contributed instances the
@@ -125,7 +126,9 @@ public class LazyExtensionManager {
 		if (extensions == null) {
 			initialize();
 		}
-		final Descriptor[] resultArray = new Descriptor[extensions.size()];
+		@SuppressWarnings("unchecked")
+		final Descriptor[] resultArray = new LazyExtensionManager.Descriptor[extensions
+				.size()];
 		extensions.toArray(resultArray);
 		return resultArray;
 	}
@@ -135,8 +138,8 @@ public class LazyExtensionManager {
 	 * 
 	 * @return
 	 */
-	public Iterator iterator() {
-		return new InstanceIterator(internalGetInstances());
+	public Iterator<E> iterator() {
+		return new InstanceIterator<E>(internalGetInstances());
 	}
 
 	private synchronized void remove(Descriptor descriptor) {
@@ -146,7 +149,7 @@ public class LazyExtensionManager {
 	}
 
 	private void initialize() {
-		extensions = new ArrayList(5);
+		extensions = new ArrayList<Descriptor>(5);
 		registerConfigurationElements();
 		initializeDescriptors(extensions);
 	}
@@ -182,7 +185,7 @@ public class LazyExtensionManager {
 	/**
 	 * @param descriptors
 	 */
-	protected void initializeDescriptors(List descriptors) {
+	protected void initializeDescriptors(List<Descriptor> descriptors) {
 		// empty
 	}
 

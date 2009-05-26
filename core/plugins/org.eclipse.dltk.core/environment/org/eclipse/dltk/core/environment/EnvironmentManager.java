@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -48,7 +47,7 @@ public final class EnvironmentManager {
 			+ ".environment"; //$NON-NLS-1$
 
 	private static class EnvironmentManagerExtensionManager extends
-			LazyExtensionManager {
+			LazyExtensionManager<IEnvironmentProvider> {
 
 		private class EnvironmentProviderDesc extends Descriptor {
 			private int priority;
@@ -78,9 +77,9 @@ public final class EnvironmentManager {
 			return new EnvironmentProviderDesc(confElement);
 		}
 
-		protected void initializeDescriptors(List descriptors) {
-			Collections.sort(descriptors, new Comparator() {
-				public int compare(Object arg0, Object arg1) {
+		protected void initializeDescriptors(List<Descriptor> descriptors) {
+			Collections.sort(descriptors, new Comparator<Descriptor>() {
+				public int compare(Descriptor arg0, Descriptor arg1) {
 					EnvironmentProviderDesc d1 = (EnvironmentProviderDesc) arg0;
 					EnvironmentProviderDesc d2 = (EnvironmentProviderDesc) arg1;
 					return d1.priority - d2.priority;
@@ -105,9 +104,7 @@ public final class EnvironmentManager {
 		if (res != null && res.getType() != IResource.PROJECT) {
 			URI locationURI = res.getLocationURI();
 			if (locationURI != null) {
-				for (Iterator i = manager.iterator(); i.hasNext();) {
-					IEnvironmentProvider provider = (IEnvironmentProvider) i
-							.next();
+				for (IEnvironmentProvider provider : manager) {
 					waitInitialized(provider);
 					IEnvironment env = provider.getEnvironment(locationURI);
 					if (env != null) {
@@ -134,9 +131,7 @@ public final class EnvironmentManager {
 		if (element != null && element.getType() != IResource.PROJECT) {
 			URI locationURI = element.getLocationURI();
 			if (locationURI != null) {
-				for (Iterator i = manager.iterator(); i.hasNext();) {
-					IEnvironmentProvider provider = (IEnvironmentProvider) i
-							.next();
+				for (IEnvironmentProvider provider : manager) {
 					waitInitialized(provider);
 					IEnvironment env = provider.getEnvironment(locationURI);
 					if (env != null) {
@@ -174,8 +169,7 @@ public final class EnvironmentManager {
 	}
 
 	private static IEnvironment detectEnvironment(IProject project) {
-		for (Iterator i = manager.iterator(); i.hasNext();) {
-			IEnvironmentProvider provider = (IEnvironmentProvider) i.next();
+		for (IEnvironmentProvider provider : manager) {
 			waitInitialized(provider);
 			IEnvironment environment = provider.getProjectEnvironment(project);
 			if (environment != null) {
@@ -265,9 +259,8 @@ public final class EnvironmentManager {
 	}
 
 	public static IEnvironment[] getEnvironments(boolean allowWait) {
-		List envList = new ArrayList();
-		for (Iterator i = manager.iterator(); i.hasNext();) {
-			IEnvironmentProvider provider = (IEnvironmentProvider) i.next();
+		List<IEnvironment> envList = new ArrayList<IEnvironment>();
+		for (IEnvironmentProvider provider : manager) {
 			if (allowWait) {
 				waitInitialized(provider);
 			}
@@ -283,8 +276,7 @@ public final class EnvironmentManager {
 	}
 
 	public static IEnvironment getEnvironmentById(String envId) {
-		for (Iterator i = manager.iterator(); i.hasNext();) {
-			IEnvironmentProvider provider = (IEnvironmentProvider) i.next();
+		for (IEnvironmentProvider provider : manager) {
 			waitInitialized(provider);
 			IEnvironment env = provider.getEnvironment(envId);
 			if (env != null) {
@@ -347,8 +339,7 @@ public final class EnvironmentManager {
 	 * Tests if all providers are initialized.
 	 */
 	public static boolean isInitialized() {
-		for (Iterator i = manager.iterator(); i.hasNext();) {
-			IEnvironmentProvider provider = (IEnvironmentProvider) i.next();
+		for (IEnvironmentProvider provider : manager) {
 			if (!provider.isInitialized()) {
 				return false;
 			}
@@ -389,8 +380,7 @@ public final class EnvironmentManager {
 			monitor.beginTask(Util.EMPTY_STRING,
 					manager.getDescriptors().length);
 		}
-		for (Iterator i = manager.iterator(); i.hasNext();) {
-			IEnvironmentProvider provider = (IEnvironmentProvider) i.next();
+		for (IEnvironmentProvider provider : manager) {
 			if (monitor != null) {
 				monitor.setTaskName(NLS.bind(
 						Messages.EnvironmentManager_initializingTaskName,
