@@ -121,7 +121,7 @@ public class DialogField {
 		return 1;	
 	}	
 	
-	protected static GridData gridDataForLabel(int span) {
+	public static GridData gridDataForLabel(int span) {
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= span;
 		return gd;
