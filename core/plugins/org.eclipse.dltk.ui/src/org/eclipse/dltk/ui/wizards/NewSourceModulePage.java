@@ -78,6 +78,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -119,7 +120,8 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 
 	private IStatus remoteFolderChanged() {
 		StatusInfo status = new StatusInfo();
-		if (remoteFolderDialogField != null && isLinkingEnabled()) {
+		if (remoteFolderDialogField != null
+				&& remoteFolderDialogField.isEnabled()) {
 			String remoteFolder = remoteFolderDialogField.getText();
 			if (remoteFolder.length() == 0) {
 				status
@@ -164,8 +166,36 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 				remoteFolderStatus = remoteFolderChanged(), fileChanged() });
 	}
 
+	private Button createLink;
+	private Label remoteFolderLabel;
+	private Composite remoteFolderLabelContainer;
+
 	protected void createRemoteFolderControls(Composite parent, int nColumns) {
-		remoteFolderDialogField.doFillIntoGrid(parent, nColumns);
+		remoteFolderLabelContainer = new Composite(parent, SWT.NONE);
+		final GridLayout layout = new GridLayout();
+		layout.marginWidth = 0;
+		remoteFolderLabelContainer.setLayout(layout);
+		remoteFolderLabelContainer.setLayoutData(StringDialogField
+				.gridDataForLabel(1));
+		remoteFolderLabel = remoteFolderDialogField
+				.getLabelControl(remoteFolderLabelContainer);
+		remoteFolderLabel.setLayoutData(StringDialogField.gridDataForLabel(1));
+		createLink = new Button(remoteFolderLabelContainer, SWT.CHECK);
+		createLink.setText(Messages.NewSourceModulePage_LinkToFolder);
+		createLink.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				remoteFolderDialogField.setEnabled(createLink.getSelection());
+				remoteFolderStatus = remoteFolderChanged();
+				handleFieldChanged(REMOTE_FOLDER);
+			}
+		});
+		createLink.setLayoutData(StringDialogField.gridDataForLabel(1));
+		final Text text = remoteFolderDialogField.getTextControl(parent);
+		text.setLayoutData(StringDialogField.gridDataForText(nColumns - 2));
+		final Button button = remoteFolderDialogField.getChangeControl(parent);
+		button.setLayoutData(StringButtonDialogField.gridDataForButton(button,
+				1));
+		updateRemoteFolderLableEnablement();
 	}
 
 	protected void createFileControls(Composite parent, int nColumns) {
@@ -343,7 +373,10 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		remoteFolderDialogField = new StringButtonDialogField(
 				new IStringButtonAdapter() {
 					public void changeControlPressed(DialogField field) {
-						final IEnvironment environment = getLinkedEnvironment();
+						IEnvironment environment = getLinkedEnvironment();
+						if (environment == null) {
+							environment = getEnvironment();
+						}
 						if (environment != null) {
 							final IEnvironmentUI ui = (IEnvironmentUI) environment
 									.getAdapter(IEnvironmentUI.class);
@@ -402,8 +435,9 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		if (isLinkingSupported() && isLinkingEnabled()) {
 			final IResource resource = currentScriptFolder.getResource();
 			if (resource != null
-					&& (resource.getType() & (IResource.FOLDER | IResource.PROJECT)) != 0) {
-				final IEnvironment environment = getLinkedEnvironment();
+					&& (resource.getType() & (IResource.FOLDER | IResource.PROJECT)) != 0
+					&& remoteFolderDialogField.isEnabled()) {
+				final IEnvironment environment = getEnvironment();
 				if (environment != null) {
 					final IFileHandle folder = environment.getFile(new Path(
 							remoteFolderDialogField.getText()));
@@ -611,16 +645,14 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 	}
 
 	protected boolean isLinkingEnabled() {
-		return getLinkedEnvironment() != null;
+		return true;
 	}
 
 	public void setScriptFolder(IScriptFolder root, boolean canBeModified) {
 		super.setScriptFolder(root, canBeModified);
 		if (remoteFolderDialogField != null) {
-			final boolean linkingEnabled = isLinkingEnabled();
-			remoteFolderDialogField.setEnabled(linkingEnabled);
-			if (linkingEnabled
-					&& remoteFolderDialogField.getText().length() == 0) {
+			updateRemoteFolderLableEnablement();
+			if (remoteFolderDialogField.getText().length() == 0) {
 				final IProjectFragment fragment = getProjectFragment();
 				if (fragment != null) {
 					final List remotePaths = collectLinkedPaths(fragment
@@ -638,13 +670,41 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 								}
 							}
 						}
-						if (base != null && base.segmentCount() >= 2) {
+						if (base != null && base.segmentCount() >= 1) {
 							remoteFolderDialogField.setText(base.toString());
 						}
 					}
 				}
 			}
 		}
+	}
+
+	private void updateRemoteFolderLableEnablement() {
+		if (getLinkedEnvironment() != null) {
+			if (remoteFolderLabel != null) {
+				((GridData) remoteFolderLabel.getLayoutData()).exclude = false;
+				remoteFolderLabel.setVisible(true);
+			}
+			if (createLink != null) {
+				((GridData) createLink.getLayoutData()).exclude = true;
+				createLink.setVisible(false);
+			}
+			remoteFolderDialogField.setEnabled(true);
+		} else {
+			if (remoteFolderLabel != null) {
+				((GridData) remoteFolderLabel.getLayoutData()).exclude = true;
+				remoteFolderLabel.setVisible(false);
+			}
+			if (createLink != null) {
+				((GridData) createLink.getLayoutData()).exclude = false;
+				createLink.setVisible(true);
+				remoteFolderDialogField.setEnabled(createLink.getSelection());
+			}
+		}
+		if (remoteFolderLabelContainer != null) {
+			remoteFolderLabelContainer.layout();
+		}
+		remoteFolderStatus = remoteFolderChanged();
 	}
 
 	protected IEnvironment getLinkedEnvironment() {
@@ -667,9 +727,19 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		return null;
 	}
 
+	protected IEnvironment getEnvironment() {
+		final IProjectFragment fragment = getProjectFragment();
+		if (fragment != null) {
+			return EnvironmentManager.getEnvironment(fragment
+					.getScriptProject().getProject());
+		}
+		return null;
+	}
+
 	protected List collectLinkedPaths(IProject project) {
 		try {
-			final IEnvironment environment = getLinkedEnvironment(project);
+			final IEnvironment environment = EnvironmentManager
+					.getEnvironment(project);
 			if (environment == null) {
 				return null;
 			}

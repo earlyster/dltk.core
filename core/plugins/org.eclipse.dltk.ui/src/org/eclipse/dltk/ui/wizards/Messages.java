@@ -20,6 +20,7 @@ public class Messages extends NLS {
 	public static String NewSourceModulePage_file;
 	public static String NewSourceModulePage_fileAlreadyExists;
 	public static String NewSourceModulePage_InvalidFileName;
+	public static String NewSourceModulePage_LinkToFolder;
 	public static String NewSourceModulePage_noFoldersAvailable;
 	public static String NewSourceModulePage_noTemplate;
 	public static String NewSourceModulePage_pathCannotBeEmpty;
