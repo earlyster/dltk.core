@@ -14,6 +14,7 @@ public class Messages extends NLS {
 	public static String ExternalCheckerConfigurationPage_deleteRule;
 	public static String ExternalCheckerConfigurationPage_filenameExtensions;
 	public static String ExternalCheckerConfigurationPage_outputRule;
+	public static String ExternalCheckerConfigurationPage_passInterpreterEnvironmentVariables;
 	public static String ExternalCheckerConfigurationPage_patternIsARegularExpression;
 	public static String ExternalCheckerConfigurationPage_patternRules;
 	public static String ExternalCheckerConfigurationPage_type;

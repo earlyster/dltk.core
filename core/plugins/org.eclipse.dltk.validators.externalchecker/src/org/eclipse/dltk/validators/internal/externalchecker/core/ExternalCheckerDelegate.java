@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.compiler.CharOperation;
@@ -15,6 +17,10 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.internal.launching.EnvironmentResolver;
+import org.eclipse.dltk.launching.EnvironmentVariable;
+import org.eclipse.dltk.launching.IInterpreterInstall;
+import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.validators.core.CommandLine;
 import org.eclipse.dltk.validators.core.IValidatorOutput;
 import org.eclipse.dltk.validators.core.IValidatorProblem;
@@ -35,12 +41,13 @@ class ExternalCheckerDelegate {
 	private final IEnvironment environment;
 	private final IExecutionEnvironment execEnvironment;
 	private final String[] extensions;
-	private final List rules = new ArrayList();
+	private final boolean passInterpreterEnvironmentVars;
+	private final List<Rule> rules = new ArrayList<Rule>();
 
 	static interface IExternalReporterDelegate {
 		void report(IValidatorProblem problem) throws CoreException;
 	}
-	
+
 	public ExternalCheckerDelegate(IEnvironment environment,
 			ExternalChecker externalChecker) {
 		this.environment = environment;
@@ -53,13 +60,15 @@ class ExternalCheckerDelegate {
 
 		this.arguments = externalChecker.getArguments();
 		this.extensions = prepareExtensions(externalChecker.getExtensions());
+		this.passInterpreterEnvironmentVars = externalChecker
+				.isPassInterpreterEnvironmentVars();
 		this.command = prepareCommand(externalChecker.getCommand(), environment);
 	}
 
 	public IValidatorReporter createValidatorReporter() {
 		return new ValidatorReporter(getMarkerId(), false);
 	}
-	
+
 	public String getMarkerId() {
 		return MARKER_ID;
 	}
@@ -82,17 +91,47 @@ class ExternalCheckerDelegate {
 				return true;
 			}
 		}
-	
+
 		return false;
 	}
+
+	private static class EnvContainer {
+		String[] environmentVars;
+	}
+
+	private final Map<IProject, EnvContainer> projectEnvs = new HashMap<IProject, EnvContainer>();
 
 	public void runValidator(IResource resource, IValidatorOutput console,
 			IExternalReporterDelegate delegate) throws CoreException {
 		CommandLine cmdLine = new CommandLine(arguments);
 		cmdLine.replaceSequence('f', getResourcePath(resource));
 		cmdLine.add(0, command);
-
-		Process process = execEnvironment.exec(cmdLine.toArray(), null, null);
+		final String[] env;
+		if (passInterpreterEnvironmentVars) {
+			final IProject project = resource.getProject();
+			EnvContainer envContainer = projectEnvs.get(project);
+			if (envContainer == null) {
+				envContainer = new EnvContainer();
+				IInterpreterInstall install = ScriptRuntime
+						.getInterpreterInstall(DLTKCore.create(project));
+				if (install != null) {
+					EnvironmentVariable[] resolved = EnvironmentResolver
+							.resolve(execEnvironment
+									.getEnvironmentVariables(true), install
+									.getEnvironmentVariables(), true);
+					envContainer.environmentVars = new String[resolved.length];
+					for (int i = 0; i < resolved.length; ++i) {
+						envContainer.environmentVars[i] = resolved[i]
+								.toString();
+					}
+				}
+				projectEnvs.put(project, envContainer);
+			}
+			env = envContainer.environmentVars;
+		} else {
+			env = null;
+		}
+		Process process = execEnvironment.exec(cmdLine.toArray(), null, env);
 		BufferedReader input = new BufferedReader(new InputStreamReader(process
 				.getInputStream()));
 
@@ -143,7 +182,8 @@ class ExternalCheckerDelegate {
 		return null;
 	}
 
-	private String prepareCommand(Map commands, IEnvironment environment) {
+	private String prepareCommand(Map<IEnvironment, String> commands,
+			IEnvironment environment) {
 		String result = (String) commands.get(environment);
 		if (result != null) {
 			result = result.trim();

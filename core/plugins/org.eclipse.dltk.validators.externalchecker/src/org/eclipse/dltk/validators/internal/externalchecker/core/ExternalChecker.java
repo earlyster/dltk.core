@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
@@ -25,29 +26,31 @@ import org.w3c.dom.NodeList;
 public class ExternalChecker extends AbstractValidator {
 
 	private static final String EXTENSIONS = "scriptPattrn"; //$NON-NLS-1$
-
 	private static final String ARGUMENTS = "arguments"; //$NON-NLS-1$
+	private static final String INTERPRETER_ENVIRONMENT_VARS = "interpreterEnvironmentVars"; //$NON-NLS-1$
+
 	private static final String PATH_TAG = "path"; //$NON-NLS-1$
 	private static final String ENVIRONMENT_ATTR = "environment"; //$NON-NLS-1$
 	private static final String PATH_ATTR = "path"; //$NON-NLS-1$
 
 	private String arguments;
-	private Map paths;
-	private List rules = new ArrayList();
+	private Map<IEnvironment, String> paths;
+	private List<Rule> rules = new ArrayList<Rule>();
 	private String extensions;
+	private boolean passInterpreterEnvironmentVars;
 
-	public void setCommand(Map command) {
+	public void setCommand(Map<IEnvironment, String> command) {
 		this.paths = command;
 		fireChanged();
 	}
 
-	public void setRules(Vector list) {
+	public void setRules(Vector<Rule> list) {
 		rules.clear();
 		rules.addAll(list);
 		fireChanged();
 	}
 
-	public Map getCommand() {
+	public Map<IEnvironment, String> getCommand() {
 		return paths;
 	}
 
@@ -58,11 +61,11 @@ public class ExternalChecker extends AbstractValidator {
 		this.extensions = "*"; //$NON-NLS-1$
 	}
 
-	private Map newEmptyPath() {
-		Map result = new HashMap();
+	private Map<IEnvironment, String> newEmptyPath() {
+		Map<IEnvironment, String> result = new HashMap<IEnvironment, String>();
 		IEnvironment[] environments = EnvironmentManager.getEnvironments();
 		for (int i = 0; i < environments.length; i++) {
-			result.put(environments[i], ""); //$NON-NLS-1$
+			result.put(environments[i], Util.EMPTY_STRING);
 		}
 		return result;
 	}
@@ -90,6 +93,8 @@ public class ExternalChecker extends AbstractValidator {
 		}
 		this.arguments = element.getAttribute(ARGUMENTS);
 		this.extensions = element.getAttribute(EXTENSIONS);
+		this.passInterpreterEnvironmentVars = Boolean.valueOf(element
+				.getAttribute(INTERPRETER_ENVIRONMENT_VARS));
 
 		NodeList nodes = element.getChildNodes();
 		rules.clear();
@@ -108,6 +113,8 @@ public class ExternalChecker extends AbstractValidator {
 		super.storeTo(doc, element);
 		element.setAttribute(ARGUMENTS, this.arguments);
 		element.setAttribute(EXTENSIONS, this.extensions);
+		element.setAttribute(INTERPRETER_ENVIRONMENT_VARS, Boolean
+				.toString(this.passInterpreterEnvironmentVars));
 
 		for (int i = 0; i < rules.size(); i++) {
 			Element elem = doc.createElement("rule"); //$NON-NLS-1$
@@ -116,7 +123,8 @@ public class ExternalChecker extends AbstractValidator {
 			element.appendChild(elem);
 		}
 
-		for (Iterator iterator = paths.keySet().iterator(); iterator.hasNext();) {
+		for (Iterator<IEnvironment> iterator = paths.keySet().iterator(); iterator
+				.hasNext();) {
 			IEnvironment env = (IEnvironment) iterator.next();
 			if (env != null) {
 				Element elem = doc.createElement(PATH_TAG);
@@ -174,15 +182,33 @@ public class ExternalChecker extends AbstractValidator {
 		fireChanged();
 	}
 
+	/**
+	 * @return the useInterpreterEnvironmentVars
+	 */
+	public boolean isPassInterpreterEnvironmentVars() {
+		return passInterpreterEnvironmentVars;
+	}
+
+	/**
+	 * @param useInterpreterEnvironmentVars
+	 *            the useInterpreterEnvironmentVars to set
+	 */
+	public void setPassInterpreterEnvironmentVars(
+			boolean useInterpreterEnvironmentVars) {
+		this.passInterpreterEnvironmentVars = useInterpreterEnvironmentVars;
+		fireChanged();
+	}
+
 	public Object getValidator(IScriptProject project, Class validatorType) {
 		if (validatorType == IResourceValidator.class) {
 			return new ExternalResourceWorker(getEnvrironment(project), this);
 		}
-		
-		if (validatorType == ISourceModuleValidator.class) {		
-			return new ExternalSourceModuleWorker(getEnvrironment(project), this);
+
+		if (validatorType == ISourceModuleValidator.class) {
+			return new ExternalSourceModuleWorker(getEnvrironment(project),
+					this);
 		}
-		
+
 		// safety incase new validator types are introduced
 		return null;
 	}
@@ -190,8 +216,8 @@ public class ExternalChecker extends AbstractValidator {
 	protected Object clone() {
 		try {
 			final ExternalChecker clone = (ExternalChecker) super.clone();
-			clone.paths = new HashMap(paths);
-			clone.rules = new ArrayList(rules);
+			clone.paths = new HashMap<IEnvironment, String>(paths);
+			clone.rules = new ArrayList<Rule>(rules);
 			return clone;
 		} catch (CloneNotSupportedException e) {
 			// should not happen

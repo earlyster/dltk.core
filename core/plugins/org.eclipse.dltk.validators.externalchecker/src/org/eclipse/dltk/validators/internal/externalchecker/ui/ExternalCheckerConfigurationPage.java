@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.dltk.ui.environment.EnvironmentPathBlock;
 import org.eclipse.dltk.ui.environment.IEnvironmentPathBlockListener;
@@ -45,6 +46,7 @@ public class ExternalCheckerConfigurationPage extends
 	private StringDialogField fArguments;
 	private EnvironmentPathBlock fPath;
 	private StringDialogField fExtensions;
+	private SelectionButtonDialogField fPassInterpreterEnvironmentVars;
 
 	private Table fTable;
 	private TableViewer tableViewer;
@@ -135,6 +137,9 @@ public class ExternalCheckerConfigurationPage extends
 		externalChecker.setCommand(this.fPath.getPaths());
 		externalChecker.setRules(rulesList.getRules());
 		externalChecker.setExtensions(this.fExtensions.getText());
+		externalChecker
+				.setPassInterpreterEnvironmentVars(this.fPassInterpreterEnvironmentVars
+						.isSelected());
 	}
 
 	private void createPathBrowse(final Composite parent, int columns) {
@@ -153,6 +158,8 @@ public class ExternalCheckerConfigurationPage extends
 		this.createPathBrowse(ancestor, columns);
 		this.fArguments.doFillIntoGrid(ancestor, columns);
 		this.fExtensions.doFillIntoGrid(ancestor, columns);
+		this.fPassInterpreterEnvironmentVars.doFillIntoGrid(ancestor, columns);
+
 		Label label = new Label(ancestor, SWT.WRAP);
 		label
 				.setText(Messages.ExternalCheckerConfigurationPage_commaSeparatedListOfExtensions);
@@ -267,6 +274,8 @@ public class ExternalCheckerConfigurationPage extends
 
 		this.fPath.setPaths(externalChecker.getCommand());
 		this.fExtensions.setText(externalChecker.getExtensions());
+		this.fPassInterpreterEnvironmentVars.setSelection(externalChecker
+				.isPassInterpreterEnvironmentVars());
 
 		this.rulesList.getRules().clear();
 		for (int i = 0; i < externalChecker.getNRules(); i++) {
@@ -282,6 +291,10 @@ public class ExternalCheckerConfigurationPage extends
 		this.fExtensions = new StringDialogField();
 		this.fExtensions
 				.setLabelText(Messages.ExternalCheckerConfigurationPage_filenameExtensions);
+		this.fPassInterpreterEnvironmentVars = new SelectionButtonDialogField(
+				SWT.CHECK);
+		this.fPassInterpreterEnvironmentVars
+				.setLabelText(Messages.ExternalCheckerConfigurationPage_passInterpreterEnvironmentVariables);
 	}
 
 	public class RulesContentProvider implements IStructuredContentProvider,
