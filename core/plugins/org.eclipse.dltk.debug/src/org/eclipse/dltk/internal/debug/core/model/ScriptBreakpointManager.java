@@ -654,7 +654,7 @@ public class ScriptBreakpointManager implements IBreakpointListener,
 								(IScriptSpawnpoint) breakpoint);
 					}
 				} else if (breakpoint instanceof IScriptBreakpoint) {
-					for (int j = 0; i < sessions.length; ++j) {
+					for (int j = 0; j < sessions.length; ++j) {
 						changeBreakpoint(sessions[j],
 								(IScriptBreakpoint) breakpoint);
 					}
