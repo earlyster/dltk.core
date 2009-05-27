@@ -75,7 +75,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 	static class ResourceVisitor implements IResourceDeltaVisitor,
 			IResourceVisitor {
-		final Set resources = new HashSet();
+		final Set<IResource> resources = new HashSet<IResource>();
 		private final IProgressMonitor monitor;
 
 		public ResourceVisitor(IProgressMonitor monitor) {
@@ -386,7 +386,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		if (scriptProject == null)
 			return new IProject[0];
 		IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-		ArrayList projects = new ArrayList();
+		ArrayList<IProject> projects = new ArrayList<IProject>();
 		try {
 			IBuildpathEntry[] entries = scriptProject
 					.getExpandedBuildpath(true);
@@ -422,9 +422,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		} catch (ModelException e) {
 			return new IProject[0];
 		}
-		IProject[] result = new IProject[projects.size()];
-		projects.toArray(result);
-		return result;
+		return projects.toArray(new IProject[projects.size()]);
 	}
 
 	public State getLastState(IProject project, IProgressMonitor monitor) {
@@ -535,8 +533,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	private Set getResourcesFrom(Object el, final IProgressMonitor monitor,
-			int ticks) throws CoreException {
+	private Set<IResource> getResourcesFrom(Object el,
+			final IProgressMonitor monitor, int ticks) throws CoreException {
 		monitor.subTask(Messages.ScriptBuilder_scanningProject);
 		try {
 			ResourceVisitor resourceVisitor = new ResourceVisitor(monitor);
@@ -562,9 +560,10 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 		final IProjectFragment[] fragments = prj.getAllProjectFragments();
 		// new external fragments
-		final List extFragments = new ArrayList(fragments.length);
+		final List<IProjectFragment> extFragments = new ArrayList<IProjectFragment>(
+				fragments.length);
 		// external fragments paths
-		final List fragmentPaths = new ArrayList(fragments.length);
+		final List<IPath> fragmentPaths = new ArrayList<IPath>(fragments.length);
 		for (int i = 0; i < fragments.length; i++) {
 			final IProjectFragment fragment = fragments[i];
 			if (fragment.isExternal()) {
@@ -581,8 +580,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		// monitor.subTask(name);
 		final ExternalModuleVisitor visitor = new ExternalModuleVisitor(mon);
 		mon.beginTask(name, extFragments.size());
-		for (Iterator iterator = extFragments.iterator(); iterator.hasNext();) {
-			IProjectFragment fragment = (IProjectFragment) iterator.next();
+		for (IProjectFragment fragment : extFragments) {
 			// New project fragment, we need to obtain all modules
 			// from this fragment.
 			fragment.accept(visitor);
@@ -622,7 +620,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			Set resources = getResourcesFrom(delta, monitor, WORK_RESOURCES);
+			Set<IResource> resources = getResourcesFrom(delta, monitor,
+					WORK_RESOURCES);
 			if (monitor.isCanceled()) {
 				return;
 			}
