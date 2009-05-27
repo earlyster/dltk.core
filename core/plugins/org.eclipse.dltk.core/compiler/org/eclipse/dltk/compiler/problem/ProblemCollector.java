@@ -12,7 +12,6 @@
 package org.eclipse.dltk.compiler.problem;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.dltk.compiler.task.ITaskReporter;
@@ -20,7 +19,7 @@ import org.eclipse.dltk.compiler.task.ITaskReporter;
 public class ProblemCollector extends AbstractProblemReporter implements
 		ITaskReporter {
 
-	protected final List problems = new ArrayList();
+	protected final List<IProblem> problems = new ArrayList<IProblem>();
 
 	public void reportProblem(IProblem problem) {
 		problems.add(problem);
@@ -39,7 +38,7 @@ public class ProblemCollector extends AbstractProblemReporter implements
 		return problems.isEmpty();
 	}
 
-	public Object getAdapter(Class adapter) {
+	public Object getAdapter(@SuppressWarnings("unchecked") Class adapter) {
 		if (ITaskReporter.class.equals(adapter)
 				|| IProblemReporter.class.equals(adapter)) {
 			return this;
@@ -52,8 +51,7 @@ public class ProblemCollector extends AbstractProblemReporter implements
 	 */
 	public boolean hasErrors() {
 		if (!problems.isEmpty()) {
-			for (Iterator i = problems.iterator(); i.hasNext();) {
-				final IProblem problem = (IProblem) i.next();
+			for (final IProblem problem : problems) {
 				if (problem.isError()) {
 					return true;
 				}
@@ -168,8 +166,7 @@ public class ProblemCollector extends AbstractProblemReporter implements
 	 * @param destination
 	 */
 	public void copyTo(IProblemReporter destination) {
-		for (Iterator i = problems.iterator(); i.hasNext();) {
-			final IProblem problem = (IProblem) i.next();
+		for (final IProblem problem : problems) {
 			destination.reportProblem(problem);
 		}
 	}
@@ -177,10 +174,9 @@ public class ProblemCollector extends AbstractProblemReporter implements
 	/**
 	 * @return
 	 */
-	public List getErrors() {
-		final List result = new ArrayList();
-		for (Iterator i = problems.iterator(); i.hasNext();) {
-			final IProblem problem = (IProblem) i.next();
+	public List<IProblem> getErrors() {
+		final List<IProblem> result = new ArrayList<IProblem>();
+		for (final IProblem problem : problems) {
 			if (problem.isError()) {
 				result.add(problem);
 			}
