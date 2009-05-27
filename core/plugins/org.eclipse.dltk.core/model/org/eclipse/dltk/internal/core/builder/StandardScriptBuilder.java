@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.compiler.problem.DefaultProblem;
+import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -137,7 +138,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		}
 	}
 
-	private List reporters = null;
+	private List<IProblemReporter> reporters = null;
 
 	private void buildNatureModules(IScriptProject project, int buildType,
 			final List modules, IProgressMonitor monitor) {
@@ -146,7 +147,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 			return;
 		}
 		int counter = 0;
-		reporters = new ArrayList(modules.size());
+		reporters = new ArrayList<IProblemReporter>(modules.size());
 		for (Iterator j = modules.iterator(); j.hasNext();) {
 			if (monitor.isCanceled())
 				return;
@@ -341,10 +342,8 @@ public class StandardScriptBuilder implements IScriptBuilder,
 			endBuildNeeded = false;
 		}
 		if (reporters != null) {
-			for (Iterator j = reporters.iterator(); j.hasNext();) {
-				final BuildProblemReporter reporter = (BuildProblemReporter) j
-						.next();
-				reporter.flush();
+			for (IProblemReporter reporter : reporters) {
+				((BuildProblemReporter) reporter).flush();
 			}
 			reporters = null;
 		}
