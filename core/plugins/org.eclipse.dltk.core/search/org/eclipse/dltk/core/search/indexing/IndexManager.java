@@ -306,8 +306,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	public synchronized Index getIndex(IPath containerPath,
 			String indexLocation, boolean reuseExistingFile,
 			boolean createIfMissing) {
-		String containerPathStr = containerPath.toPortableString();
-		boolean mixin = containerPathStr.startsWith(SPECIAL_MIXIN);
+		boolean mixin = containerPath.toString().startsWith(SPECIAL_MIXIN);
 		// Path is already canonical per construction
 		Index index = (Index) this.indexes.get(indexLocation);
 		if (index == null) {
