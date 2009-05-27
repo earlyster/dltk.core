@@ -50,7 +50,8 @@ public class UIModelProviderManager {
 	private static Map labelProviders = null;
 	private static Map compareProviders = null;
 
-	public static IModelContentProvider[] getContentProviders(String lang) {
+	public synchronized static IModelContentProvider[] getContentProviders(
+			String lang) {
 		if (contentProviders == null) {
 			contentProviders = initializeProviders(contentProviderManager);
 		}
@@ -72,7 +73,7 @@ public class UIModelProviderManager {
 		return NONE_MODEL_CONTENT_PROVIDERS;
 	}
 
-	public static ILabelProvider[] getLabelProviders(String lang) {
+	public synchronized static ILabelProvider[] getLabelProviders(String lang) {
 		if (labelProviders == null) {
 			labelProviders = initializeProviders(labelProviderManager);
 		}
@@ -94,7 +95,8 @@ public class UIModelProviderManager {
 		return NONE_LABEL_PROVIDERS;
 	}
 
-	public static IModelCompareProvider[] getCompareProviders(String lang) {
+	public synchronized static IModelCompareProvider[] getCompareProviders(
+			String lang) {
 		if (compareProviders == null) {
 			compareProviders = initializeProviders(compareProviderManager);
 		}
@@ -116,7 +118,7 @@ public class UIModelProviderManager {
 		return NONE_MODEL_COMPARE_PROVIDERS;
 	}
 
-	private static Map initializeProviders(
+	private synchronized static Map initializeProviders(
 			SimpleClassDLTKExtensionManager manager) {
 		Map providers = new HashMap();
 		ElementInfo[] infos = manager.getElementInfos();
