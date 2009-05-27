@@ -33,6 +33,8 @@ public class IndexSelector {
 	IDLTKSearchScope searchScope;
 	SearchPattern pattern;
 	IPath[] indexLocations; // cache of the keys for looking index up
+	IPath[] containerPaths;
+	private boolean mixinOnly = false;
 
 	// public boolean mixin = false; // Set to true then mixin search are used.
 
@@ -150,7 +152,7 @@ public class IndexSelector {
 		SimpleSet locations = new SimpleSet();
 		IModelElement focus = MatchLocator.projectOrArchiveFocus(this.pattern);
 
-		boolean mix = false;// this.pattern instanceof MixinPattern;
+		boolean mix = this.mixinOnly;
 
 		IScriptModel model = ModelManager.getModelManager().getModel();
 		if (focus == null) {
@@ -336,5 +338,9 @@ public class IndexSelector {
 			return project;
 		}
 		return null;
+	}
+
+	public void setMixinOnly(boolean bOnlyMixin) {
+		this.mixinOnly = false;
 	}
 }

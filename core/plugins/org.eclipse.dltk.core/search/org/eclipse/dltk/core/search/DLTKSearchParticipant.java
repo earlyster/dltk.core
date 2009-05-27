@@ -137,6 +137,7 @@ public class DLTKSearchParticipant extends SearchParticipant {
 	public IPath[] selectIndexes(SearchPattern pattern, IDLTKSearchScope scope) {
 		if (this.indexSelector == null) {
 			this.indexSelector = new IndexSelector(scope, pattern);
+			this.indexSelector.setMixinOnly(this.bOnlyMixin);
 		}
 		return this.indexSelector.getIndexLocations();
 	}

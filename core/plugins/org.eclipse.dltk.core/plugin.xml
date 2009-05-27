@@ -146,4 +146,12 @@
             class="org.eclipse.dltk.core.caching.ArchiveContentCacheProvider">
       </contentCacheProvider>
    </extension>
+   <extension
+         point="org.eclipse.emf.ecore.generated_package">
+      <package
+            class="org.eclipse.dltk.core.caching.cache.CachePackage"
+            genModel="model/cache_model.genmodel"
+            uri="http://eclipse.org/dltk/cache_model">
+      </package>
+   </extension>
 </plugin>

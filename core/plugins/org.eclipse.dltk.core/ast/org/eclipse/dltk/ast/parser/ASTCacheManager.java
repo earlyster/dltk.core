@@ -15,7 +15,7 @@ public class ASTCacheManager {
 
 	private static Map<String, IASTCache[]> providers = null;
 
-	public static IASTCache[] getProviders(String lang) {
+	public synchronized static IASTCache[] getProviders(String lang) {
 		if (providers == null) {
 			providers = new HashMap<String, IASTCache[]>();
 

@@ -35,6 +35,7 @@ public class MixinIndex extends Index {
 
 	private static final char[] OLD_HEADER = "MIXIN INDEX 0.1".toCharArray(); //$NON-NLS-1$
 	private static final char[] HEADER = "MIXIN INDEX 0.2".toCharArray(); //$NON-NLS-1$
+	private static final char[] HEADER3 = "MIXIN INDEX 0.3".toCharArray(); //$NON-NLS-1$
 
 	private final HashtableOfObject keyToDocs = new HashtableOfObject(10);
 	private final SimpleSet documentNames = new SimpleSet(10);
@@ -256,7 +257,8 @@ public class MixinIndex extends Index {
 						if (CharOperation.equals(OLD_HEADER, header)) {
 							loadDocToKeyFormat(stream);
 							successful = true;
-						} else if (CharOperation.equals(HEADER, header)) {
+						} else if (CharOperation.equals(HEADER, header)
+								|| CharOperation.equals(HEADER3, header)) {
 							loadKeyToDocFormat(stream);
 							successful = true;
 						}

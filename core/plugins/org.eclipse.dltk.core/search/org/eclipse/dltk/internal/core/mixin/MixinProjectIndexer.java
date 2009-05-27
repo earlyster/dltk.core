@@ -13,9 +13,11 @@ package org.eclipse.dltk.internal.core.mixin;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.mixin.MixinModelRegistry;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.core.AbstractProjectIndexer;
@@ -26,6 +28,8 @@ public class MixinProjectIndexer extends AbstractProjectIndexer {
 
 	public void doIndexing(DLTKSearchDocument document, ISourceModule module) {
 		new MixinIndexer(document, module).indexDocument();
+		MixinModelRegistry.removeSourceModule(DLTKLanguageManager
+				.getLanguageToolkit(module), module);
 	}
 
 	public Index getProjectIndex(IPath path) {

@@ -2,6 +2,8 @@ package org.eclipse.dltk.core.caching;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,6 +18,7 @@ import java.util.Set;
 import java.util.zip.CRC32;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
@@ -27,7 +30,6 @@ import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
@@ -47,7 +49,7 @@ public class MetadataContentCache extends AbstractContentCache {
 		this.cacheLocation = cacheLocation;
 	}
 
-	private void initialize() {
+	private synchronized void initialize() {
 		if (indexResource == null) {
 			File file = new File(cacheLocation.toOSString());
 			if (!file.exists()) {
@@ -55,12 +57,14 @@ public class MetadataContentCache extends AbstractContentCache {
 			}
 
 			IPath indexFile = cacheLocation.append("index");
-			indexResource = new XMIResourceImpl(URI.createFileURI(indexFile
-					.toOSString()));
-			File indexFileHandle = new File(indexFile.toOSString());
+			indexResource = new XMIResourceImpl();
+			indexFileHandle = new File(indexFile.toOSString());
 			if (indexFileHandle.exists()) {
 				try {
-					indexResource.load(null);
+					BufferedInputStream loadStream = new BufferedInputStream(
+							new FileInputStream(indexFileHandle), 4096);
+					indexResource.load(loadStream, null);
+					loadStream.close();
 				} catch (Exception e) {
 					save(false);
 					if (DLTKCore.DEBUG) {
@@ -105,6 +109,7 @@ public class MetadataContentCache extends AbstractContentCache {
 		entry.setPath(handle.getPath().toPortableString());
 		entry.setTimestamp(getHandleLastModification(handle));
 		index.getEntries().add(entry);
+		entry.setLastAccessTime(System.currentTimeMillis());
 		entryCache.put(key, entry);
 		return entry;
 	}
@@ -178,6 +183,7 @@ public class MetadataContentCache extends AbstractContentCache {
 	}
 
 	long changeCount = 0;
+	private File indexFileHandle;
 
 	public synchronized void save(boolean countSaves) {
 		if (indexResource == null) {
@@ -194,7 +200,10 @@ public class MetadataContentCache extends AbstractContentCache {
 		try {
 			Map<String, Object> options = new HashMap<String, Object>();
 			options.put(Resource.OPTION_SAVE_ONLY_IF_CHANGED, Boolean.TRUE);
-			indexResource.save(options);
+			BufferedOutputStream outStream = new BufferedOutputStream(
+					new FileOutputStream(indexFileHandle), 4096);
+			indexResource.save(outStream, options);
+			outStream.close();
 		} catch (IOException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
@@ -222,32 +231,46 @@ public class MetadataContentCache extends AbstractContentCache {
 		}
 		if (file != null && file.exists()) {
 			try {
-				return new BufferedInputStream(
-						new MetadataFileInputStream(file), 4096);
+				PerformanceNode node = RuntimePerformanceMonitor.begin();
+				ByteArrayOutputStream bout = new ByteArrayOutputStream();
+				BufferedInputStream inp = new BufferedInputStream(
+						new FileInputStream(file), 4096);
+				Util.copy(inp, bout);
+				node.done("Metadata", RuntimePerformanceMonitor.IOREAD, file
+						.length(), EnvironmentManager.getLocalEnvironment());
+				return new ByteArrayInputStream(bout.toByteArray());
 			} catch (FileNotFoundException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
 				return null;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 
 		return null;
 	}
 
-	public class MetadataFileOutputStream extends FileOutputStream {
+	public class MetadataFileOutputStream extends BufferedOutputStream {
 		File file;
 		private PerformanceNode node;
+		private ByteArrayOutputStream bytes;
 
 		public MetadataFileOutputStream(File file) throws FileNotFoundException {
-			super(file);
-			node = RuntimePerformanceMonitor.begin();
+			super(new ByteArrayOutputStream());
+			bytes = (ByteArrayOutputStream) out;
+			this.file = file;
 			this.file = file;
 		}
 
 		@Override
 		public void close() throws IOException {
 			super.close();
+			node = RuntimePerformanceMonitor.begin();
+			org.eclipse.dltk.compiler.util.Util.copy(file,
+					new ByteArrayInputStream(bytes.toByteArray()));
 			node.done("Metadata", RuntimePerformanceMonitor.IOWRITE, file
 					.length(), EnvironmentManager.getLocalEnvironment());
 		}

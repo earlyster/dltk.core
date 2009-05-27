@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.zip.CRC32;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -33,6 +32,7 @@ import org.eclipse.dltk.compiler.util.SimpleLookupTable;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -258,7 +258,6 @@ public class IndexManager extends JobManager implements IIndexConstants {
 						Util
 								.verbose("-> cannot reuse existing index: " + indexLocation + " path: " + prefix); //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					// fall thru
 				}
 			}
 
@@ -307,7 +306,8 @@ public class IndexManager extends JobManager implements IIndexConstants {
 	public synchronized Index getIndex(IPath containerPath,
 			String indexLocation, boolean reuseExistingFile,
 			boolean createIfMissing) {
-		boolean mixin = containerPath.toString().startsWith(SPECIAL_MIXIN);
+		String containerPathStr = containerPath.toPortableString();
+		boolean mixin = containerPathStr.startsWith(SPECIAL_MIXIN);
 		// Path is already canonical per construction
 		Index index = (Index) this.indexes.get(indexLocation);
 		if (index == null) {
@@ -318,9 +318,11 @@ public class IndexManager extends JobManager implements IIndexConstants {
 				// should only be reachable for query jobs
 				// IF you put an index in the cache, then AddArchiveFileToIndex
 				// fails because it thinks there is nothing to do
-				this.rebuildIndex(indexLocation, containerPath);
+				if (!createIfMissing && !mixin) {
+					this.rebuildIndex(indexLocation, containerPath);
+					return null;
+				}
 				// if (!mixin) {
-				// return null;
 				// }
 			}
 			// index isn't cached, consider reusing an existing index file
@@ -354,7 +356,10 @@ public class IndexManager extends JobManager implements IIndexConstants {
 								Util
 										.verbose("-> cannot reuse existing index: " + indexLocation + " path: " + containerPathString); //$NON-NLS-1$ //$NON-NLS-2$
 							}
-							this.rebuildIndex(indexLocation, containerPath);
+							if (!createIfMissing) {
+								this.rebuildIndex(indexLocation, containerPath);
+								return null;
+							}
 						}
 						/* index = null; */// will fall thru to createIfMissing
 						// & create a empty index for the
@@ -364,7 +369,10 @@ public class IndexManager extends JobManager implements IIndexConstants {
 				if (currentIndexState == SAVED_STATE) { // rebuild index if
 					// existing file is
 					// missing
-					this.rebuildIndex(indexLocation, containerPath);
+					if (!createIfMissing) {
+						this.rebuildIndex(indexLocation, containerPath);
+						return null;
+					}
 				}
 			}
 			// index wasn't found on disk, consider creating an empty new one
@@ -519,9 +527,32 @@ public class IndexManager extends JobManager implements IIndexConstants {
 
 		Object target = Model.getTarget(workspace.getRoot(), containerPath,
 				true);
+		// Try to search for specified container path using model
+		// if (target == null || target instanceof IFileHandle) {
+		// try {
+		// IScriptProject[] scriptProjects = ModelManager
+		// .getModelManager().getModel().getScriptProjects();
+		// for (IScriptProject project : scriptProjects) {
+		// IProjectFragment[] fragments = project
+		// .getProjectFragments();
+		// for (IProjectFragment fragment : fragments) {
+		// if (fragment.getPath().equals(containerPath)) {
+		// target = fragment;
+		// break;
+		// }
+		// }
+		// if (target != null) {
+		// break;
+		// }
+		// }
+		// } catch (ModelException e) {
+		// DLTKCore.error("Failed to obtain list of DLTK projects", e);
+		// }
+		// }
 		if (target == null) {
 			return;
 		}
+
 		if (VERBOSE) {
 			Util
 					.verbose("-> request to rebuild index: " + indexLocation + " path: " + containerPath.toString()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -535,8 +566,10 @@ public class IndexManager extends JobManager implements IIndexConstants {
 				// request = new IndexAllProject(p, this);
 				ProjectIndexerManager.indexProject(p);
 			}
-		} else if (target instanceof IFolder) {
-			// request = new IndexBinaryFolder((IFolder) target, this);
+		} else if (target instanceof IProjectFragment) {
+			ProjectIndexerManager.indexProjectFragment(
+					((IProjectFragment) target).getScriptProject(),
+					containerPath);
 			return;
 		} else if (target instanceof IFile) {
 			// request = new AddArchiveFileToIndex((IFile) target, this);

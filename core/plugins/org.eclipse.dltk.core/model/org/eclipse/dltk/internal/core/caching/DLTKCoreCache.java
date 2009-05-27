@@ -57,6 +57,10 @@ public class DLTKCoreCache extends AbstractContentCache {
 				.getStateLocation().append("cache"));
 		DLTKCore.addElementChangedListener(listener);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(listener);
+		initialize();
+	}
+
+	private void initialize() {
 		Object[] objects = extensions.getObjects();
 		for (int i = 0; i < objects.length; i++) {
 			IContentCacheProvider provider = (IContentCacheProvider) objects[i];

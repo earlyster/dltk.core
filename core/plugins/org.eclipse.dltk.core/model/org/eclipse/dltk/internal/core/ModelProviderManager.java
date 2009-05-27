@@ -35,7 +35,7 @@ public class ModelProviderManager {
 			DLTKCore.PLUGIN_ID + ".model");
 	private static Map providers = null;
 
-	public static IModelProvider[] getProviders(String lang) {
+	public synchronized static IModelProvider[] getProviders(String lang) {
 		if (providers == null) {
 			providers = new HashMap();
 
