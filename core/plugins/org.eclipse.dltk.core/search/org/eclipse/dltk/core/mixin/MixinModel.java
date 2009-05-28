@@ -152,9 +152,12 @@ public class MixinModel {
 		}
 	}
 
+	private static final long REQUEST_CACHE_EXPIRE_TIME = 15000;
+
 	private static class RequestCacheEntry {
+		long expireTime;
 		String prefix = null;
-		Set modules = null;
+		Set<ISourceModule> modules = null;
 		Set<String> keys = null;
 	}
 
@@ -189,13 +192,12 @@ public class MixinModel {
 		}
 
 		long parses = TRACE ? System.currentTimeMillis() : 0;
-		for (Iterator iterator = entry.modules.iterator(); iterator.hasNext();) {
-			ISourceModule module = (ISourceModule) iterator.next();
+		for (ISourceModule module : entry.modules) {
 			reportModule(module);
 		}
 		long parsee = TRACE ? System.currentTimeMillis() : 0;
 
-		Set result = new HashSet();
+		Set<MixinElement> result = new HashSet<MixinElement>();
 
 		// int i = 0;
 		for (String key : entry.keys) {
@@ -211,11 +213,11 @@ public class MixinModel {
 					+ String.valueOf(parsee - parses));
 		}
 
-		return (IMixinElement[]) result
-				.toArray(new IMixinElement[result.size()]);
+		return result.toArray(new IMixinElement[result.size()]);
 	}
 
-	private void addKeyToSet(Set result, MixinElement element, String pattern) {
+	private void addKeyToSet(Set<MixinElement> result, MixinElement element,
+			String pattern) {
 		// Skip all not matched keys
 		if (!CharOperation.match(pattern.toCharArray(), element.key
 				.toCharArray(), true)) {
@@ -234,12 +236,15 @@ public class MixinModel {
 	private RequestCacheEntry findFromMixin(String pattern) {
 		RequestCacheEntry entry = (RequestCacheEntry) requestCache.get(pattern);
 		// Set modules = new HashSet();
-		if (entry == null) {
+		if (entry == null || entry.expireTime < System.currentTimeMillis()) {
 			Map keys = new HashMap();
 			ISourceModule[] containedModules = SearchEngine.searchMixinSources(
 					createSearchScope(), pattern, toolkit, keys);
 			entry = new RequestCacheEntry();
-			entry.modules = new HashSet(Arrays.asList(containedModules));
+			entry.expireTime = System.currentTimeMillis()
+					+ REQUEST_CACHE_EXPIRE_TIME;
+			entry.modules = new HashSet<ISourceModule>(Arrays
+					.asList(containedModules));
 			entry.prefix = pattern;
 			Collection values = keys.values();
 			entry.keys = new HashSet<String>();
@@ -325,7 +330,8 @@ public class MixinModel {
 
 	public synchronized void reportModule(ISourceModule sourceModule) {
 		if (!this.elementToMixinCache.containsKey(sourceModule)) {
-			this.elementToMixinCache.put(sourceModule, new ArrayList());
+			this.elementToMixinCache.put(sourceModule,
+					new ArrayList<MixinElement>());
 		} else { // Module already in model. So we do not to rebuild it.
 			if (!this.modulesToReparse.remove(sourceModule)) {
 				return;
