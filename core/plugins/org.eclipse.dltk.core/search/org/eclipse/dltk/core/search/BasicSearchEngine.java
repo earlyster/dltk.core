@@ -914,16 +914,19 @@ public class BasicSearchEngine {
 		}
 
 		char[][] enclosingTypeNames = null;
-		ISearchPatternProcessor processor = getSearchPatternProcessor(scope
-				.getLanguageToolkit());
-		String patternString = new String(typeName);
-		if (processor != null) {
-			char[] qualificationChars = processor
-					.extractTypeQualification(patternString);
-			enclosingTypeNames = CharOperation.splitOn(processor
-					.getDelimiterReplacementString().toCharArray(),
-					qualificationChars);
-			typeName = processor.extractTypeChars(patternString).toCharArray();
+		if (typeName != null) {
+			ISearchPatternProcessor processor = getSearchPatternProcessor(scope
+					.getLanguageToolkit());
+			if (processor != null) {
+				String patternString = new String(typeName);
+				char[] qualificationChars = processor
+						.extractTypeQualification(patternString);
+				enclosingTypeNames = CharOperation.splitOn(processor
+						.getDelimiterReplacementString().toCharArray(),
+						qualificationChars);
+				typeName = processor.extractTypeChars(patternString)
+						.toCharArray();
+			}
 		}
 
 		final TypeDeclarationPattern pattern = packageMatchRule == SearchPattern.R_EXACT_MATCH ? new TypeDeclarationPattern(
