@@ -25,7 +25,6 @@ import org.eclipse.dltk.core.RuntimePerformanceMonitor;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
-import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 
 /**
@@ -133,8 +132,7 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 			try {
 				char[] data = Util.getInputStreamAsCharArray(stream, -1,
 						Util.UTF_8);
-				IEnvironment env = file.getEnvironment();
-				p.done("#", RuntimePerformanceMonitor.IOREAD, data.length, env);
+				p.done("#", RuntimePerformanceMonitor.IOREAD, data.length);
 				return data;
 			} catch (IOException e) {
 				throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
