@@ -103,7 +103,12 @@ class DebugConsoleContentAssistProcessor implements IContentAssistProcessor {
 						IDbgpProperty property = thread.getDbgpSession()
 								.getCoreCommands().getProperty(fullName);
 						if (property != null) {
-							map.put(property.getName(), getTree(property
+							String name = property.getName();
+							int index = name.lastIndexOf(".");
+							if (index != -1) {
+								name = name.substring(index + 1);
+							}
+							map.put(name, getTree(property
 									.getAvailableChildren()));
 							SortedMap segmentMap = (SortedMap) map
 									.get(segments[lastSegment]);
