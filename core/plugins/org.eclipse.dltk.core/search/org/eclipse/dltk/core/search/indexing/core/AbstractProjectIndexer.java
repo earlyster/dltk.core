@@ -33,7 +33,8 @@ import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 import org.eclipse.dltk.internal.core.search.processing.IJob;
 import org.eclipse.osgi.util.NLS;
 
-public abstract class AbstractProjectIndexer implements IProjectIndexer {
+public abstract class AbstractProjectIndexer implements IProjectIndexer,
+		IProjectIndexer.Internal {
 
 	private final IndexManager manager = ModelManager.getModelManager()
 			.getIndexManager();
