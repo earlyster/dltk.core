@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="org.eclipse.dltk.ui.main"
+            class="org.eclipse.dltk.core.tools.internal.ui.DLTKPerformanceViewPart"
+            id="org.eclipse.dltk.core.tools.ui.performance.view"
+            name="DLTK Runtime performance"
+            restorable="true">
+      </view>
+   </extension>
+
+</plugin>
