@@ -21,6 +21,21 @@ import org.eclipse.dltk.internal.core.search.processing.IJob;
 
 public interface IProjectIndexer {
 
+	public interface Internal extends IProjectIndexer {
+
+		void indexSourceModule(Index index, IDLTKLanguageToolkit toolkit,
+				ISourceModule change, IPath containerPath);
+
+		void request(IJob request);
+
+		Index getProjectFragmentIndex(IProjectFragment fragment);
+
+		Index getProjectIndex(IScriptProject project);
+
+		IndexManager getIndexManager();
+
+	}
+
 	/**
 	 * @param project
 	 */
@@ -73,16 +88,5 @@ public interface IProjectIndexer {
 	 * Is called just after initialization to verify the indexes
 	 */
 	void startIndexing();
-
-	void request(IJob request);
-
-	void indexSourceModule(Index index, IDLTKLanguageToolkit toolkit,
-			ISourceModule change, IPath containerPath);
-
-	Index getProjectFragmentIndex(IProjectFragment fragment);
-
-	Index getProjectIndex(IScriptProject project);
-
-	IndexManager getIndexManager();
 
 }

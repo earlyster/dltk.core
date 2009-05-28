@@ -59,7 +59,7 @@ class ProjectRequest extends IndexRequest {
 				.getLanguageToolkit(project);
 		final IProjectFragment[] fragments = ((ScriptProject) project)
 				.getAllProjectFragments();
-		IProjectIndexer indexer = getIndexer();
+		IProjectIndexer.Internal indexer = getIndexer();
 		final SourceModuleCollector moduleCollector = new SourceModuleCollector();
 		for (int i = 0; i < fragments.length; ++i) {
 			if (isCancelled) {
