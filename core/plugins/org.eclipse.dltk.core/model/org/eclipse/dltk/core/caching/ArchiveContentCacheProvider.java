@@ -77,7 +77,8 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 					PerformanceNode p = RuntimePerformanceMonitor.begin();
 					Util.copy(zipFileHandle, inp);
 					inp.close();
-					p.done("#", "Indexes read", zipFileHandle.length());
+					p.done("#", "Indexes read", zipFileHandle.length(),
+							indexFile.getEnvironment());
 				}
 				ZipFile zipFile = new ZipFile(zipFileHandle);
 
