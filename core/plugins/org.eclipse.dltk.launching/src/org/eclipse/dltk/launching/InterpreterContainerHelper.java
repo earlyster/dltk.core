@@ -16,7 +16,7 @@ import org.eclipse.dltk.internal.core.BuildpathEntry;
 
 public class InterpreterContainerHelper {
 	private static final char SEPARATOR = '|';
-	private static final String PACKAGES_ATTR = "dependencies"; //$NON-NLS-1$
+	private static final String PACKAGES_ATTR = "user_dependencies"; //$NON-NLS-1$
 	private static final String PACKAGES_AUTO_ATTR = "auto_dependencies"; //$NON-NLS-1$
 	public static final String CONTAINER_PATH = ScriptRuntime.INTERPRETER_CONTAINER;
 
