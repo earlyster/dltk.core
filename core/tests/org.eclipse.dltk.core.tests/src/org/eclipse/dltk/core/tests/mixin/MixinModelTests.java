@@ -48,19 +48,31 @@ public class MixinModelTests extends AbstractModelTests {
 
 	public void testMixin001() throws Throwable {
 		MixinModel model = new MixinModel(TestLanguageToolkit.getDefault());
-		IMixinElement[] results = model.find("{foo");
-		TestCase.assertEquals(1, results.length);
+		try {
+			IMixinElement[] results = model.find("{foo");
+			TestCase.assertEquals(1, results.length);
+		} finally {
+			model.stop();
+		}
 	}
 
 	public void testMixin002() throws Throwable {
 		MixinModel model = new MixinModel(TestLanguageToolkit.getDefault());
-		IMixinElement[] results = model.find("{foo*");
-		TestCase.assertEquals(3, results.length);
+		try {
+			IMixinElement[] results = model.find("{foo*");
+			TestCase.assertEquals(3, results.length);
+		} finally {
+			model.stop();
+		}
 	}
 
 	public void testMixin003() throws Throwable {
 		MixinModel model = new MixinModel(TestLanguageToolkit.getDefault());
-		IMixinElement[] results = model.find("{foo*a");
-		TestCase.assertEquals(1, results.length);
+		try {
+			IMixinElement[] results = model.find("{foo*a");
+			TestCase.assertEquals(1, results.length);
+		} finally {
+			model.stop();
+		}
 	}
 }
