@@ -12,7 +12,6 @@ package org.eclipse.dltk.core.environment;
 
 import java.net.URI;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.resources.IResource;
@@ -113,8 +112,8 @@ public class EnvironmentPathUtils {
 		return env.getFile(path);
 	}
 
-	public static Map decodePaths(String concatenatedPaths) {
-		Map result = new HashMap();
+	public static Map<IEnvironment, String> decodePaths(String concatenatedPaths) {
+		Map<IEnvironment, String> result = new HashMap<IEnvironment, String>();
 		if (concatenatedPaths != null) {
 			String[] paths = concatenatedPaths
 					.split(EnvironmentPathUtils.PATH_DELIMITER);
@@ -132,19 +131,15 @@ public class EnvironmentPathUtils {
 		return result;
 	}
 
-	public static String encodePaths(Map env2path) {
-		Iterator it = env2path.entrySet().iterator();
+	public static String encodePaths(Map<IEnvironment, String> env2path) {
 		StringBuffer concatenatedPaths = new StringBuffer();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
-			IEnvironment key = (IEnvironment) entry.getKey();
-			String localPath = (String) entry.getValue();
-			IPath path = EnvironmentPathUtils.getFullPath(key, new Path(
-					localPath));
-			concatenatedPaths.append(path.toPortableString());
-			if (it.hasNext()) {
+		for (Map.Entry<IEnvironment, String> entry : env2path.entrySet()) {
+			if (concatenatedPaths.length() != 0) {
 				concatenatedPaths.append(EnvironmentPathUtils.PATH_DELIMITER);
 			}
+			IPath path = EnvironmentPathUtils.getFullPath(entry.getKey(),
+					new Path(entry.getValue()));
+			concatenatedPaths.append(path.toPortableString());
 		}
 		return concatenatedPaths.toString();
 	}
