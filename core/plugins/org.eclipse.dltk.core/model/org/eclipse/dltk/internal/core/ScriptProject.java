@@ -2433,7 +2433,9 @@ public class ScriptProject extends Openable implements IScriptProject {
 	 */
 	public IProjectFragment findProjectFragment0(IPath path)
 			throws ModelException {
-		if (!EnvironmentPathUtils.isFull(path)) {
+		if (!EnvironmentPathUtils.isFull(path)
+				&& (path.segmentCount() == 0 || !path.segment(0).startsWith(
+						IBuildpathEntry.BUILDPATH_SPECIAL))) {
 			path = EnvironmentPathUtils.getFullPath(EnvironmentManager
 					.getEnvironment(this), path);
 		}

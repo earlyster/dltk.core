@@ -109,9 +109,10 @@ abstract class IndexRequest extends AbstractJob {
 				if (module == null) {
 					changes.add(document);
 				} else if (environment != null) {
-					final IFileHandle handle = environment
-							.getFile(EnvironmentPathUtils.getLocalPath(module
-									.getPath()));
+					// final IFileHandle handle = environment
+					// .getFile(EnvironmentPathUtils.getLocalPath(module
+					// .getPath()));
+					IFileHandle handle = EnvironmentPathUtils.getFile(module);
 					if (handle != null
 							&& handle.lastModified() > indexLastModified) {
 						changes.add(module);

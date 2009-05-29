@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.compiler.util.Util;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
@@ -168,6 +169,10 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	protected String getNatureId() throws CoreException {
 		IPath path = getFullPath();
 		IDLTKLanguageToolkit toolkit = lookupLanguageToolkit(path);
+		if (toolkit == null) {
+			toolkit = DLTKLanguageManager
+					.getLanguageToolkit(getScriptProject());
+		}
 		return (toolkit != null) ? toolkit.getNatureId() : null;
 	}
 

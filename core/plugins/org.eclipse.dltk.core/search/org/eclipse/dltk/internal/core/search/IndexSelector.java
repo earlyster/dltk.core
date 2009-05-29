@@ -341,6 +341,6 @@ public class IndexSelector {
 	}
 
 	public void setMixinOnly(boolean bOnlyMixin) {
-		this.mixinOnly = false;
+		this.mixinOnly = bOnlyMixin;
 	}
 }

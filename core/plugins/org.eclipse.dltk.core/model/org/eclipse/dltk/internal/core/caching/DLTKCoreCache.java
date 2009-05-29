@@ -8,9 +8,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IModelElementVisitor;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.SimpleClassDLTKExtensionManager;
 import org.eclipse.dltk.core.caching.AbstractContentCache;
 import org.eclipse.dltk.core.caching.IContentCacheProvider;
@@ -50,6 +53,25 @@ public class DLTKCoreCache extends AbstractContentCache {
 		protected void remove(ISourceModule element) {
 			removeElement(element);
 		};
+
+		protected void remove(org.eclipse.dltk.core.IProjectFragment element) {
+			IProjectFragment fragment = (IProjectFragment) element;
+			try {
+				fragment.accept(new IModelElementVisitor() {
+					public boolean visit(IModelElement element) {
+						if (element.getElementType() == ISourceModule.SOURCE_MODULE) {
+							remove((ISourceModule) element);
+							return false;
+						}
+						return true;
+					}
+				});
+			} catch (ModelException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+		}
 	};
 
 	public DLTKCoreCache() {

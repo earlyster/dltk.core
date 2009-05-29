@@ -9,6 +9,7 @@ import org.eclipse.dltk.core.ElementChangedEvent;
 import org.eclipse.dltk.core.IElementChangedListener;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
@@ -26,6 +27,9 @@ public abstract class ModelCacheListener implements IResourceChangeListener,
 	}
 
 	protected void remove(IProject element) {
+	}
+
+	protected void remove(IProjectFragment element) {
 	}
 
 	public void elementChanged(ElementChangedEvent event) {
@@ -66,9 +70,18 @@ public abstract class ModelCacheListener implements IResourceChangeListener,
 				IModelElementDelta child = affectedChildren[i];
 				processDelta(child);
 			}
-		} else if (delta.getKind() == IModelElementDelta.REMOVED
+		} else if ((delta.getKind() == IModelElementDelta.REMOVED || delta
+				.getKind() == IModelElementDelta.CHANGED)
 				&& element.getElementType() == IModelElement.SCRIPT_FOLDER) {
-			remove((IScriptFolder) element);
+			if (delta.getAffectedChildren().length == 0) {
+				remove((IScriptFolder) element);
+			}
+		} else if ((delta.getKind() == IModelElementDelta.REMOVED || delta
+				.getKind() == IModelElementDelta.CHANGED)
+				&& element.getElementType() == IModelElement.PROJECT_FRAGMENT) {
+			if (delta.getAffectedChildren().length == 0) {
+				remove((IProjectFragment) element);
+			}
 		}
 	}
 

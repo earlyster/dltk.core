@@ -19,8 +19,11 @@ import org.eclipse.dltk.core.IElementCacheListener;
 import org.eclipse.dltk.core.IElementChangedListener;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
+import org.eclipse.dltk.core.IModelElementVisitor;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceModuleInfoCache;
+import org.eclipse.dltk.core.ModelException;
 
 /**
  * Used to cache some source module information. All information related to
@@ -113,6 +116,28 @@ public class SourceModuleInfoCache implements ISourceModuleInfoCache {
 						System.out
 								.println("[Cache] skip delta: kind=" + delta.getKind() + " flags=" + Integer.toHexString(delta.getFlags()) + " elementName=" + delta.getElement().getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
+				}
+				if (element.getElementType() == ISourceModule.PROJECT_FRAGMENT) {
+					if (delta.getAffectedChildren().length == 0) {
+						IProjectFragment fragment = (IProjectFragment) element;
+						try {
+							fragment.accept(new IModelElementVisitor() {
+								public boolean visit(IModelElement element) {
+									if (element.getElementType() == ISourceModule.SOURCE_MODULE) {
+										SourceModuleInfoCache.this
+												.remove((ISourceModule) element);
+										return false;
+									}
+									return true;
+								}
+							});
+						} catch (ModelException e) {
+							if (DLTKCore.DEBUG) {
+								e.printStackTrace();
+							}
+						}
+					}
+
 				}
 			}
 			if ((delta.getFlags() & IModelElementDelta.F_CHILDREN) != 0) {
