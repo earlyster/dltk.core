@@ -150,16 +150,16 @@ public class EditorUtility {
 				if (inputElement instanceof IModelElement) {
 
 					// first try to get it from the system.
-					String editorId = getEditorID(input, inputElement);
-
-					if (editorId == null) { // Transitional code
-						if (input != null) {
-							IDLTKUILanguageToolkit toolkit = DLTKUILanguageManager
-									.getLanguageToolkit((IModelElement) inputElement);
-							if (toolkit != null) {
-								editorId = toolkit.getEditorId(inputElement);
-							}
+					String editorId = null;
+					if (input != null) {
+						IDLTKUILanguageToolkit toolkit = DLTKUILanguageManager
+								.getLanguageToolkit((IModelElement) inputElement);
+						if (toolkit != null) {
+							editorId = toolkit.getEditorId(inputElement);
 						}
+					}
+					if (editorId == null) { // Transitional code
+						editorId = getEditorID(input, inputElement);
 					}
 
 					if (editorId != null) {
