@@ -74,7 +74,7 @@ public class CacheTests extends AbstractModelTests {
 				new NullProgressMonitor());
 		ArchiveCacheIndexBuilder builder = new ArchiveCacheIndexBuilder(
 				new FileOutputStream(new File(index_file.getLocation()
-						.toOSString())));
+						.toOSString())), 0);
 
 		IFile file1 = PROJECT.getFile("file1.te");
 		file1.create(new ByteArrayInputStream(new byte[0]), true,
