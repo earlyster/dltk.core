@@ -470,7 +470,7 @@ public class TypeHierarchyViewPart extends ViewPart implements
 					element = memberToSelect.getDeclaringType();
 
 				}
-				if (!element.exists()) {
+				if (element == null || !element.exists()) {
 					MessageDialog
 							.openError(
 									getSite().getShell(),
