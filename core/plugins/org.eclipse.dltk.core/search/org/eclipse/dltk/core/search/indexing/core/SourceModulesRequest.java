@@ -76,6 +76,10 @@ class SourceModulesRequest extends IndexRequest {
 							(ISourceModule) change, containerPath);
 				}
 			}
+		} catch (Throwable t) {
+			if (DLTKCore.DEBUG) {
+				t.printStackTrace();
+			}
 		} finally {
 			try {
 				index.save();

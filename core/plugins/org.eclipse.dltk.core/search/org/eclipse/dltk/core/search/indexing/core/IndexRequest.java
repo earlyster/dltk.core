@@ -25,6 +25,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.internal.environment.EFSFileHandle;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.AbstractJob;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
@@ -113,8 +114,14 @@ abstract class IndexRequest extends AbstractJob {
 					// .getFile(EnvironmentPathUtils.getLocalPath(module
 					// .getPath()));
 					IFileHandle handle = EnvironmentPathUtils.getFile(module);
-					if (handle != null
-							&& handle.lastModified() > indexLastModified) {
+					long lmodif = 0;
+					if (handle instanceof EFSFileHandle) {
+						lmodif = ((EFSFileHandle) handle)
+								.lastModifiedFromCache();
+					} else {
+						lmodif = handle.lastModified();
+					}
+					if (handle != null && lmodif > indexLastModified) {
 						changes.add(module);
 					}
 				}

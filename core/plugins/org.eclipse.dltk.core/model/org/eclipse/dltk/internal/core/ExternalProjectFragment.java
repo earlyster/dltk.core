@@ -33,6 +33,7 @@ import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.internal.environment.EFSFileHandle;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Util;
 
@@ -330,7 +331,13 @@ public class ExternalProjectFragment extends ProjectFragment implements
 			long stamp = 0;
 			IFileHandle file = environment.getFile(this.getPath());
 			if (file != null && file.exists()) {
-				stamp = file.lastModified();
+				long lmodif = 0;
+				if (file instanceof EFSFileHandle) {
+					lmodif = ((EFSFileHandle) file).lastModifiedFromCache();
+				} else {
+					lmodif = file.lastModified();
+				}
+				stamp = lmodif;
 			} else {
 				return 0;
 			}

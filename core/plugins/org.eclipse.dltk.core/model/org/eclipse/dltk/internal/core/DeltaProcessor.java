@@ -52,6 +52,7 @@ import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.internal.environment.EFSFileHandle;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
 import org.eclipse.dltk.internal.core.builder.ScriptBuilder;
@@ -180,7 +181,13 @@ public class DeltaProcessor {
 	 * detecting external JAR changes
 	 */
 	public static long getTimeStamp(IFileHandle file) {
-		return file.lastModified() + file.length();
+		long lmodif = 0;
+		if (file instanceof EFSFileHandle) {
+			lmodif = ((EFSFileHandle) file).lastModifiedFromCache();
+		} else {
+			lmodif = file.lastModified();
+		}
+		return lmodif + file.length();
 	}
 
 	/*

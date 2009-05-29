@@ -35,4 +35,10 @@ public interface IContentCache {
 	public File getEntryAsFile(IFileHandle handle, String attribute);
 
 	public void clear();
+
+	public boolean setCacheEntryAttribute(IFileHandle entryHandle,
+			String attribute, long timestamp);
+
+	public long getCacheEntryAttributeLong(IFileHandle entryHandle,
+			String attribute);
 }
