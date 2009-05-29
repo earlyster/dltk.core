@@ -50,6 +50,7 @@ import org.eclipse.dltk.internal.core.mixin.MixinManager;
 import org.eclipse.dltk.internal.core.util.LRUCache;
 
 public class MixinModel {
+	private static final long REQUEST_CACHE_EXPIRE_TIME = 5000;
 	private static final boolean DEBUG = false;
 	private static final boolean TRACE = false;
 
@@ -151,8 +152,6 @@ public class MixinModel {
 			return SearchEngine.createWorkspaceScope(toolkit);
 		}
 	}
-
-	private static final long REQUEST_CACHE_EXPIRE_TIME = 15000;
 
 	private static class RequestCacheEntry {
 		long expireTime;
@@ -879,6 +878,12 @@ public class MixinModel {
 		notExistKeysCache.remove(key);
 		requestCache.remove(key);
 		// MixinElement e = (MixinElement)this.cache.get(key);
+	}
+
+	public void clearKeysCache() {
+		existKeysCache.clear();
+		notExistKeysCache.clear();
+		requestCache.clone();
 	}
 
 	// // Mixin object initialize listeners code

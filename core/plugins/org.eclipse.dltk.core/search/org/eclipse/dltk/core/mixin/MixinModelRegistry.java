@@ -51,4 +51,16 @@ public class MixinModelRegistry {
 
 	}
 
+	public static void clearKeysCache(IDLTKLanguageToolkit toolkit) {
+		synchronized (models) {
+			for (Iterator i = models.keySet().iterator(); i.hasNext();) {
+				final MixinModel model = (MixinModel) i.next();
+				if (toolkit.getNatureId().equals(model.getNature())) {
+					model.clearKeysCache();
+				}
+			}
+		}
+
+	}
+
 }

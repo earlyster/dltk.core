@@ -22,9 +22,12 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 public class ArchiveCacheIndexBuilder {
 	private ZipOutputStream zip;
 	private CacheIndex index = CacheFactory.eINSTANCE.createCacheIndex();
+	private long version;
 
-	public ArchiveCacheIndexBuilder(OutputStream stream) throws IOException {
+	public ArchiveCacheIndexBuilder(OutputStream stream, long version)
+			throws IOException {
 		zip = new ZipOutputStream(new BufferedOutputStream(stream, 8096));
+		this.version = version;
 	}
 
 	public void addEntry(String fileName, long timeStamp, String attribute,
@@ -66,6 +69,7 @@ public class ArchiveCacheIndexBuilder {
 			}
 		}
 		CacheEntry entry = CacheFactory.eINSTANCE.createCacheEntry();
+		entry.setLastAccessTime(version);
 		entry.setPath(path);
 		entry.setTimestamp(timeStamp);
 		index.getEntries().add(entry);

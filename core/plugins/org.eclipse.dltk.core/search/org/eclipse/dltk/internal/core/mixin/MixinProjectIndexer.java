@@ -28,8 +28,8 @@ public class MixinProjectIndexer extends AbstractProjectIndexer {
 
 	public void doIndexing(DLTKSearchDocument document, ISourceModule module) {
 		new MixinIndexer(document, module).indexDocument();
-		MixinModelRegistry.removeSourceModule(DLTKLanguageManager
-				.getLanguageToolkit(module), module);
+		MixinModelRegistry.clearKeysCache(DLTKLanguageManager
+				.getLanguageToolkit(module));
 	}
 
 	public Index getProjectIndex(IPath path) {
