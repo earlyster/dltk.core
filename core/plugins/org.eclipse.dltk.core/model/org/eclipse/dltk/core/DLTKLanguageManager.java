@@ -84,16 +84,22 @@ public class DLTKLanguageManager {
 	public static IDLTKLanguageToolkit getLanguageToolkit(IModelElement element) {
 		IDLTKLanguageToolkit toolkit = (IDLTKLanguageToolkit) InternalDLTKLanguageManager
 				.getLanguageToolkitsManager().getObject(element);
-		if (toolkit == null && element != null
-				&& element.getElementType() == IModelElement.SOURCE_MODULE) {
-			if (element.getResource() != null) {
-				IDLTKLanguageToolkit tk = findAppropriateToolkitByObject(element
-						.getResource());
-				if (tk != null) {
-					return tk;
-				}
+		if (toolkit == null) {
+			while (element != null
+					&& element.getElementType() != IModelElement.SOURCE_MODULE) {
+				element = element.getParent();
 			}
-			return findAppropriateToolkitByObject(element.getPath());
+			if (element != null
+					&& element.getElementType() == IModelElement.SOURCE_MODULE) {
+				if (element.getResource() != null) {
+					IDLTKLanguageToolkit tk = findAppropriateToolkitByObject(element
+							.getResource());
+					if (tk != null) {
+						return tk;
+					}
+				}
+				return findAppropriateToolkitByObject(element.getPath());
+			}
 		}
 		return toolkit;
 	}
