@@ -604,8 +604,8 @@ public class MixinModel {
 	private class MixinElement implements IMixinElement, IInternalMixinElement {
 		private String key;
 		private boolean bFinal = false;
-		private List sourceModules = new ArrayList();
-		private Map sourceModuleToObject = new HashMap();
+		private List<ISourceModule> sourceModules = new ArrayList<ISourceModule>();
+		private Map<ISourceModule, Object> sourceModuleToObject = new HashMap<ISourceModule, Object>();
 
 		/**
 		 * List of Strings.
@@ -646,13 +646,13 @@ public class MixinModel {
 					if (object instanceof List) {
 						((List) object).add(info.object);
 					} else {
-						List list = new ArrayList();
+						List<Object> list = new ArrayList<Object>();
 						list.add(object);
 						list.add(info.object);
 						this.sourceModuleToObject.put(module, list);
 					}
 				} else {
-					List list = new ArrayList();
+					List<Object> list = new ArrayList<Object>();
 					list.add(info.object);
 					this.sourceModuleToObject.put(module, list);
 				}
@@ -717,7 +717,7 @@ public class MixinModel {
 			if (!this.isFinal()) {
 				get(this.key);
 			}
-			return (ISourceModule[]) this.sourceModules
+			return this.sourceModules
 					.toArray(new ISourceModule[this.sourceModules.size()]);
 		}
 
