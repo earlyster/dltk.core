@@ -12,7 +12,6 @@
 package org.eclipse.dltk.core.mixin;
 
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -32,7 +31,7 @@ public class MixinModelRegistry {
 		}
 	}
 
-	private static final Map models = new IdentityHashMap();
+	private static final Map<MixinModel, Object> models = new IdentityHashMap<MixinModel, Object>();
 
 	/**
 	 * @param toolkit
@@ -41,8 +40,7 @@ public class MixinModelRegistry {
 	public static void removeSourceModule(IDLTKLanguageToolkit toolkit,
 			ISourceModule module) {
 		synchronized (models) {
-			for (Iterator i = models.keySet().iterator(); i.hasNext();) {
-				final MixinModel model = (MixinModel) i.next();
+			for (final MixinModel model : models.keySet()) {
 				if (toolkit.getNatureId().equals(model.getNature())) {
 					model.remove(module);
 				}
@@ -53,8 +51,7 @@ public class MixinModelRegistry {
 
 	public static void clearKeysCache(IDLTKLanguageToolkit toolkit) {
 		synchronized (models) {
-			for (Iterator i = models.keySet().iterator(); i.hasNext();) {
-				final MixinModel model = (MixinModel) i.next();
+			for (final MixinModel model : models.keySet()) {
 				if (toolkit.getNatureId().equals(model.getNature())) {
 					model.clearKeysCache();
 				}
