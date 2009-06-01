@@ -19,7 +19,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 
 public class MixinSourceElementRequestor implements ISourceElementRequestor {
-	private List path = new ArrayList();
+	private List<String> path = new ArrayList<String>();
 	private IMixinRequestor requestor;
 	private boolean signature = false;
 	private ISourceModule module;
@@ -50,8 +50,8 @@ public class MixinSourceElementRequestor implements ISourceElementRequestor {
 			}
 			for (int i = 0; i < children.length; ++i) {
 				if (children[i].getElementName().equals(path.get(index))) {
-					IModelElement el = getElement( children[i], index + 1 );
-					if( el != null ) {
+					IModelElement el = getElement(children[i], index + 1);
+					if (el != null) {
 						return el;
 					}
 				}
