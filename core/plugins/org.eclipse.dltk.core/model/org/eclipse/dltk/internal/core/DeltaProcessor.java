@@ -2191,7 +2191,7 @@ public class DeltaProcessor {
 										fragment.getPath(),
 										new Long(newTimeStamp));
 								// index new library
-								ProjectIndexerManager.indexLibrary(
+								ProjectIndexerManager.indexProjectFragment(
 										scriptProject, fragment.getPath());
 								if (fragment instanceof Openable) {
 									this.elementAdded((Openable) fragment,
@@ -2203,7 +2203,7 @@ public class DeltaProcessor {
 							if (newTimeStamp == 0) {
 								this.state.getCustomTimeStamps().remove(
 										fragment.getPath());
-								ProjectIndexerManager.removeLibrary(
+								ProjectIndexerManager.removeProjectFragment(
 										scriptProject, fragment.getPath());
 								if (fragment instanceof Openable) {
 									this.elementRemoved((Openable) fragment,
@@ -2215,7 +2215,7 @@ public class DeltaProcessor {
 										fragment.getPath(),
 										new Long(newTimeStamp));
 								// index new library
-								ProjectIndexerManager.indexLibrary(
+								ProjectIndexerManager.indexProjectFragment(
 										scriptProject, fragment.getPath());
 								if (fragment instanceof Openable) {
 									this.contentChanged((Openable) fragment);

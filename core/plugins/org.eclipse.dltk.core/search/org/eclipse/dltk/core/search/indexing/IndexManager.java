@@ -35,6 +35,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.BasicSearchEngine;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
@@ -42,6 +43,7 @@ import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.index.MixinIndex;
 import org.eclipse.dltk.internal.core.Model;
+import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.search.PatternSearchJob;
 import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
@@ -317,7 +319,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 				// should only be reachable for query jobs
 				// IF you put an index in the cache, then AddArchiveFileToIndex
 				// fails because it thinks there is nothing to do
-				if (!createIfMissing && !mixin) {
+				if (!createIfMissing) {
 					this.rebuildIndex(indexLocation, containerPath);
 					return null;
 				}
@@ -524,30 +526,35 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			return;
 		}
 
-		Object target = Model.getTarget(workspace.getRoot(), containerPath,
-				true);
+		String cp = containerPath.toString();
+		if (cp.startsWith(SPECIAL_MIXIN)) {
+			cp = cp.substring(SPECIAL_MIXIN.length());
+		}
+		Path pathCP = new Path(cp);
+
+		Object target = Model.getTarget(workspace.getRoot(), pathCP, true);
 		// Try to search for specified container path using model
-		// if (target == null || target instanceof IFileHandle) {
-		// try {
-		// IScriptProject[] scriptProjects = ModelManager
-		// .getModelManager().getModel().getScriptProjects();
-		// for (IScriptProject project : scriptProjects) {
-		// IProjectFragment[] fragments = project
-		// .getProjectFragments();
-		// for (IProjectFragment fragment : fragments) {
-		// if (fragment.getPath().equals(containerPath)) {
-		// target = fragment;
-		// break;
-		// }
-		// }
-		// if (target != null) {
-		// break;
-		// }
-		// }
-		// } catch (ModelException e) {
-		// DLTKCore.error("Failed to obtain list of DLTK projects", e);
-		// }
-		// }
+		if (target == null || target instanceof IFileHandle) {
+			try {
+				IScriptProject[] scriptProjects = ModelManager
+						.getModelManager().getModel().getScriptProjects();
+				for (IScriptProject project : scriptProjects) {
+					IProjectFragment[] fragments = project
+							.getProjectFragments();
+					for (IProjectFragment fragment : fragments) {
+						if (fragment.getPath().equals(pathCP)) {
+							target = fragment;
+							break;
+						}
+					}
+					if (target != null) {
+						break;
+					}
+				}
+			} catch (ModelException e) {
+				DLTKCore.error("Failed to obtain list of DLTK projects", e);
+			}
+		}
 		if (target == null) {
 			return;
 		}
@@ -567,8 +574,7 @@ public class IndexManager extends JobManager implements IIndexConstants {
 			}
 		} else if (target instanceof IProjectFragment) {
 			ProjectIndexerManager.indexProjectFragment(
-					((IProjectFragment) target).getScriptProject(),
-					containerPath);
+					((IProjectFragment) target).getScriptProject(), pathCP);
 			return;
 		} else if (target instanceof IFile) {
 			// request = new AddArchiveFileToIndex((IFile) target, this);
