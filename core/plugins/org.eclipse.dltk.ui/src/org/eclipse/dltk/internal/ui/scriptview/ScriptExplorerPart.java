@@ -37,7 +37,6 @@ import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.StandardModelElementContentProvider;
@@ -86,11 +85,9 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
-import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -222,17 +219,17 @@ public class ScriptExplorerPart extends ViewPart implements
 		}
 	};
 
-	private ITreeViewerListener fExpansionListener = new ITreeViewerListener() {
-		public void treeCollapsed(TreeExpansionEvent event) {
-		}
-
-		public void treeExpanded(TreeExpansionEvent event) {
-			Object element = event.getElement();
-			if (element instanceof ISourceModule) {
-				expandMainType(element);
-			}
-		}
-	};
+//	private ITreeViewerListener fExpansionListener = new ITreeViewerListener() {
+//		public void treeCollapsed(TreeExpansionEvent event) {
+//		}
+//
+//		public void treeExpanded(TreeExpansionEvent event) {
+//			Object element = event.getElement();
+//			if (element instanceof ISourceModule) {
+//				expandMainType(element);
+//			}
+//		}
+//	};
 
 	protected class PackageExplorerProblemTreeViewer extends ProblemTreeViewer {
 		// fix for 64372 Projects showing up in Package Explorer twice [package
@@ -591,9 +588,9 @@ public class ScriptExplorerPart extends ViewPart implements
 
 		DLTKUIPlugin.getDefault().getPreferenceStore()
 				.removePropertyChangeListener(this);
-		if (fViewer != null) {
-			fViewer.removeTreeListener(fExpansionListener);
-		}
+//		if (fViewer != null) {
+//			fViewer.removeTreeListener(fExpansionListener);
+//		}
 
 		if (fActionSet != null) {
 			fActionSet.dispose();
@@ -670,7 +667,7 @@ public class ScriptExplorerPart extends ViewPart implements
 		IStatusLineManager slManager = getViewSite().getActionBars()
 				.getStatusLineManager();
 		fViewer.addSelectionChangedListener(new StatusBarUpdater(slManager));
-		fViewer.addTreeListener(fExpansionListener);
+//		fViewer.addTreeListener(fExpansionListener);
 
 		// ScriptUIHelp.setHelp(fViewer, IScriptHelpContextIds.PACKAGES_VIEW);
 
@@ -1351,37 +1348,37 @@ public class ScriptExplorerPart extends ViewPart implements
 		return null;
 	}
 
-	/**
-	 * A compilation unit or class was expanded, expand the main type.
-	 */
-	void expandMainType(Object element) {
-		try {
-			IType type = null;
-			if (element instanceof ISourceModule) {
-				ISourceModule cu = (ISourceModule) element;
-				IType[] types = cu.getTypes();
-				if (types.length > 0) {
-					type = types[0];
-				}
-			}
-			if (type != null) {
-				final IType type2 = type;
-				Control ctrl = fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()) {
-					ctrl.getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							Control ctrl2 = fViewer.getControl();
-							if (ctrl2 != null && !ctrl2.isDisposed()) {
-								fViewer.expandToLevel(type2, 1);
-							}
-						}
-					});
-				}
-			}
-		} catch (ModelException e) {
-			// no reveal
-		}
-	}
+	// /**
+	// * A compilation unit or class was expanded, expand the main type.
+	// */
+	// void expandMainType(Object element) {
+	// try {
+	// IType type = null;
+	// if (element instanceof ISourceModule) {
+	// ISourceModule cu = (ISourceModule) element;
+	// IType[] types = cu.getTypes();
+	// if (types.length > 0) {
+	// type = types[0];
+	// }
+	// }
+	// if (type != null) {
+	// final IType type2 = type;
+	// Control ctrl = fViewer.getControl();
+	// if (ctrl != null && !ctrl.isDisposed()) {
+	// ctrl.getDisplay().asyncExec(new Runnable() {
+	// public void run() {
+	// Control ctrl2 = fViewer.getControl();
+	// if (ctrl2 != null && !ctrl2.isDisposed()) {
+	// fViewer.expandToLevel(type2, 1);
+	// }
+	// }
+	// });
+	// }
+	// }
+	// } catch (ModelException e) {
+	// // no reveal
+	// }
+	// }
 
 	protected Object getElementOfInput(IEditorInput input) {
 		if (input instanceof IFileEditorInput)
