@@ -123,32 +123,32 @@ public class RefactorActionGroup extends ActionGroup {
 	private ScriptEditor fEditor;
 	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
 
- 	private SelectionDispatchAction fMoveAction;
-	private SelectionDispatchAction fRenameAction;
-	private SelectionDispatchAction fModifyParametersAction;
-	private SelectionDispatchAction fConvertAnonymousToNestedAction;
-	private SelectionDispatchAction fConvertNestedToTopAction;
+	protected SelectionDispatchAction fMoveAction;
+	protected SelectionDispatchAction fRenameAction;
+	protected SelectionDispatchAction fModifyParametersAction;
+	protected SelectionDispatchAction fConvertAnonymousToNestedAction;
+	protected SelectionDispatchAction fConvertNestedToTopAction;
 	
-	private SelectionDispatchAction fPullUpAction;
-	private SelectionDispatchAction fPushDownAction;
-	private SelectionDispatchAction fExtractInterfaceAction;
-	private SelectionDispatchAction fExtractSupertypeAction;
-	private SelectionDispatchAction fChangeTypeAction;
-	private SelectionDispatchAction fUseSupertypeAction;
-	private SelectionDispatchAction fInferTypeArgumentsAction;
+	protected SelectionDispatchAction fPullUpAction;
+	protected SelectionDispatchAction fPushDownAction;
+	protected SelectionDispatchAction fExtractInterfaceAction;
+	protected SelectionDispatchAction fExtractSupertypeAction;
+	protected SelectionDispatchAction fChangeTypeAction;
+	protected SelectionDispatchAction fUseSupertypeAction;
+	protected SelectionDispatchAction fInferTypeArgumentsAction;
 	
-	private SelectionDispatchAction fInlineAction;
+	protected SelectionDispatchAction fInlineAction;
 //	private SelectionDispatchAction fReplaceInvocationsAction;
-	private SelectionDispatchAction fIntroduceIndirectionAction;
-	private SelectionDispatchAction fExtractMethodAction;
-	private SelectionDispatchAction fExtractTempAction;
-	private SelectionDispatchAction fExtractConstantAction;
-	private SelectionDispatchAction fIntroduceParameterAction;
-	private SelectionDispatchAction fIntroduceFactoryAction;
-	private SelectionDispatchAction fConvertLocalToFieldAction;
-	private SelectionDispatchAction fSelfEncapsulateField;
+	protected SelectionDispatchAction fIntroduceIndirectionAction;
+	protected SelectionDispatchAction fExtractMethodAction;
+	protected SelectionDispatchAction fExtractTempAction;
+	protected SelectionDispatchAction fExtractConstantAction;
+	protected SelectionDispatchAction fIntroduceParameterAction;
+	protected SelectionDispatchAction fIntroduceFactoryAction;
+	protected SelectionDispatchAction fConvertLocalToFieldAction;
+	protected SelectionDispatchAction fSelfEncapsulateField;
 	
-	private UndoRedoActionGroup fUndoRedoActionGroup;
+	protected UndoRedoActionGroup fUndoRedoActionGroup;
 	
 	private final List fActions= new ArrayList();
 	
