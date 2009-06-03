@@ -209,6 +209,9 @@ public class DLTKContentTypeManager {
 	 */
 	private static boolean isValidFileNameForContentType(
 			IContentType[] derived, String name) {
+		if (name == null || name.length() == 0) {
+			return false;
+		}
 		for (int i = 0; i < derived.length; i++) {
 			IContentType type = derived[i];
 			if (type.isAssociatedWith(name)) {

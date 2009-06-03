@@ -36,9 +36,11 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IElementChangedListener;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
+import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.mixin.IMixinRequestor.ElementInfo;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -203,7 +205,7 @@ public class MixinModel {
 			MixinElement element = getCreateEmpty(key);
 			markElementAsFinal(element);
 			addKeyToSet(result, element, pattern);
-		}
+			}
 		if (TRACE) {
 			long end = System.currentTimeMillis();
 			System.out.println("MixinModel::find.time:" //$NON-NLS-1$
@@ -417,6 +419,27 @@ public class MixinModel {
 					&& (delta.getFlags() & IModelElementDelta.F_BUILDPATH_CHANGED) != 0) {
 				clear();
 				return;
+			} else if ((delta.getKind() == IModelElementDelta.REMOVED || delta
+					.getKind() == IModelElementDelta.CHANGED)
+					&& (element.getElementType() == IModelElement.SCRIPT_FOLDER || element
+							.getElementType() == IModelElement.PROJECT_FRAGMENT)) {
+				if (delta.getAffectedChildren().length == 0) {
+					try {
+						element.accept(new IModelElementVisitor() {
+							public boolean visit(IModelElement element) {
+								if (element.getElementType() == ISourceModule.SOURCE_MODULE) {
+									remove((ISourceModule) element);
+									return false;
+								}
+								return true;
+							}
+						});
+					} catch (ModelException e) {
+						if (DLTKCore.DEBUG) {
+							e.printStackTrace();
+						}
+					}
+				}
 			}
 			if (delta.getKind() == IModelElementDelta.ADDED) {
 				if (element.getElementType() == IModelElement.SOURCE_MODULE) {
