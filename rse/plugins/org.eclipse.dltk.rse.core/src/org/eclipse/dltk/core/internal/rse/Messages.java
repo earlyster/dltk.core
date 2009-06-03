@@ -21,6 +21,7 @@ public class Messages extends NLS {
 	public static String RSEExecEnvironment_hostNotFound;
 	public static String RSEExecEnvironment_ErrorConnecting;
 	public static String RSEExecEnvironment_ErrorRunningCommand;
+	public static String RSEExecEnvironment_fetchEnvVars;
 	public static String RSEExecEnvironment_ProcessCreateError;
 	public static String RSEExecEnvironment_LauncherUploadError;
 	public static String RSEExecEnvironment_NoFileServicerError;

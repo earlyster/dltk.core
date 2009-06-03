@@ -340,7 +340,9 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 			if (process != null) {
 				final BufferedReader input = new BufferedReader(
 						new InputStreamReader(process.getInputStream()));
-				Thread t = new Thread(new Runnable() {
+				Thread t = new Thread(NLS.bind(
+						Messages.RSEExecEnvironment_fetchEnvVars, environment
+								.getHost().getName())) {
 					public void run() {
 						try {
 							while (true) {
@@ -357,10 +359,11 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 								}
 							}
 						} catch (IOException e) {
-							DLTKRSEPlugin.log(e);
+							if (DLTKCore.DEBUG)
+								DLTKRSEPlugin.log(e);
 						}
 					}
-				});
+				};
 				t.start();
 				try {
 					t.join(25000);// No more than 25 seconds
