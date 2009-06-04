@@ -106,6 +106,9 @@ public class EFSDeployment implements IDeployment {
 	}
 
 	public void dispose() {
+		if (root == null) {
+			return;
+		}
 		try {
 			root.delete(EFS.NONE, null);
 		} catch (CoreException e) {
@@ -114,6 +117,7 @@ public class EFSDeployment implements IDeployment {
 			}
 		}
 		DeploymentManager.getInstance().removeDeployment(this);
+		root = null;
 	}
 
 	public IPath getAbsolutePath() {
