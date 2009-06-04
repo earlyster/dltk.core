@@ -11,6 +11,7 @@ package org.eclipse.dltk.launching;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
@@ -196,6 +197,33 @@ public class ScriptLaunchUtil {
 		return runScript(natureId, environment.getId(), config, monitor);
 	}
 
+	private static class ErrorStreamReaderThread extends Thread {
+
+		final InputStream stream;
+
+		/**
+		 * @param stream
+		 */
+		public ErrorStreamReaderThread(InputStream stream) {
+			this.stream = stream;
+		}
+
+		/*
+		 * @see java.lang.Thread#run()
+		 */
+		public void run() {
+			byte[] buffer = new byte[256];
+			try {
+				while (stream.read(buffer) != -1) {
+					// ignore
+				}
+			} catch (IOException e) {
+				// ignore
+			}
+		}
+
+	}
+
 	/**
 	 * Read content from specified stream.
 	 * 
@@ -224,7 +252,9 @@ public class ScriptLaunchUtil {
 				final Process process = ScriptLaunchUtil
 						.runScriptWithInterpreter(exeEnv, installLocations
 								.toOSString(), config);
-				Thread readerThread = new Thread(new Runnable() {
+				process.getOutputStream().close();
+				new ErrorStreamReaderThread(process.getErrorStream()).start();
+				Thread readerThread = new Thread(scriptPath) {
 					public void run() {
 						BufferedReader input = null;
 						try {
@@ -253,7 +283,7 @@ public class ScriptLaunchUtil {
 							}
 						}
 					}
-				});
+				};
 				try {
 					readerThread.start();
 					readerThread.join(10000);
