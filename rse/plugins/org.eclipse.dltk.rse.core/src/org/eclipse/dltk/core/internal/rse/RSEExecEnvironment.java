@@ -31,6 +31,7 @@ import org.eclipse.dltk.core.internal.rse.perfomance.RSEPerfomanceStatistics;
 import org.eclipse.dltk.internal.launching.execution.EFSDeployment;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.rse.core.model.IHost;
+import org.eclipse.rse.core.subsystems.IConnectorService;
 import org.eclipse.rse.core.subsystems.ISubSystem;
 import org.eclipse.rse.services.clientserver.messages.SystemMessageException;
 import org.eclipse.rse.services.files.IFileService;
@@ -59,18 +60,53 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 					.inc(RSEPerfomanceStatistics.DEPLOYMENTS_CREATED);
 		}
 		try {
-			String tmpDir = getTempDir();
-			if (tmpDir != null) {
-				String rootPath = tmpDir + environment.getSeparator()
-						+ getTempName("dltk", ".tmp"); //$NON-NLS-1$ //$NON-NLS-2$
-				URI rootUri = createRemoteURI(environment.getHost(), rootPath);
-				return new EFSDeployment(environment, rootUri);
-			}
+			return createDeploymentUnsafe();
 		} catch (CoreException e) {
-			if (DLTKCore.DEBUG)
+			IStatus status = e.getStatus();
+			if (status != null
+					&& status.getPlugin().equals("org.eclipse.rse.efs")) {
+				// Lets wait for some time and try one more time.
+				final IHost host = environment.getHost();
+				final IShellServiceSubSystem system = getSubSystem(host,
+						IShellServiceSubSystem.class);
+				if (system == null) {
+					DLTKRSEPlugin.logWarning(NLS.bind(
+							Messages.RSEExecEnvironment_hostNotFound, host
+									.getName()));
+					return null;
+				}
+				try {
+					system.connect(new NullProgressMonitor(), false);
+				} catch (Exception e3) {
+					DLTKCore.error("Failed to create deployment:", e3);
+				}
+				for (int i = 0; i < 10; ++i) {
+					try {
+						EFSDeployment dep = createDeploymentUnsafe();
+						if (dep != null) {
+							return dep;
+						}
+					} catch (Exception e2) {
+						DLTKCore.error("Failed to create deployment:", e2);
+					}
+				}
+			}
+			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
+			}
 		}
 
+		return null;
+	}
+
+	private EFSDeployment createDeploymentUnsafe() throws CoreException {
+		String tmpDir = getTempDir();
+		if (tmpDir != null) {
+			String rootPath = tmpDir + environment.getSeparator()
+					+ getTempName("dltk", ".tmp"); //$NON-NLS-1$ //$NON-NLS-2$
+			URI rootUri = createRemoteURI(environment.getHost(), rootPath);
+			return new EFSDeployment(environment, rootUri);
+		}
 		return null;
 	}
 
