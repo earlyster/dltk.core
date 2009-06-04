@@ -97,7 +97,7 @@ public abstract class ProjectWizardSecondPage extends
 		super.setVisible(visible);
 	}
 
-	private void changeToNewProject() {
+	protected void changeToNewProject() {
 		fKeepContent = fFirstPage.getDetect();
 
 		final IRunnableWithProgress op = new IRunnableWithProgress() {
@@ -303,34 +303,7 @@ public abstract class ProjectWizardSecondPage extends
 
 			// Not rebuild project external libraries if exist project with same
 			// interpreter.
-			IInterpreterInstall projectInterpreter = this.fFirstPage
-					.getInterpreter();
-			if (projectInterpreter == null) {
-				final String nature = getScriptNature();
-				if (nature != null) {
-					projectInterpreter = ScriptRuntime
-							.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
-									nature, fFirstPage
-											.getInterpreterEnvironment()
-											.getId()));
-				}
-			}
-			if (projectInterpreter != null) {
-				final IEnvironment interpreterEnv = projectInterpreter
-						.getEnvironment();
-				if (!fFirstPage.getEnvironment().equals(interpreterEnv)) {
-					EnvironmentManager.setEnvironmentId(fCurrProject,
-							interpreterEnv.getId(), false);
-				} else {
-					EnvironmentManager.setEnvironmentId(fCurrProject, null,
-							false);
-				}
-				// Locate projects with same interpreter.
-				ProjectWizardUtils.reuseInterpreterLibraries(fCurrProject,
-						projectInterpreter, monitor);
-			} else {
-				EnvironmentManager.setEnvironmentId(fCurrProject, null, false);
-			}
+			configureEnvironment(monitor);
 			postConfigureProject();
 		} finally {
 			monitor.done();
@@ -342,11 +315,41 @@ public abstract class ProjectWizardSecondPage extends
 		}
 	}
 
+	protected void configureEnvironment(IProgressMonitor monitor)
+			throws CoreException {
+		IInterpreterInstall projectInterpreter = this.fFirstPage
+				.getInterpreter();
+		if (projectInterpreter == null) {
+			final String nature = getScriptNature();
+			if (nature != null) {
+				projectInterpreter = ScriptRuntime
+						.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
+								nature, fFirstPage.getInterpreterEnvironment()
+										.getId()));
+			}
+		}
+		if (projectInterpreter != null) {
+			final IEnvironment interpreterEnv = projectInterpreter
+					.getEnvironment();
+			if (!fFirstPage.getEnvironment().equals(interpreterEnv)) {
+				EnvironmentManager.setEnvironmentId(fCurrProject,
+						interpreterEnv.getId(), false);
+			} else {
+				EnvironmentManager.setEnvironmentId(fCurrProject, null, false);
+			}
+			// Locate projects with same interpreter.
+			ProjectWizardUtils.reuseInterpreterLibraries(fCurrProject,
+					projectInterpreter, monitor);
+		} else {
+			EnvironmentManager.setEnvironmentId(fCurrProject, null, false);
+		}
+	}
+
 	protected void postConfigureProject() throws CoreException {
 		// empty override in descendants
 	}
 
-	private void removeProject() {
+	protected void removeProject() {
 		if (fCurrProject == null || !fCurrProject.exists()) {
 			return;
 		}

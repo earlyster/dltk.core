@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.EnvironmentChangedListener;
@@ -48,6 +49,7 @@ import org.eclipse.dltk.launching.InterpreterStandin;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -137,27 +139,18 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		private static final String DIALOGSTORE_LAST_EXTERNAL_ENVIRONMENT = DLTKUIPlugin.PLUGIN_ID
 				+ ".last.external.environment"; //$NON-NLS-1$
 
-		public LocationGroup(Composite composite) {
+		public LocationGroup() {
 			fPreviousExternalLocation = Util.EMPTY_STRING;
-			final int numColumns = 3;
-			final Group group = new Group(composite, SWT.NONE);
-			group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			group.setLayout(initGridLayout(new GridLayout(numColumns, false),
-					true));
-			group
-					.setText(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_title);
 
 			fWorkspaceRadio = new SelectionButtonDialogField(SWT.RADIO);
 			fWorkspaceRadio.setDialogFieldListener(this);
 			fWorkspaceRadio
 					.setLabelText(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_workspace_desc);
-			fWorkspaceRadio.doFillIntoGrid(group, numColumns);
 
 			fExternalRadio = new SelectionButtonDialogField(SWT.RADIO);
 			fExternalRadio.setDialogFieldListener(this);
 			fExternalRadio
 					.setLabelText(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_external_desc);
-			fExternalRadio.doFillIntoGrid(group, numColumns);
 
 			fLocation = new StringButtonDialogField(this);
 			fLocation.setDialogFieldListener(this);
@@ -165,8 +158,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 					.setLabelText(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_locationLabel_desc);
 			fLocation
 					.setButtonLabel(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_browseButton_desc);
-			fLocation.doFillIntoGrid(group, numColumns);
-			LayoutUtil.setHorizontalGrabbing(fLocation.getTextControl(null));
 
 			fEnvironment = new ComboDialogField(SWT.DROP_DOWN | SWT.READ_ONLY);
 			fEnvironment
@@ -177,6 +168,24 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 					updateInterpreters();
 				}
 			});
+		}
+
+		public void createControls(Composite composite) {
+			final int numColumns = 3;
+			final Group group = new Group(composite, SWT.NONE);
+			group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			group.setLayout(initGridLayout(new GridLayout(numColumns, false),
+					true));
+			group
+					.setText(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_title);
+			createControls(group, numColumns);
+		}
+
+		protected void createControls(Group group, int numColumns) {
+			fWorkspaceRadio.doFillIntoGrid(group, numColumns);
+			fExternalRadio.doFillIntoGrid(group, numColumns);
+			fLocation.doFillIntoGrid(group, numColumns);
+			LayoutUtil.setHorizontalGrabbing(fLocation.getTextControl(null));
 			environmentChangedListener = new EnvironmentChangedListener() {
 				public void environmentsModified() {
 					Display.getDefault().asyncExec(new Runnable() {
@@ -326,13 +335,31 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			}
 		}
 
-		public void dialogFieldChanged(DialogField field) {
-			if (field == fWorkspaceRadio || field == fExternalRadio) {
-				fLocation.setEnabled(!fWorkspaceRadio.isSelected());
-				fEnvironment.setEnabled(!fWorkspaceRadio.isSelected());
+		protected static final int ANY = 0;
+		protected static final int WORKSPACE = 1;
+		protected static final int EXTERNAL = 2;
+
+		protected boolean isModeField(DialogField field, int kind) {
+			switch (kind) {
+			case ANY:
+				return field == fWorkspaceRadio || field == fExternalRadio;
+			case WORKSPACE:
+				return field == fWorkspaceRadio;
+			case EXTERNAL:
+				return field == fExternalRadio;
+			default:
+				return false;
 			}
-			if (field == fWorkspaceRadio) {
-				final boolean checked = fWorkspaceRadio.isSelected();
+		}
+
+		public void dialogFieldChanged(DialogField field) {
+			if (isModeField(field, ANY)) {
+				final boolean external = isExternalProject();
+				fLocation.setEnabled(external);
+				fEnvironment.setEnabled(external);
+			}
+			if (isModeField(field, WORKSPACE)) {
+				final boolean checked = isInWorkspace();
 				if (checked) {
 					fPreviousExternalLocation = fLocation.getText();
 					fLocation.setText(getDefaultPath(fNameGroup.getName()));
@@ -347,7 +374,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 				updateInterpreters();
 			}
 
-			if (field == fExternalRadio) {
+			if (isModeField(field, EXTERNAL)) {
 				updateInterpreters();
 			}
 
@@ -361,6 +388,43 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 				environmentChangedListener = null;
 			}
 		}
+
+		public IStatus validate(IProject handle) {
+			final String location = getLocation().toOSString();
+			// check whether location is empty
+			if (location.length() == 0) {
+				return new StatusInfo(
+						IStatus.WARNING,
+						NewWizardMessages.ScriptProjectWizardFirstPage_Message_enterLocation);
+			}
+			// check whether the location is a syntactically correct path
+			if (!Path.EMPTY.isValidPath(location)) {
+				return new StatusInfo(
+						IStatus.ERROR,
+						NewWizardMessages.ScriptProjectWizardFirstPage_Message_invalidDirectory);
+			}
+			final IPath projectPath = Path.fromOSString(location);
+			final IEnvironment environment = getEnvironment();
+			// check whether the location has the workspace as prefix
+			if (!isInWorkspace() && environment.isLocal()
+					&& Platform.getLocation().isPrefixOf(projectPath)) {
+				return new StatusInfo(
+						IStatus.ERROR,
+						NewWizardMessages.ScriptProjectWizardFirstPage_Message_cannotCreateInWorkspace);
+			}
+			if (!isInWorkspace() && environment.isLocal()) {
+				// If we do not place the contents in the workspace validate the
+				// location.
+				final IStatus locationStatus = DLTKUIPlugin.getWorkspace()
+						.validateProjectLocation(handle, projectPath);
+				if (!locationStatus.isOK()) {
+					return new StatusInfo(IStatus.ERROR, locationStatus
+							.getMessage());
+				}
+			}
+			return Status.OK_STATUS;
+		}
+
 	}
 
 	protected interface IInterpreterGroup {
@@ -789,7 +853,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	 */
 	private final class Validator implements Observer {
 		public void update(Observable o, Object arg) {
-			final IWorkspace workspace = DLTKUIPlugin.getWorkspace();
 			final String name = fNameGroup.getName();
 			// check whether the project name field is empty
 			if (name.length() == 0) {
@@ -799,8 +862,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 				return;
 			}
 			// check whether the project name is valid
-			final IStatus nameStatus = workspace.validateName(name,
-					IResource.PROJECT);
+			final IStatus nameStatus = DLTKUIPlugin.getWorkspace()
+					.validateName(name, IResource.PROJECT);
 			if (!nameStatus.isOK()) {
 				setErrorMessage(nameStatus.getMessage());
 				setPageComplete(false);
@@ -813,39 +876,16 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 				setPageComplete(false);
 				return;
 			}
-			final String location = fLocationGroup.getLocation().toOSString();
-			// check whether location is empty
-			if (location.length() == 0) {
-				setErrorMessage(null);
-				setMessage(NewWizardMessages.ScriptProjectWizardFirstPage_Message_enterLocation);
-				setPageComplete(false);
-				return;
-			}
-			// check whether the location is a syntactically correct path
-			if (!Path.EMPTY.isValidPath(location)) {
-				setErrorMessage(NewWizardMessages.ScriptProjectWizardFirstPage_Message_invalidDirectory);
-				setPageComplete(false);
-				return;
-			}
-			final IPath projectPath = Path.fromOSString(location);
-			final IEnvironment environment = getEnvironment();
-			// check whether the location has the workspace as prefix
-			if (!fLocationGroup.isInWorkspace() && environment.isLocal()
-					&& Platform.getLocation().isPrefixOf(projectPath)) {
-				setErrorMessage(NewWizardMessages.ScriptProjectWizardFirstPage_Message_cannotCreateInWorkspace);
-				setPageComplete(false);
-				return;
-			}
-			if (!fLocationGroup.isInWorkspace() && environment.isLocal()) {
-				// If we do not place the contents in the workspace validate the
-				// location.
-				final IStatus locationStatus = workspace
-						.validateProjectLocation(handle, projectPath);
-				if (!locationStatus.isOK()) {
+			final IStatus locationStatus = fLocationGroup.validate(handle);
+			if (!locationStatus.isOK()) {
+				if (locationStatus.getSeverity() != IStatus.ERROR) {
+					setErrorMessage(null);
+					setMessage(locationStatus.getMessage());
+				} else {
 					setErrorMessage(locationStatus.getMessage());
-					setPageComplete(false);
-					return;
 				}
+				setPageComplete(false);
+				return;
 			}
 			if (supportInterpreter() && interpeterRequired()) {
 				if (!interpretersPresent) {
@@ -946,7 +986,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		// create UI elements
 		fNameGroup = new NameGroup(composite, fInitialName);
-		fLocationGroup = new LocationGroup(composite);
+		fLocationGroup = createLocationGroup();
+		fLocationGroup.createControls(composite);
 
 		// fInterpreterEnvironmentGroup= new
 		// InterpreterEnvironmentGroup(composite);
@@ -986,6 +1027,10 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(composite,
 		// IDLTKHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
+	}
+
+	protected LocationGroup createLocationGroup() {
+		return new LocationGroup();
 	}
 
 	protected void createCustomGroups(Composite composite) {
