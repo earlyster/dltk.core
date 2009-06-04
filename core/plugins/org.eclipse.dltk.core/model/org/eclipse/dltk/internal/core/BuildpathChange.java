@@ -277,11 +277,11 @@ public class BuildpathChange {
 								rootIDs, null, // inside original project
 								false, // don't retrieve exported roots
 								false, null); /* no reverse map */
-						pkgFragmentRoots = new ProjectFragment[accumulatedRoots
+						pkgFragmentRoots = new IProjectFragment[accumulatedRoots
 								.size()];
 						accumulatedRoots.copyInto(pkgFragmentRoots);
 					} catch (ModelException e) {
-						pkgFragmentRoots = new ProjectFragment[] {};
+						pkgFragmentRoots = new IProjectFragment[] {};
 					}
 				}
 				addBuildpathDeltas(delta, pkgFragmentRoots,

@@ -322,7 +322,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		if (this.isRootFolder()) {
 			return ModelElementInfo.NO_NON_SCRIPT_RESOURCES;
 		} else {
-			if (getProjectFragment() instanceof ProjectFragment) {
+			if (getProjectFragment() instanceof IProjectFragment) {
 				return ((ScriptFolderInfo) getElementInfo())
 						.getForeignResources(getResource(),
 								(IProjectFragment) getProjectFragment());

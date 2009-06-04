@@ -2707,6 +2707,22 @@ public class ScriptProject extends Openable implements IScriptProject {
 				break;
 			}
 		}
+		// Check for all fragments for custom elements
+		try {
+			IProjectFragment[] allProjectFragments = getAllProjectFragments();
+			for (IProjectFragment fragment : allProjectFragments) {
+				if (fragment.isExternal()) {
+					IPath path = fragment.getPath();
+					if (path.isPrefixOf(elementPath)) {
+						return true;
+					}
+				}
+			}
+		} catch (ModelException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
 		return false;
 	}
 

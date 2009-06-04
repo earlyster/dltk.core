@@ -220,7 +220,7 @@ public class NameLookup {
 					// are actual packages
 					ProjectElementInfo.addNames(pkgName, this.isPackageCache);
 				} else {
-					if (existing instanceof ProjectFragment) {
+					if (existing instanceof IProjectFragment) {
 						if (!existing.equals(root))
 							this.scriptFolders
 									.put(pkgName, new IProjectFragment[] {
@@ -332,7 +332,7 @@ public class NameLookup {
 		}
 		Object value = this.scriptFolders.get(pkgName);
 		if (value != null) {
-			if (value instanceof ProjectFragment) {
+			if (value instanceof IProjectFragment) {
 				return findSourceModule(pkgName, cuName,
 						(IProjectFragment) value);
 			} else {
@@ -448,7 +448,7 @@ public class NameLookup {
 						if (defaultPkgRoot == null) {
 							return null;
 						}
-						if (defaultPkgRoot instanceof ProjectFragment
+						if (defaultPkgRoot instanceof IProjectFragment
 								&& defaultPkgRoot.equals(root))
 							return ((IProjectFragment) root)
 									.getScriptFolder(Path.EMPTY);
@@ -495,7 +495,7 @@ public class NameLookup {
 				if (pkgName != null
 						&& Util.startsWithIgnoreCase(pkgName, splittedName)) {
 					Object value = this.scriptFolders.valueTable[i];
-					if (value instanceof ProjectFragment) {
+					if (value instanceof IProjectFragment) {
 						IScriptFolder pkg = ((IProjectFragment) value)
 								.getScriptFolder(toPath(pkgName));
 						if (oneFragment == null) {
@@ -537,7 +537,7 @@ public class NameLookup {
 			Object value = this.scriptFolders.get(splittedName);
 			if (value == null)
 				return null;
-			if (value instanceof ProjectFragment) {
+			if (value instanceof IProjectFragment) {
 				return new IScriptFolder[] { ((IProjectFragment) value)
 						.getScriptFolder(toPath(splittedName)) };
 			} else {
@@ -861,7 +861,7 @@ public class NameLookup {
 				if (pkgName != null
 						&& Util.startsWithIgnoreCase(pkgName, splittedName)) {
 					Object value = this.scriptFolders.valueTable[i];
-					if (value instanceof ProjectFragment) {
+					if (value instanceof IProjectFragment) {
 						IProjectFragment root = (IProjectFragment) value;
 						requestor.acceptScriptFolder(root
 								.getScriptFolder(toPath(pkgName)));
@@ -880,7 +880,7 @@ public class NameLookup {
 		} else {
 			String[] splittedName = Util.splitOn('.', name, 0, name.length());
 			Object value = this.scriptFolders.get(splittedName);
-			if (value instanceof ProjectFragment) {
+			if (value instanceof IProjectFragment) {
 				requestor.acceptScriptFolder(((IProjectFragment) value)
 						.getScriptFolder(toPath(splittedName)));
 			} else {

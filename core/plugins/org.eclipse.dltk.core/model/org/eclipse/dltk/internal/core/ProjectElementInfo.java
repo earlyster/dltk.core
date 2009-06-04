@@ -276,7 +276,7 @@ class ProjectElementInfo extends OpenableElementInfo {
 						// are actual packages
 						addNames(pkgName, isPackageCache);
 					} else {
-						if (existing instanceof ProjectFragment) {
+						if (existing instanceof IProjectFragment) {
 							fragmentsCache.put(pkgName, new IProjectFragment[] {
 									(IProjectFragment) existing, root });
 						} else {
