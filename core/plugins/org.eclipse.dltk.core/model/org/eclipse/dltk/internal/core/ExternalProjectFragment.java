@@ -333,7 +333,7 @@ public class ExternalProjectFragment extends ProjectFragment implements
 			if (file != null && file.exists()) {
 				long lmodif = 0;
 				if (file instanceof EFSFileHandle) {
-					lmodif = ((EFSFileHandle) file).lastModifiedFromCache();
+					lmodif = ((EFSFileHandle) file).lastModified();
 				} else {
 					lmodif = file.lastModified();
 				}

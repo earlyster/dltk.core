@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.internal.environment;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,11 +27,9 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
-import org.eclipse.dltk.core.caching.IContentCache;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
-import org.eclipse.dltk.internal.core.ModelManager;
 
 public class EFSFileHandle implements IFileHandle {
 
@@ -186,27 +181,27 @@ public class EFSFileHandle implements IFileHandle {
 
 	}
 
-	public long lastModifiedFromCache() {
-		if (this.environment.isLocal()) {
-			return file.fetchInfo().getLastModified();
-		}
-		// Try to restore timestamp from local cache.
-		IContentCache coreCache = ModelManager.getModelManager().getCoreCache();
-		File asFile = coreCache.getEntryAsFile(this, "timestamp");
-		if (asFile.exists()) {
-			try {
-				DataInputStream dis = new DataInputStream(new FileInputStream(
-						asFile));
-				long timestamp = dis.readLong();
-				dis.close();
-				return timestamp;
-			} catch (IOException e) {
-			}
-		}
-		long lastModified = file.fetchInfo().getLastModified();
-		coreCache.setCacheEntryAttribute(this, "timestamp", lastModified);
-		return lastModified;
-	}
+	// public long lastModifiedFromCache() {
+	// if (this.environment.isLocal()) {
+	// return file.fetchInfo().getLastModified();
+	// }
+	// // Try to restore timestamp from local cache.
+	// IContentCache coreCache = ModelManager.getModelManager().getCoreCache();
+	// File asFile = coreCache.getEntryAsFile(this, "timestamp");
+	// if (asFile.exists()) {
+	// try {
+	// DataInputStream dis = new DataInputStream(new FileInputStream(
+	// asFile));
+	// long timestamp = dis.readLong();
+	// dis.close();
+	// return timestamp;
+	// } catch (IOException e) {
+	// }
+	// }
+	// long lastModified = file.fetchInfo().getLastModified();
+	// coreCache.setCacheEntryAttribute(this, "timestamp", lastModified);
+	// return lastModified;
+	// }
 
 	public long length() {
 		return file.fetchInfo().getLength();

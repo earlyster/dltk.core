@@ -146,8 +146,8 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 				String path = cacheEntry.getPath();
 				IFileHandle entryHandle = new WrapTimeStampHandle(parent
 						.getChild(path), cacheEntry.getTimestamp());
-				cache.setCacheEntryAttribute(entryHandle, "timestamp",
-						cacheEntry.getTimestamp());
+				// cache.setCacheEntryAttribute(entryHandle, "timestamp",
+				// cacheEntry.getTimestamp());
 				EList<CacheEntryAttribute> attributes = cacheEntry
 						.getAttributes();
 				for (CacheEntryAttribute cacheEntryAttribute : attributes) {

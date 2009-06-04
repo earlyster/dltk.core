@@ -116,8 +116,7 @@ abstract class IndexRequest extends AbstractJob {
 					IFileHandle handle = EnvironmentPathUtils.getFile(module);
 					long lmodif = 0;
 					if (handle instanceof EFSFileHandle) {
-						lmodif = ((EFSFileHandle) handle)
-								.lastModifiedFromCache();
+						lmodif = ((EFSFileHandle) handle).lastModified();
 					} else {
 						lmodif = handle.lastModified();
 					}
