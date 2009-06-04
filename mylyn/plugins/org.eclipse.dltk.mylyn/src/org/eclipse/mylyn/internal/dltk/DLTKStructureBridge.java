@@ -169,7 +169,7 @@ public class DLTKStructureBridge extends AbstractContextStructureBridge
 		}
 
 		boolean accepts = object instanceof IModelElement
-				|| object instanceof ProjectFragment
+				|| object instanceof IProjectFragment
 				|| object instanceof BuildPathContainer.RequiredProjectWrapper
 				|| object instanceof IProjectFragment
 				|| object instanceof WorkingSet;
