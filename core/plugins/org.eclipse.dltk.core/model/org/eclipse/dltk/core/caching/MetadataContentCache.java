@@ -38,7 +38,7 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
  * This class is designed to store any kind of information into metadata cache.
  */
 public class MetadataContentCache extends AbstractContentCache {
-	private static final int DAY_IN_MILIS = 1000 * 60 * 60 * 24;
+	private static final int DAY_IN_MILIS = 60;// 1000 * 60 * 60 * 24;
 	private static final int SAVE_DELTA = 100;
 	private Resource indexResource = null;
 	private Map<String, CacheEntry> entryCache = new HashMap<String, CacheEntry>();

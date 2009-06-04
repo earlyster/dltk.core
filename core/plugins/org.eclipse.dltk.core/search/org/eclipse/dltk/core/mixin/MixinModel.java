@@ -41,6 +41,8 @@ import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.core.mixin.IMixinRequestor.ElementInfo;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -205,7 +207,7 @@ public class MixinModel {
 			MixinElement element = getCreateEmpty(key);
 			markElementAsFinal(element);
 			addKeyToSet(result, element, pattern);
-			}
+		}
 		if (TRACE) {
 			long end = System.currentTimeMillis();
 			System.out.println("MixinModel::find.time:" //$NON-NLS-1$
@@ -235,6 +237,7 @@ public class MixinModel {
 	}
 
 	private RequestCacheEntry findFromMixin(String pattern) {
+		PerformanceNode p = RuntimePerformanceMonitor.begin();
 		RequestCacheEntry entry = (RequestCacheEntry) requestCache.get(pattern);
 		// Set modules = new HashSet();
 		if (entry == null || entry.expireTime < System.currentTimeMillis()) {
@@ -255,6 +258,7 @@ public class MixinModel {
 			}
 			this.requestCache.put(pattern, entry);
 		}
+		p.done(getNature(), "Mixin model search items", 0);
 		return entry;
 	}
 

@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
@@ -26,6 +28,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.core.caching.IContentCache;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
@@ -33,6 +37,10 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.ModelManager;
 
 public class EFSFileHandle implements IFileHandle {
+
+	private static Map<String, Long> timestamps = new HashMap<String, Long>();
+	private static Map<String, Long> lastaccess = new HashMap<String, Long>();
+
 	private IFileStore file;
 	private IEnvironment environment;
 
@@ -151,7 +159,31 @@ public class EFSFileHandle implements IFileHandle {
 	}
 
 	public long lastModified() {
-		return file.fetchInfo().getLastModified();
+		String n = toString();
+		long c = 0;
+		boolean flag = !environment.isLocal();
+		if (flag) {
+			if (timestamps.containsKey(n)) {
+				c = System.currentTimeMillis();
+				Long last = lastaccess.get(n);
+				if (last != null
+						&& (c - last.longValue()) < 1000 * 60 * 60 * 24) {
+					return timestamps.get(n);
+				}
+			}
+		}
+		PerformanceNode p = RuntimePerformanceMonitor.begin();
+		long lm = file.fetchInfo().getLastModified();
+		if (flag) {
+			timestamps.put(n, lm);
+			if (c == 0) {
+				c = System.currentTimeMillis();
+			}
+			lastaccess.put(n, c);
+		}
+		p.done("#", "Return file timestamp", 0);
+		return lm;
+
 	}
 
 	public long lastModifiedFromCache() {

@@ -26,7 +26,9 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
 import org.eclipse.dltk.internal.core.ModelManager;
@@ -945,6 +947,7 @@ public class SearchEngine {
 	public static ISourceModule[] searchMixinSources(
 			final IDLTKSearchScope scope, String key,
 			IDLTKLanguageToolkit toolkit, final Map keys) {
+		PerformanceNode p = RuntimePerformanceMonitor.begin();
 		final long startTime = DLTKCore.VERBOSE_MIXIN ? System
 				.currentTimeMillis() : 0;
 		// Index requestor
@@ -1010,6 +1013,7 @@ public class SearchEngine {
 					String.valueOf(modules.size()),
 					Long.toString(System.currentTimeMillis() - startTime) }));
 		}
+		p.done(toolkit.getNatureId(), "Search mixin modules", 0);
 		return (ISourceModule[]) modules.toArray(new ISourceModule[modules
 				.size()]);
 	}

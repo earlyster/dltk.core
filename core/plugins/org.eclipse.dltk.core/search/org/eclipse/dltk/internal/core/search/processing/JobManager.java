@@ -277,8 +277,7 @@ public abstract class JobManager implements Runnable {
 							if (VERBOSE)
 								Util
 										.verbose("-> GOING TO SLEEP - " + searchJob);//$NON-NLS-1$
-							Thread.sleep(searchJob instanceof WaitJob ? 250
-									: 50);
+							Thread.sleep(searchJob instanceof WaitJob ? 25 : 5);
 						} catch (InterruptedException e) {
 							// ignore
 						}
