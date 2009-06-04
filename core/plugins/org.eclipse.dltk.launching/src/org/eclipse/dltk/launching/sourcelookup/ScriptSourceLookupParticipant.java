@@ -18,10 +18,12 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.core.DLTKDebugConstants;
 import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
+import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.debug.core.model.ScriptStackFrame;
 import org.eclipse.dltk.internal.launching.IPathEquality;
@@ -54,7 +56,17 @@ public class ScriptSourceLookupParticipant extends
 			}
 			if (element.getElementType() == IModelElement.SOURCE_MODULE) {
 				ISourceModule module = (ISourceModule) element;
-				if (pathEquality.equals(fileFullPath, module.getPath())) {
+				IPath modulePath = module.getPath();
+				if (module instanceof ExternalSourceModule) {
+					IEnvironment environment = EnvironmentManager
+							.getEnvironment(element);
+					ExternalSourceModule mdl = (ExternalSourceModule) module;
+					modulePath = mdl.getFullPath();
+					if (!EnvironmentPathUtils.isFull(modulePath))
+						modulePath = EnvironmentPathUtils.getFullPath(
+								environment, modulePath);
+				}
+				if (pathEquality.equals(fileFullPath, modulePath)) {
 					result[0] = module;
 				}
 				return false;
