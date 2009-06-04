@@ -403,7 +403,7 @@ public abstract class InterpretersBlock implements
 
 		fTable.layout();
 
-		Composite buttons = new Composite(parent, SWT.NULL);
+		buttons = new Composite(parent, SWT.NULL);
 		buttons.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 		layout = new GridLayout();
 		layout.marginHeight = 0;
@@ -555,7 +555,7 @@ public abstract class InterpretersBlock implements
 		fSortColumn = 2;
 	}
 
-	private void enableButtons() {
+	protected void enableButtons() {
 		IStructuredSelection selection = (IStructuredSelection) fInterpreterList
 				.getSelection();
 		int selectionCount = selection.size();
@@ -958,6 +958,8 @@ public abstract class InterpretersBlock implements
 	private static String fgLastUsedID;
 
 	private IEnvironment[] environments;
+
+	protected Composite buttons;
 
 	/**
 	 * Find a unique Interpreter id. Check existing 'real' Interpreters, as well
