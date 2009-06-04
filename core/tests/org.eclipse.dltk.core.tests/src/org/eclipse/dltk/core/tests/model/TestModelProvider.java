@@ -17,7 +17,9 @@ import java.util.List;
 
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelProvider;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ProjectFragment;
 
 public class TestModelProvider implements IModelProvider {
@@ -36,7 +38,7 @@ public class TestModelProvider implements IModelProvider {
 			for (Iterator iterator = children.iterator(); iterator.hasNext();) {
 				IModelElement el = (IModelElement) iterator.next();
 				if (el.getElementType() == IModelElement.SCRIPT_FOLDER) {
-					addon.add(new TestFolder((ProjectFragment) parentElement,
+					addon.add(new TestFolder((ModelElement) parentElement,
 							el.getPath().removeFirstSegments(
 									el.getParent().getPath().segmentCount())));
 				}

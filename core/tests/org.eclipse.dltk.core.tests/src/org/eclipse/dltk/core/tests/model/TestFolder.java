@@ -15,11 +15,12 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ProjectFragment;
 import org.eclipse.dltk.internal.core.ScriptFolder;
 
 public class TestFolder extends ScriptFolder {
-	protected TestFolder(ProjectFragment parent, IPath path) {
+	protected TestFolder(ModelElement parent, IPath path) {
 		super(parent, path);
 	}
 
