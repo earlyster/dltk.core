@@ -39,7 +39,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 	protected final IPath path;
 	private final String elementName;
 
-	protected ScriptFolder(ProjectFragment parent, IPath path) {
+	protected ScriptFolder(ModelElement parent, IPath path) {
 		super(parent);
 		this.path = path;
 
@@ -147,22 +147,11 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		HashSet vChildren = new HashSet();
 		try {
 			IProjectFragment root = getProjectFragment();
-			char[][] inclusionPatterns = null;
-			if (root instanceof ProjectFragment) {
-				inclusionPatterns = ((ProjectFragment) root)
-						.fullInclusionPatternChars();
-			}
-			char[][] exclusionPatterns = null;
-			if (root instanceof ProjectFragment) {
-				exclusionPatterns = ((ProjectFragment) root)
-						.fullExclusionPatternChars();
-			}
 			IResource[] members = ((IContainer) underlyingResource).members();
 			for (int i = 0, max = members.length; i < max; i++) {
 				IResource child = members[i];
 				if (child.getType() != IResource.FOLDER
-						&& !Util.isExcluded(child, inclusionPatterns,
-								exclusionPatterns)) {
+						&& !Util.isExcluded(child, root)) {
 					IModelElement childElement;
 					if (kind == IProjectFragment.K_SOURCE
 							&& Util.isValidSourceModule(this, child)) {
@@ -336,7 +325,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 			if (getProjectFragment() instanceof ProjectFragment) {
 				return ((ScriptFolderInfo) getElementInfo())
 						.getForeignResources(getResource(),
-								(ProjectFragment) getProjectFragment());
+								(IProjectFragment) getProjectFragment());
 			}
 			return ModelElementInfo.NO_NON_SCRIPT_RESOURCES;
 		}
@@ -368,8 +357,8 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 			ModelElement classFile = (ModelElement) getSourceModule(classFileName);
 			return classFile.getHandleFromMemento(memento, owner);
 		case JEM_USER_ELEMENT:
-			return MementoModelElementUtil.getHandleFromMemento(memento,
-					this, owner);
+			return MementoModelElementUtil.getHandleFromMemento(memento, this,
+					owner);
 		}
 		return null;
 	}

@@ -693,11 +693,7 @@ public abstract class AbstractSourceModule extends Openable implements
 			return e.getModelStatus();
 		}
 		if (resource != null) {
-			char[][] inclusionPatterns = ((ProjectFragment) root)
-					.fullInclusionPatternChars();
-			char[][] exclusionPatterns = ((ProjectFragment) root)
-					.fullExclusionPatternChars();
-			if (Util.isExcluded(resource, inclusionPatterns, exclusionPatterns))
+			if (Util.isExcluded(resource, root))
 				return new ModelStatus(
 						IModelStatusConstants.ELEMENT_NOT_ON_BUILDPATH, this);
 			if (!resource.isAccessible())

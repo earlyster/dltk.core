@@ -35,7 +35,6 @@ import org.eclipse.dltk.internal.compiler.lookup.TypeScope;
 import org.eclipse.dltk.internal.core.Model;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.Openable;
-import org.eclipse.dltk.internal.core.ProjectFragment;
 import org.eclipse.dltk.internal.core.ScriptProject;
 
 /**
@@ -103,7 +102,7 @@ public class HandleFactory {
 			IScriptFolder pkgFragment = (IScriptFolder) this.packageHandles
 					.get(pkgName);
 			if (pkgFragment == null) {
-				pkgFragment = ((ProjectFragment) this.lastPkgFragmentRoot)
+				pkgFragment = ((IProjectFragment) this.lastPkgFragmentRoot)
 						.getScriptFolder(toPath(pkgName));
 				this.packageHandles.put(pkgName, pkgFragment);
 			}

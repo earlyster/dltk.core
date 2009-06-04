@@ -20,12 +20,12 @@ import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.search.BasicSearchEngine;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.MethodNameMatchRequestor;
 import org.eclipse.dltk.core.search.TypeNameRequestor;
 import org.eclipse.dltk.internal.core.Openable;
-import org.eclipse.dltk.internal.core.ProjectFragment;
 import org.eclipse.dltk.internal.core.util.HandleFactory;
 import org.eclipse.dltk.internal.core.util.HashtableOfArrayToObject;
 
@@ -146,8 +146,8 @@ public class MethodNameMatchRequestorWrapper implements
 		IScriptFolder pkgFragment = (IScriptFolder) this.packageHandles
 				.get(pkgName);
 		if (pkgFragment == null) {
-			pkgFragment = ((ProjectFragment) this.lastProjectFragment)
-					.getScriptFolder(pkgName);
+			pkgFragment = ((IProjectFragment) this.lastProjectFragment)
+					.getScriptFolder(ScriptModelUtil.toPath(pkgName));
 			this.packageHandles.put(pkgName, pkgFragment);
 		}
 		String simpleName = simpleNames[length];

@@ -12,6 +12,8 @@ package org.eclipse.dltk.internal.core;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.core.IElementCacheListener;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.core.util.LRUCache;
 
@@ -54,8 +56,8 @@ public class ElementCache extends OverflowingLRUCache {
 				// We must close an entire external folder of zip.
 				if (element instanceof ArchiveFolder
 						|| element instanceof ExternalScriptFolder) {
-					ScriptFolder archiveFolder = (ScriptFolder) element;
-					ProjectFragment root = (ProjectFragment) archiveFolder
+					IScriptFolder archiveFolder = (IScriptFolder) element;
+					IProjectFragment root = (IProjectFragment) archiveFolder
 							.getParent();
 					root.close();
 				} else {

@@ -21,11 +21,11 @@ import org.eclipse.dltk.core.IBuffer;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
-
 
 /**
  * Commits the contents of a working copy compilation unit to its original
@@ -70,32 +70,39 @@ public class CommitWorkingCopyOperation extends ModelOperation {
 	 */
 	protected void executeOperation() throws ModelException {
 		try {
-			beginTask(Messages.workingCopy_commit, 2); 
+			beginTask(Messages.workingCopy_commit, 2);
 			SourceModule workingCopy = getSourceModule();
-			
-			if (ExternalScriptProject.EXTERNAL_PROJECT_NAME.equals(workingCopy.getScriptProject().getElementName())) {
+
+			if (ExternalScriptProject.EXTERNAL_PROJECT_NAME.equals(workingCopy
+					.getScriptProject().getElementName())) {
 				// case of a working copy without a resource
 				workingCopy.getBuffer().save(this.progressMonitor, this.force);
 				return;
 			}
-			
+
 			ISourceModule primary = workingCopy.getPrimary();
 			boolean isPrimary = workingCopy.isPrimary();
 
 			ModelElementDeltaBuilder deltaBuilder = null;
-			ProjectFragment root = (ProjectFragment) workingCopy.getAncestor(IModelElement.PROJECT_FRAGMENT);
+			IProjectFragment root = (IProjectFragment) workingCopy
+					.getAncestor(IModelElement.PROJECT_FRAGMENT);
 			boolean isIncluded = !Util.isExcluded(workingCopy);
-			IFile resource = (IFile)workingCopy.getResource();
-			if (isPrimary || (root.validateOnBuildpath().isOK() && 
-				isIncluded && resource.isAccessible() &&  
-				Util.isValidSourceModule(workingCopy, workingCopy.getResource()))) {
-				
+			IFile resource = (IFile) workingCopy.getResource();
+			if (isPrimary
+					|| (root instanceof ProjectFragment
+							&& ((ProjectFragment) root).validateOnBuildpath()
+									.isOK() && isIncluded
+							&& resource.isAccessible() && Util
+							.isValidSourceModule(workingCopy, workingCopy
+									.getResource()))) {
+
 				// force opening so that the delta builder can get the old info
 				if (!isPrimary && !primary.isOpen()) {
 					primary.open(null);
 				}
 
-				// creates the delta builder (this remembers the content of the cu) if:
+				// creates the delta builder (this remembers the content of the
+				// cu) if:
 				// - it is not excluded
 				// - and it is not a primary or it is a non-consistent primary
 				if (isIncluded && (!isPrimary || !workingCopy.isConsistent())) {
@@ -105,55 +112,63 @@ public class CommitWorkingCopyOperation extends ModelOperation {
 				// save the cu
 				IBuffer primaryBuffer = primary.getBuffer();
 				if (!isPrimary) {
-					if (primaryBuffer == null) return;
+					if (primaryBuffer == null)
+						return;
 					char[] primaryContents = primaryBuffer.getCharacters();
 					boolean hasSaved = false;
 					try {
 						IBuffer workingCopyBuffer = workingCopy.getBuffer();
-						if (workingCopyBuffer == null) return;
-						primaryBuffer.setContents(workingCopyBuffer.getCharacters());
+						if (workingCopyBuffer == null)
+							return;
+						primaryBuffer.setContents(workingCopyBuffer
+								.getCharacters());
 						primaryBuffer.save(this.progressMonitor, this.force);
 						primary.makeConsistent(this);
 						hasSaved = true;
 					} finally {
-						if (!hasSaved){
-							// restore original buffer contents since something went wrong
+						if (!hasSaved) {
+							// restore original buffer contents since something
+							// went wrong
 							primaryBuffer.setContents(primaryContents);
 						}
 					}
 				} else {
-					// for a primary working copy no need to set the content of the buffer again
+					// for a primary working copy no need to set the content of
+					// the buffer again
 					primaryBuffer.save(this.progressMonitor, this.force);
 					primary.makeConsistent(this);
 				}
 			} else {
-				// working copy on cu outside buildpath OR resource doesn't exist yet
+				// working copy on cu outside buildpath OR resource doesn't
+				// exist yet
 				String encoding = null;
 				try {
 					encoding = resource.getCharset();
-				}
-				catch (CoreException ce) {
+				} catch (CoreException ce) {
 					// use no encoding
 				}
 				String contents = workingCopy.getSource();
-				if (contents == null) return;
+				if (contents == null)
+					return;
 				try {
-					byte[] bytes = encoding == null 
-						? contents.getBytes() 
-						: contents.getBytes(encoding);
-					ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+					byte[] bytes = encoding == null ? contents.getBytes()
+							: contents.getBytes(encoding);
+					ByteArrayInputStream stream = new ByteArrayInputStream(
+							bytes);
 					if (resource.exists()) {
-						resource.setContents(
-							stream, 
-							this.force ? IResource.FORCE | IResource.KEEP_HISTORY : IResource.KEEP_HISTORY, 
-							null);
+						resource.setContents(stream,
+								this.force ? IResource.FORCE
+										| IResource.KEEP_HISTORY
+										: IResource.KEEP_HISTORY, null);
 					} else {
-						resource.create(stream, this.force, this.progressMonitor);
+						resource.create(stream, this.force,
+								this.progressMonitor);
 					}
 				} catch (CoreException e) {
 					throw new ModelException(e);
 				} catch (UnsupportedEncodingException e) {
-					throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
+					throw new ModelException(e,
+							IModelStatusConstants.IO_EXCEPTION);
 				}
 
 			}
@@ -187,9 +202,11 @@ public class CommitWorkingCopyOperation extends ModelOperation {
 	protected SourceModule getSourceModule() {
 		return (SourceModule) getElementToProcess();
 	}
+
 	protected ISchedulingRule getSchedulingRule() {
 		IResource resource = getElementToProcess().getResource();
-		if (resource == null) return null;
+		if (resource == null)
+			return null;
 		IWorkspace workspace = resource.getWorkspace();
 		if (resource.exists()) {
 			return workspace.getRuleFactory().modifyRule(resource);
@@ -205,15 +222,16 @@ public class CommitWorkingCopyOperation extends ModelOperation {
 	 * operation is not a working copy
 	 * <li>ELEMENT_NOT_PRESENT - the compilation unit the working copy is based
 	 * on no longer exists.
-	 * <li>UPDATE_CONFLICT - the original compilation unit has changed since
-	 * the working copy was created and the operation specifies no force
+	 * <li>UPDATE_CONFLICT - the original compilation unit has changed since the
+	 * working copy was created and the operation specifies no force
 	 * <li>READ_ONLY - the original compilation unit is in read-only mode
 	 * </ul>
 	 */
 	public IModelStatus verify() {
 		SourceModule cu = getSourceModule();
 		if (!cu.isWorkingCopy()) {
-			return new ModelStatus(IModelStatusConstants.INVALID_ELEMENT_TYPES, cu);
+			return new ModelStatus(IModelStatusConstants.INVALID_ELEMENT_TYPES,
+					cu);
 		}
 		if (cu.hasResourceChanged() && !this.force) {
 			return new ModelStatus(IModelStatusConstants.UPDATE_CONFLICT);

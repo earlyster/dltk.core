@@ -278,7 +278,7 @@ class ProjectElementInfo extends OpenableElementInfo {
 					} else {
 						if (existing instanceof ProjectFragment) {
 							fragmentsCache.put(pkgName, new IProjectFragment[] {
-									(ProjectFragment) existing, root });
+									(IProjectFragment) existing, root });
 						} else {
 							IProjectFragment[] entry = (IProjectFragment[]) existing;
 							IProjectFragment[] copy = new IProjectFragment[entry.length + 1];

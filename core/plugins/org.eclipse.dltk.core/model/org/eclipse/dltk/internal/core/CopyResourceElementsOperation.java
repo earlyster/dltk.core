@@ -157,14 +157,12 @@ public class CopyResourceElementsOperation extends MultiOperation {
 	 * fragments, false otherwise
 	 */
 	private boolean createNeededScriptFolders(IContainer sourceFolder,
-			ProjectFragment root, IPath newFragName, boolean moveFolder)
+			IProjectFragment root, IPath newFragName, boolean moveFolder)
 			throws ModelException {
 		boolean containsReadOnlyScriptFolder = false;
 		IContainer parentFolder = (IContainer) root.getResource();
 		ModelElementDelta projectDelta = null;
 		IPath sideEffectPackageName = new Path(""); //$NON-NLS-1$
-		char[][] inclusionPatterns = root.fullInclusionPatternChars();
-		char[][] exclusionPatterns = root.fullExclusionPatternChars();
 		for (int i = 0; i < newFragName.segmentCount(); i++) {
 			String subFolderName = newFragName.segment(i);
 			sideEffectPackageName = sideEffectPackageName.append(subFolderName);
@@ -185,8 +183,7 @@ public class CopyResourceElementsOperation extends MultiOperation {
 				if (i < newFragName.segmentCount() - 1 // all but the last one
 						// are side effect
 						// packages
-						&& !Util.isExcluded(parentFolder, inclusionPatterns,
-								exclusionPatterns)) {
+						&& !Util.isExcluded(parentFolder, root)) {
 					if (projectDelta == null) {
 						projectDelta = getDeltaFor(root.getScriptProject());
 					}
@@ -227,11 +224,11 @@ public class CopyResourceElementsOperation extends MultiOperation {
 	 * this source element and its destination. If the operation is a cross
 	 * project operation
 	 * <ul>
-	 * <li>On a copy, the delta should be rooted in the dest project <li>On a
-	 * move, two deltas are generated
+	 * <li>On a copy, the delta should be rooted in the dest project
+	 * <li>On a move, two deltas are generated
 	 * <ul>
-	 * <li>one rooted in the source project <li>one rooted in the destination
-	 * project
+	 * <li>one rooted in the source project
+	 * <li>one rooted in the destination project
 	 * </ul>
 	 * </ul>
 	 * If the operation is rooted in a single project, the delta is rooted in
@@ -264,7 +261,7 @@ public class CopyResourceElementsOperation extends MultiOperation {
 	 *                if the operation is unable to complete
 	 */
 	private void processSourceModuleResource(ISourceModule source,
-			ScriptFolder dest) throws ModelException {
+			IScriptFolder dest) throws ModelException {
 		String newCUName = getNewNameFor(source);
 		String destName = (newCUName != null) ? newCUName : source
 				.getElementName();
@@ -288,7 +285,7 @@ public class CopyResourceElementsOperation extends MultiOperation {
 		// or an
 		// IProject
 		IFile destFile = destFolder.getFile(new Path(destName));
-		SourceModule destCU = new SourceModule(dest, destName,
+		SourceModule destCU = new SourceModule((ModelElement) dest, destName,
 				DefaultWorkingCopyOwner.PRIMARY);
 		if (sourceResource == null || !destFile.equals(sourceResource)) {
 			try {
@@ -372,7 +369,7 @@ public class CopyResourceElementsOperation extends MultiOperation {
 				String oldName = /* Util.getNameWithoutScriptLikeExtension( */source
 						.getElementName();// );
 				String newName = /* Util.getNameWithoutScriptLikeExtension( */newCUName;// )
-																						// ;
+				// ;
 				prepareDeltas(source.getType(oldName), destCU.getType(newName),
 						isMove());
 			}
@@ -419,13 +416,13 @@ public class CopyResourceElementsOperation extends MultiOperation {
 		switch (element.getElementType()) {
 		case IModelElement.SOURCE_MODULE:
 			processSourceModuleResource((ISourceModule) element,
-					(ScriptFolder) dest);
+					(IScriptFolder) dest);
 			createdElements.add(((IScriptFolder) dest).getSourceModule(element
 					.getElementName()));
 			break;
 		case IModelElement.SCRIPT_FOLDER:
-			processScriptFolderResource((ScriptFolder) element,
-					(ProjectFragment) dest, getNewNameFor(element));
+			processScriptFolderResource((IScriptFolder) element,
+					(IProjectFragment) dest, getNewNameFor(element));
 			break;
 		default:
 			throw new ModelException(new ModelStatus(
@@ -457,12 +454,14 @@ public class CopyResourceElementsOperation extends MultiOperation {
 	 * @exception ScriptModelException
 	 *                if the operation is unable to complete
 	 */
-	private void processScriptFolderResource(ScriptFolder source,
-			ProjectFragment root, String newName) throws ModelException {
+	private void processScriptFolderResource(IScriptFolder source,
+			IProjectFragment root, String newName) throws ModelException {
 		try {
 			// String[] newFragName = (newName == null) ? source.path.segments()
 			// : Util.getTrimmedSimpleNames(newName);
-			IPath newFragName = (newName == null) ? source.path : new Path(
+			IPath source_path = source.getPath().removeFirstSegments(
+					source.getParent().getPath().segmentCount());
+			IPath newFragName = (newName == null) ? source_path : new Path(
 					newName);
 			IScriptFolder newFrag = root.getScriptFolder(newFragName);
 			IResource[] resources = collectResourcesOfInterest(source);
@@ -580,11 +579,10 @@ public class CopyResourceElementsOperation extends MultiOperation {
 			}
 			// Update package statement in compilation unit if needed
 			if (!Util.equalArraysOrNull(new Object[] { newFragName },
-					new Object[] { source.path })) { // if package has been
+					new Object[] { source_path })) { // if package has been
 				// renamed, update the
 				// compilation units
-				char[][] inclusionPatterns = root.fullInclusionPatternChars();
-				char[][] exclusionPatterns = root.fullExclusionPatternChars();
+
 				for (int i = 0; i < resources.length; i++) {
 					String resourceName = resources[i].getName();
 					IDLTKLanguageToolkit toolkit = DLTKLanguageManager
@@ -596,10 +594,10 @@ public class CopyResourceElementsOperation extends MultiOperation {
 						// we only consider potential compilation units
 						ISourceModule cu = newFrag
 								.getSourceModule(resourceName);
-						if (Util.isExcluded(cu.getPath(), inclusionPatterns,
-								exclusionPatterns, false/*
-														 * not a folder
-														 */))
+						if (Util.isExcluded(cu.getPath(), root, false/*
+																	 * not a
+																	 * folder
+																	 */))
 							continue;
 						if (DLTKCore.DEBUG) {
 							System.err
@@ -712,7 +710,8 @@ public class CopyResourceElementsOperation extends MultiOperation {
 	/**
 	 * Possible failures:
 	 * <ul>
-	 * <li>NO_ELEMENTS_TO_PROCESS - no elements supplied to the operation <li>
+	 * <li>NO_ELEMENTS_TO_PROCESS - no elements supplied to the operation
+	 * <li>
 	 * INDEX_OUT_OF_BOUNDS - the number of renamings supplied to the operation
 	 * does not match the number of elements that were supplied.
 	 * </ul>

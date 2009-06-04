@@ -629,19 +629,15 @@ public class Util {
 		case IModelElement.PROJECT_FRAGMENT:
 			return false;
 		case IModelElement.SCRIPT_FOLDER:
-			ProjectFragment root = (ProjectFragment) element
+			IProjectFragment root = (IProjectFragment) element
 					.getAncestor(IModelElement.PROJECT_FRAGMENT);
 			IResource resource = element.getResource();
-			return resource != null
-					&& isExcluded(resource, root.fullInclusionPatternChars(),
-							root.fullExclusionPatternChars());
+			return resource != null && isExcluded(resource, root);
 		case IModelElement.SOURCE_MODULE:
-			root = (ProjectFragment) element
+			root = (IProjectFragment) element
 					.getAncestor(IModelElement.PROJECT_FRAGMENT);
 			resource = element.getResource();
-			if (resource != null
-					&& isExcluded(resource, root.fullInclusionPatternChars(),
-							root.fullExclusionPatternChars()))
+			if (resource != null && isExcluded(resource, root))
 				return true;
 			return isExcluded(element.getParent());
 		default:
@@ -680,6 +676,16 @@ public class Util {
 		return isExcluded(path, inclusionPatterns, exclusionPatterns,
 				resourceType == IResource.FOLDER
 						|| resourceType == IResource.PROJECT);
+	}
+
+	public final static boolean isExcluded(IResource resource,
+			IProjectFragment fragment) {
+		IPath path = resource.getFullPath();
+		// ensure that folders are only excluded if all of their children are
+		// excluded
+		int resourceType = resource.getType();
+		return isExcluded(path, fragment, resourceType == IResource.FOLDER
+				|| resourceType == IResource.PROJECT);
 	}
 
 	public static boolean isValidSourceModule(IModelElement parent,

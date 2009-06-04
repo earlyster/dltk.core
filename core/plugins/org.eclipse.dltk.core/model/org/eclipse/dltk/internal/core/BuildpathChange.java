@@ -257,14 +257,14 @@ public class BuildpathChange {
 					result |= HAS_LIBRARY_CHANGE;
 				}
 
-				ProjectFragment[] pkgFragmentRoots = null;
+				IProjectFragment[] pkgFragmentRoots = null;
 				if (removedRoots != null) {
-					ProjectFragment oldRoot = (ProjectFragment) removedRoots
+					IProjectFragment oldRoot = (IProjectFragment) removedRoots
 							.get(this.oldResolvedBuildpath[i].getPath());
 					if (oldRoot != null) { // use old root if any (could be
 						// none
 						// if entry wasn't bound)
-						pkgFragmentRoots = new ProjectFragment[] { oldRoot };
+						pkgFragmentRoots = new IProjectFragment[] { oldRoot };
 					}
 				}
 				if (pkgFragmentRoots == null) {
@@ -290,9 +290,14 @@ public class BuildpathChange {
 				// remember timestamp of jars that were removed (in case they
 				// are added as external jar in the same operation)
 				for (int j = 0, length = pkgFragmentRoots.length; j < length; j++) {
-					ProjectFragment root = pkgFragmentRoots[j];
+					IProjectFragment root = pkgFragmentRoots[j];
 					if (root.isArchive() && !root.isExternal()) {
-						Object resource = root.resource;
+						Object resource = null;
+						if (root instanceof ProjectFragment) {
+							resource = ((ProjectFragment) root).resource;
+						} else {
+							resource = root.getResource();
+						}
 						File file = null;
 						if (resource instanceof File) {
 							file = (File) resource;

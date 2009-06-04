@@ -37,7 +37,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 
 	// ~ Constructors
 
-	public SourceModule(ScriptFolder parent, String name, WorkingCopyOwner owner) {
+	public SourceModule(ModelElement parent, String name, WorkingCopyOwner owner) {
 		super(parent, name, owner, false);
 
 		if (DLTKCore.VERBOSE) {
@@ -228,7 +228,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 
 		ModelManager manager = ModelManager.getModelManager();
 
-		SourceModule workingCopy = new SourceModule((ScriptFolder) getParent(),
+		SourceModule workingCopy = new SourceModule((ModelElement) getParent(),
 				getElementName(), workingCopyOwner);
 		ModelManager.PerWorkingCopyInfo perWorkingCopyInfo = manager
 				.getPerWorkingCopyInfo(workingCopy, false /* don't create */,
@@ -446,7 +446,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	 * ()
 	 */
 	protected ISourceModule getOriginalSourceModule() {
-		return new SourceModule((ScriptFolder) getParent(), getElementName(),
+		return new SourceModule((ModelElement) getParent(), getElementName(),
 				DefaultWorkingCopyOwner.PRIMARY);
 	}
 

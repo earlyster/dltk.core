@@ -223,7 +223,7 @@ public class SetBuildpathOperation extends ModelOperation {
 						&& path.isPrefixOf(location) && !path.equals(location)) {
 					IProjectFragment[] roots = this.project
 							.computeProjectFragments(buildpath[i]);
-					ProjectFragment root = (ProjectFragment) roots[0];
+					IProjectFragment root = (IProjectFragment) roots[0];
 					// now the output location becomes a package fragment -
 					// along with any subfolders
 					ArrayList folders = new ArrayList();

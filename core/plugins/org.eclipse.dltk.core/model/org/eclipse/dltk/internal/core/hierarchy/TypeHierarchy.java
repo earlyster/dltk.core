@@ -12,13 +12,47 @@ package org.eclipse.dltk.internal.core.hierarchy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-import org.eclipse.core.runtime.*;
-import org.eclipse.dltk.core.*;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.ElementChangedEvent;
+import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IElementChangedListener;
+import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IModelElementDelta;
+import org.eclipse.dltk.core.IModelStatusConstants;
+import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.core.ITypeHierarchy;
+import org.eclipse.dltk.core.ITypeHierarchyChangedListener;
+import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
-import org.eclipse.dltk.internal.core.*;
+import org.eclipse.dltk.internal.core.ModelElement;
+import org.eclipse.dltk.internal.core.ModelStatus;
+import org.eclipse.dltk.internal.core.Openable;
+import org.eclipse.dltk.internal.core.Region;
+import org.eclipse.dltk.internal.core.ScriptProject;
+import org.eclipse.dltk.internal.core.SourceModule;
+import org.eclipse.dltk.internal.core.TypeVector;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
 
@@ -724,7 +758,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 		case IModelElement.PROJECT_FRAGMENT:
 			return isAffectedByPackageFragmentRoot(delta, element);
 		case IModelElement.SCRIPT_FOLDER:
-			return isAffectedByPackageFragment(delta, (ScriptFolder) element);
+			return isAffectedByPackageFragment(delta, (IScriptFolder) element);
 		case IModelElement.SOURCE_MODULE:
 			return isAffectedByOpenable(delta, element);
 		}
@@ -833,7 +867,7 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * hierarchy
 	 */
 	private boolean isAffectedByPackageFragment(IModelElementDelta delta,
-			ScriptFolder element) {
+			IScriptFolder element) {
 		switch (delta.getKind()) {
 		case IModelElementDelta.ADDED:
 			// if the package fragment is in the projects being considered, this
@@ -1125,10 +1159,10 @@ public class TypeHierarchy implements ITypeHierarchy, IElementChangedListener {
 	 * the same name.
 	 */
 	protected boolean packageRegionContainsSamePackageFragment(
-			ScriptFolder element) {
+			IScriptFolder element) {
 		IModelElement[] pkgs = this.packageRegion.getElements();
 		for (int i = 0; i < pkgs.length; i++) {
-			ScriptFolder pkg = (ScriptFolder) pkgs[i];
+			IScriptFolder pkg = (IScriptFolder) pkgs[i];
 			if (pkg.getElementName().equals(element.getElementName())) {
 				return true;
 			}

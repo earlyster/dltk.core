@@ -737,7 +737,7 @@ public class ModelManager implements ISaveParticipant {
 						 * given we have a resource child of the root, it cannot
 						 * be a ZIP fragment
 						 */
-						ProjectFragment root = (ProjectFragment) ((ScriptProject) project)
+						IProjectFragment root = (IProjectFragment) ((ScriptProject) project)
 								.getFolderProjectFragment(rootPath);
 						if (root == null)
 							return null;
@@ -876,7 +876,7 @@ public class ModelManager implements ISaveParticipant {
 					}
 					if (validSrcModule) {
 						ISourceModule workingCopy = new SourceModule(
-								(ScriptFolder) primaryWorkingCopy.getParent(),
+								(ModelElement) primaryWorkingCopy.getParent(),
 								primaryWorkingCopy.getElementName(), owner);
 						if (!workingCopyToInfos.containsKey(workingCopy))
 							result[index++] = primaryWorkingCopy;

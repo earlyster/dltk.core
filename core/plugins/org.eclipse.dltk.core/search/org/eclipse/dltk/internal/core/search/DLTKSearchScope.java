@@ -27,6 +27,7 @@ import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
@@ -37,7 +38,6 @@ import org.eclipse.dltk.internal.core.ExternalProjectFragment;
 import org.eclipse.dltk.internal.core.Model;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelManager;
-import org.eclipse.dltk.internal.core.ScriptFolder;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.util.Util;
 
@@ -302,7 +302,7 @@ public class DLTKSearchScope extends AbstractSearchScope {
 				if (DLTKCore.DEBUG) {
 					System.err.println("TODO: Check. Bug possible..."); //$NON-NLS-1$
 				}
-				String relativePath = ((ScriptFolder) element).getPath()
+				String relativePath = ((ModelElement) element).getPath()
 						.toString() + '/';
 				containerPath = root.getPath();
 				containerPathToString = containerPath.toString();
@@ -582,7 +582,9 @@ public class DLTKSearchScope extends AbstractSearchScope {
 				return Path.EMPTY;
 			return element.getPath();
 		case IModelElement.SCRIPT_FOLDER:
-			String relativePath = ((ScriptFolder) element).getRelativePath()
+			String relativePath = ((IScriptFolder) element).getPath()
+					.removeFirstSegments(
+							element.getParent().getPath().segmentCount())
 					.toString() + '/';
 			return getPath(element.getParent(), relativeToRoot).append(
 					new Path(relativePath));

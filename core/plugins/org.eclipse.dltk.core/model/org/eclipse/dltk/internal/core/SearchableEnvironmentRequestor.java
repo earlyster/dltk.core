@@ -12,9 +12,10 @@ package org.eclipse.dltk.internal.core;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.env.ISourceModule;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.codeassist.ISearchRequestor;
@@ -99,7 +100,7 @@ class SearchableEnvironmentRequestor extends ModelElementRequestor {
 
 			if (this.checkAccessRestrictions
 					&& (!type.getScriptProject().equals(this.project))) {
-				ProjectFragment root = (ProjectFragment) type
+				IProjectFragment root = (IProjectFragment) type
 						.getAncestor(IModelElement.PROJECT_FRAGMENT);
 				BuildpathEntry entry = (BuildpathEntry) this.nameLookup.rootToResolvedEntries
 						.get(root);

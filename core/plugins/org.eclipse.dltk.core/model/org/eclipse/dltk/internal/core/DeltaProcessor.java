@@ -734,7 +734,7 @@ public class DeltaProcessor {
 		case IModelElement.SCRIPT_FOLDER:
 			if (rootInfo != null) {
 				if (rootInfo.project.contains(resource)) {
-					ProjectFragment root = (ProjectFragment) rootInfo
+					IProjectFragment root = (IProjectFragment) rootInfo
 							.getProjectFragment(null);
 					// create package handle
 					IPath pkgPath = path.removeFirstSegments(rootInfo.rootPath
@@ -774,7 +774,7 @@ public class DeltaProcessor {
 				IScriptFolder pkgFragment = null;
 				switch (this.currentElement.getElementType()) {
 				case IModelElement.PROJECT_FRAGMENT:
-					ProjectFragment root = (ProjectFragment) this.currentElement;
+					IProjectFragment root = (IProjectFragment) this.currentElement;
 					IPath rootPath = root.getPath();
 					IPath pkgPath = path.removeLastSegments(1);
 					IPath pkgName = pkgPath.removeFirstSegments(rootPath
@@ -1002,31 +1002,31 @@ public class DeltaProcessor {
 					status = (String) externalArchivesStatus.get(entryPath);
 					if (status != null) {
 						if (status == EXTERNAL_ZIP_ADDED) {
-							ProjectFragment root = (ProjectFragment) scriptProject
+							IProjectFragment root = (IProjectFragment) scriptProject
 									.getProjectFragment(entryPath);
 							if (VERBOSE) {
 								System.out
 										.println("- External ZIP ADDED, affecting root: " + root.getElementName()); //$NON-NLS-1$
 							}
-							this.elementAdded(root, null, null);
+							this.elementAdded((Openable) root, null, null);
 							hasDelta = true;
 						} else if (status == EXTERNAL_ZIP_CHANGED) {
-							ProjectFragment root = (ProjectFragment) scriptProject
+							IProjectFragment root = (IProjectFragment) scriptProject
 									.getProjectFragment(entryPath);
 							if (VERBOSE) {
 								System.out
 										.println("- External ZIP CHANGED, affecting root: " + root.getElementName()); //$NON-NLS-1$
 							}
-							this.contentChanged(root);
+							this.contentChanged((Openable) root);
 							hasDelta = true;
 						} else if (status == EXTERNAL_ZIP_REMOVED) {
-							ProjectFragment root = (ProjectFragment) scriptProject
+							IProjectFragment root = (IProjectFragment) scriptProject
 									.getProjectFragment(entryPath);
 							if (VERBOSE) {
 								System.out
 										.println("- External ZIP REMOVED, affecting root: " + root.getElementName()); //$NON-NLS-1$
 							}
-							this.elementRemoved(root, null, null);
+							this.elementRemoved((Openable) root, null, null);
 
 							this.state.addBuildpathValidation(scriptProject); // see
 							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=
@@ -1712,11 +1712,11 @@ public class DeltaProcessor {
 				((ProjectElementInfo) info).setForeignResources(null);
 				// if a package fragment root is the project, clear it too
 				ScriptProject project = (ScriptProject) element;
-				ProjectFragment projectRoot = (ProjectFragment) project
+				IProjectFragment projectRoot = (IProjectFragment) project
 						.getProjectFragment(project.getProject());
 				if (projectRoot.isOpen()) {
-					((ProjectFragmentInfo) projectRoot.getElementInfo())
-							.setForeignResources(null);
+					((ProjectFragmentInfo) ((Openable) projectRoot)
+							.getElementInfo()).setForeignResources(null);
 				}
 				break;
 			case IModelElement.SCRIPT_FOLDER:
@@ -2774,7 +2774,7 @@ public class DeltaProcessor {
 		case IModelElement.PROJECT_FRAGMENT:
 			if (element instanceof ArchiveProjectFragment
 					|| element instanceof ExternalProjectFragment) {
-				ProjectFragment root = (ProjectFragment) element;
+				IProjectFragment root = (IProjectFragment) element;
 				// index External or zip fragment only once (if the root is
 				// in its declaring
 				// project)
@@ -2783,7 +2783,13 @@ public class DeltaProcessor {
 				char[][] fullInclusionPatternChars = null;
 				char[][] fullExclusionPatternChars = null;
 				try {
-					buildpathEntry = (BuildpathEntry) root.getBuildpathEntry();
+					if (root instanceof ProjectFragment) {
+						buildpathEntry = (BuildpathEntry) ((ProjectFragment) root)
+								.getBuildpathEntry();
+					} else {
+						buildpathEntry = (BuildpathEntry) root
+								.getRawBuildpathEntry();
+					}
 					fullInclusionPatternChars = buildpathEntry
 							.fullInclusionPatternChars();
 					fullExclusionPatternChars = buildpathEntry
@@ -2817,7 +2823,7 @@ public class DeltaProcessor {
 			}
 			int kind = delta.getKind();
 			if (kind == IResourceDelta.ADDED || kind == IResourceDelta.REMOVED) {
-				ProjectFragment root = (ProjectFragment) element;
+				IProjectFragment root = (IProjectFragment) element;
 				this.updateRootIndex(root, Path.EMPTY, delta);
 				break;
 			}
@@ -2829,7 +2835,7 @@ public class DeltaProcessor {
 			case IResourceDelta.REMOVED:
 				IScriptFolder pkg = null;
 				if (element instanceof IProjectFragment) {
-					ProjectFragment root = (ProjectFragment) element;
+					IProjectFragment root = (IProjectFragment) element;
 					pkg = root.getScriptFolder(Path.EMPTY);
 				} else {
 					pkg = (IScriptFolder) element;
@@ -2965,7 +2971,7 @@ public class DeltaProcessor {
 	 * Updates the index of the given root (assuming it's an addition or a
 	 * removal). This is done recusively, pkg being the current package.
 	 */
-	private void updateRootIndex(ProjectFragment root, IPath pkgPath,
+	private void updateRootIndex(IProjectFragment root, IPath pkgPath,
 			IResourceDelta delta) {
 		Openable pkg = (Openable) root.getScriptFolder(pkgPath);
 		this.updateIndex(pkg, delta);

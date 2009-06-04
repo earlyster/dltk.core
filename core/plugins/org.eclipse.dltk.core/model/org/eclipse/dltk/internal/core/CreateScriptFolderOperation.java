@@ -76,13 +76,11 @@ public class CreateScriptFolderOperation extends ModelOperation {
 	 */
 	protected void executeOperation() throws ModelException {
 		ModelElementDelta delta = null;
-		ProjectFragment root = (ProjectFragment) getParentElement();
+		IProjectFragment root = (IProjectFragment) getParentElement();
 		beginTask(Messages.operation_createScriptFolderProgress, this.pkgName.segmentCount());
 		IContainer parentFolder = (IContainer) root.getResource();
 		IPath sideEffectPackageName = Path.EMPTY;
 		ArrayList results = new ArrayList(this.pkgName.segmentCount());
-		char[][] inclusionPatterns = root.fullInclusionPatternChars();
-		char[][] exclusionPatterns = root.fullExclusionPatternChars();
 		int i;
 		for (i = 0; i < this.pkgName.segmentCount(); i++) {
 			String subFolderName = this.pkgName.segment(i);
@@ -92,7 +90,7 @@ public class CreateScriptFolderOperation extends ModelOperation {
 				createFolder(parentFolder, subFolderName, force);
 				parentFolder = parentFolder.getFolder(new Path(subFolderName));
 				IScriptFolder addedFrag = root.getScriptFolder(sideEffectPackageName);
-				if (!Util.isExcluded(parentFolder, inclusionPatterns, exclusionPatterns)) {
+				if (!Util.isExcluded(parentFolder, root)) {
 					if (delta == null) {
 						delta = newModelElementDelta();
 					}
