@@ -5,10 +5,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
@@ -44,7 +49,7 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 		String DLTK_INDEX_FILE = ".dltk.index";
 		// Check for additional indexes
 		if (processIndexFile(handle, attribute, parent, parent
-				.getChild(DLTK_INDEX_FILE))) {
+				.getChild(DLTK_INDEX_FILE), cache)) {
 			return cache.getCacheEntryAttribute(handle, attribute);
 		}
 		IFileHandle[] children = parent.getChildren();
@@ -52,7 +57,8 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 			String fileName = fileHandle.getName();
 			if (fileName.startsWith(DLTK_INDEX_FILE)
 					&& !fileName.equals(DLTK_INDEX_FILE)) {
-				if (processIndexFile(handle, attribute, parent, fileHandle)) {
+				if (processIndexFile(handle, attribute, parent, fileHandle,
+						cache)) {
 					return cache.getCacheEntryAttribute(handle, attribute);
 				}
 			}
@@ -60,8 +66,34 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 		return null;
 	}
 
-	private boolean processIndexFile(IFileHandle handle, String attribute,
-			IFileHandle parent, IFileHandle indexFile) {
+	public static void processFolderIndexes(IFileHandle folder,
+			IContentCache cache, IProgressMonitor monitor) {
+		String DLTK_INDEX_FILE = ".dltk.index";
+		// Check for additional indexes
+		IFileHandle[] children = folder.getChildren();
+		List<IFileHandle> indexFiles = new ArrayList<IFileHandle>();
+		for (IFileHandle fileHandle : children) {
+			String fileName = fileHandle.getName();
+			if (fileName.startsWith(DLTK_INDEX_FILE)
+					&& !fileName.equals(DLTK_INDEX_FILE)) {
+				indexFiles.add(fileHandle);
+			}
+		}
+		SubProgressMonitor processingIndexes = new SubProgressMonitor(monitor,
+				1);
+		processingIndexes
+				.beginTask("Processing index files", indexFiles.size());
+		for (IFileHandle fileHandle : indexFiles) {
+			processingIndexes.subTask("Processing:" + fileHandle.toOSString());
+			processIndexFile(null, null, folder, fileHandle, cache);
+			processingIndexes.worked(1);
+		}
+		processingIndexes.done();
+	}
+
+	private static boolean processIndexFile(IFileHandle handle,
+			String attribute, IFileHandle parent, IFileHandle indexFile,
+			IContentCache cache) {
 		if (indexFile != null && indexFile.exists()) {
 			String stamp = cache.getCacheEntryAttributeString(indexFile,
 					"timestamp");
@@ -72,62 +104,8 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 				}
 			}
 			try {
-				File zipFileHandle = cache.getEntryAsFile(indexFile, "handle");
-
-				if (!zipFileHandle.exists()) {
-					BufferedInputStream inp = new BufferedInputStream(indexFile
-							.openInputStream(new NullProgressMonitor()), 4096);
-					PerformanceNode p = RuntimePerformanceMonitor.begin();
-					Util.copy(zipFileHandle, inp);
-					inp.close();
-					p.done("#", "Indexes read", zipFileHandle.length(),
-							indexFile.getEnvironment());
-				}
-				ZipFile zipFile = new ZipFile(zipFileHandle);
-
-				ZipEntry entry = zipFile.getEntry(".index");
-				Resource indexResource = new BinaryResourceImpl(URI
-						.createURI("dltk_cache://zipIndex"));
-				indexResource.load(zipFile.getInputStream(entry), null);
-				EList<EObject> contents = indexResource.getContents();
-				boolean found = false;
-				for (EObject eObject : contents) {
-					CacheIndex cacheIndex = (CacheIndex) eObject;
-					EList<CacheEntry> entries = cacheIndex.getEntries();
-					for (CacheEntry cacheEntry : entries) {
-						String path = cacheEntry.getPath();
-						IFileHandle entryHandle = new WrapTimeStampHandle(
-								parent.getChild(path), cacheEntry
-										.getTimestamp());
-						cache.setCacheEntryAttribute(entryHandle, "timestamp",
-								cacheEntry.getTimestamp());
-						EList<CacheEntryAttribute> attributes = cacheEntry
-								.getAttributes();
-						for (CacheEntryAttribute cacheEntryAttribute : attributes) {
-							if (attribute.equals(cacheEntryAttribute.getName())
-									&& cacheEntry.getPath().equals(
-											handle.getName())) {
-								found = true;
-							}
-							OutputStream stream = null;
-							stream = cache.getCacheEntryAttributeOutputStream(
-									entryHandle, cacheEntryAttribute.getName());
-							String location = cacheEntryAttribute.getLocation();
-							ZipEntry zipEntry = zipFile.getEntry(location);
-							zipFile.getInputStream(zipEntry);
-							InputStream inputStream;
-							try {
-								inputStream = zipFile.getInputStream(zipEntry);
-								Util.copy(inputStream, stream);
-								stream.close();
-								inputStream.close();
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-						}
-					}
-				}
-				cache.setCacheEntryAttribute(indexFile, "timestamp", fStamp);
+				boolean found = processIndexFile(handle, attribute, parent,
+						indexFile, fStamp, cache);
 				return found;
 			} catch (IOException e) {
 				if (DLTKCore.DEBUG) {
@@ -136,6 +114,70 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 			}
 		}
 		return false;
+	}
+
+	public static boolean processIndexFile(IFileHandle handle,
+			String attribute, IFileHandle parent, IFileHandle indexFile,
+			String fStamp, IContentCache cache) throws IOException,
+			ZipException {
+		File zipFileHandle = cache.getEntryAsFile(indexFile, "handle");
+
+		if (!zipFileHandle.exists()) {
+			BufferedInputStream inp = new BufferedInputStream(indexFile
+					.openInputStream(new NullProgressMonitor()), 4096);
+			PerformanceNode p = RuntimePerformanceMonitor.begin();
+			Util.copy(zipFileHandle, inp);
+			inp.close();
+			p.done("#", "Indexes read", zipFileHandle.length(), indexFile
+					.getEnvironment());
+		}
+		ZipFile zipFile = new ZipFile(zipFileHandle);
+
+		ZipEntry entry = zipFile.getEntry(".index");
+		Resource indexResource = new BinaryResourceImpl(URI
+				.createURI("dltk_cache://zipIndex"));
+		indexResource.load(zipFile.getInputStream(entry), null);
+		EList<EObject> contents = indexResource.getContents();
+		boolean found = false;
+		for (EObject eObject : contents) {
+			CacheIndex cacheIndex = (CacheIndex) eObject;
+			EList<CacheEntry> entries = cacheIndex.getEntries();
+			for (CacheEntry cacheEntry : entries) {
+				String path = cacheEntry.getPath();
+				IFileHandle entryHandle = new WrapTimeStampHandle(parent
+						.getChild(path), cacheEntry.getTimestamp());
+				cache.setCacheEntryAttribute(entryHandle, "timestamp",
+						cacheEntry.getTimestamp());
+				EList<CacheEntryAttribute> attributes = cacheEntry
+						.getAttributes();
+				for (CacheEntryAttribute cacheEntryAttribute : attributes) {
+					if (handle != null && attribute != null) {
+						if (attribute.equals(cacheEntryAttribute.getName())
+								&& cacheEntry.getPath()
+										.equals(handle.getName())) {
+							found = true;
+						}
+					}
+					OutputStream stream = null;
+					stream = cache.getCacheEntryAttributeOutputStream(
+							entryHandle, cacheEntryAttribute.getName());
+					String location = cacheEntryAttribute.getLocation();
+					ZipEntry zipEntry = zipFile.getEntry(location);
+					zipFile.getInputStream(zipEntry);
+					InputStream inputStream;
+					try {
+						inputStream = zipFile.getInputStream(zipEntry);
+						Util.copy(inputStream, stream);
+						stream.close();
+						inputStream.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		cache.setCacheEntryAttribute(indexFile, "timestamp", fStamp);
+		return found;
 	}
 
 	public void setCache(IContentCache cache) {
