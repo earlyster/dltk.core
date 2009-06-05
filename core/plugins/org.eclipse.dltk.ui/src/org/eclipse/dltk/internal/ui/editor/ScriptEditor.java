@@ -479,18 +479,6 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			}
 		}
 
-		// http://dev.eclipse.org/bugs/show_bug.cgi?id=19270
-		public void updateIndentationPrefixes() {
-			SourceViewerConfiguration configuration = getSourceViewerConfiguration();
-			String[] types = configuration.getConfiguredContentTypes(this);
-			for (int i = 0; i < types.length; i++) {
-				String[] prefixes = configuration.getIndentPrefixes(this,
-						types[i]);
-				if (prefixes != null && prefixes.length > 0)
-					setIndentPrefixes(prefixes, types[i]);
-			}
-		}
-
 		/*
 		 * @see IWidgetTokenOwner#requestWidgetToken(IWidgetTokenKeeper)
 		 */
