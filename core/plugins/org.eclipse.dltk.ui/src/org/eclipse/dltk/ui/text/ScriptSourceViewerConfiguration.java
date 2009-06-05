@@ -26,6 +26,7 @@ import org.eclipse.dltk.ui.actions.IScriptEditorActionDefinitionIds;
 import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
 import org.eclipse.dltk.ui.formatter.ScriptFormattingStrategy;
 import org.eclipse.dltk.ui.text.completion.ContentAssistPreference;
+import org.eclipse.dltk.ui.text.util.AutoEditUtils;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -425,6 +426,25 @@ public abstract class ScriptSourceViewerConfiguration extends
 			return formatter;
 		}
 		return super.getContentFormatter(sourceViewer);
+	}
+
+	/**
+	 * Computes and returns the indent prefixes for space indentation and the
+	 * given <code>tabWidth</code>.
+	 * 
+	 * @param tabWidth
+	 *            the display tab width
+	 * @return the indent prefixes
+	 * @see #getIndentPrefixes(ISourceViewer, String)
+	 */
+	protected String[] getIndentPrefixesForSpaces(int tabWidth) {
+		final String[] indentPrefixes = new String[tabWidth + 2];
+		indentPrefixes[0] = AutoEditUtils.getNSpaces(tabWidth);
+		for (int i = 0; i < tabWidth; i++) {
+			indentPrefixes[i + 1] = AutoEditUtils.getNSpaces(i) + '\t';
+		}
+		indentPrefixes[tabWidth + 1] = ""; //$NON-NLS-1$
+		return indentPrefixes;
 	}
 
 }
