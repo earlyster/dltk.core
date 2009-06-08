@@ -168,17 +168,18 @@ public class ScriptSourceLookupParticipant extends
 
 			final IFileHandle file = getEnvironment().getFile(pathObj);
 			if (file.exists()) {
+				// check if file is available in workspace
+				final IFile[] workspaceFiles = getWorkspaceRoot()
+						.findFilesForLocationURI(file.toURI());
+				if (workspaceFiles.length != 0 && workspaceFiles[0].exists()) {
+					return workspaceFiles;
+				}
 				// Try to open external source module.
 				final ExternalSourceModuleFinder finder = new ExternalSourceModuleFinder(
 						file.getFullPath());
 				scriptProject.accept(finder);
 				if (finder.isFound()) {
 					return finder.getResult();
-				}
-				final IFile[] workspaceFiles = getWorkspaceRoot()
-						.findFilesForLocationURI(file.toURI());
-				if (workspaceFiles.length != 0 && workspaceFiles[0].exists()) {
-					return workspaceFiles;
 				}
 			}
 			return new Object[] { new DBGPSourceModule(scriptProject, path,
