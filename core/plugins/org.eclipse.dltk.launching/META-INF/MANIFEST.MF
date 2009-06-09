@@ -21,4 +21,4 @@ Export-Package: org.eclipse.dltk.internal.launching,
  org.eclipse.dltk.launching.debug,
  org.eclipse.dltk.launching.process,
  org.eclipse.dltk.launching.sourcelookup
-Bundle-RequiredExecutionEnvironment: J2SE-1.4
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
