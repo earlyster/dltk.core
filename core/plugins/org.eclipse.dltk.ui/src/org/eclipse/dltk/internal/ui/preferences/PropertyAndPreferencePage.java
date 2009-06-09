@@ -12,13 +12,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.dltk.ui.dialogs.ProjectSelectionDialog;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.preferences.PreferencesMessages;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.jface.dialogs.ControlEnableState;
@@ -152,7 +152,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage
 	}
 
 	/*
-	 * @see org.eclipse.jface.preference.IPreferencePage#createContents(Composite)
+	 * @see IPreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -329,16 +329,12 @@ public abstract class PropertyAndPreferencePage extends PreferencePage
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
+	 * @see IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
 	public void init(IWorkbench workbench) {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see org.eclipse.ui.IWorkbenchPropertyPage#getElement()
 	 */
 	public IAdaptable getElement() {
@@ -346,18 +342,14 @@ public abstract class PropertyAndPreferencePage extends PreferencePage
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IWorkbenchPropertyPage#setElement(org.eclipse.core.runtime.IAdaptable)
+	 * @see IWorkbenchPropertyPage#setElement(IAdaptable)
 	 */
 	public void setElement(IAdaptable element) {
 		fProject = (IProject) element.getAdapter(IResource.class);
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
+	 * @see PreferencePage#applyData(java.lang.Object)
 	 */
 	public void applyData(Object data) {
 		if (data instanceof Map) {
