@@ -221,8 +221,8 @@ public final class ScriptRuntime {
 	private static IInterpreterInstallType[] fgInterpreterTypes = null;
 
 	public static class DefaultInterpreterEntry {
-		private String nature;
-		private String environment;
+		private final String nature;
+		private final String environment;
 
 		public DefaultInterpreterEntry(String nature, String environment) {
 			this.nature = nature;
@@ -266,6 +266,11 @@ public final class ScriptRuntime {
 			} else if (!nature.equals(other.nature))
 				return false;
 			return true;
+		}
+
+		@Override
+		public String toString() {
+			return nature + "/" + environment; //$NON-NLS-1$
 		}
 	}
 
@@ -352,14 +357,14 @@ public final class ScriptRuntime {
 			// only happens on a CoreException
 			DLTKLaunchingPlugin.log(status);
 			// cleanup null entries in fgInterpreterTypes
-			List temp = new ArrayList(fgInterpreterTypes.length);
+			List<IInterpreterInstallType> temp = new ArrayList<IInterpreterInstallType>(
+					fgInterpreterTypes.length);
 			for (int i = 0; i < fgInterpreterTypes.length; i++) {
 				if (fgInterpreterTypes[i] != null) {
 					temp.add(fgInterpreterTypes[i]);
 				}
 				fgInterpreterTypes = new IInterpreterInstallType[temp.size()];
-				fgInterpreterTypes = (IInterpreterInstallType[]) temp
-						.toArray(fgInterpreterTypes);
+				fgInterpreterTypes = temp.toArray(fgInterpreterTypes);
 			}
 		}
 	}
@@ -566,14 +571,13 @@ public final class ScriptRuntime {
 			String nature) {
 		initializeInterpreters();
 
-		List res = new ArrayList();
+		List<IInterpreterInstallType> res = new ArrayList<IInterpreterInstallType>();
 		for (int i = 0; i < fgInterpreterTypes.length; i++) {
 			IInterpreterInstallType t = fgInterpreterTypes[i];
 			if (t.getNatureId().equals(nature))
 				res.add(t);
 		}
-		return (IInterpreterInstallType[]) res
-				.toArray(new IInterpreterInstallType[res.size()]);
+		return res.toArray(new IInterpreterInstallType[res.size()]);
 	}
 
 	public static DefaultInterpreterEntry[] getDefaultInterpreterIDs() {
@@ -963,7 +967,7 @@ public final class ScriptRuntime {
 						interperterInstall.getInstallLocation(),
 						interperterInstall.getEnvironmentVariables(), monitor);
 
-		List existingDefaultLocations = new ArrayList();
+		List<LibraryLocation> existingDefaultLocations = new ArrayList<LibraryLocation>();
 		for (int i = 0; i < defaultLocations.length; ++i) {
 			LibraryLocation location = defaultLocations[i];
 
@@ -974,7 +978,7 @@ public final class ScriptRuntime {
 			}
 		}
 
-		return (LibraryLocation[]) existingDefaultLocations
+		return existingDefaultLocations
 				.toArray(new LibraryLocation[existingDefaultLocations.size()]);
 	}
 
@@ -1470,7 +1474,7 @@ public final class ScriptRuntime {
 		List entries = new ArrayList();
 		gatherScriptLibraryPathEntries(project, requiredProjects, visited,
 				entries);
-		List resolved = new ArrayList(entries.size());
+		List<String> resolved = new ArrayList<String>(entries.size());
 		Iterator iterator = entries.iterator();
 		IStringVariableManager manager = VariablesPlugin.getDefault()
 				.getStringVariableManager();
@@ -1492,7 +1496,7 @@ public final class ScriptRuntime {
 				}
 			}
 		}
-		return (String[]) resolved.toArray(new String[resolved.size()]);
+		return resolved.toArray(new String[resolved.size()]);
 	}
 
 	/**
@@ -1559,7 +1563,7 @@ public final class ScriptRuntime {
 			IScriptProject project, boolean collectRequired,
 			IBuildpathEntry[] buildpathEntries, List entries)
 			throws CoreException {
-		List req = null;
+		List<IBuildpathEntry> req = null;
 		for (int i = 0; i < buildpathEntries.length; i++) {
 			IBuildpathEntry entry = buildpathEntries[i];
 			IBuildpathAttribute[] extraAttributes = entry.getExtraAttributes();
@@ -1580,7 +1584,7 @@ public final class ScriptRuntime {
 									.getBuildpathEntries(project), entries);
 					if (requiredProjects != null) {
 						if (req == null) {
-							req = new ArrayList();
+							req = new ArrayList<IBuildpathEntry>();
 						}
 						for (int j = 0; j < requiredProjects.length; j++) {
 							req.add(requiredProjects[j]);
@@ -1590,14 +1594,13 @@ public final class ScriptRuntime {
 			} else if (collectRequired
 					&& entry.getEntryKind() == IBuildpathEntry.BPE_PROJECT) {
 				if (req == null) {
-					req = new ArrayList();
+					req = new ArrayList<IBuildpathEntry>();
 				}
 				req.add(entry);
 			}
 		}
 		if (req != null) {
-			return (IBuildpathEntry[]) req.toArray(new IBuildpathEntry[req
-					.size()]);
+			return req.toArray(new IBuildpathEntry[req.size()]);
 		}
 		return null;
 	}
@@ -2137,7 +2140,8 @@ public final class ScriptRuntime {
 	public static IRuntimeBuildpathEntry[] computeUnresolvedRuntimeBuildpath(
 			IScriptProject project) throws CoreException {
 		IBuildpathEntry[] entries = project.getRawBuildpath();
-		List buildpathEntries = new ArrayList(3);
+		List<IRuntimeBuildpathEntry> buildpathEntries = new ArrayList<IRuntimeBuildpathEntry>(
+				3);
 		for (int i = 0; i < entries.length; i++) {
 			IBuildpathEntry entry = entries[i];
 			switch (entry.getEntryKind()) {
@@ -2165,7 +2169,7 @@ public final class ScriptRuntime {
 			}
 		}
 		buildpathEntries.add(newDefaultProjectBuildpathEntry(project));
-		return (IRuntimeBuildpathEntry[]) buildpathEntries
+		return buildpathEntries
 				.toArray(new IRuntimeBuildpathEntry[buildpathEntries.size()]);
 	}
 
@@ -2534,7 +2538,7 @@ public final class ScriptRuntime {
 		IRuntimeBuildpathEntry[] unresolved = computeUnresolvedRuntimeBuildpath(jproject);
 		// 1. remove bootpath entries
 		// 2. resolve & translate to local file system paths
-		List resolved = new ArrayList(unresolved.length);
+		List<String> resolved = new ArrayList<String>(unresolved.length);
 		for (int i = 0; i < unresolved.length; i++) {
 			IRuntimeBuildpathEntry entry = unresolved[i];
 			if (entry.getBuildpathProperty() == IRuntimeBuildpathEntry.USER_ENTRY) {
@@ -2548,7 +2552,7 @@ public final class ScriptRuntime {
 				}
 			}
 		}
-		return (String[]) resolved.toArray(new String[resolved.size()]);
+		return resolved.toArray(new String[resolved.size()]);
 	}
 
 	public static ISourceContainer[] getSourceContainers(
