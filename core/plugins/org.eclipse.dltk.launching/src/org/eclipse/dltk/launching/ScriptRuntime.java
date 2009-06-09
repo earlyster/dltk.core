@@ -278,12 +278,12 @@ public final class ScriptRuntime {
 	 * Contain association of default interpreter entries to interprter
 	 * identifiers.
 	 */
-	private static Map fgDefaultInterpreterId = new HashMap();
+	private static Map<DefaultInterpreterEntry, String> fgDefaultInterpreterId = new HashMap<DefaultInterpreterEntry, String>();
 
 	/**
 	 * Contain DefaultInterpreterEntry entry assocications
 	 */
-	private static Map fgDefaultInterpreterConnectorId = new HashMap();
+	private static Map<DefaultInterpreterEntry, String> fgDefaultInterpreterConnectorId = new HashMap<DefaultInterpreterEntry, String>();
 
 	/**
 	 * Resolvers keyed by variable name, container id, and runtime buildpath
@@ -320,7 +320,7 @@ public final class ScriptRuntime {
 	 * Set of IDs of Interpreters contributed via InterpreterInstalls extension
 	 * point.
 	 */
-	private static Set fgContributedInterpreters = new HashSet();
+	private static Set<String> fgContributedInterpreters = new HashSet<String>();
 
 	/**
 	 * This class contains only static methods, and is not intended to be
@@ -500,7 +500,7 @@ public final class ScriptRuntime {
 		DefaultInterpreterEntry defaultInterpreterID = new DefaultInterpreterEntry(
 				nature, environmentId);
 		if (fgDefaultInterpreterId.get(defaultInterpreterID) != null) {
-			previous = getInterpreterFromCompositeId((String) fgDefaultInterpreterId
+			previous = getInterpreterFromCompositeId(fgDefaultInterpreterId
 					.get(defaultInterpreterID));
 		}
 		fgDefaultInterpreterId.put(defaultInterpreterID,
@@ -510,7 +510,7 @@ public final class ScriptRuntime {
 		}
 		IInterpreterInstall current = null;
 		if (fgDefaultInterpreterId.get(defaultInterpreterID) != null) {
-			current = getInterpreterFromCompositeId((String) fgDefaultInterpreterId
+			current = getInterpreterFromCompositeId(fgDefaultInterpreterId
 					.get(defaultInterpreterID));
 		}
 		if (previous != current) {
@@ -581,20 +581,19 @@ public final class ScriptRuntime {
 	}
 
 	public static DefaultInterpreterEntry[] getDefaultInterpreterIDs() {
-		Set set = fgDefaultInterpreterId.keySet();
-		return (DefaultInterpreterEntry[]) set
-				.toArray(new DefaultInterpreterEntry[set.size()]);
+		Set<DefaultInterpreterEntry> set = fgDefaultInterpreterId.keySet();
+		return set.toArray(new DefaultInterpreterEntry[set.size()]);
 	}
 
 	private static String getDefaultInterpreterId(DefaultInterpreterEntry entry) {
 		initializeInterpreters();
-		return (String) fgDefaultInterpreterId.get(entry);
+		return fgDefaultInterpreterId.get(entry);
 	}
 
 	private static String getDefaultInterpreterConnectorId(
 			DefaultInterpreterEntry entry) {
 		initializeInterpreters();
-		return (String) fgDefaultInterpreterConnectorId.get(entry);
+		return fgDefaultInterpreterConnectorId.get(entry);
 	}
 
 	/**
@@ -1873,11 +1872,8 @@ public final class ScriptRuntime {
 									.getDefaultInterpreterInstallCompositeID(natures[i]);
 							boolean validDef = false;
 							if (defId != null) {
-								Iterator iterator = defs
-										.getValidInterpreterList().iterator();
-								while (iterator.hasNext()) {
-									IInterpreterInstall Interpreter = (IInterpreterInstall) iterator
-											.next();
+								for (IInterpreterInstall Interpreter : defs
+										.getValidInterpreterList()) {
 									if (getCompositeIdFromInterpreter(
 											Interpreter).equals(defId)) {
 										validDef = true;
@@ -1889,10 +1885,10 @@ public final class ScriptRuntime {
 							if (!validDef) {
 								// use the first as the default
 								setPref = true;
-								List list = defs
+								List<IInterpreterInstall> list = defs
 										.getValidInterpreterList(natures[i]);
 								if (!list.isEmpty()) {
-									IInterpreterInstall Interpreter = (IInterpreterInstall) list
+									IInterpreterInstall Interpreter = list
 											.get(0);
 									defs
 											.setDefaultInterpreterInstallCompositeID(
@@ -1911,8 +1907,9 @@ public final class ScriptRuntime {
 						}
 						// Create the underlying interpreters for each valid
 						// Interpreter
-						List InterpreterList = defs.getValidInterpreterList();
-						Iterator InterpreterListIterator = InterpreterList
+						List<IInterpreterInstall> InterpreterList = defs
+								.getValidInterpreterList();
+						Iterator<IInterpreterInstall> InterpreterListIterator = InterpreterList
 								.iterator();
 						while (InterpreterListIterator.hasNext()) {
 							InterpreterStandin InterpreterStandin = (InterpreterStandin) InterpreterListIterator
