@@ -24,10 +24,9 @@ package org.eclipse.dltk.launching;
  * a 'live' interpreter or as a preliminary step to making changes to a 'real'
  * interpreter.
  * </p>
- * When <code>convertToRealInterpreter</code> is called, a corresponding
- * 'real' interpreter is created if one did not previously exist, or the
- * corresponding 'real' interpreter is updated.
- * </p>
+ * When <code>convertToRealInterpreter</code> is called, a corresponding 'real'
+ * interpreter is created if one did not previously exist, or the corresponding
+ * 'real' interpreter is updated. </p>
  * <p>
  * Clients may instantiate this class; it is not intended to be subclassed.
  * </p>
@@ -55,8 +54,8 @@ public class InterpreterStandin extends AbstractInterpreterInstall {
 
 	/**
 	 * Construct a <code>InterpreterStandin</code> instance based on the
-	 * specified <code>IInterpreterInstall</code>. Changes to this standin
-	 * will not be reflected in the 'real' Interpreter until
+	 * specified <code>IInterpreterInstall</code>. Changes to this standin will
+	 * not be reflected in the 'real' Interpreter until
 	 * <code>convertToRealInterpreter</code> is called.
 	 * 
 	 * @param realInterpreter
@@ -131,6 +130,6 @@ public class InterpreterStandin extends AbstractInterpreterInstall {
 	}
 
 	public String getNatureId() {
-		return null;
+		return getInterpreterInstallType().getNatureId();
 	}
 }
