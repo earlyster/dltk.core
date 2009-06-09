@@ -603,7 +603,7 @@ public abstract class AbstractFormatterSelectionBlock extends
 				Map settings = profile.getSettings();
 				dialog.setPreferences(settings);
 				if (dialog.open() == Window.OK) {
-					profile = (Profile) manager.getSelected();
+					profile = manager.getSelected();
 					updateComboFromProfiles();
 					final Map newSettings = dialog.getPreferences();
 					if (!profile.getSettings().equals(newSettings)) {
