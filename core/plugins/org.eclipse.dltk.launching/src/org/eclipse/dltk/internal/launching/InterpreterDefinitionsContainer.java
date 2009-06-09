@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -140,8 +141,12 @@ public class InterpreterDefinitionsContainer {
 	 * @return
 	 */
 	public DefaultInterpreterEntry[] getInterpreterNatures() {
-		Set<DefaultInterpreterEntry> s = fDefaultInterpreterInstallCompositeID
-				.keySet();
+		Set<DefaultInterpreterEntry> s = new HashSet<DefaultInterpreterEntry>(
+				fDefaultInterpreterInstallCompositeID.keySet());
+		for (IInterpreterInstall install : fInterpreterList) {
+			s.add(new DefaultInterpreterEntry(install.getNatureId(), install
+					.getEnvironmentId()));
+		}
 		return s.toArray(new DefaultInterpreterEntry[s.size()]);
 	}
 
