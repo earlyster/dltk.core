@@ -60,7 +60,7 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	}
 
 	private final Object lock = new Object();
-	private int waitCount = 0;
+	private boolean waitTimeoutReached = false;
 	private static final int MAX_WAIT_COUNT = 20;
 	private static final int WAIT_INTERVAL = 500;
 	private boolean initialized = false;
@@ -162,12 +162,16 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 
 	public void waitInitialized() {
 		try {
+			int waitCount = 0;
 			while (!isReady(false)) {
 				synchronized (lock) {
-					if (waitCount > MAX_WAIT_COUNT) {
+					if (waitTimeoutReached) {
 						break;
 					}
-					++waitCount;
+					if (++waitCount > MAX_WAIT_COUNT) {
+						waitTimeoutReached = true;
+						break;
+					}
 					lock.wait(WAIT_INTERVAL);
 				}
 			}
