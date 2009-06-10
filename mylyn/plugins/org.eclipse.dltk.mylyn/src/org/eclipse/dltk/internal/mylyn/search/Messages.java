@@ -14,7 +14,7 @@ package org.eclipse.dltk.internal.mylyn.search;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.mylyn.internal.java.ui.search.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.dltk.internal.mylyn.search.messages"; //$NON-NLS-1$
 
 	static {
 		// load message values from bundle file

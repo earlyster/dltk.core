@@ -14,7 +14,7 @@ package org.eclipse.dltk.internal.mylyn.editor;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.mylyn.internal.java.ui.editor.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.dltk.internal.mylyn.editor.messages"; //$NON-NLS-1$
 
 	static {
 		// load message values from bundle file
