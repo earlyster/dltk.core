@@ -21,7 +21,7 @@
 		point="org.eclipse.mylyn.context.ui.bridges">
 		<uiBridge
 			class="org.eclipse.dltk.internal.mylyn.DLTKUiBridge"
-			contentType="java"
+			contentType="DLTK"
 			activeSearchIcon="icons/elcl16/edge-ref-java.gif"
 			activeSearchLabel="%DLTKUiBridge.activeSearch.label" />
 		<preservedFilters
@@ -33,9 +33,11 @@
 				class="org.eclipse.dltk.internal.ui.filters.ClosedProjectFilter">
 			</filter>
 		</preservedFilters>
+<!--
 		<preservedFilters
 			viewId="org.eclipse.ui.navigator.ProjectExplorer">
 		</preservedFilters>
+-->
 	</extension>
 
 	<extension

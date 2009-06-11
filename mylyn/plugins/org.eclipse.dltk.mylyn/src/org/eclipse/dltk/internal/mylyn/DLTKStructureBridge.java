@@ -48,7 +48,7 @@ import org.eclipse.ui.views.markers.internal.ConcreteMarker;
  */
 public class DLTKStructureBridge extends AbstractContextStructureBridge {
 
-	public final static String CONTENT_TYPE = "java"; //$NON-NLS-1$
+	public final static String CONTENT_TYPE = "DLTK"; //$NON-NLS-1$
 
 	@Override
 	public String getContentType() {
