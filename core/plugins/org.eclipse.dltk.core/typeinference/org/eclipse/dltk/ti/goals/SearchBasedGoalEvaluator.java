@@ -30,18 +30,18 @@ import org.eclipse.dltk.ti.ISourceModuleContext;
 
 public abstract class SearchBasedGoalEvaluator extends GoalEvaluator {
 
-	private List possiblePositionsGoals = new ArrayList();
-	private List references = new ArrayList();
+	private List<IGoal> possiblePositionsGoals = new ArrayList<IGoal>();
+	private List<ItemReference> references = new ArrayList<ItemReference>();
 
 	private SearchRequestor requestor = new SearchRequestor() {
 
+		@Override
 		public void acceptSearchMatch(SearchMatch match) throws CoreException {
 			ASTNode node = null;
 			if (match instanceof FieldReferenceMatch) {
 				FieldReferenceMatch match2 = (FieldReferenceMatch) match;
 				node = match2.getNode();
-			}
-			if (match instanceof MethodReferenceMatch) {
+			} else if (match instanceof MethodReferenceMatch) {
 				MethodReferenceMatch match2 = (MethodReferenceMatch) match;
 				node = match2.getNode();
 			}
@@ -56,6 +56,7 @@ public abstract class SearchBasedGoalEvaluator extends GoalEvaluator {
 		super(goal);
 	}
 
+	@Override
 	public IGoal[] init() {
 		IGoal goal = getGoal();
 		IScriptProject project = null;
@@ -80,22 +81,25 @@ public abstract class SearchBasedGoalEvaluator extends GoalEvaluator {
 			return IGoal.NO_GOALS;
 		}
 
-		return (IGoal[]) possiblePositionsGoals
-				.toArray(new IGoal[possiblePositionsGoals.size()]);
+		return possiblePositionsGoals.toArray(new IGoal[possiblePositionsGoals
+				.size()]);
 	}
 
+	@Override
 	public IGoal[] subGoalDone(IGoal subgoal, Object result, GoalState state) {
 		if (result != null && result instanceof ItemReference) {
-			references.add(result);
+			references.add((ItemReference) result);
 		}
 		return IGoal.NO_GOALS;
 	}
 
+	@Override
 	public Object produceResult() {
 		return references.toArray(new ItemReference[references.size()]);
 	}
 
-	protected abstract SearchPattern createSearchPattern(IDLTKLanguageToolkit toolkit);
+	protected abstract SearchPattern createSearchPattern(
+			IDLTKLanguageToolkit toolkit);
 
 	protected abstract IGoal createVerificationGoal(PossiblePosition pos);
 
