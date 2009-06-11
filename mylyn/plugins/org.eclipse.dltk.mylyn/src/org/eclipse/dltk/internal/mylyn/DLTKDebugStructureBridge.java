@@ -33,7 +33,7 @@ import org.eclipse.mylyn.context.core.IInteractionElement;
  */
 public class DLTKDebugStructureBridge extends AbstractContextStructureBridge {
 
-	public final static String CONTENT_TYPE = "java/debug"; //$NON-NLS-1$
+	public final static String CONTENT_TYPE = "DLTK/debug"; //$NON-NLS-1$
 
 	private final DLTKStructureBridge javaStructureBridge = new DLTKStructureBridge();
 
