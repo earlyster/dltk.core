@@ -19,6 +19,7 @@ public class FieldReferencesGoalEvaluator extends SearchBasedGoalEvaluator {
 		super(goal);
 	}
 
+	@Override
 	protected SearchPattern createSearchPattern(IDLTKLanguageToolkit toolkit) {
 		FieldReferencesGoal goal = (FieldReferencesGoal) getGoal();
 		String name = goal.getName();
@@ -27,6 +28,7 @@ public class FieldReferencesGoalEvaluator extends SearchBasedGoalEvaluator {
 				toolkit);
 	}
 
+	@Override
 	protected IGoal createVerificationGoal(PossiblePosition pos) {
 		return new FieldPositionVerificationGoal(this.getGoal().getContext(),
 				(FieldReferencesGoal) this.getGoal(), pos);
