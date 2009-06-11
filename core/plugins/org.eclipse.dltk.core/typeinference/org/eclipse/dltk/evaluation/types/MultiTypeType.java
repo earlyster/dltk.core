@@ -16,17 +16,17 @@ import java.util.List;
 import org.eclipse.dltk.ti.types.IEvaluatedType;
 
 public class MultiTypeType implements IEvaluatedType {
-	private List/* <IEvaluatedType> */fTypes = new ArrayList/* <IEvaluatedType> */();
+
+	private List<IEvaluatedType> fTypes = new ArrayList<IEvaluatedType>();
 
 	public MultiTypeType() {
-
 	}
 
 	/**
 	 * Add using equal.
 	 */
 	public void addType(IEvaluatedType type) {
-		Iterator i = fTypes.iterator();
+		Iterator<IEvaluatedType> i = fTypes.iterator();
 		while (i.hasNext()) {
 			IEvaluatedType ltype = (IEvaluatedType) i.next();
 			if (ltype.equals(type)) {
@@ -38,7 +38,7 @@ public class MultiTypeType implements IEvaluatedType {
 
 	public String getTypeName() {
 		String names = ""; //$NON-NLS-1$
-		Iterator i = fTypes.iterator();
+		Iterator<IEvaluatedType> i = fTypes.iterator();
 		while (i.hasNext()) {
 			IEvaluatedType type = (IEvaluatedType) i.next();
 			names += type.getTypeName() + " "; //$NON-NLS-1$
@@ -46,7 +46,7 @@ public class MultiTypeType implements IEvaluatedType {
 		return "multitype:" + names; //$NON-NLS-1$
 	}
 
-	public List/* < IEvaluatedType > */getTypes() {
+	public List<IEvaluatedType> getTypes() {
 		return this.fTypes;
 	}
 
@@ -69,4 +69,26 @@ public class MultiTypeType implements IEvaluatedType {
 		return false;
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((fTypes == null) ? 0 : fTypes.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MultiTypeType other = (MultiTypeType) obj;
+		if (fTypes == null) {
+			if (other.fTypes != null)
+				return false;
+		} else if (!fTypes.equals(other.fTypes))
+			return false;
+		return true;
+	}
 }

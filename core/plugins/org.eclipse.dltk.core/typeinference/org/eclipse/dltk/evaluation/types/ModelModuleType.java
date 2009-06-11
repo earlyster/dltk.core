@@ -13,6 +13,7 @@ import org.eclipse.dltk.core.IModule;
 import org.eclipse.dltk.ti.types.IEvaluatedType;
 
 public class ModelModuleType implements IEvaluatedType {
+
 	private IModule fModule = null;
 	private int fStepCount = 1;
 
@@ -26,7 +27,6 @@ public class ModelModuleType implements IEvaluatedType {
 	}
 
 	public String getTypeName() {
-
 		if (this.fModule != null) {
 			return "model module:" + this.fModule.getElementName(); //$NON-NLS-1$
 		} else {
@@ -35,12 +35,10 @@ public class ModelModuleType implements IEvaluatedType {
 	}
 
 	public IModule getModule() {
-
 		return this.fModule;
 	}
 
 	public int getStepCount() {
-
 		return this.fStepCount;
 	}
 
@@ -49,4 +47,29 @@ public class ModelModuleType implements IEvaluatedType {
 		return false;
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((fModule == null) ? 0 : fModule.hashCode());
+		result = prime * result + fStepCount;
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ModelModuleType other = (ModelModuleType) obj;
+		if (fModule == null) {
+			if (other.fModule != null)
+				return false;
+		} else if (!fModule.equals(other.fModule))
+			return false;
+		if (fStepCount != other.fStepCount)
+			return false;
+		return true;
+	}
 }

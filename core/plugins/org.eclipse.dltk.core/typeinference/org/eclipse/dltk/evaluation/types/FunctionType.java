@@ -15,6 +15,7 @@ import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.ti.types.IEvaluatedType;
 
 public class FunctionType implements IFunctionType {
+	
 	private MethodDeclaration fMethod;
 	private ModuleDeclaration fModule;
 
@@ -31,20 +32,6 @@ public class FunctionType implements IFunctionType {
 		this.fMethod = method;
 		this.fModule = module;
 		this.fWrongCall = wrongCall;
-	}
-
-	public boolean equals(Object obj) {
-
-		if (obj instanceof FunctionType) {
-			FunctionType m = (FunctionType) obj;
-			if (this.fMethod == m.fMethod && this.fModule == m.fModule) {
-				return true;
-			}
-		}
-		return false;
-	}
-	public int hashCode() {
-		return this.fMethod.hashCode()*10 + this.fModule.hashCode();
 	}
 
 	public String getTypeName() {
@@ -67,4 +54,32 @@ public class FunctionType implements IFunctionType {
 		return false;
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((fMethod == null) ? 0 : fMethod.hashCode());
+		result = prime * result + ((fModule == null) ? 0 : fModule.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FunctionType other = (FunctionType) obj;
+		if (fMethod == null) {
+			if (other.fMethod != null)
+				return false;
+		} else if (!fMethod.equals(other.fMethod))
+			return false;
+		if (fModule == null) {
+			if (other.fModule != null)
+				return false;
+		} else if (!fModule.equals(other.fModule))
+			return false;
+		return true;
+	}
 }

@@ -15,6 +15,9 @@ public class ErrorDefinedType implements IEvaluatedType {
 
 	public static final IEvaluatedType INSTANCE = new ErrorDefinedType();
 
+	private ErrorDefinedType() {
+	}
+
 	public String getTypeName() {
 		return "error defined"; //$NON-NLS-1$
 	}
@@ -23,5 +26,4 @@ public class ErrorDefinedType implements IEvaluatedType {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 }

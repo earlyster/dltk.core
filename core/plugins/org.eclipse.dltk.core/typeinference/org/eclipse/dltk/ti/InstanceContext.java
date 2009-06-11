@@ -33,4 +33,27 @@ public class InstanceContext extends BasicContext implements IInstanceContext {
 		return instanceType;
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((instanceType == null) ? 0 : instanceType.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		InstanceContext other = (InstanceContext) obj;
+		if (instanceType == null) {
+			if (other.instanceType != null)
+				return false;
+		} else if (!instanceType.equals(other.instanceType))
+			return false;
+		return true;
+	}
 }

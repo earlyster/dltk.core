@@ -13,26 +13,11 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.ti.types.IEvaluatedType;
 
 public class ModelClassType implements IClassType {
+
 	private IType fClass;
 
 	public ModelClassType(IType classElement) {
 		this.fClass = classElement;
-	}
-
-	public boolean equals(Object obj) {
-
-		if (obj instanceof ModelClassType) {
-			ModelClassType m = (ModelClassType) obj;
-			if (this.fClass == m.fClass) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-
-	public int hashCode() {
-		return this.fClass.hashCode();
 	}
 
 	public String getTypeName() {
@@ -43,12 +28,34 @@ public class ModelClassType implements IClassType {
 	}
 
 	public IType getTypeDeclaration() {
-
 		return this.fClass;
 	}
 
 	public boolean subtypeOf(IEvaluatedType type) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((fClass == null) ? 0 : fClass.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ModelClassType other = (ModelClassType) obj;
+		if (fClass == null) {
+			if (other.fClass != null)
+				return false;
+		} else if (!fClass.equals(other.fClass))
+			return false;
+		return true;
 	}
 }

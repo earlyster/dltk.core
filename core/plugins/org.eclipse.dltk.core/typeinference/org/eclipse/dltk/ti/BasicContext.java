@@ -51,4 +51,28 @@ public class BasicContext implements IContext, ISourceModuleContext {
 	public String toString() {
 		return "BasicContext, module " + sourceModule.getElementName(); //$NON-NLS-1$
 	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((sourceModule == null) ? 0 : sourceModule.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BasicContext other = (BasicContext) obj;
+		if (sourceModule == null) {
+			if (other.sourceModule != null)
+				return false;
+		} else if (!sourceModule.equals(other.sourceModule))
+			return false;
+		return true;
+	}
 }

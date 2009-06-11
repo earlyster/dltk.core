@@ -13,26 +13,11 @@ import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.ti.types.IEvaluatedType;
 
 public class ModelFunctionType implements IFunctionType {
+
 	private IMethod fMethod;
 
 	public ModelFunctionType(IMethod method) {
 		this.fMethod = method;
-	}
-
-	public boolean equals(Object obj) {
-
-		if (obj instanceof ModelFunctionType) {
-			ModelFunctionType m = (ModelFunctionType) obj;
-			if (this.fMethod == m.fMethod) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-
-	public int hashCode() {
-		return this.fMethod.hashCode();
 	}
 
 	public String getTypeName() {
@@ -51,4 +36,26 @@ public class ModelFunctionType implements IFunctionType {
 		return false;
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((fMethod == null) ? 0 : fMethod.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ModelFunctionType other = (ModelFunctionType) obj;
+		if (fMethod == null) {
+			if (other.fMethod != null)
+				return false;
+		} else if (!fMethod.equals(other.fMethod))
+			return false;
+		return true;
+	}
 }

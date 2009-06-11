@@ -17,7 +17,7 @@ import java.util.HashSet;
  */
 public class CombinedType implements IEvaluatedType {
 
-	private Collection types = new HashSet();
+	private Collection<IEvaluatedType> types = new HashSet<IEvaluatedType>();
 
 	public String getTypeName() {
 		return null;
@@ -63,4 +63,26 @@ public class CombinedType implements IEvaluatedType {
 		return combinedType.subtypeOf(type);
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((types == null) ? 0 : types.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CombinedType other = (CombinedType) obj;
+		if (types == null) {
+			if (other.types != null)
+				return false;
+		} else if (!types.equals(other.types))
+			return false;
+		return true;
+	}
 }

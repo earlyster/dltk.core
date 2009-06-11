@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.evaluation.types;
 
+import java.util.Arrays;
+
 import org.eclipse.dltk.ti.types.IEvaluatedType;
 
 public class AmbiguousType implements IEvaluatedType {
@@ -42,4 +44,23 @@ public class AmbiguousType implements IEvaluatedType {
 		return false;
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(possibleTypes);
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AmbiguousType other = (AmbiguousType) obj;
+		if (!Arrays.equals(possibleTypes, other.possibleTypes))
+			return false;
+		return true;
+	}
 }
