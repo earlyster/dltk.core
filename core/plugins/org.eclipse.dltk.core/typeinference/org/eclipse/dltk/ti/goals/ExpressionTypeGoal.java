@@ -27,7 +27,7 @@ public class ExpressionTypeGoal extends AbstractTypeGoal {
 
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result
 				+ ((expression == null) ? 0 : expression.hashCode());
 		return result;
@@ -36,7 +36,7 @@ public class ExpressionTypeGoal extends AbstractTypeGoal {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -46,7 +46,7 @@ public class ExpressionTypeGoal extends AbstractTypeGoal {
 				return false;
 		} else if (!expression.equals(other.expression))
 			return false;
-		return super.equals(obj);
+		return true;
 	}
 
 	public String toString() {
@@ -55,5 +55,4 @@ public class ExpressionTypeGoal extends AbstractTypeGoal {
 				+ " context: " //$NON-NLS-1$
 				+ ((context != null) ? context.toString() : "null"); //$NON-NLS-1$
 	}
-
 }
