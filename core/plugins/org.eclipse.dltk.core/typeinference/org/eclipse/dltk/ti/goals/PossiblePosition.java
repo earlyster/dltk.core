@@ -57,4 +57,47 @@ public class PossiblePosition {
 		return node;
 	}
 
+	/*
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + offset;
+		result = prime * result + length;
+		result = prime * result
+				+ ((resource == null) ? 0 : resource.hashCode());
+		return result;
+	}
+
+	/*
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PossiblePosition other = (PossiblePosition) obj;
+		if (offset != other.offset)
+			return false;
+		if (length != other.length)
+			return false;
+		if (node == null) {
+			if (other.node != null)
+				return false;
+		} else if (!node.equals(other.node))
+			return false;
+		if (resource == null) {
+			if (other.resource != null)
+				return false;
+		} else if (!resource.equals(other.resource))
+			return false;
+		return true;
+	}
+
 }

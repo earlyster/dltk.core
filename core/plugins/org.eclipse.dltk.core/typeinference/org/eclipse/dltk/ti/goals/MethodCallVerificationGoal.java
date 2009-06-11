@@ -14,7 +14,7 @@ import org.eclipse.dltk.ti.IContext;
 /**
  * Task of this goal is to verify given possible position as a real position,
  * where given method were called.
- *
+ * 
  * As result, object of ItemReference should be returned.
  */
 public class MethodCallVerificationGoal extends AbstractGoal {
@@ -35,6 +35,44 @@ public class MethodCallVerificationGoal extends AbstractGoal {
 
 	public MethodCallsGoal getGoal() {
 		return goal;
+	}
+
+	/*
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((goal == null) ? 0 : goal.hashCode());
+		result = prime * result
+				+ ((position == null) ? 0 : position.hashCode());
+		return result;
+	}
+
+	/*
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MethodCallVerificationGoal other = (MethodCallVerificationGoal) obj;
+		if (goal == null) {
+			if (other.goal != null)
+				return false;
+		} else if (!goal.equals(other.goal))
+			return false;
+		if (position == null) {
+			if (other.position != null)
+				return false;
+		} else if (!position.equals(other.position))
+			return false;
+		return true;
 	}
 
 }
