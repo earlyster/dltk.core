@@ -243,7 +243,7 @@ public abstract class ASTNode {
 	 * @return
 	 */
 	public List getChilds() {
-		final List result = new ArrayList();
+		final List<ASTNode> result = new ArrayList<ASTNode>();
 		ASTVisitor visitor = new ASTVisitor() {
 
 			public boolean visitGeneral(ASTNode node) throws Exception {
@@ -263,5 +263,24 @@ public abstract class ASTNode {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Tests if the specified node is located at the same location.
+	 * 
+	 * @param other
+	 * @return
+	 */
+	public boolean locationMatches(ASTNode other) {
+		if (other == this)
+			return true;
+		return other.sourceEnd() >= 0 && other.sourceStart() >= 0
+				&& sourceStart() == other.sourceStart()
+				&& sourceEnd() == other.sourceEnd();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
 	}
 }
