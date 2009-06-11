@@ -18,7 +18,10 @@ public final class DebugEventHelper {
 	}
 
 	private static void fireEvent(DebugEvent event) {
-		DebugPlugin.getDefault().fireDebugEventSet(new DebugEvent[] { event });
+		if (DebugPlugin.getDefault() != null) {
+			DebugPlugin.getDefault().fireDebugEventSet(
+					new DebugEvent[] { event });
+		}
 	}
 
 	public static void fireCreateEvent(IDebugElement element) {
