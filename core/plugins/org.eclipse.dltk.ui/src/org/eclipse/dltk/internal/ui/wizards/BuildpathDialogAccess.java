@@ -71,21 +71,22 @@ public final class BuildpathDialogAccess {
 	 * apply any changes.
 	 * 
 	 * @param shell
-	 * 		The parent shell for the dialog.
+	 *            The parent shell for the dialog.
 	 * @param initialEntry
-	 * 		The initial buildpath container entry.
+	 *            The initial buildpath container entry.
 	 * @param project
-	 * 		The project the entry belongs to. The project does not have to exist
-	 * 		and can also be <code>null</code>.
+	 *            The project the entry belongs to. The project does not have to
+	 *            exist and can also be <code>null</code>.
 	 * @param currentBuildpath
-	 * 		The class path entries currently selected to be set as the projects
-	 * 		buildpath. This can also include the entry to be edited. The dialog
-	 * 		uses these entries as information only (e.g. to avoid duplicate
-	 * 		entries); The user still can make changes after the the buildpath
-	 * 		container dialog has been closed. See {@link
-	 * 		IBuildpathContainerPageExtension} for more information.
+	 *            The class path entries currently selected to be set as the
+	 *            projects buildpath. This can also include the entry to be
+	 *            edited. The dialog uses these entries as information only
+	 *            (e.g. to avoid duplicate entries); The user still can make
+	 *            changes after the the buildpath container dialog has been
+	 *            closed. See {@link IBuildpathContainerPageExtension} for more
+	 *            information.
 	 * @return Returns the configured buildpath container entry or
-	 * 	<code>null</code> if the dialog has been canceled by the user.
+	 *         <code>null</code> if the dialog has been canceled by the user.
 	 */
 	public static IBuildpathEntry configureContainerEntry(Shell shell,
 			IBuildpathEntry initialEntry, IScriptProject project,
@@ -113,18 +114,19 @@ public final class BuildpathDialogAccess {
 	 * apply any changes.
 	 * 
 	 * @param shell
-	 * 		The parent shell for the dialog.
+	 *            The parent shell for the dialog.
 	 * @param project
-	 * 		The project the entry belongs to. The project does not have to exist
-	 * 		and can also be <code>null</code>.
+	 *            The project the entry belongs to. The project does not have to
+	 *            exist and can also be <code>null</code>.
 	 * @param currentBuildpath
-	 * 		The class path entries currently selected to be set as the projects
-	 * 		buildpath. This can also include the entry to be edited. The dialog
-	 * 		uses these entries as information only; The user still can make
-	 * 		changes after the the buildpath container dialog has been closed.
-	 * 		See {@link IBuildpathContainerPageExtension} for more information.
+	 *            The class path entries currently selected to be set as the
+	 *            projects buildpath. This can also include the entry to be
+	 *            edited. The dialog uses these entries as information only; The
+	 *            user still can make changes after the the buildpath container
+	 *            dialog has been closed. See
+	 *            {@link IBuildpathContainerPageExtension} for more information.
 	 * @return Returns the selected buildpath container entries or
-	 * 	<code>null</code> if the dialog has been canceled by the user.
+	 *         <code>null</code> if the dialog has been canceled by the user.
 	 */
 	public static IBuildpathEntry[] chooseContainerEntries(Shell shell,
 			IScriptProject project, IBuildpathEntry[] currentBuildpath) {
@@ -147,14 +149,14 @@ public final class BuildpathDialogAccess {
 	 * apply any changes.
 	 * 
 	 * @param shell
-	 * 		The parent shell for the dialog.
+	 *            The parent shell for the dialog.
 	 * @param initialEntry
-	 * 		The path of the initial archive entry
+	 *            The path of the initial archive entry
 	 * @param usedEntries
-	 * 		An array of paths that are already on the buildpath and therefore
-	 * 		should not be selected again.
+	 *            An array of paths that are already on the buildpath and
+	 *            therefore should not be selected again.
 	 * @return Returns the configured buildpath container entry path or
-	 * 	<code>null</code> if the dialog has been canceled by the user.
+	 *         <code>null</code> if the dialog has been canceled by the user.
 	 */
 	public static IPath configureArchiveEntry(Shell shell, IPath initialEntry,
 			IPath[] usedEntries) {
@@ -206,15 +208,15 @@ public final class BuildpathDialogAccess {
 	 * if the dialog has been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell
-	 * 		The parent shell for the dialog.
+	 *            The parent shell for the dialog.
 	 * @param initialSelection
-	 * 		The path of the element (container or archive) to initially select
-	 * 		or <code>null</code> to not select an entry.
+	 *            The path of the element (container or archive) to initially
+	 *            select or <code>null</code> to not select an entry.
 	 * @param usedEntries
-	 * 		An array of paths that are already on the buildpath and therefore
-	 * 		should not be selected again.
+	 *            An array of paths that are already on the buildpath and
+	 *            therefore should not be selected again.
 	 * @return Returns the new buildpath container entry paths or
-	 * 	<code>null</code> if the dialog has been canceled by the user.
+	 *         <code>null</code> if the dialog has been canceled by the user.
 	 */
 	public static IPath[] chooseArchiveEntries(Shell shell,
 			IPath initialSelection, IPath[] usedEntries) {
@@ -268,11 +270,11 @@ public final class BuildpathDialogAccess {
 	 * canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell
-	 * 		The parent shell for the dialog.
+	 *            The parent shell for the dialog.
 	 * @param initialEntry
-	 * 		The path of the initial archive entry.
+	 *            The path of the initial archive entry.
 	 * @return Returns the configured buildpath container entry path or
-	 * 	<code>null</code> if the dialog has been canceled by the user.
+	 *         <code>null</code> if the dialog has been canceled by the user.
 	 */
 	public static IPath configureExternalArchiveEntry(Shell shell,
 			IPath initialEntry) {
@@ -305,9 +307,9 @@ public final class BuildpathDialogAccess {
 	 * dialog has been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell
-	 * 		The parent shell for the dialog.
+	 *            The parent shell for the dialog.
 	 * @return Returns the new buildpath container entry paths or
-	 * 	<code>null</code> if the dialog has been canceled by the user.
+	 *         <code>null</code> if the dialog has been canceled by the user.
 	 */
 	public static IPath[] chooseExternalArchiveEntries(Shell shell,
 			IEnvironment environment) {
@@ -332,7 +334,7 @@ public final class BuildpathDialogAccess {
 
 		// IPath filterPath= Path.fromOSString(dialog.getFilterPath());
 		IPath[] elems = new IPath[1];
-		elems[0] = new Path(res);
+		elems[0] = EnvironmentPathUtils.getFullPath(environment, new Path(res));
 		// for (int i= 0; i < nChosen; i++) {
 		// elems[i]= filterPath.append(fileNames[i]).makeAbsolute();
 		// }
@@ -348,14 +350,15 @@ public final class BuildpathDialogAccess {
 	 * canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell
-	 * 		The parent shell for the dialog.
+	 *            The parent shell for the dialog.
 	 * @param initialSelection
-	 * 		The path of the element to initially select or <code>null</code>.
+	 *            The path of the element to initially select or
+	 *            <code>null</code>.
 	 * @param usedEntries
-	 * 		An array of paths that are already on the buildpath and therefore
-	 * 		should not be selected again.
+	 *            An array of paths that are already on the buildpath and
+	 *            therefore should not be selected again.
 	 * @return Returns the configured buildpath container entry path or
-	 * 	<code>null</code> if the dialog has been canceled by the user.
+	 *         <code>null</code> if the dialog has been canceled by the user.
 	 */
 	public static IPath[] chooseSourceFolderEntries(Shell shell,
 			IPath initialSelection, IPath[] usedEntries) {

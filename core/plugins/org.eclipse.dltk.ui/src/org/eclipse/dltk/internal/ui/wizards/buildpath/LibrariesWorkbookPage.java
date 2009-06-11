@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.compiler.util.Util;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IAccessRule;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IProjectFragment;
@@ -541,7 +542,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					.getEnvironment(this.scriptProject);
 			IResource resource = elem.getResource();
 			if (resource == null) {
-				if (Util.isArchiveFileName(elem.getPath().toOSString())) {
+				if (Util.isArchiveFileName(DLTKLanguageManager
+						.getLanguageToolkit(elem.getScriptProject()), elem
+						.getPath().toOSString())) {
 					res = openExtZipFileDialog(elem, environment);
 				} else {
 					res = opensExtSourceFolderDialog(elem, environment);

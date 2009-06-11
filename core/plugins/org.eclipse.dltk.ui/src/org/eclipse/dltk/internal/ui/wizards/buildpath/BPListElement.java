@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.BuildpathContainerInitializer;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IAccessRule;
 import org.eclipse.dltk.core.IBuildpathAttribute;
 import org.eclipse.dltk.core.IBuildpathContainer;
@@ -836,8 +837,11 @@ public class BPListElement {
 	}
 
 	public boolean isExternalFolder() {
-		return this.fExternal && this.fEntryKind == IBuildpathEntry.BPE_LIBRARY
-				&& !Util.isArchiveFileName(this.fPath.toOSString());
+		return this.fExternal
+				&& this.fEntryKind == IBuildpathEntry.BPE_LIBRARY
+				&& !Util.isArchiveFileName(DLTKLanguageManager
+						.getLanguageToolkit(getScriptProject()), this.fPath
+						.toOSString());
 	}
 
 }
