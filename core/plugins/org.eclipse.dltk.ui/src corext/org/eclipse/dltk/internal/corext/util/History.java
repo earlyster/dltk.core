@@ -237,7 +237,11 @@ public abstract class History {
 		int pos=0;
 		for (Iterator iter= values.iterator(); iter.hasNext();) {
 			Object element= iter.next();
-			fPositions.put(getKey(element), new Integer(pos));
+			if (element == null) {
+				continue;
+			}
+			Object key = getKey(element);
+			fPositions.put(key, new Integer(pos));
 			pos++;
 		}
 	}
