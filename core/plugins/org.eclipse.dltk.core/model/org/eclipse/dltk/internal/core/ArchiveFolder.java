@@ -19,15 +19,16 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.internal.core.util.Util;
-
 
 public class ArchiveFolder extends ScriptFolder {
 	public ArchiveFolder(ProjectFragment parent, IPath path) {
 		super(parent, path);
 	}
 
-	void computeForeignResources(String[] resNames, ArchiveFolderInfo info, String zipName) {
+	void computeForeignResources(String[] resNames, ArchiveFolderInfo info,
+			String zipName) {
 		if (resNames == null) {
 			info.setForeignResources(null);
 			return;
@@ -41,8 +42,11 @@ public class ArchiveFolder extends ScriptFolder {
 			for (int i = 0; i < max; i++) {
 				String resName = resNames[i];
 				if (!Util.isValidSourceModuleName(getScriptProject(), resName)) {
-					IPath parentRelativePath = new Path(resName).removeFirstSegments(this.path.segmentCount());
-					res[index++] = new ArchiveEntryFile(resName, zipName, parentRelativePath, this.getProjectFragment().getResource());
+					IPath parentRelativePath = new Path(resName)
+							.removeFirstSegments(this.path.segmentCount());
+					res[index++] = new ArchiveEntryFile(resName, zipName,
+							parentRelativePath, this.getProjectFragment()
+									.getResource());
 				}
 			}
 			if (index != max) {
@@ -51,19 +55,21 @@ public class ArchiveFolder extends ScriptFolder {
 			info.setForeignResources(res);
 		}
 	}
-	
-	
+
 	public ISourceModule getSourceModule(String name) {
-		ArchiveProjectFragment fragment = (ArchiveProjectFragment)getProjectFragment();
-		//Path zipPath = new Path(fragment.getZipName());
-		//IPath parentRelativePath = new Path(resName).removeFirstSegments(this.path.segmentCount());
-		return new ExternalSourceModule(this, name, 
-				DefaultWorkingCopyOwner.PRIMARY, 
-				true, 
-				new ArchiveEntryFile(name,fragment.getZipName(), this.path, fragment.getResource()) );
+		ArchiveProjectFragment fragment = (ArchiveProjectFragment) getProjectFragment();
+		// Path zipPath = new Path(fragment.getZipName());
+		// IPath parentRelativePath = new
+		// Path(resName).removeFirstSegments(this.path.segmentCount());
+		return new ExternalSourceModule(this, name,
+				DefaultWorkingCopyOwner.PRIMARY, true, new ArchiveEntryFile(
+						name, EnvironmentPathUtils.getLocalPath(
+								fragment.getPath()).toOSString(), this.path,
+						fragment.getResource()));
 	}
 
-	protected boolean computeChildren(OpenableElementInfo info, ArrayList entryNames) {
+	protected boolean computeChildren(OpenableElementInfo info,
+			ArrayList entryNames) {
 		if (entryNames != null && entryNames.size() > 0) {
 			ArrayList vChildren = new ArrayList();
 			for (Iterator iter = entryNames.iterator(); iter.hasNext();) {
@@ -92,17 +98,22 @@ public class ArchiveFolder extends ScriptFolder {
 	}
 
 	// Open my archive: this creates all the pkg infos
-	protected void generateInfos(Object info, HashMap newElements, IProgressMonitor pm) throws ModelException {
+	protected void generateInfos(Object info, HashMap newElements,
+			IProgressMonitor pm) throws ModelException {
 		// Open my archive: this creates all the pkg infos
 		Openable openableParent = (Openable) this.parent;
 		if (!openableParent.isOpen()) {
-			openableParent.generateInfos(openableParent.createElementInfo(), newElements, pm);
+			openableParent.generateInfos(openableParent.createElementInfo(),
+					newElements, pm);
 		}
 	}
+
 	protected Object createElementInfo() {
-		return null; // not used for ArchiveFolders: info is created when archive is opened
+		return null; // not used for ArchiveFolders: info is created when
+		// archive is opened
 	}
-	public Object[] getForeignResources() throws ModelException {		
-		return ((ArchiveFolderInfo) getElementInfo()).getForeignResources();		
+
+	public Object[] getForeignResources() throws ModelException {
+		return ((ArchiveFolderInfo) getElementInfo()).getForeignResources();
 	}
 }

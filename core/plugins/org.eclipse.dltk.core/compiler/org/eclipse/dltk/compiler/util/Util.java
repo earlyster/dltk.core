@@ -21,6 +21,8 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IDLTKLanguageToolkitExtension;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 
@@ -217,6 +219,31 @@ public class Util {
 		if (name == null) {
 			return false;
 		}
+		final int nameLength = name.length();
+		final int suffixLength = SUFFIX_ZIP.length;
+		if (nameLength < suffixLength)
+			return false;
+		for (int i = 0; i < suffixLength; i++) {
+			final char c = name.charAt(nameLength - i - 1);
+			final int suffixIndex = suffixLength - i - 1;
+			if (c != SUFFIX_zip[suffixIndex] && c != SUFFIX_ZIP[suffixIndex]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public final static boolean isArchiveFileName(IDLTKLanguageToolkit toolkit,
+			String name) {
+		if (name == null) {
+			return false;
+		}
+//		if (toolkit instanceof IDLTKLanguageToolkitExtension) {
+//			IDLTKLanguageToolkitExtension ext = (IDLTKLanguageToolkitExtension) toolkit;
+//			if (ext.isArchiveFileName(name)) {
+//				return true;
+//			}
+//		}
 		final int nameLength = name.length();
 		final int suffixLength = SUFFIX_ZIP.length;
 		if (nameLength < suffixLength)

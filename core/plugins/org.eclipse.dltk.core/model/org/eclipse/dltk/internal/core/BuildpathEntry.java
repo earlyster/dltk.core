@@ -32,6 +32,7 @@ import org.eclipse.dltk.core.IAccessRule;
 import org.eclipse.dltk.core.IBuildpathAttribute;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
@@ -1120,9 +1121,11 @@ public class BuildpathEntry implements IBuildpathEntry {
 			}
 			// allow nesting source entries in each other as long as the outer
 			// entry excludes the inner one
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit(scriptProject);
 			if (kind == IBuildpathEntry.BPE_SOURCE
 					|| (kind == IBuildpathEntry.BPE_LIBRARY && !org.eclipse.dltk.compiler.util.Util
-							.isArchiveFileName(entryPath.lastSegment()))) {
+							.isArchiveFileName(toolkit, entryPath.lastSegment()))) {
 				for (int j = 0; j < buildpath.length; j++) {
 					IBuildpathEntry otherEntry = buildpath[j];
 					if (otherEntry == null)
@@ -1131,7 +1134,8 @@ public class BuildpathEntry implements IBuildpathEntry {
 					IPath otherPath = otherEntry.getPath();
 					if (entry != otherEntry
 							&& (otherKind == IBuildpathEntry.BPE_SOURCE || (otherKind == IBuildpathEntry.BPE_LIBRARY && !org.eclipse.dltk.compiler.util.Util
-									.isArchiveFileName(otherPath.lastSegment())))) {
+									.isArchiveFileName(toolkit, otherPath
+											.lastSegment())))) {
 						char[][] inclusionPatterns, exclusionPatterns;
 						if (otherPath.isPrefixOf(entryPath)
 								&& !otherPath.equals(entryPath)

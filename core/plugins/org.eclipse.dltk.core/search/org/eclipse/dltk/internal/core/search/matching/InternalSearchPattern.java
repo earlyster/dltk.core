@@ -14,6 +14,7 @@ import java.io.IOException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.compiler.util.Util;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchParticipant;
@@ -49,13 +50,15 @@ public abstract class InternalSearchPattern {
 					relativePath, containerPath);
 			if (access != DLTKSearchScope.NOT_ENCLOSED) { // scope encloses
 				// the document path
-				String documentPath = documentPath(containerPath, relativePath);
+				String documentPath = documentPath(scope.getLanguageToolkit(),
+						containerPath, relativePath);
 				if (!requestor.acceptIndexMatch(documentPath, pattern,
 						participant, access))
 					throw new OperationCanceledException();
 			}
 		} else {
-			String documentPath = documentPath(containerPath, relativePath);
+			String documentPath = documentPath(scope.getLanguageToolkit(),
+					containerPath, relativePath);
 			if (scope.encloses(documentPath))
 				if (!requestor.acceptIndexMatch(documentPath, pattern,
 						participant, null))
@@ -68,8 +71,23 @@ public abstract class InternalSearchPattern {
 		return (SearchPattern) this;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public String documentPath(String containerPath, String relativePath) {
 		String separator = Util.isArchiveFileName(containerPath) ? IDLTKSearchScope.FILE_ENTRY_SEPARATOR
+				: "/"; //$NON-NLS-1$
+		StringBuffer buffer = new StringBuffer(containerPath.length()
+				+ separator.length() + relativePath.length());
+		buffer.append(containerPath);
+		buffer.append(separator);
+		buffer.append(relativePath);
+		return buffer.toString();
+	}
+
+	public String documentPath(IDLTKLanguageToolkit toolkit,
+			String containerPath, String relativePath) {
+		String separator = Util.isArchiveFileName(toolkit, containerPath) ? IDLTKSearchScope.FILE_ENTRY_SEPARATOR
 				: "/"; //$NON-NLS-1$
 		StringBuffer buffer = new StringBuffer(containerPath.length()
 				+ separator.length() + relativePath.length());

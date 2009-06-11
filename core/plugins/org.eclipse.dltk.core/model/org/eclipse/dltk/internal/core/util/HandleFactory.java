@@ -227,8 +227,8 @@ public class HandleFactory {
 			int index = 0;
 			for (int i = 0; i < length; i++) {
 				IPath path = enclosingProjectsAndArchives[i];
-				if (!org.eclipse.dltk.compiler.util.Util.isArchiveFileName(path
-						.lastSegment())) {
+				if (!org.eclipse.dltk.compiler.util.Util.isArchiveFileName(
+						scope.getLanguageToolkit(), path.lastSegment())) {
 					projects[index++] = this.model.getScriptProject(path
 							.segment(0));
 				}

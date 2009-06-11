@@ -17,6 +17,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
@@ -124,8 +125,9 @@ class ProjectElementInfo extends OpenableElementInfo {
 					String resName = res.getName();
 
 					// ignore a archive file on the buildpath
-					if (org.eclipse.dltk.compiler.util.Util
-							.isArchiveFileName(resName)
+					if (org.eclipse.dltk.compiler.util.Util.isArchiveFileName(
+							DLTKLanguageManager.getLanguageToolkit(project),
+							resName)
 							&& this.isBuildpathEntry(resFullPath, buildpath)) {
 						break;
 					}

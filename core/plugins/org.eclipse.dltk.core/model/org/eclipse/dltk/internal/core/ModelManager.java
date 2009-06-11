@@ -87,6 +87,7 @@ import org.eclipse.dltk.core.ISourceModuleInfoCache;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.caching.IContentCache;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.builder.ScriptBuilder;
@@ -2215,6 +2216,9 @@ public class ModelManager implements ISaveParticipant {
 								Messages.file_notFound, path.toString()), null));
 		} else {
 			// external resource -> it is ok to use toFile()
+			if (EnvironmentPathUtils.isFull(path)) {
+				path = EnvironmentPathUtils.getLocalPath(path);
+			}
 			localFile = path.toFile();
 		}
 		try {
