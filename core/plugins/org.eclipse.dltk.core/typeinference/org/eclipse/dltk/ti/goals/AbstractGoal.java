@@ -46,4 +46,14 @@ public abstract class AbstractGoal implements IGoal {
 		return true;
 	}
 
+	protected String getClassName() {
+		String name = getClass().getName();
+		int pos = name.lastIndexOf('.');
+		if (pos > 0) {
+			return name.substring(pos + 1);
+		} else {
+			return name;
+		}
+	}
+
 }
