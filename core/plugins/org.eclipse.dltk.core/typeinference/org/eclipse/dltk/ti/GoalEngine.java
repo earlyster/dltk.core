@@ -25,16 +25,16 @@ import org.eclipse.dltk.ti.statistics.IEvaluationStatisticsRequestor;
  * evaluate goals and manage their dependencies of subgoals. Also this class
  * allows pruning: before evaluating every goal(except root goal) could be
  * pruned by provided prunner.
- *
+ * 
  * This class isn't thread safe.
  */
 public class GoalEngine {
 
 	private final IGoalEvaluatorFactory evaluatorFactory;
 
-	private final LinkedList workingQueue = new LinkedList();
-	private final HashMap goalStates = new HashMap();
-	private final HashMap evaluatorStates = new HashMap();
+	private final LinkedList<WorkingPair> workingQueue = new LinkedList<WorkingPair>();
+	private final HashMap<IGoal, GoalEvaluationState> goalStates = new HashMap<IGoal, GoalEvaluationState>();
+	private final HashMap<GoalEvaluator, EvaluatorState> evaluatorStates = new HashMap<GoalEvaluator, EvaluatorState>();
 
 	private IEvaluationStatisticsRequestor statisticsRequestor;
 
@@ -43,7 +43,7 @@ public class GoalEngine {
 		public int totalSubgoals;
 		public int successfulSubgoals;
 		public int subgoalsLeft;
-		public List subgoals = new ArrayList();
+		public List<IGoal> subgoals = new ArrayList<IGoal>();
 
 		public EvaluatorState(int subgoalsLeft) {
 			this.subgoalsLeft = subgoalsLeft;
@@ -81,14 +81,12 @@ public class GoalEngine {
 		es.state = state;
 		es.creator = creator;
 		goalStates.put(goal, es);
-		this.statisticsRequestor.goalStateChanged(goal, state, null); // TODO:
-																		// add
-																		// old
-																		// state
+		this.statisticsRequestor.goalStateChanged(goal, state, null);
+		// TODO: add old state
 	}
 
 	private EvaluatorState getEvaluatorState(GoalEvaluator evaluator) {
-		return (EvaluatorState) evaluatorStates.get(evaluator);
+		return evaluatorStates.get(evaluator);
 	}
 
 	private void putEvaluatorState(GoalEvaluator evaluator, EvaluatorState state) {
@@ -98,8 +96,7 @@ public class GoalEngine {
 	private void notifyEvaluator(GoalEvaluator evaluator, IGoal subGoal) {
 		long t = 0;
 
-		GoalEvaluationState subGoalState = (GoalEvaluationState) goalStates
-				.get(subGoal);
+		GoalEvaluationState subGoalState = goalStates.get(subGoal);
 		Object result = subGoalState.result;
 		GoalState state = subGoalState.state;
 
@@ -130,8 +127,7 @@ public class GoalEngine {
 			Object newRes = evaluator.produceResult();
 			statisticsRequestor.evaluatorProducedResult(evaluator, result,
 					System.currentTimeMillis() - t);
-			GoalEvaluationState st = (GoalEvaluationState) goalStates
-					.get(evaluator.getGoal());
+			GoalEvaluationState st = goalStates.get(evaluator.getGoal());
 			Assert.isNotNull(st);
 			st.state = GoalState.DONE;
 			st.result = newRes;
@@ -194,10 +190,12 @@ public class GoalEngine {
 		workingQueue.add(new WorkingPair(rootGoal, null));
 		statisticsRequestor.evaluationStarted(rootGoal);
 		while (!workingQueue.isEmpty()) {
-			WorkingPair pair = (WorkingPair) workingQueue.getFirst();
+			WorkingPair pair = workingQueue.getFirst();
 			workingQueue.removeFirst();
-			GoalEvaluationState state = (GoalEvaluationState) goalStates
-					.get(pair.goal);
+			if (DEBUG) {
+				System.out.println(pair.goal);
+			}
+			GoalEvaluationState state = goalStates.get(pair.goal);
 			if (state != null && pair.creator != null) {
 				notifyEvaluator(pair.creator, pair.goal);
 			} else {
@@ -213,12 +211,20 @@ public class GoalEngine {
 					GoalEvaluator evaluator = evaluatorFactory
 							.createEvaluator(pair.goal);
 					Assert.isNotNull(evaluator);
+					if (DEBUG) {
+						System.out.println(" evaluator=" + evaluator); //$NON-NLS-1$
+					}
 					statisticsRequestor.goalEvaluatorAssigned(pair.goal,
 							evaluator);
 					time = System.currentTimeMillis();
 					IGoal[] newGoals = evaluator.init();
 					if (newGoals == null) {
 						newGoals = IGoal.NO_GOALS;
+					}
+					if (DEBUG) {
+						for (IGoal n : newGoals) {
+							System.out.println("- " + n); //$NON-NLS-1$
+						}
 					}
 					statisticsRequestor.evaluatorInitialized(evaluator,
 							newGoals, System.currentTimeMillis() - time);
@@ -229,7 +235,7 @@ public class GoalEngine {
 						}
 						EvaluatorState evaluatorState = new EvaluatorState(
 								newGoals.length);
-						evaluatorState.subgoals.add(Arrays.asList(newGoals));
+						evaluatorState.subgoals.addAll(Arrays.asList(newGoals));
 						putEvaluatorState(evaluator, evaluatorState);
 						storeGoal(pair.goal, GoalState.WAITING, null,
 								pair.creator);
@@ -247,7 +253,7 @@ public class GoalEngine {
 				}
 			}
 		}
-		GoalEvaluationState s = (GoalEvaluationState) goalStates.get(rootGoal);
+		GoalEvaluationState s = goalStates.get(rootGoal);
 
 		Assert.isTrue(s.state == GoalState.DONE);
 		return s.result;
@@ -258,5 +264,7 @@ public class GoalEngine {
 		goalStates.clear();
 		evaluatorStates.clear();
 	}
+
+	private static final boolean DEBUG = false;
 
 }
