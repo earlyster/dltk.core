@@ -14,7 +14,13 @@ import java.util.Map;
 
 import org.eclipse.dltk.ui.CodeFormatterConstants;
 
-public final class TabStyle {
+public enum TabStyle {
+
+	TAB(CodeFormatterConstants.TAB),
+
+	SPACES(CodeFormatterConstants.SPACE),
+
+	MIXED(CodeFormatterConstants.MIXED);
 
 	private final String name;
 
@@ -30,15 +36,7 @@ public final class TabStyle {
 		return name;
 	}
 
-	public static final TabStyle TAB = new TabStyle(CodeFormatterConstants.TAB);
-
-	public static final TabStyle SPACES = new TabStyle(
-			CodeFormatterConstants.SPACE);
-
-	public static final TabStyle MIXED = new TabStyle(
-			CodeFormatterConstants.MIXED);
-
-	private static final Map byName = new HashMap();
+	private static final Map<String, TabStyle> byName = new HashMap<String, TabStyle>();
 
 	static {
 		byName.put(TAB.getName(), TAB);
@@ -47,15 +45,12 @@ public final class TabStyle {
 	}
 
 	public static TabStyle forName(String name) {
-		return (TabStyle) byName.get(name);
+		return byName.get(name);
 	}
 
 	public static TabStyle forName(String name, TabStyle deflt) {
-		TabStyle result = forName(name);
-		if (result == null)
-			return deflt;
-		else
-			return result;
+		final TabStyle result = forName(name);
+		return result != null ? result : deflt;
 	}
 
 }
