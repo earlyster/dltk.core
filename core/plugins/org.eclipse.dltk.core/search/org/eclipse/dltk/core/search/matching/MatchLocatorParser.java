@@ -84,9 +84,9 @@ public abstract class MatchLocatorParser implements IMatchLocatorParser {
 	}
 
 	private boolean patternProcessorInitialized = false;
-	private ISearchPatternProcessor patternProcessor = null;
+	protected ISearchPatternProcessor patternProcessor = null;
 
-	private void initPatternProcessor() {
+	protected void initPatternProcessor() {
 		if (patternProcessorInitialized) {
 			return;
 		}
@@ -103,18 +103,28 @@ public abstract class MatchLocatorParser implements IMatchLocatorParser {
 		if (supers != null) {
 			for (Iterator i = supers.getChilds().iterator(); i.hasNext();) {
 				final ASTNode superClass = (ASTNode) i.next();
-				String name = t.resolveSuperClassReference(superClass);
-				if (name != null) {
-					initPatternProcessor();
-					if (patternProcessor != null) {
-						name = patternProcessor.extractTypeChars(name);
-					}
-					// TODO create QualifiedTypeReference if needed
-					patternLocator.match(new TypeReference(superClass
-							.sourceStart(), superClass.sourceEnd(), name),
-							nodeSet);
+				final TypeReference superRef = createSuperTypeReference(t,
+						superClass);
+				if (superRef != null) {
+					patternLocator.match(superRef, nodeSet);
 				}
 			}
+		}
+	}
+
+	protected TypeReference createSuperTypeReference(TypeDeclaration t,
+			final ASTNode superClass) {
+		String name = t.resolveSuperClassReference(superClass);
+		if (name != null) {
+			initPatternProcessor();
+			if (patternProcessor != null) {
+				name = patternProcessor.extractTypeChars(name);
+			}
+			// TODO create QualifiedTypeReference if needed
+			return new TypeReference(superClass.sourceStart(), superClass
+					.sourceEnd(), name);
+		} else {
+			return null;
 		}
 	}
 
