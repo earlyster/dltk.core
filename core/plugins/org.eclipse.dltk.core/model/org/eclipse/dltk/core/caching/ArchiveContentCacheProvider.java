@@ -26,7 +26,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.impl.BinaryResourceImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
 /**
  * This cache provider checks for folder .index files and load such files into
@@ -134,7 +134,7 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 		ZipFile zipFile = new ZipFile(zipFileHandle);
 
 		ZipEntry entry = zipFile.getEntry(".index");
-		Resource indexResource = new BinaryResourceImpl(URI
+		Resource indexResource = new XMIResourceImpl(URI
 				.createURI("dltk_cache://zipIndex"));
 		indexResource.load(zipFile.getInputStream(entry), null);
 		EList<EObject> contents = indexResource.getContents();
