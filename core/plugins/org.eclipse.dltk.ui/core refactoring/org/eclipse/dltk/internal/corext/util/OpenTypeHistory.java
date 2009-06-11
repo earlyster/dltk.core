@@ -32,16 +32,16 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IShutdownListener;
-import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.ElementChangedEvent;
 import org.eclipse.dltk.core.IElementChangedListener;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IShutdownListener;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.TypeNameMatch;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -297,6 +297,9 @@ public class OpenTypeHistory extends History implements IShutdownListener {
 		monitor.setTaskName(CorextMessages.TypeInfoHistory_consistency_check);
 		for (Iterator iter= typesToCheck.iterator(); iter.hasNext();) {
 			TypeNameMatch type= (TypeNameMatch)iter.next();
+			if (type == null) {
+				continue;
+			}
 			long currentTimestamp= getContainerTimestamp(type);
 			Long lastTested= (Long)fTimestampMapping.get(type);
 			if (lastTested != null && currentTimestamp != IResource.NULL_STAMP && currentTimestamp == lastTested.longValue() && !isContainerDirty(type))
