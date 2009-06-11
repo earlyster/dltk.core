@@ -164,9 +164,10 @@ public class DLTKTypeInferenceEngine implements ITypeInferencer {
 		}
 	}
 
-	private static ThreadLocal goals = new ThreadLocal() {
-		protected Object initialValue() {
-			return new ArrayList();
+	private static ThreadLocal<List<AbstractTypeGoal>> goals = new ThreadLocal<List<AbstractTypeGoal>>() {
+		@Override
+		protected List<AbstractTypeGoal> initialValue() {
+			return new ArrayList<AbstractTypeGoal>();
 		}
 	};
 
@@ -174,7 +175,7 @@ public class DLTKTypeInferenceEngine implements ITypeInferencer {
 		String nature = goal.getContext().getLangNature();
 		List list = (List) evaluatorsByNatures.get(nature);
 		if (list != null) {
-			final List threadGoals = (List) goals.get();
+			final List<AbstractTypeGoal> threadGoals = goals.get();
 			if (threadGoals.size() > 32) {
 				return null;
 			}
@@ -182,7 +183,7 @@ public class DLTKTypeInferenceEngine implements ITypeInferencer {
 			try {
 				return evaluateType(goal, time, list);
 			} finally {
-				threadGoals.remove(goal);
+				threadGoals.remove(threadGoals.size() - 1);
 			}
 		}
 		return null;
