@@ -52,17 +52,4 @@ public class SimpleReference extends Reference {
 	public String toString() {
 		return this.fName;
 	}
-
-	public boolean equals(Object obj) {
-		if (!(obj instanceof SimpleReference)) {
-			return false;
-		}
-		SimpleReference d = (SimpleReference) obj;
-		return sourceStart() == d.sourceStart() && sourceEnd() == d.sourceEnd()
-				&& (fName != null && fName.equals(d.fName));
-	}
-
-	public int hashCode() {
-		return fName.hashCode();
-	}
 }

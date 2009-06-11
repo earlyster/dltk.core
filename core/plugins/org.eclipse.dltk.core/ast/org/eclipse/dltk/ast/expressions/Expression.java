@@ -152,14 +152,4 @@ public abstract class Expression extends Statement implements
 	public void printNode(CorePrinter output) {
 		output.formatPrintLn("Expression" + getSourceRange() + ":" + getKind()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-
-	public boolean equals(Object obj) {
-		if (obj instanceof Statement) {
-			Statement s = (Statement) obj;
-			return sourceStart() == s.sourceStart()
-					&& sourceEnd() == s.sourceEnd() && getKind() == s.getKind();
-		}
-
-		return false;
-	}
 }

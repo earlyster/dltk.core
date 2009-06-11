@@ -181,23 +181,6 @@ public class MethodDeclaration extends Declaration {
 		return this.declaringTypeName;
 	}
 
-	public boolean equals(Object obj) {
-		if (!(obj instanceof MethodDeclaration)) {
-			return false;
-		}
-		MethodDeclaration d = (MethodDeclaration) obj;
-		if ((this.declaringTypeName == null && d.declaringTypeName != null)
-				|| (this.declaringTypeName != null && d.declaringTypeName == null)) {
-			return false;
-		}
-		// Only name.
-		return d.getName().equals(this.getName())
-				&& d.getNameStart() == this.getNameStart()
-				&& d.getNameEnd() == this.getNameEnd()
-				&& (this.declaringTypeName == null || this.declaringTypeName
-						.equals(d.declaringTypeName));
-	}
-
 	/*
 	 * @see org.eclipse.dltk.ast.ASTNode#matchStart()
 	 */

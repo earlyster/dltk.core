@@ -264,5 +264,4 @@ public abstract class ASTNode {
 		}
 		return result;
 	}
-
 }

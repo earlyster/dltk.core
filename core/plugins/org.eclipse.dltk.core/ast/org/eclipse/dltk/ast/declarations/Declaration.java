@@ -170,22 +170,6 @@ public abstract class Declaration extends Statement implements Modifiers {
 		}
 	}
 
-	public boolean equals(Object obj) {
-		if (!(obj instanceof Declaration)) {
-			return false;
-		}
-		Declaration d = (Declaration) obj;
-		// Only name.
-		return d.ref.getName().equals(this.ref.getName())
-				&& d.ref.sourceStart() == this.ref.sourceStart()
-				&& d.ref.sourceEnd() == this.ref.sourceEnd()
-				&& super.equals(obj);
-	}
-
-	public int hashCode() {
-		return this.ref.getName().hashCode();
-	}
-
 	public String debugString() {
 		return super.debugString() + this.getNameSourceRange().toString();
 	}
