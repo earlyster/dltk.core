@@ -43,7 +43,7 @@ public class TodoTaskPreferences extends AbstractTodoTaskPreferences implements
 	/**
 	 * @deprecated
 	 */
-	public void setTaskTags(List elements) {
+	public void setTaskTags(List<TodoTask> elements) {
 		store.setValue(TAGS, TaskTagUtils.encodeTaskTags(elements));
 	}
 

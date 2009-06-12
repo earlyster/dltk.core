@@ -26,14 +26,14 @@ public class TodoTaskSimpleParser {
 
 	public TodoTaskSimpleParser(ITodoTaskPreferences preferences) {
 		this.caseSensitive = preferences.isCaseSensitive();
-		final List tags = preferences.getTaskTags();
+		final List<TodoTask> tags = preferences.getTaskTags();
 		if (!tags.isEmpty()) {
 			final int tagCount = tags.size();
 			this.tags = new char[tagCount][];
 			this.priorities = new int[tagCount];
 			int minTagLength = Integer.MAX_VALUE;
 			for (int i = 0; i < tagCount; ++i) {
-				final TodoTask task = (TodoTask) tags.get(i);
+				final TodoTask task = tags.get(i);
 				String tagName = task.name;
 				if (!caseSensitive) {
 					tagName = tagName.toUpperCase();

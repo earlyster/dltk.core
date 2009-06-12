@@ -41,7 +41,7 @@ public interface ITodoTaskPreferences {
 	 * 
 	 * @return list of {@link TodoTask}
 	 */
-	List getTaskTags();
+	List<TodoTask> getTaskTags();
 
 	/**
 	 * returns just the names of the tags

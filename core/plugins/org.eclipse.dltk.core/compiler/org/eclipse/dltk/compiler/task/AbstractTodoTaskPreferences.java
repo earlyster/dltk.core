@@ -18,16 +18,16 @@ public abstract class AbstractTodoTaskPreferences implements
 
 	protected abstract String getRawTaskTags();
 
-	public final List getTaskTags() {
+	public final List<TodoTask> getTaskTags() {
 		return TaskTagUtils.decodeTaskTags(getRawTaskTags());
 	}
 
 	public final String[] getTagNames() {
-		final List taskTags = getTaskTags();
+		final List<TodoTask> taskTags = getTaskTags();
 		final int size = taskTags.size();
 		final String[] result = new String[size];
 		for (int i = 0; i < size; ++i) {
-			result[i] = ((TodoTask) taskTags.get(i)).name;
+			result[i] = taskTags.get(i).name;
 		}
 		return result;
 	}

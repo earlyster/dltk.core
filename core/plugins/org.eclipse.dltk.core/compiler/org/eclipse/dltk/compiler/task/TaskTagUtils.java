@@ -14,9 +14,9 @@ public abstract class TaskTagUtils {
 	private static final String TAG_SEPARATOR = ","; //$NON-NLS-1$
 	private static final String PRIORITY_SEPARATOR = ";"; //$NON-NLS-1$
 
-	public static List decodeTaskTags(String tags) {
+	public static List<TodoTask> decodeTaskTags(String tags) {
 		final String[] tagPairs = getTokens(tags, TAG_SEPARATOR);
-		final List elements = new ArrayList();
+		final List<TodoTask> elements = new ArrayList<TodoTask>();
 		for (int i = 0; i < tagPairs.length; ++i) {
 			final String[] values = getTokens(tagPairs[i], PRIORITY_SEPARATOR);
 			final TodoTask task = new TodoTask();
@@ -32,10 +32,10 @@ public abstract class TaskTagUtils {
 
 	}
 
-	public static String encodeTaskTags(List elements) {
+	public static String encodeTaskTags(List<TodoTask> elements) {
 		final StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < elements.size(); ++i) {
-			final TodoTask task = (TodoTask) elements.get(i);
+			final TodoTask task = elements.get(i);
 			if (i > 0) {
 				sb.append(TAG_SEPARATOR);
 			}
@@ -47,8 +47,8 @@ public abstract class TaskTagUtils {
 		return string;
 	}
 
-	public static List getDefaultTags() {
-		final List defaultTags = new ArrayList();
+	public static List<TodoTask> getDefaultTags() {
+		final List<TodoTask> defaultTags = new ArrayList<TodoTask>();
 		defaultTags.add(new TodoTask("FIXME", TodoTask.PRIORITY_HIGH)); //$NON-NLS-1$
 		defaultTags.add(new TodoTask("OPTIMIZE", TodoTask.PRIORITY_NORMAL)); //$NON-NLS-1$
 		defaultTags.add(new TodoTask("TODO", TodoTask.PRIORITY_NORMAL)); //$NON-NLS-1$
