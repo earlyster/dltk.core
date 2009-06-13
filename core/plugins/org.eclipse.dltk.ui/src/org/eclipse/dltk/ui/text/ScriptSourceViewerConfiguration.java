@@ -11,6 +11,7 @@ package org.eclipse.dltk.ui.text;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.dltk.compiler.task.ITodoTaskPreferences;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.internal.ui.editor.ModelElementHyperlinkDetector;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
@@ -21,12 +22,14 @@ import org.eclipse.dltk.internal.ui.text.ScriptReconciler;
 import org.eclipse.dltk.internal.ui.text.hover.EditorTextHoverDescriptor;
 import org.eclipse.dltk.internal.ui.text.hover.EditorTextHoverProxy;
 import org.eclipse.dltk.internal.ui.text.hover.ScriptInformationProvider;
+import org.eclipse.dltk.ui.CodeFormatterConstants;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.actions.IScriptEditorActionDefinitionIds;
 import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
 import org.eclipse.dltk.ui.formatter.ScriptFormattingStrategy;
 import org.eclipse.dltk.ui.text.completion.ContentAssistPreference;
 import org.eclipse.dltk.ui.text.util.AutoEditUtils;
+import org.eclipse.dltk.ui.text.util.TabStyle;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -426,6 +429,52 @@ public abstract class ScriptSourceViewerConfiguration extends
 			return formatter;
 		}
 		return super.getContentFormatter(sourceViewer);
+	}
+
+	/*
+	 * @see SourceViewerConfiguration#getIndentPrefixes(ISourceViewer, String)
+	 */
+	public String[] getIndentPrefixes(ISourceViewer sourceViewer,
+			String contentType) {
+		if (fPreferenceStore == null) {
+			return super.getIndentPrefixes(sourceViewer, contentType);
+		}
+		final TabStyle tabStyle = getTabStyle();
+		final int tabWidth = getTabWidth(sourceViewer);
+		final int indentWidth = getIndentationSize(sourceViewer);
+		if (tabStyle != TabStyle.TAB && indentWidth < tabWidth) {
+			return new String[] { AutoEditUtils.getNSpaces(indentWidth), "\t", //$NON-NLS-1$
+					Util.EMPTY_STRING };
+		} else if (tabStyle == TabStyle.TAB) {
+			return getIndentPrefixesForTab(tabWidth);
+		} else {
+			return getIndentPrefixesForSpaces(tabWidth);
+		}
+	}
+
+	protected TabStyle getTabStyle() {
+		if (fPreferenceStore != null) {
+			TabStyle tabStyle = TabStyle.forName(fPreferenceStore
+					.getString(CodeFormatterConstants.FORMATTER_TAB_CHAR));
+			if (tabStyle != null) {
+				return tabStyle;
+			}
+		}
+		return TabStyle.TAB;
+	}
+
+	public int getTabWidth(ISourceViewer sourceViewer) {
+		if (fPreferenceStore == null)
+			return super.getTabWidth(sourceViewer);
+		return fPreferenceStore
+				.getInt(CodeFormatterConstants.FORMATTER_TAB_SIZE);
+	}
+
+	protected int getIndentationSize(ISourceViewer sourceViewer) {
+		if (fPreferenceStore == null)
+			return super.getTabWidth(sourceViewer);
+		return fPreferenceStore
+				.getInt(CodeFormatterConstants.FORMATTER_INDENTATION_SIZE);
 	}
 
 	/**
