@@ -50,7 +50,7 @@ public abstract class OptionsConfigurationBlock {
 	private IWorkbenchPreferenceContainer fContainer;
 
 	// null when project specific settings are turned off
-	private Map fDisabledProjectSettings;
+	private Map<PreferenceKey, String> fDisabledProjectSettings;
 
 	// used to prevent multiple dialogs that ask for a rebuild
 	private int fRebuildCount;
@@ -80,7 +80,7 @@ public abstract class OptionsConfigurationBlock {
 		if (fProject == null || hasProjectSpecificOptions(fProject)) {
 			fDisabledProjectSettings = null;
 		} else {
-			fDisabledProjectSettings = new HashMap();
+			fDisabledProjectSettings = new HashMap<PreferenceKey, String>();
 			for (int i = 0; i < allKeys.length; i++) {
 				PreferenceKey curr = allKeys[i];
 				fDisabledProjectSettings.put(curr, curr.getStoredValue(
@@ -150,7 +150,7 @@ public abstract class OptionsConfigurationBlock {
 
 	protected String getValue(PreferenceKey key) {
 		if (fDisabledProjectSettings != null) {
-			return (String) fDisabledProjectSettings.get(key);
+			return fDisabledProjectSettings.get(key);
 		}
 		return key.getStoredValue(fLookupOrder, false, fManager);
 	}
@@ -161,7 +161,7 @@ public abstract class OptionsConfigurationBlock {
 
 	protected String setValue(PreferenceKey key, String value) {
 		if (fDisabledProjectSettings != null) {
-			return (String) fDisabledProjectSettings.put(key, value);
+			return fDisabledProjectSettings.put(key, value);
 		}
 		String oldValue = getValue(key);
 		key.setStoredValue(fLookupOrder[0], value, fManager);
@@ -172,7 +172,8 @@ public abstract class OptionsConfigurationBlock {
 		return setValue(key, String.valueOf(value));
 	}
 
-	private boolean getChanges(IScopeContext currContext, List changedSettings) {
+	private boolean getChanges(IScopeContext currContext,
+			List<PreferenceKey> changedSettings) {
 		// complete when project settings are enabled
 		boolean completeSettings = fProject != null
 				&& fDisabledProjectSettings == null;
@@ -220,12 +221,12 @@ public abstract class OptionsConfigurationBlock {
 			if (enable) {
 				for (int i = 0; i < fAllKeys.length; i++) {
 					PreferenceKey curr = fAllKeys[i];
-					String val = (String) fDisabledProjectSettings.get(curr);
+					String val = fDisabledProjectSettings.get(curr);
 					curr.setStoredValue(fLookupOrder[0], val, fManager);
 				}
 				fDisabledProjectSettings = null;
 			} else {
-				fDisabledProjectSettings = new HashMap();
+				fDisabledProjectSettings = new HashMap<PreferenceKey, String>();
 				for (int i = 0; i < fAllKeys.length; i++) {
 					PreferenceKey curr = fAllKeys[i];
 					String oldSetting = curr.getStoredValue(fLookupOrder,
@@ -254,7 +255,7 @@ public abstract class OptionsConfigurationBlock {
 	protected boolean processChanges(IWorkbenchPreferenceContainer container) {
 		IScopeContext currContext = fLookupOrder[0];
 
-		List /* <Key> */changedOptions = new ArrayList();
+		List<PreferenceKey> changedOptions = new ArrayList<PreferenceKey>();
 		boolean needsBuild = getChanges(currContext, changedOptions);
 		if (changedOptions.isEmpty()) {
 			return true;
@@ -336,7 +337,7 @@ public abstract class OptionsConfigurationBlock {
 	 * @return
 	 */
 	protected IPreferenceChangeRebuildPrompt getPreferenceChangeRebuildPrompt(
-			boolean workspaceSettings, Collection changedOptions) {
+			boolean workspaceSettings, Collection<PreferenceKey> changedOptions) {
 		return null;
 	}
 
