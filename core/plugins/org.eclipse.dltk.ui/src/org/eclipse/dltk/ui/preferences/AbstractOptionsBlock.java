@@ -256,7 +256,7 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 * java.util.Collection)
 	 */
 	protected IPreferenceChangeRebuildPrompt getPreferenceChangeRebuildPrompt(
-			boolean workspaceSettings, Collection changedOptions) {
+			boolean workspaceSettings, Collection<PreferenceKey> changedOptions) {
 		return super.getPreferenceChangeRebuildPrompt(workspaceSettings,
 				changedOptions);
 	}
