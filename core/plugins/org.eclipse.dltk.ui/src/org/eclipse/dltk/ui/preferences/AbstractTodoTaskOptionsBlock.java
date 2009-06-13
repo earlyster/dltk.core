@@ -7,6 +7,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.dltk.compiler.task.ITodoTaskPreferences;
 import org.eclipse.dltk.compiler.task.TaskTagUtils;
 import org.eclipse.dltk.compiler.task.TodoTask;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IListAdapter;
@@ -31,13 +32,17 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 /**
- * Abstract options block that can be used to by an
- * {@link AbstractConfigurationBlockPropertyAndPreferencePage} implemenation to
+ * Abstract options block that can be used by an
+ * {@link AbstractConfigurationBlockPropertyAndPreferencePage} implementation to
  * create a preferences/property page for task tags.
+ * 
+ * <p>
+ * It is recommended to instantiate {@link TodoTaskOptionsBlock} instead.
+ * </p>
  */
 public abstract class AbstractTodoTaskOptionsBlock extends AbstractOptionsBlock {
 
-	private class TodoTaskLabelProvider extends LabelProvider implements
+	private static class TodoTaskLabelProvider extends LabelProvider implements
 			ITableLabelProvider {
 
 		/*
@@ -82,12 +87,13 @@ public abstract class AbstractTodoTaskOptionsBlock extends AbstractOptionsBlock 
 				return PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_low_priority;
 			}
 
-			return ""; //$NON-NLS-1$
+			return Util.EMPTY_STRING;
 		}
 
 	}
 
 	private static class TodoTaskSorter extends ViewerSorter {
+		@SuppressWarnings("unchecked")
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			return getComparator().compare(((TodoTask) e1).name,
 					((TodoTask) e2).name);
@@ -96,7 +102,7 @@ public abstract class AbstractTodoTaskOptionsBlock extends AbstractOptionsBlock 
 
 	public class TaskTagAdapter implements IListAdapter, IDialogFieldListener {
 
-		private boolean canEdit(List selectedElements) {
+		private boolean canEdit(List<?> selectedElements) {
 			return selectedElements.size() == 1;
 		}
 
@@ -105,7 +111,7 @@ public abstract class AbstractTodoTaskOptionsBlock extends AbstractOptionsBlock 
 		}
 
 		public void selectionChanged(ListDialogField field) {
-			List selectedElements = field.getSelectedElements();
+			List<?> selectedElements = field.getSelectedElements();
 			field.enableButton(IDX_EDIT, canEdit(selectedElements));
 		}
 
@@ -265,13 +271,15 @@ public abstract class AbstractTodoTaskOptionsBlock extends AbstractOptionsBlock 
 		fCaseSensitiveCheckbox.setEnabled(enabled);
 	}
 
+	@SuppressWarnings("unchecked")
 	protected final void updateModel(DialogField field) {
 		setValue(getTags(), TaskTagUtils.encodeTaskTags(fTodoTasksList
 				.getElements()));
 	}
 
+	@Override
 	protected IPreferenceChangeRebuildPrompt getPreferenceChangeRebuildPrompt(
-			boolean workspaceSettings, Collection changedOptions) {
+			boolean workspaceSettings, Collection<PreferenceKey> changedOptions) {
 		return PreferenceChangeRebuildPrompt
 				.create(
 						workspaceSettings,
