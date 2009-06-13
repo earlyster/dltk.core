@@ -24,6 +24,7 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
 
 /**
@@ -173,6 +174,9 @@ public class GenerateActionGroup extends ActionGroup {
 		added += addEditorAction(source, DLTKActionConstants.FORMAT);
 		added += addEditorAction(source, DLTKActionConstants.FORMAT_ELEMENT);
 		added += addEditorAction(source, DLTKActionConstants.INDENT);
+		source.add(new Separator());
+		added += addEditorAction(source, ITextEditorActionConstants.SHIFT_LEFT);
+		added += addEditorAction(source, ITextEditorActionConstants.SHIFT_RIGHT);
 		source.add(new Separator(GROUP_GENERATE));
 		source.add(new Separator(GROUP_CODE));
 		source.add(new Separator(GROUP_EXTERNALIZE));
