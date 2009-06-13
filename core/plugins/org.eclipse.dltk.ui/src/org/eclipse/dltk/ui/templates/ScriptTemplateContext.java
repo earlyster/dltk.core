@@ -12,7 +12,9 @@
 package org.eclipse.dltk.ui.templates;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IPreferencesLookupDelegate;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.PreferencesLookupDelegate;
 import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -41,6 +43,10 @@ public class ScriptTemplateContext extends DocumentTemplateContext {
 
 	public final ISourceModule getSourceModule() {
 		return sourceModule;
+	}
+
+	protected IPreferencesLookupDelegate getPreferences() {
+		return new PreferencesLookupDelegate(sourceModule.getScriptProject());
 	}
 
 	/**
