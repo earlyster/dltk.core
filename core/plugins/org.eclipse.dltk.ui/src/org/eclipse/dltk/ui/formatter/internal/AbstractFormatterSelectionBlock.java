@@ -108,10 +108,10 @@ public abstract class AbstractFormatterSelectionBlock extends
 	}
 
 	protected ProfileManager getProfileManager(IScriptFormatterFactory factory) {
-		ProfileManager manager = (ProfileManager) profileByFactory.get(factory);
+		ProfileManager manager = profileByFactory.get(factory);
 		if (manager == null) {
-			List allProfiles = new ArrayList();
-			List buitinProfiles = factory.getBuiltInProfiles();
+			List<IProfile> allProfiles = new ArrayList<IProfile>();
+			List<IProfile> buitinProfiles = factory.getBuiltInProfiles();
 			if (buitinProfiles != null && buitinProfiles.size() > 0) {
 				allProfiles.addAll(buitinProfiles);
 			} else {
@@ -206,7 +206,7 @@ public abstract class AbstractFormatterSelectionBlock extends
 	}
 
 	protected ProfileStore getProfileStore(IScriptFormatterFactory factory) {
-		ProfileStore store = (ProfileStore) storeByFactory.get(factory);
+		ProfileStore store = storeByFactory.get(factory);
 		if (store == null) {
 			IProfileVersioner versioner = factory.getProfileVersioner();
 			store = new ProfileStore(versioner);
@@ -254,7 +254,7 @@ public abstract class AbstractFormatterSelectionBlock extends
 
 	protected static PreferenceKey[] collectPreferenceKeys(List factories,
 			String natureId, PreferenceKey formatterKey) {
-		List result = new ArrayList();
+		List<PreferenceKey> result = new ArrayList<PreferenceKey>();
 		result.add(formatterKey);
 		IDLTKContributedExtension[] extensions = ScriptFormatterManager
 				.getInstance().getContributions(natureId);
@@ -269,8 +269,7 @@ public abstract class AbstractFormatterSelectionBlock extends
 				}
 			}
 		}
-		return (PreferenceKey[]) result
-				.toArray(new PreferenceKey[result.size()]);
+		return result.toArray(new PreferenceKey[result.size()]);
 	}
 
 	// ~ Methods
@@ -735,8 +734,8 @@ public abstract class AbstractFormatterSelectionBlock extends
 
 	private int selectedFactory;
 	private IScriptFormatterFactory[] factories;
-	private Map storeByFactory = new HashMap();
-	private Map profileByFactory = new HashMap();
+	private Map<IScriptFormatterFactory, ProfileStore> storeByFactory = new HashMap<IScriptFormatterFactory, ProfileStore>();
+	private Map<IScriptFormatterFactory, ProfileManager> profileByFactory = new HashMap<IScriptFormatterFactory, ProfileManager>();
 	protected SourceViewer fPreviewViewer;
 
 	private static List TEMP_LIST = new ArrayList();
