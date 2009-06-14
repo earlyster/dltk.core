@@ -53,8 +53,8 @@ public abstract class AbstractScriptFormatterFactory extends
 		return FormatterMessages.AbstractScriptFormatterFactory_defaultProfileName;
 	}
 
-	public List getBuiltInProfiles() {
-		List profiles = new ArrayList();
+	public List<IProfile> getBuiltInProfiles() {
+		List<IProfile> profiles = new ArrayList<IProfile>();
 
 		IProfileVersioner versioner = getProfileVersioner();
 		BuiltInProfile profile = new BuiltInProfile(getDefaultProfileID(),
@@ -65,8 +65,8 @@ public abstract class AbstractScriptFormatterFactory extends
 		return profiles;
 	}
 
-	public Map loadDefaultSettings() {
-		Map settings = new HashMap();
+	public Map<String, String> loadDefaultSettings() {
+		Map<String, String> settings = new HashMap<String, String>();
 		PreferenceKey[] keys = getPreferenceKeys();
 		if (keys != null) {
 			DefaultScope scope = new DefaultScope();
@@ -83,8 +83,9 @@ public abstract class AbstractScriptFormatterFactory extends
 		return settings;
 	}
 
-	public Map retrievePreferences(IPreferencesLookupDelegate delegate) {
-		final Map result = new HashMap();
+	public Map<String, String> retrievePreferences(
+			IPreferencesLookupDelegate delegate) {
+		final Map<String, String> result = new HashMap<String, String>();
 		final PreferenceKey[] keys = getPreferenceKeys();
 		if (keys != null) {
 			for (int i = 0; i < keys.length; ++i) {
@@ -106,7 +107,7 @@ public abstract class AbstractScriptFormatterFactory extends
 		return result;
 	}
 
-	public void savePreferences(Map preferences,
+	public void savePreferences(Map<String, String> preferences,
 			IPreferencesSaveDelegate delegate) {
 		final PreferenceKey[] keys = getPreferenceKeys();
 		if (keys != null) {
@@ -114,7 +115,7 @@ public abstract class AbstractScriptFormatterFactory extends
 				final PreferenceKey prefKey = keys[i];
 				final String key = prefKey.getName();
 				if (preferences.containsKey(key)) {
-					final String value = (String) preferences.get(key);
+					final String value = preferences.get(key);
 					delegate.setString(prefKey.getQualifier(), key, value);
 				}
 			}
@@ -122,14 +123,14 @@ public abstract class AbstractScriptFormatterFactory extends
 
 		final String profilesKey = getProfilesKey().getName();
 		if (preferences.containsKey(profilesKey)) {
-			final String value = (String) preferences.get(profilesKey);
+			final String value = preferences.get(profilesKey);
 			delegate.setString(getProfilesKey().getQualifier(), profilesKey,
 					value);
 		}
 
 		final String activeProfileKey = getActiveProfileKey().getName();
 		if (preferences.containsKey(activeProfileKey)) {
-			final String value = (String) preferences.get(activeProfileKey);
+			final String value = preferences.get(activeProfileKey);
 			delegate.setString(getProfilesKey().getQualifier(),
 					activeProfileKey, value);
 		}

@@ -21,7 +21,7 @@ import org.eclipse.dltk.ui.formatter.IProfile;
  */
 public abstract class Profile implements IProfile {
 
-	public boolean equalsTo(Map otherMap) {
+	public boolean equalsTo(Map<String, String> otherMap) {
 		return getSettings().equals(otherMap);
 	}
 

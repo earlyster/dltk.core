@@ -14,14 +14,16 @@ package org.eclipse.dltk.internal.ui.formatter.profiles;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.dltk.ui.formatter.IProfile;
+
 /**
  * Represents a user-defined profile. A custom profile can be modified after
  * instantiation.
  */
 public class CustomProfile extends Profile {
 
-	public CustomProfile(String name, Map settings, String formatter,
-			int version) {
+	public CustomProfile(String name, Map<String, String> settings,
+			String formatter, int version) {
 		fName = name;
 		fSettings = settings;
 		fFormatter = formatter;
@@ -32,11 +34,11 @@ public class CustomProfile extends Profile {
 		return fName;
 	}
 
-	public Map getSettings() {
-		return new HashMap(fSettings);
+	public Map<String, String> getSettings() {
+		return new HashMap<String, String>(fSettings);
 	}
 
-	public void setSettings(Map settings) {
+	public void setSettings(Map<String, String> settings) {
 		if (settings == null)
 			throw new IllegalArgumentException();
 		fSettings = settings;
@@ -62,12 +64,9 @@ public class CustomProfile extends Profile {
 		fVersion = version;
 	}
 
-	public int compareTo(Object o) {
-		if (o instanceof Profile) {
-			Profile profile = (Profile) o;
-			if (o instanceof CustomProfile) {
-				return getName().compareToIgnoreCase(profile.getName());
-			}
+	public int compareTo(IProfile o) {
+		if (o instanceof CustomProfile) {
+			return getName().compareToIgnoreCase(o.getName());
 		}
 		return 1;
 	}
@@ -82,7 +81,7 @@ public class CustomProfile extends Profile {
 
 	private String fFormatter;
 	String fName;
-	private Map fSettings;
+	private Map<String, String> fSettings;
 	protected ProfileManager fManager;
 	private int fVersion;
 

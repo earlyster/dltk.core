@@ -14,14 +14,16 @@ package org.eclipse.dltk.internal.ui.formatter.profiles;
 import java.util.Collections;
 import java.util.Map;
 
+import org.eclipse.dltk.ui.formatter.IProfile;
+
 /**
  * Represents a built-in profile. The state of a built-in profile cannot be
  * changed after instantiation.
  */
 public class BuiltInProfile extends Profile {
 
-	public BuiltInProfile(String ID, String name, Map settings, int order,
-			String formatter, int currentVersion) {
+	public BuiltInProfile(String ID, String name, Map<String, String> settings,
+			int order, String formatter, int currentVersion) {
 		fName = name;
 		fID = ID;
 		fSettings = Collections.unmodifiableMap(settings);
@@ -34,18 +36,18 @@ public class BuiltInProfile extends Profile {
 		return fName;
 	}
 
-	public Map getSettings() {
+	public Map<String, String> getSettings() {
 		return fSettings;
 	}
 
-	public void setSettings(Map settings) {
+	public void setSettings(Map<String, String> settings) {
 	}
 
 	public String getID() {
 		return fID;
 	}
 
-	public final int compareTo(Object o) {
+	public final int compareTo(IProfile o) {
 		if (o instanceof BuiltInProfile) {
 			return fOrder - ((BuiltInProfile) o).fOrder;
 		}
@@ -70,7 +72,7 @@ public class BuiltInProfile extends Profile {
 
 	private final String fName;
 	private final String fID;
-	private final Map fSettings;
+	private final Map<String, String> fSettings;
 	private final int fOrder;
 	private final int fCurrentVersion;
 	private final String fFormatter;

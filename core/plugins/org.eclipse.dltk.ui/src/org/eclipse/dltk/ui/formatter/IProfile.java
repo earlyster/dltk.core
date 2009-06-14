@@ -17,19 +17,19 @@ import java.util.Map;
  * Represents a profile with a unique ID, a name and a map containing the code
  * formatter settings.
  */
-public interface IProfile extends Comparable {
+public interface IProfile extends Comparable<IProfile> {
 
 	public String getName();
 
-	public Map getSettings();
+	public Map<String, String> getSettings();
 
-	public void setSettings(Map settings);
+	public void setSettings(Map<String, String> settings);
 
 	public String getFormatterId();
 
 	public int getVersion();
 
-	public boolean equalsTo(Map otherMap);
+	public boolean equalsTo(Map<String, String> otherMap);
 
 	public String getID();
 

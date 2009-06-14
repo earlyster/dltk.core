@@ -23,7 +23,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +43,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.internal.ui.DLTKUIException;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.formatter.IProfile;
 import org.eclipse.dltk.ui.formatter.IProfileVersioner;
 import org.eclipse.osgi.util.NLS;
 import org.w3c.dom.Document;
@@ -66,11 +66,11 @@ public class ProfileStore {
 	 */
 	private final static class ProfileDefaultHandler extends DefaultHandler {
 
-		private List fProfiles;
+		private List<IProfile> fProfiles;
 		private int fVersion;
 
 		private String fName;
-		private Map fSettings;
+		private Map<String, String> fSettings;
 		private String fFormatter;
 
 		public void startElement(String uri, String localName, String qName,
@@ -94,10 +94,10 @@ public class ProfileStore {
 					throw new SAXException(ex);
 				}
 
-				fSettings = new HashMap(200);
+				fSettings = new HashMap<String, String>(200);
 
 			} else if (qName.equals(XML_NODE_ROOT)) {
-				fProfiles = new ArrayList();
+				fProfiles = new ArrayList<IProfile>();
 			}
 		}
 
@@ -112,7 +112,7 @@ public class ProfileStore {
 			}
 		}
 
-		public List getProfiles() {
+		public List<IProfile> getProfiles() {
 			return fProfiles;
 		}
 
@@ -142,7 +142,8 @@ public class ProfileStore {
 		return versioner;
 	}
 
-	public String writeProfiles(Collection profiles) throws CoreException {
+	public String writeProfiles(Collection<IProfile> profiles)
+			throws CoreException {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream(2000);
 		try {
 			writeProfilesToStream(profiles, stream, ENCODING, versioner);
@@ -161,7 +162,8 @@ public class ProfileStore {
 		}
 	}
 
-	public List readProfilesFromString(String profiles) throws CoreException {
+	public List<IProfile> readProfilesFromString(String profiles)
+			throws CoreException {
 		if (profiles != null && profiles.length() > 0) {
 			byte[] bytes;
 			try {
@@ -171,10 +173,10 @@ public class ProfileStore {
 			}
 			InputStream is = new ByteArrayInputStream(bytes);
 			try {
-				List res = readProfilesFromStream(new InputSource(is));
+				List<IProfile> res = readProfilesFromStream(new InputSource(is));
 				if (res != null) {
 					for (int i = 0; i < res.size(); i++) {
-						versioner.update((CustomProfile) res.get(i));
+						versioner.update(res.get(i));
 					}
 				}
 				return res;
@@ -197,7 +199,7 @@ public class ProfileStore {
 	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
 	 * @throws CoreException
 	 */
-	public List readProfilesFromFile(File file) throws CoreException {
+	public List<IProfile> readProfilesFromFile(File file) throws CoreException {
 		try {
 			final FileInputStream reader = new FileInputStream(file);
 			try {
@@ -223,7 +225,7 @@ public class ProfileStore {
 	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
 	 * @throws CoreException
 	 */
-	public static List readProfilesFromStream(InputSource inputSource)
+	public static List<IProfile> readProfilesFromStream(InputSource inputSource)
 			throws CoreException {
 
 		final ProfileDefaultHandler handler = new ProfileDefaultHandler();
@@ -255,7 +257,7 @@ public class ProfileStore {
 	 *            the encoding to use
 	 * @throws CoreException
 	 */
-	public void writeProfilesToFile(Collection profiles, File file,
+	public void writeProfilesToFile(Collection<IProfile> profiles, File file,
 			String encoding) throws CoreException {
 		final OutputStream stream;
 		try {
@@ -285,7 +287,7 @@ public class ProfileStore {
 	 *            the encoding to use
 	 * @throws CoreException
 	 */
-	public static void writeProfilesToStream(Collection profiles,
+	public static void writeProfilesToStream(Collection<IProfile> profiles,
 			OutputStream stream, String encoding, IProfileVersioner versioner)
 			throws CoreException {
 
@@ -298,8 +300,7 @@ public class ProfileStore {
 			final Element rootElement = document.createElement(XML_NODE_ROOT);
 			document.appendChild(rootElement);
 
-			for (final Iterator iter = profiles.iterator(); iter.hasNext();) {
-				final Profile profile = (Profile) iter.next();
+			for (final IProfile profile : profiles) {
 				if (!profile.isBuiltInProfile()) {
 					final Element profileElement = createProfileElement(
 							profile, document, versioner);
@@ -327,7 +328,7 @@ public class ProfileStore {
 	 * Create a new profile element in the specified document. The profile is
 	 * not added to the document by this method.
 	 */
-	private static Element createProfileElement(Profile profile,
+	private static Element createProfileElement(IProfile profile,
 			Document document, IProfileVersioner versioner) {
 		final Element element = document.createElement(XML_NODE_PROFILE);
 		element.setAttribute(XML_ATTRIBUTE_NAME, profile.getName());
@@ -336,11 +337,9 @@ public class ProfileStore {
 		element.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(profile
 				.getVersion()));
 
-		final Iterator keyIter = profile.getSettings().keySet().iterator();
-
-		while (keyIter.hasNext()) {
-			final String key = (String) keyIter.next();
-			final String value = (String) profile.getSettings().get(key);
+		for (Map.Entry<String, String> entry : profile.getSettings().entrySet()) {
+			final String key = entry.getKey();
+			final String value = entry.getValue();
 			if (value != null) {
 				final Element setting = document
 						.createElement(XML_NODE_SETTING);

@@ -31,7 +31,7 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 	 * @param delegate
 	 * @return
 	 */
-	Map retrievePreferences(IPreferencesLookupDelegate delegate);
+	Map<String, String> retrievePreferences(IPreferencesLookupDelegate delegate);
 
 	PreferenceKey[] getPreferenceKeys();
 
@@ -39,7 +39,8 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 
 	PreferenceKey getActiveProfileKey();
 
-	void savePreferences(Map preferences, IPreferencesSaveDelegate delegate);
+	void savePreferences(Map<String, String> preferences,
+			IPreferencesSaveDelegate delegate);
 
 	/**
 	 * Creates the {@link IScriptFormatter} with the specified preferences.
@@ -49,9 +50,10 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 	 * @param preferences
 	 *            the formatting options
 	 */
-	IScriptFormatter createFormatter(String lineDelimiter, Map preferences);
+	IScriptFormatter createFormatter(String lineDelimiter,
+			Map<String, String> preferences);
 
-	List getBuiltInProfiles();
+	List<IProfile> getBuiltInProfiles();
 
 	IProfileVersioner getProfileVersioner();
 
