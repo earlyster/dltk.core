@@ -238,12 +238,12 @@ public class Util {
 		if (name == null) {
 			return false;
 		}
-//		if (toolkit instanceof IDLTKLanguageToolkitExtension) {
-//			IDLTKLanguageToolkitExtension ext = (IDLTKLanguageToolkitExtension) toolkit;
-//			if (ext.isArchiveFileName(name)) {
-//				return true;
-//			}
-//		}
+		if (toolkit instanceof IDLTKLanguageToolkitExtension) {
+			IDLTKLanguageToolkitExtension ext = (IDLTKLanguageToolkitExtension) toolkit;
+			if (ext.isArchiveFileName(name)) {
+				return true;
+			}
+		}
 		final int nameLength = name.length();
 		final int suffixLength = SUFFIX_ZIP.length;
 		if (nameLength < suffixLength)
