@@ -21,12 +21,12 @@ import org.eclipse.jface.text.IDocument;
  */
 public abstract class AbstractScriptFormatter implements IScriptFormatter {
 
-	private final Map preferences;
+	private final Map<String, Object> preferences;
 
 	/**
 	 * @param preferences
 	 */
-	protected AbstractScriptFormatter(Map preferences) {
+	protected AbstractScriptFormatter(Map<String, Object> preferences) {
 		this.preferences = preferences;
 	}
 
