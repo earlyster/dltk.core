@@ -56,7 +56,7 @@ public abstract class AbstractFormatterTest extends TestCase {
 	 * 
 	 * @return
 	 */
-	protected Map getDefaultPreferences() {
+	protected Map<String, Object> getDefaultPreferences() {
 		return null;
 	}
 
@@ -76,7 +76,7 @@ public abstract class AbstractFormatterTest extends TestCase {
 	 *            or <code>null</code> to use default preferences.
 	 * @return
 	 */
-	protected abstract IScriptFormatter createFormatter(Map preferences);
+	protected abstract IScriptFormatter createFormatter(Map<String, Object> preferences);
 
 	protected static String joinLines(Collection lines) {
 		return joinLines((String[]) lines.toArray(new String[lines.size()]));

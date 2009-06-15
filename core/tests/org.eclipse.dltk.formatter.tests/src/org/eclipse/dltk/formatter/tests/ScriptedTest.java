@@ -33,7 +33,7 @@ public class ScriptedTest extends AbstractFormatterTest {
 
 		String getCharset();
 
-		IScriptFormatter createFormatter(Map preferences);
+		IScriptFormatter createFormatter(Map<String, Object> preferences);
 
 		String validateOptionName(String name);
 
@@ -43,19 +43,22 @@ public class ScriptedTest extends AbstractFormatterTest {
 	private String input;
 	private String expected;
 
+	@Override
 	protected void runTest() throws Throwable {
 		final String output = format(input);
 		assertEquals(expected, output);
 	}
 
 	private IScriptedTestContext context = null;
-	private Map preferences = null;
+	private Map<String, Object> preferences = null;
 
-	protected Map getDefaultPreferences() {
+	@Override
+	protected Map<String, Object> getDefaultPreferences() {
 		return preferences;
 	}
 
-	protected IScriptFormatter createFormatter(Map preferences) {
+	@Override
+	protected IScriptFormatter createFormatter(Map<String, Object> preferences) {
 		return context.createFormatter(preferences);
 	}
 
@@ -68,9 +71,9 @@ public class ScriptedTest extends AbstractFormatterTest {
 				context.getCharset());
 	}
 
-	private static final String TEST_MARKER = "====";
-	private static final String RESPONSE_MARKER = "==";
-	private static final String OPTION_MARKER = "==>";
+	private static final String TEST_MARKER = "===="; //$NON-NLS-1$
+	private static final String RESPONSE_MARKER = "=="; //$NON-NLS-1$
+	private static final String OPTION_MARKER = "==>"; //$NON-NLS-1$
 
 	public TestSuite createScriptedSuite(IScriptedTestContext context,
 			String resourceName) {
@@ -170,7 +173,7 @@ public class ScriptedTest extends AbstractFormatterTest {
 	}
 
 	private static final Pattern OPTION_PATTERN = Pattern
-			.compile("\\s*([\\w\\.]+)\\s*=\\s*(\\S+)\\s*");
+			.compile("\\s*([\\w\\.]+)\\s*=\\s*(\\S+)\\s*"); //$NON-NLS-1$
 
 	private ScriptedTest createTest(IScriptedTestContext context,
 			Map preferences, String testName, String[] lines, int testBegin,
