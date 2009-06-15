@@ -89,7 +89,7 @@ public class ScriptedTest extends AbstractFormatterTest {
 			String suiteName, String resourceName, int beginTestIndex) {
 		final TestSuite suite = new TestSuite(suiteName);
 		try {
-			Map preferences = null;
+			Map<String, Object> preferences = null;
 			final String content = new String(readResource(context,
 					resourceName));
 			final String[] lines = TextUtils.splitLines(content);
@@ -125,7 +125,7 @@ public class ScriptedTest extends AbstractFormatterTest {
 								.substring(OPTION_MARKER.length()));
 						if (matcher.matches()) {
 							if (preferences == null) {
-								preferences = new HashMap();
+								preferences = new HashMap<String, Object>();
 							}
 							final String optionName = context
 									.validateOptionName(matcher.group(1));
@@ -163,11 +163,12 @@ public class ScriptedTest extends AbstractFormatterTest {
 				}
 			}
 		} catch (final Throwable e) {
-			suite.addTest(new TestCase(e.getClass().getName()) { //$NON-NLS-1$
-						protected void runTest() throws Throwable {
-							throw e;
-						}
-					});
+			suite.addTest(new TestCase(e.getClass().getName()) {
+				@Override
+				protected void runTest() throws Throwable {
+					throw e;
+				}
+			});
 		}
 		return suite;
 	}
@@ -176,17 +177,18 @@ public class ScriptedTest extends AbstractFormatterTest {
 			.compile("\\s*([\\w\\.]+)\\s*=\\s*(\\S+)\\s*"); //$NON-NLS-1$
 
 	private ScriptedTest createTest(IScriptedTestContext context,
-			Map preferences, String testName, String[] lines, int testBegin,
-			int responseBegin, final int testEnd) throws Exception {
+			Map<String, Object> preferences, String testName, String[] lines,
+			int testBegin, int responseBegin, final int testEnd)
+			throws Exception {
 		final String input = joinLines(lines, testBegin, responseBegin - 1);
 		final String expected = joinLines(lines, responseBegin, testEnd);
-		ScriptedTest test = (ScriptedTest) getClass().newInstance();
+		ScriptedTest test = getClass().newInstance();
 		test.setName(testName);
 		test.input = input;
 		test.expected = expected;
 		test.context = context;
-		test.preferences = preferences != null ? new HashMap(preferences)
-				: preferences;
+		test.preferences = preferences != null ? new HashMap<String, Object>(
+				preferences) : preferences;
 		return test;
 	}
 
