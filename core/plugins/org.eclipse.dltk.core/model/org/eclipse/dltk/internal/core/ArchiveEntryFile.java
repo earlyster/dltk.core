@@ -81,7 +81,7 @@ public class ArchiveEntryFile extends PlatformObject implements IStorage {
 	 * @see IStorage#getFullPath
 	 */
 	public IPath getFullPath() {
-		return new Path(this.entryName);
+		return new Path(this.zipName).append(this.entryName);
 	}
 
 	/**

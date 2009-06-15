@@ -12,14 +12,17 @@ package org.eclipse.dltk.internal.core;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.dltk.core.IScriptProject;
 
-
 class ArchiveProjectFragmentInfo extends ProjectFragmentInfo {
-	
-	public Object[] getForeignResources(IScriptProject scriptProject, IResource resource, ProjectFragment fragment) {
+
+	public Object[] getForeignResources(IScriptProject scriptProject,
+			IResource resource, ProjectFragment fragment) {
 		return getForeignResources();
 	}
+
 	public Object[] getForeignResources() {
-		foreignResources = NO_NON_SCRIPT_RESOURCES;
+		if (foreignResources == null) {
+			foreignResources = NO_NON_SCRIPT_RESOURCES;
+		}
 		return foreignResources;
 	}
 }

@@ -42,10 +42,9 @@ public class ArchiveFolder extends ScriptFolder {
 			for (int i = 0; i < max; i++) {
 				String resName = resNames[i];
 				if (!Util.isValidSourceModuleName(getScriptProject(), resName)) {
-					IPath parentRelativePath = new Path(resName)
-							.removeFirstSegments(this.path.segmentCount());
-					res[index++] = new ArchiveEntryFile(resName, zipName,
-							parentRelativePath, this.getProjectFragment()
+					Path resPath = new Path(resName);
+					res[index++] = new ArchiveEntryFile(resPath.lastSegment(),
+							zipName, path, this.getProjectFragment()
 									.getResource());
 				}
 			}
@@ -59,8 +58,8 @@ public class ArchiveFolder extends ScriptFolder {
 	public ISourceModule getSourceModule(String name) {
 		ArchiveProjectFragment fragment = (ArchiveProjectFragment) getProjectFragment();
 		// Path zipPath = new Path(fragment.getZipName());
-		// IPath parentRelativePath = new
-		// Path(resName).removeFirstSegments(this.path.segmentCount());
+		// IPath parentRelativePath = new Path(resName)
+		// .removeFirstSegments(this.path.segmentCount());
 		return new ExternalSourceModule(this, name,
 				DefaultWorkingCopyOwner.PRIMARY, true, new ArchiveEntryFile(
 						name, EnvironmentPathUtils.getLocalPath(

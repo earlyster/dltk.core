@@ -107,44 +107,40 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 		IPath path = getBufferPath();
 		IFileHandle file = EnvironmentPathUtils.getFile(path);
 
-		if (file != null && file.exists()) {
+		IProjectFragment projectFragment = this.getProjectFragment();
+		if (file != null && file.exists() && !projectFragment.isArchive()) {
 			return org.eclipse.dltk.internal.core.util.Util
 					.getResourceContentsAsCharArray(file);
 		} else {
-			// This is an archive entry
-			boolean inProjectArchive = false;
-			IProjectFragment projectFragment = this.getProjectFragment();
 			if (projectFragment.isArchive()) {
-				if (projectFragment.getResource() != null) {
-					inProjectArchive = projectFragment.getResource().exists();
-				}
-			}
-			if (!inProjectArchive) {
-				throw newNotPresentException();
-			}
-			final InputStream stream;
-			PerformanceNode p = RuntimePerformanceMonitor.begin();
-			try {
-				stream = new BufferedInputStream(storage.getContents(), 4096);
-			} catch (CoreException e) {
-				throw new ModelException(e,
-						IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
-			}
-			try {
-				char[] data = Util.getInputStreamAsCharArray(stream, -1,
-						Util.UTF_8);
-				p.done("#", RuntimePerformanceMonitor.IOREAD, data.length);
-				return data;
-			} catch (IOException e) {
-				throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
-			} finally {
+				final InputStream stream;
+				PerformanceNode p = RuntimePerformanceMonitor.begin();
 				try {
-					stream.close();
+					stream = new BufferedInputStream(storage.getContents(),
+							4096);
+				} catch (CoreException e) {
+					throw new ModelException(e,
+							IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
+				}
+				try {
+					char[] data = Util.getInputStreamAsCharArray(stream, -1,
+							Util.UTF_8);
+					p.done("#", RuntimePerformanceMonitor.IOREAD, data.length);
+					return data;
 				} catch (IOException e) {
-					// ignore
+					throw new ModelException(e,
+							IModelStatusConstants.IO_EXCEPTION);
+				} finally {
+					try {
+						stream.close();
+					} catch (IOException e) {
+						// ignore
+					}
 				}
 			}
 		}
+		newNotPresentException();
+		return null;
 	}
 
 	/**
