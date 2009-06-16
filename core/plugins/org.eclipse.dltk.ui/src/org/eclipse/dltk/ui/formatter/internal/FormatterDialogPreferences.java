@@ -20,10 +20,10 @@ import org.eclipse.dltk.ui.preferences.IPreferenceDelegate;
 
 public class FormatterDialogPreferences implements IPreferenceDelegate {
 
-	private final Map preferences = new HashMap();
+	private final Map<String, String> preferences = new HashMap<String, String>();
 
 	public String getString(Object key) {
-		final String value = (String) preferences.get(key);
+		final String value = preferences.get(key);
 		return value != null ? value : Util.EMPTY_STRING;
 	}
 
@@ -32,7 +32,7 @@ public class FormatterDialogPreferences implements IPreferenceDelegate {
 	}
 
 	public void setString(Object key, String value) {
-		preferences.put(key, value);
+		preferences.put((String) key, value);
 	}
 
 	public void setBoolean(Object key, boolean value) {
@@ -42,14 +42,14 @@ public class FormatterDialogPreferences implements IPreferenceDelegate {
 	/**
 	 * @return
 	 */
-	public Map get() {
+	public Map<String, String> get() {
 		return Collections.unmodifiableMap(preferences);
 	}
 
 	/**
 	 * @param prefs
 	 */
-	public void set(Map prefs) {
+	public void set(Map<String, String> prefs) {
 		preferences.clear();
 		if (prefs != null) {
 			preferences.putAll(prefs);
