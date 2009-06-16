@@ -473,6 +473,9 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		final int nColumns = 3;
 
 		Composite composite = new Composite(parent, SWT.NONE);
+		GridData layoutData = new GridData(SWT.FILL, SWT.NONE, true, false);
+		composite.setLayoutData(layoutData);
+
 		composite.setFont(parent.getFont());
 
 		GridLayout layout = new GridLayout();
