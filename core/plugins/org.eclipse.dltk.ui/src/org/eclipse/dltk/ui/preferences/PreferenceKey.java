@@ -34,6 +34,10 @@ public final class PreferenceKey {
 		return node;
 	}
 
+	public String getStoredValue(IScopeContext context) {
+		return getStoredValue(context, null);
+	}
+
 	public String getStoredValue(IScopeContext context,
 			IWorkingCopyManager manager) {
 		return getNode(context, manager).get(fKey, null);
@@ -57,6 +61,14 @@ public final class PreferenceKey {
 		} else {
 			getNode(context, manager).remove(fKey);
 		}
+	}
+
+	/**
+	 * @param context
+	 * @param value
+	 */
+	public void setStoredValue(IScopeContext context, String value) {
+		setStoredValue(context, value, null);
 	}
 
 	public int hashCode() {
