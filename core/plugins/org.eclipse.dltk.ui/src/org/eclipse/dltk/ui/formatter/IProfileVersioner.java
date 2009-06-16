@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter;
 
-
 /**
  * This interface uses to correctly update old profiles to current version.
  * 

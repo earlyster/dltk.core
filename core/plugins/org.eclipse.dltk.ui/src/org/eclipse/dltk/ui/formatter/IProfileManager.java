@@ -12,11 +12,14 @@
 package org.eclipse.dltk.ui.formatter;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The model for the set of profiles which are available in the workbench.
  */
 public interface IProfileManager {
+
+	public boolean isDirty();
 
 	/**
 	 * Get an immutable list as view on all profiles, sorted alphabetically.
@@ -28,7 +31,7 @@ public interface IProfileManager {
 	 * 
 	 * @see #getSortedDisplayNames()
 	 */
-	public List getSortedProfiles();
+	public List<IProfile> getSortedProfiles();
 
 	/**
 	 * Get the names of all profiles stored in this profile manager, sorted
@@ -50,6 +53,8 @@ public interface IProfileManager {
 	 * @return Returns <code>true</code> if a profile with the given name exists
 	 */
 	public boolean containsName(String name);
+
+	public IProfile findProfile(String profileId);
 
 	/**
 	 * Get the currently selected profile.
@@ -95,5 +100,22 @@ public interface IProfileManager {
 	 * @return profile with specified name
 	 */
 	public IProfile rename(IProfile profile, String newName);
+
+	/**
+	 * @param profileName
+	 * @param settings
+	 * @param formatterId
+	 * @param version
+	 * @return
+	 */
+	public IProfile create(ProfileKind kind, String profileName,
+			Map<String, String> settings, String formatterId, int version);
+
+	public void markDirty();
+
+	/**
+	 * 
+	 */
+	public void clearDirty();
 
 }

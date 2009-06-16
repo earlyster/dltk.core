@@ -16,9 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.dltk.internal.ui.formatter.profiles.CustomProfile;
-import org.eclipse.dltk.internal.ui.formatter.profiles.Profile;
-import org.eclipse.dltk.internal.ui.formatter.profiles.ProfileManager;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -52,17 +49,17 @@ public class CreateProfileDialog extends StatusDialog {
 	private final static StatusInfo fDuplicate = new StatusInfo(IStatus.ERROR,
 			FormatterMessages.CreateProfileDialog_nameExists);
 
-	private final ProfileManager fProfileManager;
-	private final List fSortedProfiles;
+	private final IProfileManager fProfileManager;
+	private final List<IProfile> fSortedProfiles;
 	private final String[] fSortedNames;
 
-	private CustomProfile fCreatedProfile;
+	private IProfile fCreatedProfile;
 	protected boolean fOpenEditDialog;
 
 	private IProfileVersioner versioner;
 
 	public CreateProfileDialog(Shell parentShell,
-			ProfileManager profileManager, IProfileVersioner versioner) {
+			IProfileManager profileManager, IProfileVersioner versioner) {
 		super(parentShell);
 		fProfileManager = profileManager;
 		fSortedProfiles = fProfileManager.getSortedProfiles();
@@ -70,11 +67,13 @@ public class CreateProfileDialog extends StatusDialog {
 		this.versioner = versioner;
 	}
 
+	@Override
 	public void create() {
 		super.create();
 		setTitle(FormatterMessages.CreateProfileDialog_newProfile);
 	}
 
+	@Override
 	public Control createDialogArea(Composite parent) {
 
 		final int numColumns = 2;
@@ -168,21 +167,23 @@ public class CreateProfileDialog extends StatusDialog {
 		updateStatus(fOk);
 	}
 
+	@Override
 	protected void okPressed() {
 		if (!getStatus().isOK())
 			return;
 
-		final Map baseSettings = new HashMap(((Profile) fSortedProfiles
-				.get(fProfileCombo.getSelectionIndex())).getSettings());
+		final Map<String, String> baseSettings = new HashMap<String, String>(
+				(fSortedProfiles.get(fProfileCombo.getSelectionIndex()))
+						.getSettings());
 		final String profileName = fNameText.getText();
 
-		fCreatedProfile = new CustomProfile(profileName, baseSettings,
-				versioner.getFormatterId(), versioner.getCurrentVersion());
-		fProfileManager.addProfile(fCreatedProfile);
+		fCreatedProfile = fProfileManager.create(ProfileKind.CUSTOM,
+				profileName, baseSettings, versioner.getFormatterId(),
+				versioner.getCurrentVersion());
 		super.okPressed();
 	}
 
-	public final CustomProfile getCreatedProfile() {
+	public final IProfile getCreatedProfile() {
 		return fCreatedProfile;
 	}
 

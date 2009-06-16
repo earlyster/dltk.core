@@ -19,6 +19,10 @@ import java.util.Map;
  */
 public interface IProfile extends Comparable<IProfile> {
 
+	public interface ICustomProfile extends IProfile {
+		void setVersion(int version);
+	}
+
 	public String getName();
 
 	public Map<String, String> getSettings();

@@ -14,7 +14,6 @@ package org.eclipse.dltk.ui.formatter;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.dltk.core.DLTKContributionExtensionManager;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
-import org.eclipse.dltk.internal.ui.formatter.profiles.ProfileManager;
 import org.eclipse.dltk.internal.ui.preferences.ScriptSourcePreviewerUpdater;
 import org.eclipse.dltk.internal.ui.text.DLTKColorManager;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
@@ -153,7 +152,7 @@ public abstract class AbstractFormatterPreferencePage extends
 		protected void updatePreview() {
 			if (fPreviewViewer != null) {
 				IScriptFormatterFactory factory = getSelectedExtension();
-				ProfileManager manager = getProfileManager(factory);
+				IProfileManager manager = getProfileManager(factory);
 				FormatterPreviewUtils.updatePreview(fPreviewViewer, factory
 						.getPreviewContent(), factory, manager.getSelected()
 						.getSettings());

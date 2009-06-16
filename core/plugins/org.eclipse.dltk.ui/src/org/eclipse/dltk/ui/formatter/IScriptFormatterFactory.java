@@ -35,8 +35,6 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 
 	PreferenceKey[] getPreferenceKeys();
 
-	PreferenceKey getProfilesKey();
-
 	PreferenceKey getActiveProfileKey();
 
 	void savePreferences(Map<String, String> preferences,
@@ -55,7 +53,13 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 
 	List<IProfile> getBuiltInProfiles();
 
+	List<IProfile> getCustomProfiles();
+
+	void saveCustomProfiles(List<IProfile> profiles);
+
 	IProfileVersioner getProfileVersioner();
+
+	IProfileStore getProfileStore();
 
 	/**
 	 * Validates that this formatter factory is correctly installed.
@@ -76,5 +80,11 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 	 * @return
 	 */
 	IFormatterModifyDialog createDialog(IFormatterModifyDialogOwner dialogOwner);
+
+	/**
+	 * @param allProfiles
+	 * @return
+	 */
+	IProfileManager createProfileManager(List<IProfile> profiles);
 
 }

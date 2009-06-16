@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 xored software, Inc.
+ * Copyright (c) 2009 xored software, Inc.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,17 +11,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.formatter;
 
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
+import java.io.File;
+import java.util.Collection;
 
-public interface IFormatterModifyDialogOwner {
+import org.eclipse.core.runtime.CoreException;
 
-	Shell getShell();
+public interface IProfileStore {
 
-	ISourceViewer createPreview(Composite composite);
+	void writeProfilesToFile(Collection<IProfile> profiles, File file)
+			throws CoreException;
 
-	IDialogSettings getDialogSettings();
+	Collection<IProfile> readProfilesFromFile(File file) throws CoreException;
 
 }

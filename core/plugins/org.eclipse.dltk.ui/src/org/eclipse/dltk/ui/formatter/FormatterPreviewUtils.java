@@ -48,7 +48,7 @@ public class FormatterPreviewUtils {
 				disablePreview(viewer);
 				return;
 			}
-			final int tabSize = AbstractScriptFormatter.toInt(preferences
+			final int tabSize = toInt(preferences
 					.get(CodeFormatterConstants.FORMATTER_TAB_SIZE));
 			if (tabSize != viewer.getTextWidget().getTabs()) {
 				viewer.getTextWidget().setTabs(tabSize);
@@ -80,6 +80,20 @@ public class FormatterPreviewUtils {
 		} else {
 			disablePreview(viewer);
 		}
+	}
+
+	private static int toInt(Object value) {
+		if (value != null) {
+			if (value instanceof Number) {
+				return ((Number) value).intValue();
+			}
+			try {
+				return Integer.parseInt(value.toString());
+			} catch (NumberFormatException e) {
+				// ignore
+			}
+		}
+		return 0;
 	}
 
 	private static void disablePreview(ISourceViewer viewer) {

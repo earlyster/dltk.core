@@ -12,8 +12,6 @@
 package org.eclipse.dltk.ui.formatter;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.dltk.internal.ui.formatter.profiles.CustomProfile;
-import org.eclipse.dltk.internal.ui.formatter.profiles.ProfileManager;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -47,11 +45,11 @@ public class AlreadyExistsDialog extends StatusDialog {
 	private final StatusInfo fEmpty;
 	private final StatusInfo fDuplicate;
 
-	private final CustomProfile fProfile;
-	private final ProfileManager fProfileManager;
+	private final IProfile fProfile;
+	private final IProfileManager fProfileManager;
 
-	public AlreadyExistsDialog(Shell parentShell, CustomProfile profile,
-			ProfileManager profileManager) {
+	public AlreadyExistsDialog(Shell parentShell, IProfile profile,
+			IProfileManager profileManager) {
 		super(parentShell);
 		fProfile = profile;
 		fProfileManager = profileManager;

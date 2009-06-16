@@ -15,12 +15,14 @@ import java.util.Map;
 
 public interface IFormatterModifyDialog {
 
+	void setProfileManager(IProfileManager manager);
+
 	/**
 	 * Sets the preferences the dialog should use
 	 * 
 	 * @param prefs
 	 */
-	void setPreferences(Map prefs);
+	void setPreferences(Map<String, String> prefs);
 
 	/**
 	 * Opens the modal dialog and returns only after the dialog was completed.
@@ -34,7 +36,9 @@ public interface IFormatterModifyDialog {
 	 * 
 	 * @return
 	 */
-	Map getPreferences();
+	Map<String, String> getPreferences();
+
+	String getProfileName();
 
 	IFormatterModifyDialogOwner getOwner();
 
