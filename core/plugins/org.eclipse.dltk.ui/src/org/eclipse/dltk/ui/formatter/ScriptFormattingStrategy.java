@@ -58,7 +58,7 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 	}
 
 	/** Jobs to be formatted by this strategy */
-	private final LinkedList fJobs = new LinkedList();
+	private final LinkedList<FormatJob> fJobs = new LinkedList<FormatJob>();
 
 	/**
 	 * Creates a new java formatting strategy.
@@ -68,13 +68,13 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 	}
 
 	/*
-	 * @see
-	 * org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy#format()
+	 * @see ContextBasedFormattingStrategy#format()
 	 */
+	@Override
 	public void format() {
 		super.format();
 
-		final FormatJob job = (FormatJob) fJobs.removeFirst();
+		final FormatJob job = fJobs.removeFirst();
 		final IDocument document = job.document;
 		final TypedPosition partition = job.partition;
 
@@ -148,6 +148,7 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 		return ScriptFormatterManager.getSelected(natureId, job.project);
 	}
 
+	@Override
 	public void formatterStarts(final IFormattingContext context) {
 		super.formatterStarts(context);
 		final IDocument document = (IDocument) context
@@ -161,6 +162,7 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 		fJobs.addLast(new FormatJob(document, partition, project, formatterId));
 	}
 
+	@Override
 	public void formatterStops() {
 		super.formatterStops();
 		fJobs.clear();
