@@ -142,13 +142,17 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 		bindManager.initialize();
 	}
 
+	protected boolean saveValues() {
+		return true;
+	}
+
 	/*
 	 * Override performOk() as public API.
 	 * 
 	 * @see OptionsConfigurationBlock#performOk()
 	 */
 	public boolean performOk() {
-		return super.performOk();
+		return saveValues() && super.performOk();
 	}
 
 	/*
@@ -157,7 +161,7 @@ public abstract class AbstractOptionsBlock extends OptionsConfigurationBlock
 	 * @see OptionsConfigurationBlock#performApply()
 	 */
 	public boolean performApply() {
-		return super.performApply();
+		return saveValues() && super.performApply();
 	}
 
 	/*
