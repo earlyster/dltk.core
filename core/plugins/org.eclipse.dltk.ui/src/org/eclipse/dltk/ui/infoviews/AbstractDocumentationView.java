@@ -614,10 +614,11 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 			}
 			ISourceModule sourceModule = EditorUtility
 					.getEditorInputModelElement(editor, false);
-			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-					.getLanguageToolkit(sourceModule);
-			if (toolkit != null) {
-				return (sourceModule != null && toolkit.equals(getNature()));
+			if (sourceModule != null) {
+				final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+						.getLanguageToolkit(sourceModule);
+				return toolkit != null
+						&& toolkit.getNatureId().equals(getNature());
 			}
 		}
 		return false;
