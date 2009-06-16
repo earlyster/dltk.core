@@ -24,6 +24,8 @@ import java.util.List;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
@@ -208,7 +210,9 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 		}
 
 		/*
-		 * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+		 * @see
+		 * org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener
+		 * (org.eclipse.jface.viewers.ISelectionChangedListener)
 		 */
 		public void addSelectionChangedListener(
 				ISelectionChangedListener listener) {
@@ -231,7 +235,9 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 		}
 
 		/*
-		 * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+		 * @seeorg.eclipse.jface.viewers.ISelectionProvider#
+		 * removeSelectionChangedListener
+		 * (org.eclipse.jface.viewers.ISelectionChangedListener)
 		 */
 		public void removeSelectionChangedListener(
 				ISelectionChangedListener listener) {
@@ -239,7 +245,9 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 		}
 
 		/*
-		 * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
+		 * @see
+		 * org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse
+		 * .jface.viewers.ISelection)
 		 */
 		public void setSelection(ISelection selection) {
 			// not supported
@@ -282,7 +290,9 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 			fPresenter = new HTMLTextPresenter(false);
 			fText.addControlListener(new ControlAdapter() {
 				/*
-				 * @see org.eclipse.swt.events.ControlAdapter#controlResized(org.eclipse.swt.events.ControlEvent)
+				 * @see
+				 * org.eclipse.swt.events.ControlAdapter#controlResized(org.
+				 * eclipse.swt.events.ControlEvent)
 				 */
 				public void controlResized(ControlEvent e) {
 					setInput(fText.getText());
@@ -604,8 +614,11 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 			}
 			ISourceModule sourceModule = EditorUtility
 					.getEditorInputModelElement(editor, false);
-			return (sourceModule != null && sourceModule.getScriptProject()
-					.getLanguageToolkit().getNatureId().equals(getNature()));
+			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+					.getLanguageToolkit(sourceModule);
+			if (toolkit != null) {
+				return (sourceModule != null && toolkit.equals(getNature()));
+			}
 		}
 		return false;
 	}
@@ -633,8 +646,9 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.ui.infoviews.AbstractInfoView#getHelpContextId()
-	 * 
+	 * @see
+	 * org.eclipse.dltk.internal.ui.infoviews.AbstractInfoView#getHelpContextId
+	 * ()
 	 */
 	protected String getHelpContextId() {
 		// return IJavaHelpContextIds.JAVADOC_VIEW;
