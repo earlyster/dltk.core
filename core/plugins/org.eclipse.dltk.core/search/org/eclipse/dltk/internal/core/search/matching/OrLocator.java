@@ -14,6 +14,7 @@ import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.declarations.FieldDeclaration;
 import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.ast.declarations.TypeDeclaration;
+import org.eclipse.dltk.ast.expressions.CallExpression;
 import org.eclipse.dltk.ast.expressions.Expression;
 import org.eclipse.dltk.ast.references.Reference;
 import org.eclipse.dltk.ast.references.TypeReference;
@@ -135,6 +136,19 @@ public class OrLocator extends PatternLocator {
 		return level;
 	}
 	
+	public int match(CallExpression node, MatchingNodeSet nodeSet) {
+		int level = IMPOSSIBLE_MATCH;
+		for (int i = 0, length = this.patternLocators.length; i < length; i++) {
+			int newLevel = this.patternLocators[i].match(node, nodeSet);
+			if (newLevel > level) {
+				if (newLevel == ACCURATE_MATCH)
+					return ACCURATE_MATCH;
+				level = newLevel;
+			}
+		}
+		return level;
+	}
+
 	public void matchReportReference(ASTNode reference, IModelElement element,
 			Scope scope, int accuracy, MatchLocator locator)
 			throws CoreException {

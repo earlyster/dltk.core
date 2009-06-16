@@ -623,6 +623,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 			// parameterTypeSimpleNames, parameterTypeSignatures, typeArguments,
 			// matchRule);
 		} else {
+			MethodDeclarationPattern declarationPattern = null;
+			MethodPattern referencesPattern = null;
 			if (findDeclarations) {
 				final char[][] packageNames;
 				if (declaringTypeQualification != null) {
@@ -647,14 +649,26 @@ public abstract class SearchPattern extends InternalSearchPattern {
 				} else {
 					enclosingTypes = null;
 				}
-				return new MethodDeclarationPattern(enclosingTypes,
+
+				declarationPattern = new MethodDeclarationPattern(
+						enclosingTypes,
 						selectorChars, matchRule, toolkit);
 			}
-			return new MethodPattern(findDeclarations, findReferences,
+			if (findReferences) {
+				referencesPattern = new MethodPattern(findDeclarations,
+						findReferences,
 					selectorChars, declaringTypeQualification,
 					declaringTypeSimpleName, declaringTypeSignature, null,
 					matchRule, toolkit);
+			}
 
+			if (findDeclarations) {
+				if (findReferences) {
+					return new OrPattern(declarationPattern, referencesPattern);
+				}
+				return declarationPattern;
+			}
+			return referencesPattern;
 		}
 		return null;
 	}
@@ -1046,13 +1060,28 @@ public abstract class SearchPattern extends InternalSearchPattern {
 				break;
 			}
 
+			MethodDeclarationPattern declarationPattern = null;
+			MethodPattern referencesPattern = null;
+
 			if (findMethodDeclarations) {
-				searchPattern = new MethodDeclarationPattern(enclosingNames,
+				declarationPattern = new MethodDeclarationPattern(
+						enclosingNames,
 						selector, matchRule, toolkit);
-			} else {
-				searchPattern = new MethodPattern(findMethodDeclarations,
+			}
+			if (findMethodReferences) {
+				referencesPattern = new MethodPattern(findMethodDeclarations,
 						findMethodReferences, selector, declaringQualification,
 						declaringSimpleName, method, matchRule, toolkit);
+			}
+			if (findMethodDeclarations) {
+				if (findMethodReferences) {
+					searchPattern = new OrPattern(declarationPattern,
+							referencesPattern);
+				} else {
+					searchPattern = declarationPattern;
+				}
+			} else {
+				searchPattern = referencesPattern;
 			}
 			break;
 		case IModelElement.TYPE:
