@@ -159,6 +159,14 @@ public abstract class OptionsConfigurationBlock {
 		return Boolean.valueOf(getValue(key)).booleanValue();
 	}
 
+	protected int getIntValue(PreferenceKey key) {
+		try {
+			return Integer.parseInt(getValue(key));
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
+
 	protected String setValue(PreferenceKey key, String value) {
 		if (fDisabledProjectSettings != null) {
 			return fDisabledProjectSettings.put(key, value);
