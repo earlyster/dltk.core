@@ -103,13 +103,9 @@ public class TypeNameMatchRequestorWrapper implements
 				int separatorIndex = path
 						.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR);
 				type = separatorIndex == -1 ? createTypeFromPath(path,
-						new String(simpleTypeName), enclosingTypeNames) : null/*
-																			 * createTypeFrom(
-																			 * path
-																			 * ,
-																			 * separatorIndex
-																			 * )
-																			 */;
+						new String(simpleTypeName), enclosingTypeNames) : null;
+				// createTypeFromZip(path, new String(simpleTypeName),
+				// enclosingTypeNames);
 				if (DLTKCore.DEBUG) {
 					System.err.println("TODO: Add types from zips..."); //$NON-NLS-1$
 				}
@@ -121,6 +117,72 @@ public class TypeNameMatchRequestorWrapper implements
 		} catch (ModelException e) {
 			// skip
 		}
+	}
+
+	private IType createTypeFromZip(String resourcePath, String simpleTypeName,
+			char[][] enclosingTypeNames) throws ModelException {
+		// path to a class file inside a jar
+		// Optimization: cache package fragment root handle and package handles
+		int separatorIndex = resourcePath
+				.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR);
+		if (this.lastPkgFragmentRootPath == null
+				|| this.lastPkgFragmentRootPath.length() > resourcePath
+						.length()
+				|| !resourcePath.startsWith(this.lastPkgFragmentRootPath)) {
+			IProjectFragment root = ((DLTKSearchScope) this.scope)
+					.projectFragment(resourcePath);
+			if (root == null)
+				return null;
+			this.lastPkgFragmentRootPath = resourcePath.substring(0,
+					separatorIndex);
+			this.lastProjectFragment = root;
+			this.packageHandles = new HashtableOfArrayToObject(5);
+		}
+		// create handle
+		String classFilePath = resourcePath.substring(separatorIndex + 1);
+		String[] simpleNames = new Path(classFilePath).segments();
+		String[] pkgName;
+		int length = simpleNames.length - 1;
+		if (length > 0) {
+			pkgName = new String[length];
+			System.arraycopy(simpleNames, 0, pkgName, 0, length);
+		} else {
+			pkgName = CharOperation.NO_STRINGS;
+		}
+		IScriptFolder pkgFragment = (IScriptFolder) this.packageHandles
+				.get(pkgName);
+		if (pkgFragment == null) {
+			pkgFragment = ((IProjectFragment) this.lastProjectFragment)
+					.getScriptFolder(ScriptModelUtil.toPath(pkgName));
+			this.packageHandles.put(pkgName, pkgFragment);
+		}
+		ISourceModule unit = pkgFragment.getSourceModule(simpleNames[length]);
+		int etnLength = enclosingTypeNames == null ? 0
+				: enclosingTypeNames.length;
+		String containerTypeName = (etnLength == 0) ? simpleTypeName
+				: new String(enclosingTypeNames[0]);
+		IType type = null;
+		IType[] containerTypes = unit.getTypes();
+		for (int cnt = 0, max = containerTypes.length; cnt < max; cnt++) {
+			if (containerTypeName.equals(containerTypes[cnt].getElementName())) {
+				if (etnLength > 1) {
+					type = resolveType(containerTypes[cnt], enclosingTypeNames,
+							1);
+					if (type != null) {
+						type = type.getType(simpleTypeName);
+					}
+				} else if (etnLength == 1) {
+					type = containerTypes[cnt].getType(simpleTypeName);
+				} else {
+					type = containerTypes[cnt];
+				}
+
+				if (type != null && type.exists()) {
+					break;
+				}
+			}
+		}
+		return type;
 	}
 
 	private IType createTypeFromPath(String resourcePath,

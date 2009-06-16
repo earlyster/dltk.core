@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.internal.core.util.Util;
 
 public class ArchiveFolder extends ScriptFolder {
@@ -62,9 +61,8 @@ public class ArchiveFolder extends ScriptFolder {
 		// .removeFirstSegments(this.path.segmentCount());
 		return new ExternalSourceModule(this, name,
 				DefaultWorkingCopyOwner.PRIMARY, true, new ArchiveEntryFile(
-						name, EnvironmentPathUtils.getLocalPath(
-								fragment.getPath()).toOSString(), this.path,
-						fragment.getResource()));
+						name, fragment.getZipName(), this.path, fragment
+								.getResource()));
 	}
 
 	protected boolean computeChildren(OpenableElementInfo info,

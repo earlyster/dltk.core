@@ -29,6 +29,8 @@ import org.eclipse.dltk.core.IModelProvider;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.core.util.HashtableOfArrayToObject;
 import org.eclipse.dltk.internal.core.util.Util;
 
@@ -146,7 +148,9 @@ public class ArchiveProjectFragment extends ProjectFragment {
 	}
 
 	public String getZipName() {
-		return this.zipPath.toOSString();
+		IEnvironment environment = EnvironmentManager
+				.getEnvironment(getScriptProject());
+		return environment.convertPathToString(this.zipPath);
 	}
 
 	private void initPackageFragToTypes(
