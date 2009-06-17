@@ -848,41 +848,61 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	}
 
 	/**
+	 * Validates project fields. Returns {@link IStatus} or <code>null</code> if
+	 * there are no any problems.
+	 * 
+	 * @return
+	 */
+	protected IStatus validateProject() {
+		final String name = fNameGroup.getName();
+		// check whether the project name field is empty
+		if (name.length() == 0) {
+			return new StatusInfo(
+					IStatus.OK,
+					NewWizardMessages.ScriptProjectWizardFirstPage_Message_enterProjectName);
+		}
+		// check whether the project name is valid
+		final IStatus nameStatus = DLTKUIPlugin.getWorkspace().validateName(
+				name, IResource.PROJECT);
+		if (!nameStatus.isOK()) {
+			return nameStatus;
+		}
+		// check whether project already exists
+		final IProject handle = getProjectHandle();
+		if (handle.exists()) {
+			return new StatusInfo(
+					IStatus.ERROR,
+					NewWizardMessages.ScriptProjectWizardFirstPage_Message_projectAlreadyExists);
+		}
+		final IStatus locationStatus = fLocationGroup.validate(handle);
+		if (!locationStatus.isOK()) {
+			return locationStatus;
+		}
+		return null;
+	}
+
+	/**
+	 * Tests if valid project is specified.
+	 * 
+	 * @return
+	 */
+	protected boolean isValidProject() {
+		return validateProject() == null;
+	}
+
+	/**
 	 * Validate this page and show appropriate warnings and error
 	 * NewWizardMessages.
 	 */
 	private final class Validator implements Observer {
 		public void update(Observable o, Object arg) {
-			final String name = fNameGroup.getName();
-			// check whether the project name field is empty
-			if (name.length() == 0) {
-				setErrorMessage(null);
-				setMessage(NewWizardMessages.ScriptProjectWizardFirstPage_Message_enterProjectName);
-				setPageComplete(false);
-				return;
-			}
-			// check whether the project name is valid
-			final IStatus nameStatus = DLTKUIPlugin.getWorkspace()
-					.validateName(name, IResource.PROJECT);
-			if (!nameStatus.isOK()) {
-				setErrorMessage(nameStatus.getMessage());
-				setPageComplete(false);
-				return;
-			}
-			// check whether project already exists
-			final IProject handle = getProjectHandle();
-			if (handle.exists()) {
-				setErrorMessage(NewWizardMessages.ScriptProjectWizardFirstPage_Message_projectAlreadyExists);
-				setPageComplete(false);
-				return;
-			}
-			final IStatus locationStatus = fLocationGroup.validate(handle);
-			if (!locationStatus.isOK()) {
-				if (locationStatus.getSeverity() != IStatus.ERROR) {
+			IStatus projectStatus = validateProject();
+			if (projectStatus != null) {
+				if (projectStatus.getSeverity() != IStatus.ERROR) {
 					setErrorMessage(null);
-					setMessage(locationStatus.getMessage());
+					setMessage(projectStatus.getMessage());
 				} else {
-					setErrorMessage(locationStatus.getMessage());
+					setErrorMessage(projectStatus.getMessage());
 				}
 				setPageComplete(false);
 				return;
