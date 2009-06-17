@@ -21,11 +21,11 @@ public class ScriptTemplateProposal extends TemplateProposal {
 	private boolean isRelevanceOverriden;
 	private int relevanceOverride;
 
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jface.text.templates.TemplateProposal#getRelevance()
 	 */
 	public int getRelevance() {
-		return isRelevanceOverriden ? relevanceOverride: super.getRelevance();
+		return isRelevanceOverriden ? relevanceOverride : super.getRelevance();
 	}
 
 	public void setRelevance(int value) {
@@ -47,7 +47,8 @@ public class ScriptTemplateProposal extends TemplateProposal {
 				IDocument document = scriptContext.getDocument();
 				String indenting = ScriptTemplateContext.calculateIndent(
 						document, scriptContext.getStart());
-				String delimeter = TextUtilities.getDefaultLineDelimiter(document);
+				String delimeter = TextUtilities
+						.getDefaultLineDelimiter(document);
 
 				String info = templateBuffer.getString();
 				return info.replaceAll(delimeter + indenting, delimeter);
@@ -56,6 +57,10 @@ public class ScriptTemplateProposal extends TemplateProposal {
 			}
 		}
 		return null;
+	}
+
+	public String getTemplateName() {
+		return getTemplate().getName();
 	}
 
 	public String getPattern() {

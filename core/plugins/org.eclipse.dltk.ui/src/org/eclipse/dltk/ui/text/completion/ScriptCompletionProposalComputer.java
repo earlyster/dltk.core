@@ -167,7 +167,7 @@ public abstract class ScriptCompletionProposalComputer implements
 				final String name = tp.getPattern();
 				for (int j = 0; j < keywords.length; ++j) {
 					if (name.startsWith(keywords[j].getDisplayString())) {
-						tp.setRelevance(keywords[j].getRelevance() + 1);
+						tp.setRelevance(keywords[j].getRelevance());
 					}
 				}
 			}
