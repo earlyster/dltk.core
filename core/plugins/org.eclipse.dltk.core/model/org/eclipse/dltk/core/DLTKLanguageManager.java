@@ -114,11 +114,21 @@ public class DLTKLanguageManager {
 	public static IDLTKLanguageToolkit findToolkit(IResource resource) {
 		IDLTKLanguageToolkit toolkit = findAppropriateToolkitByObject(resource);
 		if (toolkit == null) {
-			IScriptProject scriptProject = DLTKCore.create(resource
-					.getProject());
-			toolkit = getLanguageToolkit(scriptProject);
+			toolkit = findToolkit(resource.getProject());
 		}
 		return toolkit;
+	}
+
+	/**
+	 * Returns the toolkit of the specified {@link IProject} or null if not
+	 * found.
+	 * 
+	 * @param project
+	 * @return
+	 */
+	public static IDLTKLanguageToolkit findToolkit(IProject project) {
+		return (IDLTKLanguageToolkit) InternalDLTKLanguageManager
+				.getLanguageToolkitsManager().getObject(project);
 	}
 
 	/**
@@ -129,8 +139,7 @@ public class DLTKLanguageManager {
 	 */
 	public static IDLTKLanguageToolkit findToolkitForResource(IResource resource) {
 		if (resource.getType() == IResource.PROJECT) {
-			return DLTKLanguageManager.getLanguageToolkit(DLTKCore
-					.create((IProject) resource));
+			return findToolkit((IProject) resource);
 		} else {
 			final IModelElement parent = DLTKCore.create(resource.getParent());
 			if (parent == null) {

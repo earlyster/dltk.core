@@ -34,7 +34,10 @@ public class PriorityClassDLTKExtensionManager extends
 		if (tk != null) {
 			return getObject(tk.getNatureId());
 		}
-		IProject project = scriptProject.getProject();
+		return getObject(scriptProject.getProject());
+	}
+
+	public Object getObject(IProject project) {
 		String natureId = findScriptNature(project);
 		if (natureId != null) {
 			Object toolkit = getObject(natureId);
