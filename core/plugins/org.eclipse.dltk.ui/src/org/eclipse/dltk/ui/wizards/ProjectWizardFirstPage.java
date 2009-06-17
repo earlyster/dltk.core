@@ -874,10 +874,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 					IStatus.ERROR,
 					NewWizardMessages.ScriptProjectWizardFirstPage_Message_projectAlreadyExists);
 		}
-		final IStatus locationStatus = fLocationGroup.validate(handle);
-		if (!locationStatus.isOK()) {
-			return locationStatus;
-		}
 		return null;
 	}
 
@@ -897,6 +893,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	private final class Validator implements Observer {
 		public void update(Observable o, Object arg) {
 			IStatus projectStatus = validateProject();
+			if (projectStatus == null) {
+				projectStatus = fLocationGroup.validate(getProjectHandle());
+			}
 			if (projectStatus != null) {
 				if (projectStatus.getSeverity() != IStatus.ERROR) {
 					setErrorMessage(null);
