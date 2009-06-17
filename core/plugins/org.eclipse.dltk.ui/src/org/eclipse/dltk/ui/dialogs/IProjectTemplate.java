@@ -12,11 +12,18 @@
 package org.eclipse.dltk.ui.dialogs;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Shell;
 
 public interface IProjectTemplate {
 
 	IProjectTemplateOperation configure(IProject project,
 			IProjectTemplateOperation prevOperation, Shell parentShell);
+
+	/**
+	 * @param templateOperation
+	 * @return
+	 */
+	IStatus validate(IProjectTemplateOperation templateOperation);
 
 }
