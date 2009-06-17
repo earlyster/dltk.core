@@ -147,7 +147,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 		switch (resource.getType()) {
 		case IResource.FILE:
 			if (org.eclipse.dltk.compiler.util.Util.isArchiveFileName(
-					getLanguageToolkit(), resource.getName())) {
+					DLTKLanguageManager.getLanguageToolkit(this), resource
+							.getName())) {
 				return createArchiveFragment(resource);
 			} else {
 				return null;
@@ -227,7 +228,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 				return new BuiltinProjectFragment(path, this);
 			}
 			if (org.eclipse.dltk.compiler.util.Util.isArchiveFileName(
-					getLanguageToolkit(), path.lastSegment())) {
+					DLTKLanguageManager.getLanguageToolkit(this), path
+							.lastSegment())) {
 				IResource resource = this.project.getWorkspace().getRoot()
 						.findMember(path);
 				if (resource != null && resource.getType() == IResource.FOLDER) {
@@ -843,7 +845,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 					// This is external folder or zip.
 					if (Model.isFile(target)
 							&& (org.eclipse.dltk.compiler.util.Util
-									.isArchiveFileName(getLanguageToolkit(),
+									.isArchiveFileName(DLTKLanguageManager
+											.getLanguageToolkit(this),
 											entryPath.lastSegment()))) {
 						// root = new ArchiveProjectFragment(entryPath, this);
 						root = getProjectFragment0(entryPath);
