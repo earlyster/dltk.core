@@ -18,7 +18,6 @@ import org.eclipse.dltk.core.BuildpathContainerInitializer;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathContainer;
-import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
@@ -235,6 +234,11 @@ public class ScriptElementLabels {
 	 * Post qualify referenced package fragment roots.
 	 */
 	public final static long REFERENCED_ROOT_POST_QUALIFIED = 1L << 45;
+
+	/**
+	 * Post qualify referenced archive fragment roots.
+	 */
+	public final static long REFERENCED_ARCHIVE_POST_QUALIFIED = 1L << 46;
 
 	/**
 	 * Specified to use the resolved information of a IType, IMethod or IField.
@@ -830,8 +834,7 @@ public class ScriptElementLabels {
 		if (root.isArchive())
 			getArchiveLabel(root, flags, buf);
 		else {
-			if (root.getPath().toString().startsWith(
-					IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY_STR)) {
+			if (root.isBuiltin()) {
 				buf.append(BUILTINS_FRAGMENT);
 			} else if (root.isExternal()) {
 				getExternalFolderLabel(root, flags, buf);
@@ -857,7 +860,7 @@ public class ScriptElementLabels {
 		IPath path = root.getPath();
 		path = EnvironmentPathUtils.getLocalPath(path);
 		IEnvironment env = EnvironmentManager.getEnvironment(root);
-		if (getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED)) {
+		if (getFlag(flags, REFERENCED_ARCHIVE_POST_QUALIFIED)) {
 			int segements = path.segmentCount();
 			if (segements > 0) {
 				buf.append(path.segment(segements - 1));
@@ -897,7 +900,7 @@ public class ScriptElementLabels {
 		IResource resource = root.getResource();
 		boolean rootQualified = getFlag(flags, ROOT_QUALIFIED);
 		boolean referencedQualified = getFlag(flags,
-				REFERENCED_ROOT_POST_QUALIFIED)
+				REFERENCED_ARCHIVE_POST_QUALIFIED)
 				&& isReferenced(root);
 		if (rootQualified) {
 			buf.append(EnvironmentPathUtils.getLocalPath(root.getPath())

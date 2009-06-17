@@ -44,6 +44,7 @@ public class ScriptExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	public ScriptExplorerLabelProvider(ScriptExplorerContentProvider cp,
 			IPreferenceStore store) {
 		super(DEFAULT_TEXTFLAGS | ScriptElementLabels.P_COMPRESSED
+				| ScriptElementLabels.REFERENCED_ARCHIVE_POST_QUALIFIED
 				| ScriptElementLabels.ALL_CATEGORY, DEFAULT_IMAGEFLAGS
 				| ScriptElementImageProvider.SMALL_ICONS, store);
 
@@ -79,7 +80,8 @@ public class ScriptExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	}
 
 	private String getNameDelta(IScriptFolder parent, IScriptFolder fragment) {
-		String prefix = parent.getElementName() + IScriptFolder.PACKAGE_DELIMITER;
+		String prefix = parent.getElementName()
+				+ IScriptFolder.PACKAGE_DELIMITER;
 		String fullName = fragment.getElementName();
 		if (fullName.startsWith(prefix)) {
 			return fullName.substring(prefix.length());
