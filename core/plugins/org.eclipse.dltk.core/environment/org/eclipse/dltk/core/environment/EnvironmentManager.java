@@ -49,12 +49,14 @@ public final class EnvironmentManager {
 	private static class EnvironmentManagerExtensionManager extends
 			LazyExtensionManager<IEnvironmentProvider> {
 
-		private class EnvironmentProviderDesc extends Descriptor {
+		private static class EnvironmentProviderDesc extends
+				Descriptor<IEnvironmentProvider> {
 			private int priority;
 
 			public EnvironmentProviderDesc(
+					EnvironmentManagerExtensionManager manager,
 					IConfigurationElement configurationElement) {
-				super(configurationElement);
+				super(manager, configurationElement);
 				this.priority = parseInt(configurationElement
 						.getAttribute("priority"));
 			}
@@ -73,18 +75,25 @@ public final class EnvironmentManager {
 			super(ENVIRONMENT_EXTENSION);
 		}
 
-		protected Descriptor createDescriptor(IConfigurationElement confElement) {
-			return new EnvironmentProviderDesc(confElement);
+		@Override
+		protected Descriptor<IEnvironmentProvider> createDescriptor(
+				IConfigurationElement confElement) {
+			return new EnvironmentProviderDesc(this, confElement);
 		}
 
-		protected void initializeDescriptors(List<Descriptor> descriptors) {
-			Collections.sort(descriptors, new Comparator<Descriptor>() {
-				public int compare(Descriptor arg0, Descriptor arg1) {
-					EnvironmentProviderDesc d1 = (EnvironmentProviderDesc) arg0;
-					EnvironmentProviderDesc d2 = (EnvironmentProviderDesc) arg1;
-					return d1.priority - d2.priority;
-				}
-			});
+		@Override
+		protected void initializeDescriptors(
+				List<Descriptor<IEnvironmentProvider>> descriptors) {
+			Collections.sort(descriptors,
+					new Comparator<Descriptor<IEnvironmentProvider>>() {
+						public int compare(
+								Descriptor<IEnvironmentProvider> arg0,
+								Descriptor<IEnvironmentProvider> arg1) {
+							EnvironmentProviderDesc d1 = (EnvironmentProviderDesc) arg0;
+							EnvironmentProviderDesc d2 = (EnvironmentProviderDesc) arg1;
+							return d1.priority - d2.priority;
+						}
+					});
 		}
 
 	}

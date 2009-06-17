@@ -22,12 +22,15 @@ import org.eclipse.core.runtime.Platform;
 
 public class LazyExtensionManager<E> implements Iterable<E> {
 
-	public class Descriptor {
+	public static class Descriptor<E> {
+		private final LazyExtensionManager<E> manager;
 		private final IConfigurationElement configurationElement;
 		private E instance;
 		private boolean valid;
 
-		public Descriptor(IConfigurationElement configurationElement) {
+		public Descriptor(LazyExtensionManager<E> manager,
+				IConfigurationElement configurationElement) {
+			this.manager = manager;
 			this.configurationElement = configurationElement;
 			this.valid = true;
 		}
@@ -41,11 +44,11 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 			}
 			try {
 				instance = (E) configurationElement
-						.createExecutableExtension(classAttr);
+						.createExecutableExtension(manager.classAttr);
 				return instance;
 			} catch (CoreException e) {
 				valid = false;
-				LazyExtensionManager.this.remove(this);
+				manager.remove(this);
 				return null;
 			}
 		}
@@ -53,9 +56,9 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 
 	private static class InstanceIterator<E> implements Iterator<E> {
 
-		private final LazyExtensionManager<E>.Descriptor[] descriptors;
+		private final Descriptor<E>[] descriptors;
 
-		public InstanceIterator(LazyExtensionManager<E>.Descriptor[] descriptors) {
+		public InstanceIterator(Descriptor<E>[] descriptors) {
 			this.descriptors = descriptors;
 		}
 
@@ -96,6 +99,52 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 
 	}
 
+	private static class DescriptorIterator<E> implements
+			Iterator<Descriptor<E>> {
+
+		private final Descriptor<E>[] descriptors;
+
+		public DescriptorIterator(Descriptor<E>[] descriptors) {
+			this.descriptors = descriptors;
+		}
+
+		private int index = 0;
+		private boolean nextEvaluated = false;
+		private Descriptor<E> next = null;
+
+		public boolean hasNext() {
+			if (!nextEvaluated) {
+				evaluateNext();
+				nextEvaluated = true;
+			}
+			return next != null;
+		}
+
+		private void evaluateNext() {
+			while (index < descriptors.length) {
+				next = descriptors[index++];
+				if (next != null) {
+					return;
+				}
+			}
+		}
+
+		public Descriptor<E> next() {
+			if (!hasNext()) {
+				throw new NoSuchElementException();
+			}
+			final Descriptor<E> result = next;
+			next = null;
+			nextEvaluated = false;
+			return result;
+		}
+
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+
+	}
+
 	private final String extensionPoint;
 	protected final String classAttr = "class"; //$NON-NLS-1$
 
@@ -108,7 +157,7 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 	}
 
 	// Contains list of descriptors.
-	private List<Descriptor> extensions;
+	private List<Descriptor<E>> extensions;
 
 	/**
 	 * Return array of descriptors. If there are no contributed instances the
@@ -118,16 +167,16 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 	 * @return
 	 * @throws CoreException
 	 */
-	public Descriptor[] getDescriptors() {
+	public Descriptor<E>[] getDescriptors() {
 		return internalGetInstances();
 	}
 
-	private synchronized Descriptor[] internalGetInstances() {
+	private synchronized Descriptor<E>[] internalGetInstances() {
 		if (extensions == null) {
 			initialize();
 		}
 		@SuppressWarnings("unchecked")
-		final Descriptor[] resultArray = new LazyExtensionManager.Descriptor[extensions
+		final Descriptor<E>[] resultArray = new Descriptor[extensions
 				.size()];
 		extensions.toArray(resultArray);
 		return resultArray;
@@ -142,14 +191,18 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 		return new InstanceIterator<E>(internalGetInstances());
 	}
 
-	private synchronized void remove(Descriptor descriptor) {
+	public Iterator<Descriptor<E>> descriptorIterator() {
+		return new DescriptorIterator<E>(internalGetInstances());
+	}
+
+	synchronized void remove(Descriptor<E> descriptor) {
 		if (extensions != null) {
 			extensions.remove(descriptor);
 		}
 	}
 
 	private void initialize() {
-		extensions = new ArrayList<Descriptor>(5);
+		extensions = new ArrayList<Descriptor<E>>(5);
 		registerConfigurationElements();
 		initializeDescriptors(extensions);
 	}
@@ -163,7 +216,7 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 			IConfigurationElement[] confElements) {
 		for (int i = 0; i < confElements.length; i++) {
 			final IConfigurationElement confElement = confElements[i];
-			final Descriptor descriptor = createDescriptor(confElement);
+			final Descriptor<E> descriptor = createDescriptor(confElement);
 			if (isValidDescriptor(descriptor)) {
 				extensions.add(descriptor);
 			}
@@ -174,18 +227,20 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 	 * @param confElement
 	 * @return
 	 */
-	protected Descriptor createDescriptor(IConfigurationElement confElement) {
-		return new Descriptor(confElement);
+	protected Descriptor<E> createDescriptor(
+			IConfigurationElement confElement) {
+		return new Descriptor<E>(this, confElement);
 	}
 
-	protected boolean isValidDescriptor(Descriptor descriptor) {
+	protected boolean isValidDescriptor(Descriptor<E> descriptor) {
 		return descriptor != null;
 	}
 
 	/**
 	 * @param descriptors
 	 */
-	protected void initializeDescriptors(List<Descriptor> descriptors) {
+	protected void initializeDescriptors(
+			List<Descriptor<E>> descriptors) {
 		// empty
 	}
 
