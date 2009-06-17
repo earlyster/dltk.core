@@ -895,6 +895,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			IStatus projectStatus = validateProject();
 			if (projectStatus == null) {
 				projectStatus = fLocationGroup.validate(getProjectHandle());
+				if (projectStatus.isOK()) {
+					projectStatus = null;
+				}
 			}
 			if (projectStatus != null) {
 				if (projectStatus.getSeverity() != IStatus.ERROR) {
