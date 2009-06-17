@@ -274,6 +274,9 @@ public abstract class ASTNode {
 	public boolean locationMatches(ASTNode other) {
 		if (other == this)
 			return true;
+		if (other == null) {
+			return false;
+		}
 		return other.sourceEnd() >= 0 && other.sourceStart() >= 0
 				&& sourceStart() == other.sourceStart()
 				&& sourceEnd() == other.sourceEnd();
