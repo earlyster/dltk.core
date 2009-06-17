@@ -114,10 +114,13 @@ public class ScriptProject extends Openable implements IScriptProject {
 	public ScriptProject(IProject project, ModelElement parent) {
 		super(parent);
 		this.project = project;
-		toolkit = DLTKLanguageManager.getLanguageToolkit(this);
+		toolkit = DLTKLanguageManager.findToolkit(project);
 	}
 
 	public IDLTKLanguageToolkit getLanguageToolkit() {
+		if (toolkit == null) {
+			toolkit = DLTKLanguageManager.findToolkit(project);
+		}
 		return toolkit;
 	}
 
