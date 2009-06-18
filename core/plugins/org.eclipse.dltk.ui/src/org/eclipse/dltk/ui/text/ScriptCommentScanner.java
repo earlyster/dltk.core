@@ -32,8 +32,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 
 public class ScriptCommentScanner extends AbstractScriptScanner {
 
-	private static final char COMMENT_CHAR = '#';
-
 	private final String[] fProperties;
 	private final String fDefaultTokenProperty;
 
@@ -237,15 +235,15 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 	}
 
 	/**
-	 * Returns the character used to identifiy a comment.
+	 * Returns the character used to identify a comment.
 	 * 
 	 * <p>
 	 * Default implementation returns <code>#</code>. Clients may override if
-	 * their languange uses a different identifier.
+	 * their language uses a different identifier.
 	 * </p>
 	 */
 	protected char getCommentChar() {
-		return COMMENT_CHAR;
+		return '#';
 	}
 
 	public void setRange(IDocument document, int offset, int length) {
@@ -296,23 +294,33 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 	private static final int STATE_STARTED = 1;
 	private static final int STATE_BODY = 2;
 
+	/**
+	 * Skip possible comment characters. Returns the number of characters
+	 * skipped, zero if none.
+	 * 
+	 * @return
+	 */
+	protected int skipCommentChars() {
+		int c = read();
+		if (c == getCommentChar()) {
+			return 1;
+		} else {
+			unread();
+			return 0;
+		}
+	}
+
 	/*
 	 * We overload nextToken() because of the way task parsing is implemented:
 	 * the TO-DO tasks are recognized only at the beginning of the comment
 	 */
 	public IToken nextToken() {
-		char commentChar = getCommentChar();
-
 		fTokenOffset = fOffset;
 		fColumn = UNDEFINED;
 		if (state == STATE_START) {
 			state = STATE_STARTED;
-			int count = 0;
+			int count = skipCommentChars();
 			int c = read();
-			if (c == commentChar) {
-				c = read();
-				++count;
-			}
 			while (c != EOF && Character.isWhitespace((char) c)) {
 				c = read();
 				++count;
