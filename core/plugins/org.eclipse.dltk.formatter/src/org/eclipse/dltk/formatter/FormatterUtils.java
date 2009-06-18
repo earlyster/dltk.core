@@ -69,10 +69,9 @@ public class FormatterUtils {
 		return true;
 	}
 
-	public static IFormatterTextNode[] toTextNodeArray(List list) {
+	public static IFormatterNode[] toTextNodeArray(List<IFormatterNode> list) {
 		if (list != null) {
-			return (IFormatterTextNode[]) list
-					.toArray(new IFormatterTextNode[list.size()]);
+			return list.toArray(new IFormatterNode[list.size()]);
 		} else {
 			return null;
 		}

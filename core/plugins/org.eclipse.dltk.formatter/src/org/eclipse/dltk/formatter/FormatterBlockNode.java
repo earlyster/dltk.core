@@ -13,7 +13,6 @@ package org.eclipse.dltk.formatter;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 public class FormatterBlockNode extends AbstractFormatterNode implements
@@ -26,12 +25,12 @@ public class FormatterBlockNode extends AbstractFormatterNode implements
 		super(document);
 	}
 
-	private final List body = new ArrayList();
+	private final List<IFormatterNode> body = new ArrayList<IFormatterNode>();
 
-	protected void acceptNodes(final List nodes, IFormatterContext context,
-			IFormatterWriter visitor) throws Exception {
-		for (Iterator i = nodes.iterator(); i.hasNext();) {
-			IFormatterNode node = (IFormatterNode) i.next();
+	protected void acceptNodes(final List<IFormatterNode> nodes,
+			IFormatterContext context, IFormatterWriter visitor)
+			throws Exception {
+		for (IFormatterNode node : nodes) {
 			context.enter(node);
 			node.accept(context, visitor);
 			context.leave(node);
@@ -57,7 +56,7 @@ public class FormatterBlockNode extends AbstractFormatterNode implements
 	 */
 	public int getEndOffset() {
 		if (!body.isEmpty()) {
-			return ((IFormatterNode) body.get(body.size() - 1)).getEndOffset();
+			return body.get(body.size() - 1).getEndOffset();
 		} else {
 			return DEFAULT_OFFSET;
 		}
@@ -68,7 +67,7 @@ public class FormatterBlockNode extends AbstractFormatterNode implements
 	 */
 	public int getStartOffset() {
 		if (!body.isEmpty()) {
-			return ((IFormatterNode) body.get(0)).getStartOffset();
+			return body.get(0).getStartOffset();
 		} else {
 			return DEFAULT_OFFSET;
 		}
@@ -79,8 +78,7 @@ public class FormatterBlockNode extends AbstractFormatterNode implements
 	 * org.eclipse.dltk.ruby.formatter.node.IFormatterContainerNode#isEmpty()
 	 */
 	public boolean isEmpty() {
-		for (Iterator i = body.iterator(); i.hasNext();) {
-			IFormatterNode node = (IFormatterNode) i.next();
+		for (IFormatterNode node : body) {
 			if (!node.isEmpty()) {
 				return false;
 			}
@@ -88,7 +86,7 @@ public class FormatterBlockNode extends AbstractFormatterNode implements
 		return true;
 	}
 
-	public List getChildren() {
+	public List<IFormatterNode> getChildren() {
 		return Collections.unmodifiableList(body);
 	}
 
@@ -100,7 +98,7 @@ public class FormatterBlockNode extends AbstractFormatterNode implements
 		return true;
 	}
 
-	public List getBody() {
+	public List<IFormatterNode> getBody() {
 		return body;
 	}
 
