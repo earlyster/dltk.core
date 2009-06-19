@@ -11,9 +11,12 @@ import org.eclipse.dltk.ui.preferences.PreferencesMessages;
 import org.eclipse.dltk.ui.preferences.FieldValidators.MinimumNumberValidator;
 import org.eclipse.dltk.ui.util.PixelConverter;
 import org.eclipse.dltk.ui.util.SWTFactory;
+import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -41,15 +44,23 @@ public class DefaultFoldingPreferenceConfigurationBlock extends
 		sourceCodeBlock = createSourceCodeBlock(store, page);
 	}
 
+	private Composite foldingOptionsComposite;
+
 	public Control createControl(Composite parent) {
 		Composite composite = SWTFactory.createComposite(parent, parent
-				.getFont(), 1, 1, GridData.FILL);
+				.getFont(), 1, 1, GridData.FILL_BOTH);
 
 		Button enableFolding = SWTFactory.createCheckButton(composite,
 				PreferencesMessages.FoldingConfigurationBlock_enable);
-		Text minLines = createMinLines(composite);
 
-		TabFolder tabFolder = new TabFolder(composite, SWT.NONE);
+		foldingOptionsComposite = SWTFactory.createComposite(composite,
+				composite.getFont(), 1, 1, GridData.FILL_BOTH);
+		((GridLayout) foldingOptionsComposite.getLayout()).marginHeight = 0;
+		((GridLayout) foldingOptionsComposite.getLayout()).marginWidth = 0;
+
+		createMinLines(foldingOptionsComposite);
+
+		TabFolder tabFolder = new TabFolder(foldingOptionsComposite, SWT.NONE);
 		tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		TabItem comments = new TabItem(tabFolder, SWT.NONE);
@@ -64,14 +75,27 @@ public class DefaultFoldingPreferenceConfigurationBlock extends
 			blocks.setControl(sourceCodeBlock.createControl(tabFolder));
 		}
 
-		bindControl(enableFolding, PreferenceConstants.EDITOR_FOLDING_ENABLED,
-				new Control[] { minLines, tabFolder });
+		enableFolding.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (((Button) e.widget).getSelection()) {
+					enableFoldingControls();
+				} else {
+					disableFoldingControls();
+				}
+			}
+		});
+
+		bindControl(enableFolding, PreferenceConstants.EDITOR_FOLDING_ENABLED);
 
 		createAdditionalTabs(tabFolder);
 
 		return composite;
 	}
 
+	private ControlEnableState fBlockEnableState;
+
+	@Override
 	public void dispose() {
 		documentationBlock.dispose();
 		if (sourceCodeBlock != null) {
@@ -111,6 +135,7 @@ public class DefaultFoldingPreferenceConfigurationBlock extends
 		return DEFAULT_MIN_LINES;
 	}
 
+	@Override
 	protected void initializeFields() {
 		super.initializeFields();
 		documentationBlock.initialize();
@@ -118,9 +143,14 @@ public class DefaultFoldingPreferenceConfigurationBlock extends
 		if (sourceCodeBlock != null) {
 			sourceCodeBlock.initialize();
 		}
+		if (getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED)) {
+			enableFoldingControls();
+		} else {
+			disableFoldingControls();
+		}
 	}
 
-	private Text createMinLines(Composite parent) {
+	private void createMinLines(Composite parent) {
 		Composite composite = SWTFactory.createComposite(parent, parent
 				.getFont(), 2, 1, GridData.FILL);
 		((GridLayout) composite.getLayout()).marginWidth = 0;
@@ -143,7 +173,19 @@ public class DefaultFoldingPreferenceConfigurationBlock extends
 
 		bindControl(textBox, PreferenceConstants.EDITOR_FOLDING_LINES_LIMIT,
 				new MinimumNumberValidator(minLines));
+	}
 
-		return textBox;
+	protected void enableFoldingControls() {
+		if (fBlockEnableState != null) {
+			fBlockEnableState.restore();
+			fBlockEnableState = null;
+		}
+	}
+
+	protected void disableFoldingControls() {
+		if (fBlockEnableState == null) {
+			fBlockEnableState = ControlEnableState
+					.disable(foldingOptionsComposite);
+		}
 	}
 }
