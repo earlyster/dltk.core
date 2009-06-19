@@ -43,7 +43,7 @@ public abstract class BracketInserter implements VerifyKeyListener,
 	protected boolean fCloseAngularBrackets = true;
 	protected final String CATEGORY;
 	protected IPositionUpdater fUpdater;
-	protected Stack fBracketLevelStack = new Stack();
+	protected Stack<BracketLevel> fBracketLevelStack = new Stack<BracketLevel>();
 
 	protected BracketInserter(ScriptEditor editor) {
 		this.editor = editor;
@@ -118,7 +118,7 @@ public abstract class BracketInserter implements VerifyKeyListener,
 
 	public void left(LinkedModeModel environment, int flags) {
 
-		final BracketLevel level = (BracketLevel) fBracketLevelStack.pop();
+		final BracketLevel level = fBracketLevelStack.pop();
 
 		if (flags != ILinkedModeListener.EXTERNAL_MODIFICATION) {
 			return;
