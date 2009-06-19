@@ -34,6 +34,28 @@ public interface VariableKind {
 
 	}
 
+	@Deprecated
+	public class Local extends Implementation {
+
+		public static final int ID = FIRST_VARIABLE_ID + 1;
+
+		public Local() {
+			super(ID);
+		}
+
+	}
+
+	@Deprecated
+	public class Global extends Implementation {
+
+		public static final int ID = FIRST_VARIABLE_ID + 2;
+
+		public Global() {
+			super(ID);
+		}
+
+	}
+
 	public static final int LAST_CORE_VARIABLE_ID = FIRST_VARIABLE_ID + 50;
 
 	public static final int LAST_VARIABLE_ID = LAST_CORE_VARIABLE_ID + 50;
@@ -41,11 +63,9 @@ public interface VariableKind {
 	public static final VariableKind UNKNOWN = new Implementation(
 			FIRST_VARIABLE_ID + 0);
 
-	public static final VariableKind LOCAL = new Implementation(
-			FIRST_VARIABLE_ID + 1);
+	public static final VariableKind LOCAL = new Local();
 
-	public static final VariableKind GLOBAL = new Implementation(
-			FIRST_VARIABLE_ID + 2);
+	public static final VariableKind GLOBAL = new Global();
 
 	public static final VariableKind INSTANCE = new Implementation(
 			FIRST_VARIABLE_ID + 3);
