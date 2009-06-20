@@ -553,7 +553,7 @@ public class MatchLocator implements ITypeRequestor {
 	 * Create a new parser for the given project, as well as a lookup
 	 * environment.
 	 */
-	public void initialize(ScriptProject project, int possibleMatchSize)
+	public void initialize(IScriptProject project, int possibleMatchSize)
 			throws ModelException {
 		// clean up name environment only if there are several possible match as
 		// it is
@@ -562,7 +562,7 @@ public class MatchLocator implements ITypeRequestor {
 		if (this.nameEnvironment != null && possibleMatchSize != 1)
 			this.nameEnvironment.cleanup();
 
-		ISearchableEnvironment searchableEnvironment = project
+		ISearchableEnvironment searchableEnvironment = ((ScriptProject) project)
 				.newSearchableNameEnvironment(this.workingCopies);
 
 		// if only one possible match, a file name environment costs too much,
@@ -594,7 +594,7 @@ public class MatchLocator implements ITypeRequestor {
 		this.matchesToProcess = new PossibleMatch[possibleMatchSize];
 	}
 
-	protected void locateMatches(ScriptProject scriptProject,
+	protected void locateMatches(IScriptProject scriptProject,
 			PossibleMatch[] possibleMatches, int start, int length)
 			throws CoreException {
 		initialize(scriptProject, length);
@@ -661,7 +661,7 @@ public class MatchLocator implements ITypeRequestor {
 	/**
 	 * Locate the matches amongst the possible matches.
 	 */
-	protected void locateMatches(ScriptProject scriptProject,
+	protected void locateMatches(IScriptProject scriptProject,
 			PossibleMatchSet matchSet, int expected) throws CoreException {
 		PossibleMatch[] possibleMatches = matchSet
 				.getPossibleMatches(scriptProject.getProjectFragments());
@@ -703,7 +703,7 @@ public class MatchLocator implements ITypeRequestor {
 		// not be 0
 		this.progressWorked = 0;
 		// extract working copies
-		ArrayList copies = new ArrayList();
+		ArrayList<ISourceModule> copies = new ArrayList<ISourceModule>();
 		for (int i = 0; i < docsLength; i++) {
 			SearchDocument document = searchDocuments[i];
 			if (document instanceof WorkingCopyDocument) {
@@ -728,7 +728,7 @@ public class MatchLocator implements ITypeRequestor {
 			// initialize pattern for polymorphic search (ie. method reference
 			// pattern)
 			this.patternLocator.initializePolymorphicSearch(this);
-			ScriptProject previousScriptProject = null;
+			IScriptProject previousScriptProject = null;
 			PossibleMatchSet matchSet = new PossibleMatchSet();
 			Util.sort(searchDocuments, new Util.Comparer() {
 				public int compare(Object a, Object b) {
@@ -778,8 +778,7 @@ public class MatchLocator implements ITypeRequestor {
 				// create new parser and lookup environment if this is a new
 				// project
 				IResource resource = null;
-				ScriptProject scriptProject = (ScriptProject) openable
-						.getScriptProject();
+				IScriptProject scriptProject = openable.getScriptProject();
 				resource = workingCopy != null ? workingCopy.getResource()
 						: openable.getResource();
 				if (resource == null)
@@ -824,7 +823,7 @@ public class MatchLocator implements ITypeRequestor {
 	}
 
 	public ISourceModule[] locateModules(SearchDocument[] searchDocuments) {
-		List modules = new ArrayList();
+		List<ISourceModule> modules = new ArrayList<ISourceModule>();
 		int docsLength = searchDocuments.length;
 		if (BasicSearchEngine.VERBOSE) {
 			System.out.println("Locating matches in documents ["); //$NON-NLS-1$
@@ -840,7 +839,7 @@ public class MatchLocator implements ITypeRequestor {
 		// not be 0
 		this.progressWorked = 0;
 		// extract working copies
-		ArrayList copies = new ArrayList();
+		ArrayList<ISourceModule> copies = new ArrayList<ISourceModule>();
 		for (int i = 0; i < docsLength; i++) {
 			SearchDocument document = searchDocuments[i];
 			if (document instanceof WorkingCopyDocument) {
@@ -913,14 +912,13 @@ public class MatchLocator implements ITypeRequestor {
 				// create new parser and lookup environment if this is a new
 				// project
 				IResource resource = null;
-				ScriptProject scriptProject = (ScriptProject) openable
-						.getScriptProject();
+				IScriptProject scriptProject = openable.getScriptProject();
 				resource = workingCopy != null ? workingCopy.getResource()
 						: openable.getResource();
 				if (resource == null)
 					resource = scriptProject.getProject(); // case of a file in
 				if (!modules.contains(openable)) {
-					modules.add(openable);
+					modules.add((ISourceModule) openable);
 				}
 			}
 			if (this.progressMonitor != null)
@@ -931,8 +929,7 @@ public class MatchLocator implements ITypeRequestor {
 			manager.flushZipFiles();
 			this.bindings = null;
 		}
-		return (ISourceModule[]) modules.toArray(new ISourceModule[modules
-				.size()]);
+		return modules.toArray(new ISourceModule[modules.size()]);
 	}
 
 	public SearchMatch newDeclarationMatch(IModelElement element, int accuracy,
