@@ -32,7 +32,6 @@ import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.ISearchFactory;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
@@ -915,7 +914,7 @@ public class BasicSearchEngine {
 
 		char[][] enclosingTypeNames = null;
 		if (typeName != null) {
-			ISearchPatternProcessor processor = getSearchPatternProcessor(scope
+			ISearchPatternProcessor processor = DLTKLanguageManager.getSearchPatternProcessor(scope
 					.getLanguageToolkit());
 			if (processor != null) {
 				String patternString = new String(typeName);
@@ -1716,17 +1715,5 @@ public class BasicSearchEngine {
 			}
 		}
 
-	}
-
-	private static ISearchPatternProcessor getSearchPatternProcessor(
-			IDLTKLanguageToolkit toolkit) {
-		if (toolkit != null) {
-			ISearchFactory factory = DLTKLanguageManager
-					.getSearchFactory(toolkit.getNatureId());
-			if (factory != null) {
-				return factory.createSearchPatternProcessor();
-			}
-		}
-		return null;
 	}
 }

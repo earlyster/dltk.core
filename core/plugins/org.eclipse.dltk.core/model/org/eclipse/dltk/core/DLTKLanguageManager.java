@@ -327,4 +327,23 @@ public class DLTKLanguageManager {
 		return (IInterpreterContainerExtension) InternalDLTKLanguageManager
 				.getInterpreterContainerExtensionManager().getObject(project);
 	}
+
+	public static ISearchPatternProcessor getSearchPatternProcessor(
+			String natureId) {
+		final ISearchFactory factory = getSearchFactory(natureId);
+		if (factory != null) {
+			return factory.createSearchPatternProcessor();
+		} else {
+			return null;
+		}
+	}
+
+	public static ISearchPatternProcessor getSearchPatternProcessor(
+			IDLTKLanguageToolkit toolkit) {
+		if (toolkit != null) {
+			return getSearchPatternProcessor(toolkit.getNatureId());
+		} else {
+			return null;
+		}
+	}
 }

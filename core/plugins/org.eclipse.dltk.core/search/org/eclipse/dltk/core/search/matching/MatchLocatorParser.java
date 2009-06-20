@@ -91,10 +91,9 @@ public abstract class MatchLocatorParser implements IMatchLocatorParser {
 			return;
 		}
 		patternProcessorInitialized = true;
-		final String natureId = matchLocator.scope.getLanguageToolkit()
-				.getNatureId();
-		patternProcessor = DLTKLanguageManager.getSearchFactory(natureId)
-				.createSearchPatternProcessor();
+		patternProcessor = DLTKLanguageManager
+				.getSearchPatternProcessor(matchLocator.scope
+						.getLanguageToolkit());
 	}
 
 	protected void visitTypeDeclaration(TypeDeclaration t) {

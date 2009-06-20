@@ -19,7 +19,6 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.ISearchFactory;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
@@ -593,7 +592,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		// extract parameter types infos
 		// Create method/constructor pattern
 
-		ISearchPatternProcessor processor = getSearchPatternProcessor(toolkit);
+		ISearchPatternProcessor processor = DLTKLanguageManager
+				.getSearchPatternProcessor(toolkit);
 		if (processor != null) {
 			declaringTypeQualification = processor
 					.extractDeclaringTypeQualification(patternString);
@@ -651,15 +651,13 @@ public abstract class SearchPattern extends InternalSearchPattern {
 				}
 
 				declarationPattern = new MethodDeclarationPattern(
-						enclosingTypes,
-						selectorChars, matchRule, toolkit);
+						enclosingTypes, selectorChars, matchRule, toolkit);
 			}
 			if (findReferences) {
 				referencesPattern = new MethodPattern(findDeclarations,
-						findReferences,
-					selectorChars, declaringTypeQualification,
-					declaringTypeSimpleName, declaringTypeSignature, null,
-					matchRule, toolkit);
+						findReferences, selectorChars,
+						declaringTypeQualification, declaringTypeSimpleName,
+						declaringTypeSignature, null, matchRule, toolkit);
 			}
 
 			if (findDeclarations) {
@@ -1065,8 +1063,7 @@ public abstract class SearchPattern extends InternalSearchPattern {
 
 			if (findMethodDeclarations) {
 				declarationPattern = new MethodDeclarationPattern(
-						enclosingNames,
-						selector, matchRule, toolkit);
+						enclosingNames, selector, matchRule, toolkit);
 			}
 			if (findMethodReferences) {
 				referencesPattern = new MethodPattern(findMethodDeclarations,
@@ -1156,18 +1153,6 @@ public abstract class SearchPattern extends InternalSearchPattern {
 		return null;
 	}
 
-	private static ISearchPatternProcessor getSearchPatternProcessor(
-			IDLTKLanguageToolkit toolkit) {
-		if (toolkit != null) {
-			ISearchFactory factory = DLTKLanguageManager
-					.getSearchFactory(toolkit.getNatureId());
-			if (factory != null) {
-				return factory.createSearchPatternProcessor();
-			}
-		}
-		return null;
-	}
-
 	/**
 	 * Type pattern are formed by [qualification '.']type [typeArguments]. e.g.
 	 * java.lang.Object Runnable List&lt;String&gt;
@@ -1188,7 +1173,8 @@ public abstract class SearchPattern extends InternalSearchPattern {
 
 		char[] qualificationChars = null, typeChars = null;
 
-		ISearchPatternProcessor processor = getSearchPatternProcessor(toolkit);
+		ISearchPatternProcessor processor = DLTKLanguageManager
+				.getSearchPatternProcessor(toolkit);
 		if (processor != null) {
 			qualificationChars = processor
 					.extractTypeQualification(patternString);

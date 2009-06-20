@@ -16,9 +16,7 @@ import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.ast.expressions.CallExpression;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKLanguageManager;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.ISearchFactory;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.search.SearchMatch;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
@@ -90,11 +88,8 @@ public class MethodDeclarationLocator extends PatternLocator {
 	}
 
 	private boolean checkTypeName(String declaringType) {
-		IDLTKLanguageToolkit toolkit = this.pattern.getToolkit();
-		ISearchFactory factory = DLTKLanguageManager.getSearchFactory(toolkit
-				.getNatureId());
-		ISearchPatternProcessor processor = factory
-				.createSearchPatternProcessor();
+		ISearchPatternProcessor processor = DLTKLanguageManager
+				.getSearchPatternProcessor(this.pattern.getToolkit());
 		if (processor != null) {
 			if (this.pattern.enclosingTypeNames != null
 					&& this.pattern.enclosingTypeNames.length > 0) {

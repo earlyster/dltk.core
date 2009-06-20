@@ -21,7 +21,6 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IFileHierarchyInfo;
 import org.eclipse.dltk.core.IFileHierarchyResolver;
-import org.eclipse.dltk.core.ISearchFactory;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
@@ -290,16 +289,9 @@ public class HierarchyResolver {
 	}
 
 	private static ISearchPatternProcessor getSearchPatternProcessor(IType type) {
-		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-				.getLanguageToolkit(type);
-		if (toolkit != null) {
-			ISearchFactory factory = DLTKLanguageManager
-					.getSearchFactory(toolkit.getNatureId());
-			if (factory != null) {
-				return factory.createSearchPatternProcessor();
-			}
-		}
-		return null;
+		return DLTKLanguageManager
+				.getSearchPatternProcessor(DLTKLanguageManager
+						.getLanguageToolkit(type));
 	}
 
 	protected String getDelimiterReplacementString(IType type) {
