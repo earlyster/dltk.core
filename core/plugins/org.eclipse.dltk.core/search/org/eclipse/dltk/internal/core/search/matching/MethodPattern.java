@@ -44,7 +44,7 @@ public class MethodPattern extends DLTKSearchPattern implements IIndexConstants 
 	 */
 	public static char[] createIndexKey(char[] selector, int argCount) {
 		char[] countChars = argCount < 10 ? COUNTS[argCount]
-				: (SEPARATOR + String.valueOf(argCount)).toCharArray(); //$NON-NLS-1$
+				: (SEPARATOR + String.valueOf(argCount)).toCharArray();
 		return CharOperation.concat(selector, countChars);
 	}
 
