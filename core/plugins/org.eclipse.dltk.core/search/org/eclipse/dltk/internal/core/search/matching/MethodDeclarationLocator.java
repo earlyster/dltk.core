@@ -55,7 +55,7 @@ public class MethodDeclarationLocator extends PatternLocator {
 
 		// check type names
 		String declaringType = node.getDeclaringTypeName();
-		if (checkTypeName(declaringType)) {
+		if (!checkTypeName(declaringType)) {
 			return INACCURATE_MATCH;
 		}
 
@@ -87,35 +87,44 @@ public class MethodDeclarationLocator extends PatternLocator {
 		return IMPOSSIBLE_MATCH;
 	}
 
-	private boolean checkTypeName(String declaringType) {
-		ISearchPatternProcessor processor = DLTKLanguageManager
-				.getSearchPatternProcessor(this.pattern.getToolkit());
-		if (processor != null) {
-			if (this.pattern.enclosingTypeNames != null
-					&& this.pattern.enclosingTypeNames.length > 0) {
-				char[] delimeter = processor.getDelimiterReplacementString()
-						.toCharArray();
+	@Override
+	protected void matchReportReference(ASTNode reference,
+			IModelElement element, int accuracy, MatchLocator locator) {
+		// Since this is the declaration locator - it is not interested in
+		// references.
+	}
 
+	/**
+	 * Tests if the specified {@code declaringType} matches the search pattern.
+	 * Returns <code>true</code> if matches and <code>false</code> otherwise.
+	 * 
+	 * @param declaringType
+	 * @return
+	 */
+	private boolean checkTypeName(String declaringType) {
+		if (this.pattern.enclosingTypeNames != null
+				&& this.pattern.enclosingTypeNames.length > 0) {
+			if (declaringType != null) {
+				ISearchPatternProcessor processor = DLTKLanguageManager
+						.getSearchPatternProcessor(this.pattern.getToolkit());
+				char[] delimeter = processor != null ? processor
+						.getDelimiterReplacementString().toCharArray()
+						: new char[] { '.' };
 				char[] typeName = this.pattern.enclosingTypeNames[0];
 				if (typeName == null) {
-					return false;
+					return true;
 				}
 				for (int i = 1; i < this.pattern.enclosingTypeNames.length; ++i) {
 					typeName = CharOperation.concatWithSeparator(typeName,
 							this.pattern.enclosingTypeNames[i], delimeter);
 				}
-
-				if (declaringType != null) {
-					char[] declaringTypeName = declaringType.toCharArray();
-					if (!matchesName(typeName, declaringTypeName)) {
-						return true;
-					}
-				} else {
-					return true;
+				if (!matchesName(typeName, declaringType.toCharArray())) {
+					return false;
 				}
+			} else {
+				return false;
 			}
 		}
-
-		return false;
+		return true;
 	}
 }
