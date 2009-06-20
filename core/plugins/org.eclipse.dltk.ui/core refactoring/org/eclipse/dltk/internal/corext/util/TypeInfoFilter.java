@@ -11,7 +11,6 @@ package org.eclipse.dltk.internal.corext.util;
 
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.ISearchFactory;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
@@ -273,22 +272,11 @@ public class TypeInfoFilter {
 	}
 
 	private static String getPackageDelimiter(IDLTKLanguageToolkit toolkit) {
-		ISearchPatternProcessor processor = getSearchPatternProcessor(toolkit);
+		ISearchPatternProcessor processor = DLTKLanguageManager
+				.getSearchPatternProcessor(toolkit);
 		if (processor != null) {
 			return processor.getDelimiterReplacementString();
 		}
 		return PACKAGE_DELIM;
-	}
-
-	private static ISearchPatternProcessor getSearchPatternProcessor(
-			IDLTKLanguageToolkit toolkit) {
-		if (toolkit != null) {
-			ISearchFactory factory = DLTKLanguageManager
-					.getSearchFactory(toolkit.getNatureId());
-			if (factory != null) {
-				return factory.createSearchPatternProcessor();
-			}
-		}
-		return null;
 	}
 }

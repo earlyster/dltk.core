@@ -25,7 +25,6 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.ISearchFactory;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
@@ -402,14 +401,10 @@ public class ScriptElementLabels {
 	protected String getTypeDelimiter(IModelElement modelElement) {
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(modelElement);
-		ISearchFactory factory = DLTKLanguageManager.getSearchFactory(toolkit
-				.getNatureId());
-		if (factory != null) {
-			ISearchPatternProcessor processor = factory
-					.createSearchPatternProcessor();
-			if (processor != null) {
-				return processor.getDelimiterReplacementString();
-			}
+		ISearchPatternProcessor processor = DLTKLanguageManager
+				.getSearchPatternProcessor(toolkit);
+		if (processor != null) {
+			return processor.getDelimiterReplacementString();
 		}
 		return ".";
 	}
