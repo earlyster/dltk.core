@@ -191,10 +191,21 @@ public abstract class AbstractInformationControl extends PopupDialog implements
 
 		// Create all controls early to preserve the life cycle of the original
 		// implementation.
-		create();
+		if (isEarlyCreate()) {
+			create();
+		}
 
+	}
+
+	@Override
+	public void create() {
+		super.create();
 		// Status field text can only be computed after widgets are created.
 		setInfoText(getStatusFieldText());
+	}
+
+	protected boolean isEarlyCreate() {
+		return true;
 	}
 
 	/**

@@ -63,8 +63,7 @@ import org.eclipse.ui.keys.SWTKeySupport;
 /**
  * Show outline in light-weight control.
  */
-public abstract class ScriptOutlineInformationControl extends
-		AbstractInformationControl {
+public class ScriptOutlineInformationControl extends AbstractInformationControl {
 
 	private KeyAdapter fKeyAdapter;
 	private OutlineContentProvider fOutlineContentProvider;
@@ -78,8 +77,9 @@ public abstract class ScriptOutlineInformationControl extends
 	private boolean fShowOnlyMainType;
 	private LexicalSortingAction fLexicalSortingAction;
 	private SortByDefiningTypeAction fSortByDefiningTypeAction;
-//	private ShowOnlyMainTypeAction fShowOnlyMainTypeAction;
+	// private ShowOnlyMainTypeAction fShowOnlyMainTypeAction;
 	private Map fTypeHierarchies = new HashMap();
+	private final IPreferenceStore fPreferenceStore;
 
 	/**
 	 * Category filter action group.
@@ -87,7 +87,9 @@ public abstract class ScriptOutlineInformationControl extends
 	 */
 	private String fPattern;
 
-	protected abstract IPreferenceStore getPreferenceStore();
+	protected IPreferenceStore getPreferenceStore() {
+		return fPreferenceStore;
+	}
 
 	private class OutlineLabelProvider extends AppearanceAwareLabelProvider {
 
@@ -450,9 +452,31 @@ public abstract class ScriptOutlineInformationControl extends
 	 * @param treeStyle
 	 * @param commandId
 	 */
+	@Deprecated
 	public ScriptOutlineInformationControl(Shell parent, int shellStyle,
 			int treeStyle, String commandId) {
+		this(parent, shellStyle, treeStyle, commandId, DLTKUIPlugin.getDefault().getPreferenceStore());
+	}
+
+	/**
+	 * Creates a new Script outline information control.
+	 * 
+	 * @param parent
+	 * @param shellStyle
+	 * @param treeStyle
+	 * @param commandId
+	 * @param preferenceStore
+	 */
+	public ScriptOutlineInformationControl(Shell parent, int shellStyle,
+			int treeStyle, String commandId, IPreferenceStore preferenceStore) {
 		super(parent, shellStyle, treeStyle, commandId, true);
+		this.fPreferenceStore = preferenceStore;
+		create();
+	}
+
+	@Override
+	protected final boolean isEarlyCreate() {
+		return false;
 	}
 
 	/**

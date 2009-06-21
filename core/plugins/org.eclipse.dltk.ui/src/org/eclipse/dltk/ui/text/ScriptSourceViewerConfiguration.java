@@ -195,7 +195,14 @@ public abstract class ScriptSourceViewerConfiguration extends
 	 */
 	protected IInformationControlCreator getOutlinePresenterControlCreator(
 			ISourceViewer sourceViewer, final String commandId) {
-		return null;
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				int shellStyle = SWT.RESIZE;
+				int treeStyle = SWT.V_SCROLL | SWT.H_SCROLL;
+				return new ScriptOutlineInformationControl(parent, shellStyle,
+						treeStyle, commandId, fPreferenceStore);
+			}
+		};
 	}
 
 	public IInformationPresenter getOutlinePresenter(
