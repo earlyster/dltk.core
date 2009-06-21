@@ -56,7 +56,7 @@ public class ScriptWordRule implements IRule {
 	/** The column constraint */
 	protected int fColumn = UNDEFINED;
 	/** The table of predefined words and token for this rule */
-	protected Map fWords = new HashMap();
+	protected Map<String, IToken> fWords = new HashMap<String, IToken>();
 	/** Buffer used for pattern detection */
 	private StringBuffer fBuffer = new StringBuffer();
 
@@ -64,7 +64,7 @@ public class ScriptWordRule implements IRule {
 
 	private int fLastSeenEnd = 0;
 	private String fLastSeen = Util.EMPTY_STRING;
-	private Map fNext = new HashMap();
+	private Map<String, IToken> fNext = new HashMap<String, IToken>();
 
 	/**
 	 * Creates a rule which, with the help of an word detector, will return the
@@ -211,19 +211,19 @@ public class ScriptWordRule implements IRule {
 				if (fNext.containsKey(fLastSeen)
 						&& !buffer.startsWith(fLastSeen)
 						&& scanner.getColumn() > fLastSeenEnd) {
-					IToken replace = (IToken) fNext.get(fLastSeen);
+					IToken replace = fNext.get(fLastSeen);
 					fLastSeen = buffer;
 					fLastSeenEnd = scanner.getColumn();
 					return replace;
 				}
 
-				IToken token = (IToken) fWords.get(buffer);
+				IToken token = fWords.get(buffer);
 				if (fIgnoreCase) {
-					Iterator iter = fWords.keySet().iterator();
+					Iterator<String> iter = fWords.keySet().iterator();
 					while (iter.hasNext()) {
-						String key = (String) iter.next();
+						String key = iter.next();
 						if (buffer.equalsIgnoreCase(key)) {
-							token = (IToken) fWords.get(key);
+							token = fWords.get(key);
 							break;
 						}
 					}
