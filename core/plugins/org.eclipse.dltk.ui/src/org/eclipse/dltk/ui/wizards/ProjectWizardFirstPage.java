@@ -49,6 +49,7 @@ import org.eclipse.dltk.launching.InterpreterStandin;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.dialogs.ControlStatus;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.jface.dialogs.Dialog;
@@ -63,6 +64,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Link;
@@ -444,6 +446,13 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		 */
 		void handlePossibleInterpreterChange();
 
+		boolean isInterpreterPresent();
+
+		/**
+		 * Returns the control to be decorated if error occurs
+		 */
+		Control getDecorationTarget();
+
 	}
 
 	protected abstract class AbstractInterpreterGroup extends Observable
@@ -458,6 +467,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		private String[] fComplianceLabels;
 		private final Link fPreferenceLink;
 		private IInterpreterInstall[] fInstalledInterpreters;
+		private boolean interpretersPresent;
 
 		public AbstractInterpreterGroup(Composite composite) {
 			fGroup = new Group(composite, SWT.NONE);
@@ -496,6 +506,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			fUseDefaultInterpreter = new SelectionButtonDialogField(SWT.RADIO);
 			fUseDefaultInterpreter.setLabelText(getDefaultInterpreterLabel());
 			fUseDefaultInterpreter.doFillIntoGrid(fGroup, 2);
+			fUseDefaultInterpreter.setDialogFieldListener(this);
 
 			fPreferenceLink = new Link(fGroup, SWT.NONE);
 			fPreferenceLink.setFont(fGroup.getFont());
@@ -571,7 +582,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 
 		private IInterpreterInstall[] getWorkspaceInterpeters() {
-			List standins = new ArrayList();
+			List<IInterpreterInstall> standins = new ArrayList<IInterpreterInstall>();
 			IInterpreterInstallType[] types = ScriptRuntime
 					.getInterpreterInstallTypes(getCurrentLanguageNature());
 			IEnvironment environment = getEnvironment();
@@ -586,8 +597,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 					}
 				}
 			}
-			return ((IInterpreterInstall[]) standins
-					.toArray(new IInterpreterInstall[standins.size()]));
+			return standins.toArray(new IInterpreterInstall[standins.size()]);
 		}
 
 		private String getDefaultInterpreterName() {
@@ -722,9 +732,14 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 
 		public void dialogFieldChanged(DialogField field) {
-			if (field == fInterpreterEnvironment
-					&& isTargetEnvironmentAllowed()) {
-				refreshInterpreters();
+			if (field == fInterpreterEnvironment) {
+				if (isTargetEnvironmentAllowed()) {
+					refreshInterpreters();
+				}
+			} else if (field == fUseDefaultInterpreter
+					|| field == fUseProjectInterpreter) {
+				setChanged();
+				notifyObservers();
 			}
 			updateEnableState();
 			// fDetectGroup.handlePossibleInterpreterChange();
@@ -742,6 +757,18 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 				}
 			}
 			return null;
+		}
+
+		public boolean isInterpreterPresent() {
+			return interpretersPresent;
+		}
+
+		public Control getDecorationTarget() {
+			if (fUseDefaultInterpreter.isSelected()) {
+				return fUseDefaultInterpreter.getSelectionButton();
+			} else {
+				return fUseProjectInterpreter.getSelectionButton();
+			}
 		}
 	}
 
@@ -886,18 +913,44 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		return validateProject() == null;
 	}
 
+	private ControlDecorationManager fDecorationManager;
+
 	/**
 	 * Validate this page and show appropriate warnings and error
 	 * NewWizardMessages.
 	 */
 	private final class Validator implements Observer {
 		public void update(Observable o, Object arg) {
+			final IControlDecorationManager manager = fDecorationManager
+					.beginReporting();
+			try {
+				validate(manager, o, arg);
+			} finally {
+				manager.commit();
+			}
+		}
+
+		private void validate(IControlDecorationManager decorations,
+				Observable o, Object arg) {
 			IStatus projectStatus = validateProject();
 			if (projectStatus == null) {
+				decorations.hide(fNameGroup.fNameField.getTextControl());
 				projectStatus = fLocationGroup.validate(getProjectHandle());
 				if (projectStatus.isOK()) {
 					projectStatus = null;
 				}
+				if (projectStatus != null) {
+					if (projectStatus instanceof ControlStatus) {
+						final ControlStatus cStatus = (ControlStatus) projectStatus;
+						decorations.show(cStatus.getControl(), cStatus);
+					} else {
+						decorations.show(fLocationGroup.fLocation
+								.getTextControl(), projectStatus);
+					}
+				}
+			} else {
+				decorations.show(fNameGroup.fNameField.getTextControl(),
+						projectStatus);
 			}
 			if (projectStatus != null) {
 				if (projectStatus.getSeverity() != IStatus.ERROR) {
@@ -910,9 +963,15 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 				return;
 			}
 			if (supportInterpreter() && interpeterRequired()) {
-				if (!interpretersPresent) {
+				if (!fInterpreterGroup.isInterpreterPresent()) {
 					setErrorMessage(NewWizardMessages.ProjectWizardFirstPage_atLeastOneInterpreterMustBeConfigured);
 					setPageComplete(false);
+					decorations
+							.show(
+									fInterpreterGroup.getDecorationTarget(),
+									new StatusInfo(
+											IStatus.ERROR,
+											NewWizardMessages.ProjectWizardFirstPage_atLeastOneInterpreterMustBeConfigured));
 					return;
 				}
 			}
@@ -926,7 +985,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	protected LocationGroup fLocationGroup;
 	// private LayoutGroup fLayoutGroup;
 	// private InterpreterEnvironmentGroup fInterpreterEnvironmentGroup;
-	private boolean interpretersPresent;
 	protected DetectGroup fDetectGroup;
 	private Validator fValidator;
 	protected String fInitialName;
@@ -956,7 +1014,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	 * @return true if interpreters are available for selection
 	 */
 	public boolean isInterpretersPresent() {
-		return interpretersPresent;
+		return fInterpreterGroup.isInterpreterPresent();
 	}
 
 	protected abstract boolean interpeterRequired();
@@ -1033,6 +1091,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		fNameGroup.notifyObservers();
 		// create and connect validator
 		fValidator = new Validator();
+		fDecorationManager = new ControlDecorationManager();
 		Observable interpreterGroupObservable = getInterpreterGroupObservable();
 		if (supportInterpreter() && interpreterGroupObservable != null) {
 			// fDetectGroup.addObserver(getInterpreterGroupObservable());
@@ -1149,6 +1208,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
 	public void dispose() {
+		fDecorationManager.dispose();
 		fLocationGroup.dispose();
 		super.dispose();
 	}
