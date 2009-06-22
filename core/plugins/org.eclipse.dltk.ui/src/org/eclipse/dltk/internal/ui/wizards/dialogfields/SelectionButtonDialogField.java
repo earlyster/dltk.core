@@ -100,7 +100,11 @@ public class SelectionButtonDialogField extends DialogField {
 	public int getNumberOfControls() {
 		return 1;	
 	}	
-	
+
+	public Button getSelectionButton() {
+		return getSelectionButton(null);
+	}
+
 	// ------- ui creation			
 
 	/**

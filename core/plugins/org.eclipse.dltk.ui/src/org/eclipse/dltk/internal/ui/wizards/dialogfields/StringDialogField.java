@@ -93,7 +93,11 @@ public class StringDialogField extends DialogField {
 		}
 		return true;
 	}
-		
+
+	public Text getTextControl() {
+		return getTextControl(null);
+	}
+
 	// ------- ui creation			
 
 	/**
