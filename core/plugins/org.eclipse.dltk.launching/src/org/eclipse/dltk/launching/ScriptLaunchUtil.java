@@ -208,9 +208,7 @@ public class ScriptLaunchUtil {
 			this.stream = stream;
 		}
 
-		/*
-		 * @see java.lang.Thread#run()
-		 */
+		@Override
 		public void run() {
 			byte[] buffer = new byte[256];
 			try {
@@ -222,6 +220,48 @@ public class ScriptLaunchUtil {
 			}
 		}
 
+	}
+
+	private static class OutputStreamReaderThread extends Thread {
+
+		final InputStream stream;
+		final StringBuffer output;
+		final IProgressMonitor monitor;
+
+		public OutputStreamReaderThread(InputStream stream,
+				StringBuffer output, IProgressMonitor monitor) {
+			this.stream = stream;
+			this.output = output;
+			this.monitor = monitor;
+		}
+
+		@Override
+		public void run() {
+			BufferedReader input = null;
+			try {
+				input = new BufferedReader(new InputStreamReader(stream));
+				String line;
+				while ((line = input.readLine()) != null) {
+					output.append(line);
+					output.append("\n"); //$NON-NLS-1$
+					monitor.worked(1);
+				}
+			} catch (IOException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			} finally {
+				if (input != null) {
+					try {
+						input.close();
+					} catch (IOException e) {
+						if (DLTKCore.DEBUG) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -238,70 +278,52 @@ public class ScriptLaunchUtil {
 			return null;
 		}
 		try {
+			IFileHandle builderFile = deployment.getFile(deployment.add(bundle,
+					scriptPath));
+			InterpreterConfig config = ScriptLaunchUtil
+					.createInterpreterConfig(exeEnv, builderFile, builderFile
+							.getParent());
+			config.removeEnvVar("DISPLAY"); //$NON-NLS-1$
 			final StringBuffer source = new StringBuffer();
-
-			IPath builder;
+			final Process process = ScriptLaunchUtil.runScriptWithInterpreter(
+					exeEnv, installLocations.toOSString(), config);
 			try {
-				builder = deployment.add(bundle, scriptPath);
-
-				IFileHandle builderFile = deployment.getFile(builder);
-				InterpreterConfig config = ScriptLaunchUtil
-						.createInterpreterConfig(exeEnv, builderFile,
-								builderFile.getParent());
-				config.removeEnvVar("DISPLAY"); //$NON-NLS-1$
-				final Process process = ScriptLaunchUtil
-						.runScriptWithInterpreter(exeEnv, installLocations
-								.toOSString(), config);
 				process.getOutputStream().close();
 				new ErrorStreamReaderThread(process.getErrorStream()).start();
-				Thread readerThread = new Thread(scriptPath) {
+				new OutputStreamReaderThread(process.getInputStream(), source,
+						monitor).start();
+				final Thread waitThread = new Thread() {
+					@Override
 					public void run() {
-						BufferedReader input = null;
 						try {
-							input = new BufferedReader(new InputStreamReader(
-									process.getInputStream()));
-
-							String line = null;
-							while ((line = input.readLine()) != null) {
-								source.append(line);
-								source.append("\n"); //$NON-NLS-1$
-								monitor.worked(1);
-							}
-						} catch (IOException e) {
-							if (DLTKCore.DEBUG) {
-								e.printStackTrace();
-							}
-						} finally {
-							if (input != null) {
-								try {
-									input.close();
-								} catch (IOException e) {
-									if (DLTKCore.DEBUG) {
-										e.printStackTrace();
-									}
-								}
-							}
+							process.waitFor();
+						} catch (InterruptedException e) {
+							// ignore
 						}
 					}
 				};
 				try {
-					readerThread.start();
-					readerThread.join(10000);
+					waitThread.start();
+					waitThread.join(10000);
 				} catch (InterruptedException e) {
 					if (DLTKCore.DEBUG) {
 						e.printStackTrace();
 					}
 				}
-			} catch (IOException e1) {
-				if (DLTKCore.DEBUG) {
-					e1.printStackTrace();
-				}
-			} catch (CoreException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
-				}
+			} finally {
+				process.destroy();
 			}
 			return source.toString();
+		} catch (IOException e1) {
+			if (DLTKCore.DEBUG) {
+				e1.printStackTrace();
+			}
+			return null;
+		} catch (CoreException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+			return null;
 		} finally {
 			deployment.dispose();
 		}
