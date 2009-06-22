@@ -53,9 +53,28 @@ public class RSEEnvironmentUI implements IEnvironmentUI {
 		return null;
 	}
 
-	public String selectFile(Shell shell, int executable2) {
+	public String selectFile(Shell shell, int fileType) {
+		return selectFile(shell, fileType, null);
+	}
+
+	public String selectFile(Shell shell, int fileType, String initialSelection) {
 		SystemRemoteFileDialog dialog = new SystemRemoteFileDialog(shell);
 		dialog.setDefaultSystemConnection(this.environment.getHost(), true);
+		if (initialSelection != null && initialSelection.length() != 0) {
+			final IRemoteFileSubSystem fs = RemoteFileUtility
+					.getFileSubSystem(environment.getHost());
+			if (fs != null) {
+				try {
+					final IRemoteFile remoteFile = fs.getRemoteFileObject(
+							initialSelection, new NullProgressMonitor());
+					if (remoteFile != null && remoteFile.exists()) {
+						dialog.setPreSelection(remoteFile);
+					}
+				} catch (SystemMessageException e) {
+					DLTKRSEPlugin.log(e);
+				}
+			}
+		}
 		if (dialog.open() == Window.OK) {
 			Object selectedObject = dialog.getSelectedObject();
 			if (selectedObject instanceof RemoteFile) {
