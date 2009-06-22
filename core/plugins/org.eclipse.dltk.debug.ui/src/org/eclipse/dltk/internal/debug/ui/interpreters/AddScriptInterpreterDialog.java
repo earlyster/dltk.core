@@ -466,7 +466,8 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 				.getAdapter(IEnvironmentUI.class);
 		if (environmentUI != null) {
 			String newPath = environmentUI.selectFile(getShell(),
-					IEnvironmentUI.EXECUTABLE);
+					IEnvironmentUI.EXECUTABLE, fInterpreterPath.getText()
+							.trim());
 			if (newPath != null) {
 				fInterpreterPath.setText(newPath);
 			}
