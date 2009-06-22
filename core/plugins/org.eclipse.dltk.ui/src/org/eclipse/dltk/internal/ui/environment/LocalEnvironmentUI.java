@@ -1,5 +1,7 @@
 package org.eclipse.dltk.internal.ui.environment;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -20,9 +22,25 @@ public class LocalEnvironmentUI implements IEnvironmentUI {
 		return dialog.open();
 	}
 
-	public String selectFile(Shell shell, int executable) {
+	public String selectFile(Shell shell, int fileType) {
+		return selectFile(shell, fileType, null);
+	}
+
+	public String selectFile(Shell shell, int fileType, String initialSelection) {
 		FileDialog dialog = new FileDialog(shell);
-		if (executable == EXECUTABLE) {
+		if (initialSelection != null && initialSelection.length() != 0) {
+			IPath path = new Path(initialSelection);
+			if (path.segmentCount() > 0) {
+				if (path.toFile().isFile()) {
+					dialog.setFilterPath(path.removeLastSegments(1)
+							.toOSString());
+					dialog.setFileName(path.lastSegment());
+				} else {
+					dialog.setFilterPath(path.toOSString());
+				}
+			}
+		}
+		if (fileType == EXECUTABLE) {
 			if (Platform.getOS().equals(Platform.OS_WIN32)) {
 				dialog
 						.setFilterExtensions(new String[] { "*.exe;*.bat;*.exe" }); //$NON-NLS-1$
@@ -34,5 +52,4 @@ public class LocalEnvironmentUI implements IEnvironmentUI {
 		}
 		return dialog.open();
 	}
-
 }
