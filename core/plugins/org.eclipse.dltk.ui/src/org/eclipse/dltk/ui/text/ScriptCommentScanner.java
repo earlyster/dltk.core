@@ -175,7 +175,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 
 	protected IRule createTodoRule() {
 		CombinedWordRule combinedWordRule = new CombinedWordRule(
-				new ScriptIdentifierDetector(), Token.UNDEFINED);
+				new ScriptIdentifierDetector(), getToken(fDefaultTokenProperty));
 
 		List<CombinedWordRule.WordMatcher> matchers = createMatchers();
 		if (matchers.size() > 0) {
