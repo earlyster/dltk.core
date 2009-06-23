@@ -139,6 +139,12 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 
 	public ScriptCommentScanner(IColorManager manager, IPreferenceStore store,
 			String comment, String todoTag, ITodoTaskPreferences preferences) {
+		this(manager, store, comment, todoTag, preferences, true);
+	}
+
+	public ScriptCommentScanner(IColorManager manager, IPreferenceStore store,
+			String comment, String todoTag, ITodoTaskPreferences preferences,
+			boolean initializeAutomatically) {
 		super(manager, store);
 
 		fProperties = new String[] { comment, todoTag };
@@ -146,7 +152,9 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		fDefaultTokenProperty = comment;
 
 		this.preferences = preferences;
-		initialize();
+		if (initializeAutomatically) {
+			initialize();
+		}
 	}
 
 	@Override
