@@ -36,11 +36,11 @@ import org.eclipse.ui.texteditor.ITextEditor;
  */
 public class ScriptCorrectionContext implements IScriptCorrectionContext {
 
-	private List proposals = null;
+	private List<ICompletionProposal> proposals = null;
 
 	public void addProposal(ICompletionProposal proposal) {
 		if (proposals == null) {
-			proposals = new ArrayList();
+			proposals = new ArrayList<ICompletionProposal>();
 		}
 		proposals.add(proposal);
 	}
@@ -56,8 +56,7 @@ public class ScriptCorrectionContext implements IScriptCorrectionContext {
 
 	public ICompletionProposal[] getProposals() {
 		if (proposals != null) {
-			return (ICompletionProposal[]) proposals
-					.toArray(new ICompletionProposal[proposals.size()]);
+			return proposals.toArray(new ICompletionProposal[proposals.size()]);
 		} else {
 			return null;
 		}
@@ -95,7 +94,7 @@ public class ScriptCorrectionContext implements IScriptCorrectionContext {
 		return invocationContext;
 	}
 
-	private Map attributes = null;
+	private Map<String, Object> attributes = null;
 
 	public Object getAttribute(String attributeName) {
 		if (attributes == null) {
@@ -108,7 +107,7 @@ public class ScriptCorrectionContext implements IScriptCorrectionContext {
 	public void setAttribute(String attributeName, Object value) {
 		if (value != null) {
 			if (attributes == null) {
-				attributes = new HashMap();
+				attributes = new HashMap<String, Object>();
 			}
 			attributes.put(attributeName, value);
 		} else {
