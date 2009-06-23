@@ -13,7 +13,6 @@ package org.eclipse.dltk.internal.ui.text.hover;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.ui.DLTKUILanguageManager;
-import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
@@ -95,7 +94,7 @@ public class SourceViewerInformationControl implements IInformationControl,
 
 	private Color fBackgroundColor;
 	private boolean fIsSystemBackgroundColor = true;
-	private IDLTKLanguageToolkit fToolkit;
+	private final IDLTKUILanguageToolkit fToolkit;
 
 	/**
 	 * Creates a default information control with the given shell as parent. The
@@ -134,7 +133,7 @@ public class SourceViewerInformationControl implements IInformationControl,
 	 */
 	public SourceViewerInformationControl(Shell parent, int shellStyle,
 			int style, String statusFieldText, IDLTKLanguageToolkit toolkit) {
-		this.fToolkit = toolkit;
+		this.fToolkit = DLTKUILanguageManager.getLanguageToolkit(toolkit);
 		GridLayout layout;
 		GridData gd;
 
@@ -222,11 +221,9 @@ public class SourceViewerInformationControl implements IInformationControl,
 	}
 
 	protected void createViewer(int style, Composite composite) {
-		IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager
-				.getLanguageToolkit(fToolkit.getNatureId());
 		fViewer = new ScriptSourceViewer(composite, null, null, false, style,
-				uiToolkit.getPreferenceStore());
-		fViewer.configure(uiToolkit.createSourceViewerConfiguration());
+				fToolkit.getPreferenceStore());
+		fViewer.configure(fToolkit.createSourceViewerConfiguration());
 	}
 
 	private void initializeColors() {
@@ -242,7 +239,7 @@ public class SourceViewerInformationControl implements IInformationControl,
 	}
 
 	private RGB getHoverBackgroundColorRGB() {
-		IPreferenceStore store = DLTKUIPlugin.getDefault().getPreferenceStore();
+		IPreferenceStore store = fToolkit.getPreferenceStore();
 		return store
 				.getBoolean(PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT) ? null
 				: PreferenceConverter
@@ -349,11 +346,9 @@ public class SourceViewerInformationControl implements IInformationControl,
 		}
 
 		IDocument doc = new Document(content);
-		IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager
-				.getLanguageToolkit(fToolkit.getNatureId());
-		ScriptTextTools textTools = uiToolkit.getTextTools();
+		ScriptTextTools textTools = fToolkit.getTextTools();
 		if (textTools != null) {
-			textTools.setupDocumentPartitioner(doc, uiToolkit
+			textTools.setupDocumentPartitioner(doc, fToolkit
 					.getPartitioningId());
 		}
 		fViewer.setInput(doc);
