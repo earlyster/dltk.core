@@ -108,7 +108,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * @param interpreter
 	 * @return buildpath entries
 	 */
-	private static IBuildpathEntry[] computeBuildpathEntries(
+	public static IBuildpathEntry[] computeBuildpathEntries(
 			IInterpreterInstall interpreter) {
 		LibraryLocation[] libs = interpreter.getLibraryLocations();
 		if (libs == null) {
@@ -168,9 +168,9 @@ public class InterpreterContainer implements IBuildpathContainer {
 			IBuildpathAttribute[] attributes = new IBuildpathAttribute[0];
 			entries.add(DLTKCore.newBuiltinEntry(
 					IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY.append(interpreter
-							.getInstallLocation().toOSString()),
-					EMPTY_RULES, attributes, BuildpathEntry.INCLUDE_ALL,
-					new IPath[0], false, true));
+							.getInstallLocation().toOSString()), EMPTY_RULES,
+					attributes, BuildpathEntry.INCLUDE_ALL, new IPath[0],
+					false, true));
 		}
 		return (IBuildpathEntry[]) entries.toArray(new IBuildpathEntry[entries
 				.size()]);
