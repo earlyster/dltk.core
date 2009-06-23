@@ -10,33 +10,30 @@
 
 package org.eclipse.dltk.ui.text;
 
-
 import java.util.List;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.rules.IRule;
 
-
-/**
- *
- */
-public final class SingleTokenScriptScanner extends AbstractScriptScanner{
-
+public final class SingleTokenScriptScanner extends AbstractScriptScanner {
 
 	private String[] fProperty;
 
-	public SingleTokenScriptScanner(IColorManager manager, IPreferenceStore store, String property) {
+	public SingleTokenScriptScanner(IColorManager manager,
+			IPreferenceStore store, String property) {
 		super(manager, store);
-		fProperty= new String[] { property };
+		fProperty = new String[] { property };
 		initialize();
 	}
 
+	@Override
 	protected String[] getTokenProperties() {
 		return fProperty;
 	}
 
-	protected List createRules() {
+	@Override
+	protected List<IRule> createRules() {
 		setDefaultReturnToken(getToken(fProperty[0]));
 		return null;
 	}
 }
-
