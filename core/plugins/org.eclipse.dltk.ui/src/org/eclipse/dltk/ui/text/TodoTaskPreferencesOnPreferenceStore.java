@@ -27,6 +27,7 @@ public class TodoTaskPreferencesOnPreferenceStore extends
 		this.store = store;
 	}
 
+	@Override
 	protected String getRawTaskTags() {
 		return store.getString(TAGS);
 	}
