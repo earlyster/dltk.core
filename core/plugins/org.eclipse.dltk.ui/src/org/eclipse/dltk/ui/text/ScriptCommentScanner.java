@@ -167,7 +167,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		CombinedWordRule combinedWordRule = new CombinedWordRule(
 				new ScriptIdentifierDetector(), Token.UNDEFINED);
 
-		List<TaskTagMatcher> matchers = createMatchers();
+		List<CombinedWordRule.WordMatcher> matchers = createMatchers();
 		if (matchers.size() > 0) {
 			for (int i = 0, n = matchers.size(); i < n; i++) {
 				combinedWordRule.addWordMatcher(matchers.get(i));
@@ -182,8 +182,8 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 	 * 
 	 * @return the list of word matchers
 	 */
-	protected List<TaskTagMatcher> createMatchers() {
-		List<TaskTagMatcher> list = new ArrayList<TaskTagMatcher>();
+	protected List<CombinedWordRule.WordMatcher> createMatchers() {
+		List<CombinedWordRule.WordMatcher> list = new ArrayList<CombinedWordRule.WordMatcher>();
 
 		boolean isCaseSensitive = preferences.isCaseSensitive();
 		String[] tasks = preferences.getTagNames();
