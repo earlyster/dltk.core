@@ -46,7 +46,7 @@ public class CombinedWordRule implements IRule {
 	public static class WordMatcher {
 
 		/** The table of predefined words and token for this matcher */
-		private Map fWords = new HashMap();
+		private Map<CharacterBuffer, IToken> fWords = new HashMap<CharacterBuffer, IToken>();
 
 		/**
 		 * Adds a word and the token to be returned if it is detected.
@@ -76,7 +76,7 @@ public class CombinedWordRule implements IRule {
 		 *         matcher
 		 */
 		public IToken evaluate(ICharacterScanner scanner, CharacterBuffer word) {
-			IToken token = (IToken) fWords.get(word);
+			IToken token = fWords.get(word);
 			if (token != null)
 				return token;
 			return Token.UNDEFINED;
@@ -164,6 +164,7 @@ public class CombinedWordRule implements IRule {
 		 * 
 		 * @return the content
 		 */
+		@Override
 		public String toString() {
 			return new String(fContent, 0, fLength);
 		}
@@ -179,9 +180,7 @@ public class CombinedWordRule implements IRule {
 			return fContent[i];
 		}
 
-		/*
-		 * @see java.lang.Object#hashCode()
-		 */
+		@Override
 		public int hashCode() {
 			if (fIsHashCached)
 				return fHashCode;
@@ -194,9 +193,7 @@ public class CombinedWordRule implements IRule {
 			return hash;
 		}
 
-		/*
-		 * @see java.lang.Object#equals(java.lang.Object)
-		 */
+		@Override
 		public boolean equals(Object obj) {
 			if (obj == this)
 				return true;
@@ -247,7 +244,7 @@ public class CombinedWordRule implements IRule {
 	private CharacterBuffer fBuffer = new CharacterBuffer(16);
 
 	/** List of word matchers */
-	private List fMatchers = new ArrayList();
+	private List<WordMatcher> fMatchers = new ArrayList<WordMatcher>();
 
 	/**
 	 * Creates a rule which, with the help of an word detector, will return the
@@ -371,8 +368,7 @@ public class CombinedWordRule implements IRule {
 				scanner.unread();
 
 				for (int i = 0, n = fMatchers.size(); i < n; i++) {
-					IToken token = ((WordMatcher) fMatchers.get(i)).evaluate(
-							scanner, fBuffer);
+					IToken token = fMatchers.get(i).evaluate(scanner, fBuffer);
 					if (!token.isUndefined())
 						return token;
 				}
