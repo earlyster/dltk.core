@@ -27,9 +27,15 @@ public class DLTKUILanguageManager extends PriorityClassDLTKExtensionManager {
 	}
 
 	public static IDLTKUILanguageToolkit[] getLanguageToolkits() {
-		List toolkits = instance.getObjectList();
-		return (IDLTKUILanguageToolkit[]) toolkits
-				.toArray(new IDLTKUILanguageToolkit[toolkits.size()]);
+		@SuppressWarnings("unchecked")
+		List<IDLTKUILanguageToolkit> toolkits = instance.getObjectList();
+		return toolkits.toArray(new IDLTKUILanguageToolkit[toolkits.size()]);
+	}
+
+	public static IDLTKUILanguageToolkit getLanguageToolkit(
+			IDLTKLanguageToolkit toolkit) {
+		return (IDLTKUILanguageToolkit) instance.getObject(toolkit
+				.getNatureId());
 	}
 
 	public static IDLTKUILanguageToolkit getLanguageToolkit(String natureId) {
