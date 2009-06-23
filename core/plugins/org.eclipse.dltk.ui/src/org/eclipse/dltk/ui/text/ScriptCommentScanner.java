@@ -15,12 +15,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.compiler.task.ITodoTaskPreferences;
 import org.eclipse.dltk.ui.text.rules.CombinedWordRule;
-import org.eclipse.dltk.ui.text.rules.CombinedWordRule.WordMatcher;
+import org.eclipse.dltk.ui.text.rules.CombinedWordRule.CharacterBuffer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.ICharacterScanner;
@@ -50,25 +49,22 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		}
 	}
 
-	private class TaskTagMatcher extends CombinedWordRule.WordMatcher {
+	private static class TaskTagMatcher extends CombinedWordRule.WordMatcher {
 
 		private IToken fToken;
+
 		/**
 		 * Uppercase words
-		 * 
-		 * @since 3.0
 		 */
-		private Map fUppercaseWords = new HashMap();
+		private Map<CharacterBuffer, IToken> fUppercaseWords = new HashMap<CharacterBuffer, IToken>();
+
 		/**
 		 * <code>true</code> if task tag detection is case-sensitive.
-		 * 
-		 * @since 3.0
 		 */
 		private boolean fCaseSensitive = true;
+
 		/**
 		 * Buffer for uppercase word
-		 * 
-		 * @since 3.0
 		 */
 		private CombinedWordRule.CharacterBuffer fBuffer = new CombinedWordRule.CharacterBuffer(
 				16);
@@ -77,13 +73,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 			fToken = token;
 		}
 
-		/*
-		 * @see
-		 * org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#clearWords
-		 * ()
-		 * 
-		 * @since 3.0
-		 */
+		@Override
 		public synchronized void clearWords() {
 			super.clearWords();
 			fUppercaseWords.clear();
@@ -97,28 +87,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 			}
 		}
 
-		public synchronized void addTaskTags(String value) {
-			String[] tasks = split(value, ","); //$NON-NLS-1$
-			addTaskTags(tasks);
-		}
-
-		private String[] split(String value, String delimiters) {
-			StringTokenizer tokenizer = new StringTokenizer(value, delimiters);
-			int size = tokenizer.countTokens();
-			String[] tokens = new String[size];
-			int i = 0;
-			while (i < size)
-				tokens[i++] = tokenizer.nextToken();
-			return tokens;
-		}
-
-		/*
-		 * @see
-		 * org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#addWord
-		 * (java.lang.String, org.eclipse.jface.text.rules.IToken)
-		 * 
-		 * @since 3.0
-		 */
+		@Override
 		public synchronized void addWord(String word, IToken token) {
 			Assert.isNotNull(word);
 			Assert.isNotNull(token);
@@ -128,14 +97,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 					.toUpperCase()), token);
 		}
 
-		/*
-		 * @see
-		 * org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher#evaluate
-		 * (org.eclipse.jface.text.rules.ICharacterScanner,
-		 * org.eclipse.jdt.internal.ui.text.CombinedWordRule.CharacterBuffer)
-		 * 
-		 * @since 3.0
-		 */
+		@Override
 		public synchronized IToken evaluate(ICharacterScanner scanner,
 				CombinedWordRule.CharacterBuffer word) {
 			if (fCaseSensitive)
@@ -145,7 +107,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 			for (int i = 0, n = word.length(); i < n; i++)
 				fBuffer.append(Character.toUpperCase(word.charAt(i)));
 
-			IToken token = (IToken) fUppercaseWords.get(fBuffer);
+			IToken token = fUppercaseWords.get(fBuffer);
 			if (token != null)
 				return token;
 			return Token.UNDEFINED;
@@ -157,6 +119,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		 * @return <code>true</code> iff task tag detection is case-sensitive
 		 * @since 3.0
 		 */
+		@SuppressWarnings("unused")
 		public boolean isCaseSensitive() {
 			return fCaseSensitive;
 		}
@@ -184,15 +147,17 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		initialize();
 	}
 
+	@Override
 	protected String[] getTokenProperties() {
 		return fProperties;
 	}
 
-	protected List createRules() {
+	@Override
+	protected List<IRule> createRules() {
 		IToken defaultToken = getToken(fDefaultTokenProperty);
 		setDefaultReturnToken(defaultToken);
 
-		List list = new ArrayList();
+		List<IRule> list = new ArrayList<IRule>();
 		list.add(createTodoRule());
 
 		return list;
@@ -202,10 +167,10 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		CombinedWordRule combinedWordRule = new CombinedWordRule(
 				new ScriptIdentifierDetector(), Token.UNDEFINED);
 
-		List matchers = createMatchers();
+		List<TaskTagMatcher> matchers = createMatchers();
 		if (matchers.size() > 0) {
 			for (int i = 0, n = matchers.size(); i < n; i++) {
-				combinedWordRule.addWordMatcher((WordMatcher) matchers.get(i));
+				combinedWordRule.addWordMatcher(matchers.get(i));
 			}
 		}
 
@@ -217,8 +182,8 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 	 * 
 	 * @return the list of word matchers
 	 */
-	protected List createMatchers() {
-		List list = new ArrayList();
+	protected List<TaskTagMatcher> createMatchers() {
+		List<TaskTagMatcher> list = new ArrayList<TaskTagMatcher>();
 
 		boolean isCaseSensitive = preferences.isCaseSensitive();
 		String[] tasks = preferences.getTagNames();
@@ -246,11 +211,13 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		return '#';
 	}
 
+	@Override
 	public void setRange(IDocument document, int offset, int length) {
 		super.setRange(document, offset, length);
 		state = STATE_START;
 	}
 
+	@Override
 	public void adaptToPreferenceChange(PropertyChangeEvent event) {
 		if (fTaskTagMatcher != null
 				&& event.getProperty().equals(ITodoTaskPreferences.TAGS)) {
@@ -271,11 +238,12 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 						.booleanValue();
 				fTaskTagMatcher.setCaseSensitive(caseSensitive);
 			}
-		} else {
+		} else if (super.affectsBehavior(event)) {
 			super.adaptToPreferenceChange(event);
 		}
 	}
 
+	@Override
 	public boolean affectsBehavior(PropertyChangeEvent event) {
 		if (event.getProperty().equals(ITodoTaskPreferences.TAGS)) {
 			return true;
@@ -314,6 +282,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 	 * We overload nextToken() because of the way task parsing is implemented:
 	 * the TO-DO tasks are recognized only at the beginning of the comment
 	 */
+	@Override
 	public IToken nextToken() {
 		fTokenOffset = fOffset;
 		fColumn = UNDEFINED;
