@@ -183,6 +183,7 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 		return colorKey + PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
 	}
 
+	@Override
 	public IToken nextToken() {
 		if (fNeedsLazyColorLoading)
 			resolveProxyAttributes();
