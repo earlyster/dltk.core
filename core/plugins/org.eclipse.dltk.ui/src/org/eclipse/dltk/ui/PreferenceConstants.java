@@ -224,7 +224,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String EDITOR_SHOW_SEGMENTS = "com.xore.dltk.ui.editor.showSegments"; //$NON-NLS-1$
+	public static final String EDITOR_SHOW_SEGMENTS = "org.eclipse.dltk.ui.editor.showSegments"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether folding is enabled in the Script
@@ -494,6 +494,10 @@ public class PreferenceConstants {
 		PreferenceConverter.setValue(store,
 				PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR,
 				rgb[0]);
+		store
+				.setValue(
+						PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT,
+						true);
 
 		// Fix bug 252155 - contributed by Eden Klein
 		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER,
@@ -777,6 +781,8 @@ public class PreferenceConstants {
 	public static final String EDITOR_MATCHING_BRACKETS = "editor.matching_brackets"; //$NON-NLS-1$
 
 	public static final String EDITOR_MATCHING_BRACKETS_COLOR = "editor.matching_brackets_color"; //$NON-NLS-1$
+
+	public static final String EDITOR_QUICKASSIST_LIGHTBULB = "editor.quickassist_lightbulb"; //$NON-NLS-1$
 
 	// Notification messages
 	public static final String NOTIFICATION_NOT_ON_BUILDPATH_MESSAGE = DLTKUIPlugin.PLUGIN_ID

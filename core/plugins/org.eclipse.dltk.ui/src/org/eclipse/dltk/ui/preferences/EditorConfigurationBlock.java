@@ -16,18 +16,56 @@ import java.util.ArrayList;
 
 import org.eclipse.dltk.ui.CodeFormatterConstants;
 import org.eclipse.dltk.ui.PreferenceConstants;
+import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore.OverlayKey;
+import org.eclipse.jface.preference.ColorSelector;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.List;
 
 public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 	public static final int FLAG_TAB_POLICY = 1;
 	public static final int FLAG_EDITOR_SMART_NAVIGATION = 2;
 	public static final int FLAG_TAB_ALWAYS_INDENT = 4;
+	public static final int FLAG_EDITOR_APPEARANCE_COLOR_OPTIONS = 8;
 
 	private final int flags;
+
+	private final String[][] colorListModel = new String[][] {
+			{
+					PreferencesMessages.EditorPreferencePage_matchingBracketsHighlightColor,
+					PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, null },
+			{
+					PreferencesMessages.EditorPreferencePage_backgroundForMethodParameters,
+					PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, null },
+			{
+					PreferencesMessages.EditorPreferencePage_foregroundForMethodParameters,
+					PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND, null },
+			{
+					PreferencesMessages.EditorPreferencePage_backgroundForCompletionReplacement,
+					PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND, null },
+			{
+					PreferencesMessages.EditorPreferencePage_foregroundForCompletionReplacement,
+					PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND, null },
+			{
+					PreferencesMessages.EditorPreferencePage_sourceHoverBackgroundColor,
+					PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR,
+					PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT },
+
+	};
+
+	private List colorList;
+	private ColorSelector colorEditor;
+	private Button colorDefault;
 
 	public EditorConfigurationBlock(PreferencePage mainPreferencePage,
 			OverlayPreferenceStore store) {
@@ -65,13 +103,14 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 	public EditorConfigurationBlock(PreferencePage mainPreferencePage,
 			OverlayPreferenceStore store, int flags) {
 		super(store, mainPreferencePage);
+		flags = flags | FLAG_EDITOR_APPEARANCE_COLOR_OPTIONS;
 		this.flags = flags;
 		getPreferenceStore().addKeys(createOverlayStoreKeys(flags));
 	}
 
 	private static OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys(
 			int flags) {
-		ArrayList keys = new ArrayList();
+		ArrayList<OverlayKey> keys = new ArrayList<OverlayKey>();
 		if ((flags & FLAG_EDITOR_SMART_NAVIGATION) != 0) {
 			keys.add(new OverlayPreferenceStore.OverlayKey(
 					OverlayPreferenceStore.BOOLEAN,
@@ -99,9 +138,41 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 					OverlayPreferenceStore.BOOLEAN,
 					PreferenceConstants.EDITOR_TAB_ALWAYS_INDENT));
 		}
+		if ((flags & FLAG_EDITOR_APPEARANCE_COLOR_OPTIONS) != 0) {
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.BOOLEAN,
+					PreferenceConstants.EDITOR_MATCHING_BRACKETS));
+			// keys.add(new OverlayPreferenceStore.OverlayKey(
+			// OverlayPreferenceStore.BOOLEAN,
+			// PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB));
+			// keys.add(new OverlayPreferenceStore.OverlayKey(
+			// OverlayPreferenceStore.BOOLEAN,
+			// PreferenceConstants.EDITOR_SHOW_SEGMENTS));
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.STRING,
+					PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR));
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.STRING,
+					PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND));
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.STRING,
+					PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND));
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.STRING,
+					PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND));
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.STRING,
+					PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND));
+			keys.add(new OverlayPreferenceStore.OverlayKey(
+					OverlayPreferenceStore.STRING,
+					PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR));
+			keys
+					.add(new OverlayPreferenceStore.OverlayKey(
+							OverlayPreferenceStore.BOOLEAN,
+							PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT));
+		}
 
-		return (OverlayPreferenceStore.OverlayKey[]) keys
-				.toArray(new OverlayPreferenceStore.OverlayKey[keys.size()]);
+		return keys.toArray(new OverlayPreferenceStore.OverlayKey[keys.size()]);
 	}
 
 	/**
@@ -126,6 +197,10 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 		}
 
 		createTabsGroup(control);
+
+		if ((flags & FLAG_EDITOR_APPEARANCE_COLOR_OPTIONS) != 0) {
+			createAppearanceOptionsGroup(control);
+		}
 
 		return control;
 	}
@@ -192,14 +267,193 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 		return composite;
 	}
 
+	private Control createAppearanceOptionsGroup(Composite composite) {
+		Label spacer = new Label(composite, SWT.LEFT);
+		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan = 2;
+		gd.heightHint = convertHeightInCharsToPixels(1) / 2;
+		spacer.setLayoutData(gd);
+
+		addCheckBox(composite,
+				PreferencesMessages.EditorPreferencePage_matchingBrackets,
+				PreferenceConstants.EDITOR_MATCHING_BRACKETS, 0);
+
+		// Button showSegsB = addCheckBox(composite,
+		// PreferencesMessages.EditorPreferencePage_showSegments,
+		// PreferenceConstants.EDITOR_SHOW_SEGMENTS, 0);
+		// showSegsB.setEnabled(false);
+
+		Label l = new Label(composite, SWT.LEFT);
+		gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan = 2;
+		gd.heightHint = convertHeightInCharsToPixels(1) / 2;
+		l.setLayoutData(gd);
+
+		l = new Label(composite, SWT.LEFT);
+		l.setText(PreferencesMessages.EditorPreferencePage_title1);
+		gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan = 2;
+		l.setLayoutData(gd);
+
+		Composite editorComposite = new Composite(composite, SWT.NONE);
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 2;
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		editorComposite.setLayout(layout);
+		gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL
+				| GridData.FILL_VERTICAL);
+		gd.horizontalSpan = 2;
+		editorComposite.setLayoutData(gd);
+
+		colorList = new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL
+				| SWT.BORDER);
+		gd = new GridData(GridData.VERTICAL_ALIGN_BEGINNING
+				| GridData.FILL_HORIZONTAL);
+		gd.heightHint = convertHeightInCharsToPixels(12);
+		colorList.setLayoutData(gd);
+
+		Composite stylesComposite = new Composite(editorComposite, SWT.NONE);
+		layout = new GridLayout();
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		layout.numColumns = 2;
+		stylesComposite.setLayout(layout);
+		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		l = new Label(stylesComposite, SWT.LEFT);
+		l.setText(PreferencesMessages.EditorPreferencePage_color);
+		gd = new GridData();
+		gd.horizontalAlignment = GridData.BEGINNING;
+		l.setLayoutData(gd);
+
+		colorEditor = new ColorSelector(stylesComposite);
+		Button foregroundColorButton = colorEditor.getButton();
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment = GridData.BEGINNING;
+		foregroundColorButton.setLayoutData(gd);
+
+		SelectionListener colorDefaultSelectionListener = new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean systemDefault = colorDefault.getSelection();
+				colorEditor.getButton().setEnabled(!systemDefault);
+
+				int i = colorList.getSelectionIndex();
+				if (i == -1)
+					return;
+
+				String key = colorListModel[i][2];
+				if (key != null)
+					getPreferenceStore().setValue(key, systemDefault);
+			}
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		};
+
+		colorDefault = new Button(stylesComposite, SWT.CHECK);
+		colorDefault
+				.setText(PreferencesMessages.EditorPreferencePage_systemDefault);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment = GridData.BEGINNING;
+		gd.horizontalSpan = 2;
+		colorDefault.setLayoutData(gd);
+		colorDefault.setVisible(false);
+		colorDefault.addSelectionListener(colorDefaultSelectionListener);
+
+		colorList.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+
+			public void widgetSelected(SelectionEvent e) {
+				handleAppearanceColorListSelection();
+			}
+		});
+		foregroundColorButton.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+
+			public void widgetSelected(SelectionEvent e) {
+				int i = colorList.getSelectionIndex();
+				if (i == -1)
+					return;
+
+				String key = colorListModel[i][1];
+				PreferenceConverter.setValue(getPreferenceStore(), key,
+						colorEditor.getColorValue());
+			}
+		});
+
+		return composite;
+	}
+
+	private void handleAppearanceColorListSelection() {
+		int i = colorList.getSelectionIndex();
+		if (i == -1)
+			return;
+		String key = colorListModel[i][1];
+		RGB rgb = PreferenceConverter.getColor(getPreferenceStore(), key);
+		colorEditor.setColorValue(rgb);
+		updateAppearanceColorWidgets(colorListModel[i][2]);
+	}
+
+	private void updateAppearanceColorWidgets(String systemDefaultKey) {
+		if (systemDefaultKey == null) {
+			colorDefault.setSelection(false);
+			colorDefault.setVisible(false);
+			colorEditor.getButton().setEnabled(true);
+		} else {
+			boolean systemDefault = getPreferenceStore().getBoolean(
+					systemDefaultKey);
+			colorDefault.setSelection(systemDefault);
+			colorDefault.setVisible(true);
+			colorEditor.getButton().setEnabled(!systemDefault);
+		}
+	}
+
+	@Override
 	public void initialize() {
 
 		super.initialize();
 
+		if ((flags & FLAG_EDITOR_APPEARANCE_COLOR_OPTIONS) != 0) {
+			initializeDefaultColors();
+
+			for (int i = 0; i < colorListModel.length; i++)
+				colorList.add(colorListModel[i][0]);
+
+			colorList.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					if (colorList != null && !colorList.isDisposed()) {
+						colorList.select(0);
+						handleAppearanceColorListSelection();
+					}
+				}
+			});
+		}
+
 	}
 
+	private void initializeDefaultColors() {
+		if (getPreferenceStore()
+				.getBoolean(
+						PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT)) {
+			RGB rgb = colorList.getDisplay().getSystemColor(
+					SWT.COLOR_INFO_BACKGROUND).getRGB();
+			PreferenceConverter.setValue(getPreferenceStore(),
+					PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR,
+					rgb);
+		}
+	}
+
+	@Override
 	public void performDefaults() {
 		super.performDefaults();
-
+		if ((flags & FLAG_EDITOR_APPEARANCE_COLOR_OPTIONS) != 0) {
+			initializeDefaultColors();
+			handleAppearanceColorListSelection();
+		}
 	}
 }

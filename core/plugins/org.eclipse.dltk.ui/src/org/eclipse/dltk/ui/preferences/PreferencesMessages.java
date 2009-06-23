@@ -279,6 +279,17 @@ public final class PreferencesMessages extends NLS {
 	public static String EditorPreferencePage_smartIndent;
 	public static String EditorPreferencePage_tabAlwaysIndent;
 	public static String EditorPreferencePage_evaluateTemporaryProblems;
+	public static String EditorPreferencePage_title1;
+	public static String EditorPreferencePage_matchingBrackets;
+	public static String EditorPreferencePage_matchingBracketsHighlightColor;
+	public static String EditorPreferencePage_showSegments;
+	public static String EditorPreferencePage_backgroundForMethodParameters;
+	public static String EditorPreferencePage_foregroundForMethodParameters;
+	public static String EditorPreferencePage_backgroundForCompletionReplacement;
+	public static String EditorPreferencePage_foregroundForCompletionReplacement;
+	public static String EditorPreferencePage_sourceHoverBackgroundColor;
+	public static String EditorPreferencePage_color;
+	public static String EditorPreferencePage_systemDefault;
 
 	public static String NewScriptProjectPreferencePage_title;
 	public static String NewScriptProjectPreferencePage_description;
