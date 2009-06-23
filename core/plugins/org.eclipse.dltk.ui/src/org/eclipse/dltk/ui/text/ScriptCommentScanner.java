@@ -32,6 +32,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 public class ScriptCommentScanner extends AbstractScriptScanner {
 
 	private final String[] fProperties;
+	private final String fTodoToken;
 	private final String fDefaultTokenProperty;
 
 	private TaskTagMatcher fTaskTagMatcher;
@@ -141,6 +142,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		super(manager, store);
 
 		fProperties = new String[] { comment, todoTag };
+		fTodoToken = todoTag;
 		fDefaultTokenProperty = comment;
 
 		this.preferences = preferences;
@@ -189,8 +191,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		String[] tasks = preferences.getTagNames();
 
 		if (tasks != null) {
-			fTaskTagMatcher = new TaskTagMatcher(
-					getToken(DLTKColorConstants.TASK_TAG));
+			fTaskTagMatcher = new TaskTagMatcher(getToken(fTodoToken));
 			fTaskTagMatcher.addTaskTags(tasks);
 			fTaskTagMatcher.setCaseSensitive(isCaseSensitive);
 			list.add(fTaskTagMatcher);
