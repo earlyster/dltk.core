@@ -766,7 +766,7 @@ public abstract class AbstractInterpreterInstallType implements
 
 	public static Object makeKey(IFileHandle installLocation,
 			EnvironmentVariable[] variables) {
-		String key = installLocation.toURI().toString();
+		String key = installLocation.getFullPath().toString();
 		if (variables != null) {
 			for (int i = 0; i < variables.length; i++) {
 				key += "|" + variables[i].getName() + ":" //$NON-NLS-1$ //$NON-NLS-2$
