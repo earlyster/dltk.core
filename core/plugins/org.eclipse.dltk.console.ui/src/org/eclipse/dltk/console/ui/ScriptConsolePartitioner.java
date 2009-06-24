@@ -11,8 +11,11 @@ package org.eclipse.dltk.console.ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.rules.IPredicateRule;
@@ -27,7 +30,18 @@ import org.eclipse.ui.console.IConsoleDocumentPartitioner;
 public class ScriptConsolePartitioner extends FastPartitioner implements
 		IConsoleDocumentPartitioner {
 
-	private List ranges = new ArrayList();
+	private SortedSet ranges = new TreeSet(new Comparator() {
+
+		public int compare(Object o1, Object o2) {
+			StyleRange sr1 = (StyleRange) o1;
+			StyleRange sr2 = (StyleRange) o2;
+			int start = sr1.start - sr2.start;
+			if (start == 0) {
+				return sr1.length - sr2.length;
+			}
+			return start;
+		}
+	});
 
 	private static class Constants {
 		public static final String MY_DOUBLE_QUOTED = "__my_double"; //$NON-NLS-1$
@@ -72,17 +86,23 @@ public class ScriptConsolePartitioner extends FastPartitioner implements
 
 	public StyleRange[] getStyleRanges(int offset, int length) {
 		List result = new ArrayList();
-		for (Iterator iterator = ranges.iterator(); iterator.hasNext();) {
+		// get the sublist with length = 0 so that it will return all with that
+		// offset.
+		StyleRange sr = new StyleRange(offset, 0, null, null, SWT.NO);
+		for (Iterator iterator = ranges.tailSet(sr).iterator(); iterator
+				.hasNext();) {
 			StyleRange r = (StyleRange) iterator.next();
 			if (r.start >= offset && r.start + r.length <= offset + length)
 				result.add((StyleRange) r.clone());
+			else
+				break;
 		}
 
 		if (result.size() > 0)
 			return (StyleRange[]) result.toArray(new StyleRange[result.size()]);
 
-		return new StyleRange[] { new StyleRange(offset, length, null, null,
-				SWT.NO) };
+		sr.length = length;
+		return new StyleRange[] { sr };
 	}
 
 	public boolean isReadOnly(int offset) {
