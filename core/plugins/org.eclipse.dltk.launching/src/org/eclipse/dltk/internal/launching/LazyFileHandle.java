@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
@@ -92,11 +93,8 @@ public class LazyFileHandle implements IFileHandle {
 	}
 
 	public IPath getFullPath() {
-		initialize();
-		if (handle != null) {
-			return this.handle.getFullPath();
-		}
-		return null;
+		// it is always possible to reconstruct full path back.
+		return EnvironmentPathUtils.getFullPath(environment, path);
 	}
 
 	public String getName() {
@@ -104,13 +102,16 @@ public class LazyFileHandle implements IFileHandle {
 		if (handle != null) {
 			return this.handle.getName();
 		}
-		return null;
+		return path.lastSegment();
 	}
 
 	public IFileHandle getParent() {
 		initialize();
 		if (handle != null) {
 			return this.handle.getParent();
+		}
+		if (path.segmentCount() > 0) {
+			return new LazyFileHandle(environment, path.removeLastSegments(1));
 		}
 		return null;
 	}
@@ -174,7 +175,7 @@ public class LazyFileHandle implements IFileHandle {
 		if (handle != null) {
 			return this.handle.openOutputStream(monitor);
 		}
-		return null;
+		throw new IOException("Error opening " + getFullPath()); //$NON-NLS-1$
 	}
 
 	public String toOSString() {
@@ -190,7 +191,7 @@ public class LazyFileHandle implements IFileHandle {
 		if (this.handle != null) {
 			return this.handle.toOSString();
 		}
-		return null;
+		return Util.EMPTY_STRING;
 	}
 
 	public URI toURI() {
@@ -245,6 +246,6 @@ public class LazyFileHandle implements IFileHandle {
 		if (handle != null) {
 			return this.handle.toString();
 		}
-		return "[UNRESOLVED FILE HANDLE]"; //$NON-NLS-1$
+		return "[UNRESOLVED]" + getFullPath(); //$NON-NLS-1$
 	}
 }
