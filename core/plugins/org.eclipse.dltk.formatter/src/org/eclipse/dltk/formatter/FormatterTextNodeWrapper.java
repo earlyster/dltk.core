@@ -13,7 +13,7 @@ package org.eclipse.dltk.formatter;
 
 public class FormatterTextNodeWrapper implements IFormatterTextNode {
 
-	private final IFormatterTextNode target;
+	protected final IFormatterTextNode target;
 
 	public FormatterTextNodeWrapper(IFormatterTextNode target) {
 		this.target = target;
