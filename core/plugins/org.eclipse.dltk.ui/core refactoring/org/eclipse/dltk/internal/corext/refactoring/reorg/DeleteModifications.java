@@ -30,6 +30,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.corext.refactoring.util.ModelElementUtil;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.DeleteArguments;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
@@ -41,8 +42,8 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
  * A modification collector for delete operations.
  * <p>
  * Note that the field <code>fPackagesToDelete</code> contains the actual
- * package when executing <code>handleScriptFolderDelete</code>. This is part
- * of the algorithm to check if a parent folder can be deleted.
+ * package when executing <code>handleScriptFolderDelete</code>. This is part of
+ * the algorithm to check if a parent folder can be deleted.
  * </p>
  */
 public class DeleteModifications extends RefactoringModifications {
@@ -95,8 +96,13 @@ public class DeleteModifications extends RefactoringModifications {
 			return;
 		case IModelElement.SOURCE_MODULE:
 			fDelete.add(element);
-			IType[] types = ((ISourceModule) element).getTypes();
-			fDelete.addAll(Arrays.asList(types));
+			try {
+				IType[] types = ((ISourceModule) element).getTypes();
+				fDelete.addAll(Arrays.asList(types));
+			} catch (ModelException e) {
+				// Ignore content retrieve errors
+				DLTKUIPlugin.log(e);
+			}
 			if (element.getResource() != null)
 				getResourceModifications().addDelete(element.getResource());
 			return;
@@ -156,11 +162,11 @@ public class DeleteModifications extends RefactoringModifications {
 
 	/**
 	 * This method collects file and folder deletion for notifying participants.
-	 * Participants will get notified of
-	 *  * deletion of the package (in any case) * deletion of files within the
-	 * package if only the files are deleted without the package folder
-	 * ("package cleaning") * deletion of the package folder if it is not only
-	 * cleared and if its parent is not removed as well.
+	 * Participants will get notified of * deletion of the package (in any case)
+	 * * deletion of files within the package if only the files are deleted
+	 * without the package folder ("package cleaning") * deletion of the package
+	 * folder if it is not only cleared and if its parent is not removed as
+	 * well.
 	 * 
 	 */
 	private void handleScriptFolderDelete(IScriptFolder pack)
