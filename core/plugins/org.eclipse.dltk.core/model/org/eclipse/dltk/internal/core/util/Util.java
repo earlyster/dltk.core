@@ -549,7 +549,7 @@ public class Util {
 						throw new ModelException(e,
 								IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
 					}
-					IStatus status = new Status(IStatus.ERROR,
+					IStatus status = new Status(IStatus.WARNING,
 							DLTKCore.PLUGIN_ID, NLS.bind(
 									Messages.Util_errorReceivingFile, file
 											.getFullPath(), String
