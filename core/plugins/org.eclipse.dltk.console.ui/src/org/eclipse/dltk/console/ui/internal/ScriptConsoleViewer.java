@@ -564,9 +564,10 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 									clipboard.dispose();
 									if (text != null && text.length() > 0) {
 										if (text.indexOf("\n") == -1) {
-											int cp = getCaretPosition();
-											insertText(text);
-											setCaretOffset(cp + text.length());
+											Point selectedRange = getSelectedRange();
+											getTextWidget().insert(text);
+											setCaretOffset(selectedRange.x
+													+ text.length());
 
 										} else {
 											StringTokenizer tokenizer = new StringTokenizer(
