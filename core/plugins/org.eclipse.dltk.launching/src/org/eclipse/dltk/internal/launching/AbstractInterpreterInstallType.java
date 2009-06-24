@@ -78,25 +78,25 @@ public abstract class AbstractInterpreterInstallType implements
 
 	public static final String DLTK_PATH_PREFIX = "DLTK:"; //$NON-NLS-1$
 
-	private List fInterpreters;
+	private List<IInterpreterInstall> fInterpreters;
 
 	private String fId;
 
-	private static HashMap fCachedLocations = new HashMap();
+	private static HashMap<Object, LibraryLocation[]> fCachedLocations = new HashMap<Object, LibraryLocation[]>();
 
 	protected AbstractInterpreterInstallType() {
-		fInterpreters = new ArrayList();
+		fInterpreters = new ArrayList<IInterpreterInstall>();
 	}
 
 	public IInterpreterInstall[] getInterpreterInstalls() {
-		return (IInterpreterInstall[]) fInterpreters
-				.toArray(new IInterpreterInstall[fInterpreters.size()]);
+		return fInterpreters.toArray(new IInterpreterInstall[fInterpreters
+				.size()]);
 	}
 
 	public void disposeInterpreterInstall(String id) {
-		Iterator it = fInterpreters.iterator();
+		Iterator<IInterpreterInstall> it = fInterpreters.iterator();
 		while (it.hasNext()) {
-			IInterpreterInstall install = (IInterpreterInstall) it.next();
+			IInterpreterInstall install = it.next();
 			if (install.getId().equals(id)) {
 				it.remove();
 				ScriptRuntime.fireInterpreterRemoved(install);
@@ -106,9 +106,7 @@ public abstract class AbstractInterpreterInstallType implements
 	}
 
 	public IInterpreterInstall findInterpreterInstall(String id) {
-		Iterator it = fInterpreters.iterator();
-		while (it.hasNext()) {
-			IInterpreterInstall install = (IInterpreterInstall) it.next();
+		for (IInterpreterInstall install : fInterpreters) {
 			if (install.getId().equals(id)) {
 				return install;
 			}
@@ -171,9 +169,7 @@ public abstract class AbstractInterpreterInstallType implements
 	}
 
 	public IInterpreterInstall findInterpreterInstallByName(String name) {
-		Iterator it = fInterpreters.iterator();
-		while (it.hasNext()) {
-			IInterpreterInstall install = (IInterpreterInstall) it.next();
+		for (IInterpreterInstall install : fInterpreters) {
 			if (install.getName().equals(name)) {
 				return install;
 			}
@@ -207,11 +203,11 @@ public abstract class AbstractInterpreterInstallType implements
 
 	protected String[] extractEnvironment(IExecutionEnvironment exeEnv,
 			EnvironmentVariable[] variables) {
-		Map env = exeEnv.getEnvironmentVariables(false);
+		Map<String, String> env = exeEnv.getEnvironmentVariables(false);
 
 		filterEnvironment(env);
 
-		List list = new ArrayList();
+		List<String> list = new ArrayList<String>();
 
 		EnvironmentVariable[] vars = EnvironmentResolver
 				.resolve(env, variables);
@@ -223,13 +219,11 @@ public abstract class AbstractInterpreterInstallType implements
 			}
 		}
 
-		Iterator it = env.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
+		for (Map.Entry<String, String> entry : env.entrySet()) {
 			list.add(entry.getKey() + "=" + entry.getValue()); //$NON-NLS-1$
 		}
 
-		return (String[]) list.toArray(new String[list.size()]);
+		return list.toArray(new String[list.size()]);
 	}
 
 	/**
@@ -242,7 +236,7 @@ public abstract class AbstractInterpreterInstallType implements
 	 * @param environment
 	 *            system environment
 	 */
-	protected void filterEnvironment(Map environment) {
+	protected void filterEnvironment(Map<String, String> environment) {
 		// Nothing to do
 	}
 
@@ -262,7 +256,7 @@ public abstract class AbstractInterpreterInstallType implements
 		final BufferedReader dataIn = new BufferedReader(new InputStreamReader(
 				process.getInputStream()));
 
-		final List result = new ArrayList();
+		final List<String> result = new ArrayList<String>();
 
 		// final Object lock = new Object();
 
@@ -332,7 +326,7 @@ public abstract class AbstractInterpreterInstallType implements
 			}
 		}
 
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	private boolean detectWorkInc(String line) {
@@ -358,21 +352,21 @@ public abstract class AbstractInterpreterInstallType implements
 		return NOT_WORK_COUNT;
 	}
 
-	public static LibraryLocation[] correctLocations(final List locs) {
+	public static LibraryLocation[] correctLocations(
+			final List<LibraryLocation> locs) {
 		return correctLocations(locs, null);
 	}
 
-	public static LibraryLocation[] correctLocations(final List locs,
-			IProgressMonitor monitor) {
-		List resolvedLocs = new ArrayList();
+	public static LibraryLocation[] correctLocations(
+			final List<LibraryLocation> locs, IProgressMonitor monitor) {
+		List<LibraryLocation> resolvedLocs = new ArrayList<LibraryLocation>();
 		if (monitor != null) {
 			monitor
 					.beginTask(
 							LaunchingMessages.AbstractInterpreterInstallType_correctingLocations,
 							locs.size());
 		}
-		for (Iterator iter = locs.iterator(); iter.hasNext();) {
-			LibraryLocation n = (LibraryLocation) iter.next();
+		for (LibraryLocation n : locs) {
 			// String res;
 			// try {
 			// File f = l.getLibraryPath().toFile();
@@ -391,7 +385,7 @@ public abstract class AbstractInterpreterInstallType implements
 			}
 		}
 
-		LibraryLocation[] libs = (LibraryLocation[]) resolvedLocs
+		LibraryLocation[] libs = resolvedLocs
 				.toArray(new LibraryLocation[resolvedLocs.size()]);
 		if (monitor != null) {
 			monitor.done();
@@ -399,8 +393,8 @@ public abstract class AbstractInterpreterInstallType implements
 		return libs;
 	}
 
-	protected void fillLocationsExceptOne(IEnvironment env, final List locs,
-			String[] paths, IPath path) {
+	protected void fillLocationsExceptOne(IEnvironment env,
+			final List<LibraryLocation> locs, String[] paths, IPath path) {
 		String sPath = path.toOSString();
 		for (int i = 0; i < paths.length; i++) {
 			if (!paths[i].equals(sPath)) {
@@ -460,14 +454,14 @@ public abstract class AbstractInterpreterInstallType implements
 			res = res.substring(DLTK_PATH_PREFIX.length());
 		}
 		String[] paths = res.split(getBuildPathDelimeter());
-		List filtered = new ArrayList();
+		List<String> filtered = new ArrayList<String>();
 		for (int i = 0; i < paths.length; ++i) {
 			if (!paths[i].equals(".")) { //$NON-NLS-1$
 				filtered.add(paths[i].trim());
 			}
 		}
 
-		return (String[]) filtered.toArray(new String[filtered.size()]);
+		return filtered.toArray(new String[filtered.size()]);
 
 	}
 
@@ -479,7 +473,7 @@ public abstract class AbstractInterpreterInstallType implements
 	 * @return
 	 */
 	protected String[] parsePaths(String[] result) {
-		List filtered = new ArrayList();
+		List<String> filtered = new ArrayList<String>();
 		for (int k = 0; k < result.length; ++k) {
 			String res = result[k];
 			if (res.startsWith(DLTK_PATH_PREFIX)) {
@@ -493,7 +487,7 @@ public abstract class AbstractInterpreterInstallType implements
 				}
 			}
 		}
-		return (String[]) filtered.toArray(new String[filtered.size()]);
+		return filtered.toArray(new String[filtered.size()]);
 	}
 
 	public IStatus validateInstallLocation(IFileHandle installLocation) {
@@ -533,9 +527,9 @@ public abstract class AbstractInterpreterInstallType implements
 	}
 
 	protected String retrivePaths(IExecutionEnvironment exeEnv,
-			final IFileHandle installLocation, final List locations,
-			IProgressMonitor monitor, IFileHandle locator,
-			EnvironmentVariable[] variables) {
+			final IFileHandle installLocation,
+			final List<LibraryLocation> locations, IProgressMonitor monitor,
+			IFileHandle locator, EnvironmentVariable[] variables) {
 		Process process = null;
 		try {
 			if (monitor != null) {
@@ -576,13 +570,11 @@ public abstract class AbstractInterpreterInstallType implements
 
 					fillLocationsExceptOne(exeEnv.getEnvironment(), locations,
 							paths, path);
-					if (result != null) {
-						StringBuffer resultBuffer = new StringBuffer();
-						for (int i = 0; i < result.length; i++) {
-							resultBuffer.append(result[i]).append("\n"); //$NON-NLS-1$
-						}
-						return resultBuffer.toString();
+					StringBuffer resultBuffer = new StringBuffer();
+					for (int i = 0; i < result.length; i++) {
+						resultBuffer.append(result[i]).append("\n"); //$NON-NLS-1$
 					}
+					return resultBuffer.toString();
 				}
 			} catch (CoreException e) {
 				DLTKLaunchingPlugin.log(e);
@@ -647,7 +639,8 @@ public abstract class AbstractInterpreterInstallType implements
 	}
 
 	protected ILookupRunnable createLookupRunnable(
-			final IFileHandle installLocation, final List locations,
+			final IFileHandle installLocation,
+			final List<LibraryLocation> locations,
 			final EnvironmentVariable[] variables) {
 		return new ILookupRunnable() {
 			public void run(IProgressMonitor monitor) {
@@ -692,9 +685,9 @@ public abstract class AbstractInterpreterInstallType implements
 							}
 						}
 					} finally {
-						if (deployment != null) {
-							deployment.dispose();
-						}
+						// if (deployment != null) {
+						deployment.dispose();
+						// }
 					}
 				} catch (IOException e) {
 					DLTKLaunchingPlugin
@@ -732,10 +725,10 @@ public abstract class AbstractInterpreterInstallType implements
 		}
 		Object cacheKey = makeKey(installLocation, variables);
 		if (fCachedLocations.containsKey(cacheKey)) {
-			return (LibraryLocation[]) fCachedLocations.get(cacheKey);
+			return fCachedLocations.get(cacheKey);
 		}
 
-		final ArrayList locations = new ArrayList();
+		final ArrayList<LibraryLocation> locations = new ArrayList<LibraryLocation>();
 
 		final ILookupRunnable runnable = createLookupRunnable(installLocation,
 				locations, variables);
