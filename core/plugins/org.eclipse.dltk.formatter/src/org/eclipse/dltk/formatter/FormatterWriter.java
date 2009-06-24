@@ -13,7 +13,6 @@ package org.eclipse.dltk.formatter;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.dltk.formatter.internal.ExcludeRegionList;
@@ -31,7 +30,7 @@ public class FormatterWriter implements IFormatterWriter {
 	private boolean lineStarted = false;
 	private char lastChar = 0;
 	private int lineNumber = 0;
-	private final List newLineCallbacks = new ArrayList();
+	private final List<IFormatterCallback> newLineCallbacks = new ArrayList<IFormatterCallback>();
 
 	private final String lineDelimiter;
 	private final IFormatterDocument document;
@@ -278,10 +277,10 @@ public class FormatterWriter implements IFormatterWriter {
 			}
 
 		};
-		final List copy = new ArrayList(newLineCallbacks);
+		IFormatterCallback[] copy = newLineCallbacks
+				.toArray(new IFormatterCallback[newLineCallbacks.size()]);
 		newLineCallbacks.clear();
-		for (Iterator i = copy.iterator(); i.hasNext();) {
-			IFormatterCallback callback = (IFormatterCallback) i.next();
+		for (IFormatterCallback callback : copy) {
 			callback.call(context, callbackWriter);
 		}
 	}
