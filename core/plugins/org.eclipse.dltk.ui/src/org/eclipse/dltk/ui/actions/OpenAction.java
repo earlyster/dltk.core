@@ -54,8 +54,6 @@ import org.eclipse.ui.texteditor.IEditorStatusLine;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- * 
- * 
  */
 public class OpenAction extends SelectionDispatchAction {
 
@@ -64,7 +62,8 @@ public class OpenAction extends SelectionDispatchAction {
 	/**
 	 * Creates a new <code>OpenAction</code>. The action requires that the
 	 * selection provided by the site's selection provider is of type <code>
-	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>
+	 * .
 	 * 
 	 * @param site
 	 *            the site providing context information for this action
@@ -99,12 +98,14 @@ public class OpenAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
 	}
@@ -112,7 +113,7 @@ public class OpenAction extends SelectionDispatchAction {
 	private boolean checkEnabled(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return false;
-		for (Iterator iter = selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter = selection.iterator(); iter.hasNext();) {
 			Object element = iter.next();
 			if (!checkElement(element)) {
 				return false;
@@ -153,6 +154,7 @@ public class OpenAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(ITextSelection selection) {
 		if (!isProcessable())
 			return;
@@ -202,7 +204,7 @@ public class OpenAction extends SelectionDispatchAction {
 		if (elements == null)
 			return null;
 
-		Map uniqueElements = new HashMap();
+		Map<IModelElement, IModelElement> uniqueElements = new HashMap<IModelElement, IModelElement>();
 		for (int i = 0; i < elements.length; i++) {
 			IModelElement element = elements[i];
 			IModelElement module = element
@@ -213,7 +215,7 @@ public class OpenAction extends SelectionDispatchAction {
 				}
 			}
 		}
-		return (IModelElement[]) uniqueElements.values().toArray(
+		return uniqueElements.values().toArray(
 				new IModelElement[uniqueElements.size()]);
 	}
 
@@ -231,6 +233,7 @@ public class OpenAction extends SelectionDispatchAction {
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction.
 	 */
+	@Override
 	public void run(IStructuredSelection selection) {
 		if (!checkEnabled(selection))
 			return;
