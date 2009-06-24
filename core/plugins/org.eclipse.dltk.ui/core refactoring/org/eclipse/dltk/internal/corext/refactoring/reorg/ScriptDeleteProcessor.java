@@ -36,10 +36,10 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKFeatures;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
@@ -193,7 +193,8 @@ public final class ScriptDeleteProcessor extends DeleteProcessor implements ICom
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotLinked(fResources))));
 		IResource[] javaResources= ReorgUtils.getResources(fScriptElements);
-		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(javaResources))));
+		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils
+				.getNotLinked(javaResources))));
 		for (int i= 0; i < fScriptElements.length; i++) {
 //			IModelElement element= fScriptElements[i];
 //			if (element instanceof IType && ((IType)element).isAnonymous()) {
