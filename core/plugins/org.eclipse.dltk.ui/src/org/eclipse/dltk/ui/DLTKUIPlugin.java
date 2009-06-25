@@ -181,8 +181,12 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 		DLTKLaunchingPlugin.getDefault();
 
 		// Close all open editors which has remote environment files open
-		PlatformUI.getWorkbench().addWorkbenchListener(
-				new ShutdownCloseRemoteEditorsListener());
+		try {
+			PlatformUI.getWorkbench().addWorkbenchListener(
+					new ShutdownCloseRemoteEditorsListener());
+		} catch (IllegalStateException e) {
+			// IGNORE: workbench has not been created yet.
+		}
 
 		ExecutionContexts.setManager(new UIExecutionContextManager());
 	}
