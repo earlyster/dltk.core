@@ -15,7 +15,7 @@ import java.util.Stack;
 
 public class AbstractFormatterNodeBuilder {
 
-	private final Stack stack = new Stack();
+	private final Stack<IFormatterContainerNode> stack = new Stack<IFormatterContainerNode>();
 
 	protected void start(IFormatterContainerNode root) {
 		stack.clear();
@@ -23,7 +23,7 @@ public class AbstractFormatterNodeBuilder {
 	}
 
 	protected IFormatterContainerNode peek() {
-		return (IFormatterContainerNode) stack.peek();
+		return stack.peek();
 	}
 
 	protected void push(IFormatterContainerNode node) {
