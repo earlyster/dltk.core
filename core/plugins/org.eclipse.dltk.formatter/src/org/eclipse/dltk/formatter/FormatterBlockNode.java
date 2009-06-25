@@ -90,6 +90,7 @@ public class FormatterBlockNode extends AbstractFormatterNode implements
 		return Collections.unmodifiableList(body);
 	}
 
+	@Override
 	public String toString() {
 		return body.toString();
 	}
