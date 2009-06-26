@@ -124,8 +124,8 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 				&& remoteFolderDialogField.isEnabled()) {
 			String remoteFolder = remoteFolderDialogField.getText();
 			if (remoteFolder.length() == 0) {
-				status
-						.setError(Messages.NewSourceModulePage_remoteFolderCannotBeEmpty);
+				// status
+				// .setError(Messages.NewSourceModulePage_remoteFolderCannotBeEmpty);
 			} else {
 				final IEnvironment environment = getLinkedEnvironment();
 				if (environment != null) {
@@ -436,7 +436,8 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 			final IResource resource = currentScriptFolder.getResource();
 			if (resource != null
 					&& (resource.getType() & (IResource.FOLDER | IResource.PROJECT)) != 0
-					&& remoteFolderDialogField.isEnabled()) {
+					&& remoteFolderDialogField.isEnabled()
+					&& remoteFolderDialogField.getText().length() > 0) {
 				final IEnvironment environment = getEnvironment();
 				if (environment != null) {
 					final IFileHandle folder = environment.getFile(new Path(
