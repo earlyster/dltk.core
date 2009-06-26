@@ -371,7 +371,7 @@ public abstract class MainLaunchConfigurationTab extends
 		IEnvironment environment = EnvironmentManager.getEnvironment(project);
 		if (script != null) {
 			FilePathValidator validator = new FieldValidators.FilePathValidator();
-			IStatus result = validator.validate(script.getPath(), environment);
+			IStatus result = validator.validate(script, environment);
 
 			if (!result.isOK()) {
 				IFileHandle file = PlatformFileUtils
