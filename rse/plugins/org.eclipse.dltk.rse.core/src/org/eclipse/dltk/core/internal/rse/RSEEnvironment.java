@@ -12,6 +12,7 @@ import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.internal.efs.RSEFileSystem;
 import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
 
+@SuppressWarnings("restriction")
 public class RSEEnvironment implements IEnvironment, IAdaptable {
 	private IRemoteFileSubSystem fs;
 	private IHost host;
@@ -49,6 +50,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 		return fs.getSeparatorChar();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof RSEEnvironment) {
 			RSEEnvironment other = (RSEEnvironment) obj;
@@ -57,6 +59,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		return getId().hashCode();
 	}
@@ -69,6 +72,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 		return host;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object getAdapter(Class adapter) {
 		return Platform.getAdapterManager()
 				.loadAdapter(this, adapter.getName());
