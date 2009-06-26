@@ -405,4 +405,73 @@ public final class EnvironmentManager {
 		}
 	}
 
+	private static class LocationResolverManager extends
+			LazyExtensionManager<IEnvironmentLocationResolver> {
+
+		private static class Desc extends
+				Descriptor<IEnvironmentLocationResolver> {
+			private int priority;
+
+			public Desc(LocationResolverManager manager,
+					IConfigurationElement configurationElement) {
+				super(manager, configurationElement);
+				this.priority = parseInt(configurationElement
+						.getAttribute("priority"));
+			}
+
+			private int parseInt(String value) {
+				try {
+					return Integer.parseInt(value);
+				} catch (NumberFormatException e) {
+					return 0;
+				}
+			}
+
+		}
+
+		private static final String LOCATION_RESOLVER_EXTENSION = DLTKCore.PLUGIN_ID
+				+ ".locationResolver"; //$NON-NLS-1$
+
+		public LocationResolverManager() {
+			super(LOCATION_RESOLVER_EXTENSION);
+		}
+
+		@Override
+		protected Descriptor<IEnvironmentLocationResolver> createDescriptor(
+				IConfigurationElement confElement) {
+			return new Desc(this, confElement);
+		}
+
+		@Override
+		protected void initializeDescriptors(
+				List<Descriptor<IEnvironmentLocationResolver>> descriptors) {
+			Collections.sort(descriptors,
+					new Comparator<Descriptor<IEnvironmentLocationResolver>>() {
+						public int compare(
+								Descriptor<IEnvironmentLocationResolver> arg0,
+								Descriptor<IEnvironmentLocationResolver> arg1) {
+							Desc d1 = (Desc) arg0;
+							Desc d2 = (Desc) arg1;
+							return d1.priority - d2.priority;
+						}
+					});
+		}
+	}
+
+	private static LocationResolverManager resolverManager = null;
+
+	public static URI[] resolve(URI location) {
+		if (resolverManager == null) {
+			resolverManager = new LocationResolverManager();
+		}
+		final List<URI> result = new ArrayList<URI>();
+		for (IEnvironmentLocationResolver resolver : resolverManager) {
+			final URI[] resolved = resolver.resolve(location);
+			if (resolved.length != 0) {
+				result.addAll(Arrays.asList(resolved));
+			}
+		}
+		return result.toArray(new URI[result.size()]);
+	}
+
 }
