@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.rse.core.model.IHost;
@@ -96,6 +97,15 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 				&& locationURI.getHost().equals(host.getHostName())) {
 			return new RSEFileHandle(this, locationURI);
 		} else {
+			final URI[] resolved = EnvironmentManager.resolve(locationURI);
+			for (int i = 0; i < resolved.length; ++i) {
+				final URI newLocation = resolved[i];
+				if (RSEEnvironmentProvider.RSE_SCHEME
+						.equalsIgnoreCase(newLocation.getScheme())
+						&& newLocation.getHost().equals(host.getHostName())) {
+					return new RSEFileHandle(this, newLocation);
+				}
+			}
 			return null;
 		}
 	}
