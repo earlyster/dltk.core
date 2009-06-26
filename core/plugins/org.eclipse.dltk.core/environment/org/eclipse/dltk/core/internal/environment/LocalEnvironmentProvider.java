@@ -20,7 +20,7 @@ import org.eclipse.dltk.core.environment.IEnvironmentProvider;
 
 public class LocalEnvironmentProvider implements IEnvironmentProvider {
 
-	static final String FILE_SCHEME = "file";
+	public static final String FILE_SCHEME = "file"; //$NON-NLS-1$
 
 	public LocalEnvironmentProvider() {
 	}
