@@ -1,5 +1,7 @@
 package org.eclipse.dltk.ui.preferences;
 
+import java.net.URI;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
@@ -38,6 +40,24 @@ public final class FieldValidators {
 				}
 			}
 
+			return status;
+		}
+
+		public IStatus validate(URI location, IEnvironment environment) {
+			StatusInfo status = new StatusInfo();
+			if (environment == null) {
+				status
+						.setError(org.eclipse.dltk.ui.preferences.Messages.FieldValidators_0);
+				return status;
+			}
+			IFileHandle file = environment.getFile(location);
+			if (!file.exists()) {
+				status.setError(Messages.format(
+						ValidatorMessages.FilePathNotExists, location));
+			} else if (file.isDirectory()) {
+				status.setError(Messages.format(
+						ValidatorMessages.FilePathIsInvalid, location));
+			}
 			return status;
 		}
 	}
