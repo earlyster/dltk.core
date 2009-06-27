@@ -87,7 +87,7 @@ public class FormatterControlManager implements IFormatterControlManager,
 		return text;
 	}
 
-	private final Map labelAssociations = new HashMap();
+	private final Map<Control, Label> labelAssociations = new HashMap<Control, Label>();
 
 	/**
 	 * @param control
@@ -99,7 +99,7 @@ public class FormatterControlManager implements IFormatterControlManager,
 
 	public void enableControl(Control control, boolean enabled) {
 		control.setEnabled(enabled);
-		final Label label = (Label) labelAssociations.get(control);
+		final Label label = labelAssociations.get(control);
 		if (label != null) {
 			label.setEnabled(enabled);
 		}
