@@ -24,7 +24,7 @@ public interface IExecutionEnvironment {
 	 * Local environment will return environment each time. RSE environment will
 	 * return environment only if realYneed is true.
 	 */
-	Map getEnvironmentVariables(boolean realyNeed);
+	Map<String, String> getEnvironmentVariables(boolean realyNeed);
 
 	IDeployment createDeployment();
 
