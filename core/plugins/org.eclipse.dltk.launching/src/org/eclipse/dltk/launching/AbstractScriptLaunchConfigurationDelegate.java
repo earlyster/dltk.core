@@ -55,6 +55,7 @@ import org.eclipse.dltk.debug.core.DLTKDebugLaunchConstants;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.InterpreterRuntimeBuildpathEntryResolver;
 import org.eclipse.dltk.launching.debug.DebuggingEngineManager;
+import org.eclipse.osgi.util.NLS;
 
 import com.ibm.icu.text.MessageFormat;
 
@@ -748,7 +749,24 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 				if (environment != null) {
 					final IFileHandle file = environment.getFile(scriptURI);
 					if (file != null) {
+						if (!file.exists()) {
+							abort(
+									NLS
+											.bind(
+													LaunchingMessages.AbstractScriptLaunchConfigurationDelegate_Main_script_not_exist,
+													file.toOSString()),
+									null,
+									ScriptLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_SCRIPT);
+						}
 						return file.getPath().toOSString();
+					} else {
+						abort(
+								NLS
+										.bind(
+												LaunchingMessages.AbstractScriptLaunchConfigurationDelegate_Main_script_not_resolved,
+												mainScriptName),
+								null,
+								ScriptLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_SCRIPT);
 					}
 				}
 			}
