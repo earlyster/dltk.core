@@ -45,7 +45,7 @@ public class ProjectMetadataBackup {
 
 	}
 
-	private final List entries = new ArrayList();
+	private final List<BackupEntry> entries = new ArrayList<BackupEntry>();
 
 	/**
 	 * @param projectLocation
@@ -77,8 +77,7 @@ public class ProjectMetadataBackup {
 			throws CoreException {
 		monitor.beginTask("", entries.size() * 2); //$NON-NLS-1$
 		try {
-			for (int i = 0; i < entries.size(); ++i) {
-				final BackupEntry entry = (BackupEntry) entries.get(i);
+			for (final BackupEntry entry : entries) {
 				try {
 					IFileStore projectFile = EFS.getStore(projectLocation)
 							.getChild(entry.filename);
