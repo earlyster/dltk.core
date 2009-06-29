@@ -10,16 +10,19 @@
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.dltk.launching.EnvironmentVariable;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.osgi.util.NLS;
 
 public class EnvironmentVariableContentProvider implements ITreeContentProvider {
 
@@ -44,8 +47,7 @@ public class EnvironmentVariableContentProvider implements ITreeContentProvider 
 			for (int i = 0; i < vars.length; i++) {
 				fVariables[i] = new EnvironmentVariable(vars[i]);
 			}
-		}
-		else {
+		} else {
 			fVariables = new EnvironmentVariable[0];
 		}
 		fViewer.refresh();
@@ -110,19 +112,20 @@ public class EnvironmentVariableContentProvider implements ITreeContentProvider 
 	 * Remove the libraries contained in the given selection.
 	 */
 	public void remove(IStructuredSelection selection) {
-		List newLibraries = new ArrayList();
+		List<EnvironmentVariable> newLibraries = new ArrayList<EnvironmentVariable>();
 		for (int i = 0; i < fVariables.length; i++) {
 			newLibraries.add(fVariables[i]);
 		}
-		Iterator iterator = selection.iterator();
+		@SuppressWarnings("unchecked")
+		Iterator<EnvironmentVariable> iterator = selection.iterator();
 		while (iterator.hasNext()) {
 			Object element = iterator.next();
 			if (element instanceof EnvironmentVariable) {
 				newLibraries.remove(element);
 			}
 		}
-		fVariables = (EnvironmentVariable[]) newLibraries
-				.toArray(new EnvironmentVariable[newLibraries.size()]);
+		fVariables = newLibraries.toArray(new EnvironmentVariable[newLibraries
+				.size()]);
 		fViewer.refresh();
 	}
 
@@ -131,11 +134,13 @@ public class EnvironmentVariableContentProvider implements ITreeContentProvider 
 	 * libraries if the selection is empty.
 	 */
 	public void add(EnvironmentVariable[] libs, IStructuredSelection selection) {
-		List newLibraries = new ArrayList(fVariables.length + libs.length);
+		List<EnvironmentVariable> newLibraries = new ArrayList<EnvironmentVariable>(
+				fVariables.length + libs.length);
 		for (int i = 0; i < fVariables.length; i++) {
 			newLibraries.add(fVariables[i]);
 		}
-		List toAdd = new ArrayList(libs.length);
+		List<EnvironmentVariable> toAdd = new ArrayList<EnvironmentVariable>(
+				libs.length);
 		for (int i = 0; i < libs.length; i++) {
 			toAdd.add(new EnvironmentVariable(libs[i]));
 		}
@@ -147,10 +152,46 @@ public class EnvironmentVariableContentProvider implements ITreeContentProvider 
 			int index = newLibraries.indexOf(firstLib);
 			newLibraries.addAll(index, toAdd);
 		}
-		fVariables = (EnvironmentVariable[]) newLibraries
-				.toArray(new EnvironmentVariable[newLibraries.size()]);
+		fVariables = newLibraries.toArray(new EnvironmentVariable[newLibraries
+				.size()]);
 		fViewer.refresh();
 		fViewer.setSelection(new StructuredSelection(libs), true);
+	}
+
+	/**
+	 * Attempts to add the given variable. Returns whether the variable was
+	 * added or not (as when the user answers not to overwrite an existing
+	 * variable).
+	 * 
+	 * @param variable
+	 *            the variable to add
+	 * @return whether the variable was added
+	 */
+	public boolean addVariable(EnvironmentVariable variable) {
+		String name = variable.getName();
+		List<EnvironmentVariable> newVars = new ArrayList<EnvironmentVariable>();
+		newVars.addAll(Arrays.asList(fVariables));
+		for (Iterator<EnvironmentVariable> i = newVars.iterator(); i.hasNext();) {
+			EnvironmentVariable existingVariable = i.next();
+			if (existingVariable.getName().equals(name)) {
+				boolean overWrite = MessageDialog
+						.openQuestion(
+								fViewer.getControl().getShell(),
+								Messages.EnvironmentVariableContentProvider_overwriteVariableTitle,
+								NLS
+										.bind(
+												Messages.EnvironmentVariableContentProvider_overwriteVariableMessage,
+												name));
+				if (!overWrite) {
+					return false;
+				}
+				i.remove();
+				break;
+			}
+		}
+		newVars.add(new EnvironmentVariable(variable));
+		fVariables = newVars.toArray(new EnvironmentVariable[newVars.size()]);
+		return true;
 	}
 
 	/**

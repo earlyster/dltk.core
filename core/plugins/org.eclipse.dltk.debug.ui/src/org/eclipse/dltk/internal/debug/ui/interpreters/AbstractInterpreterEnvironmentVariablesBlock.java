@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -34,11 +33,12 @@ import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
@@ -62,6 +62,7 @@ import org.eclipse.ui.dialogs.ListSelectionDialog;
  * Control used to edit the environment variables associated with a Interpreter
  * install
  */
+@SuppressWarnings("restriction")
 public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		SelectionListener, ISelectionChangedListener {
 
@@ -307,7 +308,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		} else if (source == fAddExistedButton) {
 			addExisted((IStructuredSelection) fVariablesViewer.getSelection());
 		} else if (source == fAddButton) {
-			add((IStructuredSelection) fVariablesViewer.getSelection());
+			handleAdd();
 		} else if (source == fEditButton) {
 			EnvironmentVariable[] old = this.fEnvironmentVariablesContentProvider
 					.getVariables();
@@ -382,12 +383,11 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 			if (vars != null) {
 				EnvironmentVariable[] variables = this.fEnvironmentVariablesContentProvider
 						.getVariables();
-				Set nvars = new HashSet();
+				Set<EnvironmentVariable> nvars = new HashSet<EnvironmentVariable>();
 				nvars.addAll(Arrays.asList(vars));
 				nvars.addAll(Arrays.asList(variables));
-				this.fEnvironmentVariablesContentProvider
-						.setVariables((EnvironmentVariable[]) nvars
-								.toArray(new EnvironmentVariable[nvars.size()]));
+				this.fEnvironmentVariablesContentProvider.setVariables(nvars
+						.toArray(new EnvironmentVariable[nvars.size()]));
 			}
 		}
 	}
@@ -412,9 +412,14 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		String name = dialog.getStringValue(NAME_LABEL);
 		value = dialog.getStringValue(VALUE_LABEL);
 		if (!originalName.equals(name)) {
-			fEnvironmentVariablesContentProvider.add(
-					new EnvironmentVariable[] { new EnvironmentVariable(name,
-							value) }, selection);
+			final EnvironmentVariable newVar = new EnvironmentVariable(name,
+					value);
+			if (fEnvironmentVariablesContentProvider.addVariable(newVar)) {
+				fEnvironmentVariablesContentProvider
+						.remove(new StructuredSelection(var));
+				fVariablesViewer.setSelection(new StructuredSelection(newVar),
+						true);
+			}
 		} else {
 			var.setValue(value);
 			fVariablesViewer.refresh(true);
@@ -431,19 +436,21 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	public void widgetDefaultSelected(SelectionEvent e) {
 	}
 
-	private void add(IStructuredSelection selection) {
-		EnvironmentVariable[] libs = add();
-		if (libs == null)
+	private void handleAdd() {
+		EnvironmentVariable newVar = add();
+		if (newVar == null)
 			return;
 		EnvironmentVariable[] old = this.fEnvironmentVariablesContentProvider
 				.getVariables();
-		fEnvironmentVariablesContentProvider.add(libs, selection);
+		fEnvironmentVariablesContentProvider.addVariable(newVar);
+		fVariablesViewer.setSelection(new StructuredSelection(newVar), true);
+		fVariablesViewer.refresh();
 		fDialog.updateLibraries(this.fEnvironmentVariablesContentProvider
 				.getVariables(), old);
 		update();
 	}
 
-	private EnvironmentVariable[] add() {
+	private EnvironmentVariable add() {
 		MultipleInputDialog dialog = new MultipleInputDialog(
 				fDialog.getShell(),
 				InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_addVariable);
@@ -459,8 +466,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 
 		if (name != null && value != null && name.length() > 0
 				&& value.length() > 0) {
-			return new EnvironmentVariable[] { new EnvironmentVariable(name
-					.trim(), value.trim()) };
+			return new EnvironmentVariable(name.trim(), value.trim());
 		}
 		return null;
 	}
@@ -495,6 +501,8 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		IStructuredSelection selection = (IStructuredSelection) fVariablesViewer
 				.getSelection();
 		fRemoveButton.setEnabled(!selection.isEmpty());
+		fEditButton.setEnabled(selection.size() == 1);
+		@SuppressWarnings("unused")
 		boolean enableUp = true, enableDown = true;
 		Object[] libraries = fEnvironmentVariablesContentProvider
 				.getElements(null);
@@ -504,7 +512,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		} else {
 			Object first = libraries[0];
 			Object last = libraries[libraries.length - 1];
-			for (Iterator iter = selection.iterator(); iter.hasNext();) {
+			for (Iterator<?> iter = selection.iterator(); iter.hasNext();) {
 				Object element = iter.next();
 				Object lib;
 				lib = element;
@@ -558,7 +566,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	protected EnvironmentVariable[] addExisted() {
 
 		// get Environment Variables from the Environment
-		Map envVariables = getNativeEnvironment();
+		Map<String, EnvironmentVariable> envVariables = getNativeEnvironment();
 		if (envVariables.size() == 0) {
 			MessageBox box = new MessageBox(fDialog.getShell(), SWT.ICON_ERROR);
 			box
@@ -573,10 +581,8 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		}
 
 		// get Environment Variables from the table
-		EnvironmentVariable[] items = fEnvironmentVariablesContentProvider
-				.getVariables();
-		for (int i = 0; i < items.length; i++) {
-			EnvironmentVariable var = items[i];
+		for (EnvironmentVariable var : fEnvironmentVariablesContentProvider
+				.getVariables()) {
 			envVariables.remove(var.getName());
 		}
 
@@ -600,29 +606,18 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	}
 
 	private ILabelProvider createSelectionDialogLabelProvider() {
-		return new ILabelProvider() {
+		return new LabelProvider() {
+			@Override
 			public Image getImage(Object element) {
 				return DebugPluginImages
 						.getImage(IDebugUIConstants.IMG_OBJS_ENVIRONMENT);
 			}
 
+			@Override
 			public String getText(Object element) {
 				EnvironmentVariable var = (EnvironmentVariable) element;
 				return NLS.bind(LaunchConfigurationsMessages.EnvironmentTab_7,
 						var.getName(), var.getValue());
-			}
-
-			public void addListener(ILabelProviderListener listener) {
-			}
-
-			public void dispose() {
-			}
-
-			public boolean isLabelProperty(Object element, String property) {
-				return false;
-			}
-
-			public void removeListener(ILabelProviderListener listener) {
 			}
 		};
 	}
@@ -630,27 +625,22 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	private IStructuredContentProvider createSelectionDialogContentProvider() {
 		return new IStructuredContentProvider() {
 			public Object[] getElements(Object inputElement) {
-				EnvironmentVariable[] elements = null;
-				if (inputElement instanceof HashMap) {
-					Comparator comparator = new Comparator() {
-						public int compare(Object o1, Object o2) {
-							String s1 = (String) o1;
-							String s2 = (String) o2;
-							return s1.compareTo(s2);
-						}
-					};
-					TreeMap envVars = new TreeMap(comparator);
-					envVars.putAll((Map) inputElement);
-					elements = new EnvironmentVariable[envVars.size()];
-					int index = 0;
-					for (Iterator iterator = envVars.keySet().iterator(); iterator
-							.hasNext(); index++) {
-						Object key = iterator.next();
-						elements[index] = (EnvironmentVariable) envVars
-								.get(key);
-					}
+				if (inputElement instanceof Map<?, ?>) {
+					@SuppressWarnings("unchecked")
+					final Map<String, EnvironmentVariable> env = (Map<String, EnvironmentVariable>) inputElement;
+					final EnvironmentVariable[] elements = env.values()
+							.toArray(new EnvironmentVariable[env.size()]);
+					Arrays.sort(elements,
+							new Comparator<EnvironmentVariable>() {
+								public int compare(EnvironmentVariable s1,
+										EnvironmentVariable s2) {
+									return s1.getName().compareTo(s2.getName());
+								}
+							});
+					return elements;
+				} else {
+					return new EnvironmentVariable[0];
 				}
-				return elements;
 			}
 
 			public void dispose() {
@@ -662,18 +652,17 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		};
 	}
 
-	private Map getNativeEnvironment() {
+	private Map<String, EnvironmentVariable> getNativeEnvironment() {
 		IEnvironment environment = fDialog.getEnvironment();
 		IExecutionEnvironment execEnvironment = (IExecutionEnvironment) environment
 				.getAdapter(IExecutionEnvironment.class);
-		Map stringVars = execEnvironment.getEnvironmentVariables(true);
-		HashMap vars = new HashMap();
-		for (Iterator i = stringVars.keySet().iterator(); i.hasNext();) {
-			String key = (String) i.next();
-			String value = (String) stringVars.get(key);
-			vars.put(key, new EnvironmentVariable(key, value));
+		Map<String, String> stringVars = execEnvironment
+				.getEnvironmentVariables(true);
+		HashMap<String, EnvironmentVariable> vars = new HashMap<String, EnvironmentVariable>();
+		for (Map.Entry<String, String> entry : stringVars.entrySet()) {
+			vars.put(entry.getKey(), new EnvironmentVariable(entry.getKey(),
+					entry.getValue()));
 		}
 		return vars;
 	}
-
 }
