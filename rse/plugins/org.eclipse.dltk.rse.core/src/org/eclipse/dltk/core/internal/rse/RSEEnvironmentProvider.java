@@ -6,6 +6,10 @@ import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
@@ -83,7 +87,17 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 					initThread = null;
 					lock.notifyAll();
 				}
-				EnvironmentManager.refreshBuildpathContainersForMixedProjects();
+				final Job j = new Job("Refresh Remote Interpreters") {
+					@Override
+					protected IStatus run(IProgressMonitor monitor) {
+						EnvironmentManager
+								.refreshBuildpathContainersForMixedProjects();
+						return Status.OK_STATUS;
+					}
+				};
+				j.setPriority(Job.LONG);
+				j.setUser(true);
+				j.schedule();
 				EnvironmentManager.fireEnvirontmentChange();
 			}
 		}
