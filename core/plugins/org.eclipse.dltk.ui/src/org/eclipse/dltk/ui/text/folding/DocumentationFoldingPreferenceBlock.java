@@ -5,6 +5,7 @@ import java.util.List;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore;
 import org.eclipse.dltk.ui.preferences.PreferencesMessages;
+import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore.OverlayKey;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -25,7 +26,8 @@ public class DocumentationFoldingPreferenceBlock extends
 	 * also invoke this method.
 	 * </p>
 	 */
-	protected void addOverlayKeys(List keys) {
+	@Override
+	protected void addOverlayKeys(List<OverlayKey> keys) {
 		keys.add(new OverlayPreferenceStore.OverlayKey(
 				OverlayPreferenceStore.BOOLEAN,
 				PreferenceConstants.EDITOR_COMMENT_FOLDING_JOIN_NEWLINES));

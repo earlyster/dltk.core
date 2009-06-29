@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.dltk.ui.preferences.ImprovedAbstractConfigurationBlock;
 import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore;
 import org.eclipse.dltk.ui.preferences.PreferencesMessages;
+import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore.OverlayKey;
 import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.layout.GridData;
@@ -63,10 +64,10 @@ public abstract class AbstractContributedFoldingPreferenceBlock extends
 	/**
 	 * Adds the folding option preference overlay keys.
 	 */
-	protected abstract void addOverlayKeys(List keys);
+	protected abstract void addOverlayKeys(List<OverlayKey> keys);
 
-	protected final List createOverlayKeys() {
-		ArrayList keys = new ArrayList();
+	protected final List<OverlayKey> createOverlayKeys() {
+		ArrayList<OverlayKey> keys = new ArrayList<OverlayKey>();
 		addOverlayKeys(keys);
 		return keys;
 	}

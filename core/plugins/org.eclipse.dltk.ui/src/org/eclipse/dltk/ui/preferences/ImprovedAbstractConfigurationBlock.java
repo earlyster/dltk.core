@@ -13,8 +13,8 @@ package org.eclipse.dltk.ui.preferences;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore.OverlayKey;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -85,7 +85,7 @@ public abstract class ImprovedAbstractConfigurationBlock implements
 	 * storing any preference values.
 	 * </p>
 	 */
-	protected abstract List createOverlayKeys();
+	protected abstract List<OverlayKey> createOverlayKeys();
 
 	// Binding
 
@@ -166,10 +166,10 @@ public abstract class ImprovedAbstractConfigurationBlock implements
 	}
 
 	private void addOverlayKeys() {
-		List overlayKeys = createOverlayKeys();
+		List<OverlayKey> overlayKeys = createOverlayKeys();
 		if (overlayKeys != null) {
-			OverlayKey[] keys = (OverlayKey[]) overlayKeys
-					.toArray(new OverlayKey[overlayKeys.size()]);
+			OverlayKey[] keys = overlayKeys.toArray(new OverlayKey[overlayKeys
+					.size()]);
 			store.addKeys(keys);
 		}
 	}
