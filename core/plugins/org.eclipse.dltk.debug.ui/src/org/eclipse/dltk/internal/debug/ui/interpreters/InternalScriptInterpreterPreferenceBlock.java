@@ -11,6 +11,7 @@ import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.dltk.ui.preferences.ComboViewerBlock;
 import org.eclipse.dltk.ui.preferences.ImprovedAbstractConfigurationBlock;
 import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore;
+import org.eclipse.dltk.ui.preferences.OverlayPreferenceStore.OverlayKey;
 import org.eclipse.dltk.ui.util.SWTFactory;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -112,8 +113,8 @@ public abstract class InternalScriptInterpreterPreferenceBlock extends
 	/*
 	 * @see org.eclipse.dltk.ui.preferences.ImprovedAbstractConfigurationBlock#createOverlayKeys()
 	 */
-	protected List createOverlayKeys() {
-		ArrayList keys = new ArrayList(1);
+	protected List<OverlayKey> createOverlayKeys() {
+		ArrayList<OverlayKey> keys = new ArrayList<OverlayKey>(1);
 
 		keys.add(new OverlayPreferenceStore.OverlayKey(
 				OverlayPreferenceStore.STRING, getPreferenceKey()));
@@ -130,7 +131,7 @@ public abstract class InternalScriptInterpreterPreferenceBlock extends
 	}
 
 	private IInterpreterInstall[] getInterpreterInstalls() {
-		List interpreters = new ArrayList();
+		List<IInterpreterInstall> interpreters = new ArrayList<IInterpreterInstall>();
 		IInterpreterInstallType[] types = ScriptRuntime
 				.getInterpreterInstallTypes(getNatureId());
 		for (int i = 0; i < types.length; i++) {
@@ -140,7 +141,7 @@ public abstract class InternalScriptInterpreterPreferenceBlock extends
 			}
 		}
 
-		return (IInterpreterInstall[]) interpreters
+		return interpreters
 				.toArray(new IInterpreterInstall[interpreters.size()]);
 	}
 }
