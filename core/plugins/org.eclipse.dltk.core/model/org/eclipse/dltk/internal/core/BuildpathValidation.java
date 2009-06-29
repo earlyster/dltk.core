@@ -64,7 +64,8 @@ public class BuildpathValidation {
 		// update resolved buildpath problems
 		this.project.flushBuildpathProblemMarkers(false/*cycle*/, false/*format*/);
 		
-		if (rawBuildpath != ScriptProject.INVALID_BUILDPATH ) {
+		if (rawBuildpath != ScriptProject.INVALID_BUILDPATH
+				&& rawBuildpath != null) {
 		 	for (int i = 0; i < rawBuildpath.length; i++) {
 				status = BuildpathEntry.validateBuildpathEntry(this.project, rawBuildpath[i],  true /*recurse in container*/);
 				if (!status.isOK()) {
