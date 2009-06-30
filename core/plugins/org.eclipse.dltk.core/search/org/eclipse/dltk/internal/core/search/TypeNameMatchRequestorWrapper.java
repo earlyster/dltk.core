@@ -12,7 +12,6 @@ package org.eclipse.dltk.internal.core.search;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
@@ -103,12 +102,12 @@ public class TypeNameMatchRequestorWrapper implements
 				int separatorIndex = path
 						.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR);
 				type = separatorIndex == -1 ? createTypeFromPath(path,
-						new String(simpleTypeName), enclosingTypeNames) : null;
-				// createTypeFromZip(path, new String(simpleTypeName),
-				// enclosingTypeNames);
-				if (DLTKCore.DEBUG) {
-					System.err.println("TODO: Add types from zips..."); //$NON-NLS-1$
-				}
+						new String(simpleTypeName), enclosingTypeNames)
+						: createTypeFromZip(path, new String(simpleTypeName),
+								enclosingTypeNames);
+				// if (DLTKCore.DEBUG) {
+				// System.err.println("TO DO: Add types from zips..."); //$NON-NLS-1$
+				// }
 			}
 			if (type != null) {
 				this.requestor.acceptTypeNameMatch(new DLTKSearchTypeNameMatch(
@@ -152,7 +151,7 @@ public class TypeNameMatchRequestorWrapper implements
 		IScriptFolder pkgFragment = (IScriptFolder) this.packageHandles
 				.get(pkgName);
 		if (pkgFragment == null) {
-			pkgFragment = ((IProjectFragment) this.lastProjectFragment)
+			pkgFragment = this.lastProjectFragment
 					.getScriptFolder(ScriptModelUtil.toPath(pkgName));
 			this.packageHandles.put(pkgName, pkgFragment);
 		}
@@ -224,7 +223,7 @@ public class TypeNameMatchRequestorWrapper implements
 		IScriptFolder pkgFragment = (IScriptFolder) this.packageHandles
 				.get(pkgName);
 		if (pkgFragment == null) {
-			pkgFragment = ((IProjectFragment) this.lastProjectFragment)
+			pkgFragment = this.lastProjectFragment
 					.getScriptFolder(ScriptModelUtil.toPath(pkgName));
 			this.packageHandles.put(pkgName, pkgFragment);
 		}
