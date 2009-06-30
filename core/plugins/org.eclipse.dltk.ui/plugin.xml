@@ -77,7 +77,14 @@
             class="org.eclipse.dltk.internal.ui.MarkerAdapterFactory" 
             adaptableType="org.eclipse.core.resources.IMarker">
             <adapter type="org.eclipse.search.ui.ISearchPageScoreComputer"/>
-		</factory>	  
+		</factory>
+   <factory
+         adaptableType="org.eclipse.ui.IFileEditorInput"
+         class="org.eclipse.dltk.internal.ui.FileEditorInputAdapterFactory">
+      <adapter
+            type="org.eclipse.dltk.core.IModelElement">
+      </adapter>
+   </factory>	  
             
    </extension>
  <extension
