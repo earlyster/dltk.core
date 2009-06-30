@@ -22,7 +22,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.dltk.internal.corext.util.Messages;
+import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ui.ide.undo.ResourceDescription;
 
 
 public class DeleteFolderChange extends AbstractDeleteChange {
@@ -67,7 +69,7 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 		}
 	}
 
-	protected void doDelete(IProgressMonitor pm) throws CoreException{
+	protected Change doDelete(IProgressMonitor pm) throws CoreException {
 		IFolder folder= getFolder(fPath);
 		Assert.isTrue(folder.exists());
 		pm.beginTask("", 2); //$NON-NLS-1$
@@ -81,8 +83,15 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 			}
 		}, IResource.DEPTH_INFINITE, false);
 		pm.worked(1);
+
+		ResourceDescription resourceDescription = ResourceDescription
+				.fromResource(folder);
 		folder.delete(false, true, new SubProgressMonitor(pm, 1));
+		resourceDescription.recordStateFromHistory(folder,
+				new SubProgressMonitor(pm, 1));
 		pm.done();
+
+		return new UndoDeleteResourceChange(resourceDescription);
 	}
 }
 

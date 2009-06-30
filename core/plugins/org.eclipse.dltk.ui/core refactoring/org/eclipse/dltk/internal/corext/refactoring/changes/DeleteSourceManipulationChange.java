@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.corext.refactoring.changes;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -22,7 +23,10 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.dltk.internal.corext.refactoring.util.ModelElementUtil;
 import org.eclipse.dltk.internal.corext.util.Messages;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ui.ide.undo.ResourceDescription;
 
 
 public class DeleteSourceManipulationChange extends AbstractDeleteChange {
@@ -76,7 +80,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	/*
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
-	protected void doDelete(IProgressMonitor pm) throws CoreException {
+	protected Change doDelete(IProgressMonitor pm) throws CoreException {
 		ISourceManipulation element= getSourceModification();
 		// we have to save dirty compilation units before deleting them. Otherwise
 		// we will end up showing ghost compilation units in the package explorer
@@ -85,7 +89,15 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 			pm.beginTask("", 2); //$NON-NLS-1$
 			ISourceModule unit= (ISourceModule)element;
 			saveCUnitIfNeeded(unit, new SubProgressMonitor(pm, 1));
+			// element.delete(false, new SubProgressMonitor(pm, 1));
+
+			IResource resource = unit.getResource();
+			ResourceDescription resourceDescription = ResourceDescription
+					.fromResource(resource);
 			element.delete(false, new SubProgressMonitor(pm, 1));
+			resourceDescription.recordStateFromHistory(resource,
+					new SubProgressMonitor(pm, 1));
+			return new UndoDeleteResourceChange(resourceDescription);
 		// begin fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
 		} else if (element instanceof IScriptFolder) {
 			ISourceModule[] units= ((IScriptFolder)element).getSourceModules();
@@ -94,9 +106,11 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 				saveCUnitIfNeeded(units[i], new SubProgressMonitor(pm, 1));
 			}
 			element.delete(false, new SubProgressMonitor(pm, 1));
+			return new NullChange();
 		// end fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
 		} else {
 			element.delete(false, pm);
+			return null;
 		}
 	}
 		

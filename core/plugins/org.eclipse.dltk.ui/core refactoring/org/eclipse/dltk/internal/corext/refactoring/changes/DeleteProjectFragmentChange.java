@@ -9,19 +9,44 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.corext.refactoring.changes;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.dltk.internal.corext.refactoring.reorg.IProjectFragmentManipulationQuery;
 import org.eclipse.dltk.internal.corext.refactoring.util.ModelElementUtil;
 import org.eclipse.dltk.internal.corext.util.Messages;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.ui.ide.undo.ResourceDescription;
 
 
 public class DeleteProjectFragmentChange extends AbstractDeleteChange {
@@ -64,12 +89,57 @@ public class DeleteProjectFragmentChange extends AbstractDeleteChange {
 		}
 	}
 
-	protected void doDelete(IProgressMonitor pm) throws CoreException {
+	protected Change doDelete(IProgressMonitor pm) throws CoreException {
 		if (! confirmDeleteIfReferenced())
-			return;
+			return new NullChange();
 		int resourceUpdateFlags= IResource.KEEP_HISTORY;
 		int jCoreUpdateFlags= IProjectFragment.ORIGINATING_PROJECT_BUILDPATH | IProjectFragment.OTHER_REFERRING_PROJECTS_BUILDPATH;
-		getRoot().delete(resourceUpdateFlags, jCoreUpdateFlags, pm);
+
+		pm.beginTask("", 2); //$NON-NLS-1$
+		IProjectFragment root = getRoot();
+		IResource rootResource = root.getResource();
+		CompositeChange result = new CompositeChange(getName());
+
+		ResourceDescription rootDescription = ResourceDescription
+				.fromResource(rootResource);
+		IScriptProject[] referencingProjects = ModelElementUtil
+				.getReferencingProjects(root);
+		HashMap/* <IFile, String> */classpathFilesContents = new HashMap();
+		for (int i = 0; i < referencingProjects.length; i++) {
+			IScriptProject javaProject = referencingProjects[i];
+			IFile classpathFile = javaProject.getProject().getFile(
+					ScriptProject.BUILDPATH_FILENAME);
+			if (classpathFile.exists()) {
+				classpathFilesContents.put(classpathFile,
+						getFileContents(classpathFile));
+			}
+		}
+
+		root.delete(resourceUpdateFlags, jCoreUpdateFlags,
+				new SubProgressMonitor(pm, 1));
+
+		rootDescription.recordStateFromHistory(rootResource,
+				new SubProgressMonitor(pm, 1));
+		for (Iterator iterator = classpathFilesContents.entrySet().iterator(); iterator
+				.hasNext();) {
+			Entry entry = (Entry) iterator.next();
+			IFile file = (IFile) entry.getKey();
+			String contents = (String) entry.getValue();
+			// Restore time stamps? This should probably be some sort of
+			// UndoTextFileChange.
+			TextFileChange classpathUndo = new TextFileChange(
+					Messages
+							.format(
+									RefactoringCoreMessages.DeleteProjectFragmentChange_restore_file,
+									file.getFullPath().toOSString()), file);
+			classpathUndo.setEdit(new ReplaceEdit(0, getFileLength(file),
+					contents));
+			result.add(classpathUndo);
+		}
+		result.add(new UndoDeleteResourceChange(rootDescription));
+
+		pm.done();
+		return result;
 	}
 
 	private boolean confirmDeleteIfReferenced() throws ModelException {		
@@ -81,5 +151,37 @@ public class DeleteProjectFragmentChange extends AbstractDeleteChange {
 		if (referencingProjects.length == 0)
 			return true;
 		return fUpdateClasspathQuery.confirmManipulation(getRoot(), referencingProjects);
+	}
+
+	private static int getFileLength(IFile file) throws CoreException {
+		// Cannot use file buffers here, since they are not yet in sync at this
+		// point.
+		InputStream contents = file.getContents();
+		InputStreamReader reader;
+		try {
+			reader = new InputStreamReader(contents, file.getCharset());
+		} catch (UnsupportedEncodingException e) {
+			DLTKUIPlugin.log(e);
+			reader = new InputStreamReader(contents);
+		}
+		try {
+			return (int) reader.skip(Integer.MAX_VALUE);
+		} catch (IOException e) {
+			throw new CoreException(new Status(IStatus.ERROR, DLTKUIPlugin
+					.getPluginId(), e.getMessage(), e));
+		}
+	}
+
+	private static String getFileContents(IFile file) throws CoreException {
+		ITextFileBufferManager manager = FileBuffers.getTextFileBufferManager();
+		IPath path = file.getFullPath();
+		manager.connect(path, LocationKind.IFILE, new NullProgressMonitor());
+		try {
+			return manager.getTextFileBuffer(path, LocationKind.IFILE)
+					.getDocument().get();
+		} finally {
+			manager.disconnect(path, LocationKind.IFILE,
+					new NullProgressMonitor());
+		}
 	}
 }

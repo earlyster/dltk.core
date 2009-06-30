@@ -363,6 +363,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String DeleteProjectFragmentChange_delete;
 
+	public static String DeleteProjectFragmentChange_restore_file;
+
 	public static String DeleteRefactoring_1;
 
 	public static String DeleteRefactoring_2;
@@ -2147,6 +2149,12 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String TypeContextChecker_return_type_not_empty;
 
 	public static String UndoSourceModuleChange_no_resource;
+
+	public static String UndoDeleteResourceChange_already_exists;
+
+	public static String UndoDeleteResourceChange_cannot_restore;
+
+	public static String UndoDeleteResourceChange_change_name;
 
 	public static String UseSuperTypeProcessor_checking;
 
