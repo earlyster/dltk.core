@@ -12,7 +12,6 @@ package org.eclipse.dltk.launching;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -220,7 +219,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		entries = ScriptRuntime.resolveRuntimeBuildpath(entries, configuration);
 
 		// Get USER_ENTRY
-		List userEntries = new ArrayList();
+		List<String> userEntries = new ArrayList<String>();
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i].getBuildpathProperty() == IRuntimeBuildpathEntry.USER_ENTRY) {
 				final IPath path = entries[i].getPath();
@@ -244,7 +243,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 					userEntries.add(userPath);
 			}
 		}
-		return (String[]) userEntries.toArray(new String[userEntries.size()]);
+		return userEntries.toArray(new String[userEntries.size()]);
 	}
 
 	/**
@@ -275,7 +274,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		IRuntimeBuildpathEntry[] entries = ScriptRuntime
 				.computeUnresolvedRuntimeBuildpath(configuration);
 		entries = ScriptRuntime.resolveRuntimeBuildpath(entries, configuration);
-		List bootEntries = new ArrayList(entries.length);
+		List<String> bootEntries = new ArrayList<String>(entries.length);
 		boolean empty = true;
 		boolean allStandard = true;
 		for (int i = 0; i < entries.length; i++) {
@@ -295,8 +294,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		} else if (allStandard) {
 			return null;
 		} else {
-			return (String[]) bootEntries
-					.toArray(new String[bootEntries.size()]);
+			return bootEntries.toArray(new String[bootEntries.size()]);
 		}
 	}
 
@@ -322,7 +320,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		String[][] bootpathInfo = new String[3][];
 		IRuntimeBuildpathEntry[] entries = ScriptRuntime
 				.computeUnresolvedRuntimeBuildpath(configuration);
-		List bootEntriesPrepend = new ArrayList();
+		List<IRuntimeBuildpathEntry> bootEntriesPrepend = new ArrayList<IRuntimeBuildpathEntry>();
 		int index = 0;
 		IRuntimeBuildpathEntry interpreterEnvironmentEntry = null;
 		IScriptProject project = getScriptProject(configuration);
@@ -340,10 +338,9 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 			}
 		}
 		IRuntimeBuildpathEntry[] bootEntriesPrep = ScriptRuntime
-				.resolveRuntimeBuildpath(
-						(IRuntimeBuildpathEntry[]) bootEntriesPrepend
-								.toArray(new IRuntimeBuildpathEntry[bootEntriesPrepend
-										.size()]), configuration);
+				.resolveRuntimeBuildpath(bootEntriesPrepend
+						.toArray(new IRuntimeBuildpathEntry[bootEntriesPrepend
+								.size()]), configuration);
 		String[] entriesPrep = null;
 		if (bootEntriesPrep.length > 0) {
 			entriesPrep = new String[bootEntriesPrep.length];
@@ -352,7 +349,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 			}
 		}
 		if (interpreterEnvironmentEntry != null) {
-			List bootEntriesAppend = new ArrayList();
+			List<IRuntimeBuildpathEntry> bootEntriesAppend = new ArrayList<IRuntimeBuildpathEntry>();
 			for (; index < entries.length; index++) {
 				IRuntimeBuildpathEntry entry = entries[index];
 				if (entry.getBuildpathProperty() == IRuntimeBuildpathEntry.BOOTSTRAP_ENTRY) {
@@ -362,7 +359,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 			bootpathInfo[0] = entriesPrep;
 			IRuntimeBuildpathEntry[] bootEntriesApp = ScriptRuntime
 					.resolveRuntimeBuildpath(
-							(IRuntimeBuildpathEntry[]) bootEntriesAppend
+							bootEntriesAppend
 									.toArray(new IRuntimeBuildpathEntry[bootEntriesAppend
 											.size()]), configuration);
 			if (bootEntriesApp.length > 0) {
@@ -811,18 +808,18 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		// .getNativeEnvironmentCasePreserved());
 		final boolean append = configuration.getAttribute(
 				ILaunchManager.ATTR_APPEND_ENVIRONMENT_VARIABLES, true);
-		final Map configEnv = configuration.getAttribute(
+		@SuppressWarnings("unchecked")
+		final Map<String, String> configEnv = configuration.getAttribute(
 				ILaunchManager.ATTR_ENVIRONMENT_VARIABLES, (Map) null);
 		// build base environment
-		final Map env = new HashMap();
+		final Map<String, String> env = new HashMap<String, String>();
 		if (append || configEnv == null) {
 			env.putAll(scriptExecEnvironment.getEnvironmentVariables(false));
 		}
 		if (configEnv != null) {
-			for (Iterator i = configEnv.entrySet().iterator(); i.hasNext();) {
-				final Map.Entry entry = (Map.Entry) i.next();
-				final String key = (String) entry.getKey();
-				String value = (String) entry.getValue();
+			for (Map.Entry<String, String> entry : configEnv.entrySet()) {
+				final String key = entry.getKey();
+				String value = entry.getValue();
 				if (value != null) {
 					value = VariablesPlugin.getDefault()
 							.getStringVariableManager()
@@ -1005,7 +1002,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 
 	protected IPath[] createBuildPath(ILaunchConfiguration configuration,
 			IEnvironment environment) throws CoreException {
-		List paths = new ArrayList();
+		List<Path> paths = new ArrayList<Path>();
 
 		// Buildpath
 		String[] buildpath = getBuildpath(configuration, environment);
@@ -1022,7 +1019,7 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 			}
 		}
 
-		return (IPath[]) paths.toArray(new IPath[paths.size()]);
+		return paths.toArray(new IPath[paths.size()]);
 	}
 
 	protected IProject[] getBuildOrder(ILaunchConfiguration configuration,
