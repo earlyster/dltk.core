@@ -69,8 +69,8 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
  * <ul>
  * <li><code>createContext</code> to provide the context object passed to the
  * computers</li>
- * <li><code>createProgressMonitor</code> to change the way progress is
- * reported</li>
+ * <li><code>createProgressMonitor</code> to change the way progress is reported
+ * </li>
  * <li><code>filterAndSort</code> to add sorting and filtering</li>
  * <li><code>getContextInformationValidator</code> to add context validation
  * (needed if any contexts are provided)</li>
@@ -90,7 +90,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 	 */
 	private static final String PREF_WARN_ABOUT_EMPTY_ASSIST_CATEGORY = "EmptyDefaultAssistCategory"; //$NON-NLS-1$
 
-	private final List fCategories;
+	private final List<CompletionProposalCategory> fCategories;
 
 	private final String fPartition;
 
@@ -98,12 +98,10 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 
 	private char[] fCompletionAutoActivationCharacters;
 
-	private static final Comparator ORDER_COMPARATOR = new Comparator() {
+	private static final Comparator<CompletionProposalCategory> ORDER_COMPARATOR = new Comparator<CompletionProposalCategory>() {
 
-		public int compare(Object o1, Object o2) {
-			CompletionProposalCategory d1 = (CompletionProposalCategory) o1;
-			CompletionProposalCategory d2 = (CompletionProposalCategory) o2;
-
+		public int compare(CompletionProposalCategory d1,
+				CompletionProposalCategory d2) {
 			return d1.getSortOrder() - d2.getSortOrder();
 		}
 
@@ -112,7 +110,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 	/* cycling stuff */
 	private int fRepetition = -1;
 
-	private List fCategoryIteration = null;
+	private List<List<CompletionProposalCategory>> fCategoryIteration = null;
 
 	private String fIterationGesture = null;
 
@@ -140,9 +138,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 				// this may show the warning dialog if all categories are
 				// disabled
 				fCategoryIteration = getCategoryIteration();
-				for (Iterator it = fCategories.iterator(); it.hasNext();) {
-					CompletionProposalCategory cat = (CompletionProposalCategory) it
-							.next();
+				for (CompletionProposalCategory cat : fCategories) {
 					cat.sessionStarted();
 				}
 
@@ -175,9 +171,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 				if (event.processor != ContentAssistProcessor.this)
 					return;
 
-				for (Iterator it = fCategories.iterator(); it.hasNext();) {
-					CompletionProposalCategory cat = (CompletionProposalCategory) it
-							.next();
+				for (CompletionProposalCategory cat : fCategories) {
 					cat.sessionEnded();
 				}
 
@@ -222,18 +216,20 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 
 		monitor
 				.subTask(ScriptTextMessages.ContentAssistProcessor_collecting_proposals);
-		final List proposals = collectProposals(viewer, offset, monitor, context);
+		final List<ICompletionProposal> proposals = collectProposals(viewer,
+				offset, monitor, context);
 		final long collectTime = System.currentTimeMillis();
 
 		monitor
 				.subTask(ScriptTextMessages.ContentAssistProcessor_sorting_proposals);
 
-		final List filtered = filterAndSortProposals(proposals, monitor, context);
+		final List<ICompletionProposal> filtered = filterAndSortProposals(
+				proposals, monitor, context);
 		fNumberOfComputedResults = filtered.size();
-		
+
 		final long filterTime = System.currentTimeMillis();
 
-		ICompletionProposal[] result = (ICompletionProposal[]) filtered
+		ICompletionProposal[] result = filtered
 				.toArray(new ICompletionProposal[filtered.size()]);
 		monitor.done();
 
@@ -256,15 +252,16 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 		fNumberOfComputedResults = 0;
 	}
 
-	private List collectProposals(ITextViewer viewer, int offset,
-			IProgressMonitor monitor, ContentAssistInvocationContext context) {
-		List proposals = new ArrayList();
-		List providers = getCategories();
-		for (Iterator it = providers.iterator(); it.hasNext();) {
-			CompletionProposalCategory cat = (CompletionProposalCategory) it
-					.next();
-			List computed = cat.computeCompletionProposals(context, fPartition,
-					new SubProgressMonitor(monitor, 1));
+	private List<ICompletionProposal> collectProposals(ITextViewer viewer,
+			int offset, IProgressMonitor monitor,
+			ContentAssistInvocationContext context) {
+		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+		List<CompletionProposalCategory> providers = getCategories();
+		for (CompletionProposalCategory cat : providers) {
+			@SuppressWarnings("unchecked")
+			List<ICompletionProposal> computed = cat
+					.computeCompletionProposals(context, fPartition,
+							new SubProgressMonitor(monitor, 1));
 			proposals.addAll(computed);
 			if (fErrorMessage == null) {
 				fErrorMessage = cat.getErrorMessage();
@@ -288,13 +285,14 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 	 * @return the list of filtered and sorted proposals, ready for display
 	 *         (element type: {@link ICompletionProposal})
 	 */
-	protected List filterAndSortProposals(List proposals,
-			IProgressMonitor monitor, ContentAssistInvocationContext context) {
+	protected List<ICompletionProposal> filterAndSortProposals(
+			List<ICompletionProposal> proposals, IProgressMonitor monitor,
+			ContentAssistInvocationContext context) {
 		return proposals;
 	}
-	
+
 	public IContextInformation[] computeContextInformation(ITextViewer viewer,
-			int offset) {		
+			int offset) {
 		clearState();
 
 		IProgressMonitor monitor = createProgressMonitor();
@@ -304,32 +302,33 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 
 		monitor
 				.subTask(ScriptTextMessages.ContentAssistProcessor_collecting_contexts);
-		final List proposals = collectContextInformation(viewer, offset, monitor);
+		final List<IContextInformation> proposals = collectContextInformation(
+				viewer, offset, monitor);
 
 		monitor
 				.subTask(ScriptTextMessages.ContentAssistProcessor_sorting_contexts);
-		List filtered = filterAndSortContextInformation(proposals, monitor);
+		List<IContextInformation> filtered = filterAndSortContextInformation(
+				proposals, monitor);
 		fNumberOfComputedResults = filtered.size();
 
-		IContextInformation[] result = (IContextInformation[]) filtered
+		IContextInformation[] result = filtered
 				.toArray(new IContextInformation[filtered.size()]);
 		monitor.done();
 
 		return result;
 	}
 
-	private List collectContextInformation(ITextViewer viewer, int offset,
-			IProgressMonitor monitor) {
-		List proposals = new ArrayList();
+	private List<IContextInformation> collectContextInformation(
+			ITextViewer viewer, int offset, IProgressMonitor monitor) {
+		List<IContextInformation> proposals = new ArrayList<IContextInformation>();
 		ContentAssistInvocationContext context = createContext(viewer, offset);
 		setContextInformationMode(context);
 
-		List providers = getCategories();
-		for (Iterator it = providers.iterator(); it.hasNext();) {
-			CompletionProposalCategory cat = (CompletionProposalCategory) it
-					.next();
-			List computed = cat.computeContextInformation(context, fPartition,
-					new SubProgressMonitor(monitor, 1));
+		List<CompletionProposalCategory> providers = getCategories();
+		for (CompletionProposalCategory cat : providers) {
+			@SuppressWarnings("unchecked")
+			List<IContextInformation> computed = cat.computeContextInformation(
+					context, fPartition, new SubProgressMonitor(monitor, 1));
 			proposals.addAll(computed);
 			if (fErrorMessage == null) {
 				fErrorMessage = cat.getErrorMessage();
@@ -351,8 +350,8 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 	 * @return the list of filtered and sorted proposals, ready for display
 	 *         (element type: {@link IContextInformation})
 	 */
-	protected List filterAndSortContextInformation(List contexts,
-			IProgressMonitor monitor) {
+	protected List<IContextInformation> filterAndSortContextInformation(
+			List<IContextInformation> contexts, IProgressMonitor monitor) {
 		return contexts;
 	}
 
@@ -399,7 +398,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 	protected IProgressMonitor createProgressMonitor() {
 		return new NullProgressMonitor();
 	}
-	
+
 	protected void setContextInformationMode(
 			ContentAssistInvocationContext context) {
 		// empty
@@ -419,7 +418,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 		return new ContentAssistInvocationContext(viewer, offset);
 	}
 
-	private List getCategories() {
+	private List<CompletionProposalCategory> getCategories() {
 		if (fCategoryIteration == null) {
 			return fCategories;
 		}
@@ -430,24 +429,24 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 		fRepetition++;
 
 		// fAssistant.setShowMessage(fRepetition % 2 != 0);
-		
-		return (List) fCategoryIteration.get(iteration);
+
+		return fCategoryIteration.get(iteration);
 	}
 
-	private List getCategoryIteration() {
-		List sequence = new ArrayList();
+	private List<List<CompletionProposalCategory>> getCategoryIteration() {
+		List<List<CompletionProposalCategory>> sequence = new ArrayList<List<CompletionProposalCategory>>();
 		sequence.add(getDefaultCategories());
-		for (Iterator it = getSeparateCategories().iterator(); it.hasNext();) {
-			CompletionProposalCategory cat = (CompletionProposalCategory) it
-					.next();
+		for (Iterator<CompletionProposalCategory> it = getSeparateCategories()
+				.iterator(); it.hasNext();) {
+			CompletionProposalCategory cat = it.next();
 			sequence.add(Collections.singletonList(cat));
 		}
 		return sequence;
 	}
 
-	private List getDefaultCategories() {
+	private List<CompletionProposalCategory> getDefaultCategories() {
 		// default mix - enable all included computers
-		List included = getDefaultCategoriesUnchecked();
+		List<CompletionProposalCategory> included = getDefaultCategoriesUnchecked();
 
 		if ((IDocument.DEFAULT_CONTENT_TYPE.equals(fPartition))
 				&& included.isEmpty() && !fCategories.isEmpty())
@@ -458,11 +457,9 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 		return included;
 	}
 
-	private List getDefaultCategoriesUnchecked() {
-		List included = new ArrayList();
-		for (Iterator it = fCategories.iterator(); it.hasNext();) {
-			CompletionProposalCategory category = (CompletionProposalCategory) it
-					.next();
+	private List<CompletionProposalCategory> getDefaultCategoriesUnchecked() {
+		List<CompletionProposalCategory> included = new ArrayList<CompletionProposalCategory>();
+		for (CompletionProposalCategory category : fCategories) {
 			if (category.isIncluded() && category.hasComputers(fPartition))
 				included.add(category);
 		}
@@ -561,11 +558,9 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 
 	protected abstract IPreferenceStore getPreferenceStore();
 
-	private List getSeparateCategories() {
-		ArrayList sorted = new ArrayList();
-		for (Iterator it = fCategories.iterator(); it.hasNext();) {
-			CompletionProposalCategory category = (CompletionProposalCategory) it
-					.next();
+	private List<CompletionProposalCategory> getSeparateCategories() {
+		ArrayList<CompletionProposalCategory> sorted = new ArrayList<CompletionProposalCategory>();
+		for (CompletionProposalCategory category : fCategories) {
 			if (category.isSeparateCommand()
 					&& category.hasComputers(fPartition))
 				sorted.add(category);
@@ -593,8 +588,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 		int iteration = repetition % fCategoryIteration.size();
 		if (iteration == 0)
 			return ScriptTextMessages.ContentAssistProcessor_defaultProposalCategory;
-		return toString((CompletionProposalCategory) ((List) fCategoryIteration
-				.get(iteration)).get(0));
+		return toString(fCategoryIteration.get(iteration).get(0));
 	}
 
 	private String toString(CompletionProposalCategory category) {
