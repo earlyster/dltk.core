@@ -40,6 +40,7 @@ public class MultipleInputDialog extends Dialog {
 	protected static final int TEXT = 100;
 	protected static final int BROWSE = 101;
 	protected static final int VARIABLE = 102;
+	protected static final int LABEL = 103;
 
 	protected Composite panel;
 
@@ -115,6 +116,9 @@ public class MultipleInputDialog extends Dialog {
 				createVariablesField(field.name, field.initialValue,
 						field.allowsEmpty);
 				break;
+			case LABEL:
+				createLabelField(field.name);
+				break;
 			}
 		}
 
@@ -139,6 +143,10 @@ public class MultipleInputDialog extends Dialog {
 			boolean allowsEmpty) {
 		fieldList.add(new FieldSummary(VARIABLE, labelText, initialValue,
 				allowsEmpty));
+	}
+
+	public void addLabelField(String labelText) {
+		fieldList.add(new FieldSummary(LABEL, labelText, null, false));
 	}
 
 	protected void createTextField(String labelText, String initialValue,
@@ -297,6 +305,14 @@ public class MultipleInputDialog extends Dialog {
 
 		controlList.add(text);
 
+	}
+
+	private void createLabelField(String labelText) {
+		Label label = new Label(panel, SWT.NONE);
+		label.setText(labelText);
+		GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalSpan = 2;
+		label.setLayoutData(gd);
 	}
 
 	/*
