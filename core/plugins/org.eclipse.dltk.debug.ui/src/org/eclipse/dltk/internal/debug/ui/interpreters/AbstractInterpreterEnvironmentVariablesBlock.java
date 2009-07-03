@@ -10,7 +10,6 @@
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,7 +29,6 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
-import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -69,17 +67,6 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	private static final String VALUE_LABEL = InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_value;
 
 	private static final String NAME_LABEL = InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_name;
-
-	/**
-	 * Attribute name for the last path used to open a file/directory chooser
-	 * dialog.
-	 */
-	protected static final String LAST_PATH_SETTING = "LAST_PATH_SETTING"; //$NON-NLS-1$
-
-	/**
-	 * the prefix for dialog setting pertaining to this block
-	 */
-	protected static final String DIALOG_SETTINGS_PREFIX = "AbstractInterpreterEnvironmentVariablesBlock"; //$NON-NLS-1$
 
 	protected boolean fInCallback = false;
 	protected IInterpreterInstall fInterpreterInstall;
@@ -325,14 +312,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 
 	private void performExport() {
 		FileDialog dialog = new FileDialog(this.fDialog.getShell(), SWT.SAVE);
-		// XXX 3.3 compatibility: dialog.setOverwrite(true)
-		try {
-			final Method setOverwriteMethod = dialog.getClass().getMethod(
-					"setOverwrite", new Class[] { Boolean.TYPE }); //$NON-NLS-1$
-			setOverwriteMethod.invoke(dialog, new Object[] { Boolean.TRUE });
-		} catch (Exception e) {
-			// ignore
-		}
+		dialog.setOverwrite(true);
 		dialog
 				.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_exportEnvironmentVariablesToFile);
 		String file = dialog.open();
@@ -550,7 +530,9 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		update();
 	}
 
-	protected abstract IBaseLabelProvider getLabelProvider();
+	protected IBaseLabelProvider getLabelProvider() {
+		return new EnvironmentVariablesLabelProvider();
+	}
 
 	protected void updateDialogStatus(IStatus status) {
 		fDialog.setSystemLibraryStatus(status);
@@ -561,7 +543,10 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		fDialog.setButtonLayoutData(button);
 	}
 
-	protected abstract IDialogSettings getDialogSettions();
+	@Deprecated
+	protected final void getDialogSettions() {
+
+	}
 
 	protected EnvironmentVariable[] addExisted() {
 
