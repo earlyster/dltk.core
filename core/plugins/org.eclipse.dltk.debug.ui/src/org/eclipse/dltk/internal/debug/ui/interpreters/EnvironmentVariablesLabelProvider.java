@@ -15,19 +15,21 @@ import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-
+@SuppressWarnings("restriction")
 public class EnvironmentVariablesLabelProvider extends LabelProvider {
 
+	@Override
 	public Image getImage(Object element) {
 		return DebugPluginImages
-		.getImage(IDebugUIConstants.IMG_OBJS_ENVIRONMENT);
+				.getImage(IDebugUIConstants.IMG_OBJS_ENVIRONMENT);
 	}
 
+	@Override
 	public String getText(Object element) {
-		if (element instanceof EnvironmentVariable ) {
+		if (element instanceof EnvironmentVariable) {
 			EnvironmentVariable var = (EnvironmentVariable) element;
 			return var.getName() + "=" + var.getValue(); //$NON-NLS-1$
-		} 
+		}
 		return null;
 	}
 
