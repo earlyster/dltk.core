@@ -43,7 +43,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 
 public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		IScriptInterpreterDialog {
@@ -194,14 +193,27 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 	protected Control createDialogArea(Composite ancestor) {
 		createDialogFields();
 		Composite parent = (Composite) super.createDialogArea(ancestor);
-		((GridLayout) parent.getLayout()).numColumns = 3;
+		createDialogControls(parent, 3);
 
-		fInterpreterTypeCombo.doFillIntoGrid(parent, 3);
+		initializeFields(fEditedInterpreter);
+		createFieldListeners();
+		applyDialogFont(parent);
+		return parent;
+	}
+
+	protected void createDialogControls(Composite parent, int numColumns) {
+		((GridLayout) parent.getLayout()).numColumns = numColumns;
+
+		fInterpreterTypeCombo.doFillIntoGrid(parent, numColumns);
 		((GridData) fInterpreterTypeCombo.getComboControl(null).getLayoutData()).widthHint = convertWidthInCharsToPixels(50);
 
-		fInterpreterName.doFillIntoGrid(parent, 3);
+		fInterpreterName.doFillIntoGrid(parent, numColumns);
 
-		fInterpreterPath.doFillIntoGrid(parent, 3);
+		fInterpreterPath.doFillIntoGrid(parent, numColumns);
+		final GridData interpreterPathGridData = (GridData) fInterpreterPath
+				.getTextControl(null).getLayoutData();
+		interpreterPathGridData.grabExcessHorizontalSpace = true;
+		interpreterPathGridData.widthHint = convertWidthInCharsToPixels(50);
 
 		if (this.useInterpreterArgs()) {
 			fInterpreterArgs.doFillIntoGrid(parent, 3);
@@ -212,13 +224,13 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		l
 				.setText(InterpretersMessages.AddInterpreterDialog_Interpreter_system_libraries__1);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 3;
+		gd.horizontalSpan = numColumns;
 		l.setLayoutData(gd);
 
 		fLibraryBlock = createLibraryBlock(this);
 		Control block = fLibraryBlock.createControl(parent);
 		gd = new GridData(GridData.FILL_BOTH);
-		gd.horizontalSpan = 3;
+		gd.horizontalSpan = numColumns;
 		block.setLayoutData(gd);
 
 		fEnvironmentVariablesBlock = createEnvironmentVariablesBlock();
@@ -227,24 +239,14 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 			l
 					.setText(InterpretersMessages.AddScriptInterpreterDialog_interpreterEnvironmentVariables);
 			gd = new GridData(GridData.FILL_HORIZONTAL);
-			gd.horizontalSpan = 3;
+			gd.horizontalSpan = numColumns;
 			l.setLayoutData(gd);
 
 			block = fEnvironmentVariablesBlock.createControl(parent);
 			gd = new GridData(GridData.FILL_BOTH);
-			gd.horizontalSpan = 3;
+			gd.horizontalSpan = numColumns;
 			block.setLayoutData(gd);
 		}
-
-		Text t = fInterpreterPath.getTextControl(parent);
-		gd = (GridData) t.getLayoutData();
-		gd.grabExcessHorizontalSpace = true;
-		gd.widthHint = convertWidthInCharsToPixels(50);
-
-		initializeFields();
-		createFieldListeners();
-		applyDialogFont(parent);
-		return parent;
 	}
 
 	private void updateInterpreterType() {
@@ -289,9 +291,9 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		}
 	}
 
-	private void initializeFields() {
+	protected void initializeFields(IInterpreterInstall install) {
 		fInterpreterTypeCombo.setItems(getInterpreterTypeNames());
-		if (fEditedInterpreter == null) {
+		if (install == null) {
 			fInterpreterName.setText(Util.EMPTY_STRING);
 			fInterpreterPath.setText(Util.EMPTY_STRING);
 			fLibraryBlock.initializeFrom(null, fSelectedInterpreterType);
@@ -304,16 +306,15 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 			}
 		} else {
 			fInterpreterTypeCombo.setEnabled(false);
-			fInterpreterName.setText(fEditedInterpreter.getName());
-			fInterpreterPath.setText(fEditedInterpreter.getRawInstallLocation()
+			fInterpreterName.setText(install.getName());
+			fInterpreterPath.setText(install.getRawInstallLocation()
 					.toOSString());
 			if (fEnvironmentVariablesBlock != null) {
-				fEnvironmentVariablesBlock.initializeFrom(fEditedInterpreter,
+				fEnvironmentVariablesBlock.initializeFrom(install,
 						fSelectedInterpreterType);
 			}
-			fLibraryBlock.initializeFrom(fEditedInterpreter,
-					fSelectedInterpreterType);
-			String InterpreterArgs = fEditedInterpreter.getInterpreterArgs();
+			fLibraryBlock.initializeFrom(install, fSelectedInterpreterType);
+			String InterpreterArgs = install.getInterpreterArgs();
 			if (InterpreterArgs != null) {
 				fInterpreterArgs.setText(InterpreterArgs);
 			}
