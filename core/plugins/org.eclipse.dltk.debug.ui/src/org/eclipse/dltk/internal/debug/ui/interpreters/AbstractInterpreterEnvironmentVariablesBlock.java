@@ -44,7 +44,6 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -96,8 +95,6 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	 *            the parent widget of this control
 	 */
 	public Control createControl(Composite parent) {
-		Font font = parent.getFont();
-
 		Composite comp = new Composite(parent, SWT.NONE);
 		GridLayout topLayout = new GridLayout();
 		topLayout.numColumns = 2;
@@ -106,9 +103,13 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		comp.setLayout(topLayout);
 		GridData gd = new GridData(GridData.FILL_BOTH);
 		comp.setLayoutData(gd);
+		createControlsIn(comp);
+		return comp;
+	}
 
+	public void createControlsIn(Composite comp) {
 		fVariablesViewer = new TreeViewer(comp);
-		gd = new GridData(GridData.FILL_BOTH);
+		GridData gd = new GridData(GridData.FILL_BOTH);
 		gd.heightHint = 6;
 		fVariablesViewer.getControl().setLayoutData(gd);
 		fEnvironmentVariablesContentProvider = new EnvironmentVariableContentProvider();
@@ -126,7 +127,6 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		gd = new GridData(GridData.VERTICAL_ALIGN_BEGINNING
 				| GridData.HORIZONTAL_ALIGN_FILL);
 		pathButtonComp.setLayoutData(gd);
-		pathButtonComp.setFont(font);
 
 		fAddButton = createPushButton(
 				pathButtonComp,
@@ -155,8 +155,6 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 				pathButtonComp,
 				InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_export);
 		fExportButton.addSelectionListener(this);
-
-		return comp;
 	}
 
 	/**

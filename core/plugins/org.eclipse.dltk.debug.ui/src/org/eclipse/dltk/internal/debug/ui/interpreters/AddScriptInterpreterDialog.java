@@ -193,17 +193,9 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 	protected Control createDialogArea(Composite ancestor) {
 		createDialogFields();
 		Composite parent = (Composite) super.createDialogArea(ancestor);
-		createDialogControls(parent, 3);
 
-		initializeFields(fEditedInterpreter);
-		createFieldListeners();
-		applyDialogFont(parent);
-		return parent;
-	}
-
-	protected void createDialogControls(Composite parent, int numColumns) {
+		final int numColumns = 3;
 		((GridLayout) parent.getLayout()).numColumns = numColumns;
-
 		fInterpreterTypeCombo.doFillIntoGrid(parent, numColumns);
 		((GridData) fInterpreterTypeCombo.getComboControl(null).getLayoutData()).widthHint = convertWidthInCharsToPixels(50);
 
@@ -216,10 +208,29 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		interpreterPathGridData.widthHint = convertWidthInCharsToPixels(50);
 
 		if (this.useInterpreterArgs()) {
-			fInterpreterArgs.doFillIntoGrid(parent, 3);
+			fInterpreterArgs.doFillIntoGrid(parent, numColumns);
 			((GridData) fInterpreterArgs.getTextControl(null).getLayoutData()).widthHint = convertWidthInCharsToPixels(50);
 		}
 
+		final Composite blockComposite = new Composite(parent, SWT.NONE);
+		final GridData blockCompositeLayoutData = new GridData(
+				GridData.FILL_BOTH);
+		blockCompositeLayoutData.horizontalSpan = numColumns;
+		blockComposite.setLayoutData(blockCompositeLayoutData);
+		final GridLayout blockCompositeLayout = new GridLayout(2, false);
+		blockCompositeLayout.marginHeight = 0;
+		blockCompositeLayout.marginWidth = 0;
+		blockComposite.setLayout(blockCompositeLayout);
+
+		createDialogBlocks(blockComposite, 2);
+
+		initializeFields(fEditedInterpreter);
+		createFieldListeners();
+		applyDialogFont(parent);
+		return parent;
+	}
+
+	protected void createDialogBlocks(Composite parent, int numColumns) {
 		Label l = new Label(parent, SWT.NONE);
 		l
 				.setText(InterpretersMessages.AddInterpreterDialog_Interpreter_system_libraries__1);
@@ -228,10 +239,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		l.setLayoutData(gd);
 
 		fLibraryBlock = createLibraryBlock(this);
-		Control block = fLibraryBlock.createControl(parent);
-		gd = new GridData(GridData.FILL_BOTH);
-		gd.horizontalSpan = numColumns;
-		block.setLayoutData(gd);
+		fLibraryBlock.createControlsIn(parent);
 
 		fEnvironmentVariablesBlock = createEnvironmentVariablesBlock();
 		if (fEnvironmentVariablesBlock != null) {
@@ -242,10 +250,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 			gd.horizontalSpan = numColumns;
 			l.setLayoutData(gd);
 
-			block = fEnvironmentVariablesBlock.createControl(parent);
-			gd = new GridData(GridData.FILL_BOTH);
-			gd.horizontalSpan = numColumns;
-			block.setLayoutData(gd);
+			fEnvironmentVariablesBlock.createControlsIn(parent);
 		}
 	}
 
@@ -569,6 +574,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 	 */
 	public void setButtonLayoutData(Button button) {
 		super.setButtonLayoutData(button);
+		((GridData) button.getLayoutData()).grabExcessHorizontalSpace = true;
 	}
 
 	/**

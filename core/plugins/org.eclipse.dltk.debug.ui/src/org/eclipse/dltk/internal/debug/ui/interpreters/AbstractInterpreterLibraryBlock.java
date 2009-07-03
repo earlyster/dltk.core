@@ -45,7 +45,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -99,8 +98,6 @@ public abstract class AbstractInterpreterLibraryBlock implements
 	 *            the parent widget of this control
 	 */
 	public Control createControl(Composite parent) {
-		Font font = parent.getFont();
-
 		Composite comp = new Composite(parent, SWT.NONE);
 		GridLayout topLayout = new GridLayout();
 		topLayout.numColumns = 2;
@@ -109,14 +106,18 @@ public abstract class AbstractInterpreterLibraryBlock implements
 		comp.setLayout(topLayout);
 		GridData gd = new GridData(GridData.FILL_BOTH);
 		comp.setLayoutData(gd);
+		createControlsIn(comp);
+		return comp;
+	}
 
+	public void createControlsIn(Composite comp) {
 		Composite comp2 = new Composite(comp, SWT.NONE);
-		topLayout = new GridLayout();
+		GridLayout topLayout = new GridLayout();
 		topLayout.numColumns = 1;
 		topLayout.marginHeight = 0;
 		topLayout.marginWidth = 0;
 		comp2.setLayout(topLayout);
-		gd = new GridData(GridData.FILL_BOTH);
+		GridData gd = new GridData(GridData.FILL_BOTH);
 		comp2.setLayoutData(gd);
 		fLibraryViewer = createViewer(comp2);
 		gd = new GridData(GridData.FILL_BOTH);
@@ -154,7 +155,6 @@ public abstract class AbstractInterpreterLibraryBlock implements
 		gd = new GridData(GridData.VERTICAL_ALIGN_BEGINNING
 				| GridData.HORIZONTAL_ALIGN_FILL);
 		pathButtonComp.setLayoutData(gd);
-		pathButtonComp.setFont(font);
 
 		fAddButton = createPushButton(pathButtonComp,
 				InterpretersMessages.InterpreterLibraryBlock_7);
@@ -181,8 +181,6 @@ public abstract class AbstractInterpreterLibraryBlock implements
 					InterpretersMessages.AbstractInterpreterLibraryBlock_rediscover);
 			fRediscoverButton.addSelectionListener(this);
 		}
-
-		return comp;
 	}
 
 	protected boolean isEnableButtonSupported() {
