@@ -139,8 +139,7 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 				}
 			}
 		}
-		newNotPresentException();
-		return null;
+		throw newNotPresentException();
 	}
 
 	/**
