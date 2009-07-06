@@ -410,11 +410,12 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 		if (fieldName == CONTAINER) {
-			IProjectFragment fragment = getProjectFragment();
-			if (fragment != null)
-				currentScriptFolder = fragment.getScriptFolder(""); //$NON-NLS-1$
-			else
-				currentScriptFolder = null;
+			// IProjectFragment fragment = getProjectFragment();
+			// if (fragment != null)
+			//				currentScriptFolder = fragment.getScriptFolder(""); //$NON-NLS-1$
+			// else
+			// currentScriptFolder = null;
+			currentScriptFolder = getScriptFolder();
 			sourceMoudleStatus = fileChanged();
 			remoteFolderStatus = remoteFolderChanged();
 		}

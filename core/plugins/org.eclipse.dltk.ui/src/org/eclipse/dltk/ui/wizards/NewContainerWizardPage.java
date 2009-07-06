@@ -19,17 +19,16 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.ScriptModelUtil;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptModel;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.internal.core.ExternalScriptFolder;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.StandardModelElementContentProvider;
-import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
@@ -40,6 +39,7 @@ import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringButtonDialogField
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.ModelElementLabelProvider;
 import org.eclipse.dltk.ui.ModelElementSorter;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -127,17 +127,20 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	protected void initContainerPage(IModelElement elem) {
 		IScriptFolder initRoot = null;
 		if (elem != null) {
-			initRoot = (IScriptFolder)elem.getAncestor(IModelElement.SCRIPT_FOLDER);
+			initRoot = (IScriptFolder) elem
+					.getAncestor(IModelElement.SCRIPT_FOLDER);
 			if (initRoot instanceof ExternalScriptFolder)
 				initRoot = null;
-			//TODO: I think this piece of code is a mess, please fix it 
+			// TODO: I think this piece of code is a mess, please fix it
 			try {
 				if (initRoot == null) {
-					IProjectFragment fragment = ScriptModelUtil.getProjectFragment(elem);
-					if (fragment != null && fragment.getKind() == IProjectFragment.K_SOURCE &&
-							!fragment.isExternal() )
+					IProjectFragment fragment = ScriptModelUtil
+							.getProjectFragment(elem);
+					if (fragment != null
+							&& fragment.getKind() == IProjectFragment.K_SOURCE
+							&& !fragment.isExternal())
 						initRoot = fragment.getScriptFolder(""); //$NON-NLS-1$
-					
+
 					if (initRoot == null) {
 						IScriptProject project = elem.getScriptProject();
 						if (project != null) {
@@ -153,8 +156,9 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 								}
 							}
 							if (initRoot == null) {
-								initRoot = project.getProjectFragment(project
-										.getResource()).getScriptFolder(""); //$NON-NLS-1$
+								initRoot = project.getProjectFragment(
+										project.getResource()).getScriptFolder(
+										""); //$NON-NLS-1$
 							}
 						}
 					}
@@ -163,10 +167,10 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 				DLTKUIPlugin.log(e);
 			}
 		}
-		setScriptFolder (initRoot, true);
+		setScriptFolder(initRoot, true);
 		handleFieldChanged(CONTAINER);
 	}
-	
+
 	/**
 	 * Utility method to inspect a selection to find a Script element.
 	 * 
@@ -179,48 +183,56 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	protected IModelElement getInitialScriptElement(
 			IStructuredSelection selection) {
 		IModelElement scriptElement = null;
-		
+
 		// Check selection
 		if (selection != null && !selection.isEmpty()) {
 			Object selectedElement = selection.getFirstElement();
 			// Check for adapters
 			if (selectedElement instanceof IAdaptable) {
 				IAdaptable adaptable = (IAdaptable) selectedElement;
-				scriptElement = (IModelElement) adaptable.getAdapter(IModelElement.class);
+				scriptElement = (IModelElement) adaptable
+						.getAdapter(IModelElement.class);
 				if (scriptElement == null) {
-					IResource resource = (IResource) adaptable.getAdapter(IResource.class);
-					if (resource != null && resource.getType() != IResource.ROOT) {
-						while (scriptElement == null && resource.getType() != IResource.PROJECT) {
+					IResource resource = (IResource) adaptable
+							.getAdapter(IResource.class);
+					if (resource != null
+							&& resource.getType() != IResource.ROOT) {
+						while (scriptElement == null
+								&& resource.getType() != IResource.PROJECT) {
 							resource = resource.getParent();
-							scriptElement = (IModelElement) resource.getAdapter(IModelElement.class);
+							scriptElement = (IModelElement) resource
+									.getAdapter(IModelElement.class);
 						}
-						
+
 						if (scriptElement == null) {
-							scriptElement = DLTKCore.create(resource);															
+							scriptElement = DLTKCore.create(resource);
 						}
 					}
 				}
 			}
 		}
-		
+
 		// Check view
 		if (scriptElement == null) {
 			IWorkbenchPart part = DLTKUIPlugin.getActivePage().getActivePart();
 			if (part instanceof ContentOutline) {
 				part = DLTKUIPlugin.getActivePage().getActiveEditor();
 			}
-			
+
 			if (part instanceof IViewPartInputProvider) {
-				Object provider = ((IViewPartInputProvider) part).getViewPartInput();
+				Object provider = ((IViewPartInputProvider) part)
+						.getViewPartInput();
 				if (provider instanceof IModelElement) {
 					scriptElement = (IModelElement) provider;
 				}
 			}
 		}
-		
-		if (scriptElement == null || scriptElement.getElementType() == IModelElement.SCRIPT_MODEL) {
+
+		if (scriptElement == null
+				|| scriptElement.getElementType() == IModelElement.SCRIPT_MODEL) {
 			try {
-				IScriptProject[] projects = DLTKCore.create(getWorkspaceRoot()).getScriptProjects();
+				IScriptProject[] projects = DLTKCore.create(getWorkspaceRoot())
+						.getScriptProjects();
 				if (projects.length == 1) {
 					scriptElement = projects[0];
 				}
@@ -228,10 +240,10 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 				DLTKUIPlugin.log(e);
 			}
 		}
-		
+
 		return scriptElement;
 	}
-	
+
 	/**
 	 * Returns the recommended maximum width for text fields (in pixels). This
 	 * method requires that createContent has been called before this method is
@@ -300,11 +312,12 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		currRoot = null;
 		String str = getScriptFolderText();
 		if (str.length() == 0) {
-			status.setError(NewWizardMessages.NewContainerWizardPage_error_EnterContainerName);
+			status
+					.setError(NewWizardMessages.NewContainerWizardPage_error_EnterContainerName);
 			return status;
 		}
 		IPath path = new Path(str);
-		IResource res = workspaceRoot.findMember(path);		
+		IResource res = workspaceRoot.findMember(path);
 		if (res != null) {
 			int resType = res.getType();
 			if (resType == IResource.PROJECT || resType == IResource.FOLDER) {
@@ -317,42 +330,53 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 											proj.getFullPath().toString()));
 					return status;
 				}
-				
-				IScriptProject jproject = DLTKCore.create(proj);			
+
+				IScriptProject jproject = DLTKCore.create(proj);
 				if (resType == IResource.PROJECT)
-					currRoot = jproject.getProjectFragment(res).getScriptFolder(""); //$NON-NLS-1$
+					currRoot = jproject.getProjectFragment(res)
+							.getScriptFolder(""); //$NON-NLS-1$
 				else {
-					currRoot = jproject.getProjectFragment(res).getScriptFolder(path);					
-				}					
-				
+					currRoot = jproject.getProjectFragment(res.getProject())
+							.getScriptFolder(path.removeFirstSegments(1));
+				}
+
 				if (res.exists()) {
 					try {
-//						if (!DLTKLanguageManager.hasScriptNature(jproject.getProject())) {
-							String nature = getRequiredNature();
-							if (nature != null && !proj.hasNature(nature)) {
-								if (resType == IResource.PROJECT) {
-									status
-											.setError(NewWizardMessages.NewContainerWizardPage_warning_NotAScriptProject);
-								} else {
-									status
-											.setWarning(NewWizardMessages.NewContainerWizardPage_warning_NotInAScriptProject);
-								}
-								return status;
+						// if
+						// (!DLTKLanguageManager.hasScriptNature(jproject.getProject()))
+						// {
+						String nature = getRequiredNature();
+						if (nature != null && !proj.hasNature(nature)) {
+							if (resType == IResource.PROJECT) {
+								status
+										.setError(NewWizardMessages.NewContainerWizardPage_warning_NotAScriptProject);
+							} else {
+								status
+										.setWarning(NewWizardMessages.NewContainerWizardPage_warning_NotInAScriptProject);
 							}
-//						}
-						
+							return status;
+						}
+						// }
+
 					} catch (CoreException e) {
-						status.setWarning(NewWizardMessages.NewContainerWizardPage_warning_NotAScriptProject);
+						status
+								.setWarning(NewWizardMessages.NewContainerWizardPage_warning_NotAScriptProject);
 					}
 				}
 				return status;
 			} else {
-				status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_NotAFolder,
+				status
+						.setError(Messages
+								.format(
+										NewWizardMessages.NewContainerWizardPage_error_NotAFolder,
 										str));
 				return status;
 			}
 		} else {
-			status.setError(Messages.format(NewWizardMessages.NewContainerWizardPage_error_ContainerDoesNotExist,
+			status
+					.setError(Messages
+							.format(
+									NewWizardMessages.NewContainerWizardPage_error_ContainerDoesNotExist,
 									str));
 			return status;
 		}
@@ -387,8 +411,8 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	}
 
 	/**
-	 * Returns the <code>IProjectFragment</code> that corresponds to the
-	 * current value of the source folder field.
+	 * Returns the <code>IProjectFragment</code> that corresponds to the current
+	 * value of the source folder field.
 	 * 
 	 * @return the IProjectFragment or <code>null</code> if the current source
 	 *         folder value is not a valid package fragment root
@@ -397,7 +421,8 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	public IProjectFragment getProjectFragment() {
 		if (currRoot == null)
 			return null;
-		IProjectFragment fragment = (IProjectFragment)currRoot.getAncestor(IModelElement.PROJECT_FRAGMENT);
+		IProjectFragment fragment = (IProjectFragment) currRoot
+				.getAncestor(IModelElement.PROJECT_FRAGMENT);
 		if (fragment != null)
 			return fragment;
 		IScriptProject project = currRoot.getScriptProject();
@@ -406,15 +431,15 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 				IProjectFragment[] roots = project.getProjectFragments();
 				for (int i = 0; i < roots.length; i++) {
 					if (roots[i].getKind() == IProjectFragment.K_SOURCE) {
-						return roots[i];				
+						return roots[i];
 					}
 				}
 			}
-		} catch (ModelException e) {			
+		} catch (ModelException e) {
 		}
 		return null;
 	}
-	
+
 	public IScriptFolder getScriptFolder() {
 		return currRoot;
 	}
@@ -463,14 +488,16 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	protected IScriptFolder chooseContainer() {
 		IModelElement initElement = getProjectFragment();
 		Class[] acceptedClasses = new Class[] { IScriptModel.class,
-				IScriptFolder.class, IScriptProject.class, IProjectFragment.class };
+				IScriptFolder.class, IScriptProject.class,
+				IProjectFragment.class };
 
 		ViewerFilter filter = new TypedViewerFilter(acceptedClasses) {
 			public boolean select(Viewer viewer, Object parent, Object element) {
-				if (element instanceof IProjectFragment){					
+				if (element instanceof IProjectFragment) {
 					try {
 						IProjectFragment fragment = (IProjectFragment) element;
-						if (fragment.getKind() != IProjectFragment.K_SOURCE || fragment.isExternal())
+						if (fragment.getKind() != IProjectFragment.K_SOURCE
+								|| fragment.isExternal())
 							return false;
 					} catch (ModelException e) {
 						return false;
@@ -480,13 +507,13 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 				return super.select(viewer, parent, element);
 			}
 		};
-				
+
 		StandardModelElementContentProvider provider = new StandardModelElementContentProvider();
 		ILabelProvider labelProvider = new ModelElementLabelProvider(
 				ModelElementLabelProvider.SHOW_DEFAULT);
 		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
 				getShell(), labelProvider, provider);
-		
+
 		dialog.setComparator(new ModelElementSorter());
 		dialog
 				.setTitle(NewWizardMessages.NewContainerWizardPage_ChooseSourceContainerDialog_title);
@@ -498,9 +525,10 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		dialog.setHelpAvailable(false);
 		if (dialog.open() == Window.OK) {
 			Object element = dialog.getFirstResult();
-			if (element instanceof IScriptProject) {				
+			if (element instanceof IScriptProject) {
 				IScriptProject jproject = (IScriptProject) element;
-				return jproject.getProjectFragment(jproject.getResource()).getScriptFolder(""); //$NON-NLS-1$				
+				return jproject.getProjectFragment(jproject.getResource())
+						.getScriptFolder(""); //$NON-NLS-1$				
 			} else if (element instanceof IScriptFolder) {
 				return (IScriptFolder) element;
 			} else if (element instanceof IProjectFragment) {
@@ -508,7 +536,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 			}
 			return null;
 		}
-		
+
 		return null;
 	}
 }
