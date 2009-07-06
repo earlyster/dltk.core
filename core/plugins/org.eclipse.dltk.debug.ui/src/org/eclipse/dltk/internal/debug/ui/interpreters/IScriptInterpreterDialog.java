@@ -12,7 +12,8 @@
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
 import org.eclipse.dltk.ui.dialogs.IModifyDialog;
+import org.eclipse.dltk.ui.dialogs.IStatusDialog;
 
-public interface IScriptInterpreterDialog extends IModifyDialog {
+public interface IScriptInterpreterDialog extends IModifyDialog, IStatusDialog {
 
 }
