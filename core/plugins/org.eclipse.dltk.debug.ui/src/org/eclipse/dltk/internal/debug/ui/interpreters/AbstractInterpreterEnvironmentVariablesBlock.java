@@ -29,6 +29,7 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
+import org.eclipse.dltk.ui.dialogs.MultipleInputDialog;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;

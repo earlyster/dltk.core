@@ -7,7 +7,6 @@ public class Messages extends NLS {
 	public static String EnvironmentVariableContentProvider_overwriteVariableMessage;
 	public static String EnvironmentVariableContentProvider_overwriteVariableTitle;
 	public static String EnvironmentVariablesFileUtils_incorrectFormat;
-	public static String MultipleInputDialog_ignore;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
