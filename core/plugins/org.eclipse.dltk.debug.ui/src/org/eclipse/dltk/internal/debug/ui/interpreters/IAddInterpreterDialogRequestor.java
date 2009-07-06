@@ -9,28 +9,33 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
-
 import org.eclipse.dltk.launching.IInterpreterInstall;
 
 /**
- * This interface is implemented by clients of the <code>AddInterpreterDialog</code>.
+ * This interface is implemented by clients of the
+ * <code>AddInterpreterDialog</code>.
  */
-public interface IAddInterpreterDialogRequestor {
+public interface IAddInterpreterDialogRequestor extends
+		IInterpreterAttributeContainer {
 
 	/**
 	 * Reply whether or not a new Interpreter of the specified name would
 	 * constitute a duplicate.
 	 * 
-	 * @param name the name of a potential new Interpreter
-	 * @return whether a new Interpreter with the specified name would be a duplicate Interpreter
+	 * @param name
+	 *            the name of a potential new Interpreter
+	 * @return whether a new Interpreter with the specified name would be a
+	 *         duplicate Interpreter
 	 */
 	public boolean isDuplicateName(String name);
-	
+
 	/**
-	 * Notification that a Interpreter has been added from the <code>AddInterpreterDialog</code>.
+	 * Notification that a Interpreter has been added from the
+	 * <code>AddInterpreterDialog</code>.
 	 * 
-	 * @param Interpreter the added Interpreter
+	 * @param Interpreter
+	 *            the added Interpreter
 	 */
 	public void interpreterAdded(IInterpreterInstall Interpreter);
-	
+
 }

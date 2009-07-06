@@ -1111,4 +1111,67 @@ public abstract class InterpretersBlock implements
 	public int getEnvironmentsCount() {
 		return environments.length;
 	}
+
+	private static class AttributeKey {
+		final IInterpreterInstall install;
+		final IInterpreterAttribute attribute;
+
+		public AttributeKey(IInterpreterInstall install,
+				IInterpreterAttribute attribute) {
+			this.install = install;
+			this.attribute = attribute;
+		}
+
+		@Override
+		public int hashCode() {
+			return install.hashCode() ^ attribute.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof AttributeKey) {
+				AttributeKey other = (AttributeKey) obj;
+				return install.equals(other.install)
+						&& attribute.equals(other.attribute);
+			}
+			return false;
+		}
+
+	}
+
+	private Map<AttributeKey, Object> attributes = null;
+
+	public Object get(IInterpreterInstall install,
+			IInterpreterAttribute attribute) {
+		if (attributes == null) {
+			attributes = new HashMap<AttributeKey, Object>();
+		}
+		final AttributeKey key = new AttributeKey(install, attribute);
+		Object value = attributes.get(key);
+		if (value == null) {
+			value = attribute.load(install);
+			attributes.put(key, value);
+		}
+		return value;
+	}
+
+	public void put(IInterpreterInstall install,
+			IInterpreterAttribute attribute, Object value) {
+		if (attributes == null) {
+			attributes = new HashMap<AttributeKey, Object>();
+		}
+		final AttributeKey key = new AttributeKey(install, attribute);
+		attributes.put(key, value);
+	}
+
+	public void saveInterpreterInstallAttributes() {
+		for (Map.Entry<AttributeKey, Object> entry : attributes.entrySet()) {
+			final AttributeKey key = entry.getKey();
+			final IInterpreterInstall install = key.install;
+			if (fInterpreters.contains(install)) {
+				key.attribute.save(install, entry.getValue());
+			}
+		}
+	}
+
 }

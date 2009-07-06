@@ -47,7 +47,7 @@ import org.eclipse.swt.widgets.Shell;
 public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		IScriptInterpreterDialog {
 
-	private IAddInterpreterDialogRequestor fRequestor;
+	protected final IAddInterpreterDialogRequestor fRequestor;
 
 	private IInterpreterInstallType[] fInterpreterTypes;
 
