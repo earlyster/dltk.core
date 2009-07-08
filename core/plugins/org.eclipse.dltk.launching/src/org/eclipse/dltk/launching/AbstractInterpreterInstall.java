@@ -357,11 +357,18 @@ public abstract class AbstractInterpreterInstall implements
 				} else {
 					i.remove();
 				}
+				firePropertyChangeEvent(new PropertyChangeEvent(this,
+						IInterpreterInstallChangedListener.PROPERTY_EXTENSIONS,
+						Collections.singletonList(object),
+						value != null ? Collections.singletonList(value) : null));
 				return object;
 			}
 		}
 		if (value != null) {
 			resource.getContents().add(value);
+			firePropertyChangeEvent(new PropertyChangeEvent(this,
+					IInterpreterInstallChangedListener.PROPERTY_EXTENSIONS,
+					null, Collections.singletonList(value)));
 		}
 		return null;
 	}
@@ -389,12 +396,18 @@ public abstract class AbstractInterpreterInstall implements
 	}
 
 	public void setExtensions(List<EObject> value) {
+		final List<EObject> oldValue;
 		if (resource == null) {
 			resource = createResource();
+			oldValue = null;
 		} else {
+			oldValue = new ArrayList<EObject>(resource.getContents());
 			resource.getContents().clear();
 		}
 		resource.getContents().addAll(value);
+		firePropertyChangeEvent(new PropertyChangeEvent(this,
+				IInterpreterInstallChangedListener.PROPERTY_EXTENSIONS,
+				oldValue, value));
 	}
 
 	public String saveExtensions() {

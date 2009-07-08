@@ -61,6 +61,14 @@ public interface IInterpreterInstallChangedListener {
 			+ ".PROPERTY_Interpreter_ARGUMENTS"; //$NON-NLS-1$
 
 	/**
+	 * Property constant indicating the install location of a Interpreter
+	 * install has changed.
+	 */
+	public static final String PROPERTY_EXTENSIONS = DLTKLaunchingPlugin
+			.getUniqueIdentifier()
+			+ ".PROPERTY_EXTENSIONS"; //$NON-NLS-1$
+
+	/**
 	 * Notification that the default interpreter install has changed.
 	 * 
 	 * @param previous
