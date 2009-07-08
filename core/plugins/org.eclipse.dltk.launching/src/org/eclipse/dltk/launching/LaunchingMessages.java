@@ -57,7 +57,13 @@ public class LaunchingMessages extends NLS {
 	public static String AbstractScriptLaunchConfigurationDelegate_InterpreterEnvironment_home_directory_not_specified_for__0__5;
 
 	public static String AbstractScriptLaunchConfigurationDelegate_Main_type_not_specified_11;
+	/**
+	 * @since 2.0
+	 */
 	public static String AbstractScriptLaunchConfigurationDelegate_Main_script_not_exist;
+	/**
+	 * @since 2.0
+	 */
 	public static String AbstractScriptLaunchConfigurationDelegate_Main_script_not_resolved;
 
 	public static String AbstractScriptLaunchConfigurationDelegate_startingLaunchConfiguration;

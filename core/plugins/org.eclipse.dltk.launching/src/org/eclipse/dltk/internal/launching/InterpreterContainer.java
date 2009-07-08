@@ -107,6 +107,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * 
 	 * @param interpreter
 	 * @return buildpath entries
+	 * @since 2.0
 	 */
 	public static IBuildpathEntry[] computeBuildpathEntries(
 			IInterpreterInstall interpreter) {
