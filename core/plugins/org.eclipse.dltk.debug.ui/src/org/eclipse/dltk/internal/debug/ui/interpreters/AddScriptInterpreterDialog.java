@@ -47,6 +47,9 @@ import org.eclipse.swt.widgets.Shell;
 public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		IScriptInterpreterDialog {
 
+	/**
+	 * @since 2.0
+	 */
 	protected final IAddInterpreterDialogRequestor fRequestor;
 
 	private IInterpreterInstallType[] fInterpreterTypes;
@@ -230,6 +233,9 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		return parent;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected void createDialogBlocks(Composite parent, int numColumns) {
 		Label l = new Label(parent, SWT.NONE);
 		l
@@ -287,6 +293,9 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		return names;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	private void selectInterpreterType() {
 		for (int i = 0; i < fInterpreterTypes.length; i++) {
 			if (fSelectedInterpreterType == fInterpreterTypes[i]) {
@@ -296,6 +305,9 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected void initializeFields(IInterpreterInstall install) {
 		fInterpreterTypeCombo.setItems(getInterpreterTypeNames());
 		if (install == null) {

@@ -13,6 +13,9 @@ package org.eclipse.dltk.internal.debug.ui.interpreters;
 
 import org.eclipse.dltk.launching.IInterpreterInstall;
 
+/**
+ * @since 2.0
+ */
 public interface IInterpreterAttribute {
 
 	Object load(IInterpreterInstall install);

@@ -110,6 +110,9 @@ public abstract class AbstractInterpreterLibraryBlock implements
 		return comp;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void createControlsIn(Composite comp) {
 		Composite comp2 = new Composite(comp, SWT.NONE);
 		GridLayout topLayout = new GridLayout();

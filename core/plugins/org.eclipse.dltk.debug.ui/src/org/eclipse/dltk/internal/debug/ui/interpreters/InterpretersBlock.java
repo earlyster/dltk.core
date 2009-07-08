@@ -1141,6 +1141,9 @@ public abstract class InterpretersBlock implements
 
 	private Map<AttributeKey, Object> attributes = null;
 
+	/**
+	 * @since 2.0
+	 */
 	public Object get(IInterpreterInstall install,
 			IInterpreterAttribute attribute) {
 		if (attributes == null) {
@@ -1155,6 +1158,9 @@ public abstract class InterpretersBlock implements
 		return value;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void put(IInterpreterInstall install,
 			IInterpreterAttribute attribute, Object value) {
 		if (attributes == null) {
@@ -1164,6 +1170,9 @@ public abstract class InterpretersBlock implements
 		attributes.put(key, value);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void saveInterpreterInstallAttributes() {
 		for (Map.Entry<AttributeKey, Object> entry : attributes.entrySet()) {
 			final AttributeKey key = entry.getKey();

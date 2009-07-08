@@ -166,6 +166,7 @@ public class EnvironmentVariableContentProvider implements ITreeContentProvider 
 	 * @param variable
 	 *            the variable to add
 	 * @return whether the variable was added
+	 * @since 2.0
 	 */
 	public boolean addVariable(EnvironmentVariable variable) {
 		String name = variable.getName();

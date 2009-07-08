@@ -108,6 +108,9 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		return comp;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void createControlsIn(Composite comp) {
 		fVariablesViewer = new TreeViewer(comp);
 		GridData gd = new GridData(GridData.FILL_BOTH);
@@ -542,6 +545,9 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		fDialog.setButtonLayoutData(button);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	@Deprecated
 	protected final void getDialogSettions() {
 
