@@ -782,6 +782,9 @@ public class PreferenceConstants {
 
 	public static final String EDITOR_MATCHING_BRACKETS_COLOR = "editor.matching_brackets_color"; //$NON-NLS-1$
 
+	/**
+	 * @since 2.0
+	 */
 	public static final String EDITOR_QUICKASSIST_LIGHTBULB = "editor.quickassist_lightbulb"; //$NON-NLS-1$
 
 	// Notification messages

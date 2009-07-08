@@ -142,6 +142,9 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 		this(manager, store, comment, todoTag, preferences, true);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public ScriptCommentScanner(IColorManager manager, IPreferenceStore store,
 			String comment, String todoTag, ITodoTaskPreferences preferences,
 			boolean initializeAutomatically) {
@@ -276,6 +279,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 	 * skipped, zero if none.
 	 * 
 	 * @return
+	 * @since 2.0
 	 */
 	protected int skipCommentChars() {
 		int c = read();

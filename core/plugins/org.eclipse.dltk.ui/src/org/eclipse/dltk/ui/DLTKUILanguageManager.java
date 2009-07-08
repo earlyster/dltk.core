@@ -32,6 +32,9 @@ public class DLTKUILanguageManager extends PriorityClassDLTKExtensionManager {
 		return toolkits.toArray(new IDLTKUILanguageToolkit[toolkits.size()]);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public static IDLTKUILanguageToolkit getLanguageToolkit(
 			IDLTKLanguageToolkit toolkit) {
 		return (IDLTKUILanguageToolkit) instance.getObject(toolkit

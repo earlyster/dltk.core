@@ -25,6 +25,9 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+/**
+ * @since 2.0
+ */
 public class ProjectAndSourceFolderContentProvider extends
 		ScriptBrowsingContentProvider {
 

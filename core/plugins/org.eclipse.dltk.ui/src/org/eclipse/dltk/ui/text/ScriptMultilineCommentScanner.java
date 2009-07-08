@@ -16,6 +16,9 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
 
+/**
+ * @since 2.0
+ */
 public class ScriptMultilineCommentScanner extends ScriptCommentScanner {
 
 	/**

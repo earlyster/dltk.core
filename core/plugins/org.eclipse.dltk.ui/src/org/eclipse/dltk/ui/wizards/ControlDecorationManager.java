@@ -24,6 +24,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+/**
+ * @since 2.0
+ */
 public class ControlDecorationManager implements IControlDecorationManager {
 
 	private Map<Control, ControlDecoration> decorations = new IdentityHashMap<Control, ControlDecoration>();

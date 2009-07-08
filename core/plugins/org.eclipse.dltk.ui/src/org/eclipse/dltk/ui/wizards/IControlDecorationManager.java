@@ -14,6 +14,9 @@ package org.eclipse.dltk.ui.wizards;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Control;
 
+/**
+ * @since 2.0
+ */
 public interface IControlDecorationManager {
 
 	void show(Control control, IStatus status);

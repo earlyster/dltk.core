@@ -175,6 +175,9 @@ public class DefaultFoldingPreferenceConfigurationBlock extends
 				new MinimumNumberValidator(minLines));
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected void enableFoldingControls() {
 		if (fBlockEnableState != null) {
 			fBlockEnableState.restore();
@@ -182,6 +185,9 @@ public class DefaultFoldingPreferenceConfigurationBlock extends
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected void disableFoldingControls() {
 		if (fBlockEnableState == null) {
 			fBlockEnableState = ControlEnableState

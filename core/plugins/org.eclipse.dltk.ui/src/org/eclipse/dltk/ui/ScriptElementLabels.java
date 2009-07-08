@@ -236,6 +236,8 @@ public class ScriptElementLabels {
 
 	/**
 	 * Post qualify referenced archive fragment roots.
+	 * 
+	 * @since 2.0
 	 */
 	public final static long REFERENCED_ARCHIVE_POST_QUALIFIED = 1L << 46;
 

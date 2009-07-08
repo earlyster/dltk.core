@@ -35,6 +35,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+/**
+ * @since 2.0
+ */
 public class MultipleInputDialog extends Dialog {
 	protected static final String FIELD_NAME = "FIELD_NAME"; //$NON-NLS-1$
 	protected static final int TEXT = 100;

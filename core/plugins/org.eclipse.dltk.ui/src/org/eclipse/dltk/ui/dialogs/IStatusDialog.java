@@ -14,6 +14,9 @@ package org.eclipse.dltk.ui.dialogs;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
 
+/**
+ * @since 2.0
+ */
 public interface IStatusDialog {
 
 	/**

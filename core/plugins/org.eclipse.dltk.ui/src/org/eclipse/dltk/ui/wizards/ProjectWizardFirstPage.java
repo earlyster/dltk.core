@@ -446,10 +446,15 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		 */
 		void handlePossibleInterpreterChange();
 
+		/**
+		 * @since 2.0
+		 */
 		boolean isInterpreterPresent();
 
 		/**
 		 * Returns the control to be decorated if error occurs
+		 * 
+		 * @since 2.0
 		 */
 		Control getDecorationTarget();
 
@@ -759,10 +764,16 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			return null;
 		}
 
+		/**
+		 * @since 2.0
+		 */
 		public boolean isInterpreterPresent() {
 			return interpretersPresent;
 		}
 
+		/**
+		 * @since 2.0
+		 */
 		public Control getDecorationTarget() {
 			if (fUseDefaultInterpreter.isSelected()) {
 				return fUseDefaultInterpreter.getSelectionButton();

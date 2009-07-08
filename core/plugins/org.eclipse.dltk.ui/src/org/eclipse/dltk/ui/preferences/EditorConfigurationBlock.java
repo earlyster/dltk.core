@@ -36,6 +36,9 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 	public static final int FLAG_TAB_POLICY = 1;
 	public static final int FLAG_EDITOR_SMART_NAVIGATION = 2;
 	public static final int FLAG_TAB_ALWAYS_INDENT = 4;
+	/**
+	 * @since 2.0
+	 */
 	public static final int FLAG_EDITOR_APPEARANCE_COLOR_OPTIONS = 8;
 
 	private final int flags;

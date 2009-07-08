@@ -16,6 +16,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.swt.widgets.Control;
 
+/**
+ * @since 2.0
+ */
 public class ControlStatus implements IStatus {
 
 	private final int fSeverity;

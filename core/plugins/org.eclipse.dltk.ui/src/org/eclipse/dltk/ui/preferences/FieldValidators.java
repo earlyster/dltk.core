@@ -43,6 +43,9 @@ public final class FieldValidators {
 			return status;
 		}
 
+		/**
+		 * @since 2.0
+		 */
 		public IStatus validate(URI location, IEnvironment environment) {
 			StatusInfo status = new StatusInfo();
 			if (environment == null) {

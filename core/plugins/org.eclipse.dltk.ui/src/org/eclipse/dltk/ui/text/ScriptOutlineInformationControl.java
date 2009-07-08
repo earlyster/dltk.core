@@ -466,6 +466,7 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 	 * @param treeStyle
 	 * @param commandId
 	 * @param preferenceStore
+	 * @since 2.0
 	 */
 	public ScriptOutlineInformationControl(Shell parent, int shellStyle,
 			int treeStyle, String commandId, IPreferenceStore preferenceStore) {
@@ -474,6 +475,9 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 		create();
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	@Override
 	protected final boolean isEarlyCreate() {
 		return false;

@@ -26,6 +26,8 @@ public interface IEnvironmentUI {
 
 	/**
 	 * Open file selection dialog.
+	 * 
+	 * @since 2.0
 	 */
 	String selectFile(Shell shell, int fileType, String initialSelection);
 
