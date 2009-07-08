@@ -9,10 +9,14 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
+import java.util.List;
+
 import org.eclipse.dltk.core.IBuiltinModuleProvider;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
 
 public interface IInterpreterInstall extends IBuiltinModuleProvider {
 	// Runner
@@ -63,4 +67,47 @@ public interface IInterpreterInstall extends IBuiltinModuleProvider {
 	String getInterpreterArgs();
 
 	void setInterpreterArgs(String args);
+
+	/**
+	 * Returns additional information objects belonging to this interpreter.
+	 * 
+	 * @return
+	 */
+	List<EObject> getExtensions();
+
+	/**
+	 * Returns deep copy of additional information objects belonging to this
+	 * interpreter.
+	 * 
+	 * @return
+	 */
+	List<EObject> copyExtensions();
+
+	/**
+	 * Replaces additional information objects belonging to this interpreter
+	 * with the specified ones.
+	 * 
+	 * @param value
+	 */
+	void setExtensions(List<EObject> value);
+
+	/**
+	 * Finds the first additional information object of the specified
+	 * {@link EClass}.
+	 * 
+	 * @param clazz
+	 * @return the object found or <code>null</code>
+	 */
+	EObject findExtension(EClass clazz);
+
+	/**
+	 * Replaces the first additional information object of the specified type
+	 * with specified one.
+	 * 
+	 * @param clazz
+	 * @param value
+	 *            new value or <code>null</code>
+	 * @return previous value or <code>null</code>
+	 */
+	EObject replaceExtension(EClass clazz, EObject value);
 }

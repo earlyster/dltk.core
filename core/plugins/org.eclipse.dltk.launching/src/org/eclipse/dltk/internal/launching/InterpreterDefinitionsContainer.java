@@ -39,6 +39,7 @@ import org.eclipse.dltk.launching.LaunchingMessages;
 import org.eclipse.dltk.launching.LibraryLocation;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
+import org.w3c.dom.CharacterData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -92,6 +93,7 @@ public class InterpreterDefinitionsContainer {
 	private static final String LIBRARY_LOCATIONS_TAG = "libraryLocations"; //$NON-NLS-1$
 	private static final String LIBRARY_LOCATION_TAG = "libraryLocation"; //$NON-NLS-1$
 	private static final String ENVIRONMENT_ID = "environmentId"; //$NON-NLS-1$
+	private static final String EXTENSIONS_TAG = "extensions"; //$NON-NLS-1$
 	/**
 	 * Map of InterpreterInstallTypes to Lists of corresponding
 	 * InterpreterInstalls.
@@ -495,6 +497,18 @@ public class InterpreterDefinitionsContainer {
 			element.setAttribute(IARGS_ATTR, buffer.toString());
 		}
 
+		if (interpreter instanceof IInterpreterInstallExtensionContainer) {
+			String extensions = ((IInterpreterInstallExtensionContainer) interpreter)
+					.saveExtensions();
+			if (extensions != null && extensions.length() != 0) {
+				final Element extensionsElement = doc
+						.createElement(EXTENSIONS_TAG);
+				extensionsElement.appendChild(doc
+						.createCDATASection(extensions));
+				element.appendChild(extensionsElement);
+			}
+		}
+
 		return element;
 	}
 
@@ -730,6 +744,21 @@ public class InterpreterDefinitionsContainer {
 								.setEnvironmentVariables(new EnvironmentVariable[] { var });
 					} else if (subElementName.equals(ENVIRONMENT_VARIABLES_TAG)) {
 						setEnvironmentVariables(standin, subElement);
+					} else if (subElementName.equals(EXTENSIONS_TAG)) {
+						StringBuffer body = null;
+						NodeList children = subElement.getChildNodes();
+						for (int j = 0; j < children.getLength(); ++j) {
+							Node child = children.item(j);
+							if (child.getNodeType() == Node.CDATA_SECTION_NODE) {
+								if (body == null) {
+									body = new StringBuffer();
+								}
+								body.append(((CharacterData) child).getData());
+							}
+						}
+						if (body != null) {
+							standin.loadExtensions(body.toString());
+						}
 					}
 				}
 			}

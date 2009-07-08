@@ -9,15 +9,35 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.DebugRunnerDelegate;
+import org.eclipse.dltk.internal.launching.IInterpreterInstallExtensionContainer;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.URIConverter;
+import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.xmi.XMIResource;
+import org.eclipse.emf.ecore.xmi.XMLResource;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
 /**
  * Abstract implementation of a interpreter install.
@@ -25,7 +45,8 @@ import org.eclipse.dltk.internal.launching.DebugRunnerDelegate;
  * Clients implementing interpreter installs must subclass this class.
  * </p>
  */
-public abstract class AbstractInterpreterInstall implements IInterpreterInstall {
+public abstract class AbstractInterpreterInstall implements
+		IInterpreterInstall, IInterpreterInstallExtensionContainer {
 	private IInterpreterInstallType fType;
 	private String fId;
 	private String fName;
@@ -298,4 +319,122 @@ public abstract class AbstractInterpreterInstall implements IInterpreterInstall 
 		this.fEnvironmentVariables = variables;
 		firePropertyChangeEvent(event);
 	}
+
+	private XMLResource resource = null;
+
+	protected XMIResource createResource() {
+		final XMIResourceImpl r = new XMIResourceImpl();
+		r.setEncoding(ENCODING);
+		return r;
+	}
+
+	private static final String ENCODING = "UTF-8"; //$NON-NLS-1$
+
+	public EObject findExtension(EClass clazz) {
+		if (resource != null) {
+			for (EObject object : resource.getContents()) {
+				if (clazz.equals(object.eClass())) {
+					return object;
+				}
+			}
+		}
+		return null;
+	}
+
+	public EObject replaceExtension(EClass clazz, EObject value) {
+		if (value != null) {
+			Assert.isLegal(clazz.equals(value.eClass()));
+		}
+		if (resource == null) {
+			resource = createResource();
+		}
+		for (ListIterator<EObject> i = resource.getContents().listIterator(); i
+				.hasNext();) {
+			EObject object = i.next();
+			if (clazz.equals(object.eClass())) {
+				if (value != null) {
+					i.set(value);
+				} else {
+					i.remove();
+				}
+				return object;
+			}
+		}
+		if (value != null) {
+			resource.getContents().add(value);
+		}
+		return null;
+	}
+
+	public List<EObject> copyExtensions() {
+		if (resource != null && !resource.getContents().isEmpty()) {
+			Collection<EObject> copy = EcoreUtil
+					.copyAll(resource.getContents());
+			if (copy instanceof List<?>) {
+				return (List<EObject>) copy;
+			} else {
+				return new ArrayList<EObject>(copy);
+			}
+		} else {
+			return Collections.emptyList();
+		}
+	}
+
+	public List<EObject> getExtensions() {
+		if (resource != null && !resource.getContents().isEmpty()) {
+			return new ArrayList<EObject>(resource.getContents());
+		} else {
+			return Collections.emptyList();
+		}
+	}
+
+	public void setExtensions(List<EObject> value) {
+		if (resource == null) {
+			resource = createResource();
+		} else {
+			resource.getContents().clear();
+		}
+		resource.getContents().addAll(value);
+	}
+
+	public String saveExtensions() {
+		if (resource != null && !resource.getContents().isEmpty()) {
+			StringWriter stringWriter = new StringWriter();
+			try {
+				Map<String, Object> saveOptions = new HashMap<String, Object>();
+				saveOptions.put(XMLResource.OPTION_DECLARE_XML, Boolean.FALSE);
+				saveOptions.put(XMLResource.OPTION_FORMATTED, Boolean.FALSE);
+				resource.save(new URIConverter.WriteableOutputStream(
+						stringWriter, ENCODING), saveOptions);
+			} catch (IOException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+			return stringWriter.toString();
+		} else {
+			return null;
+		}
+	}
+
+	public void loadExtensions(String value) {
+		if (value != null && value.length() != 0) {
+			if (resource == null) {
+				resource = createResource();
+			}
+			try {
+				resource.load(new URIConverter.ReadableInputStream(value,
+						ENCODING), null);
+			} catch (IOException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+		} else {
+			if (resource != null) {
+				resource.getContents().clear();
+			}
+		}
+	}
+
 }
