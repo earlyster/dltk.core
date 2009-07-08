@@ -1,7 +1,6 @@
 package org.eclipse.dltk.debug.ui;
 
 import java.util.HashMap;
-import java.util.Iterator;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.debug.core.model.IDebugElement;
@@ -17,7 +16,8 @@ public class ScriptDebugElementAdapterFactory implements IAdapterFactory {
 
 	private static ScriptDebugElementAdapterFactory instance;
 	// assume only 1 plugin installed
-	private final HashMap variableLabelProviders = new HashMap(1, 1);
+	private final HashMap<String, ScriptVariableLabelProvider> variableLabelProviders = new HashMap<String, ScriptVariableLabelProvider>(
+			1, 1);
 
 	// private static final IElementLabelProvider fgLPVariable = new
 	// ScriptVariableLableProvider();
@@ -84,9 +84,9 @@ public class ScriptDebugElementAdapterFactory implements IAdapterFactory {
 
 	private void disposeVariableLabelProviders() {
 		synchronized (variableLabelProviders) {
-			for (Iterator i = variableLabelProviders.values().iterator(); i
-					.hasNext();) {
-				((ScriptVariableLabelProvider) i.next()).dispose();
+			for (ScriptVariableLabelProvider provider : variableLabelProviders
+					.values()) {
+				provider.dispose();
 			}
 			variableLabelProviders.clear();
 		}
@@ -99,9 +99,10 @@ public class ScriptDebugElementAdapterFactory implements IAdapterFactory {
 				.getPreferenceStore();
 	}
 
-	private Object getVariableLabelProvider(IDebugElement toAdapt) {
+	private ScriptVariableLabelProvider getVariableLabelProvider(
+			IDebugElement toAdapt) {
 		final String id = toAdapt.getModelIdentifier();
-		Object provider;
+		ScriptVariableLabelProvider provider;
 		synchronized (variableLabelProviders) {
 			provider = variableLabelProviders.get(id);
 			if (provider == null) {
