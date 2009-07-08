@@ -95,7 +95,7 @@ public abstract class InterpretersBlock implements
 	/**
 	 * Interpreters being displayed
 	 */
-	protected List fInterpreters = new ArrayList();
+	protected List<IInterpreterInstall> fInterpreters = new ArrayList<IInterpreterInstall>();
 
 	/**
 	 * The main list control
@@ -114,7 +114,7 @@ public abstract class InterpretersBlock implements
 	/**
 	 * Environment to checked interpreter.
 	 */
-	private Map checkedInterpreters = new HashMap();
+	private Map<IEnvironment, IInterpreterInstall> checkedInterpreters = new HashMap<IEnvironment, IInterpreterInstall>();
 
 	// index of column used for sorting
 	private int fSortColumn = 0;
@@ -616,22 +616,22 @@ public abstract class InterpretersBlock implements
 	 * @return InterpreterEnvironments currently being displayed in this block
 	 */
 	public IInterpreterInstall[] getInterpreters() {
-		return (IInterpreterInstall[]) fInterpreters
-				.toArray(new IInterpreterInstall[fInterpreters.size()]);
+		return fInterpreters.toArray(new IInterpreterInstall[fInterpreters
+				.size()]);
 	}
 
 	public IInterpreterInstall[] getCurrentInterprers() {
 		IEnvironment environment = getCurrentEnvironment();
-		List result = new ArrayList();
-		for (Iterator iterator = fInterpreters.iterator(); iterator.hasNext();) {
-			IInterpreterInstall install = (IInterpreterInstall) iterator.next();
+		List<IInterpreterInstall> result = new ArrayList<IInterpreterInstall>();
+		for (Iterator<IInterpreterInstall> iterator = fInterpreters.iterator(); iterator
+				.hasNext();) {
+			IInterpreterInstall install = iterator.next();
 			if (install.getInstallLocation().getEnvironmentId().equals(
 					environment.getId())) {
 				result.add(install);
 			}
 		}
-		return (IInterpreterInstall[]) result
-				.toArray(new IInterpreterInstall[result.size()]);
+		return result.toArray(new IInterpreterInstall[result.size()]);
 	}
 
 	/**
@@ -639,8 +639,7 @@ public abstract class InterpretersBlock implements
 	 */
 	public boolean isDuplicateName(String name) {
 		for (int i = 0; i < fInterpreters.size(); i++) {
-			IInterpreterInstall interpreter = (IInterpreterInstall) fInterpreters
-					.get(i);
+			IInterpreterInstall interpreter = fInterpreters.get(i);
 			if (interpreter.getName().equals(name)) {
 				return true;
 			}
@@ -653,8 +652,7 @@ public abstract class InterpretersBlock implements
 	 */
 	public boolean isDuplicate(IFileHandle location) {
 		for (int i = 0; i < fInterpreters.size(); i++) {
-			IInterpreterInstall interpreter = (IInterpreterInstall) fInterpreters
-					.get(i);
+			IInterpreterInstall interpreter = fInterpreters.get(i);
 			if (interpreter.getInstallLocation().equals(location)) {
 				return true;
 			}
@@ -706,11 +704,10 @@ public abstract class InterpretersBlock implements
 
 		// choose a root directory for the search
 		// ignore installed locations
-		final Set exstingLocations = new HashSet();
-		Iterator iter = fInterpreters.iterator();
+		final Set<IFileHandle> exstingLocations = new HashSet<IFileHandle>();
+		Iterator<IInterpreterInstall> iter = fInterpreters.iterator();
 		while (iter.hasNext()) {
-			exstingLocations.add(((IInterpreterInstall) iter.next())
-					.getInstallLocation());
+			exstingLocations.add(iter.next().getInstallLocation());
 		}
 
 		// search
@@ -834,11 +831,12 @@ public abstract class InterpretersBlock implements
 	 * @return the checked Interpreter or <code>null</code> if none
 	 */
 	public IInterpreterInstall[] getCheckedInterpreters() {
-		Collection values = checkedInterpreters.values();
+		Collection<IInterpreterInstall> values = checkedInterpreters.values();
 		IInterpreterInstall[] installs = new IInterpreterInstall[values.size()];
 		int i = 0;
-		for (Iterator iterator = values.iterator(); iterator.hasNext();) {
-			installs[i] = (IInterpreterInstall) iterator.next();
+		for (Iterator<IInterpreterInstall> iterator = values.iterator(); iterator
+				.hasNext();) {
+			installs[i] = iterator.next();
 			++i;
 		}
 		return installs;
@@ -916,7 +914,7 @@ public abstract class InterpretersBlock implements
 	 */
 	protected void fillWithWorkspaceInterpreters() {
 		// fill with interpreters
-		List standins = new ArrayList();
+		List<InterpreterStandin> standins = new ArrayList<InterpreterStandin>();
 		IInterpreterInstallType[] types = ScriptRuntime
 				.getInterpreterInstallTypes(getCurrentNature());
 		for (int i = 0; i < types.length; i++) {
@@ -928,8 +926,8 @@ public abstract class InterpretersBlock implements
 					standins.add(new InterpreterStandin(install));
 				}
 		}
-		setInterpreters((IInterpreterInstall[]) standins
-				.toArray(new IInterpreterInstall[standins.size()]));
+		setInterpreters(standins.toArray(new IInterpreterInstall[standins
+				.size()]));
 	}
 
 	public void interpreterAdded(IInterpreterInstall Interpreter) {
@@ -1039,7 +1037,7 @@ public abstract class InterpretersBlock implements
 				.getSelection();
 		Iterator it = selection.iterator();
 
-		ArrayList newEntries = new ArrayList();
+		ArrayList<InterpreterStandin> newEntries = new ArrayList<InterpreterStandin>();
 		while (it.hasNext()) {
 			IInterpreterInstall selectedInterpreter = (IInterpreterInstall) it
 					.next();
@@ -1110,77 +1108,6 @@ public abstract class InterpretersBlock implements
 
 	public int getEnvironmentsCount() {
 		return environments.length;
-	}
-
-	private static class AttributeKey {
-		final IInterpreterInstall install;
-		final IInterpreterAttribute attribute;
-
-		public AttributeKey(IInterpreterInstall install,
-				IInterpreterAttribute attribute) {
-			this.install = install;
-			this.attribute = attribute;
-		}
-
-		@Override
-		public int hashCode() {
-			return install.hashCode() ^ attribute.hashCode();
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof AttributeKey) {
-				AttributeKey other = (AttributeKey) obj;
-				return install.equals(other.install)
-						&& attribute.equals(other.attribute);
-			}
-			return false;
-		}
-
-	}
-
-	private Map<AttributeKey, Object> attributes = null;
-
-	/**
-	 * @since 2.0
-	 */
-	public Object get(IInterpreterInstall install,
-			IInterpreterAttribute attribute) {
-		if (attributes == null) {
-			attributes = new HashMap<AttributeKey, Object>();
-		}
-		final AttributeKey key = new AttributeKey(install, attribute);
-		Object value = attributes.get(key);
-		if (value == null) {
-			value = attribute.load(install);
-			attributes.put(key, value);
-		}
-		return value;
-	}
-
-	/**
-	 * @since 2.0
-	 */
-	public void put(IInterpreterInstall install,
-			IInterpreterAttribute attribute, Object value) {
-		if (attributes == null) {
-			attributes = new HashMap<AttributeKey, Object>();
-		}
-		final AttributeKey key = new AttributeKey(install, attribute);
-		attributes.put(key, value);
-	}
-
-	/**
-	 * @since 2.0
-	 */
-	public void saveInterpreterInstallAttributes() {
-		for (Map.Entry<AttributeKey, Object> entry : attributes.entrySet()) {
-			final AttributeKey key = entry.getKey();
-			final IInterpreterInstall install = key.install;
-			if (fInterpreters.contains(install)) {
-				key.attribute.save(install, entry.getValue());
-			}
-		}
 	}
 
 }

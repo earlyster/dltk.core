@@ -15,8 +15,7 @@ import org.eclipse.dltk.launching.IInterpreterInstall;
  * This interface is implemented by clients of the
  * <code>AddInterpreterDialog</code>.
  */
-public interface IAddInterpreterDialogRequestor extends
-		IInterpreterAttributeContainer {
+public interface IAddInterpreterDialogRequestor {
 
 	/**
 	 * Reply whether or not a new Interpreter of the specified name would

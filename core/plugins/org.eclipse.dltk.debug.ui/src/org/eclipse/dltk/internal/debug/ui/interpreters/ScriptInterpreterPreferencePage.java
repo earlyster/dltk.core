@@ -166,9 +166,6 @@ public abstract class ScriptInterpreterPreferencePage extends PreferencePage
 						.getCurrentNature(), interpreters, defaultInterpreter)) {
 					canceled[0] = true;
 				}
-				if (!canceled[0]) {
-					fInterpretersBlock.saveInterpreterInstallAttributes();
-				}
 			}
 		});
 
