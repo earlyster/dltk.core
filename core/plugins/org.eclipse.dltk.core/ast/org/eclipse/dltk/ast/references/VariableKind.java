@@ -34,6 +34,10 @@ public interface VariableKind {
 
 	}
 
+	/**
+	 * @deprecated
+	 * @since 2.0
+	 */
 	@Deprecated
 	public class Unknown extends Implementation {
 
@@ -45,6 +49,9 @@ public interface VariableKind {
 
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	@Deprecated
 	public class Local extends Implementation {
 
@@ -56,6 +63,9 @@ public interface VariableKind {
 
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	@Deprecated
 	public class Global extends Implementation {
 
@@ -67,6 +77,9 @@ public interface VariableKind {
 
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	@Deprecated
 	public class Instance extends Implementation {
 
@@ -78,6 +91,9 @@ public interface VariableKind {
 
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	@Deprecated
 	public class Class extends Implementation {
 
@@ -89,6 +105,9 @@ public interface VariableKind {
 
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	@Deprecated
 	public class Mixin extends Implementation {
 
@@ -100,6 +119,9 @@ public interface VariableKind {
 
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	@Deprecated
 	public class Argument extends Implementation {
 

@@ -552,6 +552,8 @@ public class MatchLocator implements ITypeRequestor {
 	/**
 	 * Create a new parser for the given project, as well as a lookup
 	 * environment.
+	 * 
+	 * @since 2.0
 	 */
 	public void initialize(IScriptProject project, int possibleMatchSize)
 			throws ModelException {
@@ -594,6 +596,9 @@ public class MatchLocator implements ITypeRequestor {
 		this.matchesToProcess = new PossibleMatch[possibleMatchSize];
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected void locateMatches(IScriptProject scriptProject,
 			PossibleMatch[] possibleMatches, int start, int length)
 			throws CoreException {
@@ -660,6 +665,8 @@ public class MatchLocator implements ITypeRequestor {
 
 	/**
 	 * Locate the matches amongst the possible matches.
+	 * 
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	protected void locateMatches(IScriptProject scriptProject,
 			PossibleMatchSet matchSet, int expected) throws CoreException {

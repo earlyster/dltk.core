@@ -328,6 +328,9 @@ public class DLTKLanguageManager {
 				.getInterpreterContainerExtensionManager().getObject(project);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public static ISearchPatternProcessor getSearchPatternProcessor(
 			String natureId) {
 		final ISearchFactory factory = getSearchFactory(natureId);
@@ -338,6 +341,9 @@ public class DLTKLanguageManager {
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public static ISearchPatternProcessor getSearchPatternProcessor(
 			IDLTKLanguageToolkit toolkit) {
 		if (toolkit != null) {

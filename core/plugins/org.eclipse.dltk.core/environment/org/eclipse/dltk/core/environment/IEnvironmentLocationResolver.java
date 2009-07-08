@@ -13,6 +13,9 @@ package org.eclipse.dltk.core.environment;
 
 import java.net.URI;
 
+/**
+ * @since 2.0
+ */
 public interface IEnvironmentLocationResolver {
 
 	URI[] resolve(URI location);

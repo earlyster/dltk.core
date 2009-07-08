@@ -460,6 +460,9 @@ public final class EnvironmentManager {
 
 	private static LocationResolverManager resolverManager = null;
 
+	/**
+	 * @since 2.0
+	 */
 	public static URI[] resolve(URI location) {
 		if (resolverManager == null) {
 			resolverManager = new LocationResolverManager();
