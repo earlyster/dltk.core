@@ -166,7 +166,8 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 					zipFile.getInputStream(zipEntry);
 					InputStream inputStream;
 					try {
-						inputStream = zipFile.getInputStream(zipEntry);
+						inputStream = new BufferedInputStream(zipFile
+								.getInputStream(zipEntry), 8096);
 						Util.copy(inputStream, stream);
 						stream.close();
 						inputStream.close();
