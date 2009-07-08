@@ -25,7 +25,7 @@ import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
 import org.eclipse.dltk.internal.core.ScriptProject;
 
-class ProjectRequest extends IndexRequest {
+public class ProjectRequest extends IndexRequest {
 
 	private final IScriptProject project;
 

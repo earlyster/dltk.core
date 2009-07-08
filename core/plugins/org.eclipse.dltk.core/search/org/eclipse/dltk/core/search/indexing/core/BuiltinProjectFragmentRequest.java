@@ -24,7 +24,7 @@ import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 
-class BuiltinProjectFragmentRequest extends ExternalProjectFragmentRequest {
+public class BuiltinProjectFragmentRequest extends ExternalProjectFragmentRequest {
 
 	private final long lastModified;
 

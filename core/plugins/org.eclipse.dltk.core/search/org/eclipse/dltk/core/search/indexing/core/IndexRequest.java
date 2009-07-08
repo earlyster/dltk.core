@@ -32,7 +32,7 @@ import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer.Internal;
 
-abstract class IndexRequest extends AbstractJob {
+public abstract class IndexRequest extends AbstractJob {
 	private IProjectIndexer indexer;
 
 	public IndexRequest(IProjectIndexer indexer) {

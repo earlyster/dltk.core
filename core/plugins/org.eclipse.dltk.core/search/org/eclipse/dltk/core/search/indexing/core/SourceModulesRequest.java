@@ -27,7 +27,7 @@ import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 
-class SourceModulesRequest extends IndexRequest {
+public class SourceModulesRequest extends IndexRequest {
 
 	private final IScriptProject project;
 	private final IDLTKLanguageToolkit toolkit;
