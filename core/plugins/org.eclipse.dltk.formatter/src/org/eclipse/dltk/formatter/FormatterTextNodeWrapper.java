@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.formatter;
 
+/**
+ * @since 2.0
+ */
 public class FormatterTextNodeWrapper implements IFormatterTextNode {
 
 	protected final IFormatterTextNode target;

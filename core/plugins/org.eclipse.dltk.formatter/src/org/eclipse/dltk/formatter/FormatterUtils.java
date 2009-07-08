@@ -69,6 +69,9 @@ public class FormatterUtils {
 		return true;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public static IFormatterNode[] toTextNodeArray(List<IFormatterNode> list) {
 		if (list != null) {
 			return list.toArray(new IFormatterNode[list.size()]);
