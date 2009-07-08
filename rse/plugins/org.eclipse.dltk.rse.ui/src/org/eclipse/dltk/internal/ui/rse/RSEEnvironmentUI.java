@@ -57,6 +57,9 @@ public class RSEEnvironmentUI implements IEnvironmentUI {
 		return selectFile(shell, fileType, null);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public String selectFile(Shell shell, int fileType, String initialSelection) {
 		SystemRemoteFileDialog dialog = new SystemRemoteFileDialog(shell);
 		dialog.setDefaultSystemConnection(this.environment.getHost(), true);
