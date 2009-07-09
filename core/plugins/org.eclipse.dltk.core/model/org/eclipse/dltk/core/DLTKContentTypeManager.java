@@ -36,8 +36,11 @@ import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.core.runtime.content.IContentTypeManager;
+import org.eclipse.core.runtime.content.IContentTypeManager.ContentTypeChangeEvent;
+import org.eclipse.core.runtime.content.IContentTypeManager.IContentTypeChangeListener;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.internal.core.DLTKAssociationManager;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ScriptFileConfiguratorManager;
 
@@ -75,14 +78,13 @@ public class DLTKContentTypeManager {
 		if (DEBUG) {
 			log(toolkit.getLanguageName(), name);
 		}
-		final IContentType masterType = getMasterContentType(toolkit
-				.getLanguageContentType());
-		if (masterType == null) {
-			return false;
+		final IDLTKAssociationManager associationManager = getAssociationManager(toolkit);
+		if (associationManager.isAssociatedWith(name)) {
+			return true;
 		}
-		// Acquire derived content types
-		final IContentType[] derived = getDerivedContentTypes(masterType);
-		return isValidFileNameForContentType(derived, name);
+		// Acquire content types
+		final IContentType[] contentTypes = getContentTypes(toolkit);
+		return isValidFileNameForContentType(contentTypes, name);
 	}
 
 	public static boolean isValidFileNameForContentType(
@@ -90,13 +92,13 @@ public class DLTKContentTypeManager {
 		if (DEBUG) {
 			log(toolkit.getLanguageName(), path);
 		}
-		final IContentType masterType = getMasterContentType(toolkit
-				.getLanguageContentType());
-		if (masterType == null) {
-			return false;
+		final IDLTKAssociationManager associationManager = getAssociationManager(toolkit);
+		if (associationManager.isAssociatedWith(path.lastSegment())) {
+			return true;
 		}
-		final IContentType[] derived = getDerivedContentTypes(masterType);
-		if (isValidFileNameForContentType(derived, path.lastSegment())) {
+		// Acquire content types
+		final IContentType[] contentTypes = getContentTypes(toolkit);
+		if (isValidFileNameForContentType(contentTypes, path.lastSegment())) {
 			return true;
 		}
 		if (EnvironmentPathUtils.isFull(path)) {
@@ -105,12 +107,10 @@ public class DLTKContentTypeManager {
 				if (file.getEnvironment().isLocal()) {
 					final File localFile = new File(file.toOSString());
 					return toolkit.canValidateContent(file)
-							&& validateLocalFileContent(masterType, derived,
-									localFile);
+							&& validateLocalFileContent(contentTypes, localFile);
 				} else {
 					return toolkit.canValidateContent(file)
-							&& validateRemoteFileContent(masterType, derived,
-									file);
+							&& validateRemoteFileContent(contentTypes, file);
 				}
 			}
 			return false;
@@ -119,16 +119,16 @@ public class DLTKContentTypeManager {
 			final File file = path.toFile();
 			if (file.isFile()) {
 				return toolkit.canValidateContent(file)
-						&& validateLocalFileContent(masterType, derived, file);
+						&& validateLocalFileContent(contentTypes, file);
 			}
 		}
 		final IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		final IResource member = root.findMember(path);
 		return member != null && member.getType() == IResource.FILE
-				&& validateResourceContent(masterType, derived, (IFile) member);
+				&& validateResourceContent(contentTypes, (IFile) member);
 	}
 
-	private static boolean validateRemoteFileContent(IContentType masterType,
+	private static boolean validateRemoteFileContent(
 			final IContentType[] derived, IFileHandle file) {
 		if (DEBUG_CONTENT) {
 			log("validateContent", file); //$NON-NLS-1$
@@ -163,8 +163,8 @@ public class DLTKContentTypeManager {
 	 * @param file
 	 * @return
 	 */
-	private static boolean validateLocalFileContent(IContentType masterType,
-			IContentType[] derived, File file) {
+	private static boolean validateLocalFileContent(IContentType[] derived,
+			File file) {
 		if (DEBUG_CONTENT) {
 			log("validateContent", file); //$NON-NLS-1$
 		}
@@ -208,12 +208,12 @@ public class DLTKContentTypeManager {
 	 * Look for derived for associated extensions
 	 */
 	private static boolean isValidFileNameForContentType(
-			IContentType[] derived, String name) {
+			IContentType[] contentTypes, String name) {
 		if (name == null || name.length() == 0) {
 			return false;
 		}
-		for (int i = 0; i < derived.length; i++) {
-			IContentType type = derived[i];
+		for (int i = 0; i < contentTypes.length; i++) {
+			IContentType type = contentTypes[i];
 			if (type.isAssociatedWith(name)) {
 				return true;
 			}
@@ -234,15 +234,13 @@ public class DLTKContentTypeManager {
 		if (status.getSeverity() != IStatus.OK) {
 			return false;
 		}
-		// Acquire master content type
-		final IContentType masterType = getMasterContentType(toolkit
-				.getLanguageContentType());
-		if (masterType == null) {
-			return false;
+		final IDLTKAssociationManager associationManager = getAssociationManager(toolkit);
+		if (associationManager.isAssociatedWith(resource.getName())) {
+			return true;
 		}
-		// Acquire derived content types
-		final IContentType[] derived = getDerivedContentTypes(masterType);
-		if (isValidFileNameForContentType(derived, resource.getName())) {
+		// Acquire content types
+		final IContentType[] contentTypes = getContentTypes(toolkit);
+		if (isValidFileNameForContentType(contentTypes, resource.getName())) {
 			return true;
 		}
 		// Delegate the decision if we should validate content to the language
@@ -261,23 +259,22 @@ public class DLTKContentTypeManager {
 			}
 			return false;
 		}
-		final boolean result = validateResourceContent(masterType, derived,
+		final boolean result = validateResourceContent(contentTypes,
 				(IFile) resource);
 		setValidScript((IFile) resource, toolkit.getNatureId(), result);
 		return result;
 	}
 
 	private static boolean validateResourceContent(
-			final IContentType masterType, final IContentType[] derived,
-			final IFile file) {
+			final IContentType[] contentTypes, final IFile file) {
 		if (DEBUG_CONTENT) {
 			log("validateContent", file); //$NON-NLS-1$
 		}
 		try {
-			if (file.exists()) {
+			if (contentTypes.length != 0 && file.exists()) {
 				final IContentDescription descr = file.getContentDescription();
 				if (descr != null) {
-					if (descr.getContentType().isKindOf(masterType)) {
+					if (descr.getContentType().isKindOf(contentTypes[0])) {
 						return true;
 					}
 				}
@@ -288,8 +285,8 @@ public class DLTKContentTypeManager {
 			}
 		}
 		try {
-			for (int i = 0; i < derived.length; i++) {
-				final IContentType type = derived[i];
+			for (int i = 0; i < contentTypes.length; i++) {
+				final IContentType type = contentTypes[i];
 				/*
 				 * TODO use something like LazyInputStream if there are multiple
 				 * content types
@@ -357,11 +354,6 @@ public class DLTKContentTypeManager {
 		}
 	}
 
-	private static IContentType getMasterContentType(String languageContentType) {
-		final IContentTypeManager manager = Platform.getContentTypeManager();
-		return manager.getContentType(languageContentType);
-	}
-
 	private static boolean checkDescription(IContentType type,
 			IContentDescription description) {
 		Object object = description.getProperty(DLTK_VALID);
@@ -372,30 +364,86 @@ public class DLTKContentTypeManager {
 		return false;
 	}
 
-	private static final Map derivedContentTypesCache = new HashMap();
+	private static final Map<IDLTKLanguageToolkit, IContentType[]> contentTypesCache = new HashMap<IDLTKLanguageToolkit, IContentType[]>();
 
-	private static IContentType[] getDerivedContentTypes(IContentType masterType) {
+	private static IContentTypeChangeListener changeListener = null;
+
+	/**
+	 * Returns {@link IContentType}s for the specified IDLTKLanguageToolkit. If
+	 * there are no content types found empty array is returned. Master content
+	 * type is returned first.
+	 * 
+	 * @param toolkit
+	 * @return
+	 */
+	private static IContentType[] getContentTypes(IDLTKLanguageToolkit toolkit) {
 		IContentType[] result;
-		synchronized (derivedContentTypesCache) {
-			result = (IContentType[]) derivedContentTypesCache.get(masterType);
+		synchronized (contentTypesCache) {
+			result = contentTypesCache.get(toolkit);
 		}
 		if (result != null) {
 			return result;
 		}
 		final IContentTypeManager manager = Platform.getContentTypeManager();
-		final IContentType[] types = manager.getAllContentTypes();
-		final Set derived = new HashSet();
-		for (int i = 0; i < types.length; i++) {
-			if (types[i].isKindOf(masterType)) {
-				derived.add(types[i]);
+		synchronized (contentTypesCache) {
+			if (changeListener == null) {
+				changeListener = new IContentTypeChangeListener() {
+					public void contentTypeChanged(ContentTypeChangeEvent event) {
+						synchronized (contentTypesCache) {
+							contentTypesCache.clear();
+						}
+					}
+				};
+				manager.addContentTypeChangeListener(changeListener);
 			}
 		}
-		result = (IContentType[]) derived.toArray(new IContentType[derived
-				.size()]);
-		synchronized (derivedContentTypesCache) {
-			derivedContentTypesCache.put(masterType, result);
+		final IContentType masterType = manager.getContentType(toolkit
+				.getLanguageContentType());
+		if (masterType != null) {
+			final Set<IContentType> selected = new HashSet<IContentType>();
+			for (IContentType type : manager.getAllContentTypes()) {
+				if (type.isKindOf(masterType)) {
+					selected.add(type);
+				}
+			}
+			result = selected.toArray(new IContentType[selected.size()]);
+			for (int i = 1; i < result.length; ++i) {
+				if (result[i] == masterType) {
+					final IContentType temp = result[0];
+					result[0] = result[i];
+					result[i] = temp;
+					break;
+				}
+			}
+		} else {
+			result = new IContentType[0];
+		}
+		synchronized (contentTypesCache) {
+			contentTypesCache.put(toolkit, result);
 		}
 		return result;
+	}
+
+	private static final Map<IDLTKLanguageToolkit, IDLTKAssociationManager> associationManagerCache = new HashMap<IDLTKLanguageToolkit, IDLTKAssociationManager>();
+
+	/**
+	 * @param toolkit
+	 * @return
+	 */
+	private static IDLTKAssociationManager getAssociationManager(
+			IDLTKLanguageToolkit toolkit) {
+		IDLTKAssociationManager manager;
+		synchronized (associationManagerCache) {
+			manager = associationManagerCache.get(toolkit);
+		}
+		if (manager != null) {
+			return manager;
+		}
+		manager = new DLTKAssociationManager(toolkit.getPreferenceQualifier());
+		synchronized (associationManagerCache) {
+			associationManagerCache.put(toolkit, manager);
+		}
+		return manager;
 	}
 
 	private static IResourceChangeListener listener = null;

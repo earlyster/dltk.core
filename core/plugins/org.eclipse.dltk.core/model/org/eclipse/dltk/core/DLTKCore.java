@@ -318,6 +318,14 @@ public class DLTKCore extends Plugin {
 			+ ".codeComplete.discouragedReferenceCheck"; //$NON-NLS-1$					
 
 	/**
+	 * Possible configurable option ID.
+	 */
+	public static final String LANGUAGE_FILENAME_ASSOCIATIONS = PLUGIN_ID
+			+ ".filename.associations"; //$NON-NLS-1$					
+
+	public static final char LANGUAGE_FILENAME_ASSOCIATION_SEPARATOR = ';';
+
+	/**
 	 * Possible configurable option ID. Value is the identifier of
 	 * implementation contributed to the org.eclipse.dltk.core.fileCache
 	 * extension point.
