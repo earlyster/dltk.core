@@ -46,6 +46,9 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 			return null;
 		}
 		IFileHandle parent = handle.getParent();
+		if (parent == null) {
+			return null;
+		}
 		String DLTK_INDEX_FILE = ".dltk.index";
 		// Check for additional indexes
 		if (processIndexFile(handle, attribute, parent, parent

@@ -22,15 +22,16 @@ import java.util.Map;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.caching.IContentCache;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
-import org.eclipse.dltk.core.internal.environment.EFSFileHandle;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.AbstractJob;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer.Internal;
+import org.eclipse.dltk.internal.core.ModelManager;
 
 /**
  * @since 2.0
@@ -97,6 +98,7 @@ public abstract class IndexRequest extends AbstractJob {
 	protected List checkChanges(Index index, Collection modules,
 			IPath containerPath, IEnvironment environment)
 			throws ModelException, IOException {
+		IContentCache coreCache = ModelManager.getModelManager().getCoreCache();
 		final String[] documents = queryDocumentNames(index);
 		if (documents != null && documents.length != 0) {
 			final long indexLastModified = index.getIndexFile().lastModified();
@@ -118,14 +120,13 @@ public abstract class IndexRequest extends AbstractJob {
 					// .getPath()));
 					IFileHandle handle = EnvironmentPathUtils.getFile(module);
 					if (handle != null) {
-						long lmodif = 0;
-						if (handle instanceof EFSFileHandle) {
-							lmodif = ((EFSFileHandle) handle).lastModified();
-						} else {
-							lmodif = handle.lastModified();
-						}
-						if (handle != null && lmodif > indexLastModified) {
+						// Check content cache for file changes
+						String indexed = coreCache
+								.getCacheEntryAttributeString(handle, "indexed");
+						if (indexed == null) {
 							changes.add(module);
+							coreCache.setCacheEntryAttribute(handle, "indexed",
+									"");
 						}
 					}
 				}
