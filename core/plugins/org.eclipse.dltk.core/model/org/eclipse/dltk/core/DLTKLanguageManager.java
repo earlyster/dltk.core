@@ -40,12 +40,12 @@ public class DLTKLanguageManager {
 
 	public static IDLTKLanguageToolkit[] getLanguageToolkits() {
 
-		ElementInfo[] elementInfos = InternalDLTKLanguageManager
-				.getLanguageToolkitsManager().getElementInfos();
+		final PriorityClassDLTKExtensionManager tkManager = InternalDLTKLanguageManager
+				.getLanguageToolkitsManager();
+		ElementInfo[] elementInfos = tkManager.getElementInfos();
 		IDLTKLanguageToolkit[] toolkits = new IDLTKLanguageToolkit[elementInfos.length];
 		for (int j = 0; j < elementInfos.length; j++) {
-			toolkits[j] = (IDLTKLanguageToolkit) InternalDLTKLanguageManager
-					.getLanguageToolkitsManager()
+			toolkits[j] = (IDLTKLanguageToolkit) tkManager
 					.getInitObject(elementInfos[j]);
 		}
 		return toolkits;
