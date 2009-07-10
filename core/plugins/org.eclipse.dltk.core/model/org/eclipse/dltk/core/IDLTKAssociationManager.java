@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
+/**
+ * @since 2.0
+ */
 public interface IDLTKAssociationManager {
 
 	boolean isAssociatedWith(String name);

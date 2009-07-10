@@ -319,10 +319,15 @@ public class DLTKCore extends Plugin {
 
 	/**
 	 * Possible configurable option ID.
+	 * 
+	 * @since 2.0
 	 */
 	public static final String LANGUAGE_FILENAME_ASSOCIATIONS = PLUGIN_ID
 			+ ".filename.associations"; //$NON-NLS-1$					
 
+	/**
+	 * @since 2.0
+	 */
 	public static final char LANGUAGE_FILENAME_ASSOCIATION_SEPARATOR = ';';
 
 	/**
