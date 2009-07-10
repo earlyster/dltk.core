@@ -78,7 +78,10 @@ public class ArchiveIndexContentChecker {
 				} catch (IOException e) {
 					return true;
 				}
-				if (cacheEntry.getTimestamp() != timestamp) {
+
+				long cacheStamp = cacheEntry.getTimestamp() / 1000;
+				timestamp = timestamp / 1000;
+				if (cacheStamp != timestamp) {
 					return true;
 				}
 				collected.add(childFile);
@@ -125,7 +128,9 @@ public class ArchiveIndexContentChecker {
 					IFileInfo fetchInfo = fileStore.fetchInfo();
 					timestamp = fetchInfo.getLastModified();
 				}
-				if (cacheEntry.getTimestamp() != timestamp) {
+				long cacheStamp = cacheEntry.getTimestamp() / 1000;
+				timestamp = timestamp / 1000;
+				if (cacheStamp != timestamp) {
 					return true;
 				}
 				collected.add(childFile);
