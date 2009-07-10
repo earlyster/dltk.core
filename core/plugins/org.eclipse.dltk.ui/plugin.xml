@@ -987,6 +987,14 @@
             class="org.eclipse.dltk.internal.ui.filters.FieldsFilter"
             id="org.eclipse.dltk.ui.ScriptExplorer.FieldsFilter">
       </filter>
+      <filter
+            targetId="org.eclipse.dltk.ui.ScriptExplorer"
+            name="%HideImportDeclarations.label"
+            enabled="true"
+            description="%HideImportDeclarations.description"
+            class="org.eclipse.dltk.internal.ui.filters.ImportDeclarationFilter"
+            id="org.eclipse.dltk.ui.ScriptExplorer.ImportDeclarationFilter">
+      </filter>
     </extension>
    
    <extension
