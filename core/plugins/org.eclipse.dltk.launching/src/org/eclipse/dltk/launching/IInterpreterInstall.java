@@ -72,6 +72,7 @@ public interface IInterpreterInstall extends IBuiltinModuleProvider {
 	 * Returns additional information objects belonging to this interpreter.
 	 * 
 	 * @return
+	 * @since 2.0
 	 */
 	List<EObject> getExtensions();
 
@@ -80,6 +81,7 @@ public interface IInterpreterInstall extends IBuiltinModuleProvider {
 	 * interpreter.
 	 * 
 	 * @return
+	 * @since 2.0
 	 */
 	List<EObject> copyExtensions();
 
@@ -88,6 +90,7 @@ public interface IInterpreterInstall extends IBuiltinModuleProvider {
 	 * with the specified ones.
 	 * 
 	 * @param value
+	 * @since 2.0
 	 */
 	void setExtensions(List<EObject> value);
 
@@ -97,6 +100,7 @@ public interface IInterpreterInstall extends IBuiltinModuleProvider {
 	 * 
 	 * @param clazz
 	 * @return the object found or <code>null</code>
+	 * @since 2.0
 	 */
 	EObject findExtension(EClass clazz);
 
@@ -108,6 +112,7 @@ public interface IInterpreterInstall extends IBuiltinModuleProvider {
 	 * @param value
 	 *            new value or <code>null</code>
 	 * @return previous value or <code>null</code>
+	 * @since 2.0
 	 */
 	EObject replaceExtension(EClass clazz, EObject value);
 }

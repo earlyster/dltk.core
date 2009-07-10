@@ -63,6 +63,8 @@ public interface IInterpreterInstallChangedListener {
 	/**
 	 * Property constant indicating the install location of a Interpreter
 	 * install has changed.
+	 * 
+	 * @since 2.0
 	 */
 	public static final String PROPERTY_EXTENSIONS = DLTKLaunchingPlugin
 			.getUniqueIdentifier()

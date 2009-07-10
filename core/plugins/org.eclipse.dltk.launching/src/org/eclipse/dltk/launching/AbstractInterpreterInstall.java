@@ -44,6 +44,8 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
  * <p>
  * Clients implementing interpreter installs must subclass this class.
  * </p>
+ * 
+ * @since 2.0
  */
 public abstract class AbstractInterpreterInstall implements
 		IInterpreterInstall, IInterpreterInstallExtensionContainer {
@@ -322,6 +324,9 @@ public abstract class AbstractInterpreterInstall implements
 
 	private XMLResource resource = null;
 
+	/**
+	 * @since 2.0
+	 */
 	protected XMIResource createResource() {
 		final XMIResourceImpl r = new XMIResourceImpl();
 		r.setEncoding(ENCODING);
@@ -330,6 +335,9 @@ public abstract class AbstractInterpreterInstall implements
 
 	private static final String ENCODING = "UTF-8"; //$NON-NLS-1$
 
+	/**
+	 * @since 2.0
+	 */
 	public EObject findExtension(EClass clazz) {
 		if (resource != null) {
 			for (EObject object : resource.getContents()) {
@@ -341,6 +349,9 @@ public abstract class AbstractInterpreterInstall implements
 		return null;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public EObject replaceExtension(EClass clazz, EObject value) {
 		if (value != null) {
 			Assert.isLegal(clazz.equals(value.eClass()));
@@ -373,6 +384,9 @@ public abstract class AbstractInterpreterInstall implements
 		return null;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public List<EObject> copyExtensions() {
 		if (resource != null && !resource.getContents().isEmpty()) {
 			Collection<EObject> copy = EcoreUtil
@@ -387,6 +401,9 @@ public abstract class AbstractInterpreterInstall implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public List<EObject> getExtensions() {
 		if (resource != null && !resource.getContents().isEmpty()) {
 			return new ArrayList<EObject>(resource.getContents());
@@ -395,6 +412,9 @@ public abstract class AbstractInterpreterInstall implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void setExtensions(List<EObject> value) {
 		final List<EObject> oldValue;
 		if (resource == null) {
@@ -410,6 +430,9 @@ public abstract class AbstractInterpreterInstall implements
 				oldValue, value));
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public String saveExtensions() {
 		if (resource != null && !resource.getContents().isEmpty()) {
 			StringWriter stringWriter = new StringWriter();
@@ -430,6 +453,9 @@ public abstract class AbstractInterpreterInstall implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void loadExtensions(String value) {
 		if (value != null && value.length() != 0) {
 			if (resource == null) {

@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.launching;
 
+/**
+ * @since 2.0
+ */
 public interface IInterpreterInstallExtensionContainer {
 
 	String saveExtensions();
