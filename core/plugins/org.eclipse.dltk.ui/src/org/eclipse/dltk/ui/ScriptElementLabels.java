@@ -20,6 +20,7 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
+import org.eclipse.dltk.core.IImportDeclaration;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
@@ -408,7 +409,7 @@ public class ScriptElementLabels {
 		if (processor != null) {
 			return processor.getDelimiterReplacementString();
 		}
-		return ".";
+		return "."; //$NON-NLS-1$
 	}
 
 	protected static final boolean getFlag(long flags, long flag) {
@@ -554,6 +555,12 @@ public class ScriptElementLabels {
 		case IModelElement.SCRIPT_PROJECT:
 		case IModelElement.SCRIPT_MODEL:
 			buf.append(element.getElementName());
+			break;
+		case IModelElement.IMPORT_CONTAINER:
+			getImportContainerLabel(element, flags, buf);
+			break;
+		case IModelElement.IMPORT_DECLARATION:
+			getImportDeclarationLabel(element, flags, buf);
 			break;
 		case IModelElement.PACKAGE_DECLARATION:
 			getDeclarationLabel(element, flags, buf);
@@ -1084,4 +1091,21 @@ public class ScriptElementLabels {
 			}
 		}
 	}
+
+	protected void getImportContainerLabel(IModelElement element, long flags,
+			StringBuffer buf) {
+		buf.append(Messages.ScriptElementLabels_import_declarations);
+	}
+
+	protected void getImportDeclarationLabel(IModelElement element, long flags,
+			StringBuffer buf) {
+		buf.append(element.getElementName());
+		IImportDeclaration declaration = (IImportDeclaration) element;
+		if (declaration.getVersion() != null
+				&& declaration.getVersion().length() != 0) {
+			buf.append(" "); //$NON-NLS-1$
+			buf.append(declaration.getVersion());
+		}
+	}
+
 }

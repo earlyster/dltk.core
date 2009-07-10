@@ -88,7 +88,7 @@ public class ScriptElementImageProvider {
 	 * for <code>ISourceReference</code>s.
 	 * 
 	 * @param flags
-	 * 		Flags as defined by the ScriptImageLabelProvider
+	 *            Flags as defined by the ScriptImageLabelProvider
 	 */
 	public Image getImageLabel(Object element, int flags) {
 		return getImageLabel(computeDescriptor(element, flags));
@@ -220,6 +220,10 @@ public class ScriptElementImageProvider {
 
 		try {
 			switch (element.getElementType()) {
+			case IModelElement.IMPORT_CONTAINER:
+				return DLTKPluginImages.DESC_OBJS_IMPCONT;
+			case IModelElement.IMPORT_DECLARATION:
+				return DLTKPluginImages.DESC_OBJS_IMPDECL;
 			case IModelElement.METHOD: {
 				IMethod method = (IMethod) element;
 				int flags = method.getFlags();
@@ -389,7 +393,8 @@ public class ScriptElementImageProvider {
 	// ---- Methods to compute the adornments flags ----------------------------
 	// -----
 
-	public static int computeAdornmentFlags(IModelElement element, int renderFlags) {
+	public static int computeAdornmentFlags(IModelElement element,
+			int renderFlags) {
 		int flags = 0;
 		if (showOverlayIcons(renderFlags) && element instanceof IMember) {
 			try {

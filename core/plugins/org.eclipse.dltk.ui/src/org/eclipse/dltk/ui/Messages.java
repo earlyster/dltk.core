@@ -7,6 +7,7 @@ public class Messages extends NLS {
 	public static String DLTKExecuteExtensionHelper_natureAttributeMustBeSpecifiedAndCorrect;
 	public static String PluginImagesHelper_imageRegistryAlreadyDefined;
 	public static String DLTKUIPlugin_additionalInfo_affordance;
+	public static String ScriptElementLabels_import_declarations;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
