@@ -31,8 +31,12 @@ public class ShowCommandLineValidatorsConsoleAction extends Action {
 		final MessageBox box = new MessageBox(page.getSite().getShell(),
 				SWT.ICON_INFORMATION | SWT.OK);
 		box.setText(console.getInitialName());
-		box.setMessage((String) console
-				.getAttribute(IValidatorOutput.COMMAND_LINE));
+		String commandLine = (String) console
+				.getAttribute(IValidatorOutput.COMMAND_LINE);
+		if (commandLine == null) {
+			commandLine = "(null)"; //$NON-NLS-1$
+		}
+		box.setMessage(commandLine);
 		box.open();
 	}
 
