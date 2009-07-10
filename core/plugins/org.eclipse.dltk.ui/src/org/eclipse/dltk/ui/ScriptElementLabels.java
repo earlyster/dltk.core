@@ -1092,11 +1092,17 @@ public class ScriptElementLabels {
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected void getImportContainerLabel(IModelElement element, long flags,
 			StringBuffer buf) {
 		buf.append(Messages.ScriptElementLabels_import_declarations);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected void getImportDeclarationLabel(IModelElement element, long flags,
 			StringBuffer buf) {
 		buf.append(element.getElementName());
