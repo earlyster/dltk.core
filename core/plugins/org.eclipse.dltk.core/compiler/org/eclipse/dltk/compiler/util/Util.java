@@ -20,6 +20,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileInfo;
+import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IDLTKLanguageToolkitExtension;
@@ -106,6 +111,31 @@ public class Util {
 		try {
 			stream = new FileInputStream(file);
 			byte[] data = getInputStreamAsByteArray(stream, (int) file.length());
+			p.done("#", RuntimePerformanceMonitor.IOREAD, data.length);
+			return data;
+		} finally {
+			if (stream != null) {
+				try {
+					stream.close();
+				} catch (IOException e) {
+					// ignore
+				}
+			}
+		}
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public static byte[] getFileByteContent(IFileStore file)
+			throws CoreException, IOException {
+		InputStream stream = null;
+		PerformanceNode p = RuntimePerformanceMonitor.begin();
+		try {
+			stream = file.openInputStream(EFS.NONE, new NullProgressMonitor());
+			IFileInfo info = file.fetchInfo();
+			byte[] data = getInputStreamAsByteArray(stream, (int) info
+					.getLength());
 			p.done("#", RuntimePerformanceMonitor.IOREAD, data.length);
 			return data;
 		} finally {
@@ -343,7 +373,7 @@ public class Util {
 	public static void copy(File file, InputStream input) throws IOException {
 		PerformanceNode p = RuntimePerformanceMonitor.begin();
 		OutputStream fos = new BufferedOutputStream(new FileOutputStream(file),
-				4096);
+				8096);
 		copy(input, fos);
 		fos.close();
 		p.done("#", RuntimePerformanceMonitor.IOWRITE, file.length());

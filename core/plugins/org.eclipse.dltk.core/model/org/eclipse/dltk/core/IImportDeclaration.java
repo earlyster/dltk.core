@@ -15,6 +15,7 @@ package org.eclipse.dltk.core;
  * Represents an import declaration in Java compilation unit.
  * 
  * @noimplement This interface is not intended to be implemented by clients.
+ * @since 2.0
  */
 public interface IImportDeclaration extends IModelElement, ISourceReference {
 	/**

@@ -97,6 +97,8 @@ public interface IModelElement extends IAdaptable {
 	 * Constant representing all import declarations within a compilation unit.
 	 * A model element with this type can be safely cast to
 	 * {@link IImportContainer}.
+	 * 
+	 * @since 2.0
 	 */
 	int IMPORT_CONTAINER = 11;
 
@@ -104,6 +106,8 @@ public interface IModelElement extends IAdaptable {
 	 * Constant representing an import declaration within a compilation unit. A
 	 * model element with this type can be safely cast to
 	 * {@link IImportDeclaration}.
+	 * 
+	 * @since 2.0
 	 */
 	int IMPORT_DECLARATION = 12;
 

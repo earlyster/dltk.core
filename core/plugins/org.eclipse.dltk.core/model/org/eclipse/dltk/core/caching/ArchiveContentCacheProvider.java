@@ -136,7 +136,8 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 		ZipEntry entry = zipFile.getEntry(".index");
 		Resource indexResource = new XMIResourceImpl(URI
 				.createURI("dltk_cache://zipIndex"));
-		indexResource.load(zipFile.getInputStream(entry), null);
+		indexResource.load(new BufferedInputStream(zipFile
+				.getInputStream(entry), 8096), null);
 		EList<EObject> contents = indexResource.getContents();
 		boolean found = false;
 		for (EObject eObject : contents) {
@@ -163,7 +164,6 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 							entryHandle, cacheEntryAttribute.getName());
 					String location = cacheEntryAttribute.getLocation();
 					ZipEntry zipEntry = zipFile.getEntry(location);
-					zipFile.getInputStream(zipEntry);
 					InputStream inputStream;
 					try {
 						inputStream = new BufferedInputStream(zipFile

@@ -33,6 +33,9 @@ public interface ISourceElementRequestor {
 	public static class FieldInfo extends ElementInfo {
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public static class ImportInfo {
 		public String containerName;
 		public String name;
@@ -121,5 +124,8 @@ public interface ISourceElementRequestor {
 
 	void acceptFieldReference(char[] fieldName, int sourcePosition);
 
+	/**
+	 * @since 2.0
+	 */
 	void acceptImport(ImportInfo importInfo);
 }

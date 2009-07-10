@@ -16,6 +16,7 @@ package org.eclipse.dltk.core;
  * import declarations, no import container will be present.
  * 
  * @noimplement This interface is not intended to be implemented by clients.
+ * @since 2.0
  */
 public interface IImportContainer extends IModelElement, IParent,
 		ISourceReference {

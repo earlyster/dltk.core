@@ -21,5 +21,8 @@ public interface IStructureConstants {
 	static final int TAG_EXIT_MODULE = 17;
 	static final int TAG_EXIT_MODULE_ROOT = 18;
 	static final int TAG_EXIT_TYPE = 19;
+	/**
+	 * @since 2.0
+	 */
 	static final int TAG_ACCEPT_IMPORT = 20;
 }

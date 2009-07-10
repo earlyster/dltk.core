@@ -92,7 +92,9 @@ public class MetadataContentCache extends AbstractContentCache {
 			long accessTime = entry.getLastAccessTime();
 			long timeMillis = System.currentTimeMillis();
 			if (timeMillis - accessTime > DAY_IN_MILIS) {
-				if (entry.getTimestamp() == getHandleLastModification(handle)) {
+				long entryTimestamp = entry.getTimestamp() / 1000;
+				long handleTimestamp = getHandleLastModification(handle) / 1000;
+				if (entryTimestamp == handleTimestamp) {
 					entry.setLastAccessTime(timeMillis);
 					return entry;
 				} else {
@@ -253,53 +255,11 @@ public class MetadataContentCache extends AbstractContentCache {
 		return null;
 	}
 
-	public class MetadataFileOutputStream extends BufferedOutputStream {
-		File file;
-		private PerformanceNode node;
-		private ByteArrayOutputStream bytes;
-
-		public MetadataFileOutputStream(File file) throws FileNotFoundException {
-			super(new ByteArrayOutputStream());
-			bytes = (ByteArrayOutputStream) out;
-			this.file = file;
-			this.file = file;
-		}
-
-		@Override
-		public void close() throws IOException {
-			super.close();
-			node = RuntimePerformanceMonitor.begin();
-			org.eclipse.dltk.compiler.util.Util.copy(file,
-					new ByteArrayInputStream(bytes.toByteArray()));
-			node.done("Metadata", RuntimePerformanceMonitor.IOWRITE, file
-					.length(), EnvironmentManager.getLocalEnvironment());
-		}
-	}
-
-	public class MetadataFileInputStream extends FileInputStream {
-		File file;
-		private PerformanceNode node;
-
-		public MetadataFileInputStream(File file) throws FileNotFoundException {
-			super(file);
-			node = RuntimePerformanceMonitor.begin();
-			this.file = file;
-		}
-
-		@Override
-		public void close() throws IOException {
-			super.close();
-			node.done("Metadata", RuntimePerformanceMonitor.IOREAD, file
-					.length(), EnvironmentManager.getLocalEnvironment());
-		}
-	}
-
 	public synchronized OutputStream getCacheEntryAttributeOutputStream(
 			IFileHandle handle, String attribute) {
 		File file = getEntryAsFile(handle, attribute);
 		try {
-			return new BufferedOutputStream(new MetadataFileOutputStream(file),
-					4096);
+			return new BufferedOutputStream(new FileOutputStream(file), 4096);
 		} catch (FileNotFoundException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();

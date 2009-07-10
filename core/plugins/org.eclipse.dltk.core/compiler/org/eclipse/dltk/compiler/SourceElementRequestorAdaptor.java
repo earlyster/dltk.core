@@ -82,6 +82,9 @@ public class SourceElementRequestorAdaptor implements ISourceElementRequestor {
 	public void exitType(int declarationEnd) {
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void acceptImport(ImportInfo importInfo) {
 	}
 }

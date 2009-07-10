@@ -299,6 +299,9 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void acceptImport(ImportInfo importInfo) {
 		this.baseRequestor.acceptImport(importInfo);
 		try {

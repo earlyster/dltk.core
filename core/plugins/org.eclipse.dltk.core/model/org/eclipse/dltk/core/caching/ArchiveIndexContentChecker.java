@@ -1,5 +1,6 @@
 package org.eclipse.dltk.core.caching;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,6 +8,11 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileInfo;
+import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -36,7 +42,8 @@ public class ArchiveIndexContentChecker {
 			ZipEntry entry = zipFile.getEntry(".index");
 			Resource indexResource = new XMIResourceImpl(URI
 					.createURI("dltk_cache://zipIndex"));
-			indexResource.load(zipFile.getInputStream(entry), null);
+			indexResource.load(new BufferedInputStream(zipFile
+					.getInputStream(entry), 8096), null);
 			contents = indexResource.getContents();
 		} catch (Exception e) {
 		}
@@ -79,18 +86,72 @@ public class ArchiveIndexContentChecker {
 		}
 		File[] listFiles = parent.listFiles();
 		for (File file : listFiles) {
-			if (needIndexing(file) && !collected.contains(file)) {
+			if (file.isFile() && needIndexing(file.getName())
+					&& !collected.contains(file)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private boolean needIndexing(File file) {
-		if (file.isFile()) {
-			return DLTKContentTypeManager.isValidFileNameForContentType(
-					toolkit, new Path(file.getAbsolutePath()));
+	/**
+	 * @since 2.0
+	 */
+	public boolean containChanges(IFileStore store) {
+		if (contents == null) {
+			return true;
+		}
+		IFileStore parent = store.getParent();
+		List<IFileStore> collected = new ArrayList<IFileStore>();
+		for (EObject eObject : contents) {
+			CacheIndex cacheIndex = (CacheIndex) eObject;
+			EList<CacheEntry> entries = cacheIndex.getEntries();
+			for (CacheEntry cacheEntry : entries) {
+				String path = cacheEntry.getPath();
+				IFileStore childFile = parent.getChild(path);
+				IFileInfo childFileInfo = childFile.fetchInfo();
+				if (!childFileInfo.exists()) {
+					return true;
+				}
+				if (cacheEntry.getLastAccessTime() != version) {
+					return true;
+				}
+				long timestamp = childFileInfo.getLastModified();
+				if (childFileInfo.getAttribute(EFS.ATTRIBUTE_SYMLINK)) {
+					String canonicalFile = childFileInfo
+							.getStringAttribute(EFS.ATTRIBUTE_LINK_TARGET);
+					IFileStore fileStore = childFile.getFileStore(new Path(
+							canonicalFile));
+					IFileInfo fetchInfo = fileStore.fetchInfo();
+					timestamp = fetchInfo.getLastModified();
+				}
+				if (cacheEntry.getTimestamp() != timestamp) {
+					return true;
+				}
+				collected.add(childFile);
+			}
+		}
+		IFileStore[] listFiles = null;
+		;
+		try {
+			listFiles = parent.childStores(EFS.NONE, new NullProgressMonitor());
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+		if (listFiles != null) {
+			for (IFileStore file : listFiles) {
+				IFileInfo fileInfo = file.fetchInfo();
+				if (!fileInfo.isDirectory() && needIndexing(file.getName())
+						&& !collected.contains(file)) {
+					return true;
+				}
+			}
 		}
 		return false;
+	}
+
+	private boolean needIndexing(String name) {
+		return DLTKContentTypeManager.isValidFileNameForContentType(toolkit,
+				new Path(name));
 	}
 }
