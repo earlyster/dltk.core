@@ -53,11 +53,11 @@ public class DLTKLanguageManager {
 
 	private static IDLTKLanguageToolkit findAppropriateToolkitByObject(
 			Object object) {
-		ElementInfo[] elementInfos = InternalDLTKLanguageManager
-				.getLanguageToolkitsManager().getElementInfos();
+		final PriorityClassDLTKExtensionManager toolkitManager = InternalDLTKLanguageManager
+				.getLanguageToolkitsManager();
+		final ElementInfo[] elementInfos = toolkitManager.getElementInfos();
 		for (int j = 0; j < elementInfos.length; j++) {
-			IDLTKLanguageToolkit toolkit = (IDLTKLanguageToolkit) InternalDLTKLanguageManager
-					.getLanguageToolkitsManager()
+			IDLTKLanguageToolkit toolkit = (IDLTKLanguageToolkit) toolkitManager
 					.getInitObject(elementInfos[j]);
 			if (object instanceof IResource) {
 				if (DLTKContentTypeManager.isValidResourceForContentType(
