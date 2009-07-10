@@ -299,6 +299,20 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
+	public void acceptImport(ImportInfo importInfo) {
+		this.baseRequestor.acceptImport(importInfo);
+		try {
+			out.writeInt(TAG_ACCEPT_IMPORT);
+			out.writeInt(importInfo.sourceStart);
+			out.writeInt(importInfo.sourceEnd);
+			writeString(importInfo.containerName);
+			writeString(importInfo.name);
+			writeString(importInfo.version);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public byte[] getBytes() {
 		try {
 			stream.flush();

@@ -301,4 +301,8 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	public void exitModuleRoot() {
 	}
 
+	public void acceptImport(ImportInfo importInfo) {
+		// TODO Auto-generated method stub
+	}
+
 }

@@ -94,6 +94,20 @@ public interface IModelElement extends IAdaptable {
 	int PACKAGE_DECLARATION = 10;
 
 	/**
+	 * Constant representing all import declarations within a compilation unit.
+	 * A model element with this type can be safely cast to
+	 * {@link IImportContainer}.
+	 */
+	int IMPORT_CONTAINER = 11;
+
+	/**
+	 * Constant representing an import declaration within a compilation unit. A
+	 * model element with this type can be safely cast to
+	 * {@link IImportDeclaration}.
+	 */
+	int IMPORT_DECLARATION = 12;
+
+	/**
 	 * Starting point for any kind of user elements.
 	 */
 	int USER_ELEMENT = 15;

@@ -179,4 +179,8 @@ public class MixinSourceElementRequestor implements ISourceElementRequestor {
 		}
 		requestor.reportElement(elInfo);
 	}
+
+	public void acceptImport(ImportInfo importInfo) {
+		// TODO Auto-generated method stub
+	}
 }

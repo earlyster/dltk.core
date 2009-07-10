@@ -7,6 +7,7 @@ import java.io.InputStream;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.compiler.ISourceElementRequestor.ElementInfo;
 import org.eclipse.dltk.compiler.ISourceElementRequestor.FieldInfo;
+import org.eclipse.dltk.compiler.ISourceElementRequestor.ImportInfo;
 import org.eclipse.dltk.compiler.ISourceElementRequestor.MethodInfo;
 import org.eclipse.dltk.compiler.ISourceElementRequestor.TypeInfo;
 
@@ -90,6 +91,9 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 					break;
 				case TAG_EXIT_TYPE:
 					exitType();
+					break;
+				case TAG_ACCEPT_IMPORT:
+					acceptImport();
 					break;
 				}
 			} catch (EOFException e) {
@@ -356,4 +360,19 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 			e.printStackTrace();
 		}
 	}
+
+	private void acceptImport() {
+		try {
+			ImportInfo importInfo = new ImportInfo();
+			importInfo.sourceStart = in.readInt();
+			importInfo.sourceEnd = in.readInt();
+			importInfo.containerName = readString();
+			importInfo.name = readString();
+			importInfo.version = readString();
+			this.requestor.acceptImport(importInfo);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

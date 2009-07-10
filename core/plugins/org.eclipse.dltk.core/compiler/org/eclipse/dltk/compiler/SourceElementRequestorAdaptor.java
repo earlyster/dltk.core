@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler;
 
+
 public class SourceElementRequestorAdaptor implements ISourceElementRequestor {
 
 	public void acceptFieldReference(char[] fieldName, int sourcePosition) {
@@ -69,7 +70,7 @@ public class SourceElementRequestorAdaptor implements ISourceElementRequestor {
 	public void exitField(int declarationEnd) {
 	}
 
-	public void exitMethod(int declarationEnd) {	
+	public void exitMethod(int declarationEnd) {
 	}
 
 	public void exitModule(int declarationEnd) {
@@ -79,5 +80,8 @@ public class SourceElementRequestorAdaptor implements ISourceElementRequestor {
 	}
 
 	public void exitType(int declarationEnd) {
+	}
+
+	public void acceptImport(ImportInfo importInfo) {
 	}
 }
