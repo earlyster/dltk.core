@@ -42,6 +42,7 @@ import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.core.DLTKAssociationManager;
 import org.eclipse.dltk.internal.core.ModelManager;
+import org.eclipse.dltk.internal.core.NopAssociationManager;
 import org.eclipse.dltk.internal.core.ScriptFileConfiguratorManager;
 
 public class DLTKContentTypeManager {
@@ -439,7 +440,9 @@ public class DLTKContentTypeManager {
 		if (manager != null) {
 			return manager;
 		}
-		manager = new DLTKAssociationManager(toolkit.getPreferenceQualifier());
+		manager = toolkit.getPreferenceQualifier() != null ? new DLTKAssociationManager(
+				toolkit.getPreferenceQualifier())
+				: new NopAssociationManager();
 		synchronized (associationManagerCache) {
 			associationManagerCache.put(toolkit, manager);
 		}
