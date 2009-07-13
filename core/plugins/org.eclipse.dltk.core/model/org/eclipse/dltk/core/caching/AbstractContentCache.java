@@ -17,11 +17,18 @@ public abstract class AbstractContentCache implements IContentCache {
 		if (stream != null) {
 			try {
 				char[] chars = Util.getInputStreamAsCharArray(stream, -1, null);
-				stream.close();
 				return new String(chars);
 			} catch (IOException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
+				}
+			} finally {
+				try {
+					stream.close();
+				} catch (IOException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -35,12 +42,19 @@ public abstract class AbstractContentCache implements IContentCache {
 		if (outputStream != null) {
 			try {
 				outputStream.write(value.getBytes());
-				outputStream.close();
 			} catch (IOException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
 				return false;
+			} finally {
+				try {
+					outputStream.close();
+				} catch (IOException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
 			}
 			return true;
 		}
@@ -54,11 +68,18 @@ public abstract class AbstractContentCache implements IContentCache {
 			try {
 				DataInputStream dias = new DataInputStream(stream);
 				long result = dias.readLong();
-				stream.close();
 				return result;
 			} catch (IOException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
+				}
+			} finally {
+				try {
+					stream.close();
+				} catch (IOException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -74,12 +95,19 @@ public abstract class AbstractContentCache implements IContentCache {
 				DataOutputStream dout = new DataOutputStream(outputStream);
 				dout.writeLong(value);
 				dout.close();
-				outputStream.close();
 			} catch (IOException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
 				return false;
+			} finally {
+				try {
+					outputStream.close();
+				} catch (IOException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
+				}
 			}
 			return true;
 		}
