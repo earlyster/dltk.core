@@ -25,6 +25,7 @@
    <extension-point id="model" name="model" schema="schema/model.exsd"/>
    <extension-point id="contentCacheProvider" name="contentCacheProvider" schema="schema/contentCacheProvider.exsd"/>
    <extension-point id="astCache" name="astCache" schema="schema/astCache.exsd"/>
+   <extension-point id="filenameAssociation" name="%extension-point.name.filenameAssociation" schema="schema/filenameAssociation.exsd"/>
 
 <!-- =================================================================================== -->
 <!-- Extension: DLTK Problem                                                             -->

@@ -9,10 +9,15 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.ast.parser.ISourceParser;
 import org.eclipse.dltk.ast.parser.SourceParserManager;
@@ -108,9 +113,8 @@ public class DLTKLanguageManager {
 	 * The behavior of this method was not correct - it could return incorrect
 	 * results for files without extension. For compatibility purposes and to
 	 * allow smooth migration it is marked as deprecated -- AlexPanchenko
-	 * 
-	 * @deprecated
 	 */
+	@Deprecated
 	public static IDLTKLanguageToolkit findToolkit(IResource resource) {
 		IDLTKLanguageToolkit toolkit = findAppropriateToolkitByObject(resource);
 		if (toolkit == null) {
@@ -351,5 +355,24 @@ public class DLTKLanguageManager {
 		} else {
 			return null;
 		}
+	}
+
+	private static final String FILENAME_ASSOCIATION_EXT_POINT = DLTKCore.PLUGIN_ID
+			+ ".filenameAssociation"; //$NON-NLS-1$
+
+	public static Set<String> loadFilenameAssociations(final String natureId) {
+		final IConfigurationElement[] elements = Platform
+				.getExtensionRegistry().getConfigurationElementsFor(
+						FILENAME_ASSOCIATION_EXT_POINT);
+		final Set<String> patterns = new HashSet<String>();
+		for (IConfigurationElement element : elements) {
+			if (natureId.equals(element.getAttribute("nature"))) { //$NON-NLS-1$
+				final String pattern = element.getAttribute("pattern"); //$NON-NLS-1$
+				if (pattern != null && pattern.length() != 0) {
+					patterns.add(pattern);
+				}
+			}
+		}
+		return patterns;
 	}
 }

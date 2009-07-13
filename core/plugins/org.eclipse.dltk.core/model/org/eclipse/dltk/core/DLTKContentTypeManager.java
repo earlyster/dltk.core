@@ -441,7 +441,7 @@ public class DLTKContentTypeManager {
 			return manager;
 		}
 		manager = toolkit.getPreferenceQualifier() != null ? new DLTKAssociationManager(
-				toolkit.getPreferenceQualifier())
+				toolkit.getNatureId(), toolkit.getPreferenceQualifier())
 				: new NopAssociationManager();
 		synchronized (associationManagerCache) {
 			associationManagerCache.put(toolkit, manager);

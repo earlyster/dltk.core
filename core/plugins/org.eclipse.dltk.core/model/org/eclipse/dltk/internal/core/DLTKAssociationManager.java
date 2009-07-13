@@ -11,19 +11,24 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
+import java.util.Set;
+
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKAssociationManager;
 
 public class DLTKAssociationManager implements IDLTKAssociationManager {
 
+	private final String natureId;
 	private final String qualifier;
 
-	public DLTKAssociationManager(String qualifier) {
+	public DLTKAssociationManager(String natureId, String qualifier) {
+		this.natureId = natureId;
 		this.qualifier = qualifier;
 	}
 
@@ -59,6 +64,13 @@ public class DLTKAssociationManager implements IDLTKAssociationManager {
 			cachedPatterns = CharOperation.splitOn(
 					DLTKCore.LANGUAGE_FILENAME_ASSOCIATION_SEPARATOR, value
 							.toCharArray());
+			final Set<String> patterns = DLTKLanguageManager
+					.loadFilenameAssociations(this.natureId);
+			if (!patterns.isEmpty()) {
+				cachedPatterns = CharOperation.arrayConcat(cachedPatterns,
+						CharOperation.stringArrayToCharCharArray(patterns
+								.toArray(new String[patterns.size()])));
+			}
 		} else {
 			cachedPatterns = null;
 		}
