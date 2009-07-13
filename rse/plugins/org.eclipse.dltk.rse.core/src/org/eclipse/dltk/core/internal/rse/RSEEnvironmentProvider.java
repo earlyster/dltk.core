@@ -74,6 +74,7 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 
 	private class InitThread extends Thread {
 
+		@Override
 		public void run() {
 			try {
 				RSECorePlugin.waitForInitCompletion();
@@ -87,11 +88,12 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 					initThread = null;
 					lock.notifyAll();
 				}
-				final Job j = new Job("Refresh Remote Interpreters") {
+				final Job j = new Job(
+						Messages.RSEEnvironmentProvider_RefreshProjectsInterpreter_Job) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						EnvironmentManager
-								.refreshBuildpathContainersForMixedProjects();
+								.refreshBuildpathContainersForMixedProjects(monitor);
 						return Status.OK_STATUS;
 					}
 				};
