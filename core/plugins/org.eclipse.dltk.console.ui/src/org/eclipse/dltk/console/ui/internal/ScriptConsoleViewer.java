@@ -440,7 +440,7 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 		}
 	}
 
-	private class ScriptConsoleStyledText extends StyledText {
+	public class ScriptConsoleStyledText extends StyledText {
 
 		public ScriptConsoleStyledText(Composite parent, int style) {
 			super(parent, (style | SWT.WRAP));
