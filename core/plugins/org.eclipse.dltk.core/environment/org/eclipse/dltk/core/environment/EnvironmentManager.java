@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
@@ -58,7 +59,7 @@ public final class EnvironmentManager {
 					IConfigurationElement configurationElement) {
 				super(manager, configurationElement);
 				this.priority = parseInt(configurationElement
-						.getAttribute("priority"));
+						.getAttribute("priority")); //$NON-NLS-1$
 			}
 
 			private int parseInt(String value) {
@@ -137,7 +138,7 @@ public final class EnvironmentManager {
 		if (element == null) {
 			return null;
 		}
-		if (element != null && element.getType() != IResource.PROJECT) {
+		if (element.getType() != IResource.PROJECT) {
 			URI locationURI = element.getLocationURI();
 			if (locationURI != null) {
 				for (IEnvironmentProvider provider : manager) {
@@ -231,20 +232,30 @@ public final class EnvironmentManager {
 		}
 	}
 
-	public static void refreshBuildpathContainersForMixedProjects() {
+	public static void refreshBuildpathContainersForMixedProjects(
+			IProgressMonitor monitor) {
 		try {
-			IScriptProject[] projects = ModelManager.getModelManager()
+			SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+			final IScriptProject[] projects = ModelManager.getModelManager()
 					.getModel().getScriptProjects();
+			subMonitor.worked(10);
+			subMonitor = subMonitor.newChild(90);
+			subMonitor.beginTask(Util.EMPTY_STRING, projects.length);
 			for (int i = 0; i < projects.length; i++) {
-				IProject project = projects[i].getProject();
-				String property = project
+				final IProject project = projects[i].getProject();
+				final SubMonitor projectMonitor = subMonitor.newChild(1);
+				projectMonitor.beginTask(NLS.bind(
+						Messages.EnvironmentManager_RefreshProjectInterpreter,
+						project.getName()), 2);
+				final String property = project
 						.getPersistentProperty(PROJECT_ENVIRONMENT);
 				if (property != null) {
 					DLTKCore.refreshBuildpathContainers(projects[i]);
+					projectMonitor.worked(1);
 					new BuildpathValidation((ScriptProject) projects[i])
 							.validate();
+					projectMonitor.worked(1);
 				}
-
 			}
 		} catch (ModelException e) {
 			if (DLTKCore.DEBUG) {
@@ -254,6 +265,8 @@ public final class EnvironmentManager {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
+		} finally {
+			monitor.done();
 		}
 	}
 
@@ -416,7 +429,7 @@ public final class EnvironmentManager {
 					IConfigurationElement configurationElement) {
 				super(manager, configurationElement);
 				this.priority = parseInt(configurationElement
-						.getAttribute("priority"));
+						.getAttribute("priority")); //$NON-NLS-1$
 			}
 
 			private int parseInt(String value) {
