@@ -537,7 +537,7 @@ public class ListDialogField extends DialogField {
 
 	protected boolean getManagedButtonState(ISelection sel, int index) {
 		if (index == fRemoveButtonIndex) {
-			return !sel.isEmpty();
+			return !sel.isEmpty() && canRemove(sel);
 		} else if (index == fUpButtonIndex) {
 			return !sel.isEmpty() && canMoveUp();
 		} else if (index == fDownButtonIndex) {
@@ -862,6 +862,10 @@ public class ListDialogField extends DialogField {
 
 	private void down() {
 		moveDown(getSelectedElements());
+	}
+
+	protected boolean canRemove(ISelection selection) {
+		return true;
 	}
 
 	private boolean canMoveUp() {
