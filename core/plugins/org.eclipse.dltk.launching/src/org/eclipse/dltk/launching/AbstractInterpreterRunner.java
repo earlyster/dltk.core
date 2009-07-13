@@ -122,8 +122,8 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 	// }
 
 	//
-	protected Map getDefaultProcessMap() {
-		Map map = new HashMap();
+	protected Map<String, String> getDefaultProcessMap() {
+		Map<String, String> map = new HashMap<String, String>();
 		map.put(IProcess.ATTR_PROCESS_TYPE, getProcessType());
 		return map;
 	}
@@ -180,7 +180,7 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 	 * 
 	 */
 	private IProcess newProcess(ILaunch launch, Process p, String label,
-			Map attributes) throws CoreException {
+			Map<String, String> attributes) throws CoreException {
 		IProcess process = DebugPlugin.newProcess(launch, p, label, attributes);
 		if (process == null) {
 			p.destroy();
@@ -213,10 +213,8 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 		}
 
 		IExecutionEnvironment exeEnv = interpreterInstall.getExecEnvironment();
-		IExecutionLogger logger = DLTKDebugPlugin
-				.getDefault()
-				.getPluginPreferences()
-				.getBoolean(
+		IExecutionLogger logger = DLTKDebugPlugin.getDefault()
+				.getPluginPreferences().getBoolean(
 						DLTKDebugPreferenceConstants.PREF_LAUNCH_CATCH_OUTPUT) ? new LaunchLogger()
 				: null;
 		Process p = exeEnv.exec(cmdLine, workingDirectory, environment, logger);
