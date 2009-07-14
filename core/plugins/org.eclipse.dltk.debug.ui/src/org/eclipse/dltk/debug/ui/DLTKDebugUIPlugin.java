@@ -75,9 +75,9 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 	private static DLTKDebugUIPlugin plugin;
 
 	// Map of InterpreterInstallTypeIDs to IConfigurationElements
-	protected Map fInterpreterInstallTypePageMap;
+	protected Map<String, IConfigurationElement> fInterpreterInstallTypePageMap;
 
-	protected Map fColorTable = new HashMap(10);
+	protected Map<RGB, Color> fColorTable = new HashMap<RGB, Color>(10);
 
 	/**
 	 * Whether this plugin is in the process of shutting down.
@@ -86,7 +86,7 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 
 	private ScriptHotCodeReplaceListener fHCRListener;
 
-	private HashMap fPresentations = new HashMap();
+	private HashMap<String, ScriptDebugModelPresentation> fPresentations = new HashMap<String, ScriptDebugModelPresentation>();
 
 	// private Object fUtilPresentation;
 
@@ -104,6 +104,7 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 		plugin = this;
 	}
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 
@@ -196,6 +197,7 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 		});
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		try {
 			DLTKDebugPlugin.setSourceOffsetRetriever(null);
@@ -214,9 +216,9 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 			launchManager.removeLaunchListener(ScriptDebugLogManager
 					.getInstance());
 
-			Iterator e = fColorTable.values().iterator();
+			Iterator<Color> e = fColorTable.values().iterator();
 			while (e.hasNext())
-				((Color) e.next()).dispose();
+				e.next().dispose();
 
 		} finally {
 			super.stop(context);
@@ -378,7 +380,7 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 		if (fInterpreterInstallTypePageMap == null) {
 			initializeInterpreterInstallTypePageMap();
 		}
-		IConfigurationElement configElement = (IConfigurationElement) fInterpreterInstallTypePageMap
+		IConfigurationElement configElement = fInterpreterInstallTypePageMap
 				.get(InterpreterInstallTypeID);
 		ILaunchConfigurationTab tab = null;
 		if (configElement != null) {
@@ -398,7 +400,8 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 	}
 
 	protected void initializeInterpreterInstallTypePageMap() {
-		fInterpreterInstallTypePageMap = new HashMap(10);
+		fInterpreterInstallTypePageMap = new HashMap<String, IConfigurationElement>(
+				10);
 
 		IExtensionPoint extensionPoint = Platform
 				.getExtensionRegistry()
@@ -454,11 +457,11 @@ public class DLTKDebugUIPlugin extends AbstractUIPlugin {
 		if (!fPresentations.containsKey(modelId)) {
 			fPresentations.put(modelId, loadDebugModelPresentation(modelId));
 		}
-		return (ScriptDebugModelPresentation) fPresentations.get(modelId);
+		return fPresentations.get(modelId);
 	}
 
 	public Color getColor(RGB rgb) {
-		Color color = (Color) fColorTable.get(rgb);
+		Color color = fColorTable.get(rgb);
 		if (color == null) {
 			color = new Color(Display.getCurrent(), rgb);
 			fColorTable.put(rgb, color);
