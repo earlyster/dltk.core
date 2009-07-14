@@ -5,6 +5,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.dltk.debug.ui.messages"; //$NON-NLS-1$
 	public static String DebugConsoleManager_debugConsole;
+	public static String DebugConsoleManager_terminated;
 	public static String DLTKDebugUIPlugin_internalError;
 	public static String ScriptDebuggerConsoleToFileHyperlink_error;
 	public static String ScriptDebugModelPresentation_breakpointText;
