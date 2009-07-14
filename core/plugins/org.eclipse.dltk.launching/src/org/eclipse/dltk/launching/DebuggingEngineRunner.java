@@ -42,9 +42,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 		return DbgpSessionIdGenerator.generate();
 	}
 
-	/**
-	 * @deprecated
-	 */
+	@Deprecated
 	protected final IScriptDebugTarget addDebugTarget(ILaunch launch,
 			IDbgpService dbgpService) throws CoreException {
 		return null;
@@ -106,9 +104,9 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	}
 
 	/**
-	 * @deprecated
 	 * @see #addEngineConfig(InterpreterConfig,PreferencesLookupDelegate,ILaunch)
 	 */
+	@Deprecated
 	protected final InterpreterConfig addEngineConfig(InterpreterConfig config,
 			PreferencesLookupDelegate delegate) {
 		return null;
@@ -123,6 +121,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 			InterpreterConfig config, PreferencesLookupDelegate delegate,
 			ILaunch launch) throws CoreException;
 
+	@Override
 	public void run(InterpreterConfig config, ILaunch launch,
 			IProgressMonitor monitor) throws CoreException {
 		if (monitor == null) {
@@ -182,6 +181,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 		return process;
 	}
 
+	@Override
 	protected String[] renderCommandLine(InterpreterConfig config) {
 		String exe = (String) config.getProperty(OVERRIDE_EXE);
 		if (exe != null) {
@@ -195,9 +195,9 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	 * Used to create new script thread configurator.
 	 * 
 	 * @return
-	 * @deprecated
 	 */
-	protected IScriptDebugThreadConfigurator createThreadConfigurator() {
+	@Deprecated
+	protected final IScriptDebugThreadConfigurator createThreadConfigurator() {
 		return null;
 	}
 
@@ -208,7 +208,7 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	 */
 	protected IScriptDebugThreadConfigurator createThreadConfigurator(
 			ILaunchConfiguration configuration) {
-		return createThreadConfigurator();
+		return null;
 	}
 
 	/**
@@ -216,8 +216,8 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	 * @param launch
 	 * @param monitor
 	 * @throws CoreException
-	 * @deprecated
 	 */
+	@Deprecated
 	protected void waitDebuggerConnected(IProcess process, ILaunch launch,
 			IProgressMonitor monitor) throws CoreException {
 		ScriptDebugTarget target = (ScriptDebugTarget) launch.getDebugTarget();
@@ -316,11 +316,6 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	/**
 	 * Returns a fully qualified path to a log file name or <code>null</code> if
 	 * logging is not enabled.
-	 * 
-	 * <p>
-	 * If the user chose to use '{0}' in their file name, it will be replaced
-	 * with the debugging session id.
-	 * </p>
 	 */
 	protected String getLogFileName(PreferencesLookupDelegate delegate,
 			String sessionId) {
@@ -331,14 +326,12 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 		String keyValue = delegate.getString(qualifier,
 				getLogFileNamePreferenceKey());
 
-		Map logFileNames = EnvironmentPathUtils.decodePaths(keyValue);
+		Map<IEnvironment, String> logFileNames = EnvironmentPathUtils
+				.decodePaths(keyValue);
 		IEnvironment env = getInstall().getEnvironment();
-		String pathString = (String) logFileNames.get(env);
+		String pathString = logFileNames.get(env);
 		if (pathString != null && pathString.length() > 0) {
 			return pathString;
-			// IPath path = new Path(pathString);
-			// return PlatformFileUtils.findAbsoluteOrEclipseRelativeFile(env,
-			// path).toString();
 		} else {
 			return null;
 		}
