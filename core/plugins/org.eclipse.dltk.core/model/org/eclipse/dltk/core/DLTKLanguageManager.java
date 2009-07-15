@@ -360,6 +360,9 @@ public class DLTKLanguageManager {
 	private static final String FILENAME_ASSOCIATION_EXT_POINT = DLTKCore.PLUGIN_ID
 			+ ".filenameAssociation"; //$NON-NLS-1$
 
+	/**
+	 * @since 2.0
+	 */
 	public static Set<String> loadFilenameAssociations(final String natureId) {
 		final IConfigurationElement[] elements = Platform
 				.getExtensionRegistry().getConfigurationElementsFor(

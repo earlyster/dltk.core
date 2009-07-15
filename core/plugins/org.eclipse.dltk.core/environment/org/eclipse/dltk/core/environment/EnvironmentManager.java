@@ -232,6 +232,9 @@ public final class EnvironmentManager {
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public static void refreshBuildpathContainersForMixedProjects(
 			IProgressMonitor monitor) {
 		try {
