@@ -440,6 +440,9 @@ public class ScriptConsoleViewer extends TextConsoleViewer implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public class ScriptConsoleStyledText extends StyledText {
 
 		public ScriptConsoleStyledText(Composite parent, int style) {
