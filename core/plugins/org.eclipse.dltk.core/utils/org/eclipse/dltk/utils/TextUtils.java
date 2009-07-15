@@ -481,6 +481,22 @@ public abstract class TextUtils {
 		return sb.toString();
 	}
 
+	/**
+	 * @param lines
+	 * @param separator
+	 * @return
+	 */
+	public static String join(String[] lines, String separator) {
+		final StringBuffer sb = new StringBuffer(256);
+		for (int i = 0; i < lines.length; ++i) {
+			if (i != 0) {
+				sb.append(separator);
+			}
+			sb.append(lines[i]);
+		}
+		return sb.toString();
+	}
+
 	public static String[] split(String str, char separatorChar) {
 		if (str == null) {
 			return null;
