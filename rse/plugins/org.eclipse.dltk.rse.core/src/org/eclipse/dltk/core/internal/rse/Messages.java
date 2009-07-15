@@ -18,6 +18,9 @@ public class Messages extends NLS {
 	public static String RSEEnvironment_EmptyFileNameError;
 	public static String RSEEnvironment_EnvironmentNameSuffix;
 	public static String RSEEnvironmentProvider_providerName;
+	/**
+	 * @since 2.0
+	 */
 	public static String RSEEnvironmentProvider_RefreshProjectsInterpreter_Job;
 	public static String RSEExecEnvironment_hostNotFound;
 	public static String RSEExecEnvironment_ErrorConnecting;
