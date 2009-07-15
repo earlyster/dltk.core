@@ -15,6 +15,9 @@ public class ScriptDebugConsole extends IOConsole {
 		this.launch = launch;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public ScriptDebugConsole(String name, String encoding) {
 		this(name, null, encoding);
 	}

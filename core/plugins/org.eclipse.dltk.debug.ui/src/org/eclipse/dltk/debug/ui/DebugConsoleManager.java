@@ -58,6 +58,9 @@ public class DebugConsoleManager implements ILaunchesListener2 {
 				&& DLTKDebugLaunchConstants.isDebugConsole(launch);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected ScriptDebugConsole createConsole(ILaunch launch) {
 		final String encoding = selectEncoding(launch);
 		final ScriptDebugConsole console = new ScriptDebugConsole(
@@ -104,6 +107,9 @@ public class DebugConsoleManager implements ILaunchesListener2 {
 	protected DebugConsoleManager() {
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected String computeName(ILaunch launch) {
 		final IProcess[] processes = launch.getProcesses();
 		String consoleName;
@@ -137,6 +143,9 @@ public class DebugConsoleManager implements ILaunchesListener2 {
 		return consoleName;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected String computeName(ILaunchConfiguration config, IProcess process) {
 		String type = null;
 		try {
@@ -157,10 +166,16 @@ public class DebugConsoleManager implements ILaunchesListener2 {
 		return buffer.toString();
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void launchesAdded(ILaunch[] launches) {
 		launchesChanged(launches);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void launchesChanged(ILaunch[] launches) {
 		for (ILaunch launch : launches) {
 			if (acceptLaunch(launch)) {
@@ -180,6 +195,9 @@ public class DebugConsoleManager implements ILaunchesListener2 {
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void launchesRemoved(ILaunch[] launches) {
 		for (ILaunch launch : launches) {
 			final ScriptDebugConsole console = launchToConsoleMap.get(launch);
@@ -190,6 +208,9 @@ public class DebugConsoleManager implements ILaunchesListener2 {
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void launchesTerminated(ILaunch[] launches) {
 		for (ILaunch launch : launches) {
 			final ScriptDebugConsole console = launchToConsoleMap.get(launch);
