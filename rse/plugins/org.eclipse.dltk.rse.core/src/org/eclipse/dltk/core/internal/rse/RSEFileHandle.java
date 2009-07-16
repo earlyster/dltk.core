@@ -207,7 +207,7 @@ public class RSEFileHandle implements IFileHandle {
 			try {
 				return sshFile.getInputStream(monitor);
 			} catch (CoreException e) {
-				throw new IOException(e);
+				throw new IOException(e.getLocalizedMessage());
 			}
 		}
 		try {
@@ -234,7 +234,7 @@ public class RSEFileHandle implements IFileHandle {
 			try {
 				return sshFile.getOutputStream(monitor);
 			} catch (CoreException e) {
-				throw new IOException(e);
+				throw new IOException(e.getLocalizedMessage());
 			}
 		}
 		try {
