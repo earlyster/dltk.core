@@ -485,6 +485,7 @@ public abstract class TextUtils {
 	 * @param lines
 	 * @param separator
 	 * @return
+	 * @since 2.0
 	 */
 	public static String join(String[] lines, String separator) {
 		final StringBuffer sb = new StringBuffer(256);
