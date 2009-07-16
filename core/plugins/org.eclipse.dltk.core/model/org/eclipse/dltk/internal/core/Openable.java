@@ -506,10 +506,9 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		if (!done[0]) {
 			controlMonitor.setCanceled(true);
 			Thread.interrupted();
-			requestor
-					.completionFailure(new DefaultProblem(
-							"Completion of proposal compution is to long. Please try again. ",
-							0, null, ProblemSeverities.Warning, 0, 0, 0));
+			requestor.completionFailure(new DefaultProblem(
+					"Compution of proposals is to long. Please try again. ", 0,
+					null, ProblemSeverities.Warning, 0, 0, 0));
 			requestor.clear();
 		}
 	}
