@@ -38,6 +38,9 @@ public class RSESshManager {
 			} catch (Exception e) {
 				DLTKRSEPlugin.log(e);
 			}
+			if (!connector.isConnected()) {
+				return null;
+			}
 			String hostName = host.getHostName();
 			// Retrive user name
 			String userId = connector.getUserId();
