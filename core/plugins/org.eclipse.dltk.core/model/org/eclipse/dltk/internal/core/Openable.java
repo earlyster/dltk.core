@@ -18,9 +18,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.codeassist.ICompletionEngine;
 import org.eclipse.dltk.codeassist.ISelectionEngine;
+import org.eclipse.dltk.compiler.problem.DefaultProblem;
+import org.eclipse.dltk.compiler.problem.ProblemSeverities;
 import org.eclipse.dltk.core.BufferChangedEvent;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.DLTKCore;
@@ -441,9 +444,10 @@ public abstract class Openable extends ModelElement implements IOpenable,
 	}
 
 	/** Code Completion */
-	protected void codeComplete(org.eclipse.dltk.compiler.env.ISourceModule cu,
-			int position, CompletionRequestor requestor, WorkingCopyOwner owner)
-			throws ModelException {
+	protected void codeComplete(
+			final org.eclipse.dltk.compiler.env.ISourceModule cu,
+			final int position, CompletionRequestor requestor,
+			WorkingCopyOwner owner, long timeout) throws ModelException {
 		if (requestor == null) {
 			throw new IllegalArgumentException(
 					Messages.Openable_completionRequesterCannotBeNull);
@@ -471,7 +475,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		}
 
 		// code complete
-		ICompletionEngine engine = DLTKLanguageManager
+		final ICompletionEngine engine = DLTKLanguageManager
 				.getCompletionEngine(toolkit.getNatureId());
 		if (engine == null) {
 			return;
@@ -480,13 +484,34 @@ public abstract class Openable extends ModelElement implements IOpenable,
 		engine.setRequestor(requestor);
 		engine.setOptions(project.getOptions(true));
 		engine.setProject(project);
+		NullProgressMonitor controlMonitor = new NullProgressMonitor();
+		engine.setProgressMonitor(controlMonitor);
 
-		/*
-		 * toolkit.createCompletionEngine(environment, requestor,
-		 * project.getOptions(true), project);
-		 */
-
-		engine.complete(cu, position, 0);
+		final boolean done[] = { false };
+		Thread completeThread = new Thread() {
+			@Override
+			public void run() {
+				engine.complete(cu, position, 0);
+				done[0] = true;
+			}
+		};
+		completeThread.start();
+		try {
+			completeThread.join(timeout);
+		} catch (InterruptedException e) {
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
+		}
+		if (!done[0]) {
+			controlMonitor.setCanceled(true);
+			Thread.interrupted();
+			requestor
+					.completionFailure(new DefaultProblem(
+							"Completion of proposal compution is to long. Please try again. ",
+							0, null, ProblemSeverities.Warning, 0, 0, 0));
+			requestor.clear();
+		}
 	}
 
 	protected IModelElement[] codeSelect(

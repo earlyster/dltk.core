@@ -12,6 +12,8 @@ package org.eclipse.dltk.codeassist;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.dltk.ast.declarations.Argument;
 import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.compiler.CharOperation;
@@ -51,6 +53,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	protected CategorizedProblem problem = null;
 
 	protected char[] source;
+	private IProgressMonitor progressMonitor;
 
 	public ScriptCompletionEngine(/*
 								 * ISearchableEnvironment nameEnvironment,
@@ -701,5 +704,22 @@ public abstract class ScriptCompletionEngine extends Engine implements
 
 	public void setRequestor(CompletionRequestor requestor) {
 		this.requestor = requestor;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void setProgressMonitor(IProgressMonitor monitor) {
+		this.progressMonitor = monitor;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public IProgressMonitor getProgressMonitor() {
+		if (progressMonitor == null) {
+			progressMonitor = new NullProgressMonitor();
+		}
+		return progressMonitor;
 	}
 }

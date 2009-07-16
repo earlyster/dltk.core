@@ -18,8 +18,9 @@ import org.eclipse.dltk.compiler.problem.IProblem;
  * This class is intended to be subclassed by clients.
  * </p>
  * <p>
- * The code assist engine normally invokes methods on completion
- * requestors in the following sequence:
+ * The code assist engine normally invokes methods on completion requestors in
+ * the following sequence:
+ * 
  * <pre>
  * requestor.beginReporting();
  * requestor.acceptContext(context);
@@ -28,41 +29,42 @@ import org.eclipse.dltk.compiler.problem.IProblem;
  * ...
  * requestor.endReporting();
  * </pre>
- * If, however, the engine is unable to offer completion proposals
- * for whatever reason, <code>completionFailure</code> is called
- * with a problem object describing why completions were unavailable.
- * In this case, the sequence of calls is:
+ * 
+ * If, however, the engine is unable to offer completion proposals for whatever
+ * reason, <code>completionFailure</code> is called with a problem object
+ * describing why completions were unavailable. In this case, the sequence of
+ * calls is:
+ * 
  * <pre>
  * requestor.beginReporting();
  * requestor.acceptContext(context);
  * requestor.completionFailure(problem);
  * requestor.endReporting();
  * </pre>
+ * 
  * In either case, the bracketing <code>beginReporting</code>
  * <code>endReporting</code> calls are always made as well as
  * <code>acceptContext</code> call.
  * </p>
  * <p>
- * The class was introduced in 3.0 as a more evolvable replacement
- * for the <code>ICompletionRequestor</code> interface.
+ * The class was introduced in 3.0 as a more evolvable replacement for the
+ * <code>ICompletionRequestor</code> interface.
  * </p>
  * 
  * @see ICodeAssist
-	 *
+ * 
  */
 public abstract class CompletionRequestor {
 
 	/**
-	 * The set of CompletionProposal kinds that this requestor
-	 * ignores; <code>0</code> means the set is empty.
-	 * 1 << completionProposalKind
+	 * The set of CompletionProposal kinds that this requestor ignores;
+	 * <code>0</code> means the set is empty. 1 << completionProposalKind
 	 */
 	private int ignoreSet = 0;
 
 	/**
-	 * Creates a new completion requestor.
-	 * The requestor is interested in all kinds of completion
-	 * proposals; none will be ignored.
+	 * Creates a new completion requestor. The requestor is interested in all
+	 * kinds of completion proposals; none will be ignored.
 	 */
 	public CompletionRequestor() {
 		// do nothing
@@ -71,37 +73,42 @@ public abstract class CompletionRequestor {
 	/**
 	 * Returns whether the given kind of completion proposal is ignored.
 	 * 
-	 * @param completionProposalKind one of the kind constants declared
-	 * on <code>CompletionProposal</code>
-	 * @return <code>true</code> if the given kind of completion proposal
-	 * is ignored by this requestor, and <code>false</code> if it is of
-	 * interest
+	 * @param completionProposalKind
+	 *            one of the kind constants declared on
+	 *            <code>CompletionProposal</code>
+	 * @return <code>true</code> if the given kind of completion proposal is
+	 *         ignored by this requestor, and <code>false</code> if it is of
+	 *         interest
 	 * @see #setIgnored(int, boolean)
 	 * @see CompletionProposal#getKind()
 	 */
 	public final boolean isIgnored(int completionProposalKind) {
 		if (completionProposalKind < CompletionProposal.FIRST_KIND
-			|| completionProposalKind > CompletionProposal.LAST_KIND) {
-				throw new IllegalArgumentException("Unknown kind of completion proposal: "+completionProposalKind); //$NON-NLS-1$
+				|| completionProposalKind > CompletionProposal.LAST_KIND) {
+			throw new IllegalArgumentException(
+					"Unknown kind of completion proposal: " + completionProposalKind); //$NON-NLS-1$
 		}
 		return 0 != (this.ignoreSet & (1 << completionProposalKind));
 	}
-	
+
 	/**
 	 * Sets whether the given kind of completion proposal is ignored.
 	 * 
-	 * @param completionProposalKind one of the kind constants declared
-	 * on <code>CompletionProposal</code>
-	 * @param ignore <code>true</code> if the given kind of completion proposal
-	 * is ignored by this requestor, and <code>false</code> if it is of
-	 * interest
+	 * @param completionProposalKind
+	 *            one of the kind constants declared on
+	 *            <code>CompletionProposal</code>
+	 * @param ignore
+	 *            <code>true</code> if the given kind of completion proposal is
+	 *            ignored by this requestor, and <code>false</code> if it is of
+	 *            interest
 	 * @see #isIgnored(int)
 	 * @see CompletionProposal#getKind()
 	 */
 	public final void setIgnored(int completionProposalKind, boolean ignore) {
 		if (completionProposalKind < CompletionProposal.FIRST_KIND
-			|| completionProposalKind > CompletionProposal.LAST_KIND) {
-				throw new IllegalArgumentException("Unknown kind of completion proposal: "+completionProposalKind); //$NON-NLS-1$
+				|| completionProposalKind > CompletionProposal.LAST_KIND) {
+			throw new IllegalArgumentException(
+					"Unknown kind of completion proposal: " + completionProposalKind); //$NON-NLS-1$
 		}
 		if (ignore) {
 			this.ignoreSet |= (1 << completionProposalKind);
@@ -109,13 +116,13 @@ public abstract class CompletionRequestor {
 			this.ignoreSet &= ~(1 << completionProposalKind);
 		}
 	}
-	
+
 	/**
-	 * Pro forma notification sent before reporting a batch of
-	 * completion proposals.
+	 * Pro forma notification sent before reporting a batch of completion
+	 * proposals.
 	 * <p>
-	 * The default implementation of this method does nothing.
-	 * Clients may override.
+	 * The default implementation of this method does nothing. Clients may
+	 * override.
 	 * </p>
 	 */
 	public void beginReporting() {
@@ -123,11 +130,11 @@ public abstract class CompletionRequestor {
 	}
 
 	/**
-	 * Pro forma notification sent after reporting a batch of
-	 * completion proposals.
+	 * Pro forma notification sent after reporting a batch of completion
+	 * proposals.
 	 * <p>
-	 * The default implementation of this method does nothing.
-	 * Clients may override.
+	 * The default implementation of this method does nothing. Clients may
+	 * override.
 	 * </p>
 	 */
 	public void endReporting() {
@@ -135,47 +142,50 @@ public abstract class CompletionRequestor {
 	}
 
 	/**
-	 * Notification of failure to produce any completions.
-	 * The problem object explains what prevented completing.
+	 * Notification of failure to produce any completions. The problem object
+	 * explains what prevented completing.
 	 * <p>
-	 * The default implementation of this method does nothing.
-	 * Clients may override to receive this kind of notice.
+	 * The default implementation of this method does nothing. Clients may
+	 * override to receive this kind of notice.
 	 * </p>
 	 * 
-	 * @param problem the problem object
+	 * @param problem
+	 *            the problem object
 	 */
 	public void completionFailure(IProblem problem) {
 		// default behavior is to ignore
 	}
 
 	/**
-	 * Proposes a completion. Has no effect if the kind of proposal
-	 * is being ignored by this requestor. Callers should consider
-	 * checking {@link #isIgnored(int)} before avoid creating proposal
-	 * objects that would only be ignored.
+	 * Proposes a completion. Has no effect if the kind of proposal is being
+	 * ignored by this requestor. Callers should consider checking
+	 * {@link #isIgnored(int)} before avoid creating proposal objects that would
+	 * only be ignored.
 	 * <p>
-	 * Similarly, implementers should check 
-	 * {@link #isIgnored(int) isIgnored(proposal.getKind())} 
-	 * and ignore proposals that have been declared as uninteresting.
-	 * The proposal object passed is only valid for the duration of
-	 * completion operation.
+	 * Similarly, implementers should check {@link #isIgnored(int)
+	 * isIgnored(proposal.getKind())} and ignore proposals that have been
+	 * declared as uninteresting. The proposal object passed is only valid for
+	 * the duration of completion operation.
 	 * 
-	 * @param proposal the completion proposal
-	 * @exception IllegalArgumentException if the proposal is null
+	 * @param proposal
+	 *            the completion proposal
+	 * @exception IllegalArgumentException
+	 *                if the proposal is null
 	 */
 	public abstract void accept(CompletionProposal proposal);
-	
+
 	/**
 	 * Propose the context in which the completion occurs.
 	 * <p>
 	 * This method is called one and only one time before any call to
-	 * {@link #accept(CompletionProposal)}.
-	 * The default implementation of this method does nothing.
-	 * Clients may override.
+	 * {@link #accept(CompletionProposal)}. The default implementation of this
+	 * method does nothing. Clients may override.
 	 * </p>
-	 * @param context the completion context
 	 * 
-	 *
+	 * @param context
+	 *            the completion context
+	 * 
+	 * 
 	 */
 	public void acceptContext(CompletionContext context) {
 		// do nothing
@@ -188,5 +198,13 @@ public abstract class CompletionRequestor {
 	 */
 	public boolean isContextInformationMode() {
 		return false;
+	}
+
+	/**
+	 * Remove all collected information.
+	 * 
+	 * @since 2.0
+	 */
+	public void clear() {
 	}
 }

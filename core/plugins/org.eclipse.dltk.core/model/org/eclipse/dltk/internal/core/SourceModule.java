@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuffer;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -104,25 +103,6 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		}
 
 		super.close();
-	}
-
-	/*
-	 * @see org.eclipse.dltk.core.ICodeAssist#codeComplete(int,
-	 * org.eclipse.dltk.core.CompletionRequestor)
-	 */
-	public void codeComplete(int offset, CompletionRequestor requestor)
-			throws ModelException {
-		codeComplete(offset, requestor, DefaultWorkingCopyOwner.PRIMARY);
-	}
-
-	/*
-	 * @see org.eclipse.dltk.core.ICodeAssist#codeComplete(int,
-	 * org.eclipse.dltk.core.CompletionRequestor,
-	 * org.eclipse.dltk.core.WorkingCopyOwner)
-	 */
-	public void codeComplete(int offset, CompletionRequestor requestor,
-			WorkingCopyOwner owner) throws ModelException {
-		codeComplete(this, offset, requestor, owner);
 	}
 
 	/*

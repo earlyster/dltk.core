@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -936,6 +937,13 @@ public class SearchEngine {
 				requestor, monitor);
 	}
 
+	public static ISourceModule[] searchMixinSources(
+			final IDLTKSearchScope scope, String key,
+			IDLTKLanguageToolkit toolkit, final Map keys) {
+		return searchMixinSources(scope, key, toolkit, keys,
+				new NullProgressMonitor());
+	}
+
 	/**
 	 * 
 	 * @param key
@@ -943,10 +951,12 @@ public class SearchEngine {
 	 * @param toolkit
 	 * @param keys
 	 * @return
+	 * @since 2.0
 	 */
 	public static ISourceModule[] searchMixinSources(
 			final IDLTKSearchScope scope, String key,
-			IDLTKLanguageToolkit toolkit, final Map keys) {
+			IDLTKLanguageToolkit toolkit, final Map keys,
+			IProgressMonitor monitor) {
 		PerformanceNode p = RuntimePerformanceMonitor.begin();
 		final long startTime = DLTKCore.VERBOSE_MIXIN ? System
 				.currentTimeMillis() : 0;
@@ -1006,7 +1016,7 @@ public class SearchEngine {
 		indexManager.performConcurrentJob(new PatternSearchJob(pattern,
 				participant, // Script search only
 				scope, searchRequestor),
-				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
+				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 		if (DLTKCore.VERBOSE_MIXIN) {
 			final String msg = "mixin search for \"{0}\": {1} results in {2} ms";//$NON-NLS-1$
 			System.out.println(NLS.bind(msg, new Object[] { key,
@@ -1018,10 +1028,20 @@ public class SearchEngine {
 				.size()]);
 	}
 
+	/**
+	 * @since 2.0
+	 */
+	public static ISourceModule[] searchMixinSources(
+			final IDLTKSearchScope scope, String key,
+			IDLTKLanguageToolkit toolkit, IProgressMonitor monitor) {
+		return searchMixinSources(scope, key, toolkit, null, monitor);
+	}
+
 	public static ISourceModule[] searchMixinSources(
 			final IDLTKSearchScope scope, String key,
 			IDLTKLanguageToolkit toolkit) {
-		return searchMixinSources(scope, key, toolkit, null);
+		return searchMixinSources(scope, key, toolkit, null,
+				new NullProgressMonitor());
 	}
 
 	public static String[] searchMixinPatterns(final IDLTKSearchScope scope,

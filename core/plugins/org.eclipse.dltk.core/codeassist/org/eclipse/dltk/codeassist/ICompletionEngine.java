@@ -11,6 +11,7 @@ package org.eclipse.dltk.codeassist;
 
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.compiler.env.ISourceModule;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.IScriptProject;
@@ -23,4 +24,9 @@ public interface ICompletionEngine {
 	void setOptions(Map options);
 
 	void setProject(IScriptProject project);
+
+	/**
+	 * @since 2.0
+	 */
+	void setProgressMonitor(IProgressMonitor nullProgressMonitor);
 }

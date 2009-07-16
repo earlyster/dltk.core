@@ -27,7 +27,10 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -54,7 +57,7 @@ import org.eclipse.dltk.internal.core.mixin.MixinManager;
 import org.eclipse.dltk.internal.core.util.LRUCache;
 
 public class MixinModel {
-	private static final long REQUEST_CACHE_EXPIRE_TIME = 5000;
+	private static final long REQUEST_CACHE_EXPIRE_TIME = 2000;
 	private static final boolean DEBUG = false;
 	private static final boolean TRACE = false;
 
@@ -185,10 +188,20 @@ public class MixinModel {
 
 	private final RequestCache requestCache = new RequestCache(500);
 
+	/**
+	 * @deprecated
+	 */
 	public IMixinElement[] find(String pattern, long delta) {
+		return find(pattern, new NullProgressMonitor());
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public IMixinElement[] find(String pattern, IProgressMonitor monitor) {
 		long start = TRACE ? System.currentTimeMillis() : 0;
 
-		RequestCacheEntry entry = findFromMixin(pattern);
+		RequestCacheEntry entry = findFromMixin(pattern, monitor);
 
 		if (entry.modules == null || entry.modules.size() == 0) {
 			return new IMixinElement[0];
@@ -205,7 +218,9 @@ public class MixinModel {
 		// int i = 0;
 		for (String key : entry.keys) {
 			MixinElement element = getCreateEmpty(key);
-			markElementAsFinal(element);
+			if (!monitor.isCanceled()) {
+				markElementAsFinal(element);
+			}
 			addKeyToSet(result, element, pattern);
 		}
 		if (TRACE) {
@@ -219,8 +234,8 @@ public class MixinModel {
 		return result.toArray(new IMixinElement[result.size()]);
 	}
 
-	private void addKeyToSet(Set<MixinElement> result, MixinElement element,
-			String pattern) {
+	private synchronized void addKeyToSet(Set<MixinElement> result,
+			MixinElement element, String pattern) {
 		// Skip all not matched keys
 		if (!CharOperation.match(pattern.toCharArray(), element.key
 				.toCharArray(), true)) {
@@ -236,15 +251,21 @@ public class MixinModel {
 		}
 	}
 
-	private RequestCacheEntry findFromMixin(String pattern) {
+	private RequestCacheEntry findFromMixin(String pattern,
+			IProgressMonitor monitor) {
 		PerformanceNode p = RuntimePerformanceMonitor.begin();
 		RequestCacheEntry entry = (RequestCacheEntry) requestCache.get(pattern);
 		// Set modules = new HashSet();
 		if (entry == null || entry.expireTime < System.currentTimeMillis()) {
 			Map keys = new HashMap();
-			ISourceModule[] containedModules = SearchEngine.searchMixinSources(
-					createSearchScope(), pattern, toolkit, keys);
+			ISourceModule[] containedModules = null;
 			entry = new RequestCacheEntry();
+			try {
+				containedModules = SearchEngine.searchMixinSources(
+						createSearchScope(), pattern, toolkit, keys, monitor);
+			} catch (OperationCanceledException e) {
+				return entry;
+			}
 			entry.expireTime = System.currentTimeMillis()
 					+ REQUEST_CACHE_EXPIRE_TIME;
 			entry.modules = new HashSet<ISourceModule>(Arrays
@@ -256,18 +277,33 @@ public class MixinModel {
 				Set vals = (Set) iterator.next();
 				entry.keys.addAll(vals);
 			}
-			this.requestCache.put(pattern, entry);
+			if (!monitor.isCanceled()) {
+				this.requestCache.put(pattern, entry);
+			}
 		}
 		p.done(getNature(), "Mixin model search items", 0);
 		return entry;
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public IMixinElement[] find(String pattern) {
-		return find(pattern, -1);
+		return find(pattern, new NullProgressMonitor());
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public String[] findKeys(String pattern) {
-		RequestCacheEntry entry = findFromMixin(pattern);
+		return findKeys(pattern, new NullProgressMonitor());
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public String[] findKeys(String pattern, IProgressMonitor monitor) {
+		RequestCacheEntry entry = findFromMixin(pattern, monitor);
 		return entry.keys.toArray(new String[entry.keys.size()]);
 	}
 
@@ -364,11 +400,19 @@ public class MixinModel {
 	 * 
 	 * @param element
 	 * @return
+	 * @since 2.0
 	 */
-	public ISourceModule[] findModules(String key) {
-		RequestCacheEntry entry = findFromMixin(key);
+	public ISourceModule[] findModules(String key, IProgressMonitor monitor) {
+		RequestCacheEntry entry = findFromMixin(key, monitor);
 		return (ISourceModule[]) entry.modules
 				.toArray(new ISourceModule[entry.modules.size()]);
+	}
+
+	/**
+	 * @Deprecated
+	 */
+	public ISourceModule[] findModules(String key) {
+		return findModules(key, new NullProgressMonitor());
 	}
 
 	/**

@@ -19,106 +19,149 @@ package org.eclipse.dltk.core;
 public interface ICodeAssist {
 
 	/**
-	 * Performs code completion at the given offset position in this compilation unit,
-	 * reporting results to the given completion requestor. The <code>offset</code>
-	 * is the 0-based index of the character, after which code assist is desired.
-	 * An <code>offset</code> of -1 indicates to code assist at the beginning of this
-	 * compilation unit.
+	 * Performs code completion at the given offset position in this compilation
+	 * unit, reporting results to the given completion requestor. The
+	 * <code>offset</code> is the 0-based index of the character, after which
+	 * code assist is desired. An <code>offset</code> of -1 indicates to code
+	 * assist at the beginning of this compilation unit.
 	 * <p>
-	 *
-	 * @param offset the given offset position
-	 * @param requestor the given completion requestor
-	 * @exception ModelException if code assist could not be performed. Reasons include:<ul>
-	 *  <li>This Script element does not exist (ELEMENT_DOES_NOT_EXIST)</li>
-	 *  <li> The position specified is < -1 or is greater than this compilation unit's
-	 *      source length (INDEX_OUT_OF_BOUNDS)
-	 * </ul>
-	 *
-	 * @exception IllegalArgumentException if <code>requestor</code> is <code>null</code>
-	 *
- 	 */
-	void codeComplete(int offset, CompletionRequestor requestor)
-		throws ModelException;
-	
-	/**
-	 * Performs code completion at the given offset position in this compilation unit,
-	 * reporting results to the given completion requestor. The <code>offset</code>
-	 * is the 0-based index of the character, after which code assist is desired.
-	 * An <code>offset</code> of -1 indicates to code assist at the beginning of this
-	 * compilation unit.
-	 * It considers types in the working copies with the given owner first. In other words, 
-	 * the owner's working copies will take precedence over their original compilation units
-	 * in the workspace.
-	 * <p>
-	 * Note that if a working copy is empty, it will be as if the original compilation
-	 * unit had been deleted.
-	 * </p>
-	 *
-	 * @param offset the given offset position
-	 * @param requestor the given completion requestor
-	 * @param owner the owner of working copies that take precedence over their original compilation units
-	 * @exception ModelException if code assist could not be performed. Reasons include:<ul>
-	 *  <li>This model element does not exist (ELEMENT_DOES_NOT_EXIST)</li>
-	 *  <li> The position specified is < -1 or is greater than this compilation unit's
-	 *      source length (INDEX_OUT_OF_BOUNDS)
-	 * </ul>
-	 *
-	 * @exception IllegalArgumentException if <code>requestor</code> is <code>null</code>
-	 *
+	 * 
+	 * @param offset
+	 *            the given offset position
+	 * @param requestor
+	 *            the given completion requestor
+	 * @exception ModelException
+	 *                if code assist could not be performed. Reasons include:
+	 *                <ul>
+	 *                <li>This Script element does not exist
+	 *                (ELEMENT_DOES_NOT_EXIST)</li> <li> The position specified
+	 *                is < -1 or is greater than this compilation unit's source
+	 *                length (INDEX_OUT_OF_BOUNDS)
+	 *                </ul>
+	 * 
+	 * @exception IllegalArgumentException
+	 *                if <code>requestor</code> is <code>null</code>
+	 * @since 2.0
+	 * 
 	 */
-	void codeComplete(int offset, CompletionRequestor requestor, WorkingCopyOwner owner)
-		throws ModelException;
+	void codeComplete(int offset, CompletionRequestor requestor, long timeout)
+			throws ModelException;
 
 	/**
-	 * Returns the model elements corresponding to the given selected text in this compilation unit. 
-	 * The <code>offset</code> is the 0-based index of the first selected character. 
-	 * The <code>length</code> is the number of selected characters.
+	 * @deprecated
+	 */
+	void codeComplete(int offset, CompletionRequestor requestor)
+			throws ModelException;
+
+	/**
+	 * Performs code completion at the given offset position in this compilation
+	 * unit, reporting results to the given completion requestor. The
+	 * <code>offset</code> is the 0-based index of the character, after which
+	 * code assist is desired. An <code>offset</code> of -1 indicates to code
+	 * assist at the beginning of this compilation unit. It considers types in
+	 * the working copies with the given owner first. In other words, the
+	 * owner's working copies will take precedence over their original
+	 * compilation units in the workspace.
 	 * <p>
-	 * Note that if the <code>length</code> is 0 and the <code>offset</code> is inside an identifier 
-	 * or the index just after an identifier then this identifier is considered as the selection.
+	 * Note that if a working copy is empty, it will be as if the original
+	 * compilation unit had been deleted.
 	 * </p>
 	 * 
-	 * @param offset the given offset position
-	 * @param length the number of selected characters
+	 * @param offset
+	 *            the given offset position
+	 * @param requestor
+	 *            the given completion requestor
+	 * @param owner
+	 *            the owner of working copies that take precedence over their
+	 *            original compilation units
+	 * @exception ModelException
+	 *                if code assist could not be performed. Reasons include:
+	 *                <ul>
+	 *                <li>This model element does not exist
+	 *                (ELEMENT_DOES_NOT_EXIST)</li>
+	 *                <li>The position specified is < -1 or is greater than this
+	 *                compilation unit's source length (INDEX_OUT_OF_BOUNDS)
+	 *                </ul>
+	 * 
+	 * @exception IllegalArgumentException
+	 *                if <code>requestor</code> is <code>null</code>
+	 * @since 2.0
+	 * 
+	 */
+	void codeComplete(int offset, CompletionRequestor requestor,
+			WorkingCopyOwner owner, long timeout) throws ModelException;
+
+	/**
+	 * @deprecated
+	 */
+	void codeComplete(int offset, CompletionRequestor requestor,
+			WorkingCopyOwner owner) throws ModelException;
+
+	/**
+	 * Returns the model elements corresponding to the given selected text in
+	 * this compilation unit. The <code>offset</code> is the 0-based index of
+	 * the first selected character. The <code>length</code> is the number of
+	 * selected characters.
+	 * <p>
+	 * Note that if the <code>length</code> is 0 and the <code>offset</code> is
+	 * inside an identifier or the index just after an identifier then this
+	 * identifier is considered as the selection.
+	 * </p>
+	 * 
+	 * @param offset
+	 *            the given offset position
+	 * @param length
+	 *            the number of selected characters
 	 * @return the model elements corresponding to the given selected text
-	 *
-	 * @exception ModelException if code resolve could not be performed. Reasons include:
-	 * <ul>
-	 *  <li>This model element does not exist (ELEMENT_DOES_NOT_EXIST)</li>
-	 *  <li> The range specified is not within this element's
-	 *      source range (INDEX_OUT_OF_BOUNDS)
-	 * </ul>
-	 *
+	 * 
+	 * @exception ModelException
+	 *                if code resolve could not be performed. Reasons include:
+	 *                <ul>
+	 *                <li>This model element does not exist
+	 *                (ELEMENT_DOES_NOT_EXIST)</li>
+	 *                <li>The range specified is not within this element's
+	 *                source range (INDEX_OUT_OF_BOUNDS)
+	 *                </ul>
+	 * 
 	 */
 	IModelElement[] codeSelect(int offset, int length) throws ModelException;
+
 	/**
-	 * Returns the model elements corresponding to the given selected text in this compilation unit. 
-	 * The <code>offset</code> is the 0-based index of the first selected character. 
-	 * The <code>length</code> is the number of selected characters.
-	 * It considers types in the working copies with the given owner first. In other words, 
-	 * the owner's working copies will take precedence over their original compilation units
-	 * in the workspace.
+	 * Returns the model elements corresponding to the given selected text in
+	 * this compilation unit. The <code>offset</code> is the 0-based index of
+	 * the first selected character. The <code>length</code> is the number of
+	 * selected characters. It considers types in the working copies with the
+	 * given owner first. In other words, the owner's working copies will take
+	 * precedence over their original compilation units in the workspace.
 	 * <p>
-	 * Note that if the <code>length</code> is 0 and the <code>offset</code> is inside an identifier 
-	 * or the index just after an identifier then this identifier is considered as the selection.
+	 * Note that if the <code>length</code> is 0 and the <code>offset</code> is
+	 * inside an identifier or the index just after an identifier then this
+	 * identifier is considered as the selection.
 	 * </p>
 	 * <p>
-	 * Note that if a working copy is empty, it will be as if the original compilation
-	 * unit had been deleted.
+	 * Note that if a working copy is empty, it will be as if the original
+	 * compilation unit had been deleted.
 	 * </p>
 	 * 
-	 * @param offset the given offset position
-	 * @param length the number of selected characters
-	 * @param owner the owner of working copies that take precedence over their original compilation units
+	 * @param offset
+	 *            the given offset position
+	 * @param length
+	 *            the number of selected characters
+	 * @param owner
+	 *            the owner of working copies that take precedence over their
+	 *            original compilation units
 	 * @return the model elements corresponding to the given selected text
-	 *
-	 * @exception ModelException if code resolve could not be performed. Reasons include:
-	 * <ul>
-	 *  <li>This model element does not exist (ELEMENT_DOES_NOT_EXIST)</li>
-	 *  <li> The range specified is not within this element's
-	 *      source range (INDEX_OUT_OF_BOUNDS)
-	 * </ul>
-	 *
+	 * 
+	 * @exception ModelException
+	 *                if code resolve could not be performed. Reasons include:
+	 *                <ul>
+	 *                <li>This model element does not exist
+	 *                (ELEMENT_DOES_NOT_EXIST)</li>
+	 *                <li>The range specified is not within this element's
+	 *                source range (INDEX_OUT_OF_BOUNDS)
+	 *                </ul>
+	 * 
 	 */
-	IModelElement[] codeSelect(int offset, int length, WorkingCopyOwner owner) throws ModelException;
+	IModelElement[] codeSelect(int offset, int length, WorkingCopyOwner owner)
+			throws ModelException;
 }
