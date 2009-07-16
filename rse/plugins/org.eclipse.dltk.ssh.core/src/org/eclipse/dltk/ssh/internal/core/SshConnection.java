@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.ssh.core.ISshConnection;
 import org.eclipse.dltk.ssh.core.ISshFileHandle;
 
@@ -25,6 +26,8 @@ import com.jcraft.jsch.UserInfo;
  * 
  */
 public class SshConnection implements ISshConnection {
+	private long connectionIsDisabled = 0;
+
 	private final class LocalUserInfo implements UserInfo {
 		public void showMessage(String arg0) {
 		}
@@ -292,7 +295,7 @@ public class SshConnection implements ISshConnection {
 				channel.connect();
 			}
 		} catch (JSchException e) {
-			e.printStackTrace();
+			DLTKCore.error("Failed to create direct connection", e);
 			if (session.isConnected() && !channel.isConnected()) {
 				try {
 					Thread.sleep(1000);
@@ -305,7 +308,14 @@ public class SshConnection implements ISshConnection {
 		if (session == null || !session.isConnected() || channel == null
 				|| !channel.isConnected()) {
 			if (trycount > 0) {
-				return connect(trycount--);
+				if (session == null || !session.isConnected()) {
+					session = null;
+				}
+				return connect(trycount - 1);
+			} else {
+				// Lets disable connection for a while.
+				connectionIsDisabled = System.currentTimeMillis() + 1000 * 10; // 10
+				// seconds
 			}
 			return false;
 		} else {
@@ -372,6 +382,9 @@ public class SshConnection implements ISshConnection {
 	 * .IPath)
 	 */
 	public ISshFileHandle getHandle(IPath path) throws Exception {
+		if (connectionIsDisabled > System.currentTimeMillis()) {
+			return null;
+		}
 		GetStatOperation op = new GetStatOperation(path);
 		performOperation(op, DEFAULT_RETRY_COUNT);
 		if (op.isFinished()) {
