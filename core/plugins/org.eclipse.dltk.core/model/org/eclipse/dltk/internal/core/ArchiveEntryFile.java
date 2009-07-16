@@ -13,8 +13,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -22,21 +20,27 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.PlatformObject;
+import org.eclipse.dltk.core.Archive;
+import org.eclipse.dltk.core.ArchiveEntry;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.ModelException;
 
 public class ArchiveEntryFile extends PlatformObject implements IStorage {
+
 	private String entryName;
 	private String zipName;
 	private IPath path;
 	private IResource zipResource;
+	private ArchiveProjectFragment archiveProjectFragment;
 
 	public ArchiveEntryFile(String entryName, String zipName,
-			IPath parentRelativePath, IResource zipResource) {
+			IPath parentRelativePath, IResource zipResource,
+			ArchiveProjectFragment archiveProjectFragment) {
 		this.entryName = entryName;
 		this.zipName = zipName;
 		this.path = parentRelativePath;
 		this.zipResource = zipResource;
+		this.archiveProjectFragment = archiveProjectFragment;
 	}
 
 	public InputStream getContents() throws CoreException {
@@ -45,16 +49,17 @@ public class ArchiveEntryFile extends PlatformObject implements IStorage {
 				System.out
 						.println("(" + Thread.currentThread() + ") [JarEntryFile.getContents()] Creating ZipFile on " + this.zipName); //$NON-NLS-1$	//$NON-NLS-2$
 			}
-			ZipFile zipFile = null;
+			Archive zipFile = null;
 			try {
 				if (zipResource == null) {
-					zipFile = new ZipFile(this.zipName);
+					zipFile = ModelManager.getModelManager().getZipFile(
+							new Path(zipName), archiveProjectFragment);
 				} else {
-					zipFile = new ZipFile(this.zipResource.getLocation()
-							.toOSString());
+					zipFile = ModelManager.getModelManager().getZipFile(
+							zipResource.getLocation(), archiveProjectFragment);
 				}
-				ZipEntry zipEntry = zipFile.getEntry(this.path.append(
-						this.entryName).toString());
+				ArchiveEntry zipEntry = zipFile.getArchiveEntry(this.path
+						.append(this.entryName).toString());
 				if (zipEntry == null) {
 					throw new ModelException(new ModelStatus(
 							IModelStatusConstants.INVALID_PATH, this.entryName));

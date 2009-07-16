@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.resources.IFile;
@@ -63,6 +64,7 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.util.HashtableOfObjectToInt;
+import org.eclipse.dltk.core.Archive;
 import org.eclipse.dltk.core.BuildpathContainerInitializer;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKCore;
@@ -2184,14 +2186,17 @@ public class ModelManager implements ISaveParticipant {
 	 * it must be an absolute workspace relative path if representing a zip
 	 * inside the workspace.
 	 * 
+	 * @param archiveProjectFragment
+	 * 
 	 * @exception CoreException
 	 *                If unable to create/open the ZipFile
 	 */
-	public ZipFile getZipFile(IPath path) throws CoreException {
+	public Archive getZipFile(IPath path,
+			ArchiveProjectFragment archiveProjectFragment) throws CoreException {
 		HashMap map;
-		ZipFile zipFile;
+		Archive zipFile;
 		if ((map = (HashMap) this.zipFiles.get()) != null
-				&& (zipFile = (ZipFile) map.get(path)) != null) {
+				&& (zipFile = (Archive) map.get(path)) != null) {
 			return zipFile;
 		}
 		File localFile = null;
@@ -2226,7 +2231,8 @@ public class ModelManager implements ISaveParticipant {
 				System.out
 						.println("(" + Thread.currentThread() + ") [ModelManager.getZipFile(IPath)] Creating ZipFile on " + localFile); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			zipFile = new ZipFile(localFile);
+			zipFile = getArchive(archiveProjectFragment, localFile);
+
 			if (map != null) {
 				map.put(path, zipFile);
 			}
@@ -2235,6 +2241,17 @@ public class ModelManager implements ISaveParticipant {
 			throw new CoreException(new Status(IStatus.ERROR,
 					DLTKCore.PLUGIN_ID, -1, Messages.status_IOException, e));
 		}
+	}
+
+	public Archive getArchive(ArchiveProjectFragment archiveProjectFragment,
+			File localFile) throws ZipException, IOException {
+		Archive zipFile = null;
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(archiveProjectFragment);
+		if (toolkit != null) {
+			zipFile = toolkit.getArchive(localFile);
+		}
+		return zipFile;
 	}
 
 	public IFileCache getFileCache() {
@@ -2250,7 +2267,7 @@ public class ModelManager implements ISaveParticipant {
 		this.zipFiles.set(new HashMap());
 	}
 
-	public void closeZipFile(ZipFile zipFile) {
+	public void closeZipFile(Archive zipFile) {
 		if (zipFile == null)
 			return;
 		if (this.zipFiles.get() != null) {

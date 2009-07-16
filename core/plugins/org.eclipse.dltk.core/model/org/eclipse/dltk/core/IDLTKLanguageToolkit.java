@@ -86,4 +86,6 @@ public interface IDLTKLanguageToolkit {
 
 	String get(StringFeature feature);
 
+	Archive getArchive(File localFile);
+
 }

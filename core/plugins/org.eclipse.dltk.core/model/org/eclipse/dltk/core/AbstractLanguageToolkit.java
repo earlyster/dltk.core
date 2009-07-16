@@ -1,6 +1,8 @@
 package org.eclipse.dltk.core;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.zip.ZipException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -13,8 +15,11 @@ import org.eclipse.dltk.core.DLTKFeatures.StringFeature;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.internal.core.ZipArchiveFile;
+import org.eclipse.dltk.internal.core.util.Util;
 
 public abstract class AbstractLanguageToolkit implements IDLTKLanguageToolkit {
+
 	public AbstractLanguageToolkit() {
 	}
 
@@ -71,4 +76,14 @@ public abstract class AbstractLanguageToolkit implements IDLTKLanguageToolkit {
 		return feature.getDefaultValue();
 	}
 
+	public Archive getArchive(File localFile) {
+		try {
+			return new ZipArchiveFile(localFile);
+		} catch (ZipException e) {
+			Util.log(e, "Exception while reading zip file"); //$NON-NLS-1$
+		} catch (IOException e) {
+			Util.log(e, "Exception while reading zip file"); //$NON-NLS-1$
+		}
+		return null;
+	}
 }
