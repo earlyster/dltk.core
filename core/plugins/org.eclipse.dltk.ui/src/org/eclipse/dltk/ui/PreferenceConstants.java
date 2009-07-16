@@ -425,6 +425,15 @@ public class PreferenceConstants {
 						255, 0, 0));
 		store.setDefault(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS,
 				true);
+
+		store.setDefault(PreferenceConstants.CODEASSIST_TIMEOUT, 5000); // 5
+																		// seconds
+																		// timeout
+																		// for
+																		// compution
+																		// of
+																		// completion
+																		// proposals
 		store
 				.setDefault(PreferenceConstants.CODEASSIST_CASE_SENSITIVITY,
 						false);
@@ -570,6 +579,11 @@ public class PreferenceConstants {
 	 * 
 	 */
 	public final static String CODEASSIST_AUTOINSERT = "content_assist_autoinsert"; //$NON-NLS-1$
+
+	/**
+	 * @since 2.0
+	 */
+	public final static String CODEASSIST_TIMEOUT = "content_assist_autoinsert"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if the Script code assist adds import

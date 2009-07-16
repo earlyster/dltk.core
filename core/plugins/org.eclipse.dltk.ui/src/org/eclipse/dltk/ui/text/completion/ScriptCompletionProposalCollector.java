@@ -78,7 +78,8 @@ public abstract class ScriptCompletionProposalCollector extends
 
 	private final List fScriptProposals = new ArrayList();
 
-	private final List fRawCompletionProposals = new ArrayList();
+	private final List<CompletionProposal> fRawCompletionProposals = new ArrayList<CompletionProposal>();
+	private final List<CompletionProposal> fUnprosessedCompletionProposals = new ArrayList<CompletionProposal>();
 
 	private final List fKeywords = new ArrayList();
 
@@ -215,16 +216,7 @@ public abstract class ScriptCompletionProposalCollector extends
 			if (isFiltered(proposal))
 				return;
 			fRawCompletionProposals.add(proposal);
-			if (proposal.getKind() == CompletionProposal.POTENTIAL_METHOD_DECLARATION) {
-				acceptPotentialMethodDeclaration(proposal);
-			} else {
-				IScriptCompletionProposal scriptProposal = createScriptCompletionProposal(proposal);
-				if (scriptProposal != null) {
-					fScriptProposals.add(scriptProposal);
-					if (proposal.getKind() == CompletionProposal.KEYWORD)
-						fKeywords.add(scriptProposal);
-				}
-			}
+			fUnprosessedCompletionProposals.add(proposal);
 		} catch (IllegalArgumentException e) {
 			// all signature processing method may throw IAEs
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=84657
@@ -324,8 +316,25 @@ public abstract class ScriptCompletionProposalCollector extends
 	 * @return the unsorted list of received proposals
 	 */
 	public final IScriptCompletionProposal[] getScriptCompletionProposals() {
+		processUnprocessedProposals();
 		return (IScriptCompletionProposal[]) fScriptProposals
 				.toArray(new IScriptCompletionProposal[fScriptProposals.size()]);
+	}
+
+	private void processUnprocessedProposals() {
+		for (CompletionProposal proposal : fUnprosessedCompletionProposals) {
+			if (proposal.getKind() == CompletionProposal.POTENTIAL_METHOD_DECLARATION) {
+				acceptPotentialMethodDeclaration(proposal);
+			} else {
+				IScriptCompletionProposal scriptProposal = createScriptCompletionProposal(proposal);
+				if (scriptProposal != null) {
+					fScriptProposals.add(scriptProposal);
+					if (proposal.getKind() == CompletionProposal.KEYWORD)
+						fKeywords.add(scriptProposal);
+				}
+			}
+		}
+		fUnprosessedCompletionProposals.clear();
 	}
 
 	/**
@@ -334,6 +343,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	 * @return the unsorted list of received keyword proposals
 	 */
 	public final IScriptCompletionProposal[] getKeywordCompletionProposals() {
+		processUnprocessedProposals();
 		return (ScriptCompletionProposal[]) fKeywords
 				.toArray(new ScriptCompletionProposal[fKeywords.size()]);
 	}
@@ -771,5 +781,10 @@ public abstract class ScriptCompletionProposalCollector extends
 	public boolean isContextInformationMode() {
 		return fInvocationContext != null
 				&& fInvocationContext.isContextInformationMode();
+	}
+
+	@Override
+	public void clear() {
+		this.fScriptProposals.clear();
 	}
 }

@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 
 final class ScriptCorePreferenceBlock extends
@@ -110,15 +111,23 @@ final class ScriptCorePreferenceBlock extends
 				| SWT.BORDER, 0, items);
 
 		Group editorGroup = SWTFactory.createGroup(composite,
-				Messages.ScriptCorePreferenceBlock_editOptions, 1, 1,
+				Messages.ScriptCorePreferenceBlock_editOptions, 2, 1,
 				GridData.FILL_HORIZONTAL);
 
 		bindControl(
 				SWTFactory
 						.createCheckButton(
 								editorGroup,
-								PreferencesMessages.EditorPreferencePage_evaluateTemporaryProblems),
+								PreferencesMessages.EditorPreferencePage_evaluateTemporaryProblems,
+								2),
 				PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS);
+		// Connection timeout
+		SWTFactory.createLabel(editorGroup,
+				"Codeassist completion timeout(ms):", 1);
+		final Text connectionTimeout = SWTFactory.createText(editorGroup,
+				SWT.BORDER, 1, ""); //$NON-NLS-1$
+		bindControl(connectionTimeout, PreferenceConstants.CODEASSIST_TIMEOUT,
+				FieldValidators.POSITIVE_NUMBER_VALIDATOR);
 
 		Group uiGroup = SWTFactory.createGroup(composite,
 				Messages.ScriptCorePreferenceBlock_UI_Options, 1, 1,
@@ -190,6 +199,9 @@ final class ScriptCorePreferenceBlock extends
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
 				OverlayPreferenceStore.BOOLEAN,
 				PreferenceConstants.RESOURCE_SHOW_ERROR_INVALID_RESOURCE_NAME));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
+				OverlayPreferenceStore.INT,
+				PreferenceConstants.CODEASSIST_TIMEOUT));
 		return overlayKeys;
 	}
 

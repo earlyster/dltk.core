@@ -206,8 +206,9 @@ public abstract class ScriptCompletionProposalComputer implements
 							+ element.getClass());
 				}
 			}
-
-			sourceModule.codeComplete(offset, collector);
+			int timeout = DLTKUIPlugin.getDefault().getPreferenceStore()
+					.getInt(PreferenceConstants.CODEASSIST_TIMEOUT);
+			sourceModule.codeComplete(offset, collector, timeout);
 		} catch (ModelException e) {
 			handleCodeCompletionException(e, context);
 		}
@@ -232,8 +233,10 @@ public abstract class ScriptCompletionProposalComputer implements
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
+	 * @seeorg.eclipse.jface.text.contentassist.ICompletionProposalComputer#
+	 * computeContextInformation
+	 * (org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext,
+	 * org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	/*
 	 * public List computeContextInformation(ContentAssistInvocationContext
@@ -270,9 +273,12 @@ public abstract class ScriptCompletionProposalComputer implements
 
 		return Collections.EMPTY_LIST;
 	}
-	protected int guessContextInformationPosition(ContentAssistInvocationContext context) {
+
+	protected int guessContextInformationPosition(
+			ContentAssistInvocationContext context) {
 		return context.getInvocationOffset();
 	}
+
 	public List computeContextInformation(
 			ContentAssistInvocationContext context, IProgressMonitor monitor) {//
 
@@ -315,12 +321,14 @@ public abstract class ScriptCompletionProposalComputer implements
 	public void sessionEnded() {
 		fErrorMessage = null;
 	}
-	
+
 	/**
 	 * Creates the template completion processor
 	 * 
-	 * <p>Subclasses may return <code>null</code> if they do not wish to 
-	 * provide template support.</p>
+	 * <p>
+	 * Subclasses may return <code>null</code> if they do not wish to provide
+	 * template support.
+	 * </p>
 	 */
 	protected abstract TemplateCompletionProcessor createTemplateProposalComputer(
 			ScriptContentAssistInvocationContext context);
