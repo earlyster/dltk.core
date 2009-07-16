@@ -317,13 +317,14 @@ public class HandleFactory {
 
 		IPath path = Path.fromPortableString(pathString);
 		IProject[] projects = getAllProjects();
-		// IPath[] enclosingProjectsAndZips = scope.enclosingProjectsAndZips();
+		IPath[] enclosingProjectsAndZips = scope.enclosingProjectsAndZips();
 		for (int i = 0, max = projects.length; i < max; i++) {
 			try {
 				IProject project = projects[i];
-				// if (!checkScope(project, enclosingProjectsAndZips)) {
-				// continue;
-				// }
+				if (!checkScope(project, enclosingProjectsAndZips)) {
+					continue;
+				}
+
 				if (!project.isAccessible()
 						|| !DLTKLanguageManager.hasScriptNature(project))
 					continue;
@@ -346,5 +347,4 @@ public class HandleFactory {
 		}
 		return null;
 	}
-
 }
