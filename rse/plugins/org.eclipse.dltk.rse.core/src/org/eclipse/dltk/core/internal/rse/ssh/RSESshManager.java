@@ -31,16 +31,6 @@ public class RSESshManager {
 			return null;//
 		}
 		for (IConnectorService connector : connectorServices) {
-			try {
-				if (!connector.isConnected()) {
-					connector.connect(new NullProgressMonitor());
-				}
-			} catch (Exception e) {
-				DLTKRSEPlugin.log(e);
-			}
-			if (!connector.isConnected()) {
-				return null;
-			}
 			String hostName = host.getHostName();
 			// Retrive user name
 			String userId = connector.getUserId();
@@ -61,7 +51,19 @@ public class RSESshManager {
 					return connection;
 				}
 			}
+
 			// Try to resolve not persisted password from SSh connector
+			try {
+				if (!connector.isConnected()) {
+					connector.connect(new NullProgressMonitor());
+				}
+			} catch (Exception e) {
+				DLTKRSEPlugin.log(e);
+			}
+			if (!connector.isConnected()) {
+				return null;
+			}
+
 			String name = connector.getClass().getName();
 			if ("org.eclipse.rse.internal.connectorservice.ssh.SshConnectorService"
 					.equals(name)) {
@@ -96,6 +98,13 @@ public class RSESshManager {
 					e.printStackTrace();
 				}
 			}
+			// Try to connect any way
+			connection.connect();
+			if (connection.isConnected()) {
+				return connection;
+			}
+			// Set connection to disabled state for 10 seconds
+			connection.setDisabled(10000);
 		}
 		System.out.println("Failed to create direct ssh connection for:"
 				+ host.toString());
