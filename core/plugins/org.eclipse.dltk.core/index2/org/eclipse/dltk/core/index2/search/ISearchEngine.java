@@ -23,25 +23,27 @@ import org.eclipse.dltk.core.search.IDLTKSearchScope;
  */
 public interface ISearchEngine {
 
-	/**
-	 * Match rule: the pattern name must match exactly the name of search result
-	 */
-	public static final int MR_EXACT = (1 << 0);
+	public enum MatchRule {
+		/** The pattern name must match exactly the name of search result */
+		EXACT,
 
-	/**
-	 * Match rule: the pattern name is a prefix of search results.
-	 */
-	public static final int MR_PREFIX = (1 << 1);
+		/** The pattern name is a prefix of search results */
+		PREFIX,
 
-	/**
-	 * Search for: References
-	 */
-	public static final int SF_REFS = (1 << 0);
+		/** The pattern name contains upper-case letters of the search result */
+		CAMEL_CASE
+	}
 
-	/**
-	 * Search for: Declarations
-	 */
-	public static final int SF_DECLS = (1 << 1);
+	public enum SearchFor {
+		/** Search for references */
+		REFERENCES,
+
+		/** Search for declarations */
+		DECLARATIONS,
+
+		/** Search for declarations as well as references */
+		ALL_OCCURENCES
+	}
 
 	/**
 	 * Search for model elements in index.
@@ -66,8 +68,9 @@ public interface ISearchEngine {
 	 * @param monitor
 	 *            Progress monitor
 	 */
-	public void search(int elementType, String elementName, int flags, int limit,
-			int searchFor, int matchRule, IDLTKSearchScope scope,
-			ISearchRequestor requestor, IProgressMonitor monitor);
+	public void search(int elementType, String elementName, int flags,
+			int limit, SearchFor searchFor, MatchRule matchRule,
+			IDLTKSearchScope scope, ISearchRequestor requestor,
+			IProgressMonitor monitor);
 
 }
