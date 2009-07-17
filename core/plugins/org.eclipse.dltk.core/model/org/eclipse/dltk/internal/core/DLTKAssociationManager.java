@@ -60,21 +60,18 @@ public class DLTKAssociationManager implements IDLTKAssociationManager {
 	 * @param value
 	 */
 	private void initPatterns(String value) {
-		if (value != null) {
-			cachedPatterns = CharOperation.splitOn(
-					DLTKCore.LANGUAGE_FILENAME_ASSOCIATION_SEPARATOR, value
-							.toCharArray());
-			final Set<String> patterns = DLTKLanguageManager
-					.loadFilenameAssociations(this.natureId);
-			if (!patterns.isEmpty()) {
-				cachedPatterns = CharOperation.arrayConcat(cachedPatterns,
-						CharOperation.stringArrayToCharCharArray(patterns
-								.toArray(new String[patterns.size()])));
-			}
+		final Set<String> patterns = DLTKLanguageManager
+				.loadFilenameAssociations(this.natureId);
+		if (value != null && value.length() != 0 || !patterns.isEmpty()) {
+			char[][] patterns1 = value != null && value.length() != 0 ? CharOperation
+					.splitOn(DLTKCore.LANGUAGE_FILENAME_ASSOCIATION_SEPARATOR,
+							value.toCharArray())
+					: null;
+			char[][] patterns2 = !patterns.isEmpty() ? CharOperation
+					.stringArrayToCharCharArray(patterns
+							.toArray(new String[patterns.size()])) : null;
+			cachedPatterns = CharOperation.arrayConcat(patterns1, patterns2);
 		} else {
-			cachedPatterns = null;
-		}
-		if (cachedPatterns == null) {
 			cachedPatterns = CharOperation.NO_CHAR_CHAR;
 		}
 	}
