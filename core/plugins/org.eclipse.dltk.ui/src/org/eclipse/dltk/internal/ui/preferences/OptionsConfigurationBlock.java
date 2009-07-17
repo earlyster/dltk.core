@@ -100,11 +100,15 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	private void testIfOptionsComplete(PreferenceKey[] allKeys) {
-		for (int i = 0; i < allKeys.length; i++) {
-			if (allKeys[i].getStoredValue(fLookupOrder, false, fManager) == null) {
-				DLTKUIPlugin
-						.logErrorMessage("preference option missing: " + allKeys[i] + " (" + this.getClass().getName() + ')'); //$NON-NLS-1$//$NON-NLS-2$
-			}
+		for (PreferenceKey key : allKeys) {
+			validateValuePresenceFor(key);
+		}
+	}
+
+	protected void validateValuePresenceFor(PreferenceKey key) {
+		if (key.getStoredValue(fLookupOrder, false, fManager) == null) {
+			DLTKUIPlugin
+					.logErrorMessage("preference option missing: " + key + " (" + this.getClass().getName() + ')'); //$NON-NLS-1$//$NON-NLS-2$
 		}
 	}
 
