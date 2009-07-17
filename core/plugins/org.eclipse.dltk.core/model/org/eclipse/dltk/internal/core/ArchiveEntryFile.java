@@ -20,8 +20,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.PlatformObject;
-import org.eclipse.dltk.core.Archive;
-import org.eclipse.dltk.core.ArchiveEntry;
+import org.eclipse.dltk.core.IArchive;
+import org.eclipse.dltk.core.IArchiveEntry;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.ModelException;
 
@@ -49,16 +49,16 @@ public class ArchiveEntryFile extends PlatformObject implements IStorage {
 				System.out
 						.println("(" + Thread.currentThread() + ") [JarEntryFile.getContents()] Creating ZipFile on " + this.zipName); //$NON-NLS-1$	//$NON-NLS-2$
 			}
-			Archive zipFile = null;
+			IArchive zipFile = null;
 			try {
 				if (zipResource == null) {
-					zipFile = ModelManager.getModelManager().getZipFile(
+					zipFile = ModelManager.getModelManager().getArchive(
 							new Path(zipName), archiveProjectFragment);
 				} else {
-					zipFile = ModelManager.getModelManager().getZipFile(
+					zipFile = ModelManager.getModelManager().getArchive(
 							zipResource.getLocation(), archiveProjectFragment);
 				}
-				ArchiveEntry zipEntry = zipFile.getArchiveEntry(this.path
+				IArchiveEntry zipEntry = zipFile.getArchiveEntry(this.path
 						.append(this.entryName).toString());
 				if (zipEntry == null) {
 					throw new ModelException(new ModelStatus(
@@ -66,16 +66,28 @@ public class ArchiveEntryFile extends PlatformObject implements IStorage {
 				}
 
 				InputStream inputStream = zipFile.getInputStream(zipEntry);
-
-				byte[] buf = new byte[1024];
-				int len;
-				ByteArrayOutputStream arrayOut = new ByteArrayOutputStream();
-				while ((len = inputStream.read(buf)) > 0) {
-					arrayOut.write(buf, 0, len);
+				final int entrySize = (int) zipEntry.getSize();
+				if (entrySize >= 0) {
+					final byte[] buf = new byte[entrySize];
+					int offset = 0;
+					int len;
+					while (entrySize > offset
+							&& (len = inputStream.read(buf, offset, entrySize
+									- offset)) > 0) {
+						offset += len;
+					}
+					return new ByteArrayInputStream(buf, 0, offset);
+				} else {
+					byte[] buf = new byte[1024];
+					int len;
+					ByteArrayOutputStream arrayOut = new ByteArrayOutputStream();
+					while ((len = inputStream.read(buf)) > 0) {
+						arrayOut.write(buf, 0, len);
+					}
+					return new ByteArrayInputStream(arrayOut.toByteArray());
 				}
-				return new ByteArrayInputStream(arrayOut.toByteArray());
 			} finally {
-				zipFile.close();
+				ModelManager.getModelManager().closeArchive(zipFile);
 			}
 		} catch (IOException e) {
 			throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);
@@ -94,7 +106,6 @@ public class ArchiveEntryFile extends PlatformObject implements IStorage {
 	 */
 	public String getName() {
 		return new Path(this.entryName).lastSegment();
-		// return this.path.lastSegment();
 	}
 
 	/**

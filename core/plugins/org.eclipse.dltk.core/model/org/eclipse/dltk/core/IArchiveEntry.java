@@ -8,22 +8,32 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Enumeration;
-
 /**
  * @since 2.0
  */
-public interface Archive {
+public interface IArchiveEntry {
 
-	public Enumeration<? extends ArchiveEntry> getArchiveEntries();
-
+	/**
+	 * Returns the name of the entry.
+	 * 
+	 * @return the name of the entry
+	 */
 	public String getName();
 
-	public void close() throws IOException;
+	/**
+	 * Returns true if this is a directory entry. (For
+	 * {@link java.util.zip.ZipFile} directory entry is defined to be one whose
+	 * name ends with a '/').
+	 * 
+	 * @return true if this is a directory entry
+	 */
+	public boolean isDirectory();
 
-	public ArchiveEntry getArchiveEntry(String name);
+	/**
+	 * Returns the uncompressed size of the entry data, or -1 if not known.
+	 * 
+	 * @return the uncompressed size of the entry data, or -1 if not known
+	 */
+	public long getSize();
 
-	public InputStream getInputStream(ArchiveEntry entry) throws IOException;
 }

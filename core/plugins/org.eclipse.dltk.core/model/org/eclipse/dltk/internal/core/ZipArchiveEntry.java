@@ -2,9 +2,9 @@ package org.eclipse.dltk.internal.core;
 
 import java.util.zip.ZipEntry;
 
-import org.eclipse.dltk.core.ArchiveEntry;
+import org.eclipse.dltk.core.IArchiveEntry;
 
-public class ZipArchiveEntry implements ArchiveEntry {
+public class ZipArchiveEntry implements IArchiveEntry {
 
 	private ZipEntry zipEntry;
 
@@ -28,4 +28,7 @@ public class ZipArchiveEntry implements ArchiveEntry {
 		return zipEntry.isDirectory();
 	}
 
+	public long getSize() {
+		return zipEntry.getSize();
+	}
 }

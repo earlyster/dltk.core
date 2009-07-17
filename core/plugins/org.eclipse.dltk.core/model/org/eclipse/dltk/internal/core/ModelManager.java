@@ -28,8 +28,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -64,12 +62,12 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.util.HashtableOfObjectToInt;
-import org.eclipse.dltk.core.Archive;
 import org.eclipse.dltk.core.BuildpathContainerInitializer;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IAccessRule;
+import org.eclipse.dltk.core.IArchive;
 import org.eclipse.dltk.core.IBuildpathAttribute;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
@@ -342,7 +340,7 @@ public class ModelManager implements ISaveParticipant {
 	 * A cache of opened zip files per thread. (for a given thread, the object
 	 * value is a HashMap from IPath to java.io.ZipFile)
 	 */
-	private ThreadLocal zipFiles = new ThreadLocal();
+	private ThreadLocal<Map<IPath, IArchive>> zipFiles = new ThreadLocal<Map<IPath, IArchive>>();
 
 	/**
 	 * A cache of resource content.
@@ -2191,12 +2189,12 @@ public class ModelManager implements ISaveParticipant {
 	 * @exception CoreException
 	 *                If unable to create/open the ZipFile
 	 */
-	public Archive getZipFile(IPath path,
+	public IArchive getArchive(IPath path,
 			ArchiveProjectFragment archiveProjectFragment) throws CoreException {
-		HashMap map;
-		Archive zipFile;
-		if ((map = (HashMap) this.zipFiles.get()) != null
-				&& (zipFile = (Archive) map.get(path)) != null) {
+		Map<IPath, IArchive> map;
+		IArchive zipFile;
+		if ((map = this.zipFiles.get()) != null
+				&& (zipFile = map.get(path)) != null) {
 			return zipFile;
 		}
 		File localFile = null;
@@ -2231,7 +2229,7 @@ public class ModelManager implements ISaveParticipant {
 				System.out
 						.println("(" + Thread.currentThread() + ") [ModelManager.getZipFile(IPath)] Creating ZipFile on " + localFile); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			zipFile = getArchive(archiveProjectFragment, localFile);
+			zipFile = openArchive(archiveProjectFragment, localFile);
 
 			if (map != null) {
 				map.put(path, zipFile);
@@ -2243,15 +2241,15 @@ public class ModelManager implements ISaveParticipant {
 		}
 	}
 
-	public Archive getArchive(ArchiveProjectFragment archiveProjectFragment,
-			File localFile) throws ZipException, IOException {
-		Archive zipFile = null;
-		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+	public IArchive openArchive(ArchiveProjectFragment archiveProjectFragment,
+			File localFile) throws IOException {
+		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(archiveProjectFragment);
 		if (toolkit != null) {
-			zipFile = toolkit.getArchive(localFile);
+			return toolkit.openArchive(localFile);
+		} else {
+			return new ZipArchiveFile(localFile);
 		}
-		return zipFile;
 	}
 
 	public IFileCache getFileCache() {
@@ -2264,10 +2262,10 @@ public class ModelManager implements ISaveParticipant {
 	public void cacheZipFiles() {
 		if (this.zipFiles.get() != null)
 			return;
-		this.zipFiles.set(new HashMap());
+		this.zipFiles.set(new HashMap<IPath, IArchive>());
 	}
 
-	public void closeZipFile(Archive zipFile) {
+	public void closeArchive(IArchive zipFile) {
 		if (zipFile == null)
 			return;
 		if (this.zipFiles.get() != null) {
@@ -3068,14 +3066,12 @@ public class ModelManager implements ISaveParticipant {
 	 */
 	public void flushZipFiles() {
 		Thread currentThread = Thread.currentThread();
-		HashMap map = (HashMap) this.zipFiles.get();
+		Map<IPath, IArchive> map = this.zipFiles.get();
 		if (map == null)
 			return;
 		this.zipFiles.set(null);
-		Iterator iterator = map.values().iterator();
-		while (iterator.hasNext()) {
+		for (IArchive zipFile : map.values()) {
 			try {
-				ZipFile zipFile = (ZipFile) iterator.next();
 				if (ModelManager.ZIP_ACCESS_VERBOSE) {
 					System.out
 							.println("(" + currentThread + ") [ModelManager.flushZipFiles()] Closing ZipFile on " + zipFile.getName()); //$NON-NLS-1$//$NON-NLS-2$

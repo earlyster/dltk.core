@@ -20,8 +20,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.core.Archive;
-import org.eclipse.dltk.core.ArchiveEntry;
+import org.eclipse.dltk.core.IArchive;
+import org.eclipse.dltk.core.IArchiveEntry;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
@@ -67,17 +67,17 @@ public class ArchiveProjectFragment extends ProjectFragment {
 		ArrayList vChildren = new ArrayList();
 		final int SCRIPT = 0;
 		final int NON_SCRIPT = 1;
-		Archive archive = null;
+		IArchive archive = null;
 		try {
 			archive = ModelManager.getModelManager()
-					.getZipFile(getPath(), this);
+					.getArchive(getPath(), this);
 			HashtableOfArrayToObject packageFragToTypes = new HashtableOfArrayToObject();
 			// always create the default package
 			packageFragToTypes.put(CharOperation.NO_STRINGS, new ArrayList[] {
 					EMPTY_LIST, EMPTY_LIST });
-			for (Enumeration<? extends ArchiveEntry> e = archive
+			for (Enumeration<? extends IArchiveEntry> e = archive
 					.getArchiveEntries(); e.hasMoreElements();) {
-				ArchiveEntry member = e.nextElement();
+				IArchiveEntry member = e.nextElement();
 				initPackageFragToTypes(packageFragToTypes, member.getName(),
 						member.isDirectory());
 			}
@@ -124,7 +124,7 @@ public class ArchiveProjectFragment extends ProjectFragment {
 				throw (ModelException) e;
 			throw new ModelException(e);
 		} finally {
-			ModelManager.getModelManager().closeZipFile(archive);
+			ModelManager.getModelManager().closeArchive(archive);
 		}
 		// IModelElement[] children = new IModelElement[vChildren.size()];
 		// vChildren.toArray(children);

@@ -8,10 +8,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import org.eclipse.dltk.core.Archive;
-import org.eclipse.dltk.core.ArchiveEntry;
+import org.eclipse.dltk.core.IArchive;
+import org.eclipse.dltk.core.IArchiveEntry;
 
-public class ZipArchiveFile implements Archive {
+public class ZipArchiveFile implements IArchive {
 
 	private ZipFile zipFile;
 	public ZipArchiveFile(File file) throws ZipException, IOException {
@@ -22,26 +22,26 @@ public class ZipArchiveFile implements Archive {
 		zipFile = new ZipFile(zipName);
 	}
 
-	public InputStream getInputStream(ArchiveEntry entry) throws IOException {
+	public InputStream getInputStream(IArchiveEntry entry) throws IOException {
 		ZipArchiveEntry zipArchiveEntry = (ZipArchiveEntry) entry;
 		return zipFile.getInputStream(zipArchiveEntry.getZipEntry());
 	}
 
-	public ArchiveEntry getArchiveEntry(String name) {
+	public IArchiveEntry getArchiveEntry(String name) {
 		return new ZipArchiveEntry(zipFile.getEntry(name));
 	}
 
-	public Enumeration<? extends ArchiveEntry> getArchiveEntries() {
+	public Enumeration<? extends IArchiveEntry> getArchiveEntries() {
 		final Enumeration<? extends ZipEntry> zipEnumeration = zipFile
 				.entries();
 
-		return new Enumeration<ArchiveEntry>() {
+		return new Enumeration<IArchiveEntry>() {
 
 			public boolean hasMoreElements() {
 				return zipEnumeration.hasMoreElements();
 			}
 
-			public ArchiveEntry nextElement() {
+			public IArchiveEntry nextElement() {
 				return new ZipArchiveEntry(zipEnumeration.nextElement());
 			}
 

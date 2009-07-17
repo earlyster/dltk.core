@@ -9,6 +9,7 @@
 package org.eclipse.dltk.core;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
@@ -87,8 +88,9 @@ public interface IDLTKLanguageToolkit {
 	String get(StringFeature feature);
 
 	/**
+	 * @throws IOException
 	 * @since 2.0
 	 */
-	Archive getArchive(File localFile);
+	IArchive openArchive(File localFile) throws IOException;
 
 }
