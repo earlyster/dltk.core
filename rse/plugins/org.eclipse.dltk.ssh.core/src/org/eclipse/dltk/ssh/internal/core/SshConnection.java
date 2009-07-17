@@ -26,7 +26,7 @@ import com.jcraft.jsch.UserInfo;
  * 
  */
 public class SshConnection implements ISshConnection {
-	private long connectionIsDisabled = 0;
+	private long disabledTime = 0;
 
 	private final class LocalUserInfo implements UserInfo {
 		public void showMessage(String arg0) {
@@ -314,7 +314,7 @@ public class SshConnection implements ISshConnection {
 				return connect(trycount - 1);
 			} else {
 				// Lets disable connection for a while.
-				connectionIsDisabled = System.currentTimeMillis() + 1000 * 10; // 10
+				setDisabled(1000 * 10); // 10 seconds
 				// seconds
 			}
 			return false;
@@ -382,7 +382,7 @@ public class SshConnection implements ISshConnection {
 	 * .IPath)
 	 */
 	public ISshFileHandle getHandle(IPath path) throws Exception {
-		if (connectionIsDisabled > System.currentTimeMillis()) {
+		if (isDisabled()) {
 			return null;
 		}
 		GetStatOperation op = new GetStatOperation(path);
@@ -391,6 +391,14 @@ public class SshConnection implements ISshConnection {
 			return new SshFileHandle(this, path, op.getAttrs());
 		}
 		return new SshFileHandle(this, path, null);
+	}
+
+	public boolean isDisabled() {
+		return disabledTime > System.currentTimeMillis();
+	};
+
+	public void setDisabled(int timeout) {
+		disabledTime = System.currentTimeMillis() + timeout;
 	};
 
 	SftpATTRS getAttrs(IPath path) {

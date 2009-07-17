@@ -14,4 +14,6 @@ public interface ISshConnection {
 
 	public boolean connect();
 
+	public void setDisabled(int timeout);
+
 }
