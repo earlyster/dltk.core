@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 
+/**
+ * @since 2.0
+ */
 public interface Archive {
 
 	public Enumeration<? extends ArchiveEntry> getArchiveEntries();

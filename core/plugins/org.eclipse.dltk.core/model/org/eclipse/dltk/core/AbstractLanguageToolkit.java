@@ -76,6 +76,9 @@ public abstract class AbstractLanguageToolkit implements IDLTKLanguageToolkit {
 		return feature.getDefaultValue();
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public Archive getArchive(File localFile) {
 		try {
 			return new ZipArchiveFile(localFile);

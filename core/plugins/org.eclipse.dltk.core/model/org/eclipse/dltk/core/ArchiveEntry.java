@@ -8,6 +8,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
+/**
+ * @since 2.0
+ */
 public interface ArchiveEntry {
 
 	public String getName();
