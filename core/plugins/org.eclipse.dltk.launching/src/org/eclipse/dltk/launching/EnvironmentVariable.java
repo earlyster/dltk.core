@@ -67,6 +67,26 @@ public class EnvironmentVariable {
 					Messages.EnvironmentVariable_variableNameAndValueMustNotBeEmpty,
 					null);
 		}
+		boolean skipUntilQuote1 = false;
+		boolean skipUntilQuote2 = false;
+		for (int i = 0; i < value.length(); i++) {
+			if (value.charAt(i) == '"' && !skipUntilQuote2) {
+				// Skip all until next
+				skipUntilQuote1 = !skipUntilQuote1;
+				continue;
+			}
+			if (value.charAt(i) == '\'' && !skipUntilQuote1) {
+				skipUntilQuote2 = !skipUntilQuote2;
+			}
+		}
+		if (skipUntilQuote1) {
+			return new Status(IStatus.WARNING, DLTKCore.PLUGIN_ID, 0,
+					"Missing closing quote(\") in variable " + name, null);
+		}
+		if (skipUntilQuote2) {
+			return new Status(IStatus.WARNING, DLTKCore.PLUGIN_ID, 0,
+					"Missing closing quote(') in variable " + name, null);
+		}
 		return Status.OK_STATUS;
 	}
 
