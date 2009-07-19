@@ -60,6 +60,7 @@ public class HierarchyResolver {
 	private IType[] findTypes(String pattern, IDLTKSearchScope scope)
 			throws ModelException {
 
+		// First try to use new indexing infrastructure:
 		IType[] types = new ModelAccess().findTypes(pattern,
 				pattern == null ? MatchRule.PREFIX : MatchRule.EXACT, 0, scope,
 				hierarchyBuilder.hierarchy.progressMonitor);
@@ -67,6 +68,7 @@ public class HierarchyResolver {
 			return types;
 		}
 
+		// Use JDT-like index:
 		final List<IType> result = new LinkedList<IType>();
 		final HandleFactory handleFactory = new HandleFactory();
 		TypeNameRequestor typesCollector = new TypeNameRequestor() {
@@ -112,7 +114,6 @@ public class HierarchyResolver {
 		final Map<String, List<String>> superTypeToExtender = new HashMap<String, List<String>>();
 		final String delimiter = getDelimiterReplacementString(focusType);
 
-		HashMap<String, IType[]> cache = new HashMap<String, IType[]>();
 		Map<String, Set<IType>> tmpCache = new HashMap<String, Set<IType>>();
 
 		IType[] types = findTypes(null, hierarchyBuilder.hierarchy.scope);
@@ -140,6 +141,8 @@ public class HierarchyResolver {
 			set.add(type);
 		}
 
+		// Rebuild temporary cache in a useful format:
+		HashMap<String, IType[]> cache = new HashMap<String, IType[]>();
 		Iterator<String> i = tmpCache.keySet().iterator();
 		while (i.hasNext()) {
 			String typeName = i.next();
@@ -148,6 +151,7 @@ public class HierarchyResolver {
 					.toArray(new IType[typeElements.size()]));
 		}
 
+		// Create file hierarchy resolver for filtering non-included elements
 		IFileHierarchyResolver fileHierarchyResolver = createFileHierarchyResolver(focusType);
 		IFileHierarchyInfo hierarchyInfo = null;
 		if (fileHierarchyResolver != null) {
