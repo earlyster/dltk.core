@@ -10,6 +10,7 @@ package org.eclipse.dltk.internal.core.hierarchy;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -22,9 +23,12 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IFileHierarchyInfo;
 import org.eclipse.dltk.core.IFileHierarchyResolver;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
-import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.index2.search.ModelAccess;
+import org.eclipse.dltk.core.index2.search.ISearchEngine.MatchRule;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
+import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.TypeNameRequestor;
@@ -45,23 +49,26 @@ public class HierarchyResolver {
 	public void resolve(boolean computeSubtypes) throws CoreException {
 
 		IType focusType = hierarchyBuilder.getType();
-
 		hierarchyBuilder.hierarchy.initialize(0);
 
 		if (computeSubtypes) {
 			computeSubtypes(focusType);
 		}
-
 		computeSupertypes(focusType);
 	}
 
-	protected void computeSubtypes(IType focusType) throws CoreException {
+	private IType[] findTypes(String pattern, IDLTKSearchScope scope)
+			throws ModelException {
 
-		// Collect all inheritance information:
-		final Map superTypeToExtender = new HashMap();
+		IType[] types = new ModelAccess().findTypes(pattern,
+				pattern == null ? MatchRule.PREFIX : MatchRule.EXACT, 0, scope,
+				hierarchyBuilder.hierarchy.progressMonitor);
+		if (types != null) {
+			return types;
+		}
+
+		final List<IType> result = new LinkedList<IType>();
 		final HandleFactory handleFactory = new HandleFactory();
-		final String delimiter = getDelimiterReplacementString(focusType);
-
 		TypeNameRequestor typesCollector = new TypeNameRequestor() {
 			public void acceptType(int modifiers, char[] packageName,
 					char[] simpleTypeName, char[][] enclosingTypeNames,
@@ -69,13 +76,6 @@ public class HierarchyResolver {
 
 				if (superTypes != null) {
 					for (int i = 0; i < superTypes.length; i++) {
-						final String s = new String(superTypes[i]);
-						List extenders = (List) superTypeToExtender.get(s);
-						if (extenders == null) {
-							extenders = new LinkedList();
-							superTypeToExtender.put(s, extenders);
-						}
-
 						Openable openable = handleFactory.createOpenable(path,
 								hierarchyBuilder.hierarchy.scope);
 						ModelElement parent = openable;
@@ -87,19 +87,66 @@ public class HierarchyResolver {
 						}
 						FakeType type = new FakeType(parent, new String(
 								simpleTypeName), modifiers);
-						extenders.add(new String(type
-								.getTypeQualifiedName(delimiter)));
+						result.add(type);
 					}
 				}
 			}
 		};
-
-		engine.searchAllTypeNames(null, 0, "*".toCharArray(),
-				SearchPattern.R_PATTERN_MATCH,
+		int matchRule = SearchPattern.R_EXACT_MATCH;
+		if (pattern == null) {
+			pattern = "*"; //$NON-NLS-1$
+			matchRule = SearchPattern.R_PATTERN_MATCH;
+		}
+		engine.searchAllTypeNames(null, 0, pattern.toCharArray(), matchRule,
 				IDLTKSearchConstants.DECLARATIONS,
 				hierarchyBuilder.hierarchy.scope, typesCollector,
 				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 				hierarchyBuilder.hierarchy.progressMonitor);
+
+		return (IType[]) result.toArray(new IType[result.size()]);
+	}
+
+	protected void computeSubtypes(IType focusType) throws CoreException {
+
+		// Collect all inheritance information:
+		final Map<String, List<String>> superTypeToExtender = new HashMap<String, List<String>>();
+		final String delimiter = getDelimiterReplacementString(focusType);
+
+		HashMap<String, IType[]> cache = new HashMap<String, IType[]>();
+		Map<String, Set<IType>> tmpCache = new HashMap<String, Set<IType>>();
+
+		IType[] types = findTypes(null, hierarchyBuilder.hierarchy.scope);
+		for (IType type : types) {
+			String[] superTypes = type.getSuperClasses();
+			if (superTypes != null) {
+				for (int i = 0; i < superTypes.length; i++) {
+					String s = new String(superTypes[i]);
+					List<String> extenders = superTypeToExtender.get(s);
+					if (extenders == null) {
+						extenders = new LinkedList<String>();
+						superTypeToExtender.put(s, extenders);
+					}
+					extenders.add(type.getTypeQualifiedName(delimiter));
+				}
+			}
+
+			// Cache this type for further searches
+			String elementName = type.getElementName();
+			Set<IType> set = tmpCache.get(elementName);
+			if (set == null) {
+				set = new HashSet<IType>();
+				tmpCache.put(elementName, set);
+			}
+			set.add(type);
+		}
+
+		Iterator<String> i = tmpCache.keySet().iterator();
+		while (i.hasNext()) {
+			String typeName = i.next();
+			Set<IType> typeElements = tmpCache.get(typeName);
+			cache.put(typeName, (IType[]) typeElements
+					.toArray(new IType[typeElements.size()]));
+		}
 
 		IFileHierarchyResolver fileHierarchyResolver = createFileHierarchyResolver(focusType);
 		IFileHierarchyInfo hierarchyInfo = null;
@@ -109,15 +156,17 @@ public class HierarchyResolver {
 					hierarchyBuilder.hierarchy.progressMonitor);
 		}
 
-		computeSubtypesFor(focusType, superTypeToExtender, new HashMap(),
-				hierarchyInfo, new HashSet(), delimiter);
+		computeSubtypesFor(focusType, superTypeToExtender, cache,
+				hierarchyInfo, new HashSet<IType>(), delimiter);
 	}
 
-	protected void computeSubtypesFor(IType focusType, Map superTypeToExtender,
-			Map subTypesCache, IFileHierarchyInfo hierarchyInfo,
-			Set processedTypes, String delimiter) throws CoreException {
+	protected void computeSubtypesFor(IType focusType,
+			Map<String, List<String>> superTypeToExtender,
+			Map<String, IType[]> subTypesCache,
+			IFileHierarchyInfo hierarchyInfo, Set<IType> processedTypes,
+			String delimiter) throws CoreException {
 
-		List extenders = (List) superTypeToExtender.get(focusType
+		List<String> extenders = superTypeToExtender.get(focusType
 				.getTypeQualifiedName(delimiter));
 		if (extenders != null) {
 			IType[] subTypes = searchTypes((String[]) extenders
@@ -148,12 +197,13 @@ public class HierarchyResolver {
 					hierarchyBuilder.hierarchy.progressMonitor);
 		}
 
-		computeSupertypesFor(focusType, new HashMap(), hierarchyInfo,
-				new HashSet());
+		computeSupertypesFor(focusType, new HashMap<String, IType[]>(),
+				hierarchyInfo, new HashSet<IType>());
 	}
 
-	protected void computeSupertypesFor(IType focusType, Map superTypesCache,
-			IFileHierarchyInfo hierarchyInfo, Set processedTypes)
+	protected void computeSupertypesFor(IType focusType,
+			Map<String, IType[]> superTypesCache,
+			IFileHierarchyInfo hierarchyInfo, Set<IType> processedTypes)
 			throws CoreException {
 
 		processedTypes.add(focusType);
@@ -184,9 +234,10 @@ public class HierarchyResolver {
 		}
 	}
 
-	protected IType[] searchTypes(String[] typeNames, Map cache,
-			IFileHierarchyInfo hierarchyInfo) throws CoreException {
-		List result = new LinkedList();
+	protected IType[] searchTypes(String[] typeNames,
+			Map<String, IType[]> cache, IFileHierarchyInfo hierarchyInfo)
+			throws CoreException {
+		List<IType> result = new LinkedList<IType>();
 		for (int i = 0; i < typeNames.length; i++) {
 			String typeName = typeNames[i];
 			result.addAll(Arrays.asList(searchTypes(typeName, cache,
@@ -200,57 +251,30 @@ public class HierarchyResolver {
 		return searchTypes(type, null, hierarchyInfo);
 	}
 
-	protected IType[] searchTypes(final String typeName, Map cache,
-			final IFileHierarchyInfo hierarchyInfo) throws CoreException {
+	protected IType[] searchTypes(final String typeName,
+			Map<String, IType[]> cache, final IFileHierarchyInfo hierarchyInfo)
+			throws CoreException {
 		if (cache != null && cache.containsKey(typeName)) {
 			return (IType[]) cache.get(typeName);
 		}
 
-		final List result = new LinkedList();
-		final List filteredTypes = new LinkedList();
-		final HandleFactory handleFactory = new HandleFactory();
+		final List<IType> result = new LinkedList<IType>();
+		final List<IType> filteredTypes = new LinkedList<IType>();
 
-		TypeNameRequestor typesCollector = new TypeNameRequestor() {
-
-			public void acceptType(int modifiers, char[] packageName,
-					char[] simpleTypeName, char[][] enclosingTypeNames,
-					char[][] superTypes, String path) {
-
-				Openable openable = handleFactory.createOpenable(path,
-						hierarchyBuilder.hierarchy.scope);
-				ModelElement parent = openable;
-				ISourceModule sourceModule = (ISourceModule) openable;
-
-				if (enclosingTypeNames != null) {
-					for (int j = 0; j < enclosingTypeNames.length; ++j) {
-						parent = new FakeType(parent, new String(
-								enclosingTypeNames[j]));
-					}
-				}
-				FakeType type = new FakeType(parent,
-						new String(simpleTypeName), modifiers);
-
-				String delimiter = getDelimiterReplacementString(type);
-				String qualifiedName = type.getTypeQualifiedName(delimiter);
-				if (!typeName.equalsIgnoreCase(qualifiedName)) {
-					return;
-				}
-
-				if (hierarchyInfo != null
-						&& !hierarchyInfo.exists(sourceModule)) {
-					filteredTypes.add(type);
-					return;
-				}
-				result.add(type);
+		IType[] types = findTypes(typeName, hierarchyBuilder.hierarchy.scope);
+		for (IType type : types) {
+			String delimiter = getDelimiterReplacementString(type);
+			String qualifiedName = type.getTypeQualifiedName(delimiter);
+			if (!typeName.equalsIgnoreCase(qualifiedName)) {
+				continue;
 			}
-		};
 
-		engine.searchAllTypeNames(null, 0, typeName.toCharArray(),
-				SearchPattern.R_PATTERN_MATCH,
-				IDLTKSearchConstants.DECLARATIONS,
-				hierarchyBuilder.hierarchy.scope, typesCollector,
-				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-				hierarchyBuilder.hierarchy.progressMonitor);
+			if (hierarchyInfo != null
+					&& !hierarchyInfo.exists(type.getSourceModule())) {
+				filteredTypes.add(type);
+			}
+			result.add(type);
+		}
 
 		// If all results where filtered that means we could find a path to any
 		// of elements.
@@ -259,14 +283,14 @@ public class HierarchyResolver {
 			result.addAll(filteredTypes);
 		}
 
-		IType[] types = (IType[]) result.toArray(new IType[result.size()]);
+		types = (IType[]) result.toArray(new IType[result.size()]);
 		if (cache != null) {
 			cache.put(typeName, types);
 		}
 		return types;
 	}
 
-	public void resolve(Openable[] openables, HashSet localTypes) {
+	public void resolve(Openable[] openables, HashSet<String> localTypes) {
 		try {
 			resolve(true);
 		} catch (CoreException e) {
