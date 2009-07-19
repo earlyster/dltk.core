@@ -67,7 +67,7 @@ public class ProjectRequest extends AbstractIndexRequest {
 		}
 
 		jobManager.request(new SourceModulesRequest(projectIndexer, project
-				.getPath(), sourceModules, project.getLanguageToolkit()));
+				.getPath(), sourceModules));
 	}
 
 	private void getSourceModules(IProjectFragment fragment,

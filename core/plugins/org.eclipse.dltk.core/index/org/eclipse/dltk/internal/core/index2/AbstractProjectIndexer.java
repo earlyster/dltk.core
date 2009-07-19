@@ -11,19 +11,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.index2;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.PriorityClassDLTKExtensionManager;
 import org.eclipse.dltk.core.index2.IIndexer;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.internal.core.search.processing.JobManager;
@@ -32,32 +29,10 @@ import org.eclipse.osgi.util.NLS;
 
 public class AbstractProjectIndexer implements IProjectIndexer {
 
-	private final static String INDEXER_EXTPOINT = DLTKCore.PLUGIN_ID
-			+ ".index2"; //$NON-NLS-1$
-
-	private static PriorityClassDLTKExtensionManager indexerManager = new PriorityClassDLTKExtensionManager(
-			INDEXER_EXTPOINT);
-
 	private final IndexJobManager jobManager = new IndexJobManager();
 
 	JobManager getJobManager() {
 		return jobManager;
-	}
-
-	IIndexer getIndexer(String natureId) {
-		IIndexer indexer = (IIndexer) indexerManager.getObject(natureId);
-		if (indexer == null) {
-			indexer = (IIndexer) indexerManager.getObject("#");
-		}
-		return indexer;
-	}
-
-	IIndexer getIndexer(IModelElement modelElement) {
-		IIndexer indexer = (IIndexer) indexerManager.getObject(modelElement);
-		if (indexer == null) {
-			indexer = (IIndexer) indexerManager.getObject("#");
-		}
-		return indexer;
 	}
 
 	public void indexLibrary(IScriptProject project, IPath path) {
@@ -115,29 +90,20 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 	}
 
 	public void removeLibrary(IScriptProject project, IPath path) {
-		jobManager.requestIfNotWaiting(new RemoveContainerRequest(this, path,
-				DLTKLanguageManager.getLanguageToolkit(project)));
+		jobManager.requestIfNotWaiting(new RemoveContainerRequest(this, path));
 	}
 
 	public void removeProject(IPath projectPath) {
-
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
-				projectPath.toString());
-		IScriptProject scriptProject = DLTKCore.create(project);
-		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-				.getLanguageToolkit(scriptProject);
-
 		jobManager.requestIfNotWaiting(new RemoveContainerRequest(this,
-				projectPath, toolkit));
+				projectPath));
 	}
 
 	public void removeProjectFragment(IScriptProject project, IPath path) {
-		jobManager.requestIfNotWaiting(new RemoveContainerRequest(this, path,
-				DLTKLanguageManager.getLanguageToolkit(project)));
+		jobManager.requestIfNotWaiting(new RemoveContainerRequest(this, path));
 	}
 
 	public void removeSourceModule(IScriptProject project, String path) {
-		IIndexer indexer = getIndexer(project);
+		IIndexer indexer = IndexerManager.getIndexer();
 		if (indexer == null) {
 			return;
 		}
@@ -163,16 +129,18 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 	}
 
 	void removeSourceModule(ISourceModule sourceModule) {
+
+		IIndexer indexer = IndexerManager.getIndexer();
+		if (indexer == null) {
+			return;
+		}
+
 		IModelElement projectFragment = sourceModule
 				.getAncestor(IModelElement.PROJECT_FRAGMENT);
 		IPath containerPath = projectFragment.getPath();
 		String relativePath = Util.relativePath(sourceModule.getPath(),
 				containerPath.segmentCount());
 
-		IIndexer indexer = getIndexer(projectFragment);
-		if (indexer == null) {
-			return;
-		}
 		indexer.removeDocument(containerPath, relativePath);
 	}
 }

@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IProjectFragment;
@@ -52,8 +51,7 @@ public class ExternalProjectFragmentRequest extends AbstractIndexRequest {
 		final Set<ISourceModule> sourceModules = getExternalSourceModules();
 		JobManager jobManager = projectIndexer.getJobManager();
 		jobManager.request(new SourceModulesRequest(projectIndexer, fragment
-				.getPath(), sourceModules, DLTKLanguageManager
-				.getLanguageToolkit(fragment)));
+				.getPath(), sourceModules));
 	}
 
 	protected IEnvironment getEnvironment() {

@@ -1,0 +1,41 @@
+package org.eclipse.dltk.core.index2;
+
+import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.ISourceModule;
+
+/**
+ * Element resolver restores DLTK model element from index entry.
+ * 
+ * @author michael
+ * 
+ */
+public interface IElementResolver {
+
+	/**
+	 * Resolves model element from the index entry
+	 * 
+	 * @param elementType
+	 *            Element type
+	 * @param flags
+	 *            Element modifiers
+	 * @param offset
+	 *            Element offset
+	 * @param length
+	 *            Element length
+	 * @param nameOffset
+	 *            Element name offset
+	 * @param nameLength
+	 *            Element name length
+	 * @param elementName
+	 *            Element name
+	 * @param metadata
+	 *            Various metadata attached to the element
+	 * @param qualifier
+	 *            Element qualifier (package name + parent, for example)
+	 * @param sourceModule
+	 *            Source module where this element is declared
+	 */
+	public IModelElement resolve(int elementType, int flags, int offset,
+			int length, int nameOffset, int nameLength, String elementName,
+			String metadata, String qualifier, ISourceModule sourceModule);
+}

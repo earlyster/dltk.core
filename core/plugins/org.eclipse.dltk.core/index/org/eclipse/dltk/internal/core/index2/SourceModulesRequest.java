@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.index2.IIndexer;
 
@@ -31,17 +30,14 @@ import org.eclipse.dltk.core.index2.IIndexer;
  */
 public class SourceModulesRequest extends AbstractIndexRequest {
 
-	private final IDLTKLanguageToolkit toolkit;
 	private final IPath containerPath;
 	private final Set<ISourceModule> sourceModules;
 
 	public SourceModulesRequest(AbstractProjectIndexer indexer,
-			IPath containerPath, Set<ISourceModule> sourceModules,
-			IDLTKLanguageToolkit toolkit) {
+			IPath containerPath, Set<ISourceModule> sourceModules) {
 		super(indexer);
 		this.containerPath = containerPath;
 		this.sourceModules = sourceModules;
-		this.toolkit = toolkit;
 	}
 
 	protected String getName() {
@@ -50,7 +46,7 @@ public class SourceModulesRequest extends AbstractIndexRequest {
 
 	protected void run() throws CoreException, IOException {
 
-		IIndexer indexer = projectIndexer.getIndexer(toolkit.getNatureId());
+		IIndexer indexer = IndexerManager.getIndexer();
 		if (indexer == null) {
 			return;
 		}
@@ -58,7 +54,7 @@ public class SourceModulesRequest extends AbstractIndexRequest {
 		Set<String> toRemove = new HashSet<String>();
 		Set<ISourceModule> toReindex = new HashSet<ISourceModule>();
 		analyzeSourceModuleChanges(containerPath, sourceModules, toRemove,
-				toReindex, toolkit);
+				toReindex);
 
 		for (String path : toRemove) {
 			indexer.removeDocument(containerPath, path);

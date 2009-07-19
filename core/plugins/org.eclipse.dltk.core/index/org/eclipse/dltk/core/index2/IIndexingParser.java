@@ -14,7 +14,8 @@ package org.eclipse.dltk.core.index2;
 import org.eclipse.dltk.core.ISourceModule;
 
 /**
- * Parses source module and creates index while parsing
+ * Indexing parser reports to indexer about element declarations and their
+ * references while parsing the script source code.
  * 
  * @author michael
  * 

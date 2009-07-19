@@ -3,10 +3,10 @@
 <schema targetNamespace="org.eclipse.dltk.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.dltk.core" id="index2" name="Abstract Indexing Parser"/>
+         <meta.schema plugin="org.eclipse.dltk.core" id="indexer" name="DLTK Element Indexer"/>
       </appInfo>
       <documentation>
-         This extension point used for providing concrete indexer using abstract indexing infrastructure.
+         This extension point can be used for providing concrete implementation for abstract indexer. Indexer stores script element declarations and references in way that allows very fast access. Index implementation should not be language dependent.
       </documentation>
    </annotation>
 
@@ -18,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence>
-            <element ref="index2"/>
+            <element ref="indexer"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,30 +47,23 @@
       </complexType>
    </element>
 
-   <element name="index2">
+   <element name="indexer">
       <complexType>
-         <attribute name="class" type="string" use="required">
+         <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
                   
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  Indexer implementation class
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.dltk.core.index2.AbstractIndexer:"/>
                </appInfo>
-            </annotation>
-         </attribute>
-         <attribute name="nature" type="string">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="priority" type="string" use="default" value="0">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
             </annotation>
          </attribute>
       </complexType>
@@ -85,6 +78,14 @@
       </documentation>
    </annotation>
 
+   <annotation>
+      <appInfo>
+         <meta.section type="examples"/>
+      </appInfo>
+      <documentation>
+         See org.eclipse.dltk.core.h2 for indexer implementation based on H2 database.
+      </documentation>
+   </annotation>
 
 
 

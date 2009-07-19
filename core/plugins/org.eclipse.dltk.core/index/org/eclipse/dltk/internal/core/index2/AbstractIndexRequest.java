@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -79,10 +78,9 @@ public abstract class AbstractIndexRequest extends AbstractJob {
 	 */
 	public void analyzeSourceModuleChanges(IPath containerPath,
 			Collection<ISourceModule> sourceModules,
-			Collection<String> toRemove, Collection<ISourceModule> toReindex,
-			IDLTKLanguageToolkit toolkit) {
+			Collection<String> toRemove, Collection<ISourceModule> toReindex) {
 
-		IIndexer indexer = projectIndexer.getIndexer(toolkit.getNatureId());
+		IIndexer indexer = IndexerManager.getIndexer();
 		if (indexer == null) {
 			return;
 		}

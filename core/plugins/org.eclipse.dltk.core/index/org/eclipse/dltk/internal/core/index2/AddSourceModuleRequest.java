@@ -14,64 +14,58 @@ package org.eclipse.dltk.internal.core.index2;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.index2.IIndexer;
 
 /**
- * Request for removing container path from the index. All elements related to
- * the container path must be removed as well.
+ * Request to add source module to the index
  * 
  * @author michael
  * 
  */
-public class RemoveContainerRequest extends AbstractIndexRequest {
+public class AddSourceModuleRequest extends AbstractIndexRequest {
 
-	private final IPath containerPath;
-	private final IDLTKLanguageToolkit toolkit;
+	protected final ISourceModule sourceModule;
 
-	public RemoveContainerRequest(AbstractProjectIndexer indexer,
-			IPath containerPath, IDLTKLanguageToolkit toolkit) {
+	public AddSourceModuleRequest(AbstractProjectIndexer indexer,
+			ISourceModule sourceModule) {
 		super(indexer);
-		this.containerPath = containerPath;
-		this.toolkit = toolkit;
+		this.sourceModule = sourceModule;
 	}
 
 	protected String getName() {
-		return containerPath.toString();
+		return sourceModule.getElementName();
 	}
 
 	protected void run() throws CoreException, IOException {
-		IIndexer indexer = projectIndexer.getIndexer(toolkit.getNatureId());
+		IIndexer indexer = IndexerManager.getIndexer();
 		if (indexer == null) {
 			return;
 		}
-		indexer.removeContainer(containerPath);
+		indexer.indexDocument(sourceModule);
+	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result
+				+ ((sourceModule == null) ? 0 : sourceModule.hashCode());
+		return result;
 	}
 
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
 		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		RemoveContainerRequest other = (RemoveContainerRequest) obj;
-		if (containerPath == null) {
-			if (other.containerPath != null)
+		AddSourceModuleRequest other = (AddSourceModuleRequest) obj;
+		if (sourceModule == null) {
+			if (other.sourceModule != null)
 				return false;
-		} else if (!containerPath.equals(other.containerPath))
+		} else if (!sourceModule.equals(other.sourceModule))
 			return false;
 		return true;
-	}
-
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((containerPath == null) ? 0 : containerPath.hashCode());
-		return result;
 	}
 }
