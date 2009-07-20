@@ -52,12 +52,21 @@ public class LazyFileHandle implements IFileHandle {
 		}
 	}
 
+	/**
+	 * Support containers on load are always exists.
+	 */
 	public boolean exists() {
+		IEnvironment environment = EnvironmentManager
+				.getEnvironmentById(this.environment);
+		if (!environment.isReady()) {
+			return true; // Assume if environment are not ready what location
+			// are exists.
+		}
 		initialize();
 		if (handle != null) {
 			return this.handle.exists();
 		}
-		return false;
+		return true;
 	}
 
 	public String getCanonicalPath() {
