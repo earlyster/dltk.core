@@ -11,6 +11,7 @@ package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
@@ -424,7 +425,11 @@ public class ModelElementDelta extends SimpleDelta implements IModelElementDelta
 		addedDelta.movedFromHandle = movedFromElement;
 		insertDeltaTree(movedToElement, addedDelta);
 	}
-	
+
+	protected void addResourceDelta(IResource resource) {
+		addResourceDelta(new ResourceChangeToNonScriptDelta(resource));
+	}
+
 	/**
 	 * Adds the child delta to the collection of affected children.  If the
 	 * child is already in the collection, walk down the hierarchy.

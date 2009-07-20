@@ -8,6 +8,7 @@ public class Messages extends NLS {
 	public static String ModelOperation_operationCancelled;
 	public static String refreshing_external_folders;
 	public static String Openable_completionRequesterCannotBeNull;
+	public static String ProjectRefreshOperation_0;
 	public static String UserLibraryBuildpathContainerInitializer_dltkLanguageToolkitIsNull;
 	static {
 		// initialize resource bundle
