@@ -10,6 +10,7 @@ import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.rse.core.model.IHost;
+import org.eclipse.rse.core.subsystems.IConnectorService;
 import org.eclipse.rse.internal.efs.RSEFileSystem;
 import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
 
@@ -126,4 +127,17 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 		return RSEFileSystem.getURIFor(host.getHostName(), path);
 	}
 
+	/**
+	 * @since 2.0
+	 */
+	public boolean isReady() {
+		IConnectorService[] services = host.getConnectorServices();
+		int connected = 0;
+		for (IConnectorService service : services) {
+			if (service.isConnected()) {
+				connected++;
+			}
+		}
+		return connected == services.length;
+	}
 }
