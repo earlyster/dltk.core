@@ -39,11 +39,9 @@ import org.eclipse.dltk.internal.core.util.HandleFactory;
 public class HierarchyResolver {
 
 	private HierarchyBuilder hierarchyBuilder;
-	private SearchEngine engine;
 
 	public HierarchyResolver(HierarchyBuilder hierarchy) {
 		this.hierarchyBuilder = hierarchy;
-		this.engine = new SearchEngine();
 	}
 
 	public void resolve(boolean computeSubtypes) throws CoreException {
@@ -99,7 +97,10 @@ public class HierarchyResolver {
 			pattern = "*"; //$NON-NLS-1$
 			matchRule = SearchPattern.R_PATTERN_MATCH;
 		}
-		engine.searchAllTypeNames(null, 0, pattern.toCharArray(), matchRule,
+
+		SearchEngine searchEngine = new SearchEngine();
+		searchEngine.searchAllTypeNames(null, 0, pattern.toCharArray(),
+				matchRule,
 				IDLTKSearchConstants.DECLARATIONS,
 				hierarchyBuilder.hierarchy.scope, typesCollector,
 				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,

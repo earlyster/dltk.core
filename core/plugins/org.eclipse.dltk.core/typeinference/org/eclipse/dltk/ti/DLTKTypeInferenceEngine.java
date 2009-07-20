@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ti;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,6 +26,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.index2.search.ModelAccess;
+import org.eclipse.dltk.core.index2.search.ISearchEngine.MatchRule;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -84,14 +87,14 @@ public class DLTKTypeInferenceEngine implements ITypeInferencer {
 	}
 
 	private void searchTypeDeclarations(IScriptProject dltkProject,
-			String patternString, TypeNameMatchRequestor requestor) {
+			String patternString, final Set typeSet) {
 		try {
 			int includeMask = IDLTKSearchScope.SOURCES;
 			includeMask |= (IDLTKSearchScope.APPLICATION_LIBRARIES
 					| IDLTKSearchScope.REFERENCED_PROJECTS | IDLTKSearchScope.SYSTEM_LIBRARIES);
 			IDLTKSearchScope scope = SearchEngine.createSearchScope(
 					dltkProject, includeMask);
-			SearchEngine engine = new SearchEngine();
+
 			String typeName = ""; //$NON-NLS-1$
 			if (patternString.indexOf("::") != -1) { //$NON-NLS-1$
 				typeName = patternString
@@ -99,10 +102,26 @@ public class DLTKTypeInferenceEngine implements ITypeInferencer {
 			} else {
 				typeName = patternString;
 			}
-			engine.searchAllTypeNames(null, 0, typeName.toCharArray(),
-					SearchPattern.R_EXACT_MATCH, IDLTKSearchConstants.TYPE,
-					scope, requestor,
-					IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
+
+			// Search using new indexing infrastructure:
+			IType[] types = new ModelAccess().findTypes(typeName,
+					MatchRule.EXACT, 0, scope, null);
+			if (types != null) {
+				typeSet.addAll(Arrays.asList(types));
+
+			} else {
+				// Fallback to old indexing engine:
+				TypeNameMatchRequestor requestor = new TypeNameMatchRequestor() {
+					public void acceptTypeNameMatch(TypeNameMatch match) {
+						typeSet.add(match.getType());
+					}
+				};
+				SearchEngine engine = new SearchEngine();
+				engine.searchAllTypeNames(null, 0, typeName.toCharArray(),
+						SearchPattern.R_EXACT_MATCH, IDLTKSearchConstants.TYPE,
+						scope, requestor,
+						IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
+			}
 		} catch (CoreException cxcn) {
 			cxcn.printStackTrace();
 		}
@@ -110,19 +129,14 @@ public class DLTKTypeInferenceEngine implements ITypeInferencer {
 
 	private void collectSuperClasses(IScriptProject project, String typeName,
 			Set superClassSet) {
-		final Set iTypeSet = new HashSet();
-		searchTypeDeclarations(project, typeName, new TypeNameMatchRequestor() {
 
-			public void acceptTypeNameMatch(TypeNameMatch match) {
-				iTypeSet.add(match.getType());
-			}
+		Set typeSet = new HashSet();
+		searchTypeDeclarations(project, typeName, typeSet);
 
-		});
-
-		if (iTypeSet.isEmpty() != true) {
+		if (typeSet.isEmpty() != true) {
 			IType itype;
 			String[] superClasses;
-			for (Iterator typeIter = iTypeSet.iterator(); typeIter.hasNext();) {
+			for (Iterator typeIter = typeSet.iterator(); typeIter.hasNext();) {
 				itype = (IType) typeIter.next();
 				if (itype.exists()) {
 					try {
