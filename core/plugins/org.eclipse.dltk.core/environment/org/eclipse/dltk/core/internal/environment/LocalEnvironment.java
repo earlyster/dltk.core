@@ -125,4 +125,11 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
+	public boolean isReady() {
+		return true;
+	}
+
 }

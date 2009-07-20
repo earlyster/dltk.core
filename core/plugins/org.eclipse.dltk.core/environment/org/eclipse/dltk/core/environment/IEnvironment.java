@@ -112,4 +112,9 @@ public interface IEnvironment extends IAdaptable {
 	 */
 	String getCanonicalPath(IPath path);
 
+	/**
+	 * @since 2.0
+	 */
+	boolean isReady();
+
 }
