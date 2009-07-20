@@ -119,7 +119,7 @@ public class BrowserInformationControl implements IInformationControl,
 	private static boolean fgAvailabilityChecked = false;
 
 	/** The control's shell */
-	private Shell fShell;
+	protected Shell fShell;
 	/** The control's browser widget */
 	private Browser fBrowser;
 	/** Tells whether the browser has content */

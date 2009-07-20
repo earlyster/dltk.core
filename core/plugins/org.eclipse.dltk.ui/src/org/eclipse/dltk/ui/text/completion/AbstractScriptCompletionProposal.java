@@ -24,16 +24,16 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.internal.ui.BrowserInformationControl;
+import org.eclipse.dltk.internal.ui.text.hover.CompletionHoverControlCreator;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
+import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -880,14 +880,13 @@ public abstract class AbstractScriptCompletionProposal implements
 
 	public IInformationControlCreator getInformationControlCreator() {
 		if (fCreator == null) {
-			fCreator = new AbstractReusableInformationControlCreator() {
-
-				public IInformationControl doCreateInformationControl(
-						Shell parent) {
-					return new BrowserInformationControl(parent, SWT.NO_TRIM
-							| SWT.TOOL, SWT.NONE, null);
-				}
-			};
+			fCreator = new CompletionHoverControlCreator(
+					new IInformationControlCreator() {
+						public IInformationControl createInformationControl(
+								Shell parent) {
+							return new DefaultInformationControl(parent, true);
+						}
+					}, true);
 		}
 		return fCreator;
 		// return null;
