@@ -118,7 +118,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
 	/* A table from JavaProject to ExternalFolderChange */
 	private HashMap externalFolderChanges = new HashMap();
 
-	public HashMap projectUpdates = new HashMap();
+	public HashMap<IScriptProject, ProjectUpdateInfo> projectUpdates = new HashMap<IScriptProject, ProjectUpdateInfo>();
 
 	public static class ProjectUpdateInfo {
 		ScriptProject project;
@@ -159,7 +159,8 @@ public class DeltaProcessingState implements IResourceChangeListener {
 				IProject[] projectReferences = description
 						.getDynamicReferences();
 
-				HashSet oldReferences = new HashSet(projectReferences.length);
+				HashSet<String> oldReferences = new HashSet<String>(
+						projectReferences.length);
 				for (int i = 0; i < projectReferences.length; i++) {
 					String projectName = projectReferences[i].getName();
 					oldReferences.add(projectName);
@@ -220,7 +221,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
 	 * Workaround for bug 15168 circular errors not reported This is a cache of
 	 * the projects before any project addition/deletion has started.
 	 */
-	private HashSet scriptProjectNamesCache;
+	private HashSet<String> scriptProjectNamesCache;
 
 	/*
 	 * Need to clone defensively the listener information, in case some listener
@@ -624,9 +625,9 @@ public class DeltaProcessingState implements IResourceChangeListener {
 	 * Workaround for bug 15168 circular errors not reported Returns the list
 	 * ofscriptprojects before resource delta processing has started.
 	 */
-	public synchronized HashSet getOldScriptProjectNames() {
+	public synchronized HashSet<String> getOldScriptProjectNames() {
 		if (this.scriptProjectNamesCache == null) {
-			HashSet result = new HashSet();
+			HashSet<String> result = new HashSet<String>();
 			IScriptProject[] projects;
 			try {
 				projects = ModelManager.getModelManager().getModel()
@@ -659,11 +660,11 @@ public class DeltaProcessingState implements IResourceChangeListener {
 
 	public void saveExternalLibTimeStamps() throws CoreException {
 		if (this.externalTimeStamps != null) {
-		this.externalTimeStamps.save();
+			this.externalTimeStamps.save();
 		}
 		if (this.customTimeStamps != null) {
-		this.customTimeStamps.save();
-	}
+			this.customTimeStamps.save();
+		}
 	}
 
 	/*
@@ -736,9 +737,13 @@ public class DeltaProcessingState implements IResourceChangeListener {
 			boolean canChangeResources) throws ModelException {
 		ProjectUpdateInfo info;
 		synchronized (this) {
-			info = (ProjectUpdateInfo) (canChangeResources ? this.projectUpdates
-					.remove(project) /* remove possibly awaiting one */
-					: this.projectUpdates.get(project));
+			info = (canChangeResources ? this.projectUpdates.remove(project) /*
+																			 * remove
+																			 * possibly
+																			 * awaiting
+																			 * one
+																			 */
+			: this.projectUpdates.get(project));
 			if (info == null) {
 				info = new ProjectUpdateInfo();
 				info.project = project;

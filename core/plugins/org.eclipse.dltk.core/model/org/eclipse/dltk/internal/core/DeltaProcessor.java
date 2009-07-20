@@ -232,7 +232,7 @@ public class DeltaProcessor {
 	 * A list of IModelElement used as a scope for external archives refresh
 	 * during POST_CHANGE. This is null if no refresh is needed.
 	 */
-	private HashSet refreshedElements;
+	private HashSet<IModelElement> refreshedElements;
 
 	/*
 	 * A table from IScriptProject to an array of IProjectFragment. This table
@@ -293,7 +293,7 @@ public class DeltaProcessor {
 	 */
 	public void addForRefresh(IModelElement element) {
 		if (this.refreshedElements == null) {
-			this.refreshedElements = new HashSet();
+			this.refreshedElements = new HashSet<IModelElement>();
 		}
 		this.refreshedElements.add(element);
 	}
@@ -336,9 +336,9 @@ public class DeltaProcessor {
 			}
 			boolean hasDelta = false;
 			if (this.refreshedElements != null) {
-				Set refreshedElementsCopy = null;
+				Set<IModelElement> refreshedElementsCopy = null;
 				if (refreshedElements != null) {
-					refreshedElementsCopy = new HashSet();
+					refreshedElementsCopy = new HashSet<IModelElement>();
 					refreshedElementsCopy.addAll(refreshedElements);
 					// To avoid concurrent modifications
 					this.refreshedElements = null;
@@ -1959,9 +1959,9 @@ public class DeltaProcessor {
 						this.checkProjectsBeingAddedOrRemoved(delta);
 						// generate external archive change deltas
 						if (this.refreshedElements != null) {
-							Set refreshedElementsCopy = null;
+							Set<IModelElement> refreshedElementsCopy = null;
 							if (refreshedElements != null) {
-								refreshedElementsCopy = new HashSet();
+								refreshedElementsCopy = new HashSet<IModelElement>();
 								refreshedElementsCopy.addAll(refreshedElements);
 								// To avoid concurrent modifications
 								this.refreshedElements = null;
@@ -2062,7 +2062,7 @@ public class DeltaProcessor {
 		}
 		boolean hasDelta = false;
 
-		HashSet fragmentsToRefresh = new HashSet();
+		HashSet<IProjectFragment> fragmentsToRefresh = new HashSet<IProjectFragment>();
 		Iterator iterator = refreshedElements.iterator();
 		while (iterator.hasNext()) {
 			IModelElement element = (IModelElement) iterator.next();
@@ -2072,7 +2072,7 @@ public class DeltaProcessor {
 				try {
 					if (fragment.isExternal()
 							&& fragment.getRawBuildpathEntry() == null) {
-						fragmentsToRefresh.add(element);
+						fragmentsToRefresh.add(fragment);
 					}
 				} catch (ModelException e1) {
 					if (DLTKCore.DEBUG) {
