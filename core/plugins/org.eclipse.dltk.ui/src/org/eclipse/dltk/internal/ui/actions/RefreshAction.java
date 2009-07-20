@@ -12,8 +12,10 @@ package org.eclipse.dltk.internal.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -25,9 +27,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.internal.core.ProjectRefreshOperation;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.corext.util.Resources;
 import org.eclipse.dltk.ui.DLTKPluginImages;
@@ -112,24 +116,29 @@ public class RefreshAction extends SelectionDispatchAction {
 		final IResource[] resources = getResources(selection);
 		IWorkspaceRunnable operation = new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
-				monitor.beginTask(ActionMessages.RefreshAction_progressMessage,
+				SubMonitor progess = SubMonitor.convert(monitor,
+						ActionMessages.RefreshAction_progressMessage,
 						resources.length * 2);
-				monitor.subTask(""); //$NON-NLS-1$
 				List<IModelElement> modelElements = new ArrayList<IModelElement>(
 						5);
+				Set<IProject> affectedProjects = new HashSet<IProject>();
 				for (int r = 0; r < resources.length; r++) {
 					IResource resource = resources[r];
 					if (resource.getType() == IResource.PROJECT) {
 						checkLocationDeleted((IProject) resource);
+						affectedProjects.add((IProject) resource);
 					} else if (resource.getType() == IResource.ROOT) {
 						IProject[] projects = ((IWorkspaceRoot) resource)
 								.getProjects();
 						for (int p = 0; p < projects.length; p++) {
 							checkLocationDeleted(projects[p]);
+							affectedProjects.add(projects[p]);
 						}
+					} else {
+						affectedProjects.add(resource.getProject());
 					}
-					resource.refreshLocal(IResource.DEPTH_INFINITE,
-							new SubProgressMonitor(monitor, 1));
+					resource.refreshLocal(IResource.DEPTH_INFINITE, progess
+							.newChild(1));
 					IModelElement jElement = DLTKCore.create(resource);
 					if (jElement != null && jElement.exists())
 						modelElements.add(jElement);
@@ -144,6 +153,23 @@ public class RefreshAction extends SelectionDispatchAction {
 				// (IModelElement[]) modelElements.toArray(new
 				// IModelElement[modelElements.size()]),
 				// new SubProgressMonitor(monitor, resources.length));
+				for (Iterator<IProject> i = affectedProjects.iterator(); i
+						.hasNext();) {
+					if (!i.next().exists()) {
+						i.remove();
+					}
+				}
+				if (!affectedProjects.isEmpty()) {
+					final IScriptProject[] scriptProjects = new IScriptProject[affectedProjects
+							.size()];
+					int index = 0;
+					for (IProject project : affectedProjects) {
+						scriptProjects[index++] = DLTKCore.create(project);
+					}
+					final ProjectRefreshOperation modelRefresh = new ProjectRefreshOperation(
+							scriptProjects);
+					modelRefresh.run(progess.newChild(resources.length));
+				}
 			}
 		};
 
