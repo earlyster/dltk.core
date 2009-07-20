@@ -14,7 +14,8 @@ package org.eclipse.dltk.internal.core.index2;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.core.index2.IIndexer;
 
 /**
  * Request for removing source module from the index. All elements related to
@@ -23,29 +24,37 @@ import org.eclipse.dltk.core.ISourceModule;
  * @author michael
  * 
  */
-public abstract class RemoveSourceModuleRequest extends AbstractIndexRequest {
+public class RemoveSourceModuleRequest extends AbstractIndexRequest {
 
-	private final ISourceModule sourceModule;
+	private final IPath containerPath;
+	private final String relativePath;
 
 	public RemoveSourceModuleRequest(AbstractProjectIndexer indexer,
-			ISourceModule sourceModule) {
+			IPath containerPath, String relativePath) {
 		super(indexer);
-		this.sourceModule = sourceModule;
+		this.containerPath = containerPath;
+		this.relativePath = relativePath;
 	}
 
 	protected String getName() {
-		return sourceModule.getElementName();
+		return containerPath.append(relativePath).toString();
 	}
 
 	protected void run() throws CoreException, IOException {
-		projectIndexer.removeSourceModule(sourceModule);
+		IIndexer indexer = IndexerManager.getIndexer();
+		if (indexer == null) {
+			return;
+		}
+		indexer.removeDocument(containerPath, relativePath);
 	}
 
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result
-				+ ((sourceModule == null) ? 0 : sourceModule.hashCode());
+				+ ((containerPath == null) ? 0 : containerPath.hashCode());
+		result = prime * result
+				+ ((relativePath == null) ? 0 : relativePath.hashCode());
 		return result;
 	}
 
@@ -57,10 +66,15 @@ public abstract class RemoveSourceModuleRequest extends AbstractIndexRequest {
 		if (getClass() != obj.getClass())
 			return false;
 		RemoveSourceModuleRequest other = (RemoveSourceModuleRequest) obj;
-		if (sourceModule == null) {
-			if (other.sourceModule != null)
+		if (containerPath == null) {
+			if (other.containerPath != null)
 				return false;
-		} else if (!sourceModule.equals(other.sourceModule))
+		} else if (!containerPath.equals(other.containerPath))
+			return false;
+		if (relativePath == null) {
+			if (other.relativePath != null)
+				return false;
+		} else if (!relativePath.equals(other.relativePath))
 			return false;
 		return true;
 	}

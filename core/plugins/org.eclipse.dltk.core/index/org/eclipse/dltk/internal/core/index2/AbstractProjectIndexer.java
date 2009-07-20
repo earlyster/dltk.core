@@ -16,15 +16,12 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.index2.IIndexer;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.internal.core.search.processing.JobManager;
-import org.eclipse.dltk.internal.core.util.Util;
 import org.eclipse.osgi.util.NLS;
 
 public class AbstractProjectIndexer implements IProjectIndexer {
@@ -103,11 +100,8 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 	}
 
 	public void removeSourceModule(IScriptProject project, String path) {
-		IIndexer indexer = IndexerManager.getIndexer();
-		if (indexer == null) {
-			return;
-		}
-		indexer.removeDocument(project.getPath(), path);
+		jobManager.request(new RemoveSourceModuleRequest(this, project
+				.getPath(), path));
 	}
 
 	public void startIndexing() {
@@ -126,21 +120,5 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 			DLTKCore
 					.error("An exception is thrown while indexing workspace", e);
 		}
-	}
-
-	void removeSourceModule(ISourceModule sourceModule) {
-
-		IIndexer indexer = IndexerManager.getIndexer();
-		if (indexer == null) {
-			return;
-		}
-
-		IModelElement projectFragment = sourceModule
-				.getAncestor(IModelElement.PROJECT_FRAGMENT);
-		IPath containerPath = projectFragment.getPath();
-		String relativePath = Util.relativePath(sourceModule.getPath(),
-				containerPath.segmentCount());
-
-		indexer.removeDocument(containerPath, relativePath);
 	}
 }

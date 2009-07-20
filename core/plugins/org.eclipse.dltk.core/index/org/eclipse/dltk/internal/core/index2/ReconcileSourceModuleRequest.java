@@ -14,7 +14,11 @@ package org.eclipse.dltk.internal.core.index2;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.index2.IIndexer;
+import org.eclipse.dltk.internal.core.util.Util;
 
 /**
  * Request for reconciling source module. Obsolete source module is removed
@@ -31,7 +35,18 @@ public class ReconcileSourceModuleRequest extends AddSourceModuleRequest {
 	}
 
 	protected void run() throws CoreException, IOException {
-		projectIndexer.removeSourceModule(sourceModule);
+		IIndexer indexer = IndexerManager.getIndexer();
+		if (indexer == null) {
+			return;
+		}
+		IModelElement projectFragment = sourceModule
+				.getAncestor(IModelElement.PROJECT_FRAGMENT);
+		IPath containerPath = projectFragment.getPath();
+		String relativePath = Util.relativePath(sourceModule.getPath(),
+				containerPath.segmentCount());
+		indexer.removeDocument(containerPath, relativePath);
+
+		// Now index from scratch:
 		super.run();
 	}
 
