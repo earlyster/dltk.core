@@ -1712,7 +1712,7 @@ public class DeltaProcessor {
 				((ProjectElementInfo) info).setForeignResources(null);
 				// if a package fragment root is the project, clear it too
 				ScriptProject project = (ScriptProject) element;
-				IProjectFragment projectRoot = (IProjectFragment) project
+				IProjectFragment projectRoot = project
 						.getProjectFragment(project.getProject());
 				if (projectRoot.isOpen()) {
 					((ProjectFragmentInfo) ((Openable) projectRoot)
