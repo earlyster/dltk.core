@@ -37,6 +37,9 @@ public class RSESshManager {
 			String location = userId + "@" + host.getHostName();
 			ISshConnection connection = SshConnectionManager
 					.getConnection(location);
+			if (connection.isDisabled()) {
+				return null;
+			}
 			if (connection.isConnected()) {
 				return connection;
 			}
@@ -61,6 +64,8 @@ public class RSESshManager {
 				DLTKRSEPlugin.log(e);
 			}
 			if (!connector.isConnected()) {
+				// Set connection as disabled for ten minutes
+				connection.setDisabled(1000 * 60 * 10);
 				return null;
 			}
 
@@ -106,8 +111,8 @@ public class RSESshManager {
 			// Set connection to disabled state for 10 seconds
 			connection.setDisabled(10000);
 		}
-		System.out.println("Failed to create direct ssh connection for:"
-				+ host.toString());
+//		System.out.println("Failed to create direct ssh connection for:"
+//				+ host.toString());
 		return null;
 	}
 }
