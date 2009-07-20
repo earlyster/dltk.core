@@ -709,7 +709,8 @@ public abstract class ModelOperation implements IWorkspaceRunnable, IProgressMon
 				// update Model using deltas that were recorded during this
 				// operation
 				for (int i = previousDeltaCount, size = deltaProcessor.modelDeltas.size(); i < size; i++) {
-					deltaProcessor.updateModel((IModelElementDelta) deltaProcessor.modelDeltas.get(i));
+					deltaProcessor.updateModel(deltaProcessor.modelDeltas
+							.get(i));
 				}
 				// close the parents of the created elements and reset their
 				// project's cache (in case we are in an

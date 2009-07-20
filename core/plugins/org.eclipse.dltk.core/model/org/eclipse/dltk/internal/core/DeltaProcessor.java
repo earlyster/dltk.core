@@ -212,7 +212,7 @@ public class DeltaProcessor {
 	 * Queue of deltas created explicily by the script Model that have yet to be
 	 * fired.
 	 */
-	public ArrayList modelDeltas = new ArrayList();
+	public ArrayList<IModelElementDelta> modelDeltas = new ArrayList<IModelElementDelta>();
 	/*
 	 * Queue of reconcile deltas on working copies that have yet to be fired.
 	 * This is a table form IWorkingCopy to IModelElementDelta
@@ -248,7 +248,7 @@ public class DeltaProcessor {
 	/* A set of IDylanProject whose package fragment roots need to be refreshed */
 	private HashSet rootsToRefresh = new HashSet();
 	/** {@link Runnable}s that should be called after model is updated */
-	private final ArrayList postActions = new ArrayList();
+	private final ArrayList<Runnable> postActions = new ArrayList<Runnable>();
 	/*
 	 * Type of event that should be processed no matter what the real event type
 	 * is.
@@ -1405,7 +1405,7 @@ public class DeltaProcessor {
 	 * Flushes all deltas without firing them.
 	 */
 	public void flush() {
-		this.modelDeltas = new ArrayList();
+		this.modelDeltas = new ArrayList<IModelElementDelta>();
 	}
 
 	/*
@@ -1857,8 +1857,8 @@ public class DeltaProcessor {
 		if (postActions.size() == 0) {
 			return;
 		}
-		for (Iterator i = postActions.iterator(); i.hasNext();) {
-			((Runnable) i.next()).run();
+		for (Iterator<Runnable> i = postActions.iterator(); i.hasNext();) {
+			i.next().run();
 		}
 	}
 
@@ -2958,8 +2958,7 @@ public class DeltaProcessor {
 	public void updateModel(IModelElementDelta customDelta) {
 		if (customDelta == null) {
 			for (int i = 0, length = this.modelDeltas.size(); i < length; i++) {
-				IModelElementDelta delta = (IModelElementDelta) this.modelDeltas
-						.get(i);
+				IModelElementDelta delta = this.modelDeltas.get(i);
 				this.modelUpdater.processDelta(delta);
 			}
 		} else {
