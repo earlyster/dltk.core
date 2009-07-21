@@ -153,6 +153,15 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 		if (isConnected()) {
 			return true;
 		}
+		// TODO: Add synchronize section only if we are not calling from UI
+		// thread. Need to create UI adapter service to do it.
+		// synchronized (this.host) {
+		connectUnsafe();
+		// }
+		return isConnected();
+	}
+
+	private void connectUnsafe() {
 		boolean tryToConnect = isTryToConnect();
 		if (tryToConnect) {
 			IConnectorService[] services = host.getConnectorServices();
@@ -169,7 +178,6 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 			}
 			setTryToConnect(false);
 		}
-		return isConnected();
 	}
 
 	/**
