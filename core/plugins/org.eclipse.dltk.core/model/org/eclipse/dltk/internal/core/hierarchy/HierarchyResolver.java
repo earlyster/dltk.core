@@ -60,9 +60,8 @@ public class HierarchyResolver {
 
 		// First try to use new indexing infrastructure:
 		IType[] types = new ModelAccess().findTypes(pattern,
-				pattern == null ? MatchRule.PREFIX : MatchRule.EXACT, null,
-				scope,
-				hierarchyBuilder.hierarchy.progressMonitor);
+				pattern == null ? MatchRule.PREFIX : MatchRule.EXACT, 0, 0,
+				scope, hierarchyBuilder.hierarchy.progressMonitor);
 		if (types != null) {
 			return types;
 		}
@@ -101,8 +100,7 @@ public class HierarchyResolver {
 
 		SearchEngine searchEngine = new SearchEngine();
 		searchEngine.searchAllTypeNames(null, 0, pattern.toCharArray(),
-				matchRule,
-				IDLTKSearchConstants.DECLARATIONS,
+				matchRule, IDLTKSearchConstants.DECLARATIONS,
 				hierarchyBuilder.hierarchy.scope, typesCollector,
 				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 				hierarchyBuilder.hierarchy.progressMonitor);

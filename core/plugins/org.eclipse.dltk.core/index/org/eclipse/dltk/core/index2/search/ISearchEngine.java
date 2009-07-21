@@ -53,11 +53,13 @@ public interface ISearchEngine {
 	 *            {@link IModelElement#METHOD},{@link IModelElement#FIELD},etc.)
 	 * @param elementName
 	 *            Element name pattern
-	 * @param flags
-	 *            Array representing flags to match the results against (
-	 *            <code>null</code> - disable flag filtering). The filtering is
-	 *            done in this way:
-	 *            <code>if ((result.flags & flags[0]) != null && (result.flags & flags[1]) != null && ...)</code>
+	 * @param trueFlags
+	 *            Logical OR of flags that must exist in element flags bitset.
+	 *            Set to <code>0</code> to disable filtering by trueFlags.
+	 * @param falseFlags
+	 *            Logical OR of flags that must not exist in the element flags
+	 *            bitset. Set to <code>0</code> to disable filtering by
+	 *            falseFlags.
 	 * @param limit
 	 *            Limit number of results (<code>0</code> - unlimited)
 	 * @param searchFor
@@ -71,9 +73,9 @@ public interface ISearchEngine {
 	 * @param monitor
 	 *            Progress monitor
 	 */
-	public void search(int elementType, String elementName, int[] flags,
-			int limit, SearchFor searchFor, MatchRule matchRule,
-			IDLTKSearchScope scope, ISearchRequestor requestor,
-			IProgressMonitor monitor);
+	public void search(int elementType, String elementName, int trueFlags,
+			int falseFlags, int limit, SearchFor searchFor,
+			MatchRule matchRule, IDLTKSearchScope scope,
+			ISearchRequestor requestor, IProgressMonitor monitor);
 
 }

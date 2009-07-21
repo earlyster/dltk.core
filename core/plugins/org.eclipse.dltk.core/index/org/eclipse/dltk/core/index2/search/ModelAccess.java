@@ -43,23 +43,25 @@ public class ModelAccess {
 	 *            Element name
 	 * @param matchRule
 	 *            Match rule
-	 * @param flags
-	 *            Array representing flags to match the results against (
-	 *            <code>null</code> - disable flag filtering). The filtering is
-	 *            done in this way:
-	 *            <code>if ((result.flags & flags[0]) != null && (result.flags & flags[1]) != null && ...)</code>
+	 * @param trueFlags
+	 *            Logical OR of flags that must exist in element flags bitset.
+	 *            Set to <code>0</code> to disable filtering by trueFlags.
+	 * @param falseFlags
+	 *            Logical OR of flags that must not exist in the element flags
+	 *            bitset. Set to <code>0</code> to disable filtering by
+	 *            falseFlags.
 	 * @param scope
 	 *            Search scope
 	 * @param monitor
 	 *            Progress monitor
 	 * @return elements array, or <code>null</code> in case error has occurred.
 	 */
-	public IField[] findFields(String name, MatchRule matchRule, int[] flags,
-			IDLTKSearchScope scope, IProgressMonitor monitor) {
+	public IField[] findFields(String name, MatchRule matchRule, int trueFlags,
+			int falseFlags, IDLTKSearchScope scope, IProgressMonitor monitor) {
 
 		List<IField> result = new LinkedList<IField>();
-		if (!findElements(IModelElement.FIELD, name, matchRule, flags, scope,
-				result, monitor)) {
+		if (!findElements(IModelElement.FIELD, name, matchRule, trueFlags,
+				falseFlags, scope, result, monitor)) {
 			return null;
 		}
 		return (IField[]) result.toArray(new IField[result.size()]);
@@ -72,23 +74,26 @@ public class ModelAccess {
 	 *            Element name
 	 * @param matchRule
 	 *            Match rule
-	 * @param flags
-	 *            Array representing flags to match the results against (
-	 *            <code>null</code> - disable flag filtering). The filtering is
-	 *            done in this way:
-	 *            <code>if ((result.flags & flags[0]) != null && (result.flags & flags[1]) != null && ...)</code>
+	 * @param trueFlags
+	 *            Logical OR of flags that must exist in element flags bitset.
+	 *            Set to <code>0</code> to disable filtering by trueFlags.
+	 * @param falseFlags
+	 *            Logical OR of flags that must not exist in the element flags
+	 *            bitset. Set to <code>0</code> to disable filtering by
+	 *            falseFlags.
 	 * @param scope
 	 *            Search scope
 	 * @param monitor
 	 *            Progress monitor
 	 * @return elements array, or <code>null</code> in case error has occurred.
 	 */
-	public IMethod[] findMethods(String name, MatchRule matchRule, int[] flags,
-			IDLTKSearchScope scope, IProgressMonitor monitor) {
+	public IMethod[] findMethods(String name, MatchRule matchRule,
+			int trueFlags, int falseFlags, IDLTKSearchScope scope,
+			IProgressMonitor monitor) {
 
 		List<IMethod> result = new LinkedList<IMethod>();
-		if (!findElements(IModelElement.METHOD, name, matchRule, flags, scope,
-				result, monitor)) {
+		if (!findElements(IModelElement.METHOD, name, matchRule, trueFlags,
+				falseFlags, scope, result, monitor)) {
 			return null;
 		}
 		return (IMethod[]) result.toArray(new IMethod[result.size()]);
@@ -101,30 +106,32 @@ public class ModelAccess {
 	 *            Element name
 	 * @param matchRule
 	 *            Match rule
-	 * @param flags
-	 *            Array representing flags to match the results against (
-	 *            <code>null</code> - disable flag filtering). The filtering is
-	 *            done in this way:
-	 *            <code>if ((result.flags & flags[0]) != null && (result.flags & flags[1]) != null && ...)</code>
+	 * @param trueFlags
+	 *            Logical OR of flags that must exist in element flags bitset.
+	 *            Set to <code>0</code> to disable filtering by trueFlags.
+	 * @param falseFlags
+	 *            Logical OR of flags that must not exist in the element flags
+	 *            bitset. Set to <code>0</code> to disable filtering by
+	 *            falseFlags.
 	 * @param scope
 	 *            Search scope
 	 * @param monitor
 	 *            Progress monitor
 	 * @return elements array, or <code>null</code> in case error has occurred.
 	 */
-	public IType[] findTypes(String name, MatchRule matchRule, int[] flags,
-			IDLTKSearchScope scope, IProgressMonitor monitor) {
+	public IType[] findTypes(String name, MatchRule matchRule, int trueFlags,
+			int falseFlags, IDLTKSearchScope scope, IProgressMonitor monitor) {
 
 		List<IType> result = new LinkedList<IType>();
-		if (!findElements(IModelElement.TYPE, name, matchRule, flags, scope,
-				result, monitor)) {
+		if (!findElements(IModelElement.TYPE, name, matchRule, trueFlags,
+				falseFlags, scope, result, monitor)) {
 			return null;
 		}
 		return (IType[]) result.toArray(new IType[result.size()]);
 	}
 
 	protected <T extends IModelElement> boolean findElements(int elementType,
-			String name, MatchRule matchRule, int[] flags,
+			String name, MatchRule matchRule, int trueFlags, int falseFlags,
 			IDLTKSearchScope scope, final Collection<T> result,
 			IProgressMonitor monitor) {
 
@@ -138,7 +145,7 @@ public class ModelAccess {
 
 		ISearchEngine searchEngine = indexer.createSearchEngine();
 
-		searchEngine.search(elementType, name, flags, 0,
+		searchEngine.search(elementType, name, trueFlags, falseFlags, 0,
 				SearchFor.DECLARATIONS, matchRule, scope,
 				new ISearchRequestor() {
 

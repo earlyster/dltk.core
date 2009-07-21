@@ -105,7 +105,7 @@ public class DLTKTypeInferenceEngine implements ITypeInferencer {
 
 			// Search using new indexing infrastructure:
 			IType[] types = new ModelAccess().findTypes(typeName,
-					MatchRule.EXACT, null, scope, null);
+					MatchRule.EXACT, 0, 0, scope, null);
 			if (types != null) {
 				typeSet.addAll(Arrays.asList(types));
 
