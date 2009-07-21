@@ -149,7 +149,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	/**
 	 * @since 2.0
 	 */
-	public boolean ensureConnection() {
+	public boolean connect() {
 		if (isConnected()) {
 			return true;
 		}

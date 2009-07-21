@@ -93,7 +93,7 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public boolean exists() {
-		if (!environment.ensureConnection()) {
+		if (!environment.connect()) {
 			return false;
 		}
 		fetchSshFile();
@@ -116,7 +116,7 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public IFileHandle getChild(final String childname) {
-		if (!environment.ensureConnection()) {
+		if (!environment.connect()) {
 			URI childURI;
 			try {
 				childURI = new URI(toURI().toString() + "/" + childname);
@@ -135,7 +135,7 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public IFileHandle[] getChildren() {
-		if (!environment.ensureConnection()) {
+		if (!environment.connect()) {
 			return new IFileHandle[0];
 		}
 		fetchSshFile();
@@ -192,7 +192,7 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public boolean isDirectory() {
-		if (!environment.ensureConnection()) {
+		if (!environment.connect()) {
 			return false;
 		}
 		fetchSshFile();
@@ -203,7 +203,7 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public boolean isFile() {
-		if (!environment.ensureConnection()) {
+		if (!environment.connect()) {
 			return false;
 		}
 		fetchSshFile();
@@ -215,7 +215,7 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public boolean isSymlink() {
-		if (!environment.ensureConnection()) {
+		if (!environment.connect()) {
 			return false;
 		}
 		fetchSshFile();
@@ -227,7 +227,7 @@ public class RSEFileHandle implements IFileHandle {
 
 	private InputStream internalOpenInputStream(IProgressMonitor monitor)
 			throws IOException {
-		if (!environment.ensureConnection()) {
+		if (!environment.connect()) {
 			return null;
 		}
 		fetchSshFile();
@@ -249,7 +249,7 @@ public class RSEFileHandle implements IFileHandle {
 
 	public InputStream openInputStream(IProgressMonitor monitor)
 			throws IOException {
-		if (!environment.ensureConnection()) {
+		if (!environment.connect()) {
 			return null;
 		}
 		if (RSEPerfomanceStatistics.PERFOMANCE_TRACING) {
@@ -260,7 +260,7 @@ public class RSEFileHandle implements IFileHandle {
 
 	public OutputStream openOutputStream(IProgressMonitor monitor)
 			throws IOException {
-		if (!environment.ensureConnection()) {
+		if (!environment.connect()) {
 			return null;
 		}
 		fetchSshFile();
@@ -297,7 +297,7 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public long lastModified() {
-		if (!environment.ensureConnection()) {
+		if (!environment.connect()) {
 			return 0;
 		}
 		fetchSshFile();
@@ -334,7 +334,7 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public long length() {
-		if (!environment.ensureConnection()) {
+		if (!environment.connect()) {
 			return 0;
 		}
 		fetchSshFile();
