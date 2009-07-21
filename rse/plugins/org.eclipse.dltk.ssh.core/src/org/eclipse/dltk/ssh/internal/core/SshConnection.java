@@ -56,7 +56,8 @@ public class SshConnection implements ISshConnection {
 
 		public String[] promptKeyboardInteractive(String destination,
 				String name, String instruction, String[] prompt, boolean[] echo) {
-			return new String[] { password };
+			final String p = password;
+			return p != null ? new String[] { p } : null;
 		}
 	}
 
