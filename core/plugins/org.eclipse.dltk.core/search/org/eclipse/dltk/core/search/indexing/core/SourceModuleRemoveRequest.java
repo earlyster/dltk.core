@@ -15,6 +15,8 @@ import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
@@ -41,6 +43,10 @@ public class SourceModuleRemoveRequest extends IndexRequest {
 	}
 
 	protected void run() throws CoreException, IOException {
+		IEnvironment environment = EnvironmentManager.getEnvironment(project);
+		if (!environment.isConnected()) {
+			return;
+		}
 		final Index index = getIndexer().getProjectIndex(project);
 		final ReadWriteMonitor imon = index.monitor;
 		imon.enterWrite();

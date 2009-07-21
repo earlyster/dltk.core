@@ -23,6 +23,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
@@ -53,6 +54,10 @@ public class SourceModulesRequest extends IndexRequest {
 	}
 
 	protected void run() throws CoreException, IOException {
+		IEnvironment environment = EnvironmentManager.getEnvironment(project);
+		if (!environment.isConnected()) {
+			return;
+		}
 		final Index index = getIndexer().getProjectIndex(project);
 		if (index == null) {
 			DLTKCore.error("Index are null for:" + this.modules);

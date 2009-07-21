@@ -21,6 +21,8 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
 import org.eclipse.dltk.internal.core.ScriptProject;
@@ -58,6 +60,10 @@ public class ProjectRequest extends IndexRequest {
 	}
 
 	protected void run() throws CoreException {
+		IEnvironment environment = EnvironmentManager.getEnvironment(project);
+		if (!environment.isConnected()) {
+			return;
+		}
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(project);
 		final IProjectFragment[] fragments = ((ScriptProject) project)

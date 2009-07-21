@@ -51,7 +51,9 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptProjectUtil;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.core.BuiltinSourceModule;
 import org.eclipse.dltk.internal.core.ExternalSourceModule;
@@ -199,6 +201,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
+		// Do not build if environment are not available.
+		// TODO: Store build requests and call builds then connection will be
+		// established.
 		this.currentProject = getProject();
 		if (currentProject == null || !currentProject.isAccessible())
 			return new IProject[0];
@@ -213,6 +218,11 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 		this.scriptProject = (ScriptProject) DLTKCore.create(currentProject);
 		if (!ScriptProjectUtil.isBuilderEnabled(scriptProject)) {
+			return null;
+		}
+		IEnvironment environment = EnvironmentManager
+				.getEnvironment(scriptProject);
+		if (environment == null || !environment.isConnected()) {
 			return null;
 		}
 		final String version = currentProject

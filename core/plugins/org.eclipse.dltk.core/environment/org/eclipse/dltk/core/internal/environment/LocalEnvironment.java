@@ -128,7 +128,14 @@ public class LocalEnvironment implements IEnvironment, IAdaptable {
 	/**
 	 * @since 2.0
 	 */
-	public boolean isReady() {
+	public boolean isConnected() {
+		return true;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public boolean ensureConnection() {
 		return true;
 	}
 
