@@ -127,5 +127,5 @@ public interface IEnvironment extends IAdaptable {
 	 * @return
 	 * @since 2.0
 	 */
-	boolean ensureConnection();
+	boolean connect();
 }
