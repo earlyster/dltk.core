@@ -56,6 +56,9 @@ public class RemoteProjectLabelDecorator extends BaseLabelProvider implements
 							.getHost().getHostName();
 					if (hostName != null) {
 						addHostNameSuffix(decoration, hostName);
+						if (!environment.isConnected()) {
+							decoration.addSuffix(" [Not connected]");
+						}
 					}
 				}
 			}

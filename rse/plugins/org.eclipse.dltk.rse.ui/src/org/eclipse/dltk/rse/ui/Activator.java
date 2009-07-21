@@ -1,5 +1,6 @@
 package org.eclipse.dltk.rse.ui;
 
+import org.eclipse.dltk.internal.ui.rse.RSEConnectionMonitor;
 import org.eclipse.rse.ui.RSEUIPlugin;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -28,6 +29,7 @@ public class Activator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		RSEUIPlugin.getDefault();
+		RSEConnectionMonitor.start();
 	}
 
 	/*

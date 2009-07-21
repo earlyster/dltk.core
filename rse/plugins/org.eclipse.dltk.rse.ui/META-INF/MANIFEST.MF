@@ -16,8 +16,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.rse.services,
  org.eclipse.core.resources,
  org.eclipse.rse.files.ui,
- org.eclipse.rse.subsystems.files.core;bundle-version="3.0.0"
+ org.eclipse.rse.subsystems.files.core
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.dltk.internal.ui.rse,
  org.eclipse.dltk.rse.ui
-Bundle-RequiredExecutionEnvironment: J2SE-1.4
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
