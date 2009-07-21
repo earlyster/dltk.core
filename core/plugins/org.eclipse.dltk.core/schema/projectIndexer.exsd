@@ -2,9 +2,9 @@
 <!-- Schema file written by PDE -->
 <schema targetNamespace="org.eclipse.dltk.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appinfo>
+      <appInfo>
          <meta.schema plugin="org.eclipse.dltk.core" id="projectIndexer" name="Project Indexer"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          
       </documentation>
@@ -12,14 +12,15 @@
 
    <element name="extension">
       <annotation>
-         <appinfo>
+         <appInfo>
             <meta.element />
-         </appinfo>
+         </appInfo>
       </annotation>
       <complexType>
-         <sequence>
-            <element ref="projectIndexer"/>
-         </sequence>
+         <choice>
+            <element ref="projectIndexer" minOccurs="1" maxOccurs="unbounded"/>
+            <element ref="disable" minOccurs="1" maxOccurs="unbounded"/>
+         </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -39,9 +40,9 @@
                <documentation>
                   
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute translatable="true"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
@@ -49,9 +50,9 @@
 
    <element name="projectIndexer">
       <annotation>
-         <appinfo>
+         <appInfo>
             <meta.element labelAttribute="nature"/>
-         </appinfo>
+         </appInfo>
       </annotation>
       <complexType>
          <attribute name="class" type="string" use="required">
@@ -59,9 +60,9 @@
                <documentation>
                   
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute kind="java" basedOn=":org.eclipse.dltk.core.search.indexing.IProjectIndexer"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
          <attribute name="nature" type="string" use="required">
@@ -69,6 +70,26 @@
                <documentation>
                   If nature are # then builder is available for all script natures.
                </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="disable">
+      <annotation>
+         <documentation>
+            Disable project indexer specified by class name
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.core.search.indexing.IProjectIndexer"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
