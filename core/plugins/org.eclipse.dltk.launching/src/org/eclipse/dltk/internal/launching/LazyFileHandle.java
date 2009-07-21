@@ -58,7 +58,7 @@ public class LazyFileHandle implements IFileHandle {
 	public boolean exists() {
 		IEnvironment environment = EnvironmentManager
 				.getEnvironmentById(this.environment);
-		if (environment == null || !environment.ensureConnection()) {
+		if (environment == null || !environment.connect()) {
 			return true; // Assume if environment are not ready what location
 			// are exists.
 		}
