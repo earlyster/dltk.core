@@ -39,7 +39,7 @@ public class SshConnection implements ISshConnection {
 		}
 
 		public boolean promptPassword(String arg0) {
-			return false;
+			return true;
 		}
 
 		public boolean promptPassphrase(String arg0) {
@@ -248,7 +248,7 @@ public class SshConnection implements ISshConnection {
 		}
 	}
 
-	private static final int DEFAULT_RETRY_COUNT = 10;
+	private static final int DEFAULT_RETRY_COUNT = 2;
 
 	private static final long TIMEOUT = 3000; // One second timeout
 
@@ -277,7 +277,7 @@ public class SshConnection implements ISshConnection {
 	}
 
 	public boolean connect() {
-		return connect(DEFAULT_RETRY_COUNT);
+		return connect(0);
 	}
 
 	public synchronized boolean connect(int trycount) {
@@ -304,9 +304,10 @@ public class SshConnection implements ISshConnection {
 				channel.connect();
 			}
 		} catch (JSchException e) {
-			if (e.toString().indexOf("Auth cancel") >= 0) { //$NON-NLS-1$
+			if (e.toString().indexOf("Auth cancel") >= 0 || e.toString().indexOf("Auth fail") >= 0) { //$NON-NLS-1$
 				if (session.isConnected()) {
 					session.disconnect();
+					session = null;
 				}
 			}
 			DLTKCore.error("Failed to create direct connection", e);
@@ -317,6 +318,10 @@ public class SshConnection implements ISshConnection {
 					e1.printStackTrace();
 				}
 				// Try to reconnect
+			}
+			if (session != null) {
+				session.disconnect();
+				session = null;
 			}
 		}
 		if (session == null || !session.isConnected() || channel == null
