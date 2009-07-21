@@ -52,17 +52,6 @@ public class RSESshManager {
 			if (connection.isConnected()) {
 				return connection;
 			}
-			// Try to find password and specify it for Ssh Connection.
-			SystemSignonInformation information = PasswordPersistenceManager
-					.getInstance().find(host.getSystemType(),
-							host.getHostName(), userId);
-			if (information != null && information.getPassword() != null) {
-				connection.setPassword(information.getPassword());
-				connection.connect();
-				if (connection.isConnected()) {
-					return connection;
-				}
-			}
 
 			// Try to resolve not persisted password from SSh connector
 			synchronized (hostsInInitialization) {
@@ -122,6 +111,18 @@ public class RSESshManager {
 			} finally {
 				synchronized (hostsInInitialization) {
 					hostsInInitialization.remove(host);
+				}
+			}
+
+			// Try to find password and specify it for Ssh Connection.
+			SystemSignonInformation information = PasswordPersistenceManager
+					.getInstance().find(host.getSystemType(),
+							host.getHostName(), userId);
+			if (information != null && information.getPassword() != null) {
+				connection.setPassword(information.getPassword());
+				connection.connect();
+				if (connection.isConnected()) {
+					return connection;
 				}
 			}
 			// Try to connect any way
