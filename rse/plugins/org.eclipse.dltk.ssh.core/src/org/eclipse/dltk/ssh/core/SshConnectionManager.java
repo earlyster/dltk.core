@@ -46,6 +46,8 @@ public class SshConnectionManager {
 		Collection<SshConnection> values = connections.values();
 		for (ISshConnection connection : values) {
 			connection.disconnect();
+			connection.setDisabled(60 * 1000 * 1000 * 1000); // Disable for
+																// ever.
 		}
 	}
 }

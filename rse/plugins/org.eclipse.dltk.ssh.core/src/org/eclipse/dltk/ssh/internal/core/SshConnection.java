@@ -12,13 +12,14 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.ssh.core.ISshConnection;
 import org.eclipse.dltk.ssh.core.ISshFileHandle;
+import org.eclipse.jsch.core.IJSchService;
 
 import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
+import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
 /**
@@ -28,16 +29,17 @@ import com.jcraft.jsch.UserInfo;
 public class SshConnection implements ISshConnection {
 	private long disabledTime = 0;
 
-	private final class LocalUserInfo implements UserInfo {
+	private final class LocalUserInfo implements UserInfo,
+			UIKeyboardInteractive {
 		public void showMessage(String arg0) {
 		}
 
 		public boolean promptYesNo(String arg0) {
-			return true;
+			return false;
 		}
 
 		public boolean promptPassword(String arg0) {
-			return true;
+			return false;
 		}
 
 		public boolean promptPassphrase(String arg0) {
@@ -50,6 +52,11 @@ public class SshConnection implements ISshConnection {
 
 		public String getPassphrase() {
 			return "";
+		}
+
+		public String[] promptKeyboardInteractive(String destination,
+				String name, String instruction, String[] prompt, boolean[] echo) {
+			return new String[] { password };
 		}
 	}
 
@@ -244,7 +251,6 @@ public class SshConnection implements ISshConnection {
 
 	private static final long TIMEOUT = 3000; // One second timeout
 
-	private JSch jsch;
 	private Session session;
 	private String userName;
 	private String password;
@@ -274,18 +280,20 @@ public class SshConnection implements ISshConnection {
 	}
 
 	public synchronized boolean connect(int trycount) {
-		if (jsch == null) {
-			jsch = new JSch();
-		}
 		try {
 			if (session == null) {
-				session = jsch.getSession(userName, hostName, port);
+				IJSchService service = Activator.getDefault().getJSch();
+				session = service.createSession(hostName, port, userName);
+				session.setTimeout(0);
+				session.setServerAliveInterval(300000);
+				session.setServerAliveCountMax(6);
+				session.setPassword(password); // Set password directly
 				UserInfo ui = new LocalUserInfo();
 				session.setUserInfo(ui);
 			}
 
 			if (!session.isConnected()) {
-				session.connect();
+				session.connect(60 * 1000); // Connect with defautl timeout
 			}
 
 			if (channel == null) {
@@ -295,10 +303,15 @@ public class SshConnection implements ISshConnection {
 				channel.connect();
 			}
 		} catch (JSchException e) {
+			if (e.toString().indexOf("Auth cancel") >= 0) { //$NON-NLS-1$
+				if (session.isConnected()) {
+					session.disconnect();
+				}
+			}
 			DLTKCore.error("Failed to create direct connection", e);
 			if (session.isConnected() && !channel.isConnected()) {
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(50);
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}
@@ -311,6 +324,7 @@ public class SshConnection implements ISshConnection {
 				if (session == null || !session.isConnected()) {
 					session = null;
 				}
+				channel = null;
 				return connect(trycount - 1);
 			} else {
 				// Lets disable connection for a while.
@@ -352,7 +366,7 @@ public class SshConnection implements ISshConnection {
 			op.perform();
 			op.setFinished();
 		} catch (JSchException ex) {
-			ex.printStackTrace();
+			Activator.log(ex);
 			// if (!channel.isConnected()) {
 			if (tryCount > 0) {
 				performOperation(op, tryCount - 1);
@@ -360,7 +374,7 @@ public class SshConnection implements ISshConnection {
 			// }
 		} catch (SftpException e) {
 			if (e.id != ChannelSftp.SSH_FX_NO_SUCH_FILE) {
-				e.printStackTrace();
+				Activator.log(e);
 			}
 		} finally {
 			if (!op.isFinished()) {
