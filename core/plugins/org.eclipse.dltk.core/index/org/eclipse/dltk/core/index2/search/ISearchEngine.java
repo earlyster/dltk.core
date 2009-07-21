@@ -54,7 +54,10 @@ public interface ISearchEngine {
 	 * @param elementName
 	 *            Element name pattern
 	 * @param flags
-	 *            Element flags (<code>0</code> - disable flag filtering)
+	 *            Array representing flags to match the results against (
+	 *            <code>null</code> - disable flag filtering). The filtering is
+	 *            done in this way:
+	 *            <code>if ((result.flags & flags[0]) != null && (result.flags & flags[1]) != null && ...)</code>
 	 * @param limit
 	 *            Limit number of results (<code>0</code> - unlimited)
 	 * @param searchFor
@@ -68,7 +71,7 @@ public interface ISearchEngine {
 	 * @param monitor
 	 *            Progress monitor
 	 */
-	public void search(int elementType, String elementName, int flags,
+	public void search(int elementType, String elementName, int[] flags,
 			int limit, SearchFor searchFor, MatchRule matchRule,
 			IDLTKSearchScope scope, ISearchRequestor requestor,
 			IProgressMonitor monitor);

@@ -60,7 +60,8 @@ public class HierarchyResolver {
 
 		// First try to use new indexing infrastructure:
 		IType[] types = new ModelAccess().findTypes(pattern,
-				pattern == null ? MatchRule.PREFIX : MatchRule.EXACT, 0, scope,
+				pattern == null ? MatchRule.PREFIX : MatchRule.EXACT, null,
+				scope,
 				hierarchyBuilder.hierarchy.progressMonitor);
 		if (types != null) {
 			return types;

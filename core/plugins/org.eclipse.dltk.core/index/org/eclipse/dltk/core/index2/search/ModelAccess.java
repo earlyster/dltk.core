@@ -44,14 +44,17 @@ public class ModelAccess {
 	 * @param matchRule
 	 *            Match rule
 	 * @param flags
-	 *            Flags to filter elements by
+	 *            Array representing flags to match the results against (
+	 *            <code>null</code> - disable flag filtering). The filtering is
+	 *            done in this way:
+	 *            <code>if ((result.flags & flags[0]) != null && (result.flags & flags[1]) != null && ...)</code>
 	 * @param scope
 	 *            Search scope
 	 * @param monitor
 	 *            Progress monitor
 	 * @return elements array, or <code>null</code> in case error has occurred.
 	 */
-	public IField[] findFields(String name, MatchRule matchRule, int flags,
+	public IField[] findFields(String name, MatchRule matchRule, int[] flags,
 			IDLTKSearchScope scope, IProgressMonitor monitor) {
 
 		List<IField> result = new LinkedList<IField>();
@@ -70,14 +73,17 @@ public class ModelAccess {
 	 * @param matchRule
 	 *            Match rule
 	 * @param flags
-	 *            Flags to filter elements by
+	 *            Array representing flags to match the results against (
+	 *            <code>null</code> - disable flag filtering). The filtering is
+	 *            done in this way:
+	 *            <code>if ((result.flags & flags[0]) != null && (result.flags & flags[1]) != null && ...)</code>
 	 * @param scope
 	 *            Search scope
 	 * @param monitor
 	 *            Progress monitor
 	 * @return elements array, or <code>null</code> in case error has occurred.
 	 */
-	public IMethod[] findMethods(String name, MatchRule matchRule, int flags,
+	public IMethod[] findMethods(String name, MatchRule matchRule, int[] flags,
 			IDLTKSearchScope scope, IProgressMonitor monitor) {
 
 		List<IMethod> result = new LinkedList<IMethod>();
@@ -96,14 +102,17 @@ public class ModelAccess {
 	 * @param matchRule
 	 *            Match rule
 	 * @param flags
-	 *            Flags to filter elements by
+	 *            Array representing flags to match the results against (
+	 *            <code>null</code> - disable flag filtering). The filtering is
+	 *            done in this way:
+	 *            <code>if ((result.flags & flags[0]) != null && (result.flags & flags[1]) != null && ...)</code>
 	 * @param scope
 	 *            Search scope
 	 * @param monitor
 	 *            Progress monitor
 	 * @return elements array, or <code>null</code> in case error has occurred.
 	 */
-	public IType[] findTypes(String name, MatchRule matchRule, int flags,
+	public IType[] findTypes(String name, MatchRule matchRule, int[] flags,
 			IDLTKSearchScope scope, IProgressMonitor monitor) {
 
 		List<IType> result = new LinkedList<IType>();
@@ -115,7 +124,7 @@ public class ModelAccess {
 	}
 
 	protected <T extends IModelElement> boolean findElements(int elementType,
-			String name, MatchRule matchRule, int flags,
+			String name, MatchRule matchRule, int[] flags,
 			IDLTKSearchScope scope, final Collection<T> result,
 			IProgressMonitor monitor) {
 
