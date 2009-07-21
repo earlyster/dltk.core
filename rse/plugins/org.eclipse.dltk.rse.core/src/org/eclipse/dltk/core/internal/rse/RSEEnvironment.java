@@ -1,9 +1,13 @@
 package org.eclipse.dltk.core.internal.rse;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
@@ -18,6 +22,7 @@ import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
 public class RSEEnvironment implements IEnvironment, IAdaptable {
 	private IRemoteFileSubSystem fs;
 	private IHost host;
+	private static Map<IRemoteFileSubSystem, Boolean> tryToConnect = new HashMap<IRemoteFileSubSystem, Boolean>();
 
 	public RSEEnvironment(IRemoteFileSubSystem fs) {
 		this.fs = fs;
@@ -130,7 +135,7 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	/**
 	 * @since 2.0
 	 */
-	public boolean isReady() {
+	public boolean isConnected() {
 		IConnectorService[] services = host.getConnectorServices();
 		int connected = 0;
 		for (IConnectorService service : services) {
@@ -140,4 +145,49 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 		}
 		return connected == services.length;
 	}
+
+	/**
+	 * @since 2.0
+	 */
+	public boolean ensureConnection() {
+		if (isConnected()) {
+			return true;
+		}
+		boolean tryToConnect = isTryToConnect();
+		if (tryToConnect) {
+			IConnectorService[] services = host.getConnectorServices();
+			for (IConnectorService service : services) {
+				if (!service.isConnected()) {
+					try {
+						service.connect(new NullProgressMonitor());
+					} catch (Exception e) {
+						if (!(e instanceof OperationCanceledException)) {
+							DLTKRSEPlugin.log(e);
+						}
+					}
+				}
+			}
+			setTryToConnect(false);
+		}
+		return isConnected();
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public boolean isTryToConnect() {
+		boolean tryToConnect = true;
+		if (RSEEnvironment.tryToConnect.containsKey(fs)) {
+			tryToConnect = RSEEnvironment.tryToConnect.get(fs).booleanValue();
+		}
+		return tryToConnect;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void setTryToConnect(boolean value) {
+		RSEEnvironment.tryToConnect.put(fs, Boolean.valueOf(value));
+	}
+
 }

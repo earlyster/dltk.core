@@ -117,6 +117,9 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	private boolean isReady(boolean allowWait) {
 		synchronized (lock) {
 			if (initialized) {
+				if (RSECorePlugin.getDefault() == null) { // Shutdown process
+					return false;
+				}
 				return true;
 			}
 			boolean newThread = false;

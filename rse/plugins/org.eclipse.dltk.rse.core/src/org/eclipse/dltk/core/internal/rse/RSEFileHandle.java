@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,6 +93,9 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public boolean exists() {
+		if (!environment.ensureConnection()) {
+			return false;
+		}
 		fetchSshFile();
 		if (sshFile != null) {
 			return sshFile.exists();
@@ -112,6 +116,15 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public IFileHandle getChild(final String childname) {
+		if (!environment.ensureConnection()) {
+			URI childURI;
+			try {
+				childURI = new URI(toURI().toString() + "/" + childname);
+				return new RSEFileHandle(environment, childURI);
+			} catch (URISyntaxException e) {
+				DLTKRSEPlugin.log(e);
+			}
+		}
 		fetchSshFile();
 		IFileStore childStore = file.getChild(new Path(childname));
 		if (sshFile != null) {
@@ -122,6 +135,9 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public IFileHandle[] getChildren() {
+		if (!environment.ensureConnection()) {
+			return new IFileHandle[0];
+		}
 		fetchSshFile();
 		if (sshFile != null) {
 			try {
@@ -176,6 +192,9 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public boolean isDirectory() {
+		if (!environment.ensureConnection()) {
+			return false;
+		}
 		fetchSshFile();
 		if (sshFile != null) {
 			return sshFile.isDirectory();
@@ -184,6 +203,9 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public boolean isFile() {
+		if (!environment.ensureConnection()) {
+			return false;
+		}
 		fetchSshFile();
 		if (sshFile != null) {
 			return sshFile.exists() && !sshFile.isDirectory();
@@ -193,6 +215,9 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public boolean isSymlink() {
+		if (!environment.ensureConnection()) {
+			return false;
+		}
 		fetchSshFile();
 		if (sshFile != null) {
 			return sshFile.isSymlink();
@@ -202,6 +227,9 @@ public class RSEFileHandle implements IFileHandle {
 
 	private InputStream internalOpenInputStream(IProgressMonitor monitor)
 			throws IOException {
+		if (!environment.ensureConnection()) {
+			return null;
+		}
 		fetchSshFile();
 		if (sshFile != null) {
 			try {
@@ -221,6 +249,9 @@ public class RSEFileHandle implements IFileHandle {
 
 	public InputStream openInputStream(IProgressMonitor monitor)
 			throws IOException {
+		if (!environment.ensureConnection()) {
+			return null;
+		}
 		if (RSEPerfomanceStatistics.PERFOMANCE_TRACING) {
 			return new CountStream(this.internalOpenInputStream(monitor));
 		}
@@ -229,6 +260,9 @@ public class RSEFileHandle implements IFileHandle {
 
 	public OutputStream openOutputStream(IProgressMonitor monitor)
 			throws IOException {
+		if (!environment.ensureConnection()) {
+			return null;
+		}
 		fetchSshFile();
 		if (sshFile != null) {
 			try {
@@ -263,6 +297,9 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public long lastModified() {
+		if (!environment.ensureConnection()) {
+			return 0;
+		}
 		fetchSshFile();
 		String n = toString();
 		long c = 0;
@@ -297,6 +334,9 @@ public class RSEFileHandle implements IFileHandle {
 	}
 
 	public long length() {
+		if (!environment.ensureConnection()) {
+			return 0;
+		}
 		fetchSshFile();
 		if (sshFile != null) {
 			return sshFile.getSize();
