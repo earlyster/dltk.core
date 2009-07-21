@@ -37,7 +37,7 @@ import org.eclipse.osgi.util.NLS;
 public abstract class AbstractProjectIndexer implements IProjectIndexer,
 		IProjectIndexer.Internal {
 
-	private static final IndexManager manager = ModelManager.getModelManager()
+	private final IndexManager manager = ModelManager.getModelManager()
 			.getIndexManager();
 
 	public void request(IJob job) {

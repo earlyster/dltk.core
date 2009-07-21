@@ -42,7 +42,28 @@ public class ProjectIndexerManager {
 	private static final String INDEXER_ELEM = "projectIndexer"; //$NON-NLS-1$
 
 	// Contains list of indexers for selected nature.
-	private static Map<String, List<IConfigurationElement>> indexers;
+	private static Map<String, List<ProjectIndexerDescriptor>> indexers;
+
+	private static class ProjectIndexerDescriptor {
+		private IConfigurationElement element;
+		private IProjectIndexer projectIndexer;
+
+		ProjectIndexerDescriptor(IConfigurationElement element) {
+			this.element = element;
+		}
+
+		public IProjectIndexer getObject() {
+			if (projectIndexer == null) {
+				try {
+					projectIndexer = (IProjectIndexer) element
+							.createExecutableExtension(CLASS_ATTR);
+				} catch (CoreException e) {
+					DLTKCore.error("Error initializing project indexer", e); //$NON-NLS-1$
+				}
+			}
+			return projectIndexer;
+		}
+	}
 
 	private synchronized static void initialize() {
 		if (indexers != null) {
@@ -62,7 +83,7 @@ public class ProjectIndexerManager {
 			}
 		}
 
-		indexers = new HashMap<String, List<IConfigurationElement>>();
+		indexers = new HashMap<String, List<ProjectIndexerDescriptor>>();
 
 		Iterator<String> i = enabled.keySet().iterator();
 		while (i.hasNext()) {
@@ -70,12 +91,12 @@ public class ProjectIndexerManager {
 			IConfigurationElement element = enabled.get(className);
 			if (element != null) {
 				String nature = element.getAttribute(NATURE_ATTR);
-				List<IConfigurationElement> elements = indexers.get(nature);
+				List<ProjectIndexerDescriptor> elements = indexers.get(nature);
 				if (elements == null) {
-					elements = new LinkedList<IConfigurationElement>();
+					elements = new LinkedList<ProjectIndexerDescriptor>();
 					indexers.put(nature, elements);
 				}
-				elements.add(element);
+				elements.add(new ProjectIndexerDescriptor(element));
 			}
 		}
 	}
@@ -123,18 +144,12 @@ public class ProjectIndexerManager {
 	}
 
 	private static IProjectIndexer[] getByNature(String natureId) {
-		List<IConfigurationElement> elements = indexers.get(natureId);
+		List<ProjectIndexerDescriptor> elements = indexers.get(natureId);
 		if (elements != null) {
 			List<IProjectIndexer> result = new ArrayList<IProjectIndexer>(
 					elements.size());
-			for (IConfigurationElement element : elements) {
-				try {
-					final IProjectIndexer builder = (IProjectIndexer) element
-							.createExecutableExtension(CLASS_ATTR);
-					result.add(builder);
-				} catch (CoreException ex) {
-					DLTKCore.error("Error creating ProjectIndexer", ex); //$NON-NLS-1$
-				}
+			for (ProjectIndexerDescriptor descriptor : elements) {
+				result.add(descriptor.getObject());
 			}
 			if (!result.isEmpty()) {
 				return (IProjectIndexer[]) result
