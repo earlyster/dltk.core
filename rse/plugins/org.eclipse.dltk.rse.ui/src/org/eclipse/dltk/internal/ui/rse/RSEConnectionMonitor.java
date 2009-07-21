@@ -129,8 +129,8 @@ public class RSEConnectionMonitor implements Runnable {
 
 	public void run() {
 		EnvironmentManager.waitInitialized();
+		final Set<String> eventListenerAdded = new HashSet<String>();
 		while (Platform.isRunning()) {
-			Set<String> eventListenerAdded = new HashSet<String>();
 
 			IEnvironment[] environments = EnvironmentManager.getEnvironments();
 			for (final IEnvironment env : environments) {
