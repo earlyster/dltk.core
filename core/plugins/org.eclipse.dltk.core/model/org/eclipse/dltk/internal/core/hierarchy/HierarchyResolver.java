@@ -276,8 +276,9 @@ public class HierarchyResolver {
 			if (hierarchyInfo != null
 					&& !hierarchyInfo.exists(type.getSourceModule())) {
 				filteredTypes.add(type);
+			} else {
+				result.add(type);
 			}
-			result.add(type);
 		}
 
 		// If all results where filtered that means we could find a path to any
