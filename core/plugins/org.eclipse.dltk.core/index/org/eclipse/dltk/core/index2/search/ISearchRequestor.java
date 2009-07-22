@@ -35,7 +35,9 @@ public interface ISearchRequestor {
 	 * @param metadata
 	 *            Various metadata attached to the element
 	 * @param qualifier
-	 *            Element qualifier (package name + parent, for example)
+	 *            Element qualifier (package name, for example)
+	 * @param parent
+	 *            Element parent (declaring type, for example)
 	 * @param sourceModule
 	 *            Source module where element is declared
 	 * @param isReference
@@ -43,7 +45,7 @@ public interface ISearchRequestor {
 	 */
 	public void match(int elementType, int flags, int offset, int length,
 			int nameOffset, int nameLength, String elementName,
-			String metadata, String qualifier, ISourceModule sourceModule,
-			boolean isReference);
+			String metadata, String qualifier, String parent,
+			ISourceModule sourceModule, boolean isReference);
 
 }

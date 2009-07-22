@@ -152,14 +152,14 @@ public class ModelAccess {
 					public void match(int elementType, int flags, int offset,
 							int length, int nameOffset, int nameLength,
 							String elementName, String metadata,
-							String qualifier, ISourceModule sourceModule,
-							boolean isReference) {
+							String qualifier, String parent,
+							ISourceModule sourceModule, boolean isReference) {
 
 						IModelElement element = participant
 								.getElementResolver().resolve(elementType,
 										flags, offset, length, nameOffset,
 										nameLength, elementName, metadata,
-										qualifier, sourceModule);
+										qualifier, parent, sourceModule);
 						if (element != null) {
 							result.add((T) element);
 						}

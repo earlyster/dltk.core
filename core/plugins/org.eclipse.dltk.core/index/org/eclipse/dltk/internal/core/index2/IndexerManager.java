@@ -72,12 +72,13 @@ public class IndexerManager {
 
 	public static IIndexer getIndexer() {
 		try {
-			AbstractIndexer instance = (AbstractIndexer) indexer
-					.createExecutableExtension(CLASS_ATTR);
-			instance.setId(indexer.getAttribute(ID_ATTR));
+			if (indexer != null) {
+				AbstractIndexer instance = (AbstractIndexer) indexer
+						.createExecutableExtension(CLASS_ATTR);
+				instance.setId(indexer.getAttribute(ID_ATTR));
 
-			return instance;
-
+				return instance;
+			}
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();

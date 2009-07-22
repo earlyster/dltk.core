@@ -39,11 +39,13 @@ public interface IIndexingRequestor {
 	 * @param metadata
 	 *            Various metadata attached to the element
 	 * @param qualifier
-	 *            Element qualifier (package name + parent, for example)
+	 *            Element qualifier (package name, for example)
+	 * @param parent
+	 *            Element parent (declaring type, for example)
 	 */
 	public void addDeclaration(int elementType, int flags, int offset,
 			int length, int nameOffset, int nameLength, String elementName,
-			String metadata, String qualifier);
+			String metadata, String qualifier, String parent);
 
 	/**
 	 * Adds new element reference to the index.
