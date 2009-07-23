@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
@@ -26,6 +27,7 @@ import org.eclipse.dltk.core.index2.IIndexerParticipant;
 import org.eclipse.dltk.core.index2.search.ISearchEngine.MatchRule;
 import org.eclipse.dltk.core.index2.search.ISearchEngine.SearchFor;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
+import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.internal.core.index2.IndexerManager;
 
 /**
@@ -130,6 +132,42 @@ public class ModelAccess {
 		return (IType[]) result.toArray(new IType[result.size()]);
 	}
 
+	/**
+	 * Converts old-style search flags to MatchRule.
+	 * 
+	 * @param searchRule
+	 *            Search flags: {@link SearchPattern#R_EXACT_MATCH}, etc...
+	 * @return match rule. If searchRule is not supported by the new mechanism
+	 *         {@link MatchRule#EXACT} is returned.
+	 */
+	public static MatchRule convertSearchRule(int searchRule) {
+		MatchRule matchRule;
+		switch (searchRule) {
+		case SearchPattern.R_PREFIX_MATCH:
+			matchRule = MatchRule.PREFIX;
+			break;
+		case SearchPattern.R_CAMELCASE_MATCH:
+			matchRule = MatchRule.CAMEL_CASE;
+			break;
+		case SearchPattern.R_PATTERN_MATCH:
+			matchRule = MatchRule.PATTERN;
+			break;
+		default:
+			matchRule = MatchRule.EXACT;
+		}
+		return matchRule;
+	}
+
+	public static ISearchEngine createSearchEngine(IDLTKLanguageToolkit toolkit) {
+		if (toolkit != null) {
+			IIndexer indexer = IndexerManager.getIndexer();
+			if (indexer != null) {
+				return indexer.createSearchEngine();
+			}
+		}
+		return null;
+	}
+
 	protected <T extends IModelElement> boolean findElements(int elementType,
 			String name, MatchRule matchRule, int trueFlags, int falseFlags,
 			IDLTKSearchScope scope, final Collection<T> result,
@@ -142,7 +180,6 @@ public class ModelAccess {
 		if (indexer == null || participant == null) {
 			return false;
 		}
-
 		ISearchEngine searchEngine = indexer.createSearchEngine();
 
 		searchEngine.search(elementType, name, trueFlags, falseFlags, 0,
