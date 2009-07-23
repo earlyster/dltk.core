@@ -17,6 +17,8 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.index2.search.ModelAccess;
+import org.eclipse.dltk.core.index2.search.ISearchEngine.MatchRule;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
@@ -92,36 +94,41 @@ class ExtendedClasesContentProvider implements ITreeContentProvider {
 		IRunnableWithProgress runnable = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor)
 					throws InvocationTargetException, InterruptedException {
-				try {
-					(new SearchEngine()).searchAllTypeNames(
-							null,
-							SearchPattern.R_EXACT_MATCH,
-							"*".toCharArray(), //$NON-NLS-1$
-							SearchPattern.R_PATTERN_MATCH
-									| SearchPattern.R_CASE_SENSITIVE,
-							IDLTKSearchConstants.TYPE,
-							scope,
-							new TypeNameMatchRequestor() {
-								public void acceptTypeNameMatch(
-										TypeNameMatch match) {
-									try {
-										IType type = match.getType();
-										if (type.exists()
-												&& type.getParent()
-														.getElementType() != IModelElement.TYPE) {
-											elements.add(type);
+
+				IType[] types = new ModelAccess().findTypes(null,
+						MatchRule.PREFIX, 0, 0, scope, monitor);
+				if (types == null) {
+					try {
+						(new SearchEngine()).searchAllTypeNames(
+								null,
+								SearchPattern.R_EXACT_MATCH,
+								"*".toCharArray(), //$NON-NLS-1$
+								SearchPattern.R_PATTERN_MATCH
+										| SearchPattern.R_CASE_SENSITIVE,
+								IDLTKSearchConstants.TYPE,
+								scope,
+								new TypeNameMatchRequestor() {
+									public void acceptTypeNameMatch(
+											TypeNameMatch match) {
+										try {
+											IType type = match.getType();
+											if (type.exists()
+													&& type.getParent()
+															.getElementType() != IModelElement.TYPE) {
+												elements.add(type);
+											}
+										} catch (Exception e) {
+
 										}
-									} catch (Exception e) {
-
 									}
-								}
-							},
+								},
 
-							IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
-							monitor);
-				} catch (ModelException e) {
-					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
+								IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+								monitor);
+					} catch (ModelException e) {
+						if (DLTKCore.DEBUG) {
+							e.printStackTrace();
+						}
 					}
 				}
 			}
@@ -174,8 +181,8 @@ class ExtendedClasesContentProvider implements ITreeContentProvider {
 			IModelElement element = (IModelElement) this.input;
 			this.scope = SearchEngine.createSearchScope(element);
 		} else if (this.input instanceof IModelElement[]) {
-			this.scope = SearchEngine
-					.createSearchScope((IModelElement[]) this.input, toolkit);
+			this.scope = SearchEngine.createSearchScope(
+					(IModelElement[]) this.input, toolkit);
 		}
 	}
 }
