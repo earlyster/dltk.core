@@ -31,7 +31,10 @@ public interface ISearchEngine {
 		PREFIX,
 
 		/** The pattern name contains upper-case letters of the search result */
-		CAMEL_CASE
+		CAMEL_CASE,
+
+		/** The pattern represents a set of names separated by ',' character */
+		SET,
 	}
 
 	public enum SearchFor {
