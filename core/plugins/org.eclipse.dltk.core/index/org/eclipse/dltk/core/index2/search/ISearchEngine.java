@@ -24,17 +24,28 @@ import org.eclipse.dltk.core.search.IDLTKSearchScope;
 public interface ISearchEngine {
 
 	public enum MatchRule {
-		/** The pattern name must match exactly the name of search result */
+
+		/** The pattern name must match exactly the name of search result. */
 		EXACT,
 
-		/** The pattern name is a prefix of search results */
+		/** The pattern name is a prefix of search results. */
 		PREFIX,
 
-		/** The pattern name contains upper-case letters of the search result */
+		/**
+		 * The pattern name consists of upper-case letters of the search result.
+		 */
 		CAMEL_CASE,
 
-		/** The pattern represents a set of names separated by ',' character */
+		/**
+		 * The pattern is a set of names separated by ',', where one of them
+		 * matches the search result.
+		 */
 		SET,
+
+		/**
+		 * The name is a POSIX pattern ('*' - any string, '?' - any character)
+		 */
+		PATTERN,
 	}
 
 	public enum SearchFor {
