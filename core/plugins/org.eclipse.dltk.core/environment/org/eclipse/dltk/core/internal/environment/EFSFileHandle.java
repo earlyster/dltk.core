@@ -30,8 +30,9 @@ import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.environment.IFileStoreProvider;
 
-public class EFSFileHandle implements IFileHandle {
+public class EFSFileHandle implements IFileHandle, IFileStoreProvider {
 
 	private static Map<String, Long> timestamps = new HashMap<String, Long>();
 	private static Map<String, Long> lastaccess = new HashMap<String, Long>();
@@ -213,5 +214,12 @@ public class EFSFileHandle implements IFileHandle {
 
 	public String getEnvironmentId() {
 		return environment.getId();
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public IFileStore getFileStore() {
+		return this.file;
 	}
 }

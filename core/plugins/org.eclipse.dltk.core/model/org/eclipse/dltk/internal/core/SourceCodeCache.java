@@ -151,9 +151,13 @@ public class SourceCodeCache implements IFileCacheManagement {
 		}
 		if (entry != null) {
 			try {
-				return org.eclipse.dltk.compiler.util.Util
-						.getInputStreamAsCharArray(new ByteArrayInputStream(
-								entry.content), entry.charLength, encoding);
+				ByteArrayInputStream stream = new ByteArrayInputStream(
+						entry.content);
+				char[] result = org.eclipse.dltk.compiler.util.Util
+						.getInputStreamAsCharArray(stream, entry.charLength,
+								encoding);
+				stream.close();
+				return result;
 			} catch (IOException e) {
 				// should not happen actually
 				throw new ModelException(e, IModelStatusConstants.IO_EXCEPTION);

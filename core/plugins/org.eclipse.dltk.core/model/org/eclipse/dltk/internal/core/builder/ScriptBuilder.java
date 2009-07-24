@@ -612,10 +612,12 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			IProgressMonitor monitor) throws CoreException {
 		State newState = new State(this);
 
-		Set externalFoldersBefore = new HashSet();
+		Set externalFoldersBefore = null;
 		if (this.lastState != null) {
 			newState.copyFrom(this.lastState);
-			externalFoldersBefore.addAll(newState.getExternalFolders());
+			externalFoldersBefore = new HashSet(newState.getExternalFolders());
+		} else {
+			externalFoldersBefore = new HashSet();
 		}
 
 		this.lastState = newState;
