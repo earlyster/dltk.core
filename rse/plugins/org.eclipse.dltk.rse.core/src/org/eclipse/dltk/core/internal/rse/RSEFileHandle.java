@@ -34,6 +34,7 @@ import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.environment.IFileStoreProvider;
 import org.eclipse.dltk.core.internal.rse.perfomance.RSEPerfomanceStatistics;
 import org.eclipse.dltk.core.internal.rse.ssh.RSESshManager;
 import org.eclipse.dltk.ssh.core.ISshConnection;
@@ -41,7 +42,7 @@ import org.eclipse.dltk.ssh.core.ISshFileHandle;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.internal.efs.RSEFileSystem;
 
-public class RSEFileHandle implements IFileHandle {
+public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 
 	private static Map<String, Long> timestamps = new HashMap<String, Long>();
 	private static Map<String, Long> lastaccess = new HashMap<String, Long>();
@@ -385,5 +386,12 @@ public class RSEFileHandle implements IFileHandle {
 			}
 			return read;
 		}
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public IFileStore getFileStore() {
+		return this.file;
 	}
 }
