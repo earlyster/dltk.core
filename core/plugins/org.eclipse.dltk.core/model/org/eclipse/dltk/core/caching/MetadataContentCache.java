@@ -41,7 +41,50 @@ public class MetadataContentCache extends AbstractContentCache {
 	private static final int DAY_IN_MILIS = 60;// 1000 * 60 * 60 * 24;
 	private static final int SAVE_DELTA = 100;
 	private Resource indexResource = null;
-	private Map<String, CacheEntry> entryCache = new HashMap<String, CacheEntry>();
+
+	private static class EntryKey {
+		private String environment;
+		private String path;
+
+		public EntryKey(String environment, String path) {
+			this.environment = environment;
+			this.path = path;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((environment == null) ? 0 : environment.hashCode());
+			result = prime * result + ((path == null) ? 0 : path.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			EntryKey other = (EntryKey) obj;
+			if (environment == null) {
+				if (other.environment != null)
+					return false;
+			} else if (!environment.equals(other.environment))
+				return false;
+			if (path == null) {
+				if (other.path != null)
+					return false;
+			} else if (!path.equals(other.path))
+				return false;
+			return true;
+		}
+	}
+
+	private Map<EntryKey, CacheEntry> entryCache = new HashMap<EntryKey, CacheEntry>();
 	private IPath cacheLocation;
 	private CRC32 checksum = new CRC32();
 
@@ -86,7 +129,7 @@ public class MetadataContentCache extends AbstractContentCache {
 
 	private synchronized CacheEntry getEntry(IFileHandle handle) {
 		initialize();
-		String key = makeKey(handle);
+		EntryKey key = makeKey(handle);
 		if (entryCache.containsKey(key)) {
 			CacheEntry entry = (CacheEntry) entryCache.get(key);
 			long accessTime = entry.getLastAccessTime();
@@ -150,7 +193,7 @@ public class MetadataContentCache extends AbstractContentCache {
 		return index;
 	}
 
-	private void removeCacheEntry(CacheEntry entry, String key) {
+	private void removeCacheEntry(CacheEntry entry, EntryKey key) {
 		if (entry == null || key == null) {
 			return;
 		}
@@ -174,14 +217,14 @@ public class MetadataContentCache extends AbstractContentCache {
 		}
 	}
 
-	private String makeKey(CacheEntry entry) {
+	private EntryKey makeKey(CacheEntry entry) {
 		CacheIndex index = (CacheIndex) entry.eContainer();
-		return entry.getPath() + ":" + index.getEnvironment();
+		return new EntryKey(index.getEnvironment(), entry.getPath());
 	}
 
-	private String makeKey(IFileHandle handle) {
-		return handle.getPath().toPortableString() + ":"
-				+ handle.getEnvironmentId();
+	private EntryKey makeKey(IFileHandle handle) {
+		return new EntryKey(handle.getEnvironmentId(), handle.getPath()
+				.toString());
 	}
 
 	long changeCount = 0;
@@ -238,6 +281,7 @@ public class MetadataContentCache extends AbstractContentCache {
 				BufferedInputStream inp = new BufferedInputStream(
 						new FileInputStream(file), 4096);
 				Util.copy(inp, bout);
+				inp.close();
 				node.done("Metadata", RuntimePerformanceMonitor.IOREAD, file
 						.length(), EnvironmentManager.getLocalEnvironment());
 				return new ByteArrayInputStream(bout.toByteArray());
@@ -347,7 +391,7 @@ public class MetadataContentCache extends AbstractContentCache {
 		if (handle == null) {
 			return;
 		}
-		String key = makeKey(handle);
+		EntryKey key = makeKey(handle);
 		if (entryCache.containsKey(key)) {
 			CacheEntry entry = (CacheEntry) entryCache.get(key);
 			removeCacheEntry(entry, key);
@@ -357,8 +401,8 @@ public class MetadataContentCache extends AbstractContentCache {
 
 	public synchronized void clear() {
 		initialize();
-		Set<String> keySet = new HashSet<String>(entryCache.keySet());
-		for (String k : keySet) {
+		Set<EntryKey> keySet = new HashSet<EntryKey>(entryCache.keySet());
+		for (EntryKey k : keySet) {
 			removeCacheEntry(entryCache.get(k), k);
 		}
 		save(true);

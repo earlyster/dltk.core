@@ -173,8 +173,7 @@ public class DLTKContentTypeManager {
 			IContentType type = derived[i];
 			InputStream stream = null;
 			try {
-				stream = new BufferedInputStream(new FileInputStream(file),
-						2048);
+				stream = new BufferedInputStream(new FileInputStream(file));
 				IContentDescription description = type.getDescriptionFor(
 						stream, IContentDescription.ALL);
 				if (description != null) {

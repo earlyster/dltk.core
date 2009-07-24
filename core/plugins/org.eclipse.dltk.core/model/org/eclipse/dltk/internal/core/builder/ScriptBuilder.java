@@ -218,11 +218,17 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 		this.scriptProject = (ScriptProject) DLTKCore.create(currentProject);
 		if (!ScriptProjectUtil.isBuilderEnabled(scriptProject)) {
+			if (monitor != null) {
+				monitor.done();
+			}
 			return null;
 		}
 		IEnvironment environment = EnvironmentManager
 				.getEnvironment(scriptProject);
 		if (environment == null || !environment.isConnected()) {
+			if (monitor != null) {
+				monitor.done();
+			}
 			return null;
 		}
 		final String version = currentProject
