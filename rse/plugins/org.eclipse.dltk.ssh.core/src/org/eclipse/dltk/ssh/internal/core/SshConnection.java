@@ -5,6 +5,9 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.IPath;
@@ -452,6 +455,8 @@ public class SshConnection implements ISshConnection {
 		Operation op = new Operation() {
 			@Override
 			public void perform() throws JSchException, SftpException {
+				Date date = new Date(timestamp);
+				System.out.println(date.toString());
 				getChannel().setMtime(path.toString(),
 						(int) (timestamp / 1000L));
 			}
