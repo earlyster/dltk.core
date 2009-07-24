@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -21,7 +20,6 @@ import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.internal.rse.RSEEnvironment;
 import org.eclipse.dltk.internal.core.ProjectRefreshOperation;
-import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.subsystems.CommunicationsEvent;
 import org.eclipse.rse.core.subsystems.ICommunicationsListener;
@@ -68,7 +66,7 @@ public class RSEConnectionMonitor implements Runnable {
 			ProjectRefreshOperation op = new ProjectRefreshOperation(
 					scriptProjects);
 			try {
-				op.run(new SubProgressMonitor(monitor, 50));
+				op.run(new SubProgressMonitor(monitor, 70));
 			} catch (CoreException e1) {
 				if (DLTKCore.DEBUG) {
 					e1.printStackTrace();
@@ -78,21 +76,20 @@ public class RSEConnectionMonitor implements Runnable {
 			EnvironmentManager
 					.refreshBuildpathContainersForMixedProjects(new SubProgressMonitor(
 							monitor, 10));
-			SubProgressMonitor mm = new SubProgressMonitor(monitor, 30);
-			mm.beginTask("Procesing project", projectsToProcess.size() * 10);
-			for (IScriptProject project : projectsToProcess) {
-				ProjectIndexerManager.indexProject(project);
-				try {
-					project.getProject().build(
-							IncrementalProjectBuilder.FULL_BUILD,
-							new SubProgressMonitor(monitor, 10));
-				} catch (CoreException e) {
-					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
-					}
-				}
-			}
-			mm.done();
+			// SubProgressMonitor mm = new SubProgressMonitor(monitor, 30);
+			// mm.beginTask("Procesing project", projectsToProcess.size() * 10);
+			// for (IScriptProject project : projectsToProcess) {
+			// ProjectIndexerManager.indexProject(project);
+			// try {
+			// project.getProject().build(
+			// IncrementalProjectBuilder.FULL_BUILD,
+			// new SubProgressMonitor(monitor, 10));
+			// } catch (CoreException e) {
+			// if (DLTKCore.DEBUG) {
+			// e.printStackTrace();
+			// }
+			// }
+			// }
 			monitor.done();
 			return Status.OK_STATUS;
 		}
