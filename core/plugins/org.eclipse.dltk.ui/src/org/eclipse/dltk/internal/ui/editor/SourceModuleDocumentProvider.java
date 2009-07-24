@@ -1759,6 +1759,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 						buffer.append(readBuffer, 0, n);
 						n = in.read(readBuffer);
 					}
+					in.close();
 				} catch (IOException e) {
 					DLTKUIPlugin.log(e);
 				}
