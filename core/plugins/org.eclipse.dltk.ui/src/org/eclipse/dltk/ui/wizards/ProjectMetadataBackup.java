@@ -131,6 +131,7 @@ public class ProjectMetadataBackup {
 		FileInputStream is = new FileInputStream(source);
 		OutputStream os = target.openOutputStream(EFS.NONE, monitor);
 		copyFile(is, os);
+
 	}
 
 	private void copyFile(InputStream is, OutputStream os) throws IOException {
