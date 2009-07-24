@@ -56,13 +56,15 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 			return cache.getCacheEntryAttribute(handle, attribute);
 		}
 		IFileHandle[] children = parent.getChildren();
-		for (IFileHandle fileHandle : children) {
-			String fileName = fileHandle.getName();
-			if (fileName.startsWith(DLTK_INDEX_FILE)
-					&& !fileName.equals(DLTK_INDEX_FILE)) {
-				if (processIndexFile(handle, attribute, parent, fileHandle,
-						cache)) {
-					return cache.getCacheEntryAttribute(handle, attribute);
+		if (children != null) {
+			for (IFileHandle fileHandle : children) {
+				String fileName = fileHandle.getName();
+				if (fileName.startsWith(DLTK_INDEX_FILE)
+						&& !fileName.equals(DLTK_INDEX_FILE)) {
+					if (processIndexFile(handle, attribute, parent, fileHandle,
+							cache)) {
+						return cache.getCacheEntryAttribute(handle, attribute);
+					}
 				}
 			}
 		}
@@ -74,24 +76,27 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 		String DLTK_INDEX_FILE = ".dltk.index";
 		// Check for additional indexes
 		IFileHandle[] children = folder.getChildren();
-		List<IFileHandle> indexFiles = new ArrayList<IFileHandle>();
-		for (IFileHandle fileHandle : children) {
-			String fileName = fileHandle.getName();
-			if (fileName.startsWith(DLTK_INDEX_FILE)
-					&& !fileName.equals(DLTK_INDEX_FILE)) {
-				indexFiles.add(fileHandle);
+		if (children != null) {
+			List<IFileHandle> indexFiles = new ArrayList<IFileHandle>();
+			for (IFileHandle fileHandle : children) {
+				String fileName = fileHandle.getName();
+				if (fileName.startsWith(DLTK_INDEX_FILE)
+						&& !fileName.equals(DLTK_INDEX_FILE)) {
+					indexFiles.add(fileHandle);
+				}
 			}
+			SubProgressMonitor processingIndexes = new SubProgressMonitor(
+					monitor, 1);
+			processingIndexes.beginTask("Processing index files", indexFiles
+					.size());
+			for (IFileHandle fileHandle : indexFiles) {
+				processingIndexes.subTask("Processing:"
+						+ fileHandle.toOSString());
+				processIndexFile(null, null, folder, fileHandle, cache);
+				processingIndexes.worked(1);
+			}
+			processingIndexes.done();
 		}
-		SubProgressMonitor processingIndexes = new SubProgressMonitor(monitor,
-				1);
-		processingIndexes
-				.beginTask("Processing index files", indexFiles.size());
-		for (IFileHandle fileHandle : indexFiles) {
-			processingIndexes.subTask("Processing:" + fileHandle.toOSString());
-			processIndexFile(null, null, folder, fileHandle, cache);
-			processingIndexes.worked(1);
-		}
-		processingIndexes.done();
 	}
 
 	private static boolean processIndexFile(IFileHandle handle,
