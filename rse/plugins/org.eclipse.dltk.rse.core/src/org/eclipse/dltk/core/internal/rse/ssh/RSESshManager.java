@@ -26,7 +26,7 @@ public class RSESshManager {
 	 */
 	private static Set<IHost> hostsInInitialization = new HashSet<IHost>();
 
-	public static ISshConnection getConnection(IHost host) {
+	public static ISshConnection getConnection(final IHost host) {
 		synchronized (hostsInInitialization) {
 			if (hostsInInitialization.contains(host)) {
 				return null;
@@ -39,12 +39,12 @@ public class RSESshManager {
 		if (!systemType.getId().equals(IRSESystemType.SYSTEMTYPE_SSH_ONLY_ID)) {
 			return null;//
 		}
-		for (IConnectorService connector : connectorServices) {
+		for (final IConnectorService connector : connectorServices) {
 			String hostName = host.getHostName();
 			// Retrive user name
-			String userId = connector.getUserId();
+			final String userId = connector.getUserId();
 			String location = userId + "@" + host.getHostName();
-			ISshConnection connection = SshConnectionManager
+			final ISshConnection connection = SshConnectionManager
 					.getConnection(location);
 			if (connection.isDisabled()) {
 				return null;
@@ -52,89 +52,98 @@ public class RSESshManager {
 			if (connection.isConnected()) {
 				return connection;
 			}
-
-			// Try to resolve not persisted password from SSh connector
-			synchronized (hostsInInitialization) {
-				if (hostsInInitialization.contains(host)) {
-					return null;
+			// Make connect in separate thread
+			Thread connectionInitializationThread = new Thread(new Runnable() {
+				public void run() {
+					initializeConnection(host, connector, userId, connection);
 				}
-				hostsInInitialization.add(host);
+			});
+			connectionInitializationThread.start();
+		}
+		return null;
+	}
+
+	private static void initializeConnection(IHost host,
+			IConnectorService connector, String userId,
+			ISshConnection connection) {
+		// Try to resolve not persisted password from SSh connector
+		synchronized (hostsInInitialization) {
+			if (hostsInInitialization.contains(host)) {
+				return;
 			}
+			hostsInInitialization.add(host);
+		}
+		try {
 			try {
-				try {
-					if (!connector.isConnected()) {
-						connector.connect(new NullProgressMonitor());
-					}
-				} catch (Exception e) {
-					DLTKRSEPlugin.log(e);
-				}
 				if (!connector.isConnected()) {
-					// Set connection as disabled for ten minutes
-					connection.setDisabled(1000 * 60 * 10);
-					return null;
+					connector.connect(new NullProgressMonitor());
 				}
+			} catch (Exception e) {
+				DLTKRSEPlugin.log(e);
+			}
+			if (!connector.isConnected()) {
+				// Set connection as disabled for ten minutes
+				connection.setDisabled(1000 * 60 * 10);
+				return;
+			}
 
-				String name = connector.getClass().getName();
-				if ("org.eclipse.rse.internal.connectorservice.ssh.SshConnectorService"
-						.equals(name)) {
-					// Ssh is available
-					try {
-						Method method = connector.getClass().getMethod(
-								"getSession", null);
-						if (method != null) {
-							Object invoke = method.invoke(connector, null);
-							if (invoke instanceof Session) {
-								Session session = (Session) invoke;
-								connection.setPassword(session.getUserInfo()
-										.getPassword());
-								connection.connect();
-								if (connection.isConnected()) {
-									return connection;
-								}
+			String name = connector.getClass().getName();
+			if ("org.eclipse.rse.internal.connectorservice.ssh.SshConnectorService"
+					.equals(name)) {
+				// Ssh is available
+				try {
+					Method method = connector.getClass().getMethod(
+							"getSession", null);
+					if (method != null) {
+						Object invoke = method.invoke(connector, null);
+						if (invoke instanceof Session) {
+							Session session = (Session) invoke;
+							connection.setPassword(session.getUserInfo()
+									.getPassword());
+							connection.connect();
+							if (connection.isConnected()) {
+								return;
 							}
 						}
-					} catch (SecurityException e) {
-						e.printStackTrace();
-					} catch (NoSuchMethodException e) {
-						e.printStackTrace();
-					} catch (IllegalArgumentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (InvocationTargetException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}
-				}
-			} finally {
-				synchronized (hostsInInitialization) {
-					hostsInInitialization.remove(host);
+				} catch (SecurityException e) {
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
+		} finally {
+			synchronized (hostsInInitialization) {
+				hostsInInitialization.remove(host);
+			}
+		}
 
-			// Try to find password and specify it for Ssh Connection.
-			SystemSignonInformation information = PasswordPersistenceManager
-					.getInstance().find(host.getSystemType(),
-							host.getHostName(), userId);
-			if (information != null && information.getPassword() != null) {
-				connection.setPassword(information.getPassword());
-				connection.connect();
-				if (connection.isConnected()) {
-					return connection;
-				}
-			}
-			// Try to connect any way
+		// Try to find password and specify it for Ssh Connection.
+		SystemSignonInformation information = PasswordPersistenceManager
+				.getInstance().find(host.getSystemType(), host.getHostName(),
+						userId);
+		if (information != null && information.getPassword() != null) {
+			connection.setPassword(information.getPassword());
 			connection.connect();
 			if (connection.isConnected()) {
-				return connection;
+				return;
 			}
-			// Set connection to disabled state for 10 seconds
-			connection.setDisabled(10000);
 		}
-		// System.out.println("Failed to create direct ssh connection for:"
-		// + host.toString());
-		return null;
+		// Try to connect any way
+		connection.connect();
+		if (connection.isConnected()) {
+			return;
+		}
+		// Set connection to disabled state for 10 seconds
+		connection.setDisabled(10000);
 	}
 }

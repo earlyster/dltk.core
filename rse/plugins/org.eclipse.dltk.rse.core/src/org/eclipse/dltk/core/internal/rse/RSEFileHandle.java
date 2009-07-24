@@ -137,7 +137,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 
 	public IFileHandle[] getChildren() {
 		if (!environment.connect()) {
-			return new IFileHandle[0];
+			return null;
 		}
 		fetchSshFile();
 		if (sshFile != null) {
@@ -264,6 +264,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		if (!environment.connect()) {
 			return null;
 		}
+		timestamps.clear();
 		fetchSshFile();
 		if (sshFile != null) {
 			try {
@@ -393,5 +394,14 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 	 */
 	public IFileStore getFileStore() {
 		return this.file;
+	}
+
+	/**
+	 * Removes saved timestamp for this element.
+	 * 
+	 * @since 2.0
+	 */
+	public void clearLastModifiedCache() {
+		timestamps.remove(toString());
 	}
 }

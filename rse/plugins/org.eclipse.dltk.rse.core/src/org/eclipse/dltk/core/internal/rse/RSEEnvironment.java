@@ -15,6 +15,7 @@ import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.subsystems.IConnectorService;
+import org.eclipse.rse.core.subsystems.ISubSystem;
 import org.eclipse.rse.internal.efs.RSEFileSystem;
 import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
 
@@ -136,14 +137,21 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	 * @since 2.0
 	 */
 	public boolean isConnected() {
-		IConnectorService[] services = host.getConnectorServices();
-		int connected = 0;
-		for (IConnectorService service : services) {
-			if (service.isConnected()) {
-				connected++;
+		// IConnectorService[] services = host.getConnectorServices();
+		// int connected = 0;
+		// for (IConnectorService service : services) {
+		// if (service.isConnected()) {
+		// connected++;
+		// }
+		// }
+		// return connected == services.length;
+		ISubSystem[] subSystems = host.getSubSystems();
+		for (ISubSystem subsystem : subSystems) {
+			if (subsystem instanceof IRemoteFileSubSystem) {
+				return subsystem.isConnected();
 			}
 		}
-		return connected == services.length;
+		return false;
 	}
 
 	/**
@@ -164,18 +172,29 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	private void connectUnsafe() {
 		boolean tryToConnect = isTryToConnect();
 		if (tryToConnect) {
-			IConnectorService[] services = host.getConnectorServices();
-			for (IConnectorService service : services) {
-				if (!service.isConnected()) {
+			ISubSystem[] subSystems = host.getSubSystems();
+			for (ISubSystem subsystem : subSystems) {
+				if (subsystem instanceof IRemoteFileSubSystem) {
 					try {
-						service.connect(new NullProgressMonitor());
+						subsystem.connect(new NullProgressMonitor(), false);
 					} catch (Exception e) {
-						if (!(e instanceof OperationCanceledException)) {
-							DLTKRSEPlugin.log(e);
-						}
+						DLTKRSEPlugin.log(e);
 					}
 				}
 			}
+			//
+			// IConnectorService[] services = host.getConnectorServices();
+			// for (IConnectorService service : services) {
+			// if (!service.isConnected()) {
+			// try {
+			// service.connect(new NullProgressMonitor());
+			// } catch (Exception e) {
+			// if (!(e instanceof OperationCanceledException)) {
+			// DLTKRSEPlugin.log(e);
+			// }
+			// }
+			// }
+			// }
 			setTryToConnect(false);
 		}
 	}

@@ -64,6 +64,11 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	private static final int WAIT_INTERVAL = 500;
 	private boolean initialized = false;
 	private InitThread initThread = null;
+	private long rseInitThreadStartTime = 0;
+	private static final long RSE_INIT_THREAD_TIMEOUT = 60 * 1000; // 60 seconds
+	// for RSE
+	// initialization
+	// thread.
 
 	private static final boolean DEBUG = false;
 
@@ -104,11 +109,23 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 				}
 				return true;
 			}
+			if (initThread != null
+					&& System.currentTimeMillis() > rseInitThreadStartTime) { // RSE
+																				// wait
+																				// for
+																				// initialization
+																				// could
+																				// hang
+				initThread.interrupt();
+				initThread = null; // Try one more time.
+			}
 			boolean newThread = false;
 			if (initThread == null) {
 				newThread = true;
 				initThread = new InitThread();
 				initThread.start();
+				rseInitThreadStartTime = System.currentTimeMillis()
+						+ RSE_INIT_THREAD_TIMEOUT;
 				if (DEBUG)
 					System.out.println("start initThread"); //$NON-NLS-1$
 			}
