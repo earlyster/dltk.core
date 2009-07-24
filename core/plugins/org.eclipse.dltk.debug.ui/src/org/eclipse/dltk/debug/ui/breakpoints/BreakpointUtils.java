@@ -116,7 +116,10 @@ public class BreakpointUtils {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
-	private static interface IBreakpointLocationTester {
+	/**
+	 * @since 2.0
+	 */
+	public static interface IBreakpointLocationTester {
 
 		/**
 		 * @param bpLocation
@@ -166,7 +169,10 @@ public class BreakpointUtils {
 		}
 	}
 
-	private static IBreakpointLocationTester getBreakpointLocationTester(
+	/**
+	 * @since 2.0
+	 */
+	public static IBreakpointLocationTester getBreakpointLocationTester(
 			IEditorInput editorInput) throws CoreException {
 		IResource resource = (IResource) editorInput
 				.getAdapter(IResource.class);
@@ -225,14 +231,31 @@ public class BreakpointUtils {
 	public static ILineBreakpoint findLineBreakpoint(ITextEditor editor,
 			int lineNumber) throws CoreException {
 		final IEditorInput editorInput = editor.getEditorInput();
-		final IBreakpointLocationTester tester = getBreakpointLocationTester(editorInput);
+		final IResource resource = getBreakpointResource(editorInput);
+		final String debugModelId = getDebugModelId(editor, resource);
+		return findLineBreakpoint(editor, lineNumber, debugModelId);
+	}
+
+	/**
+	 * 
+	 * ...assume we already know debugModelId
+	 * 
+	 * @since 2.0
+	 * @param editor
+	 * @param lineNumber
+	 * @return
+	 * @throws CoreException
+	 */
+	public static ILineBreakpoint findLineBreakpoint(ITextEditor editor,
+			int lineNumber, String debugModelId) throws CoreException {
+		final IBreakpoint[] breakpoints = DebugPlugin.getDefault()
+				.getBreakpointManager().getBreakpoints(debugModelId);
+
+		final IBreakpointLocationTester tester = getBreakpointLocationTester(editor
+				.getEditorInput());
 		if (tester == null) {
 			return null;
 		}
-		final IResource resource = getBreakpointResource(editorInput);
-		final String debugModelId = getDebugModelId(editor, resource);
-		final IBreakpoint[] breakpoints = DebugPlugin.getDefault()
-				.getBreakpointManager().getBreakpoints(debugModelId);
 
 		for (int i = 0; i < breakpoints.length; i++) {
 			try {

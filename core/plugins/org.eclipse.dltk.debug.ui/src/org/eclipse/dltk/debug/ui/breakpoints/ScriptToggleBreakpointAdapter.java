@@ -224,6 +224,14 @@ public abstract class ScriptToggleBreakpointAdapter implements
 		return selection;
 	}
 
+	/**
+	 * @since 2.0
+	 */
+	private void addLineBreakpoint(ITextEditor textEditor, int lineNumber)
+			throws CoreException {
+		BreakpointUtils.addLineBreakpoint(textEditor, lineNumber);
+	}
+
 	public void toggleLineBreakpoints(final IWorkbenchPart part,
 			final ISelection selection) throws CoreException {
 
@@ -242,7 +250,8 @@ public abstract class ScriptToggleBreakpointAdapter implements
 								.getStartLine() + 1;
 
 						final IBreakpoint breakpoint = BreakpointUtils
-								.findLineBreakpoint(editor, lineNumber);
+								.findLineBreakpoint(editor, lineNumber,
+										getDebugModelId());
 
 						if (breakpoint != null) {
 							// if breakpoint already exists, delete it
@@ -265,8 +274,7 @@ public abstract class ScriptToggleBreakpointAdapter implements
 								// location
 								if (BreakpointUtils.findLineBreakpoint(editor,
 										lineNumber) == null) {
-									BreakpointUtils.addLineBreakpoint(editor,
-											lineNumber);
+									addLineBreakpoint(editor, lineNumber);
 								} else {
 									report(
 											NLS
