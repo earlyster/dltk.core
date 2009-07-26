@@ -181,7 +181,7 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 	}
 
 	@Override
-	protected IStatus validateSorceModule(IDLTKLanguageToolkit toolkit,
+	protected IStatus validateSourceModule(IDLTKLanguageToolkit toolkit,
 			IResource resource) {
 		// external, resource will always be null
 		IPath path = getFullPath();

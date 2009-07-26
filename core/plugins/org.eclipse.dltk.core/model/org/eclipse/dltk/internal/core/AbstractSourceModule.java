@@ -708,7 +708,7 @@ public abstract class AbstractSourceModule extends Openable implements
 			toolkit = lookupLanguageToolkit(this);
 		}
 
-		IStatus status = validateSorceModule(toolkit, resource);
+		IStatus status = validateSourceModule(toolkit, resource);
 		if (status != null) {
 			return status;
 		}
@@ -717,7 +717,7 @@ public abstract class AbstractSourceModule extends Openable implements
 
 	}
 
-	protected IStatus validateSorceModule(IDLTKLanguageToolkit toolkit,
+	protected IStatus validateSourceModule(IDLTKLanguageToolkit toolkit,
 			IResource resource) {
 		if (toolkit == null) {
 			toolkit = DLTKLanguageManager.findToolkit(getParent(), resource,
