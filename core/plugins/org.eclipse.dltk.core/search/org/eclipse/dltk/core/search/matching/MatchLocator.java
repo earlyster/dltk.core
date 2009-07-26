@@ -303,7 +303,7 @@ public class MatchLocator implements ITypeRequestor {
 				return this.current;
 			}
 
-			protected boolean hasNextQuery() {
+			public boolean hasNextQuery() {
 				if (this.current == leftPattern) {
 					this.current = rightPattern;
 					return true;
@@ -311,7 +311,7 @@ public class MatchLocator implements ITypeRequestor {
 				return false;
 			}
 
-			protected void resetQuery() {
+			public void resetQuery() {
 				this.current = leftPattern;
 			}
 		};

@@ -27,26 +27,32 @@ public class OrPattern extends SearchPattern implements IIndexConstants {
 	/*
 	 * Whether this pattern is erasure match.
 	 */
-//	boolean isErasureMatch;
+	// boolean isErasureMatch;
 
 	/**
-	 * One of {@link #R_ERASURE_MATCH}, {@link #R_EQUIVALENT_MATCH}, {@link #R_FULL_MATCH}.
+	 * One of {@link #R_ERASURE_MATCH}, {@link #R_EQUIVALENT_MATCH},
+	 * {@link #R_FULL_MATCH}.
 	 */
 	int matchCompatibility;
 
 	public OrPattern(SearchPattern leftPattern, SearchPattern rightPattern) {
-		super(Math.max(leftPattern.getMatchRule(), rightPattern.getMatchRule()), leftPattern.getToolkit());
-		((InternalSearchPattern)this).kind = OR_PATTERN;
-		
+		super(
+				Math.max(leftPattern.getMatchRule(), rightPattern
+						.getMatchRule()), leftPattern.getToolkit());
+		((InternalSearchPattern) this).kind = OR_PATTERN;
+
 		Assert.isNotNull(leftPattern.getToolkit());
-		Assert.isTrue(leftPattern.getToolkit().equals(rightPattern.getToolkit()));
-	
-		SearchPattern[] leftPatterns = leftPattern instanceof OrPattern ? ((OrPattern) leftPattern).patterns : null;
-		SearchPattern[] rightPatterns = rightPattern instanceof OrPattern ? ((OrPattern) rightPattern).patterns : null;
+		Assert.isTrue(leftPattern.getToolkit()
+				.equals(rightPattern.getToolkit()));
+
+		SearchPattern[] leftPatterns = leftPattern instanceof OrPattern ? ((OrPattern) leftPattern).patterns
+				: null;
+		SearchPattern[] rightPatterns = rightPattern instanceof OrPattern ? ((OrPattern) rightPattern).patterns
+				: null;
 		int leftSize = leftPatterns == null ? 1 : leftPatterns.length;
 		int rightSize = rightPatterns == null ? 1 : rightPatterns.length;
 		this.patterns = new SearchPattern[leftSize + rightSize];
-	
+
 		if (leftPatterns == null)
 			this.patterns[0] = leftPattern;
 		else
@@ -54,7 +60,8 @@ public class OrPattern extends SearchPattern implements IIndexConstants {
 		if (rightPatterns == null)
 			this.patterns[leftSize] = rightPattern;
 		else
-			System.arraycopy(rightPatterns, 0, this.patterns, leftSize, rightSize);
+			System.arraycopy(rightPatterns, 0, this.patterns, leftSize,
+					rightSize);
 
 		// Store erasure match
 		matchCompatibility = 0;
@@ -62,12 +69,17 @@ public class OrPattern extends SearchPattern implements IIndexConstants {
 			matchCompatibility |= ((DLTKSearchPattern) this.patterns[i]).matchCompatibility;
 		}
 	}
-	public void findIndexMatches(Index index, IndexQueryRequestor requestor, SearchParticipant participant, IDLTKSearchScope scope, IProgressMonitor progressMonitor) throws IOException {
-		// per construction, OR pattern can only be used with a PathCollector (which already gather results using a set)
+
+	public void findIndexMatches(Index index, IndexQueryRequestor requestor,
+			SearchParticipant participant, IDLTKSearchScope scope,
+			IProgressMonitor progressMonitor) throws IOException {
+		// per construction, OR pattern can only be used with a PathCollector
+		// (which already gather results using a set)
 		try {
 			index.startQuery();
 			for (int i = 0, length = this.patterns.length; i < length; i++)
-				((InternalSearchPattern)this.patterns[i]).findIndexMatches(index, requestor, participant, scope, progressMonitor);
+				((InternalSearchPattern) this.patterns[i]).findIndexMatches(
+						index, requestor, participant, scope, progressMonitor);
 		} finally {
 			index.stopQuery();
 		}
@@ -83,20 +95,29 @@ public class OrPattern extends SearchPattern implements IIndexConstants {
 
 	public boolean isPolymorphicSearch() {
 		for (int i = 0, length = this.patterns.length; i < length; i++)
-			if (((InternalSearchPattern) this.patterns[i]).isPolymorphicSearch()) return true;
+			if (((InternalSearchPattern) this.patterns[i])
+					.isPolymorphicSearch())
+				return true;
 		return false;
 	}
 
 	/**
 	 * Returns whether the pattern has signatures or not.
+	 * 
 	 * @return true if one at least of the stored pattern has signatures.
 	 */
 	public final boolean hasSignatures() {
 		boolean isErasureMatch = isErasureMatch();
-		for (int i = 0, length = this.patterns.length; i < length && !isErasureMatch; i++) {
-			if (((DLTKSearchPattern) this.patterns[i]).hasSignatures()) return true;
+		for (int i = 0, length = this.patterns.length; i < length
+				&& !isErasureMatch; i++) {
+			if (((DLTKSearchPattern) this.patterns[i]).hasSignatures())
+				return true;
 		}
 		return false;
+	}
+
+	public SearchPattern[] getPatterns() {
+		return patterns;
 	}
 
 	public String toString() {

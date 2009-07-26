@@ -22,6 +22,7 @@ import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.core.index2.IElementResolver;
 import org.eclipse.dltk.core.index2.IIndexer;
 import org.eclipse.dltk.core.index2.IIndexerParticipant;
 import org.eclipse.dltk.core.index2.search.ISearchEngine.MatchRule;
@@ -132,6 +133,45 @@ public class ModelAccess {
 		return (IType[]) result.toArray(new IType[result.size()]);
 	}
 
+	protected <T extends IModelElement> boolean findElements(int elementType,
+			String name, MatchRule matchRule, int trueFlags, int falseFlags,
+			IDLTKSearchScope scope, final Collection<T> result,
+			IProgressMonitor monitor) {
+
+		IDLTKLanguageToolkit toolkit = scope.getLanguageToolkit();
+		final IElementResolver elementResolver = getElementResolver(toolkit);
+		if (elementResolver == null) {
+			return false;
+		}
+		ISearchEngine searchEngine = getSearchEngine(toolkit);
+		if (searchEngine == null) {
+			return false;
+		}
+
+		searchEngine.search(elementType, name, trueFlags, falseFlags, 0,
+				SearchFor.DECLARATIONS, matchRule, scope,
+				new ISearchRequestor() {
+
+					@SuppressWarnings("unchecked")
+					public void match(int elementType, int flags, int offset,
+							int length, int nameOffset, int nameLength,
+							String elementName, String metadata,
+							String qualifier, String parent,
+							ISourceModule sourceModule, boolean isReference) {
+
+						IModelElement element = elementResolver.resolve(
+								elementType, flags, offset, length, nameOffset,
+								nameLength, elementName, metadata, qualifier,
+								parent, sourceModule);
+						if (element != null) {
+							result.add((T) element);
+						}
+					}
+				}, monitor);
+
+		return true;
+	}
+
 	/**
 	 * Converts old-style search flags to MatchRule.
 	 * 
@@ -142,23 +182,42 @@ public class ModelAccess {
 	 */
 	public static MatchRule convertSearchRule(int searchRule) {
 		MatchRule matchRule;
-		switch (searchRule) {
-		case SearchPattern.R_PREFIX_MATCH:
+		if ((searchRule & SearchPattern.R_PREFIX_MATCH) != 0) {
 			matchRule = MatchRule.PREFIX;
-			break;
-		case SearchPattern.R_CAMELCASE_MATCH:
+		} else if ((searchRule & SearchPattern.R_CAMELCASE_MATCH) != 0) {
 			matchRule = MatchRule.CAMEL_CASE;
-			break;
-		case SearchPattern.R_PATTERN_MATCH:
+		} else if ((searchRule & SearchPattern.R_PATTERN_MATCH) != 0) {
 			matchRule = MatchRule.PATTERN;
-			break;
-		default:
+		} else {
 			matchRule = MatchRule.EXACT;
 		}
 		return matchRule;
 	}
 
-	public static ISearchEngine createSearchEngine(IDLTKLanguageToolkit toolkit) {
+	/**
+	 * Creates search participant
+	 * 
+	 * @param toolkit
+	 *            Language toolkit
+	 * @return indexer participant instance or <code>null</code> in case new
+	 *         indexing infrastructure is not initiated
+	 */
+	public static IIndexerParticipant getIndexerParticipant(
+			IDLTKLanguageToolkit toolkit) {
+		IIndexer indexer = IndexerManager.getIndexer();
+		return IndexerManager.getIndexerParticipant(indexer, toolkit
+				.getNatureId());
+	}
+
+	/**
+	 * Creates new search engine instance
+	 * 
+	 * @param toolkit
+	 *            Language toolkit
+	 * @return search engine instance or <code>null</code> in case new indexing
+	 *         infrastructure is not initiated
+	 */
+	public static ISearchEngine getSearchEngine(IDLTKLanguageToolkit toolkit) {
 		if (toolkit != null) {
 			IIndexer indexer = IndexerManager.getIndexer();
 			if (indexer != null) {
@@ -168,41 +227,20 @@ public class ModelAccess {
 		return null;
 	}
 
-	protected <T extends IModelElement> boolean findElements(int elementType,
-			String name, MatchRule matchRule, int trueFlags, int falseFlags,
-			IDLTKSearchScope scope, final Collection<T> result,
-			IProgressMonitor monitor) {
-
-		IIndexer indexer = IndexerManager.getIndexer();
-		final IIndexerParticipant participant = IndexerManager
-				.getIndexerParticipant(indexer, scope.getLanguageToolkit()
-						.getNatureId());
-		if (indexer == null || participant == null) {
-			return false;
+	/**
+	 * Creates element resolver
+	 * 
+	 * @param toolkit
+	 *            Language toolkit
+	 * @return element resolver or <code>null</code> in case new indexing
+	 *         infrastructure is not initiated
+	 */
+	public static IElementResolver getElementResolver(
+			IDLTKLanguageToolkit toolkit) {
+		IIndexerParticipant participant = getIndexerParticipant(toolkit);
+		if (participant != null) {
+			return participant.getElementResolver();
 		}
-		ISearchEngine searchEngine = indexer.createSearchEngine();
-
-		searchEngine.search(elementType, name, trueFlags, falseFlags, 0,
-				SearchFor.DECLARATIONS, matchRule, scope,
-				new ISearchRequestor() {
-
-					public void match(int elementType, int flags, int offset,
-							int length, int nameOffset, int nameLength,
-							String elementName, String metadata,
-							String qualifier, String parent,
-							ISourceModule sourceModule, boolean isReference) {
-
-						IModelElement element = participant
-								.getElementResolver().resolve(elementType,
-										flags, offset, length, nameOffset,
-										nameLength, elementName, metadata,
-										qualifier, parent, sourceModule);
-						if (element != null) {
-							result.add((T) element);
-						}
-					}
-				}, monitor);
-
-		return true;
+		return null;
 	}
 }

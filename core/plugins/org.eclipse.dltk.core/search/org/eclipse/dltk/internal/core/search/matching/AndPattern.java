@@ -86,16 +86,16 @@ public abstract class AndPattern extends DLTKSearchPattern {
 				((InternalSearchPattern) this).acceptMatch((String) names[i],
 						containerPath, null/* no pattern */, requestor,
 						participant, scope); // AndPatterns cannot provide
-												// the decoded result
+		// the decoded result
 	}
 
 	/**
 	 * Returns whether another query must be done.
 	 */
-	protected abstract boolean hasNextQuery();
+	public abstract boolean hasNextQuery();
 
 	/**
 	 * Resets the query and prepares this pattern to be queried.
 	 */
-	protected abstract void resetQuery();
+	public abstract void resetQuery();
 }

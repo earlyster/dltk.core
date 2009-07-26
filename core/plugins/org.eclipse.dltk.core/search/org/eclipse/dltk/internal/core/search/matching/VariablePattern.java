@@ -14,12 +14,12 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 
 public abstract class VariablePattern extends DLTKSearchPattern {
 
-	protected boolean findDeclarations;
-	protected boolean findReferences;
+	public boolean findDeclarations;
+	public boolean findReferences;
 	protected boolean readAccess;
 	protected boolean writeAccess;
 
-	protected char[] name;
+	public char[] name;
 
 	public VariablePattern(int patternKind, boolean findDeclarations,
 			boolean readAccess, boolean writeAccess, char[] name,

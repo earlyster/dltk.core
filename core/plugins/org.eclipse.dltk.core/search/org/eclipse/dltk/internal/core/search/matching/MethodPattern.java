@@ -21,8 +21,8 @@ import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 
 public class MethodPattern extends DLTKSearchPattern implements IIndexConstants {
-	protected boolean findDeclarations;
-	protected boolean findReferences;
+	public boolean findDeclarations;
+	public boolean findReferences;
 	public char[] selector;
 	public char[] declaringQualificationName;
 	public char[] declaringSimpleName;
@@ -86,10 +86,12 @@ public class MethodPattern extends DLTKSearchPattern implements IIndexConstants 
 	 */
 	public MethodPattern(boolean findDeclarations, boolean findReferences,
 			char[] selector, char[] declaringQualification,
-			char[] declaringSimpleName, IMethod method, int matchRule, IDLTKLanguageToolkit toolkit) {
+			char[] declaringSimpleName, IMethod method, int matchRule,
+			IDLTKLanguageToolkit toolkit) {
 		this(findDeclarations, findReferences, selector,
 				declaringQualification, declaringSimpleName,
-				method == null ? null : method.getDeclaringType(), matchRule, toolkit);
+				method == null ? null : method.getDeclaringType(), matchRule,
+				toolkit);
 		// Get unique key for parameterized constructors
 		// String genericDeclaringTypeSignature = null;
 		// String genericSignature = null;
