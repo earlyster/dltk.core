@@ -200,9 +200,7 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 
 		String[] cmdLine = renderCommandLine(config);
 		IPath workingDirectory = config.getWorkingDirectoryPath();
-		String[] environment = config
-				.getEnvironmentAsStringsIncluding(interpreterInstall
-						.getEnvironmentVariables());
+		String[] environment = getEnvironmentVariablesAsStrings(config);
 
 		final String cmdLineLabel = renderCommandLineLabel(cmdLine);
 		final String processLabel = renderProcessLabel(cmdLine);
@@ -231,6 +229,11 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 				getDefaultProcessMap());
 		process.setAttribute(IProcess.ATTR_CMDLINE, cmdLineLabel);
 		return process;
+	}
+
+	protected String[] getEnvironmentVariablesAsStrings(InterpreterConfig config) {
+		return config.getEnvironmentAsStringsIncluding(getInstall()
+				.getEnvironmentVariables());
 	}
 
 	private void traceExecution(String processLabel, String cmdLineLabel,
