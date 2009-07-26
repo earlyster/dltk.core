@@ -231,6 +231,9 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 		return process;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected String[] getEnvironmentVariablesAsStrings(InterpreterConfig config) {
 		return config.getEnvironmentAsStringsIncluding(getInstall()
 				.getEnvironmentVariables());
