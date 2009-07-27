@@ -89,6 +89,8 @@ public class SqlIndexer extends AbstractIndexer {
 			DbFactory dbFactory = DbFactory.getInstance();
 			connection = dbFactory.createConnection();
 			try {
+				connection.setAutoCommit(false);
+
 				IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 						.getLanguageToolkit(sourceModule);
 				if (toolkit == null) {
@@ -125,6 +127,7 @@ public class SqlIndexer extends AbstractIndexer {
 				super.indexDocument(sourceModule);
 
 			} finally {
+				connection.commit();
 				connection.close();
 			}
 		} catch (Exception e) {
