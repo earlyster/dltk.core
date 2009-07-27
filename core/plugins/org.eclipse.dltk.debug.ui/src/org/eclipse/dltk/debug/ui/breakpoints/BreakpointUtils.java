@@ -54,6 +54,9 @@ public class BreakpointUtils {
 				.getLanguageToolkit(getNatureId(breakpoint));
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public static void addLineBreakpoint(ITextEditor textEditor, int lineNumber)
 			throws CoreException {
 		addLineBreakpoint(textEditor, lineNumber, null);
