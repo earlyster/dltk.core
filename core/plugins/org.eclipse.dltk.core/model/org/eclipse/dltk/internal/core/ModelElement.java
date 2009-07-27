@@ -53,7 +53,7 @@ public abstract class ModelElement extends PlatformObject implements
 	public static final char JEM_METHOD = '~';
 	public static final char JEM_SOURCEMODULE = '{';
 	public static final char JEM_TYPE = '[';
-	public static final char JEM_IMPORTDECLARATION = '#';
+	public static final char JEM_IMPORTDECLARATION = '&';
 	public static final char JEM_COUNT = '!';
 	public static final char JEM_LOCALVARIABLE = '@';
 	public static final char JEM_TYPE_PARAMETER = ']';
@@ -64,7 +64,7 @@ public abstract class ModelElement extends PlatformObject implements
 	 * such delimiter requires building of the model.
 	 */
 	public static final char JEM_USER_ELEMENT = '}';
-	public static final String JEM_USER_ELEMENT_ENDING = "=/<^~{[#!@]%}";
+	public static final String JEM_USER_ELEMENT_ENDING = "=/<^~{[&!@]%}";
 
 	// Used to replace path / or \\ symbols in external package names and
 	// archives.
