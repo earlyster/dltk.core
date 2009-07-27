@@ -39,8 +39,9 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
  */
 public class MetadataContentCache extends AbstractContentCache {
 	private static final int DAY_IN_MILIS = 60;// 1000 * 60 * 60 * 24;
-	private static final int SAVE_DELTA = 100;
+	private static final int SAVE_DELTA = 1000 * 60; // Minute
 	private Resource indexResource = null;
+	private long newSaveTime = 0;
 
 	private static class EntryKey {
 		private String environment;
@@ -235,9 +236,9 @@ public class MetadataContentCache extends AbstractContentCache {
 			return;
 		}
 		if (countSaves) {
-			changeCount++;
-			if (changeCount > SAVE_DELTA) {
-				changeCount = 0;
+			long current = System.currentTimeMillis();
+			if (current > newSaveTime) {
+				newSaveTime = current + SAVE_DELTA;
 			} else {
 				return;
 			}
