@@ -39,11 +39,13 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 		try {
 			IProjectFragment fragment = project.findProjectFragment(path);
 			if (fragment != null) {
+				ProgressJob progressJob = new ProgressJob(jobManager);
 				AbstractIndexRequest request = new ExternalProjectFragmentRequest(
-						this, fragment, null);
+						this, fragment, progressJob);
 				if (!jobManager.isJobWaiting(request)) {
 					jobManager.request(request);
 				}
+				progressJob.schedule();
 			} else {
 				DLTKCore.warn(NLS.bind("Unknown project fragment: ''{0}''",
 						path));
@@ -55,10 +57,13 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 	}
 
 	public void indexProject(IScriptProject project) {
-		final ProjectRequest request = new ProjectRequest(this, project, null);
+		ProgressJob progressJob = new ProgressJob(jobManager);
+		final ProjectRequest request = new ProjectRequest(this, project,
+				progressJob);
 		if (!jobManager.isJobWaiting(request)) {
 			jobManager.request(request);
 		}
+		progressJob.schedule();
 	}
 
 	public void indexProjectFragment(IScriptProject project, IPath path) {
@@ -76,17 +81,23 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 		}
 		if (fragmentToIndex == null || !fragmentToIndex.isExternal()
 				|| fragmentToIndex.isBuiltin()) {
-			ProjectRequest request = new ProjectRequest(this, project, null);
+			ProgressJob progressJob = new ProgressJob(jobManager);
+			ProjectRequest request = new ProjectRequest(this, project,
+					progressJob);
 			if (!jobManager.isJobWaiting(request)) {
 				jobManager.request(request);
 			}
+			progressJob.schedule();
 			return;
 		}
+
+		ProgressJob progressJob = new ProgressJob(jobManager);
 		ExternalProjectFragmentRequest request = new ExternalProjectFragmentRequest(
-				this, fragmentToIndex, null);
+				this, fragmentToIndex, progressJob);
 		if (!jobManager.isJobWaiting(request)) {
 			jobManager.request(request);
 		}
+		progressJob.schedule();
 	}
 
 	public void indexSourceModule(ISourceModule module,
