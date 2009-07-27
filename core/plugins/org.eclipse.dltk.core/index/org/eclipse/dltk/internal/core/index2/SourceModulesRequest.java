@@ -59,10 +59,11 @@ public class SourceModulesRequest extends AbstractIndexRequest {
 		analyzeSourceModuleChanges(containerPath, sourceModules, toRemove,
 				toReindex);
 
-		for (String path : toRemove) {
+		for (final String path : toRemove) {
 			indexer.removeDocument(containerPath, path);
 		}
-		for (ISourceModule sourceModule : toReindex) {
+
+		for (final ISourceModule sourceModule : toReindex) {
 			if (progressJob != null) {
 				String path;
 				IResource resource = sourceModule.getResource();
