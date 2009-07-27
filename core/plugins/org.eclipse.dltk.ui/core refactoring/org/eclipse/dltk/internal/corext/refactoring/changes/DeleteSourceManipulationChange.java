@@ -28,28 +28,30 @@ import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ui.ide.undo.ResourceDescription;
 
-
 public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 
 	private final String fHandle;
 	private final boolean fIsExecuteChange;
-	
-	public DeleteSourceManipulationChange(ISourceManipulation sm, boolean isExecuteChange) { 
+
+	public DeleteSourceManipulationChange(ISourceManipulation sm,
+			boolean isExecuteChange) {
 		Assert.isNotNull(sm);
-		fHandle= getScriptElement(sm).getHandleIdentifier();
-		fIsExecuteChange= isExecuteChange;
+		fHandle = getScriptElement(sm).getHandleIdentifier();
+		fIsExecuteChange = isExecuteChange;
 	}
 
 	/*
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return Messages.format(RefactoringCoreMessages.DeleteSourceManipulationChange_0, getElementName()); 
+		return Messages.format(
+				RefactoringCoreMessages.DeleteSourceManipulationChange_0,
+				getElementName());
 	}
-	
+
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		// delete changes don't provide an undo operation
-		ISourceManipulation element= getSourceModification();
+		ISourceManipulation element = getSourceModification();
 		if (fIsExecuteChange) {
 			if (element instanceof ISourceModule) {
 				// don't check anything in this case. We have a warning dialog
@@ -64,9 +66,9 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	}
 
 	private String getElementName() {
-		IModelElement modelElement= getScriptElement(getSourceModification());
+		IModelElement modelElement = getScriptElement(getSourceModification());
 		if (ModelElementUtil.isDefaultPackage(modelElement))
-			return RefactoringCoreMessages.DeleteSourceManipulationChange_1; 
+			return RefactoringCoreMessages.DeleteSourceManipulationChange_1;
 		return modelElement.getElementName();
 	}
 
@@ -76,55 +78,66 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	public Object getModifiedElement() {
 		return DLTKCore.create(fHandle);
 	}
-	
+
 	/*
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
 	protected Change doDelete(IProgressMonitor pm) throws CoreException {
-		ISourceManipulation element= getSourceModification();
-		// we have to save dirty compilation units before deleting them. Otherwise
-		// we will end up showing ghost compilation units in the package explorer
+		ISourceManipulation element = getSourceModification();
+		// we have to save dirty compilation units before deleting them.
+		// Otherwise
+		// we will end up showing ghost compilation units in the package
+		// explorer
 		// since the primary working copy still exists.
 		if (element instanceof ISourceModule) {
 			pm.beginTask("", 2); //$NON-NLS-1$
-			ISourceModule unit= (ISourceModule)element;
+			ISourceModule unit = (ISourceModule) element;
 			saveCUnitIfNeeded(unit, new SubProgressMonitor(pm, 1));
 			// element.delete(false, new SubProgressMonitor(pm, 1));
 
 			IResource resource = unit.getResource();
-			ResourceDescription resourceDescription = ResourceDescription
-					.fromResource(resource);
-			element.delete(false, new SubProgressMonitor(pm, 1));
-			resourceDescription.recordStateFromHistory(resource,
-					new SubProgressMonitor(pm, 1));
-			return new UndoDeleteResourceChange(resourceDescription);
-		// begin fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
+			if (resource != null) {
+				ResourceDescription resourceDescription = ResourceDescription
+						.fromResource(resource);
+				element.delete(false, new SubProgressMonitor(pm, 1));
+				resourceDescription.recordStateFromHistory(resource,
+						new SubProgressMonitor(pm, 1));
+				return new UndoDeleteResourceChange(resourceDescription);
+			} else {
+				element.delete(false, pm);
+			}
+			return null;
+
+			// begin fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
 		} else if (element instanceof IScriptFolder) {
-			ISourceModule[] units= ((IScriptFolder)element).getSourceModules();
+			ISourceModule[] units = ((IScriptFolder) element)
+					.getSourceModules();
 			pm.beginTask("", units.length + 1); //$NON-NLS-1$
 			for (int i = 0; i < units.length; i++) {
 				saveCUnitIfNeeded(units[i], new SubProgressMonitor(pm, 1));
 			}
 			element.delete(false, new SubProgressMonitor(pm, 1));
 			return new NullChange();
-		// end fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
+			// end fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
 		} else {
 			element.delete(false, pm);
 			return null;
 		}
 	}
-		
+
 	private ISourceManipulation getSourceModification() {
-		return (ISourceManipulation)getModifiedElement();
+		return (ISourceManipulation) getModifiedElement();
 	}
 
 	private static IModelElement getScriptElement(ISourceManipulation sm) {
-		//all known ISourceManipulations are IModelElements
-		return (IModelElement)sm;
+		// all known ISourceManipulations are IModelElements
+		return (IModelElement) sm;
 	}
-	
-	private static void saveCUnitIfNeeded(ISourceModule unit, IProgressMonitor pm) throws CoreException {
-		saveFileIfNeeded((IFile)unit.getResource(), pm);
+
+	private static void saveCUnitIfNeeded(ISourceModule unit,
+			IProgressMonitor pm) throws CoreException {
+		if (unit.getResource() != null) {
+			saveFileIfNeeded((IFile) unit.getResource(), pm);
+		}
 	}
 }
-
