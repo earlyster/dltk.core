@@ -40,7 +40,6 @@ import org.eclipse.osgi.util.NLS;
  */
 public class SqlIndexer extends AbstractIndexer {
 
-	private static final int LAST_MODIFIER = (1 << 31);
 	private Connection connection;
 	private File file;
 	private String natureId;
@@ -49,11 +48,6 @@ public class SqlIndexer extends AbstractIndexer {
 			int length, int nameOffset, int nameLength, String elementName,
 			String metadata, String qualifier, String parent) {
 
-		if (flags == 0) {
-			// This is needed for performing searches depending on bitset
-			// negations: (flag & ~someflag) != 0
-			flags = LAST_MODIFIER;
-		}
 		try {
 			DbFactory.getInstance().getElementDao().insert(connection,
 					elementType, flags, offset, length, nameOffset, nameLength,
