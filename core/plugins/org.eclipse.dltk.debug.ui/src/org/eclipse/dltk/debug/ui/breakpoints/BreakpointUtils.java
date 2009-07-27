@@ -56,6 +56,14 @@ public class BreakpointUtils {
 
 	public static void addLineBreakpoint(ITextEditor textEditor, int lineNumber)
 			throws CoreException {
+		addLineBreakpoint(textEditor, lineNumber, null);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public static void addLineBreakpoint(ITextEditor textEditor,
+			int lineNumber, String debugModelId) throws CoreException {
 		IDocument document = textEditor.getDocumentProvider().getDocument(
 				textEditor.getEditorInput());
 
@@ -65,9 +73,12 @@ public class BreakpointUtils {
 			int start = line.getOffset();
 			int end = start + line.getLength();
 
-			String debugModelId = getDebugModelId(textEditor, resource);
-			if (debugModelId == null)
-				return;
+			if (debugModelId == null) {
+				debugModelId = getDebugModelId(textEditor, resource);
+				if (debugModelId == null) {
+					return;
+				}
+			}
 
 			IPath location = getBreakpointResourceLocation(textEditor);
 			ScriptDebugModel.createLineBreakpoint(debugModelId, resource,

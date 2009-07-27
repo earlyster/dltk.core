@@ -224,14 +224,6 @@ public abstract class ScriptToggleBreakpointAdapter implements
 		return selection;
 	}
 
-	/**
-	 * @since 2.0
-	 */
-	private void addLineBreakpoint(ITextEditor textEditor, int lineNumber)
-			throws CoreException {
-		BreakpointUtils.addLineBreakpoint(textEditor, lineNumber);
-	}
-
 	public void toggleLineBreakpoints(final IWorkbenchPart part,
 			final ISelection selection) throws CoreException {
 
@@ -249,9 +241,10 @@ public abstract class ScriptToggleBreakpointAdapter implements
 						int lineNumber = ((ITextSelection) selection)
 								.getStartLine() + 1;
 
+						final String debugModelId = getDebugModelId();
 						final IBreakpoint breakpoint = BreakpointUtils
 								.findLineBreakpoint(editor, lineNumber,
-										getDebugModelId());
+										debugModelId);
 
 						if (breakpoint != null) {
 							// if breakpoint already exists, delete it
@@ -273,8 +266,9 @@ public abstract class ScriptToggleBreakpointAdapter implements
 								// Check if already breakpoint set to the same
 								// location
 								if (BreakpointUtils.findLineBreakpoint(editor,
-										lineNumber) == null) {
-									addLineBreakpoint(editor, lineNumber);
+										lineNumber, debugModelId) == null) {
+									BreakpointUtils.addLineBreakpoint(editor,
+											lineNumber, debugModelId);
 								} else {
 									report(
 											NLS
@@ -360,7 +354,7 @@ public abstract class ScriptToggleBreakpointAdapter implements
 	 */
 	protected boolean isFields(IStructuredSelection selection) {
 		if (!selection.isEmpty()) {
-			for (Iterator i = selection.iterator(); i.hasNext();) {
+			for (Iterator<?> i = selection.iterator(); i.hasNext();) {
 				Object thing = i.next();
 				if (thing instanceof IField) {
 					return true;
@@ -383,13 +377,13 @@ public abstract class ScriptToggleBreakpointAdapter implements
 	 *         possibly empty
 	 * @throws CoreException
 	 */
-	protected List getFields(IStructuredSelection selection)
+	protected List<?> getFields(IStructuredSelection selection)
 			throws CoreException {
 		if (selection.isEmpty()) {
 			return Collections.EMPTY_LIST;
 		}
-		List fields = new ArrayList(selection.size());
-		Iterator iterator = selection.iterator();
+		List<Object> fields = new ArrayList<Object>(selection.size());
+		Iterator<?> iterator = selection.iterator();
 		while (iterator.hasNext()) {
 			Object thing = iterator.next();
 			if (thing instanceof IField) {
