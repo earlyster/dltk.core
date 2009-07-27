@@ -39,7 +39,7 @@ import org.osgi.service.prefs.BackingStoreException;
  */
 public class Schema {
 
-	public static final String VERSION = "0.4"; //$NON-NLS-1$
+	public static final String VERSION = "0.5"; //$NON-NLS-1$
 
 	/** Contains already created tables names */
 	private static final Set<String> TABLES_CACHE = new HashSet<String>();
@@ -89,10 +89,8 @@ public class Schema {
 		} else {
 			tableName.append("D_"); //$NON-NLS-1$
 		}
-		tableName.append(
-				natureId.toUpperCase().replace('.', '_').replaceFirst(
-						"ORG_ECLIPSE_", "")).append('_').append(elementType) //$NON-NLS-1$ //$NON-NLS-2$
-				.toString();
+		tableName.append(natureId.toUpperCase().replace('.', '_')).append('_')
+				.append(elementType).toString();
 		return tableName.toString();
 	}
 
@@ -148,9 +146,8 @@ public class Schema {
 	}
 
 	private String getStoredSchemaVersion() {
-		return Platform.getPreferencesService().getString(
-				H2Index.PLUGIN_ID, H2IndexPreferences.SCHEMA_VERSION, null,
-				null);
+		return Platform.getPreferencesService().getString(H2Index.PLUGIN_ID,
+				H2IndexPreferences.SCHEMA_VERSION, null, null);
 	}
 
 	private void storeSchemaVersion(String newVersion) {

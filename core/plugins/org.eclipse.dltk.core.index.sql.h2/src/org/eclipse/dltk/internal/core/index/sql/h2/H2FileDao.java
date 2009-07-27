@@ -12,6 +12,7 @@
 package org.eclipse.dltk.internal.core.index.sql.h2;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -29,16 +30,24 @@ import org.eclipse.dltk.core.index.sql.IFileDao;
  */
 public class H2FileDao implements IFileDao {
 
+	private static final String Q_INSERT = "INSERT INTO FILES(PATH,TIMESTAMP,CONTAINER_ID) VALUES(?,?,?);"; //$NON-NLS-1$
+	private static final String Q_SELECT = "SELECT * FROM FILES WHERE PATH=? AND CONTAINER_ID=?;"; //$NON-NLS-1$
+	private static final String Q_SELECT_BY_CONTAINER_ID = "SELECT * FROM FILES WHERE CONTAINER_ID=?;"; //$NON-NLS-1$
+	private static final String Q_SELECT_BY_ID = "SELECT * FROM FILES WHERE ID=?;"; //$NON-NLS-1$
+	private static final String Q_DELETE = "DELETE FROM FILES WHERE PATH=? AND CONTAINER_ID=?;"; //$NON-NLS-1$
+	private static final String Q_DELETE_BY_ID = "DELETE FROM FILES WHERE ID=?;"; //$NON-NLS-1$
+
 	public File insert(Connection connection, String path, long timestamp,
 			int containerId) throws SQLException {
 
-		Statement statement = connection.createStatement();
+		PreparedStatement statement = connection.prepareStatement(Q_INSERT,
+				Statement.RETURN_GENERATED_KEYS);
 		try {
-			statement.execute(new StringBuilder(
-					"INSERT INTO FILES(PATH,TIMESTAMP,CONTAINER_ID) VALUES('")
-					.append(path).append("',").append(timestamp).append(",")
-					.append(containerId).append(");").toString(),
-					Statement.RETURN_GENERATED_KEYS);
+			int param = 0;
+			statement.setString(++param, path);
+			statement.setLong(++param, timestamp);
+			statement.setInt(++param, containerId);
+			statement.executeUpdate();
 
 			ResultSet result = statement.getGeneratedKeys();
 			try {
@@ -55,12 +64,13 @@ public class H2FileDao implements IFileDao {
 	public File select(Connection connection, String path, int containerId)
 			throws SQLException {
 
-		Statement statement = connection.createStatement();
+		PreparedStatement statement = connection.prepareStatement(Q_SELECT,
+				Statement.RETURN_GENERATED_KEYS);
 		try {
-			ResultSet result = statement.executeQuery(new StringBuilder(
-					"SELECT * FROM FILES WHERE PATH='").append(path).append(
-					"' AND CONTAINER_ID=").append(containerId).append(";")
-					.toString());
+			int param = 0;
+			statement.setString(++param, path);
+			statement.setInt(++param, containerId);
+			ResultSet result = statement.executeQuery();
 			try {
 				if (result.next()) {
 					return new File(result.getInt(1), result.getString(2),
@@ -79,11 +89,12 @@ public class H2FileDao implements IFileDao {
 			throws SQLException {
 
 		List<File> files = new LinkedList<File>();
-		Statement statement = connection.createStatement();
+		PreparedStatement statement = connection.prepareStatement(
+				Q_SELECT_BY_CONTAINER_ID, Statement.RETURN_GENERATED_KEYS);
 		try {
-			ResultSet result = statement.executeQuery(new StringBuilder(
-					"SELECT * FROM FILES WHERE CONTAINER_ID=").append(
-					containerId).append(";").toString());
+			int param = 0;
+			statement.setInt(++param, containerId);
+			ResultSet result = statement.executeQuery();
 			try {
 				if (result.next()) {
 					files.add(new File(result.getInt(1), result.getString(2),
@@ -100,11 +111,12 @@ public class H2FileDao implements IFileDao {
 
 	public File selectById(Connection connection, int id) throws SQLException {
 
-		Statement statement = connection.createStatement();
+		PreparedStatement statement = connection.prepareStatement(
+				Q_SELECT_BY_ID, Statement.RETURN_GENERATED_KEYS);
 		try {
-			ResultSet result = statement.executeQuery(new StringBuilder(
-					"SELECT * FROM FILES WHERE ID=").append(id).append(";")
-					.toString());
+			int param = 0;
+			statement.setInt(++param, id);
+			ResultSet result = statement.executeQuery();
 			try {
 				if (result.next()) {
 					return new File(result.getInt(1), result.getString(2),
@@ -122,23 +134,25 @@ public class H2FileDao implements IFileDao {
 	public void delete(Connection connection, String path, int containerId)
 			throws SQLException {
 
-		Statement statement = connection.createStatement();
+		PreparedStatement statement = connection.prepareStatement(Q_DELETE,
+				Statement.RETURN_GENERATED_KEYS);
 		try {
-			statement.executeUpdate(new StringBuilder(
-					"DELETE FROM FILES WHERE PATH='").append(path).append(
-					"' AND CONTAINER_ID=").append(containerId).append(";")
-					.toString());
+			int param = 0;
+			statement.setString(++param, path);
+			statement.setInt(++param, containerId);
+			statement.executeUpdate();
 		} finally {
 			statement.close();
 		}
 	}
 
-	public void deleteById(Connection connection, int key) throws SQLException {
-		Statement statement = connection.createStatement();
+	public void deleteById(Connection connection, int id) throws SQLException {
+		PreparedStatement statement = connection.prepareStatement(
+				Q_DELETE_BY_ID, Statement.RETURN_GENERATED_KEYS);
 		try {
-			statement.executeUpdate(new StringBuilder(
-					"DELETE FROM FILES WHERE ID=").append(key).append(";")
-					.toString());
+			int param = 0;
+			statement.setInt(++param, id);
+			statement.executeUpdate();
 		} finally {
 			statement.close();
 		}

@@ -16,6 +16,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,37 +43,64 @@ public class H2ElementDao implements IElementDao {
 	private static final String Q_INSERT_DECL = Schema
 			.readSqlFile("resources/insert_decl.sql"); //$NON-NLS-1$
 
+	/** Cache for insert element declaration queries */
+	private static final Map<String, String> R_INSERT_QUERY_CACHE = new HashMap<String, String>();
+
+	/** Cache for insert element reference queries */
+	private static final Map<String, String> D_INSERT_QUERY_CACHE = new HashMap<String, String>();
+
+	private String getTableName(Connection connection, int elementType,
+			String natureId, boolean isReference) throws SQLException {
+
+		Schema schema = new Schema();
+		String tableName = schema.getTableName(elementType, natureId,
+				isReference);
+		schema.createTable(connection, tableName, isReference);
+
+		return tableName;
+	}
+
 	public Element insert(Connection connection, int type, int flags,
 			int offset, int length, int nameOffset, int nameLength,
 			String name, String metadata, String qualifier, String parent,
 			int fileId, String natureId, boolean isReference)
 			throws SQLException {
 
-		Schema schema = new Schema();
-		String tableName = schema.getTableName(type, natureId, isReference);
-		schema.createTable(connection, tableName, isReference);
+		String tableName = getTableName(connection, type, natureId, isReference);
 
-		String query = isReference ? Q_INSERT_REF : Q_INSERT_DECL;
-		query = NLS.bind(query, tableName);
+		String query;
+		if (isReference) {
+			query = R_INSERT_QUERY_CACHE.get(tableName);
+			if (query == null) {
+				query = NLS.bind(Q_INSERT_REF, tableName);
+				R_INSERT_QUERY_CACHE.put(tableName, query);
+			}
+		} else {
+			query = D_INSERT_QUERY_CACHE.get(tableName);
+			if (query == null) {
+				query = NLS.bind(Q_INSERT_DECL, tableName);
+				D_INSERT_QUERY_CACHE.put(tableName, query);
+			}
+		}
 
 		PreparedStatement statement = connection.prepareStatement(query,
 				Statement.RETURN_GENERATED_KEYS);
 		try {
-			int columnIndex = 0;
+			int param = 0;
 
 			if (!isReference) {
-				statement.setInt(++columnIndex, flags);
+				statement.setInt(++param, flags);
 			}
 
-			statement.setInt(++columnIndex, offset);
-			statement.setInt(++columnIndex, length);
+			statement.setInt(++param, offset);
+			statement.setInt(++param, length);
 
 			if (!isReference) {
-				statement.setInt(++columnIndex, nameOffset);
-				statement.setInt(++columnIndex, nameLength);
+				statement.setInt(++param, nameOffset);
+				statement.setInt(++param, nameLength);
 			}
 
-			statement.setString(++columnIndex, name);
+			statement.setString(++param, name);
 
 			if (!isReference) {
 				StringBuilder camelCaseName = new StringBuilder();
@@ -84,19 +113,19 @@ public class H2ElementDao implements IElementDao {
 						break;
 					}
 				}
-				statement.setString(++columnIndex,
+				statement.setString(++param,
 						camelCaseName.length() > 0 ? camelCaseName.toString()
 								: null);
 			}
 
-			statement.setString(++columnIndex, metadata);
-			statement.setString(++columnIndex, qualifier);
+			statement.setString(++param, metadata);
+			statement.setString(++param, qualifier);
 
 			if (!isReference) {
-				statement.setString(++columnIndex, parent);
+				statement.setString(++param, parent);
 			}
 
-			statement.setInt(++columnIndex, fileId);
+			statement.setInt(++param, fileId);
 
 			statement.executeUpdate();
 			ResultSet result = statement.getGeneratedKeys();
@@ -125,8 +154,9 @@ public class H2ElementDao implements IElementDao {
 		long timeStamp = System.currentTimeMillis();
 		int count = 0;
 
-		String tableName = new Schema().getTableName(elementType, natureId,
+		String tableName = getTableName(connection, elementType, natureId,
 				isReference);
+
 		Statement statement = connection.createStatement();
 		try {
 			StringBuilder query = new StringBuilder("SELECT * FROM ")

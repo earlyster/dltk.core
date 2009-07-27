@@ -12,6 +12,7 @@
 package org.eclipse.dltk.internal.core.index.sql.h2;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -27,6 +28,12 @@ import org.eclipse.dltk.core.index.sql.IContainerDao;
  */
 public class H2ContainerDao implements IContainerDao {
 
+	private static final String Q_INSERT = "INSERT INTO CONTAINERS(PATH) VALUES(?);"; //$NON-NLS-1$
+	private static final String Q_SELECT_BY_PATH = "SELECT * FROM CONTAINERS WHERE PATH=?;"; //$NON-NLS-1$
+	private static final String Q_SELECT_BY_ID = "SELECT * FROM CONTAINERS WHERE ID=?;"; //$NON-NLS-1$
+	private static final String Q_DELETE_BY_PATH = "DELETE FROM CONTAINERS WHERE PATH=?;"; //$NON-NLS-1$
+	private static final String Q_DELETE_BY_ID = "DELETE FROM CONTAINERS WHERE ID=?;"; //$NON-NLS-1$
+
 	public Container insert(Connection connection, String path)
 			throws SQLException {
 
@@ -35,11 +42,12 @@ public class H2ContainerDao implements IContainerDao {
 			return container;
 		}
 
-		Statement statement = connection.createStatement();
+		PreparedStatement statement = connection.prepareStatement(Q_INSERT,
+				Statement.RETURN_GENERATED_KEYS);
 		try {
-			statement.execute(new StringBuilder(
-					"INSERT INTO CONTAINERS(PATH) VALUES('").append(path)
-					.append("');").toString(), Statement.RETURN_GENERATED_KEYS);
+			int param = 0;
+			statement.setString(++param, path);
+			statement.executeUpdate();
 
 			ResultSet result = statement.getGeneratedKeys();
 			try {
@@ -58,11 +66,12 @@ public class H2ContainerDao implements IContainerDao {
 			throws SQLException {
 
 		Container container = null;
-		Statement statement = connection.createStatement();
+		PreparedStatement statement = connection.prepareStatement(
+				Q_SELECT_BY_PATH, Statement.RETURN_GENERATED_KEYS);
 		try {
-			ResultSet result = statement.executeQuery(new StringBuilder(
-					"SELECT * FROM CONTAINERS WHERE PATH='").append(path)
-					.append("';").toString());
+			int param = 0;
+			statement.setString(++param, path);
+			ResultSet result = statement.executeQuery();
 			try {
 				if (result.next()) {
 					container = new Container(result.getInt(1), result
@@ -77,13 +86,15 @@ public class H2ContainerDao implements IContainerDao {
 		return container;
 	}
 
-	public Container selectById(Connection connection, int key)
+	public Container selectById(Connection connection, int id)
 			throws SQLException {
-		Statement statement = connection.createStatement();
+
+		PreparedStatement statement = connection.prepareStatement(
+				Q_SELECT_BY_ID, Statement.RETURN_GENERATED_KEYS);
 		try {
-			ResultSet result = statement.executeQuery(new StringBuilder(
-					"SELECT * FROM CONTAINERS WHERE ID=").append(key).append(
-					";").toString());
+			int param = 0;
+			statement.setInt(++param, id);
+			ResultSet result = statement.executeQuery();
 			try {
 				if (result.next()) {
 					return new Container(result.getInt(1), result.getString(2));
@@ -97,12 +108,13 @@ public class H2ContainerDao implements IContainerDao {
 		return null;
 	}
 
-	public void deleteById(Connection connection, int key) throws SQLException {
-		Statement statement = connection.createStatement();
+	public void deleteById(Connection connection, int id) throws SQLException {
+		PreparedStatement statement = connection.prepareStatement(
+				Q_DELETE_BY_ID, Statement.RETURN_GENERATED_KEYS);
 		try {
-			statement.executeUpdate(new StringBuilder(
-					"DELETE FROM CONTAINERS WHERE ID=").append(key).append(";")
-					.toString());
+			int param = 0;
+			statement.setInt(++param, id);
+			statement.executeUpdate();
 		} finally {
 			statement.close();
 		}
@@ -110,11 +122,12 @@ public class H2ContainerDao implements IContainerDao {
 
 	public void deleteByPath(Connection connection, String path)
 			throws SQLException {
-		Statement statement = connection.createStatement();
+		PreparedStatement statement = connection.prepareStatement(
+				Q_DELETE_BY_PATH, Statement.RETURN_GENERATED_KEYS);
 		try {
-			statement.executeUpdate(new StringBuilder(
-					"DELETE FROM CONTAINERS WHERE PATH='").append(path).append(
-					"';").toString());
+			int param = 0;
+			statement.setString(++param, path);
+			statement.executeUpdate();
 		} finally {
 			statement.close();
 		}
