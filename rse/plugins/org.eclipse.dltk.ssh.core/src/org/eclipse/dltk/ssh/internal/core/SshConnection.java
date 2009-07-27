@@ -408,11 +408,11 @@ public class SshConnection implements ISshConnection {
 		if (isDisabled()) {
 			return null;
 		}
-		GetStatOperation op = new GetStatOperation(path);
-		performOperation(op, DEFAULT_RETRY_COUNT);
-		if (op.isFinished()) {
-			return new SshFileHandle(this, path, op.getAttrs());
-		}
+		// GetStatOperation op = new GetStatOperation(path);
+		// performOperation(op, DEFAULT_RETRY_COUNT);
+		// if (op.isFinished()) {
+		// return new SshFileHandle(this, path, op.getAttrs());
+		// }
 		return new SshFileHandle(this, path, null);
 	}
 
