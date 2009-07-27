@@ -31,9 +31,12 @@ import org.eclipse.dltk.internal.core.util.Util;
 public abstract class AbstractIndexRequest extends AbstractJob {
 
 	AbstractProjectIndexer projectIndexer;
+	ProgressJob progressJob;
 
-	public AbstractIndexRequest(AbstractProjectIndexer indexer) {
+	public AbstractIndexRequest(AbstractProjectIndexer indexer,
+			ProgressJob progressJob) {
 		this.projectIndexer = indexer;
+		this.progressJob = progressJob;
 	}
 
 	public int hashCode() {

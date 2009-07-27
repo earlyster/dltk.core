@@ -30,8 +30,8 @@ import org.eclipse.dltk.internal.core.util.Util;
 public class ReconcileSourceModuleRequest extends AddSourceModuleRequest {
 
 	public ReconcileSourceModuleRequest(AbstractProjectIndexer indexer,
-			ISourceModule sourceModule) {
-		super(indexer, sourceModule);
+			ISourceModule sourceModule, ProgressJob progressJob) {
+		super(indexer, sourceModule, progressJob);
 	}
 
 	protected void run() throws CoreException, IOException {

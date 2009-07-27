@@ -38,8 +38,8 @@ public class ExternalProjectFragmentRequest extends AbstractIndexRequest {
 	protected final IProjectFragment fragment;
 
 	public ExternalProjectFragmentRequest(AbstractProjectIndexer indexer,
-			IProjectFragment fragment) {
-		super(indexer);
+			IProjectFragment fragment, ProgressJob progressJob) {
+		super(indexer, progressJob);
 		this.fragment = fragment;
 	}
 
@@ -51,7 +51,7 @@ public class ExternalProjectFragmentRequest extends AbstractIndexRequest {
 		final Set<ISourceModule> sourceModules = getExternalSourceModules();
 		JobManager jobManager = projectIndexer.getJobManager();
 		jobManager.request(new SourceModulesRequest(projectIndexer, fragment
-				.getPath(), sourceModules));
+				.getPath(), sourceModules, progressJob));
 	}
 
 	protected IEnvironment getEnvironment() {

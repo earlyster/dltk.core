@@ -29,8 +29,8 @@ public class RemoveContainerRequest extends AbstractIndexRequest {
 	private final IPath containerPath;
 
 	public RemoveContainerRequest(AbstractProjectIndexer indexer,
-			IPath containerPath) {
-		super(indexer);
+			IPath containerPath, ProgressJob progressJob) {
+		super(indexer, progressJob);
 		this.containerPath = containerPath;
 	}
 

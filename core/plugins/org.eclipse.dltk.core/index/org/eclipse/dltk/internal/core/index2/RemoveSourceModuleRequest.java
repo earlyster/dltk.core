@@ -30,8 +30,8 @@ public class RemoveSourceModuleRequest extends AbstractIndexRequest {
 	private final String relativePath;
 
 	public RemoveSourceModuleRequest(AbstractProjectIndexer indexer,
-			IPath containerPath, String relativePath) {
-		super(indexer);
+			IPath containerPath, String relativePath, ProgressJob progressJob) {
+		super(indexer, progressJob);
 		this.containerPath = containerPath;
 		this.relativePath = relativePath;
 	}

@@ -28,8 +28,8 @@ public class AddSourceModuleRequest extends AbstractIndexRequest {
 	protected final ISourceModule sourceModule;
 
 	public AddSourceModuleRequest(AbstractProjectIndexer indexer,
-			ISourceModule sourceModule) {
-		super(indexer);
+			ISourceModule sourceModule, ProgressJob progressJob) {
+		super(indexer, progressJob);
 		this.sourceModule = sourceModule;
 	}
 

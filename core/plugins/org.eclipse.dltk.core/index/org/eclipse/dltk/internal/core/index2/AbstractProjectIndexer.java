@@ -40,7 +40,7 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 			IProjectFragment fragment = project.findProjectFragment(path);
 			if (fragment != null) {
 				AbstractIndexRequest request = new ExternalProjectFragmentRequest(
-						this, fragment);
+						this, fragment, null);
 				if (!jobManager.isJobWaiting(request)) {
 					jobManager.request(request);
 				}
@@ -55,7 +55,7 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 	}
 
 	public void indexProject(IScriptProject project) {
-		final ProjectRequest request = new ProjectRequest(this, project);
+		final ProjectRequest request = new ProjectRequest(this, project, null);
 		if (!jobManager.isJobWaiting(request)) {
 			jobManager.request(request);
 		}
@@ -76,14 +76,14 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 		}
 		if (fragmentToIndex == null || !fragmentToIndex.isExternal()
 				|| fragmentToIndex.isBuiltin()) {
-			ProjectRequest request = new ProjectRequest(this, project);
+			ProjectRequest request = new ProjectRequest(this, project, null);
 			if (!jobManager.isJobWaiting(request)) {
 				jobManager.request(request);
 			}
 			return;
 		}
 		ExternalProjectFragmentRequest request = new ExternalProjectFragmentRequest(
-				this, fragmentToIndex);
+				this, fragmentToIndex, null);
 		if (!jobManager.isJobWaiting(request)) {
 			jobManager.request(request);
 		}
@@ -91,16 +91,18 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 
 	public void indexSourceModule(ISourceModule module,
 			IDLTKLanguageToolkit toolkit) {
-		jobManager.request(new AddSourceModuleRequest(this, module));
+		jobManager.request(new AddSourceModuleRequest(this, module, null));
 	}
 
 	public void reconciled(ISourceModule workingCopy,
 			IDLTKLanguageToolkit toolkit) {
-		jobManager.request(new ReconcileSourceModuleRequest(this, workingCopy));
+		jobManager.request(new ReconcileSourceModuleRequest(this, workingCopy,
+				null));
 	}
 
 	public void removeLibrary(IScriptProject project, IPath path) {
-		RemoveContainerRequest request = new RemoveContainerRequest(this, path);
+		RemoveContainerRequest request = new RemoveContainerRequest(this, path,
+				null);
 		if (!jobManager.isJobWaiting(request)) {
 			jobManager.request(request);
 		}
@@ -108,14 +110,15 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 
 	public void removeProject(IPath projectPath) {
 		RemoveContainerRequest request = new RemoveContainerRequest(this,
-				projectPath);
+				projectPath, null);
 		if (!jobManager.isJobWaiting(request)) {
 			jobManager.request(request);
 		}
 	}
 
 	public void removeProjectFragment(IScriptProject project, IPath path) {
-		RemoveContainerRequest request = new RemoveContainerRequest(this, path);
+		RemoveContainerRequest request = new RemoveContainerRequest(this, path,
+				null);
 		if (!jobManager.isJobWaiting(request)) {
 			jobManager.request(request);
 		}
@@ -123,7 +126,7 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 
 	public void removeSourceModule(IScriptProject project, String path) {
 		jobManager.request(new RemoveSourceModuleRequest(this, project
-				.getPath(), path));
+				.getPath(), path, null));
 	}
 
 	public void startIndexing() {
@@ -134,12 +137,16 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 			IScriptProject[] projects = DLTKCore.create(workspace.getRoot())
 					.getScriptProjects();
 
+			ProgressJob progressJob = new ProgressJob(jobManager);
 			for (int i = 0; i < projects.length; ++i) {
-				ProjectRequest request = new ProjectRequest(this, projects[i]);
+				ProjectRequest request = new ProjectRequest(this, projects[i],
+						progressJob);
 				if (!jobManager.isJobWaiting(request)) {
 					jobManager.request(request);
 				}
 			}
+			progressJob.schedule();
+
 		} catch (Exception e) {
 			DLTKCore
 					.error("An exception is thrown while indexing workspace", e);

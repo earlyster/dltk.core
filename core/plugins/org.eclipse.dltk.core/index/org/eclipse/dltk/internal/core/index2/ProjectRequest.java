@@ -35,8 +35,9 @@ public class ProjectRequest extends AbstractIndexRequest {
 
 	private final IScriptProject project;
 
-	public ProjectRequest(AbstractProjectIndexer indexer, IScriptProject project) {
-		super(indexer);
+	public ProjectRequest(AbstractProjectIndexer indexer,
+			IScriptProject project, ProgressJob progressJob) {
+		super(indexer, progressJob);
 		this.project = project;
 	}
 
@@ -57,17 +58,17 @@ public class ProjectRequest extends AbstractIndexRequest {
 			}
 			if (fragment instanceof BuiltinProjectFragment) {
 				jobManager.request(new BuiltinProjectFragmentRequest(
-						projectIndexer, fragment));
+						projectIndexer, fragment, progressJob));
 			} else if (fragment.isExternal()) {
 				jobManager.request(new ExternalProjectFragmentRequest(
-						projectIndexer, fragment));
+						projectIndexer, fragment, progressJob));
 			} else {
 				getSourceModules(fragment, sourceModules);
 			}
 		}
 
 		jobManager.request(new SourceModulesRequest(projectIndexer, project
-				.getPath(), sourceModules));
+				.getPath(), sourceModules, progressJob));
 	}
 
 	private void getSourceModules(IProjectFragment fragment,

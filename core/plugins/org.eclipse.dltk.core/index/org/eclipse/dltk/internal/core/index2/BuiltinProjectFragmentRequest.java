@@ -24,8 +24,8 @@ public class BuiltinProjectFragmentRequest extends
 		ExternalProjectFragmentRequest {
 
 	public BuiltinProjectFragmentRequest(AbstractProjectIndexer indexer,
-			IProjectFragment fragment) {
-		super(indexer, fragment);
+			IProjectFragment fragment, ProgressJob progressJob) {
+		super(indexer, fragment, progressJob);
 	}
 
 	protected IEnvironment getEnvironment() {
