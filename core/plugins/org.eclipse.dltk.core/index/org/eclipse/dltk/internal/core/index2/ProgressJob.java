@@ -20,6 +20,7 @@ import org.eclipse.dltk.internal.core.util.Messages;
 
 class ProgressJob extends Job {
 
+	private static transient boolean running;
 	private JobManager jobManager;
 	private IProgressMonitor monitor;
 
@@ -29,19 +30,29 @@ class ProgressJob extends Job {
 	}
 
 	protected IStatus run(IProgressMonitor monitor) {
-		this.monitor = monitor;
-		monitor.beginTask(Messages.manager_indexingTask,
-				IProgressMonitor.UNKNOWN);
-
-		while (!monitor.isCanceled() && (jobManager.awaitingJobsCount()) > 0) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				// ignore
-			}
+		if (running) {
+			// Allow only one progress job
+			return Status.CANCEL_STATUS;
 		}
-		monitor.done();
-		return Status.OK_STATUS;
+		running = true;
+		try {
+			this.monitor = monitor;
+			monitor.beginTask(Messages.manager_indexingTask,
+					IProgressMonitor.UNKNOWN);
+
+			while (!monitor.isCanceled()
+					&& (jobManager.awaitingJobsCount()) > 0) {
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					// ignore
+				}
+			}
+			monitor.done();
+			return Status.OK_STATUS;
+		} finally {
+			running = false;
+		}
 	}
 
 	public void subTask(String message) {
