@@ -48,7 +48,7 @@ public class ScriptInterpreterManager {
 		return null;
 	}
 
-	public static ScriptInterpreterManager getInstance() {
+	public static synchronized ScriptInterpreterManager getInstance() {
 		if (instance == null) {
 			instance = new ScriptInterpreterManager();
 		}

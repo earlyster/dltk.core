@@ -23,7 +23,7 @@ public class ScriptConsoleServer implements Runnable {
 
 	private static ScriptConsoleServer instance;
 
-	public static ScriptConsoleServer getInstance() {
+	public static synchronized ScriptConsoleServer getInstance() {
 		if (instance == null) {
 			instance = new ScriptConsoleServer();
 		}
@@ -43,8 +43,7 @@ public class ScriptConsoleServer implements Runnable {
 				ServerSocket s = new ServerSocket(this.port);
 				if (!s.isBound()) {
 					this.port++;
-				}
-				else {
+				} else {
 					s.close();
 					break;
 				}
