@@ -15,7 +15,7 @@ public class DebuggingEngineManager extends DLTKContributionExtensionManager {
 
 	private static DebuggingEngineManager instance;
 
-	public static DebuggingEngineManager getInstance() {
+	public static synchronized DebuggingEngineManager getInstance() {
 		if (instance == null) {
 			instance = new DebuggingEngineManager();
 		}
@@ -37,7 +37,8 @@ public class DebuggingEngineManager extends DLTKContributionExtensionManager {
 	 * @return Selected debugging engine or null (if there are no debugging
 	 *         engines at all or there are no selected engines)
 	 */
-	public IDebuggingEngine getSelectedDebuggingEngine(IProject project, String natureId) {
+	public IDebuggingEngine getSelectedDebuggingEngine(IProject project,
+			String natureId) {
 		return (IDebuggingEngine) getSelectedContribution(project, natureId);
 	}
 
@@ -57,8 +58,9 @@ public class DebuggingEngineManager extends DLTKContributionExtensionManager {
 	}
 
 	/*
-	 * @see org.eclipse.dltk.core.DLTKContributionExtensionManager#configureContribution(java.lang.Object,
-	 *      org.eclipse.core.runtime.IConfigurationElement)
+	 * @see
+	 * org.eclipse.dltk.core.DLTKContributionExtensionManager#configureContribution
+	 * (java.lang.Object, org.eclipse.core.runtime.IConfigurationElement)
 	 */
 	protected Object configureContribution(Object object,
 			IConfigurationElement config) {
@@ -66,21 +68,26 @@ public class DebuggingEngineManager extends DLTKContributionExtensionManager {
 	}
 
 	/*
-	 * @see org.eclipse.dltk.core.DLTKContributionExtensionManager#getContributionElementName()
+	 * @seeorg.eclipse.dltk.core.DLTKContributionExtensionManager#
+	 * getContributionElementName()
 	 */
 	protected String getContributionElementName() {
 		return ENGINE_TAG;
 	}
 
 	/*
-	 * @see org.eclipse.dltk.core.DLTKContributionExtensionManager#getExtensionPoint()
+	 * @see
+	 * org.eclipse.dltk.core.DLTKContributionExtensionManager#getExtensionPoint
+	 * ()
 	 */
 	protected String getExtensionPoint() {
 		return DEBUGGING_ENGINE_EXT_POINT;
 	}
 
 	/*
-	 * @see org.eclipse.dltk.core.DLTKContributionExtensionManager#isValidContribution(java.lang.Object)
+	 * @see
+	 * org.eclipse.dltk.core.DLTKContributionExtensionManager#isValidContribution
+	 * (java.lang.Object)
 	 */
 	protected boolean isValidContribution(Object object) {
 		return (object instanceof IInterpreterRunnerFactory);

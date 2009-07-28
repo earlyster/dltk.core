@@ -66,7 +66,7 @@ public class PathEqualityUtils {
 
 	}
 
-	public static IPathEquality getInstance() {
+	public static synchronized IPathEquality getInstance() {
 		final IPathEquality compare;
 		if (Platform.getOS().equals(Platform.OS_WIN32)) {
 			compare = new Win32PathCompare();

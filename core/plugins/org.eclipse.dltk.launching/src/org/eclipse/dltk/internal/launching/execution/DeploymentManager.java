@@ -29,7 +29,7 @@ public class DeploymentManager implements ILaunchesListener2 {
 
 	private static DeploymentManager sInstance = null;
 
-	public static DeploymentManager getInstance() {
+	public static synchronized DeploymentManager getInstance() {
 		if (sInstance == null) {
 			sInstance = new DeploymentManager();
 		}
