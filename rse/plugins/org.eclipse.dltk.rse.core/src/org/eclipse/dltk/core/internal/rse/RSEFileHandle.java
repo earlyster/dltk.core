@@ -12,6 +12,7 @@
 package org.eclipse.dltk.core.internal.rse;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -44,7 +45,7 @@ import org.eclipse.rse.internal.efs.RSEFileSystem;
 
 public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 
-	private static Map<String, Long> timestamps = new HashMap<String, Long>();
+	private static Map<String, IFileInfo> timestamps = new HashMap<String, IFileInfo>();
 	private static Map<String, Long> lastaccess = new HashMap<String, Long>();
 
 	private IFileStore file;
@@ -102,10 +103,35 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 			return sshFile.exists();
 		}
 		try {
-			return file.fetchInfo().exists();
+			return fetchInfo(false).exists();
 		} catch (RuntimeException e) {
 			return false;
 		}
+	}
+
+	private IFileInfo fetchInfo(boolean force) {
+		String n = toString();
+		boolean flag = !environment.isLocal();
+		long c = 0;
+		if (flag && !force) {
+			if (timestamps.containsKey(n)) {
+				c = System.currentTimeMillis();
+				Long last = lastaccess.get(n);
+				if (last != null
+						&& (c - last.longValue()) < 1000 * 60 * 60 * 24) {
+					return timestamps.get(n);
+				}
+			}
+		}
+		IFileInfo info = file.fetchInfo();
+		if (flag) {
+			timestamps.put(n, info);
+			if (c == 0) {
+				c = System.currentTimeMillis();
+			}
+			lastaccess.put(n, c);
+		}
+		return info;
 	}
 
 	public String toOSString() {
@@ -200,7 +226,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		if (sshFile != null) {
 			return sshFile.isDirectory();
 		}
-		return file.fetchInfo().isDirectory();
+		return fetchInfo(false).isDirectory();
 	}
 
 	public boolean isFile() {
@@ -211,7 +237,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		if (sshFile != null) {
 			return sshFile.exists() && !sshFile.isDirectory();
 		}
-		final IFileInfo info = file.fetchInfo();
+		final IFileInfo info = fetchInfo(false);
 		return info.exists() && !info.isDirectory();
 	}
 
@@ -223,7 +249,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		if (sshFile != null) {
 			return sshFile.isSymlink();
 		}
-		return file.fetchInfo().getAttribute(EFS.ATTRIBUTE_SYMLINK);
+		return fetchInfo(false).getAttribute(EFS.ATTRIBUTE_SYMLINK);
 	}
 
 	private InputStream internalOpenInputStream(IProgressMonitor monitor)
@@ -274,7 +300,14 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 			}
 		}
 		try {
-			return file.openOutputStream(EFS.NONE, monitor);
+			return new BufferedOutputStream(file.openOutputStream(EFS.NONE,
+					monitor)) {
+				@Override
+				public void close() throws IOException {
+					super.close();
+					clearLastModifiedCache();
+				}
+			};
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG)
 				e.printStackTrace();
@@ -303,32 +336,12 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 			return 0;
 		}
 		fetchSshFile();
-		String n = toString();
-		long c = 0;
-		boolean flag = !environment.isLocal();
-		if (flag) {
-			if (timestamps.containsKey(n)) {
-				c = System.currentTimeMillis();
-				Long last = lastaccess.get(n);
-				if (last != null
-						&& (c - last.longValue()) < 1000 * 60 * 60 * 24) {
-					return timestamps.get(n);
-				}
-			}
-		}
 		PerformanceNode p = RuntimePerformanceMonitor.begin();
 		long lm = 0;
 		if (sshFile != null) {
 			lm = sshFile.lastModificationTime();
 		} else {
-			lm = file.fetchInfo().getLastModified();
-		}
-		if (flag) {
-			timestamps.put(n, lm);
-			if (c == 0) {
-				c = System.currentTimeMillis();
-			}
-			lastaccess.put(n, c);
+			lm = fetchInfo(false).getLastModified();
 		}
 		p.done("#", "Return file timestamp", 0);
 		return lm;
@@ -343,7 +356,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		if (sshFile != null) {
 			return sshFile.getSize();
 		}
-		return file.fetchInfo().getLength();
+		return fetchInfo(false).getLength();
 	}
 
 	public IPath getFullPath() {
