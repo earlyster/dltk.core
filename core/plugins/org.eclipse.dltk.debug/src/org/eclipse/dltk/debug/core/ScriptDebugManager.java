@@ -22,7 +22,7 @@ public class ScriptDebugManager {
 
 	private static ScriptDebugManager instance;
 
-	public static ScriptDebugManager getInstance() {
+	public static synchronized ScriptDebugManager getInstance() {
 		if (instance == null) {
 			instance = new ScriptDebugManager();
 		}
