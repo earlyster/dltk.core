@@ -313,8 +313,8 @@ public final class ScriptRuntime {
 	 * cycles in project dependencies when resolving buildpath container
 	 * entries. Counters used to know when entering/exiting to clear cache
 	 */
-	private static ThreadLocal fgProjects = new ThreadLocal(); // Lists
-	private static ThreadLocal fgEntryCount = new ThreadLocal(); // Integers
+	private static ThreadLocal<List<IScriptProject>> fgProjects = new ThreadLocal<List<IScriptProject>>(); // Lists
+	private static ThreadLocal<Integer> fgEntryCount = new ThreadLocal<Integer>(); // Integers
 
 	/**
 	 * Set of IDs of Interpreters contributed via InterpreterInstalls extension
@@ -382,11 +382,7 @@ public final class ScriptRuntime {
 	}
 
 	private static String getEnvironmentFromProject(IScriptProject project) {
-		IEnvironment environment = EnvironmentManager.getEnvironment(project);
-		if (environment == null) {
-			return null;
-		}
-		return environment.getId();
+		return EnvironmentManager.getEnvironmentId(project.getProject());
 	}
 
 	/**
@@ -2272,10 +2268,10 @@ public final class ScriptRuntime {
 			break;
 		}
 		List resolved = new ArrayList(cpes.length);
-		List projects = (List) fgProjects.get();
-		Integer count = (Integer) fgEntryCount.get();
+		List<IScriptProject> projects = fgProjects.get();
+		Integer count = fgEntryCount.get();
 		if (projects == null) {
-			projects = new ArrayList();
+			projects = new ArrayList<IScriptProject>();
 			fgProjects.set(projects);
 			count = new Integer(0);
 		}
