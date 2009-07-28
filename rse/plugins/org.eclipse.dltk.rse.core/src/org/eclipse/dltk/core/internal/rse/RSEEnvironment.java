@@ -20,7 +20,7 @@ import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
 public class RSEEnvironment implements IEnvironment, IAdaptable {
 	private IRemoteFileSubSystem fs;
 	private IHost host;
-	private static Map<IRemoteFileSubSystem, Boolean> tryToConnect = new HashMap<IRemoteFileSubSystem, Boolean>();
+	private static final Map<IRemoteFileSubSystem, Boolean> tryToConnect = new HashMap<IRemoteFileSubSystem, Boolean>();
 
 	public RSEEnvironment(IRemoteFileSubSystem fs) {
 		this.fs = fs;
@@ -175,8 +175,11 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	 */
 	public boolean isTryToConnect() {
 		boolean tryToConnect = true;
-		if (RSEEnvironment.tryToConnect.containsKey(fs)) {
-			tryToConnect = RSEEnvironment.tryToConnect.get(fs).booleanValue();
+		synchronized (RSEEnvironment.tryToConnect) {
+			final Boolean value = RSEEnvironment.tryToConnect.get(fs);
+			if (value != null) {
+				tryToConnect = value.booleanValue();
+			}
 		}
 		return tryToConnect;
 	}
@@ -185,7 +188,9 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	 * @since 2.0
 	 */
 	public void setTryToConnect(boolean value) {
-		RSEEnvironment.tryToConnect.put(fs, Boolean.valueOf(value));
+		synchronized (RSEEnvironment.tryToConnect) {
+			RSEEnvironment.tryToConnect.put(fs, Boolean.valueOf(value));
+		}
 	}
 
 }
