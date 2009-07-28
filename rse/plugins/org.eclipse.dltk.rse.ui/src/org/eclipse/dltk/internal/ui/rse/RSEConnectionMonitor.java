@@ -7,19 +7,18 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.internal.rse.RSEEnvironment;
-import org.eclipse.dltk.internal.core.ProjectRefreshOperation;
+import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.subsystems.CommunicationsEvent;
 import org.eclipse.rse.core.subsystems.ICommunicationsListener;
@@ -31,55 +30,71 @@ import org.eclipse.ui.PlatformUI;
  * @since 2.0
  */
 public class RSEConnectionMonitor implements Runnable {
-	private static final String FAMILY = "rse_connection_changed_project_update_job";
+
+	private static final class ProjectUpdateFamily {
+		private final RSEEnvironment environment;
+
+		public ProjectUpdateFamily(RSEEnvironment environment) {
+			this.environment = environment;
+		}
+
+	}
 
 	private static final class ProjectUpdateJob extends Job {
 
-		private RSEEnvironment environnent;
+		private final RSEEnvironment environnent;
 
-		private ProjectUpdateJob(String name) {
-			super(name);
+		private ProjectUpdateJob(RSEEnvironment environnent) {
+			super("Environment configuration changed. Updating projects.");
+			this.environnent = environnent;
 		}
 
-		protected IStatus run(IProgressMonitor monitor) {
-			monitor.beginTask("Checking projects consistency", 100);
+		@Override
+		protected IStatus run(IProgressMonitor inputMonitor) {
+			final SubMonitor monitor = SubMonitor.convert(inputMonitor,
+					"Checking projects consistency", 100);
 			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
 					.getProjects();
 			List<IScriptProject> projectsToProcess = new ArrayList<IScriptProject>();
-			SubProgressMonitor m = new SubProgressMonitor(monitor, 10);
-			m.beginTask("Locate projects for envirinment", projects.length);
+			SubMonitor m = monitor.newChild(10);
+			m.beginTask("Locate projects for environment", projects.length);
 			for (IProject project : projects) {
-				final String envId = EnvironmentManager.getEnvironmentId(
-						project, false);
-				if (envId != null) {
-					if (envId.equals(environnent.getId())) {
-						IScriptProject scriptProject = DLTKCore.create(project);
-						projectsToProcess.add(scriptProject);
-					}
+				if (project.isAccessible()) {
+					final String envId = EnvironmentManager.getEnvironmentId(
+							project, false);
+					if (envId != null) {
+						if (envId.equals(environnent.getId())) {
+							final IScriptProject scriptProject = DLTKCore
+									.create(project);
+							projectsToProcess.add(scriptProject);
+						}
 
+					}
 				}
 				m.worked(1);
 			}
-			m.done();
-			IScriptProject scriptProjects[] = (IScriptProject[]) projectsToProcess
-					.toArray(new IScriptProject[projectsToProcess.size()]);
-			ProjectRefreshOperation op = new ProjectRefreshOperation(
-					scriptProjects);
-			try {
-				op.run(new SubProgressMonitor(monitor, 70));
-			} catch (CoreException e1) {
-				if (DLTKCore.DEBUG) {
-					e1.printStackTrace();
-				}
-			}
+			// EnvironmentManager
+			// .refreshBuildpathContainersForMixedProjects(monitor
+			// .newChild(10));
+			// IScriptProject scriptProjects[] = projectsToProcess
+			// .toArray(new IScriptProject[projectsToProcess.size()]);
+			// ProjectRefreshOperation op = new ProjectRefreshOperation(
+			// scriptProjects);
+			// try {
+			// op.run(monitor.newChild(60));
+			// } catch (CoreException e1) {
+			// if (DLTKCore.DEBUG) {
+			// e1.printStackTrace();
+			// }
+			// }
 			EnvironmentManager.fireEnvirontmentChange();
-			EnvironmentManager
-					.refreshBuildpathContainersForMixedProjects(new SubProgressMonitor(
-							monitor, 10));
-			// SubProgressMonitor mm = new SubProgressMonitor(monitor, 30);
-			// mm.beginTask("Procesing project", projectsToProcess.size() * 10);
-			// for (IScriptProject project : projectsToProcess) {
-			// ProjectIndexerManager.indexProject(project);
+			SubMonitor mm = monitor.newChild(20);
+			mm.beginTask("Indexing projects", projectsToProcess.size());
+			for (IScriptProject project : projectsToProcess) {
+				ProjectIndexerManager.indexProject(project);
+				mm.worked(1);
+			}
+			mm.done();
 			// try {
 			// project.getProject().build(
 			// IncrementalProjectBuilder.FULL_BUILD,
@@ -96,12 +111,11 @@ public class RSEConnectionMonitor implements Runnable {
 
 		@Override
 		public boolean belongsTo(Object family) {
-			return FAMILY.equals(family);
+			return family instanceof ProjectUpdateFamily
+					&& environnent
+							.equals(((ProjectUpdateFamily) family).environment);
 		}
 
-		public void setEnvironment(RSEEnvironment rseENV) {
-			this.environnent = rseENV;
-		}
 	}
 
 	private static void updateDecorator() {
@@ -153,12 +167,13 @@ public class RSEConnectionMonitor implements Runnable {
 													// environment.
 													rseENV
 															.setTryToConnect(true);
-													if (Job.getJobManager()
-															.find(FAMILY).length == 0) {
+													if (Job
+															.getJobManager()
+															.find(
+																	new ProjectUpdateFamily(
+																			rseENV)).length == 0) {
 														ProjectUpdateJob job = new ProjectUpdateJob(
-																"Environment configuration changed. Updating projects.");
-														job
-																.setEnvironment(rseENV);
+																rseENV);
 														job.setUser(true);
 														job.schedule();
 													}
@@ -172,7 +187,7 @@ public class RSEConnectionMonitor implements Runnable {
 				}
 			}
 			try {
-				Thread.sleep(250);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				return;
 			}
