@@ -1,6 +1,7 @@
 package org.eclipse.dltk.internal.ui.rse;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.core.internal.rse.DLTKRSEPlugin;
 import org.eclipse.dltk.core.internal.rse.RSEConnectionQueryManager;
 import org.eclipse.dltk.core.internal.rse.RSEConnectionQueryManager.IConnector;
@@ -52,6 +53,8 @@ public class RSEConnector implements IConnector {
 			if (subsystem instanceof IRemoteFileSubSystem) {
 				try {
 					subsystem.connect(new NullProgressMonitor(), false);
+				} catch (OperationCanceledException e) {
+					// don't log it
 				} catch (Exception e) {
 					DLTKRSEPlugin.log(e);
 				}
