@@ -61,7 +61,7 @@ public class ProjectRequest extends IndexRequest {
 
 	protected void run() throws CoreException {
 		IEnvironment environment = EnvironmentManager.getEnvironment(project);
-		if (!environment.isConnected()) {
+		if (!environment.connect()) {
 			return;
 		}
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager

@@ -78,7 +78,7 @@ public class BuildParticipantManager extends NatureExtensionManager {
 
 	private static BuildParticipantManager instance = null;
 
-	private static BuildParticipantManager getInstance() {
+	private static synchronized BuildParticipantManager getInstance() {
 		if (instance == null) {
 			instance = new BuildParticipantManager();
 		}

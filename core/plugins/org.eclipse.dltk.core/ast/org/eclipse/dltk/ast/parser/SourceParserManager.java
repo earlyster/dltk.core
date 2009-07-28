@@ -29,7 +29,7 @@ public class SourceParserManager extends DLTKContributionExtensionManager {
 
 	private static SourceParserManager instance;
 
-	public static SourceParserManager getInstance() {
+	public static synchronized SourceParserManager getInstance() {
 		if (instance == null) {
 			instance = new SourceParserManager();
 		}

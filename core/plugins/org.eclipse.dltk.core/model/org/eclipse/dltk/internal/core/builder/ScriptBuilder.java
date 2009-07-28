@@ -225,7 +225,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 		IEnvironment environment = EnvironmentManager
 				.getEnvironment(scriptProject);
-		if (environment == null || !environment.isConnected()) {
+		if (environment == null || !environment.connect()) {
 			if (monitor != null) {
 				monitor.done();
 			}

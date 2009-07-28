@@ -42,7 +42,7 @@ public class SourceModuleRequest extends IndexRequest {
 	protected void run() throws CoreException, IOException {
 		IEnvironment environment = EnvironmentManager.getEnvironment(module
 				.getScriptProject());
-		if (!environment.isConnected()) {
+		if (!environment.connect()) {
 			return;
 		}
 		final IScriptProject project = module.getScriptProject();

@@ -55,7 +55,7 @@ public class SourceModulesRequest extends IndexRequest {
 
 	protected void run() throws CoreException, IOException {
 		IEnvironment environment = EnvironmentManager.getEnvironment(project);
-		if (!environment.isConnected()) {
+		if (!environment.connect()) {
 			return;
 		}
 		final Index index = getIndexer().getProjectIndex(project);
