@@ -43,7 +43,7 @@ import org.eclipse.ui.console.IConsoleView;
 public class ScriptConsoleManager implements ILaunchListener {
 	private static ScriptConsoleManager instance;
 
-	public static ScriptConsoleManager getInstance() {
+	public static synchronized ScriptConsoleManager getInstance() {
 		if (instance == null) {
 			instance = new ScriptConsoleManager();
 		}
