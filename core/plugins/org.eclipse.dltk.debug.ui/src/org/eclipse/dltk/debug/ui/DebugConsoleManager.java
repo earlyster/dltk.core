@@ -36,7 +36,7 @@ public class DebugConsoleManager implements ILaunchesListener2 {
 
 	private static DebugConsoleManager instance;
 
-	public static DebugConsoleManager getInstance() {
+	public static synchronized DebugConsoleManager getInstance() {
 		if (instance == null) {
 			instance = new DebugConsoleManager();
 		}

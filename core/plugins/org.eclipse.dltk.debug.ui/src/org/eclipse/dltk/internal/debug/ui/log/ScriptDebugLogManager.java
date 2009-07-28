@@ -14,8 +14,8 @@ import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.debug.core.model.IDebugTarget;
-import org.eclipse.dltk.dbgp.IDbgpRawPacket;
 import org.eclipse.dltk.dbgp.IDbgpRawListener;
+import org.eclipse.dltk.dbgp.IDbgpRawPacket;
 import org.eclipse.dltk.dbgp.internal.IDbgpDebugingEngine;
 import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
@@ -37,7 +37,7 @@ public class ScriptDebugLogManager implements ILaunchListener,
 		// empty constructor
 	}
 
-	public static ScriptDebugLogManager getInstance() {
+	public static synchronized ScriptDebugLogManager getInstance() {
 		if (instance == null) {
 			instance = new ScriptDebugLogManager();
 		}

@@ -19,7 +19,7 @@ public class DLTKDebugUILanguageManager extends
 		super(LANGUAGE_EXTPOINT);
 	}
 
-	static DLTKDebugUILanguageManager getInstance() {
+	static synchronized DLTKDebugUILanguageManager getInstance() {
 		if (self == null) {
 			self = new DLTKDebugUILanguageManager();
 		}
