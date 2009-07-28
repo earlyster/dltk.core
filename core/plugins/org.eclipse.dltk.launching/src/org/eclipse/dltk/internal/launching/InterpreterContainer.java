@@ -53,7 +53,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * Cache of buildpath entries per Interpreter install. Cleared when a
 	 * Interpreter changes.
 	 */
-	private static Map fgBuildpathEntries = null;
+	private static Map<IInterpreterInstall, IBuildpathEntry[]> fgBuildpathEntries = null;
 	private static IAccessRule[] EMPTY_RULES = new IAccessRule[0];
 
 	/**
@@ -65,7 +65,8 @@ public class InterpreterContainer implements IBuildpathContainer {
 	private static IBuildpathEntry[] getBuildpathEntries(
 			IInterpreterInstall interpreter) {
 		if (fgBuildpathEntries == null) {
-			fgBuildpathEntries = new HashMap(10);
+			fgBuildpathEntries = new HashMap<IInterpreterInstall, IBuildpathEntry[]>(
+					10);
 			// add a listener to clear cached value when a Interpreter changes
 			// or is
 			// removed
@@ -92,8 +93,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 			};
 			ScriptRuntime.addInterpreterInstallChangedListener(listener);
 		}
-		IBuildpathEntry[] entries = (IBuildpathEntry[]) fgBuildpathEntries
-				.get(interpreter);
+		IBuildpathEntry[] entries = fgBuildpathEntries.get(interpreter);
 		if (entries == null) {
 			entries = computeBuildpathEntries(interpreter);
 			fgBuildpathEntries.put(interpreter, entries);
@@ -115,8 +115,9 @@ public class InterpreterContainer implements IBuildpathContainer {
 		if (libs == null) {
 			libs = ScriptRuntime.getLibraryLocations(interpreter);
 		}
-		List entries = new ArrayList(libs.length);
-		Set rawEntries = new HashSet(libs.length);
+		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>(
+				libs.length);
+		Set<IPath> rawEntries = new HashSet<IPath>(libs.length);
 		for (int i = 0; i < libs.length; i++) {
 			IPath entryPath = libs[i].getLibraryPath();
 
@@ -139,7 +140,8 @@ public class InterpreterContainer implements IBuildpathContainer {
 				 * IBuildpathEntry must be absolute"); //$NON-NLS-1$
 				 */
 				IBuildpathAttribute[] attributes = new IBuildpathAttribute[0];
-				ArrayList excluded = new ArrayList(); // paths to exclude
+				ArrayList<IPath> excluded = new ArrayList<IPath>(); // paths to
+				// exclude
 				for (int j = 0; j < libs.length; j++) {
 					IPath otherPath = libs[j].getLibraryPath();
 					if (otherPath.isEmpty())
@@ -158,9 +160,9 @@ public class InterpreterContainer implements IBuildpathContainer {
 				}
 
 				entries.add(DLTKCore.newLibraryEntry(entryPath, EMPTY_RULES,
-						attributes, BuildpathEntry.INCLUDE_ALL,
-						(IPath[]) excluded.toArray(new IPath[excluded.size()]),
-						false, true));
+						attributes, BuildpathEntry.INCLUDE_ALL, excluded
+								.toArray(new IPath[excluded.size()]), false,
+						true));
 				rawEntries.add(entryPath);
 			}
 		}
@@ -173,8 +175,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 					attributes, BuildpathEntry.INCLUDE_ALL, new IPath[0],
 					false, true));
 		}
-		return (IBuildpathEntry[]) entries.toArray(new IBuildpathEntry[entries
-				.size()]);
+		return entries.toArray(new IBuildpathEntry[entries.size()]);
 	}
 
 	/**
@@ -196,7 +197,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 */
 	public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
 		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(fInterpreterInstall);
-		List entries = new ArrayList();
+		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>();
 		entries.addAll(Arrays.asList(buildpathEntries));
 		// Use custom per project interpreter entries.
 		IInterpreterContainerExtension extension = DLTKLanguageManager
@@ -204,8 +205,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 		if (extension != null) {
 			extension.processEntres(project, entries);
 		}
-		return (IBuildpathEntry[]) entries.toArray(new IBuildpathEntry[entries
-				.size()]);
+		return entries.toArray(new IBuildpathEntry[entries.size()]);
 	}
 
 	/**
