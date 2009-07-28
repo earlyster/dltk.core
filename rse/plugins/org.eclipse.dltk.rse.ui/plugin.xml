@@ -38,4 +38,9 @@
 			</enablement>
 		</decorator>
 	</extension>
+ <extension
+       point="org.eclipse.dltk.rse.core.rseConnector">
+    <connector
+          class="org.eclipse.dltk.internal.ui.rse.RSEConnector"></connector>
+ </extension>
 </plugin>
