@@ -58,16 +58,14 @@ public class ScriptConsoleManager implements ILaunchListener {
 	}
 
 	public ScriptConsole[] getScriptConsoles(String consoleType) {
-		List consoles = new ArrayList();
-		IConsole[] consoles2 = manager.getConsoles();
-		for (int i = 0; i < consoles2.length; ++i) {
-			if (consoles2[i] instanceof ScriptConsole
-					&& consoles2[i].getType().equals(consoleType)) {
-				consoles.add(consoles2[i]);
+		List<ScriptConsole> consoles = new ArrayList<ScriptConsole>();
+		for (IConsole console : manager.getConsoles()) {
+			if (console instanceof ScriptConsole
+					&& console.getType().equals(consoleType)) {
+				consoles.add((ScriptConsole) console);
 			}
 		}
-		return (ScriptConsole[]) consoles.toArray(new ScriptConsole[consoles
-				.size()]);
+		return consoles.toArray(new ScriptConsole[consoles.size()]);
 	}
 
 	public ScriptConsole getActiveScriptConsole(String consoleType) {
