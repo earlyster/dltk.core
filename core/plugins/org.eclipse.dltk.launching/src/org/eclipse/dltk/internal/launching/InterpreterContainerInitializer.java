@@ -23,7 +23,6 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterStandin;
@@ -44,6 +43,7 @@ public class InterpreterContainerInitializer extends
 	/**
 	 * @see BuildpathContainerInitializer#initialize(IPath, IScriptProject)
 	 */
+	@Override
 	public void initialize(IPath containerPath, IScriptProject project)
 			throws CoreException {
 		int size = containerPath.segmentCount();
@@ -111,6 +111,7 @@ public class InterpreterContainerInitializer extends
 	 * The container can be updated if it refers to an existing Interpreter.
 	 * 
 	 */
+	@Override
 	public boolean canUpdateBuildpathContainer(IPath containerPath,
 			IScriptProject project) {
 		if (containerPath != null && containerPath.segmentCount() > 0) {
@@ -137,13 +138,10 @@ public class InterpreterContainerInitializer extends
 	}
 
 	public static String getEnvironmentFromProject(IScriptProject project) {
-		IEnvironment environment = EnvironmentManager.getEnvironment(project);
-		if (environment != null) {
-			return environment.getId();
-		}
-		return null;
+		return EnvironmentManager.getEnvironmentId(project.getProject());
 	}
 
+	@Override
 	public void requestBuildpathContainerUpdate(IPath containerPath,
 			IScriptProject project, IBuildpathContainer containerSuggestion)
 			throws CoreException {
@@ -204,6 +202,7 @@ public class InterpreterContainerInitializer extends
 		ScriptRuntime.saveInterpreterConfiguration();
 	}
 
+	@Override
 	public String getDescription(IPath containerPath, IScriptProject project) {
 		String tag = null;
 		if (containerPath.segmentCount() > 2) {
