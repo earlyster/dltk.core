@@ -30,7 +30,7 @@ public class ValidatorManager extends NatureExtensionManager {
 
 	private static ValidatorManager instance = null;
 
-	private static ValidatorManager getInstance() {
+	private static synchronized ValidatorManager getInstance() {
 		if (instance == null) {
 			instance = new ValidatorManager();
 		}
