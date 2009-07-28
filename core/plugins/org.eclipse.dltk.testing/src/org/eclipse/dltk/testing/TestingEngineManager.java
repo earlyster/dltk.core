@@ -70,7 +70,7 @@ public final class TestingEngineManager extends NatureExtensionManager {
 
 	private static TestingEngineManager instance = null;
 
-	private static TestingEngineManager getInstance() {
+	private static synchronized TestingEngineManager getInstance() {
 		if (instance == null) {
 			instance = new TestingEngineManager();
 		}

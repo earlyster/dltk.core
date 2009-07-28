@@ -86,7 +86,7 @@ public class TestCategoryEngineManager extends NatureExtensionManager {
 
 	private static TestCategoryEngineManager instance = null;
 
-	private static TestCategoryEngineManager getInstance() {
+	private static synchronized TestCategoryEngineManager getInstance() {
 		if (instance == null) {
 			instance = new TestCategoryEngineManager();
 		}
