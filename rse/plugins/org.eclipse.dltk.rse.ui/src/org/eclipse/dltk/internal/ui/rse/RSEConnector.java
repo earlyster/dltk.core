@@ -82,8 +82,13 @@ public class RSEConnector implements IConnector {
 	public void runDisplayRunnables() {
 		// We need to interrupt processingThread if it is no executing.
 		Display current = Display.getCurrent();
-		while (RSEConnectionQueryManager.getInstance().hasHosts()
-				&& current.readAndDispatch() && !current.isDisposed()) {
+		MAIN_LOOP: while (RSEConnectionQueryManager.getInstance().hasHosts()
+				&& !current.isDisposed()) {
+			while (current.readAndDispatch()) {
+				if (current.isDisposed()) {
+					break MAIN_LOOP;
+				}
+			}
 			IHost host = RSEConnectionQueryManager.getInstance().getNextHost(
 					false);
 			if (host != null) {
@@ -91,7 +96,6 @@ public class RSEConnector implements IConnector {
 				RSEConnectionQueryManager.getInstance()
 						.markHostAsFinished(host);
 			}
-			current.sleep();
 		}
 	}
 
