@@ -24,7 +24,7 @@ public class Implementors {
     /**
      * Returns the shared instance.
      */
-    public static Implementors getInstance() {
+	public static synchronized Implementors getInstance() {
         if (fgInstance == null) {
             fgInstance = new Implementors();
         }

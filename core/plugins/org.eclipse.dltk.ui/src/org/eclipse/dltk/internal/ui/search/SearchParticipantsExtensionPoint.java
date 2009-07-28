@@ -87,7 +87,7 @@ public class SearchParticipantsExtensionPoint {
 		return (SearchParticipantRecord[]) participantSet.toArray(participants);
 	}
 
-	public static SearchParticipantsExtensionPoint getInstance() {
+	public static synchronized SearchParticipantsExtensionPoint getInstance() {
 		if (fgInstance == null)
 			fgInstance= new SearchParticipantsExtensionPoint();
 		return fgInstance;

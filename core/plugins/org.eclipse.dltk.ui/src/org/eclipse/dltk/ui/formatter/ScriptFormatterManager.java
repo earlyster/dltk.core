@@ -20,7 +20,7 @@ public class ScriptFormatterManager extends DLTKContributionExtensionManager {
 
 	private static ScriptFormatterManager instance = null;
 
-	public static ScriptFormatterManager getInstance() {
+	public static synchronized ScriptFormatterManager getInstance() {
 		if (instance == null) {
 			instance = new ScriptFormatterManager();
 		}

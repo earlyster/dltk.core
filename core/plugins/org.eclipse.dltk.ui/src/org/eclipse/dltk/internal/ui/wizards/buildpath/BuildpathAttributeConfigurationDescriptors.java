@@ -48,7 +48,8 @@ public class BuildpathAttributeConfigurationDescriptors {
 			}
 		}
 	
-		public BuildpathAttributeConfiguration getInstance() throws CoreException  {
+		public synchronized BuildpathAttributeConfiguration getInstance()
+				throws CoreException {
 			if (fInstance == null) {
 				Object elem= CoreUtility.createExtension(fConfigElement, ATT_CLASS);
 				if (elem instanceof BuildpathAttributeConfiguration) {

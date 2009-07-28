@@ -27,7 +27,7 @@ public class ScriptCorrectionProcessorManager extends NatureExtensionManager {
 
 	private static ScriptCorrectionProcessorManager instance = null;
 
-	private static ScriptCorrectionProcessorManager getInstance() {
+	private static synchronized ScriptCorrectionProcessorManager getInstance() {
 		if (instance == null) {
 			instance = new ScriptCorrectionProcessorManager();
 		}

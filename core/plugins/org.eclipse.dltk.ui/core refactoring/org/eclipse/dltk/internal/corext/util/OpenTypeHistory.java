@@ -58,7 +58,8 @@ public class OpenTypeHistory extends History implements IShutdownListener {
 	
 	private static Map sToolkitHistory = new HashMap();
 	
-	public static OpenTypeHistory getInstance(IDLTKUILanguageToolkit toolkit) {
+	public static synchronized OpenTypeHistory getInstance(
+			IDLTKUILanguageToolkit toolkit) {
 		if( sToolkitHistory.containsKey(toolkit )) {
 			return (OpenTypeHistory)sToolkitHistory.get(toolkit);
 		}
