@@ -6,15 +6,12 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.rse.core.model.IHost;
-import org.eclipse.rse.core.subsystems.IConnectorService;
 import org.eclipse.rse.core.subsystems.ISubSystem;
 import org.eclipse.rse.internal.efs.RSEFileSystem;
 import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
@@ -161,40 +158,14 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 		if (isConnected()) {
 			return true;
 		}
-		// TODO: Add synchronize section only if we are not calling from UI
-		// thread. Need to create UI adapter service to do it.
-		// synchronized (this.host) {
 		connectUnsafe();
-		// }
 		return isConnected();
 	}
 
 	private void connectUnsafe() {
 		boolean tryToConnect = isTryToConnect();
 		if (tryToConnect) {
-			ISubSystem[] subSystems = host.getSubSystems();
-			for (ISubSystem subsystem : subSystems) {
-				if (subsystem instanceof IRemoteFileSubSystem) {
-					try {
-						subsystem.connect(new NullProgressMonitor(), false);
-					} catch (Exception e) {
-						DLTKRSEPlugin.log(e);
-					}
-				}
-			}
-			//
-			// IConnectorService[] services = host.getConnectorServices();
-			// for (IConnectorService service : services) {
-			// if (!service.isConnected()) {
-			// try {
-			// service.connect(new NullProgressMonitor());
-			// } catch (Exception e) {
-			// if (!(e instanceof OperationCanceledException)) {
-			// DLTKRSEPlugin.log(e);
-			// }
-			// }
-			// }
-			// }
+			RSEConnectionQueryManager.getInstance().connectTo(host);
 			setTryToConnect(false);
 		}
 	}

@@ -11,7 +11,7 @@ import org.osgi.framework.BundleContext;
 public class DLTKRSEPlugin extends Plugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.eclipse.dltk.rse"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "org.eclipse.dltk.rse.core"; //$NON-NLS-1$
 
 	// The shared instance
 	private static DLTKRSEPlugin plugin;
