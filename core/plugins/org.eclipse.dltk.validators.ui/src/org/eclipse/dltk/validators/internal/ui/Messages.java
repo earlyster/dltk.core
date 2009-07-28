@@ -10,6 +10,7 @@ public class Messages extends NLS {
 	public static String ValidatorsConsolePageParticipant_closeConsole;
 	public static String RemoveAllValidatorConsolesAction_text;
 	public static String RemoveAllValidatorConsolesAction_toolTipText;
+	public static String AbstractValidateSelectionWithConsole_dltkValidatorOutput;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

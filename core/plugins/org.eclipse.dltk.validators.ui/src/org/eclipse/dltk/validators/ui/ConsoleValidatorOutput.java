@@ -13,6 +13,8 @@ package org.eclipse.dltk.validators.ui;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.validators.core.IValidatorOutput;
@@ -35,6 +37,7 @@ public class ConsoleValidatorOutput implements IValidatorOutput {
 	public ConsoleValidatorOutput(String consoleName) {
 		final IConsoleManager consoleManager = ConsolePlugin.getDefault()
 				.getConsoleManager();
+		removeTerminatedConsoles(consoleName, consoleManager);
 		console = new ValidatorConsole(consoleName);
 		final IPatternMatchListener[] listeners = ValidatorConsoleTrackerManager
 				.getListeners();
@@ -44,6 +47,28 @@ public class ConsoleValidatorOutput implements IValidatorOutput {
 		consoleManager.addConsoles(new IConsole[] { console });
 		consoleManager.showConsoleView(console);
 		this.stream = console.newOutputStream();
+	}
+
+	private void removeTerminatedConsoles(String consoleName,
+			final IConsoleManager consoleManager) {
+		List<IConsole> toRemove = null;
+		final IConsole[] consoles = consoleManager.getConsoles();
+		for (IConsole console : consoles) {
+			if (console instanceof ValidatorConsole) {
+				final ValidatorConsole vConsole = (ValidatorConsole) console;
+				if (vConsole.isClosed()
+						&& consoleName.equals(vConsole.getBaseName())) {
+					if (toRemove == null) {
+						toRemove = new ArrayList<IConsole>(consoles.length);
+					}
+					toRemove.add(console);
+				}
+			}
+		}
+		if (toRemove != null) {
+			consoleManager.removeConsoles(toRemove
+					.toArray(new IConsole[toRemove.size()]));
+		}
 	}
 
 	public OutputStream getStream() {

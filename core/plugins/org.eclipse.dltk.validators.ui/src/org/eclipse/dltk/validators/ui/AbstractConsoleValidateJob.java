@@ -1,12 +1,7 @@
 package org.eclipse.dltk.validators.ui;
 
-import java.util.Date;
-
 import org.eclipse.dltk.validators.core.AbstractValidateJob;
 import org.eclipse.dltk.validators.core.IValidatorOutput;
-import org.eclipse.osgi.util.NLS;
-
-import com.ibm.icu.text.DateFormat;
 
 public abstract class AbstractConsoleValidateJob extends AbstractValidateJob {
 
@@ -14,19 +9,12 @@ public abstract class AbstractConsoleValidateJob extends AbstractValidateJob {
 		super(jobName);
 	}
 
+	@Override
 	protected IValidatorOutput createOutput() {
 		if (isConsoleRequired()) {
-			return new ConsoleValidatorOutput(getConsoleName());
+			return new ConsoleValidatorOutput(getName());
 		}
 		return super.createOutput();
-	}
-
-	protected String getConsoleName() {
-		final String timestamp = DateFormat.getDateTimeInstance(
-				DateFormat.MEDIUM, DateFormat.MEDIUM).format(
-				new Date(System.currentTimeMillis()));
-		final String message = Messages.AbstractValidateSelectionWithConsole_dltkValidatorOutput;
-		return NLS.bind(message, getName(), timestamp);
 	}
 
 	protected boolean isConsoleRequired() {
