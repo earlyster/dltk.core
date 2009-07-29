@@ -57,8 +57,8 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof RSEEnvironment) {
-			RSEEnvironment other = (RSEEnvironment) obj;
+		if (obj instanceof IEnvironment) {
+			IEnvironment other = (IEnvironment) obj;
 			return getId().equals(other.getId());
 		}
 		return false;
