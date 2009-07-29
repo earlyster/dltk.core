@@ -809,7 +809,7 @@ public class ScriptElementLabels {
 				}
 			} else {
 				String[] params = method.getParameters();
-				if (params.length > 0) {
+				if (params != null && params.length > 0) {
 					buf.append(ELLIPSIS_STRING);
 				}
 			}

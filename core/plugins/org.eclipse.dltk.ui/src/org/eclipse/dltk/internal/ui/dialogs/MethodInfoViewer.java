@@ -29,9 +29,11 @@ import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.index2.search.ModelAccess;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.MethodNameMatch;
@@ -39,6 +41,7 @@ import org.eclipse.dltk.core.search.MethodNameMatchRequestor;
 import org.eclipse.dltk.core.search.NopTypeNameRequestor;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.SearchPattern;
+import org.eclipse.dltk.internal.core.search.DLTKSearchMethodNameMatch;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.corext.util.MethodFilter;
 import org.eclipse.dltk.internal.corext.util.MethodInfoFilter;
@@ -749,13 +752,28 @@ public class MethodInfoViewer {
 				ProgressMonitor monitor) throws CoreException {
 			long start = System.currentTimeMillis();
 			fReqestor.setHistory(matchIdsInHistory);
-			// consider primary working copies during searching
-			SearchEngine engine = new SearchEngine((WorkingCopyOwner) null);
+
 			monitor
 					.setTaskName(DLTKUIMessages.TypeInfoViewer_searchJob_taskName);
-			engine.searchAllMethodNames(fFilter.getNamePattern().toCharArray(),
-					fFilter.getSearchFlags(), fElementKind, fScope, fReqestor,
-					IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
+
+			IMethod[] methods = new ModelAccess().findMethods(fFilter
+					.getNamePattern(), ModelAccess.convertSearchRule(fFilter
+					.getSearchFlags()), 0, 0, fScope, monitor);
+			if (methods != null) {
+				for (IMethod method : methods) {
+					fReqestor
+							.acceptMethodNameMatch(new DLTKSearchMethodNameMatch(
+									method, method.getFlags()));
+				}
+			} else {
+				// consider primary working copies during searching
+				SearchEngine engine = new SearchEngine((WorkingCopyOwner) null);
+				engine.searchAllMethodNames(fFilter.getNamePattern()
+						.toCharArray(), fFilter.getSearchFlags(), fElementKind,
+						fScope, fReqestor,
+						IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+						monitor);
+			}
 			if (DEBUG)
 				System.out
 						.println("Time needed until search has finished: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$

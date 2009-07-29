@@ -28,10 +28,13 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dltk.ast.Modifiers;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.index2.search.ModelAccess;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.NopTypeNameRequestor;
@@ -39,6 +42,7 @@ import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.TypeNameMatch;
 import org.eclipse.dltk.core.search.TypeNameMatchRequestor;
+import org.eclipse.dltk.internal.core.search.DLTKSearchTypeNameMatch;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.corext.util.OpenTypeHistory;
 import org.eclipse.dltk.internal.corext.util.Strings;
@@ -773,16 +777,31 @@ public class TypeInfoViewer {
 				ProgressMonitor monitor) throws CoreException {
 			long start = System.currentTimeMillis();
 			fReqestor.setHistory(matchIdsInHistory);
-			// consider primary working copies during searching
-			SearchEngine engine = new SearchEngine((WorkingCopyOwner) null);
-			String packPattern = fFilter.getPackagePattern();
+
 			monitor
 					.setTaskName(DLTKUIMessages.TypeInfoViewer_searchJob_taskName);
-			engine.searchAllTypeNames(packPattern == null ? null : packPattern
-					.toCharArray(), fFilter.getPackageFlags(), fFilter
-					.getNamePattern().toCharArray(), fFilter.getSearchFlags(),
-					fElementKind, fScope, fReqestor,
-					IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
+
+			IType[] types = new ModelAccess().findTypes(fFilter
+					.getNamePattern(), ModelAccess.convertSearchRule(fFilter
+					.getSearchFlags()), 0, Modifiers.AccNameSpace, fScope,
+					monitor);
+			if (types != null) {
+				for (IType type : types) {
+					fReqestor.acceptTypeNameMatch(new DLTKSearchTypeNameMatch(
+							type, type.getFlags()));
+				}
+			} else {
+				// consider primary working copies during searching
+				SearchEngine engine = new SearchEngine((WorkingCopyOwner) null);
+				String packPattern = fFilter.getPackagePattern();
+				engine.searchAllTypeNames(packPattern == null ? null
+						: packPattern.toCharArray(), fFilter.getPackageFlags(),
+						fFilter.getNamePattern().toCharArray(), fFilter
+								.getSearchFlags(), fElementKind, fScope,
+						fReqestor,
+						IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+						monitor);
+			}
 			if (DEBUG)
 				System.out
 						.println("Time needed until search has finished: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
