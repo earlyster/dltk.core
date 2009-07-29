@@ -62,14 +62,6 @@ public final class EnvironmentManager {
 						.getAttribute("priority")); //$NON-NLS-1$
 			}
 
-			private int parseInt(String value) {
-				try {
-					return Integer.parseInt(value);
-				} catch (NumberFormatException e) {
-					return 0;
-				}
-			}
-
 		}
 
 		public EnvironmentManagerExtensionManager() {
@@ -433,14 +425,6 @@ public final class EnvironmentManager {
 				super(manager, configurationElement);
 				this.priority = parseInt(configurationElement
 						.getAttribute("priority")); //$NON-NLS-1$
-			}
-
-			private int parseInt(String value) {
-				try {
-					return Integer.parseInt(value);
-				} catch (NumberFormatException e) {
-					return 0;
-				}
 			}
 
 		}

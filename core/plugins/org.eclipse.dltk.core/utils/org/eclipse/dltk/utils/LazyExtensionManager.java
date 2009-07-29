@@ -52,6 +52,17 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 				return null;
 			}
 		}
+
+		/**
+		 * @since 2.0
+		 */
+		protected static int parseInt(String value) {
+			try {
+				return Integer.parseInt(value);
+			} catch (NumberFormatException e) {
+				return 0;
+			}
+		}
 	}
 
 	private static class InstanceIterator<E> implements Iterator<E> {
@@ -176,8 +187,7 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 			initialize();
 		}
 		@SuppressWarnings("unchecked")
-		final Descriptor<E>[] resultArray = new Descriptor[extensions
-				.size()];
+		final Descriptor<E>[] resultArray = new Descriptor[extensions.size()];
 		extensions.toArray(resultArray);
 		return resultArray;
 	}
@@ -227,8 +237,7 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 	 * @param confElement
 	 * @return
 	 */
-	protected Descriptor<E> createDescriptor(
-			IConfigurationElement confElement) {
+	protected Descriptor<E> createDescriptor(IConfigurationElement confElement) {
 		return new Descriptor<E>(this, confElement);
 	}
 
@@ -239,8 +248,7 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 	/**
 	 * @param descriptors
 	 */
-	protected void initializeDescriptors(
-			List<Descriptor<E>> descriptors) {
+	protected void initializeDescriptors(List<Descriptor<E>> descriptors) {
 		// empty
 	}
 
