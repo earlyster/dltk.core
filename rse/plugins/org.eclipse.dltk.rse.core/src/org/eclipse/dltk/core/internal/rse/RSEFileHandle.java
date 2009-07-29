@@ -44,20 +44,24 @@ import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.internal.efs.RSEFileSystem;
 
 public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
-
-	private static Map<String, IFileInfo> timestamps = new HashMap<String, IFileInfo>();
-	private static Map<String, Long> lastaccess = new HashMap<String, Long>();
+	private static final int CACHE_LIMIT = 1000;
+	private static Map<RSEFileHandle, IFileInfo> timestamps = new HashMap<RSEFileHandle, IFileInfo>();
+	private static Map<RSEFileHandle, Long> lastaccess = new HashMap<RSEFileHandle, Long>();
 
 	private IFileStore file;
 	private IEnvironment environment;
 	private ISshFileHandle sshFile;
 
 	/**
+	 * @param infos
 	 * @since 2.0
 	 */
-	public RSEFileHandle(IEnvironment env, IFileStore file) {
+	public RSEFileHandle(IEnvironment env, IFileStore file, IFileInfo info) {
 		this.environment = env;
 		this.file = file;
+		if (info != null) {
+			timestamps.put(this, info);
+		}
 	}
 
 	private void fetchSshFile() {
@@ -91,7 +95,8 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 	}
 
 	public RSEFileHandle(IEnvironment env, URI locationURI) {
-		this(env, RSEFileSystem.getInstance().getStore(locationURI));
+		this(env, RSEFileSystem.getInstance().getStore(locationURI),
+				(IFileInfo) null);
 	}
 
 	public boolean exists() {
@@ -110,26 +115,28 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 	}
 
 	private IFileInfo fetchInfo(boolean force) {
-		String n = toString();
+		if (timestamps.size() > CACHE_LIMIT) {
+			timestamps.clear();
+			lastaccess.clear();
+		}
 		boolean flag = !environment.isLocal();
 		long c = 0;
 		if (flag && !force) {
-			if (timestamps.containsKey(n)) {
+			if (timestamps.containsKey(this)) {
 				c = System.currentTimeMillis();
-				Long last = lastaccess.get(n);
-				if (last != null
-						&& (c - last.longValue()) < 1000 * 60 * 60 * 24) {
-					return timestamps.get(n);
+				Long last = lastaccess.get(this);
+				if (last != null && (c - last.longValue()) < 1000 * 10) {
+					return timestamps.get(this);
 				}
 			}
 		}
 		IFileInfo info = file.fetchInfo();
 		if (flag) {
-			timestamps.put(n, info);
+			timestamps.put(this, info);
 			if (c == 0) {
 				c = System.currentTimeMillis();
 			}
-			lastaccess.put(n, c);
+			lastaccess.put(this, c);
 		}
 		return info;
 	}
@@ -158,7 +165,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 			return new RSEFileHandle(environment, childStore, sshFile
 					.getChild(childname));
 		}
-		return new RSEFileHandle(environment, childStore);
+		return new RSEFileHandle(environment, childStore, (IFileInfo) null);
 	}
 
 	public IFileHandle[] getChildren() {
@@ -183,10 +190,19 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 			}
 		}
 		try {
-			IFileStore[] files = file.childStores(EFS.NONE, null);
-			IFileHandle[] children = new IFileHandle[files.length];
-			for (int i = 0; i < files.length; i++)
-				children[i] = new RSEFileHandle(environment, files[i]);
+			IFileInfo[] infos = file.childInfos(EFS.NONE,
+					new NullProgressMonitor());
+
+			// IFileStore[] files = file.childStores(EFS.NONE,
+			// new NullProgressMonitor());
+			IFileHandle[] children = new IFileHandle[infos.length];
+			long c = System.currentTimeMillis();
+			for (int i = 0; i < infos.length; i++) {
+				children[i] = new RSEFileHandle(environment, file
+						.getFileStore(new Path(infos[i].getName())), infos[i]);
+				timestamps.put((RSEFileHandle) children[i], infos[i]);
+				lastaccess.put((RSEFileHandle) children[i], c);
+			}
 			return children;
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG)
@@ -211,7 +227,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		IFileStore parent = file.getParent();
 		if (parent == null)
 			return null;
-		return new RSEFileHandle(environment, parent);
+		return new RSEFileHandle(environment, parent, (IFileInfo) null);
 	}
 
 	public IPath getPath() {

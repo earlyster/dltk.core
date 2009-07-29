@@ -100,6 +100,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 	}
 
 	private EFSDeployment createDeploymentUnsafe() throws CoreException {
+		getEnvironment().connect();
 		String tmpDir = getTempDir();
 		if (tmpDir != null) {
 			String rootPath = tmpDir + environment.getSeparator()
