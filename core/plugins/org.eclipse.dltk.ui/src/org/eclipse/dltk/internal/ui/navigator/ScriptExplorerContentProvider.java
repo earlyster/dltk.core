@@ -311,6 +311,9 @@ public class ScriptExplorerContentProvider extends
 			}
 
 			if (parentElement instanceof IProject) {
+				if (!((IProject) parentElement).isAccessible()) {
+					return StandardModelElementContentProvider.NO_CHILDREN;
+				}
 				return getExtendedChildren(parentElement,
 						((IProject) parentElement).members());
 			}
