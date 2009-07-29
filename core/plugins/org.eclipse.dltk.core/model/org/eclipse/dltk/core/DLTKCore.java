@@ -2120,7 +2120,9 @@ public class DLTKCore extends Plugin {
 				final IPath reference = entry.getPath();
 				final BuildpathContainerInitializer initializer = getBuildpathContainerInitializer(reference
 						.segment(0));
-				initializer.initialize(reference, project);
+				if (initializer != null) {
+					initializer.initialize(reference, project);
+				}
 				break;
 			}
 		}
