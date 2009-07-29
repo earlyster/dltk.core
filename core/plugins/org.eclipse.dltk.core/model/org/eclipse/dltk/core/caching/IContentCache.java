@@ -19,11 +19,23 @@ public interface IContentCache {
 	public InputStream getCacheEntryAttribute(IFileHandle handle,
 			String attribute);
 
+	/**
+	 * @since 2.0
+	 */
+	public InputStream getCacheEntryAttribute(IFileHandle handle,
+			String attribute, boolean localonly);
+
 	public OutputStream getCacheEntryAttributeOutputStream(IFileHandle handle,
 			String attribute);
 
 	public String getCacheEntryAttributeString(IFileHandle handle,
 			String attribute);
+
+	/**
+	 * @since 2.0
+	 */
+	public String getCacheEntryAttributeString(IFileHandle handle,
+			String attribute, boolean localonly);
 
 	public boolean setCacheEntryAttribute(IFileHandle handle, String attribute,
 			String value);
@@ -41,4 +53,15 @@ public interface IContentCache {
 
 	public long getCacheEntryAttributeLong(IFileHandle entryHandle,
 			String attribute);
+
+	/**
+	 * @since 2.0
+	 */
+	public long getCacheEntryAttributeLong(IFileHandle entryHandle,
+			String attribute, boolean localonly);
+
+	/**
+	 * @since 2.0
+	 */
+	public void updateFolderTimestamps(IFileHandle parent);
 }

@@ -27,12 +27,15 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
 import org.eclipse.dltk.internal.core.BuiltinSourceModule;
 import org.eclipse.dltk.internal.core.ExternalSourceModule;
+import org.eclipse.dltk.internal.core.ModelManager;
 
 public class ExternalProjectFragmentRequest extends IndexRequest {
 
@@ -56,14 +59,15 @@ public class ExternalProjectFragmentRequest extends IndexRequest {
 		if (!environment.connect()) {
 			return;
 		}
-		final Set modules = getExternalSourceModules();
+		final Set<ISourceModule> modules = getExternalSourceModules();
 		final Index index = getIndexer().getProjectFragmentIndex(fragment);
 		if (index == null) {
 			return;
 		}
 		final IPath containerPath = fragment.getPath();
-		final List changes = checkChanges(index, modules, containerPath,
-				getEnvironment());
+		Set<IFileHandle> parentFolders = new HashSet<IFileHandle>();
+		final List<Object> changes = checkChanges(index, modules,
+				containerPath, getEnvironment(), parentFolders);
 		if (DEBUG) {
 			log("changes.size=" + changes.size()); //$NON-NLS-1$
 		}
@@ -73,13 +77,24 @@ public class ExternalProjectFragmentRequest extends IndexRequest {
 		final ReadWriteMonitor imon = index.monitor;
 		imon.enterWrite();
 		try {
-			for (Iterator i = changes.iterator(); !isCancelled && i.hasNext();) {
+			for (Iterator<Object> i = changes.iterator(); !isCancelled
+					&& i.hasNext();) {
 				final Object change = i.next();
 				if (change instanceof String) {
 					index.remove((String) change);
-				} else {
-					getIndexer().indexSourceModule(index, toolkit,
-							(ISourceModule) change, containerPath);
+				} else if (change instanceof ISourceModule) {
+					ISourceModule module = (ISourceModule) change;
+					IFileHandle file = EnvironmentPathUtils.getFile(module,
+							false);
+					if (file != null && changes.size() > 1) {
+						IFileHandle parentHandle = file.getParent();
+						if (parentFolders.add(parentHandle.getParent())) {
+							ModelManager.getModelManager().getCoreCache()
+									.updateFolderTimestamps(parentHandle);
+						}
+					}
+					getIndexer().indexSourceModule(index, toolkit, module,
+							containerPath);
 				}
 			}
 
@@ -101,13 +116,13 @@ public class ExternalProjectFragmentRequest extends IndexRequest {
 	}
 
 	static class ExternalModuleVisitor implements IModelElementVisitor {
-		final Set modules = new HashSet();
+		final Set<ISourceModule> modules = new HashSet<ISourceModule>();
 
 		public boolean visit(IModelElement element) {
 			if (element.getElementType() == IModelElement.SOURCE_MODULE) {
 				if (element instanceof ExternalSourceModule
 						|| element instanceof BuiltinSourceModule) {
-					modules.add(element);
+					modules.add((ISourceModule) element);
 				}
 				return false;
 			}
@@ -115,7 +130,7 @@ public class ExternalProjectFragmentRequest extends IndexRequest {
 		}
 	}
 
-	private Set getExternalSourceModules() throws ModelException {
+	private Set<ISourceModule> getExternalSourceModules() throws ModelException {
 		final ExternalModuleVisitor visitor = new ExternalModuleVisitor();
 		fragment.accept(visitor);
 		return visitor.modules;

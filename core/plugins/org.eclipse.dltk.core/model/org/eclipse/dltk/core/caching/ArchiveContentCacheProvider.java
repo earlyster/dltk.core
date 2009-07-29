@@ -35,7 +35,9 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
  * @author Andrei Sobolev
  */
 public class ArchiveContentCacheProvider implements IContentCacheProvider {
+	private static final String CHECK_TIMEOUT = ".dltk.core.archive.cache.lastaccess";
 	private IContentCache cache;
+	private static final long CACHE_UPDATE_TIMEOUT = 1000 * 60 * 60; // One hour
 
 	public ArchiveContentCacheProvider() {
 	}
@@ -53,7 +55,12 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 		// Check for additional indexes
 		if (processIndexFile(handle, attribute, parent, parent
 				.getChild(DLTK_INDEX_FILE), cache)) {
-			return cache.getCacheEntryAttribute(handle, attribute);
+			return cache.getCacheEntryAttribute(handle, attribute, true);
+		}
+		long lastAccess = cache.getCacheEntryAttributeLong(parent,
+				CHECK_TIMEOUT, true);
+		if (lastAccess + CACHE_UPDATE_TIMEOUT > System.currentTimeMillis()) {
+			return null; // no entry at all
 		}
 		IFileHandle[] children = parent.getChildren();
 		if (children != null) {
@@ -68,11 +75,14 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 				}
 			}
 		}
+		cache.setCacheEntryAttribute(parent, CHECK_TIMEOUT, System
+				.currentTimeMillis());
 		return null;
 	}
 
 	public static void processFolderIndexes(IFileHandle folder,
 			IContentCache cache, IProgressMonitor monitor) {
+		// cache.get
 		String DLTK_INDEX_FILE = ".dltk.index";
 		// Check for additional indexes
 		IFileHandle[] children = folder.getChildren();
@@ -104,8 +114,8 @@ public class ArchiveContentCacheProvider implements IContentCacheProvider {
 			IContentCache cache) {
 		if (indexFile != null && indexFile.exists()) {
 			String stamp = cache.getCacheEntryAttributeString(indexFile,
-					"timestamp");
-			String fStamp = Long.toString(indexFile.lastModified());
+					"timestamp", true);
+			String fStamp = Long.toString(indexFile.lastModified() / 1000);
 			if (stamp != null) {
 				if (fStamp.equals(stamp)) {
 					return false;

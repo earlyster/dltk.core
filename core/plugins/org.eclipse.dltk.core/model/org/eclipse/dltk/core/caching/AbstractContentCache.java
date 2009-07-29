@@ -13,7 +13,16 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 public abstract class AbstractContentCache implements IContentCache {
 	public synchronized String getCacheEntryAttributeString(IFileHandle handle,
 			String attribute) {
-		InputStream stream = getCacheEntryAttribute(handle, attribute);
+		return getCacheEntryAttributeString(handle, attribute, false);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public synchronized String getCacheEntryAttributeString(IFileHandle handle,
+			String attribute, boolean localonly) {
+		InputStream stream = getCacheEntryAttribute(handle, attribute,
+				localonly);
 		if (stream != null) {
 			try {
 				char[] chars = Util.getInputStreamAsCharArray(stream, -1, null);
@@ -63,7 +72,16 @@ public abstract class AbstractContentCache implements IContentCache {
 
 	public synchronized long getCacheEntryAttributeLong(IFileHandle handle,
 			String attribute) {
-		InputStream stream = getCacheEntryAttribute(handle, attribute);
+		return getCacheEntryAttributeLong(handle, attribute, false);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public synchronized long getCacheEntryAttributeLong(IFileHandle handle,
+			String attribute, boolean localonly) {
+		InputStream stream = getCacheEntryAttribute(handle, attribute,
+				localonly);
 		if (stream != null) {
 			try {
 				DataInputStream dias = new DataInputStream(stream);

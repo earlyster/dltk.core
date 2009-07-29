@@ -14,6 +14,7 @@ package org.eclipse.dltk.core.search.indexing.core;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
@@ -21,13 +22,15 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 
 /**
  * @since 2.0
  */
-public class BuiltinProjectFragmentRequest extends ExternalProjectFragmentRequest {
+public class BuiltinProjectFragmentRequest extends
+		ExternalProjectFragmentRequest {
 
 	private final long lastModified;
 
@@ -57,7 +60,8 @@ public class BuiltinProjectFragmentRequest extends ExternalProjectFragmentReques
 			changes.addAll(modules);
 			return changes;
 		}
-		return super.checkChanges(index, modules, containerPath, environment);
+		return super.checkChanges(index, modules, containerPath, environment,
+				new HashSet<IFileHandle>());
 	}
 
 	protected IEnvironment getEnvironment() {

@@ -165,6 +165,14 @@ public class EnvironmentPathUtils {
 	}
 
 	public static IFileHandle getFile(IModelElement element) {
+		return getFile(element, true);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public static IFileHandle getFile(IModelElement element,
+			boolean checkExistance) {
 
 		IEnvironment environment = EnvironmentManager.getEnvironment(element);
 		if (environment == null) {
@@ -187,7 +195,11 @@ public class EnvironmentPathUtils {
 				}
 			}
 			IFileHandle file = environment.getFile(path);
-			if (file.exists()) {
+			if (checkExistance) {
+				if (file.exists()) {
+					return file;
+				}
+			} else {
 				return file;
 			}
 			return null;
@@ -197,7 +209,11 @@ public class EnvironmentPathUtils {
 				return environment.getFile(res.getLocationURI());
 			}
 			IFileHandle file = environment.getFile(path);
-			if (file.exists()) {
+			if (checkExistance) {
+				if (file.exists()) {
+					return file;
+				}
+			} else {
 				return file;
 			}
 			return null;

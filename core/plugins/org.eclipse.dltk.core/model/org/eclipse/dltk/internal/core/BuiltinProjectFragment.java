@@ -34,7 +34,6 @@ import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Util;
 
-
 /**
  * Project fragment for buildpath script folders and modules.
  * 
@@ -47,8 +46,9 @@ public class BuiltinProjectFragment extends ProjectFragment {
 	static final Object INTERPRETER_CONTAINER = "org.eclipse.dltk.launching.INTERPRETER_CONTAINER"; //$NON-NLS-1$
 
 	protected final IPath fPath;
-	
+
 	IBuiltinModuleProvider builtinProvider;
+
 	/**
 	 * Maps folder names and source module names.
 	 */
@@ -59,14 +59,15 @@ public class BuiltinProjectFragment extends ProjectFragment {
 		builtinProvider = getBuiltinProvider(project);
 	}
 
-	public static IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
+	public static IBuiltinModuleProvider getBuiltinProvider(
+			IScriptProject project) {
 		try {
 			IBuildpathEntry[] entries = project.getRawBuildpath();
 			IPath containerPath = null;
 			for (int i = 0; i < entries.length; i++) {
 				if (entries[i].getEntryKind() == IBuildpathEntry.BPE_CONTAINER) {
 					IPath path = entries[i].getPath();
-					if(path.segment(0).equals(INTERPRETER_CONTAINER)) {
+					if (path.segment(0).equals(INTERPRETER_CONTAINER)) {
 						containerPath = entries[i].getPath();
 						break;
 					}
@@ -75,12 +76,14 @@ public class BuiltinProjectFragment extends ProjectFragment {
 			if (containerPath == null) {
 				return null;
 			}
-			IBuildpathContainer buildpathContainer = ModelManager.getModelManager().getBuildpathContainer(containerPath,
-					project);
-			if( buildpathContainer == null ) {
+			IBuildpathContainer buildpathContainer = ModelManager
+					.getModelManager().getBuildpathContainer(containerPath,
+							project);
+			if (buildpathContainer == null) {
 				return null;
 			}
-			IBuiltinModuleProvider builtinProvider = buildpathContainer.getBuiltinProvider(project);
+			IBuiltinModuleProvider builtinProvider = buildpathContainer
+					.getBuiltinProvider(project);
 			return builtinProvider;
 		} catch (CoreException ex) {
 			if (DLTKCore.DEBUG) {
@@ -127,18 +130,21 @@ public class BuiltinProjectFragment extends ProjectFragment {
 			ArrayList vChildren, ArrayList vForeign, Map newElements,
 			char[][] inclusionPatterns, char[][] exclusionPatterns)
 			throws ModelException {
-		BuiltinScriptFolder fldr = (BuiltinScriptFolder)getScriptFolder(new Path("")); //$NON-NLS-1$
+		BuiltinScriptFolder fldr = (BuiltinScriptFolder) getScriptFolder(new Path(
+				"")); //$NON-NLS-1$
 		vChildren.add(fldr);
-		if( this.builtinProvider == null ) {
+		if (this.builtinProvider == null) {
 			return;
 		}
 		try {
 			BuiltinScriptFolderInfo fragInfo = new BuiltinScriptFolderInfo();
-			fldr.computeChildren(fragInfo, this.builtinProvider.getBuiltinModules() );
+			fldr.computeChildren(fragInfo, this.builtinProvider
+					.getBuiltinModules());
 			fldr.computeForeignResources(fragInfo);
 			newElements.put(fldr, fragInfo);
 		} catch (IllegalArgumentException e) {
-			throw new ModelException(e, IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
+			throw new ModelException(e,
+					IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
 			/*
 			 * could be thrown by ElementTree when path is not found
 			 */
@@ -181,7 +187,7 @@ public class BuiltinProjectFragment extends ProjectFragment {
 	public boolean isExternal() {
 		return true;
 	}
-	
+
 	/*
 	 * @see org.eclipse.dltk.internal.core.ProjectFragment#isBuiltin()
 	 */
@@ -278,41 +284,63 @@ public class BuiltinProjectFragment extends ProjectFragment {
 	protected char getHandleMementoDelimiter() {
 		return JEM_PROJECTFRAGMENT;
 	}
+
 	/*
 	 * @see IProjectFragment
 	 */
 	public IBuildpathEntry getRawBuildpathEntry() throws ModelException {
 		IBuildpathEntry rawEntry = null;
 		ScriptProject project = (ScriptProject) this.getScriptProject();
-		project.getResolvedBuildpath(true/*ignoreUnresolvedEntry*/, false/*don't generateMarkerOnError*/, false/*don't returnResolutionInProgress*/); // force the reverse rawEntry cache to be populated
-										// be populated
+		project.getResolvedBuildpath(true/* ignoreUnresolvedEntry */, false/*
+																		 * don't
+																		 * generateMarkerOnError
+																		 */,
+				false/* don't returnResolutionInProgress */); // force the
+		// reverse
+		// rawEntry
+		// cache to be
+		// populated
+		// be populated
 		Map resolvedPathToRawEntries = project.getPerProjectInfo().resolvedPathToRawEntries;
 		if (resolvedPathToRawEntries != null) {
-			rawEntry = (IBuildpathEntry) resolvedPathToRawEntries.get(new Path( this.getPath().segment(0) ));
-			//try to guest map from internal element.
-			if( rawEntry != null && rawEntry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER ) {
-				IBuildpathContainer container = DLTKCore.getBuildpathContainer(rawEntry.getPath(), project);
-				IBuildpathEntry entrys[] = container.getBuildpathEntries(project);
-				for( int i = 0; i < entrys.length; ++i ) {
-					if( entrys[i].getPath().equals(new Path( this.getPath().segment(0)))) {
-						return entrys[i];
-					}
+			rawEntry = (IBuildpathEntry) resolvedPathToRawEntries.get(new Path(
+					this.getPath().segment(0)));
+		}
+		return rawEntry;
+	}
+
+	@Override
+	public IBuildpathEntry getBuildpathEntry() throws ModelException {
+		ScriptProject project = (ScriptProject) this.getScriptProject();
+		IBuildpathEntry rawEntry = getRawBuildpathEntry();
+		// try to guest map from internal element.
+		if (rawEntry != null
+				&& rawEntry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER) {
+			IBuildpathContainer container = DLTKCore.getBuildpathContainer(
+					rawEntry.getPath(), project);
+			IBuildpathEntry entrys[] = container.getBuildpathEntries(project);
+			for (int i = 0; i < entrys.length; ++i) {
+				if (entrys[i].getPath().equals(
+						new Path(this.getPath().segment(0)))) {
+					return entrys[i];
 				}
 			}
 		}
 		return rawEntry;
 	}
+
 	/*
 	 * Validate whether this project fragment is on the buildpath of its
 	 * project.
 	 */
 	protected IStatus validateOnBuildpath() {
-		return Status.OK_STATUS;		
+		return Status.OK_STATUS;
 	}
+
 	public boolean exists() {
 		return true;
 	}
-	
+
 	public long lastModified() {
 		return builtinProvider != null ? builtinProvider.lastModified() : 0;
 	}

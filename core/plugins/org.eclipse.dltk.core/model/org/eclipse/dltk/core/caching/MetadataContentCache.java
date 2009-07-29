@@ -408,4 +408,26 @@ public class MetadataContentCache extends AbstractContentCache {
 		}
 		save(true);
 	}
+
+	/**
+	 * @since 2.0
+	 */
+	public InputStream getCacheEntryAttribute(IFileHandle handle,
+			String attribute, boolean localonly) {
+		return getCacheEntryAttribute(handle, attribute);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void updateFolderTimestamps(IFileHandle parent) {
+		IFileHandle[] children = parent.getChildren();
+		if (children == null) {
+			return;
+		}
+		for (IFileHandle child : children) {
+			getEntry(child);
+		}
+
+	}
 }

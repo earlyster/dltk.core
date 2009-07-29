@@ -15,9 +15,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.ISourceModule;
@@ -66,11 +68,11 @@ public abstract class IndexRequest extends AbstractJob {
 		}
 	}
 
-	protected Map collectSourceModulePaths(Collection modules,
-			IPath containerPath) {
-		final Map paths = new HashMap();
-		for (Iterator i = modules.iterator(); i.hasNext();) {
-			final ISourceModule module = (ISourceModule) i.next();
+	protected Map<String, ISourceModule> collectSourceModulePaths(
+			Collection<ISourceModule> modules, IPath containerPath) {
+		final Map<String, ISourceModule> paths = new HashMap<String, ISourceModule>();
+		for (Iterator<ISourceModule> i = modules.iterator(); i.hasNext();) {
+			final ISourceModule module = i.next();
 			paths.put(SourceIndexUtil.containerRelativePath(containerPath,
 					module), module);
 		}
@@ -91,24 +93,31 @@ public abstract class IndexRequest extends AbstractJob {
 	 * @param containerPath
 	 * @param environment
 	 *            could be <code>null</code>
+	 * @param parentFolders
+	 *            - will be filled if cache folder timestamp update are
+	 *            performed.
 	 * @return
 	 * @throws ModelException
 	 * @throws IOException
 	 */
-	protected List checkChanges(Index index, Collection modules,
-			IPath containerPath, IEnvironment environment)
+	protected List<Object> checkChanges(Index index,
+			Collection<ISourceModule> modules, IPath containerPath,
+			IEnvironment environment, Set<IFileHandle> parentFolders)
 			throws ModelException, IOException {
 		IContentCache coreCache = ModelManager.getModelManager().getCoreCache();
 		final String[] documents = queryDocumentNames(index);
 		if (documents != null && documents.length != 0) {
-			final long indexLastModified = index.getIndexFile().lastModified();
-			final List changes = new ArrayList();
-			final Map m = collectSourceModulePaths(modules, containerPath);
+			// final long indexLastModified =
+			// index.getIndexFile().lastModified();
+			final List<Object> changes = new ArrayList<Object>();
+			final Map<String, ISourceModule> m = collectSourceModulePaths(
+					modules, containerPath);
 			if (DEBUG) {
 				log("documents.length=" + documents.length); //$NON-NLS-1$
 				log("modules.size=" + modules.size()); //$NON-NLS-1$
 				log("map.size=" + m.size()); //$NON-NLS-1$
 			}
+			Set<IFileHandle> processedFolders = new HashSet<IFileHandle>();
 			for (int i = 0; i < documents.length; ++i) {
 				final String document = documents[i];
 				final ISourceModule module = (ISourceModule) m.remove(document);
@@ -118,12 +127,19 @@ public abstract class IndexRequest extends AbstractJob {
 					// final IFileHandle handle = environment
 					// .getFile(EnvironmentPathUtils.getLocalPath(module
 					// .getPath()));
-					IFileHandle handle = EnvironmentPathUtils.getFile(module);
+					IFileHandle handle = EnvironmentPathUtils.getFile(module,
+							false);
 					if (handle != null) {
 						// Check content cache for file changes
 						String indexed = coreCache
-								.getCacheEntryAttributeString(handle, "indexed");
+								.getCacheEntryAttributeString(handle,
+										"indexed", true);
 						if (indexed == null) {
+							IFileHandle parent = handle.getParent();
+							if (processedFolders.add(parent)
+									&& documents.length > 1) {
+								coreCache.updateFolderTimestamps(parent);
+							}
 							changes.add(module);
 							coreCache.setCacheEntryAttribute(handle, "indexed",
 									"");
@@ -136,7 +152,7 @@ public abstract class IndexRequest extends AbstractJob {
 			}
 			return changes;
 		} else {
-			return new ArrayList(modules);
+			return new ArrayList<Object>(modules);
 		}
 	}
 

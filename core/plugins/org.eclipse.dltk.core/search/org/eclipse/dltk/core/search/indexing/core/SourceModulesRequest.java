@@ -12,6 +12,7 @@
 package org.eclipse.dltk.core.search.indexing.core;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,7 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.ReadWriteMonitor;
@@ -64,8 +66,9 @@ public class SourceModulesRequest extends IndexRequest {
 			return;
 		}
 		final IPath containerPath = project.getPath();
+		Set<IFileHandle> parentFolders = new HashSet<IFileHandle>();
 		final List changes = checkChanges(index, modules, containerPath,
-				EnvironmentManager.getEnvironment(project));
+				EnvironmentManager.getEnvironment(project), parentFolders);
 		if (DEBUG) {
 			log("changes.size=" + changes.size()); //$NON-NLS-1$
 		}

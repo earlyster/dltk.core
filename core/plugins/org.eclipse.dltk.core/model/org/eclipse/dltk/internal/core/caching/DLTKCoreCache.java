@@ -40,7 +40,7 @@ public class DLTKCoreCache extends AbstractContentCache {
 		}
 
 		private void removeElement(IModelElement element) {
-			IFileHandle handle = EnvironmentPathUtils.getFile(element);
+			IFileHandle handle = EnvironmentPathUtils.getFile(element, false);
 			if (handle != null) {
 				metadataCache.clearCacheEntryAttributes(handle);
 			}
@@ -102,12 +102,20 @@ public class DLTKCoreCache extends AbstractContentCache {
 
 	public InputStream getCacheEntryAttribute(IFileHandle handle,
 			String attribute) {
+		return getCacheEntryAttribute(handle, attribute, false);
+	}
+
+	public InputStream getCacheEntryAttribute(IFileHandle handle,
+			String attribute, boolean localonly) {
 		if (handle == null) {
 			return null;
 		}
 		InputStream result = metadataCache.getCacheEntryAttribute(handle,
 				attribute);
 		if (result == null) {
+			if (localonly) {
+				return null;
+			}
 			// Ask for IContentCacheProviders
 			Object[] objects = extensions.getObjects();
 			for (int i = 0; i < objects.length; i++) {
@@ -138,5 +146,9 @@ public class DLTKCoreCache extends AbstractContentCache {
 
 	public File getEntryAsFile(IFileHandle handle, String attribute) {
 		return metadataCache.getEntryAsFile(handle, attribute);
+	}
+
+	public void updateFolderTimestamps(IFileHandle parent) {
+		metadataCache.updateFolderTimestamps(parent);
 	}
 }
