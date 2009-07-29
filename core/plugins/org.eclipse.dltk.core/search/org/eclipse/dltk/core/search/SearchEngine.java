@@ -30,6 +30,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
+import org.eclipse.dltk.core.index2.search.NewSearchEngine;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
 import org.eclipse.dltk.internal.core.ModelManager;
@@ -66,12 +67,14 @@ public class SearchEngine {
 
 	// Search engine now uses basic engine functionalities
 	private BasicSearchEngine basicEngine;
+	private NewSearchEngine newSearchEngine;
 
 	/**
 	 * Creates a new search engine.
 	 */
 	public SearchEngine() {
 		this.basicEngine = new BasicSearchEngine();
+		this.newSearchEngine = new NewSearchEngine();
 	}
 
 	/**
@@ -355,8 +358,14 @@ public class SearchEngine {
 	public void search(SearchPattern pattern, SearchParticipant[] participants,
 			IDLTKSearchScope scope, SearchRequestor requestor,
 			IProgressMonitor monitor) throws CoreException {
-		this.basicEngine.search(pattern, participants, scope, requestor,
-				monitor);
+
+		if (this.newSearchEngine.isEnabled(scope.getLanguageToolkit())) {
+			this.newSearchEngine.search(pattern, participants, scope,
+					requestor, monitor);
+		} else {
+			this.basicEngine.search(pattern, participants, scope, requestor,
+					monitor);
+		}
 	}
 
 	public List searchSourceOnly(SearchPattern pattern,

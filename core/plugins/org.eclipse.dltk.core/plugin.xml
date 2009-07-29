@@ -26,6 +26,8 @@
    <extension-point id="contentCacheProvider" name="contentCacheProvider" schema="schema/contentCacheProvider.exsd"/>
    <extension-point id="astCache" name="astCache" schema="schema/astCache.exsd"/>
    <extension-point id="filenameAssociation" name="%extension-point.name.filenameAssociation" schema="schema/filenameAssociation.exsd"/>
+   <extension-point id="indexer" name="DLTK Element Indexer" schema="schema/indexer.exsd"/>
+   <extension-point id="indexerParticipant" name="DLTK Indexer Participant" schema="schema/indexerPaticipant.exsd"/>
 
 <!-- =================================================================================== -->
 <!-- Extension: DLTK Problem                                                             -->
@@ -156,4 +158,11 @@
             uri="http://eclipse.org/dltk/cache_model">
       </package>
    </extension>
+   <extension
+         point="org.eclipse.dltk.core.projectIndexer">
+      <projectIndexer
+            class="org.eclipse.dltk.internal.core.index2.AbstractProjectIndexer"
+            nature="#">
+      </projectIndexer>
+	</extension>
 </plugin>

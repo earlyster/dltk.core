@@ -18,7 +18,7 @@ import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 public class TypeReferencePattern extends AndPattern implements IIndexConstants {
 
 	protected char[] qualification;
-	protected char[] simpleName;
+	public char[] simpleName;
 
 	protected char[] currentCategory;
 
@@ -89,7 +89,7 @@ public class TypeReferencePattern extends AndPattern implements IIndexConstants 
 		return CATEGORIES;
 	}
 
-	protected boolean hasNextQuery() {
+	public boolean hasNextQuery() {
 		if (this.segments == null)
 			return false;
 
@@ -105,7 +105,7 @@ public class TypeReferencePattern extends AndPattern implements IIndexConstants 
 		return true; // index key is not encoded so query results all match
 	}
 
-	protected void resetQuery() {
+	public void resetQuery() {
 		/*
 		 * walk the segments from end to start as it will find less potential
 		 * references using 'lang' than 'java'

@@ -3,10 +3,10 @@
 <schema targetNamespace="org.eclipse.dltk.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.dltk.core" id="projectIndexer" name="Project Indexer"/>
+         <meta.schema plugin="org.eclipse.dltk.core" id="indexerParticipant" name="DLTK Indexer Participant"/>
       </appInfo>
       <documentation>
-         
+         This extension point can be used for providing indexing parser and element resolver for abstract indexer. Indexing parser reports to indexer about element declarations and their references while parsing the script source code. Indexing element resolver restores IModelElement from the index entry. Indexer participant is usually language dependent.
       </documentation>
    </annotation>
 
@@ -17,10 +17,9 @@
          </appInfo>
       </annotation>
       <complexType>
-         <choice>
-            <element ref="projectIndexer" minOccurs="1" maxOccurs="unbounded"/>
-            <element ref="disable" minOccurs="1" maxOccurs="unbounded"/>
-         </choice>
+         <sequence>
+            <element ref="indexerParticipant"/>
+         </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -48,53 +47,46 @@
       </complexType>
    </element>
 
-   <element name="projectIndexer">
-      <annotation>
-         <appInfo>
-            <meta.element labelAttribute="nature"/>
-         </appInfo>
-      </annotation>
+   <element name="indexerParticipant">
       <complexType>
-         <attribute name="class" type="string" use="required">
+         <attribute name="class" type="string">
             <annotation>
                <documentation>
-                  
+                  Indexing participant class
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.core.search.indexing.IProjectIndexer"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.core.index2.IIndexerParticipant"/>
                </appInfo>
             </annotation>
          </attribute>
-         <attribute name="nature" type="string" use="required">
+         <attribute name="nature" type="string">
             <annotation>
                <documentation>
-                  If nature are # then builder is available for all script natures.
+                  Language nature
                </documentation>
             </annotation>
          </attribute>
-      </complexType>
-   </element>
-
-   <element name="disable">
-      <annotation>
-         <documentation>
-            Disable project indexer specified by class name
-         </documentation>
-      </annotation>
-      <complexType>
-         <attribute name="class" type="string" use="required">
+         <attribute name="targetId" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  Target element indexer ID
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.core.search.indexing.IProjectIndexer"/>
+                  <meta.attribute kind="identifier" basedOn="org.eclipse.dltk.core.indexer/indexer/@id"/>
                </appInfo>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
+   <annotation>
+      <appInfo>
+         <meta.section type="since"/>
+      </appInfo>
+      <documentation>
+         2.0
+      </documentation>
+   </annotation>
 
 
 

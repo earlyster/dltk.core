@@ -3,10 +3,10 @@
 <schema targetNamespace="org.eclipse.dltk.core" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.dltk.core" id="projectIndexer" name="Project Indexer"/>
+         <meta.schema plugin="org.eclipse.dltk.core" id="indexer" name="DLTK Element Indexer"/>
       </appInfo>
       <documentation>
-         
+         This extension point can be used for providing concrete implementation for abstract indexer. Indexer stores script element declarations and references in way that allows very fast access. Index implementation should not be language dependent.
       </documentation>
    </annotation>
 
@@ -17,10 +17,9 @@
          </appInfo>
       </annotation>
       <complexType>
-         <choice>
-            <element ref="projectIndexer" minOccurs="1" maxOccurs="unbounded"/>
-            <element ref="disable" minOccurs="1" maxOccurs="unbounded"/>
-         </choice>
+         <sequence>
+            <element ref="indexer"/>
+         </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -48,54 +47,45 @@
       </complexType>
    </element>
 
-   <element name="projectIndexer">
-      <annotation>
-         <appInfo>
-            <meta.element labelAttribute="nature"/>
-         </appInfo>
-      </annotation>
+   <element name="indexer">
       <complexType>
-         <attribute name="class" type="string" use="required">
+         <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
                   
                </documentation>
-               <appInfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.core.search.indexing.IProjectIndexer"/>
-               </appInfo>
             </annotation>
          </attribute>
-         <attribute name="nature" type="string" use="required">
-            <annotation>
-               <documentation>
-                  If nature are # then builder is available for all script natures.
-               </documentation>
-            </annotation>
-         </attribute>
-      </complexType>
-   </element>
-
-   <element name="disable">
-      <annotation>
-         <documentation>
-            Disable project indexer specified by class name
-         </documentation>
-      </annotation>
-      <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  Indexer implementation class
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.core.search.indexing.IProjectIndexer"/>
+                  <meta.attribute kind="java" basedOn="org.eclipse.dltk.core.index2.AbstractIndexer:"/>
                </appInfo>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
+   <annotation>
+      <appInfo>
+         <meta.section type="since"/>
+      </appInfo>
+      <documentation>
+         2.0
+      </documentation>
+   </annotation>
 
+   <annotation>
+      <appInfo>
+         <meta.section type="examples"/>
+      </appInfo>
+      <documentation>
+         See org.eclipse.dltk.core.h2 for indexer implementation based on H2 database.
+      </documentation>
+   </annotation>
 
 
 

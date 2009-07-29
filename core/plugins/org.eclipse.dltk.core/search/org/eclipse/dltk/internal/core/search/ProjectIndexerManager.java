@@ -10,9 +10,13 @@
 package org.eclipse.dltk.internal.core.search;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -34,28 +38,65 @@ public class ProjectIndexerManager {
 
 	private final static String NATURE_ATTR = "nature"; //$NON-NLS-1$
 	private static final String CLASS_ATTR = "class"; //$NON-NLS-1$
+	private static final String DISABLE_ELEM = "disable"; //$NON-NLS-1$
+	private static final String INDEXER_ELEM = "projectIndexer"; //$NON-NLS-1$
 
 	// Contains list of indexers for selected nature.
-	private static Map indexers;
+	private static Map<String, List<ProjectIndexerDescriptor>> indexers;
+
+	private static class ProjectIndexerDescriptor {
+		private IConfigurationElement element;
+		private IProjectIndexer projectIndexer;
+
+		ProjectIndexerDescriptor(IConfigurationElement element) {
+			this.element = element;
+		}
+
+		public IProjectIndexer getObject() {
+			if (projectIndexer == null) {
+				try {
+					projectIndexer = (IProjectIndexer) element
+							.createExecutableExtension(CLASS_ATTR);
+				} catch (CoreException e) {
+					DLTKCore.error("Error initializing project indexer", e); //$NON-NLS-1$
+				}
+			}
+			return projectIndexer;
+		}
+	}
 
 	private synchronized static void initialize() {
 		if (indexers != null) {
 			return;
 		}
 
-		indexers = new HashMap(5);
-		IConfigurationElement[] cfg = Platform.getExtensionRegistry()
-				.getConfigurationElementsFor(EXTPOINT);
+		Map<String, IConfigurationElement> enabled = new HashMap<String, IConfigurationElement>();
+		for (IConfigurationElement element : Platform.getExtensionRegistry()
+				.getConfigurationElementsFor(EXTPOINT)) {
+			if (DISABLE_ELEM.equals(element.getName())) {
+				enabled.put(element.getAttribute(CLASS_ATTR), null);
+			} else if (INDEXER_ELEM.equals(element.getName())) {
+				String className = element.getAttribute(CLASS_ATTR);
+				if (!enabled.containsKey(className)) {
+					enabled.put(className, element);
+				}
+			}
+		}
 
-		for (int i = 0; i < cfg.length; i++) {
-			String nature = cfg[i].getAttribute(NATURE_ATTR);
-			if (indexers.get(nature) != null) {
-				List elements = (List) indexers.get(nature);
-				elements.add(cfg[i]);
-			} else {
-				List elements = new ArrayList();
-				elements.add(cfg[i]);
-				indexers.put(nature, elements);
+		indexers = new HashMap<String, List<ProjectIndexerDescriptor>>();
+
+		Iterator<String> i = enabled.keySet().iterator();
+		while (i.hasNext()) {
+			String className = i.next();
+			IConfigurationElement element = enabled.get(className);
+			if (element != null) {
+				String nature = element.getAttribute(NATURE_ATTR);
+				List<ProjectIndexerDescriptor> elements = indexers.get(nature);
+				if (elements == null) {
+					elements = new LinkedList<ProjectIndexerDescriptor>();
+					indexers.put(nature, elements);
+				}
+				elements.add(new ProjectIndexerDescriptor(element));
 			}
 		}
 	}
@@ -86,59 +127,33 @@ public class ProjectIndexerManager {
 
 	public static IProjectIndexer[] getAllIndexers() {
 		initialize();
-		final List result = new ArrayList();
-		final String[] natures = (String[]) indexers.keySet().toArray(
-				new String[indexers.size()]);
-		for (int i = 0; i < natures.length; ++i) {
-			final IProjectIndexer[] byNature = getByNature(natures[i]);
+
+		Set<String> natures = indexers.keySet();
+		List<IProjectIndexer> result = new ArrayList<IProjectIndexer>(natures
+				.size());
+		for (String natureId : natures) {
+			final IProjectIndexer[] byNature = getByNature(natureId);
 			if (byNature != null) {
-				for (int j = 0; j < byNature.length; ++j) {
-					result.add(byNature[j]);
-				}
+				result.addAll(Arrays.asList(byNature));
 			}
 		}
 		if (!result.isEmpty()) {
-			return (IProjectIndexer[]) result
-					.toArray(new IProjectIndexer[result.size()]);
-		} else {
-			return null;
+			return result.toArray(new IProjectIndexer[result.size()]);
 		}
+		return null;
 	}
 
 	private static IProjectIndexer[] getByNature(String natureId) {
-		final Object ext = indexers.get(natureId);
-		if (ext != null) {
-			if (ext instanceof IProjectIndexer[]) {
-				return (IProjectIndexer[]) ext;
-			} else if (ext instanceof List) {
-				final List elements = (List) ext;
-				final List result = new ArrayList(elements.size());
-				// new IProjectIndexer[elements
-				// .size()];
-				for (int i = 0; i < elements.size(); ++i) {
-					Object e = elements.get(i);
-					if (e instanceof IProjectIndexer) {
-						result.add(e);
-					} else {
-						final IConfigurationElement cfg = (IConfigurationElement) e;
-						try {
-							final IProjectIndexer builder = (IProjectIndexer) cfg
-									.createExecutableExtension(CLASS_ATTR);
-							result.add(builder);
-						} catch (CoreException ex) {
-							DLTKCore.error("Error creating ProjectIndexer", ex); //$NON-NLS-1$
-						}
-					}
-				}
-				if (!result.isEmpty()) {
-					final IProjectIndexer[] array = (IProjectIndexer[]) result
-							.toArray(new IProjectIndexer[result.size()]);
-					indexers.put(natureId, array);
-					return array;
-				} else {
-					indexers.remove(natureId);
-					return null;
-				}
+		List<ProjectIndexerDescriptor> elements = indexers.get(natureId);
+		if (elements != null) {
+			List<IProjectIndexer> result = new ArrayList<IProjectIndexer>(
+					elements.size());
+			for (ProjectIndexerDescriptor descriptor : elements) {
+				result.add(descriptor.getObject());
+			}
+			if (!result.isEmpty()) {
+				return (IProjectIndexer[]) result
+						.toArray(new IProjectIndexer[result.size()]);
 			}
 		}
 		return null;
