@@ -130,8 +130,7 @@ public class BuiltinProjectFragment extends ProjectFragment {
 			ArrayList vChildren, ArrayList vForeign, Map newElements,
 			char[][] inclusionPatterns, char[][] exclusionPatterns)
 			throws ModelException {
-		BuiltinScriptFolder fldr = (BuiltinScriptFolder) getScriptFolder(new Path(
-				"")); //$NON-NLS-1$
+		BuiltinScriptFolder fldr = (BuiltinScriptFolder) getScriptFolder(Path.EMPTY);
 		vChildren.add(fldr);
 		if (this.builtinProvider == null) {
 			return;
