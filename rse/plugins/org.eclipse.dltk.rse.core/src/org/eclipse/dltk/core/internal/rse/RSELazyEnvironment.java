@@ -14,6 +14,9 @@ package org.eclipse.dltk.core.internal.rse;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.internal.environment.LazyEnvironment;
 
+/**
+ * @since 2.0
+ */
 public class RSELazyEnvironment extends LazyEnvironment {
 
 	private final RSEEnvironmentProvider provider;
