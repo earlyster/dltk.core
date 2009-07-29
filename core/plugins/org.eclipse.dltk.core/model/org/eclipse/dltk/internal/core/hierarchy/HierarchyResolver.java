@@ -10,6 +10,7 @@ package org.eclipse.dltk.internal.core.hierarchy;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IFileHierarchyInfo;
 import org.eclipse.dltk.core.IFileHierarchyResolver;
+import org.eclipse.dltk.core.ISearchFactory;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
@@ -61,6 +63,7 @@ public class HierarchyResolver {
 		final Map superTypeToExtender = new HashMap();
 		final HandleFactory handleFactory = new HandleFactory();
 		final String delimiter = getDelimiterReplacementString(focusType);
+		final Map<String, Set<IType>> tmpCache = new HashMap<String, Set<IType>>();
 
 		TypeNameRequestor typesCollector = new TypeNameRequestor() {
 			public void acceptType(int modifiers, char[] packageName,
@@ -89,6 +92,15 @@ public class HierarchyResolver {
 								simpleTypeName), modifiers);
 						extenders.add(new String(type
 								.getTypeQualifiedName(delimiter)));
+
+						// Cache this type for further searches
+						String elementName = type.getElementName();
+						Set<IType> set = tmpCache.get(elementName);
+						if (set == null) {
+							set = new HashSet<IType>();
+							tmpCache.put(elementName, set);
+						}
+						set.add(type);
 					}
 				}
 			}
@@ -109,7 +121,17 @@ public class HierarchyResolver {
 					hierarchyBuilder.hierarchy.progressMonitor);
 		}
 
-		computeSubtypesFor(focusType, superTypeToExtender, new HashMap(),
+		// Rebuild temporary cache in a useful format:
+		HashMap<String, IType[]> cache = new HashMap<String, IType[]>();
+		Iterator<String> i = tmpCache.keySet().iterator();
+		while (i.hasNext()) {
+			String typeName = i.next();
+			Set<IType> typeElements = tmpCache.get(typeName);
+			cache.put(typeName, (IType[]) typeElements
+					.toArray(new IType[typeElements.size()]));
+		}
+
+		computeSubtypesFor(focusType, superTypeToExtender, cache,
 				hierarchyInfo, new HashSet(), delimiter);
 	}
 
@@ -289,9 +311,16 @@ public class HierarchyResolver {
 	}
 
 	private static ISearchPatternProcessor getSearchPatternProcessor(IType type) {
-		return DLTKLanguageManager
-				.getSearchPatternProcessor(DLTKLanguageManager
-						.getLanguageToolkit(type));
+		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+				.getLanguageToolkit(type);
+		if (toolkit != null) {
+			ISearchFactory factory = DLTKLanguageManager
+					.getSearchFactory(toolkit.getNatureId());
+			if (factory != null) {
+				return factory.createSearchPatternProcessor();
+			}
+		}
+		return null;
 	}
 
 	protected String getDelimiterReplacementString(IType type) {
