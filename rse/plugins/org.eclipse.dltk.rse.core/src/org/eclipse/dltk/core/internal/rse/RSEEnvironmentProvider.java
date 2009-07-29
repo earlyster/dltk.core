@@ -32,6 +32,10 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	}
 
 	public IEnvironment getEnvironment(String envId) {
+		return getEnvironment(envId, true);
+	}
+
+	public IEnvironment getEnvironment(String envId, boolean lazy) {
 		if (envId.startsWith(RSE_ENVIRONMENT_PREFIX)) {
 			String name = envId.substring(RSE_ENVIRONMENT_PREFIX.length());
 			IHost connection = getRSEConnection(name);
@@ -40,6 +44,8 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 						.getFileSubSystem(connection);
 				if (fs != null)
 					return new RSEEnvironment(fs);
+			} else if (lazy) {
+				return new RSELazyEnvironment(envId, this);
 			}
 		}
 		return null;
@@ -64,20 +70,63 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	private static final int WAIT_INTERVAL = 500;
 	private boolean initialized = false;
 	private InitThread initThread = null;
-	private long rseInitThreadStartTime = 0;
-	private static final long RSE_INIT_THREAD_TIMEOUT = 60 * 1000; // 60 seconds
-	// for RSE
-	// initialization
-	// thread.
+	private static final long RSE_INIT_THREAD_TIMEOUT = 60 * 1000;
 
 	private static final boolean DEBUG = false;
+
+	private static class WatchdogThread extends Thread {
+		private final Thread thread;
+		private final long timeout;
+
+		public WatchdogThread(Thread thread, long timeout) {
+			this.thread = thread;
+			this.timeout = timeout;
+			setDaemon(true);
+			setName(RSEEnvironmentProvider.class.getSimpleName()
+					+ "-WatchdogThread"); //$NON-NLS-1$			
+		}
+
+		@Override
+		public void run() {
+			try {
+				if (DEBUG)
+					System.out.println(Thread.currentThread().getName()
+							+ " started"); //$NON-NLS-1$
+				Thread.sleep(timeout);
+				if (thread.isAlive()) {
+					if (DEBUG)
+						System.out.println("InitThread.interrupt()"); //$NON-NLS-1$
+					thread.interrupt();
+				} else {
+					if (DEBUG)
+						System.out.println(Thread.currentThread().getName()
+								+ " sleeped"); //$NON-NLS-1$
+				}
+			} catch (InterruptedException e) {
+				if (DEBUG)
+					System.out.println(Thread.currentThread().getName()
+							+ " interrupted"); //$NON-NLS-1$
+			}
+		}
+
+	}
 
 	private class InitThread extends Thread {
 
 		@Override
 		public void run() {
+			final WatchdogThread watchdog = new WatchdogThread(this,
+					RSE_INIT_THREAD_TIMEOUT);
+			watchdog.start();
 			try {
+				if (DEBUG)
+					System.out.println(Thread.currentThread().getName()
+							+ " started"); //$NON-NLS-1$
 				RSECorePlugin.waitForInitCompletion();
+				if (DEBUG)
+					System.out.println(Thread.currentThread().getName()
+							+ " finished"); //$NON-NLS-1$
+				watchdog.interrupt();
 			} catch (InterruptedException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
@@ -109,23 +158,13 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 				}
 				return true;
 			}
-			if (initThread != null
-					&& System.currentTimeMillis() > rseInitThreadStartTime) { // RSE
-																				// wait
-																				// for
-																				// initialization
-																				// could
-																				// hang
-				initThread.interrupt();
-				initThread = null; // Try one more time.
-			}
 			boolean newThread = false;
 			if (initThread == null) {
 				newThread = true;
 				initThread = new InitThread();
+				initThread.setName(getClass().getSimpleName() + "-InitThread"); //$NON-NLS-1$
+				initThread.setDaemon(true);
 				initThread.start();
-				rseInitThreadStartTime = System.currentTimeMillis()
-						+ RSE_INIT_THREAD_TIMEOUT;
 				if (DEBUG)
 					System.out.println("start initThread"); //$NON-NLS-1$
 			}
@@ -188,6 +227,9 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 					}
 					if (++waitCount > MAX_WAIT_COUNT) {
 						waitTimeoutReached = true;
+						if (DEBUG)
+							System.out.println(Thread.currentThread().getName()
+									+ " - waitInitialized - timeout reached"); //$NON-NLS-1$						
 						break;
 					}
 					lock.wait(WAIT_INTERVAL);
