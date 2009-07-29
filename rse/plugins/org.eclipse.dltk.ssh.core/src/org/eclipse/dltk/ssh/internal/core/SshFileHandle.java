@@ -18,6 +18,10 @@ import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
 
 public class SshFileHandle implements ISshFileHandle {
+	private static final int CACHE_LIMIT = 1000;
+	private static Map<SshFileHandle, SftpATTRS> timestamps = new HashMap<SshFileHandle, SftpATTRS>();
+	private static Map<SshFileHandle, Long> lastaccess = new HashMap<SshFileHandle, Long>();
+
 	private SshConnection connection = null;
 	private IPath path;
 	private IPath linkTarget;
@@ -87,12 +91,36 @@ public class SshFileHandle implements ISshFileHandle {
 
 	private void fetchAttrs(boolean clean) {
 		if (attrs == null || clean) {
-			attrs = connection.getAttrs(path);
+			attrs = fetchCacheAttrs(clean);
 		}
 		if (attrs != null && attrs.isLink()) {
-			attrs = connection.getAttrs(path);
+			attrs = fetchCacheAttrs(clean);
 			this.linkTarget = connection.getResolvedPath(path);
 		}
+	}
+
+	private SftpATTRS fetchCacheAttrs(boolean clean) {
+		if (timestamps.size() > CACHE_LIMIT) {
+			timestamps.clear();
+			lastaccess.clear();
+		}
+		long c = 0;
+		if (!clean) {
+			if (timestamps.containsKey(this)) {
+				c = System.currentTimeMillis();
+				Long last = lastaccess.get(this);
+				if (last != null && (c - last.longValue()) < 1000 * 10) {
+					return timestamps.get(this);
+				}
+			}
+		}
+		SftpATTRS attrs = connection.getAttrs(path);
+		timestamps.put(this, attrs);
+		if (c == 0) {
+			c = System.currentTimeMillis();
+		}
+		lastaccess.put(this, c);
+		return attrs;
 	}
 
 	public synchronized ISshFileHandle getChild(String newEntryName) {
@@ -125,6 +153,7 @@ public class SshFileHandle implements ISshFileHandle {
 		Vector list = connection.list(path);
 		if (list != null) {
 			children.clear();
+			long c = System.currentTimeMillis();
 			for (Object object : list) {
 				LsEntry entry = (LsEntry) object;
 				String filename = entry.getFilename();
@@ -134,6 +163,8 @@ public class SshFileHandle implements ISshFileHandle {
 				SftpATTRS childAttrs = entry.getAttrs();
 				SshFileHandle childHandle = new SshFileHandle(connection, path
 						.append(filename), childAttrs);
+				timestamps.put(childHandle, childAttrs);
+				lastaccess.put(childHandle, c);
 				children.put(filename, childHandle);
 			}
 			childrenFetched = true;
@@ -270,5 +301,37 @@ public class SshFileHandle implements ISshFileHandle {
 			return attrs.isLink();
 		}
 		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((connection == null) ? 0 : connection.hashCode());
+		result = prime * result + ((path == null) ? 0 : path.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SshFileHandle other = (SshFileHandle) obj;
+		if (connection == null) {
+			if (other.connection != null)
+				return false;
+		} else if (!connection.equals(other.connection))
+			return false;
+		if (path == null) {
+			if (other.path != null)
+				return false;
+		} else if (!path.equals(other.path))
+			return false;
+		return true;
 	}
 }
