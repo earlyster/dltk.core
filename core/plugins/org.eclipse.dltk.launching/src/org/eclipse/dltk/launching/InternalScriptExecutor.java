@@ -70,6 +70,10 @@ public class InternalScriptExecutor {
 		IExecutionEnvironment execEnv = install.getExecEnvironment();
 
 		IDeployment deployment = execEnv.createDeployment();
+		if (deployment == null) {
+			throw new IOException(
+					"Failed to deploy script. Connection to environment are not established.");
+		}
 		IPath deploymentPath = deployer.deployScript(deployment);
 
 		try {

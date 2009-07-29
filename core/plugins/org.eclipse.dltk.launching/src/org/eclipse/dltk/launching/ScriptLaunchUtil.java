@@ -274,7 +274,8 @@ public class ScriptLaunchUtil {
 			IFileHandle installLocations, final IProgressMonitor monitor) {
 		IDeployment deployment = exeEnv.createDeployment();
 		if (deployment == null) {
-			// happens if RSE is not initialized yet
+			// happens if RSE is not initialized yet or no connection
+			// established
 			return null;
 		}
 		try {
