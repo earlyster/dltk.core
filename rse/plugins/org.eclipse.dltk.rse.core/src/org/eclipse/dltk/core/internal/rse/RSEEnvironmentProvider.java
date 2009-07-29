@@ -35,22 +35,16 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 		return getEnvironment(envId, true);
 	}
 
-	/**
-	 * @since 2.0
-	 */
 	public IEnvironment getEnvironment(String envId, boolean lazy) {
 		if (envId.startsWith(RSE_ENVIRONMENT_PREFIX)) {
 			String name = envId.substring(RSE_ENVIRONMENT_PREFIX.length());
-			if (isReady(false)) {
-				IHost connection = getRSEConnection(name);
-				if (connection != null) {
-					IRemoteFileSubSystem fs = RemoteFileUtility
-							.getFileSubSystem(connection);
-					if (fs != null)
-						return new RSEEnvironment(fs);
-				}
-			}
-			if (lazy) {
+			IHost connection = getRSEConnection(name);
+			if (connection != null) {
+				IRemoteFileSubSystem fs = RemoteFileUtility
+						.getFileSubSystem(connection);
+				if (fs != null)
+					return new RSEEnvironment(fs);
+			} else if (lazy) {
 				return new RSELazyEnvironment(envId, this);
 			}
 		}
@@ -58,7 +52,7 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	}
 
 	private IHost getRSEConnection(String name) {
-		if (isReady()) {
+		if (isReady(false)) {
 			IHost[] connections = SystemStartHere.getConnections();
 			for (int i = 0; i < connections.length; i++) {
 				IHost connection = connections[i];
