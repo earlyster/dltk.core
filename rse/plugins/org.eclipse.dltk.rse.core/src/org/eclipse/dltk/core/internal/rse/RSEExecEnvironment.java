@@ -149,7 +149,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 							Messages.RSEExecEnvironment_NoFileServicerError,
 							host.getAliasName()), null));
 		}
-		if (getEnvironment().connect()) {
+		if (!getEnvironment().connect()) {
 			throw new CoreException(newStatus(
 					RSEStatusConstants.NO_FILE_SERVICE, NLS.bind(
 							Messages.RSEExecEnvironment_NotConnected, host
