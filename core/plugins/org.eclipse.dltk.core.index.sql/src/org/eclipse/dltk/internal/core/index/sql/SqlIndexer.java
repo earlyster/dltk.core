@@ -44,14 +44,13 @@ public class SqlIndexer extends AbstractIndexer {
 	private File file;
 	private String natureId;
 
-	public void addDeclaration(int elementType, int flags, int offset,
-			int length, int nameOffset, int nameLength, String elementName,
-			String metadata, String qualifier, String parent) {
+	public void addDeclaration(DeclarationInfo info) {
 
 		try {
 			DbFactory.getInstance().getElementDao().insert(connection,
-					elementType, flags, offset, length, nameOffset, nameLength,
-					elementName, metadata, qualifier, parent, file.getId(),
+					info.elementType, info.flags, info.offset, info.length,
+					info.nameOffset, info.nameLength, info.elementName,
+					info.metadata, info.qualifier, info.parent, file.getId(),
 					natureId, false);
 
 		} catch (SQLException e) {
@@ -62,13 +61,13 @@ public class SqlIndexer extends AbstractIndexer {
 		}
 	}
 
-	public void addReference(int elementType, int offset, int length,
-			String elementName, String metadata, String qualifier) {
+	public void addReference(ReferenceInfo info) {
 
 		try {
 			DbFactory.getInstance().getElementDao().insert(connection,
-					elementType, 0, offset, length, 0, 0, elementName,
-					metadata, qualifier, null, file.getId(), natureId, true);
+					info.elementType, 0, info.offset, info.length, 0, 0,
+					info.elementName, info.metadata, info.qualifier, null,
+					file.getId(), natureId, true);
 
 		} catch (SQLException e) {
 			SqlIndex
