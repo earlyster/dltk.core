@@ -14,11 +14,6 @@
       %license
    </license>
 
-   <url>
-      <update label="%updateSiteName" url="http://download.eclipse.org/technology/dltk/updates/"/>
-      <discovery label="%updateSiteName" url="http://download.eclipse.org/technology/dltk/updates/"/>
-   </url>
-
    <includes
          id="org.eclipse.dltk.mylyn"
          version="0.0.0"/>
