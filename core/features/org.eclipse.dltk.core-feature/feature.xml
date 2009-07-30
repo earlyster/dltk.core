@@ -22,9 +22,10 @@ http://www.eclipse.org/legal/epl-v10.html
    <license url="%licenseURL">
       %license
    </license>
-   
+
    <requires>
       <import feature="org.eclipse.platform" version="3.3.0" match="compatible"/>
+      <import feature="org.eclipse.emf" version="2.4.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
