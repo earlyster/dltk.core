@@ -20,6 +20,7 @@ import org.eclipse.dltk.internal.core.util.Messages;
 
 class ProgressJob extends Job {
 
+	private static transient boolean scheduled;
 	private static transient boolean running;
 	private JobManager jobManager;
 	private IProgressMonitor monitor;
@@ -56,6 +57,10 @@ class ProgressJob extends Job {
 	}
 
 	public void subTask(String message) {
+		if (!scheduled) {
+			schedule();
+			scheduled = true;
+		}
 		if (monitor != null) {
 			monitor.subTask(message);
 		}

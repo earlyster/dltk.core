@@ -39,13 +39,11 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 		try {
 			IProjectFragment fragment = project.findProjectFragment(path);
 			if (fragment != null) {
-				ProgressJob progressJob = new ProgressJob(jobManager);
 				AbstractIndexRequest request = new ExternalProjectFragmentRequest(
-						this, fragment, progressJob);
+						this, fragment, new ProgressJob(jobManager));
 				if (!jobManager.isJobWaiting(request)) {
 					jobManager.request(request);
 				}
-				progressJob.schedule();
 			} else {
 				DLTKCore.warn(NLS.bind("Unknown project fragment: ''{0}''",
 						path));
@@ -57,13 +55,11 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 	}
 
 	public void indexProject(IScriptProject project) {
-		ProgressJob progressJob = new ProgressJob(jobManager);
-		final ProjectRequest request = new ProjectRequest(this, project,
-				progressJob);
+		ProjectRequest request = new ProjectRequest(this, project,
+				new ProgressJob(jobManager));
 		if (!jobManager.isJobWaiting(request)) {
 			jobManager.request(request);
 		}
-		progressJob.schedule();
 	}
 
 	public void indexProjectFragment(IScriptProject project, IPath path) {
@@ -81,23 +77,19 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 		}
 		if (fragmentToIndex == null || !fragmentToIndex.isExternal()
 				|| fragmentToIndex.isBuiltin()) {
-			ProgressJob progressJob = new ProgressJob(jobManager);
 			ProjectRequest request = new ProjectRequest(this, project,
-					progressJob);
+					new ProgressJob(jobManager));
 			if (!jobManager.isJobWaiting(request)) {
 				jobManager.request(request);
 			}
-			progressJob.schedule();
 			return;
 		}
 
-		ProgressJob progressJob = new ProgressJob(jobManager);
 		ExternalProjectFragmentRequest request = new ExternalProjectFragmentRequest(
-				this, fragmentToIndex, progressJob);
+				this, fragmentToIndex, new ProgressJob(jobManager));
 		if (!jobManager.isJobWaiting(request)) {
 			jobManager.request(request);
 		}
-		progressJob.schedule();
 	}
 
 	public void indexSourceModule(ISourceModule module,
@@ -148,16 +140,13 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 			IScriptProject[] projects = DLTKCore.create(workspace.getRoot())
 					.getScriptProjects();
 
-			ProgressJob progressJob = new ProgressJob(jobManager);
 			for (int i = 0; i < projects.length; ++i) {
 				ProjectRequest request = new ProjectRequest(this, projects[i],
-						progressJob);
+						new ProgressJob(jobManager));
 				if (!jobManager.isJobWaiting(request)) {
 					jobManager.request(request);
 				}
 			}
-			progressJob.schedule();
-
 		} catch (Exception e) {
 			DLTKCore
 					.error("An exception is thrown while indexing workspace", e);
