@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.index2;
 
+import org.eclipse.dltk.core.IModelElement;
+
 /**
  * Model element handler for indexing process
  * 
@@ -21,49 +23,85 @@ package org.eclipse.dltk.core.index2;
 public interface IIndexingRequestor {
 
 	/**
+	 * Element reference information
+	 */
+	public class ReferenceInfo {
+		/**
+		 * Element type ({@link IModelElement#FIELD}, {@link IModelElement#Type}
+		 * , etc...)
+		 */
+		public int elementType;
+
+		/** Element start offset in document */
+		public int offset;
+
+		/** Element length in document */
+		public int length;
+
+		/** Element name */
+		public String elementName;
+
+		/** Various element metadata */
+		public String metadata;
+
+		/** Element qualifier */
+		public String qualifier;
+
+		public ReferenceInfo(int elementType, int offset, int length,
+				String elementName, String metadata, String qualifier) {
+			super();
+			this.elementType = elementType;
+			this.offset = offset;
+			this.length = length;
+			this.elementName = elementName;
+			this.metadata = metadata;
+			this.qualifier = qualifier;
+		}
+	}
+
+	/**
+	 * Element declaration information
+	 */
+	public class DeclarationInfo extends ReferenceInfo {
+
+		/** Element modifiers */
+		public int flags;
+
+		/** Element name offset in document */
+		public int nameOffset;
+
+		/** Element name length in document */
+		public int nameLength;
+
+		/** Element parent information */
+		public String parent;
+
+		public DeclarationInfo(int elementType, int flags, int offset,
+				int length, int nameOffset, int nameLength, String elementName,
+				String metadata, String qualifier, String parent) {
+
+			super(elementType, offset, length, elementName, metadata, qualifier);
+
+			this.flags = flags;
+			this.nameOffset = nameOffset;
+			this.nameLength = nameLength;
+			this.parent = parent;
+		}
+	}
+
+	/**
 	 * Adds new element declaration to the index.
 	 * 
-	 * @param elementType
-	 *            Element type
-	 * @param flags
-	 *            Element modifiers
-	 * @param offset
-	 *            Element offset
-	 * @param length
-	 *            Element length
-	 * @param nameOffset
-	 *            Element name offset
-	 * @param nameLength
-	 *            Element name length
-	 * @param elementName
-	 *            Element name
-	 * @param metadata
-	 *            Various metadata attached to the element
-	 * @param qualifier
-	 *            Element qualifier (package name, for example)
-	 * @param parent
-	 *            Element parent (declaring type, for example)
+	 * @param info
+	 *            Information about element declaration
 	 */
-	public void addDeclaration(int elementType, int flags, int offset,
-			int length, int nameOffset, int nameLength, String elementName,
-			String metadata, String qualifier, String parent);
+	public void addDeclaration(DeclarationInfo info);
 
 	/**
 	 * Adds new element reference to the index.
 	 * 
-	 * @param elementType
-	 *            Element type
-	 * @param offset
-	 *            Element offset
-	 * @param length
-	 *            Element length
-	 * @param elementName
-	 *            Element name
-	 * @param metadata
-	 *            Various metadata attached to the element
-	 * @param qualifier
-	 *            Element qualifier (package name + parent, for example)
+	 * @param info
+	 *            Information about element reference
 	 */
-	public void addReference(int elementType, int offset, int length,
-			String elementName, String metadata, String qualifier);
+	public void addReference(ReferenceInfo info);
 }

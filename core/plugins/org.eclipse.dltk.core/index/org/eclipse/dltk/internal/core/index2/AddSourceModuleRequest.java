@@ -42,6 +42,7 @@ public class AddSourceModuleRequest extends AbstractIndexRequest {
 		if (indexer == null) {
 			return;
 		}
+		reportToProgress(sourceModule);
 		indexer.indexDocument(sourceModule);
 	}
 

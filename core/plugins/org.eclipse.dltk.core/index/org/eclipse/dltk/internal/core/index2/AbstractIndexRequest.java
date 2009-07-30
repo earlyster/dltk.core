@@ -14,6 +14,7 @@ package org.eclipse.dltk.internal.core.index2;
 import java.util.Collection;
 import java.util.Map;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
@@ -37,6 +38,20 @@ public abstract class AbstractIndexRequest extends AbstractJob {
 			ProgressJob progressJob) {
 		this.projectIndexer = indexer;
 		this.progressJob = progressJob;
+	}
+
+	protected void reportToProgress(ISourceModule sourceModule) {
+		if (progressJob != null) {
+			String path;
+			IResource resource = sourceModule.getResource();
+			if (resource != null) {
+				path = resource.getFullPath().toString();
+			} else {
+				path = EnvironmentPathUtils.getFile(sourceModule)
+						.getCanonicalPath();
+			}
+			progressJob.subTask(path);
+		}
 	}
 
 	public int hashCode() {

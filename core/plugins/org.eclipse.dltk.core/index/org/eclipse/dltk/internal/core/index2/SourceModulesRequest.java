@@ -15,11 +15,9 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.index2.IIndexer;
 
 /**
@@ -64,17 +62,7 @@ public class SourceModulesRequest extends AbstractIndexRequest {
 		}
 
 		for (final ISourceModule sourceModule : toReindex) {
-			if (progressJob != null) {
-				String path;
-				IResource resource = sourceModule.getResource();
-				if (resource != null) {
-					path = resource.getFullPath().toString();
-				} else {
-					path = EnvironmentPathUtils.getFile(sourceModule)
-							.getCanonicalPath();
-				}
-				progressJob.subTask(path);
-			}
+			reportToProgress(sourceModule);
 			indexer.indexDocument(sourceModule);
 		}
 	}
