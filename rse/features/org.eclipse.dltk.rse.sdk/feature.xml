@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.dltk.rse.sdk"
       label="%featureName"
-      version="1.0.0.qualifier"
+      version="2.0.0.qualifier"
       provider-name="%providerName"
       image="eclipse_update_120.jpg">
 
@@ -13,11 +13,6 @@
    <license url="%licenseURL">
       %license
    </license>
-
-   <url>
-      <update label="%updateSiteName" url="http://download.eclipse.org/technology/dltk/updates/"/>
-      <discovery label="%updateSiteName" url="http://download.eclipse.org/technology/dltk/updates/"/>
-   </url>
 
    <includes
          id="org.eclipse.dltk.rse"
