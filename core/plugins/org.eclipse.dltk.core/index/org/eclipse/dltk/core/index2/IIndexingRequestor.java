@@ -15,6 +15,7 @@ package org.eclipse.dltk.core.index2;
  * Model element handler for indexing process
  * 
  * @author michael
+ * @since 2.0
  * 
  */
 public interface IIndexingRequestor {

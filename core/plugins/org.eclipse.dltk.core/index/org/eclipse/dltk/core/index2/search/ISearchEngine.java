@@ -19,6 +19,7 @@ import org.eclipse.dltk.core.search.IDLTKSearchScope;
  * Basic interface for searching model elements in index.
  * 
  * @author michael
+ * @since 2.0
  * 
  */
 public interface ISearchEngine {

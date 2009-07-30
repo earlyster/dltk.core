@@ -56,6 +56,7 @@ import org.eclipse.dltk.internal.core.util.Messages;
  * This is an implementation of search engine using new indexing infrastructure.
  * 
  * @author michael
+ * @since 2.0
  * 
  */
 public class NewSearchEngine {

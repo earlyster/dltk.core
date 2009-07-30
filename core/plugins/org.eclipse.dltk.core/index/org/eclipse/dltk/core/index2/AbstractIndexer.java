@@ -16,6 +16,9 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.internal.core.index2.IndexerManager;
 
+/**
+ * @since 2.0
+ */
 public abstract class AbstractIndexer implements IIndexer, IIndexingRequestor {
 
 	private String id;

@@ -21,6 +21,7 @@ import org.eclipse.dltk.core.index2.search.ISearchEngine;
  * Abstract source module indexer
  * 
  * @author michael
+ * @since 2.0
  * 
  */
 public interface IIndexer {

@@ -18,6 +18,7 @@ import org.eclipse.dltk.core.ISourceModule;
  * references while parsing the script source code.
  * 
  * @author michael
+ * @since 2.0
  * 
  */
 public interface IIndexingParser {

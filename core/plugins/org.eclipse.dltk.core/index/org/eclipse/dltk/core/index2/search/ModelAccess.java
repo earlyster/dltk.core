@@ -35,6 +35,7 @@ import org.eclipse.dltk.internal.core.index2.IndexerManager;
  * Utility for accessing DLTK model elements through index
  * 
  * @author michael
+ * @since 2.0
  * 
  */
 public class ModelAccess {

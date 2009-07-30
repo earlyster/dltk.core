@@ -13,6 +13,9 @@ package org.eclipse.dltk.core.index2.search;
 
 import org.eclipse.dltk.core.ISourceModule;
 
+/**
+ * @since 2.0
+ */
 public interface ISearchRequestor {
 
 	/**

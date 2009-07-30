@@ -18,6 +18,7 @@ import org.eclipse.dltk.core.ISourceModule;
  * Element resolver restores DLTK model element from index entry.
  * 
  * @author michael
+ * @since 2.0
  * 
  */
 public interface IElementResolver {
