@@ -16,7 +16,7 @@
 <feature
       id="org.eclipse.dltk.rse"
       label="%featureName"
-      version="1.0.0.qualifier"
+      version="2.0.0.qualifier"
       provider-name="%providerName"
       image="eclipse_update_120.jpg">
 
@@ -35,11 +35,6 @@ http://www.eclipse.org/legal/epl-v10.html
    <license url="%licenseURL">
       %license
    </license>
-
-   <url>
-      <update label="%updateSiteName" url="http://download.eclipse.org/technology/dltk/updates/"/>
-      <discovery label="%updateSiteName" url="http://download.eclipse.org/technology/dltk/updates/"/>
-   </url>
 
    <requires>
       <import feature="org.eclipse.dltk.core" version="1.0.0" match="compatible"/>
