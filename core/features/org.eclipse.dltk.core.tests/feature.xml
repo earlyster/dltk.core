@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.dltk.core.tests"
       label="%featureName"
-      version="1.0.0.qualifier"
+      version="2.0.0.qualifier"
       provider-name="%featureProvider">
 
    <description>
@@ -17,11 +17,7 @@
       %license
    </license>
 
-   <url>
-      <update label="%updateSiteName" url="http://download.eclipse.org/technology/dltk/updates/"/>
-   </url>
-
-   <plugin
+    <plugin
          id="org.eclipse.dltk.core.tests"
          download-size="0"
          install-size="0"
