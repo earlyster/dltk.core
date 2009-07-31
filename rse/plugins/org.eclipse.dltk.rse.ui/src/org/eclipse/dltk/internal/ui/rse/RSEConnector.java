@@ -25,17 +25,26 @@ public class RSEConnector implements IConnector {
 					if (RSEConnectionQueryManager.getInstance().hasHosts()) {
 						Display display = PlatformUI.getWorkbench()
 								.getDisplay();
-						display.syncExec(new Runnable() {
-							public void run() {
-								IHost host = RSEConnectionQueryManager
-										.getInstance().getNextHost(false);
-								if (host != null) {
-									connect(host);
-									RSEConnectionQueryManager.getInstance()
-											.markHostAsFinished(host);
-								}
+						if (PlatformUI.getWorkbench().isClosing()) {
+							IHost host = RSEConnectionQueryManager
+									.getInstance().getNextHost(false);
+							if (host != null) {
+								RSEConnectionQueryManager.getInstance()
+										.markHostAsFinished(host);
 							}
-						});
+						} else {
+							display.syncExec(new Runnable() {
+								public void run() {
+									IHost host = RSEConnectionQueryManager
+											.getInstance().getNextHost(false);
+									if (host != null) {
+										connect(host);
+										RSEConnectionQueryManager.getInstance()
+												.markHostAsFinished(host);
+									}
+								}
+							});
+						}
 					}
 					try {
 						Thread.sleep(200);
@@ -86,7 +95,8 @@ public class RSEConnector implements IConnector {
 		// We need to interrupt processingThread if it is no executing.
 		Display current = Display.getCurrent();
 		MAIN_LOOP: while (RSEConnectionQueryManager.getInstance().hasHosts()
-				&& !current.isDisposed()) {
+				&& !current.isDisposed()
+				&& !PlatformUI.getWorkbench().isClosing()) {
 			while (current.readAndDispatch()) {
 				if (current.isDisposed()) {
 					break MAIN_LOOP;
