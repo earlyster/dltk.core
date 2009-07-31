@@ -3,7 +3,6 @@ package org.eclipse.dltk.launching;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,15 +18,16 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.osgi.util.NLS;
 
 public class InterpreterSearcher {
-	private Set searchedFiles;
-	private List found;
-	private List types;
+	private Set<IFileHandle> searchedDirs;
+	private List<IFileHandle> found;
+	private List<IInterpreterInstallType> types;
 
 	private String natureId;
-	private Set ignore;
+	private IInterpreterInstallType[] installTypes;
+	private Set<IFileHandle> ignore;
 
 	protected void searchFast(IProgressMonitor monitor,
-			IEnvironment environment, int deep) {
+			IEnvironment environment, int depth) {
 		if (monitor.isCanceled()) {
 			return;
 		}
@@ -38,17 +38,17 @@ public class InterpreterSearcher {
 		if (exeEnv == null)
 			return;
 
-		Map env = exeEnv.getEnvironmentVariables(true);
+		monitor.subTask(Messages.InterpreterSearcher_0);
+		Map<String, String> env = exeEnv.getEnvironmentVariables(true);
 
 		if (env == null) {
 			return;
 		}
 		String path = null;
-		final Iterator it = env.keySet().iterator();
-		while (it.hasNext()) {
-			final String name = (String) it.next();
-			if (name.compareToIgnoreCase("path") == 0) { //$NON-NLS-1$
-				path = (String) env.get(name);
+		for (final String name : env.keySet()) {
+			if (name.equalsIgnoreCase("path")) { //$NON-NLS-1$
+				path = env.get(name);
+				break;
 			}
 		}
 		if (path == null) {
@@ -58,23 +58,21 @@ public class InterpreterSearcher {
 		// Folder list
 		final String separator = environment.getPathsSeparator();
 
-		final List folders = new ArrayList();
+		final List<IPath> folders = new ArrayList<IPath>();
 		String[] res = path.split(separator);
 		for (int i = 0; i < res.length; i++) {
 			folders.add(Path.fromOSString(res[i]));
 		}
 
-		final Iterator iter = folders.iterator();
-		while (iter.hasNext()) {
-			final IPath folder = (IPath) iter.next();
-
-			if (folder != null) {
-				IFileHandle f = environment.getFile(folder);
-				if (f.isDirectory()) {
-					search(f, monitor, deep);
-				}
+		monitor.beginTask(Messages.InterpreterSearcher_1, folders.size());
+		for (final IPath folder : folders) {
+			IFileHandle f = environment.getFile(folder);
+			if (f.isDirectory()) {
+				search(f, monitor, depth);
 			}
+			monitor.worked(1);
 		}
+		monitor.done();
 	}
 
 	/**
@@ -86,12 +84,12 @@ public class InterpreterSearcher {
 	 * @param found
 	 * @param types
 	 * @param ignore
-	 * @param deep
+	 * @param depth
 	 *            deepness of search. -1 if infinite.
 	 */
 	protected void search(IFileHandle directory, IProgressMonitor monitor,
-			int deep) {
-		if (deep == 0) {
+			int depth) {
+		if (depth == 0) {
 			return;
 		}
 
@@ -99,7 +97,7 @@ public class InterpreterSearcher {
 			return;
 		}
 
-		if (searchedFiles.contains(directory)) {
+		if (!searchedDirs.add(directory)) {
 			return;
 		}
 
@@ -108,7 +106,7 @@ public class InterpreterSearcher {
 			return;
 		}
 
-		List subDirs = new ArrayList();
+		List<IFileHandle> subDirs = new ArrayList<IFileHandle>();
 		for (int i = 0; i < files.length; i++) {
 			if (monitor.isCanceled()) {
 				return;
@@ -118,15 +116,12 @@ public class InterpreterSearcher {
 
 			monitor.subTask(NLS.bind(
 					Messages.InterpreterSearcher_foundSearching, Integer
-							.toString(found.size()), file.getCanonicalPath()));
+							.valueOf(found.size()), file.getCanonicalPath()));
 
 			// Check if file is a symlink
 			if (file.isDirectory() && file.isSymlink()) {
 				continue;
 			}
-
-			IInterpreterInstallType[] installTypes = ScriptRuntime
-					.getInterpreterInstallTypes(natureId);
 
 			if (!ignore.contains(file)) {
 				boolean validLocation = false;
@@ -157,35 +152,37 @@ public class InterpreterSearcher {
 			}
 		}
 
-		while (!subDirs.isEmpty()) {
-			IFileHandle subDir = (IFileHandle) subDirs.remove(0);
-			search(subDir, monitor, deep - 1);
+		if (!subDirs.isEmpty()) {
+			for (IFileHandle subDir : subDirs) {
+				search(subDir, monitor, depth - 1);
+			}
 		}
-
-		searchedFiles.add(directory);
 	}
 
 	public InterpreterSearcher() {
-		this.searchedFiles = new HashSet();
-		this.found = new ArrayList();
-		this.types = new ArrayList();
+		this.searchedDirs = new HashSet<IFileHandle>();
+		this.found = new ArrayList<IFileHandle>();
+		this.types = new ArrayList<IInterpreterInstallType>();
 	}
 
-	public void search(IEnvironment environment, String natureId, Set ignore,
-			int deep, IProgressMonitor monitor) {
+	public void search(IEnvironment environment, String natureId,
+			Set<IFileHandle> ignore, int depth, IProgressMonitor monitor) {
 		if (natureId == null) {
 			throw new IllegalArgumentException();
 		}
 
 		this.found.clear();
 		this.types.clear();
-		this.searchedFiles.clear();
+		this.searchedDirs.clear();
 
 		this.natureId = natureId;
-		this.ignore = ignore == null ? Collections.EMPTY_SET : ignore;
+		this.installTypes = ScriptRuntime.getInterpreterInstallTypes(natureId);
+
+		this.ignore = ignore == null ? Collections.<IFileHandle> emptySet()
+				: ignore;
 
 		searchFast(monitor == null ? new NullProgressMonitor() : monitor,
-				environment, deep);
+				environment, depth);
 	}
 
 	public boolean hasResults() {
@@ -193,11 +190,10 @@ public class InterpreterSearcher {
 	}
 
 	public IFileHandle[] getFoundFiles() {
-		return (IFileHandle[]) found.toArray(new IFileHandle[found.size()]);
+		return found.toArray(new IFileHandle[found.size()]);
 	}
 
 	public IInterpreterInstallType[] getFoundInstallTypes() {
-		return (IInterpreterInstallType[]) types
-				.toArray(new IInterpreterInstallType[types.size()]);
+		return types.toArray(new IInterpreterInstallType[types.size()]);
 	}
 }
