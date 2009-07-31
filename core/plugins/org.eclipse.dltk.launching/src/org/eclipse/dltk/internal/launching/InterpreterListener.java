@@ -14,14 +14,16 @@ import org.eclipse.dltk.launching.IInterpreterInstallChangedListener;
 import org.eclipse.dltk.launching.PropertyChangeEvent;
 
 /**
- * Simple interpreter listener that reports whether interpreter settings have changed.
+ * Simple interpreter listener that reports whether interpreter settings have
+ * changed.
  */
 public class InterpreterListener implements IInterpreterInstallChangedListener {
-	
+
 	private boolean changed = false;
 
-	public void defaultInterpreterInstallChanged(IInterpreterInstall previous, IInterpreterInstall current) {
-		changed = true;
+	public void defaultInterpreterInstallChanged(IInterpreterInstall previous,
+			IInterpreterInstall current) {
+		changed();
 	}
 
 	public void interpreterAdded(IInterpreterInstall Interpreter) {
@@ -33,6 +35,13 @@ public class InterpreterListener implements IInterpreterInstallChangedListener {
 	}
 
 	public void interpreterRemoved(IInterpreterInstall Interpreter) {
+		changed = true;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected void changed() {
 		changed = true;
 	}
 
