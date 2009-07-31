@@ -54,12 +54,15 @@ public class ScriptLaunchUtil {
 				workingDirectoryPath);
 
 		Map envVars = exeEnv.getEnvironmentVariables(false);
-		config.addEnvVars(envVars);
-		EnvironmentVariable[] resVars = EnvironmentResolver.resolve(envVars,
-				env);
-		if (resVars != null) {
-			for (int i = 0; i < resVars.length; i++) {
-				config.addEnvVar(resVars[i].getName(), resVars[i].getValue());
+		if (envVars != null) {
+			config.addEnvVars(envVars);
+			EnvironmentVariable[] resVars = EnvironmentResolver.resolve(
+					envVars, env);
+			if (resVars != null) {
+				for (int i = 0; i < resVars.length; i++) {
+					config.addEnvVar(resVars[i].getName(), resVars[i]
+							.getValue());
+				}
 			}
 		}
 

@@ -40,6 +40,9 @@ public class InterpreterSearcher {
 
 		Map env = exeEnv.getEnvironmentVariables(true);
 
+		if (env == null) {
+			return;
+		}
 		String path = null;
 		final Iterator it = env.keySet().iterator();
 		while (it.hasNext()) {

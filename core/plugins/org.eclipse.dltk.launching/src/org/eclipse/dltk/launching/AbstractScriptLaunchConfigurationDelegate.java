@@ -814,7 +814,11 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		// build base environment
 		final Map<String, String> env = new HashMap<String, String>();
 		if (append || configEnv == null) {
-			env.putAll(scriptExecEnvironment.getEnvironmentVariables(false));
+			Map<String, String> envVars = scriptExecEnvironment
+					.getEnvironmentVariables(false);
+			if (envVars != null) {
+				env.putAll(envVars);
+			}
 		}
 		if (configEnv != null) {
 			for (Map.Entry<String, String> entry : configEnv.entrySet()) {

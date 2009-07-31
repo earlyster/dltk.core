@@ -204,7 +204,9 @@ public abstract class AbstractInterpreterInstallType implements
 	protected String[] extractEnvironment(IExecutionEnvironment exeEnv,
 			EnvironmentVariable[] variables) {
 		Map<String, String> env = exeEnv.getEnvironmentVariables(false);
-
+		if (exeEnv == null) {
+			return null;
+		}
 		filterEnvironment(env);
 
 		List<String> list = new ArrayList<String>();
@@ -631,8 +633,10 @@ public abstract class AbstractInterpreterInstallType implements
 		}
 		sb.append("\n"); //$NON-NLS-1$
 		sb.append("Environment:\n"); //$NON-NLS-1$
-		for (int i = 0; i < environment.length; i++) {
-			sb.append('\t').append(environment[i]).append('\n');
+		if (environment != null) {
+			for (int i = 0; i < environment.length; i++) {
+				sb.append('\t').append(environment[i]).append('\n');
+			}
 		}
 		sb.append("-----------------------------------------------\n"); //$NON-NLS-1$
 		System.out.println(sb);
