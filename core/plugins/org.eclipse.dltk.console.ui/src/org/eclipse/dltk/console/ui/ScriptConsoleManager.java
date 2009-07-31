@@ -51,15 +51,13 @@ public class ScriptConsoleManager implements ILaunchListener {
 		return instance;
 	}
 
-	private IConsoleManager manager;
-
-	protected ScriptConsoleManager() {
-		this.manager = ConsolePlugin.getDefault().getConsoleManager();
+	private IConsoleManager getConsoleManager() {
+		return ConsolePlugin.getDefault().getConsoleManager();
 	}
 
 	public ScriptConsole[] getScriptConsoles(String consoleType) {
 		List<ScriptConsole> consoles = new ArrayList<ScriptConsole>();
-		for (IConsole console : manager.getConsoles()) {
+		for (IConsole console : getConsoleManager().getConsoles()) {
 			if (console instanceof ScriptConsole
 					&& console.getType().equals(consoleType)) {
 				consoles.add((ScriptConsole) console);
@@ -98,7 +96,7 @@ public class ScriptConsoleManager implements ILaunchListener {
 	}
 
 	public void closeAll() {
-		IConsole[] consoles = manager.getConsoles();
+		IConsole[] consoles = getConsoleManager().getConsoles();
 		for (int i = 0; i < consoles.length; ++i) {
 			IConsole console = consoles[i];
 			if (console instanceof ScriptConsole) {
@@ -108,15 +106,15 @@ public class ScriptConsoleManager implements ILaunchListener {
 	}
 
 	public void showConsole(ScriptConsole console) {
-		manager.showConsoleView(console);
+		getConsoleManager().showConsoleView(console);
 	}
 
 	public void add(ScriptConsole console) {
-		manager.addConsoles(new IConsole[] { console });
+		getConsoleManager().addConsoles(new IConsole[] { console });
 	}
 
 	public void remove(ScriptConsole console) {
-		manager.removeConsoles(new IConsole[] { console });
+		getConsoleManager().removeConsoles(new IConsole[] { console });
 	}
 
 	protected IScriptConsoleFactory findScriptConsoleFactory(String natureId)
