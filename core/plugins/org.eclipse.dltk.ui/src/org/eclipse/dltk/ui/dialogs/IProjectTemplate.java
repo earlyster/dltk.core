@@ -13,9 +13,15 @@ package org.eclipse.dltk.ui.dialogs;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.swt.widgets.Shell;
 
 public interface IProjectTemplate {
+
+	/**
+	 * @since 2.0
+	 */
+	void setCurrentEnvironment(IEnvironment environment);
 
 	IProjectTemplateOperation configure(IProject project,
 			IProjectTemplateOperation prevOperation, Shell parentShell);

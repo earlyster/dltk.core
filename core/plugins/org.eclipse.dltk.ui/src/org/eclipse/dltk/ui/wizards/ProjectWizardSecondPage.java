@@ -281,7 +281,7 @@ public abstract class ProjectWizardSecondPage extends
 			monitor
 					.beginTask(
 							NewWizardMessages.ScriptProjectWizardSecondPage_operation_create,
-							3);
+							4);
 			if (fCurrProject == null) {
 				updateProject(new SubProgressMonitor(monitor, 1));
 			}
@@ -304,7 +304,7 @@ public abstract class ProjectWizardSecondPage extends
 			// Not rebuild project external libraries if exist project with same
 			// interpreter.
 			configureEnvironment(monitor);
-			postConfigureProject();
+			postConfigureProject(new SubProgressMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 			fCurrProject = null;
@@ -345,8 +345,13 @@ public abstract class ProjectWizardSecondPage extends
 		}
 	}
 
-	protected void postConfigureProject() throws CoreException {
+	/**
+	 * @since 2.0
+	 */
+	protected void postConfigureProject(IProgressMonitor monitor)
+			throws CoreException, InterruptedException {
 		// empty override in descendants
+		monitor.done();
 	}
 
 	protected void removeProject() {

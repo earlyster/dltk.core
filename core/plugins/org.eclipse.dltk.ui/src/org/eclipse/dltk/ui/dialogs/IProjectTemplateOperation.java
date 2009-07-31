@@ -12,11 +12,15 @@
 package org.eclipse.dltk.ui.dialogs;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.widgets.Shell;
 
 public interface IProjectTemplateOperation {
 
-	IStatus execute(IProject project, Shell context);
+	/**
+	 * @since 2.0
+	 */
+	IStatus execute(IProject project, Shell context, IProgressMonitor monitor);
 
 }
