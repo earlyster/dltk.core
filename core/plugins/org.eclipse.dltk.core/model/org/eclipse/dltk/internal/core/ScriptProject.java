@@ -689,11 +689,13 @@ public class ScriptProject extends Openable implements IScriptProject {
 		// Call for extra model providers
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(this);
-		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
-				.getNatureId());
-		if (providers != null) {
-			for (int i = 0; i < providers.length; i++) {
-				providers[i].provideModelChanges(this, fragments);
+		if (toolkit != null) {
+			IModelProvider[] providers = ModelProviderManager
+					.getProviders(toolkit.getNatureId());
+			if (providers != null) {
+				for (int i = 0; i < providers.length; i++) {
+					providers[i].provideModelChanges(this, fragments);
+				}
 			}
 		}
 
@@ -3148,11 +3150,13 @@ public class ScriptProject extends Openable implements IScriptProject {
 		// Call for extra model providers
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(this);
-		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
-				.getNatureId());
-		if (providers != null) {
-			for (int i = 0; i < providers.length; i++) {
-				providers[i].provideModelChanges(this, fragments);
+		if (toolkit != null) {
+			IModelProvider[] providers = ModelProviderManager
+					.getProviders(toolkit.getNatureId());
+			if (providers != null) {
+				for (int i = 0; i < providers.length; i++) {
+					providers[i].provideModelChanges(this, fragments);
+				}
 			}
 		}
 		return (IProjectFragment[]) fragments
