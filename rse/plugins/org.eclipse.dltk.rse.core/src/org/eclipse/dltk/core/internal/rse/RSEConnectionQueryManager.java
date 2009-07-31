@@ -3,6 +3,7 @@ package org.eclipse.dltk.core.internal.rse;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.utils.LazyExtensionManager;
 import org.eclipse.dltk.utils.LazyExtensionManager.Descriptor;
 import org.eclipse.rse.core.model.IHost;
@@ -166,7 +167,7 @@ public class RSEConnectionQueryManager {
 			}
 		}
 		synchronized (requests) {
-			while (!request.isFinished()) {
+			while (!request.isFinished() && Platform.isRunning()) {
 				try {
 					requests.wait(100);
 				} catch (InterruptedException e) {
