@@ -5,9 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.IPath;
@@ -307,24 +305,20 @@ public class SshConnection implements ISshConnection {
 				channel.connect();
 			}
 		} catch (JSchException e) {
-			if (e.toString().indexOf("Auth cancel") >= 0 || e.toString().indexOf("Auth fail") >= 0) { //$NON-NLS-1$
+			String eToStr = e.toString();
+			boolean needLog = true;
+			if (eToStr.indexOf("Auth cancel") >= 0 || eToStr.indexOf("Auth fail") >= 0 || eToStr.indexOf("session is down") >= 0) { //$NON-NLS-1$
 				if (session.isConnected()) {
 					session.disconnect();
 					session = null;
 				}
 			}
-			DLTKCore.error("Failed to create direct connection", e);
-			if (session.isConnected() && !channel.isConnected()) {
-				try {
-					Thread.sleep(50);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-				// Try to reconnect
-			}
 			if (session != null) {
 				session.disconnect();
 				session = null;
+			}
+			if (needLog) {
+				DLTKCore.error("Failed to create direct connection", e);
 			}
 		}
 		if (session == null || !session.isConnected() || channel == null
@@ -352,11 +346,13 @@ public class SshConnection implements ISshConnection {
 	 * @see org.eclipse.dltk.ssh.core.ISshConnection#disconnect()
 	 */
 	public void disconnect() {
-		if (channel.isConnected()) {
+		if (channel != null && channel.isConnected()) {
 			channel.disconnect();
+			channel = null;
 		}
-		if (session.isConnected()) {
+		if (session != null && session.isConnected()) {
 			session.disconnect();
+			session = null;
 		}
 	}
 
@@ -548,5 +544,5 @@ public class SshConnection implements ISshConnection {
 			return false;
 		return true;
 	}
-	
+
 }
