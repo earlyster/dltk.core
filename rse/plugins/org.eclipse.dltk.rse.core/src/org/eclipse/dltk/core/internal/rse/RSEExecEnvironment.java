@@ -325,6 +325,9 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 
 	@SuppressWarnings("unchecked")
 	public Map getEnvironmentVariables(boolean realyNeed) {
+		if (!getEnvironment().connect()) {
+			return null;
+		}
 		if (!realyNeed) {
 			return new HashMap<String, String>();
 		}
