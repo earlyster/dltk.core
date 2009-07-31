@@ -119,10 +119,12 @@ class ExternalCheckerDelegate {
 							.resolve(execEnvironment
 									.getEnvironmentVariables(true), install
 									.getEnvironmentVariables(), true);
-					envContainer.environmentVars = new String[resolved.length];
-					for (int i = 0; i < resolved.length; ++i) {
-						envContainer.environmentVars[i] = resolved[i]
-								.toString();
+					if (resolved != null) {
+						envContainer.environmentVars = new String[resolved.length];
+						for (int i = 0; i < resolved.length; ++i) {
+							envContainer.environmentVars[i] = resolved[i]
+									.toString();
+						}
 					}
 				}
 				projectEnvs.put(project, envContainer);
