@@ -649,9 +649,11 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		Map<String, String> stringVars = execEnvironment
 				.getEnvironmentVariables(true);
 		HashMap<String, EnvironmentVariable> vars = new HashMap<String, EnvironmentVariable>();
-		for (Map.Entry<String, String> entry : stringVars.entrySet()) {
-			vars.put(entry.getKey(), new EnvironmentVariable(entry.getKey(),
-					entry.getValue()));
+		if (stringVars != null) {
+			for (Map.Entry<String, String> entry : stringVars.entrySet()) {
+				vars.put(entry.getKey(), new EnvironmentVariable(
+						entry.getKey(), entry.getValue()));
+			}
 		}
 		return vars;
 	}
