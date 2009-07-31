@@ -13,7 +13,13 @@ public class Messages extends NLS {
 	public static String InterpreterConfig_scriptArgumentCannotBeNull;
 	public static String InterpreterConfig_scriptFileCannotBeNull;
 	public static String InterpreterConfig_workingDirectoryCannotBeNull;
+	/**
+	 * @since 2.0
+	 */
 	public static String InterpreterSearcher_0;
+	/**
+	 * @since 2.0
+	 */
 	public static String InterpreterSearcher_1;
 	public static String InterpreterSearcher_foundSearching;
 	static {
