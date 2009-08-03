@@ -101,6 +101,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PartInitException;
@@ -316,7 +317,9 @@ public abstract class ScriptBrowsingPart extends ViewPart implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets
+	 * .Composite)
 	 */
 	public void createPartControl(Composite parent) {
 		Assert.isTrue(fViewer == null);
@@ -530,7 +533,9 @@ public abstract class ScriptBrowsingPart extends ViewPart implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.action.IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
+	 * @see
+	 * org.eclipse.jface.action.IMenuListener#menuAboutToShow(org.eclipse.jface
+	 * .action.IMenuManager)
 	 */
 	public void menuAboutToShow(IMenuManager menu) {
 		DLTKUIPlugin.createStandardGroups(menu);
@@ -633,8 +638,7 @@ public abstract class ScriptBrowsingPart extends ViewPart implements
 	}
 
 	/**
-	 * Answers if the given <code>element</code> is a valid input for this
-	 * part.
+	 * Answers if the given <code>element</code> is a valid input for this part.
 	 * 
 	 * @param element
 	 *            the object to test
@@ -972,12 +976,16 @@ public abstract class ScriptBrowsingPart extends ViewPart implements
 		if (page != null)
 			selection = page.getSelection();
 		if (selection instanceof ITextSelection) {
-			Object part = PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-					.getActivePage().getActivePart();
-			if (part instanceof IEditorPart) {
-				setSelectionFromEditor((IEditorPart) part);
-				if (fViewer.getSelection() != null)
-					return;
+			IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow();
+			IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+			if (activePage != null) {
+				Object part = activePage.getActivePart();
+				if (part instanceof IEditorPart) {
+					setSelectionFromEditor((IEditorPart) part);
+					if (fViewer.getSelection() != null)
+						return;
+				}
 			}
 		}
 
@@ -1088,8 +1096,7 @@ public abstract class ScriptBrowsingPart extends ViewPart implements
 				setSelection(new StructuredSelection(elementToSelect), true);
 			else
 				setSelection(StructuredSelection.EMPTY, true);
-		}
-		else {
+		} else {
 			setSelection(new StructuredSelection(o), true);
 			setInput(o);
 		}
@@ -1275,10 +1282,10 @@ public abstract class ScriptBrowsingPart extends ViewPart implements
 				}
 				adjustInputAndSetSelection(je);
 			} /*
-				 * else if (ei instanceof IClassFileEditorInput) { IClassFile cf =
-				 * ((IClassFileEditorInput) ei).getClassFile();
-				 * adjustInputAndSetSelection(cf); }
-				 */
+			 * else if (ei instanceof IClassFileEditorInput) { IClassFile cf =
+			 * ((IClassFileEditorInput) ei).getClassFile();
+			 * adjustInputAndSetSelection(cf); }
+			 */
 		}
 	}
 
@@ -1359,7 +1366,8 @@ public abstract class ScriptBrowsingPart extends ViewPart implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider#getViewPartInput()
+	 * @seeorg.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider#
+	 * getViewPartInput()
 	 */
 	public Object getViewPartInput() {
 		if (fViewer != null) {
