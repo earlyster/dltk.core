@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.debug.core.model;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +25,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.model.IScriptLineBreakpoint;
 
@@ -140,9 +145,26 @@ public class ScriptLineBreakpoint extends AbstractScriptBreakpoint implements
 	public URI getResourceURI() {
 		try {
 			IResource resource = ensureMarker().getResource();
-			if (!resource.equals(getWorkspaceRoot()))
-				return makeUri(new Path(ensureMarker().getResource()
-						.getLocationURI().getPath()));
+			if (!resource.equals(getWorkspaceRoot())) {
+				final IEnvironment environment = EnvironmentManager
+						.getEnvironment(resource.getProject());
+				if (environment != null) {
+					final IFileHandle handle = environment.getFile(resource
+							.getLocationURI());
+					if (handle != null) {
+						try {
+							return new URI(
+									"file", "", handle.getPath().toString(), null); //$NON-NLS-1$ //$NON-NLS-2$
+						} catch (URISyntaxException e) {
+							if (DLTKCore.DEBUG) {
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+				// FIXME review later...
+				return makeUri(new Path(resource.getLocationURI().getPath()));
+			}
 
 			// else
 			String portablePath = (String) ensureMarker().getAttribute(
