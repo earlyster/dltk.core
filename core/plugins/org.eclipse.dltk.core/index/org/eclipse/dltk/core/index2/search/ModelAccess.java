@@ -206,6 +206,9 @@ public class ModelAccess {
 	public static IIndexerParticipant getIndexerParticipant(
 			IDLTKLanguageToolkit toolkit) {
 		IIndexer indexer = IndexerManager.getIndexer();
+		if (indexer == null) {
+			return null;
+		}
 		return IndexerManager.getIndexerParticipant(indexer, toolkit
 				.getNatureId());
 	}
