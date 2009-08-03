@@ -4,6 +4,7 @@ import java.net.URI;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -68,6 +69,52 @@ public class ScriptSourceLookupParticipant extends
 				}
 				if (pathEquality.equals(fileFullPath, modulePath)) {
 					result[0] = module;
+				}
+				return false;
+			}
+			return true;
+		}
+
+		public boolean isFound() {
+			return result[0] != null;
+		}
+
+		public Object[] getResult() {
+			return result;
+		}
+	}
+
+	private final class LocalSourceModuleFinder implements IModelElementVisitor {
+
+		private final IPath fileFullPath;
+
+		private LocalSourceModuleFinder(IPath fileFullPath) {
+			this.fileFullPath = fileFullPath;
+		}
+
+		private final IPathEquality pathEquality = PathEqualityUtils
+				.getInstance();
+
+		private final IFile[] result = new IFile[1];
+
+		public boolean visit(IModelElement element) {
+			if (element.getElementType() == IModelElement.PROJECT_FRAGMENT) {
+				IProjectFragment fragment = (IProjectFragment) element;
+				if (fragment.isExternal()) {
+					return false;
+				}
+			}
+			if (element.getElementType() == IModelElement.SOURCE_MODULE) {
+				ISourceModule module = (ISourceModule) element;
+				IEnvironment environment = EnvironmentManager
+						.getEnvironment(element.getScriptProject());
+				final IResource resource = module.getResource();
+				if (resource != null) {
+					final IFileHandle file = environment.getFile(resource
+							.getLocationURI());
+					if (pathEquality.equals(fileFullPath, file.getPath())) {
+						result[0] = (IFile) resource;
+					}
 				}
 				return false;
 			}
@@ -180,6 +227,12 @@ public class ScriptSourceLookupParticipant extends
 				scriptProject.accept(finder);
 				if (finder.isFound()) {
 					return finder.getResult();
+				}
+				final LocalSourceModuleFinder finder2 = new LocalSourceModuleFinder(
+						file.getPath());
+				scriptProject.accept(finder2);
+				if (finder2.isFound()) {
+					return finder2.getResult();
 				}
 			}
 			return new Object[] { new DBGPSourceModule(scriptProject, path,
