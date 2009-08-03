@@ -200,6 +200,37 @@ public class ScriptLaunchUtil {
 		return runScript(natureId, environment.getId(), config, monitor);
 	}
 
+	/**
+	 * @since 2.0
+	 */
+	public static ILaunch runScript(IInterpreterInstall install,
+			IFileHandle scriptFile, IFileHandle workingDirectory,
+			String[] interpreterArgs, String[] scriptArgs,
+			IProgressMonitor monitor) throws CoreException {
+		IEnvironment environment = scriptFile.getEnvironment();
+		IExecutionEnvironment execEnvironment = (IExecutionEnvironment) environment
+				.getAdapter(IExecutionEnvironment.class);
+		InterpreterConfig config = createInterpreterConfig(execEnvironment,
+				scriptFile, workingDirectory);
+
+		if (interpreterArgs != null) {
+			config.addInterpreterArgs(interpreterArgs);
+		}
+
+		if (scriptArgs != null) {
+			config.addScriptArgs(scriptArgs);
+		}
+		EnvironmentVariable[] variables = EnvironmentResolver.resolve(config
+				.getEnvVars(), install.getEnvironmentVariables());
+		if (variables != null) {
+			for (int i = 0; i < variables.length; i++) {
+				config.addEnvVar(variables[i].getName(), variables[i]
+						.getValue());
+			}
+		}
+		return runScript(install, config, monitor);
+	}
+
 	private static class ErrorStreamReaderThread extends Thread {
 
 		final InputStream stream;
