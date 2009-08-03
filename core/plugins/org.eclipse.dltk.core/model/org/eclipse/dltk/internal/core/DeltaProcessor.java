@@ -51,6 +51,8 @@ import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
@@ -1966,10 +1968,18 @@ public class DeltaProcessor {
 								// To avoid concurrent modifications
 								this.refreshedElements = null;
 							}
-							this.createExternalArchiveDelta(null,
-									refreshedElementsCopy);
-							this.createCustomElementDelta(null,
-									refreshedElementsCopy);
+							// Call archive or custom deltas only if project are
+							// correctly connected
+							IProject project = resource.getProject();
+							IEnvironment environment = EnvironmentManager
+									.getEnvironment(project);
+							if (environment != null
+									&& environment.isConnected()) {
+								this.createExternalArchiveDelta(null,
+										refreshedElementsCopy);
+								this.createCustomElementDelta(null,
+										refreshedElementsCopy);
+							}
 						}
 						IModelElementDelta translatedDelta = this
 								.processResourceDelta(delta);
