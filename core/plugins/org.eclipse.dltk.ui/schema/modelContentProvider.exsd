@@ -63,7 +63,7 @@ With this extension it is possibly to display some custom items in script explor
                   Class implementing IModelProvider to build structure
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.internal.ui.model.IModelContentProvider"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.ui.IModelContentProvider"/>
                </appInfo>
             </annotation>
          </attribute>
