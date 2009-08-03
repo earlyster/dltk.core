@@ -89,6 +89,11 @@ public class SshConnection implements ISshConnection {
 			this.path = path;
 		}
 
+		@Override
+		public String toString() {
+			return "Get information for file:" + path;
+		}
+
 		public void perform() throws JSchException, SftpException {
 			attrs = getChannel().stat(path.toString());
 		}
@@ -104,6 +109,11 @@ public class SshConnection implements ISshConnection {
 
 		public ResolveLinkOperation(IPath path) {
 			this.path = path;
+		}
+
+		@Override
+		public String toString() {
+			return "Resolve link information for file:" + path;
 		}
 
 		public void perform() throws JSchException, SftpException {
@@ -172,6 +182,11 @@ public class SshConnection implements ISshConnection {
 		}
 
 		@Override
+		public String toString() {
+			return "Get input stream for file:" + path;
+		}
+
+		@Override
 		public void failed() {
 			// channel.disconnect();
 			// channel = null;
@@ -209,6 +224,11 @@ public class SshConnection implements ISshConnection {
 			this.path = path;
 		}
 
+		@Override
+		public String toString() {
+			return "Get output stream for file:" + path;
+		}
+
 		public void perform() throws JSchException, SftpException {
 			stream = channel.put(path.toString(), getChannel().OVERWRITE);
 			performStreamOperation = true;
@@ -238,6 +258,11 @@ public class SshConnection implements ISshConnection {
 
 		public ListFolderOperation(IPath path) {
 			this.path = path;
+		}
+
+		@Override
+		public String toString() {
+			return "List folder:" + path + " for files";
 		}
 
 		public void perform() throws JSchException, SftpException {
@@ -379,8 +404,14 @@ public class SshConnection implements ISshConnection {
 			// }
 		} catch (SftpException e) {
 			if (e.id != ChannelSftp.SSH_FX_NO_SUCH_FILE) {
-				Activator.log(e);
+				if (e.id == ChannelSftp.SSH_FX_PERMISSION_DENIED) {
+					Activator.log("Permission denied to perform:"
+							+ op.toString());
+				} else {
+					Activator.log(e);
+				}
 			}
+
 		} finally {
 			if (!op.isFinished()) {
 				op.failed();
