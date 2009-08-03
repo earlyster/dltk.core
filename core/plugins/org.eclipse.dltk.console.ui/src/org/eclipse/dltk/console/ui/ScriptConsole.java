@@ -35,7 +35,6 @@ import org.eclipse.dltk.console.ScriptConsoleHistory;
 import org.eclipse.dltk.console.ScriptConsolePrompt;
 import org.eclipse.dltk.console.ScriptExecResult;
 import org.eclipse.dltk.console.ui.internal.ICommandHandler;
-import org.eclipse.dltk.console.ui.internal.ScriptConsoleInput;
 import org.eclipse.dltk.console.ui.internal.ScriptConsolePage;
 import org.eclipse.dltk.console.ui.internal.ScriptConsoleSession;
 import org.eclipse.dltk.console.ui.internal.ScriptConsoleViewer;
@@ -54,7 +53,8 @@ import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.TextConsole;
 import org.eclipse.ui.part.IPageBookViewPage;
 
-public class ScriptConsole extends TextConsole implements ICommandHandler {
+public class ScriptConsole extends TextConsole implements ICommandHandler,
+		IScriptConsole {
 	private ILaunch launch = null;
 	private ILaunchesListener2 listener = null;
 
@@ -120,6 +120,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 			final BufferedReader reader = new BufferedReader(
 					new InputStreamReader(stream));
 			Thread readerThread = new Thread() {
+				@Override
 				public void run() {
 					while (!terminated) {
 						String readLine;
@@ -193,6 +194,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 
 	private boolean terminated = false;
 
+	@Override
 	protected IConsoleDocumentPartitioner getPartitioner() {
 		return partitioner;
 	}
@@ -272,6 +274,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		return documentListener;
 	}
 
+	@Override
 	public IPageBookViewPage createPage(IConsoleView view) {
 		SourceViewerConfiguration cfg = new ScriptConsoleSourceViewerConfiguration(
 				processor, hover);
@@ -284,12 +287,16 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		return new ScriptConsolePage(this, view, cfg);
 	}
 
+	@Override
 	public void clearConsole() {
 		page.clearConsolePage();
 	}
 
-	public IScriptConsoleInput getInput() {
-		return new ScriptConsoleInput(page);
+	/**
+	 * @since 2.0
+	 */
+	public void insertText(String line) {
+		page.insertText(line);
 	}
 
 	public int getState() {
@@ -340,6 +347,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		}
 	}
 
+	@Override
 	public void dispose() {
 		partitioner.clearRanges();
 
@@ -355,7 +363,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 
 	public void setLaunch(ILaunch launch) {
 		this.launch = launch;
-		if (this.listener == null) {
+		if (this.launch != null && this.listener == null) {
 			this.listener = new ScriptConsoleLaunchListener();
 			DebugPlugin.getDefault().getLaunchManager().addLaunchListener(
 					listener);
@@ -369,14 +377,14 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		return launch;
 	}
 
-	private Set connectedProcesses;
+	private Set<IScriptProcess> connectedProcesses;
 
 	/**
 	 * @param process
 	 */
 	public synchronized void connect(IScriptProcess process) {
 		if (connectedProcesses == null) {
-			connectedProcesses = new HashSet();
+			connectedProcesses = new HashSet<IScriptProcess>();
 		}
 		if (connectedProcesses.add(process)) {
 			final IStreamsProxy proxy = process.getScriptStreamsProxy();
@@ -398,7 +406,7 @@ public class ScriptConsole extends TextConsole implements ICommandHandler {
 		}
 	}
 
-	private List fStreamListeners = new ArrayList();
+	private List<StreamListener> fStreamListeners = new ArrayList<StreamListener>();
 
 	/**
 	 * @param streamMonitor

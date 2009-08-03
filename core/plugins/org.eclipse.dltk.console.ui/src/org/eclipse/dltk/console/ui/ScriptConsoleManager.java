@@ -27,6 +27,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.dltk.console.IScriptInterpreter;
 import org.eclipse.dltk.console.ScriptConsoleServer;
 import org.eclipse.dltk.console.ScriptInterpreterManager;
+import org.eclipse.dltk.console.ui.internal.ConsoleViewManager;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.launching.process.IScriptProcess;
@@ -36,7 +37,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
 
@@ -55,33 +55,52 @@ public class ScriptConsoleManager implements ILaunchListener {
 		return ConsolePlugin.getDefault().getConsoleManager();
 	}
 
-	public ScriptConsole[] getScriptConsoles(String consoleType) {
-		List<ScriptConsole> consoles = new ArrayList<ScriptConsole>();
+	/**
+	 * @since 2.0
+	 */
+	public IScriptConsole[] getScriptConsoles(String consoleType) {
+		List<IScriptConsole> consoles = new ArrayList<IScriptConsole>();
 		for (IConsole console : getConsoleManager().getConsoles()) {
-			if (console instanceof ScriptConsole
+			if (console instanceof IScriptConsole
 					&& console.getType().equals(consoleType)) {
 				consoles.add((ScriptConsole) console);
 			}
 		}
-		return consoles.toArray(new ScriptConsole[consoles.size()]);
+		return consoles.toArray(new IScriptConsole[consoles.size()]);
 	}
 
-	public ScriptConsole getActiveScriptConsole(String consoleType) {
-		IWorkbenchWindow window = PlatformUI.getWorkbench()
+	private String[] consoleViewIds = null;
+
+	private synchronized String[] getConsoleViewIds() {
+		if (consoleViewIds == null) {
+			final List<String> viewIds = new ArrayList<String>();
+			for (ConsoleViewManager.Descriptor descriptor : new ConsoleViewManager(
+					"org.eclipse.dltk.console.ui.consoleView").getDescriptors()) { //$NON-NLS-1$
+				viewIds.add(descriptor.getViewId());
+			}
+			consoleViewIds = viewIds.toArray(new String[viewIds.size()]);
+		}
+		return consoleViewIds;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public IScriptConsole getActiveScriptConsole(String consoleType) {
+		final IWorkbenchWindow window = PlatformUI.getWorkbench()
 				.getActiveWorkbenchWindow();
 		if (window != null) {
-			IWorkbenchPage page = window.getActivePage();
+			final IWorkbenchPage page = window.getActivePage();
 			if (page != null) {
-				IViewPart part = page
-						.findView(IConsoleConstants.ID_CONSOLE_VIEW);
-
-				if (part != null && part instanceof IConsoleView) {
-					IConsoleView view = (IConsoleView) part;
-					IConsole console = view.getConsole();
-
-					if (console instanceof ScriptConsole
-							&& console.getType().equals(consoleType)) {
-						return (ScriptConsole) console;
+				for (String consoleViewId : getConsoleViewIds()) {
+					IViewPart part = page.findView(consoleViewId);
+					if (part != null && part instanceof IConsoleView) {
+						IConsoleView view = (IConsoleView) part;
+						IConsole console = view.getConsole();
+						if (console instanceof IScriptConsole
+								&& console.getType().equals(consoleType)) {
+							return (IScriptConsole) console;
+						}
 					}
 				}
 			}
@@ -90,7 +109,10 @@ public class ScriptConsoleManager implements ILaunchListener {
 		return null;
 	}
 
-	public void close(ScriptConsole console) {
+	/**
+	 * @since 2.0
+	 */
+	public void close(IScriptConsole console) {
 		console.terminate();
 		remove(console);
 	}
@@ -99,8 +121,8 @@ public class ScriptConsoleManager implements ILaunchListener {
 		IConsole[] consoles = getConsoleManager().getConsoles();
 		for (int i = 0; i < consoles.length; ++i) {
 			IConsole console = consoles[i];
-			if (console instanceof ScriptConsole) {
-				close((ScriptConsole) console);
+			if (console instanceof IScriptConsole) {
+				close((IScriptConsole) console);
 			}
 		}
 	}
@@ -113,7 +135,10 @@ public class ScriptConsoleManager implements ILaunchListener {
 		getConsoleManager().addConsoles(new IConsole[] { console });
 	}
 
-	public void remove(ScriptConsole console) {
+	/**
+	 * @since 2.0
+	 */
+	public void remove(IScriptConsole console) {
 		getConsoleManager().removeConsoles(new IConsole[] { console });
 	}
 
