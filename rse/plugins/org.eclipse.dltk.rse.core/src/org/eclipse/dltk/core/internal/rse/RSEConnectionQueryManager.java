@@ -19,6 +19,11 @@ import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
  * 
  */
 public class RSEConnectionQueryManager {
+	/**
+	 * 5 minutes for connection to be established.
+	 */
+	private static final long CONNECTION_TIMEOUT = 1000 * 60 * 2;
+
 	private static RSEConnectionQueryManager queryManager = null;
 
 	public static synchronized RSEConnectionQueryManager getInstance() {
@@ -166,10 +171,16 @@ public class RSEConnectionQueryManager {
 				connector.runDisplayRunnables();
 			}
 		}
+		long endTime = System.currentTimeMillis() + CONNECTION_TIMEOUT;
 		synchronized (requests) {
 			while (!request.isFinished() && Platform.isRunning()) {
 				try {
 					requests.wait(100);
+					long currentTime = System.currentTimeMillis();
+					if (currentTime > endTime) {
+						markHostAsFinished(host);
+						break;
+					}
 				} catch (InterruptedException e) {
 					DLTKRSEPlugin.log(e);
 				}
