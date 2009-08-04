@@ -44,7 +44,7 @@ public class SourceModuleRemoveRequest extends IndexRequest {
 
 	protected void run() throws CoreException, IOException {
 		IEnvironment environment = EnvironmentManager.getEnvironment(project);
-		if (!environment.connect()) {
+		if (environment == null || !environment.connect()) {
 			return;
 		}
 		final Index index = getIndexer().getProjectIndex(project);

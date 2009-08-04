@@ -56,7 +56,7 @@ public class ExternalProjectFragmentRequest extends IndexRequest {
 	protected void run() throws CoreException, IOException {
 		IEnvironment environment = EnvironmentManager.getEnvironment(fragment
 				.getScriptProject());
-		if (!environment.connect()) {
+		if (environment == null || !environment.connect()) {
 			return;
 		}
 		final Set<ISourceModule> modules = getExternalSourceModules();
