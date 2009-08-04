@@ -90,11 +90,14 @@ public class SqlSearchEngine implements ISearchEngine {
 					ISearchPatternProcessor processor = DLTKLanguageManager
 							.getSearchPatternProcessor(scope
 									.getLanguageToolkit());
-					String delim = processor.getDelimiterReplacementString();
-					int i = elementName.lastIndexOf(delim);
-					if (i != -1) {
-						qualifier = elementName.substring(0, i);
-						elementName = elementName.substring(i + 1);
+					if (processor != null) {
+						String delim = processor
+								.getDelimiterReplacementString();
+						int i = elementName.lastIndexOf(delim);
+						if (i != -1) {
+							qualifier = elementName.substring(0, i);
+							elementName = elementName.substring(i + 1);
+						}
 					}
 				}
 
