@@ -94,7 +94,7 @@ public class SshFileHandle implements ISshFileHandle {
 			attrs = fetchCacheAttrs(clean);
 		}
 		if (attrs != null && attrs.isLink()) {
-			attrs = fetchCacheAttrs(clean);
+			attrs = fetchCacheAttrs(true);
 			this.linkTarget = connection.getResolvedPath(path);
 		}
 	}
