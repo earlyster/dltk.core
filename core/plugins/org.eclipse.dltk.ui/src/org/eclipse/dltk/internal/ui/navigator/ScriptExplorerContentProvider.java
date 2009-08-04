@@ -77,7 +77,7 @@ public class ScriptExplorerContentProvider extends
 	private boolean fShowLibrariesNode;
 	private boolean fFoldPackages;
 
-	private Collection fPendingUpdates;
+	private Collection<Runnable> fPendingUpdates;
 
 	/**
 	 * Creates a new content provider for Java elements.
@@ -113,7 +113,7 @@ public class ScriptExplorerContentProvider extends
 	 * (non-Javadoc) Method declared on IElementChangedListener.
 	 */
 	public void elementChanged(final ElementChangedEvent event) {
-		final ArrayList runnables = new ArrayList();
+		final ArrayList<Runnable> runnables = new ArrayList<Runnable>();
 		try {
 			// 58952 delete project does not update Package Explorer [package
 			// explorer]
@@ -131,7 +131,7 @@ public class ScriptExplorerContentProvider extends
 		}
 	}
 
-	protected final void executeRunnables(final Collection runnables) {
+	protected final void executeRunnables(final Collection<Runnable> runnables) {
 
 		// now post all collected runnables
 		Control ctrl = fViewer.getControl();
@@ -161,7 +161,7 @@ public class ScriptExplorerContentProvider extends
 	 * the display thread.
 	 */
 	public void runPendingUpdates() {
-		Collection pendingUpdates;
+		Collection<Runnable> pendingUpdates;
 		synchronized (this) {
 			pendingUpdates = fPendingUpdates;
 			fPendingUpdates = null;
@@ -174,14 +174,14 @@ public class ScriptExplorerContentProvider extends
 		}
 	}
 
-	private void runUpdates(final Collection runnables) {
-		Iterator runnableIterator = runnables.iterator();
+	private void runUpdates(final Collection<Runnable> runnables) {
+		Iterator<Runnable> runnableIterator = runnables.iterator();
 		while (runnableIterator.hasNext()) {
-			((Runnable) runnableIterator.next()).run();
+			runnableIterator.next().run();
 		}
 	}
 
-	private boolean inputDeleted(final Collection runnables) {
+	private boolean inputDeleted(final Collection<Runnable> runnables) {
 		if (fInput == null) {
 			return false;
 		}
@@ -642,7 +642,7 @@ public class ScriptExplorerContentProvider extends
 	 *             thrown when the access to an element failed
 	 */
 	private boolean processDelta(final IModelElementDelta delta,
-			final Collection runnables) throws ModelException {
+			final Collection<Runnable> runnables) throws ModelException {
 
 		int kind = delta.getKind();
 		int flags = delta.getFlags();
@@ -841,7 +841,7 @@ public class ScriptExplorerContentProvider extends
 	}
 
 	/* package */void handleAffectedChildren(final IModelElementDelta delta,
-			final IModelElement element, final Collection runnables)
+			final IModelElement element, final Collection<Runnable> runnables)
 			throws ModelException {
 		int count = 0;
 
@@ -906,7 +906,7 @@ public class ScriptExplorerContentProvider extends
 
 	protected void processAffectedChildren(
 			final IModelElementDelta[] affectedChildren,
-			final Collection runnables) throws ModelException {
+			final Collection<Runnable> runnables) throws ModelException {
 		for (int i = 0; i < affectedChildren.length; i++) {
 			processDelta(affectedChildren[i], runnables);
 		}
@@ -930,7 +930,7 @@ public class ScriptExplorerContentProvider extends
 	 *            )
 	 */
 	private void updateSelection(final IModelElementDelta delta,
-			final Collection runnables) {
+			final Collection<Runnable> runnables) {
 		final IModelElement addedElement = findAddedElement(delta);
 		if (addedElement != null) {
 			final StructuredSelection selection = new StructuredSelection(
@@ -970,7 +970,7 @@ public class ScriptExplorerContentProvider extends
 	 *            )
 	 */
 	private void postUpdateIcon(final IModelElement element,
-			final Collection runnables) {
+			final Collection<Runnable> runnables) {
 		runnables.add(new Runnable() {
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
@@ -993,7 +993,7 @@ public class ScriptExplorerContentProvider extends
 	 * @return true if the parent got refreshed
 	 */
 	private boolean processResourceDelta(final IResourceDelta delta,
-			final Object parent, final Collection runnables) {
+			final Object parent, final Collection<Runnable> runnables) {
 		int status = delta.getKind();
 		int flags = delta.getFlags();
 
@@ -1057,7 +1057,7 @@ public class ScriptExplorerContentProvider extends
 	}
 
 	protected void postRefresh(Object root, final int relation,
-			final Object affectedElement, final Collection runnables) {
+			final Object affectedElement, final Collection<Runnable> runnables) {
 		// JFace doesn't refresh when object isn't part of the viewer
 		// Therefore move the refresh start down to the viewer's input
 		if (isParent(root, fInput)) {
@@ -1096,7 +1096,7 @@ public class ScriptExplorerContentProvider extends
 	}
 
 	protected void postRefresh(final List toRefresh,
-			final boolean updateLabels, final Collection runnables) {
+			final boolean updateLabels, final Collection<Runnable> runnables) {
 		runnables.add(new Runnable() {
 			public void run() {
 				for (Iterator iter = toRefresh.iterator(); iter.hasNext();) {
@@ -1107,7 +1107,7 @@ public class ScriptExplorerContentProvider extends
 	}
 
 	protected void postAdd(final Object parent, final Object element,
-			final Collection runnables) {
+			final Collection<Runnable> runnables) {
 		runnables.add(new Runnable() {
 			public void run() {
 				Widget[] items = fViewer.testFindItems(element);
@@ -1127,7 +1127,8 @@ public class ScriptExplorerContentProvider extends
 		});
 	}
 
-	protected void postRemove(final Object element, final Collection runnables) {
+	protected void postRemove(final Object element,
+			final Collection<Runnable> runnables) {
 		runnables.add(new Runnable() {
 			public void run() {
 				fViewer.remove(element);
@@ -1136,7 +1137,7 @@ public class ScriptExplorerContentProvider extends
 	}
 
 	protected void postProjectStateChanged(final Object root,
-			final Collection runnables) {
+			final Collection<Runnable> runnables) {
 		runnables.add(new Runnable() {
 			public void run() {
 				fViewer.refresh(root, true);
