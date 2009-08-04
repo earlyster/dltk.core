@@ -178,8 +178,14 @@ public class H2ElementDao implements IElementDao {
 				}
 				// Camel-case
 				else if (matchRule == MatchRule.CAMEL_CASE) {
-					query.append(" AND CC_NAME LIKE '").append(pattern).append(
-							"%'");
+					if (!isReference) {
+						query.append(" AND CC_NAME LIKE '").append(pattern)
+								.append("%'");
+					} else {
+						H2Index
+								.error("MatchRule.CAMEL_CASE is not supported by element references search."); //$NON-NLS-1$
+						return;
+					}
 				}
 				// Set of names
 				else if (matchRule == MatchRule.SET) {
