@@ -82,7 +82,7 @@ public class RSEConnectionQueryManager {
 
 		boolean isDirectProcessingRequired();
 
-		void runDisplayRunnables();
+		void runDisplayRunnables(long connectionTimeout);
 	}
 
 	public void setConnectingStatus(boolean status) {
@@ -168,7 +168,7 @@ public class RSEConnectionQueryManager {
 		for (Descriptor<IConnector> descriptor : descriptors) {
 			IConnector connector = descriptor.get();
 			if (connector.isDirectProcessingRequired()) {
-				connector.runDisplayRunnables();
+				connector.runDisplayRunnables(CONNECTION_TIMEOUT);
 			}
 		}
 		long endTime = System.currentTimeMillis() + CONNECTION_TIMEOUT;
