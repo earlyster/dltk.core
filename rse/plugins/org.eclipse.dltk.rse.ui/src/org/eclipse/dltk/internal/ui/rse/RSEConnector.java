@@ -91,7 +91,8 @@ public class RSEConnector implements IConnector {
 		}
 	}
 
-	public void runDisplayRunnables() {
+	public void runDisplayRunnables(long timeout) {
+		long end = System.currentTimeMillis() + timeout;
 		// We need to interrupt processingThread if it is no executing.
 		Display current = Display.getCurrent();
 		MAIN_LOOP: while (RSEConnectionQueryManager.getInstance().hasHosts()
@@ -101,6 +102,9 @@ public class RSEConnector implements IConnector {
 				if (current.isDisposed()) {
 					break MAIN_LOOP;
 				}
+			}
+			if (end < System.currentTimeMillis()) { // Timeout
+				break;
 			}
 			IHost host = RSEConnectionQueryManager.getInstance().getNextHost(
 					false);
