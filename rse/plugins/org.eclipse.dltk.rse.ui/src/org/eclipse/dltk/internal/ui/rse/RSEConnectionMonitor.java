@@ -135,6 +135,7 @@ public class RSEConnectionMonitor implements Runnable {
 
 	public static void start() {
 		Thread t = new Thread(monitor);
+		t.setName("RSE Connection Monitor");
 		t.start();
 	}
 
