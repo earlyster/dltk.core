@@ -167,6 +167,12 @@ public class H2ElementDao implements IElementDao {
 
 			// Name patterns
 			if (pattern != null && pattern.length() > 0) {
+				if (isReference && matchRule == MatchRule.CAMEL_CASE) {
+					H2Index
+							.warn("MatchRule.CAMEL_CASE is not supported by element references search."); //$NON-NLS-1$
+					matchRule = MatchRule.EXACT;
+				}
+
 				// Exact pattern
 				if (matchRule == MatchRule.EXACT) {
 					query.append(" AND NAME='").append(pattern).append('\'');
@@ -178,14 +184,8 @@ public class H2ElementDao implements IElementDao {
 				}
 				// Camel-case
 				else if (matchRule == MatchRule.CAMEL_CASE) {
-					if (!isReference) {
-						query.append(" AND CC_NAME LIKE '").append(pattern)
-								.append("%'");
-					} else {
-						H2Index
-								.error("MatchRule.CAMEL_CASE is not supported by element references search."); //$NON-NLS-1$
-						return;
-					}
+					query.append(" AND CC_NAME LIKE '").append(pattern).append(
+							"%'");
 				}
 				// Set of names
 				else if (matchRule == MatchRule.SET) {
