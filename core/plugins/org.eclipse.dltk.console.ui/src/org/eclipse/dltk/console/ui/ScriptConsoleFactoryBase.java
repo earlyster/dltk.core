@@ -15,18 +15,18 @@ public abstract class ScriptConsoleFactoryBase implements IConsoleFactory {
 	public ScriptConsoleFactoryBase() {
 	}
 
-	protected void registerAndOpenConsole(ScriptConsole console) {
+	protected void registerAndOpenConsole(IScriptConsole console) {
 		ScriptConsoleManager manager = ScriptConsoleManager.getInstance();
 		manager.add(console);
 		manager.showConsole(console);
 	}
 
 	public void openConsole() {
-		ScriptConsole console = createConsoleInstance();
+		IScriptConsole console = createConsoleInstance();
 		if (console != null) {
 			registerAndOpenConsole(console);
 		}
 	}
 
-	protected abstract ScriptConsole createConsoleInstance();
+	protected abstract IScriptConsole createConsoleInstance();
 }
