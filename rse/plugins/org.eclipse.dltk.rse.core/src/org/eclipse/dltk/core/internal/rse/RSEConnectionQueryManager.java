@@ -22,7 +22,7 @@ public class RSEConnectionQueryManager {
 	/**
 	 * 5 minutes for connection to be established.
 	 */
-	private static final long CONNECTION_TIMEOUT = 1000 * 60 * 2;
+	private static final long CONNECTION_TIMEOUT = 1000 * 10; // ten seconds.
 
 	private static RSEConnectionQueryManager queryManager = null;
 
@@ -178,7 +178,8 @@ public class RSEConnectionQueryManager {
 					requests.wait(100);
 					long currentTime = System.currentTimeMillis();
 					if (currentTime > endTime) {
-						markHostAsFinished(host);
+						// Just break
+						// markHostAsFinished(host);
 						break;
 					}
 				} catch (InterruptedException e) {
