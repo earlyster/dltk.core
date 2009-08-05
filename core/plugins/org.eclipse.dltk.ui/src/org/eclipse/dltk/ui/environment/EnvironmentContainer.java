@@ -38,8 +38,8 @@ import org.omg.CORBA.Environment;
 public class EnvironmentContainer {
 
 	private boolean initialized = false;
-	private final Map environments = new HashMap();
-	private List environmentList = Collections.EMPTY_LIST;
+	private final Map<String, IEnvironment> environments = new HashMap<String, IEnvironment>();
+	private List<IEnvironment> environmentList = Collections.emptyList();
 
 	private IEnvironmentChangedListener listener = null;
 
@@ -57,11 +57,10 @@ public class EnvironmentContainer {
 		}
 	}
 
-	private static class EnvironmentComparator implements Comparator {
+	private static class EnvironmentComparator implements
+			Comparator<IEnvironment> {
 
-		public int compare(Object arg0, Object arg1) {
-			final IEnvironment e1 = (IEnvironment) arg0;
-			final IEnvironment e2 = (IEnvironment) arg1;
+		public int compare(final IEnvironment e1, final IEnvironment e2) {
 			if (e1.isLocal() != e2.isLocal()) {
 				return e1.isLocal() ? -1 : +1;
 			}
@@ -85,6 +84,7 @@ public class EnvironmentContainer {
 		if (listener == null) {
 			listener = new EnvironmentChangedListener() {
 
+				@Override
 				public void environmentsModified() {
 					synchronized (environments) {
 						initEnvironments();
@@ -113,7 +113,7 @@ public class EnvironmentContainer {
 	 * 
 	 * @return
 	 */
-	public List getEnvironments() {
+	public List<IEnvironment> getEnvironments() {
 		return environmentList;
 	}
 
@@ -123,10 +123,10 @@ public class EnvironmentContainer {
 	 * @return
 	 */
 	public String[] getEnvironmentIds() {
-		final List list = environmentList;
+		final List<IEnvironment> list = environmentList;
 		final String[] ids = new String[list.size()];
 		for (int i = 0; i < ids.length; ++i) {
-			ids[i] = ((IEnvironment) list.get(i)).getId();
+			ids[i] = list.get(i).getId();
 		}
 		return ids;
 	}
@@ -136,7 +136,7 @@ public class EnvironmentContainer {
 	 * @return
 	 */
 	public IEnvironment get(String environmentId) {
-		return (IEnvironment) environments.get(environmentId);
+		return environments.get(environmentId);
 	}
 
 	/**
@@ -146,8 +146,7 @@ public class EnvironmentContainer {
 	 * @return
 	 */
 	public String getName(String environmentId) {
-		final IEnvironment environment = (IEnvironment) environments
-				.get(environmentId);
+		final IEnvironment environment = environments.get(environmentId);
 		if (environment != null) {
 			return environment.getName();
 		} else {
