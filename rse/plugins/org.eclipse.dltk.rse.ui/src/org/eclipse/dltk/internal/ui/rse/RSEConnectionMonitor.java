@@ -124,18 +124,28 @@ public class RSEConnectionMonitor implements Runnable {
 
 	}
 
-	private static void updateDecorator() {
+	private void updateDecorator() {
 		Display display = PlatformUI.getWorkbench().getDisplay();
 		if (display.isDisposed()) {
 			return;
 		}
 		display.asyncExec(new Runnable() {
 			public void run() {
-				PlatformUI.getWorkbench().getDecoratorManager().update(
-						"org.eclipse.dltk.rse.decorators.projectdecorator");
+				if (updatingDecorators) {
+					return;
+				}
+				updatingDecorators = true;
+				try {
+					PlatformUI.getWorkbench().getDecoratorManager().update(
+							RemoteProjectLabelDecorator.ID);
+				} finally {
+					updatingDecorators = false;
+				}
 			}
 		});
 	}
+
+	private boolean updatingDecorators = false;
 
 	private static RSEConnectionMonitor monitor = new RSEConnectionMonitor();
 

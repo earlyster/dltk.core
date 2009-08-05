@@ -28,6 +28,11 @@ import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 public class RemoteProjectLabelDecorator extends BaseLabelProvider implements
 		ILightweightLabelDecorator {
 
+	/**
+	 * @since 2.0
+	 */
+	public static final String ID = "org.eclipse.dltk.rse.decorators.projectdecorator"; //$NON-NLS-1$
+
 	public void decorate(Object element, IDecoration decoration) {
 		if (element instanceof IProject) {
 			decorateProjectText((IProject) element, decoration);
