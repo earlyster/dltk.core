@@ -38,6 +38,7 @@ import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.utils.ExecutableOperation;
 import org.eclipse.dltk.utils.ExecutionContexts;
 import org.eclipse.dltk.utils.LazyExtensionManager;
+import org.eclipse.dltk.utils.LazyExtensionManager.Descriptor;
 import org.eclipse.osgi.util.NLS;
 
 public final class EnvironmentManager {
@@ -47,24 +48,29 @@ public final class EnvironmentManager {
 	private static final String ENVIRONMENT_EXTENSION = DLTKCore.PLUGIN_ID
 			+ ".environment"; //$NON-NLS-1$
 
-	private static class EnvironmentManagerExtensionManager extends
+	private static class EnvironmentProviderManager extends
 			LazyExtensionManager<IEnvironmentProvider> {
 
 		private static class EnvironmentProviderDesc extends
 				Descriptor<IEnvironmentProvider> {
+			private String id;
 			private int priority;
 
-			public EnvironmentProviderDesc(
-					EnvironmentManagerExtensionManager manager,
+			public EnvironmentProviderDesc(EnvironmentProviderManager manager,
 					IConfigurationElement configurationElement) {
 				super(manager, configurationElement);
 				this.priority = parseInt(configurationElement
 						.getAttribute("priority")); //$NON-NLS-1$
+				this.id = configurationElement.getAttribute("id"); //$NON-NLS-1$
+			}
+
+			public String getId() {
+				return id;
 			}
 
 		}
 
-		public EnvironmentManagerExtensionManager() {
+		public EnvironmentProviderManager() {
 			super(ENVIRONMENT_EXTENSION);
 		}
 
@@ -91,11 +97,30 @@ public final class EnvironmentManager {
 
 	}
 
-	private static final EnvironmentManagerExtensionManager manager = new EnvironmentManagerExtensionManager();
+	private static final EnvironmentProviderManager manager = new EnvironmentProviderManager();
 
 	private static ListenerList listeners = new ListenerList();
 
 	private EnvironmentManager() {
+	}
+
+	/**
+	 * Returns {@link IEnvironmentProvider} with the specified
+	 * <code>providerId</code> or <code>null</code>.
+	 * 
+	 * @since 2.0
+	 */
+	public static IEnvironmentProvider getEnvironmentProvider(String providerId) {
+		if (providerId != null) {
+			for (Descriptor<IEnvironmentProvider> descriptor : manager
+					.getDescriptors()) {
+				final EnvironmentProviderManager.EnvironmentProviderDesc desc = (EnvironmentProviderManager.EnvironmentProviderDesc) descriptor;
+				if (providerId.equals(desc.getId())) {
+					return desc.get();
+				}
+			}
+		}
+		return null;
 	}
 
 	public static IEnvironment getEnvironment(IModelElement element) {
