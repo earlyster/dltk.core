@@ -17,7 +17,9 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.environment.IEnvironmentProvider;
 import org.eclipse.dltk.core.internal.rse.RSEEnvironment;
+import org.eclipse.dltk.core.internal.rse.RSEEnvironmentProvider;
 import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.subsystems.CommunicationsEvent;
@@ -42,11 +44,11 @@ public class RSEConnectionMonitor implements Runnable {
 
 	private static final class ProjectUpdateJob extends Job {
 
-		private final RSEEnvironment environnent;
+		private final RSEEnvironment environment;
 
-		private ProjectUpdateJob(RSEEnvironment environnent) {
+		private ProjectUpdateJob(RSEEnvironment environment) {
 			super("Environment configuration changed. Updating projects.");
-			this.environnent = environnent;
+			this.environment = environment;
 		}
 
 		@Override
@@ -63,7 +65,7 @@ public class RSEConnectionMonitor implements Runnable {
 					final String envId = EnvironmentManager.getEnvironmentId(
 							project, false);
 					if (envId != null) {
-						if (envId.equals(environnent.getId())) {
+						if (envId.equals(environment.getId())) {
 							final IScriptProject scriptProject = DLTKCore
 									.create(project);
 							projectsToProcess.add(scriptProject);
@@ -87,7 +89,11 @@ public class RSEConnectionMonitor implements Runnable {
 			// e1.printStackTrace();
 			// }
 			// }
-			EnvironmentManager.fireEnvirontmentChange();
+			IEnvironmentProvider provider = EnvironmentManager
+					.getEnvironmentProvider(RSEEnvironmentProvider.ID);
+			if (provider != null && provider instanceof RSEEnvironmentProvider) {
+				((RSEEnvironmentProvider) provider).fireAdded(environment);
+			}
 			SubMonitor mm = monitor.newChild(20);
 			mm.beginTask("Indexing projects", projectsToProcess.size());
 			for (IScriptProject project : projectsToProcess) {
@@ -112,7 +118,7 @@ public class RSEConnectionMonitor implements Runnable {
 		@Override
 		public boolean belongsTo(Object family) {
 			return family instanceof ProjectUpdateFamily
-					&& environnent
+					&& environment
 							.equals(((ProjectUpdateFamily) family).environment);
 		}
 
