@@ -73,7 +73,8 @@ public class ProjectWizardUtils {
 	 * @param firstPage
 	 * @return
 	 */
-	static List getDefaultBuildpathEntry(ILocationGroup firstPage) {
+	static List<IBuildpathEntry> getDefaultBuildpathEntry(
+			ILocationGroup firstPage) {
 		IBuildpathEntry defaultPath = ScriptRuntime
 				.getDefaultInterpreterContainerEntry();
 
@@ -90,7 +91,7 @@ public class ProjectWizardUtils {
 		}
 		if (defaultPath != null)
 			return Collections.singletonList(defaultPath);
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 }

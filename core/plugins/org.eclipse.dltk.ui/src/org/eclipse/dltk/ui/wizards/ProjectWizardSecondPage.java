@@ -88,6 +88,7 @@ public abstract class ProjectWizardSecondPage extends
 	 * 
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
 			changeToNewProject();
@@ -206,22 +207,22 @@ public abstract class ProjectWizardSecondPage extends
 
 				// configure the buildpath entries, including the default
 				// InterpreterEnvironment library.
-				List cpEntries = new ArrayList();
+				List<IBuildpathEntry> cpEntries = new ArrayList<IBuildpathEntry>();
 				cpEntries.add(DLTKCore.newSourceEntry(projectPath
 						.append(srcPath)));
 				cpEntries.addAll(ProjectWizardUtils
 						.getDefaultBuildpathEntry(fFirstPage));
-				entries = (IBuildpathEntry[]) cpEntries
-						.toArray(new IBuildpathEntry[cpEntries.size()]);
+				entries = cpEntries.toArray(new IBuildpathEntry[cpEntries
+						.size()]);
 
 			} else {
 				IPath projectPath = fCurrProject.getFullPath();
-				List cpEntries = new ArrayList();
+				List<IBuildpathEntry> cpEntries = new ArrayList<IBuildpathEntry>();
 				cpEntries.add(DLTKCore.newSourceEntry(projectPath));
 				cpEntries.addAll(ProjectWizardUtils
 						.getDefaultBuildpathEntry(fFirstPage));
-				entries = (IBuildpathEntry[]) cpEntries
-						.toArray(new IBuildpathEntry[cpEntries.size()]);
+				entries = cpEntries.toArray(new IBuildpathEntry[cpEntries
+						.size()]);
 
 				monitor.worked(20);
 			}
