@@ -88,7 +88,8 @@ public class ExternalProjectFragmentRequest extends IndexRequest {
 							false);
 					if (file != null && changes.size() > 1) {
 						IFileHandle parentHandle = file.getParent();
-						if (parentFolders.add(parentHandle.getParent())) {
+						if (parentHandle != null
+								&& parentFolders.add(parentHandle.getParent())) {
 							ModelManager.getModelManager().getCoreCache()
 									.updateFolderTimestamps(parentHandle);
 						}
