@@ -28,6 +28,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
@@ -47,7 +48,7 @@ import org.eclipse.dltk.internal.core.util.Util;
  * Abstract class for Script Search tests.
  */
 public class AbstractDLTKSearchTests extends AbstractModelTests implements
-		IDLTKSearchConstants {
+		IDLTKSearchConstants, IScriptProjectFilenames {
 
 	public static List JAVA_SEARCH_SUITES = null;
 	protected IScriptProject SCRIPT_PROJECT;
@@ -432,12 +433,12 @@ public class AbstractDLTKSearchTests extends AbstractModelTests implements
 			super.copyDirectory(sourceDir, targetDir);
 		} else {
 			targetDir.mkdirs();
-			File sourceFile = new File(sourceDir, ".project");
-			File targetFile = new File(targetDir, ".project");
+			File sourceFile = new File(sourceDir, PROJECT_FILENAME);
+			File targetFile = new File(targetDir, PROJECT_FILENAME);
 			targetFile.createNewFile();
 			copy(sourceFile, targetFile);
-			sourceFile = new File(sourceDir, ".buildpath");
-			targetFile = new File(targetDir, ".buildpath");
+			sourceFile = new File(sourceDir, BUILDPATH_FILENAME);
+			targetFile = new File(targetDir, BUILDPATH_FILENAME);
 			targetFile.createNewFile();
 			copy(sourceFile, targetFile);
 		}
