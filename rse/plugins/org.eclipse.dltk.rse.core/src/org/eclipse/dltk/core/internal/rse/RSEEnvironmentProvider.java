@@ -2,7 +2,9 @@ package org.eclipse.dltk.core.internal.rse;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -19,6 +21,11 @@ import org.eclipse.rse.subsystems.files.core.model.RemoteFileUtility;
 import org.eclipse.rse.subsystems.files.core.subsystems.IRemoteFileSubSystem;
 
 public class RSEEnvironmentProvider implements IEnvironmentProvider {
+
+	/**
+	 * @since 2.0
+	 */
+	public static final String ID = "org.eclipse.dltk.rse.RSEEnvironmentProvider"; //$NON-NLS-1$
 
 	public static final String RSE_SCHEME = "rse"; //$NON-NLS-1$
 
@@ -130,7 +137,6 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 				if (DEBUG)
 					System.out.println(Thread.currentThread().getName()
 							+ " finished"); //$NON-NLS-1$
-				EnvironmentManager.fireEnvirontmentChange();
 				watchdog.interrupt();
 			} catch (InterruptedException e) {
 				if (DLTKCore.DEBUG) {
@@ -143,8 +149,29 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 					lock.notifyAll();
 				}
 			}
+			for (IEnvironment environment : getEnvironments()) {
+				fireAdded(environment);
+			}
 		}
 
+	}
+
+	private final Set<String> firedEnvironmentIds = new HashSet<String>();
+
+	/**
+	 * @since 2.0
+	 */
+	public void fireAdded(IEnvironment environment) {
+		final boolean added;
+		synchronized (firedEnvironmentIds) {
+			added = firedEnvironmentIds.add(environment.getId());
+		}
+		if (added) {
+			if (DEBUG) {
+				System.out.println("added " + environment.getId()); //$NON-NLS-1$
+			}
+			EnvironmentManager.environmentAdded(environment);
+		}
 	}
 
 	public boolean isInitialized() {
