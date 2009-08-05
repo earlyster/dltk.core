@@ -127,10 +127,16 @@ public class ScriptConsoleManager implements ILaunchListener {
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void showConsole(IScriptConsole console) {
 		getConsoleManager().showConsoleView(console);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void add(IScriptConsole console) {
 		getConsoleManager().addConsoles(new IConsole[] { console });
 	}

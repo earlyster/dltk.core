@@ -15,6 +15,9 @@ public abstract class ScriptConsoleFactoryBase implements IConsoleFactory {
 	public ScriptConsoleFactoryBase() {
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected void registerAndOpenConsole(IScriptConsole console) {
 		ScriptConsoleManager manager = ScriptConsoleManager.getInstance();
 		manager.add(console);
@@ -28,5 +31,8 @@ public abstract class ScriptConsoleFactoryBase implements IConsoleFactory {
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected abstract IScriptConsole createConsoleInstance();
 }
