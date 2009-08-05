@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.internal.core.util.Util;
 
 public class ExternalFoldersManager {
@@ -189,7 +190,8 @@ public class ExternalFoldersManager {
 							.append(EXTERNAL_PROJECT_NAME);
 					projectPath.toFile().mkdirs();
 					FileOutputStream output = new FileOutputStream(projectPath
-							.append(".project").toOSString()); //$NON-NLS-1$
+							.append(IScriptProjectFilenames.PROJECT_FILENAME)
+							.toOSString());
 					try {
 						output
 								.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + //$NON-NLS-1$

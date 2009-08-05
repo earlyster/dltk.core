@@ -55,6 +55,7 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementMemento;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.core.IModelMarker;
 import org.eclipse.dltk.core.IModelProvider;
 import org.eclipse.dltk.core.IModelStatus;
@@ -82,11 +83,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class ScriptProject extends Openable implements IScriptProject {
-	/**
-	 * Name of file containing project buildpath
-	 */
-	public static final String BUILDPATH_FILENAME = ".buildpath"; //$NON-NLS-1$
+public class ScriptProject extends Openable implements IScriptProject,
+		IScriptProjectFilenames {
 	/**
 	 * Value of the project's raw buildpath if the .buildpath file contains
 	 * invalid entries.
@@ -1508,8 +1506,8 @@ public class ScriptProject extends Openable implements IScriptProject {
 		}
 		// actual file saving
 		try {
-			setSharedProperty(ScriptProject.BUILDPATH_FILENAME,
-					encodeBuildpath(newBuildpath, true, unknownElements));
+			setSharedProperty(BUILDPATH_FILENAME, encodeBuildpath(newBuildpath,
+					true, unknownElements));
 			return true;
 		} catch (CoreException e) {
 			throw new ModelException(e);
@@ -2178,7 +2176,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 	public IBuildpathEntry[] readFileEntriesWithException(Map unknownElements)
 			throws CoreException, IOException, AssertionFailedException {
 		String xmlBuildpath;
-		IFile rscFile = this.project.getFile(ScriptProject.BUILDPATH_FILENAME);
+		IFile rscFile = this.project.getFile(BUILDPATH_FILENAME);
 		if (rscFile.exists()) {
 			byte[] bytes = Util.getResourceContentsAsByteArray(rscFile);
 			try {
@@ -2612,19 +2610,19 @@ public class ScriptProject extends Openable implements IScriptProject {
 			Util
 					.log(
 							e,
-							"Exception while reading " + getPath().append(ScriptProject.BUILDPATH_FILENAME)); //$NON-NLS-1$
+							"Exception while reading " + getPath().append(BUILDPATH_FILENAME)); //$NON-NLS-1$
 			return ScriptProject.INVALID_BUILDPATH;
 		} catch (IOException e) {
 			Util
 					.log(
 							e,
-							"Exception while reading " + getPath().append(ScriptProject.BUILDPATH_FILENAME)); //$NON-NLS-1$
+							"Exception while reading " + getPath().append(BUILDPATH_FILENAME)); //$NON-NLS-1$
 			return ScriptProject.INVALID_BUILDPATH;
 		} catch (AssertionFailedException e) {
 			Util
 					.log(
 							e,
-							"Exception while reading " + getPath().append(ScriptProject.BUILDPATH_FILENAME)); //$NON-NLS-1$
+							"Exception while reading " + getPath().append(BUILDPATH_FILENAME)); //$NON-NLS-1$
 			return ScriptProject.INVALID_BUILDPATH;
 		}
 	}
