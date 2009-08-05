@@ -28,6 +28,7 @@ import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.BPListElement;
 import org.eclipse.dltk.ui.tests.DLTKUITestsPlugin;
@@ -385,9 +386,9 @@ public class ContentProviderTests1 extends TestCase {
 			Object object = resource[i];
 			if (object instanceof IFile) {
 				IFile file = (IFile) object;
-				if (".buildpath".equals(file.getName()))//$NON-NLS-1$
+				if (IScriptProjectFilenames.BUILDPATH_FILENAME.equals(file.getName()))//$NON-NLS-1$
 					fFile1 = file;
-				else if (".project".equals(file.getName()))//$NON-NLS-1$
+				else if (IScriptProjectFilenames.PROJECT_FILENAME.equals(file.getName()))//$NON-NLS-1$
 					fFile2 = file;
 			}
 		}

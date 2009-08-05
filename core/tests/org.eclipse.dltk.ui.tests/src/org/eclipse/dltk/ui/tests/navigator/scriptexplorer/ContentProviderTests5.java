@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.internal.ui.scriptview.ScriptExplorerPart;
 import org.eclipse.dltk.internal.ui.util.CoreUtility;
@@ -87,9 +88,9 @@ public class ContentProviderTests5 extends TestCase{
 			Object object = resource[i];
 			if (object instanceof IFile) {
 				IFile file = (IFile) object;
-				if (".buildpath".equals(file.getName()))
+				if (IScriptProjectFilenames.BUILDPATH_FILENAME.equals(file.getName()))
 					fDotBuildpath = file;
-				else if (".project".equals(file.getName()))
+				else if (IScriptProjectFilenames.PROJECT_FILENAME.equals(file.getName()))
 					fDotProject = file;
 			}
 		}
