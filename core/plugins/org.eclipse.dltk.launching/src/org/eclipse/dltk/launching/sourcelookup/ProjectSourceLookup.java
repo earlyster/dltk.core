@@ -33,6 +33,9 @@ import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.IPathEquality;
 import org.eclipse.dltk.internal.launching.PathEqualityUtils;
 
+/**
+ * @since 2.0
+ */
 public class ProjectSourceLookup {
 
 	private final IProject project;

@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching.sourcelookup;
 
+/**
+ * @since 2.0
+ */
 public interface IProjectLookupResult {
 
 	/**
