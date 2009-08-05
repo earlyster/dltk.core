@@ -23,8 +23,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.dltk.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.dltk.internal.corext.refactoring.ScriptRefactoringArguments;
@@ -98,7 +99,8 @@ public class RenameScriptProjectProcessor extends ScriptRenameProcessor implemen
 	}
 	
 	protected IFile[] getChangedFiles() throws CoreException {
-		IFile projectFile= fProject.getProject().getFile(".project"); //$NON-NLS-1$
+		IFile projectFile = fProject.getProject().getFile(
+				IScriptProjectFilenames.PROJECT_FILENAME);
 		if (projectFile != null && projectFile.exists()) {
 			return new IFile[] {projectFile};
 		}

@@ -31,6 +31,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.ui.util.CoreUtility;
@@ -172,7 +173,7 @@ public abstract class ProjectWizardSecondPage extends
 
 			if (fFirstPage.getDetect()) {
 				if (!fCurrProject
-						.getFile(ProjectWizardUtils.FILENAME_BUILDPATH)
+						.getFile(IScriptProjectFilenames.BUILDPATH_FILENAME)
 						.exists()) {
 					IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 							.getLanguageToolkit(getScriptNature());
@@ -262,8 +263,8 @@ public abstract class ProjectWizardSecondPage extends
 			throws CoreException {
 		projectFileBackup = new ProjectMetadataBackup();
 		projectFileBackup.backup(projectLocation, new String[] {
-				ProjectWizardUtils.FILENAME_PROJECT,
-				ProjectWizardUtils.FILENAME_BUILDPATH });
+				IScriptProjectFilenames.PROJECT_FILENAME,
+				IScriptProjectFilenames.BUILDPATH_FILENAME });
 	}
 
 	private void restoreExistingFiles(URI projectLocation,

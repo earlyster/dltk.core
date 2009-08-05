@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
@@ -139,8 +140,10 @@ public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 	 */
 	public void init(IScriptProject jproject, IBuildpathEntry[] defaultEntries,
 			boolean defaultsOverrideExistingBuildpath) {
-		if (!defaultsOverrideExistingBuildpath && jproject.exists()
-				&& jproject.getProject().getFile(".buildpath").exists()) { //$NON-NLS-1$			
+		if (!defaultsOverrideExistingBuildpath
+				&& jproject.exists()
+				&& jproject.getProject().getFile(
+						IScriptProjectFilenames.BUILDPATH_FILENAME).exists()) {
 			defaultEntries = null;
 		}
 		getBuildPathsBlock().init(jproject, defaultEntries);

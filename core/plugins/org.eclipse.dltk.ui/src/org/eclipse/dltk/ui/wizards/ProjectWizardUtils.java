@@ -64,9 +64,6 @@ public class ProjectWizardUtils {
 				lastState);
 	}
 
-	static final String FILENAME_PROJECT = ".project"; //$NON-NLS-1$
-	static final String FILENAME_BUILDPATH = ".buildpath"; //$NON-NLS-1$
-
 	/**
 	 * Returns List of IBuildpathEntry or empty list.
 	 * 

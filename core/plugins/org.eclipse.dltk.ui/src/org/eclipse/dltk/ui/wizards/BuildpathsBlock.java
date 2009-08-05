@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
@@ -265,7 +266,8 @@ public abstract class BuildpathsBlock {
 		boolean projectExists = false;
 		List newBuildpath = null;
 		IProject project = fCurrScriptProject.getProject();
-		projectExists = (project.exists() && project.getFile(".buildpath").exists()); //$NON-NLS-1$
+		projectExists = (project.exists() && project.getFile(
+				IScriptProjectFilenames.BUILDPATH_FILENAME).exists());
 		if (projectExists) {
 			if (buildpathEntries == null) {
 				buildpathEntries = fCurrScriptProject.readRawBuildpath();
@@ -338,12 +340,14 @@ public abstract class BuildpathsBlock {
 	}
 
 	public boolean hasChangesInBuildpathFile() {
-		IFile file = fCurrScriptProject.getProject().getFile(".buildpath"); //$NON-NLS-1$
+		IFile file = fCurrScriptProject.getProject().getFile(
+				IScriptProjectFilenames.BUILDPATH_FILENAME);
 		return fFileTimeStamp != file.getModificationStamp();
 	}
 
 	public void initializeTimeStamps() {
-		IFile file = fCurrScriptProject.getProject().getFile(".buildpath"); //$NON-NLS-1$
+		IFile file = fCurrScriptProject.getProject().getFile(
+				IScriptProjectFilenames.BUILDPATH_FILENAME);
 		fFileTimeStamp = file.getModificationStamp();
 		fUserSettingsTimeStamp = getEncodedSettings();
 	}
