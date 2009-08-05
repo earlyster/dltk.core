@@ -20,6 +20,7 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.corext.buildpath.BuildpathModifier;
 import org.eclipse.dltk.internal.corext.util.Messages;
@@ -248,7 +249,10 @@ public abstract class DialogPackageExplorer implements IMenuListener,
 			try {
 				if (element instanceof IFile) {
 					IFile file = (IFile) element;
-					if (file.getName().equals(".buildpath") || file.getName().equals(".project")) //$NON-NLS-1$//$NON-NLS-2$
+					if (file.getName().equals(
+							IScriptProjectFilenames.BUILDPATH_FILENAME)
+							|| file.getName().equals(
+									IScriptProjectFilenames.PROJECT_FILENAME))
 						return false;
 				}
 				if (element instanceof IProjectFragment) {
