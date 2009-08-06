@@ -857,7 +857,7 @@ public class DeltaProcessor {
 				}
 				IEnvironment environment = EnvironmentManager
 						.getEnvironment(scriptProject);
-				if (environment != null && environment.isConnected()) {
+				if (environment != null && !environment.isConnected()) {
 					// Project environment is not connected.
 					break;
 				}
@@ -2101,7 +2101,7 @@ public class DeltaProcessor {
 				}
 				IEnvironment environment = EnvironmentManager
 						.getEnvironment(scriptProject);
-				if (environment != null && environment.isConnected()) {
+				if (environment != null && !environment.isConnected()) {
 					break; // Project environment is not connected.
 				}
 				try {
