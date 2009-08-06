@@ -182,10 +182,10 @@ public class SshFileHandle implements ISshFileHandle {
 			throws CoreException {
 		fetchAttrs();
 		if (attrs != null) {
-			IPath current = this.path;
-			if (attrs.isLink() && linkTarget != null) {
-				current = linkTarget;
-			}
+			// IPath current = this.path;
+			// if (attrs.isLink() && linkTarget != null) {
+			// current = linkTarget;
+			// }
 			final InputStream stream = connection.get(this.path);
 			if (stream != null) {
 				InputStream wrapperStream = new BufferedInputStream(stream) {
