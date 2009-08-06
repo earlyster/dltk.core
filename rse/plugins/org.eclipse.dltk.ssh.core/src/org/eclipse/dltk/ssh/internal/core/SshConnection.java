@@ -62,12 +62,10 @@ public class SshConnection implements ISshConnection {
 		}
 	}
 
-	private class Operation {
+	private static abstract class Operation {
 		boolean finished = false;
 
-		public void perform() throws JSchException, SftpException {
-
-		}
+		public abstract void perform() throws JSchException, SftpException;
 
 		public void setFinished() {
 			finished = true;
