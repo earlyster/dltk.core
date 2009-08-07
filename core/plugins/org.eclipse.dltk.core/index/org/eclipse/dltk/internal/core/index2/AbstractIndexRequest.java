@@ -20,6 +20,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.index2.IIndexer;
+import org.eclipse.dltk.core.index2.ProjectIndexer2;
 import org.eclipse.dltk.core.search.indexing.AbstractJob;
 import org.eclipse.dltk.internal.core.util.Util;
 
@@ -31,10 +32,10 @@ import org.eclipse.dltk.internal.core.util.Util;
  */
 public abstract class AbstractIndexRequest extends AbstractJob {
 
-	AbstractProjectIndexer projectIndexer;
+	ProjectIndexer2 projectIndexer;
 	ProgressJob progressJob;
 
-	public AbstractIndexRequest(AbstractProjectIndexer indexer,
+	public AbstractIndexRequest(ProjectIndexer2 indexer,
 			ProgressJob progressJob) {
 		this.projectIndexer = indexer;
 		this.progressJob = progressJob;

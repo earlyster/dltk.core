@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.index2.IIndexer;
+import org.eclipse.dltk.core.index2.ProjectIndexer2;
 
 /**
  * Request for re-indexing a set of source modules. First, source modules are
@@ -33,7 +34,7 @@ public class SourceModulesRequest extends AbstractIndexRequest {
 	private final IPath containerPath;
 	private final Set<ISourceModule> sourceModules;
 
-	public SourceModulesRequest(AbstractProjectIndexer indexer,
+	public SourceModulesRequest(ProjectIndexer2 indexer,
 			IPath containerPath, Set<ISourceModule> sourceModules,
 			ProgressJob progressJob) {
 		super(indexer, progressJob);

@@ -158,11 +158,16 @@
             uri="http://eclipse.org/dltk/cache_model">
       </package>
    </extension>
+<!--
+========================================================
+Don't contribute it for all languages. At least for now.
+========================================================
    <extension
          point="org.eclipse.dltk.core.projectIndexer">
       <projectIndexer
-            class="org.eclipse.dltk.internal.core.index2.AbstractProjectIndexer"
+            class="org.eclipse.dltk.core.index2.ProjectIndexer2"
             nature="#">
       </projectIndexer>
 	</extension>
+-->
 </plugin>

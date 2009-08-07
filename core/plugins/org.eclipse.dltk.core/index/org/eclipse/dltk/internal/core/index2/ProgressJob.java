@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.internal.core.search.processing.JobManager;
 import org.eclipse.dltk.internal.core.util.Messages;
 
-class ProgressJob extends Job {
+public class ProgressJob extends Job {
 
 	private static transient boolean scheduled;
 	private static transient boolean running;

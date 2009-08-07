@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Zend Technologies
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.index2;
+package org.eclipse.dltk.core.index2;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -23,17 +23,23 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.ModelManager;
-import org.eclipse.dltk.internal.core.search.processing.JobManager;
+import org.eclipse.dltk.internal.core.index2.AbstractIndexRequest;
+import org.eclipse.dltk.internal.core.index2.AddSourceModuleRequest;
+import org.eclipse.dltk.internal.core.index2.ExternalProjectFragmentRequest;
+import org.eclipse.dltk.internal.core.index2.ProgressJob;
+import org.eclipse.dltk.internal.core.index2.ProjectRequest;
+import org.eclipse.dltk.internal.core.index2.ReconcileSourceModuleRequest;
+import org.eclipse.dltk.internal.core.index2.RemoveContainerRequest;
+import org.eclipse.dltk.internal.core.index2.RemoveSourceModuleRequest;
 import org.eclipse.osgi.util.NLS;
 
-public class AbstractProjectIndexer implements IProjectIndexer {
+/**
+ * @since 2.0
+ */
+public class ProjectIndexer2 implements IProjectIndexer {
 
 	private final IndexManager jobManager = ModelManager.getModelManager()
 			.getIndexManager();
-
-	JobManager getJobManager() {
-		return jobManager;
-	}
 
 	public void indexLibrary(IScriptProject project, IPath path) {
 		try {
@@ -151,5 +157,12 @@ public class AbstractProjectIndexer implements IProjectIndexer {
 			DLTKCore
 					.error("An exception is thrown while indexing workspace", e);
 		}
+	}
+
+	/**
+	 * @param request
+	 */
+	public void request(AbstractIndexRequest request) {
+		jobManager.request(request);
 	}
 }

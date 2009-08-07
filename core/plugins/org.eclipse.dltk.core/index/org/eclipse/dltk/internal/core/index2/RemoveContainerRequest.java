@@ -16,6 +16,7 @@ import java.io.IOException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.index2.IIndexer;
+import org.eclipse.dltk.core.index2.ProjectIndexer2;
 
 /**
  * Request for removing container path from the index. All elements related to
@@ -28,7 +29,7 @@ public class RemoveContainerRequest extends AbstractIndexRequest {
 
 	private final IPath containerPath;
 
-	public RemoveContainerRequest(AbstractProjectIndexer indexer,
+	public RemoveContainerRequest(ProjectIndexer2 indexer,
 			IPath containerPath, ProgressJob progressJob) {
 		super(indexer, progressJob);
 		this.containerPath = containerPath;

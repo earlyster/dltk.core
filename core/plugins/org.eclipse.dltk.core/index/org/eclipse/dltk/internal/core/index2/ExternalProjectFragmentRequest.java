@@ -23,9 +23,9 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.index2.ProjectIndexer2;
 import org.eclipse.dltk.internal.core.BuiltinSourceModule;
 import org.eclipse.dltk.internal.core.ExternalSourceModule;
-import org.eclipse.dltk.internal.core.search.processing.JobManager;
 
 /**
  * Request for indexing external project
@@ -37,7 +37,7 @@ public class ExternalProjectFragmentRequest extends AbstractIndexRequest {
 
 	protected final IProjectFragment fragment;
 
-	public ExternalProjectFragmentRequest(AbstractProjectIndexer indexer,
+	public ExternalProjectFragmentRequest(ProjectIndexer2 indexer,
 			IProjectFragment fragment, ProgressJob progressJob) {
 		super(indexer, progressJob);
 		this.fragment = fragment;
@@ -49,9 +49,8 @@ public class ExternalProjectFragmentRequest extends AbstractIndexRequest {
 
 	protected void run() throws CoreException, IOException {
 		final Set<ISourceModule> sourceModules = getExternalSourceModules();
-		JobManager jobManager = projectIndexer.getJobManager();
-		jobManager.request(new SourceModulesRequest(projectIndexer, fragment
-				.getPath(), sourceModules, progressJob));
+		projectIndexer.request(new SourceModulesRequest(projectIndexer,
+				fragment.getPath(), sourceModules, progressJob));
 	}
 
 	protected IEnvironment getEnvironment() {

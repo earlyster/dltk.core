@@ -16,6 +16,7 @@ import java.io.IOException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.index2.IIndexer;
+import org.eclipse.dltk.core.index2.ProjectIndexer2;
 
 /**
  * Request to add source module to the index
@@ -27,7 +28,7 @@ public class AddSourceModuleRequest extends AbstractIndexRequest {
 
 	protected final ISourceModule sourceModule;
 
-	public AddSourceModuleRequest(AbstractProjectIndexer indexer,
+	public AddSourceModuleRequest(ProjectIndexer2 indexer,
 			ISourceModule sourceModule, ProgressJob progressJob) {
 		super(indexer, progressJob);
 		this.sourceModule = sourceModule;

@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.index2.IIndexer;
+import org.eclipse.dltk.core.index2.ProjectIndexer2;
 import org.eclipse.dltk.internal.core.util.Util;
 
 /**
@@ -29,7 +30,7 @@ import org.eclipse.dltk.internal.core.util.Util;
  */
 public class ReconcileSourceModuleRequest extends AddSourceModuleRequest {
 
-	public ReconcileSourceModuleRequest(AbstractProjectIndexer indexer,
+	public ReconcileSourceModuleRequest(ProjectIndexer2 indexer,
 			ISourceModule sourceModule, ProgressJob progressJob) {
 		super(indexer, sourceModule, progressJob);
 	}

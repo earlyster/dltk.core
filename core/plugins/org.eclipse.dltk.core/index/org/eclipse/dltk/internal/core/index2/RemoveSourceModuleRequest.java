@@ -16,6 +16,7 @@ import java.io.IOException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.index2.IIndexer;
+import org.eclipse.dltk.core.index2.ProjectIndexer2;
 
 /**
  * Request for removing source module from the index. All elements related to
@@ -29,7 +30,7 @@ public class RemoveSourceModuleRequest extends AbstractIndexRequest {
 	private final IPath containerPath;
 	private final String relativePath;
 
-	public RemoveSourceModuleRequest(AbstractProjectIndexer indexer,
+	public RemoveSourceModuleRequest(ProjectIndexer2 indexer,
 			IPath containerPath, String relativePath, ProgressJob progressJob) {
 		super(indexer, progressJob);
 		this.containerPath = containerPath;

@@ -13,6 +13,7 @@ package org.eclipse.dltk.internal.core.index2;
 
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.core.index2.ProjectIndexer2;
 
 /**
  * Request for indexing builtin (special) project fragment
@@ -23,7 +24,7 @@ import org.eclipse.dltk.core.environment.IEnvironment;
 public class BuiltinProjectFragmentRequest extends
 		ExternalProjectFragmentRequest {
 
-	public BuiltinProjectFragmentRequest(AbstractProjectIndexer indexer,
+	public BuiltinProjectFragmentRequest(ProjectIndexer2 indexer,
 			IProjectFragment fragment, ProgressJob progressJob) {
 		super(indexer, fragment, progressJob);
 	}

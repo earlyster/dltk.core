@@ -21,9 +21,9 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.index2.ProjectIndexer2;
 import org.eclipse.dltk.internal.core.BuiltinProjectFragment;
 import org.eclipse.dltk.internal.core.ScriptProject;
-import org.eclipse.dltk.internal.core.search.processing.JobManager;
 
 /**
  * Request for indexing project
@@ -35,8 +35,8 @@ public class ProjectRequest extends AbstractIndexRequest {
 
 	private final IScriptProject project;
 
-	public ProjectRequest(AbstractProjectIndexer indexer,
-			IScriptProject project, ProgressJob progressJob) {
+	public ProjectRequest(ProjectIndexer2 indexer, IScriptProject project,
+			ProgressJob progressJob) {
 		super(indexer, progressJob);
 		this.project = project;
 	}
@@ -49,25 +49,23 @@ public class ProjectRequest extends AbstractIndexRequest {
 		final IProjectFragment[] fragments = ((ScriptProject) project)
 				.getAllProjectFragments();
 
-		final JobManager jobManager = projectIndexer.getJobManager();
-
 		final Set<ISourceModule> sourceModules = new HashSet<ISourceModule>();
 		for (final IProjectFragment fragment : fragments) {
 			if (isCancelled) {
 				return;
 			}
 			if (fragment instanceof BuiltinProjectFragment) {
-				jobManager.request(new BuiltinProjectFragmentRequest(
+				projectIndexer.request(new BuiltinProjectFragmentRequest(
 						projectIndexer, fragment, progressJob));
 			} else if (fragment.isExternal()) {
-				jobManager.request(new ExternalProjectFragmentRequest(
+				projectIndexer.request(new ExternalProjectFragmentRequest(
 						projectIndexer, fragment, progressJob));
 			} else {
 				getSourceModules(fragment, sourceModules);
 			}
 		}
 
-		jobManager.request(new SourceModulesRequest(projectIndexer, project
+		projectIndexer.request(new SourceModulesRequest(projectIndexer, project
 				.getPath(), sourceModules, progressJob));
 	}
 
