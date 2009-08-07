@@ -12,7 +12,7 @@ package org.eclipse.dltk.internal.core.search;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +43,7 @@ public class ProjectIndexerManager {
 
 	// Contains list of indexers for selected nature.
 	private static Map<String, List<ProjectIndexerDescriptor>> indexers;
+	private static final Map<String, Set<String>> disabledIndexers = new HashMap<String, Set<String>>();
 
 	private static class ProjectIndexerDescriptor {
 		private IConfigurationElement element;
@@ -50,6 +51,10 @@ public class ProjectIndexerManager {
 
 		ProjectIndexerDescriptor(IConfigurationElement element) {
 			this.element = element;
+		}
+
+		public String getIndexerClass() {
+			return element.getAttribute(CLASS_ATTR);
 		}
 
 		public IProjectIndexer getObject() {
@@ -70,26 +75,18 @@ public class ProjectIndexerManager {
 			return;
 		}
 
-		Map<String, IConfigurationElement> enabled = new HashMap<String, IConfigurationElement>();
+		indexers = new HashMap<String, List<ProjectIndexerDescriptor>>();
 		for (IConfigurationElement element : Platform.getExtensionRegistry()
 				.getConfigurationElementsFor(EXTPOINT)) {
 			if (DISABLE_ELEM.equals(element.getName())) {
-				enabled.put(element.getAttribute(CLASS_ATTR), null);
-			} else if (INDEXER_ELEM.equals(element.getName())) {
-				String className = element.getAttribute(CLASS_ATTR);
-				if (!enabled.containsKey(className)) {
-					enabled.put(className, element);
+				final String nature = element.getAttribute(NATURE_ATTR);
+				Set<String> disabledForNature = disabledIndexers.get(nature);
+				if (disabledForNature == null) {
+					disabledForNature = new HashSet<String>();
+					disabledIndexers.put(nature, disabledForNature);
 				}
-			}
-		}
-
-		indexers = new HashMap<String, List<ProjectIndexerDescriptor>>();
-
-		Iterator<String> i = enabled.keySet().iterator();
-		while (i.hasNext()) {
-			String className = i.next();
-			IConfigurationElement element = enabled.get(className);
-			if (element != null) {
+				disabledForNature.add(element.getAttribute(CLASS_ATTR));
+			} else if (INDEXER_ELEM.equals(element.getName())) {
 				String nature = element.getAttribute(NATURE_ATTR);
 				List<ProjectIndexerDescriptor> elements = indexers.get(nature);
 				if (elements == null) {
@@ -148,12 +145,16 @@ public class ProjectIndexerManager {
 		if (elements != null) {
 			List<IProjectIndexer> result = new ArrayList<IProjectIndexer>(
 					elements.size());
+			Set<String> disabled = disabledIndexers.get(natureId);
 			for (ProjectIndexerDescriptor descriptor : elements) {
+				if (disabled != null
+						&& disabled.contains(descriptor.getIndexerClass())) {
+					continue;
+				}
 				result.add(descriptor.getObject());
 			}
 			if (!result.isEmpty()) {
-				return (IProjectIndexer[]) result
-						.toArray(new IProjectIndexer[result.size()]);
+				return result.toArray(new IProjectIndexer[result.size()]);
 			}
 		}
 		return null;

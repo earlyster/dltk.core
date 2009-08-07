@@ -92,6 +92,13 @@
                </appInfo>
             </annotation>
          </attribute>
+         <attribute name="nature" type="string" use="required">
+            <annotation>
+               <documentation>
+                  If nature are # then builder is available for all script natures.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 
