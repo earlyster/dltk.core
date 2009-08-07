@@ -12,9 +12,11 @@
 package org.eclipse.dltk.core.index.sql;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dltk.core.IShutdownListener;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -35,10 +37,19 @@ public class SqlIndex extends Plugin {
 		plugin = this;
 	}
 
+	private static final ListenerList shutdownListeners = new ListenerList();
+
+	public static void addShutdownListener(IShutdownListener listener) {
+		shutdownListeners.add(listener);
+	}
+
 	@Override
 	public void stop(BundleContext context) throws Exception {
-		DbFactory.disposeInstance();
-
+		Object[] listeners = shutdownListeners.getListeners();
+		for (int i = 0; i < listeners.length; ++i) {
+			((IShutdownListener) listeners[i]).shutdown();
+		}
+		shutdownListeners.clear();
 		plugin = null;
 		super.stop(context);
 	}

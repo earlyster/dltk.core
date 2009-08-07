@@ -16,6 +16,7 @@ import java.sql.SQLException;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dltk.core.IShutdownListener;
 
 /**
  * Abstract database access factory
@@ -38,6 +39,26 @@ public abstract class DbFactory {
 				if (FACTORY_ELEM.equals(element.getName())) {
 					instance = (DbFactory) element
 							.createExecutableExtension(CLASS_ATTR);
+					/*
+					 * Explicitly register shutdown handler, so it would be
+					 * disposed only if class was loaded.
+					 * 
+					 * We don't want static initialization code to be executed
+					 * during framework shutdown.
+					 */
+					SqlIndex.addShutdownListener(new IShutdownListener() {
+						public void shutdown() {
+							if (instance != null) {
+								try {
+									instance.dispose();
+								} catch (SQLException e) {
+									SqlIndex.error("DbFactory.dispose() error",
+											e);
+								}
+								instance = null;
+							}
+						}
+					});
 				}
 			}
 		} catch (Exception e) {
@@ -94,15 +115,4 @@ public abstract class DbFactory {
 	 */
 	public abstract IContainerDao getContainerDao();
 
-	/**
-	 * Disposes instance created if any.
-	 * 
-	 * @throws SQLException
-	 */
-	static void disposeInstance() throws SQLException {
-		if (instance != null) {
-			instance.dispose();
-			instance = null;
-		}
-	}
 }
