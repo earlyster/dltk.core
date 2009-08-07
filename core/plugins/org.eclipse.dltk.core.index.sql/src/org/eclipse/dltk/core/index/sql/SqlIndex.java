@@ -29,13 +29,15 @@ public class SqlIndex extends Plugin {
 
 	private static SqlIndex plugin;
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
-		DbFactory.getInstance().dispose();
+		DbFactory.disposeInstance();
 
 		plugin = null;
 		super.stop(context);

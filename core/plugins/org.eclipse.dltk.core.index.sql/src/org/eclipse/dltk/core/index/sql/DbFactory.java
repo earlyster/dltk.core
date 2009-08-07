@@ -93,4 +93,16 @@ public abstract class DbFactory {
 	 * @return container DAO
 	 */
 	public abstract IContainerDao getContainerDao();
+
+	/**
+	 * Disposes instance created if any.
+	 * 
+	 * @throws SQLException
+	 */
+	static void disposeInstance() throws SQLException {
+		if (instance != null) {
+			instance.dispose();
+			instance = null;
+		}
+	}
 }
