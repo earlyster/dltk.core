@@ -68,7 +68,7 @@ public class ModelAccess {
 				falseFlags, scope, result, monitor)) {
 			return null;
 		}
-		return (IField[]) result.toArray(new IField[result.size()]);
+		return result.toArray(new IField[result.size()]);
 	}
 
 	/**
@@ -100,7 +100,7 @@ public class ModelAccess {
 				falseFlags, scope, result, monitor)) {
 			return null;
 		}
-		return (IMethod[]) result.toArray(new IMethod[result.size()]);
+		return result.toArray(new IMethod[result.size()]);
 	}
 
 	/**
@@ -131,7 +131,7 @@ public class ModelAccess {
 				falseFlags, scope, result, monitor)) {
 			return null;
 		}
-		return (IType[]) result.toArray(new IType[result.size()]);
+		return result.toArray(new IType[result.size()]);
 	}
 
 	protected <T extends IModelElement> boolean findElements(int elementType,
