@@ -359,6 +359,10 @@ public class NewSearchEngine {
 	}
 
 	public boolean isEnabled(IDLTKLanguageToolkit toolkit) {
-		return ModelAccess.getSearchEngine(toolkit) != null;
+		/*
+		 * XXX indexer is contributed per language, while indexer and
+		 * searchEngine are global.
+		 */
+		return ModelAccess.getIndexerParticipant(toolkit) != null;
 	}
 }
