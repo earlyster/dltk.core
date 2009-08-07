@@ -34,7 +34,7 @@ public class IndexerManager {
 			+ ".indexerParticipant"; //$NON-NLS-1$
 	private static final String INDEXER_POINT = DLTKCore.PLUGIN_ID + ".indexer"; //$NON-NLS-1$
 	private static final String INDEXER_ATTR = "indexer"; //$NON-NLS-1$
-	private static final String PARTICIPANT_ATTR = "indexerParticipant"; //$NON-NLS-1$
+	private static final String PARTICIPANT_ELEMENT = "indexerParticipant"; //$NON-NLS-1$
 	private static final String CLASS_ATTR = "class"; //$NON-NLS-1$
 	private static final String NATURE_ATTR = "nature"; //$NON-NLS-1$
 	private static final String ID_ATTR = "id"; //$NON-NLS-1$
@@ -58,7 +58,7 @@ public class IndexerManager {
 				PARTICIPANT_POINT);
 		for (IConfigurationElement element : elements) {
 			String name = element.getName();
-			if (PARTICIPANT_ATTR.equals(name)) {
+			if (PARTICIPANT_ELEMENT.equals(name)) {
 				String targetId = element.getAttribute(TARGET_ID_ATTR);
 				String nature = element.getAttribute(NATURE_ATTR);
 				if (!indexerParticipants.containsKey(targetId)) {
