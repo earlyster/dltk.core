@@ -23,6 +23,7 @@ import org.eclipse.dltk.core.tests.model.TestLanguageToolkit;
 /**
  * Tests for the {@link MixinIndex} class.
  */
+@SuppressWarnings("deprecation")
 public class MixinModelTests extends AbstractModelTests {
 
 	private IProject project;
