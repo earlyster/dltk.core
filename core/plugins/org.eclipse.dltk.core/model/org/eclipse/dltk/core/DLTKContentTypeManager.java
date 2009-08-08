@@ -236,6 +236,13 @@ public class DLTKContentTypeManager {
 		}
 		final IDLTKAssociationManager associationManager = getAssociationManager(toolkit);
 		if (associationManager.isAssociatedWith(resource.getName())) {
+			try {
+				configureAsScript((IFile) resource, toolkit.getNatureId());
+			} catch (CoreException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
 			return true;
 		}
 		// Acquire content types
@@ -339,17 +346,22 @@ public class DLTKContentTypeManager {
 			file.setPersistentProperty(DLTK_VALID, value ? TRUE_VALUE
 					: FALSE_VALUE);
 			if (value) {
-				final IScriptFileConfigurator[] configurators = ScriptFileConfiguratorManager
-						.get(natureId);
-				if (configurators != null) {
-					for (int i = 0; i < configurators.length; ++i) {
-						configurators[i].configure(file);
-					}
-				}
+				configureAsScript(file, natureId);
 			}
 		} catch (CoreException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
+			}
+		}
+	}
+
+	private static void configureAsScript(IFile file, String natureId)
+			throws CoreException {
+		final IScriptFileConfigurator[] configurators = ScriptFileConfiguratorManager
+				.get(natureId);
+		if (configurators != null) {
+			for (int i = 0; i < configurators.length; ++i) {
+				configurators[i].configure(file);
 			}
 		}
 	}
