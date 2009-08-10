@@ -10,7 +10,6 @@ import java.util.Vector;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.ssh.core.ISshConnection;
 import org.eclipse.dltk.ssh.core.ISshFileHandle;
 import org.eclipse.jsch.core.IJSchService;
@@ -22,6 +21,7 @@ import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
+import com.jcraft.jsch.ChannelSftp.LsEntry;
 
 /**
  * TODO: Add correct operation synchronization.
@@ -52,7 +52,7 @@ public class SshConnection implements ISshConnection {
 		}
 
 		public String getPassphrase() {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 
 		public String[] promptKeyboardInteractive(String destination,
@@ -89,9 +89,10 @@ public class SshConnection implements ISshConnection {
 
 		@Override
 		public String toString() {
-			return "Get information for file:" + path;
+			return "Get information for file:" + path; //$NON-NLS-1$
 		}
 
+		@Override
 		public void perform() throws JSchException, SftpException {
 			attrs = getChannel().stat(path.toString());
 		}
@@ -111,9 +112,10 @@ public class SshConnection implements ISshConnection {
 
 		@Override
 		public String toString() {
-			return "Resolve link information for file:" + path;
+			return "Resolve link information for file:" + path; //$NON-NLS-1$
 		}
 
+		@Override
 		public void perform() throws JSchException, SftpException {
 			SftpATTRS attrs = channel.stat(path.toString());
 			boolean isRoot = (path.segmentCount() == 0);
@@ -174,6 +176,7 @@ public class SshConnection implements ISshConnection {
 			this.path = path;
 		}
 
+		@Override
 		public void perform() throws JSchException, SftpException {
 			stream = channel.get(path.toString());
 			performStreamOperation = true;
@@ -181,7 +184,7 @@ public class SshConnection implements ISshConnection {
 
 		@Override
 		public String toString() {
-			return "Get input stream for file:" + path;
+			return "Get input stream for file:" + path; //$NON-NLS-1$
 		}
 
 		@Override
@@ -224,11 +227,12 @@ public class SshConnection implements ISshConnection {
 
 		@Override
 		public String toString() {
-			return "Get output stream for file:" + path;
+			return "Get output stream for file:" + path; //$NON-NLS-1$
 		}
 
+		@Override
 		public void perform() throws JSchException, SftpException {
-			stream = channel.put(path.toString(), getChannel().OVERWRITE);
+			stream = channel.put(path.toString(), ChannelSftp.OVERWRITE);
 			performStreamOperation = true;
 		}
 
@@ -252,7 +256,7 @@ public class SshConnection implements ISshConnection {
 
 	private class ListFolderOperation extends Operation {
 		private IPath path;
-		private Vector v;
+		private Vector<LsEntry> v;
 
 		public ListFolderOperation(IPath path) {
 			this.path = path;
@@ -260,21 +264,23 @@ public class SshConnection implements ISshConnection {
 
 		@Override
 		public String toString() {
-			return "List folder:" + path + " for files";
+			return "List folder:" + path + " for files"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
+		@Override
+		@SuppressWarnings("unchecked")
 		public void perform() throws JSchException, SftpException {
 			v = getChannel().ls(path.toString());
 		}
 
-		public Vector getVector() {
+		public Vector<LsEntry> getVector() {
 			return v;
 		}
 	}
 
 	private static final int DEFAULT_RETRY_COUNT = 2;
 
-	private static final long TIMEOUT = 3000; // One second timeout
+	// private static final long TIMEOUT = 3000; // One second timeout
 
 	private Session session;
 	private String userName;
@@ -322,7 +328,7 @@ public class SshConnection implements ISshConnection {
 			}
 
 			if (channel == null) {
-				channel = (ChannelSftp) session.openChannel("sftp");
+				channel = (ChannelSftp) session.openChannel("sftp"); //$NON-NLS-1$
 			}
 			if (!channel.isConnected()) {
 				channel.connect();
@@ -330,7 +336,7 @@ public class SshConnection implements ISshConnection {
 		} catch (JSchException e) {
 			String eToStr = e.toString();
 			boolean needLog = true;
-			if (eToStr.indexOf("Auth cancel") >= 0 || eToStr.indexOf("Auth fail") >= 0 || eToStr.indexOf("session is down") >= 0) { //$NON-NLS-1$
+			if (eToStr.indexOf("Auth cancel") >= 0 || eToStr.indexOf("Auth fail") >= 0 || eToStr.indexOf("session is down") >= 0) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				if (session.isConnected()) {
 					session.disconnect();
 					session = null;
@@ -341,7 +347,7 @@ public class SshConnection implements ISshConnection {
 				session = null;
 			}
 			if (needLog) {
-				DLTKCore.error("Failed to create direct connection", e);
+				Activator.error("Failed to create direct connection", e); //$NON-NLS-1$
 			}
 		}
 		if (session == null || !session.isConnected() || channel == null
@@ -403,7 +409,7 @@ public class SshConnection implements ISshConnection {
 		} catch (SftpException e) {
 			if (e.id != ChannelSftp.SSH_FX_NO_SUCH_FILE) {
 				if (e.id == ChannelSftp.SSH_FX_PERMISSION_DENIED) {
-					Activator.log("Permission denied to perform:"
+					Activator.log("Permission denied to perform:" //$NON-NLS-1$
 							+ op.toString());
 				} else {
 					Activator.log(e);
@@ -419,7 +425,7 @@ public class SshConnection implements ISshConnection {
 	}
 
 	private ChannelSftp getChannel() {
-		return (ChannelSftp) channel;
+		return channel;
 	}
 
 	/*
@@ -467,7 +473,7 @@ public class SshConnection implements ISshConnection {
 		return null;
 	}
 
-	Vector list(IPath path) {
+	Vector<LsEntry> list(IPath path) {
 		ListFolderOperation op = new ListFolderOperation(path);
 		performOperation(op, DEFAULT_RETRY_COUNT);
 		if (op.isFinished()) {

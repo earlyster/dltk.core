@@ -24,7 +24,7 @@ public class SshFileHandle implements ISshFileHandle {
 
 	private SshConnection connection = null;
 	private IPath path;
-	private IPath linkTarget;
+	// private IPath linkTarget;
 	private SftpATTRS attrs;
 	private Map<String, SshFileHandle> children = new HashMap<String, SshFileHandle>();
 	private boolean childrenFetched = false;
@@ -44,7 +44,7 @@ public class SshFileHandle implements ISshFileHandle {
 	 */
 	public ISshFileHandle createFolder(String newEntryName,
 			IProgressMonitor monitor) throws CoreException {
-		ISshFileHandle child = (ISshFileHandle) getChild(newEntryName);
+		ISshFileHandle child = getChild(newEntryName);
 		if (child != null) {
 			child.mkdir();
 			fetchAttrs();
@@ -95,7 +95,7 @@ public class SshFileHandle implements ISshFileHandle {
 		}
 		if (attrs != null && attrs.isLink()) {
 			attrs = fetchCacheAttrs(true);
-			this.linkTarget = connection.getResolvedPath(path);
+			// this.linkTarget = connection.getResolvedPath(path);
 		}
 	}
 
@@ -146,18 +146,16 @@ public class SshFileHandle implements ISshFileHandle {
 			fetchChildren();
 		}
 		return children.values().toArray(new SshFileHandle[children.size()]);
-
 	}
 
 	private void fetchChildren() {
-		Vector list = connection.list(path);
+		Vector<LsEntry> list = connection.list(path);
 		if (list != null) {
 			children.clear();
 			long c = System.currentTimeMillis();
-			for (Object object : list) {
-				LsEntry entry = (LsEntry) object;
+			for (LsEntry entry : list) {
 				String filename = entry.getFilename();
-				if (filename.equals(".") || filename.equals("..")) {
+				if (filename.equals(".") || filename.equals("..")) { //$NON-NLS-1$ //$NON-NLS-2$
 					continue;
 				}
 				SftpATTRS childAttrs = entry.getAttrs();

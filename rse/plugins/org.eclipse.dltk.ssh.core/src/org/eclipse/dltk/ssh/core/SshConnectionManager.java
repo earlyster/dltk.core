@@ -28,10 +28,10 @@ public class SshConnectionManager {
 		if (connections.containsKey(user_host)) {
 			return connections.get(user_host);
 		}
-		int indexOf = user_host.indexOf("@");
+		int indexOf = user_host.indexOf("@"); //$NON-NLS-1$
 		String userName = user_host.substring(0, indexOf);
 		String hostName = user_host.substring(indexOf + 1);
-		int portIndexOf = hostName.indexOf(":");
+		int portIndexOf = hostName.indexOf(":"); //$NON-NLS-1$
 		int port = 22;
 		if (portIndexOf != -1) {
 			port = Integer.parseInt(hostName.substring(portIndexOf + 1));

@@ -8,15 +8,13 @@ import org.eclipse.jsch.core.IJSchService;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.jcraft.jsch.JSch;
-
 /**
  * The activator class controls the plug-in life cycle
  */
 public class Activator extends Plugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.eclipse.dltk.ssh";
+	public static final String PLUGIN_ID = "org.eclipse.dltk.ssh"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;
@@ -29,13 +27,7 @@ public class Activator extends Plugin {
 	public Activator() {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext
-	 * )
-	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
@@ -44,13 +36,7 @@ public class Activator extends Plugin {
 		tracker.open();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext
-	 * )
-	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		SshConnectionManager.disconnectAll();
 		tracker.close();
@@ -79,7 +65,11 @@ public class Activator extends Plugin {
 		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, message, null));
 	}
 
-	public static void log(Exception e) {
+	public static void error(String message, Throwable t) {
+		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, message, t));
+	}
+
+	public static void log(Throwable e) {
 		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, e
 				.getLocalizedMessage(), e));
 	}
