@@ -31,6 +31,10 @@ class TestScriptCommentScanner extends ScriptCommentScanner {
 		setRange(new Document(text), 0, text.length());
 	}
 
+	public String getText() {
+		return fDocument.get();
+	}
+
 	/*
 	 * increase visibility
 	 */
