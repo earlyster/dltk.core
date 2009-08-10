@@ -39,6 +39,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -91,14 +92,26 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 	 * @param scriptProject
 	 *            the current script project
 	 */
+	@Override
 	public void init(IScriptProject scriptProject) {
 		fScriptProject = scriptProject;
 		fHintTextGroup.setScriptProject(scriptProject);
 
-		fPackageExplorer.setInput(scriptProject);
-
+		if (Display.getCurrent() != null) {
+			doUpdateUI();
+		} else {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					doUpdateUI();
+				}
+			});
+		}
 		// boolean useFolderOutputs= false;
 		// List cpelements= fBuildpathList.getElements();
+	}
+
+	private void doUpdateUI() {
+		fPackageExplorer.setInput(fScriptProject);
 	}
 
 	/**

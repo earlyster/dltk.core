@@ -38,6 +38,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
@@ -84,10 +85,21 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		fProjectsList.setViewerSorter(new BPListElementSorter());
 	}
 
+	@Override
 	public void init(IScriptProject jproject) {
-		updateProjectsList(jproject);
+		fCurrJProject = jproject;
+
+		if (Display.getCurrent() != null) {
+			updateProjectsList();
+		} else {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					updateProjectsList();
+				}
+			});
+		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -99,7 +111,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		fProjectsList.setLabelText(title);
 	}
 
-	private void updateProjectsList(IScriptProject currJProject) {
+	private void updateProjectsList() {
 		// add the projects-cpentries that are already on the class path
 		List cpelements = fBuildpathList.getElements();
 
@@ -112,7 +124,6 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			}
 		}
 		fProjectsList.setElements(checkedProjects);
-		fCurrJProject = currJProject;
 	}
 
 	// -------- UI creation ---------

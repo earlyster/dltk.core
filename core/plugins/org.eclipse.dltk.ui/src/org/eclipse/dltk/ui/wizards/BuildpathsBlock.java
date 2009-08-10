@@ -11,7 +11,6 @@ package org.eclipse.dltk.ui.wizards;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
@@ -290,7 +289,7 @@ public abstract class BuildpathsBlock {
 		if (newBuildpath == null) {
 			newBuildpath = getDefaultBuildpath(jproject);
 		}
-		List exportedEntries = new ArrayList();
+		List<BPListElement> exportedEntries = new ArrayList<BPListElement>();
 		for (int i = 0; i < newBuildpath.size(); i++) {
 			BPListElement curr = (BPListElement) newBuildpath.get(i);
 			if (curr.isExported()
@@ -302,6 +301,14 @@ public abstract class BuildpathsBlock {
 		fBuildPathDialogField.enableButton(project.exists());
 		fBuildPathList.setElements(newBuildpath);
 		fBuildPathList.setCheckedElements(exportedEntries);
+
+		fBuildPathList.selectFirstElement();
+		if (fSourceContainerPage != null) {
+			fSourceContainerPage.init(fCurrScriptProject);
+			fProjectsPage.init(fCurrScriptProject);
+			fLibrariesPage.init(fCurrScriptProject);
+		}
+
 		initializeTimeStamps();
 		updateUI();
 	}
@@ -327,11 +334,6 @@ public abstract class BuildpathsBlock {
 	protected void doUpdateUI() {
 		fBuildPathDialogField.refresh();
 		fBuildPathList.refresh();
-		if (fSourceContainerPage != null) {
-			fSourceContainerPage.init(fCurrScriptProject);
-			fProjectsPage.init(fCurrScriptProject);
-			fLibrariesPage.init(fCurrScriptProject);
-		}
 		doStatusLineUpdate();
 	}
 
@@ -406,8 +408,8 @@ public abstract class BuildpathsBlock {
 	// -------- evaluate default settings --------
 	protected abstract IPreferenceStore getPreferenceStore();
 
-	private List getDefaultBuildpath(IScriptProject jproj) {
-		List list = new ArrayList();
+	private List<BPListElement> getDefaultBuildpath(IScriptProject jproj) {
+		List<BPListElement> list = new ArrayList<BPListElement>();
 		IResource srcFolder;
 		IPreferenceStore store = getPreferenceStore();
 		if (store != null) {
@@ -602,9 +604,9 @@ public abstract class BuildpathsBlock {
 	 * Creates the script project and sets the configured build path and output
 	 * location. If the project already exists only build paths are updated.
 	 */
-	public static void flush(List buildpathEntries, IScriptProject javaProject,
-			IProgressMonitor monitor) throws CoreException,
-			OperationCanceledException {
+	public static void flush(List<BPListElement> buildpathEntries,
+			IScriptProject javaProject, IProgressMonitor monitor)
+			throws CoreException, OperationCanceledException {
 		if (monitor == null) {
 			monitor = new NullProgressMonitor();
 		}
@@ -625,8 +627,7 @@ public abstract class BuildpathsBlock {
 			int nEntries = buildpathEntries.size();
 			IBuildpathEntry[] buildpath = new IBuildpathEntry[nEntries];
 			int i = 0;
-			for (Iterator iter = buildpathEntries.iterator(); iter.hasNext();) {
-				BPListElement entry = (BPListElement) iter.next();
+			for (BPListElement entry : buildpathEntries) {
 				buildpath[i] = entry.getBuildpathEntry();
 				i++;
 				IResource res = entry.getResource();
@@ -792,7 +793,8 @@ public abstract class BuildpathsBlock {
 		ISelectionStatusValidator validator = new TypedElementSelectionValidator(
 				acceptedClasses, false);
 		IProject[] allProjects = fWorkspaceRoot.getProjects();
-		ArrayList rejectedElements = new ArrayList(allProjects.length);
+		ArrayList<IProject> rejectedElements = new ArrayList<IProject>(
+				allProjects.length);
 		IProject currProject = fCurrScriptProject.getProject();
 		for (int i = 0; i < allProjects.length; i++) {
 			if (!allProjects[i].equals(currProject)) {

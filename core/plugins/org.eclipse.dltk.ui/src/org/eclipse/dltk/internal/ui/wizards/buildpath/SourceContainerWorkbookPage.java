@@ -41,6 +41,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.INewWizard;
 
@@ -195,15 +196,24 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fFoldersList.setLabelText(title);
 	}
 
+	@Override
 	public void init(IScriptProject jproject) {
 		fCurrJProject = jproject;
-		updateFoldersList();
+		if (Display.getCurrent() != null) {
+			updateFoldersList();
+		} else {
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					updateFoldersList();
+				}
+			});
+		}
 	}
 
 	protected void updateFoldersList() {
-		ArrayList folders = new ArrayList();
+		ArrayList<BPListElement> folders = new ArrayList<BPListElement>();
 
-		List cpelements = fBuildpathList.getElements();
+		List<?> cpelements = fBuildpathList.getElements();
 		for (int i = 0; i < cpelements.size(); i++) {
 			BPListElement cpe = (BPListElement) cpelements.get(i);
 			if (cpe.getEntryKind() == IBuildpathEntry.BPE_SOURCE) {
@@ -213,7 +223,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fFoldersList.setElements(folders);
 
 		for (int i = 0; i < folders.size(); i++) {
-			BPListElement cpe = (BPListElement) folders.get(i);
+			BPListElement cpe = folders.get(i);
 			IPath[] ePatterns = (IPath[]) cpe
 					.getAttribute(BPListElement.EXCLUSION);
 			IPath[] iPatterns = (IPath[]) cpe
