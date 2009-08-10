@@ -23,6 +23,11 @@ public class CharOperationTests extends TestCase {
 		return new TestSuite(CharOperationTests.class);
 	}
 
+	public void testSplitOnNull() {
+		char[][] result = CharOperation.splitOn("::".toCharArray(), null);
+		assertNull(result);
+	}
+
 	public void testSplitOn1() {
 		char[][] result = CharOperation.splitOn("::".toCharArray(), "AAA"
 				.toCharArray());
