@@ -394,4 +394,11 @@ public class CombinedWordRule implements IRule {
 		for (int i = fBuffer.length() - 1; i >= 0; i--)
 			scanner.unread();
 	}
+
+	/**
+	 * @since 2.0
+	 */
+	public IToken getDefaultToken() {
+		return fDefaultToken;
+	}
 }
