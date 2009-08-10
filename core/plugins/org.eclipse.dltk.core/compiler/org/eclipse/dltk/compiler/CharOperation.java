@@ -3299,10 +3299,14 @@ public final class CharOperation {
 	 * @param array
 	 *            the given array
 	 * @return a new array which is the split of the given array using the given
-	 *         divider
+	 *         divider or <code>null</code> if {@code array} parameter is
+	 *         <code>null</code>.
 	 */
 	public static final char[][] splitOn(char[] divider, char[] array) {
-		int length = array == null ? 0 : array.length;
+		if (array == null) {
+			return null;
+		}
+		int length = array.length;
 		if (length == 0)
 			return NO_CHAR_CHAR;
 
