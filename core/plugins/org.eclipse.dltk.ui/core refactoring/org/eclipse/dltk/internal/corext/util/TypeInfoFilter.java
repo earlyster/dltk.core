@@ -153,7 +153,7 @@ public class TypeInfoFilter {
 		} else {
 			fPackageMatcher = new PatternMatcher(evaluatePackagePattern(text
 					.substring(0, index), packageDelimiter), true);
-			String name = text.substring(index + 1);
+			String name = text.substring(index + packageDelimiter.length());
 			if (name.length() == 0)
 				name = "*"; //$NON-NLS-1$
 			fNameMatcher = new PatternMatcher(name, true);
