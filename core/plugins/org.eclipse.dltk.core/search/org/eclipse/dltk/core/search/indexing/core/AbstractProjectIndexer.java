@@ -31,6 +31,7 @@ import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
+import org.eclipse.dltk.internal.core.search.LazyDLTKSearchDocument;
 import org.eclipse.dltk.internal.core.search.processing.IJob;
 import org.eclipse.osgi.util.NLS;
 
@@ -153,7 +154,7 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 		final SearchParticipant participant = SearchEngine
 				.getDefaultSearchParticipant();
 		final IPath path = module.getPath();
-		final DLTKSearchDocument document = new DLTKSearchDocument(path
+		final DLTKSearchDocument document = new LazyDLTKSearchDocument(path
 				.toString(), containerPath, null, participant,
 				module instanceof ExternalSourceModule, module
 						.getScriptProject().getProject());
