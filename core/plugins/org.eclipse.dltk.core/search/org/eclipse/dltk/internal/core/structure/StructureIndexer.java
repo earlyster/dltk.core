@@ -137,11 +137,18 @@ public class StructureIndexer extends AbstractIndexer {
 							stream, requestor);
 					processor.perform();
 					performed = true;
-					stream.close();
 				} catch (IOException e) {
 					performed = false;
 					if (DLTKCore.DEBUG) {
 						e.printStackTrace();
+					}
+				} finally {
+					try {
+						stream.close();
+					} catch (IOException e) {
+						if (DLTKCore.DEBUG) {
+							e.printStackTrace();
+						}
 					}
 				}
 			}
