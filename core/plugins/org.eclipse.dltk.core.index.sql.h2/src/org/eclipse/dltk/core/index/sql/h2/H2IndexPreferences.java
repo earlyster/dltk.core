@@ -30,6 +30,7 @@ public class H2IndexPreferences extends AbstractPreferenceInitializer {
 	 */
 	public static final String SCHEMA_VERSION = "schemaVersion"; //$NON-NLS-1$
 
+	@Override
 	public void initializeDefaultPreferences() {
 		IEclipsePreferences p = ((IScopeContext) new DefaultScope())
 				.getNode(H2Index.PLUGIN_ID);
