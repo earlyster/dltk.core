@@ -107,6 +107,7 @@ public class HighlightedPosition extends Position {
 	/*
 	 * @see org.eclipse.jface.text.Position#setLength(int)
 	 */
+	@Override
 	public void setLength(int length) {
 		synchronized (fLock) {
 			super.setLength(length);
@@ -116,6 +117,7 @@ public class HighlightedPosition extends Position {
 	/*
 	 * @see org.eclipse.jface.text.Position#setOffset(int)
 	 */
+	@Override
 	public void setOffset(int offset) {
 		synchronized (fLock) {
 			super.setOffset(offset);
@@ -125,6 +127,7 @@ public class HighlightedPosition extends Position {
 	/*
 	 * @see org.eclipse.jface.text.Position#delete()
 	 */
+	@Override
 	public void delete() {
 		synchronized (fLock) {
 			super.delete();
@@ -134,6 +137,7 @@ public class HighlightedPosition extends Position {
 	/*
 	 * @see org.eclipse.jface.text.Position#undelete()
 	 */
+	@Override
 	public void undelete() {
 		synchronized (fLock) {
 			super.undelete();
@@ -147,14 +151,17 @@ public class HighlightedPosition extends Position {
 		return fStyle;
 	}
 
+	@Override
 	public boolean equals(Object other) {
 		return this == other;
 	}
 
+	@Override
 	public int hashCode() {
 		return System.identityHashCode(this);
 	}
 
+	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer();
 		sb.append("HLPos["); //$NON-NLS-1$

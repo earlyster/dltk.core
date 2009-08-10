@@ -23,6 +23,7 @@ import org.eclipse.dltk.core.SourceParserUtil;
 public abstract class ASTSemanticHighlighter extends
 		AbstractSemanticHighlighter {
 
+	@Override
 	protected boolean doHighlighting(
 			org.eclipse.dltk.compiler.env.ISourceModule code) throws Exception {
 		final ModuleDeclaration module = parseCode(code);

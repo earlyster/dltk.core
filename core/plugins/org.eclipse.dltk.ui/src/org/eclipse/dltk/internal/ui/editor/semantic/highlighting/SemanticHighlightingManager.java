@@ -81,6 +81,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		/*
 		 * @see org.eclipse.jface.text.Region#equals(java.lang.Object)
 		 */
+		@Override
 		public boolean equals(Object o) {
 			return super.equals(o) && o instanceof HighlightedRange
 					&& fKey.equals(((HighlightedRange) o).getKey());
@@ -89,6 +90,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		/*
 		 * @see org.eclipse.jface.text.Region#hashCode()
 		 */
+		@Override
 		public int hashCode() {
 			return super.hashCode() | fKey.hashCode();
 		}
@@ -227,8 +229,8 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 					updater.initialize(fPresenter, fHighlightings);
 					final ISourceModule code = new SourceCode(fSourceViewer
 							.getDocument().get());
-					UpdateResult result = updater.reconcile(code,
-							Collections.EMPTY_LIST);
+					UpdateResult result = updater.reconcile(code, Collections
+							.<HighlightedPosition> emptyList());
 					fPresenter.updatePresentation(null, result.addedPositions,
 							HighlightedPosition.NO_POSITIONS);
 				}

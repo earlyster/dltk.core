@@ -45,13 +45,13 @@ public abstract class AbstractSemanticHighlighter implements
 		this.highlightingStyles = styles;
 	}
 
-	private final List newPositions = new ArrayList();
+	private final List<HighlightedPosition> newPositions = new ArrayList<HighlightedPosition>();
 	private int oldPositionCount = 0;
-	private final List oldPositions = new ArrayList();
+	private final List<HighlightedPosition> oldPositions = new ArrayList<HighlightedPosition>();
 
 	public UpdateResult reconcile(
 			org.eclipse.dltk.compiler.env.ISourceModule code,
-			List currentPositions) {
+			List<HighlightedPosition> currentPositions) {
 		try {
 			newPositions.clear();
 			this.oldPositionCount = currentPositions.size();
@@ -93,8 +93,7 @@ public abstract class AbstractSemanticHighlighter implements
 		}
 		final HighlightingStyle hl = highlightingStyles[highlightingIndex];
 		for (int i = 0, size = oldPositions.size(); i < size; ++i) {
-			final HighlightedPosition p = (HighlightedPosition) oldPositions
-					.get(i);
+			final HighlightedPosition p = oldPositions.get(i);
 			if (p != null && p.isEqual(start, len, hl)) {
 				oldPositions.set(i, null);
 				--oldPositionCount;
@@ -104,8 +103,7 @@ public abstract class AbstractSemanticHighlighter implements
 		if (!newPositions.isEmpty()) {
 			final int lowBound = Math.max(newPositions.size() - 2, 0);
 			for (int i = newPositions.size(); --i >= lowBound;) {
-				final HighlightedPosition p = (HighlightedPosition) newPositions
-						.get(i);
+				final HighlightedPosition p = newPositions.get(i);
 				if (p.isEqual(start, len, hl)) {
 					if (DEBUG) {
 						System.err
@@ -137,8 +135,7 @@ public abstract class AbstractSemanticHighlighter implements
 		final HighlightedPosition[] result = new HighlightedPosition[oldPositionCount];
 		int index = 0;
 		for (int i = 0, size = oldPositions.size(); i < size; ++i) {
-			final HighlightedPosition p = (HighlightedPosition) oldPositions
-					.get(i);
+			final HighlightedPosition p = oldPositions.get(i);
 			if (p != null) {
 				result[index++] = p;
 			}
@@ -149,17 +146,15 @@ public abstract class AbstractSemanticHighlighter implements
 	protected void checkNewPositionOrdering() {
 		if (newPositions.isEmpty())
 			return;
-		Collections.sort(newPositions, new Comparator() {
-
-			public int compare(Object o1, Object o2) {
-				final Position p1 = (Position) o1;
-				final Position p2 = (Position) o2;
+		Collections.sort(newPositions, new Comparator<HighlightedPosition>() {
+			public int compare(HighlightedPosition p1, HighlightedPosition p2) {
 				return p1.getOffset() - p2.getOffset();
 			}
 		});
 		Position previous = null;
-		for (Iterator i = newPositions.iterator(); i.hasNext();) {
-			final Position current = (Position) i.next();
+		for (Iterator<HighlightedPosition> i = newPositions.iterator(); i
+				.hasNext();) {
+			final Position current = i.next();
 			if (previous != null
 					&& previous.getOffset() + previous.getLength() > current
 							.getOffset()) {

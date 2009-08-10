@@ -136,7 +136,7 @@ public class SemanticHighlightingReconciler implements
 			HighlightedPosition[] added = HighlightedPosition.NO_POSITIONS;
 			HighlightedPosition[] removed = HighlightedPosition.NO_POSITIONS;
 			if (!fJobPresenter.isCanceled()) {
-				final List currentPositions = new ArrayList();
+				final List<HighlightedPosition> currentPositions = new ArrayList<HighlightedPosition>();
 				fJobPresenter.addAllPositions(currentPositions);
 				final UpdateResult result = positionUpdater.reconcile(
 						(org.eclipse.dltk.compiler.env.ISourceModule) ast,
@@ -264,6 +264,7 @@ public class SemanticHighlightingReconciler implements
 
 			if (element != null) {
 				fJob = new Job(DLTKEditorMessages.SemanticHighlighting_job) {
+					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						if (oldJob != null) {
 							try {

@@ -2,8 +2,6 @@ package org.eclipse.dltk.ui.editor.highlighting;
 
 import java.util.List;
 
-import org.eclipse.dltk.ui.editor.highlighting.HighlightedPosition;
-
 /**
  * Language specific semantic highlighting API.
  */
@@ -16,23 +14,6 @@ public interface ISemanticHighlighter {
 
 		public final HighlightedPosition[] addedPositions;
 		public final HighlightedPosition[] removedPositions;
-
-		/**
-		 * @param added
-		 *            positions that should be added. The listed positions
-		 *            should not overlap. The list should be sorted by starting
-		 *            offset.
-		 * @param removed
-		 *            positions that should be removed. The listed positions
-		 *            should be sorted by starting offset.
-		 * @deprecated
-		 */
-		public UpdateResult(List added, List removed) {
-			this.addedPositions = new HighlightedPosition[added.size()];
-			added.toArray(this.addedPositions);
-			this.removedPositions = new HighlightedPosition[removed.size()];
-			removed.toArray(this.removedPositions);
-		}
 
 		/**
 		 * @param addedPositions
@@ -70,6 +51,6 @@ public interface ISemanticHighlighter {
 	 * @return
 	 */
 	UpdateResult reconcile(org.eclipse.dltk.compiler.env.ISourceModule code,
-			List currentPositions);
+			List<HighlightedPosition> currentPositions);
 
 }
