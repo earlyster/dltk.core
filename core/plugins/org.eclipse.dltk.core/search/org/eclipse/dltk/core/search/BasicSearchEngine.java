@@ -914,8 +914,8 @@ public class BasicSearchEngine {
 
 		char[][] enclosingTypeNames = null;
 		if (typeName != null) {
-			ISearchPatternProcessor processor = DLTKLanguageManager.getSearchPatternProcessor(scope
-					.getLanguageToolkit());
+			ISearchPatternProcessor processor = DLTKLanguageManager
+					.getSearchPatternProcessor(scope.getLanguageToolkit());
 			if (processor != null) {
 				String patternString = new String(typeName);
 				char[] qualificationChars = processor
@@ -937,7 +937,7 @@ public class BasicSearchEngine {
 
 		// Get working copy path(s). Store in a single string in case of only
 		// one to optimize comparison in requestor
-		final HashSet workingCopyPaths = new HashSet();
+		final HashSet<String> workingCopyPaths = new HashSet<String>();
 		String workingCopyPath = null;
 		ISourceModule[] copies = getWorkingCopies();
 		final int copiesLength = copies == null ? 0 : copies.length;
