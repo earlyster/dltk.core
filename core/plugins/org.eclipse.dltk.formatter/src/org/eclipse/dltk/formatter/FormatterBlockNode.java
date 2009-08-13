@@ -13,6 +13,7 @@ package org.eclipse.dltk.formatter;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class FormatterBlockNode extends AbstractFormatterNode implements
@@ -27,10 +28,10 @@ public class FormatterBlockNode extends AbstractFormatterNode implements
 
 	private final List<IFormatterNode> body = new ArrayList<IFormatterNode>();
 
-	protected void acceptNodes(final List<IFormatterNode> nodes,
-			IFormatterContext context, IFormatterWriter visitor)
-			throws Exception {
-		for (IFormatterNode node : nodes) {
+	protected void acceptNodes(final List nodes, IFormatterContext context,
+			IFormatterWriter visitor) throws Exception {
+		for (Iterator<?> i = nodes.iterator(); i.hasNext();) {
+			IFormatterNode node = (IFormatterNode) i.next();
 			context.enter(node);
 			node.accept(context, visitor);
 			context.leave(node);

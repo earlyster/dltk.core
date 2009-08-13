@@ -69,10 +69,17 @@ public class FormatterUtils {
 		return true;
 	}
 
-	/**
-	 * @since 2.0
-	 */
-	public static IFormatterNode[] toTextNodeArray(List<IFormatterNode> list) {
+	@SuppressWarnings("unchecked")
+	public static IFormatterTextNode[] toTextNodeArray(List list) {
+		if (list != null) {
+			return (IFormatterTextNode[]) list
+					.toArray(new IFormatterTextNode[list.size()]);
+		} else {
+			return null;
+		}
+	}
+
+	public static IFormatterNode[] toNodeArray(List<IFormatterNode> list) {
 		if (list != null) {
 			return list.toArray(new IFormatterNode[list.size()]);
 		} else {
