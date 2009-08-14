@@ -165,15 +165,18 @@ public class ScriptDebugOptionsManager implements IDebugEventSetListener,
 			} else if (kind == DebugEvent.CREATE) {
 				if (source instanceof IScriptDebugTarget) {
 					try {
-						IScriptDebugTarget target = (IScriptDebugTarget) source;
-						ILaunchConfiguration configuration = target.getLaunch()
-								.getLaunchConfiguration();
-						IScriptProject scriptProject;
-						scriptProject = AbstractScriptLaunchConfigurationDelegate
-								.getScriptProject(configuration);
-						String[] activeFilters = StepFilterManager
-								.getActiveFilters(scriptProject);
-						target.setFilters(activeFilters);
+						final IScriptDebugTarget target = (IScriptDebugTarget) source;
+						final ILaunchConfiguration configuration = target
+								.getLaunch().getLaunchConfiguration();
+						if (configuration != null) {
+							final IScriptProject project = AbstractScriptLaunchConfigurationDelegate
+									.getScriptProject(configuration);
+							if (project != null) {
+								final String[] activeFilters = StepFilterManager
+										.getActiveFilters(project);
+								target.setFilters(activeFilters);
+							}
+						}
 						// target.setUseStepFilters(StepFilterManager
 						// .isUseStepFilters(scriptProject));
 					} catch (CoreException e) {
