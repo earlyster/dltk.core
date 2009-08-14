@@ -85,7 +85,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		private final ProjectionAnnotationModel fModel;
 		private final IDocument fDocument;
 		private final boolean fAllowCollapsing;
-		protected LinkedHashMap fMap = new LinkedHashMap();
+		protected LinkedHashMap<Annotation, Position> fMap = new LinkedHashMap<Annotation, Position>();
 
 		public FoldingStructureComputationContext(IDocument document,
 				ProjectionAnnotationModel model, boolean allowCollapsing) {
@@ -94,7 +94,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 			fAllowCollapsing = allowCollapsing;
 		}
 
-		public Map getMap() {
+		public Map<Annotation, Position> getMap() {
 			return fMap;
 		}
 
@@ -185,6 +185,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		 * 
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
+		@Override
 		public boolean equals(Object obj) {
 			if (obj instanceof SourceRangeStamp) {
 				SourceRangeStamp s = (SourceRangeStamp) obj;
@@ -198,6 +199,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		 * 
 		 * @see java.lang.Object#hashCode()
 		 */
+		@Override
 		public int hashCode() {
 			return hash;
 		}
@@ -263,6 +265,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		/*
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public String toString() {
 			return "ScriptProjectionAnnotation:\n" + //$NON-NLS-1$
 					"\tcollapsed: \t" + isCollapsed() + "\n" + //$NON-NLS-1$ //$NON-NLS-2$
@@ -556,7 +559,6 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	protected boolean fInitCollapseClasses;
 	protected boolean fInitCollapseMethods;
 
-	private IElementCommentResolver fElementCommentResolver;
 	private boolean fInitCollapseDocs;
 
 	/**
@@ -707,28 +709,27 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	private void update(FoldingStructureComputationContext ctx) {
 		if (ctx == null)
 			return;
-		Map additions = new HashMap();
-		List deletions = new ArrayList();
-		List updates = new ArrayList();
+		Map<Annotation, Position> additions = new HashMap<Annotation, Position>();
+		List<Annotation> deletions = new ArrayList<Annotation>();
+		List<Annotation> updates = new ArrayList<Annotation>();
 		if (!computeFoldingStructure(ctx)) {
 			return;
 		}
-		Map updated = ctx.fMap;
-		Map previous = computeCurrentStructure(ctx);
-		Iterator e = updated.keySet().iterator();
-		while (e.hasNext()) {
+		Map<Annotation, Position> updated = ctx.fMap;
+		Map<SourceRangeStamp, List<Tuple>> previous = computeCurrentStructure(ctx);
+		for (Iterator<Annotation> e = updated.keySet().iterator(); e.hasNext();) {
 			ScriptProjectionAnnotation newAnnotation = (ScriptProjectionAnnotation) e
 					.next();
 			SourceRangeStamp stamp = newAnnotation.getStamp();
-			Position newPosition = (Position) updated.get(newAnnotation);
-			List annotations = (List) previous.get(stamp);
+			Position newPosition = updated.get(newAnnotation);
+			List<Tuple> annotations = previous.get(stamp);
 			if (annotations == null) {
 				additions.put(newAnnotation, newPosition);
 			} else {
-				Iterator x = annotations.iterator();
+				Iterator<Tuple> x = annotations.iterator();
 				boolean matched = false;
 				while (x.hasNext()) {
-					Tuple tuple = (Tuple) x.next();
+					Tuple tuple = x.next();
 					ScriptProjectionAnnotation existingAnnotation = tuple.annotation;
 					Position existingPosition = tuple.position;
 					if (newAnnotation.isComment() == existingAnnotation
@@ -760,12 +761,10 @@ public abstract class AbstractASTFoldingStructureProvider implements
 					previous.remove(stamp);
 			}
 		}
-		e = previous.values().iterator();
-		while (e.hasNext()) {
-			List list = (List) e.next();
+		for (List<Tuple> list : previous.values()) {
 			int size = list.size();
 			for (int i = 0; i < size; i++)
-				deletions.add(((Tuple) list.get(i)).annotation);
+				deletions.add(list.get(i).annotation);
 		}
 		Annotation[] removals = new Annotation[deletions.size()];
 		deletions.toArray(removals);
@@ -1093,31 +1092,31 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		return provider.getDocument(fEditor.getEditorInput());
 	}
 
-	private Map computeCurrentStructure(FoldingStructureComputationContext ctx) {
-		Map map = new HashMap();
+	private Map<SourceRangeStamp, List<Tuple>> computeCurrentStructure(
+			FoldingStructureComputationContext ctx) {
+		Map<SourceRangeStamp, List<Tuple>> map = new HashMap<SourceRangeStamp, List<Tuple>>();
 		ProjectionAnnotationModel model = ctx.getModel();
-		Iterator e = model.getAnnotationIterator();
+		Iterator<?> e = model.getAnnotationIterator();
 		while (e.hasNext()) {
 			Object annotation = e.next();
 			if (annotation instanceof ScriptProjectionAnnotation) {
 				ScriptProjectionAnnotation ann = (ScriptProjectionAnnotation) annotation;
 				Position position = model.getPosition(ann);
-				List list = (List) map.get(ann.getStamp());
+				List<Tuple> list = map.get(ann.getStamp());
 				if (list == null) {
-					list = new ArrayList(2);
+					list = new ArrayList<Tuple>(2);
 					map.put(ann.getStamp(), list);
 				}
 				list.add(new Tuple(ann, position));
 			}
 		}
-		Comparator comparator = new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return ((Tuple) o1).position.getOffset()
-						- ((Tuple) o2).position.getOffset();
+		Comparator<Tuple> comparator = new Comparator<Tuple>() {
+			public int compare(Tuple o1, Tuple o2) {
+				return o1.position.getOffset() - o2.position.getOffset();
 			}
 		};
-		for (Iterator it = map.values().iterator(); it.hasNext();) {
-			List list = (List) it.next();
+		for (Iterator<List<Tuple>> it = map.values().iterator(); it.hasNext();) {
+			List<Tuple> list = it.next();
 			Collections.sort(list, comparator);
 		}
 		return map;
@@ -1152,8 +1151,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		ProjectionAnnotationModel model = getModel();
 		if (model == null)
 			return;
-		List modified = new ArrayList();
-		Iterator iter = model.getAnnotationIterator();
+		List<Annotation> modified = new ArrayList<Annotation>();
+		Iterator<?> iter = model.getAnnotationIterator();
 		while (iter.hasNext()) {
 			Object annotation = iter.next();
 			if (annotation instanceof ScriptProjectionAnnotation) {
@@ -1167,7 +1166,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 				}
 			}
 		}
-		model.modifyAnnotations(null, null, (Annotation[]) modified
+		model.modifyAnnotations(null, null, modified
 				.toArray(new Annotation[modified.size()]));
 	}
 
@@ -1192,25 +1191,27 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	}
 
 	protected static class FoldingASTVisitor extends ASTVisitor {
-		private final List result = new ArrayList();
+		private final List<CodeBlock> result = new ArrayList<CodeBlock>();
 		private final int offset;
 
 		protected FoldingASTVisitor(int offset) {
 			this.offset = offset;
 		}
 
+		@Override
 		public boolean visit(MethodDeclaration s) throws Exception {
 			add(s);
 			return super.visit(s);
 		}
 
+		@Override
 		public boolean visit(TypeDeclaration s) throws Exception {
 			add(s);
 			return super.visit(s);
 		}
 
 		public CodeBlock[] getResults() {
-			return (CodeBlock[]) result.toArray(new CodeBlock[result.size()]);
+			return result.toArray(new CodeBlock[result.size()]);
 		}
 
 		protected final void add(ASTNode s) {
@@ -1425,10 +1426,9 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		try {
 			if (contents == null)
 				return new IRegion[0];
-			List regions = new ArrayList();
 			Document d = new Document(contents);
 			installDocumentStuff(d);
-			List docRegionList = new ArrayList();
+			List<ITypedRegion> docRegionList = new ArrayList<ITypedRegion>();
 			int offset = 0;
 			while (true) {
 				try {
@@ -1439,9 +1439,10 @@ public abstract class AbstractASTFoldingStructureProvider implements
 					break;
 				}
 			}
-			ITypedRegion docRegions[] = new ITypedRegion[docRegionList.size()];
-			docRegionList.toArray(docRegions);
 			int start = -1;
+			List<IRegion> regions = new ArrayList<IRegion>();
+			ITypedRegion docRegions[] = docRegionList
+					.toArray(new ITypedRegion[docRegionList.size()]);
 			for (int i = 0; i < docRegions.length; i++) {
 				ITypedRegion region = docRegions[i];
 				boolean multiline = isMultilineRegion(d, region);
@@ -1510,7 +1511,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	}
 
 	public static class MethodCollector implements IModelElementVisitor {
-		private final Map methodByNameRange = new HashMap();
+		private final Map<SourceRange, IModelElement> methodByNameRange = new HashMap<SourceRange, IModelElement>();
 
 		public boolean visit(IModelElement element) {
 
@@ -1531,8 +1532,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		 * @param length
 		 */
 		public IModelElement get(int offset, int length) {
-			return (IModelElement) methodByNameRange.get(new SourceRange(
-					offset, length));
+			return methodByNameRange.get(new SourceRange(offset, length));
 		}
 
 	}
