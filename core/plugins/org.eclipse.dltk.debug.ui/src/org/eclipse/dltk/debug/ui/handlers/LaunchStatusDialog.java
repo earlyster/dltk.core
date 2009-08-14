@@ -89,7 +89,7 @@ public class LaunchStatusDialog extends IconAndMessageDialog {
 		commandLinePrompt.setLayoutData(commandLineData);
 
 		final Text commandLineValue = new Text(composite, SWT.WRAP
-				| SWT.READ_ONLY);
+				| SWT.READ_ONLY | SWT.BORDER);
 		commandLineValue.setText(commandLine);
 		final GridData commandLineValueData = new GridData(
 				GridData.FILL_HORIZONTAL);
