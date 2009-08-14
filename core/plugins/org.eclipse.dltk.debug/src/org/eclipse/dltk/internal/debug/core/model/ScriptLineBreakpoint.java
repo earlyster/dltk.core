@@ -157,7 +157,7 @@ public class ScriptLineBreakpoint extends AbstractScriptBreakpoint implements
 							if (!path.startsWith("/")) { //$NON-NLS-1$
 								path = "/" + path; //$NON-NLS-1$
 							}
-							return new URI("file", null, path, null); //$NON-NLS-1$
+							return new URI("file", "", path, null); //$NON-NLS-1$ //$NON-NLS-2$
 						} catch (URISyntaxException e) {
 							if (DLTKCore.DEBUG) {
 								e.printStackTrace();
