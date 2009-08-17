@@ -13,7 +13,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -44,7 +43,6 @@ import org.eclipse.dltk.utils.CorePrinter;
 
 public abstract class AbstractSourceModule extends Openable implements
 		ISourceModule, org.eclipse.dltk.compiler.env.ISourceModule {
-	private static final int DEFAULT_COMPLETION_TIMEOUT = 5000;
 
 	// ~ Static fields/initializers
 
@@ -732,27 +730,5 @@ public abstract class AbstractSourceModule extends Openable implements
 		}
 
 		return null;
-	}
-
-	public void codeComplete(int offset, CompletionRequestor requestor)
-			throws ModelException {
-		codeComplete(offset, requestor, DefaultWorkingCopyOwner.PRIMARY,
-				DEFAULT_COMPLETION_TIMEOUT);
-	}
-
-	public void codeComplete(int offset, CompletionRequestor requestor,
-			long timeout) throws ModelException {
-		codeComplete(offset, requestor, DefaultWorkingCopyOwner.PRIMARY,
-				timeout);
-	}
-
-	public void codeComplete(int offset, CompletionRequestor requestor,
-			WorkingCopyOwner owner, long timeout) throws ModelException {
-		codeComplete(this, offset, requestor, owner, timeout);
-	}
-
-	public void codeComplete(int offset, CompletionRequestor requestor,
-			WorkingCopyOwner owner) throws ModelException {
-		codeComplete(this, offset, requestor, owner, DEFAULT_COMPLETION_TIMEOUT);
 	}
 }

@@ -5,6 +5,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -180,7 +181,22 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 		// lifetime of the working copy
 	}
 
-	@Override
+	/*
+	 * @see
+	 * org.eclipse.dltk.internal.core.AbstractSourceModule#getProblemReporter
+	 * (java.lang.String)
+	 */
+	protected IProblemReporter getProblemReporter(String natureId) {
+		// external, no reporter required
+		return null;
+	}
+
+	/*
+	 * @see
+	 * org.eclipse.dltk.internal.core.AbstractSourceModule#validateSorceModule
+	 * (org.eclipse.dltk.core.IDLTKLanguageToolkit,
+	 * org.eclipse.core.resources.IResource)
+	 */
 	protected IStatus validateSourceModule(IDLTKLanguageToolkit toolkit,
 			IResource resource) {
 		// external, resource will always be null
