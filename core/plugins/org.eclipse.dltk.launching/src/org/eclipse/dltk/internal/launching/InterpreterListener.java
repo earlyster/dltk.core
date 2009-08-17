@@ -27,15 +27,15 @@ public class InterpreterListener implements IInterpreterInstallChangedListener {
 	}
 
 	public void interpreterAdded(IInterpreterInstall Interpreter) {
-		changed = true;
+		changed();
 	}
 
 	public void interpreterChanged(PropertyChangeEvent event) {
-		changed = true;
+		changed();
 	}
 
 	public void interpreterRemoved(IInterpreterInstall Interpreter) {
-		changed = true;
+		changed();
 	}
 
 	/**
