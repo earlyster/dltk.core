@@ -55,7 +55,6 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementMemento;
-import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.core.IModelMarker;
 import org.eclipse.dltk.core.IModelProvider;
 import org.eclipse.dltk.core.IModelStatus;
@@ -64,6 +63,7 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IRegion;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.core.ISearchableEnvironment;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
@@ -876,19 +876,21 @@ public class ScriptProject extends Openable implements IScriptProject,
 				 * check if bound to project (23977)
 				 */
 				IProject requiredProjectRsc = (IProject) member;
-				rootIDs.add(rootID);
-				ScriptProject requiredProject = (ScriptProject) DLTKCore
-						.create(requiredProjectRsc);
-				requiredProject
-						.computeProjectFragments(
-								requiredProject.getResolvedBuildpath(),
-								accumulatedRoots,
-								rootIDs,
-								rootToResolvedEntries == null ? resolvedEntry
-										: ((BuildpathEntry) resolvedEntry)
-												.combineWith((BuildpathEntry) referringEntry),
-								checkExistency, retrieveExportedRoots,
-								rootToResolvedEntries);
+				if (ScriptProject.hasScriptNature(requiredProjectRsc)) {
+					rootIDs.add(rootID);
+					ScriptProject requiredProject = (ScriptProject) DLTKCore
+							.create(requiredProjectRsc);
+					requiredProject
+							.computeProjectFragments(
+									requiredProject.getResolvedBuildpath(),
+									accumulatedRoots,
+									rootIDs,
+									rootToResolvedEntries == null ? resolvedEntry
+											: ((BuildpathEntry) resolvedEntry)
+													.combineWith((BuildpathEntry) referringEntry),
+									checkExistency, retrieveExportedRoots,
+									rootToResolvedEntries);
+				}
 			}
 			break;
 		}
