@@ -73,10 +73,11 @@ public class TypeHistoryManager extends AbstractContextListener {
 					DLTKSearchTypeNameMatch typeNameMatch = new DLTKSearchTypeNameMatch(type, type.getFlags());
 
 					IDLTKUILanguageToolkit toolkit = DLTKUILanguageManager.getLanguageToolkit(element);
-					if (add && !OpenTypeHistory.getInstance(toolkit).contains(typeNameMatch)) {
-						OpenTypeHistory.getInstance(toolkit).accessed(typeNameMatch);
+					final OpenTypeHistory history = OpenTypeHistory.getInstance(toolkit);
+					if (add && !history.contains(typeNameMatch)) {
+						history.accessed(typeNameMatch);
 					} else {
-						OpenTypeHistory.getInstance(toolkit).remove(typeNameMatch);
+						history.remove(typeNameMatch);
 					}
 				}
 			} catch (ModelException e) {
