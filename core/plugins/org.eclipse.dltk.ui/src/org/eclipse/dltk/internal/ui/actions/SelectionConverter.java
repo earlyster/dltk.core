@@ -25,6 +25,7 @@ import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.ui.ModelElementLabelProvider;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -78,7 +79,7 @@ public class SelectionConverter {
 		if (!selection.isEmpty()) {
 			IModelElement[] result = new IModelElement[selection.size()];
 			int i = 0;
-			for (Iterator iter = selection.iterator(); iter.hasNext(); i++) {
+			for (Iterator<?> iter = selection.iterator(); iter.hasNext(); i++) {
 				Object element = iter.next();
 				if (!(element instanceof IModelElement))
 					return EMPTY_RESULT;
@@ -99,8 +100,7 @@ public class SelectionConverter {
 	public static IModelElement[] codeResolveOrInputForked(IEditorPart editor)
 			throws InvocationTargetException, InterruptedException {
 		IModelElement input = getInput(editor);
-		ITextSelection selection = (ITextSelection) ((ITextEditor) editor)
-				.getSelectionProvider().getSelection();
+		ITextSelection selection = getTextSelection(editor);
 		IModelElement[] result = performForkedCodeResolve(input, selection);
 		if (result.length == 0) {
 			result = new IModelElement[] { input };
@@ -122,8 +122,7 @@ public class SelectionConverter {
 	public static IModelElement[] codeResolve(IEditorPart editor,
 			boolean primaryOnly) throws ModelException {
 		return codeResolve(getInput(editor, primaryOnly),
-				(ITextSelection) ((ITextEditor) editor).getSelectionProvider()
-						.getSelection());
+				getTextSelection(editor));
 	}
 
 	/**
@@ -140,8 +139,7 @@ public class SelectionConverter {
 			boolean primaryOnly) throws InvocationTargetException,
 			InterruptedException {
 		return performForkedCodeResolve(getInput(editor, primaryOnly),
-				(ITextSelection) ((ITextEditor) editor).getSelectionProvider()
-						.getSelection());
+				getTextSelection(editor));
 	}
 
 	public static IModelElement getElementAtOffset(IEditorPart editor)
@@ -158,8 +156,16 @@ public class SelectionConverter {
 	private static IModelElement getElementAtOffset(IEditorPart editor,
 			boolean primaryOnly) throws ModelException {
 		return getElementAtOffset(getInput(editor, primaryOnly),
-				(ITextSelection) ((ITextEditor) editor).getSelectionProvider()
-						.getSelection());
+				getTextSelection(editor));
+	}
+
+	private static ITextSelection getTextSelection(IEditorPart editor) {
+		if (editor instanceof ITextEditor) {
+			return (ITextSelection) ((ITextEditor) editor)
+					.getSelectionProvider().getSelection();
+		} else {
+			return TextSelection.emptySelection();
+		}
 	}
 
 	public static IModelElement getInput(IEditorPart editor) {
