@@ -147,8 +147,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 		switch (resource.getType()) {
 		case IResource.FILE:
 			if (org.eclipse.dltk.compiler.util.Util.isArchiveFileName(
-					DLTKLanguageManager.getLanguageToolkit(this), resource
-							.getName())) {
+					getLanguageToolkit(), resource.getName())) {
 				return createArchiveFragment(resource);
 			} else {
 				return null;
@@ -228,8 +227,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 				return new BuiltinProjectFragment(path, this);
 			}
 			if (org.eclipse.dltk.compiler.util.Util.isArchiveFileName(
-					DLTKLanguageManager.getLanguageToolkit(this), path
-							.lastSegment())) {
+					getLanguageToolkit(), path.lastSegment())) {
 				IResource resource = this.project.getWorkspace().getRoot()
 						.findMember(path);
 				if (resource != null && resource.getType() == IResource.FOLDER) {
@@ -845,8 +843,7 @@ public class ScriptProject extends Openable implements IScriptProject {
 					// This is external folder or zip.
 					if (Model.isFile(target)
 							&& (org.eclipse.dltk.compiler.util.Util
-									.isArchiveFileName(DLTKLanguageManager
-											.getLanguageToolkit(this),
+									.isArchiveFileName(getLanguageToolkit(),
 											entryPath.lastSegment()))) {
 						// root = new ArchiveProjectFragment(entryPath, this);
 						root = getProjectFragment0(entryPath);
@@ -876,19 +873,21 @@ public class ScriptProject extends Openable implements IScriptProject {
 				 * check if bound to project (23977)
 				 */
 				IProject requiredProjectRsc = (IProject) member;
-				rootIDs.add(rootID);
-				ScriptProject requiredProject = (ScriptProject) DLTKCore
-						.create(requiredProjectRsc);
-				requiredProject
-						.computeProjectFragments(
-								requiredProject.getResolvedBuildpath(),
-								accumulatedRoots,
-								rootIDs,
-								rootToResolvedEntries == null ? resolvedEntry
-										: ((BuildpathEntry) resolvedEntry)
-												.combineWith((BuildpathEntry) referringEntry),
-								checkExistency, retrieveExportedRoots,
-								rootToResolvedEntries);
+				if (ScriptProject.hasScriptNature(requiredProjectRsc)) {
+					rootIDs.add(rootID);
+					ScriptProject requiredProject = (ScriptProject) DLTKCore
+							.create(requiredProjectRsc);
+					requiredProject
+							.computeProjectFragments(
+									requiredProject.getResolvedBuildpath(),
+									accumulatedRoots,
+									rootIDs,
+									rootToResolvedEntries == null ? resolvedEntry
+											: ((BuildpathEntry) resolvedEntry)
+													.combineWith((BuildpathEntry) referringEntry),
+									checkExistency, retrieveExportedRoots,
+									rootToResolvedEntries);
+				}
 			}
 			break;
 		}
