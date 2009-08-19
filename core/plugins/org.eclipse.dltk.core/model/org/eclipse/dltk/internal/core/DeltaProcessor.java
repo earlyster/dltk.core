@@ -229,7 +229,7 @@ public class DeltaProcessor {
 	 */
 	private final ModelUpdater modelUpdater = new ModelUpdater();
 	/* A set of IDLTKProject whose caches need to be reset */
-	private HashSet projectCachesToReset = new HashSet();
+	private HashSet<IScriptProject> projectCachesToReset = new HashSet<IScriptProject>();
 	/*
 	 * A list of IModelElement used as a scope for external archives refresh
 	 * during POST_CHANGE. This is null if no refresh is needed.
@@ -248,7 +248,7 @@ public class DeltaProcessor {
 	public Map oldRoots;
 
 	/* A set of IDylanProject whose package fragment roots need to be refreshed */
-	private HashSet rootsToRefresh = new HashSet();
+	private HashSet<IScriptProject> rootsToRefresh = new HashSet<IScriptProject>();
 	/** {@link Runnable}s that should be called after model is updated */
 	private final ArrayList<Runnable> postActions = new ArrayList<Runnable>();
 	/*
@@ -1153,8 +1153,9 @@ public class DeltaProcessor {
 				this.state.updateRoots(element.getPath(), delta, this);
 				// refresh pkg fragment roots and caches of the project (and its
 				// dependents)
-				this.rootsToRefresh.add(element);
-				this.projectCachesToReset.add(element);
+				final IScriptProject project = (IScriptProject) element;
+				this.rootsToRefresh.add(project);
+				this.projectCachesToReset.add(project);
 			}
 		} else {
 			if (delta == null
@@ -1314,25 +1315,29 @@ public class DeltaProcessor {
 		case IModelElement.SCRIPT_MODEL:
 			this.manager.indexManager.reset();
 			break;
-		case IModelElement.SCRIPT_PROJECT:
+		case IModelElement.SCRIPT_PROJECT: {
 			this.state.updateRoots(element.getPath(), delta, this);
 			// refresh pkg fragment roots and caches of the project (and its
 			// dependents)
-			this.rootsToRefresh.add(element);
-			this.projectCachesToReset.add(element);
+			final IScriptProject project = (IScriptProject) element;
+			this.rootsToRefresh.add(project);
+			this.projectCachesToReset.add(project);
 			break;
-		case IModelElement.PROJECT_FRAGMENT:
-			ScriptProject project = (ScriptProject) element.getScriptProject();
+		}
+		case IModelElement.PROJECT_FRAGMENT: {
+			IScriptProject project = element.getScriptProject();
 			// refresh pkg fragment roots and caches of the project (and its
 			// dependents)
 			this.rootsToRefresh.add(project);
 			this.projectCachesToReset.add(project);
 			break;
-		case IModelElement.SCRIPT_FOLDER:
+		}
+		case IModelElement.SCRIPT_FOLDER: {
 			// reset package fragment cache
-			project = (ScriptProject) element.getScriptProject();
+			IScriptProject project = element.getScriptProject();
 			this.projectCachesToReset.add(project);
 			break;
+		}
 		}
 	}
 
@@ -2074,7 +2079,7 @@ public class DeltaProcessor {
 		boolean hasDelta = false;
 
 		HashSet<IProjectFragment> fragmentsToRefresh = new HashSet<IProjectFragment>();
-		Iterator iterator = refreshedElements.iterator();
+		Iterator<?> iterator = refreshedElements.iterator();
 		while (iterator.hasNext()) {
 			IModelElement element = (IModelElement) iterator.next();
 			switch (element.getElementType()) {
@@ -2127,10 +2132,10 @@ public class DeltaProcessor {
 				}
 				break;
 			case IModelElement.SCRIPT_MODEL:
-				Iterator projectNames = this.state.getOldScriptProjectNames()
-						.iterator();
+				Iterator<String> projectNames = this.state
+						.getOldScriptProjectNames().iterator();
 				while (projectNames.hasNext()) {
-					String projectName = (String) projectNames.next();
+					String projectName = projectNames.next();
 					IProject project = ResourcesPlugin.getWorkspace().getRoot()
 							.getProject(projectName);
 					if (!DLTKLanguageManager.hasScriptNature(project)) {
@@ -2158,14 +2163,14 @@ public class DeltaProcessor {
 			}
 		}
 		// perform refresh
-		Iterator projectNames = this.state.getOldScriptProjectNames()
+		Iterator<String> projectNames = this.state.getOldScriptProjectNames()
 				.iterator();
 		IWorkspaceRoot wksRoot = ResourcesPlugin.getWorkspace().getRoot();
 		while (projectNames.hasNext()) {
 			if (monitor != null && monitor.isCanceled()) {
 				break;
 			}
-			String projectName = (String) projectNames.next();
+			String projectName = projectNames.next();
 			IProject project = wksRoot.getProject(projectName);
 			if (!DLTKLanguageManager.hasScriptNature(project)) {
 				// project is not accessible or has lost its Script nature
@@ -2174,8 +2179,8 @@ public class DeltaProcessor {
 			ScriptProject scriptProject = (ScriptProject) DLTKCore
 					.create(project);
 			IProjectFragment[] fragments;
-			Set fragmentsSet = new HashSet();
-			Set fragmentsSetOld = new HashSet();
+			Set<IProjectFragment> fragmentsSet = new HashSet<IProjectFragment>();
+			Set<IProjectFragment> fragmentsSetOld = new HashSet<IProjectFragment>();
 			;
 			try {
 				fragmentsSetOld.addAll(Arrays.asList(scriptProject
@@ -2183,7 +2188,7 @@ public class DeltaProcessor {
 				fragmentsSet.addAll(Arrays.asList(scriptProject
 						.getAllProjectFragments()));
 				fragmentsSet.addAll(fragmentsSetOld);
-				fragments = (IProjectFragment[]) fragmentsSet
+				fragments = fragmentsSet
 						.toArray(new IProjectFragment[fragmentsSet.size()]);
 				for (int i = 0; i < fragments.length; i++) {
 					if (!fragmentsToRefresh.contains(fragments[i])) {
@@ -2684,8 +2689,9 @@ public class DeltaProcessor {
 									this);
 							// refresh pkg fragment roots and caches of the
 							// project (and its dependents)
-							this.rootsToRefresh.add(element);
-							this.projectCachesToReset.add(element);
+							final IScriptProject project = (IScriptProject) element;
+							this.rootsToRefresh.add(project);
+							this.projectCachesToReset.add(project);
 							this.postActions.add(new Runnable() {
 								public void run() {
 									ProjectIndexerManager.indexProject(res);
