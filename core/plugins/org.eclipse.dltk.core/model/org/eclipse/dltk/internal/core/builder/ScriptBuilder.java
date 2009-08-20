@@ -203,9 +203,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	protected IProject[] build(int kind,
 			@SuppressWarnings("unchecked") Map args, IProgressMonitor monitor)
 			throws CoreException {
-		// Do not build if environment are not available.
-		// TODO: Store build requests and call builds then connection will be
-		// established.
 		this.currentProject = getProject();
 		if (currentProject == null || !currentProject.isAccessible())
 			return new IProject[0];
@@ -228,6 +225,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		IEnvironment environment = EnvironmentManager
 				.getEnvironment(scriptProject);
 		if (environment == null || !environment.isConnected()) {
+			// Do not build if environment is not available.
+			// TODO: Store build requests and call builds when connection will
+			// be established.
 			if (monitor != null) {
 				monitor.done();
 			}
