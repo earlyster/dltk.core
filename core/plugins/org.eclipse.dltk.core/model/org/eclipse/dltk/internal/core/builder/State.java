@@ -37,7 +37,7 @@ public class State {
 	 **/
 	public static final byte VERSION = 0x0016;
 
-	Set externalFolderLocations = new HashSet();
+	Set<IPath> externalFolderLocations = new HashSet<IPath>();
 
 	boolean noCleanExternalFolders = false;
 
@@ -77,7 +77,7 @@ public class State {
 		this.noCleanExternalFolders = false;
 	}
 
-	public Set getExternalFolders() {
+	public Set<IPath> getExternalFolders() {
 		return this.externalFolderLocations;
 	}
 
@@ -152,9 +152,9 @@ public class State {
 		 * ClasspathMultiDirectory[] int id String path(s)
 		 */
 		out.writeInt(externalFolderLocations.size());
-		for (Iterator iterator = this.externalFolderLocations.iterator(); iterator
+		for (Iterator<IPath> iterator = this.externalFolderLocations.iterator(); iterator
 				.hasNext();) {
-			IPath path = (IPath) iterator.next();
+			IPath path = iterator.next();
 			out.writeUTF(path.toPortableString());
 		}
 		out.writeBoolean(this.noCleanExternalFolders);
@@ -163,6 +163,7 @@ public class State {
 	/**
 	 * Returns a string representation of the receiver.
 	 */
+	@Override
 	public String toString() {
 		return "State for " + scriptProjectName //$NON-NLS-1$
 				+ " (#" + buildNumber //$NON-NLS-1$

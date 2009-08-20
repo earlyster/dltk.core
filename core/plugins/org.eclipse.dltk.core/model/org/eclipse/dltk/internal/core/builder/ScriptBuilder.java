@@ -13,7 +13,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -47,6 +46,7 @@ import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IModelMarker;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptProjectUtil;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
@@ -124,7 +124,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	}
 
 	static class ExternalModuleVisitor implements IModelElementVisitor {
-		final Set elements = new HashSet();
+		final Set<ISourceModule> elements = new HashSet<ISourceModule>();
 		private final IProgressMonitor monitor;
 
 		public ExternalModuleVisitor(IProgressMonitor monitor) {
@@ -156,7 +156,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			} else if (element.getElementType() == IModelElement.SOURCE_MODULE) {
 				if (element instanceof ExternalSourceModule
 						|| element instanceof BuiltinSourceModule) {
-					elements.add(element);
+					elements.add((ISourceModule) element);
 				}
 				return false; // do not enter into source module content.
 			} else if (element.getElementType() == IModelElement.SCRIPT_FOLDER) {
@@ -199,7 +199,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 	private static final String CURRENT_VERSION = "200810012003-2123"; //$NON-NLS-1$
 
-	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
+	@Override
+	protected IProject[] build(int kind,
+			@SuppressWarnings("unchecked") Map args, IProgressMonitor monitor)
 			throws CoreException {
 		// Do not build if environment are not available.
 		// TODO: Store build requests and call builds then connection will be
@@ -325,7 +327,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 					scriptProject.getLanguageToolkit(), resource)) {
 				continue;
 			}
-			final Map attributes = marker.getAttributes();
+			final Map<?, ?> attributes = marker.getAttributes();
 			if (attributes == null) {
 				continue;
 			}
@@ -342,6 +344,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
+	@Override
 	protected void clean(IProgressMonitor monitor) throws CoreException {
 		long start = 0;
 		if (TRACE) {
@@ -478,14 +481,14 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 							.getName()));
 			monitor.beginTask(NONAME, WORK_RESOURCES + WORK_EXTERNAL
 					+ WORK_SOURCES + WORK_BUILD);
-			Set resources = getResourcesFrom(currentProject, monitor,
-					WORK_RESOURCES);
+			Set<IResource> resources = getResourcesFrom(currentProject,
+					monitor, WORK_RESOURCES);
 			if (monitor.isCanceled()) {
 				return;
 			}
-			Set externalElements = getExternalElementsFrom(scriptProject,
-					monitor, WORK_EXTERNAL, true);
-			Set externalFolders = new HashSet(
+			Set<ISourceModule> externalElements = getExternalElementsFrom(
+					scriptProject, monitor, WORK_EXTERNAL, true);
+			Set<IPath> externalFolders = new HashSet<IPath>(
 					this.lastState.externalFolderLocations);
 			if (monitor.isCanceled()) {
 				return;
@@ -499,8 +502,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 			builders = getScriptBuilders();
 
-			List localResources = new ArrayList();
-			List localElements = new ArrayList();
+			List<IResource> localResources = new ArrayList<IResource>();
+			List<ISourceModule> localElements = new ArrayList<ISourceModule>();
 			locateSourceModules(monitor, WORK_SOURCES, resources,
 					localElements, localResources);
 
@@ -512,9 +515,10 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			resourceTicks = Math.min(resourceTicks, WORK_BUILD / 4);
 
 			try {
-				buildElements(localElements, externalElements, monitor,
-						WORK_BUILD - resourceTicks, IScriptBuilder.FULL_BUILD,
-						Collections.EMPTY_SET, externalFolders, builders);
+				final BuilderState[] states = estimateBuild(localElements,
+						externalElements, Collections.<IPath> emptySet(),
+						externalFolders, builders, IScriptBuilder.FULL_BUILD);
+				buildElements(states, monitor, WORK_BUILD - resourceTicks);
 				lastBuildSourceFiles += externalElements.size();
 			} catch (CoreException e) {
 				DLTKCore.error(Messages.ScriptBuilder_errorBuildElements, e);
@@ -567,7 +571,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	private Set getExternalElementsFrom(ScriptProject prj,
+	private Set<ISourceModule> getExternalElementsFrom(ScriptProject prj,
 			final IProgressMonitor monitor, int tiks, boolean updateState)
 			throws ModelException {
 		final String name = Messages.ScriptBuilder_scanningExternalFolders;
@@ -618,12 +622,13 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			IProgressMonitor monitor) throws CoreException {
 		State newState = new State(this);
 
-		Set externalFoldersBefore = null;
+		final Set<IPath> externalFoldersBefore;
 		if (this.lastState != null) {
 			newState.copyFrom(this.lastState);
-			externalFoldersBefore = new HashSet(newState.getExternalFolders());
+			externalFoldersBefore = new HashSet<IPath>(newState
+					.getExternalFolders());
 		} else {
-			externalFoldersBefore = new HashSet();
+			externalFoldersBefore = new HashSet<IPath>();
 		}
 
 		this.lastState = newState;
@@ -643,12 +648,18 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			if (DEBUG)
-				log("Number of changed resources in delta: " + resources.size()); //$NON-NLS-1$
-			Set externalElements = getExternalElementsFrom(scriptProject,
-					monitor, WORK_EXTERNAL, true);
+			if (DEBUG) {
+				String msg = "Changed resources in delta: " + resources.size(); //$NON-NLS-1$
+				if (!resources.isEmpty() && resources.size() < 10) {
+					msg += ", " + resources.toString(); //$NON-NLS-1$
+				}
+				log(msg);
+			}
+			Set<ISourceModule> externalElements = getExternalElementsFrom(
+					scriptProject, monitor, WORK_EXTERNAL, true);
 			// New external folders set
-			Set externalFolders = new HashSet(lastState.externalFolderLocations);
+			Set<IPath> externalFolders = new HashSet<IPath>(
+					lastState.externalFolderLocations);
 			if (monitor.isCanceled()) {
 				return;
 			}
@@ -659,8 +670,8 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 			builders = getScriptBuilders();
 
-			List localResources = new ArrayList();
-			List localElements = new ArrayList();
+			List<IResource> localResources = new ArrayList<IResource>();
+			List<ISourceModule> localElements = new ArrayList<ISourceModule>();
 			locateSourceModules(monitor, WORK_SOURCES, resources,
 					localElements, localResources);
 
@@ -674,10 +685,11 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 				return;
 			}
 			try {
-				buildElements(localElements, externalElements, monitor,
-						WORK_BUILD - resourceTicks,
-						IScriptBuilder.INCREMENTAL_BUILD,
-						externalFoldersBefore, externalFolders, builders);
+				final BuilderState[] states = estimateBuild(localElements,
+						externalElements, externalFoldersBefore,
+						externalFolders, builders,
+						IScriptBuilder.INCREMENTAL_BUILD);
+				buildElements(states, monitor, WORK_BUILD - resourceTicks);
 			} catch (CoreException e) {
 				DLTKCore.error(Messages.ScriptBuilder_errorBuildElements, e);
 			}
@@ -735,15 +747,17 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	 * @return
 	 */
 	protected void locateSourceModules(IProgressMonitor monitor, int tiks,
-			Set resources, List realElements, List realResources) {
+			Set<IResource> resources, List<ISourceModule> realElements,
+			List<IResource> realResources) {
 		IProgressMonitor sub = new SubProgressMonitor(monitor, tiks / 3);
 		sub.beginTask(NONAME, resources.size());
 		int remainingWork = resources.size();
-		for (Iterator iterator = resources.iterator(); iterator.hasNext();) {
+		for (Iterator<IResource> iterator = resources.iterator(); iterator
+				.hasNext();) {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			IResource res = (IResource) iterator.next();
+			IResource res = iterator.next();
 			sub.subTask(NLS.bind(
 					Messages.ScriptBuilder_Locating_source_modules, String
 							.valueOf(remainingWork), res.getName()));
@@ -755,7 +769,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			if (element != null
 					&& element.getElementType() == IModelElement.SOURCE_MODULE
 					&& element.exists()) {
-				realElements.add(element);
+				realElements.add((ISourceModule) element);
 			} else {
 				realResources.add(res);
 			}
@@ -769,8 +783,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	 * Build only resources, if some resources are elements they they will be
 	 * returned.
 	 */
-	protected void buildResources(List realResources, IProgressMonitor monitor,
-			int tiks, int buildType, IScriptBuilder[] builders) {
+	protected void buildResources(List<IResource> realResources,
+			IProgressMonitor monitor, int tiks, int buildType,
+			IScriptBuilder[] builders) {
 		if (builders == null || builders.length == 0 || realResources.isEmpty()) {
 			monitor.worked(tiks);
 			return;
@@ -787,37 +802,35 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	protected void buildElements(List localElements, Set externalElements,
-			IProgressMonitor monitor, int ticks, int buildType,
-			Set externalFoldersBefore, Set externalFolders,
-			IScriptBuilder[] builders) throws CoreException {
+	private static class BuilderState {
+		final IScriptBuilder builder;
+		int buildType;
+		int workEstimation;
+		List<ISourceModule> elements;
+		List<ISourceModule> externalElements;
 
-		// TODO: replace this stuff with multistatus
-		if (builders == null) {
-			return;
+		BuilderState(IScriptBuilder builder, int buildType) {
+			this.builder = builder;
+			this.buildType = buildType;
 		}
+	}
 
-		final int[] workEstimations = new int[builders.length];
-		final List[] builderToElements = new List[builders.length];
-		final List[] builderExternalElements = new List[builders.length];
-		final int[] buildTypes = new int[builders.length];
-		Arrays.fill(buildTypes, buildType);
-		estimateBuild(localElements, externalElements, externalFoldersBefore,
-				externalFolders, builders, workEstimations, builderToElements,
-				builderExternalElements, buildTypes);
-
+	private void buildElements(final BuilderState[] states,
+			IProgressMonitor monitor, int ticks) {
 		int total = 0;
-		for (int k = 0; k < builders.length; k++) {
-			total += workEstimations[k];
+		for (int k = 0; k < states.length; k++) {
+			total += states[k].workEstimation;
 		}
 
-		for (int k = 0; k < builders.length; k++) {
+		// TODO collect statuses from the individual builders?
+		for (int k = 0; k < states.length; k++) {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			final IScriptBuilder builder = builders[k];
-			int builderWork = workEstimations[k] * ticks / total;
-			final List buildExternalElements = builderExternalElements[k];
+			final BuilderState state = states[k];
+			final IScriptBuilder builder = state.builder;
+			int builderWork = state.workEstimation * ticks / total;
+			final List<ISourceModule> buildExternalElements = state.externalElements;
 			if (buildExternalElements != null
 					&& buildExternalElements.size() > 0
 					&& builder instanceof IScriptBuilderExtension) {
@@ -828,9 +841,9 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 						Integer.toString(buildExternalElements.size())));
 				((IScriptBuilderExtension) builder).buildExternalElements(
 						scriptProject, buildExternalElements,
-						new SubProgressMonitor(monitor, step), buildTypes[k]);
+						new SubProgressMonitor(monitor, step), state.buildType);
 			}
-			final List buildElementsList = builderToElements[k];
+			final List<ISourceModule> buildElementsList = state.elements;
 			if (buildElementsList.size() > 0) {
 				final int step = buildElementsList.size() * ticks / total;
 				builderWork -= step;
@@ -838,13 +851,12 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 						Messages.ScriptBuilder_building_N_localModules, Integer
 								.toString(buildElementsList.size())));
 				builder.buildModelElements(scriptProject, buildElementsList,
-						new SubProgressMonitor(monitor, step), buildTypes[k]);
+						new SubProgressMonitor(monitor, step), state.buildType);
 			}
 			if (builderWork > 0) {
 				monitor.worked(builderWork);
 			}
 		}
-		// TODO: Do something with status.
 	}
 
 	/**
@@ -872,28 +884,35 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 	 *            resulting build types for each builder
 	 * @throws CoreException
 	 */
-	private void estimateBuild(List localElements, Set externalElements,
-			Set externalFoldersBefore, Set externalFolders,
-			IScriptBuilder[] builders, final int[] workEstimations,
-			final List[] builderToElements, List[] builderExternalElements,
-			int[] buildTypes) throws CoreException {
-		final HashSet elementsAsSet = new HashSet(localElements);
-		List projectElements = null;
-		List projectExternalElements = null;
+	private BuilderState[] estimateBuild(List<ISourceModule> localElements,
+			Set<ISourceModule> externalElements,
+			Set<IPath> externalFoldersBefore, Set<IPath> externalFolders,
+			IScriptBuilder[] builders, final int buildType)
+			throws CoreException {
+		if (builders == null) {
+			return new BuilderState[0];
+		}
+		final BuilderState[] states = new BuilderState[builders.length];
+		final HashSet<ISourceModule> elementsAsSet = new HashSet<ISourceModule>(
+				localElements);
+		List<ISourceModule> projectElements = null;
+		List<ISourceModule> projectExternalElements = null;
 		for (int k = 0; k < builders.length; k++) {
 			final IScriptBuilder builder = builders[k];
+			final BuilderState state = new BuilderState(builder, buildType);
+			states[k] = state;
 			final IScriptBuilder.DependencyResponse response = builder
-					.getDependencies(this.scriptProject, buildTypes[k],
+					.getDependencies(this.scriptProject, state.buildType,
 							elementsAsSet, externalElements,
 							externalFoldersBefore, externalFolders);
-			final List buildElementsList;
-			final List buildExternalElements;
+			final List<ISourceModule> buildElementsList;
+			final List<ISourceModule> buildExternalElements;
 			if (response == null) {
 				buildElementsList = localElements;
 				buildExternalElements = null;
 			} else {
 				if (response.isFullLocalBuild()) {
-					if (buildTypes[k] == IScriptBuilder.FULL_BUILD) {
+					if (state.buildType == IScriptBuilder.FULL_BUILD) {
 						buildElementsList = localElements;
 					} else {
 						if (projectElements == null) {
@@ -902,62 +921,70 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 						buildElementsList = projectElements;
 					}
 				} else {
-					final Set dependencies = response.getLocalDependencies();
+					@SuppressWarnings("unchecked")
+					final Set<ISourceModule> dependencies = response
+							.getLocalDependencies();
 					if (dependencies != null && !dependencies.isEmpty()
 							&& !elementsAsSet.containsAll(dependencies)) {
-						final Set e = new HashSet(elementsAsSet.size()
-								+ dependencies.size());
+						final Set<ISourceModule> e = new HashSet<ISourceModule>(
+								elementsAsSet.size() + dependencies.size());
 						e.addAll(elementsAsSet);
 						e.addAll(dependencies);
-						buildElementsList = new ArrayList(e);
+						buildElementsList = new ArrayList<ISourceModule>(e);
 					} else {
 						buildElementsList = localElements;
 					}
 				}
 				if (response.isFullExternalBuild()) {
-					if (buildTypes[k] == IScriptBuilder.FULL_BUILD) {
-						buildExternalElements = new ArrayList(externalElements);
+					if (state.buildType == IScriptBuilder.FULL_BUILD) {
+						buildExternalElements = new ArrayList<ISourceModule>(
+								externalElements);
 					} else {
 						if (projectExternalElements == null) {
-							projectExternalElements = new ArrayList(
+							projectExternalElements = new ArrayList<ISourceModule>(
 									getExternalElementsFrom(scriptProject,
 											new NullProgressMonitor(), 1, false));
 						}
 						buildExternalElements = projectExternalElements;
 					}
 				} else {
-					final Set dependencies = response.getExternalDependencies();
+					@SuppressWarnings("unchecked")
+					final Set<ISourceModule> dependencies = response
+							.getExternalDependencies();
 					if (dependencies != null && !dependencies.isEmpty()
 							&& !externalElements.containsAll(dependencies)) {
-						final Set e = new HashSet(externalElements.size()
-								+ dependencies.size());
+						final Set<ISourceModule> e = new HashSet<ISourceModule>(
+								externalElements.size() + dependencies.size());
 						e.addAll(externalElements);
 						e.addAll(dependencies);
-						buildExternalElements = new ArrayList(e);
+						buildExternalElements = new ArrayList<ISourceModule>(e);
 					} else {
 						buildExternalElements = null;
 					}
 				}
 				if (response.isFullLocalBuild()
 						|| response.isFullExternalBuild()) {
-					buildTypes[k] = IScriptBuilder.FULL_BUILD;
+					state.buildType = IScriptBuilder.FULL_BUILD;
 				}
 			}
-			builderToElements[k] = buildElementsList;
-			builderExternalElements[k] = buildExternalElements;
+			state.elements = buildElementsList;
+			state.externalElements = buildExternalElements;
 			int work = buildElementsList.size();
 			if (buildExternalElements != null) {
 				work += buildExternalElements.size();
 			}
-			workEstimations[k] = Math.max(work, 1);
+			state.workEstimation = Math.max(work, 1);
 		}
+		return states;
 	}
 
-	private List collectLocalElements() throws CoreException {
+	private List<ISourceModule> collectLocalElements() throws CoreException {
 		final IProgressMonitor nullMon = new NullProgressMonitor();
-		final Set resources = getResourcesFrom(currentProject, nullMon, 1);
-		final List elements = new ArrayList();
-		locateSourceModules(nullMon, 1, resources, elements, new ArrayList());
+		final Set<IResource> resources = getResourcesFrom(currentProject,
+				nullMon, 1);
+		final List<ISourceModule> elements = new ArrayList<ISourceModule>();
+		locateSourceModules(nullMon, 1, resources, elements,
+				new ArrayList<IResource>());
 		return elements;
 	}
 
