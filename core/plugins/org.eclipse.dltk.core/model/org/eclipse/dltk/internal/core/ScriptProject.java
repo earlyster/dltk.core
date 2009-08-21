@@ -1003,6 +1003,14 @@ public class ScriptProject extends Openable implements IScriptProject,
 		}
 	}
 
+	public void resetResolvedBuildpath() {
+		try {
+			getPerProjectInfo().resetResolvedBuildpath();
+		} catch (ModelException e) {
+			// project doesn't exist
+		}
+	}
+
 	/**
 	 * Reset the collection of project fragments (local ones) - only if opened.
 	 */

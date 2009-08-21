@@ -232,6 +232,11 @@ public class ModelManager implements ISaveParticipant {
 			}
 		}
 
+		public synchronized void resetResolvedBuildpath() {
+			// null out resolved information
+			resolvedBuildpath = null;
+		}
+
 		// updating raw buildpath need to flush obsoleted cached information
 		// about resolved entries
 		public synchronized void updateBuildpathInformation(
