@@ -110,7 +110,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
 	public PersistentTimeStampMap customTimeStamps;
 
 	/* A table from ScriptProject to BuildpathValidation */
-	private HashMap buildpathValidations = new HashMap();
+	private HashMap<ScriptProject, BuildpathValidation> buildpathValidations = new HashMap<ScriptProject, BuildpathValidation>();
 
 	/* A table from ScriptProject to ProjectReferenceChange */
 	private HashMap projectReferenceChanges = new HashMap();
@@ -307,8 +307,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
 
 	public synchronized BuildpathValidation addBuildpathValidation(
 			ScriptProject project) {
-		BuildpathValidation validation = (BuildpathValidation) this.buildpathValidations
-				.get(project);
+		BuildpathValidation validation = this.buildpathValidations.get(project);
 		if (validation == null) {
 			validation = new BuildpathValidation(project);
 			this.buildpathValidations.put(project, validation);
