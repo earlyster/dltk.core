@@ -423,9 +423,9 @@ public class BuildpathEntry implements IBuildpathEntry {
 		case IBuildpathEntry.BPE_SOURCE:
 			buffer.append("BPE_SOURCE"); //$NON-NLS-1$
 			break;
-		// case IBuildpathEntry.BPE_VARIABLE :
-		// buffer.append("BPE_VARIABLE"); //$NON-NLS-1$
-		// break;
+		case IBuildpathEntry.BPE_VARIABLE:
+			buffer.append("BPE_VARIABLE"); //$NON-NLS-1$
+			break;
 		case IBuildpathEntry.BPE_CONTAINER:
 			buffer.append("BPE_CONTAINER"); //$NON-NLS-1$
 			break;
