@@ -687,11 +687,13 @@ public class ScriptProject extends Openable implements IScriptProject {
 		// Call for extra model providers
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(this);
-		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
-				.getNatureId());
-		if (providers != null) {
-			for (int i = 0; i < providers.length; i++) {
-				providers[i].provideModelChanges(this, fragments);
+		if (toolkit != null) {
+			IModelProvider[] providers = ModelProviderManager
+					.getProviders(toolkit.getNatureId());
+			if (providers != null) {
+				for (int i = 0; i < providers.length; i++) {
+					providers[i].provideModelChanges(this, fragments);
+				}
 			}
 		}
 
@@ -997,6 +999,14 @@ public class ScriptProject extends Openable implements IScriptProject {
 				.getModelManager().peekAtInfo(this);
 		if (info != null) {
 			info.resetCaches();
+		}
+	}
+
+	public void resetResolvedBuildpath() {
+		try {
+			getPerProjectInfo().resetResolvedBuildpath();
+		} catch (ModelException e) {
+			// project doesn't exist
 		}
 	}
 
@@ -3147,11 +3157,13 @@ public class ScriptProject extends Openable implements IScriptProject {
 		// Call for extra model providers
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(this);
-		IModelProvider[] providers = ModelProviderManager.getProviders(toolkit
-				.getNatureId());
-		if (providers != null) {
-			for (int i = 0; i < providers.length; i++) {
-				providers[i].provideModelChanges(this, fragments);
+		if (toolkit != null) {
+			IModelProvider[] providers = ModelProviderManager
+					.getProviders(toolkit.getNatureId());
+			if (providers != null) {
+				for (int i = 0; i < providers.length; i++) {
+					providers[i].provideModelChanges(this, fragments);
+				}
 			}
 		}
 		return (IProjectFragment[]) fragments
