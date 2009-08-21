@@ -472,8 +472,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 
 	protected void fullBuild(final IProgressMonitor monitor) {
 
-		State newState = clearLastState();
-		this.lastState = newState;
+		this.lastState = clearLastState();
 		IScriptBuilder[] builders = null;
 		try {
 			monitor.setTaskName(NLS.bind(
