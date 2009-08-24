@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathAttribute;
@@ -175,6 +176,14 @@ public class BuildpathTests extends ModifyingResourceTests {
 			}
 		}
 		return result;
+	}
+
+	protected int numberOfBuildpathProblems(IScriptProject scriptProject)
+			throws CoreException {
+		IMarker[] markers = scriptProject.getProject().findMarkers(
+				IModelMarker.BUILDPATH_PROBLEM_MARKER, false,
+				IResource.DEPTH_ZERO);
+		return markers.length;
 	}
 
 	public void tearDownSuite() throws Exception {
@@ -991,6 +1000,58 @@ public class BuildpathTests extends ModifyingResourceTests {
 			}
 		} finally {
 			this.deleteProject("P");
+		}
+	}
+
+	/**
+	 * Ensure that missing projects are properly reported.
+	 */
+	public void testMissingProjectReport1() throws CoreException {
+		final String name1 = "p1miss";
+		final String name2 = "p2miss";
+		try {
+			IScriptProject p1 = createScriptProject(name1, TEST_NATURE,
+					new String[] { "" });
+			assertEquals(0, numberOfBuildpathProblems(p1));
+			IScriptProject p2 = createScriptProject(name2, TEST_NATURE,
+					new String[] { "" });
+			assertEquals(0, numberOfBuildpathProblems(p2));
+			// Add dependency
+			IBuildpathEntry[] originalP2CP = p2.getRawBuildpath();
+			// Add P1 as a prerequesite of P2
+			int length = originalP2CP.length;
+			IBuildpathEntry[] newCP = new IBuildpathEntry[length + 1];
+			System.arraycopy(originalP2CP, 0, newCP, 0, length);
+			newCP[length] = DLTKCore.newProjectEntry(p1.getProject()
+					.getFullPath(), false);
+			p2.setRawBuildpath(newCP, null);
+			waitForAutoBuild(); // wait for markers to be created
+			assertEquals(0, numberOfBuildpathProblems(p1));
+			assertEquals(0, numberOfBuildpathProblems(p2));
+			p1.getProject().close(new NullProgressMonitor());
+			waitForAutoBuild(); // wait for markers to be created
+			assertEquals(1, numberOfBuildpathProblems(p2));
+		} finally {
+			deleteProjects(new String[] { name1, name2 });
+		}
+	}
+
+	/**
+	 * Ensure that missing projects are properly reported.
+	 */
+	public void testMissingProjectReport2() throws CoreException, IOException {
+		final String name1 = "miss1";
+		final String name2 = "miss2";
+		try {
+			IScriptProject p2 = setUpScriptProject(name2);
+			waitForAutoBuild();
+			assertEquals(1, numberOfBuildpathProblems(p2));
+			IScriptProject p1 = setUpScriptProject(name1);
+			waitForAutoBuild();
+			assertEquals(0, numberOfBuildpathProblems(p1));
+			assertEquals(0, numberOfBuildpathProblems(p2));
+		} finally {
+			deleteProjects(new String[] { name1, name2 });
 		}
 	}
 
