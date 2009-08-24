@@ -248,14 +248,7 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 
 	protected IProject setUpProject(final String projectName)
 			throws CoreException, IOException {
-		// copy files in project from source workspace to target workspace
-		final File sourceWorkspacePath = getSourceWorkspacePath();
-		final File targetWorkspacePath = getWorkspaceRoot().getLocation()
-				.toFile();
-		copyDirectory(new File(sourceWorkspacePath, projectName), new File(
-				targetWorkspacePath, projectName));
-
-		return createProject(projectName);
+		return setUpProjectTo(projectName, projectName);
 	}
 
 	protected IScriptProject setUpScriptProjectTo(final String projectName,
