@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IconAndMessageDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -37,11 +38,13 @@ public class LaunchStatusDialog extends IconAndMessageDialog {
 		message = HandlerMessages.LaunchStatusDialog_message;
 	}
 
+	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setText(HandlerMessages.LaunchStatusDialog_title);
 	}
 
+	@Override
 	protected Image getImage() {
 		return getWarningImage();
 	}
@@ -51,6 +54,9 @@ public class LaunchStatusDialog extends IconAndMessageDialog {
 	private Label elapsedTimeValue;
 
 	public void updateElapsedTime(long elapsedTime) {
+		if (elapsedTimeValue == null || elapsedTimeValue.isDisposed()) {
+			return;
+		}
 		int h = (int) (elapsedTime / 1000 / 60 / 60);
 		elapsedTime -= h * 1000 * 60 * 60;
 		int m = (int) (elapsedTime / 1000 / 60);
@@ -71,6 +77,7 @@ public class LaunchStatusDialog extends IconAndMessageDialog {
 		elapsedTimeValue.setText(sb.toString());
 	}
 
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		createMessageArea(parent);
 
@@ -81,21 +88,24 @@ public class LaunchStatusDialog extends IconAndMessageDialog {
 		compositeData.horizontalSpan = 2;
 		composite.setLayoutData(compositeData);
 
-		final Label commandLinePrompt = new Label(composite, SWT.NONE);
-		commandLinePrompt
-				.setText(HandlerMessages.LaunchStatusDialog_commandLinePrompt);
-		final GridData commandLineData = new GridData(GridData.FILL_HORIZONTAL);
-		commandLineData.horizontalSpan = 2;
-		commandLinePrompt.setLayoutData(commandLineData);
+		if (commandLine != null) {
+			final Label commandLinePrompt = new Label(composite, SWT.NONE);
+			commandLinePrompt
+					.setText(HandlerMessages.LaunchStatusDialog_commandLinePrompt);
+			final GridData commandLineData = new GridData(
+					GridData.FILL_HORIZONTAL);
+			commandLineData.horizontalSpan = 2;
+			commandLinePrompt.setLayoutData(commandLineData);
 
-		final Text commandLineValue = new Text(composite, SWT.WRAP
-				| SWT.READ_ONLY | SWT.BORDER);
-		commandLineValue.setText(commandLine);
-		final GridData commandLineValueData = new GridData(
-				GridData.FILL_HORIZONTAL);
-		commandLineValueData.horizontalSpan = 2;
-		commandLineValueData.widthHint = 500;
-		commandLineValue.setLayoutData(commandLineValueData);
+			final Text commandLineValue = new Text(composite, SWT.WRAP
+					| SWT.READ_ONLY | SWT.BORDER);
+			commandLineValue.setText(commandLine);
+			final GridData commandLineValueData = new GridData(
+					GridData.FILL_HORIZONTAL);
+			commandLineValueData.horizontalSpan = 2;
+			commandLineValueData.widthHint = 500;
+			commandLineValue.setLayoutData(commandLineValueData);
+		}
 
 		final Label elapsedTimePrompt = new Label(composite, SWT.NONE);
 		elapsedTimePrompt
@@ -107,6 +117,7 @@ public class LaunchStatusDialog extends IconAndMessageDialog {
 		return parent;
 	}
 
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		createCancelButton(parent);
 	}
@@ -116,6 +127,7 @@ public class LaunchStatusDialog extends IconAndMessageDialog {
 				IDialogConstants.CANCEL_LABEL, true);
 	}
 
+	@Override
 	protected void cancelPressed() {
 		this.monitor.setCanceled(true);
 		close();
@@ -123,6 +135,16 @@ public class LaunchStatusDialog extends IconAndMessageDialog {
 
 	public void setCommandLine(String commandLine) {
 		this.commandLine = commandLine;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void setLaunchName(String launchName) {
+		if (launchName != null) {
+			message = NLS.bind(HandlerMessages.LaunchStatusDialog_message0,
+					launchName);
+		}
 	}
 
 }

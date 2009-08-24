@@ -18,6 +18,10 @@ public class HandlerMessages extends NLS {
 	public static String LaunchStatusDialog_commandLinePrompt;
 	public static String LaunchStatusDialog_elapsedTimePrompt;
 	public static String LaunchStatusDialog_message;
+	/**
+	 * @since 2.0
+	 */
+	public static String LaunchStatusDialog_message0;
 	public static String LaunchStatusDialog_title;
 	static {
 		// initialize resource bundle

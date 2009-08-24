@@ -12,6 +12,8 @@
 package org.eclipse.dltk.debug.ui.handlers;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
@@ -48,15 +50,11 @@ public class LaunchStatusHandler implements ILaunchStatusHandler {
 		if (isDisposed()) {
 			return;
 		}
-		if (!isDialogCreated()) {
-			asyncExec(new Runnable() {
-				public void run() {
-					createDialog();
-				}
-			});
-		}
 		asyncExec(new Runnable() {
 			public void run() {
+				if (!isDialogCreated()) {
+					createDialog();
+				}
 				dialog.updateElapsedTime(elapsedTime);
 			}
 		});
@@ -81,8 +79,18 @@ public class LaunchStatusHandler implements ILaunchStatusHandler {
 		}
 		dialog = new LaunchStatusDialog(window != null ? window.getShell()
 				: null, monitor);
-		dialog.setCommandLine(debugTarget.getProcess().getAttribute(
-				IProcess.ATTR_CMDLINE));
+		final ILaunch launch = debugTarget.getLaunch();
+		if (launch != null) {
+			final ILaunchConfiguration configuration = launch
+					.getLaunchConfiguration();
+			if (configuration != null) {
+				dialog.setLaunchName(configuration.getName());
+			}
+		}
+		final IProcess process = debugTarget.getProcess();
+		String cmdLine = process != null ? process
+				.getAttribute(IProcess.ATTR_CMDLINE) : null;
+		dialog.setCommandLine(cmdLine);
 		dialog.open();
 	}
 
