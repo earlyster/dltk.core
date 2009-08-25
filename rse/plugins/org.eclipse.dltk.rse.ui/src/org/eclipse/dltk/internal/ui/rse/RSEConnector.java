@@ -18,7 +18,7 @@ public class RSEConnector implements IConnector {
 	private static boolean running = true;
 	private Thread processingThread = null;
 
-	private Thread createPoprocessingThread() {
+	private Thread createProcessingThread() {
 		return new Thread("RSE connection resolver") {
 			public void run() {
 				while (running) {
@@ -86,7 +86,7 @@ public class RSEConnector implements IConnector {
 
 	public void register() {
 		if (processingThread == null) {
-			processingThread = createPoprocessingThread();
+			processingThread = createProcessingThread();
 			processingThread.start();
 		}
 	}
