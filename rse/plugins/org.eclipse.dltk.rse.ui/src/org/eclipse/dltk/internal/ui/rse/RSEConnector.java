@@ -1,5 +1,8 @@
 package org.eclipse.dltk.internal.ui.rse;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.core.internal.rse.DLTKRSEPlugin;
@@ -56,12 +59,24 @@ public class RSEConnector implements IConnector {
 		};
 	}
 
+	private final Set<IHost> activeConnects = new HashSet<IHost>();
+
 	private void connect(IHost host) {
 		ISubSystem[] subSystems = host.getSubSystems();
 		for (ISubSystem subsystem : subSystems) {
 			if (subsystem instanceof IRemoteFileSubSystem) {
 				try {
-					subsystem.connect(new NullProgressMonitor(), false);
+					synchronized (activeConnects) {
+						if (!activeConnects.add(host))
+							return;
+					}
+					try {
+						subsystem.connect(new NullProgressMonitor(), false);
+					} finally {
+						synchronized (activeConnects) {
+							activeConnects.remove(host);
+						}
+					}
 				} catch (OperationCanceledException e) {
 					// don't log it
 				} catch (Exception e) {
