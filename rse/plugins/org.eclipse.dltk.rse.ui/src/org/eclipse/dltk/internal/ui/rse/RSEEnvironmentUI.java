@@ -26,7 +26,7 @@ public class RSEEnvironmentUI implements IEnvironmentUI {
 	}
 
 	public String selectFolder(Shell shell, String initialFolder) {
-		if (!environment.connect()) {
+		if (!environment.connect(true)) {
 			return null;
 		}
 		SystemRemoteFolderDialog dialog = new SystemRemoteFolderDialog(shell);
@@ -64,7 +64,7 @@ public class RSEEnvironmentUI implements IEnvironmentUI {
 	 * @since 2.0
 	 */
 	public String selectFile(Shell shell, int fileType, String initialSelection) {
-		if (!environment.connect()) {
+		if (!environment.connect(true)) {
 			return null;
 		}
 		SystemRemoteFileDialog dialog = new SystemRemoteFileDialog(shell);
