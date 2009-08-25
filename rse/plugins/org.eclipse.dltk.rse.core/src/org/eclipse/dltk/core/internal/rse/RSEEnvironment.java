@@ -155,16 +155,23 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	 * @since 2.0
 	 */
 	public boolean connect() {
+		return connect(false);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public boolean connect(boolean force) {
 		if (isConnected()) {
 			return true;
 		}
-		connectUnsafe();
+		connectUnsafe(force);
 		return isConnected();
 	}
 
-	private void connectUnsafe() {
+	private void connectUnsafe(boolean force) {
 		boolean tryToConnect = isTryToConnect();
-		if (tryToConnect) {
+		if (force || tryToConnect) {
 			RSEConnectionQueryManager.getInstance().connectTo(host);
 			setTryToConnect(false);
 		}
