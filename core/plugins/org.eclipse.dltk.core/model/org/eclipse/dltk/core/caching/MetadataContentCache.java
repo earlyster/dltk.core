@@ -132,7 +132,7 @@ public class MetadataContentCache extends AbstractContentCache {
 		initialize();
 		EntryKey key = makeKey(handle);
 		if (entryCache.containsKey(key)) {
-			CacheEntry entry = (CacheEntry) entryCache.get(key);
+			CacheEntry entry = entryCache.get(key);
 			long accessTime = entry.getLastAccessTime();
 			long timeMillis = System.currentTimeMillis();
 			if (timeMillis - accessTime > DAY_IN_MILIS) {
@@ -394,7 +394,7 @@ public class MetadataContentCache extends AbstractContentCache {
 		}
 		EntryKey key = makeKey(handle);
 		if (entryCache.containsKey(key)) {
-			CacheEntry entry = (CacheEntry) entryCache.get(key);
+			CacheEntry entry = entryCache.get(key);
 			removeCacheEntry(entry, key);
 			save(true);
 		}
