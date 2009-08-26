@@ -39,53 +39,9 @@ import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
  */
 public class MetadataContentCache extends AbstractContentCache {
 	private static final int DAY_IN_MILIS = 60;// 1000 * 60 * 60 * 24;
-	private static final int SAVE_DELTA = 1000 * 60; // Minute
+	private static final int SAVE_DELTA = 100;
 	private Resource indexResource = null;
-	private long newSaveTime = 0;
-
-	private static class EntryKey {
-		private String environment;
-		private String path;
-
-		public EntryKey(String environment, String path) {
-			this.environment = environment;
-			this.path = path;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result
-					+ ((environment == null) ? 0 : environment.hashCode());
-			result = prime * result + ((path == null) ? 0 : path.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			EntryKey other = (EntryKey) obj;
-			if (environment == null) {
-				if (other.environment != null)
-					return false;
-			} else if (!environment.equals(other.environment))
-				return false;
-			if (path == null) {
-				if (other.path != null)
-					return false;
-			} else if (!path.equals(other.path))
-				return false;
-			return true;
-		}
-	}
-
-	private Map<EntryKey, CacheEntry> entryCache = new HashMap<EntryKey, CacheEntry>();
+	private Map<String, CacheEntry> entryCache = new HashMap<String, CacheEntry>();
 	private IPath cacheLocation;
 	private CRC32 checksum = new CRC32();
 
@@ -130,15 +86,13 @@ public class MetadataContentCache extends AbstractContentCache {
 
 	private synchronized CacheEntry getEntry(IFileHandle handle) {
 		initialize();
-		EntryKey key = makeKey(handle);
+		String key = makeKey(handle);
 		if (entryCache.containsKey(key)) {
 			CacheEntry entry = (CacheEntry) entryCache.get(key);
 			long accessTime = entry.getLastAccessTime();
 			long timeMillis = System.currentTimeMillis();
 			if (timeMillis - accessTime > DAY_IN_MILIS) {
-				long entryTimestamp = entry.getTimestamp() / 1000;
-				long handleTimestamp = getHandleLastModification(handle) / 1000;
-				if (entryTimestamp == handleTimestamp) {
+				if (entry.getTimestamp() == getHandleLastModification(handle)) {
 					entry.setLastAccessTime(timeMillis);
 					return entry;
 				} else {
@@ -194,7 +148,7 @@ public class MetadataContentCache extends AbstractContentCache {
 		return index;
 	}
 
-	private void removeCacheEntry(CacheEntry entry, EntryKey key) {
+	private void removeCacheEntry(CacheEntry entry, String key) {
 		if (entry == null || key == null) {
 			return;
 		}
@@ -218,14 +172,14 @@ public class MetadataContentCache extends AbstractContentCache {
 		}
 	}
 
-	private EntryKey makeKey(CacheEntry entry) {
+	private String makeKey(CacheEntry entry) {
 		CacheIndex index = (CacheIndex) entry.eContainer();
-		return new EntryKey(index.getEnvironment(), entry.getPath());
+		return entry.getPath() + ":" + index.getEnvironment();
 	}
 
-	private EntryKey makeKey(IFileHandle handle) {
-		return new EntryKey(handle.getEnvironmentId(), handle.getPath()
-				.toString());
+	private String makeKey(IFileHandle handle) {
+		return handle.getPath().toPortableString() + ":"
+				+ handle.getEnvironmentId();
 	}
 
 	long changeCount = 0;
@@ -236,9 +190,9 @@ public class MetadataContentCache extends AbstractContentCache {
 			return;
 		}
 		if (countSaves) {
-			long current = System.currentTimeMillis();
-			if (current > newSaveTime) {
-				newSaveTime = current + SAVE_DELTA;
+			changeCount++;
+			if (changeCount > SAVE_DELTA) {
+				changeCount = 0;
 			} else {
 				return;
 			}
@@ -282,7 +236,6 @@ public class MetadataContentCache extends AbstractContentCache {
 				BufferedInputStream inp = new BufferedInputStream(
 						new FileInputStream(file), 4096);
 				Util.copy(inp, bout);
-				inp.close();
 				node.done("Metadata", RuntimePerformanceMonitor.IOREAD, file
 						.length(), EnvironmentManager.getLocalEnvironment());
 				return new ByteArrayInputStream(bout.toByteArray());
@@ -300,11 +253,53 @@ public class MetadataContentCache extends AbstractContentCache {
 		return null;
 	}
 
+	public class MetadataFileOutputStream extends BufferedOutputStream {
+		File file;
+		private PerformanceNode node;
+		private ByteArrayOutputStream bytes;
+
+		public MetadataFileOutputStream(File file) throws FileNotFoundException {
+			super(new ByteArrayOutputStream());
+			bytes = (ByteArrayOutputStream) out;
+			this.file = file;
+			this.file = file;
+		}
+
+		@Override
+		public void close() throws IOException {
+			super.close();
+			node = RuntimePerformanceMonitor.begin();
+			org.eclipse.dltk.compiler.util.Util.copy(file,
+					new ByteArrayInputStream(bytes.toByteArray()));
+			node.done("Metadata", RuntimePerformanceMonitor.IOWRITE, file
+					.length(), EnvironmentManager.getLocalEnvironment());
+		}
+	}
+
+	public class MetadataFileInputStream extends FileInputStream {
+		File file;
+		private PerformanceNode node;
+
+		public MetadataFileInputStream(File file) throws FileNotFoundException {
+			super(file);
+			node = RuntimePerformanceMonitor.begin();
+			this.file = file;
+		}
+
+		@Override
+		public void close() throws IOException {
+			super.close();
+			node.done("Metadata", RuntimePerformanceMonitor.IOREAD, file
+					.length(), EnvironmentManager.getLocalEnvironment());
+		}
+	}
+
 	public synchronized OutputStream getCacheEntryAttributeOutputStream(
 			IFileHandle handle, String attribute) {
 		File file = getEntryAsFile(handle, attribute);
 		try {
-			return new BufferedOutputStream(new FileOutputStream(file), 4096);
+			return new BufferedOutputStream(new MetadataFileOutputStream(file),
+					4096);
 		} catch (FileNotFoundException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
@@ -365,8 +360,8 @@ public class MetadataContentCache extends AbstractContentCache {
 			File file = new File(location.toOSString());
 			if (!file.exists()) {
 				index.setLastIndex(i);
-				return location.removeFirstSegments(cacheLocation
-						.segmentCount());
+				return location.removeFirstSegments(
+						cacheLocation.segmentCount()).setDevice(null);
 			}
 		}
 	}
@@ -392,7 +387,7 @@ public class MetadataContentCache extends AbstractContentCache {
 		if (handle == null) {
 			return;
 		}
-		EntryKey key = makeKey(handle);
+		String key = makeKey(handle);
 		if (entryCache.containsKey(key)) {
 			CacheEntry entry = (CacheEntry) entryCache.get(key);
 			removeCacheEntry(entry, key);
@@ -402,8 +397,8 @@ public class MetadataContentCache extends AbstractContentCache {
 
 	public synchronized void clear() {
 		initialize();
-		Set<EntryKey> keySet = new HashSet<EntryKey>(entryCache.keySet());
-		for (EntryKey k : keySet) {
+		Set<String> keySet = new HashSet<String>(entryCache.keySet());
+		for (String k : keySet) {
 			removeCacheEntry(entryCache.get(k), k);
 		}
 		save(true);
