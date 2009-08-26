@@ -43,8 +43,5 @@ public class DLTKDebugPluginPreferenceInitializer extends
 
 		prefs.setDefault(
 				DLTKDebugPreferenceConstants.PREF_DBGP_SHOW_SCOPE_CLASS, false);
-
-		prefs.setDefault(
-				DLTKDebugPreferenceConstants.PREF_LAUNCH_CATCH_OUTPUT, false);
 	}
 }

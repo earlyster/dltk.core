@@ -41,7 +41,4 @@ public class DLTKDebugPreferenceConstants {
 	public static final String PREF_DBGP_SHOW_SCOPE_CLASS = PREF_DBGP_SHOW_SCOPE_PREFIX
 			+ "class"; //$NON-NLS-1$
 
-	public static final String PREF_LAUNCH_CATCH_OUTPUT = DLTKDebugPlugin.PLUGIN_ID
-			+ ".catchOutput"; //$NON-NLS-1$
-
 }
