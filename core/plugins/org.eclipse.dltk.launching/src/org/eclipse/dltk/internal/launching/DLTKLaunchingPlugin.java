@@ -54,6 +54,7 @@ import org.eclipse.dltk.launching.IRuntimeBuildpathEntry2;
 import org.eclipse.dltk.launching.InterpreterStandin;
 import org.eclipse.dltk.launching.LaunchingMessages;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.utils.DLTKLoggingOption;
 import org.osgi.framework.BundleContext;
 import org.w3c.dom.Document;
 import org.xml.sax.helpers.DefaultHandler;
@@ -75,6 +76,12 @@ public class DLTKLaunchingPlugin extends Plugin implements
 					Platform
 							.getDebugOption("org.eclipse.dltk.launching/traceExecution")) //$NON-NLS-1$
 			.booleanValue();
+
+	/**
+	 * @since 2.0
+	 */
+	public static final DLTKLoggingOption LOGGING_CATCH_OUTPUT = new DLTKLoggingOption(
+			PLUGIN_ID, "catchOutput"); //$NON-NLS-1$
 
 	/**
 	 * Runtime buildpath extensions
@@ -642,7 +649,8 @@ public class DLTKLaunchingPlugin extends Plugin implements
 		public void process() throws CoreException {
 			if (job == null) {
 				job = new InterpreterUpdateJob(this);
-				job.setName(LaunchingMessages.DLTKLaunchingPlugin_rebindInterpreters);
+				job
+						.setName(LaunchingMessages.DLTKLaunchingPlugin_rebindInterpreters);
 				job.schedule();
 			} else {
 				try {

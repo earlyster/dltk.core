@@ -48,4 +48,11 @@
            id="org.eclipse.dltk.launching.scriptProcessFactory">
      </processFactory>
   </extension>
+<extension point="org.eclipse.dltk.core.loggingOptions">
+   <loggingOption
+   		category="Launching"
+        id="catchOutput"
+        name="Catch &amp; save output of the launched processes">
+   </loggingOption>
+</extension>
 </plugin>
