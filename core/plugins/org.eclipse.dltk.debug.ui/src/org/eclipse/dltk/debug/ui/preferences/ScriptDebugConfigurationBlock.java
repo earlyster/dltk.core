@@ -75,10 +75,6 @@ public class ScriptDebugConfigurationBlock extends
 				OverlayPreferenceStore.BOOLEAN,
 				IDLTKDebugUIPreferenceConstants.PREF_ALERT_HCR_NOT_SUPPORTED));
 
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
-				OverlayPreferenceStore.BOOLEAN,
-				DLTKDebugPreferenceConstants.PREF_LAUNCH_CATCH_OUTPUT));
-
 		return overlayKeys;
 	}
 
@@ -262,17 +258,9 @@ public class ScriptDebugConfigurationBlock extends
 
 		createDbgpGroup(composite);
 		createHotCodeReplaceGroup(composite);
-		createLogging(composite);
 		createScriptLanguagesLinks(composite);
 
 		return composite;
-	}
-
-	private void createLogging(Composite parent) {
-		final Group group = SWTFactory.createGroup(parent, "Logging", 1, 1,
-				GridData.FILL_HORIZONTAL);
-		bindControl(SWTFactory.createCheckButton(group, "Catch output"),
-				DLTKDebugPreferenceConstants.PREF_LAUNCH_CATCH_OUTPUT);
 	}
 
 	public void initialize() {
