@@ -1073,6 +1073,12 @@
             id="org.eclipse.dltk.preferences"
             name="%MainScriptPreferencePage.name">
       </page>
+      <page
+            class="org.eclipse.dltk.internal.ui.preferences.DLTKLoggingPreferencePage"
+            id="org.eclipse.dltk.logging.preferences"
+            category="org.eclipse.dltk.preferences"
+            name="Logging">
+      </page>
    </extension>
     
     
