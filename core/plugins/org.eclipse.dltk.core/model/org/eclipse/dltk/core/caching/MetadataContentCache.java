@@ -365,8 +365,8 @@ public class MetadataContentCache extends AbstractContentCache {
 			File file = new File(location.toOSString());
 			if (!file.exists()) {
 				index.setLastIndex(i);
-				return location.removeFirstSegments(cacheLocation
-						.segmentCount());
+				return location.removeFirstSegments(
+						cacheLocation.segmentCount()).setDevice(null);
 			}
 		}
 	}
