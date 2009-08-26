@@ -28,6 +28,7 @@
    <extension-point id="filenameAssociation" name="%extension-point.name.filenameAssociation" schema="schema/filenameAssociation.exsd"/>
    <extension-point id="indexer" name="DLTK Element Indexer" schema="schema/indexer.exsd"/>
    <extension-point id="indexerParticipant" name="DLTK Indexer Participant" schema="schema/indexerPaticipant.exsd"/>
+   <extension-point id="loggingOptions" name="DLTK Logging Options" schema="schema/loggingOptions.exsd"/>
 
 <!-- =================================================================================== -->
 <!-- Extension: DLTK Problem                                                             -->

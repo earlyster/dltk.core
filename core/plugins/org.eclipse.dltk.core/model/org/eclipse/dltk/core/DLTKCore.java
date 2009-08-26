@@ -331,6 +331,18 @@ public class DLTKCore extends Plugin {
 	public static final char LANGUAGE_FILENAME_ASSOCIATION_SEPARATOR = ';';
 
 	/**
+	 * Possible configurable option ID.
+	 * 
+	 * @since 2.0
+	 */
+	public static final String LOGGING_OPTIONS = PLUGIN_ID + ".logging.options"; //$NON-NLS-1$					
+
+	/**
+	 * @since 2.0
+	 */
+	public static final char LOGGING_OPTION_SEPARATOR = ';';
+
+	/**
 	 * Possible configurable option ID. Value is the identifier of
 	 * implementation contributed to the org.eclipse.dltk.core.fileCache
 	 * extension point.
