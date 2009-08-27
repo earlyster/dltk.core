@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.dltk.core.IModelElement;
@@ -70,6 +71,13 @@ public class ModelElementInfo {
 		return this.children.toArray(new IModelElement[this.children.size()]);
 	}
 
+	public List<IModelElement> getChildrenAsList() {
+		if (children == null)
+			return Collections.emptyList();
+		else
+			return this.children;
+	}
+
 	public void removeChild(IModelElement child) {
 		if (this.children != null) {
 			this.children.remove(child);
@@ -84,6 +92,14 @@ public class ModelElementInfo {
 			for (int i = 0; i < children.length; i++) {
 				this.children.add(children[i]);
 			}
+		}
+	}
+
+	public void setChildren(List<IModelElement> children) {
+		if (children == null) {
+			this.children = null;
+		} else {
+			this.children = new ArrayList<IModelElement>(children);
 		}
 	}
 
