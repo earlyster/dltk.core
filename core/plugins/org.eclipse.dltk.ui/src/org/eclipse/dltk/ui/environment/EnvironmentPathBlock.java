@@ -45,7 +45,7 @@ public class EnvironmentPathBlock {
 	/**
 	 * Environment to path association.
 	 */
-	private Map paths = new HashMap();
+	private Map<IEnvironment, String> paths = new HashMap<IEnvironment, String>();
 
 	private boolean useFolders = false;
 
@@ -163,15 +163,18 @@ public class EnvironmentPathBlock {
 		pathColumn.getColumn().setText(Messages.EnvironmentPathBlock_path);
 		pathColumn.getColumn().setWidth(conv.convertWidthInCharsToPixels(40));
 		pathColumn.setEditingSupport(new EditingSupport(pathViewer) {
+			@Override
 			protected boolean canEdit(Object element) {
 				return true;
 			}
 
+			@Override
 			protected CellEditor getCellEditor(Object element) {
 				return new TextCellEditor(pathTable) {
 					private Button browse;
 					private Composite composite;
 
+					@Override
 					protected Control createControl(Composite compositeParent) {
 						composite = new Composite(compositeParent, SWT.NONE);
 						composite
@@ -193,12 +196,14 @@ public class EnvironmentPathBlock {
 						browse.setLayoutData(new GridData(SWT.DEFAULT,
 								SWT.FILL, false, true));
 						browse.addSelectionListener(new SelectionAdapter() {
+							@Override
 							public void widgetSelected(SelectionEvent e) {
 								editPath();
 								doFocusLost();
 							}
 						});
 						FocusAdapter listener = new FocusAdapter() {
+							@Override
 							public void focusLost(FocusEvent e) {
 								Control cursorControl = composite.getDisplay()
 										.getCursorControl();
@@ -219,21 +224,24 @@ public class EnvironmentPathBlock {
 						super.focusLost();
 					}
 
+					@Override
 					protected void focusLost() {
 					}
 				};
 			}
 
+			@Override
 			protected Object getValue(Object element) {
 				Object value = paths.get(element);
 				return value != null ? value : Util.EMPTY_STRING;
 			}
 
+			@Override
 			protected void setValue(Object element, Object value) {
 				if (value == null || Util.EMPTY_STRING.equals(value)) {
 					paths.remove(element);
 				} else {
-					paths.put(element, value);
+					paths.put((IEnvironment) element, (String) value);
 				}
 				pathViewer.refresh();
 				fireValueChanged();
@@ -279,7 +287,7 @@ public class EnvironmentPathBlock {
 		return (IStructuredSelection) pathViewer.getSelection();
 	}
 
-	public void setPaths(Map paths) {
+	public void setPaths(Map<IEnvironment, String> paths) {
 		this.paths = paths;
 		pathTable.getDisplay().asyncExec(new Runnable() {
 			public void run() {
@@ -289,7 +297,7 @@ public class EnvironmentPathBlock {
 		});
 	}
 
-	public Map getPaths() {
+	public Map<IEnvironment, String> getPaths() {
 		return this.paths;
 	}
 
