@@ -40,6 +40,7 @@ import org.eclipse.dltk.launching.LaunchingMessages;
 import org.eclipse.dltk.launching.LibraryLocation;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
+import org.eclipse.osgi.util.NLS;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -685,8 +686,8 @@ public class InterpreterDefinitionsContainer {
 				}
 			}
 		} else {
-			DLTKLaunchingPlugin
-					.log("Interpreter type element with unknown id."); //$NON-NLS-1$
+			DLTKLaunchingPlugin.log(NLS.bind(
+					"Interpreter type element with unknown id \"{0}\".", id)); //$NON-NLS-1$
 		}
 	}
 
