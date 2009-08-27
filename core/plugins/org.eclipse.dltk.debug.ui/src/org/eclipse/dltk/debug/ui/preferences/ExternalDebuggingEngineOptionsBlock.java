@@ -7,6 +7,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.ui.environment.EnvironmentPathBlock;
 import org.eclipse.dltk.ui.preferences.PreferenceKey;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
@@ -92,17 +93,18 @@ public abstract class ExternalDebuggingEngineOptionsBlock extends
 		return GridData.FILL_BOTH;
 	}
 
+	@Override
 	protected boolean processChanges(IWorkbenchPreferenceContainer container) {
 		setEnvironmentPaths(enginePaths.getPaths());
 		return super.processChanges(container);
 	}
 
-	private Map getEnvironmentPaths() {
+	private Map<IEnvironment, String> getEnvironmentPaths() {
 		String pathKeyValue = getString(getDebuggingEnginePathKey());
 		return EnvironmentPathUtils.decodePaths(pathKeyValue);
 	}
 
-	private void setEnvironmentPaths(Map env2path) {
+	private void setEnvironmentPaths(Map<IEnvironment, String> env2path) {
 		String pathKeyValue = EnvironmentPathUtils.encodePaths(env2path);
 		setString(getDebuggingEnginePathKey(), pathKeyValue);
 	}
