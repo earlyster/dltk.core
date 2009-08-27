@@ -17,6 +17,7 @@ public abstract class ExternalDebuggingEngineRunner extends
 		super(install);
 	}
 
+	@Override
 	protected final InterpreterConfig addEngineConfig(InterpreterConfig config,
 			PreferencesLookupDelegate delegate, ILaunch launch)
 			throws CoreException {
@@ -58,8 +59,7 @@ public abstract class ExternalDebuggingEngineRunner extends
 		String qualifier = getDebuggingEnginePreferenceQualifier();
 
 		String pathKeyValue = delegate.getString(qualifier, key);
-		String path = (String) EnvironmentPathUtils.decodePaths(pathKeyValue)
-				.get(env);
+		String path = EnvironmentPathUtils.decodePaths(pathKeyValue).get(env);
 		if (path != null && path.length() != 0) {
 			return PlatformFileUtils.findAbsoluteOrEclipseRelativeFile(env,
 					new Path(path));
