@@ -553,7 +553,8 @@ public abstract class AbstractSourceModule extends Openable implements
 						.getModificationStamp();
 			}
 			// We need to update children contents using model providers
-			List childrenSet = Arrays.asList(moduleInfo.getChildren());
+			List childrenSet = new ArrayList(Arrays.asList(moduleInfo
+					.getChildren()));
 			// Call for extra model providers
 			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 					.getLanguageToolkit(this);
