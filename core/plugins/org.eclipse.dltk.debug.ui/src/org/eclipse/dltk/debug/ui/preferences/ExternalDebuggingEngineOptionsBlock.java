@@ -99,7 +99,10 @@ public abstract class ExternalDebuggingEngineOptionsBlock extends
 		return super.processChanges(container);
 	}
 
-	private Map<IEnvironment, String> getEnvironmentPaths() {
+	/**
+	 * @since 2.0
+	 */
+	protected Map<IEnvironment, String> getEnvironmentPaths() {
 		String pathKeyValue = getString(getDebuggingEnginePathKey());
 		return EnvironmentPathUtils.decodePaths(pathKeyValue);
 	}
