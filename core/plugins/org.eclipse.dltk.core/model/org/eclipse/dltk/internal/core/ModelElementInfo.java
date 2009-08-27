@@ -24,7 +24,7 @@ public class ModelElementInfo {
 	 * Collection of handles of immediate children of this object. This is an
 	 * empty array if this element has no children.
 	 */
-	private List children;
+	private List<IModelElement> children;
 
 	/**
 	 * Shared empty collection used for efficiency.
@@ -36,7 +36,7 @@ public class ModelElementInfo {
 
 	public void addChild(IModelElement child) {
 		if (this.children == null) {
-			this.children = new ArrayList(5);
+			this.children = new ArrayList<IModelElement>(5);
 		}
 		if (!this.children.contains(child)) {
 			this.children.add(child);
@@ -52,9 +52,10 @@ public class ModelElementInfo {
 	protected IModelElement get(int i) {
 		if (this.children == null)
 			return null;
-		return (IModelElement) children.get(i);
+		return children.get(i);
 	}
 
+	@Override
 	public Object clone() {
 		try {
 			return super.clone();
@@ -66,8 +67,7 @@ public class ModelElementInfo {
 	public IModelElement[] getChildren() {
 		if (children == null)
 			return ModelElement.NO_ELEMENTS;
-		return (IModelElement[]) this.children
-				.toArray(new IModelElement[this.children.size()]);
+		return this.children.toArray(new IModelElement[this.children.size()]);
 	}
 
 	public void removeChild(IModelElement child) {
@@ -80,7 +80,7 @@ public class ModelElementInfo {
 		if (children == null) {
 			this.children = null;
 		} else {
-			this.children = new ArrayList(children.length);
+			this.children = new ArrayList<IModelElement>(children.length);
 			for (int i = 0; i < children.length; i++) {
 				this.children.add(children[i]);
 			}

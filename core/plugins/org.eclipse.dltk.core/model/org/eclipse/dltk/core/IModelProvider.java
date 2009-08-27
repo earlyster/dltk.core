@@ -25,7 +25,8 @@ public interface IModelProvider {
 	 * Any new elements need to implement @see:IModelElementMemento to handle
 	 * inner element references.
 	 */
-	void provideModelChanges(IModelElement parentElement, List children);
+	void provideModelChanges(IModelElement parentElement,
+			List<IModelElement> children);
 
 	/**
 	 * Used for performance reasons.

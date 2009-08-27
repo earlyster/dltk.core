@@ -555,7 +555,8 @@ public abstract class AbstractSourceModule extends Openable implements
 						.getModificationStamp();
 			}
 			// We need to update children contents using model providers
-			List childrenSet = Arrays.asList(moduleInfo.getChildren());
+			List<IModelElement> childrenSet = Arrays.asList(moduleInfo
+					.getChildren());
 			// Call for extra model providers
 			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 					.getLanguageToolkit(this);
@@ -566,7 +567,7 @@ public abstract class AbstractSourceModule extends Openable implements
 					providers[i].provideModelChanges(this, childrenSet);
 				}
 			}
-			moduleInfo.setChildren((IModelElement[]) childrenSet
+			moduleInfo.setChildren(childrenSet
 					.toArray(new IModelElement[childrenSet.size()]));
 
 			return moduleInfo.isStructureKnown();
