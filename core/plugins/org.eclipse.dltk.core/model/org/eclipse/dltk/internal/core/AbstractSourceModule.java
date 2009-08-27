@@ -1,7 +1,6 @@
 package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -555,8 +554,8 @@ public abstract class AbstractSourceModule extends Openable implements
 						.getModificationStamp();
 			}
 			// We need to update children contents using model providers
-			List<IModelElement> childrenSet = Arrays.asList(moduleInfo
-					.getChildren());
+			List<IModelElement> childrenSet = new ArrayList<IModelElement>(
+					moduleInfo.getChildrenAsList());
 			// Call for extra model providers
 			IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 					.getLanguageToolkit(this);
@@ -567,8 +566,7 @@ public abstract class AbstractSourceModule extends Openable implements
 					providers[i].provideModelChanges(this, childrenSet);
 				}
 			}
-			moduleInfo.setChildren(childrenSet
-					.toArray(new IModelElement[childrenSet.size()]));
+			moduleInfo.setChildren(childrenSet);
 
 			return moduleInfo.isStructureKnown();
 		} catch (CoreException e) {
