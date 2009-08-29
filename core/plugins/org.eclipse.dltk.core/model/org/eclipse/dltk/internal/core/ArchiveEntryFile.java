@@ -50,6 +50,7 @@ public class ArchiveEntryFile extends PlatformObject implements IStorage {
 						.println("(" + Thread.currentThread() + ") [JarEntryFile.getContents()] Creating ZipFile on " + this.zipName); //$NON-NLS-1$	//$NON-NLS-2$
 			}
 			IArchive zipFile = null;
+			InputStream inputStream = null;
 			try {
 				if (zipResource == null) {
 					zipFile = ModelManager.getModelManager().getArchive(
@@ -65,7 +66,7 @@ public class ArchiveEntryFile extends PlatformObject implements IStorage {
 							IModelStatusConstants.INVALID_PATH, this.entryName));
 				}
 
-				InputStream inputStream = zipFile.getInputStream(zipEntry);
+				inputStream = zipFile.getInputStream(zipEntry);
 				final int entrySize = (int) zipEntry.getSize();
 				if (entrySize >= 0) {
 					final byte[] buf = new byte[entrySize];
@@ -87,6 +88,9 @@ public class ArchiveEntryFile extends PlatformObject implements IStorage {
 					return new ByteArrayInputStream(arrayOut.toByteArray());
 				}
 			} finally {
+				if (inputStream != null) {
+					inputStream.close();
+				}
 				ModelManager.getModelManager().closeArchive(zipFile);
 			}
 		} catch (IOException e) {
