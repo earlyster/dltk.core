@@ -75,7 +75,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	 * handle being created until there is no conflict.
 	 */
 	protected void resolveDuplicates(SourceRefElement handle) {
-		while (this.newElements.containsKey(handle)) {
+		if (this.newElements.containsKey(handle)) {
 			handle.occurrenceCount++;
 		}
 	}
