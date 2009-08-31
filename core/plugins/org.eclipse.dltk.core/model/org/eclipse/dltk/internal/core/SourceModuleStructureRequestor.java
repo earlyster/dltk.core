@@ -9,12 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Stack;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
@@ -34,11 +32,6 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	 * The info object for the module being parsed
 	 */
 	private SourceModuleElementInfo moduleInfo;
-
-	/**
-	 * The import container info - null until created
-	 */
-	protected Map<String, ImportContainer> importContainers = null;
 
 	/**
 	 * Hashtable of children elements of the source module. Children are added
@@ -75,7 +68,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	 * handle being created until there is no conflict.
 	 */
 	protected void resolveDuplicates(SourceRefElement handle) {
-		while (this.newElements.containsKey(handle)) {
+		if (this.newElements.containsKey(handle)) {
 			handle.occurrenceCount++;
 		}
 	}
@@ -454,60 +447,4 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 
 	public void acceptTypeReference(char[] typeName, int sourcePosition) {
 	}
-
-	public void acceptImport(ImportInfo importInfo) {
-		ModelElement parentHandle = (ModelElement) this.handleStack.peek();
-		if (!(parentHandle.getElementType() == IModelElement.SOURCE_MODULE)) {
-			// TODO review?
-			Assert.isTrue(false); // Should not happen
-		}
-
-		ISourceModule parentCU = (ISourceModule) parentHandle;
-
-		final ImportContainerInfo importContainerInfo;
-		ImportContainer importContainer;
-
-		// create the import container and its info
-		if (this.importContainers == null) {
-			importContainers = new HashMap<String, ImportContainer>();
-		}
-		importContainer = importContainers.get(importInfo.containerName);
-		if (importContainer == null) {
-			importContainer = createImportContainer(parentCU,
-					importInfo.containerName);
-			importContainers.put(importInfo.containerName, importContainer);
-			importContainerInfo = new ImportContainerInfo();
-			ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack
-					.peek();
-			parentInfo.addChild(importContainer);
-			this.newElements.put(importContainer, importContainerInfo);
-		} else {
-			importContainerInfo = (ImportContainerInfo) newElements
-					.get(importContainer);
-		}
-
-		String elementName = ModelManager.getModelManager().intern(
-				importInfo.name);
-		ImportDeclaration handle = createImportDeclaration(importContainer,
-				elementName, importInfo.version);
-		resolveDuplicates(handle);
-
-		ImportDeclarationElementInfo info = new ImportDeclarationElementInfo();
-		info.setSourceRangeStart(importInfo.sourceStart);
-		info.setSourceRangeEnd(importInfo.sourceEnd);
-
-		importContainerInfo.addChild(handle);
-		this.newElements.put(handle, info);
-	}
-
-	protected ImportContainer createImportContainer(ISourceModule parent,
-			String container) {
-		return new ImportContainer((AbstractSourceModule) parent, container);
-	}
-
-	protected ImportDeclaration createImportDeclaration(ImportContainer parent,
-			String name, String version) {
-		return new ImportDeclaration(parent, name, version);
-	}
-
 }
