@@ -336,8 +336,29 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 					currRoot = jproject.getProjectFragment(res)
 							.getScriptFolder(""); //$NON-NLS-1$
 				else {
-					currRoot = jproject.getProjectFragment(res.getProject())
-							.getScriptFolder(path.removeFirstSegments(1));
+					IProjectFragment[] fragments = null;
+					try {
+						fragments = jproject.getProjectFragments();
+					} catch (ModelException e) {
+						if (DLTKCore.DEBUG) {
+							e.printStackTrace();
+						}
+					}
+					if (fragments != null) {
+						IProjectFragment projectFragment = null;
+						for (IProjectFragment fragment : fragments) {
+							if (fragment.getPath().isPrefixOf(path)) {
+								projectFragment = fragment;
+								break;
+							}
+						}
+						if (projectFragment != null) {
+							IPath fragmentPath = projectFragment.getPath();
+							currRoot = projectFragment.getScriptFolder(path
+									.removeFirstSegments(fragmentPath
+											.segmentCount()));
+						}
+					}
 				}
 
 				if (res.exists()) {
