@@ -138,7 +138,13 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 		try {
 			// check project fragment on buildpath of its project
 			ScriptProject project = (ScriptProject) this.getScriptProject();
-			IBuildpathEntry[] buildpath = project.getResolvedBuildpath();
+
+			IBuildpathEntry[] buildpath = null;
+			if (getResource() != null) {
+				buildpath = project.getResourceOnlyResolvedBuildpath();
+			} else {
+				buildpath = project.getResolvedBuildpath();
+			}
 			for (int i = 0, length = buildpath.length; i < length; i++) {
 				IBuildpathEntry entry = buildpath[i];
 				if (entry.getPath().equals(path)) {
@@ -279,7 +285,8 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 			if (providers != null) {
 				boolean provides = false;
 				for (int i = 0; i < providers.length; i++) {
-					if (providers[i].isModelChangesProvidedFor(this, path.segment(0))) {
+					if (providers[i].isModelChangesProvidedFor(this, path
+							.segment(0))) {
 						provides = true;
 						break;
 					}
@@ -490,8 +497,8 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 				return pkg.getHandleFromMemento(token, memento, owner);
 			}
 		case JEM_USER_ELEMENT:
-			return MementoModelElementUtil.getHandleFromMemento(memento,
-					this, owner);
+			return MementoModelElementUtil.getHandleFromMemento(memento, this,
+					owner);
 		}
 		return null;
 	}

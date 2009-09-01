@@ -3199,4 +3199,25 @@ public class ScriptProject extends Openable implements IScriptProject,
 		frags.toArray(fragments);
 		return fragments;
 	}
+
+	/**
+	 * Because resources could only be in project, not came from containers.
+	 * Lets skip container buildpath entries then checking.
+	 * 
+	 * This should remove deadlock then we came here from editor initialization
+	 * and try to lock already locked workspace.
+	 */
+	public IBuildpathEntry[] getResourceOnlyResolvedBuildpath()
+			throws ModelException {
+		IBuildpathEntry[] rawBuildpath = getRawBuildpath();
+		List<IBuildpathEntry> rawEntries = new ArrayList<IBuildpathEntry>();
+		for (IBuildpathEntry entry : rawBuildpath) {
+			if (entry.getEntryKind() != IBuildpathEntry.BPE_CONTAINER) {
+				rawEntries.add(entry);
+			}
+		}
+		rawBuildpath = rawEntries
+				.toArray(new IBuildpathEntry[rawEntries.size()]);
+		return getResolvedBuildpath(rawBuildpath, true, false, null);
+	}
 }

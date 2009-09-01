@@ -726,7 +726,8 @@ public class ModelManager implements ISaveParticipant {
 		IPath resourcePath = resource.getFullPath();
 		try {
 			IBuildpathEntry[] entries = ((ScriptProject) project)
-					.getResolvedBuildpath();
+					.getResourceOnlyResolvedBuildpath();
+
 			for (int i = 0; i < entries.length; i++) {
 				IBuildpathEntry entry = entries[i];
 				if (entry.getEntryKind() == IBuildpathEntry.BPE_PROJECT)
