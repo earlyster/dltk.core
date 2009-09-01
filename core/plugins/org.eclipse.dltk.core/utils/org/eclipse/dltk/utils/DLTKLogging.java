@@ -12,73 +12,72 @@
 package org.eclipse.dltk.utils;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.osgi.service.debug.DebugOptions;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.service.prefs.BackingStoreException;
 
 /**
  * @since 2.0
  */
 public class DLTKLogging {
 
-	private static ServiceTracker debugTracker = null;
-	private static boolean initialized = false;
+	private static DLTKDebugOptions debugOptions = null;
 
-	private static synchronized DebugOptions getDebugOptions() {
-		if (debugTracker == null) {
-			final BundleContext context = getBundleContext();
-			if (context == null)
-				return null;
-			debugTracker = new ServiceTracker(context, DebugOptions.class
-					.getName(), null);
-			debugTracker.open();
+	@SuppressWarnings("serial")
+	private static class DLTKDebugOptions extends HashSet<String> {
+
+		public DLTKDebugOptions() {
+			super();
 		}
-		final DebugOptions debugOptions = (DebugOptions) debugTracker
-				.getService();
-		if (debugOptions != null && !initialized) {
+
+		public DLTKDebugOptions(DLTKDebugOptions source) {
+			super(source);
+		}
+
+	}
+
+	private static synchronized DLTKDebugOptions getDebugOptions() {
+		if (debugOptions == null) {
+			debugOptions = new DLTKDebugOptions();
 			final String loggingOptions = new InstanceScope().getNode(
 					DLTKCore.PLUGIN_ID).get(DLTKCore.LOGGING_OPTIONS, null);
 			if (loggingOptions != null) {
 				for (String option : TextUtils.split(loggingOptions,
 						DLTKCore.LOGGING_OPTION_SEPARATOR)) {
-					debugOptions.setOption(option, Boolean.TRUE.toString());
+					debugOptions.add(option);
 				}
 			}
-			initialized = true;
 		}
 		return debugOptions;
 	}
 
+	private static synchronized void setDebugOptions(
+			DLTKDebugOptions debugOptions) {
+		DLTKLogging.debugOptions = new DLTKDebugOptions(debugOptions);
+	}
+
+	private static DLTKDebugOptions copy(DLTKDebugOptions source) {
+		return new DLTKDebugOptions(source);
+	}
+
 	public static boolean isEnabled(String option) {
-		final DebugOptions debugOptions = getDebugOptions();
-		return debugOptions != null
-				&& debugOptions.getBooleanOption(option, false);
+		final DLTKDebugOptions debugOptions = getDebugOptions();
+		return debugOptions.contains(option);
 	}
 
 	public static void setEnabled(String option, boolean value) {
-		final DebugOptions debugOptions = getDebugOptions();
-		if (debugOptions != null) {
-			debugOptions.setOption(option, Boolean.toString(value));
+		final DLTKDebugOptions debugOptions = copy(getDebugOptions());
+		if (value) {
+			debugOptions.add(option);
+		} else {
+			debugOptions.remove(option);
 		}
-	}
-
-	private static BundleContext getBundleContext() {
-		final Plugin plugin = DLTKCore.getDefault();
-		if (plugin != null) {
-			final Bundle bundle = plugin.getBundle();
-			if (bundle != null) {
-				return bundle.getBundleContext();
-			}
-		}
-		return null;
+		setDebugOptions(debugOptions);
 	}
 
 	/**
@@ -86,27 +85,38 @@ public class DLTKLogging {
 	 * @return
 	 */
 	public static Map<String, Boolean> getState(Collection<String> options) {
-		final DebugOptions debugOptions = getDebugOptions();
-		if (debugOptions != null) {
-			final Map<String, Boolean> result = new HashMap<String, Boolean>();
-			for (String option : options) {
-				boolean value = debugOptions.getBooleanOption(option, false);
-				result.put(option, Boolean.valueOf(value));
-			}
-			return result;
-		} else {
-			return Collections.emptyMap();
+		final DLTKDebugOptions debugOptions = getDebugOptions();
+		final Map<String, Boolean> result = new HashMap<String, Boolean>();
+		for (String option : options) {
+			boolean value = debugOptions.contains(option);
+			result.put(option, Boolean.valueOf(value));
 		}
+		return result;
 	}
 
 	public static void setState(Map<String, Boolean> state) {
-		final DebugOptions debugOptions = getDebugOptions();
-		if (debugOptions != null) {
-			for (Map.Entry<String, Boolean> entry : state.entrySet()) {
-				debugOptions.setOption(entry.getKey(), entry.getValue()
-						.toString());
+		final DLTKDebugOptions debugOptions = copy(getDebugOptions());
+		for (Map.Entry<String, Boolean> entry : state.entrySet()) {
+			if (entry.getValue().booleanValue()) {
+				debugOptions.add(entry.getKey());
+			} else {
+				debugOptions.remove(entry.getKey());
 			}
 		}
+		final IEclipsePreferences node = new InstanceScope()
+				.getNode(DLTKCore.PLUGIN_ID);
+		if (!debugOptions.isEmpty()) {
+			node.put(DLTKCore.LOGGING_OPTIONS, TextUtils.join(debugOptions,
+					DLTKCore.LOGGING_OPTION_SEPARATOR));
+		} else {
+			node.remove(DLTKCore.LOGGING_OPTIONS);
+		}
+		try {
+			node.flush();
+		} catch (BackingStoreException e) {
+			DLTKCore.error("Error Saving Logging Options", e); //$NON-NLS-1$
+		}
+		setDebugOptions(debugOptions);
 	}
 
 }
