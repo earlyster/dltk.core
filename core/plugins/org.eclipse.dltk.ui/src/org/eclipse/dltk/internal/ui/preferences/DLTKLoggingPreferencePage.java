@@ -21,16 +21,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.utils.DLTKLogging;
-import org.eclipse.dltk.utils.TextUtils;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -41,7 +34,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.osgi.service.prefs.BackingStoreException;
 
 public class DLTKLoggingPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage {
@@ -155,23 +147,7 @@ public class DLTKLoggingPreferencePage extends PreferencePage implements
 			}
 		}
 		DLTKLogging.setState(state);
-		final IEclipsePreferences node = new InstanceScope()
-				.getNode(DLTKCore.PLUGIN_ID);
-		if (!enabled.isEmpty()) {
-			node.put(DLTKCore.LOGGING_OPTIONS, TextUtils.join(enabled,
-					DLTKCore.LOGGING_OPTION_SEPARATOR));
-		} else {
-			node.remove(DLTKCore.LOGGING_OPTIONS);
-		}
-		try {
-			node.flush();
-			return true;
-		} catch (BackingStoreException e) {
-			ErrorDialog.openError(getShell(), "Error Saving Logging Options",
-					null, new Status(IStatus.ERROR, DLTKUIPlugin.PLUGIN_ID, e
-							.getMessage(), e));
-			return false;
-		}
+		return true;
 	}
 
 	@Override
