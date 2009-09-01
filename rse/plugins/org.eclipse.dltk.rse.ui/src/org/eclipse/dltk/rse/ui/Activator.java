@@ -15,7 +15,6 @@ import org.eclipse.dltk.internal.ui.rse.RSEConnector;
 import org.eclipse.rse.ui.RSEUIPlugin;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -45,12 +44,12 @@ public class Activator extends AbstractUIPlugin {
 		plugin = this;
 		RSEUIPlugin.getDefault();
 		RSEConnectionMonitor.start();
-		try {
-			PlatformUI.getWorkbench().addWorkbenchListener(
-					new ShutdownCloseProjectsWithLinkedFiles());
-		} catch (IllegalStateException e) {
-			// IGNORE: workbench has not been created yet.
-		}
+		// try {
+		// PlatformUI.getWorkbench().addWorkbenchListener(
+		// new ShutdownCloseProjectsWithLinkedFiles());
+		// } catch (IllegalStateException e) {
+		// // IGNORE: workbench has not been created yet.
+		// }
 	}
 
 	/*
