@@ -53,11 +53,13 @@ public interface ISourceElementRequestor {
 	void enterField(FieldInfo info);
 
 	/**
-	 * Add selected field only if it not pressent yet. If field are added into
-	 * method, it also checks method arguments.
+	 * Adds selected field only if it isn't already added. If field is added
+	 * into a method, then field name is also compared with the method
+	 * parameters names.
 	 * 
 	 * @param info
-	 * @return TODO
+	 * @return <code>true</code> if field has been just added or
+	 *         <code>false</code> if another field with the same was found.
 	 */
 	boolean enterFieldCheckDuplicates(FieldInfo info);
 
