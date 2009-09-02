@@ -519,7 +519,14 @@ public abstract class AbstractFormatterSelectionBlock extends
 	protected void doSetFactory(int index) {
 		selectedFactory = index;
 		setValue(getSavedContributionKey(), factories[index].getId());
-		fFactoryDescription.setText(getSelectedExtension().getDescription());
+		String desc = getSelectedExtension().getDescription();
+		if (desc != null && desc.length() != 0) {
+			fFactoryDescription.setText(desc);
+		} else {
+			fFactoryDescription.setVisible(false);
+			GridData data = (GridData) fFactoryDescription.getLayoutData();
+			data.exclude = true;
+		}
 		updateComboFromProfiles();
 		applyPreferences();
 	}
