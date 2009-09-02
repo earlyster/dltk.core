@@ -612,7 +612,7 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 			}
 		}
 		if (activeTemplateDescriptors.size() > 0) {
-			Group contents = new Group(composite, SWT.BORDER);
+			Group contents = new Group(composite, SWT.NONE);
 			contents.setText("Contents");
 			GridData ggd = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
 			ggd.horizontalSpan = nColumns;
