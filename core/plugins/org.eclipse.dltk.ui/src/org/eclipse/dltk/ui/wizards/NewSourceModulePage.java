@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -52,6 +53,7 @@ import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.dltk.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -62,6 +64,9 @@ import org.eclipse.dltk.ui.preferences.CodeTemplatesPreferencePage;
 import org.eclipse.dltk.ui.text.templates.ICodeTemplateArea;
 import org.eclipse.dltk.ui.text.templates.SourceModuleTemplateContext;
 import org.eclipse.dltk.ui.util.CodeGeneration;
+import org.eclipse.dltk.ui.wizards.INewSourceModuleTemplate.IValidationNotifier;
+import org.eclipse.dltk.utils.LazyExtensionManager;
+import org.eclipse.dltk.utils.LazyExtensionManager.Descriptor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -78,6 +83,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
@@ -87,14 +93,60 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 
 	private static final String REMOTE_FOLDER = "NewSourceModulePage.remoteFolder"; //$NON-NLS-1$
 	private static final String FILE = "NewSourceModulePage.file"; //$NON-NLS-1$
+	private static final String TEMPLATE = "NewSourceModulePage.template"; //$NON-NLS-1$
 
 	private IStatus sourceMoudleStatus;
 	private IStatus remoteFolderStatus = null;
+	private IStatus templateStatus = null;
 
 	private IScriptFolder currentScriptFolder;
 
 	private StringDialogField fileDialogField;
 	private StringButtonDialogField remoteFolderDialogField;
+
+	static class TemplateDescriptor extends
+			Descriptor<INewSourceModuleTemplate> {
+		final String nature;
+		final String name;
+
+		/**
+		 * @param configurationElement
+		 */
+		public TemplateDescriptor(TemplateManager manager,
+				IConfigurationElement configurationElement) {
+			super(manager, configurationElement);
+			this.nature = configurationElement.getAttribute("nature");
+			this.name = configurationElement.getAttribute("name");
+		}
+
+	}
+
+	static class TemplateManager extends
+			LazyExtensionManager<INewSourceModuleTemplate> {
+
+		private String nature;
+
+		/**
+		 * @param extensionPoint
+		 */
+		public TemplateManager(String nature) {
+			super(DLTKUIPlugin.PLUGIN_ID + ".sourceModuleTemplate"); //$NON-NLS-1$
+			this.nature = nature;
+		}
+
+		@Override
+		protected boolean isValidDescriptor(
+				Descriptor<INewSourceModuleTemplate> descriptor) {
+			String natureId = ((TemplateDescriptor) descriptor).nature;
+			return natureId == null || this.nature.equals(natureId);
+		}
+
+		@Override
+		protected Descriptor<INewSourceModuleTemplate> createDescriptor(
+				IConfigurationElement confElement) {
+			return new TemplateDescriptor(this, confElement);
+		}
+	}
 
 	private IStatus fileChanged() {
 		StatusInfo status = new StatusInfo();
@@ -419,9 +471,20 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 			sourceMoudleStatus = fileChanged();
 			remoteFolderStatus = remoteFolderChanged();
 		}
+		// add template statusess here
+		templateStatus = null;
+		for (SelectionButtonDialogField f : templateFields) {
+			if (f.isSelected()) {
+				INewSourceModuleTemplate template = templateFieldToTemplate
+						.get(f);
+				if (template != null) {
+					templateStatus = template.validate();
+				}
+			}
+		}
 
 		updateStatus(new IStatus[] { containerStatus, remoteFolderStatus,
-				sourceMoudleStatus });
+				sourceMoudleStatus, templateStatus });
 	}
 
 	public ISourceModule createFile(IProgressMonitor monitor)
@@ -433,10 +496,23 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		final String fileName = getFileName();
 		final ISourceModule module = currentScriptFolder
 				.getSourceModule(fileName);
+		for (SelectionButtonDialogField f : templateFields) {
+			if (f.isSelected()) {
+				INewSourceModuleTemplate template = templateFieldToTemplate
+						.get(f);
+				if (template != null) {
+					if (!template.createSourceModule(getScriptFolder(),
+							fileName, getFileContent(module))) {
+						return null;
+					}
+				}
+			}
+		}
 		if (isLinkingSupported() && isLinkingEnabled()) {
 			final IResource resource = currentScriptFolder.getResource();
 			if (resource != null
 					&& (resource.getType() & (IResource.FOLDER | IResource.PROJECT)) != 0
+					&& remoteFolderDialogField != null
 					&& remoteFolderDialogField.isEnabled()
 					&& remoteFolderDialogField.getText().length() > 0) {
 				final IEnvironment environment = getEnvironment();
@@ -490,6 +566,27 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		Dialog.applyDialogFont(composite);
 	}
 
+	private List<SelectionButtonDialogField> templateFields = new ArrayList<SelectionButtonDialogField>();
+	private Map<SelectionButtonDialogField, INewSourceModuleTemplate> templateFieldToTemplate = new HashMap<SelectionButtonDialogField, INewSourceModuleTemplate>();
+	IDialogFieldListener templateEnablementUpdater = new IDialogFieldListener() {
+		public void dialogFieldChanged(DialogField field) {
+			for (SelectionButtonDialogField f : templateFields) {
+				INewSourceModuleTemplate template = templateFieldToTemplate
+						.get(f);
+				if (template != null) {
+					template.updateEnablement(f.equals(field));
+				}
+			}
+			handleFieldChanged(TEMPLATE);
+		}
+	};
+	private IValidationNotifier validationNotifier = new IValidationNotifier() {
+		public void validate() {
+			handleFieldChanged(TEMPLATE);
+		}
+	};
+	private List<TemplateDescriptor> activeTemplateDescriptors;
+
 	/**
 	 * Creates content controls on the specified composite.
 	 * 
@@ -498,11 +595,65 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 	 */
 	protected void createContentControls(Composite composite, final int nColumns) {
 		createContainerControls(composite, nColumns);
-		if (remoteFolderDialogField != null) {
-			createRemoteFolderControls(composite, nColumns);
-		}
+
 		// createPackageControls(composite, nColumns);
 		createFileControls(composite, nColumns);
+		TemplateManager manager = new TemplateManager(getRequiredNature());
+		Descriptor<INewSourceModuleTemplate>[] descriptors = manager
+				.getDescriptors();
+		IScriptFolder scriptFolder = getScriptFolder();
+		IEnvironment env = getEnvironment();
+		activeTemplateDescriptors = new ArrayList<TemplateDescriptor>();
+		for (Descriptor<INewSourceModuleTemplate> descriptor : descriptors) {
+			TemplateDescriptor descr = (TemplateDescriptor) descriptor;
+			INewSourceModuleTemplate template = descr.get();
+			if (template.isAvailable(env, scriptFolder)) {
+				activeTemplateDescriptors.add(descr);
+			}
+		}
+		if (activeTemplateDescriptors.size() > 0) {
+			Group contents = new Group(composite, SWT.BORDER);
+			contents.setText("Contents");
+			GridData ggd = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
+			ggd.horizontalSpan = nColumns;
+			contents.setLayoutData(ggd);
+			contents.setLayout(new GridLayout(nColumns, false));
+			SelectionButtonDialogField lfield = new SelectionButtonDialogField(
+					SWT.RADIO);
+			lfield.setLabelText("Create new file in workspace");
+			lfield.doFillIntoGrid(contents, nColumns);
+			templateFields.add(lfield);
+			lfield.setDialogFieldListener(templateEnablementUpdater);
+			for (TemplateDescriptor descr : activeTemplateDescriptors) {
+				INewSourceModuleTemplate template = descr.get();
+
+				SelectionButtonDialogField field = new SelectionButtonDialogField(
+						SWT.RADIO);
+				field.setLabelText(descr.name);
+				field.doFillIntoGrid(contents, 1);
+				Composite parent = new Composite(contents, SWT.NONE);
+				GridLayout layout = new GridLayout(3, false);
+				layout.marginHeight = 0;
+				layout.marginWidth = 0;
+				parent.setLayout(layout);
+				GridData ld = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
+				ld.horizontalSpan = nColumns - 1;
+				parent.setLayoutData(ld);
+				template.setEnvironment(env);
+				template.createControl(parent, 3);
+				template.setNotifier(validationNotifier);
+				templateFields.add(field);
+				templateFieldToTemplate.put(field, template);
+				field.setDialogFieldListener(templateEnablementUpdater);
+			}
+			lfield.setSelection(true);
+		}
+		if (descriptors.length == 0) {
+			if (isLinkingSupported()) {
+				createRemoteFolderControls(composite, nColumns);
+			}
+		}
+
 		if (fTemplateDialogField != null) {
 			createTemplateControls(composite, nColumns);
 		}
