@@ -7,8 +7,8 @@
       plugin="org.eclipse.dltk.core.index"
       image="eclipse_update_120.jpg">
 
-   <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+   <description url="http://www.eclipse.org/dltk">
+      %description
    </description>
 
    <copyright url="http://www.eclipse.org/legal/epl-v10.html">
@@ -40,5 +40,11 @@ http://www.eclipse.org/legal/epl-v10.html
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="org.eclipse.dltk.core.index"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>
