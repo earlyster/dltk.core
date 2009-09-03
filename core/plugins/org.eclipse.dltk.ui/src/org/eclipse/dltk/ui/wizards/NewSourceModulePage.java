@@ -478,7 +478,8 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 				INewSourceModuleTemplate template = templateFieldToTemplate
 						.get(f);
 				if (template != null) {
-					templateStatus = template.validate();
+					templateStatus = template.validate(getScriptFolder(),
+							getFileName());
 				}
 			}
 		}

@@ -25,7 +25,7 @@ public interface INewSourceModuleTemplate {
 
 	boolean isAvailable(IEnvironment environment, IScriptFolder folder);
 
-	IStatus validate();
+	IStatus validate(IScriptFolder folder, String fileName);
 
 	void setNotifier(IValidationNotifier notifier);
 }
