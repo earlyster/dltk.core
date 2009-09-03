@@ -138,7 +138,8 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		protected boolean isValidDescriptor(
 				Descriptor<INewSourceModuleTemplate> descriptor) {
 			String natureId = ((TemplateDescriptor) descriptor).nature;
-			return natureId == null || this.nature.equals(natureId);
+			return natureId == null || this.nature.equals(natureId)
+					|| natureId.equals("#");
 		}
 
 		@Override
