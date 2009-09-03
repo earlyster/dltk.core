@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.dltk.debug.ui;singleton:=true
-Bundle-Version: 2.0.0.qualifier
+Bundle-Version: 1.0.1.qualifier
 Bundle-Activator: org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin
 Bundle-Vendor: %pluginProvider
 Bundle-Localization: plugin
@@ -37,6 +37,6 @@ Export-Package: org.eclipse.dltk.debug.ui,
  org.eclipse.dltk.internal.debug.ui.handlers,
  org.eclipse.dltk.internal.debug.ui.interpreters,
  org.eclipse.dltk.internal.debug.ui.launcher
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: J2SE-1.4
 Bundle-ActivationPolicy: lazy
 Import-Package: com.ibm.icu.text
