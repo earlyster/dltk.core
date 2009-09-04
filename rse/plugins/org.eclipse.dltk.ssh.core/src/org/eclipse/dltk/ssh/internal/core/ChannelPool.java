@@ -174,7 +174,7 @@ public class ChannelPool {
 			// if (needLog) {
 			// Activator.error("Failed to create direct connection", e); //$NON-NLS-1$
 			// }
-			if (!disconnectUsedChannels()) {
+			if (!(CHANNEL_IS_NOT_OPENED.equals(e.getMessage()) && disconnectUsedChannels())) {
 				disconnect();
 			}
 			throw e;
@@ -184,6 +184,8 @@ public class ChannelPool {
 			// }
 		}
 	}
+
+	private static final String CHANNEL_IS_NOT_OPENED = "channel is not opened."; //$NON-NLS-1$
 
 	/**
 	 * @return
