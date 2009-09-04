@@ -62,16 +62,19 @@ public class Activator extends Plugin {
 	}
 
 	public static void log(String message) {
-		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, message, null));
+		log(new Status(IStatus.ERROR, PLUGIN_ID, message, null));
 	}
 
 	public static void error(String message, Throwable t) {
-		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, message, t));
+		log(new Status(IStatus.ERROR, PLUGIN_ID, message, t));
+	}
+
+	public static void warn(String message) {
+		log(new Status(IStatus.WARNING, PLUGIN_ID, message));
 	}
 
 	public static void log(Throwable e) {
-		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, e
-				.getLocalizedMessage(), e));
+		log(new Status(IStatus.ERROR, PLUGIN_ID, e.getLocalizedMessage(), e));
 	}
 
 }

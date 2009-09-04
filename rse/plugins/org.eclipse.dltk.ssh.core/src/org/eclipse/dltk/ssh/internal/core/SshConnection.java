@@ -297,10 +297,9 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 	private void performOperation(final Operation op, int tryCount) {
 		final ChannelSftp channel = acquireChannel(op, tryCount);
 		if (channel != null) {
-			boolean badChannel = false;
 			try {
 				if (DEBUG) {
-					log(op);
+					log(" [do] " + op); //$NON-NLS-1$
 				}
 				op.perform(channel);
 				op.setFinished();
@@ -308,7 +307,7 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 				if (e.id == ChannelSftp.SSH_FX_FAILURE
 						&& e.getCause() instanceof JSchException) {
 					Activator.log(e);
-					badChannel = true;
+					destroyChannel(channel);
 					disconnect();
 					if (tryCount > 0) {
 						performOperation(op, tryCount - 1);
@@ -322,7 +321,7 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 					}
 				}
 			} finally {
-				if (!badChannel && !op.isLongRunning()) {
+				if (!op.isLongRunning()) {
 					releaseChannel(channel);
 				}
 			}
