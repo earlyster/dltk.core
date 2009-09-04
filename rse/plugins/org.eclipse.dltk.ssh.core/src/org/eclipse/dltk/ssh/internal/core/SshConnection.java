@@ -280,6 +280,8 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 		}
 	}
 
+	private static boolean DEBUG = false;
+
 	private void performOperation(final Operation op) {
 		performOperation(op, DEFAULT_RETRY_COUNT);
 	}
@@ -289,6 +291,8 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 		if (channel != null) {
 			boolean badChannel = false;
 			try {
+				if (DEBUG)
+					System.out.println(op);
 				op.perform(channel);
 				op.setFinished();
 			} catch (SftpException e) {
@@ -377,6 +381,11 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 				System.out.println(date.toString());
 				channel.setMtime(path.toString(), (int) (timestamp / 1000L));
 			}
+
+			@Override
+			public String toString() {
+				return "setLastModified " + path; //$NON-NLS-1$
+			}
 		};
 		performOperation(op);
 	}
@@ -391,6 +400,11 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 					channel.rmdir(path.toString());
 				}
 			}
+
+			@Override
+			public String toString() {
+				return "delete " + path; //$NON-NLS-1$
+			}
 		};
 		performOperation(op);
 	}
@@ -400,6 +414,11 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 			@Override
 			public void perform(ChannelSftp channel) throws SftpException {
 				channel.mkdir(path.toString());
+			}
+
+			@Override
+			public String toString() {
+				return "mkdir " + path; //$NON-NLS-1$
 			}
 		};
 		performOperation(op);
