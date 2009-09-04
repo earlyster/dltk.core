@@ -10,7 +10,6 @@
 package org.eclipse.dltk.internal.core;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Stack;
 
@@ -45,7 +44,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	 * to the table as they are found by the parser. Keys are handles, values
 	 * are corresponding info objects.
 	 */
-	private Map newElements;
+	private Map<IModelElement, ModelElementInfo> newElements;
 
 	/**
 	 * Stack of parent scope info objects. The info on the top of the stack is
@@ -53,13 +52,13 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	 * method, the parent info object will be the type the method is contained
 	 * in.
 	 */
-	private Stack infoStack;
+	private Stack<ModelElementInfo> infoStack;
 
 	/**
 	 * Stack of parent handles, corresponding to the info stack. We keep both,
 	 * since info objects do not have back pointers to handles.
 	 */
-	private Stack handleStack;
+	private Stack<ModelElement> handleStack;
 
 	protected boolean hasSyntaxErrors = false;
 
@@ -81,20 +80,20 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	}
 
 	public void enterModule() {
-		this.infoStack = new Stack();
-		this.handleStack = new Stack();
+		this.infoStack = new Stack<ModelElementInfo>();
+		this.handleStack = new Stack<ModelElement>();
 		this.enterModuleRoot();
 	}
 
 	public void enterModuleRoot() {
 		this.infoStack.push(this.moduleInfo);
-		this.handleStack.push(this.module);
+		this.handleStack.push((ModelElement) this.module);
 	}
 
 	public void enterField(FieldInfo fieldInfo) {
 
-		ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack.peek();
-		ModelElement parentHandle = (ModelElement) this.handleStack.peek();
+		ModelElementInfo parentInfo = this.infoStack.peek();
+		ModelElement parentHandle = this.handleStack.peek();
 
 		this.createField(fieldInfo, parentInfo, parentHandle);
 	}
@@ -149,14 +148,14 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	}
 
 	public boolean enterFieldCheckDuplicates(FieldInfo fieldInfo) {
-		ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack.peek();
-		ModelElement parentHandle = (ModelElement) this.handleStack.peek();
+		ModelElementInfo parentInfo = this.infoStack.peek();
+		ModelElement parentHandle = this.handleStack.peek();
 		return this.enterFieldCheckDuplicates(fieldInfo, parentInfo,
 				parentHandle);
 	}
 
 	public void enterMethodRemoveSame(MethodInfo methodInfo) {
-		ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack.peek();
+		ModelElementInfo parentInfo = this.infoStack.peek();
 		IModelElement[] childrens = parentInfo.getChildren();
 		for (int i = 0; i < childrens.length; ++i) {
 			if (childrens[i].getElementName().equals(methodInfo.name)) {
@@ -167,8 +166,8 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	}
 
 	public void enterMethod(MethodInfo methodInfo) {
-		ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack.peek();
-		ModelElement parentHandle = (ModelElement) this.handleStack.peek();
+		ModelElementInfo parentInfo = this.infoStack.peek();
+		ModelElement parentHandle = this.handleStack.peek();
 
 		this.processMethod(methodInfo, parentInfo, parentHandle);
 	}
@@ -222,8 +221,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	 */
 	private SourceType getCurrentType() {
 		SourceType t = null;
-		for (Iterator iter = this.handleStack.iterator(); iter.hasNext();) {
-			Object o = iter.next();
+		for (ModelElement o : this.handleStack) {
 			if (o instanceof SourceType) {
 				t = (SourceType) o;
 			}
@@ -233,7 +231,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 
 	/**
 	 * Searches for a type already in the model. If founds, returns it. If
-	 * <code>parentName</code> starts with a delimeter, searches starting from
+	 * <code>parentName</code> starts with a delimiter, searches starting from
 	 * current source module (i.e. in global), else from the current level.
 	 * 
 	 * @param parentName
@@ -339,8 +337,8 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	}
 
 	public void enterType(TypeInfo typeInfo) {
-		ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack.peek();
-		ModelElement parentHandle = (ModelElement) this.handleStack.peek();
+		ModelElementInfo parentInfo = this.infoStack.peek();
+		ModelElement parentHandle = this.handleStack.peek();
 		this.processType(typeInfo, parentInfo, parentHandle);
 	}
 
@@ -424,8 +422,8 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 
 	public void acceptPackage(int declarationStart, int declarationEnd,
 			char[] name) {
-		ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack.peek();
-		ModelElement parentHandle = (ModelElement) this.handleStack.peek();
+		ModelElementInfo parentInfo = this.infoStack.peek();
+		ModelElement parentHandle = this.handleStack.peek();
 		PackageDeclaration handle = null;
 
 		// if (parentHandle.getElementType() == IModelElement.SOURCE_MODULE) {
@@ -456,7 +454,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	}
 
 	public void acceptImport(ImportInfo importInfo) {
-		ModelElement parentHandle = (ModelElement) this.handleStack.peek();
+		ModelElement parentHandle = this.handleStack.peek();
 		if (!(parentHandle.getElementType() == IModelElement.SOURCE_MODULE)) {
 			// TODO review?
 			Assert.isTrue(false); // Should not happen
@@ -477,8 +475,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 					importInfo.containerName);
 			importContainers.put(importInfo.containerName, importContainer);
 			importContainerInfo = new ImportContainerInfo();
-			ModelElementInfo parentInfo = (ModelElementInfo) this.infoStack
-					.peek();
+			ModelElementInfo parentInfo = this.infoStack.peek();
 			parentInfo.addChild(importContainer);
 			this.newElements.put(importContainer, importContainerInfo);
 		} else {
