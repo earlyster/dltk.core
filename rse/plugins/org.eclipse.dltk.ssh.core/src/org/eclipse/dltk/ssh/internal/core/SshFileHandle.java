@@ -17,7 +17,8 @@ import org.eclipse.dltk.ssh.core.ISshFileHandle;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
 
-public class SshFileHandle implements ISshFileHandle {
+public class SshFileHandle implements ISshFileHandle,
+		IOutputStreamCloseListener {
 	private static final int CACHE_LIMIT = 1000;
 	private static Map<SshFileHandle, SftpATTRS> timestamps = new HashMap<SshFileHandle, SftpATTRS>();
 	private static Map<SshFileHandle, Long> lastaccess = new HashMap<SshFileHandle, Long>();
@@ -59,7 +60,7 @@ public class SshFileHandle implements ISshFileHandle {
 	 */
 	public void mkdir() {
 		connection.mkdir(path);
-		fetchAttrs(true);
+		cleanAttrs();
 	}
 
 	/*
@@ -71,7 +72,7 @@ public class SshFileHandle implements ISshFileHandle {
 		fetchAttrs();
 		if (attrs != null) {
 			connection.delete(path, attrs.isDir());
-			fetchAttrs(true);
+			cleanAttrs();
 		}
 	}
 
@@ -87,6 +88,12 @@ public class SshFileHandle implements ISshFileHandle {
 
 	private void fetchAttrs() {
 		fetchAttrs(false);
+	}
+
+	private void cleanAttrs() {
+		attrs = null;
+		timestamps.remove(this);
+		lastaccess.remove(this);
 	}
 
 	private void fetchAttrs(boolean clean) {
@@ -178,26 +185,17 @@ public class SshFileHandle implements ISshFileHandle {
 	 */
 	public InputStream getInputStream(IProgressMonitor monitor)
 			throws CoreException {
-		fetchAttrs();
-		if (attrs != null) {
-			// IPath current = this.path;
-			// if (attrs.isLink() && linkTarget != null) {
-			// current = linkTarget;
-			// }
-			final InputStream stream = connection.get(this.path);
-			if (stream != null) {
-				InputStream wrapperStream = new BufferedInputStream(stream) {
-					@Override
-					public void close() throws IOException {
-						super.close();
-						// fetchAttrs(true);
-					}
-				};
-				return wrapperStream;
-			}
-			return stream;
-		}
-		return null;
+		// fetchAttrs();
+		// if (attrs != null) {
+		// IPath current = this.path;
+		// if (attrs.isLink() && linkTarget != null) {
+		// current = linkTarget;
+		// }
+		final InputStream stream = connection.get(this.path);
+		// TODO throw/wrap original exception?
+		return stream;
+		// }
+		// return null;
 	}
 
 	/*
@@ -218,18 +216,12 @@ public class SshFileHandle implements ISshFileHandle {
 	 */
 	public OutputStream getOutputStream(IProgressMonitor monitor)
 			throws CoreException {
-		final OutputStream stream = connection.put(this.path);
-		if (stream != null) {
-			OutputStream wrapperStream = new BufferedOutputStream(stream) {
-				@Override
-				public void close() throws IOException {
-					super.close();
-					fetchAttrs(true);
-				}
-			};
-			return wrapperStream;
-		}
+		final OutputStream stream = connection.put(this.path, this);
 		return stream;
+	}
+
+	public void streamClosed() {
+		cleanAttrs();
 	}
 
 	/*
@@ -277,7 +269,7 @@ public class SshFileHandle implements ISshFileHandle {
 	public void setLastModified(long timestamp, IProgressMonitor monitor)
 			throws CoreException {
 		connection.setLastModified(path, timestamp);
-		fetchAttrs(true);
+		cleanAttrs();
 	}
 
 	/*

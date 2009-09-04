@@ -96,6 +96,8 @@ public class ChannelPool {
 		}
 	}
 
+	private static boolean DEBUG = false;
+
 	protected synchronized void connectSession() throws JSchException {
 		if (session == null) {
 			IJSchService service = Activator.getDefault().getJSch();
@@ -111,7 +113,13 @@ public class ChannelPool {
 
 		if (!session.isConnected()) {
 			// Connect with default timeout
+			if (DEBUG) {
+				log("session.connect()"); //$NON-NLS-1$
+			}
 			session.connect(60 * 1000);
+			if (DEBUG) {
+				log("session.connected"); //$NON-NLS-1$
+			}
 		}
 	}
 
@@ -143,6 +151,9 @@ public class ChannelPool {
 			final ChannelSftp channel = (ChannelSftp) session
 					.openChannel("sftp"); //$NON-NLS-1$			
 			if (!channel.isConnected()) {
+				if (DEBUG) {
+					log("channel.connect()"); //$NON-NLS-1$
+				}
 				channel.connect();
 			}
 			usedChannels.put(channel, createUsageInfo(context));
@@ -182,19 +193,35 @@ public class ChannelPool {
 
 	public void disconnect() {
 		for (ChannelSftp channel : freeChannels) {
+			if (DEBUG) {
+				log("channel.disconnect()"); //$NON-NLS-1$
+			}
 			channel.disconnect();
 		}
 		freeChannels.clear();
 		// TODO log used connections
 		for (Map.Entry<ChannelSftp, ChannelUsageInfo> entry : usedChannels
 				.entrySet()) {
+			if (DEBUG) {
+				log("channel.disconnect() " + entry.getValue().context); //$NON-NLS-1$
+			}
 			entry.getKey().disconnect();
 		}
 		usedChannels.clear();
 		if (session != null) {
+			if (DEBUG) {
+				log("session.disconnect()"); //$NON-NLS-1$
+			}
 			session.disconnect();
 			session = null;
 		}
+	}
+
+	private static final long loadedAt = System.currentTimeMillis();
+
+	protected void log(Object message) {
+		System.out
+				.println("[" + (System.currentTimeMillis() - loadedAt) + "] " + message); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public boolean isConnected() {

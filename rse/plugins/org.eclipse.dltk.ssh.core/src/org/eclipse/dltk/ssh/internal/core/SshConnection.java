@@ -187,11 +187,13 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 	}
 
 	private class PutOperation extends Operation {
-		private IPath path;
+		private final IPath path;
+		private final IOutputStreamCloseListener closeListener;
 		private OutputStream stream;
 
-		public PutOperation(IPath path) {
+		public PutOperation(IPath path, IOutputStreamCloseListener closeListener) {
 			this.path = path;
+			this.closeListener = closeListener;
 		}
 
 		@Override
@@ -206,8 +208,10 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 
 		@Override
 		public void perform(ChannelSftp channel) throws SftpException {
-			stream = new PutOperationOutputStream(channel.put(path.toString(),
-					ChannelSftp.OVERWRITE), channel);
+			final OutputStream rawStream = channel.put(path.toString(),
+					ChannelSftp.OVERWRITE);
+			stream = new PutOperationOutputStream(rawStream, channel,
+					closeListener);
 		}
 
 		public OutputStream getStream() {
@@ -218,20 +222,24 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 
 	private class PutOperationOutputStream extends BufferedOutputStream {
 		private final ChannelSftp channel;
+		private final IOutputStreamCloseListener closeListener;
 
-		public PutOperationOutputStream(OutputStream out, ChannelSftp channel) {
+		public PutOperationOutputStream(OutputStream out, ChannelSftp channel,
+				IOutputStreamCloseListener closeListener) {
 			super(out, STREAM_BUFFER_SIZE);
 			this.channel = channel;
+			this.closeListener = closeListener;
 		}
 
 		@Override
 		public void close() throws IOException {
 			try {
 				super.close();
+				if (closeListener != null) {
+					closeListener.streamClosed();
+				}
 			} finally {
 				releaseChannel(channel);
-				// TODO channel.disconnect();
-				// TODO channel = null;
 			}
 		}
 
@@ -291,8 +299,9 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 		if (channel != null) {
 			boolean badChannel = false;
 			try {
-				if (DEBUG)
-					System.out.println(op);
+				if (DEBUG) {
+					log(op);
+				}
 				op.perform(channel);
 				op.setFinished();
 			} catch (SftpException e) {
@@ -434,7 +443,11 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 	}
 
 	OutputStream put(IPath path) {
-		PutOperation op = new PutOperation(path);
+		return put(path, null);
+	}
+
+	OutputStream put(IPath path, IOutputStreamCloseListener closeListener) {
+		PutOperation op = new PutOperation(path, closeListener);
 		performOperation(op);
 		if (op.isFinished()) {
 			return op.getStream();
