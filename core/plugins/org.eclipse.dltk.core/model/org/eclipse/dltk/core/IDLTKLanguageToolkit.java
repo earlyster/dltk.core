@@ -88,9 +88,11 @@ public interface IDLTKLanguageToolkit {
 	String get(StringFeature feature);
 
 	/**
+	 * @param archiveProjectFragment
 	 * @throws IOException
 	 * @since 2.0
 	 */
-	IArchive openArchive(File localFile) throws IOException;
+	IArchive openArchive(IArchiveProjectFragment archiveProjectFragment,
+			File localFile) throws IOException;
 
 }

@@ -20,9 +20,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IArchive;
 import org.eclipse.dltk.core.IArchiveEntry;
-import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IArchiveProjectFragment;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelProvider;
@@ -34,7 +35,8 @@ import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.core.util.HashtableOfArrayToObject;
 import org.eclipse.dltk.internal.core.util.Util;
 
-public class ArchiveProjectFragment extends ProjectFragment {
+public class ArchiveProjectFragment extends ProjectFragment implements
+		IArchiveProjectFragment {
 	public final static ArrayList EMPTY_LIST = new ArrayList();
 	/**
 	 * The path to the zip file (a workspace relative path if the archive is
@@ -42,6 +44,7 @@ public class ArchiveProjectFragment extends ProjectFragment {
 	 */
 	protected final IPath zipPath;
 	protected final IResource zipResource;
+	private IArchive archive;
 
 	protected ArchiveProjectFragment(IResource resource, ScriptProject project) {
 		super(resource, project);
@@ -67,7 +70,7 @@ public class ArchiveProjectFragment extends ProjectFragment {
 		ArrayList vChildren = new ArrayList();
 		final int SCRIPT = 0;
 		final int NON_SCRIPT = 1;
-		IArchive archive = null;
+		archive = null;
 		try {
 			archive = ModelManager.getModelManager()
 					.getArchive(getPath(), this);
@@ -288,6 +291,10 @@ public class ArchiveProjectFragment extends ProjectFragment {
 			return this.zipPath.equals(other.zipPath);
 		}
 		return false;
+	}
+
+	public IArchive getArchive() {
+		return archive;
 	}
 
 	public String getElementName() {

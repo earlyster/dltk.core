@@ -16,12 +16,16 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IDLTKLanguageToolkitExtension;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.index2.IIndexer;
 import org.eclipse.dltk.core.index2.ProjectIndexer2;
 import org.eclipse.dltk.core.search.indexing.AbstractJob;
+import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.util.Util;
 
 /**
@@ -48,8 +52,19 @@ public abstract class AbstractIndexRequest extends AbstractJob {
 			if (resource != null) {
 				path = resource.getFullPath().toString();
 			} else {
-				path = EnvironmentPathUtils.getFile(sourceModule)
-						.getCanonicalPath();
+				IDLTKLanguageToolkit toolkit = DLTKLanguageManager
+						.getLanguageToolkit(sourceModule);
+				if (toolkit instanceof IDLTKLanguageToolkitExtension
+						&& ((IDLTKLanguageToolkitExtension) toolkit)
+								.isArchiveFileName(sourceModule.getPath()
+										.toString())) {
+					path = ((ExternalSourceModule) sourceModule).getFullPath()
+							.toString();
+				} else {
+					path = EnvironmentPathUtils.getFile(sourceModule)
+							.getCanonicalPath();
+				}
+
 			}
 			progressJob.subTask(path);
 		}
@@ -105,7 +120,7 @@ public abstract class AbstractIndexRequest extends AbstractJob {
 		}
 
 		Map<String, Long> documentNames = indexer.getDocuments(containerPath);
-		if (documentNames == null) {
+		if (documentNames == null || documentNames.isEmpty()) {
 			toReindex.addAll(sourceModules);
 			return;
 		}
