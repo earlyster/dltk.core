@@ -19,6 +19,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IDLTKLanguageToolkitExtension;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
@@ -29,6 +30,7 @@ import org.eclipse.dltk.core.index.sql.File;
 import org.eclipse.dltk.core.index.sql.SqlIndex;
 import org.eclipse.dltk.core.index2.AbstractIndexer;
 import org.eclipse.dltk.core.index2.search.ISearchEngine;
+import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.util.Util;
 import org.eclipse.osgi.util.NLS;
 
@@ -98,8 +100,17 @@ public class SqlIndexer extends AbstractIndexer {
 				Container container = dbFactory.getContainerDao().insert(
 						connection, containerPath.toString());
 
-				String relativePath = Util.relativePath(sourceModule.getPath(),
-						containerPath.segmentCount());
+				String relativePath;
+				if (toolkit instanceof IDLTKLanguageToolkitExtension
+						&& ((IDLTKLanguageToolkitExtension) toolkit)
+								.isArchiveFileName(sourceModule.getPath()
+										.toString())) {
+					relativePath = ((ExternalSourceModule) sourceModule)
+							.getFullPath().toString();
+				} else {
+					relativePath = Util.relativePath(sourceModule.getPath(),
+							containerPath.segmentCount());
+				}
 				IFileHandle handle = EnvironmentPathUtils.getFile(sourceModule);
 
 				File existing = dbFactory.getFileDao().select(connection,
@@ -113,9 +124,14 @@ public class SqlIndexer extends AbstractIndexer {
 					dbFactory.getFileDao().deleteById(connection,
 							existing.getId());
 				}
-
+				long lastModifyed;
+				if (handle != null) {
+					lastModifyed = handle.lastModified();
+				} else {
+					lastModifyed = 0;
+				}
 				file = dbFactory.getFileDao().insert(connection, relativePath,
-						handle.lastModified(), container.getId());
+						lastModifyed, container.getId());
 
 				super.indexDocument(sourceModule);
 

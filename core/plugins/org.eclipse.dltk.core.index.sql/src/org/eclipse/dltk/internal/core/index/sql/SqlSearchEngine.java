@@ -22,6 +22,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IDLTKLanguageToolkitExtension;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
@@ -167,14 +169,28 @@ public class SqlSearchEngine implements ISearchEngine {
 				}
 
 				String containerPath = container.getPath();
+				IDLTKLanguageToolkit toolkit = ((DLTKSearchScope) scope)
+						.getLanguageToolkit();
+				if (toolkit instanceof IDLTKLanguageToolkitExtension
+						&& ((IDLTKLanguageToolkitExtension) toolkit)
+								.isArchiveFileName(containerPath)) {
+					containerPath = containerPath
+							+ IDLTKSearchScope.FILE_ENTRY_SEPARATOR;
+				}
+
 				String resourcePath = new Path(containerPath).append(
 						file.getPath()).toString();
 
 				IProjectFragment projectFragment = projectFragmentCache
 						.get(containerPath);
+
 				if (projectFragment == null) {
 					projectFragment = ((DLTKSearchScope) scope)
 							.projectFragment(resourcePath);
+					if (projectFragment == null) {
+						projectFragment = ((DLTKSearchScope) scope)
+								.projectFragment(containerPath);
+					}
 					projectFragmentCache.put(containerPath, projectFragment);
 				}
 				if (projectFragment == null) {
