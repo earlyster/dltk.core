@@ -39,8 +39,8 @@ public class RSESshManager {
 			return null;//
 		}
 		for (final IConnectorService connector : connectorServices) {
-			String hostName = host.getHostName();
-			// Retrive user name
+			// String hostName = host.getHostName();
+			// Retrieve user name
 			final String userId = connector.getUserId();
 			String location = userId + "@" + host.getHostName();
 			final ISshConnection connection = SshConnectionManager
@@ -52,11 +52,12 @@ public class RSESshManager {
 				return connection;
 			}
 			// Make connect in separate thread
-			Thread connectionInitializationThread = new Thread(new Runnable() {
+			Thread connectionInitializationThread = new Thread() {
+				@Override
 				public void run() {
 					initializeConnection(host, connector, userId, connection);
 				}
-			});
+			};
 			connectionInitializationThread.start();
 		}
 		return null;
