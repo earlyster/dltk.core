@@ -26,6 +26,7 @@ import com.jcraft.jsch.UserInfo;
 
 public class ChannelPool {
 
+	private final long inactivityTimeout;
 	private final String userName;
 	private final int port;
 	private final String hostName;
@@ -52,10 +53,12 @@ public class ChannelPool {
 	 * @param hostName
 	 * @param port
 	 */
-	public ChannelPool(String userName, String hostName, int port) {
+	public ChannelPool(String userName, String hostName, int port,
+			long inactivityTimeout) {
 		this.userName = userName;
 		this.hostName = hostName;
 		this.port = port;
+		this.inactivityTimeout = inactivityTimeout;
 	}
 
 	public void setPassword(String password) {
@@ -125,67 +128,77 @@ public class ChannelPool {
 		}
 	}
 
-	protected ChannelSftp acquireChannel(final Object context, int tryCount) {
+	protected ChannelSftp acquireChannel(final Object context, long timeout) {
+		final long start = System.currentTimeMillis();
 		for (;;) {
 			try {
 				return acquireChannel(context);
-			} catch (JSchException ex) {
-				if (--tryCount <= 0) {
-					Activator.error("Failed to create direct connection", ex); //$NON-NLS-1$					
+			} catch (JSchException e) {
+				if (isOutOfChannels(e)) {
+					if (tryCloseOldChannels()) {
+						continue;
+					}
+				}
+				if (System.currentTimeMillis() - start > timeout) {
+					Activator.error("Failed to create direct connection", e); //$NON-NLS-1$					
+					return null;
+				}
+				if (DEBUG) {
+					log(" <sleep>"); //$NON-NLS-1$
+				}
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e1) {
 					return null;
 				}
 			}
 		}
 	}
 
-	protected synchronized ChannelSftp acquireChannel(Object context)
-			throws JSchException {
-		connectSession();
-		try {
-			if (DEBUG) {
-				log("<acquireChannel> " + context); //$NON-NLS-1$
-			}
-			while (!freeChannels.isEmpty()) {
-				final ChannelSftp channel = freeChannels.remove(freeChannels
-						.size() - 1);
-				if (channel.isConnected()) {
-					usedChannels.put(channel, createUsageInfo(context));
-					return channel;
-				}
-			}
-			final ChannelSftp channel = (ChannelSftp) session
-					.openChannel("sftp"); //$NON-NLS-1$			
-			if (!channel.isConnected()) {
-				if (DEBUG) {
-					log("channel.connect()"); //$NON-NLS-1$
-				}
-				channel.connect();
-			}
-			usedChannels.put(channel, createUsageInfo(context));
-			return channel;
-		} catch (JSchException e) {
-			// String eToStr = e.toString();
-			// if (eToStr.indexOf("Auth cancel") >= 0 || eToStr.indexOf("Auth fail") >= 0 || eToStr.indexOf("session is down") >= 0) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			// if (session.isConnected()) {
-			// session.disconnect();
-			// session = null;
-			// }
-			// }
-			// if (needLog) {
-			// Activator.error("Failed to create direct connection", e); //$NON-NLS-1$
-			// }
-			if (!(CHANNEL_IS_NOT_OPENED.equals(e.getMessage()) && disconnectUsedChannels())) {
-				disconnect();
-			}
-			throw e;
-			// if (session != null) {
-			// session.disconnect();
-			// session = null;
-			// }
-		}
+	private boolean isOutOfChannels(JSchException e) {
+		return CHANNEL_IS_NOT_OPENED.equals(e.getMessage());
 	}
 
 	private static final String CHANNEL_IS_NOT_OPENED = "channel is not opened."; //$NON-NLS-1$
+
+	protected synchronized ChannelSftp acquireChannel(Object context)
+			throws JSchException {
+		connectSession();
+		if (DEBUG) {
+			log("<acquireChannel> " + context); //$NON-NLS-1$
+		}
+		while (!freeChannels.isEmpty()) {
+			final ChannelSftp channel = freeChannels
+					.remove(freeChannels.size() - 1);
+			if (channel.isConnected()) {
+				usedChannels.put(channel, createUsageInfo(context));
+				return channel;
+			}
+		}
+		final ChannelSftp channel = (ChannelSftp) session.openChannel("sftp"); //$NON-NLS-1$			
+		if (!channel.isConnected()) {
+			if (DEBUG) {
+				log("channel.connect()"); //$NON-NLS-1$
+			}
+			channel.connect();
+		}
+		usedChannels.put(channel, createUsageInfo(context));
+		return channel;
+		// String eToStr = e.toString();
+		// if (eToStr.indexOf("Auth cancel") >= 0 || eToStr.indexOf("Auth fail") >= 0 || eToStr.indexOf("session is down") >= 0) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		// if (session.isConnected()) {
+		// session.disconnect();
+		// session = null;
+		// }
+		// }
+		// if (needLog) {
+		// Activator.error("Failed to create direct connection", e); //$NON-NLS-1$
+		// }
+		// if (session != null) {
+		// session.disconnect();
+		// session = null;
+		// }
+	}
 
 	/**
 	 * @return
@@ -213,13 +226,61 @@ public class ChannelPool {
 		channel.disconnect();
 	}
 
-	private boolean disconnectUsedChannels() {
+	private synchronized boolean tryCloseOldChannels() {
 		if (!usedChannels.isEmpty()) {
-			closeUsedChannels();
-			return true;
-		} else {
-			return false;
+			ChannelSftp selectedChannel = null;
+			ChannelUsageInfo selectedUsageInfo = null;
+			long selectedLastActivity = 0;
+			for (Map.Entry<ChannelSftp, ChannelUsageInfo> entry : usedChannels
+					.entrySet()) {
+				final ChannelUsageInfo usageInfo = entry.getValue();
+				if (canClose(usageInfo.context)) {
+					final long lastActivity = getLastActivity(usageInfo.context);
+					if (lastActivity != Long.MIN_VALUE) {
+						if (selectedChannel == null
+								|| lastActivity < selectedLastActivity) {
+							selectedChannel = entry.getKey();
+							selectedUsageInfo = usageInfo;
+							selectedLastActivity = lastActivity;
+						}
+					}
+				}
+			}
+			if (selectedChannel != null) {
+				final long currentTime = System.currentTimeMillis();
+				if (currentTime - selectedLastActivity > inactivityTimeout) {
+					Activator
+							.warn("Close active channel \"" + selectedUsageInfo.context + "\" created " + (currentTime - selectedUsageInfo.timestamp) + "ms ago, lastActivity=" + (currentTime - selectedLastActivity) + "ms ago"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					if (DEBUG) {
+						log(" channel.disconnect() " + selectedUsageInfo.context); //$NON-NLS-1$
+					}
+					selectedChannel.disconnect();
+					return true;
+				}
+			}
 		}
+		return false;
+	}
+
+	/**
+	 * Tests if channel allocated for this context could be closed.
+	 * 
+	 * @param context
+	 * @return
+	 */
+	protected boolean canClose(Object context) {
+		return false;
+	}
+
+	/**
+	 * Returns the time of last activity in the channel allocated for this
+	 * context.
+	 * 
+	 * @param context
+	 * @return
+	 */
+	protected long getLastActivity(Object context) {
+		return Long.MIN_VALUE;
 	}
 
 	private void closeUsedChannels() {

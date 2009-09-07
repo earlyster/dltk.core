@@ -43,10 +43,17 @@ public class SshConnectionManager {
 	}
 
 	public static void disconnectAll() {
+		disconnectAll(false);
+	}
+
+	public static synchronized void disconnectAll(boolean destroyAll) {
 		Collection<SshConnection> values = connections.values();
 		for (ISshConnection connection : values) {
 			connection.disconnect();
 			connection.setDisabled(60 * 1000 * 1000 * 1000); // Disable forever.
+		}
+		if (destroyAll) {
+			connections.clear();
 		}
 	}
 }

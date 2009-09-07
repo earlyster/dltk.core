@@ -136,9 +136,15 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 
 	private static final int STREAM_BUFFER_SIZE = 32000;
 
-	private class GetOperation extends Operation {
+	private static interface StreamOperation {
+		boolean isActiveCall();
+
+		long getLastActivity();
+	}
+
+	private class GetOperation extends Operation implements StreamOperation {
 		private IPath path;
-		private InputStream stream;
+		private GetOperationInputStream stream;
 
 		public GetOperation(IPath path) {
 			this.path = path;
@@ -164,15 +170,30 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 			return stream;
 		}
 
+		public boolean isActiveCall() {
+			return stream != null && stream.activeCalls != 0;
+		}
+
+		public long getLastActivity() {
+			if (stream != null) {
+				return stream.lastActivity;
+			} else {
+				return Long.MIN_VALUE;
+			}
+		}
+
 	}
 
 	private class GetOperationInputStream extends BufferedInputStream {
 
 		private final ChannelSftp channel;
+		private int activeCalls;
+		private long lastActivity;
 
 		public GetOperationInputStream(InputStream in, ChannelSftp channel) {
 			super(in, STREAM_BUFFER_SIZE);
 			this.channel = channel;
+			updateLastActivity();
 		}
 
 		@Override
@@ -184,12 +205,57 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 			}
 		}
 
+		private void updateLastActivity() {
+			lastActivity = System.currentTimeMillis();
+		}
+
+		private void beginActivity() {
+			++activeCalls;
+			updateLastActivity();
+		}
+
+		private void endActivity() {
+			--activeCalls;
+			updateLastActivity();
+		}
+
+		@Override
+		public synchronized int read() throws IOException {
+			beginActivity();
+			try {
+				return super.read();
+			} finally {
+				endActivity();
+			}
+		}
+
+		@Override
+		public int read(byte[] b) throws IOException {
+			beginActivity();
+			try {
+				return super.read(b);
+			} finally {
+				endActivity();
+			}
+		}
+
+		@Override
+		public synchronized int read(byte[] b, int off, int len)
+				throws IOException {
+			beginActivity();
+			try {
+				return super.read(b, off, len);
+			} finally {
+				endActivity();
+			}
+		}
+
 	}
 
-	private class PutOperation extends Operation {
+	private class PutOperation extends Operation implements StreamOperation {
 		private final IPath path;
 		private final IOutputStreamCloseListener closeListener;
-		private OutputStream stream;
+		private PutOperationOutputStream stream;
 
 		public PutOperation(IPath path, IOutputStreamCloseListener closeListener) {
 			this.path = path;
@@ -218,17 +284,32 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 			return stream;
 		}
 
+		public boolean isActiveCall() {
+			return stream != null && stream.activeCalls != 0;
+		}
+
+		public long getLastActivity() {
+			if (stream != null) {
+				return stream.lastActivity;
+			} else {
+				return Long.MIN_VALUE;
+			}
+		}
+
 	}
 
 	private class PutOperationOutputStream extends BufferedOutputStream {
 		private final ChannelSftp channel;
 		private final IOutputStreamCloseListener closeListener;
+		private int activeCalls;
+		private long lastActivity;
 
 		public PutOperationOutputStream(OutputStream out, ChannelSftp channel,
 				IOutputStreamCloseListener closeListener) {
 			super(out, STREAM_BUFFER_SIZE);
 			this.channel = channel;
 			this.closeListener = closeListener;
+			updateActivity();
 		}
 
 		@Override
@@ -240,6 +321,51 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 				}
 			} finally {
 				releaseChannel(channel);
+			}
+		}
+
+		private void updateActivity() {
+			lastActivity = System.currentTimeMillis();
+		}
+
+		private void beginActivity() {
+			++activeCalls;
+			updateActivity();
+		}
+
+		private void endActivity() {
+			--activeCalls;
+			updateActivity();
+		}
+
+		@Override
+		public synchronized void write(int b) throws IOException {
+			beginActivity();
+			try {
+				super.write(b);
+			} finally {
+				endActivity();
+			}
+		}
+
+		@Override
+		public void write(byte[] b) throws IOException {
+			beginActivity();
+			try {
+				super.write(b);
+			} finally {
+				endActivity();
+			}
+		}
+
+		@Override
+		public synchronized void write(byte[] b, int off, int len)
+				throws IOException {
+			beginActivity();
+			try {
+				super.write(b, off, len);
+			} finally {
+				endActivity();
 			}
 		}
 
@@ -270,9 +396,11 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 	}
 
 	private static final int DEFAULT_RETRY_COUNT = 2;
+	private static final long DEFAULT_ACQUIRE_TIMEOUT = 30 * 1000;
+	private static final long DEFAULT_INACTIVITY_TIMEOUT = 60 * 1000;
 
 	public SshConnection(String userName, String hostName, int port) {
-		super(userName, hostName, port);
+		super(userName, hostName, port, DEFAULT_INACTIVITY_TIMEOUT);
 	}
 
 	public boolean connect() {
@@ -295,7 +423,7 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 	}
 
 	private void performOperation(final Operation op, int tryCount) {
-		final ChannelSftp channel = acquireChannel(op, tryCount);
+		final ChannelSftp channel = acquireChannel(op, DEFAULT_ACQUIRE_TIMEOUT);
 		if (channel != null) {
 			try {
 				if (DEBUG) {
@@ -325,6 +453,20 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 					releaseChannel(channel);
 				}
 			}
+		}
+	}
+
+	@Override
+	protected boolean canClose(Object context) {
+		return context instanceof StreamOperation;
+	}
+
+	@Override
+	protected long getLastActivity(Object context) {
+		if (context instanceof StreamOperation) {
+			return ((StreamOperation) context).getLastActivity();
+		} else {
+			return super.getLastActivity(context);
 		}
 	}
 
