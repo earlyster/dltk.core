@@ -17,8 +17,19 @@ import com.jcraft.jsch.ChannelSftp.LsEntry;
 public class SshFileHandle implements ISshFileHandle,
 		IOutputStreamCloseListener {
 	private static final int CACHE_LIMIT = 1000;
-	private static Map<SshFileHandle, SftpATTRS> timestamps = new HashMap<SshFileHandle, SftpATTRS>();
-	private static Map<SshFileHandle, Long> lastaccess = new HashMap<SshFileHandle, Long>();
+
+	private static class CacheEntry {
+		final SftpATTRS attrs;
+		final long lastAccess;
+
+		public CacheEntry(SftpATTRS attrs, long lastAccess) {
+			this.attrs = attrs;
+			this.lastAccess = lastAccess;
+		}
+
+	}
+
+	private static final Map<SshFileHandle, CacheEntry> attrCache = new HashMap<SshFileHandle, CacheEntry>();
 
 	private SshConnection connection = null;
 	private IPath path;
@@ -89,8 +100,9 @@ public class SshFileHandle implements ISshFileHandle,
 
 	private void cleanAttrs() {
 		attrs = null;
-		timestamps.remove(this);
-		lastaccess.remove(this);
+		synchronized (attrCache) {
+			attrCache.remove(this);
+		}
 	}
 
 	private void fetchAttrs(boolean clean) {
@@ -104,26 +116,27 @@ public class SshFileHandle implements ISshFileHandle,
 	}
 
 	private SftpATTRS fetchCacheAttrs(boolean clean) {
-		if (timestamps.size() > CACHE_LIMIT) {
-			timestamps.clear();
-			lastaccess.clear();
-		}
 		long c = 0;
-		if (!clean) {
-			if (timestamps.containsKey(this)) {
-				c = System.currentTimeMillis();
-				Long last = lastaccess.get(this);
-				if (last != null && (c - last.longValue()) < 1000 * 10) {
-					return timestamps.get(this);
+		synchronized (attrCache) {
+			if (attrCache.size() > CACHE_LIMIT) {
+				attrCache.clear();
+			} else if (!clean) {
+				final CacheEntry entry = attrCache.get(this);
+				if (entry != null) {
+					c = System.currentTimeMillis();
+					if ((c - entry.lastAccess) < 1000 * 10) {
+						return entry.attrs;
+					}
 				}
 			}
 		}
 		SftpATTRS attrs = connection.getAttrs(path);
-		timestamps.put(this, attrs);
 		if (c == 0) {
 			c = System.currentTimeMillis();
 		}
-		lastaccess.put(this, c);
+		synchronized (attrCache) {
+			attrCache.put(this, new CacheEntry(attrs, c));
+		}
 		return attrs;
 	}
 
@@ -165,8 +178,9 @@ public class SshFileHandle implements ISshFileHandle,
 				SftpATTRS childAttrs = entry.getAttrs();
 				SshFileHandle childHandle = new SshFileHandle(connection, path
 						.append(filename), childAttrs);
-				timestamps.put(childHandle, childAttrs);
-				lastaccess.put(childHandle, c);
+				synchronized (attrCache) {
+					attrCache.put(childHandle, new CacheEntry(childAttrs, c));
+				}
 				children.put(filename, childHandle);
 			}
 			childrenFetched = true;
