@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 public class CommandLine {
 
-	private final List args = new ArrayList();
+	private final List<String> args = new ArrayList<String>();
 
 	public CommandLine() {
 		// default constructor
@@ -48,7 +48,7 @@ public class CommandLine {
 
 	public void replaceSequence(char pattern, String value) {
 		for (int i = 0, size = args.size(); i < size; ++i) {
-			final String arg = (String) args.get(i);
+			final String arg = args.get(i);
 			final String replaced = replace(arg, pattern, value);
 			if (!arg.equals(replaced)) {
 				args.set(i, replaced);
@@ -82,7 +82,7 @@ public class CommandLine {
 	}
 
 	public String[] toArray() {
-		return (String[]) args.toArray(new String[args.size()]);
+		return args.toArray(new String[args.size()]);
 	}
 
 	/**
@@ -91,6 +91,7 @@ public class CommandLine {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < args.size(); ++i) {
