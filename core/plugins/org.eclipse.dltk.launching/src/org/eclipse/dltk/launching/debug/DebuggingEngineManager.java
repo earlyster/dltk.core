@@ -8,9 +8,10 @@ import org.eclipse.dltk.internal.launching.debug.DebuggingEngine;
 import org.eclipse.dltk.launching.IInterpreterRunnerFactory;
 
 public class DebuggingEngineManager extends DLTKContributionExtensionManager {
-	private static final String DEBUGGING_ENGINE_EXT_POINT = DLTKLaunchingPlugin.PLUGIN_ID
+	static final String DEBUGGING_ENGINE_EXT_POINT = DLTKLaunchingPlugin.PLUGIN_ID
 			+ ".debuggingEngine"; //$NON-NLS-1$
 
+	private static final String ENGINE_CONTRIBUTION = "engineContribution"; //$NON-NLS-1$
 	private static final String ENGINE_TAG = "engine"; //$NON-NLS-1$
 
 	private static DebuggingEngineManager instance;
@@ -55,6 +56,11 @@ public class DebuggingEngineManager extends DLTKContributionExtensionManager {
 	 */
 	public boolean hasSelectedDebuggingEngine(IProject project, String natureId) {
 		return getSelectedDebuggingEngine(project, natureId) != null;
+	}
+
+	@Override
+	protected boolean isNatureContribution(IConfigurationElement main) {
+		return ENGINE_CONTRIBUTION.equals(main.getName());
 	}
 
 	/*
