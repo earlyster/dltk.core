@@ -103,30 +103,35 @@ public class ChannelPool {
 
 	private static boolean DEBUG = false;
 
-	protected synchronized void connectSession() throws JSchException {
-		if (session == null) {
-			IJSchService service = Activator.getDefault().getJSch();
-			session = service.createSession(hostName, port, userName);
-			session.setTimeout(0);
-			session.setServerAliveInterval(300000);
-			session.setServerAliveCountMax(6);
-			session.setPassword(password); // Set password
-			// directly
-			UserInfo ui = new LocalUserInfo();
-			session.setUserInfo(ui);
-		}
-
-		if (!session.isConnected()) {
-			// Connect with default timeout
-			if (DEBUG) {
-				log("session.connect()"); //$NON-NLS-1$
+	protected void connectSession() throws JSchException {
+		synchronized (lock) {
+			if (session == null) {
+				IJSchService service = Activator.getDefault().getJSch();
+				session = service.createSession(hostName, port, userName);
+				session.setTimeout(0);
+				session.setServerAliveInterval(300000);
+				session.setServerAliveCountMax(6);
+				session.setPassword(password); // Set password
+				// directly
+				UserInfo ui = new LocalUserInfo();
+				session.setUserInfo(ui);
 			}
-			session.connect(60 * 1000);
-			if (DEBUG) {
-				log("...connected"); //$NON-NLS-1$
+
+			if (!session.isConnected()) {
+				// Connect with default timeout
+				if (DEBUG) {
+					log("session.connect()"); //$NON-NLS-1$
+				}
+				session.connect(60 * 1000);
+				if (DEBUG) {
+					log("...connected"); //$NON-NLS-1$
+				}
 			}
 		}
 	}
+
+	private final Object channelNotifier = new Object();
+	private final Object lock = new Object();
 
 	protected ChannelSftp acquireChannel(final Object context, long timeout) {
 		final long start = System.currentTimeMillis();
@@ -147,7 +152,9 @@ public class ChannelPool {
 					log(" <sleep>"); //$NON-NLS-1$
 				}
 				try {
-					Thread.sleep(1000);
+					synchronized (channelNotifier) {
+						channelNotifier.wait(1000);
+					}
 				} catch (InterruptedException e1) {
 					return null;
 				}
@@ -161,18 +168,19 @@ public class ChannelPool {
 
 	private static final String CHANNEL_IS_NOT_OPENED = "channel is not opened."; //$NON-NLS-1$
 
-	protected synchronized ChannelSftp acquireChannel(Object context)
-			throws JSchException {
+	protected ChannelSftp acquireChannel(Object context) throws JSchException {
 		connectSession();
 		if (DEBUG) {
 			log("<acquireChannel> " + context); //$NON-NLS-1$
 		}
-		while (!freeChannels.isEmpty()) {
-			final ChannelSftp channel = freeChannels
-					.remove(freeChannels.size() - 1);
-			if (channel.isConnected()) {
-				usedChannels.put(channel, createUsageInfo(context));
-				return channel;
+		synchronized (lock) {
+			while (!freeChannels.isEmpty()) {
+				final ChannelSftp channel = freeChannels.remove(freeChannels
+						.size() - 1);
+				if (channel.isConnected()) {
+					usedChannels.put(channel, createUsageInfo(context));
+					return channel;
+				}
 			}
 		}
 		final ChannelSftp channel = (ChannelSftp) session.openChannel("sftp"); //$NON-NLS-1$			
@@ -182,7 +190,9 @@ public class ChannelPool {
 			}
 			channel.connect();
 		}
-		usedChannels.put(channel, createUsageInfo(context));
+		synchronized (lock) {
+			usedChannels.put(channel, createUsageInfo(context));
+		}
 		return channel;
 		// String eToStr = e.toString();
 		// if (eToStr.indexOf("Auth cancel") >= 0 || eToStr.indexOf("Auth fail") >= 0 || eToStr.indexOf("session is down") >= 0) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -211,10 +221,15 @@ public class ChannelPool {
 		if (DEBUG) {
 			log("<releaseChannel>"); //$NON-NLS-1$
 		}
-		if (usedChannels.remove(channel) != null) {
-			freeChannels.add(channel);
-		} else {
-			channel.disconnect();
+		synchronized (lock) {
+			if (usedChannels.remove(channel) != null) {
+				freeChannels.add(channel);
+			} else {
+				channel.disconnect();
+			}
+		}
+		synchronized (channelNotifier) {
+			channelNotifier.notifyAll();
 		}
 	}
 
@@ -222,40 +237,45 @@ public class ChannelPool {
 		if (DEBUG) {
 			log("<destroyChannel>"); //$NON-NLS-1$
 		}
-		usedChannels.remove(channel);
+		synchronized (lock) {
+			usedChannels.remove(channel);
+		}
 		channel.disconnect();
 	}
 
-	private synchronized boolean tryCloseOldChannels() {
-		if (!usedChannels.isEmpty()) {
-			ChannelSftp selectedChannel = null;
-			ChannelUsageInfo selectedUsageInfo = null;
-			long selectedLastActivity = 0;
-			for (Map.Entry<ChannelSftp, ChannelUsageInfo> entry : usedChannels
-					.entrySet()) {
-				final ChannelUsageInfo usageInfo = entry.getValue();
-				if (canClose(usageInfo.context)) {
-					final long lastActivity = getLastActivity(usageInfo.context);
-					if (lastActivity != Long.MIN_VALUE) {
-						if (selectedChannel == null
-								|| lastActivity < selectedLastActivity) {
-							selectedChannel = entry.getKey();
-							selectedUsageInfo = usageInfo;
-							selectedLastActivity = lastActivity;
+	private boolean tryCloseOldChannels() {
+		synchronized (lock) {
+			if (!usedChannels.isEmpty()) {
+				ChannelSftp selectedChannel = null;
+				ChannelUsageInfo selectedUsageInfo = null;
+				long selectedLastActivity = 0;
+				for (Map.Entry<ChannelSftp, ChannelUsageInfo> entry : usedChannels
+						.entrySet()) {
+					final ChannelUsageInfo usageInfo = entry.getValue();
+					if (canClose(usageInfo.context)) {
+						final long lastActivity = getLastActivity(usageInfo.context);
+						if (lastActivity != Long.MIN_VALUE) {
+							if (selectedChannel == null
+									|| lastActivity < selectedLastActivity) {
+								selectedChannel = entry.getKey();
+								selectedUsageInfo = usageInfo;
+								selectedLastActivity = lastActivity;
+							}
 						}
 					}
 				}
-			}
-			if (selectedChannel != null) {
-				final long currentTime = System.currentTimeMillis();
-				if (currentTime - selectedLastActivity > inactivityTimeout) {
-					Activator
-							.warn("Close active channel \"" + selectedUsageInfo.context + "\" created " + (currentTime - selectedUsageInfo.timestamp) + "ms ago, lastActivity=" + (currentTime - selectedLastActivity) + "ms ago"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-					if (DEBUG) {
-						log(" channel.disconnect() " + selectedUsageInfo.context); //$NON-NLS-1$
+				if (selectedChannel != null) {
+					final long currentTime = System.currentTimeMillis();
+					if (currentTime - selectedLastActivity > inactivityTimeout) {
+						Activator
+								.warn("Close active channel \"" + selectedUsageInfo.context + "\" created " + (currentTime - selectedUsageInfo.timestamp) + "ms ago, lastActivity=" + (currentTime - selectedLastActivity) + "ms ago"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+						if (DEBUG) {
+							log(" channel.disconnect() " + selectedUsageInfo.context); //$NON-NLS-1$
+						}
+						selectedChannel.disconnect();
+						usedChannels.remove(selectedChannel);
+						return true;
 					}
-					selectedChannel.disconnect();
-					return true;
 				}
 			}
 		}
@@ -283,35 +303,33 @@ public class ChannelPool {
 		return Long.MIN_VALUE;
 	}
 
-	private void closeUsedChannels() {
-		for (Map.Entry<ChannelSftp, ChannelUsageInfo> entry : usedChannels
-				.entrySet()) {
-			final ChannelUsageInfo usageInfo = entry.getValue();
-			Activator
-					.warn("Close active channel \"" + usageInfo.context + "\" created " + (System.currentTimeMillis() - usageInfo.timestamp) + "ms ago"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			if (DEBUG) {
-				log(" channel.disconnect() " + usageInfo.context); //$NON-NLS-1$
+	public void disconnect() {
+		synchronized (lock) {
+			for (ChannelSftp channel : freeChannels) {
+				if (DEBUG) {
+					log("channel.disconnect()"); //$NON-NLS-1$
+				}
+				channel.disconnect();
 			}
-			entry.getKey().disconnect();
-		}
-		usedChannels.clear();
-	}
-
-	public synchronized void disconnect() {
-		for (ChannelSftp channel : freeChannels) {
-			if (DEBUG) {
-				log("channel.disconnect()"); //$NON-NLS-1$
+			freeChannels.clear();
+			for (Map.Entry<ChannelSftp, ChannelUsageInfo> entry : usedChannels
+					.entrySet()) {
+				final ChannelUsageInfo usageInfo = entry.getValue();
+				Activator
+						.warn("Close active channel \"" + usageInfo.context + "\" created " + (System.currentTimeMillis() - usageInfo.timestamp) + "ms ago"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				if (DEBUG) {
+					log(" channel.disconnect() " + usageInfo.context); //$NON-NLS-1$
+				}
+				entry.getKey().disconnect();
 			}
-			channel.disconnect();
-		}
-		freeChannels.clear();
-		closeUsedChannels();
-		if (session != null) {
-			if (DEBUG) {
-				log("session.disconnect()"); //$NON-NLS-1$
+			usedChannels.clear();
+			if (session != null) {
+				if (DEBUG) {
+					log("session.disconnect()"); //$NON-NLS-1$
+				}
+				session.disconnect();
+				session = null;
 			}
-			session.disconnect();
-			session = null;
 		}
 	}
 
