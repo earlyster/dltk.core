@@ -98,8 +98,8 @@ public abstract class DLTKContributionExtensionManager {
 	 *            nature id
 	 * 
 	 * @return list of avaiable contributions or
-	 *         <code>Collections.EMPTY_LIST</code> if no contributions have
-	 *         been registered by the plugin
+	 *         <code>Collections.EMPTY_LIST</code> if no contributions have been
+	 *         registered by the plugin
 	 */
 	protected final List getContributionsByNature(String natureId) {
 		if (!hasContributions(natureId)) {
@@ -269,14 +269,23 @@ public abstract class DLTKContributionExtensionManager {
 			IExtension extension = extensions[i];
 			IConfigurationElement[] elements = extension
 					.getConfigurationElements();
-
-			IConfigurationElement main = elements[0];
-
-			String natureId = main.getAttribute(NATURE_ID);
-			IConfigurationElement[] innerElements = main.getChildren();
-
-			loadChildren(natureId, innerElements);
+			for (IConfigurationElement main : elements) {
+				if (isNatureContribution(main)) {
+					String natureId = main.getAttribute(NATURE_ID);
+					IConfigurationElement[] innerElements = main.getChildren();
+					loadChildren(natureId, innerElements);
+				}
+			}
 		}
+	}
+
+	/**
+	 * @param main
+	 * @return
+	 * @since 2.0
+	 */
+	protected boolean isNatureContribution(IConfigurationElement main) {
+		return true;
 	}
 
 }
