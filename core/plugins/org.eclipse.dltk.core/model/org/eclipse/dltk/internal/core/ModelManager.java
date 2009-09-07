@@ -2253,7 +2253,7 @@ public class ModelManager implements ISaveParticipant {
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(archiveProjectFragment);
 		if (toolkit != null) {
-			return toolkit.openArchive(archiveProjectFragment, localFile);
+			return toolkit.openArchive(localFile);
 		} else {
 			return new ZipArchiveFile(localFile);
 		}

@@ -78,8 +78,7 @@ public abstract class AbstractLanguageToolkit implements IDLTKLanguageToolkit {
 	 * @throws IOException
 	 * @since 2.0
 	 */
-	public IArchive openArchive(IArchiveProjectFragment archiveProjectFragment,
-			File localFile) throws IOException {
+	public IArchive openArchive(File localFile) throws IOException {
 		return new ZipArchiveFile(localFile);
 	}
 }

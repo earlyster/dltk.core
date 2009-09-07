@@ -92,7 +92,6 @@ public interface IDLTKLanguageToolkit {
 	 * @throws IOException
 	 * @since 2.0
 	 */
-	IArchive openArchive(IArchiveProjectFragment archiveProjectFragment,
-			File localFile) throws IOException;
+	IArchive openArchive(File localFile) throws IOException;
 
 }
