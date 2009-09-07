@@ -542,7 +542,13 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 				}
 			};
 			if (restoreId == dialog.open()) {
-				IPreferenceStore store = getPreferenceStore();
+				/*
+				 * FIXME Restore default settings in DLTKUIPlugin preferences,
+				 * since at the moment this is the only IPreferenceStore these
+				 * preferences are read from.
+				 */
+				IPreferenceStore store = DLTKUIPlugin.getDefault()
+						.getPreferenceStore();
 				store
 						.setToDefault(PreferenceConstants.CODEASSIST_CATEGORY_ORDER);
 				store
