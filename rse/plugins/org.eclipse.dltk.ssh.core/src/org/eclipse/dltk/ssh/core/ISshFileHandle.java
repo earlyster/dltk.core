@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 public interface ISshFileHandle {
@@ -26,6 +27,8 @@ public interface ISshFileHandle {
 			throws CoreException;
 
 	public String getName();
+
+	public IPath getPath();
 
 	public OutputStream getOutputStream(IProgressMonitor monitor)
 			throws CoreException;

@@ -207,6 +207,25 @@ public class SshFileHandle implements ISshFileHandle,
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see org.eclipse.dltk.ssh.core.ISshFileHandle#getPath()
+	 */
+	public IPath getPath() {
+		return path;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return path.toString();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see
 	 * org.eclipse.dltk.ssh.internal.core.ISshFileHandle#getOutputStream(org
 	 * .eclipse.core.runtime.IProgressMonitor)
