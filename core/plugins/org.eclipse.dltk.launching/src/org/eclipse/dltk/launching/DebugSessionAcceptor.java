@@ -11,10 +11,13 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.dltk.compiler.util.Util;
@@ -86,7 +89,7 @@ public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 
 	private static final int WAIT_CHUNK = 1000;
 
-	public boolean waitConnection(final int timeout) {
+	public boolean waitConnection(final int timeout) throws CoreException {
 		final SubProgressMonitor sub = new SubProgressMonitor(parentMonitor, 1);
 		sub.beginTask(Util.EMPTY_STRING, timeout / WAIT_CHUNK);
 		try {
@@ -103,6 +106,7 @@ public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 					if (target.isTerminated() || sub.isCanceled()) {
 						break;
 					}
+					abortIfProcessTerminated();
 					synchronized (this) {
 						wait(WAIT_CHUNK);
 					}
@@ -127,6 +131,18 @@ public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 			return false;
 		} finally {
 			sub.done();
+		}
+	}
+
+	private void abortIfProcessTerminated() throws CoreException {
+		if (target.getProcess() != null && target.getProcess().isTerminated()) {
+			throw new CoreException(
+					new Status(
+							IStatus.ERROR,
+							DLTKLaunchingPlugin.PLUGIN_ID,
+							ScriptLaunchConfigurationConstants.ERR_DEBUGGER_PROCESS_TERMINATED,
+							LaunchingMessages.DebugSessionAcceptor_DebuggerUnexpectedlyTerminated,
+							null));
 		}
 	}
 
@@ -188,7 +204,7 @@ public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 		return initializeMonitor;
 	}
 
-	public boolean waitInitialized(final int timeout) {
+	public boolean waitInitialized(final int timeout) throws CoreException {
 		final IProgressMonitor sub = getInitializeMonitor();
 		try {
 			final long start = System.currentTimeMillis();
@@ -202,6 +218,7 @@ public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 					if (target.isTerminated() || sub.isCanceled()) {
 						break;
 					}
+					abortIfProcessTerminated();
 					synchronized (this) {
 						wait(WAIT_CHUNK);
 					}

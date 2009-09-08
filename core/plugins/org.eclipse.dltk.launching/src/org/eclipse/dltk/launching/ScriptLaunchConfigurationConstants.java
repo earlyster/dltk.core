@@ -178,6 +178,8 @@ public class ScriptLaunchConfigurationConstants {
 	 */
 	public static final int ERR_NO_TESTING_ENGINE = 111;
 
+	public static final int ERR_DEBUGGER_PROCESS_TERMINATED = 112;
+
 	public static final int ERR_NO_DEFAULT_INTERPRETER_INSTALL = 167;
 
 	// Debugging engine errors

@@ -153,4 +153,5 @@ public class LaunchingMessages extends NLS {
 
 	public static String ScriptRuntime_Buildpath_references_non_existant_project___0__3;
 
+	public static String DebugSessionAcceptor_DebuggerUnexpectedlyTerminated;
 }
