@@ -68,7 +68,6 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IAccessRule;
 import org.eclipse.dltk.core.IArchive;
-import org.eclipse.dltk.core.IArchiveProjectFragment;
 import org.eclipse.dltk.core.IBuildpathAttribute;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
@@ -2248,7 +2247,7 @@ public class ModelManager implements ISaveParticipant {
 		}
 	}
 
-	public IArchive openArchive(IArchiveProjectFragment archiveProjectFragment,
+	public IArchive openArchive(ArchiveProjectFragment archiveProjectFragment,
 			File localFile) throws IOException {
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(archiveProjectFragment);

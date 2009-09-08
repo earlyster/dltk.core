@@ -23,7 +23,6 @@ import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IArchive;
 import org.eclipse.dltk.core.IArchiveEntry;
-import org.eclipse.dltk.core.IArchiveProjectFragment;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelProvider;
@@ -35,8 +34,7 @@ import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.core.util.HashtableOfArrayToObject;
 import org.eclipse.dltk.internal.core.util.Util;
 
-public class ArchiveProjectFragment extends ProjectFragment implements
-		IArchiveProjectFragment {
+public class ArchiveProjectFragment extends ProjectFragment {
 	public final static ArrayList EMPTY_LIST = new ArrayList();
 	/**
 	 * The path to the zip file (a workspace relative path if the archive is
