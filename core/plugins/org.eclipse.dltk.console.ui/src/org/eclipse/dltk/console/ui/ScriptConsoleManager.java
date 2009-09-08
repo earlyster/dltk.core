@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchListener;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.dltk.console.IScriptInterpreter;
 import org.eclipse.dltk.console.ScriptConsoleServer;
@@ -182,6 +183,9 @@ public class ScriptConsoleManager implements ILaunchListener {
 	}
 
 	public void launchChanged(final ILaunch launch) {
+		if (!ILaunchManager.RUN_MODE.equals(launch.getLaunchMode())) {
+			return;
+		}
 		try {
 			final ILaunchConfiguration configuration = launch
 					.getLaunchConfiguration();
