@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.handlers;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IconAndMessageDialog;
@@ -28,11 +27,11 @@ import org.eclipse.swt.widgets.Text;
 
 public class LaunchStatusDialog extends IconAndMessageDialog {
 
-	private final IProgressMonitor monitor;
+	private final LaunchStatusHandler handler;
 
-	public LaunchStatusDialog(Shell shell, IProgressMonitor monitor) {
+	public LaunchStatusDialog(Shell shell, LaunchStatusHandler handler) {
 		super(shell);
-		this.monitor = monitor;
+		this.handler = handler;
 		setShellStyle(getDefaultOrientation() | SWT.BORDER | SWT.TITLE
 				| SWT.APPLICATION_MODAL);
 		message = HandlerMessages.LaunchStatusDialog_message;
@@ -129,7 +128,7 @@ public class LaunchStatusDialog extends IconAndMessageDialog {
 
 	@Override
 	protected void cancelPressed() {
-		this.monitor.setCanceled(true);
+		this.handler.setCanceled(true);
 		close();
 	}
 
