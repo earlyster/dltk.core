@@ -18,6 +18,7 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.launching.ILaunchStatusHandler;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
@@ -30,6 +31,10 @@ public class LaunchStatusHandler implements ILaunchStatusHandler {
 	private LaunchStatusDialog dialog = null;
 
 	public void initialize(IDebugTarget target, IProgressMonitor monitor) {
+		if (Display.getCurrent() != null) {
+			throw new IllegalStateException(getClass().getSimpleName()
+					+ " should be initialized in background threads only");
+		}
 		this.debugTarget = target;
 		this.monitor = monitor;
 	}
