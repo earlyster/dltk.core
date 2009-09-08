@@ -139,7 +139,9 @@ public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 				DLTKLaunchingPlugin.logWarning(e);
 			}
 		}
-		return new NopLaunchStatusHandler();
+		final ILaunchStatusHandler handler = new NopLaunchStatusHandler();
+		handler.initialize(target, parentMonitor);
+		return handler;
 	}
 
 	public void acceptDbgpThread(IDbgpSession session, IProgressMonitor monitor) {
