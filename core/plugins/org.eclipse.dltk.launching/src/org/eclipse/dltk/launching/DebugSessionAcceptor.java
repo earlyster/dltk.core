@@ -27,10 +27,11 @@ import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 		IScriptDebugTargetListener {
 
-	private static class NopLaunchStatusHandler implements ILaunchStatusHandler {
+	private static class NopLaunchStatusHandler implements
+			ILaunchStatusHandler, ILaunchStatusHandlerExtension {
 
 		public void initialize(IDebugTarget target, IProgressMonitor monitor) {
-			monitor.setCanceled(true);
+			// empty
 		}
 
 		public void updateElapsedTime(long elapsedTime) {
@@ -39,6 +40,10 @@ public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 
 		public void dispose() {
 			// empty
+		}
+
+		public boolean isCanceled() {
+			return true;
 		}
 
 	}
@@ -105,6 +110,11 @@ public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 					if (timeout != 0 && (now - start) > timeout) {
 						if (statusHandler == null) {
 							statusHandler = createStatusHandler();
+						}
+						if (statusHandler instanceof ILaunchStatusHandlerExtension
+								&& ((ILaunchStatusHandlerExtension) statusHandler)
+										.isCanceled()) {
+							return false;
 						}
 						statusHandler.updateElapsedTime(now - start);
 					}
