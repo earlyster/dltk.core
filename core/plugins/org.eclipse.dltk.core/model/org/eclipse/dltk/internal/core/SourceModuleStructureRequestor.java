@@ -9,10 +9,12 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Stack;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
@@ -21,6 +23,11 @@ import org.eclipse.dltk.core.ModelException;
 
 public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 
+	/**
+	 * The cache contains the maximum occurrence index per reference element
+	 */
+	private Map<SourceRefElement, Integer> counters = new HashMap<SourceRefElement, Integer>();
+	
 	private final static String[] EMPTY = new String[0];
 
 	/**
@@ -68,10 +75,17 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	 * handle being created until there is no conflict.
 	 */
 	protected void resolveDuplicates(SourceRefElement handle) {
-		while (this.newElements.containsKey(handle)) {
-			handle.occurrenceCount++;
+		Assert.isTrue(handle.occurrenceCount == 1);
+		Integer counter = counters.get(handle);
+		if (counter == null) {
+			counters.put(handle, handle.occurrenceCount);
+		} else {
+			++counter;
+			handle.occurrenceCount = counter;
 		}
+		Assert.isTrue(!this.newElements.containsKey(handle));
 	}
+
 
 	public void enterModule() {
 		this.infoStack = new Stack();
