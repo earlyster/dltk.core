@@ -357,6 +357,8 @@ public class ScriptConsole extends TextConsole implements ICommandHandler,
 					listener);
 			listener = null;
 		}
+		closeStreams();
+		disposeStreams();
 
 		super.dispose();
 	}
@@ -421,6 +423,25 @@ public class ScriptConsole extends TextConsole implements ICommandHandler,
 	}
 
 	/**
+	 * cleanup method to close all of the open stream to this console
+	 */
+	private synchronized void closeStreams() {
+		for (StreamListener listener : fStreamListeners) {
+			listener.closeStream();
+		}
+	}
+
+	/**
+	 * disposes of the listeners for each of the stream associated with this
+	 * console
+	 */
+	private synchronized void disposeStreams() {
+		for (StreamListener listener : fStreamListeners) {
+			listener.dispose();
+		}
+	}
+
+	/**
 	 * This class listens to a specified IO stream
 	 */
 	private class StreamListener implements IStreamListener {
@@ -462,10 +483,6 @@ public class ScriptConsole extends TextConsole implements ICommandHandler,
 									.equals(fStreamId));
 				}
 			}
-		}
-
-		public IStreamMonitor getStreamMonitor() {
-			return fStreamMonitor;
 		}
 
 		public void closeStream() {
