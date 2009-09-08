@@ -30,6 +30,7 @@ public final class TextMessages extends NLS {
 	public static String ScriptOutlineInformationControl_LexicalSortingAction_label;
 	public static String ScriptOutlineInformationControl_LexicalSortingAction_tooltip;
 	public static String ScriptOutlineInformationControl_LexicalSortingAction_description;
+	public static String ScriptReconcilingStrategy_ReconcilingJobName;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, TextMessages.class);

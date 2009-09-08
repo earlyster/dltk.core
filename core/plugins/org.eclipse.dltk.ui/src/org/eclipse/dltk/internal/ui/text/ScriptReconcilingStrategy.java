@@ -12,9 +12,12 @@ package org.eclipse.dltk.internal.ui.text;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -55,6 +58,47 @@ public class ScriptReconcilingStrategy implements IReconcilingStrategy,
 		}
 	}
 
+	private static class ReconcilerFeedback extends Job {
+
+		public ReconcilerFeedback() {
+			super(TextMessages.ScriptReconcilingStrategy_ReconcilingJobName);
+			setPriority(Job.SHORT);
+			schedule(1000);
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			for (;;) {
+				if (monitor.isCanceled()) {
+					break;
+				}
+				synchronized (lock) {
+					if (canceled) {
+						break;
+					}
+					try {
+						lock.wait(1000);
+					} catch (InterruptedException e) {
+						break;
+					}
+				}
+			}
+			return Status.OK_STATUS;
+		}
+
+		private final Object lock = new Object();
+		private boolean canceled = false;
+
+		public void stop() {
+			synchronized (lock) {
+				canceled = true;
+				lock.notify();
+			}
+			cancel();
+		}
+
+	}
+
 	private IProblemRequestorExtension getProblemRequestorExtension() {
 		IAnnotationModel model = fDocumentProvider.getAnnotationModel(fEditor
 				.getEditorInput());
@@ -78,7 +122,12 @@ public class ScriptReconcilingStrategy implements IReconcilingStrategy,
 		try {
 			SafeRunner.run(new ISafeRunnable() {
 				public void run() throws ModelException {
-					reconcile(unit, initialReconcile);
+					final ReconcilerFeedback feedback = new ReconcilerFeedback();
+					try {
+						reconcile(unit, initialReconcile);
+					} finally {
+						feedback.stop();
+					}
 				}
 
 				public void handleException(Throwable ex) {
