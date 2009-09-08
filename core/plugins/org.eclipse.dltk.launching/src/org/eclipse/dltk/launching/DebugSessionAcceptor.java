@@ -30,7 +30,7 @@ public class DebugSessionAcceptor implements IDbgpThreadAcceptor,
 	private static class NopLaunchStatusHandler implements ILaunchStatusHandler {
 
 		public void initialize(IDebugTarget target, IProgressMonitor monitor) {
-			// empty
+			monitor.setCanceled(true);
 		}
 
 		public void updateElapsedTime(long elapsedTime) {
