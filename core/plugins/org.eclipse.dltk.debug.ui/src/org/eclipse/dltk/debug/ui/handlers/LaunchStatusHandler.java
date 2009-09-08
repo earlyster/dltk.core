@@ -126,12 +126,18 @@ public class LaunchStatusHandler implements ILaunchStatusHandler,
 
 	private boolean canceled = false;
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean isCanceled() {
 		synchronized (lock) {
 			return canceled;
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void setCanceled(boolean value) {
 		synchronized (lock) {
 			canceled = value;

@@ -29,6 +29,9 @@ public class LaunchStatusDialog extends IconAndMessageDialog {
 
 	private final LaunchStatusHandler handler;
 
+	/**
+	 * @since 2.0
+	 */
 	public LaunchStatusDialog(Shell shell, LaunchStatusHandler handler) {
 		super(shell);
 		this.handler = handler;
