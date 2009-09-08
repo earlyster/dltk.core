@@ -141,6 +141,7 @@ public abstract class ScriptSourceViewerConfiguration extends
 					editor, getConfiguredDocumentPartitioning(sourceViewer));
 			ScriptReconciler reconciler = new ScriptReconciler(editor,
 					strategy, false);
+			reconciler.setIsAllowedToModifyDocument(false);
 			reconciler.setIsIncrementalReconciler(false);
 			reconciler.setProgressMonitor(new NullProgressMonitor());
 			reconciler.setDelay(500);
