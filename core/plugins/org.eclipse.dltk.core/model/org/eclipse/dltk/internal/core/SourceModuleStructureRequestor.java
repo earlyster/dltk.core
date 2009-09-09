@@ -23,11 +23,15 @@ import org.eclipse.dltk.core.ModelException;
 
 public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 
+	private static class Counter {
+		int value;
+	}
+
 	/**
 	 * The cache contains the maximum occurrence index per reference element
 	 */
-	private Map<SourceRefElement, Integer> counters = new HashMap<SourceRefElement, Integer>();
-	
+	private Map<SourceRefElement, Counter> counters = new HashMap<SourceRefElement, Counter>();
+
 	private final static String[] EMPTY = new String[0];
 
 	/**
@@ -76,12 +80,14 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	 */
 	protected void resolveDuplicates(SourceRefElement handle) {
 		Assert.isTrue(handle.occurrenceCount == 1);
-		Integer counter = counters.get(handle);
+		Counter counter = counters.get(handle);
 		if (counter == null) {
-			counters.put(handle, handle.occurrenceCount);
+			counter = new Counter();
+			counter.value = handle.occurrenceCount;
+			counters.put(handle, counter);
 		} else {
-			++counter;
-			handle.occurrenceCount = counter;
+			++counter.value;
+			handle.occurrenceCount = counter.value;
 		}
 		Assert.isTrue(!this.newElements.containsKey(handle));
 	}
