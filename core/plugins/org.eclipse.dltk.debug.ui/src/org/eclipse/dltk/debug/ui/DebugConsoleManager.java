@@ -15,6 +15,9 @@ import java.util.Map;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -23,14 +26,19 @@ import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.debug.ui.console.ConsoleColorProvider;
+import org.eclipse.debug.ui.console.IConsoleColorProvider;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.debug.core.DLTKDebugLaunchConstants;
 import org.eclipse.dltk.debug.core.model.IScriptDebugTarget;
+import org.eclipse.dltk.launching.process.IScriptProcess;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
+
+import com.ibm.icu.text.MessageFormat;
 
 public class DebugConsoleManager implements ILaunchesListener2 {
 
@@ -63,12 +71,19 @@ public class DebugConsoleManager implements ILaunchesListener2 {
 	 */
 	protected ScriptDebugConsole createConsole(ILaunch launch) {
 		final String encoding = selectEncoding(launch);
-		final ScriptDebugConsole console = new ScriptDebugConsole(
-				computeName(launch), encoding);
 		final IProcess[] processes = launch.getProcesses();
-		if (processes.length != 0) {
+		final IProcess process = processes.length != 0 ? processes[0] : null;
+		final IConsoleColorProvider colorProvider = getColorProvider(process != null ? process
+				.getAttribute(IProcess.ATTR_PROCESS_TYPE)
+				: null);
+		final ScriptDebugConsole console = new ScriptDebugConsole(
+				computeName(launch), null, encoding, colorProvider);
+		if (process != null) {
 			console.setAttribute(IDebugUIConstants.ATTR_CONSOLE_PROCESS,
-					processes[0]);
+					process);
+			if (process instanceof IScriptProcess) {
+				console.connect((IScriptProcess) process);
+			}
 		}
 		console.setLaunch(launch);
 		final IConsoleManager manager = getConsoleManager();
@@ -184,6 +199,11 @@ public class DebugConsoleManager implements ILaunchesListener2 {
 					console = createConsole(launch);
 					launchToConsoleMap.put(launch, console);
 				}
+				final IProcess[] processes = launch.getProcesses();
+				if (processes.length != 0
+						&& processes[0] instanceof IScriptProcess) {
+					// console.con
+				}
 				if (launch.getDebugTarget() instanceof IScriptDebugTarget) {
 					IScriptDebugTarget target = (IScriptDebugTarget) launch
 							.getDebugTarget();
@@ -226,6 +246,68 @@ public class DebugConsoleManager implements ILaunchesListener2 {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Console document content provider extensions, keyed by extension id
+	 */
+	private Map<String, IConfigurationElement> fColorProviders = null;
+
+	/**
+	 * The default color provider. Used if no color provider is contributed for
+	 * the given process type.
+	 */
+	private IConsoleColorProvider fDefaultColorProvider;
+
+	/**
+	 * Returns a new console document color provider extension for the given
+	 * process type, or <code>null</code> if none.
+	 * 
+	 * @param type
+	 *            corresponds to <code>IProcess.ATTR_PROCESS_TYPE</code>
+	 * @return IConsoleColorProvider
+	 */
+	private IConsoleColorProvider getColorProvider(String type) {
+		if (fColorProviders == null) {
+			fColorProviders = new HashMap<String, IConfigurationElement>();
+			IExtensionPoint extensionPoint = Platform
+					.getExtensionRegistry()
+					.getExtensionPoint(
+							IDebugUIConstants.PLUGIN_ID,
+							IDebugUIConstants.EXTENSION_POINT_CONSOLE_COLOR_PROVIDERS);
+			IConfigurationElement[] elements = extensionPoint
+					.getConfigurationElements();
+			for (int i = 0; i < elements.length; i++) {
+				IConfigurationElement extension = elements[i];
+				fColorProviders.put(
+						extension.getAttribute("processType"), extension); //$NON-NLS-1$
+			}
+		}
+		IConfigurationElement extension = fColorProviders.get(type);
+		if (extension != null) {
+			try {
+				Object colorProvider = extension
+						.createExecutableExtension("class"); //$NON-NLS-1$
+				if (colorProvider instanceof IConsoleColorProvider) {
+					return (IConsoleColorProvider) colorProvider;
+				}
+				DLTKDebugUIPlugin
+						.logErrorMessage(MessageFormat
+								.format(
+										"Extension {0} must specify an instanceof IConsoleColorProvider for class attribute.", //$NON-NLS-1$
+										new String[] { extension
+												.getDeclaringExtension()
+												.getUniqueIdentifier() }));
+			} catch (CoreException e) {
+				DLTKDebugUIPlugin.log(e);
+			}
+		}
+		// no color provider found of specified type, return default color
+		// provider.
+		if (fDefaultColorProvider == null) {
+			fDefaultColorProvider = new ConsoleColorProvider();
+		}
+		return fDefaultColorProvider;
 	}
 
 }

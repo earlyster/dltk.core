@@ -38,6 +38,7 @@ import org.eclipse.dltk.debug.ui.messages.ScriptLaunchMessages;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.launching.LaunchingMessages;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
+import org.eclipse.dltk.launching.process.ScriptRuntimeProcessFactory;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -163,11 +164,12 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 	 */
 	protected ILaunchConfiguration findLaunchConfiguration(IResource script,
 			ILaunchConfigurationType configType) {
-		List candidateConfigs = Collections.EMPTY_LIST;
+		List<ILaunchConfiguration> candidateConfigs = Collections.emptyList();
 		try {
 			ILaunchConfiguration[] configs = DebugPlugin.getDefault()
 					.getLaunchManager().getLaunchConfigurations(configType);
-			candidateConfigs = new ArrayList(configs.length);
+			candidateConfigs = new ArrayList<ILaunchConfiguration>(
+					configs.length);
 			for (int i = 0; i < configs.length; i++) {
 				ILaunchConfiguration config = configs[i];
 				if (config
@@ -232,6 +234,8 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 			wc.setAttribute(
 					ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
 					script.getProjectRelativePath().toPortableString());
+			wc.setAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID,
+					ScriptRuntimeProcessFactory.PROCESS_FACTORY_ID);
 			//
 			// IEnvironment environment =
 			// EnvironmentManager.getEnvironment(script
@@ -261,7 +265,8 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 	 * specified launch configurations. Return the chosen config, or
 	 * <code>null</code> if the user cancelled the dialog.
 	 */
-	protected ILaunchConfiguration chooseConfiguration(List configList) {
+	protected ILaunchConfiguration chooseConfiguration(
+			List<ILaunchConfiguration> configList) {
 		IDebugModelPresentation labelProvider = DebugUITools
 				.newDebugModelPresentation();
 		ElementListSelectionDialog dialog = new ElementListSelectionDialog(
@@ -286,14 +291,14 @@ public abstract class AbstractScriptLaunchShortcut implements ILaunchShortcut {
 	 * @return corresponding Script elements
 	 */
 	private IResource[] getScriptResources(Object[] objects, IProgressMonitor pm) {
-		List list = new ArrayList(objects.length);
+		List<IResource> list = new ArrayList<IResource>(objects.length);
 		for (int i = 0; i < objects.length; i++) {
 			Object object = objects[i];
 			try {
 				if (object instanceof IFile) {
 					IFile f = (IFile) object;
 					if (!f.getName().startsWith(".")) //$NON-NLS-1$
-						list.add(object);
+						list.add(f);
 				} else if (object instanceof IContainer) {
 					IContainer f = (IContainer) object;
 					IResource[] mem = f.members();

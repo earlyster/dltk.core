@@ -274,6 +274,8 @@ public abstract class MainLaunchConfigurationTab extends
 		config.setAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
 				getScriptName());
+		config.setAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID,
+				ScriptRuntimeProcessFactory.PROCESS_FACTORY_ID);
 		if (debugConsole != null) {
 			config.setAttribute(
 					ScriptLaunchConfigurationConstants.ATTR_DEBUG_CONSOLE,
@@ -325,13 +327,6 @@ public abstract class MainLaunchConfigurationTab extends
 					.setAttribute(
 							ScriptLaunchConfigurationConstants.ATTR_USE_INTERACTIVE_CONSOLE,
 							useInteractiveConsole);
-			if (useInteractiveConsole) {
-				config.setAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID,
-						ScriptRuntimeProcessFactory.PROCESS_FACTORY_ID);
-			} else {
-				config.setAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID,
-						(String) null);
-			}
 			String old = null;
 			try {
 				old = config
