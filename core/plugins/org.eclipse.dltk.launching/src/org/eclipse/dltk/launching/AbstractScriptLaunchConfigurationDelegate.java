@@ -891,7 +891,16 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 
 	public void launch(ILaunchConfiguration configuration, String mode,
 			ILaunch launch, IProgressMonitor monitor) throws CoreException {
-
+		/*
+		 * reset ATTR_CAPTURE_OUTPUT, since it's not used now. This attribute is
+		 * set in ScriptCommonTab if interactive console is on, but at the
+		 * moment we use another way, so this attribute should be removed.
+		 * 
+		 * TODO #1: do it in migration delegate?
+		 * 
+		 * TODO #2: modify ScriptCommonTab so, it would not set it.
+		 */
+		launch.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT, null);
 		try {
 			IProject project = ScriptRuntime.getScriptProject(configuration)
 					.getProject();

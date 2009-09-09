@@ -15,7 +15,6 @@ import org.eclipse.dltk.core.PreferencesLookupDelegate;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.dbgp.DbgpSessionIdGenerator;
-import org.eclipse.dltk.debug.core.DLTKDebugLaunchConstants;
 import org.eclipse.dltk.debug.core.DLTKDebugPlugin;
 import org.eclipse.dltk.debug.core.DLTKDebugPreferenceConstants;
 import org.eclipse.dltk.debug.core.ExtendedDebugEventDetails;
@@ -30,6 +29,7 @@ import org.eclipse.dltk.internal.launching.LaunchConfigurationUtils;
 import org.eclipse.dltk.launching.debug.DbgpConnectionConfig;
 import org.eclipse.dltk.launching.debug.DebuggingEngineManager;
 import org.eclipse.dltk.launching.debug.IDebuggingEngine;
+import org.eclipse.dltk.launching.process.ScriptRuntimeProcessFactory;
 
 public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 	// Launch attributes
@@ -83,12 +83,6 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 				showClassVarsPreferenceKey()));
 		target.toggleLocalVariables(delegate.getBoolean(qualifier,
 				showLocalVarsPreferenceKey()));
-
-		// Disable the output of the debugging engine process
-		if (DLTKDebugLaunchConstants.isDebugConsole(launch)) {
-			launch.setAttribute(DebugPlugin.ATTR_CAPTURE_OUTPUT,
-					DLTKDebugLaunchConstants.FALSE);
-		}
 
 		// Debugging engine id
 		launch.setAttribute(LAUNCH_ATTR_DEBUGGING_ENGINE_ID,
@@ -335,5 +329,31 @@ public abstract class DebuggingEngineRunner extends AbstractInterpreterRunner {
 		} else {
 			return null;
 		}
+	}
+
+	private String getProcessFactoryId(ILaunch launch) {
+		final ILaunchConfiguration config = launch.getLaunchConfiguration();
+		if (config != null) {
+			try {
+				return config.getAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID,
+						(String) null);
+			} catch (CoreException e) {
+			}
+		}
+		return null;
+	}
+
+	@Override
+	protected IProcess newProcess(ILaunch launch, Process p, String label,
+			Map<String, String> attributes) throws CoreException {
+		if (getProcessFactoryId(launch) == null
+				&& ScriptRuntimeProcessFactory.isSupported(launch)) {
+			/*
+			 * Process factory not specified, but it should be.
+			 */
+			return new ScriptRuntimeProcessFactory().newProcess(launch, p,
+					label, attributes);
+		}
+		return super.newProcess(launch, p, label, attributes);
 	}
 }
