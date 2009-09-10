@@ -62,7 +62,9 @@ public class LaunchStatusHandler implements ILaunchStatusHandler,
 				if (!isDialogCreated()) {
 					createDialog();
 				}
-				dialog.updateElapsedTime(elapsedTime);
+				final LaunchStatusDialog d = dialog;
+				if (d != null)
+					d.updateElapsedTime(elapsedTime);
 			}
 		});
 	}
