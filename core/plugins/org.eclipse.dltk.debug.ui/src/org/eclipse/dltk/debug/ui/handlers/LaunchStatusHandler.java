@@ -27,7 +27,6 @@ public class LaunchStatusHandler implements ILaunchStatusHandler,
 		ILaunchStatusHandlerExtension {
 
 	private IDebugTarget debugTarget;
-	private IProgressMonitor monitor;
 	private final Object lock = new Object();
 	private boolean disposed = false;
 	private LaunchStatusDialog dialog = null;
@@ -38,7 +37,6 @@ public class LaunchStatusHandler implements ILaunchStatusHandler,
 					+ " should be initialized in background threads only");
 		}
 		this.debugTarget = target;
-		this.monitor = monitor;
 	}
 
 	private boolean isDialogCreated() {
