@@ -18,10 +18,13 @@ import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.launching.ILaunchStatusHandler;
+import org.eclipse.dltk.launching.ILaunchStatusHandlerExtension;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-public class LaunchStatusHandler implements ILaunchStatusHandler {
+public class LaunchStatusHandler implements ILaunchStatusHandler,
+		ILaunchStatusHandlerExtension {
 
 	private IDebugTarget debugTarget;
 	private IProgressMonitor monitor;
@@ -30,6 +33,10 @@ public class LaunchStatusHandler implements ILaunchStatusHandler {
 	private LaunchStatusDialog dialog = null;
 
 	public void initialize(IDebugTarget target, IProgressMonitor monitor) {
+		if (Display.getCurrent() != null) {
+			throw new IllegalStateException(getClass().getSimpleName()
+					+ " should be initialized in background threads only");
+		}
 		this.debugTarget = target;
 		this.monitor = monitor;
 	}
@@ -78,7 +85,7 @@ public class LaunchStatusHandler implements ILaunchStatusHandler {
 			window = PlatformUI.getWorkbench().getWorkbenchWindows()[0];
 		}
 		dialog = new LaunchStatusDialog(window != null ? window.getShell()
-				: null, monitor);
+				: null, this);
 		final ILaunch launch = debugTarget.getLaunch();
 		if (launch != null) {
 			final ILaunchConfiguration configuration = launch
@@ -114,6 +121,26 @@ public class LaunchStatusHandler implements ILaunchStatusHandler {
 					disposeDialog();
 				}
 			});
+		}
+	}
+
+	private boolean canceled = false;
+
+	/**
+	 * @since 2.0
+	 */
+	public boolean isCanceled() {
+		synchronized (lock) {
+			return canceled;
+		}
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void setCanceled(boolean value) {
+		synchronized (lock) {
+			canceled = value;
 		}
 	}
 
