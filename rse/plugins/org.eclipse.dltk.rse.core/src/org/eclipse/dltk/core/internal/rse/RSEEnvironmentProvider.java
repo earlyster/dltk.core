@@ -8,6 +8,10 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
@@ -85,39 +89,27 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 
 	private static final boolean DEBUG = false;
 
-	private static class WatchdogThread extends Thread {
+	private static class WatchdogThread extends Job {
 		private final Thread thread;
-		private final long timeout;
 
-		public WatchdogThread(Thread thread, long timeout) {
-			this.thread = thread;
-			this.timeout = timeout;
-			setDaemon(true);
-			setName(RSEEnvironmentProvider.class.getSimpleName()
+		public WatchdogThread(Thread thread) {
+			super(RSEEnvironmentProvider.class.getSimpleName()
 					+ "-WatchdogThread"); //$NON-NLS-1$			
+			this.thread = thread;
+			setSystem(true);
 		}
 
 		@Override
-		public void run() {
-			try {
+		public IStatus run(IProgressMonitor monitor) {
+			if (thread.isAlive()) {
 				if (DEBUG)
-					System.out.println(Thread.currentThread().getName()
-							+ " started"); //$NON-NLS-1$
-				Thread.sleep(timeout);
-				if (thread.isAlive()) {
-					if (DEBUG)
-						System.out.println("InitThread.interrupt()"); //$NON-NLS-1$
-					thread.interrupt();
-				} else {
-					if (DEBUG)
-						System.out.println(Thread.currentThread().getName()
-								+ " sleeped"); //$NON-NLS-1$
-				}
-			} catch (InterruptedException e) {
+					System.out.println("InitThread.interrupt()"); //$NON-NLS-1$
+				thread.interrupt();
+			} else {
 				if (DEBUG)
-					System.out.println(Thread.currentThread().getName()
-							+ " interrupted"); //$NON-NLS-1$
+					System.out.println("InitThread is already terminated"); //$NON-NLS-1$
 			}
+			return Status.OK_STATUS;
 		}
 
 	}
@@ -126,9 +118,8 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 
 		@Override
 		public void run() {
-			final WatchdogThread watchdog = new WatchdogThread(this,
-					RSE_INIT_THREAD_TIMEOUT);
-			watchdog.start();
+			final WatchdogThread watchdog = new WatchdogThread(this);
+			watchdog.schedule(RSE_INIT_THREAD_TIMEOUT);
 			try {
 				if (DEBUG)
 					System.out.println(Thread.currentThread().getName()
@@ -137,9 +128,9 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 				if (DEBUG)
 					System.out.println(Thread.currentThread().getName()
 							+ " finished"); //$NON-NLS-1$
-				watchdog.interrupt();
+				watchdog.cancel();
 			} catch (InterruptedException e) {
-				if (DLTKCore.DEBUG) {
+				if (DLTKCore.DEBUG || DEBUG) {
 					e.printStackTrace();
 				}
 			} finally {
