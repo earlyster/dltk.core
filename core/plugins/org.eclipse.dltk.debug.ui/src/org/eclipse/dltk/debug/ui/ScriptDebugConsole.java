@@ -30,6 +30,9 @@ public class ScriptDebugConsole extends IOConsole {
 		this.launch = launch;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public ScriptDebugConsole(String name, ImageDescriptor imageDescriptor,
 			String encoding, IConsoleColorProvider colorProvider) {
 		super(name, null, imageDescriptor, encoding, true);
@@ -67,6 +70,7 @@ public class ScriptDebugConsole extends IOConsole {
 
 	/**
 	 * @param process
+	 * @since 2.0
 	 */
 	public synchronized void connect(IScriptProcess process) {
 		if (connectedProcesses == null) {
@@ -81,6 +85,9 @@ public class ScriptDebugConsole extends IOConsole {
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void connect(final IStreamsProxy proxy) {
 		IStreamMonitor streamMonitor = proxy.getErrorStreamMonitor();
 		if (streamMonitor != null) {
