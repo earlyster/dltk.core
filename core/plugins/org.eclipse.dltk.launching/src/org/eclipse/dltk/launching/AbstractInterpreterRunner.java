@@ -174,6 +174,7 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 	 * @return the new process
 	 * @throws CoreException
 	 *             problems occurred creating the process
+	 * @since 2.0
 	 * 
 	 */
 	protected IProcess newProcess(ILaunch launch, Process p, String label,

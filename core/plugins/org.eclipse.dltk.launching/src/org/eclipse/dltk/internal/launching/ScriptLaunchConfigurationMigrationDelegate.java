@@ -18,6 +18,9 @@ import org.eclipse.debug.core.ILaunchConfigurationMigrationDelegate;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.dltk.launching.process.ScriptRuntimeProcessFactory;
 
+/**
+ * @since 2.0
+ */
 public class ScriptLaunchConfigurationMigrationDelegate implements
 		ILaunchConfigurationMigrationDelegate {
 

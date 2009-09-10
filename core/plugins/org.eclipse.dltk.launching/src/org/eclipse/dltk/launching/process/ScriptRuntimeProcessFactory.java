@@ -48,6 +48,9 @@ public class ScriptRuntimeProcessFactory implements IProcessFactory {
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public static boolean isSupported(ILaunch launch) {
 		final ILaunchConfiguration config = launch.getLaunchConfiguration();
 		if (ILaunchManager.DEBUG_MODE.equals(launch.getLaunchMode())) {
