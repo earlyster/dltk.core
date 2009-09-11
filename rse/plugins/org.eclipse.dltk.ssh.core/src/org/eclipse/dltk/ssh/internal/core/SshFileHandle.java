@@ -316,11 +316,8 @@ public class SshFileHandle implements ISshFileHandle,
 	}
 
 	public boolean isSymlink() {
-		fetchAttrs();
-		if (attrs != null) {
-			return attrs.isLink();
-		}
-		return false;
+		final SftpATTRS attrs = connection.getLAttrs(path);
+		return attrs != null && attrs.isLink();
 	}
 
 	@Override

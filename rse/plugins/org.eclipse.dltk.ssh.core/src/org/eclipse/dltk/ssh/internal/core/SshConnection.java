@@ -46,8 +46,8 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 	}
 
 	private static class GetStatOperation extends Operation {
-		private IPath path;
-		private SftpATTRS attrs;
+		protected IPath path;
+		protected SftpATTRS attrs;
 
 		public GetStatOperation(IPath path) {
 			this.path = path;
@@ -65,6 +65,18 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 
 		public SftpATTRS getAttrs() {
 			return attrs;
+		}
+	}
+
+	private static class GetLStatOperation extends GetStatOperation {
+
+		public GetLStatOperation(IPath path) {
+			super(path);
+		}
+
+		@Override
+		public void perform(ChannelSftp channel) throws SftpException {
+			attrs = channel.lstat(path.toString());
 		}
 	}
 
@@ -498,6 +510,15 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 
 	SftpATTRS getAttrs(IPath path) {
 		GetStatOperation op = new GetStatOperation(path);
+		performOperation(op);
+		if (op.isFinished()) {
+			return op.getAttrs();
+		}
+		return null;
+	}
+
+	SftpATTRS getLAttrs(IPath path) {
+		GetLStatOperation op = new GetLStatOperation(path);
 		performOperation(op);
 		if (op.isFinished()) {
 			return op.getAttrs();
