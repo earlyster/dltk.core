@@ -55,7 +55,13 @@ public class SqlSearchEngine implements ISearchEngine {
 
 		try {
 			DbFactory dbFactory = DbFactory.getInstance();
+			if (dbFactory == null) {
+				return;
+			}
 			Connection connection = dbFactory.createConnection();
+			if (connection == null) {
+				return;
+			}
 			try {
 				String natureId = scope.getLanguageToolkit().getNatureId();
 				ElementHandler elementHandler = new ElementHandler(connection,
