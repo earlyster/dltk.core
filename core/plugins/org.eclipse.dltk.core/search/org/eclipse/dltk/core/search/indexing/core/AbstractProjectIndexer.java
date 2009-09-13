@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search.indexing.core;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -41,6 +44,8 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 	private final IndexManager manager = ModelManager.getModelManager()
 			.getIndexManager();
 
+	protected final Set<String> disabledNatures = new HashSet<String>();
+
 	public void request(IJob job) {
 		manager.request(job);
 	}
@@ -56,11 +61,19 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 	}
 
 	public void indexProject(IScriptProject project) {
+		if (disabledNatures.contains(DLTKLanguageManager.getLanguageToolkit(
+				project).getNatureId())) {
+			return;
+		}
 		final ProjectRequest request = new ProjectRequest(this, project, true);
 		requestIfNotWaiting(request);
 	}
 
 	public void indexLibrary(IScriptProject project, IPath path) {
+		if (disabledNatures.contains(DLTKLanguageManager.getLanguageToolkit(
+				project).getNatureId())) {
+			return;
+		}
 		try {
 			final IProjectFragment fragment = project.findProjectFragment(path);
 			if (fragment != null) {
@@ -81,6 +94,10 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 	}
 
 	public void indexProjectFragment(IScriptProject project, IPath path) {
+		if (disabledNatures.contains(DLTKLanguageManager.getLanguageToolkit(
+				project).getNatureId())) {
+			return;
+		}
 		IProjectFragment fragmentToIndex = null;
 		try {
 			IProjectFragment[] fragments = project.getProjectFragments();
@@ -105,11 +122,17 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 
 	public void indexSourceModule(ISourceModule module,
 			IDLTKLanguageToolkit toolkit) {
+		if (disabledNatures.contains(toolkit.getNatureId())) {
+			return;
+		}
 		request(new SourceModuleRequest(this, module, toolkit));
 	}
 
 	public void reconciled(ISourceModule workingCopy,
 			IDLTKLanguageToolkit toolkit) {
+		if (disabledNatures.contains(toolkit.getNatureId())) {
+			return;
+		}
 		request(new ReconcileSourceModuleRequest(this, workingCopy, toolkit));
 	}
 
@@ -138,6 +161,10 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 			IScriptProject[] projects = DLTKCore.create(workspace.getRoot())
 					.getScriptProjects();
 			for (int i = 0; i < projects.length; ++i) {
+				if (disabledNatures.contains(DLTKLanguageManager
+						.getLanguageToolkit(projects[i]).getNatureId())) {
+					continue;
+				}
 				requestIfNotWaiting(new ProjectRequest(this, projects[i], false));
 			}
 		} catch (Exception e) {
@@ -190,5 +217,9 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 
 	public Index getProjectFragmentIndex(IProjectFragment fragment) {
 		return getIndexManager().getIndex(fragment.getPath(), true, true);
+	}
+
+	public void disableForNature(String natureId) {
+		disabledNatures.add(natureId);
 	}
 }

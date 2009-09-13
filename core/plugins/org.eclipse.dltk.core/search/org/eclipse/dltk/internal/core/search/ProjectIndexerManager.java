@@ -62,6 +62,15 @@ public class ProjectIndexerManager {
 				try {
 					projectIndexer = (IProjectIndexer) element
 							.createExecutableExtension(CLASS_ATTR);
+
+					for (String natureId : disabledIndexers.keySet()) {
+						Set<String> disabled = disabledIndexers.get(natureId);
+						if (disabled != null
+								&& disabled.contains(element
+										.getAttribute(CLASS_ATTR))) {
+							projectIndexer.disableForNature(natureId);
+						}
+					}
 				} catch (CoreException e) {
 					DLTKCore.error("Error initializing project indexer", e); //$NON-NLS-1$
 				}

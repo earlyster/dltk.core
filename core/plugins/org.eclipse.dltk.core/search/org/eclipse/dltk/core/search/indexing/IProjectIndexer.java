@@ -89,4 +89,8 @@ public interface IProjectIndexer {
 	 */
 	void startIndexing();
 
+	/**
+	 * Disable this indexer for the given set of natures
+	 */
+	void disableForNature(String natureId);
 }
