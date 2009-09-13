@@ -16,6 +16,8 @@ import java.sql.SQLException;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.ILock;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.IShutdownListener;
 
 /**
@@ -30,44 +32,8 @@ public abstract class DbFactory {
 	private static final String FACTORY_ELEM = "factory"; //$NON-NLS-1$
 	private static final String CLASS_ATTR = "class"; //$NON-NLS-1$
 
+	private static ILock instanceLock = Job.getJobManager().newLock();
 	private static DbFactory instance;
-	static {
-		try {
-			for (IConfigurationElement element : Platform
-					.getExtensionRegistry().getConfigurationElementsFor(
-							EXTPOINT)) {
-				if (FACTORY_ELEM.equals(element.getName())) {
-					instance = (DbFactory) element
-							.createExecutableExtension(CLASS_ATTR);
-					/*
-					 * Explicitly register shutdown handler, so it would be
-					 * disposed only if class was loaded.
-					 * 
-					 * We don't want static initialization code to be executed
-					 * during framework shutdown.
-					 */
-					SqlIndex.addShutdownListener(new IShutdownListener() {
-						public void shutdown() {
-							if (instance != null) {
-								try {
-									instance.dispose();
-								} catch (SQLException e) {
-									SqlIndex.error("DbFactory.dispose() error",
-											e);
-								}
-								instance = null;
-							}
-						}
-					});
-				}
-			}
-		} catch (Exception e) {
-			SqlIndex
-					.error(
-							"An exception has occurred while creating database factory",
-							e);
-		}
-	}
 
 	/**
 	 * Returns current DAO factory provided through extension point
@@ -75,6 +41,51 @@ public abstract class DbFactory {
 	 * @return
 	 */
 	public static DbFactory getInstance() {
+		try {
+			instanceLock.acquire();
+			if (instance == null) {
+				try {
+					for (IConfigurationElement element : Platform
+							.getExtensionRegistry()
+							.getConfigurationElementsFor(EXTPOINT)) {
+						if (FACTORY_ELEM.equals(element.getName())) {
+							instance = (DbFactory) element
+									.createExecutableExtension(CLASS_ATTR);
+							/*
+							 * Explicitly register shutdown handler, so it would
+							 * be disposed only if class was loaded.
+							 * 
+							 * We don't want static initialization code to be
+							 * executed during framework shutdown.
+							 */
+							SqlIndex
+									.addShutdownListener(new IShutdownListener() {
+										public void shutdown() {
+											if (instance != null) {
+												try {
+													instance.dispose();
+												} catch (SQLException e) {
+													SqlIndex
+															.error(
+																	"DbFactory.dispose() error",
+																	e);
+												}
+												instance = null;
+											}
+										}
+									});
+						}
+					}
+				} catch (Exception e) {
+					SqlIndex
+							.error(
+									"An exception has occurred while creating database factory",
+									e);
+				}
+			}
+		} finally {
+			instanceLock.release();
+		}
 		return instance;
 	}
 
