@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.dltk.internal.testing.launcher.NullTestRunnerUI;
 import org.eclipse.dltk.internal.testing.util.NumberUtils;
 import org.eclipse.dltk.testing.DLTKTestingPlugin;
 import org.eclipse.dltk.testing.ITestCategoryEngine;
@@ -102,6 +103,9 @@ public class TestCategoryEngineManager extends NatureExtensionManager {
 	 */
 	public static ITestCategoryEngine[] getCategoryEngines(
 			ITestRunnerUI runnerUI) {
+		if (runnerUI instanceof NullTestRunnerUI) {
+			return null;
+		}
 		final Descriptor[] descriptors = (Descriptor[]) getInstance()
 				.getInstances(runnerUI.getTestingEngine().getId());
 		if (descriptors == null) {
