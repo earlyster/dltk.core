@@ -44,6 +44,9 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 	private final IndexManager manager = ModelManager.getModelManager()
 			.getIndexManager();
 
+	/**
+	 * @since 2.0
+	 */
 	protected final Set<String> disabledNatures = new HashSet<String>();
 
 	public void request(IJob job) {
@@ -219,6 +222,9 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 		return getIndexManager().getIndex(fragment.getPath(), true, true);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void disableForNature(String natureId) {
 		disabledNatures.add(natureId);
 	}
