@@ -4,6 +4,10 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileInfo;
+import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -123,6 +127,23 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	}
 
 	public String getCanonicalPath(IPath path) {
+		if (connect()) {
+			try {
+				IFileStore store = EFS.getStore(getURI(path));
+				IFileInfo info = store.fetchInfo();
+				if (info.getAttribute(EFS.ATTRIBUTE_SYMLINK)) {
+					String linkTarget = info
+							.getStringAttribute(EFS.ATTRIBUTE_LINK_TARGET);
+					IFileStore resolved = store.getFileStore(new Path(
+							linkTarget));
+					return resolved.toURI().getPath();
+				} else {
+					return store.toURI().getPath();
+				}
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+		}
 		return convertPathToString(path);
 	}
 
