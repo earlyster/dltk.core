@@ -203,6 +203,7 @@ public class NewSearchEngine {
 			final Collection<String> paths, IProgressMonitor monitor) {
 
 		int elementType = 0;
+		String qualifier = null;
 		String elementName = null;
 		SearchFor searchFor = null;
 		MatchRule matchRule = null;
@@ -269,7 +270,8 @@ public class NewSearchEngine {
 					.getLanguageToolkit());
 
 			if (searchEngine != null) {
-				searchEngine.search(elementType, elementName, 0, 0, 0,
+				searchEngine.search(elementType, qualifier, elementName, 0, 0,
+						0,
 						searchFor, matchRule, scope, new ISearchRequestor() {
 
 							public void match(int elementType, int flags,

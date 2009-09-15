@@ -66,6 +66,8 @@ public interface ISearchEngine {
 	 * @param elementType
 	 *            Element type ({@link IModelElement#TYPE},
 	 *            {@link IModelElement#METHOD},{@link IModelElement#FIELD},etc.)
+	 * @param qualifier
+	 *            Element qualifier (package name)
 	 * @param elementName
 	 *            Element name pattern
 	 * @param trueFlags
@@ -88,7 +90,8 @@ public interface ISearchEngine {
 	 * @param monitor
 	 *            Progress monitor
 	 */
-	public void search(int elementType, String elementName, int trueFlags,
+	public void search(int elementType, String qualifier, String elementName,
+			int trueFlags,
 			int falseFlags, int limit, SearchFor searchFor,
 			MatchRule matchRule, IDLTKSearchScope scope,
 			ISearchRequestor requestor, IProgressMonitor monitor);

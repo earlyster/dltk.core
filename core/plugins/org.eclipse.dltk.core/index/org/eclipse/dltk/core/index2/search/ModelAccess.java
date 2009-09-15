@@ -16,10 +16,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.index2.IElementResolver;
@@ -41,7 +43,8 @@ import org.eclipse.dltk.internal.core.index2.IndexerManager;
 public class ModelAccess {
 
 	/**
-	 * Finds field elements in index
+	 * Finds field elements in index. Element qualifier (package name) will be
+	 * calculated from the field name.
 	 * 
 	 * @param name
 	 *            Element name
@@ -72,7 +75,43 @@ public class ModelAccess {
 	}
 
 	/**
-	 * Finds method elements in index
+	 * Finds field elements in index
+	 * 
+	 * @param qualifier
+	 *            Element qualifier (package name)
+	 * @param name
+	 *            Element name
+	 * @param matchRule
+	 *            Match rule
+	 * @param trueFlags
+	 *            Logical OR of flags that must exist in element flags bitset.
+	 *            Set to <code>0</code> to disable filtering by trueFlags.
+	 * @param falseFlags
+	 *            Logical OR of flags that must not exist in the element flags
+	 *            bitset. Set to <code>0</code> to disable filtering by
+	 *            falseFlags.
+	 * @param scope
+	 *            Search scope
+	 * @param monitor
+	 *            Progress monitor
+	 * @return elements array, or <code>null</code> in case error has occurred.
+	 */
+	public IField[] findFields(String qualifier, String name,
+			MatchRule matchRule, int trueFlags,
+			int falseFlags, IDLTKSearchScope scope, IProgressMonitor monitor) {
+
+		List<IField> result = new LinkedList<IField>();
+		if (!findElements(IModelElement.FIELD, qualifier, name, matchRule,
+				trueFlags,
+				falseFlags, scope, result, monitor)) {
+			return null;
+		}
+		return result.toArray(new IField[result.size()]);
+	}
+
+	/**
+	 * Finds method elements in index.Element qualifier (package name) will be
+	 * calculated from the method name.
 	 * 
 	 * @param name
 	 *            Element name
@@ -104,7 +143,43 @@ public class ModelAccess {
 	}
 
 	/**
-	 * Finds type elements in index
+	 * Finds method elements in index
+	 * 
+	 * @param qualifier
+	 *            Element qualifier (package name)
+	 * @param name
+	 *            Element name
+	 * @param matchRule
+	 *            Match rule
+	 * @param trueFlags
+	 *            Logical OR of flags that must exist in element flags bitset.
+	 *            Set to <code>0</code> to disable filtering by trueFlags.
+	 * @param falseFlags
+	 *            Logical OR of flags that must not exist in the element flags
+	 *            bitset. Set to <code>0</code> to disable filtering by
+	 *            falseFlags.
+	 * @param scope
+	 *            Search scope
+	 * @param monitor
+	 *            Progress monitor
+	 * @return elements array, or <code>null</code> in case error has occurred.
+	 */
+	public IMethod[] findMethods(String qualifier, String name,
+			MatchRule matchRule, int trueFlags, int falseFlags,
+			IDLTKSearchScope scope, IProgressMonitor monitor) {
+
+		List<IMethod> result = new LinkedList<IMethod>();
+		if (!findElements(IModelElement.METHOD, qualifier, name, matchRule,
+				trueFlags,
+				falseFlags, scope, result, monitor)) {
+			return null;
+		}
+		return result.toArray(new IMethod[result.size()]);
+	}
+
+	/**
+	 * Finds type elements in index. Element qualifier (package name) will be
+	 * calculated from the type name.
 	 * 
 	 * @param name
 	 *            Element name
@@ -134,8 +209,67 @@ public class ModelAccess {
 		return result.toArray(new IType[result.size()]);
 	}
 
+	/**
+	 * Finds type elements in index.
+	 * 
+	 * @param qualifier
+	 *            Element qualifier (package name)
+	 * @param name
+	 *            Element name
+	 * @param matchRule
+	 *            Match rule
+	 * @param trueFlags
+	 *            Logical OR of flags that must exist in element flags bitset.
+	 *            Set to <code>0</code> to disable filtering by trueFlags.
+	 * @param falseFlags
+	 *            Logical OR of flags that must not exist in the element flags
+	 *            bitset. Set to <code>0</code> to disable filtering by
+	 *            falseFlags.
+	 * @param scope
+	 *            Search scope
+	 * @param monitor
+	 *            Progress monitor
+	 * @return elements array, or <code>null</code> in case error has occurred.
+	 */
+	public IType[] findTypes(String qualifier, String name,
+			MatchRule matchRule, int trueFlags, int falseFlags,
+			IDLTKSearchScope scope, IProgressMonitor monitor) {
+
+		List<IType> result = new LinkedList<IType>();
+		if (!findElements(IModelElement.TYPE, qualifier, name, matchRule,
+				trueFlags,
+				falseFlags, scope, result, monitor)) {
+			return null;
+		}
+		return result.toArray(new IType[result.size()]);
+	}
+
 	protected <T extends IModelElement> boolean findElements(int elementType,
 			String name, MatchRule matchRule, int trueFlags, int falseFlags,
+			IDLTKSearchScope scope, final Collection<T> result,
+			IProgressMonitor monitor) {
+
+		String qualifier = null;
+		if (name != null) {
+			ISearchPatternProcessor processor = DLTKLanguageManager
+					.getSearchPatternProcessor(scope.getLanguageToolkit());
+			if (processor != null) {
+				String delim = processor.getDelimiterReplacementString();
+				int i = name.lastIndexOf(delim);
+				if (i != -1) {
+					qualifier = name.substring(0, i);
+					name = name.substring(i + 1);
+				}
+			}
+		}
+
+		return findElements(elementType, qualifier, name, matchRule, trueFlags,
+				falseFlags, scope, result, monitor);
+	}
+
+	protected <T extends IModelElement> boolean findElements(int elementType,
+			String qualifier, String name, MatchRule matchRule, int trueFlags,
+			int falseFlags,
 			IDLTKSearchScope scope, final Collection<T> result,
 			IProgressMonitor monitor) {
 
@@ -149,7 +283,8 @@ public class ModelAccess {
 			return false;
 		}
 
-		searchEngine.search(elementType, name, trueFlags, falseFlags, 0,
+		searchEngine.search(elementType, qualifier, name, trueFlags,
+				falseFlags, 0,
 				SearchFor.DECLARATIONS, matchRule, scope,
 				new ISearchRequestor() {
 
