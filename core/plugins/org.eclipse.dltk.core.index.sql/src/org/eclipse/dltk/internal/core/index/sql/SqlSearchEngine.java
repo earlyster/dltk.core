@@ -21,12 +21,10 @@ import java.util.Map;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IDLTKLanguageToolkitExtension;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
-import org.eclipse.dltk.core.ISearchPatternProcessor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.index.sql.Container;
 import org.eclipse.dltk.core.index.sql.DbFactory;
@@ -44,12 +42,12 @@ import org.eclipse.dltk.internal.core.search.DLTKWorkspaceScope;
  * Search engine implementation for SQL-based index.
  * 
  * @author michael
- * 
+ * @since 2.0
  */
 public class SqlSearchEngine implements ISearchEngine {
 
-	public void search(int elementType, String elementName, int trueFlags,
-			int falseFlags, int limit, SearchFor searchFor,
+	public void search(int elementType, String qualifier, String elementName,
+			int trueFlags, int falseFlags, int limit, SearchFor searchFor,
 			MatchRule matchRule, IDLTKSearchScope scope,
 			final ISearchRequestor requestor, IProgressMonitor monitor) {
 
@@ -92,22 +90,6 @@ public class SqlSearchEngine implements ISearchEngine {
 						|| searchFor == SearchFor.ALL_OCCURENCES;
 				boolean searchForRefs = searchFor == SearchFor.REFERENCES
 						|| searchFor == SearchFor.ALL_OCCURENCES;
-
-				String qualifier = null;
-				if (elementName != null) {
-					ISearchPatternProcessor processor = DLTKLanguageManager
-							.getSearchPatternProcessor(scope
-									.getLanguageToolkit());
-					if (processor != null) {
-						String delim = processor
-								.getDelimiterReplacementString();
-						int i = elementName.lastIndexOf(delim);
-						if (i != -1) {
-							qualifier = elementName.substring(0, i);
-							elementName = elementName.substring(i + 1);
-						}
-					}
-				}
 
 				if (searchForDecls) {
 					dbFactory.getElementDao().search(connection, elementName,
