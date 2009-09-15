@@ -144,6 +144,10 @@ public class H2ElementDao implements IElementDao {
 		return null;
 	}
 
+	private String escapeBackslash(String pattern) {
+		return pattern.replaceAll("\\\\", "\\\\\\\\");
+	}
+
 	public void search(Connection connection, String pattern,
 			MatchRule matchRule, int elementType, int trueFlags,
 			int falseFlags, String qualifier, String parent, int[] filesId,
@@ -179,13 +183,13 @@ public class H2ElementDao implements IElementDao {
 				}
 				// Prefix
 				else if (matchRule == MatchRule.PREFIX) {
-					query.append(" AND NAME LIKE '").append(pattern).append(
-							"%'");
+					query.append(" AND NAME LIKE '").append(
+							escapeBackslash(pattern)).append("%'");
 				}
 				// Camel-case
 				else if (matchRule == MatchRule.CAMEL_CASE) {
-					query.append(" AND CC_NAME LIKE '").append(pattern).append(
-							"%'");
+					query.append(" AND CC_NAME LIKE '").append(
+							escapeBackslash(pattern)).append("%'");
 				}
 				// Set of names
 				else if (matchRule == MatchRule.SET) {
@@ -202,8 +206,8 @@ public class H2ElementDao implements IElementDao {
 				// POSIX pattern
 				else if (matchRule == MatchRule.PATTERN) {
 					query.append(" AND NAME LIKE '").append(
-							pattern.replace('*', '%').replace('?', '_'))
-							.append("'");
+							escapeBackslash(pattern).replace('*', '%').replace(
+									'?', '_')).append("'");
 				}
 			}
 
