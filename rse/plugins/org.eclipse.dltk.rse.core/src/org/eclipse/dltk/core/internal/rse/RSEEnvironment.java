@@ -127,22 +127,10 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	}
 
 	public String getCanonicalPath(IPath path) {
-		if (connect()) {
-			try {
-				IFileStore store = EFS.getStore(getURI(path));
-				IFileInfo info = store.fetchInfo();
-				if (info.getAttribute(EFS.ATTRIBUTE_SYMLINK)) {
-					String linkTarget = info
-							.getStringAttribute(EFS.ATTRIBUTE_LINK_TARGET);
-					IFileStore resolved = store.getFileStore(new Path(
-							linkTarget));
-					return resolved.toURI().getPath();
-				} else {
-					return store.toURI().getPath();
-				}
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
+		IFileHandle file = getFile(path);
+		if( file instanceof RSEFileHandle) {
+			RSEFileHandle handle = (RSEFileHandle) file;
+			return handle.getResolveCanonicalPath();
 		}
 		return convertPathToString(path);
 	}

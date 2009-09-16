@@ -44,6 +44,7 @@ import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.internal.efs.RSEFileSystem;
 
 public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
+	private static final int SYMLINK_CONNECTION_TIMEOUT = 30 * 1000;
 	private static final int CACHE_LIMIT = 1000;
 	private static Map<RSEFileHandle, IFileInfo> timestamps = new HashMap<RSEFileHandle, IFileInfo>();
 	private static Map<RSEFileHandle, Long> lastaccess = new HashMap<RSEFileHandle, Long>();
@@ -261,11 +262,26 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		if (!environment.connect()) {
 			return false;
 		}
-		fetchSshFile();
+		fetchSshFileWait();
 		if (sshFile != null) {
 			return sshFile.isSymlink();
 		}
 		return fetchInfo(false).getAttribute(EFS.ATTRIBUTE_SYMLINK);
+	}
+
+	private void fetchSshFileWait() {
+		long startTime = System.currentTimeMillis();
+		while (sshFile == null
+				&& (System.currentTimeMillis() - startTime < SYMLINK_CONNECTION_TIMEOUT)) {
+			fetchSshFile();
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	private InputStream internalOpenInputStream(IProgressMonitor monitor)
@@ -432,5 +448,42 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 	 */
 	public void clearLastModifiedCache() {
 		timestamps.remove(toString());
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public String getResolveCanonicalPath() {
+		if (environment.connect()) {
+			// Try to resolve canonical path using direct ssh connection
+			if (isSymlink()) {
+				if (sshFile != null) {
+					String link = sshFile.readLink();
+					if (link.startsWith("/")) {
+						IFileHandle handle = environment
+								.getFile(new Path(link));
+						return handle.getCanonicalPath();
+					} else {
+						String canonicalPath = environment.getFile(
+								getPath().removeLastSegments(1).append(link))
+								.getCanonicalPath();
+						return canonicalPath;
+					}
+				}
+			} else {
+				return file.toURI().getPath();
+			}
+
+			IFileInfo info = file.fetchInfo();
+			if (info != null && info.getAttribute(EFS.ATTRIBUTE_SYMLINK)) {
+				String linkTarget = info
+						.getStringAttribute(EFS.ATTRIBUTE_LINK_TARGET);
+				IFileStore resolved = file.getFileStore(new Path(linkTarget));
+				return resolved.toURI().getPath();
+			} else {
+				return file.toURI().getPath();
+			}
+		}
+		return null;
 	}
 }
