@@ -68,6 +68,45 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 		}
 	}
 
+	private static class ReadLinkOperation extends Operation {
+		protected IPath path;
+		protected String link = "";
+
+		public ReadLinkOperation(IPath path) {
+			this.path = path;
+		}
+
+		@Override
+		public String toString() {
+			return "Get information for file:" + path; //$NON-NLS-1$
+		}
+
+		@Override
+		public void perform(ChannelSftp channel) throws SftpException {
+			if (path.segmentCount() == 0) {
+				return;
+			}
+			String spath = path.toString();
+			link = channel.readlink(spath);
+			if (link != null && !link.equals(spath)) {
+				String curDir = channel.pwd();
+				String parentPath = path.removeLastSegments(1).toString();
+				if (!parentPath.equals(curDir)) {
+					channel.cd(parentPath);
+				}
+				SftpATTRS attrs = channel.stat(link);
+				if (attrs.isDir()) {
+					channel.cd(spath);
+					link = channel.pwd();
+				}
+			}
+		}
+
+		public String getLink() {
+			return link;
+		}
+	}
+
 	private static class GetLStatOperation extends GetStatOperation {
 
 		public GetLStatOperation(IPath path) {
@@ -600,6 +639,15 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 		performOperation(op);
 		if (op.isFinished()) {
 			return op.getStream();
+		}
+		return null;
+	}
+
+	String readLink(IPath path) {
+		ReadLinkOperation op = new ReadLinkOperation(path);
+		performOperation(op);
+		if (op.isFinished()) {
+			return op.getLink();
 		}
 		return null;
 	}

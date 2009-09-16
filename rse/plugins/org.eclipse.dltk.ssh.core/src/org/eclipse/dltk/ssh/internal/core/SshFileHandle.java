@@ -351,4 +351,8 @@ public class SshFileHandle implements ISshFileHandle,
 			return false;
 		return true;
 	}
+
+	public String readLink() {
+		return connection.readLink(path);
+	}
 }

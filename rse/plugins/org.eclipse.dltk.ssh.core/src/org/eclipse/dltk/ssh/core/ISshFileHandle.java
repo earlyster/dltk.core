@@ -44,4 +44,6 @@ public interface ISshFileHandle {
 
 	public boolean isSymlink();
 
+	public String readLink();
+
 }
