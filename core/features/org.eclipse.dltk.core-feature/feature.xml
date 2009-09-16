@@ -23,6 +23,11 @@ http://www.eclipse.org/legal/epl-v10.html
       %license
    </license>
 
+   <includes
+         id="org.eclipse.dltk.index"
+         version="0.0.0"
+         optional="true"/>
+
    <requires>
       <import feature="org.eclipse.platform" version="3.3.0" match="compatible"/>
       <import feature="org.eclipse.emf.ecore" version="2.4.0" match="greaterOrEqual"/>
@@ -114,26 +119,6 @@ http://www.eclipse.org/legal/epl-v10.html
 
    <plugin
          id="org.eclipse.dltk.formatter"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.dltk.core.index"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.dltk.core.index.sql"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.dltk.core.index.sql.h2"
          download-size="0"
          install-size="0"
          version="0.0.0"
