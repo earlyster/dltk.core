@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +36,7 @@ import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.index2.search.ModelAccess;
+import org.eclipse.dltk.core.index2.search.ISearchEngine.MatchRule;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.NopTypeNameRequestor;
@@ -781,10 +783,29 @@ public class TypeInfoViewer {
 			monitor
 					.setTaskName(DLTKUIMessages.TypeInfoViewer_searchJob_taskName);
 
+			MatchRule searchRule = ModelAccess.convertSearchRule(fFilter
+			.getSearchFlags());
 			IType[] types = new ModelAccess().findTypes(fFilter
-					.getNamePattern(), ModelAccess.convertSearchRule(fFilter
-					.getSearchFlags()), 0, Modifiers.AccNameSpace, fScope,
+					.getNamePattern(), searchRule, 0, Modifiers.AccNameSpace, fScope,
 					monitor);
+			if (searchRule == MatchRule.CAMEL_CASE) {
+				LinkedList<IType> result = new LinkedList<IType>();
+				if (types != null) {
+					result.addAll(Arrays.asList(types));
+				}
+				// old-style search engine searches for prefixes as well when
+				// 'camel-case' pattern is given. This is not the case for the
+				// new search engine, so we invoke another search process for
+				// prefixes:
+				types = new ModelAccess().findTypes(fFilter.getNamePattern(),
+						MatchRule.PREFIX, 0, Modifiers.AccNameSpace, fScope,
+						monitor);
+				if (types != null) {
+					result.addAll(Arrays.asList(types));
+				}
+				types = result.size() == 0 ? null : result
+						.toArray(new IType[result.size()]);
+			}
 			if (types != null) {
 				for (IType type : types) {
 					fReqestor.acceptTypeNameMatch(new DLTKSearchTypeNameMatch(
