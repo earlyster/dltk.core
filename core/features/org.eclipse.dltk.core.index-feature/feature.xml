@@ -25,6 +25,11 @@ http://www.eclipse.org/legal/epl-v10.html
 
    <requires>
       <import feature="org.eclipse.dltk.core" version="2.0.0.qualifier"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.dltk.core" version="2.0.0" match="greaterOrEqual"/>
+      <import plugin="org.h2" version="1.1.115" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.dltk.core.index.sql" version="2.0.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
