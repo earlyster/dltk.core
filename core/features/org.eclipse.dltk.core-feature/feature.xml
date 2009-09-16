@@ -24,7 +24,7 @@ http://www.eclipse.org/legal/epl-v10.html
    </license>
 
    <includes
-         id="org.eclipse.dltk.index"
+         id="org.eclipse.dltk.core.index"
          version="0.0.0"
          optional="true"/>
 
