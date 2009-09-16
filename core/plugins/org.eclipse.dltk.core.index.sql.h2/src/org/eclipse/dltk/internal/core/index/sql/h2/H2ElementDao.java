@@ -222,11 +222,11 @@ public class H2ElementDao implements IElementDao {
 			}
 
 			// Qualifier
-			if (qualifier != null) {
+			if (qualifier != null && qualifier.length() > 0) {
 				query.append(" AND QUALIFIER='").append(qualifier).append('\'');
 			}
 			// Parent
-			if (parent != null) {
+			if (parent != null && qualifier.length() > 0) {
 				query.append(" AND PARENT='").append(parent).append('\'');
 			}
 
