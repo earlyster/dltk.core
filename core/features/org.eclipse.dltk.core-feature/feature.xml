@@ -23,11 +23,6 @@ http://www.eclipse.org/legal/epl-v10.html
       %license
    </license>
 
-   <includes
-         id="org.eclipse.dltk.core.index"
-         version="0.0.0"
-         optional="true"/>
-
    <requires>
       <import feature="org.eclipse.platform" version="3.3.0" match="compatible"/>
       <import feature="org.eclipse.emf.ecore" version="2.4.0" match="greaterOrEqual"/>
