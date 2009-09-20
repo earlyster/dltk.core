@@ -53,6 +53,7 @@ public class ProgressJob extends Job {
 			return Status.OK_STATUS;
 		} finally {
 			running = false;
+			scheduled = false;
 		}
 	}
 
