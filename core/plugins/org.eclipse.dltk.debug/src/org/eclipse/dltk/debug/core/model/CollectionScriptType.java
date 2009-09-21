@@ -18,7 +18,7 @@ public class CollectionScriptType extends AtomicScriptType {
 	}
 
 	public String formatDetails(IScriptValue value) {
-		final StringBuilder sb = new StringBuilder();
+		final StringBuffer sb = new StringBuffer();
 		try {
 			IVariable[] variables2 = value.getVariables();
 			if (variables2.length > 0) {
