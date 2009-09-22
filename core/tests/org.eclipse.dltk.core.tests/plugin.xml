@@ -64,6 +64,13 @@
      </content-type>
   </extension>
   <extension
+        point="org.eclipse.dltk.core.projectIndexer">
+        <enable
+              indexer="org.eclipse.dltk.core.indexer.mixin"
+              nature="org.eclipse.dltk.core.tests.testnature">
+        </enable>
+  </extension>
+  <extension
         point="org.eclipse.dltk.core.mixin">
      <mixin
            class="org.eclipse.dltk.core.tests.TestMixinParser"
