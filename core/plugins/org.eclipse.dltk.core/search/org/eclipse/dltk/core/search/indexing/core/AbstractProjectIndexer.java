@@ -17,7 +17,6 @@ import java.util.Set;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -147,13 +146,11 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 	}
 
 	public void removeProject(IPath projectPath) {
-		requestIfNotWaiting(new RemoveIndexRequest(this, new Path(projectPath
-				.toString())));
+		requestIfNotWaiting(new RemoveIndexRequest(this, projectPath));
 	}
 
 	public void removeLibrary(IScriptProject project, IPath path) {
-		requestIfNotWaiting(new RemoveIndexRequest(this, new Path(path
-				.toString())));
+		requestIfNotWaiting(new RemoveIndexRequest(this, path));
 	}
 
 	public void startIndexing() {
