@@ -31,6 +31,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
@@ -261,6 +262,9 @@ public class ScriptElementImageProvider {
 				return getScriptFolderIcon(element, renderFlags);
 
 			case IModelElement.SOURCE_MODULE:
+				if (((ISourceModule) element).isBinary()) {
+					return getBinaryModuleIcon(element, renderFlags);
+				}
 				boolean external = element instanceof IExternalSourceModule;
 				return getSourceModuleIcon(element, external, renderFlags);
 
@@ -296,6 +300,11 @@ public class ScriptElementImageProvider {
 			DLTKUIPlugin.log(e);
 			return DLTKPluginImages.DESC_OBJS_GHOST;
 		}
+	}
+
+	private ImageDescriptor getBinaryModuleIcon(IModelElement element,
+			int renderFlags) {
+		return DLTKPluginImages.DESC_OBJS_CFILE;
 	}
 
 	private ImageDescriptor getSourceModuleIcon(IModelElement element,
