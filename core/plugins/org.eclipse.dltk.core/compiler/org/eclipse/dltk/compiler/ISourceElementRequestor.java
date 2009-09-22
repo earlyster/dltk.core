@@ -9,49 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler;
 
-public interface ISourceElementRequestor {
-
-	public abstract static class ElementInfo {
-		public int declarationStart;
-		public int modifiers;
-		public String name;
-		public int nameSourceStart;
-		public int nameSourceEnd;
-	}
-
-	public static class TypeInfo extends ElementInfo {
-		public String[] superclasses;
-	}
-
-	public static class MethodInfo extends ElementInfo {
-		public String[] parameterNames;
-		public String[] parameterInitializers;
-		public String[] exceptionTypes;
-		public boolean isConstructor;
-	}
-
-	public static class FieldInfo extends ElementInfo {
-	}
-
-	/**
-	 * @since 2.0
-	 */
-	public static class ImportInfo {
-		public String containerName;
-		public String name;
-		public String version;
-		public int sourceStart;
-		public int sourceEnd;
-	}
-
-	void enterModule();
-
-	void enterModuleRoot();
-
-	void exitModuleRoot();
-
-	void enterField(FieldInfo info);
-
+public interface ISourceElementRequestor extends IElementRequestor {
 	/**
 	 * Adds selected field only if it isn't already added. If field is added
 	 * into a method, then field name is also compared with the method
@@ -60,20 +18,18 @@ public interface ISourceElementRequestor {
 	 * @param info
 	 * @return <code>true</code> if field has been just added or
 	 *         <code>false</code> if another field with the same was found.
+	 * @since 2.0
 	 */
-	boolean enterFieldCheckDuplicates(FieldInfo info);
-
-	void enterMethod(MethodInfo info);
-
-	void acceptPackage(int declarationStart, int declarationEnd, char[] name);
+	boolean enterFieldCheckDuplicates(IElementRequestor.FieldInfo info);
 
 	/**
 	 * equivalent to enterMethod except for removing previous declared methods
 	 * with same name.
 	 * 
 	 * @param info
+	 * @since 2.0
 	 */
-	void enterMethodRemoveSame(MethodInfo info);
+	void enterMethodRemoveSame(IElementRequestor.MethodInfo info);
 
 	/**
 	 * Enter method for selected parent in currect module.
@@ -83,9 +39,10 @@ public interface ISourceElementRequestor {
 	 *            parent name delimited with $ symbol.
 	 * @return boolean - return false if parent with selected name, coul'd not
 	 *         be found.
+	 * @since 2.0
 	 */
-	boolean enterMethodWithParentType(MethodInfo info, String parentName,
-			String delimiter);
+	boolean enterMethodWithParentType(IElementRequestor.MethodInfo info,
+			String parentName, String delimiter);
 
 	/**
 	 * Enter field for selected parent in currect module.
@@ -95,11 +52,10 @@ public interface ISourceElementRequestor {
 	 *            parent name delimited with $ symbol.
 	 * @return boolean - return false if parent with selected name, coul'd not
 	 *         be found.
+	 * @since 2.0
 	 */
-	boolean enterFieldWithParentType(FieldInfo info, String parentName,
-			String delimiter);
-
-	void enterType(TypeInfo info);
+	boolean enterFieldWithParentType(IElementRequestor.FieldInfo info,
+			String parentName, String delimiter);
 
 	/**
 	 * If type with same name already exist, then enter it instead.
@@ -108,26 +64,4 @@ public interface ISourceElementRequestor {
 	 * @return boolean false if no such type found.
 	 */
 	boolean enterTypeAppend(String fullName, String delimiter);
-
-	void exitModule(int declarationEnd);
-
-	void exitField(int declarationEnd);
-
-	void exitMethod(int declarationEnd);
-
-	void exitType(int declarationEnd);
-
-	void acceptMethodReference(char[] methodName, int argCount,
-			int sourcePosition, int sourceEndPosition);
-
-	void acceptTypeReference(char[][] typeName, int sourceStart, int sourceEnd);
-
-	void acceptTypeReference(char[] typeName, int sourcePosition);
-
-	void acceptFieldReference(char[] fieldName, int sourcePosition);
-
-	/**
-	 * @since 2.0
-	 */
-	void acceptImport(ImportInfo importInfo);
 }

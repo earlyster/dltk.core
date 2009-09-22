@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
-import org.eclipse.dltk.compiler.ISourceElementRequestor.ElementInfo;
-import org.eclipse.dltk.compiler.ISourceElementRequestor.FieldInfo;
-import org.eclipse.dltk.compiler.ISourceElementRequestor.ImportInfo;
-import org.eclipse.dltk.compiler.ISourceElementRequestor.MethodInfo;
-import org.eclipse.dltk.compiler.ISourceElementRequestor.TypeInfo;
+import org.eclipse.dltk.compiler.IElementRequestor.ElementInfo;
+import org.eclipse.dltk.compiler.IElementRequestor.FieldInfo;
+import org.eclipse.dltk.compiler.IElementRequestor.ImportInfo;
+import org.eclipse.dltk.compiler.IElementRequestor.MethodInfo;
+import org.eclipse.dltk.compiler.IElementRequestor.TypeInfo;
 
 public class StructureModelProcessor extends AbstractDataLoader implements
 		IStructureConstants {
@@ -225,7 +225,8 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 		info.superclasses = readDataStringsStr();
 	}
 
-	private void readElementInfo(ElementInfo info) throws IOException {
+	private void readElementInfo(ElementInfo info)
+			throws IOException {
 		info.name = readString();
 		info.modifiers = in.readInt();
 		info.nameSourceStart = in.readInt();

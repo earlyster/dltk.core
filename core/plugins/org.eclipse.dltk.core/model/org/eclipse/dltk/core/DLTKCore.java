@@ -2505,6 +2505,15 @@ public class DLTKCore extends Plugin {
 								message, null));
 	}
 
+	/**
+	 * @since 2.0
+	 */
+	public static void error(Throwable e) {
+		plugin.getLog().log(
+				new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, e
+						.getLocalizedMessage(), e));
+	}
+
 	public static void error(String message, Throwable t) {
 		plugin.getLog().log(
 				new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, t));

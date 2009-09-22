@@ -10,6 +10,7 @@
 package org.eclipse.dltk.core.search.indexing;
 
 import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.compiler.IBinaryElementRequestor;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISearchFactory;
@@ -21,7 +22,7 @@ import org.eclipse.dltk.core.ISearchPatternProcessor;
  * an index.
  */
 public class SourceIndexerRequestor implements ISourceElementRequestor,
-		IIndexConstants {
+		IBinaryElementRequestor, IIndexConstants {
 	protected AbstractIndexer indexer;
 	// char[] packageName = CharOperation.NO_CHAR;
 	protected char[][] enclosingTypeNames = new char[5][];
@@ -145,6 +146,9 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 		return qualification;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterType(TypeInfo typeInfo) {
 		// eliminate possible qualifications, given they need to be fully
 		// resolved again
@@ -170,6 +174,9 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 		this.pushTypeName(typeInfo.name.toCharArray());
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterConstructor(MethodInfo methodInfo) {
 		this.indexer.addConstructorDeclaration(methodInfo.name,
 				methodInfo.parameterNames, methodInfo.exceptionTypes);
@@ -178,6 +185,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 
 	/**
 	 * @see ISourceElementRequestor#enterField(FieldInfo)
+	 * @since 2.0
 	 */
 	public void enterField(FieldInfo fieldInfo) {
 		this.indexer.addFieldDeclaration(fieldInfo.name.toCharArray());
@@ -186,6 +194,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 
 	/**
 	 * @see ISourceElementRequestor#enterMethod(MethodInfo)
+	 * @since 2.0
 	 */
 	public void enterMethod(MethodInfo methodInfo) {
 		this.indexer.addMethodDeclaration(methodInfo.modifiers, this.pkgName,
@@ -235,6 +244,9 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 		enclosingTypeNames[depth++] = typeName;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterMethodRemoveSame(MethodInfo info) {
 		if (DLTKCore.DEBUG) {
 			System.out.println("TODO: Add replace method code."); //$NON-NLS-1$
@@ -263,12 +275,18 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 			char[] name) {
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean enterFieldCheckDuplicates(FieldInfo info) {
 		this.indexer.addFieldDeclaration(info.name.toCharArray());
 		this.methodDepth++;
 		return true;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean enterMethodWithParentType(MethodInfo info,
 			String parentName, String delimiter) {
 		this.enterMethod(info);
@@ -276,6 +294,9 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 		return true;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean enterFieldWithParentType(FieldInfo info, String parentName,
 			String delimiter) {
 		this.indexer.addFieldDeclaration(info.name.toCharArray());
@@ -283,6 +304,9 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 		return true;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean enterTypeAppend(TypeInfo info, String fullName,
 			String delimiter) {
 		enterType(info);

@@ -16,6 +16,8 @@ public class InternalDLTKLanguageManager {
 			+ ".language"; //$NON-NLS-1$
 	private final static String SOURCE_ELEMENT_PARSERS_EXTPOINT = DLTKCore.PLUGIN_ID
 			+ ".sourceElementParsers"; //$NON-NLS-1$
+	private final static String BINARY_ELEMENT_PARSERS_EXTPOINT = DLTKCore.PLUGIN_ID
+			+ ".binaryElementParsers"; //$NON-NLS-1$
 	private final static String SOURCE_PARSERS_EXTPOINT = DLTKCore.PLUGIN_ID
 			+ ".sourceParsers"; //$NON-NLS-1$
 	private final static String PROBLEM_FACTORY_EXTPOINT = DLTKCore.PLUGIN_ID
@@ -30,16 +32,18 @@ public class InternalDLTKLanguageManager {
 			+ ".callHierarchy"; //$NON-NLS-1$
 	private final static String FILE_HIERARCHY_RESOLVER_EXTPOINT = DLTKCore.PLUGIN_ID
 			+ ".fileHierarchyResolvers";//$NON-NLS-1$
-	
+
 	private final static String INTERPRETER_CONTAINER_EXTENSION_EXTPOINT = DLTKCore.PLUGIN_ID
-	+ ".interpreterContainerExtension";//$NON-NLS-1$
-	
+			+ ".interpreterContainerExtension";//$NON-NLS-1$
+
 	private static PriorityClassDLTKExtensionManager languageToolkitsManager = new PriorityClassDLTKExtensionManager(
 			LANGUAGE_EXTPOINT);
 
 	// Inner managers
 	private static PriorityClassDLTKExtensionManager sourceElementParsersManager = new NewInstanceClassBasedDLTKExtensionManager(
 			SOURCE_ELEMENT_PARSERS_EXTPOINT);
+	private static PriorityClassDLTKExtensionManager binaryElementParsersManager = new NewInstanceClassBasedDLTKExtensionManager(
+			BINARY_ELEMENT_PARSERS_EXTPOINT);
 	private static PriorityClassDLTKExtensionManager problemFactoryManager = new PriorityClassDLTKExtensionManager(
 			PROBLEM_FACTORY_EXTPOINT);
 
@@ -56,36 +60,50 @@ public class InternalDLTKLanguageManager {
 			CALLHIERARCHY_EXTPOINT);
 	private static PriorityClassDLTKExtensionManager fileHierarchyResolversManager = new PriorityClassDLTKExtensionManager(
 			FILE_HIERARCHY_RESOLVER_EXTPOINT);
-	
+
 	private static PriorityClassDLTKExtensionManager interoreterContainerExtensionManager = new PriorityClassDLTKExtensionManager(
 			INTERPRETER_CONTAINER_EXTENSION_EXTPOINT);
+
 	public static PriorityClassDLTKExtensionManager getSourceElementParsersManager() {
 		return sourceElementParsersManager;
 	}
+
+	public static PriorityClassDLTKExtensionManager getBinaryElementParsersManager() {
+		return binaryElementParsersManager;
+	}
+
 	public static PriorityClassDLTKExtensionManager getProblemFactoryManager() {
 		return problemFactoryManager;
 	}
+
 	public static PriorityClassDLTKExtensionManager getSelectionEngineManager() {
 		return selectionEngineManager;
 	}
+
 	public static PriorityClassDLTKExtensionManager getCompletionEngineManager() {
 		return completionEngineManager;
 	}
+
 	public static PriorityClassDLTKExtensionManager getSourceParsersManager() {
 		return sourceParsersManager;
 	}
+
 	public static PriorityClassDLTKExtensionManager getSearchManager() {
 		return searchManager;
 	}
+
 	public static PriorityClassDLTKExtensionManager getCallHierarchyManager() {
 		return callHierarchyManager;
 	}
+
 	public static PriorityClassDLTKExtensionManager getFileHierarchyResolversManager() {
 		return fileHierarchyResolversManager;
 	}
+
 	public static PriorityClassDLTKExtensionManager getLanguageToolkitsManager() {
 		return languageToolkitsManager;
 	}
+
 	public static PriorityClassDLTKExtensionManager getInterpreterContainerExtensionManager() {
 		return interoreterContainerExtensionManager;
 	}

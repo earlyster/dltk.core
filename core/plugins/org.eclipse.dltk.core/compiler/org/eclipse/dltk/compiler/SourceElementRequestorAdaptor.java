@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler;
 
-
 public class SourceElementRequestorAdaptor implements ISourceElementRequestor {
 
 	public void acceptFieldReference(char[] fieldName, int sourcePosition) {
@@ -31,24 +30,42 @@ public class SourceElementRequestorAdaptor implements ISourceElementRequestor {
 	public void acceptTypeReference(char[] typeName, int sourcePosition) {
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterField(FieldInfo info) {
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean enterFieldCheckDuplicates(FieldInfo info) {
 		return false;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean enterFieldWithParentType(FieldInfo info, String parentName,
 			String delimiter) {
 		return false;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterMethod(MethodInfo info) {
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterMethodRemoveSame(MethodInfo info) {
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean enterMethodWithParentType(MethodInfo info,
 			String parentName, String delimiter) {
 		return false;
@@ -60,6 +77,9 @@ public class SourceElementRequestorAdaptor implements ISourceElementRequestor {
 	public void enterModuleRoot() {
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterType(TypeInfo info) {
 	}
 

@@ -26,6 +26,7 @@ import org.eclipse.dltk.codeassist.ISelectionEngine;
 import org.eclipse.dltk.compiler.problem.DefaultProblemFactory;
 import org.eclipse.dltk.compiler.problem.IProblemFactory;
 import org.eclipse.dltk.core.PriorityDLTKExtensionManager.ElementInfo;
+import org.eclipse.dltk.core.model.binary.IBinaryElementParser;
 import org.eclipse.dltk.core.search.DLTKSearchParticipant;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.IMatchLocatorParser;
@@ -196,6 +197,23 @@ public class DLTKLanguageManager {
 			IModelElement element) {
 		return (ISourceElementParser) InternalDLTKLanguageManager
 				.getSourceElementParsersManager().getObject(element);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public static IBinaryElementParser getBinaryElementParser(String nature) {
+		return (IBinaryElementParser) InternalDLTKLanguageManager
+				.getBinaryElementParsersManager().getObject(nature);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public static IBinaryElementParser getBinaryElementParser(
+			IModelElement element) {
+		return (IBinaryElementParser) InternalDLTKLanguageManager
+				.getBinaryElementParsersManager().getObject(element);
 	}
 
 	// public static ISourceParser getSourceParser( String nature ) throws

@@ -18,6 +18,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IModule;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ISourceModule;
@@ -28,6 +29,8 @@ import org.eclipse.dltk.core.caching.IContentCache;
 import org.eclipse.dltk.core.caching.StructureModelProcessor;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
+import org.eclipse.dltk.core.model.binary.IBinaryElementParser;
+import org.eclipse.dltk.core.model.binary.IBinaryModule;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.core.search.indexing.AbstractIndexer;
@@ -155,18 +158,22 @@ public class StructureIndexer extends AbstractIndexer {
 		}
 
 		if (!performed) {
-			ISourceElementParser parser = ((InternalSearchDocument) this.document)
-					.getParser();
-			if (parser == null) {
-				parser = DLTKLanguageManager
+			if (!sourceModule.isBinary()) {
+				ISourceElementParser parser = DLTKLanguageManager
 						.getSourceElementParser(sourceModule);
+				ISourceModuleInfoCache cache = ModelManager.getModelManager()
+						.getSourceModuleInfoCache();
+				ISourceModuleInfo info = cache
+						.get((ISourceModule) sourceModule);
+				parser.setRequestor(requestor);
+				parser.parseSourceModule(new ParserInput(document,
+						(ISourceModule) sourceModule), info);
+			} else {
+				IBinaryElementParser parser = DLTKLanguageManager
+						.getBinaryElementParser(sourceModule);
+				parser.setRequestor(requestor);
+				parser.parseBinaryModule((IBinaryModule) sourceModule);
 			}
-			ISourceModuleInfoCache cache = ModelManager.getModelManager()
-					.getSourceModuleInfoCache();
-			ISourceModuleInfo info = cache.get(sourceModule);
-			parser.setRequestor(requestor);
-			parser.parseSourceModule(new ParserInput(document, sourceModule),
-					info);
 		}
 
 		long ended = System.currentTimeMillis();

@@ -388,4 +388,9 @@ public interface ISourceModule extends IModule, ISourceReference,
 	IField[] getFields() throws ModelException;
 
 	boolean isBuiltin();
+
+	/**
+	 * @since 2.0
+	 */
+	boolean isBinary();
 }
