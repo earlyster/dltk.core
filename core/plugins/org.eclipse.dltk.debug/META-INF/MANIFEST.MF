@@ -25,5 +25,5 @@ Export-Package: org.eclipse.dltk.dbgp,
  org.eclipse.dltk.debug.core.model,
  org.eclipse.dltk.internal.debug.core.model,
  org.eclipse.dltk.internal.debug.core.model.operations
-Bundle-RequiredExecutionEnvironment: J2SE-1.4
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
