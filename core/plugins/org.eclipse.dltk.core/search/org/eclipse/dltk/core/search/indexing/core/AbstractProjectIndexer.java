@@ -14,8 +14,6 @@ package org.eclipse.dltk.core.search.indexing.core;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -27,7 +25,6 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.index.Index;
-import org.eclipse.dltk.core.search.indexing.AbstractJob;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.internal.core.ExternalSourceModule;
@@ -154,24 +151,14 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 	}
 
 	public void startIndexing() {
-		final IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		try {
-			IScriptProject[] projects = DLTKCore.create(workspace.getRoot())
-					.getScriptProjects();
-			for (int i = 0; i < projects.length; ++i) {
-				if (disabledNatures.contains(DLTKLanguageManager
-						.getLanguageToolkit(projects[i]).getNatureId())) {
-					continue;
-				}
-				requestIfNotWaiting(new ProjectRequest(this, projects[i], false));
-			}
-		} catch (Exception e) {
-			DLTKCore.error(Messages.MixinIndexer_startIndexingError, e);
+		//
+	}
 
-			if (AbstractJob.DEBUG) {
-				e.printStackTrace();
-			}
-		}
+	/**
+	 * @since 2.0
+	 */
+	public boolean wantRefreshOnStart() {
+		return true;
 	}
 
 	public void indexSourceModule(Index index, IDLTKLanguageToolkit toolkit,

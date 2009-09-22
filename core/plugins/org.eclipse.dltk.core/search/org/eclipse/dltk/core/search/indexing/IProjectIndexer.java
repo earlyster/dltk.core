@@ -90,6 +90,15 @@ public interface IProjectIndexer {
 	void startIndexing();
 
 	/**
+	 * Specifies if this indexer wants to refresh indexes for all projects. If
+	 * this method returns <code>true</code> then
+	 * {@link #indexProject(IScriptProject)} would be called for each project.
+	 * 
+	 * @since 2.0
+	 */
+	boolean wantRefreshOnStart();
+
+	/**
 	 * Disable this indexer for the given set of natures
 	 * 
 	 * @since 2.0

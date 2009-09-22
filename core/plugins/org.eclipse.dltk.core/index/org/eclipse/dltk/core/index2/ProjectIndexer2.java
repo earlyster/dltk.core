@@ -14,8 +14,6 @@ package org.eclipse.dltk.core.index2;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -149,26 +147,11 @@ public class ProjectIndexer2 implements IProjectIndexer {
 	}
 
 	public void startIndexing() {
-		jobManager.reset();
+		//
+	}
 
-		final IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		try {
-			IScriptProject[] projects = DLTKCore.create(workspace.getRoot())
-					.getScriptProjects();
-
-			for (int i = 0; i < projects.length; ++i) {
-				if (disabledNatures.contains(DLTKLanguageManager
-						.getLanguageToolkit(projects[i]).getNatureId())) {
-					continue;
-				}
-				ProjectRequest request = new ProjectRequest(this, projects[i],
-						new ProgressJob(jobManager));
-				jobManager.requestIfNotWaiting(request);
-			}
-		} catch (Exception e) {
-			DLTKCore
-					.error("An exception is thrown while indexing workspace", e);
-		}
+	public boolean wantRefreshOnStart() {
+		return true;
 	}
 
 	/**

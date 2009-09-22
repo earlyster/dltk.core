@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
@@ -378,9 +379,34 @@ public class ProjectIndexerManager {
 
 	public static void startIndexing() {
 		final IProjectIndexer[] indexers = getAllIndexers();
-		if (indexers != null) {
-			for (int i = 0; i < indexers.length; ++i) {
-				indexers[i].startIndexing();
+		if (indexers == null) {
+			return;
+		}
+		boolean wantRefresh = false;
+		for (int i = 0; i < indexers.length; ++i) {
+			indexers[i].startIndexing();
+			wantRefresh |= indexers[i].wantRefreshOnStart();
+		}
+		if (wantRefresh) {
+			final IScriptProject[] projects;
+			try {
+				projects = DLTKCore.create(
+						ResourcesPlugin.getWorkspace().getRoot())
+						.getScriptProjects();
+			} catch (Exception e) {
+				DLTKCore.error(e);
+				return;
+			}
+			for (int i = 0; i < projects.length; ++i) {
+				final IScriptProject project = projects[i];
+				final IProjectIndexer[] projectIndexers = getIndexers(project);
+				if (projectIndexers != null) {
+					for (IProjectIndexer projectIndexer : projectIndexers) {
+						if (projectIndexer.wantRefreshOnStart()) {
+							projectIndexer.indexProject(project);
+						}
+					}
+				}
 			}
 		}
 	}
