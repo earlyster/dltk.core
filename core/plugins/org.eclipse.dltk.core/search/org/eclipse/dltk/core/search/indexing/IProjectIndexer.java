@@ -98,10 +98,4 @@ public interface IProjectIndexer {
 	 */
 	boolean wantRefreshOnStart();
 
-	/**
-	 * Disable this indexer for the given set of natures
-	 * 
-	 * @since 2.0
-	 */
-	void disableForNature(String natureId);
 }

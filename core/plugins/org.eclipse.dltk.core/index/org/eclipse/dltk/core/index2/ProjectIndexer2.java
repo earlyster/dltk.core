@@ -11,12 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.index2;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
@@ -43,13 +39,7 @@ public class ProjectIndexer2 implements IProjectIndexer {
 	private final IndexManager jobManager = ModelManager.getModelManager()
 			.getIndexManager();
 
-	protected final Set<String> disabledNatures = new HashSet<String>();
-
 	public void indexLibrary(IScriptProject project, IPath path) {
-		if (disabledNatures.contains(DLTKLanguageManager.getLanguageToolkit(
-				project).getNatureId())) {
-			return;
-		}
 		try {
 			IProjectFragment fragment = project.findProjectFragment(path);
 			if (fragment != null) {
@@ -67,20 +57,12 @@ public class ProjectIndexer2 implements IProjectIndexer {
 	}
 
 	public void indexProject(IScriptProject project) {
-		if (disabledNatures.contains(DLTKLanguageManager.getLanguageToolkit(
-				project).getNatureId())) {
-			return;
-		}
 		ProjectRequest request = new ProjectRequest(this, project,
 				new ProgressJob(jobManager));
 		jobManager.requestIfNotWaiting(request);
 	}
 
 	public void indexProjectFragment(IScriptProject project, IPath path) {
-		if (disabledNatures.contains(DLTKLanguageManager.getLanguageToolkit(
-				project).getNatureId())) {
-			return;
-		}
 		IProjectFragment fragmentToIndex = null;
 		try {
 			IProjectFragment[] fragments = project.getProjectFragments();
@@ -108,17 +90,11 @@ public class ProjectIndexer2 implements IProjectIndexer {
 
 	public void indexSourceModule(ISourceModule module,
 			IDLTKLanguageToolkit toolkit) {
-		if (disabledNatures.contains(toolkit.getNatureId())) {
-			return;
-		}
 		jobManager.request(new AddSourceModuleRequest(this, module, null));
 	}
 
 	public void reconciled(ISourceModule workingCopy,
 			IDLTKLanguageToolkit toolkit) {
-		if (disabledNatures.contains(toolkit.getNatureId())) {
-			return;
-		}
 		jobManager.request(new ReconcileSourceModuleRequest(this, workingCopy,
 				null));
 	}
@@ -161,7 +137,4 @@ public class ProjectIndexer2 implements IProjectIndexer {
 		jobManager.request(request);
 	}
 
-	public void disableForNature(String natureId) {
-		disabledNatures.add(natureId);
-	}
 }

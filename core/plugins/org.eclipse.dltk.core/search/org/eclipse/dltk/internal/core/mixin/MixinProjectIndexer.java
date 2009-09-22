@@ -27,10 +27,6 @@ import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 public class MixinProjectIndexer extends AbstractProjectIndexer {
 
 	public void doIndexing(DLTKSearchDocument document, ISourceModule module) {
-		if (disabledNatures.contains(DLTKLanguageManager.getLanguageToolkit(
-				module).getNatureId())) {
-			return;
-		}
 		new MixinIndexer(document, module).indexDocument();
 		MixinModelRegistry.clearKeysCache(DLTKLanguageManager
 				.getLanguageToolkit(module));

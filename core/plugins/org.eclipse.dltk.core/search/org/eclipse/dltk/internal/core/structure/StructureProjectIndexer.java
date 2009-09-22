@@ -11,17 +11,12 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.structure;
 
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.search.indexing.core.AbstractProjectIndexer;
 import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 
 public class StructureProjectIndexer extends AbstractProjectIndexer {
 	public void doIndexing(DLTKSearchDocument document, ISourceModule module) {
-		if (disabledNatures.contains(DLTKLanguageManager.getLanguageToolkit(
-				module).getNatureId())) {
-			return;
-		}
 		new StructureIndexer(document, module).indexDocument();
 	}
 }
