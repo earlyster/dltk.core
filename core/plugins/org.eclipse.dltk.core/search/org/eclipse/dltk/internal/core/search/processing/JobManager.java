@@ -328,6 +328,15 @@ public abstract class JobManager implements Runnable {
 		performConcurrentJob(new WaitJob(), IJob.WaitUntilReady, null);
 	}
 
+	/**
+	 * @since 2.0
+	 */
+	public void requestIfNotWaiting(IJob job) {
+		if (!isJobWaiting(job)) {
+			request(job);
+		}
+	}
+
 	public synchronized void request(IJob job) {
 
 		job.ensureReadyToRun();

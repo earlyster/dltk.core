@@ -54,9 +54,7 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 	}
 
 	protected void requestIfNotWaiting(IJob job) {
-		if (!manager.isJobWaiting(job)) {
-			manager.request(job);
-		}
+		manager.requestIfNotWaiting(job);
 	}
 
 	public IndexManager getIndexManager() {
