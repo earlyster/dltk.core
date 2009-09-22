@@ -101,7 +101,7 @@
       point="org.eclipse.dltk.core.projectIndexer">
       <projectIndexer
             class="org.eclipse.dltk.internal.core.mixin.MixinProjectIndexer"
-            nature="#">
+            id="org.eclipse.dltk.core.indexer.mixin">
       </projectIndexer>
 </extension>
 <extension
@@ -142,8 +142,16 @@
          point="org.eclipse.dltk.core.projectIndexer">
       <projectIndexer
             class="org.eclipse.dltk.internal.core.structure.StructureProjectIndexer"
-            nature="#">
+            id="org.eclipse.dltk.core.indexer.structure">
       </projectIndexer>
+      <projectIndexer
+            class="org.eclipse.dltk.core.index2.ProjectIndexer2"
+      		id="org.eclipse.dltk.core.indexer.index2">
+      </projectIndexer>
+      <enable
+            indexer="org.eclipse.dltk.core.indexer.structure"
+            nature="#">
+      </enable>
    </extension>
    <extension
          point="org.eclipse.dltk.core.contentCacheProvider">
@@ -159,16 +167,4 @@
             uri="http://eclipse.org/dltk/cache_model">
       </package>
    </extension>
-<!--
-========================================================
-Don't contribute it for all languages. At least for now.
-========================================================
-   <extension
-         point="org.eclipse.dltk.core.projectIndexer">
-      <projectIndexer
-            class="org.eclipse.dltk.core.index2.ProjectIndexer2"
-            nature="#">
-      </projectIndexer>
-	</extension>
--->
 </plugin>

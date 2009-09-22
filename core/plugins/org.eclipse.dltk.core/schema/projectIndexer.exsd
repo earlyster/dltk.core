@@ -17,9 +17,10 @@
          </appInfo>
       </annotation>
       <complexType>
-         <choice>
-            <element ref="projectIndexer" minOccurs="1" maxOccurs="unbounded"/>
-            <element ref="disable" minOccurs="1" maxOccurs="unbounded"/>
+         <choice minOccurs="1" maxOccurs="unbounded">
+            <element ref="projectIndexer"/>
+            <element ref="disable"/>
+            <element ref="enable"/>
          </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -53,8 +54,21 @@
          <appInfo>
             <meta.element labelAttribute="nature"/>
          </appInfo>
+         <documentation>
+            Project Indexer declaration
+         </documentation>
       </annotation>
       <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The identifier of this project indexer
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="identifier"/>
+               </appInfo>
+            </annotation>
+         </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
@@ -63,13 +77,6 @@
                <appInfo>
                   <meta.attribute kind="java" basedOn=":org.eclipse.dltk.core.search.indexing.IProjectIndexer"/>
                </appInfo>
-            </annotation>
-         </attribute>
-         <attribute name="nature" type="string" use="required">
-            <annotation>
-               <documentation>
-                  If nature are # then builder is available for all script natures.
-               </documentation>
             </annotation>
          </attribute>
       </complexType>
@@ -82,20 +89,42 @@
          </documentation>
       </annotation>
       <complexType>
-         <attribute name="class" type="string" use="required">
+         <attribute name="indexer" type="string" use="required">
             <annotation>
                <documentation>
                   
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.core.search.indexing.IProjectIndexer"/>
+                  <meta.attribute kind="identifier" basedOn="org.eclipse.dltk.core.projectIndexer/projectIndexer/@id"/>
                </appInfo>
             </annotation>
          </attribute>
          <attribute name="nature" type="string" use="required">
             <annotation>
                <documentation>
-                  If nature are # then builder is available for all script natures.
+                  If nature is # then indexer is available for all script natures.
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="enable">
+      <complexType>
+         <attribute name="indexer" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="identifier" basedOn="org.eclipse.dltk.core.projectIndexer/projectIndexer/@id"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="nature" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
                </documentation>
             </annotation>
          </attribute>
