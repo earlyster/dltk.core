@@ -11,12 +11,15 @@ package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.PlatformObject;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementMemento;
@@ -191,6 +194,11 @@ public abstract class ModelElement extends PlatformObject implements
 			if (!hadTemporaryCache) {
 				manager.putInfos(this, newElements);
 			}
+		} catch (CoreException e) {
+			// DLTKCore.error("openWhemClosed error", e);
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 		} finally {
 			if (!hadTemporaryCache) {
 				manager.resetTemporaryCache();
@@ -318,17 +326,18 @@ public abstract class ModelElement extends PlatformObject implements
 	 * @param type
 	 *            - one of the EM_* constants defined by ModelElement
 	 */
-	protected ArrayList getChildrenOfType(int type) throws ModelException {
+	protected List<IModelElement> getChildrenOfType(int type)
+			throws ModelException {
 		return getChildrenOfType(type, null);
 	}
 
-	protected ArrayList getChildrenOfType(int type, IProgressMonitor monitor)
-			throws ModelException {
+	protected List<IModelElement> getChildrenOfType(int type,
+			IProgressMonitor monitor) throws ModelException {
 		IModelElement[] children = getChildren(monitor);
 		int size = children.length;
-		ArrayList list = new ArrayList(size);
+		List<IModelElement> list = new ArrayList<IModelElement>(size);
 		for (int i = 0; i < size; ++i) {
-			ModelElement elt = (ModelElement) children[i];
+			IModelElement elt = (IModelElement) children[i];
 			if (elt.getElementType() == type) {
 				list.add(elt);
 			}
@@ -653,7 +662,7 @@ public abstract class ModelElement extends PlatformObject implements
 		return buff.toString();
 	}
 
-	protected void getHandleMemento(StringBuffer buff) {
+	public void getHandleMemento(StringBuffer buff) {
 		((ModelElement) getParent()).getHandleMemento(buff);
 		buff.append(getHandleMementoDelimiter());
 		escapeMementoName(buff, getElementName());

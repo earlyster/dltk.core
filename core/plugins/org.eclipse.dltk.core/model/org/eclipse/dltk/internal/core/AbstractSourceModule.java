@@ -187,7 +187,7 @@ public abstract class AbstractSourceModule extends Openable implements
 	}
 
 	public IField[] getFields() throws ModelException {
-		ArrayList list = getChildrenOfType(FIELD);
+		List<IModelElement> list = getChildrenOfType(FIELD);
 		IField[] array = new IField[list.size()];
 		list.toArray(array);
 		return array;
@@ -255,7 +255,7 @@ public abstract class AbstractSourceModule extends Openable implements
 	}
 
 	public IMethod[] getMethods() throws ModelException {
-		ArrayList list = getChildrenOfType(METHOD);
+		List<IModelElement> list = getChildrenOfType(METHOD);
 		IMethod[] array = new IMethod[list.size()];
 		list.toArray(array);
 		return array;
@@ -277,7 +277,7 @@ public abstract class AbstractSourceModule extends Openable implements
 	}
 
 	public IPackageDeclaration[] getPackageDeclarations() throws ModelException {
-		ArrayList list = getChildrenOfType(PACKAGE_DECLARATION);
+		List<IModelElement> list = getChildrenOfType(PACKAGE_DECLARATION);
 		IPackageDeclaration[] array = new IPackageDeclaration[list.size()];
 		list.toArray(array);
 		return array;
@@ -363,7 +363,7 @@ public abstract class AbstractSourceModule extends Openable implements
 	}
 
 	public IType[] getTypes() throws ModelException {
-		ArrayList list = getChildrenOfType(TYPE);
+		List<IModelElement> list = getChildrenOfType(TYPE);
 		IType[] array = new IType[list.size()];
 		list.toArray(array);
 		return array;
@@ -753,5 +753,9 @@ public abstract class AbstractSourceModule extends Openable implements
 	public void codeComplete(int offset, CompletionRequestor requestor,
 			WorkingCopyOwner owner) throws ModelException {
 		codeComplete(this, offset, requestor, owner, DEFAULT_COMPLETION_TIMEOUT);
+	}
+
+	public boolean isBinary() {
+		return false;
 	}
 }

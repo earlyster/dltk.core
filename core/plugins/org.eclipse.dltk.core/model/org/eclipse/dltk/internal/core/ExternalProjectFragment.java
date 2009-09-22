@@ -163,7 +163,7 @@ public class ExternalProjectFragment extends ProjectFragment implements
 		}
 	}
 
-	protected void getHandleMemento(StringBuffer buff) {
+	public void getHandleMemento(StringBuffer buff) {
 		((ModelElement) getParent()).getHandleMemento(buff);
 		buff.append(getHandleMementoDelimiter());
 		escapeMementoName(buff, getElementName());

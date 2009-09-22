@@ -83,7 +83,7 @@ public class SourceType extends NamedMember implements IType {
 	}
 
 	public IField[] getFields() throws ModelException {
-		ArrayList list = getChildrenOfType(FIELD);
+		List<IModelElement> list = getChildrenOfType(FIELD);
 		IField[] array = new IField[list.size()];
 		list.toArray(array);
 		return array;
@@ -94,7 +94,7 @@ public class SourceType extends NamedMember implements IType {
 	}
 
 	public IType[] getTypes() throws ModelException {
-		ArrayList list = getChildrenOfType(TYPE);
+		List<IModelElement> list = getChildrenOfType(TYPE);
 		IType[] array = new IType[list.size()];
 		list.toArray(array);
 		return array;
@@ -105,7 +105,7 @@ public class SourceType extends NamedMember implements IType {
 	}
 
 	public IMethod[] getMethods() throws ModelException {
-		ArrayList list = getChildrenOfType(METHOD);
+		List<IModelElement> list = getChildrenOfType(METHOD);
 		IMethod[] array = new IMethod[list.size()];
 		list.toArray(array);
 		return array;

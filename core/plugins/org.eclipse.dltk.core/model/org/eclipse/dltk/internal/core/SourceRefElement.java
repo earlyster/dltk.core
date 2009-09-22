@@ -160,7 +160,7 @@ public abstract class SourceRefElement extends ModelElement implements
 		return this;
 	}
 
-	protected void getHandleMemento(StringBuffer buff) {
+	public void getHandleMemento(StringBuffer buff) {
 		super.getHandleMemento(buff);
 		if (this.occurrenceCount > 1) {
 			buff.append(JEM_COUNT);

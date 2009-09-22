@@ -11,6 +11,7 @@ package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -53,7 +54,7 @@ public class BuiltinScriptFolder extends ScriptFolder {
 	}
 
 	public ISourceModule[] getSourceModules() throws ModelException {
-		ArrayList list = getChildrenOfType(SOURCE_MODULE);
+		List<IModelElement> list = getChildrenOfType(SOURCE_MODULE);
 		ISourceModule[] array = new ISourceModule[list.size()];
 		list.toArray(array);
 		return array;

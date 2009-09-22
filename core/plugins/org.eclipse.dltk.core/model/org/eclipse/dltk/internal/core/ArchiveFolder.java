@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.core;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -60,10 +61,13 @@ public class ArchiveFolder extends ScriptFolder {
 		// Path zipPath = new Path(fragment.getZipName());
 		// IPath parentRelativePath = new Path(resName)
 		// .removeFirstSegments(this.path.segmentCount());
-		return new ExternalSourceModule(this, name,
-				DefaultWorkingCopyOwner.PRIMARY, true, new ArchiveEntryFile(
-						name, fragment.getZipName(), this.path, fragment
-.getResource(), (ArchiveProjectFragment) parent));
+		return new ExternalSourceModule(
+				this,
+				name,
+				DefaultWorkingCopyOwner.PRIMARY,
+				true,
+				new ArchiveEntryFile(name, fragment.getZipName(), this.path,
+						fragment.getResource(), (ArchiveProjectFragment) parent));
 	}
 
 	protected boolean computeChildren(OpenableElementInfo info,
@@ -85,7 +89,7 @@ public class ArchiveFolder extends ScriptFolder {
 	}
 
 	public ISourceModule[] getSourceModules() throws ModelException {
-		ArrayList list = getChildrenOfType(SOURCE_MODULE);
+		List<IModelElement> list = getChildrenOfType(SOURCE_MODULE);
 		ISourceModule[] array = new ISourceModule[list.size()];
 		list.toArray(array);
 		return array;

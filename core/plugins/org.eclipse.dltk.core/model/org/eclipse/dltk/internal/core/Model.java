@@ -389,7 +389,7 @@ public class Model extends Openable implements IScriptModel {
 		return null;
 	}
 
-	protected void getHandleMemento(StringBuffer buff) {
+	public void getHandleMemento(StringBuffer buff) {
 		buff.append(getElementName());
 	}
 

@@ -76,7 +76,7 @@ public class ImportDeclaration extends SourceRefElement implements
 	 *      the handle delimiter is associated to the import container already
 	 */
 	@Override
-	protected void getHandleMemento(StringBuffer buff) {
+	public void getHandleMemento(StringBuffer buff) {
 		((ModelElement) getParent()).getHandleMemento(buff);
 		escapeMementoName(buff, getElementName());
 		if (this.occurrenceCount > 1) {

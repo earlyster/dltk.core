@@ -2196,7 +2196,7 @@ public class ModelManager implements ISaveParticipant {
 	 *                If unable to create/open the ZipFile
 	 */
 	public IArchive getArchive(IPath path,
-			ArchiveProjectFragment archiveProjectFragment) throws CoreException {
+			IProjectFragment archiveProjectFragment) throws CoreException {
 		Map<IPath, IArchive> map;
 		IArchive zipFile;
 		if ((map = this.zipFiles.get()) != null
@@ -2247,7 +2247,7 @@ public class ModelManager implements ISaveParticipant {
 		}
 	}
 
-	public IArchive openArchive(ArchiveProjectFragment archiveProjectFragment,
+	public IArchive openArchive(IProjectFragment archiveProjectFragment,
 			File localFile) throws IOException {
 		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(archiveProjectFragment);

@@ -465,7 +465,7 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 		return this.getRawBuildpathEntry();
 	}
 
-	protected void getHandleMemento(StringBuffer buff) {
+	public void getHandleMemento(StringBuffer buff) {
 		((ModelElement) getParent()).getHandleMemento(buff);
 		buff.append(getHandleMementoDelimiter());
 		final IPath path = ((IResource) resource).getProjectRelativePath();
