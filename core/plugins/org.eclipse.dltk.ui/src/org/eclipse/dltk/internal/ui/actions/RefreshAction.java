@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.core.ProjectRefreshOperation;
@@ -153,21 +154,19 @@ public class RefreshAction extends SelectionDispatchAction {
 				// (IModelElement[]) modelElements.toArray(new
 				// IModelElement[modelElements.size()]),
 				// new SubProgressMonitor(monitor, resources.length));
-				for (Iterator<IProject> i = affectedProjects.iterator(); i
-						.hasNext();) {
-					if (!i.next().exists()) {
-						i.remove();
+				final List<IScriptProject> scriptProjects = new ArrayList<IScriptProject>(
+						affectedProjects.size());
+				for (IProject project : affectedProjects) {
+					if (project.exists()
+							&& DLTKLanguageManager.hasScriptNature(project)) {
+						scriptProjects.add(DLTKCore.create(project));
 					}
 				}
-				if (!affectedProjects.isEmpty()) {
-					final IScriptProject[] scriptProjects = new IScriptProject[affectedProjects
-							.size()];
-					int index = 0;
-					for (IProject project : affectedProjects) {
-						scriptProjects[index++] = DLTKCore.create(project);
-					}
+				if (!scriptProjects.isEmpty()) {
 					final ProjectRefreshOperation modelRefresh = new ProjectRefreshOperation(
-							scriptProjects);
+							scriptProjects
+									.toArray(new IScriptProject[scriptProjects
+											.size()]));
 					modelRefresh.run(progess.newChild(resources.length));
 				}
 			}
