@@ -57,9 +57,7 @@ public class ProjectIndexer2 implements IProjectIndexer {
 			if (fragment != null) {
 				AbstractIndexRequest request = new ExternalProjectFragmentRequest(
 						this, fragment, new ProgressJob(jobManager));
-				if (!jobManager.isJobWaiting(request)) {
-					jobManager.request(request);
-				}
+				jobManager.requestIfNotWaiting(request);
 			} else {
 				DLTKCore.warn(NLS.bind("Unknown project fragment: ''{0}''",
 						path));
@@ -77,9 +75,7 @@ public class ProjectIndexer2 implements IProjectIndexer {
 		}
 		ProjectRequest request = new ProjectRequest(this, project,
 				new ProgressJob(jobManager));
-		if (!jobManager.isJobWaiting(request)) {
-			jobManager.request(request);
-		}
+		jobManager.requestIfNotWaiting(request);
 	}
 
 	public void indexProjectFragment(IScriptProject project, IPath path) {
@@ -103,17 +99,13 @@ public class ProjectIndexer2 implements IProjectIndexer {
 				|| fragmentToIndex.isBuiltin()) {
 			ProjectRequest request = new ProjectRequest(this, project,
 					new ProgressJob(jobManager));
-			if (!jobManager.isJobWaiting(request)) {
-				jobManager.request(request);
-			}
+			jobManager.requestIfNotWaiting(request);
 			return;
 		}
 
 		ExternalProjectFragmentRequest request = new ExternalProjectFragmentRequest(
 				this, fragmentToIndex, new ProgressJob(jobManager));
-		if (!jobManager.isJobWaiting(request)) {
-			jobManager.request(request);
-		}
+		jobManager.requestIfNotWaiting(request);
 	}
 
 	public void indexSourceModule(ISourceModule module,
@@ -136,25 +128,19 @@ public class ProjectIndexer2 implements IProjectIndexer {
 	public void removeLibrary(IScriptProject project, IPath path) {
 		RemoveContainerRequest request = new RemoveContainerRequest(this, path,
 				null);
-		if (!jobManager.isJobWaiting(request)) {
-			jobManager.request(request);
-		}
+		jobManager.requestIfNotWaiting(request);
 	}
 
 	public void removeProject(IPath projectPath) {
 		RemoveContainerRequest request = new RemoveContainerRequest(this,
 				projectPath, null);
-		if (!jobManager.isJobWaiting(request)) {
-			jobManager.request(request);
-		}
+		jobManager.requestIfNotWaiting(request);
 	}
 
 	public void removeProjectFragment(IScriptProject project, IPath path) {
 		RemoveContainerRequest request = new RemoveContainerRequest(this, path,
 				null);
-		if (!jobManager.isJobWaiting(request)) {
-			jobManager.request(request);
-		}
+		jobManager.requestIfNotWaiting(request);
 	}
 
 	public void removeSourceModule(IScriptProject project, String path) {
@@ -177,9 +163,7 @@ public class ProjectIndexer2 implements IProjectIndexer {
 				}
 				ProjectRequest request = new ProjectRequest(this, projects[i],
 						new ProgressJob(jobManager));
-				if (!jobManager.isJobWaiting(request)) {
-					jobManager.request(request);
-				}
+				jobManager.requestIfNotWaiting(request);
 			}
 		} catch (Exception e) {
 			DLTKCore
