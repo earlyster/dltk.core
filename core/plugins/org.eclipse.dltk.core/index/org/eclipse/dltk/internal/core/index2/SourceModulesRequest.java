@@ -55,6 +55,10 @@ public class SourceModulesRequest extends AbstractIndexRequest {
 
 		Set<String> toRemove = new HashSet<String>();
 		Set<ISourceModule> toReindex = new HashSet<ISourceModule>();
+
+		if (progressJob != null) {
+			progressJob.subTask("Looking for source modules to index");
+		}
 		analyzeSourceModuleChanges(containerPath, sourceModules, toRemove,
 				toReindex);
 
