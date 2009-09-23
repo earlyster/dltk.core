@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuffer;
+import org.eclipse.dltk.core.IExternalSourceModule;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IProjectFragment;
@@ -47,7 +48,6 @@ import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.core.BufferManager;
 import org.eclipse.dltk.internal.core.BuiltinSourceModule;
 import org.eclipse.dltk.internal.core.ExternalProjectFragment;
-import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.ui.DLTKUI;
 import org.eclipse.dltk.internal.ui.DLTKUIMessages;
@@ -147,7 +147,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 						return new DocumentAdapter(workingCopy,
 								(IFile) resource);
 					}
-				} else if (original instanceof ExternalSourceModule) {
+				} else if (original instanceof IExternalSourceModule) {
 					IProjectFragment fragment = (IProjectFragment) original
 							.getAncestor(IModelElement.PROJECT_FRAGMENT);
 					if (!fragment.isArchive()) {

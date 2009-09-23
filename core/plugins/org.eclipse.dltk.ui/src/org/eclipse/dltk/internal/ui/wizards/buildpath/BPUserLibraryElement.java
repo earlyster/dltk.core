@@ -49,6 +49,10 @@ public class BPUserLibraryElement {
 		public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
 			return null;
 		}
+
+		public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
+			return null;
+		}
 	}
 	
 	

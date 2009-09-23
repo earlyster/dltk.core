@@ -785,8 +785,12 @@ public class ScriptElementLabels {
 				int nParams = 0;
 				if (getFlag(flags, M_PARAMETER_NAMES) && method.exists()) {
 					names = method.getParameters();
-					initializers = method.getParameterInitializers();
-					nParams = names.length;
+					if (names != null) {
+						initializers = method.getParameterInitializers();
+						nParams = names.length;
+					} else {
+						nParams = 0;
+					}
 				}
 
 				for (int i = 0; i < nParams; i++) {

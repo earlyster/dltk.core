@@ -71,6 +71,10 @@ public class BuildPathSupport {
 		public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
 			return fOriginal.getBuiltinProvider(project);
 		}
+
+		public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
+			return fOriginal.getRawBuildpathEntries(project);
+		}
 	}
 
 	/**

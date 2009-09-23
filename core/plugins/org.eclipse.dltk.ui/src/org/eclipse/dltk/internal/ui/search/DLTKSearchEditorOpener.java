@@ -10,10 +10,10 @@
 package org.eclipse.dltk.internal.ui.search;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.dltk.core.IExternalSourceModule;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.SourceModule;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.editor.ExternalStorageEditorInput;
@@ -116,10 +116,10 @@ public class DLTKSearchEditorOpener {
 		if (element instanceof IModelElement) {
 			IModelElement module = ((IModelElement) element)
 					.getAncestor(IModelElement.SOURCE_MODULE);
-			if (module instanceof ExternalSourceModule) {
-				String editorID = getEditorID((ExternalSourceModule) module);
+			if (module instanceof IExternalSourceModule) {
+				String editorID = getEditorID((IExternalSourceModule) module);
 				return showInEditor(wbPage, new ExternalStorageEditorInput(
-						(ExternalSourceModule) module), editorID);
+						(IExternalSourceModule) module), editorID);
 			} else if (module instanceof SourceModule) {
 				String editorID = getEditorID((SourceModule) module);
 				IFile file = getFile(element);

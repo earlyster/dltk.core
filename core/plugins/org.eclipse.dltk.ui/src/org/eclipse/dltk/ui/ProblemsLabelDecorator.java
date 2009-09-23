@@ -18,12 +18,12 @@ import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IExternalSourceModule;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.SourceModule;
 import org.eclipse.dltk.internal.ui.editor.ExternalStorageEditorInput;
 import org.eclipse.dltk.ui.viewsupport.IProblemChangedListener;
@@ -252,8 +252,9 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 				FileEditorInput editorInput= new FileEditorInput((IFile) original.getResource());
 				return DLTKUIPlugin.getDefault().getSourceModuleDocumentProvider().getAnnotationModel(editorInput);
 			}
-			else if( original instanceof ExternalSourceModule ) { 				
-				ExternalStorageEditorInput editorInput= new ExternalStorageEditorInput((ExternalSourceModule)original);
+ else if (original instanceof IExternalSourceModule) {
+				ExternalStorageEditorInput editorInput = new ExternalStorageEditorInput(
+						(IExternalSourceModule) original);
 				return DLTKUIPlugin.getDefault().getSourceModuleDocumentProvider().getAnnotationModel(editorInput);
 			}
 		}
