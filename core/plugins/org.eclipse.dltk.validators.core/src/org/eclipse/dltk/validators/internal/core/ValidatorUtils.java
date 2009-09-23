@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IExternalSourceModule;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IParent;
@@ -72,7 +73,7 @@ public class ValidatorUtils {
 				}
 			}
 			if (element.getElementType() == IModelElement.SOURCE_MODULE
-					&& !(element instanceof ExternalSourceModule || element instanceof BuiltinSourceModule)
+					&& !(element instanceof IExternalSourceModule || element instanceof BuiltinSourceModule)
 					&& element.getResource() != null) {
 				if (!elements.contains(element)) {
 					elements.add(element);
