@@ -272,7 +272,9 @@ public abstract class History {
 				if (type.getNodeName().equalsIgnoreCase(fInfoNodeName)) {
 					try {
 						Object object= createFromElement(type);
-						fHistory.put(getKey(object), object);
+						if (object != null) {
+							fHistory.put(getKey(object), object);
+						}
 					}
 					catch( Exception me ) {
 						if(DLTKCore.DEBUG) {
