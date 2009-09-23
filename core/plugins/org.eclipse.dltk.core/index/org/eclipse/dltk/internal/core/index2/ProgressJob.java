@@ -20,10 +20,9 @@ import org.eclipse.dltk.internal.core.util.Messages;
 
 public class ProgressJob extends Job {
 
-	private static transient boolean scheduled;
-	private static transient boolean running;
 	private JobManager jobManager;
 	private IProgressMonitor monitor;
+	private transient boolean running;
 
 	public ProgressJob(JobManager jobManager) {
 		super(Messages.manager_indexingInProgress);
@@ -31,10 +30,6 @@ public class ProgressJob extends Job {
 	}
 
 	protected IStatus run(IProgressMonitor monitor) {
-		if (running) {
-			// Allow only one progress job
-			return Status.CANCEL_STATUS;
-		}
 		running = true;
 		try {
 			this.monitor = monitor;
@@ -53,14 +48,13 @@ public class ProgressJob extends Job {
 			return Status.OK_STATUS;
 		} finally {
 			running = false;
-			scheduled = false;
+			this.monitor = null;
 		}
 	}
 
 	public void subTask(String message) {
-		if (!scheduled) {
+		if (!running) {
 			schedule();
-			scheduled = true;
 		}
 		if (monitor != null) {
 			monitor.subTask(message);

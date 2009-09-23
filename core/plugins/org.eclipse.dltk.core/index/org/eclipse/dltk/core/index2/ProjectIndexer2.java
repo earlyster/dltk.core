@@ -39,12 +39,14 @@ public class ProjectIndexer2 implements IProjectIndexer {
 	private final IndexManager jobManager = ModelManager.getModelManager()
 			.getIndexManager();
 
+	private final ProgressJob progressJob = new ProgressJob(jobManager);
+
 	public void indexLibrary(IScriptProject project, IPath path) {
 		try {
 			IProjectFragment fragment = project.findProjectFragment(path);
 			if (fragment != null) {
 				AbstractIndexRequest request = new ExternalProjectFragmentRequest(
-						this, fragment, new ProgressJob(jobManager));
+						this, fragment, progressJob);
 				jobManager.requestIfNotWaiting(request);
 			} else {
 				DLTKCore.warn(NLS.bind("Unknown project fragment: ''{0}''",
@@ -57,8 +59,7 @@ public class ProjectIndexer2 implements IProjectIndexer {
 	}
 
 	public void indexProject(IScriptProject project) {
-		ProjectRequest request = new ProjectRequest(this, project,
-				new ProgressJob(jobManager));
+		ProjectRequest request = new ProjectRequest(this, project, progressJob);
 		jobManager.requestIfNotWaiting(request);
 	}
 
@@ -78,13 +79,13 @@ public class ProjectIndexer2 implements IProjectIndexer {
 		if (fragmentToIndex == null || !fragmentToIndex.isExternal()
 				|| fragmentToIndex.isBuiltin()) {
 			ProjectRequest request = new ProjectRequest(this, project,
-					new ProgressJob(jobManager));
+					progressJob);
 			jobManager.requestIfNotWaiting(request);
 			return;
 		}
 
 		ExternalProjectFragmentRequest request = new ExternalProjectFragmentRequest(
-				this, fragmentToIndex, new ProgressJob(jobManager));
+				this, fragmentToIndex, progressJob);
 		jobManager.requestIfNotWaiting(request);
 	}
 

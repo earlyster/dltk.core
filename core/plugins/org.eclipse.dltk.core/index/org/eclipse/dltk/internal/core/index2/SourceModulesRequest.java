@@ -12,8 +12,10 @@
 package org.eclipse.dltk.internal.core.index2;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -54,7 +56,13 @@ public class SourceModulesRequest extends AbstractIndexRequest {
 		}
 
 		Set<String> toRemove = new HashSet<String>();
-		Set<ISourceModule> toReindex = new HashSet<ISourceModule>();
+		Set<ISourceModule> toReindex = new TreeSet<ISourceModule>(
+				new Comparator<ISourceModule>() {
+					public int compare(ISourceModule s1, ISourceModule s2) {
+						return s1.getPath().toString().compareTo(
+								s2.getPath().toString());
+					}
+				});
 
 		if (progressJob != null) {
 			progressJob.subTask("Looking for source modules to index");
