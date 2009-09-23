@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IExternalSourceModule;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatus;
@@ -251,8 +252,8 @@ public abstract class MultiOperation extends ModelOperation {
 						if (isMove() && cu.isWorkingCopy() && !cu.isPrimary())
 							error(IModelStatusConstants.INVALID_ELEMENT_TYPES, element);
 					}
-					else if( element instanceof ExternalSourceModule ) {
-						ExternalSourceModule cu = (ExternalSourceModule)element;
+ else if (element instanceof IExternalSourceModule) {
+					IExternalSourceModule cu = (IExternalSourceModule) element;
 						if (isMove() && cu.isWorkingCopy() && !cu.isPrimary())
 							error(IModelStatusConstants.INVALID_ELEMENT_TYPES, element);
 					}

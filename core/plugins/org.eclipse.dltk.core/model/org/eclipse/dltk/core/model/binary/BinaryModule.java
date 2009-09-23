@@ -1,17 +1,21 @@
 package org.eclipse.dltk.core.model.binary;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IExternalSourceModule;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelProvider;
 import org.eclipse.dltk.core.IProblemRequestor;
@@ -28,7 +32,8 @@ import org.eclipse.dltk.utils.CorePrinter;
 /**
  * @since 2.0
  */
-public class BinaryModule extends AbstractSourceModule implements IBinaryModule {
+public class BinaryModule extends AbstractSourceModule implements
+		IBinaryModule, IExternalSourceModule {
 	private SourceMapper sourceMapper = new SourceMapper();
 
 	protected BinaryModule(ModelElement parent, String name,
@@ -235,5 +240,22 @@ public class BinaryModule extends AbstractSourceModule implements IBinaryModule 
 
 	public char[] getFileName() {
 		return this.getPath().toOSString().toCharArray();
+	}
+
+	@Override
+	public IPath getPath() {
+		return this.getParent().getPath().append(this.getElementName());
+	}
+
+	public InputStream getContents() throws CoreException {
+		return new ByteArrayInputStream(getSource().getBytes());
+	}
+
+	public IPath getFullPath() {
+		return getPath();
+	}
+
+	public String getName() {
+		return getPath().lastSegment();
 	}
 }

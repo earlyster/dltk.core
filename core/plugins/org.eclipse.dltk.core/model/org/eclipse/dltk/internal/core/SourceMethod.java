@@ -75,6 +75,9 @@ public class SourceMethod extends NamedMember implements IMethod {
 	 */
 	public boolean isConstructor() throws ModelException {
 		SourceMethodElementInfo info = (SourceMethodElementInfo) getElementInfo();
+		if (info == null) {
+			return false;
+		}
 		return info.isConstructor();
 	}
 

@@ -96,6 +96,11 @@ public interface IBuildpathContainer {
     IBuildpathEntry[] getBuildpathEntries(IScriptProject project);
 
 	/**
+	 * @since 2.0
+	 */
+	IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project);
+
+	/**
 	 * Answers a readable description of this container
 	 * 
 	 * @return String - a string description of the container

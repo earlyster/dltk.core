@@ -9,5 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
-public interface IExternalSourceModule extends ISourceModule {
+import org.eclipse.core.resources.IStorage;
+
+public interface IExternalSourceModule extends ISourceModule, IStorage {
 }

@@ -28,7 +28,7 @@ public abstract class BinaryMember extends NamedMember {
 
 	@Override
 	public ISourceRange getSourceRange() throws ModelException {
-		return super.getSourceRange();
+		return getSourceMapper().getSourceRange(this);
 	}
 
 	public SourceMapper getSourceMapper() {

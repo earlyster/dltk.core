@@ -22,7 +22,7 @@ import org.eclipse.dltk.core.WorkingCopyOwner;
  * Base class for all external source module representations.
  */
 public abstract class AbstractExternalSourceModule extends AbstractSourceModule
-		implements IExternalSourceModule, IStorage {
+		implements IExternalSourceModule {
 
 	protected AbstractExternalSourceModule(ModelElement parent, String name,
 			WorkingCopyOwner owner) {

@@ -162,6 +162,10 @@ public class ModelManager implements ISaveParticipant {
 		public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
 			return null;
 		}
+
+		public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
+			return null;
+		}
 	};
 	/*
 	 * A HashSet that contains the IScriptProject whose buildpath is being
@@ -1400,6 +1404,11 @@ public class ModelManager implements ISaveParticipant {
 					public IBuiltinModuleProvider getBuiltinProvider(
 							IScriptProject project) {
 						return null;
+					}
+
+					public IBuildpathEntry[] getRawBuildpathEntries(
+							IScriptProject project) {
+						return containerEntries;
 					}
 				};
 				if (addToContainerValues) {
@@ -2826,6 +2835,10 @@ public class ModelManager implements ISaveParticipant {
 
 		public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
 			return null;
+		}
+
+		public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
+			return entries;
 		}
 	}
 

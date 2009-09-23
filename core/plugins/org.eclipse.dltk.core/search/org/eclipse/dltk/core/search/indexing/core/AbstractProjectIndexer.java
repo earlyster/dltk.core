@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IExternalSourceModule;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
@@ -24,7 +25,6 @@ import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.index.Index;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
-import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 import org.eclipse.dltk.internal.core.search.LazyDLTKSearchDocument;
@@ -142,7 +142,7 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 		final IPath path = module.getPath();
 		final DLTKSearchDocument document = new LazyDLTKSearchDocument(path
 				.toString(), containerPath, null, participant,
-				module instanceof ExternalSourceModule, module
+				module instanceof IExternalSourceModule, module
 						.getScriptProject().getProject());
 		document.toolkit = toolkit;
 		// try {

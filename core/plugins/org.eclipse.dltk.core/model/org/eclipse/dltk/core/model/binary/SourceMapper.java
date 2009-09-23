@@ -27,6 +27,9 @@ public class SourceMapper {
 	private Map<IModelElement, Range> typeNameRanges = new HashMap<IModelElement, Range>();
 
 	private ISourceRange getRange(Range range) {
+		if (range == null) {
+			return new SourceRange(0, 0);
+		}
 		return new SourceRange(range.start, range.end - range.start + 1);
 	}
 

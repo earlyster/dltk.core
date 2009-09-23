@@ -1,6 +1,7 @@
 package org.eclipse.dltk.core.search.indexing.core;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.core.IExternalSourceModule;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.ISourceModule;
@@ -19,14 +20,21 @@ public class SourceIndexUtil {
 		IProjectFragment fragment = (IProjectFragment) module
 				.getAncestor(IModelElement.PROJECT_FRAGMENT);
 		if (fragment.isArchive()) {
-			if (module instanceof ExternalSourceModule) {
+			if (module instanceof IExternalSourceModule) {
 				ExternalSourceModule ext = (ExternalSourceModule) module;
 				IPath fullPath = ext.getFullPath();
 				return fullPath.toString();
 			}
+			if (module.isBinary()) {
+				IPath modulePath = module.getPath();
+				return modulePath.removeFirstSegments(
+						containerPath.segmentCount()).setDevice(null)
+						.toString();
+			}
 		}
 		if (module instanceof ExternalSourceModule
-				|| module instanceof BuiltinSourceModule) {
+				|| module instanceof BuiltinSourceModule
+				|| ((ISourceModule) module).isBinary()) {
 			return path.removeFirstSegments(containerPath.segmentCount())
 					.setDevice(null).toString();
 		} else if (module instanceof SourceModule) {

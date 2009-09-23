@@ -70,8 +70,6 @@ import org.eclipse.dltk.internal.compiler.impl.ITypeRequestor;
 import org.eclipse.dltk.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.dltk.internal.compiler.lookup.SourceModuleScope;
 import org.eclipse.dltk.internal.core.ArchiveProjectFragment;
-import org.eclipse.dltk.internal.core.BuiltinSourceModule;
-import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ModelStatus;
@@ -480,13 +478,8 @@ public class MatchLocator implements ITypeRequestor {
 	protected IType createTypeHandle(String simpleTypeName) {
 		Openable openable = this.currentPossibleMatch.openable;
 		IType type = null;
-		if (openable instanceof SourceModule)
-			type = ((SourceModule) openable).getType(simpleTypeName);
-		else if (openable instanceof ExternalSourceModule) {
-			type = ((ExternalSourceModule) openable).getType(simpleTypeName);
-		} else if (openable instanceof BuiltinSourceModule) {
-			type = ((BuiltinSourceModule) openable).getType(simpleTypeName);
-		}
+		if (openable instanceof ISourceModule)
+			type = ((ISourceModule) openable).getType(simpleTypeName);
 		resolveDuplicates(type);
 		return type;
 	}
@@ -507,12 +500,8 @@ public class MatchLocator implements ITypeRequestor {
 	protected IMethod createMethodHandle(String simpleTypeName) {
 		Openable openable = this.currentPossibleMatch.openable;
 		IMethod method = null;
-		if (openable instanceof SourceModule)
-			method = ((SourceModule) openable).getMethod(simpleTypeName);
-		if (openable instanceof ExternalSourceModule) {
-			method = ((ExternalSourceModule) openable)
-					.getMethod(simpleTypeName);
-		}
+		if (openable instanceof ISourceModule)
+			method = ((ISourceModule) openable).getMethod(simpleTypeName);
 		resolveDuplicates(method);
 		return method;
 	}
@@ -523,10 +512,8 @@ public class MatchLocator implements ITypeRequestor {
 	protected IField createFieldHandle(String simpleTypeName) {
 		Openable openable = this.currentPossibleMatch.openable;
 		IField field;
-		if (openable instanceof SourceModule) {
+		if (openable instanceof ISourceModule) {
 			field = ((SourceModule) openable).getField(simpleTypeName);
-		} else if (openable instanceof ExternalSourceModule) {
-			field = ((ExternalSourceModule) openable).getField(simpleTypeName);
 		} else {
 			field = null;
 		}
