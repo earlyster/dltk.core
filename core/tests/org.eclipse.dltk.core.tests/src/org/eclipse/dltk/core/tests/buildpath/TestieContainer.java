@@ -43,4 +43,9 @@ public class TestieContainer implements IBuildpathContainer {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
