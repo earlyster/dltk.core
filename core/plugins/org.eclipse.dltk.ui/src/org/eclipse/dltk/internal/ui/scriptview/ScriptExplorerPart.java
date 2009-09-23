@@ -473,7 +473,7 @@ public class ScriptExplorerPart extends ViewPart implements
 			fIsCurrentLayoutFlat = fDialogSettings
 					.getInt(ScriptExplorerPart.TAG_LAYOUT) == ScriptExplorerPart.FLAT_LAYOUT;
 		} catch (NumberFormatException e) {
-			fIsCurrentLayoutFlat = true;
+			fIsCurrentLayoutFlat = false;
 		}
 
 		try {
@@ -522,8 +522,8 @@ public class ScriptExplorerPart extends ViewPart implements
 
 	private void restoreLayoutState(IMemento memento) {
 		Integer layoutState = memento.getInteger(ScriptExplorerPart.TAG_LAYOUT);
-		fIsCurrentLayoutFlat = layoutState == null
-				|| layoutState.intValue() == ScriptExplorerPart.FLAT_LAYOUT;
+		fIsCurrentLayoutFlat = layoutState != null
+				&& layoutState.intValue() == ScriptExplorerPart.FLAT_LAYOUT;
 
 		// on by default
 		Integer groupLibraries = memento
