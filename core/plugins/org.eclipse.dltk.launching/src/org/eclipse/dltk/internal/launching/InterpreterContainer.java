@@ -209,6 +209,16 @@ public class InterpreterContainer implements IBuildpathContainer {
 	}
 
 	/**
+	 * @since 2.0
+	 */
+	public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
+		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(fInterpreterInstall);
+		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>();
+		entries.addAll(Arrays.asList(buildpathEntries));
+		return entries.toArray(new IBuildpathEntry[entries.size()]);
+	}
+
+	/**
 	 * @see IBuildpathContainer#getDescription()
 	 */
 	public String getDescription(IScriptProject project) {

@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IExternalSourceModule;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IProjectFragment;
@@ -28,7 +29,6 @@ import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
-import org.eclipse.dltk.internal.core.ExternalSourceModule;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.launching.IPathEquality;
 import org.eclipse.dltk.internal.launching.PathEqualityUtils;
@@ -68,10 +68,10 @@ public class ProjectSourceLookup {
 			if (element.getElementType() == IModelElement.SOURCE_MODULE) {
 				ISourceModule module = (ISourceModule) element;
 				IPath modulePath = module.getPath();
-				if (module instanceof ExternalSourceModule) {
+				if (module instanceof IExternalSourceModule) {
 					IEnvironment environment = EnvironmentManager
 							.getEnvironment(element);
-					ExternalSourceModule mdl = (ExternalSourceModule) module;
+					IExternalSourceModule mdl = (IExternalSourceModule) module;
 					modulePath = mdl.getFullPath();
 					if (!EnvironmentPathUtils.isFull(modulePath))
 						modulePath = EnvironmentPathUtils.getFullPath(
