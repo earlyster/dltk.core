@@ -22,6 +22,8 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IDLTKLanguageToolkitExtension;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.index.sql.Container;
@@ -80,6 +82,9 @@ public class SqlIndexer extends AbstractIndexer {
 	}
 
 	public void indexDocument(ISourceModule sourceModule) {
+
+		PerformanceNode p = RuntimePerformanceMonitor.begin();
+
 		try {
 			DbFactory dbFactory = DbFactory.getInstance();
 			connection = dbFactory.createConnection();
@@ -138,6 +143,9 @@ public class SqlIndexer extends AbstractIndexer {
 			} finally {
 				connection.commit();
 				connection.close();
+
+				p.done(natureId, "SQL Index Document", sourceModule
+						.getSourceRange().getLength());
 			}
 		} catch (Exception e) {
 			SqlIndex
