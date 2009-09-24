@@ -103,8 +103,9 @@ public abstract class ModelElement extends PlatformObject implements
 	public boolean exists() {
 
 		try {
-			getElementInfo();
-			return true;
+			if (getElementInfo() != null) {
+				return true;
+			}
 		} catch (ModelException e) {
 			// element doesn't exist: return false
 		}
