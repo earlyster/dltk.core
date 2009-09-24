@@ -64,9 +64,6 @@ public class SourceModulesRequest extends AbstractIndexRequest {
 					}
 				});
 
-		if (progressJob != null) {
-			progressJob.subTask("Looking for source modules to index");
-		}
 		analyzeSourceModuleChanges(containerPath, sourceModules, toRemove,
 				toReindex);
 
