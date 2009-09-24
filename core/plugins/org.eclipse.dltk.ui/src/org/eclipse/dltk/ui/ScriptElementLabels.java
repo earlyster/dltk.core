@@ -42,6 +42,8 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 /**
  * <code>ScriptElementLabels</code> provides helper methods to render names of
  * Script elements.
+ * 
+ * @since 2.0
  */
 public class ScriptElementLabels {
 	/**
@@ -339,7 +341,10 @@ public class ScriptElementLabels {
 
 	public final static String BUILTINS_FRAGMENT = "(builtins)"; //$NON-NLS-1$
 
-	private final static long QUALIFIER_FLAGS = P_COMPRESSED | USE_RESOLVED;
+	/**
+	 * @since 2.0
+	 */
+	protected final static long QUALIFIER_FLAGS = P_COMPRESSED | USE_RESOLVED;
 
 	private static ScriptElementLabels sInstanceO = new ScriptElementLabels() {
 	};
@@ -420,13 +425,25 @@ public class ScriptElementLabels {
 	 * Package name compression
 	 */
 
-	private static String fgPkgNamePrefix;
+	/**
+	 * @since 2.0
+	 */
+	protected static String fgPkgNamePrefix;
 
-	private static String fgPkgNamePostfix;
+	/**
+	 * @since 2.0
+	 */
+	protected static String fgPkgNamePostfix;
 
-	private static int fgPkgNameChars;
+	/**
+	 * @since 2.0
+	 */
+	protected static int fgPkgNameChars;
 
-	private static int fgPkgNameLength = -1;
+	/**
+	 * @since 2.0
+	 */
+	protected static int fgPkgNameLength = -1;
 
 	/**
 	 * Returns the label of the given object. The object must be of type
@@ -550,7 +567,7 @@ public class ScriptElementLabels {
 			getTypeLabel((IType) element, flags, buf);
 			break;
 		case IModelElement.SOURCE_MODULE:
-			getSourceModel((ISourceModule) element, flags, buf);
+			getSourceModule((ISourceModule) element, flags, buf);
 			break;
 		case IModelElement.SCRIPT_PROJECT:
 		case IModelElement.SCRIPT_MODEL:
@@ -579,7 +596,7 @@ public class ScriptElementLabels {
 				.getAncestor(IModelElement.SOURCE_MODULE);
 		if (sourceModule != null && getFlag(flags, APPEND_FILE)) {
 			buf.append(CONCAT_STRING);
-			getSourceModel(sourceModule, flags, buf);
+			getSourceModule(sourceModule, flags, buf);
 		}
 
 		if (root != null && getFlag(flags, APPEND_ROOT_PATH)) {
@@ -640,7 +657,10 @@ public class ScriptElementLabels {
 		}
 	}
 
-	protected void getSourceModel(ISourceModule module, long flags,
+	/**
+	 * @since 2.0
+	 */
+	protected void getSourceModule(ISourceModule module, long flags,
 			StringBuffer buf) {
 		if (getFlag(flags, CU_QUALIFIED)) {
 			IScriptFolder pack = (IScriptFolder) module.getParent();
@@ -756,7 +776,15 @@ public class ScriptElementLabels {
 	}
 
 	protected void getFieldLabel(IField field, long flags, StringBuffer buf) {
-
+		// qualification
+		if (getFlag(flags, F_FULLY_QUALIFIED)) {
+			IType type = field.getDeclaringType();
+			if (type != null) {
+				getTypeLabel(type, T_FULLY_QUALIFIED
+						| (flags & QUALIFIER_FLAGS), buf);
+				buf.append(getTypeDelimiter(type));
+			}
+		}
 		buf.append(field.getElementName());
 		// TODO: Add type detection here.
 	}
@@ -844,7 +872,7 @@ public class ScriptElementLabels {
 		else {
 			if (root.isBuiltin()) {
 				buf.append(BUILTINS_FRAGMENT);
-			} else if (root.isExternal()) {
+			} else if (root.isExternal() && !root.isBinary()) {
 				getExternalFolderLabel(root, flags, buf);
 			} else {
 				getFolderLabel(root, flags, buf);
