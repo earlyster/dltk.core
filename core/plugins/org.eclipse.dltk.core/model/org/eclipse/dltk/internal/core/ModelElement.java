@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -103,11 +102,13 @@ public abstract class ModelElement extends PlatformObject implements
 	public boolean exists() {
 
 		try {
-			if (getElementInfo() != null) {
-				return true;
-			}
+			getElementInfo();
+			return true;
 		} catch (ModelException e) {
 			// element doesn't exist: return false
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 		return false;
 	}
@@ -194,11 +195,6 @@ public abstract class ModelElement extends PlatformObject implements
 			}
 			if (!hadTemporaryCache) {
 				manager.putInfos(this, newElements);
-			}
-		} catch (CoreException e) {
-			// DLTKCore.error("openWhemClosed error", e);
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
 			}
 		} finally {
 			if (!hadTemporaryCache) {
@@ -338,7 +334,7 @@ public abstract class ModelElement extends PlatformObject implements
 		int size = children.length;
 		List<IModelElement> list = new ArrayList<IModelElement>(size);
 		for (int i = 0; i < size; ++i) {
-			IModelElement elt = (IModelElement) children[i];
+			IModelElement elt = children[i];
 			if (elt.getElementType() == type) {
 				list.add(elt);
 			}
