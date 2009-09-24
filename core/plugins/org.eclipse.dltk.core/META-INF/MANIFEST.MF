@@ -13,6 +13,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore.xmi;bundle-version="2.4.0"
 Eclipse-LazyStart: true
 Export-Package: org.eclipse.dltk.ast,
+ org.eclipse.dltk.ast.binary,
  org.eclipse.dltk.ast.declarations,
  org.eclipse.dltk.ast.expressions,
  org.eclipse.dltk.ast.parser,

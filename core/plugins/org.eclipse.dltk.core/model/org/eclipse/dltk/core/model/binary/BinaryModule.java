@@ -16,17 +16,22 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IExternalSourceModule;
+import org.eclipse.dltk.core.IField;
+import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelProvider;
 import org.eclipse.dltk.core.IProblemRequestor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
+import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.AbstractSourceModule;
+import org.eclipse.dltk.internal.core.MementoModelElementUtil;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelProviderManager;
 import org.eclipse.dltk.internal.core.OpenableElementInfo;
+import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.utils.CorePrinter;
 
 /**
@@ -257,5 +262,58 @@ public class BinaryModule extends AbstractSourceModule implements
 
 	public String getName() {
 		return getPath().lastSegment();
+	}
+
+	public IModelElement getHandleFromMemento(String token,
+			MementoTokenizer memento, WorkingCopyOwner workingCopyOwner) {
+		switch (token.charAt(0)) {
+		case JEM_USER_ELEMENT:
+			return MementoModelElementUtil.getHandleFromMemento(memento, this,
+					workingCopyOwner);
+		}
+
+		return null;
+	}
+
+	@Override
+	public IType getType(String typeName) {
+		try {
+			IType[] types = getTypes();
+			for (IType type : types) {
+				if (type.getElementName().equals(typeName)) {
+					return type;
+				}
+			}
+		} catch (ModelException e) {
+		}
+		return new BinaryType(parent, typeName);
+	}
+
+	@Override
+	public IMethod getMethod(String selector) {
+		try {
+			IMethod[] methods = getMethods();
+			for (IMethod method : methods) {
+				if (method.getElementName().equals(selector)) {
+					return method;
+				}
+			}
+		} catch (ModelException e) {
+		}
+		return new BinaryMethod(parent, selector);
+	}
+
+	@Override
+	public IField getField(String fieldName) {
+		try {
+			IField[] fields = getFields();
+			for (IField field : fields) {
+				if (field.getElementName().equals(fieldName)) {
+					return field;
+				}
+			}
+		} catch (ModelException e) {
+		}
+		return new BinaryField(parent, fieldName);
 	}
 }

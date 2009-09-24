@@ -23,6 +23,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IFileHierarchyInfo;
 import org.eclipse.dltk.core.IFileHierarchyResolver;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.index2.search.ModelAccess;
@@ -79,15 +80,53 @@ public class HierarchyResolver {
 						Openable openable = handleFactory.createOpenable(path,
 								hierarchyBuilder.hierarchy.scope);
 						ModelElement parent = openable;
+						boolean binary = false;
+						if (openable instanceof ISourceModule) {
+							binary = ((ISourceModule) openable).isBinary();
+						}
 						if (enclosingTypeNames != null) {
-							for (int j = 0; j < enclosingTypeNames.length; ++j) {
-								parent = new FakeType(parent, new String(
-										enclosingTypeNames[j]));
+							if (!binary) {
+								for (int j = 0; j < enclosingTypeNames.length; ++j) {
+									parent = new FakeType(parent, new String(
+											enclosingTypeNames[j]));
+								}
+							} else {
+								for (int j = 0; j < enclosingTypeNames.length; ++j) {
+									if (parent instanceof ISourceModule) {
+										parent = (ModelElement) ((ISourceModule) parent)
+												.getType(new String(
+														enclosingTypeNames[j]));
+									} else if (parent instanceof IType) {
+										parent = (ModelElement) ((IType) parent)
+												.getType(new String(
+														enclosingTypeNames[j]));
+									}
+									if (parent == null) {
+										break;
+									}
+								}
 							}
 						}
-						FakeType type = new FakeType(parent, new String(
-								simpleTypeName), modifiers);
-						result.add(type);
+						if (parent != null) {
+							if (binary) {
+								IType type = null;
+								if (parent instanceof ISourceModule) {
+									type = ((ISourceModule) parent)
+											.getType(new String(simpleTypeName));
+								} else if (parent instanceof IType) {
+									type = ((IType) parent).getType(new String(
+											simpleTypeName));
+								}
+								if (type != null) {
+									result.add(type);
+								}
+
+							} else {
+								FakeType type = new FakeType(parent,
+										new String(simpleTypeName), modifiers);
+								result.add(type);
+							}
+						}
 					}
 				}
 			}

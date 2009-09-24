@@ -56,6 +56,9 @@ public class SourceType extends NamedMember implements IType {
 	public String[] getSuperClasses() throws ModelException {
 		SourceTypeElementInfo info = (SourceTypeElementInfo) this
 				.getElementInfo();
+		if (info == null) {
+			return new String[0];
+		}
 		return info.superclassNames;
 	}
 

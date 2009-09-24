@@ -111,6 +111,9 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterField(FieldInfo info) {
 		this.baseRequestor.enterField(info);
 		try {
@@ -146,6 +149,9 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		out.writeInt(info.declarationStart);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean enterFieldCheckDuplicates(FieldInfo info) {
 		boolean result = this.baseRequestor.enterFieldCheckDuplicates(info);
 		try {
@@ -158,6 +164,9 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		return result;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean enterFieldWithParentType(FieldInfo info, String parentName,
 			String delimiter) {
 		boolean result = this.baseRequestor.enterFieldWithParentType(info,
@@ -174,6 +183,9 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		return result;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterMethod(MethodInfo info) {
 		this.baseRequestor.enterMethod(info);
 		try {
@@ -184,6 +196,9 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterMethodRemoveSame(MethodInfo info) {
 		this.baseRequestor.enterMethodRemoveSame(info);
 		try {
@@ -194,6 +209,9 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean enterMethodWithParentType(MethodInfo info,
 			String parentName, String delimiter) {
 		boolean result = this.baseRequestor.enterMethodWithParentType(info,
@@ -227,6 +245,9 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterType(TypeInfo info) {
 		this.baseRequestor.enterType(info);
 		try {

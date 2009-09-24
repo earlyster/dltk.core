@@ -546,4 +546,8 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 	public IScriptFolder getScriptFolder(String[] pkgName) {
 		return this.getScriptFolder(ScriptModelUtil.toPath(pkgName));
 	}
+
+	public boolean isBinary() {
+		return false;
+	}
 }

@@ -105,18 +105,30 @@ public class MixinSourceElementRequestor implements ISourceElementRequestor {
 	public void acceptTypeReference(char[] typeName, int sourcePosition) {
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean enterFieldCheckDuplicates(FieldInfo info) {
 		return false;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean enterFieldWithParentType(FieldInfo info, String parentName,
 			String delimiter) {
 		return false;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterMethodRemoveSame(MethodInfo info) {
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean enterMethodWithParentType(MethodInfo info,
 			String parentName, String delimiter) {
 		return false;
@@ -150,6 +162,9 @@ public class MixinSourceElementRequestor implements ISourceElementRequestor {
 		exitElement();
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterField(FieldInfo info) {
 		enterElement(info.name);
 		IMixinRequestor.ElementInfo elInfo = new IMixinRequestor.ElementInfo();
@@ -160,6 +175,9 @@ public class MixinSourceElementRequestor implements ISourceElementRequestor {
 		requestor.reportElement(elInfo);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterMethod(MethodInfo info) {
 		enterElement(info.name);
 		IMixinRequestor.ElementInfo elInfo = new IMixinRequestor.ElementInfo();
@@ -170,6 +188,9 @@ public class MixinSourceElementRequestor implements ISourceElementRequestor {
 		requestor.reportElement(elInfo);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void enterType(TypeInfo info) {
 		enterElement(info.name);
 		IMixinRequestor.ElementInfo elInfo = new IMixinRequestor.ElementInfo();

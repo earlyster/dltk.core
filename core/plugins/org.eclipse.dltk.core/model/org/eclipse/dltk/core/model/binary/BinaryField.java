@@ -22,11 +22,6 @@ public class BinaryField extends BinaryMember implements IField {
 		return FIELD;
 	}
 
-	@Override
-	protected char getHandleMementoDelimiter() {
-		return JEM_USER_ELEMENT;
-	}
-
 	public boolean equals(Object o) {
 		if (!(o instanceof BinaryField)) {
 			return false;

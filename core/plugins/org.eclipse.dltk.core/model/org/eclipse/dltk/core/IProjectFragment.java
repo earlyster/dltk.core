@@ -346,5 +346,10 @@ public interface IProjectFragment extends IParent, IModelElement, IOpenable {
 	 *
 	 */
 	void move(IPath destination, int updateResourceFlags, int updateModelFlags, IBuildpathEntry sibling, IProgressMonitor monitor) throws ModelException;
+
+	/**
+	 * @since 2.0
+	 */
+	boolean isBinary();
 	
 }

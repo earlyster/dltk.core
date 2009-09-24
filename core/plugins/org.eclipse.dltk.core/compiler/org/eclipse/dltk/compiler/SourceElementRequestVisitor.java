@@ -22,6 +22,7 @@ import org.eclipse.dltk.ast.expressions.Expression;
 import org.eclipse.dltk.ast.expressions.Literal;
 import org.eclipse.dltk.ast.expressions.StringLiteral;
 import org.eclipse.dltk.ast.statements.Statement;
+import org.eclipse.dltk.compiler.IElementRequestor.TypeInfo;
 
 public class SourceElementRequestVisitor extends ASTVisitor {
 
@@ -90,6 +91,8 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 	/**
 	 * Called before method info is propogated to the source element requestor.
 	 * This is a last chance to modify the method info
+	 * 
+	 * @since 2.0
 	 */
 	protected void modifyMethodInfo(MethodDeclaration methodDeclaration,
 			ISourceElementRequestor.MethodInfo mi) {
@@ -98,9 +101,10 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 	/**
 	 * Called before method info is propogated to the source element requestor.
 	 * This is a last chance to modify the method info
+	 * 
+	 * @since 2.0
 	 */
-	protected void modifyClassInfo(TypeDeclaration typeDeclaration,
-			ISourceElementRequestor.TypeInfo ti) {
+	protected void modifyClassInfo(TypeDeclaration typeDeclaration, TypeInfo ti) {
 	}
 
 	/**

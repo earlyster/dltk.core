@@ -7,8 +7,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.internal.core.MementoModelElementUtil;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.NamedMember;
+import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 
 /**
  * @since 2.0
@@ -60,5 +63,16 @@ public abstract class BinaryMember extends NamedMember {
 
 	public void removeChild(IModelElement element) {
 		this.children.remove(element);
+	}
+
+	public IModelElement getHandleFromMemento(String token,
+			MementoTokenizer memento, WorkingCopyOwner workingCopyOwner) {
+		switch (token.charAt(0)) {
+		case JEM_USER_ELEMENT:
+			return MementoModelElementUtil.getHandleFromMemento(memento, this,
+					workingCopyOwner);
+		}
+
+		return null;
 	}
 }

@@ -26,11 +26,6 @@ public class BinaryMethod extends BinaryMember implements IMethod {
 		return METHOD;
 	}
 
-	@Override
-	protected char getHandleMementoDelimiter() {
-		return JEM_USER_ELEMENT;
-	}
-
 	public boolean equals(Object o) {
 		if (!(o instanceof BinaryMethod)) {
 			return false;
