@@ -25,6 +25,11 @@ public abstract class BinaryMember extends NamedMember {
 	}
 
 	@Override
+	public boolean exists() {
+		return true;
+	}
+
+	@Override
 	protected char getHandleMementoDelimiter() {
 		return JEM_USER_ELEMENT;
 	}
