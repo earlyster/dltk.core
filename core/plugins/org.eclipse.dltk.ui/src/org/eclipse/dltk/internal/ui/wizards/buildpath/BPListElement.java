@@ -59,6 +59,8 @@ public class BPListElement {
 
 	private IPath fPath, fOrginalPath;
 
+	private IPath sourcePath, sourceRootPath;
+
 	private IResource fResource;
 
 	private boolean fIsExported;
@@ -175,6 +177,8 @@ public class BPListElement {
 
 		if (fCachedEntry == null) {
 			fCachedEntry = newBuildpathEntry();
+			fCachedEntry.setSourceAttachmentPath(getSourcePath());
+			fCachedEntry.setSourceAttachmentRootPath(getSourceRootPath());
 		}
 		return fCachedEntry;
 	}
@@ -242,6 +246,22 @@ public class BPListElement {
 	public IPath getPath() {
 
 		return fPath;
+	}
+
+	public IPath getSourcePath() {
+		return sourcePath;
+	}
+
+	public IPath getSourceRootPath() {
+		return sourceRootPath;
+	}
+
+	public void setSourcePath(IPath sourcePath) {
+		this.sourcePath = sourcePath;
+	}
+
+	public void setSourceRootPath(IPath sourceRootPath) {
+		this.sourceRootPath = sourceRootPath;
 	}
 
 	/**
@@ -626,6 +646,8 @@ public class BPListElement {
 		elem.setAttribute(ACCESSRULES, curr.getAccessRules());
 		elem.setAttribute(COMBINE_ACCESSRULES, new Boolean(curr
 				.combineAccessRules()));
+		elem.setSourcePath(curr.getSourceAttachmentPath());
+		elem.setSourceRootPath(curr.getSourceAttachmentRootPath());
 
 		IBuildpathAttribute[] extraAttributes = curr.getExtraAttributes();
 		for (int i = 0; i < extraAttributes.length; i++) {
