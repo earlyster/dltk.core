@@ -85,7 +85,9 @@ public abstract class SourceRefElement extends ModelElement implements
 	 */
 	public ISourceRange getSourceRange() throws ModelException {
 		SourceRefElementInfo info = (SourceRefElementInfo) getElementInfo();
-		return info.getSourceRange();
+		if (info != null)
+			return info.getSourceRange();
+		return null;
 	}
 
 	public IPath getPath() {
