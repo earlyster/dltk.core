@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.dltk.rse.ui;singleton:=true
 Bundle-Version: 2.0.0.qualifier
-Bundle-Activator: org.eclipse.dltk.rse.ui.Activator
+Bundle-Activator: org.eclipse.dltk.internal.ui.rse.DLTKRSEUI
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
@@ -18,6 +18,5 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.rse.files.ui,
  org.eclipse.rse.subsystems.files.core
 Bundle-ActivationPolicy: lazy
-Export-Package: org.eclipse.dltk.internal.ui.rse,
- org.eclipse.dltk.rse.ui
+Export-Package: org.eclipse.dltk.internal.ui.rse;x-internal:=true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
