@@ -49,12 +49,14 @@ public class H2DbFactory extends DbFactory {
 
 		int cacheSize = Platform.getPreferencesService().getInt(
 				H2Index.PLUGIN_ID, H2IndexPreferences.DB_CACHE_SIZE, 0, null);
+		String cacheType = Platform.getPreferencesService()
+				.getString(H2Index.PLUGIN_ID, H2IndexPreferences.DB_CACHE_TYPE,
+						null, null);
 
-		String connString = new StringBuilder("jdbc:h2:")
-				.append(dbPath.append(DB_NAME).toOSString())
-				.append(
-						";UNDO_LOG=0;LOCK_MODE=0;LOG=0;CACHE_TYPE=SOFT_LRU;CACHE_SIZE=")
-				.append(cacheSize).toString();
+		String connString = new StringBuilder("jdbc:h2:").append(
+				dbPath.append(DB_NAME).toOSString()).append(
+				";UNDO_LOG=0;LOCK_MODE=0;LOG=0;CACHE_TYPE=").append(cacheType)
+				.append(";CACHE_SIZE=").append(cacheSize).toString();
 
 		pool = JdbcConnectionPool.create(connString, DB_USER, DB_PASS);
 

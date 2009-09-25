@@ -19,6 +19,13 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 public class H2IndexPreferences extends AbstractPreferenceInitializer {
 
 	/**
+	 * H2 Database index cache type.
+	 * 
+	 * @see http://www.h2database.com/html/features.html#cache_settings
+	 */
+	public static final String DB_CACHE_TYPE = "cacheType"; //$NON-NLS-1$
+
+	/**
 	 * H2 Database index cache size.
 	 * 
 	 * @see http://www.h2database.com/html/features.html#cache_settings
@@ -36,5 +43,6 @@ public class H2IndexPreferences extends AbstractPreferenceInitializer {
 				.getNode(H2Index.PLUGIN_ID);
 
 		p.putInt(DB_CACHE_SIZE, 64000);
+		p.put(DB_CACHE_TYPE, "LRU");
 	}
 }
