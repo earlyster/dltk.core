@@ -70,7 +70,7 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 
 	private static class ReadLinkOperation extends Operation {
 		protected IPath path;
-		protected String link = "";
+		protected String link;
 
 		public ReadLinkOperation(IPath path) {
 			this.path = path;
