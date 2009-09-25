@@ -261,4 +261,24 @@ public interface IBuildpathEntry {
 	boolean isExternal();
 
 	public boolean isContainerEntry();
+
+	/**
+	 * @since 2.0
+	 */
+	public IPath getSourceAttachmentPath();
+
+	/**
+	 * @since 2.0
+	 */
+	public IPath getSourceAttachmentRootPath();
+
+	/**
+	 * @since 2.0
+	 */
+	void setSourceAttachmentPath(IPath sourceAttachmentPath);
+
+	/**
+	 * @since 2.0
+	 */
+	void setSourceAttachmentRootPath(IPath sourceAttachmentRootPath);
 }

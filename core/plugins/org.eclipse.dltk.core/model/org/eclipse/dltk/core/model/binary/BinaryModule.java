@@ -38,8 +38,7 @@ import org.eclipse.dltk.utils.CorePrinter;
  * @since 2.0
  */
 public class BinaryModule extends AbstractSourceModule implements
-		IBinaryModule, IExternalSourceModule {
-	private SourceMapper sourceMapper = new SourceMapper();
+		IBinaryModule, IExternalSourceModule, ISourceMapperProvider {
 
 	protected BinaryModule(ModelElement parent, String name,
 			WorkingCopyOwner owner) {
@@ -107,12 +106,12 @@ public class BinaryModule extends AbstractSourceModule implements
 		return null;
 	}
 
-	public void setSourceMapper(SourceMapper mapper) {
-		this.sourceMapper = mapper;
-	}
-
 	public SourceMapper getSourceMapper() {
-		return this.sourceMapper;
+		IModelElement parent = getParent();
+		if (parent instanceof ISourceMapperProvider) {
+			return ((ISourceMapperProvider) parent).getSourceMapper();
+		}
+		return null;
 	}
 
 	public boolean isBinary() {
@@ -140,10 +139,22 @@ public class BinaryModule extends AbstractSourceModule implements
 	}
 
 	public String getSource() throws ModelException {
+		SourceMapper mapper = getSourceMapper();
+		if (mapper != null) {
+			String name = this.getElementName();
+			String content = mapper.getSource(this, name);
+			if (content != null) {
+				return content;
+			}
+		}
 		return "//Binary source are not available";
 	}
 
 	public ISourceRange getSourceRange() throws ModelException {
+		SourceMapper mapper = getSourceMapper();
+		if (mapper != null) {
+			return mapper.getSourceRange(this);
+		}
 		return null;
 	}
 

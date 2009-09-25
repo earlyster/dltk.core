@@ -57,6 +57,8 @@ public class BuildpathEntry implements IBuildpathEntry {
 	public static final String TAG_BUILDPATHENTRY = "buildpathentry"; //$NON-NLS-1$	
 	public static final String TAG_KIND = "kind"; //$NON-NLS-1$
 	public static final String TAG_PATH = "path"; //$NON-NLS-1$
+	public static final String TAG_SOURCEPATH = "sourcepath"; //$NON-NLS-1$
+	public static final String TAG_ROOTPATH = "rootpath"; //$NON-NLS-1$
 	public static final String TAG_EXPORTED = "exported"; //$NON-NLS-1$
 	public static final String TAG_EXTERNAL = "external"; //$NON-NLS-1$
 	public static final String TAG_INCLUDING = "including"; //$NON-NLS-1$
@@ -137,6 +139,28 @@ public class BuildpathEntry implements IBuildpathEntry {
 	 * The export flag
 	 */
 	boolean isExported;
+
+	/**
+	 * Describes the path to the source archive/folder associated with this
+	 * classpath entry, or <code>null</code> if this buildpath entry has no
+	 * source attachment.
+	 * <p>
+	 * Only library and variable buildpath entries may have source attachments.
+	 * For library buildpath entries, the result path (if present) locates a
+	 * source archive. For variable classpath entries, the result path (if
+	 * present) has an analogous form and meaning as the variable path, namely
+	 * the first segment is the name of a classpath variable.
+	 */
+	public IPath sourceAttachmentPath;
+
+	/**
+	 * Describes the path within the source archive where package fragments are
+	 * located. An empty path indicates that packages are located at the root of
+	 * the source archive. Returns a non-<code>null</code> value if and only if
+	 * <code>getSourceAttachmentPath</code> returns a non-<code>null</code>
+	 * value.
+	 */
+	public IPath sourceAttachmentRootPath;
 	/*
 	 * The extra attributes
 	 */
@@ -186,6 +210,22 @@ public class BuildpathEntry implements IBuildpathEntry {
 		if (exclusionPatterns.length > 0) {
 			this.fullExclusionPatternChars = UNINIT_PATTERNS;
 		}
+	}
+
+	public IPath getSourceAttachmentPath() {
+		return sourceAttachmentPath;
+	}
+
+	public IPath getSourceAttachmentRootPath() {
+		return sourceAttachmentRootPath;
+	}
+
+	public void setSourceAttachmentPath(IPath sourceAttachmentPath) {
+		this.sourceAttachmentPath = sourceAttachmentPath;
+	}
+
+	public void setSourceAttachmentRootPath(IPath sourceAttachmentRootPath) {
+		this.sourceAttachmentRootPath = sourceAttachmentRootPath;
 	}
 
 	public int getEntryKind() {
@@ -334,7 +374,7 @@ public class BuildpathEntry implements IBuildpathEntry {
 				|| referringEntry.getAccessRuleSet() != null) {
 			boolean combine = this.entryKind == BPE_SOURCE
 					|| referringEntry.combineAccessRules();
-			return new BuildpathEntry(
+			BuildpathEntry newEntry = new BuildpathEntry(
 					getContentKind(),
 					getEntryKind(),
 					getPath(),
@@ -348,6 +388,9 @@ public class BuildpathEntry implements IBuildpathEntry {
 							referringEntry.getAccessRules(), getAccessRules(),
 							combine), this.combineAccessRules,
 					this.extraAttributes, this.isExternal);
+			newEntry.setSourceAttachmentPath(getSourceAttachmentPath());
+			newEntry.setSourceAttachmentRootPath(getSourceAttachmentRootPath());
+			return newEntry;
 		}
 		// no need to clone
 		return this;
@@ -584,6 +627,7 @@ public class BuildpathEntry implements IBuildpathEntry {
 			entry = DLTKCore.newLibraryEntry(path, accessRules,
 					extraAttributes, inclusionPatterns, exclusionPatterns,
 					isExported, isExternal);
+
 			break;
 		case IBuildpathEntry.BPE_SOURCE:
 			// entry = DLTKCore.newSourceEntry(path, inclusionPatterns,
@@ -614,6 +658,13 @@ public class BuildpathEntry implements IBuildpathEntry {
 		default:
 			throw new AssertionFailedException(Messages.bind(
 					Messages.buildpath_unknownKind, kindAttr));
+		}
+
+		String sourcePath = removeAttribute(TAG_SOURCEPATH, attributes);
+		String rootPath = removeAttribute(TAG_ROOTPATH, attributes);
+		if (sourcePath.length() > 0) {
+			entry.setSourceAttachmentPath(new Path(sourcePath));
+			entry.setSourceAttachmentRootPath(new Path(rootPath));
 		}
 		if (unknownAttributes != null || unknownChildren != null) {
 			UnknownXmlElements unknownXmlElements = new UnknownXmlElements();
@@ -864,7 +915,7 @@ public class BuildpathEntry implements IBuildpathEntry {
 	 */
 	public void elementEncode(XMLWriter writer, IPath projectPath,
 			boolean indent, boolean newLine, Map unknownElements) {
-		HashMap parameters = new HashMap();
+		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put(TAG_KIND, kindToString(this.entryKind));
 		IPath xmlPath = this.path;
 		if (this.entryKind != IBuildpathEntry.BPE_CONTAINER
@@ -891,6 +942,14 @@ public class BuildpathEntry implements IBuildpathEntry {
 		}
 		if (this.isExternal) {
 			parameters.put(TAG_EXTERNAL, "true");//$NON-NLS-1$
+		}
+		if (this.sourceAttachmentPath != null) {
+			parameters
+					.put(TAG_SOURCEPATH, this.sourceAttachmentPath.toString());
+		}
+		if (this.sourceAttachmentRootPath != null) {
+			parameters.put(TAG_ROOTPATH, this.sourceAttachmentRootPath
+					.toString());
 		}
 		encodePatterns(this.inclusionPatterns, TAG_INCLUDING, parameters);
 		encodePatterns(this.exclusionPatterns, TAG_EXCLUDING, parameters);

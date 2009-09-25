@@ -16,7 +16,8 @@ import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 /**
  * @since 2.0
  */
-public abstract class BinaryMember extends NamedMember {
+public abstract class BinaryMember extends NamedMember implements
+		ISourceMapperProvider {
 	private int flags;
 	private List<IModelElement> children = new ArrayList<IModelElement>();
 
@@ -40,9 +41,9 @@ public abstract class BinaryMember extends NamedMember {
 	}
 
 	public SourceMapper getSourceMapper() {
-		IModelElement module = getAncestor(SOURCE_MODULE);
-		if (module instanceof BinaryModule) {
-			return ((BinaryModule) module).getSourceMapper();
+		IModelElement parent = getParent();
+		if (parent instanceof ISourceMapperProvider) {
+			return ((ISourceMapperProvider) parent).getSourceMapper();
 		}
 		return null;
 	}

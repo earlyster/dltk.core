@@ -14,7 +14,16 @@ import java.util.List;
 
 public interface IInterpreterContainerExtension {
 	/**
-	 * This method could modify set of entries.
+	 * This method could modify set of entries. Called only then we plan to user
+	 * not raw entries.
 	 */
 	void processEntres(IScriptProject project, List<IBuildpathEntry> entries);
+
+	/**
+	 * Called for both processed and raw entries. Befor processEntries to make
+	 * any required operations.
+	 * 
+	 * @since 2.0
+	 */
+	void preProcessEntries(IScriptProject project, List<IBuildpathEntry> entries);
 }

@@ -85,8 +85,7 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 	private void addChild(ModelElement parentHandle, ModelElement handle) {
 		if (parentHandle instanceof BinaryMember) {
 			((BinaryMember) parentHandle).addChild(handle);
-		}
-		if (parentHandle instanceof ISourceModule) {
+		} else if (parentHandle instanceof ISourceModule) {
 			this.moduleInfo.addChild(handle);
 		}
 	}
