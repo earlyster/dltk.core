@@ -17,6 +17,10 @@ import org.eclipse.rse.core.subsystems.IConnectorService;
 import com.jcraft.jsch.Session;
 
 public class RSESshManager {
+
+	private static final String RSE_SSH_CONNECTOR_SERVICE_CLASSNAME = "org.eclipse.rse.internal.connectorservice.ssh.SshConnectorService"; //$NON-NLS-1$
+	private static final String SSH_CONNECTOR_SERVICE_GETSESSION_METHODNAME = "getSession"; //$NON-NLS-1$
+
 	/**
 	 * Create or return Ssh connection for specified remote host.
 	 * 
@@ -87,15 +91,18 @@ public class RSESshManager {
 				return;
 			}
 
-			String name = connector.getClass().getName();
-			if ("org.eclipse.rse.internal.connectorservice.ssh.SshConnectorService"
-					.equals(name)) {
+			final Class<? extends IConnectorService> connectorClass = connector
+					.getClass();
+			if (RSE_SSH_CONNECTOR_SERVICE_CLASSNAME.equals(connectorClass
+					.getName())) {
 				// Ssh is available
 				try {
-					Method method = connector.getClass().getMethod(
-							"getSession", null);
+					Method method = connectorClass.getMethod(
+							SSH_CONNECTOR_SERVICE_GETSESSION_METHODNAME,
+							new Class[0]);
 					if (method != null) {
-						Object invoke = method.invoke(connector, null);
+						Object invoke = method.invoke(connector,
+								(Object[]) null);
 						if (invoke instanceof Session) {
 							Session session = (Session) invoke;
 							connection.setPassword(session.getUserInfo()
