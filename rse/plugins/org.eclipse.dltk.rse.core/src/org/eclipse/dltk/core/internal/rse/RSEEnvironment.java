@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -124,15 +125,19 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 
 	public String getCanonicalPath(IPath path) {
 		IFileHandle file = getFile(path);
-		if( file instanceof RSEFileHandle) {
+		if (file instanceof RSEFileHandle) {
 			RSEFileHandle handle = (RSEFileHandle) file;
-			return handle.getResolveCanonicalPath();
+			return handle.resolvePath();
 		}
 		return convertPathToString(path);
 	}
 
 	public static URI getURIFor(IHost host, String path) {
 		return RSEFileSystem.getURIFor(host.getHostName(), path);
+	}
+
+	public static IFileStore getStoreFor(URI locationURI) {
+		return RSEFileSystem.getInstance().getStore(locationURI);
 	}
 
 	/**

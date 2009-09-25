@@ -41,28 +41,36 @@ import org.eclipse.dltk.core.internal.rse.ssh.RSESshManager;
 import org.eclipse.dltk.ssh.core.ISshConnection;
 import org.eclipse.dltk.ssh.core.ISshFileHandle;
 import org.eclipse.rse.core.model.IHost;
-import org.eclipse.rse.internal.efs.RSEFileSystem;
 
 public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 	private static final int SYMLINK_CONNECTION_TIMEOUT = 30 * 1000;
 	private static final int CACHE_LIMIT = 1000;
-	private static Map<RSEFileHandle, IFileInfo> timestamps = new HashMap<RSEFileHandle, IFileInfo>();
-	private static Map<RSEFileHandle, Long> lastaccess = new HashMap<RSEFileHandle, Long>();
+	private static final long CACHE_ENTRY_LIFETIME = 10 * 1000;
 
-	private IFileStore file;
-	private IEnvironment environment;
+	private static class CacheEntry {
+		final IFileInfo fileInfo;
+		final long timestamp;
+
+		public CacheEntry(IFileInfo fileInfo, long timestamp) {
+			this.fileInfo = fileInfo;
+			this.timestamp = timestamp;
+		}
+
+	}
+
+	private static final Map<IFileStore, CacheEntry> cache = new HashMap<IFileStore, CacheEntry>();
+
+	private final IFileStore file;
+	private final IEnvironment environment;
 	private ISshFileHandle sshFile;
 
 	/**
 	 * @param infos
 	 * @since 2.0
 	 */
-	public RSEFileHandle(IEnvironment env, IFileStore file, IFileInfo info) {
+	public RSEFileHandle(IEnvironment env, IFileStore file) {
 		this.environment = env;
 		this.file = file;
-		if (info != null) {
-			timestamps.put(this, info);
-		}
 	}
 
 	private void fetchSshFile() {
@@ -75,10 +83,9 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 			ISshConnection connection = RSESshManager.getConnection(host);
 			if (connection != null) { // This is ssh connection, and it's alive.
 				try {
-					sshFile = connection.getHandle(new Path(file.toURI()
-							.getPath()));
+					sshFile = connection.getHandle(new Path(getPathString()));
 				} catch (Exception e) {
-					DLTKRSEPlugin.log("Failed to locate direct ssh connection",
+					DLTKRSEPlugin.log("Failed to locate direct ssh connection", //$NON-NLS-1$
 							e);
 				}
 			}
@@ -96,8 +103,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 	}
 
 	public RSEFileHandle(IEnvironment env, URI locationURI) {
-		this(env, RSEFileSystem.getInstance().getStore(locationURI),
-				(IFileInfo) null);
+		this(env, RSEEnvironment.getStoreFor(locationURI));
 	}
 
 	public boolean exists() {
@@ -116,30 +122,44 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 	}
 
 	private IFileInfo fetchInfo(boolean force) {
-		if (timestamps.size() > CACHE_LIMIT) {
-			timestamps.clear();
-			lastaccess.clear();
-		}
-		boolean flag = !environment.isLocal();
-		long c = 0;
-		if (flag && !force) {
-			if (timestamps.containsKey(this)) {
-				c = System.currentTimeMillis();
-				Long last = lastaccess.get(this);
-				if (last != null && (c - last.longValue()) < 1000 * 10) {
-					return timestamps.get(this);
+		final boolean isRemote = !environment.isLocal();
+		long now = 0;
+		if (isRemote && !force) {
+			CacheEntry entry;
+			synchronized (cache) {
+				entry = cache.get(getCacheKey());
+			}
+			if (entry != null) {
+				now = System.currentTimeMillis();
+				if (now - entry.timestamp < CACHE_ENTRY_LIFETIME) {
+					return entry.fileInfo;
 				}
 			}
 		}
-		IFileInfo info = file.fetchInfo();
-		if (flag) {
-			timestamps.put(this, info);
-			if (c == 0) {
-				c = System.currentTimeMillis();
+		final IFileInfo info = file.fetchInfo();
+		if (isRemote) {
+			if (now == 0) {
+				now = System.currentTimeMillis();
 			}
-			lastaccess.put(this, c);
+			synchronized (cache) {
+				checkCacheLimit();
+				cache.put(getCacheKey(), new CacheEntry(info, now));
+			}
 		}
 		return info;
+	}
+
+	private static void checkCacheLimit() {
+		if (cache.size() > CACHE_LIMIT) {
+			cache.clear();
+		}
+	}
+
+	/**
+	 * @return
+	 */
+	private final IFileStore getCacheKey() {
+		return file;
 	}
 
 	public String toOSString() {
@@ -154,19 +174,19 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		if (!environment.connect()) {
 			URI childURI;
 			try {
-				childURI = new URI(toURI().toString() + "/" + childname);
+				childURI = new URI(toURI().toString() + "/" + childname); //$NON-NLS-1$
 				return new RSEFileHandle(environment, childURI);
 			} catch (URISyntaxException e) {
 				DLTKRSEPlugin.log(e);
 			}
 		}
 		fetchSshFile();
-		IFileStore childStore = file.getChild(new Path(childname));
+		IFileStore childStore = file.getChild(childname);
 		if (sshFile != null) {
 			return new RSEFileHandle(environment, childStore, sshFile
 					.getChild(childname));
 		}
-		return new RSEFileHandle(environment, childStore, (IFileInfo) null);
+		return new RSEFileHandle(environment, childStore);
 	}
 
 	public IFileHandle[] getChildren() {
@@ -176,14 +196,15 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		fetchSshFile();
 		if (sshFile != null) {
 			try {
-				ISshFileHandle[] children = sshFile
+				final ISshFileHandle[] children = sshFile
 						.getChildren(new NullProgressMonitor());
-				IFileHandle rseChildren[] = new IFileHandle[children.length];
+				final IFileHandle rseChildren[] = new IFileHandle[children.length];
 				for (int i = 0; i < children.length; i++) {
-					IFileStore childStore = file.getChild(new Path(children[i]
-							.getName()));
+					final ISshFileHandle child = children[i];
+					final IFileStore childStore = file
+							.getChild(child.getName());
 					rseChildren[i] = new RSEFileHandle(environment, childStore,
-							children[i]);
+							child);
 				}
 				return rseChildren;
 			} catch (CoreException e) {
@@ -191,18 +212,24 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 			}
 		}
 		try {
-			IFileInfo[] infos = file.childInfos(EFS.NONE,
+			final IFileInfo[] infos = file.childInfos(EFS.NONE,
 					new NullProgressMonitor());
-
-			// IFileStore[] files = file.childStores(EFS.NONE,
-			// new NullProgressMonitor());
-			IFileHandle[] children = new IFileHandle[infos.length];
-			long c = System.currentTimeMillis();
+			if (infos.length != 0) {
+				synchronized (cache) {
+					checkCacheLimit();
+				}
+			}
+			final IFileHandle[] children = new IFileHandle[infos.length];
+			final long now = System.currentTimeMillis();
 			for (int i = 0; i < infos.length; i++) {
+				final IFileInfo childInfo = infos[i];
 				children[i] = new RSEFileHandle(environment, file
-						.getFileStore(new Path(infos[i].getName())), infos[i]);
-				timestamps.put((RSEFileHandle) children[i], infos[i]);
-				lastaccess.put((RSEFileHandle) children[i], c);
+						.getChild(childInfo.getName()));
+				final IFileStore childCacheKey = ((RSEFileHandle) children[i])
+						.getCacheKey();
+				synchronized (cache) {
+					cache.put(childCacheKey, new CacheEntry(childInfo, now));
+				}
 			}
 			return children;
 		} catch (CoreException e) {
@@ -228,11 +255,15 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		IFileStore parent = file.getParent();
 		if (parent == null)
 			return null;
-		return new RSEFileHandle(environment, parent, (IFileInfo) null);
+		return new RSEFileHandle(environment, parent);
 	}
 
 	public IPath getPath() {
-		return new Path(file.toURI().getPath());
+		return new Path(getPathString());
+	}
+
+	private String getPathString() {
+		return file.toURI().getPath();
 	}
 
 	public boolean isDirectory() {
@@ -270,7 +301,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 	}
 
 	private void fetchSshFileWait() {
-		long startTime = System.currentTimeMillis();
+		final long startTime = System.currentTimeMillis();
 		while (sshFile == null
 				&& (System.currentTimeMillis() - startTime < SYMLINK_CONNECTION_TIMEOUT)) {
 			fetchSshFile();
@@ -322,7 +353,9 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		if (!environment.connect()) {
 			return null;
 		}
-		timestamps.clear();
+		synchronized (cache) {
+			cache.clear();
+		}
 		fetchSshFile();
 		if (sshFile != null) {
 			try {
@@ -347,6 +380,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		}
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof RSEFileHandle) {
 			RSEFileHandle anotherFile = (RSEFileHandle) obj;
@@ -355,10 +389,12 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		return file.hashCode();
 	}
 
+	@Override
 	public String toString() {
 		return toOSString();
 	}
@@ -375,7 +411,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		} else {
 			lm = fetchInfo(false).getLastModified();
 		}
-		p.done("#", "Return file timestamp", 0);
+		p.done("#", "Return file timestamp", 0); //$NON-NLS-1$//$NON-NLS-2$
 		return lm;
 
 	}
@@ -399,13 +435,14 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 		return environment.getId();
 	}
 
-	private final class CountStream extends BufferedInputStream {
+	private static final class CountStream extends BufferedInputStream {
 		private InputStream stream;
 
 		public CountStream(InputStream stream) {
 			super(stream);
 		}
 
+		@Override
 		public int read() throws IOException {
 			int read = stream.read();
 			if (read != -1) {
@@ -415,6 +452,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 			return read;
 		}
 
+		@Override
 		public int read(byte[] b, int off, int len) throws IOException {
 			int read = this.stream.read(b, off, len);
 			if (read != -1) {
@@ -424,6 +462,7 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 			return read;
 		}
 
+		@Override
 		public int read(byte[] b) throws IOException {
 			int read = this.stream.read(b);
 			if (read != -1) {
@@ -447,43 +486,53 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 	 * @since 2.0
 	 */
 	public void clearLastModifiedCache() {
-		timestamps.remove(toString());
+		synchronized (cache) {
+			cache.remove(getCacheKey());
+		}
 	}
 
 	/**
 	 * @since 2.0
 	 */
-	public String getResolveCanonicalPath() {
-		if (environment.connect()) {
+	public String resolvePath() {
+		final String currentPath = getPathString();
+		if (environment.connect() && isSymlink()) {
 			// Try to resolve canonical path using direct ssh connection
-			if (isSymlink()) {
-				if (sshFile != null) {
-					String link = sshFile.readLink();
-					if (link.startsWith("/")) {
-						IFileHandle handle = environment
-								.getFile(new Path(link));
-						return handle.getCanonicalPath();
+			if (sshFile != null) {
+				final String link = sshFile.readLink();
+				if (link != null) {
+					if (link.startsWith("/")) { //$NON-NLS-1$
+						if (!link.equals(currentPath)) {
+							return environment.getFile(new Path(link))
+									.getCanonicalPath();
+						}
 					} else {
-						String canonicalPath = environment.getFile(
-								getPath().removeLastSegments(1).append(link))
-								.getCanonicalPath();
-						return canonicalPath;
+						final IPath fullLink = getPath().removeLastSegments(1)
+								.append(link);
+						if (!currentPath.equals(fullLink.toString())) {
+							return environment.getFile(fullLink)
+									.getCanonicalPath();
+						}
 					}
 				}
 			} else {
-				return file.toURI().getPath();
-			}
-
-			IFileInfo info = file.fetchInfo();
-			if (info != null && info.getAttribute(EFS.ATTRIBUTE_SYMLINK)) {
-				String linkTarget = info
-						.getStringAttribute(EFS.ATTRIBUTE_LINK_TARGET);
-				IFileStore resolved = file.getFileStore(new Path(linkTarget));
-				return resolved.toURI().getPath();
-			} else {
-				return file.toURI().getPath();
+				final IFileInfo info = file.fetchInfo();
+				if (info != null && info.getAttribute(EFS.ATTRIBUTE_SYMLINK)) {
+					final String linkTarget = info
+							.getStringAttribute(EFS.ATTRIBUTE_LINK_TARGET);
+					if (linkTarget != null && !currentPath.equals(linkTarget)) {
+						final Path link = new Path(linkTarget);
+						final IFileStore resolved;
+						if (link.isAbsolute()) {
+							resolved = file.getFileSystem().getStore(link);
+						} else {
+							resolved = file.getFileStore(link);
+						}
+						return resolved.toURI().getPath();
+					}
+				}
 			}
 		}
-		return null;
+		return currentPath;
 	}
 }
