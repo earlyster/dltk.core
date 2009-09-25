@@ -12,7 +12,6 @@ package org.eclipse.dltk.debug.ui.interpreters;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -94,30 +93,29 @@ public class InterpretersUpdater {
 		InterpreterDefinitionsContainer container = new InterpreterDefinitionsContainer();
 
 		// Default interpreter id for natureId
-		Set envs = new HashSet();
+		final Set<String> envIds = new HashSet<String>();
 		if (defaultInterpreters != null) {
 			for (int i = 0; i < defaultInterpreters.length; i++) {
 				final String defaultId = ScriptRuntime
 						.getCompositeIdFromInterpreter(defaultInterpreters[i]);
-				IEnvironment environment = defaultInterpreters[i]
-						.getEnvironment();
-				DefaultInterpreterEntry entry = new DefaultInterpreterEntry(
-						langNatureId, environment.getId());
-				container.setDefaultInterpreterInstallCompositeID(entry,
-						defaultId);
-				envs.add(environment);
+				final String environmentId = defaultInterpreters[i]
+						.getEnvironmentId();
+				if (environmentId != null) {
+					DefaultInterpreterEntry entry = new DefaultInterpreterEntry(
+							langNatureId, environmentId);
+					container.setDefaultInterpreterInstallCompositeID(entry,
+							defaultId);
+					envIds.add(environmentId);
+				}
 			}
 		}
-		IEnvironment[] environments = EnvironmentManager.getEnvironments();
-		for (int i = 0; i < environments.length; i++) {
-			if (!envs.contains(environments[i])) {
+		for (IEnvironment environment : EnvironmentManager.getEnvironments()) {
+			if (!envIds.contains(environment.getId())) {
 				DefaultInterpreterEntry entry = new DefaultInterpreterEntry(
-						langNatureId, environments[i].getId());
+						langNatureId, environment.getId());
 				container.setDefaultInterpreterInstallCompositeID(entry, null);
 			}
 		}
-		// container.setDefaultInterpreterInstallCompositeID(langNatureId,
-		// null);
 
 		// Interpreters for natureId
 		for (int i = 0; i < interpreters.length; i++) {
@@ -125,10 +123,8 @@ public class InterpretersUpdater {
 		}
 
 		// Default interpreters for other languages
-		final DefaultInterpreterEntry[] entries = fOriginalInterpreters
-				.getInterpreterNatures();
-		for (int i = 0; i < entries.length; i++) {
-			final DefaultInterpreterEntry entry = entries[i];
+		for (final DefaultInterpreterEntry entry : fOriginalInterpreters
+				.getInterpreterNatures()) {
 			if (!langNatureId.equals(entry.getNature())) {
 				final String defaultId = fOriginalInterpreters
 						.getDefaultInterpreterInstallCompositeID(entry);
@@ -138,10 +134,8 @@ public class InterpretersUpdater {
 		}
 
 		// Save interpreters from other languages to the container
-		final Iterator it = fOriginalInterpreters.getInterpreterList()
-				.iterator();
-		while (it.hasNext()) {
-			final IInterpreterInstall install = (IInterpreterInstall) it.next();
+		for (final IInterpreterInstall install : fOriginalInterpreters
+				.getInterpreterList()) {
 			if (!langNatureId.equals(install.getInterpreterInstallType()
 					.getNatureId())) {
 				container.addInterpreter(install);
