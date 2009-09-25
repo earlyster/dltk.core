@@ -63,7 +63,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * @return buildpath entries
 	 */
 	private static IBuildpathEntry[] getBuildpathEntries(
-			IInterpreterInstall interpreter) {
+			IInterpreterInstall interpreter, IScriptProject project) {
 		if (fgBuildpathEntries == null) {
 			fgBuildpathEntries = new HashMap<IInterpreterInstall, IBuildpathEntry[]>(
 					10);
@@ -95,7 +95,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 		}
 		IBuildpathEntry[] entries = fgBuildpathEntries.get(interpreter);
 		if (entries == null) {
-			entries = computeBuildpathEntries(interpreter);
+			entries = computeBuildpathEntries(interpreter, project);
 			fgBuildpathEntries.put(interpreter, entries);
 		}
 		return entries;
@@ -110,7 +110,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * @since 2.0
 	 */
 	public static IBuildpathEntry[] computeBuildpathEntries(
-			IInterpreterInstall interpreter) {
+			IInterpreterInstall interpreter, IScriptProject project) {
 		LibraryLocation[] libs = interpreter.getLibraryLocations();
 		if (libs == null) {
 			libs = ScriptRuntime.getLibraryLocations(interpreter);
@@ -122,23 +122,9 @@ public class InterpreterContainer implements IBuildpathContainer {
 			IPath entryPath = libs[i].getLibraryPath();
 
 			if (!entryPath.isEmpty()) {
-				// TODO Check this
-				// // resolve symlink
-				// IEnvironment environment = interpreter.getEnvironment();
-				//
-				// IFileHandle f = environment.getFile(entryPath);
-				// if (!f.exists())
-				// continue;
-				// entryPath = new Path(f.getCanonicalPath());
-				//
-				//				
 				if (rawEntries.contains(entryPath))
 					continue;
 
-				/*
-				 * if (!entryPath.isAbsolute()) Assert.isTrue(false, "Path for
-				 * IBuildpathEntry must be absolute"); //$NON-NLS-1$
-				 */
 				IBuildpathAttribute[] attributes = new IBuildpathAttribute[0];
 				ArrayList<IPath> excluded = new ArrayList<IPath>(); // paths to
 				// exclude
@@ -175,6 +161,13 @@ public class InterpreterContainer implements IBuildpathContainer {
 					attributes, BuildpathEntry.INCLUDE_ALL, new IPath[0],
 					false, true));
 		}
+
+		// Preprocess entries using extension
+		IInterpreterContainerExtension extension = DLTKLanguageManager
+				.getInterpreterContainerExtensions(project);
+		if (extension != null) {
+			extension.preProcessEntries(project, entries);
+		}
 		return entries.toArray(new IBuildpathEntry[entries.size()]);
 	}
 
@@ -196,7 +189,8 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * @see IBuildpathContainer#getBuildpathEntries(IScriptProject)
 	 */
 	public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
-		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(fInterpreterInstall);
+		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(
+				fInterpreterInstall, project);
 		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>();
 		entries.addAll(Arrays.asList(buildpathEntries));
 		// Use custom per project interpreter entries.
@@ -212,7 +206,8 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * @since 2.0
 	 */
 	public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
-		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(fInterpreterInstall);
+		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(
+				fInterpreterInstall, project);
 		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>();
 		entries.addAll(Arrays.asList(buildpathEntries));
 		return entries.toArray(new IBuildpathEntry[entries.size()]);
