@@ -21,6 +21,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rse.connectorservice.ssh;resolution:=optional,
  org.eclipse.rse.services.ssh;bundle-version="3.0.0";resolution:=optional
 Bundle-ActivationPolicy: lazy
-Export-Package: org.eclipse.dltk.core.internal.rse,
- org.eclipse.dltk.core.internal.rse.perfomance
+Export-Package: org.eclipse.dltk.core.internal.rse;x-friends:=org.eclipse.dltk.rse.ui,
+ org.eclipse.dltk.core.internal.rse.perfomance;x-internal:=true
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
