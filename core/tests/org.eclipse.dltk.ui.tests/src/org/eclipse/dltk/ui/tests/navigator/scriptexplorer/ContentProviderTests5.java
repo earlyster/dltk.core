@@ -112,14 +112,14 @@ public class ContentProviderTests5 extends TestCase {
 		assertNotNull(page);
 
 		IViewPart myPart = page.showView(DLTKUIPlugin.ID_SCRIPTEXPLORER);
-		if (myPart instanceof ScriptExplorerPart) {
-			ScriptExplorerPart ScriptExplorerPart = (ScriptExplorerPart) myPart;
-			fProvider = (ITreeContentProvider) ScriptExplorerPart
-					.getTreeViewer().getContentProvider();
-			setFolding(false);
-		} else {
-			assertTrue("Unable to get view", false);
+		assertTrue("Unable to get view", myPart instanceof ScriptExplorerPart);
+		ScriptExplorerPart part = (ScriptExplorerPart) myPart;
+		if (!part.isFlatLayout()) {
+			part.setFlatLayout(true);
 		}
+		fProvider = (ITreeContentProvider) part.getTreeViewer()
+				.getContentProvider();
+		setFolding(false);
 		assertNotNull(fProvider);
 	}
 
@@ -210,8 +210,8 @@ public class ContentProviderTests5 extends TestCase {
 	}
 
 	public void REM_testNestedSource1() throws Exception { // bug 35851, 66694
-	// <BuildpathEntry excluding="a-b/a/b/" kind="src" path="src"/>
-	// <BuildpathEntry kind="src" path="src/a-b/a/b"/>
+		// <BuildpathEntry excluding="a-b/a/b/" kind="src" path="src"/>
+		// <BuildpathEntry kind="src" path="src/a-b/a/b"/>
 		IPath[] inclusionFilters = {};
 		IPath[] exclusionFilters = { new Path("a-b/a/b/") };
 		IProjectFragment src = ScriptProjectHelper.addSourceContainer(
@@ -252,8 +252,8 @@ public class ContentProviderTests5 extends TestCase {
 	}
 
 	public void testInclExcl1() throws Exception { // bug 35851, 66694
-	// <BuildpathEntry including="a/b/c/" excluding="a/b/c/d/" kind="src"
-	// path="src2"/>
+		// <BuildpathEntry including="a/b/c/" excluding="a/b/c/d/" kind="src"
+		// path="src2"/>
 		IPath[] inclusionFilters = { new Path("a/b/c/") };
 		IPath[] exclusionFilters = { new Path("a/b/c/d/") };
 		IProjectFragment src = ScriptProjectHelper.addSourceContainer(
