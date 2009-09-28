@@ -336,13 +336,16 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 				.getChildren();
 		int namesLength = this.path.segmentCount();
 		nextPackage: for (int i = 0, length = packages.length; i < length; i++) {
-			IPath otherNames = ((ScriptFolder) packages[i]).path;
-			if (otherNames.segmentCount() <= namesLength)
-				continue nextPackage;
-			for (int j = 0; j < namesLength; j++)
-				if (!this.path.segment(j).equals(otherNames.segment(j)))
+			IPath otherNames = null;
+			if (packages[i] instanceof ScriptFolder) {
+				otherNames = ((ScriptFolder) packages[i]).path;
+				if (otherNames.segmentCount() <= namesLength)
 					continue nextPackage;
-			return true;
+				for (int j = 0; j < namesLength; j++)
+					if (!this.path.segment(j).equals(otherNames.segment(j)))
+						continue nextPackage;
+				return true;
+			}
 		}
 		return false;
 	}
