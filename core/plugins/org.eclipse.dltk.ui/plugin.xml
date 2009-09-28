@@ -1430,6 +1430,13 @@
 			namespace="org.eclipse.dltk"
 			properties="markerType"
 			type="org.eclipse.core.resources.IMarker"/>
+		<propertyTester
+        	class="org.eclipse.dltk.ui.util.ScriptProjectNaturePropertyTester"
+        	id="org.eclipse.dltk.ui.propertyTester1"
+        	namespace="org.eclipse.dltk"
+        	properties="hasScriptNature"
+        	type="org.eclipse.core.resources.IProject">
+		</propertyTester>
 	</extension>
 	<extension point="org.eclipse.ui.startup">
     	<startup class="org.eclipse.dltk.internal.ui.DLTKUI"/>
