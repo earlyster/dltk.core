@@ -147,8 +147,8 @@ public class ScriptExplorerPart extends ViewPart implements
 	private static final String PERF_CREATE_PART_CONTROL = "org.eclipse.dltk.ui/perf/explorer/createPartControl"; //$NON-NLS-1$
 	private static final String PERF_MAKE_ACTIONS = "org.eclipse.dltk.ui/perf/explorer/makeActions"; //$NON-NLS-1$
 
-	private static final int HIERARCHICAL_LAYOUT = 0x1;
-	private static final int FLAT_LAYOUT = 0x2;
+	protected static final int HIERARCHICAL_LAYOUT = 0x1;
+	protected static final int FLAT_LAYOUT = 0x2;
 
 	public static final int PROJECTS_AS_ROOTS = 1;
 	public static final int WORKING_SETS_AS_ROOTS = 2;
@@ -473,7 +473,7 @@ public class ScriptExplorerPart extends ViewPart implements
 			fIsCurrentLayoutFlat = fDialogSettings
 					.getInt(ScriptExplorerPart.TAG_LAYOUT) == ScriptExplorerPart.FLAT_LAYOUT;
 		} catch (NumberFormatException e) {
-			fIsCurrentLayoutFlat = false;
+			fIsCurrentLayoutFlat = getDefaultPackageLayout() == FLAT_LAYOUT;
 		}
 
 		try {
@@ -483,6 +483,10 @@ public class ScriptExplorerPart extends ViewPart implements
 			fRootMode = ScriptExplorerPart.PROJECTS_AS_ROOTS;
 		}
 
+	}
+
+	protected int getDefaultPackageLayout() {
+		return HIERARCHICAL_LAYOUT;
 	}
 
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
@@ -522,8 +526,9 @@ public class ScriptExplorerPart extends ViewPart implements
 
 	private void restoreLayoutState(IMemento memento) {
 		Integer layoutState = memento.getInteger(ScriptExplorerPart.TAG_LAYOUT);
-		fIsCurrentLayoutFlat = layoutState != null
-				&& layoutState.intValue() == ScriptExplorerPart.FLAT_LAYOUT;
+		if (layoutState != null) {
+			fIsCurrentLayoutFlat = layoutState.intValue() == ScriptExplorerPart.FLAT_LAYOUT;
+		}
 
 		// on by default
 		Integer groupLibraries = memento
