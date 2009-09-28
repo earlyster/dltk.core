@@ -22,14 +22,15 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.util.ExceptionHandler;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.dltk.ui.wizards.BuildpathsBlock;
+import org.eclipse.dltk.utils.AdaptUtils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -191,13 +192,15 @@ public abstract class BuildPathsPropertyPage extends PropertyPage implements
 	}
 
 	protected IProject getProject() {
-		IAdaptable adaptable = getElement();
-		if (adaptable != null) {
-			IModelElement elem = (IModelElement) adaptable
-					.getAdapter(IModelElement.class);
-			if (elem instanceof IScriptProject) {
-				return ((IScriptProject) elem).getProject();
-			}
+		final IAdaptable adaptable = getElement();
+		IProject project = AdaptUtils.getAdapter(adaptable, IProject.class);
+		if (project != null) {
+			return project;
+		}
+		final IModelElement elem = AdaptUtils.getAdapter(adaptable,
+				IModelElement.class);
+		if (elem instanceof IScriptProject) {
+			return ((IScriptProject) elem).getProject();
 		}
 		return null;
 	}
