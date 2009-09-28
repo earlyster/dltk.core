@@ -122,7 +122,8 @@ public class RenameSourceModuleProcessor extends ScriptRenameProcessor
 	// ---- IRenameProcessor -------------------------------------
 
 	public String getCurrentElementName() {
-		return getSimpleCUName();
+		// return initial name with extension
+		return fCu.getElementName();
 	}
 
 	public String getCurrentElementQualifier() {
