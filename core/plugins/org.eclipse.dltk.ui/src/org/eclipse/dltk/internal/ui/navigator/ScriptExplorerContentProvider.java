@@ -558,7 +558,7 @@ public class ScriptExplorerContentProvider extends
 		if (index != -1) {
 			String realParentName = name.substring(0, index);
 			IScriptFolder element = parent.getScriptFolder(realParentName);
-			if (element.exists()) {
+			if (element != null && element.exists()) {
 				try {
 					if (fFoldPackages
 							&& ScriptExplorerContentProvider.isEmpty(element)
@@ -571,7 +571,7 @@ public class ScriptExplorerContentProvider extends
 					// ignore
 				}
 				return element;
-			} else { // bug 65240
+			} else if (element != null) { // bug 65240
 				IResource resource = element.getResource();
 				if (resource != null) {
 					return resource;
