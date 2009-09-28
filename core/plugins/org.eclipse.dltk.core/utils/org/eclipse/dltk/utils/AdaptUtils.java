@@ -17,6 +17,8 @@ import org.eclipse.core.runtime.PlatformObject;
 
 /**
  * Provides utilities for working with adaptable and non-adaptable objects.
+ * 
+ * @since 2.0
  */
 public class AdaptUtils {
 
