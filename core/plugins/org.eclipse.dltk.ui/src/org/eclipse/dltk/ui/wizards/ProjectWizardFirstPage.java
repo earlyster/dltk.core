@@ -664,7 +664,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 
 		protected abstract String getIntereprtersPreferencePageId();
 
-		protected abstract String getCurrentLanguageNature();
+		protected final String getCurrentLanguageNature() {
+			return getScriptNature();
+		}
 
 		protected boolean isTargetEnvironmentAllowed() {
 			return true;
@@ -1027,6 +1029,11 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	public boolean isInterpretersPresent() {
 		return fInterpreterGroup.isInterpreterPresent();
 	}
+
+	/**
+	 * @since 2.0
+	 */
+	public abstract String getScriptNature();
 
 	protected abstract boolean interpeterRequired();
 

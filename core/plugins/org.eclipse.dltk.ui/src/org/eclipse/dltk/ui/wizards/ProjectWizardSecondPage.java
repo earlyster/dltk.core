@@ -152,12 +152,12 @@ public abstract class ProjectWizardSecondPage extends
 			}
 
 			URI realLocation = fCurrProjectLocation;
-			if (fCurrProjectLocation == null) { // inside workspace
+			if (realLocation == null) { // inside workspace
 				try {
 					URI rootLocation = ResourcesPlugin.getWorkspace().getRoot()
 							.getLocationURI();
-					realLocation = new URI(rootLocation.getScheme(), null, Path
-							.fromPortableString(rootLocation.getPath()).append(
+					realLocation = new URI(rootLocation.getScheme(), null,
+							new Path(rootLocation.getPath()).append(
 									fCurrProject.getName()).toString(), null);
 				} catch (URISyntaxException e) {
 					Assert.isTrue(false, "Can't happen"); //$NON-NLS-1$
@@ -169,12 +169,11 @@ public abstract class ProjectWizardSecondPage extends
 			createProject(fCurrProject, fCurrProjectLocation,
 					new SubProgressMonitor(monitor, 20));
 
-			IBuildpathEntry[] entries = null;
+			final IBuildpathEntry[] entries;
 
 			if (fFirstPage.getDetect()) {
-				if (!fCurrProject
-						.getFile(IScriptProjectFilenames.BUILDPATH_FILENAME)
-						.exists()) {
+				if (!fCurrProject.getFile(
+						IScriptProjectFilenames.BUILDPATH_FILENAME).exists()) {
 					IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 							.getLanguageToolkit(getScriptNature());
 					final BuildpathDetector detector = createBuildpathDetector(
@@ -182,6 +181,7 @@ public abstract class ProjectWizardSecondPage extends
 					entries = detector.getBuildpath();
 				} else {
 					monitor.worked(20);
+					entries = null;
 				}
 			} else if (fFirstPage.isSrc()) {
 				IPreferenceStore store = getPreferenceStore();
@@ -196,13 +196,13 @@ public abstract class ProjectWizardSecondPage extends
 					monitor.worked(10);
 				}
 
-				if (srcPath.segmentCount() > 0) {
-					IFolder folder = fCurrProject.getFolder(srcPath);
-					CoreUtility.createFolder(folder, true, true,
-							new SubProgressMonitor(monitor, 10));
-				} else {
-					monitor.worked(10);
-				}
+				// if (srcPath.segmentCount() > 0) {
+				// IFolder folder = fCurrProject.getFolder(srcPath);
+				// CoreUtility.createFolder(folder, true, true,
+				// new SubProgressMonitor(monitor, 10));
+				// } else {
+				// monitor.worked(10);
+				// }
 
 				final IPath projectPath = fCurrProject.getFullPath();
 
@@ -248,6 +248,11 @@ public abstract class ProjectWizardSecondPage extends
 				toolkit);
 		detector.detectBuildpath(new SubProgressMonitor(monitor, 20));
 		return detector;
+	}
+
+	@Override
+	protected final String getScriptNature() {
+		return fFirstPage.getScriptNature();
 	}
 
 	protected abstract IPreferenceStore getPreferenceStore();

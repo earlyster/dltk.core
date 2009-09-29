@@ -73,7 +73,6 @@ public class GenericDLTKProjectWizard extends NewElementWizard implements
 
 	public void addPages() {
 		super.addPages();
-		final String curNature = this.nature;
 		final String curPreferencePageId = this.preferencePageId;
 		fFirstPage = new ProjectWizardFirstPage() {
 
@@ -82,14 +81,15 @@ public class GenericDLTKProjectWizard extends NewElementWizard implements
 					super(composite);
 				}
 
-				protected String getCurrentLanguageNature() {
-					return curNature;
-				}
-
 				protected String getIntereprtersPreferencePageId() {
 					return curPreferencePageId;
 				}
 			};
+
+			@Override
+			public String getScriptNature() {
+				return nature;
+			}
 
 			protected IInterpreterGroup createInterpreterGroup(Composite parent) {
 				return new GenericDLTKInterpreterGroup(parent);
@@ -113,10 +113,6 @@ public class GenericDLTKProjectWizard extends NewElementWizard implements
 				return new GenericDLTKBuildpathBlock(
 						new BusyIndicatorRunnableContext(), listener, 0,
 						useNewSourcePage(), null);
-			}
-
-			protected String getScriptNature() {
-				return curNature;
 			}
 
 			protected IPreferenceStore getPreferenceStore() {
