@@ -156,8 +156,14 @@ public abstract class ProjectWizardSecondPage extends
 				try {
 					URI rootLocation = ResourcesPlugin.getWorkspace().getRoot()
 							.getLocationURI();
-					realLocation = new URI(rootLocation.getScheme(), null,
-							new Path(rootLocation.getPath()).append(
+					/*
+					 * Path.fromPortableString() is required here, because it
+					 * handles path in the way expected by URI constructor. (On
+					 * windows the path keeps the leading slash, e.g.
+					 * "/C:/Users/alex/...")
+					 */
+					realLocation = new URI(rootLocation.getScheme(), null, Path
+							.fromPortableString(rootLocation.getPath()).append(
 									fCurrProject.getName()).toString(), null);
 				} catch (URISyntaxException e) {
 					Assert.isTrue(false, "Can't happen"); //$NON-NLS-1$
