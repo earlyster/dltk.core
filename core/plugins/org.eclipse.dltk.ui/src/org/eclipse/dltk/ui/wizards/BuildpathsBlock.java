@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IScriptProject;
@@ -576,14 +575,14 @@ public abstract class BuildpathsBlock {
 		if (monitor != null && monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		if (!DLTKLanguageManager.hasScriptNature(project)) {
+		if (!project.hasNature(nature)) {
 			IProjectDescription description = project.getDescription();
 			String[] prevNatures = description.getNatureIds();
 			String[] newNatures = new String[prevNatures.length + 1];
 			System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
 			newNatures[prevNatures.length] = nature;
 			if (DLTKCore.DEBUG) {
-				System.err.println("Add selection of possible natures here"); //$NON-NLS-1$
+				// System.err.println("Add selection of possible natures here");
 			}
 			description.setNatureIds(newNatures);
 			project.setDescription(description, monitor);
