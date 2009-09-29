@@ -35,12 +35,13 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.ui.wizards.IBuildpathDetector;
 
 import com.ibm.icu.text.Collator;
 
 /**
  */
-public class BuildpathDetector {
+public class BuildpathDetector implements IBuildpathDetector {
 	private HashMap fSourceFolders;
 	private List fSourceFiles;
 	private HashSet fZIPFiles;
@@ -60,8 +61,7 @@ public class BuildpathDetector {
 		}
 	}
 
-	public BuildpathDetector(IProject project, IDLTKLanguageToolkit toolkit)
-			throws CoreException {
+	public BuildpathDetector(IProject project, IDLTKLanguageToolkit toolkit) {
 		fSourceFolders = new HashMap();
 		fZIPFiles = new HashSet(10);
 		fSourceFiles = new ArrayList(100);
@@ -231,8 +231,9 @@ public class BuildpathDetector {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.core.resources.IResourceProxyVisitor#visit(org.eclipse.core
-	 *      .resources.IResourceProxy)
+	 * @see
+	 * org.eclipse.core.resources.IResourceProxyVisitor#visit(org.eclipse.core
+	 * .resources.IResourceProxy)
 	 */
 	public boolean visit(IResourceProxy proxy, List files) {
 		if (fMonitor.isCanceled()) {

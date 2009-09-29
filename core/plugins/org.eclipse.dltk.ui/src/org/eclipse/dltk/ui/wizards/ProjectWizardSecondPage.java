@@ -180,10 +180,9 @@ public abstract class ProjectWizardSecondPage extends
 			if (fFirstPage.getDetect()) {
 				if (!fCurrProject.getFile(
 						IScriptProjectFilenames.BUILDPATH_FILENAME).exists()) {
-					IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-							.getLanguageToolkit(getScriptNature());
-					final BuildpathDetector detector = createBuildpathDetector(
-							monitor, toolkit);
+					final IBuildpathDetector detector = createBuildpathDetector();
+					detector
+							.detectBuildpath(new SubProgressMonitor(monitor, 20));
 					entries = detector.getBuildpath();
 				} else {
 					monitor.worked(20);
@@ -247,13 +246,23 @@ public abstract class ProjectWizardSecondPage extends
 		}
 	}
 
-	protected BuildpathDetector createBuildpathDetector(
-			IProgressMonitor monitor, IDLTKLanguageToolkit toolkit)
-			throws CoreException {
-		BuildpathDetector detector = new BuildpathDetector(fCurrProject,
-				toolkit);
-		detector.detectBuildpath(new SubProgressMonitor(monitor, 20));
-		return detector;
+	/**
+	 * @since 2.0
+	 */
+	protected IBuildpathDetector createBuildpathDetector() {
+		return new BuildpathDetector(fCurrProject, getLanguageToolkit());
+	}
+
+	@Deprecated
+	protected void createBuildpathDetector(IProgressMonitor monitor,
+			IDLTKLanguageToolkit toolkit) {
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected IDLTKLanguageToolkit getLanguageToolkit() {
+		return DLTKLanguageManager.getLanguageToolkit(getScriptNature());
 	}
 
 	@Override
