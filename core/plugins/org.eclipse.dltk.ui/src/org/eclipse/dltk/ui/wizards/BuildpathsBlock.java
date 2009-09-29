@@ -107,7 +107,7 @@ public abstract class BuildpathsBlock {
 	}
 
 	protected IWorkspaceRoot fWorkspaceRoot;
-	protected CheckedListDialogField fBuildPathList;
+	protected CheckedListDialogField<BPListElement> fBuildPathList;
 	protected StringButtonDialogField fBuildPathDialogField;
 	protected StatusInfo fPathStatus;
 	protected StatusInfo fBuildPathStatus;
@@ -152,8 +152,8 @@ public abstract class BuildpathsBlock {
 				/* 2 */null,
 				NewWizardMessages.BuildPathsBlock_buildpath_checkall_button,
 				NewWizardMessages.BuildPathsBlock_buildpath_uncheckall_button };
-		fBuildPathList = new CheckedListDialogField(null, buttonLabels,
-				new BPListLabelProvider());
+		fBuildPathList = new CheckedListDialogField<BPListElement>(null,
+				buttonLabels, new BPListLabelProvider());
 		fBuildPathList.setDialogFieldListener(adapter);
 		fBuildPathList
 				.setLabelText(NewWizardMessages.BuildPathsBlock_buildpath_label);
@@ -237,6 +237,7 @@ public abstract class BuildpathsBlock {
 		folder.setSelection(fPageIndex);
 		fCurrPage = (BuildPathBasePage) folder.getItem(fPageIndex).getData();
 		folder.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				tabChanged(e.item);
 			}
@@ -274,7 +275,7 @@ public abstract class BuildpathsBlock {
 	public void init(IScriptProject jproject, IBuildpathEntry[] buildpathEntries) {
 		fCurrScriptProject = jproject;
 		boolean projectExists = false;
-		List newBuildpath = null;
+		List<BPListElement> newBuildpath = null;
 		IProject project = fCurrScriptProject.getProject();
 		projectExists = (project.exists() && project.getFile(
 				IScriptProjectFilenames.BUILDPATH_FILENAME).exists());
@@ -291,7 +292,7 @@ public abstract class BuildpathsBlock {
 		}
 		List<BPListElement> exportedEntries = new ArrayList<BPListElement>();
 		for (int i = 0; i < newBuildpath.size(); i++) {
-			BPListElement curr = (BPListElement) newBuildpath.get(i);
+			BPListElement curr = newBuildpath.get(i);
 			if (curr.isExported()
 					|| curr.getEntryKind() == IBuildpathEntry.BPE_SOURCE) {
 				exportedEntries.add(curr);
@@ -366,8 +367,9 @@ public abstract class BuildpathsBlock {
 		fUserSettingsTimeStamp = getEncodedSettings();
 	}
 
-	private ArrayList getExistingEntries(IBuildpathEntry[] buildpathEntries) {
-		ArrayList newBuildpath = new ArrayList();
+	private List<BPListElement> getExistingEntries(
+			IBuildpathEntry[] buildpathEntries) {
+		List<BPListElement> newBuildpath = new ArrayList<BPListElement>();
 		for (int i = 0; i < buildpathEntries.length; i++) {
 			IBuildpathEntry curr = buildpathEntries[i];
 			newBuildpath.add(BPListElement.createFromExisting(curr,
@@ -391,11 +393,11 @@ public abstract class BuildpathsBlock {
 	 *         returned must not be valid.
 	 */
 	public IBuildpathEntry[] getRawBuildPath() {
-		List elements = fBuildPathList.getElements();
+		List<BPListElement> elements = fBuildPathList.getElements();
 		int nElements = elements.size();
 		IBuildpathEntry[] entries = new IBuildpathEntry[elements.size()];
 		for (int i = 0; i < nElements; i++) {
-			BPListElement currElement = (BPListElement) elements.get(i);
+			BPListElement currElement = elements.get(i);
 			entries[i] = currElement.getBuildpathEntry();
 		}
 		return entries;
@@ -481,12 +483,12 @@ public abstract class BuildpathsBlock {
 	 */
 	public void updatePathStatus() {
 		fPathStatus.setOK();
-		List elements = fBuildPathList.getElements();
+		List<BPListElement> elements = fBuildPathList.getElements();
 		BPListElement entryMissing = null;
 		int nEntriesMissing = 0;
 		IBuildpathEntry[] entries = new IBuildpathEntry[elements.size()];
 		for (int i = elements.size() - 1; i >= 0; i--) {
-			BPListElement currElement = (BPListElement) elements.get(i);
+			BPListElement currElement = elements.get(i);
 			boolean isChecked = fBuildPathList.isChecked(currElement);
 			if (currElement.getEntryKind() == IBuildpathEntry.BPE_SOURCE) {
 				if (!isChecked) {
@@ -524,10 +526,10 @@ public abstract class BuildpathsBlock {
 	}
 
 	protected void updateBuildPathStatus() {
-		List elements = fBuildPathList.getElements();
+		List<BPListElement> elements = fBuildPathList.getElements();
 		IBuildpathEntry[] entries = new IBuildpathEntry[elements.size()];
 		for (int i = elements.size() - 1; i >= 0; i--) {
-			BPListElement currElement = (BPListElement) elements.get(i);
+			BPListElement currElement = elements.get(i);
 			entries[i] = currElement.getBuildpathEntry();
 		}
 		IModelStatus status = BuildpathEntry.validateBuildpath(
@@ -564,9 +566,8 @@ public abstract class BuildpathsBlock {
 				project.open(new SubProgressMonitor(monitor, 50));
 			}
 		} finally {
-			if (monitor != null) {
-				monitor.done();
-			}
+			// not null
+			monitor.done();
 		}
 	}
 
@@ -575,7 +576,7 @@ public abstract class BuildpathsBlock {
 		if (monitor != null && monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		if (!DLTKLanguageManager.hasScriptNature(project.getProject())) {
+		if (!DLTKLanguageManager.hasScriptNature(project)) {
 			IProjectDescription description = project.getDescription();
 			String[] prevNatures = description.getNatureIds();
 			String[] newNatures = new String[prevNatures.length + 1];
@@ -789,7 +790,8 @@ public abstract class BuildpathsBlock {
 
 	// ---------- util method ------------
 	private IContainer chooseContainer() {
-		Class[] acceptedClasses = new Class[] { IProject.class, IFolder.class };
+		Class<?>[] acceptedClasses = new Class[] { IProject.class,
+				IFolder.class };
 		ISelectionStatusValidator validator = new TypedElementSelectionValidator(
 				acceptedClasses, false);
 		IProject[] allProjects = fWorkspaceRoot.getProjects();
@@ -829,7 +831,7 @@ public abstract class BuildpathsBlock {
 			TabItem tabItem = (TabItem) widget;
 			BuildPathBasePage newPage = (BuildPathBasePage) tabItem.getData();
 			if (fCurrPage != null) {
-				List selection = fCurrPage.getSelection();
+				List<?> selection = fCurrPage.getSelection();
 				if (!selection.isEmpty()) {
 					newPage.setSelection(selection, false);
 				}
@@ -879,7 +881,7 @@ public abstract class BuildpathsBlock {
 				}
 				BuildPathBasePage page = (BuildPathBasePage) fTabFolder
 						.getItem(pageIndex).getData();
-				List selection = new ArrayList(1);
+				List<Object> selection = new ArrayList<Object>(1);
 				selection.add(elementToSelect);
 				page.setSelection(selection, true);
 			}
