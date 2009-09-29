@@ -33,7 +33,7 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 
 	public static final String RSE_SCHEME = "rse"; //$NON-NLS-1$
 
-	public static final String RSE_ENVIRONMENT_PREFIX = DLTKRSEPlugin.PLUGIN_ID
+	public static final String RSE_ENVIRONMENT_PREFIX = DLTKRSEPlugin.NAMESPACE
 			+ ".rseEnvironment."; //$NON-NLS-1$
 
 	public RSEEnvironmentProvider() {
