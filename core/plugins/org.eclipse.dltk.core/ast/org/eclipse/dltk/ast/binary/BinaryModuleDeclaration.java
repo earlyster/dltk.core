@@ -14,6 +14,7 @@ import org.eclipse.dltk.core.model.binary.IBinaryModule;
 public class BinaryModuleDeclaration extends ModuleDeclaration {
 
 	private IBinaryModule module;
+	private BinaryElementIndexer indexer = new BinaryElementIndexer();
 
 	public BinaryModuleDeclaration(IBinaryModule module) {
 		super(0);
@@ -25,13 +26,16 @@ public class BinaryModuleDeclaration extends ModuleDeclaration {
 			for (IModelElement element : children) {
 				switch (element.getElementType()) {
 				case IModelElement.TYPE:
-					getStatements().add(new BinaryType((IType) element));
+					getStatements().add(
+							new BinaryType((IType) element, indexer));
 					break;
 				case IModelElement.METHOD:
-					getStatements().add(new BinaryMethod((IMethod) element));
+					getStatements().add(
+							new BinaryMethod((IMethod) element, indexer));
 					break;
 				case IModelElement.FIELD:
-					getStatements().add(new BinaryField((IField) element));
+					getStatements().add(
+							new BinaryField((IField) element, indexer));
 					break;
 				}
 			}

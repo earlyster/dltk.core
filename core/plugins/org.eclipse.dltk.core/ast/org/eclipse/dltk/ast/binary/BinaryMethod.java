@@ -3,9 +3,11 @@ package org.eclipse.dltk.ast.binary;
 import org.eclipse.dltk.ast.declarations.Argument;
 import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.ast.references.SimpleReference;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 
@@ -16,22 +18,32 @@ public class BinaryMethod extends MethodDeclaration {
 
 	private IMethod element;
 
-	public BinaryMethod(IMethod type) {
-		super(type.getElementName(), 0, 0, 0, 0);
+	public BinaryMethod(IMethod type, BinaryElementIndexer indexer) {
+		super(type.getElementName(), 0, 0, 0, indexer.getIndex());
 		this.element = type;
+		try {
+			ISourceRange nameRange = type.getNameRange();
+			setNameStart(nameRange.getOffset());
+			setNameEnd(nameRange.getOffset() + nameRange.getLength());
+		} catch (ModelException e1) {
+			DLTKCore.error(e1);
+		}
 		IModelElement[] children;
 		try {
 			children = element.getChildren();
 			for (IModelElement element : children) {
 				switch (element.getElementType()) {
 				case IModelElement.TYPE:
-					getStatements().add(new BinaryType((IType) element));
+					getStatements().add(
+							new BinaryType((IType) element, indexer));
 					break;
 				case IModelElement.METHOD:
-					getStatements().add(new BinaryMethod((IMethod) element));
+					getStatements().add(
+							new BinaryMethod((IMethod) element, indexer));
 					break;
 				case IModelElement.FIELD:
-					getStatements().add(new BinaryField((IField) element));
+					getStatements().add(
+							new BinaryField((IField) element, indexer));
 					break;
 				}
 			}

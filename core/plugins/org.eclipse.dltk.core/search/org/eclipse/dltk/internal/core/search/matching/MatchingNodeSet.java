@@ -21,7 +21,6 @@ import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.matching.PatternLocator;
 import org.eclipse.dltk.internal.core.util.Util;
 
-
 /**
  * A set of matches and possible matches, which need to be resolved.
  */
@@ -30,11 +29,12 @@ public class MatchingNodeSet {
 	 * Map of matching ast nodes that don't need to be resolved to their
 	 * accuracy level. Each node is removed as it is reported.
 	 */
-	public SimpleLookupTable matchingNodes = new SimpleLookupTable(3); // node ->
-																// accuracy
+	public SimpleLookupTable matchingNodes = new SimpleLookupTable(3); // node
+	// ->
+	// accuracy
 	private HashtableOfLong matchingNodesKeys = new HashtableOfLong(3); // sourceRange
-																		// ->
-																		// node
+	// ->
+	// node
 	static Integer EXACT_MATCH = new Integer(SearchMatch.A_ACCURATE);
 	static Integer POTENTIAL_MATCH = new Integer(SearchMatch.A_INACCURATE);
 	static Integer ERASURE_MATCH = new Integer(SearchPattern.R_ERASURE_MATCH);
@@ -51,17 +51,17 @@ public class MatchingNodeSet {
 
 	public int addMatch(ASTNode node, int matchLevel) {
 		switch (matchLevel & PatternLocator.NODE_SET_MASK) {
-			case PatternLocator.INACCURATE_MATCH:
-				addTrustedMatch(node, POTENTIAL_MATCH);
-				break;
-			case PatternLocator.POSSIBLE_MATCH:
-				addPossibleMatch(node);
-				break;
-			case PatternLocator.ERASURE_MATCH:
-				addTrustedMatch(node, ERASURE_MATCH);
-				break;
-			case PatternLocator.ACCURATE_MATCH:
-				addTrustedMatch(node, EXACT_MATCH);
+		case PatternLocator.INACCURATE_MATCH:
+			addTrustedMatch(node, POTENTIAL_MATCH);
+			break;
+		case PatternLocator.POSSIBLE_MATCH:
+			addPossibleMatch(node);
+			break;
+		case PatternLocator.ERASURE_MATCH:
+			addTrustedMatch(node, ERASURE_MATCH);
+			break;
+		case PatternLocator.ACCURATE_MATCH:
+			addTrustedMatch(node, EXACT_MATCH);
 		}
 		return matchLevel;
 	}
@@ -70,7 +70,7 @@ public class MatchingNodeSet {
 		// remove existing node at same position from set
 		// (case of recovery that created the same node several time
 		// see http://bugs.eclipse.org/bugs/show_bug.cgi?id=29366)
-		long key = (((long) node.sourceStart()) << 32) + node.sourceEnd();
+		long key = computeNodeKey(node);
 		ASTNode existing = (ASTNode) this.possibleMatchingNodesKeys.get(key);
 		if (existing != null && existing.getClass().equals(node.getClass()))
 			this.possibleMatchingNodesSet.remove(existing);
@@ -87,7 +87,7 @@ public class MatchingNodeSet {
 		// remove existing node at same position from set
 		// (case of recovery that created the same node several time
 		// see http://bugs.eclipse.org/bugs/show_bug.cgi?id=29366)
-		long key = (((long) node.sourceStart()) << 32) + node.sourceEnd();
+		long key = computeNodeKey(node);
 		ASTNode existing = (ASTNode) this.matchingNodesKeys.get(key);
 		if (existing != null && existing.getClass().equals(node.getClass()))
 			this.matchingNodes.removeKey(existing);
@@ -100,13 +100,15 @@ public class MatchingNodeSet {
 		Object[] nodes = this.possibleMatchingNodesSet.values;
 		for (int i = 0, l = nodes.length; i < l; i++) {
 			ASTNode node = (ASTNode) nodes[i];
-			if (node != null && start <= node.sourceStart() && node.sourceEnd() <= end)
+			if (node != null && start <= node.sourceStart()
+					&& node.sourceEnd() <= end)
 				return true;
 		}
 		nodes = this.matchingNodes.keyTable;
 		for (int i = 0, l = nodes.length; i < l; i++) {
 			ASTNode node = (ASTNode) nodes[i];
-			if (node != null && start <= node.sourceStart() && node.sourceEnd() <= end)
+			if (node != null && start <= node.sourceStart()
+					&& node.sourceEnd() <= end)
 				return true;
 		}
 		return false;
@@ -121,7 +123,8 @@ public class MatchingNodeSet {
 		Object[] keyTable = this.matchingNodes.keyTable;
 		for (int i = 0, l = keyTable.length; i < l; i++) {
 			ASTNode node = (ASTNode) keyTable[i];
-			if (node != null && start <= node.sourceStart() && node.sourceEnd() <= end) {
+			if (node != null && start <= node.sourceStart()
+					&& node.sourceEnd() <= end) {
 				if (nodes == null)
 					nodes = new ArrayList();
 				nodes.add(node);
@@ -134,7 +137,8 @@ public class MatchingNodeSet {
 		// sort nodes by source starts
 		Util.Comparer comparer = new Util.Comparer() {
 			public int compare(Object o1, Object o2) {
-				return ((ASTNode) o1).sourceStart() - ((ASTNode) o2).sourceStart();
+				return ((ASTNode) o1).sourceStart()
+						- ((ASTNode) o2).sourceStart();
 			}
 		};
 		Util.sort(result, comparer);
@@ -142,7 +146,7 @@ public class MatchingNodeSet {
 	}
 
 	public Object removePossibleMatch(ASTNode node) {
-		long key = (((long) node.sourceStart()) << 32) + node.sourceEnd();
+		long key = computeNodeKey(node);
 		ASTNode existing = (ASTNode) this.possibleMatchingNodesKeys.get(key);
 		if (existing == null)
 			return null;
@@ -150,8 +154,12 @@ public class MatchingNodeSet {
 		return this.possibleMatchingNodesSet.remove(node);
 	}
 
+	private long computeNodeKey(ASTNode node) {
+		return ((((long) node.sourceStart()) << 32) + node.sourceEnd());
+	}
+
 	public Object removeTrustedMatch(ASTNode node) {
-		long key = (((long) node.sourceStart()) << 32) + node.sourceEnd();
+		long key = computeNodeKey(node);
 		ASTNode existing = (ASTNode) this.matchingNodesKeys.get(key);
 		if (existing == null)
 			return null;
@@ -171,17 +179,17 @@ public class MatchingNodeSet {
 				continue;
 			result.append("\n\t"); //$NON-NLS-1$
 			switch (((Integer) valueTable[i]).intValue()) {
-				case SearchMatch.A_ACCURATE:
-					result.append("ACCURATE_MATCH: "); //$NON-NLS-1$
-					break;
-				case SearchMatch.A_INACCURATE:
-					result.append("INACCURATE_MATCH: "); //$NON-NLS-1$
-					break;
-				case SearchPattern.R_ERASURE_MATCH:
-					result.append("ERASURE_MATCH: "); //$NON-NLS-1$
-					break;
+			case SearchMatch.A_ACCURATE:
+				result.append("ACCURATE_MATCH: "); //$NON-NLS-1$
+				break;
+			case SearchMatch.A_INACCURATE:
+				result.append("INACCURATE_MATCH: "); //$NON-NLS-1$
+				break;
+			case SearchPattern.R_ERASURE_MATCH:
+				result.append("ERASURE_MATCH: "); //$NON-NLS-1$
+				break;
 			}
-			//node.print(0, result);
+			// node.print(0, result);
 			if (DLTKCore.DEBUG) {
 				System.err.println("TODO: Add node print..."); //$NON-NLS-1$
 			}
@@ -193,7 +201,7 @@ public class MatchingNodeSet {
 			if (node == null)
 				continue;
 			result.append("\nPOSSIBLE_MATCH: "); //$NON-NLS-1$
-			//node.print(0, result);
+			// node.print(0, result);
 			if (DLTKCore.DEBUG) {
 				System.err.println("TODO: Add node print..."); //$NON-NLS-1$
 			}
