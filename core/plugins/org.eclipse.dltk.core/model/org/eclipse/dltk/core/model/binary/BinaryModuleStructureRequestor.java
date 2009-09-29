@@ -82,11 +82,13 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 		this.handleStack.push(handle);
 	}
 
-	private void addChild(ModelElement parentHandle, ModelElement handle) {
+	protected void addChild(ModelElement parentHandle, ModelElement handle) {
 		if (parentHandle instanceof BinaryMember) {
 			((BinaryMember) parentHandle).addChild(handle);
 		} else if (parentHandle instanceof ISourceModule) {
-			this.moduleInfo.addChild(handle);
+			if (this.moduleInfo != null) {
+				this.moduleInfo.addChild(handle);
+			}
 		}
 	}
 
@@ -165,7 +167,9 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 		// this.moduleInfo.setBinaryLength(declarationEnd + 1);
 
 		// determine if there were any parsing errors
-		this.moduleInfo.setIsStructureKnown(!this.hasSyntaxErrors);
+		if (this.moduleInfo != null) {
+			this.moduleInfo.setIsStructureKnown(!this.hasSyntaxErrors);
+		}
 	}
 
 	public void exitModuleRoot() {

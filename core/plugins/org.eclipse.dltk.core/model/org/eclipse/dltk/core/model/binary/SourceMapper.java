@@ -27,22 +27,28 @@ public class SourceMapper {
 	private static class Range {
 		int start;
 		int end;
+
+		public Range(int start, int end) {
+			super();
+			this.start = start;
+			this.end = end;
+		}
 	}
 
 	private Map<IModelElement, Range> sourceRanges = new HashMap<IModelElement, Range>();
 
-	private Map<IModelElement, Range> typeNameRanges = new HashMap<IModelElement, Range>();
+	private Map<IModelElement, Range> nameRanges = new HashMap<IModelElement, Range>();
 
 	private IPath sourcePath;
 
-	private IPath sourceRoot;
+	// private IPath sourceRoot;
 
 	private Set<IBinaryModule> sourcesNotPressent = new HashSet<IBinaryModule>();
 	private Map<IBinaryModule, String> sourcesMap = new WeakHashMap<IBinaryModule, String>();
 
 	public SourceMapper(IPath sourcePath, IPath sourceAttachmentRootPath) {
 		this.sourcePath = sourcePath;
-		this.sourceRoot = sourceAttachmentRootPath;
+		// this.sourceRoot = sourceAttachmentRootPath;
 	}
 
 	private ISourceRange getRange(Range range) {
@@ -53,26 +59,41 @@ public class SourceMapper {
 	}
 
 	public ISourceRange getSourceRange(IModelElement element) {
+		fetchRangesForElement(element);
 		return getRange(sourceRanges.get(element));
+	}
+
+	protected void fetchRangesForElement(IModelElement element) {
 	}
 
 	public ISourceRange getNameRange(IModelElement element) {
-		return getRange(sourceRanges.get(element));
+		fetchRangesForElement(element);
+		return getRange(nameRanges.get(element));
 	}
 
 	void reportType(TypeInfo info, IType type) {
-
+		nameRanges.put(type,
+				new Range(info.nameSourceStart, info.nameSourceEnd));
+		sourceRanges.put(type, new Range(info.declarationStart, 0));
 	}
 
 	void reportField(FieldInfo info, IField field) {
-
+		nameRanges.put(field, new Range(info.nameSourceStart,
+				info.nameSourceEnd));
+		sourceRanges.put(field, new Range(info.declarationStart, 0));
 	}
 
-	void reportMethod(MethodInfo info, IMethod mehtod) {
-
+	void reportMethod(MethodInfo info, IMethod method) {
+		nameRanges.put(method, new Range(info.nameSourceStart,
+				info.nameSourceEnd));
+		sourceRanges.put(method, new Range(info.declarationStart, 0));
 	}
 
 	public void setRangeEnd(IModelElement element, int declarationEnd) {
+		Range range = sourceRanges.get(element);
+		if (range != null) {
+			range.end = declarationEnd;
+		}
 	}
 
 	public String getSource(IBinaryModule binaryModule, String fileName) {

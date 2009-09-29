@@ -11,6 +11,7 @@ import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.MementoModelElementUtil;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.NamedMember;
+import org.eclipse.dltk.internal.core.SourceRange;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 
 /**
@@ -41,7 +42,16 @@ public abstract class BinaryMember extends NamedMember implements
 		if (mapper != null) {
 			return mapper.getSourceRange(this);
 		}
-		return null;
+		return new SourceRange(0, 0);
+	}
+
+	@Override
+	public ISourceRange getNameRange() throws ModelException {
+		final SourceMapper mapper = getSourceMapper();
+		if (mapper != null) {
+			return mapper.getNameRange(this);
+		}
+		return new SourceRange(0, 0);
 	}
 
 	public SourceMapper getSourceMapper() {

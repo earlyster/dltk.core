@@ -38,7 +38,8 @@ import org.eclipse.dltk.utils.CorePrinter;
  * @since 2.0
  */
 public class BinaryModule extends AbstractSourceModule implements
-		IBinaryModule, IExternalSourceModule, ISourceMapperProvider {
+		IBinaryModule, IExternalSourceModule, ISourceMapperProvider,
+		org.eclipse.dltk.compiler.env.ISourceModule {
 
 	protected BinaryModule(ModelElement parent, String name,
 			WorkingCopyOwner owner) {
@@ -141,8 +142,7 @@ public class BinaryModule extends AbstractSourceModule implements
 	public String getSource() throws ModelException {
 		SourceMapper mapper = getSourceMapper();
 		if (mapper != null) {
-			String name = this.getElementName();
-			String content = mapper.getSource(this, name);
+			String content = mapper.getSource(this, this.getElementName());
 			if (content != null) {
 				return content;
 			}
