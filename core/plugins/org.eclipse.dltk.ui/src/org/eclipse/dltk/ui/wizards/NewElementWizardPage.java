@@ -10,8 +10,8 @@
 package org.eclipse.dltk.ui.wizards;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.jface.wizard.WizardPage;
 
 
