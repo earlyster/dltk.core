@@ -20,6 +20,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ElementChangedEvent;
 import org.eclipse.dltk.core.IBuildpathEntry;
@@ -48,9 +51,11 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.progress.UIJob;
 
 /**
  * Content provider for the PackageExplorer.
@@ -78,6 +83,8 @@ public class ScriptExplorerContentProvider extends
 	private boolean fFoldPackages;
 
 	private Collection<Runnable> fPendingUpdates;
+
+	private UIJob fUpdateJob;
 
 	/**
 	 * Creates a new content provider for Java elements.
@@ -136,8 +143,15 @@ public class ScriptExplorerContentProvider extends
 		// now post all collected runnables
 		Control ctrl = fViewer.getControl();
 		if (ctrl != null && !ctrl.isDisposed()) {
+		final boolean hasPendingUpdates;
+			synchronized (this) {
+				hasPendingUpdates = fPendingUpdates != null
+						&& !fPendingUpdates.isEmpty();
+			}
 			// Are we in the UIThread? If so spin it until we are done
-			if (ctrl.getDisplay().getThread() == Thread.currentThread()) {
+			if (!hasPendingUpdates
+					&& ctrl.getDisplay().getThread() == Thread.currentThread()
+					&& !fViewer.isBusy()) {
 				runUpdates(runnables);
 			} else {
 				synchronized (this) {
@@ -147,13 +161,28 @@ public class ScriptExplorerContentProvider extends
 						fPendingUpdates.addAll(runnables);
 					}
 				}
-				ctrl.getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						runPendingUpdates();
-					}
-				});
+				postAsyncUpdate(ctrl.getDisplay());			
 			}
 		}
+	}
+
+	private void postAsyncUpdate(final Display display) {
+		if (fUpdateJob == null) {
+			fUpdateJob = new UIJob(display, "Update Script explorer") { //$NON-NLS-1$
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					TreeViewer viewer = fViewer;
+					if (viewer != null && viewer.isBusy()) {
+						// reschedule when viewer is busy: bug 184991
+						schedule(100);
+					} else {
+						runPendingUpdates();
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			fUpdateJob.setSystem(true);
+		}
+		fUpdateJob.schedule();
 	}
 
 	/**
@@ -1040,6 +1069,19 @@ public class ScriptExplorerContentProvider extends
 			return true;
 		}
 		IResourceDelta[] resourceDeltas = delta.getAffectedChildren();
+
+		int count = 0;
+		for (int i = 0; i < resourceDeltas.length; i++) {
+			int kind = resourceDeltas[i].getKind();
+			if (kind == IResourceDelta.ADDED || kind == IResourceDelta.REMOVED) {
+				count++;
+				if (count > 1) {
+					postRefresh(parent, PARENT, resource, runnables);
+					return true;
+				}
+			}
+		}
+
 		for (int i = 0; i < resourceDeltas.length; i++) {
 			if (processResourceDelta(resourceDeltas[i], resource, runnables)) {
 				return false; // early return, element got refreshed
@@ -1060,7 +1102,7 @@ public class ScriptExplorerContentProvider extends
 			final Object affectedElement, final Collection<Runnable> runnables) {
 		// JFace doesn't refresh when object isn't part of the viewer
 		// Therefore move the refresh start down to the viewer's input
-		if (isParent(root, fInput)) {
+		if (isParent(root, fInput) || root instanceof IScriptModel) {
 			root = fInput;
 		}
 		List toRefresh = new ArrayList(1);
