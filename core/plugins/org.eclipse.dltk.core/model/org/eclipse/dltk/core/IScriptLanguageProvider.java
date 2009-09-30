@@ -11,7 +11,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
-public interface IScriptLanguageDependent {
+/**
+ * @since 2.0
+ */
+public interface IScriptLanguageProvider {
 
 	IDLTKLanguageToolkit getLanguageToolkit();
 

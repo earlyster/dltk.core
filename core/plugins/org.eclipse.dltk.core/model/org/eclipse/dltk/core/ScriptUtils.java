@@ -92,7 +92,7 @@ public abstract class ScriptUtils {
 	/**
 	 * Tests if the nature of the specified input object is the same as
 	 * specified value. If the input object does not implement neither
-	 * {@link IScriptLanguageDependent} nor {@link IScriptNatureDependent} then
+	 * {@link IScriptLanguageProvider} nor {@link IScriptNatureDependent} then
 	 * <code>defaultValue<code> is returned.
 	 * 
 	 * @param natureId
@@ -105,8 +105,8 @@ public abstract class ScriptUtils {
 		if (input instanceof IScriptNatureDependent) {
 			return natureId.equals(((IScriptNatureDependent) input)
 					.getNatureId());
-		} else if (input instanceof IScriptLanguageDependent) {
-			return natureId.equals((((IScriptLanguageDependent) input)
+		} else if (input instanceof IScriptLanguageProvider) {
+			return natureId.equals((((IScriptLanguageProvider) input)
 					.getLanguageToolkit().getNatureId()));
 		} else {
 			return defaultValue;
@@ -115,7 +115,7 @@ public abstract class ScriptUtils {
 
 	/**
 	 * Retrieves the nature of the specified input object. If the input object
-	 * does not implement neither {@link IScriptLanguageDependent} nor
+	 * does not implement neither {@link IScriptLanguageProvider} nor
 	 * {@link IScriptNatureDependent} then <code>null<code> is returned.
 	 * 
 	 * @param natureId
@@ -126,8 +126,8 @@ public abstract class ScriptUtils {
 	public static String getNatureId(Object input) {
 		if (input instanceof IScriptNatureDependent) {
 			return ((IScriptNatureDependent) input).getNatureId();
-		} else if (input instanceof IScriptLanguageDependent) {
-			return ((IScriptLanguageDependent) input).getLanguageToolkit()
+		} else if (input instanceof IScriptLanguageProvider) {
+			return ((IScriptLanguageProvider) input).getLanguageToolkit()
 					.getNatureId();
 		} else {
 			return null;
