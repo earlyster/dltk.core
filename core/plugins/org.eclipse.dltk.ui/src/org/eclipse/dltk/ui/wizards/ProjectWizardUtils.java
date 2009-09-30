@@ -72,8 +72,6 @@ public class ProjectWizardUtils {
 	 */
 	static List<IBuildpathEntry> getDefaultBuildpathEntry(
 			ILocationGroup firstPage) {
-		IBuildpathEntry defaultPath = ScriptRuntime
-				.getDefaultInterpreterContainerEntry();
 
 		IPath InterpreterEnvironmentContainerPath = new Path(
 				ScriptRuntime.INTERPRETER_CONTAINER);
@@ -86,6 +84,8 @@ public class ProjectWizardUtils {
 			return Collections.singletonList(DLTKCore
 					.newContainerEntry(newPath));
 		}
+		final IBuildpathEntry defaultPath = ScriptRuntime
+				.getDefaultInterpreterContainerEntry();
 		if (defaultPath != null)
 			return Collections.singletonList(defaultPath);
 		return Collections.emptyList();

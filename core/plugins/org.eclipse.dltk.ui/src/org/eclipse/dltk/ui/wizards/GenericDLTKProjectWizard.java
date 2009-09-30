@@ -7,18 +7,9 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
-import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
-import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
-import org.eclipse.dltk.ui.util.BusyIndicatorRunnableContext;
-import org.eclipse.dltk.ui.util.IStatusChangeListener;
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.INewWizard;
-import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
 public class GenericDLTKProjectWizard extends NewElementWizard implements
@@ -35,38 +26,6 @@ public class GenericDLTKProjectWizard extends NewElementWizard implements
 
 	public String getNature() {
 		return nature;
-	}
-
-	protected IPreferenceStore getPreferenceStoreFromNature() {
-		IDLTKUILanguageToolkit languageToolkit = DLTKUILanguageManager
-				.getLanguageToolkit(nature);
-		if (languageToolkit != null) {
-			return languageToolkit.getPreferenceStore();
-		}
-		return null;
-	}
-
-	private class GenericDLTKBuildpathBlock extends BuildpathsBlock {
-
-		public GenericDLTKBuildpathBlock(IRunnableContext runnableContext,
-				IStatusChangeListener context, int pageToShow,
-				boolean useNewPage, IWorkbenchPreferenceContainer pageContainer) {
-			super(runnableContext, context, pageToShow, useNewPage,
-					pageContainer);
-		}
-
-		protected IPreferenceStore getPreferenceStore() {
-			return getPreferenceStoreFromNature();
-		}
-
-		protected boolean supportZips() {
-			IDLTKLanguageToolkit languageToolkit = null;
-			languageToolkit = DLTKLanguageManager.getLanguageToolkit(nature);
-			if (languageToolkit != null) {
-				return languageToolkit.languageSupportZIPBuildpath();
-			}
-			return false;
-		}
 	}
 
 	public void addPages() {
@@ -91,18 +50,7 @@ public class GenericDLTKProjectWizard extends NewElementWizard implements
 		addPage(fFirstPage);
 
 		// Second page
-		fSecondPage = new ProjectWizardSecondPage(fFirstPage) {
-			protected BuildpathsBlock createBuildpathBlock(
-					IStatusChangeListener listener) {
-				return new GenericDLTKBuildpathBlock(
-						new BusyIndicatorRunnableContext(), listener, 0,
-						useNewSourcePage(), null);
-			}
-
-			protected IPreferenceStore getPreferenceStore() {
-				return getPreferenceStoreFromNature();
-			}
-		};
+		fSecondPage = new ProjectWizardSecondPage(fFirstPage);
 		addPage(fSecondPage);
 	}
 

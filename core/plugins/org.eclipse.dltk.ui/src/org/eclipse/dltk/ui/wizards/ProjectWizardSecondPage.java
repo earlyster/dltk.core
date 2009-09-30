@@ -40,6 +40,9 @@ import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
+import org.eclipse.dltk.ui.DLTKUILanguageManager;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.util.ExceptionHandler;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -51,8 +54,8 @@ import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
  * project creation (so that linked folders can be defined) and, if an existing
  * external location was specified, offers to do a buildpath detection
  */
-public abstract class ProjectWizardSecondPage extends
-		CapabilityConfigurationPage implements IProjectWizardLastPage {
+public class ProjectWizardSecondPage extends CapabilityConfigurationPage
+		implements IProjectWizardLastPage {
 
 	private final ProjectWizardFirstPage fFirstPage;
 
@@ -80,6 +83,7 @@ public abstract class ProjectWizardSecondPage extends
 		return fFirstPage;
 	}
 
+	@Override
 	protected boolean useNewSourcePage() {
 		return true;
 	}
@@ -189,25 +193,18 @@ public abstract class ProjectWizardSecondPage extends
 					entries = null;
 				}
 			} else if (fFirstPage.isSrc()) {
-				IPreferenceStore store = getPreferenceStore();
-				IPath srcPath = new Path(store
-						.getString(PreferenceConstants.SRC_SRCNAME));
+				final IDLTKUILanguageToolkit toolkit = getUILanguageToolkit();
+				final IPath srcPath = toolkit != null ? new Path(toolkit
+						.getString(PreferenceConstants.SRC_SRCNAME))
+						: Path.EMPTY;
 
 				if (srcPath.segmentCount() > 0) {
-					IFolder folder = fCurrProject.getFolder(srcPath);
+					final IFolder folder = fCurrProject.getFolder(srcPath);
 					CoreUtility.createFolder(folder, true, true,
-							new SubProgressMonitor(monitor, 10));
+							new SubProgressMonitor(monitor, 20));
 				} else {
-					monitor.worked(10);
+					monitor.worked(20);
 				}
-
-				// if (srcPath.segmentCount() > 0) {
-				// IFolder folder = fCurrProject.getFolder(srcPath);
-				// CoreUtility.createFolder(folder, true, true,
-				// new SubProgressMonitor(monitor, 10));
-				// } else {
-				// monitor.worked(10);
-				// }
 
 				final IPath projectPath = fCurrProject.getFullPath();
 
@@ -254,11 +251,13 @@ public abstract class ProjectWizardSecondPage extends
 	}
 
 	/**
-	 * @since 2.0
+	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	@Deprecated
-	protected void createBuildpathDetector(IProgressMonitor monitor,
-			IDLTKLanguageToolkit toolkit) {
+	protected final BuildpathDetector createBuildpathDetector(
+			IProgressMonitor monitor, IDLTKLanguageToolkit toolkit)
+			throws CoreException {
+		return null;
 	}
 
 	/**
@@ -273,7 +272,22 @@ public abstract class ProjectWizardSecondPage extends
 		return fFirstPage.getScriptNature();
 	}
 
-	protected abstract IPreferenceStore getPreferenceStore();
+	/**
+	 * @since 2.0
+	 */
+	protected IDLTKUILanguageToolkit getUILanguageToolkit() {
+		return DLTKUILanguageManager.getLanguageToolkit(getScriptNature());
+	}
+
+	@Deprecated
+	protected IPreferenceStore getPreferenceStore() {
+		final IDLTKUILanguageToolkit languageToolkit = getUILanguageToolkit();
+		if (languageToolkit != null) {
+			return languageToolkit.getPreferenceStore();
+		}
+		// return default preference store to avoid NPE
+		return DLTKUIPlugin.getDefault().getPreferenceStore();
+	}
 
 	private URI getProjectLocationURI() throws CoreException {
 		if (fFirstPage.isInWorkspace()) {

@@ -30,7 +30,9 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelStatus;
+import org.eclipse.dltk.core.IScriptLanguageProvider;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.corext.util.Messages;
@@ -54,9 +56,12 @@ import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.dltk.ui.DLTKPluginImages;
+import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
+import org.eclipse.dltk.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.dltk.ui.viewsupport.ImageDisposer;
 import org.eclipse.jface.dialogs.Dialog;
@@ -91,7 +96,7 @@ import org.eclipse.ui.views.navigator.ResourceComparator;
 
 import static org.eclipse.dltk.core.IScriptProjectFilenames.BUILDPATH_FILENAME;
 
-public abstract class BuildpathsBlock {
+public class BuildpathsBlock {
 	public static interface IRemoveOldBinariesQuery {
 		/**
 		 * Do the callback. Returns <code>true</code> if .class files should be
@@ -112,7 +117,7 @@ public abstract class BuildpathsBlock {
 	protected StatusInfo fPathStatus;
 	protected StatusInfo fBuildPathStatus;
 	protected IScriptProject fCurrScriptProject;
-	protected IStatusChangeListener fContext;
+	protected final IStatusChangeListener fContext;
 	protected Control fSWTWidget;
 	protected TabFolder fTabFolder;
 	protected int fPageIndex;
@@ -125,12 +130,17 @@ public abstract class BuildpathsBlock {
 	protected IRunnableContext fRunnableContext;
 	protected boolean fUseNewPage;
 
-	protected final IWorkbenchPreferenceContainer fPageContainer; // null when
+	// null when invoked from a non-property page context
+	protected final IWorkbenchPreferenceContainer fPageContainer;
 
-	// invoked from
-	// a
-	// non-property
-	// page context
+	/**
+	 * @since 2.0
+	 */
+	public BuildpathsBlock(IStatusChangeListener context, int pageToShow,
+			boolean useNewPage, IWorkbenchPreferenceContainer pageContainer) {
+		this(new BusyIndicatorRunnableContext(), context, pageToShow,
+				useNewPage, pageContainer);
+	}
 
 	public BuildpathsBlock(IRunnableContext runnableContext,
 			IStatusChangeListener context, int pageToShow, boolean useNewPage,
@@ -138,6 +148,10 @@ public abstract class BuildpathsBlock {
 		fPageContainer = pageContainer;
 		fWorkspaceRoot = DLTKUIPlugin.getWorkspace().getRoot();
 		fContext = context;
+		if (!(fContext instanceof IScriptLanguageProvider)) {
+			DLTKUIPlugin.log(new Exception("context should implement " //$NON-NLS-1$
+					+ IScriptLanguageProvider.class.getSimpleName()));
+		}
 		fUseNewPage = useNewPage;
 		fPageIndex = pageToShow;
 		fSourceContainerPage = null;
@@ -172,7 +186,10 @@ public abstract class BuildpathsBlock {
 		fCurrScriptProject = null;
 	}
 
-	protected abstract boolean supportZips();
+	protected boolean supportZips() {
+		final IDLTKLanguageToolkit toolkit = getLanguageToolkit();
+		return toolkit != null && toolkit.languageSupportZIPBuildpath();
+	}
 
 	// -------- UI creation ---------
 	public Control createControl(Composite parent) {
@@ -407,17 +424,47 @@ public abstract class BuildpathsBlock {
 		return fPageIndex;
 	}
 
+	/**
+	 * @since 2.0
+	 */
+	protected IDLTKLanguageToolkit getLanguageToolkit() {
+		if (fContext instanceof IScriptLanguageProvider) {
+			return ((IScriptLanguageProvider) fContext).getLanguageToolkit();
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected IDLTKUILanguageToolkit getUILanguageToolkit() {
+		final IDLTKLanguageToolkit toolkit = getLanguageToolkit();
+		if (toolkit != null) {
+			return DLTKUILanguageManager.getLanguageToolkit(toolkit);
+		}
+		return null;
+	}
+
 	// -------- evaluate default settings --------
-	protected abstract IPreferenceStore getPreferenceStore();
+	protected IPreferenceStore getPreferenceStore() {
+		final IDLTKUILanguageToolkit ui = getUILanguageToolkit();
+		if (ui != null) {
+			return ui.getPreferenceStore();
+		}
+		// return default value to avoid NPE
+		return DLTKUIPlugin.getDefault().getPreferenceStore();
+	}
 
 	private List<BPListElement> getDefaultBuildpath(IScriptProject jproj) {
 		List<BPListElement> list = new ArrayList<BPListElement>();
-		IResource srcFolder;
-		IPreferenceStore store = getPreferenceStore();
-		if (store != null) {
-			String sourceFolderName = store
+		final IDLTKUILanguageToolkit toolkit = getUILanguageToolkit();
+		if (toolkit != null) {
+			final IResource srcFolder;
+			final String sourceFolderName = toolkit
 					.getString(PreferenceConstants.SRC_SRCNAME);
-			if (store.getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ)
+			if (toolkit
+					.getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ)
 					&& sourceFolderName.length() > 0) {
 				srcFolder = jproj.getProject().getFolder(sourceFolderName);
 			} else {

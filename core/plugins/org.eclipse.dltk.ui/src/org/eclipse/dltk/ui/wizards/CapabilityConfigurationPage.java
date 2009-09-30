@@ -21,10 +21,14 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IScriptLanguageProvider;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.dltk.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -75,25 +79,29 @@ public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 		setDescription(NewWizardMessages.ScriptCapabilityConfigurationPage_description);
 	}
 
+	private class BuildpathBlockListener implements IStatusChangeListener,
+			IScriptLanguageProvider {
+		public void statusChanged(IStatus status) {
+			updateStatus(status);
+		}
+
+		public IDLTKLanguageToolkit getLanguageToolkit() {
+			return DLTKLanguageManager.getLanguageToolkit(getScriptNature());
+		}
+	}
+
 	protected BuildpathsBlock getBuildPathsBlock() {
 		if (fBuildPathsBlock == null) {
-			IStatusChangeListener listener = new IStatusChangeListener() {
-				public void statusChanged(IStatus status) {
-					updateStatus(status);
-				}
-			};
-			fBuildPathsBlock = createBuildpathBlock(listener);
+			fBuildPathsBlock = createBuildpathBlock(new BuildpathBlockListener());
 		}
 		return fBuildPathsBlock;
 	}
 
-	protected abstract BuildpathsBlock createBuildpathBlock(
-			IStatusChangeListener listener);
-
-	// {
-	// return new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener,
-	// 0, useNewSourcePage(), null);
-	// }
+	protected BuildpathsBlock createBuildpathBlock(
+			IStatusChangeListener listener) {
+		return new BuildpathsBlock(new BusyIndicatorRunnableContext(),
+				listener, 0, useNewSourcePage(), null);
+	}
 
 	/**
 	 * Clients can override this method to choose if the new source page is
