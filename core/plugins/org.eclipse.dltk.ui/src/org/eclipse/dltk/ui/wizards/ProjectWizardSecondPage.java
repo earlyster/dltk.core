@@ -253,6 +253,9 @@ public abstract class ProjectWizardSecondPage extends
 		return new BuildpathDetector(fCurrProject, getLanguageToolkit());
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	@Deprecated
 	protected void createBuildpathDetector(IProgressMonitor monitor,
 			IDLTKLanguageToolkit toolkit) {
