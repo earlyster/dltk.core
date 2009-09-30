@@ -32,7 +32,6 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
@@ -89,6 +88,8 @@ import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.views.navigator.ResourceComparator;
+
+import static org.eclipse.dltk.core.IScriptProjectFilenames.BUILDPATH_FILENAME;
 
 public abstract class BuildpathsBlock {
 	public static interface IRemoveOldBinariesQuery {
@@ -276,8 +277,8 @@ public abstract class BuildpathsBlock {
 		boolean projectExists = false;
 		List<BPListElement> newBuildpath = null;
 		IProject project = fCurrScriptProject.getProject();
-		projectExists = (project.exists() && project.getFile(
-				IScriptProjectFilenames.BUILDPATH_FILENAME).exists());
+		projectExists = project.exists()
+				&& project.getFile(BUILDPATH_FILENAME).exists();
 		if (projectExists) {
 			if (buildpathEntries == null) {
 				buildpathEntries = fCurrScriptProject.readRawBuildpath();
@@ -354,14 +355,14 @@ public abstract class BuildpathsBlock {
 	}
 
 	public boolean hasChangesInBuildpathFile() {
-		IFile file = fCurrScriptProject.getProject().getFile(
-				IScriptProjectFilenames.BUILDPATH_FILENAME);
+		IFile file = fCurrScriptProject.getProject()
+				.getFile(BUILDPATH_FILENAME);
 		return fFileTimeStamp != file.getModificationStamp();
 	}
 
 	public void initializeTimeStamps() {
-		IFile file = fCurrScriptProject.getProject().getFile(
-				IScriptProjectFilenames.BUILDPATH_FILENAME);
+		IFile file = fCurrScriptProject.getProject()
+				.getFile(BUILDPATH_FILENAME);
 		fFileTimeStamp = file.getModificationStamp();
 		fUserSettingsTimeStamp = getEncodedSettings();
 	}
