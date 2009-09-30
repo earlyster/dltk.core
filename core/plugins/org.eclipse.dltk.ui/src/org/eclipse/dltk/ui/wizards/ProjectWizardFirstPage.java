@@ -48,7 +48,9 @@ import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterStandin;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
+import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.dialogs.ControlStatus;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.environment.IEnvironmentUI;
@@ -473,8 +475,15 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		private final Link fPreferenceLink;
 		private IInterpreterInstall[] fInstalledInterpreters;
 		private boolean interpretersPresent;
+		private final boolean fTargetEnvironmentAllowed;
 
 		public AbstractInterpreterGroup(Composite composite) {
+			this(composite, true);
+		}
+
+		protected AbstractInterpreterGroup(Composite composite,
+				boolean targetEnvironmentAllowed) {
+			this.fTargetEnvironmentAllowed = targetEnvironmentAllowed;
 			fGroup = new Group(composite, SWT.NONE);
 			fGroup.setFont(composite.getFont());
 			fGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -485,7 +494,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			fGroup
 					.setText(NewWizardMessages.ScriptProjectWizardFirstPage_InterpreterEnvironmentGroup_title);
 
-			if (isTargetEnvironmentAllowed()) {
+			if (targetEnvironmentAllowed) {
 				final Composite interpreterEnvironmentComposite = new Composite(
 						fGroup, SWT.NONE);
 				interpreterEnvironmentComposite.setLayout(initGridLayout(
@@ -657,19 +666,28 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		 */
 		void showInterpreterPreferencePage() {
 			final String pageId = getIntereprtersPreferencePageId();
-
+			if (pageId == null)
+				return;
 			PreferencesUtil.createPreferenceDialogOn(getShell(), pageId,
 					new String[] { pageId }, null).open();
 		}
 
-		protected abstract String getIntereprtersPreferencePageId();
+		protected String getIntereprtersPreferencePageId() {
+			final IDLTKUILanguageToolkit languageToolkit = DLTKUILanguageManager
+					.getLanguageToolkit(getScriptNature());
+			if (languageToolkit != null) {
+				return languageToolkit.getInterpreterPreferencePage();
+			}
+			return null;
+		}
 
 		protected final String getCurrentLanguageNature() {
 			return getScriptNature();
 		}
 
-		protected boolean isTargetEnvironmentAllowed() {
-			return true;
+		@Deprecated
+		protected final boolean isTargetEnvironmentAllowed() {
+			return fTargetEnvironmentAllowed;
 		}
 
 		/*
@@ -797,32 +815,20 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	 */
 	protected class DefaultInterpreterGroup extends AbstractInterpreterGroup {
 
-		private final String interpreterPreferencePage;
-		private final List<DefaultInterpreterGroupOption> options;
-
 		/**
 		 * @param composite
 		 */
 		public DefaultInterpreterGroup(Composite composite,
-				String interpreterPreferencePage,
 				DefaultInterpreterGroupOption... options) {
-			super(composite);
-			this.interpreterPreferencePage = interpreterPreferencePage;
-			this.options = Arrays.asList(options);
+			this(composite, Arrays.asList(options));
 		}
 
-		@Override
-		protected String getIntereprtersPreferencePageId() {
-			return interpreterPreferencePage;
-		}
-
-		@Override
-		protected boolean isTargetEnvironmentAllowed() {
-			if (options
-					.contains(DefaultInterpreterGroupOption.NO_TARGET_ENVIRONMENT)) {
-				return false;
-			}
-			return super.isTargetEnvironmentAllowed();
+		private DefaultInterpreterGroup(Composite composite,
+				List<DefaultInterpreterGroupOption> options) {
+			super(
+					composite,
+					!options
+							.contains(DefaultInterpreterGroupOption.NO_TARGET_ENVIRONMENT));
 		}
 
 	}
@@ -1083,7 +1089,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		return true;
 	}
 
-	protected abstract IInterpreterGroup createInterpreterGroup(Composite parent);
+	protected IInterpreterGroup createInterpreterGroup(Composite parent) {
+		return new DefaultInterpreterGroup(parent);
+	}
 
 	protected IInterpreterGroup getInterpreterGroup() {
 		return fInterpreterGroup;

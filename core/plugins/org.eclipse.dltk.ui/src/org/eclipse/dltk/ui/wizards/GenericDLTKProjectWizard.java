@@ -17,7 +17,6 @@ import org.eclipse.dltk.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
@@ -28,7 +27,6 @@ public class GenericDLTKProjectWizard extends NewElementWizard implements
 	private ProjectWizardSecondPage fSecondPage;
 	private IConfigurationElement fConfigElement;
 	private String nature;
-	private String preferencePageId;
 
 	public GenericDLTKProjectWizard() {
 		setDialogSettings(DLTKUIPlugin.getDefault().getDialogSettings());
@@ -78,11 +76,6 @@ public class GenericDLTKProjectWizard extends NewElementWizard implements
 			@Override
 			public String getScriptNature() {
 				return nature;
-			}
-
-			@Override
-			protected IInterpreterGroup createInterpreterGroup(Composite parent) {
-				return new DefaultInterpreterGroup(parent, preferencePageId);
 			}
 
 			@Override
