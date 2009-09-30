@@ -149,4 +149,25 @@ public abstract class AbstractDLTKUILanguageToolkit implements
 	public String[] getEditorPreferencePages() {
 		return null;
 	}
+
+	/**
+	 * @since 2.0
+	 */
+	public boolean getBoolean(String name) {
+		return getPreferenceStore().getBoolean(name);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public int getInt(String name) {
+		return getPreferenceStore().getInt(name);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public String getString(String name) {
+		return getPreferenceStore().getString(name);
+	}
 }
