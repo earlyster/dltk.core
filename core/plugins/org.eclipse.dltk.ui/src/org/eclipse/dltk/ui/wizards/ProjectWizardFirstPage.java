@@ -786,6 +786,48 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	}
 
 	/**
+	 * @since 2.0
+	 */
+	protected enum DefaultInterpreterGroupOption {
+		NO_TARGET_ENVIRONMENT
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected class DefaultInterpreterGroup extends AbstractInterpreterGroup {
+
+		private final String interpreterPreferencePage;
+		private final List<DefaultInterpreterGroupOption> options;
+
+		/**
+		 * @param composite
+		 */
+		public DefaultInterpreterGroup(Composite composite,
+				String interpreterPreferencePage,
+				DefaultInterpreterGroupOption... options) {
+			super(composite);
+			this.interpreterPreferencePage = interpreterPreferencePage;
+			this.options = Arrays.asList(options);
+		}
+
+		@Override
+		protected String getIntereprtersPreferencePageId() {
+			return interpreterPreferencePage;
+		}
+
+		@Override
+		protected boolean isTargetEnvironmentAllowed() {
+			if (options
+					.contains(DefaultInterpreterGroupOption.NO_TARGET_ENVIRONMENT)) {
+				return false;
+			}
+			return super.isTargetEnvironmentAllowed();
+		}
+
+	}
+
+	/**
 	 * Show a warning when the project location contains files.
 	 */
 	protected final class DetectGroup extends Observable implements Observer,
