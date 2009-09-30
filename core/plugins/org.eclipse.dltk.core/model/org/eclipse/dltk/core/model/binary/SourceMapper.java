@@ -24,6 +24,8 @@ import org.eclipse.dltk.internal.core.SourceRange;
  * @since 2.0
  */
 public class SourceMapper {
+	protected static final SourceRange UNKNOWN_RANGE = new SourceRange(-1, 0);
+
 	private static class Range {
 		int start;
 		int end;
@@ -53,7 +55,7 @@ public class SourceMapper {
 
 	private ISourceRange getRange(Range range) {
 		if (range == null) {
-			return new SourceRange(0, 0);
+			return UNKNOWN_RANGE;
 		}
 		return new SourceRange(range.start, range.end - range.start + 1);
 	}
