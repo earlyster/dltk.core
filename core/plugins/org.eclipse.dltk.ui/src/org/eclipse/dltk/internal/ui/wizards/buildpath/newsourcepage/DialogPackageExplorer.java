@@ -10,11 +10,18 @@
 
 package org.eclipse.dltk.internal.ui.wizards.buildpath.newsourcepage;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IModelElement;
@@ -399,18 +406,9 @@ public abstract class DialogPackageExplorer implements IMenuListener,
 	 */
 	public void setInput(IScriptProject project) {
 		fCurrJProject = project;
-		fPackageViewer.setInput(new Object());
-		IStructuredSelection selection = new StructuredSelection(project);
-		fPackageViewer.setSelection(selection);
-		fPackageViewer.expandToLevel(2);
-		fCurrentSelection = selection;
-		try {
-			if (fActionGroup != null)
-				fActionGroup.refresh(new DialogExplorerActionContext(
-						fCurrentSelection, fCurrJProject));
-		} catch (ModelException e) {
-			DLTKUIPlugin.log(e);
-		}
+		fPackageViewer.setInput(new Object[0]);
+		fCurrentSelection = new StructuredSelection(project);
+		setSelection(Collections.singletonList(project));
 	}
 
 	/**
@@ -426,16 +424,34 @@ public abstract class DialogPackageExplorer implements IMenuListener,
 	 * @param elements
 	 *            the object to be selected and displayed
 	 */
-	public void setSelection(List elements) {
+	public void setSelection(final List<?> elements) {
 		if (elements == null || elements.size() == 0)
 			return;
-		fPackageViewer.refresh();
-		IStructuredSelection selection = new StructuredSelection(elements);
-		fPackageViewer.setSelection(selection, true);
-		fPackageViewer.getTree().setFocus();
+		try {
+			ResourcesPlugin.getWorkspace().run(
+					new IWorkspaceRunnable() {
+						public void run(IProgressMonitor monitor)
+								throws CoreException {
+							fPackageViewer.refresh();
+							final IStructuredSelection selection = new StructuredSelection(
+									elements);
+							fPackageViewer.setSelection(selection, true);
+							fPackageViewer.getTree().setFocus();
+							if (fActionGroup != null)
+								fActionGroup
+										.refresh(new DialogExplorerActionContext(
+												selection, fCurrJProject));
 
-		if (elements.size() == 1 && elements.get(0) instanceof IScriptProject)
-			fPackageViewer.expandToLevel(elements.get(0), 1);
+							if (elements.size() == 1
+									&& elements.get(0) instanceof IScriptProject)
+								fPackageViewer
+										.expandToLevel(elements.get(0), 1);
+						}
+					}, ResourcesPlugin.getWorkspace().getRoot(),
+					IWorkspace.AVOID_UPDATE, new NullProgressMonitor());
+		} catch (CoreException e) {
+			DLTKUIPlugin.log(e);
+		}
 	}
 
 	/**
