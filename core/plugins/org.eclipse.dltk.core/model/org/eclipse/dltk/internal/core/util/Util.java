@@ -532,6 +532,10 @@ public class Util {
 		}
 	}
 
+	private static boolean isFatalException(CoreException e) {
+		return e.getCause() instanceof FileNotFoundException;
+	}
+
 	public static char[] getResourceContentsAsCharArray(IFile file,
 			String encoding) throws ModelException {
 		// Get resource contents
@@ -545,7 +549,7 @@ public class Util {
 				} catch (CoreException e) {
 					// Some times for RSE we can get here if connection is not
 					// established yet, or if connection are lost.
-					if (--tryCount == 0) {
+					if (isFatalException(e) || --tryCount == 0) {
 						throw new ModelException(e,
 								IModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
 					}
