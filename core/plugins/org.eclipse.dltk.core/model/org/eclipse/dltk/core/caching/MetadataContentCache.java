@@ -161,8 +161,8 @@ public class MetadataContentCache extends AbstractContentCache {
 	}
 
 	private long getHandleLastModification(IFileHandle handle) {
-		IEnvironment environment = handle.getEnvironment();
-		if (environment.isLocal()) {
+		final IEnvironment environment = handle.getEnvironment();
+		if (environment != null && environment.isLocal()) {
 			try {
 				File file = new File(handle.getPath().toOSString());
 				File canonicalFile = file.getCanonicalFile();
