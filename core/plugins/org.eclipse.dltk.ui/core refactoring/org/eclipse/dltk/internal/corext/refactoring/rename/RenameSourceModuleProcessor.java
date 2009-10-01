@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKContentTypeManager;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKFeatures;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
@@ -122,8 +123,24 @@ public class RenameSourceModuleProcessor extends ScriptRenameProcessor
 	// ---- IRenameProcessor -------------------------------------
 
 	public String getCurrentElementName() {
-		// return initial name with extension
-		return fCu.getElementName();
+		if (isFileExtensionRequired()) {
+			// return initial name without extension
+			return getSimpleCUName();
+		} else {
+			// return initial name with extension
+			return fCu.getElementName();
+		}
+	}
+
+	/**
+	 * Tests if script file must have an extension for this language
+	 * 
+	 * @return
+	 */
+	public boolean isFileExtensionRequired() {
+		final IDLTKLanguageToolkit tk = DLTKLanguageManager
+				.getLanguageToolkit(fCu);
+		return tk != null && tk.get(DLTKFeatures.FILE_EXTENSION_REQUIRED);
 	}
 
 	public String getCurrentElementQualifier() {
@@ -226,8 +243,8 @@ public class RenameSourceModuleProcessor extends ScriptRenameProcessor
 
 	public int getMatchStrategy() {
 		return RenamingNameSuggestor.STRATEGY_EXACT; // method should not be
-														// called in this case
-														// anyway ...
+		// called in this case
+		// anyway ...
 	}
 
 	public void setMatchStrategy(int selectedStrategy) {
@@ -279,7 +296,7 @@ public class RenameSourceModuleProcessor extends ScriptRenameProcessor
 	 * Removes the extension (whatever comes after the last '.') from the given
 	 * file name.
 	 */
-	private static String removeFileNameExtension(String fileName) {
+	public static String removeFileNameExtension(String fileName) {
 		if (fileName.lastIndexOf(".") == -1) //$NON-NLS-1$
 			return fileName;
 		return fileName.substring(0, fileName.lastIndexOf(".")); //$NON-NLS-1$
