@@ -23,7 +23,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class RenameRefactoringWizard extends RefactoringWizard {
 	
 	private final String fInputPageDescription;
-	private final String fPageContextHelpId;
+	protected final String fPageContextHelpId;
 	private final ImageDescriptor fInputPageImageDescriptor;
 	
 	public RenameRefactoringWizard(Refactoring refactoring, String defaultPageTitle, String inputPageDescription, 
