@@ -742,8 +742,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	 * @since 2.0
 	 */
 	protected enum DefaultInterpreterGroupOption {
-		@Deprecated
-		NO_TARGET_ENVIRONMENT
+		NONE
 	}
 
 	/**
