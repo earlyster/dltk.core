@@ -75,4 +75,12 @@ public final class DLTKFeatures {
 	public static final BooleanFeature DELETE_MODULE_WITHOUT_TOP_LEVEL_TYPES = new BooleanFeature(
 			"DELETE_MODULE_WITHOUT_TOP_LEVEL_TYPES", false); //$NON-NLS-1$
 
+	/**
+	 * Specifies if script files must have an extension
+	 * 
+	 * @since 2.0
+	 */
+	public static final BooleanFeature FILE_EXTENSION_REQUIRED = new BooleanFeature(
+			"FILE_EXTENSION_REQUIRED", false); //$NON-NLS-1$
+
 }
