@@ -102,6 +102,7 @@ import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.part.ShowInContext;
+import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -401,7 +402,8 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		}
 
 		/*
-		 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
+		 * @see
+		 * ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 		 */
 		protected void handleLabelProviderChanged(
 				LabelProviderChangedEvent event) {
@@ -439,8 +441,9 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 				if (i.getData() instanceof IModelElement) {
 					IModelElement je = (IModelElement) i.getData();
 					if (/*
-					 * je.getElementType() == IModelElement.IMPORT_CONTAINER ||
-					 */isInnerType(je)) {
+						 * je.getElementType() == IModelElement.IMPORT_CONTAINER
+						 * ||
+						 */isInnerType(je)) {
 						if (i != fReusedExpandedItem) {
 							setExpanded(i, false);
 							return;
@@ -452,7 +455,9 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		}
 
 		/*
-		 * @see org.eclipse.jface.viewers.AbstractTreeViewer#isExpandable(java.lang.Object)
+		 * @see
+		 * org.eclipse.jface.viewers.AbstractTreeViewer#isExpandable(java.lang
+		 * .Object)
 		 */
 		public boolean isExpandable(Object element) {
 			if (hasFilters()) {
@@ -869,7 +874,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 	// private String fContextMenuID;
 	private Menu fMenu;
 	protected ScriptOutlineViewer fOutlineViewer;
-	private ScriptEditor fEditor;
+	private IScriptEditor fEditor;
 	protected IPreferenceStore fStore;
 	private MemberFilterActionGroup fMemberFilterActionGroup;
 
@@ -900,7 +905,10 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 	// */
 	// private CategoryFilterActionGroup fCategoryFilterActionGroup;
 
-	public ScriptOutlinePage(ScriptEditor editor, IPreferenceStore store) {
+	/**
+	 * @since 2.0
+	 */
+	public ScriptOutlinePage(IScriptEditor editor, IPreferenceStore store) {
 		super();
 
 		Assert.isNotNull(editor);
@@ -909,8 +917,10 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		fEditor = editor;
 		fStore = store;
 
-		fTogglePresentation = new TogglePresentationAction();
-		fTogglePresentation.setEditor(editor);
+		if (editor instanceof ITextEditor) {
+			fTogglePresentation = new TogglePresentationAction();
+			fTogglePresentation.setEditor((ITextEditor) editor);
+		}
 
 		fPropertyChangeListener = new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
@@ -950,7 +960,9 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.IPostSelectionProvider#addPostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+	 * @see
+	 * org.eclipse.jface.text.IPostSelectionProvider#addPostSelectionChangedListener
+	 * (org.eclipse.jface.viewers.ISelectionChangedListener)
 	 */
 	public void addPostSelectionChangedListener(
 			ISelectionChangedListener listener) {
@@ -962,7 +974,8 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 	}
 
 	/*
-	 * @see ISelectionProvider#addSelectionChangedListener(ISelectionChangedListener)
+	 * @see
+	 * ISelectionProvider#addSelectionChangedListener(ISelectionChangedListener)
 	 */
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		if (fOutlineViewer != null) {
@@ -1087,11 +1100,12 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 						action);
 		actionBars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS,
 				action);
-
-		actionBars
-				.setGlobalActionHandler(
-						ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY,
-						fTogglePresentation);
+		if (fTogglePresentation != null) {
+			actionBars
+					.setGlobalActionHandler(
+							ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY,
+							fTogglePresentation);
+		}
 
 		fActionGroups.fillActionBars(actionBars);
 
@@ -1153,8 +1167,9 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		if (fActionGroups != null) {
 			fActionGroups.dispose();
 		}
-
-		fTogglePresentation.setEditor(null);
+		if (fTogglePresentation != null) {
+			fTogglePresentation.setEditor(null);
+		}
 
 		fOutlineViewer = null;
 
@@ -1330,7 +1345,9 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.IPostSelectionProvider#removePostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+	 * @seeorg.eclipse.jface.text.IPostSelectionProvider#
+	 * removePostSelectionChangedListener
+	 * (org.eclipse.jface.viewers.ISelectionChangedListener)
 	 */
 	public void removePostSelectionChangedListener(
 			ISelectionChangedListener listener) {
@@ -1342,7 +1359,9 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 	}
 
 	/*
-	 * @see ISelectionProvider#removeSelectionChangedListener(ISelectionChangedListener)
+	 * @see
+	 * ISelectionProvider#removeSelectionChangedListener(ISelectionChangedListener
+	 * )
 	 */
 	public void removeSelectionChangedListener(
 			ISelectionChangedListener listener) {

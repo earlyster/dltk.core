@@ -183,7 +183,8 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import com.ibm.icu.text.BreakIterator;
 
 public abstract class ScriptEditor extends AbstractDecoratedTextEditor
-		implements IScriptReconcilingListener, IScriptLanguageProvider {
+		implements IScriptReconcilingListener, IScriptLanguageProvider,
+		IScriptEditor {
 
 	/** The editor's save policy */
 	protected ISavePolicy fSavePolicy = null;
@@ -1537,8 +1538,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	 * @param checkIfOutlinePageActive
 	 *            <code>true</code> if check for active outline page needs to be
 	 *            done
+	 * @since 2.0
 	 */
-	protected void synchronizeOutlinePage(ISourceReference element,
+	public void synchronizeOutlinePage(ISourceReference element,
 			boolean checkIfOutlinePageActive) {
 		if (fOutlinePage != null && element != null
 				&& !(checkIfOutlinePageActive && isOutlinePageActive())) {
@@ -1708,8 +1710,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	 * indication.
 	 * 
 	 * @return the computed source reference
+	 * @since 2.0
 	 */
-	protected ISourceReference computeHighlightRangeSourceReference() {
+	public ISourceReference computeHighlightRangeSourceReference() {
 		ISourceViewer sourceViewer = getSourceViewer();
 		if (sourceViewer == null)
 			return null;
