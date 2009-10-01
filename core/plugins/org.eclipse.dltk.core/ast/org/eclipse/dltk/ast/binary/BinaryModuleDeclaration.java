@@ -1,44 +1,31 @@
 package org.eclipse.dltk.ast.binary;
 
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
-import org.eclipse.dltk.core.IField;
-import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.model.binary.IBinaryModule;
 
 /**
  * @since 2.0
+ * 
+ *        Creates all children elements in constructor. Preserves logical
+ *        positioning of elements
  */
 public class BinaryModuleDeclaration extends ModuleDeclaration {
 
 	private IBinaryModule module;
-	private BinaryElementIndexer indexer = new BinaryElementIndexer();
 
-	public BinaryModuleDeclaration(IBinaryModule module) {
+	public BinaryModuleDeclaration(IBinaryModule module,
+			BinaryElementFactory factory) {
 		super(0);
 		this.module = module;
 		// Fill in top level structures
 		IModelElement[] children;
 		try {
 			children = module.getChildren();
-			for (IModelElement element : children) {
-				switch (element.getElementType()) {
-				case IModelElement.TYPE:
-					getStatements().add(
-							new BinaryType((IType) element, indexer));
-					break;
-				case IModelElement.METHOD:
-					getStatements().add(
-							new BinaryMethod((IMethod) element, indexer));
-					break;
-				case IModelElement.FIELD:
-					getStatements().add(
-							new BinaryField((IField) element, indexer));
-					break;
-				}
-			}
+			factory.processModelElements(children, getStatements());
+			factory.processReferences(this);
+			setEnd(factory.getIndexer().getCurrent());
 		} catch (ModelException e) {
 			e.printStackTrace();
 		}

@@ -98,7 +98,7 @@ public class SourceMapper {
 		}
 	}
 
-	public String getSource(IBinaryModule binaryModule, String fileName) {
+	public String getSource(IBinaryModule binaryModule) {
 		if (sourcesNotPressent.contains(binaryModule)) {
 			return null;
 		}
@@ -106,7 +106,7 @@ public class SourceMapper {
 		if (content != null) {
 			return content;
 		}
-		String source = findSource(binaryModule, fileName);
+		String source = findSource(binaryModule, binaryModule.getElementName());
 		if (source != null) {
 			sourcesMap.put(binaryModule, source);
 		} else {

@@ -3,9 +3,8 @@ package org.eclipse.dltk.ast.binary;
 import org.eclipse.dltk.ast.ASTListNode;
 import org.eclipse.dltk.ast.declarations.TypeDeclaration;
 import org.eclipse.dltk.ast.references.SimpleReference;
+import org.eclipse.dltk.ast.references.TypeReference;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IField;
-import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.IType;
@@ -18,8 +17,9 @@ public class BinaryType extends TypeDeclaration {
 
 	private IType element;
 
-	public BinaryType(IType type, BinaryElementIndexer indexer) {
-		super(type.getElementName(), 0, 0, 0, indexer.getIndex());
+	public BinaryType(IType type, BinaryElementFactory factory) {
+		super(type.getElementName(), 0, 0, factory.nextIndex(), factory
+				.nextIndex());
 		try {
 			ISourceRange nameRange = type.getNameRange();
 			setNameStart(nameRange.getOffset());
@@ -31,31 +31,24 @@ public class BinaryType extends TypeDeclaration {
 		IModelElement[] children;
 		try {
 			children = element.getChildren();
-			for (IModelElement element : children) {
-				switch (element.getElementType()) {
-				case IModelElement.TYPE:
-					getStatements().add(
-							new BinaryType((IType) element, indexer));
-					break;
-				case IModelElement.METHOD:
-					getStatements().add(
-							new BinaryMethod((IMethod) element, indexer));
-					break;
-				case IModelElement.FIELD:
-					getStatements().add(
-							new BinaryField((IField) element, indexer));
-					break;
-				}
-			}
+			factory.processModelElements(children, getStatements());
 			setModifiers(element.getFlags());
 			String[] superClasses = element.getSuperClasses();
 			ASTListNode supers = new ASTListNode();
 			if (superClasses != null) {
 				for (String superName : superClasses) {
-					supers.addNode(new SimpleReference(0, 0, superName));
+					SimpleReference r = new SimpleReference(
+							factory.nextIndex(), factory.nextIndex(), superName);
+					supers.addNode(r);
+					// Super class reference
+					getStatements().add(
+							new TypeReference(r.sourceStart(), r.sourceEnd(),
+									superName));
 				}
 			}
 			setSuperClasses(supers);
+			factory.processReferences(this, getStatements());
+			setEnd(factory.getIndexer().getCurrent());
 		} catch (ModelException e) {
 			e.printStackTrace();
 		}
@@ -72,5 +65,9 @@ public class BinaryType extends TypeDeclaration {
 	@Override
 	public int hashCode() {
 		return this.element.hashCode();
+	}
+
+	public IModelElement getElement() {
+		return element;
 	}
 }

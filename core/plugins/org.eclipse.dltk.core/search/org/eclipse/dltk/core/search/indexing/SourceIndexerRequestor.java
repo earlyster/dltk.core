@@ -22,7 +22,7 @@ import org.eclipse.dltk.core.ISearchPatternProcessor;
  * an index.
  */
 public class SourceIndexerRequestor implements ISourceElementRequestor,
-		IBinaryElementRequestor, IIndexConstants {
+		IBinaryElementRequestor, IIndexConstants, IIndexRequestor {
 	protected AbstractIndexer indexer;
 	// char[] packageName = CharOperation.NO_CHAR;
 	protected char[][] enclosingTypeNames = new char[5][];

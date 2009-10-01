@@ -4,11 +4,9 @@ import org.eclipse.dltk.ast.declarations.Argument;
 import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.ast.references.SimpleReference;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceRange;
-import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 
 /**
@@ -18,8 +16,9 @@ public class BinaryMethod extends MethodDeclaration {
 
 	private IMethod element;
 
-	public BinaryMethod(IMethod type, BinaryElementIndexer indexer) {
-		super(type.getElementName(), 0, 0, 0, indexer.getIndex());
+	public BinaryMethod(IMethod type, BinaryElementFactory factory) {
+		super(type.getElementName(), 0, 0, factory.nextIndex(), factory
+				.nextIndex());
 		this.element = type;
 		try {
 			ISourceRange nameRange = type.getNameRange();
@@ -31,27 +30,16 @@ public class BinaryMethod extends MethodDeclaration {
 		IModelElement[] children;
 		try {
 			children = element.getChildren();
-			for (IModelElement element : children) {
-				switch (element.getElementType()) {
-				case IModelElement.TYPE:
-					getStatements().add(
-							new BinaryType((IType) element, indexer));
-					break;
-				case IModelElement.METHOD:
-					getStatements().add(
-							new BinaryMethod((IMethod) element, indexer));
-					break;
-				case IModelElement.FIELD:
-					getStatements().add(
-							new BinaryField((IField) element, indexer));
-					break;
-				}
-			}
+			children = type.getChildren();
 			String[] parameters = element.getParameters();
 			for (String paramName : parameters) {
-				addArgument(new Argument(new SimpleReference(0, 0, paramName),
-						0, null, 0));
+				addArgument(new Argument(new SimpleReference(factory
+						.nextIndex(), factory.nextIndex(), paramName), 0, null,
+						0));
 			}
+			factory.processModelElements(children, getStatements());
+			factory.processReferences(this, getStatements());
+			setEnd(factory.getIndexer().getCurrent());
 		} catch (ModelException e) {
 			e.printStackTrace();
 		}
@@ -68,5 +56,9 @@ public class BinaryMethod extends MethodDeclaration {
 	@Override
 	public int hashCode() {
 		return this.element.hashCode();
+	}
+
+	public IModelElement getElement() {
+		return element;
 	}
 }

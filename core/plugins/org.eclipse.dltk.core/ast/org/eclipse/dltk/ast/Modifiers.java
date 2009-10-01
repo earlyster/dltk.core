@@ -51,5 +51,10 @@ public interface Modifiers {
 	public static final int AccTestCase = (1 << 15);
 	public static final int AccTest = (1 << 16);
 
-	public static final int USER_MODIFIER = 17;
+	/**
+	 * @since 2.0
+	 */
+	public static final int AccSynthetic = (1 << 17);
+
+	public static final int USER_MODIFIER = 18;
 }

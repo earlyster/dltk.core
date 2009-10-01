@@ -9,4 +9,8 @@ public class BinaryElementIndexer {
 	public int getIndex() {
 		return index++;
 	}
+
+	public int getCurrent() {
+		return index;
+	}
 }

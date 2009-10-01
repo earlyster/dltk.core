@@ -142,7 +142,7 @@ public class BinaryModule extends AbstractSourceModule implements
 	public String getSource() throws ModelException {
 		SourceMapper mapper = getSourceMapper();
 		if (mapper != null) {
-			String content = mapper.getSource(this, this.getElementName());
+			String content = mapper.getSource(this);
 			if (content != null) {
 				return content;
 			}
