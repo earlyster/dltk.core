@@ -243,7 +243,7 @@ public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 	 * @see org.eclipse.core.resources.IProjectDescription#setLocationURI(java.net.URI)
 	 * 
 	 */
-	public static void createProject(IProject project, URI locationURI,
+	public void createProject(IProject project, URI locationURI,
 			IProgressMonitor monitor) throws CoreException {
 		BuildpathsBlock.createProject(project, locationURI, monitor);
 	}

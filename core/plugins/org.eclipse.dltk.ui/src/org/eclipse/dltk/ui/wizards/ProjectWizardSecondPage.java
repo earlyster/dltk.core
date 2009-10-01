@@ -137,6 +137,19 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 		}
 	}
 
+	@Override
+	public void createProject(IProject project, URI locationURI,
+			IProgressMonitor monitor) throws CoreException {
+		super.createProject(project, locationURI, monitor);
+		final IEnvironment environment = fFirstPage.getEnvironment();
+		if (!environment.equals(EnvironmentManager.getLocalEnvironment())) {
+			EnvironmentManager.setEnvironmentId(project, environment.getId(),
+					false);
+		} else {
+			EnvironmentManager.setEnvironmentId(project, null, false);
+		}
+	}
+
 	final void updateProject(IProgressMonitor monitor) throws CoreException,
 			InterruptedException {
 
@@ -340,9 +353,9 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 				// }
 			}
 
-			// Not rebuild project external libraries if exist project with same
-			// interpreter.
-			configureEnvironment(monitor);
+			// Don't rebuild external libraries if project with same
+			// interpreter exists.
+			reuseInterpreterLibraries(monitor);
 			postConfigureProject(new SubProgressMonitor(monitor, 1));
 		} finally {
 			monitor.done();
@@ -354,7 +367,7 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 		}
 	}
 
-	protected void configureEnvironment(IProgressMonitor monitor)
+	private void reuseInterpreterLibraries(IProgressMonitor monitor)
 			throws CoreException {
 		IInterpreterInstall projectInterpreter = this.fFirstPage
 				.getInterpreter();
@@ -363,24 +376,13 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 			if (nature != null) {
 				projectInterpreter = ScriptRuntime
 						.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
-								nature, fFirstPage.getInterpreterEnvironment()
-										.getId()));
+								nature, fFirstPage.getEnvironment().getId()));
 			}
 		}
 		if (projectInterpreter != null) {
-			final IEnvironment interpreterEnv = projectInterpreter
-					.getEnvironment();
-			if (!fFirstPage.getEnvironment().equals(interpreterEnv)) {
-				EnvironmentManager.setEnvironmentId(fCurrProject,
-						interpreterEnv.getId(), false);
-			} else {
-				EnvironmentManager.setEnvironmentId(fCurrProject, null, false);
-			}
 			// Locate projects with same interpreter.
 			ProjectWizardUtils.reuseInterpreterLibraries(fCurrProject,
 					projectInterpreter, monitor);
-		} else {
-			EnvironmentManager.setEnvironmentId(fCurrProject, null, false);
 		}
 	}
 
