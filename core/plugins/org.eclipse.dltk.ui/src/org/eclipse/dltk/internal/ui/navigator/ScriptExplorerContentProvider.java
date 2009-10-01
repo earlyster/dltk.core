@@ -47,7 +47,6 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
@@ -682,39 +681,58 @@ public class ScriptExplorerContentProvider extends
 				&& elementType != IModelElement.SCRIPT_PROJECT) {
 			IScriptProject proj = element.getScriptProject();
 			if (proj == null || !proj.getProject().isOpen()) {
-				// needed if
-				// parent
-				// already did
-				// the 'open'
-				// check!
+				// TODO: Not needed if parent already did the 'open' check!
 				return false;
 			}
 		}
 
-		if (!fIsFlatLayout && elementType == IModelElement.SCRIPT_FOLDER) {
-			if (kind == IModelElementDelta.REMOVED) {
-				final Object parent = getHierarchicalPackageParent((IScriptFolder) element);
-				if (parent instanceof IProjectFragment) {
-					postRemove(element, runnables);
-					return false;
-				} else {
-					postRefresh(internalGetParent(parent), GRANT_PARENT,
-							element, runnables);
-					return true;
+		if (elementType == IModelElement.SCRIPT_FOLDER) {
+			if ((flags & (IModelElementDelta.F_CONTENT | IModelElementDelta.F_CHILDREN)) == IModelElementDelta.F_CONTENT) {
+				if (!fIsFlatLayout) {
+					Object parent = getHierarchicalPackageParent((IScriptFolder) element);
+					if (!(parent instanceof IProjectFragment)) {
+						postRefresh(internalGetParent(parent), GRANT_PARENT,
+								element, runnables);
+						return true;
+					}
 				}
-			} else if (kind == IModelElementDelta.ADDED) {
-				final Object parent = getHierarchicalPackageParent((IScriptFolder) element);
-				if (parent instanceof IProjectFragment) {
-					postAdd(parent, element, runnables);
-					return false;
-				} else {
-					postRefresh(internalGetParent(parent), GRANT_PARENT,
-							element, runnables);
-					return true;
-				}
+				// content change, without children info (for example resource
+				// added/removed to class folder package)
+				postRefresh(internalGetParent(element), PARENT, element,
+						runnables);
+				return true;
 			}
-			handleAffectedChildren(delta, element, runnables);
-			return false;
+
+			if (!fIsFlatLayout) {
+				if (kind == IModelElementDelta.REMOVED) {
+					final Object parent = getHierarchicalPackageParent((IScriptFolder) element);
+					if (parent instanceof IProjectFragment) {
+						postRemove(element, runnables);
+						return false;
+					} else {
+						postRefresh(internalGetParent(parent), GRANT_PARENT,
+								element, runnables);
+						return true;
+					}
+				} else if (kind == IModelElementDelta.ADDED) {
+					final Object parent = getHierarchicalPackageParent((IScriptFolder) element);
+					if (parent instanceof IProjectFragment) {
+						if (fFoldPackages) {
+							postRefresh(parent, PARENT, element, runnables);
+							return true;
+						} else {
+							postAdd(parent, element, runnables);
+							return false;
+						}
+					} else {
+						postRefresh(internalGetParent(parent), GRANT_PARENT,
+								element, runnables);
+						return true;
+					}
+				}
+				handleAffectedChildren(delta, element, runnables);
+				return false;
+			}
 		}
 
 		if (elementType == IModelElement.SOURCE_MODULE) {
@@ -770,6 +788,14 @@ public class ScriptExplorerContentProvider extends
 					postRefresh(parent, PARENT, element, runnables);
 				}
 				return true;
+
+			} else if (element instanceof IProjectFragment
+					&& ((IProjectFragment) element).getKind() != IProjectFragment.K_SOURCE) {
+				// libs and class folders can show up twice (in library
+				// container and as resource at original location)
+				IResource resource = element.getResource();
+				if (resource != null)
+					postRemove(resource, runnables);
 			}
 
 			postRemove(element, runnables);
@@ -813,24 +839,27 @@ public class ScriptExplorerContentProvider extends
 			}
 		}
 
-		if (elementType == IModelElement.SOURCE_MODULE) {
+		if (elementType == IModelElement.SOURCE_MODULE
+				|| elementType == IModelElement.BINARY_MODULE) {
 			if (kind == IModelElementDelta.CHANGED) {
 				// isStructuralCUChange already performed above
 				postRefresh(element, ORIGINAL, element, runnables);
-				updateSelection(delta, runnables);
 			}
 			return false;
 		}
-		// no changes possible in class files
-		// if (elementType == IModelElement.CLASS_FILE) {
-		// return false;
-		// }
 
 		if (elementType == IModelElement.PROJECT_FRAGMENT) {
-			// the contents of an external JAR has changed
+			// the contents of an external JAR or class folder has changed
 			if ((flags & IModelElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0) {
 				postRefresh(element, ORIGINAL, element, runnables);
 				return false;
+			}
+			if ((flags & (IModelElementDelta.F_CONTENT | IModelElementDelta.F_CHILDREN)) == IModelElementDelta.F_CONTENT) {
+				// content change, without children info (for example resource
+				// added/removed to class folder package)
+				postRefresh(internalGetParent(element), PARENT, element,
+						runnables);
+				return true;
 			}
 			// the source attachment of a JAR has changed
 			// if ((flags & ( | IModelElementDelta.F_SOURCEDETACHED)) != 0) {
@@ -845,6 +874,7 @@ public class ScriptExplorerContentProvider extends
 				return true;
 			}
 		}
+
 		handleAffectedChildren(delta, element, runnables);
 		return false;
 	}
@@ -936,46 +966,6 @@ public class ScriptExplorerContentProvider extends
 	}
 
 	/**
-	 * Updates the selection. It finds newly added elements and selects them.
-	 * 
-	 * @param delta
-	 *            the delta to process
-	 * @param runnables
-	 *            the resulting view changes as runnables (type {@link Runnable}
-	 *            )
-	 */
-	private void updateSelection(final IModelElementDelta delta,
-			final Collection<Runnable> runnables) {
-		final IModelElement addedElement = findAddedElement(delta);
-		if (addedElement != null) {
-			final StructuredSelection selection = new StructuredSelection(
-					addedElement);
-			runnables.add(new Runnable() {
-				public void run() {
-					// 19431
-					// if the item is already visible then select it
-					if (fViewer.testFindItem(addedElement) != null) {
-						fViewer.setSelection(selection);
-					}
-				}
-			});
-		}
-	}
-
-	private IModelElement findAddedElement(final IModelElementDelta delta) {
-		if (delta.getKind() == IModelElementDelta.ADDED) {
-			return delta.getElement();
-		}
-
-		IModelElementDelta[] affectedChildren = delta.getAffectedChildren();
-		for (int i = 0; i < affectedChildren.length; i++) {
-			return findAddedElement(affectedChildren[i]);
-		}
-
-		return null;
-	}
-
-	/**
 	 * Updates the package icon
 	 * 
 	 * @param element
@@ -1029,6 +1019,7 @@ public class ScriptExplorerContentProvider extends
 				return true;
 			} else {
 				postRemove(resource, runnables);
+				return false;
 			}
 		}
 		if ((status & IResourceDelta.ADDED) != 0) {
@@ -1040,6 +1031,7 @@ public class ScriptExplorerContentProvider extends
 				return true;
 			} else {
 				postAdd(parent, resource, runnables);
+				return false;
 			}
 		}
 		if ((status & IResourceDelta.CHANGED) != 0) {
