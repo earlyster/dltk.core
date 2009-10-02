@@ -182,18 +182,24 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 					true));
 			group
 					.setText(NewWizardMessages.ScriptProjectWizardFirstPage_LocationGroup_title);
-			createControls(group, numColumns);
+			createModeControls(group, numColumns);
+			createEnvironmentControls(group, numColumns);
+			createLocationControls(group, numColumns);
 		}
 
 		/**
 		 * @since 2.0
 		 */
-		protected void createControls(Composite group, int numColumns) {
-			createModeControls(group, numColumns);
-			createEnvironmentControls(group, numColumns);
-			createLocationControls(group, numColumns);
+		protected void initialize() {
 			fWorkspaceRadio.setSelection(true);
 			fExternalRadio.setSelection(false);
+		}
+
+		/**
+		 * @since 2.0
+		 */
+		@Deprecated
+		protected final void createControls(Composite group, int numColumns) {
 		}
 
 		/**
@@ -278,13 +284,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 
 		protected String getDefaultPath(String name) {
-			IEnvironment environment = this.getEnvironment();
-			if (environment != null && environment.isLocal()) {
-				final IPath path = Platform.getLocation().append(name);
-				return path.toOSString();
-			} else {
-				return ""; //$NON-NLS-1$
-			}
+			return Platform.getLocation().append(name).toOSString();
 		}
 
 		/*
@@ -294,10 +294,28 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		 * java.lang.Object)
 		 */
 		public void update(Observable o, Object arg) {
-			if (isInWorkspace()) {
+			if (!canChangeEnvironment()) {
+				selectLocalEnvironment();
+			}
+			if (!canChangeLocation()) {
 				fLocation.setText(getDefaultPath(fNameGroup.getName()));
 			}
 			fireEvent();
+		}
+
+		private void selectLocalEnvironment() {
+			if (environments == null) {
+				return;
+			}
+			final IEnvironment local = EnvironmentManager.getLocalEnvironment();
+			for (int i = 0; i < environments.length; ++i) {
+				if (local.equals(environments[i])) {
+					if (fEnvironment.getSelectionIndex() != i) {
+						fEnvironment.selectItem(i);
+					}
+					break;
+				}
+			}
 		}
 
 		public IPath getLocation() {
@@ -318,12 +336,19 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		/**
 		 * @since 2.0
 		 */
-		public boolean canChangeEnvironment() {
-			return false;
+		protected boolean canChangeLocation() {
+			return isExternalProject();
+		}
+
+		/**
+		 * @since 2.0
+		 */
+		protected boolean canChangeEnvironment() {
+			return isExternalProject();
 		}
 
 		public IEnvironment getEnvironment() {
-			if (isExternalProject() || canChangeEnvironment()) {
+			if (canChangeEnvironment()) {
 				final int index = fEnvironment.getSelectionIndex();
 				if (index >= 0 && index < environments.length) {
 					return environments[index];
@@ -386,13 +411,30 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 
 		public void dialogFieldChanged(DialogField field) {
 			if (isModeField(field, ANY)) {
-				final boolean external = isExternalProject();
-				fLocation.setEnabled(external);
-				fEnvironment.setEnabled(external || canChangeEnvironment());
+				if (field instanceof SelectionButtonDialogField) {
+					if (!((SelectionButtonDialogField) field)
+							.getSelectionButton().getSelection()) {
+						return;
+					}
+				}
+				refreshControls();
 			}
-			if (isModeField(field, WORKSPACE)) {
-				final boolean checked = isInWorkspace();
-				if (checked) {
+
+			fireEvent();
+		}
+
+		/**
+		 * @since 2.0
+		 */
+		protected void refreshControls() {
+			final boolean wasLocationEnabled = fLocation.isEnabled();
+			fLocation.setEnabled(canChangeLocation());
+			fEnvironment.setEnabled(canChangeEnvironment());
+			if (!canChangeEnvironment()) {
+				selectLocalEnvironment();
+			}
+			if (canChangeLocation() != wasLocationEnabled) {
+				if (wasLocationEnabled) {
 					fPreviousExternalLocation = fLocation.getText();
 					fLocation.setText(getDefaultPath(fNameGroup.getName()));
 				} else {
@@ -403,14 +445,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 						fLocation.setText(""); //$NON-NLS-1$
 					}
 				}
-				updateInterpreters();
 			}
-
-			if (isModeField(field, EXTERNAL)) {
-				updateInterpreters();
-			}
-
-			fireEvent();
+			updateInterpreters();
 		}
 
 		protected void dispose() {
@@ -1064,6 +1100,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		fNameGroup = new NameGroup(composite, fInitialName);
 		fLocationGroup = createLocationGroup();
 		fLocationGroup.createControls(composite);
+		fLocationGroup.initialize();
+		fLocationGroup.refreshControls();
 
 		// fInterpreterEnvironmentGroup= new
 		// InterpreterEnvironmentGroup(composite);
