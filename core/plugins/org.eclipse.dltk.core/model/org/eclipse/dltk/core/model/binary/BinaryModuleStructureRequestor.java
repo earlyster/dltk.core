@@ -9,20 +9,30 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.model.binary;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.compiler.IBinaryElementRequestor;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.internal.core.ImportContainer;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelManager;
+import org.eclipse.dltk.internal.core.SourceRefElement;
 
 /**
  * @since 2.0
  */
 public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
+	private static class Counter {
+		int value;
+	}
 
+	/**
+	 * The cache contains the maximum occurrence index per reference element
+	 */
+	private Map<SourceRefElement, Counter> counters = new HashMap<SourceRefElement, Counter>();
 	private final static String[] EMPTY = new String[0];
 
 	/**
@@ -73,7 +83,7 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 
 		BinaryField handle = new BinaryField(parentHandle, manager
 				.intern(fieldInfo.name));
-
+		resolveDuplicates(handle);
 		addChild(parentHandle, handle);
 		handle.setFlags(fieldInfo.modifiers);
 		if (mapper != null) {
@@ -106,6 +116,7 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 		ModelManager manager = ModelManager.getModelManager();
 		BinaryMethod handle = new BinaryMethod(parentHandle, manager
 				.intern(nameString));
+		resolveDuplicates(handle);
 
 		String[] parameterNames = methodInfo.parameterNames == null ? EMPTY
 				: methodInfo.parameterNames;
@@ -149,6 +160,8 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 	private void processType(TypeInfo typeInfo, ModelElement parentHandle) {
 		String nameString = typeInfo.name;
 		BinaryType handle = new BinaryType(parentHandle, nameString);
+		handle.setFlags(typeInfo.modifiers);
+		resolveDuplicates(handle);
 
 		ModelManager manager = ModelManager.getModelManager();
 		String[] superclasses = typeInfo.superclasses;
@@ -222,4 +235,16 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 
 	}
 
+	protected void resolveDuplicates(SourceRefElement handle) {
+		Assert.isTrue(handle.occurrenceCount == 1);
+		Counter counter = counters.get(handle);
+		if (counter == null) {
+			counter = new Counter();
+			counter.value = handle.occurrenceCount;
+			counters.put(handle, counter);
+		} else {
+			++counter.value;
+			handle.occurrenceCount = counter.value;
+		}
+	}
 }
