@@ -23,4 +23,6 @@ public interface IScriptEditor {
 
 	public IModelElement getElementAt(int offset);
 
+	public void setSelection(IModelElement element);
+
 }

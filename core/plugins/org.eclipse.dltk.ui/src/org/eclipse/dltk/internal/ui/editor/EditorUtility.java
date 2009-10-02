@@ -259,8 +259,8 @@ public class EditorUtility {
 	public static void revealInEditor(IEditorPart part, IModelElement element) {
 		if (element == null)
 			return;
-		if (part instanceof ScriptEditor) {
-			((ScriptEditor) part).setSelection(element);
+		if (part instanceof IScriptEditor) {
+			((IScriptEditor) part).setSelection(element);
 			if (DLTKCore.DEBUG) {
 				System.err.println("Add revealInEditor set selection"); //$NON-NLS-1$
 			}
