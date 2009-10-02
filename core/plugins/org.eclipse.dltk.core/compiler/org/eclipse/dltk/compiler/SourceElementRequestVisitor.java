@@ -26,7 +26,7 @@ import org.eclipse.dltk.compiler.IElementRequestor.TypeInfo;
 
 public class SourceElementRequestVisitor extends ASTVisitor {
 
-	protected ISourceElementRequestor fRequestor = null;
+	protected IElementRequestor fRequestor = null;
 
 	protected boolean fInClass = false; // if we are in class
 	protected boolean fInMethod = false; // if we are in method
@@ -37,7 +37,10 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 	// Used to hold visited nodes in depth
 	protected Stack<ASTNode> fNodes = new Stack<ASTNode>();
 
-	public SourceElementRequestVisitor(ISourceElementRequestor requesor) {
+	/**
+	 * @since 2.0
+	 */
+	public SourceElementRequestVisitor(IElementRequestor requesor) {
 		this.fRequestor = requesor;
 	}
 
@@ -161,9 +164,11 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 		List args = method.getArguments();
 
 		String[] parameter = new String[args.size()];
+		String[] initializers = new String[args.size()];
 		for (int a = 0; a < args.size(); a++) {
 			Argument arg = (Argument) args.get(a);
 			parameter[a] = arg.getName();
+			initializers[a] = null;
 		}
 
 		ISourceElementRequestor.MethodInfo mi = new ISourceElementRequestor.MethodInfo();
@@ -173,6 +178,7 @@ public class SourceElementRequestVisitor extends ASTVisitor {
 		mi.nameSourceStart = method.getNameStart();
 		mi.nameSourceEnd = method.getNameEnd() - 1;
 		mi.declarationStart = method.sourceStart();
+		mi.parameterInitializers = initializers;
 
 		modifyMethodInfo(method, mi);
 

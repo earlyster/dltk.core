@@ -76,7 +76,7 @@ public class Flags implements Modifiers {
 	public static boolean isInterface(int flags) {
 		return (flags & AccInterface) != 0;
 	}
-	
+
 	/**
 	 * Returns whether the given integer includes the indication that the
 	 * element is synthetic.
@@ -84,6 +84,7 @@ public class Flags implements Modifiers {
 	 * @param flags
 	 *            the flags
 	 * @return <code>true</code> if the element is marked synthetic
+	 * @since 2.0
 	 */
 	public static boolean isSynthetic(int flags) {
 		return (flags & AccSynthetic) != 0;
