@@ -20,6 +20,9 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
+/**
+ * @since 2.0
+ */
 public abstract class ProjectWizard extends NewElementWizard implements
 		INewWizard, IExecutableExtension {
 
