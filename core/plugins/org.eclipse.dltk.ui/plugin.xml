@@ -435,7 +435,7 @@
             name="%ScriptWorkingSetPage.name"
             pageClass="org.eclipse.dltk.internal.ui.workingsets.ScriptWorkingSetPage"
             updaterClass="org.eclipse.dltk.internal.ui.workingsets.ScriptWorkingSetUpdater"
-            icon="/icons/full/obj16/jworkingSet_obj.gif"
+            icon="/icons/full/obj16/workingSet_obj.gif"
             id="org.eclipse.dltk.ui.ScriptWorkingSetPage">
       </workingSet>
    </extension>
@@ -445,7 +445,7 @@
    <extension point="org.eclipse.ui.workingSets">
       <workingSet
             name="%OthersWorkingSetWizardPage.name"
-            icon="/icons/full/obj16/jworkingSet_obj.gif"
+            icon="/icons/full/obj16/workingSet_obj.gif"
             updaterClass="org.eclipse.dltk.internal.ui.workingsets.OthersWorkingSetUpdater"
             id="org.eclipse.dltk.internal.ui.OthersWorkingSet">
       </workingSet>
