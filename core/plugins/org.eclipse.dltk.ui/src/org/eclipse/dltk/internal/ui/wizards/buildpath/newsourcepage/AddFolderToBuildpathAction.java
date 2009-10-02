@@ -27,11 +27,11 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.corext.buildpath.BuildpathModifier;
-import org.eclipse.dltk.internal.ui.dialogs.StatusInfo;
+import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.BPListElement;
 import org.eclipse.dltk.internal.ui.wizards.buildpath.BuildPathBasePage;
@@ -54,17 +54,20 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
-
-public class AddFolderToBuildpathAction extends Action implements ISelectionChangedListener {
+public class AddFolderToBuildpathAction extends Action implements
+		ISelectionChangedListener {
 
 	private final IWorkbenchSite fSite;
-	private final List fSelectedElements; //IScriptProject || IPackageFrament || IFolder
+	// IScriptProject || IPackageFrament || IFolder
+	private final List<Object> fSelectedElements;
 
 	public AddFolderToBuildpathAction(IWorkbenchSite site) {
-		super(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label, DLTKPluginImages.DESC_OBJS_PACKFRAG_ROOT);
+		super(
+				NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label,
+				DLTKPluginImages.DESC_OBJS_PACKFRAG_ROOT);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip);
-		fSite= site;
-		fSelectedElements= new ArrayList();
+		fSite = site;
+		fSelectedElements = new ArrayList<Object>();
 	}
 
 	/**
@@ -73,41 +76,48 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 	public void run() {
 
 		final IScriptProject project;
-		Object object= fSelectedElements.get(0);
+		Object object = fSelectedElements.get(0);
 		if (object instanceof IScriptProject) {
-			project= (IScriptProject)object;
+			project = (IScriptProject) object;
 		} else if (object instanceof IScriptFolder) {
-			project= ((IScriptFolder)object).getScriptProject();
+			project = ((IScriptFolder) object).getScriptProject();
 		} else {
-			IFolder folder= (IFolder)object;
-			project= DLTKCore.create(folder.getProject());
+			IFolder folder = (IFolder) object;
+			project = DLTKCore.create(folder.getProject());
 			if (project == null)
 				return;
 		}
 
-		final boolean removeProjectFromBuildpath;					
-		if (fSelectedElements.size() == 1 && fSelectedElements.get(0) instanceof IScriptProject //if only the project should be added, then the query does not need to be executed 
-				) {
+		final boolean removeProjectFromBuildpath;
+		if (fSelectedElements.size() == 1
+				&& fSelectedElements.get(0) instanceof IScriptProject) {
+			/*
+			 * if only the project should be added, then the query does not need
+			 * to be executed
+			 */
 			removeProjectFromBuildpath = true;
 		} else {
-			removeProjectFromBuildpath= false;				
+			removeProjectFromBuildpath = false;
 		}
 
 		try {
-			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+			final IRunnableWithProgress runnable = new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
 					try {
-						List result= addToBuildpath(fSelectedElements, project, removeProjectFromBuildpath, monitor);
+						List result = addToBuildpath(fSelectedElements,
+								project, removeProjectFromBuildpath, monitor);
 						selectAndReveal(new StructuredSelection(result));
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
 					}
 				}
 			};
-			PlatformUI.getWorkbench().getProgressService().run(true, false, runnable);
+			PlatformUI.getWorkbench().getProgressService().run(true, false,
+					runnable);
 		} catch (final InvocationTargetException e) {
 			if (e.getCause() instanceof CoreException) {
-				showExceptionDialog((CoreException)e.getCause());
+				showExceptionDialog((CoreException) e.getCause());
 			} else {
 				DLTKUIPlugin.log(e);
 			}
@@ -115,51 +125,71 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 		}
 	}
 
-	private List addToBuildpath(List elements, IScriptProject project, boolean removeProjectFromBuildpath, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+	private List addToBuildpath(List elements, IScriptProject project,
+			boolean removeProjectFromBuildpath, IProgressMonitor monitor)
+			throws OperationCanceledException, CoreException {
 		if (!DLTKLanguageManager.hasScriptNature(project.getProject())) {
-			StatusInfo rootStatus= new StatusInfo();
-			rootStatus.setError(NewWizardMessages.BuildpathModifier_Error_NoNatures); 
+			StatusInfo rootStatus = new StatusInfo();
+			rootStatus
+					.setError(NewWizardMessages.BuildpathModifier_Error_NoNatures);
 			throw new CoreException(rootStatus);
 		}
-		
+
 		try {
-			monitor.beginTask(NewWizardMessages.BuildpathModifier_Monitor_AddToBuildpath, elements.size() + 4); 			
-			
+			monitor.beginTask(
+					NewWizardMessages.BuildpathModifier_Monitor_AddToBuildpath,
+					elements.size() + 4);
+
 			monitor.worked(1);
 
-			List existingEntries= BuildpathModifier.getExistingEntries(project);
+			List existingEntries = BuildpathModifier
+					.getExistingEntries(project);
 			if (removeProjectFromBuildpath) {
-				BuildpathModifier.removeFromBuildpath(project, existingEntries, new SubProgressMonitor(monitor, 1));
+				BuildpathModifier.removeFromBuildpath(project, existingEntries,
+						new SubProgressMonitor(monitor, 1));
 			} else {
 				monitor.worked(1);
 			}
 
-			List newEntries= new ArrayList();
-			for (int i= 0; i < elements.size(); i++) {
-				Object element= elements.get(i);
+			List newEntries = new ArrayList();
+			for (int i = 0; i < elements.size(); i++) {
+				Object element = elements.get(i);
 				BPListElement entry;
 				if (element instanceof IResource)
-					entry= BuildpathModifier.addToBuildpath((IResource) element, existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
+					entry = BuildpathModifier.addToBuildpath(
+							(IResource) element, existingEntries, newEntries,
+							project, new SubProgressMonitor(monitor, 1));
 				else
-					entry= BuildpathModifier.addToBuildpath((IModelElement) element, existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
+					entry = BuildpathModifier.addToBuildpath(
+							(IModelElement) element, existingEntries,
+							newEntries, project, new SubProgressMonitor(
+									monitor, 1));
 				newEntries.add(entry);
 			}
 
-			Set modifiedSourceEntries= new HashSet();
-			BuildPathBasePage.fixNestingConflicts((BPListElement[])newEntries.toArray(new BPListElement[newEntries.size()]), (BPListElement[])existingEntries.toArray(new BPListElement[existingEntries.size()]), modifiedSourceEntries);
+			Set modifiedSourceEntries = new HashSet();
+			BuildPathBasePage
+					.fixNestingConflicts((BPListElement[]) newEntries
+							.toArray(new BPListElement[newEntries.size()]),
+							(BPListElement[]) existingEntries
+									.toArray(new BPListElement[existingEntries
+											.size()]), modifiedSourceEntries);
 
-			BuildpathModifier.setNewEntry(existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
+			BuildpathModifier.setNewEntry(existingEntries, newEntries, project,
+					new SubProgressMonitor(monitor, 1));
 
-			BuildpathModifier.commitBuildPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
+			BuildpathModifier.commitBuildPath(existingEntries, project,
+					new SubProgressMonitor(monitor, 1));
 
-			List result= new ArrayList();
-			for (int i= 0; i < newEntries.size(); i++) {
-				IBuildpathEntry entry= ((BPListElement) newEntries.get(i)).getBuildpathEntry();
+			List result = new ArrayList();
+			for (int i = 0; i < newEntries.size(); i++) {
+				IBuildpathEntry entry = ((BPListElement) newEntries.get(i))
+						.getBuildpathEntry();
 				IModelElement root;
 				if (entry.getPath().equals(project.getPath()))
-					root= project;
+					root = project;
 				else
-					root= project.findProjectFragment(entry.getPath());
+					root = project.findProjectFragment(entry.getPath());
 				if (root != null) {
 					result.add(root);
 				}
@@ -188,21 +218,35 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 			return false;
 		try {
 			fSelectedElements.clear();
-			for (Iterator iter= elements.iterator(); iter.hasNext();) {
-				Object element= iter.next();
-				fSelectedElements.add(element);
+			for (Iterator<?> iter = elements.iterator(); iter.hasNext();) {
+				Object element = iter.next();
 				if (element instanceof IScriptProject) {
-					if (BuildpathModifier.isSourceFolder((IScriptProject)element))
+					if (BuildpathModifier
+							.isSourceFolder((IScriptProject) element))
 						return false;
+					fSelectedElements.add(element);
+				} else if (element instanceof IProject) {
+					IScriptProject scriptProject = DLTKCore
+							.create((IProject) element);
+					if (!scriptProject.isValid()
+							|| BuildpathModifier.isSourceFolder(scriptProject)) {
+						return false;
+					}
+					fSelectedElements.add(scriptProject);
 				} else if (element instanceof IScriptFolder) {
-					int type= DialogPackageExplorerActionGroup.getType(element, ((IScriptFolder)element).getScriptProject());
-					if (type != DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT && type != DialogPackageExplorerActionGroup.INCLUDED_FOLDER)
+					int type = DialogPackageExplorerActionGroup.getType(
+							element, ((IScriptFolder) element)
+									.getScriptProject());
+					if (type != DialogPackageExplorerActionGroup.PACKAGE_FRAGMENT
+							&& type != DialogPackageExplorerActionGroup.INCLUDED_FOLDER)
 						return false;
+					fSelectedElements.add(element);
 				} else if (element instanceof IFolder) {
-					IProject project= ((IFolder)element).getProject();
-					IScriptProject scriptProject= DLTKCore.create(project);
+					IProject project = ((IFolder) element).getProject();
+					IScriptProject scriptProject = DLTKCore.create(project);
 					if (scriptProject == null || !scriptProject.exists())
 						return false;
+					fSelectedElements.add(element);
 				} else {
 					return false;
 				}
@@ -214,57 +258,62 @@ public class AddFolderToBuildpathAction extends Action implements ISelectionChan
 	}
 
 	private void showExceptionDialog(CoreException exception) {
-		showError(exception, fSite.getShell(), NewWizardMessages.AddSourceFolderToBuildpathAction_ErrorTitle, exception.getMessage());
+		showError(exception, fSite.getShell(),
+				NewWizardMessages.AddSourceFolderToBuildpathAction_ErrorTitle,
+				exception.getMessage());
 	}
 
-	private void showError(CoreException e, Shell shell, String title, String message) {
-		IStatus status= e.getStatus();
+	private void showError(CoreException e, Shell shell, String title,
+			String message) {
+		IStatus status = e.getStatus();
 		if (status != null) {
 			ErrorDialog.openError(shell, message, title, status);
 		} else {
 			MessageDialog.openError(shell, title, message);
 		}
 	}
-	
+
 	private void selectAndReveal(final ISelection selection) {
 		// validate the input
-		IWorkbenchPage page= fSite.getPage();
+		IWorkbenchPage page = fSite.getPage();
 		if (page == null)
 			return;
 
 		// get all the view and editor parts
-		List parts= new ArrayList();
-		IWorkbenchPartReference refs[]= page.getViewReferences();
-		for (int i= 0; i < refs.length; i++) {
-			IWorkbenchPart part= refs[i].getPart(false);
+		List parts = new ArrayList();
+		IWorkbenchPartReference refs[] = page.getViewReferences();
+		for (int i = 0; i < refs.length; i++) {
+			IWorkbenchPart part = refs[i].getPart(false);
 			if (part != null)
 				parts.add(part);
 		}
-		refs= page.getEditorReferences();
-		for (int i= 0; i < refs.length; i++) {
+		refs = page.getEditorReferences();
+		for (int i = 0; i < refs.length; i++) {
 			if (refs[i].getPart(false) != null)
 				parts.add(refs[i].getPart(false));
 		}
 
-		Iterator itr= parts.iterator();
+		Iterator itr = parts.iterator();
 		while (itr.hasNext()) {
-			IWorkbenchPart part= (IWorkbenchPart) itr.next();
+			IWorkbenchPart part = (IWorkbenchPart) itr.next();
 
 			// get the part's ISetSelectionTarget implementation
-			ISetSelectionTarget target= null;
+			ISetSelectionTarget target = null;
 			if (part instanceof ISetSelectionTarget)
-				target= (ISetSelectionTarget) part;
+				target = (ISetSelectionTarget) part;
 			else
-				target= (ISetSelectionTarget) part.getAdapter(ISetSelectionTarget.class);
+				target = (ISetSelectionTarget) part
+						.getAdapter(ISetSelectionTarget.class);
 
 			if (target != null) {
 				// select and reveal resource
-				final ISetSelectionTarget finalTarget= target;
-				page.getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						finalTarget.selectReveal(selection);
-					}
-				});
+				final ISetSelectionTarget finalTarget = target;
+				page.getWorkbenchWindow().getShell().getDisplay().asyncExec(
+						new Runnable() {
+							public void run() {
+								finalTarget.selectReveal(selection);
+							}
+						});
 			}
 		}
 	}

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -23,6 +24,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
@@ -139,7 +141,7 @@ public class AddLibraryToBuildpathAction extends Action implements
 										NewWizardMessages.BuildpathModifier_Monitor_AddToBuildpath,
 										4);
 
-						List addedEntries = new ArrayList();
+						List<BPListElement> addedEntries = new ArrayList<BPListElement>();
 						for (int i = 0; i < selected.length; i++) {
 							BPListElement listElement = BPListElement
 									.createFromExisting(selected[i], project);
@@ -199,10 +201,18 @@ public class AddLibraryToBuildpathAction extends Action implements
 	}
 
 	public boolean canHandle(IStructuredSelection selection) {
-		if (selection.size() == 1
-				&& selection.getFirstElement() instanceof IScriptProject) {
-			fSelectedProject = (IScriptProject) selection.getFirstElement();
+		if (selection.size() != 1)
+			return false;
+		final Object first = selection.getFirstElement();
+		if (first instanceof IScriptProject) {
+			fSelectedProject = (IScriptProject) first;
 			return true;
+		} else if (first instanceof IProject) {
+			IScriptProject scriptProject = DLTKCore.create((IProject) first);
+			if (scriptProject.isValid()) {
+				fSelectedProject = scriptProject;
+				return true;
+			}
 		}
 		return false;
 	}

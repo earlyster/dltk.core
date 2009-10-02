@@ -14,12 +14,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
@@ -143,10 +145,13 @@ public class AddArchiveToBuildpathAction extends Action implements ISelectionCha
 			return false;
 
 		Object first= selection.getFirstElement();
-		if (!(first instanceof IScriptProject))
+		if (first instanceof IScriptProject)
+			fScriptProject = (IScriptProject) first;
+		else if (first instanceof IProject) {
+			fScriptProject = DLTKCore.create((IProject) first);
+		} else
 			return false;
 
-		fScriptProject= (IScriptProject)first;
 		if( fScriptProject == null || !fScriptProject.exists() ) {
 			return false;
 		}
