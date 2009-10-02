@@ -77,4 +77,16 @@ public class Flags implements Modifiers {
 		return (flags & AccInterface) != 0;
 	}
 	
+	/**
+	 * Returns whether the given integer includes the indication that the
+	 * element is synthetic.
+	 * 
+	 * @param flags
+	 *            the flags
+	 * @return <code>true</code> if the element is marked synthetic
+	 */
+	public static boolean isSynthetic(int flags) {
+		return (flags & AccSynthetic) != 0;
+	}
+
 }
