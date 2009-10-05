@@ -33,6 +33,7 @@ import org.eclipse.dltk.core.index.sql.SqlIndex;
 import org.eclipse.dltk.core.index2.AbstractIndexer;
 import org.eclipse.dltk.core.index2.search.ISearchEngine;
 import org.eclipse.dltk.internal.core.ExternalSourceModule;
+import org.eclipse.dltk.internal.core.SourceModule;
 import org.eclipse.dltk.internal.core.util.Util;
 import org.eclipse.osgi.util.NLS;
 
@@ -99,9 +100,13 @@ public class SqlIndexer extends AbstractIndexer {
 
 				natureId = toolkit.getNatureId();
 
-				IModelElement projectFragment = sourceModule
-						.getAncestor(IModelElement.PROJECT_FRAGMENT);
-				IPath containerPath = projectFragment.getPath();
+				IPath containerPath;
+				if (sourceModule instanceof SourceModule) {
+					containerPath = sourceModule.getScriptProject().getPath();
+				} else {
+					containerPath = sourceModule.getAncestor(
+							IModelElement.PROJECT_FRAGMENT).getPath();
+				}
 				Container container = dbFactory.getContainerDao().insert(
 						connection, containerPath.toString());
 
