@@ -11,7 +11,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.utils;
 
+import java.util.AbstractCollection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -51,6 +53,13 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 				manager.remove(this);
 				return null;
 			}
+		}
+
+		/**
+		 * @since 2.0
+		 */
+		public String getAttribute(String name) {
+			return configurationElement.getAttribute(name);
 		}
 
 		/**
@@ -156,6 +165,27 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 
 	}
 
+	private static class DescriptorCollection<E> extends
+			AbstractCollection<Descriptor<E>> {
+
+		private final Descriptor<E>[] descriptors;
+
+		public DescriptorCollection(Descriptor<E>[] descriptors) {
+			this.descriptors = descriptors;
+		}
+
+		@Override
+		public Iterator<Descriptor<E>> iterator() {
+			return new DescriptorIterator<E>(descriptors);
+		}
+
+		@Override
+		public int size() {
+			return descriptors.length;
+		}
+
+	}
+
 	private final String extensionPoint;
 	protected final String classAttr = "class"; //$NON-NLS-1$
 
@@ -203,6 +233,13 @@ public class LazyExtensionManager<E> implements Iterable<E> {
 
 	public Iterator<Descriptor<E>> descriptorIterator() {
 		return new DescriptorIterator<E>(internalGetInstances());
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public Collection<Descriptor<E>> descriptors() {
+		return new DescriptorCollection<E>(internalGetInstances());
 	}
 
 	synchronized void remove(Descriptor<E> descriptor) {
