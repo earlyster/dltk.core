@@ -28,11 +28,13 @@ public abstract class ProjectWizard extends NewElementWizard implements
 
 	private IConfigurationElement fConfigElement;
 
+	@Override
 	protected void finishPage(IProgressMonitor monitor)
 			throws InterruptedException, CoreException {
 		getLastPage().performFinish(monitor); // use the full progress monitor
 	}
 
+	@Override
 	public boolean performFinish() {
 		boolean res = super.performFinish();
 		if (res) {
@@ -52,7 +54,7 @@ public abstract class ProjectWizard extends NewElementWizard implements
 		}
 		throw new IllegalStateException(IProjectWizardLastPage.class
 				.getSimpleName()
-				+ " not found");
+				+ " not found"); //$NON-NLS-1$
 	}
 
 	/*
@@ -64,15 +66,18 @@ public abstract class ProjectWizard extends NewElementWizard implements
 		fConfigElement = cfig;
 	}
 
+	@Override
 	public boolean performCancel() {
 		getLastPage().performCancel();
 		return super.performCancel();
 	}
 
+	@Override
 	public IModelElement getCreatedElement() {
 		return getLastPage().getScriptProject();
 	}
 
+	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
 		IWizardPage nextPage = super.getNextPage(page);
 		while (nextPage != null && !isEnabledPage(nextPage)) {
@@ -81,6 +86,7 @@ public abstract class ProjectWizard extends NewElementWizard implements
 		return nextPage;
 	}
 
+	@Override
 	public IWizardPage getPreviousPage(IWizardPage page) {
 		IWizardPage prevPage = super.getPreviousPage(page);
 		while (prevPage != null && !isEnabledPage(prevPage)) {
@@ -89,6 +95,7 @@ public abstract class ProjectWizard extends NewElementWizard implements
 		return prevPage;
 	}
 
+	@Override
 	public boolean canFinish() {
 		final IWizardPage[] pages = getPages();
 		for (int i = 0; i < pages.length; ++i) {
