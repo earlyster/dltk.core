@@ -91,7 +91,8 @@ public class ProjectIndexer2 implements IProjectIndexer {
 
 	public void indexSourceModule(ISourceModule module,
 			IDLTKLanguageToolkit toolkit) {
-		jobManager.request(new AddSourceModuleRequest(this, module, null));
+		jobManager
+				.request(new AddSourceModuleRequest(this, module, progressJob));
 	}
 
 	public void reconciled(ISourceModule workingCopy,
