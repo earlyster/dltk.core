@@ -11,16 +11,34 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.wizard.IWizardPage;
 
 /**
  * @since 2.0
  */
-public interface IProjectWizardExtensionContext {
+public interface IProjectWizardPage extends IWizardPage {
 
-	Composite getControl();
+	/**
+	 * This method is called initially to configure project create steps.
+	 * 
+	 * @param creator
+	 */
+	void configureSteps(ProjectCreator creator);
 
-	GridLayout initGridLayout(GridLayout layout, boolean margins);
+	/**
+	 * This methods is called for all previous pages to update project create
+	 * steps.
+	 * 
+	 * @param creator
+	 */
+	void updateSteps();
+
+	/**
+	 * This method is called when project being created was deleted as a result
+	 * of project wizard cancellation or returning to the 1st page.
+	 * 
+	 * @param creator
+	 */
+	void resetPage();
 
 }

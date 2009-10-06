@@ -182,7 +182,7 @@ public class PreferenceConstants {
 	 * and output folder equals to the project.
 	 * </p>
 	 */
-	public static final String SRCBIN_FOLDERS_IN_NEWPROJ = "com.xore.dltk.ui.wizards.srcBinFoldersInNewProjects"; //$NON-NLS-1$
+	public static final String SRCBIN_FOLDERS_IN_NEWPROJ = "org.eclipse.dltk.ui.wizards.srcBinFoldersInNewProjects"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether the hierarchy view's selection
@@ -203,7 +203,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see #SRCBIN_FOLDERS_IN_NEWPROJ
 	 */
-	public static final String SRC_SRCNAME = "com.xore.dltk.ui.wizards.srcFoldersSrcName"; //$NON-NLS-1$	
+	public static final String SRC_SRCNAME = "org.eclipse.dltk.ui.wizards.srcFoldersSrcName"; //$NON-NLS-1$	
 
 	public final static String EDITOR_SMART_INDENT = "editorSmartIndent"; //$NON-NLS-1$
 

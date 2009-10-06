@@ -11,34 +11,28 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.dltk.core.environment.IEnvironment;
-import org.eclipse.dltk.ui.dialogs.IProjectTemplate;
+import org.eclipse.dltk.core.IBuildpathEntry;
 
 /**
  * @since 2.0
  */
-public interface IProjectWizardExtension {
-	interface IValidationRequestor {
-		void validate();
-	}
-
-	void createControls(IProjectWizardExtensionContext context);
+public interface IBuildpathDetector {
 
 	/**
-	 * @param project
-	 * @param monitor
+	 * Executes buildpath detection
+	 * 
+	 * @param subProgressMonitor
 	 * @throws CoreException
 	 */
-	void postConfigure(IProject project, IProgressMonitor monitor)
-			throws CoreException;
+	void detectBuildpath(IProgressMonitor monitor) throws CoreException;
 
-	IStatus validate(IProject handle, IEnvironment environment,
-			IProjectTemplate template);
-
-	void setValidationRequestor(IValidationRequestor requestor);
+	/**
+	 * Returns the detection results
+	 * 
+	 * @return
+	 */
+	IBuildpathEntry[] getBuildpath();
 
 }

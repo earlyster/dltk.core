@@ -29,11 +29,11 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelStatus;
+import org.eclipse.dltk.core.IScriptLanguageProvider;
 import org.eclipse.dltk.core.IScriptProject;
-import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.internal.corext.util.Messages;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
@@ -56,9 +56,12 @@ import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.dltk.ui.DLTKPluginImages;
+import org.eclipse.dltk.ui.DLTKUILanguageManager;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
+import org.eclipse.dltk.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.dltk.ui.viewsupport.ImageDisposer;
 import org.eclipse.jface.dialogs.Dialog;
@@ -91,7 +94,9 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.views.navigator.ResourceComparator;
 
-public abstract class BuildpathsBlock {
+import static org.eclipse.dltk.core.IScriptProjectFilenames.BUILDPATH_FILENAME;
+
+public class BuildpathsBlock {
 	public static interface IRemoveOldBinariesQuery {
 		/**
 		 * Do the callback. Returns <code>true</code> if .class files should be
@@ -107,12 +112,12 @@ public abstract class BuildpathsBlock {
 	}
 
 	protected IWorkspaceRoot fWorkspaceRoot;
-	protected CheckedListDialogField fBuildPathList;
+	protected CheckedListDialogField<BPListElement> fBuildPathList;
 	protected StringButtonDialogField fBuildPathDialogField;
 	protected StatusInfo fPathStatus;
 	protected StatusInfo fBuildPathStatus;
 	protected IScriptProject fCurrScriptProject;
-	protected IStatusChangeListener fContext;
+	protected final IStatusChangeListener fContext;
 	protected Control fSWTWidget;
 	protected TabFolder fTabFolder;
 	protected int fPageIndex;
@@ -125,12 +130,17 @@ public abstract class BuildpathsBlock {
 	protected IRunnableContext fRunnableContext;
 	protected boolean fUseNewPage;
 
-	protected final IWorkbenchPreferenceContainer fPageContainer; // null when
+	// null when invoked from a non-property page context
+	protected final IWorkbenchPreferenceContainer fPageContainer;
 
-	// invoked from
-	// a
-	// non-property
-	// page context
+	/**
+	 * @since 2.0
+	 */
+	public BuildpathsBlock(IStatusChangeListener context, int pageToShow,
+			boolean useNewPage, IWorkbenchPreferenceContainer pageContainer) {
+		this(new BusyIndicatorRunnableContext(), context, pageToShow,
+				useNewPage, pageContainer);
+	}
 
 	public BuildpathsBlock(IRunnableContext runnableContext,
 			IStatusChangeListener context, int pageToShow, boolean useNewPage,
@@ -138,6 +148,10 @@ public abstract class BuildpathsBlock {
 		fPageContainer = pageContainer;
 		fWorkspaceRoot = DLTKUIPlugin.getWorkspace().getRoot();
 		fContext = context;
+		if (!(fContext instanceof IScriptLanguageProvider)) {
+			DLTKUIPlugin.log(new Exception("context should implement " //$NON-NLS-1$
+					+ IScriptLanguageProvider.class.getSimpleName()));
+		}
 		fUseNewPage = useNewPage;
 		fPageIndex = pageToShow;
 		fSourceContainerPage = null;
@@ -152,8 +166,8 @@ public abstract class BuildpathsBlock {
 				/* 2 */null,
 				NewWizardMessages.BuildPathsBlock_buildpath_checkall_button,
 				NewWizardMessages.BuildPathsBlock_buildpath_uncheckall_button };
-		fBuildPathList = new CheckedListDialogField(null, buttonLabels,
-				new BPListLabelProvider());
+		fBuildPathList = new CheckedListDialogField<BPListElement>(null,
+				buttonLabels, new BPListLabelProvider());
 		fBuildPathList.setDialogFieldListener(adapter);
 		fBuildPathList
 				.setLabelText(NewWizardMessages.BuildPathsBlock_buildpath_label);
@@ -172,7 +186,10 @@ public abstract class BuildpathsBlock {
 		fCurrScriptProject = null;
 	}
 
-	protected abstract boolean supportZips();
+	protected boolean supportZips() {
+		final IDLTKLanguageToolkit toolkit = getLanguageToolkit();
+		return toolkit != null && toolkit.languageSupportZIPBuildpath();
+	}
 
 	// -------- UI creation ---------
 	public Control createControl(Composite parent) {
@@ -237,6 +254,7 @@ public abstract class BuildpathsBlock {
 		folder.setSelection(fPageIndex);
 		fCurrPage = (BuildPathBasePage) folder.getItem(fPageIndex).getData();
 		folder.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				tabChanged(e.item);
 			}
@@ -274,10 +292,10 @@ public abstract class BuildpathsBlock {
 	public void init(IScriptProject jproject, IBuildpathEntry[] buildpathEntries) {
 		fCurrScriptProject = jproject;
 		boolean projectExists = false;
-		List newBuildpath = null;
+		List<BPListElement> newBuildpath = null;
 		IProject project = fCurrScriptProject.getProject();
-		projectExists = (project.exists() && project.getFile(
-				IScriptProjectFilenames.BUILDPATH_FILENAME).exists());
+		projectExists = project.exists()
+				&& project.getFile(BUILDPATH_FILENAME).exists();
 		if (projectExists) {
 			if (buildpathEntries == null) {
 				buildpathEntries = fCurrScriptProject.readRawBuildpath();
@@ -291,7 +309,7 @@ public abstract class BuildpathsBlock {
 		}
 		List<BPListElement> exportedEntries = new ArrayList<BPListElement>();
 		for (int i = 0; i < newBuildpath.size(); i++) {
-			BPListElement curr = (BPListElement) newBuildpath.get(i);
+			BPListElement curr = newBuildpath.get(i);
 			if (curr.isExported()
 					|| curr.getEntryKind() == IBuildpathEntry.BPE_SOURCE) {
 				exportedEntries.add(curr);
@@ -354,20 +372,21 @@ public abstract class BuildpathsBlock {
 	}
 
 	public boolean hasChangesInBuildpathFile() {
-		IFile file = fCurrScriptProject.getProject().getFile(
-				IScriptProjectFilenames.BUILDPATH_FILENAME);
+		IFile file = fCurrScriptProject.getProject()
+				.getFile(BUILDPATH_FILENAME);
 		return fFileTimeStamp != file.getModificationStamp();
 	}
 
 	public void initializeTimeStamps() {
-		IFile file = fCurrScriptProject.getProject().getFile(
-				IScriptProjectFilenames.BUILDPATH_FILENAME);
+		IFile file = fCurrScriptProject.getProject()
+				.getFile(BUILDPATH_FILENAME);
 		fFileTimeStamp = file.getModificationStamp();
 		fUserSettingsTimeStamp = getEncodedSettings();
 	}
 
-	private ArrayList getExistingEntries(IBuildpathEntry[] buildpathEntries) {
-		ArrayList newBuildpath = new ArrayList();
+	private List<BPListElement> getExistingEntries(
+			IBuildpathEntry[] buildpathEntries) {
+		List<BPListElement> newBuildpath = new ArrayList<BPListElement>();
 		for (int i = 0; i < buildpathEntries.length; i++) {
 			IBuildpathEntry curr = buildpathEntries[i];
 			newBuildpath.add(BPListElement.createFromExisting(curr,
@@ -391,11 +410,11 @@ public abstract class BuildpathsBlock {
 	 *         returned must not be valid.
 	 */
 	public IBuildpathEntry[] getRawBuildPath() {
-		List elements = fBuildPathList.getElements();
+		List<BPListElement> elements = fBuildPathList.getElements();
 		int nElements = elements.size();
 		IBuildpathEntry[] entries = new IBuildpathEntry[elements.size()];
 		for (int i = 0; i < nElements; i++) {
-			BPListElement currElement = (BPListElement) elements.get(i);
+			BPListElement currElement = elements.get(i);
 			entries[i] = currElement.getBuildpathEntry();
 		}
 		return entries;
@@ -405,17 +424,47 @@ public abstract class BuildpathsBlock {
 		return fPageIndex;
 	}
 
+	/**
+	 * @since 2.0
+	 */
+	protected IDLTKLanguageToolkit getLanguageToolkit() {
+		if (fContext instanceof IScriptLanguageProvider) {
+			return ((IScriptLanguageProvider) fContext).getLanguageToolkit();
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected IDLTKUILanguageToolkit getUILanguageToolkit() {
+		final IDLTKLanguageToolkit toolkit = getLanguageToolkit();
+		if (toolkit != null) {
+			return DLTKUILanguageManager.getLanguageToolkit(toolkit);
+		}
+		return null;
+	}
+
 	// -------- evaluate default settings --------
-	protected abstract IPreferenceStore getPreferenceStore();
+	protected IPreferenceStore getPreferenceStore() {
+		final IDLTKUILanguageToolkit ui = getUILanguageToolkit();
+		if (ui != null) {
+			return ui.getPreferenceStore();
+		}
+		// return default value to avoid NPE
+		return DLTKUIPlugin.getDefault().getPreferenceStore();
+	}
 
 	private List<BPListElement> getDefaultBuildpath(IScriptProject jproj) {
 		List<BPListElement> list = new ArrayList<BPListElement>();
-		IResource srcFolder;
-		IPreferenceStore store = getPreferenceStore();
-		if (store != null) {
-			String sourceFolderName = store
+		final IDLTKUILanguageToolkit toolkit = getUILanguageToolkit();
+		if (toolkit != null) {
+			final IResource srcFolder;
+			final String sourceFolderName = toolkit
 					.getString(PreferenceConstants.SRC_SRCNAME);
-			if (store.getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ)
+			if (toolkit
+					.getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ)
 					&& sourceFolderName.length() > 0) {
 				srcFolder = jproj.getProject().getFolder(sourceFolderName);
 			} else {
@@ -481,12 +530,12 @@ public abstract class BuildpathsBlock {
 	 */
 	public void updatePathStatus() {
 		fPathStatus.setOK();
-		List elements = fBuildPathList.getElements();
+		List<BPListElement> elements = fBuildPathList.getElements();
 		BPListElement entryMissing = null;
 		int nEntriesMissing = 0;
 		IBuildpathEntry[] entries = new IBuildpathEntry[elements.size()];
 		for (int i = elements.size() - 1; i >= 0; i--) {
-			BPListElement currElement = (BPListElement) elements.get(i);
+			BPListElement currElement = elements.get(i);
 			boolean isChecked = fBuildPathList.isChecked(currElement);
 			if (currElement.getEntryKind() == IBuildpathEntry.BPE_SOURCE) {
 				if (!isChecked) {
@@ -524,10 +573,10 @@ public abstract class BuildpathsBlock {
 	}
 
 	protected void updateBuildPathStatus() {
-		List elements = fBuildPathList.getElements();
+		List<BPListElement> elements = fBuildPathList.getElements();
 		IBuildpathEntry[] entries = new IBuildpathEntry[elements.size()];
 		for (int i = elements.size() - 1; i >= 0; i--) {
-			BPListElement currElement = (BPListElement) elements.get(i);
+			BPListElement currElement = elements.get(i);
 			entries[i] = currElement.getBuildpathEntry();
 		}
 		IModelStatus status = BuildpathEntry.validateBuildpath(
@@ -564,9 +613,8 @@ public abstract class BuildpathsBlock {
 				project.open(new SubProgressMonitor(monitor, 50));
 			}
 		} finally {
-			if (monitor != null) {
-				monitor.done();
-			}
+			// not null
+			monitor.done();
 		}
 	}
 
@@ -575,14 +623,14 @@ public abstract class BuildpathsBlock {
 		if (monitor != null && monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		if (!DLTKLanguageManager.hasScriptNature(project.getProject())) {
+		if (!project.hasNature(nature)) {
 			IProjectDescription description = project.getDescription();
 			String[] prevNatures = description.getNatureIds();
 			String[] newNatures = new String[prevNatures.length + 1];
 			System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
 			newNatures[prevNatures.length] = nature;
 			if (DLTKCore.DEBUG) {
-				System.err.println("Add selection of possible natures here"); //$NON-NLS-1$
+				// System.err.println("Add selection of possible natures here");
 			}
 			description.setNatureIds(newNatures);
 			project.setDescription(description, monitor);
@@ -789,7 +837,8 @@ public abstract class BuildpathsBlock {
 
 	// ---------- util method ------------
 	private IContainer chooseContainer() {
-		Class[] acceptedClasses = new Class[] { IProject.class, IFolder.class };
+		Class<?>[] acceptedClasses = new Class[] { IProject.class,
+				IFolder.class };
 		ISelectionStatusValidator validator = new TypedElementSelectionValidator(
 				acceptedClasses, false);
 		IProject[] allProjects = fWorkspaceRoot.getProjects();
@@ -829,7 +878,7 @@ public abstract class BuildpathsBlock {
 			TabItem tabItem = (TabItem) widget;
 			BuildPathBasePage newPage = (BuildPathBasePage) tabItem.getData();
 			if (fCurrPage != null) {
-				List selection = fCurrPage.getSelection();
+				List<?> selection = fCurrPage.getSelection();
 				if (!selection.isEmpty()) {
 					newPage.setSelection(selection, false);
 				}
@@ -879,7 +928,7 @@ public abstract class BuildpathsBlock {
 				}
 				BuildPathBasePage page = (BuildPathBasePage) fTabFolder
 						.getItem(pageIndex).getData();
-				List selection = new ArrayList(1);
+				List<Object> selection = new ArrayList<Object>(1);
 				selection.add(elementToSelect);
 				page.setSelection(selection, true);
 			}

@@ -10,7 +10,6 @@
 package org.eclipse.dltk.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -21,10 +20,14 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
+import org.eclipse.dltk.core.IDLTKLanguageToolkit;
+import org.eclipse.dltk.core.IScriptLanguageProvider;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.dltk.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -46,15 +49,18 @@ import org.eclipse.swt.widgets.Control;
  * <p>
  * Clients may instantiate or subclass.
  * </p>
- * 
  */
-
 public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 
 	private static final String PAGE_NAME = "DLTKCapabilityConfigurationPage"; //$NON-NLS-1$
 
 	private IScriptProject fScriptProject;
 	private BuildpathsBlock fBuildPathsBlock;
+
+	@Deprecated
+	public CapabilityConfigurationPage() {
+		this(PAGE_NAME);
+	}
 
 	/**
 	 * Creates a wizard page that can be used in a script project creation
@@ -66,34 +72,40 @@ public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 	 * {@link #init(IScriptProject, IPath, IBuildpathEntry[], boolean)} is
 	 * required.
 	 * </p>
+	 * 
+	 * @since 2.0
 	 */
-	public CapabilityConfigurationPage() {
-		super(PAGE_NAME);
+	public CapabilityConfigurationPage(String pageName) {
+		super(pageName);
 		fScriptProject = null;
 
 		setTitle(NewWizardMessages.ScriptCapabilityConfigurationPage_title);
 		setDescription(NewWizardMessages.ScriptCapabilityConfigurationPage_description);
 	}
 
+	private class BuildpathBlockListener implements IStatusChangeListener,
+			IScriptLanguageProvider {
+		public void statusChanged(IStatus status) {
+			updateStatus(status);
+		}
+
+		public IDLTKLanguageToolkit getLanguageToolkit() {
+			return DLTKLanguageManager.getLanguageToolkit(getScriptNature());
+		}
+	}
+
 	protected BuildpathsBlock getBuildPathsBlock() {
 		if (fBuildPathsBlock == null) {
-			IStatusChangeListener listener = new IStatusChangeListener() {
-				public void statusChanged(IStatus status) {
-					updateStatus(status);
-				}
-			};
-			fBuildPathsBlock = createBuildpathBlock(listener);
+			fBuildPathsBlock = createBuildpathBlock(new BuildpathBlockListener());
 		}
 		return fBuildPathsBlock;
 	}
 
-	protected abstract BuildpathsBlock createBuildpathBlock(
-			IStatusChangeListener listener);
-
-	// {
-	// return new BuildPathsBlock(new BusyIndicatorRunnableContext(), listener,
-	// 0, useNewSourcePage(), null);
-	// }
+	protected BuildpathsBlock createBuildpathBlock(
+			IStatusChangeListener listener) {
+		return new BuildpathsBlock(new BusyIndicatorRunnableContext(),
+				listener, 0, useNewSourcePage(), null);
+	}
 
 	/**
 	 * Clients can override this method to choose if the new source page is
@@ -216,28 +228,6 @@ public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 			};
 		}
 		return null;
-	}
-
-	/**
-	 * Helper method to create and open a IProject. The project location is
-	 * configured. No natures are added.
-	 * 
-	 * @param project
-	 *            The handle of the project to create.
-	 * @param locationURI
-	 *            The location of the project or <code>null</code> to create the
-	 *            project in the workspace
-	 * @param monitor
-	 *            a progress monitor to report progress or <code>null</code> if
-	 *            progress reporting is not desired
-	 * @throws CoreException
-	 *             if the project couldn't be created
-	 * @see org.eclipse.core.resources.IProjectDescription#setLocationURI(java.net.URI)
-	 * 
-	 */
-	public static void createProject(IProject project, URI locationURI,
-			IProgressMonitor monitor) throws CoreException {
-		BuildpathsBlock.createProject(project, locationURI, monitor);
 	}
 
 	/**

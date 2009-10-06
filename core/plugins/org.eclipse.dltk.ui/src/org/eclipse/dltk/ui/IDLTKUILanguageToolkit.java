@@ -45,4 +45,44 @@ public interface IDLTKUILanguageToolkit {
 	String getDebugPreferencePage();
 
 	String[] getEditorPreferencePages();
+
+	/**
+	 * Returns the current value of the boolean-valued preference with the given
+	 * name. Returns the default-default value (<code>false</code>) if there is
+	 * no preference with the given name, or if the current value cannot be
+	 * treated as a boolean.
+	 * 
+	 * @param name
+	 *            the name of the preference
+	 * @return the boolean-valued preference
+	 * @since 2.0
+	 */
+	public boolean getBoolean(String name);
+
+	/**
+	 * Returns the current value of the integer-valued preference with the given
+	 * name. Returns the default-default value (<code>0</code>) if there is no
+	 * preference with the given name, or if the current value cannot be treated
+	 * as an integer.
+	 * 
+	 * @param name
+	 *            the name of the preference
+	 * @return the int-valued preference
+	 * @since 2.0
+	 */
+	public int getInt(String name);
+
+	/**
+	 * Returns the current value of the string-valued preference with the given
+	 * name. Returns the default-default value (the empty string <code>""</code>
+	 * ) if there is no preference with the given name, or if the current value
+	 * cannot be treated as a string.
+	 * 
+	 * @param name
+	 *            the name of the preference
+	 * @return the string-valued preference
+	 * @since 2.0
+	 */
+	public String getString(String name);
+
 }

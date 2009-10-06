@@ -16,7 +16,6 @@
    <extension-point id="modelLabelProvider" name="modelLabelProvider" schema="schema/modelLabelProvider.exsd"/>
    <extension-point id="modelCompareProvider" name="modelCompareProvider" schema="schema/modelCompareProvider.exsd"/>  
    <extension-point id="projectTemplate" name="Project Template" schema="schema/projectTemplate.exsd"/>
-   <extension-point id="projectWizardExtension" name="Project Wizard Extension" schema="schema/projectWizardExtension.exsd"/>
    <extension-point id="sourceModuleTemplate" name="sourceModuleTemplate" schema="schema/sourceModuleTemplate.exsd"/>
    <extension
     	id="DLTKSearchResultPage"
@@ -1430,13 +1429,6 @@
 			namespace="org.eclipse.dltk"
 			properties="markerType"
 			type="org.eclipse.core.resources.IMarker"/>
-		<propertyTester
-        	class="org.eclipse.dltk.ui.util.ScriptProjectNaturePropertyTester"
-        	id="org.eclipse.dltk.ui.propertyTester1"
-        	namespace="org.eclipse.dltk"
-        	properties="hasScriptNature"
-        	type="org.eclipse.core.resources.IProject">
-		</propertyTester>
 	</extension>
 	<extension point="org.eclipse.ui.startup">
     	<startup class="org.eclipse.dltk.internal.ui.DLTKUI"/>

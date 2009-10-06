@@ -23,6 +23,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptLanguageProvider;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
@@ -47,7 +48,7 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
  * Property page for configuring the DLTK build path
  */
 public abstract class BuildPathsPropertyPage extends PropertyPage implements
-		IStatusChangeListener {
+		IStatusChangeListener, IScriptLanguageProvider {
 
 	public static final String PROP_ID = "org.eclipse.dltk.ui.propertyPages.BuildPathsPropertyPage"; //$NON-NLS-1$
 
@@ -159,11 +160,11 @@ public abstract class BuildPathsPropertyPage extends PropertyPage implements
 		return fBuildPathsBlock.createControl(parent);
 	}
 
-	// fBuildPathsBlock= new BuildPathsBlock(new
-	// BusyIndicatorRunnableContext(),this, getSettings().getInt(INDEX), false,
-	// pageContainer);
-	protected abstract BuildpathsBlock createBuildPathBlock(
-			IWorkbenchPreferenceContainer pageContainer);
+	protected BuildpathsBlock createBuildPathBlock(
+			IWorkbenchPreferenceContainer pageContainer) {
+		return new BuildpathsBlock(this, getSettings().getInt(INDEX), false,
+				pageContainer);
+	}
 
 	/*
 	 * Content for non-script projects.

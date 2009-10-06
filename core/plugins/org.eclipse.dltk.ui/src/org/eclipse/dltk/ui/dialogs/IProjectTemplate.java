@@ -11,25 +11,17 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.dialogs;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.dltk.core.environment.IEnvironment;
-import org.eclipse.swt.widgets.Shell;
+import java.util.List;
+
+import org.eclipse.jface.wizard.IWizardPage;
 
 public interface IProjectTemplate {
 
 	/**
+	 * Returns the list of pages to be added to the project wizard
+	 * 
 	 * @since 2.0
 	 */
-	void setCurrentEnvironment(IEnvironment environment);
-
-	IProjectTemplateOperation configure(IProject project,
-			IProjectTemplateOperation prevOperation, Shell parentShell);
-
-	/**
-	 * @param templateOperation
-	 * @return
-	 */
-	IStatus validate(IProjectTemplateOperation templateOperation);
+	List<IWizardPage> getPages();
 
 }
