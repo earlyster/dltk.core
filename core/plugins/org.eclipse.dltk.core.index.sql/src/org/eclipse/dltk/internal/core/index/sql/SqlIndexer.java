@@ -84,7 +84,11 @@ public class SqlIndexer extends AbstractIndexer {
 
 	public void indexDocument(ISourceModule sourceModule) {
 
-		PerformanceNode p = RuntimePerformanceMonitor.begin();
+		IFileHandle fileHandle = EnvironmentPathUtils.getFile(sourceModule);
+		PerformanceNode performance = null;
+		if (SqlIndex.DEBUG) {
+			performance = RuntimePerformanceMonitor.begin();
+		}
 
 		try {
 			DbFactory dbFactory = DbFactory.getInstance();
@@ -121,12 +125,14 @@ public class SqlIndexer extends AbstractIndexer {
 					relativePath = Util.relativePath(sourceModule.getPath(),
 							containerPath.segmentCount());
 				}
-				IFileHandle handle = EnvironmentPathUtils.getFile(sourceModule);
+
+				long lastModified = fileHandle == null ? 0 : fileHandle
+						.lastModified();
 
 				File existing = dbFactory.getFileDao().select(connection,
 						relativePath, container.getId());
 				if (existing != null) {
-					if (existing.getTimestamp() == handle.lastModified()) {
+					if (existing.getTimestamp() == lastModified) {
 						// File is not updated - nothing to do
 						return;
 					}
@@ -134,14 +140,8 @@ public class SqlIndexer extends AbstractIndexer {
 					dbFactory.getFileDao().deleteById(connection,
 							existing.getId());
 				}
-				long lastModifyed;
-				if (handle != null) {
-					lastModifyed = handle.lastModified();
-				} else {
-					lastModifyed = 0;
-				}
 				file = dbFactory.getFileDao().insert(connection, relativePath,
-						lastModifyed, container.getId());
+						lastModified, container.getId());
 
 				super.indexDocument(sourceModule);
 
@@ -149,8 +149,10 @@ public class SqlIndexer extends AbstractIndexer {
 				connection.commit();
 				connection.close();
 
-				p.done(natureId, "SQL Index Document", sourceModule
-						.getSourceRange().getLength());
+				if (SqlIndex.DEBUG) {
+					performance.done(natureId, "SQL Index Document", fileHandle
+							.length());
+				}
 			}
 		} catch (Exception e) {
 			SqlIndex
