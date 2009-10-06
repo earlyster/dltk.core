@@ -353,7 +353,6 @@ public final class NewWizardMessages extends NLS {
 	public static String ScriptProjectWizardFirstPage_Message_enterLocation;
 	public static String ScriptProjectWizardFirstPage_Message_invalidDirectory;
 	public static String ScriptProjectWizardFirstPage_Message_cannotCreateInWorkspace;
-	public static String ScriptProjectWizardFirstPage_page_pageName;
 
 	public static String ScriptProjectWizardFirstPage_page_title;
 	public static String ScriptProjectWizardFirstPage_page_description;

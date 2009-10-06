@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -34,18 +34,39 @@ import org.eclipse.dltk.ui.DLTKUIPlugin;
 
 public class ProjectMetadataBackup {
 
-	private static class BackupEntry {
-		final String filename;
-		final File backup;
+	private static final String DOT = "."; //$NON-NLS-1$
 
-		public BackupEntry(String filename, File backup) {
+	private static class BackupKey {
+		final URI location;
+		final String filename;
+
+		public BackupKey(URI location, String filename) {
+			this.location = location;
 			this.filename = filename;
-			this.backup = backup;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + filename.hashCode();
+			result = prime * result + location.hashCode();
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof BackupKey) {
+				final BackupKey other = (BackupKey) obj;
+				return filename.equals(other.filename)
+						&& location.equals(other.location);
+			}
+			return false;
 		}
 
 	}
 
-	private final List<BackupEntry> entries = new ArrayList<BackupEntry>();
+	private final Map<BackupKey, File> entries = new HashMap<BackupKey, File>();
 
 	/**
 	 * @param projectLocation
@@ -57,13 +78,32 @@ public class ProjectMetadataBackup {
 		final IFileStore folder = EFS.getStore(projectLocation);
 		if (folder.fetchInfo().exists()) {
 			for (int i = 0; i < filenames.length; ++i) {
-				final IFileStore file = folder.getChild(filenames[i]);
-				if (file.fetchInfo().exists()) {
-					final File backup = createBackup(file, filenames[i]
-							.substring(1)
-							+ "-desc"); //$NON-NLS-1$
-					entries.add(new BackupEntry(filenames[i], backup));
+				final String filename = filenames[i];
+				final BackupKey key = new BackupKey(projectLocation, filename);
+				if (entries.containsKey(key)) {
+					continue;
 				}
+				final IFileStore file = folder.getChild(filename);
+				if (file.fetchInfo().exists()) {
+					String tmp = filename;
+					if (tmp.startsWith(DOT)) {
+						tmp = tmp.substring(DOT.length());
+					}
+					tmp = "eclipse-" + tmp + "-";//$NON-NLS-1$ //$NON-NLS-2$
+					final File backup = createBackup(file, tmp);
+					entries.put(key, backup);
+				} else {
+					entries.put(key, null);
+				}
+			}
+		} else {
+			for (int i = 0; i < filenames.length; ++i) {
+				final BackupKey key = new BackupKey(projectLocation,
+						filenames[i]);
+				if (entries.containsKey(key)) {
+					continue;
+				}
+				entries.put(key, null);
 			}
 		}
 	}
@@ -72,19 +112,26 @@ public class ProjectMetadataBackup {
 	 * @param projectLocation
 	 * @param monitor
 	 * @throws CoreException
+	 * @since 2.0
 	 */
-	public void restore(URI projectLocation, IProgressMonitor monitor)
-			throws CoreException {
+	public void restore(IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask("", entries.size() * 2); //$NON-NLS-1$
 		try {
-			for (final BackupEntry entry : entries) {
+			for (Map.Entry<BackupKey, File> entry : entries.entrySet()) {
 				try {
-					IFileStore projectFile = EFS.getStore(projectLocation)
-							.getChild(entry.filename);
+					final File backup = entry.getValue();
+					if (backup == null) {
+						monitor.worked(2);
+						continue;
+					}
+					final IFileStore projectFile = EFS.getStore(
+							entry.getKey().location).getChild(
+							entry.getKey().filename);
 					projectFile.delete(EFS.NONE, new SubProgressMonitor(
 							monitor, 1));
-					copyFile(entry.backup, projectFile, new SubProgressMonitor(
+					copyFile(backup, projectFile, new SubProgressMonitor(
 							monitor, 1));
+					backup.delete();
 				} catch (IOException e) {
 					IStatus status = new Status(
 							IStatus.ERROR,
@@ -103,7 +150,7 @@ public class ProjectMetadataBackup {
 	private File createBackup(IFileStore source, String name)
 			throws CoreException {
 		try {
-			File bak = File.createTempFile("eclipse-" + name, ".bak"); //$NON-NLS-1$//$NON-NLS-2$
+			File bak = File.createTempFile(name, ".bak"); //$NON-NLS-1$
 			copyFile(source, bak);
 			return bak;
 		} catch (IOException e) {
@@ -131,7 +178,6 @@ public class ProjectMetadataBackup {
 		FileInputStream is = new FileInputStream(source);
 		OutputStream os = target.openOutputStream(EFS.NONE, monitor);
 		copyFile(is, os);
-
 	}
 
 	private void copyFile(InputStream is, OutputStream os) throws IOException {

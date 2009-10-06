@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
+import java.net.URI;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.environment.IEnvironment;
@@ -30,10 +32,36 @@ public interface ILocationGroup {
 
 	IPath getLocation();
 
-	IInterpreterInstall getSelectedInterpreter();
+	/**
+	 * @since 2.0
+	 */
+	URI getLocationURI();
+
+	/**
+	 * @since 2.0
+	 */
+	IInterpreterInstall getInterpreter();
 
 	void addLocationListener(Listener listener);
 
 	boolean getDetect();
+
+	/**
+	 * @return
+	 * @since 2.0
+	 */
+	boolean isInWorkspace();
+
+	/**
+	 * @return
+	 * @since 2.0
+	 */
+	boolean isSrc();
+
+	/**
+	 * @return
+	 * @since 2.0
+	 */
+	String getScriptNature();
 
 }

@@ -28,6 +28,7 @@ import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.builder.State;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.jface.wizard.IWizardPage;
 
 public class ProjectWizardUtils {
 
@@ -76,7 +77,7 @@ public class ProjectWizardUtils {
 		IPath InterpreterEnvironmentContainerPath = new Path(
 				ScriptRuntime.INTERPRETER_CONTAINER);
 
-		IInterpreterInstall inst = firstPage.getSelectedInterpreter();
+		IInterpreterInstall inst = firstPage.getInterpreter();
 		if (inst != null) {
 			IPath newPath = InterpreterEnvironmentContainerPath.append(
 					inst.getInterpreterInstallType().getId()).append(
@@ -89,6 +90,15 @@ public class ProjectWizardUtils {
 		if (defaultPath != null)
 			return Collections.singletonList(defaultPath);
 		return Collections.emptyList();
+	}
+
+	/**
+	 * @param page
+	 * @return
+	 * @since 2.0
+	 */
+	public static boolean isProjectRequredFor(IWizardPage page) {
+		return !(page instanceof ProjectWizardFirstPage);
 	}
 
 }

@@ -66,13 +66,6 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="browseButton" type="string">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
          <attribute name="nature" type="string">
             <annotation>
                <documentation>

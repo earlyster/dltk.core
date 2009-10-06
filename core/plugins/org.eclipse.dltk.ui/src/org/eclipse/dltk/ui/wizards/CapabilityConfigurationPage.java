@@ -10,7 +10,6 @@
 package org.eclipse.dltk.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -50,15 +49,18 @@ import org.eclipse.swt.widgets.Control;
  * <p>
  * Clients may instantiate or subclass.
  * </p>
- * 
  */
-
 public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 
 	private static final String PAGE_NAME = "DLTKCapabilityConfigurationPage"; //$NON-NLS-1$
 
 	private IScriptProject fScriptProject;
 	private BuildpathsBlock fBuildPathsBlock;
+
+	@Deprecated
+	public CapabilityConfigurationPage() {
+		this(PAGE_NAME);
+	}
 
 	/**
 	 * Creates a wizard page that can be used in a script project creation
@@ -70,9 +72,11 @@ public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 	 * {@link #init(IScriptProject, IPath, IBuildpathEntry[], boolean)} is
 	 * required.
 	 * </p>
+	 * 
+	 * @since 2.0
 	 */
-	public CapabilityConfigurationPage() {
-		super(PAGE_NAME);
+	public CapabilityConfigurationPage(String pageName) {
+		super(pageName);
 		fScriptProject = null;
 
 		setTitle(NewWizardMessages.ScriptCapabilityConfigurationPage_title);
@@ -224,28 +228,6 @@ public abstract class CapabilityConfigurationPage extends NewElementWizardPage {
 			};
 		}
 		return null;
-	}
-
-	/**
-	 * Helper method to create and open a IProject. The project location is
-	 * configured. No natures are added.
-	 * 
-	 * @param project
-	 *            The handle of the project to create.
-	 * @param locationURI
-	 *            The location of the project or <code>null</code> to create the
-	 *            project in the workspace
-	 * @param monitor
-	 *            a progress monitor to report progress or <code>null</code> if
-	 *            progress reporting is not desired
-	 * @throws CoreException
-	 *             if the project couldn't be created
-	 * @see org.eclipse.core.resources.IProjectDescription#setLocationURI(java.net.URI)
-	 * 
-	 */
-	public void createProject(IProject project, URI locationURI,
-			IProgressMonitor monitor) throws CoreException {
-		BuildpathsBlock.createProject(project, locationURI, monitor);
 	}
 
 	/**

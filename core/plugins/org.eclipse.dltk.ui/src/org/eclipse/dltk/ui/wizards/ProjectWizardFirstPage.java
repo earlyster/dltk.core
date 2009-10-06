@@ -1017,7 +1017,11 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	protected DetectGroup fDetectGroup;
 	private Validator fValidator;
 	protected String fInitialName;
-	private static final String PAGE_NAME = NewWizardMessages.ScriptProjectWizardFirstPage_page_pageName;
+
+	/**
+	 * @since 2.0
+	 */
+	public static final String PAGE_NAME = "ProjectWizardFirstPage"; //$NON-NLS-1$
 
 	/**
 	 * Create a new <code>SimpleProjectFirstPage</code>.
@@ -1051,7 +1055,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	 */
 	public abstract String getScriptNature();
 
-	protected abstract boolean interpeterRequired();
+	protected boolean interpeterRequired() {
+		return true;
+	}
 
 	protected boolean supportInterpreter() {
 		return true;
@@ -1079,13 +1085,12 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 	}
 
-	protected IInterpreterInstall getInterpreter() {
+	/**
+	 * @since 2.0
+	 */
+	public IInterpreterInstall getInterpreter() {
 		return fInterpreterGroup != null ? fInterpreterGroup
 				.getSelectedInterpreter() : null;
-	}
-
-	public IInterpreterInstall getSelectedInterpreter() {
-		return getInterpreter();
 	}
 
 	private IInterpreterGroup fInterpreterGroup;
@@ -1155,11 +1160,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	 * Returns the current project location path as entered by the user, or its
 	 * anticipated initial value. Note that if the default has been returned the
 	 * path in a project description used to create a project should not be set.
-	 * <p>
-	 * TODO At some point this method has to be converted to return an URI
-	 * instead of an path. However, this first requires support from Platform/UI
-	 * to specify a project location different than in a local file system.
-	 * </p>
 	 * 
 	 * @return the project location path or its anticipated initial value.
 	 */
@@ -1231,6 +1231,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	/*
 	 * see @DialogPage.setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
@@ -1241,6 +1242,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	/*
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 */
+	@Override
 	public void dispose() {
 		fDecorationManager.dispose();
 		fLocationGroup.dispose();
@@ -1266,6 +1268,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	/**
 	 * Set the layout data for a button.
 	 */
+	@Override
 	protected GridData setButtonLayoutData(Button button) {
 		return super.setButtonLayoutData(button);
 	}

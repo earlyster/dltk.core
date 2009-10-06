@@ -9,45 +9,16 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
-import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
-import org.eclipse.dltk.core.IScriptProjectFilenames;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
-import org.eclipse.dltk.core.environment.IEnvironment;
-import org.eclipse.dltk.internal.ui.util.CoreUtility;
 import org.eclipse.dltk.internal.ui.wizards.BuildpathDetector;
-import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.dltk.launching.IInterpreterInstall;
-import org.eclipse.dltk.launching.ScriptRuntime;
-import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
-import org.eclipse.dltk.ui.DLTKUILanguageManager;
-import org.eclipse.dltk.ui.DLTKUIPlugin;
-import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
-import org.eclipse.dltk.ui.PreferenceConstants;
-import org.eclipse.dltk.ui.util.ExceptionHandler;
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.dltk.ui.wizards.ProjectCreator.IProjectCreateStep;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 
 /**
  * As addition to the DLTKCapabilityConfigurationPage, the wizard does an early
@@ -55,32 +26,29 @@ import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
  * external location was specified, offers to do a buildpath detection
  */
 public class ProjectWizardSecondPage extends CapabilityConfigurationPage
-		implements IProjectWizardLastPage {
+		implements IProjectWizardPage {
 
-	private final ProjectWizardFirstPage fFirstPage;
+	private final ProjectCreator fCreator;
 
-	private URI fCurrProjectLocation; // null if location is platform location
-	private IProject fCurrProject;
-
-	private boolean fKeepContent;
-
-	private ProjectMetadataBackup projectFileBackup = null;
-	private Boolean fIsAutobuild;
+	/**
+	 * @since 2.0
+	 */
+	public static final String PAGE_NAME = "ProjectWizardSecondPage"; //$NON-NLS-1$
 
 	/**
 	 * Constructor for ScriptProjectWizardSecondPage.
 	 */
-	public ProjectWizardSecondPage(ProjectWizardFirstPage mainPage) {
-		fFirstPage = mainPage;
-		fCurrProjectLocation = null;
-		fCurrProject = null;
-		fKeepContent = false;
-
-		fIsAutobuild = null;
+	public ProjectWizardSecondPage(ProjectWizardFirstPage firstPage) {
+		super(PAGE_NAME);
+		fCreator = new ProjectCreator((IProjectWizard) firstPage.getWizard(),
+				firstPage);
 	}
 
-	public ProjectWizardFirstPage getFirstPage() {
-		return fFirstPage;
+	/**
+	 * @since 2.0
+	 */
+	public ProjectCreator getCreator() {
+		return fCreator;
 	}
 
 	@Override
@@ -96,171 +64,12 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
-			changeToNewProject();
-		} else {
-			removeProject();
+			((IProjectWizard) getWizard()).createProject();
+		} else if (!ProjectWizardUtils.isProjectRequredFor(getContainer()
+				.getCurrentPage())) {
+			((IProjectWizard) getWizard()).removeProject();
 		}
 		super.setVisible(visible);
-	}
-
-	protected void changeToNewProject() {
-		fKeepContent = fFirstPage.getDetect();
-
-		final IRunnableWithProgress op = new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor)
-					throws InvocationTargetException, InterruptedException {
-				try {
-					if (fIsAutobuild == null) {
-						fIsAutobuild = Boolean.valueOf(CoreUtility
-								.enableAutoBuild(false));
-					}
-					updateProject(monitor);
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				} catch (OperationCanceledException e) {
-					throw new InterruptedException();
-				} finally {
-					monitor.done();
-				}
-			}
-		};
-
-		try {
-			getContainer().run(true, false,
-					new WorkspaceModifyDelegatingOperation(op));
-		} catch (InvocationTargetException e) {
-			final String title = NewWizardMessages.ScriptProjectWizardSecondPage_error_title;
-			final String message = NewWizardMessages.ScriptProjectWizardSecondPage_error_message;
-			ExceptionHandler.handle(e, getShell(), title, message);
-		} catch (InterruptedException e) {
-			// cancel pressed
-		}
-	}
-
-	@Override
-	public void createProject(IProject project, URI locationURI,
-			IProgressMonitor monitor) throws CoreException {
-		super.createProject(project, locationURI, monitor);
-		final IEnvironment environment = fFirstPage.getEnvironment();
-		if (!environment.equals(EnvironmentManager.getLocalEnvironment())) {
-			EnvironmentManager.setEnvironmentId(project, environment.getId(),
-					false);
-		} else {
-			EnvironmentManager.setEnvironmentId(project, null, false);
-		}
-	}
-
-	final void updateProject(IProgressMonitor monitor) throws CoreException,
-			InterruptedException {
-
-		fCurrProject = fFirstPage.getProjectHandle();
-		fCurrProjectLocation = getProjectLocationURI();
-
-		if (monitor == null) {
-			monitor = new NullProgressMonitor();
-		}
-		try {
-			monitor
-					.beginTask(
-							NewWizardMessages.ScriptProjectWizardSecondPage_operation_initialize,
-							70);
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-
-			URI realLocation = fCurrProjectLocation;
-			if (realLocation == null) { // inside workspace
-				try {
-					URI rootLocation = ResourcesPlugin.getWorkspace().getRoot()
-							.getLocationURI();
-					/*
-					 * Path.fromPortableString() is required here, because it
-					 * handles path in the way expected by URI constructor. (On
-					 * windows the path keeps the leading slash, e.g.
-					 * "/C:/Users/alex/...")
-					 */
-					realLocation = new URI(rootLocation.getScheme(), null, Path
-							.fromPortableString(rootLocation.getPath()).append(
-									fCurrProject.getName()).toString(), null);
-				} catch (URISyntaxException e) {
-					Assert.isTrue(false, "Can't happen"); //$NON-NLS-1$
-				}
-			}
-
-			rememberExistingFiles(realLocation);
-
-			createProject(fCurrProject, fCurrProjectLocation,
-					new SubProgressMonitor(monitor, 20));
-
-			final IBuildpathEntry[] entries;
-
-			if (fFirstPage.getDetect()) {
-				if (!fCurrProject.getFile(
-						IScriptProjectFilenames.BUILDPATH_FILENAME).exists()) {
-					final IBuildpathDetector detector = createBuildpathDetector();
-					detector
-							.detectBuildpath(new SubProgressMonitor(monitor, 20));
-					entries = detector.getBuildpath();
-				} else {
-					monitor.worked(20);
-					entries = null;
-				}
-			} else if (fFirstPage.isSrc()) {
-				final IDLTKUILanguageToolkit toolkit = getUILanguageToolkit();
-				final IPath srcPath = toolkit != null ? new Path(toolkit
-						.getString(PreferenceConstants.SRC_SRCNAME))
-						: Path.EMPTY;
-
-				if (srcPath.segmentCount() > 0) {
-					final IFolder folder = fCurrProject.getFolder(srcPath);
-					CoreUtility.createFolder(folder, true, true,
-							new SubProgressMonitor(monitor, 20));
-				} else {
-					monitor.worked(20);
-				}
-
-				final IPath projectPath = fCurrProject.getFullPath();
-
-				// configure the buildpath entries, including the default
-				// InterpreterEnvironment library.
-				List<IBuildpathEntry> cpEntries = new ArrayList<IBuildpathEntry>();
-				cpEntries.add(DLTKCore.newSourceEntry(projectPath
-						.append(srcPath)));
-				cpEntries.addAll(ProjectWizardUtils
-						.getDefaultBuildpathEntry(fFirstPage));
-				entries = cpEntries.toArray(new IBuildpathEntry[cpEntries
-						.size()]);
-
-			} else {
-				IPath projectPath = fCurrProject.getFullPath();
-				List<IBuildpathEntry> cpEntries = new ArrayList<IBuildpathEntry>();
-				cpEntries.add(DLTKCore.newSourceEntry(projectPath));
-				cpEntries.addAll(ProjectWizardUtils
-						.getDefaultBuildpathEntry(fFirstPage));
-				entries = cpEntries.toArray(new IBuildpathEntry[cpEntries
-						.size()]);
-
-				monitor.worked(20);
-			}
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-
-			init(DLTKCore.create(fCurrProject), entries, false);
-			configureScriptProject(new SubProgressMonitor(monitor, 30)); // create
-			/*
-			 * the script project to allow the use of the new source folder page
-			 */
-		} finally {
-			monitor.done();
-		}
-	}
-
-	/**
-	 * @since 2.0
-	 */
-	protected IBuildpathDetector createBuildpathDetector() {
-		return new BuildpathDetector(fCurrProject, getLanguageToolkit());
 	}
 
 	/**
@@ -273,199 +82,69 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 		return null;
 	}
 
-	/**
-	 * @since 2.0
-	 */
-	protected IDLTKLanguageToolkit getLanguageToolkit() {
-		return DLTKLanguageManager.getLanguageToolkit(getScriptNature());
-	}
-
 	@Override
 	protected final String getScriptNature() {
-		return fFirstPage.getScriptNature();
-	}
-
-	/**
-	 * @since 2.0
-	 */
-	protected IDLTKUILanguageToolkit getUILanguageToolkit() {
-		return DLTKUILanguageManager.getLanguageToolkit(getScriptNature());
+		return fCreator.getScriptNature();
 	}
 
 	@Deprecated
-	protected IPreferenceStore getPreferenceStore() {
-		final IDLTKUILanguageToolkit languageToolkit = getUILanguageToolkit();
-		if (languageToolkit != null) {
-			return languageToolkit.getPreferenceStore();
-		}
-		// return default preference store to avoid NPE
-		return DLTKUIPlugin.getDefault().getPreferenceStore();
-	}
-
-	private URI getProjectLocationURI() throws CoreException {
-		if (fFirstPage.isInWorkspace()) {
-			return null;
-		}
-		return fFirstPage.getLocationURI();
-	}
-
-	private void rememberExistingFiles(URI projectLocation)
-			throws CoreException {
-		projectFileBackup = new ProjectMetadataBackup();
-		projectFileBackup.backup(projectLocation, new String[] {
-				IScriptProjectFilenames.PROJECT_FILENAME,
-				IScriptProjectFilenames.BUILDPATH_FILENAME });
-	}
-
-	private void restoreExistingFiles(URI projectLocation,
-			IProgressMonitor monitor) throws CoreException {
-		if (projectFileBackup != null) {
-			projectFileBackup.restore(projectLocation, monitor);
-		}
-	}
-
-	/**
-	 * Called from the wizard on finish.
-	 */
-	public void performFinish(IProgressMonitor monitor) throws CoreException,
-			InterruptedException {
-		try {
-			monitor
-					.beginTask(
-							NewWizardMessages.ScriptProjectWizardSecondPage_operation_create,
-							4);
-			if (fCurrProject == null) {
-				updateProject(new SubProgressMonitor(monitor, 1));
-			}
-			configureScriptProject(new SubProgressMonitor(monitor, 2));
-
-			if (!fKeepContent) {
-				if (DLTKCore.DEBUG) {
-					System.err
-							.println("Add compiler compilance options here..."); //$NON-NLS-1$
-				}
-				// String compliance= fFirstPage.getCompilerCompliance();
-				// if (compliance != null) {
-				// IScriptProject project= DLTKCore.create(fCurrProject);
-				// Map options= project.getOptions(false);
-				// ModelUtil.setCompilanceOptions(options, compliance);
-				// project.setOptions(options);
-				// }
-			}
-
-			// Don't rebuild external libraries if project with same
-			// interpreter exists.
-			reuseInterpreterLibraries(monitor);
-			postConfigureProject(new SubProgressMonitor(monitor, 1));
-		} finally {
-			monitor.done();
-			fCurrProject = null;
-			if (fIsAutobuild != null) {
-				CoreUtility.enableAutoBuild(fIsAutobuild.booleanValue());
-				fIsAutobuild = null;
-			}
-		}
-	}
-
-	private void reuseInterpreterLibraries(IProgressMonitor monitor)
-			throws CoreException {
-		IInterpreterInstall projectInterpreter = this.fFirstPage
-				.getInterpreter();
-		if (projectInterpreter == null) {
-			final String nature = getScriptNature();
-			if (nature != null) {
-				projectInterpreter = ScriptRuntime
-						.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
-								nature, fFirstPage.getEnvironment().getId()));
-			}
-		}
-		if (projectInterpreter != null) {
-			// Locate projects with same interpreter.
-			ProjectWizardUtils.reuseInterpreterLibraries(fCurrProject,
-					projectInterpreter, monitor);
-		}
+	protected final IPreferenceStore getPreferenceStore() {
+		return null;
 	}
 
 	/**
 	 * @since 2.0
 	 */
-	protected void postConfigureProject(IProgressMonitor monitor)
-			throws CoreException, InterruptedException {
-		// empty override in descendants
-		monitor.done();
-	}
-
-	protected void removeProject() {
-		if (fCurrProject == null || !fCurrProject.exists()) {
-			return;
-		}
-
-		IRunnableWithProgress op = new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor)
-					throws InvocationTargetException, InterruptedException {
-				doRemoveProject(monitor);
-			}
-		};
-
-		try {
-			getContainer().run(true, true,
-					new WorkspaceModifyDelegatingOperation(op));
-		} catch (InvocationTargetException e) {
-			final String title = NewWizardMessages.ScriptProjectWizardSecondPage_error_remove_title;
-			final String message = NewWizardMessages.ScriptProjectWizardSecondPage_error_remove_message;
-			ExceptionHandler.handle(e, getShell(), title, message);
-		} catch (InterruptedException e) {
-			// cancel pressed
-		}
-	}
-
-	final void doRemoveProject(IProgressMonitor monitor)
-			throws InvocationTargetException {
-		final boolean noProgressMonitor = (fCurrProjectLocation == null); // inside
-		// workspace
-		if (monitor == null || noProgressMonitor) {
-			monitor = new NullProgressMonitor();
-		}
-		monitor
-				.beginTask(
-						NewWizardMessages.ScriptProjectWizardSecondPage_operation_remove,
-						3);
-		try {
-			try {
-				URI projLoc = fCurrProject.getLocationURI();
-
-				boolean removeContent = !fKeepContent
-						&& fCurrProject
-								.isSynchronized(IResource.DEPTH_INFINITE);
-				fCurrProject.delete(removeContent, false,
-						new SubProgressMonitor(monitor, 2));
-
-				restoreExistingFiles(projLoc,
-						new SubProgressMonitor(monitor, 1));
-			} finally {
-				CoreUtility.enableAutoBuild(fIsAutobuild.booleanValue()); // fIsAutobuild
-				// must
-				// be
-				// set
-				fIsAutobuild = null;
-			}
-		} catch (CoreException e) {
-			throw new InvocationTargetException(e);
-		} finally {
-			monitor.done();
-			fCurrProject = null;
-			fKeepContent = false;
-		}
+	public void configureSteps(ProjectCreator creator) {
+		creator.addStep(IProjectCreateStep.KIND_INIT_UI,
+				IProjectCreateStep.BEFORE, initStep, this);
+		creator.addStep(IProjectCreateStep.KIND_FINISH,
+				IProjectCreateStep.BEFORE, configureStep, this);
 	}
 
 	/**
-	 * Called from the wizard on cancel.
+	 * @since 2.0
 	 */
-	public void performCancel() {
-		removeProject();
+	public void updateSteps() {
+		// empty
 	}
 
-	public IProject getCurrProject() {
-		return fCurrProject;
+	/**
+	 * @since 2.0
+	 */
+	public void resetPage() {
+		final IProjectWizard wizard = (IProjectWizard) getWizard();
+		init(DLTKCore.create(wizard.getProject()), null, false);
 	}
+
+	private final IProjectCreateStep initStep = new IProjectCreateStep() {
+
+		public void execute(IProject project, IProgressMonitor monitor)
+				throws CoreException {
+			final IBuildpathEntry[] entries = fCreator.initBuildpath(monitor);
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
+			init(DLTKCore.create(project), entries, false);
+		}
+
+		public boolean isRecurrent() {
+			return false;
+		}
+
+	};
+
+	private final IProjectCreateStep configureStep = new IProjectCreateStep() {
+
+		public void execute(IProject project, IProgressMonitor monitor)
+				throws CoreException, InterruptedException {
+			configureScriptProject(monitor);
+		}
+
+		public boolean isRecurrent() {
+			return true;
+		}
+
+	};
+
 }
