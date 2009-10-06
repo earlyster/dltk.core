@@ -195,7 +195,10 @@ public final class EnvironmentManager {
 		return detectEnvironment(project);
 	}
 
-	private static IEnvironment detectEnvironment(IProject project) {
+	/**
+	 * @since 2.0
+	 */
+	public static IEnvironment detectEnvironment(IProject project) {
 		for (IEnvironmentProvider provider : manager) {
 			waitInitialized(provider);
 			IEnvironment environment = provider.getProjectEnvironment(project);
