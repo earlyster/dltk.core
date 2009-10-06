@@ -311,7 +311,7 @@ public class ProjectCreator {
 		fSteps.add(new StepState(kind, priority, step, page));
 	}
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	/**
 	 * @param kind
