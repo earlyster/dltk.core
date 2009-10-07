@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.INewWizard;
@@ -139,6 +140,10 @@ public abstract class ProjectWizard extends NewElementWizard implements
 	 */
 	public IEnvironment getEnvironment() {
 		return getFirstPage().getEnvironment();
+	}
+
+	public IInterpreterInstall getInterpreter() {
+		return getFirstPage().getInterpreter();
 	}
 
 	/**
