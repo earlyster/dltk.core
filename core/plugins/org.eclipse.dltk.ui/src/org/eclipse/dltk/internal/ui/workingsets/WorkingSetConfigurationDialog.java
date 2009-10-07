@@ -108,10 +108,10 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			for (int i= 0; i < elements.length; i++) {
 				IAdaptable element= elements[i];
 				IProject p= (IProject)element.getAdapter(IProject.class);
-				if (p == null || !p.exists())
-					return false;
+				if (p == null || p.exists())
+					return true;
 			}
-			return true;
+			return false;
 		}
 		private boolean isActive(IWorkingSet workingSet) {
 			return fActiveWorkingSets.contains(workingSet);
