@@ -15,7 +15,7 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 	}
 
 	public void testEnvironmentResolve001() {
-		Map env = new HashMap();
+		Map<String, String> env = new HashMap<String, String>();
 		EnvironmentVariable[] vars = new EnvironmentVariable[] { mk("A", "a") };
 		EnvironmentVariable[] resolve = EnvironmentResolver.resolve(env, vars);
 		assertNotNull(resolve);
@@ -23,7 +23,7 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 	}
 
 	public void testEnvironmentResolve002() {
-		Map env = new HashMap();
+		Map<String, String> env = new HashMap<String, String>();
 		EnvironmentVariable[] vars = new EnvironmentVariable[] { mk("A", "a"),
 				mk("B", "a$Ac") };
 		EnvironmentVariable[] resolve = EnvironmentResolver.resolve(env, vars,
@@ -34,7 +34,7 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 	}
 
 	public void testEnvironmentResolve002a() {
-		Map env = new HashMap();
+		Map<String, String> env = new HashMap<String, String>();
 		EnvironmentVariable[] vars = new EnvironmentVariable[] { mk("A", "a"),
 				mk("B", "a$A:c") };
 		EnvironmentVariable[] resolve = EnvironmentResolver.resolve(env, vars);
@@ -44,7 +44,7 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 	}
 
 	public void testEnvironmentResolve003() {
-		Map env = new HashMap();
+		Map<String, String> env = new HashMap<String, String>();
 		EnvironmentVariable[] vars = new EnvironmentVariable[] {
 				mk("AUTOTEST", "/Develop/cisco/ats5.0.0"),
 				mk("ATS_EASY", "$AUTOTEST/ats_easy") };
@@ -55,7 +55,7 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 	}
 
 	public void testEnvironmentResolve004() {
-		Map env = new HashMap();
+		Map<String, String> env = new HashMap<String, String>();
 		env.put("PATH", "/bin:/usr/bin");
 		EnvironmentVariable[] vars = new EnvironmentVariable[] { mk("PATH",
 				"/sbin:$PATH") };
@@ -65,7 +65,7 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 	}
 
 	public void testEnvironmentResolve005() {
-		Map env = new HashMap();
+		Map<String, String> env = new HashMap<String, String>();
 		env.put("PATH", "/bin:/usr/bin");
 		EnvironmentVariable[] vars = new EnvironmentVariable[] {
 				new EnvironmentVariable("a1", "A1"),
@@ -81,7 +81,7 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 	}
 
 	public void testEnvironmentResolve006() {
-		Map env = new HashMap();
+		Map<String, String> env = new HashMap<String, String>();
 		env.put("PATH", "/bin:/usr/bin");
 		EnvironmentVariable[] vars = new EnvironmentVariable[] {
 				new EnvironmentVariable("a1", "A1$a4"),
@@ -93,7 +93,7 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 	}
 
 	public void testEnvironmentResolve007() {
-		Map env = new HashMap();
+		Map<String, String> env = new HashMap<String, String>();
 		env.put("PATH", "/bin:/usr/bin");
 		EnvironmentVariable[] vars = new EnvironmentVariable[] {
 				new EnvironmentVariable("a1", "$a2"),
@@ -105,7 +105,7 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 	}
 
 	public void testEnvironmentResolve008() {
-		Map env = new HashMap();
+		Map<String, String> env = new HashMap<String, String>();
 		env.put("PATH", "/bin:/usr/bin");
 		EnvironmentVariable[] vars = new EnvironmentVariable[] {
 				new EnvironmentVariable("PATH", "/sbii/bin/:$PATH"),
@@ -117,7 +117,7 @@ public class EnvironmentResolverTests extends SuiteOfTestCases {
 	}
 
 	public void testEnvironmentResolve008a() {
-		Map env = new HashMap();
+		Map<String, String> env = new HashMap<String, String>();
 		EnvironmentVariable[] vars = new EnvironmentVariable[] {
 				new EnvironmentVariable("PATH", "/sbii/bin/:$PATH"),
 				new EnvironmentVariable("a2", "alla{$PATH}") };
