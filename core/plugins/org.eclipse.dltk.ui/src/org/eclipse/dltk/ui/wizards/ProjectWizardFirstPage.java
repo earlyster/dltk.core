@@ -20,9 +20,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -43,6 +43,7 @@ import org.eclipse.dltk.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.dltk.internal.ui.workingsets.WorkingSetIDs;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterStandin;
@@ -63,20 +64,23 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.ui.dialogs.WorkingSetConfigurationBlock;
 
 /**
  * The first page of the <code>SimpleProjectWizard</code>.
+ * 
+ * @since 2.0
  */
 public abstract class ProjectWizardFirstPage extends WizardPage implements
-		ILocationGroup {
+		ILocationGroup, IProjectWizardPage {
 
 	/**
 	 * Request a project name. Fires an event whenever the text field is
@@ -801,6 +805,38 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 
 	}
 
+	private static final class WorkingSetGroup {
+
+		private final WorkingSetConfigurationBlock fWorkingSetBlock;
+
+		public WorkingSetGroup() {
+			String[] workingSetIds = new String[] { WorkingSetIDs.SCRIPT,
+					WorkingSetIDs.RESOURCE };
+			fWorkingSetBlock = new WorkingSetConfigurationBlock(workingSetIds,
+					DLTKUIPlugin.getDefault().getDialogSettings());
+		}
+
+		public Control createControl(Composite composite) {
+			Group workingSetGroup = new Group(composite, SWT.NONE);
+			workingSetGroup.setFont(composite.getFont());
+			workingSetGroup
+					.setText(NewWizardMessages.ProjectWizardFirstPage_WorkingSets_group);
+			workingSetGroup
+					.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			workingSetGroup.setLayout(new GridLayout(1, false));
+			fWorkingSetBlock.createContent(workingSetGroup);
+			return workingSetGroup;
+		}
+
+		public void setWorkingSets(IWorkingSet[] workingSets) {
+			fWorkingSetBlock.setWorkingSets(workingSets);
+		}
+
+		public IWorkingSet[] getSelectedWorkingSets() {
+			return fWorkingSetBlock.getSelectedWorkingSets();
+		}
+	}
+
 	/**
 	 * Show a warning when the project location contains files.
 	 */
@@ -1017,6 +1053,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	protected DetectGroup fDetectGroup;
 	private Validator fValidator;
 	protected String fInitialName;
+	private WorkingSetGroup fWorkingSetGroup;
 
 	/**
 	 * @since 2.0
@@ -1118,14 +1155,14 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 		createCustomGroups(composite);
 		// fLayoutGroup= new LayoutGroup(composite);
+		getWorkingSetGroup().createControl(composite);
 		fDetectGroup = new DetectGroup(composite);
+
 		// establish connections
 		fNameGroup.addObserver(fLocationGroup);
 		// fDetectGroup.addObserver(fLayoutGroup);
 		// fDetectGroup.addObserver(fInterpreterEnvironmentGroup);
-
 		fLocationGroup.addObserver(fDetectGroup);
-		fLocationGroup.addObserver(locationObservers);
 		// initialize all elements
 		fNameGroup.notifyObservers();
 		// create and connect validator
@@ -1147,6 +1184,30 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(composite,
 		// IDLTKHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected WorkingSetGroup getWorkingSetGroup() {
+		if (fWorkingSetGroup == null) {
+			fWorkingSetGroup = createWorkingSetGroup();
+		}
+		return fWorkingSetGroup;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected WorkingSetGroup createWorkingSetGroup() {
+		return new WorkingSetGroup();
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected WorkingSetDetector createWorkingSetDetector() {
+		return new WorkingSetDetector();
 	}
 
 	protected LocationGroup createLocationGroup() {
@@ -1174,25 +1235,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 
 	public IPath getLocation() {
 		return fLocationGroup.getLocation();
-	}
-
-	private class LocationObservers implements Observer {
-		final ListenerList observers = new ListenerList();
-
-		public void update(Observable o, Object arg) {
-			final Object[] listeners = observers.getListeners();
-			for (int i = 0; i < listeners.length; ++i) {
-				((ILocationGroup.Listener) listeners[i]).update(
-						ProjectWizardFirstPage.this, arg);
-			}
-		}
-
-	}
-
-	private LocationObservers locationObservers = new LocationObservers();
-
-	public void addLocationListener(ILocationGroup.Listener listener) {
-		locationObservers.observers.add(listener);
 	}
 
 	/**
@@ -1266,11 +1308,49 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	}
 
 	/**
-	 * Set the layout data for a button.
+	 * Returns the working sets to which the new project should be added.
+	 * 
+	 * @return the selected working sets to which the new project should be
+	 *         added
+	 * @since 2.0
 	 */
-	@Override
-	protected GridData setButtonLayoutData(Button button) {
-		return super.setButtonLayoutData(button);
+	public IWorkingSet[] getWorkingSets() {
+		return getWorkingSetGroup().getSelectedWorkingSets();
+	}
+
+	/**
+	 * Sets the working sets to which the new project should be added.
+	 * 
+	 * @param workingSets
+	 *            the initial selected working sets
+	 * @since 2.0
+	 */
+	public void setWorkingSets(IWorkingSet[] workingSets) {
+		Assert.isLegal(workingSets != null);
+		getWorkingSetGroup().setWorkingSets(workingSets);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void initProjectWizardPage() {
+		final IProjectWizard wizard = (IProjectWizard) getWizard();
+		setWorkingSets(createWorkingSetDetector().detect(wizard.getSelection(),
+				wizard.getWorkbench()));
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void updateProjectWizardPage() {
+		// empty
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void resetProjectWizardPage() {
+		// empty
 	}
 
 }

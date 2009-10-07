@@ -95,7 +95,9 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 	/**
 	 * @since 2.0
 	 */
-	public void configureSteps(ProjectCreator creator) {
+	public void initProjectWizardPage() {
+		final IProjectWizard wizard = (IProjectWizard) getWizard();
+		final ProjectCreator creator = wizard.getProjectCreator();
 		creator.addStep(IProjectCreateStep.KIND_INIT_UI,
 				IProjectCreateStep.BEFORE, initStep, this);
 		creator.addStep(IProjectCreateStep.KIND_FINISH,
@@ -105,14 +107,14 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 	/**
 	 * @since 2.0
 	 */
-	public void updateSteps() {
+	public void updateProjectWizardPage() {
 		// empty
 	}
 
 	/**
 	 * @since 2.0
 	 */
-	public void resetPage() {
+	public void resetProjectWizardPage() {
 		final IProjectWizard wizard = (IProjectWizard) getWizard();
 		init(DLTKCore.create(wizard.getProject()), null, false);
 	}

@@ -22,6 +22,7 @@ import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
 /**
@@ -38,7 +39,7 @@ public abstract class ProjectWizard extends NewElementWizard implements
 		if (creator != null) {
 			for (IWizardPage page : getPages()) {
 				if (page instanceof IProjectWizardPage) {
-					((IProjectWizardPage) page).configureSteps(creator);
+					((IProjectWizardPage) page).initProjectWizardPage();
 				}
 			}
 		}
@@ -56,8 +57,15 @@ public abstract class ProjectWizard extends NewElementWizard implements
 		updateSteps(null);
 		boolean res = super.performFinish();
 		if (res) {
+			final IScriptProject newElement = getCreatedElement();
+			IWorkingSet[] workingSets = ((ProjectWizardFirstPage) getFirstPage())
+					.getWorkingSets();
+			if (workingSets.length > 0) {
+				getWorkbench().getWorkingSetManager().addToWorkingSets(
+						newElement, workingSets);
+			}
 			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
-			selectAndReveal(getCreatedElement().getProject());
+			selectAndReveal(newElement.getProject());
 		}
 		return res;
 	}
@@ -164,7 +172,7 @@ public abstract class ProjectWizard extends NewElementWizard implements
 				break;
 			}
 			if (page instanceof IProjectWizardPage) {
-				((IProjectWizardPage) page).updateSteps();
+				((IProjectWizardPage) page).updateProjectWizardPage();
 			}
 		}
 	}

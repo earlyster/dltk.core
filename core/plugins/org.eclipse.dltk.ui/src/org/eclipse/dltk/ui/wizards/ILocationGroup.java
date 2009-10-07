@@ -20,10 +20,6 @@ import org.eclipse.dltk.launching.IInterpreterInstall;
 
 public interface ILocationGroup {
 
-	public interface Listener {
-		void update(ILocationGroup locationGroup, Object arg);
-	}
-
 	String getProjectName();
 
 	IProject getProjectHandle();
@@ -41,8 +37,6 @@ public interface ILocationGroup {
 	 * @since 2.0
 	 */
 	IInterpreterInstall getInterpreter();
-
-	void addLocationListener(Listener listener);
 
 	boolean getDetect();
 

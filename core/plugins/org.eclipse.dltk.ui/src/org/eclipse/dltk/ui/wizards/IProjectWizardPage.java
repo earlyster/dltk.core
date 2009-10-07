@@ -23,7 +23,7 @@ public interface IProjectWizardPage extends IWizardPage {
 	 * 
 	 * @param creator
 	 */
-	void configureSteps(ProjectCreator creator);
+	void initProjectWizardPage();
 
 	/**
 	 * This methods is called for all previous pages to update project create
@@ -31,7 +31,7 @@ public interface IProjectWizardPage extends IWizardPage {
 	 * 
 	 * @param creator
 	 */
-	void updateSteps();
+	void updateProjectWizardPage();
 
 	/**
 	 * This method is called when project being created was deleted as a result
@@ -39,6 +39,6 @@ public interface IProjectWizardPage extends IWizardPage {
 	 * 
 	 * @param creator
 	 */
-	void resetPage();
+	void resetProjectWizardPage();
 
 }
