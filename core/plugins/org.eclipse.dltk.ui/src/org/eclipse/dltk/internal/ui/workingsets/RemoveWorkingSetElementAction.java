@@ -32,7 +32,7 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 	
 	public void selectionChanged(IStructuredSelection selection) {
 		IWorkingSet workingSet= getWorkingSet(selection);
-		setEnabled(workingSet != null && !OthersWorkingSetUpdater.ID.equals(workingSet.getId()));
+		setEnabled(workingSet != null && !WorkingSetIDs.OTHERS.equals(workingSet.getId()));
 	}
 
 	private IWorkingSet getWorkingSet(IStructuredSelection selection) {

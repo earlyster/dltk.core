@@ -25,8 +25,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptModel;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.ui.navigator.ScriptExplorerContentProvider;
-import org.eclipse.dltk.internal.ui.workingsets.OthersWorkingSetUpdater;
-import org.eclipse.dltk.internal.ui.workingsets.ScriptWorkingSetUpdater;
+import org.eclipse.dltk.internal.ui.workingsets.WorkingSetIDs;
 import org.eclipse.dltk.internal.ui.workingsets.WorkingSetModel;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -126,8 +125,8 @@ public abstract class WorkingSetAwareContentProvider extends
 
 	private boolean isKnownWorkingSet(IWorkingSet set) {
 		String id = set.getId();
-		return OthersWorkingSetUpdater.ID.equals(id)
-				|| ScriptWorkingSetUpdater.ID.equals(id);
+		return WorkingSetIDs.OTHERS.equals(id)
+				|| WorkingSetIDs.SCRIPT.equals(id);
 	}
 
 	private IProject getProject(IModelElement element) {

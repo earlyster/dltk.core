@@ -224,7 +224,7 @@ public class WorkingSetModel {
 		fActiveWorkingSets= new ArrayList(2);
 
 		IWorkingSet others= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.WorkingSetModel_others_name, new IAdaptable[0]); 
-		others.setId(OthersWorkingSetUpdater.ID);
+		others.setId(WorkingSetIDs.OTHERS);
 		fLocalWorkingSetManager.addWorkingSet(others);
 		Assert.isNotNull(fOthersWorkingSetUpdater);
 		
@@ -307,7 +307,7 @@ public class WorkingSetModel {
 
 	public boolean needsConfiguration() {
 		return !fConfigured && fActiveWorkingSets.size() == 1 &&
-		OthersWorkingSetUpdater.ID.equals(((IWorkingSet)fActiveWorkingSets.get(0)).getId());
+		WorkingSetIDs.OTHERS.equals(((IWorkingSet)fActiveWorkingSets.get(0)).getId());
 	}
 
 	public void configured() {

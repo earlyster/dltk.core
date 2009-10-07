@@ -41,8 +41,6 @@ import org.eclipse.ui.PlatformUI;
 
 public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 	
-	public static final String ID= "org.eclipse.dltk.internal.ui.OthersWorkingSet";  //$NON-NLS-1$
-	
 	private IWorkingSet fWorkingSet;
 	private WorkingSetModel fWorkingSetModel;
 	

@@ -32,8 +32,6 @@ import org.eclipse.ui.IWorkingSetUpdater;
 
 public class ScriptWorkingSetUpdater implements IWorkingSetUpdater, IElementChangedListener {
 
-	public static final String ID= "org.eclipse.dltk.ui.ScriptWorkingSetPage"; //$NON-NLS-1$
-	
 	private List fWorkingSets;
 	
 	private static class WorkingSetDelta {

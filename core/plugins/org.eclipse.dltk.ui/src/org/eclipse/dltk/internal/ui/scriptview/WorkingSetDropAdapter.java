@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.dltk.internal.ui.dnd.DLTKViewerDropAdapter;
-import org.eclipse.dltk.internal.ui.workingsets.OthersWorkingSetUpdater;
+import org.eclipse.dltk.internal.ui.workingsets.WorkingSetIDs;
 import org.eclipse.dltk.internal.ui.workingsets.WorkingSetModel;
 import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -155,7 +155,7 @@ public class WorkingSetDropAdapter extends DLTKViewerDropAdapter implements Tran
 					return DND.DROP_COPY;
 				if (paths.length == 1) {
 					IWorkingSet ws= (IWorkingSet)path.getSegment(0);
-					if (OthersWorkingSetUpdater.ID.equals(ws.getId()))
+					if (WorkingSetIDs.OTHERS.equals(ws.getId()))
 						return DND.DROP_MOVE;
 				}
 			}
@@ -174,7 +174,7 @@ public class WorkingSetDropAdapter extends DLTKViewerDropAdapter implements Tran
 	}
 	
 	private boolean isOthersWorkingSet(IWorkingSet ws) {
-		return OthersWorkingSetUpdater.ID.equals(ws.getId());
+		return WorkingSetIDs.OTHERS.equals(ws.getId());
 	}
 	
 	private void initializeState(Object target, ISelection s) {

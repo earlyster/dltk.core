@@ -35,7 +35,7 @@ import org.eclipse.dltk.internal.corext.refactoring.reorg.ModelElementTransfer;
 import org.eclipse.dltk.internal.corext.refactoring.reorg.ParentChecker;
 import org.eclipse.dltk.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.dltk.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.dltk.internal.ui.workingsets.OthersWorkingSetUpdater;
+import org.eclipse.dltk.internal.ui.workingsets.WorkingSetIDs;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.actions.SelectionDispatchAction;
 import org.eclipse.dltk.ui.util.ExceptionHandler;
@@ -477,7 +477,7 @@ public class PasteAction extends SelectionDispatchAction{
 			if (selectedResources.length != 0 || selectedScriptElements.length != 0 || selectedWorkingSets.length != 1)
 				return false;
 			IWorkingSet ws= selectedWorkingSets[0];
-			return !OthersWorkingSetUpdater.ID.equals(ws.getId());
+			return !WorkingSetIDs.OTHERS.equals(ws.getId());
 		}
 	}
 	

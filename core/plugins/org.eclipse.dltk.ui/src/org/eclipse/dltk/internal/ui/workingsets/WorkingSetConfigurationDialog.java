@@ -96,8 +96,8 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			IWorkingSet ws= (IWorkingSet)element;
 			String id= ws.getId();
-			return OthersWorkingSetUpdater.ID.equals(id) ||
-				ScriptWorkingSetUpdater.ID.equals(id) || isCompatible(ws) || isActive(ws);
+			return WorkingSetIDs.OTHERS.equals(id) ||
+				WorkingSetIDs.SCRIPT.equals(id) || isCompatible(ws) || isActive(ws);
 		}
 		private boolean isCompatible(IWorkingSet set) {
 			if (!set.isSelfUpdating() || set.isAggregateWorkingSet())
@@ -357,7 +357,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	private void createWorkingSet() {
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-		IWorkingSetNewWizard wizard= manager.createWorkingSetNewWizard(new String[] {ScriptWorkingSetUpdater.ID});
+		IWorkingSetNewWizard wizard= manager.createWorkingSetNewWizard(new String[] {WorkingSetIDs.SCRIPT});
 		// the wizard can't be null since we have at least the Script working set.
 		WizardDialog dialog= new WizardDialog(getShell(), wizard);
 		dialog.create();
