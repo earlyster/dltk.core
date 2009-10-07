@@ -371,7 +371,7 @@ public class ProjectCreator {
 	private void resetPages() {
 		for (IWizardPage page : owner.getPages()) {
 			if (page instanceof IProjectWizardPage) {
-				((IProjectWizardPage) page).resetPage();
+				((IProjectWizardPage) page).resetProjectWizardPage();
 			}
 		}
 	}

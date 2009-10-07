@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.INewWizard;
@@ -38,7 +39,7 @@ public abstract class ProjectWizard extends NewElementWizard implements
 		if (creator != null) {
 			for (IWizardPage page : getPages()) {
 				if (page instanceof IProjectWizardPage) {
-					((IProjectWizardPage) page).configureSteps(creator);
+					((IProjectWizardPage) page).initProjectWizardPage();
 				}
 			}
 		}
@@ -126,16 +127,14 @@ public abstract class ProjectWizard extends NewElementWizard implements
 		return true;
 	}
 
-	/**
-	 * @since 2.0
-	 */
 	public IEnvironment getEnvironment() {
 		return getFirstPage().getEnvironment();
 	}
 
-	/**
-	 * @since 2.0
-	 */
+	public IInterpreterInstall getInterpreter() {
+		return getFirstPage().getInterpreter();
+	}
+
 	public IProject getProject() {
 		return getFirstPage().getProjectHandle();
 	}
@@ -164,7 +163,7 @@ public abstract class ProjectWizard extends NewElementWizard implements
 				break;
 			}
 			if (page instanceof IProjectWizardPage) {
-				((IProjectWizardPage) page).updateSteps();
+				((IProjectWizardPage) page).updateProjectWizardPage();
 			}
 		}
 	}
