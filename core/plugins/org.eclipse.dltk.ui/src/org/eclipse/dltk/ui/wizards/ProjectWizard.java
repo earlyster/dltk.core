@@ -135,9 +135,6 @@ public abstract class ProjectWizard extends NewElementWizard implements
 		return true;
 	}
 
-	/**
-	 * @since 2.0
-	 */
 	public IEnvironment getEnvironment() {
 		return getFirstPage().getEnvironment();
 	}
@@ -146,9 +143,6 @@ public abstract class ProjectWizard extends NewElementWizard implements
 		return getFirstPage().getInterpreter();
 	}
 
-	/**
-	 * @since 2.0
-	 */
 	public IProject getProject() {
 		return getFirstPage().getProjectHandle();
 	}
