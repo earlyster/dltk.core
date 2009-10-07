@@ -13,7 +13,7 @@ import org.eclipse.dltk.launching.EnvironmentVariable;
 public final class EnvironmentResolver {
 	private static class REnvironmentVariable {
 		EnvironmentVariable var;
-		final Set dependencies = new HashSet();
+		final Set<String> dependencies = new HashSet<String>();
 
 		public REnvironmentVariable(EnvironmentVariable var) {
 			this.var = var;
@@ -23,7 +23,7 @@ public final class EnvironmentResolver {
 	/*
 	 * Resolves specified set of environment variables with system environment
 	 */
-	public static EnvironmentVariable[] resolve(Map penv,
+	public static EnvironmentVariable[] resolve(Map<String, String> penv,
 			EnvironmentVariable[] variables) {
 		return resolve(penv, variables, false);
 	}
@@ -31,16 +31,16 @@ public final class EnvironmentResolver {
 	/*
 	 * Resolves specified set of environment variables with system environment
 	 */
-	public static EnvironmentVariable[] resolve(Map penv,
+	public static EnvironmentVariable[] resolve(Map<String, String> penv,
 			EnvironmentVariable[] variables, boolean keepUnresolved) {
 		if (variables == null) {
 			return null;
 		}
-		Map env = new HashMap();
-		Map selfDep = new HashMap();
-		for (Iterator iterator = penv.keySet().iterator(); iterator.hasNext();) {
-			String name = (String) iterator.next();
-			String value = (String) penv.get(name);
+		Map<String, String> env = new HashMap<String, String>();
+		Map<String, String> selfDep = new HashMap<String, String>();
+		for (Map.Entry<String, String> entry : penv.entrySet()) {
+			String name = entry.getKey();
+			String value = entry.getValue();
 			env.put(name, value);
 		}
 
@@ -51,10 +51,10 @@ public final class EnvironmentResolver {
 				env.remove(name);
 			}
 		}
-		Map resolved = new HashMap();
-		List result = new ArrayList();
+		Map<String, String> resolved = new HashMap<String, String>();
+		List<EnvironmentVariable> result = new ArrayList<EnvironmentVariable>();
 		// 1) replace all top level environment variables
-		List unresolved = new ArrayList();
+		List<REnvironmentVariable> unresolved = new ArrayList<REnvironmentVariable>();
 		for (int i = 0; i < variables.length; i++) {
 			REnvironmentVariable var = new REnvironmentVariable(
 					new EnvironmentVariable(variables[i]));
@@ -68,9 +68,9 @@ public final class EnvironmentResolver {
 			if (maxCycles < 0) {
 				break;
 			}
-			for (Iterator iterator = unresolved.iterator(); iterator.hasNext();) {
-				REnvironmentVariable var = (REnvironmentVariable) iterator
-						.next();
+			for (Iterator<REnvironmentVariable> iterator = unresolved
+					.iterator(); iterator.hasNext();) {
+				REnvironmentVariable var = iterator.next();
 				if (isResolved(var.var)) {
 					result.add(var.var);
 					resolved.put(var.var.getName(), var.var.getValue());
@@ -107,8 +107,7 @@ public final class EnvironmentResolver {
 			}
 		}
 
-		return (EnvironmentVariable[]) result
-				.toArray(new EnvironmentVariable[result.size()]);
+		return result.toArray(new EnvironmentVariable[result.size()]);
 	}
 
 	private static boolean isSelfCyclic(REnvironmentVariable var) {
@@ -131,13 +130,11 @@ public final class EnvironmentResolver {
 	}
 
 	private static boolean isUnresolvable(REnvironmentVariable var,
-			List unresolved) {
+			List<REnvironmentVariable> unresolved) {
 		EnvironmentVariable t = var.var;
 		while (true) {
 			boolean step = false;
-			for (Iterator iterator = unresolved.iterator(); iterator.hasNext();) {
-				REnvironmentVariable rvar = (REnvironmentVariable) iterator
-						.next();
+			for (REnvironmentVariable rvar : unresolved) {
 				if (!rvar.var.getName().equals(t.getName())
 						&& containVar(t, rvar.var.getName())) {
 					t = resolveVariable(t, rvar.var.getName(), rvar.var
@@ -171,13 +168,13 @@ public final class EnvironmentResolver {
 		return new EnvironmentVariable(var.getName(), result);
 	}
 
-	private static boolean isCyclic(REnvironmentVariable var, List unresolved) {
+	private static boolean isCyclic(REnvironmentVariable var,
+			List<REnvironmentVariable> unresolved) {
 		// Detect direct cycles
 		if (var.dependencies.size() == 0) {
 			return false;
 		}
-		for (Iterator iterator2 = unresolved.iterator(); iterator2.hasNext();) {
-			REnvironmentVariable env2 = (REnvironmentVariable) iterator2.next();
+		for (REnvironmentVariable env2 : unresolved) {
 			if (var.dependencies.contains(env2.var.getName())
 					&& env2.dependencies.contains(var.var.getName())) {
 				return true;
@@ -186,12 +183,13 @@ public final class EnvironmentResolver {
 		return false;
 	}
 
-	private static void resolveVariable(REnvironmentVariable var, Map env) {
+	private static void resolveVariable(REnvironmentVariable var,
+			Map<String, String> env) {
 		EnvironmentVariable v = var.var;
-		for (Iterator iterator = env.keySet().iterator(); iterator.hasNext();) {
-			String varName = (String) iterator.next();
+		for (Map.Entry<String, String> entry : env.entrySet()) {
+			final String varName = entry.getKey();
 			if (containVar(v, varName)) {
-				v = resolveVariable(v, varName, (String) env.get(varName));
+				v = resolveVariable(v, varName, entry.getValue());
 			}
 		}
 		var.var = v;
