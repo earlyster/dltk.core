@@ -220,4 +220,24 @@ public final class EnvironmentResolver {
 		}
 		return false;
 	}
+
+	/**
+	 * Finds the variable with the specified name
+	 * 
+	 * @param vars
+	 * @param name
+	 * @return
+	 * @since 2.0
+	 */
+	public static EnvironmentVariable find(EnvironmentVariable[] vars,
+			String name) {
+		if (vars != null && name != null) {
+			for (EnvironmentVariable var : vars) {
+				if (name.equals(var.getName())) {
+					return var;
+				}
+			}
+		}
+		return null;
+	}
 }
