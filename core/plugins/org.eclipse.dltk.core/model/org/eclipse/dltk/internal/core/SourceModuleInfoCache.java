@@ -160,33 +160,30 @@ public class SourceModuleInfoCache implements ISourceModuleInfoCache {
 	};
 
 	private static class SourceModuleInfo implements ISourceModuleInfo {
-		private Map map;
+		private Map<Object, Object> map;
 
-		public Object get(Object key) {
+		public synchronized Object get(Object key) {
 			if (map == null) {
 				return null;
 			}
 			return map.get(key);
 		}
 
-		public void put(Object key, Object value) {
+		public synchronized void put(Object key, Object value) {
 			if (map == null) {
-				map = new HashMap();
+				map = new HashMap<Object, Object>();
 			}
 			map.put(key, value);
 		}
 
-		public void remove(Object key) {
+		public synchronized void remove(Object key) {
 			if (map != null) {
 				map.remove(key);
 			}
 		}
 
-		public boolean isEmpty() {
-			if (this.map == null) {
-				return true;
-			}
-			return this.map.isEmpty();
+		public synchronized boolean isEmpty() {
+			return this.map == null || this.map.isEmpty();
 		}
 	}
 
