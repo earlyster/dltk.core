@@ -365,7 +365,7 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 	}
 
 	protected Template[] getApplicableTemplates() {
-		final List result = new ArrayList();
+		final List<Template> result = new ArrayList<Template>();
 		final ICodeTemplateArea templateArea = getTemplateArea();
 		if (templateArea != null) {
 			final TemplateStore store = templateArea.getTemplateAccess()
@@ -373,10 +373,8 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 			final String[] contextTypeIds = getCodeTemplateContextTypeIds();
 			for (int i = 0; i < contextTypeIds.length; ++i) {
 				Template[] templates = store.getTemplates(contextTypeIds[i]);
-				Arrays.sort(templates, new Comparator() {
-					public int compare(Object arg0, Object arg1) {
-						final Template t0 = ((Template) arg0);
-						final Template t1 = ((Template) arg1);
+				Arrays.sort(templates, new Comparator<Template>() {
+					public int compare(Template t0, Template t1) {
 						return t0.getName().compareToIgnoreCase(t1.getName());
 					}
 				});
@@ -385,7 +383,7 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 				}
 			}
 		}
-		return (Template[]) result.toArray(new Template[result.size()]);
+		return result.toArray(new Template[result.size()]);
 	}
 
 	protected String getLastUsedTemplateKey() {
@@ -914,14 +912,14 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		return null;
 	}
 
-	protected List collectLinkedPaths(IProject project) {
+	protected List<IPath> collectLinkedPaths(IProject project) {
 		try {
 			final IEnvironment environment = EnvironmentManager
 					.getEnvironment(project);
 			if (environment == null) {
 				return null;
 			}
-			final Set result = new HashSet();
+			final Set<IPath> result = new HashSet<IPath>();
 			final IResource[] children = project.members();
 			for (int i = 0; i < children.length; i++) {
 				final IResource child = children[i];
@@ -936,7 +934,7 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 					}
 				}
 			}
-			return !result.isEmpty() ? new ArrayList(result) : null;
+			return !result.isEmpty() ? new ArrayList<IPath>(result) : null;
 		} catch (CoreException e) {
 			// not possible for project to be inaccessible
 			DLTKUIPlugin.log(e);
