@@ -10,6 +10,7 @@
 package org.eclipse.dltk.ui.wizards;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -20,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -164,6 +167,23 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 				if (module.exists()) {
 					status
 							.setError(Messages.NewSourceModulePage_fileAlreadyExists);
+				} else {
+					IResource resource = module.getResource();
+					if (resource != null) {
+						URI location = resource.getLocationURI();
+						if (location != null) {
+							try {
+								IFileStore store = EFS.getStore(location);
+								if (store.fetchInfo().exists()) {
+									status
+											.setError(Messages.NewSourceModulePage_error_TypeNameExistsDifferentCase);
+								}
+							} catch (CoreException e) {
+								status
+										.setError(Messages.NewSourceModulePage_error_uri_location_unkown);
+							}
+						}
+					}
 				}
 			}
 		}

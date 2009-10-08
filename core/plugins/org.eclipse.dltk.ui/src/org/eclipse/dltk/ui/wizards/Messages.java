@@ -30,14 +30,17 @@ public class Messages extends NLS {
 	public static String NewSourceModulePage_remoteFolderNotExist;
 	public static String NewSourceModulePage_selectScriptFolder;
 	public static String NewSourceModulePage_Template;
+	/**
+	 * @since 2.0
+	 */
+	public static String NewSourceModulePage_error_uri_location_unkown;
+
+	/**
+	 * @since 2.0
+	 */
+	public static String NewSourceModulePage_error_TypeNameExistsDifferentCase;
+
 	public static String NewSourceModuleWizard_errorInOpenInEditor;
-	public static String ProjectFolder_kind_libraryFolder;
-	public static String ProjectFolder_kind_folder;
-	public static String ProjectFolder_kind_other;
-	public static String ProjectFolder_kind_sourceFolder;
-	public static String ScriptProjectWizardSecondPage_operation_initialize;
-	public static String SelectFolders_description;
-	public static String SelectFolders_title;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
