@@ -126,7 +126,8 @@ public abstract class WorkingSetAwareContentProvider extends
 	private boolean isKnownWorkingSet(IWorkingSet set) {
 		String id = set.getId();
 		return WorkingSetIDs.OTHERS.equals(id)
-				|| WorkingSetIDs.SCRIPT.equals(id);
+				|| WorkingSetIDs.SCRIPT.equals(id)
+				|| WorkingSetIDs.RESOURCE.equals(id);
 	}
 
 	private IProject getProject(IModelElement element) {
