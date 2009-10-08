@@ -28,6 +28,7 @@ public abstract class NewSourceModuleWizard extends NewElementWizard {
 
 	protected abstract NewSourceModulePage createNewSourceModulePage();
 
+	@Override
 	public void addPages() {
 		super.addPages();
 
@@ -36,18 +37,18 @@ public abstract class NewSourceModuleWizard extends NewElementWizard {
 		addPage(page);
 	}
 
+	@Override
 	public IModelElement getCreatedElement() {
 		return module;
 	}
 
+	@Override
 	protected void finishPage(IProgressMonitor monitor)
 			throws InterruptedException, CoreException {
 		module = page.createFile(monitor);
 	}
 
-	/*
-	 * @see org.eclipse.dltk.ui.wizards.NewElementWizard#performFinish()
-	 */
+	@Override
 	public boolean performFinish() {
 		final boolean result = super.performFinish();
 		if (result && module != null) {
