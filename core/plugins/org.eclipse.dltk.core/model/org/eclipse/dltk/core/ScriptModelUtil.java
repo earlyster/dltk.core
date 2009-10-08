@@ -14,7 +14,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
-import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.search.IDLTKSearchConstants;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
@@ -181,14 +180,7 @@ public class ScriptModelUtil {
 		IDLTKLanguageToolkit languageToolkit = DLTKLanguageManager
 				.getLanguageToolkit(cu);
 
-		String contentType = languageToolkit.getLanguageContentType();
-		IContentTypeManager manager = Platform.getContentTypeManager();
-		IContentType type = manager.getContentType(contentType);
-		String[] languageFileExtensions = null;
-		if (type != null) {
-			languageFileExtensions = type
-					.getFileSpecs(IContentType.FILE_EXTENSION_SPEC);
-		}
+		String[] languageFileExtensions = getFileExtensions(languageToolkit);
 		if (languageFileExtensions != null) {
 			for (int i = 0; i < languageFileExtensions.length; i++) {
 				if (newMainName.endsWith(languageFileExtensions[i])) {
@@ -203,6 +195,24 @@ public class ScriptModelUtil {
 			return newMainName + oldName.substring(i);
 		} else {
 			return newMainName;
+		}
+	}
+
+	/**
+	 * Returns the file extensions for the specified language toolkit or
+	 * <code>null</code> if content type for this language could not be
+	 * determined.
+	 * 
+	 * @since 2.0
+	 */
+	public static String[] getFileExtensions(
+			IDLTKLanguageToolkit languageToolkit) {
+		final IContentType type = Platform.getContentTypeManager()
+				.getContentType(languageToolkit.getLanguageContentType());
+		if (type != null) {
+			return type.getFileSpecs(IContentType.FILE_EXTENSION_SPEC);
+		} else {
+			return null;
 		}
 	}
 
