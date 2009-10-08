@@ -9,6 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,10 +56,12 @@ import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.dltk.ui.dialogs.ControlStatus;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.environment.IEnvironmentUI;
+import org.eclipse.dltk.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -69,6 +72,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -843,14 +847,29 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	protected final class DetectGroup extends Observable implements Observer,
 			SelectionListener {
 		private final Link fHintText;
+		private Label fIcon;
 		private boolean fDetect;
 
-		public DetectGroup(Composite composite) {
+		public DetectGroup(Composite parent) {
+			Composite composite = new Composite(parent, SWT.WRAP);
+			composite
+					.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			GridLayout layout = new GridLayout(2, false);
+			layout.marginHeight = 0;
+			layout.marginWidth = 0;
+			layout.horizontalSpacing = 10;
+			composite.setLayout(layout);
+
+			fIcon = new Label(composite, SWT.LEFT);
+			GridData gd = new GridData(SWT.LEFT, SWT.CENTER, false, false);
+			fIcon.setLayoutData(gd);
+
 			fHintText = new Link(composite, SWT.WRAP);
-			fHintText.setFont(composite.getFont());
+			fHintText.setFont(parent.getFont());
 			fHintText.addSelectionListener(this);
-			GridData gd = new GridData(GridData.FILL, SWT.FILL, true, true);
+			gd = new GridData(GridData.FILL, SWT.FILL, true, true);
 			gd.widthHint = convertWidthInCharsToPixels(50);
+			gd.heightHint = convertHeightInCharsToPixels(3);
 			fHintText.setLayoutData(gd);
 			if (supportInterpreter()) {
 				handlePossibleInterpreterChange();
@@ -866,36 +885,46 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 					&& workspace.getRoot().findMember(name) == null;
 		}
 
+		private boolean computeDetectState() {
+			IPath location = fLocationGroup.getLocation();
+			if (fLocationGroup.isInWorkspace()) {
+				if (!isValidProjectName(getProjectName())) {
+					return false;
+				} else {
+					final IEnvironment environment = EnvironmentManager
+							.getLocalEnvironment();
+					final IFileHandle directory = environment.getFile(location
+							.append(getProjectName()));
+					return directory.isDirectory();
+				}
+			} else {
+				IEnvironment environment = fLocationGroup.getEnvironment();
+				if (!location.isEmpty()) {
+					final IFileHandle directory = environment.getFile(location);
+					return directory.isDirectory();
+				} else {
+					return false;
+				}
+			}
+		}
+
 		public void update(Observable o, Object arg) {
 			if (o instanceof LocationGroup) {
-				boolean oldDetectState = fDetect;
-				IPath location = fLocationGroup.getLocation();
-				if (fLocationGroup.isInWorkspace()) {
-					if (!isValidProjectName(getProjectName())) {
-						fDetect = false;
-					} else {
-						IEnvironment environment = fLocationGroup
-								.getEnvironment();
-						final IFileHandle directory = environment
-								.getFile(location.append(getProjectName()));
-						fDetect = directory.isDirectory();
-					}
-				} else {
-					IEnvironment environment = fLocationGroup.getEnvironment();
-					if (location.toPortableString().length() > 0) {
-						final IFileHandle directory = environment
-								.getFile(location);
-						fDetect = directory.isDirectory();
-					}
-				}
+				final boolean oldDetectState = fDetect;
+				fDetect = computeDetectState();
 				if (oldDetectState != fDetect) {
 					setChanged();
 					notifyObservers();
 					if (fDetect) {
+						fIcon.setImage(Dialog
+								.getImage(Dialog.DLG_IMG_MESSAGE_INFO));
+						fIcon.setVisible(true);
 						fHintText.setVisible(true);
 						fHintText
 								.setText(NewWizardMessages.ScriptProjectWizardFirstPage_DetectGroup_message);
+						fHintText.getParent().layout();
 					} else {
+						fIcon.setVisible(false);
 						fHintText.setVisible(false);
 					}
 					if (supportInterpreter()) {
@@ -954,8 +983,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 					NewWizardMessages.ScriptProjectWizardFirstPage_Message_enterProjectName);
 		}
 		// check whether the project name is valid
-		final IStatus nameStatus = DLTKUIPlugin.getWorkspace().validateName(
-				name, IResource.PROJECT);
+		final IWorkspace workspace = DLTKUIPlugin.getWorkspace();
+		final IStatus nameStatus = workspace.validateName(name,
+				IResource.PROJECT);
 		if (!nameStatus.isOK()) {
 			return nameStatus;
 		}
@@ -965,6 +995,27 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			return new StatusInfo(
 					IStatus.ERROR,
 					NewWizardMessages.ScriptProjectWizardFirstPage_Message_projectAlreadyExists);
+		}
+		IPath projectLocation = workspace.getRoot().getLocation().append(name);
+		if (projectLocation.toFile().exists()) {
+			try {
+				// correct casing
+				String canonicalPath = projectLocation.toFile()
+						.getCanonicalPath();
+				projectLocation = new Path(canonicalPath);
+			} catch (IOException e) {
+				DLTKUIPlugin.log(e);
+			}
+			String existingName = projectLocation.lastSegment();
+			if (!existingName.equals(fNameGroup.getName())) {
+				return new StatusInfo(
+						IStatus.ERROR,
+						NLS
+								.bind(
+										NewWizardMessages.ScriptProjectWizardFirstPage_Message_invalidProjectNameForWorkspaceRoot,
+										BasicElementLabels
+												.getResourceName(existingName)));
+			}
 		}
 		return null;
 	}
