@@ -34,10 +34,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.content.IContentType;
-import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -47,6 +44,7 @@ import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
@@ -702,11 +700,9 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(requiredNature);
-		String contentType = toolkit.getLanguageContentType();
-		IContentTypeManager manager = Platform.getContentTypeManager();
-		IContentType type = manager.getContentType(contentType);
-		if (type != null) {
-			return type.getFileSpecs(IContentType.FILE_EXTENSION_SPEC);
+		String[] extensions = ScriptModelUtil.getFileExtensions(toolkit);
+		if (extensions != null) {
+			return extensions;
 		}
 
 		return new String[] { Util.EMPTY_STRING };
