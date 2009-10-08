@@ -1782,12 +1782,11 @@ public class ScriptExplorerPart extends ViewPart implements
 	private void createWorkingSetModel() {
 		SafeRunner.run(new ISafeRunnable() {
 			public void run() throws Exception {
-				fWorkingSetModel = (fMemento != null) ? new WorkingSetModel(
-						fMemento) : new WorkingSetModel();
+				fWorkingSetModel = new WorkingSetModel(fMemento);
 			}
 
 			public void handleException(Throwable exception) {
-				fWorkingSetModel = new WorkingSetModel();
+				fWorkingSetModel = new WorkingSetModel(null);
 			}
 		});
 	}
