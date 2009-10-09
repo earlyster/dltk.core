@@ -270,8 +270,7 @@ public abstract class MainLaunchConfigurationTab extends
 		config.setAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
 				getScriptName());
-		config.setAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID,
-				ScriptRuntimeProcessFactory.PROCESS_FACTORY_ID);
+		applyProcessFactory(config);
 		if (debugConsole != null) {
 			config.setAttribute(
 					ScriptLaunchConfigurationConstants.ATTR_DEBUG_CONSOLE,
@@ -279,6 +278,14 @@ public abstract class MainLaunchConfigurationTab extends
 		}
 		performApplyConnectionTimeout(config);
 		performApplyInteractiveConsole(config);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected void applyProcessFactory(ILaunchConfigurationWorkingCopy config) {
+		config.setAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID,
+				ScriptRuntimeProcessFactory.PROCESS_FACTORY_ID);
 	}
 
 	protected void performApplyConnectionTimeout(
