@@ -9,6 +9,7 @@ import java.util.Set;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.IStreamListener;
 import org.eclipse.debug.core.model.IFlushableStreamMonitor;
+import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.debug.core.model.IStreamsProxy;
 import org.eclipse.debug.ui.IDebugUIConstants;
@@ -19,23 +20,40 @@ import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 
 public class ScriptDebugConsole extends IOConsole {
-	private ILaunch launch;
+
+	/**
+	 * @since 2.0
+	 */
+	public static final String TYPE = DLTKDebugUIPlugin.PLUGIN_ID
+			+ ".ScriptDebugConsoleType"; //$NON-NLS-1$
+
+	private final ILaunch launch;
 	private final IConsoleColorProvider fColorProvider;
 
 	public ILaunch getLaunch() {
 		return launch;
 	}
 
-	public void setLaunch(ILaunch launch) {
-		this.launch = launch;
+	/**
+	 * @since 2.0
+	 */
+	public IProcess getProcess() {
+		final IProcess[] processes = launch.getProcesses();
+		if (processes.length != 0) {
+			return processes[0];
+		} else {
+			return null;
+		}
 	}
 
 	/**
 	 * @since 2.0
 	 */
-	public ScriptDebugConsole(String name, ImageDescriptor imageDescriptor,
-			String encoding, IConsoleColorProvider colorProvider) {
-		super(name, null, imageDescriptor, encoding, true);
+	public ScriptDebugConsole(ILaunch launch, String name,
+			ImageDescriptor imageDescriptor, String encoding,
+			IConsoleColorProvider colorProvider) {
+		super(name, TYPE, imageDescriptor, encoding, true);
+		this.launch = launch;
 		this.fColorProvider = colorProvider;
 
 		this.addPatternMatchListener(new ScriptDebugConsoleTraceTracker());

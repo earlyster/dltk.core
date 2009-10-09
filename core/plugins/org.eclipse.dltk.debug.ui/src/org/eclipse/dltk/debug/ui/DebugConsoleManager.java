@@ -76,7 +76,7 @@ public class DebugConsoleManager implements ILaunchesListener2 {
 		final IConsoleColorProvider colorProvider = getColorProvider(process != null ? process
 				.getAttribute(IProcess.ATTR_PROCESS_TYPE)
 				: null);
-		final ScriptDebugConsole console = new ScriptDebugConsole(
+		final ScriptDebugConsole console = new ScriptDebugConsole(launch,
 				computeName(launch), null, encoding, colorProvider);
 		if (process != null) {
 			console.setAttribute(IDebugUIConstants.ATTR_CONSOLE_PROCESS,
@@ -85,7 +85,6 @@ public class DebugConsoleManager implements ILaunchesListener2 {
 				console.connect((IScriptProcess) process);
 			}
 		}
-		console.setLaunch(launch);
 		final IConsoleManager manager = getConsoleManager();
 		manager.addConsoles(new IConsole[] { console });
 		manager.showConsoleView(console);

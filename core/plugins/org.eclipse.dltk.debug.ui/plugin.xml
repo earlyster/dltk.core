@@ -527,4 +527,20 @@
      <handler class="org.eclipse.dltk.debug.ui.handlers.LaunchStatusHandler"/>
   </extension>
 
+   <extension point="org.eclipse.ui.console.consolePageParticipants">
+      <consolePageParticipant
+            class="org.eclipse.dltk.internal.debug.ui.console.ScriptDebugConsolePageParticipant"
+            id="org.eclipse.dltk.debug.ui.scriptDebugConsolePageParticipant">
+         <enablement>
+         	<and>
+         		<instanceof value="org.eclipse.dltk.debug.ui.ScriptDebugConsole"/>
+				<test
+					property="org.eclipse.ui.console.consoleTypeTest"
+					value="org.eclipse.dltk.debug.ui.ScriptDebugConsoleType" />
+				<!-- value of ScriptDebugConsole.TYPE -->
+         	</and>
+         </enablement>
+      </consolePageParticipant>
+   </extension>
+
 </plugin>
