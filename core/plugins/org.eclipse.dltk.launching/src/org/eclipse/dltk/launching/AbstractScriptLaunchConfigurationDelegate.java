@@ -865,28 +865,41 @@ public abstract class AbstractScriptLaunchConfigurationDelegate extends
 		}
 	}
 
+	@Override
 	public ILaunch getLaunch(ILaunchConfiguration configuration, String mode)
 			throws CoreException {
 		final Launch launch = new Launch(configuration, mode, null);
 		if (ILaunchManager.DEBUG_MODE.equals(mode)) {
-			if (!configuration
-					.getAttribute(
-							ScriptLaunchConfigurationConstants.ATTR_DEBUG_CONSOLE,
-							true)) {
-				launch.setAttribute(
-						DLTKDebugLaunchConstants.ATTR_DEBUG_CONSOLE,
-						DLTKDebugLaunchConstants.FALSE);
-			}
-			if (configuration
-					.getAttribute(
-							ScriptLaunchConfigurationConstants.ENABLE_BREAK_ON_FIRST_LINE,
-							false)) {
-				launch.setAttribute(
-						DLTKDebugLaunchConstants.ATTR_BREAK_ON_FIRST_LINE,
-						DLTKDebugLaunchConstants.TRUE);
-			}
+			setDebugConsoleAttributes(launch, configuration);
+			setDebugOptions(launch, configuration);
 		}
 		return launch;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected void setDebugOptions(final Launch launch,
+			ILaunchConfiguration configuration) throws CoreException {
+		if (configuration.getAttribute(
+				ScriptLaunchConfigurationConstants.ENABLE_BREAK_ON_FIRST_LINE,
+				false)) {
+			launch.setAttribute(
+					DLTKDebugLaunchConstants.ATTR_BREAK_ON_FIRST_LINE,
+					DLTKDebugLaunchConstants.TRUE);
+		}
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected void setDebugConsoleAttributes(final Launch launch,
+			ILaunchConfiguration configuration) throws CoreException {
+		if (!configuration.getAttribute(
+				ScriptLaunchConfigurationConstants.ATTR_DEBUG_CONSOLE, true)) {
+			launch.setAttribute(DLTKDebugLaunchConstants.ATTR_DEBUG_CONSOLE,
+					DLTKDebugLaunchConstants.FALSE);
+		}
 	}
 
 	public void launch(ILaunchConfiguration configuration, String mode,
