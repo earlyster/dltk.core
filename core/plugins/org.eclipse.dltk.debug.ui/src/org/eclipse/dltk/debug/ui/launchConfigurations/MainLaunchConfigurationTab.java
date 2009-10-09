@@ -101,6 +101,7 @@ public abstract class MainLaunchConfigurationTab extends
 		this.useInteractiveConsoleGroup = true;
 	}
 
+	@Override
 	protected void doInitializeForm(ILaunchConfiguration config) {
 		updateMainModuleFromConfig(config);
 		initializeDebugConsole(config);
@@ -165,6 +166,7 @@ public abstract class MainLaunchConfigurationTab extends
 		fSearchButton = createPushButton(editParent,
 				DLTKLaunchConfigurationsMessages.mainTab_searchButton, null);
 		fSearchButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleSearchButtonSelected();
 			}
@@ -213,16 +215,13 @@ public abstract class MainLaunchConfigurationTab extends
 		fScriptText.setText(getMainModuleName(config));
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
-	 * #doCreateControl(org.eclipse.swt.widgets.Composite)
-	 */
+	@Override
 	protected void doCreateControl(Composite composite) {
 		createMainModuleEditor(composite,
 				DLTKLaunchConfigurationsMessages.mainTab_mainModule);
 	}
 
+	@Override
 	protected void createDebugOptions(Composite group) {
 		super.createDebugOptions(group);
 		if (canSelectDebugConsoleType()) {
@@ -247,6 +246,7 @@ public abstract class MainLaunchConfigurationTab extends
 		return DLTKLaunchConfigurationsMessages.mainTab_title;
 	}
 
+	@Override
 	protected void setDefaults(ILaunchConfigurationWorkingCopy configuration,
 			IModelElement element) {
 		super.setDefaults(configuration, element);
@@ -265,11 +265,7 @@ public abstract class MainLaunchConfigurationTab extends
 		}
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.dltk.debug.ui.launchConfigurations.ScriptLaunchConfigurationTab
-	 * #doPerformApply(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
-	 */
+	@Override
 	protected void doPerformApply(ILaunchConfigurationWorkingCopy config) {
 		config.setAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_MAIN_SCRIPT_NAME,
@@ -293,6 +289,7 @@ public abstract class MainLaunchConfigurationTab extends
 						(String) null);
 	}
 
+	@Override
 	protected IResource getResource(ILaunchConfiguration config)
 			throws CoreException {
 		final String projectName = LaunchConfigurationUtils
@@ -392,9 +389,11 @@ public abstract class MainLaunchConfigurationTab extends
 	}
 
 	/**
-	 * @deprecated typo in method name
+	 * typo in method name
+	 * 
 	 * @return
 	 */
+	@Deprecated
 	protected final URI validatAndGetScriptPath() {
 		return validateAndGetScriptPath();
 	}
@@ -455,13 +454,12 @@ public abstract class MainLaunchConfigurationTab extends
 		return script;
 	}
 
+	@Override
 	protected boolean validate() {
 		return super.validate() && validateScript();
 	}
 
-	/*
-	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#getImage()
-	 */
+	@Override
 	public Image getImage() {
 		return DLTKPluginImages.get(DLTKPluginImages.IMG_OBJS_CLASS);
 	}
@@ -472,6 +470,7 @@ public abstract class MainLaunchConfigurationTab extends
 				EMPTY_STRING);
 	}
 
+	@Override
 	protected void createCustomSections(Composite parent) {
 		if (useInteractiveConsoleGroup) {
 			Group group = new Group(parent, SWT.NONE);
@@ -488,6 +487,7 @@ public abstract class MainLaunchConfigurationTab extends
 			interactiveConsoleCheck.addSelectionListener(getWidgetListener());
 			interactiveConsoleCheck
 					.addSelectionListener(new SelectionAdapter() {
+						@Override
 						public void widgetSelected(SelectionEvent e) {
 							notifyInteractiveChangedListeners(interactiveConsoleCheck
 									.getSelection());
