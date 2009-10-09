@@ -74,8 +74,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse
-	 *      .swt.widgets.Composite)
+	 * @see ILaunchConfigurationTab#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
 		Composite comp = new Composite(parent, SWT.NONE);
@@ -137,8 +136,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 	private boolean initializing = false;
 
 	/*
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse
-	 *      .debug.core.ILaunchConfiguration)
+	 * @see ILaunchConfigurationTab#initializeFrom(ILaunchConfiguration)
 	 */
 	public final void initializeFrom(ILaunchConfiguration config) {
 		initializing = true;
@@ -150,10 +148,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 		}
 	}
 
-	/*
-	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#isValid(org.eclipse
-	 *      .debug.core.ILaunchConfiguration)
-	 */
+	@Override
 	public boolean isValid(ILaunchConfiguration launchConfig) {
 		validatePage(false);
 		return !isError();
@@ -191,8 +186,8 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse
-	 *      .debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see
+	 * ILaunchConfigurationTab#performApply(ILaunchConfigurationWorkingCopy)
 	 */
 	public final void performApply(ILaunchConfigurationWorkingCopy config) {
 		String project = fProjText.getText().trim();
@@ -262,8 +257,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 	}
 
 	/*
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(org.eclipse.
-	 *      debug.core.ILaunchConfigurationWorkingCopy)
+	 * @see ILaunchConfigurationTab#setDefaults(ILaunchConfigurationWorkingCopy)
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
 		IModelElement element = getContextModelElement();
@@ -302,20 +296,24 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 * Returns the current preference value for the 'break on first line'
 	 * setting
 	 */
-	protected abstract boolean breakOnFirstLinePrefEnabled(
-			PreferencesLookupDelegate delegate);
+	protected boolean breakOnFirstLinePrefEnabled(
+			PreferencesLookupDelegate delegate) {
+		return false;
+	}
 
 	/**
 	 * Returns the current preference value for the 'Dbgp logging enabled'
 	 * setting
 	 */
-	protected abstract boolean dbpgLoggingPrefEnabled(
-			PreferencesLookupDelegate delegate);
+	protected boolean dbpgLoggingPrefEnabled(PreferencesLookupDelegate delegate) {
+		return false;
+	}
 
 	/**
 	 * @deprecated not used anymore
 	 * @return
 	 */
+	@Deprecated
 	protected final boolean doCanSave() {
 		return false;
 	}
@@ -358,8 +356,8 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 * 
 	 * @return <code>true</code> if the toolkit is valid for the launch
 	 *         configuration, <code>false</code> otherwise
-	 * @deprecated
 	 */
+	@Deprecated
 	protected final boolean isValidToolkit(IDLTKLanguageToolkit toolkit) {
 		/*
 		 * This method is not used anymore - the test in validateProject() is
@@ -504,6 +502,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 		fProjButton = createPushButton(editParent,
 				DLTKLaunchConfigurationsMessages.mainTab_projectButton, null);
 		fProjButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleProjectButtonSelected();
 			}
@@ -537,9 +536,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 		return getScriptModel().getScriptProject(projectName);
 	}
 
-	/**
-	 * @deprecated
-	 */
+	@Deprecated
 	protected final String[] getProjectAndScriptNames() {
 		return null;
 	}
@@ -625,9 +622,7 @@ public abstract class ScriptLaunchConfigurationTab extends
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
-	/**
-	 * @deprecated
-	 */
+	@Deprecated
 	protected final String guessProjectName() {
 		return EMPTY_STRING;
 	}
