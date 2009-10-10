@@ -127,6 +127,16 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		return Util.combineHashCodes(parent.hashCode(), path.hashCode());
 	}
 
+	@Override
+	public boolean exists() {
+		/*
+		 * super.exist() only checks for the parent and the resource existence
+		 * so also ensure that the package is not excluded (see
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=138577)
+		 */
+		return super.exists() && !Util.isExcluded(this);
+	}
+
 	public int getKind() throws ModelException {
 		return getProjectFragment().getKind();
 	}
