@@ -1111,6 +1111,31 @@ public class BuildpathTests extends ModifyingResourceTests {
 		}
 	}
 
+	public void testScriptFolderExclude() throws CoreException {
+		try {
+			// create
+			final IScriptProject project = createScriptProject("A_",
+					TEST_NATURE, new String[] { "" });
+			project.getProject().getFolder("src").create(true, true, null);
+			// find folder & test it
+			final IScriptFolder folder = project.findScriptFolder(new Path(
+					"/A_/src"));
+			assertNotNull(folder);
+			assertTrue(folder.exists());
+			// change buildpath
+			final IBuildpathEntry entry1 = DLTKCore.newSourceEntry(new Path(
+					"/A_/src"));
+			final IBuildpathEntry entry2 = DLTKCore.newSourceEntry(new Path(
+					"/A_"), new IPath[0], new IPath[] { new Path("src/") });
+			project.setRawBuildpath(new IBuildpathEntry[] { entry1, entry2 },
+					null);
+			// test folder after change
+			assertFalse(folder.exists());
+		} finally {
+			deleteProject("A_");
+		}
+	}
+
 	/**
 	 * Setting the buildpath to empty should result in no entries, and a delta
 	 * with removed roots.
