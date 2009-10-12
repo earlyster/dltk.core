@@ -12,7 +12,6 @@ package org.eclipse.dltk.internal.debug.ui.interpreters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -78,7 +77,7 @@ public abstract class AbstractInterpreterComboBlock {
 	/**
 	 * Interpreters being displayed
 	 */
-	private List fInterpreters = new ArrayList();
+	private List<IInterpreterInstall> fInterpreters = new ArrayList<IInterpreterInstall>();
 
 	/**
 	 * The main control
@@ -341,31 +340,24 @@ public abstract class AbstractInterpreterComboBlock {
 	 * @param Interpreters
 	 *            InterpreterEnvironments to be displayed
 	 */
-	protected void setInterpreters(List interpreters) {
+	protected void setInterpreters(List<IInterpreterInstall> interpreters) {
 		fInterpreters.clear();
-		for (Iterator iterator = interpreters.iterator(); iterator.hasNext();) {
-			IInterpreterInstall install = (IInterpreterInstall) iterator.next();
+		for (IInterpreterInstall install : interpreters) {
 			if (environment != null
 					&& environment.equals(install.getEnvironment())) {
 				fInterpreters.add(install);
 			}
 		}
 		// sort by name
-		Collections.sort(fInterpreters, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				IInterpreterInstall left = (IInterpreterInstall) o1;
-				IInterpreterInstall right = (IInterpreterInstall) o2;
-				return left.getName().compareToIgnoreCase(right.getName());
+		Collections.sort(fInterpreters, new Comparator<IInterpreterInstall>() {
+			public int compare(IInterpreterInstall o1, IInterpreterInstall o2) {
+				return o1.getName().compareToIgnoreCase(o2.getName());
 			}
 		});
 		// now make an array of names
 		String[] names = new String[fInterpreters.size()];
-		Iterator iter = fInterpreters.iterator();
-		int i = 0;
-		while (iter.hasNext()) {
-			IInterpreterInstall Interpreter = (IInterpreterInstall) iter.next();
-			names[i] = Interpreter.getName();
-			i++;
+		for (int i = 0, size = fInterpreters.size(); i < size; ++i) {
+			names[i] = fInterpreters.get(i).getName();
 		}
 		fCombo.setItems(names);
 		fCombo.setVisibleItemCount(Math.min(names.length, 20));
@@ -407,7 +399,7 @@ public abstract class AbstractInterpreterComboBlock {
 		}
 		int index = fCombo.getSelectionIndex();
 		if (index >= 0) {
-			return (IInterpreterInstall) fInterpreters.get(index);
+			return fInterpreters.get(index);
 		}
 		return null;
 	}
@@ -526,8 +518,7 @@ public abstract class AbstractInterpreterComboBlock {
 		if (fSpecificButton.getSelection()) {
 			int index = fCombo.getSelectionIndex();
 			if (index >= 0) {
-				IInterpreterInstall Interpreter = (IInterpreterInstall) fInterpreters
-						.get(index);
+				IInterpreterInstall Interpreter = fInterpreters.get(index);
 				return ScriptRuntime.newInterpreterContainerPath(Interpreter);
 			}
 			return null;
@@ -620,7 +611,7 @@ public abstract class AbstractInterpreterComboBlock {
 
 	protected void fillWithWorkspaceInterpreters() {
 		// fill with interpreters
-		List standins = new ArrayList();
+		List<IInterpreterInstall> standins = new ArrayList<IInterpreterInstall>();
 		IInterpreterInstallType[] types = ScriptRuntime
 				.getInterpreterInstallTypes(getCurrentLanguageNature());
 		for (int i = 0; i < types.length; i++) {
