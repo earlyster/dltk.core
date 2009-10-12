@@ -119,8 +119,8 @@ public abstract class AbstractInterpreterComboBlock {
 
 	private IStatus fStatus = OK_STATUS;
 
-	private static IStatus OK_STATUS = new Status(IStatus.OK, DLTKDebugUIPlugin
-			.getUniqueIdentifier(), 0, "", null); //$NON-NLS-1$
+	private static final IStatus OK_STATUS = new Status(IStatus.OK,
+			DLTKDebugUIPlugin.getUniqueIdentifier(), 0, "", null); //$NON-NLS-1$
 
 	protected AbstractInterpreterComboBlock(
 			IMainLaunchConfigurationTabListenerManager listenerManager) {
