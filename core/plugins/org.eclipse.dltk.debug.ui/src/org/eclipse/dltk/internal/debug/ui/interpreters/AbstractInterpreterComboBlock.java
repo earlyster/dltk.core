@@ -37,6 +37,8 @@ import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterStandin;
 import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.launching.ScriptRuntime;
+import org.eclipse.dltk.ui.DLTKUILanguageManager;
+import org.eclipse.dltk.ui.IDLTKUILanguageToolkit;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
@@ -604,9 +606,17 @@ public abstract class AbstractInterpreterComboBlock {
 
 	/**
 	 * Shows window with appropriate language preference page.
-	 * 
 	 */
-	protected abstract void showInterpreterPreferencePage();
+	protected void showInterpreterPreferencePage() {
+		IDLTKUILanguageToolkit toolkit = DLTKUILanguageManager
+				.getLanguageToolkit(getCurrentLanguageNature());
+		if (toolkit != null) {
+			final String pageId = toolkit.getInterpreterPreferencePage();
+			if (pageId != null) {
+				showPrefPage(pageId);
+			}
+		}
+	}
 
 	protected void fillWithWorkspaceInterpreters() {
 		// fill with interpreters
