@@ -182,7 +182,7 @@ public class ScriptDebugConsolePageParticipant implements
 		}
 		// CONTEXTLAUNCHING
 		if (ILaunchConfiguration.class.equals(required)) {
-			ILaunch launch = getProcess().getLaunch();
+			ILaunch launch = fConsole.getLaunch();
 			if (launch != null) {
 				return launch.getLaunchConfiguration();
 			}
@@ -280,18 +280,16 @@ public class ScriptDebugConsolePageParticipant implements
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.debug.internal.ui.contexts.provisional.IDebugContextListener
-	 * #contextEvent
-	 * (org.eclipse.debug.internal.ui.contexts.provisional.DebugContextEvent)
+	 * @see IDebugContextListener#contextEvent(DebugContextEvent)
 	 */
 	public void debugContextChanged(DebugContextEvent event) {
 		if ((event.getFlags() & DebugContextEvent.ACTIVATED) > 0) {
-			if (fView != null
-					&& getProcess().equals(DebugUITools.getCurrentProcess())) {
-				fView.display(fConsole);
+			final IProcess process = getProcess();
+			if (process != null) {
+				if (fView != null
+						&& process.equals(DebugUITools.getCurrentProcess())) {
+					fView.display(fConsole);
+				}
 			}
 		}
 
