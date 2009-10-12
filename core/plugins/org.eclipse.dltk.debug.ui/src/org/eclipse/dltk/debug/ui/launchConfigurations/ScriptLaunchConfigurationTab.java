@@ -755,12 +755,15 @@ public abstract class ScriptLaunchConfigurationTab extends
 	 * @return
 	 */
 	protected boolean validateProject(IScriptProject project) {
-		if (project == null) {
-			return false;
+		if (project != null) {
+			try {
+				return project.getProject().hasNature(getNatureID());
+			} catch (CoreException e) {
+				if (DLTKCore.DEBUG)
+					e.printStackTrace();
+			}
 		}
-		final IDLTKLanguageToolkit toolkit = DLTKLanguageManager
-				.getLanguageToolkit(project);
-		return toolkit != null && toolkit.getNatureId().equals(getNatureID());
+		return false;
 	}
 
 	protected void projectChanged() {
