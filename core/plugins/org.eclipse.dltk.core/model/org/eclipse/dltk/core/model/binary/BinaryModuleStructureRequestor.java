@@ -15,9 +15,10 @@ import java.util.Stack;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.compiler.IBinaryElementRequestor;
-import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.internal.core.ImportContainer;
 import org.eclipse.dltk.internal.core.ModelElement;
+import org.eclipse.dltk.internal.core.ModelElementInfo;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.SourceRefElement;
 
@@ -50,56 +51,59 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 	 * since info objects do not have back pointers to handles.
 	 */
 	private Stack<ModelElement> handleStack;
+	private Stack<ModelElementInfo> infoStack;
 
 	private BinaryModuleElementInfo moduleInfo;
 
-	protected boolean hasSyntaxErrors = false;
-
 	private SourceMapper mapper;
+	private Map<IModelElement, ModelElementInfo> newElements;
 
 	public BinaryModuleStructureRequestor(IBinaryModule module,
-			BinaryModuleElementInfo moduleInfo, SourceMapper mapper) {
+			BinaryModuleElementInfo moduleInfo, SourceMapper mapper,
+			Map<IModelElement, ModelElementInfo> newElements) {
 		this.module = module;
 		this.moduleInfo = moduleInfo;
 		this.mapper = mapper;
+		this.newElements = newElements;
 	}
 
 	public void enterModule() {
 		this.handleStack = new Stack<ModelElement>();
+		this.infoStack = new Stack<ModelElementInfo>();
 		this.enterModuleRoot();
 	}
 
 	public void enterModuleRoot() {
 		this.handleStack.push((ModelElement) this.module);
+		this.infoStack.push(this.moduleInfo);
 	}
 
 	public void enterField(FieldInfo fieldInfo) {
 		ModelElement parentHandle = this.handleStack.peek();
-		this.createField(fieldInfo, parentHandle);
+		ModelElementInfo parentInfo = this.infoStack.peek();
+		this.createField(fieldInfo, parentHandle, parentInfo);
 	}
 
-	private void createField(FieldInfo fieldInfo, ModelElement parentHandle) {
+	protected void addChild(ModelElementInfo parentInfo, IModelElement handle) {
+		parentInfo.addChild(handle);
+	}
+
+	private void createField(FieldInfo fieldInfo, ModelElement parentHandle,
+			ModelElementInfo parentInfo) {
 		ModelManager manager = ModelManager.getModelManager();
 
 		BinaryField handle = new BinaryField(parentHandle, manager
 				.intern(fieldInfo.name));
+		BinaryFieldElementInfo handleInfo = new BinaryFieldElementInfo();
+		handleInfo.setFlags(fieldInfo.modifiers);
 		resolveDuplicates(handle);
-		addChild(parentHandle, handle);
-		handle.setFlags(fieldInfo.modifiers);
+		addChild(parentInfo, handle);
+		newElements.put(handle, handleInfo);
 		if (mapper != null) {
 			mapper.reportField(fieldInfo, handle);
 		}
 		this.handleStack.push(handle);
-	}
-
-	protected void addChild(ModelElement parentHandle, ModelElement handle) {
-		if (parentHandle instanceof BinaryMember) {
-			((BinaryMember) parentHandle).addChild(handle);
-		} else if (parentHandle instanceof ISourceModule) {
-			if (this.moduleInfo != null) {
-				this.moduleInfo.addChild(handle);
-			}
-		}
+		this.infoStack.push(handleInfo);
 	}
 
 	public void enterMethodRemoveSame(MethodInfo methodInfo) {
@@ -108,10 +112,12 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 
 	public void enterMethod(MethodInfo methodInfo) {
 		ModelElement parentHandle = this.handleStack.peek();
-		this.processMethod(methodInfo, parentHandle);
+		ModelElementInfo parentInfo = this.infoStack.peek();
+		this.processMethod(methodInfo, parentHandle, parentInfo);
 	}
 
-	private void processMethod(MethodInfo methodInfo, ModelElement parentHandle) {
+	private void processMethod(MethodInfo methodInfo,
+			ModelElement parentHandle, ModelElementInfo parentInfo) {
 		String nameString = methodInfo.name;
 		ModelManager manager = ModelManager.getModelManager();
 		BinaryMethod handle = new BinaryMethod(parentHandle, manager
@@ -123,17 +129,24 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 
 		String[] parameterInitializers = methodInfo.parameterInitializers == null ? EMPTY
 				: methodInfo.parameterInitializers;
+		String[] parameterTypes = methodInfo.parameterTypes == null ? EMPTY
+				: methodInfo.parameterTypes;
 
-		handle.setParameters(parameterNames);
-		handle.setParameterInitializers(parameterInitializers);
-		handle.setIsConstructur(methodInfo.isConstructor);
-		handle.setFlags(methodInfo.modifiers);
+		BinaryMethodElementInfo handleInfo = new BinaryMethodElementInfo();
+		handleInfo.setArgumentNames(parameterNames);
+		handleInfo.setArgumentInializers(parameterInitializers);
+		handleInfo.setArgumentTypes(parameterTypes);
+		handleInfo.setIsConstructor(methodInfo.isConstructor);
+		handleInfo.setFlags(methodInfo.modifiers);
+
+		addChild(parentInfo, handle);
+		newElements.put(handle, handleInfo);
 		if (mapper != null) {
 			mapper.reportMethod(methodInfo, handle);
 		}
 
-		addChild(parentHandle, handle);
 		this.handleStack.push(handle);
+		this.infoStack.push(handleInfo);
 	}
 
 	public boolean enterMethodWithParentType(MethodInfo info,
@@ -150,17 +163,20 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 
 	public void enterType(TypeInfo typeInfo) {
 		ModelElement parentHandle = this.handleStack.peek();
-		this.processType(typeInfo, parentHandle);
+		ModelElementInfo parentInfo = this.infoStack.peek();
+		this.processType(typeInfo, parentHandle, parentInfo);
 	}
 
 	public boolean enterTypeAppend(String fullName, String delimiter) {
 		return false;
 	}
 
-	private void processType(TypeInfo typeInfo, ModelElement parentHandle) {
+	private void processType(TypeInfo typeInfo, ModelElement parentHandle,
+			ModelElementInfo parentInfo) {
 		String nameString = typeInfo.name;
 		BinaryType handle = new BinaryType(parentHandle, nameString);
-		handle.setFlags(typeInfo.modifiers);
+		BinaryTypeElementInfo handleInfo = new BinaryTypeElementInfo();
+		handleInfo.setFlags(typeInfo.modifiers);
 		resolveDuplicates(handle);
 
 		ModelManager manager = ModelManager.getModelManager();
@@ -168,25 +184,24 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 		for (int i = 0, length = superclasses == null ? 0 : superclasses.length; i < length; i++) {
 			superclasses[i] = manager.intern(superclasses[i]);
 		}
-		handle.setSuperclassNames(superclasses);
-		addChild(parentHandle, handle);
+		handleInfo.setSuperclassNames(superclasses);
+		newElements.put(handle, handleInfo);
+		addChild(parentInfo, handle);
 		if (mapper != null) {
 			mapper.reportType(typeInfo, handle);
 		}
 		this.handleStack.push(handle);
+		this.infoStack.push(handleInfo);
 	}
 
 	public void exitModule(int declarationEnd) {
-		// this.moduleInfo.setBinaryLength(declarationEnd + 1);
-
 		// determine if there were any parsing errors
-		if (this.moduleInfo != null) {
-			this.moduleInfo.setIsStructureKnown(!this.hasSyntaxErrors);
-		}
+		this.moduleInfo.setIsStructureKnown(true);
 	}
 
 	public void exitModuleRoot() {
 		this.handleStack.pop();
+		this.infoStack.pop();
 	}
 
 	public void exitField(int declarationEnd) {
@@ -203,6 +218,7 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 
 	protected void exitMember(int declarationEnd) {
 		ModelElement element = this.handleStack.pop();
+		ModelElementInfo elementInfo = this.infoStack.pop();
 		if (mapper != null) {
 			mapper.setRangeEnd(element, declarationEnd);
 		}
@@ -211,10 +227,12 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 	public void acceptPackage(int declarationStart, int declarationEnd,
 			char[] name) {
 		ModelElement parentHandle = this.handleStack.peek();
+		ModelElementInfo parentInfo = this.infoStack.peek();
 		BinaryPackageDeclaration handle = new BinaryPackageDeclaration(
 				parentHandle, new String(name));
-		addChild(parentHandle, handle);
-
+		BinaryPackageDeclarationElementInfo info = new BinaryPackageDeclarationElementInfo();
+		addChild(parentInfo, handle);
+		newElements.put(handle, info);
 	}
 
 	public void acceptFieldReference(char[] fieldName, int BinaryPosition) {
@@ -235,7 +253,7 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 
 	}
 
-	protected void resolveDuplicates(SourceRefElement handle) {
+	private void resolveDuplicates(SourceRefElement handle) {
 		Assert.isTrue(handle.occurrenceCount == 1);
 		Counter counter = counters.get(handle);
 		if (counter == null) {
@@ -246,5 +264,6 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 			++counter.value;
 			handle.occurrenceCount = counter.value;
 		}
+		Assert.isTrue(!this.newElements.containsKey(handle));
 	}
 }

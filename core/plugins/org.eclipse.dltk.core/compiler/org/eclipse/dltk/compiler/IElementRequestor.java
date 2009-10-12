@@ -1,6 +1,5 @@
 package org.eclipse.dltk.compiler;
 
-
 /**
  * @since 2.0
  */
@@ -20,6 +19,7 @@ public interface IElementRequestor {
 	public static class MethodInfo extends ElementInfo {
 		public String[] parameterNames;
 		public String[] parameterInitializers;
+		public String[] parameterTypes;
 		public String[] exceptionTypes;
 		public boolean isConstructor;
 	}
@@ -40,7 +40,7 @@ public interface IElementRequestor {
 	void acceptImport(ImportInfo importInfo);
 
 	void acceptMethodReference(char[] methodName, int argCount,
-	int sourcePosition, int sourceEndPosition);
+			int sourcePosition, int sourceEndPosition);
 
 	void acceptPackage(int declarationStart, int declarationEnd, char[] name);
 

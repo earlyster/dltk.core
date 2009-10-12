@@ -1,9 +1,5 @@
 package org.eclipse.dltk.core.model.binary;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ModelException;
@@ -19,8 +15,6 @@ import org.eclipse.dltk.internal.core.util.MementoTokenizer;
  */
 public abstract class BinaryMember extends NamedMember implements
 		ISourceMapperProvider {
-	private int flags;
-	private List<IModelElement> children = new ArrayList<IModelElement>();
 
 	public BinaryMember(ModelElement parent, String name) {
 		super(parent, name);
@@ -64,25 +58,7 @@ public abstract class BinaryMember extends NamedMember implements
 
 	@Override
 	public int getFlags() throws ModelException {
-		return flags;
-	}
-
-	void setFlags(int flags) {
-		this.flags = flags;
-	}
-
-	@Override
-	public IModelElement[] getChildren(IProgressMonitor monitor)
-			throws ModelException {
-		return children.toArray(new IModelElement[children.size()]);
-	}
-
-	public void addChild(IModelElement element) {
-		this.children.add(element);
-	}
-
-	public void removeChild(IModelElement element) {
-		this.children.remove(element);
+		return ((BinaryMemberInfo) getElementInfo()).getFlags();
 	}
 
 	public IModelElement getHandleFromMemento(String token,

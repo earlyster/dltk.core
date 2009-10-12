@@ -24,10 +24,10 @@ import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.internal.core.CreateTypeHierarchyOperation;
 import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
-import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.hierarchy.TypeHierarchy;
+import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.utils.CorePrinter;
 
 /**
@@ -37,7 +37,6 @@ public class BinaryType extends BinaryMember implements IType, IParent {
 	private static final IField[] NO_FIELDS = new IField[0];
 	private static final IMethod[] NO_METHODS = new IMethod[0];
 	private static final IType[] NO_TYPES = new IType[0];
-	private String[] superclasses;
 
 	public BinaryType(ModelElement parent, String name) {
 		super(parent, name);
@@ -152,7 +151,7 @@ public class BinaryType extends BinaryMember implements IType, IParent {
 	}
 
 	public String[] getSuperClasses() throws ModelException {
-		return superclasses;
+		return ((BinaryTypeElementInfo) getElementInfo()).getSuperclassNames();
 	}
 
 	public IType getType(String name) {
@@ -395,9 +394,5 @@ public class BinaryType extends BinaryMember implements IType, IParent {
 			output.formatPrint(ex.getLocalizedMessage());
 		}
 		output.dedent();
-	}
-
-	void setSuperclassNames(String[] superclasses) {
-		this.superclasses = superclasses;
 	}
 }

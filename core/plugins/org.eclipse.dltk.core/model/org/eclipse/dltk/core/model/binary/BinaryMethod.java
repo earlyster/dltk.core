@@ -10,10 +10,6 @@ import org.eclipse.dltk.utils.CorePrinter;
  */
 public class BinaryMethod extends BinaryMember implements IMethod {
 
-	private String[] parameters;
-	private boolean isConstructur;
-	private String[] parameterInitializers;
-
 	public BinaryMethod(ModelElement parent, String name) {
 		super(parent, name);
 	}
@@ -50,27 +46,19 @@ public class BinaryMethod extends BinaryMember implements IMethod {
 		return getFullyQualifiedName("$"); //$NON-NLS-1$
 	}
 
+	private BinaryMethodElementInfo getInfo() throws ModelException {
+		return (BinaryMethodElementInfo) getElementInfo();
+	}
+
 	public String[] getParameterInitializers() throws ModelException {
-		return parameterInitializers;
+		return getInfo().getArgumentInitializers();
 	}
 
 	public String[] getParameters() throws ModelException {
-		return parameters;
+		return getInfo().getArgumentNames();
 	}
 
 	public boolean isConstructor() throws ModelException {
-		return isConstructur;
-	}
-
-	void setParameters(String[] parameterNames) {
-		this.parameters = parameterNames;
-	}
-
-	void setIsConstructur(boolean isConstructor) {
-		this.isConstructur = isConstructor;
-	}
-
-	void setParameterInitializers(String[] parameterInitializers) {
-		this.parameterInitializers = parameterInitializers;
+		return getInfo().isConstructor();
 	}
 }

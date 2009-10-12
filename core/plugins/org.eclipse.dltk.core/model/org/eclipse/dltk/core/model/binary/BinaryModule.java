@@ -81,7 +81,7 @@ public class BinaryModule extends AbstractSourceModule implements
 			return false;
 		}
 		BinaryModuleStructureRequestor requestor = new BinaryModuleStructureRequestor(
-				this, moduleInfo, this.getSourceMapper());
+				this, moduleInfo, this.getSourceMapper(), newElements);
 		binaryParser.setRequestor(requestor);
 		binaryParser.parseBinaryModule(this);
 
