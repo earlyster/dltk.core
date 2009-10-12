@@ -11,7 +11,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
-public interface IScriptNatureDependent {
+/**
+ * @since 2.0
+ */
+public interface IScriptNatureProvider {
 
 	String getNatureId();
 
