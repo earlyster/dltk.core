@@ -127,6 +127,16 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 		return Util.combineHashCodes(parent.hashCode(), path.hashCode());
 	}
 
+	@Override
+	public boolean exists() {
+		/*
+		 * super.exist() only checks for the parent and the resource existence
+		 * so also ensure that the package is not excluded (see
+		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=138577)
+		 */
+		return super.exists() && !Util.isExcluded(this);
+	}
+
 	public int getKind() throws ModelException {
 		return getProjectFragment().getKind();
 	}
@@ -312,7 +322,7 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 	}
 
 	public ISourceModule[] getSourceModules() throws ModelException {
-		ArrayList list = getChildrenOfType(SOURCE_MODULE);
+		List<IModelElement> list = getChildrenOfType(SOURCE_MODULE);
 		ISourceModule[] array = new ISourceModule[list.size()];
 		list.toArray(array);
 		return array;
@@ -336,13 +346,16 @@ public class ScriptFolder extends Openable implements IScriptFolder {
 				.getChildren();
 		int namesLength = this.path.segmentCount();
 		nextPackage: for (int i = 0, length = packages.length; i < length; i++) {
-			IPath otherNames = ((ScriptFolder) packages[i]).path;
-			if (otherNames.segmentCount() <= namesLength)
-				continue nextPackage;
-			for (int j = 0; j < namesLength; j++)
-				if (!this.path.segment(j).equals(otherNames.segment(j)))
+			IPath otherNames = null;
+			if (packages[i] instanceof ScriptFolder) {
+				otherNames = ((ScriptFolder) packages[i]).path;
+				if (otherNames.segmentCount() <= namesLength)
 					continue nextPackage;
-			return true;
+				for (int j = 0; j < namesLength; j++)
+					if (!this.path.segment(j).equals(otherNames.segment(j)))
+						continue nextPackage;
+				return true;
+			}
 		}
 		return false;
 	}
