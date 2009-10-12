@@ -130,7 +130,7 @@ public class HandleFactory {
 			}
 			// create handle
 			resourcePath = resourcePath.substring(this.lastPkgFragmentRootPath
-					.length() + 1);
+					.length());
 			String[] simpleNames = Path.fromPortableString(resourcePath)
 					.segments();
 			String[] pkgName;
