@@ -440,13 +440,21 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 		return createScriptProject(projectName, natures, sourceFolders, null);
 	}
 
+	protected IScriptProject createScriptProject(final String projectName,
+			final String[] natures, final String[] sourceFolders,
+			final String[] projects) throws CoreException {
+		return createScriptProject(projectName, natures, sourceFolders,
+				projects, null);
+	}
+
 	/*
 	 * Creates a script project with the given source folders an output
 	 * location. Add those on the project's buildpath.
 	 */
 	protected IScriptProject createScriptProject(final String projectName,
 			final String[] natures, final String[] sourceFolders,
-			final String[] projects) throws CoreException {
+			final String[] projects, final String[] containers)
+			throws CoreException {
 		final IScriptProject[] result = new IScriptProject[1];
 		IWorkspaceRunnable create = new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {
@@ -464,9 +472,11 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 				IPath projectPath = project.getFullPath();
 				int sourceLength = sourceFolders == null ? 0
 						: sourceFolders.length;
+				int containersLength = containers == null ? 0
+						: containers.length;
 				int projectLength = projects == null ? 0 : projects.length;
 				IBuildpathEntry[] entries = new IBuildpathEntry[sourceLength
-						+ projectLength];
+						+ projectLength + containersLength];
 				for (int i = 0; i < sourceLength; i++) {
 					IPath sourcePath = new Path(sourceFolders[i]);
 					int segmentCount = sourcePath.segmentCount();
@@ -486,6 +496,7 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 					entries[i] = DLTKCore.newSourceEntry(projectPath
 							.append(sourcePath));
 				}
+
 				for (int i = 0; i < projectLength; i++) {
 
 					// accessible files
@@ -501,6 +512,11 @@ public abstract class AbstractModelTests extends SuiteOfTestCases {
 									.getAccessRules(accessibleFiles,
 											nonAccessibleFiles), true,
 							new IBuildpathAttribute[0], false);
+				}
+
+				for (int i = 0; i < containersLength; i++) {
+					entries[sourceLength + projectLength + i] = DLTKCore
+							.newContainerEntry(new Path(containers[i]));
 				}
 				// set buildpath and output location
 				IScriptProject scriptProject = DLTKCore.create(project);
