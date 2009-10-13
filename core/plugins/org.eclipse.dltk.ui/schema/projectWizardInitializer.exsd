@@ -18,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence>
-            <element ref="projectTemplate" minOccurs="1" maxOccurs="unbounded"/>
+            <element ref="projectWizardInitializer" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,7 +47,7 @@
       </complexType>
    </element>
 
-   <element name="projectTemplate">
+   <element name="projectWizardInitializer">
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>
@@ -55,22 +55,8 @@
                   
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.ui.dialogs.IProjectTemplate"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.ui.wizards.IProjectWizardInitializer"/>
                </appInfo>
-            </annotation>
-         </attribute>
-         <attribute name="id" type="string" use="required">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="name" type="string" use="required">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
             </annotation>
          </attribute>
          <attribute name="nature" type="string">
