@@ -174,11 +174,7 @@ public class SqlSearchEngine implements ISearchEngine {
 
 				if (projectFragment == null) {
 					projectFragment = ((DLTKSearchScope) scope)
-							.projectFragment(resourcePath);
-					if (projectFragment == null) {
-						projectFragment = ((DLTKSearchScope) scope)
-								.projectFragment(containerPath);
-					}
+							.projectFragment(containerPath);
 					projectFragmentCache.put(containerPath, projectFragment);
 				}
 				if (projectFragment == null) {
