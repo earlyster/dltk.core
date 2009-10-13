@@ -202,13 +202,13 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		fInterpreterTypeCombo.doFillIntoGrid(parent, numColumns);
 		((GridData) fInterpreterTypeCombo.getComboControl(null).getLayoutData()).widthHint = convertWidthInCharsToPixels(50);
 
-		fInterpreterName.doFillIntoGrid(parent, numColumns);
-
 		fInterpreterPath.doFillIntoGrid(parent, numColumns);
 		final GridData interpreterPathGridData = (GridData) fInterpreterPath
 				.getTextControl(null).getLayoutData();
 		interpreterPathGridData.grabExcessHorizontalSpace = true;
 		interpreterPathGridData.widthHint = convertWidthInCharsToPixels(50);
+
+		fInterpreterName.doFillIntoGrid(parent, numColumns);
 
 		if (this.useInterpreterArgs()) {
 			fInterpreterArgs.doFillIntoGrid(parent, numColumns);
@@ -281,7 +281,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 
 	public void create() {
 		super.create();
-		fInterpreterName.setFocus();
+		fInterpreterPath.setFocus();
 		selectInterpreterType();
 	}
 
@@ -553,11 +553,11 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 	// }
 
 	private void setInterpreterNameStatus(IStatus status) {
-		fStati[0] = status;
+		fStati[1] = status;
 	}
 
 	private void setInterpreterLocationStatus(IStatus status) {
-		fStati[1] = status;
+		fStati[0] = status;
 	}
 
 	protected IStatus getSystemLibraryStatus() {
