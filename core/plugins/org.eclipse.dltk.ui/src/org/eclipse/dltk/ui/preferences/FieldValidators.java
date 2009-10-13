@@ -54,7 +54,7 @@ public final class FieldValidators {
 				return status;
 			}
 			IFileHandle file = environment.getFile(location);
-			if (!file.exists()) {
+			if (file == null || !file.exists()) {
 				status.setError(Messages.format(
 						ValidatorMessages.FilePathNotExists, location));
 			} else if (file.isDirectory()) {
