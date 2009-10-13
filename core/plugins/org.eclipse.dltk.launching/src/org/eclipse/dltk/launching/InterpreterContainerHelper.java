@@ -13,6 +13,7 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
+import org.eclipse.dltk.utils.TextUtils;
 
 public class InterpreterContainerHelper {
 	private static final char SEPARATOR = '|';
@@ -21,7 +22,8 @@ public class InterpreterContainerHelper {
 	public static final String CONTAINER_PATH = ScriptRuntime.INTERPRETER_CONTAINER;
 
 	public static void getInterpreterContainerDependencies(
-			IScriptProject project, Set packages, Set autoPackages) {
+			IScriptProject project, Set<String> packages,
+			Set<String> autoPackages) {
 		IBuildpathEntry[] rawBuildpath = null;
 		try {
 			rawBuildpath = project.getRawBuildpath();
@@ -63,29 +65,12 @@ public class InterpreterContainerHelper {
 	}
 
 	private static String[] split(String value) {
-		List result = new ArrayList();
-		int start = 0, end = 0;
-		for (int i = 0; i < value.length(); i++) {
-			if (value.charAt(i) == SEPARATOR && start < end) {
-				String sub = value.substring(start, end);
-				if (sub.length() > 0) {
-					result.add(sub);
-				}
-				start = end + 1;
-			}
-			end++;
-		}
-		if (start < end) {
-			String sub = value.substring(start, end);
-			if (sub.length() > 0) {
-				result.add(sub);
-			}
-		}
-		return (String[]) result.toArray(new String[result.size()]);
+		return TextUtils.split(value, SEPARATOR);
 	}
 
 	public static void setInterpreterContainerDependencies(
-			IScriptProject project, Set packages, Set autoPackages) {
+			IScriptProject project, Set<String> packages,
+			Set<String> autoPackages) {
 		IBuildpathEntry[] rawBuildpath = null;
 		try {
 			rawBuildpath = project.getRawBuildpath();
@@ -97,7 +82,7 @@ public class InterpreterContainerHelper {
 		IPath containerName = new Path(CONTAINER_PATH).append(project
 				.getElementName());
 
-		List newBuildpath = new ArrayList();
+		List<IBuildpathEntry> newBuildpath = new ArrayList<IBuildpathEntry>();
 		boolean found = false;
 		for (int i = 0; i < rawBuildpath.length; i++) {
 			if (!rawBuildpath[i].getPath().segment(0).equals(CONTAINER_PATH)) {
@@ -112,7 +97,7 @@ public class InterpreterContainerHelper {
 			newBuildpath.add(createPackagesContainer(packages, autoPackages,
 					containerName));
 		}
-		IBuildpathEntry[] nbp = (IBuildpathEntry[]) newBuildpath
+		IBuildpathEntry[] nbp = newBuildpath
 				.toArray(new IBuildpathEntry[newBuildpath.size()]);
 		try {
 			project.setRawBuildpath(nbp, new NullProgressMonitor());
@@ -123,8 +108,8 @@ public class InterpreterContainerHelper {
 		}
 	}
 
-	public static IBuildpathEntry createPackagesContainer(Set names,
-			Set autoPackages, IPath containerName) {
+	public static IBuildpathEntry createPackagesContainer(Set<String> names,
+			Set<String> autoPackages, IPath containerName) {
 		String pkgs = pkgsToString(names);
 		String autoPkgs = pkgsToString(autoPackages);
 		IBuildpathAttribute attr = DLTKCore.newBuildpathAttribute(
@@ -137,15 +122,7 @@ public class InterpreterContainerHelper {
 		return container;
 	}
 
-	private static String pkgsToString(Set names) {
-		StringBuffer buffer = new StringBuffer();
-		Object[] array = names.toArray();
-		for (int i = 0; i < array.length; i++) {
-			buffer.append((String) array[i]);
-			if (i != array.length - 1) {
-				buffer.append(SEPARATOR);
-			}
-		}
-		return buffer.toString();
+	private static String pkgsToString(Set<String> names) {
+		return TextUtils.join(names, SEPARATOR);
 	}
 }
