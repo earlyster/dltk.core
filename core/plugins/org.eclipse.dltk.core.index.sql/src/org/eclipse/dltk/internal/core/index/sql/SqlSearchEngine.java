@@ -35,6 +35,7 @@ import org.eclipse.dltk.core.index.sql.SqlIndex;
 import org.eclipse.dltk.core.index2.search.ISearchEngine;
 import org.eclipse.dltk.core.index2.search.ISearchRequestor;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
+import org.eclipse.dltk.internal.core.ArchiveProjectFragment;
 import org.eclipse.dltk.internal.core.search.DLTKSearchScope;
 import org.eclipse.dltk.internal.core.search.DLTKWorkspaceScope;
 
@@ -174,7 +175,11 @@ public class SqlSearchEngine implements ISearchEngine {
 
 				if (projectFragment == null) {
 					projectFragment = ((DLTKSearchScope) scope)
-							.projectFragment(containerPath);
+							.projectFragment(resourcePath);
+					if (projectFragment == null) {
+						projectFragment = ((DLTKSearchScope) scope)
+								.projectFragment(containerPath);
+					}
 					projectFragmentCache.put(containerPath, projectFragment);
 				}
 				if (projectFragment == null) {
@@ -188,10 +193,17 @@ public class SqlSearchEngine implements ISearchEngine {
 				ISourceModule sourceModule = sourceModuleCache
 						.get(resourcePath);
 				if (sourceModule == null) {
-					IScriptFolder scriptFolder = projectFragment
-							.getScriptFolder(relativePath.removeLastSegments(1));
-					sourceModule = scriptFolder.getSourceModule(relativePath
-							.lastSegment());
+					if (projectFragment.isExternal()
+							|| projectFragment instanceof ArchiveProjectFragment) {
+						IScriptFolder scriptFolder = projectFragment
+								.getScriptFolder(relativePath
+										.removeLastSegments(1));
+						sourceModule = scriptFolder
+								.getSourceModule(relativePath.lastSegment());
+					} else {
+						sourceModule = projectFragment.getScriptFolder("")
+								.getSourceModule(relativePath.lastSegment());
+					}
 					sourceModuleCache.put(resourcePath, sourceModule);
 				}
 
