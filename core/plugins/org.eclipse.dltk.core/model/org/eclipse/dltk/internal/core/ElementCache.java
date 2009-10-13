@@ -46,6 +46,7 @@ public class ElementCache extends OverflowingLRUCache {
 	 * NOTE: this triggers an external removal of this element by closing the
 	 * element.
 	 */
+	@Override
 	protected boolean close(LRUCacheEntry entry) {
 		Openable element = (Openable) entry._fKey;
 		notifyListenersClose(element);
@@ -89,6 +90,7 @@ public class ElementCache extends OverflowingLRUCache {
 	/*
 	 * Returns a new instance of the receiver.
 	 */
+	@Override
 	protected LRUCache newInstance(int size, int overflow) {
 		return new ElementCache(size, overflow);
 	}
@@ -104,7 +106,7 @@ public class ElementCache extends OverflowingLRUCache {
 		}
 	}
 
-	protected ListenerList getListenerList() {
+	private synchronized ListenerList getListenerList() {
 		if (listeners == null) {
 			listeners = new ListenerList();
 		}
