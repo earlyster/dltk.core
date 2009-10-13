@@ -142,18 +142,18 @@ public abstract class TextUtils {
 		}
 
 		public String[] split() {
-			final List result = new ArrayList();
+			final List<String> result = new ArrayList<String>();
 			contentPos = 0;
 			while (contentPos < contentEnd) {
 				final int begin = contentPos;
 				final int end = findEndOfLine();
 				result.add(content.subSequence(begin, end).toString());
 			}
-			return (String[]) result.toArray(new String[result.size()]);
+			return result.toArray(new String[result.size()]);
 		}
 
 		public String[] split(int lines) {
-			final List result = new ArrayList(lines);
+			final List<String> result = new ArrayList<String>(lines);
 			contentPos = 0;
 			while (lines > 0 && contentPos < contentEnd) {
 				final int begin = contentPos;
@@ -161,7 +161,7 @@ public abstract class TextUtils {
 				result.add(content.subSequence(begin, end).toString());
 				--lines;
 			}
-			return (String[]) result.toArray(new String[result.size()]);
+			return result.toArray(new String[result.size()]);
 		}
 
 		public int countLines() {
@@ -221,7 +221,7 @@ public abstract class TextUtils {
 		}
 
 		public ISourceLineTracker buildLineTracker() {
-			final List delimiters = new ArrayList();
+			final List<String> delimiters = new ArrayList<String>();
 			int[] lineOffsets = new int[256];
 			int lineCount = 0;
 			contentPos = 0;
@@ -243,8 +243,7 @@ public abstract class TextUtils {
 				lineOffsets = newLineOffsets;
 			}
 			return new DefaultSourceLineTracker(contentEnd, lineOffsets,
-					(String[]) delimiters
-							.toArray(new String[delimiters.size()]));
+					delimiters.toArray(new String[delimiters.size()]));
 		}
 
 	}
@@ -389,7 +388,7 @@ public abstract class TextUtils {
 	 *            the separator character to use, null treated as ""
 	 * @return the joined String, <code>null</code> if null collection input
 	 */
-	public static String join(Collection collection, String separator) {
+	public static String join(Collection<?> collection, String separator) {
 		// handle null, zero and one elements before building a buffer
 		if (collection == null) {
 			return null;
@@ -397,7 +396,7 @@ public abstract class TextUtils {
 		if (collection.isEmpty()) {
 			return ""; //$NON-NLS-1$
 		}
-		final Iterator iterator = collection.iterator();
+		final Iterator<?> iterator = collection.iterator();
 		final Object first = iterator.next();
 		if (!iterator.hasNext()) {
 			return first != null ? first.toString() : ""; //$NON-NLS-1$
@@ -437,7 +436,7 @@ public abstract class TextUtils {
 	 *            the separator character to use, null treated as ""
 	 * @return the joined String, <code>null</code> if null collection input
 	 */
-	public static String join(Collection collection, char separator) {
+	public static String join(Collection<?> collection, char separator) {
 		// handle null, zero and one elements before building a buffer
 		if (collection == null) {
 			return null;
@@ -445,7 +444,7 @@ public abstract class TextUtils {
 		if (collection.isEmpty()) {
 			return ""; //$NON-NLS-1$
 		}
-		final Iterator iterator = collection.iterator();
+		final Iterator<?> iterator = collection.iterator();
 		final Object first = iterator.next();
 		if (!iterator.hasNext()) {
 			return first != null ? first.toString() : ""; //$NON-NLS-1$
@@ -510,7 +509,7 @@ public abstract class TextUtils {
 		if (i == -1) {
 			return new String[] { str };
 		}
-		final List list = new ArrayList();
+		final List<String> list = new ArrayList<String>();
 		int start = 0;
 		boolean match = i != 0;
 		while (i < len) {
@@ -528,7 +527,7 @@ public abstract class TextUtils {
 		if (match) {
 			list.add(str.substring(start, i));
 		}
-		return (String[]) list.toArray(new String[list.size()]);
+		return list.toArray(new String[list.size()]);
 	}
 
 }
