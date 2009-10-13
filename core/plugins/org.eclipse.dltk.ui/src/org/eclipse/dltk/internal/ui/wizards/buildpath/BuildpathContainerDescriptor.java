@@ -23,14 +23,10 @@ import org.eclipse.dltk.internal.ui.util.CoreUtility;
 import org.eclipse.dltk.internal.ui.wizards.IBuildpathContainerPage;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 
-
-/**
-  */
 public class BuildpathContainerDescriptor {
 
 	private IConfigurationElement fConfigElement;
 	private IBuildpathContainerPage fPage;
-	
 
 	private static final String ATT_EXTENSION = "buildpathContainerPage"; //$NON-NLS-1$
 
@@ -39,10 +35,11 @@ public class BuildpathContainerDescriptor {
 	private static final String ATT_PAGE_CLASS = "class"; //$NON-NLS-1$
 	private static final String ATT_NATURE = "nature"; //$NON-NLS-1$
 
-	public BuildpathContainerDescriptor(IConfigurationElement configElement) throws CoreException {
+	public BuildpathContainerDescriptor(IConfigurationElement configElement)
+			throws CoreException {
 		super();
 		fConfigElement = configElement;
-		fPage= null;
+		fPage = null;
 
 		String id = fConfigElement.getAttribute(ATT_ID);
 		String name = configElement.getAttribute(ATT_NAME);
@@ -50,60 +47,73 @@ public class BuildpathContainerDescriptor {
 		String nature = configElement.getAttribute(ATT_NATURE);
 
 		if (name == null) {
-			throw new CoreException(new Status(IStatus.ERROR, DLTKUIPlugin.PLUGIN_ID, 0, "Invalid extension (missing name): " + id, null)); //$NON-NLS-1$
+			throw new CoreException(new Status(IStatus.ERROR,
+					DLTKUIPlugin.PLUGIN_ID, 0,
+					"Invalid extension (missing name): " + id, null)); //$NON-NLS-1$
 		}
 		if (nature == null) {
-			throw new CoreException(new Status(IStatus.ERROR, DLTKUIPlugin.PLUGIN_ID, 0, "Invalid extension (missing nature): " + nature, null)); //$NON-NLS-1$
+			throw new CoreException(new Status(IStatus.ERROR,
+					DLTKUIPlugin.PLUGIN_ID, 0,
+					"Invalid extension (missing nature): " + nature, null)); //$NON-NLS-1$
 		}
 		if (pageClassName == null) {
-			throw new CoreException(new Status(IStatus.ERROR, DLTKUIPlugin.PLUGIN_ID, 0, "Invalid extension (missing page class name): " + id, null)); //$NON-NLS-1$
+			throw new CoreException(new Status(IStatus.ERROR,
+					DLTKUIPlugin.PLUGIN_ID, 0,
+					"Invalid extension (missing page class name): " + id, null)); //$NON-NLS-1$
 		}
 	}
 
-	public IBuildpathContainerPage createPage() throws CoreException  {
+	public IBuildpathContainerPage createPage() throws CoreException {
 		if (fPage == null) {
-			Object elem= CoreUtility.createExtension(fConfigElement, ATT_PAGE_CLASS);
+			Object elem = CoreUtility.createExtension(fConfigElement,
+					ATT_PAGE_CLASS);
 			if (elem instanceof IBuildpathContainerPage) {
-				fPage= (IBuildpathContainerPage) elem;
+				fPage = (IBuildpathContainerPage) elem;
 			} else {
-				String id= fConfigElement.getAttribute(ATT_ID);
-				throw new CoreException(new Status(IStatus.ERROR, DLTKUIPlugin.PLUGIN_ID, 0, "Invalid extension (page not of type IBuildpathContainerPage): " + id, null)); //$NON-NLS-1$
+				String id = fConfigElement.getAttribute(ATT_ID);
+				throw new CoreException(
+						new Status(
+								IStatus.ERROR,
+								DLTKUIPlugin.PLUGIN_ID,
+								0,
+								"Invalid extension (page not of type IBuildpathContainerPage): " + id, null)); //$NON-NLS-1$
 			}
 		}
 		return fPage;
 	}
-	
+
 	public IBuildpathContainerPage getPage() {
 		return fPage;
 	}
-	
+
 	public void setPage(IBuildpathContainerPage page) {
-		fPage= page;
+		fPage = page;
 	}
-	
+
 	public void dispose() {
 		if (fPage != null) {
 			fPage.dispose();
-			fPage= null;
+			fPage = null;
 		}
 	}
 
 	public String getName() {
 		return fConfigElement.getAttribute(ATT_NAME);
 	}
-	
+
 	public String getPageClass() {
 		return fConfigElement.getAttribute(ATT_PAGE_CLASS);
-	}	
-	
-	public String getNature () {
-		return fConfigElement.getAttribute(ATT_NATURE );
+	}
+
+	public String getNature() {
+		return fConfigElement.getAttribute(ATT_NATURE);
 	}
 
 	public boolean canEdit(IBuildpathEntry entry, String defid) {
 		String id = fConfigElement.getAttribute(ATT_ID);
 		return id.equals(defid);
 	}
+
 	public boolean canEdit(IBuildpathEntry entry) {
 		String id = fConfigElement.getAttribute(ATT_ID);
 		if (entry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER) {
@@ -112,38 +122,47 @@ public class BuildpathContainerDescriptor {
 		}
 		return false;
 	}
-	
+
 	public static BuildpathContainerDescriptor[] getDescriptors() {
 		return getDescriptors(null);
 	}
 
-	public static BuildpathContainerDescriptor[] getDescriptors(IScriptProject proj) {
-		ArrayList containers= new ArrayList();
-		
-		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(DLTKUIPlugin.PLUGIN_ID, ATT_EXTENSION);
+	public static BuildpathContainerDescriptor[] getDescriptors(
+			IScriptProject proj) {
+		ArrayList<BuildpathContainerDescriptor> containers = new ArrayList<BuildpathContainerDescriptor>();
+
+		IExtensionPoint extensionPoint = Platform.getExtensionRegistry()
+				.getExtensionPoint(DLTKUIPlugin.PLUGIN_ID, ATT_EXTENSION);
 		if (extensionPoint != null) {
-			BuildpathContainerDescriptor defaultPage= null;
-			String defaultPageName= BuildpathContainerDefaultPage.class.getName();
-			
-			IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
+			BuildpathContainerDescriptor defaultPage = null;
+			String defaultPageName = BuildpathContainerDefaultPage.class
+					.getName();
+
+			IConfigurationElement[] elements = extensionPoint
+					.getConfigurationElements();
 			for (int i = 0; i < elements.length; i++) {
 				try {
-					BuildpathContainerDescriptor curr= new BuildpathContainerDescriptor(elements[i]);					
+					BuildpathContainerDescriptor curr = new BuildpathContainerDescriptor(
+							elements[i]);
 					if (defaultPageName.equals(curr.getPageClass())) {
-						defaultPage= curr;
+						defaultPage = curr;
 					} else {
-						if (proj == null || proj.getProject().hasNature(curr.getNature()))
+						if (proj == null
+								|| proj.getProject()
+										.hasNature(curr.getNature()))
 							containers.add(curr);
 					}
 				} catch (CoreException e) {
 					DLTKUIPlugin.log(e);
 				}
 			}
-			if (defaultPageName != null && containers.isEmpty() && defaultPage != null) {
+			if (defaultPageName != null && containers.isEmpty()
+					&& defaultPage != null) {
 				// default page only added of no other extensions found
 				containers.add(defaultPage);
 			}
 		}
-		return (BuildpathContainerDescriptor[]) containers.toArray(new BuildpathContainerDescriptor[containers.size()]);
+		return containers.toArray(new BuildpathContainerDescriptor[containers
+				.size()]);
 	}
 }
