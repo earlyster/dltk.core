@@ -55,8 +55,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceComparator;
 
 public abstract class MainLaunchConfigurationTab extends
-		ScriptLaunchConfigurationTab implements
-		IMainLaunchConfigurationTabListenerManager {
+		ScriptLaunchConfigurationTab implements IMainLaunchConfigurationTab {
 
 	private Text fScriptText;
 
@@ -64,7 +63,7 @@ public abstract class MainLaunchConfigurationTab extends
 
 	private boolean useInteractiveConsoleGroup = false;
 
-	ListenerList listeners = new ListenerList();
+	private final ListenerList listeners = new ListenerList();
 
 	public MainLaunchConfigurationTab(String mode) {
 		super(mode);
@@ -78,7 +77,27 @@ public abstract class MainLaunchConfigurationTab extends
 		this.listeners.remove(listener);
 	}
 
+	/*
+	 * Increase visibility
+	 */
+	@Override
+	public IScriptProject getProject() {
+		return super.getProject();
+	}
+
+	private IProject lastProjectNotification = null;
+
 	private void notifyProjectChangedListeners(IProject project) {
+		if (project != null) {
+			if (project.equals(lastProjectNotification)) {
+				return;
+			}
+		} else {
+			if (lastProjectNotification == null) {
+				return;
+			}
+		}
+		lastProjectNotification = project;
 		Object[] list = this.listeners.getListeners();
 		for (int i = 0; i < list.length; i++) {
 			((IMainLaunchConfigurationTabListener) list[i])

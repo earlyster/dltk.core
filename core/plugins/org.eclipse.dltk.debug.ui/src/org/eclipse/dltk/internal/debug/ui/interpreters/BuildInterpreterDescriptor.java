@@ -20,14 +20,16 @@ import org.eclipse.osgi.util.NLS;
  */
 public class BuildInterpreterDescriptor extends InterpreterDescriptor {
 
-	private String fNature;
-	private String fEnvironment;
+	private final IInterpreterComboBlockContext fContext;
 
-	public BuildInterpreterDescriptor(String nature, String environment) {
-		fNature = nature;
-		this.fEnvironment = environment;
+	/**
+	 * @since 2.0
+	 */
+	public BuildInterpreterDescriptor(IInterpreterComboBlockContext context) {
+		this.fContext = context;
 	}
 
+	@Override
 	public String getDescription() {
 		String name = ScriptLaunchMessages.InterpreterTab_7;
 		IInterpreterInstall interpreter = getInterpreter();
@@ -40,9 +42,10 @@ public class BuildInterpreterDescriptor extends InterpreterDescriptor {
 	/*
 	 * @see InterpreterDescriptor#getInterpreter()
 	 */
+	@Override
 	public IInterpreterInstall getInterpreter() {
 		return ScriptRuntime
-				.getDefaultInterpreterInstall(new DefaultInterpreterEntry(
-						fNature, fEnvironment));
+				.getDefaultInterpreterInstall(new DefaultInterpreterEntry(fContext
+						.getNatureId(), fContext.getEnvironment().getId()));
 	}
 }

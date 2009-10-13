@@ -16,6 +16,7 @@ import org.eclipse.debug.core.IStatusHandler;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.debug.ui.ScriptDebugImages;
 import org.eclipse.dltk.internal.ui.wizards.IBuildpathContainerPage;
 import org.eclipse.dltk.ui.wizards.IBuildpathContainerPageExtension;
@@ -43,7 +44,7 @@ public abstract class AbstractInterpreterContainerWizardPage extends WizardPage
 	/**
 	 * InterpreterEnvironment control
 	 */
-	private AbstractInterpreterComboBlock fInterpreterEnvironmentBlock;
+	private AbstractInterpreterComboBlock fInterpreterBlock;
 
 	private IScriptProject scriptProject;
 
@@ -58,11 +59,11 @@ public abstract class AbstractInterpreterContainerWizardPage extends WizardPage
 	}
 
 	public boolean finish() {
-		IStatus status = fInterpreterEnvironmentBlock.getStatus();
+		IStatus status = fInterpreterBlock.getStatus();
 		if (!status.isOK()) {
 			return false;
 		}
-		fSelection = fInterpreterEnvironmentBlock.getEntry();
+		fSelection = fInterpreterBlock.getEntry();
 		return true;
 	}
 
@@ -81,11 +82,11 @@ public abstract class AbstractInterpreterContainerWizardPage extends WizardPage
 	protected void initializeFromSelection() {
 		if (getControl() != null) {
 			if (fSelection == null) {
-				fInterpreterEnvironmentBlock.setUseDefaultInterpreter();
+				fInterpreterBlock.setUseDefaultInterpreter();
 			} else {
-				fInterpreterEnvironmentBlock.setPath(fSelection.getPath());
+				fInterpreterBlock.setPath(fSelection.getPath());
 			}
-			IStatus status = fInterpreterEnvironmentBlock.getStatus();
+			IStatus status = fInterpreterBlock.getStatus();
 			if (!status.isOK()) {
 				setErrorMessage(status.getMessage());
 				try {
@@ -95,7 +96,7 @@ public abstract class AbstractInterpreterContainerWizardPage extends WizardPage
 						Boolean b = (Boolean) handler
 								.handleStatus(status, this);
 						if (b.booleanValue()) {
-							fInterpreterEnvironmentBlock.refreshInterpreters();
+							fInterpreterBlock.refreshInterpreters();
 						}
 					}
 				} catch (CoreException e) {
@@ -104,7 +105,13 @@ public abstract class AbstractInterpreterContainerWizardPage extends WizardPage
 		}
 	}
 
-	protected abstract AbstractInterpreterComboBlock getInterpreterBlock();
+	/**
+	 * @since 2.0
+	 */
+	protected AbstractInterpreterComboBlock createInterpreterBlock(
+			IInterpreterComboBlockContext context) {
+		return new AbstractInterpreterComboBlock(context);
+	}
 
 	/*
 	 * @see IDialogPage#createControl(Composite)
@@ -116,26 +123,21 @@ public abstract class AbstractInterpreterContainerWizardPage extends WizardPage
 		GridData gd = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(gd);
 		composite.setFont(parent.getFont());
-		fInterpreterEnvironmentBlock = getInterpreterBlock();
-		fInterpreterEnvironmentBlock.setEnvironment(EnvironmentManager
-				.getEnvironment(getScriptProject()));
-		String currentLanguageNature = fInterpreterEnvironmentBlock
-				.getCurrentLanguageNature();
-		fInterpreterEnvironmentBlock
+		final IInterpreterComboBlockContext context = createInterpreterBlockHost();
+		fInterpreterBlock = createInterpreterBlock(context);
+		fInterpreterBlock
 				.setDefaultInterpreterDescriptor(new BuildInterpreterDescriptor(
-						currentLanguageNature, EnvironmentManager
-								.getEnvironment(getScriptProject()).getId()));
-		fInterpreterEnvironmentBlock
+						context));
+		fInterpreterBlock
 				.setTitle(InterpretersMessages.InterpreterContainerWizardPage_3);
-		fInterpreterEnvironmentBlock.createControl(composite);
+		fInterpreterBlock.createControl(composite);
 		// gd = new GridData(GridData.FILL_HORIZONTAL);
 		// fInterpreterEnvironmentBlock.getControl().setLayoutData(gd);
 		setControl(composite);
-		fInterpreterEnvironmentBlock
+		fInterpreterBlock
 				.addPropertyChangeListener(new IPropertyChangeListener() {
 					public void propertyChange(PropertyChangeEvent event) {
-						IStatus status = fInterpreterEnvironmentBlock
-								.getStatus();
+						IStatus status = fInterpreterBlock.getStatus();
 						if (status.isOK()) {
 							setErrorMessage(null);
 						} else {
@@ -150,11 +152,29 @@ public abstract class AbstractInterpreterContainerWizardPage extends WizardPage
 		initializeFromSelection();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.dialogs.IDialogPage#getImage()
+	/**
+	 * @return
 	 */
+	private IInterpreterComboBlockContext createInterpreterBlockHost() {
+		return new IInterpreterComboBlockContext() {
+
+			public int getMode() {
+				return M_BUILDPATH;
+			}
+
+			public IEnvironment getEnvironment() {
+				return EnvironmentManager.getEnvironment(getScriptProject());
+			}
+
+			public String getNatureId() {
+				return AbstractInterpreterContainerWizardPage.this
+						.getScriptNature();
+			}
+
+		};
+	}
+
+	@Override
 	public Image getImage() {
 		return ScriptDebugImages.get(ScriptDebugImages.IMG_WIZBAN_LIBRARY);
 	}
@@ -172,4 +192,9 @@ public abstract class AbstractInterpreterContainerWizardPage extends WizardPage
 	public IBuildpathEntry[] getCurrentEntries() {
 		return this.currentEntries;
 	}
+
+	/**
+	 * @since 2.0
+	 */
+	public abstract String getScriptNature();
 }

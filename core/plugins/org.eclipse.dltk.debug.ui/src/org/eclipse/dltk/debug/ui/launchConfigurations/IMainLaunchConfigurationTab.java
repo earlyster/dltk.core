@@ -11,10 +11,21 @@
  *******************************************************************************/
 package org.eclipse.dltk.debug.ui.launchConfigurations;
 
-import org.eclipse.core.resources.IProject;
+import org.eclipse.dltk.core.IScriptProject;
 
-public interface IMainLaunchConfigurationTabListener {
-	void projectChanged(IProject project);
+/**
+ * @since 2.0
+ */
+public interface IMainLaunchConfigurationTab {
 
-	void interactiveChanged(boolean state);
+	/**
+	 * @since 2.0
+	 */
+	String getNatureID();
+
+	IScriptProject getProject();
+
+	public void addListener(IMainLaunchConfigurationTabListener listener);
+
+	public void removeListener(IMainLaunchConfigurationTabListener listener);
 }

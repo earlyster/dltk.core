@@ -14,21 +14,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.debug.ui.DLTKDebugUIPlugin;
 import org.eclipse.dltk.debug.ui.IDLTKDebugUIConstants;
 import org.eclipse.dltk.debug.ui.actions.ControlAccessibleListener;
-import org.eclipse.dltk.debug.ui.launchConfigurations.IMainLaunchConfigurationTabListener;
-import org.eclipse.dltk.debug.ui.launchConfigurations.IMainLaunchConfigurationTabListenerManager;
 import org.eclipse.dltk.internal.launching.DLTKLaunchingPlugin;
 import org.eclipse.dltk.internal.ui.util.SWTUtil;
 import org.eclipse.dltk.launching.IInterpreterInstall;
@@ -65,10 +61,10 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
  * "use default" button check state changes.
  * </p>
  */
-public abstract class AbstractInterpreterComboBlock {
+public class AbstractInterpreterComboBlock {
 
 	public static final String PROPERTY_INTERPRETER = "PROPERTY_INTERPRETER"; //$NON-NLS-1$
-	private IEnvironment environment;
+
 	/**
 	 * This block's control
 	 */
@@ -122,32 +118,20 @@ public abstract class AbstractInterpreterComboBlock {
 	private static final IStatus OK_STATUS = new Status(IStatus.OK,
 			DLTKDebugUIPlugin.getUniqueIdentifier(), 0, "", null); //$NON-NLS-1$
 
-	protected AbstractInterpreterComboBlock(
-			IMainLaunchConfigurationTabListenerManager listenerManager) {
-		if (listenerManager != null) {
-			listenerManager
-					.addListener(new IMainLaunchConfigurationTabListener() {
-						public void projectChanged(IProject project) {
-							IEnvironment env = EnvironmentManager
-									.getEnvironment(project);
-							if (env != null) {
-								if (!env.equals(environment)) {
-									environment = env;
-									refreshInterpreters();
-								}
-							}
-						}
+	private final IInterpreterComboBlockContext fContext;
 
-						public void interactiveChanged(boolean state) {
-						}
-					});
-		}
+	/**
+	 * @since 2.0
+	 */
+	public AbstractInterpreterComboBlock(IInterpreterComboBlockContext context) {
+		this.fContext = context;
 	}
 
 	/**
-	 * @deprecated
+	 * @since 2.0
 	 */
-	protected AbstractInterpreterComboBlock() {
+	protected IInterpreterComboBlockContext getContext() {
+		return fContext;
 	}
 
 	public void addPropertyChangeListener(IPropertyChangeListener listener) {
@@ -201,6 +185,7 @@ public abstract class AbstractInterpreterComboBlock {
 			fDefaultButton = new Button(group, SWT.RADIO);
 			fDefaultButton.setText(fDefaultDescriptor.getDescription());
 			fDefaultButton.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					if (fDefaultButton.getSelection()) {
 						setUseDefaultInterpreter();
@@ -232,6 +217,7 @@ public abstract class AbstractInterpreterComboBlock {
 					.setText(InterpretersMessages.InterpretersComboBlock_1);
 		}
 		fSpecificButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (fSpecificButton.getSelection()) {
 					fCombo.setEnabled(true);
@@ -268,6 +254,7 @@ public abstract class AbstractInterpreterComboBlock {
 				.addListener(fCombo, fSpecificButton.getText());
 
 		fCombo.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				firePropertyChange();
 			}
@@ -309,7 +296,7 @@ public abstract class AbstractInterpreterComboBlock {
 		refreshInterpreters();
 	}
 
-	private void restoreCombo(List elements, Object element, Combo combo) {
+	private void restoreCombo(List<?> elements, Object element, Combo combo) {
 		int index = -1;
 		if (element != null) {
 			index = elements.indexOf(element);
@@ -342,12 +329,7 @@ public abstract class AbstractInterpreterComboBlock {
 	 */
 	protected void setInterpreters(List<IInterpreterInstall> interpreters) {
 		fInterpreters.clear();
-		for (IInterpreterInstall install : interpreters) {
-			if (environment != null
-					&& environment.equals(install.getEnvironment())) {
-				fInterpreters.add(install);
-			}
-		}
+		fInterpreters.addAll(interpreters);
 		// sort by name
 		Collections.sort(fInterpreters, new Comparator<IInterpreterInstall>() {
 			public int compare(IInterpreterInstall o1, IInterpreterInstall o2) {
@@ -551,29 +533,23 @@ public abstract class AbstractInterpreterComboBlock {
 				containerPath)) {
 			setUseDefaultInterpreter();
 		} else {
-			if (environment != null) {
-				IInterpreterInstall install = ScriptRuntime
-						.getInterpreterInstall(getCurrentLanguageNature(),
-								environment.getId(), containerPath);
-				if (install == null) {
-					setError(InterpretersMessages.InterpretersComboBlock_8);
-				} else {
-					selectInterpreter(install);
-					IFileHandle location = install.getInstallLocation();
-					if (location == null) {
-						setError(InterpretersMessages.InterpretersComboBlock_12);
-					} else if (!location.exists()) {
-						setError(InterpretersMessages.InterpretersComboBlock_13);
-					}
-				}
-			} else {
+			final IEnvironment environment = fContext.getEnvironment();
+			final IInterpreterInstall install = environment != null ? ScriptRuntime
+					.getInterpreterInstall(fContext.getNatureId(), environment
+							.getId(), containerPath)
+					: null;
+			if (install == null) {
 				setError(InterpretersMessages.InterpretersComboBlock_8);
+			} else {
+				selectInterpreter(install);
+				IFileHandle location = install.getInstallLocation();
+				if (location == null) {
+					setError(InterpretersMessages.InterpretersComboBlock_12);
+				} else if (!location.exists()) {
+					setError(InterpretersMessages.InterpretersComboBlock_13);
+				}
 			}
 		}
-	}
-
-	public void setEnvironment(IEnvironment environment) {
-		this.environment = environment;
 	}
 
 	private void setError(String message) {
@@ -611,19 +587,27 @@ public abstract class AbstractInterpreterComboBlock {
 
 	protected void fillWithWorkspaceInterpreters() {
 		// fill with interpreters
-		List<IInterpreterInstall> standins = new ArrayList<IInterpreterInstall>();
-		IInterpreterInstallType[] types = ScriptRuntime
+		final List<IInterpreterInstall> standins = new ArrayList<IInterpreterInstall>();
+		final IInterpreterInstallType[] types = ScriptRuntime
 				.getInterpreterInstallTypes(getCurrentLanguageNature());
+		final IEnvironment environment = fContext.getEnvironment();
+
 		for (int i = 0; i < types.length; i++) {
 			IInterpreterInstallType type = types[i];
 			IInterpreterInstall[] installs = type.getInterpreterInstalls();
 			for (int j = 0; j < installs.length; j++) {
-				IInterpreterInstall install = installs[j];
-				standins.add(new InterpreterStandin(install));
+				final IInterpreterInstall install = installs[j];
+				if (environment != null
+						&& environment.getId().equals(
+								install.getEnvironmentId())) {
+					standins.add(new InterpreterStandin(install));
+				}
 			}
 		}
 		setInterpreters(standins);
 	}
 
-	protected abstract String getCurrentLanguageNature();
+	protected final String getCurrentLanguageNature() {
+		return fContext.getNatureId();
+	}
 }
