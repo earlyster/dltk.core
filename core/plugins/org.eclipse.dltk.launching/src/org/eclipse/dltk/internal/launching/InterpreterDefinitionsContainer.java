@@ -691,6 +691,9 @@ public class InterpreterDefinitionsContainer {
 		}
 	}
 
+	private static final String RSE_PREFIX = "org.eclipse.dltk.rse.rseEnvironment."; //$NON-NLS-1$
+	private static final String RSE_COMPATIBLE_PREFIX = "org.eclipse.dltk.rse.core.rseEnvironment."; //$NON-NLS-1$
+
 	/**
 	 * Parse the specified Interpreter node, create a InterpreterStandin for it,
 	 * and add this to the specified container.
@@ -708,6 +711,13 @@ public class InterpreterDefinitionsContainer {
 			}
 
 			String envId = element.getAttribute(ENVIRONMENT_ID);
+
+			// some intermediate versions were using wrong environment
+			// identifiers, so fix it.
+			if (envId.startsWith(RSE_COMPATIBLE_PREFIX)) {
+				envId = RSE_PREFIX
+						+ envId.substring(RSE_COMPATIBLE_PREFIX.length());
+			}
 			// IEnvironment env = EnvironmentManager.getEnvironmentById(envId);
 			// if (env == null) {
 			// return;
