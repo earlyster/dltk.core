@@ -55,7 +55,7 @@ public class H2DbFactory extends DbFactory {
 
 		String connString = new StringBuilder("jdbc:h2:").append(
 				dbPath.append(DB_NAME).toOSString()).append(
-				";UNDO_LOG=0;LOCK_MODE=0;LOG=0;CACHE_TYPE=").append(cacheType)
+				";UNDO_LOG=0;LOCK_MODE=0;CACHE_TYPE=").append(cacheType)
 				.append(";CACHE_SIZE=").append(cacheSize).toString();
 
 		pool = JdbcConnectionPool.create(connString, DB_USER, DB_PASS);
