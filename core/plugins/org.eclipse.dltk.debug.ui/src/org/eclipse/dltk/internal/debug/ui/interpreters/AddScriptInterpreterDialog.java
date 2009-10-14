@@ -347,7 +347,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 	protected IStatus validateInterpreterLocation() {
 		IEnvironment selectedEnv = getEnvironment();
 		String locationName = fInterpreterPath.getText();
-		IStatus s = null;
+		final IStatus s;
 		final IFileHandle file;
 		if (locationName.length() == 0) {
 			file = null;
