@@ -36,6 +36,10 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	public static final String RSE_ENVIRONMENT_PREFIX = DLTKRSEPlugin.NAMESPACE
 			+ ".rseEnvironment."; //$NON-NLS-1$
 
+	static final String COMPATIBLE_PREFIX = DLTKRSEPlugin.PLUGIN_ID
+			+ RSE_ENVIRONMENT_PREFIX
+					.substring(DLTKRSEPlugin.NAMESPACE.length());
+
 	public RSEEnvironmentProvider() {
 	}
 
@@ -53,15 +57,25 @@ public class RSEEnvironmentProvider implements IEnvironmentProvider {
 	public IEnvironment getEnvironment(String envId, boolean lazy) {
 		if (envId.startsWith(RSE_ENVIRONMENT_PREFIX)) {
 			String name = envId.substring(RSE_ENVIRONMENT_PREFIX.length());
-			IHost connection = getRSEConnection(name);
-			if (connection != null) {
-				IRemoteFileSubSystem fs = RemoteFileUtility
-						.getFileSubSystem(connection);
-				if (fs != null)
-					return new RSEEnvironment(fs);
-			} else if (lazy) {
-				return new RSELazyEnvironment(envId, this);
-			}
+			return getEnvironmentForName(name, envId, lazy);
+		} else if (envId.startsWith(COMPATIBLE_PREFIX)) {
+			String name = envId.substring(COMPATIBLE_PREFIX.length());
+			return getEnvironmentForName(name, RSE_ENVIRONMENT_PREFIX + name,
+					lazy);
+		}
+		return null;
+	}
+
+	private IEnvironment getEnvironmentForName(String name, String envId,
+			boolean lazy) {
+		final IHost connection = getRSEConnection(name);
+		if (connection != null) {
+			final IRemoteFileSubSystem fs = RemoteFileUtility
+					.getFileSubSystem(connection);
+			if (fs != null)
+				return new RSEEnvironment(fs);
+		} else if (lazy) {
+			return new RSELazyEnvironment(envId, this);
 		}
 		return null;
 	}
