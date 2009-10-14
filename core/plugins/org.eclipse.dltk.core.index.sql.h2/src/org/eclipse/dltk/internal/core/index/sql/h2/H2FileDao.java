@@ -96,7 +96,7 @@ public class H2FileDao implements IFileDao {
 			statement.setInt(++param, containerId);
 			ResultSet result = statement.executeQuery();
 			try {
-				if (result.next()) {
+				while (result.next()) {
 					files.add(new File(result.getInt(1), result.getString(2),
 							result.getLong(3), result.getInt(4)));
 				}
