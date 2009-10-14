@@ -33,6 +33,13 @@ public class H2IndexPreferences extends AbstractPreferenceInitializer {
 	public static final String DB_CACHE_SIZE = "cacheSize"; //$NON-NLS-1$
 
 	/**
+	 * Whether to use transaction locking.
+	 * 
+	 * @see http://www.h2database.com/html/grammar.html#set_lock_mode
+	 */
+	public static final String DB_LOCK_MODE = "lockMode"; //$NON-NLS-1$
+
+	/**
 	 * Schema version
 	 */
 	public static final String SCHEMA_VERSION = "schemaVersion"; //$NON-NLS-1$
@@ -42,7 +49,8 @@ public class H2IndexPreferences extends AbstractPreferenceInitializer {
 		IEclipsePreferences p = ((IScopeContext) new DefaultScope())
 				.getNode(H2Index.PLUGIN_ID);
 
-		p.putInt(DB_CACHE_SIZE, 64000);
+		p.putInt(DB_CACHE_SIZE, 64000); // 64Mb
 		p.put(DB_CACHE_TYPE, "LRU");
+		p.putInt(DB_LOCK_MODE, 0); // no transaction isolation
 	}
 }

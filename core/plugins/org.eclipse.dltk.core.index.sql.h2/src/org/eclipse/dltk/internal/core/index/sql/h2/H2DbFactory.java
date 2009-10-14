@@ -17,6 +17,7 @@ import java.sql.Statement;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.dltk.core.index.sql.DbFactory;
 import org.eclipse.dltk.core.index.sql.IContainerDao;
 import org.eclipse.dltk.core.index.sql.IElementDao;
@@ -46,17 +47,7 @@ public class H2DbFactory extends DbFactory {
 		}
 
 		IPath dbPath = H2Index.getDefault().getStateLocation();
-
-		int cacheSize = Platform.getPreferencesService().getInt(
-				H2Index.PLUGIN_ID, H2IndexPreferences.DB_CACHE_SIZE, 0, null);
-		String cacheType = Platform.getPreferencesService()
-				.getString(H2Index.PLUGIN_ID, H2IndexPreferences.DB_CACHE_TYPE,
-						null, null);
-
-		String connString = new StringBuilder("jdbc:h2:").append(
-				dbPath.append(DB_NAME).toOSString()).append(
-				";UNDO_LOG=0;LOCK_MODE=0;CACHE_TYPE=").append(cacheType)
-				.append(";CACHE_SIZE=").append(cacheSize).toString();
+		String connString = getConnectionString(dbPath);
 
 		pool = JdbcConnectionPool.create(connString, DB_USER, DB_PASS);
 
@@ -89,6 +80,37 @@ public class H2DbFactory extends DbFactory {
 		} finally {
 			connection.close();
 		}
+	}
+
+	/**
+	 * Generates connection string using user preferences
+	 * 
+	 * @param dbPath
+	 *            Path to the database files
+	 * @return
+	 */
+	private String getConnectionString(IPath dbPath) {
+
+		IPreferencesService preferencesService = Platform
+				.getPreferencesService();
+
+		StringBuilder buf = new StringBuilder("jdbc:h2:").append(dbPath.append(
+				DB_NAME).toOSString());
+
+		buf.append(";UNDO_LOG=0");
+		buf.append(";LOCK_MODE=").append(
+				preferencesService.getInt(H2Index.PLUGIN_ID,
+						H2IndexPreferences.DB_LOCK_MODE, 0, null));
+
+		buf.append(";CACHE_TYPE=").append(
+				preferencesService.getString(H2Index.PLUGIN_ID,
+						H2IndexPreferences.DB_CACHE_TYPE, null, null));
+
+		buf.append(";CACHE_SIZE=").append(
+				preferencesService.getInt(H2Index.PLUGIN_ID,
+						H2IndexPreferences.DB_CACHE_SIZE, 0, null));
+
+		return buf.toString();
 	}
 
 	public Connection createConnection() throws SQLException {
