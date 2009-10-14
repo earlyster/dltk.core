@@ -136,6 +136,8 @@ public abstract class AbstractIndexRequest extends AbstractJob {
 				if (documentNames.get(relativePath) < handle.lastModified()) {
 					toReindex.add(sourceModule);
 				}
+			} else {
+				toReindex.add(sourceModule);
 			}
 		}
 	}
