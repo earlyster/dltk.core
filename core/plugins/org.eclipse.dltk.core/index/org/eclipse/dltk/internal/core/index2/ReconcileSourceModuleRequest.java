@@ -19,6 +19,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.index2.IIndexer;
 import org.eclipse.dltk.core.index2.ProjectIndexer2;
+import org.eclipse.dltk.internal.core.SourceModule;
 import org.eclipse.dltk.internal.core.util.Util;
 
 /**
@@ -40,11 +41,17 @@ public class ReconcileSourceModuleRequest extends AddSourceModuleRequest {
 		if (indexer == null) {
 			return;
 		}
-		IModelElement projectFragment = sourceModule
-				.getAncestor(IModelElement.PROJECT_FRAGMENT);
-		IPath containerPath = projectFragment.getPath();
+
+		IPath containerPath;
+		if (sourceModule instanceof SourceModule) {
+			containerPath = sourceModule.getScriptProject().getPath();
+		} else {
+			containerPath = sourceModule.getAncestor(
+					IModelElement.PROJECT_FRAGMENT).getPath();
+		}
 		String relativePath = Util.relativePath(sourceModule.getPath(),
 				containerPath.segmentCount());
+
 		indexer.removeDocument(containerPath, relativePath);
 
 		// Now index from scratch:
