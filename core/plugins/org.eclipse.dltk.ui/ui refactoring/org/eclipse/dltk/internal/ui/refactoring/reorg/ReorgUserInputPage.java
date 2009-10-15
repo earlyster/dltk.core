@@ -40,7 +40,9 @@ import org.eclipse.swt.widgets.Label;
 
 abstract class ReorgUserInputPage extends UserInputWizardPage{
 	private static final long LABEL_FLAGS= ScriptElementLabels.ALL_DEFAULT
-			| ScriptElementLabels.M_PRE_RETURNTYPE | ScriptElementLabels.M_PARAMETER_NAMES | ScriptElementLabels.F_PRE_TYPE_SIGNATURE;
+			| ScriptElementLabels.M_APP_RETURNTYPE
+			| ScriptElementLabels.M_PARAMETER_NAMES
+			| ScriptElementLabels.F_PRE_TYPE_SIGNATURE;
 	private TreeViewer fViewer;
 	public ReorgUserInputPage(String pageName) {
 		super(pageName);			

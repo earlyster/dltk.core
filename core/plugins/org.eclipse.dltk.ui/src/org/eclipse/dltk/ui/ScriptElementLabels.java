@@ -11,6 +11,7 @@ package org.eclipse.dltk.ui;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -261,7 +262,7 @@ public class ScriptElementLabels {
 	public final static long ALL_FULLY_QUALIFIED = new Long(F_FULLY_QUALIFIED
 			| M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED
 			| D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED | P_QUALIFIED
-			| ROOT_QUALIFIED).longValue();
+			| ROOT_QUALIFIED | M_PRE_RETURNTYPE).longValue();
 
 	/**
 	 * Post qualify all elements
@@ -276,7 +277,8 @@ public class ScriptElementLabels {
 	 * T_TYPE_PARAMETERS enabled)
 	 */
 	public final static long ALL_DEFAULT = new Long(M_PARAMETER_NAMES
-			| T_TYPE_PARAMETERS | M_PARAMETER_INITIALIZERS).longValue();
+			| T_TYPE_PARAMETERS | M_PARAMETER_INITIALIZERS | M_APP_RETURNTYPE)
+			.longValue();
 
 	public final static long F_CATEGORY = 1L << 49;
 
@@ -786,7 +788,17 @@ public class ScriptElementLabels {
 			}
 		}
 		buf.append(field.getElementName());
-		// TODO: Add type detection here.
+		try {
+			String type = field.getType();
+			if (type != null
+					&& getFlag(flags, ScriptElementLabels.F_APP_TYPE_SIGNATURE)
+					&& field.exists()) {
+				buf.append(ScriptElementLabels.DECL_STRING);
+				buf.append(type);
+			}
+		} catch (CoreException e) {
+			DLTKCore.error("Failed to append type name to field", e);
+		}
 	}
 
 	protected void getMethodLabel(IMethod method, long flags, StringBuffer buf) {
@@ -846,6 +858,15 @@ public class ScriptElementLabels {
 				}
 			}
 			buf.append(')');
+
+			String type = method.getType();
+			if (type != null
+					&& getFlag(flags, ScriptElementLabels.M_APP_RETURNTYPE)
+					&& method.exists() && !method.isConstructor()) {
+				int offset = buf.length();
+				buf.append(ScriptElementLabels.DECL_STRING);
+				buf.append(type);
+			}
 
 			// post qualification
 			if (getFlag(flags, M_POST_QUALIFIED)) {

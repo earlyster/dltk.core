@@ -98,6 +98,7 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 		private OutlineLabelProvider() {
 			super(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS
 					| ScriptElementLabels.F_APP_TYPE_SIGNATURE
+					| ScriptElementLabels.M_APP_RETURNTYPE
 					| ScriptElementLabels.ALL_CATEGORY,
 					AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS,
 					getPreferenceStore());
@@ -202,7 +203,10 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 				Item i = (Item) node;
 				if (i.getData() instanceof IModelElement) {
 					IModelElement je = (IModelElement) i.getData();
-					if (/* je.getElementType() == IModelElement.IMPORT_CONTAINER || */isInnerType(je)) {
+					if (/*
+						 * je.getElementType() == IModelElement.IMPORT_CONTAINER
+						 * ||
+						 */isInnerType(je)) {
 						setExpanded(i, false);
 						return;
 					}
@@ -455,7 +459,8 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 	@Deprecated
 	public ScriptOutlineInformationControl(Shell parent, int shellStyle,
 			int treeStyle, String commandId) {
-		this(parent, shellStyle, treeStyle, commandId, DLTKUIPlugin.getDefault().getPreferenceStore());
+		this(parent, shellStyle, treeStyle, commandId, DLTKUIPlugin
+				.getDefault().getPreferenceStore());
 	}
 
 	/**
@@ -551,16 +556,19 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 		String keySequence = sequences[0].format();
 
 		if (fOutlineContentProvider.isShowingInheritedMembers())
-			return Messages.format(TextMessages.ScriptOutlineInformationControl_pressToHideInheritedMembers,
-					keySequence);
+			return Messages
+					.format(
+							TextMessages.ScriptOutlineInformationControl_pressToHideInheritedMembers,
+							keySequence);
 		else
-			return Messages.format(TextMessages.ScriptOutlineInformationControl_pressToShowInheritedMembers,
-					keySequence);
+			return Messages
+					.format(
+							TextMessages.ScriptOutlineInformationControl_pressToShowInheritedMembers,
+							keySequence);
 	}
 
 	/*
 	 * @see org.eclipse.dltk.internal.ui.text.AbstractInformationControl#getId()
-	 * 
 	 */
 	protected String getId() {
 		return "org.eclipse.dltk.internal.ui.text.QuickOutline"; //$NON-NLS-1$
@@ -627,7 +635,9 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.ui.text.AbstractInformationControl#fillViewMenu(org.eclipse.jface.action.IMenuManager)
+	 * @see
+	 * org.eclipse.dltk.internal.ui.text.AbstractInformationControl#fillViewMenu
+	 * (org.eclipse.jface.action.IMenuManager)
 	 */
 	protected void fillViewMenu(IMenuManager viewMenu) {
 		super.fillViewMenu(viewMenu);
@@ -643,9 +653,9 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 	}
 
 	/*
-	 * @see org.eclipse.dltk.internal.ui.text.AbstractInformationControl#setMatcherString(java.lang.String,
-	 *      boolean)
-	 * 
+	 * @see
+	 * org.eclipse.dltk.internal.ui.text.AbstractInformationControl#setMatcherString
+	 * (java.lang.String, boolean)
 	 */
 	protected void setMatcherString(String pattern, boolean update) {
 		fPattern = pattern;
@@ -666,8 +676,8 @@ public class ScriptOutlineInformationControl extends AbstractInformationControl 
 
 	private ITypeHierarchy getSuperTypeHierarchy(IType type) {
 		/*
-		 * ITypeHierarchy th= (ITypeHierarchy)fTypeHierarchies.get(type); if (th ==
-		 * null) { try { th= SuperTypeHierarchyCache.getTypeHierarchy(type,
+		 * ITypeHierarchy th= (ITypeHierarchy)fTypeHierarchies.get(type); if (th
+		 * == null) { try { th= SuperTypeHierarchyCache.getTypeHierarchy(type,
 		 * getProgressMonitor()); } catch (ModelException e) { return null; }
 		 * catch (OperationCanceledException e) { return null; }
 		 * fTypeHierarchies.put(type, th); } return th;

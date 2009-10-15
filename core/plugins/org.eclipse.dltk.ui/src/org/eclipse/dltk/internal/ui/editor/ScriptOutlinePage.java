@@ -1023,7 +1023,8 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		AppearanceAwareLabelProvider lprovider = new AppearanceAwareLabelProvider(
 				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS
 						| ScriptElementLabels.F_APP_TYPE_SIGNATURE
-						| ScriptElementLabels.ALL_CATEGORY,
+						| ScriptElementLabels.ALL_CATEGORY
+						| ScriptElementLabels.M_APP_RETURNTYPE,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS, fStore);
 
 		ILabelDecorator ldecorator = getLabelDecorator();

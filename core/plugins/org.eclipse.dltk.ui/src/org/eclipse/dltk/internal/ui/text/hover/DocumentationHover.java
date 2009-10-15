@@ -40,7 +40,8 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 		IInformationProviderExtension2, ITextHoverExtension {
 
 	private final long LABEL_FLAGS = // ScriptElementLabels.ALL_FULLY_QUALIFIED
-	ScriptElementLabels.M_PRE_RETURNTYPE
+	ScriptElementLabels.M_APP_RETURNTYPE
+			| ScriptElementLabels.F_APP_TYPE_SIGNATURE
 			| ScriptElementLabels.M_PARAMETER_TYPES
 			| ScriptElementLabels.M_PARAMETER_NAMES
 			| ScriptElementLabels.M_EXCEPTIONS
@@ -91,12 +92,12 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 						Shell parent) {
 					if (BrowserInformationControl.isAvailable(parent))
 						return new BrowserInformationControl(parent, SWT.TOOL
-								| SWT.NO_TRIM, SWT.NONE,
-								EditorsUI.getTooltipAffordanceString());
+								| SWT.NO_TRIM, SWT.NONE, EditorsUI
+								.getTooltipAffordanceString());
 					else
 						return new DefaultInformationControl(parent, SWT.NONE,
-								new HTMLTextPresenter(true),
-								EditorsUI.getTooltipAffordanceString());
+								new HTMLTextPresenter(true), EditorsUI
+										.getTooltipAffordanceString());
 				}
 
 				public boolean canReuse(IInformationControl control) {
@@ -104,7 +105,8 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 					if (canReuse
 							&& control instanceof IInformationControlExtension4)
 						((IInformationControlExtension4) control)
-								.setStatusText(EditorsUI.getTooltipAffordanceString());
+								.setStatusText(EditorsUI
+										.getTooltipAffordanceString());
 					return canReuse;
 
 				}
@@ -124,7 +126,7 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 			HTMLPrinter.addSmallHeader(buffer, getInfoText(result[0]));
 			HTMLPrinter.addParagraph(buffer, "<hr>"); //$NON-NLS-1$
 			for (int i = 0; i < result.length; i++) {
-// HTMLPrinter.startBulletList(buffer);
+				// HTMLPrinter.startBulletList(buffer);
 				IModelElement curr = result[i];
 				if (curr instanceof IMember) {
 					IMember member = (IMember) curr;
@@ -132,13 +134,13 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 					Reader reader;
 					try {
 						reader = ScriptDocumentationAccess
-								.getHTMLContentReader(nature, member,
-										true, true);
+								.getHTMLContentReader(nature, member, true,
+										true);
 
 						// Provide hint why there's no doc
 						if (reader == null) {
-// reader= new
-// StringReader(DLTKHoverMessages.ScriptdocHover_noAttachedInformation);
+							// reader= new
+							// StringReader(DLTKHoverMessages.ScriptdocHover_noAttachedInformation);
 							continue;
 						}
 
@@ -147,8 +149,8 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 					}
 
 					if (reader != null) {
-// HTMLPrinter.addBullet(buffer, getInfoText(curr));
-// HTMLPrinter.addParagraph(buffer, "<br>");
+						// HTMLPrinter.addBullet(buffer, getInfoText(curr));
+						// HTMLPrinter.addParagraph(buffer, "<br>");
 						if (hasContents) {
 							HTMLPrinter.addParagraph(buffer, "<hr>"); //$NON-NLS-1$
 						}
@@ -156,7 +158,7 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 					}
 					hasContents = true;
 				}
-// HTMLPrinter.endBulletList(buffer);
+				// HTMLPrinter.endBulletList(buffer);
 			}
 
 		} else {
@@ -185,12 +187,11 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 				}
 				hasContents = true;
 			}/*
-				 * else if (curr.getElementType() ==
-				 * IModelElement.LOCAL_VARIABLE || curr.getElementType() ==
-				 * IModelElement.TYPE_PARAMETER) {
-				 * HTMLPrinter.addSmallHeader(buffer, getInfoText(curr));
-				 * hasContents= true; }
-				 */
+			 * else if (curr.getElementType() == IModelElement.LOCAL_VARIABLE ||
+			 * curr.getElementType() == IModelElement.TYPE_PARAMETER) {
+			 * HTMLPrinter.addSmallHeader(buffer, getInfoText(curr));
+			 * hasContents= true; }
+			 */
 		}
 
 		if (!hasContents)
@@ -211,7 +212,7 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 		try {
 			reader = ScriptDocumentationAccess.getHTMLContentReader(nature,
 					content);
-			
+
 			if (reader != null) {
 				HTMLPrinter.addParagraph(buffer, reader);
 				if (buffer.length() > 0) {

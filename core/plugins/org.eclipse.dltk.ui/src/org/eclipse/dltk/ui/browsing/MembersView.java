@@ -64,7 +64,9 @@ public class MembersView extends ScriptBrowsingPart implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)
+	 * @see
+	 * org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java
+	 * .lang.Class)
 	 */
 	public Object getAdapter(Class key) {
 		if (key == IShowInTargetList.class) {
@@ -88,6 +90,7 @@ public class MembersView extends ScriptBrowsingPart implements
 		return new AppearanceAwareLabelProvider(
 				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS
 						| ScriptElementLabels.F_APP_TYPE_SIGNATURE
+						| ScriptElementLabels.M_APP_RETURNTYPE
 						| ScriptElementLabels.ALL_CATEGORY,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS, DLTKUIPlugin
 						.getDefault().getPreferenceStore());
@@ -110,7 +113,9 @@ public class MembersView extends ScriptBrowsingPart implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createViewer(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createViewer(org
+	 * .eclipse.swt.widgets.Composite)
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
 		ProblemTreeViewer viewer = new ProblemTreeViewer(parent, SWT.MULTI);
@@ -128,7 +133,10 @@ public class MembersView extends ScriptBrowsingPart implements
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#fillActionBars(org.eclipse.ui.IActionBars)
+	 * @see
+	 * org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#fillActionBars(
+	 * org.eclipse.ui.IActionBars)
+	 * 
 	 * @since 3.2
 	 */
 	protected void fillActionBars(IActionBars actionBars) {
@@ -141,7 +149,10 @@ public class MembersView extends ScriptBrowsingPart implements
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#setInput(java.lang.Object)
+	 * @see
+	 * org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#setInput(java.lang
+	 * .Object)
+	 * 
 	 * @since 3.2
 	 */
 	protected void setInput(Object input) {
@@ -159,8 +170,7 @@ public class MembersView extends ScriptBrowsingPart implements
 	}
 
 	/**
-	 * Answers if the given <code>element</code> is a valid input for this
-	 * part.
+	 * Answers if the given <code>element</code> is a valid input for this part.
 	 * 
 	 * @param element
 	 *            the object to test
@@ -340,7 +350,9 @@ public class MembersView extends ScriptBrowsingPart implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+	 * @see
+	 * org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse
+	 * .jface.util.PropertyChangeEvent)
 	 */
 	public void propertyChange(PropertyChangeEvent event) {
 		if (MembersOrderPreferenceCache.isMemberOrderProperty(event

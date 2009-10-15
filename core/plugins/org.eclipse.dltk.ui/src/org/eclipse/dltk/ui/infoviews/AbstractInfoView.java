@@ -66,7 +66,8 @@ public abstract class AbstractInfoView extends ViewPart implements
 		ISelectionListener, IMenuListener, IPropertyChangeListener {
 	/** ScriptElementLabels flags used for the title */
 	private final long TITLE_FLAGS = ScriptElementLabels.ALL_FULLY_QUALIFIED
-			| ScriptElementLabels.M_PRE_RETURNTYPE
+			| ScriptElementLabels.M_APP_RETURNTYPE
+			| ScriptElementLabels.F_APP_TYPE_SIGNATURE
 			| ScriptElementLabels.M_PARAMETER_TYPES
 			| ScriptElementLabels.M_PARAMETER_NAMES
 			| ScriptElementLabels.M_EXCEPTIONS
@@ -86,6 +87,7 @@ public abstract class AbstractInfoView extends ViewPart implements
 			| ScriptElementLabels.M_APP_RETURNTYPE
 			| ScriptElementLabels.M_EXCEPTIONS
 			| ScriptElementLabels.F_APP_TYPE_SIGNATURE
+			| ScriptElementLabels.M_APP_RETURNTYPE
 			| ScriptElementLabels.T_TYPE_PARAMETERS;
 	/*
 	 * @see IPartListener2
@@ -362,7 +364,7 @@ public abstract class AbstractInfoView extends ViewPart implements
 
 	/*
 	 * @see ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart,
-	 *      org.eclipse.jface.viewers.ISelection)
+	 * org.eclipse.jface.viewers.ISelection)
 	 */
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (part.equals(this))

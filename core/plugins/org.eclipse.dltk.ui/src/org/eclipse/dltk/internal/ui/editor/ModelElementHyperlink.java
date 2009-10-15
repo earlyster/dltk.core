@@ -60,11 +60,11 @@ public class ModelElementHyperlink implements IHyperlink {
 	}
 
 	private final long TITLE_FLAGS = ScriptElementLabels.ALL_FULLY_QUALIFIED
-			| ScriptElementLabels.M_PRE_RETURNTYPE
+			| ScriptElementLabels.M_APP_RETURNTYPE
 			| ScriptElementLabels.M_PARAMETER_TYPES
 			| ScriptElementLabels.M_PARAMETER_NAMES
 			| ScriptElementLabels.M_EXCEPTIONS
-			| ScriptElementLabels.F_PRE_TYPE_SIGNATURE
+			| ScriptElementLabels.F_APP_TYPE_SIGNATURE
 			| ScriptElementLabels.M_PRE_TYPE_PARAMETERS
 			| ScriptElementLabels.T_TYPE_PARAMETERS
 			| ScriptElementLabels.USE_RESOLVED;

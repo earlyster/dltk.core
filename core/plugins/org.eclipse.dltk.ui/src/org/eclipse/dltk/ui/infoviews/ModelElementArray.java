@@ -101,7 +101,8 @@ public class ModelElementArray {
 
 	private static final long TOOLTIP_FLAGS = ScriptElementLabels.T_FULLY_QUALIFIED
 			| ScriptElementLabels.T_CONTAINER_QUALIFIED
-			| ScriptElementLabels.M_PRE_RETURNTYPE
+			| ScriptElementLabels.M_APP_RETURNTYPE
+			| ScriptElementLabels.F_APP_TYPE_SIGNATURE
 			| ScriptElementLabels.M_PARAMETER_TYPES
 			| ScriptElementLabels.M_PARAMETER_NAMES
 			| ScriptElementLabels.M_EXCEPTIONS
