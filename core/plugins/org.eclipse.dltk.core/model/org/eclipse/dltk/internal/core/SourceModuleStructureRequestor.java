@@ -128,6 +128,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 		info.setNameSourceEnd(fieldInfo.nameSourceEnd);
 		info.setSourceRangeStart(fieldInfo.declarationStart);
 		info.setFlags(fieldInfo.modifiers);
+		info.setType(fieldInfo.type);
 
 		parentInfo.addChild(handle);
 		this.newElements.put(handle, info);
@@ -203,6 +204,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 		info.setNameSourceStart(methodInfo.nameSourceStart);
 		info.setNameSourceEnd(methodInfo.nameSourceEnd);
 		info.setIsConstructor(methodInfo.isConstructor);
+		info.setReturnType(methodInfo.returnType);
 
 		String[] parameterNames = methodInfo.parameterNames == null ? EMPTY
 				: methodInfo.parameterNames;

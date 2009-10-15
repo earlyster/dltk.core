@@ -9,13 +9,13 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.model.binary;
 
-
 class BinaryMethodElementInfo extends BinaryMemberInfo {
 
 	private String[] argumentNames;
 	private String[] argumentInitializers;
 	private String[] argumentTypes;
 	private boolean isConstructor;
+	private String returnType;
 
 	protected void setArgumentNames(String[] names) {
 		this.argumentNames = names;
@@ -50,6 +50,10 @@ class BinaryMethodElementInfo extends BinaryMemberInfo {
 	}
 
 	public String getReturnTypeName() {
-		return null;
+		return returnType;
+	}
+
+	public void setReturnType(String returnType) {
+		this.returnType = returnType;
 	}
 }

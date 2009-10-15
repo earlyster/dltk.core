@@ -41,10 +41,10 @@ public class SourceField extends NamedMember implements IField {
 	public String getFullyQualifiedName(String enclosingTypeSeparator) {
 		try {
 			return getFullyQualifiedName(enclosingTypeSeparator, false/*
-																		 * don't
-																		 * show
-																		 * parameters
-																		 */);
+																	 * don't
+																	 * show
+																	 * parameters
+																	 */);
 		} catch (ModelException e) {
 			// exception thrown only when showing parameters
 			return null;
@@ -53,5 +53,13 @@ public class SourceField extends NamedMember implements IField {
 
 	public String getFullyQualifiedName() {
 		return getFullyQualifiedName("$"); //$NON-NLS-1$
+	}
+
+	public String getType() throws ModelException {
+		SourceFieldElementInfo info = (SourceFieldElementInfo) getElementInfo();
+		if (info != null) {
+			return info.getType();
+		}
+		return null;
 	}
 }

@@ -45,4 +45,12 @@ public class BinaryField extends BinaryMember implements IField {
 	public String getFullyQualifiedName() {
 		return getFullyQualifiedName("$"); //$NON-NLS-1$
 	}
+
+	public String getType() throws ModelException {
+		BinaryFieldElementInfo info = (BinaryFieldElementInfo) getElementInfo();
+		if (info != null) {
+			return info.getType();
+		}
+		return null;
+	}
 }

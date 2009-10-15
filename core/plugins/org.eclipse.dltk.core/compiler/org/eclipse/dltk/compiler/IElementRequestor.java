@@ -21,10 +21,12 @@ public interface IElementRequestor {
 		public String[] parameterInitializers;
 		public String[] parameterTypes;
 		public String[] exceptionTypes;
+		public String returnType;
 		public boolean isConstructor;
 	}
 
 	public static class FieldInfo extends ElementInfo {
+		public String type;
 	}
 
 	public static class ImportInfo {

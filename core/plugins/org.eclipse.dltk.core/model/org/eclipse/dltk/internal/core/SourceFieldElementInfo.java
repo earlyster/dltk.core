@@ -9,7 +9,14 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
+class SourceFieldElementInfo extends MemberElementInfo {
+	private String type;
 
-class SourceFieldElementInfo extends MemberElementInfo {	
+	public String getType() {
+		return type;
+	}
 
+	public void setType(String type) {
+		this.type = type;
+	}
 }

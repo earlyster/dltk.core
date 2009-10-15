@@ -22,6 +22,7 @@ class SourceMethodElementInfo extends MemberElementInfo implements
 	private String[] argumentNames;
 	private String[] argumentInitializers;
 	private boolean isConstructor;
+	private String type;
 
 	protected void setArgumentNames(String[] names) {
 		this.argumentNames = names;
@@ -47,23 +48,11 @@ class SourceMethodElementInfo extends MemberElementInfo implements
 		return isConstructor;
 	}
 
-	public char[][] getExceptionTypeNames() {
-		// TODO Auto-generated method stub
-		return null;
+	public String getReturnTypeName() {
+		return type;
 	}
 
-	public char[] getReturnTypeName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public char[][][] getTypeParameterBounds() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public char[][] getTypeParameterNames() {
-		// TODO Auto-generated method stub
-		return null;
+	public void setReturnType(String type) {
+		this.type = type;
 	}
 }

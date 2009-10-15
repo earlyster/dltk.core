@@ -96,6 +96,7 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 				.intern(fieldInfo.name));
 		BinaryFieldElementInfo handleInfo = new BinaryFieldElementInfo();
 		handleInfo.setFlags(fieldInfo.modifiers);
+		handleInfo.setType(fieldInfo.type);
 		resolveDuplicates(handle);
 		addChild(parentInfo, handle);
 		newElements.put(handle, handleInfo);
@@ -138,6 +139,7 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 		handleInfo.setArgumentTypes(parameterTypes);
 		handleInfo.setIsConstructor(methodInfo.isConstructor);
 		handleInfo.setFlags(methodInfo.modifiers);
+		handleInfo.setReturnType(methodInfo.returnType);
 
 		addChild(parentInfo, handle);
 		newElements.put(handle, handleInfo);

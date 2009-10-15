@@ -9,10 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.model.binary;
 
-
 class BinaryFieldElementInfo extends BinaryMemberInfo {
 	private String enumInitializerValue;
 	private boolean isEnumValue;
+	private String type;
 
 	public boolean isEnumValue() {
 		return isEnumValue;
@@ -28,5 +28,13 @@ class BinaryFieldElementInfo extends BinaryMemberInfo {
 
 	public void setEnumInitializerValue(String enumInitializerValue) {
 		this.enumInitializerValue = enumInitializerValue;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 }

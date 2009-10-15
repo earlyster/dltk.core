@@ -22,15 +22,6 @@ public interface ISourceMethod extends IGenericMethod {
 	int getDeclarationSourceStart();
 
 	/**
-	 * Answer the unresolved names of the exception types or null if the array
-	 * is empty.
-	 * 
-	 * A name is a simple name or a qualified, dot separated name. For example,
-	 * Hashtable or java.util.Hashtable.
-	 */
-	char[][] getExceptionTypeNames();
-
-	/**
 	 * Answer the source end position of the method's selector.
 	 */
 	int getNameSourceEnd();
@@ -46,18 +37,8 @@ public interface ISourceMethod extends IGenericMethod {
 	 * 
 	 * The name is a simple name or a qualified, dot separated name. For
 	 * example, Hashtable or java.util.Hashtable.
+	 * 
+	 * @since 2.0
 	 */
-	char[] getReturnTypeName();
-
-	/**
-	 * Answer the names of the receiver's type parameters or null if the array
-	 * is empty.
-	 */
-	char[][] getTypeParameterNames();
-
-	/**
-	 * Answer the array of bound names of the receiver's type parameters or null
-	 * if the array is empty.
-	 */
-	char[][][] getTypeParameterBounds();
+	String getReturnTypeName();
 }

@@ -14,5 +14,14 @@ public interface IField extends IMember {
 	
 	String getFullyQualifiedName();
 	
-	public String getTypeQualifiedName(String enclosingTypeSeparator, boolean showParameters) throws ModelException;	
+	public String getTypeQualifiedName(String enclosingTypeSeparator,
+			boolean showParameters) throws ModelException;
+
+	/**
+	 * Return language dependent type name
+	 * 
+	 * @return
+	 * @since 2.0
+	 */
+	String getType() throws ModelException;
 }

@@ -110,4 +110,13 @@ public class SourceMethod extends NamedMember implements IMethod {
 		Assert.isTrue(false); // should not happen
 		return null;
 	}
+
+	public String getType() throws ModelException {
+		SourceMethodElementInfo info = (SourceMethodElementInfo) this
+				.getElementInfo();
+		if (info != null) {
+			return info.getReturnTypeName();
+		}
+		return null;
+	}
 }

@@ -46,19 +46,35 @@ public class BinaryMethod extends BinaryMember implements IMethod {
 		return getFullyQualifiedName("$"); //$NON-NLS-1$
 	}
 
-	private BinaryMethodElementInfo getInfo() throws ModelException {
-		return (BinaryMethodElementInfo) getElementInfo();
-	}
-
 	public String[] getParameterInitializers() throws ModelException {
-		return getInfo().getArgumentInitializers();
+		BinaryMethodElementInfo info = (BinaryMethodElementInfo) getElementInfo();
+		if (info != null) {
+			return info.getArgumentInitializers();
+		}
+		return null;
 	}
 
 	public String[] getParameters() throws ModelException {
-		return getInfo().getArgumentNames();
+		BinaryMethodElementInfo info = (BinaryMethodElementInfo) getElementInfo();
+		if (info != null) {
+			return info.getArgumentNames();
+		}
+		return null;
 	}
 
 	public boolean isConstructor() throws ModelException {
-		return getInfo().isConstructor();
+		BinaryMethodElementInfo info = (BinaryMethodElementInfo) getElementInfo();
+		if (info != null) {
+			return info.isConstructor();
+		}
+		return false;
+	}
+
+	public String getType() throws ModelException {
+		BinaryMethodElementInfo info = (BinaryMethodElementInfo) getElementInfo();
+		if (info != null) {
+			return info.getReturnTypeName();
+		}
+		return null;
 	}
 }
