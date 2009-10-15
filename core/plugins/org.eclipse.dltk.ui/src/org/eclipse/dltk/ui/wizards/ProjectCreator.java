@@ -179,8 +179,23 @@ public class ProjectCreator {
 
 		boolean isRecurrent();
 
+		boolean isCancelable();
+
 		void execute(IProject project, IProgressMonitor monitor)
 				throws CoreException, InterruptedException;
+
+	}
+
+	public static abstract class ProjectCreateStep implements
+			IProjectCreateStep {
+
+		public boolean isCancelable() {
+			return false;
+		}
+
+		public boolean isRecurrent() {
+			return false;
+		}
 
 	}
 
@@ -379,6 +394,11 @@ public class ProjectCreator {
 	public void changeToNewProject() {
 		fKeepContent = fLocation.getDetect();
 
+		final BeforeCurrentPageStepTracker stepTracker = new BeforeCurrentPageStepTracker(
+				fStepTracker);
+
+		final boolean cancelable = isCancelable(stepTracker);
+
 		final IRunnableWithProgress op = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor)
 					throws InvocationTargetException, InterruptedException {
@@ -387,8 +407,7 @@ public class ProjectCreator {
 						fIsAutobuild = Boolean.valueOf(CoreUtility
 								.enableAutoBuild(false));
 					}
-					updateProject(monitor, new BeforeCurrentPageStepTracker(
-							fStepTracker));
+					updateProject(monitor, stepTracker);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				} catch (OperationCanceledException e) {
@@ -400,7 +419,7 @@ public class ProjectCreator {
 		};
 
 		try {
-			getContainer().run(true, false,
+			getContainer().run(true, cancelable,
 					new WorkspaceModifyDelegatingOperation(op));
 		} catch (InvocationTargetException e) {
 			final String title = NewWizardMessages.ScriptProjectWizardSecondPage_error_title;
@@ -408,7 +427,28 @@ public class ProjectCreator {
 			ExceptionHandler.handle(e, getShell(), title, message);
 		} catch (InterruptedException e) {
 			// cancel pressed
+			if (cancelable)
+				throw new OperationCanceledException();
 		}
+	}
+
+	/**
+	 * @param stepTracker
+	 * @return
+	 */
+	private boolean isCancelable(IStepTracker stepTracker) {
+		final List<String> kinds = new ArrayList<String>();
+		kinds.add(IProjectCreateStep.KIND_INIT);
+		kinds.add(IProjectCreateStep.KIND_INIT_UI);
+		kinds.add(IProjectCreateStep.KIND_FINISH);
+		for (StepState state : fSteps) {
+			if (kinds.contains(state.kind) && owner.isEnabledPage(state.page)
+					&& stepTracker.canExecute(state)
+					&& state.step.isCancelable()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	final void updateProject(IProgressMonitor monitor, IStepTracker stepTracker)

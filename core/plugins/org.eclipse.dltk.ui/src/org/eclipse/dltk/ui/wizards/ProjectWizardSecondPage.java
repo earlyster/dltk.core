@@ -18,6 +18,7 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.internal.ui.wizards.BuildpathDetector;
 import org.eclipse.dltk.ui.wizards.ProjectCreator.IProjectCreateStep;
+import org.eclipse.dltk.ui.wizards.ProjectCreator.ProjectCreateStep;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
@@ -64,7 +65,13 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
-			((IProjectWizard) getWizard()).createProject();
+			try {
+				((IProjectWizard) getWizard()).createProject();
+			} catch (OperationCanceledException e) {
+				getShell().close();
+				// TODO getContainer().showPage(getPreviousPage());
+				return;
+			}
 		} else if (!ProjectWizardUtils.isProjectRequredFor(getContainer()
 				.getCurrentPage())) {
 			((IProjectWizard) getWizard()).removeProject();
@@ -119,7 +126,7 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 		init(DLTKCore.create(wizard.getProject()), null, false);
 	}
 
-	private final IProjectCreateStep initStep = new IProjectCreateStep() {
+	private final IProjectCreateStep initStep = new ProjectCreateStep() {
 
 		public void execute(IProject project, IProgressMonitor monitor)
 				throws CoreException {
@@ -130,19 +137,16 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 			init(DLTKCore.create(project), entries, false);
 		}
 
-		public boolean isRecurrent() {
-			return false;
-		}
-
 	};
 
-	private final IProjectCreateStep configureStep = new IProjectCreateStep() {
+	private final IProjectCreateStep configureStep = new ProjectCreateStep() {
 
 		public void execute(IProject project, IProgressMonitor monitor)
 				throws CoreException, InterruptedException {
 			configureScriptProject(monitor);
 		}
 
+		@Override
 		public boolean isRecurrent() {
 			return true;
 		}
