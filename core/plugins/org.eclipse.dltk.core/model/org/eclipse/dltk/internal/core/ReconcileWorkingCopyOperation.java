@@ -38,6 +38,7 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 		this.workingCopyOwner = workingCopyOwner;
 	}
 
+	@Override
 	protected void executeOperation() throws ModelException {
 		if (this.progressMonitor != null) {
 			if (this.progressMonitor.isCanceled())
@@ -103,10 +104,12 @@ public class ReconcileWorkingCopyOperation extends ModelOperation {
 	/**
 	 * @see ModelOperation#isReadOnly
 	 */
+	@Override
 	public boolean isReadOnly() {
 		return true;
 	}
 
+	@Override
 	protected IModelStatus verify() {
 		IModelStatus status = super.verify();
 		if (!status.isOK()) {
