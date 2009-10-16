@@ -69,9 +69,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		}
 	}
 
-	/*
-	 * @see org.eclipse.dltk.internal.core.Openable#canBeRemovedFromCache()
-	 */
+	@Override
 	public boolean canBeRemovedFromCache() {
 		if (getPerWorkingCopyInfo() != null) {
 			return false; // working copies should remain in the cache until
@@ -80,11 +78,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		return super.canBeRemovedFromCache();
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.dltk.internal.core.Openable#canBufferBeRemovedFromCache(org
-	 * .eclipse.dltk.core.IBuffer)
-	 */
+	@Override
 	public boolean canBufferBeRemovedFromCache(IBuffer buffer) {
 		if (getPerWorkingCopyInfo() != null) {
 			return false; // working copy buffers should remain in the cache
@@ -93,9 +87,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		return super.canBufferBeRemovedFromCache(buffer);
 	}
 
-	/*
-	 * @see org.eclipse.dltk.internal.core.ModelElement#close()
-	 */
+	@Override
 	public void close() throws ModelException {
 		if (getPerWorkingCopyInfo() != null) {
 			return; // a working copy must remain opened until it is discarded
@@ -134,11 +126,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		op.runOperation(null);
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.dltk.internal.core.AbstractSourceModule#equals(java.lang.
-	 * Object)
-	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof SourceModule)) {
 			return false;
@@ -147,9 +135,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		return super.equals(obj);
 	}
 
-	/*
-	 * @see org.eclipse.dltk.internal.core.Openable#exists()
-	 */
+	@Override
 	public boolean exists() {
 		// working copy always exists in the model until it is gotten rid of
 		// (even if not on buildpath)
@@ -172,6 +158,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	 * exist. Note: the use count of the per working copy info is NOT
 	 * incremented.
 	 */
+	@Override
 	public ModelManager.PerWorkingCopyInfo getPerWorkingCopyInfo() {
 		// XXX: should be an interface method that allows a null
 		// don't create or record usage - no problem requestor required
@@ -257,11 +244,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		return !isPrimary() || (getPerWorkingCopyInfo() != null);
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.dltk.internal.core.Openable#makeConsistent(org.eclipse.core
-	 * .runtime.IProgressMonitor)
-	 */
+	@Override
 	public void makeConsistent(IProgressMonitor monitor) throws ModelException {
 		if (isConsistent())
 			return;
@@ -345,11 +328,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		getModel().rename(elements, dests, renamings, replace, monitor);
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.dltk.internal.core.Openable#save(org.eclipse.core.runtime
-	 * .IProgressMonitor, boolean)
-	 */
+	@Override
 	public void save(IProgressMonitor pm, boolean force) throws ModelException {
 		if (isWorkingCopy()) {
 			// no need to save the buffer for a working copy (this is a noop)
@@ -365,16 +344,12 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		super.save(pm, force);
 	}
 
-	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#preventReopen()
-	 */
+	@Override
 	protected boolean preventReopen() {
 		return super.preventReopen() && (getPerWorkingCopyInfo() == null);
 	}
 
-	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getNatureId()
-	 */
+	@Override
 	protected String getNatureId() throws CoreException {
 		IResource resource = this.getResource();
 		Object lookup = (resource == null) ? (Object) getPath() : resource;
@@ -386,9 +361,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		return lookupLanguageToolkit.getNatureId();
 	}
 
-	/*
-	 * @see org.eclipse.dltk.internal.core.Openable#closing(java.lang.Object)
-	 */
+	@Override
 	protected void closing(Object info) {
 		if (getPerWorkingCopyInfo() == null) {
 			super.closing(info);
@@ -411,18 +384,12 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 		return Util.getResourceContentsAsCharArray(file);
 	}
 
-	/*
-	 * @see org.eclipse.dltk.internal.core.AbstractSourceModule#getModuleType()
-	 */
+	@Override
 	protected String getModuleType() {
 		return "DLTK Source Module: "; //$NON-NLS-1$
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.dltk.internal.core.AbstractSourceModule#getOriginalSourceModule
-	 * ()
-	 */
+	@Override
 	protected ISourceModule getOriginalSourceModule() {
 		return new SourceModule((ModelElement) getParent(), getElementName(),
 				DefaultWorkingCopyOwner.PRIMARY);
