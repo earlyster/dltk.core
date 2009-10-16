@@ -34,9 +34,7 @@ public abstract class AbstractSourceElementParser implements
 		try {
 			moduleDeclaration.traverse(requestor);
 		} catch (Exception e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
+			DLTKCore.error("Failed to build model for tcl module", e);
 		}
 	}
 
