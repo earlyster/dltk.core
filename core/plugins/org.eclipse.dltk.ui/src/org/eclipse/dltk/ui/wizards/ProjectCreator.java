@@ -191,6 +191,11 @@ public class ProjectCreator {
 			return false;
 		}
 
+		public boolean isCancelable() {
+			// not available in the interface in this branch.
+			return true;
+		}
+
 	}
 
 	private static class StepState {
