@@ -184,6 +184,15 @@ public class ProjectCreator {
 
 	}
 
+	public static abstract class ProjectCreateStep implements
+			IProjectCreateStep {
+
+		public boolean isRecurrent() {
+			return false;
+		}
+
+	}
+
 	private static class StepState {
 		final String kind;
 		final int priority;
