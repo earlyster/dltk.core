@@ -472,12 +472,9 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 
 	public void acceptImport(ImportInfo importInfo) {
 		ModelElement parentHandle = this.handleStack.peek();
-		if (!(parentHandle.getElementType() == IModelElement.SOURCE_MODULE)) {
-			// TODO review?
-			Assert.isTrue(false); // Should not happen
-		}
+		// if ((parentHandle.getElementType() == IModelElement.SOURCE_MODULE)) {
 
-		ISourceModule parentCU = (ISourceModule) parentHandle;
+		ISourceModule parentCU = (ISourceModule) parentHandle.getSourceModule();
 
 		final ImportContainerInfo importContainerInfo;
 		ImportContainer importContainer;
@@ -512,6 +509,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 
 		importContainerInfo.addChild(handle);
 		this.newElements.put(handle, info);
+		// }
 	}
 
 	protected ImportContainer createImportContainer(ISourceModule parent,
