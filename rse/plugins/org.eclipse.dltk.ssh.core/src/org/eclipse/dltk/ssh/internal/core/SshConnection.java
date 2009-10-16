@@ -19,15 +19,11 @@ import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
 
-/**
- * TODO: Add correct operation synchronization.
- * 
- */
 public class SshConnection extends ChannelPool implements ISshConnection {
 	private long disabledTime = 0;
 
 	private static abstract class Operation {
-		boolean finished = false;
+		private boolean finished = false;
 
 		public boolean isLongRunning() {
 			return false;
@@ -500,7 +496,7 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 					}
 				}
 			} finally {
-				if (!op.isLongRunning()) {
+				if (!(op.isLongRunning() && op.isFinished())) {
 					releaseChannel(channel);
 				}
 			}
