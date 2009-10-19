@@ -14,32 +14,36 @@ import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IProblemRequestor;
 import org.eclipse.dltk.core.ModelException;
 
-
 /**
- * Switch and ISourceModule to working copy mode
- * and signal the working copy addition through a delta.
+ * Switch and ISourceModule to working copy mode and signal the working copy
+ * addition through a delta.
  */
 public class BecomeWorkingCopyOperation extends ModelOperation {
-	
-	IProblemRequestor problemRequestor;
-	
+
+	final IProblemRequestor problemRequestor;
+
 	/*
 	 * Creates a BecomeWorkingCopyOperation for the given working copy.
-	 * perOwnerWorkingCopies map is not null if the working copy is a shared working copy.
+	 * perOwnerWorkingCopies map is not null if the working copy is a shared
+	 * working copy.
 	 */
-	public BecomeWorkingCopyOperation(SourceModule workingCopy, IProblemRequestor problemRequestor) {
-		super(new IModelElement[] {workingCopy});
+	public BecomeWorkingCopyOperation(SourceModule workingCopy,
+			IProblemRequestor problemRequestor) {
+		super(new IModelElement[] { workingCopy });
 		this.problemRequestor = problemRequestor;
 	}
-	
+
+	@Override
 	protected void executeOperation() throws ModelException {
 
-		// open the working copy now to ensure contents are that of the current state of this element
+		// open the working copy now to ensure contents are that of the current
+		// state of this element
 		SourceModule workingCopy = getWorkingCopy();
 		// create if needed, record usage
 		ModelManager.getModelManager().getPerWorkingCopyInfo(workingCopy, true,
 				true, this.problemRequestor);
-		workingCopy.openWhenClosed(workingCopy.createElementInfo(), this.progressMonitor);
+		workingCopy.openWhenClosed(workingCopy.createElementInfo(),
+				this.progressMonitor);
 
 		if (!workingCopy.isPrimary()) {
 			// report added script delta for a non-primary working copy
@@ -48,29 +52,35 @@ public class BecomeWorkingCopyOperation extends ModelOperation {
 			addDelta(delta);
 		} else {
 			if (workingCopy.getResource().isAccessible()) {
-				// report a F_PRIMARY_WORKING_COPY change delta for a primary working copy
+				// report a F_PRIMARY_WORKING_COPY change delta for a primary
+				// working copy
 				ModelElementDelta delta = new ModelElementDelta(this.getModel());
-				delta.changed(workingCopy, IModelElementDelta.F_PRIMARY_WORKING_COPY);
+				delta.changed(workingCopy,
+						IModelElementDelta.F_PRIMARY_WORKING_COPY);
 				addDelta(delta);
 			} else {
 				// report an ADDED delta
 				ModelElementDelta delta = new ModelElementDelta(this.getModel());
-				delta.added(workingCopy, IModelElementDelta.F_PRIMARY_WORKING_COPY);
+				delta.added(workingCopy,
+						IModelElementDelta.F_PRIMARY_WORKING_COPY);
 				addDelta(delta);
 			}
 		}
 
-		this.resultElements = new IModelElement[] {workingCopy};
+		this.resultElements = new IModelElement[] { workingCopy };
 	}
+
 	/*
 	 * Returns the working copy this operation is working on.
 	 */
 	protected SourceModule getWorkingCopy() {
-		return (SourceModule)getElementToProcess();
+		return (SourceModule) getElementToProcess();
 	}
+
 	/*
 	 * @see ModelOperation#isReadOnly
 	 */
+	@Override
 	public boolean isReadOnly() {
 		return true;
 	}
