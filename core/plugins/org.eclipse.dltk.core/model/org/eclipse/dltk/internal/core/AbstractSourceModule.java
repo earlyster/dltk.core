@@ -644,7 +644,16 @@ public abstract class AbstractSourceModule extends Openable implements
 							&& (original = getOriginalSourceModule()).isOpen()) {
 						buffer.setContents(original.getSource());
 					} else {
-						char[] content = getBufferContent();
+						char[] content;
+						try {
+							content = getBufferContent();
+						} catch (ModelException e) {
+							if (e.getStatus().getCode() == IModelStatusConstants.ELEMENT_DOES_NOT_EXIST) {
+								content = CharOperation.NO_CHAR;
+							} else {
+								throw e;
+							}
+						}
 						buffer.setContents(content);
 					}
 				} else {
