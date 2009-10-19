@@ -59,7 +59,10 @@ public class RSESshManager {
 			Thread connectionInitializationThread = new Thread() {
 				@Override
 				public void run() {
-					initializeConnection(host, connector, userId, connection);
+					if (DLTKRSEPlugin.getDefault() != null) {
+						initializeConnection(host, connector, userId,
+								connection);
+					}
 				}
 			};
 			connectionInitializationThread.start();
