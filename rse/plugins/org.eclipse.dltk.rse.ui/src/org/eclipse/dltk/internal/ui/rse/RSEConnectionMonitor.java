@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IEnvironmentProvider;
@@ -75,20 +76,6 @@ public class RSEConnectionMonitor implements Runnable {
 				}
 				m.worked(1);
 			}
-			// EnvironmentManager
-			// .refreshBuildpathContainersForMixedProjects(monitor
-			// .newChild(10));
-			// IScriptProject scriptProjects[] = projectsToProcess
-			// .toArray(new IScriptProject[projectsToProcess.size()]);
-			// ProjectRefreshOperation op = new ProjectRefreshOperation(
-			// scriptProjects);
-			// try {
-			// op.run(monitor.newChild(60));
-			// } catch (CoreException e1) {
-			// if (DLTKCore.DEBUG) {
-			// e1.printStackTrace();
-			// }
-			// }
 			IEnvironmentProvider provider = EnvironmentManager
 					.getEnvironmentProvider(RSEEnvironmentProvider.ID);
 			if (provider != null && provider instanceof RSEEnvironmentProvider) {
@@ -97,20 +84,17 @@ public class RSEConnectionMonitor implements Runnable {
 			SubMonitor mm = monitor.newChild(20);
 			mm.beginTask("Indexing projects", projectsToProcess.size());
 			for (IScriptProject project : projectsToProcess) {
+				// TODO: Need more correct interpreters update here.
+				try {
+					project.setRawBuildpath(project.getRawBuildpath(), mm
+							.newChild(1));
+				} catch (ModelException e) {
+					DLTKCore.error(e);
+				}
 				ProjectIndexerManager.indexProject(project);
 				mm.worked(1);
 			}
 			mm.done();
-			// try {
-			// project.getProject().build(
-			// IncrementalProjectBuilder.FULL_BUILD,
-			// new SubProgressMonitor(monitor, 10));
-			// } catch (CoreException e) {
-			// if (DLTKCore.DEBUG) {
-			// e.printStackTrace();
-			// }
-			// }
-			// }
 			monitor.done();
 			return Status.OK_STATUS;
 		}
