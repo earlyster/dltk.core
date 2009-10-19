@@ -23,10 +23,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * similar to File class.
  */
 public interface IFileHandle {
-	/**
-	 * @deprecated
-	 */
-	String ID_SEPARATOR = "#"; //$NON-NLS-1$
 
 	/**
 	 * Return associated environment.
