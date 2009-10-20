@@ -85,7 +85,7 @@ public class ScriptLaunchUtil {
 		return exeEnv.exec(cmdLine, workingDirectoryPath, environmentAsStrings);
 	}
 
-	private static void traceExecution(String processLabel,
+	public static void traceExecution(String processLabel,
 			String[] cmdLineLabel, String[] environment) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("-----------------------------------------------\n"); //$NON-NLS-1$
@@ -231,7 +231,7 @@ public class ScriptLaunchUtil {
 		return runScript(install, config, monitor);
 	}
 
-	private static class ErrorStreamReaderThread extends Thread {
+	public static class ErrorStreamReaderThread extends Thread {
 
 		final InputStream stream;
 
@@ -256,7 +256,7 @@ public class ScriptLaunchUtil {
 
 	}
 
-	private static class OutputStreamReaderThread extends Thread {
+	public static class OutputStreamReaderThread extends Thread {
 
 		final InputStream stream;
 		final StringBuffer output;

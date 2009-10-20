@@ -100,11 +100,21 @@ public interface IInterpreterInstallType {
 	 * ensure what interpreter are correct.
 	 * 
 	 * @param file
-	 *            the root directory of a potential installation for this type
-	 *            of interpreter
-	 * @return a status object describing whether the install location is valid
+	 *            potential installation location for this type of interpreter
+	 * @param variables
+	 *            current set of specified user environment variables, they
+	 *            overwrite environment variables with same names
+	 * @param libraryLocations
+	 *            current set of library locations, they overwrite environment
+	 *            library locations
+	 * @param monitor
+	 *            progress monitor
+	 * @since 2.0
+	 * @return
 	 */
-	IStatus validateInstallLocation(IFileHandle file);
+	IStatus validateInstallLocation(IFileHandle file,
+			EnvironmentVariable[] variables,
+			LibraryLocation[] libraryLocations, IProgressMonitor monitor);
 
 	/**
 	 * Used to search interpreters.

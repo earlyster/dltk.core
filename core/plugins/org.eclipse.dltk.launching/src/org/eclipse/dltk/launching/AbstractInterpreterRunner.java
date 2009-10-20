@@ -19,10 +19,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugEvent;
+import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.dltk.compiler.util.Util;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionLogger;
@@ -191,7 +196,7 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 		return config.renderCommandLine(interpreterInstall);
 	}
 
-	protected IProcess rawRun(ILaunch launch, InterpreterConfig config)
+	protected IProcess rawRun(final ILaunch launch, InterpreterConfig config)
 			throws CoreException {
 
 		checkConfig(config, getInstall().getEnvironment());
@@ -220,11 +225,63 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 
 		launch.setAttribute(DLTKLaunchingPlugin.LAUNCH_COMMAND_LINE,
 				cmdLineLabel);
+		final IProcess process[] = new IProcess[] { null };
+		DebugPlugin.getDefault().addDebugEventListener(
+				new IDebugEventSetListener() {
+					public void handleDebugEvents(DebugEvent[] events) {
+						for (int i = 0; i < events.length; i++) {
+							DebugEvent event = events[i];
+							if (event.getSource().equals(process[0])) {
+								if (event.getKind() == DebugEvent.CHANGE
+										|| event.getKind() == DebugEvent.TERMINATE) {
+									updateProcessLabel(launch, cmdLineLabel,
+											process[0]);
+									if (event.getKind() == DebugEvent.TERMINATE) {
+										DebugPlugin.getDefault()
+												.removeDebugEventListener(this);
+									}
+								}
+							}
+						}
+					}
+				});
+		process[0] = newProcess(launch, p, processLabel, getDefaultProcessMap());
+		process[0].setAttribute(IProcess.ATTR_CMDLINE, cmdLineLabel);
+		updateProcessLabel(launch, cmdLineLabel, process[0]);
+		return process[0];
+	}
 
-		IProcess process = newProcess(launch, p, processLabel,
-				getDefaultProcessMap());
-		process.setAttribute(IProcess.ATTR_CMDLINE, cmdLineLabel);
-		return process;
+	private void updateProcessLabel(final ILaunch launch,
+			final String cmdLineLabel, final IProcess process) {
+		StringBuffer buffer = new StringBuffer();
+		int exitValue = 0;
+		try {
+			exitValue = process.getExitValue();
+		} catch (DebugException e1) {
+			// DLTKCore.error(e1);
+			exitValue = 0;// Seems not available yet
+		}
+		if (exitValue != 0) {
+			buffer.append("<abnormal exit code:" + exitValue + "> ");
+		}
+		String type = null;
+		ILaunchConfiguration launchConfiguration = launch
+				.getLaunchConfiguration();
+		if (launchConfiguration != null) {
+			try {
+				type = launchConfiguration.getType().getName();
+			} catch (CoreException e) {
+				DLTKCore.error(e);
+			}
+			buffer.append(launchConfiguration.getName());
+		}
+		if (type != null) {
+			buffer.append(" ["); //$NON-NLS-1$
+			buffer.append(type);
+			buffer.append("] "); //$NON-NLS-1$
+		}
+		buffer.append(process.getLabel());
+		process.setAttribute(IProcess.ATTR_PROCESS_LABEL, buffer.toString());
 	}
 
 	/**

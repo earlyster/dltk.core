@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -492,7 +493,21 @@ public abstract class AbstractInterpreterInstallType implements
 		return filtered.toArray(new String[filtered.size()]);
 	}
 
+	/**
+	 * @deprecated Please use following method instead
+	 *             <b>validateInstallLocation</b>(iFileHandle,
+	 *             EnvironmentVariable[], LibraryLocation[])
+	 * @param installLocation
+	 * @return
+	 */
 	public IStatus validateInstallLocation(IFileHandle installLocation) {
+		return validateInstallLocation(installLocation, null, null,
+				new NullProgressMonitor());
+	}
+
+	public IStatus validateInstallLocation(IFileHandle installLocation,
+			EnvironmentVariable[] variables,
+			LibraryLocation[] libraryLocations, IProgressMonitor monitor) {
 		if (!installLocation.exists() || !installLocation.isFile()) {
 			return createStatus(IStatus.ERROR,
 					InterpreterMessages.errNonExistentOrInvalidInstallLocation,

@@ -653,14 +653,8 @@ public class DLTKLaunchingPlugin extends Plugin implements
 						.setName(LaunchingMessages.DLTKLaunchingPlugin_rebindInterpreters);
 				job.schedule();
 			} else {
-				try {
-					job.join();
-					job.schedule();
-				} catch (InterruptedException e) {
-					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
-					}
-				}
+				// job.join();
+				job.schedule();
 			}
 		}
 
