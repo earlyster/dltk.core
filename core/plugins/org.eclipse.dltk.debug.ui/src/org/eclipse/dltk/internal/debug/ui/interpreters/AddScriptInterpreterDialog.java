@@ -159,6 +159,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		fInterpreterPath.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
 				updateValidateInterpreterLocation();
+				fLibraryBlock.restoreDefaultLibraries();
 				updateStatusLine();
 			}
 		});
@@ -438,7 +439,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		} else {
 			fLibraryBlock.setHomeDirectory(null);
 		}
-		fLibraryBlock.restoreDefaultLibraries();
+		// fLibraryBlock.restoreDefaultLibraries();
 		// if (fEnvironmentVariablesBlock != null) {
 		// fEnvironmentVariablesBlock.restoreDefaultVariables();
 		// }

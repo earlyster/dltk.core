@@ -404,10 +404,12 @@ public abstract class AbstractInterpreterLibraryBlock implements
 			fLibraryContentProvider
 					.remove((IStructuredSelection) fLibraryViewer
 							.getSelection());
+			this.fDialog.updateValidateInterpreterLocation();
 		} else if (source == fAddButton) {
 			add((IStructuredSelection) fLibraryViewer.getSelection());
 		} else if (source == fDefaultButton) {
 			restoreDefaultLibraries();
+			this.fDialog.updateValidateInterpreterLocation();
 		} else if (source == fRediscoverButton) {
 			this.reDiscover(this.fDialog.getEnvironmentVariables(), null);
 		} else if (source == fEnabledButton) {
@@ -435,6 +437,7 @@ public abstract class AbstractInterpreterLibraryBlock implements
 		fLibraryContentProvider.initialize(this.getHomeDirectory(), fDialog
 				.getEnvironmentVariables(), false);
 		update();
+		this.fDialog.updateValidateInterpreterLocation();
 	}
 
 	/*
