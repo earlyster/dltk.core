@@ -505,6 +505,9 @@ public abstract class AbstractInterpreterInstallType implements
 				new NullProgressMonitor());
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public IStatus validateInstallLocation(IFileHandle installLocation,
 			EnvironmentVariable[] variables,
 			LibraryLocation[] libraryLocations, IProgressMonitor monitor) {

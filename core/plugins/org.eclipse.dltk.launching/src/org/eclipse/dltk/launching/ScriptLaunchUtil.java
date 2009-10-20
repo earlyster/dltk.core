@@ -85,6 +85,9 @@ public class ScriptLaunchUtil {
 		return exeEnv.exec(cmdLine, workingDirectoryPath, environmentAsStrings);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public static void traceExecution(String processLabel,
 			String[] cmdLineLabel, String[] environment) {
 		StringBuffer sb = new StringBuffer();
@@ -231,6 +234,9 @@ public class ScriptLaunchUtil {
 		return runScript(install, config, monitor);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public static class ErrorStreamReaderThread extends Thread {
 
 		final InputStream stream;
@@ -256,6 +262,9 @@ public class ScriptLaunchUtil {
 
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public static class OutputStreamReaderThread extends Thread {
 
 		final InputStream stream;
