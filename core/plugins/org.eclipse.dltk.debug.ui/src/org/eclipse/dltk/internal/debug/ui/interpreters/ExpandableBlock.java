@@ -9,6 +9,9 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 
+/**
+ * @since 2.0
+ */
 public class ExpandableBlock extends ExpandableComposite {
 	private final Composite content;
 

@@ -224,6 +224,9 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		install.setEnvironmentVariables(libs);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public EnvironmentVariable[] getEnvironmentVariables() {
 		EnvironmentVariable[] libs = fEnvironmentVariablesContentProvider
 				.getVariables();

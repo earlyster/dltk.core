@@ -323,6 +323,9 @@ public abstract class AbstractInterpreterLibraryBlock implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public LibraryLocation[] getLibraryLocations() {
 		if (isDefaultLocations()) {
 			return null;

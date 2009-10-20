@@ -258,6 +258,9 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected Composite createEnvironmentVariablesBlockParent(Composite parent,
 			int numColumns) {
 		Label l = new Label(parent, SWT.NONE);
@@ -269,6 +272,9 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		return parent;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected Composite createLibraryBlockParent(Composite parent,
 			int numColumns) {
 		Label l = new Label(parent, SWT.NONE);
@@ -299,6 +305,9 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		updateStatusLine();
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected void updateValidateInterpreterLocation() {
 		setInterpreterLocationStatus(validateInterpreterLocation());
 	}
@@ -603,6 +612,9 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		fStati[0] = status;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected IStatus getInterpreterLocationStatus() {
 		return fStati[0];
 	}
