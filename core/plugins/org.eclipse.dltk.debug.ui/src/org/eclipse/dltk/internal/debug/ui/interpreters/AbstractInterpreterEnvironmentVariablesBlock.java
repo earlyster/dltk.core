@@ -224,6 +224,12 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		install.setEnvironmentVariables(libs);
 	}
 
+	public EnvironmentVariable[] getEnvironmentVariables() {
+		EnvironmentVariable[] libs = fEnvironmentVariablesContentProvider
+				.getVariables();
+		return libs;
+	}
+
 	/**
 	 * Determines if the present setup is the default location s for this
 	 * InterpreterEnvironment
@@ -294,6 +300,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 							.getSelection());
 			fDialog.updateLibraries(this.fEnvironmentVariablesContentProvider
 					.getVariables(), old);
+			fDialog.updateValidateInterpreterLocation();
 		} else if (source == fAddExistedButton) {
 			addExisted((IStructuredSelection) fVariablesViewer.getSelection());
 		} else if (source == fAddButton) {
@@ -301,11 +308,16 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		} else if (source == fEditButton) {
 			EnvironmentVariable[] old = this.fEnvironmentVariablesContentProvider
 					.getVariables();
-			edit((IStructuredSelection) fVariablesViewer.getSelection());
-			fDialog.updateLibraries(this.fEnvironmentVariablesContentProvider
-					.getVariables(), old);
+			if (edit((IStructuredSelection) fVariablesViewer.getSelection())) {
+				fDialog.updateLibraries(
+						this.fEnvironmentVariablesContentProvider
+								.getVariables(), old);
+				fDialog.updateValidateInterpreterLocation();
+			}
 		} else if (source == fImportButton) {
-			performImport();
+			if (performImport()) {
+				fDialog.updateValidateInterpreterLocation();
+			}
 		} else if (source == fExportButton) {
 			performExport();
 		}
@@ -340,7 +352,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		box.open();
 	}
 
-	private void performImport() {
+	private boolean performImport() {
 		FileDialog dialog = new FileDialog(this.fDialog.getShell(), SWT.OPEN);
 		dialog
 				.setText(InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_importEnvironmentVariablesFromFile);
@@ -352,7 +364,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 				showErrorMessage(
 						InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_environmentImport,
 						text);
-				return;
+				return false;
 			}
 			EnvironmentVariable[] vars = null;
 			try {
@@ -361,6 +373,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 				showErrorMessage(
 						InterpretersMessages.AbstractInterpreterEnvironmentVariablesBlock_environmentImport,
 						e.getMessage());
+				return false;
 			}
 			if (vars != null) {
 				EnvironmentVariable[] variables = this.fEnvironmentVariablesContentProvider
@@ -371,14 +384,16 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 				this.fEnvironmentVariablesContentProvider.setVariables(nvars
 						.toArray(new EnvironmentVariable[nvars.size()]));
 			}
+			return true;
 		}
+		return false;
 	}
 
-	private void edit(IStructuredSelection selection) {
+	private boolean edit(IStructuredSelection selection) {
 		EnvironmentVariable var = (EnvironmentVariable) selection
 				.getFirstElement();
 		if (var == null) {
-			return;
+			return false;
 		}
 		String originalName = var.getName();
 		String value = var.getValue();
@@ -389,7 +404,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		dialog.addVariablesField(VALUE_LABEL, value, true);
 
 		if (dialog.open() != Window.OK) {
-			return;
+			return false;
 		}
 		String name = dialog.getStringValue(NAME_LABEL);
 		value = dialog.getStringValue(VALUE_LABEL);
@@ -406,6 +421,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 			var.setValue(value);
 			fVariablesViewer.refresh(true);
 		}
+		return true;
 	}
 
 	/*
@@ -430,6 +446,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		fDialog.updateLibraries(this.fEnvironmentVariablesContentProvider
 				.getVariables(), old);
 		update();
+		fDialog.updateValidateInterpreterLocation();
 	}
 
 	private EnvironmentVariable add() {

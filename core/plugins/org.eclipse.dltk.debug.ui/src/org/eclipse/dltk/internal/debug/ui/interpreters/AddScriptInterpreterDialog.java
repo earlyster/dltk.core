@@ -9,10 +9,14 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.debug.ui.interpreters;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.util.Util;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.internal.environment.LazyFileHandle;
@@ -27,15 +31,17 @@ import org.eclipse.dltk.launching.EnvironmentVariable;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallType;
 import org.eclipse.dltk.launching.InterpreterStandin;
+import org.eclipse.dltk.launching.LibraryLocation;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
+import org.eclipse.dltk.ui.dialogs.TimeTriggeredProgressMonitorDialog;
 import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.dltk.utils.PlatformFileUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.StatusDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -152,7 +158,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 
 		fInterpreterPath.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
-				setInterpreterLocationStatus(validateInterpreterLocation());
+				updateValidateInterpreterLocation();
 				updateStatusLine();
 			}
 		});
@@ -216,8 +222,8 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		}
 
 		final Composite blockComposite = new Composite(parent, SWT.NONE);
-		final GridData blockCompositeLayoutData = new GridData(
-				GridData.FILL_BOTH);
+		final GridData blockCompositeLayoutData = new GridData(SWT.FILL,
+				SWT.FILL, true, true);
 		blockCompositeLayoutData.horizontalSpan = numColumns;
 		blockComposite.setLayoutData(blockCompositeLayoutData);
 		final GridLayout blockCompositeLayout = new GridLayout(2, false);
@@ -237,27 +243,41 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 	 * @since 2.0
 	 */
 	protected void createDialogBlocks(Composite parent, int numColumns) {
+		Composite libraryBlockParent = createLibraryBlockParent(parent,
+				numColumns);
+
+		fLibraryBlock = createLibraryBlock(this);
+		fLibraryBlock.createControlsIn(libraryBlockParent);
+
+		fEnvironmentVariablesBlock = createEnvironmentVariablesBlock();
+		if (fEnvironmentVariablesBlock != null) {
+			Composite envParent = createEnvironmentVariablesBlockParent(parent,
+					numColumns);
+
+			fEnvironmentVariablesBlock.createControlsIn(envParent);
+		}
+	}
+
+	protected Composite createEnvironmentVariablesBlockParent(Composite parent,
+			int numColumns) {
+		Label l = new Label(parent, SWT.NONE);
+		l
+				.setText(InterpretersMessages.AddScriptInterpreterDialog_interpreterEnvironmentVariables);
+		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = numColumns;
+		l.setLayoutData(gd);
+		return parent;
+	}
+
+	protected Composite createLibraryBlockParent(Composite parent,
+			int numColumns) {
 		Label l = new Label(parent, SWT.NONE);
 		l
 				.setText(InterpretersMessages.AddInterpreterDialog_Interpreter_system_libraries__1);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = numColumns;
 		l.setLayoutData(gd);
-
-		fLibraryBlock = createLibraryBlock(this);
-		fLibraryBlock.createControlsIn(parent);
-
-		fEnvironmentVariablesBlock = createEnvironmentVariablesBlock();
-		if (fEnvironmentVariablesBlock != null) {
-			l = new Label(parent, SWT.NONE);
-			l
-					.setText(InterpretersMessages.AddScriptInterpreterDialog_interpreterEnvironmentVariables);
-			gd = new GridData(GridData.FILL_HORIZONTAL);
-			gd.horizontalSpan = numColumns;
-			l.setLayoutData(gd);
-
-			fEnvironmentVariablesBlock.createControlsIn(parent);
-		}
+		return parent;
 	}
 
 	private void updateInterpreterType() {
@@ -269,7 +289,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		if (selIndex >= 0 && selIndex < fInterpreterTypes.length) {
 			fSelectedInterpreterType = fInterpreterTypes[selIndex];
 		}
-		setInterpreterLocationStatus(validateInterpreterLocation());
+		updateValidateInterpreterLocation();
 		fLibraryBlock.initializeFrom(fEditedInterpreter,
 				fSelectedInterpreterType);
 		if (fEnvironmentVariablesBlock != null) {
@@ -277,6 +297,10 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 					fSelectedInterpreterType);
 		}
 		updateStatusLine();
+	}
+
+	protected void updateValidateInterpreterLocation() {
+		setInterpreterLocationStatus(validateInterpreterLocation());
 	}
 
 	public void create() {
@@ -362,13 +386,32 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 						InterpretersMessages.addInterpreterDialog_locationNotExists);
 			} else {
 				final IStatus[] temp = new IStatus[1];
-				BusyIndicator.showWhile(getShell().getDisplay(),
-						new Runnable() {
-							public void run() {
-								temp[0] = getInterpreterType()
-										.validateInstallLocation(file);
-							}
-						});
+				TimeTriggeredProgressMonitorDialog progressDialog = new TimeTriggeredProgressMonitorDialog(
+						this.getShell(), 500);
+				try {
+					progressDialog.run(false, false,
+							new IRunnableWithProgress() {
+								public void run(IProgressMonitor monitor)
+										throws InvocationTargetException,
+										InterruptedException {
+									EnvironmentVariable[] environmentVariables = null;
+									if (fEnvironmentVariablesBlock != null) {
+										environmentVariables = fEnvironmentVariablesBlock
+												.getEnvironmentVariables();
+									}
+									LibraryLocation[] locations = fLibraryBlock
+											.getLibraryLocations();
+									temp[0] = getInterpreterType()
+											.validateInstallLocation(file,
+													environmentVariables,
+													locations, monitor);
+								}
+							});
+				} catch (InvocationTargetException e) {
+					DLTKCore.error(e);
+				} catch (InterruptedException e) {
+					DLTKCore.error(e);
+				}
 				s = temp[0];
 			}
 		}
@@ -560,12 +603,17 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		fStati[0] = status;
 	}
 
+	protected IStatus getInterpreterLocationStatus() {
+		return fStati[0];
+	}
+
 	protected IStatus getSystemLibraryStatus() {
 		return fStati[3];
 	}
 
 	public void setSystemLibraryStatus(IStatus status) {
 		fStati[3] = status;
+
 	}
 
 	/**

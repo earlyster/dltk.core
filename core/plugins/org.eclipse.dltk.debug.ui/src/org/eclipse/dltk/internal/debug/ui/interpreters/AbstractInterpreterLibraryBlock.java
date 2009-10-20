@@ -323,6 +323,15 @@ public abstract class AbstractInterpreterLibraryBlock implements
 		}
 	}
 
+	public LibraryLocation[] getLibraryLocations() {
+		if (isDefaultLocations()) {
+			return null;
+		} else {
+			LibraryLocation[] libs = fLibraryContentProvider.getLibraries();
+			return libs;
+		}
+	}
+
 	/**
 	 * Determines if the present setup is the default location s for this
 	 * InterpreterEnvironment
