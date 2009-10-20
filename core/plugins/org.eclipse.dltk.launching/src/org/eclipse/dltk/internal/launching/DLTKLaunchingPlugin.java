@@ -607,7 +607,6 @@ public class DLTKLaunchingPlugin extends Plugin implements
 
 		// old container ids to new
 		private HashMap fRenamedContainerIds = new HashMap();
-		private Job job;
 
 		public void defaultInterpreterInstallChanged(
 				IInterpreterInstall previous, IInterpreterInstall current) {
@@ -640,22 +639,13 @@ public class DLTKLaunchingPlugin extends Plugin implements
 		public void interpreterRemoved(IInterpreterInstall Interpreter) {
 		}
 
-		// InterpreterUpdateJob job = null;
-
 		/**
 		 * Re-bind buildpath variables and containers affected by the
 		 * InterpreterEnvironment changes.
 		 */
 		public void process() throws CoreException {
-			if (job == null) {
-				job = new InterpreterUpdateJob(this);
-				job
-						.setName(LaunchingMessages.DLTKLaunchingPlugin_rebindInterpreters);
-				job.schedule();
-			} else {
-				// job.join();
-				job.schedule();
-			}
+			Job job = new InterpreterUpdateJob(this);
+			job.schedule();
 		}
 
 		protected void doit(IProgressMonitor monitor) throws CoreException {
@@ -680,6 +670,7 @@ public class DLTKLaunchingPlugin extends Plugin implements
 
 		public InterpreterUpdateJob(InterpreterChanges changes) {
 			super(LaunchingMessages.LaunchingPlugin_1);
+			// setName(LaunchingMessages.DLTKLaunchingPlugin_rebindInterpreters);
 			fChanges = changes;
 			setSystem(true);
 		}
