@@ -3015,6 +3015,16 @@ public class DeltaProcessor {
 		}
 	}
 
+	public void chealCustomTimestampsFor(IModelElement[] elements) {
+		if (state == null) {
+			return;
+		}
+		for (IModelElement e : elements) {
+			state.customTimeStamps.getTimestamps().remove(e);
+
+		}
+	}
+
 	// /*
 	// * Check whether .buildpath files are affected by the given delta.
 	// * Creates/removes problem markers if needed. Remember the affected
