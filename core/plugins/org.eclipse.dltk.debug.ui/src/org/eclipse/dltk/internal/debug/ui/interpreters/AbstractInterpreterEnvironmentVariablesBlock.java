@@ -483,6 +483,7 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 		fDialog.updateLibraries(this.fEnvironmentVariablesContentProvider
 				.getVariables(), old);
 		update();
+		fDialog.updateValidateInterpreterLocation();
 	}
 
 	/*
