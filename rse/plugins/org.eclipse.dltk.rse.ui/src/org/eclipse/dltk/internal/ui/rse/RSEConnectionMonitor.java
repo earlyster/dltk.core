@@ -22,6 +22,7 @@ import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IEnvironmentProvider;
 import org.eclipse.dltk.core.internal.rse.RSEEnvironment;
 import org.eclipse.dltk.core.internal.rse.RSEEnvironmentProvider;
+import org.eclipse.dltk.internal.core.DeltaProcessor;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
@@ -90,10 +91,12 @@ public class RSEConnectionMonitor implements Runnable {
 				((ScriptProject) project).updateProjectFragments();
 				mm.worked(1);
 				try {
-					ModelManager.getModelManager().getDeltaProcessor()
-							.checkExternalChanges(
-									new IModelElement[] { project },
-									mm.newChild(1));
+					DeltaProcessor processor = ModelManager.getModelManager()
+							.getDeltaProcessor();
+					processor.clearCustomTimestampsFor(project
+							.getProjectFragments());
+					processor.checkExternalChanges(
+							new IModelElement[] { project }, mm.newChild(1));
 				} catch (ModelException e) {
 					DLTKCore.error(e);
 				}
