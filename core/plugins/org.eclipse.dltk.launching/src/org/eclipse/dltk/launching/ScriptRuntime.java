@@ -289,13 +289,13 @@ public final class ScriptRuntime {
 	 * Resolvers keyed by variable name, container id, and runtime buildpath
 	 * entry id.
 	 */
-	private static Map fgContainerResolvers = null;
-	private static Map fgRuntimeBuildpathEntryResolvers = null;
+	private static Map<String, IRuntimeBuildpathEntryResolver> fgContainerResolvers = null;
+	private static Map<String, IRuntimeBuildpathEntryResolver> fgRuntimeBuildpathEntryResolvers = null;
 
 	/**
 	 * Path providers keyed by id
 	 */
-	private static Map fgPathProviders = null;
+	private static Map<String, IRuntimeBuildpathProvider> fgPathProviders = null;
 
 	/**
 	 * Default buildpath and source path providers.
@@ -363,8 +363,8 @@ public final class ScriptRuntime {
 				if (fgInterpreterTypes[i] != null) {
 					temp.add(fgInterpreterTypes[i]);
 				}
-				fgInterpreterTypes = new IInterpreterInstallType[temp.size()];
-				fgInterpreterTypes = temp.toArray(fgInterpreterTypes);
+				fgInterpreterTypes = temp
+						.toArray(new IInterpreterInstallType[temp.size()]);
 			}
 		}
 	}
@@ -1354,14 +1354,14 @@ public final class ScriptRuntime {
 	 */
 	public static void addContainerResolver(
 			IRuntimeBuildpathEntryResolver resolver, String containerIdentifier) {
-		Map map = getContainerResolvers();
+		Map<String, IRuntimeBuildpathEntryResolver> map = getContainerResolvers();
 		map.put(containerIdentifier, resolver);
 	}
 
 	/**
 	 * Returns all registered container resolvers.
 	 */
-	private static Map getContainerResolvers() {
+	private static Map<String, IRuntimeBuildpathEntryResolver> getContainerResolvers() {
 		if (fgContainerResolvers == null) {
 			initializeResolvers();
 		}
@@ -1373,8 +1373,10 @@ public final class ScriptRuntime {
 				.getExtensionPoint(DLTKLaunchingPlugin.PLUGIN_ID,
 						EXTENSION_POINT_RUNTIME_BUILDPATH_ENTRY_RESOLVERS);
 		IConfigurationElement[] extensions = point.getConfigurationElements();
-		fgContainerResolvers = new HashMap(extensions.length);
-		fgRuntimeBuildpathEntryResolvers = new HashMap(extensions.length);
+		fgContainerResolvers = new HashMap<String, IRuntimeBuildpathEntryResolver>(
+				extensions.length);
+		fgRuntimeBuildpathEntryResolvers = new HashMap<String, IRuntimeBuildpathEntryResolver>(
+				extensions.length);
 		for (int i = 0; i < extensions.length; i++) {
 			RuntimeBuildpathEntryResolver res = new RuntimeBuildpathEntryResolver(
 					extensions[i]);
@@ -1392,7 +1394,7 @@ public final class ScriptRuntime {
 	/**
 	 * Returns all registered buildpath providers.
 	 */
-	private static Map getBuildpathProviders() {
+	private static Map<String, IRuntimeBuildpathProvider> getBuildpathProviders() {
 		if (fgPathProviders == null) {
 			initializeProviders();
 		}
@@ -1404,7 +1406,8 @@ public final class ScriptRuntime {
 				.getExtensionPoint(DLTKLaunchingPlugin.PLUGIN_ID,
 						EXTENSION_POINT_RUNTIME_BUILDPATH_PROVIDERS);
 		IConfigurationElement[] extensions = point.getConfigurationElements();
-		fgPathProviders = new HashMap(extensions.length);
+		fgPathProviders = new HashMap<String, IRuntimeBuildpathProvider>(
+				extensions.length);
 		for (int i = 0; i < extensions.length; i++) {
 			RuntimeBuildpathProvider res = new RuntimeBuildpathProvider(
 					extensions[i]);
@@ -1447,17 +1450,15 @@ public final class ScriptRuntime {
 	 */
 	public static String[] computeScriptLibraryPath(IScriptProject project,
 			boolean requiredProjects) throws CoreException {
-		Set visited = new HashSet();
-		List entries = new ArrayList();
+		Set<IScriptProject> visited = new HashSet<IScriptProject>();
+		List<String> entries = new ArrayList<String>();
 		gatherScriptLibraryPathEntries(project, requiredProjects, visited,
 				entries);
 		List<String> resolved = new ArrayList<String>(entries.size());
-		Iterator iterator = entries.iterator();
 		IStringVariableManager manager = VariablesPlugin.getDefault()
 				.getStringVariableManager();
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		while (iterator.hasNext()) {
-			String entry = (String) iterator.next();
+		for (String entry : entries) {
 			String resolvedEntry = manager.performStringSubstitution(entry);
 			IPath path = new Path(resolvedEntry);
 			if (path.isAbsolute()) {
@@ -1493,8 +1494,8 @@ public final class ScriptRuntime {
 	 * 
 	 */
 	private static void gatherScriptLibraryPathEntries(IScriptProject project,
-			boolean requiredProjects, Set visited, List entries)
-			throws CoreException {
+			boolean requiredProjects, Set<IScriptProject> visited,
+			List<String> entries) throws CoreException {
 		if (visited.contains(project)) {
 			return;
 		}
@@ -1538,7 +1539,7 @@ public final class ScriptRuntime {
 	 */
 	private static IBuildpathEntry[] processScriptLibraryPathEntries(
 			IScriptProject project, boolean collectRequired,
-			IBuildpathEntry[] buildpathEntries, List entries)
+			IBuildpathEntry[] buildpathEntries, List<String> entries)
 			throws CoreException {
 		List<IBuildpathEntry> req = null;
 		for (int i = 0; i < buildpathEntries.length; i++) {
@@ -2164,8 +2165,7 @@ public final class ScriptRuntime {
 		if (providerId == null) {
 			provider = fgDefaultBuildpathProvider;
 		} else {
-			provider = (IRuntimeBuildpathProvider) getBuildpathProviders().get(
-					providerId);
+			provider = getBuildpathProviders().get(providerId);
 			if (provider == null) {
 				abort(MessageFormat.format(LaunchingMessages.ScriptRuntime_26,
 						new String[] { providerId }), null);
@@ -2184,9 +2184,7 @@ public final class ScriptRuntime {
 		if (providerId == null) {
 			provider = fgDefaultSourcepathProvider;
 		} else {
-
-			provider = (IRuntimeBuildpathProvider) getBuildpathProviders().get(
-					providerId);
+			provider = getBuildpathProviders().get(providerId);
 			if (provider == null) {
 				abort(MessageFormat.format(LaunchingMessages.ScriptRuntime_27,
 						new String[] { providerId }), null);
@@ -2246,7 +2244,8 @@ public final class ScriptRuntime {
 			property = IRuntimeBuildpathEntry.BOOTSTRAP_ENTRY;
 			break;
 		}
-		List resolved = new ArrayList(cpes.length);
+		List<IRuntimeBuildpathEntry> resolved = new ArrayList<IRuntimeBuildpathEntry>(
+				cpes.length);
 		List<IScriptProject> projects = fgProjects.get();
 		Integer count = fgEntryCount.get();
 		if (projects == null) {
@@ -2296,7 +2295,7 @@ public final class ScriptRuntime {
 		IRuntimeBuildpathEntry[] result = new IRuntimeBuildpathEntry[resolved
 				.size()];
 		for (int i = 0; i < result.length; i++) {
-			result[i] = (IRuntimeBuildpathEntry) resolved.get(i);
+			result[i] = resolved.get(i);
 			result[i].setBuildpathProperty(property);
 		}
 		return result;
@@ -2471,7 +2470,7 @@ public final class ScriptRuntime {
 	/**
 	 * Returns all registered runtime buildpath entry resolvers.
 	 */
-	private static Map getEntryResolvers() {
+	private static Map<String, IRuntimeBuildpathEntryResolver> getEntryResolvers() {
 		if (fgRuntimeBuildpathEntryResolvers == null) {
 			initializeResolvers();
 		}
@@ -2488,8 +2487,8 @@ public final class ScriptRuntime {
 	 */
 	private static IRuntimeBuildpathEntryResolver getContributedResolver(
 			String typeId) {
-		IRuntimeBuildpathEntryResolver resolver = (IRuntimeBuildpathEntryResolver) getEntryResolvers()
-				.get(typeId);
+		IRuntimeBuildpathEntryResolver resolver = getEntryResolvers().get(
+				typeId);
 		if (resolver == null) {
 			return new DefaultEntryResolver();
 		}
