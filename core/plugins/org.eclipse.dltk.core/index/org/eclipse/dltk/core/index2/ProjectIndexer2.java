@@ -98,30 +98,30 @@ public class ProjectIndexer2 implements IProjectIndexer {
 	public void reconciled(ISourceModule workingCopy,
 			IDLTKLanguageToolkit toolkit) {
 		jobManager.request(new ReconcileSourceModuleRequest(this, workingCopy,
-				null));
+				progressJob));
 	}
 
 	public void removeLibrary(IScriptProject project, IPath path) {
 		RemoveContainerRequest request = new RemoveContainerRequest(this, path,
-				null);
+				progressJob);
 		jobManager.requestIfNotWaiting(request);
 	}
 
 	public void removeProject(IPath projectPath) {
 		RemoveContainerRequest request = new RemoveContainerRequest(this,
-				projectPath, null);
+				projectPath, progressJob);
 		jobManager.requestIfNotWaiting(request);
 	}
 
 	public void removeProjectFragment(IScriptProject project, IPath path) {
 		RemoveContainerRequest request = new RemoveContainerRequest(this, path,
-				null);
+				progressJob);
 		jobManager.requestIfNotWaiting(request);
 	}
 
 	public void removeSourceModule(IScriptProject project, String path) {
 		jobManager.request(new RemoveSourceModuleRequest(this, project
-				.getPath(), path, null));
+				.getPath(), path, progressJob));
 	}
 
 	public void startIndexing() {
