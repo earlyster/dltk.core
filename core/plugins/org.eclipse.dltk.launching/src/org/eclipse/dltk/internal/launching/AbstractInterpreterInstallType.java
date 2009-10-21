@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -205,23 +204,21 @@ public abstract class AbstractInterpreterInstallType implements
 	protected String[] extractEnvironment(IExecutionEnvironment exeEnv,
 			EnvironmentVariable[] variables) {
 		Map<String, String> env = exeEnv.getEnvironmentVariables(false);
-		if (exeEnv == null) {
+		if (env == null) {
 			return null;
 		}
 		filterEnvironment(env);
 
-		List<String> list = new ArrayList<String>();
-
-		EnvironmentVariable[] vars = EnvironmentResolver
-				.resolve(env, variables);
-
 		// Overwrite from variables with updates values.
 		if (variables != null) {
+			EnvironmentVariable[] vars = EnvironmentResolver.resolve(env,
+					variables);
 			for (int i = 0; i < vars.length; i++) {
 				env.put(vars[i].getName(), vars[i].getValue());
 			}
 		}
 
+		List<String> list = new ArrayList<String>();
 		for (Map.Entry<String, String> entry : env.entrySet()) {
 			list.add(entry.getKey() + "=" + entry.getValue()); //$NON-NLS-1$
 		}
@@ -494,15 +491,21 @@ public abstract class AbstractInterpreterInstallType implements
 	}
 
 	/**
-	 * @deprecated Please use following method instead
-	 *             <b>validateInstallLocation</b>(iFileHandle,
-	 *             EnvironmentVariable[], LibraryLocation[])
+	 * Please override the following method instead
+	 * <b>validateInstallLocation</b>(iFileHandle, EnvironmentVariable[],
+	 * LibraryLocation[])
+	 * 
 	 * @param installLocation
 	 * @return
 	 */
+	@Deprecated
 	public IStatus validateInstallLocation(IFileHandle installLocation) {
-		return validateInstallLocation(installLocation, null, null,
-				new NullProgressMonitor());
+		if (!installLocation.exists() || !installLocation.isFile()) {
+			return createStatus(IStatus.ERROR,
+					InterpreterMessages.errNonExistentOrInvalidInstallLocation,
+					null);
+		}
+		return validatePossiblyName(installLocation);
 	}
 
 	/**
@@ -511,12 +514,7 @@ public abstract class AbstractInterpreterInstallType implements
 	public IStatus validateInstallLocation(IFileHandle installLocation,
 			EnvironmentVariable[] variables,
 			LibraryLocation[] libraryLocations, IProgressMonitor monitor) {
-		if (!installLocation.exists() || !installLocation.isFile()) {
-			return createStatus(IStatus.ERROR,
-					InterpreterMessages.errNonExistentOrInvalidInstallLocation,
-					null);
-		}
-		return validatePossiblyName(installLocation);
+		return validateInstallLocation(installLocation);
 	}
 
 	public IStatus validatePossiblyName(IFileHandle installLocation) {
