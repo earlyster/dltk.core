@@ -15,8 +15,10 @@ import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.index2.IIndexer;
 import org.eclipse.dltk.core.index2.ProjectIndexer2;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * Request for removing container path from the index. All elements related to
@@ -43,6 +45,13 @@ public class RemoveContainerRequest extends AbstractIndexRequest {
 		IIndexer indexer = IndexerManager.getIndexer();
 		if (indexer == null) {
 			return;
+		}
+		if (progressJob != null) {
+			IPath path = containerPath;
+			if (EnvironmentPathUtils.isFull(path)) {
+				path = EnvironmentPathUtils.getLocalPath(path);
+			}
+			progressJob.subTask(NLS.bind("cleaning ''{0}''", path));
 		}
 		indexer.removeContainer(containerPath);
 	}
