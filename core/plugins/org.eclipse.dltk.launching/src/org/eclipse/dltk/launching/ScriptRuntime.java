@@ -11,7 +11,6 @@ package org.eclipse.dltk.launching;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -871,39 +870,21 @@ public final class ScriptRuntime {
 	 * already set when initialized.
 	 */
 	private static boolean addPersistedInterpreters(
-			InterpreterDefinitionsContainer interpreterDefs) throws IOException {
+			InterpreterDefinitionsContainer interpreterDefs) {
 		// Try retrieving the Interpreter preferences from the preference store
-		String InterpreterXMLString = getPreferences().getString(
+		String interpreterXMLString = getPreferences().getString(
 				PREF_INTERPRETER_XML);
 
 		// If the preference was found, load Interpreters from it into memory
-		if (InterpreterXMLString.length() > 0) {
+		if (interpreterXMLString.length() > 0) {
 			try {
 				ByteArrayInputStream inputStream = new ByteArrayInputStream(
-						InterpreterXMLString.getBytes());
+						interpreterXMLString.getBytes());
 				InterpreterDefinitionsContainer.parseXMLIntoContainer(
 						inputStream, interpreterDefs);
 				return false;
 			} catch (IOException ioe) {
 				DLTKLaunchingPlugin.log(ioe);
-			}
-		} else {
-			// Otherwise, look for the old file that previously held the
-			// Interpreter definitions
-			IPath stateLocation = DLTKLaunchingPlugin.getDefault()
-					.getStateLocation();
-			IPath stateFile = stateLocation
-					.append("interpreterConfiguration.xml"); //$NON-NLS-1$
-			File file = new File(stateFile.toOSString());
-
-			if (file.exists()) {
-				// If file exists, load Interpreter definitions from it into
-				// memory and write the definitions to
-				// the preference store WITHOUT triggering any processing of the
-				// new value
-				FileInputStream fileInputStream = new FileInputStream(file);
-				InterpreterDefinitionsContainer.parseXMLIntoContainer(
-						fileInputStream, interpreterDefs);
 			}
 		}
 		return true;
@@ -1854,71 +1835,66 @@ public final class ScriptRuntime {
 					fgInitializingInterpreters = true;
 					// 1. load Interpreter type extensions
 					initializeInterpreterTypeExtensions();
-					try {
-						defs = new InterpreterDefinitionsContainer();
+					defs = new InterpreterDefinitionsContainer();
 
-						// 2. add persisted Interpreters
-						setPref = addPersistedInterpreters(defs);
+					// 2. add persisted Interpreters
+					setPref = addPersistedInterpreters(defs);
 
-						// 4. load contributed Interpreter installs
-						addInterpreterExtensions(defs);
+					// 4. load contributed Interpreter installs
+					addInterpreterExtensions(defs);
 
-						// 5. verify default interpreters is valid
-						DefaultInterpreterEntry[] natures = defs
-								.getInterpreterNatures();
-						for (int i = 0; i < natures.length; i++) {
-							String defId = defs
-									.getDefaultInterpreterInstallCompositeID(natures[i]);
-							boolean validDef = false;
-							if (defId != null) {
-								for (IInterpreterInstall Interpreter : defs
-										.getValidInterpreterList()) {
-									if (getCompositeIdFromInterpreter(
-											Interpreter).equals(defId)) {
-										validDef = true;
-										break;
-									}
+					// 5. verify default interpreters is valid
+					DefaultInterpreterEntry[] natures = defs
+							.getInterpreterNatures();
+					for (int i = 0; i < natures.length; i++) {
+						String defId = defs
+								.getDefaultInterpreterInstallCompositeID(natures[i]);
+						boolean validDef = false;
+						if (defId != null) {
+							for (IInterpreterInstall iterpreter : defs
+									.getValidInterpreterList()) {
+								if (getCompositeIdFromInterpreter(iterpreter)
+										.equals(defId)) {
+									validDef = true;
+									break;
 								}
 							}
+						}
 
-							if (!validDef) {
-								// use the first as the default
-								setPref = true;
-								List<IInterpreterInstall> list = defs
-										.getValidInterpreterList(natures[i]);
-								if (!list.isEmpty()) {
-									IInterpreterInstall Interpreter = list
-											.get(0);
-									defs
-											.setDefaultInterpreterInstallCompositeID(
-													natures[i],
-													getCompositeIdFromInterpreter(Interpreter));
-								}
+						if (!validDef) {
+							// use the first as the default
+							setPref = true;
+							List<IInterpreterInstall> list = defs
+									.getValidInterpreterList(natures[i]);
+							if (!list.isEmpty()) {
+								IInterpreterInstall Interpreter = list.get(0);
+								defs
+										.setDefaultInterpreterInstallCompositeID(
+												natures[i],
+												getCompositeIdFromInterpreter(Interpreter));
 							}
-
-							String defInstCID = defs
-									.getDefaultInterpreterInstallCompositeID(natures[i]);
-							fgDefaultInterpreterId.put(natures[i], defInstCID);
-							String defIntCTypeID = defs
-									.getDefaultInterpreterInstallConnectorTypeID(natures[i]);
-							fgDefaultInterpreterConnectorId.put(natures[i],
-									defIntCTypeID);
-						}
-						// Create the underlying interpreters for each valid
-						// Interpreter
-						List<IInterpreterInstall> InterpreterList = defs
-								.getValidInterpreterList();
-						Iterator<IInterpreterInstall> InterpreterListIterator = InterpreterList
-								.iterator();
-						while (InterpreterListIterator.hasNext()) {
-							InterpreterStandin InterpreterStandin = (InterpreterStandin) InterpreterListIterator
-									.next();
-							InterpreterStandin.convertToRealInterpreter();
 						}
 
-					} catch (IOException e) {
-						DLTKLaunchingPlugin.log(e);
+						String defInstCID = defs
+								.getDefaultInterpreterInstallCompositeID(natures[i]);
+						fgDefaultInterpreterId.put(natures[i], defInstCID);
+						String defIntCTypeID = defs
+								.getDefaultInterpreterInstallConnectorTypeID(natures[i]);
+						fgDefaultInterpreterConnectorId.put(natures[i],
+								defIntCTypeID);
 					}
+					// Create the underlying interpreters for each valid
+					// Interpreter
+					List<IInterpreterInstall> InterpreterList = defs
+							.getValidInterpreterList();
+					Iterator<IInterpreterInstall> InterpreterListIterator = InterpreterList
+							.iterator();
+					while (InterpreterListIterator.hasNext()) {
+						InterpreterStandin InterpreterStandin = (InterpreterStandin) InterpreterListIterator
+								.next();
+						InterpreterStandin.convertToRealInterpreter();
+					}
+
 				} finally {
 					fgInitializingInterpreters = false;
 				}
