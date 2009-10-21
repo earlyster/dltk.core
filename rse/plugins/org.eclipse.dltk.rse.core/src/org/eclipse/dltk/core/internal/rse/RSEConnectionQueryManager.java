@@ -95,7 +95,7 @@ public class RSEConnectionQueryManager {
 		synchronized (requests) {
 			return isConnecting;
 		}
-	};
+	}
 
 	public void markHostAsFinished(IHost host) {
 		synchronized (requests) {
