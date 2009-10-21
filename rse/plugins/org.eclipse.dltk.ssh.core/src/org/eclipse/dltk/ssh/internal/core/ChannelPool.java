@@ -188,7 +188,7 @@ public class ChannelPool {
 			if (DEBUG) {
 				log("channel.connect()"); //$NON-NLS-1$
 			}
-			channel.connect();
+			channel.connect(10000);
 		}
 		synchronized (lock) {
 			usedChannels.put(channel, createUsageInfo(context));
