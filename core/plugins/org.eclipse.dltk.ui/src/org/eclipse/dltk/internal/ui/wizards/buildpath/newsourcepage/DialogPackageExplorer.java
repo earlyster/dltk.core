@@ -93,7 +93,7 @@ public abstract class DialogPackageExplorer implements IMenuListener,
 		 */
 		@Override
 		public Object[] getElements(Object element) {
-			if (fCurrJProject == null)
+			if (fCurrJProject == null || !fCurrJProject.exists())
 				return new Object[0];
 			return new Object[] { fCurrJProject };
 		}
