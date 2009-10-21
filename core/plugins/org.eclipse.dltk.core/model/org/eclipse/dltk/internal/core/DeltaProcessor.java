@@ -3015,7 +3015,7 @@ public class DeltaProcessor {
 		}
 	}
 
-	public void chealCustomTimestampsFor(IModelElement[] elements) {
+	public void clearCustomTimestampsFor(IModelElement[] elements) {
 		if (state == null) {
 			return;
 		}
