@@ -25,6 +25,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
@@ -269,7 +270,11 @@ public abstract class AbstractInterpreterRunner implements IInterpreterRunner {
 				.getLaunchConfiguration();
 		if (launchConfiguration != null) {
 			try {
-				type = launchConfiguration.getType().getName();
+				ILaunchConfigurationType launchConfigType = launchConfiguration
+						.getType();
+				if (launchConfigType != null) {
+					type = launchConfigType.getName();
+				}
 			} catch (CoreException e) {
 				DLTKCore.error(e);
 			}
