@@ -531,6 +531,15 @@ public final class ScriptRuntime {
 			// install.getInterpreterInstallType().disposeInterpreterInstall(
 			// install.getId());
 		}
+		if (!hasInterpreterInstalls(entry.getNature(), entry.getEnvironment())) {
+			/*
+			 * If there are no any interpreters for the specified nature and
+			 * environment - just return null and avoid re-initialization.
+			 * Generally speaking user should not be forced to configure every
+			 * interpreter for every host.
+			 */
+			return null;
+		}
 		synchronized (fgInterpreterLock) {
 			// fgDefaultInterpreterId = null;
 			fgDefaultInterpreterId.clear();
@@ -539,6 +548,28 @@ public final class ScriptRuntime {
 		}
 
 		return getInterpreterFromCompositeId(getDefaultInterpreterId(entry));
+	}
+
+	/**
+	 * Tests if there are any interpreters for the specified nature and host.
+	 * 
+	 * @param natureId
+	 * @param environmentId
+	 * @return
+	 */
+	private static boolean hasInterpreterInstalls(String natureId,
+			String environmentId) {
+		if (environmentId == null) {
+			return false;
+		}
+		for (IInterpreterInstallType type : getInterpreterInstallTypes(natureId)) {
+			for (IInterpreterInstall install : type.getInterpreterInstalls()) {
+				if (environmentId.equals(install.getEnvironmentId())) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
