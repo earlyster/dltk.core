@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
@@ -21,6 +22,8 @@ import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IEnvironmentProvider;
 import org.eclipse.dltk.core.internal.rse.RSEEnvironment;
 import org.eclipse.dltk.core.internal.rse.RSEEnvironmentProvider;
+import org.eclipse.dltk.internal.core.ModelManager;
+import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.search.ProjectIndexerManager;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.subsystems.CommunicationsEvent;
@@ -82,12 +85,15 @@ public class RSEConnectionMonitor implements Runnable {
 				((RSEEnvironmentProvider) provider).fireAdded(environment);
 			}
 			SubMonitor mm = monitor.newChild(20);
-			mm.beginTask("Indexing projects", projectsToProcess.size());
+			mm.beginTask("Indexing projects", projectsToProcess.size() * 3);
 			for (IScriptProject project : projectsToProcess) {
-				// TODO: Need more correct interpreters update here.
+				((ScriptProject) project).updateProjectFragments();
+				mm.worked(1);
 				try {
-					project.setRawBuildpath(project.getRawBuildpath(), mm
-							.newChild(1));
+					ModelManager.getModelManager().getDeltaProcessor()
+							.checkExternalChanges(
+									new IModelElement[] { project },
+									mm.newChild(1));
 				} catch (ModelException e) {
 					DLTKCore.error(e);
 				}
