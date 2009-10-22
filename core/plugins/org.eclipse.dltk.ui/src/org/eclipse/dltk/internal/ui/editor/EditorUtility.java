@@ -229,7 +229,7 @@ public class EditorUtility {
 			} else if (element instanceof ISourceModule) {
 				ISourceModule unit = ((ISourceModule) element).getPrimary();
 				IResource resource = unit.getResource();
-				if (resource instanceof IFile)
+				if (resource instanceof IFile && ((IFile) resource).exists())
 					return new FileEditorInput((IFile) resource);
 			}
 			element = element.getParent();
