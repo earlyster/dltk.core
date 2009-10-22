@@ -38,6 +38,13 @@ public interface ILocationGroup {
 	 */
 	IInterpreterInstall getInterpreter();
 
+	/**
+	 * Test if buildpath detection should be performed by the project wizard.
+	 * This is usually the case when project is created at existing location.
+	 * 
+	 * @return <code>true</code> if buildpath detection should be performed and
+	 *         <code>false</code> if default buildpath should be used.
+	 */
 	boolean getDetect();
 
 	/**
