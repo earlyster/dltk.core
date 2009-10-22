@@ -425,7 +425,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 				s = temp[0];
 			}
 		}
-		if (s.isOK()) {
+		if (s != null && s.isOK()) {
 			fLibraryBlock.setHomeDirectory(file);
 
 			String name = fInterpreterName.getText();
@@ -541,7 +541,6 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 							.trim());
 			if (newPath != null) {
 				fInterpreterPath.setText(newPath);
-				updateValidateInterpreterLocation();
 			}
 		}
 	}
