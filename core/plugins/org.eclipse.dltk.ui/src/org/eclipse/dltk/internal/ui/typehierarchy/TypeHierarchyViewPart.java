@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ITypeHierarchy;
 import org.eclipse.dltk.core.ModelException;
@@ -937,10 +938,9 @@ public class TypeHierarchyViewPart extends ViewPart implements
 				new CCPActionGroup(this),
 				// new GenerateActionGroup(this),
 				new RefactorActionGroup(this) /*
-												 * , new
-												 * DLTKSearchActionGroup(this,
-												 * getLanguageToolkit())
-												 */
+											 * , new DLTKSearchActionGroup(this,
+											 * getLanguageToolkit())
+											 */
 		});
 
 		fActionGroups.fillActionBars(actionBars);
@@ -1140,8 +1140,9 @@ public class TypeHierarchyViewPart extends ViewPart implements
 	}
 
 	/*
-	 * When the input changed or the hierarchy pane becomes visible, <code>updateHierarchyViewer<code>
-	 * brings up the correct view and refreshes the current tree
+	 * When the input changed or the hierarchy pane becomes visible,
+	 * <code>updateHierarchyViewer<code> brings up the correct view and
+	 * refreshes the current tree
 	 */
 	private void updateHierarchyViewer(final boolean doExpand) {
 		if (fInputElement == null) {
@@ -1739,26 +1740,28 @@ public class TypeHierarchyViewPart extends ViewPart implements
 			return;
 		}
 
-		// IModelElement elem=
-		// (IModelElement)editor.getEditorInput().getAdapter(
-		// IModelElement.class);
-		// try {
-		// IType type= null;
-		// if (elem instanceof ISourceModule) {
-		// type= ((ISourceModule) elem).findPrimaryType();
-		// }
-		// if (type != null) {
-		// internalSelectType(type, true);
-		// if (getCurrentViewer().getSelection().isEmpty()) {
-		// updateMethodViewer(null);
-		// } else {
-		// updateMethodViewer(type);
-		// }
-		// }
-		// } catch (ModelException e) {
-		// DLTKUIPlugin.log(e);
-		// }
-
+		IModelElement elem = (IModelElement) editor.getEditorInput()
+				.getAdapter(IModelElement.class);
+		try {
+			IType type = null;
+			if (elem instanceof ISourceModule) {
+				// Take the first type:
+				IType[] allTypes = ((ISourceModule) elem).getTypes();
+				if (allTypes.length > 0) {
+					type = allTypes[0];
+				}
+			}
+			if (type != null) {
+				internalSelectType(type, true);
+				if (getCurrentViewer().getSelection().isEmpty()) {
+					updateMethodViewer(null);
+				} else {
+					updateMethodViewer(type);
+				}
+			}
+		} catch (ModelException e) {
+			DLTKUIPlugin.log(e);
+		}
 	}
 
 	/*
