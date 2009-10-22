@@ -51,6 +51,7 @@ public interface ILocationGroup {
 	 * Test if project is being created at already existing location
 	 * 
 	 * @return
+	 * @since 2.0
 	 */
 	boolean isExistingLocation();
 

@@ -30,6 +30,7 @@ public interface IProjectTemplate {
 	 * 
 	 * @return <code>true</code> if buildpath detection should be performed and
 	 *         <code>false</code> if default buildpath should be used.
+	 * @since 2.0
 	 */
 	boolean getDetect();
 

@@ -1316,6 +1316,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		return isExistingLocation();
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean isExistingLocation() {
 		return fDetectGroup.mustDetect();
 	}
