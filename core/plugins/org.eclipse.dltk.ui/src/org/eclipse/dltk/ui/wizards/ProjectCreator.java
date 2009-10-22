@@ -392,7 +392,7 @@ public class ProjectCreator {
 	}
 
 	public void changeToNewProject() {
-		fKeepContent = fLocation.getDetect();
+		fKeepContent = fLocation.isExistingLocation();
 
 		final BeforeCurrentPageStepTracker stepTracker = new BeforeCurrentPageStepTracker(
 				fStepTracker);
