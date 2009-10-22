@@ -541,6 +541,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 							.trim());
 			if (newPath != null) {
 				fInterpreterPath.setText(newPath);
+				updateValidateInterpreterLocation();
 			}
 		}
 	}
