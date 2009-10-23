@@ -85,4 +85,8 @@ public final class ActionMessages extends NLS {
 	public static String OpenTypeHierarchyAction_messages_no_types;
 	public static String OpenTypeHierarchyAction_messages_no_valid_script_element;
 	public static String FormatAction_label;
+
+	public static String ConfigureContainerAction_error_title;
+	public static String ConfigureContainerAction_error_creationfailed_message;
+	public static String ConfigureContainerAction_error_applyingfailed_message;
 }

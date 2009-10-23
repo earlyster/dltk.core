@@ -100,6 +100,18 @@
           <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
       </enablement-->
    </extension>
+   <extension point="org.eclipse.ui.propertyPages">
+      <page
+            name="%buildpathContainerPageName"
+            class="org.eclipse.dltk.ui.preferences.BuildpathContainerPreferencePage"
+            id="org.eclipse.dltk.ui.propertyPages.BuildpathContainerPreferencePage">
+         <enabledWhen>
+         	<adapt type="org.eclipse.dltk.internal.ui.scriptview.BuildPathContainer" />
+         </enabledWhen>
+         <keywordReference id="org.eclipse.dltk.ui.buildpathcontainer" />
+      </page>
+   </extension>
+
    <extension
          point="org.eclipse.ui.elementFactories">
       <factory
