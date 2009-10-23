@@ -60,14 +60,26 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 
 	private IInterpreterInstallType[] fInterpreterTypes;
 
-	private IInterpreterInstallType fSelectedInterpreterType;
+	/**
+	 * @since 2.0
+	 */
+	protected IInterpreterInstallType fSelectedInterpreterType;
 
 	private ComboDialogField fInterpreterTypeCombo;
 
-	private final IInterpreterInstall fEditedInterpreter;
+	/**
+	 * @since 2.0
+	 */
+	protected final IInterpreterInstall fEditedInterpreter;
 
-	private AbstractInterpreterLibraryBlock fLibraryBlock;
-	private AbstractInterpreterEnvironmentVariablesBlock fEnvironmentVariablesBlock;
+	/**
+	 * @since 2.0
+	 */
+	protected AbstractInterpreterLibraryBlock fLibraryBlock;
+	/**
+	 * @since 2.0
+	 */
+	protected AbstractInterpreterEnvironmentVariablesBlock fEnvironmentVariablesBlock;
 
 	private StringButtonDialogField fInterpreterPath;
 
@@ -332,7 +344,8 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 	 */
 	private void selectInterpreterType() {
 		for (int i = 0; i < fInterpreterTypes.length; i++) {
-			if (fSelectedInterpreterType == fInterpreterTypes[i]) {
+			if (fSelectedInterpreterType.getId().equals(
+					fInterpreterTypes[i].getId())) {
 				fInterpreterTypeCombo.selectItem(i);
 				return;
 			}
@@ -397,7 +410,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 			} else {
 				final IStatus[] temp = new IStatus[1];
 				TimeTriggeredProgressMonitorDialog progressDialog = new TimeTriggeredProgressMonitorDialog(
-						this.getShell(), 500);
+						this.getShell(), 200);
 				try {
 					progressDialog.run(false, false,
 							new IRunnableWithProgress() {
@@ -710,5 +723,12 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 
 	public boolean execute() {
 		return open() == Window.OK;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected String getInterpreterPath() {
+		return fInterpreterPath.getText();
 	}
 }
