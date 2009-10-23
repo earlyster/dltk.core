@@ -56,9 +56,7 @@ public abstract class ScriptInterpreterPreferencePage extends PreferencePage
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
+	 * @see IWorkbenchPreferencePage#init(IWorkbench)
 	 */
 	public void init(IWorkbench workbench) {
 	}
@@ -99,11 +97,7 @@ public abstract class ScriptInterpreterPreferencePage extends PreferencePage
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
-	 */
+	@Override
 	protected Control createContents(Composite ancestor) {
 		initializeDialogUnits(ancestor);
 
@@ -148,11 +142,7 @@ public abstract class ScriptInterpreterPreferencePage extends PreferencePage
 		return ancestor;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
-	 */
+	@Override
 	public boolean performOk() {
 		final boolean[] canceled = new boolean[] { false };
 		BusyIndicator.showWhile(null, new Runnable() {
@@ -195,6 +185,7 @@ public abstract class ScriptInterpreterPreferencePage extends PreferencePage
 		return section;
 	}
 
+	@Deprecated
 	protected IScriptModel getScriptModel() {
 		return DLTKCore.create(ResourcesPlugin.getWorkspace().getRoot());
 	}
