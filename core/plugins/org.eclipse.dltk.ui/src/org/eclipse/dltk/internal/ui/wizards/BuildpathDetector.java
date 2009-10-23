@@ -42,37 +42,35 @@ import com.ibm.icu.text.Collator;
 /**
  */
 public class BuildpathDetector implements IBuildpathDetector {
-	private HashMap fSourceFolders;
-	private List fSourceFiles;
-	private HashSet fZIPFiles;
+	private HashMap<IPath, List<IPath>> fSourceFolders;
+	// private List fSourceFiles;
+	private HashSet<IPath> fZIPFiles;
 	private IProject fProject;
 	private IBuildpathEntry[] fResultBuildpath;
 	private IProgressMonitor fMonitor;
 	private IDLTKLanguageToolkit fToolkit;
 
-	private static class BPSorter implements Comparator {
+	private static class BPSorter implements Comparator<IBuildpathEntry> {
 		private Collator fCollator = Collator.getInstance();
 
-		public int compare(Object o1, Object o2) {
-			IBuildpathEntry e1 = (IBuildpathEntry) o1;
-			IBuildpathEntry e2 = (IBuildpathEntry) o2;
+		public int compare(IBuildpathEntry e1, IBuildpathEntry e2) {
 			return fCollator.compare(e1.getPath().toString(), e2.getPath()
 					.toString());
 		}
 	}
 
 	public BuildpathDetector(IProject project, IDLTKLanguageToolkit toolkit) {
-		fSourceFolders = new HashMap();
-		fZIPFiles = new HashSet(10);
-		fSourceFiles = new ArrayList(100);
+		fSourceFolders = new HashMap<IPath, List<IPath>>();
+		fZIPFiles = new HashSet<IPath>(10);
+		// fSourceFiles = new ArrayList(100);
 		fProject = project;
 		fResultBuildpath = null;
 		fToolkit = toolkit;
 	}
 
-	private boolean isNested(IPath path, Iterator iter) {
+	private boolean isNested(IPath path, Iterator<IPath> iter) {
 		while (iter.hasNext()) {
-			IPath other = (IPath) iter.next();
+			IPath other = iter.next();
 			if (other.isPrefixOf(path)) {
 				return true;
 			}
@@ -95,7 +93,7 @@ public class BuildpathDetector implements IBuildpathDetector {
 			monitor.beginTask(Messages.BuildpathDetector_detectingBuildpath,
 					120);
 			fMonitor = monitor;
-			final List correctFiles = new ArrayList();
+			final List<IFile> correctFiles = new ArrayList<IFile>();
 			fProject.accept(new IResourceProxyVisitor() {
 				public boolean visit(IResourceProxy proxy) throws CoreException {
 					return BuildpathDetector.this.visit(proxy, correctFiles);
@@ -105,7 +103,7 @@ public class BuildpathDetector implements IBuildpathDetector {
 			SubProgressMonitor sub = new SubProgressMonitor(monitor, 80);
 			processSources(correctFiles, sub);
 			sub.done();
-			ArrayList cpEntries = new ArrayList();
+			ArrayList<IBuildpathEntry> cpEntries = new ArrayList<IBuildpathEntry>();
 			detectSourceFolders(cpEntries);
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -122,18 +120,18 @@ public class BuildpathDetector implements IBuildpathDetector {
 			monitor.worked(10);
 			addInterpreterContainer(cpEntries);
 			if (cpEntries.size() == 1) {
-				IBuildpathEntry entry = (IBuildpathEntry) cpEntries.get(0);
+				IBuildpathEntry entry = cpEntries.get(0);
 				if (entry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER) {
 					cpEntries.add(0, DLTKCore.newSourceEntry(fProject
 							.getFullPath()));
 				}
 
 			}
-			if (cpEntries.isEmpty() && fSourceFiles.isEmpty()) {
+			if (cpEntries.isEmpty() /* && fSourceFiles.isEmpty() */) {
 				return;
 			}
 
-			IBuildpathEntry[] entries = (IBuildpathEntry[]) cpEntries
+			IBuildpathEntry[] entries = cpEntries
 					.toArray(new IBuildpathEntry[cpEntries.size()]);
 			if (!BuildpathEntry.validateBuildpath(DLTKCore.create(fProject),
 					entries).isOK()) {
@@ -145,20 +143,21 @@ public class BuildpathDetector implements IBuildpathDetector {
 		}
 	}
 
-	protected void processSources(List correctFiles, SubProgressMonitor sub) {
+	protected void processSources(List<IFile> correctFiles,
+			SubProgressMonitor sub) {
 	}
 
-	protected void addInterpreterContainer(ArrayList cpEntries) {
+	protected void addInterpreterContainer(ArrayList<IBuildpathEntry> cpEntries) {
 		cpEntries.add(DLTKCore.newContainerEntry(new Path(
 				ScriptRuntime.INTERPRETER_CONTAINER)));
 	}
 
-	private void detectLibraries(ArrayList cpEntries) {
+	private void detectLibraries(ArrayList<IBuildpathEntry> cpEntries) {
 		if (this.fToolkit.languageSupportZIPBuildpath()) {
-			ArrayList res = new ArrayList();
-			Set sourceFolderSet = fSourceFolders.keySet();
-			for (Iterator iter = fZIPFiles.iterator(); iter.hasNext();) {
-				IPath path = (IPath) iter.next();
+			ArrayList<IBuildpathEntry> res = new ArrayList<IBuildpathEntry>();
+			Set<IPath> sourceFolderSet = fSourceFolders.keySet();
+			for (Iterator<IPath> iter = fZIPFiles.iterator(); iter.hasNext();) {
+				IPath path = iter.next();
 				if (isNested(path, sourceFolderSet.iterator())) {
 					continue;
 				}
@@ -170,15 +169,16 @@ public class BuildpathDetector implements IBuildpathDetector {
 		}
 	}
 
-	private void detectSourceFolders(ArrayList resEntries) {
-		ArrayList res = new ArrayList();
-		Set sourceFolderSet = fSourceFolders.keySet();
-		for (Iterator iter = sourceFolderSet.iterator(); iter.hasNext();) {
-			IPath path = (IPath) iter.next();
+	private void detectSourceFolders(ArrayList<IBuildpathEntry> resEntries) {
+		ArrayList<IBuildpathEntry> res = new ArrayList<IBuildpathEntry>();
+		Set<IPath> sourceFolderSet = fSourceFolders.keySet();
+		for (Iterator<IPath> iter = sourceFolderSet.iterator(); iter.hasNext();) {
+			IPath path = iter.next();
 			// ArrayList excluded = new ArrayList();
 			boolean primary = true;
-			for (Iterator inner = sourceFolderSet.iterator(); inner.hasNext();) {
-				IPath other = (IPath) inner.next();
+			for (Iterator<IPath> inner = sourceFolderSet.iterator(); inner
+					.hasNext();) {
+				IPath other = inner.next();
 				if (!path.equals(other) && other.isPrefixOf(path)) {
 					primary = false;
 					break;
@@ -203,26 +203,27 @@ public class BuildpathDetector implements IBuildpathDetector {
 		resEntries.addAll(res);
 	}
 
-	private void addToMap(HashMap map, IPath folderPath, IPath relPath) {
-		List list = (List) map.get(folderPath);
+	private void addToMap(HashMap<IPath, List<IPath>> map, IPath folderPath,
+			IPath relPath) {
+		List<IPath> list = map.get(folderPath);
 		if (list == null) {
-			list = new ArrayList(50);
+			list = new ArrayList<IPath>(50);
 			map.put(folderPath, list);
 		}
 		list.add(relPath);
 	}
 
-	private IPath getFolderPath(IPath packPath, IPath relpath) {
-		int remainingSegments = packPath.segmentCount()
-				- relpath.segmentCount();
-		if (remainingSegments >= 0) {
-			IPath common = packPath.removeFirstSegments(remainingSegments);
-			if (common.equals(relpath)) {
-				return packPath.uptoSegment(remainingSegments);
-			}
-		}
-		return null;
-	}
+	// private IPath getFolderPath(IPath packPath, IPath relpath) {
+	// int remainingSegments = packPath.segmentCount()
+	// - relpath.segmentCount();
+	// if (remainingSegments >= 0) {
+	// IPath common = packPath.removeFirstSegments(remainingSegments);
+	// if (common.equals(relpath)) {
+	// return packPath.uptoSegment(remainingSegments);
+	// }
+	// }
+	// return null;
+	// }
 
 	private boolean hasExtension(String name, String ext) {
 		return name.endsWith(ext) && (ext.length() != name.length());
@@ -235,14 +236,14 @@ public class BuildpathDetector implements IBuildpathDetector {
 	 * org.eclipse.core.resources.IResourceProxyVisitor#visit(org.eclipse.core
 	 * .resources.IResourceProxy)
 	 */
-	public boolean visit(IResourceProxy proxy, List files) {
+	public boolean visit(IResourceProxy proxy, List<IFile> files) {
 		if (fMonitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
 		if (proxy.getType() == IResource.FILE) {
 			String name = proxy.getName();
-			IResource res = proxy.requestResource();
-			if (visitSourceModule((IFile) res)) {
+			IFile res = (IFile) proxy.requestResource();
+			if (visitSourceModule(res)) {
 				files.add(res);
 			} else if (res.getType() == IResource.FILE
 					&& hasExtension(name, ".zip")) { //$NON-NLS-1$
