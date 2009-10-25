@@ -102,20 +102,21 @@ public class H2ElementDao implements IElementDao {
 
 			statement.setString(++param, name);
 
+			String camelCaseName = null;
 			if (!isReference) {
-				StringBuilder camelCaseName = new StringBuilder();
+				StringBuilder camelCaseNameBuf = new StringBuilder();
 				for (int i = 0; i < name.length(); ++i) {
 					char ch = name.charAt(i);
 					if (Character.isUpperCase(ch)) {
-						camelCaseName.append(ch);
+						camelCaseNameBuf.append(ch);
 					} else if (i == 0) {
 						// not applicable for camel case search
 						break;
 					}
 				}
 				statement.setString(++param,
-						camelCaseName.length() > 0 ? camelCaseName.toString()
-								: null);
+						camelCaseNameBuf.length() > 0 ? camelCaseNameBuf
+								.toString() : null);
 			}
 
 			statement.setString(++param, metadata);
@@ -132,8 +133,9 @@ public class H2ElementDao implements IElementDao {
 			try {
 				if (result.next()) {
 					return new Element(result.getInt(1), type, flags, offset,
-							length, nameOffset, nameLength, name, metadata,
-							qualifier, parent, fileId, isReference);
+							length, nameOffset, nameLength, name,
+							camelCaseName, metadata, qualifier, parent, fileId,
+							isReference);
 				}
 			} finally {
 				result.close();
@@ -226,7 +228,7 @@ public class H2ElementDao implements IElementDao {
 				query.append(" AND QUALIFIER='").append(qualifier).append('\'');
 			}
 			// Parent
-			if (parent != null && qualifier.length() > 0) {
+			if (parent != null && parent.length() > 0) {
 				query.append(" AND PARENT='").append(parent).append('\'');
 			}
 
@@ -290,8 +292,9 @@ public class H2ElementDao implements IElementDao {
 					}
 
 					String name = result.getString(++columnIndex);
+					String camelCaseName = null;
 					if (!isReference) {
-						++columnIndex; // skip CC_NAME
+						camelCaseName = result.getString(++columnIndex);
 					}
 
 					String metadata = result.getString(++columnIndex);
@@ -304,8 +307,9 @@ public class H2ElementDao implements IElementDao {
 					int fileId = result.getInt(++columnIndex);
 
 					handler.handle(new Element(id, elementType, f, offset,
-							length, nameOffset, nameLength, name, metadata,
-							qualifier, parent, fileId, isReference));
+							length, nameOffset, nameLength, name,
+							camelCaseName, metadata, qualifier, parent, fileId,
+							isReference));
 				}
 			} finally {
 				result.close();
