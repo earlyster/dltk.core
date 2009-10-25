@@ -29,6 +29,7 @@ public class Element implements Serializable {
 	private int nameOffset;
 	private int nameLength;
 	private String name;
+	private String camelCaseName;
 	private String metadata;
 	private String qualifier;
 	private String parent;
@@ -36,8 +37,9 @@ public class Element implements Serializable {
 	private boolean isReference;
 
 	public Element(int id, int type, int flags, int offset, int length,
-			int nameOffset, int nameLength, String name, String metadata,
-			String qualifier, String parent, int fileId, boolean isReference) {
+			int nameOffset, int nameLength, String name, String camelCaseName,
+			String metadata, String qualifier, String parent, int fileId,
+			boolean isReference) {
 		super();
 		this.id = id;
 		this.type = type;
@@ -47,6 +49,7 @@ public class Element implements Serializable {
 		this.nameOffset = nameOffset;
 		this.nameLength = nameLength;
 		this.name = name;
+		this.camelCaseName = camelCaseName;
 		this.metadata = metadata;
 		this.qualifier = qualifier;
 		this.parent = parent;
@@ -86,6 +89,10 @@ public class Element implements Serializable {
 		return name;
 	}
 
+	public String getCamelCaseName() {
+		return camelCaseName;
+	}
+
 	public String getMetadata() {
 		return metadata;
 	}
@@ -110,6 +117,7 @@ public class Element implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + id;
+		result = prime * result + type;
 		return result;
 	}
 
@@ -123,11 +131,13 @@ public class Element implements Serializable {
 		Element other = (Element) obj;
 		if (id != other.id)
 			return false;
+		if (type != other.type)
+			return false;
 		return true;
 	}
 
 	public String toString() {
-		return "ElementDao [isReference=" + isReference + ", name=" + name
-				+ "]";
+		return "Element [type=" + type + ", isReference=" + isReference
+				+ ", name=" + name + "]";
 	}
 }
