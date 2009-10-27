@@ -16,16 +16,16 @@ import java.util.Date;
 import org.eclipse.dltk.internal.ui.text.DLTKColorManager;
 import org.eclipse.dltk.ui.text.IColorManager;
 import org.eclipse.jface.viewers.IColorProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 
 import com.ibm.icu.text.SimpleDateFormat;
 
-public class ScriptDebugLogLabelProvider implements ITableLabelProvider,
-		IColorProvider {
+public class ScriptDebugLogLabelProvider extends LabelProvider implements
+		ITableLabelProvider, IColorProvider {
 
 	private final IColorManager colorManager = new DLTKColorManager(false);
 
@@ -35,26 +35,13 @@ public class ScriptDebugLogLabelProvider implements ITableLabelProvider,
 	private final SimpleDateFormat timeFormat = new SimpleDateFormat(
 			"HH:mm:ss.SSS"); //$NON-NLS-1$
 
-	public void addListener(ILabelProviderListener listener) {
-		// TODO Auto-generated method stub
-	}
-
+	@Override
 	public void dispose() {
+		super.dispose();
 		colorManager.dispose();
 	}
 
-	public boolean isLabelProperty(Object element, String property) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public void removeListener(ILabelProviderListener listener) {
-		// TODO Auto-generated method stub
-
-	}
-
 	public Image getColumnImage(Object element, int columnIndex) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -97,11 +84,10 @@ public class ScriptDebugLogLabelProvider implements ITableLabelProvider,
 				result = result.substring(end);
 			}
 		}
-		return result;
+		return result.replaceAll("[\\p{Cntrl}]+", ""); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public Color getBackground(Object element) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
