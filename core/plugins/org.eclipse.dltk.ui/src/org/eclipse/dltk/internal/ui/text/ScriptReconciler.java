@@ -140,9 +140,7 @@ public class ScriptReconciler extends MonoReconciler {
 			fControl = control;
 		}
 
-		/*
-		 * @see ShellListener#shellActivated(ShellEvent)
-		 */
+		@Override
 		public void shellActivated(ShellEvent e) {
 			if (!fControl.isDisposed() && fControl.isVisible()) {
 				if (hasModelChanged())
@@ -151,9 +149,7 @@ public class ScriptReconciler extends MonoReconciler {
 			}
 		}
 
-		/*
-		 * @see ShellListener#shellDeactivated(ShellEvent)
-		 */
+		@Override
 		public void shellDeactivated(ShellEvent e) {
 			if (!fControl.isDisposed() && fControl.getShell() == e.getSource()) {
 				setModelChanged(false);
@@ -293,11 +289,7 @@ public class ScriptReconciler extends MonoReconciler {
 	 */
 	private ISourceModule fReconciledElement;
 
-	/*
-	 * @see
-	 * org.eclipse.jface.text.reconciler.IReconciler#install(org.eclipse.jface
-	 * .text.ITextViewer)
-	 */
+	@Override
 	public void install(ITextViewer textViewer) {
 		super.install(textViewer);
 
@@ -341,9 +333,7 @@ public class ScriptReconciler extends MonoReconciler {
 		return null;
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.reconciler.IReconciler#uninstall()
-	 */
+	@Override
 	public void uninstall() {
 
 		IWorkbenchPartSite site = fTextEditor.getSite();
@@ -374,10 +364,7 @@ public class ScriptReconciler extends MonoReconciler {
 		super.uninstall();
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.jface.text.reconciler.AbstractReconciler#forceReconciling()
-	 */
+	@Override
 	protected void forceReconciling() {
 		if (!fIninitalProcessDone)
 			return;
@@ -387,30 +374,20 @@ public class ScriptReconciler extends MonoReconciler {
 		strategy.notifyListeners(false);
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.jface.text.reconciler.AbstractReconciler#aboutToReconcile()
-	 * 
-	 * @since 3.0
-	 */
+	@Override
 	protected void aboutToBeReconciled() {
 		ScriptCompositeReconcilingStrategy strategy = (ScriptCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
 		strategy.aboutToBeReconciled();
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.jface.text.reconciler.AbstractReconciler#reconcilerReset()
-	 */
+	@Override
 	protected void reconcilerReset() {
 		super.reconcilerReset();
 		ScriptCompositeReconcilingStrategy strategy = (ScriptCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
 		strategy.notifyListeners(true);
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.reconciler.MonoReconciler#initialProcess()
-	 */
+	@Override
 	protected void initialProcess() {
 		synchronized (fMutex) {
 			super.initialProcess();
