@@ -11,6 +11,8 @@ package org.eclipse.dltk.internal.core.search;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
@@ -84,6 +86,22 @@ public class DLTKSearchScope extends AbstractSearchScope {
 
 	public IDLTKLanguageToolkit getLanguageToolkit() {
 		return toolkit;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public String[] getRelativePaths() {
+		List<String> relativePaths = new LinkedList<String>();
+		if (this.relativePaths != null) {
+			for (String path : this.relativePaths) {
+				if (path != null) {
+					relativePaths.add(path);
+				}
+			}
+		}
+		return (String[]) relativePaths
+				.toArray(new String[relativePaths.size()]);
 	}
 
 	private void addEnclosingProjectOrArchive(IPath path) {
