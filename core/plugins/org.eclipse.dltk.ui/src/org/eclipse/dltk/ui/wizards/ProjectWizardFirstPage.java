@@ -1244,7 +1244,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(composite,
 		// IDLTKHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
-		final IProjectWizardState state = getProjectWizardState();
+		final IProjectWizardState state = getWizardState();
 		if (state.getProjectName() != null) {
 			setName(state.getProjectName());
 		}
@@ -1427,8 +1427,8 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	/**
 	 * @since 2.0
 	 */
-	protected final IProjectWizardState getProjectWizardState() {
-		return ((ProjectWizard) getWizard()).getProjectWizardState();
+	protected final IProjectWizardState getWizardState() {
+		return ((ProjectWizard) getWizard()).getWizardState();
 	}
 
 }

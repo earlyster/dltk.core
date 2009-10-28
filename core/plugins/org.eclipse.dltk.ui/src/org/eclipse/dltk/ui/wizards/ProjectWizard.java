@@ -183,7 +183,7 @@ public abstract class ProjectWizard extends NewElementWizard implements
 	/**
 	 * @since 2.0
 	 */
-	public IProjectWizardState getProjectWizardState() {
+	public IProjectWizardState getWizardState() {
 		if (projectWizardState == null) {
 			projectWizardState = new ProjectWizardState(getScriptNature());
 			for (IProjectWizardInitializer initializer : new ProjectWizardInitializerManager(
