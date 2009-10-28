@@ -596,13 +596,14 @@ public final class ScriptRuntime {
 	 */
 	public static IInterpreterInstallType[] getInterpreterInstallTypes(
 			String nature) {
-		initializeInterpreters();
-
 		List<IInterpreterInstallType> res = new ArrayList<IInterpreterInstallType>();
-		for (int i = 0; i < fgInterpreterTypes.length; i++) {
-			IInterpreterInstallType t = fgInterpreterTypes[i];
-			if (t.getNatureId().equals(nature))
-				res.add(t);
+		synchronized (fgInterpreterLock) {
+			initializeInterpreters();
+			for (int i = 0; i < fgInterpreterTypes.length; i++) {
+				IInterpreterInstallType t = fgInterpreterTypes[i];
+				if (t.getNatureId().equals(nature))
+					res.add(t);
+			}
 		}
 		return res.toArray(new IInterpreterInstallType[res.size()]);
 	}
