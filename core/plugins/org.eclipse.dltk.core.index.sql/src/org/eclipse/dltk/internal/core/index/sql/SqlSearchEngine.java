@@ -69,21 +69,48 @@ public class SqlSearchEngine implements ISearchEngine {
 
 				// Calculate filtering by container:
 				int[] containersId = null;
+				int[] filesId = null;
 				if (!(scope instanceof DLTKWorkspaceScope)) {
+					// Calculate container IDs:
 					IPath[] containerPaths = scope.enclosingProjectsAndZips();
-					List<Integer> l = new LinkedList<Integer>();
-					for (int i = 0; i < containerPaths.length; ++i) {
+					List<Integer> containerIdsList = new LinkedList<Integer>();
+					for (IPath containerPath : containerPaths) {
 						Container container = dbFactory.getContainerDao()
 								.selectByPath(connection,
-										containerPaths[i].toString());
+										containerPath.toString());
 						if (container != null) {
-							l.add(container.getId());
+							containerIdsList.add(container.getId());
 						}
 					}
-					if (l.size() > 0) {
-						containersId = new int[l.size()];
-						for (int i = 0; i < l.size(); ++i) {
-							containersId[i] = l.get(i);
+					if (containerIdsList.size() > 0) {
+						containersId = new int[containerIdsList.size()];
+						for (int i = 0; i < containerIdsList.size(); ++i) {
+							containersId[i] = containerIdsList.get(i);
+						}
+					}
+
+					// Calculate file IDs:
+					if (scope instanceof DLTKSearchScope) {
+						List<Integer> fileIdsList = new LinkedList<Integer>();
+						String[] relativePaths = ((DLTKSearchScope) scope)
+								.getRelativePaths();
+						for (String relativePath : relativePaths) {
+							if (relativePath.length() > 0) {
+								for (Integer containerId : containerIdsList) {
+									File file = dbFactory.getFileDao().select(
+											connection, relativePath,
+											containerId);
+									if (file != null) {
+										fileIdsList.add(file.getId());
+									}
+								}
+							}
+						}
+						if (fileIdsList.size() > 0) {
+							filesId = new int[fileIdsList.size()];
+							for (int i = 0; i < fileIdsList.size(); ++i) {
+								filesId[i] = fileIdsList.get(i);
+							}
 						}
 					}
 				}
@@ -96,13 +123,13 @@ public class SqlSearchEngine implements ISearchEngine {
 				if (searchForDecls) {
 					dbFactory.getElementDao().search(connection, elementName,
 							matchRule, elementType, trueFlags, falseFlags,
-							qualifier, null, null, containersId, natureId,
+							qualifier, null, filesId, containersId, natureId,
 							limit, false, elementHandler, monitor);
 				}
 				if (searchForRefs) {
 					dbFactory.getElementDao().search(connection, elementName,
 							matchRule, elementType, trueFlags, falseFlags,
-							qualifier, null, null, containersId, natureId,
+							qualifier, null, filesId, containersId, natureId,
 							limit, true, elementHandler, monitor);
 				}
 			} finally {
