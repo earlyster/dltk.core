@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
+import org.eclipse.dltk.core.environment.IEnvironment;
+
 /**
  * @since 2.0
  */
@@ -22,9 +24,23 @@ public interface IProjectWizardInitializer {
 
 		String MODE_EXTERNAL = "org.eclipse.dltk.ui.projectWizard.external"; //$NON-NLS-1$
 
+		String getScriptNature();
+
+		String getProjectName();
+
+		void setProjectName(String name);
+
+		String getToolTipText(String mode);
+
 		void setToolTipText(String mode, String tooltip);
 
+		String getMode();
+
 		void setMode(String mode);
+
+		IEnvironment getEnvironment();
+
+		void setEnvironment(IEnvironment environment);
 
 	}
 

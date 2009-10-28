@@ -510,7 +510,7 @@ public class ProjectCreator {
 	}
 
 	public String getScriptNature() {
-		return fLocation.getScriptNature();
+		return ((ProjectWizard) owner).getScriptNature();
 	}
 
 	protected IBuildpathDetector createBuildpathDetector() {

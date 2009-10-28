@@ -15,18 +15,15 @@ public class GenericDLTKProjectWizard extends ProjectWizard {
 		setWindowTitle(Messages.GenericDLTKProjectWizard_newDltkProject);
 	}
 
-	public String getNature() {
+	@Override
+	public String getScriptNature() {
 		return nature;
 	}
 
+	@Override
 	public void addPages() {
 		super.addPages();
 		fFirstPage = new ProjectWizardFirstPage() {
-
-			@Override
-			public String getScriptNature() {
-				return nature;
-			}
 
 			@Override
 			protected boolean interpeterRequired() {

@@ -19,7 +19,10 @@ import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.internal.ui.wizards.ProjectWizardInitializerManager;
+import org.eclipse.dltk.internal.ui.wizards.ProjectWizardState;
 import org.eclipse.dltk.launching.IInterpreterInstall;
+import org.eclipse.dltk.ui.wizards.IProjectWizardInitializer.IProjectWizardState;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.INewWizard;
@@ -36,12 +39,9 @@ public abstract class ProjectWizard extends NewElementWizard implements
 
 	@Override
 	public void createPageControls(Composite pageContainer) {
-		final ProjectCreator creator = getProjectCreator();
-		if (creator != null) {
-			for (IWizardPage page : getPages()) {
-				if (page instanceof IProjectWizardPage) {
-					((IProjectWizardPage) page).initProjectWizardPage();
-				}
+		for (IWizardPage page : getPages()) {
+			if (page instanceof IProjectWizardPage) {
+				((IProjectWizardPage) page).initProjectWizardPage();
 			}
 		}
 		super.createPageControls(pageContainer);
@@ -174,6 +174,24 @@ public abstract class ProjectWizard extends NewElementWizard implements
 				((IProjectWizardPage) page).updateProjectWizardPage();
 			}
 		}
+	}
+
+	public abstract String getScriptNature();
+
+	private IProjectWizardState projectWizardState = null;
+
+	/**
+	 * @since 2.0
+	 */
+	public IProjectWizardState getProjectWizardState() {
+		if (projectWizardState == null) {
+			projectWizardState = new ProjectWizardState(getScriptNature());
+			for (IProjectWizardInitializer initializer : new ProjectWizardInitializerManager(
+					getScriptNature())) {
+				initializer.initialize(projectWizardState);
+			}
+		}
+		return projectWizardState;
 	}
 
 }

@@ -57,6 +57,7 @@ import org.eclipse.dltk.ui.dialogs.ControlStatus;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.dltk.ui.viewsupport.BasicElementLabels;
+import org.eclipse.dltk.ui.wizards.IProjectWizardInitializer.IProjectWizardState;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -312,12 +313,18 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 
 		private void selectLocalEnvironment() {
+			setEnvironment(EnvironmentManager.getLocalEnvironment());
+		}
+
+		/**
+		 * @since 2.0
+		 */
+		protected void setEnvironment(final IEnvironment env) {
 			if (environments == null) {
 				return;
 			}
-			final IEnvironment local = EnvironmentManager.getLocalEnvironment();
 			for (int i = 0; i < environments.length; ++i) {
-				if (local.equals(environments[i])) {
+				if (env.equals(environments[i])) {
 					if (fEnvironment.getSelectionIndex() != i) {
 						fEnvironment.selectItem(i);
 					}
@@ -703,7 +710,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 
 		protected String getIntereprtersPreferencePageId() {
 			final IDLTKUILanguageToolkit languageToolkit = DLTKUILanguageManager
-					.getLanguageToolkit(getScriptNature());
+					.getLanguageToolkit(getCurrentLanguageNature());
 			if (languageToolkit != null) {
 				return languageToolkit.getInterpreterPreferencePage();
 			}
@@ -1141,7 +1148,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	/**
 	 * @since 2.0
 	 */
-	public abstract String getScriptNature();
+	public final String getScriptNature() {
+		return ((ProjectWizard) getWizard()).getScriptNature();
+	}
 
 	protected boolean interpeterRequired() {
 		return true;
@@ -1235,6 +1244,10 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		}
 		// PlatformUI.getWorkbench().getHelpSystem().setHelp(composite,
 		// IDLTKHelpContextIds.NEW_JAVAPROJECT_WIZARD_PAGE);
+		final IProjectWizardState state = getProjectWizardState();
+		if (state.getProjectName() != null) {
+			setName(state.getProjectName());
+		}
 	}
 
 	/**
@@ -1409,6 +1422,13 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	 */
 	public void resetProjectWizardPage() {
 		// empty
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected final IProjectWizardState getProjectWizardState() {
+		return ((ProjectWizard) getWizard()).getProjectWizardState();
 	}
 
 }
