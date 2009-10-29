@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.editor;
 
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
@@ -23,13 +22,10 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ElementChangedEvent;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IElementChangedListener;
-import org.eclipse.dltk.core.IField;
-import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IParent;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptModelUtil;
@@ -66,7 +62,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
@@ -76,11 +71,9 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Composite;
@@ -148,17 +141,14 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 				return children;
 			}
 
-			Vector v = new Vector();
+			List<IModelElement> v = new ArrayList<IModelElement>();
 			for (int i = 0; i < children.length; i++) {
 				if (matches(children[i])) {
 					continue;
 				}
-				v.addElement(children[i]);
+				v.add(children[i]);
 			}
-
-			IModelElement[] result = new IModelElement[v.size()];
-			v.copyInto(result);
-			return result;
+			return v.toArray(new IModelElement[v.size()]);
 		}
 
 		public Object[] getChildren(Object parent) {
@@ -347,45 +337,10 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 	 */
 	protected class ScriptOutlineViewer extends TreeViewer {
 
-		/**
-		 * Indicates an item which has been reused. At the point of its reuse it
-		 * has been expanded. This field is used to communicate between
-		 * <code>internalExpandToLevel</code> and <code>reuseTreeItem</code>.
-		 */
-		private Item fReusedExpandedItem;
-		private boolean fReorderedMembers;
-		private boolean fForceFireSelectionChanged;
-
 		public ScriptOutlineViewer(Tree tree) {
 			super(tree);
-			setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
+			setAutoExpandLevel(ALL_LEVELS);
 			setUseHashlookup(true);
-		}
-
-		protected boolean filtered(IModelElement parent, IModelElement child) {
-
-			Object[] result = new Object[] { child };
-			ViewerFilter[] filters = getFilters();
-			for (int i = 0; i < filters.length; i++) {
-				result = filters[i].filter(this, parent, result);
-				if (result.length == 0) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		protected ISourceRange getSourceRange(IModelElement element)
-				throws ModelException {
-			if (element instanceof ISourceReference) {
-				return ((ISourceReference) element).getSourceRange();
-			}
-			if (element instanceof IMember
-			/* && !(element instanceof IInitializer) */) {
-				return ((IMember) element).getNameRange();
-			}
-			return null;
 		}
 
 		private IResource getUnderlyingResource() {
@@ -401,10 +356,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 			return null;
 		}
 
-		/*
-		 * @see
-		 * ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
-		 */
+		@Override
 		protected void handleLabelProviderChanged(
 				LabelProviderChangedEvent event) {
 			Object input = getInput();
@@ -432,48 +384,28 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 			super.handleLabelProviderChanged(event);
 		}
 
-		/*
-		 * @see TreeViewer#internalExpandToLevel
-		 */
+		@Override
 		protected void internalExpandToLevel(Widget node, int level) {
 			if (node instanceof Item) {
 				Item i = (Item) node;
 				if (i.getData() instanceof IModelElement) {
 					IModelElement je = (IModelElement) i.getData();
-					if (/*
-						 * je.getElementType() == IModelElement.IMPORT_CONTAINER
-						 * ||
-						 */isInnerType(je)) {
-						if (i != fReusedExpandedItem) {
-							setExpanded(i, false);
-							return;
-						}
+					if (je.getElementType() == IModelElement.IMPORT_CONTAINER
+							|| isInnerType(je)) {
+						setExpanded(i, false);
+						return;
 					}
 				}
 			}
 			super.internalExpandToLevel(node, level);
 		}
 
-		/*
-		 * @see
-		 * org.eclipse.jface.viewers.AbstractTreeViewer#isExpandable(java.lang
-		 * .Object)
-		 */
+		@Override
 		public boolean isExpandable(Object element) {
 			if (hasFilters()) {
 				return getFilteredChildren(element).length > 0;
 			}
 			return super.isExpandable(element);
-		}
-
-		protected boolean mustUpdateParent(IModelElementDelta delta,
-				IModelElement element) {
-			return false;
-		}
-
-		protected boolean overlaps(ISourceRange range, int start, int end) {
-			return start <= (range.getOffset() + range.getLength() - 1)
-					&& range.getOffset() <= end;
 		}
 
 		/**
@@ -484,282 +416,14 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		 *            the Java element delta used to reconcile the Java outline
 		 */
 		public void reconcile(IModelElementDelta delta) {
-			fReorderedMembers = false;
-			fForceFireSelectionChanged = false;
-			if (getComparator() == null) {
-
-				Widget w = findItem(fInput);
-				if (w != null && !w.isDisposed()) {
-					update(w, delta);
-				}
-				if (fForceFireSelectionChanged) {
-					fireSelectionChanged(new SelectionChangedEvent(getSite()
-							.getSelectionProvider(), this.getSelection()));
-				}
-				if (fReorderedMembers) {
-					refresh(false);
-					fReorderedMembers = false;
-				}
-
-			} else {
-				// just for now
-				refresh(true);
-			}
-		}
-
-		protected void reuseTreeItem(Item item, Object element) {
-
-			// remove children
-			Item[] c = getChildren(item);
-			if (c != null && c.length > 0) {
-
-				if (getExpanded(item)) {
-					fReusedExpandedItem = item;
-				}
-
-				for (int k = 0; k < c.length; k++) {
-					if (c[k].getData() != null) {
-						disassociate(c[k]);
-					}
-					c[k].dispose();
-				}
-			}
-
-			updateItem(item, element);
-			updatePlus(item, element);
-			internalExpandToLevel(item, AbstractTreeViewer.ALL_LEVELS);
-
-			fReusedExpandedItem = null;
-			fForceFireSelectionChanged = true;
-		}
-
-		protected void update(Widget w, IModelElementDelta delta) {
-
-			Item item;
-
-			IModelElement parent = delta.getElement();
-			IModelElementDelta[] affected = delta.getAffectedChildren();
-			Item[] children = getChildren(w);
-
-			boolean doUpdateParent = false;
-			boolean doUpdateParentsPlus = false;
-
-			Vector deletions = new Vector();
-			Vector additions = new Vector();
-
-			for (int i = 0; i < affected.length; i++) {
-				IModelElementDelta affectedDelta = affected[i];
-				IModelElement affectedElement = affectedDelta.getElement();
-				int status = affected[i].getKind();
-
-				// find tree item with affected element
-				int j;
-				for (j = 0; j < children.length; j++) {
-					if (affectedElement.equals(children[j].getData())) {
-						break;
-					}
-				}
-
-				if (j == children.length) {
-					// remove from collapsed parent
-					if ((status & IModelElementDelta.REMOVED) != 0) {
-						doUpdateParentsPlus = true;
-						continue;
-					}
-					// addition
-					if ((status & IModelElementDelta.CHANGED) != 0
-							&& (affectedDelta.getFlags() & IModelElementDelta.F_MODIFIERS) != 0
-							&& !filtered(parent, affectedElement)) {
-						additions.addElement(affectedDelta);
-					}
-					continue;
-				}
-
-				item = children[j];
-
-				// removed
-				if ((status & IModelElementDelta.REMOVED) != 0) {
-					deletions.addElement(item);
-					doUpdateParent = doUpdateParent
-							|| mustUpdateParent(affectedDelta, affectedElement);
-
-					// changed
-				} else if ((status & IModelElementDelta.CHANGED) != 0) {
-					int change = affectedDelta.getFlags();
-					doUpdateParent = doUpdateParent
-							|| mustUpdateParent(affectedDelta, affectedElement);
-
-					if ((change & IModelElementDelta.F_MODIFIERS) != 0) {
-						if (filtered(parent, affectedElement)) {
-							deletions.addElement(item);
-						} else {
-							updateItem(item, affectedElement);
-						}
-					}
-
-					if ((change & IModelElementDelta.F_CONTENT) != 0) {
-						updateItem(item, affectedElement);
-					}
-
-					// if ((change & IModelElementDelta.F_CATEGORIES) != 0)
-					// updateItem(item, affectedElement);
-
-					if ((change & IModelElementDelta.F_CHILDREN) != 0) {
-						update(item, affectedDelta);
-					}
-
-					if ((change & IModelElementDelta.F_REORDER) != 0) {
-						fReorderedMembers = true;
-					}
-				}
-			}
-
-			// find all elements to add
-			IModelElementDelta[] add = delta.getAddedChildren();
-			if (additions.size() > 0) {
-				IModelElementDelta[] tmp = new IModelElementDelta[add.length
-						+ additions.size()];
-				System.arraycopy(add, 0, tmp, 0, add.length);
-				for (int i = 0; i < additions.size(); i++) {
-					tmp[i + add.length] = (IModelElementDelta) additions
-							.elementAt(i);
-				}
-				add = tmp;
-			}
-
-			// add at the right position
-			go2: for (int i = 0; i < add.length; i++) {
-
-				try {
-
-					IModelElement e = add[i].getElement();
-					if (filtered(parent, e)) {
-						continue go2;
-					}
-
-					doUpdateParent = doUpdateParent
-							|| mustUpdateParent(add[i], e);
-					ISourceRange rng = getSourceRange(e);
-					int start = rng.getOffset();
-					int end = start + rng.getLength() - 1;
-					int nameOffset = Integer.MAX_VALUE;
-					if (e instanceof IField) {
-						ISourceRange nameRange = ((IField) e).getNameRange();
-						if (nameRange != null) {
-							nameOffset = nameRange.getOffset();
-						}
-					}
-
-					Item last = null;
-					item = null;
-					children = getChildren(w);
-
-					for (int j = 0; j < children.length; j++) {
-						item = children[j];
-						IModelElement r = (IModelElement) item.getData();
-
-						if (r == null) {
-							// parent node collapsed and not be opened before ->
-							// do nothing
-							continue go2;
-						}
-
-						try {
-							rng = getSourceRange(r);
-
-							// multi-field declarations always start at
-							// the same offset. They also have the same
-							// end offset if the field sequence is terminated
-							// with a semicolon. If not, the source range
-							// ends behind the identifier / initializer
-							// see
-							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=51851
-							boolean multiFieldDeclaration = r.getElementType() == IModelElement.FIELD
-									&& e.getElementType() == IModelElement.FIELD
-									&& rng.getOffset() == start;
-
-							// elements are inserted by occurrence
-							// however, multi-field declarations have
-							// equal source ranges offsets, therefore we
-							// compare name-range offsets.
-							boolean multiFieldOrderBefore = false;
-							if (multiFieldDeclaration) {
-								if (r instanceof IField) {
-									ISourceRange nameRange = ((IField) r)
-											.getNameRange();
-									if (nameRange != null) {
-										if (nameRange.getOffset() > nameOffset) {
-											multiFieldOrderBefore = true;
-										}
-									}
-								}
-							}
-
-							if (!multiFieldDeclaration
-									&& overlaps(rng, start, end)) {
-
-								// be tolerant if the delta is not correct, or
-								// if
-								// the tree has been updated other than by a
-								// delta
-								reuseTreeItem(item, e);
-								continue go2;
-
-							} else if (multiFieldOrderBefore
-									|| rng.getOffset() > start) {
-
-								if (last != null && deletions.contains(last)) {
-									// reuse item
-									deletions.removeElement(last);
-									reuseTreeItem(last, e);
-								} else {
-									// nothing to reuse
-									createTreeItem(w, e, j);
-								}
-								continue go2;
-							}
-
-						} catch (ModelException x) {
-							// stumbled over deleted element
-						}
-
-						last = item;
-					}
-
-					// add at the end of the list
-					if (last != null && deletions.contains(last)) {
-						// reuse item
-						deletions.removeElement(last);
-						reuseTreeItem(last, e);
-					} else {
-						// nothing to reuse
-						createTreeItem(w, e, -1);
-					}
-
-				} catch (ModelException x) {
-					// the element to be added is not present -> don't add it
-				}
-			}
-
-			// remove items which haven't been reused
-			Enumeration e = deletions.elements();
-			while (e.hasMoreElements()) {
-				item = (Item) e.nextElement();
-				disassociate(item);
-				item.dispose();
-			}
-
-			if (doUpdateParent) {
-				updateItem(w, delta.getElement());
-			}
-			if (!doUpdateParent && doUpdateParentsPlus && w instanceof Item) {
-				updatePlus((Item) w, delta.getElement());
-			}
+			refresh(true);
 		}
 
 	}
 
 	class LexicalSortingAction extends Action {
+
+		private static final String LEXICAL_SORTING_ACTION_IS_CHECKED = "LexicalSortingAction.isChecked"; //$NON-NLS-1$
 
 		private ModelElementSorter fComparator = new ModelElementSorter();
 		private SourcePositionSorter fSourcePositonComparator = new SourcePositionSorter();
@@ -775,10 +439,11 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 			setDescription(DLTKEditorMessages.ScriptOutlinePage_Sort_description);
 
 			boolean checked = fStore
-					.getBoolean("LexicalSortingAction.isChecked"); //$NON-NLS-1$
+					.getBoolean(LEXICAL_SORTING_ACTION_IS_CHECKED);
 			valueChanged(checked, false);
 		}
 
+		@Override
 		public void run() {
 			valueChanged(isChecked(), true);
 		}
@@ -801,7 +466,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 
 			if (store) {
 				DLTKUIPlugin.getDefault().getPreferenceStore().setValue(
-						"LexicalSortingAction.isChecked", on); //$NON-NLS-1$
+						LEXICAL_SORTING_ACTION_IS_CHECKED, on);
 			}
 		}
 	}
@@ -810,6 +475,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		/*
 		 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(Class)
 		 */
+		@SuppressWarnings("unchecked")
 		public Object getAdapter(Class clas) {
 			if (clas == IWorkbenchAdapter.class) {
 				return this;
@@ -817,9 +483,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 			return null;
 		}
 
-		/*
-		 * @see java.lang.Object#toString()
-		 */
+		@Override
 		public String toString() {
 			return DLTKEditorMessages.ScriptOutlinePage_error_NoTopLevelType;
 		}
@@ -854,6 +518,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		/**
 		 * Runs the action.
 		 */
+		@Override
 		public void run() {
 			DLTKUIPlugin.getDefault().getPreferenceStore().setValue(
 					PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE,
@@ -866,7 +531,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 
 	}
 
-	static Object[] NO_CHILDREN = new Object[0];
+	static final Object[] NO_CHILDREN = new Object[0];
 
 	/** A flag to show contents of top level type only */
 	// private boolean fTopLevelTypeOnly;
@@ -882,7 +547,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 			ListenerList.IDENTITY);
 	private ListenerList fPostSelectionChangedListeners = new ListenerList(
 			ListenerList.IDENTITY);
-	private Hashtable fActions = new Hashtable();
+	private Hashtable<String, IAction> fActions = new Hashtable<String, IAction>();
 
 	private TogglePresentationAction fTogglePresentation;
 
@@ -1013,9 +678,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		return null;
 	}
 
-	/*
-	 * @see IPage#createControl
-	 */
+	@Override
 	public void createControl(Composite parent) {
 
 		Tree tree = new Tree(parent, SWT.MULTI);
@@ -1125,6 +788,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		fOutlineViewer.setInput(fInput);
 	}
 
+	@Override
 	public void dispose() {
 
 		if (fEditor == null) {
@@ -1188,12 +852,13 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 
 	public IAction getAction(String actionID) {
 		Assert.isNotNull(actionID);
-		return (IAction) fActions.get(actionID);
+		return fActions.get(actionID);
 	}
 
 	/*
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
+	@SuppressWarnings("unchecked")
 	public Object getAdapter(Class key) {
 		if (key == IShowInSource.class) {
 			return getShowInSource();
@@ -1213,6 +878,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		return null;
 	}
 
+	@Override
 	public Control getControl() {
 		if (fOutlineViewer != null) {
 			return fOutlineViewer.getControl();
@@ -1283,6 +949,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 	/*
 	 * (non-Javadoc) Method declared on Page
 	 */
+	@Override
 	public void init(IPageSite pageSite) {
 		super.init(pageSite);
 	}
@@ -1379,7 +1046,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 			ISelection s = fOutlineViewer.getSelection();
 			if (s instanceof IStructuredSelection) {
 				IStructuredSelection ss = (IStructuredSelection) s;
-				List elements = ss.toList();
+				List<?> elements = ss.toList();
 				if (!elements.contains(reference)) {
 					s = (reference == null ? StructuredSelection.EMPTY
 							: new StructuredSelection(reference));
@@ -1401,6 +1068,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 	/*
 	 * @see Page#setFocus()
 	 */
+	@Override
 	public void setFocus() {
 		if (fOutlineViewer != null) {
 			fOutlineViewer.getControl().setFocus();
