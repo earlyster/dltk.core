@@ -14,6 +14,11 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 
+/**
+ * org.eclipse.jface.viewers.DecorationOverlayIcon should be used instead of
+ * this class.
+ */
+@Deprecated
 public abstract class AnnotatedImageDescriptor extends CompositeImageDescriptor {
 
 	protected static ImageData getImageData(ImageDescriptor descriptor) {
@@ -75,6 +80,6 @@ public abstract class AnnotatedImageDescriptor extends CompositeImageDescriptor 
 		final Point size = getSize();
 		drawImage(data, 0, size.y - data.height);
 	}
-	
+
 	protected abstract void drawAnnotations();
 }
