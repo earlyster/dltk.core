@@ -13,32 +13,39 @@ import org.eclipse.dltk.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.PlatformUI;
 
-
 /**
  * Action used to enable / disable method filter properties
  */
 public class MemberFilterAction extends Action {
 
-	private AbstractModelElementFilter fFilter;
+	private final AbstractModelElementFilter fFilter;
 
-	private MemberFilterActionGroup fFilterActionGroup;
+	private final MemberFilterActionGroup fFilterActionGroup;
 
 	/**
 	 * Construct an action for MemberFilterActioGroup
-	 * @param actionGroup object of MemberFilterActioGroup
-	 * @param title title of action
-	 * @param property One of MemberFilter.FILTER_*
-	 * @param contextHelpId context id for help
-	 * @param initValue initial state of filter
+	 * 
+	 * @param actionGroup
+	 *            object of MemberFilterActioGroup
+	 * @param title
+	 *            title of action
+	 * @param property
+	 *            One of MemberFilter.FILTER_*
+	 * @param contextHelpId
+	 *            context id for help
+	 * @param initValue
+	 *            initial state of filter
 	 */
 	public MemberFilterAction(MemberFilterActionGroup actionGroup,
-			String title, AbstractModelElementFilter filter, String contextHelpId, boolean initValue) {
+			String title, AbstractModelElementFilter filter,
+			String contextHelpId, boolean initValue) {
 		super(title);
 		fFilterActionGroup = actionGroup;
 		fFilter = filter;
-
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, contextHelpId);
-
+		if (contextHelpId != null && contextHelpId.length() != 0) {
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(this,
+					contextHelpId);
+		}
 		setChecked(initValue);
 	}
 
@@ -49,7 +56,8 @@ public class MemberFilterAction extends Action {
 		return fFilter;
 	}
 
-	public void run() {		
-		fFilterActionGroup.processMemberFilterAction(this);		
+	@Override
+	public void run() {
+		fFilterActionGroup.processMemberFilterAction(this);
 	}
 }
