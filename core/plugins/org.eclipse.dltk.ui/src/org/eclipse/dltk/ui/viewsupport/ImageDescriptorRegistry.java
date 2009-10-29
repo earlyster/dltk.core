@@ -18,6 +18,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 public class ImageDescriptorRegistry {
+
 	private final HashMap<ImageDescriptor, Image> fRegistry = new HashMap<ImageDescriptor, Image>(
 			10);
 
@@ -32,16 +33,31 @@ public class ImageDescriptorRegistry {
 	}
 
 	/**
+	 * @param disposeWithDisplay
+	 * @since 2.0
+	 */
+	public ImageDescriptorRegistry(boolean disposeWithDisplay) {
+		this(DLTKUIPlugin.getStandardDisplay(), disposeWithDisplay);
+	}
+
+	public ImageDescriptorRegistry(Display display) {
+		this(display, true);
+	}
+
+	/**
 	 * Creates a new image descriptor registry for the given display. All images
 	 * managed by this registry will be disposed when the display gets disposed.
 	 * 
 	 * @param display
 	 *            the display the images managed by this registry are allocated
 	 *            for
+	 * @since 2.0
 	 */
-	public ImageDescriptorRegistry(Display display) {
+	public ImageDescriptorRegistry(Display display, boolean disposeWithDisplay) {
 		fDisplay = display;
-		hookDisplay();
+		if (disposeWithDisplay) {
+			hookDisplay();
+		}
 	}
 
 	/**
