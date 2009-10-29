@@ -270,20 +270,27 @@ public class NewSearchEngine {
 					.getLanguageToolkit());
 
 			if (searchEngine != null) {
+				ISearchRequestor requestor = new ISearchRequestor() {
+					public void match(int elementType, int flags, int offset,
+							int length, int nameOffset, int nameLength,
+							String elementName, String metadata,
+							String qualifier, String parent,
+							ISourceModule sourceModule, boolean isReference) {
+
+						paths.add(sourceModule.getPath().toString());
+					}
+				};
+
 				searchEngine.search(elementType, qualifier, elementName, 0, 0,
-						0,
-						searchFor, matchRule, scope, new ISearchRequestor() {
+						0, searchFor, matchRule, scope, requestor, monitor);
 
-							public void match(int elementType, int flags,
-									int offset, int length, int nameOffset,
-									int nameLength, String elementName,
-									String metadata, String qualifier,
-									String parent, ISourceModule sourceModule,
-									boolean isReference) {
-
-								paths.add(sourceModule.getPath().toString());
-							}
-						}, monitor);
+				if (matchRule == MatchRule.CAMEL_CASE) {
+					// Search also for prefix (workaround to the way original
+					// search engine worked)
+					searchEngine.search(elementType, qualifier, elementName, 0,
+							0, 0, searchFor, MatchRule.PREFIX, scope,
+							requestor, monitor);
+				}
 			}
 		}
 	}
