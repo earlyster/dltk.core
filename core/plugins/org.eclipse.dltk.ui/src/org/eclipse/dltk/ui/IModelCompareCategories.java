@@ -13,8 +13,16 @@ public interface IModelCompareCategories {
 	public static final int STORAGE = 8;
 
 	public static final int PACKAGE_DECL = 9;
+	/**
+	 * @since 2.0
+	 */
+	public static final int IMPORT_CONTAINER = 10;
+	/**
+	 * @since 2.0
+	 */
+	public static final int IMPORT_DECLARATION = 11;
 
-	public static final int MEMBERSOFFSET = 10;
+	public static final int MEMBERSOFFSET = 15;
 
 	public static final int SCRIPT_ELEMENTS = 50;
 	public static final int OTHERS = 51;

@@ -117,10 +117,10 @@ public class ModelElementSorter extends ViewerSorter implements
 					return getMemberCategory(MembersOrderPreferenceCache.TYPE_INDEX);
 				case IModelElement.PACKAGE_DECLARATION:
 					return PACKAGE_DECL;
-					// case IModelElement.IMPORT_CONTAINER :
-					// return IMPORT_CONTAINER;
-					// case IModelElement.IMPORT_DECLARATION :
-					// return IMPORT_DECLARATION;
+				case IModelElement.IMPORT_CONTAINER:
+					return IMPORT_CONTAINER;
+				case IModelElement.IMPORT_DECLARATION:
+					return IMPORT_DECLARATION;
 				case IModelElement.SCRIPT_FOLDER:
 					return SCRIPTFOLDER;
 				case IModelElement.PROJECT_FRAGMENT:
