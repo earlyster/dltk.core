@@ -17,11 +17,11 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
-public class ImageDescriptorRegistry
-{
-	private HashMap fRegistry = new HashMap(10);
+public class ImageDescriptorRegistry {
+	private final HashMap<ImageDescriptor, Image> fRegistry = new HashMap<ImageDescriptor, Image>(
+			10);
 
-	private Display fDisplay;
+	private final Display fDisplay;
 
 	/**
 	 * Creates a new image descriptor registry for the current or default
@@ -39,13 +39,13 @@ public class ImageDescriptorRegistry
 	 *            the display the images managed by this registry are allocated
 	 *            for
 	 */
-	public ImageDescriptorRegistry( Display display ) {
+	public ImageDescriptorRegistry(Display display) {
 		fDisplay = display;
 		hookDisplay();
 	}
 
 	/**
-	 * Returns the image assiciated with the given image descriptor.
+	 * Returns the image associated with the given image descriptor.
 	 * 
 	 * @param descriptor
 	 *            the image descriptor for which the registry manages an image
@@ -53,17 +53,16 @@ public class ImageDescriptorRegistry
 	 *         <code>null</code> if the image descriptor can't create the
 	 *         requested image.
 	 */
-	public Image get(ImageDescriptor descriptor)
-	{
-		if( descriptor == null )
+	public Image get(ImageDescriptor descriptor) {
+		if (descriptor == null)
 			descriptor = ImageDescriptor.getMissingImageDescriptor();
 
-		Image result = (Image) fRegistry.get(descriptor);
-		if( result != null )
+		Image result = fRegistry.get(descriptor);
+		if (result != null)
 			return result;
-		
+
 		result = descriptor.createImage();
-		if( result != null )
+		if (result != null)
 			fRegistry.put(descriptor, result);
 		return result;
 	}
@@ -71,20 +70,18 @@ public class ImageDescriptorRegistry
 	/**
 	 * Disposes all images managed by this registry.
 	 */
-	public void dispose()
-	{
-		for( Iterator iter = fRegistry.values().iterator(); iter.hasNext(); ) {
-			Image image = (Image) iter.next();
+	public void dispose() {
+		for (Iterator<Image> iter = fRegistry.values().iterator(); iter
+				.hasNext();) {
+			Image image = iter.next();
 			image.dispose();
 		}
 		fRegistry.clear();
 	}
 
-	private void hookDisplay()
-	{
+	private void hookDisplay() {
 		fDisplay.disposeExec(new Runnable() {
-			public void run()
-			{
+			public void run() {
 				dispose();
 			}
 		});
