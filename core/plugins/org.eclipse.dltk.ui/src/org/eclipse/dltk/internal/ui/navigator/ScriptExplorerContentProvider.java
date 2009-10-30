@@ -504,11 +504,11 @@ public class ScriptExplorerContentProvider extends
 			throws ModelException {
 		IModelElement[] children = parent.getChildren();
 
-		List<IModelElement> newElements = new ArrayList<IModelElement>();
 		if (fragment == null || fragment.isRootFolder()) {
+			List<IModelElement> newElements = new ArrayList<IModelElement>();
 			for (int i = 0; i < children.length; ++i) {
 				if (children[i] instanceof IScriptFolder) {
-					IScriptFolder scriptFolder = ((IScriptFolder) children[i]);
+					IScriptFolder scriptFolder = (IScriptFolder) children[i];
 					if (scriptFolder.isRootFolder()) {
 						IModelElement[] members = scriptFolder.getChildren();
 						for (int j = 0; j < members.length; ++j) {
@@ -519,7 +519,7 @@ public class ScriptExplorerContentProvider extends
 				}
 				newElements.add(children[i]);
 			}
-			children = (IModelElement[]) newElements
+			children = newElements
 					.toArray(new IModelElement[newElements.size()]);
 		}
 
