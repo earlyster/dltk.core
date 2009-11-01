@@ -28,6 +28,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkitExtension;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.index.sql.Container;
 import org.eclipse.dltk.core.index.sql.DbFactory;
 import org.eclipse.dltk.core.index.sql.Element;
@@ -94,8 +95,20 @@ public class SqlSearchEngine implements ISearchEngine {
 						List<Integer> fileIdsList = new LinkedList<Integer>();
 						String[] relativePaths = ((DLTKSearchScope) scope)
 								.getRelativePaths();
-						for (String relativePath : relativePaths) {
+						String[] fileExtensions = ScriptModelUtil
+								.getFileExtensions(scope.getLanguageToolkit());
+
+						// XXX - need a better way do differentiate between file
+						// and container scopes
+						PATH_ITER: for (String relativePath : relativePaths) {
 							if (relativePath.length() > 0) {
+								if (fileExtensions != null) {
+									for (String ext : fileExtensions) {
+										if (!relativePath.endsWith("." + ext)) {
+											break PATH_ITER; // not a file
+										}
+									}
+								}
 								for (Integer containerId : containerIdsList) {
 									File file = dbFactory.getFileDao().select(
 											connection, relativePath,
