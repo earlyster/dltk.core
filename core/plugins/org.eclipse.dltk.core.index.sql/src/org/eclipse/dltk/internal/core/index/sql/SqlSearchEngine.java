@@ -100,13 +100,18 @@ public class SqlSearchEngine implements ISearchEngine {
 
 						// XXX - need a better way do differentiate between file
 						// and container scopes
-						PATH_ITER: for (String relativePath : relativePaths) {
+						for (String relativePath : relativePaths) {
 							if (relativePath.length() > 0) {
 								if (fileExtensions != null) {
+									boolean isScriptFile = false;
 									for (String ext : fileExtensions) {
-										if (!relativePath.endsWith("." + ext)) {
-											break PATH_ITER; // not a file
+										if (relativePath.endsWith("." + ext)) {
+											isScriptFile = true;
+											break;
 										}
+									}
+									if (!isScriptFile) {
+										break;
 									}
 								}
 								for (Integer containerId : containerIdsList) {
