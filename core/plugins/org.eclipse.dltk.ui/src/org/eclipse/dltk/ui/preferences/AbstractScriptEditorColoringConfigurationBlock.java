@@ -346,7 +346,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 	/**
 	 * Highlighting color list
 	 */
-	protected final java.util.List fListModel = new ArrayList();
+	protected final java.util.List<HighlightingColorListItem> fListModel = new ArrayList<HighlightingColorListItem>();
 
 	/**
 	 * Highlighting color list viewer
@@ -398,7 +398,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 
 		fColorManager = new DLTKColorManager(false);
 
-		final Set colorKeys = new HashSet();
+		final Set<String> colorKeys = new HashSet<String>();
 
 		final String[][] model = getSyntaxColorListModel();
 		for (int i = 0, n = model.length; i < n; i++) {
@@ -433,11 +433,10 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 
-		ArrayList overlayKeys = new ArrayList();
+		ArrayList<OverlayPreferenceStore.OverlayKey> overlayKeys = new ArrayList<OverlayPreferenceStore.OverlayKey>();
 
 		for (int i = 0, n = fListModel.size(); i < n; i++) {
-			HighlightingColorListItem item = (HighlightingColorListItem) fListModel
-					.get(i);
+			HighlightingColorListItem item = fListModel.get(i);
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
 					OverlayPreferenceStore.STRING, item.getColorKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(
