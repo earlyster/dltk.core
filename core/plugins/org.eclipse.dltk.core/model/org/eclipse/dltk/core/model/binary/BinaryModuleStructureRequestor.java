@@ -9,13 +9,13 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.model.binary;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.compiler.IBinaryElementRequestor;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.internal.core.DuplicateResolver;
 import org.eclipse.dltk.internal.core.ImportContainer;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelElementInfo;
@@ -26,14 +26,9 @@ import org.eclipse.dltk.internal.core.SourceRefElement;
  * @since 2.0
  */
 public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
-	private static class Counter {
-		int value;
-	}
 
-	/**
-	 * The cache contains the maximum occurrence index per reference element
-	 */
-	private Map<SourceRefElement, Counter> counters = new HashMap<SourceRefElement, Counter>();
+	private DuplicateResolver.Resolver counters = DuplicateResolver.create();
+
 	private final static String[] EMPTY = new String[0];
 
 	/**
@@ -256,16 +251,7 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 	}
 
 	private void resolveDuplicates(SourceRefElement handle) {
-		Assert.isTrue(handle.occurrenceCount == 1);
-		Counter counter = counters.get(handle);
-		if (counter == null) {
-			counter = new Counter();
-			counter.value = handle.occurrenceCount;
-			counters.put(handle, counter);
-		} else {
-			++counter.value;
-			handle.occurrenceCount = counter.value;
-		}
+		counters.resolveDuplicates(handle);
 		Assert.isTrue(!this.newElements.containsKey(handle));
 	}
 }

@@ -22,14 +22,7 @@ import org.eclipse.dltk.core.ModelException;
 
 public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 
-	private static class Counter {
-		int value;
-	}
-
-	/**
-	 * The cache contains the maximum occurrence index per reference element
-	 */
-	private Map<SourceRefElement, Counter> counters = new HashMap<SourceRefElement, Counter>();
+	private DuplicateResolver.Resolver counters = DuplicateResolver.create();
 
 	private final static String[] EMPTY = new String[0];
 
@@ -83,16 +76,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	 * handle being created until there is no conflict.
 	 */
 	protected void resolveDuplicates(SourceRefElement handle) {
-		Assert.isTrue(handle.occurrenceCount == 1);
-		Counter counter = counters.get(handle);
-		if (counter == null) {
-			counter = new Counter();
-			counter.value = handle.occurrenceCount;
-			counters.put(handle, counter);
-		} else {
-			++counter.value;
-			handle.occurrenceCount = counter.value;
-		}
+		counters.resolveDuplicates(handle);
 		Assert.isTrue(!this.newElements.containsKey(handle));
 	}
 
