@@ -43,11 +43,14 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 
 	private final int flags;
 
-	protected static class EditorColorItem {
-		final String name;
-		final String colorKey;
-		final String systemDefaultKey;
-		final int systemColor;
+	/**
+	 * @since 2.0
+	 */
+	public static class EditorColorItem {
+		public final String name;
+		public final String colorKey;
+		public final String systemDefaultKey;
+		public final int systemColor;
 
 		public EditorColorItem(String name, String colorKey) {
 			this(name, colorKey, null, 0);
@@ -65,6 +68,9 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 
 	private final EditorColorItem[] fColorListModel;
 
+	/**
+	 * @since 2.0
+	 */
 	protected EditorColorItem[] createColorListModel() {
 		return new EditorColorItem[] {
 				new EditorColorItem(
