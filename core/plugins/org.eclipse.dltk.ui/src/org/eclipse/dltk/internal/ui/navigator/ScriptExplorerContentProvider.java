@@ -289,9 +289,7 @@ public class ScriptExplorerContentProvider extends
 			return nonPackages;
 		}
 		for (int i = 0; i < nonPackages.length; i++) {
-			if (!result.contains(nonPackages[i])) {
-				result.add(nonPackages[i]);
-			}
+			result.add(nonPackages[i]);
 		}
 		return result.toArray();
 	}
