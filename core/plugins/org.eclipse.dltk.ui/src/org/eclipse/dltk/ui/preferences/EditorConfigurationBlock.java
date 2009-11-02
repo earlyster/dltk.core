@@ -43,28 +43,51 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 
 	private final int flags;
 
-	private final String[][] colorListModel = new String[][] {
-			{
-					PreferencesMessages.EditorPreferencePage_matchingBracketsHighlightColor,
-					PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, null },
-			{
-					PreferencesMessages.EditorPreferencePage_backgroundForMethodParameters,
-					PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, null },
-			{
-					PreferencesMessages.EditorPreferencePage_foregroundForMethodParameters,
-					PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND, null },
-			{
-					PreferencesMessages.EditorPreferencePage_backgroundForCompletionReplacement,
-					PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND, null },
-			{
-					PreferencesMessages.EditorPreferencePage_foregroundForCompletionReplacement,
-					PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND, null },
-			{
-					PreferencesMessages.EditorPreferencePage_sourceHoverBackgroundColor,
-					PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR,
-					PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT },
+	protected static class EditorColorItem {
+		final String name;
+		final String colorKey;
+		final String systemDefaultKey;
+		final int systemColor;
 
-	};
+		public EditorColorItem(String name, String colorKey) {
+			this(name, colorKey, null, 0);
+		}
+
+		public EditorColorItem(String name, String colorKey,
+				String systemDefaultKey, int systemColor) {
+			this.name = name;
+			this.colorKey = colorKey;
+			this.systemDefaultKey = systemDefaultKey;
+			this.systemColor = systemColor;
+		}
+
+	}
+
+	private final EditorColorItem[] fColorListModel;
+
+	protected EditorColorItem[] createColorListModel() {
+		return new EditorColorItem[] {
+				new EditorColorItem(
+						PreferencesMessages.EditorPreferencePage_matchingBracketsHighlightColor,
+						PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR),
+				new EditorColorItem(
+						PreferencesMessages.EditorPreferencePage_backgroundForMethodParameters,
+						PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND),
+				new EditorColorItem(
+						PreferencesMessages.EditorPreferencePage_foregroundForMethodParameters,
+						PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND),
+				new EditorColorItem(
+						PreferencesMessages.EditorPreferencePage_backgroundForCompletionReplacement,
+						PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND),
+				new EditorColorItem(
+						PreferencesMessages.EditorPreferencePage_foregroundForCompletionReplacement,
+						PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND),
+				new EditorColorItem(
+						PreferencesMessages.EditorPreferencePage_sourceHoverBackgroundColor,
+						PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR,
+						PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT,
+						SWT.COLOR_INFO_BACKGROUND) };
+	}
 
 	private List colorList;
 	private ColorSelector colorEditor;
@@ -108,11 +131,17 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 		super(store, mainPreferencePage);
 		flags = flags | FLAG_EDITOR_APPEARANCE_COLOR_OPTIONS;
 		this.flags = flags;
-		getPreferenceStore().addKeys(createOverlayStoreKeys(flags));
+		if ((flags & FLAG_EDITOR_APPEARANCE_COLOR_OPTIONS) != 0) {
+			fColorListModel = createColorListModel();
+		} else {
+			fColorListModel = null;
+		}
+		getPreferenceStore().addKeys(
+				createOverlayStoreKeys(flags, fColorListModel));
 	}
 
 	private static OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys(
-			int flags) {
+			int flags, EditorColorItem[] colorItems) {
 		ArrayList<OverlayKey> keys = new ArrayList<OverlayKey>();
 		if ((flags & FLAG_EDITOR_SMART_NAVIGATION) != 0) {
 			keys.add(new OverlayPreferenceStore.OverlayKey(
@@ -151,28 +180,17 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 			// keys.add(new OverlayPreferenceStore.OverlayKey(
 			// OverlayPreferenceStore.BOOLEAN,
 			// PreferenceConstants.EDITOR_SHOW_SEGMENTS));
-			keys.add(new OverlayPreferenceStore.OverlayKey(
-					OverlayPreferenceStore.STRING,
-					PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR));
-			keys.add(new OverlayPreferenceStore.OverlayKey(
-					OverlayPreferenceStore.STRING,
-					PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND));
-			keys.add(new OverlayPreferenceStore.OverlayKey(
-					OverlayPreferenceStore.STRING,
-					PreferenceConstants.CODEASSIST_PARAMETERS_FOREGROUND));
-			keys.add(new OverlayPreferenceStore.OverlayKey(
-					OverlayPreferenceStore.STRING,
-					PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND));
-			keys.add(new OverlayPreferenceStore.OverlayKey(
-					OverlayPreferenceStore.STRING,
-					PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND));
-			keys.add(new OverlayPreferenceStore.OverlayKey(
-					OverlayPreferenceStore.STRING,
-					PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR));
-			keys
-					.add(new OverlayPreferenceStore.OverlayKey(
-							OverlayPreferenceStore.BOOLEAN,
-							PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT));
+			if (colorItems != null) {
+				for (EditorColorItem item : colorItems) {
+					keys.add(new OverlayPreferenceStore.OverlayKey(
+							OverlayPreferenceStore.STRING, item.colorKey));
+					if (item.systemDefaultKey != null) {
+						keys.add(new OverlayPreferenceStore.OverlayKey(
+								OverlayPreferenceStore.BOOLEAN,
+								item.systemDefaultKey));
+					}
+				}
+			}
 		}
 
 		return keys.toArray(new OverlayPreferenceStore.OverlayKey[keys.size()]);
@@ -345,7 +363,7 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 				if (i == -1)
 					return;
 
-				String key = colorListModel[i][2];
+				String key = fColorListModel[i].systemDefaultKey;
 				if (key != null)
 					getPreferenceStore().setValue(key, systemDefault);
 			}
@@ -383,7 +401,7 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 				if (i == -1)
 					return;
 
-				String key = colorListModel[i][1];
+				String key = fColorListModel[i].colorKey;
 				PreferenceConverter.setValue(getPreferenceStore(), key,
 						colorEditor.getColorValue());
 			}
@@ -396,10 +414,10 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 		int i = colorList.getSelectionIndex();
 		if (i == -1)
 			return;
-		String key = colorListModel[i][1];
+		String key = fColorListModel[i].colorKey;
 		RGB rgb = PreferenceConverter.getColor(getPreferenceStore(), key);
 		colorEditor.setColorValue(rgb);
-		updateAppearanceColorWidgets(colorListModel[i][2]);
+		updateAppearanceColorWidgets(fColorListModel[i].systemDefaultKey);
 	}
 
 	private void updateAppearanceColorWidgets(String systemDefaultKey) {
@@ -424,8 +442,8 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 		if ((flags & FLAG_EDITOR_APPEARANCE_COLOR_OPTIONS) != 0) {
 			initializeDefaultColors();
 
-			for (int i = 0; i < colorListModel.length; i++)
-				colorList.add(colorListModel[i][0]);
+			for (int i = 0; i < fColorListModel.length; i++)
+				colorList.add(fColorListModel[i].name);
 
 			colorList.getDisplay().asyncExec(new Runnable() {
 				public void run() {
@@ -440,14 +458,14 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 	}
 
 	private void initializeDefaultColors() {
-		if (getPreferenceStore()
-				.getBoolean(
-						PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT)) {
-			RGB rgb = colorList.getDisplay().getSystemColor(
-					SWT.COLOR_INFO_BACKGROUND).getRGB();
-			PreferenceConverter.setValue(getPreferenceStore(),
-					PreferenceConstants.EDITOR_SOURCE_HOVER_BACKGROUND_COLOR,
-					rgb);
+		for (EditorColorItem item : fColorListModel) {
+			if (item.systemDefaultKey != null
+					&& getPreferenceStore().getBoolean(item.systemDefaultKey)) {
+				RGB rgb = colorList.getDisplay().getSystemColor(
+						item.systemColor).getRGB();
+				PreferenceConverter.setValue(getPreferenceStore(),
+						item.colorKey, rgb);
+			}
 		}
 	}
 
