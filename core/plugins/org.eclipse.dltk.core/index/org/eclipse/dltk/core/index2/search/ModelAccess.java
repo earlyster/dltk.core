@@ -274,6 +274,9 @@ public class ModelAccess {
 			IProgressMonitor monitor) {
 
 		IDLTKLanguageToolkit toolkit = scope.getLanguageToolkit();
+		if (toolkit == null) {
+			return false;
+		}
 		final IElementResolver elementResolver = getElementResolver(toolkit);
 		if (elementResolver == null) {
 			return false;
