@@ -67,6 +67,13 @@ public class OverlayPreferenceStore implements IPreferenceStore {
 	private PropertyListener fPropertyListener;
 	private boolean fLoaded;
 
+	/**
+	 * @since 2.0
+	 */
+	public OverlayPreferenceStore(IPreferenceStore parent) {
+		this(parent, new OverlayKey[0]);
+	}
+
 	public OverlayPreferenceStore(IPreferenceStore parent,
 			OverlayKey[] overlayKeys) {
 		fParent = parent;
