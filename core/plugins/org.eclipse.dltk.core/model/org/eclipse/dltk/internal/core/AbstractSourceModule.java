@@ -618,63 +618,67 @@ public abstract class AbstractSourceModule extends Openable implements
 	protected IBuffer openBuffer(IProgressMonitor pm, Object info)
 			throws ModelException {
 		// create buffer
-		final BufferManager bufManager = getBufferManager();
-		final boolean isWorkingCopy = isWorkingCopy();
+		BufferManager bufManager = getBufferManager();
+		boolean isWorkingCopy = isWorkingCopy();
 		IBuffer buffer = isWorkingCopy ? this.owner.createBuffer(this)
 				: BufferManager.createBuffer(this);
-		if (buffer == null) {
+		if (buffer == null)
 			return null;
+
+		ISourceModule original = null;
+		boolean mustSetToOriginalContent = false;
+		if (isWorkingCopy) {
+			// ensure that isOpen() is called outside the bufManager
+			// synchronized block
+			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=237772
+			mustSetToOriginalContent = !isPrimary()
+					&& (original = new SourceModule((ModelElement) getParent(),
+							getElementName(), DefaultWorkingCopyOwner.PRIMARY))
+							.isOpen();
 		}
 
-		/*
-		 * synchronize to ensure that 2 threads are not putting 2 different
-		 * buffers at the same time see
-		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=146331
-		 */
+		// synchronize to ensure that 2 threads are not putting 2 different
+		// buffers at the same time
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=146331
 		synchronized (bufManager) {
-			final IBuffer existingBuffer = bufManager.getBuffer(this);
+			IBuffer existingBuffer = bufManager.getBuffer(this);
 			if (existingBuffer != null)
 				return existingBuffer;
+
 			// set the buffer source
-			char[] chars = buffer.getCharacters();
-			if ((chars == null) || (chars.length == 0)) {
+			if (buffer.getCharacters() == null) {
 				if (isWorkingCopy) {
-					ISourceModule original;
-					if (!isPrimary()
-							&& (original = getOriginalSourceModule()).isOpen()) {
+					if (mustSetToOriginalContent) {
 						buffer.setContents(original.getSource());
 					} else {
-						char[] content;
-						try {
-							content = getBufferContent();
-						} catch (ModelException e) {
-							if (e.getStatus().getCode() == IModelStatusConstants.ELEMENT_DOES_NOT_EXIST) {
-								content = CharOperation.NO_CHAR;
-							} else {
-								throw e;
-							}
+						IFile file = (IFile) getResource();
+						if (file == null || !file.exists()) {
+							// initialize buffer with empty contents
+							buffer.setContents(CharOperation.NO_CHAR);
+						} else {
+							buffer.setContents(Util
+									.getResourceContentsAsCharArray(file));
 						}
-						buffer.setContents(content);
 					}
 				} else {
-					char[] content = getBufferContent();
-					buffer.setContents(content);
+					IFile file = (IFile) getResource();
+					if (file == null || !file.exists())
+						throw newNotPresentException();
+					buffer.setContents(Util
+							.getResourceContentsAsCharArray(file));
 				}
 			}
 
 			// add buffer to buffer cache
-			/*
-			 * note this may cause existing buffers to be removed from the
-			 * buffer cache, but only primary compilation unit's buffer can be
-			 * closed, thus no call to a client's IBuffer#close() can be done in
-			 * this synchronized block.
-			 */
+			// note this may cause existing buffers to be removed from the
+			// buffer cache, but only primary compilation unit's buffer
+			// can be closed, thus no call to a client's IBuffer#close() can be
+			// done in this synchronized block.
 			bufManager.addBuffer(buffer);
 
 			// listen to buffer changes
 			buffer.addBufferChangedListener(this);
 		}
-
 		return buffer;
 	}
 
