@@ -54,32 +54,47 @@ public class H2DbFactory extends DbFactory {
 		Schema schema = new Schema();
 		boolean initializeSchema = false;
 
-		Connection connection = pool.getConnection();
-		try {
-			Statement statement = connection.createStatement();
+		int tries = 2; // Tries for opening database
+		Connection connection = null;
+		do {
 			try {
-				statement.executeQuery("SELECT COUNT(*) FROM FILES WHERE 1=0;");
-				initializeSchema = !schema.isCompatible();
-
-			} catch (SQLException e) {
-				// Basic table doesn't exist
-				initializeSchema = true;
-			} finally {
-				statement.close();
-			}
-
-			if (initializeSchema) {
-				connection.close();
-				pool.dispose();
-				DeleteDbFiles.execute(dbPath.toOSString(), DB_NAME, true);
-
-				pool = JdbcConnectionPool.create(connString, DB_USER, DB_PASS);
 				connection = pool.getConnection();
-				schema.initialize(connection);
+				try {
+					Statement statement = connection.createStatement();
+					try {
+						statement
+								.executeQuery("SELECT COUNT(*) FROM FILES WHERE 1=0;");
+						initializeSchema = !schema.isCompatible();
+
+					} catch (SQLException e) {
+						// Basic table doesn't exist
+						initializeSchema = true;
+					} finally {
+						statement.close();
+					}
+
+					if (initializeSchema) {
+						connection.close();
+						pool.dispose();
+						// Destroy schema by removing DB (if exists)
+						DeleteDbFiles.execute(dbPath.toOSString(), DB_NAME,
+								true);
+
+						pool = JdbcConnectionPool.create(connString, DB_USER,
+								DB_PASS);
+						connection = pool.getConnection();
+						schema.initialize(connection);
+					}
+				} finally {
+					if (connection != null) {
+						connection.close();
+					}
+				}
+			} catch (SQLException e) {
+				// remove corrupted DB
+				DeleteDbFiles.execute(dbPath.toOSString(), DB_NAME, true);
 			}
-		} finally {
-			connection.close();
-		}
+		} while (connection == null && --tries > 0);
 	}
 
 	/**
