@@ -9,13 +9,10 @@ import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.ui.editor.highlighting.ISemanticHighlighter;
-import org.eclipse.dltk.ui.editor.highlighting.SemanticHighlighting;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
 import org.eclipse.dltk.ui.viewsupport.ScriptUILabelProvider;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.PlatformUI;
@@ -126,21 +123,10 @@ public abstract class AbstractDLTKUILanguageToolkit implements
 	public ScriptTextTools getTextTools() {
 		return new ScriptTextTools(getPartitioningId(),
 				CharOperation.NO_STRINGS, true) {
+			@Override
 			public ScriptSourceViewerConfiguration createSourceViewerConfiguraton(
 					IPreferenceStore preferenceStore, ITextEditor editor,
 					String partitioning) {
-				return null;
-			}
-
-			public IPartitionTokenScanner getPartitionScanner() {
-				return null;
-			}
-
-			public SemanticHighlighting[] getSemanticHighlightings() {
-				return null;
-			}
-
-			public ISemanticHighlighter getSemanticPositionUpdater() {
 				return null;
 			}
 		};
