@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -236,10 +235,12 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 	 * Color list label provider.
 	 */
 	private class ColorListLabelProvider extends LabelProvider {
+		@Override
 		public String getText(Object element) {
 			if (element instanceof String)
 				return (String) element;
-			return ((HighlightingColorListItem) element).getDisplayName();
+			else
+				return ((HighlightingColorListItem) element).getDisplayName();
 		}
 	}
 
@@ -254,11 +255,10 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 	protected class ColorListContentProvider implements ITreeContentProvider {
 
 		public Object[] getElements(Object inputElement) {
-			List categorys = new ArrayList();
-			String[] cats = getCategories();
-			for (int a = 0; a < cats.length; a++) {
-				if (getElementsForCategory(cats[a]).length > 0) {
-					categorys.add(cats[a]);
+			List<String> categorys = new ArrayList<String>();
+			for (String cat : getCategories()) {
+				if (getElementsForCategory(cat).length > 0) {
+					categorys.add(cat);
 				}
 			}
 			return categorys.toArray();
@@ -375,14 +375,10 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 
 	protected abstract void setDocumentPartitioning(IDocument document);
 
-	public Object[] getElementsForCategory(String entry) {
-		List elements = new ArrayList();
-
-		Iterator i = this.fListModel.iterator();
-		while (i.hasNext()) {
-			HighlightingColorListItem item = (HighlightingColorListItem) i
-					.next();
-			if (item.getCategory().equals(entry)) {
+	protected Object[] getElementsForCategory(String entry) {
+		List<HighlightingColorListItem> elements = new ArrayList<HighlightingColorListItem>();
+		for (HighlightingColorListItem item : this.fListModel) {
+			if (entry.equals(item.getCategory())) {
 				elements.add(item);
 			}
 		}
@@ -473,6 +469,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		return createSyntaxPage(parent);
 	}
 
+	@Override
 	public void initialize() {
 		super.initialize();
 
@@ -480,6 +477,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		fListViewer.setSelection(new StructuredSelection(sCoreCategory));
 	}
 
+	@Override
 	public void performDefaults() {
 		super.performDefaults();
 
@@ -491,6 +489,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		fPreviewViewer.invalidateTextPresentation();
 	}
 
+	@Override
 	public void dispose() {
 		uninstallSemanticHighlighting();
 		fColorManager.dispose();
@@ -556,6 +555,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		link
 				.setText(PreferencesMessages.DLTKEditorColoringConfigurationBlock_link);
 		link.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				PreferencesUtil.createPreferenceDialogOn(parent.getShell(),
 						e.text, null, null);
@@ -610,9 +610,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		gd = new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
 		gd.heightHint = convertHeightInCharsToPixels(9);
 		int maxWidth = 0;
-		for (Iterator it = fListModel.iterator(); it.hasNext();) {
-			HighlightingColorListItem item = (HighlightingColorListItem) it
-					.next();
+		for (HighlightingColorListItem item : fListModel) {
 			maxWidth = Math.max(maxWidth, convertWidthInCharsToPixels(item
 					.getDisplayName().length()));
 		}
@@ -883,6 +881,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		final ScriptTextTools textTools = getTextTools();
 		if (fSemanticHighlightingManager == null && textTools != null) {
 			fSemanticHighlightingManager = new SemanticHighlightingManager() {
+				@Override
 				protected ScriptTextTools getTextTools() {
 					return textTools;
 				}
