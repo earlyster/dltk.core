@@ -108,7 +108,7 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		 */
 		private String fUnderlineKey;
 
-		private String fCategory;
+		private final String fCategory;
 
 		/**
 		 * Initialize the item with the given values.
@@ -282,14 +282,11 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		}
 
 		public Object getParent(Object element) {
-			if (element instanceof String)
+			if (element instanceof HighlightingColorListItem) {
+				return ((HighlightingColorListItem) element).getCategory();
+			} else {
 				return null;
-			int index = fListModel.indexOf(element);
-			if (index < 4)
-				return sDocumentationCategory;
-			if (index >= 7)
-				return sCoreCategory;
-			return sCommentsCategory;
+			}
 		}
 
 		public boolean hasChildren(Object element) {
