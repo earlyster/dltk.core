@@ -21,6 +21,7 @@ public class ProjectWizardState implements IProjectWizardState {
 
 	private final String nature;
 	private IEnvironment environment;
+	private String externalLocation;
 	private String projectName;
 	private String mode;
 	private final Map<String, String> tooltips = new HashMap<String, String>();
@@ -63,6 +64,14 @@ public class ProjectWizardState implements IProjectWizardState {
 
 	public IEnvironment getEnvironment() {
 		return environment;
+	}
+
+	public String getExternalLocation() {
+		return externalLocation;
+	}
+
+	public void setExternalLocation(String externalLocation) {
+		this.externalLocation = externalLocation;
 	}
 
 }

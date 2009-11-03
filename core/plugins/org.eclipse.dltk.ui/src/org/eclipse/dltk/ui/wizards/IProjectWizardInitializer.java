@@ -42,6 +42,10 @@ public interface IProjectWizardInitializer {
 
 		void setEnvironment(IEnvironment environment);
 
+		String getExternalLocation();
+
+		void setExternalLocation(String path);
+
 	}
 
 	void initialize(IProjectWizardState state);
