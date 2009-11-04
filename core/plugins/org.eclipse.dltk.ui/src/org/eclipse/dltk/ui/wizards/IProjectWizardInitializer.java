@@ -46,6 +46,26 @@ public interface IProjectWizardInitializer {
 
 		void setExternalLocation(String path);
 
+		/**
+		 * Returns the value of a client defined attribute.
+		 * 
+		 * @param key
+		 *            the attribute key
+		 * @return value the String attribute value, or <code>null</code> if
+		 *         undefined
+		 */
+		String getString(String key);
+
+		/**
+		 * Sets the value of a client defined attribute.
+		 * 
+		 * @param key
+		 *            the attribute key
+		 * @param value
+		 *            the attribute value
+		 */
+		void setString(String key, String value);
+
 	}
 
 	void initialize(IProjectWizardState state);
