@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.eclipse.dltk.core.environment.IExecutionEnvironment;
 import org.eclipse.dltk.core.environment.IExecutionLogger;
 import org.eclipse.dltk.core.internal.rse.perfomance.RSEPerfomanceStatistics;
 import org.eclipse.dltk.internal.launching.execution.EFSDeployment;
+import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.rse.core.model.IHost;
 import org.eclipse.rse.core.subsystems.ISubSystem;
@@ -177,7 +179,10 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		if (environment != null) {
 			// TODO Skip environment variables which are already in shell?
 			for (int i = 0; i < environment.length; i++) {
-				commands.add(buildExportCommand(environment[i]));
+				final String env = environment[i];
+				if (isSafeEnvironmentVariable(extractName(env))) {
+					commands.add(buildExportCommand(env));
+				}
 			}
 		}
 		final String token = TOKEN_PREFIX + System.currentTimeMillis();
@@ -288,6 +293,19 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		}
 	}
 
+	private static final List<String> UNSAFE_ENV_VARS = Arrays
+			.asList(TextUtils
+					.split(
+							"GROUPS;BASH_ARGC;BASH_ARGV;BASH_SOURCE;BASH_LINENO;BASH_VERSINFO;EUID;PPID;SHELLOPTS;UID", ';')); //$NON-NLS-1$
+
+	/**
+	 * @param envVarName
+	 * @return
+	 */
+	public boolean isSafeEnvironmentVariable(String envVarName) {
+		return !UNSAFE_ENV_VARS.contains(envVarName);
+	}
+
 	private static String buildExportCommand(String envEntry) {
 		return toShellArguments(envEntry) + ";export " + extractName(envEntry); //$NON-NLS-1$
 	}
@@ -307,10 +325,62 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 		return pos > 0 ? environmentEntry.substring(0, pos) : environmentEntry;
 	}
 
-	private static String toShellArguments(String cmd) {
-		String replaceAll = cmd.replaceAll(" ", "\\\\ "); //$NON-NLS-1$ //$NON-NLS-2$
-		return replaceAll;
+	private static int scanMissingQuote(String cmd) {
+		int quote1 = -1;
+		int quote2 = -1;
+		for (int i = 0; i < cmd.length(); i++) {
+			final char ch = cmd.charAt(i);
+			if (ch == '"' && quote1 == -1) {
+				quote2 = quote2 == -1 ? i : -1;
+			} else if (ch == '\'' && quote2 == -1) {
+				quote1 = quote1 == -1 ? i : -1;
+			}
+		}
+		if (quote1 != -1 || quote2 != -1) {
+			if (quote1 == -1) {
+				return quote2;
+			} else if (quote2 == -1) {
+				return quote1;
+			} else {
+				return Math.min(quote1, quote2);
+			}
+		}
+		return -1;
 	}
+
+	private static String toShellArguments(String cmd) {
+		final int quote = scanMissingQuote(cmd);
+		if (quote != -1) {
+			return toShellArguments(cmd.substring(0, quote))
+					+ "\\" //$NON-NLS-1$
+					+ cmd.charAt(quote)
+					+ toShellArguments(cmd.substring(quote + 1));
+		}
+		boolean quote1 = false;
+		boolean quote2 = false;
+		final StringBuilder sb = new StringBuilder(cmd.length() * 2);
+		for (int i = 0; i < cmd.length(); i++) {
+			final char ch = cmd.charAt(i);
+			if (ch == '"' && !quote1) {
+				quote2 = !quote2;
+			} else if (ch == '\'' && !quote2) {
+				quote1 = !quote1;
+			}
+			if (ch == ' ' && !quote1 && !quote2) {
+				sb.append('\\');
+			}
+			sb.append(ch);
+		}
+		return sb.toString();
+	}
+
+	// public static void main(String[] args) {
+	// System.out.println(toShellArguments("A='"));
+	// System.out.println(toShellArguments("B1='\""));
+	// System.out.println(toShellArguments("B1=\"'"));
+	// System.out.println(toShellArguments("C=\" \""));
+	// System.out.println(toShellArguments("D=\" \"'\" \""));
+	// }
 
 	private String buildCommand(String[] cmdLine) {
 		StringBuffer cmd = new StringBuffer();
@@ -360,13 +430,19 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 								if (pos != -1) {
 									String varName = line.substring(0, pos);
 									String varValue = line.substring(pos + 1);
-									result.put(varName, varValue);
+									if (isValid(varName, varValue)) {
+										result.put(varName, varValue);
+									}
 								}
 							}
 						} catch (IOException e) {
 							if (DLTKCore.DEBUG)
 								DLTKRSEPlugin.log(e);
 						}
+					}
+
+					private boolean isValid(String varName, String varValue) {
+						return !"".equals(varName) && !"_".equals(varName); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				};
 				t.start();
