@@ -37,4 +37,14 @@ public interface IExecutionEnvironment {
 	IEnvironment getEnvironment();
 
 	boolean isValidExecutableAndEquals(String name, IPath fName);
+
+	/**
+	 * Tests if it's safe to specify value for the specified environment
+	 * variable.
+	 * 
+	 * @param envVarName
+	 * @return
+	 */
+	boolean isSafeEnvironmentVariable(String envVarName);
+
 }
