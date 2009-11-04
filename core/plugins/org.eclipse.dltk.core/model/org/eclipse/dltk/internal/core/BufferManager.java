@@ -15,7 +15,6 @@ import java.util.Enumeration;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.dltk.core.IBuffer;
-import org.eclipse.dltk.core.IBufferFactory;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IOpenable;
 
@@ -35,18 +34,6 @@ public class BufferManager {
 	private BufferCache openBuffers = new BufferCache(60);
 
 	/**
-	 * @deprecated
-	 */
-	protected IBufferFactory defaultBufferFactory = new IBufferFactory() {
-		/**
-		 * @deprecated
-		 */
-		public IBuffer createBuffer(IOpenable owner) {
-			return BufferManager.createBuffer(owner);
-		}
-	};
-
-	/**
 	 * Adds a buffer to the table of open buffers.
 	 */
 	protected void addBuffer(IBuffer buffer) {
@@ -56,8 +43,8 @@ public class BufferManager {
 			System.out.println("Adding buffer for " + owner); //$NON-NLS-1$
 		}
 		synchronized (this.openBuffers) {
-		this.openBuffers.put(buffer.getOwner(), buffer);
-	}
+			this.openBuffers.put(buffer.getOwner(), buffer);
+		}
 		// close buffers that were removed from the cache if space was needed
 		this.openBuffers.closeBuffers();
 		if (VERBOSE) {
@@ -67,14 +54,14 @@ public class BufferManager {
 	}
 
 	public static IBuffer createBuffer(IOpenable owner) {
-		IModelElement element = (IModelElement) owner;
+		IModelElement element = owner;
 		IResource resource = element.getResource();
 		return new Buffer(resource instanceof IFile ? (IFile) resource : null,
 				owner, element.isReadOnly());
 	}
 
 	public static IBuffer createNullBuffer(IOpenable owner) {
-		IModelElement element = (IModelElement) owner;
+		IModelElement element = owner;
 		IResource resource = element.getResource();
 		return new NullBuffer(resource instanceof IFile ? (IFile) resource
 				: null, owner, element.isReadOnly());
@@ -88,7 +75,7 @@ public class BufferManager {
 	public IBuffer getBuffer(IOpenable owner) {
 		synchronized (this.openBuffers) {
 			return (IBuffer) this.openBuffers.get(owner);
-	}
+		}
 	}
 
 	/**
@@ -97,17 +84,8 @@ public class BufferManager {
 	public synchronized static BufferManager getDefaultBufferManager() {
 		if (DEFAULT_BUFFER_MANAGER == null) {
 			DEFAULT_BUFFER_MANAGER = new BufferManager();
-	}
+		}
 		return DEFAULT_BUFFER_MANAGER;
-	}
-
-	/**
-	 * Returns the default buffer factory.
-	 * 
-	 * @deprecated
-	 */
-	public IBufferFactory getDefaultBufferFactory() {
-		return this.defaultBufferFactory;
 	}
 
 	/**
@@ -123,7 +101,7 @@ public class BufferManager {
 		synchronized (this.openBuffers) {
 			this.openBuffers.shrink();
 			result = this.openBuffers.elements();
-	}
+		}
 		// close buffers that were removed from the cache if space was needed
 		this.openBuffers.closeBuffers();
 		return result;
@@ -137,10 +115,10 @@ public class BufferManager {
 			String owner = ((Openable) buffer.getOwner())
 					.toStringWithAncestors();
 			System.out.println("Removing buffer for " + owner); //$NON-NLS-1$
-	}
+		}
 		synchronized (this.openBuffers) {
-		this.openBuffers.remove(buffer.getOwner());
-	}
+			this.openBuffers.remove(buffer.getOwner());
+		}
 		// close buffers that were removed from the cache (should be only one)
 		this.openBuffers.closeBuffers();
 		if (VERBOSE) {

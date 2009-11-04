@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.dltk.core.IBuffer;
 import org.eclipse.dltk.internal.core.util.LRUCache;
@@ -19,55 +20,60 @@ import org.eclipse.dltk.internal.core.util.LRUCache;
  */
 public class BufferCache extends OverflowingLRUCache {
 
-	private ThreadLocal buffersToClose = new ThreadLocal();
-/**
- * Constructs a new buffer cache of the given size.
- */
-public BufferCache(int size) {
-	super(size);
-}
-/**
- * Constructs a new buffer cache of the given size.
- */
-public BufferCache(int size, int overflow) {
-	super(size, overflow);
-}
-/**
- * Returns true if the buffer is successfully closed and
- * removed from the cache, otherwise false.
- *
- * <p>NOTE: this triggers an external removal of this buffer
- * by closing the buffer.
- */
-protected boolean close(LRUCacheEntry entry) {
-	IBuffer buffer= (IBuffer) entry._fValue;
+	private ThreadLocal<List<IBuffer>> buffersToClose = new ThreadLocal<List<IBuffer>>();
 
-	// prevent buffer that have unsaved changes or working copy buffer to be removed
-	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=39311
-	if (!((Openable)buffer.getOwner()).canBufferBeRemovedFromCache(buffer)) {
-		return false;
-	} else {
-			ArrayList buffers = (ArrayList) this.buffersToClose.get();
+	/**
+	 * Constructs a new buffer cache of the given size.
+	 */
+	public BufferCache(int size) {
+		super(size);
+	}
+
+	/**
+	 * Constructs a new buffer cache of the given size.
+	 */
+	public BufferCache(int size, int overflow) {
+		super(size, overflow);
+	}
+
+	/**
+	 * Returns true if the buffer is successfully closed and removed from the
+	 * cache, otherwise false.
+	 * 
+	 * <p>
+	 * NOTE: this triggers an external removal of this buffer by closing the
+	 * buffer.
+	 */
+	protected boolean close(LRUCacheEntry entry) {
+		IBuffer buffer = (IBuffer) entry._fValue;
+
+		// prevent buffer that have unsaved changes or working copy buffer to be
+		// removed see https://bugs.eclipse.org/bugs/show_bug.cgi?id=39311
+		if (!((Openable) buffer.getOwner()).canBufferBeRemovedFromCache(buffer)) {
+			return false;
+		} else {
+			List<IBuffer> buffers = this.buffersToClose.get();
 			if (buffers == null) {
-				buffers = new ArrayList();
+				buffers = new ArrayList<IBuffer>();
 				this.buffersToClose.set(buffers);
 			}
 			buffers.add(buffer);
-		return true;
+			return true;
+		}
 	}
-}
 
 	void closeBuffers() {
-		ArrayList buffers = (ArrayList) this.buffersToClose.get();
+		List<IBuffer> buffers = this.buffersToClose.get();
 		if (buffers == null)
 			return;
 		this.buffersToClose.set(null);
 		for (int i = 0, length = buffers.size(); i < length; i++) {
-			((IBuffer) buffers.get(i)).close();
+			buffers.get(i).close();
 		}
 	}
+
 	/**
-	 * Returns a new instance of the reciever.
+	 * Returns a new instance of the receiver.
 	 */
 	protected LRUCache newInstance(int size, int newOverflow) {
 		return new BufferCache(size, newOverflow);
