@@ -88,6 +88,12 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 		ILocationGroup, IProjectWizardPage {
 
 	/**
+	 * @since 2.0
+	 */
+	public static final String ATTR_EXTERNAL_BROWSE_LOCATION = DLTKUIPlugin.PLUGIN_ID
+			+ ".external.browse.location."; //$NON-NLS-1$
+
+	/**
 	 * Request a project name. Fires an event whenever the text field is
 	 * changed, regardless of its content.
 	 */
@@ -379,32 +385,42 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			if (environmentUI != null) {
 				String directoryName = fLocation.getText().trim();
 				if (directoryName.length() == 0) {
-					final IDialogSettings dSettings = DLTKUIPlugin.getDefault()
-							.getDialogSettings();
-					final String savedEnvId = dSettings
-							.get(DIALOGSTORE_LAST_EXTERNAL_ENVIRONMENT);
-					if (savedEnvId == null
-							|| savedEnvId.equals(environment.getId())) {
-						final String prevLocation = dSettings
-								.get(DIALOGSTORE_LAST_EXTERNAL_LOC);
-						if (prevLocation != null) {
-							directoryName = prevLocation;
-						}
+					final String prevLocation = loadLastExternalLocation(environment);
+					if (prevLocation != null) {
+						directoryName = prevLocation;
 					}
 				}
 				final String selectedDirectory = environmentUI.selectFolder(
 						getShell(), directoryName);
 
 				if (selectedDirectory != null) {
-					final IDialogSettings dSettings = DLTKUIPlugin.getDefault()
-							.getDialogSettings();
 					fLocation.setText(selectedDirectory);
-					dSettings.put(DIALOGSTORE_LAST_EXTERNAL_LOC,
-							selectedDirectory);
-					dSettings.put(DIALOGSTORE_LAST_EXTERNAL_ENVIRONMENT,
-							environment.getId());
+					saveLastExternalLocation(environment, selectedDirectory);
 				}
 			}
+		}
+
+		protected String loadLastExternalLocation(IEnvironment environment) {
+			final String browseLocation = getWizardState().getString(
+					ATTR_EXTERNAL_BROWSE_LOCATION + environment.getId());
+			if (browseLocation != null && browseLocation.length() != 0) {
+				return browseLocation;
+			}
+			IDialogSettings ds = DLTKUIPlugin.getDefault().getDialogSettings();
+			final String savedEnvId = ds
+					.get(DIALOGSTORE_LAST_EXTERNAL_ENVIRONMENT);
+			if (savedEnvId == null || savedEnvId.equals(environment.getId())) {
+				return ds.get(DIALOGSTORE_LAST_EXTERNAL_LOC);
+			} else {
+				return null;
+			}
+		}
+
+		protected void saveLastExternalLocation(final IEnvironment environment,
+				final String directory) {
+			IDialogSettings ds = DLTKUIPlugin.getDefault().getDialogSettings();
+			ds.put(DIALOGSTORE_LAST_EXTERNAL_LOC, directory);
+			ds.put(DIALOGSTORE_LAST_EXTERNAL_ENVIRONMENT, environment.getId());
 		}
 
 		protected static final int ANY = 0;
