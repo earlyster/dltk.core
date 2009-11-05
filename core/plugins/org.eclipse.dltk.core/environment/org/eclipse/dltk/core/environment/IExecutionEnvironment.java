@@ -44,6 +44,7 @@ public interface IExecutionEnvironment {
 	 * 
 	 * @param envVarName
 	 * @return
+	 * @since 2.0
 	 */
 	boolean isSafeEnvironmentVariable(String envVarName);
 
