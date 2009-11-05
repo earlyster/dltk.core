@@ -400,6 +400,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			}
 		}
 
+		/**
+		 * @since 2.0
+		 */
 		protected String loadLastExternalLocation(IEnvironment environment) {
 			final String browseLocation = getWizardState().getString(
 					ATTR_EXTERNAL_BROWSE_LOCATION + environment.getId());
@@ -416,6 +419,9 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 			}
 		}
 
+		/**
+		 * @since 2.0
+		 */
 		protected void saveLastExternalLocation(final IEnvironment environment,
 				final String directory) {
 			IDialogSettings ds = DLTKUIPlugin.getDefault().getDialogSettings();
