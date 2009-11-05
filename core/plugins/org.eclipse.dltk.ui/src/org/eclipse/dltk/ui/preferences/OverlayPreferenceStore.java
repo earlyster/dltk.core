@@ -35,8 +35,8 @@ public class OverlayPreferenceStore implements IPreferenceStore {
 
 	public static class OverlayKey {
 
-		TypeDescriptor fDescriptor;
-		String fKey;
+		final TypeDescriptor fDescriptor;
+		final String fKey;
 
 		public OverlayKey(TypeDescriptor descriptor, String key) {
 			fDescriptor = descriptor;
