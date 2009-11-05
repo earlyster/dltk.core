@@ -104,6 +104,9 @@ public class LocalExecEnvironment implements IExecutionEnvironment {
 		return false;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public boolean isSafeEnvironmentVariable(String envVarName) {
 		return true;
 	}
