@@ -138,6 +138,14 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		}
 
 		/**
+		 * @since 2.0
+		 */
+		public String[] getKeys() {
+			return new String[] { fColorKey, fBoldKey, fItalicKey,
+					fStrikethroughKey, fUnderlineKey };
+		}
+
+		/**
 		 * @return the bold preference key
 		 */
 		public String getBoldKey() {
@@ -228,6 +236,15 @@ public abstract class AbstractScriptEditorColoringConfigurationBlock extends
 		 */
 		public String getEnableKey() {
 			return fEnableKey;
+		}
+
+		@Override
+		public String[] getKeys() {
+			final String[] keys = super.getKeys();
+			final String[] result = new String[keys.length + 1];
+			System.arraycopy(keys, 0, result, 0, keys.length);
+			result[keys.length] = fEnableKey;
+			return result;
 		}
 	}
 
