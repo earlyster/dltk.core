@@ -114,6 +114,10 @@ public class ProjectIndexer2 implements IProjectIndexer {
 	}
 
 	public void removeProjectFragment(IScriptProject project, IPath path) {
+		if (path.equals(project.getPath())) {
+			// Project is removed through removeProject(...)
+			return;
+		}
 		RemoveContainerRequest request = new RemoveContainerRequest(this, path,
 				progressJob);
 		jobManager.requestIfNotWaiting(request);
