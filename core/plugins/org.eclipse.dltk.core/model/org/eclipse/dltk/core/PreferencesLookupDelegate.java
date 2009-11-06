@@ -113,7 +113,7 @@ public class PreferencesLookupDelegate implements IPreferencesLookupDelegate {
 			list.add(0, new ProjectScope(project));
 		}
 
-		return (IScopeContext[]) list.toArray(new IScopeContext[list.size()]);
+		return list.toArray(new IScopeContext[list.size()]);
 	}
 
 }
