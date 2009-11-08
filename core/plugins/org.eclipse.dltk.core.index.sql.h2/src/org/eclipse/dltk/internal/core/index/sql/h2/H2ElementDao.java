@@ -114,9 +114,10 @@ public class H2ElementDao implements IElementDao {
 						break;
 					}
 				}
-				statement.setString(++param,
-						camelCaseNameBuf.length() > 0 ? camelCaseNameBuf
-								.toString() : null);
+				camelCaseName = camelCaseNameBuf.length() > 0 ? camelCaseNameBuf
+						.toString()
+						: null;
+				statement.setString(++param, camelCaseName);
 			}
 
 			statement.setString(++param, metadata);
