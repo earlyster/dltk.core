@@ -271,12 +271,11 @@ public class NewSearchEngine {
 
 			if (searchEngine != null) {
 				ISearchRequestor requestor = new ISearchRequestor() {
-					public void match(int elementType, int flags,
-							int offset, int length, int nameOffset,
-							int nameLength, String elementName,
-							String metadata, String qualifier,
-							String parent, ISourceModule sourceModule,
-							boolean isReference) {
+					public void match(int elementType, int flags, int offset,
+							int length, int nameOffset, int nameLength,
+							String elementName, String metadata,
+							String qualifier, String parent,
+							ISourceModule sourceModule, boolean isReference) {
 
 						paths.add(sourceModule.getPath().toString());
 					}
