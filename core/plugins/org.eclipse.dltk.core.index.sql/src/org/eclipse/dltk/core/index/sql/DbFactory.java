@@ -41,50 +41,52 @@ public abstract class DbFactory {
 	 * @return
 	 */
 	public static DbFactory getInstance() {
-		try {
-			instanceLock.acquire();
-			if (instance == null) {
-				try {
-					for (IConfigurationElement element : Platform
-							.getExtensionRegistry()
-							.getConfigurationElementsFor(EXTPOINT)) {
-						if (FACTORY_ELEM.equals(element.getName())) {
-							instance = (DbFactory) element
-									.createExecutableExtension(CLASS_ATTR);
-							/*
-							 * Explicitly register shutdown handler, so it would
-							 * be disposed only if class was loaded.
-							 * 
-							 * We don't want static initialization code to be
-							 * executed during framework shutdown.
-							 */
-							SqlIndex
-									.addShutdownListener(new IShutdownListener() {
-										public void shutdown() {
-											if (instance != null) {
-												try {
-													instance.dispose();
-												} catch (SQLException e) {
-													SqlIndex
-															.error(
-																	"DbFactory.dispose() error",
-																	e);
+		if (instance == null) {
+			try {
+				instanceLock.acquire();
+				if (instance == null) {
+					try {
+						for (IConfigurationElement element : Platform
+								.getExtensionRegistry()
+								.getConfigurationElementsFor(EXTPOINT)) {
+							if (FACTORY_ELEM.equals(element.getName())) {
+								instance = (DbFactory) element
+										.createExecutableExtension(CLASS_ATTR);
+								/*
+								 * Explicitly register shutdown handler, so it
+								 * would be disposed only if class was loaded.
+								 * 
+								 * We don't want static initialization code to
+								 * be executed during framework shutdown.
+								 */
+								SqlIndex
+										.addShutdownListener(new IShutdownListener() {
+											public void shutdown() {
+												if (instance != null) {
+													try {
+														instance.dispose();
+													} catch (SQLException e) {
+														SqlIndex
+																.error(
+																		"DbFactory.dispose() error",
+																		e);
+													}
+													instance = null;
 												}
-												instance = null;
 											}
-										}
-									});
+										});
+							}
 						}
+					} catch (Exception e) {
+						SqlIndex
+								.error(
+										"An exception has occurred while creating database factory",
+										e);
 					}
-				} catch (Exception e) {
-					SqlIndex
-							.error(
-									"An exception has occurred while creating database factory",
-									e);
 				}
+			} finally {
+				instanceLock.release();
 			}
-		} finally {
-			instanceLock.release();
 		}
 		return instance;
 	}
