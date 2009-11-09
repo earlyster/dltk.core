@@ -17,6 +17,7 @@ public abstract class RemoteDebuggingEngineRunner extends DebuggingEngineRunner 
 		super(install);
 	}
 
+	@Override
 	protected IScriptDebugTarget createDebugTarget(ILaunch launch,
 			IDbgpService dbgpService) throws CoreException {
 		return new RemoteScriptDebugTarget(getDebugModelId(), dbgpService,
@@ -26,6 +27,7 @@ public abstract class RemoteDebuggingEngineRunner extends DebuggingEngineRunner 
 	/*
 	 * @see DebuggingEngineRunner#getSessionId(ILaunchConfiguration)
 	 */
+	@Override
 	protected String getSessionId(ILaunchConfiguration configuration)
 			throws CoreException {
 		return configuration.getAttribute(
@@ -37,6 +39,7 @@ public abstract class RemoteDebuggingEngineRunner extends DebuggingEngineRunner 
 	 * @see DebuggingEngineRunner#addEngineConfig(InterpreterConfig,
 	 * IScriptProject,ILaunch)
 	 */
+	@Override
 	protected InterpreterConfig addEngineConfig(InterpreterConfig config,
 			PreferencesLookupDelegate delegate, ILaunch launch) {
 		return config;
@@ -46,6 +49,7 @@ public abstract class RemoteDebuggingEngineRunner extends DebuggingEngineRunner 
 	 * @see DebuggingEngineRunner#run(InterpreterConfig, ILaunch,
 	 * IProgressMonitor)
 	 */
+	@Override
 	public void run(InterpreterConfig config, ILaunch launch,
 			IProgressMonitor monitor) throws CoreException {
 		try {
@@ -64,6 +68,7 @@ public abstract class RemoteDebuggingEngineRunner extends DebuggingEngineRunner 
 	/*
 	 * @see DebuggingEngineRunner#getDebuggingEngineId()
 	 */
+	@Override
 	protected String getDebuggingEngineId() {
 		return null;
 	}
@@ -71,31 +76,18 @@ public abstract class RemoteDebuggingEngineRunner extends DebuggingEngineRunner 
 	/*
 	 * @see DebuggingEngineRunner#getDebuggingEnginePreferenceQualifier()
 	 */
+	@Override
 	protected String getDebuggingEnginePreferenceQualifier() {
 		return getDebugPreferenceQualifier();
 	}
 
 	/*
-	 * @see DebuggingEngineRunner#getLoggingEnabledPreferenceKey()
-	 */
-	protected String getLoggingEnabledPreferenceKey() {
-		// not supported on the client side
-		return null;
-	}
-
-	/*
 	 * @see DebuggingEngineRunner#getLogFileNamePreferenceKey()
 	 */
+	@Override
 	protected String getLogFileNamePreferenceKey() {
 		// not supported on the client side
 		return null;
 	}
 
-	/*
-	 * @see DebuggingEngineRunner#getLogFilePathPreferenceKey()
-	 */
-	protected String getLogFilePathPreferenceKey() {
-		// not supported on the client side
-		return null;
-	}
 }
