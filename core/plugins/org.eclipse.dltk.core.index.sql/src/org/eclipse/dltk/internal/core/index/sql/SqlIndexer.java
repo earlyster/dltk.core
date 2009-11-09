@@ -29,6 +29,7 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.index.sql.Container;
 import org.eclipse.dltk.core.index.sql.DbFactory;
 import org.eclipse.dltk.core.index.sql.File;
+import org.eclipse.dltk.core.index.sql.IElementDao;
 import org.eclipse.dltk.core.index.sql.SqlIndex;
 import org.eclipse.dltk.core.index2.AbstractIndexer;
 import org.eclipse.dltk.core.index2.search.ISearchEngine;
@@ -48,15 +49,19 @@ public class SqlIndexer extends AbstractIndexer {
 	private Connection connection;
 	private File file;
 	private String natureId;
+	private IElementDao elementDao;
+
+	public SqlIndexer() {
+		elementDao = DbFactory.getInstance().getElementDao();
+	}
 
 	public void addDeclaration(DeclarationInfo info) {
 
 		try {
-			DbFactory.getInstance().getElementDao().insert(connection,
-					info.elementType, info.flags, info.offset, info.length,
-					info.nameOffset, info.nameLength, info.elementName,
-					info.metadata, info.qualifier, info.parent, file.getId(),
-					natureId, false);
+			elementDao.insert(connection, info.elementType, info.flags,
+					info.offset, info.length, info.nameOffset, info.nameLength,
+					info.elementName, info.metadata, info.qualifier,
+					info.parent, file.getId(), natureId, false);
 
 		} catch (SQLException e) {
 			SqlIndex
@@ -69,10 +74,9 @@ public class SqlIndexer extends AbstractIndexer {
 	public void addReference(ReferenceInfo info) {
 
 		try {
-			DbFactory.getInstance().getElementDao().insert(connection,
-					info.elementType, 0, info.offset, info.length, 0, 0,
-					info.elementName, info.metadata, info.qualifier, null,
-					file.getId(), natureId, true);
+			elementDao.insert(connection, info.elementType, 0, info.offset,
+					info.length, 0, 0, info.elementName, info.metadata,
+					info.qualifier, null, file.getId(), natureId, true);
 
 		} catch (SQLException e) {
 			SqlIndex
