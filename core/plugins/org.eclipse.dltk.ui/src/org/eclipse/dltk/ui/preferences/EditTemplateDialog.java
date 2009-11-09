@@ -81,6 +81,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.ActiveShellExpression;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.IHandlerActivation;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
@@ -166,8 +167,9 @@ public class EditTemplateDialog extends StatusDialog {
 
 	private StatusInfo fValidationStatus;
 	private boolean fSuppressError = true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=4354
-	private Map fGlobalActions = new HashMap(10);
-	private List fSelectionActions = new ArrayList(3);
+	private Map<String, IAction> fGlobalActions = new HashMap<String, IAction>(
+			10);
+	private List<String> fSelectionActions = new ArrayList<String>(3);
 	private String[][] fContextTypes;
 
 	private ContextTypeRegistry fContextTypeRegistry;
@@ -501,7 +503,8 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 
 	private void initializeActions() {
-		final ArrayList handlerActivations = new ArrayList(3);
+		final List<IHandlerActivation> handlerActivations = new ArrayList<IHandlerActivation>(
+				3);
 		final IHandlerService handlerService = (IHandlerService) PlatformUI
 				.getWorkbench().getAdapter(IHandlerService.class);
 		final Expression expression = new ActiveShellExpression(fPatternEditor
@@ -519,17 +522,16 @@ public class EditTemplateDialog extends StatusDialog {
 			}
 
 			public void focusGained(FocusEvent e) {
-				IAction action = (IAction) fGlobalActions
+				IAction action = fGlobalActions
 						.get(ITextEditorActionConstants.REDO);
 				handlerActivations.add(handlerService.activateHandler(
 						IWorkbenchActionDefinitionIds.REDO, new ActionHandler(
 								action), expression));
-				action = (IAction) fGlobalActions
-						.get(ITextEditorActionConstants.UNDO);
+				action = fGlobalActions.get(ITextEditorActionConstants.UNDO);
 				handlerActivations.add(handlerService.activateHandler(
 						IWorkbenchActionDefinitionIds.UNDO, new ActionHandler(
 								action), expression));
-				action = (IAction) fGlobalActions.get("ContentAssistProposal");
+				action = fGlobalActions.get("ContentAssistProposal");
 				handlerActivations
 						.add(handlerService
 								.activateHandler(
@@ -591,34 +593,33 @@ public class EditTemplateDialog extends StatusDialog {
 	private void fillContextMenu(IMenuManager menu) {
 		menu.add(new GroupMarker(ITextEditorActionConstants.GROUP_UNDO));
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO,
-				(IAction) fGlobalActions.get(ITextEditorActionConstants.UNDO));
+				fGlobalActions.get(ITextEditorActionConstants.UNDO));
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_UNDO,
-				(IAction) fGlobalActions.get(ITextEditorActionConstants.REDO));
+				fGlobalActions.get(ITextEditorActionConstants.REDO));
 
 		menu.add(new Separator(ITextEditorActionConstants.GROUP_EDIT));
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT,
-				(IAction) fGlobalActions.get(ITextEditorActionConstants.CUT));
+				fGlobalActions.get(ITextEditorActionConstants.CUT));
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT,
-				(IAction) fGlobalActions.get(ITextEditorActionConstants.COPY));
+				fGlobalActions.get(ITextEditorActionConstants.COPY));
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT,
-				(IAction) fGlobalActions.get(ITextEditorActionConstants.PASTE));
+				fGlobalActions.get(ITextEditorActionConstants.PASTE));
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT,
-				(IAction) fGlobalActions
-						.get(ITextEditorActionConstants.SELECT_ALL));
+				fGlobalActions.get(ITextEditorActionConstants.SELECT_ALL));
 
 		menu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
-		menu.appendToGroup(IContextMenuConstants.GROUP_GENERATE,
-				(IAction) fGlobalActions.get("ContentAssistProposal")); //$NON-NLS-1$
+		menu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fGlobalActions
+				.get("ContentAssistProposal")); //$NON-NLS-1$
 	}
 
 	protected void updateSelectionDependentActions() {
-		Iterator iterator = fSelectionActions.iterator();
-		while (iterator.hasNext())
-			updateAction((String) iterator.next());
+		for (String actionId : fSelectionActions) {
+			updateAction(actionId);
+		}
 	}
 
 	protected void updateAction(String actionId) {
-		IAction action = (IAction) fGlobalActions.get(actionId);
+		IAction action = fGlobalActions.get(actionId);
 		if (action instanceof IUpdate)
 			((IUpdate) action).update();
 	}
