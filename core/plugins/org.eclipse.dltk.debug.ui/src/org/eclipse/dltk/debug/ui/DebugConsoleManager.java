@@ -61,9 +61,10 @@ public class DebugConsoleManager implements ILaunchesListener2 {
 		if (!ILaunchManager.DEBUG_MODE.equals(launch.getLaunchMode())) {
 			return false;
 		}
-		// FIXME test for remote session?
 		return launch.getProcesses().length != 0
-				&& DLTKDebugLaunchConstants.isDebugConsole(launch);
+				&& DLTKDebugLaunchConstants.isDebugConsole(launch)
+				|| launch.getDebugTarget() instanceof IScriptDebugTarget
+				&& ((IScriptDebugTarget) launch.getDebugTarget()).isRemote();
 	}
 
 	/**
