@@ -112,6 +112,7 @@ import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionListener;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistantExtension2;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.information.IInformationProvider;
@@ -385,7 +386,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		private boolean fIgnoreTextConverters = false;
 		private boolean fInCompletionSession;
 
-		public IContentAssistant getContentAssistant() {
+		protected IContentAssistant getContentAssistant() {
 			return fContentAssistant;
 		}
 
@@ -400,13 +401,18 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		public void configure(SourceViewerConfiguration configuration) {
 			super.configure(configuration);
 
-			((ContentAssistant) getContentAssistant())
-					.addCompletionListener(this);
+			final IContentAssistant ca = getContentAssistant();
+			if (ca instanceof IContentAssistantExtension2) {
+				((IContentAssistantExtension2) ca).addCompletionListener(this);
+			}
 		}
 
 		public void unconfigure() {
-			((ContentAssistant) getContentAssistant())
-					.removeCompletionListener(this);
+			final IContentAssistant ca = getContentAssistant();
+			if (ca instanceof IContentAssistantExtension2) {
+				((IContentAssistantExtension2) ca)
+						.removeCompletionListener(this);
+			}
 
 			super.unconfigure();
 		}
