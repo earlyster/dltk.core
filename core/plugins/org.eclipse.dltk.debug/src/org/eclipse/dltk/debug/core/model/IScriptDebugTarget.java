@@ -76,4 +76,6 @@ public interface IScriptDebugTarget extends IDebugTarget {
 	IDbgpSession[] getSessions();
 
 	IScriptBreakpointPathMapper getPathMapper();
+
+	boolean isRemote();
 }

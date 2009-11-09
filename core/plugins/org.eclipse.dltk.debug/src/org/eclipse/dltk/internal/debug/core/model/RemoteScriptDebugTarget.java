@@ -64,4 +64,9 @@ public class RemoteScriptDebugTarget extends ScriptDebugTarget {
 				remoteWorkingDir, stripSrcFolders);
 	}
 
+	@Override
+	public boolean isRemote() {
+		return true;
+	}
+
 }

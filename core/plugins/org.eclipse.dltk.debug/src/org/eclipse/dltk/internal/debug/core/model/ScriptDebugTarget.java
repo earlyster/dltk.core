@@ -543,4 +543,8 @@ public class ScriptDebugTarget extends ScriptDebugElement implements
 		return threadManager;
 	}
 
+	public boolean isRemote() {
+		return false;
+	}
+
 }
