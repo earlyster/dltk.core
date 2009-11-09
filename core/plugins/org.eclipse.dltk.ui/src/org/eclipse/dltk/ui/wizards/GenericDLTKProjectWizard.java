@@ -42,13 +42,10 @@ public class GenericDLTKProjectWizard extends ProjectWizard {
 		addPage(fSecondPage);
 	}
 
-	/*
-	 * Stores the configuration element for the wizard. The config element will
-	 * be used in <code>performFinish</code> to set the result perspective.
-	 */
+	@Override
 	public void setInitializationData(IConfigurationElement cfig,
 			String propertyName, Object data) {
-		setInitializationData(cfig, propertyName, data);
+		super.setInitializationData(cfig, propertyName, data);
 		if (data instanceof String) {
 			this.nature = (String) data;
 		} else if (data instanceof Map<?, ?>) {
