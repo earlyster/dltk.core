@@ -28,5 +28,5 @@ public interface ICompletionEngine {
 	/**
 	 * @since 2.0
 	 */
-	void setProgressMonitor(IProgressMonitor nullProgressMonitor);
+	void setProgressMonitor(IProgressMonitor progressMonitor);
 }
