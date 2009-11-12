@@ -602,9 +602,15 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 		for (IProjectFragment fragment : extFragments) {
 			// New project fragment, we need to obtain all modules
 			// from this fragment.
-			fragment.accept(visitor);
-			if (updateState) {
-				fragmentPaths.add(fragment.getPath());
+			try {
+				fragment.accept(visitor);
+				if (updateState) {
+					fragmentPaths.add(fragment.getPath());
+				}
+			} catch (ModelException e) {
+				if (!e.isDoesNotExist()) {
+					throw e;
+				}
 			}
 			mon.worked(1);
 		}
