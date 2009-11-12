@@ -655,7 +655,7 @@ public abstract class AbstractSourceModule extends Openable implements
 						try {
 							content = getBufferContent();
 						} catch (ModelException e) {
-							if (e.getStatus().getCode() == IModelStatusConstants.ELEMENT_DOES_NOT_EXIST) {
+							if (e.isDoesNotExist()) {
 								content = CharOperation.NO_CHAR;
 							} else {
 								throw e;
