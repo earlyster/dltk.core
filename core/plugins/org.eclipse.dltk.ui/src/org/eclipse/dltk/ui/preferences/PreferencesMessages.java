@@ -90,7 +90,12 @@ public final class PreferencesMessages extends NLS {
 
 	public static String TemplateVariableProposal_error_title;
 
+	@Deprecated
 	public static String DLTKEditorPreferencePage_default;
+	/**
+	 * @since 2.0
+	 */
+	public static String DLTKEditorPreferencePage_others;
 	public static String DLTKEditorPreferencePage_singleLineComment;
 	public static String DLTKEditorPreferencePage_returnKeyword;
 	public static String DLTKEditorPreferencePage_keywords;
