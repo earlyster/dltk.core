@@ -160,7 +160,7 @@ public class HierarchyResolver {
 			String[] superTypes = type.getSuperClasses();
 			if (superTypes != null) {
 				for (int i = 0; i < superTypes.length; i++) {
-					String s = new String(superTypes[i]);
+					String s = superTypes[i];
 					List<String> extenders = superTypeToExtender.get(s);
 					if (extenders == null) {
 						extenders = new LinkedList<String>();
