@@ -18,6 +18,7 @@ import org.eclipse.dltk.compiler.env.CompilerSourceCode;
 import org.eclipse.dltk.compiler.env.ISourceModule;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
+import org.eclipse.dltk.ui.ColorPreferenceConverter;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.editor.highlighting.HighlightedPosition;
 import org.eclipse.dltk.ui.editor.highlighting.HighlightingStyle;
@@ -31,7 +32,6 @@ import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
@@ -516,14 +516,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 
 	private void adaptToTextBackgroundChange(HighlightingStyle highlighting,
 			PropertyChangeEvent event) {
-		RGB rgb = null;
-
-		Object value = event.getNewValue();
-		if (value instanceof RGB)
-			rgb = (RGB) value;
-		else if (value instanceof String)
-			rgb = StringConverter.asRGB((String) value);
-
+		RGB rgb = ColorPreferenceConverter.asRGB(event.getNewValue());
 		if (rgb != null) {
 
 			String property = event.getProperty();
@@ -558,14 +551,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 
 	private void adaptToTextForegroundChange(HighlightingStyle highlighting,
 			PropertyChangeEvent event) {
-		RGB rgb = null;
-
-		Object value = event.getNewValue();
-		if (value instanceof RGB)
-			rgb = (RGB) value;
-		else if (value instanceof String)
-			rgb = StringConverter.asRGB((String) value);
-
+		RGB rgb = ColorPreferenceConverter.asRGB(event.getNewValue());
 		if (rgb != null) {
 
 			String property = event.getProperty();

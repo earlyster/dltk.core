@@ -13,10 +13,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.dltk.ui.ColorPreferenceConverter;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.BufferedRuleBasedScanner;
 import org.eclipse.jface.text.rules.IRule;
@@ -316,14 +316,7 @@ public abstract class AbstractScriptScanner extends BufferedRuleBasedScanner {
 	}
 
 	private void adaptToColorChange(Token token, PropertyChangeEvent event) {
-		RGB rgb = null;
-
-		Object value = event.getNewValue();
-		if (value instanceof RGB)
-			rgb = (RGB) value;
-		else if (value instanceof String)
-			rgb = StringConverter.asRGB((String) value);
-
+		RGB rgb = ColorPreferenceConverter.asRGB(event.getNewValue());
 		if (rgb != null) {
 
 			String property = event.getProperty();
