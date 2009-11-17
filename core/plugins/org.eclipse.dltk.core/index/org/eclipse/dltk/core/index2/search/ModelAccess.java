@@ -97,13 +97,12 @@ public class ModelAccess {
 	 * @return elements array, or <code>null</code> in case error has occurred.
 	 */
 	public IField[] findFields(String qualifier, String name,
-			MatchRule matchRule, int trueFlags,
-			int falseFlags, IDLTKSearchScope scope, IProgressMonitor monitor) {
+			MatchRule matchRule, int trueFlags, int falseFlags,
+			IDLTKSearchScope scope, IProgressMonitor monitor) {
 
 		List<IField> result = new LinkedList<IField>();
 		if (!findElements(IModelElement.FIELD, qualifier, name, matchRule,
-				trueFlags,
-				falseFlags, scope, result, monitor)) {
+				trueFlags, falseFlags, scope, result, monitor)) {
 			return null;
 		}
 		return result.toArray(new IField[result.size()]);
@@ -170,8 +169,7 @@ public class ModelAccess {
 
 		List<IMethod> result = new LinkedList<IMethod>();
 		if (!findElements(IModelElement.METHOD, qualifier, name, matchRule,
-				trueFlags,
-				falseFlags, scope, result, monitor)) {
+				trueFlags, falseFlags, scope, result, monitor)) {
 			return null;
 		}
 		return result.toArray(new IMethod[result.size()]);
@@ -237,8 +235,7 @@ public class ModelAccess {
 
 		List<IType> result = new LinkedList<IType>();
 		if (!findElements(IModelElement.TYPE, qualifier, name, matchRule,
-				trueFlags,
-				falseFlags, scope, result, monitor)) {
+				trueFlags, falseFlags, scope, result, monitor)) {
 			return null;
 		}
 		return result.toArray(new IType[result.size()]);
@@ -269,8 +266,7 @@ public class ModelAccess {
 
 	protected <T extends IModelElement> boolean findElements(int elementType,
 			String qualifier, String name, MatchRule matchRule, int trueFlags,
-			int falseFlags,
-			IDLTKSearchScope scope, final Collection<T> result,
+			int falseFlags, IDLTKSearchScope scope, final Collection<T> result,
 			IProgressMonitor monitor) {
 
 		IDLTKLanguageToolkit toolkit = scope.getLanguageToolkit();
@@ -287,8 +283,7 @@ public class ModelAccess {
 		}
 
 		searchEngine.search(elementType, qualifier, name, trueFlags,
-				falseFlags, 0,
-				SearchFor.DECLARATIONS, matchRule, scope,
+				falseFlags, 0, SearchFor.DECLARATIONS, matchRule, scope,
 				new ISearchRequestor() {
 
 					@SuppressWarnings("unchecked")
@@ -343,6 +338,9 @@ public class ModelAccess {
 	 */
 	public static IIndexerParticipant getIndexerParticipant(
 			IDLTKLanguageToolkit toolkit) {
+		if (toolkit == null) {
+			return null;
+		}
 		IIndexer indexer = IndexerManager.getIndexer();
 		if (indexer == null) {
 			return null;
@@ -379,9 +377,11 @@ public class ModelAccess {
 	 */
 	public static IElementResolver getElementResolver(
 			IDLTKLanguageToolkit toolkit) {
-		IIndexerParticipant participant = getIndexerParticipant(toolkit);
-		if (participant != null) {
-			return participant.getElementResolver();
+		if (toolkit != null) {
+			IIndexerParticipant participant = getIndexerParticipant(toolkit);
+			if (participant != null) {
+				return participant.getElementResolver();
+			}
 		}
 		return null;
 	}
