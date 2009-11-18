@@ -57,7 +57,7 @@ public abstract class AbstractOpenPreferencePageStatusHandler implements
 			}
 		});
 
-		return new Boolean(result[0]);
+		return Boolean.valueOf(result[0]);
 	}
 
 	/**
