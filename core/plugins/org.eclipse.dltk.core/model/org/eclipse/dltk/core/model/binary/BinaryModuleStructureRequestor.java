@@ -232,7 +232,7 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 		newElements.put(handle, info);
 	}
 
-	public void acceptFieldReference(char[] fieldName, int BinaryPosition) {
+	public void acceptFieldReference(String fieldName, int BinaryPosition) {
 	}
 
 	public void acceptMethodReference(String methodName, int argCount,

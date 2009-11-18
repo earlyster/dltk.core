@@ -142,7 +142,7 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 
 	public void acceptFieldReference() {
 		try {
-			char[] fieldName = readDataString();
+			String fieldName = readString();
 			int sourcePosition = in.readInt();
 			this.requestor.acceptFieldReference(fieldName, sourcePosition);
 		} catch (IOException e) {

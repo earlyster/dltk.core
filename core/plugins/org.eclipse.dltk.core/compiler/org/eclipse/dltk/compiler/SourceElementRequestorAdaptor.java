@@ -12,7 +12,7 @@ package org.eclipse.dltk.compiler;
 
 public class SourceElementRequestorAdaptor implements ISourceElementRequestor {
 
-	public void acceptFieldReference(char[] fieldName, int sourcePosition) {
+	public void acceptFieldReference(String fieldName, int sourcePosition) {
 	}
 
 	public void acceptMethodReference(String methodName, int argCount,

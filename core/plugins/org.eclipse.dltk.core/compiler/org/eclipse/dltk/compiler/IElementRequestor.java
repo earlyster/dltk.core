@@ -37,7 +37,7 @@ public interface IElementRequestor {
 		public int sourceEnd;
 	}
 
-	void acceptFieldReference(char[] fieldName, int sourcePosition);
+	void acceptFieldReference(String fieldName, int sourcePosition);
 
 	void acceptImport(ImportInfo importInfo);
 

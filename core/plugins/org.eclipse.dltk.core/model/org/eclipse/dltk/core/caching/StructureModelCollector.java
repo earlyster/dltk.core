@@ -46,7 +46,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
-	public void acceptFieldReference(char[] fieldName, int sourcePosition) {
+	public void acceptFieldReference(String fieldName, int sourcePosition) {
 		this.baseRequestor.acceptFieldReference(fieldName, sourcePosition);
 		try {
 			out.writeInt(TAG_FIELD_REFERENCE);

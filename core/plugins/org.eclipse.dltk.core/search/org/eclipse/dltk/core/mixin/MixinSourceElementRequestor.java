@@ -87,7 +87,7 @@ public class MixinSourceElementRequestor implements ISourceElementRequestor {
 		return buffer.toString();
 	}
 
-	public void acceptFieldReference(char[] fieldName, int sourcePosition) {
+	public void acceptFieldReference(String fieldName, int sourcePosition) {
 	}
 
 	public void acceptMethodReference(String methodName, int argCount,

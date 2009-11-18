@@ -57,8 +57,8 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	/**
 	 * @see ISourceElementRequestor#acceptFieldReference(char[], int)
 	 */
-	public void acceptFieldReference(char[] fieldName, int sourcePosition) {
-		this.indexer.addFieldReference(fieldName);
+	public void acceptFieldReference(String fieldName, int sourcePosition) {
+		this.indexer.addFieldReference(fieldName.toCharArray());
 	}
 
 	/**

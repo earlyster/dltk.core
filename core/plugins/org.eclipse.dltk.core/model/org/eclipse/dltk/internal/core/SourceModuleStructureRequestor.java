@@ -442,7 +442,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 		this.newElements.put(handle, info);
 	}
 
-	public void acceptFieldReference(char[] fieldName, int sourcePosition) {
+	public void acceptFieldReference(String fieldName, int sourcePosition) {
 	}
 
 	public void acceptMethodReference(String methodName, int argCount,
