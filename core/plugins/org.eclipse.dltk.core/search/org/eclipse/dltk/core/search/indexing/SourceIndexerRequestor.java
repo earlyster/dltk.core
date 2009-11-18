@@ -82,9 +82,9 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	/**
 	 * @see ISourceElementRequestor#acceptMethodReference(char[], int, int, int)
 	 */
-	public void acceptMethodReference(char[] methodName, int argCount,
+	public void acceptMethodReference(String methodName, int argCount,
 			int sourcePosition, int sourceEndPosition) {
-		this.indexer.addMethodReference(methodName, argCount);
+		this.indexer.addMethodReference(methodName.toCharArray(), argCount);
 	}
 
 	// /**

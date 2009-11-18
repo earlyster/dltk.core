@@ -152,7 +152,7 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 
 	public void acceptMethodReference() {
 		try {
-			char[] methodName = readDataString();
+			String methodName = readString();
 			int argCount = in.readInt();
 			int sourcePosition = in.readInt();
 			int sourceEndPosition = in.readInt();

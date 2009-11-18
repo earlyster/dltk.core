@@ -235,7 +235,7 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 	public void acceptFieldReference(char[] fieldName, int BinaryPosition) {
 	}
 
-	public void acceptMethodReference(char[] methodName, int argCount,
+	public void acceptMethodReference(String methodName, int argCount,
 			int BinaryPosition, int BinaryEndPosition) {
 	}
 

@@ -57,7 +57,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
-	public void acceptMethodReference(char[] methodName, int argCount,
+	public void acceptMethodReference(String methodName, int argCount,
 			int sourcePosition, int sourceEndPosition) {
 		this.baseRequestor.acceptMethodReference(methodName, argCount,
 				sourcePosition, sourceEndPosition);
