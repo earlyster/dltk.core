@@ -264,12 +264,24 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	}
 
 	/**
-	 * Returns the Interpreter install associated with this library block.
+	 * Returns the Interpreter install associated with this library block or
+	 * <code>null</code> if new interpreter is being added.
 	 * 
 	 * @return Interpreter install
 	 */
 	protected IInterpreterInstall getInterpreterInstall() {
 		return fInterpreterInstall;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected IEnvironment getEnvironment() {
+		if (fInterpreterInstall != null) {
+			return fInterpreterInstall.getEnvironment();
+		} else {
+			return fDialog.getEnvironment();
+		}
 	}
 
 	/**
@@ -535,17 +547,16 @@ public abstract class AbstractInterpreterEnvironmentVariablesBlock implements
 	 * Initializes this control based on the settings in the given Interpreter
 	 * install and type.
 	 * 
-	 * @param Interpreter
+	 * @param interpreter
 	 *            Interpreter or <code>null</code> if none
 	 * @param type
 	 *            type of Interpreter install
 	 */
-
-	public void initializeFrom(IInterpreterInstall Interpreter,
+	public void initializeFrom(IInterpreterInstall interpreter,
 			IInterpreterInstallType type) {
-		fInterpreterInstall = Interpreter;
+		fInterpreterInstall = interpreter;
 		fInterpreterInstallType = type;
-		if (Interpreter != null) {
+		if (interpreter != null) {
 			fEnvironmentVariablesContentProvider
 					.setVariables(getInterpreterInstall()
 							.getEnvironmentVariables());
