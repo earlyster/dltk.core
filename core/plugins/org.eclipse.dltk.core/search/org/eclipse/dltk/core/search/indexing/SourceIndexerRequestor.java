@@ -62,17 +62,6 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	}
 
 	/**
-	 * @see ISourceElementRequestor#acceptImport(int, int, char[][], boolean,
-	 *      int)
-	 */
-	public void acceptImport(int declarationStart, int declarationEnd,
-			char[][] tokens, boolean onDemand, int modifiers) {
-		// imports have already been reported while creating the ImportRef node
-		// (see
-		// SourceElementParser#comsume*ImportDeclarationName() methods)
-	}
-
-	/**
 	 * @see ISourceElementRequestor#acceptLineSeparatorPositions(int[])
 	 */
 	public void acceptLineSeparatorPositions(int[] positions) {
