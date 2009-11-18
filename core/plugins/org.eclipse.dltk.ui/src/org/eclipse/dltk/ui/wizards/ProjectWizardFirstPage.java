@@ -838,7 +838,31 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 
 	}
 
-	private static final class WorkingSetGroup {
+	/**
+	 * @since 2.0
+	 */
+	protected interface IWorkingSetGroup {
+
+		/**
+		 * Create child control.
+		 * 
+		 * @param composite
+		 */
+		void createControl(Composite composite);
+
+		/**
+		 * @return
+		 */
+		IWorkingSet[] getSelectedWorkingSets();
+
+		/**
+		 * @param workingSets
+		 */
+		void setWorkingSets(IWorkingSet[] workingSets);
+
+	}
+
+	private static final class WorkingSetGroup implements IWorkingSetGroup {
 
 		private final WorkingSetConfigurationBlock fWorkingSetBlock;
 
@@ -849,7 +873,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 					DLTKUIPlugin.getDefault().getDialogSettings());
 		}
 
-		public Control createControl(Composite composite) {
+		public void createControl(Composite composite) {
 			Group workingSetGroup = new Group(composite, SWT.NONE);
 			workingSetGroup.setFont(composite.getFont());
 			workingSetGroup
@@ -858,7 +882,6 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 					.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			workingSetGroup.setLayout(new GridLayout(1, false));
 			fWorkingSetBlock.createContent(workingSetGroup);
-			return workingSetGroup;
 		}
 
 		public void setWorkingSets(IWorkingSet[] workingSets) {
@@ -1133,7 +1156,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	protected DetectGroup fDetectGroup;
 	private Validator fValidator;
 	protected String fInitialName;
-	private WorkingSetGroup fWorkingSetGroup;
+	private IWorkingSetGroup fWorkingSetGroup;
 
 	/**
 	 * @since 2.0
@@ -1275,7 +1298,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	/**
 	 * @since 2.0
 	 */
-	protected WorkingSetGroup getWorkingSetGroup() {
+	protected final IWorkingSetGroup getWorkingSetGroup() {
 		if (fWorkingSetGroup == null) {
 			fWorkingSetGroup = createWorkingSetGroup();
 		}
@@ -1285,7 +1308,7 @@ public abstract class ProjectWizardFirstPage extends WizardPage implements
 	/**
 	 * @since 2.0
 	 */
-	protected WorkingSetGroup createWorkingSetGroup() {
+	protected IWorkingSetGroup createWorkingSetGroup() {
 		return new WorkingSetGroup();
 	}
 
