@@ -392,50 +392,22 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 	}
 
 	protected IStatus validateInterpreterLocation() {
-		IEnvironment selectedEnv = getEnvironment();
-		String locationName = fInterpreterPath.getText();
 		final IStatus s;
 		final IFileHandle file;
-		if (locationName.length() == 0) {
+		final Path location = new Path(fInterpreterPath.getText());
+		if (location.isEmpty()) {
 			file = null;
 			s = new StatusInfo(IStatus.INFO,
 					InterpretersMessages.addInterpreterDialog_enterLocation);
 		} else {
 			file = PlatformFileUtils.findAbsoluteOrEclipseRelativeFile(
-					selectedEnv, new Path(locationName));
+					getEnvironment(), location);
 			if (!file.exists()) {
 				s = new StatusInfo(
 						IStatus.ERROR,
 						InterpretersMessages.addInterpreterDialog_locationNotExists);
 			} else {
-				final IStatus[] temp = new IStatus[1];
-				TimeTriggeredProgressMonitorDialog progressDialog = new TimeTriggeredProgressMonitorDialog(
-						this.getShell(), 200);
-				try {
-					progressDialog.run(false, false,
-							new IRunnableWithProgress() {
-								public void run(IProgressMonitor monitor)
-										throws InvocationTargetException,
-										InterruptedException {
-									EnvironmentVariable[] environmentVariables = null;
-									if (fEnvironmentVariablesBlock != null) {
-										environmentVariables = fEnvironmentVariablesBlock
-												.getEnvironmentVariables();
-									}
-									LibraryLocation[] locations = fLibraryBlock
-											.getLibraryLocations();
-									temp[0] = getInterpreterType()
-											.validateInstallLocation(file,
-													environmentVariables,
-													locations, monitor);
-								}
-							});
-				} catch (InvocationTargetException e) {
-					DLTKCore.error(e);
-				} catch (InterruptedException e) {
-					DLTKCore.error(e);
-				}
-				s = temp[0];
+				s = validateInterpreter(file);
 			}
 		}
 		if (s != null && s.isOK()) {
@@ -457,6 +429,33 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		// fEnvironmentVariablesBlock.restoreDefaultVariables();
 		// }
 		return s;
+	}
+
+	private IStatus validateInterpreter(final IFileHandle file) {
+		final IStatus[] temp = new IStatus[1];
+		TimeTriggeredProgressMonitorDialog progressDialog = new TimeTriggeredProgressMonitorDialog(
+				this.getShell(), 200);
+		try {
+			progressDialog.run(false, false, new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor)
+						throws InvocationTargetException, InterruptedException {
+					EnvironmentVariable[] environmentVariables = null;
+					if (fEnvironmentVariablesBlock != null) {
+						environmentVariables = fEnvironmentVariablesBlock
+								.getEnvironmentVariables();
+					}
+					LibraryLocation[] locations = fLibraryBlock
+							.getLibraryLocations();
+					temp[0] = getInterpreterType().validateInstallLocation(
+							file, environmentVariables, locations, monitor);
+				}
+			});
+		} catch (InvocationTargetException e) {
+			DLTKCore.error(e);
+		} catch (InterruptedException e) {
+			DLTKCore.error(e);
+		}
+		return temp[0];
 	}
 
 	/**
