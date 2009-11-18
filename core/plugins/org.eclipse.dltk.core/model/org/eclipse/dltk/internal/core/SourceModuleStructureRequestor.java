@@ -424,13 +424,13 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	}
 
 	public void acceptPackage(int declarationStart, int declarationEnd,
-			char[] name) {
+			String name) {
 		ModelElementInfo parentInfo = this.infoStack.peek();
 		ModelElement parentHandle = this.handleStack.peek();
 		PackageDeclaration handle = null;
 
 		// if (parentHandle.getElementType() == IModelElement.SOURCE_MODULE) {
-		handle = new PackageDeclaration(parentHandle, new String(name));
+		handle = new PackageDeclaration(parentHandle, name);
 
 		this.resolveDuplicates(handle);
 

@@ -165,7 +165,7 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 
 	public void acceptPackage() {
 		try {
-			char[] name = readDataString();
+			String name = readString();
 			int declarationStart = in.readInt();
 			int declarationEnd = in.readInt();
 			this.requestor
@@ -225,8 +225,7 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 		info.superclasses = readDataStringsStr();
 	}
 
-	private void readElementInfo(ElementInfo info)
-			throws IOException {
+	private void readElementInfo(ElementInfo info) throws IOException {
 		info.name = readString();
 		info.modifiers = in.readInt();
 		info.nameSourceStart = in.readInt();

@@ -73,7 +73,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	}
 
 	public void acceptPackage(int declarationStart, int declarationEnd,
-			char[] name) {
+			String name) {
 		this.baseRequestor
 				.acceptPackage(declarationStart, declarationEnd, name);
 		try {

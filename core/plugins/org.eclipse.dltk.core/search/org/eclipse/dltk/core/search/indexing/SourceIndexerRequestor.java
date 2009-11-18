@@ -272,7 +272,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	}
 
 	public void acceptPackage(int declarationStart, int declarationEnd,
-			char[] name) {
+			String name) {
 	}
 
 	/**

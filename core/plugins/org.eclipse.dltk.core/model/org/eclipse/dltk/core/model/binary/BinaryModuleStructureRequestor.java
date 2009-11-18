@@ -222,11 +222,11 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 	}
 
 	public void acceptPackage(int declarationStart, int declarationEnd,
-			char[] name) {
+			String name) {
 		ModelElement parentHandle = this.handleStack.peek();
 		ModelElementInfo parentInfo = this.infoStack.peek();
 		BinaryPackageDeclaration handle = new BinaryPackageDeclaration(
-				parentHandle, new String(name));
+				parentHandle, name);
 		BinaryPackageDeclarationElementInfo info = new BinaryPackageDeclarationElementInfo();
 		addChild(parentInfo, handle);
 		newElements.put(handle, info);

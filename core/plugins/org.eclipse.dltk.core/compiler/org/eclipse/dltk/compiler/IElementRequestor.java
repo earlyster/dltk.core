@@ -44,7 +44,7 @@ public interface IElementRequestor {
 	void acceptMethodReference(char[] methodName, int argCount,
 			int sourcePosition, int sourceEndPosition);
 
-	void acceptPackage(int declarationStart, int declarationEnd, char[] name);
+	void acceptPackage(int declarationStart, int declarationEnd, String name);
 
 	void acceptTypeReference(char[] typeName, int sourcePosition);
 
