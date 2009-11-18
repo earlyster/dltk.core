@@ -35,6 +35,7 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IImportDeclaration;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IPackageDeclaration;
 import org.eclipse.dltk.core.IScriptLanguageProvider;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
@@ -1474,7 +1475,8 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 						offset = range.getOffset();
 						length = range.getLength();
 					}
-				} else if (reference instanceof IImportDeclaration) {
+				} else if (reference instanceof IImportDeclaration
+						|| reference instanceof IPackageDeclaration) {
 					// range is still getSourceRange()
 					offset = range.getOffset();
 					length = range.getLength();
