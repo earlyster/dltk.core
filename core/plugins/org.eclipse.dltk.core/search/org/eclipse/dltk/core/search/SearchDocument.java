@@ -57,6 +57,7 @@ public abstract class SearchDocument extends InternalSearchDocument {
 	 * @param key
 	 *            the key of the index entry
 	 */
+	@Override
 	public void addIndexEntry(char[] category, char[] key) {
 		super.addIndexEntry(category, key);
 	}
@@ -134,6 +135,7 @@ public abstract class SearchDocument extends InternalSearchDocument {
 	 * 
 	 * @return the path to the document
 	 */
+	@Override
 	public final String getPath() {
 		return this.documentPath;
 	}
@@ -144,6 +146,7 @@ public abstract class SearchDocument extends InternalSearchDocument {
 	 * {@link SearchParticipant#indexDocument(SearchDocument document, org.eclipse.core.runtime.IPath indexPath)}
 	 * .
 	 */
+	@Override
 	public void removeAllIndexEntries() {
 		super.removeAllIndexEntries();
 	}
