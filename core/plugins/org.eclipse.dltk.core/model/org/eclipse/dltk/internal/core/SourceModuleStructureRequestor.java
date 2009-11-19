@@ -15,12 +15,14 @@ import java.util.Stack;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
+import org.eclipse.dltk.compiler.ISourceElementRequestorExtension;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 
-public class SourceModuleStructureRequestor implements ISourceElementRequestor {
+public class SourceModuleStructureRequestor implements ISourceElementRequestor,
+		ISourceElementRequestorExtension {
 
 	private DuplicateResolver.Resolver counters = DuplicateResolver.create();
 
@@ -503,6 +505,10 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor {
 	protected ImportDeclaration createImportDeclaration(ImportContainer parent,
 			String name, String version) {
 		return new ImportDeclaration(parent, name, version);
+	}
+
+	public int getMode() {
+		return MODE_STRUCTURE;
 	}
 
 }
