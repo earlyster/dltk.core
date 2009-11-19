@@ -1,6 +1,5 @@
 package org.eclipse.dltk.core.caching;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -12,15 +11,15 @@ import org.eclipse.dltk.internal.core.util.Util;
 
 public abstract class AbstractDataSaver {
 	private static final int MAX_STR = 65500;
-	protected OutputStream stream;
 	protected DataOutputStream out;
 	private List<String> stringIndex = new ArrayList<String>();
-	private ByteArrayOutputStream bout;
+	private final ByteArrayOutputStream data = new ByteArrayOutputStream();
 
-	public AbstractDataSaver(OutputStream stream) {
-		this.stream = stream;
-		bout = new ByteArrayOutputStream();
-		this.out = new DataOutputStream(bout);
+	/**
+	 * @since 2.0
+	 */
+	public AbstractDataSaver() {
+		this.out = new DataOutputStream(data);
 	}
 
 	protected void writeString(String value) throws IOException {
@@ -87,16 +86,34 @@ public abstract class AbstractDataSaver {
 		}
 	}
 
-	protected void storeStringIndex() throws IOException {
-		this.out.flush();
-		this.out = new DataOutputStream(this.stream);
-
+	/**
+	 * @since 2.0
+	 */
+	protected void storeStringIndex(OutputStream stream) throws IOException {
+		final DataOutputStream indexOut = new DataOutputStream(stream);
 		// Store strings
-		out.writeInt(stringIndex.size());
+		indexOut.writeInt(stringIndex.size());
 		for (String s : this.stringIndex) {
-			Util.writeUTF(out, s.toCharArray());
+			Util.writeUTF(indexOut, s.toCharArray());
 		}
-		org.eclipse.dltk.compiler.util.Util.copy(new ByteArrayInputStream(bout
-				.toByteArray()), this.out);
+		indexOut.flush();
 	}
+
+	/**
+	 * @param stream
+	 * @throws IOException
+	 * @since 2.0
+	 */
+	protected void saveDataTo(OutputStream stream) throws IOException {
+		data.writeTo(stream);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected void saveTo(OutputStream stream) throws IOException {
+		storeStringIndex(stream);
+		data.writeTo(stream);
+	}
+
 }

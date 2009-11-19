@@ -9,10 +9,6 @@ import org.eclipse.dltk.core.mixin.IMixinRequestor;
 public class MixinModelCollector extends AbstractDataSaver implements
 		IMixinRequestor {
 
-	public MixinModelCollector() {
-		super(new ByteArrayOutputStream());
-	}
-
 	public void reportElement(ElementInfo info) {
 		try {
 			if (info != null && info.key != null) {
@@ -23,14 +19,14 @@ public class MixinModelCollector extends AbstractDataSaver implements
 	}
 
 	public byte[] getBytes() {
+		final ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		try {
-			stream.flush();
-			storeStringIndex();
+			saveTo(stream);
 		} catch (IOException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
 		}
-		return ((ByteArrayOutputStream) stream).toByteArray();
+		return stream.toByteArray();
 	}
 }

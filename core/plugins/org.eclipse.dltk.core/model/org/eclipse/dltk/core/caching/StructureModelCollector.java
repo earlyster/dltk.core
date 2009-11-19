@@ -12,7 +12,6 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	private ISourceElementRequestor baseRequestor;
 
 	public StructureModelCollector(ISourceElementRequestor requestor) {
-		super(new ByteArrayOutputStream());
 		this.baseRequestor = requestor;
 	}
 
@@ -354,14 +353,14 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	}
 
 	public byte[] getBytes() {
+		final ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		try {
-			stream.flush();
-			storeStringIndex();
+			saveTo(stream);
 		} catch (IOException e) {
 			if (DLTKCore.DEBUG) {
 				e.printStackTrace();
 			}
 		}
-		return ((ByteArrayOutputStream) stream).toByteArray();
+		return stream.toByteArray();
 	}
 }
