@@ -71,10 +71,12 @@ public final class PreferenceKey {
 		setStoredValue(context, value, null);
 	}
 
+	@Override
 	public int hashCode() {
 		return fQualifier.hashCode() ^ fKey.hashCode();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof PreferenceKey) {
 			final PreferenceKey other = (PreferenceKey) obj;
@@ -84,12 +86,20 @@ public final class PreferenceKey {
 		return false;
 	}
 
+	@Override
 	public String toString() {
 		return fQualifier + '/' + fKey;
 	}
 
 	public String getQualifier() {
 		return fQualifier;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public boolean belongsTo(String qualifier) {
+		return fQualifier.equals(qualifier);
 	}
 
 }
