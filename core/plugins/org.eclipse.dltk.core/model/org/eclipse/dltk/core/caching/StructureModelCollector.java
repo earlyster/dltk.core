@@ -16,6 +16,13 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		this.baseRequestor = requestor;
 	}
 
+	/**
+	 * @since 2.0
+	 */
+	protected void writeTag(int tag) throws IOException {
+		out.writeInt(tag);
+	}
+
 	private void writeString(char[] fieldName) throws IOException {
 		if (fieldName == null) {
 			writeString((String) null);
@@ -52,7 +59,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void acceptFieldReference(String fieldName, int sourcePosition) {
 		this.baseRequestor.acceptFieldReference(fieldName, sourcePosition);
 		try {
-			out.writeInt(TAG_FIELD_REFERENCE);
+			writeTag(TAG_FIELD_REFERENCE);
 			writeString(fieldName);
 			out.writeInt(sourcePosition);
 		} catch (IOException e) {
@@ -68,7 +75,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		this.baseRequestor.acceptMethodReference(methodName, argCount,
 				sourcePosition, sourceEndPosition);
 		try {
-			out.writeInt(TAG_METHOD_REF1);
+			writeTag(TAG_METHOD_REF1);
 			writeString(methodName);
 			out.writeInt(argCount);
 			out.writeInt(sourcePosition);
@@ -86,7 +93,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		this.baseRequestor
 				.acceptPackage(declarationStart, declarationEnd, name);
 		try {
-			out.writeInt(TAG_PACKAGE);
+			writeTag(TAG_PACKAGE);
 			writeString(name);
 			out.writeInt(declarationStart);
 			out.writeInt(declarationEnd);
@@ -100,7 +107,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		this.baseRequestor
 				.acceptTypeReference(typeName, sourceStart, sourceEnd);
 		try {
-			out.writeInt(TAG_TYPE_REFERENCE1);
+			writeTag(TAG_TYPE_REFERENCE1);
 			writeString(typeName);
 			out.writeInt(sourceStart);
 			out.writeInt(sourceEnd);
@@ -112,7 +119,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void acceptTypeReference(char[] typeName, int sourcePosition) {
 		this.baseRequestor.acceptTypeReference(typeName, sourcePosition);
 		try {
-			out.writeInt(TAG_TYPE_REFERENCE2);
+			writeTag(TAG_TYPE_REFERENCE2);
 			writeString(typeName);
 			out.writeInt(sourcePosition);
 		} catch (IOException e) {
@@ -126,7 +133,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void enterField(FieldInfo info) {
 		this.baseRequestor.enterField(info);
 		try {
-			out.writeInt(TAG_ENTER_FIELD);
+			writeTag(TAG_ENTER_FIELD);
 			writeFieldInfo(info);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -164,7 +171,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public boolean enterFieldCheckDuplicates(FieldInfo info) {
 		boolean result = this.baseRequestor.enterFieldCheckDuplicates(info);
 		try {
-			out.writeInt(TAG_ENTER_FIELD_DUPL);
+			writeTag(TAG_ENTER_FIELD_DUPL);
 			writeFieldInfo(info);
 			out.writeBoolean(result);
 		} catch (IOException e) {
@@ -181,7 +188,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		boolean result = this.baseRequestor.enterFieldWithParentType(info,
 				parentName, delimiter);
 		try {
-			out.writeInt(TAG_ENTER_FIELD_WITH_PARENT);
+			writeTag(TAG_ENTER_FIELD_WITH_PARENT);
 			writeFieldInfo(info);
 			writeString(parentName);
 			writeString(delimiter);
@@ -198,7 +205,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void enterMethod(MethodInfo info) {
 		this.baseRequestor.enterMethod(info);
 		try {
-			out.writeInt(TAG_ENTER_METHOD);
+			writeTag(TAG_ENTER_METHOD);
 			writeMethodInfo(info);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -211,7 +218,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void enterMethodRemoveSame(MethodInfo info) {
 		this.baseRequestor.enterMethodRemoveSame(info);
 		try {
-			out.writeInt(TAG_ENTER_METHOD_REMOVE_SAME);
+			writeTag(TAG_ENTER_METHOD_REMOVE_SAME);
 			writeMethodInfo(info);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -226,7 +233,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		boolean result = this.baseRequestor.enterMethodWithParentType(info,
 				parentName, delimiter);
 		try {
-			out.writeInt(TAG_ENTER_METHOD_WITH_PARENT);
+			writeTag(TAG_ENTER_METHOD_WITH_PARENT);
 			writeMethodInfo(info);
 			writeString(parentName);
 			writeString(delimiter);
@@ -239,7 +246,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void enterModule() {
 		this.baseRequestor.enterModule();
 		try {
-			out.writeInt(TAG_ENTER_MODULE);
+			writeTag(TAG_ENTER_MODULE);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -248,7 +255,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void enterModuleRoot() {
 		this.baseRequestor.enterModuleRoot();
 		try {
-			out.writeInt(TAG_ENTER_MODULE_ROOT);
+			writeTag(TAG_ENTER_MODULE_ROOT);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -260,7 +267,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void enterType(TypeInfo info) {
 		this.baseRequestor.enterType(info);
 		try {
-			out.writeInt(TAG_ENTER_TYPE);
+			writeTag(TAG_ENTER_TYPE);
 			writeTypeInfo(info);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -271,7 +278,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		boolean result = this.baseRequestor
 				.enterTypeAppend(fullName, delimiter);
 		try {
-			out.writeInt(TAG_ENTER_TYPE_APPEND);
+			writeTag(TAG_ENTER_TYPE_APPEND);
 			writeString(fullName);
 			writeString(delimiter);
 		} catch (IOException e) {
@@ -283,7 +290,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void exitField(int declarationEnd) {
 		this.baseRequestor.exitField(declarationEnd);
 		try {
-			out.writeInt(TAG_EXIT_FIELD);
+			writeTag(TAG_EXIT_FIELD);
 			out.writeInt(declarationEnd);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -293,7 +300,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void exitMethod(int declarationEnd) {
 		this.baseRequestor.exitMethod(declarationEnd);
 		try {
-			out.writeInt(TAG_EXIT_METHOD);
+			writeTag(TAG_EXIT_METHOD);
 			out.writeInt(declarationEnd);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -303,7 +310,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void exitModule(int declarationEnd) {
 		this.baseRequestor.exitModule(declarationEnd);
 		try {
-			out.writeInt(TAG_EXIT_MODULE);
+			writeTag(TAG_EXIT_MODULE);
 			out.writeInt(declarationEnd);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -313,7 +320,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void exitModuleRoot() {
 		this.baseRequestor.exitModuleRoot();
 		try {
-			out.writeInt(TAG_EXIT_MODULE_ROOT);
+			writeTag(TAG_EXIT_MODULE_ROOT);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -322,7 +329,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void exitType(int declarationEnd) {
 		this.baseRequestor.exitType(declarationEnd);
 		try {
-			out.writeInt(TAG_EXIT_TYPE);
+			writeTag(TAG_EXIT_TYPE);
 			out.writeInt(declarationEnd);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -335,7 +342,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	public void acceptImport(ImportInfo importInfo) {
 		this.baseRequestor.acceptImport(importInfo);
 		try {
-			out.writeInt(TAG_ACCEPT_IMPORT);
+			writeTag(TAG_ACCEPT_IMPORT);
 			out.writeInt(importInfo.sourceStart);
 			out.writeInt(importInfo.sourceEnd);
 			writeString(importInfo.containerName);
