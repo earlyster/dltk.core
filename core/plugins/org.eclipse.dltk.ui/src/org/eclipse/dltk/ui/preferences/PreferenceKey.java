@@ -78,8 +78,8 @@ public final class PreferenceKey {
 	public boolean equals(Object obj) {
 		if (obj instanceof PreferenceKey) {
 			final PreferenceKey other = (PreferenceKey) obj;
-			return fQualifier.equals(other.fQualifier)
-					&& fKey.equals(other.fKey);
+			return fKey.equals(other.fKey)
+					&& fQualifier.equals(other.fQualifier);
 		}
 		return false;
 	}
