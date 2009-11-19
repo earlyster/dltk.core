@@ -46,6 +46,9 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void acceptFieldReference(String fieldName, int sourcePosition) {
 		this.baseRequestor.acceptFieldReference(fieldName, sourcePosition);
 		try {
@@ -57,6 +60,9 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void acceptMethodReference(String methodName, int argCount,
 			int sourcePosition, int sourceEndPosition) {
 		this.baseRequestor.acceptMethodReference(methodName, argCount,
@@ -72,6 +78,9 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public void acceptPackage(int declarationStart, int declarationEnd,
 			String name) {
 		this.baseRequestor
