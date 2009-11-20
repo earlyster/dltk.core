@@ -18,8 +18,6 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.dltk.core.IModelElement;
-import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.internal.ui.StandardModelElementContentProvider;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -82,11 +80,12 @@ public class LevelTreeContentProvider extends DLTKSearchContentProvider
 				}
 			}
 		}
-		if (fCurrentLevel != LEVEL_FILE && child instanceof IType) {
-			IType type = (IType) child;
-			if (possibleParent instanceof ISourceModule)
-				possibleParent = type.getScriptFolder();
-		}
+		// TODO make this optional if there are languages with 1 class per file
+		// if (fCurrentLevel != LEVEL_FILE && child instanceof IType) {
+		// IType type = (IType) child;
+		// if (possibleParent instanceof ISourceModule)
+		// possibleParent = type.getScriptFolder();
+		// }
 		return possibleParent;
 	}
 
