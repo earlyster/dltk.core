@@ -90,10 +90,14 @@ public class DLTKSearchEditorOpener {
 	public IEditorPart openElement(Object element) throws PartInitException,
 			ModelException {
 		IWorkbenchPage wbPage = DLTKUIPlugin.getActivePage();
+		final IEditorPart editor;
 		if (NewSearchUI.reuseEditor())
-			return showWithReuse(element, wbPage);
+			editor = showWithReuse(element, wbPage);
 		else
-			return showWithoutReuse(element, wbPage);
+			editor = showWithoutReuse(element, wbPage);
+		if (element instanceof IModelElement)
+			EditorUtility.revealInEditor(editor, (IModelElement) element);
+		return editor;
 	}
 
 	public IEditorPart openMatch(Match match) throws PartInitException,
