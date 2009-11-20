@@ -261,9 +261,6 @@ public class EditorUtility {
 			return;
 		if (part instanceof IScriptEditor) {
 			((IScriptEditor) part).setSelection(element);
-			if (DLTKCore.DEBUG) {
-				System.err.println("Add revealInEditor set selection"); //$NON-NLS-1$
-			}
 			return;
 		}
 		// Support for non-Script editor
