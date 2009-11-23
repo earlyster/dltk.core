@@ -101,6 +101,8 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 			throws CoreException {
 		final ILaunchConfiguration configuration = element.getLaunch()
 				.getLaunchConfiguration();
+		if (configuration == null)
+			return null;
 
 		final String projectName = configuration.getAttribute(
 				ScriptLaunchConfigurationConstants.ATTR_PROJECT_NAME,
@@ -173,6 +175,9 @@ public abstract class ScriptDebugModelPresentation extends LabelProvider
 			IScriptStackFrame stackFrame) throws CoreException {
 		final URI uri = stackFrame.getSourceURI();
 		final IProject project = getProject(stackFrame);
+
+		if (project == null)
+			return Path.EMPTY;
 
 		final IPath projectPath = new Path(project.getLocationURI().getPath());
 		final IPath realPath = new Path(uri.getPath());
