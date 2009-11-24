@@ -9,22 +9,18 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -34,7 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -52,15 +47,12 @@ import org.eclipse.dltk.internal.ui.util.SWTUtil;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.dltk.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
-import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.ModelElementLabelProvider;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
-import org.eclipse.dltk.ui.environment.IEnvironmentUI;
 import org.eclipse.dltk.ui.preferences.CodeTemplatesPreferencePage;
 import org.eclipse.dltk.ui.text.templates.ICodeTemplateArea;
 import org.eclipse.dltk.ui.text.templates.SourceModuleTemplateContext;
@@ -85,25 +77,21 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 public abstract class NewSourceModulePage extends NewContainerWizardPage {
 
-	private static final String REMOTE_FOLDER = "NewSourceModulePage.remoteFolder"; //$NON-NLS-1$
 	private static final String FILE = "NewSourceModulePage.file"; //$NON-NLS-1$
 	private static final String TEMPLATE = "NewSourceModulePage.template"; //$NON-NLS-1$
 
 	private IStatus sourceMoudleStatus;
-	private IStatus remoteFolderStatus = null;
 	private IStatus templateStatus = null;
 
 	private IScriptFolder currentScriptFolder;
 
 	private StringDialogField fileDialogField;
-	private StringButtonDialogField remoteFolderDialogField;
 
 	static class TemplateDescriptor extends
 			Descriptor<INewSourceModuleTemplate> {
@@ -189,29 +177,6 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		return status;
 	}
 
-	private IStatus remoteFolderChanged() {
-		StatusInfo status = new StatusInfo();
-		if (remoteFolderDialogField != null
-				&& remoteFolderDialogField.isEnabled()) {
-			String remoteFolder = remoteFolderDialogField.getText();
-			if (remoteFolder.length() == 0) {
-				// status
-				// .setError(Messages.NewSourceModulePage_remoteFolderCannotBeEmpty);
-			} else {
-				final IEnvironment environment = getLinkedEnvironment();
-				if (environment != null) {
-					final IFileHandle file = environment.getFile(new Path(
-							remoteFolder));
-					if (file == null || !file.isDirectory()) {
-						status
-								.setError(Messages.NewSourceModulePage_remoteFolderNotExist);
-					}
-				}
-			}
-		}
-		return status;
-	}
-
 	/**
 	 * The wizard owning this page is responsible for calling this method with
 	 * the current selection. The selection is used to initialize the fields of
@@ -221,9 +186,6 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 	 *            used to initialize the fields
 	 */
 	public void init(IStructuredSelection selection) {
-		if (isLinkingSupported() && remoteFolderDialogField == null) {
-			createRemoteFolderField();
-		}
 		if (getTemplateArea() != null) {
 			createTemplateField();
 		}
@@ -233,40 +195,7 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		initContainerPage(element);
 		updateTemplates();
 
-		updateStatus(new IStatus[] { containerStatus,
-				remoteFolderStatus = remoteFolderChanged(), fileChanged() });
-	}
-
-	private Button createLink;
-	private Label remoteFolderLabel;
-	private Composite remoteFolderLabelContainer;
-
-	protected void createRemoteFolderControls(Composite parent, int nColumns) {
-		remoteFolderLabelContainer = new Composite(parent, SWT.NONE);
-		final GridLayout layout = new GridLayout();
-		layout.marginWidth = 0;
-		remoteFolderLabelContainer.setLayout(layout);
-		remoteFolderLabelContainer.setLayoutData(StringDialogField
-				.gridDataForLabel(1));
-		remoteFolderLabel = remoteFolderDialogField
-				.getLabelControl(remoteFolderLabelContainer);
-		remoteFolderLabel.setLayoutData(StringDialogField.gridDataForLabel(1));
-		createLink = new Button(remoteFolderLabelContainer, SWT.CHECK);
-		createLink.setText(Messages.NewSourceModulePage_LinkToFolder);
-		createLink.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				remoteFolderDialogField.setEnabled(createLink.getSelection());
-				remoteFolderStatus = remoteFolderChanged();
-				handleFieldChanged(REMOTE_FOLDER);
-			}
-		});
-		createLink.setLayoutData(StringDialogField.gridDataForLabel(1));
-		final Text text = remoteFolderDialogField.getTextControl(parent);
-		text.setLayoutData(StringDialogField.gridDataForText(nColumns - 2));
-		final Button button = remoteFolderDialogField.getChangeControl(parent);
-		button.setLayoutData(StringButtonDialogField.gridDataForButton(button,
-				1));
-		updateRemoteFolderLableEnablement();
+		updateStatus(new IStatus[] { containerStatus, fileChanged() });
 	}
 
 	protected void createFileControls(Composite parent, int nColumns) {
@@ -293,6 +222,7 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		configureTemplates
 				.setText(Messages.NewSourceModulePage_ConfigureTemplates);
 		configureTemplates.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String templateName = null;
 				final Template template = getSelectedTemplate();
@@ -438,44 +368,13 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		});
 	}
 
-	protected void createRemoteFolderField() {
-		remoteFolderDialogField = new StringButtonDialogField(
-				new IStringButtonAdapter() {
-					public void changeControlPressed(DialogField field) {
-						IEnvironment environment = getLinkedEnvironment();
-						if (environment == null) {
-							environment = getEnvironment();
-						}
-						if (environment != null) {
-							final IEnvironmentUI ui = (IEnvironmentUI) environment
-									.getAdapter(IEnvironmentUI.class);
-							final String folder = ui.selectFolder(getShell(),
-									remoteFolderDialogField.getText());
-							if (folder != null) {
-								remoteFolderDialogField.setText(folder);
-							}
-						}
-					}
-				});
-		remoteFolderDialogField
-				.setDialogFieldListener(new IDialogFieldListener() {
-					public void dialogFieldChanged(DialogField field) {
-						remoteFolderStatus = remoteFolderChanged();
-						handleFieldChanged(REMOTE_FOLDER);
-					}
-				});
-		remoteFolderDialogField
-				.setButtonLabel(Messages.NewSourceModulePage_remoteFolder_BrowseButton);
-		remoteFolderDialogField
-				.setLabelText(Messages.NewSourceModulePage_remoteFolder_label);
-	}
-
 	protected void createTemplateField() {
 		fTemplateDialogField = new ComboDialogField(SWT.READ_ONLY);
 		fTemplateDialogField
 				.setLabelText(Messages.NewSourceModulePage_Template);
 	}
 
+	@Override
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 		if (fieldName == CONTAINER) {
@@ -486,7 +385,6 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 			// currentScriptFolder = null;
 			currentScriptFolder = getScriptFolder();
 			sourceMoudleStatus = fileChanged();
-			remoteFolderStatus = remoteFolderChanged();
 		}
 		// add template statusess here
 		templateStatus = null;
@@ -501,8 +399,8 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 			}
 		}
 
-		updateStatus(new IStatus[] { containerStatus, remoteFolderStatus,
-				sourceMoudleStatus, templateStatus });
+		updateStatus(new IStatus[] { containerStatus, sourceMoudleStatus,
+				templateStatus });
 	}
 
 	public ISourceModule createFile(IProgressMonitor monitor)
@@ -522,36 +420,6 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 					if (!template.createSourceModule(getScriptFolder(),
 							fileName, getFileContent(module))) {
 						return null;
-					}
-				}
-			}
-		}
-		if (isLinkingSupported() && isLinkingEnabled()) {
-			final IResource resource = currentScriptFolder.getResource();
-			if (resource != null
-					&& (resource.getType() & (IResource.FOLDER | IResource.PROJECT)) != 0
-					&& remoteFolderDialogField != null
-					&& remoteFolderDialogField.isEnabled()
-					&& remoteFolderDialogField.getText().length() > 0) {
-				final IEnvironment environment = getEnvironment();
-				if (environment != null) {
-					final IFileHandle folder = environment.getFile(new Path(
-							remoteFolderDialogField.getText()));
-					final IFileHandle handle = folder.getChild(fileName);
-					final boolean fileExists = handle.exists();
-					if (!fileExists) {
-						try {
-							handle.openOutputStream(monitor).close();
-						} catch (IOException e) {
-							throw new CoreException(new Status(IStatus.ERROR,
-									DLTKUIPlugin.PLUGIN_ID, e.getMessage(), e));
-						}
-					}
-					final IFile file = ((IContainer) resource)
-							.getFile(new Path(fileName));
-					file.createLink(handle.toURI(), 0, monitor);
-					if (fileExists) {
-						return module;
 					}
 				}
 			}
@@ -666,11 +534,6 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 			}
 			lfield.setSelection(true);
 		}
-		if (descriptors.length == 0) {
-			if (isLinkingSupported()) {
-				createRemoteFolderControls(composite, nColumns);
-			}
-		}
 
 		if (fTemplateDialogField != null) {
 			createTemplateControls(composite, nColumns);
@@ -748,6 +611,7 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		return null;
 	}
 
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
@@ -812,93 +676,6 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		return Util.EMPTY_STRING;
 	}
 
-	protected boolean isLinkingSupported() {
-		return false;
-	}
-
-	protected boolean isLinkingEnabled() {
-		return true;
-	}
-
-	public void setScriptFolder(IScriptFolder root, boolean canBeModified) {
-		super.setScriptFolder(root, canBeModified);
-		if (remoteFolderDialogField != null) {
-			updateRemoteFolderLableEnablement();
-			if (remoteFolderDialogField.getText().length() == 0) {
-				final IProjectFragment fragment = getProjectFragment();
-				if (fragment != null) {
-					final List remotePaths = collectLinkedPaths(fragment
-							.getScriptProject().getProject());
-					if (remotePaths != null) {
-						IPath base = null;
-						for (Iterator i = remotePaths.iterator(); i.hasNext();) {
-							IPath path = (IPath) i.next();
-							if (base == null || path.isPrefixOf(base)) {
-								base = path;
-							} else {
-								int segments = path.matchingFirstSegments(base);
-								if (segments >= 2) {
-									base = base.uptoSegment(segments);
-								}
-							}
-						}
-						if (base != null && base.segmentCount() >= 1) {
-							remoteFolderDialogField.setText(base.toString());
-						}
-					}
-				}
-			}
-		}
-	}
-
-	private void updateRemoteFolderLableEnablement() {
-		if (getLinkedEnvironment() != null) {
-			if (remoteFolderLabel != null) {
-				((GridData) remoteFolderLabel.getLayoutData()).exclude = false;
-				remoteFolderLabel.setVisible(true);
-			}
-			if (createLink != null) {
-				((GridData) createLink.getLayoutData()).exclude = true;
-				createLink.setVisible(false);
-			}
-			remoteFolderDialogField.setEnabled(true);
-		} else {
-			if (remoteFolderLabel != null) {
-				((GridData) remoteFolderLabel.getLayoutData()).exclude = true;
-				remoteFolderLabel.setVisible(false);
-			}
-			if (createLink != null) {
-				((GridData) createLink.getLayoutData()).exclude = false;
-				createLink.setVisible(true);
-				remoteFolderDialogField.setEnabled(createLink.getSelection());
-			}
-		}
-		if (remoteFolderLabelContainer != null) {
-			remoteFolderLabelContainer.layout();
-		}
-		remoteFolderStatus = remoteFolderChanged();
-	}
-
-	protected IEnvironment getLinkedEnvironment() {
-		final IProjectFragment fragment = getProjectFragment();
-		if (fragment != null) {
-			return getLinkedEnvironment(fragment.getScriptProject()
-					.getProject());
-		}
-		return null;
-	}
-
-	protected IEnvironment getLinkedEnvironment(IProject project) {
-		if (project != null) {
-			final String envId = EnvironmentManager.getEnvironmentId(project,
-					false);
-			if (envId != null) {
-				return EnvironmentManager.getEnvironmentById(envId);
-			}
-		}
-		return null;
-	}
-
 	protected IEnvironment getEnvironment() {
 		final IProjectFragment fragment = getProjectFragment();
 		if (fragment != null) {
@@ -908,33 +685,4 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		return null;
 	}
 
-	protected List<IPath> collectLinkedPaths(IProject project) {
-		try {
-			final IEnvironment environment = EnvironmentManager
-					.getEnvironment(project);
-			if (environment == null) {
-				return null;
-			}
-			final Set<IPath> result = new HashSet<IPath>();
-			final IResource[] children = project.members();
-			for (int i = 0; i < children.length; i++) {
-				final IResource child = children[i];
-				if (child.isLinked()) {
-					final IFileHandle file = environment.getFile(child
-							.getLocationURI());
-					if (file != null
-							&& environment.equals(file.getEnvironment())) {
-						final IPath path = file.getPath();
-						result.add(file.isFile() ? path.removeLastSegments(1)
-								: path);
-					}
-				}
-			}
-			return !result.isEmpty() ? new ArrayList<IPath>(result) : null;
-		} catch (CoreException e) {
-			// not possible for project to be inaccessible
-			DLTKUIPlugin.log(e);
-			return null;
-		}
-	}
 }
