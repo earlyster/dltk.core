@@ -203,7 +203,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		private static boolean fgImagesInitialized = false;
 
 		private final ISourceModule fSourceModule;
-		private List fOverlaids;
+		private List<IScriptAnnotation> fOverlaids;
 		private final IProblem fProblem;
 		private Image fImage;
 		private boolean fImageInitialized = false;
@@ -383,7 +383,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		 */
 		public void addOverlaid(IScriptAnnotation annotation) {
 			if (fOverlaids == null)
-				fOverlaids = new ArrayList(1);
+				fOverlaids = new ArrayList<IScriptAnnotation>(1);
 			fOverlaids.add(annotation);
 		}
 
@@ -477,7 +477,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			Object fValue;
 		}
 
-		private List fList = new ArrayList(2);
+		private List<Entry> fList = new ArrayList<Entry>(2);
 		private int fAnchor = 0;
 
 		public ReverseMap() {
@@ -490,7 +490,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			// behind anchor
 			int length = fList.size();
 			for (int i = fAnchor; i < length; i++) {
-				entry = (Entry) fList.get(i);
+				entry = fList.get(i);
 				if (entry.fPosition.equals(position)) {
 					fAnchor = i;
 					return entry.fValue;
@@ -499,7 +499,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 
 			// before anchor
 			for (int i = 0; i < fAnchor; i++) {
-				entry = (Entry) fList.get(i);
+				entry = fList.get(i);
 				if (entry.fPosition.equals(position)) {
 					fAnchor = i;
 					return entry.fValue;
@@ -513,7 +513,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			Entry entry;
 			int length = fList.size();
 			for (int i = 0; i < length; i++) {
-				entry = (Entry) fList.get(i);
+				entry = fList.get(i);
 				if (entry.fPosition.equals(position))
 					return i;
 			}
@@ -528,7 +528,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				entry.fValue = value;
 				fList.add(entry);
 			} else {
-				Entry entry = (Entry) fList.get(index);
+				Entry entry = fList.get(index);
 				entry.fValue = value;
 			}
 		}
@@ -555,21 +555,21 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 
 		private static class ProblemRequestorState {
 			boolean fInsideReportingSequence = false;
-			List fReportedProblems;
+			List<IProblem> fReportedProblems;
 		}
 
-		private ThreadLocal fProblemRequestorState = new ThreadLocal();
+		private ThreadLocal<ProblemRequestorState> fProblemRequestorState = new ThreadLocal<ProblemRequestorState>();
 		private int fStateCount = 0;
 
 		private ISourceModule fSourceModule;
-		private List fGeneratedAnnotations = new ArrayList();
+		private List<ProblemAnnotation> fGeneratedAnnotations = new ArrayList<ProblemAnnotation>();
 		private IProgressMonitor fProgressMonitor;
 		private boolean fIsActive = false;
 		private boolean fIsHandlingTemporaryProblems;
 
 		private ReverseMap fReverseMap = new ReverseMap();
-		private List fPreviouslyOverlaid = null;
-		private List fCurrentlyOverlaid = new ArrayList();
+		private List<ScriptMarkerAnnotation> fPreviouslyOverlaid = null;
+		private List<ScriptMarkerAnnotation> fCurrentlyOverlaid = new ArrayList<ScriptMarkerAnnotation>();
 
 		public SourceModuleAnnotationModel(IResource resource) {
 			super(resource);
@@ -616,8 +616,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		 * @see IProblemRequestor#beginReporting()
 		 */
 		public void beginReporting() {
-			ProblemRequestorState state = (ProblemRequestorState) fProblemRequestorState
-					.get();
+			ProblemRequestorState state = fProblemRequestorState.get();
 			if (state == null)
 				internalBeginReporting(false);
 		}
@@ -628,8 +627,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		 * beginReportingSequence()
 		 */
 		public void beginReportingSequence() {
-			ProblemRequestorState state = (ProblemRequestorState) fProblemRequestorState
-					.get();
+			ProblemRequestorState state = fProblemRequestorState.get();
 			if (state == null)
 				internalBeginReporting(true);
 		}
@@ -655,7 +653,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 							.getScriptProject().isOnBuildpath(fSourceModule))) {
 				ProblemRequestorState state = new ProblemRequestorState();
 				state.fInsideReportingSequence = insideReportingSequence;
-				state.fReportedProblems = new ArrayList();
+				state.fReportedProblems = new ArrayList<IProblem>();
 				synchronized (getLockObject()) {
 					fProblemRequestorState.set(state);
 					++fStateCount;
@@ -672,8 +670,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				 * || problem.getID() == JavaSpellingReconcileStrategy
 				 * .SPELLING_PROBLEM_ID
 				 */
-				ProblemRequestorState state = (ProblemRequestorState) fProblemRequestorState
-						.get();
+				ProblemRequestorState state = fProblemRequestorState.get();
 				if (state != null)
 					state.fReportedProblems.add(problem);
 			}
@@ -683,8 +680,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		 * @see IProblemRequestor#endReporting()
 		 */
 		public void endReporting() {
-			ProblemRequestorState state = (ProblemRequestorState) fProblemRequestorState
-					.get();
+			ProblemRequestorState state = fProblemRequestorState.get();
 			if (state != null && !state.fInsideReportingSequence)
 				internalEndReporting(state);
 		}
@@ -695,8 +691,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		 * endReportingSequence()
 		 */
 		public void endReportingSequence() {
-			ProblemRequestorState state = (ProblemRequestorState) fProblemRequestorState
-					.get();
+			ProblemRequestorState state = fProblemRequestorState.get();
 			if (state != null && state.fInsideReportingSequence)
 				internalEndReporting(state);
 		}
@@ -716,7 +711,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		/**
 		 * Signals the end of problem reporting.
 		 */
-		private void reportProblems(List reportedProblems) {
+		private void reportProblems(List<IProblem> reportedProblems) {
 			if (fProgressMonitor != null && fProgressMonitor.isCanceled())
 				return;
 
@@ -727,7 +722,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				boolean isCanceled = false;
 
 				fPreviouslyOverlaid = fCurrentlyOverlaid;
-				fCurrentlyOverlaid = new ArrayList();
+				fCurrentlyOverlaid = new ArrayList<ScriptMarkerAnnotation>();
 
 				if (fGeneratedAnnotations.size() > 0) {
 					temporaryProblemsChanged = true;
@@ -737,7 +732,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 
 				if (reportedProblems != null && reportedProblems.size() > 0) {
 
-					Iterator e = reportedProblems.iterator();
+					Iterator<IProblem> e = reportedProblems.iterator();
 					while (e.hasNext()) {
 
 						if (fProgressMonitor != null
@@ -746,7 +741,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 							break;
 						}
 
-						IProblem problem = (IProblem) e.next();
+						IProblem problem = e.next();
 						Position position = createPositionFromProblem(problem);
 						if (position != null) {
 
@@ -777,10 +772,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			if (isCanceled) {
 				fCurrentlyOverlaid.addAll(fPreviouslyOverlaid);
 			} else if (fPreviouslyOverlaid != null) {
-				Iterator e = fPreviouslyOverlaid.iterator();
-				while (e.hasNext()) {
-					ScriptMarkerAnnotation annotation = (ScriptMarkerAnnotation) e
-							.next();
+				for (ScriptMarkerAnnotation annotation : fPreviouslyOverlaid) {
 					annotation.setOverlay(null);
 				}
 			}
@@ -807,9 +799,9 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		private void overlayMarkers(Position position,
 				ProblemAnnotation problemAnnotation) {
 			Object value = getAnnotations(position);
-			if (value instanceof List) {
-				List list = (List) value;
-				for (Iterator e = list.iterator(); e.hasNext();)
+			if (value instanceof List<?>) {
+				List<?> list = (List<?>) value;
+				for (Iterator<?> e = list.iterator(); e.hasNext();)
 					setOverlay(e.next(), problemAnnotation);
 			} else {
 				setOverlay(value, problemAnnotation);
@@ -888,12 +880,13 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 				Object cached = fReverseMap.get(position);
 				if (cached == null)
 					fReverseMap.put(position, annotation);
-				else if (cached instanceof List) {
-					List list = (List) cached;
+				else if (cached instanceof List<?>) {
+					@SuppressWarnings("unchecked")
+					List<Annotation> list = (List<Annotation>) cached;
 					list.add(annotation);
 				} else if (cached instanceof Annotation) {
-					List list = new ArrayList(2);
-					list.add(cached);
+					List<Annotation> list = new ArrayList<Annotation>(2);
+					list.add((Annotation) cached);
 					list.add(annotation);
 					fReverseMap.put(position, list);
 				}
@@ -918,8 +911,8 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 			Position position = getPosition(annotation);
 			synchronized (getLockObject()) {
 				Object cached = fReverseMap.get(position);
-				if (cached instanceof List) {
-					List list = (List) cached;
+				if (cached instanceof List<?>) {
+					List<?> list = (List<?>) cached;
 					list.remove(annotation);
 					if (list.size() == 1) {
 						fReverseMap.put(position, list.get(0));
@@ -953,7 +946,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		protected IMarker[] retrieveMarkers() throws CoreException {
 			String moduleLocation = location.toPortableString();
 			IMarker[] markers = super.retrieveMarkers();
-			List locationMarkers = new LinkedList();
+			List<IMarker> locationMarkers = new LinkedList<IMarker>();
 			for (int i = 0; i < markers.length; i++) {
 				IMarker marker = markers[i];
 				String markerLocation = (String) marker
@@ -962,8 +955,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 					locationMarkers.add(marker);
 				}
 			}
-			return (IMarker[]) locationMarkers
-					.toArray(new IMarker[locationMarkers.size()]);
+			return locationMarkers.toArray(new IMarker[locationMarkers.size()]);
 		}
 
 		/**
