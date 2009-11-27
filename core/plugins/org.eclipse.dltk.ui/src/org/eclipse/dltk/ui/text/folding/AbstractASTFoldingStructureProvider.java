@@ -1005,11 +1005,12 @@ public abstract class AbstractASTFoldingStructureProvider implements
 			throws BadLocationException {
 		int line1 = d.getLineOfOffset(region.getOffset());
 		int line2 = d.getLineOfOffset(region.getOffset() + region.getLength());
-		if (getMinimalFoldableLinesCount() > 0) {
-			return (line2 - line1 + 1 >= getMinimalFoldableLinesCount());
+		final int foldMinLines = getMinimalFoldableLinesCount();
+		if (foldMinLines > 0) {
+			return line2 - line1 + 1 >= foldMinLines;
+		} else {
+			return line1 != line2;
 		}
-
-		return (line1 != line2);
 	}
 
 	/**
@@ -1056,7 +1057,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	 *         aligned with line offsets, <code>null</code> if the region is too
 	 *         small to be foldable (e.g. covers only one line)
 	 */
-	protected final IRegion alignRegion(IRegion region,
+	protected IRegion alignRegion(IRegion region,
 			FoldingStructureComputationContext ctx) {
 		if (region == null)
 			return null;
@@ -1430,7 +1431,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 			installDocumentStuff(d);
 			List<ITypedRegion> docRegionList = new ArrayList<ITypedRegion>();
 			int offset = 0;
-			while (true) {
+			for (;;) {
 				try {
 					ITypedRegion region = getRegion(d, offset);
 					docRegionList.add(region);
@@ -1439,64 +1440,68 @@ public abstract class AbstractASTFoldingStructureProvider implements
 					break;
 				}
 			}
-			int start = -1;
+			ITypedRegion start = null;
+			ITypedRegion lastRegion = null;
 			List<IRegion> regions = new ArrayList<IRegion>();
-			ITypedRegion docRegions[] = docRegionList
-					.toArray(new ITypedRegion[docRegionList.size()]);
-			for (int i = 0; i < docRegions.length; i++) {
-				ITypedRegion region = docRegions[i];
-				boolean multiline = isMultilineRegion(d, region);
-				boolean badStart = false;
-				if (d.getLineOffset(d.getLineOfOffset(region.getOffset())) != region
-						.getOffset()) {
-					int lineStart = d.getLineOffset(d.getLineOfOffset(region
-							.getOffset()));
-					String lineStartStr = d.get(lineStart, region.getOffset()
-							- lineStart);
-					if (lineStartStr.trim().length() != 0)
-						badStart = true;
-				}
-				if (!badStart
-						&& (region.getType().equals(partition)
-								|| (start != -1 && isEmptyRegion(d, region)
-										&& multiline && collapseEmptyLines()) || (start != -1
-								&& isEmptyRegion(d, region) && !multiline))) {
-					if (start == -1)
-						start = i;
+			for (ITypedRegion region : docRegionList) {
+				if (startsAtLineBegin(d, region)
+						&& (region.getType().equals(partition) || (start != null
+								&& isEmptyRegion(d, region) && collapseEmptyLines()))) {
+					// TODO introduce line limit for collapseEmptyLines() ?
+					if (start == null)
+						start = region;
 				} else {
-					if (start != -1) {
-						int offset0 = docRegions[start].getOffset();
-						int length0 = docRegions[i - 1].getOffset() - offset0
-								+ docRegions[i - 1].getLength() - 1;
-						String testForTrim = contents.substring(offset0,
-								offset0 + length0).trim();
-						length0 = testForTrim.length();
+					if (start != null) {
+						int offset0 = start.getOffset();
+						int length0 = lastRegion.getOffset()
+								+ lastRegion.getLength() - offset0 - 1;
+						length0 = contents
+								.substring(offset0, offset0 + length0).trim()
+								.length();
 						IRegion fullRegion = new Region(offset0, length0);
 						if (isMultilineRegion(d, fullRegion)) {
 							regions.add(fullRegion);
 						}
 					}
-					start = -1;
+					start = null;
 				}
+				lastRegion = region;
 			}
-			if (start != -1) {
-				int offset0 = docRegions[start].getOffset();
-				int length0 = docRegions[docRegions.length - 1].getOffset()
-						- offset0
-						+ docRegions[docRegions.length - 1].getLength() - 1;
+			if (start != null) {
+				int offset0 = start.getOffset();
+				int length0 = lastRegion.getOffset() - offset0
+						+ lastRegion.getLength() - 1;
 				IRegion fullRegion = new Region(offset0, length0);
 				if (isMultilineRegion(d, fullRegion)) {
 					regions.add(fullRegion);
 				}
 			}
+			prepareRegions(d, regions);
 			removeDocumentStuff(d);
-			IRegion[] result = new IRegion[regions.size()];
-			regions.toArray(result);
-			return result;
+			return regions.toArray(new IRegion[regions.size()]);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
 		return new IRegion[0];
+	}
+
+	/**
+	 * @param d
+	 * @param regions
+	 */
+	protected void prepareRegions(Document d, List<IRegion> regions) {
+		// override in descendants
+	}
+
+	private boolean startsAtLineBegin(Document d, ITypedRegion region)
+			throws BadLocationException {
+		int lineStart = d.getLineOffset(d.getLineOfOffset(region.getOffset()));
+		if (lineStart != region.getOffset()) {
+			if (!isEmptyRegion(d, lineStart, region.getOffset() - lineStart)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	protected boolean collapseEmptyLines() {
