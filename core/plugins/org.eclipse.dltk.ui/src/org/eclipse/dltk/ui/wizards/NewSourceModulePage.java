@@ -14,18 +14,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -42,7 +38,6 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
-import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.internal.ui.util.SWTUtil;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
@@ -412,6 +407,10 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		final String fileName = getFileName();
 		final ISourceModule module = currentScriptFolder
 				.getSourceModule(fileName);
+
+		currentScriptFolder.createSourceModule(fileName,
+				getFileContent(module), true, monitor);
+
 		for (SelectionButtonDialogField f : templateFields) {
 			if (f.isSelected()) {
 				INewSourceModuleTemplate template = templateFieldToTemplate
@@ -424,9 +423,6 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 				}
 			}
 		}
-
-		currentScriptFolder.createSourceModule(fileName,
-				getFileContent(module), true, monitor);
 
 		return module;
 	}
@@ -493,6 +489,10 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		for (Descriptor<INewSourceModuleTemplate> descriptor : descriptors) {
 			TemplateDescriptor descr = (TemplateDescriptor) descriptor;
 			INewSourceModuleTemplate template = descr.get();
+			if (template instanceof INewSourceModuleTemplateInitializer) {
+				((INewSourceModuleTemplateInitializer) template)
+						.initialize(scriptFolder);
+			}
 			if (template.isAvailable(env, scriptFolder)) {
 				activeTemplateDescriptors.add(descr);
 			}
@@ -510,6 +510,7 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 			lfield.doFillIntoGrid(contents, nColumns);
 			templateFields.add(lfield);
 			lfield.setDialogFieldListener(templateEnablementUpdater);
+			SelectionButtonDialogField selectedButton = lfield;
 			for (TemplateDescriptor descr : activeTemplateDescriptors) {
 				INewSourceModuleTemplate template = descr.get();
 
@@ -531,8 +532,13 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 				templateFields.add(field);
 				templateFieldToTemplate.put(field, template);
 				field.setDialogFieldListener(templateEnablementUpdater);
+				if (template instanceof INewSourceModuleTemplateInitializer
+						&& ((INewSourceModuleTemplateInitializer) template)
+								.isActive()) {
+					selectedButton = field;
+				}
 			}
-			lfield.setSelection(true);
+			selectedButton.setSelection(true);
 		}
 
 		if (fTemplateDialogField != null) {
