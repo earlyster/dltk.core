@@ -996,6 +996,26 @@ public abstract class AbstractASTFoldingStructureProvider implements
 		return isEmptyRegion(d, r.getOffset(), r.getLength());
 	}
 
+	/**
+	 * Tests if the specified region contains only space or tab characters.
+	 * 
+	 * @param document
+	 * @param region
+	 * @return
+	 * @throws BadLocationException
+	 */
+	protected boolean isBlankRegion(IDocument document, ITypedRegion region)
+			throws BadLocationException {
+		String value = document.get(region.getOffset(), region.getLength());
+		for (int i = 0; i < value.length(); ++i) {
+			char ch = value.charAt(i);
+			if (ch != ' ' && ch != '\t') {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	protected boolean isEmptyRegion(IDocument d, int offset, int length)
 			throws BadLocationException {
 		return d.get(offset, length).trim().length() == 0;
@@ -1444,12 +1464,15 @@ public abstract class AbstractASTFoldingStructureProvider implements
 			ITypedRegion lastRegion = null;
 			List<IRegion> regions = new ArrayList<IRegion>();
 			for (ITypedRegion region : docRegionList) {
-				if (startsAtLineBegin(d, region)
-						&& (region.getType().equals(partition) || (start != null
-								&& isEmptyRegion(d, region) && collapseEmptyLines()))) {
-					// TODO introduce line limit for collapseEmptyLines() ?
+				if (region.getType().equals(partition)
+						&& startsAtLineBegin(d, region)) {
 					if (start == null)
 						start = region;
+				} else if (start != null
+						&& (isBlankRegion(d, region) || isEmptyRegion(d, region)
+								&& collapseEmptyLines())) {
+					// blanks or empty lines
+					// TODO introduce line limit for collapseEmptyLines() ?
 				} else {
 					if (start != null) {
 						int offset0 = start.getOffset();
