@@ -113,4 +113,12 @@ public class TextUtilsTest extends TestCase {
 		assertEquals("123456", parts[0]);
 	}
 
+	public void testSplitWords() {
+		String[] words = TextUtils.splitWords("A B C");
+		assertEquals(3, words.length);
+		assertEquals("A", words[0]);
+		assertEquals("B", words[1]);
+		assertEquals("C", words[2]);
+	}
+
 }
