@@ -477,7 +477,8 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		String pName = genName;
 		if (pName != null) {
 			int index = 0;
-			while (!validateGeneratedName(pName)) {
+			while (!(validateGeneratedName(pName) && !fRequestor
+					.isDuplicateName(pName, fEditedInterpreter))) {
 				pName = genName + "(" + String.valueOf(++index) //$NON-NLS-1$
 						+ ")"; //$NON-NLS-1$
 			}
@@ -518,7 +519,7 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		if (name == null || name.trim().length() == 0) {
 			status.setInfo(InterpretersMessages.addInterpreterDialog_enterName);
 		} else {
-			if (fRequestor.isDuplicateName(name)
+			if (fRequestor.isDuplicateName(name, fEditedInterpreter)
 					&& (fEditedInterpreter == null || !name
 							.equals(fEditedInterpreter.getName()))) {
 				status

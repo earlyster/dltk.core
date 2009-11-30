@@ -26,7 +26,8 @@ public interface IAddInterpreterDialogRequestor {
 	 * @return whether a new Interpreter with the specified name would be a
 	 *         duplicate Interpreter
 	 */
-	public boolean isDuplicateName(String name);
+	public boolean isDuplicateName(String name,
+			IInterpreterInstall editedInterpreter);
 
 	/**
 	 * Notification that a Interpreter has been added from the

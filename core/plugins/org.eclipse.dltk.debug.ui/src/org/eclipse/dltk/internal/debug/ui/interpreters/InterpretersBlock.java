@@ -636,11 +636,14 @@ public abstract class InterpretersBlock implements
 	/**
 	 * @see IAddInterpreterDialogRequestor#isDuplicateName(String)
 	 */
-	public boolean isDuplicateName(String name) {
+	public boolean isDuplicateName(String name,
+			IInterpreterInstall editedInterpreter) {
 		for (int i = 0; i < fInterpreters.size(); i++) {
 			IInterpreterInstall interpreter = fInterpreters.get(i);
 			if (interpreter.getName().equals(name)) {
-				return true;
+				if (interpreter != editedInterpreter) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -770,7 +773,7 @@ public abstract class InterpretersBlock implements
 
 				String nameCopy = name;
 				int j = 1;
-				while (isDuplicateName(nameCopy)) {
+				while (isDuplicateName(nameCopy, null)) {
 					nameCopy = name + '(' + (j++) + ')';
 				}
 				if (widths[0] < nameCopy.length()) {
@@ -983,7 +986,7 @@ public abstract class InterpretersBlock implements
 	 * 
 	 */
 	protected String generateName(String name) {
-		if (!isDuplicateName(name)) {
+		if (!isDuplicateName(name, null)) {
 			return name;
 		}
 
