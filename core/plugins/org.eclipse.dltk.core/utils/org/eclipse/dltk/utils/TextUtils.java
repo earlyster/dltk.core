@@ -530,4 +530,48 @@ public abstract class TextUtils {
 		return list.toArray(new String[list.size()]);
 	}
 
+	private static int indexOfWhitespace(String str) {
+		for (int i = 0; i < str.length(); ++i) {
+			if (Character.isWhitespace(str.charAt(i))) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public static String[] splitWords(String str) {
+		if (str == null) {
+			return null;
+		}
+		int len = str.length();
+		if (len == 0) {
+			return CharOperation.NO_STRINGS;
+		}
+		int i = indexOfWhitespace(str);
+		if (i == -1) {
+			return new String[] { str };
+		}
+		final List<String> list = new ArrayList<String>();
+		int start = 0;
+		boolean match = i != 0;
+		while (i < len) {
+			if (Character.isWhitespace(str.charAt(i))) {
+				if (match) {
+					list.add(str.substring(start, i));
+					match = false;
+				}
+				start = ++i;
+				continue;
+			}
+			match = true;
+			i++;
+		}
+		if (match) {
+			list.add(str.substring(start, i));
+		}
+		return list.toArray(new String[list.size()]);
+	}
 }
