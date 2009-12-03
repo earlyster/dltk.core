@@ -113,7 +113,7 @@ public class ScriptElementImageProvider {
 		return (flags & OVERLAY_ICONS) != 0;
 	}
 
-	private static boolean useSmallSize(int flags) {
+	public static boolean useSmallSize(int flags) {
 		return (flags & SMALL_ICONS) != 0;
 	}
 
