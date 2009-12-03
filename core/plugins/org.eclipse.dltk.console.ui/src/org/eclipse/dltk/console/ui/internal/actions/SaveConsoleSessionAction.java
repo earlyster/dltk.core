@@ -21,7 +21,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-
+import org.eclipse.ui.actions.ActionFactory;
 
 public class SaveConsoleSessionAction extends Action {
 	private ScriptConsole console;
@@ -29,6 +29,7 @@ public class SaveConsoleSessionAction extends Action {
 	public SaveConsoleSessionAction(ScriptConsole console, String text,
 			String tooltip) {
 		this.console = console;
+		setId(ActionFactory.SAVE.getId());
 		setText(text);
 		setToolTipText(tooltip);
 	}
