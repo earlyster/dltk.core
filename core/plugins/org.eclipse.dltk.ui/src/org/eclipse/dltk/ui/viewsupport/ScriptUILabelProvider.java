@@ -12,6 +12,7 @@ package org.eclipse.dltk.ui.viewsupport;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -21,6 +22,7 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.internal.ui.UIModelProviderManager;
 import org.eclipse.dltk.ui.ScriptElementImageProvider;
 import org.eclipse.dltk.ui.ScriptElementLabels;
+import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
@@ -29,6 +31,8 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
 
 public class ScriptUILabelProvider implements ILabelProvider, IColorProvider {
 
@@ -107,25 +111,89 @@ public class ScriptUILabelProvider implements ILabelProvider, IColorProvider {
 
 	public Image getImage(Object element) {
 		ILabelProvider[] providers = getProviders(element);
+		final int flags = evaluateImageFlags(element);
 		Image result = null;
 		if (providers != null) {
 			for (int i = 0; i < providers.length; i++) {
 				Image image = providers[i].getImage(element);
 				if (image != null) {
-					result = image;
+					if (ScriptElementImageProvider.useSmallSize(flags)) {
+						result = image;
+					} else {
+						result = getLocalRegistry().get(
+								new BigImageDescriptor(image,
+										ScriptElementImageProvider.BIG_SIZE));
+					}
 					break;
 				}
 			}
 		}
 		if (result == null) {
-			result = fImageLabelProvider.getImageLabel(element,
-					evaluateImageFlags(element));
+			result = fImageLabelProvider.getImageLabel(element, flags);
 		}
 		if (result == null
 				&& (element instanceof IStorage || element instanceof ISourceModule)) {
 			result = fStorageLabelProvider.getImage(element);
 		}
 		return decorateImage(result, element);
+	}
+
+	private static class BigImageDescriptor extends CompositeImageDescriptor {
+
+		private final Point fSize;
+
+		private final Image fBaseImage;
+
+		public BigImageDescriptor(Image baseImage, Point size) {
+			fBaseImage = baseImage;
+			Assert.isNotNull(fBaseImage);
+			fSize = size;
+			Assert.isNotNull(fSize);
+		}
+
+		/*
+		 * (non-Javadoc) Method declared in CompositeImageDescriptor
+		 */
+		protected Point getSize() {
+			return fSize;
+		}
+
+		/*
+		 * (non-Javadoc) Method declared on Object.
+		 */
+		public boolean equals(Object object) {
+			if (object == null
+					|| !BigImageDescriptor.class.equals(object.getClass())) {
+				return false;
+			}
+			BigImageDescriptor other = (BigImageDescriptor) object;
+			return fBaseImage.equals(other.fBaseImage)
+					&& fSize.equals(other.fSize);
+		}
+
+		/*
+		 * (non-Javadoc) Method declared on Object.
+		 */
+		public int hashCode() {
+			return fBaseImage.hashCode() ^ fSize.hashCode();
+		}
+
+		protected void drawCompositeImage(int width, int height) {
+			ImageData bg = this.fBaseImage.getImageData();
+			if (bg != null) {
+				drawImage(bg, 0, 0);
+			}
+		}
+
+	}
+
+	private ImageDescriptorRegistry localRegistry = null;
+
+	private ImageDescriptorRegistry getLocalRegistry() {
+		if (localRegistry == null) {
+			localRegistry = new ImageDescriptorRegistry(false);
+		}
+		return localRegistry;
 	}
 
 	public String getText(Object element) {
@@ -184,6 +252,10 @@ public class ScriptUILabelProvider implements ILabelProvider, IColorProvider {
 				decorator.dispose();
 			}
 			fLabelDecorators = null;
+		}
+		if (localRegistry != null) {
+			localRegistry.dispose();
+			localRegistry = null;
 		}
 
 		fStorageLabelProvider.dispose();
