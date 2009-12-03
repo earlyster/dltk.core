@@ -157,6 +157,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.ISelectionListener;
@@ -169,6 +170,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditor;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
@@ -1361,7 +1363,14 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				fOutlinePage = createOutlinePage();
 			return fOutlinePage;
 		}
-
+		if (required == IShowInTargetList.class) {
+			return new IShowInTargetList() {
+				public String[] getShowInTargetIds() {
+					return new String[] { DLTKUIPlugin.ID_SCRIPT_EXPLORER,
+							IPageLayout.ID_OUTLINE };
+				}
+			};
+		}
 		if (required == IFoldingStructureProvider.class)
 			return fProjectionModelUpdater;
 		if (required == IFoldingStructureProviderExtension.class)
