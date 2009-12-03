@@ -99,7 +99,12 @@ import org.osgi.framework.BundleContext;
 public class DLTKUIPlugin extends AbstractUIPlugin {
 
 	public static final String PLUGIN_ID = "org.eclipse.dltk.ui"; //$NON-NLS-1$
-	public static final String ID_SCRIPTEXPLORER = "org.eclipse.dltk.ui.ScriptExplorer"; //$NON-NLS-1$
+	/**
+	 * @since 2.0
+	 */
+	public static final String ID_SCRIPT_EXPLORER = "org.eclipse.dltk.ui.ScriptExplorer"; //$NON-NLS-1$
+	@Deprecated
+	public static final String ID_SCRIPTEXPLORER = ID_SCRIPT_EXPLORER;
 	public static final String ID_TYPE_HIERARCHY = "org.eclipse.dltk.ui.TypeHierarchy"; //$NON-NLS-1$
 	/**
 	 * The preference page id of the build path variables preference page (value
