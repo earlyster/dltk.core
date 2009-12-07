@@ -32,6 +32,7 @@ import org.eclipse.dltk.launching.ScriptLaunchConfigurationConstants;
 import org.eclipse.dltk.launching.ScriptRuntime;
 import org.eclipse.dltk.launching.ScriptRuntime.DefaultInterpreterEntry;
 import org.eclipse.dltk.ui.DLTKPluginImages;
+import org.eclipse.dltk.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.osgi.util.NLS;
@@ -96,6 +97,7 @@ public class InterpreterTab extends CommonScriptLaunchTab {
 	@Override
 	public void dispose() {
 		super.dispose();
+		registry.dispose();
 		if (fInterpreterBlock != null) {
 			fInterpreterBlock.removePropertyChangeListener(fCheckListener);
 		}
@@ -319,8 +321,11 @@ public class InterpreterTab extends CommonScriptLaunchTab {
 	 */
 	@Override
 	public Image getImage() {
-		return DLTKPluginImages.DESC_OBJS_NATIVE_LIB_PATH_ATTRIB.createImage();
+		return registry.get(DLTKPluginImages.DESC_OBJS_NATIVE_LIB_PATH_ATTRIB);
 	}
+
+	private final ImageDescriptorRegistry registry = new ImageDescriptorRegistry(
+			false);
 
 	protected void updateInterpreterFromConfig(ILaunchConfiguration config) {
 		try {
