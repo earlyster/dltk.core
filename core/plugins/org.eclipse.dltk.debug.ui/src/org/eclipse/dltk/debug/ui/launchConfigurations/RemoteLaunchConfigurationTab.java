@@ -45,6 +45,7 @@ public abstract class RemoteLaunchConfigurationTab extends
 	/*
 	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#getImage()
 	 */
+	@Override
 	public Image getImage() {
 		return DebugUITools.getImage(IDebugUIConstants.IMG_LCL_DISCONNECT);
 	}
