@@ -229,7 +229,6 @@ public class BuildpathsBlock {
 		item.setControl(fProjectsPage.getControl(folder));
 		fLibrariesPage = new LibrariesWorkbookPage(this.supportZips(),
 				fBuildPathList, fPageContainer);
-		fLibrariesPage.setScriptProject(getScriptProject());
 		item = new TabItem(folder, SWT.NONE);
 		item.setText(NewWizardMessages.BuildPathsBlock_tab_libraries);
 		item.setImage(DLTKPluginImages.get(DLTKPluginImages.IMG_OBJS_LIBRARY));

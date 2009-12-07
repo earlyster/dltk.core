@@ -79,7 +79,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private final int IDX_WITHOUTZIP = -2;
 	private int IDX_ADD = 0;
 	private boolean fWithZip = false;
-	private IScriptProject scriptProject;
 
 	public LibrariesWorkbookPage(boolean supportZips,
 			ListDialogField classPathList,
@@ -245,8 +244,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	private void libaryPageCustomButtonPressed(DialogField field, int index) {
 		BPListElement[] libentries = null;
-		IEnvironment environment = EnvironmentManager
-				.getEnvironment(this.scriptProject);
+		IEnvironment environment = getEnvironment();
 		switch (index - IDX_ADD) {
 		case IDX_ADDZIP: /* add archive */
 			if (fWithZip) {
@@ -548,8 +546,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			res = openContainerSelectionDialog(elem);
 			break;
 		case IBuildpathEntry.BPE_LIBRARY:
-			IEnvironment environment = EnvironmentManager
-					.getEnvironment(this.scriptProject);
+			IEnvironment environment = getEnvironment();
 			IResource resource = elem.getResource();
 			if (resource == null) {
 				if (Util.isArchiveFileName(DLTKLanguageManager
@@ -878,7 +875,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 	}
 
-	public void setScriptProject(IScriptProject scriptProject) {
-		this.scriptProject = scriptProject;
+	private IEnvironment getEnvironment() {
+		return EnvironmentManager.getEnvironment(this.fCurrJProject);
 	}
 }
