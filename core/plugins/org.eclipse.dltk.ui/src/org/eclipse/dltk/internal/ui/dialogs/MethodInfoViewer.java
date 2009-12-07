@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -887,31 +886,6 @@ public class MethodInfoViewer {
 			fSeparatorWidth = gc.getAdvanceWidth(SEPARATOR);
 			fMessage = " " + DLTKUIMessages.TypeInfoViewer_separator_message + " "; //$NON-NLS-1$ //$NON-NLS-2$
 			fMessageLength = gc.textExtent(fMessage).x;
-		}
-	}
-
-	private static class ImageManager {
-		private Map fImages = new HashMap(20);
-
-		public Image get(ImageDescriptor descriptor) {
-			if (descriptor == null)
-				descriptor = ImageDescriptor.getMissingImageDescriptor();
-
-			Image result = (Image) fImages.get(descriptor);
-			if (result != null)
-				return result;
-			result = descriptor.createImage();
-			if (result != null)
-				fImages.put(descriptor, result);
-			return result;
-		}
-
-		public void dispose() {
-			for (Iterator iter = fImages.values().iterator(); iter.hasNext();) {
-				Image image = (Image) iter.next();
-				image.dispose();
-			}
-			fImages.clear();
 		}
 	}
 
