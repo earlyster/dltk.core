@@ -25,15 +25,8 @@ import org.eclipse.swt.graphics.Image;
  */
 public class FilterLabelProvider extends LabelProvider implements
 		ITableLabelProvider {
-	ScriptElementImageProvider provider;
 
-	public FilterLabelProvider() {
-		provider = new ScriptElementImageProvider();
-	}
-
-	private static final Image IMG_PKG = DLTKPluginImages.getDescriptor(
-			DLTKPluginImages.IMG_OBJS_PACKAGE).createImage();
-	private Map typeImages = new HashMap();
+	private Map<Integer, Image> typeImages = new HashMap<Integer, Image>();
 
 	/**
 	 * @see ITableLabelProvider#getColumnText(Object, int)
@@ -48,6 +41,7 @@ public class FilterLabelProvider extends LabelProvider implements
 	/**
 	 * @see ILabelProvider#getText(Object)
 	 */
+	@Override
 	public String getText(Object element) {
 		return ((Filter) element).getName();
 	}
@@ -59,16 +53,25 @@ public class FilterLabelProvider extends LabelProvider implements
 		Filter filter = (Filter) object;
 		String name = filter.getName();
 		if (name.endsWith("*") || name.equals("")) { //$NON-NLS-1$ //$NON-NLS-2$
-			return IMG_PKG;
+			return DLTKPluginImages.get(DLTKPluginImages.IMG_OBJS_PACKAGE);
 		}
 		Integer mod = new Integer(filter.getModifiers());
 		if (typeImages.containsKey(mod)) {
-			return (Image) typeImages.get(mod);
+			return typeImages.get(mod);
 		} else {
-			Image img = provider.getTypeImageDescriptor(filter.getModifiers(),
-					false).createImage();
+			Image img = ScriptElementImageProvider.getTypeImageDescriptor(
+					filter.getModifiers(), false).createImage();
 			typeImages.put(mod, img);
 			return img;
 		}
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		for (Image image : typeImages.values()) {
+			image.dispose();
+		}
+		typeImages.clear();
 	}
 }
