@@ -376,8 +376,7 @@ public class BPListLabelProvider extends LabelProvider {
 			// }
 			return null;
 		} else if (element instanceof BPUserLibraryElement) {
-			return DLTKPluginImages.getDescriptor(
-					DLTKPluginImages.IMG_OBJS_LIBRARY).createImage();
+			return DLTKPluginImages.get(DLTKPluginImages.IMG_OBJS_LIBRARY);
 		} else if (element instanceof IAccessRule) {
 			IAccessRule rule = (IAccessRule) element;
 			return AccessRulesLabelProvider.getResolutionImage(rule.getKind());
