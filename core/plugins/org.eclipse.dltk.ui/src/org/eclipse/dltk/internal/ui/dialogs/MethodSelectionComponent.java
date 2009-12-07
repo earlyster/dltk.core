@@ -308,10 +308,10 @@ public class MethodSelectionComponent extends Composite implements ITypeSelectio
 		data.horizontalAlignment = GridData.END;
 		fToolBar.setLayoutData(data);
 
-		//		fToolItem.setImage(DLTKPluginImages.get(DLTKPluginImages.IMG_ELCL_VIEW_MENU));
-		//		fToolItem.setDisabledImage(DLTKPluginImages.get(DLTKPluginImages.IMG_DLCL_VIEW_MENU));
-		fToolItem.setImage(DLTKPluginImages.DESC_ELCL_VIEW_MENU.createImage());
-		fToolItem.setDisabledImage(DLTKPluginImages.DESC_DLCL_VIEW_MENU.createImage());
+		fToolItem.setImage(DLTKUIPlugin.getImageDescriptorRegistry().get(
+				DLTKPluginImages.DESC_ELCL_VIEW_MENU));
+		fToolItem.setDisabledImage(DLTKUIPlugin.getImageDescriptorRegistry()
+				.get(DLTKPluginImages.DESC_DLCL_VIEW_MENU));
 		fToolItem.setToolTipText(DLTKUIMessages.TypeSelectionComponent_menu);
 		fToolItem.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
