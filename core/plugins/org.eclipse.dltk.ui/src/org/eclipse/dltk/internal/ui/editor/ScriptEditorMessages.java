@@ -18,21 +18,17 @@ import org.eclipse.osgi.util.NLS;
  */
 final class ScriptEditorMessages extends NLS {
 
-	private static final String BUNDLE_FOR_CONSTRUCTED_KEYS= "org.eclipse.dltk.internal.ui.editor.ConstructedScriptEditorMessages";//$NON-NLS-1$
-	private static ResourceBundle fgBundleForConstructedKeys= ResourceBundle.getBundle(BUNDLE_FOR_CONSTRUCTED_KEYS);
-
 	/**
 	 * Returns the message bundle which contains constructed keys.
-	 *
-	 *
+	 * 
 	 * @return the message bundle
 	 */
 	public static ResourceBundle getBundleForConstructedKeys() {
-		return fgBundleForConstructedKeys;
+		return DLTKEditorMessages.getBundleForConstructedKeys();
 	}
 
-	private static final String BUNDLE_NAME= ScriptEditorMessages.class.getName();
-
+	private static final String BUNDLE_NAME = ScriptEditorMessages.class
+			.getName();
 
 	private ScriptEditorMessages() {
 		// Do not instantiate
