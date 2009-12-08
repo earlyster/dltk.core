@@ -948,62 +948,72 @@ public class SearchEngine {
 
 	public static ISourceModule[] searchMixinSources(
 			final IDLTKSearchScope scope, String key,
-			IDLTKLanguageToolkit toolkit, final Map keys) {
-		return searchMixinSources(scope, key, toolkit, keys,
+			IDLTKLanguageToolkit toolkit,
+			final Map<ISourceModule, Set<String>> keysByModule) {
+		return searchMixinSources(scope, key, toolkit, keysByModule,
 				new NullProgressMonitor());
 	}
 
 	/**
-	 * 
-	 * @param key
-	 *            contains map of ISourceModule to Set
+	 * @param scope
+	 * @param searchPattern
 	 * @param toolkit
-	 * @param keys
+	 * @param keysByModule
+	 *            is filled with search results if not <code>null</code>
+	 * @param monitor
 	 * @return
 	 * @since 2.0
 	 */
 	public static ISourceModule[] searchMixinSources(
-			final IDLTKSearchScope scope, String key,
-			IDLTKLanguageToolkit toolkit, final Map keys,
+			final IDLTKSearchScope scope, String searchPattern,
+			IDLTKLanguageToolkit toolkit,
+			final Map<ISourceModule, Set<String>> keysByModule,
 			IProgressMonitor monitor) {
 		PerformanceNode p = RuntimePerformanceMonitor.begin();
 		final long startTime = DLTKCore.VERBOSE_MIXIN ? System
 				.currentTimeMillis() : 0;
 		// Index requestor
-		final HandleFactory factory = new HandleFactory();
-		final List modules = new ArrayList();
-		final Map processed = new HashMap();
+		final Map<String, ISourceModule> processed = new HashMap<String, ISourceModule>();
 		IndexQueryRequestor searchRequestor = new IndexQueryRequestor() {
+
+			final HandleFactory factory = new HandleFactory();
+			final Set<String> searched = new HashSet<String>();
+
+			@Override
 			public boolean acceptIndexMatch(String documentPath,
 					SearchPattern indexRecord, SearchParticipant participant,
 					AccessRuleSet access) {
 				// String s = IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY.toString();
-				if (documentPath.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR) != -1) {
-					documentPath = documentPath
-							.substring(documentPath
-									.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR) + 1);
+				final int indexSeparator = documentPath
+						.indexOf(IDLTKSearchScope.FILE_ENTRY_SEPARATOR);
+				if (indexSeparator != -1) {
+					documentPath = documentPath.substring(indexSeparator + 1);
 				}
-				if (!processed.containsKey(documentPath)) {
-					Openable module = factory.createOpenable(documentPath,
-							scope);
-					if (module instanceof ISourceModule) {
-						modules.add(module);
+				ISourceModule module = processed.get(documentPath);
+				if (module == null) {
+					if (!searched.add(documentPath)) {
+						return true;
 					}
+					Openable openable = factory.createOpenable(documentPath,
+							scope);
+					if (openable == null
+							|| !(openable instanceof ISourceModule)) {
+						return true;
+					}
+					module = (ISourceModule) openable;
 					processed.put(documentPath, module);
 				}
 
-				ISourceModule module = (ISourceModule) processed
-						.get(documentPath);
-				if (keys != null) {
+				if (keysByModule != null) {
 					final String val = new String(indexRecord.getIndexKey());
-					final Set keysList;
-					if (keys.containsKey(module)) {
-						keysList = (Set) keys.get(module);
+					final Set<String> keys;
+					if (keysByModule.containsKey(module)) {
+						keys = keysByModule.get(module);
 					} else {
-						keysList = new HashSet();
-						keys.put(module, keysList);
+						keys = new HashSet<String>();
+						keysByModule.put(module, keys);
 					}
-					keysList.add(val);
+					keys.add(val);
 				}
 
 				return true;
@@ -1012,7 +1022,7 @@ public class SearchEngine {
 		IndexManager indexManager = ModelManager.getModelManager()
 				.getIndexManager();
 
-		MixinPattern pattern = new MixinPattern(key.toCharArray(),
+		MixinPattern pattern = new MixinPattern(searchPattern.toCharArray(),
 				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE
 						| SearchPattern.R_PATTERN_MATCH, toolkit);
 
@@ -1028,13 +1038,12 @@ public class SearchEngine {
 				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 		if (DLTKCore.VERBOSE_MIXIN) {
 			final String msg = "mixin search for \"{0}\": {1} results in {2} ms";//$NON-NLS-1$
-			System.out.println(NLS.bind(msg, new Object[] { key,
-					String.valueOf(modules.size()),
+			System.out.println(NLS.bind(msg, new Object[] { searchPattern,
+					String.valueOf(processed.size()),
 					Long.toString(System.currentTimeMillis() - startTime) }));
 		}
-		p.done(toolkit.getNatureId(), "Search mixin modules", 0);
-		return (ISourceModule[]) modules.toArray(new ISourceModule[modules
-				.size()]);
+		p.done(toolkit.getNatureId(), "Search mixin modules", 0); //$NON-NLS-1$
+		return processed.values().toArray(new ISourceModule[processed.size()]);
 	}
 
 	/**
@@ -1056,8 +1065,9 @@ public class SearchEngine {
 	public static String[] searchMixinPatterns(final IDLTKSearchScope scope,
 			String key, IDLTKLanguageToolkit toolkit) {
 		// Index requestor
-		final List result = new ArrayList();
+		final List<String> result = new ArrayList<String>();
 		IndexQueryRequestor searchRequestor = new IndexQueryRequestor() {
+			@Override
 			public boolean acceptIndexMatch(String documentPath,
 					SearchPattern indexRecord, SearchParticipant participant,
 					AccessRuleSet access) {
@@ -1090,7 +1100,7 @@ public class SearchEngine {
 				participant, // Script search only
 				scope, searchRequestor),
 				IDLTKSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	/**
