@@ -713,6 +713,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		super.dispose();
 	}
 
+	@Override
 	protected void initializeEditor() {
 		IPreferenceStore store = createCombinedPreferenceStore(null);
 		setPreferenceStore(store);
@@ -732,7 +733,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	 * @return the preference store for this editor
 	 */
 	private IPreferenceStore createCombinedPreferenceStore(IEditorInput input) {
-		final List stores = new ArrayList(8);
+		final List<IPreferenceStore> stores = new ArrayList<IPreferenceStore>(8);
 		final IScriptProject project = EditorUtility.getScriptProject(input);
 		final IDLTKLanguageToolkit toolkit = getLanguageToolkit();
 		final String preferenceQualifier = toolkit.getPreferenceQualifier();
@@ -755,7 +756,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				.getPluginPreferences()));
 		stores.add(EditorsUI.getPreferenceStore());
 		stores.add(PlatformUI.getPreferenceStore());
-		return new ChainedPreferenceStore((IPreferenceStore[]) stores
+		return new ChainedPreferenceStore(stores
 				.toArray(new IPreferenceStore[stores.size()]));
 	}
 
@@ -2965,7 +2966,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		fReconcilingListeners.remove(semanticHighlightingReconciler);
 	}
 
-	protected SemanticHighlightingManager fSemanticManager;
+	private SemanticHighlightingManager fSemanticManager;
 
 	private void installSemanticHighlighting() {
 		ScriptTextTools textTools = getTextTools();
