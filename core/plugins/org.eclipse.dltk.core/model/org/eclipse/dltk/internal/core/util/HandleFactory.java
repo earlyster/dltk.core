@@ -332,7 +332,7 @@ public class HandleFactory {
 						.getScriptProject(project);
 				IProjectFragment[] roots = scriptProject.getProjectFragments();
 				for (int j = 0, rootCount = roots.length; j < rootCount; j++) {
-					IProjectFragment root = (IProjectFragment) roots[j];
+					IProjectFragment root = roots[j];
 					if (root.getPath().isPrefixOf(path)
 							&& !Util.isExcluded(path, root, false)) {
 						return root;
