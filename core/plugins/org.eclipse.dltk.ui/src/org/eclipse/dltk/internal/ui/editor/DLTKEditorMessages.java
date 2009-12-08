@@ -41,6 +41,10 @@ public final class DLTKEditorMessages extends NLS {
 
 	public static String SourceModuleEditor_error_saving_message1;
 	public static String SourceModuleEditor_error_saving_title1;
+	/**
+	 * @since 2.0
+	 */
+	public static String ScriptEditor_InitializeSemanticHighlighting;
 	public static String ScriptOutlinePage_Sort_label;
 	public static String ScriptOutlinePage_Sort_tooltip;
 	public static String ScriptOutlinePage_Sort_description;

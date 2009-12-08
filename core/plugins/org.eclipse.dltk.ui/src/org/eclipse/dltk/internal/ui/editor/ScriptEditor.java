@@ -25,8 +25,11 @@ import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dltk.compiler.CharOperation;
@@ -50,6 +53,7 @@ import org.eclipse.dltk.internal.ui.actions.FoldingActionGroup;
 import org.eclipse.dltk.internal.ui.actions.refactoring.RefactorActionGroup;
 import org.eclipse.dltk.internal.ui.editor.selectionaction.GoToNextPreviousMemberAction;
 import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlightingManager;
+import org.eclipse.dltk.internal.ui.editor.semantic.highlighting.SemanticHighlightingReconciler;
 import org.eclipse.dltk.internal.ui.text.DLTKWordIterator;
 import org.eclipse.dltk.internal.ui.text.DocumentCharacterIterator;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
@@ -1772,6 +1776,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		return (ISourceReference) element;
 	}
 
+	@Override
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 
@@ -1801,6 +1806,15 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		fEditorSelectionChangedListener.install(getSelectionProvider());
 		if (true)
 			installSemanticHighlighting();
+		if (!isEditable()) {
+			/*
+			 * Manually call semantic highlighting for read only editor, since
+			 * usually it's done from reconciler, but
+			 * ScriptSourceViewerConfiguration.getReconciler(ISourceViewer)
+			 * doesn't create reconciler for read only editor.
+			 */
+			updateSemanticHighlighting();
+		}
 	}
 
 	/**
@@ -2966,7 +2980,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		fReconcilingListeners.remove(semanticHighlightingReconciler);
 	}
 
-	private SemanticHighlightingManager fSemanticManager;
+	protected SemanticHighlightingManager fSemanticManager;
 
 	private void installSemanticHighlighting() {
 		ScriptTextTools textTools = getTextTools();
@@ -2976,6 +2990,30 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 					(ScriptSourceViewer) getSourceViewer(), textTools
 							.getColorManager(), getPreferenceStore());
 		}
+	}
+
+	private void updateSemanticHighlighting() {
+		final IModelElement element = getInputModelElement();
+		if (!(element instanceof ISourceModule)) {
+			return;
+		}
+		Job job = new Job(
+				DLTKEditorMessages.ScriptEditor_InitializeSemanticHighlighting) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				if (fSemanticManager != null) {
+					SemanticHighlightingReconciler reconciler = fSemanticManager
+							.getReconciler();
+					if (reconciler != null)
+						reconciler.reconciled((ISourceModule) element, false,
+								monitor);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setPriority(Job.DECORATE);
+		job.setSystem(true);
+		job.schedule();
 	}
 
 	/**
