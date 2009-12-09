@@ -22,6 +22,7 @@ import org.eclipse.dltk.core.index.sql.DbFactory;
 import org.eclipse.dltk.core.index.sql.IContainerDao;
 import org.eclipse.dltk.core.index.sql.IElementDao;
 import org.eclipse.dltk.core.index.sql.IFileDao;
+import org.eclipse.dltk.core.index.sql.SqlIndex;
 import org.eclipse.dltk.core.index.sql.h2.H2Index;
 import org.eclipse.dltk.core.index.sql.h2.H2IndexPreferences;
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -91,8 +92,21 @@ public class H2DbFactory extends DbFactory {
 					}
 				}
 			} catch (SQLException e) {
+				SqlIndex
+						.error(
+								"An exception occurred while connecting to a database. Retrying ...",
+								e);
+
 				// remove corrupted DB
-				DeleteDbFiles.execute(dbPath.toOSString(), DB_NAME, true);
+				try {
+					DeleteDbFiles.execute(dbPath.toOSString(), DB_NAME, true);
+
+				} catch (SQLException e1) {
+					SqlIndex.error(
+							"An exception has occurred while removing corrupted DB: "
+									+ dbPath.toOSString(), e1);
+					throw e1;
+				}
 			}
 		} while (connection == null && --tries > 0);
 	}
