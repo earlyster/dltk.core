@@ -102,39 +102,35 @@ public class TypeInfoViewer {
 	private static class SearchRequestor extends TypeNameMatchRequestor {
 		private volatile boolean fStop;
 
-		private Set fHistory;
+		private Set<TypeNameMatch> fHistory;
 
 		private TypeInfoFilter fFilter;
-		private List fResult;
+		private List<TypeNameMatch> fResult;
 		private TypeFilter fTypeFilter;
 
 		public SearchRequestor(TypeInfoFilter filter, TypeFilter typeFilter) {
 			super();
-			fResult = new ArrayList(2048);
+			fResult = new ArrayList<TypeNameMatch>(2048);
 			fFilter = filter;
 			fTypeFilter = typeFilter;
 		}
 
 		public TypeNameMatch[] getResult() {
-			return (TypeNameMatch[]) fResult.toArray(new TypeNameMatch[fResult
-					.size()]);
+			return fResult.toArray(new TypeNameMatch[fResult.size()]);
 		}
 
 		public void cancel() {
 			fStop = true;
 		}
 
-		public void setHistory(Set history) {
+		public void setHistory(Set<TypeNameMatch> history) {
 			fHistory = history;
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.jdt.core.search.TypeNameMatchRequestor#acceptTypeNameMatch
-		 * (org.eclipse.jdt.core.search.TypeNameMatch)
+		 * @see TypeNameMatchRequestor#acceptTypeNameMatch(TypeNameMatch)
 		 */
+		@Override
 		public void acceptTypeNameMatch(TypeNameMatch match) {
 			if (fStop)
 				return;
@@ -147,7 +143,8 @@ public class TypeInfoViewer {
 		}
 	}
 
-	protected static class TypeInfoComparator implements Comparator {
+	protected static class TypeInfoComparator implements
+			Comparator<TypeNameMatch> {
 		private TypeInfoLabelProvider fLabelProvider;
 		private TypeInfoFilter fFilter;
 
@@ -157,9 +154,7 @@ public class TypeInfoViewer {
 			fFilter = filter;
 		}
 
-		public int compare(Object left, Object right) {
-			TypeNameMatch leftInfo = (TypeNameMatch) left;
-			TypeNameMatch rightInfo = (TypeNameMatch) right;
+		public int compare(TypeNameMatch leftInfo, TypeNameMatch rightInfo) {
 			int leftCategory = getCamelCaseCategory(leftInfo);
 			int rightCategory = getCamelCaseCategory(rightInfo);
 			if (leftCategory < rightCategory)
@@ -170,6 +165,7 @@ public class TypeInfoViewer {
 					.getSimpleTypeName());
 			if (result != 0)
 				return result;
+			// TODO it should be generalized for scripting languages
 			boolean leftHasNamespace = (leftInfo.getTypeQualifiedName()
 					.indexOf('$') != -1);
 			boolean rightHasNamespace = (rightInfo.getTypeQualifiedName()
@@ -255,28 +251,26 @@ public class TypeInfoViewer {
 		private ITypeInfoImageProvider fProviderExtension;
 		private TypeInfoRequestorAdapter fAdapter = new TypeInfoRequestorAdapter();
 
-		private Map fLib2Name = new HashMap();
+		private Map<String, String> fLib2Name = new HashMap<String, String>();
 		private String[] fInstallLocations;
 		private String[] fVMNames;
 
 		public TypeInfoLabelProvider(ITypeInfoImageProvider extension) {
 			fProviderExtension = extension;
-			List locations = new ArrayList();
-			List labels = new ArrayList();
+			List<String> locations = new ArrayList<String>();
+			List<String> labels = new ArrayList<String>();
 			IInterpreterInstallType[] installs = ScriptRuntime
 					.getInterpreterInstallTypes(fToolkit.getCoreToolkit()
 							.getNatureId());
 			for (int i = 0; i < installs.length; i++) {
 				processVMInstallType(installs[i], locations, labels);
 			}
-			fInstallLocations = (String[]) locations
-					.toArray(new String[locations.size()]);
-			fVMNames = (String[]) labels.toArray(new String[labels.size()]);
-
+			fInstallLocations = locations.toArray(new String[locations.size()]);
+			fVMNames = labels.toArray(new String[labels.size()]);
 		}
 
 		private void processVMInstallType(IInterpreterInstallType installType,
-				List locations, List labels) {
+				List<String> locations, List<String> labels) {
 			if (installType != null) {
 				IInterpreterInstall[] installs = installType
 						.getInterpreterInstalls();
@@ -452,7 +446,7 @@ public class TypeInfoViewer {
 						return fVMNames[i];
 					}
 				}
-				String lib = (String) fLib2Name.get(name);
+				String lib = fLib2Name.get(name);
 				if (lib != null)
 					return lib;
 			}
@@ -480,6 +474,7 @@ public class TypeInfoViewer {
 			cancel();
 		}
 
+		@Override
 		public IStatus runInUIThread(IProgressMonitor monitor) {
 			if (stopped())
 				return new Status(IStatus.CANCEL, DLTKUIPlugin.getPluginId(),
@@ -508,11 +503,13 @@ public class TypeInfoViewer {
 			fViewer = viewer;
 		}
 
+		@Override
 		public void setTaskName(String name) {
 			super.setTaskName(name);
 			fName = name;
 		}
 
+		@Override
 		public void beginTask(String name, int totalWork) {
 			super.beginTask(name, totalWork);
 			if (fName == null)
@@ -520,17 +517,20 @@ public class TypeInfoViewer {
 			fTotalWork = totalWork;
 		}
 
+		@Override
 		public void worked(int work) {
 			super.worked(work);
 			internalWorked(work);
 		}
 
+		@Override
 		public void done() {
 			fDone = true;
 			fViewer.setProgressMessage(""); //$NON-NLS-1$
 			super.done();
 		}
 
+		@Override
 		public void internalWorked(double work) {
 			fWorked = fWorked + work;
 			fViewer.setProgressMessage(getMessage());
@@ -562,6 +562,7 @@ public class TypeInfoViewer {
 			setSystem(true);
 		}
 
+		@Override
 		protected final IStatus run(IProgressMonitor parent) {
 			ProgressMonitor monitor = new ProgressMonitor(parent, fViewer);
 			try {
@@ -600,6 +601,7 @@ public class TypeInfoViewer {
 			cancel();
 		}
 
+		@Override
 		protected IStatus doRun(ProgressMonitor monitor) {
 			try {
 				if (VIRTUAL) {
@@ -622,7 +624,7 @@ public class TypeInfoViewer {
 		}
 
 		protected abstract TypeNameMatch[] getSearchResult(
-				Set matchIdsInHistory, ProgressMonitor monitor)
+				Set<TypeNameMatch> matchIdsInHistory, ProgressMonitor monitor)
 				throws CoreException;
 
 		private void internalRun(ProgressMonitor monitor) throws CoreException,
@@ -636,10 +638,10 @@ public class TypeInfoViewer {
 			TypeNameMatch last = null;
 			TypeNameMatch type = null;
 			TypeNameMatch next = null;
-			List elements = new ArrayList();
-			List imageDescriptors = new ArrayList();
-			List labels = new ArrayList();
-			Set filteredMatches = new HashSet();
+			List<TypeNameMatch> elements = new ArrayList<TypeNameMatch>();
+			List<ImageDescriptor> imageDescriptors = new ArrayList<ImageDescriptor>();
+			List<String> labels = new ArrayList<String>();
+			Set<TypeNameMatch> filteredMatches = new HashSet<TypeNameMatch>();
 
 			TypeNameMatch[] matchingTypes = fHistory
 					.getFilteredTypeInfos(fFilter);
@@ -706,7 +708,7 @@ public class TypeInfoViewer {
 				}
 				fViewer.addAll(fTicket, elements, imageDescriptors, labels);
 				long sleep = 100 - (System.currentTimeMillis() - startTime);
-				if (false)
+				if (DEBUG)
 					System.out.println("Sleeping for: " + sleep); //$NON-NLS-1$
 
 				if (sleep > 0)
@@ -730,7 +732,8 @@ public class TypeInfoViewer {
 			if ((fMode & INDEX) == 0)
 				return;
 
-			Set filteredMatches = new HashSet(matchingTypes.length * 2);
+			Set<TypeNameMatch> filteredMatches = new HashSet<TypeNameMatch>(
+					matchingTypes.length * 2);
 			for (int i = 0; i < matchingTypes.length; i++) {
 				filteredMatches.add(matchingTypes[i]);
 			}
@@ -769,13 +772,16 @@ public class TypeInfoViewer {
 			fReqestor = new SearchRequestor(filter, new TypeFilter(toolkit));
 		}
 
+		@Override
 		public void stop() {
 			fReqestor.cancel();
 			super.stop();
 		}
 
-		protected TypeNameMatch[] getSearchResult(Set matchIdsInHistory,
-				ProgressMonitor monitor) throws CoreException {
+		@Override
+		protected TypeNameMatch[] getSearchResult(
+				Set<TypeNameMatch> matchIdsInHistory, ProgressMonitor monitor)
+				throws CoreException {
 			long start = System.currentTimeMillis();
 			fReqestor.setHistory(matchIdsInHistory);
 
@@ -783,10 +789,10 @@ public class TypeInfoViewer {
 					.setTaskName(DLTKUIMessages.TypeInfoViewer_searchJob_taskName);
 
 			MatchRule searchRule = ModelAccess.convertSearchRule(fFilter
-			.getSearchFlags());
+					.getSearchFlags());
 			IType[] types = new ModelAccess().findTypes(fFilter
-					.getNamePattern(), searchRule, 0, Modifiers.AccNameSpace, fScope,
-					monitor);
+					.getNamePattern(), searchRule, 0, Modifiers.AccNameSpace,
+					fScope, monitor);
 			if (searchRule == MatchRule.CAMEL_CASE) {
 				LinkedList<IType> result = new LinkedList<IType>();
 				if (types != null) {
@@ -847,9 +853,11 @@ public class TypeInfoViewer {
 			fLastResult = lastResult;
 		}
 
-		protected TypeNameMatch[] getSearchResult(Set filteredHistory,
-				ProgressMonitor monitor) throws CoreException {
-			List result = new ArrayList(2048);
+		@Override
+		protected TypeNameMatch[] getSearchResult(
+				Set<TypeNameMatch> filteredHistory, ProgressMonitor monitor)
+				throws CoreException {
+			List<TypeNameMatch> result = new ArrayList<TypeNameMatch>(2048);
 			for (int i = 0; i < fLastResult.length; i++) {
 				TypeNameMatch type = fLastResult[i];
 				if (filteredHistory.contains(type))
@@ -858,8 +866,8 @@ public class TypeInfoViewer {
 					result.add(type);
 			}
 			// we have to sort if the filter is a camel case filter.
-			TypeNameMatch[] types = (TypeNameMatch[]) result
-					.toArray(new TypeNameMatch[result.size()]);
+			TypeNameMatch[] types = result.toArray(new TypeNameMatch[result
+					.size()]);
 			if (fFilter.isCamelCasePattern()) {
 				Arrays.sort(types, new TypeInfoComparator(fLabelProvider,
 						fFilter));
@@ -880,6 +888,7 @@ public class TypeInfoViewer {
 			cancel();
 		}
 
+		@Override
 		protected IStatus doRun(ProgressMonitor monitor) {
 			try {
 				monitor
@@ -950,7 +959,7 @@ public class TypeInfoViewer {
 
 	/* non virtual table */
 	private int fNextElement;
-	private List fItems;
+	private List<TableItem> fItems;
 
 	/* virtual table */
 	private TypeNameMatch[] fHistoryMatches;
@@ -1021,10 +1030,11 @@ public class TypeInfoViewer {
 				| SWT.FLAT | flags | (VIRTUAL ? SWT.VIRTUAL : SWT.NONE));
 		fTable.setFont(parent.getFont());
 		fLabelProvider = new TypeInfoLabelProvider(imageExtension);
-		fItems = new ArrayList(500);
+		fItems = new ArrayList<TableItem>(500);
 		fTable.setHeaderVisible(false);
 		addPopupMenu();
 		fTable.addControlListener(new ControlAdapter() {
+			@Override
 			public void controlResized(ControlEvent event) {
 				int itemHeight = fTable.getItemHeight();
 				Rectangle clientArea = fTable.getClientArea();
@@ -1032,6 +1042,7 @@ public class TypeInfoViewer {
 			}
 		});
 		fTable.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == SWT.DEL) {
 					deleteHistoryEntry();
@@ -1051,6 +1062,7 @@ public class TypeInfoViewer {
 			}
 		});
 		fTable.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (fLastSelection != null) {
 					for (int i = 0; i < fLastSelection.length; i++) {
@@ -1171,15 +1183,14 @@ public class TypeInfoViewer {
 
 	public TypeNameMatch[] getSelection() {
 		TableItem[] items = fTable.getSelection();
-		List result = new ArrayList(items.length);
+		List<TypeNameMatch> result = new ArrayList<TypeNameMatch>(items.length);
 		for (int i = 0; i < items.length; i++) {
 			Object data = items[i].getData();
 			if (data instanceof TypeNameMatch) {
-				result.add(data);
+				result.add((TypeNameMatch) data);
 			}
 		}
-		return (TypeNameMatch[]) result
-				.toArray(new TypeNameMatch[result.size()]);
+		return result.toArray(new TypeNameMatch[result.size()]);
 	}
 
 	public void stop() {
@@ -1288,12 +1299,14 @@ public class TypeInfoViewer {
 		final MenuItem remove = new MenuItem(menu, SWT.NONE);
 		remove.setText(DLTKUIMessages.TypeInfoViewer_remove_from_history);
 		menu.addMenuListener(new MenuAdapter() {
+			@Override
 			public void menuShown(MenuEvent e) {
 				TableItem[] selection = fTable.getSelection();
 				remove.setEnabled(canEnable(selection));
 			}
 		});
 		remove.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				deleteHistoryEntry();
 			}
@@ -1377,20 +1390,21 @@ public class TypeInfoViewer {
 		});
 	}
 
-	private void addHistory(int ticket, final List elements,
-			final List imageDescriptors, final List labels) {
+	private void addHistory(int ticket, final List<TypeNameMatch> elements,
+			final List<ImageDescriptor> imageDescriptors,
+			final List<String> labels) {
 		addAll(ticket, elements, imageDescriptors, labels);
 	}
 
-	private void addAll(int ticket, final List elements,
-			final List imageDescriptors, final List labels) {
+	private void addAll(int ticket, final List<TypeNameMatch> elements,
+			final List<ImageDescriptor> imageDescriptors,
+			final List<String> labels) {
 		syncExec(ticket, new Runnable() {
 			public void run() {
 				int size = elements.size();
 				for (int i = 0; i < size; i++) {
-					addSingleElement(elements.get(i),
-							(ImageDescriptor) imageDescriptors.get(i),
-							(String) labels.get(i));
+					addSingleElement(elements.get(i), imageDescriptors.get(i),
+							labels.get(i));
 				}
 			}
 		});
@@ -1423,7 +1437,7 @@ public class TypeInfoViewer {
 	private void addDashLine() {
 		TableItem item = null;
 		if (fItems.size() > fNextElement) {
-			item = (TableItem) fItems.get(fNextElement);
+			item = fItems.get(fNextElement);
 		} else {
 			item = new TableItem(fTable, SWT.NONE);
 			fItems.add(item);
@@ -1437,7 +1451,7 @@ public class TypeInfoViewer {
 		TableItem item = null;
 		Object old = null;
 		if (fItems.size() > fNextElement) {
-			item = (TableItem) fItems.get(fNextElement);
+			item = fItems.get(fNextElement);
 			old = item.getData();
 			item.setForeground(null);
 		} else {
