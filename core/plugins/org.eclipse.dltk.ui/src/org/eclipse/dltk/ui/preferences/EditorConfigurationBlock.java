@@ -223,7 +223,9 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 			createSettingsGroup(composite);
 		}
 
-		createTabsGroup(control);
+		if ((flags & (FLAG_TAB_POLICY | FLAG_TAB_ALWAYS_INDENT)) != 0) {
+			createTabsGroup(control);
+		}
 
 		if ((flags & FLAG_EDITOR_APPEARANCE_COLOR_OPTIONS) != 0) {
 			createAppearanceOptionsGroup(control);
