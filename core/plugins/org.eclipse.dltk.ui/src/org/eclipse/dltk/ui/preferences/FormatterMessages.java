@@ -18,11 +18,16 @@ import org.eclipse.osgi.util.NLS;
  */
 public final class FormatterMessages extends NLS {
 
-	private static final String BUNDLE_NAME= FormatterMessages.class.getName(); 
+	private static final String BUNDLE_NAME = FormatterMessages.class.getName();
 
 	private FormatterMessages() {
 		// Do not instantiate
 	}
+
+	/**
+	 * @since 2.0
+	 */
+	public static String IndentationTabPage_generalSettings;
 	public static String IndentationTabPage_preview_header;
 
 	public static String IndentationTabPage_general_group_option_tab_policy;
