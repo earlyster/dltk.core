@@ -57,6 +57,13 @@ public class ScriptedTest extends AbstractFormatterTest {
 		return preferences;
 	}
 
+	public void setPreference(String optionName, Object optionValue) {
+		if (preferences == null) {
+			preferences = new HashMap<String, Object>();
+		}
+		preferences.put(optionName, optionValue);
+	}
+
 	@Override
 	protected IScriptFormatter createFormatter(Map<String, Object> preferences) {
 		return context.createFormatter(preferences);
@@ -89,7 +96,6 @@ public class ScriptedTest extends AbstractFormatterTest {
 			String suiteName, String resourceName, int beginTestIndex) {
 		final TestSuite suite = new TestSuite(suiteName);
 		try {
-			Map<String, Object> preferences = null;
 			final String content = new String(readResource(context,
 					resourceName));
 			final String[] lines = TextUtils.splitLines(content);
@@ -124,9 +130,6 @@ public class ScriptedTest extends AbstractFormatterTest {
 						final Matcher matcher = OPTION_PATTERN.matcher(line
 								.substring(OPTION_MARKER.length()));
 						if (matcher.matches()) {
-							if (preferences == null) {
-								preferences = new HashMap<String, Object>();
-							}
 							final String optionName = context
 									.validateOptionName(matcher.group(1));
 							if (optionName == null)
@@ -138,9 +141,15 @@ public class ScriptedTest extends AbstractFormatterTest {
 							if (optionValue == null)
 								throw new IllegalArgumentException(
 										"Invalid option value: " + line);
-							preferences.put(optionName, optionValue);
+							setPreference(optionName, optionValue);
 						} else {
-							// TODO log error
+							suite.addTest(new TestCase(resourceName + ":"
+									+ testEnd) {
+								@Override
+								protected void runTest() throws Throwable {
+									throw new IllegalArgumentException(line);
+								}
+							});
 						}
 					}
 				} else if (line.startsWith(RESPONSE_MARKER)) {
