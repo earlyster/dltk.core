@@ -30,6 +30,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.TextEdit;
 
+@SuppressWarnings("nls")
 public abstract class AbstractFormatterTest extends TestCase {
 
 	/**
@@ -76,13 +77,14 @@ public abstract class AbstractFormatterTest extends TestCase {
 	 *            or <code>null</code> to use default preferences.
 	 * @return
 	 */
-	protected abstract IScriptFormatter createFormatter(Map<String, Object> preferences);
+	protected abstract IScriptFormatter createFormatter(
+			Map<String, Object> preferences);
 
-	protected static String joinLines(Collection lines) {
-		return joinLines((String[]) lines.toArray(new String[lines.size()]));
+	protected static String joinLines(Collection<String> lines) {
+		return joinLines(lines.toArray(new String[lines.size()]));
 	}
 
-	protected static String joinLines(String[] lines) {
+	protected static String joinLines(String... lines) {
 		return Strings.concatenate(lines, Util.LINE_SEPARATOR)
 				+ Util.LINE_SEPARATOR;
 	}
