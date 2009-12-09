@@ -11,12 +11,16 @@
 package org.eclipse.dltk.ui.actions;
 
 import org.eclipse.dltk.internal.ui.actions.DLTKQuickMenuAction;
+import org.eclipse.dltk.internal.ui.editor.DLTKEditorMessages;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
+import org.eclipse.dltk.ui.formatter.ScriptFormatterManager;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.commands.ActionHandler;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -26,6 +30,7 @@ import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
+import org.eclipse.ui.texteditor.TextOperationAction;
 
 /**
  * Action group that adds the source and generate actions to a part's context
@@ -104,6 +109,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fGroupName = groupName;
 
 		installQuickAccessAction();
+		installFormatAction();
 	}
 
 	private FormatAction formatAction;
@@ -124,6 +130,22 @@ public class GenerateActionGroup extends ActionGroup {
 					fQuickAccessAction.getActionDefinitionId(),
 					new ActionHandler(fQuickAccessAction));
 		}
+	}
+
+	private void installFormatAction() {
+		if (!ScriptFormatterManager.hasFormatterFor(fEditor
+				.getLanguageToolkit().getNatureId())) {
+			return;
+		}
+		Action action = new TextOperationAction(DLTKEditorMessages
+				.getBundleForConstructedKeys(),
+				"Format.", fEditor, ISourceViewer.FORMAT); //$NON-NLS-1$
+		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.FORMAT);
+		fEditor.setAction(DLTKActionConstants.FORMAT, action);
+		fEditor.markAsStateDependentAction(DLTKActionConstants.FORMAT, true);
+		fEditor
+				.markAsSelectionDependentAction(DLTKActionConstants.FORMAT,
+						true);
 	}
 
 	public void fillActionBars(IActionBars actionBar) {
