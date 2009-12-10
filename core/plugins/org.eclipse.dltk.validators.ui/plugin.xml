@@ -67,11 +67,5 @@
             id="org.eclipse.dltk.validators.ui.visibility">
       </actionFilterTester>
    </extension>
-   <extension
-         point="org.eclipse.dltk.ui.editorContextActionGroup">
-      <editorContextActionGroup
-            class="org.eclipse.dltk.validators.internal.ui.popup.actions.DLTKValidatorsActionGroup">
-      </editorContextActionGroup>
-   </extension>
 
 </plugin>
