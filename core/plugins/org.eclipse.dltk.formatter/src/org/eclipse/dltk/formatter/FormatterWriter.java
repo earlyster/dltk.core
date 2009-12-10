@@ -22,10 +22,10 @@ import org.eclipse.jface.text.IRegion;
 
 public class FormatterWriter implements IFormatterWriter {
 
-	private final StringBuffer writer = new StringBuffer();
-	private final StringBuffer indent = new StringBuffer();
-	private final StringBuffer callbackBuffer = new StringBuffer();
-	private final StringBuffer emptyLines = new StringBuffer();
+	private final StringBuilder writer = new StringBuilder();
+	private final StringBuilder indent = new StringBuilder();
+	private final StringBuilder callbackBuffer = new StringBuilder();
+	private final StringBuilder emptyLines = new StringBuilder();
 
 	private boolean lineStarted = false;
 	private char lastChar = 0;
@@ -343,7 +343,7 @@ public class FormatterWriter implements IFormatterWriter {
 		writeIndent(context, writer);
 	}
 
-	protected void writeIndent(IFormatterContext context, StringBuffer buffer) {
+	protected void writeIndent(IFormatterContext context, StringBuilder buffer) {
 		indentGenerator.generateIndent(context.getIndent(), buffer);
 	}
 
