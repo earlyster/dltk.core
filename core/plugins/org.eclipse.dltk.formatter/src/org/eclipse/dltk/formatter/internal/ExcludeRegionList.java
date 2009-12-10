@@ -22,12 +22,11 @@ import org.eclipse.jface.text.Region;
 
 public class ExcludeRegionList {
 
-	private final List excludes = new ArrayList();
+	private final List<IRegion> excludes = new ArrayList<IRegion>();
 
 	public boolean isExcluded(int start, int end) {
 		if (!excludes.isEmpty()) {
-			for (Iterator i = excludes.iterator(); i.hasNext();) {
-				final IRegion region = (IRegion) i.next();
+			for (final IRegion region : excludes) {
 				final int regionEnd = region.getOffset() + region.getLength();
 				if (start <= regionEnd && region.getOffset() <= end) {
 					return true;
@@ -38,9 +37,8 @@ public class ExcludeRegionList {
 	}
 
 	public IRegion[] selectValidRanges(int start, int end) {
-		final List result = new ArrayList();
-		for (Iterator i = excludes.iterator(); i.hasNext();) {
-			final IRegion region = (IRegion) i.next();
+		final List<Region> result = new ArrayList<Region>();
+		for (final IRegion region : excludes) {
 			final int regionEnd = region.getOffset() + region.getLength();
 			if (start <= regionEnd && region.getOffset() <= end) {
 				if (start < region.getOffset()) {
@@ -56,10 +54,10 @@ public class ExcludeRegionList {
 		if (start < end) {
 			result.add(new Region(start, end - start));
 		}
-		return (IRegion[]) result.toArray(new IRegion[result.size()]);
+		return result.toArray(new IRegion[result.size()]);
 	}
 
-	public List getExcludes() {
+	public List<IRegion> getExcludes() {
 		return Collections.unmodifiableList(excludes);
 	}
 
@@ -67,8 +65,8 @@ public class ExcludeRegionList {
 		int start = region.getOffset();
 		int end = region.getOffset() + region.getLength();
 		if (!excludes.isEmpty()) {
-			for (Iterator i = excludes.iterator(); i.hasNext();) {
-				final IRegion r = (IRegion) i.next();
+			for (Iterator<IRegion> i = excludes.iterator(); i.hasNext();) {
+				final IRegion r = i.next();
 				final int rEnd = r.getOffset() + r.getLength();
 				if (r.getOffset() <= end && start <= rEnd) {
 					if (region.getOffset() >= r.getOffset()
@@ -97,10 +95,10 @@ public class ExcludeRegionList {
 		Collections.sort(excludes, REGION_COMPARATOR);
 	}
 
-	private static final Comparator REGION_COMPARATOR = new Comparator() {
+	private static final Comparator<IRegion> REGION_COMPARATOR = new Comparator<IRegion>() {
 
-		public int compare(Object o1, Object o2) {
-			return ((IRegion) o1).getOffset() - ((IRegion) o2).getOffset();
+		public int compare(IRegion o1, IRegion o2) {
+			return o1.getOffset() - o2.getOffset();
 		}
 
 	};
