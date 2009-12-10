@@ -25,7 +25,7 @@ public class FormatterMixedIndentGenerator implements IFormatterIndentGenerator 
 		this.tabSize = Math.max(tabSize, 1);
 	}
 
-	public void generateIndent(int indentLevel, StringBuffer target) {
+	public void generateIndent(int indentLevel, StringBuilder target) {
 		final int indent = indentLevel * indentSize;
 		final int tabCount = indent / tabSize;
 		for (int i = 0; i < tabCount; ++i) {

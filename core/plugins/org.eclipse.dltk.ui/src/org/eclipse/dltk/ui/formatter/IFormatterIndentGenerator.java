@@ -13,7 +13,7 @@ package org.eclipse.dltk.ui.formatter;
 
 public interface IFormatterIndentGenerator {
 
-	void generateIndent(int indentLevel, StringBuffer target);
+	void generateIndent(int indentLevel, StringBuilder target);
 
 	int getTabSize();
 

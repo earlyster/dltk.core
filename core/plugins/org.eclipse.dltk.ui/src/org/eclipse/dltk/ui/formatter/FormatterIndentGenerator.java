@@ -26,7 +26,7 @@ public class FormatterIndentGenerator implements IFormatterIndentGenerator {
 		this.tabSize = tabSize;
 	}
 
-	public void generateIndent(final int indentLevel, StringBuffer target) {
+	public void generateIndent(final int indentLevel, StringBuilder target) {
 		if (indentLevel > 0) {
 			int size = indentLevel * indentationSize;
 			while (size > 0) {
