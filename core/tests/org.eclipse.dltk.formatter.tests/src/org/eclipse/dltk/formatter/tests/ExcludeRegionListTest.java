@@ -25,7 +25,7 @@ public class ExcludeRegionListTest extends TestCase {
 		ExcludeRegionList w = new ExcludeRegionList();
 		w.excludeRegion(new Region(0, 2));
 		w.excludeRegion(new Region(1, 2));
-		List excludes = w.getExcludes();
+		List<IRegion> excludes = w.getExcludes();
 		assertEquals(1, excludes.size());
 		assertEquals(new Region(0, 3), excludes.get(0));
 	}
@@ -34,7 +34,7 @@ public class ExcludeRegionListTest extends TestCase {
 		ExcludeRegionList w = new ExcludeRegionList();
 		w.excludeRegion(new Region(0, 1));
 		w.excludeRegion(new Region(1, 2));
-		List excludes = w.getExcludes();
+		List<IRegion> excludes = w.getExcludes();
 		assertEquals(1, excludes.size());
 		assertEquals(new Region(0, 3), excludes.get(0));
 	}
@@ -44,7 +44,7 @@ public class ExcludeRegionListTest extends TestCase {
 		final Region r04 = new Region(0, 4);
 		w.excludeRegion(r04);
 		w.excludeRegion(new Region(1, 2));
-		List excludes = w.getExcludes();
+		List<IRegion> excludes = w.getExcludes();
 		assertEquals(1, excludes.size());
 		assertEquals(r04, excludes.get(0));
 		assertSame(r04, excludes.get(0));
@@ -54,7 +54,7 @@ public class ExcludeRegionListTest extends TestCase {
 		ExcludeRegionList w = new ExcludeRegionList();
 		w.excludeRegion(new Region(0, 2));
 		w.excludeRegion(new Region(4, 2));
-		List excludes = w.getExcludes();
+		List<IRegion> excludes = w.getExcludes();
 		assertEquals(2, excludes.size());
 		assertEquals(new Region(0, 2), excludes.get(0));
 		assertEquals(new Region(4, 2), excludes.get(1));
@@ -66,7 +66,7 @@ public class ExcludeRegionListTest extends TestCase {
 		w.excludeRegion(new Region(4, 2));
 		final Region r08 = new Region(0, 8);
 		w.excludeRegion(r08);
-		List excludes = w.getExcludes();
+		List<IRegion> excludes = w.getExcludes();
 		assertEquals(1, excludes.size());
 		assertEquals(r08, excludes.get(0));
 		assertSame(r08, excludes.get(0));
@@ -77,7 +77,7 @@ public class ExcludeRegionListTest extends TestCase {
 		final Region r = new Region(0, 4);
 		w.excludeRegion(r);
 		w.excludeRegion(new Region(1, 1));
-		List excludes = w.getExcludes();
+		List<IRegion> excludes = w.getExcludes();
 		assertEquals(1, excludes.size());
 		assertEquals(r, excludes.get(0));
 		assertSame(r, excludes.get(0));
