@@ -515,19 +515,18 @@ public abstract class AbstractSourceModule extends Openable implements
 			}
 
 			final ISourceElementParser parser = getSourceElementParser(natureId);
-			if (!isReadOnly()) {
-				if (parser instanceof ISourceElementParserExtension) {
-					((ISourceElementParserExtension) parser)
-							.setScriptProject(this.getScriptProject());
-				}
-			}
-
-			parser.setRequestor(requestor);
-
 			final AccumulatingProblemReporter problemReporter = getAccumulatingProblemReporter();
-			parser.setReporter(problemReporter);
-
-			SourceParserUtil.parseSourceModule(this, parser);
+			if (parser != null) {
+				if (!isReadOnly()) {
+					if (parser instanceof ISourceElementParserExtension) {
+						((ISourceElementParserExtension) parser)
+								.setScriptProject(this.getScriptProject());
+					}
+				}
+				parser.setRequestor(requestor);
+				parser.setReporter(problemReporter);
+				SourceParserUtil.parseSourceModule(this, parser);
+			}
 			if (problemReporter != null) {
 				if (!problemReporter.hasErrors()) {
 					StructureBuilder.build(natureId, this, problemReporter);
