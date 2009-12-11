@@ -35,12 +35,11 @@ public class FormatterIndentDetector implements IFormatterWriter {
 
 	}
 
-	public void ensureLineStarted(IFormatterContext context) throws Exception {
+	public void ensureLineStarted(IFormatterContext context) {
 		// empty
 	}
 
-	public void write(IFormatterContext context, int startOffset, int endOffset)
-			throws Exception {
+	public void write(IFormatterContext context, int startOffset, int endOffset) {
 		if (!indentDetected && startOffset >= offset) {
 			level = context.getIndent();
 			indentDetected = true;
@@ -50,24 +49,22 @@ public class FormatterIndentDetector implements IFormatterWriter {
 	/*
 	 * @see IFormatterWriter#writeText(IFormatterContext, String)
 	 */
-	public void writeText(IFormatterContext context, String text)
-			throws Exception {
+	public void writeText(IFormatterContext context, String text) {
 		// empty
 	}
 
 	/*
 	 * @see IFormatterWriter#writeLineBreak(IFormatterContext)
 	 */
-	public void writeLineBreak(IFormatterContext context) throws Exception {
+	public void writeLineBreak(IFormatterContext context) {
 		// empty
 	}
 
-	public void skipNextLineBreaks(IFormatterContext context) throws Exception {
+	public void skipNextLineBreaks(IFormatterContext context) {
 		// empty
 	}
 
-	public void appendToPreviousLine(IFormatterContext context, String text)
-			throws Exception {
+	public void appendToPreviousLine(IFormatterContext context, String text) {
 		// empty
 	}
 

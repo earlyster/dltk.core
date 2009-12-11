@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.formatter;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,14 +52,13 @@ public class FormatterWriter implements IFormatterWriter {
 		this.indentGenerator = indentGenerator;
 	}
 
-	public void ensureLineStarted(IFormatterContext context) throws Exception {
+	public void ensureLineStarted(IFormatterContext context) {
 		if (!lineStarted) {
 			startLine(context);
 		}
 	}
 
-	public void write(IFormatterContext context, int startOffset, int endOffset)
-			throws Exception {
+	public void write(IFormatterContext context, int startOffset, int endOffset) {
 		if (!excludes.isExcluded(startOffset, endOffset)) {
 			if (endOffset > startOffset) {
 				write(context, document.get(startOffset, endOffset));
@@ -77,8 +75,7 @@ public class FormatterWriter implements IFormatterWriter {
 	/*
 	 * @see IFormatterWriter#writeText(IFormatterContext, String)
 	 */
-	public void writeText(IFormatterContext context, String text)
-			throws Exception {
+	public void writeText(IFormatterContext context, String text) {
 		skipNextNewLine = false;
 		if (lineStarted) {
 			trimTrailingSpaces();
@@ -96,7 +93,7 @@ public class FormatterWriter implements IFormatterWriter {
 	/*
 	 * @see IFormatterWriter#writeLineBreak(IFormatterContext)
 	 */
-	public void writeLineBreak(IFormatterContext context) throws Exception {
+	public void writeLineBreak(IFormatterContext context) {
 		if (lineStarted) {
 			write(context, lineDelimiter);
 			assert (!lineStarted);
@@ -104,12 +101,11 @@ public class FormatterWriter implements IFormatterWriter {
 		}
 	}
 
-	public void skipNextLineBreaks(IFormatterContext context) throws Exception {
+	public void skipNextLineBreaks(IFormatterContext context) {
 		skipNextNewLine = true;
 	}
 
-	public void appendToPreviousLine(IFormatterContext context, String text)
-			throws Exception {
+	public void appendToPreviousLine(IFormatterContext context, String text) {
 		if (!lineStarted && canAppendToPreviousLine) {
 			skipNextNewLine = false;
 			emptyLines.setLength(0);
@@ -135,8 +131,7 @@ public class FormatterWriter implements IFormatterWriter {
 		canAppendToPreviousLine = false;
 	}
 
-	protected void write(IFormatterContext context, String text)
-			throws IOException {
+	protected void write(IFormatterContext context, String text) {
 		if (!context.isWrapping()) {
 			for (int i = 0; i < text.length(); ++i) {
 				write(context, text.charAt(i));
@@ -225,9 +220,8 @@ public class FormatterWriter implements IFormatterWriter {
 	/**
 	 * @param context
 	 * @param charAt
-	 * @throws IOException
 	 */
-	protected void write(IFormatterContext context, char ch) throws IOException {
+	protected void write(IFormatterContext context, char ch) {
 		if (ch == '\n' || ch == '\r') {
 			if (lineStarted) {
 				if (trimTrailingSpaces) {
@@ -292,7 +286,7 @@ public class FormatterWriter implements IFormatterWriter {
 		}
 	}
 
-	private void startLine(IFormatterContext context) throws IOException {
+	private void startLine(IFormatterContext context) {
 		if (callbackBuffer.length() != 0) {
 			writer.append(callbackBuffer);
 			callbackBuffer.setLength(0);
@@ -388,6 +382,13 @@ public class FormatterWriter implements IFormatterWriter {
 			writeEmptyLines();
 			emptyLines.setLength(0);
 		}
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public int getLinesPreserve() {
+		return linesPreserve;
 	}
 
 	/**

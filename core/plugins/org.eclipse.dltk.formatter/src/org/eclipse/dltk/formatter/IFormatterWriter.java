@@ -15,19 +15,17 @@ import org.eclipse.jface.text.IRegion;
 
 public interface IFormatterWriter {
 
-	void ensureLineStarted(IFormatterContext context) throws Exception;
+	void ensureLineStarted(IFormatterContext context);
 
-	void write(IFormatterContext context, int startOffset, int endOffset)
-			throws Exception;
+	void write(IFormatterContext context, int startOffset, int endOffset);
 
 	/**
 	 * Writes specified text at the current position. Ideally text should not
 	 * contain line breaks characters.
 	 * 
 	 * @param text
-	 * @throws Exception
 	 */
-	void writeText(IFormatterContext context, String text) throws Exception;
+	void writeText(IFormatterContext context, String text);
 
 	/**
 	 * Writes line break at the current position.
@@ -35,12 +33,11 @@ public interface IFormatterWriter {
 	 * @param context
 	 * @throws Exception
 	 */
-	void writeLineBreak(IFormatterContext context) throws Exception;
+	void writeLineBreak(IFormatterContext context);
 
-	void skipNextLineBreaks(IFormatterContext context) throws Exception;
+	void skipNextLineBreaks(IFormatterContext context);
 
-	void appendToPreviousLine(IFormatterContext context, String text)
-			throws Exception;
+	void appendToPreviousLine(IFormatterContext context, String text);
 
 	void disableAppendToPreviousLine();
 
