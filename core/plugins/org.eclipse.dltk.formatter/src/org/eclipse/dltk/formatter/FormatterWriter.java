@@ -343,6 +343,9 @@ public class FormatterWriter implements IFormatterWriter {
 		writeIndent(context, writer);
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected void writeIndent(IFormatterContext context, StringBuilder buffer) {
 		indentGenerator.generateIndent(context.getIndent(), buffer);
 	}
