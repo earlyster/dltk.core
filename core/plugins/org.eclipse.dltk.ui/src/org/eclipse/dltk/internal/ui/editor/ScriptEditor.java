@@ -389,7 +389,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 	class AdaptedSourceViewer extends ScriptSourceViewer implements
 			ICompletionListener {
-		private List fTextConverters;
+		private List<ITextConverter> fTextConverters;
 
 		private boolean fIgnoreTextConverters = false;
 		private boolean fInCompletionSession;
@@ -468,7 +468,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 		public void addTextConverter(ITextConverter textConverter) {
 			if (fTextConverters == null) {
-				fTextConverters = new ArrayList(1);
+				fTextConverters = new ArrayList<ITextConverter>(1);
 				fTextConverters.add(textConverter);
 			} else if (!fTextConverters.contains(textConverter))
 				fTextConverters.add(textConverter);
@@ -485,18 +485,16 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		/*
 		 * @see TextViewer#customizeDocumentCommand(DocumentCommand)
 		 */
+		@Override
 		protected void customizeDocumentCommand(DocumentCommand command) {
 			super.customizeDocumentCommand(command);
 			if (!fIgnoreTextConverters && fTextConverters != null) {
-				for (Iterator e = fTextConverters.iterator(); e.hasNext();)
-					((ITextConverter) e.next()).customizeDocumentCommand(
-							getDocument(), command);
+				for (ITextConverter c : fTextConverters)
+					c.customizeDocumentCommand(getDocument(), command);
 			}
 		}
 
-		/*
-		 * @see IWidgetTokenOwner#requestWidgetToken(IWidgetTokenKeeper)
-		 */
+		@Override
 		public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
 			if (PlatformUI.getWorkbench().getHelpSystem()
 					.isContextHelpDisplayed())
@@ -504,11 +502,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			return super.requestWidgetToken(requester);
 		}
 
-		/*
-		 * @see
-		 * IWidgetTokenOwnerExtension#requestWidgetToken(IWidgetTokenKeeper,
-		 * int)
-		 */
+		@Override
 		public boolean requestWidgetToken(IWidgetTokenKeeper requester,
 				int priority) {
 			if (PlatformUI.getWorkbench().getHelpSystem()
@@ -540,6 +534,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			return null;
 		}
 
+		@Override
 		public IFormattingContext createFormattingContext() {
 			final IFormattingContext context = super.createFormattingContext();
 			final IProject project = getProject();
