@@ -40,6 +40,8 @@ public class FormatterWriter implements IFormatterWriter {
 	private boolean preserveSpaces = true;
 	private boolean skipNextNewLine = false;
 	private boolean canAppendToPreviousLine = false;
+	private boolean trimTrailingSpaces = true;
+	private boolean trimBlankLines = true;
 
 	/**
 	 * @param lineDelimiter
@@ -228,7 +230,9 @@ public class FormatterWriter implements IFormatterWriter {
 	protected void write(IFormatterContext context, char ch) throws IOException {
 		if (ch == '\n' || ch == '\r') {
 			if (lineStarted) {
-				trimTrailingSpaces();
+				if (trimTrailingSpaces) {
+					trimTrailingSpaces();
+				}
 				writer.append(ch);
 				lineStarted = false;
 				if (!newLineCallbacks.isEmpty()) {
@@ -242,7 +246,10 @@ public class FormatterWriter implements IFormatterWriter {
 					emptyLines.append(ch);
 				}
 			} else {
-				indent.setLength(0);// add option "trim empty lines"
+				if (!trimBlankLines) {
+					emptyLines.append(indent);
+				}
+				indent.setLength(0);
 				emptyLines.append(ch);
 			}
 		} else if (!lineStarted) {
@@ -411,6 +418,34 @@ public class FormatterWriter implements IFormatterWriter {
 
 	public void setPreserveSpaces(boolean preserveSpaces) {
 		this.preserveSpaces = preserveSpaces;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public boolean isTrimTrailingSpaces() {
+		return trimTrailingSpaces;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void setTrimTrailingSpaces(boolean trimTrailingSpaces) {
+		this.trimTrailingSpaces = trimTrailingSpaces;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public boolean isTrimEmptyLines() {
+		return trimBlankLines;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void setTrimEmptyLines(boolean trimEmptyLines) {
+		this.trimBlankLines = trimEmptyLines;
 	}
 
 }
