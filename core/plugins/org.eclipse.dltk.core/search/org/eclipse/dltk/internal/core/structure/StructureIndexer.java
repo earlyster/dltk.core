@@ -163,6 +163,8 @@ public class StructureIndexer extends AbstractIndexer {
 			if (!sourceModule.isBinary()) {
 				ISourceElementParser parser = DLTKLanguageManager
 						.getSourceElementParser(sourceModule);
+				if (parser == null)
+					return;
 				ISourceModuleInfoCache cache = ModelManager.getModelManager()
 						.getSourceModuleInfoCache();
 				ISourceModuleInfo info = cache.get(sourceModule);
