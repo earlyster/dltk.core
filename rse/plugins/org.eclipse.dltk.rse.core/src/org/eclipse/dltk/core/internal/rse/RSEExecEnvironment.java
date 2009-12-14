@@ -418,6 +418,7 @@ public class RSEExecEnvironment implements IExecutionEnvironment {
 				Thread t = new Thread(NLS.bind(
 						Messages.RSEExecEnvironment_fetchEnvVars, environment
 								.getHost().getName())) {
+					@Override
 					public void run() {
 						try {
 							while (true) {
