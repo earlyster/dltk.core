@@ -22,8 +22,10 @@ import org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.WorkbenchWindow;
 
@@ -73,8 +75,19 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 	@Override
 	public void format() {
 		super.format();
-
 		final FormatJob job = fJobs.removeFirst();
+		BusyIndicator.showWhile(PlatformUI.getWorkbench().getDisplay(),
+				new Runnable() {
+					public void run() {
+						doFormat(job);
+					}
+				});
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected void doFormat(final FormatJob job) {
 		final IDocument document = job.document;
 		final TypedPosition partition = job.partition;
 
@@ -102,8 +115,9 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 					}
 				}
 			} catch (FormatterSyntaxProblemException e) {
-				WorkbenchWindow window = (WorkbenchWindow) PlatformUI
-						.getWorkbench().getActiveWorkbenchWindow();
+				final IWorkbench workbench = PlatformUI.getWorkbench();
+				WorkbenchWindow window = (WorkbenchWindow) workbench
+						.getActiveWorkbenchWindow();
 				if (window != null && window.getStatusLineManager() != null) {
 					window
 							.getStatusLineManager()
@@ -113,7 +127,7 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 													FormatterMessages.ScriptFormattingStrategy_unableToFormatSourceContainingSyntaxError,
 													e.getMessage()));
 				}
-				PlatformUI.getWorkbench().getDisplay().beep();
+				workbench.getDisplay().beep();
 			} catch (MalformedTreeException e) {
 				DLTKUIPlugin
 						.warn(
