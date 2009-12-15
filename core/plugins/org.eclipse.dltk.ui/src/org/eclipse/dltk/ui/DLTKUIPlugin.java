@@ -235,17 +235,24 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	private static class UIExecutionContextManager implements
 			IExecutionContextManager {
 
+		private boolean active = false;
+
 		public void executeInBackground(final IExecutableOperation operation) {
 			if (!isRunningInUIThread()) {
 				operation.execute(new NullProgressMonitor());
 			} else if (DLTKUI.isStarted()) {
+				if (active) {
+					return;
+				}
 				final ProgressMonitorDialog dialog = new ProgressMonitorDialog(
 						null) {
+					@Override
 					protected void configureShell(Shell shell) {
 						super.configureShell(shell);
 						shell.setText(operation.getOperationName());
 					}
 				};
+				active = true;
 				try {
 					dialog.run(true, false, new IRunnableWithProgress() {
 						public void run(IProgressMonitor monitor) {
@@ -258,6 +265,8 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 					DLTKCore.error(e.getMessage(), e);
 				} catch (InterruptedException e) {
 					DLTKCore.error(e.getMessage(), e);
+				} finally {
+					active = false;
 				}
 			}
 		}
@@ -277,6 +286,7 @@ public class DLTKUIPlugin extends AbstractUIPlugin {
 	/**
 	 * This method is called when the plug-in is stopped
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 
 		ExecutionContexts.setManager(null);
