@@ -31,7 +31,8 @@ public interface IEnvironment extends IAdaptable {
 	 * 
 	 * @param path
 	 *            environment-local path
-	 * @return
+	 * @return {@link IFileHandle} for the specified local path, not
+	 *         <code>null</code>.
 	 */
 	IFileHandle getFile(IPath path);
 
