@@ -36,8 +36,8 @@ public class RSEEnvironment implements IEnvironment, IAdaptable {
 	}
 
 	public IFileHandle getFile(IPath path) {
-		if (Path.EMPTY.equals(path)) {
-			throw new RuntimeException(
+		if (path == null || Path.EMPTY.equals(path)) {
+			throw new IllegalArgumentException(
 					Messages.RSEEnvironment_EmptyFileNameError);
 		}
 		return new RSEFileHandle(this, getURIFor(host, path.toString()));
