@@ -33,6 +33,7 @@ import org.eclipse.dltk.core.builder.IBuildContext;
 import org.eclipse.dltk.core.builder.IBuildParticipant;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension2;
+import org.eclipse.dltk.core.builder.IBuildParticipantExtension3;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
 import org.eclipse.dltk.internal.core.ScriptProject;
@@ -59,7 +60,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 	public void buildExternalElements(ScriptProject project,
 			List externalElements, IProgressMonitor monitor, int buildType) {
 		beginBuild(buildType, monitor);
-		final IBuildParticipantExtension2[] extensions = selectExtension2();
+		final List<IBuildParticipantExtension2> extensions = selectExtension(IBuildParticipantExtension2.class);
 
 		if (extensions != null) {
 			int remainingWork = externalElements.size();
@@ -76,11 +77,11 @@ public class StandardScriptBuilder implements IScriptBuilder,
 				final ExternalModuleBuildContext context = new ExternalModuleBuildContext(
 						module, buildType);
 				try {
-					for (int i = 0; i < extensions.length; ++i) {
+					for (int i = 0; i < extensions.size(); ++i) {
 						if (monitor.isCanceled()) {
 							return;
 						}
-						extensions[i].buildExternalModule(context);
+						extensions.get(i).buildExternalModule(context);
 					}
 				} catch (CoreException e) {
 					DLTKCore
@@ -98,22 +99,21 @@ public class StandardScriptBuilder implements IScriptBuilder,
 	/**
 	 * @return
 	 */
-	private IBuildParticipantExtension2[] selectExtension2() {
+	private <T> List<T> selectExtension(Class<T> clazz) {
 		if (participants != null) {
 			int count = 0;
 			for (int i = 0; i < participants.length; ++i) {
 				final IBuildParticipant participant = participants[i];
-				if (participant instanceof IBuildParticipantExtension2) {
+				if (clazz.isInstance(participant)) {
 					++count;
 				}
 			}
 			if (count != 0) {
-				final IBuildParticipantExtension2[] result = new IBuildParticipantExtension2[count];
-				count = 0;
+				final List<T> result = new ArrayList<T>(count);
 				for (int i = 0; i < participants.length; ++i) {
 					final IBuildParticipant participant = participants[i];
-					if (participant instanceof IBuildParticipantExtension2) {
-						result[count++] = (IBuildParticipantExtension2) participant;
+					if (clazz.isInstance(participant)) {
+						result.add((T) participant);
 					}
 				}
 				return result;
@@ -247,6 +247,12 @@ public class StandardScriptBuilder implements IScriptBuilder,
 	}
 
 	public void clean(IScriptProject project, IProgressMonitor monitor) {
+		final List<IBuildParticipantExtension3> extensions = selectExtension(IBuildParticipantExtension3.class);
+		if (extensions != null) {
+			for (IBuildParticipantExtension3 extension : extensions) {
+				extension.clean();
+			}
+		}
 		final IProject p = project.getProject();
 		try {
 			p.deleteMarkers(DefaultProblem.MARKER_TYPE_PROBLEM, true,
