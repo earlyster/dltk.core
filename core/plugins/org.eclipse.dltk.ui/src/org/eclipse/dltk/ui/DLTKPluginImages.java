@@ -55,6 +55,11 @@ public class DLTKPluginImages {
 	public static final String IMG_OBJS_LIBRARY = NAME_PREFIX + "library_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_LIBRARY_SRC = NAME_PREFIX + "library_src_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_ACCESSRULES_ATTRIB = NAME_PREFIX + "access_restriction_attrib.gif"; //$NON-NLS-1$
+	/**
+	 * @since 2.0
+	 */
+	public static final String IMG_OBJS_JAVADOCTAG = NAME_PREFIX
+			+ "jdoc_tag_obj.gif"; //$NON-NLS-1$
 	
 	public static final String IMG_CORRECTION_CHANGE= NAME_PREFIX + "correction_change.gif"; //$NON-NLS-1$
 	
@@ -281,6 +286,11 @@ public class DLTKPluginImages {
     
     public static final ImageDescriptor DESC_OBJS_LIBRARY= createManagedFromKey(T_OBJ, IMG_OBJS_LIBRARY);
     public static final ImageDescriptor DESC_OBJS_LIBRARY_SRC= createManagedFromKey(T_OBJ, IMG_OBJS_LIBRARY_SRC);
+	/**
+	 * @since 2.0
+	 */
+	public static final ImageDescriptor DESC_OBJS_JAVADOCTAG = createManagedFromKey(
+			T_OBJ, IMG_OBJS_JAVADOCTAG);
     
     public static final ImageDescriptor DESC_TOOL_OPENMETHOD= createUnManaged(T_ETOOL, "opentype.gif"); 					//$NON-NLS-1$
     public static final ImageDescriptor DESC_TOOL_OPENTYPE= createUnManaged(T_ETOOL, "opentype.gif"); 					//$NON-NLS-1$
