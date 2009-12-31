@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IMember;
+import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
 
@@ -177,6 +178,31 @@ public class ScriptDocumentationAccess {
 		return merge(nature, new Operation() {
 			public Reader getInfo(IScriptDocumentationProvider provider) {
 				return provider.getInfo(content);
+			}
+		});
+	}
+
+	/**
+	 * Returns the documentation for the specified keyword
+	 * 
+	 * @param nature
+	 * @param context
+	 * @param keyword
+	 * @since 2.0
+	 */
+	public static Reader getKeywordDocumentation(String nature,
+			final IModelElement context, final String keyword)
+			throws ModelException {
+		return merge(nature, new Operation() {
+			public Reader getInfo(IScriptDocumentationProvider provider) {
+				if (provider instanceof IScriptDocumentationProviderExtension) {
+					final IScriptDocumentationProviderExtension ext = (IScriptDocumentationProviderExtension) provider;
+					final IDocumentationResponse response = ext
+							.describeKeyword(keyword, context);
+					return DocumentationUtils.getReader(response);
+				} else {
+					return provider.getInfo(keyword);
+				}
 			}
 		});
 	}

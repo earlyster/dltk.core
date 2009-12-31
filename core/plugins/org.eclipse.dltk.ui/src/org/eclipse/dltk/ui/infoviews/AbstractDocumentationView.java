@@ -396,7 +396,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	protected Object computeInput(Object input) {
 		if (getControl() != null) {
 			if (input instanceof KeywordInput) {
-				return getScriptdocHtml(((KeywordInput) input).getValue());
+				return getScriptdocHtml((KeywordInput) input);
 			} else if (input instanceof ModelElementArray) {
 				final ModelElementArray array = (ModelElementArray) input;
 				return getScriptdocHtmlDetailed(array.getElements());
@@ -458,11 +458,11 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	 *            the Script elements for which to get the Javadoc
 	 * @return a string with the Javadoc in HTML format.
 	 */
-	private String getScriptdocHtml(String result) {
+	private String getScriptdocHtml(KeywordInput keyword) {
 		StringBuffer buffer = new StringBuffer();
 		try {
-			Reader reader = ScriptDocumentationAccess.getHTMLContentReader(
-					getNature(), result);
+			Reader reader = ScriptDocumentationAccess.getKeywordDocumentation(
+					getNature(), keyword.getContext(), keyword.getValue());
 			if (reader != null) {
 				HTMLPrinter.addParagraph(buffer, reader);
 			}

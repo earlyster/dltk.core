@@ -14,6 +14,7 @@ package org.eclipse.dltk.ui.infoviews;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.text.ScriptWordFinder;
 import org.eclipse.dltk.internal.ui.util.SelectionUtil;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
@@ -70,13 +71,19 @@ public abstract class AbstractInfoView extends ViewPart implements
 	 */
 	protected static class KeywordInput {
 		private final String value;
+		private final IModelElement context;
 
-		public KeywordInput(String value) {
+		public KeywordInput(String value, IModelElement context) {
 			this.value = value;
+			this.context = context;
 		}
 
 		public String getValue() {
 			return value;
+		}
+
+		public IModelElement getContext() {
+			return context;
 		}
 
 	}
@@ -523,7 +530,10 @@ public abstract class AbstractInfoView extends ViewPart implements
 						if (reg != null) {
 							try {
 								tmp = new KeywordInput(document.get(reg
-										.getOffset(), reg.getLength()));
+										.getOffset(), reg.getLength()),
+										EditorUtility
+												.getEditorInputModelElement(
+														edit, false));
 							} catch (BadLocationException e) {
 								tmp = null;
 							}
