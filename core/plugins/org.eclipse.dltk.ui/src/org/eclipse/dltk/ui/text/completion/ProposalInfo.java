@@ -102,8 +102,8 @@ public class ProposalInfo {
 		if (content != null && fElement != null) {
 			IDLTKLanguageToolkit languageToolkit = DLTKLanguageManager
 					.getLanguageToolkit(fElement);
-			Reader reader = ScriptDocumentationAccess.getHTMLContentReader(
-					languageToolkit.getNatureId(), content);
+			Reader reader = ScriptDocumentationAccess.getKeywordDocumentation(
+					languageToolkit.getNatureId(), fElement, content);
 			if (reader != null) {
 				StringBuffer buffer = new StringBuffer();
 				HTMLPrinter.addParagraph(buffer, reader);
