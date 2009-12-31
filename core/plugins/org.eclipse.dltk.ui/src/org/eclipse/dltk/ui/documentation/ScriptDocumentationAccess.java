@@ -105,9 +105,8 @@ public class ScriptDocumentationAccess {
 			boolean allowInherited, boolean allowExternal)
 			throws ModelException {
 		IScriptDocumentationProvider[] providers = getContributedProviders();
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		char[] buff = null;
-		boolean prev = false;
 		for (int i = 0; i < providers.length; i++) {
 			IScriptDocumentationProvider p = providers[i];
 			String pNature = providerNatures.get(p);
@@ -115,12 +114,14 @@ public class ScriptDocumentationAccess {
 				continue;
 			Reader reader = p.getInfo(member, allowInherited, allowExternal);
 			if (reader != null) {
-				int size = 0;
+				if (buffer.length() != 0) {
+					buffer.append("<hr/>"); //$NON-NLS-1$
+				}
 				if (buff == null) {
 					buff = new char[BUFF_SIZE];
 				}
-				int len = 0;
 				try {
+					int len;
 					while ((len = reader.read(buff, 0, BUFF_SIZE)) != -1) {
 						buffer.append(buff, 0, len);
 					}
@@ -128,12 +129,6 @@ public class ScriptDocumentationAccess {
 					if (DLTKCore.DEBUG) {
 						e.printStackTrace();
 					}
-				}
-				if (prev && size > 0) {
-					buffer.append("<hr/>"); //$NON-NLS-1$
-				}
-				if (size > 0) {
-					prev = true;
 				}
 			}
 		}
@@ -160,24 +155,24 @@ public class ScriptDocumentationAccess {
 	public static Reader getHTMLContentReader(String nature, String content)
 			throws ModelException {
 		IScriptDocumentationProvider[] providers = getContributedProviders();
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		char[] buff = null;
-		boolean prev = false;
 		for (int i = 0; i < providers.length; i++) {
 			IScriptDocumentationProvider p = providers[i];
 			String pNature = providerNatures.get(p);
 			if (pNature == null || !pNature.equals(nature))
 				continue;
 			Reader reader = p.getInfo(content);
-			int size = 0;
 			if (reader != null) {
+				if (buffer.length() != 0) {
+					buffer.append("<hr/>"); //$NON-NLS-1$
+				}
 				if (buff == null) {
 					buff = new char[BUFF_SIZE];
 				}
-				int len = 0;
 				try {
+					int len;
 					while ((len = reader.read(buff, 0, BUFF_SIZE)) != -1) {
-						size += len;
 						buffer.append(buff, 0, len);
 					}
 				} catch (IOException e) {
@@ -185,12 +180,6 @@ public class ScriptDocumentationAccess {
 						e.printStackTrace();
 					}
 				}
-			}
-			if (prev && size > 0) {
-				buffer.append("<hr/>"); //$NON-NLS-1$
-			}
-			if (size > 0) {
-				prev = true;
 			}
 		}
 		if (buffer.length() > 0) {
