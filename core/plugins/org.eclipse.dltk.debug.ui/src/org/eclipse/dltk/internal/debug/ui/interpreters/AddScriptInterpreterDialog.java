@@ -212,27 +212,13 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		return null;
 	}
 
+	@Override
 	protected Control createDialogArea(Composite ancestor) {
-		createDialogFields();
-		Composite parent = (Composite) super.createDialogArea(ancestor);
-
+		final Composite parent = (Composite) super.createDialogArea(ancestor);
 		final int numColumns = 3;
 		((GridLayout) parent.getLayout()).numColumns = numColumns;
-		fInterpreterTypeCombo.doFillIntoGrid(parent, numColumns);
-		((GridData) fInterpreterTypeCombo.getComboControl(null).getLayoutData()).widthHint = convertWidthInCharsToPixels(50);
 
-		fInterpreterPath.doFillIntoGrid(parent, numColumns);
-		final GridData interpreterPathGridData = (GridData) fInterpreterPath
-				.getTextControl(null).getLayoutData();
-		interpreterPathGridData.grabExcessHorizontalSpace = true;
-		interpreterPathGridData.widthHint = convertWidthInCharsToPixels(50);
-
-		fInterpreterName.doFillIntoGrid(parent, numColumns);
-
-		if (this.useInterpreterArgs()) {
-			fInterpreterArgs.doFillIntoGrid(parent, numColumns);
-			((GridData) fInterpreterArgs.getTextControl(null).getLayoutData()).widthHint = convertWidthInCharsToPixels(50);
-		}
+		createSimpleFields(parent, numColumns);
 
 		final Composite blockComposite = new Composite(parent, SWT.NONE);
 		final GridData blockCompositeLayoutData = new GridData(SWT.FILL,
@@ -250,6 +236,29 @@ public abstract class AddScriptInterpreterDialog extends StatusDialog implements
 		createFieldListeners();
 		applyDialogFont(parent);
 		return parent;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected void createSimpleFields(Composite parent, final int numColumns) {
+		createDialogFields();
+
+		fInterpreterTypeCombo.doFillIntoGrid(parent, numColumns);
+		((GridData) fInterpreterTypeCombo.getComboControl(null).getLayoutData()).widthHint = convertWidthInCharsToPixels(50);
+
+		fInterpreterPath.doFillIntoGrid(parent, numColumns);
+		final GridData interpreterPathGridData = (GridData) fInterpreterPath
+				.getTextControl(null).getLayoutData();
+		interpreterPathGridData.grabExcessHorizontalSpace = true;
+		interpreterPathGridData.widthHint = convertWidthInCharsToPixels(50);
+
+		fInterpreterName.doFillIntoGrid(parent, numColumns);
+
+		if (this.useInterpreterArgs()) {
+			fInterpreterArgs.doFillIntoGrid(parent, numColumns);
+			((GridData) fInterpreterArgs.getTextControl(null).getLayoutData()).widthHint = convertWidthInCharsToPixels(50);
+		}
 	}
 
 	/**
