@@ -20,6 +20,7 @@ import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.ICodeAssist;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
@@ -114,8 +115,7 @@ public abstract class AbstractScriptEditorTextHover implements
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 
 		String nature = null;
-		IModelElement inputModelElement = EditorUtility
-				.getEditorInputModelElement(this.fEditor, false);
+		IModelElement inputModelElement = getEditorInputModelElement();
 		if (inputModelElement == null)
 			return null;
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
@@ -172,6 +172,10 @@ public abstract class AbstractScriptEditorTextHover implements
 			}
 		}
 		return null;
+	}
+
+	protected ISourceModule getEditorInputModelElement() {
+		return EditorUtility.getEditorInputModelElement(this.fEditor, false);
 	}
 
 	/**
