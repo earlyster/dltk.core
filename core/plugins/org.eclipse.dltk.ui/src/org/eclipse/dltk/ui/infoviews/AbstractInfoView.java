@@ -64,6 +64,23 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
  */
 public abstract class AbstractInfoView extends ViewPart implements
 		ISelectionListener, IMenuListener, IPropertyChangeListener {
+
+	/**
+	 * @since 2.0
+	 */
+	protected static class KeywordInput {
+		private final String value;
+
+		public KeywordInput(String value) {
+			this.value = value;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+	}
+
 	/** ScriptElementLabels flags used for the title */
 	private final long TITLE_FLAGS = ScriptElementLabels.ALL_FULLY_QUALIFIED
 			| ScriptElementLabels.M_APP_RETURNTYPE
@@ -505,8 +522,8 @@ public abstract class AbstractInfoView extends ViewPart implements
 								((ITextSelection) selection).getOffset());
 						if (reg != null) {
 							try {
-								tmp = document.get(reg.getOffset(), reg
-										.getLength());
+								tmp = new KeywordInput(document.get(reg
+										.getOffset(), reg.getLength()));
 							} catch (BadLocationException e) {
 								tmp = null;
 							}
@@ -563,6 +580,10 @@ public abstract class AbstractInfoView extends ViewPart implements
 			final ModelElementArray array = (ModelElementArray) in;
 			setContentDescription(array.getContentDescription());
 			setTitleToolTip(array.getTitleTooltip());
+		} else if (in instanceof KeywordInput) {
+			final KeywordInput keyword = (KeywordInput) in;
+			setContentDescription(keyword.getValue());
+			setTitleToolTip(keyword.getValue());
 		} else {
 			setContentDescription(in.toString());
 			setTitleToolTip(in.toString());

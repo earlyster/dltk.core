@@ -18,7 +18,6 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -146,6 +145,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 		/**
 		 * Selects all in the view.
 		 */
+		@Override
 		public void run() {
 			if (fControl instanceof StyledText)
 				((StyledText) fControl).selectAll();
@@ -180,6 +180,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 			if (fControl instanceof StyledText) {
 				((StyledText) fControl)
 						.addSelectionListener(new SelectionAdapter() {
+							@Override
 							public void widgetSelected(SelectionEvent e) {
 								fireSelectionChanged();
 							}
@@ -209,11 +210,6 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 						.selectionChanged(event);
 		}
 
-		/*
-		 * @see
-		 * org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener
-		 * (org.eclipse.jface.viewers.ISelectionChangedListener)
-		 */
 		public void addSelectionChangedListener(
 				ISelectionChangedListener listener) {
 			fListeners.add(listener);
@@ -234,21 +230,11 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 			}
 		}
 
-		/*
-		 * @seeorg.eclipse.jface.viewers.ISelectionProvider#
-		 * removeSelectionChangedListener
-		 * (org.eclipse.jface.viewers.ISelectionChangedListener)
-		 */
 		public void removeSelectionChangedListener(
 				ISelectionChangedListener listener) {
 			fListeners.remove(listener);
 		}
 
-		/*
-		 * @see
-		 * org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse
-		 * .jface.viewers.ISelection)
-		 */
 		public void setSelection(ISelection selection) {
 			// not supported
 		}
@@ -257,6 +243,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#internalCreatePartControl(Composite)
 	 */
+	@Override
 	protected void internalCreatePartControl(Composite parent) {
 		try {
 			fBrowser = new Browser(parent, SWT.NONE);
@@ -289,11 +276,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 			fText.setEditable(false);
 			fPresenter = new HTMLTextPresenter(false);
 			fText.addControlListener(new ControlAdapter() {
-				/*
-				 * @see
-				 * org.eclipse.swt.events.ControlAdapter#controlResized(org.
-				 * eclipse.swt.events.ControlEvent)
-				 */
+				@Override
 				public void controlResized(ControlEvent e) {
 					setInput(fText.getText());
 				}
@@ -335,12 +318,14 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#createActions()
 	 */
+	@Override
 	protected void createActions() {
 		super.createActions();
 		fSelectAllAction = new SelectAllAction(getControl(),
 				(SelectionProvider) getSelectionProvider());
 	}
 
+	@Override
 	protected IAction getSelectAllAction() {
 		// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
 		if (fIsUsingBrowserWidget)
@@ -348,6 +333,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 		return fSelectAllAction;
 	}
 
+	@Override
 	protected IAction getCopyToClipboardAction() {
 		// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
 		if (fIsUsingBrowserWidget)
@@ -358,6 +344,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#setForeground(Color)
 	 */
+	@Override
 	protected void setForeground(Color color) {
 		getControl().setForeground(color);
 	}
@@ -365,6 +352,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#setBackground(Color)
 	 */
+	@Override
 	protected void setBackground(Color color) {
 		getControl().setBackground(color);
 		// Apply style sheet
@@ -379,6 +367,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 		}
 	}
 
+	@Override
 	protected String getBackgroundColorKey() {
 		return "org.eclipse.dltk.ui.ScriptdocView.backgroundColor"; //$NON-NLS-1$
 	}
@@ -386,6 +375,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#internalDispose()
 	 */
+	@Override
 	protected void internalDispose() {
 		fText = null;
 		fBrowser = null;
@@ -394,6 +384,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	/*
 	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()
 	 */
+	@Override
 	public void setFocus() {
 		getControl().setFocus();
 	}
@@ -401,10 +392,11 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#computeInput(Object)
 	 */
+	@Override
 	protected Object computeInput(Object input) {
 		if (getControl() != null) {
-			if (input instanceof String) {
-				return getScriptdocHtml((String) input);
+			if (input instanceof KeywordInput) {
+				return getScriptdocHtml(((KeywordInput) input).getValue());
 			} else if (input instanceof ModelElementArray) {
 				final ModelElementArray array = (ModelElementArray) input;
 				return getScriptdocHtmlDetailed(array.getElements());
@@ -429,6 +421,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#setInput(Object)
 	 */
+	@Override
 	protected void setInput(Object input) {
 		String javadocHtml = (String) input;
 		if (fIsUsingBrowserWidget) {
@@ -494,7 +487,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	 */
 	private String getScriptdocHtmlDetailed(IModelElement[] result) {
 		final StringBuffer buffer = new StringBuffer();
-		final List nodocs = new ArrayList();
+		final List<String> nodocs = new ArrayList<String>();
 		for (int i = 0; i < result.length; i++) {
 			final IModelElement curr = result[i];
 			if (curr instanceof IMember) {
@@ -528,8 +521,8 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 			HTMLPrinter.addParagraph(buffer,
 					InfoViewMessages.ScriptdocView_noAttachedInformationHeader);
 			HTMLPrinter.startBulletList(buffer);
-			for (Iterator i = nodocs.iterator(); i.hasNext();) {
-				HTMLPrinter.addBullet(buffer, (String) i.next());
+			for (String s : nodocs) {
+				HTMLPrinter.addBullet(buffer, s);
 			}
 			HTMLPrinter.endBulletList(buffer);
 		}
@@ -605,6 +598,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	 * 
 	 * @see org.eclipse.dltk.ui.infoviews.AbstractInfoView#isValidWorkbenchPart(org.eclipse.ui.IWorkbenchPart)
 	 */
+	@Override
 	protected boolean isValidWorkbenchPart(IWorkbenchPart part) {
 		if (part instanceof IEditorPart) {
 			final IEditorPart editor = (IEditorPart) part;
@@ -639,6 +633,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 	/*
 	 * @see AbstractInfoView#getControl()
 	 */
+	@Override
 	protected Control getControl() {
 		if (fIsUsingBrowserWidget)
 			return fBrowser;
@@ -646,11 +641,7 @@ public abstract class AbstractDocumentationView extends AbstractInfoView {
 			return fText;
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.dltk.internal.ui.infoviews.AbstractInfoView#getHelpContextId
-	 * ()
-	 */
+	@Override
 	protected String getHelpContextId() {
 		// return IJavaHelpContextIds.JAVADOC_VIEW;
 		System.err.println("TODO: add help support here"); //$NON-NLS-1$
