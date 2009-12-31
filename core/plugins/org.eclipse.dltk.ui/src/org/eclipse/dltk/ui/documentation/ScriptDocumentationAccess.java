@@ -38,7 +38,7 @@ public class ScriptDocumentationAccess {
 	private static final String ATTR_CLASS = "class"; //$NON-NLS-1$
 	private static final String ATTR_NATURE = "nature"; //$NON-NLS-1$
 	private static IScriptDocumentationProvider[] documentationProviders = null;
-	private static Map providerNatures = new HashMap();
+	private static Map<IScriptDocumentationProvider, String> providerNatures = new HashMap<IScriptDocumentationProvider, String>();
 
 	private ScriptDocumentationAccess() {
 		// do not instantiate
@@ -50,21 +50,20 @@ public class ScriptDocumentationAccess {
 	 */
 	private static IScriptDocumentationProvider[] createProviders(
 			IConfigurationElement[] elements) {
-		List result = new ArrayList(elements.length);
+		List<IScriptDocumentationProvider> result = new ArrayList<IScriptDocumentationProvider>(
+				elements.length);
 		for (int i = 0; i < elements.length; i++) {
 			IConfigurationElement element = elements[i];
 			try {
 				IScriptDocumentationProvider pr = (IScriptDocumentationProvider) element
 						.createExecutableExtension(ATTR_CLASS);
-				String nature = element.getAttribute(ATTR_NATURE);
 				result.add(pr);
-				providerNatures.put(pr, nature);
+				providerNatures.put(pr, element.getAttribute(ATTR_NATURE));
 			} catch (CoreException e) {
 				DLTKUIPlugin.log(e);
 			}
 		}
-		return (IScriptDocumentationProvider[]) result
-				.toArray(new IScriptDocumentationProvider[result.size()]);
+		return result.toArray(new IScriptDocumentationProvider[result.size()]);
 	}
 
 	/**
@@ -97,8 +96,8 @@ public class ScriptDocumentationAccess {
 	 *            documentation, look into parent types methods.
 	 * @param allowExternal
 	 *            Allows external documentation like man-pages.
-	 * @return Reader for a content, or <code>null</code> if no documentation
-	 *         is found.
+	 * @return Reader for a content, or <code>null</code> if no documentation is
+	 *         found.
 	 * @throws ModelException
 	 *             is thrown when the elements documentation can not be accessed
 	 */
@@ -111,7 +110,7 @@ public class ScriptDocumentationAccess {
 		boolean prev = false;
 		for (int i = 0; i < providers.length; i++) {
 			IScriptDocumentationProvider p = providers[i];
-			String pNature = (String) providerNatures.get(p);
+			String pNature = providerNatures.get(p);
 			if (pNature == null || !pNature.equals(nature))
 				continue;
 			Reader reader = p.getInfo(member, allowInherited, allowExternal);
@@ -153,8 +152,8 @@ public class ScriptDocumentationAccess {
 	 * 
 	 * @param content
 	 *            The keyword to find.
-	 * @return Reader for a content, or <code>null</code> if no documentation
-	 *         is found.
+	 * @return Reader for a content, or <code>null</code> if no documentation is
+	 *         found.
 	 * @throws ModelException
 	 *             is thrown when the elements documentation can not be accessed
 	 */
@@ -166,7 +165,7 @@ public class ScriptDocumentationAccess {
 		boolean prev = false;
 		for (int i = 0; i < providers.length; i++) {
 			IScriptDocumentationProvider p = providers[i];
-			String pNature = (String) providerNatures.get(p);
+			String pNature = providerNatures.get(p);
 			if (pNature == null || !pNature.equals(nature))
 				continue;
 			Reader reader = p.getInfo(content);
