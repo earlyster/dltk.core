@@ -21,6 +21,7 @@ import org.eclipse.dltk.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.dltk.internal.ui.text.IInformationControlExtension4;
 import org.eclipse.dltk.ui.ScriptElementLabels;
 import org.eclipse.dltk.ui.documentation.ScriptDocumentationAccess;
+import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IInformationControl;
@@ -85,6 +86,7 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 		return fPresenterControlCreator;
 	}
 
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		if (fHoverControlCreator == null) {
 			fHoverControlCreator = new AbstractReusableInformationControlCreator() {
@@ -115,6 +117,7 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 		return fHoverControlCreator;
 	}
 
+	@Override
 	protected String getHoverInfo(String nature, IModelElement[] result) {
 		StringBuffer buffer = new StringBuffer();
 		int nResults = result.length;
@@ -206,14 +209,13 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 		return null;
 	}
 
+	@Override
 	protected String getHoverInfo(String nature, String content) {
-		StringBuffer buffer = new StringBuffer();
-		Reader reader;
 		try {
-			reader = ScriptDocumentationAccess.getHTMLContentReader(nature,
-					content);
-
+			Reader reader = ScriptDocumentationAccess.getKeywordDocumentation(
+					nature, getEditorInputModelElement(), content);
 			if (reader != null) {
+				StringBuffer buffer = new StringBuffer();
 				HTMLPrinter.addParagraph(buffer, reader);
 				if (buffer.length() > 0) {
 					HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheet());
@@ -224,7 +226,6 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 		} catch (ModelException ex) {
 			// TODO: log
 		}
-
 		return null;
 	}
 
@@ -233,17 +234,6 @@ public class DocumentationHover extends AbstractScriptEditorTextHover implements
 				: LABEL_FLAGS;
 		String label = ScriptElementLabels.getDefault().getElementLabel(member,
 				flags);
-		StringBuffer buf = new StringBuffer();
-		for (int i = 0; i < label.length(); i++) {
-			char ch = label.charAt(i);
-			if (ch == '<') {
-				buf.append("&lt;"); //$NON-NLS-1$
-			} else if (ch == '>') {
-				buf.append("&gt;"); //$NON-NLS-1$
-			} else {
-				buf.append(ch);
-			}
-		}
-		return buf.toString();
+		return TextUtils.escapeHTML(label);
 	}
 }
