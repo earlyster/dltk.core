@@ -80,89 +80,29 @@ public class ScriptDocumentationAccess {
 		return documentationProviders;
 	}
 
-	private static final int BUFF_SIZE = 2048;
-
-	/**
-	 * Gets a reader for an IMember documentation. Content are found using
-	 * documentation documentationProviders, contributed via extension point.
-	 * The content does contain HTML code describing member. It may be for ex.
-	 * header comment or a man page. (if <code>allowExternal</code> is
-	 * <code>true</code>)
-	 * 
-	 * @param member
-	 *            The member to get documentation for.
-	 * @param allowInherited
-	 *            For procedures and methods: if member doesn't have it's own
-	 *            documentation, look into parent types methods.
-	 * @param allowExternal
-	 *            Allows external documentation like man-pages.
-	 * @return Reader for a content, or <code>null</code> if no documentation is
-	 *         found.
-	 * @throws ModelException
-	 *             is thrown when the elements documentation can not be accessed
-	 */
-	public static Reader getHTMLContentReader(String nature, IMember member,
-			boolean allowInherited, boolean allowExternal)
-			throws ModelException {
-		IScriptDocumentationProvider[] providers = getContributedProviders();
-		StringBuilder buffer = new StringBuilder();
-		char[] buff = null;
-		for (int i = 0; i < providers.length; i++) {
-			IScriptDocumentationProvider p = providers[i];
-			String pNature = providerNatures.get(p);
+	private static List<IScriptDocumentationProvider> getProviders(String nature) {
+		final List<IScriptDocumentationProvider> result = new ArrayList<IScriptDocumentationProvider>();
+		final IScriptDocumentationProvider[] providers = getContributedProviders();
+		for (IScriptDocumentationProvider p : providers) {
+			final String pNature = providerNatures.get(p);
 			if (pNature == null || !pNature.equals(nature))
 				continue;
-			Reader reader = p.getInfo(member, allowInherited, allowExternal);
-			if (reader != null) {
-				if (buffer.length() != 0) {
-					buffer.append("<hr/>"); //$NON-NLS-1$
-				}
-				if (buff == null) {
-					buff = new char[BUFF_SIZE];
-				}
-				try {
-					int len;
-					while ((len = reader.read(buff, 0, BUFF_SIZE)) != -1) {
-						buffer.append(buff, 0, len);
-					}
-				} catch (IOException e) {
-					if (DLTKCore.DEBUG) {
-						e.printStackTrace();
-					}
-				}
-			}
+			result.add(p);
 		}
-		if (buffer.length() > 0) {
-			char[] content = new char[buffer.length()];
-			buffer.getChars(0, buffer.length(), content, 0);
-			return new CharArrayReader(content);
-		}
-		return null;
+		return result;
 	}
 
-	/**
-	 * Gets a reader for an keyword documentation. Content are found using ALL
-	 * documentation documentationProviders, contributed via extension point.
-	 * The content does contain HTML code describing member.
-	 * 
-	 * @param content
-	 *            The keyword to find.
-	 * @return Reader for a content, or <code>null</code> if no documentation is
-	 *         found.
-	 * @throws ModelException
-	 *             is thrown when the elements documentation can not be accessed
-	 */
-	public static Reader getHTMLContentReader(String nature, String content)
-			throws ModelException {
-		IScriptDocumentationProvider[] providers = getContributedProviders();
+	private static interface Operation {
+		Reader getInfo(IScriptDocumentationProvider provider);
+	}
+
+	private static final int BUFF_SIZE = 2048;
+
+	private static Reader merge(String nature, Operation operation) {
 		StringBuilder buffer = new StringBuilder();
 		char[] buff = null;
-		for (int i = 0; i < providers.length; i++) {
-			IScriptDocumentationProvider p = providers[i];
-			String pNature = providerNatures.get(p);
-			if (pNature == null || !pNature.equals(nature))
-				continue;
-			Reader reader = p.getInfo(content);
+		for (IScriptDocumentationProvider p : getProviders(nature)) {
+			Reader reader = operation.getInfo(p);
 			if (reader != null) {
 				if (buffer.length() != 0) {
 					buffer.append("<hr/>"); //$NON-NLS-1$
@@ -188,5 +128,56 @@ public class ScriptDocumentationAccess {
 			return new CharArrayReader(cnt);
 		}
 		return null;
+	}
+
+	/**
+	 * Gets a reader for an IMember documentation. Content are found using
+	 * documentation documentationProviders, contributed via extension point.
+	 * The content does contain HTML code describing member. It may be for ex.
+	 * header comment or a man page. (if <code>allowExternal</code> is
+	 * <code>true</code>)
+	 * 
+	 * @param member
+	 *            The member to get documentation for.
+	 * @param allowInherited
+	 *            For procedures and methods: if member doesn't have it's own
+	 *            documentation, look into parent types methods.
+	 * @param allowExternal
+	 *            Allows external documentation like man-pages.
+	 * @return Reader for a content, or <code>null</code> if no documentation is
+	 *         found.
+	 * @throws ModelException
+	 *             is thrown when the elements documentation can not be accessed
+	 */
+	public static Reader getHTMLContentReader(String nature,
+			final IMember member, final boolean allowInherited,
+			final boolean allowExternal) throws ModelException {
+		return merge(nature, new Operation() {
+			public Reader getInfo(IScriptDocumentationProvider provider) {
+				return provider.getInfo(member, allowInherited, allowExternal);
+			}
+		});
+	}
+
+	/**
+	 * Gets a reader for an keyword documentation. Content are found using ALL
+	 * documentation documentationProviders, contributed via extension point.
+	 * The content does contain HTML code describing member.
+	 * 
+	 * @param content
+	 *            The keyword to find.
+	 * @return Reader for a content, or <code>null</code> if no documentation is
+	 *         found.
+	 * @throws ModelException
+	 *             is thrown when the elements documentation can not be accessed
+	 */
+	@Deprecated
+	public static Reader getHTMLContentReader(String nature,
+			final String content) throws ModelException {
+		return merge(nature, new Operation() {
+			public Reader getInfo(IScriptDocumentationProvider provider) {
+				return provider.getInfo(content);
+			}
+		});
 	}
 }
