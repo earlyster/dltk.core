@@ -47,7 +47,15 @@ public class AbstractFormatterNodeBuilder {
 	}
 
 	protected void checkedPop(IFormatterContainerNode expected, int bodyEnd) {
-		if (stack.pop() != expected) {
+		IFormatterContainerNode top = stack.pop();
+		if (top instanceof IFormatterNodeProxy) {
+			final IFormatterNode target = ((IFormatterNodeProxy) top)
+					.getTargetNode();
+			if (target instanceof IFormatterContainerNode) {
+				top = (IFormatterContainerNode) target;
+			}
+		}
+		if (top != expected) {
 			throw new IllegalStateException();
 		}
 		if (bodyEnd > 0 && expected.getEndOffset() < bodyEnd) {
