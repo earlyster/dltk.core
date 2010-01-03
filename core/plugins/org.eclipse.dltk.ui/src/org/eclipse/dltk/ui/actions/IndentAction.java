@@ -98,10 +98,10 @@ public class IndentAction extends TextEditorAction {
 						.getSelected(ScriptUtils.getNatureId(getTextEditor()),
 								project);
 				if (factory != null) {
-					final Map<String, String> preferences = factory
+					Map<String, String> preferences = factory
 							.retrievePreferences(new PreferencesLookupDelegate(
 									project));
-					// TODO update preferences to keep all the lines
+					preferences = factory.changeToIndentingOnly(preferences);
 					final String lineDelimiter = TextUtilities
 							.getDefaultLineDelimiter(document);
 					final IScriptFormatter formatter = factory.createFormatter(

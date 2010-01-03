@@ -33,6 +33,15 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 	 */
 	Map<String, String> retrievePreferences(IPreferencesLookupDelegate delegate);
 
+	/**
+	 * Change the preferences to perform only indenting. Preferences affecting
+	 * the number of lines will be disabled.
+	 * 
+	 * @param preferences
+	 * @return
+	 */
+	Map<String, String> changeToIndentingOnly(Map<String, String> preferences);
+
 	PreferenceKey[] getPreferenceKeys();
 
 	PreferenceKey getActiveProfileKey();
