@@ -13,16 +13,14 @@ package org.eclipse.dltk.formatter;
 
 import java.util.List;
 
-
-
 public interface IFormatterContainerNode extends IFormatterNode {
 
 	void addChild(IFormatterNode child);
 
 	boolean isEmpty();
 
-	List getBody();
+	List<IFormatterNode> getBody();
 
-	List getChildren();
+	List<IFormatterNode> getChildren();
 
 }
