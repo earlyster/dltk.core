@@ -65,7 +65,7 @@ public class ProfileStore implements IProfileStore {
 	/**
 	 * A SAX event handler to parse the xml format for profiles.
 	 */
-	private final static class ProfileDefaultHandler extends DefaultHandler {
+	private final class ProfileDefaultHandler extends DefaultHandler {
 
 		private List<IProfile> fProfiles;
 		private int fVersion;
@@ -106,6 +106,11 @@ public class ProfileStore implements IProfileStore {
 		@Override
 		public void endElement(String uri, String localName, String qName) {
 			if (qName.equals(XML_NODE_PROFILE)) {
+				for (Map.Entry<String, String> entry : defaults.entrySet()) {
+					if (!fSettings.containsKey(entry.getKey())) {
+						fSettings.put(entry.getKey(), entry.getValue());
+					}
+				}
 				fProfiles.add(new CustomProfile(fName, fSettings, fFormatter,
 						fVersion));
 				fName = null;
@@ -134,8 +139,12 @@ public class ProfileStore implements IProfileStore {
 	private final static String XML_ATTRIBUTE_PROFILE_FORMATTER = "formatter"; //$NON-NLS-1$
 	private final static String XML_ATTRIBUTE_VALUE = "value"; //$NON-NLS-1$
 
-	public ProfileStore(IProfileVersioner versioner) {
+	private final Map<String, String> defaults;
+
+	public ProfileStore(IProfileVersioner versioner,
+			Map<String, String> defaults) {
 		this.versioner = versioner;
+		this.defaults = defaults;
 	}
 
 	/**
@@ -228,7 +237,7 @@ public class ProfileStore implements IProfileStore {
 	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
 	 * @throws CoreException
 	 */
-	public static List<IProfile> readProfilesFromStream(InputSource inputSource)
+	protected List<IProfile> readProfilesFromStream(InputSource inputSource)
 			throws CoreException {
 
 		final ProfileDefaultHandler handler = new ProfileDefaultHandler();

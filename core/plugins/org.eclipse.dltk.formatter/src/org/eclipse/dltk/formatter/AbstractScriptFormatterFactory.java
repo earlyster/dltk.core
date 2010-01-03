@@ -200,7 +200,7 @@ public abstract class AbstractScriptFormatterFactory extends
 	}
 
 	public IProfileStore getProfileStore() {
-		return new ProfileStore(getProfileVersioner());
+		return new ProfileStore(getProfileVersioner(), loadDefaultSettings());
 	}
 
 	protected IProfileVersioner createProfileVersioner() {
