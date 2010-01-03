@@ -110,6 +110,7 @@ public class GenerateActionGroup extends ActionGroup {
 
 		installQuickAccessAction();
 		installFormatAction();
+		installIndentAction();
 	}
 
 	private FormatAction formatAction;
@@ -145,6 +146,17 @@ public class GenerateActionGroup extends ActionGroup {
 		fEditor.markAsStateDependentAction(DLTKActionConstants.FORMAT, true);
 		fEditor
 				.markAsSelectionDependentAction(DLTKActionConstants.FORMAT,
+						true);
+	}
+
+	private void installIndentAction() {
+		Action action = new IndentAction(DLTKEditorMessages
+				.getBundleForConstructedKeys(), "Indent.", fEditor); //$NON-NLS-1$
+		action.setActionDefinitionId(IScriptEditorActionDefinitionIds.INDENT);
+		fEditor.setAction(DLTKActionConstants.INDENT, action);
+		fEditor.markAsStateDependentAction(DLTKActionConstants.INDENT, true);
+		fEditor
+				.markAsSelectionDependentAction(DLTKActionConstants.INDENT,
 						true);
 	}
 
@@ -193,9 +205,9 @@ public class GenerateActionGroup extends ActionGroup {
 		added += addEditorAction(source, DLTKActionConstants.COMMENT);
 		added += addEditorAction(source, DLTKActionConstants.UNCOMMENT);
 		source.add(new Separator(GROUP_EDIT));
+		added += addEditorAction(source, DLTKActionConstants.INDENT);
 		added += addEditorAction(source, DLTKActionConstants.FORMAT);
 		added += addEditorAction(source, DLTKActionConstants.FORMAT_ELEMENT);
-		added += addEditorAction(source, DLTKActionConstants.INDENT);
 		source.add(new Separator());
 		added += addEditorAction(source, ITextEditorActionConstants.SHIFT_LEFT);
 		added += addEditorAction(source, ITextEditorActionConstants.SHIFT_RIGHT);
@@ -232,6 +244,8 @@ public class GenerateActionGroup extends ActionGroup {
 				getAction(fEditor, DLTKActionConstants.ADD_BLOCK_COMMENT));
 		bars.setGlobalActionHandler(DLTKActionConstants.REMOVE_BLOCK_COMMENT,
 				getAction(fEditor, DLTKActionConstants.REMOVE_BLOCK_COMMENT));
+		bars.setGlobalActionHandler(DLTKActionConstants.INDENT, getAction(
+				fEditor, DLTKActionConstants.INDENT));
 		bars.setGlobalActionHandler(DLTKActionConstants.FORMAT, getAction(
 				fEditor, DLTKActionConstants.FORMAT));
 		bars.setGlobalActionHandler(DLTKActionConstants.FORMAT_ELEMENT,
