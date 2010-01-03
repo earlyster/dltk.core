@@ -41,6 +41,7 @@ public class FormatterWriter implements IFormatterWriter {
 	private boolean canAppendToPreviousLine = false;
 	private boolean trimTrailingSpaces = true;
 	private boolean trimBlankLines = true;
+	private boolean keepLines = false;
 
 	/**
 	 * @param lineDelimiter
@@ -94,7 +95,7 @@ public class FormatterWriter implements IFormatterWriter {
 	 * @see IFormatterWriter#writeLineBreak(IFormatterContext)
 	 */
 	public void writeLineBreak(IFormatterContext context) {
-		if (lineStarted) {
+		if (lineStarted && !keepLines) {
 			write(context, lineDelimiter);
 			assert (!lineStarted);
 			skipNextNewLine = true;
@@ -102,7 +103,9 @@ public class FormatterWriter implements IFormatterWriter {
 	}
 
 	public void skipNextLineBreaks(IFormatterContext context) {
-		skipNextNewLine = true;
+		if (!keepLines) {
+			skipNextNewLine = true;
+		}
 	}
 
 	public void appendToPreviousLine(IFormatterContext context, String text) {
@@ -447,6 +450,21 @@ public class FormatterWriter implements IFormatterWriter {
 	 */
 	public void setTrimEmptyLines(boolean trimEmptyLines) {
 		this.trimBlankLines = trimEmptyLines;
+	}
+
+	/**
+	 * @param keepLines
+	 *            the keepLines to set
+	 */
+	public void setKeepLines(boolean keepLines) {
+		this.keepLines = keepLines;
+	}
+
+	/**
+	 * @return the keepLines
+	 */
+	public boolean isKeepLines() {
+		return keepLines;
 	}
 
 }
