@@ -165,6 +165,11 @@ public abstract class AbstractScriptFormatterFactory extends
 		return result;
 	}
 
+	public Map<String, String> changeToIndentingOnly(
+			Map<String, String> preferences) {
+		return preferences;
+	}
+
 	public void savePreferences(Map<String, String> preferences,
 			IPreferencesSaveDelegate delegate) {
 		final PreferenceKey[] keys = getPreferenceKeys();
