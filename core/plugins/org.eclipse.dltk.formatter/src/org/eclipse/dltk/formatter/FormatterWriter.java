@@ -455,6 +455,7 @@ public class FormatterWriter implements IFormatterWriter {
 	/**
 	 * @param keepLines
 	 *            the keepLines to set
+	 * @since 2.0
 	 */
 	public void setKeepLines(boolean keepLines) {
 		this.keepLines = keepLines;
@@ -462,6 +463,7 @@ public class FormatterWriter implements IFormatterWriter {
 
 	/**
 	 * @return the keepLines
+	 * @since 2.0
 	 */
 	public boolean isKeepLines() {
 		return keepLines;

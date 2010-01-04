@@ -165,6 +165,9 @@ public abstract class AbstractScriptFormatterFactory extends
 		return result;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	public Map<String, String> changeToIndentingOnly(
 			Map<String, String> preferences) {
 		return preferences;
