@@ -39,6 +39,7 @@ public interface IScriptFormatterFactory extends IDLTKContributedExtension {
 	 * 
 	 * @param preferences
 	 * @return
+	 * @since 2.0
 	 */
 	Map<String, String> changeToIndentingOnly(Map<String, String> preferences);
 
