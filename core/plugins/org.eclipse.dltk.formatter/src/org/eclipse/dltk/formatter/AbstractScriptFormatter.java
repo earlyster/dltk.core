@@ -13,10 +13,9 @@ package org.eclipse.dltk.formatter;
 
 import java.util.Map;
 
+import org.eclipse.dltk.formatter.internal.FormatterIndentGenerator;
+import org.eclipse.dltk.formatter.internal.FormatterMixedIndentGenerator;
 import org.eclipse.dltk.ui.CodeFormatterConstants;
-import org.eclipse.dltk.ui.formatter.FormatterIndentGenerator;
-import org.eclipse.dltk.ui.formatter.FormatterMixedIndentGenerator;
-import org.eclipse.dltk.ui.formatter.IFormatterIndentGenerator;
 import org.eclipse.dltk.ui.formatter.IScriptFormatter;
 import org.eclipse.jface.text.IDocument;
 
@@ -74,6 +73,9 @@ public abstract class AbstractScriptFormatter implements IScriptFormatter {
 		return null;
 	}
 
+	/**
+	 * @since 2.0
+	 */
 	protected IFormatterIndentGenerator createIndentGenerator() {
 		final int tabSize = getInt(CodeFormatterConstants.FORMATTER_TAB_SIZE);
 		final int indentSize = getInt(CodeFormatterConstants.FORMATTER_INDENTATION_SIZE);

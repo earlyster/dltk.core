@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.dltk.formatter.internal.ExcludeRegionList;
-import org.eclipse.dltk.ui.formatter.IFormatterIndentGenerator;
 import org.eclipse.dltk.utils.TextUtils;
 import org.eclipse.jface.text.IRegion;
 
@@ -45,6 +44,7 @@ public class FormatterWriter implements IFormatterWriter {
 
 	/**
 	 * @param lineDelimiter
+	 * @since 2.0
 	 */
 	public FormatterWriter(IFormatterDocument document, String lineDelimiter,
 			IFormatterIndentGenerator indentGenerator) {
