@@ -77,7 +77,9 @@ public class FormatterWriter implements IFormatterWriter {
 	 * @see IFormatterWriter#writeText(IFormatterContext, String)
 	 */
 	public void writeText(IFormatterContext context, String text) {
-		skipNextNewLine = false;
+		if (text.length() != 0) {
+			skipNextNewLine = false;
+		}
 		if (lineStarted) {
 			trimTrailingSpaces();
 		}
