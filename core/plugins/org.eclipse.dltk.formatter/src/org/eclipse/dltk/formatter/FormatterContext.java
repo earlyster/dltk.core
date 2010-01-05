@@ -36,7 +36,7 @@ public class FormatterContext implements IFormatterContext, Cloneable {
 	private boolean comment = false;
 	private boolean wrapping = false;
 	private int blankLines = 0;
-	private final List path = new ArrayList();
+	private final List<PathEntry> path = new ArrayList<PathEntry>();
 
 	public FormatterContext(int indent) {
 		this.indent = indent;
@@ -118,12 +118,12 @@ public class FormatterContext implements IFormatterContext, Cloneable {
 	}
 
 	public void leave(IFormatterNode node) {
-		final PathEntry entry = (PathEntry) path.remove(path.size() - 1);
+		final PathEntry entry = path.remove(path.size() - 1);
 		if (entry.node != node) {
 			throw new IllegalStateException("leave() - node mismatch"); //$NON-NLS-1$
 		}
 		if (!path.isEmpty() && isCountable(node)) {
-			final PathEntry parent = (PathEntry) path.get(path.size() - 1);
+			final PathEntry parent = path.get(path.size() - 1);
 			++parent.childIndex;
 		}
 	}
@@ -134,7 +134,7 @@ public class FormatterContext implements IFormatterContext, Cloneable {
 
 	public IFormatterNode getParent() {
 		if (path.size() > 1) {
-			final PathEntry entry = (PathEntry) path.get(path.size() - 2);
+			final PathEntry entry = path.get(path.size() - 2);
 			return entry.node;
 		} else {
 			return null;
@@ -143,7 +143,7 @@ public class FormatterContext implements IFormatterContext, Cloneable {
 
 	public int getChildIndex() {
 		if (path.size() > 1) {
-			final PathEntry entry = (PathEntry) path.get(path.size() - 2);
+			final PathEntry entry = path.get(path.size() - 2);
 			return entry.childIndex;
 		} else {
 			return -1;
