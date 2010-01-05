@@ -47,6 +47,7 @@ public class ScriptedTest extends AbstractFormatterTest {
 	protected void runTest() throws Throwable {
 		final String output = format(input);
 		assertEquals(expected, output);
+		assertEquals("Reformatting", expected, format(output)); //$NON-NLS-1$
 	}
 
 	private IScriptedTestContext context = null;
