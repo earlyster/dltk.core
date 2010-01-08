@@ -9,6 +9,7 @@ import java.util.Vector;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.ssh.core.ISshFileHandle;
 
 import com.jcraft.jsch.SftpATTRS;
@@ -175,9 +176,16 @@ public class SshFileHandle implements ISshFileHandle,
 				if (filename.equals(".") || filename.equals("..")) { //$NON-NLS-1$ //$NON-NLS-2$
 					continue;
 				}
-				SftpATTRS childAttrs = entry.getAttrs();
-				SshFileHandle childHandle = new SshFileHandle(connection, path
-						.append(filename), childAttrs);
+				final SftpATTRS childAttrs = entry.getAttrs();
+				final IPath childPath;
+				if (filename.indexOf(IPath.DEVICE_SEPARATOR) == -1) {
+					childPath = path.append(filename);
+				} else {
+					// this way DEVICE_SEPARATOR is kept in path segment
+					childPath = path.append(new Path(null, filename));
+				}
+				SshFileHandle childHandle = new SshFileHandle(connection,
+						childPath, childAttrs);
 				synchronized (attrCache) {
 					attrCache.put(childHandle, new CacheEntry(childAttrs, c));
 				}
