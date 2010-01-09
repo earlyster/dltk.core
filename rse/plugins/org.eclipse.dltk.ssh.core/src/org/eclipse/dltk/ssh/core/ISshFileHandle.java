@@ -14,6 +14,8 @@ public interface ISshFileHandle {
 
 	public void mkdir();
 
+	public void move(IPath destination) throws CoreException;
+
 	public void delete() throws CoreException;
 
 	public boolean exists();

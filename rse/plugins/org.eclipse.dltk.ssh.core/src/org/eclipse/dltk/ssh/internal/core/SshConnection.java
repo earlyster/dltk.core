@@ -8,8 +8,11 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.Vector;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.ssh.core.ISshConnection;
 import org.eclipse.dltk.ssh.core.ISshFileHandle;
 
@@ -442,6 +445,23 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 		}
 	}
 
+	static class MoveOperation extends Operation {
+
+		final IPath source;
+		final IPath destination;
+
+		public MoveOperation(IPath source, IPath destination) {
+			this.source = source;
+			this.destination = destination;
+		}
+
+		@Override
+		public void perform(ChannelSftp channel) throws SftpException {
+			channel.rename(source.toString(), destination.toString());
+		}
+
+	}
+
 	private static final int DEFAULT_RETRY_COUNT = 2;
 	private static final long DEFAULT_ACQUIRE_TIMEOUT = 30 * 1000;
 	private static final long DEFAULT_INACTIVITY_TIMEOUT = 60 * 1000;
@@ -661,4 +681,18 @@ public class SshConnection extends ChannelPool implements ISshConnection {
 		return null;
 	}
 
+	/**
+	 * @param source
+	 * @param destination
+	 * @throws CoreException
+	 */
+	void move(IPath source, IPath destination) throws CoreException {
+		MoveOperation op = new MoveOperation(source, destination);
+		performOperation(op);
+		if (!op.isFinished()) {
+			throw new CoreException(new Status(IStatus.ERROR,
+					Activator.PLUGIN_ID, "Error moving " + source + " to " //$NON-NLS-1$ //$NON-NLS-2$
+							+ destination));
+		}
+	}
 }

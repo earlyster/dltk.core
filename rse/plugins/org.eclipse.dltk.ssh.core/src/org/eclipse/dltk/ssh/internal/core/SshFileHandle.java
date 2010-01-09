@@ -363,4 +363,8 @@ public class SshFileHandle implements ISshFileHandle,
 	public String readLink() {
 		return connection.readLink(path);
 	}
+
+	public void move(IPath destination) throws CoreException {
+		connection.move(path, destination);
+	}
 }
