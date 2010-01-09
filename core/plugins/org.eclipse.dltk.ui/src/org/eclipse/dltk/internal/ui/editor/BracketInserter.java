@@ -23,7 +23,9 @@ import org.eclipse.jface.text.IDocumentExtension;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedModeUI;
@@ -209,5 +211,33 @@ public abstract class BracketInserter implements VerifyKeyListener,
 		IRegion newSelection = level.fUI.getSelectedRegion();
 		sourceViewer.setSelectedRange(newSelection.getOffset(), newSelection
 				.getLength());
+	}
+
+	/**
+	 * Validates the content type at the specified location
+	 * 
+	 * @param document
+	 * @param offset
+	 * @param partitioning
+	 * @param contentTypes
+	 *            acceptable content types, if empty only
+	 *            IDocument.DEFAULT_CONTENT_TYPE is checked.
+	 * @return
+	 * @throws BadLocationException
+	 */
+	protected static boolean validatePartitioning(IDocument document,
+			int offset, String partitioning, String... contentTypes)
+			throws BadLocationException {
+		final ITypedRegion partition = TextUtilities.getPartition(document,
+				partitioning, offset, true);
+		if (contentTypes.length != 0) {
+			for (String contentType : contentTypes) {
+				if (contentType.equals(partition.getType()))
+					return true;
+			}
+			return false;
+		} else {
+			return IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType());
+		}
 	}
 }
