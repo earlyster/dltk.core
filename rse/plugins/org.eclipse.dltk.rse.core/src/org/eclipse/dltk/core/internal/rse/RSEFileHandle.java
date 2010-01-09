@@ -33,6 +33,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.FileHandles;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.environment.IFileStoreProvider;
@@ -534,5 +535,16 @@ public class RSEFileHandle implements IFileHandle, IFileStoreProvider {
 			}
 		}
 		return currentPath;
+	}
+
+	public void move(IFileHandle destination) throws CoreException {
+		fetchSshFile();
+		if (sshFile != null) {
+			sshFile.move(FileHandles.asPath(destination, environment));
+		} else {
+			file
+					.move(FileHandles.asFileStore(destination), EFS.OVERWRITE,
+							null);
+		}
 	}
 }
