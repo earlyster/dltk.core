@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -160,4 +161,10 @@ public interface IFileHandle {
 	 * @return
 	 */
 	long length();
+
+	/**
+	 * @param destination
+	 * @since 2.0
+	 */
+	void move(IFileHandle destination) throws CoreException;
 }

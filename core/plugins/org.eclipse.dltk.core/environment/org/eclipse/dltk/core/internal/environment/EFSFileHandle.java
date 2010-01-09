@@ -28,6 +28,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
+import org.eclipse.dltk.core.environment.FileHandles;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.environment.IFileHandle;
 import org.eclipse.dltk.core.environment.IFileStoreProvider;
@@ -221,5 +222,10 @@ public class EFSFileHandle implements IFileHandle, IFileStoreProvider {
 	 */
 	public IFileStore getFileStore() {
 		return this.file;
+	}
+
+	public void move(IFileHandle destination) throws CoreException {
+		final IFileStore destStore = FileHandles.asFileStore(destination);
+		file.move(destStore, EFS.OVERWRITE, null);
 	}
 }

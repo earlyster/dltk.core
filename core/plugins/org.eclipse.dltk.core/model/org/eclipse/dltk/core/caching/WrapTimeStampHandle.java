@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.environment.IEnvironment;
@@ -95,5 +96,9 @@ public class WrapTimeStampHandle implements IFileHandle {
 
 	public URI toURI() {
 		return this.handle.toURI();
+	}
+
+	public void move(IFileHandle destination) throws CoreException {
+		this.handle.move(destination);
 	}
 }

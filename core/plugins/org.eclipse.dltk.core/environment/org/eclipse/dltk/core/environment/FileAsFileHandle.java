@@ -20,11 +20,15 @@ import java.io.OutputStream;
 import java.net.URI;
 
 import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.internal.environment.LocalEnvironment;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * {@link File} as {@link IFileHandle} wrapper
@@ -141,6 +145,19 @@ public class FileAsFileHandle implements IFileHandle {
 
 	public URI toURI() {
 		return file.toURI();
+	}
+
+	public void move(IFileHandle destination) throws CoreException {
+		final File destFile = FileHandles.asFile(destination);
+		if (!file.renameTo(destFile)) {
+			throw new CoreException(new Status(IStatus.ERROR,
+					DLTKCore.PLUGIN_ID, NLS.bind("Rename {0} to {1} failed", //$NON-NLS-1$
+							file, destFile)));
+		}
+	}
+
+	File getFile() {
+		return file;
 	}
 
 }

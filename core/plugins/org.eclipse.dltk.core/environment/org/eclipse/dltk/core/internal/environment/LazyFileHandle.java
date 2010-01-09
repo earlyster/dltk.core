@@ -16,9 +16,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.compiler.util.Util;
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
 import org.eclipse.dltk.core.environment.IEnvironment;
@@ -263,5 +267,15 @@ public class LazyFileHandle implements IFileHandle {
 			return this.handle.toString();
 		}
 		return "[UNRESOLVED]" + getFullPath(); //$NON-NLS-1$
+	}
+
+	public void move(IFileHandle destination) throws CoreException {
+		initialize();
+		if (handle != null) {
+			handle.move(destination);
+		} else {
+			throw new CoreException(new Status(IStatus.ERROR,
+					DLTKCore.PLUGIN_ID, "Error resolving " + getFullPath())); //$NON-NLS-1$
+		}
 	}
 }
