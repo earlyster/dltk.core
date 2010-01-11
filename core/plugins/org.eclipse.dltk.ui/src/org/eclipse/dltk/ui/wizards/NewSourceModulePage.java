@@ -499,14 +499,14 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		}
 		if (activeTemplateDescriptors.size() > 0) {
 			Group contents = new Group(composite, SWT.NONE);
-			contents.setText("Contents");
+			contents.setText("Create");
 			GridData ggd = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
 			ggd.horizontalSpan = nColumns;
 			contents.setLayoutData(ggd);
 			contents.setLayout(new GridLayout(nColumns, false));
 			SelectionButtonDialogField lfield = new SelectionButtonDialogField(
 					SWT.RADIO);
-			lfield.setLabelText("Create new file in workspace");
+			lfield.setLabelText("in &workspace");
 			lfield.doFillIntoGrid(contents, nColumns);
 			templateFields.add(lfield);
 			lfield.setDialogFieldListener(templateEnablementUpdater);
