@@ -22,7 +22,10 @@ public class FormatterWriter implements IFormatterWriter {
 
 	private final StringBuilder writer = new StringBuilder();
 	private final StringBuilder indent = new StringBuilder();
-	private final StringBuilder callbackBuffer = new StringBuilder();
+	/**
+	 * @since 2.0
+	 */
+	protected final StringBuilder callbackBuffer = new StringBuilder();
 	private final StringBuilder emptyLines = new StringBuilder();
 
 	private boolean lineStarted = false;
