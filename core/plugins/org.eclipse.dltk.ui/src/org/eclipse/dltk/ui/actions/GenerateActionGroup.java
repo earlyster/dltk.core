@@ -85,6 +85,7 @@ public class GenerateActionGroup extends ActionGroup {
 			super(editor, QUICK_MENU_ID);
 		}
 
+		@Override
 		protected void fillMenu(IMenuManager menu) {
 			fillQuickMenu(menu);
 		}
@@ -160,6 +161,7 @@ public class GenerateActionGroup extends ActionGroup {
 						true);
 	}
 
+	@Override
 	public void fillActionBars(IActionBars actionBar) {
 		super.fillActionBars(actionBar);
 		if (fEditor != null) {
@@ -170,6 +172,7 @@ public class GenerateActionGroup extends ActionGroup {
 		}
 	}
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
 		String menuText = "Source"; //$NON-NLS-1$
@@ -187,7 +190,10 @@ public class GenerateActionGroup extends ActionGroup {
 			menu.appendToGroup(fGroupName, subMenu);
 	}
 
-	private void fillQuickMenu(IMenuManager menu) {
+	/**
+	 * @since 2.0
+	 */
+	protected void fillQuickMenu(IMenuManager menu) {
 		if (isEditorOwner()) {
 			fillEditorSubMenu(menu);
 		} else {
@@ -205,9 +211,9 @@ public class GenerateActionGroup extends ActionGroup {
 		added += addEditorAction(source, DLTKActionConstants.COMMENT);
 		added += addEditorAction(source, DLTKActionConstants.UNCOMMENT);
 		source.add(new Separator(GROUP_EDIT));
-		added += addEditorAction(source, DLTKActionConstants.INDENT);
 		added += addEditorAction(source, DLTKActionConstants.FORMAT);
 		added += addEditorAction(source, DLTKActionConstants.FORMAT_ELEMENT);
+		added += addEditorAction(source, DLTKActionConstants.INDENT);
 		source.add(new Separator());
 		added += addEditorAction(source, ITextEditorActionConstants.SHIFT_LEFT);
 		added += addEditorAction(source, ITextEditorActionConstants.SHIFT_RIGHT);
@@ -222,9 +228,7 @@ public class GenerateActionGroup extends ActionGroup {
 		return 1;
 	}
 
-	/*
-	 * (non-Javadoc) Method declared in ActionGroup
-	 */
+	@Override
 	public void dispose() {
 		if (fQuickAccessHandlerActivation != null && fHandlerService != null) {
 			fHandlerService.deactivateHandler(fQuickAccessHandlerActivation);
@@ -244,8 +248,6 @@ public class GenerateActionGroup extends ActionGroup {
 				getAction(fEditor, DLTKActionConstants.ADD_BLOCK_COMMENT));
 		bars.setGlobalActionHandler(DLTKActionConstants.REMOVE_BLOCK_COMMENT,
 				getAction(fEditor, DLTKActionConstants.REMOVE_BLOCK_COMMENT));
-		bars.setGlobalActionHandler(DLTKActionConstants.INDENT, getAction(
-				fEditor, DLTKActionConstants.INDENT));
 		bars.setGlobalActionHandler(DLTKActionConstants.FORMAT, getAction(
 				fEditor, DLTKActionConstants.FORMAT));
 		bars.setGlobalActionHandler(DLTKActionConstants.FORMAT_ELEMENT,
