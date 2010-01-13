@@ -3,7 +3,7 @@
 <schema targetNamespace="org.eclipse.dltk.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.eclipse.dltk.ui" id="sourceModuleTemplate" name="sourceModuleTemplate"/>
+         <meta.schema plugin="org.eclipse.dltk.ui" id="sourceModuleWizardExtension" name="SourceModule Wizard Extension"/>
       </appInfo>
       <documentation>
          [Enter description of this extension point.]
@@ -18,7 +18,7 @@
       </annotation>
       <complexType>
          <sequence minOccurs="1" maxOccurs="unbounded">
-            <element ref="sourceModuleTemplate"/>
+            <element ref="wizardExtension"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,15 +47,8 @@
       </complexType>
    </element>
 
-   <element name="sourceModuleTemplate">
+   <element name="wizardExtension">
       <complexType>
-         <attribute name="name" type="string" use="required">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
          <attribute name="nature" type="string" use="required">
             <annotation>
                <documentation>
@@ -69,7 +62,7 @@
                   
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.ui.wizards.INewSourceModuleTemplate"/>
+                  <meta.attribute kind="java" basedOn=":org.eclipse.dltk.ui.wizards.ISourceModuleWizardExtension"/>
                </appInfo>
             </annotation>
          </attribute>

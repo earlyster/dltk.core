@@ -9,18 +9,59 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.environment.EnvironmentManager;
+import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.ui.DLTKUIPlugin;
+import org.eclipse.dltk.utils.LazyExtensionManager;
+import org.eclipse.dltk.utils.LazyExtensionManager.Descriptor;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PartInitException;
 
-public abstract class NewSourceModuleWizard extends NewElementWizard {
+public abstract class NewSourceModuleWizard extends NewElementWizard implements
+		ISourceModuleWizard {
+
+	static class WizardExtensionManager extends
+			LazyExtensionManager<ISourceModuleWizardExtension> {
+
+		private final String nature;
+
+		/**
+		 * @param nature
+		 */
+		public WizardExtensionManager(String nature) {
+			super(DLTKUIPlugin.PLUGIN_ID + ".sourceModuleWizardExtension"); //$NON-NLS-1$
+			this.nature = nature;
+		}
+
+		private static final String ATTR_NATURE = "nature"; //$NON-NLS-1$
+
+		@Override
+		protected boolean isValidDescriptor(
+				Descriptor<ISourceModuleWizardExtension> descriptor) {
+			final String extensionNatureId = descriptor
+					.getAttribute(ATTR_NATURE);
+			return extensionNatureId == null
+					|| this.nature.equals(extensionNatureId)
+					|| extensionNatureId.equals("#"); //$NON-NLS-1$
+		}
+
+	}
 
 	private NewSourceModulePage page;
 
@@ -28,13 +69,43 @@ public abstract class NewSourceModuleWizard extends NewElementWizard {
 
 	protected abstract NewSourceModulePage createNewSourceModulePage();
 
+	private final List<ISourceModuleWizardExtension> extensions = new ArrayList<ISourceModuleWizardExtension>();
+
 	@Override
 	public void addPages() {
 		super.addPages();
-
 		page = createNewSourceModulePage();
+		createExtensions();
 		page.init(getSelection());
 		addPage(page);
+	}
+
+	private void createExtensions() {
+		final WizardExtensionManager manager = new WizardExtensionManager(page
+				.getRequiredNature());
+		for (Descriptor<ISourceModuleWizardExtension> descriptor : manager
+				.getDescriptors()) {
+			final ISourceModuleWizardExtension extension = descriptor.get();
+			if (extension != null && extension.start(this)) {
+				extensions.add(extension);
+			}
+		}
+	}
+
+	@Override
+	public void createPageControls(Composite pageContainer) {
+		for (ISourceModuleWizardExtension extension : extensions) {
+			extension.initialize();
+		}
+		super.createPageControls(pageContainer);
+		created = true;
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	protected List<ISourceModuleWizardExtension> getExtensions() {
+		return Collections.unmodifiableList(extensions);
 	}
 
 	@Override
@@ -76,4 +147,93 @@ public abstract class NewSourceModuleWizard extends NewElementWizard {
 			}
 		});
 	}
+
+	/**
+	 * @since 2.0
+	 */
+	public IEnvironment getEnvironment() {
+		return EnvironmentManager.getEnvironment(getProject());
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public IProject getProject() {
+		return getFolder().getScriptProject().getProject();
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public IScriptFolder getFolder() {
+		return page.getScriptFolder();
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public String getFileName() {
+		return page.getFileName();
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void validate() {
+		page.handleFieldChanged("XXX");// FIXME
+	}
+
+	private boolean created = false;
+	private String mode = null;
+	private Set<String> disabledModes = null;
+
+	/**
+	 * @since 2.0
+	 */
+	public String getMode() {
+		if (!created) {
+			return mode;
+		} else {
+			return page.getMode();
+		}
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void setMode(String mode) {
+		if (!created) {
+			this.mode = mode;
+		} else {
+			page.setMode(mode);
+		}
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void enableMode(String mode, boolean enable) {
+		if (!created) {
+			if (enable) {
+				if (disabledModes != null) {
+					disabledModes.remove(mode);
+				}
+			} else {
+				if (disabledModes == null) {
+					disabledModes = new HashSet<String>();
+				}
+				disabledModes.add(mode);
+			}
+		} else {
+			page.enableMode(mode, enable);
+		}
+	}
+
+	boolean isModeEnabled(String mode) {
+		if (disabledModes == null) {
+			return true;
+		}
+		return !disabledModes.contains(mode);
+	}
+
 }

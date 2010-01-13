@@ -17,7 +17,7 @@
    <extension-point id="modelCompareProvider" name="modelCompareProvider" schema="schema/modelCompareProvider.exsd"/>  
    <extension-point id="projectTemplate" name="Project Template" schema="schema/projectTemplate.exsd"/>
    <extension-point id="projectWizardInitializer" name="Project Wizard Initializer" schema="schema/projectWizardInitializer.exsd"/>
-   <extension-point id="sourceModuleTemplate" name="sourceModuleTemplate" schema="schema/sourceModuleTemplate.exsd"/>
+   <extension-point id="sourceModuleWizardExtension" name="SourceModule Wizard Extension" schema="schema/sourceModuleWizardExtension.exsd"/>
    <extension
     	id="DLTKSearchResultPage"
         point="org.eclipse.search.searchResultViewPages">

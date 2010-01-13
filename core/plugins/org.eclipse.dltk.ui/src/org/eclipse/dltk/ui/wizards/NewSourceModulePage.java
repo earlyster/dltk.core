@@ -12,6 +12,7 @@ package org.eclipse.dltk.ui.wizards;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +22,6 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -33,11 +33,13 @@ import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
+import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.internal.ui.util.SWTUtil;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
@@ -45,16 +47,14 @@ import org.eclipse.dltk.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.ModelElementLabelProvider;
 import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.preferences.CodeTemplatesPreferencePage;
 import org.eclipse.dltk.ui.text.templates.ICodeTemplateArea;
 import org.eclipse.dltk.ui.text.templates.SourceModuleTemplateContext;
 import org.eclipse.dltk.ui.util.CodeGeneration;
-import org.eclipse.dltk.ui.wizards.INewSourceModuleTemplate.IValidationNotifier;
-import org.eclipse.dltk.utils.LazyExtensionManager;
-import org.eclipse.dltk.utils.LazyExtensionManager.Descriptor;
+import org.eclipse.dltk.ui.wizards.ISourceModuleWizard.ICreateContext;
+import org.eclipse.dltk.ui.wizards.ISourceModuleWizard.ICreateStep;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -81,57 +81,11 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 	private static final String FILE = "NewSourceModulePage.file"; //$NON-NLS-1$
 	private static final String TEMPLATE = "NewSourceModulePage.template"; //$NON-NLS-1$
 
-	private IStatus sourceMoudleStatus;
-	private IStatus templateStatus = null;
+	private IStatus sourceModuleStatus;
 
 	private IScriptFolder currentScriptFolder;
 
 	private StringDialogField fileDialogField;
-
-	static class TemplateDescriptor extends
-			Descriptor<INewSourceModuleTemplate> {
-		final String nature;
-		final String name;
-
-		/**
-		 * @param configurationElement
-		 */
-		public TemplateDescriptor(TemplateManager manager,
-				IConfigurationElement configurationElement) {
-			super(manager, configurationElement);
-			this.nature = configurationElement.getAttribute("nature");
-			this.name = configurationElement.getAttribute("name");
-		}
-
-	}
-
-	static class TemplateManager extends
-			LazyExtensionManager<INewSourceModuleTemplate> {
-
-		private String nature;
-
-		/**
-		 * @param extensionPoint
-		 */
-		public TemplateManager(String nature) {
-			super(DLTKUIPlugin.PLUGIN_ID + ".sourceModuleTemplate"); //$NON-NLS-1$
-			this.nature = nature;
-		}
-
-		@Override
-		protected boolean isValidDescriptor(
-				Descriptor<INewSourceModuleTemplate> descriptor) {
-			String natureId = ((TemplateDescriptor) descriptor).nature;
-			return natureId == null || this.nature.equals(natureId)
-					|| natureId.equals("#");
-		}
-
-		@Override
-		protected Descriptor<INewSourceModuleTemplate> createDescriptor(
-				IConfigurationElement confElement) {
-			return new TemplateDescriptor(this, confElement);
-		}
-	}
 
 	private IStatus fileChanged() {
 		StatusInfo status = new StatusInfo();
@@ -224,9 +178,9 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 				if (template != null) {
 					templateName = template.getName();
 				}
-				Map data = null;
+				Map<String, Object> data = null;
 				if (templateName != null) {
-					data = new HashMap();
+					data = new HashMap<String, Object>();
 					data.put(CodeTemplatesPreferencePage.DATA_SELECT_TEMPLATE,
 							templateName);
 				}
@@ -350,14 +304,14 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		setTitle(getPageTitle());
 		setDescription(getPageDescription());
 
-		sourceMoudleStatus = new StatusInfo();
+		sourceModuleStatus = new StatusInfo();
 
 		// fileDialogField
 		fileDialogField = new StringDialogField();
 		fileDialogField.setLabelText(Messages.NewSourceModulePage_file);
 		fileDialogField.setDialogFieldListener(new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {
-				sourceMoudleStatus = fileChanged();
+				sourceModuleStatus = fileChanged();
 				handleFieldChanged(FILE);
 			}
 		});
@@ -379,23 +333,132 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 			// else
 			// currentScriptFolder = null;
 			currentScriptFolder = getScriptFolder();
-			sourceMoudleStatus = fileChanged();
+			sourceModuleStatus = fileChanged();
 		}
-		// add template statusess here
-		templateStatus = null;
-		for (SelectionButtonDialogField f : templateFields) {
-			if (f.isSelected()) {
-				INewSourceModuleTemplate template = templateFieldToTemplate
-						.get(f);
-				if (template != null) {
-					templateStatus = template.validate(getScriptFolder(),
-							getFileName());
+		final List<IStatus> statuses = new ArrayList<IStatus>();
+		if (containerStatus != null) {
+			statuses.add(containerStatus);
+		}
+		if (sourceModuleStatus != null) {
+			statuses.add(sourceModuleStatus);
+		}
+		if (!StatusUtil.isError(statuses)) {
+			// validate extensions only if no errors
+			for (ISourceModuleWizardExtension extension : getExtensions()) {
+				final IStatus status = extension.validate();
+				if (status != null) {
+					statuses.add(status);
 				}
 			}
 		}
+		updateStatus(statuses.toArray(new IStatus[statuses.size()]));
+	}
 
-		updateStatus(new IStatus[] { containerStatus, sourceMoudleStatus,
-				templateStatus });
+	private static class CreateContext implements ICreateContext {
+
+		final IScriptFolder scriptFolder;
+		final ISourceModule sourceModule;
+
+		/**
+		 * @param fileName
+		 * @param scriptFolder
+		 * @param sourceModule
+		 */
+		public CreateContext(IScriptFolder scriptFolder,
+				ISourceModule sourceModule) {
+			this.scriptFolder = scriptFolder;
+			this.sourceModule = sourceModule;
+		}
+
+		public IEnvironment getEnvironment() {
+			IEnvironment environment = EnvironmentManager
+					.getEnvironment(getScriptFolder());
+			if (environment == null) {
+				environment = EnvironmentManager.getLocalEnvironment();
+			}
+			return environment;
+		}
+
+		public IScriptFolder getScriptFolder() {
+			return scriptFolder;
+		}
+
+		public IScriptProject getScriptProject() {
+			return getScriptFolder().getScriptProject();
+		}
+
+		public ISourceModule getSourceModule() {
+			return sourceModule;
+		}
+
+		private static class StepEntry {
+			final String kind;
+			final int priority;
+			final ICreateStep step;
+
+			public StepEntry(String kind, int priority, ICreateStep step) {
+				this.kind = kind;
+				this.priority = priority;
+				this.step = step;
+			}
+
+		}
+
+		final List<StepEntry> entries = new ArrayList<StepEntry>();
+
+		public void addStep(String kind, int priority, ICreateStep step) {
+			entries.add(new StepEntry(kind, priority, step));
+		}
+
+		public ICreateStep[] getSteps(String kind) {
+			final List<StepEntry> selection = new ArrayList<StepEntry>();
+			for (StepEntry entry : entries) {
+				if (kind.equals(entry.kind)) {
+					selection.add(entry);
+				}
+			}
+			Collections.sort(selection, new Comparator<StepEntry>() {
+				public int compare(StepEntry e1, StepEntry e2) {
+					return e1.priority - e1.priority;
+				}
+			});
+			final ICreateStep[] steps = new ICreateStep[selection.size()];
+			for (int i = 0; i < selection.size(); ++i) {
+				steps[i] = selection.get(i).step;
+			}
+			return steps;
+		}
+
+		private String content = Util.EMPTY_STRING;
+
+		public String getContent() {
+			return content;
+		}
+
+		public void setContent(String content) {
+			this.content = content;
+		}
+
+	}
+
+	class InitializeFileContent implements ICreateStep {
+
+		public void execute(ICreateContext context, IProgressMonitor monitor)
+				throws CoreException {
+			context.setContent(getFileContent(context.getSourceModule()));
+		}
+
+	}
+
+	static class CreateSourceModuleStep implements ICreateStep {
+
+		public void execute(ICreateContext context, IProgressMonitor monitor)
+				throws CoreException {
+			context.getScriptFolder().createSourceModule(
+					context.getSourceModule().getElementName(),
+					context.getContent(), true, monitor);
+		}
+
 	}
 
 	public ISourceModule createFile(IProgressMonitor monitor)
@@ -403,27 +466,26 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		if (monitor == null) {
 			monitor = new NullProgressMonitor();
 		}
-
 		final String fileName = getFileName();
 		final ISourceModule module = currentScriptFolder
 				.getSourceModule(fileName);
-
-		currentScriptFolder.createSourceModule(fileName,
-				getFileContent(module), true, monitor);
-
-		for (SelectionButtonDialogField f : templateFields) {
-			if (f.isSelected()) {
-				INewSourceModuleTemplate template = templateFieldToTemplate
-						.get(f);
-				if (template != null) {
-					if (!template.createSourceModule(getScriptFolder(),
-							fileName, getFileContent(module))) {
-						return null;
-					}
-				}
-			}
+		CreateContext context = new CreateContext(currentScriptFolder, module);
+		context.addStep(ICreateStep.KIND_PREPARE, 0,
+				new InitializeFileContent());
+		context.addStep(ICreateStep.KIND_EXECUTE, 0,
+				new CreateSourceModuleStep());
+		for (ISourceModuleWizardExtension extension : getExtensions()) {
+			extension.prepare(context);
 		}
-
+		final List<ICreateStep> steps = new ArrayList<ICreateStep>();
+		steps.addAll(Arrays.asList(context.getSteps(ICreateStep.KIND_PREPARE)));
+		steps.addAll(Arrays.asList(context.getSteps(ICreateStep.KIND_EXECUTE)));
+		steps
+				.addAll(Arrays.asList(context
+						.getSteps(ICreateStep.KIND_FINALIZE)));
+		for (ICreateStep step : steps) {
+			step.execute(context, monitor);
+		}
 		return module;
 	}
 
@@ -448,26 +510,87 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		Dialog.applyDialogFont(composite);
 	}
 
-	private List<SelectionButtonDialogField> templateFields = new ArrayList<SelectionButtonDialogField>();
-	private Map<SelectionButtonDialogField, INewSourceModuleTemplate> templateFieldToTemplate = new HashMap<SelectionButtonDialogField, INewSourceModuleTemplate>();
-	IDialogFieldListener templateEnablementUpdater = new IDialogFieldListener() {
+	private static class WorkspaceMode implements ISourceModuleWizardMode {
+
+		public WorkspaceMode() {
+		}
+
+		public void createControl(Composite parent, int columns) {
+			// empty
+		}
+
+		public String getId() {
+			return ISourceModuleWizard.MODE_WORKSPACE;
+		}
+
+		public String getName() {
+			return "&workspace";
+		}
+
+		public void setEnabled(boolean enabled) {
+			// empty
+		}
+
+	}
+
+	private static class ModeEntry {
+		final SelectionButtonDialogField field;
+		final ISourceModuleWizardMode template;
+
+		public ModeEntry(SelectionButtonDialogField field,
+				ISourceModuleWizardMode template) {
+			this.field = field;
+			this.template = template;
+		}
+
+		private Boolean enabled = null;
+
+		public boolean getSelection() {
+			return enabled != null && enabled.booleanValue();
+		}
+
+		public void setSelection(boolean value) {
+			if (enabled == null || value != enabled.booleanValue()) {
+				if (field != null) {
+					field.setSelection(value);
+				}
+				template.setEnabled(value);
+				enabled = Boolean.valueOf(value);
+			}
+		}
+
+	}
+
+	final List<ModeEntry> modes = new ArrayList<ModeEntry>();
+
+	private ModeEntry getActiveMode() {
+		for (ModeEntry f : modes) {
+			if (f.getSelection()) {
+				return f;
+			}
+		}
+		if (!modes.isEmpty()) {
+			return modes.get(0);
+		}
+		throw new IllegalStateException("No modes");
+	}
+
+	private final IDialogFieldListener modeSelectionUpdater = new IDialogFieldListener() {
 		public void dialogFieldChanged(DialogField field) {
-			for (SelectionButtonDialogField f : templateFields) {
-				INewSourceModuleTemplate template = templateFieldToTemplate
-						.get(f);
-				if (template != null) {
-					template.updateEnablement(f.equals(field));
+			ModeEntry selection = null;
+			for (ModeEntry f : modes) {
+				if (f.field != null && f.field.isSelected()) {
+					selection = f;
+				}
+			}
+			if (selection != null) {
+				for (ModeEntry f : modes) {
+					f.setSelection(f == selection);
 				}
 			}
 			handleFieldChanged(TEMPLATE);
 		}
 	};
-	private IValidationNotifier validationNotifier = new IValidationNotifier() {
-		public void validate() {
-			handleFieldChanged(TEMPLATE);
-		}
-	};
-	private List<TemplateDescriptor> activeTemplateDescriptors;
 
 	/**
 	 * Creates content controls on the specified composite.
@@ -480,70 +603,65 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 
 		// createPackageControls(composite, nColumns);
 		createFileControls(composite, nColumns);
-		TemplateManager manager = new TemplateManager(getRequiredNature());
-		Descriptor<INewSourceModuleTemplate>[] descriptors = manager
-				.getDescriptors();
-		IScriptFolder scriptFolder = getScriptFolder();
-		IEnvironment env = getEnvironment();
-		activeTemplateDescriptors = new ArrayList<TemplateDescriptor>();
-		for (Descriptor<INewSourceModuleTemplate> descriptor : descriptors) {
-			TemplateDescriptor descr = (TemplateDescriptor) descriptor;
-			INewSourceModuleTemplate template = descr.get();
-			if (template instanceof INewSourceModuleTemplateInitializer) {
-				((INewSourceModuleTemplateInitializer) template)
-						.initialize(scriptFolder);
-			}
-			if (template.isAvailable(env, scriptFolder)) {
-				activeTemplateDescriptors.add(descr);
-			}
+		final List<ISourceModuleWizardMode> modes = new ArrayList<ISourceModuleWizardMode>();
+		for (ISourceModuleWizardExtension extension : getExtensions()) {
+			modes.addAll(extension.getModes());
 		}
-		if (activeTemplateDescriptors.size() > 0) {
-			Group contents = new Group(composite, SWT.NONE);
-			contents.setText("Create");
+		if (!modes.isEmpty()) {
+			final Group contents = new Group(composite, SWT.NONE);
+			contents.setText("Location");
 			GridData ggd = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
 			ggd.horizontalSpan = nColumns;
 			contents.setLayoutData(ggd);
 			contents.setLayout(new GridLayout(nColumns, false));
-			SelectionButtonDialogField lfield = new SelectionButtonDialogField(
-					SWT.RADIO);
-			lfield.setLabelText("in &workspace");
-			lfield.doFillIntoGrid(contents, nColumns);
-			templateFields.add(lfield);
-			lfield.setDialogFieldListener(templateEnablementUpdater);
-			SelectionButtonDialogField selectedButton = lfield;
-			for (TemplateDescriptor descr : activeTemplateDescriptors) {
-				INewSourceModuleTemplate template = descr.get();
-
-				SelectionButtonDialogField field = new SelectionButtonDialogField(
-						SWT.RADIO);
-				field.setLabelText(descr.name);
-				field.doFillIntoGrid(contents, 1);
-				Composite parent = new Composite(contents, SWT.NONE);
-				GridLayout layout = new GridLayout(3, false);
-				layout.marginHeight = 0;
-				layout.marginWidth = 0;
-				parent.setLayout(layout);
-				GridData ld = new GridData(SWT.FILL, SWT.DEFAULT, true, false);
-				ld.horizontalSpan = nColumns - 1;
-				parent.setLayoutData(ld);
-				template.setEnvironment(env);
-				template.createControl(parent, 3);
-				template.setNotifier(validationNotifier);
-				templateFields.add(field);
-				templateFieldToTemplate.put(field, template);
-				field.setDialogFieldListener(templateEnablementUpdater);
-				if (template instanceof INewSourceModuleTemplateInitializer
-						&& ((INewSourceModuleTemplateInitializer) template)
-								.isActive()) {
-					selectedButton = field;
-				}
+			ModeEntry wsEntry = addMode(contents, nColumns, new WorkspaceMode());
+			((GridData) wsEntry.field.getSelectionButton().getLayoutData()).horizontalSpan = nColumns;
+			for (ISourceModuleWizardMode template : modes) {
+				addMode(contents, nColumns, template);
 			}
-			selectedButton.setSelection(true);
+			for (ModeEntry modeEntry : this.modes) {
+				modeEntry.field.setDialogFieldListener(modeSelectionUpdater);
+			}
+		} else {
+			final ModeEntry entry = new ModeEntry(null, new WorkspaceMode());
+			entry.setSelection(true);
+			this.modes.add(entry);
 		}
-
 		if (fTemplateDialogField != null) {
 			createTemplateControls(composite, nColumns);
 		}
+	}
+
+	private List<ISourceModuleWizardExtension> getExtensions() {
+		return ((NewSourceModuleWizard) getWizard()).getExtensions();
+	}
+
+	private ModeEntry addMode(Composite parent, int nColumns,
+			ISourceModuleWizardMode template) {
+		SelectionButtonDialogField field = new SelectionButtonDialogField(
+				SWT.RADIO);
+		field.setLabelText(template.getName());
+		field.doFillIntoGrid(parent, 1);
+		// Composite parent = new Composite(contents, SWT.NONE);
+		// GridLayout layout = new GridLayout(3, false);
+		// layout.marginHeight = 0;
+		// layout.marginWidth = 0;
+		// parent.setLayout(layout);
+		// GridData ld = new GridData(SWT.FILL, SWT.DEFAULT, true,
+		// false);
+		// ld.horizontalSpan = nColumns - 1;
+		// parent.setLayoutData(ld);
+		template.createControl(parent, nColumns - 1);
+		final ModeEntry entry = new ModeEntry(field, template);
+		this.modes.add(entry);
+		String activeMode = ((NewSourceModuleWizard) getWizard()).getMode();
+		if (activeMode == null) {
+			activeMode = ISourceModuleWizard.MODE_WORKSPACE;
+		}
+		entry.setSelection(template.getId().equals(activeMode));
+		entry.field.setEnabled(((NewSourceModuleWizard) getWizard())
+				.isModeEnabled(template.getId()));
+		return entry;
 	}
 
 	protected String getFileText() {
@@ -689,6 +807,25 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 					.getScriptProject().getProject());
 		}
 		return null;
+	}
+
+	String getMode() {
+		return getActiveMode().template.getId();
+	}
+
+	void setMode(String mode) {
+		for (ModeEntry entry : modes) {
+			entry.setSelection(mode != null
+					&& mode.equals(entry.template.getId()));
+		}
+	}
+
+	void enableMode(String mode, boolean enable) {
+		for (ModeEntry entry : modes) {
+			if (mode.equals(entry.template.getId()) && entry.field != null) {
+				entry.field.setEnabled(enable);
+			}
+		}
 	}
 
 }
