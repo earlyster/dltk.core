@@ -825,9 +825,22 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 	}
 
 	void enableMode(String mode, boolean enable) {
+		boolean updateSelection = false;
 		for (ModeEntry entry : modes) {
 			if (mode.equals(entry.template.getId()) && entry.field != null) {
+				if (entry.getSelection() && !enable) {
+					updateSelection = true;
+					entry.setSelection(false);
+				}
 				entry.field.setEnabled(enable);
+			}
+		}
+		if (updateSelection) {
+			for (ModeEntry entry : modes) {
+				if (entry.field == null || entry.field.isEnabled()) {
+					entry.setSelection(true);
+					break;
+				}
 			}
 		}
 	}
