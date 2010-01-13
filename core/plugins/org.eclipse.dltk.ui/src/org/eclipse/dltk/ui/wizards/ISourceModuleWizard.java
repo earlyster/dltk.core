@@ -29,6 +29,10 @@ public interface ISourceModuleWizard {
 	 */
 	String MODE_WORKSPACE = "org.eclipse.dltk.ui.sourceModuleWizard.workspace"; //$NON-NLS-1$
 
+	String FIELD_CONTAINER = NewContainerWizardPage.CONTAINER;
+
+	String FIELD_FILE = NewSourceModulePage.FILE;
+
 	/**
 	 * Returns the environment of the project selected in the wizard
 	 */
@@ -93,5 +97,13 @@ public interface ISourceModuleWizard {
 		void execute(ICreateContext context, IProgressMonitor monitor)
 				throws CoreException;
 	}
+
+	public interface IFieldChangeListener {
+		void fieldChanged();
+	}
+
+	void addFieldChangeListener(String field, IFieldChangeListener listener);
+
+	void removeFieldChangeListener(String field, IFieldChangeListener listener);
 
 }

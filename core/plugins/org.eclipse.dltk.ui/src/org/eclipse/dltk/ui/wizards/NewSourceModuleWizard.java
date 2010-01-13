@@ -11,13 +11,16 @@ package org.eclipse.dltk.ui.wizards;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceModule;
@@ -180,7 +183,7 @@ public abstract class NewSourceModuleWizard extends NewElementWizard implements
 	 * @since 2.0
 	 */
 	public void validate() {
-		page.handleFieldChanged("XXX");// FIXME
+		page.handleFieldChanged(NewSourceModulePage.EXTENSIONS);
 	}
 
 	private boolean created = false;
@@ -234,6 +237,53 @@ public abstract class NewSourceModuleWizard extends NewElementWizard implements
 			return true;
 		}
 		return !disabledModes.contains(mode);
+	}
+
+	private Map<String, ListenerList> listeners = null;
+
+	/**
+	 * @since 2.0
+	 */
+	public void addFieldChangeListener(String field,
+			IFieldChangeListener listener) {
+		if (listeners == null) {
+			listeners = new HashMap<String, ListenerList>();
+		}
+		ListenerList list = listeners.get(field);
+		if (list == null) {
+			list = new ListenerList();
+			listeners.put(field, list);
+		}
+		list.add(listener);
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public void removeFieldChangeListener(String field,
+			IFieldChangeListener listener) {
+		if (listeners != null) {
+			final ListenerList list = listeners.get(field);
+			if (list != null) {
+				list.remove(listener);
+				if (list.isEmpty()) {
+					listeners.remove(field);
+				}
+			}
+		}
+	}
+
+	void fireFieldChange(String field) {
+		if (listeners != null) {
+			final ListenerList list = listeners.get(field);
+			if (list != null) {
+				for (Object listener : list.getListeners()) {
+					if (listener instanceof IFieldChangeListener) {
+						((IFieldChangeListener) listener).fieldChanged();
+					}
+				}
+			}
+		}
 	}
 
 }

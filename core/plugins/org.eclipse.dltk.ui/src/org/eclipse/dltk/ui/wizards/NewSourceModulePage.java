@@ -39,7 +39,6 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
-import org.eclipse.dltk.internal.ui.dialogs.StatusUtil;
 import org.eclipse.dltk.internal.ui.util.SWTUtil;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
@@ -64,6 +63,7 @@ import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -78,10 +78,12 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 
 public abstract class NewSourceModulePage extends NewContainerWizardPage {
 
-	private static final String FILE = "NewSourceModulePage.file"; //$NON-NLS-1$
+	static final String FILE = "NewSourceModulePage.file"; //$NON-NLS-1$
 	private static final String TEMPLATE = "NewSourceModulePage.template"; //$NON-NLS-1$
+	static final String EXTENSIONS = "NewSourceModulePage.extensions"; //$NON-NLS-1$
 
 	private IStatus sourceModuleStatus;
+	private final List<IStatus> extensionStatus = new ArrayList<IStatus>();
 
 	private IScriptFolder currentScriptFolder;
 
@@ -327,13 +329,23 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
 		if (fieldName == CONTAINER) {
-			// IProjectFragment fragment = getProjectFragment();
-			// if (fragment != null)
-			//				currentScriptFolder = fragment.getScriptFolder(""); //$NON-NLS-1$
-			// else
-			// currentScriptFolder = null;
 			currentScriptFolder = getScriptFolder();
 			sourceModuleStatus = fileChanged();
+		}
+		if (fieldName == FILE || fieldName == CONTAINER) {
+			final IWizard wizard = getWizard();
+			if (wizard != null) {
+				((NewSourceModuleWizard) wizard).fireFieldChange(fieldName);
+			}
+		}
+		if (fieldName == EXTENSIONS) {
+			extensionStatus.clear();
+			for (ISourceModuleWizardExtension extension : getExtensions()) {
+				final IStatus status = extension.validate();
+				if (status != null) {
+					extensionStatus.add(status);
+				}
+			}
 		}
 		final List<IStatus> statuses = new ArrayList<IStatus>();
 		if (containerStatus != null) {
@@ -342,15 +354,7 @@ public abstract class NewSourceModulePage extends NewContainerWizardPage {
 		if (sourceModuleStatus != null) {
 			statuses.add(sourceModuleStatus);
 		}
-		if (!StatusUtil.isError(statuses)) {
-			// validate extensions only if no errors
-			for (ISourceModuleWizardExtension extension : getExtensions()) {
-				final IStatus status = extension.validate();
-				if (status != null) {
-					statuses.add(status);
-				}
-			}
-		}
+		statuses.addAll(extensionStatus);
 		updateStatus(statuses.toArray(new IStatus[statuses.size()]));
 	}
 
