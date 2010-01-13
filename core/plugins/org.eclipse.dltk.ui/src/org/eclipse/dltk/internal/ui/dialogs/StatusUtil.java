@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.ui.dialogs;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -51,6 +53,18 @@ public class StatusUtil {
 			}
 		}
 		return max;
+	}
+
+	/**
+	 * Tests if the specified list contains errors
+	 */
+	public static boolean isError(List<IStatus> statuses) {
+		for (IStatus curr : statuses) {
+			if (curr.matches(IStatus.ERROR)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
