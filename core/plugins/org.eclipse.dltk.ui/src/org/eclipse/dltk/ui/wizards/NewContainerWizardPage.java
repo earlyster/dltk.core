@@ -192,6 +192,9 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 				IAdaptable adaptable = (IAdaptable) selectedElement;
 				scriptElement = (IModelElement) adaptable
 						.getAdapter(IModelElement.class);
+				if (scriptElement != null && scriptElement.isReadOnly()) {
+					scriptElement = scriptElement.getScriptProject();
+				}
 				if (scriptElement == null) {
 					IResource resource = (IResource) adaptable
 							.getAdapter(IResource.class);
