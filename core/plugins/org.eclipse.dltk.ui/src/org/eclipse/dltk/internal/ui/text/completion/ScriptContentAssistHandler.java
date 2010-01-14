@@ -12,7 +12,6 @@ package org.eclipse.dltk.internal.ui.text.completion;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.editor.SpecificContentAssistExecutor;
 import org.eclipse.dltk.ui.text.completion.CompletionProposalComputerRegistry;
 import org.eclipse.ui.IEditorPart;
@@ -56,7 +55,7 @@ public final class ScriptContentAssistHandler extends AbstractHandler {
 			if (page != null) {
 				IEditorPart editor= page.getActiveEditor();
 				if (editor instanceof ITextEditor)
-					return (ScriptEditor) editor;
+					return (ITextEditor) editor;
 			}
 		}
 		return null;
