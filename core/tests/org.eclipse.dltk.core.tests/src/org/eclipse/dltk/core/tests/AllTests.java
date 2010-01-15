@@ -31,8 +31,7 @@ import org.eclipse.dltk.core.tests.utils.TextUtilsTest;
 public class AllTests {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite(
-				"Test for org.eclipse.dltk.core.tests.model");
+		TestSuite suite = new TestSuite("org.eclipse.dltk.core.tests.model");
 		// $JUnit-BEGIN$
 		suite.addTest(new TestSuite(CompilerUtilTests.class));
 		suite.addTest(new TestSuite(CompilerCharOperationTests.class));
