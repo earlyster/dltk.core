@@ -18,7 +18,7 @@ public class AllTests {
 
 	public static Test suite() {
 		TestSuite suite = new TestSuite(
-				"Test for org.eclipse.dltk.formatter.tests"); //$NON-NLS-1$
+				"org.eclipse.dltk.formatter.tests"); //$NON-NLS-1$
 		// $JUnit-BEGIN$
 		suite.addTestSuite(ExcludeRegionListTest.class);
 		// $JUnit-END$
