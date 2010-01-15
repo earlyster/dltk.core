@@ -13,7 +13,7 @@ import org.eclipse.dltk.ui.tests.text.TodoHighlightingTest;
 public class AllTests {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite("Test for org.eclipse.dltk.ui.tests");
+		TestSuite suite = new TestSuite("org.eclipse.dltk.ui.tests");
 		//$JUnit-BEGIN$
 		suite.addTestSuite(ScriptElementLabelsTest.class);
 		suite.addTestSuite(DLTKUILanguageManagerTests.class);
