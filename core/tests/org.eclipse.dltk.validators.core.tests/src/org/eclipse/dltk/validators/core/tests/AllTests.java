@@ -7,11 +7,11 @@ public class AllTests {
 
 	public static Test suite() {
 		TestSuite suite = new TestSuite(
-				"Test for org.eclipse.dltk.validators.core.tests");
-		//$JUnit-BEGIN$
+				"org.eclipse.dltk.validators.core.tests");
+		// $JUnit-BEGIN$
 		suite.addTestSuite(ValidatorContainerTests.class);
 		suite.addTestSuite(CommandLineTests.class);
-		//$JUnit-END$
+		// $JUnit-END$
 		return suite;
 	}
 
