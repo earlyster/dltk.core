@@ -31,7 +31,7 @@ import org.eclipse.dltk.debug.tests.breakpoints.BreakpointTests;
 public class AllTests {
 
 	public static Test suite() {
-		final TestSuite suite = new TestSuite("Test for org.eclipse.dltk.debug");
+		final TestSuite suite = new TestSuite("org.eclipse.dltk.debug");
 
 		// // $JUnit-BEGIN$
 
