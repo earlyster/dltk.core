@@ -12,8 +12,10 @@ package org.eclipse.dltk.ui.text.completion;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,6 +41,7 @@ import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionListener;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistantExtension2;
 import org.eclipse.jface.text.contentassist.IContentAssistantExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -129,8 +132,17 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 		fAssistant.addCompletionListener(new ICompletionListener() {
 
 			public void assistSessionStarted(ContentAssistEvent event) {
-				if (event.processor != ContentAssistProcessor.this)
-					return;
+
+				if (event.processor != ContentAssistProcessor.this) {
+					final IContentAssistant assistant = event.assistant;
+					if (assistant instanceof IScriptContentAssistExtension) {
+						final IScriptContentAssistExtension extension = (IScriptContentAssistExtension) assistant;
+						if (!extension.provide(event.processor))
+							return;
+					} else {
+						return;
+					}
+				}
 
 				fIterationGesture = getIterationGesture();
 				KeySequence binding = getIterationBinding();
@@ -165,7 +177,9 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 			}
 
 			/*
-			 * @see org.eclipse.jface.text.contentassist.ICompletionListener#assistSessionEnded(org.eclipse.jface.text.contentassist.ContentAssistEvent)
+			 * @seeorg.eclipse.jface.text.contentassist.ICompletionListener#
+			 * assistSessionEnded
+			 * (org.eclipse.jface.text.contentassist.ContentAssistEvent)
 			 */
 			public void assistSessionEnded(ContentAssistEvent event) {
 				if (event.processor != ContentAssistProcessor.this)
@@ -256,18 +270,19 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 			int offset, IProgressMonitor monitor,
 			ContentAssistInvocationContext context) {
 		List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
+		Set<ICompletionProposal> proposalSet = new HashSet<ICompletionProposal>();
 		List<CompletionProposalCategory> providers = getCategories();
 		for (CompletionProposalCategory cat : providers) {
 			@SuppressWarnings("unchecked")
 			List<ICompletionProposal> computed = cat
 					.computeCompletionProposals(context, fPartition,
 							new SubProgressMonitor(monitor, 1));
-			proposals.addAll(computed);
+			proposalSet.addAll(computed);
 			if (fErrorMessage == null) {
 				fErrorMessage = cat.getErrorMessage();
 			}
 		}
-
+		proposals.addAll(proposalSet);
 		return proposals;
 	}
 
@@ -491,7 +506,9 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 					new String[] { restoreButtonLabel,
 							IDialogConstants.CLOSE_LABEL }, 1) {
 				/*
-				 * @see org.eclipse.dltk.internal.ui.dialogs.OptionalMessageDialog#createCustomArea(org.eclipse.swt.widgets.Composite)
+				 * @see
+				 * org.eclipse.dltk.internal.ui.dialogs.OptionalMessageDialog
+				 * #createCustomArea(org.eclipse.swt.widgets.Composite)
 				 */
 				protected Control createCustomArea(Composite composite) {
 					// wrap link and checkbox in one composite without space
