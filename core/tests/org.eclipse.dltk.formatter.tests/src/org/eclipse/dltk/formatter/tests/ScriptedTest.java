@@ -18,10 +18,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.eclipse.dltk.compiler.util.Util;
+import org.eclipse.dltk.ui.formatter.FormatterException;
 import org.eclipse.dltk.ui.formatter.IScriptFormatter;
 import org.eclipse.dltk.utils.TextUtils;
 import org.osgi.framework.Bundle;
@@ -47,7 +49,13 @@ public class ScriptedTest extends AbstractFormatterTest {
 	protected void runTest() throws Throwable {
 		final String output = format(input);
 		assertEquals(expected, output);
-		assertEquals("Reformatting", expected, format(output)); //$NON-NLS-1$
+		try {
+			assertEquals("Reformatting", expected, format(output)); //$NON-NLS-1$
+		} catch (FormatterException e) {
+			AssertionFailedError fail = new AssertionFailedError(e.getMessage());
+			fail.initCause(e);
+			throw fail;
+		}
 	}
 
 	private IScriptedTestContext context = null;
