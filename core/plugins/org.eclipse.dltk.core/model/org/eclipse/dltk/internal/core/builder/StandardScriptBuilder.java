@@ -36,7 +36,6 @@ import org.eclipse.dltk.core.builder.IBuildParticipantExtension2;
 import org.eclipse.dltk.core.builder.IBuildParticipantExtension3;
 import org.eclipse.dltk.core.builder.IScriptBuilder;
 import org.eclipse.dltk.core.builder.IScriptBuilderExtension;
-import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.osgi.util.NLS;
 
 public class StandardScriptBuilder implements IScriptBuilder,
@@ -57,7 +56,7 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		}
 	}
 
-	public void buildExternalElements(ScriptProject project,
+	public void buildExternalElements(IScriptProject project,
 			List externalElements, IProgressMonitor monitor, int buildType) {
 		beginBuild(buildType, monitor);
 		final List<IBuildParticipantExtension2> extensions = selectExtension(IBuildParticipantExtension2.class);
