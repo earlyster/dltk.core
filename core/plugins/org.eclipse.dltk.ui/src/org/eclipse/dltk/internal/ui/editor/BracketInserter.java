@@ -224,6 +224,7 @@ public abstract class BracketInserter implements VerifyKeyListener,
 	 *            IDocument.DEFAULT_CONTENT_TYPE is checked.
 	 * @return
 	 * @throws BadLocationException
+	 * @since 2.0
 	 */
 	protected static boolean validatePartitioning(IDocument document,
 			int offset, String partitioning, String... contentTypes)
