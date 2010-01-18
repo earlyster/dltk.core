@@ -1003,6 +1003,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	 * @param region
 	 * @return
 	 * @throws BadLocationException
+	 * @since 2.0
 	 */
 	protected boolean isBlankRegion(IDocument document, ITypedRegion region)
 			throws BadLocationException {
@@ -1511,6 +1512,7 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	/**
 	 * @param d
 	 * @param regions
+	 * @since 2.0
 	 */
 	protected void prepareRegions(Document d, List<IRegion> regions) {
 		// override in descendants
