@@ -44,6 +44,8 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 /**
  * Indents a line or range of lines in a script document to its correct
  * position.
+ * 
+ * @since 2.0
  */
 public class IndentAction extends TextEditorAction {
 
