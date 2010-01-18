@@ -182,8 +182,17 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 			 * (org.eclipse.jface.text.contentassist.ContentAssistEvent)
 			 */
 			public void assistSessionEnded(ContentAssistEvent event) {
-				if (event.processor != ContentAssistProcessor.this)
-					return;
+
+				if (event.processor != ContentAssistProcessor.this) {
+					final IContentAssistant assistant = event.assistant;
+					if (assistant instanceof IScriptContentAssistExtension) {
+						final IScriptContentAssistExtension extension = (IScriptContentAssistExtension) assistant;
+						if (!extension.provide(event.processor))
+							return;
+					} else {
+						return;
+					}
+				}
 
 				for (CompletionProposalCategory cat : fCategories) {
 					cat.sessionEnded();
