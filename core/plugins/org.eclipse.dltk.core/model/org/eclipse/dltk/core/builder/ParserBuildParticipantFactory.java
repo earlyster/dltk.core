@@ -27,6 +27,7 @@ import org.eclipse.dltk.internal.core.ModelManager;
 public class ParserBuildParticipantFactory extends AbstractBuildParticipantType
 		implements IExecutableExtension {
 
+	@Override
 	public IBuildParticipant createBuildParticipant(IScriptProject project)
 			throws CoreException {
 		if (natureId != null) {
