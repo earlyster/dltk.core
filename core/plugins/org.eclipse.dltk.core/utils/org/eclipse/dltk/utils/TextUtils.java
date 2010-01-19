@@ -327,7 +327,8 @@ public abstract class TextUtils {
 		}
 
 		public int getLineOffset(int line) {
-			return line < lineOffsets.length ? lineOffsets[line] : 0;
+			return line >= 0 && line < lineOffsets.length ? lineOffsets[line]
+					: 0;
 		}
 
 		public int getNumberOfLines() {
