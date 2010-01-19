@@ -175,10 +175,10 @@ public abstract class FormatterModifyTabPage implements
 		fShowInvisibleButton.setSelection(savedValue);
 		updateShowInvisible(savedValue);
 
-		final GridData gd = createGridData(numColumns, GridData.FILL_BOTH, 0);
-		gd.widthHint = 0;
-		gd.heightHint = 0;
 		if (previewViewer instanceof TextViewer) {
+			GridData gd = createGridData(numColumns, GridData.FILL_BOTH, 0);
+			gd.widthHint = 100;
+			gd.heightHint = 100;
 			((TextViewer) previewViewer).getControl().setLayoutData(gd);
 		}
 

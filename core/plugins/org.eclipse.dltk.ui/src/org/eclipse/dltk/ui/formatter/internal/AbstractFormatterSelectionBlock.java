@@ -512,7 +512,7 @@ public abstract class AbstractFormatterSelectionBlock extends
 			fFactoryCombo.select(index);
 		}
 
-		fFactoryDescription = createLabel(composite, "", numColumns);
+		fFactoryDescription = createLabel(composite, "", numColumns, true);
 		doSetFactory(index);
 	}
 
@@ -541,8 +541,7 @@ public abstract class AbstractFormatterSelectionBlock extends
 				| GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan = numColumns;
 		gd.verticalSpan = 7;
-		gd.widthHint = 0;
-		gd.heightHint = 0;
+		gd.heightHint = 100;
 		fPreviewViewer.getControl().setLayoutData(gd);
 	}
 
@@ -679,11 +678,19 @@ public abstract class AbstractFormatterSelectionBlock extends
 
 	protected static Label createLabel(Composite composite, String text,
 			int numColumns) {
-		final GridData gd = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gd.horizontalSpan = numColumns;
-		gd.widthHint = 0;
+		return createLabel(composite, text, numColumns, false);
+	}
 
-		final Label label = new Label(composite, SWT.WRAP);
+	protected static Label createLabel(Composite composite, String text,
+			int numColumns, boolean wrap) {
+		final GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = numColumns;
+		if (wrap) {
+			gd.heightHint = new PixelConverter(composite)
+					.convertHeightInCharsToPixels(2);
+		}
+
+		final Label label = new Label(composite, wrap ? SWT.WRAP : SWT.NONE);
 		label.setFont(composite.getFont());
 		label.setText(text);
 		label.setLayoutData(gd);
