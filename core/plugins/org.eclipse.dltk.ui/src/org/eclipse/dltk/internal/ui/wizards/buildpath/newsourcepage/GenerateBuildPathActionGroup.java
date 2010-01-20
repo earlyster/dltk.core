@@ -448,8 +448,21 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		if (!(sel instanceof IStructuredSelection))
 			return false;
 		IStructuredSelection selection = (IStructuredSelection) sel;
-		for (Iterator<?> iter = selection.iterator(); iter.hasNext();) {
+
+		if (selection.isEmpty()) {
+			return false;
+		}
+
+		for (Iterator iter = selection.iterator(); iter.hasNext();) {
 			Object element = iter.next();
+
+			if (element instanceof IProject) {
+				IProject project = (IProject) element;
+				if (!project.isAccessible()) {
+					return false;
+				}
+			}
+
 			if (element instanceof IWorkingSet)
 				return false;
 		}
