@@ -27,9 +27,6 @@ package org.eclipse.dltk.compiler.problem;
  * compiling. However, the problem markers carry equivalent information to
  * IProblem, in particular their ID (attribute "id") is set to one of the IDs
  * defined on this interface.
- * 
- * FIXME updated documentation: end position is documented as inclusive, but it
- * is generated and used as not inclusive.
  */
 public interface IProblem {
 
@@ -64,14 +61,16 @@ public interface IProblem {
 	String getOriginatingFileName();
 
 	/**
-	 * Answer the end position of the problem (inclusive), or -1 if unknown.
+	 * Answer the end position of the problem (EXCLUSIVE), or -1 if unknown. The
+	 * value is zero-relative.
 	 * 
 	 * @return the end position of the problem (inclusive), or -1 if unknown
 	 */
 	int getSourceEnd();
 
 	/**
-	 * Answer the line number in source where the problem begins.
+	 * Answer the line number in source where the problem begins, or -1 if
+	 * unknown. The value is zero-relative.
 	 * 
 	 * @return the line number in source where the problem begins
 	 */
@@ -79,6 +78,7 @@ public interface IProblem {
 
 	/**
 	 * Answer the start position of the problem (inclusive), or -1 if unknown.
+	 * The value is zero-relative.
 	 * 
 	 * @return the start position of the problem (inclusive), or -1 if unknown
 	 */
