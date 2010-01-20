@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core.builder;
 
-import java.util.Iterator;
-
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -45,9 +43,7 @@ public class BuildProblemReporter extends ProblemCollector {
 				resource.deleteMarkers(DefaultProblem.MARKER_TYPE_TASK, true,
 						IResource.DEPTH_INFINITE);
 			}
-			for (Iterator i = problems.iterator(); i.hasNext();) {
-				final IProblem problem = (IProblem) i.next();
-
+			for (final IProblem problem : problems) {
 				final String markerType;
 				if (problem instanceof CategorizedProblem) {
 					markerType = ((CategorizedProblem) problem).getMarkerType();
@@ -55,11 +51,19 @@ public class BuildProblemReporter extends ProblemCollector {
 					markerType = DefaultProblem.MARKER_TYPE_PROBLEM;
 				}
 				final IMarker m = resource.createMarker(markerType);
-				m.setAttribute(IMarker.LINE_NUMBER, problem
-						.getSourceLineNumber() + 1);
+				if (problem.getSourceLineNumber() >= 0) {
+					m.setAttribute(IMarker.LINE_NUMBER, problem
+							.getSourceLineNumber() + 1);
+				}
 				m.setAttribute(IMarker.MESSAGE, problem.getMessage());
-				m.setAttribute(IMarker.CHAR_START, problem.getSourceStart());
-				m.setAttribute(IMarker.CHAR_END, problem.getSourceEnd());
+				if (problem.getSourceStart() >= 0) {
+					m
+							.setAttribute(IMarker.CHAR_START, problem
+									.getSourceStart());
+				}
+				if (problem.getSourceEnd() >= 0) {
+					m.setAttribute(IMarker.CHAR_END, problem.getSourceEnd());
+				}
 				if (DefaultProblem.MARKER_TYPE_PROBLEM.equals(markerType)) {
 					int severity = IMarker.SEVERITY_INFO;
 					if (problem.isError()) {
@@ -86,7 +90,8 @@ public class BuildProblemReporter extends ProblemCollector {
 			}
 			problems.clear();
 		} catch (CoreException e) {
-			DLTKCore.error(Messages.BuildProblemReporter_errorUpdatingMarkers, e);
+			DLTKCore.error(Messages.BuildProblemReporter_errorUpdatingMarkers,
+					e);
 		}
 	}
 
