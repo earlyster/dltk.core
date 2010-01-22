@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.dltk.ast.ASTNode;
+import org.eclipse.dltk.ast.ASTVisitor;
 import org.eclipse.dltk.ast.declarations.FieldDeclaration;
 import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
@@ -82,6 +83,27 @@ public class ASTUtil {
 		}
 		return (FieldDeclaration[]) finalVariables.toArray(new FieldDeclaration[finalVariables
 				.size()]);
+	}
+
+	public static <E> List<E> select(ASTNode root, final Class<E> type) {
+		final List<E> result = new ArrayList<E>();
+		try {
+			root.traverse(new ASTVisitor() {
+				@SuppressWarnings("unchecked")
+				@Override
+				public boolean visitGeneral(ASTNode s) throws Exception {
+					if (type.isInstance(s)) {
+						result.add((E) s);
+						return false;
+					} else {
+						return true;
+					}
+				}
+			});
+		} catch (Exception e) {
+			//
+		}
+		return result;
 	}
 	
 }
