@@ -12,6 +12,7 @@
 package org.eclipse.dltk.compiler.problem;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.dltk.compiler.task.ITaskReporter;
@@ -20,6 +21,10 @@ public class ProblemCollector extends AbstractProblemReporter implements
 		ITaskReporter {
 
 	protected final List<IProblem> problems = new ArrayList<IProblem>();
+
+	public void reset() {
+		problems.clear();
+	}
 
 	public void reportProblem(IProblem problem) {
 		problems.add(problem);
@@ -169,6 +174,10 @@ public class ProblemCollector extends AbstractProblemReporter implements
 		for (final IProblem problem : problems) {
 			destination.reportProblem(problem);
 		}
+	}
+
+	public List<IProblem> getProblems() {
+		return Collections.unmodifiableList(problems);
 	}
 
 	/**
