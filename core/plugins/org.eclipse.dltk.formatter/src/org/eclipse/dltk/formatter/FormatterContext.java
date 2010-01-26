@@ -59,7 +59,7 @@ public class FormatterContext implements IFormatterContext, Cloneable {
 	 */
 	public void decIndent() {
 		--indent;
-		assert indent >= 0;
+		// TODO assert indent >= 0;
 	}
 
 	/*
