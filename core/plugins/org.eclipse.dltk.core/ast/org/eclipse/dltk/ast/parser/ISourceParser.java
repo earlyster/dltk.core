@@ -11,8 +11,8 @@ package org.eclipse.dltk.ast.parser;
 
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
-import org.eclipse.dltk.core.IDLTKContributedExtension;
 
-public interface ISourceParser extends IDLTKContributedExtension {
-	ModuleDeclaration parse(char[] fileName, char[] source, IProblemReporter reporter);
+public interface ISourceParser {
+	ModuleDeclaration parse(char[] fileName, char[] source,
+			IProblemReporter reporter);
 }
