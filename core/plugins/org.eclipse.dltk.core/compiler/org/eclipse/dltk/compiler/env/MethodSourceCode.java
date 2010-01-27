@@ -75,8 +75,8 @@ public class MethodSourceCode implements ISourceModule {
 	/*
 	 * @see org.eclipse.dltk.compiler.env.IDependent#getFileName()
 	 */
-	public char[] getFileName() {
-		return method.getSourceModule().getPath().toString().toCharArray();
+	public String getFileName() {
+		return method.getSourceModule().getPath().toString();
 	}
 
 }

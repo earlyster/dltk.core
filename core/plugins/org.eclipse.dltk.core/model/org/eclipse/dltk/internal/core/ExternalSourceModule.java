@@ -73,8 +73,8 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 	/*
 	 * @see org.eclipse.dltk.compiler.env.IDependent#getFileName()
 	 */
-	public char[] getFileName() {
-		return getPath().toOSString().toCharArray();
+	public String getFileName() {
+		return getPath().toOSString();
 	}
 
 	/*

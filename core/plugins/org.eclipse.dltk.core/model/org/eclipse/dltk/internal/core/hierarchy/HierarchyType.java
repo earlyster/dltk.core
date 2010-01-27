@@ -37,9 +37,8 @@ public class HierarchyType implements IGenericType {
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.env.IDependent#getFileName()
 	 */
-	public char[] getFileName() {
-		return this.typeHandle.getSourceModule().getElementName()
-				.toCharArray();
+	public String getFileName() {
+		return this.typeHandle.getSourceModule().getElementName();
 	}
 
 	/**

@@ -24,5 +24,5 @@ public interface IDependent {
 	 * 
 	 * Return null if no file defines the type.
 	 */
-	char[] getFileName();
+	String getFileName();
 }

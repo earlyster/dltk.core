@@ -225,12 +225,12 @@ public abstract class HierarchyBuilder {
 	/**
 	 * Create an ICompilationUnit info from the given compilation unit on disk.
 	 */
-	protected ISourceModule createCompilationUnitFromPath(Openable handle,
+	protected ISourceModule createCompilationUnitFromPath(
+			final Openable handle,
 			IFile file) {
-		final char[] elementName = handle.getElementName().toCharArray();
 		return new ResourceSourceModule(file, file.getLocationURI()) {
-			public char[] getFileName() {
-				return elementName;
+			public String getFileName() {
+				return handle.getElementName();
 			}
 		};
 	}

@@ -81,8 +81,8 @@ public class StructureIndexer extends AbstractIndexer {
 			return document.getContents();
 		}
 
-		public char[] getFileName() {
-			return document.getPath().toCharArray();
+		public String getFileName() {
+			return document.getPath();
 		}
 
 	}

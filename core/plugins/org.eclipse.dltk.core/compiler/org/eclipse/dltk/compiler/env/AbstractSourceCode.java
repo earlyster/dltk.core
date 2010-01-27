@@ -13,7 +13,7 @@ package org.eclipse.dltk.compiler.env;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.IModelElement;
 
 public abstract class AbstractSourceCode implements ISourceModule {
@@ -35,8 +35,8 @@ public abstract class AbstractSourceCode implements ISourceModule {
 	/*
 	 * @see org.eclipse.dltk.compiler.env.IDependent#getFileName()
 	 */
-	public char[] getFileName() {
-		return CharOperation.NO_CHAR;
+	public String getFileName() {
+		return Util.EMPTY_STRING;
 	}
 
 }

@@ -57,8 +57,8 @@ public class BuiltinSourceModule extends AbstractExternalSourceModule implements
 	/*
 	 * @see org.eclipse.dltk.compiler.env.IDependent#getFileName()
 	 */
-	public char[] getFileName() {
-		return this.getPath().toOSString().toCharArray();
+	public String getFileName() {
+		return this.getPath().toOSString();
 	}
 
 	/*

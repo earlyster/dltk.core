@@ -254,8 +254,8 @@ public class BinaryModule extends AbstractSourceModule implements
 		return lookupLanguageToolkit.getNatureId();
 	}
 
-	public char[] getFileName() {
-		return this.getPath().toOSString().toCharArray();
+	public String getFileName() {
+		return this.getPath().toOSString();
 	}
 
 	@Override

@@ -80,8 +80,8 @@ public class PossibleMatch implements ISourceModule {
 	 * .class file for binary openable with attached source.
 	 * 
 	 */
-	public char[] getFileName() {
-		return this.openable.getElementName().toCharArray();
+	public String getFileName() {
+		return this.openable.getElementName();
 	}
 
 	public char[] getMainTypeName() {

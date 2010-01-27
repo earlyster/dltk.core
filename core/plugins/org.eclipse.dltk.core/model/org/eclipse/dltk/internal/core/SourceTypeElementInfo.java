@@ -115,7 +115,7 @@ public class SourceTypeElementInfo extends MemberElementInfo implements
 		return false;
 	}
 
-	public char[] getFileName() {
+	public String getFileName() {
 		// TODO Auto-generated method stub
 		return null;
 	}

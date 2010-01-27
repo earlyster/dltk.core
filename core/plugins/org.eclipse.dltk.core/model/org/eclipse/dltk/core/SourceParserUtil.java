@@ -163,14 +163,14 @@ public class SourceParserUtil {
 		return flags == 0 ? baseKey : baseKey + flags;
 	}
 
-	public static ModuleDeclaration getModuleDeclaration(char[] filename,
+	public static ModuleDeclaration getModuleDeclaration(String filename,
 			char[] content, String nature, IProblemReporter reporter,
 			ISourceModuleInfo mifo) {
 		return getModuleDeclaration(filename, content, nature, reporter, mifo,
 				ISourceParserConstants.DEFAULT);
 	}
 
-	public static ModuleDeclaration getModuleDeclaration(char[] filename,
+	public static ModuleDeclaration getModuleDeclaration(String filename,
 			char[] content, String nature, IProblemReporter reporter,
 			ISourceModuleInfo mifo, int flags) {
 		ISourceParser sourceParser;// = new SourceParser(this.fReporter);
@@ -183,8 +183,8 @@ public class SourceParserUtil {
 		if (moduleDeclaration == null) {
 			final ProblemCollector collector = mifo != null ? new ProblemCollector()
 					: null;
-			moduleDeclaration = sourceParser.parse(filename, content,
-					collector != null ? collector : reporter);
+			moduleDeclaration = sourceParser.parse(filename.toCharArray(),
+					content, collector != null ? collector : reporter);
 			if (collector != null && reporter != null) {
 				collector.copyTo(reporter);
 			}

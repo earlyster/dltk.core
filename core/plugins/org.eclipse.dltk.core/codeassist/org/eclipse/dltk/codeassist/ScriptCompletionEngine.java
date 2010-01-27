@@ -46,7 +46,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	protected int endPosition;
 	protected int offset;
 
-	protected char[] fileName = null;
+	protected String fileName = null;
 
 	protected boolean noProposal = true;
 
