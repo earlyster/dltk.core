@@ -13,7 +13,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.dltk.compiler.CharOperation;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelStatus;
@@ -76,14 +76,14 @@ public class DBGPSourceModule extends AbstractExternalSourceModule {
 	/*
 	 * @see org.eclipse.dltk.compiler.env.IDependent#getFileName()
 	 */
-	public char[] getFileName() {
+	public String getFileName() {
 		/*
 		 * XXX: remote source should not be touched by compiler
 		 * 
 		 * remove this and just make the other sub-classes implement
 		 * org.eclipse.dltk.compiler.env.IDependent directly?
 		 */
-		return CharOperation.NO_CHAR;
+		return Util.EMPTY_STRING;
 	}
 
 	/*
