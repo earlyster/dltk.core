@@ -2,6 +2,7 @@ package org.eclipse.dltk.core.tests.parser;
 
 import org.eclipse.dltk.ast.parser.ISourceParser;
 import org.eclipse.dltk.core.DLTKLanguageManager;
+import org.eclipse.dltk.core.IDLTKContributedExtension;
 import org.eclipse.dltk.core.tests.model.AbstractModelTests;
 import org.eclipse.dltk.core.tests.model.TestConstants;
 import org.eclipse.dltk.core.tests.model.TestSourceParser;
@@ -19,8 +20,7 @@ public class SourceParserTests extends AbstractModelTests {
 	public void testGetSourceParser() {
 		ISourceParser parser = null;
 
-		parser = DLTKLanguageManager
-				.getSourceParser(TestConstants.NATURE_ID);
+		parser = DLTKLanguageManager.getSourceParser(TestConstants.NATURE_ID);
 
 		assertNotNull(parser);
 		assertTrue((parser instanceof TestSourceParser));
@@ -33,14 +33,15 @@ public class SourceParserTests extends AbstractModelTests {
 	}
 
 	private void testParserConfig(ISourceParser parser) {
+		final IDLTKContributedExtension extension = (IDLTKContributedExtension) parser;
 		// these are configured to the same value in plugin.xml
-		assertEquals(PARSER_NAME, parser.getName());
-		assertEquals(PARSER_NAME, parser.getDescription());
+		assertEquals(PARSER_NAME, extension.getName());
+		assertEquals(PARSER_NAME, extension.getDescription());
 
-		assertEquals(PARSER_ID, parser.getId());
-		assertEquals(TestConstants.NATURE_ID, parser.getNatureId());
+		assertEquals(PARSER_ID, extension.getId());
+		assertEquals(TestConstants.NATURE_ID, extension.getNatureId());
 
-		assertEquals(PARSER_PRIORITY, parser.getPriority());
+		assertEquals(PARSER_PRIORITY, extension.getPriority());
 	}
 
 }
