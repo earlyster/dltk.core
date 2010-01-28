@@ -431,7 +431,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	}
 
 	protected void findMethods(char[] token, boolean canCompleteEmptyToken,
-			List methods, int kind) {
+			List<IMethod> methods, int kind) {
 		if (methods == null || methods.size() == 0)
 			return;
 
@@ -439,7 +439,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		String tok = new String(token);
 		if (canCompleteEmptyToken || length > 0) {
 			for (int i = 0; i < methods.size(); i++) {
-				IMethod method = (IMethod) methods.get(i);
+				IMethod method = methods.get(i);
 				String qname = processMethodName(method, tok);
 				char[] name = qname.toCharArray();
 				if (DEBUG) {
