@@ -216,9 +216,7 @@ public class EditorConfigurationBlock extends AbstractConfigurationBlock {
 		control.setLayout(new GridLayout());
 
 		if ((flags & FLAG_EDITOR_SMART_NAVIGATION) != 0) {
-			Composite composite;
-
-			composite = createSubsection(control, null,
+			Composite composite = createSubsection(control, null,
 					PreferencesMessages.EditorPreferencePage_title0);
 			createSettingsGroup(composite);
 		}
