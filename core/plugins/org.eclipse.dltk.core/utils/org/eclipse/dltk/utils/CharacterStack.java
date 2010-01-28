@@ -40,6 +40,13 @@ public class CharacterStack {
 	/**
 	 * @return
 	 */
+	public boolean isEmpty() {
+		return size == 0;
+	}
+
+	/**
+	 * @return
+	 */
 	public char peek() {
 		final int len = size;
 		if (size == 0) {
