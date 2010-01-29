@@ -16,7 +16,6 @@ import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ModelException;
 
-
 public class ExternalScriptProject extends ScriptProject {
 	
 	/*
@@ -33,15 +32,18 @@ public class ExternalScriptProject extends ScriptProject {
 		}
 	}
 	
+	@Override
 	public boolean equals(Object o) {
 		return this == o;
 	}
 
+	@Override
 	public boolean exists() {
 		// external project never exists
 		return false;
 	}
 	
+	@Override
 	public String getOption(String optionName, boolean inheritDLTKCoreOptions) {
 		if(DLTKCore.DEBUG) {
 			System.err.println("ExternalScriptProject getOption should be corrected..."); //$NON-NLS-1$
@@ -52,11 +54,13 @@ public class ExternalScriptProject extends ScriptProject {
 		return super.getOption(optionName, inheritDLTKCoreOptions);
 	}
 	
+	@Override
 	public boolean isOnBuildpath(IModelElement element) {
 		// since project is external, no element is on buildpath (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=61013#c16)
 		return false;
 	}
 
+	@Override
 	public boolean isOnBuildpath(IResource resource) {
 		// since project is external, no resource is on buildpath (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=61013#c16)
 		return false;
