@@ -36,7 +36,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	// ~ Constructors
 
 	public SourceModule(ModelElement parent, String name, WorkingCopyOwner owner) {
-		super(parent, name, owner, false);
+		super(parent, name, owner);
 
 		if (DLTKCore.VERBOSE) {
 			System.out.println("SourceModule.SourceModule#" + id + "()"); //$NON-NLS-1$ //$NON-NLS-2$

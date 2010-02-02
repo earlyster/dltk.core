@@ -47,35 +47,22 @@ public abstract class AbstractSourceModule extends Openable implements
 
 	// ~ Static fields/initializers
 
-	// ~ Static fields/initializers
-
 	private static final boolean DEBUG_PRINT_MODEL = DLTKCore.DEBUG_PRINT_MODEL;
 
 	// ~ Instance fields
 
-	// ~ Instance fields
-
-	private String name;
+	private final String name;
 
 	private WorkingCopyOwner owner;
-	private boolean readOnly;
-
-	// ~ Constructors
 
 	// ~ Constructors
 
 	protected AbstractSourceModule(ModelElement parent, String name,
 			WorkingCopyOwner owner) {
-		this(parent, name, owner, false);
-	}
-
-	protected AbstractSourceModule(ModelElement parent, String name,
-			WorkingCopyOwner owner, boolean readOnly) {
 		super(parent);
 
 		this.name = name;
 		this.owner = owner;
-		this.readOnly = readOnly;
 	}
 
 	// ~ Methods
@@ -403,13 +390,6 @@ public abstract class AbstractSourceModule extends Openable implements
 	public boolean isPrimary() {
 
 		return this.owner == DefaultWorkingCopyOwner.PRIMARY;
-	}
-
-	/*
-	 * @see org.eclipse.dltk.internal.core.ModelElement#isReadOnly()
-	 */
-	public boolean isReadOnly() {
-		return readOnly;
 	}
 
 	public void printNode(CorePrinter output) {

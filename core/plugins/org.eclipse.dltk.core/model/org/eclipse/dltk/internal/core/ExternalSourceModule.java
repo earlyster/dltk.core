@@ -37,17 +37,12 @@ public class ExternalSourceModule extends AbstractExternalSourceModule {
 
 	public ExternalSourceModule(ModelElement parent, String name,
 			WorkingCopyOwner owner, IStorage storage) {
-		this(parent, name, owner, true, storage);
+		super(parent, name, owner);
+		this.storage = storage;
 	}
 
 	public IStorage getStorage() {
 		return storage;
-	}
-
-	public ExternalSourceModule(ModelElement parent, String name,
-			WorkingCopyOwner owner, boolean readOnly, IStorage storage) {
-		super(parent, name, owner, readOnly);
-		this.storage = storage;
 	}
 
 	/*

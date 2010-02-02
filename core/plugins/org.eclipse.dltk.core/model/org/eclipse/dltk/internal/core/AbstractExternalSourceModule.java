@@ -26,12 +26,12 @@ public abstract class AbstractExternalSourceModule extends AbstractSourceModule
 
 	protected AbstractExternalSourceModule(ModelElement parent, String name,
 			WorkingCopyOwner owner) {
-		this(parent, name, owner, true);
+		super(parent, name, owner);
 	}
 
-	protected AbstractExternalSourceModule(ModelElement parent, String name,
-			WorkingCopyOwner owner, boolean readOnly) {
-		super(parent, name, owner, true);
+	@Override
+	public boolean isReadOnly() {
+		return true;
 	}
 
 	/*

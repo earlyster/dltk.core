@@ -65,7 +65,6 @@ public class ArchiveFolder extends ScriptFolder {
 				this,
 				name,
 				DefaultWorkingCopyOwner.PRIMARY,
-				true,
 				new ArchiveEntryFile(name, fragment.getZipName(), this.path,
 						fragment.getResource(), (ArchiveProjectFragment) parent));
 	}

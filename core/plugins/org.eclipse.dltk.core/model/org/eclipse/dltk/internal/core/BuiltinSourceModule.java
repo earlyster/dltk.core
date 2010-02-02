@@ -26,7 +26,7 @@ public class BuiltinSourceModule extends AbstractExternalSourceModule implements
 
 	public BuiltinSourceModule(BuiltinScriptFolder parent, String name,
 			WorkingCopyOwner owner) {
-		super(parent, name, owner, true);
+		super(parent, name, owner);
 	}
 
 	/*
