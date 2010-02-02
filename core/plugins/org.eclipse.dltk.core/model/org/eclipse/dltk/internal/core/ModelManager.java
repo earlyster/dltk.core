@@ -52,7 +52,6 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
-import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.DefaultScope;
@@ -60,6 +59,8 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.dltk.compiler.problem.IProblem;
 import org.eclipse.dltk.compiler.util.HashtableOfObjectToInt;
 import org.eclipse.dltk.core.BuildpathContainerInitializer;
@@ -395,8 +396,8 @@ public class ModelManager implements ISaveParticipant {
 	static final int PREF_INSTANCE = 0;
 	static final int PREF_DEFAULT = 1;
 	// Preferences
-	HashSet optionNames = new HashSet(20);
-	Hashtable optionsCache;
+	HashSet<String> optionNames = new HashSet<String>(20);
+	Hashtable<String, String> optionsCache;
 	/*
 	 * Pools of symbols used in the model. Used as a replacement for
 	 * String#intern() that could prevent garbage collection of strings on some
@@ -416,6 +417,12 @@ public class ModelManager implements ISaveParticipant {
 		}
 		return coreCache;
 	}
+
+	/**
+	 * Listener on properties changes.
+	 */
+	private IEclipsePreferences.IPreferenceChangeListener propertyListener;
+	private IEclipsePreferences.IPreferenceChangeListener resourcesPropertyListener;
 
 	/**
 	 * Constructs a new ModelManager
@@ -999,20 +1006,18 @@ public class ModelManager implements ISaveParticipant {
 		}
 	}
 
-	public Hashtable getOptions() {
+	public Hashtable<String, String> getOptions() {
 		// return cached options if already computed
 		if (this.optionsCache != null)
-			return new Hashtable(this.optionsCache);
+			return new Hashtable<String, String>(this.optionsCache);
 		if (!Platform.isRunning()) {
 			return this.optionsCache = getDefaultOptionsNoInitialization();
 		}
 		// init
-		Hashtable options = new Hashtable(10);
+		Hashtable<String, String> options = new Hashtable<String, String>(10);
 		IPreferencesService service = Platform.getPreferencesService();
 		// set options using preferences service lookup
-		Iterator iterator = optionNames.iterator();
-		while (iterator.hasNext()) {
-			String propertyName = (String) iterator.next();
+		for (String propertyName : optionNames) {
 			String propertyValue = service.get(propertyName, null,
 					this.preferencesLookup);
 			if (propertyValue != null) {
@@ -1022,7 +1027,7 @@ public class ModelManager implements ISaveParticipant {
 		// get encoding through resource plugin
 		options.put(DLTKCore.CORE_ENCODING, DLTKCore.getEncoding());
 		// store built map in cache
-		this.optionsCache = new Hashtable(options);
+		this.optionsCache = new Hashtable<String, String>(options);
 		// return built map
 		return options;
 	}
@@ -1150,10 +1155,10 @@ public class ModelManager implements ISaveParticipant {
 			// Initialize eclipse preferences
 			initializePreferences();
 			// Listen to preference changes
-			Preferences.IPropertyChangeListener propertyListener = new Preferences.IPropertyChangeListener() {
-				public void propertyChange(Preferences.PropertyChangeEvent event) {
+			this.propertyListener = new IEclipsePreferences.IPreferenceChangeListener() {
+				public void preferenceChange(PreferenceChangeEvent event) {
 					ModelManager.this.optionsCache = null;
-					if (DLTKCore.FILE_CACHE.equals(event.getProperty())) {
+					if (DLTKCore.FILE_CACHE.equals(event.getKey())) {
 						final IFileCache newCache = createFileCache();
 						if (newCache instanceof IFileCacheManagement) {
 							((IFileCacheManagement) newCache).start();
@@ -1167,8 +1172,20 @@ public class ModelManager implements ISaveParticipant {
 					}
 				}
 			};
-			DLTKCore.getPlugin().getPluginPreferences()
-					.addPropertyChangeListener(propertyListener);
+			installPreferenceChangeListener(DLTKCore.PLUGIN_ID,
+					this.propertyListener);
+			// listen for encoding changes (see
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=255501 )
+			this.resourcesPropertyListener = new IEclipsePreferences.IPreferenceChangeListener() {
+				public void preferenceChange(PreferenceChangeEvent event) {
+					if (ResourcesPlugin.PREF_ENCODING.equals(event.getKey())) {
+						ModelManager.this.optionsCache = null;
+					}
+				}
+			};
+			installPreferenceChangeListener(ResourcesPlugin.getPlugin()
+					.getBundle().getSymbolicName(),
+					this.resourcesPropertyListener);
 			long start = -1;
 			if (VERBOSE)
 				start = System.currentTimeMillis();
@@ -1230,6 +1247,15 @@ public class ModelManager implements ISaveParticipant {
 			shutdown();
 			throw e;
 		}
+	}
+
+	private static IEclipsePreferences getPluginPreferences(String pluginId) {
+		return new InstanceScope().getNode(pluginId);
+	}
+
+	private static void installPreferenceChangeListener(String pluginId,
+			IPreferenceChangeListener listener) {
+		getPluginPreferences(pluginId).addPreferenceChangeListener(listener);
 	}
 
 	/**
@@ -1475,10 +1501,21 @@ public class ModelManager implements ISaveParticipant {
 	}
 
 	public void shutdown() {
+		final IEclipsePreferences preferences = getPluginPreferences(DLTKCore.PLUGIN_ID);
+		try {
+			preferences.flush();
+		} catch (BackingStoreException e) {
+			Util.log(e, "Could not save DLTKCore preferences"); //$NON-NLS-1$
+		}
+		// Stop listening to preferences changes
+		preferences.removePreferenceChangeListener(this.propertyListener);
+		getPluginPreferences(
+				ResourcesPlugin.getPlugin().getBundle().getSymbolicName())
+				.removePreferenceChangeListener(this.resourcesPropertyListener);
+
 		if (coreCache != null) {
 			coreCache.stop();
 		}
-		DLTKCore.getDefault().savePluginPreferences();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.removeResourceChangeListener(this.deltaState);
 		DLTKContentTypeManager.uninstallListener();
@@ -1685,7 +1722,7 @@ public class ModelManager implements ISaveParticipant {
 	}
 
 	// Do not modify without modifying getDefaultOptions()
-	private Hashtable getDefaultOptionsNoInitialization() {
+	private Hashtable<String, String> getDefaultOptionsNoInitialization() {
 		System.err
 				.println("Add language dependent compiler options. Or implement it in another whan in DLTK way..."); //$NON-NLS-1$
 		Map defaultOptionsMap = new HashMap(); // compiler defaults

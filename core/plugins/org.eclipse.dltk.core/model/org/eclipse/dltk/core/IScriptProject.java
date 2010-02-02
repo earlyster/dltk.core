@@ -83,7 +83,7 @@ public interface IScriptProject extends IModelElement, IOpenable, IParent {
 	 * @see DLTKCore#getDefaultOptions()
 	 * 
 	 */
-	Map getOptions(boolean inheritDLTKCoreOptions);
+	Map<String, String> getOptions(boolean inheritDLTKCoreOptions);
 
 	/**
 	 * Helper method for setting one option value only. Equivalent to

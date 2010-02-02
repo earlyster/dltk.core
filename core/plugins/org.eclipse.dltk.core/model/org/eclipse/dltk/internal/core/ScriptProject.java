@@ -1782,7 +1782,7 @@ public class ScriptProject extends Openable implements IScriptProject,
 		return null;
 	}
 
-	public Map getOptions(boolean inheritCoreOptions) {
+	public Map<String, String> getOptions(boolean inheritCoreOptions) {
 		// initialize to the defaults from DLTKCore options pool
 		Map options = inheritCoreOptions ? DLTKCore.getOptions()
 				: new Hashtable(5);
