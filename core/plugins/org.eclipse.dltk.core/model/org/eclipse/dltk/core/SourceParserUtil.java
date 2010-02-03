@@ -106,9 +106,9 @@ public class SourceParserUtil {
 		p1.done(toolkit.getNatureId(), "Retrive AST from cache", 0);
 		if (moduleDeclaration == null) {
 			p1.renew();
-			ISourceParser sourceParser = null;
-			sourceParser = DLTKLanguageManager.getSourceParser(toolkit
-					.getNatureId());
+			ISourceParser sourceParser = DLTKLanguageManager.getSourceParser(
+					module.getScriptProject().getProject(), toolkit
+							.getNatureId());
 			if (sourceParser != null) {
 				if (sourceParser instanceof ISourceParserExtension) {
 					((ISourceParserExtension) sourceParser).setFlags(flags);
@@ -173,8 +173,8 @@ public class SourceParserUtil {
 	public static ModuleDeclaration getModuleDeclaration(String filename,
 			char[] content, String nature, IProblemReporter reporter,
 			ISourceModuleInfo mifo, int flags) {
-		ISourceParser sourceParser;// = new SourceParser(this.fReporter);
-		sourceParser = DLTKLanguageManager.getSourceParser(nature);
+		ISourceParser sourceParser = DLTKLanguageManager
+				.getSourceParser(nature);
 		if (sourceParser instanceof ISourceParserExtension) {
 			((ISourceParserExtension) sourceParser).setFlags(flags);
 		}

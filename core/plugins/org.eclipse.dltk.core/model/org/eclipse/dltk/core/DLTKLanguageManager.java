@@ -256,8 +256,19 @@ public class DLTKLanguageManager {
 	}
 
 	public static ISourceParser getSourceParser(String natureID) {
-		return SourceParserManager.getInstance()
-				.getSourceParser(null, natureID);
+		return getSourceParser(null, natureID);
+	}
+
+	/**
+	 * @param project
+	 * @param natureID
+	 * @return
+	 * @since 2.0
+	 */
+	public static ISourceParser getSourceParser(IProject project,
+			String natureID) {
+		return SourceParserManager.getInstance().getSourceParser(project,
+				natureID);
 	}
 
 	public static DLTKSearchParticipant createSearchParticipant(String natureID) {
