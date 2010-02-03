@@ -37,24 +37,27 @@ public class SourceModulesRequest extends IndexRequest {
 
 	private final IScriptProject project;
 	private final IDLTKLanguageToolkit toolkit;
-	private final Set modules;
+	private final Set<ISourceModule> modules;
 
 	/**
 	 * @param project
 	 * @param modules
 	 */
 	public SourceModulesRequest(IProjectIndexer indexer,
-			IScriptProject project, IDLTKLanguageToolkit toolkit, Set modules) {
+			IScriptProject project, IDLTKLanguageToolkit toolkit,
+			Set<ISourceModule> modules) {
 		super(indexer);
 		this.project = project;
 		this.toolkit = toolkit;
 		this.modules = modules;
 	}
 
+	@Override
 	protected String getName() {
 		return project.getElementName();
 	}
 
+	@Override
 	protected void run() throws CoreException, IOException {
 		IEnvironment environment = EnvironmentManager.getEnvironment(project);
 		if (environment == null || !environment.connect()) {
@@ -67,7 +70,7 @@ public class SourceModulesRequest extends IndexRequest {
 		}
 		final IPath containerPath = project.getPath();
 		Set<IFileHandle> parentFolders = new HashSet<IFileHandle>();
-		final List changes = checkChanges(index, modules, containerPath,
+		final List<?> changes = checkChanges(index, modules, containerPath,
 				EnvironmentManager.getEnvironment(project), parentFolders);
 		if (DEBUG) {
 			log("changes.size=" + changes.size()); //$NON-NLS-1$
@@ -78,7 +81,8 @@ public class SourceModulesRequest extends IndexRequest {
 		final ReadWriteMonitor imon = index.monitor;
 		imon.enterWrite();
 		try {
-			for (Iterator i = changes.iterator(); !isCancelled && i.hasNext();) {
+			for (Iterator<?> i = changes.iterator(); !isCancelled
+					&& i.hasNext();) {
 				final Object change = i.next();
 				if (change instanceof String) {
 					index.remove((String) change);
@@ -102,10 +106,12 @@ public class SourceModulesRequest extends IndexRequest {
 		}
 	}
 
+	@Override
 	public boolean belongsTo(String jobFamily) {
 		return jobFamily.equals(project.getProject().getName());
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
@@ -114,6 +120,7 @@ public class SourceModulesRequest extends IndexRequest {
 		return result;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
