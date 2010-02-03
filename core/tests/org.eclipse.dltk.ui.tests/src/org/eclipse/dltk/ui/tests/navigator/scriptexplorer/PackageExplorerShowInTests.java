@@ -32,7 +32,6 @@ import org.eclipse.ui.PlatformUI;
 
 
 public class PackageExplorerShowInTests extends TestCase {
-	private static final Class clazz= PackageExplorerShowInTests.class;
 
 	public PackageExplorerShowInTests(String name) {
 		super(name);
@@ -40,16 +39,16 @@ public class PackageExplorerShowInTests extends TestCase {
 	
 	public static Test suite() {
 		if (true) {
-			return new ProjectTestSetup(new TestSuite(clazz));
+			return setUpTest(new TestSuite(PackageExplorerShowInTests.class));
 		} else {
 //			System.err.println("*** Running only parts of " + clazz.getName() + "!");
 			TestSuite suite= new TestSuite();
 			suite.addTest(new PackageExplorerShowInTests("testXXX"));
-			return new ProjectTestSetup(suite);
+			return setUpTest(suite);
 		}
 	}
 	
-	public static Test setUpTest(Test someTest) {
+	private static Test setUpTest(Test someTest) {
 		return new ProjectTestSetup(someTest);
 	}
 	
@@ -57,13 +56,15 @@ public class PackageExplorerShowInTests extends TestCase {
 	private ScriptExplorerPart fPackageExplorer;
 	private IWorkbenchPage fPage;
 	
+	@Override
 	protected void setUp() throws Exception {
 		fJProject= ProjectTestSetup.getProject();
 		fPage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-		fPackageExplorer= (ScriptExplorerPart) fPage.showView(DLTKUIPlugin.ID_SCRIPTEXPLORER);
+		fPackageExplorer= (ScriptExplorerPart) fPage.showView(DLTKUIPlugin.ID_SCRIPT_EXPLORER);
 		fPackageExplorer.selectAndReveal(new StructuredSelection());
 	}
 	
+	@Override
 	protected void tearDown() throws Exception {
 		//ScriptProjectHelper.clear(fJProject, ProjectTestSetup.getDefaultBuildpath());
 		fPage.hideView(fPackageExplorer);
