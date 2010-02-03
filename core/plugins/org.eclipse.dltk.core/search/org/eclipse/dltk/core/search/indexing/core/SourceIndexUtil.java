@@ -33,8 +33,7 @@ public class SourceIndexUtil {
 			}
 		}
 		if (module instanceof ExternalSourceModule
-				|| module instanceof BuiltinSourceModule
-				|| ((ISourceModule) module).isBinary()) {
+				|| module instanceof BuiltinSourceModule || module.isBinary()) {
 			return path.removeFirstSegments(containerPath.segmentCount())
 					.setDevice(null).toString();
 		} else if (module instanceof SourceModule) {
