@@ -191,8 +191,9 @@ public class BuildpathTests extends ModifyingResourceTests {
 		return markers.length;
 	}
 
+	@Override
 	public void tearDownSuite() throws Exception {
-		// TODO Auto-generated method stub
+		deleteProject("ModelMembers");
 		deleteProject(BUILDPATH_PRJ_0);
 		deleteProject(BUILDPATH_PRJ_1);
 		deleteProject("p1");
