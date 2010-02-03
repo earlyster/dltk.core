@@ -35,10 +35,17 @@ public class SourceModuleRequest extends IndexRequest {
 		this.toolkit = toolkit;
 	}
 
+	@Override
 	protected String getName() {
 		return module.getElementName();
 	}
 
+	@Override
+	public boolean belongsTo(String jobFamily) {
+		return jobFamily.equals(module.getScriptProject().getElementName());
+	}
+
+	@Override
 	protected void run() throws CoreException, IOException {
 		IEnvironment environment = EnvironmentManager.getEnvironment(module
 				.getScriptProject());
@@ -58,6 +65,7 @@ public class SourceModuleRequest extends IndexRequest {
 		}
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -65,6 +73,7 @@ public class SourceModuleRequest extends IndexRequest {
 		return result;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

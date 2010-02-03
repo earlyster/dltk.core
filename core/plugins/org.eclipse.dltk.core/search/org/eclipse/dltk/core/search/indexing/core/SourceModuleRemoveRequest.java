@@ -38,10 +38,17 @@ public class SourceModuleRemoveRequest extends IndexRequest {
 		this.path = path;
 	}
 
+	@Override
 	protected String getName() {
 		return path;
 	}
 
+	@Override
+	public boolean belongsTo(String jobFamily) {
+		return jobFamily.equals(project.getElementName());
+	}
+
+	@Override
 	protected void run() throws CoreException, IOException {
 		IEnvironment environment = EnvironmentManager.getEnvironment(project);
 		if (environment == null || !environment.connect()) {
@@ -57,6 +64,7 @@ public class SourceModuleRemoveRequest extends IndexRequest {
 		}
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
@@ -65,6 +73,7 @@ public class SourceModuleRemoveRequest extends IndexRequest {
 		return result;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
