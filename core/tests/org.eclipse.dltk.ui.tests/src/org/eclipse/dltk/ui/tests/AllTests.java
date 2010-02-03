@@ -14,15 +14,15 @@ public class AllTests {
 
 	public static Test suite() {
 		TestSuite suite = new TestSuite("org.eclipse.dltk.ui.tests");
-		//$JUnit-BEGIN$
-		suite.addTestSuite(ScriptElementLabelsTest.class);
+		// $JUnit-BEGIN$
+		suite.addTest(ScriptElementLabelsTest.suite());
 		suite.addTestSuite(DLTKUILanguageManagerTests.class);
 		suite.addTestSuite(ModelElementUtilTests.class);
 
 		suite.addTest(PackageExplorerTests.suite());
 		suite.addTest(ScriptTemplateContextTest.suite());
 		suite.addTest(TodoHighlightingTest.suite());
-		//$JUnit-END$
+		// $JUnit-END$
 		return suite;
 	}
 
