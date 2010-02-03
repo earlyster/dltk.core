@@ -1250,7 +1250,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	}
 
 	protected final ISourceParser getSourceParser() {
-		return DLTKLanguageManager.getSourceParser(getNatureId());
+		return DLTKLanguageManager.getSourceParser(fInput.getScriptProject()
+				.getProject(), getNatureId());
 	}
 
 	/**
