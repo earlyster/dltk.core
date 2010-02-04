@@ -293,10 +293,6 @@ public abstract class AbstractSourceModule extends Openable implements
 		return getOriginalSourceModule();
 	}
 
-	public IPath getScriptFolder() {
-		return null;
-	}
-
 	public String getSource() throws ModelException {
 		IBuffer buffer = getBufferNotOpen();
 		if (buffer == null)

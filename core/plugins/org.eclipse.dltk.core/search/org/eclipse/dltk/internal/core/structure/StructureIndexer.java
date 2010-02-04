@@ -64,10 +64,6 @@ public class StructureIndexer extends AbstractIndexer {
 			return module;
 		}
 
-		public IPath getScriptFolder() {
-			return new Path(document.getPath()).removeLastSegments(1);
-		}
-
 		public String getSourceContents() {
 			if (module != null) {
 				try {

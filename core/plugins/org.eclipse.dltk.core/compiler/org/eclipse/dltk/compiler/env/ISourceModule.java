@@ -9,20 +9,12 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.env;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.IModelElement;
 
 /**
  * This interface denotes a compilation unit, providing its name and content.
  */
 public interface ISourceModule extends IDependent {
-
-	/**
-	 * Answer the name of the package according to the directory structure or
-	 * null if package consistency checks should be ignored. For example, {java,
-	 * lang}.
-	 */
-	IPath getScriptFolder();
 
 	/**
 	 * Answer the contents of the compilation unit.

@@ -10,7 +10,6 @@
 package org.eclipse.dltk.core.search.matching;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.env.ISourceModule;
@@ -20,7 +19,6 @@ import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.internal.core.Openable;
 import org.eclipse.dltk.internal.core.SourceModule;
 import org.eclipse.dltk.internal.core.search.matching.MatchingNodeSet;
-
 
 public class PossibleMatch implements ISourceModule {
 	public static final String NO_SOURCE_FILE_NAME = "NO SOURCE FILE NAME"; //$NON-NLS-1$
@@ -32,7 +30,8 @@ public class PossibleMatch implements ISourceModule {
 	public SearchDocument document;
 	private String source;
 
-	public PossibleMatch(MatchLocator locator, IResource resource, Openable openable, SearchDocument document) {
+	public PossibleMatch(MatchLocator locator, IResource resource,
+			Openable openable, SearchDocument document) {
 		this.resource = resource;
 		this.openable = openable;
 		this.document = document;
@@ -45,7 +44,7 @@ public class PossibleMatch implements ISourceModule {
 	public void cleanUp() {
 		this.source = null;
 		if (this.parsedUnit != null) {
-			//this.parsedUnit.cleanUp();
+			// this.parsedUnit.cleanUp();
 			this.parsedUnit = null;
 		}
 		this.nodeSet = null;
@@ -59,7 +58,8 @@ public class PossibleMatch implements ISourceModule {
 		// By using the compoundName of the source file, multiple .class files
 		// (A, A$M...) are considered equal
 		// Even .class files for secondary types and their nested types
-		return CharOperation.equals(this.compoundName, ((PossibleMatch) obj).compoundName);
+		return CharOperation.equals(this.compoundName,
+				((PossibleMatch) obj).compoundName);
 	}
 
 	public String getSourceContents() {
@@ -67,7 +67,7 @@ public class PossibleMatch implements ISourceModule {
 			return this.source;
 		return this.source = this.document.getContents();
 	}
-	
+
 	/*
 	 * @see org.eclipse.dltk.compiler.env.ISourceModule#getContentsAsCharArray()
 	 */
@@ -105,17 +105,18 @@ public class PossibleMatch implements ISourceModule {
 		if (this.openable instanceof SourceModule) {
 			// get file name
 			String fileName = this.openable.getElementName(); // working copy
-																// on a .class
-																// file may not
-																// have a
-																// resource, so
-																// use the
-																// element name
+			// on a .class
+			// file may not
+			// have a
+			// resource, so
+			// use the
+			// element name
 			// get main type name
 			char[] mainTypeName = fileName.toCharArray();
 			SourceModule cu = (SourceModule) this.openable;
-			return cu.getType(new String(mainTypeName)).getFullyQualifiedName().toCharArray();
-		} 
+			return cu.getType(new String(mainTypeName)).getFullyQualifiedName()
+					.toCharArray();
+		}
 		if (DLTKCore.DEBUG) {
 			System.err.println("TODO: Code review here..."); //$NON-NLS-1$
 		}
@@ -139,8 +140,4 @@ public class PossibleMatch implements ISourceModule {
 		return openable;
 	}
 
-	public IPath getScriptFolder() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

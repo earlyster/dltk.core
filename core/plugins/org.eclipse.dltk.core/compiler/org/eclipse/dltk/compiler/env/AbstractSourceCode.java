@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.env;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.IModelElement;
 
@@ -23,13 +21,6 @@ public abstract class AbstractSourceCode implements ISourceModule {
 	 */
 	public IModelElement getModelElement() {
 		return null;
-	}
-
-	/*
-	 * @see org.eclipse.dltk.compiler.env.ISourceModule#getScriptFolder()
-	 */
-	public IPath getScriptFolder() {
-		return Path.EMPTY;
 	}
 
 	/*

@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.env;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
@@ -49,13 +48,6 @@ public class MethodSourceCode implements ISourceModule {
 	 */
 	public IModelElement getModelElement() {
 		return method;
-	}
-
-	/*
-	 * @see org.eclipse.dltk.compiler.env.ISourceModule#getScriptFolder()
-	 */
-	public IPath getScriptFolder() {
-		return method.getSourceModule().getPath().removeLastSegments(1);
 	}
 
 	/*
