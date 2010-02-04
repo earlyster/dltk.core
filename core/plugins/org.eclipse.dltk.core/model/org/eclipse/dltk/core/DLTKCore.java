@@ -362,6 +362,13 @@ public class DLTKCore extends Plugin {
 	public static final String INDEXER_ENABLED = PLUGIN_ID + ".indexer"; //$NON-NLS-1$					
 
 	/**
+	 * Possible project configurable option ID. Value is the identifier of
+	 * contributed {@link org.eclipse.dltk.ast.parser.ISourceParser}.
+	 */
+	public static final String PROJECT_SOURCE_PARSER_ID = PLUGIN_ID
+			+ ".sourceParserId"; //$NON-NLS-1$					
+
+	/**
 	 * The constructor.
 	 */
 	public DLTKCore() {

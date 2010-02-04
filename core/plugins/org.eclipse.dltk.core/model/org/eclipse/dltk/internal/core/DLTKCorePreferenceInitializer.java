@@ -51,6 +51,9 @@ public class DLTKCorePreferenceInitializer extends
 		// encoding setting comes from resource plug-in
 		optionNames.add(DLTKCore.CORE_ENCODING);
 
+		// project-specific options
+		optionNames.add(DLTKCore.PROJECT_SOURCE_PARSER_ID);
+
 		// Store default values to default preferences
 		IEclipsePreferences defaultPreferences = new DefaultScope()
 				.getNode(DLTKCore.PLUGIN_ID);
