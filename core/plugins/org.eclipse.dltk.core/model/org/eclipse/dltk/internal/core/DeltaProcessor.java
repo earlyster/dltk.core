@@ -1393,7 +1393,8 @@ public class DeltaProcessor {
 					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=130982)
 					return NON_SCRIPT_RESOURCE;
 				}
-				if (Util.isValidFolderNameForPackage(res.getName())) {
+				if (Util.isValidFolderNameForPackage(res.getParent(), res
+						.getName())) {
 					return IModelElement.SCRIPT_FOLDER;
 				}
 				return NON_SCRIPT_RESOURCE;

@@ -138,8 +138,13 @@ public class CreateScriptFolderOperation extends ModelOperation {
 		if (packageName != null) {
 			packageNameValue = packageName.toOSString();
 		}
-		if (this.pkgName == null || (this.pkgName.segmentCount() > 0 && !Util.isValidFolderNameForPackage(packageName.toString()))) {
-			return new ModelStatus(IModelStatusConstants.INVALID_NAME, packageNameValue);
+		if (this.pkgName == null
+				|| (this.pkgName.segmentCount() > 0 && !Util
+						.isValidFolderNameForPackage(
+								(IContainer) getParentElement().getResource(),
+								packageName.toString()))) {
+			return new ModelStatus(IModelStatusConstants.INVALID_NAME,
+					packageNameValue);
 		}
 		IProjectFragment root = (IProjectFragment) getParentElement();
 		if (root.isReadOnly()) {

@@ -104,7 +104,8 @@ class ProjectFragmentInfo extends OpenableElementInfo {
 				case IResource.FOLDER:
 					// ignore valid packages or excluded folders that correspond
 					// to a nested pkg fragment root
-					if (Util.isValidFolderNameForPackage(member.getName())
+					if (Util.isValidFolderNameForPackage(folder, member
+							.getName())
 							&& (!Util.isExcluded(member, inclusionPatterns,
 									exclusionPatterns) || isBuildpathEntry(
 									member.getFullPath(), classpath)))

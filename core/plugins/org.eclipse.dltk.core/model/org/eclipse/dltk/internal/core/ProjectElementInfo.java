@@ -159,7 +159,8 @@ class ProjectElementInfo extends OpenableElementInfo {
 					if ((srcIsProject
 							&& !Util.isExcluded(res, inclusionPatterns,
 									exclusionPatterns) && Util
-							.isValidFolderNameForPackage(res.getName()))
+							.isValidFolderNameForPackage((IContainer) project
+									.getResource(), res.getName()))
 							|| this.isBuildpathEntry(resFullPath, buildpath)) {
 						break;
 					}

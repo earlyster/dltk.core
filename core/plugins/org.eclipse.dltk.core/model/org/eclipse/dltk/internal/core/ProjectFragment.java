@@ -237,8 +237,7 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 				String memberName = member.getName();
 				switch (member.getType()) {
 				case IResource.FOLDER:
-					// TODO check is folder is valid for a package
-					if (Util.isValidFolderNameForPackage(memberName)) {
+					if (Util.isValidFolderNameForPackage(folder, memberName)) {
 						if (scriptProject.contains(member)) {
 							IPath newPath = path.append(manager
 									.intern(memberName));

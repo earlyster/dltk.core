@@ -23,4 +23,9 @@ public interface IScriptProjectFilenames {
 	 */
 	public static final String BUILDPATH_FILENAME = ".buildpath"; //$NON-NLS-1$
 
+	/**
+	 * Name of the folder containing project specific options
+	 */
+	public static final String SETTINGS_FOLDER_NAME = ".settings"; //$NON-NLS-1$
+
 }

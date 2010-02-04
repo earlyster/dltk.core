@@ -25,6 +25,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ProjectScope;
@@ -46,6 +47,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.IScriptProjectFilenames;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor;
 import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
@@ -1042,7 +1044,23 @@ public class Util {
 	 * is not.
 	 */
 	public static boolean isValidFolderNameForPackage(String folderName) {
+		// TODO check if folder is valid for a package
 		return true;
+	}
+
+	/**
+	 * @param container
+	 * @param folderName
+	 * @return
+	 */
+	public static boolean isValidFolderNameForPackage(IContainer container,
+			String folderName) {
+		if (container.getType() == IResource.PROJECT
+				&& IScriptProjectFilenames.SETTINGS_FOLDER_NAME
+						.equals(folderName)) {
+			return false;
+		}
+		return isValidFolderNameForPackage(folderName);
 	}
 
 	/**
@@ -1499,4 +1517,5 @@ public class Util {
 
 		return isExcluded(path, inclusion, exclusion, isFolderPath);
 	}
+
 }
