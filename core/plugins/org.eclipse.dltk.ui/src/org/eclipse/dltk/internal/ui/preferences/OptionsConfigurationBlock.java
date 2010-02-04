@@ -9,6 +9,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -304,7 +305,9 @@ public abstract class OptionsConfigurationBlock {
 			// by the page container
 			if (doBuild) { // post build
 				incrementRebuildCount();
-				container.registerUpdateJob(CoreUtility.getBuildJob(fProject));
+				for (Job job : createBuildJobs(fProject)) {
+					container.registerUpdateJob(job);
+				}
 			}
 		} else {
 			// apply changes right away
@@ -315,11 +318,17 @@ public abstract class OptionsConfigurationBlock {
 				return false;
 			}
 			if (doBuild) {
-				CoreUtility.getBuildJob(fProject).schedule();
+				for (Job job : createBuildJobs(fProject)) {
+					job.schedule();
+				}
 			}
 
 		}
 		return true;
+	}
+
+	protected Job[] createBuildJobs(IProject project) {
+		return new Job[] { CoreUtility.getBuildJob(project) };
 	}
 
 	public void performDefaults() {
