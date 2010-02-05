@@ -193,11 +193,13 @@ public class ProjectFragment extends Openable implements IProjectFragment {
 				// Call for extra model providers
 				IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 						.getLanguageToolkit(this);
-				IModelProvider[] providers = ModelProviderManager
-						.getProviders(toolkit.getNatureId());
-				if (providers != null) {
-					for (int i = 0; i < providers.length; i++) {
-						providers[i].provideModelChanges(this, childrenSet);
+				if (toolkit != null) {
+					IModelProvider[] providers = ModelProviderManager
+							.getProviders(toolkit.getNatureId());
+					if (providers != null) {
+						for (int i = 0; i < providers.length; i++) {
+							providers[i].provideModelChanges(this, childrenSet);
+						}
 					}
 				}
 				info.setChildren((IModelElement[]) childrenSet
