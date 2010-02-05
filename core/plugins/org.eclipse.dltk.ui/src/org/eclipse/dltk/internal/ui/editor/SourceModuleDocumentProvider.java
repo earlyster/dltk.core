@@ -1174,11 +1174,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		return null;
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#createEmptyFileInfo
-	 * ()
-	 */
+	@Override
 	protected FileInfo createEmptyFileInfo() {
 
 		return new SourceModuleInfo();
@@ -1196,20 +1192,12 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#createAnnotationModel
-	 * (org.eclipse.core.resources.IFile)
-	 */
+	@Override
 	protected IAnnotationModel createAnnotationModel(IFile file) {
 		return new SourceModuleAnnotationModel(file);
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#createFileInfo(java
-	 * .lang.Object)
-	 */
+	@Override
 	protected FileInfo createFileInfo(Object element) throws CoreException {
 
 		ISourceModule original = null;
@@ -1276,12 +1264,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		return cuInfo;
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#disposeFileInfo(
-	 * java.lang.Object,
-	 * org.eclipse.ui.editors.text.TextFileDocumentProvider.FileInfo)
-	 */
+	@Override
 	protected void disposeFileInfo(Object element, FileInfo info) {
 
 		if (info instanceof SourceModuleInfo) {
@@ -1320,11 +1303,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		return new NullProgressMonitor();
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#createSaveOperation
-	 * (java.lang.Object, org.eclipse.jface.text.IDocument, boolean)
-	 */
+	@Override
 	protected DocumentProviderOperation createSaveOperation(
 			final Object element, final IDocument document,
 			final boolean overwrite) throws CoreException {
@@ -1500,11 +1479,7 @@ public class SourceModuleDocumentProvider extends TextFileDocumentProvider
 		}
 	}
 
-	/*
-	 * @see
-	 * org.eclipse.ui.editors.text.TextFileDocumentProvider#connect(java.lang
-	 * .Object)
-	 */
+	@Override
 	public void connect(Object element) throws CoreException {
 		super.connect(element);
 		if (getFileInfo(element) != null)
