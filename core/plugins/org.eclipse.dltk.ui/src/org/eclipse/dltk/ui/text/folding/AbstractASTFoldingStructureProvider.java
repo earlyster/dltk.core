@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -1227,7 +1228,9 @@ public abstract class AbstractASTFoldingStructureProvider implements
 	}
 
 	protected final ISourceParser getSourceParser() {
-		return DLTKLanguageManager.getSourceParser(getNatureId());
+		final IProject project = fInput != null ? fInput.getScriptProject()
+				.getProject() : null;
+		return DLTKLanguageManager.getSourceParser(project, getNatureId());
 	}
 
 	/**
