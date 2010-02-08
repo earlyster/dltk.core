@@ -9,15 +9,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.ast.parser.ISourceParser;
 import org.eclipse.dltk.ast.parser.SourceParserManager;
@@ -45,12 +40,12 @@ public class DLTKLanguageManager {
 
 	public static IDLTKLanguageToolkit[] getLanguageToolkits() {
 
-		final PriorityClassDLTKExtensionManager tkManager = InternalDLTKLanguageManager
-				.getLanguageToolkitsManager();
-		ElementInfo[] elementInfos = tkManager.getElementInfos();
+		ElementInfo[] elementInfos = InternalDLTKLanguageManager
+				.getLanguageToolkitsManager().getElementInfos();
 		IDLTKLanguageToolkit[] toolkits = new IDLTKLanguageToolkit[elementInfos.length];
 		for (int j = 0; j < elementInfos.length; j++) {
-			toolkits[j] = (IDLTKLanguageToolkit) tkManager
+			toolkits[j] = (IDLTKLanguageToolkit) InternalDLTKLanguageManager
+					.getLanguageToolkitsManager()
 					.getInitObject(elementInfos[j]);
 		}
 		return toolkits;
@@ -58,11 +53,11 @@ public class DLTKLanguageManager {
 
 	private static IDLTKLanguageToolkit findAppropriateToolkitByObject(
 			Object object) {
-		final PriorityClassDLTKExtensionManager toolkitManager = InternalDLTKLanguageManager
-				.getLanguageToolkitsManager();
-		final ElementInfo[] elementInfos = toolkitManager.getElementInfos();
+		ElementInfo[] elementInfos = InternalDLTKLanguageManager
+				.getLanguageToolkitsManager().getElementInfos();
 		for (int j = 0; j < elementInfos.length; j++) {
-			IDLTKLanguageToolkit toolkit = (IDLTKLanguageToolkit) toolkitManager
+			IDLTKLanguageToolkit toolkit = (IDLTKLanguageToolkit) InternalDLTKLanguageManager
+					.getLanguageToolkitsManager()
 					.getInitObject(elementInfos[j]);
 			if (object instanceof IResource) {
 				if (DLTKContentTypeManager.isValidResourceForContentType(
@@ -113,8 +108,9 @@ public class DLTKLanguageManager {
 	 * The behavior of this method was not correct - it could return incorrect
 	 * results for files without extension. For compatibility purposes and to
 	 * allow smooth migration it is marked as deprecated -- AlexPanchenko
+	 * 
+	 * @deprecated
 	 */
-	@Deprecated
 	public static IDLTKLanguageToolkit findToolkit(IResource resource) {
 		IDLTKLanguageToolkit toolkit = findAppropriateToolkitByObject(resource);
 		if (toolkit == null) {
@@ -238,8 +234,19 @@ public class DLTKLanguageManager {
 	}
 
 	public static ISourceParser getSourceParser(String natureID) {
-		return SourceParserManager.getInstance()
-				.getSourceParser(null, natureID);
+		return getSourceParser(null, natureID);
+	}
+
+	/**
+	 * @param project
+	 * @param natureID
+	 * @return
+	 * @since 2.0
+	 */
+	public static ISourceParser getSourceParser(IProject project,
+			String natureID) {
+		return SourceParserManager.getInstance().getSourceParser(project,
+				natureID);
 	}
 
 	public static DLTKSearchParticipant createSearchParticipant(String natureID) {
@@ -330,52 +337,5 @@ public class DLTKLanguageManager {
 			IScriptProject project) {
 		return (IInterpreterContainerExtension) InternalDLTKLanguageManager
 				.getInterpreterContainerExtensionManager().getObject(project);
-	}
-
-	/**
-	 * @since 2.0
-	 */
-	public static ISearchPatternProcessor getSearchPatternProcessor(
-			String natureId) {
-		final ISearchFactory factory = getSearchFactory(natureId);
-		if (factory != null) {
-			return factory.createSearchPatternProcessor();
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * @since 2.0
-	 */
-	public static ISearchPatternProcessor getSearchPatternProcessor(
-			IDLTKLanguageToolkit toolkit) {
-		if (toolkit != null) {
-			return getSearchPatternProcessor(toolkit.getNatureId());
-		} else {
-			return null;
-		}
-	}
-
-	private static final String FILENAME_ASSOCIATION_EXT_POINT = DLTKCore.PLUGIN_ID
-			+ ".filenameAssociation"; //$NON-NLS-1$
-
-	/**
-	 * @since 2.0
-	 */
-	public static Set<String> loadFilenameAssociations(final String natureId) {
-		final IConfigurationElement[] elements = Platform
-				.getExtensionRegistry().getConfigurationElementsFor(
-						FILENAME_ASSOCIATION_EXT_POINT);
-		final Set<String> patterns = new HashSet<String>();
-		for (IConfigurationElement element : elements) {
-			if (natureId.equals(element.getAttribute("nature"))) { //$NON-NLS-1$
-				final String pattern = element.getAttribute("pattern"); //$NON-NLS-1$
-				if (pattern != null && pattern.length() != 0) {
-					patterns.add(pattern);
-				}
-			}
-		}
-		return patterns;
 	}
 }

@@ -27,11 +27,12 @@ import org.eclipse.dltk.internal.core.ModelManager;
 public class ParserBuildParticipantFactory extends AbstractBuildParticipantType
 		implements IExecutableExtension {
 
+	@Override
 	public IBuildParticipant createBuildParticipant(IScriptProject project)
 			throws CoreException {
 		if (natureId != null) {
-			final ISourceParser parser = DLTKLanguageManager
-					.getSourceParser(natureId);
+			final ISourceParser parser = DLTKLanguageManager.getSourceParser(
+					project.getProject(), natureId);
 			if (parser != null) {
 				return new ParserBuildParticipant(parser);
 			}
