@@ -21,9 +21,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ISourceElementParser;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.ISourceModuleInfoCache;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
 import org.eclipse.dltk.core.caching.IContentCache;
 import org.eclipse.dltk.core.caching.StructureModelProcessor;
 import org.eclipse.dltk.core.environment.EnvironmentPathUtils;
@@ -161,12 +159,10 @@ public class StructureIndexer extends AbstractIndexer {
 						.getSourceElementParser(sourceModule);
 				if (parser == null)
 					return;
-				ISourceModuleInfoCache cache = ModelManager.getModelManager()
-						.getSourceModuleInfoCache();
-				ISourceModuleInfo info = cache.get(sourceModule);
 				parser.setRequestor(requestor);
-				parser.parseSourceModule(
-						new ParserInput(document, sourceModule), info);
+				parser
+						.parseSourceModule(new ParserInput(document,
+								sourceModule));
 			} else {
 				IBinaryElementParser parser = DLTKLanguageManager
 						.getBinaryElementParser(sourceModule);

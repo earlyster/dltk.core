@@ -33,8 +33,9 @@ import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
-import org.eclipse.dltk.core.SourceParserUtil;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor;
 import org.eclipse.dltk.core.WorkingCopyOwner;
+import org.eclipse.dltk.core.RuntimePerformanceMonitor.PerformanceNode;
 import org.eclipse.dltk.internal.core.ModelManager.PerWorkingCopyInfo;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 import org.eclipse.dltk.internal.core.util.Messages;
@@ -450,6 +451,7 @@ public abstract class AbstractSourceModule extends Openable implements
 		return null;
 	}
 
+	@Override
 	protected boolean buildStructure(OpenableElementInfo info,
 			IProgressMonitor pm, Map newElements, IResource underlyingResource)
 			throws ModelException {
@@ -501,7 +503,9 @@ public abstract class AbstractSourceModule extends Openable implements
 				}
 				parser.setRequestor(requestor);
 				parser.setReporter(problemReporter);
-				SourceParserUtil.parseSourceModule(this, parser);
+				PerformanceNode p = RuntimePerformanceMonitor.begin();
+				parser.parseSourceModule(this);
+				p.done(natureId, "Source Element parser", 0);
 			}
 			if (problemReporter != null) {
 				if (!problemReporter.hasErrors()) {
@@ -749,4 +753,5 @@ public abstract class AbstractSourceModule extends Openable implements
 	public boolean isBinary() {
 		return false;
 	}
+
 }

@@ -9,10 +9,9 @@
  *******************************************************************************/
 package org.eclipse.dltk.ast.parser;
 
-import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
+import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 
 public interface ISourceParser {
-	ModuleDeclaration parse(char[] fileName, char[] source,
-			IProblemReporter reporter);
+	IModuleDeclaration parse(IModuleSource input, IProblemReporter reporter);
 }

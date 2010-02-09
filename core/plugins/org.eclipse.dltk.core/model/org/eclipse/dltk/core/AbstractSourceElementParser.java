@@ -13,8 +13,8 @@ package org.eclipse.dltk.core;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.compiler.SourceElementRequestVisitor;
+import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
-import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
 
 public abstract class AbstractSourceElementParser implements
 		ISourceElementParser {
@@ -22,44 +22,30 @@ public abstract class AbstractSourceElementParser implements
 	private ISourceElementRequestor sourceElementRequestor = null;
 	private IProblemReporter problemReporter;
 
-	public void parseSourceModule(
-			org.eclipse.dltk.compiler.env.ISourceModule module,
-			ISourceModuleInfo astCache) {
-		final ModuleDeclaration moduleDeclaration = parse(module, astCache);
-		if (moduleDeclaration == null) {
-			return;
-		}
-		SourceElementRequestVisitor requestor = createVisitor();
-
-		try {
-			moduleDeclaration.traverse(requestor);
-		} catch (Exception e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
+	public void parseSourceModule(IModuleSource module) {
+		final ModuleDeclaration moduleDeclaration = parse(module);
+		if (moduleDeclaration != null) {
+			final SourceElementRequestVisitor requestor = createVisitor();
+			try {
+				moduleDeclaration.traverse(requestor);
+			} catch (Exception e) {
+				if (DLTKCore.DEBUG) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 
-	protected ModuleDeclaration parse(
-			org.eclipse.dltk.compiler.env.ISourceModule module,
-			ISourceModuleInfo astCache) {
-		final ModuleDeclaration moduleDeclaration;
+	protected ModuleDeclaration parse(IModuleSource module) {
 		if (module instanceof ISourceModule) {
-			moduleDeclaration = SourceParserUtil.getModuleDeclaration(
-					(ISourceModule) module, problemReporter, astCache);
+			// use source module cache
+			return SourceParserUtil.getModuleDeclaration(
+					(ISourceModule) module, problemReporter);
 		} else {
-			IModelElement modelElement = module.getModelElement();
-			if (modelElement != null && modelElement instanceof ISourceModule) {
-				moduleDeclaration = SourceParserUtil
-						.getModuleDeclaration((ISourceModule) modelElement,
-								problemReporter, astCache);
-			} else {
-				moduleDeclaration = SourceParserUtil.getModuleDeclaration(
-						module.getFileName(), module.getContentsAsCharArray(),
-						getNatureId(), problemReporter, astCache);
-			}
+			// parse directly without cache
+			return SourceParserUtil.getModuleDeclaration(module, getNatureId(),
+					problemReporter);
 		}
-		return moduleDeclaration;
 	}
 
 	public void setReporter(IProblemReporter reporter) {

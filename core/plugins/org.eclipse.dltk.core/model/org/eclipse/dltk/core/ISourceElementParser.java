@@ -9,17 +9,15 @@
 package org.eclipse.dltk.core;
 
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
+import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
-import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
 
 public interface ISourceElementParser {
 	/**
-	 * Parses contents of the module with ast creation. Also it is recommended to
-	 * use SourceParserUtils to put delcaration into cache, and retrieve it from
-	 * it.
+	 * Parses contents of the module and report all information to the
+	 * requestor.
 	 */
-	void parseSourceModule(org.eclipse.dltk.compiler.env.ISourceModule module,
-			ISourceModuleInfo mifo);
+	void parseSourceModule(IModuleSource module);
 
 	void setRequestor(ISourceElementRequestor requestor);
 

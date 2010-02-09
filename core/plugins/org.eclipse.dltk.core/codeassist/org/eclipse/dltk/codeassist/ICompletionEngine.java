@@ -12,12 +12,12 @@ package org.eclipse.dltk.codeassist;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.dltk.compiler.env.ISourceModule;
+import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.core.CompletionRequestor;
 import org.eclipse.dltk.core.IScriptProject;
 
 public interface ICompletionEngine {
-	void complete(ISourceModule module, int position, int i);
+	void complete(IModuleSource module, int position, int i);
 
 	void setRequestor(CompletionRequestor requestor);
 

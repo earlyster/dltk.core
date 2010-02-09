@@ -19,13 +19,14 @@ import java.util.List;
 
 import org.eclipse.dltk.ast.ASTNode;
 import org.eclipse.dltk.ast.ASTVisitor;
+import org.eclipse.dltk.ast.parser.IModuleDeclaration;
 import org.eclipse.dltk.ast.statements.Block;
 import org.eclipse.dltk.ast.statements.Statement;
 import org.eclipse.dltk.ast.utils.ASTUtil;
 import org.eclipse.dltk.internal.compiler.lookup.SourceModuleScope;
 import org.eclipse.dltk.utils.CorePrinter;
 
-public class ModuleDeclaration extends ASTNode {
+public class ModuleDeclaration extends ASTNode implements IModuleDeclaration {
 	private List types;
 	private List functions;
 	protected List variables;

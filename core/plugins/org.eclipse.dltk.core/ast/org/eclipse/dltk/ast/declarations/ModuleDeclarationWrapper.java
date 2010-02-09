@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 xored software, Inc.
+ * Copyright (c) 2010 xored software, Inc.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,25 +9,24 @@
  * Contributors:
  *     xored software, Inc. - initial API and Implementation (Alex Panchenko)
  *******************************************************************************/
-package org.eclipse.dltk.compiler.env;
+package org.eclipse.dltk.ast.declarations;
 
-import org.eclipse.dltk.compiler.util.Util;
-import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.ast.parser.IModuleDeclaration;
 
-public abstract class AbstractSourceCode implements ISourceModule {
+/**
+ * Compatibility wrapper of the parser result.
+ */
+public class ModuleDeclarationWrapper extends ModuleDeclaration {
 
-	/*
-	 * @see org.eclipse.dltk.compiler.env.ISourceModule#getModelElement()
-	 */
-	public IModelElement getModelElement() {
-		return null;
+	private final IModuleDeclaration target;
+
+	public ModuleDeclarationWrapper(IModuleDeclaration target) {
+		super(0);
+		this.target = target;
 	}
 
-	/*
-	 * @see org.eclipse.dltk.compiler.env.IDependent#getFileName()
-	 */
-	public String getFileName() {
-		return Util.EMPTY_STRING;
+	public IModuleDeclaration getTarget() {
+		return target;
 	}
 
 }

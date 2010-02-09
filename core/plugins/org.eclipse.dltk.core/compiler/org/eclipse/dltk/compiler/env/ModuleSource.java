@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 xored software, Inc.
+ * Copyright (c) 2010 xored software, Inc.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,29 +11,35 @@
  *******************************************************************************/
 package org.eclipse.dltk.compiler.env;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.IModelElement;
 
-@Deprecated
-public class CompilerSourceCode implements IModuleSource {
+public class ModuleSource implements IModuleSource {
 
+	private final String filename;
 	private String string;
 	private char[] charArray;
 
-	public CompilerSourceCode(String content) {
-		Assert.isNotNull(content);
-		this.string = content;
+	public ModuleSource(char[] content) {
+		this(Util.EMPTY_STRING, content);
 	}
 
-	public CompilerSourceCode(char[] content) {
-		Assert.isNotNull(content);
+	public ModuleSource(String content) {
+		this(Util.EMPTY_STRING, content);
+	}
+
+	public ModuleSource(String filename, char[] content) {
+		assert content != null;
+		this.filename = filename;
 		this.charArray = content;
 	}
 
-	/*
-	 * @see org.eclipse.dltk.compiler.env.ISourceModule#getContentsAsCharArray()
-	 */
+	public ModuleSource(String filename, String content) {
+		assert content != null;
+		this.filename = filename;
+		this.string = content;
+	}
+
 	public char[] getContentsAsCharArray() {
 		if (charArray == null) {
 			charArray = string.toCharArray();
@@ -41,9 +47,6 @@ public class CompilerSourceCode implements IModuleSource {
 		return charArray;
 	}
 
-	/*
-	 * @see org.eclipse.dltk.compiler.env.ISourceModule#getSourceContents()
-	 */
 	public String getSourceContents() {
 		if (string == null) {
 			string = new String(charArray);
@@ -51,18 +54,12 @@ public class CompilerSourceCode implements IModuleSource {
 		return string;
 	}
 
-	/*
-	 * @see org.eclipse.dltk.compiler.env.ISourceModule#getModelElement()
-	 */
-	public IModelElement getModelElement() {
-		return null;
+	public String getFileName() {
+		return filename;
 	}
 
-	/*
-	 * @see org.eclipse.dltk.compiler.env.IDependent#getFileName()
-	 */
-	public String getFileName() {
-		return Util.EMPTY_STRING;
+	public IModelElement getModelElement() {
+		return null;
 	}
 
 }

@@ -15,8 +15,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
+import org.eclipse.dltk.ast.parser.IModuleDeclaration;
 import org.eclipse.dltk.ast.parser.ISourceParser;
 import org.eclipse.dltk.ast.parser.ISourceParserConstants;
+import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.compiler.problem.ProblemCollector;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IScriptProject;
@@ -56,7 +58,7 @@ public class ParserBuildParticipantFactory extends AbstractBuildParticipantType
 		}
 
 		public void build(IBuildContext context) throws CoreException {
-			ModuleDeclaration moduleDeclaration = (ModuleDeclaration) context
+			IModuleDeclaration moduleDeclaration = (ModuleDeclaration) context
 					.get(IBuildContext.ATTR_MODULE_DECLARATION);
 			if (moduleDeclaration != null) {
 				// do nothing if already have AST - optimization for reconcile
@@ -78,9 +80,8 @@ public class ParserBuildParticipantFactory extends AbstractBuildParticipantType
 			// create problem collector
 			final ProblemCollector problemCollector = new ProblemCollector();
 			// parse
-			moduleDeclaration = parser.parse(context.getSourceModule()
-					.getPath().toString().toCharArray(), context.getContents(),
-					context.getProblemReporter());
+			moduleDeclaration = parser.parse((IModuleSource) context
+					.getSourceModule(), context.getProblemReporter());
 			// put result to the cache
 			SourceParserUtil.putModuleToCache(cacheEntry, moduleDeclaration,
 					ISourceParserConstants.DEFAULT, problemCollector);
