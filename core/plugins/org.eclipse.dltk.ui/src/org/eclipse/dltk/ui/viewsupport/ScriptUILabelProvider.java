@@ -134,6 +134,14 @@ public class ScriptUILabelProvider implements ILabelProvider, IColorProvider {
 		if (result == null
 				&& (element instanceof IStorage || element instanceof ISourceModule)) {
 			result = fStorageLabelProvider.getImage(element);
+			// StorageLabelProvider always returns 16x16 images
+			// resize if this provider returns big icons
+			if (result != null
+					&& !ScriptElementImageProvider.useSmallSize(flags)) {
+				result = getLocalRegistry().get(
+						new BigImageDescriptor(result,
+								ScriptElementImageProvider.BIG_SIZE));
+			}
 		}
 		return decorateImage(result, element);
 	}
@@ -151,16 +159,12 @@ public class ScriptUILabelProvider implements ILabelProvider, IColorProvider {
 			Assert.isNotNull(fSize);
 		}
 
-		/*
-		 * (non-Javadoc) Method declared in CompositeImageDescriptor
-		 */
+		@Override
 		protected Point getSize() {
 			return fSize;
 		}
 
-		/*
-		 * (non-Javadoc) Method declared on Object.
-		 */
+		@Override
 		public boolean equals(Object object) {
 			if (object == null
 					|| !BigImageDescriptor.class.equals(object.getClass())) {
@@ -171,13 +175,12 @@ public class ScriptUILabelProvider implements ILabelProvider, IColorProvider {
 					&& fSize.equals(other.fSize);
 		}
 
-		/*
-		 * (non-Javadoc) Method declared on Object.
-		 */
+		@Override
 		public int hashCode() {
 			return fBaseImage.hashCode() ^ fSize.hashCode();
 		}
 
+		@Override
 		protected void drawCompositeImage(int width, int height) {
 			ImageData bg = this.fBaseImage.getImageData();
 			if (bg != null) {
