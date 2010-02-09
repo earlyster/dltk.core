@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
+import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.internal.ui.editor.DLTKEditorMessages;
@@ -139,8 +140,7 @@ public class SemanticHighlightingReconciler implements
 				final List<HighlightedPosition> currentPositions = new ArrayList<HighlightedPosition>();
 				fJobPresenter.addAllPositions(currentPositions);
 				final UpdateResult result = positionUpdater.reconcile(
-						(org.eclipse.dltk.compiler.env.ISourceModule) ast,
-						currentPositions);
+						(IModuleSource) ast, currentPositions);
 				added = result.addedPositions;
 				removed = result.removedPositions;
 			}

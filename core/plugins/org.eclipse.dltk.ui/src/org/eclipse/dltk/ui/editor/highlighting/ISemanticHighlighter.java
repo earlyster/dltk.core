@@ -2,6 +2,8 @@ package org.eclipse.dltk.ui.editor.highlighting;
 
 import java.util.List;
 
+import org.eclipse.dltk.compiler.env.IModuleSource;
+
 /**
  * Language specific semantic highlighting API.
  */
@@ -50,7 +52,7 @@ public interface ISemanticHighlighter {
 	 *            starting offset.
 	 * @return
 	 */
-	UpdateResult reconcile(org.eclipse.dltk.compiler.env.ISourceModule code,
+	UpdateResult reconcile(IModuleSource code,
 			List<HighlightedPosition> currentPositions);
 
 }

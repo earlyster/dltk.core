@@ -11,8 +11,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.editor.highlighting;
 
-import org.eclipse.dltk.ast.ASTVisitor;
-import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
+import org.eclipse.dltk.ast.parser.IModuleDeclaration;
+import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.SourceParserUtil;
@@ -23,24 +23,12 @@ import org.eclipse.dltk.core.SourceParserUtil;
 public abstract class ASTSemanticHighlighter extends
 		AbstractSemanticHighlighter {
 
-	@Override
-	protected boolean doHighlighting(
-			org.eclipse.dltk.compiler.env.ISourceModule code) throws Exception {
-		final ModuleDeclaration module = parseCode(code);
-		if (module != null) {
-			module.traverse(createVisitor(code));
-			return true;
-		}
-		return false;
-	}
-
 	/**
 	 * @param code
 	 * @return
 	 * @throws ModelException
 	 */
-	protected ModuleDeclaration parseCode(
-			org.eclipse.dltk.compiler.env.ISourceModule code)
+	protected IModuleDeclaration parseCode(IModuleSource code)
 			throws ModelException {
 		if (code instanceof ISourceModule) {
 			return parseSourceModule((ISourceModule) code);
@@ -49,25 +37,20 @@ public abstract class ASTSemanticHighlighter extends
 		}
 	}
 
-	protected ModuleDeclaration parseSourceCode(
-			org.eclipse.dltk.compiler.env.ISourceModule code)
-			throws ModelException {
-		if (code instanceof ISourceModule) {
-			return SourceParserUtil.getModuleDeclaration((ISourceModule) code);
-		}
-		return SourceParserUtil.getModuleDeclaration(code.getFileName(), code
-				.getContentsAsCharArray(), getNature(), null, null);
+	private IModuleDeclaration parseSourceCode(IModuleSource code) {
+		return SourceParserUtil.parse(code, getNature(), null);
 	}
 
-	protected ModuleDeclaration parseSourceModule(
+	private IModuleDeclaration parseSourceModule(
 			final ISourceModule sourceModule) {
-		return SourceParserUtil.getModuleDeclaration(sourceModule);
+		return SourceParserUtil.parse(sourceModule, null);
 	}
 
 	protected abstract String getNature();
 
-	protected abstract ASTVisitor createVisitor(
-			org.eclipse.dltk.compiler.env.ISourceModule sourceCode)
-			throws ModelException;
+	@Deprecated
+	protected final void createVisitor(
+			org.eclipse.dltk.compiler.env.ISourceModule sourceCode) {
+	}
 
 }

@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.jface.text.Position;
 
@@ -49,8 +50,7 @@ public abstract class AbstractSemanticHighlighter implements
 	private int oldPositionCount = 0;
 	private final List<HighlightedPosition> oldPositions = new ArrayList<HighlightedPosition>();
 
-	public UpdateResult reconcile(
-			org.eclipse.dltk.compiler.env.ISourceModule code,
+	public UpdateResult reconcile(IModuleSource code,
 			List<HighlightedPosition> currentPositions) {
 		try {
 			newPositions.clear();
@@ -83,8 +83,8 @@ public abstract class AbstractSemanticHighlighter implements
 	 * @return
 	 * @throws Exception
 	 */
-	protected abstract boolean doHighlighting(
-			org.eclipse.dltk.compiler.env.ISourceModule code) throws Exception;
+	protected abstract boolean doHighlighting(IModuleSource code)
+			throws Exception;
 
 	public void addPosition(int start, int end, int highlightingIndex) {
 		final int len = end - start;

@@ -28,6 +28,7 @@ import org.eclipse.dltk.ast.declarations.MethodDeclaration;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.ast.declarations.TypeDeclaration;
 import org.eclipse.dltk.ast.parser.ISourceParser;
+import org.eclipse.dltk.compiler.env.ModuleSource;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.ElementChangedEvent;
@@ -1288,7 +1289,8 @@ public abstract class AbstractASTFoldingStructureProvider implements
 								.getMessage(), e));
 			}
 		}
-		return getSourceParser().parse(null, code.toCharArray(), null);
+		return (ModuleDeclaration) getSourceParser().parse(
+				new ModuleSource(code), null);
 	}
 
 	protected CodeBlock[] buildCodeBlocks(ModuleDeclaration decl, int offset) {

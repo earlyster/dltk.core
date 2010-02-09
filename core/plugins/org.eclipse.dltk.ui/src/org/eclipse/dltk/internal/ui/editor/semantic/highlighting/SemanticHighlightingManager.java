@@ -14,8 +14,7 @@ package org.eclipse.dltk.internal.ui.editor.semantic.highlighting;
 import java.util.Collections;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.dltk.compiler.env.CompilerSourceCode;
-import org.eclipse.dltk.compiler.env.ISourceModule;
+import org.eclipse.dltk.compiler.env.ModuleSource;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.editor.ScriptSourceViewer;
 import org.eclipse.dltk.ui.ColorPreferenceConverter;
@@ -94,14 +93,6 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		public int hashCode() {
 			return super.hashCode() | fKey.hashCode();
 		}
-	}
-
-	private static class SourceCode extends CompilerSourceCode {
-
-		public SourceCode(String source) {
-			super(source);
-		}
-
 	}
 
 	/** Semantic highlighting presenter */
@@ -227,7 +218,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 						.getSemanticPositionUpdater();
 				if (updater != null) {
 					updater.initialize(fPresenter, fHighlightings);
-					final ISourceModule code = new SourceCode(fSourceViewer
+					final ModuleSource code = new ModuleSource(fSourceViewer
 							.getDocument().get());
 					UpdateResult result = updater.reconcile(code, Collections
 							.<HighlightedPosition> emptyList());
