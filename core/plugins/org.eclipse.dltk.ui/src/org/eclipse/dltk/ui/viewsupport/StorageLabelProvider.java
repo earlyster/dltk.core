@@ -10,7 +10,6 @@
 package org.eclipse.dltk.ui.viewsupport;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.resources.IStorage;
@@ -30,7 +29,7 @@ import org.eclipse.ui.PlatformUI;
 public class StorageLabelProvider extends LabelProvider {
 	private IEditorRegistry fEditorRegistry = null;
 
-	private Map fImageMap = new HashMap(10);
+	private Map<String, Image> fImageMap = new HashMap<String, Image>(10);
 
 	private Image fDefaultImage;
 
@@ -45,6 +44,7 @@ public class StorageLabelProvider extends LabelProvider {
 	 * 
 	 * @see ILabelProvider#getImage
 	 */
+	@Override
 	public Image getImage(Object element) {
 		if (element instanceof ISourceModule) {
 			return getImageForEntry((ISourceModule) element);
@@ -60,6 +60,7 @@ public class StorageLabelProvider extends LabelProvider {
 	 * 
 	 * @see ILabelProvider#getText
 	 */
+	@Override
 	public String getText(Object element) {
 		if (element instanceof IStorage)
 			return ((IStorage) element).getName();
@@ -72,11 +73,10 @@ public class StorageLabelProvider extends LabelProvider {
 	 * 
 	 * @see IBaseLabelProvider#dispose
 	 */
+	@Override
 	public void dispose() {
 		if (fImageMap != null) {
-			Iterator each = fImageMap.values().iterator();
-			while (each.hasNext()) {
-				Image image = (Image) each.next();
+			for (Image image : fImageMap.values()) {
 				image.dispose();
 			}
 			fImageMap = null;
@@ -97,7 +97,7 @@ public class StorageLabelProvider extends LabelProvider {
 
 		// Try to find icon for full name
 		String name = element.getName();
-		Image image = (Image) fImageMap.get(name);
+		Image image = fImageMap.get(name);
 		if (image != null)
 			return image;
 		IFileEditorMapping[] mappings = getEditorRegistry()
@@ -115,10 +115,10 @@ public class StorageLabelProvider extends LabelProvider {
 			if (path == null)
 				return getDefaultImage();
 			key = path.getFileExtension();
-// if( key == null )
-// return getDefaultImage();
+			// if( key == null )
+			// return getDefaultImage();
 			if (key != null) {
-				image = (Image) fImageMap.get(key);
+				image = fImageMap.get(key);
 				if (image != null)
 					return image;
 			}
@@ -156,7 +156,7 @@ public class StorageLabelProvider extends LabelProvider {
 
 		// Try to find icon for full name
 		String name = element.getElementName();
-		Image image = (Image) fImageMap.get(name);
+		Image image = fImageMap.get(name);
 		if (image != null)
 			return image;
 		IFileEditorMapping[] mappings = getEditorRegistry()
@@ -174,10 +174,10 @@ public class StorageLabelProvider extends LabelProvider {
 			if (path == null)
 				return getDefaultImage();
 			key = path.getFileExtension();
-// if( key == null )
-// return getDefaultImage();
+			// if( key == null )
+			// return getDefaultImage();
 			if (key != null) {
-				image = (Image) fImageMap.get(key);
+				image = fImageMap.get(key);
 				if (image != null)
 					return image;
 			}
