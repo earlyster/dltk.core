@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 public abstract class TaskTagUtils {
 
@@ -56,11 +57,18 @@ public abstract class TaskTagUtils {
 		return defaultTags;
 	}
 
+	@Deprecated
 	public static void initializeDefaultValues(Preferences store) {
 		store.setDefault(ITodoTaskPreferences.ENABLED, true);
 		store.setDefault(ITodoTaskPreferences.CASE_SENSITIVE, true);
 		store.setDefault(ITodoTaskPreferences.TAGS,
 				encodeTaskTags(getDefaultTags()));
+	}
+
+	public static void initializeDefaultValues(IEclipsePreferences prefs) {
+		prefs.putBoolean(ITodoTaskPreferences.ENABLED, true);
+		prefs.putBoolean(ITodoTaskPreferences.CASE_SENSITIVE, true);
+		prefs.put(ITodoTaskPreferences.TAGS, encodeTaskTags(getDefaultTags()));
 	}
 
 	public static boolean isValidName(String newText) {
