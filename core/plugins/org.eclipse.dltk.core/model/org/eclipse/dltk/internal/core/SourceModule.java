@@ -150,7 +150,7 @@ public class SourceModule extends AbstractSourceModule implements ISourceModule 
 	 * @see org.eclipse.dltk.compiler.env.IDependent#getFileName()
 	 */
 	public String getFileName() {
-		return this.getPath().toOSString();
+		return this.getPath().toString();
 	}
 
 	/**
