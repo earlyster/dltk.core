@@ -10,25 +10,16 @@
 package org.eclipse.dltk.core.tests.model;
 
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
+import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.core.ISourceElementParser;
-import org.eclipse.dltk.core.ISourceModuleInfoCache.ISourceModuleInfo;
 
 public class TestSourceElementParser implements ISourceElementParser {
 
 	private static final String PARSEME_HEADER = "# parseme!\n";
 	private ISourceElementRequestor requestor;
 
-	public TestSourceElementParser() {
-
-	}
-
-// TestSourceElementParser(ISorceElementRequestor requestor) {
-// this.requestor = requestor;
-// }
-
-	public void parseSourceModule(org.eclipse.dltk.compiler.env.ISourceModule module,
-			ISourceModuleInfo astCashe) {
+	public void parseSourceModule(IModuleSource module) {
 		String file = module.getSourceContents();
 		if (file.startsWith(PARSEME_HEADER)) {
 			parsePseudo(file);
@@ -66,7 +57,7 @@ public class TestSourceElementParser implements ISourceElementParser {
 			String[] split = line.split("\\s+");
 			if (split.length > 0) {
 				String cmd = split[0];
-				String arg = (split.length > 1)?split[1]:null;
+				String arg = (split.length > 1) ? split[1] : null;
 				if (cmd.equals("enterType")) {
 					ISourceElementRequestor.TypeInfo ti = new ISourceElementRequestor.TypeInfo();
 					ti.name = arg;
