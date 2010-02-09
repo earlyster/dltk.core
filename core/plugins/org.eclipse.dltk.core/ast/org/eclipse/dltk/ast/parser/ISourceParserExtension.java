@@ -9,7 +9,7 @@
  *******************************************************************************/
 package org.eclipse.dltk.ast.parser;
 
-
+@Deprecated
 public interface ISourceParserExtension {
 	void setFlags(int flags);
 }
