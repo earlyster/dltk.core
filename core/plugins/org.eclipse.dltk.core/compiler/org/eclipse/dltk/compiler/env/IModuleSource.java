@@ -16,6 +16,9 @@ import org.eclipse.dltk.core.IModelElement;
 /**
  * This interface denotes a source of a module, providing its name and content.
  * 
+ * It was renamed from org.eclipse.dltk.compiler.env.ISourceModule to make names
+ * unique.
+ * 
  * If the object also implements {@link org.eclipse.dltk.core.ISourceModule},
  * then it could be treated as a source file of the project, otherwise it's just
  * a source code, without any physical location.
