@@ -12,7 +12,6 @@ package org.eclipse.dltk.ui.text.completion;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -70,6 +69,7 @@ public abstract class ScriptCompletionProposalComputer implements
 			fPosition = position;
 		}
 
+		@Override
 		public boolean equals(Object object) {
 			if (object instanceof ContextInformationWrapper)
 				return fContextInformation
@@ -81,15 +81,15 @@ public abstract class ScriptCompletionProposalComputer implements
 
 	private String fErrorMessage;
 
-	private List addContextInformations(
+	private List<IContextInformation> addContextInformations(
 			ScriptContentAssistInvocationContext context, int offset,
 			IProgressMonitor monitor) {
-		List proposals = computeScriptCompletionProposals(offset, context,
-				monitor);
-		List result = new ArrayList(proposals.size());
+		List<ICompletionProposal> proposals = computeScriptCompletionProposals(
+				offset, context, monitor);
+		List<IContextInformation> result = new ArrayList<IContextInformation>(
+				proposals.size());
 
-		for (Iterator it = proposals.iterator(); it.hasNext();) {
-			ICompletionProposal proposal = (ICompletionProposal) it.next();
+		for (ICompletionProposal proposal : proposals) {
 			IContextInformation contextInformation = proposal
 					.getContextInformation();
 			if (contextInformation != null) {
@@ -132,8 +132,8 @@ public abstract class ScriptCompletionProposalComputer implements
 	}
 
 	// Code template completion proposals for script language
-	protected List computeTemplateCompletionProposals(int offset,
-			ScriptContentAssistInvocationContext context,
+	protected List<ICompletionProposal> computeTemplateCompletionProposals(
+			int offset, ScriptContentAssistInvocationContext context,
 			IProgressMonitor monitor) {
 		TemplateCompletionProcessor templateProcessor = createTemplateProposalComputer(context);
 		if (templateProcessor != null) {
@@ -145,7 +145,7 @@ public abstract class ScriptCompletionProposalComputer implements
 			return Arrays.asList(proposals);
 		}
 
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 	/**
@@ -175,20 +175,20 @@ public abstract class ScriptCompletionProposalComputer implements
 	}
 
 	// Script language specific completion proposals like types or keywords
-	protected List computeScriptCompletionProposals(int offset,
-			ScriptContentAssistInvocationContext context,
+	protected List<ICompletionProposal> computeScriptCompletionProposals(
+			int offset, ScriptContentAssistInvocationContext context,
 			IProgressMonitor monitor) {
 
 		// Source module getting
 		ISourceModule sourceModule = context.getSourceModule();
 		if (sourceModule == null) {
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 
 		// Create and configure collector
 		ScriptCompletionProposalCollector collector = createCollector(context);
 		if (collector == null) {
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 
 		collector.setInvocationContext(context);
@@ -223,7 +223,7 @@ public abstract class ScriptCompletionProposalComputer implements
 				fErrorMessage = error;
 			}
 
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 
 		return Arrays.asList(proposals);
@@ -252,13 +252,13 @@ public abstract class ScriptCompletionProposalComputer implements
 	 */
 
 	// Completion proposals
-	public List computeCompletionProposals(
+	public List<ICompletionProposal> computeCompletionProposals(
 			ContentAssistInvocationContext context, IProgressMonitor monitor) {
 
 		if (context instanceof ScriptContentAssistInvocationContext) {
 			ScriptContentAssistInvocationContext scriptContext = (ScriptContentAssistInvocationContext) context;
 
-			List proposals = new ArrayList();
+			List<ICompletionProposal> proposals = new ArrayList<ICompletionProposal>();
 
 			// Language specific proposals (already sorted and etc.)
 			proposals.addAll(computeScriptCompletionProposals(context
@@ -271,7 +271,7 @@ public abstract class ScriptCompletionProposalComputer implements
 			return proposals;
 		}
 
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 	protected int guessContextInformationPosition(
@@ -279,18 +279,18 @@ public abstract class ScriptCompletionProposalComputer implements
 		return context.getInvocationOffset();
 	}
 
-	public List computeContextInformation(
+	public List<IContextInformation> computeContextInformation(
 			ContentAssistInvocationContext context, IProgressMonitor monitor) {//
 
 		if (context instanceof ScriptContentAssistInvocationContext) {
 			ScriptContentAssistInvocationContext scriptContext = (ScriptContentAssistInvocationContext) context;
 
 			int contextInformationPosition = guessContextInformationPosition(scriptContext);
-			List result = addContextInformations(scriptContext,
-					contextInformationPosition, monitor);
+			List<IContextInformation> result = addContextInformations(
+					scriptContext, contextInformationPosition, monitor);
 			return result;
 		}
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 
 		// List types = computeCompletionProposals(context, monitor);
 		// Iterator iter = types.iterator();
