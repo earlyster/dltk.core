@@ -31,12 +31,13 @@ public class AbstractFormatterNodeBuilder {
 		stack.push(node);
 	}
 
-	protected void addChild(IFormatterNode node) {
+	protected IFormatterNode addChild(IFormatterNode node) {
 		IFormatterContainerNode parentNode = peek();
 		if (!node.isEmpty()) {
 			advanceParent(parentNode, node.getStartOffset());
 		}
 		parentNode.addChild(node);
+		return node;
 	}
 
 	private void advanceParent(IFormatterContainerNode parentNode, final int pos) {
