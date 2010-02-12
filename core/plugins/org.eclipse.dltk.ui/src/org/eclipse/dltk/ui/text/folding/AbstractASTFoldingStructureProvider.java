@@ -1268,6 +1268,9 @@ public abstract class AbstractASTFoldingStructureProvider implements
 
 	protected CodeBlock[] getCodeBlocks(String code, int offset) {
 		ModuleDeclaration decl = parse(code, offset);
+		if (decl == null) {
+			return null;
+		}
 		return buildCodeBlocks(decl, offset);
 	}
 
