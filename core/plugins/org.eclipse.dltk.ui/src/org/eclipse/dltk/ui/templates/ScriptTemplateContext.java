@@ -26,7 +26,8 @@ import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
 
-public class ScriptTemplateContext extends DocumentTemplateContext {
+public class ScriptTemplateContext extends DocumentTemplateContext implements
+		IScriptTemplateContext {
 	private final ISourceModule sourceModule;
 
 	protected ScriptTemplateContext(TemplateContextType type,
