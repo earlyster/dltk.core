@@ -14,9 +14,11 @@ package org.eclipse.dltk.ui.text.templates;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.ui.templates.IScriptTemplateContext;
 import org.eclipse.jface.text.templates.TemplateContextType;
 
-public class SourceModuleTemplateContext extends FileTemplateContext {
+public class SourceModuleTemplateContext extends FileTemplateContext implements
+		IScriptTemplateContext {
 
 	/**
 	 * @param contextType
@@ -27,12 +29,18 @@ public class SourceModuleTemplateContext extends FileTemplateContext {
 		super(contextType, lineDelimiter);
 	}
 
+	private ISourceModule module;
+
 	public void setSourceModuleVariables(ISourceModule module) {
-		// TODO add interpreter variables
+		this.module = module;
 		final IResource resource = module.getResource();
 		if (resource instanceof IFile) {
 			setResourceVariables((IFile) resource);
 		}
+	}
+
+	public ISourceModule getSourceModule() {
+		return module;
 	}
 
 }

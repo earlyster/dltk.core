@@ -11,11 +11,21 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text.templates;
 
+import org.eclipse.dltk.ui.templates.ScriptTemplateVariables;
+
 public class SourceModuleTemplateContextType extends FileTemplateContextType {
 
 	public SourceModuleTemplateContextType() {
 		super();
-		// TODO add interpreter variables
+		addScriptvariables();
+	}
+
+	/**
+	 * Adds script template variable resolvers
+	 */
+	private void addScriptvariables() {
+		addResolver(new ScriptTemplateVariables.Language());
+		addResolver(new ScriptTemplateVariables.Interpreter());
 	}
 
 }
