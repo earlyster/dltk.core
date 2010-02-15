@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
-*******************************************************************************/
+ *******************************************************************************/
 package org.eclipse.dltk.ui.templates;
 
 import org.eclipse.core.runtime.CoreException;
@@ -69,30 +69,30 @@ public final class ScriptTemplateVariables {
 		}
 
 		protected String resolve(TemplateContext context) {
-			String path = null;
-
-			try {
-				ISourceModule module = getSourceModule(context);
-				IInterpreterInstall install = ScriptRuntime
-						.getInterpreterInstall(module.getScriptProject());
-				
-				path = install.getRawInstallLocation().toOSString();				
-			} catch (CoreException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
+			final ISourceModule module = getSourceModule(context);
+			if (module != null) {
+				try {
+					final IInterpreterInstall install = ScriptRuntime
+							.getInterpreterInstall(module.getScriptProject());
+					if (install != null) {
+						return install.getRawInstallLocation().toOSString();
+					}
+				} catch (CoreException e) {
+					if (DLTKCore.DEBUG) {
+						e.printStackTrace();
+					}
 				}
 			}
-
-			return path;
+			return null;
 		}
-		
+
 		protected boolean isUnambiguous(TemplateContext context) {
 			return resolve(context) != null;
 		}
 	}
 
 	private static ISourceModule getSourceModule(TemplateContext context) {
-		return ((ScriptTemplateContext) context).getSourceModule();
+		return ((IScriptTemplateContext) context).getSourceModule();
 	}
 
 }
