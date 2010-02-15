@@ -1291,6 +1291,22 @@ public final class CharOperation {
 		return true;
 	}
 
+	/**
+	 * Compares two strings null-safe.
+	 * 
+	 * @param first
+	 * @param second
+	 * @return
+	 */
+	public static final boolean equals(String first, String second) {
+		if (first == second)
+			return true;
+		else if (first == null || second == null)
+			return false;
+		else
+			return first.equals(second);
+	}
+
 	public static final boolean equals(String[] first, String[] second) {
 		if (first == second)
 			return true;
