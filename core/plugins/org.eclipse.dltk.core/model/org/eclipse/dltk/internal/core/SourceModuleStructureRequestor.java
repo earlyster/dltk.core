@@ -200,15 +200,23 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor,
 			final MethodParameterInfo[] params = new MethodParameterInfo[parameterNames.length];
 			for (int i = 0, length = parameterNames.length; i < length; i++) {
 				String name = manager.intern(parameterNames[i]);
-				String type = methodInfo.parameterTypes != null
-						&& i < methodInfo.parameterTypes.length ? manager
-						.intern(methodInfo.parameterTypes[i]) : null;
-				String defaultValue = methodInfo.parameterInitializers != null
-						&& i < methodInfo.parameterInitializers.length ? manager
-						.intern(methodInfo.parameterInitializers[i])
-						: null;
-				params[i] = new MethodParameterInfo(name, type,
-						defaultValue);
+				String type = null;
+				String defaultValue = null;
+				if (methodInfo.parameterTypes != null
+						&& i < methodInfo.parameterTypes.length) {
+					type = methodInfo.parameterTypes[i];
+					if (type != null) {
+						type = manager.intern(type);
+					}
+				}
+				if (methodInfo.parameterInitializers != null
+						&& i < methodInfo.parameterInitializers.length) {
+					defaultValue = methodInfo.parameterInitializers[i];
+					if (defaultValue != null) {
+						defaultValue = manager.intern(defaultValue);
+					}
+				}
+				params[i] = new MethodParameterInfo(name, type, defaultValue);
 			}
 			info.setArguments(params);
 		}
