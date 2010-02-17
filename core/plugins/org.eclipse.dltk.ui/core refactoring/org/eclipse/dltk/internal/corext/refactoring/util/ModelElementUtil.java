@@ -19,36 +19,38 @@ import java.util.Set;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMember;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISourceReference;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
+import org.eclipse.dltk.core.ScriptModelUtil;
 import org.eclipse.dltk.corext.SourceRange;
-
 
 public class ModelElementUtil {
 	// no instances
-	private ModelElementUtil() {}
+	private ModelElementUtil() {
+	}
 
-	public static IModelElement[] getElementsOfType(IModelElement[] elements, int type) {
-		Set result = new HashSet(elements.length);
+	public static IModelElement[] getElementsOfType(IModelElement[] elements,
+			int type) {
+		Set<IModelElement> result = new HashSet<IModelElement>(elements.length);
 		for (int i = 0; i < elements.length; i++) {
 			IModelElement element = elements[i];
 			if (element.getElementType() == type)
 				result.add(element);
 		}
-		return (IModelElement[]) result.toArray(new IModelElement[result.size()]);
+		return result.toArray(new IModelElement[result.size()]);
 	}
-	
-	public static boolean isAncestorOf(IModelElement ancestor, IModelElement child) {
+
+	public static boolean isAncestorOf(IModelElement ancestor,
+			IModelElement child) {
 		IModelElement parent = child.getParent();
 		while (parent != null && !parent.equals(ancestor)) {
 			parent = parent.getParent();
@@ -56,26 +58,30 @@ public class ModelElementUtil {
 		return parent != null;
 	}
 
-	public static IMethod[] getAllConstructors(IType type) throws ModelException {
-		List result = new ArrayList();
+	public static IMethod[] getAllConstructors(IType type)
+			throws ModelException {
+		List<IMethod> result = new ArrayList<IMethod>();
 		IMethod[] methods = type.getMethods();
 		for (int i = 0; i < methods.length; i++) {
 			IMethod iMethod = methods[i];
 			if (iMethod.isConstructor())
 				result.add(iMethod);
 		}
-		return (IMethod[]) result.toArray(new IMethod[result.size()]);
+		return result.toArray(new IMethod[result.size()]);
 	}
 
 	/**
 	 * Returns an array of projects that have the specified root on their
 	 * buildpaths.
 	 */
-	public static IScriptProject[] getReferencingProjects(IProjectFragment root) throws ModelException {
+	public static IScriptProject[] getReferencingProjects(IProjectFragment root)
+			throws ModelException {
 		IBuildpathEntry cpe = root.getRawBuildpathEntry();
 		IScriptProject myProject = root.getScriptProject();
-		IScriptProject[] allScriptProjects = DLTKCore.create(ResourcesPlugin.getWorkspace().getRoot()).getScriptProjects();
-		List result = new ArrayList(allScriptProjects.length);
+		IScriptProject[] allScriptProjects = DLTKCore.create(
+				ResourcesPlugin.getWorkspace().getRoot()).getScriptProjects();
+		List<IScriptProject> result = new ArrayList<IScriptProject>(
+				allScriptProjects.length);
 		for (int i = 0; i < allScriptProjects.length; i++) {
 			IScriptProject project = allScriptProjects[i];
 			if (project.equals(myProject))
@@ -84,13 +90,13 @@ public class ModelElementUtil {
 			if (roots.length > 0)
 				result.add(project);
 		}
-		return (IScriptProject[]) result.toArray(new IScriptProject[result.size()]);
+		return result.toArray(new IScriptProject[result.size()]);
 	}
 
 	public static IMember[] merge(IMember[] a1, IMember[] a2) {
 		// Don't use hash sets since ordering is important for some
 		// refactorings.
-		List result = new ArrayList(a1.length + a2.length);
+		List<IMember> result = new ArrayList<IMember>(a1.length + a2.length);
 		for (int i = 0; i < a1.length; i++) {
 			IMember member = a1[i];
 			if (!result.contains(member))
@@ -101,11 +107,12 @@ public class ModelElementUtil {
 			if (!result.contains(member))
 				result.add(member);
 		}
-		return (IMember[]) result.toArray(new IMember[result.size()]);
+		return result.toArray(new IMember[result.size()]);
 	}
 
 	public static boolean isDefaultPackage(Object element) {
-		return (element instanceof IScriptFolder) && ((IScriptFolder) element).isRootFolder();
+		return (element instanceof IScriptFolder)
+				&& ((IScriptFolder) element).isRootFolder();
 	}
 
 	/**
@@ -114,14 +121,13 @@ public class ModelElementUtil {
 	 * @return an array containing the given package and all subpackages
 	 * @throws ModelException
 	 */
-	public static IScriptFolder[] getPackageAndSubpackages(IScriptFolder pack) throws ModelException {
+	public static IScriptFolder[] getPackageAndSubpackages(IScriptFolder pack)
+			throws ModelException {
 		if (pack.isRootFolder())
-			return new IScriptFolder[] {
-				pack
-			};
+			return new IScriptFolder[] { pack };
 		IProjectFragment root = (IProjectFragment) pack.getParent();
 		IModelElement[] allPackages = root.getChildren();
-		ArrayList subpackages = new ArrayList();
+		ArrayList<IScriptFolder> subpackages = new ArrayList<IScriptFolder>();
 		subpackages.add(pack);
 		final IPath folderPath = pack.getPath();
 		for (int i = 0; i < allPackages.length; i++) {
@@ -132,7 +138,7 @@ public class ModelElementUtil {
 				subpackages.add(currentPackage);
 			}
 		}
-		return (IScriptFolder[]) subpackages.toArray(new IScriptFolder[subpackages.size()]);
+		return subpackages.toArray(new IScriptFolder[subpackages.size()]);
 	}
 
 	/**
@@ -157,10 +163,11 @@ public class ModelElementUtil {
 	}
 
 	public static IMember[] sortByOffset(IMember[] members) {
-		Comparator comparator = new Comparator() {
-			public int compare(Object o1, Object o2) {
+		Comparator<IMember> comparator = new Comparator<IMember>() {
+			public int compare(IMember o1, IMember o2) {
 				try {
-					return ((IMember) o1).getNameRange().getOffset() - ((IMember) o2).getNameRange().getOffset();
+					return o1.getNameRange().getOffset()
+							- o2.getNameRange().getOffset();
 				} catch (ModelException e) {
 					return 0;
 				}
@@ -179,6 +186,7 @@ public class ModelElementUtil {
 	}
 
 	public static String createFieldSignature(IField field) {
-		return ScriptModelUtil.getFullyQualifiedName(field.getDeclaringType()) + IScriptFolder.PACKAGE_DELIMITER + field.getElementName(); 
+		return ScriptModelUtil.getFullyQualifiedName(field.getDeclaringType())
+				+ IScriptFolder.PACKAGE_DELIMITER + field.getElementName();
 	}
 }
