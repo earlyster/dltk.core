@@ -9,36 +9,34 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.model.binary;
 
-class BinaryMethodElementInfo extends BinaryMemberInfo {
+import org.eclipse.dltk.compiler.env.IGenericMethod;
+import org.eclipse.dltk.core.IParameter;
+import org.eclipse.dltk.internal.core.SourceMethodUtils;
 
-	private String[] argumentNames;
-	private String[] argumentInitializers;
-	private String[] argumentTypes;
+class BinaryMethodElementInfo extends BinaryMemberInfo implements
+		IGenericMethod {
+
+	private IParameter[] arguments;
 	private boolean isConstructor;
 	private String returnType;
 
-	protected void setArgumentNames(String[] names) {
-		this.argumentNames = names;
+	protected void setArguments(IParameter[] arguments) {
+		this.arguments = arguments;
+	}
+
+	public IParameter[] getArguments() {
+		return this.arguments;
+	}
+
+	/*
+	 * @see org.eclipse.dltk.compiler.env.IGenericMethod#getModifiers()
+	 */
+	public int getModifiers() {
+		return getFlags();
 	}
 
 	public String[] getArgumentNames() {
-		return this.argumentNames;
-	}
-
-	protected void setArgumentInializers(String[] initializers) {
-		this.argumentInitializers = initializers;
-	}
-
-	public String[] getArgumentInitializers() {
-		return this.argumentInitializers;
-	}
-
-	public void setArgumentTypes(String[] argumentTypes) {
-		this.argumentTypes = argumentTypes;
-	}
-
-	public String[] getArgumentTypes() {
-		return argumentTypes;
+		return SourceMethodUtils.getParameterNames(arguments);
 	}
 
 	public void setIsConstructor(boolean isConstructor) {

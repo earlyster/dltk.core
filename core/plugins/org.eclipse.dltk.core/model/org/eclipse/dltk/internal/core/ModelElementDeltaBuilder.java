@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -253,12 +254,8 @@ public class ModelElementDeltaBuilder {
 					&& newInfo instanceof SourceMethodElementInfo) {
 				SourceMethodElementInfo oldSourceMethodInfo = (SourceMethodElementInfo) oldInfo;
 				SourceMethodElementInfo newSourceMethodInfo = (SourceMethodElementInfo) newInfo;
-				if (!CharOperation.equals(oldSourceMethodInfo
-						.getArgumentNames(), newSourceMethodInfo
-						.getArgumentNames())
-						|| !CharOperation.equals(oldSourceMethodInfo
-								.getArgumentInitializers(), newSourceMethodInfo
-								.getArgumentInitializers())) {
+				if (!Arrays.equals(oldSourceMethodInfo.getArguments(),
+						newSourceMethodInfo.getArguments())) {
 					this.delta
 							.changed(newElement, IModelElementDelta.F_CONTENT);
 				}

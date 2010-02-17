@@ -10,6 +10,7 @@
 package org.eclipse.dltk.internal.core;
 
 import org.eclipse.dltk.compiler.env.ISourceMethod;
+import org.eclipse.dltk.core.IParameter;
 
 class SourceMethodElementInfo extends MemberElementInfo implements
 		ISourceMethod {
@@ -19,25 +20,20 @@ class SourceMethodElementInfo extends MemberElementInfo implements
 	 * is a collection of the names of the parameters for this method, in the
 	 * order the parameters are delcared.
 	 */
-	private String[] argumentNames;
-	private String[] argumentInitializers;
+	private IParameter[] arguments;
 	private boolean isConstructor;
 	private String type;
 
-	protected void setArgumentNames(String[] names) {
-		this.argumentNames = names;
-	}
-
 	public String[] getArgumentNames() {
-		return this.argumentNames;
+		return SourceMethodUtils.getParameterNames(arguments);
 	}
 
-	protected void setArgumentInializers(String[] initializers) {
-		this.argumentInitializers = initializers;
+	public IParameter[] getArguments() {
+		return arguments;
 	}
 
-	public String[] getArgumentInitializers() {
-		return this.argumentInitializers;
+	public void setArguments(IParameter[] params) {
+		this.arguments = params;
 	}
 
 	public void setIsConstructor(boolean isConstructor) {

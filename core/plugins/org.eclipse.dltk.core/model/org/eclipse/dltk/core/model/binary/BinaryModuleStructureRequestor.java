@@ -17,9 +17,11 @@ import org.eclipse.dltk.compiler.IBinaryElementRequestor;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.internal.core.DuplicateResolver;
 import org.eclipse.dltk.internal.core.ImportContainer;
+import org.eclipse.dltk.internal.core.MethodParameterInfo;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.internal.core.ModelElementInfo;
 import org.eclipse.dltk.internal.core.ModelManager;
+import org.eclipse.dltk.internal.core.SourceMethodUtils;
 import org.eclipse.dltk.internal.core.SourceRefElement;
 
 /**
@@ -122,19 +124,27 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 
 		String[] parameterNames = methodInfo.parameterNames == null ? EMPTY
 				: methodInfo.parameterNames;
-
-		String[] parameterInitializers = methodInfo.parameterInitializers == null ? EMPTY
-				: methodInfo.parameterInitializers;
-		String[] parameterTypes = methodInfo.parameterTypes == null ? EMPTY
-				: methodInfo.parameterTypes;
-
 		BinaryMethodElementInfo handleInfo = new BinaryMethodElementInfo();
-		handleInfo.setArgumentNames(parameterNames);
-		handleInfo.setArgumentInializers(parameterInitializers);
-		handleInfo.setArgumentTypes(parameterTypes);
-		handleInfo.setIsConstructor(methodInfo.isConstructor);
-		handleInfo.setFlags(methodInfo.modifiers);
-		handleInfo.setReturnType(methodInfo.returnType);
+		if (parameterNames.length == 0) {
+			handleInfo.setArguments(SourceMethodUtils.NO_PARAMETERS);
+		} else {
+			final MethodParameterInfo[] params = new MethodParameterInfo[parameterNames.length];
+			for (int i = 0; i < parameterNames.length; ++i) {
+				// TODO intern names
+				final String type = methodInfo.parameterTypes != null
+						&& i < methodInfo.parameterTypes.length ? methodInfo.parameterTypes[i]
+						: null;
+				final String defaultValue = methodInfo.parameterInitializers != null
+						&& i < methodInfo.parameterInitializers.length ? methodInfo.parameterInitializers[i]
+						: null;
+				params[i] = new MethodParameterInfo(parameterNames[i], type,
+						defaultValue);
+			}
+			handleInfo.setArguments(params);
+			handleInfo.setIsConstructor(methodInfo.isConstructor);
+			handleInfo.setFlags(methodInfo.modifiers);
+			handleInfo.setReturnType(methodInfo.returnType);
+		}
 
 		addChild(parentInfo, handle);
 		newElements.put(handle, handleInfo);

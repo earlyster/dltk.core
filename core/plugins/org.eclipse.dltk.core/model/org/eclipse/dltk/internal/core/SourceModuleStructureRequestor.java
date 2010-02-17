@@ -194,23 +194,24 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor,
 
 		String[] parameterNames = methodInfo.parameterNames == null ? EMPTY
 				: methodInfo.parameterNames;
-
-		String[] parameterInitializers = methodInfo.parameterInitializers == null ? EMPTY
-				: methodInfo.parameterInitializers;
-
-		if (parameterNames.length != parameterInitializers.length) {
-			parameterInitializers = new String[parameterNames.length];
-		}
-
-		for (int i = 0, length = parameterNames.length; i < length; i++) {
-			parameterNames[i] = manager.intern(parameterNames[i]);
-			if (parameterInitializers[i] != null) {
-				parameterInitializers[i] = manager
-						.intern(parameterInitializers[i]);
+		if (parameterNames.length == 0) {
+			info.setArguments(SourceMethodUtils.NO_PARAMETERS);
+		} else {
+			final MethodParameterInfo[] params = new MethodParameterInfo[parameterNames.length];
+			for (int i = 0, length = parameterNames.length; i < length; i++) {
+				String name = manager.intern(parameterNames[i]);
+				String type = methodInfo.parameterTypes != null
+						&& i < methodInfo.parameterTypes.length ? manager
+						.intern(methodInfo.parameterTypes[i]) : null;
+				String defaultValue = methodInfo.parameterInitializers != null
+						&& i < methodInfo.parameterInitializers.length ? manager
+						.intern(methodInfo.parameterInitializers[i])
+						: null;
+				params[i] = new MethodParameterInfo(name, type,
+						defaultValue);
 			}
+			info.setArguments(params);
 		}
-		info.setArgumentNames(parameterNames);
-		info.setArgumentInializers(parameterInitializers);
 
 		parentInfo.addChild(handle);
 		this.newElements.put(handle, info);

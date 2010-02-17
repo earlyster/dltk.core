@@ -332,7 +332,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						if (method != null) {
 							try {
 								proposal.setFlags(method.getFlags());
-								arguments = method.getParameters();
+								arguments = method.getParameterNames();
 							} catch (ModelException e) {
 								if (DLTKCore.DEBUG) {
 									e.printStackTrace();
@@ -473,7 +473,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						String[] arguments = null;
 
 						try {
-							arguments = method.getParameters();
+							arguments = method.getParameterNames();
 						} catch (ModelException e) {
 							if (DLTKCore.DEBUG) {
 								e.printStackTrace();

@@ -1,6 +1,7 @@
 package org.eclipse.dltk.core.model.binary;
 
 import org.eclipse.dltk.core.IMethod;
+import org.eclipse.dltk.core.IParameter;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.core.ModelElement;
 import org.eclipse.dltk.utils.CorePrinter;
@@ -22,6 +23,7 @@ public class BinaryMethod extends BinaryMember implements IMethod {
 		return METHOD;
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof BinaryMethod)) {
 			return false;
@@ -46,35 +48,19 @@ public class BinaryMethod extends BinaryMember implements IMethod {
 		return getFullyQualifiedName("$"); //$NON-NLS-1$
 	}
 
-	public String[] getParameterInitializers() throws ModelException {
-		BinaryMethodElementInfo info = (BinaryMethodElementInfo) getElementInfo();
-		if (info != null) {
-			return info.getArgumentInitializers();
-		}
-		return null;
+	public IParameter[] getParameters() throws ModelException {
+		return ((BinaryMethodElementInfo) getElementInfo()).getArguments();
 	}
 
-	public String[] getParameters() throws ModelException {
-		BinaryMethodElementInfo info = (BinaryMethodElementInfo) getElementInfo();
-		if (info != null) {
-			return info.getArgumentNames();
-		}
-		return null;
+	public String[] getParameterNames() throws ModelException {
+		return ((BinaryMethodElementInfo) getElementInfo()).getArgumentNames();
 	}
 
 	public boolean isConstructor() throws ModelException {
-		BinaryMethodElementInfo info = (BinaryMethodElementInfo) getElementInfo();
-		if (info != null) {
-			return info.isConstructor();
-		}
-		return false;
+		return ((BinaryMethodElementInfo) getElementInfo()).isConstructor();
 	}
 
 	public String getType() throws ModelException {
-		BinaryMethodElementInfo info = (BinaryMethodElementInfo) getElementInfo();
-		if (info != null) {
-			return info.getReturnTypeName();
-		}
-		return null;
+		return ((BinaryMethodElementInfo) getElementInfo()).getReturnTypeName();
 	}
 }

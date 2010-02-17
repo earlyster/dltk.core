@@ -9,12 +9,44 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
+/**
+ * Represents a method (or constructor) declared in a type.
+ */
 public interface IMethod extends IMember {
 
-	public String[] getParameters() throws ModelException;
+	/**
+	 * Returns the parameters in this method. Returns an empty array if this
+	 * method has no parameters.
+	 * 
+	 * @exception ModelException
+	 *                if this element does not exist or if an exception occurs
+	 *                while accessing its corresponding resource.
+	 * @return the parameters in this method, an empty array if this method has
+	 *         no parameters
+	 */
+	public IParameter[] getParameters() throws ModelException;
 
-	public String[] getParameterInitializers() throws ModelException;
+	/**
+	 * Returns the names of parameters in this method. Returns an empty array if
+	 * this method has no parameters.
+	 * 
+	 * @exception ModelException
+	 *                if this element does not exist or if an exception occurs
+	 *                while accessing its corresponding resource.
+	 * @return the names of parameters in this method, an empty array if this
+	 *         method has no parameters
+	 */
+	public String[] getParameterNames() throws ModelException;
 
+	/**
+	 * Returns whether this method is a constructor.
+	 * 
+	 * @exception ModelException
+	 *                if this element does not exist or if an exception occurs
+	 *                while accessing its corresponding resource.
+	 * 
+	 * @return true if this method is a constructor, false otherwise
+	 */
 	boolean isConstructor() throws ModelException;
 
 	/**

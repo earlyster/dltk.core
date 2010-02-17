@@ -12,6 +12,7 @@ package org.eclipse.dltk.internal.core;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IParameter;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.utils.CorePrinter;
@@ -26,6 +27,7 @@ public class SourceMethod extends NamedMember implements IMethod {
 		return METHOD;
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof SourceMethod)) {
 			return false;
@@ -33,22 +35,12 @@ public class SourceMethod extends NamedMember implements IMethod {
 		return super.equals(o);
 	}
 
-	public String[] getParameters() throws ModelException {
-		SourceMethodElementInfo info = (SourceMethodElementInfo) this
-				.getElementInfo();
-		if (info != null) {
-			return info.getArgumentNames();
-		}
-		return null;
+	public String[] getParameterNames() throws ModelException {
+		return ((SourceMethodElementInfo) getElementInfo()).getArgumentNames();
 	}
 
-	public String[] getParameterInitializers() throws ModelException {
-		SourceMethodElementInfo info = (SourceMethodElementInfo) this
-				.getElementInfo();
-		if (info != null) {
-			return info.getArgumentInitializers();
-		}
-		return null;
+	public IParameter[] getParameters() throws ModelException {
+		return ((SourceMethodElementInfo) getElementInfo()).getArguments();
 	}
 
 	public void printNode(CorePrinter output) {
@@ -74,13 +66,10 @@ public class SourceMethod extends NamedMember implements IMethod {
 	 * @see IMethod
 	 */
 	public boolean isConstructor() throws ModelException {
-		SourceMethodElementInfo info = (SourceMethodElementInfo) getElementInfo();
-		if (info == null) {
-			return false;
-		}
-		return info.isConstructor();
+		return ((SourceMethodElementInfo) getElementInfo()).isConstructor();
 	}
 
+	@Override
 	protected char getHandleMementoDelimiter() {
 		return JEM_METHOD;
 	}
@@ -98,6 +87,7 @@ public class SourceMethod extends NamedMember implements IMethod {
 		return getFullyQualifiedName("$"); //$NON-NLS-1$
 	}
 
+	@Override
 	public IScriptFolder getScriptFolder() {
 		IModelElement parentElement = this.parent;
 		while (parentElement != null) {
@@ -112,11 +102,6 @@ public class SourceMethod extends NamedMember implements IMethod {
 	}
 
 	public String getType() throws ModelException {
-		SourceMethodElementInfo info = (SourceMethodElementInfo) this
-				.getElementInfo();
-		if (info != null) {
-			return info.getReturnTypeName();
-		}
-		return null;
+		return ((SourceMethodElementInfo) getElementInfo()).getReturnTypeName();
 	}
 }

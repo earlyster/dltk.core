@@ -147,7 +147,7 @@ public abstract class Member extends SourceRefElement implements IMember {
 		String elementName = method.getElementName();
 		String[] parameters;
 		try {
-			parameters = method.getParameters();
+			parameters = method.getParameterNames();
 		} catch (ModelException e) {
 			parameters = new String[0];
 			e.printStackTrace();
@@ -157,7 +157,7 @@ public abstract class Member extends SourceRefElement implements IMember {
 			IMethod existingMethod = methods[i];
 			try {
 				if (areSimilarMethods(elementName, parameters, existingMethod
-						.getElementName(), existingMethod.getParameters())) {
+						.getElementName(), existingMethod.getParameterNames())) {
 					list.add(existingMethod);
 				}
 			} catch (ModelException e) {

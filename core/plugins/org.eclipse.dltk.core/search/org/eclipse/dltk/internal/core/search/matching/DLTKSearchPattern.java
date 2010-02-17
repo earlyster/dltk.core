@@ -165,7 +165,7 @@ public class DLTKSearchPattern extends SearchPattern {
 		}
 		String[] argumentsSignatures = null;
 		try {
-			argumentsSignatures = method.getParameters();
+			argumentsSignatures = method.getParameterNames();
 		} catch (ModelException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
