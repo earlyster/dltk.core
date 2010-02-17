@@ -19,33 +19,31 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IOpenable;
 import org.eclipse.dltk.core.ISourceModule;
 
-
-
 public class ResourceUtil {
-	
-	private ResourceUtil(){
+
+	private ResourceUtil() {
 	}
-	
+
 	public static IFile[] getFiles(ISourceModule[] cus) {
-		List files= new ArrayList(cus.length);
-		for (int i= 0; i < cus.length; i++) {
-			IResource resource= ResourceUtil.getResource(cus[i]);
+		List<IResource> files = new ArrayList<IResource>(cus.length);
+		for (int i = 0; i < cus.length; i++) {
+			IResource resource = ResourceUtil.getResource(cus[i]);
 			if (resource != null && resource.getType() == IResource.FILE)
 				files.add(resource);
 		}
-		return (IFile[]) files.toArray(new IFile[files.size()]);
+		return files.toArray(new IFile[files.size()]);
 	}
 
 	public static IFile getFile(ISourceModule cu) {
-		IResource resource= ResourceUtil.getResource(cu);
+		IResource resource = ResourceUtil.getResource(cu);
 		if (resource != null && resource.getType() == IResource.FILE)
-			return (IFile)resource;
+			return (IFile) resource;
 		else
 			return null;
 	}
 
-	//----- other ------------------------------
-			
+	// ----- other ------------------------------
+
 	/**
 	 * Finds an <code>IResource</code> for a given <code>ISourceModule</code>.
 	 * If the parameter is a working copy then the <code>IResource</code> for
@@ -55,29 +53,29 @@ public class ResourceUtil {
 		return cu.getResource();
 	}
 
-
 	/**
-	 * Returns the <code>IResource</code> that the given <code>IMember</code> is defined in.
+	 * Returns the <code>IResource</code> that the given <code>IMember</code> is
+	 * defined in.
 	 */
 	public static IResource getResource(IMember member) {
-		//Assert.isTrue(!member.isBinary());
+		// Assert.isTrue(!member.isBinary());
 		return getResource(member.getSourceModule());
 	}
 
-	public static IResource getResource(Object o){
+	public static IResource getResource(Object o) {
 		if (o instanceof IResource)
-			return (IResource)o;
+			return (IResource) o;
 		if (o instanceof IModelElement)
-			return getResource((IModelElement)o);
-		return null;	
+			return getResource((IModelElement) o);
+		return null;
 	}
 
-	private static IResource getResource(IModelElement element){
-		if (element.getElementType() == IModelElement.SOURCE_MODULE) 
+	private static IResource getResource(IModelElement element) {
+		if (element.getElementType() == IModelElement.SOURCE_MODULE)
 			return getResource((ISourceModule) element);
-		else if (element instanceof IOpenable) 
+		else if (element instanceof IOpenable)
 			return element.getResource();
-		else	
-			return null;	
+		else
+			return null;
 	}
 }
