@@ -250,7 +250,7 @@ public class AbstractDLTKSearchTests extends AbstractModelTests implements
 				line.append(method.getElementName());
 			}
 			line.append("(");
-			String[] parameters = method.getParameters();
+			String[] parameters = method.getParameterNames();
 			for (int i = 0, length = parameters.length; i < length; i++) {
 				if (i < length - 1) {
 					// line.append(Signature.toString(parameters[i]));

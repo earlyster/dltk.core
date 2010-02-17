@@ -42,7 +42,7 @@ public class ModelTestUtils
 {
 
 	public static void assertParameterNames( IMethod method, String[] names ) throws Exception {
-		String[] params = method.getParameters();
+		String[] params = method.getParameterNames();
 		TestCase.assertNotNull( params );
 		int index = 0;
 		for( int i = 0; i < params.length; ++i ) {		
@@ -153,7 +153,7 @@ public class ModelTestUtils
 			IMethod method = (IMethod) element;
 			TestCase.assertNotNull(method);
 			if( method.getElementName().equals(name) ) {
-				String[] params = method.getParameters();
+				String[] params = method.getParameterNames();
 				TestCase.assertNotNull(params);
 				TestCase.assertEquals(argCount, params.length );
 
