@@ -297,14 +297,14 @@ public class ModelElementSorter extends ViewerSorter implements
 		if (e1 instanceof IMethod && e2 instanceof IMethod) {
 			String[] params1 = null;
 			try {
-				params1 = ((IMethod) e1).getParameters();
+				params1 = ((IMethod) e1).getParameterNames();
 			} catch (ModelException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			String[] params2 = null;
 			try {
-				params2 = ((IMethod) e2).getParameters();
+				params2 = ((IMethod) e2).getParameterNames();
 			} catch (ModelException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();

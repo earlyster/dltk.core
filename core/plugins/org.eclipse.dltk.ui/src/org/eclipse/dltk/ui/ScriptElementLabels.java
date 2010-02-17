@@ -24,6 +24,7 @@ import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IImportDeclaration;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
+import org.eclipse.dltk.core.IParameter;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.IScriptProject;
@@ -820,40 +821,30 @@ public class ScriptElementLabels {
 			buf.append('(');
 			if (getFlag(flags, M_PARAMETER_TYPES | M_PARAMETER_NAMES)) {
 				// TODO: Add type detection calls from here.
-				String[] names = null;
-				String[] initializers = null;
-				int nParams = 0;
-				if (getFlag(flags, M_PARAMETER_NAMES) && method.exists()) {
-					names = method.getParameters();
-					if (names != null) {
-						initializers = method.getParameterInitializers();
-						nParams = names.length;
-					} else {
-						nParams = 0;
-					}
-				}
+				if (method.exists()) {
+					final IParameter[] params = method.getParameters();
+					final int nParams = params.length;
 
-				for (int i = 0; i < nParams; i++) {
-					if (i > 0) {
-						buf.append(COMMA_STRING);
-					}
+					for (int i = 0; i < nParams; i++) {
+						if (i > 0) {
+							buf.append(COMMA_STRING);
+						}
 
-					if (names != null) {
-						buf.append(names[i]);
+						buf.append(params[i].getName());
 
-					}
-
-					if (getFlag(flags, M_PARAMETER_INITIALIZERS)
-							&& initializers != null && initializers[i] != null) {// &&
-						// initializers[i].length()
-						// > 0
-						// ) {
-						buf.append("=\"" + initializers[i] + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+						if (getFlag(flags, M_PARAMETER_INITIALIZERS)
+								&& params[i].getDefaultValue() != null) {// &&
+							// initializers[i].length()
+							// > 0
+							// ) {
+							buf
+									.append("=\"" + params[i].getDefaultValue() + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+						}
 					}
 				}
 			} else {
-				String[] params = method.getParameters();
-				if (params != null && params.length > 0) {
+				String[] params = method.getParameterNames();
+				if (params.length > 0) {
 					buf.append(ELLIPSIS_STRING);
 				}
 			}
