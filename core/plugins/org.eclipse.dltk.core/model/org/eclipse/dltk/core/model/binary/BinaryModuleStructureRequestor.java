@@ -130,15 +130,24 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 		} else {
 			final MethodParameterInfo[] params = new MethodParameterInfo[parameterNames.length];
 			for (int i = 0; i < parameterNames.length; ++i) {
-				// TODO intern names
-				final String type = methodInfo.parameterTypes != null
-						&& i < methodInfo.parameterTypes.length ? methodInfo.parameterTypes[i]
-						: null;
-				final String defaultValue = methodInfo.parameterInitializers != null
-						&& i < methodInfo.parameterInitializers.length ? methodInfo.parameterInitializers[i]
-						: null;
-				params[i] = new MethodParameterInfo(parameterNames[i], type,
-						defaultValue);
+				String type = null;
+				String defaultValue = null;
+				if (methodInfo.parameterTypes != null
+						&& i < methodInfo.parameterTypes.length) {
+					type = methodInfo.parameterTypes[i];
+					if (type != null) {
+						type = manager.intern(type);
+					}
+				}
+				if (methodInfo.parameterInitializers != null
+						&& i < methodInfo.parameterInitializers.length) {
+					defaultValue = methodInfo.parameterInitializers[i];
+					if (defaultValue != null) {
+						defaultValue = manager.intern(defaultValue);
+					}
+				}
+				params[i] = new MethodParameterInfo(manager
+						.intern(parameterNames[i]), type, defaultValue);
 			}
 			handleInfo.setArguments(params);
 			handleInfo.setIsConstructor(methodInfo.isConstructor);
