@@ -33,9 +33,6 @@ public class InternalDLTKLanguageManager {
 	private final static String FILE_HIERARCHY_RESOLVER_EXTPOINT = DLTKCore.PLUGIN_ID
 			+ ".fileHierarchyResolvers";//$NON-NLS-1$
 
-	private final static String INTERPRETER_CONTAINER_EXTENSION_EXTPOINT = DLTKCore.PLUGIN_ID
-			+ ".interpreterContainerExtension";//$NON-NLS-1$
-
 	private static PriorityClassDLTKExtensionManager languageToolkitsManager = new PriorityClassDLTKExtensionManager(
 			LANGUAGE_EXTPOINT);
 
@@ -60,9 +57,6 @@ public class InternalDLTKLanguageManager {
 			CALLHIERARCHY_EXTPOINT);
 	private static PriorityClassDLTKExtensionManager fileHierarchyResolversManager = new PriorityClassDLTKExtensionManager(
 			FILE_HIERARCHY_RESOLVER_EXTPOINT);
-
-	private static PriorityClassDLTKExtensionManager interoreterContainerExtensionManager = new PriorityClassDLTKExtensionManager(
-			INTERPRETER_CONTAINER_EXTENSION_EXTPOINT);
 
 	public static PriorityClassDLTKExtensionManager getSourceElementParsersManager() {
 		return sourceElementParsersManager;
@@ -104,7 +98,4 @@ public class InternalDLTKLanguageManager {
 		return languageToolkitsManager;
 	}
 
-	public static PriorityClassDLTKExtensionManager getInterpreterContainerExtensionManager() {
-		return interoreterContainerExtensionManager;
-	}
 }

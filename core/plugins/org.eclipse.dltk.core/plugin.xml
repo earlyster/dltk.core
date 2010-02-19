@@ -17,7 +17,6 @@
    <extension-point id="environment" name="%extension-point.name.environment" schema="schema/environment.exsd"/>
    <extension-point id="locationResolver" name="%extension-point.name.locationResolver" schema="schema/locationResolver.exsd"/>
    <extension-point id="fileHierarchyResolvers" name="%extension-point.name.fileHierarchyResolvers" schema="schema/fileHierarchyResolvers.exsd"/>
-   <extension-point id="interpreterContainerExtension" name="%extension-point.name.interpreterContainerExtension" schema="schema/interpreterContainerExtension.exsd"/>
    <extension-point id="buildpathVariableInitializer" name="%extension-point.name.buildpathVariableInitializer" schema="schema/buildpathVariableInitializer.exsd"/>
    <extension-point id="scriptFileConfigurator" name="%extension-point.name.scriptFileConfigurator" schema="schema/scriptFileConfigurator.exsd"/>
    <extension-point id="buildParticipant" name="%extension-point.name.buildParticipant" schema="schema/buildParticipant.exsd"/>

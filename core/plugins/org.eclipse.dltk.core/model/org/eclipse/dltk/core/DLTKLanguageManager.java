@@ -355,11 +355,6 @@ public class DLTKLanguageManager {
 				.getFileHierarchyResolversManager().getObject(natureId);
 	}
 
-	public static IInterpreterContainerExtension getInterpreterContainerExtensions(
-			IScriptProject project) {
-		return (IInterpreterContainerExtension) InternalDLTKLanguageManager
-				.getInterpreterContainerExtensionManager().getObject(project);
-	}
 
 	/**
 	 * @since 2.0
