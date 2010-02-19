@@ -40,8 +40,6 @@ import org.eclipse.dltk.launching.ScriptRuntime;
 public class InterpreterRuntimeBuildpathEntryResolver implements
 		IRuntimeBuildpathEntryResolver2 {
 
-	private static IAccessRule[] EMPTY_RULES = new IAccessRule[0];
-
 	/**
 	 * @see IRuntimeBuildpathEntryResolver#resolveRuntimeBuildpathEntry(IRuntimeBuildpathEntry,
 	 *      ILaunchConfiguration)
@@ -127,7 +125,8 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 			// determine if bootpath should be explicit
 			kind = IRuntimeBuildpathEntry.BOOTSTRAP_ENTRY;
 		}
-		List resolvedEntries = new ArrayList(libs.length);
+		List<IRuntimeBuildpathEntry> resolvedEntries = new ArrayList<IRuntimeBuildpathEntry>(
+				libs.length);
 		final IEnvironment environment = interpreter.getEnvironment();
 		for (int i = 0; i < libs.length; i++) {
 			IPath systemLibraryPath = libs[i].getLibraryPath();
@@ -150,7 +149,7 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 				}
 			}
 		}
-		return (IRuntimeBuildpathEntry[]) resolvedEntries
+		return resolvedEntries
 				.toArray(new IRuntimeBuildpathEntry[resolvedEntries.size()]);
 	}
 
@@ -257,7 +256,7 @@ public class InterpreterRuntimeBuildpathEntryResolver implements
 		IPath libraryPath = location.getLibraryPath();
 		IBuildpathAttribute[] attributes = new IBuildpathAttribute[0];
 		IBuildpathEntry bpe = DLTKCore.newLibraryEntry(libraryPath,
-				EMPTY_RULES, attributes, false, false);
+				IAccessRule.EMPTY_RULES, attributes, false, false);
 		IRuntimeBuildpathEntry resolved = new RuntimeBuildpathEntry(bpe);
 		resolved.setBuildpathProperty(kind);
 		return resolved;

@@ -34,11 +34,10 @@ import org.eclipse.dltk.launching.LaunchingMessages;
 import org.eclipse.dltk.launching.LibraryLocation;
 import org.eclipse.dltk.launching.PropertyChangeEvent;
 import org.eclipse.dltk.launching.ScriptRuntime;
-
-import com.ibm.icu.text.MessageFormat;
+import org.eclipse.osgi.util.NLS;
 
 /**
- * Interpreter Container - resolves a buildpath container tp interpreter
+ * Interpreter Container - resolves a buildpath container to an interpreter
  */
 public class InterpreterContainer implements IBuildpathContainer {
 	/**
@@ -54,7 +53,6 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * Interpreter changes.
 	 */
 	private static Map<IInterpreterInstall, IBuildpathEntry[]> fgBuildpathEntries = null;
-	private static IAccessRule[] EMPTY_RULES = new IAccessRule[0];
 
 	/**
 	 * Returns the buildpath entries associated with the given interpreter.
@@ -145,8 +143,9 @@ public class InterpreterContainer implements IBuildpathContainer {
 					}
 				}
 
-				entries.add(DLTKCore.newLibraryEntry(entryPath, EMPTY_RULES,
-						attributes, BuildpathEntry.INCLUDE_ALL, excluded
+				entries.add(DLTKCore.newLibraryEntry(entryPath,
+						IAccessRule.EMPTY_RULES, attributes,
+						BuildpathEntry.INCLUDE_ALL, excluded
 								.toArray(new IPath[excluded.size()]), false,
 						true));
 				rawEntries.add(entryPath);
@@ -157,9 +156,9 @@ public class InterpreterContainer implements IBuildpathContainer {
 			IBuildpathAttribute[] attributes = new IBuildpathAttribute[0];
 			entries.add(DLTKCore.newBuiltinEntry(
 					IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY.append(interpreter
-							.getInstallLocation().toOSString()), EMPTY_RULES,
-					attributes, BuildpathEntry.INCLUDE_ALL, new IPath[0],
-					false, true));
+							.getInstallLocation().toOSString()),
+					IAccessRule.EMPTY_RULES, attributes,
+					BuildpathEntry.INCLUDE_ALL, new IPath[0], false, true));
 		}
 
 		// Preprocess entries using extension
@@ -218,10 +217,10 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 */
 	public String getDescription(IScriptProject project) {
 		String tag = fInterpreterInstall.getName();
-		return MessageFormat
-				.format(
+		return NLS
+				.bind(
 						LaunchingMessages.InterpreterEnvironmentContainer_InterpreterEnvironment_System_Library_1,
-						new String[] { tag });
+						tag);
 	}
 
 	/**
