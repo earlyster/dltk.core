@@ -19,15 +19,16 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
-import org.eclipse.dltk.core.DLTKLanguageManager;
 import org.eclipse.dltk.core.IAccessRule;
 import org.eclipse.dltk.core.IBuildpathAttribute;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IBuiltinModuleProvider;
-import org.eclipse.dltk.core.IInterpreterContainerExtension;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.core.BuildpathEntry;
+import org.eclipse.dltk.launching.DLTKInterpreterManager;
+import org.eclipse.dltk.launching.IInterpreterContainerExtension;
+import org.eclipse.dltk.launching.IInterpreterContainerExtension2;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallChangedListener;
 import org.eclipse.dltk.launching.LaunchingMessages;
@@ -93,7 +94,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 		}
 		IBuildpathEntry[] entries = fgBuildpathEntries.get(interpreter);
 		if (entries == null) {
-			entries = computeBuildpathEntries(interpreter, project);
+			entries = computeBuildpathEntries(interpreter);
 			fgBuildpathEntries.put(interpreter, entries);
 		}
 		return entries;
@@ -108,11 +109,8 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * @since 2.0
 	 */
 	public static IBuildpathEntry[] computeBuildpathEntries(
-			IInterpreterInstall interpreter, IScriptProject project) {
-		LibraryLocation[] libs = interpreter.getLibraryLocations();
-		if (libs == null) {
-			libs = ScriptRuntime.getLibraryLocations(interpreter);
-		}
+			IInterpreterInstall interpreter) {
+		LibraryLocation[] libs = ScriptRuntime.getLibraryLocations(interpreter);
 		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>(
 				libs.length);
 		Set<IPath> rawEntries = new HashSet<IPath>(libs.length);
@@ -153,19 +151,20 @@ public class InterpreterContainer implements IBuildpathContainer {
 		}
 		// Add builtin entry.
 		{
-			IBuildpathAttribute[] attributes = new IBuildpathAttribute[0];
 			entries.add(DLTKCore.newBuiltinEntry(
 					IBuildpathEntry.BUILTIN_EXTERNAL_ENTRY.append(interpreter
 							.getInstallLocation().toOSString()),
-					IAccessRule.EMPTY_RULES, attributes,
-					BuildpathEntry.INCLUDE_ALL, new IPath[0], false, true));
+					IAccessRule.EMPTY_RULES, new IBuildpathAttribute[0],
+					BuildpathEntry.INCLUDE_ALL, BuildpathEntry.EXCLUDE_NONE,
+					false, true));
 		}
 
 		// Preprocess entries using extension
-		IInterpreterContainerExtension extension = DLTKLanguageManager
-				.getInterpreterContainerExtensions(project);
-		if (extension != null) {
-			extension.preProcessEntries(project, entries);
+		IInterpreterContainerExtension extension = DLTKInterpreterManager
+				.getInterpreterContainerExtensions(interpreter.getNatureId());
+		if (extension instanceof IInterpreterContainerExtension2) {
+			((IInterpreterContainerExtension2) extension).preProcessEntries(
+					interpreter, entries);
 		}
 		return entries.toArray(new IBuildpathEntry[entries.size()]);
 	}
@@ -193,7 +192,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>();
 		entries.addAll(Arrays.asList(buildpathEntries));
 		// Use custom per project interpreter entries.
-		IInterpreterContainerExtension extension = DLTKLanguageManager
+		IInterpreterContainerExtension extension = DLTKInterpreterManager
 				.getInterpreterContainerExtensions(project);
 		if (extension != null) {
 			extension.processEntres(project, entries);

@@ -10,6 +10,7 @@
    <extension-point id="interpreterInstalls" name="%extension-point.name.interpreterInstalls" schema="schema/interpreterInstalls.exsd"/>
    <extension-point id="debuggingEngine" name="%extension-point.name.debuggingEngine" schema="schema/debuggingEngine.exsd"/>
    <extension-point id="launchStatusHandler" name="%extension-point.name.launchStatusHandler" schema="schema/launchStatusHandler.exsd"/>
+   <extension-point id="interpreterContainerExtension" name="%extension-point.name.interpreterContainerExtension" schema="schema/interpreterContainerExtension.exsd"/>
 
   <extension
         point="org.eclipse.dltk.launching.runtimeBuildpathEntryResolvers">
