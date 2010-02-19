@@ -53,6 +53,8 @@ import org.eclipse.core.runtime.IPath;
  */
 public interface IAccessRule {
 	
+	static IAccessRule[] EMPTY_RULES = new IAccessRule[0];
+	
 	/**
 	 * Constant indicating that files matching the rule's pattern are accessible.
 	 */
