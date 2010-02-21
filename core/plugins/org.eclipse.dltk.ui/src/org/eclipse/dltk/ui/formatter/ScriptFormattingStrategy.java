@@ -103,6 +103,10 @@ public class ScriptFormattingStrategy extends ContextBasedFormattingStrategy {
 					final Map prefs = getPreferences();
 					final IScriptFormatter formatter = formatterFactory
 							.createFormatter(lineDelimiter, prefs);
+					if (formatter instanceof IScriptFormatterExtension) {
+						((IScriptFormatterExtension) formatter)
+								.initialize(job.project);
+					}
 					final int indentationLevel = formatter
 							.detectIndentationLevel(document, offset);
 					final TextEdit edit = formatter.format(document.get(),
