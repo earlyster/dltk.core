@@ -219,6 +219,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 	 * their language uses a different identifier.
 	 * </p>
 	 */
+	@Deprecated
 	protected char getCommentChar() {
 		return '#';
 	}
@@ -282,8 +283,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 	 * @since 2.0
 	 */
 	protected int skipCommentChars() {
-		int c = read();
-		if (c == getCommentChar()) {
+		if (read() == getCommentChar()) {
 			return 1;
 		} else {
 			unread();
@@ -303,7 +303,7 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 			state = STATE_STARTED;
 			int count = skipCommentChars();
 			int c = read();
-			while (c != EOF && Character.isWhitespace((char) c)) {
+			while (c != EOF && (c == ' ' || c == '\t')) {
 				c = read();
 				++count;
 			}
@@ -322,8 +322,24 @@ public class ScriptCommentScanner extends AbstractScriptScanner {
 			}
 		}
 		int count = 0;
-		while (read() != EOF) {
+		for (;;) {
+			int c = read();
+			if (c == EOF) {
+				break;
+			}
 			++count;
+			if (c == '\r') {
+				if (read() == '\n') {
+					++count;
+				} else {
+					unread();
+				}
+				state = STATE_START;
+				break;
+			} else if (c == '\n') {
+				state = STATE_START;
+				break;
+			}
 		}
 		return count > 0 ? fDefaultReturnToken : Token.EOF;
 	}
