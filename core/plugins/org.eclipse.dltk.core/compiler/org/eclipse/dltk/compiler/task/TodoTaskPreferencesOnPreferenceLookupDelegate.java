@@ -48,6 +48,7 @@ public class TodoTaskPreferencesOnPreferenceLookupDelegate extends
 		return delegate.getBoolean(pluginId, CASE_SENSITIVE);
 	}
 
+	@Override
 	protected String getRawTaskTags() {
 		return delegate.getString(pluginId, TAGS);
 	}
