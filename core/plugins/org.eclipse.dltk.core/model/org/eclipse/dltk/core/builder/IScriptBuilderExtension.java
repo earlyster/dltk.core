@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ISourceModule;
 
 public interface IScriptBuilderExtension {
 
@@ -24,7 +25,8 @@ public interface IScriptBuilderExtension {
 	 * @param monitor
 	 * @param buildType
 	 */
-	void buildExternalElements(IScriptProject project, List externalElements,
-			IProgressMonitor monitor, int buildType);
+	void buildExternalElements(IScriptProject project,
+			List<ISourceModule> externalElements, IProgressMonitor monitor,
+			int buildType);
 
 }

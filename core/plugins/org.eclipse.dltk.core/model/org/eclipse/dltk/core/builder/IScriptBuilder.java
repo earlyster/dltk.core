@@ -13,10 +13,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ISourceModule;
 
 /**
  * Interface called from script builder to build the selected resource.
@@ -41,7 +43,7 @@ public interface IScriptBuilder {
 	 * 
 	 * @return
 	 */
-	IStatus buildResources(IScriptProject project, List resources,
+	IStatus buildResources(IScriptProject project, List<IResource> resources,
 			IProgressMonitor monitor, int status);
 
 	/**
@@ -50,8 +52,8 @@ public interface IScriptBuilder {
 	 * 
 	 * @return
 	 */
-	IStatus buildModelElements(IScriptProject project, List elements,
-			IProgressMonitor monitor, int status);
+	IStatus buildModelElements(IScriptProject project,
+			List<ISourceModule> elements, IProgressMonitor monitor, int status);
 
 	public static class DependencyResponse {
 		public boolean isFullLocalBuild() {
@@ -62,54 +64,63 @@ public interface IScriptBuilder {
 			return false;
 		}
 
-		public Set getLocalDependencies() {
-			return Collections.EMPTY_SET;
+		public Set<ISourceModule> getLocalDependencies() {
+			return Collections.emptySet();
 		}
 
-		public Set getExternalDependencies() {
-			return Collections.EMPTY_SET;
+		public Set<ISourceModule> getExternalDependencies() {
+			return Collections.emptySet();
 		}
 
 		public static final DependencyResponse FULL_LOCAL_BUILD = new DependencyResponse() {
+			@Override
 			public boolean isFullLocalBuild() {
 				return true;
 			}
 		};
 
 		public static final DependencyResponse FULL_EXTERNAL_BUILD = new DependencyResponse() {
+			@Override
 			public boolean isFullLocalBuild() {
 				return true;
 			}
 
+			@Override
 			public boolean isFullExternalBuild() {
 				return true;
 			}
 		};
 
-		public static DependencyResponse createLocal(final Set localDependencies) {
+		public static DependencyResponse createLocal(
+				final Set<ISourceModule> localDependencies) {
 			return new DependencyResponse() {
-				public Set getLocalDependencies() {
+				@Override
+				public Set<ISourceModule> getLocalDependencies() {
 					return localDependencies;
 				}
 			};
 		}
 
 		public static DependencyResponse create(final boolean fullLocal,
-				final Set localDependencies, final Set externalDependencies) {
+				final Set<ISourceModule> localDependencies,
+				final Set<ISourceModule> externalDependencies) {
 			return new DependencyResponse() {
 
+				@Override
 				public boolean isFullLocalBuild() {
 					return fullLocal;
 				}
 
-				public Set getLocalDependencies() {
+				@Override
+				public Set<ISourceModule> getLocalDependencies() {
 					return !fullLocal && localDependencies != null ? localDependencies
-							: Collections.EMPTY_SET;
+							: Collections.<ISourceModule> emptySet();
 				}
 
-				public Set getExternalDependencies() {
+				@Override
+				public Set<ISourceModule> getExternalDependencies() {
 					return externalDependencies != null ? externalDependencies
-							: Collections.EMPTY_SET;
+							: Collections.<ISourceModule> emptySet();
 				}
 			};
 		}
@@ -141,7 +152,8 @@ public interface IScriptBuilder {
 	 *         {@link DependencyResponse#create(Set)}
 	 */
 	DependencyResponse getDependencies(IScriptProject project, int buildType,
-			Set localElements, Set externalElements, Set oldExternalFolders,
+			Set<ISourceModule> localElements,
+			Set<ISourceModule> externalElements, Set oldExternalFolders,
 			Set externalFolders);
 
 	/**

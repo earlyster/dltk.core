@@ -926,7 +926,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 						buildElementsList = projectElements;
 					}
 				} else {
-					@SuppressWarnings("unchecked")
 					final Set<ISourceModule> dependencies = response
 							.getLocalDependencies();
 					if (dependencies != null && !dependencies.isEmpty()
@@ -953,7 +952,6 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 						buildExternalElements = projectExternalElements;
 					}
 				} else {
-					@SuppressWarnings("unchecked")
 					final Set<ISourceModule> dependencies = response
 							.getExternalDependencies();
 					if (dependencies != null && !dependencies.isEmpty()

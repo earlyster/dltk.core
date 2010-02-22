@@ -44,8 +44,9 @@ public class StandardScriptBuilder implements IScriptBuilder,
 
 	private static final int WORK_BUILD = 100;
 
-	public IStatus buildModelElements(IScriptProject project, List elements,
-			IProgressMonitor monitor, int buildType) {
+	public IStatus buildModelElements(IScriptProject project,
+			List<ISourceModule> elements, IProgressMonitor monitor,
+			int buildType) {
 		monitor.beginTask(Util.EMPTY_STRING, WORK_BUILD);
 		try {
 			buildModules(project, elements, buildType, BuildUtils
@@ -57,16 +58,18 @@ public class StandardScriptBuilder implements IScriptBuilder,
 	}
 
 	public void buildExternalElements(IScriptProject project,
-			List externalElements, IProgressMonitor monitor, int buildType) {
+			List<ISourceModule> externalElements, IProgressMonitor monitor,
+			int buildType) {
 		beginBuild(buildType, monitor);
 		final List<IBuildParticipantExtension2> extensions = selectExtension(IBuildParticipantExtension2.class);
 
 		if (extensions != null) {
 			int remainingWork = externalElements.size();
-			for (Iterator j = externalElements.iterator(); j.hasNext();) {
+			for (Iterator<ISourceModule> j = externalElements.iterator(); j
+					.hasNext();) {
 				if (monitor.isCanceled())
 					return;
-				final ISourceModule module = (ISourceModule) j.next();
+				final ISourceModule module = j.next();
 				monitor
 						.subTask(NLS
 								.bind(
@@ -112,7 +115,9 @@ public class StandardScriptBuilder implements IScriptBuilder,
 				for (int i = 0; i < participants.length; ++i) {
 					final IBuildParticipant participant = participants[i];
 					if (clazz.isInstance(participant)) {
-						result.add((T) participant);
+						@SuppressWarnings("unchecked")
+						final T casted = (T) participant;
+						result.add(casted);
 					}
 				}
 				return result;
@@ -121,8 +126,9 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		return null;
 	}
 
-	private void buildModules(IScriptProject project, List elements,
-			int buildType, IProgressMonitor monitor) {
+	private void buildModules(IScriptProject project,
+			List<ISourceModule> elements, int buildType,
+			IProgressMonitor monitor) {
 		final long startTime = DEBUG ? System.currentTimeMillis() : 0;
 		monitor.beginTask(Messages.ValidatorBuilder_buildingModules, elements
 				.size());
@@ -140,17 +146,17 @@ public class StandardScriptBuilder implements IScriptBuilder,
 	private List<IProblemReporter> reporters = null;
 
 	private void buildNatureModules(IScriptProject project, int buildType,
-			final List modules, IProgressMonitor monitor) {
+			final List<ISourceModule> modules, IProgressMonitor monitor) {
 		beginBuild(buildType, monitor);
 		if (participants.length == 0) {
 			return;
 		}
 		int counter = 0;
 		reporters = new ArrayList<IProblemReporter>(modules.size());
-		for (Iterator j = modules.iterator(); j.hasNext();) {
+		for (Iterator<ISourceModule> j = modules.iterator(); j.hasNext();) {
 			if (monitor.isCanceled())
 				return;
-			final ISourceModule module = (ISourceModule) j.next();
+			final ISourceModule module = j.next();
 			monitor.subTask(NLS.bind(
 					Messages.ValidatorBuilder_buildModuleSubTask, String
 							.valueOf(modules.size() - counter), module
@@ -218,15 +224,15 @@ public class StandardScriptBuilder implements IScriptBuilder,
 		}
 	}
 
-	public IStatus buildResources(IScriptProject project, List resources,
-			IProgressMonitor monitor, int buildType) {
+	public IStatus buildResources(IScriptProject project,
+			List<IResource> resources, IProgressMonitor monitor, int buildType) {
 		final IProgressMonitor sub = new SubProgressMonitor(monitor, resources
 				.size() * 2);
 		try {
 			sub.beginTask(Util.EMPTY_STRING, resources.size());
 			try {
-				for (Iterator i = resources.iterator(); i.hasNext();) {
-					final IResource resource = (IResource) i.next();
+				for (Iterator<IResource> i = resources.iterator(); i.hasNext();) {
+					final IResource resource = i.next();
 					final String template = Messages.ValidatorBuilder_clearingResourceMarkers;
 					sub.subTask(NLS.bind(template, resource.getName()));
 					resource.deleteMarkers(DefaultProblem.MARKER_TYPE_PROBLEM,
@@ -266,13 +272,14 @@ public class StandardScriptBuilder implements IScriptBuilder,
 	}
 
 	public DependencyResponse getDependencies(IScriptProject project,
-			int buildType, Set localElements, Set externalElements,
-			Set oldExternalFolders, Set externalFolders) {
+			int buildType, Set<ISourceModule> localElements,
+			Set<ISourceModule> externalElements, Set oldExternalFolders,
+			Set externalFolders) {
 		if (participants == null) {
 			return null;
 		}
-		Set localDependencies = null;
-		Set externalDependencies = null;
+		Set<ISourceModule> localDependencies = null;
+		Set<ISourceModule> externalDependencies = null;
 		boolean fullLocal = false;
 		for (int i = 0; i < participants.length; ++i) {
 			final IBuildParticipant participant = participants[i];
@@ -289,14 +296,14 @@ public class StandardScriptBuilder implements IScriptBuilder,
 							fullLocal = true;
 						} else if (!response.getLocalDependencies().isEmpty()) {
 							if (localDependencies == null) {
-								localDependencies = new HashSet();
+								localDependencies = new HashSet<ISourceModule>();
 							}
 							localDependencies.addAll(response
 									.getLocalDependencies());
 						}
 						if (!response.getExternalDependencies().isEmpty()) {
 							if (externalDependencies == null) {
-								externalDependencies = new HashSet();
+								externalDependencies = new HashSet<ISourceModule>();
 							}
 							externalDependencies.addAll(response
 									.getExternalDependencies());
