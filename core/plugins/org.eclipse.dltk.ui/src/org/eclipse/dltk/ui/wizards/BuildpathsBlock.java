@@ -9,6 +9,8 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.wizards;
 
+import static org.eclipse.dltk.core.IScriptProjectFilenames.BUILDPATH_FILENAME;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +66,7 @@ import org.eclipse.dltk.ui.dialogs.StatusInfo;
 import org.eclipse.dltk.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.dltk.ui.util.IStatusChangeListener;
 import org.eclipse.dltk.ui.viewsupport.ImageDisposer;
+import org.eclipse.dltk.utils.ResourceUtil;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -93,8 +96,6 @@ import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.views.navigator.ResourceComparator;
-
-import static org.eclipse.dltk.core.IScriptProjectFilenames.BUILDPATH_FILENAME;
 
 public class BuildpathsBlock {
 	public static interface IRemoveOldBinariesQuery {
@@ -619,25 +620,7 @@ public class BuildpathsBlock {
 
 	public static void addScriptNature(IProject project,
 			IProgressMonitor monitor, String nature) throws CoreException {
-		if (monitor != null && monitor.isCanceled()) {
-			throw new OperationCanceledException();
-		}
-		if (!project.hasNature(nature)) {
-			IProjectDescription description = project.getDescription();
-			String[] prevNatures = description.getNatureIds();
-			String[] newNatures = new String[prevNatures.length + 1];
-			System.arraycopy(prevNatures, 0, newNatures, 0, prevNatures.length);
-			newNatures[prevNatures.length] = nature;
-			if (DLTKCore.DEBUG) {
-				// System.err.println("Add selection of possible natures here");
-			}
-			description.setNatureIds(newNatures);
-			project.setDescription(description, monitor);
-		} else {
-			if (monitor != null) {
-				monitor.worked(1);
-			}
-		}
+		ResourceUtil.addNature(project, monitor, nature);
 	}
 
 	public void configureScriptProject(IProgressMonitor monitor)
