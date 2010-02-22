@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.dltk.core;
 
+/**
+ * Deprecated, use IModuleSource#getModelElement().getScriptProject() instead
+ */
+@Deprecated
 public interface ISourceElementParserExtension {
 	void setScriptProject(IScriptProject project);
 }
