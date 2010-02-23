@@ -7,7 +7,6 @@
  *
  
  *******************************************************************************/
-
 package org.eclipse.dltk.internal.ui.editor;
 
 import org.eclipse.core.runtime.Assert;
@@ -28,6 +27,7 @@ public class GotoMatchingBracketAction extends Action {
 		// IJavaHelpContextIds.GOTO_MATCHING_BRACKET_ACTION);
 	}
 
+	@Override
 	public void run() {
 		fEditor.gotoMatchingBracket();
 	}
