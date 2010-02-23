@@ -2897,13 +2897,25 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 	private ICharacterPairMatcher fBracketMatcher;
 
-	protected ICharacterPairMatcher getBracketMatcher() {
+	/**
+	 * Returns the bracket matcher for this editor, delegates to
+	 * {@link #createBracketMatcher()} to actually create it.
+	 * 
+	 * @return the bracket matcher or <code>null</code>
+	 */
+	protected final ICharacterPairMatcher getBracketMatcher() {
 		if (fBracketMatcher == null) {
 			fBracketMatcher = createBracketMatcher();
 		}
 		return fBracketMatcher;
 	}
 
+	/**
+	 * Override in your editor class to create bracket matcher for your
+	 * language.
+	 * 
+	 * @return
+	 */
 	protected ICharacterPairMatcher createBracketMatcher() {
 		return null;
 	}
