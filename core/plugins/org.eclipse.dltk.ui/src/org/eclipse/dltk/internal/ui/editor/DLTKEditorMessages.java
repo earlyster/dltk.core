@@ -60,6 +60,10 @@ public final class DLTKEditorMessages extends NLS {
 	public static String ModelElementHyperlink_text;
 	public static String ModelElementHyperlink_typeLabel;
 
+	public static String ScriptEditor_noMatchingBracketFound;
+	public static String ScriptEditor_nobracketSelected;
+	public static String ScriptEditor_matchingBracketIsOutsideSelectedElement;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, DLTKEditorMessages.class);
 	}

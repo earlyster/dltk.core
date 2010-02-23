@@ -135,6 +135,7 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ISourceViewerExtension2;
@@ -183,6 +184,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
+import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.texteditor.TextNavigationAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -2893,8 +2895,103 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		}
 	}
 
+	private ICharacterPairMatcher fBracketMatcher;
+
+	protected ICharacterPairMatcher getBracketMatcher() {
+		if (fBracketMatcher == null) {
+			fBracketMatcher = createBracketMatcher();
+		}
+		return fBracketMatcher;
+	}
+
+	protected ICharacterPairMatcher createBracketMatcher() {
+		return null;
+	}
+
+	@Override
+	protected void configureSourceViewerDecorationSupport(
+			SourceViewerDecorationSupport support) {
+		configureBracketMatcher(support);
+		super.configureSourceViewerDecorationSupport(support);
+	}
+
+	protected void configureBracketMatcher(SourceViewerDecorationSupport support) {
+		final ICharacterPairMatcher bracketMatcher = getBracketMatcher();
+		if (bracketMatcher != null) {
+			support.setCharacterPairMatcher(bracketMatcher);
+			support.setMatchingCharacterPainterPreferenceKeys(
+					MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR);
+		}
+	}
+
+	/**
+	 * Jumps to the matching bracket.
+	 */
 	public void gotoMatchingBracket() {
-		// Nothing to do by default
+		final ICharacterPairMatcher bracketMatcher = getBracketMatcher();
+		if (bracketMatcher == null) {
+			return;
+		}
+		ISourceViewer sourceViewer = getSourceViewer();
+		IDocument document = sourceViewer.getDocument();
+		if (document == null)
+			return;
+
+		IRegion selection = getSignedSelection(sourceViewer);
+
+		int selectionLength = Math.abs(selection.getLength());
+		if (selectionLength > 1) {
+			setStatusLineErrorMessage(DLTKEditorMessages.ScriptEditor_nobracketSelected);
+			sourceViewer.getTextWidget().getDisplay().beep();
+			return;
+		}
+
+		// #26314
+		int sourceCaretOffset = selection.getOffset() + selection.getLength();
+		if (isSurroundedByBrackets(document, sourceCaretOffset))
+			sourceCaretOffset -= selection.getLength();
+
+		IRegion region = bracketMatcher.match(document, sourceCaretOffset);
+		if (region == null) {
+			setStatusLineErrorMessage(DLTKEditorMessages.ScriptEditor_noMatchingBracketFound);
+			sourceViewer.getTextWidget().getDisplay().beep();
+			return;
+		}
+
+		int offset = region.getOffset();
+		int length = region.getLength();
+
+		if (length < 1)
+			return;
+
+		int anchor = bracketMatcher.getAnchor();
+		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34195
+		int targetOffset = (ICharacterPairMatcher.RIGHT == anchor) ? offset + 1
+				: offset + length;
+
+		boolean visible = false;
+		if (sourceViewer instanceof ITextViewerExtension5) {
+			ITextViewerExtension5 extension = (ITextViewerExtension5) sourceViewer;
+			visible = (extension.modelOffset2WidgetOffset(targetOffset) > -1);
+		} else {
+			IRegion visibleRegion = sourceViewer.getVisibleRegion();
+			// http://dev.eclipse.org/bugs/show_bug.cgi?id=34195
+			visible = (targetOffset >= visibleRegion.getOffset() && targetOffset <= visibleRegion
+					.getOffset()
+					+ visibleRegion.getLength());
+		}
+
+		if (!visible) {
+			setStatusLineErrorMessage(DLTKEditorMessages.ScriptEditor_matchingBracketIsOutsideSelectedElement);
+			sourceViewer.getTextWidget().getDisplay().beep();
+			return;
+		}
+
+		if (selection.getLength() < 0)
+			targetOffset -= selection.getLength();
+
+		sourceViewer.setSelectedRange(targetOffset, selection.getLength());
+		sourceViewer.revealRange(targetOffset, selection.getLength());
 	}
 
 	public void updatedTitleImage(Image image) {
