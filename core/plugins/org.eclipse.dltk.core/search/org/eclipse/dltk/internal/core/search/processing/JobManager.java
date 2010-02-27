@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.internal.core.util.Messages;
 import org.eclipse.dltk.internal.core.util.Util;
+import org.eclipse.osgi.util.NLS;
 
 public abstract class JobManager implements Runnable {
 
@@ -232,9 +233,6 @@ public abstract class JobManager implements Runnable {
 				throw new OperationCanceledException();
 
 			case IJob.WaitUntilReady:
-				int awaitingWork;
-				IJob previousJob = null;
-				IJob currentJob;
 				IProgressMonitor subProgress = null;
 				int totalWork = this.awaitingJobsCount();
 				if (progress != null && totalWork > 0) {
@@ -255,10 +253,12 @@ public abstract class JobManager implements Runnable {
 					synchronized (this) {
 						this.awaitingClients++;
 					}
+					IJob previousJob = null;
+					int awaitingWork;
 					while ((awaitingWork = awaitingJobsCount()) > 0) {
 						if (subProgress != null && subProgress.isCanceled())
 							throw new OperationCanceledException();
-						currentJob = currentJob();
+						final IJob currentJob = currentJob();
 						// currentJob can be null when jobs have been added to
 						// the queue but job manager is not enabled
 						if (currentJob != null && currentJob != previousJob) {
@@ -266,7 +266,7 @@ public abstract class JobManager implements Runnable {
 								Util
 										.verbose("-> NOT READY - waiting until ready - " + searchJob);//$NON-NLS-1$
 							if (subProgress != null) {
-								subProgress.subTask(Messages.bind(
+								subProgress.subTask(NLS.bind(
 										Messages.manager_filesToIndex, Integer
 												.toString(awaitingWork)));
 								subProgress.worked(1);
@@ -319,6 +319,7 @@ public abstract class JobManager implements Runnable {
 			return false;
 		}
 
+		@Override
 		public String toString() {
 			return "WAIT-UNTIL-READY-JOB"; //$NON-NLS-1$
 		}
@@ -391,15 +392,15 @@ public abstract class JobManager implements Runnable {
 					super(name);
 				}
 
+				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					int awaitingJobsCount;
 					monitor.beginTask(Messages.manager_indexingTask,
 							IProgressMonitor.UNKNOWN);
 					while (!monitor.isCanceled()
 							&& (awaitingJobsCount = awaitingJobsCount()) > 0) {
-						monitor.subTask(Messages.bind(
-								Messages.manager_filesToIndex, Integer
-										.toString(awaitingJobsCount)));
+						monitor.subTask(NLS.bind(Messages.manager_filesToIndex,
+								Integer.toString(awaitingJobsCount)));
 						try {
 							Thread.sleep(500);
 						} catch (InterruptedException e) {
@@ -537,8 +538,9 @@ public abstract class JobManager implements Runnable {
 		}
 	}
 
+	@Override
 	public String toString() {
-		StringBuffer buffer = new StringBuffer(10);
+		StringBuffer buffer = new StringBuffer(64);
 		buffer.append("Enable count:").append(this.enableCount).append('\n'); //$NON-NLS-1$
 		int numJobs = this.jobEnd - this.jobStart + 1;
 		buffer.append("Jobs in queue:").append(numJobs).append('\n'); //$NON-NLS-1$
