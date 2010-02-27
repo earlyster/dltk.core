@@ -16,7 +16,6 @@ import java.util.Stack;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.compiler.ISourceElementRequestorExtension;
-import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
@@ -303,51 +302,6 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor,
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	public boolean enterMethodWithParentType(MethodInfo info,
-			String parentName, String delimiter) {
-		try {
-			ModelElement element = this.getExistentType(parentName, delimiter);
-			if (element == null) {
-				return false;
-			}
-			ModelElementInfo typeInfo = (ModelElementInfo) element
-					.getElementInfo();
-
-			IModelElement[] childrens = typeInfo.getChildren();
-			for (int i = 0; i < childrens.length; ++i) {
-				if (childrens[i].getElementName().equals(info.name)) {
-					typeInfo.removeChild(childrens[i]);
-				}
-			}
-
-			this.processMethod(info, typeInfo, element);
-			return true;
-		} catch (ModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return false;
-	}
-
-	public boolean enterFieldWithParentType(FieldInfo info, String parentName,
-			String delimiter) {
-		try {
-			ModelElement element = this.getExistentType(parentName, delimiter);
-			if (element == null) {
-				return false;
-			}
-			ModelElementInfo typeInfo = (ModelElementInfo) element
-					.getElementInfo();
-			this.enterFieldCheckDuplicates(info, typeInfo, element);
-			return true;
-		} catch (ModelException e) {
-			if (DLTKCore.DEBUG) {
-				e.printStackTrace();
-			}
-		}
-		return false;
 	}
 
 	public void enterType(TypeInfo typeInfo) {

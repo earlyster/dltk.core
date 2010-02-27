@@ -281,26 +281,6 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	/**
 	 * @since 2.0
 	 */
-	public boolean enterMethodWithParentType(MethodInfo info,
-			String parentName, String delimiter) {
-		this.enterMethod(info);
-		// this.methodDepth++;
-		return true;
-	}
-
-	/**
-	 * @since 2.0
-	 */
-	public boolean enterFieldWithParentType(FieldInfo info, String parentName,
-			String delimiter) {
-		this.indexer.addFieldDeclaration(info.name.toCharArray());
-		this.methodDepth++;
-		return true;
-	}
-
-	/**
-	 * @since 2.0
-	 */
 	public boolean enterTypeAppend(TypeInfo info, String fullName,
 			String delimiter) {
 		enterType(info);

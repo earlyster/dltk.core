@@ -165,18 +165,6 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 		this.infoStack.push(handleInfo);
 	}
 
-	public boolean enterMethodWithParentType(MethodInfo info,
-			String parentName, String delimiter) {
-		enterMethod(info);
-		return true;
-	}
-
-	public boolean enterFieldWithParentType(FieldInfo info, String parentName,
-			String delimiter) {
-		enterField(info);
-		return true;
-	}
-
 	public void enterType(TypeInfo typeInfo) {
 		ModelElement parentHandle = this.handleStack.peek();
 		ModelElementInfo parentInfo = this.infoStack.peek();

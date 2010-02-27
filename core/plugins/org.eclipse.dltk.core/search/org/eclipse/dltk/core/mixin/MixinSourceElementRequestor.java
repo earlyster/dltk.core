@@ -124,23 +124,7 @@ public class MixinSourceElementRequestor implements ISourceElementRequestor {
 	/**
 	 * @since 2.0
 	 */
-	public boolean enterFieldWithParentType(FieldInfo info, String parentName,
-			String delimiter) {
-		return false;
-	}
-
-	/**
-	 * @since 2.0
-	 */
 	public void enterMethodRemoveSame(MethodInfo info) {
-	}
-
-	/**
-	 * @since 2.0
-	 */
-	public boolean enterMethodWithParentType(MethodInfo info,
-			String parentName, String delimiter) {
-		return false;
 	}
 
 	public void enterModule() {
