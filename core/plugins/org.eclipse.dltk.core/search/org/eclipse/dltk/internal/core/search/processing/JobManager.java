@@ -241,6 +241,11 @@ public abstract class JobManager implements Runnable {
 					subProgress.beginTask("", totalWork); //$NON-NLS-1$
 					concurrentJobWork = concurrentJobWork / 2;
 				}
+				if (totalWork > 0) {
+					synchronized (delaySignal) {
+						delaySignal.notify();
+					}
+				}
 				// use local variable to avoid potential NPE (see bug 20435 NPE
 				// when searchingscriptmethod
 				// and bug 42760 NullPointerException in JobManager when
@@ -277,7 +282,7 @@ public abstract class JobManager implements Runnable {
 							if (VERBOSE)
 								Util
 										.verbose("-> GOING TO SLEEP - " + searchJob);//$NON-NLS-1$
-							Thread.sleep(searchJob instanceof WaitJob ? 25 : 5);
+							Thread.sleep(50);
 						} catch (InterruptedException e) {
 							// ignore
 						}
@@ -379,38 +384,45 @@ public abstract class JobManager implements Runnable {
 		}
 	}
 
+	private final class ProgressJob extends Job {
+		ProgressJob(String name) {
+			super(name);
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			int awaitingJobsCount;
+			monitor.beginTask(Messages.manager_indexingTask,
+					IProgressMonitor.UNKNOWN);
+			while (!monitor.isCanceled()
+					&& (awaitingJobsCount = awaitingJobsCount()) > 0) {
+				monitor.subTask(NLS.bind(Messages.manager_filesToIndex, Integer
+						.toString(awaitingJobsCount)));
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					// ignore
+				}
+			}
+			monitor.done();
+			return Status.OK_STATUS;
+		}
+	}
+
+	/**
+	 * is used for delaying before processing new jobs, that could be canceled
+	 * by {@link #performConcurrentJob()} if called with
+	 * {@link IJob#WaitUntilReady}
+	 */
+	private final Object delaySignal = new Object();
+
 	/**
 	 * Infinite loop performing resource indexing
 	 */
 	public void run() {
-
 		long idlingStart = -1;
 		activateProcessing();
 		try {
-			class ProgressJob extends Job {
-				ProgressJob(String name) {
-					super(name);
-				}
-
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					int awaitingJobsCount;
-					monitor.beginTask(Messages.manager_indexingTask,
-							IProgressMonitor.UNKNOWN);
-					while (!monitor.isCanceled()
-							&& (awaitingJobsCount = awaitingJobsCount()) > 0) {
-						monitor.subTask(NLS.bind(Messages.manager_filesToIndex,
-								Integer.toString(awaitingJobsCount)));
-						try {
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
-							// ignore
-						}
-					}
-					monitor.done();
-					return Status.OK_STATUS;
-				}
-			}
 			this.progressJob = null;
 			while (this.processingThread != null) {
 				try {
@@ -424,10 +436,7 @@ public abstract class JobManager implements Runnable {
 						// must check for new job inside this sync block to
 						// avoid timing hole
 						if ((job = currentJob()) == null) {
-							if (this.progressJob != null) {
-								this.progressJob.cancel();
-								this.progressJob = null;
-							}
+							hideProgress();
 							if (idlingStart < 0)
 								idlingStart = System.currentTimeMillis();
 							else
@@ -443,7 +452,9 @@ public abstract class JobManager implements Runnable {
 						notifyIdle(System.currentTimeMillis() - idlingStart);
 						// just woke up, delay before processing any new jobs,
 						// allow some time for the active thread to finish
-						Thread.sleep(500);
+						synchronized (delaySignal) {
+							delaySignal.wait(500);
+						}
 						continue;
 					}
 					if (VERBOSE) {
@@ -452,13 +463,7 @@ public abstract class JobManager implements Runnable {
 					}
 					try {
 						this.executing = true;
-						if (this.progressJob == null) {
-							this.progressJob = new ProgressJob(
-									Messages.manager_indexingInProgress);
-							this.progressJob.setPriority(Job.LONG);
-							this.progressJob.setSystem(true);
-							this.progressJob.schedule();
-						}
+						showProgress();
 						/* boolean status = */job.execute(null);
 						// if (status == FAILED) request(job);
 					} finally {
@@ -497,6 +502,23 @@ public abstract class JobManager implements Runnable {
 				// jobs, some indexes will be inconsistent
 			}
 			throw e;
+		}
+	}
+
+	private void showProgress() {
+		if (this.progressJob == null) {
+			this.progressJob = new ProgressJob(
+					Messages.manager_indexingInProgress);
+			this.progressJob.setPriority(Job.LONG);
+			this.progressJob.setSystem(true);
+			this.progressJob.schedule();
+		}
+	}
+
+	private void hideProgress() {
+		if (this.progressJob != null) {
+			this.progressJob.cancel();
+			this.progressJob = null;
 		}
 	}
 
