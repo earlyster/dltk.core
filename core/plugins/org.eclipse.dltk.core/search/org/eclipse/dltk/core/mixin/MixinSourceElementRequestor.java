@@ -107,11 +107,7 @@ public class MixinSourceElementRequestor implements ISourceElementRequestor {
 			String name) {
 	}
 
-	public void acceptTypeReference(char[][] typeName, int sourceStart,
-			int sourceEnd) {
-	}
-
-	public void acceptTypeReference(char[] typeName, int sourcePosition) {
+	public void acceptTypeReference(String typeName, int sourcePosition) {
 	}
 
 	/**

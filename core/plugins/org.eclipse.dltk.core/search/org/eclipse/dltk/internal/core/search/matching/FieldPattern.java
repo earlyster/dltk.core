@@ -25,8 +25,8 @@ public class FieldPattern extends VariablePattern implements IIndexConstants {
 	protected static char[][] REF_AND_DECL_CATEGORIES = { REF, FIELD_DECL };
 	protected static char[][] DECL_CATEGORIES = { FIELD_DECL };
 
-	public static char[] createIndexKey(char[] fieldName) {
-		return fieldName;
+	public static char[] createIndexKey(String fieldName) {
+		return fieldName.toCharArray();
 	}
 
 	public FieldPattern(boolean findDeclarations, boolean readAccess,

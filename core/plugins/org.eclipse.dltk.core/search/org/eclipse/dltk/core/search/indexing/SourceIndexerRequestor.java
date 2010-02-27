@@ -59,7 +59,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	 * @since 2.0
 	 */
 	public void acceptFieldReference(String fieldName, int sourcePosition) {
-		this.indexer.addFieldReference(fieldName.toCharArray());
+		this.indexer.addFieldReference(fieldName);
 	}
 
 	/**
@@ -87,27 +87,16 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	// }
 
 	/**
-	 * @see ISourceElementRequestor#acceptTypeReference(char[][], int, int)
-	 */
-	public void acceptTypeReference(char[][] typeName, int sourceStart,
-			int sourceEnd) {
-		int length = typeName.length;
-		for (int i = 0; i < length - 1; i++)
-			acceptUnknownReference(typeName[i], 0); // ?
-		acceptTypeReference(typeName[length - 1], 0);
-	}
-
-	/**
 	 * @see ISourceElementRequestor#acceptTypeReference(char[], int)
 	 */
-	public void acceptTypeReference(char[] simpleTypeName, int sourcePosition) {
+	public void acceptTypeReference(String simpleTypeName, int sourcePosition) {
 		this.indexer.addTypeReference(simpleTypeName);
 	}
 
 	/**
 	 * @see ISourceElementRequestor#acceptUnknownReference(char[][], int, int)
 	 */
-	public void acceptUnknownReference(char[][] name, int sourceStart,
+	public void acceptUnknownReference(String[] name, int sourceStart,
 			int sourceEnd) {
 		for (int i = 0; i < name.length; i++) {
 			acceptUnknownReference(name[i], 0);
@@ -117,7 +106,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	/**
 	 * @see ISourceElementRequestor#acceptUnknownReference(char[], int)
 	 */
-	public void acceptUnknownReference(char[] name, int sourcePosition) {
+	public void acceptUnknownReference(String name, int sourcePosition) {
 		this.indexer.addNameReference(name);
 	}
 
@@ -179,7 +168,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	 * @since 2.0
 	 */
 	public void enterField(FieldInfo fieldInfo) {
-		this.indexer.addFieldDeclaration(fieldInfo.name.toCharArray());
+		this.indexer.addFieldDeclaration(fieldInfo.name, fieldInfo.type);
 		this.methodDepth++;
 	}
 
@@ -273,7 +262,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	 * @since 2.0
 	 */
 	public boolean enterFieldCheckDuplicates(FieldInfo info) {
-		this.indexer.addFieldDeclaration(info.name.toCharArray());
+		this.indexer.addFieldDeclaration(info.name, info.type);
 		this.methodDepth++;
 		return true;
 	}

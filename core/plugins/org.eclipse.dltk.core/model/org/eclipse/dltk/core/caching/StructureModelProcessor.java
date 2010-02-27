@@ -176,13 +176,13 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 		}
 	}
 
-	public void acceptTypeReference1() {
+	private void acceptTypeReference1() {
 		try {
-			char[][] typeName = readDataStrings();
-			int sourceStart = in.readInt();
-			int sourceEnd = in.readInt();
-			this.requestor
-					.acceptTypeReference(typeName, sourceStart, sourceEnd);
+			/* char[][] typeName = */readDataStrings();
+			/* int sourceStart = */in.readInt();
+			/* int sourceEnd = */in.readInt();
+			// this.requestor.acceptTypeReference(typeName, sourceStart,
+			// sourceEnd);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -190,7 +190,7 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 
 	public void acceptTypeReference2() {
 		try {
-			char[] typeName = readDataString();
+			String typeName = readString();
 			int sourcePosition = in.readInt();
 			this.requestor.acceptTypeReference(typeName, sourcePosition);
 		} catch (IOException e) {

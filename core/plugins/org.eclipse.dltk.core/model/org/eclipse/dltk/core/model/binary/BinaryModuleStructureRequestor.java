@@ -246,11 +246,7 @@ public class BinaryModuleStructureRequestor implements IBinaryElementRequestor {
 			int BinaryPosition, int BinaryEndPosition) {
 	}
 
-	public void acceptTypeReference(char[][] typeName, int BinaryStart,
-			int BinaryEnd) {
-	}
-
-	public void acceptTypeReference(char[] typeName, int BinaryPosition) {
+	public void acceptTypeReference(String typeName, int BinaryPosition) {
 	}
 
 	public void acceptImport(ImportInfo importInfo) {

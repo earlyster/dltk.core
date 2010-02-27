@@ -4,6 +4,7 @@ public interface IStructureConstants {
 	static final int TAG_FIELD_REFERENCE = 0;
 	static final int TAG_METHOD_REF1 = 1;
 	static final int TAG_PACKAGE = 2;
+	@Deprecated
 	static final int TAG_TYPE_REFERENCE1 = 3;
 	static final int TAG_TYPE_REFERENCE2 = 4;
 	static final int TAG_ENTER_FIELD = 5;

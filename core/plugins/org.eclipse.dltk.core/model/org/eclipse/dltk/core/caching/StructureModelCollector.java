@@ -101,21 +101,7 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		}
 	}
 
-	public void acceptTypeReference(char[][] typeName, int sourceStart,
-			int sourceEnd) {
-		this.baseRequestor
-				.acceptTypeReference(typeName, sourceStart, sourceEnd);
-		try {
-			writeTag(TAG_TYPE_REFERENCE1);
-			writeString(typeName);
-			out.writeInt(sourceStart);
-			out.writeInt(sourceEnd);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void acceptTypeReference(char[] typeName, int sourcePosition) {
+	public void acceptTypeReference(String typeName, int sourcePosition) {
 		this.baseRequestor.acceptTypeReference(typeName, sourcePosition);
 		try {
 			writeTag(TAG_TYPE_REFERENCE2);

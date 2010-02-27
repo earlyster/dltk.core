@@ -414,11 +414,7 @@ public class SourceModuleStructureRequestor implements ISourceElementRequestor,
 			int sourcePosition, int sourceEndPosition) {
 	}
 
-	public void acceptTypeReference(char[][] typeName, int sourceStart,
-			int sourceEnd) {
-	}
-
-	public void acceptTypeReference(char[] typeName, int sourcePosition) {
+	public void acceptTypeReference(String typeName, int sourcePosition) {
 	}
 
 	public void acceptImport(ImportInfo importInfo) {

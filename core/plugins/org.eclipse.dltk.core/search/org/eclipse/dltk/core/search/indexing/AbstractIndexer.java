@@ -10,7 +10,6 @@
 package org.eclipse.dltk.core.search.indexing;
 
 import org.eclipse.dltk.compiler.CharOperation;
-import org.eclipse.dltk.core.IScriptFolder;
 import org.eclipse.dltk.core.search.SearchDocument;
 import org.eclipse.dltk.internal.core.search.matching.FieldPattern;
 import org.eclipse.dltk.internal.core.search.matching.MethodDeclarationPattern;
@@ -40,18 +39,19 @@ public abstract class AbstractIndexer implements IIndexConstants {
 			// addTypeReference(superclass);
 			// }
 			for (int i = 0, max = superclasss.length; i < max; i++) {
-				char[] superClass = erasure(superclasss[i].toCharArray());
+				String superClass = erasure(superclasss[i]);
 				addTypeReference(superClass);
 				addIndexEntry(SUPER_REF, SuperTypeReferencePattern
 						.createIndexKey(modifiers, packageName, name
 								.toCharArray(), enclosingTypeNames, null,
-								TYPE_SUFFIX, superClass, TYPE_SUFFIX));
+								TYPE_SUFFIX, superClass.toCharArray(),
+								TYPE_SUFFIX));
 
 			}
 		}
 	}
 
-	private char[] erasure(char[] typeName) {
+	private String erasure(String typeName) {
 		return typeName;
 	}
 
@@ -84,16 +84,13 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		// ConstructorPattern.createIndexKey(innermostTypeName, argCount));
 	}
 
-	public void addFieldDeclaration(char[] typeName, char[] fieldName) {
+	public void addFieldDeclaration(String fieldName, String typeName) {
 		addIndexEntry(FIELD_DECL, FieldPattern.createIndexKey(fieldName));
-		addTypeReference(typeName);
+		if (typeName != null)
+			addTypeReference(typeName);
 	}
 
-	public void addFieldDeclaration(char[] fieldName) {
-		addIndexEntry(FIELD_DECL, FieldPattern.createIndexKey(fieldName));
-	}
-
-	public void addFieldReference(char[] fieldName) {
+	public void addFieldReference(String fieldName) {
 		addNameReference(fieldName);
 	}
 
@@ -125,13 +122,12 @@ public abstract class AbstractIndexer implements IIndexConstants {
 				argCount));
 	}
 
-	public void addNameReference(char[] name) {
-		addIndexEntry(REF, name);
+	public void addNameReference(String name) {
+		addIndexEntry(REF, name.toCharArray());
 	}
 
-	public void addTypeReference(char[] typeName) {
-		addNameReference(CharOperation.lastSegment(typeName,
-				IScriptFolder.PACKAGE_DELIMITER));
+	public void addTypeReference(String typeName) {
+		addNameReference(typeName);
 	}
 
 	public abstract void indexDocument();

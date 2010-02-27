@@ -46,9 +46,7 @@ public interface IElementRequestor {
 
 	void acceptPackage(int declarationStart, int declarationEnd, String name);
 
-	void acceptTypeReference(char[] typeName, int sourcePosition);
-
-	void acceptTypeReference(char[][] typeName, int sourceStart, int sourceEnd);
+	void acceptTypeReference(String typeName, int sourcePosition);
 
 	void enterField(FieldInfo info);
 
