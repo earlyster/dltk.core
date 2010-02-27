@@ -4059,4 +4059,18 @@ public final class CharOperation {
 		}
 		return result;
 	}
+
+	/**
+	 * @param name
+	 * @param separator
+	 * @return
+	 */
+	public static String lastSegment(String name, char separator) {
+		int pos = name.lastIndexOf(separator);
+		if (pos >= 0) {
+			return name.substring(pos + 1);
+		} else {
+			return name;
+		}
+	}
 }

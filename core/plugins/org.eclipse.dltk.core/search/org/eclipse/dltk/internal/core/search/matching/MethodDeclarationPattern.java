@@ -39,11 +39,11 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 	 * packageName / enclosingTypeName / modifiers or for secondary types key =
 	 * typeName / packageName / enclosingTypeName / modifiers / 'S'
 	 */
-	public static char[] createIndexKey(int modifiers, char[] methodName,
+	public static char[] createIndexKey(int modifiers, String methodName,
 			String[] parameterNames, String packageName,
 			String[] enclosingTypeNames) {
 
-		int typeNameLength = methodName == null ? 0 : methodName.length;
+		int typeNameLength = methodName == null ? 0 : methodName.length();
 
 		int parameterNamesLength = 0;
 		if (parameterNames != null) {
@@ -69,7 +69,7 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 		char[] result = new char[resultLength];
 		int pos = 0;
 		if (typeNameLength > 0) {
-			System.arraycopy(methodName, 0, result, pos, typeNameLength);
+			methodName.getChars(0, typeNameLength, result, pos);
 			pos += typeNameLength;
 		}
 		result[pos++] = SEPARATOR;

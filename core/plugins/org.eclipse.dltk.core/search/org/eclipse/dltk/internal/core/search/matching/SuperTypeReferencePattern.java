@@ -44,7 +44,7 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 	protected static char[][] CATEGORIES = { IIndexConstants.SUPER_REF };
 
 	public static char[] createIndexKey(int modifiers, String packageName,
-			char[] typeName, char[][] enclosingTypeNames,
+			String typeName, char[][] enclosingTypeNames,
 			char[][] typeParameterSignatures, char classOrInterface,
 			char[] superTypeName, char superClassOrInterface) {
 
@@ -80,7 +80,7 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 			superSimpleName = superTypeSourceName;
 		}
 
-		char[] simpleName = CharOperation.lastSegment(typeName, '.');
+		String simpleName = CharOperation.lastSegment(typeName, '.');
 		char[] enclosingTypeName = CharOperation.concatWith(enclosingTypeNames,
 				'$');
 		if (superQualification != null
@@ -112,7 +112,7 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 		int superLength = superSimpleName == null ? 0 : superSimpleName.length;
 		int superQLength = superQualification == null ? 0
 				: superQualification.length;
-		int simpleLength = simpleName == null ? 0 : simpleName.length;
+		int simpleLength = simpleName == null ? 0 : simpleName.length();
 		int enclosingLength = enclosingTypeName == null ? 0
 				: enclosingTypeName.length;
 		int packageLength = packageName == null ? 0 : packageName.length();
@@ -130,7 +130,7 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 		}
 		result[pos++] = IIndexConstants.SEPARATOR;
 		if (simpleLength > 0) {
-			System.arraycopy(simpleName, 0, result, pos, simpleLength);
+			simpleName.getChars(0, simpleLength, result, pos);
 			pos += simpleLength;
 		}
 		result[pos++] = IIndexConstants.SEPARATOR;
@@ -252,7 +252,8 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 	}
 
 	public SearchPattern getBlankPattern() {
-		return new SuperTypeReferencePattern(R_EXACT_MATCH | R_CASE_SENSITIVE, getToolkit());
+		return new SuperTypeReferencePattern(R_EXACT_MATCH | R_CASE_SENSITIVE,
+				getToolkit());
 	}
 
 	public char[][] getIndexCategories() {

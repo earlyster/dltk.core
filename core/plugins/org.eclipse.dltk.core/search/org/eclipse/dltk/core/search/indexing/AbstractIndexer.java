@@ -42,10 +42,9 @@ public abstract class AbstractIndexer implements IIndexConstants {
 				String superClass = erasure(superclasss[i]);
 				addTypeReference(superClass);
 				addIndexEntry(SUPER_REF, SuperTypeReferencePattern
-						.createIndexKey(modifiers, packageName, name
-								.toCharArray(), enclosingTypeNames, null,
-								TYPE_SUFFIX, superClass.toCharArray(),
-								TYPE_SUFFIX));
+						.createIndexKey(modifiers, packageName, name,
+								enclosingTypeNames, null, TYPE_SUFFIX,
+								superClass.toCharArray(), TYPE_SUFFIX));
 
 			}
 		}
@@ -103,8 +102,8 @@ public abstract class AbstractIndexer implements IIndexConstants {
 			String[] parameterNames, String[] exceptionTypes) {
 
 		addIndexEntry(METHOD_DECL, MethodDeclarationPattern.createIndexKey(
-				modifiers, methodName.toCharArray(), parameterNames,
-				packageName, enclosingTypeNames));
+				modifiers, methodName, parameterNames, packageName,
+				enclosingTypeNames));
 
 		// if (parameterNames != null) {
 		// for (int i = 0; i < argCount; i++)
