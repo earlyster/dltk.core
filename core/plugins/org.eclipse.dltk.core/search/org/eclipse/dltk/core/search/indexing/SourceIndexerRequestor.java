@@ -25,7 +25,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 		IBinaryElementRequestor, IIndexConstants, IIndexRequestor {
 	protected AbstractIndexer indexer;
 	// char[] packageName = CharOperation.NO_CHAR;
-	protected char[][] enclosingTypeNames = new char[5][];
+	protected String[] enclosingTypeNames = new String[5];
 	protected int depth = 0;
 	protected int methodDepth = 0;
 	protected char[] pkgName = CharOperation.NO_CHAR;
@@ -116,10 +116,10 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	 * java.lang.Object ---> null java.util.Hashtable$Entry --> [Hashtable]
 	 * x.y.A$B$C --> [A, B]
 	 */
-	public char[][] enclosingTypeNames() {
+	public String[] enclosingTypeNames() {
 		if (depth == 0)
 			return null;
-		char[][] qualification = new char[this.depth][];
+		String[] qualification = new String[this.depth];
 		System.arraycopy(this.enclosingTypeNames, 0, qualification, 0,
 				this.depth);
 
@@ -143,15 +143,17 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 			}
 			// this.indexer.addConstructorReference(typeInfo.superclasss, 0);
 		}
-		char[][] typeNames;
+		String[] typeNames;
 		if (this.methodDepth > 0) {
-			typeNames = ONE_ZERO_CHAR;
+			typeNames = ONE_ZERO_CHAR_STRINGS;
 		} else {
 			typeNames = this.enclosingTypeNames();
 		}
 		this.indexer.addTypeDeclaration(typeInfo.modifiers, this.pkgName,
-				typeInfo.name, typeNames, typeInfo.superclasses);
-		this.pushTypeName(typeInfo.name.toCharArray());
+				typeInfo.name, CharOperation
+						.stringArrayToCharCharArray(typeNames),
+				typeInfo.superclasses);
+		this.pushTypeName(typeInfo.name);
 	}
 
 	/**
@@ -217,10 +219,10 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 		// }
 	}
 
-	public void pushTypeName(char[] typeName) {
+	public void pushTypeName(String typeName) {
 		if (depth == enclosingTypeNames.length)
 			System.arraycopy(enclosingTypeNames, 0,
-					enclosingTypeNames = new char[depth * 2][], 0, depth);
+					enclosingTypeNames = new String[depth * 2], 0, depth);
 		enclosingTypeNames[depth++] = typeName;
 	}
 

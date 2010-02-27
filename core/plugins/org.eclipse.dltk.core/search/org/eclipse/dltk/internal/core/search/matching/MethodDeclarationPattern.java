@@ -41,7 +41,7 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 	 */
 	public static char[] createIndexKey(int modifiers, char[] methodName,
 			String[] parameterNames, char[] packageName,
-			char[][] enclosingTypeNames) {
+			String[] enclosingTypeNames) {
 
 		int typeNameLength = methodName == null ? 0 : methodName.length;
 
@@ -58,7 +58,7 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 		int enclosingNamesLength = 0;
 		if (enclosingTypeNames != null) {
 			for (int i = 0, length = enclosingTypeNames.length; i < length;) {
-				enclosingNamesLength += enclosingTypeNames[i].length;
+				enclosingNamesLength += enclosingTypeNames[i].length();
 				if (++i < length)
 					enclosingNamesLength++; // for the '.' separator
 			}
@@ -91,9 +91,9 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 		result[pos++] = SEPARATOR;
 		if (enclosingTypeNames != null && enclosingNamesLength > 0) {
 			for (int i = 0, length = enclosingTypeNames.length; i < length;) {
-				char[] enclosingName = enclosingTypeNames[i];
-				int itsLength = enclosingName.length;
-				System.arraycopy(enclosingName, 0, result, pos, itsLength);
+				String enclosingName = enclosingTypeNames[i];
+				int itsLength = enclosingName.length();
+				enclosingName.getChars(0, itsLength, result, pos);
 				pos += itsLength;
 				if (++i < length)
 					result[pos++] = '$';

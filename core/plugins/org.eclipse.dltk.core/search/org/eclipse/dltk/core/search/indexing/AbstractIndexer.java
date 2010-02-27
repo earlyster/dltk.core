@@ -99,7 +99,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 	}
 
 	public void addMethodDeclaration(int modifiers, char[] packageName,
-			char[][] enclosingTypeNames, String methodName,
+			String[] enclosingTypeNames, String methodName,
 			String[] parameterNames, String[] exceptionTypes) {
 
 		addIndexEntry(METHOD_DECL, MethodDeclarationPattern.createIndexKey(

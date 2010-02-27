@@ -9,36 +9,40 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search.indexing;
 
-
 public interface IIndexConstants {
 
 	/* index encoding */
-	char[] REF= "ref".toCharArray(); //$NON-NLS-1$
-	char[] METHOD_REF= "methodRef".toCharArray(); //$NON-NLS-1$
-	char[] CONSTRUCTOR_REF= "constructorRef".toCharArray(); //$NON-NLS-1$
+	char[] REF = "ref".toCharArray(); //$NON-NLS-1$
+	char[] METHOD_REF = "methodRef".toCharArray(); //$NON-NLS-1$
+	char[] CONSTRUCTOR_REF = "constructorRef".toCharArray(); //$NON-NLS-1$
 	char[] SUPER_REF = "superRef".toCharArray(); //$NON-NLS-1$
 	char[] TYPE_DECL = "typeDecl".toCharArray(); //$NON-NLS-1$
-	char[] METHOD_DECL= "methodDecl".toCharArray(); //$NON-NLS-1$
-	char[] CONSTRUCTOR_DECL= "constructorDecl".toCharArray(); //$NON-NLS-1$
-	char[] FIELD_DECL= "fieldDecl".toCharArray(); //$NON-NLS-1$
+	char[] METHOD_DECL = "methodDecl".toCharArray(); //$NON-NLS-1$
+	char[] CONSTRUCTOR_DECL = "constructorDecl".toCharArray(); //$NON-NLS-1$
+	char[] FIELD_DECL = "fieldDecl".toCharArray(); //$NON-NLS-1$
 	char[] OBJECT = "Object".toCharArray(); //$NON-NLS-1$
 	char[] MIXIN = "mixin".toCharArray(); //$NON-NLS-1$
-	char SEPARATOR= '{';
-	char[][] COUNTS= 
-		new char[][] { new char[] {SEPARATOR, '0'}, new char[] {SEPARATOR, '1'}, new char[] {SEPARATOR, '2'}, new char[] {SEPARATOR, '3'}, new char[] {SEPARATOR, '4'},
-			new char[] {SEPARATOR, '5'}, new char[] {SEPARATOR, '6'}, new char[] {SEPARATOR, '7'}, new char[] {SEPARATOR, '8'}, new char[] {SEPARATOR, '9'}
-	};
-	char TYPE_SUFFIX = 'C';	
-	char ANNOTATION_TYPE_SUFFIX = 'A';		
+	char SEPARATOR = '{';
+	char[][] COUNTS = new char[][] { new char[] { SEPARATOR, '0' },
+			new char[] { SEPARATOR, '1' }, new char[] { SEPARATOR, '2' },
+			new char[] { SEPARATOR, '3' }, new char[] { SEPARATOR, '4' },
+			new char[] { SEPARATOR, '5' }, new char[] { SEPARATOR, '6' },
+			new char[] { SEPARATOR, '7' }, new char[] { SEPARATOR, '8' },
+			new char[] { SEPARATOR, '9' } };
+	char TYPE_SUFFIX = 'C';
+	char ANNOTATION_TYPE_SUFFIX = 'A';
 	char SECONDARY_SUFFIX = 'S';
 
-	char[] ONE_STAR = new char[] {'*'};
-	char[][] ONE_STAR_CHAR = new char[][] {ONE_STAR};
+	char[] ONE_STAR = new char[] { '*' };
+	char[][] ONE_STAR_CHAR = new char[][] { ONE_STAR };
 
-	// used as special marker for enclosing type name of local and anonymous classes
-	char ZERO_CHAR = '0'; 
-	char[] ONE_ZERO = new char[] { ZERO_CHAR }; 
-	char[][] ONE_ZERO_CHAR = new char[][] {ONE_ZERO};
+	// used as special marker for enclosing type name of local and anonymous
+	// classes
+	char ZERO_CHAR = '0';
+	char[] ONE_ZERO = new char[] { ZERO_CHAR };
+	char[][] ONE_ZERO_CHAR = new char[][] { ONE_ZERO };
+
+	String[] ONE_ZERO_CHAR_STRINGS = new String[] { String.valueOf(ONE_ZERO) };
 
 	int PKG_REF_PATTERN = 0x0001;
 	int PKG_DECL_PATTERN = 0x0002;
