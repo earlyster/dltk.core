@@ -40,12 +40,12 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 	 * typeName / packageName / enclosingTypeName / modifiers / 'S'
 	 */
 	public static char[] createIndexKey(int modifiers, char[] typeName,
-			char[] packageName, char[][] enclosingTypeNames, char[][] superTypes) { // ,
+			String packageName, char[][] enclosingTypeNames, char[][] superTypes) { // ,
 		// char
 		// typeSuffix)
 		// {
 		int typeNameLength = typeName == null ? 0 : typeName.length;
-		int packageLength = packageName == null ? 0 : packageName.length;
+		int packageLength = packageName == null ? 0 : packageName.length();
 		int enclosingNamesLength = 0;
 		if (enclosingTypeNames != null) {
 			for (int i = 0, length = enclosingTypeNames.length; i < length;) {
@@ -73,7 +73,7 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 		}
 		result[pos++] = SEPARATOR;
 		if (packageLength > 0) {
-			System.arraycopy(packageName, 0, result, pos, packageLength);
+			packageName.getChars(0, packageLength, result, pos);
 			pos += packageLength;
 		}
 		result[pos++] = SEPARATOR;

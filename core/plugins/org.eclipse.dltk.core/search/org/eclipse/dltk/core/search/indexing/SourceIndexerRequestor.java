@@ -12,6 +12,7 @@ package org.eclipse.dltk.core.search.indexing;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.IBinaryElementRequestor;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
+import org.eclipse.dltk.compiler.util.Util;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.ISearchFactory;
 import org.eclipse.dltk.core.ISearchPatternProcessor;
@@ -28,7 +29,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	protected String[] enclosingTypeNames = new String[5];
 	protected int depth = 0;
 	protected int methodDepth = 0;
-	protected char[] pkgName = CharOperation.NO_CHAR;
+	protected String pkgName = Util.EMPTY_STRING;
 
 	protected ISearchFactory searchFactory;
 	protected ISearchPatternProcessor searchPatternProcessor;
@@ -250,7 +251,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	}
 
 	public void setPackageName(String pkgName) {
-		this.pkgName = pkgName.toCharArray();
+		this.pkgName = pkgName;
 	}
 
 	/**

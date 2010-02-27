@@ -25,7 +25,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		this.document = document;
 	}
 
-	public void addTypeDeclaration(int modifiers, char[] packageName,
+	public void addTypeDeclaration(int modifiers, String packageName,
 			String name, char[][] enclosingTypeNames, String[] superclasss) {
 
 		char[] indexKey = TypeDeclarationPattern.createIndexKey(modifiers, name
@@ -98,7 +98,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		this.document.addIndexEntry(category, key);
 	}
 
-	public void addMethodDeclaration(int modifiers, char[] packageName,
+	public void addMethodDeclaration(int modifiers, String packageName,
 			String[] enclosingTypeNames, String methodName,
 			String[] parameterNames, String[] exceptionTypes) {
 

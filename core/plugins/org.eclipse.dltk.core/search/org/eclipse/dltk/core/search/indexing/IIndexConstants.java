@@ -42,7 +42,8 @@ public interface IIndexConstants {
 	char[] ONE_ZERO = new char[] { ZERO_CHAR };
 	char[][] ONE_ZERO_CHAR = new char[][] { ONE_ZERO };
 
-	String[] ONE_ZERO_CHAR_STRINGS = new String[] { String.valueOf(ONE_ZERO) };
+	String ONE_ZERO_CHAR_STRING = String.valueOf(ONE_ZERO);
+	String[] ONE_ZERO_CHAR_STRINGS = new String[] { ONE_ZERO_CHAR_STRING };
 
 	int PKG_REF_PATTERN = 0x0001;
 	int PKG_DECL_PATTERN = 0x0002;

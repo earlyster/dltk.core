@@ -40,7 +40,7 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 	 * typeName / packageName / enclosingTypeName / modifiers / 'S'
 	 */
 	public static char[] createIndexKey(int modifiers, char[] methodName,
-			String[] parameterNames, char[] packageName,
+			String[] parameterNames, String packageName,
 			String[] enclosingTypeNames) {
 
 		int typeNameLength = methodName == null ? 0 : methodName.length;
@@ -54,7 +54,7 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 			}
 		}
 
-		int packageLength = packageName == null ? 0 : packageName.length;
+		int packageLength = packageName == null ? 0 : packageName.length();
 		int enclosingNamesLength = 0;
 		if (enclosingTypeNames != null) {
 			for (int i = 0, length = enclosingTypeNames.length; i < length;) {
@@ -85,7 +85,7 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 		}
 		result[pos++] = SEPARATOR;
 		if (packageLength > 0) {
-			System.arraycopy(packageName, 0, result, pos, packageLength);
+			packageName.getChars(0, packageLength, result, pos);
 			pos += packageLength;
 		}
 		result[pos++] = SEPARATOR;
