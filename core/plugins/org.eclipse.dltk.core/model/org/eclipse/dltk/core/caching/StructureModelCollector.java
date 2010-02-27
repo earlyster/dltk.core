@@ -182,25 +182,6 @@ public class StructureModelCollector extends AbstractDataSaver implements
 	/**
 	 * @since 2.0
 	 */
-	public boolean enterFieldWithParentType(FieldInfo info, String parentName,
-			String delimiter) {
-		boolean result = this.baseRequestor.enterFieldWithParentType(info,
-				parentName, delimiter);
-		try {
-			writeTag(TAG_ENTER_FIELD_WITH_PARENT);
-			writeFieldInfo(info);
-			writeString(parentName);
-			writeString(delimiter);
-			out.writeBoolean(result);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
-
-	/**
-	 * @since 2.0
-	 */
 	public void enterMethod(MethodInfo info) {
 		this.baseRequestor.enterMethod(info);
 		try {
@@ -222,24 +203,6 @@ public class StructureModelCollector extends AbstractDataSaver implements
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * @since 2.0
-	 */
-	public boolean enterMethodWithParentType(MethodInfo info,
-			String parentName, String delimiter) {
-		boolean result = this.baseRequestor.enterMethodWithParentType(info,
-				parentName, delimiter);
-		try {
-			writeTag(TAG_ENTER_METHOD_WITH_PARENT);
-			writeMethodInfo(info);
-			writeString(parentName);
-			writeString(delimiter);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return result;
 	}
 
 	public void enterModule() {

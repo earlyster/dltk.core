@@ -17,7 +17,7 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 	private ISourceElementRequestor requestor;
 
 	public StructureModelProcessor(InputStream stream,
-			ISourceElementRequestor requestor) throws IOException {
+			ISourceElementRequestor requestor) {
 		super(stream);
 		this.requestor = requestor;
 	}
@@ -246,15 +246,15 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 		return false;
 	}
 
-	public boolean enterFieldWithParentType() {
+	private boolean enterFieldWithParentType() {
 		boolean result = false;
 		try {
 			FieldInfo info = new FieldInfo();
 			readFieldInfo(info);
-			String parentName = readString();
-			String delimiter = readString();
+			/* String parentName = */readString();
+			/* String delimiter = */readString();
 			in.readBoolean();
-			requestor.enterFieldWithParentType(info, parentName, delimiter);
+			// requestor.enterFieldWithParentType(info, parentName, delimiter);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -281,15 +281,16 @@ public class StructureModelProcessor extends AbstractDataLoader implements
 		}
 	}
 
-	public boolean enterMethodWithParentType() {
+	private boolean enterMethodWithParentType() {
 		boolean result = false;
 		try {
 			MethodInfo info = new MethodInfo();
 			readMethodInfo(info);
-			String parentName = readString();
-			String delimiter = readString();
-			result = this.requestor.enterMethodWithParentType(info, parentName,
-					delimiter);
+			/* String parentName = */readString();
+			/* String delimiter = */readString();
+			// result = this.requestor.enterMethodWithParentType(info,
+			// parentName,
+			// delimiter);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

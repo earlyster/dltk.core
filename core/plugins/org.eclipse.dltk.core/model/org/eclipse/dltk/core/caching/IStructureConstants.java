@@ -8,9 +8,11 @@ public interface IStructureConstants {
 	static final int TAG_TYPE_REFERENCE2 = 4;
 	static final int TAG_ENTER_FIELD = 5;
 	static final int TAG_ENTER_FIELD_DUPL = 6;
+	@Deprecated
 	static final int TAG_ENTER_FIELD_WITH_PARENT = 7;
 	static final int TAG_ENTER_METHOD = 8;
 	static final int TAG_ENTER_METHOD_REMOVE_SAME = 9;
+	@Deprecated
 	static final int TAG_ENTER_METHOD_WITH_PARENT = 10;
 	static final int TAG_ENTER_MODULE = 11;
 	static final int TAG_ENTER_MODULE_ROOT = 12;

@@ -32,32 +32,6 @@ public interface ISourceElementRequestor extends IElementRequestor {
 	void enterMethodRemoveSame(IElementRequestor.MethodInfo info);
 
 	/**
-	 * Enter method for selected parent in currect module.
-	 * 
-	 * @param info
-	 * @param parentName
-	 *            parent name delimited with $ symbol.
-	 * @return boolean - return false if parent with selected name, coul'd not
-	 *         be found.
-	 * @since 2.0
-	 */
-	boolean enterMethodWithParentType(IElementRequestor.MethodInfo info,
-			String parentName, String delimiter);
-
-	/**
-	 * Enter field for selected parent in currect module.
-	 * 
-	 * @param info
-	 * @param parentName
-	 *            parent name delimited with $ symbol.
-	 * @return boolean - return false if parent with selected name, coul'd not
-	 *         be found.
-	 * @since 2.0
-	 */
-	boolean enterFieldWithParentType(IElementRequestor.FieldInfo info,
-			String parentName, String delimiter);
-
-	/**
 	 * If type with same name already exist, then enter it instead.
 	 * 
 	 * @param info
