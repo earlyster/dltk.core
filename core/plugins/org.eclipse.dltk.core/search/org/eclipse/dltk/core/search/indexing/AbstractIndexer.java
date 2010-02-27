@@ -117,9 +117,9 @@ public abstract class AbstractIndexer implements IIndexConstants {
 		// addTypeReference(returnType);
 	}
 
-	public void addMethodReference(char[] methodName, int argCount) {
-		addIndexEntry(METHOD_REF, MethodPattern.createIndexKey(methodName,
-				argCount));
+	public void addMethodReference(String methodName, int argCount) {
+		addIndexEntry(METHOD_REF, MethodPattern.createIndexKey(methodName
+				.toCharArray(), argCount));
 	}
 
 	public void addNameReference(String name) {

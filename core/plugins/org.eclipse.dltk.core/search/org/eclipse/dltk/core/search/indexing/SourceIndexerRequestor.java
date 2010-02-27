@@ -75,7 +75,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	 */
 	public void acceptMethodReference(String methodName, int argCount,
 			int sourcePosition, int sourceEndPosition) {
-		this.indexer.addMethodReference(methodName.toCharArray(), argCount);
+		this.indexer.addMethodReference(methodName, argCount);
 	}
 
 	// /**
