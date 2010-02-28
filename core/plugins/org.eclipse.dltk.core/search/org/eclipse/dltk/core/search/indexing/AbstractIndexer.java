@@ -26,7 +26,7 @@ public abstract class AbstractIndexer implements IIndexConstants {
 	}
 
 	public void addTypeDeclaration(int modifiers, String packageName,
-			String name, char[][] enclosingTypeNames, String[] superclasss) {
+			String name, String[] enclosingTypeNames, String[] superclasss) {
 
 		char[] indexKey = TypeDeclarationPattern.createIndexKey(modifiers,
 				name, packageName, enclosingTypeNames, CharOperation

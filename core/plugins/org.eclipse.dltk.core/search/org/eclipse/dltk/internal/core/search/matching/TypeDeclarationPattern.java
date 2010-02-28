@@ -40,7 +40,7 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 	 * typeName / packageName / enclosingTypeName / modifiers / 'S'
 	 */
 	public static char[] createIndexKey(int modifiers, String typeName,
-			String packageName, char[][] enclosingTypeNames, char[][] superTypes) { // ,
+			String packageName, String[] enclosingTypeNames, char[][] superTypes) { // ,
 		// char
 		// typeSuffix)
 		// {
@@ -49,7 +49,7 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 		int enclosingNamesLength = 0;
 		if (enclosingTypeNames != null) {
 			for (int i = 0, length = enclosingTypeNames.length; i < length;) {
-				enclosingNamesLength += enclosingTypeNames[i].length;
+				enclosingNamesLength += enclosingTypeNames[i].length();
 				if (++i < length)
 					enclosingNamesLength++; // for the '.' separator
 			}
@@ -79,9 +79,9 @@ public class TypeDeclarationPattern extends DLTKSearchPattern implements
 		result[pos++] = SEPARATOR;
 		if (enclosingTypeNames != null && enclosingNamesLength > 0) {
 			for (int i = 0, length = enclosingTypeNames.length; i < length;) {
-				char[] enclosingName = enclosingTypeNames[i];
-				int itsLength = enclosingName.length;
-				System.arraycopy(enclosingName, 0, result, pos, itsLength);
+				String enclosingName = enclosingTypeNames[i];
+				int itsLength = enclosingName.length();
+				enclosingName.getChars(0, itsLength, result, pos);
 				pos += itsLength;
 				if (++i < length)
 					result[pos++] = '$';

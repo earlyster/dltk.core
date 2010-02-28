@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.core.search.indexing;
 
-import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.compiler.IBinaryElementRequestor;
 import org.eclipse.dltk.compiler.ISourceElementRequestor;
 import org.eclipse.dltk.compiler.util.Util;
@@ -151,9 +150,7 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 			typeNames = this.enclosingTypeNames();
 		}
 		this.indexer.addTypeDeclaration(typeInfo.modifiers, this.pkgName,
-				typeInfo.name, CharOperation
-						.stringArrayToCharCharArray(typeNames),
-				typeInfo.superclasses);
+				typeInfo.name, typeNames, typeInfo.superclasses);
 		this.pushTypeName(typeInfo.name);
 	}
 

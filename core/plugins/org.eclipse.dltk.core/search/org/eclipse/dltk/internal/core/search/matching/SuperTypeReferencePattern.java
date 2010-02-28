@@ -44,7 +44,7 @@ public class SuperTypeReferencePattern extends DLTKSearchPattern {
 	protected static char[][] CATEGORIES = { IIndexConstants.SUPER_REF };
 
 	public static char[] createIndexKey(int modifiers, String packageName,
-			String typeName, char[][] enclosingTypeNames,
+			String typeName, String[] enclosingTypeNames,
 			char[][] typeParameterSignatures, char classOrInterface,
 			char[] superTypeName, char superClassOrInterface) {
 
