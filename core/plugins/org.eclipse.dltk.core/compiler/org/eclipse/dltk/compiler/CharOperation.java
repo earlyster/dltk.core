@@ -1003,6 +1003,35 @@ public final class CharOperation {
 		return result;
 	}
 
+	public static final char[] concatWith(String[] array, char separator) {
+		int length = array == null ? 0 : array.length;
+		if (length == 0)
+			return CharOperation.NO_CHAR;
+
+		int size = length - 1;
+		int index = length;
+		while (--index >= 0) {
+			final int len = array[index].length();
+			if (len == 0)
+				size--;
+			else
+				size += len;
+		}
+		if (size <= 0)
+			return CharOperation.NO_CHAR;
+		char[] result = new char[size];
+		index = length;
+		while (--index >= 0) {
+			length = array[index].length();
+			if (length > 0) {
+				array[index].getChars(0, length, result, (size -= length));
+				if (--size >= 0)
+					result[size] = separator;
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * Answers true if the array contains an occurrence of character, false
 	 * otherwise.
