@@ -75,9 +75,9 @@ public class MethodDeclarationPattern extends DLTKSearchPattern implements
 		result[pos++] = SEPARATOR;
 		if (parameterNames != null && parameterNamesLength > 0) {
 			for (int i = 0, length = parameterNames.length; i < length;) {
-				char[] parameterName = parameterNames[i].toCharArray();
-				int itsLength = parameterName.length;
-				System.arraycopy(parameterName, 0, result, pos, itsLength);
+				String parameterName = parameterNames[i];
+				int itsLength = parameterName.length();
+				parameterName.getChars(0, itsLength, result, pos);
 				pos += itsLength;
 				if (++i < length)
 					result[pos++] = ',';
