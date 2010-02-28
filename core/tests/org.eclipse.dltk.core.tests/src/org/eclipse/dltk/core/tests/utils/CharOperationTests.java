@@ -52,4 +52,13 @@ public class CharOperationTests extends TestCase {
 		assertEquals("CC", new String(result[2]));
 	}
 
+	public void testStringConcatWith() {
+		char[] result = CharOperation
+				.concatWith(new String[] { "A", "B" }, '.');
+		assertEquals(3, result.length);
+		assertEquals('A', result[0]);
+		assertEquals('.', result[1]);
+		assertEquals('B', result[2]);
+	}
+
 }
