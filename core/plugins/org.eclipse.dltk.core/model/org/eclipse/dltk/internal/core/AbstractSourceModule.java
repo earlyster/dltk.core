@@ -128,15 +128,15 @@ public abstract class AbstractSourceModule extends Openable implements
 	}
 
 	public IType[] getAllTypes() throws ModelException {
-		IModelElement[] types = getTypes();
+		IType[] types = getTypes();
 		int i;
-		ArrayList allTypes = new ArrayList(types.length);
-		ArrayList typesToTraverse = new ArrayList(types.length);
+		ArrayList<IType> allTypes = new ArrayList<IType>(types.length);
+		ArrayList<IType> typesToTraverse = new ArrayList<IType>(types.length);
 		for (i = 0; i < types.length; i++) {
 			typesToTraverse.add(types[i]);
 		}
 		while (!typesToTraverse.isEmpty()) {
-			IType type = (IType) typesToTraverse.get(0);
+			IType type = typesToTraverse.get(0);
 			typesToTraverse.remove(type);
 			allTypes.add(type);
 			types = type.getTypes();
