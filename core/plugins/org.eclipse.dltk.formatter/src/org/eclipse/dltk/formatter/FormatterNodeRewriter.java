@@ -12,17 +12,15 @@
 package org.eclipse.dltk.formatter;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public abstract class FormatterNodeRewriter {
 
 	protected void mergeTextNodes(IFormatterContainerNode root) {
-		final List body = root.getBody();
-		final List newBody = new ArrayList();
-		final List texts = new ArrayList();
-		for (Iterator i = body.iterator(); i.hasNext();) {
-			final IFormatterNode node = (IFormatterNode) i.next();
+		final List<IFormatterNode> body = root.getBody();
+		final List<IFormatterNode> newBody = new ArrayList<IFormatterNode>();
+		final List<IFormatterNode> texts = new ArrayList<IFormatterNode>();
+		for (final IFormatterNode node : body) {
 			if (isPlainTextNode(node)) {
 				if (!texts.isEmpty()
 						&& ((IFormatterTextNode) texts.get(texts.size() - 1))
@@ -44,19 +42,18 @@ public abstract class FormatterNodeRewriter {
 			body.clear();
 			body.addAll(newBody);
 		}
-		for (Iterator i = body.iterator(); i.hasNext();) {
-			final IFormatterNode node = (IFormatterNode) i.next();
+		for (final IFormatterNode node : body) {
 			if (node instanceof IFormatterContainerNode) {
 				mergeTextNodes((IFormatterContainerNode) node);
 			}
 		}
 	}
 
-	private void flushTextNodes(List texts, List newBody) {
+	private void flushTextNodes(List<IFormatterNode> texts,
+			List<IFormatterNode> newBody) {
 		if (texts.size() > 1) {
-			final IFormatterNode first = (IFormatterNode) texts.get(0);
-			final IFormatterNode last = (IFormatterNode) texts
-					.get(texts.size() - 1);
+			final IFormatterNode first = texts.get(0);
+			final IFormatterNode last = texts.get(texts.size() - 1);
 			newBody.add(new FormatterTextNode(first.getDocument(), first
 					.getStartOffset(), last.getEndOffset()));
 		} else {
@@ -82,18 +79,17 @@ public abstract class FormatterNodeRewriter {
 
 	}
 
-	private final List comments = new ArrayList();
+	private final List<CommentInfo> comments = new ArrayList<CommentInfo>();
 
 	protected void addComment(int startOffset, int endOffset, Object object) {
 		comments.add(new CommentInfo(startOffset, endOffset, object));
 	}
 
 	protected void insertComments(IFormatterContainerNode root) {
-		final List body = root.getBody();
-		final List newBody = new ArrayList();
+		final List<IFormatterNode> body = root.getBody();
+		final List<IFormatterNode> newBody = new ArrayList<IFormatterNode>();
 		boolean changes = false;
-		for (Iterator i = body.iterator(); i.hasNext();) {
-			final IFormatterNode node = (IFormatterNode) i.next();
+		for (final IFormatterNode node : body) {
 			if (isPlainTextNode(node)) {
 				if (hasComments(node.getStartOffset(), node.getEndOffset())) {
 					selectValidRanges(root.getDocument(),
@@ -110,8 +106,7 @@ public abstract class FormatterNodeRewriter {
 			body.clear();
 			body.addAll(newBody);
 		}
-		for (Iterator i = body.iterator(); i.hasNext();) {
-			final IFormatterNode node = (IFormatterNode) i.next();
+		for (final IFormatterNode node : body) {
 			if (node instanceof IFormatterContainerNode) {
 				insertComments((IFormatterContainerNode) node);
 			}
@@ -119,8 +114,7 @@ public abstract class FormatterNodeRewriter {
 	}
 
 	private boolean hasComments(int startOffset, int endOffset) {
-		for (Iterator i = comments.iterator(); i.hasNext();) {
-			final CommentInfo commentNode = (CommentInfo) i.next();
+		for (final CommentInfo commentNode : comments) {
 			if (commentNode.startOffset < endOffset
 					&& startOffset < commentNode.endOffset) {
 				return true;
@@ -130,9 +124,8 @@ public abstract class FormatterNodeRewriter {
 	}
 
 	private void selectValidRanges(IFormatterDocument document, int start,
-			int end, List result) {
-		for (Iterator i = comments.iterator(); i.hasNext();) {
-			final CommentInfo comment = (CommentInfo) i.next();
+			int end, List<IFormatterNode> result) {
+		for (final CommentInfo comment : comments) {
 			if (start <= comment.endOffset && comment.startOffset <= end) {
 				if (start < comment.startOffset) {
 					int validEnd = Math.min(end, comment.startOffset);
