@@ -15,6 +15,9 @@ import java.util.List;
 
 /**
  * This interface could be used to extend generic structure model building.
+ * 
+ * Model providers are registered using the "org.eclipse.dltk.core.model"
+ * extension point.
  */
 public interface IModelProvider {
 	/**
