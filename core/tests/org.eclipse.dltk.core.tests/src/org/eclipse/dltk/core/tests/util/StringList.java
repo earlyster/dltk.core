@@ -25,4 +25,9 @@ public class StringList extends ArrayList<String> {
 		return sb.toString();
 	}
 
+	@Override
+	public String[] toArray() {
+		return toArray(new String[size()]);
+	}
+
 }
