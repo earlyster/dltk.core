@@ -285,15 +285,11 @@ public class ScriptElementLabels {
 
 	/**
 	 * Prepend first category (if any) to method.
-	 * 
-	 * 
 	 */
 	public final static long M_CATEGORY = 1L << 50;
 
 	/**
 	 * Prepend first category (if any) to type.
-	 * 
-	 * 
 	 */
 	public final static long T_CATEGORY = 1L << 51;
 
@@ -365,37 +361,43 @@ public class ScriptElementLabels {
 			return sInstanceO;
 		}
 
+		@Override
 		public String getContainerEntryLabel(IPath containerPath,
 				IScriptProject project) throws ModelException {
-
 			return getLabels(project).getContainerEntryLabel(containerPath,
 					project);
 		}
 
+		@Override
 		public void getDeclarationLabel(IModelElement declaration, long flags,
 				StringBuffer buf) {
 			getLabels(declaration).getDeclarationLabel(declaration, flags, buf);
 		}
 
+		@Override
 		public void getElementLabel(IModelElement element, long flags,
 				StringBuffer buf) {
 			getLabels(element).getElementLabel(element, flags, buf);
 		}
 
+		@Override
 		public String getElementLabel(IModelElement element, long flags) {
 			return getLabels(element).getElementLabel(element, flags);
 		}
 
+		@Override
 		public void getProjectFragmentLabel(IProjectFragment root, long flags,
 				StringBuffer buf) {
 			getLabels(root).getProjectFragmentLabel(root, flags, buf);
 		}
 
+		@Override
 		public void getScriptFolderLabel(IProjectFragment pack, long flags,
 				StringBuffer buf) {
 			getLabels(pack).getScriptFolderLabel(pack, flags, buf);
 		}
 
+		@Override
 		protected void getTypeLabel(IType type, long flags, StringBuffer buf) {
 			getLabels(type).getTypeLabel(type, flags, buf);
 		}
@@ -850,13 +852,14 @@ public class ScriptElementLabels {
 			}
 			buf.append(')');
 
-			String type = method.getType();
-			if (type != null
-					&& getFlag(flags, ScriptElementLabels.M_APP_RETURNTYPE)
+			if (getFlag(flags, ScriptElementLabels.M_APP_RETURNTYPE)
 					&& method.exists() && !method.isConstructor()) {
-				int offset = buf.length();
-				buf.append(ScriptElementLabels.DECL_STRING);
-				buf.append(type);
+				String type = method.getType();
+				if (type != null) {
+					// int offset = buf.length();
+					buf.append(ScriptElementLabels.DECL_STRING);
+					buf.append(type);
+				}
 			}
 
 			// post qualification
@@ -868,10 +871,6 @@ public class ScriptElementLabels {
 							| (flags & QUALIFIER_FLAGS), buf);
 				}
 			}
-
-			// TODO: Add return type method detection here,
-			// if( getFlag( flags, M_APP_RETURNTYPE ) && method.exists( ) ) {
-			// }
 		} catch (ModelException e) {
 			e.printStackTrace();
 		}
@@ -1113,7 +1112,7 @@ public class ScriptElementLabels {
 	public void getDeclarationLabel(IModelElement declaration, long flags,
 			StringBuffer buf) {
 		if (getFlag(flags, D_QUALIFIED)) {
-			IModelElement openable = (IModelElement) declaration.getOpenable();
+			IModelElement openable = declaration.getOpenable();
 			if (openable != null) {
 				buf.append(getElementLabel(openable, CF_QUALIFIED
 						| CU_QUALIFIED | (flags & QUALIFIER_FLAGS)));
@@ -1127,7 +1126,7 @@ public class ScriptElementLabels {
 		// }
 		// post qualification
 		if (getFlag(flags, D_POST_QUALIFIED)) {
-			IModelElement openable = (IModelElement) declaration.getOpenable();
+			IModelElement openable = declaration.getOpenable();
 			if (openable != null) {
 				buf.append(CONCAT_STRING);
 				buf.append(getElementLabel(openable, CF_QUALIFIED
