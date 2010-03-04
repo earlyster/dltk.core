@@ -139,13 +139,13 @@ public class ScriptElementImageProvider {
 
 	private static final String ATTR_NATURE = "nature"; //$NON-NLS-1$
 
-	private static Map labelProviders = null;
+	private static Map<String, ILabelProvider> labelProviders = null;
 
 	/**
 	 * Creates {@link ILabelProvider} objects from configuration elements.
 	 */
 	private static void createProviders(IConfigurationElement[] elements) {
-		labelProviders = new HashMap();
+		labelProviders = new HashMap<String, ILabelProvider>();
 		for (int i = 0; i < elements.length; i++) {
 			IConfigurationElement element = elements[i];
 			try {
@@ -171,9 +171,7 @@ public class ScriptElementImageProvider {
 		if (languageToolkit == null) {
 			return null;
 		}
-		String nature = languageToolkit.getNatureId();
-		ILabelProvider provider = (ILabelProvider) labelProviders.get(nature);
-		return provider;
+		return labelProviders.get(languageToolkit.getNatureId());
 	}
 
 	public ImageDescriptor getWorkbenchImageDescriptor(IAdaptable adaptable,
