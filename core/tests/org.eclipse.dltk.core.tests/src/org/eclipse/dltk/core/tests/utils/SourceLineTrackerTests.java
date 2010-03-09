@@ -59,4 +59,23 @@ public class SourceLineTrackerTests extends TestCase {
 		assertEquals(line1.length(), tracker.getLineLength(1));
 	}
 
+	public void testLineOffsetLastLineNoLineDelimiter() {
+		final ISourceLineTracker lineTracker = TextUtils
+				.createLineTracker("123" + "\n" + "456");
+		assertEquals(2, lineTracker.getNumberOfLines());
+		assertNotNull(lineTracker.getLineDelimiter(0));
+		assertNull(lineTracker.getLineDelimiter(1));
+		assertEquals(ISourceLineTracker.WRONG_OFFSET, lineTracker
+				.getLineOffset(2));
+	}
+
+	public void testLineOffsetLastLineWithLineDelimiter() {
+		final ISourceLineTracker lineTracker = TextUtils
+				.createLineTracker("123" + "\n" + "456" + "\n");
+		assertEquals(2, lineTracker.getNumberOfLines());
+		assertNotNull(lineTracker.getLineDelimiter(0));
+		assertNotNull(lineTracker.getLineDelimiter(1));
+		assertEquals(lineTracker.getLength(), lineTracker.getLineOffset(2));
+	}
+
 }
