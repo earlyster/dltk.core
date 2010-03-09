@@ -222,28 +222,17 @@ public abstract class TextUtils {
 
 		public ISourceLineTracker buildLineTracker() {
 			final List<String> delimiters = new ArrayList<String>();
-			int[] lineOffsets = new int[256];
-			int lineCount = 0;
+			IntList lineOffsets = new IntList(256);
 			contentPos = 0;
 			while (contentPos < contentEnd) {
 				final int begin = contentPos;
 				findEndOfLine();
-				if (lineCount >= lineOffsets.length) {
-					int[] newLineOffsets = new int[lineOffsets.length * 2 + 1];
-					System.arraycopy(lineOffsets, 0, newLineOffsets, 0,
-							lineOffsets.length);
-					lineOffsets = newLineOffsets;
-				}
-				lineOffsets[lineCount++] = begin;
+				lineOffsets.add(begin);
 				delimiters.add(lastLineDelimiter);
 			}
-			if (lineCount < lineOffsets.length) {
-				int[] newLineOffsets = new int[lineCount];
-				System.arraycopy(lineOffsets, 0, newLineOffsets, 0, lineCount);
-				lineOffsets = newLineOffsets;
-			}
-			return new DefaultSourceLineTracker(contentEnd, lineOffsets,
-					delimiters.toArray(new String[delimiters.size()]));
+			return new DefaultSourceLineTracker(contentEnd, lineOffsets
+					.toArray(), delimiters
+					.toArray(new String[delimiters.size()]));
 		}
 
 	}
@@ -327,8 +316,16 @@ public abstract class TextUtils {
 		}
 
 		public int getLineOffset(int line) {
-			return line >= 0 && line < lineOffsets.length ? lineOffsets[line]
-					: 0;
+			if (line < 0 && line > lineOffsets.length) {
+				return WRONG_OFFSET;
+			}
+			if (line == lineOffsets.length) {
+				if (delimiters[line - 1] != null) {
+					return contentLength;
+				}
+				return WRONG_OFFSET;
+			}
+			return lineOffsets[line];
 		}
 
 		public int getNumberOfLines() {

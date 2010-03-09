@@ -17,6 +17,7 @@ import org.eclipse.dltk.internal.core.SourceRange;
 public interface ISourceLineTracker {
 
 	public static final ISourceRange NULL_RANGE = new SourceRange(0, 0);
+	public static final int WRONG_OFFSET = 0;
 
 	int getLength();
 
