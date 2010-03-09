@@ -250,12 +250,25 @@ public class ModelElementDeltaBuilder {
 			if (((MemberElementInfo) oldInfo).getModifiers() != ((MemberElementInfo) newInfo)
 					.getModifiers()) {
 				this.delta.changed(newElement, IModelElementDelta.F_MODIFIERS);
-			} else if (oldInfo instanceof SourceMethodElementInfo
+			}
+			if (oldInfo instanceof SourceMethodElementInfo
 					&& newInfo instanceof SourceMethodElementInfo) {
 				SourceMethodElementInfo oldSourceMethodInfo = (SourceMethodElementInfo) oldInfo;
 				SourceMethodElementInfo newSourceMethodInfo = (SourceMethodElementInfo) newInfo;
 				if (!Arrays.equals(oldSourceMethodInfo.getArguments(),
-						newSourceMethodInfo.getArguments())) {
+						newSourceMethodInfo.getArguments())
+						|| !CharOperation.equals(oldSourceMethodInfo
+								.getReturnTypeName(), newSourceMethodInfo
+								.getReturnTypeName())) {
+					this.delta
+							.changed(newElement, IModelElementDelta.F_CONTENT);
+				}
+			} else if (oldInfo instanceof SourceFieldElementInfo
+					&& newInfo instanceof SourceFieldElementInfo) {
+				SourceFieldElementInfo oldFieldInfo = (SourceFieldElementInfo) oldInfo;
+				SourceFieldElementInfo newFieldInfo = (SourceFieldElementInfo) newInfo;
+				if (!CharOperation.equals(oldFieldInfo.getType(), newFieldInfo
+						.getType())) {
 					this.delta
 							.changed(newElement, IModelElementDelta.F_CONTENT);
 				}
