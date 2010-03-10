@@ -20,7 +20,6 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 public class AppearanceAwareLabelProvider extends ScriptUILabelProvider
 		implements IPropertyChangeListener {
 	public final static long DEFAULT_TEXTFLAGS = ScriptElementLabels.ROOT_VARIABLE
-			| ScriptElementLabels.M_PARAMETER_NAMES
 			| ScriptElementLabels.M_PARAMETER_TYPES
 			| ScriptElementLabels.M_APP_TYPE_PARAMETERS
 			| ScriptElementLabels.M_APP_RETURNTYPE
