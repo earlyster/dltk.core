@@ -821,35 +821,7 @@ public class ScriptElementLabels {
 
 			// parameters
 			buf.append('(');
-			if (getFlag(flags, M_PARAMETER_TYPES | M_PARAMETER_NAMES)) {
-				// TODO: Add type detection calls from here.
-				if (method.exists()) {
-					final IParameter[] params = method.getParameters();
-					final int nParams = params.length;
-
-					for (int i = 0; i < nParams; i++) {
-						if (i > 0) {
-							buf.append(COMMA_STRING);
-						}
-
-						buf.append(params[i].getName());
-
-						if (getFlag(flags, M_PARAMETER_INITIALIZERS)
-								&& params[i].getDefaultValue() != null) {// &&
-							// initializers[i].length()
-							// > 0
-							// ) {
-							buf
-									.append("=\"" + params[i].getDefaultValue() + "\""); //$NON-NLS-1$ //$NON-NLS-2$
-						}
-					}
-				}
-			} else {
-				String[] params = method.getParameterNames();
-				if (params.length > 0) {
-					buf.append(ELLIPSIS_STRING);
-				}
-			}
+			getMethodParameters(method, flags, buf);
 			buf.append(')');
 
 			if (getFlag(flags, ScriptElementLabels.M_APP_RETURNTYPE)
@@ -873,6 +845,44 @@ public class ScriptElementLabels {
 			}
 		} catch (ModelException e) {
 			e.printStackTrace();
+		}
+	}
+
+	protected void getMethodParameters(IMethod method, long flags,
+			StringBuffer buf) throws ModelException {
+		if (getFlag(flags, M_PARAMETER_TYPES | M_PARAMETER_NAMES)) {
+			if (method.exists()) {
+				final boolean bNames = getFlag(flags, M_PARAMETER_NAMES);
+				final boolean bTypes = getFlag(flags, M_PARAMETER_TYPES);
+				final boolean bInitializers = getFlag(flags,
+						M_PARAMETER_INITIALIZERS);
+				final IParameter[] params = method.getParameters();
+				for (int i = 0, nParams = params.length; i < nParams; i++) {
+					if (i > 0) {
+						buf.append(COMMA_STRING);
+					}
+					if (bNames) {
+						buf.append(params[i].getName());
+					}
+					if (bTypes) {
+						if (params[i].getType() != null) {
+							if (bNames) {
+								buf.append(':');
+							}
+							buf.append(params[i].getType());
+						} else if (!bNames) {
+							buf.append(params[i].getName());
+						}
+					}
+					if (bInitializers && params[i].getDefaultValue() != null) {
+						buf.append("=\"");
+						buf.append(params[i].getDefaultValue());
+						buf.append("\"");
+					}
+				}
+			}
+		} else if (method.getParameters().length > 0) {
+			buf.append(ELLIPSIS_STRING);
 		}
 	}
 
