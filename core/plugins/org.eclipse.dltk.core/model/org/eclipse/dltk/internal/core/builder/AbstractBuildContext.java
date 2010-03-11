@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
+import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.builder.IBuildContext;
@@ -28,7 +29,7 @@ import org.eclipse.osgi.util.NLS;
 public abstract class AbstractBuildContext implements IBuildContext,
 		IBuildContextExtension {
 
-	private final Map attributes = new HashMap();
+	private final Map<String, Object> attributes = new HashMap<String, Object>();
 
 	public Object get(String attribute) {
 		return attributes.get(attribute);
@@ -105,6 +106,34 @@ public abstract class AbstractBuildContext implements IBuildContext,
 	 */
 	public final IFile getFile() {
 		return (IFile) module.getResource();
+	}
+
+	/*
+	 * @see org.eclipse.dltk.compiler.env.IModuleSource#getSourceContents()
+	 */
+	public String getSourceContents() {
+		return new String(getContents());
+	}
+
+	/*
+	 * @see org.eclipse.dltk.compiler.env.IModuleSource#getContentsAsCharArray()
+	 */
+	public char[] getContentsAsCharArray() {
+		return getContents();
+	}
+
+	/*
+	 * @see org.eclipse.dltk.compiler.env.IModuleSource#getModelElement()
+	 */
+	public IModelElement getModelElement() {
+		return getSourceModule();
+	}
+
+	/*
+	 * @see org.eclipse.dltk.compiler.env.IDependent#getFileName()
+	 */
+	public String getFileName() {
+		return getSourceModule().getElementName();
 	}
 
 }

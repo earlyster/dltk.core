@@ -13,6 +13,7 @@ package org.eclipse.dltk.core.builder;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
+import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.compiler.problem.IProblemReporter;
 import org.eclipse.dltk.compiler.task.ITaskReporter;
 import org.eclipse.dltk.core.ISourceModule;
@@ -21,7 +22,7 @@ import org.eclipse.dltk.core.environment.IFileHandle;
 /**
  * The context of the building a module.
  */
-public interface IBuildContext {
+public interface IBuildContext extends IModuleSource {
 
 	/**
 	 * The name of the attribute to store the {@link ModuleDeclaration}
