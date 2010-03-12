@@ -773,7 +773,7 @@ public class ScriptBuilder extends IncrementalProjectBuilder {
 			IModelElement element = DLTKCore.create(res);
 			if (element != null
 					&& element.getElementType() == IModelElement.SOURCE_MODULE
-					&& element.exists()) {
+					&& element.exists() && scriptProject.isOnBuildpath(element)) {
 				realElements.add((ISourceModule) element);
 			} else {
 				realResources.add(res);
