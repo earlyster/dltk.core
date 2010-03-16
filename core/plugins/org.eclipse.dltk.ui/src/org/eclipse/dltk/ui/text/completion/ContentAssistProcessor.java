@@ -39,6 +39,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ContentAssistEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionListener;
+import org.eclipse.jface.text.contentassist.ICompletionListenerExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
@@ -121,6 +122,100 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 
 	private String fErrorMessage;
 
+	class CompletionListener implements ICompletionListener,
+			ICompletionListenerExtension {
+
+		public void assistSessionStarted(ContentAssistEvent event) {
+
+			if (event.processor != ContentAssistProcessor.this) {
+				final IContentAssistant assistant = event.assistant;
+				if (assistant instanceof IScriptContentAssistExtension) {
+					final IScriptContentAssistExtension extension = (IScriptContentAssistExtension) assistant;
+					if (!extension.provide(event.processor))
+						return;
+				} else {
+					return;
+				}
+			}
+
+			fIterationGesture = getIterationGesture();
+			KeySequence binding = getIterationBinding();
+
+			// this may show the warning dialog if all categories are
+			// disabled
+			fCategoryIteration = getCategoryIteration();
+			for (CompletionProposalCategory cat : fCategories) {
+				cat.sessionStarted();
+			}
+
+			fRepetition = 0;
+			if (event.assistant instanceof IContentAssistantExtension2) {
+				IContentAssistantExtension2 extension = (IContentAssistantExtension2) event.assistant;
+
+				if (fCategoryIteration.size() == 1) {
+					extension.setRepeatedInvocationMode(false);
+					extension.setShowEmptyList(false);
+				} else {
+					extension.setRepeatedInvocationMode(true);
+					extension.setStatusLineVisible(true);
+					extension.setStatusMessage(createIterationMessage());
+					extension.setShowEmptyList(true);
+					if (extension instanceof IContentAssistantExtension3) {
+						IContentAssistantExtension3 ext3 = (IContentAssistantExtension3) extension;
+						((ContentAssistant) ext3)
+								.setRepeatedInvocationTrigger(binding);
+					}
+				}
+			}
+		}
+
+		/*
+		 * @see ICompletionListener#assistSessionEnded(ContentAssistEvent)
+		 */
+		public void assistSessionEnded(ContentAssistEvent event) {
+
+			if (event.processor != ContentAssistProcessor.this) {
+				final IContentAssistant assistant = event.assistant;
+				if (assistant instanceof IScriptContentAssistExtension) {
+					final IScriptContentAssistExtension extension = (IScriptContentAssistExtension) assistant;
+					if (!extension.provide(event.processor))
+						return;
+				} else {
+					return;
+				}
+			}
+
+			for (CompletionProposalCategory cat : fCategories) {
+				cat.sessionEnded();
+			}
+
+			fCategoryIteration = null;
+			fRepetition = -1;
+			fIterationGesture = null;
+			if (event.assistant instanceof IContentAssistantExtension2) {
+				IContentAssistantExtension2 extension = (IContentAssistantExtension2) event.assistant;
+				extension.setShowEmptyList(false);
+				extension.setRepeatedInvocationMode(false);
+				extension.setStatusLineVisible(false);
+				if (extension instanceof IContentAssistantExtension3) {
+					IContentAssistantExtension3 ext3 = (IContentAssistantExtension3) extension;
+					((ContentAssistant) ext3)
+							.setRepeatedInvocationTrigger(KeySequence
+									.getInstance());
+				}
+			}
+		}
+
+		public void selectionChanged(ICompletionProposal proposal,
+				boolean smartToggle) {
+		}
+
+		public void assistSessionRestarted(ContentAssistEvent event) {
+			fRepetition = 0;
+		}
+
+	}
+
 	public ContentAssistProcessor(ContentAssistant assistant, String partition) {
 		Assert.isNotNull(partition);
 		Assert.isNotNull(assistant);
@@ -129,97 +224,7 @@ public abstract class ContentAssistProcessor implements IContentAssistProcessor 
 		fCategories = CompletionProposalComputerRegistry.getDefault()
 				.getProposalCategories();
 		fAssistant = assistant;
-		fAssistant.addCompletionListener(new ICompletionListener() {
-
-			public void assistSessionStarted(ContentAssistEvent event) {
-
-				if (event.processor != ContentAssistProcessor.this) {
-					final IContentAssistant assistant = event.assistant;
-					if (assistant instanceof IScriptContentAssistExtension) {
-						final IScriptContentAssistExtension extension = (IScriptContentAssistExtension) assistant;
-						if (!extension.provide(event.processor))
-							return;
-					} else {
-						return;
-					}
-				}
-
-				fIterationGesture = getIterationGesture();
-				KeySequence binding = getIterationBinding();
-
-				// this may show the warning dialog if all categories are
-				// disabled
-				fCategoryIteration = getCategoryIteration();
-				for (CompletionProposalCategory cat : fCategories) {
-					cat.sessionStarted();
-				}
-
-				fRepetition = 0;
-				if (event.assistant instanceof IContentAssistantExtension2) {
-					IContentAssistantExtension2 extension = (IContentAssistantExtension2) event.assistant;
-
-					if (fCategoryIteration.size() == 1) {
-						extension.setRepeatedInvocationMode(false);
-						extension.setShowEmptyList(false);
-					} else {
-						extension.setRepeatedInvocationMode(true);
-						extension.setStatusLineVisible(true);
-						extension.setStatusMessage(createIterationMessage());
-						extension.setShowEmptyList(true);
-						if (extension instanceof IContentAssistantExtension3) {
-							IContentAssistantExtension3 ext3 = (IContentAssistantExtension3) extension;
-							((ContentAssistant) ext3)
-									.setRepeatedInvocationTrigger(binding);
-						}
-					}
-
-				}
-			}
-
-			/*
-			 * @seeorg.eclipse.jface.text.contentassist.ICompletionListener#
-			 * assistSessionEnded
-			 * (org.eclipse.jface.text.contentassist.ContentAssistEvent)
-			 */
-			public void assistSessionEnded(ContentAssistEvent event) {
-
-				if (event.processor != ContentAssistProcessor.this) {
-					final IContentAssistant assistant = event.assistant;
-					if (assistant instanceof IScriptContentAssistExtension) {
-						final IScriptContentAssistExtension extension = (IScriptContentAssistExtension) assistant;
-						if (!extension.provide(event.processor))
-							return;
-					} else {
-						return;
-					}
-				}
-
-				for (CompletionProposalCategory cat : fCategories) {
-					cat.sessionEnded();
-				}
-
-				fCategoryIteration = null;
-				fRepetition = -1;
-				fIterationGesture = null;
-				if (event.assistant instanceof IContentAssistantExtension2) {
-					IContentAssistantExtension2 extension = (IContentAssistantExtension2) event.assistant;
-					extension.setShowEmptyList(false);
-					extension.setRepeatedInvocationMode(false);
-					extension.setStatusLineVisible(false);
-					if (extension instanceof IContentAssistantExtension3) {
-						IContentAssistantExtension3 ext3 = (IContentAssistantExtension3) extension;
-						((ContentAssistant) ext3)
-								.setRepeatedInvocationTrigger(KeySequence
-										.getInstance());
-					}
-				}
-			}
-
-			public void selectionChanged(ICompletionProposal proposal,
-					boolean smartToggle) {
-			}
-
-		});
+		fAssistant.addCompletionListener(new CompletionListener());
 	}
 
 	public final ICompletionProposal[] computeCompletionProposals(
