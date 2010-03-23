@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.dltk.ast.declarations.ModuleDeclaration;
 import org.eclipse.dltk.ast.parser.IModuleDeclaration;
 import org.eclipse.dltk.ast.parser.ISourceParser;
-import org.eclipse.dltk.ast.parser.ISourceParserConstants;
 import org.eclipse.dltk.compiler.env.IModuleSource;
 import org.eclipse.dltk.compiler.problem.ProblemCollector;
 import org.eclipse.dltk.core.DLTKLanguageManager;
@@ -69,8 +68,7 @@ public class ParserBuildParticipantFactory extends AbstractBuildParticipantType
 					.getSourceModuleInfoCache().get(context.getSourceModule());
 			// check if there is cached AST
 			moduleDeclaration = SourceParserUtil.getModuleFromCache(cacheEntry,
-					ISourceParserConstants.DEFAULT, context
-							.getProblemReporter());
+					context.getProblemReporter());
 			if (moduleDeclaration != null) {
 				// use AST from cache
 				context.set(IBuildContext.ATTR_MODULE_DECLARATION,
@@ -81,10 +79,12 @@ public class ParserBuildParticipantFactory extends AbstractBuildParticipantType
 			final ProblemCollector problemCollector = new ProblemCollector();
 			// parse
 			moduleDeclaration = parser.parse((IModuleSource) context
-					.getSourceModule(), context.getProblemReporter());
+					.getSourceModule(), problemCollector);
 			// put result to the cache
 			SourceParserUtil.putModuleToCache(cacheEntry, moduleDeclaration,
-					ISourceParserConstants.DEFAULT, problemCollector);
+					problemCollector);
+			context.set(IBuildContext.ATTR_MODULE_DECLARATION,
+					moduleDeclaration);
 			// report errors to the build context
 			problemCollector.copyTo(context.getProblemReporter());
 		}

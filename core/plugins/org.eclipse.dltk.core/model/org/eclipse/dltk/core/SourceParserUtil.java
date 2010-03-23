@@ -234,8 +234,9 @@ public class SourceParserUtil {
 	/**
 	 * This is for use in parsers.
 	 */
-	public static ModuleDeclaration getModuleFromCache(ISourceModuleInfo mifo,
-			int flags, IProblemReporter reporter) {
+	public static IModuleDeclaration getModuleFromCache(ISourceModuleInfo mifo,
+			IProblemReporter reporter) {
+		final int flags = 0;// FIXME remove later
 		if (mifo != null && useASTCaching) {
 			final IModuleDeclaration moduleDeclaration = (IModuleDeclaration) mifo
 					.get(getKey(AST, flags));
@@ -246,13 +247,14 @@ public class SourceParserUtil {
 					collector.copyTo(reporter);
 				}
 			}
-			return wrap(moduleDeclaration);
+			return moduleDeclaration;
 		}
 		return null;
 	}
 
 	public static void putModuleToCache(ISourceModuleInfo info,
-			IModuleDeclaration module, int flags, ProblemCollector collector) {
+			IModuleDeclaration module, ProblemCollector collector) {
+		final int flags = 0; // TODO remove later
 		if (info != null && useASTCaching) {
 			info.put(getKey(AST, flags), module);
 			final String errorKey = getKey(ERRORS, flags);
