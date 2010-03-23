@@ -583,7 +583,7 @@ public class PreferenceConstants {
 	/**
 	 * @since 2.0
 	 */
-	public final static String CODEASSIST_TIMEOUT = "content_assist_autoinsert"; //$NON-NLS-1$
+	public final static String CODEASSIST_TIMEOUT = "content_assist_timeout"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if the Script code assist adds import
