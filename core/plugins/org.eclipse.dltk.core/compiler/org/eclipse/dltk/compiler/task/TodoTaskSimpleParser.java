@@ -119,6 +119,7 @@ public class TodoTaskSimpleParser {
 					&& compareTag(content, begin, end, tag)) {
 				final String msg = new String(content, begin, end - begin);
 				reporter.reportTask(msg, lineNumber, priorities[i], begin, end);
+				break;
 			}
 		}
 	}
