@@ -791,16 +791,17 @@ public class ScriptElementLabels {
 			}
 		}
 		buf.append(field.getElementName());
-		try {
-			String type = field.getType();
-			if (type != null
-					&& getFlag(flags, ScriptElementLabels.F_APP_TYPE_SIGNATURE)
-					&& field.exists()) {
-				buf.append(ScriptElementLabels.DECL_STRING);
-				buf.append(type);
+		if (getFlag(flags, ScriptElementLabels.F_APP_TYPE_SIGNATURE)
+				&& field.exists()) {
+			try {
+				String type = field.getType();
+				if (type != null) {
+					buf.append(ScriptElementLabels.DECL_STRING);
+					buf.append(type);
+				}
+			} catch (CoreException e) {
+				DLTKCore.error("Failed to append type name to field", e);
 			}
-		} catch (CoreException e) {
-			DLTKCore.error("Failed to append type name to field", e);
 		}
 	}
 
