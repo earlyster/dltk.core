@@ -86,8 +86,6 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.model.IWorkbenchAdapter;
-import org.eclipse.ui.model.WorkbenchAdapter;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
 import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.IShowInSource;
@@ -213,10 +211,6 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 				DLTKCore.removeElementChangedListener(fListener);
 				fListener = null;
 			}
-		}
-
-		public boolean isDeleted(Object o) {
-			return false;
 		}
 
 		protected boolean matches(IModelElement element) {
@@ -468,24 +462,6 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 				DLTKUIPlugin.getDefault().getPreferenceStore().setValue(
 						LEXICAL_SORTING_ACTION_IS_CHECKED, on);
 			}
-		}
-	}
-
-	static class NoClassElement extends WorkbenchAdapter implements IAdaptable {
-		/*
-		 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(Class)
-		 */
-		@SuppressWarnings("unchecked")
-		public Object getAdapter(Class clas) {
-			if (clas == IWorkbenchAdapter.class) {
-				return this;
-			}
-			return null;
-		}
-
-		@Override
-		public String toString() {
-			return DLTKEditorMessages.ScriptOutlinePage_error_NoTopLevelType;
 		}
 	}
 
@@ -866,7 +842,7 @@ public class ScriptOutlinePage extends Page implements IContentOutlinePage,
 		if (key == IShowInTargetList.class) {
 			return new IShowInTargetList() {
 				public String[] getShowInTargetIds() {
-					return new String[] { DLTKUIPlugin.ID_SCRIPTEXPLORER };
+					return new String[] { DLTKUIPlugin.ID_SCRIPT_EXPLORER };
 				}
 
 			};
