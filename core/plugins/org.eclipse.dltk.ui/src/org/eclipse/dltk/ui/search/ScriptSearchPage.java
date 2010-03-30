@@ -224,7 +224,7 @@ public abstract class ScriptSearchPage extends DialogPage implements
 	private final static String STORE_HISTORY = "HISTORY"; //$NON-NLS-1$
 	private final static String STORE_HISTORY_SIZE = "HISTORY_SIZE"; //$NON-NLS-1$
 
-	private final List fPreviousSearchPatterns;
+	private final List<SearchPatternData> fPreviousSearchPatterns;
 
 	private SearchPatternData fInitialData;
 	private IModelElement fModelElement;
@@ -257,7 +257,7 @@ public abstract class ScriptSearchPage extends DialogPage implements
 	private Button fIncludeInterpreterEnvironmentCheckbox;
 
 	public ScriptSearchPage() {
-		fPreviousSearchPatterns = new ArrayList();
+		fPreviousSearchPatterns = new ArrayList<SearchPatternData>();
 	}
 
 	public boolean performAction() {
@@ -365,7 +365,7 @@ public abstract class ScriptSearchPage extends DialogPage implements
 		int patternCount = fPreviousSearchPatterns.size();
 		String[] patterns = new String[patternCount];
 		for (int i = 0; i < patternCount; i++)
-			patterns[i] = ((SearchPatternData) fPreviousSearchPatterns.get(i))
+			patterns[i] = fPreviousSearchPatterns.get(i)
 					.getPattern();
 		return patterns;
 	}
@@ -384,8 +384,8 @@ public abstract class ScriptSearchPage extends DialogPage implements
 	}
 
 	private SearchPatternData findInPrevious(String pattern) {
-		for (Iterator iter = fPreviousSearchPatterns.iterator(); iter.hasNext();) {
-			SearchPatternData element = (SearchPatternData) iter.next();
+		for (Iterator<SearchPatternData> iter = fPreviousSearchPatterns.iterator(); iter.hasNext();) {
+			SearchPatternData element = iter.next();
 			if (pattern.equals(element.getPattern())) {
 				return element;
 			}
@@ -600,7 +600,7 @@ public abstract class ScriptSearchPage extends DialogPage implements
 				|| selectionIndex >= fPreviousSearchPatterns.size())
 			return;
 
-		SearchPatternData initialData = (SearchPatternData) fPreviousSearchPatterns
+		SearchPatternData initialData = fPreviousSearchPatterns
 				.get(selectionIndex);
 
 		setSearchFor(initialData.getSearchFor());
@@ -870,7 +870,7 @@ public abstract class ScriptSearchPage extends DialogPage implements
 
 	private SearchPatternData getDefaultInitValues() {
 		if (!fPreviousSearchPatterns.isEmpty()) {
-			return (SearchPatternData) fPreviousSearchPatterns.get(0);
+			return fPreviousSearchPatterns.get(0);
 		}
 		return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive,
 				"", null, false); //$NON-NLS-1$
@@ -952,8 +952,8 @@ public abstract class ScriptSearchPage extends DialogPage implements
 		s.put(STORE_HISTORY_SIZE, historySize);
 		for (int i = 0; i < historySize; i++) {
 			IDialogSettings histSettings = s.addNewSection(STORE_HISTORY + i);
-			SearchPatternData data = ((SearchPatternData) fPreviousSearchPatterns
-					.get(i));
+			SearchPatternData data = fPreviousSearchPatterns
+					.get(i);
 			data.store(histSettings);
 		}
 	}
