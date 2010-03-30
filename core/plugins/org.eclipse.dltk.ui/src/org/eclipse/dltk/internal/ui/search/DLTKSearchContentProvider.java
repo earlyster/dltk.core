@@ -31,10 +31,6 @@ public abstract class DLTKSearchContentProvider implements IStructuredContentPro
 	public abstract void elementsChanged(Object[] updatedElements);
 	public abstract void clear();
 
-	public void filtersChanged(MatchFilter[] filters) {
-	}
-	
-	
 	public void dispose() {
 		// nothing to do
 	}

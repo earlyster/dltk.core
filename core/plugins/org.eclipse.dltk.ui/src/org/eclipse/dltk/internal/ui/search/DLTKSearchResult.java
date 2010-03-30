@@ -26,43 +26,22 @@ import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.dltk.ui.search.IMatchPresentation;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.SearchResultEvent;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.IEditorMatchAdapter;
 import org.eclipse.search.ui.text.IFileMatchAdapter;
 import org.eclipse.search.ui.text.Match;
-import org.eclipse.search.ui.text.MatchEvent;
 import org.eclipse.ui.IEditorPart;
-
 
 public class DLTKSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter {
 	
-	public static class MatchFilterEvent extends SearchResultEvent {
-		private static final long serialVersionUID= 1234L;
-		
-		private final MatchFilter[] fActivatedFilters;
-
-		public MatchFilterEvent(ISearchResult searchResult, MatchFilter[] activatedFilters) {
-			super(searchResult);
-			fActivatedFilters= activatedFilters;
-		}
-		
-		public MatchFilter[] getActivatedFilters() {
-			return fActivatedFilters;
-		}
-	}
-	
 	private DLTKSearchQuery fQuery;
-	private Map fElementsToParticipants;
+	private Map<Object, IMatchPresentation> fElementsToParticipants;
 	private static final Match[] NO_MATCHES= new Match[0];
-	
-	private MatchFilter[] fActivatedMatchFilters;
 	
 	public DLTKSearchResult(DLTKSearchQuery query) {
 		fQuery= query;
-		fElementsToParticipants= new HashMap();
-		fActivatedMatchFilters= MatchFilter.getLastUsedFilters();
+		fElementsToParticipants= new HashMap<Object, IMatchPresentation>();
+		setActiveMatchFilters(DLTKMatchFilter.getLastUsedFilters());
 	}
 
 	public ImageDescriptor getImageDescriptor() {
@@ -76,63 +55,7 @@ public class DLTKSearchResult extends AbstractTextSearchResult implements IEdito
 	public String getTooltip() {
 		return getLabel();
 	}
-	
-	public void setActivatedFilters(MatchFilter[] matchFilters) {
-		fActivatedMatchFilters= matchFilters;
-		MatchFilter.setLastUsedFilters(matchFilters);
-		updateFilterStateForAllMarkers();
-		fireChange(new MatchFilterEvent(this, matchFilters));
-	}
-	
-	public MatchFilter[] getActivatedMatchFilters() {
-		return fActivatedMatchFilters;
-	}
-	
-	public boolean hasMatchFilterActivated(MatchFilter filter) {
-		String id= filter.getID();
-		for (int i= 0; i < fActivatedMatchFilters.length; i++) {
-			if (fActivatedMatchFilters[i].getID().equals(id)) {
-				return true;
-			}
-		}
-		return false;
-	}
 		
-	protected void fireChange(SearchResultEvent e) {
-		if (e instanceof MatchEvent && ((MatchEvent) e).getKind() == MatchEvent.ADDED) {
-			// initialize all new markers
-			updateFilterState(((MatchEvent) e).getMatches());
-		}
-		super.fireChange(e);
-	}
-	
-	private void updateFilterStateForAllMarkers() {
-		Object[] elements= getElements();
-		for (int i= 0; i < elements.length; i++) {
-			updateFilterState(getMatches(elements[i]));
-		}		
-	}
-	
-	private void updateFilterState(Match[] matches) {
-		for (int i= 0; i < matches.length; i++) {
-			Object match= matches[i];
-			if (match instanceof DLTKElementMatch) {
-				updateFilterState((DLTKElementMatch) match);
-			}
-		}
-	}
-		
-	private void updateFilterState(DLTKElementMatch match) {	
-		for (int i= 0; i < fActivatedMatchFilters.length; i++) {
-			if (fActivatedMatchFilters[i].filters(match)) {
-				match.setFiltered(true);
-				return;
-			}
-		}
-		match.setFiltered(false);
-	}
-	
-
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
 		return computeContainedMatches(editor.getEditorInput());
 	}
@@ -143,7 +66,7 @@ public class DLTKSearchResult extends AbstractTextSearchResult implements IEdito
 	
 	private Match[] computeContainedMatches(IAdaptable adaptable) {
 		IModelElement modelElement= (IModelElement) adaptable.getAdapter(IModelElement.class);
-		Set matches= new HashSet();
+		Set<Match> matches= new HashSet<Match>();
 		if (modelElement != null) {
 			collectMatches(matches, modelElement);
 		}
@@ -152,13 +75,13 @@ public class DLTKSearchResult extends AbstractTextSearchResult implements IEdito
 			collectMatches(matches, file);
 		}
 		if (!matches.isEmpty()) {
-			return (Match[]) matches.toArray(new Match[matches.size()]);
+			return matches.toArray(new Match[matches.size()]);
 		}
 		return NO_MATCHES;
 	}
 	
 	
-	private void collectMatches(Set matches, IFile element) {
+	private void collectMatches(Set<Match> matches, IFile element) {
 		Match[] m= getMatches(element);
 		if (m.length != 0) {
 			for (int i= 0; i < m.length; i++) {
@@ -167,7 +90,7 @@ public class DLTKSearchResult extends AbstractTextSearchResult implements IEdito
 		}
 	}
 	
-	private void collectMatches(Set matches, IModelElement element) {
+	private void collectMatches(Set<Match> matches, IModelElement element) {
 		Match[] m= getMatches(element);
 		if (m.length != 0) {
 			for (int i= 0; i < m.length; i++) {
@@ -220,6 +143,14 @@ public class DLTKSearchResult extends AbstractTextSearchResult implements IEdito
 		return false;
 	}
 
+	/*
+	 * @see AbstractTextSearchResult#getAllMatchFilters()
+	 */
+	@Override
+	public org.eclipse.search.ui.text.MatchFilter[] getAllMatchFilters() {
+		return DLTKMatchFilter.allFilters();
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.search.ui.ISearchResult#getQuery()
 	 */
@@ -228,7 +159,7 @@ public class DLTKSearchResult extends AbstractTextSearchResult implements IEdito
 	}
 	
 	synchronized IMatchPresentation getSearchParticpant(Object element) {
-		return (IMatchPresentation) fElementsToParticipants.get(element);
+		return fElementsToParticipants.get(element);
 	}
 
 	boolean addMatch(Match match, IMatchPresentation participant) {

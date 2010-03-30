@@ -190,6 +190,15 @@ public class LevelTreeContentProvider extends DLTKSearchContentProvider
 		Set children = (Set) fChildrenMap.get(parentElement);
 		if (children == null)
 			return EMPTY_ARR;
+		int limit = getPage().getElementLimit().intValue();
+		if (limit != -1 && limit < children.size()) {
+			Object[] limitedArray = new Object[limit];
+			Iterator iterator = children.iterator();
+			for (int i = 0; i < limit; i++) {
+				limitedArray[i] = iterator.next();
+			}
+			return limitedArray;
+		}
 		return children.toArray();
 	}
 
@@ -235,9 +244,4 @@ public class LevelTreeContentProvider extends DLTKSearchContentProvider
 		getPage().getViewer().refresh();
 	}
 
-	public void filtersChanged(MatchFilter[] filters) {
-		super.filtersChanged(filters);
-		initialize(fResult);
-		getPage().getViewer().refresh();
-	}
 }
