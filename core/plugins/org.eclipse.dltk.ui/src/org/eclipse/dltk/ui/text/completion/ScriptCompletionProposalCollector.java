@@ -76,14 +76,14 @@ public abstract class ScriptCompletionProposalCollector extends
 	private final ImageDescriptorRegistry fRegistry = DLTKUIPlugin
 			.getImageDescriptorRegistry();
 
-	private final List fScriptProposals = new ArrayList();
+	private final List<IScriptCompletionProposal> fScriptProposals = new ArrayList<IScriptCompletionProposal>();
 
 	private final List<CompletionProposal> fRawCompletionProposals = new ArrayList<CompletionProposal>();
 	private final List<CompletionProposal> fUnprosessedCompletionProposals = new ArrayList<CompletionProposal>();
 
-	private final List fKeywords = new ArrayList();
+	private final List<IScriptCompletionProposal> fKeywords = new ArrayList<IScriptCompletionProposal>();
 
-	private final Set fSuggestedMethodNames = new HashSet();
+	private final Set<String> fSuggestedMethodNames = new HashSet<String>();
 
 	private final ISourceModule fSourceModule;
 
@@ -197,7 +197,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	}
 
 	protected CompletionProposal[] getRawCompletionProposals() {
-		return (CompletionProposal[]) fRawCompletionProposals
+		return fRawCompletionProposals
 				.toArray(new CompletionProposal[fRawCompletionProposals.size()]);
 	}
 
@@ -317,7 +317,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	 */
 	public final IScriptCompletionProposal[] getScriptCompletionProposals() {
 		processUnprocessedProposals();
-		return (IScriptCompletionProposal[]) fScriptProposals
+		return fScriptProposals
 				.toArray(new IScriptCompletionProposal[fScriptProposals.size()]);
 	}
 
@@ -344,7 +344,7 @@ public abstract class ScriptCompletionProposalCollector extends
 	 */
 	public final IScriptCompletionProposal[] getKeywordCompletionProposals() {
 		processUnprocessedProposals();
-		return (ScriptCompletionProposal[]) fKeywords
+		return fKeywords
 				.toArray(new ScriptCompletionProposal[fKeywords.size()]);
 	}
 
