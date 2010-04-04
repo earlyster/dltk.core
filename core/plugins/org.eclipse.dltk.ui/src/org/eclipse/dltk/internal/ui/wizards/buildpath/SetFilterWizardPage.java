@@ -161,6 +161,7 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 		patternList.setDialogFieldListener(adapter);
 		patternList.setLabelText(label);
 		patternList.enableButton(IDX_EDIT, false);
+		patternList.enableButton(IDX_REMOVE, false);
 	
 		IPath[] pattern= (IPath[]) entryToEdit.getAttribute(key);
 		
@@ -214,12 +215,17 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 	protected void doSelectionChanged(ListDialogField field) {
 		List selected= field.getSelectedElements();
 		field.enableButton(IDX_EDIT, canEdit(selected));
+		field.enableButton(IDX_REMOVE, canDelete(selected));
 	}
         	
 	private boolean canEdit(List selected) {
 		return selected.size() == 1;
 	}
-	
+
+	private boolean canDelete(List selected) {
+		return !selected.isEmpty();
+	}
+
 	private void editEntry(ListDialogField field) {
 		List selElements= field.getSelectedElements();
 		if (selElements.size() != 1) {
