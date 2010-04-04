@@ -13,10 +13,11 @@ package org.eclipse.dltk.internal.core;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.ModelException;
 
 
@@ -215,7 +216,7 @@ public class ModelUpdater {
 				break;
 			case IModelElement.SOURCE_MODULE :
 				// filter out working copies that are not primary (we don't want to add/remove them to/from the package fragment
-				SourceModule cu = (SourceModule)element;
+				ISourceModule cu = (ISourceModule)element;
 				if (cu.isWorkingCopy() && !cu.isPrimary()) {
 					return;
 				}
