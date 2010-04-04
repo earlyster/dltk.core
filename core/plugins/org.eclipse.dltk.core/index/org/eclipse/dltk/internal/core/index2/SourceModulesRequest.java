@@ -12,10 +12,12 @@
 package org.eclipse.dltk.internal.core.index2;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -36,9 +38,8 @@ public class SourceModulesRequest extends AbstractIndexRequest {
 	private final IPath containerPath;
 	private final Set<ISourceModule> sourceModules;
 
-	public SourceModulesRequest(ProjectIndexer2 indexer,
-			IPath containerPath, Set<ISourceModule> sourceModules,
-			ProgressJob progressJob) {
+	public SourceModulesRequest(ProjectIndexer2 indexer, IPath containerPath,
+			Set<ISourceModule> sourceModules, ProgressJob progressJob) {
 		super(indexer, progressJob);
 		this.containerPath = containerPath;
 		this.sourceModules = sourceModules;
@@ -56,13 +57,7 @@ public class SourceModulesRequest extends AbstractIndexRequest {
 		}
 
 		Set<String> toRemove = new HashSet<String>();
-		Set<ISourceModule> toReindex = new TreeSet<ISourceModule>(
-				new Comparator<ISourceModule>() {
-					public int compare(ISourceModule s1, ISourceModule s2) {
-						return s1.getPath().toString().compareTo(
-								s2.getPath().toString());
-					}
-				});
+		List<ISourceModule> toReindex = new ArrayList<ISourceModule>();
 
 		analyzeSourceModuleChanges(containerPath, sourceModules, toRemove,
 				toReindex);
@@ -70,6 +65,13 @@ public class SourceModulesRequest extends AbstractIndexRequest {
 		for (final String path : toRemove) {
 			indexer.removeDocument(containerPath, path);
 		}
+
+		Collections.sort(toReindex, new Comparator<ISourceModule>() {
+			public int compare(ISourceModule m1, ISourceModule m2) {
+				return m1.getPath().toString().compareTo(
+						m2.getPath().toString());
+			}
+		});
 
 		for (final ISourceModule sourceModule : toReindex) {
 			reportToProgress(sourceModule);
