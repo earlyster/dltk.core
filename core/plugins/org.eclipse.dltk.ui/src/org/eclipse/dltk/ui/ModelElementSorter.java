@@ -82,9 +82,9 @@ public class ModelElementSorter extends ViewerSorter implements
 
 		IModelCompareProvider[] providers = getCompareProviders(element);
 		for (int i = 0; i < providers.length; i++) {
-			CompareResult category = providers[i].category(element);
+			Integer category = providers[i].category(element);
 			if (category != null) {
-				return category.result;
+				return category.intValue();
 			}
 		}
 

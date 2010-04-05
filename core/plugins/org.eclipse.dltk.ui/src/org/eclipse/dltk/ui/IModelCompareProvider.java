@@ -28,7 +28,7 @@ public interface IModelCompareProvider {
 	 * @return One of {@link IModelCompareCategories} in {@link CompareResult}
 	 *         Return null if comparison of element are not supported.
 	 */
-	CompareResult category(Object parentElement);
+	Integer category(Object parentElement);
 
 	/**
 	 * Compare two elements.
