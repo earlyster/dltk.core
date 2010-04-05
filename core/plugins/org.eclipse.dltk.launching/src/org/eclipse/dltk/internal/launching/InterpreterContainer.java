@@ -62,7 +62,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * @return buildpath entries
 	 */
 	private static IBuildpathEntry[] getBuildpathEntries(
-			IInterpreterInstall interpreter, IScriptProject project) {
+			IInterpreterInstall interpreter) {
 		if (fgBuildpathEntries == null) {
 			fgBuildpathEntries = new HashMap<IInterpreterInstall, IBuildpathEntry[]>(
 					10);
@@ -187,8 +187,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * @see IBuildpathContainer#getBuildpathEntries(IScriptProject)
 	 */
 	public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
-		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(
-				fInterpreterInstall, project);
+		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(fInterpreterInstall);
 		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>();
 		entries.addAll(Arrays.asList(buildpathEntries));
 		// Use custom per project interpreter entries.
@@ -204,8 +203,7 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * @since 2.0
 	 */
 	public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
-		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(
-				fInterpreterInstall, project);
+		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(fInterpreterInstall);
 		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>();
 		entries.addAll(Arrays.asList(buildpathEntries));
 		return entries.toArray(new IBuildpathEntry[entries.size()]);
