@@ -240,7 +240,7 @@ public class InterpreterContainer implements IBuildpathContainer,
 		return fPath;
 	}
 
-	public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
+	public IBuiltinModuleProvider getBuiltinProvider() {
 		return fInterpreterInstall;
 	}
 }
