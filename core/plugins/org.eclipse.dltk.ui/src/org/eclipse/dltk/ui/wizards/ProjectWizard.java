@@ -156,13 +156,17 @@ public abstract class ProjectWizard extends NewElementWizard implements
 		getProjectCreator().removeProject();
 	}
 
+	private ProjectCreator fCreator;
+
 	public ProjectCreator getProjectCreator() {
-		final IWizardPage page = getPage(ProjectWizardSecondPage.PAGE_NAME);
-		if (page != null) {
-			return ((ProjectWizardSecondPage) page).getCreator();
-		} else {
-			return null;
+		if (fCreator == null) {
+			fCreator = createProjectCreator();
 		}
+		return fCreator;
+	}
+
+	protected ProjectCreator createProjectCreator() {
+		return new ProjectCreator(this, getFirstPage());
 	}
 
 	protected void updateSteps(final IWizardPage currentPage) {

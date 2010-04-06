@@ -29,32 +29,35 @@ import org.eclipse.jface.preference.IPreferenceStore;
 public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 		implements IProjectWizardPage {
 
-	private final ProjectCreator fCreator;
-
 	/**
 	 * @since 2.0
 	 */
 	public static final String PAGE_NAME = "ProjectWizardSecondPage"; //$NON-NLS-1$
+
+	private final ProjectWizardFirstPage firstPage;
 
 	/**
 	 * Constructor for ScriptProjectWizardSecondPage.
 	 */
 	public ProjectWizardSecondPage(ProjectWizardFirstPage firstPage) {
 		super(PAGE_NAME);
-		fCreator = new ProjectCreator((IProjectWizard) firstPage.getWizard(),
-				firstPage);
+		this.firstPage = firstPage;
 	}
 
 	/**
 	 * @since 2.0
 	 */
-	public ProjectCreator getCreator() {
-		return fCreator;
+	protected final ProjectCreator getCreator() {
+		return getProjectWizard().getProjectCreator();
 	}
 
 	@Override
 	protected boolean useNewSourcePage() {
 		return true;
+	}
+
+	protected final IProjectWizard getProjectWizard() {
+		return (IProjectWizard) getWizard();
 	}
 
 	/*
@@ -66,7 +69,7 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 	public void setVisible(boolean visible) {
 		if (visible) {
 			try {
-				((IProjectWizard) getWizard()).createProject();
+				getProjectWizard().createProject();
 			} catch (OperationCanceledException e) {
 				getShell().close();
 				// TODO getContainer().showPage(getPreviousPage());
@@ -74,7 +77,7 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 			}
 		} else if (!ProjectWizardUtils.isProjectRequredFor(getContainer()
 				.getCurrentPage())) {
-			((IProjectWizard) getWizard()).removeProject();
+			getProjectWizard().removeProject();
 		}
 		super.setVisible(visible);
 	}
@@ -84,14 +87,13 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 	 */
 	@Deprecated
 	protected final BuildpathDetector createBuildpathDetector(
-			IProgressMonitor monitor, IDLTKLanguageToolkit toolkit)
-			throws CoreException {
+			IProgressMonitor monitor, IDLTKLanguageToolkit toolkit) {
 		return null;
 	}
 
 	@Override
 	protected final String getScriptNature() {
-		return fCreator.getScriptNature();
+		return firstPage.getScriptNature();
 	}
 
 	@Deprecated
@@ -103,8 +105,7 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 	 * @since 2.0
 	 */
 	public void initProjectWizardPage() {
-		final IProjectWizard wizard = (IProjectWizard) getWizard();
-		final ProjectCreator creator = wizard.getProjectCreator();
+		final ProjectCreator creator = getCreator();
 		creator.addStep(IProjectCreateStep.KIND_INIT_UI,
 				IProjectCreateStep.BEFORE, initStep, this);
 		creator.addStep(IProjectCreateStep.KIND_FINISH,
@@ -122,7 +123,7 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 	 * @since 2.0
 	 */
 	public void resetProjectWizardPage() {
-		final IProjectWizard wizard = (IProjectWizard) getWizard();
+		final IProjectWizard wizard = getProjectWizard();
 		init(DLTKCore.create(wizard.getProject()), null, false);
 	}
 
@@ -130,7 +131,8 @@ public class ProjectWizardSecondPage extends CapabilityConfigurationPage
 
 		public void execute(IProject project, IProgressMonitor monitor)
 				throws CoreException {
-			final IBuildpathEntry[] entries = fCreator.initBuildpath(monitor);
+			final IBuildpathEntry[] entries = getCreator().initBuildpath(
+					monitor);
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
