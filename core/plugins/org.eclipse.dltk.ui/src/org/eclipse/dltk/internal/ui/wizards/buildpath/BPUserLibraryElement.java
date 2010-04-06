@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IBuiltinModuleProvider;
 import org.eclipse.dltk.core.IScriptProject;
 
 
@@ -44,10 +43,6 @@ public class BPUserLibraryElement {
 		
 		public IPath getPath() {
 			return BPUserLibraryElement.this.getPath();
-		}
-
-		public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
-			return null;
 		}
 
 	}
