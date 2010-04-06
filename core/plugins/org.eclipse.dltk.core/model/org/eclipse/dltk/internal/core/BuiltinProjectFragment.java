@@ -83,7 +83,7 @@ public class BuiltinProjectFragment extends ProjectFragment {
 			if (buildpathContainer != null
 					&& buildpathContainer instanceof IBuildpathContainerExtension) {
 				return ((IBuildpathContainerExtension) buildpathContainer)
-						.getBuiltinProvider(project);
+						.getBuiltinProvider();
 			}
 		} catch (CoreException ex) {
 			if (DLTKCore.DEBUG) {

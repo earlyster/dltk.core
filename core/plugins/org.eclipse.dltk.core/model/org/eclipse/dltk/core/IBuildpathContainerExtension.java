@@ -13,6 +13,6 @@ package org.eclipse.dltk.core;
 
 public interface IBuildpathContainerExtension extends IBuildpathContainer {
 
-	IBuiltinModuleProvider getBuiltinProvider(IScriptProject project);
+	IBuiltinModuleProvider getBuiltinProvider();
 
 }
