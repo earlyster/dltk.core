@@ -13,7 +13,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IBuiltinModuleProvider;
 import org.eclipse.dltk.core.IScriptProject;
 
 public class TestieContainer implements IBuildpathContainer {
@@ -37,11 +36,6 @@ public class TestieContainer implements IBuildpathContainer {
 
 	public IPath getPath() {
 		return fPath;
-	}
-
-	public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

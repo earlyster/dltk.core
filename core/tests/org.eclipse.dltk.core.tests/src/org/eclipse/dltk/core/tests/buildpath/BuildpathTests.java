@@ -31,7 +31,6 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathAttribute;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IBuiltinModuleProvider;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
 import org.eclipse.dltk.core.IModelMarker;
@@ -88,11 +87,6 @@ public class BuildpathTests extends ModifyingResourceTests {
 
 		public int getKind() {
 			return 0;
-		}
-
-		public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
-			// TODO Auto-generated method stub
-			return null;
 		}
 
 	}
