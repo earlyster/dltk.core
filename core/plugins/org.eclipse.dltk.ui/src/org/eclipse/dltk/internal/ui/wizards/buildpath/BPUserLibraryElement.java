@@ -50,9 +50,6 @@ public class BPUserLibraryElement {
 			return null;
 		}
 
-		public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
-			return null;
-		}
 	}
 	
 	
