@@ -53,7 +53,38 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * Cache of buildpath entries per Interpreter install. Cleared when a
 	 * Interpreter changes.
 	 */
-	private static Map<IInterpreterInstall, IBuildpathEntry[]> fgBuildpathEntries = null;
+	private static final Map<IInterpreterInstall, IBuildpathEntry[]> fgBuildpathEntries = new HashMap<IInterpreterInstall, IBuildpathEntry[]>(
+			10);
+
+	private static ChangeListener changeListener = null;
+
+	private static class ChangeListener implements
+			IInterpreterInstallChangedListener {
+
+		public void defaultInterpreterInstallChanged(
+				IInterpreterInstall previous, IInterpreterInstall current) {
+		}
+
+		public void interpreterChanged(PropertyChangeEvent event) {
+			if (event.getSource() != null
+					&& event.getSource() instanceof IInterpreterInstall) {
+				remove((IInterpreterInstall) event.getSource());
+			}
+		}
+
+		public void interpreterAdded(IInterpreterInstall newInterpreter) {
+		}
+
+		public void interpreterRemoved(IInterpreterInstall removedInterpreter) {
+			remove(removedInterpreter);
+		}
+
+		private void remove(IInterpreterInstall interpreter) {
+			synchronized (fgBuildpathEntries) {
+				fgBuildpathEntries.remove(interpreter);
+			}
+		}
+	}
 
 	/**
 	 * Returns the buildpath entries associated with the given interpreter.
@@ -61,41 +92,25 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * @param interpreter
 	 * @return buildpath entries
 	 */
-	private static IBuildpathEntry[] getBuildpathEntries(
+	public static IBuildpathEntry[] getBuildpathEntries(
 			IInterpreterInstall interpreter) {
-		if (fgBuildpathEntries == null) {
-			fgBuildpathEntries = new HashMap<IInterpreterInstall, IBuildpathEntry[]>(
-					10);
-			// add a listener to clear cached value when a Interpreter changes
-			// or is
-			// removed
-			IInterpreterInstallChangedListener listener = new IInterpreterInstallChangedListener() {
-				public void defaultInterpreterInstallChanged(
-						IInterpreterInstall previous,
-						IInterpreterInstall current) {
-				}
-
-				public void interpreterChanged(PropertyChangeEvent event) {
-					if (event.getSource() != null) {
-						fgBuildpathEntries.remove(event.getSource());
-					}
-				}
-
-				public void interpreterAdded(IInterpreterInstall newInterpreter) {
-
-				}
-
-				public void interpreterRemoved(
-						IInterpreterInstall removedInterpreter) {
-					fgBuildpathEntries.remove(removedInterpreter);
-				}
-			};
-			ScriptRuntime.addInterpreterInstallChangedListener(listener);
+		IBuildpathEntry[] entries;
+		synchronized (fgBuildpathEntries) {
+			if (changeListener == null) {
+				// add a listener to clear cached value when an interpreter
+				// changes or is removed
+				changeListener = new ChangeListener();
+				ScriptRuntime
+						.addInterpreterInstallChangedListener(changeListener);
+			}
+			entries = fgBuildpathEntries.get(interpreter);
 		}
-		IBuildpathEntry[] entries = fgBuildpathEntries.get(interpreter);
 		if (entries == null) {
+			// TODO don't call it simultaneously for the same interpreter
 			entries = computeBuildpathEntries(interpreter);
-			fgBuildpathEntries.put(interpreter, entries);
+			synchronized (fgBuildpathEntries) {
+				fgBuildpathEntries.put(interpreter, entries);
+			}
 		}
 		return entries;
 	}
@@ -106,9 +121,8 @@ public class InterpreterContainer implements IBuildpathContainer {
 	 * 
 	 * @param interpreter
 	 * @return buildpath entries
-	 * @since 2.0
 	 */
-	public static IBuildpathEntry[] computeBuildpathEntries(
+	private static IBuildpathEntry[] computeBuildpathEntries(
 			IInterpreterInstall interpreter) {
 		LibraryLocation[] libs = ScriptRuntime.getLibraryLocations(interpreter);
 		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>(
@@ -196,16 +210,6 @@ public class InterpreterContainer implements IBuildpathContainer {
 		if (extension != null) {
 			extension.processEntres(project, entries);
 		}
-		return entries.toArray(new IBuildpathEntry[entries.size()]);
-	}
-
-	/**
-	 * @since 2.0
-	 */
-	public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
-		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(fInterpreterInstall);
-		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>();
-		entries.addAll(Arrays.asList(buildpathEntries));
 		return entries.toArray(new IBuildpathEntry[entries.size()]);
 	}
 
