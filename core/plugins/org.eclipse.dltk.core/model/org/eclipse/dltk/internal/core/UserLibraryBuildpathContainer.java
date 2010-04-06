@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IBuiltinModuleProvider;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.internal.core.util.Util;
@@ -80,10 +79,6 @@ public class UserLibraryBuildpathContainer implements IBuildpathContainer {
 		Util.verbose(
 			"UserLibrary INIT - FAILED (no user library found)\n" + //$NON-NLS-1$
 			"	userLibraryName: " + userLibraryName); //$NON-NLS-1$
-	}
-
-	public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
-		return null;
 	}
 
 }

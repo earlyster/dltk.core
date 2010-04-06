@@ -72,7 +72,6 @@ import org.eclipse.dltk.core.IArchive;
 import org.eclipse.dltk.core.IBuildpathAttribute;
 import org.eclipse.dltk.core.IBuildpathContainer;
 import org.eclipse.dltk.core.IBuildpathEntry;
-import org.eclipse.dltk.core.IBuiltinModuleProvider;
 import org.eclipse.dltk.core.IDLTKLanguageToolkit;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatus;
@@ -158,10 +157,6 @@ public class ModelManager implements ISaveParticipant {
 
 		public String toString() {
 			return getDescription(null);
-		}
-
-		public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
-			return null;
 		}
 
 	};
@@ -1422,11 +1417,6 @@ public class ModelManager implements ISaveParticipant {
 
 					public String toString() {
 						return getDescription(project);
-					}
-
-					public IBuiltinModuleProvider getBuiltinProvider(
-							IScriptProject project) {
-						return null;
 					}
 
 				};
@@ -2861,10 +2851,6 @@ public class ModelManager implements ISaveParticipant {
 
 		public String toString() {
 			return getDescription(project);
-		}
-
-		public IBuiltinModuleProvider getBuiltinProvider(IScriptProject project) {
-			return null;
 		}
 
 	}

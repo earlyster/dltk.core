@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IBuildpathContainer;
+import org.eclipse.dltk.core.IBuildpathContainerExtension;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IBuiltinModuleProvider;
 import org.eclipse.dltk.core.IModelElement;
@@ -79,12 +80,11 @@ public class BuiltinProjectFragment extends ProjectFragment {
 			IBuildpathContainer buildpathContainer = ModelManager
 					.getModelManager().getBuildpathContainer(containerPath,
 							project);
-			if (buildpathContainer == null) {
-				return null;
+			if (buildpathContainer != null
+					&& buildpathContainer instanceof IBuildpathContainerExtension) {
+				return ((IBuildpathContainerExtension) buildpathContainer)
+						.getBuiltinProvider(project);
 			}
-			IBuiltinModuleProvider builtinProvider = buildpathContainer
-					.getBuiltinProvider(project);
-			return builtinProvider;
 		} catch (CoreException ex) {
 			if (DLTKCore.DEBUG) {
 				ex.printStackTrace();

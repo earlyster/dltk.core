@@ -145,5 +145,4 @@ public interface IBuildpathContainer {
 	 */
 	IPath getPath();
 
-	IBuiltinModuleProvider getBuiltinProvider(IScriptProject project);
 }
