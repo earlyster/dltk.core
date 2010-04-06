@@ -164,9 +164,6 @@ public class ModelManager implements ISaveParticipant {
 			return null;
 		}
 
-		public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
-			return null;
-		}
 	};
 	/*
 	 * A HashSet that contains the IScriptProject whose buildpath is being
@@ -1432,10 +1429,6 @@ public class ModelManager implements ISaveParticipant {
 						return null;
 					}
 
-					public IBuildpathEntry[] getRawBuildpathEntries(
-							IScriptProject project) {
-						return containerEntries;
-					}
 				};
 				if (addToContainerValues) {
 					getModelManager().containerPut(project, containerPath,
@@ -2874,9 +2867,6 @@ public class ModelManager implements ISaveParticipant {
 			return null;
 		}
 
-		public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
-			return entries;
-		}
 	}
 
 	private final class ContainersLoadHelper {

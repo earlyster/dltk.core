@@ -86,7 +86,4 @@ public class UserLibraryBuildpathContainer implements IBuildpathContainer {
 		return null;
 	}
 
-	public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
-		return getBuildpathEntries(project);
-	}
 }
