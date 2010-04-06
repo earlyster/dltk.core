@@ -22,6 +22,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.IAccessRule;
 import org.eclipse.dltk.core.IBuildpathAttribute;
 import org.eclipse.dltk.core.IBuildpathContainer;
+import org.eclipse.dltk.core.IBuildpathContainerExtension;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IBuiltinModuleProvider;
 import org.eclipse.dltk.core.IScriptProject;
@@ -40,7 +41,8 @@ import org.eclipse.osgi.util.NLS;
 /**
  * Interpreter Container - resolves a buildpath container to an interpreter
  */
-public class InterpreterContainer implements IBuildpathContainer {
+public class InterpreterContainer implements IBuildpathContainer,
+		IBuildpathContainerExtension {
 	/**
 	 * Corresponding interpreter
 	 */
