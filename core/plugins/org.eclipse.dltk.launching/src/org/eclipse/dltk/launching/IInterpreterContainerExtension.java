@@ -18,14 +18,19 @@ import org.eclipse.dltk.core.IScriptProject;
 public interface IInterpreterContainerExtension {
 
 	/**
-	 * This method is called to customize (add or remove elements in the the
-	 * specified list) the set of entries {@link IBuildpathEntry
-	 * IBuildpathEntries}.
+	 * <p>
+	 * This method is called to customize (only add or remove elements,
+	 * modification of existing objects is not allowed) the
+	 * {@link IBuildpathEntry IBuildpathEntries} returned to the project.
+	 * </p>
 	 * 
+	 * <p>
 	 * It's called for each project.
+	 * </p>
 	 * 
-	 * Entries are initialized with the entries constructed for the interpreter
-	 * library locations.
+	 * <p>
+	 * Entries are initialized with the interpreter library locations.
+	 * </p>
 	 */
 	void processEntres(IScriptProject project, List<IBuildpathEntry> entries);
 
