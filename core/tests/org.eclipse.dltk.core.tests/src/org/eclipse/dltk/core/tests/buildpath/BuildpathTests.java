@@ -95,10 +95,6 @@ public class BuildpathTests extends ModifyingResourceTests {
 			return null;
 		}
 
-		public IBuildpathEntry[] getRawBuildpathEntries(IScriptProject project) {
-			// TODO Auto-generated method stub
-			return null;
-		}
 	}
 
 	public BuildpathTests(String name) {
