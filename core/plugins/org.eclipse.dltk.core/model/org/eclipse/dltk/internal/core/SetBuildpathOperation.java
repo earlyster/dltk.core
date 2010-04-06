@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFolder;
@@ -22,7 +23,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.dltk.compiler.util.ObjectVector;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementDelta;
@@ -368,8 +368,8 @@ public class SetBuildpathOperation extends ModelOperation {
 				}
 				if (pkgFragmentRoots == null) {
 					try {
-						ObjectVector accumulatedRoots = new ObjectVector();
-						HashSet rootIDs = new HashSet(5);
+						List<IProjectFragment> accumulatedRoots = new ArrayList<IProjectFragment>();
+						HashSet<String> rootIDs = new HashSet<String>(5);
 						rootIDs.add(this.project.rootID());
 						this.project.computeProjectFragments(
 								this.oldResolvedPath[i], accumulatedRoots,
@@ -379,9 +379,9 @@ public class SetBuildpathOperation extends ModelOperation {
 								false, // don't check existency
 								false, // don't retrieve exported roots
 								null); /* no reverse map */
-						pkgFragmentRoots = new IProjectFragment[accumulatedRoots
-								.size()];
-						accumulatedRoots.copyInto(pkgFragmentRoots);
+						pkgFragmentRoots = accumulatedRoots
+								.toArray(new IProjectFragment[accumulatedRoots
+										.size()]);
 					} catch (ModelException e) {
 						pkgFragmentRoots = new IProjectFragment[] {};
 					}

@@ -33,7 +33,7 @@ class ProjectElementInfo extends OpenableElementInfo {
 		ProjectCache(IProjectFragment[] allProjectFragmentCache,
 				HashtableOfArrayToObject allPkgFragmentsCache,
 				HashtableOfArrayToObject isPackageCache,
-				Map rootToResolvedEntries) {
+				Map<IProjectFragment, BuildpathEntry> rootToResolvedEntries) {
 			this.allProjectFragmentCache = allProjectFragmentCache;
 			this.allPkgFragmentsCache = allPkgFragmentsCache;
 			this.rootToResolvedEntries = rootToResolvedEntries;
@@ -57,7 +57,7 @@ class ProjectElementInfo extends OpenableElementInfo {
 		 */
 		public HashtableOfArrayToObject isPackageCache;
 
-		public Map rootToResolvedEntries;
+		public Map<IProjectFragment, BuildpathEntry> rootToResolvedEntries;
 	}
 
 	ProjectCache projectCache;
@@ -235,7 +235,8 @@ class ProjectElementInfo extends OpenableElementInfo {
 		ProjectCache cache = this.projectCache;
 		if (cache == null) {
 			IProjectFragment[] roots;
-			Map reverseMap = new HashMap(3);
+			Map<IProjectFragment, BuildpathEntry> reverseMap = new HashMap<IProjectFragment, BuildpathEntry>(
+					3);
 			try {
 				roots = project.getAllProjectFragments(reverseMap);
 			} catch (ModelException e) {

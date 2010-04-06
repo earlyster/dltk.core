@@ -26,6 +26,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -722,18 +723,17 @@ public class ScriptProject extends Openable implements IScriptProject,
 	 */
 	public IProjectFragment[] computeProjectFragments(
 			IBuildpathEntry[] resolvedBuildpath, boolean retrieveExportedRoots,
-			Map rootToResolvedEntries) throws ModelException {
-		ObjectVector accumulatedRoots = new ObjectVector();
+			Map<IProjectFragment, BuildpathEntry> rootToResolvedEntries)
+			throws ModelException {
+		List<IProjectFragment> accumulatedRoots = new ArrayList<IProjectFragment>();
 		computeProjectFragments(resolvedBuildpath, accumulatedRoots,
-				new HashSet(5), // rootIDs
+				new HashSet<String>(5), // rootIDs
 				null, // inside original project
 				true, // check existency
 				retrieveExportedRoots, rootToResolvedEntries);
 
-		List fragments = accumulatedRoots.asList();
-		IProjectFragment[] rootArray = new IProjectFragment[fragments.size()];
-		fragments.toArray(rootArray);
-		return rootArray;
+		return accumulatedRoots.toArray(new IProjectFragment[accumulatedRoots
+				.size()]);
 	}
 
 	/**
@@ -757,9 +757,10 @@ public class ScriptProject extends Openable implements IScriptProject,
 	 * @throws ModelException
 	 */
 	public void computeProjectFragments(IBuildpathEntry[] resolvedBuildpath,
-			ObjectVector accumulatedRoots, HashSet rootIDs,
+			List<IProjectFragment> accumulatedRoots, Set<String> rootIDs,
 			IBuildpathEntry referringEntry, boolean checkExistency,
-			boolean retrieveExportedRoots, Map rootToResolvedEntries)
+			boolean retrieveExportedRoots,
+			Map<IProjectFragment, BuildpathEntry> rootToResolvedEntries)
 			throws ModelException {
 		if (referringEntry == null) {
 			rootIDs.add(rootID());
@@ -793,9 +794,10 @@ public class ScriptProject extends Openable implements IScriptProject,
 	 * @throws ModelException
 	 */
 	public void computeProjectFragments(IBuildpathEntry resolvedEntry,
-			ObjectVector accumulatedRoots, HashSet rootIDs,
+			List<IProjectFragment> accumulatedRoots, Set<String> rootIDs,
 			IBuildpathEntry referringEntry, boolean checkExistency,
-			boolean retrieveExportedRoots, Map rootToResolvedEntries)
+			boolean retrieveExportedRoots,
+			Map<IProjectFragment, BuildpathEntry> rootToResolvedEntries)
 			throws ModelException {
 		String rootID = ((BuildpathEntry) resolvedEntry).rootID();
 		if (rootIDs.contains(rootID))
@@ -3141,7 +3143,8 @@ public class ScriptProject extends Openable implements IScriptProject,
 		return getAllProjectFragments(null /* no reverse map */);
 	}
 
-	public IProjectFragment[] getAllProjectFragments(Map rootToResolvedEntries)
+	public IProjectFragment[] getAllProjectFragments(
+			Map<IProjectFragment, BuildpathEntry> rootToResolvedEntries)
 			throws ModelException {
 		IProjectFragment[] computed = computeProjectFragments(
 				getResolvedBuildpath(true/* ignoreUnresolvedEntry */, false/*
