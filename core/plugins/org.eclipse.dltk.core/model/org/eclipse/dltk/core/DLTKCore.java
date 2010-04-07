@@ -1972,7 +1972,7 @@ public class DLTKCore extends Plugin {
 															.getDescription());
 													buffer.append(" {\n"); //$NON-NLS-1$
 													IBuildpathEntry[] entries = container
-															.getBuildpathEntries(null);
+															.getBuildpathEntries();
 													if (entries != null) {
 														for (int i = 0; i < entries.length; i++) {
 															buffer

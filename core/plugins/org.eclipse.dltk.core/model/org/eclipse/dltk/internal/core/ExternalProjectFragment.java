@@ -312,8 +312,7 @@ public class ExternalProjectFragment extends ProjectFragment implements
 				&& rawEntry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER) {
 			IBuildpathContainer container = DLTKCore.getBuildpathContainer(
 					rawEntry.getPath(), this.getScriptProject());
-			IBuildpathEntry entrys[] = container
-					.getBuildpathEntries(getScriptProject());
+			IBuildpathEntry entrys[] = container.getBuildpathEntries();
 			for (int i = 0; i < entrys.length; ++i) {
 				if (entrys[i].getPath().equals(this.getPath())) {
 					return entrys[i];

@@ -106,7 +106,7 @@ public interface IBuildpathContainer {
 	 *         represents
 	 * @see IBuildpathEntry
 	 */
-	IBuildpathEntry[] getBuildpathEntries(IScriptProject project);
+	IBuildpathEntry[] getBuildpathEntries();
 
 	/**
 	 * Answers a readable description of this container

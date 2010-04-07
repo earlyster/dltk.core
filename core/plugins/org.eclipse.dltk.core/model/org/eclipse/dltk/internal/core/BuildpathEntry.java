@@ -1359,7 +1359,7 @@ public class BuildpathEntry implements IBuildpathEntry {
 						return ModelStatus.VERIFIED_OK;
 					}
 					IBuildpathEntry[] containerEntries = container
-							.getBuildpathEntries(project);
+							.getBuildpathEntries();
 					if (containerEntries != null) {
 						for (int i = 0, length = containerEntries.length; i < length; i++) {
 							IBuildpathEntry containerEntry = containerEntries[i];

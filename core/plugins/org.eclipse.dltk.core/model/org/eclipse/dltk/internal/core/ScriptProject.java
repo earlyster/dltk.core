@@ -434,7 +434,7 @@ public class ScriptProject extends Openable implements IScriptProject,
 				}
 
 				IBuildpathEntry[] containerEntries = container
-						.getBuildpathEntries(this);
+						.getBuildpathEntries();
 				if (containerEntries == null)
 					break;
 
@@ -2713,7 +2713,7 @@ public class ScriptProject extends Openable implements IScriptProject,
 				if (container == null)
 					break;
 				IBuildpathEntry[] containerEntries = container
-						.getBuildpathEntries(this);
+						.getBuildpathEntries();
 				if (containerEntries == null)
 					break;
 				// container was bound

@@ -31,7 +31,7 @@ public class UserLibraryBuildpathContainerInitializer extends
 	 * (non-Javadoc)
 	 * 
 	 * @see org.eclipse.dltk.core.ClasspathContainerInitializer#canUpdateClasspathContainer(org.eclipse.core.runtime.IPath,
-	 *      org.eclipse.dltk.core.IJavaProject)
+	 * org.eclipse.dltk.core.IJavaProject)
 	 */
 	public boolean canUpdateBuildpathContainer(IPath containerPath,
 			IScriptProject project) {
@@ -71,12 +71,15 @@ public class UserLibraryBuildpathContainerInitializer extends
 				tk = DLTKLanguageManager.getLanguageToolkit(nature);
 				userLibName = userLibName.substring(pos + 1);
 			}
-			if( tk == null ) {
+			if (tk == null) {
 				tk = toolkit;
 			}
 			if (tk == null) {
-				throw new CoreException(new Status(IStatus.ERROR,
-						DLTKCore.PLUGIN_ID, Messages.UserLibraryBuildpathContainerInitializer_dltkLanguageToolkitIsNull));
+				throw new CoreException(
+						new Status(
+								IStatus.ERROR,
+								DLTKCore.PLUGIN_ID,
+								Messages.UserLibraryBuildpathContainerInitializer_dltkLanguageToolkitIsNull));
 			}
 			UserLibrary userLibrary = ModelManager.getUserLibraryManager()
 					.getUserLibrary(userLibName, tk);
@@ -114,7 +117,7 @@ public class UserLibraryBuildpathContainerInitializer extends
 						.getUserLibraryManager()
 						.setUserLibrary(
 								name,
-								containerSuggestion.getBuildpathEntries(project),
+								containerSuggestion.getBuildpathEntries(),
 								containerSuggestion.getKind() == IBuildpathContainer.K_SYSTEM,
 								toolkit);
 			} else {

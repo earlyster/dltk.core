@@ -140,7 +140,7 @@ public class ModelManager implements ISaveParticipant {
 			"Variable Initialization In Progress"); //$NON-NLS-1$
 
 	public final static IBuildpathContainer CONTAINER_INITIALIZATION_IN_PROGRESS = new IBuildpathContainer() {
-		public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
+		public IBuildpathEntry[] getBuildpathEntries() {
 			return null;
 		}
 
@@ -1398,8 +1398,7 @@ public class ModelManager implements ISaveParticipant {
 			if (entries != ScriptProject.INVALID_BUILDPATH) {
 				final IBuildpathEntry[] containerEntries = entries;
 				IBuildpathContainer container = new IBuildpathContainer() {
-					public IBuildpathEntry[] getBuildpathEntries(
-							IScriptProject project) {
+					public IBuildpathEntry[] getBuildpathEntries() {
 						return containerEntries;
 					}
 
@@ -1962,7 +1961,7 @@ public class ModelManager implements ISaveParticipant {
 		buffer.append("	container path: " + containerPath + '\n'); //$NON-NLS-1$
 		if (container != null) {
 			buffer.append("	container: " + container.getDescription() + " {\n"); //$NON-NLS-2$//$NON-NLS-1$
-			IBuildpathEntry[] entries = container.getBuildpathEntries(project);
+			IBuildpathEntry[] entries = container.getBuildpathEntries();
 			if (entries != null) {
 				for (int i = 0; i < entries.length; i++) {
 					buffer.append("		" + entries[i] + '\n'); //$NON-NLS-1$
@@ -2023,7 +2022,7 @@ public class ModelManager implements ISaveParticipant {
 					buffer.append(previousContainer.getDescription());
 					buffer.append(" {\n"); //$NON-NLS-1$
 					IBuildpathEntry[] entries = previousContainer
-							.getBuildpathEntries(project);
+							.getBuildpathEntries();
 					if (entries != null) {
 						for (int j = 0; j < entries.length; j++) {
 							buffer.append(" 		"); //$NON-NLS-1$
@@ -2128,8 +2127,7 @@ public class ModelManager implements ISaveParticipant {
 			return false;
 		IBuildpathContainer previousSessionContainer = getPreviousSessionContainer(
 				containerPath, project);
-		final IBuildpathEntry[] newEntries = container
-				.getBuildpathEntries(project);
+		final IBuildpathEntry[] newEntries = container.getBuildpathEntries();
 		if (previousSessionContainer == null)
 			if (newEntries.length == 0) {
 				containerPut(project, containerPath, container);
@@ -2138,7 +2136,7 @@ public class ModelManager implements ISaveParticipant {
 				return false;
 			}
 		final IBuildpathEntry[] oldEntries = previousSessionContainer
-				.getBuildpathEntries(project);
+				.getBuildpathEntries();
 		if (oldEntries.length != newEntries.length)
 			return false;
 		for (int i = 0, length = newEntries.length; i < length; i++) {
@@ -2511,7 +2509,7 @@ public class ModelManager implements ISaveParticipant {
 						}
 						if (container != null) {
 							IBuildpathEntry[] entries = container
-									.getBuildpathEntries(project);
+									.getBuildpathEntries();
 							containerString = ((ScriptProject) project)
 									.encodeBuildpath(entries, false, null/*
 																		 * not
@@ -2660,7 +2658,7 @@ public class ModelManager implements ISaveParticipant {
 							path, project);
 				}
 				if (container != null)
-					cpEntries = container.getBuildpathEntries(project);
+					cpEntries = container.getBuildpathEntries();
 				savePath(path);
 				saveBuildpathEntries(cpEntries);
 			}
@@ -2830,7 +2828,7 @@ public class ModelManager implements ISaveParticipant {
 			this.project = project;
 		}
 
-		public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
+		public IBuildpathEntry[] getBuildpathEntries() {
 			return entries;
 		}
 

@@ -317,7 +317,7 @@ public class BuiltinProjectFragment extends ProjectFragment {
 				&& rawEntry.getEntryKind() == IBuildpathEntry.BPE_CONTAINER) {
 			IBuildpathContainer container = DLTKCore.getBuildpathContainer(
 					rawEntry.getPath(), project);
-			IBuildpathEntry entrys[] = container.getBuildpathEntries(project);
+			IBuildpathEntry entrys[] = container.getBuildpathEntries();
 			for (int i = 0; i < entrys.length; ++i) {
 				if (entrys[i].getPath().equals(
 						new Path(this.getPath().segment(0)))) {
