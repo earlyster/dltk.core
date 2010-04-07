@@ -23,7 +23,7 @@ import org.eclipse.dltk.core.IScriptProject;
 public class BPUserLibraryElement {
 
 	private class UpdatedBuildpathContainer implements IBuildpathContainer {
-		public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
+		public IBuildpathEntry[] getBuildpathEntries() {
 			BPListElement[] children = getChildren();
 			IBuildpathEntry[] entries = new IBuildpathEntry[children.length];
 			for (int i = 0; i < entries.length; i++) {
@@ -56,7 +56,7 @@ public class BPUserLibraryElement {
 		fName = name;
 		fChildren = new ArrayList();
 		if (container != null) {
-			IBuildpathEntry[] entries = container.getBuildpathEntries(project);
+			IBuildpathEntry[] entries = container.getBuildpathEntries();
 			BPListElement[] res = new BPListElement[entries.length];
 			for (int i = 0; i < res.length; i++) {
 				IBuildpathEntry curr = entries[i];
@@ -180,8 +180,7 @@ public class BPUserLibraryElement {
 				|| (oldContainer.getKind() == IBuildpathContainer.K_SYSTEM) != fIsSystemLibrary) {
 			return true;
 		}
-		IBuildpathEntry[] oldEntries = oldContainer
-				.getBuildpathEntries(project);
+		IBuildpathEntry[] oldEntries = oldContainer.getBuildpathEntries();
 		if (fChildren.size() != oldEntries.length) {
 			return true;
 		}

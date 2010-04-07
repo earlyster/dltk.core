@@ -51,7 +51,7 @@ public class BuildPathSupport {
 		}
 
 
-		public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
+		public IBuildpathEntry[] getBuildpathEntries() {
 			return fNewEntries;
 		}
 
@@ -106,7 +106,7 @@ public class BuildPathSupport {
 		if (container == null) {
 			throw new CoreException(new Status(IStatus.ERROR, DLTKUIPlugin.PLUGIN_ID, IStatus.ERROR, "Container " + containerPath + " cannot be resolved", null));  //$NON-NLS-1$//$NON-NLS-2$
 		}
-		IBuildpathEntry[] entries= container.getBuildpathEntries(project);
+		IBuildpathEntry[] entries = container.getBuildpathEntries();
 		IBuildpathEntry[] newEntries= new IBuildpathEntry[entries.length];
 		for (int i= 0; i < entries.length; i++) {
 			IBuildpathEntry curr= entries[i];
