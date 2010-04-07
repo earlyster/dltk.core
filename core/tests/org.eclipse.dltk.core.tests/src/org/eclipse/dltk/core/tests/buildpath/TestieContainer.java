@@ -26,7 +26,7 @@ public class TestieContainer implements IBuildpathContainer {
 		return new IBuildpathEntry[] { DLTKCore.newExtLibraryEntry(this.fPath) };
 	}
 
-	public String getDescription(IScriptProject project) {
+	public String getDescription() {
 		return "Testie Buildpath Container";
 	}
 

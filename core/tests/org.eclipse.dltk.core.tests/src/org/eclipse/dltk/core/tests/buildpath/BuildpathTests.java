@@ -81,7 +81,7 @@ public class BuildpathTests extends ModifyingResourceTests {
 			return this.entries;
 		}
 
-		public String getDescription(IScriptProject project) {
+		public String getDescription() {
 			return this.path.toString();
 		}
 
