@@ -55,8 +55,8 @@ public class BuildPathSupport {
 			return fNewEntries;
 		}
 
-		public String getDescription(IScriptProject project) {
-			return fOriginal.getDescription(project);
+		public String getDescription() {
+			return fOriginal.getDescription();
 		}
 
 		public int getKind() {

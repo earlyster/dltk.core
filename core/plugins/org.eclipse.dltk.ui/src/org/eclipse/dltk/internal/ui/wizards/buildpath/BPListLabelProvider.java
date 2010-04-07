@@ -263,7 +263,7 @@ public class BPListLabelProvider extends LabelProvider {
 				IBuildpathContainer container = DLTKCore.getBuildpathContainer(
 						path, cpentry.getScriptProject());
 				if (container != null) {
-					return container.getDescription(cpentry.getScriptProject());
+					return container.getDescription();
 				}
 				BuildpathContainerInitializer initializer = DLTKCore
 						.getBuildpathContainerInitializer(path.segment(0));

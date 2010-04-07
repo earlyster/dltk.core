@@ -146,7 +146,7 @@ public class BuildPathContainer extends ProjectFragmentContainer {
 
 	public String getLabel() {
 		if (fContainer != null)
-			return fContainer.getDescription(this.getScriptProject());
+			return fContainer.getDescription();
 		
 		IPath path= fClassPathEntry.getPath();
 		String containerId= path.segment(0);
