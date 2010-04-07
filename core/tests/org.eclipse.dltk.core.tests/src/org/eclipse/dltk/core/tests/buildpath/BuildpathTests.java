@@ -77,7 +77,7 @@ public class BuildpathTests extends ModifyingResourceTests {
 			return this.path;
 		}
 
-		public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
+		public IBuildpathEntry[] getBuildpathEntries() {
 			return this.entries;
 		}
 

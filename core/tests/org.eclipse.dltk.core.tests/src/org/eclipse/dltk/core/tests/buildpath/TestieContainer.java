@@ -22,7 +22,7 @@ public class TestieContainer implements IBuildpathContainer {
 		this.fPath = srcPath;
 	}
 
-	public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
+	public IBuildpathEntry[] getBuildpathEntries() {
 		return new IBuildpathEntry[] { DLTKCore.newExtLibraryEntry(this.fPath) };
 	}
 
