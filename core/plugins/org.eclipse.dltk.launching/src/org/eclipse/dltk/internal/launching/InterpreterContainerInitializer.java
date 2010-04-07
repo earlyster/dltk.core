@@ -56,7 +56,8 @@ public class InterpreterContainerInitializer extends
 						getEnvironmentFromProject(project), containerPath);
 				InterpreterContainer container = null;
 				if (interp != null) {
-					container = new InterpreterContainer(interp, containerPath);
+					container = new InterpreterContainer(interp, containerPath,
+							project);
 				}
 				DLTKCore.setBuildpathContainer(containerPath,
 						new IScriptProject[] { project },
@@ -161,8 +162,7 @@ public class InterpreterContainerInitializer extends
 			throw new CoreException(status);
 		}
 		// update of the interpreter with new library locations
-		IBuildpathEntry[] entries = containerSuggestion
-				.getBuildpathEntries(project);
+		IBuildpathEntry[] entries = containerSuggestion.getBuildpathEntries();
 		LibraryLocation[] libs = new LibraryLocation[entries.length];
 		for (int i = 0; i < entries.length; i++) {
 			IBuildpathEntry entry = entries[i];

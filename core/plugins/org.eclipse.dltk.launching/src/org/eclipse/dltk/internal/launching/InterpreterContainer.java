@@ -51,6 +51,8 @@ public class InterpreterContainer implements IBuildpathContainer,
 	 * Container path used to resolve to this interpreter
 	 */
 	private IPath fPath = null;
+
+	private IScriptProject fProject;
 	/**
 	 * Cache of buildpath entries per Interpreter install. Cleared when a
 	 * Interpreter changes.
@@ -194,23 +196,25 @@ public class InterpreterContainer implements IBuildpathContainer,
 	 * @param path
 	 *            container path used to resolve this interpreter
 	 */
-	public InterpreterContainer(IInterpreterInstall interpreter, IPath path) {
+	public InterpreterContainer(IInterpreterInstall interpreter, IPath path,
+			IScriptProject project) {
 		fInterpreterInstall = interpreter;
 		fPath = path;
+		fProject = project;
 	}
 
 	/**
 	 * @see IBuildpathContainer#getBuildpathEntries(IScriptProject)
 	 */
-	public IBuildpathEntry[] getBuildpathEntries(IScriptProject project) {
+	public IBuildpathEntry[] getBuildpathEntries() {
 		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(fInterpreterInstall);
 		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>();
 		entries.addAll(Arrays.asList(buildpathEntries));
 		// Use custom per project interpreter entries.
 		IInterpreterContainerExtension extension = DLTKInterpreterManager
-				.getInterpreterContainerExtensions(project);
+				.getInterpreterContainerExtensions(fProject);
 		if (extension != null) {
-			extension.processEntres(project, entries);
+			extension.processEntres(fProject, entries);
 		}
 		return entries.toArray(new IBuildpathEntry[entries.size()]);
 	}
