@@ -218,7 +218,7 @@ public class InterpreterContainer implements IBuildpathContainer,
 	/**
 	 * @see IBuildpathContainer#getDescription()
 	 */
-	public String getDescription(IScriptProject project) {
+	public String getDescription() {
 		String tag = fInterpreterInstall.getName();
 		return NLS
 				.bind(
