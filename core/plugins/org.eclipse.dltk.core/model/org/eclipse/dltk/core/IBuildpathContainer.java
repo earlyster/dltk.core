@@ -113,7 +113,7 @@ public interface IBuildpathContainer {
 	 * 
 	 * @return String - a string description of the container
 	 */
-	String getDescription(IScriptProject project);
+	String getDescription();
 
 	/**
 	 * Answers the kind of this container. Can be either:

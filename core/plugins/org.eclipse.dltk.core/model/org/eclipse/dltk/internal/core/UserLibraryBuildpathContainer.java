@@ -45,7 +45,7 @@ public class UserLibraryBuildpathContainer implements IBuildpathContainer {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.IClasspathContainer#getDescription()
 	 */
-	public String getDescription(IScriptProject project) {
+	public String getDescription() {
 		return this.name;
 	}
 

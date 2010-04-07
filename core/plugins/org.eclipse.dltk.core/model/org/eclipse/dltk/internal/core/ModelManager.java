@@ -144,7 +144,7 @@ public class ModelManager implements ISaveParticipant {
 			return null;
 		}
 
-		public String getDescription(IScriptProject project) {
+		public String getDescription() {
 			return "Container Initialization In Progress";} //$NON-NLS-1$
 
 		public int getKind() {
@@ -156,7 +156,7 @@ public class ModelManager implements ISaveParticipant {
 		}
 
 		public String toString() {
-			return getDescription(null);
+			return getDescription();
 		}
 
 	};
@@ -1403,7 +1403,7 @@ public class ModelManager implements ISaveParticipant {
 						return containerEntries;
 					}
 
-					public String getDescription(IScriptProject project) {
+					public String getDescription() {
 						return "Persisted container [" + containerPath + " for project [" + project.getElementName() + "]"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 					}
 
@@ -1416,7 +1416,7 @@ public class ModelManager implements ISaveParticipant {
 					}
 
 					public String toString() {
-						return getDescription(project);
+						return getDescription();
 					}
 
 				};
@@ -1961,8 +1961,7 @@ public class ModelManager implements ISaveParticipant {
 		buffer.append("	project: " + project.getElementName() + '\n'); //$NON-NLS-1$
 		buffer.append("	container path: " + containerPath + '\n'); //$NON-NLS-1$
 		if (container != null) {
-			buffer
-					.append("	container: " + container.getDescription(project) + " {\n"); //$NON-NLS-2$//$NON-NLS-1$
+			buffer.append("	container: " + container.getDescription() + " {\n"); //$NON-NLS-2$//$NON-NLS-1$
 			IBuildpathEntry[] entries = container.getBuildpathEntries(project);
 			if (entries != null) {
 				for (int i = 0; i < entries.length; i++) {
@@ -2021,7 +2020,7 @@ public class ModelManager implements ISaveParticipant {
 							.append("	project: " + project.getElementName() + '\n'); //$NON-NLS-1$
 					buffer.append("	container path: " + containerPath + '\n'); //$NON-NLS-1$
 					buffer.append("	previous value: "); //$NON-NLS-1$
-					buffer.append(previousContainer.getDescription(project));
+					buffer.append(previousContainer.getDescription());
 					buffer.append(" {\n"); //$NON-NLS-1$
 					IBuildpathEntry[] entries = previousContainer
 							.getBuildpathEntries(project);
@@ -2167,7 +2166,7 @@ public class ModelManager implements ISaveParticipant {
 												return buffer.toString();
 											}
 											buffer.append(container
-													.getDescription(project));
+													.getDescription());
 											buffer.append(" {\n"); //$NON-NLS-1$
 											for (int j = 0; j < oldEntries.length; j++) {
 												buffer.append(" 			"); //$NON-NLS-1$
@@ -2189,7 +2188,7 @@ public class ModelManager implements ISaveParticipant {
 												return buffer.toString();
 											}
 											buffer.append(container
-													.getDescription(project));
+													.getDescription());
 											buffer.append(" {\n"); //$NON-NLS-1$
 											for (int j = 0; j < newEntries.length; j++) {
 												buffer.append(" 			"); //$NON-NLS-1$
@@ -2835,7 +2834,7 @@ public class ModelManager implements ISaveParticipant {
 			return entries;
 		}
 
-		public String getDescription(IScriptProject prj) {
+		public String getDescription() {
 			return "Persisted container [" + containerPath //$NON-NLS-1$
 					+ " for project [" + project.getElementName() //$NON-NLS-1$
 					+ "]]"; //$NON-NLS-1$  
@@ -2850,7 +2849,7 @@ public class ModelManager implements ISaveParticipant {
 		}
 
 		public String toString() {
-			return getDescription(project);
+			return getDescription();
 		}
 
 	}

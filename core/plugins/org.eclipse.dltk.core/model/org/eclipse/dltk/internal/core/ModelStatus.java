@@ -331,7 +331,7 @@ public class ModelStatus extends Status implements IModelStatus,
 						description = initializer.getDescription(path,
 								scriptProject);
 				} else {
-					description = container.getDescription(scriptProject);
+					description = container.getDescription();
 				}
 				if (description == null)
 					description = path.makeRelative().toString();
