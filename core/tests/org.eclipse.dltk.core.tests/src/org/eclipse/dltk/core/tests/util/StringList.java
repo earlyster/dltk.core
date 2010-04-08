@@ -30,4 +30,16 @@ public class StringList extends ArrayList<String> {
 		return toArray(new String[size()]);
 	}
 
+	/**
+	 * @return
+	 */
+	public int length() {
+		int length = 0;
+		for (String line : this) {
+			length += line.length();
+			length += 1; // EOL
+		}
+		return length;
+	}
+
 }
