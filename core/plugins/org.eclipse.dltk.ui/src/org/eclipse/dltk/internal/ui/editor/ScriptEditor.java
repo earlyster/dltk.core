@@ -81,6 +81,7 @@ import org.eclipse.dltk.ui.formatter.ScriptFormattingContextProperties;
 import org.eclipse.dltk.ui.text.ScriptSourceViewerConfiguration;
 import org.eclipse.dltk.ui.text.ScriptTextTools;
 import org.eclipse.dltk.ui.text.folding.AbstractASTFoldingStructureProvider;
+import org.eclipse.dltk.ui.text.folding.FoldingProviderManager;
 import org.eclipse.dltk.ui.text.folding.IElementCommentResolver;
 import org.eclipse.dltk.ui.text.folding.IFoldingStructureProvider;
 import org.eclipse.dltk.ui.text.folding.IFoldingStructureProviderExtension;
@@ -2043,12 +2044,26 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	}
 
 	/**
+	 * Creates folding structure provider to use in this editor. Default
+	 * implementation queries the
+	 * <code>org.eclipse.dltk.ui.folding/structureProvider</code> extension
+	 * point.
+	 * 
+	 * @return folding structure provider or <code>null</code>.
+	 */
+	protected IFoldingStructureProvider createFoldingStructureProvider() {
+		return getFoldingStructureProvider();
+	}
+
+	/**
 	 * Returns folding structure provider.
 	 * 
 	 * @return
 	 */
+	@Deprecated
 	protected IFoldingStructureProvider getFoldingStructureProvider() {
-		return null;
+		return FoldingProviderManager.getStructureProvider(getLanguageToolkit()
+				.getNatureId());
 	}
 
 	private boolean isEditorHoverProperty(String property) {
@@ -2302,6 +2317,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			super(ST.WORD_NEXT);
 		}
 
+		@Override
 		protected void setCaretPosition(final int position) {
 			getTextWidget().setCaretOffset(
 					modelOffset2WidgetOffset(getSourceViewer(), position));
@@ -2320,6 +2336,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			super(ST.DELETE_WORD_NEXT);
 		}
 
+		@Override
 		protected void setCaretPosition(final int position) {
 			if (!validateEditorInputState())
 				return;
@@ -2341,6 +2358,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			}
 		}
 
+		@Override
 		protected int findNextPosition(int position) {
 			return fIterator.following(position);
 		}
@@ -2366,6 +2384,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			super(ST.SELECT_WORD_NEXT);
 		}
 
+		@Override
 		protected void setCaretPosition(final int position) {
 			final ISourceViewer viewer = getSourceViewer();
 			final StyledText text = viewer.getTextWidget();
@@ -2470,6 +2489,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			super(ST.WORD_PREVIOUS);
 		}
 
+		@Override
 		protected void setCaretPosition(final int position) {
 			getTextWidget().setCaretOffset(
 					modelOffset2WidgetOffset(getSourceViewer(), position));
@@ -2488,6 +2508,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			super(ST.DELETE_WORD_PREVIOUS);
 		}
 
+		@Override
 		protected void setCaretPosition(int position) {
 			if (!validateEditorInputState())
 				return;
@@ -2509,6 +2530,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			}
 		}
 
+		@Override
 		protected int findPreviousPosition(int position) {
 			return fIterator.preceding(position);
 		}
@@ -2529,6 +2551,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 			super(ST.SELECT_WORD_PREVIOUS);
 		}
 
+		@Override
 		protected void setCaretPosition(final int position) {
 			final ISourceViewer viewer = getSourceViewer();
 			final StyledText text = viewer.getTextWidget();
@@ -2545,9 +2568,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	}
 
 	/*
-	 * @see
-	 * org.eclipse.ui.texteditor.AbstractTextEditor#createNavigationActions()
+	 * @see AbstractTextEditor#createNavigationActions()
 	 */
+	@Override
 	protected void createNavigationActions() {
 		super.createNavigationActions();
 		final StyledText textWidget = getSourceViewer().getTextWidget();
@@ -2574,6 +2597,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 				SWT.NULL);
 	}
 
+	@Override
 	protected final ISourceViewer createSourceViewer(Composite parent,
 			IVerticalRuler verticalRuler, int styles) {
 
@@ -2635,7 +2659,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 
 		fProjectionSupport.install();
 
-		fProjectionModelUpdater = getFoldingStructureProvider();
+		fProjectionModelUpdater = createFoldingStructureProvider();
 		if (fProjectionModelUpdater != null)
 			fProjectionModelUpdater.install(this, projectionViewer,
 					getPreferenceStore());
@@ -2690,10 +2714,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	}
 
 	/*
-	 * @see
-	 * org.eclipse.ui.texteditor.AbstractTextEditor#rulerContextMenuAboutToShow
-	 * (org.eclipse.jface.action.IMenuManager)
+	 * @see AbstractTextEditor#rulerContextMenuAboutToShow(IMenuManager)
 	 */
+	@Override
 	protected void rulerContextMenuAboutToShow(IMenuManager menu) {
 		super.rulerContextMenuAboutToShow(menu);
 		IMenuManager foldingMenu = new MenuManager(
@@ -2731,6 +2754,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#performRevert()
 	 */
+	@Override
 	protected void performRevert() {
 		ProjectionViewer projectionViewer = (ProjectionViewer) getSourceViewer();
 		projectionViewer.setRedraw(false);
@@ -2769,9 +2793,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	}
 
 	/*
-	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#performSave(boolean,
-	 * org.eclipse.core.runtime.IProgressMonitor)
+	 * @see AbstractTextEditor#performSave(boolean, IProgressMonitor)
 	 */
+	@Override
 	protected void performSave(boolean overwrite,
 			IProgressMonitor progressMonitor) {
 		IDocumentProvider p = getDocumentProvider();
@@ -2792,6 +2816,7 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	/*
 	 * @see AbstractTextEditor#doSave(IProgressMonitor)
 	 */
+	@Override
 	public void doSave(IProgressMonitor progressMonitor) {
 
 		IDocumentProvider p = getDocumentProvider();
@@ -3132,20 +3157,22 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 		}
 	}
 
+	@Override
 	public int getOrientation() {
 		return SWT.LEFT_TO_RIGHT;
 	}
 
+	@Override
 	protected String[] collectContextMenuPreferencePages() {
-		final List result = new ArrayList();
+		final List<String> result = new ArrayList<String>();
 		final IDLTKUILanguageToolkit uiToolkit = DLTKUILanguageManager
 				.getLanguageToolkit(getLanguageToolkit().getNatureId());
 		addPages(result, uiToolkit.getEditorPreferencePages());
 		addPages(result, super.collectContextMenuPreferencePages());
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
-	private void addPages(final List result, final String[] pages) {
+	private void addPages(final List<String> result, final String[] pages) {
 		if (pages != null) {
 			for (int i = 0; i < pages.length; ++i) {
 				if (!result.contains(pages[i])) {
@@ -3156,9 +3183,9 @@ public abstract class ScriptEditor extends AbstractDecoratedTextEditor
 	}
 
 	/*
-	 * @seeorg.eclipse.ui.texteditor.AbstractDecoratedTextEditor#
-	 * isTabsToSpacesConversionEnabled()
+	 * @see AbstractDecoratedTextEditor#isTabsToSpacesConversionEnabled()
 	 */
+	@Override
 	protected boolean isTabsToSpacesConversionEnabled() {
 		return getPreferenceStore() != null
 				&& CodeFormatterConstants.SPACE.equals(getPreferenceStore()

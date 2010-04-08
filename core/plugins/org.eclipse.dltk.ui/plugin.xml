@@ -18,6 +18,7 @@
    <extension-point id="projectTemplate" name="Project Template" schema="schema/projectTemplate.exsd"/>
    <extension-point id="projectWizardInitializer" name="Project Wizard Initializer" schema="schema/projectWizardInitializer.exsd"/>
    <extension-point id="sourceModuleWizardExtension" name="SourceModule Wizard Extension" schema="schema/sourceModuleWizardExtension.exsd"/>
+   <extension-point id="folding" name="Folding Structure Provider" schema="schema/folding.exsd"/>
    <extension
     	id="DLTKSearchResultPage"
         point="org.eclipse.search.searchResultViewPages">
