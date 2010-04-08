@@ -70,6 +70,8 @@ public class NatureExtensionManager {
 			IConfigurationElement[] confElements, final String categoryAttr) {
 		for (int i = 0; i < confElements.length; i++) {
 			final IConfigurationElement confElement = confElements[i];
+			if (!isValidElement(confElement))
+				continue;
 			final String category = confElement.getAttribute(categoryAttr);
 			if (category != null) {
 				List elements = (List) extensions.get(category);
@@ -88,6 +90,10 @@ public class NatureExtensionManager {
 				DLTKCore.warn(msg);
 			}
 		}
+	}
+
+	protected boolean isValidElement(IConfigurationElement element) {
+		return true;
 	}
 
 	/**
