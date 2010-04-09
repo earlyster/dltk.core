@@ -24,6 +24,18 @@ public interface IFoldingBlockProvider {
 	void setRequestor(IFoldingBlockRequestor requestor);
 
 	/**
+	 * Returns the minimal number of lines for reported blocks. Blocks
+	 * containing fewer lines won't be folded. Single line blocks couldn't be
+	 * folded anyway.
+	 * 
+	 * If you want finer control over blocks return 0 here and make decision in
+	 * your code.
+	 * 
+	 * @return
+	 */
+	int getMinimalLineCount();
+
+	/**
 	 * Compute foldable blocks and report them to the requestor provided via
 	 * separate call. If current folding operation should be interrupted (e.g.
 	 * because of unrecoverable syntax error) then provider should throw

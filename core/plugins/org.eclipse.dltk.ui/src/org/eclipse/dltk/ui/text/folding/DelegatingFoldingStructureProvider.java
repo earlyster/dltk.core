@@ -704,7 +704,10 @@ public class DelegatingFoldingStructureProvider implements
 			final Requestor requestor = new Requestor(content, ctx);
 			for (IFoldingBlockProvider provider : blockProviders) {
 				provider.setRequestor(requestor);
+				requestor.lineCountDelta = Math.max(1, provider
+						.getMinimalLineCount() - 1);
 				provider.computeFoldableBlocks(content);
+				provider.setRequestor(null);
 			}
 			return true;
 		} catch (ModelException e) {
@@ -756,13 +759,6 @@ public class DelegatingFoldingStructureProvider implements
 		return d.get(offset, length).trim().length() == 0;
 	}
 
-	protected static int countLines(IDocument d, IRegion region)
-			throws BadLocationException {
-		int line1 = d.getLineOfOffset(region.getOffset());
-		int line2 = d.getLineOfOffset(region.getOffset() + region.getLength());
-		return line2 - line1 + 1;
-	}
-
 	/**
 	 * Creates a comment folding position from an
 	 * {@link #alignRegion(IRegion, DelegatingFoldingStructureProvider.FoldingStructureComputationContext)
@@ -808,7 +804,7 @@ public class DelegatingFoldingStructureProvider implements
 	 *         small to be foldable (e.g. covers only one line)
 	 */
 	protected static IRegion alignRegion(IRegion region,
-			FoldingStructureComputationContext ctx) {
+			FoldingStructureComputationContext ctx, int lineCountDelta) {
 		if (region == null)
 			return null;
 		IDocument document = ctx.getDocument();
@@ -816,7 +812,7 @@ public class DelegatingFoldingStructureProvider implements
 			int start = document.getLineOfOffset(region.getOffset());
 			int end = document.getLineOfOffset(region.getOffset()
 					+ region.getLength());
-			if (start >= end)
+			if (start + lineCountDelta > end)
 				return null;
 			int offset = document.getLineOffset(start);
 			int endOffset;
@@ -1026,8 +1022,9 @@ public class DelegatingFoldingStructureProvider implements
 
 	private static class Requestor implements IFoldingBlockRequestor {
 
-		private final IFoldingContent content;
-		private final FoldingStructureComputationContext ctx;
+		final IFoldingContent content;
+		final FoldingStructureComputationContext ctx;
+		int lineCountDelta;
 
 		public Requestor(IFoldingContent content,
 				FoldingStructureComputationContext ctx) {
@@ -1039,17 +1036,14 @@ public class DelegatingFoldingStructureProvider implements
 				Object element, boolean collapse) {
 			try {
 				IRegion region = new Region(start, end - start);
-				// TODO number of lines per kind
-				if (countLines(ctx.getDocument(), region) < 2)
+				final IRegion normalized = alignRegion(region, ctx,
+						lineCountDelta);
+				if (normalized == null) {
 					return;
-
+				}
 				if (element == null) {
 					element = new SourceRangeStamp(region.getLength(), content
 							.get(region).hashCode());
-				}
-				final IRegion normalized = alignRegion(region, ctx);
-				if (normalized == null) {
-					return;
 				}
 				Position position = kind.isComment() ? createCommentPosition(normalized)
 						: createMemberPosition(normalized);
@@ -1063,13 +1057,8 @@ public class DelegatingFoldingStructureProvider implements
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();
 				}
-			} catch (BadLocationException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
-				}
 			}
 		}
-
 	}
 
 }

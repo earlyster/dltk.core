@@ -14,6 +14,7 @@ package org.eclipse.dltk.ui.text.folding;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.text.IPartitioningProvider;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -28,6 +29,12 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.rules.FastPartitioner;
 
 /**
+ * Abstract implementation of {@link IFoldingBlockProvider} to fold
+ * comments/documentation based on document partitioning.
+ * 
+ * Extend it and in the body of computeFoldableBlocks() make a few calls to
+ * {@link #computeBlocksForPartitionType(IFoldingContent, String, IFoldingBlockKind, boolean)}
+ * 
  * @since 2.0
  */
 public abstract class PartitioningFoldingBlockProvider implements
@@ -113,11 +120,11 @@ public abstract class PartitioningFoldingBlockProvider implements
 		this.fInitCollapseDocs = value;
 	}
 
-	protected int getMinimalFoldableLinesCount() {
+	public int getMinimalLineCount() {
 		return fBlockLinesMin;
 	}
 
-	protected void setMinimalFoldableLinesCount(int value) {
+	protected void setMinimalLineCount(int value) {
 		this.fBlockLinesMin = value;
 	}
 
@@ -192,7 +199,9 @@ public abstract class PartitioningFoldingBlockProvider implements
 			reportRegions(document, regions, kind, collapse);
 			removeDocumentStuff(document);
 		} catch (BadLocationException e) {
-			e.printStackTrace();
+			if (DLTKCore.DEBUG) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -201,9 +210,11 @@ public abstract class PartitioningFoldingBlockProvider implements
 	 * @param regions
 	 * @param kind
 	 * @param collapse
+	 * @throws BadLocationException
 	 */
 	protected void reportRegions(Document document, List<IRegion> regions,
-			IFoldingBlockKind kind, boolean collapse) {
+			IFoldingBlockKind kind, boolean collapse)
+			throws BadLocationException {
 		for (IRegion region : regions) {
 			// TODO
 			Object element = null;
