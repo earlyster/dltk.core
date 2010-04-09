@@ -120,7 +120,7 @@ public abstract class IndexRequest extends AbstractJob {
 			Set<IFileHandle> processedFolders = new HashSet<IFileHandle>();
 			for (int i = 0; i < documents.length; ++i) {
 				final String document = documents[i];
-				final ISourceModule module = (ISourceModule) m.remove(document);
+				final ISourceModule module = m.remove(document);
 				if (module == null) {
 					changes.add(document);
 				} else if (environment != null) {
