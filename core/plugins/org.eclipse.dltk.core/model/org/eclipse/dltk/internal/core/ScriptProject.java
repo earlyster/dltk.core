@@ -19,7 +19,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -671,8 +671,8 @@ public class ScriptProject extends Openable implements IScriptProject,
 		// since can create deadlocks (see bug 37274)
 		IBuildpathEntry[] resolvedBuildpath = getResolvedBuildpath();
 		// compute the project fragements
-		IModelElement[] children = computeProjectFragments(resolvedBuildpath,
-				false, null);
+		IProjectFragment[] children = computeProjectFragments(
+				resolvedBuildpath, false, null);
 		setProjectInfoChildren(info, children);
 
 		// remember the timestamps of external libraries the first time they are
@@ -682,9 +682,9 @@ public class ScriptProject extends Openable implements IScriptProject,
 	}
 
 	private void setProjectInfoChildren(OpenableElementInfo info,
-			IModelElement[] children) {
-		List fragments = new ArrayList();
-		fragments.addAll(Arrays.asList(children));
+			IProjectFragment[] children) {
+		List<IProjectFragment> fragments = new ArrayList<IProjectFragment>();
+		Collections.addAll(fragments, children);
 		// Call for extra model providers
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(this);
@@ -698,8 +698,9 @@ public class ScriptProject extends Openable implements IScriptProject,
 			}
 		}
 
-		info.setChildren((IModelElement[]) fragments
-				.toArray(new IModelElement[fragments.size()]));
+		info
+				.setChildren(fragments.toArray(new IModelElement[fragments
+						.size()]));
 	}
 
 	public ModelManager.PerProjectInfo getPerProjectInfo()
@@ -3156,8 +3157,8 @@ public class ScriptProject extends Openable implements IScriptProject,
 							 */), true/* retrieveExportedRoots */,
 				rootToResolvedEntries);
 		// Add all user project fragments
-		List fragments = new ArrayList();
-		fragments.addAll(Arrays.asList(computed));
+		List<IProjectFragment> fragments = new ArrayList<IProjectFragment>();
+		Collections.addAll(fragments, computed);
 		// Call for extra model providers
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
 				.getLanguageToolkit(this);
@@ -3170,8 +3171,7 @@ public class ScriptProject extends Openable implements IScriptProject,
 				}
 			}
 		}
-		return (IProjectFragment[]) fragments
-				.toArray(new IProjectFragment[fragments.size()]);
+		return fragments.toArray(new IProjectFragment[fragments.size()]);
 	}
 
 	public static boolean hasScriptNature(IProject p) {
