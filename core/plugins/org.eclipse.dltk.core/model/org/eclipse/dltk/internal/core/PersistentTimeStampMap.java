@@ -9,7 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -20,7 +20,7 @@ import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.internal.core.util.Util;
 
 public class PersistentTimeStampMap {
-	private Hashtable timestamps = null;
+	private Hashtable<IPath, Long> timestamps = null;
 	private File file;
 
 	public PersistentTimeStampMap(File timestampsFile) {
@@ -33,15 +33,15 @@ public class PersistentTimeStampMap {
 		}
 	}
 
-	public Hashtable getTimestamps() {
+	public Hashtable<IPath, Long> getTimestamps() {
 		if (timestamps == null) {
 			timestamps = readTimeStamps(this.file);
 		}
 		return timestamps;
 	}
 
-	private Hashtable readTimeStamps(File timestampsFile) {
-		Hashtable timeStamps = new Hashtable();
+	private Hashtable<IPath, Long> readTimeStamps(File timestampsFile) {
+		Hashtable<IPath, Long> timeStamps = new Hashtable<IPath, Long>();
 		DataInputStream in = null;
 		try {
 			in = new DataInputStream(new BufferedInputStream(
@@ -68,7 +68,7 @@ public class PersistentTimeStampMap {
 		return timeStamps;
 	}
 
-	private void saveTimeStamps(Hashtable stamps, File timestamps)
+	private void saveTimeStamps(Hashtable<IPath, Long> stamps, File timestamps)
 			throws CoreException {
 		if (stamps == null)
 			return;
@@ -77,12 +77,9 @@ public class PersistentTimeStampMap {
 			out = new DataOutputStream(new BufferedOutputStream(
 					new FileOutputStream(timestamps)));
 			out.writeInt(stamps.size());
-			Iterator keys = stamps.keySet().iterator();
-			while (keys.hasNext()) {
-				IPath key = (IPath) keys.next();
-				out.writeUTF(key.toPortableString());
-				Long timestamp = (Long) stamps.get(key);
-				out.writeLong(timestamp.longValue());
+			for (Map.Entry<IPath, Long> entry : stamps.entrySet()) {
+				out.writeUTF(entry.getKey().toPortableString());
+				out.writeLong(entry.getValue().longValue());
 			}
 		} catch (IOException e) {
 			IStatus status = new Status(IStatus.ERROR, DLTKCore.PLUGIN_ID,
