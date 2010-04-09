@@ -2168,6 +2168,8 @@ public class DeltaProcessor {
 				break;
 			}
 		}
+		final Map<IPath, Long> customTimeStamps = this.state
+				.getCustomTimeStamps();
 		// perform refresh
 		Iterator<String> projectNames = this.state.getOldScriptProjectNames()
 				.iterator();
@@ -2202,8 +2204,8 @@ public class DeltaProcessor {
 					}
 					IProjectFragment fragment = fragments[i];
 					if (fragment instanceof IProjectFragmentTimestamp) {
-						Long oldTimestamp = (Long) this.state
-								.getCustomTimeStamps().get(fragment.getPath());
+						Long oldTimestamp = customTimeStamps.get(fragment
+								.getPath());
 						long newTimeStamp = ((IProjectFragmentTimestamp) fragment)
 								.getTimeStamp();
 						boolean old = fragmentsSetOld.contains(fragment);
@@ -2213,8 +2215,7 @@ public class DeltaProcessor {
 								/**
 								 * This is new element
 								 **/
-								this.state.getCustomTimeStamps().put(
-										fragment.getPath(),
+								customTimeStamps.put(fragment.getPath(),
 										new Long(newTimeStamp));
 								// index new library
 								ProjectIndexerManager.indexProjectFragment(
@@ -2227,8 +2228,7 @@ public class DeltaProcessor {
 							}
 						} else {
 							if (newTimeStamp == 0) {
-								this.state.getCustomTimeStamps().remove(
-										fragment.getPath());
+								customTimeStamps.remove(fragment.getPath());
 								ProjectIndexerManager.removeProjectFragment(
 										scriptProject, fragment.getPath());
 								if (fragment instanceof Openable) {
@@ -2237,8 +2237,7 @@ public class DeltaProcessor {
 								}
 								hasDelta = true;
 							} else if (oldTimestamp.longValue() != newTimeStamp) {
-								this.state.getCustomTimeStamps().put(
-										fragment.getPath(),
+								customTimeStamps.put(fragment.getPath(),
 										new Long(newTimeStamp));
 								// index new library
 								ProjectIndexerManager.indexProjectFragment(
