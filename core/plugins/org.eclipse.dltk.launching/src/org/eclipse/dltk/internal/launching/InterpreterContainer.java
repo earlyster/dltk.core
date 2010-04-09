@@ -10,7 +10,7 @@
 package org.eclipse.dltk.internal.launching;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -219,9 +219,10 @@ public class InterpreterContainer implements IBuildpathContainer,
 
 	private IBuildpathEntry[] computeBuildpathEntries() {
 		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(fInterpreterInstall);
-		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>();
-		entries.addAll(Arrays.asList(buildpathEntries));
-		// Use custom per project interpreter entries.
+		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>(
+				buildpathEntries.length);
+		Collections.addAll(entries, buildpathEntries);
+		// customize entries for this project
 		IInterpreterContainerExtension extension = DLTKInterpreterManager
 				.getInterpreterContainerExtension(fProject);
 		if (extension != null) {
