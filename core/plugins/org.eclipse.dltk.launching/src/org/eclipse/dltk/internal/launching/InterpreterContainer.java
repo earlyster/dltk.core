@@ -54,6 +54,9 @@ public class InterpreterContainer implements IBuildpathContainer,
 	private IPath fPath = null;
 
 	private IScriptProject fProject;
+
+	private IBuildpathEntry[] fEntries = null;
+
 	/**
 	 * Cache of buildpath entries per Interpreter install. Cleared when a
 	 * Interpreter changes.
@@ -208,6 +211,13 @@ public class InterpreterContainer implements IBuildpathContainer,
 	 * @see IBuildpathContainer#getBuildpathEntries(IScriptProject)
 	 */
 	public IBuildpathEntry[] getBuildpathEntries() {
+		if (fEntries == null) {
+			fEntries = computeBuildpathEntries();
+		}
+		return fEntries;
+	}
+
+	private IBuildpathEntry[] computeBuildpathEntries() {
 		IBuildpathEntry[] buildpathEntries = getBuildpathEntries(fInterpreterInstall);
 		List<IBuildpathEntry> entries = new ArrayList<IBuildpathEntry>();
 		entries.addAll(Arrays.asList(buildpathEntries));
