@@ -14,7 +14,9 @@ package org.eclipse.dltk.ui.text.folding;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.dltk.ui.PreferenceConstants;
 import org.eclipse.dltk.ui.text.IPartitioningProvider;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -38,9 +40,85 @@ public abstract class PartitioningFoldingBlockProvider implements
 		this.partitioningProvider = partitioningProvider;
 	}
 
-	protected boolean collapseEmptyLines() {
-		// TODO
-		return true;
+	private int fBlockLinesMin;
+	private boolean fDocsFolding;
+	private boolean fCommentsFolding;
+	private boolean fFoldNewLines;
+	private boolean fInitCollapseComments;
+	private boolean fInitCollapseDocs;
+	private boolean fInitCollapseHeaderComments;
+
+	public void initializePreferences(IPreferenceStore preferenceStore) {
+		fBlockLinesMin = preferenceStore
+				.getInt(PreferenceConstants.EDITOR_FOLDING_LINES_LIMIT);
+		fDocsFolding = preferenceStore
+				.getBoolean(PreferenceConstants.EDITOR_DOCS_FOLDING_ENABLED);
+		fCommentsFolding = preferenceStore
+				.getBoolean(PreferenceConstants.EDITOR_COMMENTS_FOLDING_ENABLED);
+		fFoldNewLines = preferenceStore
+				.getBoolean(PreferenceConstants.EDITOR_COMMENT_FOLDING_JOIN_NEWLINES);
+		fInitCollapseComments = preferenceStore
+				.getBoolean(PreferenceConstants.EDITOR_FOLDING_INIT_COMMENTS);
+		fInitCollapseHeaderComments = preferenceStore
+				.getBoolean(PreferenceConstants.EDITOR_FOLDING_INIT_HEADER_COMMENTS);
+		fInitCollapseDocs = preferenceStore
+				.getBoolean(PreferenceConstants.EDITOR_FOLDING_INIT_DOCS);
+	}
+
+	protected boolean isFoldingDocs() {
+		return fDocsFolding;
+	}
+
+	protected void setFoldingDocs(boolean value) {
+		this.fDocsFolding = value;
+	}
+
+	protected boolean isFoldingComments() {
+		return fCommentsFolding;
+	}
+
+	protected void setFoldingComments(boolean value) {
+		this.fCommentsFolding = value;
+	}
+
+	protected boolean isJoinCommentsSeparatedByEmptyLines() {
+		return fFoldNewLines;
+	}
+
+	protected void setJoinCommentsSeparatedByEmptyLines(boolean value) {
+		this.fFoldNewLines = value;
+	}
+
+	protected boolean isCollapseComments() {
+		return fInitCollapseComments;
+	}
+
+	protected boolean isCollapseHeaderComment() {
+		return fInitCollapseHeaderComments;
+	}
+
+	protected boolean isCollapseDocs() {
+		return fInitCollapseDocs;
+	}
+
+	protected void setCollapseComments(boolean value) {
+		this.fInitCollapseComments = value;
+	}
+
+	protected void setCollapseHeaderComment(boolean value) {
+		this.fInitCollapseHeaderComments = value;
+	}
+
+	protected void setCollapseDocs(boolean value) {
+		this.fInitCollapseDocs = value;
+	}
+
+	protected int getMinimalFoldableLinesCount() {
+		return fBlockLinesMin;
+	}
+
+	protected void setMinimalFoldableLinesCount(int value) {
+		this.fBlockLinesMin = value;
 	}
 
 	private IFoldingBlockRequestor requestor;
@@ -49,26 +127,44 @@ public abstract class PartitioningFoldingBlockProvider implements
 		this.requestor = requestor;
 	}
 
+	private List<ITypedRegion> computePartitioning(Document d) {
+		// TODO TextUtilities.computePartitioning() ?
+		List<ITypedRegion> docRegionList = new ArrayList<ITypedRegion>();
+		int offset = 0;
+		for (;;) {
+			try {
+				ITypedRegion region = TextUtilities.getPartition(d,
+						partitioningProvider.getPartitioning(), offset, true);
+				docRegionList.add(region);
+				offset = region.getLength() + region.getOffset() + 1;
+			} catch (BadLocationException e1) {
+				break;
+			}
+		}
+		return docRegionList;
+	}
+
 	protected void computeBlocksForPartitionType(IFoldingContent content,
-			String partition, IFoldingBlockKind kind) {
+			String partition, IFoldingBlockKind kind, boolean collapse) {
 		try {
 			final String contents = content.getSourceContents();
 			if (contents == null || contents.length() == 0) {
 				return;
 			}
-			Document d = new Document(contents);
-			installDocumentStuff(d);
+			Document document = new Document(contents);
+			installDocumentStuff(document);
 			ITypedRegion start = null;
 			ITypedRegion lastRegion = null;
 			List<IRegion> regions = new ArrayList<IRegion>();
-			for (ITypedRegion region : computePartitioning(d)) {
+			for (ITypedRegion region : computePartitioning(document)) {
 				if (region.getType().equals(partition)
-						&& startsAtLineBegin(d, region)) {
+						&& startsAtLineBegin(document, region)) {
 					if (start == null)
 						start = region;
 				} else if (start != null
-						&& (isBlankRegion(d, region) || isEmptyRegion(d, region)
-								&& collapseEmptyLines())) {
+						&& (isBlankRegion(document, region) || isEmptyRegion(
+								document, region)
+								&& isJoinCommentsSeparatedByEmptyLines())) {
 					// blanks or empty lines
 					// TODO introduce line limit for collapseEmptyLines() ?
 				} else {
@@ -80,8 +176,7 @@ public abstract class PartitioningFoldingBlockProvider implements
 						length0 = contents
 								.substring(offset0, offset0 + length0).trim()
 								.length();
-						IRegion fullRegion = new Region(offset0, length0);
-						regions.add(fullRegion);
+						regions.add(new Region(offset0, length0));
 					}
 					start = null;
 				}
@@ -92,48 +187,29 @@ public abstract class PartitioningFoldingBlockProvider implements
 				int offset0 = start.getOffset();
 				int length0 = lastRegion.getOffset() - offset0
 						+ lastRegion.getLength() - 1;
-				IRegion fullRegion = new Region(offset0, length0);
-				regions.add(fullRegion);
+				regions.add(new Region(offset0, length0));
 			}
-			prepareRegions(d, regions);
-			removeDocumentStuff(d);
-			for (IRegion region : regions) {
-				Object element = null;
-				requestor.acceptBlock(region, kind, element);
-			}
+			reportRegions(document, regions, kind, collapse);
+			removeDocumentStuff(document);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private List<ITypedRegion> computePartitioning(Document d) {
-		// TODO TextUtilities.computePartitioning() ?
-		List<ITypedRegion> docRegionList = new ArrayList<ITypedRegion>();
-		int offset = 0;
-		for (;;) {
-			try {
-				ITypedRegion region = getRegion(d, offset);
-				docRegionList.add(region);
-				offset = region.getLength() + region.getOffset() + 1;
-			} catch (BadLocationException e1) {
-				break;
-			}
-		}
-		return docRegionList;
-	}
-
 	/**
-	 * @param d
+	 * @param document
 	 * @param regions
+	 * @param kind
+	 * @param collapse
 	 */
-	protected void prepareRegions(Document d, List<IRegion> regions) {
-		// override in descendants
-	}
-
-	private ITypedRegion getRegion(IDocument d, int offset)
-			throws BadLocationException {
-		return TextUtilities.getPartition(d, partitioningProvider
-				.getPartitioning(), offset, true);
+	protected void reportRegions(Document document, List<IRegion> regions,
+			IFoldingBlockKind kind, boolean collapse) {
+		for (IRegion region : regions) {
+			// TODO
+			Object element = null;
+			requestor.acceptBlock(region.getOffset(), region.getOffset()
+					+ region.getLength(), kind, element, collapse);
+		}
 	}
 
 	/**
@@ -143,7 +219,6 @@ public abstract class PartitioningFoldingBlockProvider implements
 	 * @param region
 	 * @return
 	 * @throws BadLocationException
-	 * @since 2.0
 	 */
 	protected boolean isBlankRegion(IDocument document, ITypedRegion region)
 			throws BadLocationException {

@@ -72,7 +72,11 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
  * Updates the projection model of a source module using AST info.
+ * 
+ * @see DelegatingFoldingStructureProvider
+ * @see IFoldingBlockProvider
  */
+@Deprecated
 public abstract class AbstractASTFoldingStructureProvider implements
 		IFoldingStructureProvider, IFoldingStructureProviderExtension {
 

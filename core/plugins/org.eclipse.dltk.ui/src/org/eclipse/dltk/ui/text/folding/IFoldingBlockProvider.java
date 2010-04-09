@@ -11,10 +11,27 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text.folding;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
+/**
+ * Folding block provider. Implementations should be contributed to
+ * <code>org.eclipse.dltk.ui.folding/blockProvider</code> extension point.
+ */
 public interface IFoldingBlockProvider {
+
+	void initializePreferences(IPreferenceStore preferenceStore);
 
 	void setRequestor(IFoldingBlockRequestor requestor);
 
+	/**
+	 * Compute foldable blocks and report them to the requestor provided via
+	 * separate call. If current folding operation should be interrupted (e.g.
+	 * because of unrecoverable syntax error) then provider should throw
+	 * {@link AbortFoldingException}
+	 * 
+	 * @param content
+	 * @throws AbortFoldingException
+	 */
 	void computeFoldableBlocks(IFoldingContent content);
 
 }

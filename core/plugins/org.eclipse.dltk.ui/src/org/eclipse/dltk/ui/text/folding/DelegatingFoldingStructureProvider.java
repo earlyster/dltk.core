@@ -47,7 +47,10 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
- * Updates the projection model of a source module using AST info.
+ * This implementation of {@link IFoldingStructureProvider} delegates the actual
+ * work to the contributed {@link IFoldingBlockProvider}s
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
  */
 public class DelegatingFoldingStructureProvider implements
 		IFoldingStructureProvider, IFoldingStructureProviderExtension {
@@ -143,6 +146,11 @@ public class DelegatingFoldingStructureProvider implements
 		public int hashCode() {
 			return element.hashCode();
 		}
+
+		@Override
+		public String toString() {
+			return kind.toString() + " " + element.toString();
+		}
 	}
 
 	/**
@@ -190,12 +198,17 @@ public class DelegatingFoldingStructureProvider implements
 	}
 
 	private static final class Tuple {
-		ScriptProjectionAnnotation annotation;
-		Position position;
+		final ScriptProjectionAnnotation annotation;
+		final Position position;
 
 		Tuple(ScriptProjectionAnnotation annotation, Position position) {
 			this.annotation = annotation;
 			this.position = position;
+		}
+
+		@Override
+		public String toString() {
+			return getClass().getSimpleName() + "[" + position.toString() + "]";
 		}
 	}
 
@@ -583,7 +596,11 @@ public class DelegatingFoldingStructureProvider implements
 
 	protected FoldingStructureComputationContext createInitialContext(
 			boolean isReinit) {
-		// TODO initializePreferences(fStore);
+		if (blockProviders != null) {
+			for (IFoldingBlockProvider provider : blockProviders) {
+				provider.initializePreferences(fStore);
+			}
+		}
 		fInput = getInputElement();
 		if (fInput == null)
 			return null;
@@ -691,6 +708,8 @@ public class DelegatingFoldingStructureProvider implements
 			}
 			return true;
 		} catch (ModelException e) {
+			return false;
+		} catch (AbortFoldingException e) {
 			return false;
 		}
 	}
@@ -939,6 +958,11 @@ public class DelegatingFoldingStructureProvider implements
 		}
 
 		@Override
+		public int hashCode() {
+			return hashCode;
+		}
+
+		@Override
 		public boolean equals(Object obj) {
 			if (obj instanceof SourceRangeStamp) {
 				final SourceRangeStamp other = (SourceRangeStamp) obj;
@@ -946,6 +970,12 @@ public class DelegatingFoldingStructureProvider implements
 			} else {
 				return false;
 			}
+		}
+
+		@Override
+		public String toString() {
+			return getClass().getSimpleName() + "@"
+					+ Integer.toHexString(hashCode);
 		}
 
 	}
@@ -1005,9 +1035,10 @@ public class DelegatingFoldingStructureProvider implements
 			this.ctx = ctx;
 		}
 
-		public void acceptBlock(IRegion region, IFoldingBlockKind kind,
-				Object element) {
+		public void acceptBlock(int start, int end, IFoldingBlockKind kind,
+				Object element, boolean collapse) {
 			try {
+				IRegion region = new Region(start, end - start);
 				// TODO number of lines per kind
 				if (countLines(ctx.getDocument(), region) < 2)
 					return;
@@ -1016,7 +1047,7 @@ public class DelegatingFoldingStructureProvider implements
 					element = new SourceRangeStamp(region.getLength(), content
 							.get(region).hashCode());
 				}
-				IRegion normalized = alignRegion(region, ctx);
+				final IRegion normalized = alignRegion(region, ctx);
 				if (normalized == null) {
 					return;
 				}
@@ -1025,9 +1056,9 @@ public class DelegatingFoldingStructureProvider implements
 				if (position == null) {
 					return;
 				}
-				boolean collapse = false; // TODO
-				ctx.addProjectionRange(new ScriptProjectionAnnotation(collapse,
-						kind, element), position);
+				ctx.addProjectionRange(new ScriptProjectionAnnotation(ctx
+						.allowCollapsing()
+						&& collapse, kind, element), position);
 			} catch (StringIndexOutOfBoundsException e) {
 				if (DLTKCore.DEBUG) {
 					e.printStackTrace();

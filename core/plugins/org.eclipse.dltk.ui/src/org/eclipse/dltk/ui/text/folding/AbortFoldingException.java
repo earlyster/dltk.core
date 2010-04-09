@@ -11,9 +11,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.ui.text.folding;
 
-public interface IFoldingBlockRequestor {
+/**
+ * Exception to be thrown to abort current folding operation.
+ */
+public class AbortFoldingException extends RuntimeException {
 
-	void acceptBlock(int start, int end, IFoldingBlockKind kind,
-			Object element, boolean collapse);
+	private static final long serialVersionUID = 1L;
 
 }
