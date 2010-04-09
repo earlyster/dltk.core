@@ -21,6 +21,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementVisitor;
 import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.core.ISourceModule;
 import org.eclipse.dltk.core.environment.EnvironmentManager;
 import org.eclipse.dltk.core.environment.IEnvironment;
 import org.eclipse.dltk.core.search.indexing.IProjectIndexer;
@@ -34,31 +35,29 @@ public class ProjectRequest extends IndexRequest {
 
 	private final IScriptProject project;
 
-	// private final boolean indexExternal;
-
-	public ProjectRequest(IProjectIndexer indexer, IScriptProject project,
-			boolean indexExternal) {
+	public ProjectRequest(IProjectIndexer indexer, IScriptProject project) {
 		super(indexer);
 		this.project = project;
-		// this.indexExternal = indexExternal;
 	}
 
+	@Override
 	protected String getName() {
 		return project.getElementName();
 	}
 
 	static class SourceModuleCollector implements IModelElementVisitor {
-		final Set modules = new HashSet();
+		final Set<ISourceModule> modules = new HashSet<ISourceModule>();
 
 		public boolean visit(IModelElement element) {
 			if (element.getElementType() == IModelElement.SOURCE_MODULE) {
-				modules.add(element);
+				modules.add((ISourceModule) element);
 				return false;
 			}
 			return true;
 		}
 	}
 
+	@Override
 	protected void run() throws CoreException {
 		IEnvironment environment = EnvironmentManager.getEnvironment(project);
 		if (environment == null || !environment.connect()) {
@@ -78,17 +77,13 @@ public class ProjectRequest extends IndexRequest {
 			if (DEBUG) {
 				log(" fragment " + fragment.getPath()); //$NON-NLS-1$
 			}
-			if (fragment instanceof BuiltinProjectFragment) {
-				// if (indexExternal) {
-				indexer.request(new BuiltinProjectFragmentRequest(indexer,
-						fragment, toolkit, ((BuiltinProjectFragment) fragment)
-								.lastModified()));
-				// }
+			if (fragment.isBuiltin()) {
+				indexer.requestIfNotWaiting(new BuiltinProjectFragmentRequest(
+						indexer, fragment, toolkit,
+						((BuiltinProjectFragment) fragment).lastModified()));
 			} else if (fragment.isExternal()) {
-				// if (indexExternal) {
-				indexer.request(new ExternalProjectFragmentRequest(indexer,
-						fragment, toolkit));
-				// }
+				indexer.requestIfNotWaiting(new ExternalProjectFragmentRequest(
+						indexer, fragment, toolkit));
 			} else {
 				fragment.accept(moduleCollector);
 			}
@@ -97,10 +92,12 @@ public class ProjectRequest extends IndexRequest {
 				moduleCollector.modules));
 	}
 
+	@Override
 	public boolean belongsTo(String jobFamily) {
 		return jobFamily.equals(project.getProject().getName());
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -108,6 +105,7 @@ public class ProjectRequest extends IndexRequest {
 		return result;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

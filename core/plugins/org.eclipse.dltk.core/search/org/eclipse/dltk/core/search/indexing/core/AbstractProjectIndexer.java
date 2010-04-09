@@ -41,7 +41,7 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 		manager.request(job);
 	}
 
-	protected void requestIfNotWaiting(IJob job) {
+	public void requestIfNotWaiting(IJob job) {
 		manager.requestIfNotWaiting(job);
 	}
 
@@ -50,7 +50,7 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 	}
 
 	public void indexProject(IScriptProject project) {
-		final ProjectRequest request = new ProjectRequest(this, project, true);
+		final ProjectRequest request = new ProjectRequest(this, project);
 		requestIfNotWaiting(request);
 	}
 
@@ -89,7 +89,7 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 		}
 		if (fragmentToIndex == null || !fragmentToIndex.isExternal()
 				|| fragmentToIndex.isBuiltin()) {
-			requestIfNotWaiting(new ProjectRequest(this, project, true));
+			requestIfNotWaiting(new ProjectRequest(this, project));
 			return;
 		}
 		requestIfNotWaiting(new ExternalProjectFragmentRequest(this,
@@ -109,7 +109,7 @@ public abstract class AbstractProjectIndexer implements IProjectIndexer,
 
 	public void removeProjectFragment(IScriptProject project, IPath sourceFolder) {
 		// TODO optimize
-		requestIfNotWaiting(new ProjectRequest(this, project, false));
+		requestIfNotWaiting(new ProjectRequest(this, project));
 	}
 
 	public void removeSourceModule(IScriptProject project, String path) {

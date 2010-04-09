@@ -28,6 +28,8 @@ public interface IProjectIndexer {
 
 		void request(IJob request);
 
+		void requestIfNotWaiting(IJob job);
+
 		Index getProjectFragmentIndex(IProjectFragment fragment);
 
 		Index getProjectIndex(IScriptProject project);
