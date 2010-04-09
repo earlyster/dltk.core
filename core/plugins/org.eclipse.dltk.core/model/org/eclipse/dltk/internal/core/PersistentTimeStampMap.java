@@ -33,7 +33,7 @@ public class PersistentTimeStampMap {
 		}
 	}
 
-	public Hashtable<IPath, Long> getTimestamps() {
+	public Map<IPath, Long> getTimestamps() {
 		if (timestamps == null) {
 			timestamps = readTimeStamps(this.file);
 		}
