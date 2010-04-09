@@ -189,8 +189,8 @@ public class ModelManager implements ISaveParticipant {
 			IBuildpathEntry[] buildpath = this.resolvedBuildpath;
 			if (buildpath == null)
 				return;
-			Map externalTimeStamps = ModelManager.getModelManager().deltaState
-					.getExternalLibTimeStamps();
+			Map<IPath, Long> externalTimeStamps = ModelManager
+					.getModelManager().deltaState.getExternalLibTimeStamps();
 			for (int i = 0, length = buildpath.length; i < length; i++) {
 				IBuildpathEntry entry = buildpath[i];
 				if (entry.getEntryKind() == IBuildpathEntry.BPE_LIBRARY) {
@@ -206,7 +206,7 @@ public class ModelManager implements ISaveParticipant {
 					}
 				}
 			}
-			Map customTimeStamps = ModelManager.getModelManager().deltaState
+			Map<IPath, Long> customTimeStamps = ModelManager.getModelManager().deltaState
 					.getCustomTimeStamps();
 			// Save custom project fragments timestamps.
 			try {
