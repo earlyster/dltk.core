@@ -30,6 +30,7 @@ import org.eclipse.dltk.internal.core.BuildpathEntry;
 import org.eclipse.dltk.launching.DLTKInterpreterManager;
 import org.eclipse.dltk.launching.IInterpreterContainerExtension;
 import org.eclipse.dltk.launching.IInterpreterContainerExtension2;
+import org.eclipse.dltk.launching.IInterpreterContainerExtension3;
 import org.eclipse.dltk.launching.IInterpreterInstall;
 import org.eclipse.dltk.launching.IInterpreterInstallChangedListener;
 import org.eclipse.dltk.launching.LaunchingMessages;
@@ -179,7 +180,7 @@ public class InterpreterContainer implements IBuildpathContainer,
 
 		// Preprocess entries using extension
 		IInterpreterContainerExtension extension = DLTKInterpreterManager
-				.getInterpreterContainerExtensions(interpreter.getNatureId());
+				.getInterpreterContainerExtension(interpreter.getNatureId());
 		if (extension instanceof IInterpreterContainerExtension2) {
 			((IInterpreterContainerExtension2) extension).preProcessEntries(
 					interpreter, entries);
@@ -212,7 +213,7 @@ public class InterpreterContainer implements IBuildpathContainer,
 		entries.addAll(Arrays.asList(buildpathEntries));
 		// Use custom per project interpreter entries.
 		IInterpreterContainerExtension extension = DLTKInterpreterManager
-				.getInterpreterContainerExtensions(fProject);
+				.getInterpreterContainerExtension(fProject);
 		if (extension != null) {
 			extension.processEntres(fProject, entries);
 		}
@@ -223,11 +224,18 @@ public class InterpreterContainer implements IBuildpathContainer,
 	 * @see IBuildpathContainer#getDescription()
 	 */
 	public String getDescription() {
-		String tag = fInterpreterInstall.getName();
-		return NLS
-				.bind(
-						LaunchingMessages.InterpreterEnvironmentContainer_InterpreterEnvironment_System_Library_1,
-						tag);
+		final IInterpreterContainerExtension extension = DLTKInterpreterManager
+				.getInterpreterContainerExtension(fProject);
+		if (extension instanceof IInterpreterContainerExtension3) {
+			return ((IInterpreterContainerExtension3) extension)
+					.getDescription(fInterpreterInstall);
+		} else {
+			String tag = fInterpreterInstall.getName();
+			return NLS
+					.bind(
+							LaunchingMessages.InterpreterEnvironmentContainer_InterpreterEnvironment_System_Library_1,
+							tag);
+		}
 	}
 
 	/**

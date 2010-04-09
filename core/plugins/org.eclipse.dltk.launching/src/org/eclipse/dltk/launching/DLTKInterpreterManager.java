@@ -23,16 +23,16 @@ public class DLTKInterpreterManager {
 	private final static String INTERPRETER_CONTAINER_EXTENSION_EXTPOINT = DLTKLaunchingPlugin.PLUGIN_ID
 			+ ".interpreterContainerExtension";//$NON-NLS-1$
 
-	private static PriorityClassDLTKExtensionManager interpreterContainerExtensionManager = new PriorityClassDLTKExtensionManager(
+	private static final PriorityClassDLTKExtensionManager interpreterContainerExtensionManager = new PriorityClassDLTKExtensionManager(
 			INTERPRETER_CONTAINER_EXTENSION_EXTPOINT);
 
-	public static IInterpreterContainerExtension getInterpreterContainerExtensions(
+	public static IInterpreterContainerExtension getInterpreterContainerExtension(
 			IScriptProject project) {
 		return (IInterpreterContainerExtension) interpreterContainerExtensionManager
 				.getObject(project);
 	}
 
-	public static IInterpreterContainerExtension getInterpreterContainerExtensions(
+	public static IInterpreterContainerExtension getInterpreterContainerExtension(
 			String natureId) {
 		return (IInterpreterContainerExtension) interpreterContainerExtensionManager
 				.getObject(natureId);
