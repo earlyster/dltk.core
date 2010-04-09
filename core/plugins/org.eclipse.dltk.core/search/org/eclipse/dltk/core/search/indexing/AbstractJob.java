@@ -48,13 +48,12 @@ public abstract class AbstractJob implements IJob {
 	}
 
 	private final String getShortClassName() {
-		final String name = getClass().getName();
-		final int pos = name.lastIndexOf('.');
-		return pos >= 0 ? name.substring(pos + 1) : name;
+		return getClass().getSimpleName();
 	}
 
 	private String savedName;
 
+	@Override
 	public String toString() {
 		final String shortClassName = getShortClassName();
 		if (savedName == null) {
