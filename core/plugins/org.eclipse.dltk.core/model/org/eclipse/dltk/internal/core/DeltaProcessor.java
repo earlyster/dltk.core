@@ -10,8 +10,8 @@
 package org.eclipse.dltk.internal.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -2072,28 +2072,46 @@ public class DeltaProcessor {
 		}
 	}
 
+	private static boolean isVirtualProjectFragment(IProjectFragment fragment)
+			throws ModelException {
+		return fragment.isExternal() && fragment.getRawBuildpathEntry() == null;
+	}
+
+	@SuppressWarnings("serial")
+	private static class FragmentCache extends
+			HashMap<ScriptProject, IProjectFragment[]> {
+
+		public IProjectFragment[] getAllFragments(ScriptProject project)
+				throws ModelException {
+			IProjectFragment[] fragments = get(project);
+			if (fragments == null) {
+				fragments = project.getAllProjectFragments();
+				put(project, fragments);
+			}
+			return fragments;
+		}
+
+	}
+
 	/**
 	 * Create delta for custom user project fragments.
 	 * 
 	 * @param refreshedElementsCopy
 	 */
 	private boolean createCustomElementDelta(IProgressMonitor monitor,
-			Set refreshedElements) {
+			Set<IModelElement> refreshedElements) {
 		if (refreshedElements == null) {
 			return false;
 		}
 		boolean hasDelta = false;
-
+		final FragmentCache fragmentCache = new FragmentCache();
 		HashSet<IProjectFragment> fragmentsToRefresh = new HashSet<IProjectFragment>();
-		Iterator<?> iterator = refreshedElements.iterator();
-		while (iterator.hasNext()) {
-			IModelElement element = (IModelElement) iterator.next();
+		for (IModelElement element : refreshedElements) {
 			switch (element.getElementType()) {
 			case IModelElement.PROJECT_FRAGMENT:
 				IProjectFragment fragment = (IProjectFragment) element;
 				try {
-					if (fragment.isExternal()
-							&& fragment.getRawBuildpathEntry() == null) {
+					if (isVirtualProjectFragment(fragment)) {
 						fragmentsToRefresh.add(fragment);
 					}
 				} catch (ModelException e1) {
@@ -2119,15 +2137,13 @@ public class DeltaProcessor {
 					IProjectFragment[] fragments = scriptProject
 							.getProjectFragments();
 					for (int i = 0; i < fragments.length; i++) {
-						if (fragments[i].isExternal()
-								&& fragments[i].getRawBuildpathEntry() == null) {
+						if (isVirtualProjectFragment(fragments[i])) {
 							fragmentsToRefresh.add(fragments[i]);
 						}
 					}
-					fragments = scriptProject.getAllProjectFragments();
+					fragments = fragmentCache.getAllFragments(scriptProject);
 					for (int i = 0; i < fragments.length; i++) {
-						if (fragments[i].isExternal()
-								&& fragments[i].getRawBuildpathEntry() == null) {
+						if (isVirtualProjectFragment(fragments[i])) {
 							fragmentsToRefresh.add(fragments[i]);
 						}
 					}
@@ -2138,10 +2154,7 @@ public class DeltaProcessor {
 				}
 				break;
 			case IModelElement.SCRIPT_MODEL:
-				Iterator<String> projectNames = this.state
-						.getOldScriptProjectNames().iterator();
-				while (projectNames.hasNext()) {
-					String projectName = projectNames.next();
+				for (String projectName : this.state.getOldScriptProjectNames()) {
 					IProject project = ResourcesPlugin.getWorkspace().getRoot()
 							.getProject(projectName);
 					if (!DLTKLanguageManager.hasScriptNature(project)) {
@@ -2154,8 +2167,7 @@ public class DeltaProcessor {
 						IProjectFragment[] fragments = scriptProject
 								.getProjectFragments();
 						for (int i = 0; i < fragments.length; i++) {
-							if (fragments[i].isExternal()
-									&& fragments[i].getRawBuildpathEntry() == null) {
+							if (isVirtualProjectFragment(fragments[i])) {
 								fragmentsToRefresh.add(fragments[i]);
 							}
 						}
@@ -2168,17 +2180,24 @@ public class DeltaProcessor {
 				break;
 			}
 		}
+		if (fragmentsToRefresh.isEmpty()) {
+			return false;
+		}
+		final Set<String> projectsToRefresh = new HashSet<String>();
+		for (IProjectFragment fragment : fragmentsToRefresh) {
+			projectsToRefresh.add(fragment.getScriptProject().getElementName());
+		}
 		final Map<IPath, Long> customTimeStamps = this.state
 				.getCustomTimeStamps();
 		// perform refresh
-		Iterator<String> projectNames = this.state.getOldScriptProjectNames()
-				.iterator();
 		IWorkspaceRoot wksRoot = ResourcesPlugin.getWorkspace().getRoot();
-		while (projectNames.hasNext()) {
+		for (String projectName : this.state.getOldScriptProjectNames()) {
+			if (!projectsToRefresh.contains(projectName)) {
+				continue;
+			}
 			if (monitor != null && monitor.isCanceled()) {
 				break;
 			}
-			String projectName = projectNames.next();
 			IProject project = wksRoot.getProject(projectName);
 			if (!DLTKLanguageManager.hasScriptNature(project)) {
 				// project is not accessible or has lost its Script nature
@@ -2186,67 +2205,65 @@ public class DeltaProcessor {
 			}
 			ScriptProject scriptProject = (ScriptProject) DLTKCore
 					.create(project);
-			IProjectFragment[] fragments;
-			Set<IProjectFragment> fragmentsSet = new HashSet<IProjectFragment>();
-			Set<IProjectFragment> fragmentsSetOld = new HashSet<IProjectFragment>();
-			;
 			try {
-				fragmentsSetOld.addAll(Arrays.asList(scriptProject
-						.getProjectFragments()));
-				fragmentsSet.addAll(Arrays.asList(scriptProject
-						.getAllProjectFragments()));
-				fragmentsSet.addAll(fragmentsSetOld);
-				fragments = fragmentsSet
-						.toArray(new IProjectFragment[fragmentsSet.size()]);
-				for (int i = 0; i < fragments.length; i++) {
-					if (!fragmentsToRefresh.contains(fragments[i])) {
+				final Set<IProjectFragment> oldFragments = new HashSet<IProjectFragment>();
+				Collections.addAll(oldFragments, scriptProject
+						.getProjectFragments());
+				final Set<IProjectFragment> newFragments = new HashSet<IProjectFragment>();
+				Collections.addAll(newFragments, fragmentCache
+						.getAllFragments(scriptProject));
+				final Set<IProjectFragment> allFragments = new HashSet<IProjectFragment>();
+				allFragments.addAll(oldFragments);
+				allFragments.addAll(newFragments);
+				allFragments.retainAll(fragmentsToRefresh);
+				for (IProjectFragment fragment : allFragments) {
+					if (!(fragment instanceof IProjectFragmentTimestamp)) {
 						continue;
 					}
-					IProjectFragment fragment = fragments[i];
-					if (fragment instanceof IProjectFragmentTimestamp) {
-						Long oldTimestamp = customTimeStamps.get(fragment
-								.getPath());
+					final boolean isNew = newFragments.contains(fragment);
+					final boolean isOld = oldFragments.contains(fragment);
+					if (isNew && !isOld) {
 						long newTimeStamp = ((IProjectFragmentTimestamp) fragment)
 								.getTimeStamp();
-						boolean old = fragmentsSetOld.contains(fragment);
-						if (oldTimestamp == null || oldTimestamp == 0
-								|| old == false) {
-							if (newTimeStamp != 0) {
-								/**
-								 * This is new element
-								 **/
-								customTimeStamps.put(fragment.getPath(),
-										new Long(newTimeStamp));
-								// index new library
-								ProjectIndexerManager.indexProjectFragment(
-										scriptProject, fragment.getPath());
-								if (fragment instanceof Openable) {
-									this.elementAdded((Openable) fragment,
-											null, null);
-								}
-								hasDelta = true;
+						if (newTimeStamp == 0)
+							continue;
+						customTimeStamps.put(fragment.getPath(), new Long(
+								newTimeStamp));
+						// index new library
+						ProjectIndexerManager.indexLibrary(scriptProject,
+								fragment.getPath());
+						if (fragment instanceof Openable) {
+							this.elementAdded((Openable) fragment, null, null);
+						}
+						hasDelta = true;
+					} else if (isOld && !isNew) {
+						// TODO it's shared and can be used in other projects
+						// customTimeStamps.remove(fragment.getPath());
+						// ProjectIndexerManager.removeLibrary(scriptProject,
+						// fragment.getPath());
+						if (fragment instanceof Openable) {
+							this
+									.elementRemoved((Openable) fragment, null,
+											null);
+						}
+						hasDelta = true;
+					} else {
+						final Long oldTimestamp = customTimeStamps.get(fragment
+								.getPath());
+						final long newTimeStamp = ((IProjectFragmentTimestamp) fragment)
+								.getTimeStamp();
+						if (newTimeStamp != 0
+								&& (oldTimestamp == null || newTimeStamp != oldTimestamp
+										.longValue())) {
+							customTimeStamps.put(fragment.getPath(), new Long(
+									newTimeStamp));
+							// index changed library
+							ProjectIndexerManager.indexLibrary(scriptProject,
+									fragment.getPath());
+							if (fragment instanceof Openable) {
+								this.contentChanged((Openable) fragment);
 							}
-						} else {
-							if (newTimeStamp == 0) {
-								customTimeStamps.remove(fragment.getPath());
-								ProjectIndexerManager.removeProjectFragment(
-										scriptProject, fragment.getPath());
-								if (fragment instanceof Openable) {
-									this.elementRemoved((Openable) fragment,
-											null, null);
-								}
-								hasDelta = true;
-							} else if (oldTimestamp.longValue() != newTimeStamp) {
-								customTimeStamps.put(fragment.getPath(),
-										new Long(newTimeStamp));
-								// index new library
-								ProjectIndexerManager.indexProjectFragment(
-										scriptProject, fragment.getPath());
-								if (fragment instanceof Openable) {
-									this.contentChanged((Openable) fragment);
-								}
-								hasDelta = true;
-							}
+							hasDelta = true;
 						}
 					}
 				}
