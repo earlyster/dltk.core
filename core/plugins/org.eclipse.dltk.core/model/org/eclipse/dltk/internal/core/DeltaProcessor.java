@@ -3016,9 +3016,10 @@ public class DeltaProcessor {
 	}
 
 	public void clearCustomTimestampsFor(IModelElement[] elements) {
-		final Map timeStamps = state.getCustomTimeStamps();
+		final Map<IPath, Long> timeStamps = state.getCustomTimeStamps();
 		for (IModelElement e : elements) {
-			timeStamps.remove(e);
+			// TODO test if it actually works
+			timeStamps.remove(e.getPath());
 		}
 	}
 
