@@ -9,16 +9,11 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +27,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.dltk.compiler.CharOperation;
 import org.eclipse.dltk.core.DLTKCore;
@@ -569,7 +563,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
 
 	}
 
-	public Hashtable getExternalLibTimeStamps() {
+	public Map<IPath, Long> getExternalLibTimeStamps() {
 		if (this.externalTimeStamps == null) {
 			this.externalTimeStamps = new PersistentTimeStampMap(
 					getTimeStampsFile());
@@ -577,35 +571,7 @@ public class DeltaProcessingState implements IResourceChangeListener {
 		return this.externalTimeStamps.getTimestamps();
 	}
 
-	private Hashtable readTimeStamps(File timestampsFile) {
-		Hashtable timeStamps = new Hashtable();
-		DataInputStream in = null;
-		try {
-			in = new DataInputStream(new BufferedInputStream(
-					new FileInputStream(timestampsFile)));
-			int size = in.readInt();
-			while (size-- > 0) {
-				String key = in.readUTF();
-				long timestamp = in.readLong();
-				timeStamps.put(Path.fromPortableString(key),
-						new Long(timestamp));
-			}
-		} catch (IOException e) {
-			if (timestampsFile.exists())
-				Util.log(e, "Unable to read external time stamps"); //$NON-NLS-1$
-		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException e) {
-					// nothing we can do: ignore
-				}
-			}
-		}
-		return timeStamps;
-	}
-
-	public Hashtable getCustomTimeStamps() {
+	public Map<IPath, Long> getCustomTimeStamps() {
 		if (this.customTimeStamps == null) {
 			this.customTimeStamps = new PersistentTimeStampMap(
 					getCustomTimeStampsFile());
