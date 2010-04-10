@@ -55,6 +55,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		private final List fSelectedElements;
 
 		public OpenBuildPathWizardAction(BuildPathWizard wizard) {
+			setShell(SourceContainerWorkbookPage.this.getShell());
 			fWizard = wizard;
 			addPropertyChangeListener(this);
 			fSelectedElements = fFoldersList.getSelectedElements();
