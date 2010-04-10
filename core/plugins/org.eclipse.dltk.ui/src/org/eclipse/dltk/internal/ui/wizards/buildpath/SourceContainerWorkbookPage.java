@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.IBuildpathEntry;
 import org.eclipse.dltk.core.IScriptProject;
+import org.eclipse.dltk.internal.core.util.Util;
 import org.eclipse.dltk.internal.corext.buildpath.BuildpathModifier;
 import org.eclipse.dltk.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.dltk.internal.ui.wizards.dialogfields.DialogField;
@@ -345,7 +346,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (field == fFoldersList) {
 			if (index == getIDX_ADD()) {
 				IProject project = fCurrJProject.getProject();
-				if (project.exists() && hasFolders(project)) {
+				if (project.isAccessible() && hasFolders(project)) {
 					List existingElements = fFoldersList.getElements();
 					BPListElement[] existing = (BPListElement[]) existingElements
 							.toArray(new BPListElement[existingElements.size()]);
@@ -386,7 +387,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		try {
 			IResource[] members = container.members();
 			for (int i = 0; i < members.length; i++) {
-				if (members[i] instanceof IContainer) {
+				if (members[i] instanceof IContainer
+						&& Util.isValidFolderNameForPackage(container,
+								members[i].getName())) {
 					return true;
 				}
 			}
