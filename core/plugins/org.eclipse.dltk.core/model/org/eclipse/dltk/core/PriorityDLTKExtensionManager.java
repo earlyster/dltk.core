@@ -78,13 +78,16 @@ public class PriorityDLTKExtensionManager {
 				.getConfigurationElementsFor(this.extensionPoint);
 
 		for (int i = 0; i < cfg.length; i++) {
-			String nature = cfg[i].getAttribute(this.identifier);
+			final IConfigurationElement element = cfg[i];
+			if (!isValidConfigurationElement(element))
+				continue;
+			String nature = element.getAttribute(this.identifier);
 			ElementInfo oldInfo = (ElementInfo) extensions.get(nature);
 			if (oldInfo != null) {
-				int lev = getLevel(cfg[i]);
+				int lev = getLevel(element);
 				if (lev <= oldInfo.level) {
 					ElementInfo e = oldInfo;
-					ElementInfo nInfo = createNewInfo(cfg[i], null);
+					ElementInfo nInfo = createNewInfo(element, null);
 					while (e != null) {
 						if (e.oldInfo == null) {
 							e.oldInfo = nInfo;
@@ -102,9 +105,17 @@ public class PriorityDLTKExtensionManager {
 					continue;
 				}
 			}
-			ElementInfo info = createNewInfo(cfg[i], oldInfo);
+			ElementInfo info = createNewInfo(element, oldInfo);
 			extensions.put(nature, info);
 		}
+	}
+
+	/**
+	 * @param element
+	 * @return
+	 */
+	protected boolean isValidConfigurationElement(IConfigurationElement element) {
+		return true;
 	}
 
 	private ElementInfo createNewInfo(IConfigurationElement cfg,
