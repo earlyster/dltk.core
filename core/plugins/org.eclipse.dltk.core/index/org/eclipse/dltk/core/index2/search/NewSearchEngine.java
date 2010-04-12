@@ -141,7 +141,7 @@ public class NewSearchEngine {
 
 					Set<String> indexMatchPathSet = new HashSet<String>();
 					collectPaths(pattern, scope, indexMatchPathSet, monitor);
-					String[] indexMatchPaths = (String[]) indexMatchPathSet
+					String[] indexMatchPaths = indexMatchPathSet
 							.toArray(new String[indexMatchPathSet.size()]);
 
 					if (monitor != null && monitor.isCanceled())
@@ -154,7 +154,7 @@ public class NewSearchEngine {
 								Messages.engine_searching_matching,
 								new String[] { participant.getDescription() }));
 
-					if (indexMatchPaths != null) {
+					if (indexMatchPaths.length != 0) {
 						int indexMatchLength = indexMatchPaths.length;
 						SearchDocument[] indexMatches = new SearchDocument[indexMatchLength];
 						for (int j = 0; j < indexMatchLength; j++) {
