@@ -345,14 +345,16 @@ public class MatchLocator implements IMatchLocator, ITypeRequestor {
 	public MatchLocator() {
 	}
 
-	public void initialize(SearchPattern pattern, SearchRequestor requestor,
-			IDLTKSearchScope scope) {
+	public void initialize(SearchPattern pattern, IDLTKSearchScope scope) {
 		this.pattern = pattern;
 		this.patternLocator = PatternLocator.patternLocator(this.pattern, scope
 				.getLanguageToolkit());
 		this.matchContainer = this.patternLocator.matchContainer();
-		this.requestor = requestor;
 		this.scope = scope;
+	}
+
+	public void setRequestor(SearchRequestor requestor) {
+		this.requestor = requestor;
 	}
 
 	public void setProgressMonitor(IProgressMonitor progressMonitor) {

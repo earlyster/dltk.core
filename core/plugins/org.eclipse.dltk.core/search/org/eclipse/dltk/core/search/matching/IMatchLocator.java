@@ -20,8 +20,9 @@ import org.eclipse.dltk.core.search.SearchRequestor;
 
 public interface IMatchLocator {
 
-	void initialize(SearchPattern pattern, SearchRequestor requestor,
-			IDLTKSearchScope scope);
+	void initialize(SearchPattern pattern, IDLTKSearchScope scope);
+
+	void setRequestor(SearchRequestor requestor);
 
 	void setProgressMonitor(IProgressMonitor progressMonitor);
 
