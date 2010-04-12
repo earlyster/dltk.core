@@ -311,15 +311,15 @@ public class BasicSearchEngine {
 						SearchDocument[] matches = MatchLocator
 								.addWorkingCopies(pattern, indexMatches,
 										getWorkingCopies(), participant);
-						final Set paths = new HashSet();
-						List filteredMatches = new ArrayList();
+						final Set<IPath> paths = new HashSet<IPath>();
+						List<SearchDocument> filteredMatches = new ArrayList<SearchDocument>();
 						for (int q = 0; q < matches.length; ++q) {
 							IPath path = new Path(matches[q].getPath());
 							if (paths.add(path)) {
 								filteredMatches.add(matches[q]);
 							}
 						}
-						SearchDocument[] fmatches = (SearchDocument[]) filteredMatches
+						SearchDocument[] fmatches = filteredMatches
 								.toArray(new SearchDocument[filteredMatches
 										.size()]);
 						participant.locateMatches(fmatches, pattern, scope,
