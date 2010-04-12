@@ -7,52 +7,57 @@
  *
  
  *******************************************************************************/
-package org.eclipse.dltk.internal.core.search.matching;
+package org.eclipse.dltk.core.search.matching;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.dltk.compiler.util.ObjectVector;
-import org.eclipse.dltk.compiler.util.SimpleLookupTable;
 import org.eclipse.dltk.core.IProjectFragment;
-import org.eclipse.dltk.core.search.matching.PossibleMatch;
-
 
 /**
  * A set of PossibleMatches that is sorted by package fragment roots.
  */
 public class PossibleMatchSet {
-	private SimpleLookupTable rootsToPossibleMatches = new SimpleLookupTable(5);
+	private Map<IPath, List<PossibleMatch>> rootsToMatches = new HashMap<IPath, List<PossibleMatch>>(
+			5);
 	private int elementCount = 0;
 
 	public void add(PossibleMatch possibleMatch) {
 		IPath path = possibleMatch.openable.getProjectFragment().getPath();
-		ObjectVector possibleMatches = (ObjectVector) this.rootsToPossibleMatches.get(path);
+		List<PossibleMatch> possibleMatches = rootsToMatches.get(path);
 		if (possibleMatches != null) {
 			if (possibleMatches.contains(possibleMatch))
 				return;
 		} else {
-			this.rootsToPossibleMatches.put(path, possibleMatches = new ObjectVector());
+			rootsToMatches.put(path,
+					possibleMatches = new ArrayList<PossibleMatch>());
 		}
 		possibleMatches.add(possibleMatch);
-		this.elementCount++;
+		elementCount++;
 	}
 
 	public PossibleMatch[] getPossibleMatches(IProjectFragment[] roots) {
-		PossibleMatch[] result = new PossibleMatch[this.elementCount];
+		PossibleMatch[] result = new PossibleMatch[elementCount];
 		int index = 0;
 		for (int i = 0, length = roots.length; i < length; i++) {
-			ObjectVector possibleMatches = (ObjectVector) this.rootsToPossibleMatches.get(roots[i].getPath());
+			List<PossibleMatch> possibleMatches = rootsToMatches.get(roots[i]
+					.getPath());
 			if (possibleMatches != null) {
-				possibleMatches.copyInto(result, index);
-				index += possibleMatches.size();
+				for (int j = 0, size = possibleMatches.size(); j < size; ++j)
+					result[index++] = possibleMatches.get(j);
 			}
 		}
-		if (index < this.elementCount)
-			System.arraycopy(result, 0, result = new PossibleMatch[index], 0, index);
+		if (index < elementCount)
+			System.arraycopy(result, 0, result = new PossibleMatch[index], 0,
+					index);
 		return result;
 	}
 
 	public void reset() {
-		this.rootsToPossibleMatches = new SimpleLookupTable(5);
-		this.elementCount = 0;
+		rootsToMatches.clear();
+		elementCount = 0;
 	}
 }

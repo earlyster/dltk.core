@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.dltk.ast.parser.ISourceParser;
 import org.eclipse.dltk.ast.parser.SourceParserManager;
 import org.eclipse.dltk.codeassist.ICompletionEngine;
@@ -30,9 +29,8 @@ import org.eclipse.dltk.core.model.binary.IBinaryElementParser;
 import org.eclipse.dltk.core.search.DLTKSearchParticipant;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.IMatchLocatorParser;
-import org.eclipse.dltk.core.search.SearchPattern;
-import org.eclipse.dltk.core.search.SearchRequestor;
 import org.eclipse.dltk.core.search.indexing.SourceIndexerRequestor;
+import org.eclipse.dltk.core.search.matching.IMatchLocator;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
 import org.eclipse.dltk.core.search.matching.MatchLocatorParser;
 import org.eclipse.dltk.internal.core.InternalDLTKLanguageManager;
@@ -288,18 +286,8 @@ public class DLTKLanguageManager {
 				.getObject(natureId);
 	}
 
-	public static MatchLocator createMatchLocator(String natureID,
-			SearchPattern pattern, SearchRequestor requestor,
-			IDLTKSearchScope scope, SubProgressMonitor subProgressMonitor) {
-		ISearchFactory factory = getSearchFactory(natureID);
-		if (factory != null) {
-			MatchLocator locator = factory.createMatchLocator(pattern,
-					requestor, scope, subProgressMonitor);
-			if (locator != null) {
-				return locator;
-			}
-		}
-		return new MatchLocator(pattern, requestor, scope, subProgressMonitor);
+	public static IMatchLocator createMatchLocator(String natureID) {
+		return InternalDLTKLanguageManager.createMatchLocator(natureID);
 	}
 
 	public static SourceIndexerRequestor createSourceRequestor(String natureID) {
@@ -354,7 +342,6 @@ public class DLTKLanguageManager {
 		return (IFileHierarchyResolver) InternalDLTKLanguageManager
 				.getFileHierarchyResolversManager().getObject(natureId);
 	}
-
 
 	/**
 	 * @since 2.0

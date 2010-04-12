@@ -8,8 +8,12 @@
  *******************************************************************************/
 package org.eclipse.dltk.internal.core;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.dltk.core.DLTKCore;
 import org.eclipse.dltk.core.PriorityClassDLTKExtensionManager;
+import org.eclipse.dltk.core.search.matching.IMatchLocator;
+import org.eclipse.dltk.core.search.matching.MatchLocator;
 
 public class InternalDLTKLanguageManager {
 	private final static String LANGUAGE_EXTPOINT = DLTKCore.PLUGIN_ID
@@ -52,7 +56,15 @@ public class InternalDLTKLanguageManager {
 			SOURCE_PARSERS_EXTPOINT);
 
 	private static PriorityClassDLTKExtensionManager searchManager = new PriorityClassDLTKExtensionManager(
-			SEARCH_EXTPOINT);
+			SEARCH_EXTPOINT) {
+		@Override
+		protected boolean isValidConfigurationElement(
+				IConfigurationElement element) {
+			return "searchFactory".equals(element.getName())
+					|| "seachFactory".equals(element.getName());
+			// XXX there was a typo in schema
+		}
+	};
 	private static PriorityClassDLTKExtensionManager callHierarchyManager = new PriorityClassDLTKExtensionManager(
 			CALLHIERARCHY_EXTPOINT);
 	private static PriorityClassDLTKExtensionManager fileHierarchyResolversManager = new PriorityClassDLTKExtensionManager(
@@ -96,6 +108,40 @@ public class InternalDLTKLanguageManager {
 
 	public static PriorityClassDLTKExtensionManager getLanguageToolkitsManager() {
 		return languageToolkitsManager;
+	}
+
+	private static final PriorityClassDLTKExtensionManager matchLocatorManager = new PriorityClassDLTKExtensionManager(
+			SEARCH_EXTPOINT) {
+		@Override
+		protected boolean isValidConfigurationElement(
+				IConfigurationElement element) {
+			return "matchLocator".equals(element.getName());
+		}
+
+		@Override
+		public Object getInitObject(ElementInfo ext) {
+			try {
+				if (ext != null)
+					return createObject(ext.config);
+			} catch (CoreException e) {
+				if (DLTKCore.DEBUG)
+					e.printStackTrace();
+			}
+			return null;
+		}
+	};
+
+	/**
+	 * @param natureID
+	 * @return
+	 */
+	public static IMatchLocator createMatchLocator(String natureID) {
+		final IMatchLocator locator = (IMatchLocator) matchLocatorManager
+				.getObject(natureID);
+		if (locator != null) {
+			return locator;
+		}
+		return new MatchLocator();
 	}
 
 }

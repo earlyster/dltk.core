@@ -416,7 +416,7 @@ public class BasicSearchEngine {
 								.addWorkingCopies(pattern, indexMatches,
 										getWorkingCopies(), participant);
 						ISourceModule[] modules = participant.locateModules(
-								matches, pattern, scope, subMonitor);
+								matches, scope, subMonitor);
 						for (int k = 0; k < modules.length; ++k) {
 							if (!documents.contains(modules[k])) {
 								documents.add(modules[k]);

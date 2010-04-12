@@ -189,14 +189,13 @@ public abstract class SearchParticipant {
 	 * Return correct source modules from selected index matches.
 	 * 
 	 * @param matches
-	 * @param pattern
 	 * @param scope
 	 * @param subMonitor
 	 * @return
 	 */
 	public abstract ISourceModule[] locateModules(SearchDocument[] matches,
-			SearchPattern pattern, IDLTKSearchScope scope,
-			IProgressMonitor subMonitor) throws CoreException;
+			IDLTKSearchScope scope, IProgressMonitor subMonitor)
+			throws CoreException;
 
 	/**
 	 * Removes the index for a given path.

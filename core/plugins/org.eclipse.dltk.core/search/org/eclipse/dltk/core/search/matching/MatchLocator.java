@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
@@ -84,11 +83,10 @@ import org.eclipse.dltk.internal.core.search.IndexSelector;
 import org.eclipse.dltk.internal.core.search.matching.AndPattern;
 import org.eclipse.dltk.internal.core.search.matching.InternalSearchPattern;
 import org.eclipse.dltk.internal.core.search.matching.MatchingNodeSet;
-import org.eclipse.dltk.internal.core.search.matching.PossibleMatchSet;
 import org.eclipse.dltk.internal.core.util.HandleFactory;
 import org.eclipse.dltk.internal.core.util.Util;
 
-public class MatchLocator implements ITypeRequestor {
+public class MatchLocator implements IMatchLocator, ITypeRequestor {
 	public static final int MAX_AT_ONCE;
 	static {
 		long maxMemory = Runtime.getRuntime().maxMemory();
@@ -121,7 +119,7 @@ public class MatchLocator implements ITypeRequestor {
 
 	public IDLTKSearchScope scope;
 
-	public IProgressMonitor progressMonitor;
+	private IProgressMonitor progressMonitor;
 
 	public org.eclipse.dltk.core.ISourceModule[] workingCopies;
 
@@ -344,14 +342,20 @@ public class MatchLocator implements ITypeRequestor {
 				: getProjectOrArchive(pattern.focus);
 	}
 
-	public MatchLocator(SearchPattern pattern, SearchRequestor requestor,
-			IDLTKSearchScope scope, IProgressMonitor progressMonitor) {
+	public MatchLocator() {
+	}
+
+	public void initialize(SearchPattern pattern, SearchRequestor requestor,
+			IDLTKSearchScope scope) {
 		this.pattern = pattern;
 		this.patternLocator = PatternLocator.patternLocator(this.pattern, scope
 				.getLanguageToolkit());
 		this.matchContainer = this.patternLocator.matchContainer();
 		this.requestor = requestor;
 		this.scope = scope;
+	}
+
+	public void setProgressMonitor(IProgressMonitor progressMonitor) {
 		this.progressMonitor = progressMonitor;
 	}
 
@@ -597,11 +601,7 @@ public class MatchLocator implements ITypeRequestor {
 			try {
 				if (!parse(possibleMatch))
 					continue;
-				if (this.progressMonitor != null) {
-					this.progressWorked++;
-					if ((this.progressWorked % this.progressStep) == 0)
-						this.progressMonitor.worked(this.progressStep);
-				}
+				worked();
 				process(possibleMatch);
 				if (this.numberOfMatches > 0
 						&& this.matchesToProcess[this.numberOfMatches - 1] == possibleMatch) {
@@ -742,11 +742,7 @@ public class MatchLocator implements ITypeRequestor {
 				searchDocuments[i] = null; // free current document
 				String pathString = searchDocument.getPath();
 				if (i > 0 && pathString.equals(previousPath)) {
-					if (this.progressMonitor != null) {
-						this.progressWorked++;
-						if ((this.progressWorked % this.progressStep) == 0)
-							this.progressMonitor.worked(this.progressStep);
-					}
+					worked();
 					displayed++;
 					continue;
 				}
@@ -761,11 +757,7 @@ public class MatchLocator implements ITypeRequestor {
 							this.scope);
 				}
 				if (openable == null) {
-					if (this.progressMonitor != null) {
-						this.progressWorked++;
-						if ((this.progressWorked % this.progressStep) == 0)
-							this.progressMonitor.worked(this.progressStep);
-					}
+					worked();
 					displayed++;
 					continue; // match is outside buildpath
 				}
@@ -816,114 +808,12 @@ public class MatchLocator implements ITypeRequestor {
 		}
 	}
 
-	public ISourceModule[] locateModules(SearchDocument[] searchDocuments) {
-		List<ISourceModule> modules = new ArrayList<ISourceModule>();
-		int docsLength = searchDocuments.length;
-		if (BasicSearchEngine.VERBOSE) {
-			System.out.println("Locating matches in documents ["); //$NON-NLS-1$
-			for (int i = 0; i < docsLength; i++)
-				System.out.println("\t" + searchDocuments[i]); //$NON-NLS-1$
-			System.out.println("]"); //$NON-NLS-1$
+	private void worked() {
+		if (this.progressMonitor != null) {
+			this.progressWorked++;
+			if ((this.progressWorked % this.progressStep) == 0)
+				this.progressMonitor.worked(this.progressStep);
 		}
-		// init infos for progress increasing
-		int n = docsLength < 1000 ? Math.min(Math.max(docsLength / 200 + 1, 2),
-				4) : 5 * (docsLength / 1000);
-		this.progressStep = docsLength < n ? 1 : docsLength / n; // step
-		// should
-		// not be 0
-		this.progressWorked = 0;
-		// extract working copies
-		ArrayList<ISourceModule> copies = new ArrayList<ISourceModule>();
-		for (int i = 0; i < docsLength; i++) {
-			SearchDocument document = searchDocuments[i];
-			if (document instanceof WorkingCopyDocument) {
-				copies.add(((WorkingCopyDocument) document).workingCopy);
-			}
-		}
-		int copiesLength = copies.size();
-		this.workingCopies = new org.eclipse.dltk.core.ISourceModule[copiesLength];
-		copies.toArray(this.workingCopies);
-		ModelManager manager = ModelManager.getModelManager();
-		this.bindings = new SimpleLookupTable();
-		try {
-			// optimize access to zip files during search operation
-			manager.cacheZipFiles();
-			// initialize handle factory (used as a cache of handles so as to
-			// optimize space)
-			if (this.handleFactory == null)
-				this.handleFactory = new HandleFactory();
-			if (this.progressMonitor != null) {
-				this.progressMonitor.beginTask("", searchDocuments.length); //$NON-NLS-1$
-			}
-			// initialize pattern for polymorphic search (ie. method reference
-			// pattern)
-			this.patternLocator.initializePolymorphicSearch(this);
-			Util.sort(searchDocuments, new Util.Comparer() {
-				public int compare(Object a, Object b) {
-					return ((SearchDocument) a).getPath().compareTo(
-							((SearchDocument) b).getPath());
-				}
-			});
-			int displayed = 0; // progress worked displayed
-			String previousPath = null;
-			for (int i = 0; i < docsLength; i++) {
-				if (this.progressMonitor != null
-						&& this.progressMonitor.isCanceled()) {
-					throw new OperationCanceledException();
-				}
-				// skip duplicate paths
-				SearchDocument searchDocument = searchDocuments[i];
-				searchDocuments[i] = null; // free current document
-				String pathString = searchDocument.getPath();
-				if (i > 0 && pathString.equals(previousPath)) {
-					if (this.progressMonitor != null) {
-						this.progressWorked++;
-						if ((this.progressWorked % this.progressStep) == 0)
-							this.progressMonitor.worked(this.progressStep);
-					}
-					displayed++;
-					continue;
-				}
-				previousPath = pathString;
-				Openable openable;
-				org.eclipse.dltk.core.ISourceModule workingCopy = null;
-				if (searchDocument instanceof WorkingCopyDocument) {
-					workingCopy = ((WorkingCopyDocument) searchDocument).workingCopy;
-					openable = (Openable) workingCopy;
-				} else {
-					openable = this.handleFactory.createOpenable(pathString,
-							this.scope);
-				}
-				if (openable == null) {
-					if (this.progressMonitor != null) {
-						this.progressWorked++;
-						if ((this.progressWorked % this.progressStep) == 0)
-							this.progressMonitor.worked(this.progressStep);
-					}
-					displayed++;
-					continue; // match is outside buildpath
-				}
-				// create new parser and lookup environment if this is a new
-				// project
-				IResource resource = null;
-				IScriptProject scriptProject = openable.getScriptProject();
-				resource = workingCopy != null ? workingCopy.getResource()
-						: openable.getResource();
-				if (resource == null)
-					resource = scriptProject.getProject(); // case of a file in
-				if (!modules.contains(openable)) {
-					modules.add((ISourceModule) openable);
-				}
-			}
-			if (this.progressMonitor != null)
-				this.progressMonitor.done();
-		} finally {
-			if (this.nameEnvironment != null)
-				this.nameEnvironment.cleanup();
-			manager.flushZipFiles();
-			this.bindings = null;
-		}
-		return modules.toArray(new ISourceModule[modules.size()]);
 	}
 
 	public SearchMatch newDeclarationMatch(IModelElement element, int accuracy,

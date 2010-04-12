@@ -16,10 +16,11 @@ public abstract class AbstractSearchFactory implements ISearchFactory {
 		return null;
 	}
 
-	public MatchLocator createMatchLocator(SearchPattern pattern,
+	@Deprecated
+	public final MatchLocator createMatchLocator(SearchPattern pattern,
 			SearchRequestor requestor, IDLTKSearchScope scope,
 			SubProgressMonitor monitor) {
-		return new MatchLocator(pattern, requestor, scope, monitor);
+		return new MatchLocator();
 	}
 
 	public ISearchPatternProcessor createSearchPatternProcessor() {
