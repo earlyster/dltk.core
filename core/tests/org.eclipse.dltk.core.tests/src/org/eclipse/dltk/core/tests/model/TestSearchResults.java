@@ -12,7 +12,6 @@
 package org.eclipse.dltk.core.tests.model;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -27,11 +26,12 @@ import org.eclipse.dltk.core.search.SearchRequestor;
 
 public class TestSearchResults extends SearchRequestor {
 
+	@Override
 	public void acceptSearchMatch(SearchMatch match) throws CoreException {
 		matches.add(match);
 	}
 
-	private List matches = new ArrayList();
+	private List<SearchMatch> matches = new ArrayList<SearchMatch>();
 
 	public int size() {
 		return matches.size();
@@ -49,19 +49,21 @@ public class TestSearchResults extends SearchRequestor {
 		assertExists(IMethod.class, name);
 	}
 
-	public void assertExists(Class modelElementClass, String modelElementName) {
+	public void assertExists(Class<? extends IModelElement> modelElementClass,
+			String modelElementName) {
 		if (locate(modelElementClass, modelElementName) == null) {
 			Assert.fail("Not found " + modelElementName + ":"
 					+ modelElementClass.getName());
 		}
 	}
 
-	public IModelElement locate(Class modelElementClass, String modelElementName) {
+	public IModelElement locate(
+			Class<? extends IModelElement> modelElementClass,
+			String modelElementName) {
 		Assert.assertNotNull(modelElementClass);
 		Assert.assertTrue(IModelElement.class
 				.isAssignableFrom(modelElementClass));
-		for (Iterator i = matches.iterator(); i.hasNext();) {
-			final SearchMatch match = (SearchMatch) i.next();
+		for (final SearchMatch match : matches) {
 			if (modelElementClass.isAssignableFrom(match.getElement()
 					.getClass())) {
 				IModelElement element = (IModelElement) match.getElement();
