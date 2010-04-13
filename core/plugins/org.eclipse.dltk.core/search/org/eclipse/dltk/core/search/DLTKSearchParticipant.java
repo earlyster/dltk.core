@@ -101,7 +101,8 @@ public class DLTKSearchParticipant extends SearchParticipant {
 			throws CoreException {
 		IMatchLocator matchLocator = createMatchLocator(scope
 				.getLanguageToolkit());
-		matchLocator.initialize(pattern, requestor, scope);
+		matchLocator.initialize(pattern, scope);
+		matchLocator.setRequestor(requestor);
 		matchLocator.setProgressMonitor(monitor == null ? null
 				: new SubProgressMonitor(monitor, 95));
 		/* eliminating false matches and locating them */
