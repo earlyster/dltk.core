@@ -98,6 +98,11 @@ public class ExternalStorageEditorInput implements IEditorInput,
 			return false;
 		}
 		ExternalStorageEditorInput other = (ExternalStorageEditorInput) obj;
+
+		if (fStorage.getFullPath().equals(other.fStorage.getFullPath())) {
+			return true;
+		}
+
 		return fStorage.equals(other.fStorage);
 	}
 
