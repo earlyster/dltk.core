@@ -22,7 +22,7 @@ import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-public abstract class ScriptTextTools {
+public abstract class ScriptTextTools implements IPartitioningProvider {
 	private DLTKColorManager fColorManager;
 
 	private String fDefaultPartitioning;
@@ -34,6 +34,14 @@ public abstract class ScriptTextTools {
 		fDefaultPartitioning = defaultPartitioning;
 		fLegalContentTypes = legalContentTypes;
 		fColorManager = new DLTKColorManager(autoDisposeOnDisplayDispose);
+	}
+
+	public String getPartitioning() {
+		return fDefaultPartitioning;
+	}
+
+	public String[] getPartitionContentTypes() {
+		return fLegalContentTypes;
 	}
 
 	/**
@@ -85,6 +93,11 @@ public abstract class ScriptTextTools {
 				fDefaultPartitioning);
 	}
 
+	public IPartitionTokenScanner createPartitionScanner() {
+		return getPartitionScanner();
+	}
+
+	@Deprecated
 	public IPartitionTokenScanner getPartitionScanner() {
 		return null;
 	}
@@ -96,7 +109,7 @@ public abstract class ScriptTextTools {
 	 * @return a newly created script document partitioner
 	 */
 	public IDocumentPartitioner createDocumentPartitioner() {
-		IPartitionTokenScanner scaner = getPartitionScanner();
+		IPartitionTokenScanner scaner = createPartitionScanner();
 		if (scaner == null) {
 			return null;
 		}
