@@ -9,7 +9,6 @@
  *******************************************************************************/
 package org.eclipse.dltk.launching;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -19,7 +18,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.dltk.core.IScriptProject;
 
-
 /**
  * Default implementation for buildpath provider.
  * <p>
@@ -27,21 +25,28 @@ import org.eclipse.dltk.core.IScriptProject;
  * </p>
  */
 public class StandardBuildpathProvider implements IRuntimeBuildpathProvider {
-	public IRuntimeBuildpathEntry[] computeUnresolvedBuildpath(ILaunchConfiguration configuration) throws CoreException {
-		boolean useDefault = configuration.getAttribute(ScriptLaunchConfigurationConstants.ATTR_DEFAULT_BUILDPATH, true);
+	public IRuntimeBuildpathEntry[] computeUnresolvedBuildpath(
+			ILaunchConfiguration configuration) throws CoreException {
+		boolean useDefault = configuration
+				.getAttribute(
+						ScriptLaunchConfigurationConstants.ATTR_DEFAULT_BUILDPATH,
+						true);
 		if (useDefault) {
 			IScriptProject proj = ScriptRuntime.getScriptProject(configuration);
-			IRuntimeBuildpathEntry InterpreterEnvironmentEntry = ScriptRuntime.computeInterpreterEntry(configuration);
+			IRuntimeBuildpathEntry InterpreterEnvironmentEntry = ScriptRuntime
+					.computeInterpreterEntry(configuration);
 			if (proj == null) {
-				//no project - use default libraries
+				// no project - use default libraries
 				if (InterpreterEnvironmentEntry == null) {
 					return new IRuntimeBuildpathEntry[0];
 				}
-				return new IRuntimeBuildpathEntry[]{InterpreterEnvironmentEntry};				
+				return new IRuntimeBuildpathEntry[] { InterpreterEnvironmentEntry };
 			}
-			IRuntimeBuildpathEntry[] entries = ScriptRuntime.computeUnresolvedRuntimeBuildpath(proj);
+			IRuntimeBuildpathEntry[] entries = ScriptRuntime
+					.computeUnresolvedRuntimeBuildpath(proj);
 			// replace project interpreter with config's interpreter
-			IRuntimeBuildpathEntry projEntry = ScriptRuntime.computeInterpreterEntry(proj);
+			IRuntimeBuildpathEntry projEntry = ScriptRuntime
+					.computeInterpreterEntry(proj);
 			if (InterpreterEnvironmentEntry != null && projEntry != null) {
 				if (!InterpreterEnvironmentEntry.equals(projEntry)) {
 					for (int i = 0; i < entries.length; i++) {
@@ -56,41 +61,53 @@ public class StandardBuildpathProvider implements IRuntimeBuildpathProvider {
 			return entries;
 		}
 		// recover persisted buildpath
-		return recoverRuntimePath(configuration, ScriptLaunchConfigurationConstants.ATTR_BUILDPATH);
+		return recoverRuntimePath(configuration,
+				ScriptLaunchConfigurationConstants.ATTR_BUILDPATH);
 	}
-	
-	public IRuntimeBuildpathEntry[] resolveBuildpath(IRuntimeBuildpathEntry[] entries, ILaunchConfiguration configuration) throws CoreException {
-		List all = new ArrayList(entries.length);
+
+	public IRuntimeBuildpathEntry[] resolveBuildpath(
+			IRuntimeBuildpathEntry[] entries, ILaunchConfiguration configuration)
+			throws CoreException {
+		List<IRuntimeBuildpathEntry> all = new ArrayList<IRuntimeBuildpathEntry>(
+				entries.length);
 		for (int i = 0; i < entries.length; i++) {
-			IRuntimeBuildpathEntry[] resolved =ScriptRuntime.resolveRuntimeBuildpathEntry(entries[i], configuration);
+			IRuntimeBuildpathEntry[] resolved = ScriptRuntime
+					.resolveRuntimeBuildpathEntry(entries[i], configuration);
 			for (int j = 0; j < resolved.length; j++) {
 				all.add(resolved[j]);
 			}
 		}
-		return (IRuntimeBuildpathEntry[])all.toArray(new IRuntimeBuildpathEntry[all.size()]);
+		return all.toArray(new IRuntimeBuildpathEntry[all.size()]);
 	}
-	
+
 	/**
 	 * Returns a collection of runtime buildpath entries that are defined in the
-	 * specified attribute of the given launch configuration. When present,
-	 * the attribute must contain a list of runtime buildpath entry mementos.
+	 * specified attribute of the given launch configuration. When present, the
+	 * attribute must contain a list of runtime buildpath entry mementos.
 	 * 
-	 * @param configuration launch configuration
-	 * @param attribute attribute name containing the list of entries
+	 * @param configuration
+	 *            launch configuration
+	 * @param attribute
+	 *            attribute name containing the list of entries
 	 * @return collection of runtime buildpath entries that are defined in the
-	 *  specified attribute of the given launch configuration
-	 * @exception CoreException if unable to retrieve the list
+	 *         specified attribute of the given launch configuration
+	 * @exception CoreException
+	 *                if unable to retrieve the list
 	 */
-	protected IRuntimeBuildpathEntry[] recoverRuntimePath(ILaunchConfiguration configuration, String attribute) throws CoreException {
-		List entries = configuration.getAttribute(attribute, Collections.EMPTY_LIST);
-		IRuntimeBuildpathEntry[] rtes = new IRuntimeBuildpathEntry[entries.size()];
-		Iterator iter = entries.iterator();
+	protected IRuntimeBuildpathEntry[] recoverRuntimePath(
+			ILaunchConfiguration configuration, String attribute)
+			throws CoreException {
+		List<?> entries = configuration.getAttribute(attribute,
+				Collections.EMPTY_LIST);
+		IRuntimeBuildpathEntry[] rtes = new IRuntimeBuildpathEntry[entries
+				.size()];
 		int i = 0;
-		while (iter.hasNext()) {
-			rtes[i] = ScriptRuntime.newRuntimeBuildpathEntry((String)iter.next());
+		for (Iterator<?> iter = entries.iterator(); iter.hasNext();) {
+			rtes[i] = ScriptRuntime.newRuntimeBuildpathEntry((String) iter
+					.next());
 			i++;
 		}
-		return rtes;		
-	}	
+		return rtes;
+	}
 
 }
