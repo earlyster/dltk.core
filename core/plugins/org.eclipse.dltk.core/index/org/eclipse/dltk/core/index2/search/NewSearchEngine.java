@@ -39,7 +39,7 @@ import org.eclipse.dltk.core.search.SearchEngine;
 import org.eclipse.dltk.core.search.SearchParticipant;
 import org.eclipse.dltk.core.search.SearchPattern;
 import org.eclipse.dltk.core.search.SearchRequestor;
-import org.eclipse.dltk.core.search.matching.MatchLocator;
+import org.eclipse.dltk.core.search.matching.ModuleFactory;
 import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.dltk.internal.core.ModelManager;
 import org.eclipse.dltk.internal.core.SourceModule;
@@ -161,7 +161,7 @@ public class NewSearchEngine {
 							indexMatches[j] = participant.getDocument(
 									indexMatchPaths[j], null);
 						}
-						SearchDocument[] matches = MatchLocator
+						SearchDocument[] matches = ModuleFactory
 								.addWorkingCopies(pattern, indexMatches,
 										getWorkingCopies(), participant);
 

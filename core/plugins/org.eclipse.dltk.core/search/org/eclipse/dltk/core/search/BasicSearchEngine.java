@@ -39,7 +39,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.core.search.indexing.IIndexConstants;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
-import org.eclipse.dltk.core.search.matching.MatchLocator;
+import org.eclipse.dltk.core.search.matching.ModuleFactory;
 import org.eclipse.dltk.internal.compiler.env.AccessRestriction;
 import org.eclipse.dltk.internal.compiler.env.AccessRuleSet;
 import org.eclipse.dltk.internal.core.DefaultWorkingCopyOwner;
@@ -308,7 +308,7 @@ public class BasicSearchEngine {
 							indexMatches[j] = participant.getDocument(
 									indexMatchPaths[j], null);
 						}
-						SearchDocument[] matches = MatchLocator
+						SearchDocument[] matches = ModuleFactory
 								.addWorkingCopies(pattern, indexMatches,
 										getWorkingCopies(), participant);
 						final Set<IPath> paths = new HashSet<IPath>();
@@ -412,7 +412,7 @@ public class BasicSearchEngine {
 							indexMatches[j] = participant.getDocument(
 									indexMatchPaths[j], null);
 						}
-						SearchDocument[] matches = MatchLocator
+						SearchDocument[] matches = ModuleFactory
 								.addWorkingCopies(pattern, indexMatches,
 										getWorkingCopies(), participant);
 						ISourceModule[] modules = participant.locateModules(
@@ -1465,7 +1465,7 @@ public class BasicSearchEngine {
 					}
 					char[] contents = Util
 							.getResourceContentsAsCharArray((IFile) resource);
-					SearchDocument[] documents = MatchLocator.addWorkingCopies(
+					SearchDocument[] documents = ModuleFactory.addWorkingCopies(
 							pattern,
 							new SearchDocument[] { new DLTKSearchDocument(
 									enclosingElement.getPath().toString(),

@@ -13,15 +13,12 @@
 package org.eclipse.dltk.core.search.matching;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.dltk.ast.ASTNode;
@@ -43,7 +40,6 @@ import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IParent;
-import org.eclipse.dltk.core.IProjectFragment;
 import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ISearchableEnvironment;
 import org.eclipse.dltk.core.ISourceModule;
@@ -77,9 +73,7 @@ import org.eclipse.dltk.internal.core.Openable;
 import org.eclipse.dltk.internal.core.ScriptProject;
 import org.eclipse.dltk.internal.core.SourceModule;
 import org.eclipse.dltk.internal.core.SourceRefElement;
-import org.eclipse.dltk.internal.core.search.DLTKSearchDocument;
 import org.eclipse.dltk.internal.core.search.IndexQueryRequestor;
-import org.eclipse.dltk.internal.core.search.IndexSelector;
 import org.eclipse.dltk.internal.core.search.matching.AndPattern;
 import org.eclipse.dltk.internal.core.search.matching.InternalSearchPattern;
 import org.eclipse.dltk.internal.core.search.matching.MatchingNodeSet;
@@ -123,7 +117,7 @@ public class MatchLocator implements IMatchLocator, ITypeRequestor {
 
 	public org.eclipse.dltk.core.ISourceModule[] workingCopies;
 
-	public HandleFactory handleFactory;
+	private HandleFactory handleFactory;
 
 	// cache of all super type names if scope is hierarchy scope
 	public char[][][] allSuperTypeNames;
@@ -164,34 +158,6 @@ public class MatchLocator implements IMatchLocator, ITypeRequestor {
 	// Cache for handles
 	private HashSet handles;
 
-	public static class WorkingCopyDocument extends DLTKSearchDocument {
-		public org.eclipse.dltk.core.ISourceModule workingCopy;
-
-		WorkingCopyDocument(org.eclipse.dltk.core.ISourceModule workingCopy,
-				SearchParticipant participant, boolean external) {
-			super(workingCopy.getPath().toString(), getContents(workingCopy),
-					participant, external, workingCopy.getScriptProject()
-							.getProject());
-			this.workingCopy = workingCopy;
-		}
-
-		private static char[] getContents(
-				org.eclipse.dltk.core.ISourceModule workingCopy) {
-			try {
-				return workingCopy.getSourceAsCharArray();
-			} catch (ModelException e) {
-				if (DLTKCore.DEBUG) {
-					e.printStackTrace();
-				}
-				return new char[0];
-			}
-		}
-
-		public String toString() {
-			return "WorkingCopyDocument for " + getPath(); //$NON-NLS-1$
-		}
-	}
-
 	static public class WrappedCoreException extends RuntimeException {
 		private static final long serialVersionUID = 8354329870126121212L; // backward
 
@@ -203,87 +169,9 @@ public class MatchLocator implements IMatchLocator, ITypeRequestor {
 		}
 	}
 
-	public static SearchDocument[] addWorkingCopies(
-			InternalSearchPattern pattern, SearchDocument[] indexMatches,
-			org.eclipse.dltk.core.ISourceModule[] copies,
-			SearchParticipant participant) {
-		// working copies take precedence over corresponding compilation units
-		HashMap workingCopyDocuments = workingCopiesThatCanSeeFocus(copies,
-				pattern.focus, pattern.isPolymorphicSearch(), participant);
-		SearchDocument[] matches = null;
-		int length = indexMatches.length;
-		for (int i = 0; i < length; i++) {
-			SearchDocument searchDocument = indexMatches[i];
-			if (searchDocument.getParticipant() == participant) {
-				SearchDocument workingCopyDocument = (SearchDocument) workingCopyDocuments
-						.remove(searchDocument.getPath());
-				if (workingCopyDocument != null) {
-					if (matches == null) {
-						System
-								.arraycopy(indexMatches, 0,
-										matches = new SearchDocument[length],
-										0, length);
-					}
-					matches[i] = workingCopyDocument;
-				}
-			}
-		}
-		if (matches == null) { // no working copy
-			matches = indexMatches;
-		}
-		int remainingWorkingCopiesSize = workingCopyDocuments.size();
-		if (remainingWorkingCopiesSize != 0) {
-			System.arraycopy(matches, 0, matches = new SearchDocument[length
-					+ remainingWorkingCopiesSize], 0, length);
-			Iterator iterator = workingCopyDocuments.values().iterator();
-			int index = length;
-			while (iterator.hasNext()) {
-				matches[index++] = (SearchDocument) iterator.next();
-			}
-		}
-		return matches;
-	}
-
 	public static void setFocus(InternalSearchPattern pattern,
 			IModelElement focus) {
 		pattern.focus = focus;
-	}
-
-	/*
-	 * Returns the working copies that can see the given focus.
-	 */
-	private static HashMap workingCopiesThatCanSeeFocus(
-			org.eclipse.dltk.core.ISourceModule[] copies, IModelElement focus,
-			boolean isPolymorphicSearch, SearchParticipant participant) {
-		if (copies == null)
-			return new HashMap();
-		if (focus != null) {
-			while (!(focus instanceof IScriptProject)
-					&& !(focus instanceof ArchiveProjectFragment)) {
-				focus = focus.getParent();
-			}
-		}
-		HashMap result = new HashMap();
-		for (int i = 0, length = copies.length; i < length; i++) {
-			org.eclipse.dltk.core.ISourceModule workingCopy = copies[i];
-			IPath projectOrArchive = MatchLocator.getProjectOrArchive(
-					workingCopy).getPath();
-			if (focus == null
-					|| IndexSelector.canSeeFocus(focus, isPolymorphicSearch,
-							projectOrArchive)) {
-				boolean external = false;
-				IProjectFragment frag = (IProjectFragment) workingCopy
-						.getAncestor(IModelElement.PROJECT_FRAGMENT);
-				if (frag != null) {
-					external = frag.isExternal();
-				}
-
-				result.put(workingCopy.getPath().toString(),
-						new WorkingCopyDocument(workingCopy, participant,
-								external));
-			}
-		}
-		return result;
 	}
 
 	public static SearchPattern createAndPattern(
@@ -699,16 +587,7 @@ public class MatchLocator implements IMatchLocator, ITypeRequestor {
 		// not be 0
 		this.progressWorked = 0;
 		// extract working copies
-		ArrayList<ISourceModule> copies = new ArrayList<ISourceModule>();
-		for (int i = 0; i < docsLength; i++) {
-			SearchDocument document = searchDocuments[i];
-			if (document instanceof WorkingCopyDocument) {
-				copies.add(((WorkingCopyDocument) document).workingCopy);
-			}
-		}
-		int copiesLength = copies.size();
-		this.workingCopies = new org.eclipse.dltk.core.ISourceModule[copiesLength];
-		copies.toArray(this.workingCopies);
+		this.workingCopies = ModuleFactory.selectWorkingCopies(searchDocuments);
 		ModelManager manager = ModelManager.getModelManager();
 		this.bindings = new SimpleLookupTable();
 		try {
@@ -718,6 +597,8 @@ public class MatchLocator implements IMatchLocator, ITypeRequestor {
 			// optimize space)
 			if (this.handleFactory == null)
 				this.handleFactory = new HandleFactory();
+			final ModuleFactory moduleFactory = new ModuleFactory(
+					handleFactory, this.scope);
 			if (this.progressMonitor != null) {
 				this.progressMonitor.beginTask("", searchDocuments.length); //$NON-NLS-1$
 			}
@@ -733,7 +614,7 @@ public class MatchLocator implements IMatchLocator, ITypeRequestor {
 				}
 			});
 			int displayed = 0; // progress worked displayed
-			String previousPath = null;
+			final Set<String> previousPaths = new HashSet<String>();
 			for (int i = 0; i < docsLength; i++) {
 				if (this.progressMonitor != null
 						&& this.progressMonitor.isCanceled()) {
@@ -742,22 +623,13 @@ public class MatchLocator implements IMatchLocator, ITypeRequestor {
 				// skip duplicate paths
 				SearchDocument searchDocument = searchDocuments[i];
 				searchDocuments[i] = null; // free current document
-				String pathString = searchDocument.getPath();
-				if (i > 0 && pathString.equals(previousPath)) {
+				if (!previousPaths.add(searchDocument.getPath())) {
 					worked();
 					displayed++;
 					continue;
 				}
-				previousPath = pathString;
-				Openable openable;
-				org.eclipse.dltk.core.ISourceModule workingCopy = null;
-				if (searchDocument instanceof WorkingCopyDocument) {
-					workingCopy = ((WorkingCopyDocument) searchDocument).workingCopy;
-					openable = (Openable) workingCopy;
-				} else {
-					openable = this.handleFactory.createOpenable(pathString,
-							this.scope);
-				}
+				final ISourceModule openable = moduleFactory
+						.create(searchDocument);
 				if (openable == null) {
 					worked();
 					displayed++;
@@ -765,10 +637,8 @@ public class MatchLocator implements IMatchLocator, ITypeRequestor {
 				}
 				// create new parser and lookup environment if this is a new
 				// project
-				IResource resource = null;
 				IScriptProject scriptProject = openable.getScriptProject();
-				resource = workingCopy != null ? workingCopy.getResource()
-						: openable.getResource();
+				IResource resource = openable.getResource();
 				if (resource == null)
 					resource = scriptProject.getProject(); // case of a file in
 				// an external jar

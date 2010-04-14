@@ -31,6 +31,12 @@ public class PossibleMatch implements ISourceModule {
 	private String source;
 
 	public PossibleMatch(MatchLocator locator, IResource resource,
+			org.eclipse.dltk.core.ISourceModule openable,
+			SearchDocument document) {
+		this(locator, resource, (Openable) openable, document);
+	}
+
+	public PossibleMatch(MatchLocator locator, IResource resource,
 			Openable openable, SearchDocument document) {
 		this.resource = resource;
 		this.openable = openable;

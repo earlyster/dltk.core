@@ -10,7 +10,9 @@
 package org.eclipse.dltk.core.search;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -29,12 +31,10 @@ import org.eclipse.dltk.core.search.index.MixinIndex;
 import org.eclipse.dltk.core.search.indexing.IndexManager;
 import org.eclipse.dltk.core.search.matching.IMatchLocator;
 import org.eclipse.dltk.core.search.matching.MatchLocator;
-import org.eclipse.dltk.core.search.matching.MatchLocator.WorkingCopyDocument;
+import org.eclipse.dltk.core.search.matching.ModuleFactory;
 import org.eclipse.dltk.internal.core.Model;
-import org.eclipse.dltk.internal.core.Openable;
 import org.eclipse.dltk.internal.core.search.IndexSelector;
 import org.eclipse.dltk.internal.core.search.LazyDLTKSearchDocument;
-import org.eclipse.dltk.internal.core.util.HandleFactory;
 import org.eclipse.dltk.internal.core.util.Util;
 
 /**
@@ -141,7 +141,7 @@ public class DLTKSearchParticipant extends SearchParticipant {
 		final int progressStep = docsLength < n ? 1 : docsLength / n;
 		int progressWorked = 0;
 		// initialize handle factory
-		final HandleFactory handleFactory = new HandleFactory();
+		final ModuleFactory moduleFactory = new ModuleFactory(scope);
 		if (progressMonitor != null) {
 			progressMonitor.beginTask("", searchDocuments.length); //$NON-NLS-1$
 		}
@@ -151,7 +151,7 @@ public class DLTKSearchParticipant extends SearchParticipant {
 						((SearchDocument) b).getPath());
 			}
 		});
-		String previousPath = null;
+		final Set<String> previousPaths = new HashSet<String>();
 		for (int i = 0; i < docsLength; i++) {
 			if (progressMonitor != null && progressMonitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -163,22 +163,15 @@ public class DLTKSearchParticipant extends SearchParticipant {
 			}
 			SearchDocument searchDocument = searchDocuments[i];
 			searchDocuments[i] = null; // free current document
-			String pathString = searchDocument.getPath();
 			// skip duplicate paths
-			if (i > 0 && pathString.equals(previousPath)) {
-				continue;
+			if (previousPaths.add(searchDocument.getPath())) {
+				final ISourceModule openable = moduleFactory
+						.create(searchDocument);
+				if (openable == null) {
+					continue; // match is outside buildpath
+				}
+				modules.add(openable);
 			}
-			previousPath = pathString;
-			Openable openable;
-			if (searchDocument instanceof WorkingCopyDocument) {
-				openable = (Openable) ((WorkingCopyDocument) searchDocument).workingCopy;
-			} else {
-				openable = handleFactory.createOpenable(pathString, scope);
-			}
-			if (openable == null) {
-				continue; // match is outside buildpath
-			}
-			modules.add((ISourceModule) openable);
 		}
 		if (progressMonitor != null)
 			progressMonitor.done();
