@@ -23,6 +23,7 @@ import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelElementMemento;
 import org.eclipse.dltk.core.IModelElementVisitor;
+import org.eclipse.dltk.core.IModelElementVisitorExtension;
 import org.eclipse.dltk.core.IModelStatus;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IOpenable;
@@ -699,6 +700,9 @@ public abstract class ModelElement extends PlatformObject implements
 			IModelElement[] elements = getChildren();
 			for (int i = 0; i < elements.length; ++i) {
 				elements[i].accept(visitor);
+			}
+			if (visitor instanceof IModelElementVisitorExtension) {
+				((IModelElementVisitorExtension) visitor).endVisit(this);
 			}
 		}
 	}
