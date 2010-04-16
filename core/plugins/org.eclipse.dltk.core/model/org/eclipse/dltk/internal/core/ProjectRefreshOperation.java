@@ -60,7 +60,8 @@ public class ProjectRefreshOperation extends ModelOperation {
 			if (!fragment.isExternal()
 					&& fragment.getKind() == IProjectFragment.K_SOURCE) {
 				for (IModelElement element : fragment.getChildren()) {
-					if (element.getElementType() == IModelElement.SCRIPT_FOLDER) {
+					if (element.getElementType() == IModelElement.SCRIPT_FOLDER
+							&& element.exists()) {
 						for (ISourceModule module : ((IScriptFolder) element)
 								.getSourceModules()) {
 							modules.add(module);
