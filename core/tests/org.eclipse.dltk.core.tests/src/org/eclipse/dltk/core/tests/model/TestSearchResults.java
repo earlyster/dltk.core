@@ -37,6 +37,10 @@ public class TestSearchResults extends SearchRequestor {
 		return matches.size();
 	}
 
+	public IModelElement get(int index) {
+		return (IModelElement) matches.get(index).getElement();
+	}
+
 	public void assertSourceModule(String name) {
 		assertExists(ISourceModule.class, name);
 	}
