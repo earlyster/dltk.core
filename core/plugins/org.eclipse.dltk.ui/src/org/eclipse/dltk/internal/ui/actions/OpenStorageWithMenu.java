@@ -11,9 +11,6 @@ package org.eclipse.dltk.internal.ui.actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Hashtable;
 
 import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.IAdaptable;
@@ -37,8 +34,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.EditorsUI;
 
-import com.ibm.icu.text.Collator;
-
 /**
  * A menu for opening files in the workbench.
  * <p>
@@ -60,8 +55,6 @@ public class OpenStorageWithMenu extends ContributionItem {
 	private IEditorRegistry registry = PlatformUI.getWorkbench()
 			.getEditorRegistry();
 
-	private static Hashtable imageCache = new Hashtable(11);
-
 	/**
 	 * The id of this action.
 	 */
@@ -75,31 +68,13 @@ public class OpenStorageWithMenu extends ContributionItem {
 	private static final int MATCH_BOTH = IWorkbenchPage.MATCH_INPUT
 			| IWorkbenchPage.MATCH_ID;
 
-	/*
-	 * Compares the labels from two IEditorDescriptor objects
-	 */
-	private static final Comparator comparer = new Comparator() {
-		private Collator collator = Collator.getInstance();
-
-		public int compare(Object arg0, Object arg1) {
-			try {
-				String s1 = ((IEditorDescriptor) arg0).getLabel();
-				String s2 = ((IEditorDescriptor) arg1).getLabel();
-				return collator.compare(s1, s2);
-			} catch (NullPointerException ex) {
-				ex.printStackTrace();
-			}
-			return 0;
-		}
-	};
-
 	/**
 	 * Constructs a new instance of <code>OpenWithMenu</code>.
 	 * <p>
 	 * If this method is used be sure to set the selected file by invoking
-	 * <code>setFile</code>. The file input is required when the user selects
-	 * an item in the menu. At that point the menu will attempt to open an
-	 * editor with the file as its input.
+	 * <code>setFile</code>. The file input is required when the user selects an
+	 * item in the menu. At that point the menu will attempt to open an editor
+	 * with the file as its input.
 	 * </p>
 	 * 
 	 * @param page
@@ -137,10 +112,10 @@ public class OpenStorageWithMenu extends ContributionItem {
 		if (imageDesc == null) {
 			return null;
 		}
-		Image image = (Image) imageCache.get(imageDesc);
+		Image image = OpenModelElementWithMenu.imageCache.get(imageDesc);
 		if (image == null) {
 			image = imageDesc.createImage();
-			imageCache.put(imageDesc, image);
+			OpenModelElementWithMenu.imageCache.put(imageDesc, image);
 		}
 		return image;
 	}
@@ -248,8 +223,8 @@ public class OpenStorageWithMenu extends ContributionItem {
 				.findEditor(EditorsUI.DEFAULT_TEXT_EDITOR_ID); // may be null
 		IEditorDescriptor preferredEditor = getDefaultEditor(); // may be null
 
-		Object[] editors = registry.getEditors(storage.getName());
-		Collections.sort(Arrays.asList(editors), comparer);
+		IEditorDescriptor[] editors = registry.getEditors(storage.getName());
+		Arrays.sort(editors, OpenModelElementWithMenu.comparer);
 
 		boolean defaultFound = false;
 
@@ -289,16 +264,16 @@ public class OpenStorageWithMenu extends ContributionItem {
 		}
 
 		// Add system editor (should never be null)
-// IEditorDescriptor descriptor = registry
-// .findEditor(IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID);
-// createMenuItem(menu, descriptor, preferredEditor);
+		// IEditorDescriptor descriptor = registry
+		// .findEditor(IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID);
+		// createMenuItem(menu, descriptor, preferredEditor);
 
-// // Add system in-place editor (can be null)
-// IEditorDescriptor descriptor = registry
-// .findEditor(IEditorRegistry.SYSTEM_INPLACE_EDITOR_ID);
-// if (descriptor != null) {
-// createMenuItem(menu, descriptor, preferredEditor);
-// }
+		// // Add system in-place editor (can be null)
+		// IEditorDescriptor descriptor = registry
+		// .findEditor(IEditorRegistry.SYSTEM_INPLACE_EDITOR_ID);
+		// if (descriptor != null) {
+		// createMenuItem(menu, descriptor, preferredEditor);
+		// }
 		createDefaultMenuItem(menu, storage);
 	}
 
@@ -309,12 +284,7 @@ public class OpenStorageWithMenu extends ContributionItem {
 		if (this.storage instanceof IStorage) {
 			return (IStorage) this.storage;
 		}
-		IStorage resource = (IStorage) this.storage.getAdapter(IStorage.class);
-		if (resource instanceof IStorage) {
-			return resource;
-		}
-
-		return null;
+		return (IStorage) this.storage.getAdapter(IStorage.class);
 	}
 
 	/*
