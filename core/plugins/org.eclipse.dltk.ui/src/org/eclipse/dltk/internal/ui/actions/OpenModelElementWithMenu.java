@@ -11,7 +11,6 @@ package org.eclipse.dltk.internal.ui.actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
 
@@ -63,7 +62,8 @@ public class OpenModelElementWithMenu extends ContributionItem {
 	private IEditorRegistry registry = PlatformUI.getWorkbench()
 			.getEditorRegistry();
 
-	private static Hashtable imageCache = new Hashtable(11);
+	private static Hashtable<ImageDescriptor, Image> imageCache = new Hashtable<ImageDescriptor, Image>(
+			11);
 
 	/**
 	 * The id of this action.
@@ -80,12 +80,12 @@ public class OpenModelElementWithMenu extends ContributionItem {
 	/*
 	 * Compares the labels from two IEditorDescriptor objects
 	 */
-	private static final Comparator comparer = new Comparator() {
+	private static final Comparator<IEditorDescriptor> comparer = new Comparator<IEditorDescriptor>() {
 		private Collator collator = Collator.getInstance();
 
-		public int compare(Object arg0, Object arg1) {
-			String s1 = ((IEditorDescriptor) arg0).getLabel();
-			String s2 = ((IEditorDescriptor) arg1).getLabel();
+		public int compare(IEditorDescriptor arg0, IEditorDescriptor arg1) {
+			String s1 = arg0.getLabel();
+			String s2 = arg1.getLabel();
 			return collator.compare(s1, s2);
 		}
 	};
@@ -134,7 +134,7 @@ public class OpenModelElementWithMenu extends ContributionItem {
 		if (imageDesc == null) {
 			return null;
 		}
-		Image image = (Image) imageCache.get(imageDesc);
+		Image image = imageCache.get(imageDesc);
 		if (image == null) {
 			image = imageDesc.createImage();
 			imageCache.put(imageDesc, image);
@@ -240,15 +240,15 @@ public class OpenModelElementWithMenu extends ContributionItem {
 				.findEditor(DEFAULT_TEXT_EDITOR_ID); // may be null
 		IEditorDescriptor preferredEditor = getDefaultEditor(); // may be null
 
-		Object[] editors = registry.getEditors(file.getName(), IDE
+		IEditorDescriptor[] editors = registry.getEditors(file.getName(), IDE
 				.getContentType(file));
-		Collections.sort(Arrays.asList(editors), comparer);
+		Arrays.sort(editors, comparer);
 
 		boolean defaultFound = false;
 
 		// Check that we don't add it twice. This is possible
 		// if the same editor goes to two mappings.
-		ArrayList alreadyMapped = new ArrayList();
+		ArrayList<IEditorDescriptor> alreadyMapped = new ArrayList<IEditorDescriptor>();
 
 		if (preferredEditor != null) {
 			createMenuItem(menu, preferredEditor, preferredEditor);
