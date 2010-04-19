@@ -94,16 +94,6 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 	}
 
 	/**
-	 * @see ISourceElementRequestor#acceptUnknownReference(char[][], int, int)
-	 */
-	public void acceptUnknownReference(String[] name, int sourceStart,
-			int sourceEnd) {
-		for (int i = 0; i < name.length; i++) {
-			acceptUnknownReference(name[i], 0);
-		}
-	}
-
-	/**
 	 * @see ISourceElementRequestor#acceptUnknownReference(char[], int)
 	 */
 	public void acceptUnknownReference(String name, int sourcePosition) {
@@ -180,6 +170,14 @@ public class SourceIndexerRequestor implements ISourceElementRequestor,
 		this.indexer.addMethodDeclaration(methodInfo.modifiers, this.pkgName,
 				this.enclosingTypeNames(), methodInfo.name,
 				methodInfo.parameterNames, methodInfo.exceptionTypes);
+		if (methodInfo.returnType != null) {
+			this.indexer.addTypeReference(methodInfo.returnType);
+		}
+		if (methodInfo.parameterTypes != null) {
+			for (String type : methodInfo.parameterTypes) {
+				this.indexer.addTypeReference(type);
+			}
+		}
 		this.methodDepth++;
 	}
 
