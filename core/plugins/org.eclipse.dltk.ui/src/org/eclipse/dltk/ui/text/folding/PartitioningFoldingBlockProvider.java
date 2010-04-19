@@ -128,7 +128,7 @@ public abstract class PartitioningFoldingBlockProvider implements
 		this.fBlockLinesMin = value;
 	}
 
-	private IFoldingBlockRequestor requestor;
+	protected IFoldingBlockRequestor requestor;
 
 	public void setRequestor(IFoldingBlockRequestor requestor) {
 		this.requestor = requestor;
