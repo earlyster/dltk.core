@@ -30,6 +30,7 @@ import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.internal.ui.editor.EditorUtility;
 import org.eclipse.dltk.internal.ui.editor.ScriptEditor;
 import org.eclipse.dltk.internal.ui.text.DocumentCharacterIterator;
+import org.eclipse.dltk.ui.DLTKUIPlugin;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -713,6 +714,10 @@ public class DelegatingFoldingStructureProvider implements
 		} catch (ModelException e) {
 			return false;
 		} catch (AbortFoldingException e) {
+			return false;
+		} catch (RuntimeException e) {
+			DLTKUIPlugin.logErrorMessage("Error in FoldingBlockProvider", e);
+			blockProviders = null;
 			return false;
 		}
 	}
