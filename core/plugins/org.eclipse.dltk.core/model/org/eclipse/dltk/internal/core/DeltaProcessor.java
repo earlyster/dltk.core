@@ -153,15 +153,10 @@ public class DeltaProcessor {
 		}
 	}
 
-	private final static int IGNORE = 0;
-	private final static int SOURCE = 1;
-	private final static int BINARY = 2;
+	// private final static int IGNORE = 0;
+	// private final static int SOURCE = 1;
+	// private final static int BINARY = 2;
 
-	private final static String EXTERNAL_ZIP_ADDED = "external zip added"; //$NON-NLS-1$
-	private final static String EXTERNAL_ZIP_CHANGED = "external zip changed"; //$NON-NLS-1$
-	private final static String EXTERNAL_ZIP_REMOVED = "external zip removed"; //$NON-NLS-1$
-	private final static String EXTERNAL_ZIP_UNCHANGED = "external zip unchanged"; //$NON-NLS-1$
-	private final static String INTERNAL_ZIP_IGNORE = "internal zip ignore"; //$NON-NLS-1$
 	private final static int NON_SCRIPT_RESOURCE = -1;
 	public static boolean DEBUG = false;
 	public static boolean VERBOSE = false;
@@ -825,24 +820,26 @@ public class DeltaProcessor {
 		return this.currentElement;
 	}
 
+	enum ZipStatus {
+		EXTERNAL_ZIP_ADDED, EXTERNAL_ZIP_CHANGED, EXTERNAL_ZIP_REMOVED, EXTERNAL_ZIP_UNCHANGED, INTERNAL_ZIP_IGNORE
+	}
+
 	/*
 	 * Check if external archives have changed and create the corresponding
 	 * deltas. Returns whether at least on delta was created.
 	 */
 	private boolean createExternalArchiveDelta(IProgressMonitor monitor,
-			Set refreshedElements) {
+			Set<IModelElement> refreshedElements) {
 		if (refreshedElements == null) {
 			return false;
 		}
-		HashMap externalArchivesStatus = new HashMap();
+		Map<IPath, ZipStatus> externalArchivesStatus = new HashMap<IPath, ZipStatus>();
 		boolean hasDelta = false;
 		// find JARs to refresh
-		HashSet archivePathsToRefresh = new HashSet();
-		Iterator iterator = refreshedElements.iterator();
+		Set<IPath> archivePathsToRefresh = new HashSet<IPath>();
 		// modification exception (see
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=63534)
-		while (iterator.hasNext()) {
-			IModelElement element = (IModelElement) iterator.next();
+		for (IModelElement element : refreshedElements) {
 			switch (element.getElementType()) {
 			case IModelElement.PROJECT_FRAGMENT:
 				archivePathsToRefresh.add(element.getPath());
@@ -874,10 +871,7 @@ public class DeltaProcessor {
 				}
 				break;
 			case IModelElement.SCRIPT_MODEL:
-				Iterator projectNames = this.state.getOldScriptProjectNames()
-						.iterator();
-				while (projectNames.hasNext()) {
-					String projectName = (String) projectNames.next();
+				for (String projectName : this.state.getOldScriptProjectNames()) {
 					IProject project = ResourcesPlugin.getWorkspace().getRoot()
 							.getProject(projectName);
 					if (!DLTKLanguageManager.hasScriptNature(project)) {
@@ -902,14 +896,11 @@ public class DeltaProcessor {
 			}
 		}
 		// perform refresh
-		Iterator projectNames = this.state.getOldScriptProjectNames()
-				.iterator();
 		IWorkspaceRoot wksRoot = ResourcesPlugin.getWorkspace().getRoot();
-		while (projectNames.hasNext()) {
+		for (String projectName : this.state.getOldScriptProjectNames()) {
 			if (monitor != null && monitor.isCanceled()) {
 				break;
 			}
-			String projectName = (String) projectNames.next();
 			IProject project = wksRoot.getProject(projectName);
 			if (!DLTKLanguageManager.hasScriptNature(project)) {
 				// project is not accessible or has lost its Script nature
@@ -931,8 +922,7 @@ public class DeltaProcessor {
 					if (!archivePathsToRefresh.contains(entryPath)) {
 						continue; // not supposed to be refreshed
 					}
-					String status = (String) externalArchivesStatus
-							.get(entryPath);
+					ZipStatus status = externalArchivesStatus.get(entryPath);
 					if (status == null) {
 						// compute shared status
 						Object targetLibrary = Model.getTarget(wksRoot,
@@ -941,7 +931,7 @@ public class DeltaProcessor {
 							if (this.state.getExternalLibTimeStamps().remove(
 									entryPath) != null) {
 								externalArchivesStatus.put(entryPath,
-										EXTERNAL_ZIP_REMOVED);
+										ZipStatus.EXTERNAL_ZIP_REMOVED);
 								// the jar was physically removed: remove the
 								// index
 								this.manager.indexManager
@@ -954,15 +944,14 @@ public class DeltaProcessor {
 							IFileHandle externalFile = (IFileHandle) targetLibrary;
 							// check timestamp to figure if JAR has changed in
 							// some way
-							Long oldTimestamp = (Long) this.state
+							Long oldTimestamp = this.state
 									.getExternalLibTimeStamps().get(entryPath);
 							long newTimeStamp = getTimeStamp(externalFile);
-							final BuildpathEntry bpEntry = (BuildpathEntry) entry;
 							if (oldTimestamp != null) {
 								if (newTimeStamp == 0) { // file doesn't
 									// exist
 									externalArchivesStatus.put(entryPath,
-											EXTERNAL_ZIP_REMOVED);
+											ZipStatus.EXTERNAL_ZIP_REMOVED);
 									this.state.getExternalLibTimeStamps()
 											.remove(entryPath);
 									// remove the index
@@ -972,7 +961,7 @@ public class DeltaProcessor {
 											scriptProject, entryPath);
 								} else if (oldTimestamp.longValue() != newTimeStamp) {
 									externalArchivesStatus.put(entryPath,
-											EXTERNAL_ZIP_CHANGED);
+											ZipStatus.EXTERNAL_ZIP_CHANGED);
 									this.state.getExternalLibTimeStamps().put(
 											entryPath, new Long(newTimeStamp));
 									// first remove the index so that it is
@@ -984,16 +973,16 @@ public class DeltaProcessor {
 											scriptProject, entryPath);
 								} else {
 									externalArchivesStatus.put(entryPath,
-											EXTERNAL_ZIP_UNCHANGED);
+											ZipStatus.EXTERNAL_ZIP_UNCHANGED);
 								}
 							} else {
 								if (newTimeStamp == 0) { // jar still doesn't
 									// exist
 									externalArchivesStatus.put(entryPath,
-											EXTERNAL_ZIP_UNCHANGED);
+											ZipStatus.EXTERNAL_ZIP_UNCHANGED);
 								} else {
 									externalArchivesStatus.put(entryPath,
-											EXTERNAL_ZIP_ADDED);
+											ZipStatus.EXTERNAL_ZIP_ADDED);
 									this.state.getExternalLibTimeStamps().put(
 											entryPath, new Long(newTimeStamp));
 									// index the new jar
@@ -1003,13 +992,13 @@ public class DeltaProcessor {
 							}
 						} else { // internal ZIP
 							externalArchivesStatus.put(entryPath,
-									INTERNAL_ZIP_IGNORE);
+									ZipStatus.INTERNAL_ZIP_IGNORE);
 						}
 					}
 					// according to computed status, generate a delta
-					status = (String) externalArchivesStatus.get(entryPath);
+					status = externalArchivesStatus.get(entryPath);
 					if (status != null) {
-						if (status == EXTERNAL_ZIP_ADDED) {
+						if (status == ZipStatus.EXTERNAL_ZIP_ADDED) {
 							IProjectFragment root = scriptProject
 									.getProjectFragment(entryPath);
 							if (VERBOSE) {
@@ -1022,7 +1011,7 @@ public class DeltaProcessor {
 							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=185733
 							this.state.addBuildpathValidation(scriptProject);
 							hasDelta = true;
-						} else if (status == EXTERNAL_ZIP_CHANGED) {
+						} else if (status == ZipStatus.EXTERNAL_ZIP_CHANGED) {
 							IProjectFragment root = scriptProject
 									.getProjectFragment(entryPath);
 							if (VERBOSE) {
@@ -1031,7 +1020,7 @@ public class DeltaProcessor {
 							}
 							this.contentChanged((Openable) root);
 							hasDelta = true;
-						} else if (status == EXTERNAL_ZIP_REMOVED) {
+						} else if (status == ZipStatus.EXTERNAL_ZIP_REMOVED) {
 							IProjectFragment root = scriptProject
 									.getProjectFragment(entryPath);
 							if (VERBOSE) {
