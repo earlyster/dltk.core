@@ -29,7 +29,7 @@ public interface IModelProvider {
 	 * inner element references.
 	 */
 	void provideModelChanges(IModelElement parentElement,
-			List<? extends IModelElement> children);
+			List<IModelElement> children);
 
 	/**
 	 * Used for performance reasons.

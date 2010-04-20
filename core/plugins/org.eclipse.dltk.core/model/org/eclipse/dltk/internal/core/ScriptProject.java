@@ -683,7 +683,7 @@ public class ScriptProject extends Openable implements IScriptProject,
 
 	private void setProjectInfoChildren(OpenableElementInfo info,
 			IProjectFragment[] children) {
-		List<IProjectFragment> fragments = new ArrayList<IProjectFragment>();
+		List<IModelElement> fragments = new ArrayList<IModelElement>();
 		Collections.addAll(fragments, children);
 		// Call for extra model providers
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
@@ -3157,7 +3157,7 @@ public class ScriptProject extends Openable implements IScriptProject,
 							 */), true/* retrieveExportedRoots */,
 				rootToResolvedEntries);
 		// Add all user project fragments
-		List<IProjectFragment> fragments = new ArrayList<IProjectFragment>();
+		List<IModelElement> fragments = new ArrayList<IModelElement>();
 		Collections.addAll(fragments, computed);
 		// Call for extra model providers
 		IDLTKLanguageToolkit toolkit = DLTKLanguageManager
