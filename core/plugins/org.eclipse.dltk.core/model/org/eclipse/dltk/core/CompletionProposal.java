@@ -232,7 +232,7 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	 * Parameter names (for method completions), or <code>null</code> if none.
 	 * Lazily computed. Defaults to <code>null</code>.
 	 */
-	private char[][] parameterNames = null;
+	private String[] parameterNames = null;
 
 	/**
 	 * Indicates whether parameter names have been computed.
@@ -780,7 +780,7 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	 * @return the parameter names, or <code>null</code> if none or not
 	 *         available or not relevant
 	 */
-	public char[][] findParameterNames(IProgressMonitor monitor) {
+	public String[] findParameterNames(IProgressMonitor monitor) {
 		return this.parameterNames;
 	}
 
@@ -795,7 +795,7 @@ public final class CompletionProposal extends InternalCompletionProposal {
 	 * @param parameterNames
 	 *            the parameter names, or <code>null</code> if none
 	 */
-	public void setParameterNames(char[][] parameterNames) {
+	public void setParameterNames(String[] parameterNames) {
 		this.parameterNames = parameterNames;
 		// this.parameterNamesComputed = true;
 	}

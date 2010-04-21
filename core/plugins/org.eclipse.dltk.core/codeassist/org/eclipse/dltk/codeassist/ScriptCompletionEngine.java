@@ -341,11 +341,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						}
 
 						if (arguments != null && arguments.length > 0) {
-							char[][] args = new char[arguments.length][];
-							for (int j = 0; j < arguments.length; ++j) {
-								args[j] = arguments[j].toCharArray();
-							}
-							proposal.setParameterNames(args);
+							proposal.setParameterNames(arguments);
 						}
 
 						proposal.setName(name);
@@ -394,10 +390,10 @@ public abstract class ScriptCompletionEngine extends Engine implements
 						// proposal.setTypeName(displayName);
 						List arguments = method.getArguments();
 						if (arguments != null && arguments.size() > 0) {
-							char[][] args = new char[arguments.size()][];
+							String[] args = new String[arguments.size()];
 							for (int j = 0; j < arguments.size(); ++j) {
 								args[j] = ((Argument) arguments.get(j))
-										.getName().toCharArray();
+										.getName();
 							}
 							proposal.setParameterNames(args);
 						}
@@ -480,11 +476,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 							}
 						}
 						if (arguments != null && arguments.length > 0) {
-							char[][] args = new char[arguments.length][];
-							for (int j = 0; j < arguments.length; ++j) {
-								args[j] = arguments[j].toCharArray();
-							}
-							proposal.setParameterNames(args);
+							proposal.setParameterNames(arguments);
 						}
 
 						proposal.setName(name);
