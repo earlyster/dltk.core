@@ -89,12 +89,12 @@ public class CompletionTestsRequestor extends CompletionRequestor {
 			case CompletionProposal.METHOD_DECLARATION:
 				String resultString = new String(proposal.getName())+"(";
 				
-				char[][] parameterNames = proposal.findParameterNames(null);
+				String[] parameterNames = proposal.findParameterNames(null);
 				if ( parameterNames != null ) {
 					for ( int i = 0; i < parameterNames.length; i++ ){
 						if ( i > 0 )
 							resultString += ",";
-						resultString += new String(parameterNames[i]);
+						resultString += parameterNames[i];
 					}
 				}
 				resultString += ")";

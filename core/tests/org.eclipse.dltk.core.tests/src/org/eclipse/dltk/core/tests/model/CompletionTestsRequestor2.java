@@ -254,7 +254,7 @@ public class CompletionTestsRequestor2 extends CompletionRequestor {
 		buffer.append(", ");
 		buffer.append(proposal.getName() == null ? NULL_LITERAL : proposal.getName());
 		if(this.showParameterNames) {
-			char[][] parameterNames = proposal.findParameterNames(null);
+			String[] parameterNames = proposal.findParameterNames(null);
 			buffer.append(", ");
 			if(parameterNames == null || parameterNames.length <= 0) {
 				buffer.append(NULL_LITERAL);
