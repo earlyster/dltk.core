@@ -46,7 +46,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	protected int endPosition;
 	protected int offset;
 
-	protected String fileName = null;
+	// protected String fileName = null;
 
 	protected boolean noProposal = true;
 
@@ -294,7 +294,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	}
 
 	public void findMethods(char[] token, boolean canCompleteEmptyToken,
-			List methods, List methodNames) {
+			List<IMethod> methods, List methodNames) {
 		if (methods == null || methods.size() == 0)
 			return;
 
@@ -302,7 +302,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		// String tok = new String(token);
 		if (canCompleteEmptyToken || length > 0) {
 			for (int i = 0; i < methods.size(); i++) {
-				IMethod method = (IMethod) methods.get(i);
+				IMethod method = methods.get(i);
 				String qname = (String) methodNames.get(i);
 				// processMethodName(method, tok);
 				char[] name = qname.toCharArray();
@@ -415,14 +415,14 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	}
 
 	protected void findMethods(char[] token, boolean canCompleteEmptyToken,
-			List methods) {
+			List<IMethod> methods) {
 		findMethods(token, canCompleteEmptyToken, methods,
 				CompletionProposal.METHOD_DECLARATION);
 	}
 
 	public void findFields(char[] token, boolean canCompleteEmptyToken,
-			List methods, String prefix) {
-		findFields(token, canCompleteEmptyToken, methods,
+			List<IField> fields, String prefix) {
+		findFields(token, canCompleteEmptyToken, fields,
 				CompletionProposal.FIELD_REF, prefix);
 	}
 
@@ -496,7 +496,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	}
 
 	protected void findFields(char[] token, boolean canCompleteEmptyToken,
-			List fields, int kind, String prefix) {
+			List<IField> fields, int kind, String prefix) {
 		if (fields == null || fields.size() == 0)
 			return;
 
@@ -504,7 +504,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		String tok = new String(token);
 		if (canCompleteEmptyToken || length > 0) {
 			for (int i = 0; i < fields.size(); i++) {
-				IField field = (IField) fields.get(i);
+				IField field = fields.get(i);
 				String qname = processFieldName(field, tok);
 				char[] name = qname.toCharArray();
 				if (DEBUG) {
@@ -545,7 +545,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	}
 
 	public void findFields(char[] token, boolean canCompleteEmptyToken,
-			List fields, int kind, List names) {
+			List<IField> fields, int kind, List names) {
 		if (fields == null || fields.size() == 0)
 			return;
 
@@ -553,7 +553,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		// String tok = new String(token);
 		if (canCompleteEmptyToken || length > 0) {
 			for (int i = 0; i < fields.size(); i++) {
-				IField field = (IField) fields.get(i);
+				IField field = fields.get(i);
 				String qname = (String) names.get(i);
 				char[] name = qname.toCharArray();
 				if (DEBUG) {
@@ -590,7 +590,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	}
 
 	public void findTypes(char[] token, boolean canCompleteEmptyToken,
-			List types) {
+			List<IType> types) {
 		if (types == null || types.size() == 0)
 			return;
 
@@ -598,7 +598,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		String tok = new String(token);
 		if (canCompleteEmptyToken || length > 0) {
 			for (int i = 0; i < types.size(); i++) {
-				IType type = (IType) types.get(i);
+				IType type = types.get(i);
 				String qname = processTypeName(type, tok);
 				char[] name = qname.toCharArray();
 				if (DEBUG) {
