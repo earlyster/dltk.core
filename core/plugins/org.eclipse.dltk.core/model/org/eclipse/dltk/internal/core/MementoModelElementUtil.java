@@ -20,8 +20,8 @@ import org.eclipse.dltk.core.WorkingCopyOwner;
 import org.eclipse.dltk.internal.core.util.MementoTokenizer;
 
 public class MementoModelElementUtil {
-	public static IModelElement getHandleFromMemento(
-			MementoTokenizer memento, IParent parent, WorkingCopyOwner owner) {
+	public static IModelElement getHandleFromMemento(MementoTokenizer memento,
+			IParent parent, WorkingCopyOwner owner) {
 		String token = null;
 		String name = "";
 		while (memento.hasMoreTokens()) {
@@ -40,8 +40,13 @@ public class MementoModelElementUtil {
 				if (name.equals(children[i].getElementName())
 						&& children[i] instanceof IModelElementMemento) {
 					IModelElementMemento childMemento = (IModelElementMemento) children[i];
-					return childMemento.getHandleFromMemento(token, memento,
-							owner);
+					if (token == null) {
+						return childMemento
+								.getHandleFromMemento(memento, owner);
+					} else {
+						return childMemento.getHandleFromMemento(token,
+								memento, owner);
+					}
 				}
 			}
 		} catch (ModelException e) {
