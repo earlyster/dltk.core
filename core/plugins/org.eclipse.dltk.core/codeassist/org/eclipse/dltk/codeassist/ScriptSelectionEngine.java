@@ -22,6 +22,7 @@ public abstract class ScriptSelectionEngine extends Engine implements
 	public ScriptSelectionEngine() {
 		super(null);
 	}
+
 	public void setEnvironment(SearchableEnvironment environment) {
 		this.nameEnvironment = environment;
 		this.lookupEnvironment = new LookupEnvironment(this, nameEnvironment);
