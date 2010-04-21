@@ -35,6 +35,7 @@ import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.IModelStatusConstants;
 import org.eclipse.dltk.core.IOpenable;
 import org.eclipse.dltk.core.IProjectFragment;
+import org.eclipse.dltk.core.IScriptProject;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.WorkingCopyOwner;
 
@@ -465,7 +466,7 @@ public abstract class Openable extends ModelElement implements IOpenable,
 			return;
 		}
 
-		ScriptProject project = (ScriptProject) getScriptProject();
+		IScriptProject project = getScriptProject();
 
 		IDLTKLanguageToolkit toolkit = null;
 
