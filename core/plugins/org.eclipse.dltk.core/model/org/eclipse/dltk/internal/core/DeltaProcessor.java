@@ -1001,6 +1001,10 @@ public class DeltaProcessor {
 						if (status == ZipStatus.EXTERNAL_ZIP_ADDED) {
 							IProjectFragment root = scriptProject
 									.getProjectFragment(entryPath);
+							if (root == null) {
+								logFragmentNotFound(scriptProject, entryPath);
+								continue;
+							}
 							if (VERBOSE) {
 								System.out
 										.println("- External ZIP ADDED, affecting root: " + root.getElementName()); //$NON-NLS-1$
@@ -1014,6 +1018,10 @@ public class DeltaProcessor {
 						} else if (status == ZipStatus.EXTERNAL_ZIP_CHANGED) {
 							IProjectFragment root = scriptProject
 									.getProjectFragment(entryPath);
+							if (root == null) {
+								logFragmentNotFound(scriptProject, entryPath);
+								continue;
+							}
 							if (VERBOSE) {
 								System.out
 										.println("- External ZIP CHANGED, affecting root: " + root.getElementName()); //$NON-NLS-1$
@@ -1023,6 +1031,10 @@ public class DeltaProcessor {
 						} else if (status == ZipStatus.EXTERNAL_ZIP_REMOVED) {
 							IProjectFragment root = scriptProject
 									.getProjectFragment(entryPath);
+							if (root == null) {
+								logFragmentNotFound(scriptProject, entryPath);
+								continue;
+							}
 							if (VERBOSE) {
 								System.out
 										.println("- External ZIP REMOVED, affecting root: " + root.getElementName()); //$NON-NLS-1$
@@ -1041,6 +1053,13 @@ public class DeltaProcessor {
 		}
 		// Check for external project fragment changes via timestamps.
 		return hasDelta;
+	}
+
+	private static void logFragmentNotFound(ScriptProject scriptProject,
+			IPath entryPath) {
+		if (DEBUG)
+			System.out.println("ProjectFragment \"" + entryPath
+					+ "\" not found in " + scriptProject.getElementName());
 	}
 
 	private ModelElementDelta currentDelta() {
