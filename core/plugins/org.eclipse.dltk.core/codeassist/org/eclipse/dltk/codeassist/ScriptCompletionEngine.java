@@ -503,6 +503,8 @@ public abstract class ScriptCompletionEngine extends Engine implements
 			ICompletionNameProvider<IField> nameProvider) {
 		if (fields == null || fields.size() == 0)
 			return;
+		if (nameProvider == null)
+			nameProvider = CompletionNameProviders.defaultProvider();
 
 		int length = token.length;
 		// String tok = new String(token);
