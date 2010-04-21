@@ -181,11 +181,18 @@ public abstract class ScriptCompletionEngine extends Engine implements
 		}
 	}
 
-	protected abstract int getEndOfEmptyToken();
+	protected int getEndOfEmptyToken() {
+		// TODO wtf?
+		return 0;
+	}
 
-	protected abstract String processMethodName(IMethod method, String token);
+	protected String processMethodName(IMethod method, String token) {
+		return method.getElementName();
+	}
 
-	protected abstract String processTypeName(IType method, String token);
+	protected String processTypeName(IType type, String token) {
+		return type.getElementName();
+	}
 
 	@Deprecated
 	protected final String processFieldName(IField field, String token) {
