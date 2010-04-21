@@ -329,10 +329,10 @@ public abstract class ScriptCompletionEngine extends Engine implements
 					// accept result
 					ScriptCompletionEngine.this.noProposal = false;
 					if (!ScriptCompletionEngine.this.requestor
-							.isIgnored(CompletionProposal.METHOD_DECLARATION)) {
+							.isIgnored(CompletionProposal.METHOD_REF)) {
 						CompletionProposal proposal = ScriptCompletionEngine.this
 								.createProposal(
-										CompletionProposal.METHOD_DECLARATION,
+										CompletionProposal.METHOD_REF,
 										ScriptCompletionEngine.this.actualCompletionPosition);
 						// proposal.setSignature(getSignature(typeBinding));
 						// proposal.setPackageName(q);
@@ -390,10 +390,10 @@ public abstract class ScriptCompletionEngine extends Engine implements
 					// accept result
 					ScriptCompletionEngine.this.noProposal = false;
 					if (!ScriptCompletionEngine.this.requestor
-							.isIgnored(CompletionProposal.METHOD_DECLARATION)) {
+							.isIgnored(CompletionProposal.METHOD_REF)) {
 						CompletionProposal proposal = ScriptCompletionEngine.this
 								.createProposal(
-										CompletionProposal.METHOD_DECLARATION,
+										CompletionProposal.METHOD_REF,
 										ScriptCompletionEngine.this.actualCompletionPosition);
 						// proposal.setSignature(getSignature(typeBinding));
 						// proposal.setPackageName(q);
@@ -427,7 +427,7 @@ public abstract class ScriptCompletionEngine extends Engine implements
 	protected void findMethods(char[] token, boolean canCompleteEmptyToken,
 			List<IMethod> methods) {
 		findMethods(token, canCompleteEmptyToken, methods,
-				CompletionProposal.METHOD_DECLARATION);
+				CompletionProposal.METHOD_REF);
 	}
 
 	public void findFields(char[] token, boolean canCompleteEmptyToken,
